@@ -1,5 +1,105 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.95 — EL COMPÁS MURIÓ + LA LÁGRIMA DE TINTA (el disparo propio) + LA TINTA VIVA + LA .94 ESTABLE
+
+**Petición del usuario**: "perfecto ya funciona bien la mecanica del
+grimorio hambriento, ahora antes de continuar debes guardar la version
+actual como version estable / luego quitar la restriccion del compás de
+la sombra — tus dos reglas a la vez: un ataque cada 10 s (marcado al
+nacer) y nunca antes de 2 s de terminar el anterior (marcado al morir).
+El re-lanzamiento al matar murió. — creo que mejor es dejarlo atacar
+cuando quiera / esto debe cambiar: la descarga prestada — el disparo del
+jugador sigue siendo el Nightglow vanilla (proyectil de prueba) […]
+tengo una idea, te dare un sprite para un disparo, tu has que el
+disparo tenga efectos, te dare el codigo como siempre, eso es mejor que
+darte la imagen png, quiero que con este proyectil seas creativo, lo
+animes y crees una nueva arma con el proyectil".
+
+1. **LA .94 GUARDADA COMO VERSIÓN ESTABLE** (la letra: «antes de
+   continuar debes guardar la version actual como version estable»):
+   tag `stable-v6.50.94` + rama `stable-v6.50.94-backup` → `80d4d7b`
+   (el commit de la versión — su árbol ES la .94, patrón .81: jamás en
+   la punta de main); STABLE-SNAPSHOT con la sección del canal estable
+   de la .94 + manifiesto SHA-256 de las 384 entradas; README apuntando
+   al retorno seguro. La .94 es la que el usuario PROBÓ: «perfecto ya
+   funciona bien la mecanica del grimorio hambriento».
+2. **EL COMPÁS DE LA SOMBRA MURIÓ** (la letra: «creo que mejor es
+   dejarlo atacar cuando quiera»): `TICKS_ENTRE_ATAQUES` (600 = 10 s),
+   `TICKS_TRAS_TERMINAR` (120 = 2 s), `_proximoAtaque`, `MarcarAtaque`,
+   `AtaqueListo`, `SombraTerminada` y el `OnKill` que las tocaba —
+   **ELIMINADOS** de `SombraPaginaCaza`; el espíritu lanza su sombra
+   CUANDO HAY PRESA que se mueva cerca (la única cola es la natural:
+   una presa por sombra, `SombraActiva` — y el silencio mientras el
+   dueño dispara, `JugadorAtacoReciente`, sigue vivo: eso no era un
+   reloj de ataque sino la caza del ausente).
+3. **LA DESCARGA PRESTADA MURIÓ — LA LÁGRIMA DE TINTA** (la letra:
+   «te dare un sprite para un disparo […] seas creativo, lo animes»):
+   el clic izq del grimorio YA NO dispara el Nightglow vanilla (931) —
+   escupe **LA LÁGRIMA DE TINTA** (`LagrimaDeTintaProjectile`), nacida
+   del SPRITE EXACTO del usuario (607×1344 RLE «sin pérdida · sin
+   manipulación», decodificado por `tools/gen_tinta_viva_v65095.py`):
+   una página doblada en sombra con corazón de marfil. LA ANIMACIÓN:
+   strip de 4 frames 28×76 (`Main.projFrames`) — las puntas laten
+   (escala 0.94→1.0 a lo largo) y el corazón se aviva ×1.0→×1.45 por
+   frame (el pulso vive en los PÍXELES, el halo aditivo del draw sólo
+   lo corona: violeta fuera, marfil dentro). LOS EFECTOS: homing que
+   ACELERA (12→19 px/t, giro capado 0.11 rad/t, re-busca cada 8 t),
+   EL GOTEO (polvo violeta sin gravedad + gotas que SÍ caen), LAS
+   ESTELAS (5 fantasmas por `oldPos` desvaneciéndose) + EL VAIVÉN
+   (balanceo perpendicular SOLO en el draw — el hitbox viaja honesto),
+   LA LUZ (violeta de sombra + marfil que late con el frame),
+   atraviesa MUROS (`tileCollide false`: las sombras no conocen
+   puertas), 3 presas por lágrima (`penetrate 3`), y al romperse: la
+   SALPICADURA (anillo de tinta) + **LA MANCHA** (`ManchaDeTinta`: el
+   charco de `SombrasLib.Charco` que se desvanece 36 t donde la
+   lágrima murió — el recuerdo del disparo).
+4. **LA NUEVA ARMA — LA TINTA VIVA** (`TintaViva`, la letra: «crees
+   una nueva arma con el proyectil»): el arma mágica (90 daño, 9 maná,
+   24 useTime, 15.5 shootSpeed, autoReuse) que escupe las lágrimas —
+   con su ICONO 44×44 (la lágrima rotada −35° al Lanczos desde la
+   fuente, rotar ANTES de reducir) y su tooltip literario ×3 idiomas.
+   Coherencia total: si el NERVIOSO anda FUERA, la tinta sale DEL
+   LIBRO flotante (`PosicionDelLibro` — la letra .93 manda para toda
+   la familia). Entrega: Bolsa de las Sombras + receta de 5 maderas
+   (protocolo de pruebas).
+5. **BUG .94 CAZADO EN EL TEXTO**: el tooltip del grimorio ORIGINAL
+   seguía prometiendo la GRACIA de los 10 s («Si pasan 10 segundos sin
+   comer…» + «clic der (y lo calma 10 s)») — esa gracia MURIÓ en la
+   .94 (el reloj suma SIEMPRE): el texto ya no miente. Y el tooltip del
+   Nervioso ya no promete el compás muerto.
+6. **VERIFICACIÓN**: build real 0/0 (308 .cs = 306 + la lágrima y su
+   arma) · .tmod 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a:
+   386 entradas (384 de la .94 + LagrimaDeTintaProjectile.rawimg +
+   TintaViva.rawimg), EOF exacto, blob diff whitelist exacto (dll/pdb/
+   Info + 3 hjson), arte byte-idéntico (378), CECIL (audit_v65095.py,
+   0 fallos): el compás ENTERO ELIMINADO + el espíritu sin relojes
+   pero con SombraActiva/JugadorAtacoReciente + el Shoot del libro SIN
+   el 931 y CON la lágrima + LagrimaDeTintaProjectile con toda su
+   máquina (projFrames 4, OnHitNPC/OnKill/BuscarPresa) + ManchaDeTinta
+   con el Charco + TintaViva con su Shoot desde el libro + la bolsa
+   entregándola + GrimorioFuriaSistema/OleadaNPC IL IDÉNTICOS a la
+   .94 · hjson ×3: TintaViva presente, compás y gracia muertos en el
+   texto, es-ES espejo por contenido, 787 hojas simétricas es↔en
+   (+2 de TintaViva), en-US tabs 4278, paquete == árbol ×3 · headless
+   «Sandboxing v6.50.95 → Adding Recipes → Server started»
+   0 EXCEPCIONES.
+
+   CHECKLIST DEL USUARIO (la prueba EN JUEGO): (a) el libro ataca
+   CUANDO QUIERE: mata una presa y la siguiente sombra sale ENSEGUIDA
+   si algo se mueve cerca (sin esperar 10 s ni 2 s); (b) el clic izq
+   del grimorio YA NO dispara el Nightglow de hadas: escupe LA LÁGRIMA
+   DE TINTA — página oscura con corazón de marfil que RESPIRA (4
+   frames), PERSIGUE a la presa (curva y acelera), GOTEA estelas
+   violetas, deja ESTELAS de fantasma, pasa MUROS y al romperse
+   SALPICA y deja LA MANCHA en el suelo; (c) con el espíritu fuera, la
+   lágrima nace DEL LIBRO flotante (y la mano va vacía); (d) LA TINTA
+   VIVA llega en la Bolsa de las Sombras (icono diagonal): cada disparo
+   es una lágrima (3 presas por lágrima) y si el Nervioso anda fuera,
+   TAMBIÉN dispara desde el libro; (e) el tooltip de ambos libros ya no
+   promete ni el compás ni la calma de 10 s; (f) la .94 quedó marcada
+   como estable: tag stable-v6.50.94 + rama stable-v6.50.94-backup en
+   el repo.
+
 ## Commit v6.50.94 — EL RELOJ SIEMPRE + EL COMPÁS DE LA SOMBRA + LA FUGA MUERTA + EL FESTÍN EGOÍSTA + EL ESPÍRITU ÚNICO
 
 **Petición del usuario**: "el grimorio hambriento nervioso no ha hecho

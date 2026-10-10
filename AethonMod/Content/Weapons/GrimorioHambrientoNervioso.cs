@@ -83,12 +83,16 @@ namespace AethonMod.Content.Weapons
     ///   criaturas con el libro (30 s) — y mientras el jugador dispara
     ///   con el libro, el espíritu NO lanza sombras (la caza solitaria
     ///   es del ausente).
-    /// · EL COMPÁS DE LA SOMBRA: un ataque cada 10 s (y nunca antes de
-    ///   2 s de terminar el anterior) — el re-lanzamiento al matar murió.
     /// · EL FESTÍN EGOÍSTA: el libro se come a la presa ENTERA (botín
     ///   incluido) y la XP es DE EL LIBRO (sube SU nivel) — el jugador
     ///   no recibe NADA (el festín compartido con el Grimorio del Eterno
     ///   murió con la .93).
+    ///
+    /// v6.50.95 — EL COMPÁS MURIÓ (la letra del usuario: «creo que mejor
+    /// es dejarlo atacar cuando quiera»): sin relojes — la sombra sale
+    /// cuando hay presa que se mueva cerca. Y LA DESCARGA PRESTADA
+    /// también murió: el clic izq escupe LA LÁGRIMA DE TINTA (el disparo
+    /// propio del libro — el sprite del usuario, heredado de la base).
     /// </summary>
     public class GrimorioHambrientoNervioso : GrimorioHambriento
     {
@@ -829,11 +833,10 @@ namespace AethonMod.Content.Weapons
         /// v6.50.94 — SIN GRACIA Y SIN MARCA DE DIGESTIÓN: el bocado ya no
         /// congela el reloj del apetito (la letra: «el hambre se pausa» —
         /// la gracia de la .92 moría aquí) y el compás de la sombra ya no
-        /// nace en la absorción (la .93 lo marcaba A MITAD del ataque — la
-        /// sombra moría 84 t después y apenas quedaban 0,6 s de pausa
-        /// real: el re-lanzamiento al matar era ESA brecha). Ahora el
-        /// compás vive en el NACER (MarcarAtaque) y el MORIR
-        /// (SombraTerminada) de la sombra.</summary>
+        /// nace en la absorción (la .93 lo marcaba A MITAD del ataque).
+        /// v6.50.95 — el compás ENTERO murió (la letra: «dejarlo atacar
+        /// cuando quiera»): la absorción ya no toca reloj NINGUNO — sólo
+        /// come, resta −1% de hambre y cobra la XP.</summary>
         internal static void AbsorberPresa(NPC presa, Player dueño)
         {
             if (presa == null || !presa.active)

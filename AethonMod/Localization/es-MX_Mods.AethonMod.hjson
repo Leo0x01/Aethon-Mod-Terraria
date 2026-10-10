@@ -100,12 +100,13 @@ Items: {
                 Tooltip:
                         '''
                         El ojo del Códice Vivo: te mira, parpadea y pasa hambre.
-                        Si pasan 10 segundos sin comer, el apetito crece de
-                        cero a TOTAL en un minuto: el parpadeo se acelera
-                        (de 10-20 s a cada 2 s), la mirada se agita y el
-                        iris dorado se enciende ROJO.
-                        Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito (y lo calma 10 s).
+                        Su apetito crece de cero a TOTAL en un minuto (tasa
+                        de prueba): el parpadeo se acelera (de 10-20 s a
+                        cada 2 s), la mirada se agita y el iris dorado se
+                        enciende ROJO.
+                        Clic izq: escupe LA LÁGRIMA DE TINTA — la descarga
+                        perseguidora PROPIA del libro (pruebas, sin maná).
+                        Clic der: reinicia el apetito.
                         Objeto de pruebas — eliminar antes de publicar.
                         '''
         }
@@ -126,16 +127,17 @@ baja (−1%) y el clic derecho la reinicia.
 Desde el 25% sale a cazar POR SU CUENTA si te ausentas
 (AFK 5 s, o 30 s sin atacar criaturas con el libro):
 flota cerca de ti y su Sombra de la Página devora a
-la criatura que se mueva cerca — su ataque se lanza
-UNA vez cada 10 s (y nunca antes de 2 s de terminar
-el anterior).
+la criatura que se mueva cerca — ataca cuando QUIERE:
+en cuanto termina con una presa, sale tras la
+siguiente que se mueva.
 El festín es EGOÍSTA: se come a la presa ENTERA, botín
 incluido — la XP es de ESTE libro (sube su nivel);
 tú no recibes nada. Mientras está fuera, sus ataques
 salen DEL LIBRO (tu mano ataca vacía).
 NUNCA se escapa: al 100% se queda flotando cerca de
 ti, cazando por sí mismo.
-Clic izq: descarga perseguidora (pruebas, sin maná).
+Clic izq: escupe LA LÁGRIMA DE TINTA — la descarga
+perseguidora PROPIA del libro (pruebas, sin maná).
 Clic der: reinicia el apetito.
 Objeto de pruebas — comparar con el original.
 '''
@@ -162,6 +164,25 @@ Objeto de pruebas — comparar con el original.
                         que CUBRE ENTERO al jefe — traga con pulso mientras las almas
                         vuelven a ti por el cuerpo. A 1 de vida: el festín.
                         (Arma de prueba de las fauces — v2.)
+                        '''
+        }
+
+        // v6.50.95 — LA TINTA VIVA (la letra: «quiero que con este
+        // proyectil seas creativo, lo animes y crees una nueva arma con
+        // el proyectil»): el arma que escupe LA LÁGRIMA DE TINTA — el
+        // disparo propio del libro, nacido del sprite EXACTO del usuario.
+        TintaViva: {
+                DisplayName: Tinta Viva
+                Tooltip:
+                        '''
+                        «La primera lágrima que el grimorio no quiso llorar.»
+                        Escupe LÁGRIMAS DE TINTA — la página doblada en
+                        sombra con corazón de marfil: respiran en vuelo,
+                        persiguen a tu presa (la tinta aprende a caer),
+                        gotean estelas de sombra, atraviesan los muros y,
+                        al romperse, salpican y dejan LA MANCHA.
+                        Si el Nervioso anda FUERA, la tinta sale DEL LIBRO.
+                        Tres presas por lágrima.
                         '''
         }
         // v6.50.91 — EL CÓDICE VIVO FUE BORRADO POR COMPLETO (la letra del

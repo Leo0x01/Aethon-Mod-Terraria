@@ -95,12 +95,13 @@ Items: {
 		Tooltip:
 			'''
 			The Living Codex's eye: it watches, blinks and gets hungry.
-			If 10 seconds pass without eating, the appetite grows
-			from zero to FULL in one minute: blinking speeds up
-			(from 10-20 s to every 2 s), the gaze grows restless
-			and the golden iris ignites RED.
-			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite (and calms it 10 s).
+			Its appetite grows from zero to FULL in one minute
+			(test rate): blinking speeds up (from 10-20 s to
+			every 2 s), the gaze grows restless and the golden
+			iris ignites RED.
+			Left click: spits THE INK TEAR — the book's OWN
+			homing shot (testing, no mana).
+			Right click: resets the appetite.
 			Testing item — remove before publishing.
 			'''
 	}
@@ -123,15 +124,16 @@ From 25% hunger on it hunts ON ITS OWN whenever you
 step away (AFK 5 s, or 30 s without attacking
 creatures with the book): it floats near you and its
 Page Shadow devours whatever creature moves nearby —
-its attack fires ONCE every 10 s (and never sooner
-than 2 s after the previous one ends).
+it strikes WHENEVER IT WANTS: the moment it finishes
+one prey, it goes after the next one that moves.
 The feast is SELFISH: it eats the prey WHOLE, loot
 included — the XP belongs to THIS book (it raises its
 own level); you get nothing. While it is out, its
 attacks come FROM THE BOOK (your hand swings empty).
 It NEVER escapes: at 100% it just keeps floating
 near you, hunting on its own.
-Left click: homing bolt (testing, no mana).
+Left click: spits THE INK TEAR — the book's OWN
+homing shot (testing, no mana).
 Right click: resets the appetite.
 Testing item — compare against the original.
 '''
@@ -159,6 +161,25 @@ Testing item — compare against the original.
 			mass that COVERS the whole boss — swallows in pulse while its
 			souls travel back to you through the body. At 1 HP: the feast.
 			(Maw test weapon — v2.)
+			'''
+	}
+
+	// v6.50.95 — LIVING INK (the user's letter: "I want you to be
+	// creative with this projectile, animate it and create a new weapon
+	// with the projectile"): the weapon that spits THE INK TEAR — the
+	// book's own shot, born from the user's EXACT sprite.
+	TintaViva: {
+		DisplayName: Living Ink
+		Tooltip:
+			'''
+			"The first tear the grimoire refused to cry."
+			Spits INK TEARS — the page folded into shadow with
+			a heart of ivory: they breathe in flight, chase your
+			prey (the ink learns how to fall), drip trails of
+			shadow, pass through walls and, when they break,
+			they splash and leave THE STAIN.
+			If the Nervous one is OUT, the ink flies FROM THE BOOK.
+			Three prey per tear.
 			'''
 	}
 

@@ -199,26 +199,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 Projectile.rotation = MathF.Sin(t * 0.045f) * 0.12f + lado * 0.10f;
 
                 // LA CAZA (autoridad): algo se mueve cerca → la sombra.
-                // v6.50.94 — EL COMPÁS DE LA SOMBRA (la letra: «haciendo
-                // que el libro en ese estado solo pueda lanzar su ataque
-                // de la sombra de la pagina una vez cada 10 segundo o algo
-                // asi, o poniendo por codigo que no puede lanzar un ataque
-                // 2 segundos despues de terminar el primero»): UN ataque
-                // cada 10 s (MarcarAtaque al NACER la sombra) y jamás
-                // antes de 2 s de TERMINAR la anterior (SombraTerminada al
-                // morir) — el re-lanzamiento en el instante de la muerte
-                // murió. Y mientras el jugador dispara con el libro, el
-                // espíritu NO lanza sombras por su cuenta (la caza
-                // solitaria es del ausente: AFK o mucho tiempo sin
-                // atacar criaturas con el libro).
+                // v6.50.95 — EL COMPÁS MURIÓ (la letra del usuario: «creo
+                // que mejor es dejarlo atacar cuando quiera»): sin el
+                // reloj de los 10 s y sin los 2 s tras terminar — la
+                // sombra sale CUANDO HAY PRESA que se mueva cerca. La
+                // única cola que queda es la natural: una presa por
+                // sombra (SombraActiva). Y mientras el jugador dispara
+                // con el libro, el espíritu NO lanza sombras por su
+                // cuenta (la caza solitaria es del ausente: AFK o mucho
+                // tiempo sin atacar criaturas con el libro).
                 if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
-                    SombraPaginaCaza.AtaqueListo(Projectile.owner) &&
                     !GrimorioHambrientoNervioso.JugadorAtacoReciente())
                 {
                     NPC presa = PresaCercana();
                     if (presa != null)
                     {
-                        SombraPaginaCaza.MarcarAtaque(Projectile.owner);
                         Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
                             Vector2.Zero, ModContent.ProjectileType<SombraPaginaCaza>(),
                             0, 0f, Projectile.owner, presa.whoAmI + 1, 0f, 0f);

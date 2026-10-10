@@ -8,6 +8,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.Systems;
+using AethonMod.Content.Projectiles.Sombras;
 
 namespace AethonMod.Content.Weapons
 {
@@ -244,9 +245,10 @@ namespace AethonMod.Content.Weapons
     ///   salta). El viaje del iris en el arte original era de 0,7 px a
     ///   escala de juego (invisible) — por eso la capa: la mueve el código
     ///   (±3,5 px), visible y viva.
-    /// · ARMA: clic izq dispara la descarga perseguidora (Nightglow 931, la
-    ///   del Grimorio del Eterno); clic der REINICIA el apetito (demo
-    ///   repetible). Sin maná (objeto de pruebas).
+    /// · ARMA: clic izq escupe LA LÁGRIMA DE TINTA (v6.50.95 — el
+    ///   disparo propio: el sprite del usuario animado, homing, estelas
+    ///   y mancha; la descarga prestada Nightglow murió); clic der
+    ///   REINICIA el apetito (demo repetible). Sin maná (objeto de pruebas).
     ///
     /// v6.50.84 — EL IRIS CIRCULAR + EL OJO EN TODAS PARTES. La letra del
     /// usuario: «cuando el item esta en el mundo no se ve bien el ojo, pero
@@ -332,7 +334,7 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 1, 0, 0);
             Item.rare = ItemRarityID.Quest;
             Item.autoReuse = true;
-            Item.shoot = 931;        // Nightglow (fix 48688dd): el hook Shoot necesita shoot>0
+            Item.shoot = ModContent.ProjectileType<LagrimaDeTintaProjectile>();   // v6.50.95 — LA LÁGRIMA DE TINTA (adiós Nightglow 931): el hook Shoot necesita shoot>0
             Item.shootSpeed = 12f;
             Item.UseSound = SoundID.Item4; // el sonido de la familia del grimorio
         }
@@ -376,10 +378,15 @@ namespace AethonMod.Content.Weapons
                 return false;
             Estado.UltimoDisparo = Main.GameUpdateCount;
 
-            // La descarga perseguidora del Grimorio del Eterno (931 — homing vanilla).
+            // v6.50.95 — LA DESCARGA PRESTADA MURIÓ: el libro YA NO
+            // dispara el Nightglow vanilla (931) — escupe SU PROPIA
+            // tinta: LA LÁGRIMA DE TINTA (LagrimaDeTintaProjectile),
+            // el sprite del usuario animado, con homing propio, estelas
+            // y mancha — coherencia visual total con el libro.
             // v6.50.93 — el ORIGEN es virtual: el Nervioso con el libro
             // FUERA dispara DESDE el libro flotante, no desde el jugador.
-            Projectile.NewProjectile(source, OrigenDelDisparo(player, position), velocity, 931,
+            Projectile.NewProjectile(source, OrigenDelDisparo(player, position), velocity,
+                ModContent.ProjectileType<LagrimaDeTintaProjectile>(),
                 damage, knockback, player.whoAmI);
             return false; // ya la spawneé yo: nada de doble vanilla
         }

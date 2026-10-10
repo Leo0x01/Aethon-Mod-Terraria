@@ -568,7 +568,7 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "La Bolsa de las Sombras";
         protected override string NombreCorto => "Bolsa de las Sombras";
         protected override Color ColorFiesta => new(196, 90, 255);
-        protected override string Nota => "Las cuatro páginas de la sombra — donde hay sombra, la página mira";
+        protected override string Nota => "Las páginas de la sombra — donde hay sombra, la página mira (y la tinta vuela)";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -578,6 +578,11 @@ namespace AethonMod.Content.Items.Bolsas
             // solo nos quedamos con La Sombra de la Página») — la familia
             // vuelve a ser UNA: la fauce tentacular aprobada.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA ÚNICA: la aprobada por el usuario
+            // v6.50.95 — LA TINTA VIVA (la letra: «quiero que con este
+            // proyectil seas creativo, lo animes y crees una nueva arma
+            // con el proyectil»): el arma que escupe LA LÁGRIMA DE TINTA
+            // — el disparo propio del libro (adiós Nightglow prestado).
+            l.Add((ModContent.ItemType<Weapons.Sombras.TintaViva>(), 1));
             return l;
         }
     }

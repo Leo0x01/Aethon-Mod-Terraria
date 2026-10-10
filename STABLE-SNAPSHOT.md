@@ -1,28 +1,23 @@
-# AethonMod — ESTADO ACTUAL (v6.50.94)
+# AethonMod — ESTADO ACTUAL (v6.50.95)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.94 (LA LETRA DEL NERVIOSO que la .93 prometía
-> y no cumplió en juego: EL RELOJ SIEMPRE — la gracia de los 10 s de la
-> .92 era LA PAUSA que el usuario veía («el hambre se pausa»): muerta,
-> Paso() suma SIEMPRE, el bocado sólo resta −1%; EL COMPÁS DE LA SOMBRA —
-> un ataque cada 10 s (marcado al NACER) y NADA antes de 2 s de TERMINAR
-> la anterior (marcado en OnKill): la digestión .93 marcaba a mitad del
-> ataque y la sombra moría 84 t después — 0,6 s de pausa real era ESA la
-> brecha del re-lanzamiento al matar; LA FUGA MUERTA — MODO_FUGA/IrAFuga/
-> frases/purgados: al 100% el libro se queda flotando cerca cazando por
-> sí mismo; LA CAZA DEL AUSENTE — sale del 25% con AFK 5 s O 30 s sin
-> atacar con el libro, y mientras el dueño dispara (5 s) el espíritu
-> calla sus sombras; EL FESTÍN EGOÍSTA — la XP de cada presa es DEL
-> NERVIOSO (ShardLevelItem lo adopta, tooltip con SU nivel, sin Eterno ni
-> latido: el jugador NADA); EL ESPÍRITU ÚNICO — SoyDuplicado() disuelve
-> al segundo espíritu del dueño: jamás DOS libros flotando (la «copia» de
-> la captura del usuario con el destello naciendo de la equivocada).
-> .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f, 384 entradas,
-> auditoría TODO OK, headless 0 excepciones.)
-> dios (la muerte de Aethon es UN SOLO ACTO: gran explosión de luz y
-> desaparecer, el cielo queda LIMPIO, en MP en TODAS las pantallas) —
-> decompile del paquete 8/8 + 9/9 regresión .80 + 10/10 contrato .79.
-
+> Última actualización: v6.50.95 (EL COMPÁS MURIÓ + LA LÁGRIMA DE
+> TINTA. La letra: «luego quitar la restriccion del compás de la
+> sombra — tus dos reglas a la vez […] creo que mejor es dejarlo
+> atacar cuando quiera / esto debe cambiar: la descarga prestada […]
+> te dare un sprite para un disparo, tu has que el disparo tenga
+> efectos, te dare el codigo como siempre […] quiero que con este
+> proyectil seas creativo, lo animes y crees una nueva arma con el
+> proyectil» — la .94 quedó GUARDADA COMO ESTABLE (tag
+> stable-v6.50.94 + rama -backup → 80d4d7b, manifiesto SHA-256 de las
+> 384 entradas — el punto de retorno); el libro YA NO espera 10 s ni
+> 2 s para lanzar su sombra: ataca cuando QUIERE; y el disparo propio
+> nació del sprite del usuario: LA LÁGRIMA DE TINTA (4 frames
+> respirando, homing que acelera, goteo, estelas, salpicadura, la
+> mancha) + LA TINTA VIVA, el arma que la escupe (bolsa de sombras) —
+> el Nightglow prestado (931) MURIÓ en el Shoot del libro. .tmod
+> 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a, 386 entradas,
+> auditoría TODO OK (audit_v65095.py), headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1912,6 +1907,25 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **⏳ v6.50.95 LISTA (pendiente de publicación)** — EL COMPÁS MURIÓ + LA LÁGRIMA DE TINTA +
+   LA TINTA VIVA + LA .94 GUARDADA COMO ESTABLE. La letra completa en CHANGES.md v6.50.95.
+   (1) ESTABLE: tag stable-v6.50.94 + rama stable-v6.50.94-backup →
+   80d4d7b + manifiesto SHA-256 (384) + README. (2) SIN RELOJES:
+   la sombra sale cuando hay presa (una presa por sombra; el silencio
+   mientras el dueño dispara SIGUE — es la caza del ausente, no un
+   compás). (3) LA LÁGRIMA: sprite del usuario → strip 4×28×76
+   (latido en los píxeles: escala 0.94→1.0 + marfil ×1.0→×1.45) +
+   homing acelerante + goteo + estelas oldPos + vaivén de draw + luz
+   violeta/marfil + muros abiertos + 3 penetraciones + salpicadura +
+   LA MANCHA (Charco 36 t). (4) EL ARMA: TintaViva 90/9/24, icono
+   −35°, bolsa + madera; dispara DESDE el libro si el Nervioso está
+   fuera. (5) TEXTO HONESTO: el tooltip del original ya no promete la
+   gracia muerta de la .92/.94. VERIFICACIÓN: build real 0/0 (308
+   .cs) · audit_v65095.py 0 fallos (386 entradas, EOF exacto, blob
+   whitelist, CECIL compás muerto + lágrima completa + sistemas
+   intactos, hjson ×3 espejo + 787 hojas + tabs 4278) · headless 0
+   excepciones.
+
 1. **✅ v6.50.94 PUBLICADA — release 408947983** — EL RELOJ SIEMPRE + EL
    COMPÁS DE LA SOMBRA + LA FUGA MUERTA + EL FESTÍN EGOÍSTA + EL ESPÍRITU
    ÚNICO. La letra: «el hambre se pausa / su ataque sigue relanzandose al
@@ -2405,6 +2419,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.95** | ✅ Build-verificada (build real 0/0 sobre 308 .cs = 306 + la lágrima y su arma, .tmod 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a, 386 entradas = 384 de la .94 + LagrimaDeTintaProjectile.rawimg + TintaViva.rawimg, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson + 2 rawimg nuevos), arte byte-idéntico en las 378 restantes, CECIL: compás ENTERO eliminado de SombraPaginaCaza (TICKS_ENTRE_ATAQUES/TICKS_TRAS_TERMINAR/_proximoAtaque/MarcarAtaque/AtaqueListo/SombraTerminada/OnKill) + espíritu sin relojes pero con SombraActiva/JugadorAtacoReciente + el Shoot del libro SIN el ldc.i4 931 y CON la lágrima + projFrames 4 + OnHitNPC/OnKill/BuscarPresa de la lágrima + ManchaDeTinta con Charco + TintaViva con Shoot/PosicionDelLibro + la bolsa entregándola + GrimorioFuriaSistema/OleadaNPC IL IDÉNTICOS a la .94, hjson ×3 con TintaViva + compás y gracia muertos en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4278, paquete == árbol ×3, headless «Sandboxing v6.50.95 → Adding Recipes → Server started» 0 excepciones), ⏳ pendiente de release | LA LETRA: «luego quitar la restriccion del compás de la sombra — tus dos reglas a la vez […] creo que mejor es dejarlo atacar cuando quiera / te dare un sprite para un disparo […] seas creativo, lo animes y crees una nueva arma con el proyectil». (1) ESTABLE: la .94 marcada (tag + rama backup + manifiesto SHA-256). (2) EL COMPÁS MUERTO: la sombra sale cuando hay presa — sin 10 s ni 2 s. (3) LA LÁGRIMA DE TINTA: el sprite EXACTO del usuario → strip de 4 frames (el latido vive en los PÍXELES), homing acelerante, goteo, estelas, vaivén, muros abiertos, 3 presas, salpicadura y LA MANCHA. (4) LA TINTA VIVA: el arma (icono −35°, bolsa, dispara desde el libro). (5) textos honestos. LECCIONES: (1) el sprite del usuario viaja como CÓDIGO RLE — decodificar con la casa y bajar al Lanczos (rotar ANTES de reducir para el icono); (2) un cooldown que molesta al usuario no se afina: se BORRA — «atacar cuando quiera» es sin reloj, la cola natural (una presa por sombra) basta; (3) Dust.NewDustPerfect devuelve Dust (NO int: no se indexa Main.dust[d]) | 
 | **v6.50.94** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f, 384 entradas (el MISMO set de la .93), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: UltimaComida/TICKS_GRACIA_COMIDA/PasoSinHambre/MarcarDigestion/IrAFuga/MODO_FUGA/«Fugitivo»/«Escapa» ELIMINADOS + MarcarAtaque/AtaqueListo/SombraTerminada/OnKill con 600 y 120 plegados + SoyDuplicado en el espíritu + Shoot/JugadorAtacoReciente con 1800/300 plegados + ShardLevelItem adopta al Nervioso + GrimorioHambriento(clase-ítem)/OleadaNPC/GrimorioFuriaSistema IL IDÉNTICOS a la .93, hjson: es-ES espejo RESTAURADO con cabecera canónica (el árbol .93 llevaba el re-serializado sin cabecera — el 18º incidente), 13 claves Nervioso (con «Nivel», sin fuga), 785 hojas es↔en, en-US tabs 4235, paquete==árbol ×3, headless «Sandboxing v6.50.94 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408947983 + asset AethonMod.tmod 627959141 2.555.191 B, CDN verificado byte a byte md5 52004cee…, /releases/latest = v6.50.94), ⏳ en juego | LA LETRA: «el hambre se pausa […] su ataque sigue relanzandose al matar a una criatura, eso del ataque se puede arreglar haciendo que el libro en ese estado solo pueda lanzar su ataque de la sombra de la pagina una vez cada 10 segundo o algo asi, o poniendo por codigo que no puede lanzar un ataque 2 segundos despues de terminar el primero […] los proyectiles del libro no salen del libro cuando esta flotando, salen de una copia del sprite del libro que el jugador muestra en su mano […] la fuga simplemente la quitamos el libro no se fuga, solo queda flotando cerca del jugador cazando por si mismo, esto de la caza por su cuenta es cuando el jugador esta en afk o simplemente lleva mucho tiempo sin atacar criaturas con el libro […] el festin compartido no tiene sentido, el libro caza por estar hambriento, en este caso el libro debe ser egoista y comer toda la criatura loot incluido por eso el libro recibe la exp y el jugador nada». (1) EL RELOJ SIEMPRE: la gracia de los 10 s de la .92 (UltimaComida) era LA PAUSA — muerta; Paso() suma 1/3600 siempre, el bocado resta −1%. (2) EL COMPÁS: 10 s entre lanzamientos (MarcarAtaque al nacer) + 2 s tras terminar (SombraTerminada en OnKill) — la digestión .93 marcaba a mitad del ataque y dejaba 0,6 s reales. (3) LA FUGA MUERTA: al 100% sigue cazando cerca. (4) LA CAZA DEL AUSENTE: AFK 5 s O 30 s sin disparar con el libro; mientras el dueño dispara (<5 s) el espíritu calla. (5) EL FESTÍN EGOÍSTA: la XP al NERVIOSO (ShardLevelItem + tooltip de nivel), sin Eterno/latido: el jugador NADA. (6) EL ESPÍRITU ÚNICO: SoyDuplicado disuelve al segundo espíritu del dueño — la copia de la captura murió por construcción. LECCIONES: (1) un reloj condicionado a comer JAMÁS deja de «pausarse» — la regla del usuario final fue SIN condiciones: suma SIEMPRE; (2) un cooldown de ataque se marca al NACER y al MORIR del ataque, NUNCA en un evento intermedio (la absorción): la mitad del ataque descuenta la pausa real; (3) las entidades únicas se defienden SOLAS: el dedup por (modo, whoAmI) mata la clase entera de bugs de copias sin importar la causa del spawn; (4) auditar que cada release deje SU fila en el HISTORIAL — la .93 volvió a olvidarla (patrón .90/Task 82) y hubo de restaurarse de los commits |
 | **v6.50.93** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.354 B md5 363932e16d8ce060736497bbfabcc2d1, 384 entradas (el MISMO set de la .92), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: PasoSinHambre ELIMINADO de EstadoGrimorio + OrigenDelDisparo ×2 (base y Nervioso) + PosicionDelLibro + UMBRAL_CACERIA 0.25 plegada + MarcarDigestion/DigestionLista (ldc.i4.s 120) + IrAFuga en el espíritu + SelloVivo/_sellados/TTL_SELLO 900 + el chequeo 7|13 del préstamo de corrupción DENTRO del IL de PreAI + GrimorioFuriaSistema IL IDÉNTICO a la .92, hjson: es-ES espejo por contenido, 786 hojas es↔en, en-US tabs 4293, paquete==árbol ×3, headless «Sandboxing v6.50.93 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408895980 + asset AethonMod.tmod 627773875 2.555.354 B, CDN verificado byte a byte md5 363932e1…, /releases/latest = v6.50.93), ⏳ en juego (la .94 corrige lo que la prueba reveló: el hambre aún se pausaba por la gracia, el re-lanzamiento al matar seguía, la copia del sprite junto a la mano) | LA LETRA: «en la oleada el devorador de mundo aparecio y se fue […] las versiones de oleada son entidades separadas de las originales […] el libro solo sale a cazar de 25% de hambre en adelante […] si el jugador ataque y el libro esta fuera sus ataques salen del libro no del jugador […] el nivel de hambre debe subir independientemente el libro case o no […] su ataque vuelve a lanzarce justo cuando mata a la criatura, esto no debe pasar». (1) EL DEVORADOR QUE SE FUE: la causa raíz en el decompile — al PARTIR al gusano vanilla MUTA el cuerpo en cabeza (SetDefaultsKeepPlayerInteraction(13)) y NPC.SetDefaults borra los globals (_globals=null): el sello moría con la instancia y la cabeza nueva era enterrada por su IA hasta active=false; CURA DOBLE: registro SelloVivo por whoAmI (TTL 15 s, re-adoptado en el propio SetDefaults) + préstamo de zona a TODA la mesa viva (incluidos los DevourerHead escupidos, 7|13 en PreAI). (2) UMBRAL_CACERIA 0.25 + IrAFuga al 100% estando fuera. (3) OrigenDelDisparo virtual + LA MANO VACÍA (ModifyItemDraw return false sin agregar nada). (4) PasoSinHambre eliminado (el reloj corría tras la gracia de 10 s). (5) LA DIGESTIÓN 120 t marcada en la absorción. LECCIONES: (1) un GlobalNPC NO sobrevive al cambio de type de su propio NPC — los sellos que sobreviven a una mutación viven en un REGISTRO externo por whoAmI; (2) los préstamos a vanilla no dependen del npc.target: TODA la mesa viva; (3) los const NPCID llegan PLEGADOS (ldc.i4.7): auditar por el literal DENTRO del bloque IL; (4) el cuerpo JSON de un release con newlines+unicode va por ARCHIVO (-d @file) |
 | **v6.50.92** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs = 308 − 2 difuntos, build real 0/0, .tmod 2.553.604 B md5 96a68ef512886dca01335abb16fb4d7f, 384 entradas = 386 de .91 − 2 rawimg de los difuntos, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 378 restantes, CECIL: GrimorioHambrientoErratico/GrimorioHambrientoInestable AUSENTES + la bandera Erratico muerta en EstadoGrimorio + FocoDelFestin/UltimaComida/FocoPantalla/TICKS_GRACIA_COMIDA presentes + la GRACIA 600 plegada en el IL de Paso + SombraPaginaCaza y la clase-ítem GrimorioHambriento con IL IDÉNTICO a .91 + el espíritu CAMBIA documentado (se inclina y mira su comida), espejo es-ES==es-MX por CONTENIDO (regenerado con sync_es_es_v65092), familia de DOS en los 3 idiomas + 13 claves del Nervioso + difuntos purgados del hjson, 785 hojas simétricas es↔en, en-US con tabs, headless «Sandboxing v6.50.92 → Adding Recipes → menú de mundos» 0 excepciones), ✔ PUBLICADA (release 408824648 + asset 627492527 2.553.604 B, CDN verificado byte a byte md5 96a68ef512886dca01335abb16fb4d7f, /releases/latest = v6.50.92), ⏳ en juego | LA LETRA: «el ACTUALIZAR-FUENTE.bat tiene que borrar y copiar, pero solo borra y no copia, arreglar eso […] borra al grimorio hambriento inestable y al erratico, deja el original y al nervioso […] el hambre debe subir si es que en 10 segundos no come nada, el libro debe mirar lo que esta comiendo». (1) EL .BAT: la .91 tenía finales LF + bloques if multilinea — cmd.exe descarrila al parsear bloques que cruzan sus fronteras de lectura de 512 bytes con LF (el rmdir corría, el robocopy no); cura CRLF + CERO bloques (if de una línea + goto) + conteo «[OK] N archivos copiados» + .gitattributes *.bat -text (el blob conserva el CRLF también en los ZIP de GitHub). (2) LA FAMILIA DE DOS: Errático (.87) e Inestable (.89) borrados (clases+sprites+bolsa+localización ×3; la bandera Erratico murió con su dueño). (3) LA GRACIA DE LOS 10 s: el reloj del hambre sólo corre tras 10 s sin comer (UltimaComida — presas absorbidas y el clic derecho marcan la hora; tasa 0→100% en un minuto intacta). (4) EL FOCO DEL FESTÍN: mientras la sombra devora, el espíritu se INCLINA hacia la presa y clava el iris (o en las almas subiendo); el ojo del ítem (hotbar/mano/mundo) persigue el festín vía FocoPantalla en Paso (LERP 0,10 suave). LECCIONES: (1) los .bat de la casa NACEN con CRLF y SIN bloques multilinea — cmd.exe lee en bloques de 512 bytes y los finales LF desplazan el parseo (el bug podía aparecer y desaparecer con cualquier edición que moviera bytes); (2) .gitattributes *.bat -text protege el blob para clones Y descargas ZIP; (3) el hambre condicionado a comer convierte el reinicio de la demo en «alimentar» — el clic derecho calma 10 s; (4) una mirada nueva no vive en el draw: vive en el ESTADO (FocoPantalla en Paso) para que hotbar, mano, mundo y espíritu la compartan |
