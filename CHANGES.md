@@ -1,5 +1,104 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.93 — LA OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE + LOS ATAQUES DEL LIBRO SALEN DEL LIBRO + UN ATAQUE POR CRIATURA
+
+**Petición del usuario**: "en la oleada el devorador de mundo aparecio y se
+fue, debes asegurarte de que los jefes y monstruos invocados en las oleadas
+no se vean afectados por los parametros de biomas o climas que sus
+versiones originales, ten en cuenta que las versiones de oleada son
+entidades separadas de las originales por lo tanto no se ven afectadas /
+el libro solo sale a cazar de 25% de hambre en adelante / si el jugador
+ataque y el libro esta fuera sus ataques salen del libro no del jugador,
+ya que el libro estaba fuera, ataque y el jugador tenia una copia del
+libro en la mano / el nivel de hambre debe subir independientemente el
+libro case o no […] esto es porque el libro esta fuera y su hambre se
+congela, el hambre no debe congelarse / cuando el libro ataca y se
+alimenta, su ataque vuelve a lanzarce justo cuando mata a la criatura,
+esto no debe pasar, solo se debe lanzar una vez su ataque hasta que la
+criatura muera".
+
+1. **EL DEVORADOR QUE SE FUE — LA CAUSA RAÍZ ENCONTRADA EN EL DECOMPILE**:
+   al PARTIR al gusano, la IA de vanilla MUTA el cuerpo huérfano en CABEZA
+   (`type = 13; SetDefaultsKeepPlayerInteraction(13)`) — y
+   `NPC.SetDefaults` arranca con `_globals = null`: **los globals del NPC
+   se DESTRUYEN** y se re-instancian frescos. El sello de la oleada moría
+   con la instancia: la cabeza nueva nacía SIN `EsDeOleada` (sin
+   protección de `CheckActive`, sin stats del festín, sin aura), SIN
+   préstamo de zona — y su IA vanilla («¿nadie vive en la Corrupción?»)
+   la ENTERRABA hacia abajo y, pasada la mitad de la roca, APAGABA LA
+   CADENA ENTERA con `active = false` DIRECTO (que ningún hook detiene).
+   El jugador mataba la cabeza y el resto del gusano "se iba". **CURA
+   DOBLE**: (a) **EL REGISTRO DE LOS QUE MUTAN** — `SelloVivo` por slot
+   (`whoAmI`) con TTL de 15 s escrito por `Marcar` y re-adoptado por el
+   propio `SetDefaults` al ver la mutación (un `NewNPC` normal pasa con
+   `active=false`: jamás adopta) — la cabeza partida vuelve al festín en
+   el MISMO tick, con stats y todo; (b) **EL PRÉSTAMO DE ZONA A TODA LA
+   MESA** — ya no depende del `npc.target` (que nace `255` el primer tick
+   y muere con el jugador): la zona del guardián se presta a TODOS los
+   vivos durante su AI, así el chequeo de vanilla SIEMPRE encuentra a su
+   gente. La oleada ES su propio ambiente: ni el Devorador de oleada ni
+   los **Devoradores que escupe en el subsuelo** (`DevourerHead`, 7) leen
+   la Corrupción del mundo; el Cerebro su Carmesí, la Reina su Jungla,
+   Deerclops su Nieve (la noche del Ojo/Skeletron y la superficie de la
+   Reina siguen prestadas como desde la .73).
+2. **EL UMBRAL DE LA CAZA: 25%** (la letra: «el libro solo sale a cazar de
+   25% de hambre en adelante»): `UMBRAL_CACERIA 0.25` — debajo del 25% el
+   libro NO sale ni con el jugador quieto (antes salía con cualquier
+   hambre > 0 bajo el 50%). Y **LA CAZA SE HARTA**: con el hambre al 100%
+   estando fuera, el espíritu rompe y HUYE ÉL solo (`IrAFuga` — la fuga
+   de la .91 sólo nacía del inventario: un libro cazando que llegaba al
+   tope patrullaba para siempre). Fase nueva del tooltip: «HAMBRIENTO»
+   (25–50%, listo para salir a cazar).
+3. **LOS ATAQUES DEL LIBRO SALEN DEL LIBRO** (la letra: «si el jugador
+   ataque y el libro esta fuera sus ataques salen del libro no del
+   jugador […] mientras el libro este fuera todos los ataques que
+   pertenecen al libro salen del libro»): `OrigenDelDisparo` virtual en
+   la base (la descarga perseguidora nace del punto de siempre) que el
+   Nervioso re-escribe con `PosicionDelLibro` — mientras el espíritu está
+   fuera, la descarga perseguidora parte DEL LIBRO FLOTANTE (el jugador
+   apunta, el libro dispara). La Sombra de la Página ya nacía del libro
+   (su raíz es el espíritu desde la .91). Y **LA MANO VACÍA** (la letra:
+   «si el jugador ataca con el libro este no tendra el sprite del libro
+   en su mano, pero solo cuando el libro esta fuera ya que esta
+   flotando»): `ModifyItemDraw` no dibuja NADA mientras el libro está
+   fuera — ni cuerpo, ni tiras, ni ojo: la mano ataca vacía porque el
+   libro REAL es el que flota. Al volver el espíritu, el libro de siempre.
+4. **EL RELOJ DEL APETITO CORRE SIEMPRE** (la letra: «el nivel de hambre
+   debe subir independientemente el libro case o no […] su hambre se
+   congela, el hambre no debe congelarse»): el `PasoSinHambre` de la .91
+   (el rescate del valor que congelaba el reloj mientras patrullaba)
+   queda **ELIMINADO** — el apetito avanza lo cace o no cace, el libro
+   fuera o dentro, tras la gracia de los 10 s de la .92. La tasa sigue
+   siendo la de PRUEBA (0→100% en un minuto tras la gracia — la versión
+   real irá más lenta); sólo las presas lo bajan (−1% + 10 s de gracia) y
+   el clic derecho lo reinicia.
+5. **UN ATAQUE POR CRIATURA — LA DIGESTIÓN** (la letra: «solo se debe
+   lanzar una vez su ataque hasta que la criatura muera»): la sombra
+   activa ya bloqueaba lanzamientos paralelos; ahora, tras comer una
+   presa, `AbsorberPresa` marca **LA DIGESTIÓN** (`MarcarDigestion`, 120
+   ticks = 2 s de PRUEBA) y el espíritu espera a `DigestionLista` antes
+   de lanzar la siguiente sombra — el ataque ya NO se re-lanza en el
+   instante exacto en que mata a la criatura.
+6. **VERIFICACIÓN**: oráculo 0/0 (306 .cs) · build real 0/0 · .tmod
+   2.555.354 B md5 `363932e16d8ce060736497bbfabcc2d1`: 384 entradas (el
+   MISMO set de la .92), EOF exacto, blob diff whitelist exacto
+   (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 378 restantes,
+   CECIL: `PasoSinHambre` ELIMINADO de EstadoGrimorio + `OrigenDelDisparo`
+   en la base y el Nervioso + `PosicionDelLibro` + `UMBRAL_CACERIA` 0.25
+   plegada + `MarcarDigestion`/`DigestionLista` con 120 plegado
+   (`ldc.i4.s`) + `IrAFuga` en el espíritu + `SelloVivo`/`_sellados`/
+   `TTL_SELLO` 900 + el chequeo 7|13 del préstamo de corrupción DENTRO
+   del IL de `PreAI` + la fase «Hambriento» en el tooltip +
+   **GrimorioFuriaSistema IL IDÉNTICO a la .92** (el sistema de oleadas
+   no se tocó — sólo su sello) · hjson: es-ES espejo de es-MX por
+   contenido, familia de DOS + **14 claves del Nervioso** (con
+   «Hambriento»), 786 hojas simétricas es↔en, en-US con sus tabs (4293),
+   paquete == árbol byte a byte en los 3 idiomas · headless
+   «Sandboxing v6.50.93 → Adding Recipes → Server started» **0
+   EXCEPCIONES**.
+
+---
+
 ## Commit v6.50.92 — LA FAMILIA SE ENCOGE A DOS + LA GRACIA DE LOS 10 s + EL LIBRO MIRA SU COMIDA (+ el ACTUALIZAR-FUENTE arreglado)
 
 **Petición del usuario**: "el ACTUALIZAR-FUENTE.bat tiene que borrar y copiar,

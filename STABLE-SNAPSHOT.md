@@ -1,7 +1,7 @@
-# AethonMod — ESTADO ACTUAL (v6.50.92)
+# AethonMod — ESTADO ACTUAL (v6.50.93)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.92 (LA FAMILIA SE ENCOGE A DOS: el Errático y el Inestable BORRADOS — quedan el original SERENO y el Nervioso HAMBRIENTO; LA GRACIA DE LOS 10 s: el hambre sólo sube si el libro no come; EL LIBRO MIRA SU COMIDA mientras la sombra devora; EL .BAT ARREGLADO — borraba y no copiaba: LF + bloques multilinea descarrilaban a cmd.exe, ahora CRLF + cero bloques) LA BASE — la .82 rellenaba el socket con RUIDO
+> Última actualización: v6.50.93 (LA OLEADA ES OTRA ENTIDAD: el Devorador de oleada ya NO se va — su cabeza mutada al partirlo perdía el sello (SetDefaults borra los globals del NPC) y su IA lo enterraba: REGISTRO de sellos por slot + re-adopción + préstamo de zona a TODOS los vivos; EL UMBRAL DE LA CAZA 25%: el libro sólo sale del 25% en adelante y al 100% estando fuera HUYE él solo; LOS ATAQUES DEL LIBRO SALEN DEL LIBRO mientras flota (la mano ataca VACÍA); EL RELOJ DEL APETITO CORRE SIEMPRE: PasoSinHambre eliminado — el hambre suba cace o no cace; LA DIGESTIÓN: un ataque por criatura, sin re-lanzamiento al matar) LA BASE — la .82 rellenaba el socket con RUIDO
 > GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
 > vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
 > MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
@@ -1902,6 +1902,63 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    `CarnadaDelGrimorio`, `RelojDeArenaDelEscriba`, `BossSummonBag`, los 4 tests de VFX.
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
+
+1. **⏳ v6.50.93 LISTA (build-verificada — publicación pendiente)** — LA
+   OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE. La letra: «en la
+   oleada el devorador de mundo aparecio y se fue, debes asegurarte de que
+   los jefes y monstruos invocados en las oleadas no se vean afectados por
+   los parametros de biomas o climas que sus versiones originales, ten en
+   cuenta que las versiones de oleada son entidades separadas de las
+   originales por lo tanto no se ven afectadas / el libro solo sale a
+   cazar de 25% de hambre en adelante / si el jugador ataque y el libro
+   esta fuera sus ataques salen del libro no del jugador […] el jugador
+   tenia una copia del libro en la mano / el nivel de hambre debe subir
+   independientemente el libro case o no […] su hambre se congela, el
+   hambre no debe congelarse / su ataque vuelve a lanzarce justo cuando
+   mata a la criatura […] solo se debe lanzar una vez su ataque hasta que
+   la criatura muera». (1) LA CAUSA RAÍZ DEL DEVORADOR (decompile de
+   NPC.cs): al partir al gusano, vanilla muta el cuerpo huérfano en CABEZA
+   («type = 13; SetDefaultsKeepPlayerInteraction(13)») y NPC.SetDefaults
+   arranca con «_globals = null» — los globals del NPC se DESTRUYEN: el
+   sello moría con la instancia y la cabeza nueva, sin sello, era
+   enterrada por su IA («¿nadie en la Corrupción?») hasta apagar la cadena
+   (active=false directo). CURA DOBLE: EL REGISTRO (SelloVivo por whoAmI,
+   TTL 15 s, re-adoptado en el propio SetDefaults — los NewNPC normales
+   pasan con active=false y jamás adoptan) + EL PRÉSTAMO DE ZONA A TODA LA
+   MESA (sin target: TODOS los vivos reciben la zona del guardián durante
+   su AI — y los DevourerHead escupidos también). (2) UMBRAL_CACERIA 0.25
+   — el libro sólo sale a cazar del 25% en adelante (fase nueva del
+   tooltip: «Hambriento») y con el 100% estando FUERA el espíritu rompe y
+   huye él solo (IrAFuga — antes patrullaba para siempre). (3)
+   OrigenDelDisparo virtual: la descarga perseguidora nace DEL LIBRO
+   FLOTANTE mientras el espíritu está fuera + LA MANO VACÍA
+   (ModifyItemDraw no dibuja nada — el libro real es el que flota). (4)
+   PasoSinHambre ELIMINADO: el reloj del apetito corre SIEMPRE tras la
+   gracia de 10 s (tasa de PRUEBA — la real irá más lenta). (5) LA
+   DIGESTIÓN: MarcarDigestion/DigestionLista (120 t) — tras comer una
+   presa el espíritu espera antes de lanzar la siguiente sombra: UN
+   ataque por criatura, sin re-lanzamiento al matar. VERIFICACIÓN:
+   oráculo 0/0 (306 .cs) · build real 0/0 · .tmod 2.555.354 B md5
+   363932e16d8ce060736497bbfabcc2d1: 384 entradas (el mismo set de la
+   .92), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson),
+   arte byte-idéntico (378), CECIL: PasoSinHambre eliminado +
+   OrigenDelDisparo + PosicionDelLibro + 0.25 plegada + MarcarDigestion/
+   DigestionLista (ldc.i4.s 120) + IrAFuga + SelloVivo/_sellados/
+   TTL_SELLO 900 + el chequeo 7|13 DENTRO del IL de PreAI +
+   GrimorioFuriaSistema IL IDÉNTICO a la .92 · hjson: es-ES espejo, 14
+   claves Nervioso (con «Hambriento»), 786 hojas es↔en, en-US tabs 4293,
+   paquete == árbol ×3 · headless 0 EXCEPCIONES. LECCIONES: (1) un
+   GlobalNPC NO sobrevive a un cambio de type de su propio NPC —
+   SetDefaults borra _globals: los sellos que deben sobrevivir a una
+   mutación viven en un REGISTRO externo por whoAmI; (2) los préstamos a
+   vanilla NO deben depender del npc.target (nace 255, muere con el
+   jugador): se presta a TODA la mesa viva; (3) los const NPCID y los
+   literales 9..255 llegan PLEGADOS al IL (ldc.i4.7 / ldc.i4.s 13) — el
+   nombre JAMÁS aparece: auditar por el literal DENTRO del bloque del
+   método; (4) el ataque de un libro que está FUERA sale del libro en
+   TODAS sus vías: el Shoot por el OrigenDelDisparo virtual, la sombra ya
+   nacía del espíritu, y la mano se dibuja VACÍA (return false sin
+   agregar nada al cache).
 
 1. **✅ v6.50.92 PUBLICADA — release 408824648** — el usuario
    pidió TRES cosas y todas entraron: (1) el .bat ARREGLADO (borraba y no
