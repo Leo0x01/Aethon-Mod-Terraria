@@ -83,6 +83,10 @@ animes y crees una nueva arma con el proyectil".
    (+2 de TintaViva), en-US tabs 4278, paquete == árbol ×3 · headless
    «Sandboxing v6.50.95 → Adding Recipes → Server started»
    0 EXCEPCIONES.
+   PUBLICACIÓN: tag v6.50.95 + release 409141905 (make_latest) + asset
+   AethonMod.tmod 628744486 2.577.464 B (md5 a52cb68693c5decb4cd45f1baa97fb7a),
+   CDN VERIFICADO BYTE A BYTE, /releases/latest = v6.50.95, respaldo
+   /home/sync/AethonMod-v6.50.95.tmod.
 
    CHECKLIST DEL USUARIO (la prueba EN JUEGO): (a) el libro ataca
    CUANDO QUIERE: mata una presa y la siguiente sombra sale ENSEGUIDA
