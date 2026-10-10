@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==================================================================
-#  AethonMod v6.50.91 — ACTUALIZADOR DE FUENTES (Linux / macOS)
+#  AethonMod v6.50.92 — ACTUALIZADOR DE FUENTES (Linux / macOS)
 #
 #  Qué hace: git pull del repo + BORRADO de la versión anterior +
 #  copia de la subcarpeta AethonMod (EL MOD) hacia ModSources/AethonMod,
 #  que es la carpeta que tModLoader compila (Develop Mods > Build & Reload).
-#  v6.50.91 — PRIMERO BORRA la versión anterior (la letra del usuario),
+#  v6.50.92 — PRIMERO BORRA la versión anterior (la letra del usuario),
 #  igual que su gemelo ACTUALIZAR-FUENTE.bat: copia limpia, sin archivos
 #  muertos de versiones viejas colgando en ModSources.
 # ==================================================================

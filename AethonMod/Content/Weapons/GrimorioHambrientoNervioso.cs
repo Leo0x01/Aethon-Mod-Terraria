@@ -27,8 +27,9 @@ namespace AethonMod.Content.Weapons
     /// · EL GLITCH del Errático — la receta .88 INTACTA (el volumen que el
     ///   usuario aprobó: tiras 2-4 desfasándose hasta ±6 px, ráfagas de
     ///   12-24 ticks que se rehacen cada 2 frames, cada 15 s → 2,1 s con el
-    ///   hambre) con máquina de estado PROPIA: el Nervioso rompe a SU hora,
-    ///   jamás sincronizado con el Errático o el Inestable.
+    ///   hambre) con máquina de estado PROPIA: el Nervioso rompe a SU hora
+    ///   (v6.50.92: la familia es DOS libros — el Errático y el Inestable
+    ///   quedaron BORRADOS, cada uno con su máquina).
     /// · EL NERVIOSO, en DOS capas: EL OJO ANSIOSO (revisa cada 2,4 s →
     ///   0,42 s, miradas que SALTAN a la meta, 1 de cada 3 al CENTRO y
     ///   dardos laterales) y EL SOBRESALTO (cada 6,5 s → 1,8 s, brinco de
@@ -39,13 +40,12 @@ namespace AethonMod.Content.Weapons
     /// nervioso por tener miedo, esta mas bien intranquilo, hambriento,
     /// enojado, inquieto, quiero comer y tiene hambre»). El temperamento se
     /// re-lee: el Nervioso es UN APETITO CON CUERPO — intranquilo, con
-    /// hambre, enojado. La familia queda con CUATRO TEMPERAMENTOS: el normal
-    /// SERENO, el Errático CAÓTICO (ojo desenfrenado + glitch), el Nervioso
-    /// HAMBRIENTO (ojo ansioso + sobresaltos + temblor + glitch) y el
-    /// Inestable POSEÍDO (ojo sereno en cuerpo que se descompone + aura
-    /// roja — su firma, que aquí NO existe). El ciclo vive en SU PROPIO
-    /// EstadoGrimorio (la lección de la .86): los cuatro pasan hambre por
-    /// separado.
+    /// hambre, enojado. v6.50.92 — LA FAMILIA SE ENCOGE A DOS (la letra:
+    /// «borra al grimorio hambriento inestable y al erratico, deja el
+    /// original y al nervioso»): quedan el normal SERENO y el Nervioso
+    /// HAMBRIENTO (el Errático CAÓTICO y el Inestable POSEÍDO, difuntos).
+    /// El ciclo vive en SU PROPIO EstadoGrimorio (la lección de la .86):
+    /// los dos libros pasan hambre por separado.
     ///
     /// v6.50.91 — LAS DOS VIDAS DEL NERVIOSO (el umbral es el 50%):
     /// · DEBAJO DEL 50%: EL CAZADOR. Tranquilo y paciente — sin temblor, sin
@@ -562,6 +562,28 @@ namespace AethonMod.Content.Weapons
             return false;
         }
 
+        /// <summary>v6.50.92 — ¿DÓNDE ESTÁ LA COMIDA? Mientras la sombra
+        /// devora a una presa, éste es el punto que el libro MIRA (la
+        /// letra del usuario: «el libro debe mirar lo que esta comiendo»):
+        /// la presa viva mientras la muerde, el cuerpo de la sombra
+        /// mientras las almas suben al libro. Null = no hay festín.</summary>
+        internal static Vector2? FocoDelFestin(int dueño)
+        {
+            int tipo = ModContent.ProjectileType<SombraPaginaCaza>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.type != tipo || pr.owner != dueño)
+                    continue;
+                int idx = (int)pr.ai[0] - 1;
+                NPC presa = idx >= 0 && idx < Main.maxNPCs ? Main.npc[idx] : null;
+                if (presa != null && presa.active && presa.life > 0)
+                    return presa.Center;      // la está MORDIENDO: mirarLA
+                return pr.Center;             // la está ABSORBIENDO: mirar el festín
+            }
+            return null;
+        }
+
         /// <summary>EL PASO DE LAS DOS VIDAS — una vez por tick desde
         /// UpdateInventory (el guard del tick vale por TODAS las copias del
         /// Nervioso en el inventario: la quietud se cuenta UNA vez). La VOZ
@@ -586,6 +608,15 @@ namespace AethonMod.Content.Weapons
             // === LA VOZ DEL HAMBRE — «comienza a decir que tiene hambre»:
             //     suena en la pantalla del dueño, en cualquier máquina ===
             FrasesDeHambre(h);
+
+            // === v6.50.92 — EL FOCO DEL FESTÍN: mientras la sombra devora,
+            //     el ojo del libro (hotbar, mano, mundo) se clava en SU
+            //     COMIDA — la letra: «el libro debe mirar lo que esta
+            //     comiendo». Visual puro: también en el cliente MP (la
+            //     sombra y los NPC llegan sincronizados) ===
+            _estadoNervioso.FocoPantalla = FocoDelFestin(player.whoAmI) is Vector2 festin
+                ? festin - Main.screenPosition
+                : (Vector2?)null;
 
             // === LA AUTORIDAD: SP o anfitrión de un listen server (el
             //     cliente MP sólo oye a su libro — no toca NPCs) ===
@@ -723,6 +754,11 @@ namespace AethonMod.Content.Weapons
 
             // EL APETITO: −1% por presa (la letra: 50% → 49%)
             _estadoNervioso.Hambre = Math.Max(0f, _estadoNervioso.Hambre - 0.01f);
+
+            // v6.50.92 — LA COMIDA MARCA LA HORA (la letra: «el hambre debe
+            // subir si es que en 10 segundos no come nada»): este bocado
+            // congela el reloj del apetito 10 s — el libro acaba de comer.
+            _estadoNervioso.UltimaComida = Main.GameUpdateCount;
 
             // LA XP — el pipeline de siempre (el Grimorio del Eterno visible
             // cobra: la muerte no es del jugador, pero el libro sí comió)

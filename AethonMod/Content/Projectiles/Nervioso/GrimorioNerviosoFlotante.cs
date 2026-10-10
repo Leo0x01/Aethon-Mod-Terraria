@@ -172,8 +172,12 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 Projectile.velocity += (destino - Projectile.Center) * 0.02f;
                 Projectile.velocity *= 0.90f;
 
-                // el libro se INCLINA hacia su dueño — lo está mirando
-                float lado = dueño.MountedCenter.X < Projectile.Center.X ? -1f : 1f;
+                // v6.50.92 — el libro se INCLINA hacia lo que MIRA: su
+                // COMIDA mientras devora (la letra: «el libro debe mirar
+                // lo que esta comiendo»), su dueño el resto de la vela
+                Vector2 atento = GrimorioHambrientoNervioso.FocoDelFestin(Projectile.owner)
+                    ?? dueño.MountedCenter;
+                float lado = atento.X < Projectile.Center.X ? -1f : 1f;
                 Projectile.rotation = MathF.Sin(t * 0.045f) * 0.12f + lado * 0.10f;
 
                 // LA CAZA (autoridad): algo se mueve cerca → la sombra
@@ -316,7 +320,11 @@ namespace AethonMod.Content.Projectiles.Nervioso
             else
             {
                 // LA MIRADA: en caza, clavada en su dueño («mirando al
-                // jugador»); en fuga, los dardos ansiosos del Estado
+                // jugador»)… salvo mientras COME: entonces en su COMIDA
+                // (v6.50.92 — la letra: «el libro debe mirar lo que esta
+                // comiendo»: la presa que la sombra muerde, o las almas
+                // subiendo mientras las absorbe); en fuga, los dardos
+                // ansiosos del Estado
                 Vector2 mirada;
                 if (fuga)
                 {
@@ -324,8 +332,9 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 }
                 else
                 {
-                    Player dueño = Main.player[Projectile.owner];
-                    Vector2 d = dueño.MountedCenter - Projectile.Center;
+                    Vector2 objetivo = GrimorioHambrientoNervioso.FocoDelFestin(Projectile.owner)
+                        ?? Main.player[Projectile.owner].MountedCenter;
+                    Vector2 d = objetivo - Projectile.Center;
                     mirada = d.LengthSquared() > 4f
                         ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
                         : Vector2.Zero;

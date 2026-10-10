@@ -1,7 +1,7 @@
 // ESPEJO GENERADO de es-MX_Mods.AethonMod.hjson — NO EDITAR A MANO.
 // v6.50.71 — todas las variantes de español leen este espejo del cuerpo
 // de es-MX (invariante .77: cuerpo byte-idéntico; regenerado por
-// tools/sync_es_es_v65083.py — incidente #9 del espejo, v6.50.83).
+// tools/sync_es_es_v65092.py — familia de DOS libros, v6.50.92).
 
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
@@ -100,69 +100,36 @@ Items: {
                 Tooltip:
                         '''
                         El ojo del Códice Vivo: te mira, parpadea y pasa hambre.
-                        En 60 segundos el apetito crece de cero a TOTAL: el parpadeo
-                        se acelera (de 10-20 s a cada 2 s), la mirada se agita y el
+                        Si pasan 10 segundos sin comer, el apetito crece de
+                        cero a TOTAL en un minuto: el parpadeo se acelera
+                        (de 10-20 s a cada 2 s), la mirada se agita y el
                         iris dorado se enciende ROJO.
                         Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito para repetir la demo.
+                        Clic der: reinicia el apetito (y lo calma 10 s).
                         Objeto de pruebas — eliminar antes de publicar.
                         '''
         }
 
-        // v6.50.87 — LAS DOS COPIAS, SEGUNDA RONDA: el usuario devolvió las
-        // animaciones de la .86 («se ven bastante mal y exageradas») y pidió
-        // efectos MÁS SUAVES — el ERRÁTICO se vuelve errático con el hambre
-        // (más hambre = más errático) y sufre un glitch suave; el
-        // TEMBLOROSO lo que hace es temblar.
-        GrimorioHambrientoErratico: {
-                DisplayName: Grimorio Hambriento Errático
-                Tooltip:
-                        '''
-                        La copia ERRÁTICA — el mismo ojo hambriento, pero este
-                        libro se pone nervioso con el apetito: la mirada se
-                        vuelve errática (cada vez más cuanto más hambre) y el
-                        libro sufre interferencias breves, tiras que se
-                        desfasan como una señal que se pierde.
-                        Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito para repetir la demo.
-                        Objeto de pruebas — comparar con el original.
-                        '''
-        }
-
-        // v6.50.90 — EL TERCER ASIENTO CAMBIA DE DUEÑO: el Tembloroso
-        // queda BORRADO y entra EL NERVIOSO (temblor + glitch + nervios).
+        // v6.50.92 — LA FAMILIA SE ENCOGE A DOS (la letra del usuario:
+        // «borra al grimorio hambriento inestable y al erratico, deja
+        // el original y al nervioso»): el Errático (.87) y el Inestable
+        // (.89) BORRADOS; el Nervioso (.90) vive sus DOS VIDAS (.91).
         GrimorioHambrientoNervioso: {
                 DisplayName: Grimorio Hambriento Nervioso
                 Tooltip:
                         '''
-                        La copia NERVIOSA — el mismo ojo hambriento, pero
-                        este libro vive asustado: tiembla sin parar, se
-                        sobresalta de golpe (y cada susto lo rompe en tiras
-                        un instante) y su mirada salta de un lado a otro,
-                        revisando. Cuanto más hambre, más sustos y más
-                        roto queda.
+                        La copia HAMBRIENTA — el mismo ojo, pero este libro
+                        es APETITO CON CUERPO: intranquilo, enojado, con
+                        hambre. Debajo del 50% es EL CAZADOR: si te quedas
+                        quieto, sale a flotar sobre ti y su Sombra de la
+                        Página devora a la criatura que se mueva cerca
+                        (sin botín; la XP sí es del grimorio) — cada presa
+                        lo sacia 1% y, mientras come, el ojo se clava en su
+                        comida. Del 50% en adelante es EL IMPACIENTE
+                        (habla, tiembla, provoca oleadas); al 100%, SE ESCAPA.
+                        El hambre sólo sube si pasan 10 segundos sin comer.
                         Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito para repetir la demo.
-                        Objeto de pruebas — comparar con el original.
-                        '''
-        }
-
-        // v6.50.89 — LA CUARTA COPIA: EL INESTABLE — la unión que pidió el
-        // usuario: el glitch del Errático + el temblor del Tembloroso, con
-        // un aura roja pequeña respirando detrás del libro.
-        GrimorioHambrientoInestable: {
-                DisplayName: Grimorio Hambriento Inestable
-                Tooltip:
-                        '''
-                        La copia INESTABLE — la unión de las dos: el mismo ojo
-                        hambriento, pero este libro se descompone con el
-                        apetito. Tiembla sin descanso y sufre las
-                        interferencias del Errático: tiras que se desfasan en
-                        ráfagas cada vez más frecuentes y violentas.
-                        Un aura roja pequeña lo envuelve, respirando: el
-                        libro arde por dentro mientras se rompe por fuera.
-                        Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito para repetir la demo.
+                        Clic der: reinicia el apetito (y lo calma 10 s).
                         Objeto de pruebas — comparar con el original.
                         '''
         }

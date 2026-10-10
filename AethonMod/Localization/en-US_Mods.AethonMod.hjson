@@ -95,68 +95,36 @@ Items: {
 		Tooltip:
 			'''
 			The Living Codex's eye: it watches, blinks and gets hungry.
-			In 60 seconds the appetite grows from zero to FULL: blinking
-			speeds up (from 10-20 s to every 2 s), the gaze grows restless
+			If 10 seconds pass without eating, the appetite grows
+			from zero to FULL in one minute: blinking speeds up
+			(from 10-20 s to every 2 s), the gaze grows restless
 			and the golden iris ignites RED.
 			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite to replay the demo.
+			Right click: resets the appetite (and calms it 10 s).
 			Testing item — remove before publishing.
 			'''
 	}
 
-	// v6.50.87 — THE TWO COPIES, ROUND TWO: the user returned the .86
-	// animations ("they look quite bad and exaggerated") and asked for
-	// MUCH SOFTER effects — the ERRATIC one turns erratic with hunger
-	// (more hunger = more erratic) plus a soft glitch; the TREMBLING
-	// one, what it does is tremble.
-	GrimorioHambrientoErratico: {
-		DisplayName: Erratic Hungry Grimoire
-		Tooltip:
-			'''
-			The ERRATIC copy — the same hungry eye, but this book
-			grows nervous with its appetite: the gaze turns erratic
-			(the more hunger, the more erratic) and the book suffers
-			brief interference — strips of it sliding out of phase,
-			like a signal breaking up.
-			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite to replay the demo.
-			Testing item — compare against the original.
-			'''
-	}
-
-	// v6.50.90 — THE THIRD SEAT CHANGES HANDS: the Trembling one is
-	// DELETED and THE NERVOUS ONE enters (shudder + glitch + nerves).
+	// v6.50.92 — THE FAMILY SHRINKS TO TWO (the user's letter:
+	// "delete the unstable and the erratic hungry grimoire, keep
+	// the original and the nervous one"): the Erratic (.87) and
+	// the Unstable (.89) are DELETED; the Nervous one lives its
+	// TWO LIVES from .91.
 	GrimorioHambrientoNervioso: {
 		DisplayName: Nervous Hungry Grimoire
 		Tooltip:
 			'''
-			The NERVOUS copy — the same hungry eye, but this book
-			lives frightened: it shivers nonstop, flinches out of
-			nowhere (and each startle breaks it into strips for a
-			beat), and its gaze darts side to side, checking. The
-			more hunger, the more startles — and the more it breaks.
+			The HUNGRY copy — the same eye, but this book is
+			APPETITE WITH A BODY: restless, angry, starving. Below
+			50% it is THE HUNTER: stand still and it floats out
+			over you, and its Page Shadow devours whatever creature
+			moves nearby (no loot; the XP still goes to the grimoire)
+			— each prey eases it 1%, and while it eats, its eye
+			locks onto its food. From 50% on it is THE IMPATIENT one
+			(it talks, trembles, summons waves); at 100%, IT ESCAPES.
+			Hunger only rises if 10 seconds pass without eating.
 			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite to replay the demo.
-			Testing item — compare against the original.
-			'''
-	}
-
-	// v6.50.89 — THE FOURTH COPY: THE UNSTABLE ONE — the union the
-	// user asked for: the Erratic's glitch + the Trembling's shudder,
-	// with a small red aura breathing behind the book.
-	GrimorioHambrientoInestable: {
-		DisplayName: Unstable Hungry Grimoire
-		Tooltip:
-			'''
-			The UNSTABLE copy — the union of both: the same hungry
-			eye, but this book falls apart with appetite. It
-			trembles without rest and suffers the
-			Erratic's interference: strips slipping in ever more
-			frequent, violent bursts.
-			A small red aura wraps it, breathing: the book burns
-			inside while it breaks outside.
-			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite to replay the demo.
+			Right click: resets the appetite (and calms it 10 s).
 			Testing item — compare against the original.
 			'''
 	}

@@ -16,9 +16,9 @@ namespace AethonMod.Content.Weapons
     /// PROPIO ojo. La .82 guardaba el ciclo en statics de la CLASE: al llegar
     /// la tercera copia habría UN solo hambre compartido y los tres ojos
     /// marcarían el mismo paso. Ahora el estado vive en una instancia POR
-    /// CLASE de ítem (GrimorioHambriento y sus dos copias declaran cada uno
-    /// su `static EstadoGrimorio` y lo exponen vía la propiedad virtual
-    /// `Estado`) — cada libro pasa hambre por su cuenta.
+    /// CLASE de ítem (GrimorioHambriento y su copia viva — el Nervioso —
+    /// declaran cada uno su `static EstadoGrimorio` y lo exponen vía la
+    /// propiedad virtual `Estado`) — cada libro pasa hambre por su cuenta.
     ///
     /// El ciclo es el de la .82 (la letra del usuario): «el libro está normal
     /// y parpadea cada 10 a 20 segundos; cuando tiene hambre el parpadeo es
@@ -48,6 +48,20 @@ namespace AethonMod.Content.Weapons
     /// CONGELA EL RELOJ: PasoSinHambre() avanza el ojo sin tocar el
     /// hambre (la letra: el libro «se mantendrá cazando su propia comida
     /// hasta llegar a 0% de hambre»).
+    ///
+    /// v6.50.92 — LA GRACIA DE LOS 10 s + EL FOCO DEL FESTÍN + LA FAMILIA
+    /// SE ENCOGE A DOS. La letra del usuario: «el hambre debe subir si es
+    /// que en 10 segundos no come nada, el libro debe mirar lo que esta
+    /// comiendo» y «borra al grimorio hambriento inestable y al erratico,
+    /// deja el original y al nervioso». (1) EL RELOJ DEL APETITO sólo
+    /// corre cuando el libro lleva 10 s SIN COMER: cada bocado (presa
+    /// absorbida por la caza del Nervioso, o el reinicio de la demo)
+    /// marca la hora del último bocado (UltimaComida). (2) Mientras la
+    /// sombra devora a una presa, el ojo del libro se CLAVA en su comida
+    /// (FocoPantalla — hotbar, mano y mundo persiguen el festín). (3) El
+    /// Errático (.87) y el Inestable (.89) quedan BORRADOS: la bandera
+    /// Erratico murió con su dueño — quedan el original SERENO y el
+    /// Nervioso HAMBRIENTO.
     /// </summary>
     public class EstadoGrimorio
     {
@@ -55,9 +69,21 @@ namespace AethonMod.Content.Weapons
         private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);
         private const float LERP_MIRADA = 0.10f;
 
+        // v6.50.92 — 10 s de gracia tras el último bocado antes de que el
+        // apetito vuelva a correr (la letra: «el hambre debe subir si es
+        // que en 10 segundos no come nada»)
+        private const uint TICKS_GRACIA_COMIDA = 600u;
+
         public float Hambre;
-        public bool Erratico;        // v6.50.87 — la copia ERRÁTICA (mirada caótica)
         public bool Nervioso;        // v6.50.90 — la copia NERVIOSA (mirada ansiosa)
+        // v6.50.92 — LA HORA DEL ÚLTIMO BOCADO: el reloj del hambre sólo
+        // avanza cuando pasan 10 s sin comer (0 = el libro aún no ha
+        // probado bocado — el primer tick arranca la gracia)
+        public uint UltimaComida;
+        // v6.50.92 — EL FOCO DEL FESTÍN (pantalla-px): mientras la sombra
+        // devora a una presa, el ojo mira SU COMIDA en vez de vagar
+        // (null = no hay festín: el ciclo de miradas de siempre)
+        public Vector2? FocoPantalla;
         public uint TickMarcado;
         public int TParpadeo = 180;
         public int Fase;                    // >0: secuencia del párpado (11→1)
@@ -68,10 +94,13 @@ namespace AethonMod.Content.Weapons
         public bool PosValida;
         public uint UltimoDisparo;
 
-        /// <summary>EL REINICIO del apetito (clic derecho — la demo se repite).</summary>
+        /// <summary>EL REINICIO del apetito (clic derecho — la demo se repite).
+        /// v6.50.92: reiniciar TAMBIÉN alimenta la gracia — el apetito se
+        /// calma 10 s antes de volver a correr (la letra del usuario).</summary>
         public void Reiniciar()
         {
             Hambre = 0f;
+            UltimaComida = Main.GameUpdateCount;
             Fase = 0;
             TParpadeo = 60;
             TMirada = 30;
@@ -85,7 +114,14 @@ namespace AethonMod.Content.Weapons
         /// </summary>
         public void Paso()
         {
-            Hambre = Math.Min(1f, Hambre + 1f / 3600f);
+            // v6.50.92 — LA GRACIA DE LOS 10 s (la letra: «el hambre debe
+            // subir si es que en 10 segundos no come nada»): el reloj del
+            // apetito sólo corre cuando el libro lleva 10 s sin probar
+            // bocado. Un libro recién creado arranca su gracia ahora.
+            if (UltimaComida == 0u)
+                UltimaComida = Main.GameUpdateCount;
+            if (Main.GameUpdateCount - UltimaComida >= TICKS_GRACIA_COMIDA)
+                Hambre = Math.Min(1f, Hambre + 1f / 3600f);
             float h = Hambre;
 
             // --- PARPADEO: 10-20 s (saciado) → 2 s exactos (hambre total) ---
@@ -102,26 +138,33 @@ namespace AethonMod.Content.Weapons
             }
 
             // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético);
-            //     errática (v6.50.87): 3 s → 0,16 s — la mirada desenfrenada;
             //     nerviosa (v6.50.90): 2,4 s → 0,42 s — revisa seguido, sin
-            //     llegar al frenesí de la errática: es miedo, no caos ---
-            if (--TMirada <= 0)
+            //     llegar al frenesí: es hambre, no caos ---
+            // v6.50.92 — EL FOCO DEL FESTÍN: mientras el libro COME (la
+            //     sombra devorando a su presa), el ojo se CLAVA en su
+            //     comida — la letra: «el libro debe mirar lo que esta
+            //     comiendo». Sin festín, el ciclo de miradas de siempre.
+            if (FocoPantalla.HasValue && PosValida)
+            {
+                Vector2 alFestin = FocoPantalla.Value - PosOjoPantalla;
+                if (alFestin.LengthSquared() > 1f)
+                    DespMeta = SnapDireccion(alFestin) * DESP_MAX;
+                TMirada = 30;   // al acabar el festín, mirada fresca pronto
+            }
+            else if (--TMirada <= 0)
             {
                 ElegirMirada();
                 float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
-                if (Erratico)
-                    dwell = MathHelper.Lerp(3f * 60f, 0.16f * 60f, h);
-                else if (NerviosoActivo())   // v6.50.91 — bajo el 50%: ciclo sereno
+                if (NerviosoActivo())   // v6.50.91 — bajo el 50%: ciclo sereno
                     dwell = MathHelper.Lerp(2.4f * 60f, 0.42f * 60f, h);
                 TMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
             }
-            // v6.50.87 — la errática resbala MÁS BRUSCO con el hambre (0,10 → 0,36);
             // v6.50.90 — la nerviosa SALTA a su meta (0,22 fijo): miradas que
-            // aterrizan de golpe — sin el resbalón suave del original ni la
-            // brutalidad creciente de la errática
+            // aterrizan de golpe — sin el resbalón suave del original;
+            // v6.50.92 — el festín se persigue SUAVE (0,10: seguimiento
+            // continuo de la comida, no saltos sobre ella)
             DespActual = Vector2.Lerp(DespActual, DespMeta,
-                Erratico ? 0.10f + 0.26f * h
-                : NerviosoActivo() ? 0.22f   // v6.50.91 — el salto sólo con impaciencia
+                NerviosoActivo() ? 0.22f   // v6.50.91 — el salto sólo con impaciencia
                 : LERP_MIRADA);
         }
 
@@ -166,11 +209,6 @@ namespace AethonMod.Content.Weapons
                            * new Vector2(3.5f, 2.8f);
                 }
             }
-            // v6.50.87 — el tic errático: ninguna mirada se repite
-            // (±0,35 / ±0,28 px escalados por el hambre — un temblor de meta)
-            if (Erratico)
-                meta += new Vector2((Main.rand.NextFloat() - 0.5f) * 0.7f,
-                                    (Main.rand.NextFloat() - 0.5f) * 0.56f) * Hambre;
             DespMeta = meta;
         }
 

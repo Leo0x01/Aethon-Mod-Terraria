@@ -1,0 +1,4 @@
+# El .bat NECESITA CRLF literal en el blob: cmd.exe descarrila con LF.
+# -text = git jamas normaliza sus finales de linea (los ZIP de GitHub
+# descargan el blob crudo -- con CRLF dentro).
+*.bat -text
