@@ -1903,7 +1903,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.50.93 LISTA (build-verificada — publicación pendiente)** — LA
+1. **✅ v6.50.93 PUBLICADA — release 408895980** — LA
    OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE. La letra: «en la
    oleada el devorador de mundo aparecio y se fue, debes asegurarte de que
    los jefes y monstruos invocados en las oleadas no se vean afectados por
@@ -1958,7 +1958,10 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    método; (4) el ataque de un libro que está FUERA sale del libro en
    TODAS sus vías: el Shoot por el OrigenDelDisparo virtual, la sombra ya
    nacía del espíritu, y la mano se dibuja VACÍA (return false sin
-   agregar nada al cache).
+   agregar nada al cache). PUBLICACIÓN: tag v6.50.93 + release 408895980
+   (make_latest) + asset AethonMod.tmod 627773875 2.555.354 B (md5
+   363932e16d8ce060736497bbfabcc2d1), CDN VERIFICADO BYTE A BYTE,
+   /releases/latest = v6.50.93, respaldo /home/sync/AethonMod-v6.50.93.tmod.
 
 1. **✅ v6.50.92 PUBLICADA — release 408824648** — el usuario
    pidió TRES cosas y todas entraron: (1) el .bat ARREGLADO (borraba y no
