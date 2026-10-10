@@ -1,5 +1,73 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.97 — LA LECCIÓN DEL client.log: la grieta inmune al veneno ajeno
+
+**Petición del usuario**: "hay errores mira" (client.log de tModLoader
+2026.8.3.0, sesión del 16:53 — un solo error real entre el ruido):
+
+```
+[16:53:24.162] [Main Thread/WARN] [tML]: Excepción silenciosa:
+System.InvalidOperationException: End was called, but Begin has not
+   yet been called. You must call Begin successfully before you can
+   call End.
+   at Microsoft.Xna.Framework.Graphics.SpriteBatch.End()
+   at GrietaDeTintaProjectile.DrawTodo(Color luz) …GrietaDeTintaProjectile.cs:line 349
+   at GrietaDeTintaProjectile.PreDraw(Color& lightColor) …GrietaDeTintaProjectile.cs:line 324
+   at Terraria.Main.DrawProj_Inner(Projectile proj)
+```
+
+1. **EL DIAGNÓSTICO** (la arqueología completa):
+   - La excepción ocurrió UNA sola vez, 5 s después de entrar al mundo
+     (la otra «excepción silenciosa» del log era una IOException de red
+     de Steam, sin relación). Un frame llegó al `PreDraw` de la grieta
+     con el lote del juego YA CERRADO (un `End` ajeno sin `Begin` — de
+     otro efecto o de otro mod; el estado no sobrevive al siguiente
+     frame porque vanilla re-abre el lote al empezar el draw).
+   - El `End()` pelado de `DrawTodo:349` (el que abría el lote aditivo
+     del ribbon) asumía que el PreDraw SIEMPRE llega con el lote
+     abierto — y LANZÓ.
+   - El catch del PreDraw (la .96 ya lo llevaba) tragó la excepción y
+     el `ReabrirLoteVanilla` final CURÓ el estado global para el que
+     venía detrás… pero tML 2026 registra TODA first-chance exception
+     como «Excepción silenciosa» aunque el mod la capture — por eso el
+     error apareció en el log con la traza completa pasando por el
+     catch. Ese frame la grieta fue invisible (return false sin
+     dibujar nada).
+2. **EL FIX** (una línea de código, la maquinaria ya existía):
+   `Main.spriteBatch.End()` → **`VFXCore.CerrarLoteSiAbierto()`** — la
+   SONDA de la casa (v6.50.58/67: reflexión sobre el
+   `_batchInProgress` de FNA con End defensivo de respaldo): si hay un
+   Begin vivo lo cierra como siempre, y si el frame llegó envenenado
+   NO lanza y la grieta dibuja IGUAL — las 15 capas completas en el
+   mismo frame envenenado. El catch del PreDraw queda como red de
+   última instancia y el `ReabrirLoteVanilla` del final sigue curando
+   el estado global.
+3. **LO DEMÁS INTACTO** (verificado en el IL del paquete): el stack de
+   15 efectos COMPLETO, `ManchaDeTinta`/`GrimorioFuriaSistema`/
+   `OleadaNPC`/`SombraPaginaCaza`/`GrimorioNerviosoFlotante`
+   IL-idénticos a la .96, los 3 hjson IDÉNTICOS a la .96 (esta versión
+   no toca textos), el sprite del usuario byte-idéntico.
+4. **LIMPIEZA DEL hjson — LA VERDAD SOBRE EL «WIP»**: el diff raro
+   que quedaba en el espejo `ModSources` (tooltip HUNGRY tabulado +
+   dos `DisplayName` stub) NO era una cirugía fallida: es la
+   **reescritura automática del `-build` de tML** (re-tabula los
+   multiline y AUTO-GENERA claves DisplayName para clases sin
+   entrada). Ese rewrite NUNCA entra al paquete (el paquete toma el
+   hjson leído al INICIO del build) pero se queda en el árbol: la
+   .96 lo revirtió en el repo (`git checkout`) y no en el espejo — y
+   la .97 lo volvió a escribir tras el build. Revertido de nuevo
+   (repo y espejo == paquete == .96, byte a byte): el estado
+   hand-authored es el canon; el rewrite del build es ruido que se
+   revierte.
+
+**Verificación**: build real 0/0 · audit_v65097.py 0 fallos (386
+entradas — el set EXACTO de la .96; blob diff vs .96 con whitelist
+ESTRICTA: sólo dll/pdb/Info; el IL del paquete con el patrón
+`Track → CerrarLoteSiAbierto → Begin(ribbon)` y UN solo End pelado —
+el de entrada MURIÓ; hjson ×3 paquete==árbol; tabs 4288) · headless
+«Sandboxing v6.50.97 → Adding Recipes → Server started» 0 excepciones.
+.tmod 2.579.532 B md5 15ff628984f9d2787192a7c28477f2d6.
+
 ## Commit v6.50.96 — LA GRIETA: el disparo propio re-leído como lo que siempre fue + EL STACK DE 15 EFECTOS
 
 **Petición del usuario**: "el nuevo proyectil lo usaste tal cual, no le

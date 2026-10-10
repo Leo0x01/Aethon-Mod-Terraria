@@ -64,6 +64,20 @@ namespace AethonMod.Content.Projectiles.Sombras
     ///   EL CORTE QUE SANA (la línea con aberración que se cierra —
     ///   «la realidad sana comiéndose el corte», la escuela RiftLib).
     ///
+    /// v6.50.97 — LA LECCIÓN DEL client.log (16:53:24, «hay errores mira»):
+    /// un frame llegó al PreDraw con el lote del juego YA CERRADO (un End
+    /// ajeno sin Begin — de otro efecto o de otro mod) y el End pelado que
+    /// abría el lote aditivo del ribbon LANZÓ: «End was called, but Begin
+    /// has not yet been called». El catch del PreDraw lo tragó (el juego
+    /// siguió de pie) pero tML registra TODA first-chance como «Excepción
+    /// silenciosa» — y la grieta se volvía invisible ese frame. El End
+    /// pelado muere: la entrada del lote del ribbon ahora cierra con la
+    /// SONDA de la casa (VFXCore.CerrarLoteSiAbierto — reflexión sobre el
+    /// _batchInProgress de FNA, End defensivo de respaldo): si hay un Begin
+    /// vivo lo cierra como siempre, y si el frame llegó envenenado NO
+    /// lanza y la grieta dibuja IGUAL — el ReabrirLoteVanilla del final
+    /// cura el estado global para el que venga detrás.
+    ///
     /// Coherencia total con el libro: atraviesa muros (tileCollide false:
     /// las grietas no conocen puertas), caza como el Nervioso caza, y mira
     /// a su presa como el grimorio mira al jugador.
@@ -346,7 +360,13 @@ namespace AethonMod.Content.Projectiles.Sombras
             // === 2 — EL RIBBON DEL VACÍO + 1 — LA ESTRELLA DE NACIMIENTO ===
             //     (lote aditivo propio: el rastro de NADA y la ruptura)
             Vector2[] camino = EstelaLib.Track(Projectile.whoAmI, 16).Points();
-            Main.spriteBatch.End();
+            // v6.50.97 — LA SONDA EN LA ENTRADA: el End pelado asumía que el
+            // PreDraw SIEMPRE llega con el lote del juego abierto. El client.log
+            // demostró que NO (un End ajeno sin Begin envenena el frame): ahora
+            // se cierra SOLO si hay un Begin vivo — envenenado no lanza y la
+            // grieta dibuja IGUAL (el catch del PreDraw queda como red de
+            // última instancia y el Reabrir final cura el estado global).
+            VFXCore.CerrarLoteSiAbierto();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);

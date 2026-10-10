@@ -1,26 +1,24 @@
-# AethonMod — ESTADO ACTUAL (v6.50.96)
+# AethonMod — ESTADO ACTUAL (v6.50.97)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.96 (LA GRIETA. La letra: «el nuevo
-> proyectil lo usaste tal cual, no le diste efectos visuales, digamos
-> que es un grieta como debe ser, entonces dale muchos efectos visuales
-> investiga que tipo de efectos se le pueden poner al nuevo proyectil
-> cuanto mas efectos mejor» — la «Lágrima de Tinta» de la .95 fue
-> re-leída como lo que siempre fue: UNA GRIETA ABIERTA EN LA PÁGINA;
-> la clase se llama como su naturaleza — GrietaDeTintaProjectile, con
-> el sprite del usuario SIN TOCAR (rawimg byte-idéntico) — y encima EL
-> STACK DE 15 EFECTOS: nacimiento con estrella de ruptura + anillo que
-> implode + chispas de anomalía, ribbon del vacío, 3 estelas fantasma,
-> LA ASPIRACIÓN (el mundo entra a la grieta: motas convergentes en
-> espiral + orbitales), aberración cromática rojo/cian que late, el
-> GLITCH DE TAJOS (bandas desplazadas cada 34 t), halo doble, EL IRIS
-> (anillo elíptico de apertura), EL OJO RASGADO que sólo abre con
-> presa y la MIRA, estrellas fugitivas cada 18 t, goteo, luz
-> parpadeante con flicker, vaivén + respiración, la mordida con
-> chispas, y EL COLAPSO: implosión + estallido + LA MANCHA con EL
-> CORTE QUE SANA (la línea cian/magenta/marfil que se cierra sola).
-> .tmod 2.579.444 B md5 d0d8df7882cc80530cc6e4613bfa0023, 386 entradas
-> (el rawimg RENOMBRADO), auditoría TODO OK (audit_v65096.py),
+> Última actualización: v6.50.97 (LA LECCIÓN DEL client.log. La letra:
+> «hay errores mira» — el usuario subió su client.log y dentro vivía UNA
+> excepción: InvalidOperationException «End was called, but Begin has
+> not yet been called» en GrietaDeTintaProjectile.DrawTodo:349 →
+> PreDraw:324. Un frame llegó al PreDraw de la grieta con el lote del
+> juego YA CERRADO (un End ajeno sin Begin) y el End pelado que abría
+> el lote aditivo del ribbon LANZÓ; el catch del PreDraw lo tragó y el
+> Reabrir final curó el estado global, pero tML registra TODA
+> first-chance como «Excepción silenciosa» — ese frame la grieta fue
+> invisible. EL FIX (una línea): la entrada del lote del ribbon ahora
+> usa la SONDA de la casa (VFXCore.CerrarLoteSiAbierto) en vez del End
+> pelado — si hay un Begin vivo lo cierra como siempre, y si el frame
+> llegó envenenado NO lanza y la grieta dibuja IGUAL (las 15 capas en
+> el mismo frame). NADA MÁS CAMBIA: el stack de 15 COMPLETO en el IL,
+> los intocados IL-idénticos a la .96, los 3 hjson IDÉNTICOS, el
+> sprite del usuario byte-idéntico.
+> .tmod 2.579.532 B md5 15ff628984f9d2787192a7c28477f2d6, 386 entradas
+> (el set EXACTO de la .96), auditoría TODO OK (audit_v65097.py),
 > headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1911,6 +1909,33 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.50.97 PUBLICADA — LA LECCIÓN DEL client.log: la grieta
+   inmune al veneno ajeno** — la letra: «hay errores mira» (client.log
+   del usuario, sesión 16:53): una «Excepción silenciosa» de tML con
+   InvalidOperationException «End was called, but Begin has not yet
+   been called» en GrietaDeTintaProjectile.DrawTodo:349 → PreDraw:324.
+   (1) EL DIAGNÓSTICO: un frame llegó al PreDraw con el lote del juego
+   YA CERRADO (un End ajeno sin Begin); el End pelado de la entrada
+   del lote del ribbon lanzó; el catch lo tragó y el Reabrir final
+   curó el estado, pero tML registra TODA first-chance como
+   «Excepción silenciosa» — ese frame la grieta fue invisible.
+   (2) EL FIX (una línea): Main.spriteBatch.End() →
+   VFXCore.CerrarLoteSiAbierto() — la SONDA de la casa cierra SOLO si
+   hay un Begin vivo; envenenado no lanza y la grieta dibuja IGUAL.
+   (3) VERIFICACIÓN: build real 0/0 · audit_v65097.py 0 fallos (386
+   entradas — el set de la .96; blob diff ESTRICTO: sólo dll/pdb/Info;
+   IL con Track → CerrarLoteSiAbierto → Begin y UN solo End pelado;
+   hjson ×3 IDÉNTICOS a la .96, paquete==árbol, tabs 4288) · headless
+   «Sandboxing v6.50.97 → Adding Recipes → Server started» 0
+   excepciones. PUBLICACIÓN: tag v6.50.97 + release (make_latest) +
+   asset AethonMod.tmod 2.579.532 B (md5 15ff628984f9d2787192a7c28477f2d6),
+   CDN VERIFICADO BYTE A BYTE, /releases/latest = v6.50.97, respaldo
+   /home/sync/AethonMod-v6.50.97.tmod. LECCIÓN: el diff hjson raro del
+   espejo ModSources NO era cirugía fallida — es la REESCRITURA del
+   -build de tML (re-tabula multiline + auto-genera DisplayName
+   stubs); nunca entra al paquete (éste toma el hjson leído al
+   inicio) pero se queda en el árbol: revertido en repo y espejo
+   (árbol == espejo == paquete == .96, byte a byte).
 1. **✅ v6.50.96 PUBLICADA — LA GRIETA + EL STACK DE 15 EFECTOS** — la
    letra: «el nuevo proyectil lo usaste tal cual, no le diste efectos
    visuales, digamos que es un grieta como debe ser, entonces dale
@@ -2457,6 +2482,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.97** | ✅ Build-verificada (build real 0/0 sobre 308 .cs, .tmod 2.579.532 B md5 15ff628984f9d2787192a7c28477f2d6, 386 entradas = el set EXACTO de la .96, EOF exacto, blob diff ESTRICTO (sólo dll/pdb/Info — los 3 hjson IDÉNTICOS a la .96), el sprite del usuario byte-idéntico, CECIL: DrawTodo con Track → CerrarLoteSiAbierto → Begin(ribbon) y UN solo End pelado (el de entrada MURIÓ) + PreDraw con try/catch intacto + el stack de 15 COMPLETO + ManchaDeTinta/GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/GrimorioNerviosoFlotante IL-idénticos a la .96, hjson ×3 paquete==árbol, tabs 4288, headless «Sandboxing v6.50.97 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release + asset AethonMod.tmod, CDN verificado byte a byte, /releases/latest = v6.50.97), ⏳ en juego | LA LETRA: «hay errores mira» — el client.log del usuario traía UNA «Excepción silenciosa»: InvalidOperationException «End was called, but Begin has not yet been called» en GrietaDeTintaProjectile.DrawTodo:349 → PreDraw:324. Un frame llegó al PreDraw con el lote del juego YA CERRADO (un End ajeno sin Begin) y el End pelado de la entrada del lote del ribbon lanzó; el catch del PreDraw lo tragó y el ReabrirLoteVanilla curó el estado global, pero tML registra TODA first-chance como «Excepción silenciosa» — ese frame la grieta fue invisible. EL FIX: la entrada del ribbon ahora usa la SONDA de la casa (VFXCore.CerrarLoteSiAbierto): si hay Begin vivo lo cierra como siempre, envenenado NO lanza y la grieta dibuja IGUAL. LECCIONES: (1) el diff hjson raro del espejo ModSources NO era la cirugía fallida — es la REESCRITURA del -build de tML (re-tabula los multiline + auto-genera claves DisplayName para clases sin entrada): nunca entra al paquete (éste toma el hjson leído al INICIO) pero se queda en el árbol — revertir tras cada build (la .96 lo revirtió en el repo y no en el espejo); (2) la first-chance de tML loguea incluso lo que el mod captura — el estándar de la casa es CERO excepciones LANZADAS, no cero propagadas |
 | **v6.50.96** | ✅ Build-verificada (build real 0/0 sobre 308 .cs, .tmod 2.579.444 B md5 d0d8df7882cc80530cc6e4613bfa0023, 386 entradas = las mismas de la .95 con el rawimg RENOMBRADO (LagrimaDeTintaProjectile.rawimg → GrietaDeTintaProjectile.rawimg, contenido byte-idéntico — el sprite del usuario SIN TOCAR), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 379 restantes, CECIL: GrietaDeTintaProjectile con TODO el stack (RiftLib::Star + ChispasAnomalia ×4 + EcoGlitch + EstelaLib Track/Ribbon + SombrasLib::Ojo + VFXCore::QuadSrc/Ring/Hash01 + ParticleManager::Spawn + projFrames 4 + const plegadas 34/66/7 en el IL) + LagrimaDeTintaProjectile AUSENTE + ManchaDeTinta con 3× VFXCore::Line y vida 46 + el Shoot del libro SIN el 931 y CON la grieta + TintaViva disparándola desde el libro + GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/GrimorioNerviosoFlotante IL IDÉNTICOS a la .95, hjson ×3 con la grieta viva y la lágrima muerta en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4288, paquete == árbol ×3, headless «Sandboxing v6.50.96 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409188065 + asset AethonMod.tmod 628922496 2.579.444 B, CDN verificado byte a byte md5 d0d8df78…, /releases/latest = v6.50.96, respaldo /home/sync/AethonMod-v6.50.96.tmod) | LA LETRA: «el nuevo proyectil lo usaste tal cual, no le diste efectos visuales, digamos que es un grieta como debe ser, entonces dale muchos efectos visuales investiga que tipo de efectos se le pueden poner al nuevo proyectil cuanto mas efectos mejor» (+ «dame ideas para un proyectil para el grimorio hambriento, necesito un proyectil original que no sea el proyectil del arma de la emperatris de la luz» — el Nightglow murió en la .95: el disparo ES original y del sprite del usuario). (1) LA RE-LECTURA: una grieta no llora — ASPIRA, MIRA y DESGARRA: la clase se llama como su naturaleza. (2) EL STACK DE 15: nacimiento (estrella + anillo + chispas), ribbon, fantasmas, aspiración (convergentes + orbitales), aberración cromática, glitch de tajas, halo, iris, ojo rasgado que mira, estrellas fugitivas, goteo, luz con flicker, vaivén + respiración, mordida, colapso (implosión + corte que sana sobre la mancha). LECCIONES: (1) cuando el usuario corrige la LECTURA de un concepto («digamos que es una grieta COMO DEBE SER»), el rename de la clase es parte del arreglo — el nombre es documentación viva; (2) el mod YA tenía la escuela de efectos (RiftLib/SombrasLib/EstelaLib/VFXCore): antes de inventar, PEDIR prestado de la propia casa — coherencia visual gratis; (3) cecil_check devuelve string VACÍO (returncode 0) para una clase inexistente — el chequeo de ausencia es startswith('ERROR') OR not strip(); (4) un const FLOAT se pliega ldc.r4 (un const INT como ldc.i4.s): el literal del IL delata el tipo del const | 
 | **v6.50.95** | ✅ Build-verificada (build real 0/0 sobre 308 .cs = 306 + la lágrima y su arma, .tmod 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a, 386 entradas = 384 de la .94 + LagrimaDeTintaProjectile.rawimg + TintaViva.rawimg, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson + 2 rawimg nuevos), arte byte-idéntico en las 378 restantes, CECIL: compás ENTERO eliminado de SombraPaginaCaza (TICKS_ENTRE_ATAQUES/TICKS_TRAS_TERMINAR/_proximoAtaque/MarcarAtaque/AtaqueListo/SombraTerminada/OnKill) + espíritu sin relojes pero con SombraActiva/JugadorAtacoReciente + el Shoot del libro SIN el ldc.i4 931 y CON la lágrima + projFrames 4 + OnHitNPC/OnKill/BuscarPresa de la lágrima + ManchaDeTinta con Charco + TintaViva con Shoot/PosicionDelLibro + la bolsa entregándola + GrimorioFuriaSistema/OleadaNPC IL IDÉNTICOS a la .94, hjson ×3 con TintaViva + compás y gracia muertos en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4278, paquete == árbol ×3, headless «Sandboxing v6.50.95 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409141905 + asset 628744486 2.577.464 B, CDN verificado byte a byte md5 a52cb686…, /releases/latest = v6.50.95) | LA LETRA: «luego quitar la restriccion del compás de la sombra — tus dos reglas a la vez […] creo que mejor es dejarlo atacar cuando quiera / te dare un sprite para un disparo […] seas creativo, lo animes y crees una nueva arma con el proyectil». (1) ESTABLE: la .94 marcada (tag + rama backup + manifiesto SHA-256). (2) EL COMPÁS MUERTO: la sombra sale cuando hay presa — sin 10 s ni 2 s. (3) LA LÁGRIMA DE TINTA: el sprite EXACTO del usuario → strip de 4 frames (el latido vive en los PÍXELES), homing acelerante, goteo, estelas, vaivén, muros abiertos, 3 presas, salpicadura y LA MANCHA. (4) LA TINTA VIVA: el arma (icono −35°, bolsa, dispara desde el libro). (5) textos honestos. LECCIONES: (1) el sprite del usuario viaja como CÓDIGO RLE — decodificar con la casa y bajar al Lanczos (rotar ANTES de reducir para el icono); (2) un cooldown que molesta al usuario no se afina: se BORRA — «atacar cuando quiera» es sin reloj, la cola natural (una presa por sombra) basta; (3) Dust.NewDustPerfect devuelve Dust (NO int: no se indexa Main.dust[d]) | 
 | **v6.50.94** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f, 384 entradas (el MISMO set de la .93), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: UltimaComida/TICKS_GRACIA_COMIDA/PasoSinHambre/MarcarDigestion/IrAFuga/MODO_FUGA/«Fugitivo»/«Escapa» ELIMINADOS + MarcarAtaque/AtaqueListo/SombraTerminada/OnKill con 600 y 120 plegados + SoyDuplicado en el espíritu + Shoot/JugadorAtacoReciente con 1800/300 plegados + ShardLevelItem adopta al Nervioso + GrimorioHambriento(clase-ítem)/OleadaNPC/GrimorioFuriaSistema IL IDÉNTICOS a la .93, hjson: es-ES espejo RESTAURADO con cabecera canónica (el árbol .93 llevaba el re-serializado sin cabecera — el 18º incidente), 13 claves Nervioso (con «Nivel», sin fuga), 785 hojas es↔en, en-US tabs 4235, paquete==árbol ×3, headless «Sandboxing v6.50.94 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408947983 + asset AethonMod.tmod 627959141 2.555.191 B, CDN verificado byte a byte md5 52004cee…, /releases/latest = v6.50.94), ⏳ en juego | LA LETRA: «el hambre se pausa […] su ataque sigue relanzandose al matar a una criatura, eso del ataque se puede arreglar haciendo que el libro en ese estado solo pueda lanzar su ataque de la sombra de la pagina una vez cada 10 segundo o algo asi, o poniendo por codigo que no puede lanzar un ataque 2 segundos despues de terminar el primero […] los proyectiles del libro no salen del libro cuando esta flotando, salen de una copia del sprite del libro que el jugador muestra en su mano […] la fuga simplemente la quitamos el libro no se fuga, solo queda flotando cerca del jugador cazando por si mismo, esto de la caza por su cuenta es cuando el jugador esta en afk o simplemente lleva mucho tiempo sin atacar criaturas con el libro […] el festin compartido no tiene sentido, el libro caza por estar hambriento, en este caso el libro debe ser egoista y comer toda la criatura loot incluido por eso el libro recibe la exp y el jugador nada». (1) EL RELOJ SIEMPRE: la gracia de los 10 s de la .92 (UltimaComida) era LA PAUSA — muerta; Paso() suma 1/3600 siempre, el bocado resta −1%. (2) EL COMPÁS: 10 s entre lanzamientos (MarcarAtaque al nacer) + 2 s tras terminar (SombraTerminada en OnKill) — la digestión .93 marcaba a mitad del ataque y dejaba 0,6 s reales. (3) LA FUGA MUERTA: al 100% sigue cazando cerca. (4) LA CAZA DEL AUSENTE: AFK 5 s O 30 s sin disparar con el libro; mientras el dueño dispara (<5 s) el espíritu calla. (5) EL FESTÍN EGOÍSTA: la XP al NERVIOSO (ShardLevelItem + tooltip de nivel), sin Eterno/latido: el jugador NADA. (6) EL ESPÍRITU ÚNICO: SoyDuplicado disuelve al segundo espíritu del dueño — la copia de la captura murió por construcción. LECCIONES: (1) un reloj condicionado a comer JAMÁS deja de «pausarse» — la regla del usuario final fue SIN condiciones: suma SIEMPRE; (2) un cooldown de ataque se marca al NACER y al MORIR del ataque, NUNCA en un evento intermedio (la absorción): la mitad del ataque descuenta la pausa real; (3) las entidades únicas se defienden SOLAS: el dedup por (modo, whoAmI) mata la clase entera de bugs de copias sin importar la causa del spawn; (4) auditar que cada release deje SU fila en el HISTORIAL — la .93 volvió a olvidarla (patrón .90/Task 82) y hubo de restaurarse de los commits |
