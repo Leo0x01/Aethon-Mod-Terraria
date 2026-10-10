@@ -1903,8 +1903,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **🔧 v6.50.90 COMPLETA Y VERIFICADA — PUBLICACIÓN PENDIENTE (token
-   de GitHub expirado con el wipe)** — el usuario pidió «el tercer libro
+1. **✅ PUBLICAR v6.50.90 — HECHO** — el usuario pidió «el tercer libro
    borralo, y crea otro con las mismas caracteristicas, temblor,
    glisheado, y nervioso». Entregado EL NERVIOSO: temblor .87 heredado
    del difunto + glitch .88 con máquina PROPIA + EL NERVIOSISMO nuevo
@@ -1921,15 +1920,15 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    sobresalto, Errático/Inestable/base IL IDÉNTICO a .89,
    EstadoGrimorio documentado con la bandera nueva, espejo
    es-ES==es-MX paquete+árbol, headless 7777 0 excepciones, VLM QA
-   6/6). Respaldo: /home/sync/AethonMod-v6.50.90.tmod. CUANDO HAYA
-   TOKEN: (1) .env + ~/.config/git/credentials (formato
-   https://Leo0x01:<token>@github.com, chmod 600), (2) git push origin
-   main v6.50.90, (3) release v6.50.90 con el .tmod del respaldo
-   (make_latest), (4) CDN byte a byte + /releases/latest, (5) fila .89
-   del snapshot con el release ID real. EL 18º INCIDENTE DEL ESPEJO
-   (es-ES del árbol re-serializado durante la sesión headless colgada
-   en Choose World — la .tmod siempre sana; cura sync + chequeo
-   pre-commit, paquete==árbol verificado).
+   6/6). PUBLICADO: release 408445793 (make_latest) + asset 626548192
+   2.615.131 B octet-stream, CDN verificado BYTE A BYTE,
+   /releases/latest = v6.50.90, respaldo /home/sync/AethonMod-v6.50.90.tmod.
+   NOTA DEL TOKEN: no estaba muerto — vivía incrustado en la URL del
+   remote (por eso el push funcionó); restaurado a .env +
+   ~/.config/git/credentials (las 2 ubicaciones de la casa). EL 18º
+   INCIDENTE DEL ESPEJO (es-ES del árbol re-serializado durante la
+   sesión headless colgada en Choose World — la .tmod siempre sana;
+   cura sync + chequeo pre-commit, paquete==árbol verificado).
 
 1a. **El usuario prueba v6.50.90 en juego** — EL NERVIOSO: (a) al
    principio quieto pero con la MIRADA INQUIETA (miradas que saltan de
@@ -1944,9 +1943,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    además de las de los sustos, temblor 1,3 px; (e) el Errático, el
    Inestable (aura roja) y el normal EXACTAMENTE igual que en la .89;
    (f) el Tembloroso YA NO EXISTE (ni en la bolsa ni crafteable).
-   Checklists previos vigentes. NOTA: la .90 es la primera versión que
-   queda SIN publicar por el token expirado — el usuario la recibirá
-   como release v6.50.90 apenas haya token nuevo.
+   Checklists previos vigentes. PUBLICADA como release v6.50.90
+   (408445793) — descargar de Releases y reemplazar el .tmod.
 
 1. **✅ PUBLICAR v6.50.89 — HECHO** — el usuario pidió «un cuarto
    grimorio donde el efecto glish y el temblor este unidos, ademas

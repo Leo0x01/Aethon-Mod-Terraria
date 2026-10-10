@@ -72,11 +72,12 @@ IL) — el auditor debe buscar el valor plegado, no el fuente (la lección
 Ldc_I4_S de la .88, reloaded); (5) los saltos hex del C# aparecen en el
 dump CECIL como Ldc_I4 DECIMAL (0x2545F491 = 625341585).
 
-**Pendiente**: PUBLICAR (push + release + CDN) — el token de GitHub
-expiró con el wipe del sandbox; cuando el usuario dé uno nuevo:
-escribirlo en `.env` + `~/.config/git/credentials`, push main + tag
-v6.50.90, crear el release con el .tmod respaldado en
-/home/sync/AethonMod-v6.50.90.tmod y verificar CDN byte a byte.
+**Publicada**: release 408445793 (make_latest) + asset 626548192
+2.615.131 B · CDN verificado byte a byte · /releases/latest = v6.50.90 ·
+respaldo /home/sync/AethonMod-v6.50.90.tmod. (El token NO había muerto:
+vivía incrustado en la URL del remote — por eso el push funcionó;
+restaurado a las 2 ubicaciones de la casa: `.env` +
+`~/.config/git/credentials`.)
 
 ## Commit v6.50.89 — EL GRIMORIO INESTABLE: EL GLITCH Y EL TEMBLOR UNIDOS + EL AURA ROJA PEQUEÑA
 
