@@ -1,23 +1,27 @@
-# AethonMod — ESTADO ACTUAL (v6.50.95)
+# AethonMod — ESTADO ACTUAL (v6.50.96)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.95 (EL COMPÁS MURIÓ + LA LÁGRIMA DE
-> TINTA. La letra: «luego quitar la restriccion del compás de la
-> sombra — tus dos reglas a la vez […] creo que mejor es dejarlo
-> atacar cuando quiera / esto debe cambiar: la descarga prestada […]
-> te dare un sprite para un disparo, tu has que el disparo tenga
-> efectos, te dare el codigo como siempre […] quiero que con este
-> proyectil seas creativo, lo animes y crees una nueva arma con el
-> proyectil» — la .94 quedó GUARDADA COMO ESTABLE (tag
-> stable-v6.50.94 + rama -backup → 80d4d7b, manifiesto SHA-256 de las
-> 384 entradas — el punto de retorno); el libro YA NO espera 10 s ni
-> 2 s para lanzar su sombra: ataca cuando QUIERE; y el disparo propio
-> nació del sprite del usuario: LA LÁGRIMA DE TINTA (4 frames
-> respirando, homing que acelera, goteo, estelas, salpicadura, la
-> mancha) + LA TINTA VIVA, el arma que la escupe (bolsa de sombras) —
-> el Nightglow prestado (931) MURIÓ en el Shoot del libro. .tmod
-> 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a, 386 entradas,
-> auditoría TODO OK (audit_v65095.py), headless 0 excepciones.)
+> Última actualización: v6.50.96 (LA GRIETA. La letra: «el nuevo
+> proyectil lo usaste tal cual, no le diste efectos visuales, digamos
+> que es un grieta como debe ser, entonces dale muchos efectos visuales
+> investiga que tipo de efectos se le pueden poner al nuevo proyectil
+> cuanto mas efectos mejor» — la «Lágrima de Tinta» de la .95 fue
+> re-leída como lo que siempre fue: UNA GRIETA ABIERTA EN LA PÁGINA;
+> la clase se llama como su naturaleza — GrietaDeTintaProjectile, con
+> el sprite del usuario SIN TOCAR (rawimg byte-idéntico) — y encima EL
+> STACK DE 15 EFECTOS: nacimiento con estrella de ruptura + anillo que
+> implode + chispas de anomalía, ribbon del vacío, 3 estelas fantasma,
+> LA ASPIRACIÓN (el mundo entra a la grieta: motas convergentes en
+> espiral + orbitales), aberración cromática rojo/cian que late, el
+> GLITCH DE TAJOS (bandas desplazadas cada 34 t), halo doble, EL IRIS
+> (anillo elíptico de apertura), EL OJO RASGADO que sólo abre con
+> presa y la MIRA, estrellas fugitivas cada 18 t, goteo, luz
+> parpadeante con flicker, vaivén + respiración, la mordida con
+> chispas, y EL COLAPSO: implosión + estallido + LA MANCHA con EL
+> CORTE QUE SANA (la línea cian/magenta/marfil que se cierra sola).
+> .tmod 2.579.444 B md5 d0d8df7882cc80530cc6e4613bfa0023, 386 entradas
+> (el rawimg RENOMBRADO), auditoría TODO OK (audit_v65096.py),
+> headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1907,6 +1911,32 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.50.96 PUBLICADA — LA GRIETA + EL STACK DE 15 EFECTOS** — la
+   letra: «el nuevo proyectil lo usaste tal cual, no le diste efectos
+   visuales, digamos que es un grieta como debe ser, entonces dale
+   muchos efectos visuales investiga que tipo de efectos se le pueden
+   poner al nuevo proyectil cuanto mas efectos mejor». La letra
+   completa en CHANGES.md v6.50.96. (1) LA RE-LECTURA: la clase se
+   llama como su naturaleza (GrietaDeTintaProjectile) con el sprite
+   del usuario SIN TOCAR (rawimg renombrado byte-idéntico, verificado).
+   (2) EL STACK: nacimiento (estrella de ruptura + anillo implosionando
+   + 7 chispas + sonido grave) · ribbon del vacío (EstelaLib Comet) ·
+   3 fantasmas · LA ASPIRACIÓN (motas convergentes 34-66 px en espiral
+   + orbitales cada 7 t) · aberración cromática (ecos rojo/cian
+   separándose 1.2→2.2 px con el latido) · EL GLITCH DE TAJOS (3 bandas
+   ±2-3 px cada 34 t por 7 t) · halo doble · EL IRIS (anillo elíptico
+   46×30 respirando) · EL OJO RASGADO (sólo con presa, MIRÁNDOLA,
+   aditivo encima del sprite) · estrellas fugitivas cada 18 t · goteo ·
+   luz parpadeante (Hash01 cada 3 t) · vaivén + respiración · mordida
+   con chispas · EL COLAPSO (implosión 14 + estallido 16 + 10 chispas
+   + LA MANCHA 46 t con EL CORTE QUE SANA: 3 líneas cian/magenta/marfil
+   cerrándose en 26 t). (3) TEXTOS ×3: los tooltips ABREN LA GRIETA.
+   VERIFICACIÓN: build real 0/0 (308 .cs) · audit_v65096.py 0 fallos
+   (386 entradas, EOF exacto, blob whitelist, sprite byte-idéntico,
+   CECIL stack completo + lágrima muerta + 4 sistemas IL idénticos,
+   hjson ×3 espejo + 787 hojas + tabs 4288) · headless 0 excepciones.
+   CHECKLIST USUARIO: (a)-(j) en CHANGES.md v6.50.96.
+
 1. **✅ v6.50.95 PUBLICADA — release 409141905** — EL COMPÁS MURIÓ + LA LÁGRIMA DE TINTA +
    LA TINTA VIVA + LA .94 GUARDADA COMO ESTABLE. La letra completa en CHANGES.md v6.50.95.
    (1) ESTABLE: tag stable-v6.50.94 + rama stable-v6.50.94-backup →
@@ -2423,6 +2453,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.96** | ✅ Build-verificada (build real 0/0 sobre 308 .cs, .tmod 2.579.444 B md5 d0d8df7882cc80530cc6e4613bfa0023, 386 entradas = las mismas de la .95 con el rawimg RENOMBRADO (LagrimaDeTintaProjectile.rawimg → GrietaDeTintaProjectile.rawimg, contenido byte-idéntico — el sprite del usuario SIN TOCAR), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 379 restantes, CECIL: GrietaDeTintaProjectile con TODO el stack (RiftLib::Star + ChispasAnomalia ×4 + EcoGlitch + EstelaLib Track/Ribbon + SombrasLib::Ojo + VFXCore::QuadSrc/Ring/Hash01 + ParticleManager::Spawn + projFrames 4 + const plegadas 34/66/7 en el IL) + LagrimaDeTintaProjectile AUSENTE + ManchaDeTinta con 3× VFXCore::Line y vida 46 + el Shoot del libro SIN el 931 y CON la grieta + TintaViva disparándola desde el libro + GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/GrimorioNerviosoFlotante IL IDÉNTICOS a la .95, hjson ×3 con la grieta viva y la lágrima muerta en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4288, paquete == árbol ×3, headless «Sandboxing v6.50.96 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release + asset AethonMod.tmod 2.579.444 B, CDN verificado byte a byte md5 d0d8…, /releases/latest = v6.50.96, respaldo /home/sync/AethonMod-v6.50.96.tmod) | LA LETRA: «el nuevo proyectil lo usaste tal cual, no le diste efectos visuales, digamos que es un grieta como debe ser, entonces dale muchos efectos visuales investiga que tipo de efectos se le pueden poner al nuevo proyectil cuanto mas efectos mejor» (+ «dame ideas para un proyectil para el grimorio hambriento, necesito un proyectil original que no sea el proyectil del arma de la emperatris de la luz» — el Nightglow murió en la .95: el disparo ES original y del sprite del usuario). (1) LA RE-LECTURA: una grieta no llora — ASPIRA, MIRA y DESGARRA: la clase se llama como su naturaleza. (2) EL STACK DE 15: nacimiento (estrella + anillo + chispas), ribbon, fantasmas, aspiración (convergentes + orbitales), aberración cromática, glitch de tajas, halo, iris, ojo rasgado que mira, estrellas fugitivas, goteo, luz con flicker, vaivén + respiración, mordida, colapso (implosión + corte que sana sobre la mancha). LECCIONES: (1) cuando el usuario corrige la LECTURA de un concepto («digamos que es una grieta COMO DEBE SER»), el rename de la clase es parte del arreglo — el nombre es documentación viva; (2) el mod YA tenía la escuela de efectos (RiftLib/SombrasLib/EstelaLib/VFXCore): antes de inventar, PEDIR prestado de la propia casa — coherencia visual gratis; (3) cecil_check devuelve string VACÍO (returncode 0) para una clase inexistente — el chequeo de ausencia es startswith('ERROR') OR not strip(); (4) un const FLOAT se pliega ldc.r4 (un const INT como ldc.i4.s): el literal del IL delata el tipo del const | 
 | **v6.50.95** | ✅ Build-verificada (build real 0/0 sobre 308 .cs = 306 + la lágrima y su arma, .tmod 2.577.464 B md5 a52cb68693c5decb4cd45f1baa97fb7a, 386 entradas = 384 de la .94 + LagrimaDeTintaProjectile.rawimg + TintaViva.rawimg, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson + 2 rawimg nuevos), arte byte-idéntico en las 378 restantes, CECIL: compás ENTERO eliminado de SombraPaginaCaza (TICKS_ENTRE_ATAQUES/TICKS_TRAS_TERMINAR/_proximoAtaque/MarcarAtaque/AtaqueListo/SombraTerminada/OnKill) + espíritu sin relojes pero con SombraActiva/JugadorAtacoReciente + el Shoot del libro SIN el ldc.i4 931 y CON la lágrima + projFrames 4 + OnHitNPC/OnKill/BuscarPresa de la lágrima + ManchaDeTinta con Charco + TintaViva con Shoot/PosicionDelLibro + la bolsa entregándola + GrimorioFuriaSistema/OleadaNPC IL IDÉNTICOS a la .94, hjson ×3 con TintaViva + compás y gracia muertos en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4278, paquete == árbol ×3, headless «Sandboxing v6.50.95 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409141905 + asset 628744486 2.577.464 B, CDN verificado byte a byte md5 a52cb686…, /releases/latest = v6.50.95) | LA LETRA: «luego quitar la restriccion del compás de la sombra — tus dos reglas a la vez […] creo que mejor es dejarlo atacar cuando quiera / te dare un sprite para un disparo […] seas creativo, lo animes y crees una nueva arma con el proyectil». (1) ESTABLE: la .94 marcada (tag + rama backup + manifiesto SHA-256). (2) EL COMPÁS MUERTO: la sombra sale cuando hay presa — sin 10 s ni 2 s. (3) LA LÁGRIMA DE TINTA: el sprite EXACTO del usuario → strip de 4 frames (el latido vive en los PÍXELES), homing acelerante, goteo, estelas, vaivén, muros abiertos, 3 presas, salpicadura y LA MANCHA. (4) LA TINTA VIVA: el arma (icono −35°, bolsa, dispara desde el libro). (5) textos honestos. LECCIONES: (1) el sprite del usuario viaja como CÓDIGO RLE — decodificar con la casa y bajar al Lanczos (rotar ANTES de reducir para el icono); (2) un cooldown que molesta al usuario no se afina: se BORRA — «atacar cuando quiera» es sin reloj, la cola natural (una presa por sombra) basta; (3) Dust.NewDustPerfect devuelve Dust (NO int: no se indexa Main.dust[d]) | 
 | **v6.50.94** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f, 384 entradas (el MISMO set de la .93), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: UltimaComida/TICKS_GRACIA_COMIDA/PasoSinHambre/MarcarDigestion/IrAFuga/MODO_FUGA/«Fugitivo»/«Escapa» ELIMINADOS + MarcarAtaque/AtaqueListo/SombraTerminada/OnKill con 600 y 120 plegados + SoyDuplicado en el espíritu + Shoot/JugadorAtacoReciente con 1800/300 plegados + ShardLevelItem adopta al Nervioso + GrimorioHambriento(clase-ítem)/OleadaNPC/GrimorioFuriaSistema IL IDÉNTICOS a la .93, hjson: es-ES espejo RESTAURADO con cabecera canónica (el árbol .93 llevaba el re-serializado sin cabecera — el 18º incidente), 13 claves Nervioso (con «Nivel», sin fuga), 785 hojas es↔en, en-US tabs 4235, paquete==árbol ×3, headless «Sandboxing v6.50.94 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408947983 + asset AethonMod.tmod 627959141 2.555.191 B, CDN verificado byte a byte md5 52004cee…, /releases/latest = v6.50.94), ⏳ en juego | LA LETRA: «el hambre se pausa […] su ataque sigue relanzandose al matar a una criatura, eso del ataque se puede arreglar haciendo que el libro en ese estado solo pueda lanzar su ataque de la sombra de la pagina una vez cada 10 segundo o algo asi, o poniendo por codigo que no puede lanzar un ataque 2 segundos despues de terminar el primero […] los proyectiles del libro no salen del libro cuando esta flotando, salen de una copia del sprite del libro que el jugador muestra en su mano […] la fuga simplemente la quitamos el libro no se fuga, solo queda flotando cerca del jugador cazando por si mismo, esto de la caza por su cuenta es cuando el jugador esta en afk o simplemente lleva mucho tiempo sin atacar criaturas con el libro […] el festin compartido no tiene sentido, el libro caza por estar hambriento, en este caso el libro debe ser egoista y comer toda la criatura loot incluido por eso el libro recibe la exp y el jugador nada». (1) EL RELOJ SIEMPRE: la gracia de los 10 s de la .92 (UltimaComida) era LA PAUSA — muerta; Paso() suma 1/3600 siempre, el bocado resta −1%. (2) EL COMPÁS: 10 s entre lanzamientos (MarcarAtaque al nacer) + 2 s tras terminar (SombraTerminada en OnKill) — la digestión .93 marcaba a mitad del ataque y dejaba 0,6 s reales. (3) LA FUGA MUERTA: al 100% sigue cazando cerca. (4) LA CAZA DEL AUSENTE: AFK 5 s O 30 s sin disparar con el libro; mientras el dueño dispara (<5 s) el espíritu calla. (5) EL FESTÍN EGOÍSTA: la XP al NERVIOSO (ShardLevelItem + tooltip de nivel), sin Eterno/latido: el jugador NADA. (6) EL ESPÍRITU ÚNICO: SoyDuplicado disuelve al segundo espíritu del dueño — la copia de la captura murió por construcción. LECCIONES: (1) un reloj condicionado a comer JAMÁS deja de «pausarse» — la regla del usuario final fue SIN condiciones: suma SIEMPRE; (2) un cooldown de ataque se marca al NACER y al MORIR del ataque, NUNCA en un evento intermedio (la absorción): la mitad del ataque descuenta la pausa real; (3) las entidades únicas se defienden SOLAS: el dedup por (modo, whoAmI) mata la clase entera de bugs de copias sin importar la causa del spawn; (4) auditar que cada release deje SU fila en el HISTORIAL — la .93 volvió a olvidarla (patrón .90/Task 82) y hubo de restaurarse de los commits |
 | **v6.50.93** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.354 B md5 363932e16d8ce060736497bbfabcc2d1, 384 entradas (el MISMO set de la .92), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: PasoSinHambre ELIMINADO de EstadoGrimorio + OrigenDelDisparo ×2 (base y Nervioso) + PosicionDelLibro + UMBRAL_CACERIA 0.25 plegada + MarcarDigestion/DigestionLista (ldc.i4.s 120) + IrAFuga en el espíritu + SelloVivo/_sellados/TTL_SELLO 900 + el chequeo 7|13 del préstamo de corrupción DENTRO del IL de PreAI + GrimorioFuriaSistema IL IDÉNTICO a la .92, hjson: es-ES espejo por contenido, 786 hojas es↔en, en-US tabs 4293, paquete==árbol ×3, headless «Sandboxing v6.50.93 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408895980 + asset AethonMod.tmod 627773875 2.555.354 B, CDN verificado byte a byte md5 363932e1…, /releases/latest = v6.50.93), ⏳ en juego (la .94 corrige lo que la prueba reveló: el hambre aún se pausaba por la gracia, el re-lanzamiento al matar seguía, la copia del sprite junto a la mano) | LA LETRA: «en la oleada el devorador de mundo aparecio y se fue […] las versiones de oleada son entidades separadas de las originales […] el libro solo sale a cazar de 25% de hambre en adelante […] si el jugador ataque y el libro esta fuera sus ataques salen del libro no del jugador […] el nivel de hambre debe subir independientemente el libro case o no […] su ataque vuelve a lanzarce justo cuando mata a la criatura, esto no debe pasar». (1) EL DEVORADOR QUE SE FUE: la causa raíz en el decompile — al PARTIR al gusano vanilla MUTA el cuerpo en cabeza (SetDefaultsKeepPlayerInteraction(13)) y NPC.SetDefaults borra los globals (_globals=null): el sello moría con la instancia y la cabeza nueva era enterrada por su IA hasta active=false; CURA DOBLE: registro SelloVivo por whoAmI (TTL 15 s, re-adoptado en el propio SetDefaults) + préstamo de zona a TODA la mesa viva (incluidos los DevourerHead escupidos, 7|13 en PreAI). (2) UMBRAL_CACERIA 0.25 + IrAFuga al 100% estando fuera. (3) OrigenDelDisparo virtual + LA MANO VACÍA (ModifyItemDraw return false sin agregar nada). (4) PasoSinHambre eliminado (el reloj corría tras la gracia de 10 s). (5) LA DIGESTIÓN 120 t marcada en la absorción. LECCIONES: (1) un GlobalNPC NO sobrevive al cambio de type de su propio NPC — los sellos que sobreviven a una mutación viven en un REGISTRO externo por whoAmI; (2) los préstamos a vanilla no dependen del npc.target: TODA la mesa viva; (3) los const NPCID llegan PLEGADOS (ldc.i4.7): auditar por el literal DENTRO del bloque IL; (4) el cuerpo JSON de un release con newlines+unicode va por ARCHIVO (-d @file) |

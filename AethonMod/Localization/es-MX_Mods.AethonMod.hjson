@@ -104,7 +104,7 @@ Items: {
                         de prueba): el parpadeo se acelera (de 10-20 s a
                         cada 2 s), la mirada se agita y el iris dorado se
                         enciende ROJO.
-                        Clic izq: escupe LA LÁGRIMA DE TINTA — la descarga
+                        Clic izq: abre LA GRIETA DE TINTA — la descarga
                         perseguidora PROPIA del libro (pruebas, sin maná).
                         Clic der: reinicia el apetito.
                         Objeto de pruebas — eliminar antes de publicar.
@@ -136,7 +136,7 @@ tú no recibes nada. Mientras está fuera, sus ataques
 salen DEL LIBRO (tu mano ataca vacía).
 NUNCA se escapa: al 100% se queda flotando cerca de
 ti, cazando por sí mismo.
-Clic izq: escupe LA LÁGRIMA DE TINTA — la descarga
+Clic izq: abre LA GRIETA DE TINTA — la descarga
 perseguidora PROPIA del libro (pruebas, sin maná).
 Clic der: reinicia el apetito.
 Objeto de pruebas — comparar con el original.
@@ -167,22 +167,26 @@ Objeto de pruebas — comparar con el original.
                         '''
         }
 
-        // v6.50.95 — LA TINTA VIVA (la letra: «quiero que con este
+        // v6.50.95/.96 — LA TINTA VIVA (la letra: «quiero que con este
         // proyectil seas creativo, lo animes y crees una nueva arma con
-        // el proyectil»): el arma que escupe LA LÁGRIMA DE TINTA — el
-        // disparo propio del libro, nacido del sprite EXACTO del usuario.
+        // el proyectil»): el arma que abre LA GRIETA DE TINTA — el
+        // disparo propio del libro, nacido del sprite EXACTO del usuario
+        // y re-leído en la .96 como lo que siempre fue: UNA GRIETA.
         TintaViva: {
                 DisplayName: Tinta Viva
                 Tooltip:
                         '''
-                        «La primera lágrima que el grimorio no quiso llorar.»
-                        Escupe LÁGRIMAS DE TINTA — la página doblada en
-                        sombra con corazón de marfil: respiran en vuelo,
-                        persiguen a tu presa (la tinta aprende a caer),
-                        gotean estelas de sombra, atraviesan los muros y,
-                        al romperse, salpican y dejan LA MANCHA.
-                        Si el Nervioso anda FUERA, la tinta sale DEL LIBRO.
-                        Tres presas por lágrima.
+                        «La primera herida que el grimorio abrió en el mundo.»
+                        Abre GRIETAS DE TINTA — desgarros en la página
+                        con corazón de marfil: nacen con su estrella de
+                        ruptura, ASPIRAN el mundo al vuelo, viajan con
+                        estela del vacío y ecos de fantasma, brillan con
+                        aberración cromática, glitchean en tajas y su
+                        corazón ES UN OJO RASGADO que mira a la presa.
+                        Atraviesan los muros y, al colapsar, implosionan
+                        dejando EL CORTE QUE SANA y LA MANCHA.
+                        Si el Nervioso anda FUERA, la grieta sale DEL LIBRO.
+                        Tres presas por grieta.
                         '''
         }
         // v6.50.91 — EL CÓDICE VIVO FUE BORRADO POR COMPLETO (la letra del

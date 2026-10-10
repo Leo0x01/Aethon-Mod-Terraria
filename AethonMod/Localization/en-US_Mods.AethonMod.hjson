@@ -99,7 +99,7 @@ Items: {
 			(test rate): blinking speeds up (from 10-20 s to
 			every 2 s), the gaze grows restless and the golden
 			iris ignites RED.
-			Left click: spits THE INK TEAR — the book's OWN
+			Left click: opens THE INK RIFT — the book's OWN
 			homing shot (testing, no mana).
 			Right click: resets the appetite.
 			Testing item — remove before publishing.
@@ -132,7 +132,7 @@ own level); you get nothing. While it is out, its
 attacks come FROM THE BOOK (your hand swings empty).
 It NEVER escapes: at 100% it just keeps floating
 near you, hunting on its own.
-Left click: spits THE INK TEAR — the book's OWN
+Left click: opens THE INK RIFT — the book's OWN
 homing shot (testing, no mana).
 Right click: resets the appetite.
 Testing item — compare against the original.
@@ -164,22 +164,26 @@ Testing item — compare against the original.
 			'''
 	}
 
-	// v6.50.95 — LIVING INK (the user's letter: "I want you to be
+	// v6.50.95/.96 — LIVING INK (the user's letter: "I want you to be
 	// creative with this projectile, animate it and create a new weapon
-	// with the projectile"): the weapon that spits THE INK TEAR — the
-	// book's own shot, born from the user's EXACT sprite.
+	// with the projectile"): the weapon that opens THE INK RIFT — the
+	// book's own shot, born from the user's EXACT sprite and re-read in
+	// .96 as what it always was: A RIFT.
 	TintaViva: {
 		DisplayName: Living Ink
 		Tooltip:
 			'''
-			"The first tear the grimoire refused to cry."
-			Spits INK TEARS — the page folded into shadow with
-			a heart of ivory: they breathe in flight, chase your
-			prey (the ink learns how to fall), drip trails of
-			shadow, pass through walls and, when they break,
-			they splash and leave THE STAIN.
-			If the Nervous one is OUT, the ink flies FROM THE BOOK.
-			Three prey per tear.
+			"The first wound the grimoire opened in the world."
+			Opens INK RIFTS — tears in the page with a heart of
+			ivory: they're born with their rupture star, ASPIRE
+			the world in flight, trail a ribbon of void and
+			ghost echoes, shine with chromatic aberration,
+			glitch into slices, and their heart IS A TORN EYE
+			that stares at the prey. They pass through walls
+			and, when they collapse, they implode leaving
+			THE HEALING CUT and THE STAIN.
+			If the Nervous one is OUT, the rift flies FROM THE BOOK.
+			Three prey per rift.
 			'''
 	}
 

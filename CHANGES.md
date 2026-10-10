@@ -1,5 +1,118 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.96 — LA GRIETA: el disparo propio re-leído como lo que siempre fue + EL STACK DE 15 EFECTOS
+
+**Petición del usuario**: "el nuevo proyectil lo usaste tal cual, no le
+diste efectos visuales, digamos que es un grieta como debe ser, entonces
+dale muchos efectos visuales investiga que tipo de efectos se le pueden
+poner al nuevo proyectil cuanto mas efectos mejor" (+ "dame ideas para
+un proyectil para el grimorio hambriento, necesito un proyectil original
+que no sea el proyectil del arma de la emperatris de la luz" — el
+Nightglow ya había muerto en la .95; el disparo ES original y del
+sprite del usuario desde entonces).
+
+1. **LA RE-LECTURA**: la «Lágrima de Tinta» de la .95 SIEMPRE fue UNA
+   GRIETA — el sprite del usuario (el fragmento negro con borde violeta
+   y corazón de marfil) es una PÁGINA DESGARRADA, y las grietas no
+   lloran: ASPIRAN, MIRAN y DESGARRAN. La clase se llama como su
+   naturaleza: `LagrimaDeTintaProjectile` → **`GrietaDeTintaProjectile`**
+   (el sprite del usuario SIN TOCAR — el rawimg renombrado es
+   byte-idéntico al de la .95, verificado). `ManchaDeTinta` sigue (lo
+   que la grieta sangra) y `TintaViva` sigue siendo el arma (la tinta
+   que abre la herida).
+2. **EL STACK DE 15 EFECTOS** (la investigación: aberración cromática
+   de los umbrales rotos, partículas aspiradas por los portales, el
+   glitch de tajas de los desgarros cuánticos, la estrella de ruptura
+   DoG, el ojo rasgado de la casa, el corte que sana de la escuela
+   RiftLib — todo ya vivía en las librerías del mod, la grieta lo
+   reclamó):
+   - **1 EL NACIMIENTO**: al abrirse, la ESTRELLA DE RUPTURA
+     (`RiftLib.Star` — espiga de 4 puntas creciendo 9 t con su ANILLO
+     IMPLOSIONANDO) + RÁFAGA de 7 chispas de anomalía (`RiftPaletas.Vacio`)
+     + el sonido grave del desgarro (Item122 −0.42).
+   - **2 EL RIBBON DEL VACÍO**: estela-cometa violeta (`EstelaLib.Track`
+     + `Ribbon`, perfil Comet) — el rastro de NADA de lo abierto.
+   - **3 LAS ESTELAS FANTASMA**: 3 ecos del sprite por `oldPos`.
+   - **4 LA ASPIRACIÓN**: el mundo ENTRA a la grieta — motas violeta que
+     nacen en anillo (34-66 px) y CONVERGEN EN ESPIRAL + motas ORBITALES
+     cada 7 t (el mini disco de acrección de la tinta).
+   - **5 LA ABERRACIÓN CROMÁTICA**: DOS ECOS del sprite (rojo a un lado,
+     cian al otro — la lección UmbralRoto) cuya separación LATE con el
+     corazón (1.2→2.2 px, `VFXCore.QuadSrc` aditivo bajo el sprite:
+     los ecos asoman por los bordes).
+   - **6 EL GLITCH DE TAJOS**: cada 34 t una ráfaga de 7 t donde el
+     sprite se PARTE en 3 bandas horizontales desplazadas ±2-3 px
+     (`RiftLib.EcoGlitch`) — la realidad pierde frames.
+   - **7 EL HALO DOBLE** (el .95): violeta de sombra + marfil que late.
+   - **8 EL IRIS**: el anillo ELÍPTICO de apertura (46×30 px alineado al
+     vuelo, respirando ±12%, `VFXCore.Ring` ×2 contra-rotando el interior).
+   - **9 EL OJO RASGADO**: el corazón de marfil ES UN OJO
+     (`SombrasLib.Ojo` rasgada) que SOLO abre cuando hay presa — y MIRA
+     a su presa (abierto 0.30+0.70×latido, dibujado aditivo ENCIMA del
+     sprite: el ojo brilla SOBRE la herida).
+   - **10 LAS ESTRELLAS FUGITIVAS**: cada 18 t, 2 chispas del OTRO LADO
+     se escapan de la herida (`ChispasAnomalia` + `ParticleManager`).
+   - **11 EL GOTEO** (el .95): polvo violeta flotante + GOTAS que caen.
+   - **12 LA LUZ PARPADEANTE**: la doble luz violeta/marfil ahora con
+     FLICKER de conexión rota (`VFXCore.Hash01` cada 3 t).
+   - **13 EL VAIVÉN + LA RESPIRACIÓN** (el .95): el mecerse
+     perpendicular (solo draw) y los 4 frames del strip.
+   - **14 LA MORDIDA** (`OnHitNPC`): la salpicadura en anillo (el .95) +
+     4 chispas de anomalía de la herida fresca.
+   - **15 EL COLAPSO** (`OnKill`): la grieta muere HACIA DENTRO —
+     IMPLOSIÓN de 14 motas convergentes + el estallido de 16 + 10
+     chispas + LA MANCHA (ahora 46 t de vida) con **EL CORTE QUE SANA**:
+     la línea de la herida final con aberración cromática (cian arriba,
+     magenta abajo, marfil al centro — 3× `VFXCore.Line`) que se CIERRA
+     desde los extremos hacia el centro en 26 t — «la realidad sana
+     comiéndose el corte» (la escuela RiftLib).
+   LO QUE SIGUE DEL .95 INTACTO: la cacería (homing que acelera 12→19,
+   giro capado 0.11, re-busca cada 8 t), los muros abiertos
+   (`tileCollide false`), 3 presas por grieta, el nacimiento desde el
+   LIBRO cuando el Nervioso está fuera.
+3. **TEXTOS ×3**: los tooltips de ambos libros y del arma ya no hablan
+   de lágrimas — ABREN LA GRIETA («La primera herida que el grimorio
+   abrió en el mundo», el stack contado: estrella de ruptura, aspiración,
+   ribbon del vacío, aberración cromática, glitch de tajas, el ojo
+   rasgado, el corte que sana). `tools/hjson_v65096.py`: cirugía en-US
+   (tabs 4278→4288, +10) + espejo es-ES regenerado +
+   sanidad ×3 (la lágrima muerta en los tres idiomas).
+4. **VERIFICACIÓN**: build real 0/0 (308 .cs) · .tmod 2.579.444 B md5
+   d0d8df7882cc80530cc6e4613bfa0023: 386 entradas (las mismas de la .95
+   con el rawimg RENOMBRADO), EOF exacto, blob diff whitelist exacto
+   (dll/pdb/Info + 3 hjson), el SPRITE DEL USUARIO byte-idéntico a la
+   .95 (34.060 B), arte byte-idéntico (379), CECIL (audit_v65096.py,
+   0 fallos): GrietaDeTintaProjectile EXISTE con TODO el stack (Star,
+   ChispasAnomalia ×4, EcoGlitch, Track+Ribbon, Ojo, QuadSrc, Ring,
+   Hash01, ParticleManager, projFrames 4, los const plegados 34/66/7) +
+   LagrimaDeTintaProjectile AUSENTE + ManchaDeTinta con las 3 Line y
+   vida 46 + el libro SIN el 931 y CON la grieta + TintaViva disparándola
+   desde el libro + GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/
+   GrimorioNerviosoFlotante IL IDÉNTICOS a la .95 · hjson ×3: la grieta
+   vive, la lágrima murió, espejo por contenido, 787 hojas simétricas,
+   en-US tabs 4288, paquete == árbol ×3 · headless «Sandboxing v6.50.96
+   → Adding Recipes → Server started» 0 EXCEPCIONES.
+   PUBLICACIÓN: tag v6.50.96 + release (make_latest) + asset
+   AethonMod.tmod, CDN VERIFICADO, /releases/latest = v6.50.96, respaldo
+   /home/sync/AethonMod-v6.50.96.tmod.
+
+   CHECKLIST DEL USUARIO (la prueba EN JUEGO): (a) el clic izq del
+   grimorio ABRE una grieta que NACE con un destello de estrella + su
+   anillo implosionando + chispas; (b) en vuelo la grieta ASPIRA motas
+   violetas del entorno (algunas le giran alrededor) y deja una ESTELA
+   COMETA violeta + 3 fantasmas; (c) de cerca se ven los ECOS ROJO/CIAN
+   del sprite (aberración) y el ANILLO-IRIS que respira a su alrededor;
+   (d) cada ~0.5 s la grieta GLITCHEA: el sprite se parte en tajitas
+   desplazadas un instante; (e) CON PRESA cerca, el corazón de marfil
+   SE ABRE COMO UN OJO RASGADO QUE LA MIRA (sin presa, cerrado); (f) al
+   golpear: salpicadura + chispas de anomalía; (g) al morir: IMPLOSIÓN
+   (las motas entran), estallido, LA MANCHA y sobre ella UNA LÍNEA DE
+   LUZ CON ECO CIAN/MAGENTA QUE SE CIERRA SOLA (el corte que sana);
+   (h) el arma TINTA VIVA dispara la misma grieta (y desde el libro si
+   el Nervioso está fuera); (i) la luz de la grieta PARPADEA como una
+   conexión rota; (j) los tooltips ya no mencionan lágrimas — hablan de
+   la herida que el libro abre en el mundo.
+
 ## Commit v6.50.95 — EL COMPÁS MURIÓ + LA LÁGRIMA DE TINTA (el disparo propio) + LA TINTA VIVA + LA .94 ESTABLE
 
 **Petición del usuario**: "perfecto ya funciona bien la mecanica del

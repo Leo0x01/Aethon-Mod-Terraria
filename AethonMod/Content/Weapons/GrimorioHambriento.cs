@@ -334,7 +334,7 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 1, 0, 0);
             Item.rare = ItemRarityID.Quest;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<LagrimaDeTintaProjectile>();   // v6.50.95 — LA LÁGRIMA DE TINTA (adiós Nightglow 931): el hook Shoot necesita shoot>0
+            Item.shoot = ModContent.ProjectileType<GrietaDeTintaProjectile>();   // v6.50.95/.96 — LA GRIETA DE TINTA (adiós Nightglow 931): el hook Shoot necesita shoot>0
             Item.shootSpeed = 12f;
             Item.UseSound = SoundID.Item4; // el sonido de la familia del grimorio
         }
@@ -378,15 +378,18 @@ namespace AethonMod.Content.Weapons
                 return false;
             Estado.UltimoDisparo = Main.GameUpdateCount;
 
-            // v6.50.95 — LA DESCARGA PRESTADA MURIÓ: el libro YA NO
-            // dispara el Nightglow vanilla (931) — escupe SU PROPIA
-            // tinta: LA LÁGRIMA DE TINTA (LagrimaDeTintaProjectile),
-            // el sprite del usuario animado, con homing propio, estelas
-            // y mancha — coherencia visual total con el libro.
+            // v6.50.95/.96 — LA DESCARGA PRESTADA MURIÓ: el libro YA NO
+            // dispara el Nightglow vanilla (931) — abre SU PROPIA herida:
+            // LA GRIETA DE TINTA (GrietaDeTintaProjectile), el sprite del
+            // usuario re-leído como UNA GRIETA (nace con estrella de
+            // ruptura, aspira el mundo, brilla con aberración cromática,
+            // glitchea en tajas, lleva EL OJO RASGADO que mira a su presa
+            // y muere colapsando con el corte que sana) — coherencia
+            // visual total con el libro.
             // v6.50.93 — el ORIGEN es virtual: el Nervioso con el libro
             // FUERA dispara DESDE el libro flotante, no desde el jugador.
             Projectile.NewProjectile(source, OrigenDelDisparo(player, position), velocity,
-                ModContent.ProjectileType<LagrimaDeTintaProjectile>(),
+                ModContent.ProjectileType<GrietaDeTintaProjectile>(),
                 damage, knockback, player.whoAmI);
             return false; // ya la spawneé yo: nada de doble vanilla
         }

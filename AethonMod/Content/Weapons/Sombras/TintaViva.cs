@@ -8,20 +8,23 @@ using AethonMod.Content.Projectiles.Sombras;
 namespace AethonMod.Content.Weapons.Sombras
 {
     /// <summary>
-    /// TINTAVIVA — v6.50.95 — EL ARMA DE LA LÁGRIMA DE TINTA.
+    /// TINTAVIVA — v6.50.95/.96 — EL ARMA DE LA GRIETA DE TINTA.
     /// La letra del usuario: «quiero que con este proyectil seas creativo,
     /// lo animes y crees una nueva arma con el proyectil» — la descarga
     /// prestada (el Nightglow vanilla 931 del Grimorio del Eterno) muere:
     /// el libro YA NO dispara luz de hadas ajena, escupe SU PROPIA tinta.
     ///
-    /// LA LÁGRIMA (LagrimaDeTintaProjectile) nace del sprite EXACTO del
-    /// usuario — una página doblada en sombra con corazón de marfil:
-    /// respira (4 frames), persigue a la presa (homing que acelera),
-    /// gotea tinta que cae, deja estelas de fantasma, atraviesa muros y
-    /// al romperse salpica y deja LA MANCHA.
+    /// v6.50.96 — LA GRIETA (GrietaDeTintaProjectile): el sprite EXACTO
+    /// del usuario re-leído como lo que siempre fue — UNA GRIETA ABIERTA
+    /// EN LA PÁGINA (no una lágrima: las grietas no lloran, ASPIRAN, MIRAN
+    /// y DESGARRAN). Nace con su estrella de ruptura, viaja con estela
+    /// ribbon del vacío + fantasmas + aspiración de motas + aberración
+    /// cromática + glitch de tajas + el iris de apertura + EL OJO RASGADO
+    /// que mira a su presa, y muere colapsando HACIA DENTRO con el corte
+    /// que sana y LA MANCHA.
     ///
-    /// EL ARMA: la pluma del propio grimorio — cada disparo es una
-    /// lágrima que el libro no quiso llorar. Mismo origen que la familia:
+    /// EL ARMA: la pluma del propio grimorio — cada disparo es una herida
+    /// que el libro abre en la realidad. Mismo origen que la familia:
     /// si el NERVIOSO está FUERA cazando, el disparo sale DEL LIBRO
     /// (OrigenDelDisparo — la letra .93 sigue mandando).
     /// </summary>
@@ -43,7 +46,7 @@ namespace AethonMod.Content.Weapons.Sombras
             Item.mana = 9;
             Item.knockBack = 3f;
             Item.crit = 8;
-            Item.shoot = ModContent.ProjectileType<LagrimaDeTintaProjectile>();
+            Item.shoot = ModContent.ProjectileType<GrietaDeTintaProjectile>();   // v6.50.96 — LA GRIETA DE TINTA
             Item.shootSpeed = 15.5f;
             Item.rare = ItemRarityID.Quest;
             Item.value = Item.buyPrice(0, 0, 0, 0);
@@ -62,7 +65,7 @@ namespace AethonMod.Content.Weapons.Sombras
 
             // LA PRIMERA PRESA: el jefe más cercano a cualquier distancia;
             // sin jefes, el enemigo más cercano en 1800 px (la chusma cena
-            // tinta también) — la lágrima corrige sola después (homing)
+            // tinta también) — la grieta corrige sola después (homing)
             NPC presa = SombraDeLaPagina.BuscarPresa(player.Center, true)
                 ?? SombraDeLaPagina.BuscarPresa(player.Center, false);
             Vector2 rumbo = presa != null
