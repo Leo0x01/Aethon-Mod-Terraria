@@ -1758,6 +1758,17 @@ Objeto de pruebas — comparar con el original.
                 Abierta: La {0} se abre: {1} objetos nuevos.
                 Completa: La {0} ya está completa contigo.
         }
+
+        GrimorioSellado: {
+                DisplayName: Grimorio Sellado
+                Tooltip:
+                        '''
+                        Contiene a Aethon, entidad cósmica más antigua que la realidad.
+                        Cada disparo agrieta el sello...
+                        5 disparos seguidos = desborde.
+                        Enemigos golpeados 5 veces = crítico garantizado.
+                        '''
+        }
 }
 
 Projectiles: {
@@ -1891,6 +1902,8 @@ Projectiles: {
         VenaTruenoProjectile.DisplayName: Vena de Trueno
         AethonMenorPet.DisplayName: Aethon Menor (mascota)
         MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
+        FragmentoAethon.DisplayName: Fragmento de Aethon
+        ExplosionAethon.DisplayName: Apertura de Aethon
 }
 
 Buffs: {
@@ -1922,6 +1935,11 @@ Buffs: {
         QuemaduraCosmica: {
                 DisplayName: Quemadura cósmica
                 Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
+        }
+
+        Observado: {
+                DisplayName: Observado
+                Description: Aethon te está mirando...
         }
 
         OcasoActivoBuff: {

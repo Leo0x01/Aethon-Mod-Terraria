@@ -82,6 +82,15 @@ namespace AethonMod.Content.Items.Bolsas
             // (.89) quedan BORRADOS — viven el original SERENO y el Nervioso
             // HAMBRIENTO (caza, impaciencia y fuga — v6.50.91).
             l.Add((ModContent.ItemType<GrimorioHambrientoNervioso>(), 1));
+            // v6.50.98 — EL GRIMORIO SELLADO: el arma nueva de prueba (la
+            // letra: «te dare el codigo para un arma nueva de prueba,
+            // recuerda darcela al jugador» — lección .83 otra vez: sin
+            // entrega no hay prueba). Dispara EL FRAGMENTO DE AETHON:
+            // cada golpe marca (stacks de «Observado» → 5 golpes =
+            // crítico garantizado +50%), al morir abre LA APERTURA y 5
+            // disparos seguidos = DESBORDE al 250% que le duele al que
+            // dispara (5% de vida, sin matar jamás).
+            l.Add((ModContent.ItemType<GrimorioSellado>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.

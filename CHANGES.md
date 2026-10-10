@@ -1,5 +1,139 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.98 — EL GRIMORIO SELLADO: el arma nueva de prueba (el código del usuario con TODOS sus errores muertos)
+
+**Petición del usuario**: "te dare el codigo para un arma nueva de
+prueba, recuerda darcela al jugador, este sera el proyectil y su
+efecto" — el usuario escribió el arma COMPLETA (5 clases + su diagrama
+de flujo) y el borrador traía DOS capas de errores: los de análisis
+(identidades que no existen en esta tML) y los que SOLO el build real
+puede cazar. La casa la integró al pie de la letra — con el efecto
+EXACTO que el usuario diseñó — y con la ENTREGA que pidió (lección
+.83: sin entrega no hay prueba).
+
+1. **EL ARMA — los 5 componentes tal como el usuario los diseñó**:
+   - **GrimorioSellado** (el ítem; clase `GrimorioS` renombrada — el
+     nombre completo es documentación viva): 45 daño mágico, 12 maná,
+     raro Cian, Shoot + autoReuse. Cada 5 disparos seguidos =
+     **DESBORDE**: un rayo masivo al **250%** con 8 de knockback a
+     media velocidad, que además cuesta el **5% de la vida MÁXIMA** al
+     que dispara (con clamp: NUNCA mata), 2 s de cooldown
+     (`CanUseItem` + `UpdateInventory`), 30 chispas doradas, el
+     `Item88` y el mensajito «¡Aethon se desborda!».
+   - **FragmentoAethon** (el disparo): la astilla dorada de 8 frames
+     que respira, chispas de `GoldFlame` (1/3) + rayo violeta (1/10),
+     rotación al vuelo, **homing OPCIONAL** por `ai[1]` (apagado por
+     defecto: la mejora futura solo cambia ese 0 por un 1), luz dorada
+     que late (`AddLight` de color — `Projectile.light` solo da luz
+     blanca) y al morder: **OBSERVADO** (el debuff 5 s + el stack — el
+     AddBuff iba COMENTADO en el borrador y el diagrama de flujo del
+     propio usuario lo pide).
+   - **ExplosionAethon** (LA APERTURA): nace del `OnKill` del fragmento
+     con el 50% del daño; se ABRE VIOLENTAMENTE (8 frames a 3 t, f4 es
+     el máximo) y después SE SELLA (se queda en f7: la cicatriz de
+     oro): rayos violetas radiales + la onda expansiva dorada de 36
+     puntas, atraviesa bloques y golpea en área (penetrate −1), sin
+     stacks (la explosión es la consecuencia, no la mirada).
+   - **Observado** (el debuff): la PRESENCIA — chispas doradas alrededor
+     del marcado; el daño no lo pone el buff: lo pone el sistema.
+   - **SistemaObservado** (quien cuenta): `AddStack` al golpear, 300 t
+     de vida por stack, y a 5 stacks el NPC queda «Conocido» → el
+     `ModifyHitNPC` del fragmento le regala **`SetCrit()` +
+     `FinalDamage × 1.5`** (crítico garantizado + 50% extra, sin dados).
+     Modify corre ANTES de OnHit: hacen falta 5 golpes PREVIOS — el
+     de este golpe no cuenta para su propio crítico. El reloj vive en
+     `PostUpdateWorld` (timer 5 s, NPCs muertos fuera) y `ClearWorld`
+     limpia todo al cerrar el mundo.
+2. **LOS ERRORES DEL BORRADOR — TODOS MUERTOS** (el build real es el
+   oráculo):
+   - **SINTAXIS**: `(int)(damage * 2.5f,` — el paréntesis sin cerrar
+     del desborde no compilaba NADA del archivo.
+   - **`DustID.GoldFlare` NO EXISTE** en esta tML (lección .96 otra
+     vez): `GoldFlame` + el tinte de casa (`newColor` oro) en los 7
+     sitios que lo usaban.
+   - **`ItemID.Spellbook` NO EXISTE**: la receta del borrador apuntaba
+     a la nada — es **`ItemID.SpellTome`** (verificado contra la tML).
+   - **`Kill` → `OnKill`** (el CS0619 de la lección .94).
+   - **LAS FIRMAS DE GOLPE DE ESTA tML** (CS0115 — solo el build las
+     caza): `OnHitNPC(NPC, HitInfo, int)` y `ModifyHitNPC(NPC, ref
+     HitModifiers)`; el crit garantizado es `SetCrit()` y el +50% es
+     `FinalDamage *= 1.5f` (el patrón OcasoBurst). El borrador traía
+     las firmas viejas `(ref int damage, ref float knockback, ref bool
+     crit, ref int hitDirection)`.
+   - **`GetProjectileSource_FromThis` NO EXISTE** (CS1061): el source
+     desde un proyectil aquí es **`GetSource_FromThis()`** (el patrón
+     de los 6 usos de la casa).
+   - **EL DAÑO AL JUGADOR ya no mata**: `statLife -= max/20` con clamp
+     a 1 HP («daña 5%», no «ejecuta»).
+   - **LOS CONTADORES son `static`**: los campos de instancia de un
+     ModItem mueren con cada clonación del ítem (al recogerlo, al
+     recargar el mundo) — el static de CLASE sobrevive, y el arma de
+     prueba es UNA copia por definición (viene en la bolsa).
+   - `DisplayName.SetDefault`/`Tooltip.SetDefault`: viven en el hjson
+     ×3 (la casa); en esta tML son obsoletos.
+   - LA LIMPIEZA del sistema: `List` → `HashSet` (el borrador añadía
+     DOS veces la misma key cuando el timer expiraba Y el NPC había
+     muerto — el HashSet se come el duplicado por diseño).
+3. **EL ARTE (4 texturas, la paleta de la familia: tapa negra + oro +
+   iris violeta)**: `GrimorioSellado.png` 28×30 (el libro CERRADO: el
+   sello dorado con gema violeta donde la familia tiene el ojo, las
+   correas tensadas y el canto de páginas), `FragmentoAethon.png`
+   24×192 (strip de 8: la astilla que respira — silueta CONSTANTE, el
+   destello viaja por la faceta), `ExplosionAethon.png` 48×384 (el
+   MISMO desgarro dentado creciendo f0→f4 y sanándose hasta f7 — el
+   borde es determinista por fila: el desgarro de f4 ES el de f0
+   crecido), `Observado.png` 32×32 (el ojo dorado que mira con el iris
+   violeta). VLM QA: 3 SHIP + 1 SHIP con nota (los 2 destellos blancos
+   del sello final ya venían en el generador).
+4. **LA ENTREGA** (la letra: «recuerda darcela al jugador» — lección
+   .83): en la **Bolsa del Probador**, junto a la familia del grimorio
+   + receta DOBLE: la temática del usuario (Spell Tome + 5 lingotes de
+   oro + 20 amatistas @ estantería) y la madera del protocolo
+   (v6.14.2: 5 madera). Localización ×3: es-MX (la lengua original del
+   tooltip del usuario) + es-ES espejo + en-US; 793 hojas es↔en,
+   en-US tabs 4288→4320 (+32: item 24 + proyectiles 2 + buff 6).
+5. **VERIFICACIÓN COMPLETA**: build real **0 errores/0 warnings** (313
+   .cs = 308 + las 5 clases; 374 png = 370 + las 4 texturas) · .tmod
+   2.592.506 B md5 bb82d358d15ce5088c0a3c6d4e53f6b2: **390 entradas**
+   (las 386 de la .97 + EXACTAMENTE los 4 rawimg nuevos, dims
+   verificadas W×H×4+12), EOF exacto, blob diff whitelist (dll/pdb/Info
+   + los 3 hjson — los textos nuevos), la grieta del usuario
+   byte-idéntica, arte byte-idéntico en las 382 restantes · CECIL
+   (audit_v65098.py, 0 fallos): las 7 clases nuevas con TODO el stack
+   en el IL (SetCrit+FinalDamage en ModifyHitNPC, GetSource_FromThis,
+   AddBuff+AddStack, ldc.r4 2.5 y ldc.i4.s 120 plegados en el Shoot,
+   Math::Max del clamp, 2× CreateRecipe, projFrames 8×2) +
+   GrimorioSellado en la Bolsa del Probador + Grieta/Mancha/
+   FuriaSistema/Oleada/SombraPaginaCaza/NerviosoFlotante/TintaViva/
+   GrimorioHambriento IL-IDÉNTICOS a la .97 · hjson ×3: paquete ==
+   árbol byte a byte, 793 hojas simétricas, tabs 4320 · headless
+   «Sandboxing v6.50.98 → Adding Recipes → Server started» 0
+   excepciones.
+6. **EL WARN DEL BUILD**: el `-build` escupió «Image loading failed:
+   unknown image type» — es RUIDO de siempre (la .97 lo daba también):
+   el empaquetado sigue y el .tmod cae en el mods folder del PERFIL
+   (`~/.local/share/Terraria/tModLoader/Mods/`), no en `/tmp/tml/Mods`.
+   Y el rewrite del -build volvió a tocar el ÁRBOL (es-ES sin cabecera
+   + en-US re-tabulado): revertido restaurando desde el PAQUETE (el
+   paquete siempre lleva el canon — lección .97).
+
+**Checklist para el usuario (la prueba en juego)**:
+- (a) La Bolsa del Probador entrega EL GRIMORIO SELLADO (icono: el
+  libro con el sello dorado y la gema violeta).
+- (b) Clic izq: la ASTILLA DORADA vuela (respira, chispea oro, algún
+  rayo violeta, luz dorada que late) y al morir —impacto, muro o
+  timeout— abre LA APERTURA: la grieta de oro se ABRE violentamente y
+  después SE SELLA en una línea.
+- (c) El enemigo golpeado queda OBSERVADO (chispas doradas alrededor
+  + el icono del ojo en su lista de buffs).
+- (d) 5 golpes al mismo enemigo dentro de los 5 s del stack: el 6º es
+  CRÍTICO GARANTIZADO con número grande (SetCrit + 50% extra).
+- (e) 5 disparos seguidos: DESBORDE — el rayo masivo al 250%, el
+  mensaje «¡Aethon se desborda!», el 5% de tu vida (nunca mata) y 2 s
+  de recarga (el libro no dispara).
+- (f) Recetas: Spell Tome + 5 oro + 20 amatista en la estantería, o 5
+  madera. Tooltips en los 3 idiomas.
+
 ## Commit v6.50.97 — LA LECCIÓN DEL client.log: la grieta inmune al veneno ajeno
 
 **Petición del usuario**: "hay errores mira" (client.log de tModLoader

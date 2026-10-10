@@ -1755,6 +1755,17 @@ Testing item — compare against the original.
 		Abierta: The {0} opens: {1} new items.
 		Completa: The {0} is already complete with you.
 	}
+
+	GrimorioSellado: {
+		DisplayName: Sealed Grimoire
+		Tooltip:
+			'''
+			Contains Aethon, a cosmic entity older than reality.
+			Every shot cracks the seal...
+			5 shots in a row = overflow.
+			Enemies hit 5 times = guaranteed critical.
+			'''
+	}
 }
 
 Projectiles: {
@@ -1888,6 +1899,8 @@ Projectiles: {
 	// v6.50.91 — the Nervous One's spirit and its hunting shadow
 	GrimorioNerviosoFlotante.DisplayName: The Nervous Grimoire
 	SombraPaginaCaza.DisplayName: The Nervous Grimoire's Shadow of the Page
+	FragmentoAethon.DisplayName: Fragment of Aethon
+	ExplosionAethon.DisplayName: Opening of Aethon
 }
 
 Buffs: {
@@ -1919,6 +1932,11 @@ Buffs: {
 	QuemaduraCosmica: {
 		DisplayName: Cosmic Burn
 		Description: The event horizon licks you: fire that burns inward
+	}
+
+	Observado: {
+		DisplayName: Observed
+		Description: Aethon is watching you...
 	}
 
 	OcasoActivoBuff: {
