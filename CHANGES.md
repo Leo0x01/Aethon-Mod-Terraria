@@ -59,6 +59,13 @@ que esta comiendo".
    con sus tabs · headless «Sandboxing v6.50.92 → Adding Recipes → menú
    de mundos» 0 excepciones.
 
+**Publicada**: release 408824648 (make_latest) + asset 627492527
+2.553.604 B · CDN verificado byte a byte (md5
+`96a68ef512886dca01335abb16fb4d7f`) · /releases/latest = v6.50.92 ·
+respaldo /home/sync/AethonMod-v6.50.92.tmod. (El 18º incidente del espejo
+por tercera vez: el -build re-serializó el es-ES del árbol — restaurado
+con sync_es_es_v65092 antes del commit; el paquete siempre sano.)
+
 ## Commit v6.50.91 — EL NERVIOSO CAZA POR SU CUENTA: LA CAZA, LA FUGA Y EL CÓDICE VIVO MUERE
 
 **Petición del usuario**: "no es que este nervioso por tener miedo, esta mas
