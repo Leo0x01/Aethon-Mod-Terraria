@@ -116,6 +116,15 @@ namespace AethonMod.Content.Globals
 
         // ================================================================
         //  EL PRE-DRAW — las capas de la casa DEBAJO del vanilla
+        //
+        //  v6.50.101 — EL CONTRATO DEL LOTE (lección del client.log del
+        //  usuario 05:38:06): los Flush de VFXCore cierran el lote del
+        //  pase de proyectiles y dejan NINGUNO abierto → al devolver
+        //  true, el EntitySpriteDraw del 931 lanza «Draw was called,
+        //  but Begin has not yet been called» y el End final del bucle
+        //  TUMBA EL MOTOR. El patrón de la casa (TestAdvancedFX): cerrar
+        //  → dibujar → REABRIR SIEMPRE el lote vanilla antes de que
+        //  vanilla dibuje su sprite.
         // ================================================================
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
@@ -127,8 +136,11 @@ namespace AethonMod.Content.Globals
             float opacidad = projectile.Opacity;
             float t = Main.GameUpdateCount;
 
-            switch (marca)
+            VFXCore.CerrarLoteSiAbierto();
+            try
             {
+                switch (marca)
+                {
                 case 9101f:   // === EL ECO: el anillo prismático giratorio ===
                 {
                     Color c = ColorDeHue(projectile.ai[1]);
@@ -212,7 +224,10 @@ namespace AethonMod.Content.Globals
                     VFXCore.FlushAdditive();
                     break;
                 }
+                }
             }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+            VFXCore.ReabrirLoteVanilla();   // ★ el contrato: el lote VIVO para el sprite vanilla
 
             return true;   // el sprite vanilla (núcleo blanco + estelas) ENCUENTRA
         }

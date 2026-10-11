@@ -286,6 +286,15 @@ namespace AethonMod.Content.Projectiles.Emperatriz
 
         // ================================================================
         //  EL DIBUJO — 100% por código (la casa): estela + núcleo + cruz
+        //
+        //  v6.50.101 — EL CONTRATO DEL LOTE (lección del client.log del
+        //  usuario 05:38:06): el FlushAdditive CIERRA el lote del pase
+        //  de proyectiles y deja NINGUNO abierto → el siguiente
+        //  EntitySpriteDraw de vanilla lanza «Draw was called, but Begin
+        //  has not yet been called» y el End final del bucle tumba el
+        //  motor. El patrón de la casa (GrietaDeTinta/TestAdvancedFX):
+        //  cerrar → dibujar a prueba de todo → REABRIR SIEMPRE el lote
+        //  vanilla antes de salir del PreDraw.
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
@@ -295,45 +304,51 @@ namespace AethonMod.Content.Projectiles.Emperatriz
             float fade = Projectile.Opacity * Utils.GetLerpValue(0f, 20f, Projectile.timeLeft);
             float t = Main.GameUpdateCount;
 
-            VFXCore.Begin();
-
-            // === LA ESTELA: 20 afterimages (escala 0.7, alpha 50%) ===
-            // cada fantasma lleva el SIGUIENTE color de la paleta: la
-            // estela recorre oro→cian→magenta→índigo
-            for (int i = Projectile.oldPos.Length - 1; i >= 1; i--)
+            VFXCore.CerrarLoteSiAbierto();
+            try
             {
-                if (Projectile.oldPos[i] == Vector2.Zero) continue;
-                Vector2 pos = Projectile.oldPos[i] + Projectile.Size * 0.5f;
-                float alfaCola = (1f - i / (float)Projectile.oldPos.Length) * 0.5f * fade;
-                Color cCola = Paleta[(Indice() + i) & 3];
-                VFXCore.Quad(pos, cCola * alfaCola, new Vector2(44f * escala, 44f * escala), VFXCore.GlowOrb);
+                VFXCore.Begin();
+
+                // === LA ESTELA: 20 afterimages (escala 0.7, alpha 50%) ===
+                // cada fantasma lleva el SIGUIENTE color de la paleta: la
+                // estela recorre oro→cian→magenta→índigo
+                for (int i = Projectile.oldPos.Length - 1; i >= 1; i--)
+                {
+                    if (Projectile.oldPos[i] == Vector2.Zero) continue;
+                    Vector2 pos = Projectile.oldPos[i] + Projectile.Size * 0.5f;
+                    float alfaCola = (1f - i / (float)Projectile.oldPos.Length) * 0.5f * fade;
+                    Color cCola = Paleta[(Indice() + i) & 3];
+                    VFXCore.Quad(pos, cCola * alfaCola, new Vector2(44f * escala, 44f * escala), VFXCore.GlowOrb);
+                }
+
+                // === EL NÚCLEO ===
+                Color c = Paleta[Indice()];
+                VFXCore.Quad(Projectile.Center, c * (0.85f * fade), new Vector2(52f * escala, 52f * escala), VFXCore.GlowOrb);
+                VFXCore.Quad(Projectile.Center, Color.White * (0.95f * fade), new Vector2(26f * escala, 26f * escala), VFXCore.GlowOrb);
+
+                // === LA CRUZ PULSANTE (el glow Extra[98] del 931) ===
+                float pulso = 0.8f * (1f + 0.2f * MathF.Cos(t * 0.25f));
+                float largo = 70f * escala * pulso;
+                float grosor = 7f * escala;
+                VFXCore.Line(Projectile.Center - new Vector2(largo, 0f),
+                    Projectile.Center + new Vector2(largo, 0f), c * (0.55f * fade), grosor);
+                VFXCore.Line(Projectile.Center - new Vector2(0f, largo),
+                    Projectile.Center + new Vector2(0f, largo), c * (0.55f * fade), grosor);
+
+                // la cruz diagonal, más tenue — el destello de 8 puntas
+                Vector2 diag = new Vector2(1f, 1f);
+                diag.Normalize();
+                diag *= largo * 0.6f;
+                VFXCore.Line(Projectile.Center - diag, Projectile.Center + diag,
+                    Color.White * (0.25f * fade), 5f * escala);
+                VFXCore.Line(Projectile.Center - new Vector2(diag.X, -diag.Y),
+                    Projectile.Center + new Vector2(diag.X, -diag.Y),
+                    Color.White * (0.25f * fade), 5f * escala);
+
+                VFXCore.FlushAdditive();
             }
-
-            // === EL NÚCLEO ===
-            Color c = Paleta[Indice()];
-            VFXCore.Quad(Projectile.Center, c * (0.85f * fade), new Vector2(52f * escala, 52f * escala), VFXCore.GlowOrb);
-            VFXCore.Quad(Projectile.Center, Color.White * (0.95f * fade), new Vector2(26f * escala, 26f * escala), VFXCore.GlowOrb);
-
-            // === LA CRUZ PULSANTE (el glow Extra[98] del 931) ===
-            float pulso = 0.8f * (1f + 0.2f * MathF.Cos(t * 0.25f));
-            float largo = 70f * escala * pulso;
-            float grosor = 7f * escala;
-            VFXCore.Line(Projectile.Center - new Vector2(largo, 0f),
-                Projectile.Center + new Vector2(largo, 0f), c * (0.55f * fade), grosor);
-            VFXCore.Line(Projectile.Center - new Vector2(0f, largo),
-                Projectile.Center + new Vector2(0f, largo), c * (0.55f * fade), grosor);
-
-            // la cruz diagonal, más tenue — el destello de 8 puntas
-            Vector2 diag = new Vector2(1f, 1f);
-            diag.Normalize();
-            diag *= largo * 0.6f;
-            VFXCore.Line(Projectile.Center - diag, Projectile.Center + diag,
-                Color.White * (0.25f * fade), 5f * escala);
-            VFXCore.Line(Projectile.Center - new Vector2(diag.X, -diag.Y),
-                Projectile.Center + new Vector2(diag.X, -diag.Y),
-                Color.White * (0.25f * fade), 5f * escala);
-
-            VFXCore.FlushAdditive();
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+            VFXCore.ReabrirLoteVanilla();   // ★ el contrato: salir con el lote VIVO
             return false;   // TODO el dibujado es de la casa
         }
 
