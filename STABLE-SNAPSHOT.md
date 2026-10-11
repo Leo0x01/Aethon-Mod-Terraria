@@ -1,32 +1,19 @@
-# AethonMod — ESTADO ACTUAL (v6.50.102)
+# AethonMod — ESTADO ACTUAL (v6.50.103)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.102 (LA ELEGIDA + EL GRIMORIO DEL ETERNO
-> ES EL NERVIOSO JUGABLE. La letra: «creo que me quedo con el
-> Equinoccio, puedes borrar las otras y también borra el grimorio
-> sellado, borra también tinta viva — usa el proyectil del Equinoccio
-> para el grimorio del eterno […] el grimorio del eterno tendrá las
-> mecánicas del grimorio hambriento nervioso pero esta vez será
-> jugable no de prueba».
-> Begin has not yet been called» (excepción silenciosa ×1, tML mata
-> el proyectil) → «End was called, but Begin has not yet been
-> called» (×2) → FATAL. EL DIAGNÓSTICO: los 3 sitios de dibujo nuevos
-> de la .99 (EstelaAethonProjectile.PreDraw, TrazoEmperatrizProjectile.PreDraw,
-> EmperatrizFX.PreDraw sobre el 931 vanilla) llaman
-> VFXCore.FlushAdditive/FlushAlpha — que CIERRAN el lote del pase de
-> proyectiles y salían del PreDraw sin reabrirlo; el contrato estaba
-> ESCRITO en VFXCore.cs:1012 («un PreDraw SIEMPRE sale con el lote
-> ABIERTO y válido — si llegó roto, se CURA») y los veteranos lo
-> cumplen (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos
-> NACIERON sin el paso sanador (EmperatrizFX el peor caso: return
-> true con el lote muerto → el sprite vanilla del 931 dibuja primero
-> y crashea primero). EL FIX ×3: el patrón de la casa completo en los
-> 3 PreDraw (CerrarLoteSiAbierto → try { dibujar } catch {
-> CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de
-> gameplay (las 4 disparan igual, SIN maná — mana=0 de fábrica, la
-> Bolsa de la Emperatriz bolsa 20 + receta 5 madera ×4). .tmod
-> 2.599.403 B md5 20aa8d43cd73aec96636a6d90e761715, 397 entradas,
-> oráculo 0/0, build real 0/0, headless 0 excepciones.)
+> Última actualización: v6.50.103 (EL RELOJ DE LA HORA. La letra: «esto
+> es muy rapido, el reloj de hambre debe durar una hora en llegar a
+> 100% si no se alimenta el libro» — el reloj de 15 min de la .102 se
+> leyó MUY RÁPIDO. EL CAMBIO: TasaHambre del Grimorio del Eterno
+> 1/54000 → **1/216000 (UNA HORA de 0 a 100%)**; hitos: 25% EL CAZADOR
+> a los 15 min, 50% LA IMPACIENCIA a los 30 min, 100% a la hora exacta.
+> INTACTOS: el minuto de demo del Nervioso (1/3600), la espera de caza
+> de 10 s, el −1% por presa, la pareja Equinoccio sin bruma, las 386
+> entradas (CERO archivos tocados). Tooltips ×3 «una hora de 0 a
+> 100%» / «one hour from 0 to 100%». .tmod 2.571.328 B md5
+> 4735c3b1cc34ece6e5a7b38297074e75, la constante de la hora VIVE en el
+> IL de la DLL y la de 15 min está AUSENTE, oráculo 0/0, build real
+> 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1916,7 +1903,37 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
+1. **✅ v6.50.103 PUBLICADA — EL RELOJ DE LA HORA** — la letra: «esto
+   es muy rapido, el reloj de hambre debe durar una hora en llegar a
+   100% si no se alimenta el libro» (sobre los 15 min de la .102).
+   EL CAMBIO: `TasaHambre` del Grimorio del Eterno `1/54000` →
+   **`1/216000` (UNA HORA de 0 a 100%** — 216.000 ticks = 3600 s × 60
+   t/s); hitos: **25% EL CAZADOR a los 15 min**, **50% LA IMPACIENCIA
+   a los 30 min**, **100% a la hora exacta**. INTACTOS: el minuto de
+   demo del Nervioso (1/3600), la espera de caza de 10 s
+   (TicksQuietudSalida 600), los 30 s de ausencia, el −1% por presa
+   comida, el clic der sin reinicio, la pareja Equinoccio sin bruma,
+   las 386 entradas (CERO archivos tocados — sólo la constante, sus
+   comentarios y el texto). TOOLTIPS ×3: «una hora de 0 a 100%» /
+   «one hour from 0 to 100%». VERIFICACIÓN: audit_texturas 0 · oráculo
+   0/0 (12,7 s) · build real 0/0 · audit_v650103 TODO OK — .tmod
+   2.571.328 B md5 4735c3b1cc34ece6e5a7b38297074e75, 386 entradas,
+   EOF exacto, paquete==árbol ×3, **la constante 1/216000 VIVE en el
+   IL de la DLL y la 1/54000 está AUSENTE**, 19 símbolos vivos + 10
+   muertos ausentes, regresión .102 completa · headless «Sandboxing
+   v6.50.103 → Adding Recipes → Choose World» 0 excepciones.
+   PUBLICACIÓN: commit e11f1b5 + tag v6.50.103 + push
+   (6c718a8..e11f1b5) · release **409723646** (make_latest) + asset
+   AethonMod.tmod **630979110** 2.571.328 B (md5
+   4735c3b1cc34ece6e5a7b38297074e75), CDN VERIFICADO BYTE A BYTE,
+   /releases/latest = v6.50.103, respaldo
+   /home/sync/AethonMod-v6.50.103.tmod. EL CHECKLIST DEL USUARIO:
+   (a) el reloj del Eterno tarda UNA HORA (la bolsa del hambre en el
+   tooltip avanza despacio — 25% ≈ 15 min), (b) el Nervioso de
+   prueba sigue con su minuto de demo, (c) el espíritu sale tras 10 s
+   de quietud DESDE el 25% (≈ 15 min de reloj), (d) la pareja
+   día/noche y el resto: igual que la .102.
+2. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
    NERVIOSO JUGABLE** — la letra: «creo que me quedo con el Equinoccio,
    puedes borrar las otras y también borra el grimorio sellado, borra
    también tinta viva — usa el proyectil del Equinoccio para el
@@ -1951,7 +1968,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    sombra devora (XP del Eterno), (f) clic der = Orbe Cósmico (SIN
    reiniciar el hambre).
 
-2. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
+3. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
    armas cazado)** — la letra: «hay varios errores, revisa las nuevas
    armas, al parecer tienen errores, revisa en profundidad» + el
    client.log (sesión 05:38:06): la .100 cargó bien (0/0), el jugador
@@ -2679,6 +2696,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.103** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 en 12,7 s, build real 0/0 con ruta absoluta canónica, .tmod 2.571.328 B md5 4735c3b1cc34ece6e5a7b38297074e75, 386 entradas (las MISMAS de la .102 — cero archivos tocados), EOF exacto, paquete==árbol ×3 idiomas, LA CONSTANTE 1/216000 VIVE EN EL IL DE LA DLL y la 1/54000 está AUSENTE del binario (verificado por bytes float32 — la cirugía entró al ejecutable), 19 símbolos vivos + 10 muertos ausentes del heap, regresión .102 completa (muertos, elegida, bolsa, bruma), headless «Sandboxing v6.50.103 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409723646 + asset AethonMod.tmod 630979110 2.571.328 B, CDN verificado byte a byte md5 4735c3b1…, /releases/latest = v6.50.103, respaldo /home/sync/AethonMod-v6.50.103.tmod), ⏳ en juego | LA LETRA (2026-10-11): «esto es muy rapido, el reloj de hambre debe durar una hora en llegar a 100% si no se alimenta el libro» (sobre el reloj de 15 min estrenado en la .102). EL CAMBIO: TasaHambre del Grimorio del Eterno 1/54000 → 1/216000 (UNA HORA de 0 a 100% — 216.000 ticks = 3600 s × 60 t/s); hitos escalados: 25% (EL CAZADOR) a los 15 min de juego, 50% (LA IMPACIENCIA) a los 30 min, 100% a la hora exacta. INTACTOS: el minuto de demo del Nervioso de prueba (1/3600), la espera de caza de 10 s de quietud (TicksQuietudSalida 600), los 30 s de ausencia, el −1% por presa comida, el clic der sin reinicio del apetito, la pareja Equinoccio sin bruma, el espíritu y su sombra con la XP del Eterno, las 386 entradas del paquete. TOOLTIPS ×3: «EL HAMBRE (una hora de 0 a 100%)» (es-MX/es-ES) y «THE HUNGER (one hour from 0 to 100%)» (en-US). LECCIONES: (1) el tool de EDICIÓN normaliza tabs→espacios en archivos ENTEROS — un Edit de 1 línea en el hjson es-ES rewrote 2.298 líneas (todo el archivo): los hjson con tabs (es-ES/en-US) se cirujían por BYTES (python open newline='' + replace + write newline=''), jamás con herramienta de edición de texto; el git diff --numstat lo delata (1/1 = sano, 2298/2298 = emergencia); (2) la constante del reloj se VERIFICA EN EL BINARIO (bytes float32 de 1/216000 presentes, los de 1/54000 ausentes) — la cirugía de una constante no se declara, se prueba dentro de la DLL |
 | **v6.50.102** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 — cazó 3 tandas: namespace AethonMod vs la clase, DURACION_SOBRESALTO huérfana, Math sin calificar; build real 0/0 con ruta absoluta canónica, .tmod 2.571.347 B md5 6360c13efdb69a52b8592023d44b2b41, 386 entradas (397 − 11 rawimg muertos), EOF exacto, paquete==árbol ×3 idiomas (cero claves autocreadas), símbolos VIVOS en el heap (EstadoDeLibro/EstadoEterno/LanzarPareja/TicksQuietudSalida/TasaHambre) y 10 muertos AUSENTES, headless «Sandboxing v6.50.102 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409702791 + asset AethonMod.tmod 630894070 2.571.347 B, CDN verificado byte a byte md5 6360c13e…, /releases/latest = v6.50.102, respaldo /home/sync/AethonMod-v6.50.102.tmod), ⏳ en juego | LA LETRA (2026-10-11): «creo que me quedo con el Equinoccio, puedes borrar las otras y también borra el grimorio sellado, borra también tinta viva — usa el proyectil del Equinoccio para el grimorio del eterno, también es hora de cambiar el sprite del grimorio del eterno, usaremos el Grimorio hambriento nervioso y su nueva mecánica para el grimorio del eterno — el grimorio del eterno tendrá las mecánicas del grimorio hambriento nervioso pero esta vez será jugable no de prueba». (1) LA ELEGIDA: el Equinoccio gana el estudio de las 4 pruebas; MUEREN el Grimorio Estrellado, el Eco y el Veredicto (+ Estela de Aethon y Trazo), el Grimorio Sellado CON SU CASCADA ENTERA (FragmentoAethon/ExplosionAethon/SistemaObservado/buff Observado — huérfanos sin dueño) y la Tinta Viva (su Grieta vive en el libro que la abre). (2) LA BRUMA MURIÓ (la letra: «a ese proyectil que ya no use bruma»): el negro queda eclipse LIMPIO — disco FlushAlpha + rim violeta + llama de sombra, sin BrumaColumna ni humo. (3) EL ETERNO RENACE (GrimoireEternal : GrimorioHambrientoNervioso): sprite del Nervioso por Texture override (una sola fuente de verdad — el GrimoireEternal.png murió), TasaHambre 1/54000 (15 MINUTOS — el minuto de demo queda para el Nervioso de prueba), TicksQuietudSalida 600 (10 s jugables), clic der SIN reinicio del apetito (se alimenta CAZANDO; invoca al Orbe Cósmico), LA MÁQUINA POR ESTADO: todo lo que era static de la clase Nervioso (glitch/sobresalto/temblor/layout/caza/voz) migró a EstadoGrimorio POR INSTANCIA — cada libro corre SU reloj; el espíritu flotante y su sombra reciben el TIPO de su libro en ai[2] (EstadoDeLibro/EstadoEterno): SU hambre baja (−1% por presa) y SU XP cobra (el festín egoísta alimenta a quien cazó); EL DISPARO: la pareja del Equinoccio con los parámetros del Eterno (LanzarPareja: dorado 9201 −0.35 rad + negro 9202 +0.35 rad desde la fuente dividida; OrigenDelDisparo = el libro flotante si está fuera; cada bolt del sistema = una pareja día/noche: 1 + ExtraProjectiles cada 3 niveles, en abanico); lo suyo de siempre: niveles infinitos, escalado, LOS TRES ESTADOS, sin maná (el hambre ES el coste). ENTREGA: BolsaEmperatriz = sólo el Equinoccio (receta 5 madera); el Eterno por BolsaFundacionales + Génesis (AddRecipes vacío — NO hereda la receta de 5 maderas del Nervioso). LECCIONES: (1) los .cs NO son entradas del .tmod (viven en la DLL) — al borrar archivos cuenta solo lo que EMPAQUETA (11 rawimg, no 22); (2) el es-MX es el PRIMARIO español y el es-ES su espejo — cirugía con tools/cirugia_v650102_hjson.py sobre los 3 con formato propio de cada uno; (3) las plantillas con .replace() NO usan escape {{ }} — el doble-brace se coló al hjson y hubo que cazarlo con un escaneo global; (4) la herencia GrimorioEternal : GrimorioHambrientoNervioso exige overrides quirúrgicos: UseItem (suprimir el reinicio del hambre del clic der), AddRecipes (vacío), Shoot (todo propio), Estado/TipoLibro/TicksQuietudSalida (la identidad por estado) |
 | **v6.50.101** | ✅ Build-verificada (oráculo 0/0, build real 0/0 — LA LECCIÓN DEL -BUILD: el argumento es una RUTA absoluta («-build AethonMod» construía una carpeta VACÍA que el propio tML creó en /tmp/tml: DLL de 2,5 KB, tmod de 9 KB con 3 entradas «v1.0»; la forma canónica es -build /ruta/absoluta/al/AethonMod, probada por el modSource del Info del .tmod .100), .tmod 2.599.403 B md5 20aa8d43cd73aec96636a6d90e761715, 397 entradas (el MISMO set de la .100), DLL 1.285.120 B, paquete==árbol (hjson ya canónicos, diff 0), diff DLL .100↔.101: 73,7% idéntico con alineación +156 B (la inserción del try/catch + las llamadas VFXCore en la zona exacta de los 3 PreDraw — el fix está ADENTRO), símbolos vivos en el heap (Estela/Trazo/EmperatrizFX/ReabrirLoteVanilla/CerrarLoteSiAbierto), headless «Sandboxing v6.50.101 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409593470 + asset AethonMod.tmod 630436494 2.599.403 B, CDN verificado byte a byte md5 20aa8d43…, /releases/latest = v6.50.101, respaldo /home/sync/AethonMod-v6.50.101.tmod), ⏳ en juego | LA LETRA (2026-10-11): «hay varios errores, revisa las nuevas armas, al parecer tienen errores, revisa en profundidad» + client.log 05:38:06 (la .100 cargó bien 0/0, el jugador entró al mundo, ~50 s después Main engine crash). (1) EL CRASH: «Draw was called, but Begin has not yet been called» (excepción silenciosa ×1, tML mata el proyectil) → «End was called, but Begin has not yet been called» (×2) → FATAL. (2) EL DIAGNÓSTICO: los TRES sitios de dibujo nuevos de la .99 (EstelaAethonProjectile.PreDraw, TrazoEmperatrizProjectile.PreDraw, EmperatrizFX.PreDraw sobre el 931 vanilla) llaman VFXCore.FlushAdditive/FlushAlpha — que CIERRAN el lote del pase de proyectiles (CerrarLoteSiAbierto al entrar) y dejan NINGUNO abierto — y salían del PreDraw sin reabrirlo: el siguiente EntitySpriteDraw de vanilla lanza y el End final de DrawProjectiles TUMBA EL MOTOR. El contrato de la casa estaba ESCRITO en VFXCore.cs:1012 («un PreDraw SIEMPRE sale con el lote ABIERTO y válido — si llegó roto, se CURA») y los veteranos lo cumplen (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos NACIERON sin el paso sanador; EmperatrizFX era el peor caso (return true con el lote muerto → el sprite vanilla del 931 dibuja primero y crashea primero). (3) EL FIX ×3: el patrón de la casa completo en los 3 PreDraw (CerrarLoteSiAbierto → try { dibujar } catch { CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de gameplay (las 4 disparan igual, SIN maná — mana=0 de fábrica, la Bolsa de la Emperatriz bolsa 20 + receta 5 madera ×4). LECCIONES: (1) el contrato del lote del VFXCore es BINDING para TODO PreDraw nuevo — cerrar → dibujar → ReabrirLoteVanilla: el dibujo precioso sin el paso sanador deja el renderer envenenado y el End final de DrawProjectiles tumba el motor; (2) la excepción silenciosa de tML es el DELATOR — el primer «Draw was called» mata el proyectil y el «End was called» final es FATAL: cazar la CADENA en el client.log, no el síntoma; (3) el -build de tML resuelve su argumento como RUTA: un nombre relativo construye una carpeta VACÍA (DLL de 2,5 KB, tmod de 9 KB) — la forma canónica es la RUTA absoluta al modSource |
 | **v6.50.98** | ✅ Build-verificada (build real 0/0 sobre 313 .cs = 308 + las 5 clases, 374 png = 370 + las 4 texturas, .tmod 2.592.506 B md5 bb82d358d15ce5088c0a3c6d4e53f6b2, 390 entradas = las 386 de la .97 + EXACTAMENTE los 4 rawimg nuevos (dims W×H×4+12 verificadas), EOF exacto, blob diff whitelist (dll/pdb/Info + los 3 hjson con textos nuevos), la grieta del usuario byte-idéntica, arte byte-idéntico en las 382 restantes, CECIL: las 7 clases nuevas con el stack completo (FragmentoAethon con OnHitNPC HitInfo + ModifyHitNPC HitModifiers + SetCrit + FinalDamage ×1.5 + GetSource_FromThis + AddBuff/AddStack + get_ActiveNPCs; ExplosionAethon projFrames 8 + onda de 36; SistemaObservado con PostUpdateWorld/ClearWorld; GrimorioSellado con ldc.r4 2.5 + ldc.i4.s 120 + Math::Max + 2× CreateRecipe; GrimorioSellado en la Bolsa del Probador) + Grieta/Mancha/FuriaSistema/Oleada/SombraPaginaCaza/NerviosoFlotante/TintaViva/GrimorioHambriento IL-IDÉNTICOS a la .97, hjson ×3 paquete==árbol, 793 hojas es↔en, en-US tabs 4320, headless «Sandboxing v6.50.98 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409231430 + asset AethonMod.tmod 629096679 2.592.506 B, CDN verificado byte a byte md5 bb82d358…, /releases/latest = v6.50.98, respaldo /home/sync/AethonMod-v6.50.98.tmod), ⏳ en juego | LA LETRA: «te dare el codigo para un arma nueva de prueba, recuerda darcela al jugador, este sera el proyectil y su efecto». (1) EL ARMA: GrimorioSellado + FragmentoAethon (OBSERVADO + stacks) + ExplosionAethon (la apertura que se sella) + SistemaObservado (5 stacks = «Conocido» → crítico garantizado). (2) DOS CAPAS DE ERRORES: los de análisis (DustID.GoldFlare e ItemID.Spellbook NO EXISTEN — GoldFlame/SpellTome; Kill→OnKill) y los que SOLO el build real caza (CS0115: las firmas de golpe de esta tML son OnHitNPC(NPC,HitInfo,int) y ModifyHitNPC(NPC,ref HitModifiers) — el crit es SetCrit() y el +50% FinalDamage *= 1.5f; CS1061: el source es GetSource_FromThis). (3) LA ENTREGA: Bolsa del Probador (lección .83) + receta doble. LECCIONES: (1) el build REAL con las mismas referencias es la ÚNICA red completa para el código traído de fuera; (2) el WARN «Image loading failed» del -build es ruido de siempre — el .tmod cae en el mods folder del PERFIL (~/.local/share), no en /tmp/tml/Mods; (3) el rewrite del -build volvió a tocar el árbol (es-ES sin cabecera + en-US re-tabulado): se revierte restaurando desde el PAQUETE |

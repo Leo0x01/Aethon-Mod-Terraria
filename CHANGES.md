@@ -1,5 +1,51 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.103 — EL RELOJ DE LA HORA
+
+**Petición del usuario**: "esto es muy rapido, el reloj de hambre debe
+durar una hora en llegar a 100% si no se alimenta el libro" (sobre el
+reloj de 15 minutos estrenado en la .102).
+
+**EL CAMBIO**: `TasaHambre` del Grimorio del Eterno pasa de `1/54000`
+(15 minutos) a **`1/216000` — UNA HORA COMPLETA** de 0 a 100% (216.000
+ticks = 3600 s × 60 t/s). Los hitos escalan con el reloj: **25% (EL
+CAZADOR) a los 15 min** de juego, **50% (LA IMPACIENCIA) a los 30 min**,
+**100% a la hora exacta**. Sólo la presa comida lo baja (−1% por presa)
+— el clic derecho NO reinicia el apetito (el Eterno se alimenta CAZANDO).
+
+**LO QUE NO CAMBIÓ**: el minuto de demo del Nervioso de prueba
+(`1/3600`), la espera de caza de 10 s de quietud (`TicksQuietudSalida =
+600`), los 30 s de ausencia, las parejas día/noche del Equinoccio por
+disparo, el espíritu cazador y su sombra (XP del Eterno), el Orbe
+Cósmico del clic derecho, las 386 entradas del paquete (CERO archivos
+añadidos o borrados — sólo la constante, sus comentarios y el texto).
+
+**TOOLTIPS ×3**: «EL HAMBRE (una hora de 0 a 100%)» en es-MX/es-ES y
+«THE HUNGER (one hour from 0 to 100%)» en en-US.
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 (12,7 s) · build real
+0/0 · audit_v650103 TODO OK — .tmod 2.571.328 B, md5
+`4735c3b1cc34ece6e5a7b38297074e75`, 386 entradas, EOF exacto,
+paquete==árbol ×3 idiomas, **la constante 1/216000 VIVE en el IL de la
+DLL y la vieja 1/54000 está AUSENTE del binario**, 19 símbolos vivos +
+10 muertos ausentes del heap, regresión .102 completa (los muertos, la
+elegida, la bolsa, la bruma) · headless «Sandboxing: Aethon, the
+Eternal Grimoire v6.50.103 → Adding Recipes → Choose World» — 0
+excepciones.
+
+**PUBLICACIÓN**: commit `e11f1b5` + tag `v6.50.103` → release
+`409723646` + asset `AethonMod.tmod` `630979110` (2.571.328 B, CDN
+verificado byte a byte) → `/releases/latest` = v6.50.103. Respaldo
+`/home/sync/AethonMod-v6.50.103.tmod`. (Esta entrada + la fila .103
+del HISTORIAL + el README viajan en el commit docs posterior — el
+hash propio no puede pre-rellenarse, lección .99.)
+
+**LECCIÓN**: el tool de edición NORMALIZA tabs→espacios en archivos
+ENTEROS — los hjson es-ES/en-US (formato tabs) se cirujían por BYTES
+(python `newline=''`), nunca con herramienta de edición de texto: un
+Edit de 1 línea rewrote 2.298 líneas (todo el archivo) y el diff lo
+delató a tiempo.
+
 ## Commit v6.50.102 — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL NERVIOSO JUGABLE
 
 **Petición del usuario**: "bueno se ven bien, creo que me quedo con el
