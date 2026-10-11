@@ -1,24 +1,28 @@
-# AethonMod — ESTADO ACTUAL (v6.50.104)
+# AethonMod — ESTADO ACTUAL (v6.50.105)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.104 (LA DIETA POR RAREZA + EL ICONO VIVO.
-> La letra: «el hambre en el grimorio del eterno no baja, el hambre
-> deberia bajar usando la rareza de las criaturas como fuente, cada
-> criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan
-> 10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de la
-> rareza del monstruo» + «el sprite del libro que aparece como icono de
-> la oleada no tiene animacion, deberia tener animacion». (1) LA DIETA:
-> GrimoireEternal.HambrePorPresa — jefe 0.10f, estrellas 1-5 LINEAL
-> 0.001→0.05 (fuente ShardLevelSystem.EstrellasDe, la MISMA que la XP);
-> la cobran las DOS vías: GlobalNPCXP.OnKill (cada baja acreditada con
-> xp>0) y AbsorberPresa (ReduccionHambre por tipo — el Nervioso de
-> prueba conserva su −1% de demo); el CombatText del Absorbe es DINÁMICO
-> («Absorbe: −{0}% hambre»). (2) EL ICONO: la cajita del título de la
-> oleada RESPIRA (±5%) + FLOTA (±2,5px) + SE INCLINA (±2,6°) + EL
-> SOBRESALTO cada 210 ticks (determinista, sin RNG). .tmod 2.571.971 B
-> md5 065fb45b26f59cf5ed12b7f442d6857a, 386 entradas, la escalera vive
-> en el IL de la DLL, oráculo 0/0, build real 0/0, headless 0
-> excepciones.)
+> Última actualización: v6.50.105 (LOS OJOS DEL ETERNO. La letra: «los
+> minion que use el grimorio será su propio ojo […] el ojo se mueve en la
+> direccion en la que mira, o sea para moverse primero mira y luego se
+> mueve […] se posicionan encima del jugador como una corona, y si el
+> grimorio esta fuera comienzan a orbitar al grimorio en 2 circulos uno
+> de 5 minion, otro de 6 y asi […] cada minion mira a su objetivo y usa
+> el rayo con ruido de perlin […] es negro, con bordes morado y con
+> bruma en la punta que toca al monstruo, cada minion debe tener un
+> pequeño circulo magico igual que el de los agujeros negros […] cuando
+> el minion dispara tiene un pequeño retroceso y luego se reincorpora,
+> los ojos de cada minion son independientes de cada uno de ellos y del
+> libro». El Orbe Cósmico muere entero y nacen LOS OJOS DEL LIBRO: el
+> recorte del sprite exacto del usuario 44×37 ×3 estados + el iris de la
+> .84 como capa; la máquina de la mirada (frena, fija el iris, luego se
+> mueve); la CORONA sobre el dueño / las ÓRBITAS concéntricas al libro
+> flotante (anillos de 5, 6, 7…, contrarrotando); el rayo Perlin NEGRO
+> de bordes morados (la funda aditiva + el núcleo que oscurece) con la
+> BRUMA en la punta; el golpe por GolpeMotor; el retroceso físico; el
+> círculo mágico de los agujeros negros (SigiloErosionado); el parpadeo
+> independiente por ojo, sin leer el hambre del libro. .tmod 2.584.158 B
+> md5 e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas, oráculo 0/0,
+> build real 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1908,7 +1912,61 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.104 PUBLICADA — LA DIETA POR RAREZA + EL ICONO VIVO** — la
+1. **✅ v6.50.105 PUBLICADA — LOS OJOS DEL ETERNO** — la letra: «los
+   minion que use el grimorio será su propio ojo […] el ojo se mueve en
+   la direccion en la que mira, o sea para moverse primero mira y luego
+   se mueve […] estos minion se posicionan encima del jugador como una
+   corona, y si el grimorio esta fuera comienzan a orbitar al grimorio
+   en 2 circulos uno de 5 minion, otro de 6 y asi aumentando los
+   circulos orbitales a mas minion pueda lanzarce […] cada minion mira
+   a su objetivo y usa el rayo con ruido de perlin ademas de que este
+   rayo usado por los minion es negro, con bordes morado y con bruma en
+   la punta que toca al monstruo, cada minion debe tener un pequeño
+   circulo magico igual que el de los agujeros negros […] cuando el
+   minion dispara tiene un pequeño retroceso y luego se reincorpora,
+   los ojos de cada minion son independientes de cada uno de ellos y
+   del libro y no se ven afectados por la animacion de hambre del
+   grimorio». (1) EL SPRITE: el recorte del ojo del sprite EXACTO del
+   usuario (la almendra + el armazón lila + el párpado inferior dorado),
+   44×37 ×3 estados (abierto/medio/cerrado) por LANCZOS; el iris de la
+   .84 como CAPA (escala 0.52 — a escala proporcional el iris taparía la
+   vista entera); el parpadeo con la convención de fases del libro
+   (fase>7||fase<4 = medio). (2) LA MÁQUINA DE LA MIRADA: el iris fija
+   el destino y FRENA (6 ticks) antes de moverse; el ángulo barre 0,22
+   rad/tick; mirada ±7,5/±3,5 px. (3) LA FORMACIÓN: la CORONA (arco
+   200°→340°) y con el espíritu fuera ÓRBITAS AL LIBRO (anillo k = 5+k
+   ojos, radio 58+42k, contrarrotando). (4) EL RAYO: el canal Perlin
+   VERBATIM con la funda morada aditiva (RayoStrip, violeta vivo, ancho
+   9,5) + EL NÚCLEO NEGRO en AlphaBlend encima (la cadena que oscurece)
+   + LOS GORROS + LA BRUMA en la punta que toca al monstruo; el golpe
+   por GOLPEMOTOR, cadencia 110−nivel/3; LA PATADA del retroceso 3,0
+   px/tick y la formación lo reincorpora. (5) EL CÍRCULO MÁGICO:
+   OrbitaLib.SigiloErosionado (el de los agujeros negros, dorado-ámbar)
+   alrededor de cada ojo, respirando a 16 px en la carga. (6) EL
+   PARPADEO INDEPENDIENTE: hash propio por whoAmI (6–18 s), sin leer
+   NADA del hambre; al apuntar el párpado se corta (la mirada del
+   cazador). VERIFICACIÓN: audit_texturas 0 · oráculo 0/0 · build real
+   0/0 · VLM ×3 (sprites limpios; el rayo calibrado en 3 rondas — SHIP
+   por juicio de la casa) · audit_v650105 TODO OK — .tmod 2.584.158 B
+   md5 e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas (386−2 Orbe+3
+   Ojos), EOF exacto, paquete==árbol ×3, rawimg píxel-idénticas (12 B
+   de cabecera + RGBA), símbolos OjoEternoMinion/OjoEternoBuff/
+   DrawElSello/CanalPerlin vivos + CosmicOrb* AUSENTES, las constantes
+   de la letra en el IL, regresión .102/.103/.104 completa · headless
+   «Sandboxing v6.50.105 → Adding Recipes → Choose World» 0 excepciones.
+   CHECKLIST en juego: (a) clic der invoca OJOS (no orbe), (b) la corona
+   sobre tu cabeza, (c) el parpadeo de cada ojo es suyo, (d) con el
+   espíritu fuera: anillos concéntricos al libro (5/6/7…),
+   contrarrotando, (e) cada ojo mira al objetivo y frena antes de
+   moverse, (f) el rayo negro de bordes morados con la bruma en la
+   punta, (g) el retroceso al disparar y la reincorporación, (h) el
+   círculo mágico de runas doradas alrededor de cada ojo.
+   PUBLICACIÓN: commit 1853196 + tag v6.50.105 + push (c669ae4..1853196)
+   · release **409768350** (make_latest) + asset AethonMod.tmod
+   **631162660** 2.584.158 B (md5
+   e7cd269982ffbd1dfa5b8b77b325dbe1), CDN VERIFICADO BYTE A BYTE,
+   /releases/latest = v6.50.105, respaldo /home/sync/AethonMod-v6.50.105.tmod.
+2. **✅ v6.50.104 PUBLICADA — LA DIETA POR RAREZA + EL ICONO VIVO** — la
    letra: «el hambre en el grimorio del eterno no baja, el hambre
    deberia bajar usando la rareza de las criaturas como fuente, cada
    criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan
@@ -1949,7 +2007,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    con su −1% plano, (e) el texto «Absorbe: −X% hambre» con la cifra
    real cuando la sombra devora, (f) el icono de la oleada RESPIRA,
    FLOTA, SE INCLINA y cada ~3,5 s da el SOBRESALTO.
-2. **✅ v6.50.103 PUBLICADA — EL RELOJ DE LA HORA** — la letra: «esto
+3. **✅ v6.50.103 PUBLICADA — EL RELOJ DE LA HORA** — la letra: «esto
    es muy rapido, el reloj de hambre debe durar una hora en llegar a
    100% si no se alimenta el libro» (sobre los 15 min de la .102).
    EL CAMBIO: `TasaHambre` del Grimorio del Eterno `1/54000` →
@@ -1979,7 +2037,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    prueba sigue con su minuto de demo, (c) el espíritu sale tras 10 s
    de quietud DESDE el 25% (≈ 15 min de reloj), (d) la pareja
    día/noche y el resto: igual que la .102.
-3. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
+4. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
    NERVIOSO JUGABLE** — la letra: «creo que me quedo con el Equinoccio,
    puedes borrar las otras y también borra el grimorio sellado, borra
    también tinta viva — usa el proyectil del Equinoccio para el
@@ -2014,49 +2072,6 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    sombra devora (XP del Eterno), (f) clic der = Orbe Cósmico (SIN
    reiniciar el hambre).
 
-4. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
-   armas cazado)** — la letra: «hay varios errores, revisa las nuevas
-   armas, al parecer tienen errores, revisa en profundidad» + el
-   client.log (sesión 05:38:06): la .100 cargó bien (0/0), el jugador
-   entró al mundo y ~50 s después Main engine crash — «Draw was
-   called, but Begin has not yet been called» (excepción silenciosa
-   ×1, tML mata el proyectil) → «End was called, but Begin has not
-   yet been called» (×2) → FATAL. EL DIAGNÓSTICO: los TRES sitios de
-   dibujo nuevos de la .99 (EstelaAethonProjectile.PreDraw,
-   TrazoEmperatrizProjectile.PreDraw, EmperatrizFX.PreDraw sobre el
-   931 vanilla) llaman VFXCore.FlushAdditive/FlushAlpha — que CIERRAN
-   el lote del pase de proyectiles (CerrarLoteSiAbierto al entrar) y
-   dejan NINGUNO abierto — y salían del PreDraw sin reabrirlo: el
-   siguiente EntitySpriteDraw de vanilla lanza y el End final de
-   DrawProjectiles TUMBA EL MOTOR. El contrato de la casa estaba
-   ESCRITO en VFXCore.cs:1012 y los veteranos lo cumplen
-   (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos NACIERON
-   sin el paso sanador (EmperatrizFX el peor caso: return true con el
-   lote muerto). EL FIX ×3: el patrón de la casa completo en los 3
-   PreDraw (CerrarLoteSiAbierto → try { dibujar } catch {
-   CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de
-   gameplay (las 4 disparan igual, SIN maná, la Bolsa de la Emperatriz
-   bolsa 20 al entrar al mundo + receta 5 madera ×4). VERIFICACIÓN:
-   oráculo 0/0 · build real 0/0 (LA LECCIÓN DEL -BUILD: el argumento
-   es una RUTA absoluta — «-build AethonMod» construía una carpeta
-   VACÍA en /tmp/tml; la forma canónica es -build
-   /ruta/absoluta/al/AethonMod) · .tmod 2.599.403 B md5
-   20aa8d43cd73aec96636a6d90e761715, 397 entradas, DLL 1.285.120 B,
-   paquete==árbol · diff DLL .100↔.101: 73,7% idéntico con
-   alineación +156 B en la zona exacta de los 3 PreDraw — el fix está
-   ADENTRO · símbolos vivos en el heap · headless «Sandboxing
-   v6.50.101 → Adding Recipes → Server started» 0 excepciones.
-   CHECKLIST DEL USUARIO: (a) EL MOD CARGA y NO CRASHEA al disparar
-   las 4 armas (el crash cazado), (b) la Bolsa de la Emperatriz llega
-   con las 4, (c) disparan SIN maná, (d) A: burst ×4 + Observado +
-   Desborde, (e) B: arcoíris de verdad, (f) C: trazo de jefa, (g) la
-   dual: dorado con luz + negro con bruma — (h) ELEGIR el proyectil
-   del arma nueva. PUBLICACIÓN: commit c91eec2 + tag v6.50.101 +
-   push (a9025fc..c91eec2) · release **409593470** (make_latest) +
-   asset AethonMod.tmod **630436494** 2.599.403 B (md5
-   20aa8d43cd73aec96636a6d90e761715), CDN VERIFICADO BYTE A BYTE,
-   /releases/latest = v6.50.101, respaldo
-   /home/sync/AethonMod-v6.50.101.tmod.
 1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
@@ -2742,6 +2757,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.105** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0 con ruta absoluta canónica, .tmod 2.584.158 B md5 e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas (386 − 2 rawimg del Orbe + 3 de los Ojos), EOF exacto, paquete==árbol ×3 idiomas, rawimg píxel-idénticas al árbol (12 B de cabecera (1,w,h) + RGBA — comparadas contra el PNG DECODIFICADO, no los bytes del archivo), símbolos OjoEternoMinion/OjoEternoBuff/DrawElSello/DrawElRayo/CanalPerlin/SlotDeFormacion vivos + CosmicOrbMinion/CosmicOrbBuff/CosmicOrbBolt AUSENTES del heap, las constantes de la letra en el IL (float32: 0.52 el iris · 7.5/3.5 la mirada · 0.22 el giro · 3.0 la patada · 3.49/5.93 la corona · 58/42 las órbitas · 2.55 el aro + la regresión 1/216000 y 0.10), regresión .102/.103/.104 completa, headless «Sandboxing v6.50.105 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409768350 + asset AethonMod.tmod 631162660 2.584.158 B, CDN verificado byte a byte md5 e7cd2699…, /releases/latest = v6.50.105, respaldo /home/sync/AethonMod-v6.50.105.tmod), ⏳ en juego | LA LETRA (2026-10-11): «también debemos cambiar los minions, los minion que use el grimorio será su propio ojo […] es tiempo de animar al minion, yo te daré los sprite del ojo usando código es lo mejor para que pudieses editarlo en caso de que convenga, ya sabes como animar los ojos, ahora ten en cuenta que el ojo se mueve en la direccion en la que mira, o sea para moverse primero mira y luego se mueve, algo mas, estos minion se posicionan encima del jugador como una corona, y si el grimorio esta fuera comienzan a orbitar al grimorio en 2 circulos uno de 5 minion, otro de 6 y asi aumentando los circulos orbitales a mas minion pueda lanzarce […] cada minion mira a su objetivo y usa el rayo con ruido de perlin ademas de que este rayo usado por los minion es negro, con bordes morado y con bruma en la punta que toca al monstruo, cada minion debe tener un pequeño circulo magico igual que el de los agujeros negros […] cuando el minion dispara tiene un pequeño retroceso y luego se reincorpora, los ojos de cada minion son independientes de cada uno de ellos y del libro y no se ven afectados por la animacion de hambre del grimorio». (1) EL ORBE CÓSMICO muere entero (minion + bolt + buff + 2 rawimg) — el Eterno invoca LOS OJOS DEL LIBRO: OjoEternoMinion + OjoEternoBuff (hjson ×3: Ojos del Eterno / El Ojo del Eterno / Eyes of the Eternal + el tooltip del ítem). (2) EL SPRITE: gen_ojo_eterno_v650105.py — el recorte (226,344)-(524,596) del sprite EXACTO del usuario (la almendra blanca + el armazón lila + el párpado inferior dorado), 44×37 ×3 estados por LANCZOS; el iris de la .84 como CAPA a escala 0.52 (el arte trae el iris sobredimensionado respecto de la esclera: a escala proporcional el disco taparía la vista entera y la mirada no leería); el parpadeo con la convención de fases del libro (fase>7||fase<4 = medio, la .86). (3) LA MÁQUINA DE LA MIRADA: MIRANDO (6 ticks frenando, el iris fija el destino) → MOVIENDO; el ángulo de la mirada (localAI[2]) barre 0,22 rad/tick hacia el foco; mirada ±7,5 px horizontal / ±3,5 px vertical (la geometría de la almendra), alcance por distancia (clamp dist/90). (4) LA FORMACIÓN: la CORONA sobre la cabeza del dueño (arco 200°→340°, radio 52+2,2·n tope 86, vaivén por ojo) y con el ESPÍRITU FUERA (GrimorioHambrientoNervioso.PosicionDelLibro cacheado por frame para la banda) ÓRBITAS CONCÉNTRICAS AL LIBRO: el anillo k lleva 5+k ojos (5, 6, 7… — la letra), radio 58+42·k, contrarrotando (par +0,34 / impar −0,27 rad/s); el reparto por Projectile.minionPos (el orden de invocación). (5) EL RAYO: CanalPerlin — el tronco del PerlinBolt VERBATIM (meandro fBm 3 octavas 2,8 ciclos + jitter 2 octavas 10 ciclos + el arco congelado + la envolvente exp(−5000·(t−½)^10) + Chaikin) dibujado en DOS capas: la FUNDA MORADA aditiva (RayoStrip.Filamento, violeta vivo (190,110,255), ancho 9,5) y encima EL NÚCLEO NEGRO en AlphaBlend (cadena de SoftGlow (8,3,14,215) 5,5→3 px al paso 2,5 — el patrón del horizonte de sucesos del agujero negro) + StormLib.EndCap en ambos electrodos + SombrasLib.Bruma (humo negro + aliento violeta) en la punta que toca al monstruo; el golpe por GOLPEMOTOR (el cauce del motor: crítica con las stats del dueño, varianza ±15%, TODOS los on-hit, el crédito de la kill — el guard «sólo el dueño resuelve»), daño ×WeaponScaling.MinionContactDamageMult(nivel), cadencia Math.Clamp(110−nivel/3, 55, 110); LA PATADA: velocity = −dir·3,0 al disparar y la formación lo reincorpora (freno 0,86/tick durante el fuego). (6) EL CÍRCULO MÁGICO: OrbitaLib.SigiloErosionado — EL MISMO de los agujeros negros (alfabeto RunasAbismo, dorado-ámbar (240,124,65)/(255,205,140) MEDIDO del Umbral, el aro roto con huecos por hash, 8 runas, órbita 0,06), r 13 (anillo a 2,55·13≈33 px) que RESPIRA a 16 en la carga del disparo (MathHelper.Lerp por el progreso del AIM); la presencia violácea detrás del ojo (SoftGlow (96,48,150) pulsando). (7) EL PARPADEO INDEPENDIENTE: localAI[0/1] — reloj propio por ojo (hash de whoAmI: 360+720·Hash01, 6–18 s, cero RNG), SIN leer NADA del hambre del libro (la letra: «no se ven afectados por la animacion de hambre»); al apuntar el párpado se corta (localAI[1]=1) y la mirada queda FIJA en blanco; el iris dibujado a 0,52 con la luz del mundo (Lighting.GetColor). MP: la IA corre en el dueño (tML) y el draw re-deriva el objetivo (el más cercano válido — la misma lista en todos los clientes); el parpadeo es visual-local (la deuda documentada de la casa). LECCIONES: (a) el rawimg del .tmod es 12 B de cabecera (1, w, h) + RGBA puro — se compara contra el PNG del árbol DECODIFICADO con PIL, no contra los bytes del archivo (la .100 midió «3.612 B = 30×30×4+12»: la fórmula, no el png); (b) el .cs nunca es entrada del .tmod — el oráculo de presencia de una clase es el heap #Strings de la DLL, el de una textura es la rawimg; (c) el VLM con mocks de composite aditivo OSCILA (r1 «sin borde morado» con negro 11 px → r2 «demasiado tenue» con 9,5+violeta vivo → r3 el fondo estrés del mock sigue sin resolverlo) — tras calibrar con la FÍSICA del render (la vena de RayoStrip es ~2 px EN EL EJE: la vena brillante vive BAJO el negro; el borde morado visible vive en la columna 0→0,42 de la FUNDA), SHIP por juicio de la casa y el checklist del usuario es el juez final; (d) el hjson trae el texto del tooltip del ÍTEM en la sección Items (es-MX línea 43) — la cirugía de nombres/DisplayName no basta: grep global del nombre viejo antes de cerrar (la audit lo cazó: «sobran: Orbe Cósmico») |
 | **v6.50.104** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 en 13,3 s, build real 0/0 con ruta absoluta canónica, .tmod 2.571.971 B md5 065fb45b26f59cf5ed12b7f442d6857a, 386 entradas (las mismas de la .102/.103), EOF exacto, paquete==árbol ×3 idiomas, LA ESCALERA DE LA DIETA VIVE EN EL IL DE LA DLL (float32 0.10 jefe / 0.001 piso / 0.049 resta plegada / 0.05 tope — Roslyn pliega SOLO la resta de (0.05f−0.001f) porque la /4 aplica al producto con la variable; el plegado usa aritmética float POR OPERACIÓN que difiere 1 ulp del double 0.049 — LECCIÓN cazada con un mini-proyecto compilado con el MISMO SDK), símbolos HambrePorPresa/ReduccionHambre/EstrellasDe vivos + 10 muertos ausentes, regresión .102/.103 completa (reloj 1/216000, bruma muerta, elegida, bolsa), headless «Sandboxing v6.50.104 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409732866 + asset AethonMod.tmod 631015986 2.571.971 B, CDN verificado byte a byte md5 065fb45b…, /releases/latest = v6.50.104, respaldo /home/sync/AethonMod-v6.50.104.tmod), ⏳ en juego | LA LETRA (2026-10-11): «el hambre en el grimorio del eterno no baja, el hambre deberia bajar usando la rareza de las criaturas como fuente, cada criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan 10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de la rareza del monstruo» + «el sprite del libro que aparece como icono de la oleada no tiene animacion, deberia tener animacion». (1) EL DIAGNÓSTICO: el hambre del Eterno SOLO bajaba cuando su sombra devoraba presas enteras (AbsorberPresa, −1% fijo) — las bajas normales NO alimentaban nada (el usuario mataba y el reloj ni se inmutaba). (2) LA DIETA POR RAREZA: GrimoireEternal.HambrePorPresa — jefe 0.10f; estrellas del bestiario 1-5 ESCALERA LINEAL 0.001→0.05 (0,1% · 1,3% · 2,6% · 3,8% · 5%; la fuente es ShardLevelSystem.EstrellasDe — la MISMA que la XP del libro); la cobran las DOS vías de alimento: GlobalNPCXP.OnKill (cada baja acreditada con xp>0, mismo crédito que la XP — minions y proyectiles incluidos; corre en la AUTORIDAD como AbsorberPresa, en SP la misma máquina del tooltip) y AbsorberPresa (ReduccionHambre(presa, tipoLibro): el Eterno cobra la rareza, el Nervioso de prueba conserva su −1% plano de demo); el CombatText del Absorbe es DINÁMICO («Absorbe: −{0}% hambre» — la cifra real del bocado, ToString 0.##); tooltips ×3 reescritos («Cada baja lo alimenta SEGÚN SU RAREZA: de 0,1% (1★) a 5% (5★); un jefe entero, 10%.»). Con el reloj de la hora (.103): una 5★ compra 3 min de apetito, un jefe 6 min, la chusma 1★ son 36 s por cabeza. (3) EL ICONO VIVO: la cajita del título de «Furia del grimorio» (DibujarIndicador) mostraba el sprite del Nervioso como FOTO estática — ahora RESPIRA (escala 1±5% senoidal 2,8 Hz), FLOTA (bob ±2,5px a 2,2 Hz), SE INCLINA (±2,6° a 1,4 Hz) y cada 210 ticks (3,5 s) EL SOBRESALTO: tirón de 6 ticks con decaimiento al cuadrado (rotación ±0,16 rad + respingo −3px), dirección alterna por semilla ((ciclo×7919)&1) — SIN RNG, determinista, el mismo latido en cada pantalla. LECCIONES: (1) los float32 de una expresión CON VARIABLE no se buscan como el resultado final — Roslyn deja la operación viva (ldc.r4 0.049 + ldc.r4 4) y sus constantes plegadas usan aritmética float POR OPERACIÓN (numpy float32 la reproduce; el double redondeado difiere 1 ulp) — el ldc.r4-spotting se valida con un mini-build del MISMO SDK; (2) el crédito de la dieta sigue EXACTAMENTE al crédito de la XP (FindKiller + playerInteraction + libro visible en la barra rápida) — una sola regla de «quién come» |
 | **v6.50.103** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 en 12,7 s, build real 0/0 con ruta absoluta canónica, .tmod 2.571.328 B md5 4735c3b1cc34ece6e5a7b38297074e75, 386 entradas (las MISMAS de la .102 — cero archivos tocados), EOF exacto, paquete==árbol ×3 idiomas, LA CONSTANTE 1/216000 VIVE EN EL IL DE LA DLL y la 1/54000 está AUSENTE del binario (verificado por bytes float32 — la cirugía entró al ejecutable), 19 símbolos vivos + 10 muertos ausentes del heap, regresión .102 completa (muertos, elegida, bolsa, bruma), headless «Sandboxing v6.50.103 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409723646 + asset AethonMod.tmod 630979110 2.571.328 B, CDN verificado byte a byte md5 4735c3b1…, /releases/latest = v6.50.103, respaldo /home/sync/AethonMod-v6.50.103.tmod), ⏳ en juego | LA LETRA (2026-10-11): «esto es muy rapido, el reloj de hambre debe durar una hora en llegar a 100% si no se alimenta el libro» (sobre el reloj de 15 min estrenado en la .102). EL CAMBIO: TasaHambre del Grimorio del Eterno 1/54000 → 1/216000 (UNA HORA de 0 a 100% — 216.000 ticks = 3600 s × 60 t/s); hitos escalados: 25% (EL CAZADOR) a los 15 min de juego, 50% (LA IMPACIENCIA) a los 30 min, 100% a la hora exacta. INTACTOS: el minuto de demo del Nervioso de prueba (1/3600), la espera de caza de 10 s de quietud (TicksQuietudSalida 600), los 30 s de ausencia, el −1% por presa comida, el clic der sin reinicio del apetito, la pareja Equinoccio sin bruma, el espíritu y su sombra con la XP del Eterno, las 386 entradas del paquete. TOOLTIPS ×3: «EL HAMBRE (una hora de 0 a 100%)» (es-MX/es-ES) y «THE HUNGER (one hour from 0 to 100%)» (en-US). LECCIONES: (1) el tool de EDICIÓN normaliza tabs→espacios en archivos ENTEROS — un Edit de 1 línea en el hjson es-ES rewrote 2.298 líneas (todo el archivo): los hjson con tabs (es-ES/en-US) se cirujían por BYTES (python open newline='' + replace + write newline=''), jamás con herramienta de edición de texto; el git diff --numstat lo delata (1/1 = sano, 2298/2298 = emergencia); (2) la constante del reloj se VERIFICA EN EL BINARIO (bytes float32 de 1/216000 presentes, los de 1/54000 ausentes) — la cirugía de una constante no se declara, se prueba dentro de la DLL |
 | **v6.50.102** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 — cazó 3 tandas: namespace AethonMod vs la clase, DURACION_SOBRESALTO huérfana, Math sin calificar; build real 0/0 con ruta absoluta canónica, .tmod 2.571.347 B md5 6360c13efdb69a52b8592023d44b2b41, 386 entradas (397 − 11 rawimg muertos), EOF exacto, paquete==árbol ×3 idiomas (cero claves autocreadas), símbolos VIVOS en el heap (EstadoDeLibro/EstadoEterno/LanzarPareja/TicksQuietudSalida/TasaHambre) y 10 muertos AUSENTES, headless «Sandboxing v6.50.102 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409702791 + asset AethonMod.tmod 630894070 2.571.347 B, CDN verificado byte a byte md5 6360c13e…, /releases/latest = v6.50.102, respaldo /home/sync/AethonMod-v6.50.102.tmod), ⏳ en juego | LA LETRA (2026-10-11): «creo que me quedo con el Equinoccio, puedes borrar las otras y también borra el grimorio sellado, borra también tinta viva — usa el proyectil del Equinoccio para el grimorio del eterno, también es hora de cambiar el sprite del grimorio del eterno, usaremos el Grimorio hambriento nervioso y su nueva mecánica para el grimorio del eterno — el grimorio del eterno tendrá las mecánicas del grimorio hambriento nervioso pero esta vez será jugable no de prueba». (1) LA ELEGIDA: el Equinoccio gana el estudio de las 4 pruebas; MUEREN el Grimorio Estrellado, el Eco y el Veredicto (+ Estela de Aethon y Trazo), el Grimorio Sellado CON SU CASCADA ENTERA (FragmentoAethon/ExplosionAethon/SistemaObservado/buff Observado — huérfanos sin dueño) y la Tinta Viva (su Grieta vive en el libro que la abre). (2) LA BRUMA MURIÓ (la letra: «a ese proyectil que ya no use bruma»): el negro queda eclipse LIMPIO — disco FlushAlpha + rim violeta + llama de sombra, sin BrumaColumna ni humo. (3) EL ETERNO RENACE (GrimoireEternal : GrimorioHambrientoNervioso): sprite del Nervioso por Texture override (una sola fuente de verdad — el GrimoireEternal.png murió), TasaHambre 1/54000 (15 MINUTOS — el minuto de demo queda para el Nervioso de prueba), TicksQuietudSalida 600 (10 s jugables), clic der SIN reinicio del apetito (se alimenta CAZANDO; invoca al Orbe Cósmico), LA MÁQUINA POR ESTADO: todo lo que era static de la clase Nervioso (glitch/sobresalto/temblor/layout/caza/voz) migró a EstadoGrimorio POR INSTANCIA — cada libro corre SU reloj; el espíritu flotante y su sombra reciben el TIPO de su libro en ai[2] (EstadoDeLibro/EstadoEterno): SU hambre baja (−1% por presa) y SU XP cobra (el festín egoísta alimenta a quien cazó); EL DISPARO: la pareja del Equinoccio con los parámetros del Eterno (LanzarPareja: dorado 9201 −0.35 rad + negro 9202 +0.35 rad desde la fuente dividida; OrigenDelDisparo = el libro flotante si está fuera; cada bolt del sistema = una pareja día/noche: 1 + ExtraProjectiles cada 3 niveles, en abanico); lo suyo de siempre: niveles infinitos, escalado, LOS TRES ESTADOS, sin maná (el hambre ES el coste). ENTREGA: BolsaEmperatriz = sólo el Equinoccio (receta 5 madera); el Eterno por BolsaFundacionales + Génesis (AddRecipes vacío — NO hereda la receta de 5 maderas del Nervioso). LECCIONES: (1) los .cs NO son entradas del .tmod (viven en la DLL) — al borrar archivos cuenta solo lo que EMPAQUETA (11 rawimg, no 22); (2) el es-MX es el PRIMARIO español y el es-ES su espejo — cirugía con tools/cirugia_v650102_hjson.py sobre los 3 con formato propio de cada uno; (3) las plantillas con .replace() NO usan escape {{ }} — el doble-brace se coló al hjson y hubo que cazarlo con un escaneo global; (4) la herencia GrimorioEternal : GrimorioHambrientoNervioso exige overrides quirúrgicos: UseItem (suprimir el reinicio del hambre del clic der), AddRecipes (vacío), Shoot (todo propio), Estado/TipoLibro/TicksQuietudSalida (la identidad por estado) |

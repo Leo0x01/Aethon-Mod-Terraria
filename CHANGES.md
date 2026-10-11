@@ -1,5 +1,197 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.105 — LOS OJOS DEL ETERNO
+
+**La letra**: «también debemos cambiar los minions, los minion que use el
+grimorio será su propio ojo […] es tiempo de animar al minion, yo te daré
+los sprite del ojo usando código es lo mejor para que pudieses editarlo en
+caso de que convenga, ya sabes como animar los ojos, ahora ten en cuenta
+que el ojo se mueve en la direccion en la que mira, o sea para moverse
+primero mira y luego se mueve, algo mas, estos minion se posicionan encima
+del jugador como una corona, y si el grimorio esta fuera comienzan a
+orbitar al grimorio en 2 circulos uno de 5 minion, otro de 6 y asi
+aumentando los circulos orbitales a mas minion pueda lanzarce […] cada
+minion mira a su objetivo y usa el rayo con ruido de perlin ademas de que
+este rayo usado por los minion es negro, con bordes morado y con bruma en
+la punta que toca al monstruo, cada minion debe tener un pequeño circulo
+magico igual que el de los agujeros negros […] cuando el minion dispara
+tiene un pequeño retroceso y luego se reincorpora, los ojos de cada minion
+son independientes de cada uno de ellos y del libro y no se ven afectados
+por la animacion de hambre del grimorio».
+
+**EL CAMBIO**: el Orbe Cósmico muere entero (minion + bolt + buff + 2
+rawimg) y nacen LOS OJOS DEL LIBRO:
+
+- **EL SPRITE** (tools/gen_ojo_eterno_v650105.py): el recorte del ojo del
+  sprite EXACTO del usuario (caja 226,344-524,596: la almendra blanca +
+  el armazón lila + el párpado inferior dorado), 44×37 ×3 estados
+  (abierto/medio/cerrado) por LANCZOS. El IRIS de la .84 va como CAPA
+  que se desliza (escala 0.52 — el arte trae el iris sobredimensionado:
+  a escala proporcional taparía la vista entera y la mirada no leería).
+- **LA MÁQUINA DE LA MIRADA** («primero mira y luego se mueve»): el ojo
+  fija el iris en el destino y FRENA (MIRANDO 6 ticks), y solo entonces
+  se desplaza (MOVIENDO); el ángulo del iris (localAI[2]) barre 0,22
+  rad/tick; la mirada ±7,5 px horizontal / ±3,5 px vertical (la
+  geometría de la almendra), alcance por distancia.
+- **LA FORMACIÓN**: CORONA sobre la cabeza del dueño (arco 200°→340°,
+  radio 52+2,2·n, vaivén por ojo) y con el ESPÍRITU FUERA
+  (PosicionDelLibro del Nervioso, cacheado por frame) ÓRBITAS
+  CONCÉNTRICAS AL LIBRO: el anillo k lleva 5+k ojos (5, 6, 7… — la
+  letra), radio 58+42·k, contrarrotando (par +0,34 / impar −0,27).
+- **EL RAYO** (negro con bordes morados): el canal Perlin VERBATIM del
+  PerlinBolt (fBm 3 octavas + jitter 2 + el arco congelado + la
+  envolvente ^10 + Chaikin) dibujado en DOS capas: la FUNDA MORADA
+  aditiva (RayoStrip.Filamento, violeta vivo 190,110,255, ancho 9,5) y
+  encima EL NÚCLEO NEGRO en AlphaBlend (cadena de SoftGlow negros
+  5,5→3 px que OSCURECEN — el patrón del horizonte de sucesos del
+  agujero negro) + los gorros de descarga en ambos electrodos + LA
+  BRUMA (SombrasLib.Bruma: humo negro + aliento violeta) en la punta
+  que toca al monstruo. El golpe por GOLPEMOTOR (el cauce del motor:
+  crítica real, varianza, on-hit, crédito de la kill), daño
+  ×MinionContactDamageMult(nivel), cadencia 110−nivel/3 (piso 55).
+- **EL RETROCESO**: patada física 3,0 px/tick contra el rayo al
+  disparar y la formación lo reincorpora (el freno del fuego 0,86/tick).
+- **EL CÍRCULO MÁGICO**: OrbitaLib.SigiloErosionado — EL MISMO de los
+  agujeros negros (RunasAbismo, dorado-ámbar 240,124,65 / 255,205,140,
+  el aro roto con huecos), r 13 (anillo a 33 px) que RESPIRA a 16 en la
+  carga del disparo; la presencia violácea detrás del ojo.
+- **EL PARPADEO INDEPENDIENTE**: reloj propio por ojo (hash de whoAmI,
+  6–18 s, cero RNG), SIN leer NADA del hambre del libro; al apuntar, el
+  párpado se corta y la mirada queda FIJA en blanco (la mirada del
+  cazador).
+- **hjson ×3** (es-MX espacios primario / es-ES+en-US tabs por BYTES):
+  Ojos del Eterno / El Ojo del Eterno / Eyes of the Eternal + el
+  tooltip del ítem «invoca los Ojos del Eterno (corona/órbitas + rayo
+  negro)».
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 (ruta
+absoluta) · VLM ×3 (los sprites: hoja de validación — limpio, la mirada
+lee, el parpadeo lee; el rayo: 3 rondas de calibración — 11 px tapaba la
+vena → ancho 9,5 + violeta vivo + negro 5,5→3; SHIP por juicio de la
+casa) · audit_v650105 TODO OK: .tmod 2.584.158 B md5
+e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas (386 − 2 del Orbe + 3 de
+los Ojos), EOF exacto, paquete==árbol ×3, rawimg píxel-idénticas al árbol
+(12 B de cabecera + RGBA — la .100), símbolos OjoEternoMinion/OjoEternoBuff/
+DrawElSello/CanalPerlin vivos + CosmicOrb* AUSENTES, las constantes de la
+letra en el IL (0.52/7.5/3.5/0.22/3.0/3.49/5.93/58/42/2.55 + el reloj
+1/216000 y el 0.10 del jefe), regresión .102/.103/.104 completa · headless
+«Sandboxing v6.50.105 → Adding Recipes → Choose World» 0 excepciones.
+
+**PUBLICACIÓN**: commit `1853196` + tag `v6.50.105` → release
+**409768350** (make_latest) + asset AethonMod.tmod **631162660**
+2.584.158 B (md5 `e7cd269982ffbd1dfa5b8b77b325dbe1`), CDN VERIFICADO
+BYTE A BYTE, `/releases/latest` = v6.50.105. Respaldo
+`/home/sync/AethonMod-v6.50.105.tmod`.
+
+**LECCIONES**: (a) el rawimg del .tmod es 12 B de cabecera (1, w, h) +
+RGBA puro — se compara contra el PNG del árbol DECODIFICADO, no contra
+los bytes del archivo; (b) el .cs nunca es entrada del .tmod — el oráculo
+de presencia de una clase es el heap #Strings, el de una textura es la
+rawimg; (c) el VLM con mocks de composite aditivo OSCILA (3 rondas
+contradictorias sobre el mismo arte) — tras calibrar con la física del
+render (la vena de RayoStrip es ~2 px EN EL EJE: el borde morado vive en
+la columna 0→0,42 de la funda), SHIP por juicio de la casa; (d) el hjson
+trae el tooltip del ÍTEM en la sección Items — la cirugía de nombres no
+basta: grep global del nombre viejo antes de cerrar.
+
+---
+
+## Commit v6.50.105 — LOS OJOS DEL ETERNO
+
+**La letra**: «también debemos cambiar los minions, los minion que use el
+grimorio será su propio ojo […] es tiempo de animar al minion, yo te daré
+los sprite del ojo usando código es lo mejor para que pudieses editarlo en
+caso de que convenga, ya sabes como animar los ojos, ahora ten en cuenta
+que el ojo se mueve en la direccion en la que mira, o sea para moverse
+primero mira y luego se mueve, algo mas, estos minion se posicionan encima
+del jugador como una corona, y si el grimorio esta fuera comienzan a
+orbitar al grimorio en 2 circulos uno de 5 minion, otro de 6 y asi
+aumentando los circulos orbitales a mas minion pueda lanzarce […] cada
+minion mira a su objetivo y usa el rayo con ruido de perlin ademas de que
+este rayo usado por los minion es negro, con bordes morado y con bruma en
+la punta que toca al monstruo, cada minion debe tener un pequeño circulo
+magico igual que el de los agujeros negros […] cuando el minion dispara
+tiene un pequeño retroceso y luego se reincorpora, los ojos de cada minion
+son independientes de cada uno de ellos y del libro y no se ven afectados
+por la animacion de hambre del grimorio».
+
+**EL CAMBIO**: el Orbe Cósmico muere entero (minion + bolt + buff + 2
+rawimg) y nacen LOS OJOS DEL LIBRO:
+
+- **EL SPRITE** (tools/gen_ojo_eterno_v650105.py): el recorte del ojo del
+  sprite EXACTO del usuario (caja 226,344-524,596: la almendra blanca +
+  el armazón lila + el párpado inferior dorado), 44×37 ×3 estados
+  (abierto/medio/cerrado) por LANCZOS. El IRIS de la .84 va como CAPA
+  que se desliza (escala 0.52 — el arte trae el iris sobredimensionado:
+  a escala proporcional taparía la vista entera y la mirada no leería).
+- **LA MÁQUINA DE LA MIRADA** («primero mira y luego se mueve»): el ojo
+  fija el iris en el destino y FRENA (MIRANDO 6 ticks), y solo entonces
+  se desplaza (MOVIENDO); el ángulo del iris (localAI[2]) barre 0,22
+  rad/tick; la mirada ±7,5 px horizontal / ±3,5 px vertical (la
+  geometría de la almendra), alcance por distancia.
+- **LA FORMACIÓN**: CORONA sobre la cabeza del dueño (arco 200°→340°,
+  radio 52+2,2·n, vaivén por ojo) y con el ESPÍRITU FUERA
+  (PosicionDelLibro del Nervioso, cacheado por frame) ÓRBITAS
+  CONCÉNTRICAS AL LIBRO: el anillo k lleva 5+k ojos (5, 6, 7… — la
+  letra), radio 58+42·k, contrarrotando (par +0,34 / impar −0,27).
+- **EL RAYO** (negro con bordes morados): el canal Perlin VERBATIM del
+  PerlinBolt (fBm 3 octavas + jitter 2 + el arco congelado + la
+  envolvente ^10 + Chaikin) dibujado en DOS capas: la FUNDA MORADA
+  aditiva (RayoStrip.Filamento, violeta vivo 190,110,255, ancho 9,5) y
+  encima EL NÚCLEO NEGRO en AlphaBlend (cadena de SoftGlow negros
+  5,5→3 px que OSCURECEN — el patrón del horizonte de sucesos del
+  agujero negro) + los gorros de descarga en ambos electrodos + LA
+  BRUMA (SombrasLib.Bruma: humo negro + aliento violeta) en la punta
+  que toca al monstruo. El golpe por GOLPEMOTOR (el cauce del motor:
+  crítica real, varianza, on-hit, crédito de la kill), daño
+  ×MinionContactDamageMult(nivel), cadencia 110−nivel/3 (piso 55).
+- **EL RETROCESO**: patada física 3,0 px/tick contra el rayo al
+  disparar y la formación lo reincorpora (el freno del fuego 0,86/tick).
+- **EL CÍRCULO MÁGICO**: OrbitaLib.SigiloErosionado — EL MISMO de los
+  agujeros negros (RunasAbismo, dorado-ámbar 240,124,65 / 255,205,140,
+  el aro roto con huecos), r 13 (anillo a 33 px) que RESPIRA a 16 en la
+  carga del disparo; la presencia violácea detrás del ojo.
+- **EL PARPADEO INDEPENDIENTE**: reloj propio por ojo (hash de whoAmI,
+  6–18 s, cero RNG), SIN leer NADA del hambre del libro; al apuntar, el
+  párpado se corta y la mirada queda FIJA en blanco (la mirada del
+  cazador).
+- **hjson ×3** (es-MX espacios primario / es-ES+en-US tabs por BYTES):
+  Ojos del Eterno / El Ojo del Eterno / Eyes of the Eternal + el
+  tooltip del ítem «invoca los Ojos del Eterno (corona/órbitas + rayo
+  negro)».
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 (ruta
+absoluta) · VLM ×3 (los sprites: hoja de validación — limpio, la mirada
+lee, el parpadeo lee; el rayo: 3 rondas de calibración — 11 px tapaba la
+vena → ancho 9,5 + violeta vivo + negro 5,5→3; SHIP por juicio de la
+casa) · audit_v650105 TODO OK: .tmod 2.584.158 B md5
+e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas (386 − 2 del Orbe + 3 de
+los Ojos), EOF exacto, paquete==árbol ×3, rawimg píxel-idénticas al árbol
+(12 B de cabecera + RGBA — la .100), símbolos OjoEternoMinion/OjoEternoBuff/
+DrawElSello/CanalPerlin vivos + CosmicOrb* AUSENTES, las constantes de la
+letra en el IL (0.52/7.5/3.5/0.22/3.0/3.49/5.93/58/42/2.55 + el reloj
+1/216000 y el 0.10 del jefe), regresión .102/.103/.104 completa · headless
+«Sandboxing v6.50.105 → Adding Recipes → Choose World» 0 excepciones.
+
+**PUBLICACIÓN**: commit `1853196` + tag `v6.50.105` → release
+**409768350** (make_latest) + asset AethonMod.tmod **631162660**
+2.584.158 B (md5 `e7cd269982ffbd1dfa5b8b77b325dbe1`), CDN VERIFICADO
+BYTE A BYTE, `/releases/latest` = v6.50.105. Respaldo
+`/home/sync/AethonMod-v6.50.105.tmod`.
+
+**LECCIONES**: (a) el rawimg del .tmod es 12 B de cabecera (1, w, h) +
+RGBA puro — se compara contra el PNG del árbol DECODIFICADO, no contra
+los bytes del archivo; (b) el .cs nunca es entrada del .tmod — el oráculo
+de presencia de una clase es el heap #Strings, el de una textura es la
+rawimg; (c) el VLM con mocks de composite aditivo OSCILA (3 rondas
+contradictorias sobre el mismo arte) — tras calibrar con la física del
+render (la vena de RayoStrip es ~2 px EN EL EJE: el borde morado vive en
+la columna 0→0,42 de la funda), SHIP por juicio de la casa; (d) el hjson
+trae el tooltip del ÍTEM en la sección Items — la cirugía de nombres no
+basta: grep global del nombre viejo antes de cerrar.
+
+---
+
 ## Commit v6.50.104 — LA DIETA POR RAREZA + EL ICONO VIVO
 
 **Petición del usuario**: "el hambre en el grimorio del eterno no baja,
