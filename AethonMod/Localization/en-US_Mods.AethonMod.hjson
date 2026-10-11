@@ -31,8 +31,8 @@ Items: {
 			THE HUNGER (one hour from 0 to 100%): below 25% it stays quiet;
 			from 25% it goes hunting if you go absent (still for 10 s or 30 s
 			without using it); from 50% THE IMPATIENCE — voice, tremor, glitch
-			and the hunger waves. Only eaten prey lowers it (−1% each): FEED
-			IT BY LETTING IT HUNT.
+			and the hunger waves. Every kill feeds it BY RARITY: from 0.1%
+			(1★) to 5% (5★) — a full boss is worth 10%.
 			Left click: THE EQUINOX — day (golden orb with sunlight) and night
 			(eclipse with violet rim) part above your head; every 3 levels, one
 			MORE pair. With the spirit out, the BOOK fires. Right click:
@@ -2172,7 +2172,7 @@ Hambre: {
 		Frase5: HUNGER! HUNGER! HUNGER!
 		SaleACazar: If you won't feed me, I'll go hunt for myself.
 		Saciado: …satiated. For now.
-		Absorbe: −1% hunger
+		Absorbe: −{0}% hunger
 		Nivel: Level {0} · XP {1}/{2}
 	}
 }

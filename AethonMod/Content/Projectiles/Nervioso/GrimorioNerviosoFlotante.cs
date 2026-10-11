@@ -20,8 +20,10 @@ namespace AethonMod.Content.Projectiles.Nervioso
     /// portador (la levitación del difunto Códice Vivo, su homenaje), el
     /// OJO clavado en su dueño, esperando presas. Cuando algo SE MUEVE
     /// cerca (≤480 px), del libro sale LA SOMBRA DE LA PÁGINA
-    /// (SombraPaginaCaza) a morderla: 10% por golpe, absorción, −1% de
-    /// hambre — hasta el 0% («saciado. Por ahora.»).
+    /// (SombraPaginaCaza) a morderla: 10% por golpe, absorción, y el
+    /// hambre baja LO QUE LA PRESA VALE (v6.50.104: por RAREZA en el
+    /// Eterno — 1★=0,1% … 5★=5%, jefes 10%; −1% en la demo) — hasta el
+    /// 0% («saciado. Por ahora.»).
     ///
     /// v6.50.94 — LA FUGA MURIÓ (la letra: «esto de la fuga no tiene mucho
     /// sentido, el jugador se quedaria sin el libro, la fuga simplemente

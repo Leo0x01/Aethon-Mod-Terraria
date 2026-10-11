@@ -198,6 +198,29 @@ namespace AethonMod.Content.Globals
                         }
                     }
 
+                    // v6.50.104 — LA NUEVA DIETA DEL ETERNO (la letra:
+                    // «el hambre en el grimorio del eterno no baja, el
+                    // hambre deberia bajar usando la rareza de las
+                    // criaturas como fuente, cada criatura de 1 estrella
+                    // solo quita el 0.1% de hambre los jefes quitan 10%
+                    // de hambre…»): cada baja que PAGA XP también alimenta
+                    // el reloj nervioso del libro — mismo crédito, misma
+                    // moneda: la RAREZA del bestiario (1★=0,1% … 5★=5%
+                    // lineal; un jefe, 10%). Como AbsorberPresa, corre en
+                    // la AUTORIDAD (en SP es la MISMA máquina del tooltip:
+                    // la bolsa del hambre lo muestra al instante; la
+                    // chusma nocturna natural y la comida de la oleada
+                    // TAMBIÉN alimentan aquí — la letra no pide excepciones).
+                    if (xp > 0)
+                    {
+                        float quita = Weapons.GrimoireEternal.HambrePorPresa(npc);
+                        if (quita > 0f)
+                        {
+                            var et = Weapons.GrimoireEternal.EstadoEterno;
+                            et.Hambre = System.Math.Max(0f, et.Hambre - quita);
+                        }
+                    }
+
                     // v6.47 — LA VOZ DEL HAMBRE: la kill ALIMENTA el libro —
                     // la hambre se perdona (susurros y barra palidecida
                     // vuelven a su sitio). v6.49: el servidor manda el

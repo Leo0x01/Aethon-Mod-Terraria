@@ -1725,9 +1725,35 @@ namespace AethonMod.Content.Systems
                 new Vector2(Main.screenWidth - offX, Main.screenHeight - 80),
                 (medTitulo + new Vector2(icono.Width + 12, 6f)) * num);
             Utils.DrawInvBG(sb, r2, new Color(122, 62, 66) * 0.5f);
-            sb.Draw(icono, r2.Left() + Vector2.UnitX * num * 8f, null,
-                Color.White * _alfaIndicador, 0f, new Vector2(0f, icono.Height / 2),
-                num * 0.8f, SpriteEffects.None, 0f);
+            // v6.50.104 — EL ICONO VIVO (la letra: «el sprite del libro
+            // que aparece como icono de la oleada no tiene animacion,
+            // deberia tener animacion»): el libro de la cajita ya no es
+            // una foto — RESPIRA (la escala late), FLOTA (vaivén senoidal),
+            // SE INCLINA y cada ~3,5 s sufre EL SOBRESALTO nervioso de la
+            // familia (un tirón rápido que se asienta, como el libro en el
+            // mundo). Todo DETERMINISTA (sin RNG): el mismo latido en
+            // cada pantalla.
+            float t = Main.GameUpdateCount * (1f / 60f);
+            float escalaIcono = num * 0.8f;
+            Vector2 anclaIcono = r2.Left() + Vector2.UnitX * num * 8f;
+            Vector2 centroIcono = anclaIcono + Vector2.UnitX * (icono.Width * escalaIcono * 0.5f);
+            float bobIcono = (float)Math.Sin(t * 2.2f) * 2.5f * num;
+            float giroIcono = (float)Math.Sin(t * 1.4f) * 0.045f;
+            float escIcono = escalaIcono * (1f + 0.05f * (float)Math.Sin(t * 2.8f));
+            uint pasoSobresalto = Main.GameUpdateCount % 210u;   // el ciclo de 3,5 s
+            if (pasoSobresalto < 6u)                             // el tirón: 6 ticks
+            {
+                float decae = 1f - pasoSobresalto / 6f;
+                decae *= decae;                                  // se asienta suave
+                int semilla = (int)(Main.GameUpdateCount / 210u);
+                int dirSusto = ((semilla * 7919) & 1) == 0 ? 1 : -1;  // alterna, sin RNG
+                giroIcono += decae * 0.16f * dirSusto;           // el tirón de rotación
+                bobIcono -= decae * 3f * num;                    // y el respingo
+            }
+            sb.Draw(icono, centroIcono + Vector2.UnitY * bobIcono, null,
+                Color.White * _alfaIndicador, giroIcono,
+                new Vector2(icono.Width, icono.Height) * 0.5f,
+                escIcono, SpriteEffects.None, 0f);
             Utils.DrawBorderString(sb, titulo, r2.Right() + Vector2.UnitX * num * -22f,
                 Color.White * _alfaIndicador, num * 0.9f, 1f, 0.4f);
         }

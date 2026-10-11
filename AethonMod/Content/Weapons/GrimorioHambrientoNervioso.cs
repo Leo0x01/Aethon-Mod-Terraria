@@ -690,12 +690,29 @@ namespace AethonMod.Content.Weapons
             catch { }
         }
 
+        /// <summary>v6.50.104 — LA DIETA POR LIBRO: cuánto hambre quita
+        /// comerse a ESTA presa. El Eterno come POR RAREZA (la letra:
+        /// «el hambre deberia bajar usando la rareza de las criaturas
+        /// como fuente… cada criatura de 1 estrella solo quita el 0.1%
+        /// de hambre los jefes quitan 10%…» — GrimoireEternal.
+        /// HambrePorPresa: 1★=0,1% … 5★=5%, jefes 10%); el Nervioso de
+        /// prueba conserva su −1% plano de demo (su minuto no necesita
+        /// más finura).</summary>
+        internal static float ReduccionHambre(NPC presa, int tipoLibro)
+        {
+            if (tipoLibro == ModContent.ItemType<GrimoireEternal>())
+                return GrimoireEternal.HambrePorPresa(presa);
+            return 0.01f;
+        }
+
         /// <summary>LA ABSORCIÓN (v6.50.91) — la presa muere COMIDA por el
         /// libro: «esta muerte no cuenta como que la hizo el jugador y la
         /// criatura no deja loot, pero si cuenta como exp ya que el mismo
         /// libro la mato». Sin checkDead: la criatura se APAGA bajo la
-        /// sombra (sin loot, sin gore, sin crédito) y el hambre baja 1%
-        /// (50% → 49%). La llama la sombra (SombraPaginaCaza) en la
+        /// sombra (sin loot, sin gore, sin crédito) y el hambre baja LO
+        /// QUE ESA PRESA VALE (v6.50.104 — LA DIETA POR RAREZA: el Eterno
+        /// cobra 1★=0,1% … 5★=5% y un jefe 10%; el Nervioso de prueba su
+        /// −1% de demo). La llama la sombra (SombraPaginaCaza) en la
         /// AUTORIDAD con el último mordisco.
         /// v6.50.94 — SIN GRACIA Y SIN MARCA DE DIGESTIÓN: el bocado ya no
         /// congela el reloj del apetito (la letra: «el hambre se pausa» —
@@ -703,7 +720,7 @@ namespace AethonMod.Content.Weapons
         /// nace en la absorción (la .93 lo marcaba A MITAD del ataque).
         /// v6.50.95 — el compás ENTERO murió (la letra: «dejarlo atacar
         /// cuando quiera»): la absorción ya no toca reloj NINGUNO — sólo
-        /// come, resta −1% de hambre y cobra la XP.
+        /// come, resta LA DIETA de hambre y cobra la XP.
         /// v6.50.102 — EL FESTÍN ES DEL LIBRO QUE LLAMÓ A LA SOMBRA: el
         /// tipo viaja en el espíritu (ai[2]) y baja el hambre de ESE libro
         /// — el Nervioso de prueba come para su minuto, el Eterno para su
@@ -734,10 +751,13 @@ namespace AethonMod.Content.Weapons
                     NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
             }
 
-            // EL APETITO: −1% por presa (la letra: 50% → 49%) — y el reloj
+            // EL APETITO: LO QUE ESA PRESA VALE (v6.50.104 — la dieta por
+            // rareza de la letra: el Eterno cobra 1★=0,1% … 5★=5%, el jefe
+            // 10%; el Nervioso de prueba su −1% de demo) — y el reloj
             // SIGUE corriendo (v6.50.94: sin gracia, el hambre sube SIEMPRE)
             EstadoGrimorio festin = EstadoDeLibro(tipoLibro);
-            festin.Hambre = Math.Max(0f, festin.Hambre - 0.01f);
+            float quita = ReduccionHambre(paraXP, tipoLibro);
+            festin.Hambre = Math.Max(0f, festin.Hambre - quita);
 
             // v6.50.94 — EL FESTÍN EGOÍSTA (la letra: «el festin compartido
             // no tiene sentido, el libro casa por estar hambriento, en este
@@ -748,13 +768,16 @@ namespace AethonMod.Content.Weapons
             // jugador no recibe NADA.
             CobrarXPLibro(dueño, paraXP, tipoLibro);
 
-            // el grito silencioso del apetito satisfecho
+            // el grito silencioso del apetito satisfecho — CON LA CIFRA
+            // REAL del bocado (v6.50.104: la dieta por rareza hace que
+            // cada presa pese distinto: «Absorbe: −{0}% hambre»)
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 try
                 {
                     CombatText.NewText(presa.Hitbox, new Color(235, 70, 55),
-                        Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso.Absorbe"));
+                        string.Format(Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso.Absorbe"),
+                            (quita * 100f).ToString("0.##")));
                 }
                 catch { }
             }
@@ -828,8 +851,10 @@ namespace AethonMod.Content.Weapons
                 // lo cace o no cace, el libro fuera o dentro, coma o no
                 // coma. v6.50.102 — LA TASA ES DE LA FAMILIA: el Nervioso
                 // de prueba corre su minuto de demo; el Eterno jugable su
-                // cuarto de hora. Sólo las presas lo bajan (−1%) — y el
-                // clic derecho lo reinicia SOLO en el libro de prueba.
+                // hora (.103). Las presas lo bajan (v6.50.104: POR RAREZA
+                // en el Eterno — cada baja acreditada también alimenta,
+                // GlobalNPCXP) — y el clic derecho lo reinicia SOLO en el
+                // libro de prueba.
                 Estado.Paso();
             }
 

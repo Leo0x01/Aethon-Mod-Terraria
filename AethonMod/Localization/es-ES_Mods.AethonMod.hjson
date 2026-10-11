@@ -31,7 +31,7 @@ Items: {
 			EL HAMBRE (una hora de 0 a 100%): debajo del 25% calla; del 25%
 			sale a cazar si te ausentas (quieto 10 s o 30 s sin darle uso); del
 			50% LA IMPACIENCIA — voz, temblor, glitch y las oleadas de hambre.
-			Sólo la presa comida lo baja (−1% por presa): aliméntalo CAZANDO.
+			Cada baja lo alimenta SEGÚN SU RAREZA: de 0,1% (1★) a 5% (5★); un jefe entero, 10%.
 			Clic izq: EL EQUINOCCIO — el día (orbe dorado con luz de sol) y la
 			noche (eclipse con rim violeta) se separan sobre tu cabeza; cada 3
 			niveles, una pareja MÁS. Con el espíritu fuera, dispara el LIBRO.
@@ -2170,7 +2170,7 @@ Hambre: {
 		Frase5: ¡HAMBRE! ¡HAMBRE! ¡HAMBRE!
 		SaleACazar: Si no me alimentas, salgo yo mismo a cazar.
 		Saciado: …saciado. Por ahora.
-		Absorbe: −1% hambre
+		Absorbe: −{0}% hambre
 		Nivel: Nivel {0} · XP {1}/{2}
 	}
 }

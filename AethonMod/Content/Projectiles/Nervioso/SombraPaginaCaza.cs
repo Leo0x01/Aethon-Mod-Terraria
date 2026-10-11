@@ -191,8 +191,10 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             if (presa.life - golpe <= 0)
                             {
                                 // LA ABSORCIÓN — el libro SE LA COME entera:
-                                // sin loot, sin gore, sin crédito; XP sí; −1%
-                                // (v6.50.102: del libro que llamó a esta sombra)
+                                // sin loot, sin gore, sin crédito; XP sí; el
+                                // hambre baja LO QUE VALE la presa (v6.50.104:
+                                // por RAREZA en el Eterno; del libro que llamó
+                                // a esta sombra desde la .102)
                                 GrimorioHambrientoNervioso.AbsorberPresa(presa, dueño, TipoLibroDeLaRaiz());
                                 Projectile.ai[1] = FASE_ABSORBER;
                                 Projectile.ai[2] = 0;

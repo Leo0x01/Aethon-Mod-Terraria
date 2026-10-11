@@ -34,8 +34,14 @@ namespace AethonMod.Content.Weapons
     ///   si el dueño está quieto 10 s (la demo usa 5) o lleva 30 s sin
     ///   darle uso; del 50% EL IMPACIENTE — ojo ansioso, voz, temblor,
     ///   glitch, sobresaltos y las OLEADAS probables (4%→20% cada 5 s).
-    ///   Sólo la presa comida lo baja (−1%): el clic derecho ya NO
-    ///   reinicia el apetito — el Eterno se alimenta CAZANDO, no de gratis.
+    ///   CADA BAJA LO ALIMENTA POR RAREZA (v6.50.104, la letra: «el
+    ///   hambre deberia bajar usando la rareza de las criaturas como
+    ///   fuente… cada criatura de 1 estrella solo quita el 0.1% de
+    ///   hambre los jefes quitan 10%… y el hambre se reduce de 0.1% a
+    ///   5% dependiendo de la rareza del monstruo»): 1★ quita 0,1% …
+    ///   5★ quita 5% (lineal) y un jefe entero 10%. El clic derecho ya
+    ///   NO reinicia el apetito — se alimenta MATANDO (y su sombra
+    ///   devora presas enteras: mismo valor, mismo bocado).
     /// · LA CAZA PROPIA: el espíritu (GrimorioNerviosoFlotante) sale con
     ///   el TIPO del Eterno en ai[2] — su Sombra de la Página devora
     ///   presas ENTERAS (sin loot, sin crédito) y el festín egoísta paga
@@ -76,6 +82,28 @@ namespace AethonMod.Content.Weapons
         };
         protected override EstadoGrimorio Estado => _estadoEterno;
         internal static EstadoGrimorio EstadoEterno => _estadoEterno;
+
+        // === v6.50.104 — LA DIETA POR RAREZA (la letra: «el hambre
+        //     deberia bajar usando la rareza de las criaturas como
+        //     fuente… y el hambre se reduce de 0.1% a 5% dependiendo de
+        //     la rareza del monstruo»): la MISMA fuente que la XP — las
+        //     ESTRELLAS del bestiario (ShardLevelSystem.EstrellasDe).
+        //     Escalera LINEAL 1★→5★: 0,1% · 1,3% · 2,6% · 3,8% · 5%;
+        //     el JEFE vale 10% entero. La come TODO lo que alimenta al
+        //     libro: la baja acreditada (GlobalNPCXP.OnKill) y la presa
+        //     que devora su sombra (AbsorberPresa). Con el reloj de la
+        //     hora (.103): 5★ compra 3 min de apetito, un jefe 6. ===
+        internal static float HambrePorPresa(NPC presa)
+        {
+            if (presa == null || !presa.active)
+                return 0f;
+            if (presa.boss)
+                return 0.10f;                        // EL JEFE: 10% entero
+            int estrellas = ShardLevelSystem.EstrellasDe(presa);
+            if (estrellas < 1) estrellas = 1;        // la chusma más común: el piso de la 1★
+            if (estrellas > 5) estrellas = 5;
+            return 0.001f + (estrellas - 1) * (0.05f - 0.001f) / 4f;   // 0,1% → 5% lineal
+        }
 
         // === LA IDENTIDAD EN EL REGISTRO DE LA FAMILIA: el espíritu y su
         //     sombra sirven al libro que LOS llamó (ai[2] = este tipo) ===

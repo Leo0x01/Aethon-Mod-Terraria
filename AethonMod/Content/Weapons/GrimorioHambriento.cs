@@ -59,8 +59,9 @@ namespace AethonMod.Content.Weapons
     /// tras cada bocado) PAUSABA el apetito de facto: mientras el libro
     /// cazaba y comía, el reloj nunca corría. Ahora el hambre sube
     /// SIEMPRE (tasa de prueba: 0→100% en un minuto) — coma o no coma,
-    /// cace o no cace. Sólo la presa comida la baja (−1%) y el clic
-    /// derecho la reinicia.
+    /// cace o no cace. La presa comida la baja (−1% plano en la demo;
+    /// v6.50.104: POR RAREZA en el Eterno — 1★=0,1% … 5★=5%, jefes 10%)
+    /// y el clic derecho la reinicia.
     /// </summary>
     public class EstadoGrimorio
     {
