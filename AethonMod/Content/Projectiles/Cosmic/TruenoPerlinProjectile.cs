@@ -370,9 +370,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // del MISMO camino
                 Vector2[] canal = CanalOjo(boca, ancla, seed, flick, ampFrac);
 
-                // === 1. LA FUNDA MORADA (aditiva — el borde que arde; el
-                //     MISMO grosor del cetro: 7,5) ===
-                RayoStrip.Filamento(canal, 7.5f, OjoHalo, OjoCore,
+                // === 1. LA FUNDA MORADA (aditiva — el borde que arde):
+                //     v6.50.107 — UN POCO MÁS FINO (la letra: «el proyectil
+                //     que usan los minion es muy grueso»): 6,0 (era 7,5) ===
+                RayoStrip.Filamento(canal, 6.0f, OjoHalo, OjoCore,
                     alpha * fade, StormTaper.Center, seed, flick,
                     suavizar: false, crackle: true);
                 VFXCore.CerrarLoteSiAbierto();
@@ -380,9 +381,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // === 2. EL NÚCLEO NEGRO (AlphaBlend: las cápsulas que
                 //     OSCURECEN el centro — el morado asoma en los bordes).
                 //     LA LECCIÓN de la .105: SoftGlow a escala 5,5 = 352 px
-                //     por cápsula — el rayo leía como NEBLINA gorda. Ahora
-                //     19 px sobre la funda de 7,5 (~23 px): filo negro de
-                //     ~6 px con borde morado. ===
+                //     por cápsula — el rayo leía como NEBLINA gorda. La
+                //     .106 lo bajó a 19 px; la .107 lo AFILA un paso más:
+                //     15 px (escala 0,235) sobre la funda de 6,0 — el
+                //     filo negro ~4,5 px con el borde morado asomando. ===
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -409,7 +411,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Vector2 p = Vector2.Lerp(canal[seg], canal[seg + 1],
                             MathHelper.Clamp(fseg, 0f, 1f));
                         Main.spriteBatch.Draw(glow, p, null, OjoNegro * (alpha * fade), 0f,
-                            medio, new Vector2(0.30f, 0.30f), SpriteEffects.None, 0f);
+                            medio, new Vector2(0.235f, 0.235f), SpriteEffects.None, 0f);
                     }
                 }
                 finally { Main.spriteBatch.End(); }
@@ -427,13 +429,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (!StormLib.IsLit(seed + 47 + c * 31, flick, 0.60f)) continue;
                         Vector2[] canalC = CanalOjo(ancla, _chainTo[c] - screen,
                             seed + 47 + c * 31, flick, 0.10f);
-                        RayoStrip.Filamento(canalC, 3.6f, OjoHalo, OjoCore,
+                        RayoStrip.Filamento(canalC, 2.9f, OjoHalo, OjoCore,
                             0.85f * alpha * fade, StormTaper.Center,
                             seed + 47 + c * 31, flick, suavizar: false, crackle: true);
                     }
 
                     // el gorro del electrodo del OJO (la descarga en la córnea)
-                    StormLib.EndCap(Main.spriteBatch, boca, 6.0f, OjoHalo, OjoCore, alpha * fade);
+                    StormLib.EndCap(Main.spriteBatch, boca, 4.8f, OjoHalo, OjoCore, alpha * fade);
 
                     // EL ANCLA: el núcleo de descarga en la presa (morado)
                     Texture2D texAncla = ModContent.Request<Texture2D>(
@@ -441,15 +443,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float pulso = 0.80f + 0.20f * MathF.Sin(time * 22f);
                     Main.spriteBatch.Draw(texAncla, ancla, null,
                         TintFijo(OjoHalo, 0.9f * alpha * fade * pulso), 0f,
-                        texAncla.Size() * 0.5f, 1.5f * pulso, SpriteEffects.None, 0f);
+                        texAncla.Size() * 0.5f, 1.2f * pulso, SpriteEffects.None, 0f);
                     Main.spriteBatch.Draw(texAncla, ancla, null,
                         TintFijo(OjoCore, 0.95f * alpha * fade), 0f,
-                        texAncla.Size() * 0.5f, 0.8f, SpriteEffects.None, 0f);
+                        texAncla.Size() * 0.5f, 0.65f, SpriteEffects.None, 0f);
 
                     // EL ESTALLIDO DE IMPACTO (los primeros ticks)
                     float flashI = MathHelper.Clamp(1f - _age / 6f, 0f, 1f);
                     if (flashI > 0f)
-                        StormLib.ImpactFlash(Main.spriteBatch, ancla, 46f * (0.6f + 0.4f * flashI),
+                        StormLib.ImpactFlash(Main.spriteBatch, ancla, 38f * (0.6f + 0.4f * flashI),
                             OjoHalo, flashI * alpha * fade, time * 1.1f);
 
                     // LOS ARCOS DE CORONA (crispados alrededor del ancla)
@@ -457,7 +459,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         float arcR = 18f + 26f * lifeT;
                         StormLib.ArcRing(Main.spriteBatch, ancla, arcR,
-                            time * 2.4f, time * 2.4f + 1.7f, seed + 90, flick, 2.8f,
+                            time * 2.4f, time * 2.4f + 1.7f, seed + 90, flick, 2.3f,
                             TintFijo(OjoHalo, 0.6f * fade), TintFijo(OjoCore, 0.9f * fade),
                             1f, 8);
                     }
@@ -466,7 +468,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // === 4. LA BRUMA EN LA PUNTA (la que toca al monstruo) ===
                 float prog = Math.Min(1f, _age / (float)TotalLife);
-                SombrasLib.Bruma(Projectile.Center, 24f * (0.8f + 0.4f * prog),
+                SombrasLib.Bruma(Projectile.Center, 20f * (0.8f + 0.4f * prog),
                     0.55f * alpha * fade, time, seed + 91,
                     new Vector2(0f, -10f * prog));
             }

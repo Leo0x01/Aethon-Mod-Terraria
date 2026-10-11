@@ -30,25 +30,8 @@ Items: {
                 DisplayName: Grimorio del Eterno
                 Tooltip:
                         '''
-                        Aethon, atado en forma de libro: el arma que come ES el jefe final
-                        — y ahora VISTE EL CUERPO DEL NERVIOSO: su ojo, su temblor, su
-                        glitch y su hambre, con reloj de verdad.
-                        EL HAMBRE (una hora de 0 a 100%): debajo del 25% calla; del 25%
-                        sale a cazar si te ausentas (quieto 10 s o 30 s sin darle uso); del
-                        50% LA IMPACIENCIA — voz, temblor, glitch y las oleadas de hambre.
-                        Cada baja lo alimenta SEGÚN SU RAREZA: de 0,1% (1★) a 5% (5★); un jefe entero, 10%.
-                        Clic izq: EL EQUINOCCIO — el día (orbe dorado con luz de sol) y la
-                        noche (eclipse con rim violeta) se separan sobre tu cabeza; cada 3
-                        niveles, una pareja MÁS. Con el espíritu fuera, dispara el LIBRO.
-                        Clic der: invoca los Ojos del Eterno (corona/órbitas + rayo negro).
-                        Gana XP REAL con cada baja (bestiario 0–5★, primera baja de cada
-                        especie ×3, modo difícil ×2, jefes con fórmula fija) — y su Sombra
-                        de la Página devora presas ENTERAS (botín incluido) cuya XP es DEL
-                        LIBRO: el que come es el que sube de nivel.
-                        LOS TRES ESTADOS: sostenido = todo el poder; en la barra rápida =
-                        sigue comiendo XP, conserva los espacios de esbirro y vida/maná
-                        (tope +100); guardado = nada (los esbirros ya invocados permanecen).
-                        Sin coste de maná — el hambre ES el coste.
+                                Un libro viejo que devora lo que su portador mata.
+                                Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
                         '''
         }
 

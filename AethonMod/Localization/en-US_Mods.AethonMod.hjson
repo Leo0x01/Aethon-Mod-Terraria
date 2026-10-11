@@ -25,26 +25,8 @@ Items: {
 		DisplayName: Grimoire of the Eternal
 		Tooltip:
 			'''
-			Aethon, bound in book form: the weapon that eats IS the final
-			boss — and now it WEARS THE NERVOUS BODY: its eye, its tremor,
-			its glitch and its hunger, on a real clock.
-			THE HUNGER (one hour from 0 to 100%): below 25% it stays quiet;
-			from 25% it goes hunting if you go absent (still for 10 s or 30 s
-			without using it); from 50% THE IMPATIENCE — voice, tremor, glitch
-			and the hunger waves. Every kill feeds it BY RARITY: from 0.1%
-			(1★) to 5% (5★) — a full boss is worth 10%.
-			Left click: THE EQUINOX — day (golden orb with sunlight) and night
-			(eclipse with violet rim) part above your head; every 3 levels, one
-			MORE pair. With the spirit out, the BOOK fires. Right click:
-			summons the Eyes of the Eternal (crown/orbits + black ray).
-			Earns REAL XP from every kill (bestiary rarity 0–5 stars, first
-			kill of each species ×3, hardmode ×2, bosses with a fixed formula)
-			— and its Page Shadow devours WHOLE prey (loot included) whose XP
-			IS THE BOOK'S: the one that eats is the one that levels up.
-			THREE STATES: held = full power; in the hotbar = still eats XP,
-			keeps minion slots and life/mana (capped at +100); stored = nothing
-			(already-summoned minions remain).
-			No mana cost — the hunger IS the cost.
+				An old book that devours whatever its bearer kills.
+				Keep its pages full... or your soul will be the one to fill the next.
 			'''
 	}
 
