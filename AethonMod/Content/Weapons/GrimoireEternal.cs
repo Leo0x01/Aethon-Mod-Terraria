@@ -391,18 +391,23 @@ namespace AethonMod.Content.Weapons
         }
 
         // ================================================================
-        //  TOOLTIP — v6.50.107 — LA CAJA COMPACTA. La letra: «la caja de
-        //  información del grimorio eterno es demasiado grande con datos
-        //  que no necesitan; sólo debe decir: daño mágico, daño de
-        //  invocación, datos y buff propios del juego, un pequeño texto
-        //  de lore donde explique un poco que es el libro sin decir
-        //  mucho (al menos 2 líneas), luego en progresión debe salir la
-        //  barra de hambre y la de exp».
-        //  El DAÑO MÁGICO y los datos/buff los pone EL JUEGO (vanilla,
-        //  sin tocarlos nunca); el LORE (2 líneas) vive en el hjson y
-        //  también lo dibuja el juego; de aquí sólo salen el DAÑO DE
-        //  INVOCACIÓN (pegado al daño mágico) y la PROGRESIÓN: EXP y
-        //  HAMBRE. Muere la vista completa de 25 líneas.
+        //  TOOLTIP — v6.50.108 — LA CAJA COMPACTA + LA SEGUNDA VENTANA.
+        //
+        //  La letra de la .107 (INTACTA): la caja básica es COMPACTA —
+        //  daño mágico, daño de invocación, datos y buff propios del
+        //  juego, el lore de 2 líneas y PROGRESIÓN (EXP + hambre). El
+        //  DAÑO MÁGICO y los datos/buff los pone EL JUEGO (vanilla, sin
+        //  tocarlos nunca); el LORE (2 líneas) vive en el hjson.
+        //
+        //  La letra de la .108: «ese texto [del estado del hambre] debe
+        //  ir justo debajo del hambre, no encima» → la BARRA primero y
+        //  el estado DEBAJO; «el grimorio necesita una segunda ventana
+        //  de info para visualizar sus estadísticas» → VUELVE la vista
+        //  completa por el conmutador de siempre (clic der sobre el
+        //  libro: TooltipToggleItem.ShowExtendedTooltip) con TODAS las
+        //  estadísticas; «en progresión quitaste las estadísticas del
+        //  próximo nivel, vuelve a ponerlas» → el PRÓXIMO HITO y su
+        //  escalera de mejoras, dentro de PROGRESIÓN.
         // ================================================================
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
@@ -426,10 +431,33 @@ namespace AethonMod.Content.Weapons
             }
 
             var sl = GetShard(Item);
+            bool completa = sl != null && Globals.TooltipToggleItem.ShowExtendedTooltip;
+
+            // === v6.50.108 — LA SEGUNDA VENTANA: en vista COMPLETA se
+            //     ocultan las líneas vanilla básicas (el hueco lo llenan
+            //     las secciones de estadísticas) ===
+            if (completa)
+            {
+                for (int i = tooltips.Count - 1; i >= 0; i--)
+                {
+                    string name = tooltips[i].Name ?? "";
+                    if (name == "Damage" || name == "CritChance" || name == "Speed" ||
+                        name == "Knockback" || name == "UseMana" || name == "ManaCost" ||
+                        name == "BestiaryNotes" || name == "ItemLevel" ||
+                        name.StartsWith("Tooltip") ||     // Tooltip0, Tooltip1… (el lore vive en la básica)
+                        name.StartsWith("Prefix"))
+                    {
+                        tooltips.RemoveAt(i);
+                    }
+                }
+            }
+
+            if (sl == null) return;
 
             // === EL DAÑO DE INVOCACIÓN — pegado al daño mágico del juego
-            //     (la línea vanilla "Damage" ya dice «XX daño mágico») ===
-            if (sl != null)
+            //     (la línea vanilla "Damage" ya dice «XX daño mágico»).
+            //     En la COMPLETA no: allí va por la sección DAÑO ===
+            if (!completa)
             {
                 int summonDmg = (int)(Item.damage *
                     (1f + sl.Level * WeaponScaling.SummonDamagePerLevel));
@@ -446,9 +474,111 @@ namespace AethonMod.Content.Weapons
                     tooltips.Add(summonLine);
             }
 
-            if (sl == null) return;
+            // === v6.50.108 — LA SEGUNDA VENTANA: TODAS las estadísticas.
+            //     El repertorio de la .106 (DAÑO / RECURSOS / PROYECTIL /
+            //     OJOS / BONUS) + la velocidad de ataque de los ojos de
+            //     la .107 (nivel 1 = 1,0× → nivel 100 = +50% más rápido) ===
+            if (completa)
+            {
+                int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
+                int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
+                float critPct = WeaponScaling.CritBonus(sl.Level);
+                float armorPenPct = WeaponScaling.ArmorPenBonus(sl.Level);
+                int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
+                int bonusMana = WeaponScaling.BonusMana(sl.Level);
+                int bonusLife = WeaponScaling.BonusLife(sl.Level);
+                int manaRegen = WeaponScaling.ManaRegen(sl.Level);
+                float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
+                float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
+                float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
+                int minionCost = WeaponScaling.MinionManaCost(sl.Level);
+                int totalPares = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
+                int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
+                float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
+                float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
+                float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
+                float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
+                // la .107: la velocidad de ATAQUE de los ojos sube con el
+                // nivel del libro — 1,0× en nivel 1, +50% en nivel 100
+                float ritmoOjos = (1f + 0.5f * System.Math.Min(sl.Level - 1, 99) / 99f - 1f) * 100f;
 
-            // === LA PROGRESIÓN: la barra de EXP y la barra de HAMBRE ===
+                tooltips.Add(new TooltipLine(Mod, "SectionDamage", "[c/FFD700:═══ DAÑO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "MagicDamage",
+                    $"[c/FF5555:+{magicDmgPct}% daño mágico]"));
+                tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
+                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación]"));
+                tooltips.Add(new TooltipLine(Mod, "Crit",
+                    $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
+                tooltips.Add(new TooltipLine(Mod, "ArmorPen",
+                    $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
+                tooltips.Add(new TooltipLine(Mod, "Knockback",
+                    $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionResources", "[c/55AAFF:═══ RECURSOS ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaMax",
+                    $"[c/55AAFF:+{bonusMana} mana máximo (tope +100 sin sostener)]"));
+                tooltips.Add(new TooltipLine(Mod, "LifeMax",
+                    $"[c/55AAFF:+{bonusLife} vida máxima (tope +100 sin sostener)]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaRegen",
+                    $"[c/55AAFF:+{manaRegen} mana/seg regeneración]"));
+                tooltips.Add(new TooltipLine(Mod, "LifeRegen",
+                    $"[c/FF5566:+{lifeRegen:F1} vida/seg regeneración]"));
+                tooltips.Add(new TooltipLine(Mod, "DamageRed",
+                    $"[c/FFAA55:-{dmgRed:F0}% daño recibido]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionProjectile", "[c/FFD700:═══ PROYECTIL ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "Parejas",
+                    $"[c/55AAFF:{totalPares} pareja(s) día/noche por disparo ({totalPares * 2} orbes)]"));
+                tooltips.Add(new TooltipLine(Mod, "AreaDmg",
+                    $"[c/55AAFF:+{areaDmg}px daño en área]"));
+                tooltips.Add(new TooltipLine(Mod, "OrigenLibro",
+                    "[c/BE78FD:Con el espíritu fuera, dispara el LIBRO]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ OJOS DEL ETERNO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
+                    "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
+                    $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
+                    $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
+                    $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (tope +50% en nivel 100)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
+                    $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionRange",
+                    $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionCd",
+                    "[c/BE78FD:El rayo Perlin negro, con bruma en la punta]"));
+                if (!ManaMinionGratis())
+                {
+                    tooltips.Add(new TooltipLine(Mod, "ManaMinion",
+                        $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
+                }
+
+                tooltips.Add(new TooltipLine(Mod, "SectionBonus", "[c/FF5566:═══ BONUS ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "LowMana",
+                    $"[c/FF5555:★ Mana bajo: +{lowManaBonus:F0}% daño (máximo +50%)]"));
+
+                if (WeaponScaling.HasLifesteal(sl.Level))
+                {
+                    float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
+                    int nextLs = ((sl.Level / 7) + 1) * 7;
+                    tooltips.Add(new TooltipLine(Mod, "Lifesteal",
+                        $"[c/FF5566:♥ Robo de vida: +{lsPct:F2}% (próximo nivel {nextLs})]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
+                        $"[c/78788C:♥ Robo de vida se desbloquea en nivel 7]"));
+                }
+            }
+
+            // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.
+            //     v6.50.108 — EL ORDEN DE LA LETRA: la BARRA de hambre
+            //     primero y el estado JUSTO DEBAJO («ese texto debe ir
+            //     justo debajo del hambre, no encima»). Y de vuelta LAS
+            //     ESTADÍSTICAS DEL PRÓXIMO NIVEL: el próximo hito y su
+            //     escalera de mejoras ===
             int xpNeeded = sl.XPForNextLevel();
             float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
             pct = System.Math.Clamp(pct, 0f, 1f);
@@ -462,8 +592,25 @@ namespace AethonMod.Content.Weapons
                 "[c/78FF96:═══ PROGRESIÓN ═══]"));
             tooltips.Add(new TooltipLine(Mod, "Level",
                 $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
-            if (estadoHambre != null) tooltips.Add(estadoHambre);
             if (barraHambre != null) tooltips.Add(barraHambre);
+            if (estadoHambre != null) tooltips.Add(estadoHambre);
+
+            int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
+            int nextMilestoneNum = nextMilestoneLevel / 5;
+            var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
+            tooltips.Add(new TooltipLine(Mod, "NextMilestone",
+                $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
+            foreach (var reward in nextRewards)
+            {
+                tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
+                    $"[c/78FF96:  • {reward}]"));
+            }
+
+            // === EL CONMUTADOR: la segunda ventana abre/cierra con clic
+            //     derecho sobre el libro en el inventario ===
+            tooltips.Add(new TooltipLine(Mod, "ModeIndicator", completa
+                ? "[c/78788C:═══ Click der para vista básica ═══]"
+                : "[c/78788C:═══ Click der para vista completa ═══]"));
         }
     }
 }

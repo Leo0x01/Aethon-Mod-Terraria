@@ -41,9 +41,11 @@ namespace AethonMod.Content.Projectiles
     /// 62+42k, b = 0,8a) con precesión apsidal lenta y LA SEGUNDA LEY DE
     /// KEPLER — el área barrida por tick es CONSTANTE ⇒ ACELERA en el
     /// perigeo (cerca del libro) y FRENA en el apogeo (lejos): ORBITAR,
-    /// no dar vuelta en círculo. La fase de cada ojo vive en localAI[3]
-    /// y sólo la avanza PasoOrbita (UNA vez por tick, desde la AI — el
-    /// draw la LEE, jamás la mueve).
+    /// no dar vuelta en círculo. La fase de cada ojo vive en el CAMPO DE
+    /// INSTANCIA _faseOrbital (v6.50.108: localAI es float[3] en tML —
+    /// localAI[3] tiraba IndexOutOfRange y los ojos no aparecían) y sólo
+    /// la avanza PasoOrbita (UNA vez por tick, desde la AI — el draw la
+    /// LEE, jamás la mueve).
     ///
     /// EL RAYO (la finura de la .107): el proyectil DEL CETRO DEL TRUENO
     /// PERLIN en su modo ojo, un POCO MÁS FINO — funda 6,0 (era 7,5),
@@ -79,6 +81,14 @@ namespace AethonMod.Content.Projectiles
         //     nivel 1»): BASE 110 ticks (1,83 s — la del Forbidden Ruin)
         //     dividida por la VELOCIDAD DE NIVEL y por el RITMO PROPIO ===
         private const int CADENCIA_BASE = 110;
+
+        // === v6.50.108 — LA FASE ORBITAL VIVE AQUÍ (no en localAI[3]):
+        //     el localAI de vanilla es float[3] (índices 0–2) — el [3]
+        //     de la .107 tiraba IndexOutOfRangeException en cada AI y los
+        //     ojos no aparecían. Campo de INSTANCIA: una fase POR OJO,
+        //     determinista (nace del puesto en el anillo y avanza por
+        //     PasoOrbita igual en todos los clientes) ===
+        private float _faseOrbital;
 
         // === EL IRIS ACOMODADO (la medición del arte del usuario) ===
         //     la almendra (136,197)-(389,346) de 512×500 → centro
@@ -346,10 +356,10 @@ namespace AethonMod.Content.Projectiles
         /// recorre una ELIPSE con precesión lenta y LA SEGUNDA LEY DE
         /// KEPLER — el área barrida por tick es CONSTANTE, así que
         /// ACELERA al pasar cerca del libro y FRENA al alejarse. La fase
-        /// de cada ojo vive en localAI[3] y la avanza PasoOrbita (UNA
-        /// vez por tick, desde la AI); AQUÍ sólo se LEE (el draw también
-        /// la consulta). El anillo k lleva 5+k ojos (5, 6, 7… — la
-        /// letra), contrarrotando.</summary>
+        /// de cada ojo vive en _faseOrbital (v6.50.108) y la avanza
+        /// PasoOrbita (UNA vez por tick, desde la AI); AQUÍ sólo se LEE
+        /// (el draw también la consulta). El anillo k lleva 5+k ojos
+        /// (5, 6, 7… — la letra), contrarrotando.</summary>
         private Vector2 SlotDeFormacion(Player dueño, Vector2? libro)
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
@@ -406,16 +416,18 @@ namespace AethonMod.Content.Projectiles
             enAnillo = idx - baseIdx;
         }
 
-        /// <summary>LA FASE ORBITAL de ESTE ojo (localAI[3]): nace el
-        /// día que el libro sale, repartida por su puesto en el anillo.
-        /// Determinista (hash de whoAmI implícito en el puesto) — todos
-        /// los clientes la calculan IGUAL.</summary>
+        /// <summary>LA FASE ORBITAL de ESTE ojo (_faseOrbital — v6.50.108:
+        /// era localAI[3] y localAI es float[3] en tML — el índice 3
+        /// tiraba IndexOutOfRange): nace el día que el libro sale,
+        /// repartida por su puesto en el anillo. Determinista (hash de
+        /// whoAmI implícito en el puesto) — todos los clientes la
+        /// calculan IGUAL.</summary>
         private float FaseOrbital(int enAnillo, int capAnillo, int k)
         {
-            if (Projectile.localAI[3] <= 0f)
-                Projectile.localAI[3] = 0.37f
+            if (_faseOrbital <= 0f)
+                _faseOrbital = 0.37f
                     + enAnillo / (float)capAnillo * MathHelper.TwoPi + k * 0.7f;
-            return Projectile.localAI[3];
+            return _faseOrbital;
         }
 
         /// <summary>v6.50.107 — EL PASO DE LA LUNA (UNA vez por tick,
@@ -444,7 +456,7 @@ namespace AethonMod.Content.Projectiles
             while (fase >= MathHelper.TwoPi) fase -= MathHelper.TwoPi;
             while (fase < 0f) fase += MathHelper.TwoPi;
             if (fase <= 0f) fase = 0.01f;                  // jamás volver a «sin nacer»
-            Projectile.localAI[3] = fase;
+            _faseOrbital = fase;
         }
 
         /// <summary>¿DÓNDE ESTÁ EL LIBRO? (el espíritu fuera — el patrón
