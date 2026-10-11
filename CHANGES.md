@@ -1,5 +1,77 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.102 — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL NERVIOSO JUGABLE
+
+**Petición del usuario**: "bueno se ven bien, creo que me quedo con el
+Equinoccio, puedes borrar las otras y también borra el grimorio
+sellado, borra también tinta viva — entonces con el Equinoccio, a ese
+proyectil que ya no use bruma y haz que sea el proyectil usado pero con
+los parámetros del grimorio eterno, usa el proyectil del Equinoccio
+para el grimorio del eterno — también es hora de cambiar el sprite del
+grimorio del eterno, usaremos el Grimorio hambriento nervioso y su
+nueva mecánica para el grimorio del eterno — el grimorio del eterno
+tendrá las mecánicas del grimorio hambriento nervioso pero esta vez
+será jugable no de prueba, así que ese minuto que dura el grimorio
+hambriento nervioso… cuando hagas el cambio haz un análisis y dime
+cómo queda el grimorio del eterno".
+
+**(1) LA ELEGIDA Y LOS MUERTOS**: El Equinoccio gana el estudio de las
+cuatro pruebas; las otras TRES armas mueren (El Grimorio Estrellado,
+El Eco de la Emperatriz, El Veredicto de la Emperatriz + sus
+proyectiles Estela de Aethon y Trazo de la Emperatriz). Con el Grimorio
+Sellado muere SU CASCADA ENTERA: FragmentoAethon, ExplosionAethon, el
+SistemaObservado y el buff Observado (huérfanos sin su dueño). La
+Tinta Viva también muere — su Grieta de Tinta sigue viva en el
+grimorio que la abre. 22 archivos borrados, 11 rawimg fuera del
+paquete: 397 → 386 entradas.
+
+**(2) LA BRUMA MURIÓ**: el negro del Equinoccio ya no exhala
+BrumaColumna ni humo — queda el eclipse LIMPIO: disco oscuro
+(FlushAlpha) + rim violeta pulsante + chispas de llama de sombra.
+
+**(3) EL GRIMORIO DEL ETERNO RENACE COMO EL NERVIOSO JUGABLE** —
+`GrimoireEternal : GrimorioHambrientoNervioso`, el merge completo:
+- **EL CUERPO**: el sprite del Nervioso (Texture override, una sola
+  fuente de verdad) con TODO su dibujo vivo — ojo que sigue al cursor,
+  párpados, temblor, glitch en tiras, sobresaltos, iris rojo.
+- **EL RELOJ JUGABLE**: `TasaHambre = 1/54000` — el hambre sube
+  0→100% en QUINCE MINUTOS (el Nervioso de prueba conserva su minuto
+  de demo). La espera de caza pasa de 5 s (prueba) a 10 s (jugable).
+  El clic derecho YA NO reinicia el apetito: el Eterno se alimenta
+  CAZANDO, no de gratis.
+- **LA REFACTORIZACIÓN POR ESTADO**: toda la máquina que era static de
+  LA CLASE Nervioso (glitch, sobresalto, temblor, layout, caza, voz)
+  pasó a VIVIR EN EstadoGrimorio (por instancia) — el Nervioso de
+  prueba y el Eterno corren cada uno SU ojo, SU glitch y SU caza. El
+  espíritu flotante y su sombra reciben el TIPO de su libro en ai[2]
+  (EstadoDeLibro): sirven al libro que LOS llamó — SU hambre baja,
+  SU XP cobra.
+- **EL DISPARO**: EL EQUINOCCIO con los parámetros del Eterno — cada
+  disparo abre la fuente dividida (desde el LIBRO flotante si el
+  espíritu está fuera): EL DORADO (ai[2]=9201, luz de sol + ocho
+  rayos) y EL NEGRO (ai[2]=9202, eclipse sin bruma). Cada "bolt" del
+  sistema de niveles es una PAREJA día/noche: 1 base + 1 cada 3
+  niveles, en abanico.
+- **LO SUYO DE SIEMPRE**: niveles infinitos (XP del bestiario + la XP
+  del festín egoísta de SU sombra — el libro que come es el libro que
+  sube), escalado por nivel, Orbe Cósmico en clic der, LOS TRES
+  ESTADOS, sin maná (el hambre ES el coste).
+
+**ENTREGA**: la Bolsa de la Emperatriz ahora entrega SÓLO al
+Equinoccio (receta 5 madera intacta); el Eterno sigue llegando por la
+Bolsa de los Fundacionales + el Génesis (sin la receta de 5 maderas
+heredada — el arma raíz no se clava con madera).
+
+**VERIFICACIÓN**: audit_texturas 0 faltantes · oráculo 0/0 (cazó 3
+ tandas: el namespace AethonMod vs la clase, la DURACION_SOBRESALTO
+ huérfana y un Math sin calificar) · build real 0/0 (ruta absoluta
+ canónica) · **.tmod 2.571.347 B, md5 6360c13efdb69a52b8592023d44b2b41,
+ 386 entradas**, EOF exacto, paquete==árbol en los 3 idiomas (cero
+ claves autocreadas) · símbolos VIVOS en el heap (EstadoDeLibro/
+ EstadoEterno/LanzarPareja/TicksQuietudSalida/TasaHambre) y los 10
+ muertos AUSENTES · headless «Sandboxing v6.50.102 → Adding Recipes →
+ Choose World» 0 excepciones. Respaldo /home/sync.
+
 ## Commit v6.50.101 — EL CONTRATO DEL LOTE: EL CRASH DE LAS 4 ARMAS CAZADO (la lección del client.log)
 
 **Petición del usuario**: "hay varios errores, revisa las nuevas armas,

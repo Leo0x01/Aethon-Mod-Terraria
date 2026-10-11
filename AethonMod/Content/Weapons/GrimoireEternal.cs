@@ -11,71 +11,79 @@ using AethonMod.Content.Globals;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
-    /// Grimorio del Eterno — arma mágica híbrida (magia + invocación).
+    /// GRIMORIO DEL ETERNO — v6.50.102 — EL NERVIOSO JUGABLE.
     ///
-    /// SISTEMA DE NIVELES:
-    /// - Sube de nivel comiendo XP REAL (rareza del bestiario 0–5★,
-    ///   primera kill de cada especie ×3, hardmode ×2 en criaturas,
-    ///   jefes con fórmula FIJA que crece con su nivel).
-    /// - v6.46: LOS TRES ESTADOS — sostenido: TODO el poder; en la barra
-    ///   rápida: come XP + slots de minion + vida/maná (tope +100);
-    ///   guardado: nada (los minions ya invocados permanecen).
-    /// - Niveles infinitos. Sin dependencias de BranchType ni IsImprinted.
+    /// La letra del usuario: «creo que me quedo con el Equinoccio […] usa
+    /// el proyectil del Equinoccio para el grimorio del eterno, también es
+    /// hora de cambiar el sprite del grimorio del eterno, usaremos el
+    /// Grimorio hambriento nervioso y su nueva mecánica para el grimorio
+    /// del eterno […] el grimorio del eterno tendrá las mecánicas del
+    /// grimorio hambriento nervioso pero esta vez será jugable no de
+    /// prueba, así que ese minuto que dura el grimorio hambriento
+    /// nervioso…». EL MERGE COMPLETO, en una sola arma:
     ///
-    /// CLICK IZQUIERDO: dispara el Nightglow vanilla (931 — el homing de
-    /// verdad desde el fix 48688dd; el ArcaneBolt propio quedó archivado
-    /// como API futura). SIN MANÁ (v6.42, arsenal de pruebas).
-    /// CLICK DERECHO: invoca CosmicOrbMinion. SIN MANÁ en pruebas
-    /// (v6.45, bandera ManaGratisEnPruebas — apagarla restaura el coste).
+    /// · EL CUERPO: el sprite del Grimorio Hambriento Nervioso (la familia
+    ///   del ojo — temblor, glitch en tiras, sobresaltos, iris rojo) con
+    ///   todas sus capas y su dibujo vivo.
+    /// · EL RELOJ JUGABLE: el hambre sube 0→100% en QUINCE MINUTOS
+    ///   (1/54000 por tick — el Nervioso de prueba corre su minuto de
+    ///   demo). Debajo del 25% EL CAZADOR callado; del 25% sale a cazar
+    ///   si el dueño está quieto 10 s (la demo usa 5) o lleva 30 s sin
+    ///   darle uso; del 50% EL IMPACIENTE — ojo ansioso, voz, temblor,
+    ///   glitch, sobresaltos y las OLEADAS probables (4%→20% cada 5 s).
+    ///   Sólo la presa comida lo baja (−1%): el clic derecho ya NO
+    ///   reinicia el apetito — el Eterno se alimenta CAZANDO, no de gratis.
+    /// · LA CAZA PROPIA: el espíritu (GrimorioNerviosoFlotante) sale con
+    ///   el TIPO del Eterno en ai[2] — su Sombra de la Página devora
+    ///   presas ENTERAS (sin loot, sin crédito) y el festín egoísta paga
+    ///   LA XP DEL ETERNO: el libro que come es el libro que sube de
+    ///   nivel (ShardLevelItem).
+    /// · EL DISPARO: EL EQUINOCCIO con los parámetros del Eterno — cada
+    ///   disparo abre LA FUENTE DIVIDIDA sobre el dueño (o sobre el libro
+    ///   flotante, si el espíritu está fuera: la regla del Nervioso):
+    ///   EL DORADO con luz de sol y sus ocho rayos + EL NEGRO, disco de
+    ///   eclipse con rim violeta (la bruma murió con la .102). Cada
+    ///   «bolt» del sistema de niveles es una pareja día/noche completa:
+    ///   1 base + 1 extra cada 3 niveles, en abanico.
+    /// · LO QUE YA ERA SUYO: los niveles infinitos comiendo XP REAL (la
+    ///   rareza del bestiario mide el valor, jefes con fórmula fija), el
+    ///   escalado (+2.2% daño mágico, −0.3% use time, +1 slot de minion
+    ///   cada 10 niveles, lifesteal del 7 en 7…), el Orbe Cósmico en el
+    ///   clic derecho y LOS TRES ESTADOS (sostenido/barra rápida/guardado).
     ///
-    /// ESCALADO POR NIVEL (sostenido):
-    /// - +2.2% daño mágico, +1% daño summon, +0.2% crit, +0.4% armor pen
-    /// - -0.3% use time (tope -25%)
-    /// - +1 slot de minion cada 10 niveles (tope +10 — nivel 100)
-    /// - +1 bolt extra cada 3 niveles
-    /// - Lifesteal nivel 7+: +0.1% cada 7 niveles
-    /// - Bonus por mana faltante: +0.5% daño por 1% mana faltante (tope +50%)
+    /// Sin maná (la regla de la casa — el hambre ES el coste).
     /// </summary>
-    public class GrimoireEternal : ModItem
+    public class GrimoireEternal : GrimorioHambrientoNervioso
     {
-        // v5.10: Anti-doble (migrado del TestStaff que funciona).
-        // Previene que Shoot se procese dos veces en el mismo frame,
-        // lo que causaba que se lanzaran 2 proyectiles y se invocaran
-        // 2 minions por click.
-        // v5.18: Renombrado _lastShootFrame → _lastFireFrame para coincidir
-        // con TestStaff, y movido el check DESPUÉS del bloque del minion
-        // (igual que TestStaff que funciona).
-        // v5.25: Cooldown ELIMINADO — ya no es necesario porque UseSpeedMult
-        // ahora redondea el useTime a entero, evitando el doble Shoot.
+        // === EL CUERPO DEL NERVIOSO (v6.50.102): mismo sprite que la
+        //     familia del ojo — una sola fuente de verdad para el arte ===
+        public override string Texture => "AethonMod/Content/Weapons/GrimorioHambrientoNervioso";
+
+        // === EL RELOJ JUGABLE: 0→100% en QUINCE MINUTOS (54.000 ticks).
+        //     El Nervioso de prueba corre su minuto de demo (1/3600) — el
+        //     Eterno es para PARTIDA DE VERDAD: el hambre vuelve a ser una
+        //     presión, no un espectáculo. ===
+        private static readonly EstadoGrimorio _estadoEterno = new EstadoGrimorio
+        {
+            Nervioso = true,
+            TasaHambre = 1f / 54000f,   // 15 minutos de 0 a 100%
+        };
+        protected override EstadoGrimorio Estado => _estadoEterno;
+        internal static EstadoGrimorio EstadoEterno => _estadoEterno;
+
+        // === LA IDENTIDAD EN EL REGISTRO DE LA FAMILIA: el espíritu y su
+        //     sombra sirven al libro que LOS llamó (ai[2] = este tipo) ===
+        protected override int TipoLibro => ModContent.ItemType<GrimoireEternal>();
+
+        // === LA ESPERA JUGABLE: 10 s de quietud sacan al libro a cazar
+        //     (la letra marcó los 5 s como valor de PRUEBA del Nervioso) ===
+        protected override int TicksQuietudSalida => 600;
+
+        // v5.10/v5.18: el anti-doble de la casa (mismo frame) — heredado
+        // del TestStaff que funciona. Previene que Shoot se procese dos
+        // veces en el mismo frame.
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
-
-        // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
-        // removido por request del usuario. El crafteo del Grimorio ya no produce
-        // temblor de pantalla ni texto de lore.
-
-        public override void SetStaticDefaults() { }
-
-        public override void SetDefaults()
-        {
-            Item.damage = 11;
-            Item.DamageType = DamageClass.Magic;
-            Item.width = 30;
-            Item.height = 38;
-            Item.useTime = 22;
-            Item.useAnimation = 22;
-            Item.useStyle = ItemUseStyleID.HoldUp; // v5.18: restaurado (la animación no era el problema)
-            Item.knockBack = 3f;
-            Item.value = Item.buyPrice(0, 10, 0, 0);
-            Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item8;
-            Item.autoReuse = true; // v5.1: permite mantener click para disparar continuo
-            Item.shoot = 931; // Nightglow (fix 48688dd) — proyectil vanilla con homing
-            Item.shootSpeed = 12f;
-            Item.mana = 0;    // v6.42: SIN MANÁ (la regla de la casa — todas son armas de pruebas)
-            Item.noMelee = true;
-            Item.reuseDelay = 10; // v5.16: cooldown forzado (migrado del TestStaff que funciona)
-        }
 
         /// <summary>
         /// Obtiene el ShardLevelItem del arma. Defensivo: try/catch.
@@ -98,7 +106,42 @@ namespace AethonMod.Content.Weapons
         }
 
         // ================================================================
-        //  ESCALADO DE DAÑO
+        //  LOS PARÁMETROS DEL ETERNO (los de siempre — el Equinoccio
+        //  hereda EL DAÑO y EL RITMO de aquí, no al revés)
+        // ================================================================
+
+        public override void SetDefaults()
+        {
+            Item.damage = 11;
+            Item.DamageType = DamageClass.Magic;
+            Item.width = 30;               // el cuerpo del Nervioso (textura 36×49)
+            Item.height = 42;
+            Item.useTime = 22;
+            Item.useAnimation = 22;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.knockBack = 3f;
+            Item.value = Item.buyPrice(0, 10, 0, 0);
+            Item.rare = ItemRarityID.Quest;
+            Item.UseSound = SoundID.Item8;
+            Item.autoReuse = true;         // v5.1: mantener click = disparo continuo
+            Item.shoot = 931;              // Nightglow vanilla (el número — como el Equinoccio)
+            Item.shootSpeed = 12f;
+            Item.mana = 0;                 // la regla de la casa — el hambre ES el coste
+            Item.noMelee = true;
+            Item.reuseDelay = 10;          // v5.16: cooldown del TestStaff que funciona
+        }
+
+        public override void AddRecipes()
+        {
+            // LA ADQUISICIÓN CANÓNICA DEL ETERNO (NO hereda la receta de
+            // 5 maderas del Nervioso de prueba): la Bolsa de los
+            // Fundacionales lo entrega en cada entrada al mundo y el
+            // Génesis lo forja (GenesisShard) — el arma raíz del mod no
+            // se clava con madera.
+        }
+
+        // ================================================================
+        //  ESCALADO DE DAÑO (el sistema de niveles del Eterno, intacto)
         // ================================================================
 
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
@@ -110,20 +153,8 @@ namespace AethonMod.Content.Weapons
             damage *= WeaponScaling.MagicDamageMult(sl.Level);
 
             // BONUS POR MANA FALTANTE — la mitad mágica es por-golpe (aquí);
-            // la mitad de invocación vive en ShardPlayer (v6.45, ver abajo).
+            // la mitad de invocación vive en ShardPlayer (v6.45).
             damage *= WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
-
-            // v6.45: EL BONUS DE SUMMON MOVIDO AL SITIO CORRECTO. Antes las
-            // tres líneas siguientes mutaban stats GLOBALES del jugador
-            // (daño de invocación, crítico mágico y penetración) desde este
-            // hook, que solo corre al calcular el daño de ESTE arma: los
-            // minions atacando en otros ticks no recibían nada (la misma
-            // clase de letra muerta que la regeneración de la auditoría R44).
-            // Ahora ShardPlayer.PostUpdateEquips las aplica persistentemente
-            // mientras el Grimorio esté en el inventario.
-            //   player.GetDamage(DamageClass.Summon)      += SummonDamageBonus
-            //   player.GetCritChance(DamageClass.Magic)   += CritBonus
-            //   player.GetArmorPenetration(DamageClass.Magic) += ArmorPenBonus
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -136,9 +167,8 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
         {
-            // v6.42: SIN MANÁ (la regla de la casa — todas son armas de
-            // pruebas): el coste escalado se retira; el nivel sigue
-            // escalando daño/velocidad, ya no el maná.
+            // la regla de la casa: SIN MANÁ — el nivel escala daño y
+            // velocidad; el RECURSO de esta arma es el hambre.
             Item.mana = 0;
             reduce = 1f;
             mult = 0f;
@@ -148,16 +178,15 @@ namespace AethonMod.Content.Weapons
         {
             var sl = GetShard(Item);
             if (sl == null) return 1f;
-            // v5.25: Pasar Item.useTime como base para que UseSpeedMult
-            // redondee el useTime efectivo a entero (evita doble Shoot)
+            // v5.25: base = Item.useTime para que UseSpeedMult redondee el
+            // useTime efectivo a entero (evita el doble Shoot).
             return WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
         }
 
         /// <summary>
-        /// v5.26: UseAnimationMultiplier — reduce useAnimation proporcionalmente
-        /// al useTime para que NUNCA sea menor. Si useAnimation < useTime efectivo,
-        /// tModLoader dispara Shoot 2 veces por ciclo de animación.
-        /// Aplicar el mismo multiplier a useAnimation lo arregla.
+        /// v5.26: reduce useAnimation proporcionalmente al useTime para que
+        /// NUNCA sea menor (si lo fuera, tModLoader dispararía Shoot 2 veces
+        /// por ciclo de animación).
         /// </summary>
         public override float UseAnimationMultiplier(Player player)
         {
@@ -175,38 +204,36 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 
-            // Click derecho (minion): permite Mana Flower (fix 48688dd)
-            // v6.45: en modo pruebas NO se exige maná (bandera); con la
-            // bandera OFF vuelve el coste escalado + Mana Flower.
+            // Click derecho (minion): permite Mana Flower (fix 48688dd);
+            // v6.45: en modo pruebas NO se exige maná (bandera).
             if (player.altFunctionUse == 2)
             {
                 if (ManaMinionGratis()) return true;
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 return player.statMana >= minionCost || player.manaFlower;
             }
-            // Click izquierdo (bolt): return true — Terraria maneja mana + Mana Flower (fix 48688dd)
+            // Click izquierdo (el Equinoccio): siempre
             return true;
         }
 
         public override bool AltFunctionUse(Player player) => true;
 
-        // v5.22: Eliminado UseItem override (el TestStaff no lo tiene y funciona)
-        // v5.4: Eliminado CanRightClick() y RightClick() porque CanRightClick=true
-        // hacia que tModLoader interpretara el click derecho como 'consumir item'
-        // (como una poción), haciendo que el Grimorio desapareciera del inventario.
-        // La alternancia del tooltip ahora se maneja via ItemSlot.LeftClick en
-        // el GlobalItem TooltipToggleItem (ver Content/Globals/TooltipToggleItem.cs).
+        /// <summary>v6.50.102 — LA DIFERENCIA CON EL NERVIOSO DE PRUEBA: el
+        /// clic derecho NO reinicia el apetito — invoca al Orbe Cósmico
+        /// (ver Shoot). El Eterno se alimenta CAZANDO (sus presas), no de
+        /// gratis: el botellón de la demo murió con el minuto.</summary>
+        public override bool? UseItem(Player player) => null;
 
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
+            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             // === v5.18: LÓGICA ANTI-DOBLE IDÉNTICA AL TESTSTAFF (que funciona) ===
-            // El anti-doble del fire está DESPUÉS del bloque del minion (igual que TestStaff)
             uint currentFrame = Main.GameUpdateCount;
 
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 
-            // === CLICK DERECHO: invocar minion ===
+            // === CLICK DERECHO: invocar minion (la firma del Eterno) ===
             if (player.altFunctionUse == 2)
             {
                 // Anti-doble específico para minions
@@ -228,7 +255,6 @@ namespace AethonMod.Content.Weapons
                 if (currentMinions >= maxMinions)
                 {
                     if (Main.myPlayer == player.whoAmI)
-                        // v6.50.3 — strings→hjson (hallazgo V-3)
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.SlotsMinionLlenos",
                             currentMinions, maxMinions),
                             new Color(255, 120, 120));
@@ -236,11 +262,9 @@ namespace AethonMod.Content.Weapons
                 }
 
                 // v6.45: cobrar mana del minion SOLO con la bandera de coste
-                // activa ( ManaGratisEnPruebas = OFF ). En modo pruebas la
-                // invocación es gratis como el resto del arsenal (v6.42).
+                // activa (ManaGratisEnPruebas = OFF).
                 if (!ManaMinionGratis())
                 {
-                    // Cobrar mana del minion (fix 48688dd: maneja Mana Flower)
                     int minionCost = WeaponScaling.MinionManaCost(level);
                     if (player.statMana < minionCost && !player.manaFlower) return false;
                     if (player.statMana >= minionCost)
@@ -250,18 +274,9 @@ namespace AethonMod.Content.Weapons
                     }
                 }
 
-                // Invocar minion (EXACTAMENTE una vez)
+                // Invocar minion (EXACTAMENTE una vez) — el nivel viaja en
+                // ai[2] desde el spawn (v6.50.2: el paquete 27 sí viaja).
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
-                // v5.29: Cachear el nivel del Grimorio en ai[2] para que el minion
-                // mantenga sus stats (velocidad, cooldown, rango, daño) aunque
-                // el jugador cambie de arma después de invocarlo.
-                // v6.50.2 — FIX (ai[] post-spawn no viaja): el paquete 27 sale
-                // DENTRO de NewProjectile → la escritura de ai[2] DESPUÉS del
-                // spawn solo existía en la copia local (las réplicas del minion
-                // en el server y en los demás clientes leían ai[2]==0 y caían al
-                // fallback de HeldItem — stats desincronizadas en MP). El nivel
-                // viaja ahora como argumento ai2 del spawn (Shoot corre solo en
-                // el cliente dueño; el minion nunca escribe ai[2]).
                 Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
                     damage, knockback, player.whoAmI, 0f, 0f, level);
@@ -269,7 +284,7 @@ namespace AethonMod.Content.Weapons
                 return false;
             }
 
-            // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
+            // === CLICK IZQUIERDO: EL EQUINOCCIO DEL ETERNO (v6.50.102) ===
             // Anti-doble simple (mismo frame check).
             if (currentFrame == _lastFireFrame)
             {
@@ -277,53 +292,99 @@ namespace AethonMod.Content.Weapons
             }
             _lastFireFrame = currentFrame;
 
+            // el dueño está cazando ÉL: el reloj del ausente se reinicia
+            // (la caza solitaria es del ausente — la letra del Nervioso)
+            Estado.TicksSinAtaqueLibro = 0;
+
+            // EL ORIGEN: si el espíritu está FUERA, el disparo nace DEL
+            // LIBRO FLOTANTE (la regla del Nervioso: «si el jugador ataca
+            // y el libro esta fuera sus ataques salen del libro»)
+            Vector2 pos = OrigenDelDisparo(player, position);
+
+            // === LA FUENTE DIVIDIDA (la del Equinoccio, EXACTA): la
+            //     velocidad de vanilla (aleatoria, siempre hacia arriba) —
+            //     el día y la noche separándose sobre tu cabeza ===
+            Vector2 baseV = Main.rand.NextVector2Circular(1f, 1f)
+                          + Main.rand.NextVector2CircularEdge(3f, 3f);
+            if (baseV.Y > 0f) baseV.Y *= -1f;
+
+            // LA PAREJA PRINCIPAL + LAS EXTRA POR NIVEL: cada «bolt» del
+            // sistema del Eterno es UN DÍA Y UNA NOCHE — 1 pareja base y
+            // una más cada 3 niveles, en abanico (el homing del 931 hace
+            // el resto)
             int extra = WeaponScaling.ExtraProjectiles(level);
 
-            // Proyectil principal (1 exacto)
-            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            LanzarPareja(source, pos, baseV, damage, knockback, player);
 
-            // Bolts extra en abanico
             for (int i = 0; i < extra; i++)
             {
-                float angle = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
-                Vector2 perturbedVel = velocity.RotatedBy(angle);
-                Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
+                float angulo = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
+                LanzarPareja(source, pos, baseV.RotatedBy(angulo), damage, knockback, player);
             }
 
-            return false; // return false → tModLoader NO dispara proyectil extra
+            return false;   // todos los spawns son nuestros
+        }
+
+        /// <summary>EL DÍA Y LA NOCHE — la pareja del Equinoccio con los
+        /// parámetros del Eterno (el daño ya viene escalado por nivel):
+        /// EL DORADO con luz de sol y ocho rayos (ai[2]=9201) y EL NEGRO,
+        /// disco de eclipse con rim violeta (ai[2]=9202 — sin bruma desde
+        /// la .102, la letra del usuario).</summary>
+        private static void LanzarPareja(EntitySource_ItemUse_WithAmmo source, Vector2 pos,
+            Vector2 vel, int damage, float knockback, Player player)
+        {
+            // EL DORADO — EL DÍA: ai[1] = 0.64 → el render del 931 hace
+            // hslToRgb((hue+0.5)%1) → matiz 0.14 = DORADO de verdad
+            Projectile.NewProjectile(source, pos, vel.RotatedBy(-0.35f),
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.64f,    // ai[1]: EL MATIZ DORADO
+                9201f);   // ai[2]: la marca del FX del sol
+
+            // EL NEGRO — LA NOCHE: ai[1] = 0.28 → matiz 0.78 = VIOLETA
+            // (el rim del eclipse que late en la oscuridad)
+            Projectile.NewProjectile(source, pos, vel.RotatedBy(0.35f),
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.28f,    // ai[1]: el matiz violeta (el rim)
+                9202f);   // ai[2]: la marca del FX del eclipse (SIN bruma)
         }
 
         // ================================================================
-        //  TOOLTIP
+        //  TOOLTIP — LA HERENCIA VIVA: la barra de hambre y el estado del
+        //  Nervioso (el Eterno ES el Nervioso jugable) + TODAS las
+        //  secciones del sistema de niveles de siempre.
         // ================================================================
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // Ocultar línea vanilla "Level: X"
+            // === LA HERENCIA DEL NERVIOSO: la barra de hambre viva + el
+            //     estado (tranquilo/hambriento/impaciente/cazando) ===
+            base.ModifyTooltips(tooltips);
+
+            // rescatar la pareja del hambre (va tras el daño) y quitar el
+            // nivel del Nervioso (la PROGRESIÓN del Eterno ya muestra
+            // nivel+XP con su barra) + las vanilla "Level"
+            TooltipLine barraHambre = null, estadoHambre = null;
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
+                string n = tooltips[i].Name ?? "";
                 string t = tooltips[i].Text ?? "";
-                if (tooltips[i].Name == "Level" || tooltips[i].Name == "ItemLevel" ||
+                if (n == "HambreBarra") { barraHambre = tooltips[i]; tooltips.RemoveAt(i); }
+                else if (n == "HambreEstado") { estadoHambre = tooltips[i]; tooltips.RemoveAt(i); }
+                else if (n == "NivelNervioso" || n == "Level" || n == "ItemLevel" ||
                     t.StartsWith("Level:") || t.StartsWith("Level："))
                     tooltips.RemoveAt(i);
             }
 
             var sl = GetShard(Item);
-            if (sl == null) return;
 
-            // === v5.14: En vista COMPLETA, ocultar líneas vanilla (básicas) ===
-            // Las líneas vanilla (Damage, CritChance, Knockback, UseMana, Tooltip, etc.)
-            // son info básica que ya no se necesita en la vista completa porque
-            // tenemos secciones detalladas (DAÑO, RECURSOS, etc.)
-            if (Globals.TooltipToggleItem.ShowExtendedTooltip)
+            // === v5.14: en vista COMPLETA, ocultar líneas vanilla (básicas) ===
+            if (sl != null && Globals.TooltipToggleItem.ShowExtendedTooltip)
             {
                 for (int i = tooltips.Count - 1; i >= 0; i--)
                 {
                     string name = tooltips[i].Name ?? "";
-                    // Ocultar TODAS las líneas vanilla y de modifier
-                    // Líneas vanilla: Damage, CritChance, Speed, Knockback, UseMana, ManaCost, ItemLevel
-                    // Tooltip: "Tooltip0", "Tooltip1", etc. (usar StartsWith)
-                    // Modifier: "PrefixDamage", "PrefixSpeed", "PrefixCrit", etc. (usar StartsWith)
                     if (name == "Damage" || name == "CritChance" || name == "Speed" ||
                         name == "Knockback" || name == "UseMana" || name == "ManaCost" ||
                         name == "BestiaryNotes" || name == "ItemLevel" ||
@@ -335,14 +396,25 @@ namespace AethonMod.Content.Weapons
                 }
             }
 
+            // === LA PAREJA DEL HAMBRE: pegada al daño (básica) o al tope
+            //     (completa) — el apetito es EL estado del arma ===
+            int ancla = 0;
+            for (int i = 0; i < tooltips.Count; i++)
+            {
+                if (tooltips[i].Name == "Damage") { ancla = i + 1; break; }
+            }
+            if (estadoHambre != null)
+                tooltips.Insert(System.Math.Min(ancla, tooltips.Count), estadoHambre);
+            if (barraHambre != null)
+                tooltips.Insert(System.Math.Min(ancla, tooltips.Count), barraHambre);
+
+            if (sl == null) return;
+
             // === v5.11: SummonDamage SOLO en vista básica (no en completa) ===
             int summonDmg = (int)(Item.damage * (1f + sl.Level * WeaponScaling.SummonDamagePerLevel));
 
-            // === v5.2: TOOLTIP CON 2 MODOS ===
-            // Modo básico (default): solo nivel + XP + próximo hito (ventana pequeña)
-            // Modo completo (click derecho): todas las estadísticas
+            // === v5.2: TOOLTIP CON 2 MODOS (básico / completo) ===
 
-            // Calcular todos los valores
             int xpNeeded = sl.XPForNextLevel();
             float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
             pct = System.Math.Clamp(pct, 0f, 1f);
@@ -356,13 +428,9 @@ namespace AethonMod.Content.Weapons
             int nextMilestoneNum = nextMilestoneLevel / 5;
             var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
 
-            // Indicador de modo (básico/completo)
-            // v5.7: Usa flag estático de TooltipToggleItem (mismo patrón que SeerOrb)
-            // v5.8: 'Próximo hito' solo en vista básica (no duplicar en completa)
-            // v5.9: Sección PROGRESIÓN también solo en vista básica
             if (Globals.TooltipToggleItem.ShowExtendedTooltip)
             {
-                // === MODO COMPLETO: mostrar todas las estadísticas (sin Próximo hito) ===
+                // === MODO COMPLETO: todas las estadísticas ===
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
                 int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
                 float critPct = WeaponScaling.CritBonus(sl.Level);
@@ -374,11 +442,9 @@ namespace AethonMod.Content.Weapons
                 float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
                 float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
                 float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
-                // v6.45: ManaCost eliminado — el bolt es SIN MANÁ desde v6.42
-                // (Item.mana = 0): la línea "Costo: X mana por disparo" era
-                // una promesa rota en el tooltip.
                 int minionCost = WeaponScaling.MinionManaCost(sl.Level);
-                int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
+                // v6.50.102 — cada «bolt» es una pareja día/noche
+                int totalPares = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
                 int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
                 float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
                 int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
@@ -395,15 +461,11 @@ namespace AethonMod.Content.Weapons
                     $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
                 tooltips.Add(new TooltipLine(Mod, "ArmorPen",
                     $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
-                // v6.45: MinionSlots movido a la sección ORBE CÓSMICO — el
-                // bonus de summon en su sitio correcto, junto al resto de
-                // stats del minion (antes flotaba en la sección de DAÑO).
                 tooltips.Add(new TooltipLine(Mod, "Knockback",
                     $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
 
                 tooltips.Add(new TooltipLine(Mod, "SectionResources", "[c/55AAFF:═══ RECURSOS ═══]"));
-                // v6.46: el tope +100 de la barra rápida anotado en la línea
-                // misma — el número grande es el de SOSTENER el libro.
+                // v6.46: el tope +100 de la barra rápida anotado en la línea misma
                 tooltips.Add(new TooltipLine(Mod, "ManaMax",
                     $"[c/55AAFF:+{bonusMana} mana máximo (tope +100 sin sostener)]"));
                 tooltips.Add(new TooltipLine(Mod, "LifeMax",
@@ -416,17 +478,16 @@ namespace AethonMod.Content.Weapons
                     $"[c/FFAA55:-{dmgRed:F0}% daño recibido]"));
 
                 tooltips.Add(new TooltipLine(Mod, "SectionProjectile", "[c/FFD700:═══ PROYECTIL ═══]"));
-                tooltips.Add(new TooltipLine(Mod, "Bolts",
-                    $"[c/55AAFF:{totalBolts} proyectil(es) por disparo]"));
+                tooltips.Add(new TooltipLine(Mod, "Parejas",
+                    $"[c/55AAFF:{totalPares} pareja(s) día/noche por disparo ({totalPares * 2} orbes)]"));
                 tooltips.Add(new TooltipLine(Mod, "AreaDmg",
                     $"[c/55AAFF:+{areaDmg}px daño en área]"));
-                // v6.45: la línea "Costo: X mana por disparo" eliminada — el
-                // bolt no cuesta maná desde v6.42 (promesa rota).
+                tooltips.Add(new TooltipLine(Mod, "OrigenLibro",
+                    "[c/BE78FD:Con el espíritu fuera, dispara el LIBRO]"));
 
                 tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
-                // v6.45: los slots de minion viven aquí — junto al resto del
-                // summon (antes en la sección DAÑO). v6.46: escalera nueva
-                // (cada 10 niveles, tope +10 — se sostienen en la barra rápida).
+                // v6.45/v6.46: los slots de minion — la escalera de cada 10
+                // niveles (tope +10, se sostienen en la barra rápida).
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
                     $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
@@ -438,8 +499,7 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "MinionCd",
                     $"[c/BE78FD:{hitCd} frames de cooldown]"));
                 // v6.45: el costo de invocación solo se anuncia cuando está
-                // ACTIVO (bandera de pruebas OFF) — en modo gratis mostrar
-                // un costo sería otra promesa rota.
+                // ACTIVO (bandera de pruebas OFF).
                 if (!ManaMinionGratis())
                 {
                     tooltips.Add(new TooltipLine(Mod, "ManaMinion",
@@ -468,10 +528,7 @@ namespace AethonMod.Content.Weapons
             }
             else
             {
-                // === MODO BÁSICO: SummonDamage + PROGRESIÓN + Próximo hito + indicador ===
-                // v5.11: SummonDamage (daño de invocación) solo aquí (no en vista completa)
-                // v5.62: SummonDamage en blanco (antes morado BE78FD) y justo después del
-                //        daño mágico vanilla (línea "Damage"), no al final del tooltip.
+                // === MODO BÁSICO: SummonDamage + PROGRESIÓN + Próximo hito ===
                 int summonDmgIndex = -1;
                 for (int i = 0; i < tooltips.Count; i++)
                 {
@@ -482,7 +539,7 @@ namespace AethonMod.Content.Weapons
                     }
                 }
                 var summonLine = new TooltipLine(Mod, "SummonDamage",
-                    $"{summonDmg} daño de invocación"); // sin [c/...] = color blanco default
+                    $"{summonDmg} daño de invocación"); // sin [c/...] = blanco default
                 if (summonDmgIndex >= 0 && summonDmgIndex < tooltips.Count)
                     tooltips.Insert(summonDmgIndex, summonLine);
                 else

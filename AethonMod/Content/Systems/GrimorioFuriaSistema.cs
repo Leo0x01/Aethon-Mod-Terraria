@@ -1704,9 +1704,11 @@ namespace AethonMod.Content.Systems
                 new Vector2(0f, 0.5f), new Vector2(largo * (1f - frac), alto), SpriteEffects.None, 0f);
 
             // === LA CAJITA DEL TÍTULO (el grimorio + «Furia del grimorio») ===
+            // v6.50.102 — el Eterno viste el sprite del NERVIOSO (la familia
+            // del ojo): la cajita también.
             if (_iconoTitulo == null || _iconoTitulo.IsDisposed)
                 _iconoTitulo = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Weapons/GrimoireEternal").Value;
+                    "AethonMod/Content/Weapons/GrimorioHambrientoNervioso").Value;
             Texture2D icono = _iconoTitulo;
             // v6.50.59 — EL TÍTULO CON NIVEL: la furia de nivel 2+ se
             // anuncia en SU cajita (el nivel es el nombre del castigo). En

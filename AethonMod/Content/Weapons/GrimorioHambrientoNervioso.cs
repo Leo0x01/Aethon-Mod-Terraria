@@ -99,7 +99,9 @@ namespace AethonMod.Content.Weapons
         // === EL GLITCH — las perillas de la .88 (el volumen aprobado) ===
         // v6.50.91: el gate ahora se lee sobre HambreEfectos() — sin glitch
         // por debajo del 12% DE LA FASE IMPACIENTE (= 56% de hambre real)
-        private const float HAMBRE_MIN_GLITCH = 0.12f;
+        // v6.50.102: internal — la MÁQUINA vive ahora en EstadoGrimorio
+        // (por estado) y lee las constantes de aquí (su casa conceptual).
+        internal const float HAMBRE_MIN_GLITCH = 0.12f;
 
         // === v6.50.91 — EL UMBRAL DE LA IMPACIENCIA (la letra del usuario):
         //     debajo del 50% el libro es EL CAZADOR (tranquilo, sale a
@@ -112,7 +114,8 @@ namespace AethonMod.Content.Weapons
         internal const float UMBRAL_CACERIA = 0.25f;
         // LA ESPERA: los segundos de quietud del jugador que sacan al libro
         // a cazar (5 s AHORA QUE ES UNA PRUEBA — la letra lo marcó como
-        // valor de prueba; ajustable cuando el sistema esté listo)
+        // valor de prueba; el Eterno jugable la re-escribe a 10 s vía
+        // TicksQuietudSalida)
         internal const int TICKS_QUIETUD_PRUEBA = 300;
         // v6.50.94 — LA CAZA DEL AUSENTE (la letra: «esto de la caza por su
         // cuenta es cuando el jugador esta en afk o simplemente lleva
@@ -132,147 +135,44 @@ namespace AethonMod.Content.Weapons
         private static readonly EstadoGrimorio _estadoNervioso = new EstadoGrimorio { Nervioso = true };
         protected override EstadoGrimorio Estado => _estadoNervioso;
 
-        // === LA MÁQUINA (avanza UNA vez por tick — el glitch y el
-        //     sobresalto comparten guard: las tres vías de dibujo los leen) ===
-        private static uint _tickMaquina;
-        private static int _tHastaRafaga = 120;    // 2 s hasta la primera
-        private static int _tRafaga;               // >0: ticks que le quedan a la ráfaga
-        private static uint _semilleRafaga;
+        // === v6.50.102 — LA FAMILIA SE AMPLÍA: EL ETERNO ES UN NERVIOSO
+        //     JUGABLE. Todo lo que era static de ESTA clase y hablaba del
+        //     «único» libro nervioso se volvió POR ESTADO (EstadoGrimorio)
+        //     o POR TIPO de ítem (TipoLibro): el Nervioso de prueba corre
+        //     su minuto de demo y el Eterno su cuarto de hora jugable, cada
+        //     uno con SU ojo, SU glitch, SU caza y SU festín. ===
 
-        // === EL SOBRESALTO — el brinco del susto (7 ticks, se asienta) ===
-        private static int _tHastaSobresalto = 300; // 5 s hasta el primero
-        private static int _tSobresalto;            // >0: ticks que le quedan al salto
-        private static Vector2 _dirSobresalto = Vector2.Zero;
-        private static float _ampSobresalto;
-        private const int DURACION_SOBRESALTO = 7;
+        // === v6.50.102 — LAS CONSTANTES DE LA MÁQUINA (viven AQUÍ, su casa
+        //     conceptual; la máquina misma vive POR ESTADO en EstadoGrimorio) ===
+        // EL SOBRESALTO: el brinco del susto (7 ticks, se asienta)
+        internal const int DURACION_SOBRESALTO = 7;
 
-        /// <summary>El hash determinista del layout (mismo tick = mismo glitch).</summary>
-        private static uint Hash(uint x)
+        /// <summary>¿QUÉ LIBRO SOY? El tipo de ítem que dispara esta
+        /// instancia (el Eterno lo re-escribe): decide a qué libro van la
+        /// XP del festín, qué estado lo anima y qué sprite muestra el
+        /// espíritu flotante.</summary>
+        protected virtual int TipoLibro => ModContent.ItemType<GrimorioHambrientoNervioso>();
+
+        /// <summary>LOS SEGUNDOS DE QUIETUD que sacan al libro a cazar: la
+        /// demo usa 5 s (la letra lo marcó como valor de PRUEBA); el Eterno
+        /// jugable pide 10 s (menos intrusivo en partida de verdad).</summary>
+        protected virtual int TicksQuietudSalida => TICKS_QUIETUD_PRUEBA;
+
+        /// <summary>EL ESTADO DE UN LIBRO por su tipo de ítem — el registro
+        /// de la familia nerviosa (lo leen el espíritu flotante y su sombra
+        /// para servir al libro que LOS llamó, no al que llegó primero).</summary>
+        internal static EstadoGrimorio EstadoDeLibro(int tipoLibro)
         {
-            x ^= x >> 16; x *= 0x7FEB352Du;
-            x ^= x >> 15; x *= 0x846CA68Bu;
-            x ^= x >> 13;
-            return x;
-        }
-
-        /// <summary>UN avance por tick: la ráfaga del glitch + el reloj del
-        /// sobresalto (la firma del Nervioso — el apetito que rompe el
-        /// libro). v6.50.91: los efectos leen HambreEfectos() — el umbral
-        /// del 50% de la impaciencia está AQUÍ.</summary>
-        internal static void PasoMaquina()
-        {
-            uint t = Main.GameUpdateCount;
-            if (t == _tickMaquina)
-                return;                       // 1 avance por tick
-            _tickMaquina = t;
-
-            float h = HambreEfectos();       // v6.50.91 — 0 debajo del 50%
-
-            // --- EL GLITCH (la máquina de la .88, intacta) ---
-            if (_tRafaga > 0)
-            {
-                if (--_tRafaga == 0)
-                {
-                    // la próxima ráfaga: 15 s → 2,1 s con el hambre (±25 %)
-                    _tHastaRafaga = (int)(60f * MathHelper.Lerp(15f, 2.1f, h)
-                        * (0.75f + 0.5f * (Hash(t) & 255u) / 255f));
-                }
-            }
-            else if (--_tHastaRafaga <= 0)
-            {
-                if (h >= HAMBRE_MIN_GLITCH)
-                {
-                    // 12-24 ticks — la ráfaga viva de la .88
-                    _tRafaga = 12 + (int)(Hash(t ^ 0x5BD1E995u) % 13u);
-                    _semilleRafaga = t * 2654435761u;
-                }
-                else
-                    _tHastaRafaga = 60;       // aún sin hambre: reintentar en 1 s
-            }
-
-            // --- EL SOBRESALTO (lo nuevo de la .90) ---
-            if (_tSobresalto > 0)
-            {
-                _tSobresalto--;
-            }
-            else if (--_tHastaSobresalto <= 0)
-            {
-                // v6.50.91 — EL CAZADOR NO BRINCA: debajo del umbral de la
-                // impaciencia no hay sobresaltos (tranquilo, vigilando)
-                if (h <= 0f)
-                {
-                    _tHastaSobresalto = 60;   // reintentar en 1 s
-                }
-                else
-                {
-                    // el reloj del susto: 6,5 s → 1,8 s con el hambre (±25 %)
-                    _tHastaSobresalto = (int)(60f * MathHelper.Lerp(6.5f, 1.8f, h)
-                        * (0.75f + 0.5f * (Hash(t ^ 0x68E31DA4u) & 255u) / 255f));
-                    _tSobresalto = DURACION_SOBRESALTO;
-                    _ampSobresalto = MathHelper.Lerp(1.2f, 2.2f, h);
-                    double ang = Main.rand.NextDouble() * Math.PI * 2.0;
-                    _dirSobresalto = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
-
-                    // EL HAMBRE ROMPE EL LIBRO: con hambre, cada brinco trae
-                    // una ráfaga corta (8-14 ticks) — brinca Y se rompe
-                    if (h >= HAMBRE_MIN_GLITCH && _tRafaga <= 0)
-                    {
-                        _tRafaga = 8 + (int)(Hash(t ^ 0x2545F491u) % 7u);
-                        _semilleRafaga = t * 2654435761u;
-                    }
-                }
-            }
-        }
-
-        /// <summary>EL SOBRESALTO de este tick (px de juego, unidades del
-        /// libro): el salto entero en el primer frame, asentándose lineal
-        /// en 7 ticks — un brinco, no un temblor.</summary>
-        private static Vector2 Sobresalto() =>
-            _tSobresalto > 0
-                ? _dirSobresalto * (_ampSobresalto * (_tSobresalto / (float)DURACION_SOBRESALTO))
-                : Vector2.Zero;
-
-        internal struct Tira { public int Y0, Y1; public float Off; }
-
-        /// <summary>EL LAYOUT de este tick (null = libro entero, sin ráfaga).</summary>
-        internal static Tira[] Layout(out float offOjo)
-        {
-            offOjo = 0f;
-            if (_tRafaga <= 0)
-                return null;
-
-            // las tiras se REGENERAN cada 2 frames — el tearing vivo
-            uint fase = Main.GameUpdateCount / 2u;
-            uint sd = Hash(_semilleRafaga ^ (fase * 0x9E3779B9u));
-            float h = HambreEfectos();   // v6.50.91 — el desfase también nace al 50%
-
-            int n = 2 + (int)(Hash(sd) % 3u);            // 2-4 tiras
-            var tiras = new Tira[n];
-            int hechos = 0;
-            int y = 3 + (int)(Hash(sd ^ 0xA5A5u) % 22u);
-            while (hechos < n && y <= 41)
-            {
-                int alto = 4 + (int)(Hash(sd ^ (uint)(hechos * 97 + 1)) % 9u);      // 4-12 px
-                float off = ((int)(Hash(sd ^ (uint)(hechos * 131 + 3)) % 13u) - 6)
-                    * (0.55f + 0.45f * h);                                          // ±3,3 → ±6 px
-                tiras[hechos++] = new Tira { Y0 = y, Y1 = Math.Min(46, y + alto), Off = off };
-                y = tiras[hechos - 1].Y1 + 1 + (int)(Hash(sd ^ (uint)(hechos * 17 + 5)) % 5u);
-            }
-            if (hechos < n)
-                Array.Resize(ref tiras, hechos);
-
-            // el iris VIAJA CON SU TIRA (el ojo nunca se desprende del libro)
-            for (int i = 0; i < tiras.Length; i++)
-                if (OJO.Y >= tiras[i].Y0 && OJO.Y < tiras[i].Y1)
-                { offOjo = tiras[i].Off; break; }
-            return tiras;
+            if (tipoLibro == ModContent.ItemType<GrimoireEternal>())
+                return GrimoireEternal.EstadoEterno;
+            return _estadoNervioso;
         }
 
         /// <summary>Dibuja la textura ENTERA o en TIRAS — inventario, mundo y
         /// el espíritu flotante (cada franja a su lugar natural + su desfase,
         /// con la MISMA transform del libro; sin ráfaga es UN draw).</summary>
         internal static void DibujarTiras(SpriteBatch sb, Texture2D tex, Vector2 position, Rectangle frame,
-            Color color, float rotation, Vector2 origin, float scale, Tira[] tiras)
+            Color color, float rotation, Vector2 origin, float scale, EstadoGrimorio.Tira[] tiras)
         {
             if (tiras == null || tiras.Length == 0)
             {
@@ -312,7 +212,7 @@ namespace AethonMod.Content.Weapons
         /// transform del held item. Con la gravedad invertida la franja ancla
         /// por su borde INFERIOR (la lección del espejo de la v6.50.84).</summary>
         private static void AgregarTiras(List<DrawData> cache, Texture2D tex,
-            DrawData proto, Rectangle fr, bool espejoY, Tira[] tiras)
+            DrawData proto, Rectangle fr, bool espejoY, EstadoGrimorio.Tira[] tiras)
         {
             if (tiras == null || tiras.Length == 0)
             {
@@ -350,31 +250,12 @@ namespace AethonMod.Content.Weapons
         }
 
         // =================================================================
-        // EL TEMBLOR (la receta del Tembloroso .87 — leyendo SU hambre).
+        // v6.50.102 — EL TEMBLOR, EL GLITCH Y EL SOBRESALTO VIVEN AHORA EN
+        // EL ESTADO (EstadoGrimorio.Temblor/Layout/Corrimiento/PasoMaquina):
+        // cada libro nervioso — el de prueba y el Eterno — tiembla, se rompe
+        // y brinca con SU propia hambre. Las tres vías de dibujo de abajo
+        // leen TODO por el Estado virtual (cada subclase elige su reloj).
         // =================================================================
-        /// <summary>EL TEMBLOR de este tick (px de juego, en unidades del
-        /// libro — el llamador lo escala a su contexto). Determinista puro:
-        /// una función del tick, sin estado.</summary>
-        internal static Vector2 Temblor()
-        {
-            float t = Main.GameUpdateCount / 60f;
-            // v6.50.91 — EL UMBRAL DEL 50%: el CAZADOR no tiembla; de la
-            // impaciencia en adelante la amplitud nace de CERO y llega a
-            // los 1,3 px del difunto Tembloroso al 100% de hambre
-            float he = HambreEfectos();
-            float amp = (0.20f + 1.10f * he) * he;   // 0 px → 1,3 px (desde el 50%)
-            float x = (float)Math.Sin(t * 9.3f * MathHelper.TwoPi) * 0.80f
-                    + (float)Math.Sin(t * 17.3f * MathHelper.TwoPi) * 0.25f;
-            float y = (float)Math.Sin(t * 11.9f * MathHelper.TwoPi + 1.7f) * 0.80f
-                    + (float)Math.Sin(t * 19.1f * MathHelper.TwoPi + 0.6f) * 0.25f;
-            return new Vector2(x, y) * amp;
-        }
-
-        /// <summary>EL CORRIMIENTO DEL CUERPO: temblor + sobresalto (px de
-        /// juego, unidades del libro — el escalofrío continuo y, cuando el
-        /// susto lo brinca, el salto encima). El ojo y las tiras viajan con
-        /// él: nunca desalineados del cuerpo.</summary>
-        internal static Vector2 Corrimiento() => Temblor() + Sobresalto();
 
         // =================================================================
         // INVENTARIO — el libro entero lo dibuja la copia (PreDraw false):
@@ -391,9 +272,9 @@ namespace AethonMod.Content.Weapons
             if (Main.netMode == NetmodeID.Server)
                 return;
 
-            PasoMaquina();
-            Tira[] tiras = Layout(out float offOjo);
-            Vector2 corr = Corrimiento() * scale;
+            Estado.PasoMaquina();
+            EstadoGrimorio.Tira[] tiras = Estado.Layout(out float offOjo);
+            Vector2 corr = Estado.Corrimiento() * scale;
 
             // el cursor lo sigue el ojo en su CASA (con el corrimiento del
             // cuerpo — el ojo viaja con el libro, nunca desalineado)
@@ -440,11 +321,11 @@ namespace AethonMod.Content.Weapons
             if (Main.netMode == NetmodeID.Server)
                 return;
 
-            PasoMaquina();
-            Tira[] tiras = Layout(out float offOjo);
+            Estado.PasoMaquina();
+            EstadoGrimorio.Tira[] tiras = Estado.Layout(out float offOjo);
 
             Vector2 pivote = PivoteEnMundo(out var frame, out var origen);
-            Vector2 corr = Corrimiento() * scale;
+            Vector2 corr = Estado.Corrimiento() * scale;
 
             // la CASA del ojo (con el corrimiento — el ojo viaja con el cuerpo)
             Vector2 alOjo = (OJO + Estado.DespActual - origen) * scale;
@@ -495,11 +376,11 @@ namespace AethonMod.Content.Weapons
             if (LibroFuera(drawInfo.drawPlayer))
                 return false;
 
-            PasoMaquina();
-            Tira[] tiras = Layout(out float offOjo);
+            Estado.PasoMaquina();
+            EstadoGrimorio.Tira[] tiras = Estado.Layout(out float offOjo);
 
             // EL CUERPO: temblor + sobresalto entran en la posición del libro
-            drawData.position += Corrimiento() * Math.Abs(drawData.scale.X);
+            drawData.position += Estado.Corrimiento() * Math.Abs(drawData.scale.X);
 
             bool espejoX = (drawData.effect & SpriteEffects.FlipHorizontally) != 0;
             bool espejoY = (drawData.effect & SpriteEffects.FlipVertically) != 0;
@@ -552,37 +433,18 @@ namespace AethonMod.Content.Weapons
         // =================================================================
         // v6.50.91 — LAS DOS VIDAS DEL NERVIOSO. El controlador vive aquí
         // (es SU hambre la que manda): la quietud del jugador, la salida a
-        // caza, la impaciencia con voz, las oleadas probables y la fuga.
+        // caza, la impaciencia con voz y las oleadas probables.
+        // v6.50.102 — TODO POR ESTADO: la quietud, el reloj del ausente y
+        // la voz viven en EstadoGrimorio (cada libro pasa SU hambre por su
+        // cuenta); PasoCaza es de INSTANCIA y lee el Estado virtual.
         // La CAZA toca NPCs: corre SOLO donde el jugador local es la
         // AUTORIDAD (SP o anfitrión de un listen server — el mismo contrato
         // del resto de la demo).
         // =================================================================
 
-        /// <summary>EL APETITO DE EFECTOS: 0 debajo del umbral (el CAZADOR
-        /// está tranquilo), 0→1 del 50% al 100% (la fase IMPACIENTE).</summary>
-        internal static float HambreEfectos() =>
-            Math.Max(0f, Math.Min(1f, (_estadoNervioso.Hambre - UMBRAL_IMPACIENCIA) * 2f));
-
-        // LA CAZA: la quietud contada del jugador
-        private static int _ticksQuieto;
-        // v6.50.94 — LA CAZA DEL AUSENTE: el tiempo sin que el jugador
-        // ataque criaturas con el libro (cada disparo lo pone a cero)
-        private static int _ticksSinAtaqueLibro;
-        // LA VOZ: el frío entre frases del hambre
-        private static int _ticksHastaFrase = 420;
-        // EL GUARD DEL TICK: un PasoCaza por tick, TODAS las copias juntas
-        private static uint _tickPasoCaza;
-
-        /// <summary>v6.50.94 — ¿EL JUGADOR ESTÁ CAZANDO ÉL? (disparó con el
-        /// libro hace menos de 5 s): mientras el dueño usa el libro, el
-        /// espíritu NO lanza sombras por su cuenta — la caza solitaria es
-        /// del ausente (la letra: «esto de la caza por su cuenta es cuando
-        /// el jugador esta en afk o simplemente lleva mucho tiempo sin
-        /// atacar criaturas con el libro»).</summary>
-        internal static bool JugadorAtacoReciente() => _ticksSinAtaqueLibro < TICKS_MARGEN_ATAQUE;
-
-        /// <summary>El estado compartido del Nervioso (lo leen el grimorio
-        /// flotante y su sombra para saber de qué hambre viven).</summary>
+        /// <summary>El estado compartido del Nervioso de prueba (el
+        /// espíritu flotante y su sombra lo leen como FALLBACK cuando su
+        /// libro no viajó en ai[2] — el registro real es EstadoDeLibro).</summary>
         internal static EstadoGrimorio EstadoCompartido => _estadoNervioso;
 
         /// <summary>La geometría del ojo y la escala del iris (las capas del
@@ -671,52 +533,55 @@ namespace AethonMod.Content.Weapons
         /// «esto de la caza por su cuenta es cuando el jugador esta en afk
         /// o simplemente lleva mucho tiempo sin atacar criaturas con el
         /// libro» — disparar con el libro ES darle uso; el espíritu además
-        /// calla sus sombras mientras el dueño caza él, 5 s por disparo).</summary>
+        /// calla sus sombras mientras el dueño caza él, 5 s por disparo).
+        /// v6.50.102 — el reloj es de ESTE libro (su Estado virtual).</summary>
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             bool r = base.Shoot(player, source, position, velocity, type, damage, knockback);
             if (player.altFunctionUse != 2)
-                _ticksSinAtaqueLibro = 0;
+                Estado.TicksSinAtaqueLibro = 0;
             return r;
         }
 
         /// <summary>EL PASO DE LAS DOS VIDAS — una vez por tick desde
-        /// UpdateInventory (el guard del tick vale por TODAS las copias del
-        /// Nervioso en el inventario: la quietud se cuenta UNA vez). La VOZ
-        /// suena en la pantalla del dueño; la caza y las oleadas sólo donde
-        /// el jugador local MANDA.</summary>
-        private static void PasoCaza(Player player)
+        /// UpdateInventory (el guard del tick vive en el ESTADO: vale por
+        /// todas las copias de ESTE libro en el inventario — la quietud se
+        /// cuenta UNA vez POR LIBRO; el Nervioso de prueba y el Eterno
+        /// llevan cada uno SU reloj). La VOZ suena en la pantalla del dueño;
+        /// la caza y las oleadas sólo donde el jugador local MANDA.</summary>
+        protected void PasoCaza(Player player)
         {
-            // otros jugadores: la demo del Nervioso es del dueño LOCAL (el
-            // libro no caza por proxy — y así el guard del tick jamás se lo
-            // roba otra copia ajena)
+            // otros jugadores: la caza es del dueño LOCAL (el libro no caza
+            // por proxy — y así el guard del tick jamás se lo roba otra
+            // copia ajena)
             bool local = player.whoAmI == Main.myPlayer &&
                 (Main.netMode != NetmodeID.Server || !Main.dedServ);
             if (!local)
                 return;
 
-            if (Main.GameUpdateCount == _tickPasoCaza)
-                return;                       // 1 avance por tick, todas las copias
-            _tickPasoCaza = Main.GameUpdateCount;
+            EstadoGrimorio e = Estado;
+            if (Main.GameUpdateCount == e.TickPasoCaza)
+                return;                       // 1 avance por tick, POR LIBRO
+            e.TickPasoCaza = Main.GameUpdateCount;
 
-            float h = _estadoNervioso.Hambre;
+            float h = e.Hambre;
 
             // v6.50.94 — EL RELOJ DEL AUSENTE: un tick más sin que el
             // jugador ataque criaturas con el libro (cada disparo lo
             // reinicia — ver Shoot)
-            _ticksSinAtaqueLibro++;
+            e.TicksSinAtaqueLibro++;
 
             // === LA VOZ DEL HAMBRE — «comienza a decir que tiene hambre»:
             //     suena en la pantalla del dueño, en cualquier máquina ===
-            FrasesDeHambre(h);
+            FrasesDeHambre(e, h);
 
             // === v6.50.92 — EL FOCO DEL FESTÍN: mientras la sombra devora,
             //     el ojo del libro (hotbar, mano, mundo) se clava en SU
             //     COMIDA — la letra: «el libro debe mirar lo que esta
             //     comiendo». Visual puro: también en el cliente MP (la
             //     sombra y los NPC llegan sincronizados) ===
-            _estadoNervioso.FocoPantalla = FocoDelFestin(player.whoAmI) is Vector2 festin
+            e.FocoPantalla = FocoDelFestin(player.whoAmI) is Vector2 festin
                 ? festin - Main.screenPosition
                 : (Vector2?)null;
 
@@ -727,7 +592,7 @@ namespace AethonMod.Content.Weapons
 
             bool fuera = LibroFuera(player);
             if (fuera)
-                _ticksQuieto = 0;
+                e.TicksQuieto = 0;
 
             if (!fuera)
             {
@@ -735,26 +600,27 @@ namespace AethonMod.Content.Weapons
                 // ADELANTE (la letra .93: «el libro solo sale a cazar de
                 // 25% de hambre en adelante» — el 100% YA NO EXCLUYE:
                 // la fuga murió) cuando el jugador está AUSENTE: quieto
-                // 5 s (AFK — la letra .91) O 30 s sin atacar criaturas
-                // con el libro (la letra .94: «o simplemente lleva mucho
-                // tiempo sin atacar criaturas con el libro»). AL 100% NO
-                // SE ESCAPA — se queda flotando cerca, cazando (la
-                // letra: «la fuga simplemente la quitamos el libro no se
-                // fuga, solo queda flotando cerca del jugador cazando
+                // (AFK — la letra .91; 5 s de demo, 10 s jugable) O 30 s
+                // sin atacar criaturas con el libro (la letra .94). AL
+                // 100% NO SE ESCAPA — se queda flotando cerca, cazando
+                // (la letra: «la fuga simplemente la quitamos el libro no
+                // se fuga, solo queda flotando cerca del jugador cazando
                 // por si mismo»).
+                // v6.50.102 — el espíritu nace con el TIPO de su libro en
+                // ai[2]: servirá al libro que lo llamó (SU hambre, SU XP).
                 if (h >= UMBRAL_CACERIA)
                 {
                     bool quieto = !player.dead && player.velocity.LengthSquared() < 0.02f;
-                    _ticksQuieto = quieto ? _ticksQuieto + 1 : 0;
-                    if (_ticksQuieto >= TICKS_QUIETUD_PRUEBA ||
-                        _ticksSinAtaqueLibro >= TICKS_SIN_ATAQUE_LIBRO)
+                    e.TicksQuieto = quieto ? e.TicksQuieto + 1 : 0;
+                    if (e.TicksQuieto >= TicksQuietudSalida ||
+                        e.TicksSinAtaqueLibro >= TICKS_SIN_ATAQUE_LIBRO)
                     {
-                        _ticksQuieto = 0;
-                        _ticksSinAtaqueLibro = 0;
+                        e.TicksQuieto = 0;
+                        e.TicksSinAtaqueLibro = 0;
                         Projectile.NewProjectile(player.GetSource_Misc("NerviosoCaza"),
                             player.Center - new Vector2(0f, 60f), Vector2.Zero,
                             ModContent.ProjectileType<GrimorioNerviosoFlotante>(),
-                            0, 0f, player.whoAmI, GrimorioNerviosoFlotante.MODO_CAZA, 0f, 0f);
+                            0, 0f, player.whoAmI, GrimorioNerviosoFlotante.MODO_CAZA, 0f, TipoLibro);
                         DecirLocal("SaleACazar", new Color(206, 108, 96));
                         try
                         {
@@ -790,19 +656,20 @@ namespace AethonMod.Content.Weapons
 
         /// <summary>LA VOZ DEL NERVIOSO — intranquilo, hambriento, enojado
         /// («quiero comer y tiene hambre»): del 50% en adelante el libro
-        /// EMPIEZA A DECIRLO, cada vez más seguido y más desesperado.</summary>
-        private static void FrasesDeHambre(float h)
+        /// EMPIEZA A DECIRLO, cada vez más seguido y más desesperado.
+        /// v6.50.102 — el frío entre frases es de ESTE libro (su estado).</summary>
+        private static void FrasesDeHambre(EstadoGrimorio e, float h)
         {
             if (h < UMBRAL_IMPACIENCIA)
             {
-                _ticksHastaFrase = Math.Min(_ticksHastaFrase, 300);
+                e.TicksHastaFrase = Math.Min(e.TicksHastaFrase, 300);
                 return;
             }
-            if (--_ticksHastaFrase > 0)
+            if (--e.TicksHastaFrase > 0)
                 return;
 
             float urgencia = (h - UMBRAL_IMPACIENCIA) / (1f - UMBRAL_IMPACIENCIA);
-            _ticksHastaFrase = (int)(60f * MathHelper.Lerp(9f, 3.5f, urgencia));
+            e.TicksHastaFrase = (int)(60f * MathHelper.Lerp(9f, 3.5f, urgencia));
 
             string clave = urgencia < 0.35f ? "Frase" + (1 + Main.rand.Next(2))
                 : urgencia < 0.75f ? "Frase" + (3 + Main.rand.Next(2))
@@ -836,8 +703,12 @@ namespace AethonMod.Content.Weapons
         /// nace en la absorción (la .93 lo marcaba A MITAD del ataque).
         /// v6.50.95 — el compás ENTERO murió (la letra: «dejarlo atacar
         /// cuando quiera»): la absorción ya no toca reloj NINGUNO — sólo
-        /// come, resta −1% de hambre y cobra la XP.</summary>
-        internal static void AbsorberPresa(NPC presa, Player dueño)
+        /// come, resta −1% de hambre y cobra la XP.
+        /// v6.50.102 — EL FESTÍN ES DEL LIBRO QUE LLAMÓ A LA SOMBRA: el
+        /// tipo viaja en el espíritu (ai[2]) y baja el hambre de ESE libro
+        /// — el Nervioso de prueba come para su minuto, el Eterno para su
+        /// cuarto de hora (y SU nivel).</summary>
+        internal static void AbsorberPresa(NPC presa, Player dueño, int tipoLibro)
         {
             if (presa == null || !presa.active)
                 return;
@@ -865,16 +736,17 @@ namespace AethonMod.Content.Weapons
 
             // EL APETITO: −1% por presa (la letra: 50% → 49%) — y el reloj
             // SIGUE corriendo (v6.50.94: sin gracia, el hambre sube SIEMPRE)
-            _estadoNervioso.Hambre = Math.Max(0f, _estadoNervioso.Hambre - 0.01f);
+            EstadoGrimorio festin = EstadoDeLibro(tipoLibro);
+            festin.Hambre = Math.Max(0f, festin.Hambre - 0.01f);
 
             // v6.50.94 — EL FESTÍN EGOÍSTA (la letra: «el festin compartido
             // no tiene sentido, el libro casa por estar hambriento, en este
             // caso el libro debe ser egoista y comer toda la criatura loot
             // incluido por eso el libro recibe la exp y el jugador nada»):
             // la presa se ha comido ENTERA (sin loot — la desactivación de
-            // arriba ya lo aseguró) y la XP es DEL NERVIOSO — el Grimorio
-            // del Eterno, el latido dorado y el jugador NO reciben NADA.
-            CobrarXPLibro(dueño, paraXP);
+            // arriba ya lo aseguró) y la XP es DEL LIBRO QUE COME — el
+            // jugador no recibe NADA.
+            CobrarXPLibro(dueño, paraXP, tipoLibro);
 
             // el grito silencioso del apetito satisfecho
             if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -890,21 +762,22 @@ namespace AethonMod.Content.Weapons
 
         /// <summary>v6.50.94 — LA XP ES DEL LIBRO QUE COME (la letra: «el
         /// libro debe ser egoista y comer toda la criatura loot incluido
-        /// por eso el libro recibe la exp y el jugador nada»): el festín
-        /// compartido con el Grimorio del Eterno MURIÓ — cada presa de LA
-        /// SOMBRA sube el nivel DEL NERVIOSO (ShardLevelItem ahora también
-        /// vive en este ítem); el jugador no cobra NI latido.</summary>
-        private static void CobrarXPLibro(Player dueño, NPC presa)
+        /// por eso el libro recibe la exp y el jugador nada»): cada presa de
+        /// LA SOMBRA sube el nivel DEL LIBRO QUE LA COMIÓ (ShardLevelItem
+        /// vive en el ítem); el jugador no cobra NI latido.
+        /// v6.50.102 — POR TIPO: el Nervioso de prueba cobra su XP y el
+        /// Eterno la suya — el festín egoísta alimenta a quien cazó.</summary>
+        private static void CobrarXPLibro(Player dueño, NPC presa, int tipoLibro)
         {
             try
             {
-                // el nivel del NERVIOSO que está comiendo (la primera copia manda)
+                // el nivel DEL LIBRO que está comiendo (la primera copia manda)
                 int nivelLibro = 1;
                 bool hayLibro = false;
                 for (int i = 0; i < 59; i++)
                 {
                     Item inv = dueño.inventory[i];
-                    if (inv == null || inv.type != ModContent.ItemType<GrimorioHambrientoNervioso>())
+                    if (inv == null || inv.type != tipoLibro)
                         continue;
                     if (!hayLibro)
                     {
@@ -922,12 +795,12 @@ namespace AethonMod.Content.Weapons
                 if (xp <= 0)
                     return;
 
-                // TODAS las copias del Nervioso cobran (comparten el mismo
-                // hambre estático — son el mismo apetito)
+                // TODAS las copias de ese libro cobran (comparten el mismo
+                // hambre de su clase — son el mismo apetito)
                 for (int i = 0; i < 59; i++)
                 {
                     Item inv = dueño.inventory[i];
-                    if (inv == null || inv.type != ModContent.ItemType<GrimorioHambrientoNervioso>())
+                    if (inv == null || inv.type != tipoLibro)
                         continue;
                     var sl = inv.GetGlobalItem<ShardLevelItem>();
                     if (sl != null)
@@ -953,9 +826,10 @@ namespace AethonMod.Content.Weapons
                 // «el hambre se pausa» — la gracia de los 10 s de la .92
                 // congelaba el apetito tras cada bocado): el apetito avanza
                 // lo cace o no cace, el libro fuera o dentro, coma o no
-                // coma (tasa de PRUEBA: 0→100% en un minuto; la versión
-                // real irá más lenta). Sólo las presas lo bajan (−1%) y el
-                // clic derecho lo reinicia.
+                // coma. v6.50.102 — LA TASA ES DE LA FAMILIA: el Nervioso
+                // de prueba corre su minuto de demo; el Eterno jugable su
+                // cuarto de hora. Sólo las presas lo bajan (−1%) — y el
+                // clic derecho lo reinicia SOLO en el libro de prueba.
                 Estado.Paso();
             }
 

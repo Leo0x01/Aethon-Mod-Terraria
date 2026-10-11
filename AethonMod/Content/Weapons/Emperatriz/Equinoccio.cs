@@ -7,7 +7,7 @@ using Terraria.DataStructures;
 namespace AethonMod.Content.Weapons.Emperatriz
 {
     /// <summary>
-    /// EL EQUINOCCIO — LA CUARTA ARMA: OPCIÓN B DUAL.
+    /// EL EQUINOCCIO — LA ELEGIDA (v6.50.102).
     ///
     /// Mitad aurora, mitad eclipse. Dispara DOS Nightglow vanilla (931)
     /// por uso — la opción B de nuevo (IA de Terraria intacta), pero
@@ -16,16 +16,21 @@ namespace AethonMod.Content.Weapons.Emperatriz
     ///   · EL DORADO (ai[2]=9201, ai[1]=0.64 → render DORADO): sale con
     ///     LUZ DE SOL — luz dorada intensa, halo pulsante y los OCHO
     ///     RAYOS giratorios de la casa alrededor del orbe. El día.
-    ///   · EL NEGRO (ai[2]=9202, ai[1]=0.28 → render VIOLETA): exhala
-    ///     BRUMA — LA BRUMA DE VERDAD de la casa (BrumaFX, el humo fBm
-    ///     que se desgarra) sobre todo su rastro, un DISCO DE ECLIPSE
-    ///     (la capa alfa que oscurece) con rim violeta pulsante y
-    ///     chispas de llama de sombra. La noche.
+    ///   · EL NEGRO (ai[2]=9202, ai[1]=0.28 → render VIOLETA): el
+    ///     DISCO DE ECLIPSE (la capa alfa que oscurece) con rim violeta
+    ///     pulsante y chispas de llama de sombra. La noche. LA BRUMA
+    ///     MURIÓ en la .102 (la letra: «a ese proyectil que ya no use
+    ///     bruma») — el eclipse quedó limpio.
     ///
     /// La salida es la FUENTE de vanilla dividida: el dorado se va hacia
     /// un lado y el negro hacia el otro — el día y la noche separándose
     /// sobre tu cabeza, y luego cada uno caza por su cuenta (el homing
     /// del 931 hace el resto).
+    ///
+    /// v6.50.102 — EL DISPARO HEREDADO: el Grimorio del Eterno dispara
+    /// ESTA MISMA pareja (con sus parámetros de nivel) — este libro
+    /// sigue siendo el original de pruebas, entregado por la Bolsa de
+    /// la Emperatriz.
     ///
     /// Sin maná (regla de la casa — arsenal de pruebas).
     /// </summary>

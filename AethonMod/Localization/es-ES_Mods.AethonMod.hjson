@@ -25,19 +25,25 @@ Items: {
 		DisplayName: Grimorio del Eterno
 		Tooltip:
 			'''
-			Aethon, atado en forma de libro: el arma que come ES el
-			jefe final. Cada página que devoras lo hace más fuerte —
-			y más cerca de abrirse para probarte.
-			Arma híbrida mágica/de invocación.
-			Clic izq: descarga arcana. Clic der: invoca un esbirro.
-			Gana XP REAL con cada baja: la rareza del bestiario (0–5 estrellas)
-			mide su valor, la PRIMERA baja de cada especie paga ×3 y el modo difícil
-			duplica a las criaturas; los jefes pagan XP FIJA (base + 10% de su
-			vida + estrellas + un término que crece con tu nivel).
+			Aethon, atado en forma de libro: el arma que come ES el jefe final
+			— y ahora VISTE EL CUERPO DEL NERVIOSO: su ojo, su temblor, su
+			glitch y su hambre, con reloj de verdad.
+			EL HAMBRE (15 minutos de 0 a 100%): debajo del 25% calla; del 25%
+			sale a cazar si te ausentas (quieto 10 s o 30 s sin darle uso); del
+			50% LA IMPACIENCIA — voz, temblor, glitch y las oleadas de hambre.
+			Sólo la presa comida lo baja (−1% por presa): aliméntalo CAZANDO.
+			Clic izq: EL EQUINOCCIO — el día (orbe dorado con luz de sol) y la
+			noche (eclipse con rim violeta) se separan sobre tu cabeza; cada 3
+			niveles, una pareja MÁS. Con el espíritu fuera, dispara el LIBRO.
+			Clic der: invoca el Orbe Cósmico.
+			Gana XP REAL con cada baja (bestiario 0–5★, primera baja de cada
+			especie ×3, modo difícil ×2, jefes con fórmula fija) — y su Sombra
+			de la Página devora presas ENTERAS (botín incluido) cuya XP es DEL
+			LIBRO: el que come es el que sube de nivel.
 			LOS TRES ESTADOS: sostenido = todo el poder; en la barra rápida =
-			sigue comiendo XP, conserva los espacios de esbirro y vida/maná (tope
-			+100); guardado = nada (los esbirros ya invocados permanecen).
-			Sin coste de maná (pruebas).
+			sigue comiendo XP, conserva los espacios de esbirro y vida/maná
+			(tope +100); guardado = nada (los esbirros ya invocados permanecen).
+			Sin coste de maná — el hambre ES el coste.
 			'''
 	}
 
@@ -161,29 +167,6 @@ Items: {
 			que CUBRE ENTERO al jefe — traga con pulso mientras las almas
 			vuelven a ti por el cuerpo. A 1 de vida: el festín.
 			(Arma de prueba de las fauces — v2.)
-			'''
-	}
-
-	// v6.50.95/.96 — LIVING INK (the user's letter: "I want you to be
-	// creative with this projectile, animate it and create a new weapon
-	// with the projectile"): the weapon that opens THE INK RIFT — the
-	// book's own shot, born from the user's EXACT sprite and re-read in
-	// .96 as what it always was: A RIFT.
-	TintaViva: {
-		DisplayName: Tinta Viva
-		Tooltip:
-			'''
-			«La primera herida que el grimorio abrió en el mundo.»
-			Abre GRIETAS DE TINTA — desgarros en la página
-			con corazón de marfil: nacen con su estrella de
-			ruptura, ASPIRAN el mundo al vuelo, viajan con
-			estela del vacío y ecos de fantasma, brillan con
-			aberración cromática, glitchean en tajas y su
-			corazón ES UN OJO RASGADO que mira a la presa.
-			Atraviesan los muros y, al colapsar, implosionan
-			dejando EL CORTE QUE SANA y LA MANCHA.
-			Si el Nervioso anda FUERA, la grieta sale DEL LIBRO.
-			Tres presas por grieta.
 			'''
 	}
 
@@ -1755,101 +1738,36 @@ Items: {
 		Completa: La {0} ya está completa contigo.
 	}
 
-	GrimorioSellado: {
-		DisplayName: Grimorio Sellado
-		Tooltip:
-			'''
-			Contiene a Aethon, entidad cósmica más antigua que la realidad.
-			Cada disparo agrieta el sello...
-			5 disparos seguidos = desborde.
-			Enemigos golpeados 5 veces = crítico garantizado.
-			'''
-	}
-
-	GrimorioEstrellado: {
-		// v6.50.99: OPTION A — THE CLONE (the study's recommended one)
-		DisplayName: El Grimorio Estrellado
-		Tooltip:
-			'''
-			«El sello se rompió; la Emperatriz prestó su streak.»
-			OPCIÓN A — EL CLON: cuatro Estelas de Aethon por uso con la
-			IA del streak de la Emperatriz replicada al 100% (fuente,
-			deriva, persecución, rebote) y la PALETA CÓSMICA del grimorio:
-			oro, cian, magenta e índigo con 20 estelas.
-			OBSERVADO: cada golpe marca a la presa — a 5 marcas, crítico
-			garantizado (+50% de daño).
-			DESBORDE: el 5º disparo seguido detona la estela MASIVA
-			(×2.5) y te cuesta 5% de tu vida máxima.
-			Sin maná (arma de pruebas).
-			'''
-	}
-
-	EcoEmperatriz: {
-		// v6.50.99: OPTION B — VANILLA + FIXED HUE + HOUSE FX
-		DisplayName: El Eco de la Emperatriz
-		Tooltip:
-			'''
-			«Su ataque, intacto; su arcoíris, devuelto.»
-			OPCIÓN B — EL VANILLA: dispara el Nightglow de Terraria (el
-			mismo proyectil del Grimorio del Eterno) pero con EL HUE
-			ARREGLADO: la fórmula literal del arma original — cada ráfaga
-			nace con su color y la paleta rota entre usos. Luz prismática,
-			destellos y el anillo giratorio de la casa.
-			La IA es 100% de Terraria: no se toca, y ahí está la gracia.
-			Sin maná (arma de pruebas).
-			'''
-	}
-
-	VeredictoEmperatriz: {
-		// v6.50.99: OPTION C — THE BOSS HYBRID (the 873, friendly)
-		DisplayName: El Veredicto de la Emperatriz
-		Tooltip:
-			'''
-			«El trazo de la jefa, ahora obedece.»
-			OPCIÓN C — EL HÍBRIDO DE LA JEFA: el streak 873 de la
-			Emperatriz en versión amistosa — 40 estelas, escala 1.4,
-			ATRAVIESA PAREDES y estalla en anillo radial al morir, con el
-			arcoíris completo de su ataque.
-			DESBORDE: el 5º disparo seguido lanza el TRAZO MASIVO (daño
-			×2.5, explosión triple) y te cuesta 5% de tu vida máxima.
-			Sin maná (arma de pruebas).
-			'''
-	}
-
+	// v6.50.99/.102 — THE FOURTH WEAPON — DUAL OPTION B — THE CHOSEN ONE
 	Equinoccio: {
-		// v6.50.99: THE FOURTH WEAPON — OPTION B, DUAL (day + night)
 		DisplayName: El Equinoccio
 		Tooltip:
 			'''
 			«Mitad aurora, mitad eclipse.»
-			LA CUARTA — OPCIÓN B DUAL: dos Nightglow vanilla por disparo.
-			EL DORADO sale con LUZ de sol: halo dorado pulsante y ocho
-			rayos giratorios. EL NEGRO exhala BRUMA de verdad: disco de
-			eclipse con rim violeta y humo negro sobre todo su rastro.
+			LA ELEGIDA — OPCIÓN B DUAL: dos Nightglow vanilla por disparo.
+			EL DORADO sale con LUZ de sol: halo dorado pulsante y ocho rayos
+			giratorios. EL NEGRO es un eclipse limpio: disco oscuro con rim
+			violeta pulsante y chispas de llama de sombra (la bruma murió).
 			El día y la noche se separan sobre tu cabeza… y luego cazan.
 			Sin maná (arma de pruebas).
 			'''
 	}
 
+	// v6.50.99/.102 — THE EMPRESS BAG — bag 20 (the chosen one)
 	BolsaEmperatriz: {
-		// v6.50.99: THE EMPRESS BAG — bag 20 (the 4 projectile trials)
 		DisplayName: Bolsa de la Emperatriz
 		Tooltip:
 			'''
-			Las cuatro pruebas del proyectil de la Emperatriz de la Luz.
-			El clon cósmico con el sistema Observado/Desborde (El Grimorio
-			Estrellado), el vanilla con el hue arreglado (El Eco de la
-			Emperatriz), el híbrido de la jefa con el Desborde masivo (El
-			Veredicto de la Emperatriz) y el día y la noche en un libro
-			(El Equinoccio).
-			Clic derecho para desplegarlas. Solo entrega lo que te falte.
+			La elegida del estudio del proyectil de la Emperatriz de la Luz:
+			EL EQUINOCCIO — el día y la noche en un libro. Las otras tres
+			pruebas (el clon cósmico, el eco y el veredicto) cumplieron su
+			misión y se retiraron.
+			Clic derecho para desplegarla. Solo entrega lo que te falte.
 			'''
 	}
 }
 
 Projectiles: {
-	EstelaAethonProjectile.DisplayName: La Estela de Aethon
-	TrazoEmperatrizProjectile.DisplayName: El Trazo de la Emperatriz
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
@@ -1980,8 +1898,6 @@ Projectiles: {
 	// v6.50.91 — the Nervous One's spirit and its hunting shadow
 	GrimorioNerviosoFlotante.DisplayName: El Grimorio Nervioso
 	SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
-	FragmentoAethon.DisplayName: Fragmento de Aethon
-	ExplosionAethon.DisplayName: Apertura de Aethon
 	GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
 	ManchaDeTinta.DisplayName: La Mancha de Tinta
 }
@@ -2015,11 +1931,6 @@ Buffs: {
 	QuemaduraCosmica: {
 		DisplayName: Quemadura cósmica
 		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
-	}
-
-	Observado: {
-		DisplayName: Observado
-		Description: Aethon te está mirando...
 	}
 
 	OcasoActivoBuff: {
@@ -2287,12 +2198,6 @@ RelojDeArena: {
 TestingPlayer: {
 	Bolsas: Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.
 	Dummies: Además: {0} dummies de prueba para el campo de entrenamiento.
-}
-
-Desborde: {
-	// v6.50.99: THE OBSERVED/OVERFLOW SYSTEM TEXTS — the Empress weapons family
-	Aviso: ¡EL GRIMORIO SE DESBORDA! El 5º disparo detona el proyectil masivo — la Emperatriz cobra 5% de tu vida máxima.
-	Observado: ¡OBSERVADO!
 }
 
 Configs: {

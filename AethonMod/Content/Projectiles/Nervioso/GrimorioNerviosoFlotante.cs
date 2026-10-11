@@ -67,11 +67,24 @@ namespace AethonMod.Content.Projectiles.Nervioso
 
         private float Modo => Projectile.ai[0];
 
+        /// <summary>v6.50.102 — ¿QUÉ LIBRO ME LLAMÓ? El tipo de ítem viaja
+        /// en ai[2] desde el spawn (PasoCaza del Nervioso o del Eterno): el
+        /// espíritu sirve a ESE libro — lee SU hambre, dibuja SU sprite y
+        /// alimenta SU festín (0 = el Nervioso de prueba, el fallback de
+        /// siempre para los espíritus viejos de la red).</summary>
+        private int TipoLibro => Projectile.ai[2] > 0f && Projectile.ai[2] <= int.MaxValue
+            ? (int)Projectile.ai[2]
+            : ModContent.ItemType<GrimorioHambrientoNervioso>();
+
+        /// <summary>El estado del libro que me llamó (SU hambre).</summary>
+        private EstadoGrimorio EstadoDelLibro =>
+            GrimorioHambrientoNervioso.EstadoDeLibro(TipoLibro);
+
         /// <summary>¿El jugador todavía lleva el libro? (si lo tira o lo
         /// guarda en un cofre, el espíritu se disuelve).</summary>
         private bool TieneElLibro(Player p)
         {
-            int tipo = ModContent.ItemType<GrimorioHambrientoNervioso>();
+            int tipo = TipoLibro;
             for (int i = 0; i < 58; i++)
                 if (p.inventory[i] != null && p.inventory[i].type == tipo)
                     return true;
@@ -150,7 +163,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
             float t = Projectile.ai[1];
             Player dueño = Main.player[Projectile.owner];
             bool autoridad = Main.netMode != NetmodeID.MultiplayerClient;
-            float hambre = GrimorioHambrientoNervioso.EstadoCompartido.Hambre;
+            float hambre = EstadoDelLibro.Hambre;
 
             // === LA RED DE SEGURIDAD (todas las máquinas): sin dueño, sin libro ===
             if (dueño == null || !dueño.active)
@@ -209,7 +222,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // cuenta (la caza solitaria es del ausente: AFK o mucho
                 // tiempo sin atacar criaturas con el libro).
                 if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
-                    !GrimorioHambrientoNervioso.JugadorAtacoReciente())
+                    !EstadoDelLibro.AtacoReciente())
                 {
                     NPC presa = PresaCercana();
                     if (presa != null)
@@ -257,11 +270,12 @@ namespace AethonMod.Content.Projectiles.Nervioso
             if (Main.netMode == NetmodeID.Server) return false;
 
             // LA MÁQUINA VIVA: aunque el libro duerma en la mochila (inventario
-            // cerrado), sus efectos siguen corriendo — una vez por tick
-            GrimorioHambrientoNervioso.PasoMaquina();
+            // cerrado), sus efectos siguen corriendo — una vez por tick, con
+            // LA HAMBRE DEL LIBRO QUE ME LLAMÓ (v6.50.102)
+            EstadoDelLibro.PasoMaquina();
 
             float t = Projectile.ai[1];
-            var estado = GrimorioHambrientoNervioso.EstadoCompartido;
+            var estado = EstadoDelLibro;
 
             // === EL HALO DEL ESPÍRITU (violeta — el rojo de la fuga murió
             //     con ella: este libro ya no se va) ===
@@ -277,11 +291,12 @@ namespace AethonMod.Content.Projectiles.Nervioso
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.ReabrirLoteVanilla();
 
-            // === EL LIBRO — el sprite REAL del ítem con sus capas. El
-            //     cazador flota SERENO (las tiras de glitch eran el
-            //     repertorio de la fuga, y la fuga murió) ===
-            Texture2D tex = Terraria.GameContent.TextureAssets.Item[
-                ModContent.ItemType<GrimorioHambrientoNervioso>()].Value;
+            // === EL LIBRO — el sprite REAL del ítem que lo llamó, con sus
+            //     capas (el Nervioso de prueba y el Eterno comparten el
+            //     mismo cuerpo: la familia del ojo). El cazador flota
+            //     SERENO (las tiras de glitch eran el repertorio de la
+            //     fuga, y la fuga murió) ===
+            Texture2D tex = Terraria.GameContent.TextureAssets.Item[TipoLibro].Value;
             Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height);
             Vector2 origen = frame.Size() * 0.5f;
             Vector2 pos = Projectile.Center - Main.screenPosition;

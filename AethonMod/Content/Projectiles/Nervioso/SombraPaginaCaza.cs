@@ -90,6 +90,23 @@ namespace AethonMod.Content.Projectiles.Nervioso
             return dueño != null && dueño.active ? dueño.MountedCenter : Projectile.Center;
         }
 
+        /// <summary>v6.50.102 — ¿DE QUÉ LIBRO ES ESTE FESTÍN? La sombra cuelga
+        /// del ESPÍRITU (su raíz): el tipo del libro que lo llamó viaja en
+        /// el ai[2] del espíritu — así la absorción baja el hambre y paga
+        /// la XP del libro CORRECTO (el Nervioso de prueba o el Eterno).</summary>
+        private int TipoLibroDeLaRaiz()
+        {
+            int tipo = ModContent.ProjectileType<GrimorioNerviosoFlotante>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.type == tipo && p.owner == Projectile.owner &&
+                    p.ai[2] > 0f)
+                    return (int)p.ai[2];
+            }
+            return ModContent.ItemType<GrimorioHambrientoNervioso>();
+        }
+
         public override void AI()
         {
             Projectile.ai[2]++;
@@ -173,9 +190,10 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             int golpe = Math.Max(1, (int)Math.Ceiling(presa.lifeMax * 0.10f));
                             if (presa.life - golpe <= 0)
                             {
-                                // LA ABSORCIÓN — el libro se la come entera:
+                                // LA ABSORCIÓN — el libro SE LA COME entera:
                                 // sin loot, sin gore, sin crédito; XP sí; −1%
-                                GrimorioHambrientoNervioso.AbsorberPresa(presa, dueño);
+                                // (v6.50.102: del libro que llamó a esta sombra)
+                                GrimorioHambrientoNervioso.AbsorberPresa(presa, dueño, TipoLibroDeLaRaiz());
                                 Projectile.ai[1] = FASE_ABSORBER;
                                 Projectile.ai[2] = 0;
                                 Projectile.netUpdate = true;

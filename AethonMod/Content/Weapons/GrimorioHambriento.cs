@@ -84,6 +84,41 @@ namespace AethonMod.Content.Weapons
         public bool PosValida;
         public uint UltimoDisparo;
 
+        // === v6.50.102 — LA TASA DEL APETITO (por familia): el Nervioso de
+        //     prueba corre su minuto de siempre (1/3600); el Grimorio del
+        //     Eterno — EL NERVIOSO JUGABLE — estira el reloj a 15 minutos
+        //     (1/54000): el hambre vuelve a ser una presión de verdad, no
+        //     una demo. Sólo la presa comida la baja. ===
+        public float TasaHambre = 1f / 3600f;
+
+        // === v6.50.102 — LA MÁQUINA NERVIOSA (POR ESTADO — la lección del
+        //     Eterno): el glitch y el sobresalto vivían en statics de LA
+        //     CLASE Nervioso; ahora viven AQUÍ, en el estado de CADA libro
+        //     — el Nervioso de prueba y el Eterno rompen cada uno a SU hora. ===
+        public int THastaRafaga = 120;     // 2 s hasta la primera ráfaga
+        public int TRafaga;                // >0: ticks que le quedan a la ráfaga
+        public uint SemilleRafaga;
+        private uint _tickMaquina;         // el guard: un avance por tick POR LIBRO
+        public int THastaSobresalto = 300; // 5 s hasta el primer susto
+        public int TSobresalto;            // >0: ticks que le quedan al salto
+        public Vector2 DirSobresalto = Vector2.Zero;
+        public float AmpSobresalto;
+
+        // === v6.50.102 — LA CAZA (POR ESTADO): la quietud contada, el reloj
+        //     del ausente y la voz del hambre — cada libro pasa SU hambre
+        //     por su cuenta ===
+        public int TicksQuieto;
+        public int TicksSinAtaqueLibro;
+        public int TicksHastaFrase = 420;
+        public uint TickPasoCaza;          // el guard de PasoCaza (1 avance por tick por libro)
+
+        /// <summary>v6.50.102 — ¿el dueño cazó recientemente con ESTE libro?
+        /// (disparó hace menos de 5 s): mientras el dueño usa el libro, el
+        /// espíritu NO lanza sombras por su cuenta — la caza solitaria es
+        /// del ausente.</summary>
+        public bool AtacoReciente() =>
+            TicksSinAtaqueLibro < GrimorioHambrientoNervioso.TICKS_MARGEN_ATAQUE;
+
         /// <summary>EL REINICIO del apetito (clic derecho — la demo se repite).
         /// v6.50.94: sin gracia — el reloj vuelve a correr EN EL ACTO.</summary>
         public void Reiniciar()
@@ -106,7 +141,9 @@ namespace AethonMod.Content.Weapons
             // pausa» — la gracia de los 10 s de la .92 moría aquí): el
             // apetito avanza lo coma o no lo coma, cace o no cace — sólo
             // la presa comida lo baja y el clic derecho lo reinicia.
-            Hambre = Math.Min(1f, Hambre + 1f / 3600f);
+            // v6.50.102 — LA TASA POR FAMILIA: 1/3600 (el minuto del
+            // Nervioso de prueba) o 1/54000 (el cuarto de hora del Eterno).
+            Hambre = Math.Min(1f, Hambre + TasaHambre);
             float h = Hambre;
 
             // --- PARPADEO: 10-20 s (saciado) → 2 s exactos (hambre total) ---
@@ -215,6 +252,163 @@ namespace AethonMod.Content.Weapons
         /// bandera; el resto de la familia no cambia ni un tiro de dado.</summary>
         public bool NerviosoActivo() => Nervioso && Hambre >= 0.5f;
 
+        // =================================================================
+        // v6.50.102 — LA MÁQUINA NERVIOSA (migrada de GrimorioHambriento-
+        // Nervioso, donde era static de la CLASE): el glitch en tiras y el
+        // sobresalto del susto, ahora POR ESTADO — cada libro los corre con
+        // SU hambre y su propio guard de tick.
+        // =================================================================
+
+        /// <summary>EL APETITO DE EFECTOS: 0 debajo del umbral (el CAZADOR
+        /// está tranquilo), 0→1 del 50% al 100% (la fase IMPACIENTE).</summary>
+        public float HambreEfectos() =>
+            Math.Max(0f, Math.Min(1f, (Hambre - GrimorioHambrientoNervioso.UMBRAL_IMPACIENCIA) * 2f));
+
+        /// <summary>El hash determinista del layout (mismo tick = mismo glitch).</summary>
+        private static uint Hash(uint x)
+        {
+            x ^= x >> 16; x *= 0x7FEB352Du;
+            x ^= x >> 15; x *= 0x846CA68Bu;
+            x ^= x >> 13;
+            return x;
+        }
+
+        /// <summary>UN avance por tick POR LIBRO: la ráfaga del glitch + el
+        /// reloj del sobresalto (la firma del Nervioso — el apetito que
+        /// rompe el libro).</summary>
+        public void PasoMaquina()
+        {
+            uint t = Main.GameUpdateCount;
+            if (t == _tickMaquina)
+                return;                       // 1 avance por tick, POR LIBRO
+            _tickMaquina = t;
+
+            float h = HambreEfectos();
+
+            // --- EL GLITCH (la máquina de la .88, intacta) ---
+            if (TRafaga > 0)
+            {
+                if (--TRafaga == 0)
+                {
+                    // la próxima ráfaga: 15 s → 2,1 s con el hambre (±25 %)
+                    THastaRafaga = (int)(60f * MathHelper.Lerp(15f, 2.1f, h)
+                        * (0.75f + 0.5f * (Hash(t) & 255u) / 255f));
+                }
+            }
+            else if (--THastaRafaga <= 0)
+            {
+                if (h >= GrimorioHambrientoNervioso.HAMBRE_MIN_GLITCH)
+                {
+                    // 12-24 ticks — la ráfaga viva de la .88
+                    TRafaga = 12 + (int)(Hash(t ^ 0x5BD1E995u) % 13u);
+                    SemilleRafaga = t * 2654435761u;
+                }
+                else
+                    THastaRafaga = 60;       // aún sin hambre: reintentar en 1 s
+            }
+
+            // --- EL SOBRESALTO (lo nuevo de la .90) ---
+            if (TSobresalto > 0)
+            {
+                TSobresalto--;
+            }
+            else if (--THastaSobresalto <= 0)
+            {
+                // EL CAZADOR NO BRINCA: debajo del umbral de la impaciencia
+                // no hay sobresaltos (tranquilo, vigilando)
+                if (h <= 0f)
+                {
+                    THastaSobresalto = 60;   // reintentar en 1 s
+                }
+                else
+                {
+                    // el reloj del susto: 6,5 s → 1,8 s con el hambre (±25 %)
+                    THastaSobresalto = (int)(60f * MathHelper.Lerp(6.5f, 1.8f, h)
+                        * (0.75f + 0.5f * (Hash(t ^ 0x68E31DA4u) & 255u) / 255f));
+                    TSobresalto = GrimorioHambrientoNervioso.DURACION_SOBRESALTO;
+                    AmpSobresalto = MathHelper.Lerp(1.2f, 2.2f, h);
+                    double ang = Main.rand.NextDouble() * Math.PI * 2.0;
+                    DirSobresalto = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
+
+                    // EL HAMBRE ROMPE EL LIBRO: con hambre, cada brinco trae
+                    // una ráfaga corta (8-14 ticks) — brinca Y se rompe
+                    if (h >= GrimorioHambrientoNervioso.HAMBRE_MIN_GLITCH && TRafaga <= 0)
+                    {
+                        TRafaga = 8 + (int)(Hash(t ^ 0x2545F491u) % 7u);
+                        SemilleRafaga = t * 2654435761u;
+                    }
+                }
+            }
+        }
+
+        /// <summary>EL SOBRESALTO de este tick (px de juego, unidades del
+        /// libro): el salto entero en el primer frame, asentándose lineal
+        /// en 7 ticks — un brinco, no un temblor.</summary>
+        public Vector2 Sobresalto() =>
+            TSobresalto > 0
+                ? DirSobresalto * (AmpSobresalto * (TSobresalto / (float)GrimorioHambrientoNervioso.DURACION_SOBRESALTO))
+                : Vector2.Zero;
+
+        /// <summary>Una franja del glitch (px de textura + desfase horizontal).</summary>
+        internal struct Tira { public int Y0, Y1; public float Off; }
+
+        /// <summary>EL LAYOUT de este tick (null = libro entero, sin ráfaga).</summary>
+        internal Tira[] Layout(out float offOjo)
+        {
+            offOjo = 0f;
+            if (TRafaga <= 0)
+                return null;
+
+            // las tiras se REGENERAN cada 2 frames — el tearing vivo
+            uint fase = Main.GameUpdateCount / 2u;
+            uint sd = Hash(SemilleRafaga ^ (fase * 0x9E3779B9u));
+            float h = HambreEfectos();
+
+            int n = 2 + (int)(Hash(sd) % 3u);            // 2-4 tiras
+            var tiras = new Tira[n];
+            int hechos = 0;
+            int y = 3 + (int)(Hash(sd ^ 0xA5A5u) % 22u);
+            while (hechos < n && y <= 41)
+            {
+                int alto = 4 + (int)(Hash(sd ^ (uint)(hechos * 97 + 1)) % 9u);      // 4-12 px
+                float off = ((int)(Hash(sd ^ (uint)(hechos * 131 + 3)) % 13u) - 6)
+                    * (0.55f + 0.45f * h);                                          // ±3,3 → ±6 px
+                tiras[hechos++] = new Tira { Y0 = y, Y1 = Math.Min(46, y + alto), Off = off };
+                y = tiras[hechos - 1].Y1 + 1 + (int)(Hash(sd ^ (uint)(hechos * 17 + 5)) % 5u);
+            }
+            if (hechos < n)
+                Array.Resize(ref tiras, hechos);
+
+            // el iris VIAJA CON SU TIRA (el ojo nunca se desprende del libro)
+            for (int i = 0; i < tiras.Length; i++)
+                if (GrimorioHambriento.OJO.Y >= tiras[i].Y0 && GrimorioHambriento.OJO.Y < tiras[i].Y1)
+                { offOjo = tiras[i].Off; break; }
+            return tiras;
+        }
+
+        /// <summary>EL TEMBLOR de este tick (px de juego, unidades del
+        /// libro — el llamador lo escala a su contexto). Determinista
+        /// puro: una función del tick, sin estado.</summary>
+        public Vector2 Temblor()
+        {
+            float t = Main.GameUpdateCount / 60f;
+            // EL UMBRAL DEL 50%: el CAZADOR no tiembla; de la impaciencia
+            // en adelante la amplitud nace de CERO y llega a los 1,3 px
+            float he = HambreEfectos();
+            float amp = (0.20f + 1.10f * he) * he;   // 0 px → 1,3 px (desde el 50%)
+            float x = (float)Math.Sin(t * 9.3f * MathHelper.TwoPi) * 0.80f
+                    + (float)Math.Sin(t * 17.3f * MathHelper.TwoPi) * 0.25f;
+            float y = (float)Math.Sin(t * 11.9f * MathHelper.TwoPi + 1.7f) * 0.80f
+                    + (float)Math.Sin(t * 19.1f * MathHelper.TwoPi + 0.6f) * 0.25f;
+            return new Vector2(x, y) * amp;
+        }
+
+        /// <summary>EL CORRIMIENTO DEL CUERPO: temblor + sobresalto (px de
+        /// juego, unidades del libro — el escalofrío continuo y, cuando el
+        /// susto lo brinca, el salto encima). El ojo y las tiras viajan con
+        /// él: nunca desalineados del cuerpo.</summary>
+        public Vector2 Corrimiento() => Temblor() + Sobresalto();
+
         // v6.50.93 — PASO SIN HAMBRE ELIMINADO (la letra del usuario:
         // «el nivel de hambre debe subir independientemente el libro case
         // o no […] esto es porque el libro esta fuera y su hambre se
@@ -305,8 +499,9 @@ namespace AethonMod.Content.Weapons
     public class GrimorioHambriento : ModItem
     {
         // === GEOMETRÍA (v6.50.85: el iris del ARTE — tools/gen_grimorio_hambriento_v65085.py) ===
-        // protected: las copias anclan sus capas al MISMO socket (v6.50.86).
-        protected static readonly Vector2 OJO = new Vector2(19.09f, 22.45f);   // centro del ojo en 36×49
+        // v6.50.102: internal — la MÁQUINA del hambre (EstadoGrimorio.Layout)
+        // lee el texel del ojo para saber con qué tira viaja el iris.
+        internal static readonly Vector2 OJO = new Vector2(19.09f, 22.45f);   // centro del ojo en 36×49
 
         // v6.50.84 — la capa del iris es un DISCO 32×32 (recorte circular del
         // sprite exacto) que vive en una caja fuente de 174 px → 8,87 px de

@@ -82,15 +82,10 @@ namespace AethonMod.Content.Items.Bolsas
             // (.89) quedan BORRADOS — viven el original SERENO y el Nervioso
             // HAMBRIENTO (caza, impaciencia y fuga — v6.50.91).
             l.Add((ModContent.ItemType<GrimorioHambrientoNervioso>(), 1));
-            // v6.50.98 — EL GRIMORIO SELLADO: el arma nueva de prueba (la
-            // letra: «te dare el codigo para un arma nueva de prueba,
-            // recuerda darcela al jugador» — lección .83 otra vez: sin
-            // entrega no hay prueba). Dispara EL FRAGMENTO DE AETHON:
-            // cada golpe marca (stacks de «Observado» → 5 golpes =
-            // crítico garantizado +50%), al morir abre LA APERTURA y 5
-            // disparos seguidos = DESBORDE al 250% que le duele al que
-            // dispara (5% de vida, sin matar jamás).
-            l.Add((ModContent.ItemType<GrimorioSellado>(), 1));
+            // v6.50.102 — EL GRIMORIO SELLADO MURIÓ (la letra del usuario:
+            // «también borra el grimorio sellado»): su sistema
+            // Observado/Desborde y sus proyectiles (Fragmento/Apertura de
+            // Aethon) fueron con él — el arsenal de pruebas no lo extraña.
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.
@@ -587,49 +582,35 @@ namespace AethonMod.Content.Items.Bolsas
             // solo nos quedamos con La Sombra de la Página») — la familia
             // vuelve a ser UNA: la fauce tentacular aprobada.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA ÚNICA: la aprobada por el usuario
-            // v6.50.95 — LA TINTA VIVA (la letra: «quiero que con este
-            // proyectil seas creativo, lo animes y crees una nueva arma
-            // con el proyectil»): el arma que escupe LA LÁGRIMA DE TINTA
-            // — el disparo propio del libro (adiós Nightglow prestado).
-            l.Add((ModContent.ItemType<Weapons.Sombras.TintaViva>(), 1));
+            // v6.50.102 — LA TINTA VIVA MURIÓ (la letra del usuario:
+            // «borra también tinta viva»): su Grieta de Tinta sigue viva
+            // en el grimorio que la abrió — el disparo pertenece al libro.
             return l;
         }
     }
-    /// <summary>20 — LA EMPERATRIZ (v6.50.99): LAS CUATRO PRUEBAS DEL
-    /// PROYECTIL DE LA EMPERATRIZ DE LA LUZ — el estudio completo del
-    /// streak de la jefa (ESTUDIO_PROYECTIL_NIGHTGLOW.md: el Nightglow
-    /// 931 es LA MISMA IA_171 del ataque de la Emperatriz) convertido
-    /// en las tres opciones para el arma nueva + la cuarta dual:
-    /// (A) EL GRIMORIO ESTRELLADO — el clon propio (la recomendada): la
-    /// IA_171 replicada al 100% con la PALETA CÓSMICA del grimorio y
-    /// los ganchos del sistema del Grimorio Sellado (OBSERVADO por
-    /// golpe → crítico garantizado; 5 usos → DESBORDE masivo al 250%);
-    /// (B) EL ECO DE LA EMPERATRIZ — el 931 vanilla con EL HUE
-    /// ARREGLADO (la fórmula literal del arma original: el Grimorio del
-    /// Eterno lo dejaba todo cian) + los FX globales de la casa;
-    /// (C) EL VEREDICTO DE LA EMPERATRIZ — el 873-friendly: parámetros
-    /// de jefa, atraviesa paredes, 40 estelas, explosión radial y EL
-    /// DESBORDE masivo; y LA CUARTA: EL EQUINOCCIO — opción B dual: un
-    /// orbe DORADO CON LUZ de sol y un NEGRO CON BRUMA de verdad
-    /// (BrumaFX) por disparo.</summary>
+    /// <summary>20 — LA EMPERATRIZ (v6.50.99): LA ELEGIDA DEL ESTUDIO DEL
+    /// PROYECTIL DE LA EMPERATRIZ DE LA LUZ. Las cuatro pruebas nacieron
+    /// en la .99 (A: el clon cósmico con Observado/Desborde; B: el vanilla
+    /// con el hue arreglado; C: el 873 friendly; y LA DUAL) — y la letra
+    /// del usuario de la .102 sentenció: «creo que me quedo con el
+    /// Equinoccio, puedes borrar las otras». VIVE EL EQUINOCCIO: el día y
+    /// la noche en un libro (orbe DORADO CON LUZ de sol + orbe NEGRO de
+    /// eclipse con rim violeta, SIN bruma desde la .102) — el disparo que
+    /// además heredó EL GRIMORIO DEL ETERNO.</summary>
     public class BolsaEmperatriz : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de la Emperatriz";
         protected override string NombreCorto => "Bolsa de la Emperatriz";
         protected override Color ColorFiesta => new(255, 110, 180);
-        protected override string Nota => "Las cuatro pruebas del proyectil de la Emperatriz de la Luz";
+        protected override string Nota => "La elegida: el Equinoccio — el día y la noche en un libro";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // OPCIÓN A — EL CLON (la recomendada del estudio §13)
-            l.Add((ModContent.ItemType<Weapons.Emperatriz.GrimorioEstrellado>(), 1));   // la Estela de Aethon: IA_171 + paleta cósmica + Observado/Desborde
-            // OPCIÓN B — EL VANILLA + HUE + FX
-            l.Add((ModContent.ItemType<Weapons.Emperatriz.EcoEmperatriz>(), 1));        // el 931 de verdad con el arcoíris arreglado
-            // OPCIÓN C — EL HÍBRIDO DE LA JEFA
-            l.Add((ModContent.ItemType<Weapons.Emperatriz.VeredictoEmperatriz>(), 1));  // el 873 friendly: el Desborde masivo
-            // LA CUARTA — LA DUAL
-            l.Add((ModContent.ItemType<Weapons.Emperatriz.Equinoccio>(), 1));           // el día (dorado con luz) y la noche (negro con bruma)
+            // v6.50.102 — LA ELEGIDA (la letra: «creo que me quedo con el
+            // Equinoccio, puedes borrar las otras»): las pruebas A/B/C
+            // murieron — vive LA DUAL, ahora sin bruma.
+            l.Add((ModContent.ItemType<Weapons.Emperatriz.Equinoccio>(), 1));
             return l;
         }
     }
