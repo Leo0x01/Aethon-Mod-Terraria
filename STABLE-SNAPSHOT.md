@@ -1,28 +1,27 @@
-# AethonMod — ESTADO ACTUAL (v6.50.99)
+# AethonMod — ESTADO ACTUAL (v6.50.100)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.99 (LAS CUATRO ARMAS DE LA EMPERATRIZ —
-> las 3 opciones del estudio del Nightglow + la cuarta dual. La letra:
-> «crea 3 armas con las 3 opciones... luego crea una cuarta arma, en
-> esta el proyectil debe tener la opción b, pero debe lanzar un
-> proyectil dorado con luz y el otro negro y con bruma»: (A) EL
-> GRIMORIO ESTRELLADO — el clon recomendado: la IA_171 del streak de la
-> Emperatriz replicada al 100% (fuente + deriva + SmoothStep + rebote +
-> 20 estelas) con la PALETA CÓSMICA (oro/cian/magenta/índigo) y los
-> ganchos del Grimorio Sellado (OBSERVADO → crítico garantizado +50%;
-> 5 usos → DESBORDE masivo al 250%); (B) EL ECO DE LA EMPERATRIZ — el
-> 931 vanilla con EL HUE ARREGLADO (la fórmula literal del arma
-> original: el Grimorio del Eterno lo dejaba todo cian) + luz
-> prismática y anillo giratorio; (C) EL VEREDICTO DE LA EMPERATRIZ — el
-> 873 friendly: parámetros de jefa, ATRAVIESA PAREDES, 40 estelas a
-> 1.4, explosión radial al morir y el DESBORDE masivo; y LA CUARTA: EL
-> EQUINOCCIO — opción B dual: el orbe DORADO CON LUZ de sol (halo
-> pulsante + 8 rayos giratorios + luz real) y el NEGRO CON BRUMA de
-> verdad (BrumaFX sobre el rastro + disco de eclipse con rim violeta).
-> Todo en la BOLSA 20 (La Bolsa de la Emperatriz) + receta 5 madera
-> ×4. Iconos ×4 VLM SHIP. .tmod 2.598.268 B md5
-> 47ca74adc0f927140574269b079ccf32, 394 entradas (las 390 de la .98 +
-> los 4 rawimg), oráculo 0/0, build real 0/0, headless 0 excepciones.)
+> Última actualización: v6.50.100 (LAS TRES TEXTURAS QUE FALTABAN — la
+> lección del client.log. La letra: «hay errores, recuerda siempre
+> darle el arma al jugador y estas armas no usan mana ya que son de
+> prueba» + el client.log: tML DESACTIVÓ la v6.50.99 ENTERA con TRES
+> MissingResourceException — las 4 armas de la Emperatriz tenían su
+> icono… pero la BOLSA QUE LAS ENTREGA y los DOS PROYECTILES nuevos
+> (EstelaAethonProjectile / TrazoEmperatrizProjectile) se quedaron SIN
+> .png → el mod no cargó → las armas nunca llegaron. EL FIX: las 3
+> texturas (BolsaEmperatriz 30×30 — la silueta de la casa recolorida
+> perla/rosa/oro con el trazo arcoíris en la ventana; EstelaAethon —
+> el diamante dorado de núcleo blanco con la cola
+> índigo→magenta→cian→oro; TrazoEmperatriz — el trazo arcoíris
+> asimétrico con vena blanca). LA LECCIÓN (gate permanente):
+> tools/audit_texturas.py — NI el -build NI el headless validan
+> texturas (sólo el CLIENTE las pide); el script exige el .png de toda
+> clase cargable por herencia transitiva y corre ANTES de cada build.
+> EL MANÁ: ya estaba bien (las 4 nacieron con mana 0 — regla de la
+> casa, verificada). CERO cambios de código (la DLL difiere en 70
+> bytes de 1.28 MB: versión + timestamps). .tmod 2.599.343 B md5
+> 33171c67ee2bd945273a7fcd87729291, 397 entradas (las 394 de la .99 +
+> las 3 rawimg), oráculo 0/0, build real 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1912,6 +1911,37 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.50.100 LISTA — LAS TRES TEXTURAS QUE FALTABAN (la
+   lección del client.log)** — la letra: «hay errores, recuerda
+   siempre darle el arma al jugador y estas armas no usan mana ya que
+   son de prueba» + el client.log (sesión 04:30): tML DESACTIVÓ la
+   .99 ENTERA (`Disabling Mod: AethonMod`) con TRES
+   MissingResourceException — BolsaEmperatriz +
+   EstelaAethonProjectile + TrazoEmperatrizProjectile SIN .png. EL
+   DIAGNÓSTICO: NI el -build NI el headless validan texturas (sólo el
+   CLIENTE las pide — AutoStaticDefaults); los dibujos 100% por código
+   NO eximen del asset. EL FIX: las 3 texturas ×8 iteración VLM (bolsa
+   SHIP — la silueta de la casa perla/rosa/oro con el trazo arcoíris
+   en la ventana y el nudo con volumen; trazo SHIP — la espina
+   izquierda continua + el lado derecho deshaciéndose, vena blanca
+   5px, punta larga; estela SHIP por juicio de la casa tras 8 rondas
+   de VEREDICTO OSCILANTE — ronda 4 «redonda» vs ronda 6 «diamante NO
+   círculo» vs ronda 8 «círculo NO diamante» — con TODOS los
+   elementos confirmados por el propio VLM y el sprite invisible en
+   juego). EL MANÁ: ya estaba (las 4 armas nacieron con mana = 0 en la
+   .99 — regla de la casa); CERO cambios de código (DLL: 70 bytes de
+   1.28 MB — versión + timestamps). LA LECCIÓN PERMANENTE:
+   tools/audit_texturas.py (herencia transitiva — la bolsa hereda de
+   BolsaCategoria) corre ANTES de cada build. VERIFICACIÓN:
+   audit_texturas 0 faltantes · oráculo 0/0 · build real 0/0 · .tmod
+   2.599.343 B md5 33171c67ee2bd945273a7fcd87729291, 397 entradas
+   (394 + las 3 rawimg 30×30), EOF exacto, blob diff sólo
+   dll/pdb/Info + es-ES == árbol (el espejo de la .99 quedó
+   desincronizado; es-MX/en-US intactos) · 9 clases VIVAS en el heap
+   UTF-8 · headless 0 excepciones. CHECKLIST DEL USUARIO: (a) EL MOD
+   CARGA, (b) la Bolsa de la Emperatriz llega con las 4 armas, (c) las
+   4 disparan SIN maná, (d)-(g) A/B/C/la dual como en la .99 — y
+   ELEGIR el proyectil del arma nueva.
 1. **✅ v6.50.99 PUBLICADA — LAS CUATRO ARMAS
    DE LA EMPERATRIZ (las 3 opciones del estudio + la dual)**: (A)
    GRIMORIO ESTRELLADO (60 dmg, el burst ×4 del Nightglow — useTime

@@ -1,5 +1,82 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.100 — LAS TRES TEXTURAS QUE FALTABAN: EL MOD QUE NO CARGABA (la lección del client.log)
+
+**Petición del usuario**: "hay errores, recuerda siempre darle el arma al
+jugador y estas armas no usan mana ya que son de prueba" + el client.log
+(sesión 04:30): tML DESACTIVÓ el mod v6.50.99 ENTERO con TRES
+`MissingResourceException` — `Disabling Mod: AethonMod`. Las cuatro armas
+de la Emperatriz recibieron su icono en la .99… pero la BOLSA QUE LAS
+ENTREGA y los DOS PROYECTILES nuevos se quedaron SIN .png:
+
+- `Content/Items/Bolsas/BolsaEmperatriz` (la bolsa 20 — sin ella NO
+  llegaba NINGUNA de las cuatro armas: por eso «recuerda siempre darle
+  el arma al jugador»)
+- `Content/Projectiles/Emperatriz/EstelaAethonProjectile` (el disparo A)
+- `Content/Projectiles/Emperatriz/TrazoEmperatrizProjectile` (el disparo C)
+
+**EL DIAGNÓSTICO**: NI el `-build` NI el servidor headless validan
+texturas — SOLO el cliente las pide (`AssetRepository.Request` en
+`AutoStaticDefaults`). La .99 pasó oráculo 0/0, build 0/0 y headless 0
+excepciones… y murió al primer clic del usuario. LOS DIBUJOS 100% por
+código (`PreDraw → false`) NO eximen del asset: tML lo exige igual.
+
+**EL FIX — LAS TRES TEXTURAS** (gen_texturas_v650100.py, PIL
+determinista + verificación ASCII + VLM):
+- **BolsaEmperatriz.png** (30×30): la silueta de la casa (la de
+  BolsaArmasRayo, como la de Sombras) recolorida al tema de la
+  Emperatriz — cuerpo perla-rosa con dither, lomo dorado, el nudo de
+  oro CON VOLUMEN (6×5 + destello) y en la ventana EL TRAZO ARCOÍRIS:
+  todo el cristal prismático (violeta arriba-izquierda → rojo
+  abajo-derecha por el eje d=x+y) con la vena blanca diagonal de 2px y
+  las dos chispas-blancas-con-centro-rosa. VLM: **SHIP**.
+- **EstelaAethonProjectile.png** (30×30): EL DIAMANTE dorado (rombo con
+  pico blanco arriba) de núcleo blanco caliente con resplandor
+  amarillo-brillante, las alitas triangulares doradas/cian INCLINADAS
+  HACIA ARRIBA y la cola de bandas níttidas índigo→magenta→cian→oro con
+  el dither del filo y sus motas laterales. VLM: 8 rondas (el veredicto
+  OSCILÓ: ronda 4 «cabeza redonda», ronda 6 «diamante NO círculo»,
+  ronda 8 «círculo NO diamante» — contradictorio); SHIP por juicio de
+  la casa: TODOS los elementos confirmados visibles por el propio VLM
+  («los 4 colores en el orden correcto») + el sprite NO se dibuja en
+  juego (PreDraw → false, 100% por código).
+- **TrazoEmperatrizProjectile.png** (30×30): el TRAZO ASIMÉTRICO — la
+  espina izquierda continua y el lado derecho que se DESHACE en motas
+  que derivan afuera (la «U» de la ronda 4 murió), vena blanca de 5px,
+  punta triangular blanca LARGA y las últimas motas
+  rojas/rosas/naranjas que se apagan. VLM: **SHIP**.
+
+**EL MANÁ**: ya estaba bien — las 4 armas nacieron con `Item.mana = 0`
+en la .99 (regla de la casa: arsenal de pruebas sin maná). Verificado
+línea por línea; CERO cambios de código (la DLL .100 difiere de la .99
+en 70 bytes de 1.28 MB: la cadena de versión + los timestamps del PE).
+
+**LA LECCIÓN (gate permanente)**: `tools/audit_texturas.py` — escanea
+TODA clase cargable que herede (transitivamente — la bolsa hereda de
+BolsaCategoria, no de ModItem directo) de un tipo con textura por
+convención y exige su .png (salvo abstractas o con `override string
+Texture`). SE CORRE ANTES DE CADA BUILD desde hoy. Fue exactamente lo
+que faltó en la .99: el script encuentra las 3 texturas que mataron el
+mod.
+
+**VERIFICACIÓN**: audit_texturas 0 faltantes (el gate nuevo) · oráculo
+0/0 (sin cambios de código) · -build real 0/0 · **.tmod 2.599.343 B,
+md5 33171c67ee2bd945273a7fcd87729291, 397 entradas** (las 394 de la
+.99 + EXACTAMENTE las 3 rawimg nuevas, 30×30 = 3.612 B c/u) · EOF
+exacto · blob diff: sólo dll/pdb/Info + el es-ES del paquete ahora ==
+EL ÁRBOL (el de la .99 quedó desincronizado del espejo regenerado —
+las claves Grieta/Mancha viven bajo Projectiles: en ambos, sólo cambia
+la posición; es-MX y en-US byte-idénticos) · las 9 clases del arma
+VIVAS en el heap #Strings UTF-8 · headless «Sandboxing v6.50.100 →
+Adding Recipes → Choose World» 0 excepciones.
+
+**Checklist en juego**: (a) EL MOD CARGA (el fix en sí) · (b) la Bolsa
+de la Emperatriz llega al entrar al mundo y contiene las 4 armas ·
+(c) las 4 armas disparan SIN maná · (d) A: burst ×4 + Observado +
+Desborde · (e) B: el arcoíris de verdad · (f) C: el trazo de jefa ·
+(g) la 4: el dorado con luz y el negro con bruma — y ELEGIR el
+proyectil del arma nueva.
+
 ## Commit v6.50.99 — LAS CUATRO ARMAS DE LA EMPERATRIZ: LAS 3 OPCIONES DEL ESTUDIO + LA DUAL DÍA/NOCHE
 
 **Petición del usuario**: "crea 3 armas con las 3 opciones... A — Clon
