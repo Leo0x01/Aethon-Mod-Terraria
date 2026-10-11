@@ -1,19 +1,24 @@
-# AethonMod — ESTADO ACTUAL (v6.50.103)
+# AethonMod — ESTADO ACTUAL (v6.50.104)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.103 (EL RELOJ DE LA HORA. La letra: «esto
-> es muy rapido, el reloj de hambre debe durar una hora en llegar a
-> 100% si no se alimenta el libro» — el reloj de 15 min de la .102 se
-> leyó MUY RÁPIDO. EL CAMBIO: TasaHambre del Grimorio del Eterno
-> 1/54000 → **1/216000 (UNA HORA de 0 a 100%)**; hitos: 25% EL CAZADOR
-> a los 15 min, 50% LA IMPACIENCIA a los 30 min, 100% a la hora exacta.
-> INTACTOS: el minuto de demo del Nervioso (1/3600), la espera de caza
-> de 10 s, el −1% por presa, la pareja Equinoccio sin bruma, las 386
-> entradas (CERO archivos tocados). Tooltips ×3 «una hora de 0 a
-> 100%» / «one hour from 0 to 100%». .tmod 2.571.328 B md5
-> 4735c3b1cc34ece6e5a7b38297074e75, la constante de la hora VIVE en el
-> IL de la DLL y la de 15 min está AUSENTE, oráculo 0/0, build real
-> 0/0, headless 0 excepciones.)
+> Última actualización: v6.50.104 (LA DIETA POR RAREZA + EL ICONO VIVO.
+> La letra: «el hambre en el grimorio del eterno no baja, el hambre
+> deberia bajar usando la rareza de las criaturas como fuente, cada
+> criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan
+> 10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de la
+> rareza del monstruo» + «el sprite del libro que aparece como icono de
+> la oleada no tiene animacion, deberia tener animacion». (1) LA DIETA:
+> GrimoireEternal.HambrePorPresa — jefe 0.10f, estrellas 1-5 LINEAL
+> 0.001→0.05 (fuente ShardLevelSystem.EstrellasDe, la MISMA que la XP);
+> la cobran las DOS vías: GlobalNPCXP.OnKill (cada baja acreditada con
+> xp>0) y AbsorberPresa (ReduccionHambre por tipo — el Nervioso de
+> prueba conserva su −1% de demo); el CombatText del Absorbe es DINÁMICO
+> («Absorbe: −{0}% hambre»). (2) EL ICONO: la cajita del título de la
+> oleada RESPIRA (±5%) + FLOTA (±2,5px) + SE INCLINA (±2,6°) + EL
+> SOBRESALTO cada 210 ticks (determinista, sin RNG). .tmod 2.571.971 B
+> md5 065fb45b26f59cf5ed12b7f442d6857a, 386 entradas, la escalera vive
+> en el IL de la DLL, oráculo 0/0, build real 0/0, headless 0
+> excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1903,7 +1908,48 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.103 PUBLICADA — EL RELOJ DE LA HORA** — la letra: «esto
+1. **✅ v6.50.104 PUBLICADA — LA DIETA POR RAREZA + EL ICONO VIVO** — la
+   letra: «el hambre en el grimorio del eterno no baja, el hambre
+   deberia bajar usando la rareza de las criaturas como fuente, cada
+   criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan
+   10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de la
+   rareza del monstruo» + «el sprite del libro que aparece como icono de
+   la oleada no tiene animacion, deberia tener animacion». (1) LA
+   DIETA: GrimoireEternal.HambrePorPresa (jefe 0.10f; estrellas 1-5
+   LINEAL 0.001→0.05 — fuente ShardLevelSystem.EstrellasDe, la MISMA
+   que la XP) la cobran las DOS vías de alimento: GlobalNPCXP.OnKill
+   (cada baja acreditada con xp>0 — mismo crédito que la XP, minions
+   incluidos) y AbsorberPresa vía ReduccionHambre(presa, tipoLibro) (el
+   Nervioso de prueba conserva su −1% plano de demo); el CombatText del
+   Absorbe ahora DINÁMICO («Absorbe: −{0}% hambre», la cifra real del
+   bocado); tooltips ×3 reescritos. Con el reloj de la hora (.103): una
+   5★ compra 3 min de apetito, un jefe 6 min. (2) EL ICONO VIVO: la
+   cajita del título de la oleada RESPIRA (escala ±5%), FLOTA (bob
+   ±2,5px), SE INCLINA (±2,6°) y cada 210 ticks EL SOBRESALTO nervioso
+   (tirón de 6 ticks que decae al cuadrado, dirección alterna por
+   semilla — SIN RNG, determinista). VERIFICACIÓN: audit_texturas 0 ·
+   oráculo 0/0 (13,3 s) · build real 0/0 · audit_v650104 TODO OK —
+   .tmod 2.571.971 B md5 065fb45b26f59cf5ed12b7f442d6857a, 386
+   entradas, EOF exacto, paquete==árbol ×3, LA ESCALERA VIVE EN EL IL
+   DE LA DLL (float32 0.10/0.001/0.049-resta-plegada/0.05 — Roslyn
+   pliega SOLO la resta: la /4 aplica al producto con la variable, y el
+   plegado es float POR OPERACIÓN, 1 ulp del double 0.049 — verificado
+   con mini-build del SDK), símbolos HambrePorPresa/ReduccionHambre
+   vivos + 10 muertos ausentes, regresión .102/.103 completa · headless
+   «Sandboxing v6.50.104 → Adding Recipes → Choose World» 0 excepciones.
+   PUBLICACIÓN: commit e2d187f + tag v6.50.104 + push (6179466..e2d187f)
+   · release **409732866** (make_latest) + asset AethonMod.tmod
+   **631015986** 2.571.971 B (md5 065fb45b26f59cf5ed12b7f442d6857a),
+   CDN VERIFICADO BYTE A BYTE, /releases/latest = v6.50.104, respaldo
+   /home/sync/AethonMod-v6.50.104.tmod. EL CHECKLIST DEL USUARIO: (a)
+   matar chusma común (1★) con el Eterno visible → el hambre baja
+   0,1% por baja (la bolsa del tooltip se mueve DESPACIO — son 1000
+   bajas de 1★ por el reloj entero), (b) una criatura rara (5★) baja
+   5% de golpe, (c) un jefe baja 10%, (d) el Nervioso de prueba sigue
+   con su −1% plano, (e) el texto «Absorbe: −X% hambre» con la cifra
+   real cuando la sombra devora, (f) el icono de la oleada RESPIRA,
+   FLOTA, SE INCLINA y cada ~3,5 s da el SOBRESALTO.
+2. **✅ v6.50.103 PUBLICADA — EL RELOJ DE LA HORA** — la letra: «esto
    es muy rapido, el reloj de hambre debe durar una hora en llegar a
    100% si no se alimenta el libro» (sobre los 15 min de la .102).
    EL CAMBIO: `TasaHambre` del Grimorio del Eterno `1/54000` →
@@ -1933,7 +1979,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    prueba sigue con su minuto de demo, (c) el espíritu sale tras 10 s
    de quietud DESDE el 25% (≈ 15 min de reloj), (d) la pareja
    día/noche y el resto: igual que la .102.
-2. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
+3. **✅ v6.50.102 PUBLICADA — LA ELEGIDA + EL GRIMORIO DEL ETERNO ES EL
    NERVIOSO JUGABLE** — la letra: «creo que me quedo con el Equinoccio,
    puedes borrar las otras y también borra el grimorio sellado, borra
    también tinta viva — usa el proyectil del Equinoccio para el
@@ -1968,7 +2014,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    sombra devora (XP del Eterno), (f) clic der = Orbe Cósmico (SIN
    reiniciar el hambre).
 
-3. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
+4. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
    armas cazado)** — la letra: «hay varios errores, revisa las nuevas
    armas, al parecer tienen errores, revisa en profundidad» + el
    client.log (sesión 05:38:06): la .100 cargó bien (0/0), el jugador
@@ -2696,6 +2742,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.104** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 en 13,3 s, build real 0/0 con ruta absoluta canónica, .tmod 2.571.971 B md5 065fb45b26f59cf5ed12b7f442d6857a, 386 entradas (las mismas de la .102/.103), EOF exacto, paquete==árbol ×3 idiomas, LA ESCALERA DE LA DIETA VIVE EN EL IL DE LA DLL (float32 0.10 jefe / 0.001 piso / 0.049 resta plegada / 0.05 tope — Roslyn pliega SOLO la resta de (0.05f−0.001f) porque la /4 aplica al producto con la variable; el plegado usa aritmética float POR OPERACIÓN que difiere 1 ulp del double 0.049 — LECCIÓN cazada con un mini-proyecto compilado con el MISMO SDK), símbolos HambrePorPresa/ReduccionHambre/EstrellasDe vivos + 10 muertos ausentes, regresión .102/.103 completa (reloj 1/216000, bruma muerta, elegida, bolsa), headless «Sandboxing v6.50.104 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409732866 + asset AethonMod.tmod 631015986 2.571.971 B, CDN verificado byte a byte md5 065fb45b…, /releases/latest = v6.50.104, respaldo /home/sync/AethonMod-v6.50.104.tmod), ⏳ en juego | LA LETRA (2026-10-11): «el hambre en el grimorio del eterno no baja, el hambre deberia bajar usando la rareza de las criaturas como fuente, cada criatura de 1 estrella solo quita el 0.1% de hambre los jefes quitan 10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de la rareza del monstruo» + «el sprite del libro que aparece como icono de la oleada no tiene animacion, deberia tener animacion». (1) EL DIAGNÓSTICO: el hambre del Eterno SOLO bajaba cuando su sombra devoraba presas enteras (AbsorberPresa, −1% fijo) — las bajas normales NO alimentaban nada (el usuario mataba y el reloj ni se inmutaba). (2) LA DIETA POR RAREZA: GrimoireEternal.HambrePorPresa — jefe 0.10f; estrellas del bestiario 1-5 ESCALERA LINEAL 0.001→0.05 (0,1% · 1,3% · 2,6% · 3,8% · 5%; la fuente es ShardLevelSystem.EstrellasDe — la MISMA que la XP del libro); la cobran las DOS vías de alimento: GlobalNPCXP.OnKill (cada baja acreditada con xp>0, mismo crédito que la XP — minions y proyectiles incluidos; corre en la AUTORIDAD como AbsorberPresa, en SP la misma máquina del tooltip) y AbsorberPresa (ReduccionHambre(presa, tipoLibro): el Eterno cobra la rareza, el Nervioso de prueba conserva su −1% plano de demo); el CombatText del Absorbe es DINÁMICO («Absorbe: −{0}% hambre» — la cifra real del bocado, ToString 0.##); tooltips ×3 reescritos («Cada baja lo alimenta SEGÚN SU RAREZA: de 0,1% (1★) a 5% (5★); un jefe entero, 10%.»). Con el reloj de la hora (.103): una 5★ compra 3 min de apetito, un jefe 6 min, la chusma 1★ son 36 s por cabeza. (3) EL ICONO VIVO: la cajita del título de «Furia del grimorio» (DibujarIndicador) mostraba el sprite del Nervioso como FOTO estática — ahora RESPIRA (escala 1±5% senoidal 2,8 Hz), FLOTA (bob ±2,5px a 2,2 Hz), SE INCLINA (±2,6° a 1,4 Hz) y cada 210 ticks (3,5 s) EL SOBRESALTO: tirón de 6 ticks con decaimiento al cuadrado (rotación ±0,16 rad + respingo −3px), dirección alterna por semilla ((ciclo×7919)&1) — SIN RNG, determinista, el mismo latido en cada pantalla. LECCIONES: (1) los float32 de una expresión CON VARIABLE no se buscan como el resultado final — Roslyn deja la operación viva (ldc.r4 0.049 + ldc.r4 4) y sus constantes plegadas usan aritmética float POR OPERACIÓN (numpy float32 la reproduce; el double redondeado difiere 1 ulp) — el ldc.r4-spotting se valida con un mini-build del MISMO SDK; (2) el crédito de la dieta sigue EXACTAMENTE al crédito de la XP (FindKiller + playerInteraction + libro visible en la barra rápida) — una sola regla de «quién come» |
 | **v6.50.103** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 en 12,7 s, build real 0/0 con ruta absoluta canónica, .tmod 2.571.328 B md5 4735c3b1cc34ece6e5a7b38297074e75, 386 entradas (las MISMAS de la .102 — cero archivos tocados), EOF exacto, paquete==árbol ×3 idiomas, LA CONSTANTE 1/216000 VIVE EN EL IL DE LA DLL y la 1/54000 está AUSENTE del binario (verificado por bytes float32 — la cirugía entró al ejecutable), 19 símbolos vivos + 10 muertos ausentes del heap, regresión .102 completa (muertos, elegida, bolsa, bruma), headless «Sandboxing v6.50.103 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409723646 + asset AethonMod.tmod 630979110 2.571.328 B, CDN verificado byte a byte md5 4735c3b1…, /releases/latest = v6.50.103, respaldo /home/sync/AethonMod-v6.50.103.tmod), ⏳ en juego | LA LETRA (2026-10-11): «esto es muy rapido, el reloj de hambre debe durar una hora en llegar a 100% si no se alimenta el libro» (sobre el reloj de 15 min estrenado en la .102). EL CAMBIO: TasaHambre del Grimorio del Eterno 1/54000 → 1/216000 (UNA HORA de 0 a 100% — 216.000 ticks = 3600 s × 60 t/s); hitos escalados: 25% (EL CAZADOR) a los 15 min de juego, 50% (LA IMPACIENCIA) a los 30 min, 100% a la hora exacta. INTACTOS: el minuto de demo del Nervioso de prueba (1/3600), la espera de caza de 10 s de quietud (TicksQuietudSalida 600), los 30 s de ausencia, el −1% por presa comida, el clic der sin reinicio del apetito, la pareja Equinoccio sin bruma, el espíritu y su sombra con la XP del Eterno, las 386 entradas del paquete. TOOLTIPS ×3: «EL HAMBRE (una hora de 0 a 100%)» (es-MX/es-ES) y «THE HUNGER (one hour from 0 to 100%)» (en-US). LECCIONES: (1) el tool de EDICIÓN normaliza tabs→espacios en archivos ENTEROS — un Edit de 1 línea en el hjson es-ES rewrote 2.298 líneas (todo el archivo): los hjson con tabs (es-ES/en-US) se cirujían por BYTES (python open newline='' + replace + write newline=''), jamás con herramienta de edición de texto; el git diff --numstat lo delata (1/1 = sano, 2298/2298 = emergencia); (2) la constante del reloj se VERIFICA EN EL BINARIO (bytes float32 de 1/216000 presentes, los de 1/54000 ausentes) — la cirugía de una constante no se declara, se prueba dentro de la DLL |
 | **v6.50.102** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 — cazó 3 tandas: namespace AethonMod vs la clase, DURACION_SOBRESALTO huérfana, Math sin calificar; build real 0/0 con ruta absoluta canónica, .tmod 2.571.347 B md5 6360c13efdb69a52b8592023d44b2b41, 386 entradas (397 − 11 rawimg muertos), EOF exacto, paquete==árbol ×3 idiomas (cero claves autocreadas), símbolos VIVOS en el heap (EstadoDeLibro/EstadoEterno/LanzarPareja/TicksQuietudSalida/TasaHambre) y 10 muertos AUSENTES, headless «Sandboxing v6.50.102 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409702791 + asset AethonMod.tmod 630894070 2.571.347 B, CDN verificado byte a byte md5 6360c13e…, /releases/latest = v6.50.102, respaldo /home/sync/AethonMod-v6.50.102.tmod), ⏳ en juego | LA LETRA (2026-10-11): «creo que me quedo con el Equinoccio, puedes borrar las otras y también borra el grimorio sellado, borra también tinta viva — usa el proyectil del Equinoccio para el grimorio del eterno, también es hora de cambiar el sprite del grimorio del eterno, usaremos el Grimorio hambriento nervioso y su nueva mecánica para el grimorio del eterno — el grimorio del eterno tendrá las mecánicas del grimorio hambriento nervioso pero esta vez será jugable no de prueba». (1) LA ELEGIDA: el Equinoccio gana el estudio de las 4 pruebas; MUEREN el Grimorio Estrellado, el Eco y el Veredicto (+ Estela de Aethon y Trazo), el Grimorio Sellado CON SU CASCADA ENTERA (FragmentoAethon/ExplosionAethon/SistemaObservado/buff Observado — huérfanos sin dueño) y la Tinta Viva (su Grieta vive en el libro que la abre). (2) LA BRUMA MURIÓ (la letra: «a ese proyectil que ya no use bruma»): el negro queda eclipse LIMPIO — disco FlushAlpha + rim violeta + llama de sombra, sin BrumaColumna ni humo. (3) EL ETERNO RENACE (GrimoireEternal : GrimorioHambrientoNervioso): sprite del Nervioso por Texture override (una sola fuente de verdad — el GrimoireEternal.png murió), TasaHambre 1/54000 (15 MINUTOS — el minuto de demo queda para el Nervioso de prueba), TicksQuietudSalida 600 (10 s jugables), clic der SIN reinicio del apetito (se alimenta CAZANDO; invoca al Orbe Cósmico), LA MÁQUINA POR ESTADO: todo lo que era static de la clase Nervioso (glitch/sobresalto/temblor/layout/caza/voz) migró a EstadoGrimorio POR INSTANCIA — cada libro corre SU reloj; el espíritu flotante y su sombra reciben el TIPO de su libro en ai[2] (EstadoDeLibro/EstadoEterno): SU hambre baja (−1% por presa) y SU XP cobra (el festín egoísta alimenta a quien cazó); EL DISPARO: la pareja del Equinoccio con los parámetros del Eterno (LanzarPareja: dorado 9201 −0.35 rad + negro 9202 +0.35 rad desde la fuente dividida; OrigenDelDisparo = el libro flotante si está fuera; cada bolt del sistema = una pareja día/noche: 1 + ExtraProjectiles cada 3 niveles, en abanico); lo suyo de siempre: niveles infinitos, escalado, LOS TRES ESTADOS, sin maná (el hambre ES el coste). ENTREGA: BolsaEmperatriz = sólo el Equinoccio (receta 5 madera); el Eterno por BolsaFundacionales + Génesis (AddRecipes vacío — NO hereda la receta de 5 maderas del Nervioso). LECCIONES: (1) los .cs NO son entradas del .tmod (viven en la DLL) — al borrar archivos cuenta solo lo que EMPAQUETA (11 rawimg, no 22); (2) el es-MX es el PRIMARIO español y el es-ES su espejo — cirugía con tools/cirugia_v650102_hjson.py sobre los 3 con formato propio de cada uno; (3) las plantillas con .replace() NO usan escape {{ }} — el doble-brace se coló al hjson y hubo que cazarlo con un escaneo global; (4) la herencia GrimorioEternal : GrimorioHambrientoNervioso exige overrides quirúrgicos: UseItem (suprimir el reinicio del hambre del clic der), AddRecipes (vacío), Shoot (todo propio), Estado/TipoLibro/TicksQuietudSalida (la identidad por estado) |
 | **v6.50.101** | ✅ Build-verificada (oráculo 0/0, build real 0/0 — LA LECCIÓN DEL -BUILD: el argumento es una RUTA absoluta («-build AethonMod» construía una carpeta VACÍA que el propio tML creó en /tmp/tml: DLL de 2,5 KB, tmod de 9 KB con 3 entradas «v1.0»; la forma canónica es -build /ruta/absoluta/al/AethonMod, probada por el modSource del Info del .tmod .100), .tmod 2.599.403 B md5 20aa8d43cd73aec96636a6d90e761715, 397 entradas (el MISMO set de la .100), DLL 1.285.120 B, paquete==árbol (hjson ya canónicos, diff 0), diff DLL .100↔.101: 73,7% idéntico con alineación +156 B (la inserción del try/catch + las llamadas VFXCore en la zona exacta de los 3 PreDraw — el fix está ADENTRO), símbolos vivos en el heap (Estela/Trazo/EmperatrizFX/ReabrirLoteVanilla/CerrarLoteSiAbierto), headless «Sandboxing v6.50.101 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409593470 + asset AethonMod.tmod 630436494 2.599.403 B, CDN verificado byte a byte md5 20aa8d43…, /releases/latest = v6.50.101, respaldo /home/sync/AethonMod-v6.50.101.tmod), ⏳ en juego | LA LETRA (2026-10-11): «hay varios errores, revisa las nuevas armas, al parecer tienen errores, revisa en profundidad» + client.log 05:38:06 (la .100 cargó bien 0/0, el jugador entró al mundo, ~50 s después Main engine crash). (1) EL CRASH: «Draw was called, but Begin has not yet been called» (excepción silenciosa ×1, tML mata el proyectil) → «End was called, but Begin has not yet been called» (×2) → FATAL. (2) EL DIAGNÓSTICO: los TRES sitios de dibujo nuevos de la .99 (EstelaAethonProjectile.PreDraw, TrazoEmperatrizProjectile.PreDraw, EmperatrizFX.PreDraw sobre el 931 vanilla) llaman VFXCore.FlushAdditive/FlushAlpha — que CIERRAN el lote del pase de proyectiles (CerrarLoteSiAbierto al entrar) y dejan NINGUNO abierto — y salían del PreDraw sin reabrirlo: el siguiente EntitySpriteDraw de vanilla lanza y el End final de DrawProjectiles TUMBA EL MOTOR. El contrato de la casa estaba ESCRITO en VFXCore.cs:1012 («un PreDraw SIEMPRE sale con el lote ABIERTO y válido — si llegó roto, se CURA») y los veteranos lo cumplen (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos NACIERON sin el paso sanador; EmperatrizFX era el peor caso (return true con el lote muerto → el sprite vanilla del 931 dibuja primero y crashea primero). (3) EL FIX ×3: el patrón de la casa completo en los 3 PreDraw (CerrarLoteSiAbierto → try { dibujar } catch { CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de gameplay (las 4 disparan igual, SIN maná — mana=0 de fábrica, la Bolsa de la Emperatriz bolsa 20 + receta 5 madera ×4). LECCIONES: (1) el contrato del lote del VFXCore es BINDING para TODO PreDraw nuevo — cerrar → dibujar → ReabrirLoteVanilla: el dibujo precioso sin el paso sanador deja el renderer envenenado y el End final de DrawProjectiles tumba el motor; (2) la excepción silenciosa de tML es el DELATOR — el primer «Draw was called» mata el proyectil y el «End was called» final es FATAL: cazar la CADENA en el client.log, no el síntoma; (3) el -build de tML resuelve su argumento como RUTA: un nombre relativo construye una carpeta VACÍA (DLL de 2,5 KB, tmod de 9 KB) — la forma canónica es la RUTA absoluta al modSource |

@@ -1,5 +1,62 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.104 — LA DIETA POR RAREZA + EL ICONO VIVO
+
+**Petición del usuario**: "el hambre en el grimorio del eterno no baja,
+el hambre deberia bajar usando la rareza de las criaturas como fuente,
+cada criatura de 1 estrella solo quita el 0.1% de hambre los jefes
+quitan 10% de hambre, y el hambre se reduce de 0.1% a 5% dependiendo de
+la rareza del monstruo" + "el sprite del libro que aparece como icono
+de la oleada no tiene animacion, deberia tener animacion".
+
+**(1) LA DIETA POR RAREZA**: el hambre del Eterno SOLO bajaba con las
+presas que devoraba su sombra (−1% fijo) — las bajas normales no
+alimentaban NADA. Ahora cada baja acreditada alimenta el libro según
+**la rareza del bestiario** (la misma fuente que la XP):
+- **Escalera lineal 1★→5★: 0,1% · 1,3% · 2,6% · 3,8% · 5%**; los
+  **jefes valen 10%** enteros.
+- La cobran las DOS vías de alimento: `GlobalNPCXP.OnKill` (cada baja
+  que paga XP — mismo crédito: minions y proyectiles incluidos) y
+  `AbsorberPresa` (la sombra que devora presas enteras).
+- Con el reloj de 1 hora (.103): una 5★ compra 3 min de apetito; un
+  jefe, 6 min. El texto flotante de la absorción ahora muestra LA
+  CIFRA REAL («Absorbe: −0,1% hambre» — clave dinámica `{0}`).
+- El **Nervioso de prueba conserva su −1% plano** (su demo de 1 minuto
+  no necesita más finura — `ReduccionHambre` por tipo de libro).
+- Tooltips ×3: «Cada baja lo alimenta SEGÚN SU RAREZA: de 0,1% (1★) a
+  5% (5★); un jefe entero, 10%.»
+
+**(2) EL ICONO DE LA OLEADA VIVO**: la cajita del título de «Furia del
+grimorio» mostraba el libro como una FOTO estática. Ahora **respira**
+(escala ±5%), **flota** (vaivén ±2,5 px), **se inclina** (±2,6°) y cada
+~3,5 s sufre **EL SOBRESALTO** nervioso de la familia (un tirón de 6
+ticks que se asienta) — todo DETERMINISTA (sin RNG): el mismo latido en
+cada pantalla.
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 (13,3 s) · build real
+0/0 · audit_v650104 TODO OK — .tmod 2.571.971 B, md5
+`065fb45b26f59cf5ed12b7f442d6857a`, 386 entradas, EOF exacto,
+paquete==árbol ×3, **la escalera vive EN la DLL** (float32 0.10 jefe /
+0.001 piso / 0.049 resta plegada / 0.05 tope — Roslyn pliega SOLO la
+resta porque la /4 aplica al producto con la variable, y el plegado es
+float POR OPERACIÓN: difiere 1 ulp del double 0.049, verificado con un
+build de prueba del SDK), símbolos `HambrePorPresa`/`ReduccionHambre`
+vivos + 10 muertos ausentes, regresión .102/.103 completa · headless
+«Sandboxing v6.50.104 → Adding Recipes → Choose World» — 0 excepciones.
+
+**PUBLICACIÓN**: commit `e2d187f` + tag `v6.50.104` → release
+`409732866` + asset `AethonMod.tmod` `631015986` (2.571.971 B, CDN
+verificado byte a byte) → `/releases/latest` = v6.50.104. Respaldo
+`/home/sync/AethonMod-v6.50.104.tmod`.
+
+**LECCIÓN**: los float32 de una expresión CON VARIABLE no se buscan
+como el resultado final plegado — Roslyn deja viva la operación con la
+variable (emite `ldc.r4 0.049` + `ldc.r4 4` por separado) y sus
+constantes plegadas usan aritmética float POR OPERACIÓN (numpy float32
+la reproduce; el double redondeado difiere 1 ulp). El
+`ldc.r4`-spotting se valida con un mini-proyecto compilado con el MISMO
+SDK antes de creérselo.
+
 ## Commit v6.50.103 — EL RELOJ DE LA HORA
 
 **Petición del usuario**: "esto es muy rapido, el reloj de hambre debe
