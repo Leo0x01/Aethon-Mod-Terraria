@@ -77,6 +77,11 @@ Desborde · (e) B: el arcoíris de verdad · (f) C: el trazo de jefa ·
 (g) la 4: el dorado con luz y el negro con bruma — y ELEGIR el
 proyectil del arma nueva.
 
+**PUBLICACIÓN**: tag v6.50.100 + release 409569718 (make_latest) +
+asset AethonMod.tmod 630336971 2.599.343 B (md5
+33171c67ee2bd945273a7fcd87729291), CDN VERIFICADO BYTE A BYTE,
+/releases/latest = v6.50.100, respaldo /home/sync/AethonMod-v6.50.100.tmod.
+
 ## Commit v6.50.99 — LAS CUATRO ARMAS DE LA EMPERATRIZ: LAS 3 OPCIONES DEL ESTUDIO + LA DUAL DÍA/NOCHE
 
 **Petición del usuario**: "crea 3 armas con las 3 opciones... A — Clon

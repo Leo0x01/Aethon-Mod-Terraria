@@ -1911,7 +1911,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.100 LISTA — LAS TRES TEXTURAS QUE FALTABAN (la
+1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
    son de prueba» + el client.log (sesión 04:30): tML DESACTIVÓ la
@@ -1941,7 +1941,12 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    UTF-8 · headless 0 excepciones. CHECKLIST DEL USUARIO: (a) EL MOD
    CARGA, (b) la Bolsa de la Emperatriz llega con las 4 armas, (c) las
    4 disparan SIN maná, (d)-(g) A/B/C/la dual como en la .99 — y
-   ELEGIR el proyectil del arma nueva.
+   ELEGIR el proyectil del arma nueva. PUBLICACIÓN: commit b83e07c +
+   tag v6.50.100 + push (f4a5dee..b83e07c) · release **409569718**
+   (make_latest) + asset AethonMod.tmod **630336971** 2.599.343 B
+   (md5 33171c67ee2bd945273a7fcd87729291), CDN VERIFICADO BYTE A
+   BYTE, /releases/latest = v6.50.100, respaldo
+   /home/sync/AethonMod-v6.50.100.tmod.
 1. **✅ v6.50.99 PUBLICADA — LAS CUATRO ARMAS
    DE LA EMPERATRIZ (las 3 opciones del estudio + la dual)**: (A)
    GRIMORIO ESTRELLADO (60 dmg, el burst ×4 del Nightglow — useTime
