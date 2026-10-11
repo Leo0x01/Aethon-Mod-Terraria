@@ -1,5 +1,71 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.107 — EL TAMAÑO DEL LIBRO, LA LUNA Y EL RITMO PROPIO
+
+**La letra**: «los minion son demasiado grande, deben ser mas pequeño, el
+tamaño debe ser el mismo que el del grimorio, ademas ellos atacan al mismo
+tiempo, cada ojo debe ser individual y deben tener la libertad de atacar
+cuando quieran y a la velocidad que deseen ya que la velocidad de ataque
+aumenta en cuanto mas nivel tengan el grimorio, hasta un maximo de 50% mas
+rapido a nivel 100 del grimorio subiendo a partir de nivel 1» + «el
+proyectil que usan los minion es muy grueso, debe ser un poco mas fino» +
+«la forma en la que deben moverse al rededor del libro es orbitar como una
+luna a un planeta no solo dar vuelta en ciruclo» + «la caja de informacion
+del grimorio eterno es demasiado grande con datos que no necesitan solo
+debe decir: daño magico, daño de invocacion, datos y buff propios del
+juego, un pequeño texto de lore donde explique un poco que es el libro sin
+decir mucho, al menos 2 lineas, luego en progresion debe salir la barra de
+hambre y la de exp».
+
+**EL CAMBIO**: cinco cirugías sobre los OJOS DEL ETERNO y el tooltip:
+
+- **EL TAMAÑO** (ESCALA 0.75): el espíritu viste el libro 36×49 a esc 1.15
+  = 41×56 px; el ojo 56×54 × 0.75 = 42×41 en pantalla — LA LUNA CABE EN LA
+  SOMBRA DEL PLANETA. Todo el layout escala con la MISMA constante: hitbox
+  25×15, el sello r12→15 (antes 16→20), el aliento 2.5×2.1 (antes
+  3.3×2.8), el iris y la mirada ×ESCALA; la corona se acerca (radio
+  56+2.8n tope 88 — era 64+3.2n tope 98).
+- **EL RITMO PROPIO**: MUERE la cadencia global de la .106 (110−nivel/3,
+  piso 55); NACE la cadencia de ESTE ojo: 110 / (VelocidadNivel ×
+  RitmoPropio) — VelocidadNivel = 1 + 0.5·min(nivel−1, 99)/99 (1.0× en
+  nivel 1 subiendo LINEAL hasta 1.5× = +50% más rápido en nivel 100,
+  CLAVADA ahí) y RitmoPropio = 0.85–1.15 por Hash01(whoAmI). EL DESFASE
+  DE NACIMIENTO: el primer disparo de cada ojo cae entre el 35% y el
+  100% de SU intervalo — la banda invocada de golpe JAMÁS dispara en
+  bloque: cada ojo es INDIVIDUAL.
+- **LA LUNA**: con el libro fuera MUERE el círculo (66+44k a velocidad
+  constante); NACE la elipse con LA SEGUNDA LEY DE KEPLER — a = 62+42k,
+  b = 0.8a (la órbita INCLINADA), precesión apsidal lenta (tilt = 0.9k +
+  0.18·sin(0.07t)), dθ = ω·a²/r² (el área barrida por tick es CONSTANTE):
+  el ojo ACELERA en el perigeo (cerca del libro) y FRENA en el apogeo
+  (lejos) — ORBITAR, no dar vuelta en círculo. La fase de cada ojo vive
+  en localAI[3] y SÓLO la avanza PasoOrbita (UNA vez por tick desde la
+  AI — el draw la LEE, jamás la mueve).
+- **EL RAYO FINO** (sólo el MODO OJO — el cetro propio conserva su
+  grosor): funda 7.5→6.0, cápsulas negras 19→15 px (0.30→0.235), cadenas
+  3.6→2.9, gorro 6.0→4.8, ancla 1.5/0.8→1.2/0.65, estallido 46→38,
+  arcos de corona 2.8→2.3, bruma en la punta 24→20.
+- **LA CAJA COMPACTA**: MUERE la vista completa de 25 líneas del tooltip
+  del Eterno (los hitos con premios, las secciones DAÑO/RECURSOS/
+  PROYECTIL/BONUS, el conmutador de modos); el hjson ×3 pierde el
+  mega-tooltip (19 líneas) y gana el LORE de 2 líneas («Un libro viejo
+  que devora lo que su portador mata. / Mantén sus páginas llenas... o
+  será tu alma la que llene la siguiente.»); el C#: daño mágico (vanilla,
+  sin tocar) + daño de invocación pegado al daño + PROGRESIÓN con la
+  barra de EXP y la pareja del hambre REUBICADA (HambreBarra/
+  HambreEstado al final, dentro de progresión).
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+audit_v650107 TODO OK: .tmod 2.590.979 B md5 b6f789b6a2af363de8fb03e1b83f6f20,
+387 entradas, EOF exacto, paquete==árbol ×3, rawimg 56×54 píxel-idénticas,
+PasoOrbita/FaseOrbital/AnilloDe/CadenciaPersonal/VelocidadNivel/RitmoPropio/
+ESCALA/CADENCIA_BASE vivos + get_Cadencia (la .106) MUERTO, los ldstr de la
+vista completa MUERTOS en #US (UTF-16) y la pareja HambreBarra/HambreEstado
+VIVA, las constantes de la letra en el IL, regresión .102–.106 completa ·
+headless «Sandboxing v6.50.107 → Adding Recipes → Choose World» 0 excepciones.
+
+---
+
 ## Commit v6.50.106 — EL OJO DEL USUARIO, SIN RECORTE
 
 **La letra**: «no debes hacer recorte ya que arruinaste el recorte que yo
