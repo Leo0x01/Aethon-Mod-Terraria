@@ -1754,8 +1754,120 @@ namespace AethonMod.Content.Systems
                 Color.White * _alfaIndicador, giroIcono,
                 new Vector2(icono.Width, icono.Height) * 0.5f,
                 escIcono, SpriteEffects.None, 0f);
+
+            // === v6.50.106 — EL OJO DEL ICONO VIVO (la letra: «el icono del
+            //     grimorio en el evento de oleada no tiene animacion en el
+            //     ojo»): el libro ya respira/flota/se inclina/sobresalta
+            //     (.104) — ahora SU OJO también vive. El iris SIGUE AL
+            //     CURSOR (el modelo del libro en mano: SnapDireccion
+            //     ±(3,5·2,8) texels) y el parpadeo corre SU reloj
+            //     determinista (la convención de fases de la .86:
+            //     fase>7||fase<4 = medio). En el sobresalto, la mirada
+            //     escapa al lado del tirón. CERO RNG (la regla del icono).
+            // ===
+            PasoOjoIcono();
+            if (_iconoIris == null || _iconoIris.IsDisposed)
+                _iconoIris = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+            if (_iconoParpadoMedio == null || _iconoParpadoMedio.IsDisposed)
+                _iconoParpadoMedio = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Medio").Value;
+            if (_iconoParpadoCerrado == null || _iconoParpadoCerrado.IsDisposed)
+                _iconoParpadoCerrado = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
+
+            // LA MIRADA: el iris sigue al cursor — el texel del ojo con el
+            // desp actual, pegado a la MISMA transform del icono (bob +
+            // giro + escala), como el libro en mano (ModifyItemDraw)
+            Vector2 posOjoPantalla = centroIcono + Vector2.UnitY * bobIcono +
+                ((Content.Weapons.GrimorioHambriento.OJO + _iconoDesp -
+                  new Vector2(icono.Width, icono.Height) * 0.5f) * escIcono)
+                    .RotatedBy(giroIcono);
+            Vector2 alCursor = Main.MouseScreen - posOjoPantalla;
+            Vector2 meta;
+            if (alCursor.LengthSquared() < 64f)
+                meta = Vector2.Zero;      // el cursor ENCIMA: te mira fijo a los ojos
+            else
+                meta = SnapDireccionIcono(alCursor) * new Vector2(3.5f, 2.8f);
+            // el sobresalto: la mirada escapa al lado del tirón (más rápido)
+            if (pasoSobresalto < 6u)
+            {
+                int semilla = (int)(Main.GameUpdateCount / 210u);
+                int dirSusto = ((semilla * 7919) & 1) == 0 ? 1 : -1;
+                meta = new Vector2(dirSusto * 4.5f, -2.2f);
+                _iconoDesp = Vector2.Lerp(_iconoDesp, meta, 0.5f);
+            }
+            else
+                _iconoDesp = Vector2.Lerp(_iconoDesp, meta, 0.22f);
+
+            // recalcula la posición con el desp NUEVO (la mirada se dibuja
+            // donde el iris quedó — un frame de diferencia no se lee)
+            posOjoPantalla = centroIcono + Vector2.UnitY * bobIcono +
+                ((Content.Weapons.GrimorioHambriento.OJO + _iconoDesp -
+                  new Vector2(icono.Width, icono.Height) * 0.5f) * escIcono)
+                    .RotatedBy(giroIcono);
+
+            // EL PÁRPADO o EL IRIS
+            if (_iconoFase > 0)
+            {
+                bool medio = _iconoFase > 7 || _iconoFase < 4;
+                Texture2D parpado = medio ? _iconoParpadoMedio : _iconoParpadoCerrado;
+                sb.Draw(parpado, centroIcono + Vector2.UnitY * bobIcono, null,
+                    Color.White * _alfaIndicador, giroIcono,
+                    new Vector2(parpado.Width, parpado.Height) * 0.5f,
+                    escIcono, SpriteEffects.None, 0f);
+            }
+            else
+            {
+                sb.Draw(_iconoIris, posOjoPantalla, null,
+                    Color.White * _alfaIndicador, giroIcono,
+                    _iconoIris.Size() * 0.5f,
+                    escIcono * Content.Weapons.GrimorioHambriento.IRIS_ESC,
+                    SpriteEffects.None, 0f);
+            }
+
             Utils.DrawBorderString(sb, titulo, r2.Right() + Vector2.UnitX * num * -22f,
                 Color.White * _alfaIndicador, num * 0.9f, 1f, 0.4f);
+        }
+
+        // ================================================================
+        //  v6.50.106 — LA MÁQUINA DEL OJO DEL ICONO (determinista, cero RNG)
+        // ================================================================
+        private static int _iconoTickPaso = -1;
+        private static int _iconoFase = 0;          // la fase del párpado 11→0
+        private static int _iconoEspera = 200;      // el próximo parpadeo
+        private static int _iconoCiclo = 0;         // el ciclo del período (hash)
+        private static Vector2 _iconoDesp = Vector2.Zero;   // la mirada actual
+        private static Texture2D _iconoIris;
+        private static Texture2D _iconoParpadoMedio;
+        private static Texture2D _iconoParpadoCerrado;
+
+        /// <summary>EL PASO del ojo del icono (una vez por tick de juego):
+        /// el parpadeo 4–8 s (fase 11→0 — la convención de la .86) con el
+        /// período hasheado por ciclo. Sin RNG.</summary>
+        private static void PasoOjoIcono()
+        {
+            if (_iconoTickPaso == (int)Main.GameUpdateCount) return;
+            _iconoTickPaso = (int)Main.GameUpdateCount;
+
+            if (_iconoFase > 0) _iconoFase--;
+            else if (--_iconoEspera <= 0)
+            {
+                _iconoFase = 11;                     // 4t medio · 4t cerrado · 3t medio
+                _iconoCiclo++;
+                _iconoEspera = 240 + (int)(240f * VFXCore.Hash01(_iconoCiclo, 313, 37));
+            }
+        }
+
+        /// <summary>EL SNAP de 8 direcciones (el modelo del libro en mano —
+        /// GrimorioHambriento.SnapDireccion, espejo local).</summary>
+        private static Vector2 SnapDireccionIcono(Vector2 delta)
+        {
+            if (delta.LengthSquared() < 0.01f) return Vector2.Zero;
+            int s = (int)Math.Round(Math.Atan2(delta.Y, delta.X) / (Math.PI / 4.0));
+            s &= 7;
+            return new Vector2((float)Math.Cos(s * Math.PI / 4.0),
+                                (float)Math.Sin(s * Math.PI / 4.0));
         }
 
         public override void OnWorldUnload()

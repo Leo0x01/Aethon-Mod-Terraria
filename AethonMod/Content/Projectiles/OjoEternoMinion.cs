@@ -10,130 +10,79 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Projectiles
 {
     /// <summary>
-    /// OJO ETERNO MINION — v6.50.105 — LOS MINIONS SON LOS OJOS DEL LIBRO.
+    /// OJO ETERNO MINION — v6.50.106 — EL OJO DEL USUARIO, SIN RECORTE.
     ///
-    /// La letra del usuario: «también debemos cambiar los minions, los
-    /// minion que use el grimorio será su propio ojo […] es tiempo de
-    /// animar al minion, yo te daré los sprite del ojo usando código […]
-    /// ya sabes como animar los ojos, ahora ten en cuenta que el ojo se
-    /// mueve en la direccion en la que mira, o sea para moverse primero
-    /// mira y luego se mueve, algo mas, estos minion se posicionan encima
-    /// del jugador como una corona, y si el grimorio esta fuera comienzan
-    /// a orbitar al grimorio en 2 circulos uno de 5 minion, otro de 6 y
-    /// asi aumentando los circulos orbitales a mas minion pueda lanzarce
-    /// […] cada minion mira a su objetivo y usa el rayo con ruido de
-    /// perlin ademas de que este rayo usado por los minion es negro, con
-    /// bordes morado y con bruma en la punta que toca al monstruo, cada
-    /// minion debe tener un pequeño circulo magico igual que el de los
-    /// agujeros negros […] cuando el minion dispara tiene un pequeño
-    /// retroceso y luego se reincorpora, los ojos de cada minion son
-    /// independientes de cada uno de ellos y del libro y no se ven
-    /// afectados por la animacion de hambre del grimorio».
+    /// La letra del usuario: «no debes hacer recorte ya que arruinaste el
+    /// recorte que yo mismo hice, solo debes acomodar el iris para que
+    /// pueda realmente funcionar […] la animacion que necesita de
+    /// movimiento es la misma que este invocador Ruinous_Staff» +
+    /// «el proyecril que debe usar el minion debe ser el mismo que Cetro
+    /// de Trueno de Perlin pero teñido de negro en el centro y morado en
+    /// los bordes con bruma en la punta».
     ///
-    /// EL CUERPO: el ojo del grimorio DESPRENDIDO — el recorte del sprite
-    /// EXACTO del usuario (los 3 estados en código: abierto / medio /
-    /// cerrado), 44×37, con el iris de la .84 como CAPA que se desliza
-    /// (la técnica del libro: la esclera es la base y el iris va encima).
+    /// EL SPRITE (la lección de la .105): los 3 archivos del usuario YA
+    /// ERAN su recorte perfecto (512×500: el ojo con su armazón dorado,
+    /// sus 8 remaches y sus chispas moradas) — la .105 le hizo OTRO
+    /// recorte encima y lo molió a 44×37. Ahora: CERO recorte; el
+    /// contenido opaco del archivo ES el sprite (56×54 en juego) y el
+    /// IRIS de la .84 va ACOMODADO en el centro de la ALMENDRA medida
+    /// del arte (fracción 0.513, 0.543 del recorte).
     ///
-    /// LA MIRADA MANDA («primero mira y luego se mueve»): el ojo fija su
-    /// iris en el destino ANTES de moverse — una fase de mirada (freno,
-    /// el iris gira) y luego el desplazamiento. La mirada del iris se
-    /// guarda como ÁNGULO (localAI[2]) y barre suave hacia el foco.
+    /// EL MOVIMIENTO (el Ruinous Staff — AI_206, wiki 1.4.5.7): UNA ley
+    /// de planeo continuo, sin la máquina mirando/moviendo de la .105
+    /// (frenaba en seco cerca del hueco, aceleraba al salir del umbral y
+    /// rebotaba — el «se mueven erráticos de arriba hacia abajo»): lejos
+    /// del hueco se dirige a él con inercia (arranque suave por
+    /// distancia), cerca lo SIGUE con amortiguación crítica — el hueco
+    /// se mueve (corona/órbita) y el ojo danza con él, sin sobrepasar
+    /// jamás. La cadencia 110−nivel/3 (≈1,83 s — la del Forbidden Ruin).
     ///
-    /// LA FORMACIÓN: CORONA sobre la cabeza del dueño (arco 200°→340°);
-    /// con el ESPÍRITU FUERA (GrimorioNerviosoFlotante), ÓRBITAS
-    /// CONCÉNTRICAS AL LIBRO: el anillo k lleva 5+k ojos (5, 6, 7…) —
-    /// «uno de 5 minion, otro de 6 y así aumentando los círculos
-    /// orbitales a más minion pueda lanzarse» — contrarrotando (par
-    /// horario, impar antihorario, la firma de la casa).
+    /// LA CORONA VIVA: el arco sobre la cabeza se BALANCEA (±11°), el
+    /// radio RESPIRA y cada ojo va con su vaivén propio (5,7 s) — la
+    /// corona de la .105 casi no se movía (0,09 rad/s = período de 70 s)
+    /// y leía muerta.
     ///
-    /// EL RAYO: Perlin negro con bordes morados — el canal meandrante
-    /// (fBm, la matemática del PerlinBolt) se dibuja DOS veces: la funda
-    /// morada ADITIVA (RayoStrip, el borde que arde) y encima el NÚCLEO
-    /// NEGRO en AlphaBlend (cápsulas que OSCURECEN: el centro negro, el
-    /// filo morado asomando en los bordes) — con la BRUMA de SombrasLib
-    /// en la punta que toca al monstruo. El golpe va por GOLPEMOTOR (el
-    /// cauce del motor: crítica, varianza, on-hit, crédito de la kill).
+    /// EL RAYO: el proyectil DEL CETRO DEL TRUENO PERLIN (el mismo
+    /// TruenoPerlinProjectile en su modo ojo, ai[0]=1) — el ancla nace
+    /// PEGADA al monstruo, el arco cuelga del OJO, y el golpe es el del
+    /// cetro (radio + cadena + GolpeMotor): el daño de verdad. Teñido:
+    /// negro en el centro, morado en los bordes, bruma en la punta.
     ///
-    /// EL CÍRCULO MÁGICO: OrbitaLib.SigiloErosionado — EL MISMO de los
-    /// agujeros negros (runas de RunasAbismo, dorado-ámbar, el aro roto
-    /// con huecos), en pequeño: el ojo flota en el centro de su sello.
+    /// EL IRIS MANDA («primero mira y luego se mueve»): el iris barre a
+    /// 0,22 rad/t hacia el foco — llega al ángulo mucho antes de que el
+    /// cuerpo cruce la mitad del camino; en la carga del disparo el
+    /// párpado se CORTA y el ojo queda ABIERTO clavado en su presa (la
+    /// mirada del cazador — la .105 lo dejaba en «medio» por error de
+    /// fase: forzar fase 1 = medio, no abierto).
     ///
-    /// EL PARPADEO INDEPENDIENTE: cada ojo lleva SU reloj (localAI[0/1],
-    /// hash propio por whoAmI) — la convención de fases del libro (la
-    /// .86: fase>7||fase<4 = medio) — y NO lee NADA del hambre del
-    /// grimorio: los ojos no heredan la ansiedad del libro. Al apuntar,
-    /// el párpado se corta y el ojo queda ABIERTO en blanco (la mirada
-    /// del cazador).
-    ///
-    /// MP: la IA corre en el dueño (tML); el rayo y el objetivo se
-    /// re-derivan en el draw (el más cercano válido — la misma lista en
-    /// todos los clientes); el golpe lo resuelve el dueño por GolpeMotor
-    /// (el modelo vanilla). El parpadeo es visual-local (la deuda
-    /// documentada de la casa — el reloj nervioso ya la carga).
+    /// EL PARPADEO INDEPENDIENTE (la .105): reloj propio por ojo, cero
+    /// RNG, SIN leer nada del hambre del libro.
     /// </summary>
     public class OjoEternoMinion : ModProjectile
     {
-        // === LOS MODOS (ai[0]) — la máquina de la mirada ===
-        private const float MODO_MIRANDO = 0f;     // frenando, el iris fija el destino
-        private const float MODO_MOVIENDO = 1f;    // el desplazamiento (la mirada ya está puesta)
-        private const float MODO_APUNTANDO = 2f;   // la carga: freno en seco, el círculo respira
-        private const float MODO_DISPARANDO = 3f;  // EL RAYO (el canal vivo + la bruma en la presa)
+        // === LOS MODOS (ai[0]) — la carga y el crucero ===
+        private const float MODO_CRUCERO = 0f;     // el planeo continuo (la ley única)
+        private const float MODO_APUNTANDO = 1f;   // la carga: freno, el sello respira
 
-        private const int GAZE_TICKS = 6;         // «primero mira»: la pausa del iris
-        private const int AIM_TICKS = 14;         // la carga del disparo
-        private const int FIRE_TICKS = 16;        // el rayo encendido
+        private const int AIM_TICKS = 12;          // la carga del disparo (0,2 s)
 
-        // === EL RAYO: la paleta (negro con bordes morados) —
-        //     calibrado con el mock VLM (r1 «sin borde morado» · r2 «demasiado
-        //     tenue»): el violeta VIVO y el ancho 9,5 (la falda morada ≈29 px)
-        //     para que el BORDE lea también sobre fondos claros ===
-        private static readonly Color RayoMorado = new(190, 110, 255);   // la funda: el borde que arde
-        private static readonly Color RayoClaro = new(240, 224, 255);    // la vena: el filo pálido
-        private static readonly Color RayoNegro = new(8, 3, 14, 215);    // el núcleo que oscurece
+        // === EL IRIS ACOMODADO (la medición del arte del usuario) ===
+        //     la almendra (136,197)-(389,346) de 512×500 → centro
+        //     (0.513, 0.543)·(56,54) = (28.7, 29.3) → +0.7,+2.3 del centro
+        private static readonly Vector2 IRIS_REST = new(0.7f, 2.3f);
+        private const float IRIS_ESCALA = 0.41f;   // caja 13 px → disco ~11 px
+        private const float MIRA_X = 7.5f;         // el viaje: media almendra 13,85
+        private const float MIRA_Y = 2.5f;         // el viaje: media altura 8,05
 
         // === EL CÍRCULO MÁGICO (el de los agujeros negros, en pequeño) ===
         private static readonly Color SelloOro = new(240, 124, 65);      // dorado-ámbar (MEDIDO del Umbral)
         private static readonly Color SelloPunta = new(255, 205, 140);   // la punta pálida
 
-        // === LA CORONA: el arco 200°→340° sobre la cabeza (rad) ===
-        private const float CORONA_A0 = 3.49f;
-        private const float CORONA_A1 = 5.93f;
-
+        // ================================================================
+        //  EL NIVEL (el patrón del Orbe Cósmico: ai[2] desde el spawn)
+        // ================================================================
         public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Projectile.type] = 1;    // el parpadeo no usa frames: son 3 texturas por capas
-            Main.projPet[Projectile.type] = true;
-            ProjectileID.Sets.MinionTargettingFeature[Projectile.type] = true;
-            ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
-        }
-
-        public override void SetDefaults()
-        {
-            Projectile.width = 28;                  // la almendra (el sprite 44×37 viste por fuera)
-            Projectile.height = 20;
-            Projectile.tileCollide = false;
-            Projectile.friendly = true;
-            Projectile.minion = true;
-            Projectile.minionSlots = 1f;
-            Projectile.penetrate = -1;
-            Projectile.timeLeft = 18000;
-            Projectile.DamageType = DamageClass.Summon;
-            Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 10;
-            Projectile.aiStyle = -1;
-            Projectile.light = 0.35f;
-        }
-
-        public override bool? CanCutTiles() => false;
-        public override bool MinionContactDamage() => false;   // el RAYO es el ataque: el ojo no muerde
-
-        // ================================================================
-        //  EL NIVEL (el patrón del Orbe Cósmico: ai[2] desde el spawn,
-        //  con el fallback de HeldItem para los veteranos de la red)
-        // ================================================================
         private int Level
         {
             get
@@ -161,9 +110,8 @@ namespace AethonMod.Content.Projectiles
             }
         }
 
-        /// <summary>La cadencia del rayo por nivel: 110 ticks base, −1 por
-        /// 3 niveles, piso 55 (nivel 165+). Un ojo dispara cada ~1,8 s de
-        /// base y cada ~0,9 s al tope — la andanada la pone la CORONA.</summary>
+        /// <summary>La cadencia del rayo por nivel (≈1,83 s de base — la
+        /// del Forbidden Ruin del Ruinous Staff), piso 55.</summary>
         private int Cadencia => Math.Clamp(110 - Level / 3, 55, 110);
 
         // ================================================================
@@ -185,9 +133,14 @@ namespace AethonMod.Content.Projectiles
             float t = Projectile.ai[1];
 
             // === EL PARPADEO INDEPENDIENTE (visual-local: NO lee el hambre
-            //     del libro — cada ojo lleva SU reloj; al apuntar, el párpado
-            //     se corta y la mirada queda FIJA en blanco) ===
-            if (modo != MODO_APUNTANDO && modo != MODO_DISPARANDO)
+            //     del libro — cada ojo lleva SU reloj). En la carga, el
+            //     párpado se CORTA y el ojo queda ABIERTO clavado en la
+            //     presa (la mirada del cazador — fase 0, no «medio»). ===
+            if (modo == MODO_APUNTANDO)
+            {
+                if (Projectile.localAI[1] > 0f) Projectile.localAI[1] = 0f;
+            }
+            else
             {
                 if (Projectile.localAI[1] > 0f)
                     Projectile.localAI[1]--;                      // la fase 10→1
@@ -202,18 +155,17 @@ namespace AethonMod.Content.Projectiles
                     }
                 }
             }
-            else if (Projectile.localAI[1] > 1f)
-                Projectile.localAI[1] = 1f;                        // la mirada del cazador: abrir YA
 
             // === EL FOCO DE LA MIRADA: a dónde apunta el iris ===
             NPC presa = ObjetivoDelOjo(dueño, nivel);
             Vector2? libro = PosicionDelLibro(dueño);
             Vector2 slot = SlotDeFormacion(dueño, libro);
-            Vector2 foco = (modo == MODO_APUNTANDO || modo == MODO_DISPARANDO) && presa != null
+            Vector2 foco = modo == MODO_APUNTANDO && presa != null
                 ? presa.Center
                 : slot;
 
-            // el ángulo de la mirada barre suave (0,22 rad/tick) hacia el foco
+            // el ángulo de la mirada barre suave (0,22 rad/t) hacia el foco —
+            // el iris LLEGA mucho antes que el cuerpo: «primero mira»
             float angMeta = foco == Projectile.Center
                 ? Projectile.localAI[2]
                 : (float)Math.Atan2(foco.Y - Projectile.Center.Y, foco.X - Projectile.Center.X);
@@ -222,103 +174,110 @@ namespace AethonMod.Content.Projectiles
             Projectile.localAI[2] = MathHelper.WrapAngle(
                 Projectile.localAI[2] + MathHelper.Clamp(da, -0.22f, 0.22f));
 
-            // === EL RETROCESO (física): la patada va fuera y la formación
-            //     lo reincorpora — el ojo frena el disparo y luego vuelve ===
-            if (modo == MODO_DISPARANDO)
-                Projectile.velocity *= 0.86f;
-
-            // === LA MÁQUINA ===
-            switch (modo)
+            // === LA MÁQUINA (dos modos — la carga y el crucero) ===
+            if (modo == MODO_APUNTANDO)
             {
-                case MODO_APUNTANDO:
-                    Projectile.velocity *= 0.72f;                  // freno en seco: la carga
-                    if (presa == null) { SalirDeFuego(); break; }
-                    if (t >= AIM_TICKS)
-                    {
-                        Projectile.ai[0] = MODO_DISPARANDO;
-                        Projectile.ai[1] = 0f;
-                        Projectile.netUpdate = true;
+                Projectile.velocity *= 0.75f;                  // el freno de la carga
+                if (presa == null || !presa.active || presa.life <= 0)
+                {
+                    SalirDeFuego();                            // la presa murió esperando
+                }
+                else if (t >= AIM_TICKS)
+                {
+                    Disparar(presa, nivel);
+                    SalirDeFuego();
+                }
+            }
+            else
+            {
+                // === LA LEY DEL PLANEO (el Ruinous Staff): UNA ley para
+                //     todo el viaje — sin modos, sin frenos en seco, sin
+                //     rebote. Lejos: inercia con arranque suave (la
+                //     velocidad deseada se capped por distancia — jamás
+                //     se dispara de golpe). Cerca: amortiguación crítica
+                //     (la velocidad apunta al hueco proporcional a lo
+                //     que falta: el ojo SIGUE al hueco móvil sin
+                //     sobrepasarlo nunca). ===
+                Vector2 alSlot = slot - Projectile.Center;
+                float dist = alSlot.Length();
+                if (dist > 90f)
+                {
+                    float vmax = 13f * WeaponScaling.MinionSpeedMult(nivel);
+                    Vector2 deseada = Vector2.Normalize(alSlot) *
+                        Math.Min(vmax, dist * 0.22f);
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, deseada, 0.15f);
+                }
+                else if (dist > 0.1f)
+                {
+                    Projectile.velocity = Vector2.Lerp(
+                        Projectile.velocity, alSlot * 0.25f, 0.35f);
+                }
+                else
+                {
+                    Projectile.velocity *= 0.6f;
+                }
 
-                        // === EL GOLPE (el cauce del motor — GolpeMotor) ===
-                        if (presa != null && presa.active && presa.life > 0)
-                        {
-                            int dano = Math.Max(1, (int)(Projectile.damage *
-                                WeaponScaling.MinionContactDamageMult(nivel)));
-                            GolpeMotor.Golpear(Projectile, presa, dano, Projectile.knockBack * 0.6f);
-                        }
-
-                        // === LA PATADA («un pequeño retroceso») ===
-                        Vector2 atrás = Projectile.Center - presa.Center;
-                        if (atrás.LengthSquared() > 0.01f)
-                        {
-                            atrás.Normalize();
-                            Projectile.velocity = atrás * 3.0f;
-                        }
-
-                        Sonar(SoundID.Item122.WithPitchOffset(-0.35f).WithVolumeScale(0.5f),
-                            Projectile.Center);
-                    }
-                    break;
-
-                case MODO_DISPARANDO:
-                    if (presa == null) { SalirDeFuego(); break; }
-                    if (t >= FIRE_TICKS) { SalirDeFuego(); break; }
-                    break;
-
-                default:
-                    // === LA FORMACIÓN: primero MIRA (frena), luego SE MUEVE ===
-                    Vector2 alSlot = slot - Projectile.Center;
-                    float dist = alSlot.Length();
-
-                    if (modo == MODO_MIRANDO)
-                    {
-                        Projectile.velocity *= 0.84f;              // el ojo se detiene a mirar
-                        if (t >= GAZE_TICKS && dist > 14f)
-                        {
-                            Projectile.ai[0] = MODO_MOVIENDO;
-                            Projectile.ai[1] = 0f;
-                        }
-                    }
-                    else // MOVIENDO
-                    {
-                        if (dist < 12f)
-                        {
-                            Projectile.velocity *= 0.72f;
-                            Projectile.ai[0] = MODO_MIRANDO;       // llegó: el ciclo recomienza
-                            Projectile.ai[1] = 0f;
-                        }
-                        else if (dist > 0.1f)
-                        {
-                            float velocidad = 13f * WeaponScaling.MinionSpeedMult(nivel);
-                            Vector2 deseada = Vector2.Normalize(alSlot) * velocidad;
-                            Projectile.velocity = Vector2.Lerp(Projectile.velocity, deseada, 0.16f);
-                        }
-                        // en órbita el slot gira: la persecución es continua
-                    }
-
-                    // === EL DISPARO: si hay presa y la cadencia está lista ===
-                    if (presa != null && Projectile.frame <= 0)
-                    {
-                        Projectile.ai[0] = MODO_APUNTANDO;
-                        Projectile.ai[1] = 0f;
-                        Projectile.netUpdate = true;
-                    }
-                    break;
+                // === EL DISPARO: si hay presa y la cadencia está lista ===
+                if (presa != null && Projectile.frame <= 0)
+                {
+                    Projectile.ai[0] = MODO_APUNTANDO;
+                    Projectile.ai[1] = 0f;
+                    Projectile.netUpdate = true;
+                }
             }
 
             Projectile.ai[1]++;
-            if (Projectile.frame > 0) Projectile.frame--;         // la cadencia (frame prestado: el draw es nuestro)
+            if (Projectile.frame > 0) Projectile.frame--;         // la cadencia (frame prestado)
 
-            // === LA PRESENCIA: el halo suave del ojo + el polvillo ===
-            Lighting.AddLight(Projectile.Center, new Vector3(0.50f, 0.38f, 0.20f));
-            if (Main.netMode != NetmodeID.Server && Projectile.ai[0] == MODO_DISPARANDO &&
-                Main.rand.NextBool(3) && presa != null)
+            // === LA PRESENCIA: el halo suave del ojo ===
+            Lighting.AddLight(Projectile.Center, new Vector3(0.45f, 0.34f, 0.18f));
+        }
+
+        // ================================================================
+        //  EL DISPARO — el proyectil DEL CETRO DEL TRUENO PERLIN
+        //  (el mismo TruenoPerlinProjectile, modo ojo: ai[0]=1)
+        // ================================================================
+        private void Disparar(NPC presa, int nivel)
+        {
+            // === LA PATADA («un pequeño retroceso») — la formación lo
+            //     reincorpora con la ley del planeo ===
+            Vector2 atrás = Projectile.Center - presa.Center;
+            if (atrás.LengthSquared() > 0.01f)
             {
-                Dust d = Dust.NewDustPerfect(presa.Center, DustID.Shadowflame,
-                    new Vector2(Main.rand.NextFloat(-0.6f, 0.6f), -0.5f),
-                    128, new Color(128, 64, 200), 0.45f);
-                d.noGravity = true;
+                atrás.Normalize();
+                Projectile.velocity = atrás * 3.2f;
             }
+
+            // === EL GOLPE: el cauce del cetro (radio + cadena + GolpeMotor
+            //     — resuelto por su dueño). El daño del minion escalado
+            //     por nivel, como el contacto de siempre. ===
+            if (Projectile.owner == Main.myPlayer)
+            {
+                int dano = Math.Max(1, (int)(Projectile.damage *
+                    WeaponScaling.MinionContactDamageMult(nivel)));
+                try
+                {
+                    Projectile.NewProjectile(
+                        Projectile.GetSource_FromAI(),
+                        presa.Center, Vector2.Zero,
+                        ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.TruenoPerlinProjectile>(),
+                        dano, Projectile.knockBack * 0.6f, Projectile.owner,
+                        1f, Projectile.whoAmI, presa.whoAmI);
+                }
+                catch { }
+            }
+
+            Sonar(SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.5f),
+                Projectile.Center);
+        }
+
+        /// <summary>El fin del fuego: vuelve al crucero y arranca la cadencia.</summary>
+        private void SalirDeFuego()
+        {
+            Projectile.ai[0] = MODO_CRUCERO;
+            Projectile.ai[1] = 0f;
+            Projectile.frame = Cadencia;
+            Projectile.netUpdate = true;
         }
 
         // ================================================================
@@ -334,31 +293,22 @@ namespace AethonMod.Content.Projectiles
             {
                 DrawElSello();
                 DrawElOjo();
-                if (Projectile.ai[0] == MODO_DISPARANDO)
-                    DrawElRayo();
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
-        /// <summary>El fin del fuego: vuelve a MIRAR y arranca la cadencia.</summary>
-        private void SalirDeFuego()
-        {
-            Projectile.ai[0] = MODO_MIRANDO;
-            Projectile.ai[1] = 0f;
-            Projectile.frame = Cadencia;
-            Projectile.netUpdate = true;
-        }
-
         // ================================================================
-        //  LA FORMACIÓN — la corona y las órbitas
+        //  LA FORMACIÓN — la corona viva y las órbitas
         // ================================================================
 
-        /// <summary>LA CORONA sobre la cabeza del dueño (arco 200°→340°,
-        /// el radio crece con la banda) o LAS ÓRBITAS al libro flotante:
-        /// el anillo k lleva 5+k ojos (5, 6, 7… — la letra), radio
-        /// 58+42k, contrarrotando (par horario, impar al revés).</summary>
+        /// <summary>LA CORONA sobre la cabeza del dueño — el arco se
+        /// BALANCEA (±11° a 0,30 rad/s), el radio RESPIRA (±3 px) y cada
+        /// ojo lleva su vaivén propio (5,7 s por ciclo) — la corona VIVA
+        /// que la .105 no tenía. Con el ESPÍRITU FUERA: ÓRBITAS
+        /// CONCÉNTRICAS AL LIBRO — el anillo k lleva 5+k ojos (5, 6, 7…
+        /// — la letra), radio 66+44k, contrarrotando.</summary>
         private Vector2 SlotDeFormacion(Player dueño, Vector2? libro)
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
@@ -377,24 +327,31 @@ namespace AethonMod.Content.Projectiles
                 }
                 int capAnillo = 5 + k;
                 int enAnillo = idx - baseIdx;
-                float radio = 58f + 42f * k;
-                float vel = (k % 2 == 0) ? 0.34f : -0.27f;        // contrarrotación
+                float radio = 66f + 44f * k;
+                float vel = (k % 2 == 0) ? 0.32f : -0.26f;       // contrarrotación
                 float ang = enAnillo / (float)capAnillo * MathHelper.TwoPi
                           + k * 0.7f + time * vel;
                 return centro + new Vector2((float)Math.Cos(ang) * radio,
-                                            (float)Math.Sin(ang) * radio);
+                                            (float)Math.Sin(ang) * radio)
+                       // el vaivén propio del anillo (la corona también vive arriba)
+                       + new Vector2(0f, MathF.Sin(time * 1.1f + enAnillo * 1.63f) * 3f);
             }
 
-            // === LA CORONA: el arco sobre la cabeza ===
+            // === LA CORONA: el arco sobre la cabeza — se abre con la
+            //     banda (más ojos = arco más largo) y se BALANCEA entero ===
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
             float f = (i + 0.5f) / n;
-            float angC = MathHelper.Lerp(CORONA_A0, CORONA_A1, f);
-            float radioC = Math.Min(52f + n * 2.2f, 86f);
+            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 7f));  // ±1,5° por ojo, tope ±7°
+            float a0 = MathHelper.ToRadians(195f) - abre + MathF.Sin(time * 0.30f) * 0.20f;
+            float a1 = MathHelper.ToRadians(345f) + abre + MathF.Sin(time * 0.30f) * 0.20f;
+            float angC = MathHelper.Lerp(a0, a1, f);
+            float radioC = Math.Min(64f + n * 3.2f, 98f)
+                           + MathF.Sin(time * 0.23f) * 3f;       // el radio respira
             Vector2 pos = dueño.MountedCenter + new Vector2(
                 (float)Math.Cos(angC) * radioC,
                 (float)Math.Sin(angC) * radioC);
-            pos.Y += MathF.Sin(time * 0.09f + i * 1.31f) * 2.5f;  // el vaivén de la corona
+            pos.Y += MathF.Sin(time * 1.1f + i * 1.63f) * 3f;    // el vaivén propio
             return pos;
         }
 
@@ -414,8 +371,7 @@ namespace AethonMod.Content.Projectiles
         }
 
         /// <summary>LA PRESA: la más cercana válida en rango (el filtro del
-        /// Orbe Cósmico, heredado) — la misma lista en todos los clientes:
-        /// el draw re-deriva el punto del rayo con ESTA.</summary>
+        /// Orbe Cósmico, heredado) — la misma lista en todos los clientes.</summary>
         private NPC ObjetivoDelOjo(Player dueño, int nivel)
         {
             float rango = WeaponScaling.MinionDetectionRange(nivel);
@@ -455,7 +411,7 @@ namespace AethonMod.Content.Projectiles
         /// <summary>EL CÍRCULO MÁGICO — el sello erosionado de los agujeros
         /// negros (OrbitaLib.SigiloErosionado, las runas de RunasAbismo),
         /// en pequeño alrededor del ojo. En la carga del disparo el sello
-        /// RESPIRA hacia afuera (r 13→16).</summary>
+        /// RESPIRA hacia afuera (r 16→20).</summary>
         private void DrawElSello()
         {
             Vector2 pos = Projectile.Center - Main.screenPosition;
@@ -463,11 +419,9 @@ namespace AethonMod.Content.Projectiles
             int seed = Projectile.whoAmI * 13 + 7;
 
             // la carga: el sello inhala
-            float r = 13f;
+            float r = 16f;
             if (Projectile.ai[0] == MODO_APUNTANDO)
-                r = MathHelper.Lerp(13f, 16f, Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
-            else if (Projectile.ai[0] == MODO_DISPARANDO)
-                r = 15f + MathF.Sin(time * 6f) * 0.8f;
+                r = MathHelper.Lerp(16f, 20f, Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
 
             float glyph = Math.Max(r / 52f, 0.25f) * 1.75f;
 
@@ -484,15 +438,17 @@ namespace AethonMod.Content.Projectiles
                 float pulso = 0.09f + 0.05f * MathF.Sin(time * 2.6f + Projectile.whoAmI);
                 Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
                     new Color(96, 48, 150, 255) * pulso, 0f,
-                    VFXCore.SoftGlow.Size() * 0.5f, new Vector2(2.6f, 2.2f),
+                    VFXCore.SoftGlow.Size() * 0.5f, new Vector2(3.3f, 2.8f),
                     SpriteEffects.None, 0f);
             }
             finally { Main.spriteBatch.End(); }
         }
 
-        /// <summary>EL OJO — la base (abierto), el párpado (medio/cerrado,
-        /// la convención de fases del libro: fase>7||fase<4 = medio) y el
-        /// IRIS deslizándose por la esclera (la técnica de la .84).</summary>
+        /// <summary>EL OJO — el sprite EXACTO del usuario (56×54, sin
+        /// recorte): la base (abierto), el párpado (medio/cerrado, la
+        /// convención de fases del libro: fase>7||fase<4 = medio) y el
+        /// IRIS ACOMODADO deslizándose por la almendra (reposo en el
+        /// centro medido del arte; viaje ±7,5 × ±2,5).</summary>
         private void DrawElOjo()
         {
             Vector2 pos = Projectile.Center - Main.screenPosition;
@@ -523,176 +479,67 @@ namespace AethonMod.Content.Projectiles
                         SpriteEffects.None, 0f);
 
                     // EL IRIS: el ángulo de la mirada → el desplazamiento en la
-                    // almendra (horizontal ±7,5 · vertical ±3,5 — la geometría del ojo)
+                    // almendra (±7,5 · ±2,5 — la geometría del arte del usuario)
                     float dist = Vector2.Distance(FocoVivo(), Projectile.Center);
-                    float alcance = MathHelper.Clamp(dist / 90f, 0f, 1f);
+                    float alcance = MathHelper.Clamp(dist / 110f, 0f, 1f);
                     Vector2 mirada = new Vector2(
-                        (float)Math.Cos(Projectile.localAI[2]) * 7.5f,
-                        (float)Math.Sin(Projectile.localAI[2]) * 3.5f) * alcance;
+                        (float)Math.Cos(Projectile.localAI[2]) * MIRA_X,
+                        (float)Math.Sin(Projectile.localAI[2]) * MIRA_Y) * alcance;
 
                     Texture2D iris = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
-                    Main.spriteBatch.Draw(iris, pos + mirada, null, color, 0f,
-                        iris.Size() * 0.5f, 0.52f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(iris, pos + IRIS_REST + mirada, null, color, 0f,
+                        iris.Size() * 0.5f, IRIS_ESCALA, SpriteEffects.None, 0f);
                 }
             }
             finally { Main.spriteBatch.End(); }
         }
 
         /// <summary>EL FOCO VIVO (para el alcance de la mirada): el slot de
-        /// formación, o la presa mientras apunta/dispara.</summary>
+        /// formación, o la presa mientras apunta.</summary>
         private Vector2 FocoVivo()
         {
             Player dueño = Main.player[Projectile.owner];
             if (dueño == null || !dueño.active) return Projectile.Center;
             NPC presa = ObjetivoDelOjo(dueño, Level);
-            if ((Projectile.ai[0] == MODO_APUNTANDO || Projectile.ai[0] == MODO_DISPARANDO)
-                && presa != null)
+            if (Projectile.ai[0] == MODO_APUNTANDO && presa != null)
                 return presa.Center;
             return SlotDeFormacion(dueño, PosicionDelLibro(dueño));
-        }
-
-        /// <summary>
-        /// EL RAYO PERLIN NEGRO — el canal meandrante (la matemática del
-        /// PerlinBolt: fBm 3 octavas + jitter 2, el arco congelado, la
-        /// envolvente que clava los anclajes, Chaikin) dibujado en DOS
-        /// capas: la FUNDA MORADA aditiva (RayoStrip — el borde que arde)
-        /// y el NÚCLEO NEGRO en AlphaBlend encima (las cápsulas que
-        /// OSCURECEN: el centro negro, el morado asomando en los bordes).
-        /// La BRUMA vive en la punta que toca al monstruo.
-        /// </summary>
-        private void DrawElRayo()
-        {
-            Player dueño = Main.player[Projectile.owner];
-            if (dueño == null) return;
-            NPC presa = ObjetivoDelOjo(dueño, Level);
-            if (presa == null) return;
-
-            Vector2 ojo = Projectile.Center;
-            Vector2 punta = presa.Center;
-            Vector2 a = ojo - Main.screenPosition;
-            Vector2 b = punta - Main.screenPosition;
-
-            int flick = StormLib.FlickTick(Main.GlobalTimeWrappedHourly, 9f);
-            int seed = Projectile.whoAmI * 31 + 5;
-            Vector2[] canal = CanalPerlin(a, b, seed, flick, 0.10f);
-
-            // el ramp: entra en 3 ticks, sale en 3
-            float t = Projectile.ai[1];
-            float alfa = 0.9f * Math.Min(1f, Math.Min(t / 3f, (FIRE_TICKS - t) / 3f));
-            if (alfa <= 0.02f) return;
-
-            // === 1. LA FUNDA MORADA (aditiva — RayoStrip hace su propio baile
-            //     y al salir REABRE un lote aditivo: hay que cerrarlo antes
-            //     de cambiar de modo — la lección de la .101) ===
-            float ancho = 9.5f;
-            RayoStrip.Filamento(canal, ancho, RayoMorado, RayoClaro, alfa,
-                StormTaper.Center, seed, flick, suavizar: false, crackle: true);
-            VFXCore.CerrarLoteSiAbierto();
-
-            // === 2. EL NÚCLEO NEGRO (AlphaBlend: las cápsulas que oscurecen) ===
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            try
-            {
-                Texture2D glow = VFXCore.SoftGlow;
-                Vector2 medio = glow.Size() * 0.5f;
-
-                // el camino a paso fijo (arcos acumulados — O(n), cero O(n²))
-                int n = canal.Length;
-                float[] arcos = new float[n];
-                float total = 0f;
-                for (int i = 1; i < n; i++)
-                {
-                    total += Vector2.Distance(canal[i - 1], canal[i]);
-                    arcos[i] = total;
-                }
-                int seg = 0;
-                for (float s = 0f; s <= total; s += 2.5f)
-                {
-                    while (seg + 1 < n && arcos[seg + 1] < s) seg++;
-                    float tramo = arcos[seg + 1] - arcos[seg];
-                    float f = tramo > 0.1f ? (s - arcos[seg]) / tramo : 0f;
-                    Vector2 p = Vector2.Lerp(canal[seg], canal[seg + 1],
-                        MathHelper.Clamp(f, 0f, 1f));
-
-                    // el núcleo se afina hacia la punta (termina en aguja):
-                    // 5,5→3 px — DENTRO de la zona brillante de la funda
-                    // (la columna 0→0,42 de RayoStrip), para que el BORDE
-                    // MORADO asome alrededor del negro («negro con bordes
-                    // morado» — calibrado con el mock VLM: a 11 px el negro
-                    // tapaba la vena entera y el filo no leía)
-                    float k = s / Math.Max(1f, total);
-                    float w = 5.5f - 2.5f * k;
-                    Main.spriteBatch.Draw(glow, p, null, RayoNegro * alfa, 0f, medio,
-                        new Vector2(w, w), SpriteEffects.None, 0f);
-                }
-            }
-            finally { Main.spriteBatch.End(); }
-
-            // === 3. LOS GORROS de descarga (el electrodo del ojo y la presa) ===
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            try
-            {
-                StormLib.EndCap(Main.spriteBatch, a, ancho * 0.8f, RayoMorado, RayoClaro, alfa);
-                StormLib.EndCap(Main.spriteBatch, b, ancho * 0.66f, RayoMorado, RayoClaro, alfa);
-            }
-            finally { Main.spriteBatch.End(); }
-
-            // === 4. LA BRUMA EN LA PUNTA (la que toca al monstruo) ===
-            float prog = Math.Min(1f, t / (float)FIRE_TICKS);
-            SombrasLib.Bruma(punta, 24f * (0.8f + 0.4f * prog), 0.55f * alfa,
-                Main.GlobalTimeWrappedHourly, seed + 91, new Vector2(0f, -10f * prog));
-        }
-
-        /// <summary>
-        /// EL CANAL PERLIN — el tronco del PerlinBolt (StormLib), VERBATIM
-        /// en su matemática: el meandro fBm 3 octavas (2,8 ciclos), el
-        /// jitter de 2 octavas (10 ciclos), el arco congelado por semilla,
-        /// la envolvente exp(−5000·(t−½)^10) que clava los anclajes, 48
-        /// puntos + UNA pasada de Chaikin — la curvatura continua del
-        /// arco que serpentea. Sin ramas: el rayo del ojo es UN trazo.
-        /// </summary>
-        private static Vector2[] CanalPerlin(Vector2 start, Vector2 end, int seed, int flick, float ampFrac)
-        {
-            float len = Vector2.Distance(start, end);
-            if (len < 4f) return new Vector2[] { start, end };
-
-            Vector2 dir = (end - start) / len;
-            Vector2 perp = new Vector2(-dir.Y, dir.X);
-
-            float a = ampFrac > 0.001f ? ampFrac * len : 0.12f * len;
-            a = MathF.Min(a, len * 0.30f);
-
-            float faseM = flick * 0.15f;
-            float faseJ = flick * 0.47f;
-
-            const int N = 48;
-            var pts = new Vector2[N + 1];
-            for (int i = 0; i <= N; i++)
-            {
-                float t = i / (float)N;
-                float m = (StormLib.Fbm1D(t * 2.8f + faseM, seed, 3) - 0.5f) * 2f;
-                float j = (StormLib.Fbm1D(t * 10f + faseJ, seed + 77, 2) - 0.5f) * 2f;
-                float arco = (StormLib.Ruido1D(t * 0.5f + seed * 0.013f, seed + 55) - 0.5f) * 2f;
-                float d = t - 0.5f;
-                float d2 = d * d;
-                float d5 = d2 * d2 * d;
-                float env = MathF.Exp(-5000f * d5 * d5);
-                float off = (m * 0.62f + j * 0.38f) * a + arco * 0.45f * a;
-                pts[i] = start + dir * (len * t) + perp * (off * env);
-            }
-            pts[0] = start;
-            pts[N] = end;
-            return StormLib.Chaikin(pts, 1);
         }
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
             try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
         }
+
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 1;    // el parpadeo no usa frames: son 3 texturas por capas
+            Main.projPet[Projectile.type] = true;
+            ProjectileID.Sets.MinionTargettingFeature[Projectile.type] = true;
+            ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
+        }
+
+        public override void SetDefaults()
+        {
+            // el sprite del usuario viste 56×54; la almendra (la hitbox
+            // lógica) queda adentro — el rayo es el ataque, no el contacto
+            Projectile.width = 34;
+            Projectile.height = 20;
+            Projectile.tileCollide = false;
+            Projectile.friendly = true;
+            Projectile.minion = true;
+            Projectile.minionSlots = 1f;
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 18000;
+            Projectile.DamageType = DamageClass.Summon;
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 10;
+            Projectile.aiStyle = -1;
+            Projectile.light = 0.3f;
+        }
+
+        public override bool? CanCutTiles() => false;
+        public override bool MinionContactDamage() => false;   // el RAYO es el ataque: el ojo no muerde
     }
 }

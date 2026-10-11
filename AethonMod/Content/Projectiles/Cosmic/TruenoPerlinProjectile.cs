@@ -25,6 +25,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      CADENA a 2 enemigos (60%) + Electrified.
     ///   3. MUERTE VIOLENTA: el DeathGrow revienta el meandro mientras el
     ///      alfa cae — el arco se desharbe RETORCIÉNDOSE, no educadamente.
+    ///
+    /// v6.50.106 — EL MODO OJO (ai[0]=1): EL MISMO PROYECTIL disparado por
+    /// LOS OJOS DEL ETERNO (la letra: «el proyecril que debe usar el minion
+    /// debe ser el mismo que Cetro de Trueno de Perlin pero teñido de negro
+    /// en el centro y morado en los bordes con bruma en la punta»). El
+    /// ancla nace PEGADA a la presa y la SIGUE mientras vive (la bruma en
+    /// la punta que toca al monstruo), el arco cuelga del OJO que disparó
+    /// (no del bastón) y el canal se dibuja en DOS capas: la funda morada
+    /// aditiva (el borde que arde) y encima el NÚCLEO NEGRO en AlphaBlend
+    /// (cápsulas que oscurecen el centro — el morado asoma en los bordes).
+    /// La .105 dibujaba el núcleo con SoftGlow a escala 5,5 = ¡352 px por
+    /// cápsula!: el rayo leía como una NEBLINA gorda — la lección de
+    /// «demasiado gruesos». Ahora: cápsulas de 19 px sobre la funda de
+    /// 7,5 del cetro (el MISMO grosor del arma que el usuario referenció).
     /// </summary>
     public class TruenoPerlinProjectile : ModProjectile
     {
@@ -78,42 +92,91 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             _age += 1f;
 
+            // v6.50.106 — EL MODO OJO: el mismo proyectil, la boca distinta
+            bool modoOjo = Projectile.ai[0] >= 1f;
+
             // === EL ANCLAJE: el proyectil ES el punto de descarga ===
             if (!_anchored)
             {
                 _anchored = true;
-                _muzzle = MuzzleDelDueno();
-                Projectile.velocity = Vector2.Zero;
-                Strike();
-
-                if (Main.netMode != NetmodeID.Server)
+                if (modoOjo)
                 {
-                    // EL ZAP: chasquido eléctrico agudo + trueno corto.
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item12.WithPitchOffset(0.35f).WithVolumeScale(1.05f),
-                        Projectile.Center);
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.55f),
-                        Projectile.Center);
+                    // EL OJO: el golpe del cauce del cetro (radio + cadena +
+                    // GolpeMotor — el DAÑO DE VERDAD) con el tipo de invocación
+                    Projectile.DamageType = DamageClass.Summon;
+                    _muzzle = BocaDelOjo();
+                    Projectile.velocity = Vector2.Zero;
+                    Strike();
 
-                    // Chispas eléctricas del punto de descarga.
-                    for (int i = 0; i < 16; i++)
+                    if (Main.netMode != NetmodeID.Server)
                     {
-                        float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                        Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Electric,
-                            new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) *
-                            Main.rand.NextFloat(2f, 7f),
-                            220, new Color(200, 235, 255), 1.2f);
-                        d.noGravity = true;
-                        d.fadeIn = 0f;
+                        // EL ZAP OSCURO: la mitad del registro del cetro eléctrico
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item12.WithPitchOffset(-0.15f).WithVolumeScale(0.9f),
+                            Projectile.Center);
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.55f),
+                            Projectile.Center);
+
+                        // chispas de SOMBRA violeta (la descarga del ojo no es eléctrica)
+                        for (int i = 0; i < 12; i++)
+                        {
+                            float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                            Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Shadowflame,
+                                new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) *
+                                Main.rand.NextFloat(2f, 6f),
+                                128, new Color(128, 64, 200), 1.0f);
+                            d.noGravity = true;
+                            d.fadeIn = 0f;
+                        }
+                    }
+                }
+                else
+                {
+                    _muzzle = MuzzleDelDueno();
+                    Projectile.velocity = Vector2.Zero;
+                    Strike();
+
+                    if (Main.netMode != NetmodeID.Server)
+                    {
+                        // EL ZAP: chasquido eléctrico agudo + trueno corto.
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item12.WithPitchOffset(0.35f).WithVolumeScale(1.05f),
+                            Projectile.Center);
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.55f),
+                            Projectile.Center);
+
+                        // Chispas eléctricas del punto de descarga.
+                        for (int i = 0; i < 16; i++)
+                        {
+                            float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                            Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Electric,
+                                new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) *
+                                Main.rand.NextFloat(2f, 7f),
+                                220, new Color(200, 235, 255), 1.2f);
+                            d.noGravity = true;
+                            d.fadeIn = 0f;
+                        }
                     }
                 }
             }
 
-            // === LA PERSECUCIÓN DEL CURSOR (los primeros 10 ticks): el
-            //     ancla EASEA hacia la mirada — arrastras el arco. ===
-            if (_age < TicksSiguiendo && Main.netMode != NetmodeID.Server)
+            if (modoOjo)
             {
+                // === EL ANCLA PEGADA: la punta SIGUE a su presa mientras
+                //     vive (la bruma en la punta que toca al monstruo) ===
+                NPC presa = PresaDelAncla();
+                if (presa != null)
+                    Projectile.Center = Vector2.Lerp(Projectile.Center, presa.Center, 0.55f);
+
+                // LA BOCA DEL ARCO sigue viva (el ojo planea de vuelta a la corona)
+                _muzzle = BocaDelOjo();
+            }
+            else if (_age < TicksSiguiendo && Main.netMode != NetmodeID.Server)
+            {
+                // === LA PERSECUCIÓN DEL CURSOR (los primeros 10 ticks): el
+                //     ancla EASEA hacia la mirada — arrastras el arco. ===
                 Player dueno = Main.player[Projectile.owner];
                 if (dueno != null && dueno.active && !dueno.dead)
                 {
@@ -125,19 +188,61 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // easing 0.35: persigue vivo pero sin pegarse al cursor.
                     Projectile.Center = Vector2.Lerp(Projectile.Center, deseado, 0.35f);
                 }
+
+                // LA BOCA DEL BASTÓN sigue viva (el dueño puede moverse).
+                _muzzle = MuzzleDelDueno();
+            }
+            else
+            {
+                // LA BOCA DEL BASTÓN sigue viva (el dueño puede moverse).
+                _muzzle = MuzzleDelDueno();
             }
 
-            // LA BOCA DEL BASTÓN sigue viva (el dueño puede moverse).
-            _muzzle = MuzzleDelDueno();
-
-            // === LA LUZ (estrangulada: cada 3 ticks, a lo largo del canal) ===
+            // === LA LUZ (estrangulada: cada 3 ticks, a lo largo del canal) —
+            //     el ojo alumbra VIOLETA (la lectura nocturna del rayo negro) ===
             if (_age % 3f == 0f)
             {
                 float amp = 0.12f * StormLib.DeathGrow(VidaT());
                 // el camino perlin estimado para la luz (barato: 12 puntos).
                 Vector2[] camino = CaminoPerlin(12, amp);
-                StormLib.AddLightAlong(camino, 0.55f, 0.75f, 1f, 0.8f, 90f);
+                if (modoOjo)
+                    StormLib.AddLightAlong(camino, 0.50f, 0.32f, 0.90f, 0.8f, 90f);
+                else
+                    StormLib.AddLightAlong(camino, 0.55f, 0.75f, 1f, 0.8f, 90f);
             }
+        }
+
+        // ================================================================
+        //  v6.50.106 — EL MODO OJO: la boca y la presa
+        // ================================================================
+
+        /// <summary>La boca del arco en modo ojo: EL OJO que disparó
+        /// (ai[1] = su whoAmI). Si ya murió, la última boca conocida.</summary>
+        private Vector2 BocaDelOjo()
+        {
+            int idx = (int)Projectile.ai[1];
+            if (idx >= 0 && idx < Main.maxProjectiles)
+            {
+                Projectile m = Main.projectile[idx];
+                if (m != null && m.active &&
+                    m.type == ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>())
+                    return m.Center;
+            }
+            return _muzzle != Vector2.Zero ? _muzzle : Projectile.Center;
+        }
+
+        /// <summary>La presa del ancla en modo ojo (ai[2] = su whoAmI):
+        /// viva y dañable, o null.</summary>
+        private NPC PresaDelAncla()
+        {
+            int idx = (int)Projectile.ai[2];
+            if (idx >= 0 && idx < Main.maxNPCs)
+            {
+                NPC n = Main.npc[idx];
+                if (n != null && n.active && n.life > 0 && !n.dontTakeDamage)
+                    return n;
+            }
+            return null;
         }
 
         /// <summary>La vida normalizada 0..1.</summary>
@@ -220,12 +325,196 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             try
             {
-                DrawArco();
+                if (Projectile.ai[0] >= 1f) DrawArcoOjo();
+                else DrawArco();
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
 
             VFXCore.ReabrirLoteVanilla();
             return false;
+        }
+
+        // ------------------------------------------------------------------
+        //  v6.50.106 — EL DIBUJO DEL ARCO DEL OJO (negro centro, morado
+        //  bordes, bruma en la punta) — el mismo canal del cetro
+        // ------------------------------------------------------------------
+
+        private static readonly Color OjoHalo = new(190, 110, 255);     // morado vivo (la funda: el borde)
+        private static readonly Color OjoCore = new(240, 224, 255);     // lavanda pálido (la vena)
+        private static readonly Color OjoNegro = new(8, 3, 14, 215);    // el núcleo que oscurece
+
+        private void DrawArcoOjo()
+        {
+            try
+            {
+                float time = Main.GlobalTimeWrappedHourly;
+                int seed = Seed;
+                int flick = StormLib.FlickTick(time, FlickHz);
+                Vector2 screen = Main.screenPosition;
+                Vector2 boca = _muzzle - screen;                 // EL OJO dispara
+                Vector2 ancla = Projectile.Center - screen;      // la punta PEGADA al monstruo
+
+                float lifeT = VidaT();
+                float fade = 1f - MathHelper.Clamp((lifeT - 0.40f) / 0.60f, 0f, 1f);
+                if (fade <= 0.02f) return;
+
+                // EL PARPADEO con apagado (la casa): encendido 7/10.
+                bool lit = StormLib.IsLit(seed, flick, 0.70f);
+                float alpha = lit ? 1f : 0.15f;
+
+                // LA MUERTE VIOLENTA: el meandro REVIENTA al disolverse.
+                float ampFrac = 0.12f * StormLib.DeathGrow(lifeT);
+
+                // el canal — el MISMO meandro del cetro (la matemática de
+                // PerlinBolt VERBATIM) para poder calcinar el CENTRO encima
+                // del MISMO camino
+                Vector2[] canal = CanalOjo(boca, ancla, seed, flick, ampFrac);
+
+                // === 1. LA FUNDA MORADA (aditiva — el borde que arde; el
+                //     MISMO grosor del cetro: 7,5) ===
+                RayoStrip.Filamento(canal, 7.5f, OjoHalo, OjoCore,
+                    alpha * fade, StormTaper.Center, seed, flick,
+                    suavizar: false, crackle: true);
+                VFXCore.CerrarLoteSiAbierto();
+
+                // === 2. EL NÚCLEO NEGRO (AlphaBlend: las cápsulas que
+                //     OSCURECEN el centro — el morado asoma en los bordes).
+                //     LA LECCIÓN de la .105: SoftGlow a escala 5,5 = 352 px
+                //     por cápsula — el rayo leía como NEBLINA gorda. Ahora
+                //     19 px sobre la funda de 7,5 (~23 px): filo negro de
+                //     ~6 px con borde morado. ===
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                try
+                {
+                    Texture2D glow = VFXCore.SoftGlow;
+                    Vector2 medio = glow.Size() * 0.5f;
+
+                    // el camino a paso fijo (arcos acumulados — O(n), cero O(n²))
+                    int n = canal.Length;
+                    float[] arcos = new float[n];
+                    float total = 0f;
+                    for (int i = 1; i < n; i++)
+                    {
+                        total += Vector2.Distance(canal[i - 1], canal[i]);
+                        arcos[i] = total;
+                    }
+                    int seg = 0;
+                    for (float s = 0f; s <= total; s += 2.5f)
+                    {
+                        while (seg + 1 < n && arcos[seg + 1] < s) seg++;
+                        float tramo = arcos[seg + 1] - arcos[seg];
+                        float fseg = tramo > 0.1f ? (s - arcos[seg]) / tramo : 0f;
+                        Vector2 p = Vector2.Lerp(canal[seg], canal[seg + 1],
+                            MathHelper.Clamp(fseg, 0f, 1f));
+                        Main.spriteBatch.Draw(glow, p, null, OjoNegro * (alpha * fade), 0f,
+                            medio, new Vector2(0.30f, 0.30f), SpriteEffects.None, 0f);
+                    }
+                }
+                finally { Main.spriteBatch.End(); }
+
+                // === 3. LAS CADENAS + EL GORRO DEL OJO + EL ANCLA (aditivo) ===
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                try
+                {
+                    // las cadenas (arcos perlin cortos hacia los saltos)
+                    for (int c = 0; c < 2; c++)
+                    {
+                        if (!_chainAlive[c]) continue;
+                        if (!StormLib.IsLit(seed + 47 + c * 31, flick, 0.60f)) continue;
+                        Vector2[] canalC = CanalOjo(ancla, _chainTo[c] - screen,
+                            seed + 47 + c * 31, flick, 0.10f);
+                        RayoStrip.Filamento(canalC, 3.6f, OjoHalo, OjoCore,
+                            0.85f * alpha * fade, StormTaper.Center,
+                            seed + 47 + c * 31, flick, suavizar: false, crackle: true);
+                    }
+
+                    // el gorro del electrodo del OJO (la descarga en la córnea)
+                    StormLib.EndCap(Main.spriteBatch, boca, 6.0f, OjoHalo, OjoCore, alpha * fade);
+
+                    // EL ANCLA: el núcleo de descarga en la presa (morado)
+                    Texture2D texAncla = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Projectiles/Cosmic/TruenoPerlinProjectile").Value;
+                    float pulso = 0.80f + 0.20f * MathF.Sin(time * 22f);
+                    Main.spriteBatch.Draw(texAncla, ancla, null,
+                        TintFijo(OjoHalo, 0.9f * alpha * fade * pulso), 0f,
+                        texAncla.Size() * 0.5f, 1.5f * pulso, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(texAncla, ancla, null,
+                        TintFijo(OjoCore, 0.95f * alpha * fade), 0f,
+                        texAncla.Size() * 0.5f, 0.8f, SpriteEffects.None, 0f);
+
+                    // EL ESTALLIDO DE IMPACTO (los primeros ticks)
+                    float flashI = MathHelper.Clamp(1f - _age / 6f, 0f, 1f);
+                    if (flashI > 0f)
+                        StormLib.ImpactFlash(Main.spriteBatch, ancla, 46f * (0.6f + 0.4f * flashI),
+                            OjoHalo, flashI * alpha * fade, time * 1.1f);
+
+                    // LOS ARCOS DE CORONA (crispados alrededor del ancla)
+                    if (StormLib.IsLit(seed + 90, flick, 0.65f))
+                    {
+                        float arcR = 18f + 26f * lifeT;
+                        StormLib.ArcRing(Main.spriteBatch, ancla, arcR,
+                            time * 2.4f, time * 2.4f + 1.7f, seed + 90, flick, 2.8f,
+                            TintFijo(OjoHalo, 0.6f * fade), TintFijo(OjoCore, 0.9f * fade),
+                            1f, 8);
+                    }
+                }
+                finally { Main.spriteBatch.End(); }
+
+                // === 4. LA BRUMA EN LA PUNTA (la que toca al monstruo) ===
+                float prog = Math.Min(1f, _age / (float)TotalLife);
+                SombrasLib.Bruma(Projectile.Center, 24f * (0.8f + 0.4f * prog),
+                    0.55f * alpha * fade, time, seed + 91,
+                    new Vector2(0f, -10f * prog));
+            }
+            catch
+            {
+                VFXCore.CerrarLoteSiAbierto();
+            }
+        }
+
+        /// <summary>
+        /// EL CANAL DEL OJO — la matemática del PerlinBolt (StormLib)
+        /// VERBATIM (el tronco de la .105, píxel a píxel): el meandro fBm
+        /// 3 octavas + el jitter de 2 + el arco congelado + la envolvente
+        /// ^10 + Chaikin. Se calcula AQUÍ (en vez de llamar a PerlinBolt)
+        /// para que el NÚCLEO NEGRO calcine el MISMO camino de la funda.
+        /// </summary>
+        private static Vector2[] CanalOjo(Vector2 start, Vector2 end, int seed, int flick, float ampFrac)
+        {
+            float len = Vector2.Distance(start, end);
+            if (len < 4f) return new Vector2[] { start, end };
+
+            Vector2 dir = (end - start) / len;
+            Vector2 perp = new Vector2(-dir.Y, dir.X);
+
+            float a = ampFrac > 0.001f ? ampFrac * len : 0.12f * len;
+            a = MathF.Min(a, len * 0.30f);
+
+            float faseM = flick * 0.15f;
+            float faseJ = flick * 0.47f;
+
+            const int N = 48;
+            var pts = new Vector2[N + 1];
+            for (int i = 0; i <= N; i++)
+            {
+                float t = i / (float)N;
+                float m = (StormLib.Fbm1D(t * 2.8f + faseM, seed, 3) - 0.5f) * 2f;
+                float j = (StormLib.Fbm1D(t * 10f + faseJ, seed + 77, 2) - 0.5f) * 2f;
+                float arco = (StormLib.Ruido1D(t * 0.5f + seed * 0.013f, seed + 55) - 0.5f) * 2f;
+                float d = t - 0.5f;
+                float d2 = d * d;
+                float d5 = d2 * d2 * d;
+                float env = MathF.Exp(-5000f * d5 * d5);
+                float off = (m * 0.62f + j * 0.38f) * a + arco * 0.45f * a;
+                pts[i] = start + dir * (len * t) + perp * (off * env);
+            }
+            pts[0] = start;
+            pts[N] = end;
+            return StormLib.Chaikin(pts, 1);
         }
 
         // ------------------------------------------------------------------

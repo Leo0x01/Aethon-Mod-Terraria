@@ -510,7 +510,9 @@ namespace AethonMod.Content.Weapons
         // sprite exacto) que vive en una caja fuente de 174 px → 8,87 px de
         // juego: esta constante mapea la textura al espacio del libro.
         // v6.50.87: protected — las copias dibujan su iris con la misma escala.
-        protected const float IRIS_ESC = 0.2773f;
+        // v6.50.106: internal — el ICONO DE LA OLEADA (GrimorioFuriaSistema)
+        // dibuja el iris de la cajita con la MISMA escala del libro.
+        internal const float IRIS_ESC = 0.2773f;
 
         // === EL ESTADO POR COPIA (v6.50.86) ===
         private static readonly EstadoGrimorio _estado = new EstadoGrimorio();
