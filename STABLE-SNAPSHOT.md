@@ -1912,7 +1912,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.99 LISTA (SIN PUBLICAR — falta token) — LAS CUATRO ARMAS
+1. **✅ v6.50.99 PUBLICADA — LAS CUATRO ARMAS
    DE LA EMPERATRIZ (las 3 opciones del estudio + la dual)**: (A)
    GRIMORIO ESTRELLADO (60 dmg, el burst ×4 del Nightglow — useTime
    2/animación 36 con ventana de 8 ticks —, fuente vanilla, IA_171
@@ -1951,7 +1951,14 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    arcoíris de verdad rotando entre ráfagas (adiós cian fijo), (d) C:
    el trazo de jefa atravesando paredes + el masivo de los 5 disparos,
    (e) la 4: el dorado que ILUMINA y el negro que exhala bruma — y
-   ELEGIR el proyectil del arma nueva.
+   ELEGIR el proyectil del arma nueva. PUBLICACIÓN: commit 580a4df +
+   tag v6.50.99 + push (6fe164f..580a4df, tag→push→release a la
+   primera) · release **409528139** (make_latest) + asset
+   AethonMod.tmod **630185810** 2.598.268 B (md5
+   47ca74adc0f927140574269b079ccf32), CDN VERIFICADO BYTE A BYTE
+   (md5 idéntico ×2 + cmp), /releases/latest = v6.50.99, respaldo
+   /home/sync/AethonMod-v6.50.99.tmod. Token NUEVO persistido en .env
+   + credential store (el de la .65 murió con el wipe).
 1. **✅ v6.50.98 PUBLICADA — EL GRIMORIO SELLADO (el arma nueva de
    prueba)** — la letra: «te dare el codigo para un arma nueva de
    prueba, recuerda darcela al jugador, este sera el proyectil y su

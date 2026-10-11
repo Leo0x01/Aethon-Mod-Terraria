@@ -90,6 +90,12 @@ IA_171 del ataque de la Emperatriz) convertido en armas jugables:
   PRESENTES en la DLL empaquetada · hjson VIVOS en los 3 idiomas ·
   headless «Sandboxing v6.50.99 → Adding Recipes → Server started» 0
   excepciones.
+- **PUBLICACIÓN**: tag v6.50.99 + release 409528139 (make_latest) +
+  asset AethonMod.tmod 630185810 2.598.268 B (md5
+  47ca74adc0f927140574269b079ccf32), CDN VERIFICADO BYTE A BYTE,
+  /releases/latest = v6.50.99, respaldo /home/sync/AethonMod-v6.50.99.tmod.
+  El token de la .65 murió con el wipe — el usuario entregó uno NUEVO
+  (persistido en .env + credential store).
 
 ## Commit v6.50.98 — EL GRIMORIO SELLADO: el arma nueva de prueba (el código del usuario con TODOS sus errores muertos)
 
