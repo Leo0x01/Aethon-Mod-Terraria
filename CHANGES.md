@@ -1,5 +1,54 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.108 — EL FIX DE LOS OJOS, EL ORDEN DEL HAMBRE Y LA SEGUNDA VENTANA
+
+**La letra**: «el texto que dice lo que hara el libro con el hambre, por
+ejemplo este: Fuera de Caza - flota sobre ti buscando su propia comida,
+bueno ese texto debe ir justo debajo del hambre, no encima» + «la segunda
+ventana de informacion del grimorio desaprecio, recuerda que el grimorio
+necesita una segunda ventana de info para visualisar sus estadisticas» +
+«en progresion quitaste las estadisticas del proximo nivel, vuelve a
+ponerlas» + «ademas, hay errores los minion no aparecen» (client.log:
+IndexOutOfRangeException en OjoEternoMinion.FaseOrbital, línea 415).
+
+**EL CAMBIO**: cuatro cirugías — el crash, el orden, la ventana y el hito:
+
+- **EL CRASH DE LOS OJOS**: `Projectile.localAI` es `float[3]` en
+  tModLoader (índices 0–2 válidos) — la .107 guardaba la fase orbital de
+  la luna en `localAI[3]` y la AI tiraba `IndexOutOfRange` en cada tick
+  con el libro fuera: LOS OJOS NO APARECÍAN (la excepción abortaba la AI
+  antes del posicionamiento). La fase ahora vive en el CAMPO DE
+  INSTANCIA `_faseOrbital` (una fase POR ojo, determinista en todos los
+  clientes: nace del puesto en el anillo — 0.37 + enAnillo/cap·2π + 0.7k
+  — y SÓLO la avanza PasoOrbita, una vez por tick desde la AI).
+- **EL ORDEN DE LA LETRA**: en PROGRESIÓN la BARRA de hambre primero y el
+  estado («FUERA DE CAZA — flota sobre ti buscando su propia comida.»)
+  JUSTO DEBAJO — la .107 lo ponía encima de la barra.
+- **LA SEGUNDA VENTANA VUELVE**: el conmutador de siempre (clic derecho
+  sobre el libro en el inventario, TooltipToggleItem.ShowExtendedTooltip)
+  reabre la vista completa con TODAS las estadísticas — DAÑO / RECURSOS /
+  PROYECTIL / OJOS DEL ETERNO / BONUS + la línea NUEVA de la velocidad de
+  ataque de los ojos (tope +50% en nivel 100 — la .107) + PROGRESIÓN al
+  final con la pareja del hambre y el próximo hito. La vista BÁSICA queda
+  como la .107 (compacta: daño mágico vanilla + daño de invocación +
+  datos/buff del juego + lore de 2 líneas + PROGRESIÓN con EXP + hambre).
+- **LAS ESTADÍSTICAS DEL PRÓXIMO NIVEL**: el PRÓXIMO HITO (el siguiente
+  múltiplo de 5) y su escalera de mejoras (MilestoneRewards) — de vuelta
+  dentro de PROGRESIÓN, debajo de la pareja del hambre.
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+audit_v650108 TODO OK: .tmod 2.593.519 B md5 01e03580e15a356d097143bae98a4537,
+387 entradas, EOF exacto, paquete==árbol ×3, rawimg 56×54 píxel-idénticas,
+_faseOrbital VIVO en el heap #Strings + Projectile.localAI[3] AUSENTE del
+código, los ldstr de la segunda ventana VIVOS en #US (UTF-16: «Próximo
+hito: Nivel», «═══ DAÑO ═══», «═══ RECURSOS ═══», «═══ PROYECTIL ═══»,
+«═══ BONUS ═══», «Click der para vista completa/básica») y el ORDEN
+barra→estado verificado por POSICIÓN, las constantes de la .107 (regresión
+íntegra) en el IL, regresión .102–.107 completa · headless «Sandboxing
+v6.50.108 → Adding Recipes → Choose World» 0 excepciones.
+
+---
+
 ## Commit v6.50.107 — EL TAMAÑO DEL LIBRO, LA LUNA Y EL RITMO PROPIO
 
 **La letra**: «los minion son demasiado grande, deben ser mas pequeño, el
