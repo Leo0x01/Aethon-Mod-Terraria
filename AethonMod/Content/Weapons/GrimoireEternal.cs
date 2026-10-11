@@ -25,9 +25,12 @@ namespace AethonMod.Content.Weapons
     /// · EL CUERPO: el sprite del Grimorio Hambriento Nervioso (la familia
     ///   del ojo — temblor, glitch en tiras, sobresaltos, iris rojo) con
     ///   todas sus capas y su dibujo vivo.
-    /// · EL RELOJ JUGABLE: el hambre sube 0→100% en QUINCE MINUTOS
-    ///   (1/54000 por tick — el Nervioso de prueba corre su minuto de
-    ///   demo). Debajo del 25% EL CAZADOR callado; del 25% sale a cazar
+    /// · EL RELOJ JUGABLE: el hambre sube 0→100% en UNA HORA
+    ///   (1/216000 por tick — el Nervioso de prueba corre su minuto de
+    ///   demo; la letra de la .103: «el reloj de hambre debe durar una
+    ///   hora en llegar a 100% si no se alimenta el libro» — los 15 min
+    ///   de la .102 se leyeron MUY RÁPIDOS). Debajo del 25% EL CAZADOR
+    ///   callado; del 25% sale a cazar
     ///   si el dueño está quieto 10 s (la demo usa 5) o lleva 30 s sin
     ///   darle uso; del 50% EL IMPACIENTE — ojo ansioso, voz, temblor,
     ///   glitch, sobresaltos y las OLEADAS probables (4%→20% cada 5 s).
@@ -59,14 +62,17 @@ namespace AethonMod.Content.Weapons
         //     familia del ojo — una sola fuente de verdad para el arte ===
         public override string Texture => "AethonMod/Content/Weapons/GrimorioHambrientoNervioso";
 
-        // === EL RELOJ JUGABLE: 0→100% en QUINCE MINUTOS (54.000 ticks).
+        // === EL RELOJ JUGABLE: 0→100% en UNA HORA (216.000 ticks — la
+        //     letra de la .103: una hora si no se alimenta el libro).
         //     El Nervioso de prueba corre su minuto de demo (1/3600) — el
         //     Eterno es para PARTIDA DE VERDAD: el hambre vuelve a ser una
-        //     presión, no un espectáculo. ===
+        //     presión, no un espectáculo. Hitos del reloj: 25% (EL CAZADOR)
+        //     a los 15 min, 50% (LA IMPACIENCIA) a los 30 min, 100% a la
+        //     hora exacta. ===
         private static readonly EstadoGrimorio _estadoEterno = new EstadoGrimorio
         {
             Nervioso = true,
-            TasaHambre = 1f / 54000f,   // 15 minutos de 0 a 100%
+            TasaHambre = 1f / 216000f,  // UNA HORA de 0 a 100% (la .102: 15 min — muy rápido)
         };
         protected override EstadoGrimorio Estado => _estadoEterno;
         internal static EstadoGrimorio EstadoEterno => _estadoEterno;

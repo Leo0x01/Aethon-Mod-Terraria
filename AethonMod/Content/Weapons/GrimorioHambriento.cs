@@ -86,9 +86,11 @@ namespace AethonMod.Content.Weapons
 
         // === v6.50.102 — LA TASA DEL APETITO (por familia): el Nervioso de
         //     prueba corre su minuto de siempre (1/3600); el Grimorio del
-        //     Eterno — EL NERVIOSO JUGABLE — estira el reloj a 15 minutos
-        //     (1/54000): el hambre vuelve a ser una presión de verdad, no
-        //     una demo. Sólo la presa comida la baja. ===
+        //     Eterno — EL NERVIOSO JUGABLE — estira el reloj a UNA HORA
+        //     (1/216000, la letra de la .103: «una hora en llegar a 100%
+        //     si no se alimenta el libro» — los 15 min de la .102 se
+        //     leyeron muy rápidos): el hambre vuelve a ser una presión de
+        //     verdad, no una demo. Sólo la presa comida la baja. ===
         public float TasaHambre = 1f / 3600f;
 
         // === v6.50.102 — LA MÁQUINA NERVIOSA (POR ESTADO — la lección del
@@ -142,7 +144,7 @@ namespace AethonMod.Content.Weapons
             // apetito avanza lo coma o no lo coma, cace o no cace — sólo
             // la presa comida lo baja y el clic derecho lo reinicia.
             // v6.50.102 — LA TASA POR FAMILIA: 1/3600 (el minuto del
-            // Nervioso de prueba) o 1/54000 (el cuarto de hora del Eterno).
+            // Nervioso de prueba) o 1/216000 (LA HORA del Eterno, .103).
             Hambre = Math.Min(1f, Hambre + TasaHambre);
             float h = Hambre;
 
