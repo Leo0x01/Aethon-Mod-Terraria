@@ -595,4 +595,42 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+    /// <summary>20 — LA EMPERATRIZ (v6.50.99): LAS CUATRO PRUEBAS DEL
+    /// PROYECTIL DE LA EMPERATRIZ DE LA LUZ — el estudio completo del
+    /// streak de la jefa (ESTUDIO_PROYECTIL_NIGHTGLOW.md: el Nightglow
+    /// 931 es LA MISMA IA_171 del ataque de la Emperatriz) convertido
+    /// en las tres opciones para el arma nueva + la cuarta dual:
+    /// (A) EL GRIMORIO ESTRELLADO — el clon propio (la recomendada): la
+    /// IA_171 replicada al 100% con la PALETA CÓSMICA del grimorio y
+    /// los ganchos del sistema del Grimorio Sellado (OBSERVADO por
+    /// golpe → crítico garantizado; 5 usos → DESBORDE masivo al 250%);
+    /// (B) EL ECO DE LA EMPERATRIZ — el 931 vanilla con EL HUE
+    /// ARREGLADO (la fórmula literal del arma original: el Grimorio del
+    /// Eterno lo dejaba todo cian) + los FX globales de la casa;
+    /// (C) EL VEREDICTO DE LA EMPERATRIZ — el 873-friendly: parámetros
+    /// de jefa, atraviesa paredes, 40 estelas, explosión radial y EL
+    /// DESBORDE masivo; y LA CUARTA: EL EQUINOCCIO — opción B dual: un
+    /// orbe DORADO CON LUZ de sol y un NEGRO CON BRUMA de verdad
+    /// (BrumaFX) por disparo.</summary>
+    public class BolsaEmperatriz : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de la Emperatriz";
+        protected override string NombreCorto => "Bolsa de la Emperatriz";
+        protected override Color ColorFiesta => new(255, 110, 180);
+        protected override string Nota => "Las cuatro pruebas del proyectil de la Emperatriz de la Luz";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // OPCIÓN A — EL CLON (la recomendada del estudio §13)
+            l.Add((ModContent.ItemType<Weapons.Emperatriz.GrimorioEstrellado>(), 1));   // la Estela de Aethon: IA_171 + paleta cósmica + Observado/Desborde
+            // OPCIÓN B — EL VANILLA + HUE + FX
+            l.Add((ModContent.ItemType<Weapons.Emperatriz.EcoEmperatriz>(), 1));        // el 931 de verdad con el arcoíris arreglado
+            // OPCIÓN C — EL HÍBRIDO DE LA JEFA
+            l.Add((ModContent.ItemType<Weapons.Emperatriz.VeredictoEmperatriz>(), 1));  // el 873 friendly: el Desborde masivo
+            // LA CUARTA — LA DUAL
+            l.Add((ModContent.ItemType<Weapons.Emperatriz.Equinoccio>(), 1));           // el día (dorado con luz) y la noche (negro con bruma)
+            return l;
+        }
+    }
 }

@@ -1769,9 +1769,93 @@ Objeto de pruebas — comparar con el original.
                         Enemigos golpeados 5 veces = crítico garantizado.
                         '''
         }
+
+        GrimorioEstrellado: {
+                // v6.50.99: OPCIÓN A — EL CLON (la recomendada del estudio §13)
+                DisplayName: El Grimorio Estrellado
+                Tooltip:
+                        '''
+                        «El sello se rompió; la Emperatriz prestó su streak.»
+                        OPCIÓN A — EL CLON: cuatro Estelas de Aethon por uso con la
+                        IA del streak de la Emperatriz replicada al 100% (fuente,
+                        deriva, persecución, rebote) y la PALETA CÓSMICA del grimorio:
+                        oro, cian, magenta e índigo con 20 estelas.
+                        OBSERVADO: cada golpe marca a la presa — a 5 marcas, crítico
+                        garantizado (+50% de daño).
+                        DESBORDE: el 5º disparo seguido detona la estela MASIVA
+                        (×2.5) y te cuesta 5% de tu vida máxima.
+                        Sin maná (arma de pruebas).
+                        '''
+        }
+
+        EcoEmperatriz: {
+                // v6.50.99: OPCIÓN B — VANILLA + HUE ARREGLADO + FX DE LA CASA
+                DisplayName: El Eco de la Emperatriz
+                Tooltip:
+                        '''
+                        «Su ataque, intacto; su arcoíris, devuelto.»
+                        OPCIÓN B — EL VANILLA: dispara el Nightglow de Terraria (el
+                        mismo proyectil del Grimorio del Eterno) pero con EL HUE
+                        ARREGLADO: la fórmula literal del arma original — cada ráfaga
+                        nace con su color y la paleta rota entre usos. Luz prismática,
+                        destellos y el anillo giratorio de la casa.
+                        La IA es 100% de Terraria: no se toca, y ahí está la gracia.
+                        Sin maná (arma de pruebas).
+                        '''
+        }
+
+        VeredictoEmperatriz: {
+                // v6.50.99: OPCIÓN C — EL HÍBRIDO DE LA JEFA (el 873, friendly)
+                DisplayName: El Veredicto de la Emperatriz
+                Tooltip:
+                        '''
+                        «El trazo de la jefa, ahora obedece.»
+                        OPCIÓN C — EL HÍBRIDO DE LA JEFA: el streak 873 de la
+                        Emperatriz en versión amistosa — 40 estelas, escala 1.4,
+                        ATRAVIESA PAREDES y estalla en anillo radial al morir, con el
+                        arcoíris completo de su ataque.
+                        DESBORDE: el 5º disparo seguido lanza el TRAZO MASIVO (daño
+                        ×2.5, explosión triple) y te cuesta 5% de tu vida máxima.
+                        Sin maná (arma de pruebas).
+                        '''
+        }
+
+        Equinoccio: {
+                // v6.50.99: LA CUARTA ARMA — OPCIÓN B DUAL (el día + la noche)
+                DisplayName: El Equinoccio
+                Tooltip:
+                        '''
+                        «Mitad aurora, mitad eclipse.»
+                        LA CUARTA — OPCIÓN B DUAL: dos Nightglow vanilla por disparo.
+                        EL DORADO sale con LUZ de sol: halo dorado pulsante y ocho
+                        rayos giratorios. EL NEGRO exhala BRUMA de verdad: disco de
+                        eclipse con rim violeta y humo negro sobre todo su rastro.
+                        El día y la noche se separan sobre tu cabeza… y luego cazan.
+                        Sin maná (arma de pruebas).
+                        '''
+        }
+
+        BolsaEmperatriz: {
+                // v6.50.99: LA BOLSA DE LA EMPERATRIZ — bolsa 20 (las 4 pruebas del proyectil)
+                DisplayName: Bolsa de la Emperatriz
+                Tooltip:
+                        '''
+                        Las cuatro pruebas del proyectil de la Emperatriz de la Luz.
+                        El clon cósmico con el sistema Observado/Desborde (El Grimorio
+                        Estrellado), el vanilla con el hue arreglado (El Eco de la
+                        Emperatriz), el híbrido de la jefa con el Desborde masivo (El
+                        Veredicto de la Emperatriz) y el día y la noche en un libro
+                        (El Equinoccio).
+                        Clic derecho para desplegarlas. Solo entrega lo que te falte.
+                        '''
+        }
 }
 
 Projectiles: {
+        GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
+        ManchaDeTinta.DisplayName: La Mancha de Tinta
+        EstelaAethonProjectile.DisplayName: La Estela de Aethon
+        TrazoEmperatrizProjectile.DisplayName: El Trazo de la Emperatriz
         SombraPaginaProjectile.DisplayName: La Sombra de la Página
         FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
         // v6.50.91 — el espíritu del Nervioso y su sombra cazadora
@@ -2206,6 +2290,12 @@ RelojDeArena: {
 TestingPlayer: {
         Bolsas: Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.
         Dummies: Además: {0} dummies de prueba para el campo de entrenamiento.
+}
+
+Desborde: {
+        // v6.50.99: LOS TEXTOS DEL SISTEMA OBSERVADO/DESBORDE — la familia de la Emperatriz
+        Aviso: ¡EL GRIMORIO SE DESBORDA! El 5º disparo detona el proyectil masivo — la Emperatriz cobra 5% de tu vida máxima.
+        Observado: ¡OBSERVADO!
 }
 
 Configs: {

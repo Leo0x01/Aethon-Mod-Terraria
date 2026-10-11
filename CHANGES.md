@@ -1,5 +1,96 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.99 — LAS CUATRO ARMAS DE LA EMPERATRIZ: LAS 3 OPCIONES DEL ESTUDIO + LA DUAL DÍA/NOCHE
+
+**Petición del usuario**: "crea 3 armas con las 3 opciones... A — Clon
+Aethon (recomendada): ModProjectile propio replicando la IA_171 al 100%
+(fuente + deriva + SmoothStep + rebote + estela de 20 afterimages) pero
+con la paleta cósmica del grimorio (oro/cian/magenta/índigo) y ganchos
+para el sistema Observado/Desborde. B — Vanilla + hue + FX: seguir con
+el 931 pero arreglando el hue y añadiendo FX globales. C — Híbrido de
+la jefa: versión '873 friendly' (40 afterimages, escala 1.4, explosión
+radial al morir, atraviesa paredes) — espectacular para el Desborde.
+Luego crea una cuarta arma: el proyectil debe tener la opción b, pero
+debe lanzar un proyectil dorado con luz y el otro negro y con bruma".
+
+El estudio del Nightglow (ESTUDIO_PROYECTIL_NIGHTGLOW.md — el 931 ES la
+IA_171 del ataque de la Emperatriz) convertido en armas jugables:
+
+- **(A) EL GRIMORIO ESTRELLADO + LA ESTELA DE AETHON — el clon
+  recomendado**: ModProjectile propio con la IA_171 replicada AL 100%
+  (fade-in 240→220, deriva serpenteante con la onda
+  cos(whoAmI%6/6+x/320+y/160) y fricción 0.97, persecución con línea de
+  vista a 800px, steering SmoothStep 0.075→0.125, clamp de timeLeft en
+  10, velocidad de caza 30, freno final, REBOTE en tiles, daño ×0.8 por
+  golpe, re-encadenado al golpear, muerte que quema la estela con dusts
+  bicapa) + la cadencia EXACTA del arma original (useTime 2/animación
+  36, ventana de 8 ticks → burst ×4, velocidad fuente siempre hacia
+  arriba) + la PALETA CÓSMICA por orbe (oro/cian/magenta/índigo, la
+  estela de afterimages recorre la paleta) + dibujo 100% por código
+  (GlowOrb + cruz pulsante de 8 puntas) + los GANCHOS del sistema del
+  usuario (SistemaObservado: marca por golpe, 5 = crítico garantizado
+  +50% con el juice del ojo dorado; DESBORDE con el patrón del Grimorio
+  Sellado: 5 usos → estela MASIVA ×2.5/escala ×2 + 5% de vida (nunca
+  mata) + 120 t de recarga + las 30 llamas doradas + Item88).
+- **(B) EL ECO DE LA EMPERATRIZ — el vanilla con el hue arreglado**: el
+  931 DE TERRARIA intacto (la gracia de la opción B) pero con ai[1] =
+  LA FÓRMULA LITERAL del arma original (0.66×progreso de animación +
+  miscCounter/300, módulo 1) — el hallazgo del estudio §12: el Grimorio
+  del Eterno NO pasaba el hue y todos sus orbes salían cian fijos.
+  Además los FX globales de la casa vía ai[2]=9101: luz prismática del
+  color del matiz, destellos arcoíris y el anillo giratorio.
+- **(C) EL VEREDICTO DE LA EMPERATRIZ + EL TRAZO — el híbrido de la
+  jefa**: el 873 en versión amistosa — parámetros de JEFA (persecución
+  desde 140, steering 0.05→0.10 de giros anchos, fricción 0.98),
+  ATRAVIESA PAREDES, 40 afterimages a escala 1.4 con el matiz que
+  DERIVA a lo largo de la cola (el rastro prismático de la jefa),
+  explosión RADIAL al morir (el anillo del 873) y el DESBORDE masivo:
+  escala 2.8, daño ×2.5, penetra 12, explosión TRIPLE y el temblor de
+  la casa (PulsoLib.Trauma). La salida es la de la ráfaga de la jefa:
+  (0,−6) rotada ±90°.
+- **(4) EL EQUINOCCIO — la cuarta, opción B dual**: DOS 931 vanilla
+  por disparo separándose como día y noche. EL DORADO (ai[1]=0.64 →
+  render dorado de verdad) sale con LUZ DE SOL: AddLight dorada
+  intensa, halo pulsante, estela de llama dorada y los OCHO RAYOS
+  giratorios de un sol en miniatura. EL NEGRO (ai[1]=0.28 → el violeta
+  que sangra por el rim) exhala LA BRUMA DE VERDAD de la casa:
+  SombrasLib.BrumaColumna sobre todo su rastro (el humo fBm que se
+  desgarra), el DISCO DE ECLIPSE (la capa FlushAlpha que oscurece —
+  negro puro no existe en el lote aditivo), el rim violeta pulsante
+  (lectura nocturna, lección de la casa) y chispas de llama de sombra.
+- **LA ENTREGA** (lección .83 siempre): BOLSA 20 — La Bolsa de la
+  Emperatriz (las 4 pruebas) registrada en TestingPlayer + receta de 5
+  madera ×4 (protocolo v6.14.2).
+- **EL FX GLOBAL**: EmperatrizFX (GlobalProjectile sobre el 931) marca
+  por ai[2] (9101/9201/9202) — CERO colisión con los flags ai[1] del
+  TestAdvancedFX (el estudio lo advertía) y cero cambios a la IA.
+- **Iconos ×4** (gen_emperatriz_v65099.py): el libro con el sello de
+  lacre dorado y las 4 gemas cósmicas (A), el libro abierto exhalando
+  los 4 orbes arcoíris con estelas (B), la banda diagonal arcoíris con
+  núcleo blanco sobre el libro (C) y el libro partido dorado/nocturno
+  con sol y creciente + los dos orbes (4) — VLM SHIP ×4 tras 3
+  iteraciones (los orbes redondos con corazón simétrico y la estela
+  CONTINUA fueron las lecciones).
+- **hjson ×3**: es-MX/es-ES con el formato 8-espacios de la .98, en-US
+  con tabs (¡formatos DIFERENTES por idioma — el insert va por script
+  con el formato de CADA archivo!) + la sección Desborde (Aviso/
+  Observado) — las armas nuevas ya no hardcodean sus textos.
+- **EL HALLAZGO DEL BUILD (la lección .55 otra vez, ahora con la
+  prueba)**: el -build de tML RE-SERIALIZA los hjson (tabs canónicos +
+  relleno de claves huecas del idioma base) — el .tmod se debe
+  reconstruir TRAS la primera normalización para que paquete==árbol (la
+  regla de la casa). El relleno auto-creó 2 claves en-US que faltaban
+  desde la .96 (GrietaDeTintaProjectile/ManchaDeTinta) — sus placeholders
+  se sustituyeron por nombres propios (The Ink Rift / The Ink Blot) y
+  las claves se añadieron también a es-MX/es-ES (La Grieta de Tinta / La
+  Mancha de Tinta): el hueco .96 reparado.
+- **VERIFICACIÓN**: oráculo 0/0 · -build real 0/0 · .tmod 2.598.268 B
+  md5 47ca74adc0f927140574269b079ccf32, 394 entradas (las 390 de la
+  .98 + 4 rawimg), EOF EXACTO (sum(comp)+tabla=fsize) · símbolos
+  PRESENTES en la DLL empaquetada · hjson VIVOS en los 3 idiomas ·
+  headless «Sandboxing v6.50.99 → Adding Recipes → Server started» 0
+  excepciones.
+
 ## Commit v6.50.98 — EL GRIMORIO SELLADO: el arma nueva de prueba (el código del usuario con TODOS sus errores muertos)
 
 **Petición del usuario**: "te dare el codigo para un arma nueva de

@@ -1,30 +1,28 @@
-# AethonMod — ESTADO ACTUAL (v6.50.98)
+# AethonMod — ESTADO ACTUAL (v6.50.99)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.98 (EL GRIMORIO SELLADO. La letra:
-> «te dare el codigo para un arma nueva de prueba, recuerda darcela al
-> jugador, este sera el proyectil y su efecto» — el usuario escribió el
-> arma COMPLETA: el GRIMORIO SELLADO dispara EL FRAGMENTO DE AETHON
-> (la astilla dorada de 8 frames, chispas de oro + rayos violetas, luz
-> dorada que late, homing opcional por ai[1]); al morder aplica el
-> debuff OBSERVADO y suma un stack en el SISTEMA (5 golpes = «Conocido»
-> → el 6º es crítico GARANTIZADO con SetCrit + FinalDamage ×1.5); al
-> morir abre LA APERTURA DE AETHON (la grieta que se abre violentamente
-> → se sella, 50% de daño en área); y cada 5 disparos = DESBORDE: el
-> rayo masivo al 250% que cuesta el 5% de la vida del dueño (clamp: no
-> mata) con 2 s de cooldown. LOS ERRORES DEL BORRADOR, TODOS MUERTOS
-> (dos capas: los de análisis — GoldFlare/Spellbook no existen, es
-> GoldFlame/SpellTome — y los que SOLO el build real caza: las firmas
-> de golpe de esta tML OnHitNPC(HitInfo)/ModifyHitNPC(HitModifiers) con
-> SetCrit, el GetSource_FromThis, el Kill→OnKill, el paréntesis del
-> desborde, el clamp de vida y los contadores static). LA ENTREGA: en
-> la Bolsa del Probador + receta doble (SpellTome temática y 5 madera).
-> ARTE: 4 texturas de la paleta de la familia (libro sellado 28×30,
-> astilla 24×192, apertura 48×384, ojo 32×32) — VLM QA 3 SHIP + 1 con
-> nota.
-> .tmod 2.592.506 B md5 bb82d358d15ce5088c0a3c6d4e53f6b2, 390 entradas
-> (las 386 de la .97 + los 4 rawimg nuevos), auditoría TODO OK
-> (audit_v65098.py), headless 0 excepciones.)
+> Última actualización: v6.50.99 (LAS CUATRO ARMAS DE LA EMPERATRIZ —
+> las 3 opciones del estudio del Nightglow + la cuarta dual. La letra:
+> «crea 3 armas con las 3 opciones... luego crea una cuarta arma, en
+> esta el proyectil debe tener la opción b, pero debe lanzar un
+> proyectil dorado con luz y el otro negro y con bruma»: (A) EL
+> GRIMORIO ESTRELLADO — el clon recomendado: la IA_171 del streak de la
+> Emperatriz replicada al 100% (fuente + deriva + SmoothStep + rebote +
+> 20 estelas) con la PALETA CÓSMICA (oro/cian/magenta/índigo) y los
+> ganchos del Grimorio Sellado (OBSERVADO → crítico garantizado +50%;
+> 5 usos → DESBORDE masivo al 250%); (B) EL ECO DE LA EMPERATRIZ — el
+> 931 vanilla con EL HUE ARREGLADO (la fórmula literal del arma
+> original: el Grimorio del Eterno lo dejaba todo cian) + luz
+> prismática y anillo giratorio; (C) EL VEREDICTO DE LA EMPERATRIZ — el
+> 873 friendly: parámetros de jefa, ATRAVIESA PAREDES, 40 estelas a
+> 1.4, explosión radial al morir y el DESBORDE masivo; y LA CUARTA: EL
+> EQUINOCCIO — opción B dual: el orbe DORADO CON LUZ de sol (halo
+> pulsante + 8 rayos giratorios + luz real) y el NEGRO CON BRUMA de
+> verdad (BrumaFX sobre el rastro + disco de eclipse con rim violeta).
+> Todo en la BOLSA 20 (La Bolsa de la Emperatriz) + receta 5 madera
+> ×4. Iconos ×4 VLM SHIP. .tmod 2.598.268 B md5
+> 47ca74adc0f927140574269b079ccf32, 394 entradas (las 390 de la .98 +
+> los 4 rawimg), oráculo 0/0, build real 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1914,6 +1912,46 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.50.99 LISTA (SIN PUBLICAR — falta token) — LAS CUATRO ARMAS
+   DE LA EMPERATRIZ (las 3 opciones del estudio + la dual)**: (A)
+   GRIMORIO ESTRELLADO (60 dmg, el burst ×4 del Nightglow — useTime
+   2/animación 36 con ventana de 8 ticks —, fuente vanilla, IA_171
+   clonada al 100%, paleta cósmica por orbe con estela que recorre la
+   paleta, rebote, Observado por golpe vía el SistemaObservado del
+   usuario, 5 usos = DESBORDE: estela MASIVA ×2.5 escala ×2 + 5% de
+   vida + 120 t de recarga — el patrón exacto del Grimorio Sellado),
+   (B) ECO DE LA EMPERATRIZ (60 dmg, el 931 DE TERRARIA con ai[1] = la
+   fórmula del hue del arma original + ai[2]=9101: luz prismática +
+   destellos arcoíris + anillo giratorio de la casa), (C) VEREDICTO DE
+   LA EMPERATRIZ (130 dmg, un trazo por uso con la salida de la ráfaga
+   de la jefa (0,−6)±90°, parámetros de jefa: persecución desde 140,
+   steering 0.05→0.10, fricción 0.98, tileCollide=false, 40 estelas a
+   escala 1.4 con matiz que DERIVA por la cola, explosión radial al
+   morir; DESBORDE = trazo escala 2.8 ×2.5 penetra 12 explosión triple
+   + PulsoLib.Trauma 0.40), (4) EQUINOCCIO (85 dmg, DOS 931 por
+   disparo: el DORADO ai[1]=0.64 con LUZ de sol — halo pulsante + 8
+   rayos giratorios + AddLight dorada — y el NEGRO ai[1]=0.28 con LA
+   BRUMA DE VERDAD — SombrasLib.BrumaColumna sobre oldPos + disco de
+   eclipse FlushAlpha + rim violeta pulsante + humo/chispas de
+   sombra). El FX global (EmperatrizFX) marca por ai[2]
+   (9101/9201/9202) — CERO colisión con los flags ai[1] del
+   TestAdvancedFX. ENTREGA: Bolsa 20 (La Bolsa de la Emperatriz) +
+   TestingPlayer + receta 5 madera ×4. hjson ×3 (es-MX/es-ES en el
+   formato 8-espacios de la .98; en-US en tabs) + sección Desborde
+   (Aviso/Observado — las armas nuevas ya no hardcodean el texto).
+   VERIFICACIÓN: oráculo 0/0 · build real 0/0 · .tmod 394 entradas EOF
+   exacto (sum(comp)+tabla=fsize) · los 4 rawimg nuevos dentro ·
+   símbolos PRESENTES en la DLL empaquetada (GrimorioEstrellado/
+   EstelaAethonProjectile/TrazoEmperatrizProjectile/EmperatrizFX/
+   BolsaEmperatriz) · hjson VIVOS en los 3 idiomas · headless
+   «Sandboxing v6.50.99 → Adding Recipes → Server started» 0
+   excepciones. CHECKLIST DEL USUARIO: (a) la BOLSA DE LA EMPERATRIZ
+   llega al entrar al mundo, (b) A: el burst cósmico ×4 que rebota y
+   encadena + el OBSERVADO a 5 marcas + el DESBORDE masivo, (c) B: el
+   arcoíris de verdad rotando entre ráfagas (adiós cian fijo), (d) C:
+   el trazo de jefa atravesando paredes + el masivo de los 5 disparos,
+   (e) la 4: el dorado que ILUMINA y el negro que exhala bruma — y
+   ELEGIR el proyectil del arma nueva.
 1. **✅ v6.50.98 PUBLICADA — EL GRIMORIO SELLADO (el arma nueva de
    prueba)** — la letra: «te dare el codigo para un arma nueva de
    prueba, recuerda darcela al jugador, este sera el proyectil y su

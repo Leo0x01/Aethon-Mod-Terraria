@@ -58,7 +58,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS DIECINUEVE BOLSAS (garantizadas en cada entrada) ===
+            // === LAS VEINTE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -79,6 +79,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaIdeasGrimorio>());   // v6.50.19: LAS 6 IDEAS DEL GRIMORIO
             bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
             bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63+: LAS FAUCES DEL GRIMORIO (las 3 sombras de la .62 + LA PÁGINA FINAL de la .64 — el arma 4)
+            bolsas += Entregar(ModContent.ItemType<BolsaEmperatriz>());      // v6.50.99: LAS CUATRO PRUEBAS DE LA EMPERATRIZ (A/B/C + la dual Equinoccio)
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;
