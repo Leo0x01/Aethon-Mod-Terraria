@@ -40,7 +40,7 @@ Items: {
                         Clic izq: EL EQUINOCCIO — el día (orbe dorado con luz de sol) y la
                         noche (eclipse con rim violeta) se separan sobre tu cabeza; cada 3
                         niveles, una pareja MÁS. Con el espíritu fuera, dispara el LIBRO.
-                        Clic der: invoca el Orbe Cósmico.
+                        Clic der: invoca los Ojos del Eterno (corona/órbitas + rayo negro).
                         Gana XP REAL con cada baja (bestiario 0–5★, primera baja de cada
                         especie ×3, modo difícil ×2, jefes con fórmula fija) — y su Sombra
                         de la Página devora presas ENTERAS (botín incluido) cuya XP es DEL
@@ -1779,8 +1779,7 @@ Projectiles: {
         SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
         ArcaneBolt.DisplayName: Bolt Arcano
         GenesisLight.DisplayName: Luz del Génesis
-        CosmicOrbMinion.DisplayName: Orbe Cósmico
-        CosmicOrbBolt.DisplayName: Bolt Cósmico
+        OjoEternoMinion.DisplayName: El Ojo del Eterno
         AnillosSingularesHalo.DisplayName: Anillos del Horizonte
         NebulaJellyfishMinion.DisplayName: Medusa Nebular
         NebulaLightning.DisplayName: Rayo Nebular
@@ -1905,9 +1904,9 @@ Projectiles: {
 }
 
 Buffs: {
-        CosmicOrbBuff: {
-                DisplayName: Orbe Cósmico
-                Description: Un orbe de luz cósmica te sigue y dispara a tus enemigos
+        OjoEternoBuff: {
+                DisplayName: Ojos del Eterno
+                Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
         }
 
         AethonMenorBuff: {

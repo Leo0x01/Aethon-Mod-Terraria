@@ -36,7 +36,7 @@ Items: {
 			Left click: THE EQUINOX — day (golden orb with sunlight) and night
 			(eclipse with violet rim) part above your head; every 3 levels, one
 			MORE pair. With the spirit out, the BOOK fires. Right click:
-			summons the Cosmic Orb.
+			summons the Eyes of the Eternal (crown/orbits + black ray).
 			Earns REAL XP from every kill (bestiary rarity 0–5 stars, first
 			kill of each species ×3, hardmode ×2, bosses with a fixed formula)
 			— and its Page Shadow devours WHOLE prey (loot included) whose XP
@@ -1774,8 +1774,7 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
 	GenesisLight.DisplayName: Genesis Light
-	CosmicOrbMinion.DisplayName: Cosmic Orb
-	CosmicOrbBolt.DisplayName: Cosmic Bolt
+	OjoEternoMinion.DisplayName: The Eye of the Eternal
 	AnillosSingularesHalo.DisplayName: Horizon Rings
 	NebulaJellyfishMinion.DisplayName: Nebula Jellyfish
 	NebulaLightning.DisplayName: Nebular Lightning
@@ -1905,9 +1904,9 @@ Projectiles: {
 }
 
 Buffs: {
-	CosmicOrbBuff: {
-		DisplayName: Cosmic Orb
-		Description: A cosmic orb of light follows you and shoots at your enemies
+	OjoEternoBuff: {
+		DisplayName: Eyes of the Eternal
+		Description: The grimoire's eyes hover in a crown and fire their misty black ray
 	}
 
 	AethonMenorBuff: {

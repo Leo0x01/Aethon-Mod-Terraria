@@ -57,8 +57,14 @@ namespace AethonMod.Content.Weapons
     /// · LO QUE YA ERA SUYO: los niveles infinitos comiendo XP REAL (la
     ///   rareza del bestiario mide el valor, jefes con fórmula fija), el
     ///   escalado (+2.2% daño mágico, −0.3% use time, +1 slot de minion
-    ///   cada 10 niveles, lifesteal del 7 en 7…), el Orbe Cósmico en el
-    ///   clic derecho y LOS TRES ESTADOS (sostenido/barra rápida/guardado).
+    ///   cada 10 niveles, lifesteal del 7 en 7…), LOS OJOS DEL ETERNO en
+    ///   el clic derecho (v6.50.105: los minions son los OJOS del libro —
+    ///   la letra: «el minion que use el grimorio será su propio ojo»:
+    ///   corona sobre el dueño, órbitas concéntricas al libro flotante
+    ///   (anillos de 5, 6, 7…), el rayo Perlin NEGRO de bordes morados
+    ///   con bruma en la punta, el círculo mágico de los agujeros
+    ///   negros, el retroceso al disparar y el parpadeo independiente)
+    ///   y LOS TRES ESTADOS (sostenido/barra rápida/guardado).
     ///
     /// Sin maná (la regla de la casa — el hambre ES el coste).
     /// </summary>
@@ -253,9 +259,9 @@ namespace AethonMod.Content.Weapons
         public override bool AltFunctionUse(Player player) => true;
 
         /// <summary>v6.50.102 — LA DIFERENCIA CON EL NERVIOSO DE PRUEBA: el
-        /// clic derecho NO reinicia el apetito — invoca al Orbe Cósmico
-        /// (ver Shoot). El Eterno se alimenta CAZANDO (sus presas), no de
-        /// gratis: el botellón de la demo murió con el minuto.</summary>
+        /// clic derecho NO reinicia el apetito — invoca a LOS OJOS DEL
+        /// ETERNO (ver Shoot). El Eterno se alimenta CAZANDO (sus presas),
+        /// no de gratis: el botellón de la demo murió con el minuto.</summary>
         public override bool? UseItem(Player player) => null;
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
@@ -308,11 +314,11 @@ namespace AethonMod.Content.Weapons
                     }
                 }
 
-                // Invocar minion (EXACTAMENTE una vez) — el nivel viaja en
+                // Invocar el OJO (EXACTAMENTE una vez) — el nivel viaja en
                 // ai[2] desde el spawn (v6.50.2: el paquete 27 sí viaja).
-                player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
+                player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.OjoEternoBuff>(), 18000);
                 Projectile.NewProjectile(source, position, Vector2.Zero,
-                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
+                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>(),
                     damage, knockback, player.whoAmI, 0f, 0f, level);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
@@ -481,7 +487,6 @@ namespace AethonMod.Content.Weapons
                 int totalPares = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
                 int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
                 float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
-                int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
                 float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
                 float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
                 float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
@@ -519,19 +524,22 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "OrigenLibro",
                     "[c/BE78FD:Con el espíritu fuera, dispara el LIBRO]"));
 
-                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ OJOS DEL ETERNO ═══]"));
+                // v6.50.105 — los ojos: la corona y las órbitas (la letra)
+                tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
+                    "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
                 // v6.45/v6.46: los slots de minion — la escalera de cada 10
                 // niveles (tope +10, se sostienen en la barra rápida).
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
                     $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
-                    $"[c/BE78FD:+{contactDmg:F0}% daño de contacto]"));
+                    $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
                     $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRange",
                     $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionCd",
-                    $"[c/BE78FD:{hitCd} frames de cooldown]"));
+                    "[c/BE78FD:El rayo Perlin negro, con bruma en la punta]"));
                 // v6.45: el costo de invocación solo se anuncia cuando está
                 // ACTIVO (bandera de pruebas OFF).
                 if (!ManaMinionGratis())
