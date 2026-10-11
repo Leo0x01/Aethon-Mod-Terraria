@@ -1,5 +1,65 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.101 — EL CONTRATO DEL LOTE: EL CRASH DE LAS 4 ARMAS CAZADO (la lección del client.log)
+
+**Petición del usuario**: "hay varios errores, revisa las nuevas armas,
+al parecer tienen errores, revisa en profundidad" + el client.log
+(sesión 05:38:06): la .100 cargó bien (0/0), el jugador entró al mundo
+y ~50 s después **Main engine crash** — la cadena exacta:
+
+- `Draw was called, but Begin has not yet been called.` — excepción
+  silenciosa ×1 (tML mata el proyectil)
+- `End was called, but Begin has not yet been called.` — ×2 → FATAL
+
+**EL DIAGNÓSTICO**: los TRES sitios de dibujo nuevos de la .99
+(`EstelaAethonProjectile.PreDraw`, `TrazoEmperatrizProjectile.PreDraw`
+y `EmperatrizFX.PreDraw` sobre el 931 vanilla) llaman
+`VFXCore.FlushAdditive/FlushAlpha` — que CIERRAN el lote del pase de
+proyectiles (`CerrarLoteSiAbierto` al entrar) y dejan NINGUNO abierto —
+y salían del `PreDraw` SIN REABRIRLO: el siguiente `EntitySpriteDraw`
+de vanilla lanza y el `End` final de `DrawProjectiles` TUMBA EL MOTOR.
+El contrato de la casa estaba ESCRITO en `VFXCore.cs:1012` («un
+PreDraw SIEMPRE sale con el lote ABIERTO y válido — si llegó roto, se
+CURA») y los veteranos lo cumplen (GrietaDeTinta: cerrar → try →
+catch → `ReabrirLoteVanilla`; `TestAdvancedFX.DrawTex` igual) — los 3
+nuevos NACIERON sin el paso sanador. `EmperatrizFX` era el peor caso:
+`return true` con el lote muerto → el sprite vanilla del 931 dibuja
+primero y crashea primero.
+
+**EL FIX — el patrón de la casa ×3**: `CerrarLoteSiAbierto()` →
+`try` { dibujar } `catch` { `CerrarLoteSiAbierto()` } →
+`ReabrirLoteVanilla()` — el paso sanador en los 3 `PreDraw`.
+
+**CERO cambios de gameplay**: las 4 armas disparan exactamente igual,
+SIN maná (mana = 0 de fábrica — regla de la casa), la Bolsa de la
+Emperatriz (bolsa 20) al entrar al mundo + receta 5 madera ×4.
+
+**VERIFICACIÓN**: oráculo 0/0 · build real 0/0 (LA LECCIÓN DEL
+-BUILD: el argumento es una RUTA absoluta — «-build AethonMod»
+construía una carpeta VACÍA que el propio tML creó en /tmp/tml: DLL de
+2,5 KB, tmod de 9 KB con 3 entradas «v1.0»; la forma canónica es
+`-build /ruta/absoluta/al/AethonMod`, probada por el modSource del
+Info del .tmod .100 de /home/sync) · **.tmod 2.599.403 B, md5
+20aa8d43cd73aec96636a6d90e761715, 397 entradas**, DLL 1.285.120 B,
+paquete==árbol (hjson ya canónicos, diff 0) · diff DLL .100↔.101:
+73,7% idéntico con alineación +156 B (la inserción del try/catch +
+las llamadas VFXCore en los 3 `PreDraw`) — el fix está ADENTRO ·
+símbolos vivos en el heap (Estela/Trazo/EmperatrizFX/
+ReabrirLoteVanilla/CerrarLoteSiAbierto) · headless «Sandboxing
+v6.50.101 → Adding Recipes → Server started» 0 excepciones.
+
+**Checklist en juego**: (a) EL MOD CARGA y NO CRASHEA al disparar las
+4 armas (el crash cazado) · (b) la Bolsa de la Emperatriz llega con
+las 4 · (c) disparan SIN maná · (d) A: burst ×4 + Observado +
+Desborde · (e) B: arcoíris de verdad · (f) C: trazo de jefa · (g) la
+dual: dorado con luz + negro con bruma — (h) ELEGIR el proyectil del
+arma nueva.
+
+**PUBLICACIÓN**: tag v6.50.101 + release 409593470 (make_latest) +
+asset AethonMod.tmod 630436494 2.599.403 B (md5
+20aa8d43cd73aec96636a6d90e761715), CDN VERIFICADO BYTE A BYTE,
+/releases/latest = v6.50.101, respaldo /home/sync/AethonMod-v6.50.101.tmod.
+
 ## Commit v6.50.100 — LAS TRES TEXTURAS QUE FALTABAN: EL MOD QUE NO CARGABA (la lección del client.log)
 
 **Petición del usuario**: "hay errores, recuerda siempre darle el arma al

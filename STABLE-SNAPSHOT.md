@@ -1,27 +1,30 @@
-# AethonMod — ESTADO ACTUAL (v6.50.100)
+# AethonMod — ESTADO ACTUAL (v6.50.101)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.100 (LAS TRES TEXTURAS QUE FALTABAN — la
-> lección del client.log. La letra: «hay errores, recuerda siempre
-> darle el arma al jugador y estas armas no usan mana ya que son de
-> prueba» + el client.log: tML DESACTIVÓ la v6.50.99 ENTERA con TRES
-> MissingResourceException — las 4 armas de la Emperatriz tenían su
-> icono… pero la BOLSA QUE LAS ENTREGA y los DOS PROYECTILES nuevos
-> (EstelaAethonProjectile / TrazoEmperatrizProjectile) se quedaron SIN
-> .png → el mod no cargó → las armas nunca llegaron. EL FIX: las 3
-> texturas (BolsaEmperatriz 30×30 — la silueta de la casa recolorida
-> perla/rosa/oro con el trazo arcoíris en la ventana; EstelaAethon —
-> el diamante dorado de núcleo blanco con la cola
-> índigo→magenta→cian→oro; TrazoEmperatriz — el trazo arcoíris
-> asimétrico con vena blanca). LA LECCIÓN (gate permanente):
-> tools/audit_texturas.py — NI el -build NI el headless validan
-> texturas (sólo el CLIENTE las pide); el script exige el .png de toda
-> clase cargable por herencia transitiva y corre ANTES de cada build.
-> EL MANÁ: ya estaba bien (las 4 nacieron con mana 0 — regla de la
-> casa, verificada). CERO cambios de código (la DLL difiere en 70
-> bytes de 1.28 MB: versión + timestamps). .tmod 2.599.343 B md5
-> 33171c67ee2bd945273a7fcd87729291, 397 entradas (las 394 de la .99 +
-> las 3 rawimg), oráculo 0/0, build real 0/0, headless 0 excepciones.)
+> Última actualización: v6.50.101 (EL CONTRATO DEL LOTE — el crash de
+> las 4 armas cazado. La letra: «hay varios errores, revisa las
+> nuevas armas, al parecer tienen errores, revisa en profundidad» +
+> el client.log 05:38:06: la .100 cargó bien (0/0), el jugador entró
+> al mundo y ~50 s después Main engine crash — «Draw was called, but
+> Begin has not yet been called» (excepción silenciosa ×1, tML mata
+> el proyectil) → «End was called, but Begin has not yet been
+> called» (×2) → FATAL. EL DIAGNÓSTICO: los 3 sitios de dibujo nuevos
+> de la .99 (EstelaAethonProjectile.PreDraw, TrazoEmperatrizProjectile.PreDraw,
+> EmperatrizFX.PreDraw sobre el 931 vanilla) llaman
+> VFXCore.FlushAdditive/FlushAlpha — que CIERRAN el lote del pase de
+> proyectiles y salían del PreDraw sin reabrirlo; el contrato estaba
+> ESCRITO en VFXCore.cs:1012 («un PreDraw SIEMPRE sale con el lote
+> ABIERTO y válido — si llegó roto, se CURA») y los veteranos lo
+> cumplen (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos
+> NACIERON sin el paso sanador (EmperatrizFX el peor caso: return
+> true con el lote muerto → el sprite vanilla del 931 dibuja primero
+> y crashea primero). EL FIX ×3: el patrón de la casa completo en los
+> 3 PreDraw (CerrarLoteSiAbierto → try { dibujar } catch {
+> CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de
+> gameplay (las 4 disparan igual, SIN maná — mana=0 de fábrica, la
+> Bolsa de la Emperatriz bolsa 20 + receta 5 madera ×4). .tmod
+> 2.599.403 B md5 20aa8d43cd73aec96636a6d90e761715, 397 entradas,
+> oráculo 0/0, build real 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1911,6 +1914,49 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.50.101 PUBLICADA — EL CONTRATO DEL LOTE (el crash de las 4
+   armas cazado)** — la letra: «hay varios errores, revisa las nuevas
+   armas, al parecer tienen errores, revisa en profundidad» + el
+   client.log (sesión 05:38:06): la .100 cargó bien (0/0), el jugador
+   entró al mundo y ~50 s después Main engine crash — «Draw was
+   called, but Begin has not yet been called» (excepción silenciosa
+   ×1, tML mata el proyectil) → «End was called, but Begin has not
+   yet been called» (×2) → FATAL. EL DIAGNÓSTICO: los TRES sitios de
+   dibujo nuevos de la .99 (EstelaAethonProjectile.PreDraw,
+   TrazoEmperatrizProjectile.PreDraw, EmperatrizFX.PreDraw sobre el
+   931 vanilla) llaman VFXCore.FlushAdditive/FlushAlpha — que CIERRAN
+   el lote del pase de proyectiles (CerrarLoteSiAbierto al entrar) y
+   dejan NINGUNO abierto — y salían del PreDraw sin reabrirlo: el
+   siguiente EntitySpriteDraw de vanilla lanza y el End final de
+   DrawProjectiles TUMBA EL MOTOR. El contrato de la casa estaba
+   ESCRITO en VFXCore.cs:1012 y los veteranos lo cumplen
+   (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos NACIERON
+   sin el paso sanador (EmperatrizFX el peor caso: return true con el
+   lote muerto). EL FIX ×3: el patrón de la casa completo en los 3
+   PreDraw (CerrarLoteSiAbierto → try { dibujar } catch {
+   CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de
+   gameplay (las 4 disparan igual, SIN maná, la Bolsa de la Emperatriz
+   bolsa 20 al entrar al mundo + receta 5 madera ×4). VERIFICACIÓN:
+   oráculo 0/0 · build real 0/0 (LA LECCIÓN DEL -BUILD: el argumento
+   es una RUTA absoluta — «-build AethonMod» construía una carpeta
+   VACÍA en /tmp/tml; la forma canónica es -build
+   /ruta/absoluta/al/AethonMod) · .tmod 2.599.403 B md5
+   20aa8d43cd73aec96636a6d90e761715, 397 entradas, DLL 1.285.120 B,
+   paquete==árbol · diff DLL .100↔.101: 73,7% idéntico con
+   alineación +156 B en la zona exacta de los 3 PreDraw — el fix está
+   ADENTRO · símbolos vivos en el heap · headless «Sandboxing
+   v6.50.101 → Adding Recipes → Server started» 0 excepciones.
+   CHECKLIST DEL USUARIO: (a) EL MOD CARGA y NO CRASHEA al disparar
+   las 4 armas (el crash cazado), (b) la Bolsa de la Emperatriz llega
+   con las 4, (c) disparan SIN maná, (d) A: burst ×4 + Observado +
+   Desborde, (e) B: arcoíris de verdad, (f) C: trazo de jefa, (g) la
+   dual: dorado con luz + negro con bruma — (h) ELEGIR el proyectil
+   del arma nueva. PUBLICACIÓN: commit c91eec2 + tag v6.50.101 +
+   push (a9025fc..c91eec2) · release **409593470** (make_latest) +
+   asset AethonMod.tmod **630436494** 2.599.403 B (md5
+   20aa8d43cd73aec96636a6d90e761715), CDN VERIFICADO BYTE A BYTE,
+   /releases/latest = v6.50.101, respaldo
+   /home/sync/AethonMod-v6.50.101.tmod.
 1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
@@ -2596,6 +2642,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.101** | ✅ Build-verificada (oráculo 0/0, build real 0/0 — LA LECCIÓN DEL -BUILD: el argumento es una RUTA absoluta («-build AethonMod» construía una carpeta VACÍA que el propio tML creó en /tmp/tml: DLL de 2,5 KB, tmod de 9 KB con 3 entradas «v1.0»; la forma canónica es -build /ruta/absoluta/al/AethonMod, probada por el modSource del Info del .tmod .100), .tmod 2.599.403 B md5 20aa8d43cd73aec96636a6d90e761715, 397 entradas (el MISMO set de la .100), DLL 1.285.120 B, paquete==árbol (hjson ya canónicos, diff 0), diff DLL .100↔.101: 73,7% idéntico con alineación +156 B (la inserción del try/catch + las llamadas VFXCore en la zona exacta de los 3 PreDraw — el fix está ADENTRO), símbolos vivos en el heap (Estela/Trazo/EmperatrizFX/ReabrirLoteVanilla/CerrarLoteSiAbierto), headless «Sandboxing v6.50.101 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409593470 + asset AethonMod.tmod 630436494 2.599.403 B, CDN verificado byte a byte md5 20aa8d43…, /releases/latest = v6.50.101, respaldo /home/sync/AethonMod-v6.50.101.tmod), ⏳ en juego | LA LETRA (2026-10-11): «hay varios errores, revisa las nuevas armas, al parecer tienen errores, revisa en profundidad» + client.log 05:38:06 (la .100 cargó bien 0/0, el jugador entró al mundo, ~50 s después Main engine crash). (1) EL CRASH: «Draw was called, but Begin has not yet been called» (excepción silenciosa ×1, tML mata el proyectil) → «End was called, but Begin has not yet been called» (×2) → FATAL. (2) EL DIAGNÓSTICO: los TRES sitios de dibujo nuevos de la .99 (EstelaAethonProjectile.PreDraw, TrazoEmperatrizProjectile.PreDraw, EmperatrizFX.PreDraw sobre el 931 vanilla) llaman VFXCore.FlushAdditive/FlushAlpha — que CIERRAN el lote del pase de proyectiles (CerrarLoteSiAbierto al entrar) y dejan NINGUNO abierto — y salían del PreDraw sin reabrirlo: el siguiente EntitySpriteDraw de vanilla lanza y el End final de DrawProjectiles TUMBA EL MOTOR. El contrato de la casa estaba ESCRITO en VFXCore.cs:1012 («un PreDraw SIEMPRE sale con el lote ABIERTO y válido — si llegó roto, se CURA») y los veteranos lo cumplen (GrietaDeTinta, TestAdvancedFX.DrawTex) — los 3 nuevos NACIERON sin el paso sanador; EmperatrizFX era el peor caso (return true con el lote muerto → el sprite vanilla del 931 dibuja primero y crashea primero). (3) EL FIX ×3: el patrón de la casa completo en los 3 PreDraw (CerrarLoteSiAbierto → try { dibujar } catch { CerrarLoteSiAbierto } → ReabrirLoteVanilla) — CERO cambios de gameplay (las 4 disparan igual, SIN maná — mana=0 de fábrica, la Bolsa de la Emperatriz bolsa 20 + receta 5 madera ×4). LECCIONES: (1) el contrato del lote del VFXCore es BINDING para TODO PreDraw nuevo — cerrar → dibujar → ReabrirLoteVanilla: el dibujo precioso sin el paso sanador deja el renderer envenenado y el End final de DrawProjectiles tumba el motor; (2) la excepción silenciosa de tML es el DELATOR — el primer «Draw was called» mata el proyectil y el «End was called» final es FATAL: cazar la CADENA en el client.log, no el síntoma; (3) el -build de tML resuelve su argumento como RUTA: un nombre relativo construye una carpeta VACÍA (DLL de 2,5 KB, tmod de 9 KB) — la forma canónica es la RUTA absoluta al modSource |
 | **v6.50.98** | ✅ Build-verificada (build real 0/0 sobre 313 .cs = 308 + las 5 clases, 374 png = 370 + las 4 texturas, .tmod 2.592.506 B md5 bb82d358d15ce5088c0a3c6d4e53f6b2, 390 entradas = las 386 de la .97 + EXACTAMENTE los 4 rawimg nuevos (dims W×H×4+12 verificadas), EOF exacto, blob diff whitelist (dll/pdb/Info + los 3 hjson con textos nuevos), la grieta del usuario byte-idéntica, arte byte-idéntico en las 382 restantes, CECIL: las 7 clases nuevas con el stack completo (FragmentoAethon con OnHitNPC HitInfo + ModifyHitNPC HitModifiers + SetCrit + FinalDamage ×1.5 + GetSource_FromThis + AddBuff/AddStack + get_ActiveNPCs; ExplosionAethon projFrames 8 + onda de 36; SistemaObservado con PostUpdateWorld/ClearWorld; GrimorioSellado con ldc.r4 2.5 + ldc.i4.s 120 + Math::Max + 2× CreateRecipe; GrimorioSellado en la Bolsa del Probador) + Grieta/Mancha/FuriaSistema/Oleada/SombraPaginaCaza/NerviosoFlotante/TintaViva/GrimorioHambriento IL-IDÉNTICOS a la .97, hjson ×3 paquete==árbol, 793 hojas es↔en, en-US tabs 4320, headless «Sandboxing v6.50.98 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409231430 + asset AethonMod.tmod 629096679 2.592.506 B, CDN verificado byte a byte md5 bb82d358…, /releases/latest = v6.50.98, respaldo /home/sync/AethonMod-v6.50.98.tmod), ⏳ en juego | LA LETRA: «te dare el codigo para un arma nueva de prueba, recuerda darcela al jugador, este sera el proyectil y su efecto». (1) EL ARMA: GrimorioSellado + FragmentoAethon (OBSERVADO + stacks) + ExplosionAethon (la apertura que se sella) + SistemaObservado (5 stacks = «Conocido» → crítico garantizado). (2) DOS CAPAS DE ERRORES: los de análisis (DustID.GoldFlare e ItemID.Spellbook NO EXISTEN — GoldFlame/SpellTome; Kill→OnKill) y los que SOLO el build real caza (CS0115: las firmas de golpe de esta tML son OnHitNPC(NPC,HitInfo,int) y ModifyHitNPC(NPC,ref HitModifiers) — el crit es SetCrit() y el +50% FinalDamage *= 1.5f; CS1061: el source es GetSource_FromThis). (3) LA ENTREGA: Bolsa del Probador (lección .83) + receta doble. LECCIONES: (1) el build REAL con las mismas referencias es la ÚNICA red completa para el código traído de fuera; (2) el WARN «Image loading failed» del -build es ruido de siempre — el .tmod cae en el mods folder del PERFIL (~/.local/share), no en /tmp/tml/Mods; (3) el rewrite del -build volvió a tocar el árbol (es-ES sin cabecera + en-US re-tabulado): se revierte restaurando desde el PAQUETE |
 | **v6.50.97** | ✅ Build-verificada (build real 0/0 sobre 308 .cs, .tmod 2.579.532 B md5 15ff628984f9d2787192a7c28477f2d6, 386 entradas = el set EXACTO de la .96, EOF exacto, blob diff ESTRICTO (sólo dll/pdb/Info — los 3 hjson IDÉNTICOS a la .96), el sprite del usuario byte-idéntico, CECIL: DrawTodo con Track → CerrarLoteSiAbierto → Begin(ribbon) y UN solo End pelado (el de entrada MURIÓ) + PreDraw con try/catch intacto + el stack de 15 COMPLETO + ManchaDeTinta/GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/GrimorioNerviosoFlotante IL-idénticos a la .96, hjson ×3 paquete==árbol, tabs 4288, headless «Sandboxing v6.50.97 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409212050 + asset AethonMod.tmod 629016166 2.579.532 B, CDN verificado byte a byte md5 15ff6289…, /releases/latest = v6.50.97, respaldo /home/sync/AethonMod-v6.50.97.tmod), ⏳ en juego | LA LETRA: «hay errores mira» — el client.log del usuario traía UNA «Excepción silenciosa»: InvalidOperationException «End was called, but Begin has not yet been called» en GrietaDeTintaProjectile.DrawTodo:349 → PreDraw:324. Un frame llegó al PreDraw con el lote del juego YA CERRADO (un End ajeno sin Begin) y el End pelado de la entrada del lote del ribbon lanzó; el catch del PreDraw lo tragó y el ReabrirLoteVanilla curó el estado global, pero tML registra TODA first-chance como «Excepción silenciosa» — ese frame la grieta fue invisible. EL FIX: la entrada del ribbon ahora usa la SONDA de la casa (VFXCore.CerrarLoteSiAbierto): si hay Begin vivo lo cierra como siempre, envenenado NO lanza y la grieta dibuja IGUAL. LECCIONES: (1) el diff hjson raro del espejo ModSources NO era la cirugía fallida — es la REESCRITURA del -build de tML (re-tabula los multiline + auto-genera claves DisplayName para clases sin entrada): nunca entra al paquete (éste toma el hjson leído al INICIO) pero se queda en el árbol — revertir tras cada build (la .96 lo revirtió en el repo y no en el espejo); (2) la first-chance de tML loguea incluso lo que el mod captura — el estándar de la casa es CERO excepciones LANZADAS, no cero propagadas |
 | **v6.50.96** | ✅ Build-verificada (build real 0/0 sobre 308 .cs, .tmod 2.579.444 B md5 d0d8df7882cc80530cc6e4613bfa0023, 386 entradas = las mismas de la .95 con el rawimg RENOMBRADO (LagrimaDeTintaProjectile.rawimg → GrietaDeTintaProjectile.rawimg, contenido byte-idéntico — el sprite del usuario SIN TOCAR), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 379 restantes, CECIL: GrietaDeTintaProjectile con TODO el stack (RiftLib::Star + ChispasAnomalia ×4 + EcoGlitch + EstelaLib Track/Ribbon + SombrasLib::Ojo + VFXCore::QuadSrc/Ring/Hash01 + ParticleManager::Spawn + projFrames 4 + const plegadas 34/66/7 en el IL) + LagrimaDeTintaProjectile AUSENTE + ManchaDeTinta con 3× VFXCore::Line y vida 46 + el Shoot del libro SIN el 931 y CON la grieta + TintaViva disparándola desde el libro + GrimorioFuriaSistema/OleadaNPC/SombraPaginaCaza/GrimorioNerviosoFlotante IL IDÉNTICOS a la .95, hjson ×3 con la grieta viva y la lágrima muerta en el texto, es-ES espejo por contenido, 787 hojas es↔en, en-US tabs 4288, paquete == árbol ×3, headless «Sandboxing v6.50.96 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 409188065 + asset AethonMod.tmod 628922496 2.579.444 B, CDN verificado byte a byte md5 d0d8df78…, /releases/latest = v6.50.96, respaldo /home/sync/AethonMod-v6.50.96.tmod) | LA LETRA: «el nuevo proyectil lo usaste tal cual, no le diste efectos visuales, digamos que es un grieta como debe ser, entonces dale muchos efectos visuales investiga que tipo de efectos se le pueden poner al nuevo proyectil cuanto mas efectos mejor» (+ «dame ideas para un proyectil para el grimorio hambriento, necesito un proyectil original que no sea el proyectil del arma de la emperatris de la luz» — el Nightglow murió en la .95: el disparo ES original y del sprite del usuario). (1) LA RE-LECTURA: una grieta no llora — ASPIRA, MIRA y DESGARRA: la clase se llama como su naturaleza. (2) EL STACK DE 15: nacimiento (estrella + anillo + chispas), ribbon, fantasmas, aspiración (convergentes + orbitales), aberración cromática, glitch de tajas, halo, iris, ojo rasgado que mira, estrellas fugitivas, goteo, luz con flicker, vaivén + respiración, mordida, colapso (implosión + corte que sana sobre la mancha). LECCIONES: (1) cuando el usuario corrige la LECTURA de un concepto («digamos que es una grieta COMO DEBE SER»), el rename de la clase es parte del arreglo — el nombre es documentación viva; (2) el mod YA tenía la escuela de efectos (RiftLib/SombrasLib/EstelaLib/VFXCore): antes de inventar, PEDIR prestado de la propia casa — coherencia visual gratis; (3) cecil_check devuelve string VACÍO (returncode 0) para una clase inexistente — el chequeo de ausencia es startswith('ERROR') OR not strip(); (4) un const FLOAT se pliega ldc.r4 (un const INT como ldc.i4.s): el literal del IL delata el tipo del const | 
