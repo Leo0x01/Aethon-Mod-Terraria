@@ -402,12 +402,26 @@ namespace AethonMod.Content.Weapons
         //  La letra de la .108: «ese texto [del estado del hambre] debe
         //  ir justo debajo del hambre, no encima» → la BARRA primero y
         //  el estado DEBAJO; «el grimorio necesita una segunda ventana
-        //  de info para visualizar sus estadísticas» → VUELVE la vista
+        //  de info para visualizar sus estadísticas» → la vista
         //  completa por el conmutador de siempre (clic der sobre el
-        //  libro: TooltipToggleItem.ShowExtendedTooltip) con TODAS las
-        //  estadísticas; «en progresión quitaste las estadísticas del
-        //  próximo nivel, vuelve a ponerlas» → el PRÓXIMO HITO y su
-        //  escalera de mejoras, dentro de PROGRESIÓN.
+        //  libro: TooltipToggleItem); «en progresión quitaste las
+        //  estadísticas del próximo nivel, vuelve a ponerlas» → el
+        //  PRÓXIMO HITO y su escalera de mejoras, dentro de PROGRESIÓN.
+        //
+        //  La letra de la .110: «la segunda ventana de info del grimorio
+        //  tiene demasiada informacion, crea una nueva ventana de
+        //  informacion para repartir mejor la informacion» → la vista
+        //  completa SE PARTE EN DOS y el clic derecho cicla TRES ventanas
+        //  (TooltipToggleItem.VistaEstadisticas):
+        //    · 1 EL ARMA   — DAÑO · RECURSOS · PROYECTIL · BONUS.
+        //    · 2 EL FESTÍN — LOS OJOS DEL ETERNO · PROGRESIÓN · LA
+        //      PRIMERA CENA (el nuevo festín del primer jefe).
+        //  Y el análisis de la .110 («analisa si las estadisticas del
+        //  grimorio eterno aplican realmente») dejó las etiquetas
+        //  HONESTAS: el crítico y la penetración son MÁGICOS y exigen
+        //  SOSTENER el libro (la nota al pie de EL ARMA lo dice);
+        //  los ojos leen el nivel con el que fueron INVOCADOS (la nota
+        //  al pie de EL FESTÍN también).
         // ================================================================
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
@@ -431,7 +445,11 @@ namespace AethonMod.Content.Weapons
             }
 
             var sl = GetShard(Item);
-            bool completa = sl != null && Globals.TooltipToggleItem.ShowExtendedTooltip;
+            // v6.50.110 — LAS TRES VENTANAS: 0 básica · 1 EL ARMA · 2 EL FESTÍN
+            int vista = Globals.TooltipToggleItem.VistaEstadisticas;
+            bool completa = sl != null && vista != 0;
+            bool ventanaArma = sl != null && vista == 1;
+            bool ventanaFestin = sl != null && vista == 2;
 
             // === v6.50.108 — LA SEGUNDA VENTANA: en vista COMPLETA se
             //     ocultan las líneas vanilla básicas (el hueco lo llenan
@@ -474,43 +492,36 @@ namespace AethonMod.Content.Weapons
                     tooltips.Add(summonLine);
             }
 
-            // === v6.50.108 — LA SEGUNDA VENTANA: TODAS las estadísticas.
-            //     El repertorio de la .106 (DAÑO / RECURSOS / PROYECTIL /
-            //     OJOS / BONUS) + la velocidad de ataque de los ojos de
-            //     la .107 (nivel 1 = 1,0× → nivel 100 = +50% más rápido) ===
-            if (completa)
+            // === v6.50.110 — LA VENTANA 1 · EL ARMA: el poder del libro
+            //     (DAÑO / RECURSOS / PROYECTIL / BONUS). El repertorio de
+            //     la .106/.107 con las etiquetas HONESTAS del análisis:
+            //     el crítico y la penetración son MÁGICOS y viven
+            //     SOSTENIENDO el libro (la nota al pie lo aclara) ===
+            if (ventanaArma)
             {
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
                 int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
                 float critPct = WeaponScaling.CritBonus(sl.Level);
                 float armorPenPct = WeaponScaling.ArmorPenBonus(sl.Level);
-                int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
                 int bonusMana = WeaponScaling.BonusMana(sl.Level);
                 int bonusLife = WeaponScaling.BonusLife(sl.Level);
                 int manaRegen = WeaponScaling.ManaRegen(sl.Level);
                 float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
                 float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
                 float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
-                int minionCost = WeaponScaling.MinionManaCost(sl.Level);
                 int totalPares = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
                 int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
                 float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
-                float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
-                float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
-                float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
-                // la .107: la velocidad de ATAQUE de los ojos sube con el
-                // nivel del libro — 1,0× en nivel 1, +50% en nivel 100
-                float ritmoOjos = (1f + 0.5f * System.Math.Min(sl.Level - 1, 99) / 99f - 1f) * 100f;
 
                 tooltips.Add(new TooltipLine(Mod, "SectionDamage", "[c/FFD700:═══ DAÑO ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "MagicDamage",
-                    $"[c/FF5555:+{magicDmgPct}% daño mágico]"));
+                    $"[c/FF5555:+{magicDmgPct}% daño mágico (este libro)]"));
                 tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
                     $"[c/BE78FD:+{summonDmgPct}% daño de invocación]"));
                 tooltips.Add(new TooltipLine(Mod, "Crit",
-                    $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
+                    $"[c/FFAA55:+{critPct:F1}% probabilidad de crítico mágico]"));
                 tooltips.Add(new TooltipLine(Mod, "ArmorPen",
-                    $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
+                    $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura mágica]"));
                 tooltips.Add(new TooltipLine(Mod, "Knockback",
                     $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
 
@@ -534,32 +545,6 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "OrigenLibro",
                     "[c/BE78FD:Con el espíritu fuera, dispara el LIBRO]"));
 
-                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ OJOS DEL ETERNO ═══]"));
-                tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
-                    "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
-                    $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
-                    $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (tope +50% en nivel 100)]"));
-                // v6.50.109 — LA IRA EN CADENA: los rayos de los ojos saltan
-                // a +1 enemigo cada 20 niveles (base 2, tope 7 en nivel 100)
-                int cadenaOjos = WeaponScaling.MinionChainCount(sl.Level);
-                tooltips.Add(new TooltipLine(Mod, "MinionCadena",
-                    $"[c/BE78FD:Rayo en cadena: {cadenaOjos} enemigos (base 2, +1 cada 20 niveles)]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
-                    $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionRange",
-                    $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionCd",
-                    "[c/BE78FD:El rayo Perlin negro, con bruma en la punta]"));
-                if (!ManaMinionGratis())
-                {
-                    tooltips.Add(new TooltipLine(Mod, "ManaMinion",
-                        $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
-                }
-
                 tooltips.Add(new TooltipLine(Mod, "SectionBonus", "[c/FF5566:═══ BONUS ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "LowMana",
                     $"[c/FF5555:★ Mana bajo: +{lowManaBonus:F0}% daño (máximo +50%)]"));
@@ -576,46 +561,113 @@ namespace AethonMod.Content.Weapons
                     tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
                         $"[c/78788C:♥ Robo de vida se desbloquea en nivel 7]"));
                 }
+
+                // LA NOTA AL PIE DEL ANÁLISIS (la .110): el poder de
+                // combate del libro tiene PRECIO DE POSTURA — sostenerlo
+                tooltips.Add(new TooltipLine(Mod, "NotaPostura",
+                    "[c/78788C:Sostenido: crítico · penetración · regeneración · reducción]"));
+                tooltips.Add(new TooltipLine(Mod, "NotaPostura2",
+                    "[c/78788C:Barra rápida: vida/maná (tope +100) · slots de minion]"));
+            }
+
+            // === v6.50.110 — LA VENTANA 2 · EL FESTÍN: LOS OJOS DEL
+            //     ETERNO + LA PRIMERA CENA (los sirvientes del libro y
+            //     su festín del primer jefe) ===
+            if (ventanaFestin)
+            {
+                int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
+                int minionCost = WeaponScaling.MinionManaCost(sl.Level);
+                float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
+                float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
+                float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
+                // la .107: la velocidad de ATAQUE de los ojos sube con el
+                // nivel del libro — 1,0× en nivel 1, +50% en nivel 100
+                float ritmoOjos = (1f + 0.5f * System.Math.Min(sl.Level - 1, 99) / 99f - 1f) * 100f;
+                // v6.50.109 — LA IRA EN CADENA: los rayos de los ojos saltan
+                // a +1 enemigo cada 20 niveles (base 2, tope 7 en nivel 100)
+                int cadenaOjos = WeaponScaling.MinionChainCount(sl.Level);
+
+                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ OJOS DEL ETERNO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
+                    "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
+                    $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
+                    $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
+                    $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (tope +50% en nivel 100)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionCadena",
+                    $"[c/BE78FD:Rayo en cadena: {cadenaOjos} enemigos (base 2, +1 cada 20 niveles)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
+                    $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionRange",
+                    $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionCd",
+                    "[c/BE78FD:El rayo Perlin negro, con bruma en la punta]"));
+                if (!ManaMinionGratis())
+                {
+                    tooltips.Add(new TooltipLine(Mod, "ManaMinion",
+                        $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
+                }
+                // LA NOTA AL PIE DEL ANÁLISIS (la .110): el nivel que leen
+                // los ojos es el de SU INVOCACIÓN (viaja con ellos)
+                tooltips.Add(new TooltipLine(Mod, "NotaOjos",
+                    "[c/78788C:Los ojos leen el nivel con el que fueron invocados]"));
+
+                // v6.50.110 — LA PRIMERA CENA: el festín del primer jefe
+                tooltips.Add(new TooltipLine(Mod, "SectionCena", "[c/9B59FF:═══ LA PRIMERA CENA ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "PrimeraCena",
+                    "[c/9B59FF:Al primer jefe de cada tipo: los sellos lo aprisionan,]"));
+                tooltips.Add(new TooltipLine(Mod, "PrimeraCena2",
+                    "[c/9B59FF:lo alzan al centro de la pantalla y LA SOMBRA DE LA PÁGINA]"));
+                tooltips.Add(new TooltipLine(Mod, "PrimeraCena3",
+                    "[c/9B59FF:lo devora entero — con botín completo. Solo UNA vez.]"));
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.
             //     v6.50.108 — EL ORDEN DE LA LETRA: la BARRA de hambre
-            //     primero y el estado JUSTO DEBAJO («ese texto debe ir
-            //     justo debajo del hambre, no encima»). Y de vuelta LAS
-            //     ESTADÍSTICAS DEL PRÓXIMO NIVEL: el próximo hito y su
-            //     escalera de mejoras ===
-            int xpNeeded = sl.XPForNextLevel();
-            float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
-            pct = System.Math.Clamp(pct, 0f, 1f);
-            int barLen = 20;
-            int filled = (int)(barLen * pct);
-            string bar = "";
-            for (int i = 0; i < barLen; i++)
-                bar += i < filled ? "█" : "░";
-
-            tooltips.Add(new TooltipLine(Mod, "SectionProgress",
-                "[c/78FF96:═══ PROGRESIÓN ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "Level",
-                $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
-            if (barraHambre != null) tooltips.Add(barraHambre);
-            if (estadoHambre != null) tooltips.Add(estadoHambre);
-
-            int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
-            int nextMilestoneNum = nextMilestoneLevel / 5;
-            var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
-            tooltips.Add(new TooltipLine(Mod, "NextMilestone",
-                $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
-            foreach (var reward in nextRewards)
+            //     primero y el estado JUSTO DEBAJO. En la ventana EL ARMA
+            //     (.110) no está — la progresión es del FESTÍN.
+            //     Y de vuelta LAS ESTADÍSTICAS DEL PRÓXIMO NIVEL: el
+            //     próximo hito y su escalera de mejoras ===
+            if (!ventanaArma)
             {
-                tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
-                    $"[c/78FF96:  • {reward}]"));
+                int xpNeeded = sl.XPForNextLevel();
+                float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
+                pct = System.Math.Clamp(pct, 0f, 1f);
+                int barLen = 20;
+                int filled = (int)(barLen * pct);
+                string bar = "";
+                for (int i = 0; i < barLen; i++)
+                    bar += i < filled ? "█" : "░";
+
+                tooltips.Add(new TooltipLine(Mod, "SectionProgress",
+                    "[c/78FF96:═══ PROGRESIÓN ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "Level",
+                    $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
+                if (barraHambre != null) tooltips.Add(barraHambre);
+                if (estadoHambre != null) tooltips.Add(estadoHambre);
+
+                int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
+                int nextMilestoneNum = nextMilestoneLevel / 5;
+                var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
+                tooltips.Add(new TooltipLine(Mod, "NextMilestone",
+                    $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
+                foreach (var reward in nextRewards)
+                {
+                    tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
+                        $"[c/78FF96:  • {reward}]"));
+                }
             }
 
-            // === EL CONMUTADOR: la segunda ventana abre/cierra con clic
-            //     derecho sobre el libro en el inventario ===
-            tooltips.Add(new TooltipLine(Mod, "ModeIndicator", completa
-                ? "[c/78788C:═══ Click der para vista básica ═══]"
-                : "[c/78788C:═══ Click der para vista completa ═══]"));
+            // === EL CONMUTADOR (.110): el clic derecho cicla las TRES
+            //     ventanas — la línea dice SIEMPRE a cuál vas ===
+            tooltips.Add(new TooltipLine(Mod, "ModeIndicator", vista switch
+            {
+                1 => "[c/78788C:═══ Click der para ver EL FESTÍN ═══]",
+                2 => "[c/78788C:═══ Click der para vista básica ═══]",
+                _ => "[c/78788C:═══ Click der para ver EL ARMA ═══]",
+            }));
         }
     }
 }

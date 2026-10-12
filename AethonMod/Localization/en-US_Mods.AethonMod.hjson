@@ -62,6 +62,17 @@ Items: {
 			'''
 	}
 
+	EsenciaHambre: {
+		DisplayName: Hunger Essence
+		Tooltip:
+			'''
+			Raises the Eternal Grimoire's hunger +5% per use.
+			The nervous clock tester — no waiting a full hour.
+			Reusable — not consumed.
+			Testing item — remove before publishing.
+			'''
+	}
+
 	// v6.50.75 — THE SCRIBE'S HOURGLASS: one click swaps day for night
 	// and night for day (the user's request: "one click and it's day,
 	// another click and it's night").
@@ -1883,6 +1894,7 @@ Projectiles: {
 	SombraPaginaCaza.DisplayName: The Nervous Grimoire's Shadow of the Page
 	GrietaDeTintaProjectile.DisplayName: The Ink Rift
 	ManchaDeTinta.DisplayName: The Ink Blot
+	PrimeraCenaProjectile.DisplayName: The First Feast
 }
 
 Buffs: {
@@ -2130,6 +2142,8 @@ Carnada: {
 	YaActivo: The fury is ALREADY unleashed — feed it or survive.
 	Ocupado: The world is busy (a boss or an invasion). The bait waits its turn.
 }
+
+EsenciaHambre.Sube: The Eternal Grimoire's appetite rises to {0}%.
 
 Hambre: {
 	Barra: Hunger {0}

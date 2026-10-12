@@ -58,6 +58,17 @@ namespace AethonMod.Content.Players
         public System.Collections.Generic.List<int> CronicaJefes = new System.Collections.Generic.List<int>();
 
         /// <summary>
+        /// v6.50.110 — LA PRIMERA CENA: los tipos de jefe que el grimorio
+        /// YA devoró con ESTE portador. La letra del usuario: «que esto
+        /// suceda la primera vez que se mate un jefe y solo la primera
+        /// vez, ya despues de la primera vez el jefe muere de forma
+        /// normal» — ESTA lista hace «solo la primera vez»: un tipo de
+        /// jefe, UNA cena. Persiste en el .plr (un guardado viejo trae
+        /// la lista vacía: todo jefe estrena su primera cena).
+        /// </summary>
+        public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
+
+        /// <summary>
         /// v6.48 — EL CURSOR DE LA CRÓNICA: cuántas derrotas ya están
         /// registradas (dato histórico del Testigo — sin narrador hoy,
         /// el contador sigue siendo el índice de la próxima página).
@@ -771,6 +782,8 @@ namespace AethonMod.Content.Players
                 // CARNADA de pruebas) subía el nivel natural.
                 tag["furiaNivel"] = FuriaNivel;
                 tag["furiaV2"] = true;
+                // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
+                tag["jefesDevorados"] = JefesDevorados;
             }
             catch { }
         }
@@ -796,6 +809,8 @@ namespace AethonMod.Content.Players
                     FuriaNivel = 1;
                 else
                     FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
+                // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
+                JefesDevorados = new System.Collections.Generic.List<int>(tag.GetList<int>("jefesDevorados"));
             }
             catch { }
         }

@@ -67,6 +67,17 @@ Items: {
                         '''
         }
 
+        EsenciaHambre: {
+                DisplayName: Esencia de Hambre
+                Tooltip:
+                        '''
+                        Sube el hambre del Grimorio del Eterno +5% por uso.
+                        El probador del reloj nervioso — sin esperar una hora.
+                        Reutilizable — no se consume.
+                        Objeto de pruebas — eliminar antes de publicar.
+                        '''
+        }
+
         // v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA: un clic cambia el día
         // por la noche y la noche por el día (la petición del usuario:
         // «un clic y es de día, otro clic y es de noche»).
@@ -1755,6 +1766,7 @@ Objeto de pruebas — comparar con el original.
 Projectiles: {
         GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
         ManchaDeTinta.DisplayName: La Mancha de Tinta
+        PrimeraCenaProjectile.DisplayName: La Primera Cena
         SombraPaginaProjectile.DisplayName: La Sombra de la Página
         FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
         // v6.50.91 — el espíritu del Nervioso y su sombra cazadora
@@ -2131,6 +2143,10 @@ Carnada: {
         YaActivo: La furia YA está desatada — aliméntala o sobrevive.
         Ocupado: El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.
 }
+EsenciaHambre: {
+        Sube: El apetito del Grimorio del Eterno sube a {0}%.
+}
+
 
 Hambre: {
         Barra: Hambre {0}

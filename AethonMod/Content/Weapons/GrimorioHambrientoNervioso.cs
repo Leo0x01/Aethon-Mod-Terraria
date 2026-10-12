@@ -730,6 +730,14 @@ namespace AethonMod.Content.Weapons
             if (presa == null || !presa.active)
                 return;
 
+            // v6.50.110 — EL RESPETO AL FESTÍN DE LAS FAUCES: si esta presa
+            // está en un festín en curso (LA PRIMERA CENA del Eterno o la
+            // devoración clásica), la sombra NO la absorbe — ese festín la
+            // terminará con SU muerte real (y SU loot). Defensa en
+            // profundidad: las sombras ya la sueltan antes de morder.
+            if (Globals.FaucesGlobalNPC.EnFauces(presa))
+                return;
+
             // LA CADENA COMPLETA (jefes multi-segmento: el Devorador entero)
             int real = presa.realLife >= 0 && presa.realLife != presa.whoAmI ? presa.realLife : presa.whoAmI;
             NPC principal = Main.npc[real];

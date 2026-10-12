@@ -179,6 +179,17 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 {
                     if (presa != null && presa.active && presa.life > 0)
                     {
+                        // v6.50.110 — SI EL FESTÍN DE LAS FAUCES TOMÓ LA PRESA
+                        // (LA PRIMERA CENA del Eterno o la devoración clásica):
+                        // SOLTARLA — ese festín la termina con SU cine y SU
+                        // loot, y esta sombra no se mete en la mesa ajena
+                        if (Globals.FaucesGlobalNPC.EnFauces(presa))
+                        {
+                            Projectile.ai[1] = FASE_DISIPAR;
+                            Projectile.ai[2] = 0;
+                            Projectile.netUpdate = true;
+                            break;
+                        }
                         Projectile.Center = presa.Center;
                         Projectile.rotation = (presa.Center - RaizDeSombra()).ToRotation();
 
