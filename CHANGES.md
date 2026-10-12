@@ -1,5 +1,62 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.109 — LA MITAD, LA FORMACIÓN GIRATORIA DEL RUINOUS Y LA IRA EN CADENA
+
+**La letra**: «reduce el tamaño de los minion en un 50% y mejora la
+animacion, que sea mas parecida a Ruinous_Staff en el momento en el que
+estan alrededor del libro» + «añadir una estadistica para el grimorio
+eterno que mejore a los minion».
+
+**EL CAMBIO**: tres cirugías — la mitad, la formación y la cadena:
+
+- **EL TAMAÑO A LA MITAD**: `ESCALA` 0,75 → **0,375** — el ojo (56×54)
+  pasa de 42×41 a **21×20 px** en pantalla: LA MITAD EXACTA de la
+  letra. Hitbox 25×15 → 12×8; el sello mágico a la ESCALA (r =
+  ESCALA·16 ≈ 6 px → ESCALA·20 ≈ 7,5 en la carga); el aliento violáceo
+  a la ESCALA; la corona sobre la cabeza apretada (radio 56+2,8n tope
+  88 → **44+2,4n tope 70**); las órbitas apretadas (62+42k → **46+34k**).
+- **LA FORMACIÓN GIRATORIA DEL RUINOUS** (la wiki del Forbidden Ruin —
+  el minion del Ruinous Staff: «they form a spinning orbital formation»
+  + «continuously adjusts its position to stay along the line segment
+  between the player and its target»): MUERE la elipse kepleriana de
+  la .107 (la 2ª ley aceleraba el paso en el perigeo y el giro LEÍA A
+  TIRONES) y MUERE el freno en seco de la carga (velocity *= 0,75 — el
+  ojo se congelaba al apuntar). NACE EL GIRO CONSTANTE por anillo (ω
+  par +0,42 rad/s ≈ una vuelta cada 15 s / impar −0,36 contrarrotando),
+  el anillo casi circular (0,94 — se lee como UNA RUEDA), el radio que
+  RESPIRA despacio (±3,5%), la micro-deriva propia de cada ojo (1,6 px
+  en 2D, lenta) y EL PLANEO DE LA CARGA: durante los 12 ticks de
+  puntería el ojo SE REPOSICIONA deslizándose hacia la línea ancla↔presa
+  (el punto a 35% de la distancia, tope 220 px; vmax 6·MinionSpeedMult)
+  — una LEVANTADA hacia la presa; el movimiento NUNCA muere.
+- **LA IRA EN CADENA — la estadística NUEVA que mejora a los minion**:
+  los rayos de los ojos saltan a **+1 enemigo extra cada 20 niveles**
+  del grimorio (base 2 en nivel 1 → tope 7 en nivel 100) —
+  `WeaponScaling.MinionChainCount` +
+  `TruenoPerlinProjectile.Strike` en modo ojo (`NivelDelOjo` lee el
+  nivel del ai[2] del ojo que disparó; los arrays de cadena
+  `MaxCadenasOjo = 7`; el CETRO propio conserva sus 2 saltos de
+  siempre) + la línea NUEVA «Rayo en cadena: N enemigos» en la segunda
+  ventana (MinionCadena, junto a la de velocidad de ataque) + «+1 salto
+  de cadena del rayo» en los hitos 20/40/60/80/100 (MilestoneRewards,
+  sólo cuando el salto SUBE).
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+audit_v650109 TODO OK: .tmod 2.596.043 B md5 ec37b2b1830d928eb7ed164360db02b8,
+387 entradas, EOF exacto, paquete==árbol ×3, rawimg 56×54 píxel-idénticas,
+MinionChainCount/NivelDelOjo/MaxCadenasOjo VIVOS en el heap + los ldstr
+«MinionCadena»/«Rayo en cadena: »/«+1 salto de cadena del rayo» VIVOS en
+#US (UTF-16), las constantes de la .109 en el IL (0.375 la mitad · 46/34
+las órbitas · 0.94 la rueda · 0.42/−0.36 el giro constante · 0.035 la
+respiración · 1.6 la deriva · 6/0.12/0.18/220 el planeo de la carga ·
+44/2.4/70 la corona · 6/7.5 el sello a la ESCALA) + la regresión
+.102–.108 ÍNTEGRA, Kepler (dθ ∝ a²/r²) y el freno en seco AUSENTES del
+árbol, localAI[3] AUSENTE del código, el ORDEN barra→estado y la segunda
+ventana INTACTOS (.108) · headless «Sandboxing v6.50.109 → Adding
+Recipes → Choose World» 0 excepciones.
+
+---
+
 ## Commit v6.50.108 — EL FIX DE LOS OJOS, EL ORDEN DEL HAMBRE Y LA SEGUNDA VENTANA
 
 **La letra**: «el texto que dice lo que hara el libro con el hambre, por

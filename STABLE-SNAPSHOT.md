@@ -1,29 +1,26 @@
-# AethonMod — ESTADO ACTUAL (v6.50.108)
+# AethonMod — ESTADO ACTUAL (v6.50.109)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.108 (EL FIX DE LOS OJOS, EL ORDEN DEL
-> HAMBRE Y LA SEGUNDA VENTANA. La letra: «el texto que dice lo que hara
-> el libro con el hambre, por ejemplo este: Fuera de Caza - flota sobre
-> ti buscando su propia comida, bueno ese texto debe ir justo debajo del
-> hambre, no encima» + «la segunda ventana de informacion del grimorio
-> desaprecio, recuerda que el grimorio necesita una segunda ventana de
-> info para visualisar sus estadisticas» + «en progresion quitaste las
-> estadisticas del proximo nivel, vuelve a ponerlas» + «ademas, hay
-> errores los minion no aparecen» — client.log: IndexOutOfRange en
-> OjoEternoMinion.FaseOrbital línea 415). Cuatro cirugías: (1) EL CRASH
-> — Projectile.localAI es float[3] en tML (índices 0–2): la .107 guardaba
-> la fase orbital de la luna en localAI[3] y la AI tiraba
-> IndexOutOfRange en cada tick con el libro fuera (los ojos no
-> aparecían); la fase ahora vive en el CAMPO DE INSTANCIA _faseOrbital
-> (una fase POR ojo, determinista en todos los clientes). (2) EL ORDEN —
-> en PROGRESIÓN la BARRA de hambre primero y el estado («FUERA DE
-> CAZA…») JUSTO DEBAJO. (3) LA SEGUNDA VENTANA — vuelve la vista completa
-> por el conmutador de siempre (clic der sobre el libro) con TODAS las
-> estadísticas + la línea nueva de la velocidad de ataque de los ojos
-> (tope +50% nivel 100); la vista básica queda como la .107. (4) EL HITO
-> — el PRÓXIMO HITO y su escalera de mejoras, de vuelta dentro de
-> PROGRESIÓN. .tmod 2.593.519 B
-> md5 01e03580e15a356d097143bae98a4537, 387 entradas, oráculo 0/0,
+> Última actualización: v6.50.109 (LA MITAD, LA FORMACIÓN GIRATORIA DEL
+> RUINOUS Y LA IRA EN CADENA. La letra: «reduce el tamaño de los minion
+> en un 50% y mejora la animacion, que sea mas parecida a Ruinous_Staff
+> en el momento en el que estan alrededor del libro» + «añadir una
+> estadistica para el grimorio eterno que mejore a los minion»).
+> Tres cirugías: (1) EL TAMAÑO A LA MITAD — ESCALA 0,75→0,375 (el ojo
+> 21×20 px); hitbox 12×8, sello/aliento a la ESCALA, corona 44+2,4n
+> tope 70, órbitas 46+34k. (2) LA FORMACIÓN GIRATORIA DEL RUINOUS —
+> MUERE la elipse kepleriana de la .107 (aceleración de perigeo =
+> tirones) y MUERE el freno en seco de la carga; NACE el GIRO
+> CONSTANTE por anillo (ω +0,42/−0,36 rad/s), el anillo casi circular
+> (0,94), el radio que respira (±3,5%), la micro-deriva propia (1,6 px)
+> y EL PLANEO DE LA CARGA hacia la línea ancla↔presa (una LEVANTADA
+> hacia la presa — el movimiento nunca muere). (3) LA IRA EN CADENA —
+> los rayos de los ojos saltan a +1 enemigo cada 20 niveles del
+> grimorio (base 2 → tope 7 en nivel 100): WeaponScaling.
+> MinionChainCount + Strike en modo ojo + la línea «Rayo en cadena» en
+> la segunda ventana + el hito «+1 salto de cadena del rayo» en
+> 20/40/60/80/100. .tmod 2.596.043 B
+> md5 ec37b2b1830d928eb7ed164360db02b8, 387 entradas, oráculo 0/0,
 > build real 0/0, headless 0 excepciones.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1914,7 +1911,60 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.108 PUBLICADA — EL FIX DE LOS OJOS, EL ORDEN DEL HAMBRE Y
+1. **✅ v6.50.109 PUBLICADA — LA MITAD, LA FORMACIÓN GIRATORIA DEL
+   RUINOUS Y LA IRA EN CADENA** — la letra: «reduce el tamaño de los
+   minion en un 50% y mejora la animacion, que sea mas parecida a
+   Ruinous_Staff en el momento en el que estan alrededor del libro» +
+   «añadir una estadistica para el grimorio eterno que mejore a los
+   minion». (1) EL TAMAÑO A LA MITAD: ESCALA 0,75→0,375 — el ojo 56×54
+   → 21×20 px en pantalla (LA MITAD EXACTA); hitbox 25×15→12×8; el
+   sello a la ESCALA (r 6→7,5 en la carga); el aliento a la ESCALA; la
+   corona 44+2,4n tope 70 (era 56+2,8n/88); las órbitas 46+34k (era
+   62+42k). (2) LA FORMACIÓN GIRATORIA DEL RUINOUS (la wiki del
+   Forbidden Ruin: «they form a spinning orbital formation» +
+   «continuously adjusts its position to stay along the line segment
+   between the player and its target»): MUERE la elipse kepleriana de
+   la .107 (la 2ª ley aceleraba en el perigeo — el giro leía a
+   tirones) y MUERE el freno en seco de la carga (velocity *= 0,75);
+   NACE EL GIRO CONSTANTE por anillo (ω par +0,42 rad/s ≈ vuelta cada
+   15 s / impar −0,36 contrarrotando), el anillo casi circular (0,94 —
+   UNA RUEDA), el radio que RESPIRA (±3,5%), la micro-deriva propia
+   (1,6 px, 2D) y EL PLANEO DE LA CARGA: en los 12 ticks de puntería
+   el ojo SE REPOSICIONA hacia la línea ancla↔presa (punto al 35% de
+   la distancia, tope 220 px, vmax 6·MinionSpeedMult) — una LEVANTADA
+   hacia la presa; el movimiento NUNCA muere. (3) LA IRA EN CADENA —
+   LA ESTADÍSTICA NUEVA: los rayos de los ojos saltan a +1 enemigo
+   extra cada 20 niveles (base 2 → tope 7 en nivel 100) —
+   WeaponScaling.MinionChainCount + TruenoPerlinProjectile.Strike en
+   modo ojo (NivelDelOjo lee el nivel del ai[2] del ojo;
+   MaxCadenasOjo = 7; el cetro propio conserva sus 2 saltos) + la
+   línea «Rayo en cadena: N enemigos» en la segunda ventana +
+   «+1 salto de cadena del rayo» en los hitos 20/40/60/80/100.
+   VERIFICACIÓN: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+   audit_v650109 TODO OK — .tmod 2.596.043 B md5
+   ec37b2b1830d928eb7ed164360db02b8, 387 entradas, EOF exacto,
+   paquete==árbol ×3, rawimg 56×54 píxel-idénticas,
+   MinionChainCount/NivelDelOjo/MaxCadenasOjo VIVOS en el heap + los
+   ldstr «MinionCadena»/«Rayo en cadena: »/«+1 salto de cadena del
+   rayo» VIVOS en #US (UTF-16), las constantes de la .109 en el IL +
+   la regresión .102–.108 ÍNTEGRA, Kepler y el freno en seco
+   AUSENTES del árbol, localAI[3] AUSENTE del código, el ORDEN
+   barra→estado y la segunda ventana INTACTOS (.108) · headless
+   «Sandboxing v6.50.109 → Adding Recipes → Choose World» 0
+   excepciones. CHECKLIST en juego: (a) los ojos a LA MITAD del
+   tamaño de la .108, (b) con el libro fuera: los anillos GIRAN LISO
+   a velocidad constante (sin tirones — la formación giratoria del
+   Ruinous) y el radio respira, (c) al apuntar: el ojo SE INCLINA
+   hacia la presa en vez de frenarse en seco, (d) la línea «Rayo en
+   cadena: N enemigos» en la segunda ventana, (e) a nivel 20/40/… el
+   rayo salta a un enemigo MÁS, (f) los hitos 20/40/60/80/100 listan
+   «+1 salto de cadena del rayo».
+   PUBLICACIÓN: commit 5aa4a8a + tag v6.50.109 + push (1217354..5aa4a8a)
+   · release **410028555** (make_latest) + asset AethonMod.tmod
+   **632240478** 2.596.043 B (md5
+   ec37b2b1830d928eb7ed164360db02b8), CDN VERIFICADO BYTE A BYTE,
+   /releases/latest = v6.50.109, respaldo /home/sync/AethonMod-v6.50.109.tmod.
+2. **✅ v6.50.108 PUBLICADA — EL FIX DE LOS OJOS, EL ORDEN DEL HAMBRE Y
    LA SEGUNDA VENTANA** — la letra: «el texto que dice lo que hara el
    libro con el hambre, por ejemplo este: Fuera de Caza - flota sobre ti
    buscando su propia comida, bueno ese texto debe ir justo debajo del
@@ -1963,7 +2013,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **631436547** 2.593.519 B (md5
    01e03580e15a356d097143bae98a4537), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.108, respaldo /home/sync/AethonMod-v6.50.108.tmod.
-2. **✅ v6.50.107 PUBLICADA — EL TAMAÑO DEL LIBRO, LA LUNA Y EL RITMO
+3. **✅ v6.50.107 PUBLICADA — EL TAMAÑO DEL LIBRO, LA LUNA Y EL RITMO
    PROPIO** — la letra: «los minion son demasiado grande, deben ser mas
    pequeño, el tamaño debe ser el mismo que el del grimorio, ademas ellos
    atacan al mismo tiempo, cada ojo debe ser individual y deben tener la
@@ -2024,7 +2074,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **631370474** 2.590.979 B (md5
    b6f789b6a2af363de8fb03e1b83f6f20), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.107, respaldo /home/sync/AethonMod-v6.50.107.tmod.
-3. **✅ v6.50.106 PUBLICADA — EL OJO DEL USUARIO, SIN RECORTE** — la
+4. **✅ v6.50.106 PUBLICADA — EL OJO DEL USUARIO, SIN RECORTE** — la
    letra: «no debes hacer recorte ya que arruinaste el recorte que yo
    mismo hice, solo debes acomodar el iris para que pueda realmente
    funcionar, los rayos que lanzan los ojos son demasiado gruesos y no
@@ -2084,60 +2134,6 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **631271623** 2.594.318 B (md5
    894cb4c910ca7449681e8b9a422165a4), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.106, respaldo /home/sync/AethonMod-v6.50.106.tmod.
-4. **✅ v6.50.105 PUBLICADA — LOS OJOS DEL ETERNO** — la letra: «los
-   minion que use el grimorio será su propio ojo […] el ojo se mueve en
-   la direccion en la que mira, o sea para moverse primero mira y luego
-   se mueve […] estos minion se posicionan encima del jugador como una
-   corona, y si el grimorio esta fuera comienzan a orbitar al grimorio
-   en 2 circulos uno de 5 minion, otro de 6 y asi aumentando los
-   circulos orbitales a mas minion pueda lanzarce […] cada minion mira
-   a su objetivo y usa el rayo con ruido de perlin ademas de que este
-   rayo usado por los minion es negro, con bordes morado y con bruma en
-   la punta que toca al monstruo, cada minion debe tener un pequeño
-   circulo magico igual que el de los agujeros negros […] cuando el
-   minion dispara tiene un pequeño retroceso y luego se reincorpora,
-   los ojos de cada minion son independientes de cada uno de ellos y
-   del libro y no se ven afectados por la animacion de hambre del
-   grimorio». (1) EL SPRITE: el recorte del ojo del sprite EXACTO del
-   usuario (la almendra + el armazón lila + el párpado inferior dorado),
-   44×37 ×3 estados (abierto/medio/cerrado) por LANCZOS; el iris de la
-   .84 como CAPA (escala 0.52 — a escala proporcional el iris taparía la
-   vista entera); el parpadeo con la convención de fases del libro
-   (fase>7||fase<4 = medio). (2) LA MÁQUINA DE LA MIRADA: el iris fija
-   el destino y FRENA (6 ticks) antes de moverse; el ángulo barre 0,22
-   rad/tick; mirada ±7,5/±3,5 px. (3) LA FORMACIÓN: la CORONA (arco
-   200°→340°) y con el espíritu fuera ÓRBITAS AL LIBRO (anillo k = 5+k
-   ojos, radio 58+42k, contrarrotando). (4) EL RAYO: el canal Perlin
-   VERBATIM con la funda morada aditiva (RayoStrip, violeta vivo, ancho
-   9,5) + EL NÚCLEO NEGRO en AlphaBlend encima (la cadena que oscurece)
-   + LOS GORROS + LA BRUMA en la punta que toca al monstruo; el golpe
-   por GOLPEMOTOR, cadencia 110−nivel/3; LA PATADA del retroceso 3,0
-   px/tick y la formación lo reincorpora. (5) EL CÍRCULO MÁGICO:
-   OrbitaLib.SigiloErosionado (el de los agujeros negros, dorado-ámbar)
-   alrededor de cada ojo, respirando a 16 px en la carga. (6) EL
-   PARPADEO INDEPENDIENTE: hash propio por whoAmI (6–18 s), sin leer
-   NADA del hambre; al apuntar el párpado se corta (la mirada del
-   cazador). VERIFICACIÓN: audit_texturas 0 · oráculo 0/0 · build real
-   0/0 · VLM ×3 (sprites limpios; el rayo calibrado en 3 rondas — SHIP
-   por juicio de la casa) · audit_v650105 TODO OK — .tmod 2.584.158 B
-   md5 e7cd269982ffbd1dfa5b8b77b325dbe1, 387 entradas (386−2 Orbe+3
-   Ojos), EOF exacto, paquete==árbol ×3, rawimg píxel-idénticas (12 B
-   de cabecera + RGBA), símbolos OjoEternoMinion/OjoEternoBuff/
-   DrawElSello/CanalPerlin vivos + CosmicOrb* AUSENTES, las constantes
-   de la letra en el IL, regresión .102/.103/.104 completa · headless
-   «Sandboxing v6.50.105 → Adding Recipes → Choose World» 0 excepciones.
-   CHECKLIST en juego: (a) clic der invoca OJOS (no orbe), (b) la corona
-   sobre tu cabeza, (c) el parpadeo de cada ojo es suyo, (d) con el
-   espíritu fuera: anillos concéntricos al libro (5/6/7…),
-   contrarrotando, (e) cada ojo mira al objetivo y frena antes de
-   moverse, (f) el rayo negro de bordes morados con la bruma en la
-   punta, (g) el retroceso al disparar y la reincorporación, (h) el
-   círculo mágico de runas doradas alrededor de cada ojo.
-   PUBLICACIÓN: commit 1853196 + tag v6.50.105 + push (c669ae4..1853196)
-   · release **409768350** (make_latest) + asset AethonMod.tmod
-   **631162660** 2.584.158 B (md5
-   e7cd269982ffbd1dfa5b8b77b325dbe1), CDN VERIFICADO BYTE A BYTE,
-   /releases/latest = v6.50.105, respaldo /home/sync/AethonMod-v6.50.105.tmod.
 1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
@@ -2823,6 +2819,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.109** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.596.043 B md5 ec37b2b1830d928eb7ed164360db02b8, 387 entradas, EOF exacto, paquete==árbol ×3 idiomas, rawimg 56×54 píxel-idénticas, MinionChainCount/NivelDelOjo/MaxCadenasOjo VIVOS en el heap #Strings + los ldstr «MinionCadena»·«Rayo en cadena: »·«+1 salto de cadena del rayo» VIVOS en el heap #US (UTF-16LE), las constantes de la .109 en el IL (0.375 la mitad · 46/34 las órbitas · 0.94 la rueda · 0.42/−0.36 el giro constante · 0.035 la respiración · 1.6 la deriva · 6/0.12/0.18/220 el planeo de la carga · 44/2.4/70 la corona · 6/7.5 el sello a la ESCALA) + la regresión .102–.108 ÍNTEGRA en el IL, Kepler (dθ ∝ a²/r²) y el freno en seco (velocity *= 0.75f) AUSENTES del ÁRBOL, localAI[3] AUSENTE del código, el ORDEN barra→estado y la segunda ventana INTACTOS (.108), headless «Sandboxing v6.50.109 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 410028555 + asset AethonMod.tmod 632240478 2.596.043 B, CDN verificado byte a byte md5 ec37b2b1…, /releases/latest = v6.50.109, respaldo /home/sync/AethonMod-v6.50.109.tmod), ⏳ en juego | LA LETRA (2026-10-12): «reduce el tamaño de los minion en un 50% y mejora la animacion, que sea mas parecida a Ruinous_Staff en el momento en el que estan alrededor del libro» + «añadir una estadistica para el grimorio eterno que mejore a los minion». (1) EL TAMAÑO: ESCALA 0,75→0,375 — LA MITAD EXACTA (el ojo 21×20 px); hitbox 12×8, sello ESCALA·16→ESCALA·20 (6→7,5 px), aliento a la ESCALA, corona 44+2,4n tope 70, órbitas 46+34k. (2) EL RUINOUS (investigado en la wiki del Forbidden Ruin — el minion del Ruinous Staff: hovers above the player · aggressively chases · spinning orbital formation · se reposiciona continuamente sobre la línea jugador↔presa): la elipse kepleriana de la .107 MURIÓ (el usuario vio los tirones de la 2ª ley) — NACE el GIRO CONSTANTE (ω fija por anillo, contrarrotación +0,42/−0,36 rad/s), el anillo casi circular (0,94), el radio respirando (±3,5%), la micro-deriva (1,6 px 2D) y el PLANEO DE LA CARGA (el freno en seco murió: el ojo se desliza hacia la línea ancla↔presa a vmax 6·MinionSpeedMult — «continuously adjusts its position», la firma del Ruinous). (3) LA IRA EN CADENA (la estadística pedida): +1 salto de cadena del rayo por cada 20 niveles (2→7): WeaponScaling.MinionChainCount (nuevo) + el MODO OJO de TruenoPerlinProjectile.Strike lee el nivel vía NivelDelOjo (el ai[2] del ojo) y los arrays MaxCadenasOjo=7; el CETRO propio NO cambia (sus 2 saltos); tooltip: «MinionCadena» («Rayo en cadena: N enemigos (base 2, +1 cada 20 niveles)») en la sección OJOS DEL ETERNO; hitos: «+1 salto de cadena del rayo» cuando MinionChainCount(level−5) < MinionChainCount(level) — niveles 20/40/60/80/100. LECCIONES: (a) el sandbox PUEDE VOLVER ATRÁS el repo local (estaba en .65 con GitHub en .108): fetch + diff ANTES de tocar nada — el usuario lo avisó («recuerda revisar y comparar siempre la version de github»); el reset --hard a origin/main restaura TODO (los untracked colisionantes eran idénticos a origin); (b) el ENTORNO también se wipea (/tmp/tml, /tmp/sdk, ~/.dotnet/tools, .verify, el token de .env, ~/.git-credentials): reconstruir tML del release zip 2026.08.3.0 + SDK 8.0.404 + verify.csproj (10 refs managed de Libraries) + ilspycmd 9.0.0.7889 (DOTNET_ROOT=/tmp/sdk); (c) el Ruinous Staff NO está en tML 2026.08 (es 1.4.5): la fuente de verdad es la WIKI (terraria.wiki.gg/wiki/Ruinous_Staff — cadencia 1,75–1,92 s, rango 50 tiles, línea jugador↔presa, spinning orbital formation); (d) las constantes const-fold: ESCALA·16f se pliega a 6f en el IL (ESCALA es const — Roslyn pliega const×const), así que el audit busca el RESULTADO (6f/7.5f) y el 0.375f crudo vive en las multiplicaciones con VARIABLES | 
 | **v6.50.108** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.593.519 B md5 01e03580e15a356d097143bae98a4537, 387 entradas, EOF exacto, paquete==árbol ×3 idiomas, rawimg 56×54 píxel-idénticas, el CAMPO _faseOrbital VIVO en el heap #Strings + Projectile.localAI[3] AUSENTE del código (el crash de la .107), los ldstr de la SEGUNDA VENTANA VIVOS en el heap #US (UTF-16LE: «Próximo hito: Nivel» · «═══ DAÑO ═══» · «═══ RECURSOS ═══» · «═══ PROYECTIL ═══» · «═══ BONUS ═══» · «Click der para vista completa/básica» · «MinionRitmo») y el ORDEN barra→estado verificado por POSICIÓN (find(tooltips.Add(barraHambre)) < find(tooltips.Add(estadoHambre))), las constantes de la .107 (regresión íntegra) en el IL (0.75 la escala · 0.5 el 50% · 0.85/0.30 el ritmo · 0.35/0.65 el desfase · 62/42/0.80 la elipse · 0.32/−0.27 la contrarrotación · 0.9/0.18/0.07 la precesión · 0.37 la fase natal · 56/2.8/88 la corona · 12/15 el sello · 6.0/0.235/2.9/4.8/1.2/0.65/38/2.3/20 el rayo fino + la regresión 1/216000, 0.10, 0.41, 7.5, 3.2, 2.55, 0.55, 3.5/2.8), regresión .102–.107 completa, headless «Sandboxing v6.50.108 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409833698 + asset AethonMod.tmod 631436547 2.593.519 B, CDN verificado byte a byte md5 01e03580…, /releases/latest = v6.50.108, respaldo /home/sync/AethonMod-v6.50.108.tmod), ⏳ en juego | LA LETRA (2026-10-11): «el texto que dice lo que hara el libro con el hambre, por ejemplo este: Fuera de Caza - flota sobre ti buscando su propia comida, bueno ese texto debe ir justo debajo del hambre, no encima» + «la segunda ventana de informacion del grimorio desaprecio, recuerda que el grimorio necesita una segunda ventana de info para visualisar sus estadisticas» + «en progresion quitaste las estadisticas del proximo nivel, vuelve a poneras» + «ademas, hay errores los minion no aparecen». (1) EL CRASH (client.log del usuario: System.IndexOutOfRangeException at OjoEternoMinion.FaseOrbital(Int32,Int32,Int32) line 415, at .PasoOrbita line 436, at .AI line 159): Projectile.localAI es float[3] en tML — la .107 guardaba la fase orbital de la luna en localAI[3]; con el libro fuera, cada tick de la AI tiraba IndexOutOfRange (excepción silenciosa de tML) y abortaba ANTES del SlotDeFormacion: los ojos no se posicionaban ni disparaban; la fase ahora vive en el CAMPO DE INSTANCIA _faseOrbital de OjoEternoMinion (los ModProjectile son una instancia POR proyectil: una fase POR ojo), determinista en todos los clientes (natal 0.37 + enAnillo/cap·2π + 0.7k, avance por PasoOrbita UNA vez por tick) — el índice fuera de rango MUERE y el campo entra al heap #Strings (los nombres de CAMPO también viven ahí, no sólo los de método). (2) EL ORDEN: PROGRESIÓN = SectionProgress + Level (barra de EXP 20 █░) + HambreBarra + HambreEstado DEBAJO (la .107 ponía el estado ENCIMA de la barra — la letra lo quiere JUSTO DEBAJO). (3) LA SEGUNDA VENTANA: la .107 mató la vista completa de 25 líneas (ShowExtendedTooltip, MilestoneRewards, las secciones ═══ DAÑO/RECURSOS/PROYECTIL/BONUS ═══ y el conmutador «Click der para vista») — el usuario la PIDE DE VUELTA («el grimorio necesita una segunda ventana de info para visualisar sus estadisticas»); VUELVE íntegra por el MISMO conmutador (TooltipToggleItem — GlobalItem que aplica SOLO a GrimoireEternal y alterna con clic der en el inventario) + la línea NUEVA «velocidad de ataque de los ojos (tope +50% en nivel 100)» (ritmoOjos = (1+0.5·min(nivel−1,99)/99 − 1)·100 — la fórmula de la .107 en versión tooltip) + PROGRESIÓN al final EN AMBAS VISTAS (EXP + hambre + próximo hito — la progresión ya no es exclusiva de la básica). (4) EL PRÓXIMO HITO: «en progresion quitaste las estadisticas del proximo nivel, vuelve a poneras» — el bloque NextMilestone (siguiente múltiplo de 5) + la lista MilestoneRewards (los «+1 slot de minion», «+2% armor penetration»…), de vuelta DEBAJO de la pareja del hambre. LECCIONES: (a) Projectile.localAI y Projectile.ai son float[3] en tML — NUNCA índices ≥3: el estado extra de un ModProjectile va en CAMPOS DE INSTANCIA (una instancia POR proyectil, viva mientras el proyectil exista) — el heap #Strings guarda también los nombres de CAMPO (el audit de presencia puede cazarlos igual que los de método); (b) el stack trace del client.log del usuario DA LA LÍNEA EXACTA del crash — leerlo ANTES de tocar código: FaseOrbital@415 = el localAI[3]; (c) la .107 mató los ldstr de la vista completa y la .108 los REVIVE — el audit de una versión es una FOTO, no una ley: los VIVOS/MUERTOS_US se recalculan por versión (los ldstr viajan en #US UTF-16LE); (d) el ORDEN de dos líneas del tooltip se audita por POSICIÓN (find(a) < find(b)), no por presencia — ambas líneas están presentes en cualquier orden | 
 | **v6.50.107** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.590.979 B md5 b6f789b6a2af363de8fb03e1b83f6f20, 387 entradas, EOF exacto, paquete==árbol ×3 idiomas, rawimg 56×54 píxel-idénticas, símbolos PasoOrbita/FaseOrbital/AnilloDe/CadenciaPersonal/VelocidadNivel/RitmoPropio/ESCALA/CADENCIA_BASE vivos + get_Cadencia (la cadencia global de la .106) AUSENTE del heap, los ldstr de la vista completa de 25 líneas MUERTOS en el heap #US (UTF-16LE) y la pareja HambreBarra/HambreEstado VIVA, las constantes de la letra en el IL (float32: 0.75 la escala · 0.5 el 50% · 0.85/0.30 el ritmo propio · 0.35/0.65 el desfase de nacimiento · 62/42/0.80 la elipse · 0.32/−0.27 la contrarrotación · 0.9/0.18/0.07 la precesión · 0.37 la fase natal · 56/2.8/88 la corona · 12/15 el sello · 6.0/0.235/2.9/4.8/1.2/0.65/38/2.3/20 el rayo fino + la regresión 1/216000, 0.10, 0.41, 7.5, 3.2, 2.55, 0.55, 3.5/2.8), regresión .102–.106 completa, headless «Sandboxing v6.50.107 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409818581 + asset AethonMod.tmod 631370474 2.590.979 B, CDN verificado byte a byte md5 b6f789b6…, /releases/latest = v6.50.107, respaldo /home/sync/AethonMod-v6.50.107.tmod), ⏳ en juego | LA LETRA (2026-10-11): «los minion son demasiado grande, deben ser mas pequeño, el tamaño debe ser el mismo que el del grimorio, ademas ellos atacan al mismo tiempo, cada ojo debe ser individual y deben tener la libertad de atacar cuando quieran y a la velocidad que deseen ya que la velocidad de ataque aumenta en cuanto mas nivel tengan el grimorio, hasta un maximo de 50% mas rapido a nivel 100 del grimorio subiendo a partir de nivel 1» + «el proyectil que usan los minion es muy grueso, debe ser un poco mas fino» + «la forma en la que deben moverse al rededor del libro es orbitar como una luna a un planeta no solo dar vuelta en ciruclo» + «la caja de informacion del grimorio eterno es demasiado grande con datos que no necesitan solo debe decir: daño magico, daño de invocacion, datos y buff propios del juego, un pequeño texto de lore donde explique un poco que es el libro sin decir mucho, al menos 2 lineas, luego en progresion debe salir la barra de hambre y la de exp». (1) EL TAMAÑO: ESCALA 0.75 — el espíritu viste el libro 36×49 a esc 1.15 = 41×56 px; el ojo 56×54 × 0.75 = 42×41 en pantalla: LA LUNA CABE EN LA SOMBRA DEL PLANETA; todo el layout escala con la MISMA constante (hitbox 34×20→25×15, el sello r16→12 respirando a 15, el aliento 3.3×2.8→2.5×2.1, IRIS_REST+mirada ×ESCALA, IRIS_ESCALA×ESCALA); la corona se acerca (radio 64+3.2n tope 98 → 56+2.8n tope 88). (2) EL RITMO PROPIO: muere la cadencia global de la .106 (110−nivel/3 piso 55 — get_Cadencia); nace la cadencia de ESTE ojo: CADENCIA_BASE 110 (1.83 s, la del Forbidden Ruin) / (VelocidadNivel × RitmoPropio); VelocidadNivel = 1 + 0.5·min(nivel−1, 99)/99 — 1.0× en nivel 1 subiendo LINEAL hasta 1.5× (un 50% más rápido) en nivel 100, CLAVADA ahí (el tope de la letra); RitmoPropio = 0.85 + 0.30·Hash01(whoAmI, 577, 131) — cada ojo ataca a la velocidad que LE da la gana; EL DESFASE DE NACIMIENTO: el primer disparo de cada ojo cae entre el 35% y el 100% de SU intervalo (Hash01(whoAmI, 811, 23)) — la banda invocada de golpe JAMÁS dispara en bloque (ai[1]==0 && frame==0 = el tick de nacimiento); SalirDeFuego arranca CadenciaPersonal (la de ESTE ojo — nivel × ritmo). (3) LA LUNA: con el libro fuera muere el círculo (radio 66+44k a velocidad angular constante); nace la elipse con LA SEGUNDA LEY DE KEPLER — semieje mayor a = 62+42k, semieje menor b = 0.8a (la órbita INCLINADA), precesión apsidal lenta (tilt = 0.9k + 0.18·sin(time·0.07 + k·1.3)), y el área barrida por tick CONSTANTE: dθ = ω·a²/r² (ω = 0.32 par / −0.27 impar, en rad/s ÷ 60 por tick) — el ojo ACELERA en el perigeo (r corto, cerca del libro) y FRENA en el apogeo (r largo, lejos): ORBITAR COMO UNA LUNA, no dar vuelta en círculo; la fase de cada ojo vive en localAI[3] (natal 0.37 + enAnillo/cap·2π + 0.7k — jamás 0: no renace) y SÓLO la avanza PasoOrbita (llamado UNA vez por tick desde la AI, ANTES del SlotDeFormacion — el draw la LEE vía FocoVivo, jamás la mueve: sin doble avance); AnilloDe extrae la escalera 5, 6, 7… y el vaivén propio (sin(1.1t + 1.63·enAnillo)·3) sigue vivo en la corona Y en la órbita. (4) EL RAYO FINO (sólo el MODO OJO de TruenoPerlinProjectile — DrawArcoOjo…CanalOjo; el DrawArco del cetro propio conserva su grosor de siempre): funda 7.5→6.0 (RayoStrip.Filamento), cápsulas negras 19→15 px (SoftGlow 0.30→0.235 — 64×64: la escala es ABSOLUTA), cadenas 3.6→2.9, gorro del electrodo 6.0→4.8 (EndCap), ancla 1.5/0.8→1.2/0.65, estallido de impacto 46→38 (ImpactFlash), arcos de corona 2.8→2.3 (ArcRing), bruma en la punta 24→20 (SombrasLib.Bruma). (5) LA CAJA COMPACTA: muere la vista completa de 25 líneas del tooltip del Eterno (ShowExtendedTooltip, MilestoneRewards con su lista, las secciones ═══ DAÑO ═══/═══ RECURSOS ═══/═══ PROYECTIL ═══/═══ BONUS ═══, el conmutador «Click der para vista»); el hjson ×3 (es-ES/en-US con TABS por BYTES — cirugia por python newline='', es-MX con espacios: la línea Tooltip: a 16 espacios, las triples comillas a 24, el contenido a 32) pierde el mega-tooltip de 19 líneas y gana el LORE de 2 líneas («Un libro viejo que devora lo que su portador mata. / Mantén sus páginas llenas... o será tu alma la que llene la siguiente.» — en-US: «An old book that devours whatever its bearer kills. / Keep its pages full... or your soul will be the one to fill the next.»); el C# sólo añade: la línea de DAÑO DE INVOCACIÓN pegada al Damage vanilla (que ya dice «XX daño mágico»), y PROGRESIÓN al final (barra de EXP de 20 █░ + la pareja HambreBarra/HambreEstado del Nervioso REUBICADA de tras-el-daño al final, dentro de progresión). LECCIONES: (a) los ldstr (los strings literales de C#) viven en el heap #US en UTF-16LE — los NOMBRES de las TooltipLine («HambreBarra») son ldstr, NO identificadores #Strings: el audit los caza con s.encode('utf-16-le'); (b) las ausencias de patrones del cetro se comprueban SOLO en el trozo del MODO OJO (cetro[cetro.index('private void DrawArcoOjo()'):cetro.index('private static Vector2[] CanalOjo')]) — DrawArco es el cetro PROPIO y conserva su grosor (1.5f·pulso y 46f viven ahí legítimamente); (c) «Click der para vista» vive en SeerOrb (SU toggle legítimo): una ausencia se comprueba en el ÁRBOL del archivo tocado, no en la DLL entera; (d) el /releases/latest SIN token da RATE LIMIT y devuelve None — la verificación de latest SIEMPRE con -H Authorization; (e) el es-MX usa 16/24/32 ESPACIOS (no tabs) — el byte-edit de su bloque Tooltip debe usar las sangrías exactas del archivo, y el patrón de búsqueda debe anclarse con \n previo (el «8 espacios + Tooltip:» es SUBSTRING del «16 espacios + Tooltip:» de las otras 123 entradas) |
 | **v6.50.106** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 ×2 --no-incremental, build real 0/0 con ruta absoluta canónica, .tmod 2.594.318 B md5 894cb4c910ca7449681e8b9a422165a4, 387 entradas, EOF exacto, paquete==árbol ×3 idiomas, rawimg 56×54 píxel-idénticas al árbol (la NORMALIZACIÓN DE tML: el empaquetador pone a CERO el RGB de los píxeles alpha=0 — el LANCZOS deja ringing 1-2 y el gen del árbol debe normalizar igual), símbolos OjoEternoMinion/OjoEternoBuff/DrawElSello/DrawElOjo/SlotDeFormacion/Disparar/IRIS_REST + TruenoPerlinProjectile/DrawArcoOjo/CanalOjo/BocaDelOjo/PresaDelAncla/OjoHalo/OjoNegro + PasoOjoIcono/SnapDireccionIcono/_iconoDesp vivos + DrawElRayo/CanalPerlin (mudados de la .105 al cetro) y CosmicOrb* AUSENTES del heap, las constantes de la letra en el IL (float32: 0.41 el iris · 7.5/2.5 la mirada · 0.7/2.3 IRIS_REST · 0.15/0.35/0.25 la ley del planeo · 0.22 el tope de arranque · 0.20 el balanceo · 1.1 el vaivén · 66/44 las órbitas · 3.2 la patada · 16 el sello · 0.30 la cápsula negra · 0.55 el ancla pegada · 3.5/2.8 la mirada del icono + la regresión 1/216000 y 0.10), regresión .102/.103/.104/.105 completa, headless «Sandboxing v6.50.106 → Adding Recipes → Choose World» 0 excepciones), ✔ PUBLICADA (release 409795447 + asset AethonMod.tmod 631271623 2.594.318 B, CDN verificado byte a byte md5 894cb4c9…, /releases/latest = v6.50.106, respaldo /home/sync/AethonMod-v6.50.106.tmod), ⏳ en juego | LA LETRA (2026-10-11): «no debes hacer recorte ya que arruinaste el recorte que yo mismo hice, solo debes acomodar el iris para que pueda realmente funcionar, los rayos que lanzan los ojos son demasiado gruesos y no hacen daño, ademas la animacion de la corona no existen, se mueven erraticamente de arriba hacia abajo, ademas la animacion que necesita de movimienot es la misma que este invocador Ruinous_Staff investiga mucho como funciona el Ruinous_Staff en las versiones mas actuales de Terraria» + «el icono del grimorio en el evento de oleada no tiene animacion en el ojo» + «el projecril que debe usar el minion debe ser el mismo que Cetro de Trueno de Perlin pero teñido de negro en el centro y morado en los bordes con bruma en la punta» + «te volvere a dar el codigo del minion por si lo perdiste al recortarlo, recuerda no debes recortar el sprite que te di ya que lo recorte perfecto como debe ser». (1) EL DIAGNÓSTICO DEL RECORTE: los 3 archivos del usuario YA ERAN su recorte perfecto (bbox opaco (121,199)-(632,698) = 512×500: el ojo con su armazón dorado, sus 8 remaches y sus chispas moradas — VLM: sin ninguna parte del libro) y la .105 le hizo OTRO recorte encima ((226,344)-(524,596): la almendra sin el aro exterior ni los remaches) moliéndolo a 44×37. AHORA: CERO recorte — el contenido opaco del archivo ES el sprite (56×54) y el iris de la .84 va ACOMODADO en el centro de la ALMENDRA medida (fracción (0.513, 0.543)·(56,54), escala 0.41, viaje ±7,5/±2,5 — la geometría de la almendra 27,7×16,1). (2) EL MOVIMIENTO (la wiki del Ruinous Staff 1.4.5.7 — AI_206_ForbiddenMinion: «hovers above the player… tries to stay at a short fixed distance… continuously adjusts its position»): muere la máquina MIRANDO/MOVIENDO de la .105 (frenaba en seco cerca del hueco, aceleraba al salir del umbral y REBOTABA — el «se mueven erráticos»); UNA ley: lejos (>90 px) inercia con arranque suave (velocidad deseada capped por dist×0,22), cerca amortiguación CRÍTICA (velocidad ∝ al hueco restante — sigue al hueco móvil sin sobrepasarse); la corona se BALANCEA (±11° a 0,30 rad/s), el radio RESPIRA (±3 px) y cada ojo lleva su vaivén propio (5,7 s — la .105 casi no se movía: 0,09 rad/s = 70 s de período); órbitas recalibradas (66+44·k, contrarrotación ±0,32/−0,26); la cadencia 110−nivel/3 ≈ 1,83 s (LA DEL FORBIDDEN RUIN — wiki: 1,75–1,92 s). (3) EL RAYO: el minion YA NO dibuja su rayo — LO DISPARA: TruenoPerlinProjectile en MODO OJO (ai[0]=1, ai[1]=el ojo que disparó, ai[2]=la presa): el ancla nace PEGADA al monstruo y LO SIGUE mientras vive (la bruma en la punta que toca a la presa — la punta pegada), el arco cuelga del OJO (no del bastón), el golpe es EL DEL CETRO (Strike radio 100 + cadena ×2 al 60% + Electrified, por GOLPEMOTOR) con DamageType Summon; teñido: la funda morada aditiva AL GROSOR DEL CETRO (7,5 — RayoStrip.Filamento) y encima el NÚCLEO NEGRO en AlphaBlend con cápsulas de 19 px (escala SoftGlow 0,30 — LA LECCIÓN: la .105 las ponía a escala 5,5 = 352 px cada una (SoftGlow es 64×64: la escala es ABSOLUTA), el rayo leía como NEBLINA GORDA); el zap oscuro (Item12 −0,15 / Item122 −0,45), las chispas de SOMBRA violeta (DustID.Shadowflame) y la luz violácea (0,50/0,32/0,90); LA MIRADA DEL CAZADOR corregida (la .105 forzaba fase=1 = «medio» — el bug; ahora fase→0: ABIERTO clavado en la presa). (4) EL ICONO DE LA OLEADA (GrimorioFuriaSistema.DibujarIndicador): el ojo del libro de la cajita SIGUE AL CURSOR (el modelo del libro en mano: SnapDireccion ±(3,5·2,8) texels, lerp 0,22, el cursor encima = fijo a los ojos) + el PARPADEO determinista (fase 11→0, la convención de la .86, período 240+240·Hash01 por ciclo — 4-8 s) con los párpados GrimorioHambriento_Medio/_Cerrado de la familia + en el SOBRESALTO la mirada ESCAPA al lado del tirón (lerp 0,5); IRIS_ESC protected→internal (el icono usa la MISMA escala 0,2773 del iris del libro, pegado a la MISMA transform del icono: bob + giro + escala). LECCIONES: (a) el archivo del usuario YA ERA el recorte — el bbox opaco del archivo es SU criterio, no el mío: NUNCA más recortar sobre un recorte (la .105 confundió «el LIBRO ENTERO» con el recorte porque el canvas es 706×967: el CONTENIDO opaco es lo que cuenta); (b) el RGB de los píxeles alpha=0: tML lo pone a CERO al empaquetar — el LANCZOS deja ringing 1-2 ahí y el audit ve DIFF paquete≠árbol en ~19 px invisibles: normalizar el PNG del árbol igual (rgb=0 donde alpha=0); (c) la escala de las cápsulas SoftGlow es ABSOLUTA (textura 64×64: scale 5,5 = 352 px en pantalla) — los grosores se miden en PX DE PANTALLA, nunca en «unidades de textura» |
