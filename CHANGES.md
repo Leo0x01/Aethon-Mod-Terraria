@@ -1,5 +1,100 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.110 — LA PRIMERA CENA, LAS TRES VENTANAS, LA ESENCIA DE HAMBRE Y EL ANÁLISIS
+
+**La letra**: «analisa si las estadisticas del grimorio eterno aplican
+realmente» + «la segunda ventana de info del grimorio tiene demasiada
+informacion, crea una nueva ventana de informacion para repartir mejor
+la informacion» + «crea un item que le de hambre al grimorio eterno
+para comprobar si funciona, que suba el hambre de 5 en 5 y que no sea
+consumible» + «asegurate de que el grimorio eterno tenga la sombra de
+la pagina para cuando sale a cazar y que ademas cuando se mata un jefe
+su animacion de muerte se detenga y sea deborado por el grimorio usando
+la sombra de la pagina, el jugador recibe loot ya que cuenta como una
+muerte normal, lo que sucede es que el jugador ataca al jefe y cuando
+llegue a 100 de vida el jefe se detiene circulos magicos como los de
+los agujeros negros aprisionan al jefe, lo levantan y llevan al centro
+de la pantalla y luego del grimorio sale la sombra de la pagina y
+devora por completo al jefe, que esto suceda la primera vez que se
+mate un jefe y solo la primera vez, ya despues de la primera vez el
+jefe muere de forma normal sin que el grimorio intervenga».
+
+**EL CAMBIO**: cinco entregas — el análisis, las ventanas, el ítem, la
+verificación de la caza y EL CINE del primer jefe:
+
+- **EL ANÁLISIS (aplican TODAS)**: las 24 líneas de la segunda ventana
+  verificadas UNA A UNA contra su punto de aplicación real — daño
+  mágico/knockback/uso (`GrimoireEternal.ModifyWeaponDamage·Knockback·
+  UseTimeMultiplier`), invocación+crítico+penetración+vida/maná/slots
+  (`ShardPlayer.PostUpdateEquips`), regeneración (`PostUpdateBuffs`),
+  daño recibido (`ModifyHurt`), los ojos (`OjoEternoMinion`: daño del
+  rayo, velocidad, cadencia, rango), la cadena
+  (`TruenoPerlinProjectile.Strike`), el área (`CosmicProjectileFX`), el
+  lifesteal (`GlobalNPCXP.OnHitByItem·Projectile`) y el mana bajo (por
+  golpe + persistente). Las etiquetas quedaron HONESTAS: «daño mágico
+  (este libro)», «crítico mágico», «penetración de armadura mágica»,
+  la nota al pie de postura en EL ARMA (sostenido vs barra rápida) y
+  la del nivel de invocación en EL FESTÍN.
+- **LAS TRES VENTANAS**: la vista completa de la .108 se PARTE en dos
+  y el clic derecho cicla BÁSICA → **EL ARMA** (DAÑO·RECURSOS·
+  PROYECTIL·BONUS + notas) → **EL FESTÍN** (OJOS DEL ETERNO·LA PRIMERA
+  CENA·PROGRESIÓN con la barra de hambre y su estado debajo) → BÁSICA
+  (`TooltipToggleItem.VistaEstadisticas` 0/1/2; la línea final del
+  tooltip dice SIEMPRE a cuál vas).
+- **LA ESENCIA DE HAMBRE (ítem de pruebas)**: +5% de hambre AL ETERNO
+  por uso («de 5 en 5»), pila 1, **NO consumible**, la voz del apetito
+  con su cifra real, en MP la barra viaja
+  (`EcoRed.SincronizarHambre`), en la **Bolsa Probador**, textura
+  24×24 propia (la página negra de borde violáceo con el iris rojo del
+  hambre) + hjson ×3 con la indentación de CADA archivo (tabs es-ES/
+  en-US, espacios es-MX).
+- **LA SOMBRA DE LA CAZA — VERIFICADA**: la cadena
+  `UpdateInventory → PasoCaza → espíritu (ai[2]=Eterno) →
+  SombraPaginaCaza` vive intacta: del 25% de hambre el Eterno sale a
+  cazar y SU sombra de la página devora presas enteras (XP del libro +
+  la dieta por rareza).
+- **LA PRIMERA CENA — el festín del primer jefe** (`FaucesGlobalNPC`
+  estado 3 + `PrimeraCenaProjectile`): el jefe llega a **100 de vida**
+  → SE DETIENE (vida clavada en 100, inmune, sin IA ni animación) si
+  el portador lo peleó (`playerInteraction`), lleva el Eterno en la
+  barra rápida y ese tipo de jefe aún no ha sido devorado
+  (`ShardPlayer.JefesDevorados` — persiste en el .plr: «solo la
+  primera vez»; después, muerte normal sin intervención). LA
+  COREOGRAFÍA (430 t ≈ 7,2 s): TRES sellos erosionados (los de los
+  agujeros negros, `OrbitaLib.SigiloErosionado`) se materializan
+  alrededor del jefe (0-40), CONTRAEN y APRISIONAN (40-60), lo
+  LEVANTAN (−90 px) y lo LLEVAN al CENTRO VIVO de la pantalla (60-150
+  — si el portador camina, el preso lo sigue colgado del centro), el
+  sello íntimo se cierra (150-175), **DEL GRIMORIO sale LA SOMBRA DE
+  LA PÁGINA** (la mano del portador) que lo devora por completo
+  (175-345: `ColumnaViva`+`Masa` fusiforme+`Devorador` v2 de elipse
+  completa+almas-ojo volando) mientras los sellos SE ENCIENEN en él
+  (radio → 0), y EL TRAGO (345-430) inhala la elipse entera hacia la
+  punta. A los 430 LA MUERTE REAL (2ª pasada de `CheckDead`): **LOOT
+  COMPLETO**, bestiario, banners y flags downed* — la
+  `PurgaVisualMuerte` tapa el gore («quedando solo su loot»). Los
+  worms enroscan sus segmentos alrededor del centro (determinista por
+  whoAmI); UNA cena a la vez en el mundo; y LAS SOMBRAS RESPETAN EL
+  FESTÍN AJENO: `SombraPaginaCaza` y `SombraPaginaProjectile` SUELTAN
+  a cualquier presa `EnFauces` y `AbsorberPresa` la rechaza (defensa
+  en profundidad — sin eso la sombra de la caza se comía al jefe del
+  cine sin loot).
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+headless «Sandboxing v6.50.110 → world gen → Server started» 0
+excepciones · audit_v650110 TODO OK (184 ✓): .tmod 2.601.415 B md5
+e8f1ba78facfc4208a83c475c0cd1f7f, 388 entradas (387 +
+EsenciaHambre.rawimg), EOF exacto, hjson semántico == árbol ×3 + es-MX
+byte a byte, PrimeraCenaProjectile/ArrancarPrimeraCena/EnFauces/
+JefesDevorados/VistaEstadisticas VIVOS en #Strings, los ldstr de las
+tres ventanas y LA PRIMERA CENA VIVOS en #US (UTF-16), las constantes
+del cine en el IL (430/345/175/150/−90/3.1/0.92/0.80/0.45/62/0.05) +
+la regresión .103–.109 ÍNTEGRA.
+
+**PUBLICACIÓN**: release 410075869 + asset AethonMod.tmod 632401101
+2.601.415 B (md5 e8f1ba78…), CDN verificado byte a byte,
+/releases/latest = v6.50.110.
+
 ## Commit v6.50.109 — LA MITAD, LA FORMACIÓN GIRATORIA DEL RUINOUS Y LA IRA EN CADENA
 
 **La letra**: «reduce el tamaño de los minion en un 50% y mejora la
