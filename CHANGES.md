@@ -1,5 +1,69 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.112 — EL PEREZOSO Y LA PÁGINA EN BLANCO
+
+**La letra**: «el libro cuando esta fuera se mueve muy rapido, debe ser
+mas lento» + «necesito un item que reinicie el contador de los jefes
+para verificar como devora los jefes, este iten no debe ser
+consumible».
+
+**EL CAMBIO**: dos entregas — el muelle del libro flotante y el
+probador de LA PRIMERA CENA:
+
+- **EL MUELLE DEL PEREZOSO**: el espíritu flotante de la .111 (tirón
+  `0.02`, freno `0.90` y **SIN TOPE** en MODO_CAZA) pegaba el libro a
+  la cabeza del jugador con un tirón al 27% MÁS rápido que la carrera
+  y lo convertía en **MISIL** al teletransportarse o caer — **127 px/t
+  medidos en `tools/sim_libro_v650112.py`**, la simulación del muelle
+  con los escenarios reales (caminar 3 / correr 6,25 / esprintar 9 /
+  caer 10,5 / vagoneta 20 px/t + teletransporte de 1500 px). EL MUELLE
+  NUEVO: tirón a menos de la mitad (`0.009` — el libro se queda ATRÁS
+  con elegancia: 42 px al caminar, 88 al correr, 127 al esprintar),
+  freno `0.88` y **TOPE GRADUADO** `Clamp(dist×0.01, 10, 20)`: 10 px/t
+  cerca del dueño (nunca más rápido que una caída), 20 sólo si quedó
+  muy lejos — un teletransporte NO lo pierde (1500 px en ~110 t de
+  deriva serena, no en 15 de misil). **LA VUELTA deja de ser zumazo**:
+  empuje `0.32` (era `0.90`), tope `12` (era `22`) — planea a casa en
+  ~15 t desde la vela (era un misil de 9). Y el perdedor de
+  `SoyDuplicado` ahora se **DISUELVE EN POLVO** de llama de sombra
+  (con la vuelta lenta es más fácil que un espíritu que planea a casa
+  pierda contra un cazador nuevo — sin polvo era un chasquido seco
+  invisible).
+- **LA PÁGINA EN BLANCO (ítem de pruebas)**: borra
+  `ShardPlayer.JefesDevorados` del portador — la lista de LA PRIMERA
+  CENA de la .110 («que esto suceda la primera vez que se mate un jefe
+  y solo la primera vez»): la página donde el grimorio escribió sus
+  festines queda EN BLANCO y **cada tipo de jefe vuelve a estrenar su
+  cena completa** (el jefe se detiene a 100 de vida → los sellos lo
+  aprisionan y lo llevan al centro de la pantalla → LA SOMBRA DE LA
+  PÁGINA lo devora → el loot cae como una muerte normal). **NO
+  CONSUMIBLE** (pila 1, el patrón de la Esencia de Hambre), la voz
+  cuenta cuántos festines se borraron («Reset») o que no había ninguno
+  («Nada»), autoridad SP/server con `EcoRed.AnunciarAlPortador` en MP.
+  Textura 24×24 por `tools/gen_pagina_blanca_v650112.py` — la hermana
+  de la Esencia de Hambre: el MISMO pliego negro torcido del grimorio
+  con la tinta BORRÁNDOSE de izquierda a derecha y las motas violáceas
+  alzándose del borde (la memoria en humo). hjson ×3 por
+  `tools/insert_hjson_v650112.py` (DETECTA el formato post-packager:
+  es-ES/en-US claves planas top-level, es-MX bloque + espacios).
+  Registrada en la **BOLSA DEL PROBADOR** (la lección v6.50.63: cada
+  ítem nuevo en DOS sitios).
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
+headless «Sandboxing v6.50.112 → Adding Content → Configuring →
+Finalizing → Adding Recipes → Server started» 0 excepciones ·
+audit_v650112 TODO OK (188 ✓): .tmod 2.605.378 B md5
+d46aa5d53086005e12301a0059063ed9, 390 entradas (389 +
+PaginaEnBlanco.rawimg 24×24 píxel-idéntica), EOF exacto, PaginaEnBlanco
++ las constantes del muelle nuevo (0.009/0.88/0.01/10/20/0.32/12)
+VIVAS en el IL, los muertos del muelle viejo (0.02/0.90/22) AUSENTES
+del árbol, las claves Reset/Nada VIVAS en #US y en el paquete hjson
+×3 + la regresión .104–.111 ÍNTEGRA.
+
+**PUBLICACIÓN**: release 410136787 + asset AethonMod.tmod 632578719
+2.605.378 B (md5 d46aa5d5…), CDN verificado byte a byte,
+/releases/latest = v6.50.112.
+
 ## Commit v6.50.111 — LA PROMESA CUMPLIDA Y EL ICONO DEL OJO
 
 **La letra**: «que raro, a veces los minion se desactivan por si solo» +
