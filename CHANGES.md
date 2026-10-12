@@ -58,9 +58,10 @@ en NINGÚN otro .cs), el override Texture MUERTO, la mentira
 cambió) + la regresión .104–.110 ÍNTEGRA (heap, ldstr UTF-16,
 constantes del IL, hjson ×3 semántico, es-MX byte a byte).
 
-**PUBLICACIÓN**: (ver STABLE-SNAPSHOT) — release con asset
-AethonMod.tmod 2.604.250 B (md5 4987a56f…), CDN verificado byte a
-byte, /releases/latest = v6.50.111.
+**PUBLICACIÓN**: commit 2de0025 + tag v6.50.111 + push · release
+410107088 + asset AethonMod.tmod 632503332 2.604.250 B (md5
+4987a56fb49f8e41ca294af1e61b5eeb), CDN verificado byte a byte,
+/releases/latest = v6.50.111.
 
 ## Commit v6.50.110 — LA PRIMERA CENA, LAS TRES VENTANAS, LA ESENCIA DE HAMBRE Y EL ANÁLISIS
 
