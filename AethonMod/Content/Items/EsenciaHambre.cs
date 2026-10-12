@@ -67,7 +67,11 @@ namespace AethonMod.Content.Items
             et.Hambre = System.Math.Min(1f, et.Hambre + HambrePorUso);
 
             // LA VOZ del apetito nuevo (en la pantalla del portador)
-            int pct = (int)(et.Hambre * 100f);
+            // v6.50.113 — CON DECIMALES (la letra: «tambien debes permitir
+            // que visualizar el medidor de hambre tenga decimales»):
+            // el (int) truncaba (47,3% → «47%»); ahora "0.0" — un
+            // decimal SIEMPRE visible, a juego con la barra del tooltip.
+            string pct = (et.Hambre * 100f).ToString("0.0");
             if (Main.netMode == NetmodeID.Server)
             {
                 EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.EsenciaHambre.Sube",

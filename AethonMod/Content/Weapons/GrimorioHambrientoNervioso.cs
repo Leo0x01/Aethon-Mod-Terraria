@@ -691,17 +691,24 @@ namespace AethonMod.Content.Weapons
         }
 
         /// <summary>v6.50.104 — LA DIETA POR LIBRO: cuánto hambre quita
-        /// comerse a ESTA presa. El Eterno come POR RAREZA (la letra:
-        /// «el hambre deberia bajar usando la rareza de las criaturas
-        /// como fuente… cada criatura de 1 estrella solo quita el 0.1%
-        /// de hambre los jefes quitan 10%…» — GrimoireEternal.
-        /// HambrePorPresa: 1★=0,1% … 5★=5%, jefes 10%); el Nervioso de
-        /// prueba conserva su −1% plano de demo (su minuto no necesita
-        /// más finura).</summary>
+        /// comerse a ESTA presa. 
+        /// v6.50.113 — EL PLANO DEL AUTÓCTONO (la letra: «si el libro se
+        /// alimenta por si solo, cada muerte que el libro haga por si
+        /// mismo debe reducir 1 de hambre, actualmente solo lo hace en
+        /// 0%»): cuando el Eterno cazó POR SÍ MISMO (la sombra de la
+        /// página lo devora ENTERO), la dieta de la .104 (1★=0,1% —
+        /// para la chusma común, casi NADA: el medidor ni se movía)
+        /// muere para ESTE camino y cada presa devorada baja UN PUNTO
+        /// PLANO de hambre (0.01f = 1% — «cada muerte… debe reducir 1
+        /// de hambre»). La dieta POR RAREZA sigue viva en el otro camino
+        /// (la baja ACREDITADA del jugador: GlobalNPCXP.OnKill) — la
+        /// letra de la .104 no se toca ahí; el Nervioso de prueba ya
+        /// comía plano (−1% de demo) y sigue igual.</summary>
         internal static float ReduccionHambre(NPC presa, int tipoLibro)
         {
-            if (tipoLibro == ModContent.ItemType<GrimoireEternal>())
-                return GrimoireEternal.HambrePorPresa(presa);
+            // v6.50.113 — LA SOMBRA COME PLANO: 1% por presa devorada
+            // por sí mismo (Eterno y Nervioso por igual — el festín
+            // del autóctono no mira estrellas).
             return 0.01f;
         }
 
@@ -759,10 +766,13 @@ namespace AethonMod.Content.Weapons
                     NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
             }
 
-            // EL APETITO: LO QUE ESA PRESA VALE (v6.50.104 — la dieta por
-            // rareza de la letra: el Eterno cobra 1★=0,1% … 5★=5%, el jefe
-            // 10%; el Nervioso de prueba su −1% de demo) — y el reloj
-            // SIGUE corriendo (v6.50.94: sin gracia, el hambre sube SIEMPRE)
+            // EL APETITO: v6.50.113 — LA SOMBRA COME PLANO (la letra:
+            // «cada muerte que el libro haga por si mismo debe reducir
+            // 1 de hambre»): la dieta por rareza de la .104 (1★=0,1%
+            // — la chusma común no movía el medidor) murió para el
+            // festín del autóctono: 1% PLANO por presa devorada — y
+            // el reloj SIGUE corriendo (v6.50.94: sin gracia, el
+            // hambre sube SIEMPRE)
             EstadoGrimorio festin = EstadoDeLibro(tipoLibro);
             float quita = ReduccionHambre(paraXP, tipoLibro);
             festin.Hambre = Math.Max(0f, festin.Hambre - quita);

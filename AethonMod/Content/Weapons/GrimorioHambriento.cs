@@ -817,12 +817,19 @@ namespace AethonMod.Content.Weapons
         // =================================================================
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
+            // v6.50.113 — EL MEDIDOR CON DECIMALES (la letra: «tambien
+            //     debes permitir que visualizar el medidor de hambre
+            //     tenga decimales»): el (int) TRUNCABA (47,9% → «47%" —
+            //     y con la dieta de la .104 la chusma común (0,1%) no
+            //     movía NI un número entero): ahora UN DECIMAL siempre
+            //     visible («0.0»: 47,3% — el reloj de la hora añade
+            //     0,1% cada ~22 s y la sombra come plano de 1% en 1%).
             float h = Estado.Hambre;
             int llenos = (int)Math.Round(h * 10f);
             char[] barra = new char[10];
             for (int i = 0; i < 10; i++)
                 barra[i] = i < llenos ? '✦' : '—';
-            string textoBarra = $"[{new string(barra)}] {(int)(h * 100f)}%";
+            string textoBarra = $"[{new string(barra)}] {(h * 100f).ToString("0.0")}%";
 
             float rojo = Estado.NivelRojo();
             var color = Color.Lerp(new Color(198, 160, 78), new Color(235, 70, 55),
