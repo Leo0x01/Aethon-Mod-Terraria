@@ -1,5 +1,70 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.113 — LA SOMBRA COME PLANO, EL MEDIDOR CON DECIMALES Y LOS TRES ICONOS DEL USUARIO
+
+**La letra**: «si el libro se alimenta por si solo, cada muerte que el
+libro haga por si mismo debe reducir 1 de hambre, actualmente solo lo
+hace en 0%» + «tambien debes permitir que visualizar el medidor de
+hambre tenga decimales» + «el icono que debes usar para el buff cuando
+sale el minion es este, icono de minion.txt / tambien para el icono del
+mod o sea lo que se ve cuando instala el mod es este, icono del
+mod.txt / ahora para el icono de la mascota de luz es este icono de
+mascota de luz.txt».
+
+**EL CAMBIO**: tres entregas — el festín del autóctono, el decimal del
+medidor y el arte del usuario:
+
+- **EL PLANO DEL AUTÓCTONO** (la sombra come plano): `ReduccionHambre`
+  — el camino del festín autónomo (`AbsorberPresa`: la sombra de la
+  página devora presas ENTERAS cuando el libro sale a cazar solo) —
+  devolvía la dieta por rareza de la .104 (`HambrePorPresa`: 1★=0,1% —
+  la chusma común no movía NI un entero del medidor: «solo lo hace en
+  0%»); ahora devuelve `0.01f` PLANO: **cada muerte que el libro hace
+  POR SÍ MISMO baja 1% de hambre**, Eterno y Nervioso por igual. La
+  dieta por rareza SIGUE VIVA en el otro camino (la baja acreditada del
+  jugador: `GlobalNPCXP.OnKill` → `HambrePorPresa` — la letra de la
+  .104 no se toca ahí): la sombra del libro come plano, el juego del
+  jugador sigue cobrando por rareza.
+- **EL MEDIDOR CON DECIMALES**: la barra del tooltip
+  (`GrimorioHambriento`) y la voz de la Esencia de Hambre usaban `(int)`
+  TRUNCADOR (47,9% → «47%»); ahora `ToString("0.0")` — **UN decimal
+  SIEMPRE visible** (47,3%), a juego barra y voz (con el plano de 1% en
+  1% y el reloj de la hora añadiendo 0,1% cada ~22 s, el decimal se
+  GANA).
+- **LOS TRES ICONOS DEL USUARIO**: sus tres `SPRITE_EXACTO` 2048×2048
+  (base64 → tuplas de 5 bytes n,R,G,B,A — runs de 255 máx) decodificados
+  y reducidos con el filtro que eligió el VLM (NEAREST los 32×32,
+  LANCZOS el 80×80): `OjoEternoBuff.png` 32×32 (el buff del minion),
+  `AethonMenorBuff.png` 32×32 (el buff de la mascota de luz),
+  `icon.png` 80×80 (EL ICONO DEL MOD — el que se ve en el menú Mods al
+  instalarlo; el viejo era de la .13: 924 B) y su hermano pequeño
+  `icon_small.png` 30×30 (vistas compactas; el viejo seguía mostrando
+  el arte viejo). DECOMPILE verificado (tML 2026.08.3.0):
+  `ContentConverters` EXIME `icon.png` de la conversión rawimg (viaja
+  PNG crudo) y `AddResource` consume el stream de `icon_small.png`
+  comparándolo con la plantilla (ToRaw falla → también viaja PNG
+  crudo); `ModLoader.GetModIcon` exige 80×80/30×30 EXACTOS («icon.png
+  is not 80x80» si no).
+
+**VERIFICACIÓN**: audit_texturas 0 · oráculo /home/z/.verify 0/0
+(regenerado con `tools/regen_oracle.py`: TODAS las DLLs gestionadas de
+Libraries/** + tModLoader.dll, menos tModCodeAssist/tModPorter/Tests/
+Native/runtimes — 79 refs, 311 .cs) · build real 0/0 → .tmod 2.621.290
+B · headless serverconfig113 (seed iconos113, autocreate, puerto 7782):
+«Sandboxing v6.50.113 → Adding Content → Adding Recipes → world gen →
+Server started» 0 excepciones · audit_v650113 TODO OK (190 ✓): 390
+entradas (los mismos nombres de la .112 — los iconos son REEMPLAZOS),
+EOF exacto, `icon.png`/`icon_small.png` PNG crudos byte a byte +
+80×80/30×30 EXACTOS, las dos rawimg de buff píxel-idénticas al árbol
+nuevo, el plano (`return 0.01f` en ReduccionHambre;
+`HambrePorPresa(presa)` AUSENTE de la sombra pero VIVO en OnKill), el
+decimal (`0.0` en barra y voz, los `(int)` truncadores MUERTOS) + la
+regresión .104–.112 ÍNTEGRA.
+
+**PUBLICACIÓN**: release 410912156 + asset AethonMod.tmod 634680327
+2.621.290 B (md5 b627b56a…), CDN verificado byte a byte,
+/releases/latest = v6.50.113.
+
 ## Commit v6.50.112 — EL PEREZOSO Y LA PÁGINA EN BLANCO
 
 **La letra**: «el libro cuando esta fuera se mueve muy rapido, debe ser
