@@ -202,6 +202,49 @@ namespace AethonMod.Content.Players
         public override void PostUpdateEquips()
         {
             int nivel = NivelLibro(false);   // sostenido O barra rápida
+
+            // ============================================================
+            // v6.50.111 — LA PROMESA CUMPLIDA (el fix de «a veces los
+            // minion se desactivan por si solos").
+            //
+            // EL DESCUBRIMIENTO: vanilla CULLA minions CADA TICK dentro
+            // de Projectile.Update — «si slotsMinions + minionSlots >
+            // maxMinions → Kill()» (el comentario de abajo, «vanilla no
+            // los despawnea al bajar maxMinions», era FALSO). El bonus
+            // de slots del libro solo vive mientras está SOSTENIDO o en
+            // la BARRA RÁPIDA: el tick en que el libro salía de ahí —
+            // AL CURSOR al reorganizar el inventario, a un cofre, a la
+            // hucha, al inventario profundo — el bonus se esfumaba y el
+            // escuadrón entero moría EN UN SOLO TICK, «sin razón".
+            //
+            // LA LEY NUEVA: el techo PUEDE bajar (guardado el libro, ya
+            // no se invoca más de lo que el cuerpo aguanta) — pero
+            // JAMÁS por debajo de lo que YA ESTÁ VIVO: mientras el
+            // libro siga contando (barra rápida) o quede algún OJO del
+            // Eterno en el aire, los slots en uso son LEGALES.
+            // ============================================================
+            {
+                int tipoOjo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                float slotsEnUso = 0f;
+                bool hayOjos = false;
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || !p.minion) continue;
+                    if (p.owner != Player.whoAmI) continue;
+                    slotsEnUso += p.minionSlots;      // lo que vanilla va a contar
+                    if (p.type == tipoOjo) hayOjos = true;
+                }
+                // el techo vivo: libro a mano (nivel) O ojos viviendo
+                if (nivel > 0 || hayOjos)
+                {
+                    int techoVivo = (int)Math.Ceiling(slotsEnUso);
+                    if (techoVivo > Player.maxMinions)
+                        Player.maxMinions = techoVivo;
+                }
+            }
+
             if (nivel <= 0) return;
             bool sostenido = NivelLibro(true) > 0;
 
@@ -210,8 +253,10 @@ namespace AethonMod.Content.Players
             // Slots de minion: base del juego + los del libro (nivel/10,
             // tope +10 al nivel 100). Se SUMA a lo que el resto del
             // equipamiento dé. Guardado el libro, la capacidad baja —
-            // pero los minions YA invocados permanecen (vanilla no los
-            // despawnea al bajar maxMinions: se van al desinvocarlos).
+            // pero los minions YA invocados permanecen: LA PROMESA
+            // CUMPLIDA de arriba clava el techo en lo vivo (v6.50.111:
+            // vanilla SÍ los culla tick a tick si se pasa del máximo —
+            // el fix llega tras ver al escuadrón morir «solo").
             Player.maxMinions += WeaponScaling.BonusMinionSlots(nivel);
 
             // === RECURSOS: completos al sostener, tope +100 en la barra ===

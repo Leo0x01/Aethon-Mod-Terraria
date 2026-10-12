@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Buffs
 {
     /// <summary>
-    /// OjoEternoBuff — v6.50.105 — el buff de LOS OJOS DEL ETERNO.
+    /// OjoEternoBuff — v6.50.111 — el buff de LOS OJOS DEL ETERNO.
     ///
     /// La letra del usuario: «los minion que use el grimorio será su
     /// propio ojo» — los minions del Grimorio del Eterno ya no son el
@@ -13,11 +13,22 @@ namespace AethonMod.Content.Buffs
     /// disparan el rayo Perlin negro de bordes morados.
     ///
     /// El patrón del Orbe Cósmico (v6.50.3: el timeLeft nunca expira) y
-    /// la textura del buff es EL OJO ABIERTO (el mismo sprite del minion).
+    /// v6.50.111 — EL ICONO PROPIO: la letra «el icono que muestra el
+    /// buff del minion es demasiado grande» — este buff apuntaba su
+    /// textura AL SPRITE DEL PROYECTIL (56×54) y el HUD dibuja la
+    /// textura TAL CUAL: salía GIGANTE, montado sobre los vecinos. El
+    /// icono ahora es Content/Buffs/OjoEternoBuff.png (32×32 — el
+    /// estándar de los otros 10 buffs de la casa): EL OJO COMPUESTO —
+    /// la base OjoEterno_Abierto CON EL IRIS en su reposo (en runtime
+    /// el iris se dibuja aparte), reducido a 32×32 por
+    /// tools/gen_icono_ojo_v650111.py. Si un día se cambia el arte:
+    /// REEMPLAZAR ese .png manteniendo 32×32.
     /// </summary>
     public class OjoEternoBuff : ModBuff
     {
-        public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
+        // (v6.50.105-110 apuntaba a Content/Projectiles/OjoEterno_Abierto,
+        //  56×54 — el HUD lo dibujaba ENORME. Textura por convención: el
+        //  .png junto al .cs, 32×32 como los demás buffs.)
 
         public override void SetStaticDefaults()
         {

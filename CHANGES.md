@@ -1,5 +1,67 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.111 — LA PROMESA CUMPLIDA Y EL ICONO DEL OJO
+
+**La letra**: «que raro, a veces los minion se desactivan por si solo» +
+«el icono que muestra el buff del minion es demasiado grande dame un
+prompt para crear un icono adecuado en una IA de arte».
+
+**EL CAMBIO**: dos entregas — el fix de la masacre invisible y el
+icono propio del buff:
+
+- **LA PROMESA CUMPLIDA (el fix de «se desactivan por sí solos»)**:
+  el diagnóstico llegó por DECOMPILACIÓN del tML real del usuario
+  (2026.8.3.0): `Terraria.Projectile.Update` CULLA minions CADA TICK —
+  «`si player.slotsMinions + minionSlots > maxMinions → Kill()`» (y
+  `numMinions`/`slotsMinions` se ponen a 0 cada tick en
+  `Player.Update`, línea 27272 — el comentario de ShardPlayer «vanilla
+  no los despawnea al bajar maxMinions» era FALSO). El bonus de slots
+  del Eterno (`ShardPlayer.PostUpdateEquips`) solo vive SOSTENIDO o en
+  la BARRA RÁPIDA: el tick en que el libro salía de ahí — AL CURSOR al
+  reorganizar el inventario, a un cofre, a la hucha, al inventario
+  profundo — `maxMinions` se desplomaba y el escuadrón entero moría EN
+  UN SOLO TICK «sin razón» (el ojo nº1 del array sobrevivía: la
+  masacre era parcial y leía «a veces»). LA LEY NUEVA
+  (`PostUpdateEquips`, antes de todo): el techo de `maxMinions` JAMÁS
+  baja de los slots YA EN USO mientras el libro cuente (`nivel > 0`) o
+  quede un OJO vivo — se suma `minionSlots` de TODOS los minions del
+  jugador (la MISMA cuenta que vanilla hará en el loop de proyectiles:
+  otros minions incluidos) y `Math.Ceiling` de eso clava el piso.
+  Guardado el libro, NO se pueden invocar MÁS ojos (el chequeo del
+  Shoot sigue contando `maxMinions`), pero los vivos PERMANECEN — la
+  promesa original del diseño, ahora de verdad.
+- **EL ICONO DEL OJO (el buff gigante)**: `OjoEternoBuff` apuntaba su
+  textura AL SPRITE DEL PROYECTIL (56×54) y el HUD de buffs dibuja la
+  textura TAL CUAL — el icono salía GIGANTE, montado sobre los buffs
+  vecinos. EL ICONO PROPIO: `Content/Buffs/OjoEternoBuff.png` 32×32
+  (el estándar de los otros 10 buffs de la casa), generado por
+  `tools/gen_icono_ojo_v650111.py`: EL OJO COMPUESTO — la base
+  `OjoEterno_Abierto` CON EL IRIS en su posición de reposo (13×13 en
+  `IRIS_REST` (0,7 · 2,3) — en runtime el iris se dibuja APARTE y el
+  sprite base está sin pupila), reducido a 32×32 con BOX + alfa
+  re-endurecido (candidato FILO — verificado por VLM contra NEAREST y
+  BOX puro: se lee como UN OJO con pupila, nítido, sin artefactos). El
+  `override Texture` MUERE (textura por convención: el .png junto al
+  .cs). Para cambiarlo por arte de IA: REEMPLAZAR ese .png manteniendo
+  32×32 (el PROMPT se entregó en la conversación).
+
+**Verificación**: audit_texturas 0 · oráculo 0/0 (12,1 s) · build real
+0/0 (.tmod 2.604.250 B) · headless serverconfig111 (seed ojo111,
+autocreate) «Sandboxing v6.50.111 → Adding → Configuring → Finalizing
+→ world gen → Server started» 0 EXCEPCIONES · audit_v650111 TODO OK:
+389 entradas (388 + OjoEternoBuff.rawimg 4108 B = 12+32×32×4 magic 1),
+EOF exacto, `Ceiling` VIVO en el heap (la huella del fix — no existe
+en NINGÚN otro .cs), el override Texture MUERTO, la mentira
+«se van al desinvocarlos» MUERTA, la rawimg píxel-idéntica al .png del
+árbol (RGB nulo sólo en alfa 0 — la conversión del packager),
+`OjoEterno_Abierto.rawimg` sigue en el paquete (el ojo EN JUEGO no
+cambió) + la regresión .104–.110 ÍNTEGRA (heap, ldstr UTF-16,
+constantes del IL, hjson ×3 semántico, es-MX byte a byte).
+
+**PUBLICACIÓN**: (ver STABLE-SNAPSHOT) — release con asset
+AethonMod.tmod 2.604.250 B (md5 4987a56f…), CDN verificado byte a
+byte, /releases/latest = v6.50.111.
+
 ## Commit v6.50.110 — LA PRIMERA CENA, LAS TRES VENTANAS, LA ESENCIA DE HAMBRE Y EL ANÁLISIS
 
 **La letra**: «analisa si las estadisticas del grimorio eterno aplican
