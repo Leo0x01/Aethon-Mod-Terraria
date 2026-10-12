@@ -57,9 +57,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private Vector2 _muzzle;        // la punta del bastón (coords de MUNDO)
         private bool _anchored;
 
-        // === LAS CADENAS (hasta 2 saltos desde el ancla) ===
-        private readonly Vector2[] _chainTo = new Vector2[2];
-        private readonly bool[] _chainAlive = new bool[2];
+        // === LAS CADENAS — v6.50.109 LA IRA EN CADENA: en modo OJO el
+        //     número de saltos lo manda el NIVEL del grimorio (base 2,
+        //     +1 cada 20 niveles, tope 7 — WeaponScaling.MinionChainCount);
+        //     el CETRO propio conserva sus 2 saltos de siempre ===
+        private const int MaxCadenasOjo = 7;
+        private readonly Vector2[] _chainTo = new Vector2[MaxCadenasOjo];
+        private readonly bool[] _chainAlive = new bool[MaxCadenasOjo];
 
         private float _age;
 
@@ -263,10 +267,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return _muzzle != Vector2.Zero ? _muzzle : Projectile.Center;
         }
 
+        /// <summary>EL NIVEL DEL OJO (v6.50.109 — la IRA EN CADENA): el
+        /// nivel del grimorio vive en el ai[2] del OJO que disparó (lo
+        /// planta OjoEternoMinion al nacer); con el ojo muerto o
+        /// reciclado, nivel 1 (la base de 2 saltos).</summary>
+        private int NivelDelOjo()
+        {
+            int idx = (int)Projectile.ai[1];
+            if (idx >= 0 && idx < Main.maxProjectiles)
+            {
+                Projectile m = Main.projectile[idx];
+                if (m != null && m.active &&
+                    m.type == ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>()
+                    && m.ai[2] >= 1f)
+                    return (int)m.ai[2];
+            }
+            return 1;
+        }
+
         /// <summary>
-        /// EL GOLPE: radio 100 en el ancla + cadena a 2 enemigos (60%) +
-        /// Electrified. v6.50 — GolpeMotor (el cauce del motor: crítica
-        /// real, varianza, on-hit y sync MP — resuelto en el cliente dueño).
+        /// EL GOLPE: radio 100 en el ancla + cadena (2 saltos — el CETRO;
+        /// en MODO OJO la IRA EN CADENA: +1 salto cada 20 niveles del
+        /// grimorio, tope 7) + Electrified. v6.50 — GolpeMotor (el cauce
+        /// del motor: crítica real, varianza, on-hit y sync MP — resuelto
+        /// en el cliente dueño).
         /// </summary>
         private void Strike()
         {
@@ -284,10 +308,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 golpeados.Add(npc);
             }
 
-            // === LA CADENA: hasta 2 saltos (60% del daño) ===
+            // === LA CADENA: hasta 2 saltos (60% del daño) — el CETRO. En
+            //     el MODO OJO, LA IRA EN CADENA del grimorio: 2 → 7 saltos
+            //     según el nivel (2 + nivel/20, tope 7) ===
+            int numCadenas = Projectile.ai[0] >= 1f
+                ? Content.Systems.WeaponScaling.MinionChainCount(NivelDelOjo())
+                : 2;
             int chainDamage = Math.Max(1, (int)(Projectile.damage * 0.60f));
             Vector2 origin = Projectile.Center;
-            for (int c = 0; c < 2; c++)
+            for (int c = 0; c < numCadenas; c++)
             {
                 NPC best = null;
                 float bestDist = 280f;
@@ -423,7 +452,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 try
                 {
                     // las cadenas (arcos perlin cortos hacia los saltos)
-                    for (int c = 0; c < 2; c++)
+                    for (int c = 0; c < _chainAlive.Length; c++)
                     {
                         if (!_chainAlive[c]) continue;
                         if (!StormLib.IsLit(seed + 47 + c * 31, flick, 0.60f)) continue;

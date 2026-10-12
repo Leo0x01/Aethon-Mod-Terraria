@@ -543,6 +543,11 @@ namespace AethonMod.Content.Weapons
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
                     $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (tope +50% en nivel 100)]"));
+                // v6.50.109 — LA IRA EN CADENA: los rayos de los ojos saltan
+                // a +1 enemigo cada 20 niveles (base 2, tope 7 en nivel 100)
+                int cadenaOjos = WeaponScaling.MinionChainCount(sl.Level);
+                tooltips.Add(new TooltipLine(Mod, "MinionCadena",
+                    $"[c/BE78FD:Rayo en cadena: {cadenaOjos} enemigos (base 2, +1 cada 20 niveles)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
                     $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRange",

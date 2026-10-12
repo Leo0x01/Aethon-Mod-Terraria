@@ -10,42 +10,45 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Projectiles
 {
     /// <summary>
-    /// OJO ETERNO MINION — v6.50.107 — EL TAMAÑO DEL LIBRO, LA LUNA Y EL
-    /// RITMO PROPIO.
+    /// OJO ETERNO MINION — v6.50.109 — LA MITAD Y LA FORMACIÓN GIRATORIA
+    /// DEL RUINOUS.
     ///
-    /// La letra de la .107: «los minion son demasiado grande, deben ser
-    /// más pequeño, el tamaño debe ser el mismo que el del grimorio» +
-    /// «ellos atacan al mismo tiempo, cada ojo debe ser individual y
-    /// deben tener la libertad de atacar cuando quieran y a la velocidad
-    /// que deseen, ya que la velocidad de ataque aumenta en cuanto más
-    /// nivel tenga el grimorio, hasta un máximo de 50% más rápido a
-    /// nivel 100, subiendo a partir de nivel 1» + «el proyectil que usan
-    /// los minion es muy grueso, debe ser un poco más fino» + «la forma
-    /// en la que deben moverse al rededor del libro es orbitar como una
-    /// luna a un planeta, no solo dar vuelta en círculo».
+    /// La letra de la .109: «reduce el tamaño de los minion en un 50% y
+    /// mejora la animación, que sea más parecida a Ruinous_Staff en el
+    /// momento en el que están alrededor del libro» + «añadir una
+    /// estadística para el grimorio eterno que mejore a los minion»
+    /// (LA IRA EN CADENA: los rayos saltan a +1 enemigo cada 20 niveles,
+    /// base 2 → tope 7 en nivel 100 — vive en WeaponScaling.
+    /// MinionChainCount y en TruenoPerlinProjectile.Strike).
     ///
-    /// EL TAMAÑO: el espíritu viste el libro 36×49 a esc 1,15 = 41×56
-    /// px; el ojo (56×54) se pone a ESCALA 0,75 = 42×41 en pantalla — LA
-    /// LUNA CABE EN LA SOMBRA DEL PLANETA. Todo el layout (hitbox, iris,
-    /// mirada, sello) escala con la MISMA constante.
+    /// EL TAMAÑO: ESCALA 0,375 — LA MITAD EXACTA de la .107 (0,75): el
+    /// ojo 56×54 → 21×20 px en pantalla. Hitbox, sello, aliento, iris
+    /// y mirada escalan con la MISMA constante.
     ///
-    /// EL RITMO PROPIO: cada ojo dispara a SU velocidad — 110 ticks de
-    /// base (1,83 s, la del Forbidden Ruin) divididos por la VELOCIDAD
-    /// DE NIVEL (1,0× en nivel 1 subiendo LINEAL hasta 1,5× = un 50%
-    /// más rápido en nivel 100, clavada ahí) y por el RITMO PERSONAL del
-    /// ojo (0,85–1,15 por hash de whoAmI). El primer disparo tras
-    /// invocar cae entre el 35% y el 100% del intervalo: la banda NUNCA
-    /// dispara en bloque — cada ojo es INDIVIDUAL.
+    /// EL RUINOUS (la wiki del Forbidden Ruin — el minion del Ruinous
+    /// Staff): «they form a spinning orbital formation» — los anillos
+    /// GIRAN A VELOCIDAD CONSTANTE (MUERE la elipse kepleriana de la
+    /// .107 con su aceleración de perigeo: el giro leía a tirones), el
+    /// radio RESPIRA despacio (±3,5%) y cada ojo lleva su micro-deriva
+    /// propia (1,6 px, 2D). Y en la carga: «continuously adjusts its
+    /// position to stay along the line segment between the player and
+    /// its target» — el ojo YA NO frena en seco: SE REPOSICIONA
+    /// deslizándose hacia la línea ancla↔presa (una LEVANTADA hacia la
+    /// presa — el movimiento NUNCA muere).
     ///
-    /// LA LUNA: con el libro fuera, cada ojo recorre una ELIPSE (a =
-    /// 62+42k, b = 0,8a) con precesión apsidal lenta y LA SEGUNDA LEY DE
-    /// KEPLER — el área barrida por tick es CONSTANTE ⇒ ACELERA en el
-    /// perigeo (cerca del libro) y FRENA en el apogeo (lejos): ORBITAR,
-    /// no dar vuelta en círculo. La fase de cada ojo vive en el CAMPO DE
-    /// INSTANCIA _faseOrbital (v6.50.108: localAI es float[3] en tML —
-    /// localAI[3] tiraba IndexOutOfRange y los ojos no aparecían) y sólo
-    /// la avanza PasoOrbita (UNA vez por tick, desde la AI — el draw la
-    /// LEE, jamás la mueve).
+    /// EL RITMO PROPIO (la .107, INTACTO): cada ojo dispara a SU
+    /// velocidad — 110 ticks de base divididos por la VELOCIDAD DE
+    /// NIVEL (1,0× en nivel 1 subiendo LINEAL hasta 1,5× = un 50%
+    /// más rápido en nivel 100) y por el RITMO PERSONAL del ojo
+    /// (0,85–1,15 por hash de whoAmI). El primer disparo tras invocar
+    /// cae entre el 35% y el 100% del intervalo: la banda NUNCA dispara
+    /// en bloque — cada ojo es INDIVIDUAL.
+    ///
+    /// LA FASE ORBITAL vive en el CAMPO DE INSTANCIA _faseOrbital
+    /// (v6.50.108: localAI es float[3] en tML — localAI[3] tiraba
+    /// IndexOutOfRange y los ojos no aparecían) y sólo la avanza
+    /// PasoOrbita (UNA vez por tick, desde la AI — el draw la LEE,
+    /// jamás la mueve).
     ///
     /// EL RAYO (la finura de la .107): el proyectil DEL CETRO DEL TRUENO
     /// PERLIN en su modo ojo, un POCO MÁS FINO — funda 6,0 (era 7,5),
@@ -66,12 +69,13 @@ namespace AethonMod.Content.Projectiles
 
         private const int AIM_TICKS = 12;          // la carga del disparo (0,2 s)
 
-        // === EL TAMAÑO DEL LIBRO (la .107: «deben ser más pequeño, el
-        //     tamaño debe ser el mismo que el del grimorio») — el
-        //     ESPÍRITU viste el sprite 36×49 a esc 1,15 = 41×56 px; el
-        //     ojo 56×54 × 0,75 = 42×41: LA LUNA CABE EN LA SOMBRA DEL
-        //     PLANETA. Todo el layout escala con ESTA constante ===
-        private const float ESCALA = 0.75f;
+        // === v6.50.109 — EL TAMAÑO A LA MITAD (la letra: «reduce el
+        //     tamaño de los minion en un 50%»): la .107 los puso al
+        //     tamaño del libro (ESCALA 0,75 = 42×41 px); ahora ESCALA
+        //     0,375 = 21×20 px en pantalla — LA MITAD EXACTA. Todo el
+        //     layout (hitbox, iris, mirada, sello, aliento) escala con
+        //     ESTA constante ===
+        private const float ESCALA = 0.375f;
 
         // === LA CADENCIA INDIVIDUAL (la .107: «cada ojo debe ser
         //     individual y deben tener la libertad de atacar cuando
@@ -222,15 +226,43 @@ namespace AethonMod.Content.Projectiles
             // === LA MÁQUINA (dos modos — la carga y el crucero) ===
             if (modo == MODO_APUNTANDO)
             {
-                Projectile.velocity *= 0.75f;                  // el freno de la carga
+                // === v6.50.109 — EL PLANEO DEL RUINOUS EN LA CARGA (la
+                //     wiki del Forbidden Ruin: «continuously adjusts its
+                //     position to stay along the line segment between
+                //     the player and its target»): MUERE el freno en seco
+                //     (velocity *= 0,75 = el ojo se congelaba); el ojo
+                //     AHORA SE REPOSICIONA deslizándose hacia la línea
+                //     ancla↔presa — el movimiento NUNCA muere, la carga
+                //     se lee como una LEVANTADA hacia la presa ===
                 if (presa == null || !presa.active || presa.life <= 0)
                 {
                     SalirDeFuego();                            // la presa murió esperando
                 }
-                else if (t >= AIM_TICKS)
+                else
                 {
-                    Disparar(presa, nivel);
-                    SalirDeFuego();
+                    Vector2 refPt = libro is Vector2 centroLibro
+                        ? centroLibro : dueño.MountedCenter;
+                    Vector2 aLaPresa = presa.Center - refPt;
+                    float dP = aLaPresa.Length();
+                    if (dP > 0.01f)
+                    {
+                        // el punto de tiro: sobre la línea ancla↔presa,
+                        // acercándose sin abandonar el vecindario del libro
+                        Vector2 ancla = refPt + Vector2.Normalize(aLaPresa)
+                            * Math.Min(dP * 0.35f, 220f);
+                        Vector2 deseada = (ancla - Projectile.Center) * 0.12f;
+                        float vmax = 6f * WeaponScaling.MinionSpeedMult(nivel);
+                        if (deseada.Length() > vmax)
+                            deseada = Vector2.Normalize(deseada) * vmax;
+                        Projectile.velocity = Vector2.Lerp(
+                            Projectile.velocity, deseada, 0.18f);
+                    }
+
+                    if (t >= AIM_TICKS)
+                    {
+                        Disparar(presa, nivel);
+                        SalirDeFuego();
+                    }
                 }
             }
             else
@@ -350,16 +382,22 @@ namespace AethonMod.Content.Projectiles
         // ================================================================
 
         /// <summary>LA FORMACIÓN — la corona viva y las órbitas.
-        /// v6.50.107 — LA ÓRBITA DE LA LUNA (la letra: «la forma en la
-        /// que deben moverse al rededor del libro es orbitar como una
-        /// luna a un planeta, no solo dar vuelta en círculo»): cada ojo
-        /// recorre una ELIPSE con precesión lenta y LA SEGUNDA LEY DE
-        /// KEPLER — el área barrida por tick es CONSTANTE, así que
-        /// ACELERA al pasar cerca del libro y FRENA al alejarse. La fase
-        /// de cada ojo vive en _faseOrbital (v6.50.108) y la avanza
-        /// PasoOrbita (UNA vez por tick, desde la AI); AQUÍ sólo se LEE
-        /// (el draw también la consulta). El anillo k lleva 5+k ojos
-        /// (5, 6, 7… — la letra), contrarrotando.</summary>
+        /// v6.50.109 — LA FORMACIÓN GIRATORIA DEL RUINOUS (la letra:
+        /// «mejora la animación, que sea más parecida a Ruinous_Staff
+        /// en el momento en el que están alrededor del libro» — la wiki:
+        /// «when multiple Forbidden Ruins are summoned, they form a
+        /// spinning orbital formation»): MUERE la elipse kepleriana de
+        /// la .107 (la 2ª ley aceleraba el paso en el perigeo y lo leía
+        /// como un TIRÓN — el giro ya no es constante); NACE el anillo
+        /// que GIRA A VELOCIDAD CONSTANTE — cada anillo es una formación
+        /// giratoria lisa, el radio RESPIRA despacio (±3,5%, 7 s) y cada
+        /// ojo lleva su micro-deriva propia (1,6 px, 2D — antes el vaivén
+        /// era ±3 px verticales a 1,1 rad/s: nervioso). El ojo NUNCA va
+        /// sobre raíles: PERSIGUE su puesto con la ley del planeo (la de
+        /// abajo — la del Ruinous). La fase de cada ojo vive en
+        /// _faseOrbital (v6.50.108) y la avanza PasoOrbita (UNA vez por
+        /// tick, desde la AI); AQUÍ sólo se LEE. El anillo k lleva 5+k
+        /// ojos (5, 6, 7… — la letra), contrarrotando.</summary>
         private Vector2 SlotDeFormacion(Player dueño, Vector2? libro)
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
@@ -367,22 +405,30 @@ namespace AethonMod.Content.Projectiles
 
             if (libro is Vector2 centro)
             {
-                // === LA ÓRBITA: la elipse del anillo k (5, 6, 7, …) ===
+                // === LA ÓRBITA: el anillo k (5, 6, 7, …) GIRANDO LISO ===
                 AnilloDe(idx, out int k, out int enAnillo, out int capAnillo);
-                float a = 62f + 42f * k;                     // semieje mayor
-                float b = a * 0.80f;                         // semieje menor: la órbita INCLINADA
-                float tilt = k * 0.9f
-                    + 0.18f * MathF.Sin(time * 0.07f + k * 1.3f);  // precesión apsidal lenta
+                // v6.50.109: anillos más cerca del libro (46+34k — el ojo
+                // es la MITAD y las órbitas se aprietan en proporción) y el
+                // radio RESPIRA despacio (la formación viva del Ruinous)
+                float radio = (46f + 34f * k)
+                    * (1f + 0.035f * MathF.Sin(time * 0.9f + k * 1.7f));
                 float fase = FaseOrbital(enAnillo, capAnillo, k);
-                Vector2 punto = new Vector2((float)Math.Cos(fase) * a,
-                                             (float)Math.Sin(fase) * b);
-                return centro + punto.RotatedBy(tilt)
-                    // el vaivén propio del anillo (la corona también vive afuera)
-                    + new Vector2(0f, MathF.Sin(time * 1.1f + enAnillo * 1.63f) * 3f);
+                // el anillo casi circular (0,94): la formación giratoria
+                // se lee como UNA RUEDA — sin precesión, sin tirones
+                Vector2 punto = new Vector2((float)Math.Cos(fase) * radio,
+                                             (float)Math.Sin(fase) * radio * 0.94f);
+                // la micro-deriva propia: 1,6 px en 2D, DESPACIO (5–10 s
+                // por ciclo — el vaivén vivo del Forbidden Ruin)
+                Vector2 deriva = new Vector2(
+                    MathF.Sin(time * 0.80f + enAnillo * 2.1f),
+                    MathF.Sin(time * 0.65f + enAnillo * 1.3f)) * 1.6f;
+                return centro + punto + deriva;
             }
 
             // === LA CORONA: el arco sobre la cabeza — se abre con la
-            //     banda (más ojos = arco más largo) y se BALANCEA entero ===
+            //     banda (más ojos = arco más largo) y se BALANCEA entero.
+            //     v6.50.109: radio apretado a la mitad (44+2,4n, tope 70)
+            //     — el ojo es la MITAD y la corona se le acerca ===
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
             float f = (i + 0.5f) / n;
@@ -390,12 +436,12 @@ namespace AethonMod.Content.Projectiles
             float a0 = MathHelper.ToRadians(195f) - abre + MathF.Sin(time * 0.30f) * 0.20f;
             float a1 = MathHelper.ToRadians(345f) + abre + MathF.Sin(time * 0.30f) * 0.20f;
             float angC = MathHelper.Lerp(a0, a1, f);
-            float radioC = Math.Min(56f + n * 2.8f, 88f)
+            float radioC = Math.Min(44f + n * 2.4f, 70f)
                            + MathF.Sin(time * 0.23f) * 3f;       // el radio respira
             Vector2 pos = dueño.MountedCenter + new Vector2(
                 (float)Math.Cos(angC) * radioC,
                 (float)Math.Sin(angC) * radioC);
-            pos.Y += MathF.Sin(time * 1.1f + i * 1.63f) * 3f;    // el vaivén propio
+            pos.Y += MathF.Sin(time * 1.1f + i * 1.63f) * 2f;    // el vaivén propio (mitad)
             return pos;
         }
 
@@ -430,28 +476,27 @@ namespace AethonMod.Content.Projectiles
             return _faseOrbital;
         }
 
-        /// <summary>v6.50.107 — EL PASO DE LA LUNA (UNA vez por tick,
-        /// desde la AI): LA SEGUNDA LEY DE KEPLER — el área barrida por
-        /// tick es constante ⇒ dθ = ω·a²/r²: el ojo ACELERA en el
-        /// perigeo (r corto) y FRENA en el apogeo (r largo). ORBITAR,
-        /// no dar vuelta en círculo. Contrarrotación par/impar; el
-        /// reloj NUNCA se para (ni en la carga del disparo).</summary>
+        /// <summary>v6.50.109 — EL PASO DE LA FORMACIÓN GIRATORIA (UNA
+        /// vez por tick, desde la AI): MUERE la 2ª ley de Kepler de la
+        /// .107 (dθ ∝ a²/r² aceleraba en el perigeo — el ojo LLEGABA y
+        /// se FRENABA y el giro leía a tirones); NACE EL GIRO CONSTANTE
+        /// del Ruinous Staff (la wiki: «a spinning orbital formation»):
+        /// cada anillo gira a velocidad angular FIJA — la formación
+        /// entera se lee como una rueda lisa. Contrarrotación par/impar;
+        /// el reloj NUNCA se para (ni en la carga del disparo).</summary>
         private void PasoOrbita(Vector2? libro)
         {
             if (!(libro is Vector2)) return;            // en la corona no hay luna
             int idx = Math.Max(0, (int)Projectile.minionPos);
             AnilloDe(idx, out int k, out int enAnillo, out int capAnillo);
 
-            float a = 62f + 42f * k;
-            float b = a * 0.80f;
-
             float fase = FaseOrbital(enAnillo, capAnillo, k);
-            float ca = (float)Math.Cos(fase), sa = (float)Math.Sin(fase);
-            float r2 = (a * ca) * (a * ca) + (b * sa) * (b * sa);
-            if (r2 < 1f) r2 = 1f;
 
-            float omega = (k % 2 == 0) ? 0.32f : -0.27f;   // rad/s — contrarrotación
-            float dFase = omega / 60f * (a * a) / r2;      // Kepler: dθ ∝ a²/r²
+            // GIRO CONSTANTE — la formación giratoria del Ruinous: el
+            // anillo par gira a 0,42 rad/s (una vuelta cada ~15 s) y el
+            // impar contrarrota a −0,36 — sin aceleraciones, sin frenos
+            float omega = (k % 2 == 0) ? 0.42f : -0.36f;   // rad/s
+            float dFase = omega / 60f;                     // por tick
             fase += dFase;
             while (fase >= MathHelper.TwoPi) fase -= MathHelper.TwoPi;
             while (fase < 0f) fase += MathHelper.TwoPi;
@@ -514,19 +559,21 @@ namespace AethonMod.Content.Projectiles
 
         /// <summary>EL CÍRCULO MÁGICO — el sello erosionado de los agujeros
         /// negros (OrbitaLib.SigiloErosionado, las runas de RunasAbismo),
-        /// en pequeño alrededor del ojo. En la carga del disparo el sello
-        /// RESPIRA hacia afuera (r 12→15 — v6.50.107: la escala del
-        /// LIBRO, antes 16→20 del ojo grande).</summary>
+        /// en pequeño alrededor del ojo. v6.50.109: TODO escala con ESCALA
+        /// (el ojo es la mitad — el sello también: r = ESCALA·16 ≈ 6 px,
+        /// y en la carga del disparo RESPIRA hacia afuera r → ESCALA·20
+        /// ≈ 7,5 — antes 12→15 del ojo grande de la .107).</summary>
         private void DrawElSello()
         {
             Vector2 pos = Projectile.Center - Main.screenPosition;
             float time = Main.GlobalTimeWrappedHourly;
             int seed = Projectile.whoAmI * 13 + 7;
 
-            // la carga: el sello inhala
-            float r = 12f;
+            // la carga: el sello inhala (ESCALA·16 → ESCALA·20)
+            float r = ESCALA * 16f;
             if (Projectile.ai[0] == MODO_APUNTANDO)
-                r = MathHelper.Lerp(12f, 15f, Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
+                r = MathHelper.Lerp(ESCALA * 16f, ESCALA * 20f,
+                    Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
 
             float glyph = Math.Max(r / 52f, 0.25f) * 1.75f;
 
@@ -539,11 +586,12 @@ namespace AethonMod.Content.Projectiles
                     2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
                     offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
 
-                // la presencia: el aliento violáceo DETRÁS del ojo (la lectura nocturna)
+                // la presencia: el aliento violáceo DETRÁS del ojo (la
+                // lectura nocturna) — a la ESCALA del ojo (la mitad)
                 float pulso = 0.09f + 0.05f * MathF.Sin(time * 2.6f + Projectile.whoAmI);
                 Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
                     new Color(96, 48, 150, 255) * pulso, 0f,
-                    VFXCore.SoftGlow.Size() * 0.5f, new Vector2(2.5f, 2.1f),
+                    VFXCore.SoftGlow.Size() * 0.5f, new Vector2(ESCALA * 3.33f, ESCALA * 2.8f),
                     SpriteEffects.None, 0f);
             }
             finally { Main.spriteBatch.End(); }
@@ -629,11 +677,11 @@ namespace AethonMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            // el ojo viste el TAMAÑO DEL LIBRO (ESCALA 0,75 = 42×41 en
+            // v6.50.109 — el ojo a la MITAD (ESCALA 0,375 = 21×20 en
             // pantalla); la hitbox lógica (la almendra) va adentro — el
             // rayo es el ataque, no el contacto
-            Projectile.width = 25;
-            Projectile.height = 15;
+            Projectile.width = 12;
+            Projectile.height = 8;
             Projectile.tileCollide = false;
             Projectile.friendly = true;
             Projectile.minion = true;

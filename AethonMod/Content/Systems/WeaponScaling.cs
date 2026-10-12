@@ -256,6 +256,20 @@ namespace AethonMod.Content.Systems
             return range;
         }
 
+        /// <summary>v6.50.109 — LA IRA EN CADENA (la letra: «añadir una
+        /// estadística para el grimorio eterno que mejore a los minion»):
+        /// los rayos de los ojos saltan a +1 enemigo extra cada 20 niveles
+        /// — base 2 saltos en nivel 1, tope 7 saltos en nivel 100. El
+        /// cetro propio (TruenoPerlinStaff) NO lee esto: su cadena sigue
+        /// fija en 2 — la estadística es del GRIMORIO y sólo mejoran LOS
+        /// OJOS.</summary>
+        public static int MinionChainCount(int level)
+        {
+            int extra = level / 20;
+            if (extra > 5) extra = 5;
+            return 2 + extra;
+        }
+
         // ================================================================
         //  HITOS (cada 5 niveles, con múltiples mejoras por hito)
         // ================================================================
@@ -350,6 +364,12 @@ namespace AethonMod.Content.Systems
                 if (range < 1500f)
                     rewards.Add("+100px rango detección");
             }
+
+            // v6.50.109 — LA IRA EN CADENA: +1 salto de cadena del rayo de
+            // los ojos cada 20 niveles (nivel 20, 40, 60, 80, 100 — de 2 a 7)
+            if (milestone % 4 == 0
+                && MinionChainCount(level - 5) < MinionChainCount(level))
+                rewards.Add("+1 salto de cadena del rayo");
 
             // Lifesteal +0.1% cada 7 niveles (en hitos cercanos)
             // Nivel 7, 14, 21, 28, 35... = hitos 1.4, 2.8, 4.2, 5.6, 7...
