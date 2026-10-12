@@ -180,8 +180,25 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 if (!TieneElLibro(dueño)) { Projectile.Kill(); return; }
 
                 // v6.50.94 — EL ESPÍRITU ÚNICO (cada 30 t, barato): jamás
-                // dos libros del mismo dueño — véase SoyDuplicado()
-                if (t % 30f == 0f && SoyDuplicado()) { Projectile.Kill(); return; }
+                // dos libros del mismo dueño — véase SoyDuplicado().
+                // v6.50.112 — LA DISOLUCIÓN CON POLVO: con la vuelta lenta
+                // es más fácil que un espíritu que planea a casa pierda
+                // contra un cazador nuevo — que se disuelva EN PANTALLA
+                // (un polvillo de llama de sombra), no un chasquido seco.
+                if (t % 30f == 0f && SoyDuplicado())
+                {
+                    if (Main.netMode != NetmodeID.Server)
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            int d = Dust.NewDust(Projectile.Center - new Vector2(14, 14), 28, 28,
+                                DustID.Shadowflame, 0f, -0.2f, 128, default, 0.6f);
+                            Main.dust[d].noGravity = true;
+                        }
+                    }
+                    Projectile.Kill();
+                    return;
+                }
 
                 if (Modo == MODO_CAZA)
                 {
@@ -198,12 +215,28 @@ namespace AethonMod.Content.Projectiles.Nervioso
             // === EL MOVIMIENTO ===
             if (Modo == MODO_CAZA)
             {
-                // LA VELA (la levitación del Códice Vivo): muelle suave
-                // encima del dueño + el vaivén que respiraba el difunto
+                // v6.50.112 — LA VUELTA DEL PEREZOSO (la letra: «el libro
+                // cuando esta fuera se mueve muy rapido, debe ser mas
+                // lento»): el muelle de la .111 (tirón 0.02, freno 0.90 y
+                // SIN TOPE) pegaba el libro a la cabeza del jugador con
+                // un tirón al 27% MÁS rápido que la carrera y lo
+                // convertía en MISIL al teletransportarse (127 px/t
+                // medidos en simulación) o al caer. EL MUELLE NUEVO:
+                // tirón a menos de la mitad (0.009 — el libro se queda
+                // ATRÁS con elegancia: 42 px al caminar, 127 al
+                // esprintar, los números de tools/sim_libro_v650112.py)
+                // y EL TOPE GRADUADO: 10 px/t cerca del dueño (nunca más
+                // rápido que una caída) subiendo a 20 sólo si quedó muy
+                // lejos (para que un teletransporte no lo pierda: cruza
+                // 1500 px en ~110 t de deriva serena, no en 15 de misil).
                 Vector2 destino = dueño.MountedCenter + new Vector2(0f, -ALTURA_VELA)
                     + new Vector2(MathF.Sin(t * 0.07f) * 10f, MathF.Sin(t * 0.11f) * 14f);
-                Projectile.velocity += (destino - Projectile.Center) * 0.02f;
-                Projectile.velocity *= 0.90f;
+                Projectile.velocity += (destino - Projectile.Center) * 0.009f;
+                Projectile.velocity *= 0.88f;
+                float tope = MathHelper.Clamp(
+                    Vector2.Distance(destino, Projectile.Center) * 0.01f, 10f, 20f);
+                float velCaza = Projectile.velocity.Length();
+                if (velCaza > tope) Projectile.velocity *= tope / velCaza;
 
                 // v6.50.92 — el libro se INCLINA hacia lo que MIRA: su
                 // COMIDA mientras devora (la letra: «el libro debe mirar
@@ -238,7 +271,12 @@ namespace AethonMod.Content.Projectiles.Nervioso
             }
             else
             {
-                // LA VUELTA: acelera hacia su dueño y se guarda al tocarlo
+                // LA VUELTA: planea hacia su dueño y se guarda al tocarlo.
+                // v6.50.112 — EL MISIL MURIÓ (la letra: «debe ser mas
+                // lento»): la vuelta de la .111 aceleraba a 0.90/t con
+                // tope 22 px/t — un ZUMAZO de 9 ticks desde la vela; ahora
+                // es un planeo: 0.32/t de empuje, tope 12 px/t (llega de
+                // la vela en ~15 t, de 300 px en ~41 — la simulación).
                 Vector2 hacia = dueño.MountedCenter - Projectile.Center;
                 if (hacia.Length() < 30f)
                 {
@@ -252,9 +290,9 @@ namespace AethonMod.Content.Projectiles.Nervioso
                     return;
                 }
                 hacia = hacia.SafeNormalize(-Vector2.UnitY);
-                Projectile.velocity += hacia * 0.90f;
+                Projectile.velocity += hacia * 0.32f;
                 float vel = Projectile.velocity.Length();
-                if (vel > 22f) Projectile.velocity *= 22f / vel;
+                if (vel > 12f) Projectile.velocity *= 12f / vel;
                 Projectile.rotation *= 0.90f;
             }
 

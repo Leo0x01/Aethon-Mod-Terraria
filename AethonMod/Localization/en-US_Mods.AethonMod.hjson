@@ -73,6 +73,17 @@ Items: {
 			'''
 	}
 
+	PaginaEnBlanco: {
+		DisplayName: Blank Page
+		Tooltip:
+			'''
+			Wipes the Eternal Grimoire's feast memory.
+			Every boss type will debut its FIRST DINNER again.
+			Reusable — not consumed.
+			Testing item — remove before publishing.
+			'''
+	}
+
 	// v6.50.75 — THE SCRIBE'S HOURGLASS: one click swaps day for night
 	// and night for day (the user's request: "one click and it's day,
 	// another click and it's night").
@@ -2144,6 +2155,11 @@ Carnada: {
 }
 
 EsenciaHambre.Sube: The Eternal Grimoire's appetite rises to {0}%.
+
+PaginaEnBlanco: {
+	Reset: The grimoire forgets its {0} feasts — every boss will debut its first dinner again.
+	Nada: The grimoire remembers no feasts — every first dinner is yet to come.
+}
 
 Hambre: {
 	Barra: Hunger {0}

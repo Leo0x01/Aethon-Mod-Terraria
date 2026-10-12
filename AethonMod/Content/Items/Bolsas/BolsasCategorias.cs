@@ -60,6 +60,12 @@ namespace AethonMod.Content.Items.Bolsas
             // nervioso del Eterno (+5% de hambre por uso, no consumible —
             // la letra: «para comprobar si funciona»).
             l.Add((ModContent.ItemType<Items.EsenciaHambre>(), 1));
+            // v6.50.112 — LA PÁGINA EN BLANCO: el probador de LA PRIMERA
+            // CENA (borra la lista de jefes devorados del portador — cada
+            // tipo de jefe vuelve a estrenar su cena, no consumible — la
+            // letra: «un item que reinicie el contador de los jefes para
+            // verificar como devora los jefes»).
+            l.Add((ModContent.ItemType<Items.PaginaEnBlanco>(), 1));
             // v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA: el probador del
             // cielo («un clic y es de día, otro clic y es de noche») —
             // para ver el ambiente de la oleada en sus dos caras (el

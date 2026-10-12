@@ -73,6 +73,17 @@ Items: {
 			'''
 	}
 
+	PaginaEnBlanco: {
+		DisplayName: Página en Blanco
+		Tooltip:
+			'''
+			Borra la memoria de festines del Grimorio del Eterno.
+			Cada tipo de jefe volverá a estrenar SU PRIMERA CENA.
+			Reutilizable — no se consume.
+			Objeto de pruebas — eliminar antes de publicar.
+			'''
+	}
+
 	// v6.50.75 — THE SCRIBE'S HOURGLASS: one click swaps day for night
 	// and night for day (the user's request: "one click and it's day,
 	// another click and it's night").
@@ -2143,6 +2154,11 @@ Carnada: {
 }
 
 EsenciaHambre.Sube: El apetito del Grimorio del Eterno sube a {0}%.
+
+PaginaEnBlanco: {
+	Reset: El grimorio olvida sus {0} festines — cada jefe volverá a estrenar su primera cena.
+	Nada: El grimorio no recuerda ningún festín — toda primera cena está por ocurrir.
+}
 
 Hambre: {
 	Barra: Hambre {0}
