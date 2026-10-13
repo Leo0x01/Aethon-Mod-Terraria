@@ -2361,7 +2361,9 @@ Ocaso.Rotulo: EL OCASO
 
 Armas: {
         ResonanciaEcos: La resonancia despierta {0} eco(s).
-        SlotsMinionLlenos: Espacios de esbirro llenos: {0}/{1}.
+        GuardianDetenido: El grimorio detiene al guardián en seco: «A ti solo te devoraré UNA vez… con eso me basta.» (+1 nivel)
+        OjoFortalecido: El escuadrón está lleno: el grimorio FORTALECE a un ojo (+{0}% de daño).
+        OjosAlMaximo: Los diez ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 
 Diag: {

@@ -68,22 +68,33 @@ namespace AethonMod.Content.Players
         /// </summary>
         public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
 
+        /// <summary>
+        /// v6.50.115 — ¿Ya ocurrió EL FESTÍN DEL GUARDIÁN? El easter egg de
+        /// la Mazmorra (la letra: «el guardia intenta atacar al jugador
+        /// pero antes de que toque al jugador el grimorio lo detiene y
+        /// hace la animación de devorarlo, esto solo lo hace una vez y
+        /// el grimorio lo dice… esta acción con el guardián le da 1
+        /// nivel completo»): UNA VEZ por portador — la marca persiste en
+        /// el .plr. PaginaEnBlanco también la borra (el probador de
+        /// primeras veces).</summary>
+        public bool GuardianMazmorraDevorado = false;
+
         // ================================================================
         // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
         // ================================================================
 
         /// <summary>El techo de invocación de los ojos para cada jugador
-        /// (cacheado en PostUpdateEquips: 20 + equipo + nivel). Lo lee la
-        /// compuerta del clic derecho del Eterno — NO maxMinions, que el
-        /// techo vivo de la promesa .111 infla (el runaway de los ojos
-        /// sin límite).</summary>
+        /// (cacheado en PostUpdateEquips: el ESCUADRÓN 10 de la .115 —
+        /// PLANO, ya sin equipo ni nivel). Lo lee la compuerta del clic
+        /// derecho del Eterno — NO maxMinions, que el techo vivo de la
+        /// promesa .111 infla (el runaway de los ojos sin límite).</summary>
         private static readonly int[] _techoOjos = new int[Main.maxPlayers];
         /// <summary>El tick del cacheo (frío = aún no corrió el hook).</summary>
         private static readonly uint[] _techoTick = new uint[Main.maxPlayers];
 
         /// <summary>EL TECHO DE INVOCACIÓN de los ojos del Eterno para un
         /// jugador (caliente del cache si el hook ya corrió este tick;
-        /// frío: 20 + nivel sin equipo — el primer tick de todos).</summary>
+        /// frío: el escuadrón 10 — el primer tick de todos).</summary>
         public static int TechoOjosDe(Player p, int nivel)
         {
             if (p == null) return WeaponScaling.TechoOjosEterno(0, nivel);
@@ -880,6 +891,9 @@ namespace AethonMod.Content.Players
                 tag["furiaV2"] = true;
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 tag["jefesDevorados"] = JefesDevorados;
+                // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
+                // Mazmorra: una vez por portador)
+                tag["guardianDevorado"] = GuardianMazmorraDevorado;
             }
             catch { }
         }
@@ -907,6 +921,9 @@ namespace AethonMod.Content.Players
                     FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 JefesDevorados = new System.Collections.Generic.List<int>(tag.GetList<int>("jefesDevorados"));
+                // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
+                // no ocurrió — el guardado viejo estrena el easter egg)
+                GuardianMazmorraDevorado = tag.GetBool("guardianDevorado");
             }
             catch { }
         }

@@ -105,39 +105,37 @@ namespace AethonMod.Content.Systems
         /// <summary>+2 vida max cada 20 niveles (Infinito).</summary>
         public static int BonusLife(int level) => (level / 20) * 2;
 
-        /// <summary>
-        /// v6.46: +1 slot de minion cada 10 NIVELES, tope +10 (nivel 100).
-        /// La capacidad del libro se SUMA a la base del juego y al resto
-        /// del equipamiento. Los slots se sostienen mientras el libro esté
-        /// SOSTENIDO o en la BARRA RÁPIDA; guardado el libro la capacidad
-        /// baja, pero los minions YA invocados permanecen (vanilla no
-        /// despawnea minions al bajar maxMinions — se van al
-        /// desinvocarlos o morir). Antes era +1 cada 5 niveles sin tope:
-        /// la nueva escalera (10 → 1 · 20 → 2 · … · 100 → 10) es la que
-        /// pidió el usuario.
-        /// </summary>
-        public static int BonusMinionSlots(int level)
-        {
-            int extra = level / 10;
-            if (extra > 10) extra = 10;
-            return extra;
-        }
+        // (v6.50.115 — la escalera de +1 slot de minion cada 10 niveles
+        // de la v6.46–.114 MUERE: solo servía para inflar el escuadrón
+        // de los ojos, y el escuadrón de la .115 es LLANO: 10, sin
+        // equipo ni nivel — ver EscuadronEterno abajo. Los minions
+        // VANILLA nunca la leyeron: siguen a maxMinions de siempre.)
+
+        /// <summary>EL ESCUADRÓN DE LOS OJOS DEL ETERNO (la letra .115:
+        /// «en el caso de los minions del grimorio, 30 son demasiado»):
+        /// DIEZ — y la invocación que sería la 11.ª YA NO INVOCA:
+        /// FORTALECE a un ojo vivo (+50% de daño por mejora, 4 mejoras
+        /// máximas — OjoEternoMinion.MejorasDe/Fortalecer).</summary>
+        public const int EscuadronEterno = 10;
 
         /// <summary>
-        /// v6.50.114 — EL TECHO DE LOS OJOS DEL ETERNO (la letra: «deberían
-        /// tener un límite de 10, pero actualiza a que tengan un límite de
-        /// 20 con el libro y más con items y armadura de invocador»):
-        /// ESCUADRÓN BASE 20 + lo que el EQUIPO DE INVOCADOR aporte
-        /// (armadura y accesorios: lo que vanilla suma MÁS ALLÁ de la
-        /// base 1) + la escalera por nivel (el +1 cada 10 de la .109, tope
-        /// +10). Este es el techo PARA INVOCAR (la compuerta del clic
-        /// derecho) — NO el techo vivo de ShardPlayer (la promesa de que
-        /// lo ya vivo no se culla es aparte y sigue en pie).
+        /// v6.50.115 — EL TECHO PLANO DE LOS OJOS DEL ETERNO (la letra:
+        /// «en el caso de los minions del grimorio, 30 son demasiado…
+        /// cuando llegue a 11 minions del grimorio en la siguiente
+        /// invocación no invoca minion, lo que hace es fortalecer a uno
+        /// que ya existe con un 50% de daño»): el 20+equipo+nivel de la
+        /// .114 (que con todo puesto llegaba a 30) MUERE — EL ESCUADRÓN
+        /// SON 10, LLANOS: ni el equipo de invocador ni el nivel del
+        /// libro lo inflan (los minions VANILLA siguen con su
+        /// maxMinions de siempre, sin tocar). La compuerta del clic
+        /// derecho lee ESTE número y, con el escuadrón lleno, cada
+        /// invocación FORTALECE a un ojo existente. (La firma conserva
+        /// los parámetros de la .114 por los call sites — ya no
+        /// cuentan: el tope es un PISO de maxMinions y NADA más.)
         /// </summary>
         public static int TechoOjosEterno(int equipoInvocador, int nivel)
         {
-            if (equipoInvocador < 0) equipoInvocador = 0;
-            return 20 + equipoInvocador + BonusMinionSlots(nivel);
+            return EscuadronEterno;
         }
 
         // ================================================================

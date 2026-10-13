@@ -5,8 +5,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.Projectiles.Sombras;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
@@ -115,6 +117,12 @@ namespace AethonMod.Content.Globals
         /// <summary>whoAmI del jefe en LA PRIMERA CENA activa (-1 = ninguna): los gemelos esperan su turno.</summary>
         private static int _cenaActiva = -1;
 
+        // === v6.50.115 — EL PORTADOR DE LA CENA: el preso cuelga ENCIMA
+        //     DE ÉL (la letra: «es mejor ubicar al jefe encima del
+        //     jugador y que el grimorio se ponga a un lado para devorar
+        //     al jefe») — el motor necesita saber QUIÉN lo peleó ===
+        private static int _cenaPortador = -1;
+
         // === LAS MARCAS (golpe mortal de nuestras armas) ===
         // whoAmI del jefe → tick de caducidad. La marca vive 5 s: si otra
         // cosa lo mata después, la muerte es de esa otra cosa.
@@ -201,6 +209,12 @@ namespace AethonMod.Content.Globals
         private static bool PrimeraCenaPendiente(NPC jefe, out Player portador)
         {
             portador = null;
+            // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO PASA POR
+            //     AQUÍ: su devoración es EXCLUSIVA del easter egg (lo
+            //     DETIENE a un paso del portador — IntentarDetenerGuardian);
+            //     matarlo a distancia es una muerte normal, sin cena ===
+            if (jefe.type == NPCID.DungeonGuardian) return false;
+
             // la cena única: si YA hay una en marcha, el próximo jefe espera
             if (_cenaActiva >= 0)
             {
@@ -254,6 +268,7 @@ namespace AethonMod.Content.Globals
             g._posCenaBase = jefe.Center;
             g._posCenaLista = true;
             _cenaActiva = jefe.whoAmI;
+            _cenaPortador = portador.whoAmI;   // v6.50.115: el preso cuelga ENCIMA de él
 
             jefe.life = VidaUmbralPrimeraCena;    // se detiene EN 100
             jefe.active = true;
@@ -397,6 +412,21 @@ namespace AethonMod.Content.Globals
 
         public override bool PreAI(NPC npc)
         {
+            // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el
+            //     easter egg de la letra: «en su fase de guardián… el
+            //     guardia intenta atacar al jugador pero antes de que
+            //     toque al jugador el grimorio lo detiene y hace la
+            //     animación de devorarlo, esto solo lo hace una vez y el
+            //     grimorio lo dice… esta acción con el guardián le da 1
+            //     nivel completo»): la arremetida del guardián se
+            //     intercepta A UN PASO del portador — el libro lo DETIENE
+            //     en seco y se lo come ===
+            if (DevorarEstado == 0 && npc.type == NPCID.DungeonGuardian &&
+                Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                IntentarDetenerGuardian(npc);
+            }
+
             // === v6.50.110 — EL GATILLO DE LA PRIMERA CENA: el jefe llegó
             //     a 100 de vida y hay portador con derecho a su primera
             //     cena de ESTE tipo → el jefe SE DETIENE y arranca el cine
@@ -485,12 +515,104 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
+        //  v6.50.115 — EL GUARDIÁN DE LA MAZMORRA: LA DETENCIÓN
+        // ==================================================================
+
+        /// <summary>La distancia de la detención: a UN PASO del portador
+        /// (px — antes de que el guardián lo toque, la letra del easteregg).</summary>
+        private const float GuardianPaso = 250f;
+
+        /// <summary>
+        /// EL EASTEREGG DEL GUARDIÁN (v6.50.115): el Guardián de la
+        /// Mazmorra (la fase de defensa 9999) carga contra el jugador —
+        /// pero ANTES de tocarlo, el grimorio lo DETIENE y lo devora.
+        /// UNA SOLA VEZ por portador (ShardPlayer.GuardianMazmorraDevorado
+        /// — la voz del libro lo anuncia: «solo lo devoraré una vez, con
+        /// eso basta»), y el festín le regala 1 NIVEL COMPLETO al
+        /// Eterno. La devoración usa LA PRIMERA CENA completa (los
+        /// anillos lo aprisionan encima del portador, el libro a un
+        /// costado, la sombra de la página lo devora, loot íntegro).
+        /// </summary>
+        private static void IntentarDetenerGuardian(NPC npc)
+        {
+            if (_cenaActiva >= 0) return;               // la mesa está servida: UNA cena
+            if (npc == null || !npc.active || npc.life <= 0) return;
+
+            for (int i = 0; i < Main.maxPlayers; i++)
+            {
+                Player p = Main.player[i];
+                if (p == null || !p.active || p.dead) continue;
+                if (!TieneEternoVisible(p)) continue;   // el portador del libro, a la mano
+
+                var sp = p.GetModPlayer<Players.ShardPlayer>();
+                if (sp == null) continue;
+                if (sp.GuardianMazmorraDevorado) continue;   // ya ocurrió: SOLO UNA VEZ
+
+                float d = Vector2.Distance(npc.Center, p.Center);
+                if (d > GuardianPaso) continue;             // aún no amenaza a nadie
+
+                // va a por él: la carga del guardián apunta AL portador
+                Vector2 rumbo = p.Center - npc.Center;
+                if (rumbo.LengthSquared() < 1f) continue;
+                if (npc.velocity.LengthSquared() < 4f) continue;      // parado no carga
+                if (Vector2.Dot(npc.velocity, Vector2.Normalize(rumbo)) < 0.35f) continue;
+
+                // === LA MARCA DEL ÚNICO FESTÍN (antes del espectáculo:
+                // aunque el cine se interrumpiera, JAMÁS se repite) ===
+                sp.GuardianMazmorraDevorado = true;
+
+                // === LA VOZ DEL GRIMORIO («solo lo devorará una sola
+                //     vez ya que con eso es suficiente») ===
+                var color = new Color(196, 138, 255);
+                if (Main.netMode == NetmodeID.Server)
+                    EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Armas.GuardianDetenido", color);
+                else if (p.whoAmI == Main.myPlayer)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.GuardianDetenido"), color);
+
+                // === +1 NIVEL COMPLETO al Eterno del portador (la
+                //     recompensa del atajo — SubirNivelDirecto celebra
+                //     con sus efectos de siempre) ===
+                int tipoLibro = ModContent.ItemType<Weapons.GrimoireEternal>();
+                for (int s = 0; s < 59; s++)
+                {
+                    Item inv = p.inventory[s];
+                    if (inv == null || inv.type != tipoLibro) continue;
+                    var sl = inv.GetGlobalItem<ShardLevelItem>();
+                    if (sl != null) sl.SubirNivelDirecto(inv, 1);
+                    break;
+                }
+
+                // === LA DETENCIÓN: el guardián queda PRESO en plena
+                //     carga — la cena completa hace el resto ===
+                ArrancarPrimeraCena(npc, p);
+                return;
+            }
+        }
+
+        // ==================================================================
         //  v6.50.110 — EL MOTOR DE LA PRIMERA CENA (PreAI del estado 3)
         // ==================================================================
 
-        /// <summary>El centro VIVO de la pantalla en coords de mundo (el jefe cuelga de ÉL).</summary>
-        private static Vector2 CentroDePantalla =>
-            Main.screenPosition + new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
+        /// <summary>
+        /// v6.50.115 — EL ANCLA NUEVA: el preso cuelga ENCIMA DEL
+        /// PORTADOR (la letra: «es mejor ubicar al jefe encima del
+        /// jugador»), a un paso sobre su cabeza (margen = medio jefe +
+        /// 120 px — el libro llegará a un COSTADO). Sin portador vivo
+        /// (el que era, cayó), el viejo centro de la pantalla sostiene
+        /// al preso para que el cine no se caiga a pedazos.
+        /// </summary>
+        private Vector2 AnclaSobrePortador(NPC npc)
+        {
+            Player p = _cenaPortador >= 0 && _cenaPortador < Main.maxPlayers
+                ? Main.player[_cenaPortador] : null;
+            if (p != null && p.active && !p.dead)
+            {
+                float margen = MathF.Max(npc.width, npc.height) * 0.62f + 120f;
+                return p.MountedCenter + new Vector2(0f, -margen);
+            }
+            return Main.screenPosition + new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f
+                - new Vector2(0f, 120f);
+        }
 
         private void PrimeraCenaPreAI(NPC npc)
         {
@@ -539,18 +661,20 @@ namespace AethonMod.Content.Globals
             if (t == 345) Sonar(SoundID.Item122.WithPitchOffset(0.34f).WithVolumeScale(0.6f), npc.Center);   // el trago
             if (t == 400) Sonar(SoundID.Item122.WithPitchOffset(0.48f).WithVolumeScale(0.8f), npc.Center);   // v6.50.114: EL LIBRO SE CIERRA
 
-            // === LA ELEVACIÓN AL CENTRO DE LA PANTALLA (la letra: los
-            //     círculos «lo levantan y llevan al centro de la
-            //     pantalla»): sube −90 px, VIAJA al centro y de allí
-            //     CUELGA del centro vivo (si el portador camina, el
-            //     preso lo sigue) con el vaivén del aprisionado ===
+            // === v6.50.115 — LA ELEVACIÓN SOBRE EL PORTADOR (la letra:
+            //     «ubicar al jefe encima del jugador y que el grimorio se
+            //     ponga a un lado para devorar al jefe»): sube −90 px,
+            //     VIAJA al ancla y de allí CUELGA del portador vivo (si
+            //     camina, el preso lo sigue) con el vaivén del aprisionado
+            //     — el centro de la pantalla MUERE como destino ===
             if (t >= 60)
             {
                 float subir = MathHelper.Clamp((t - 60) / 40f, 0f, 1f);
                 float viajar = MathHelper.Clamp((t - 100) / 50f, 0f, 1f);
                 Vector2 levantado = _posCenaBase + new Vector2(0f, -90f * MathHelper.SmoothStep(0f, 1f, subir));
-                Vector2 destino = t >= 150 ? CentroDePantalla
-                    : Vector2.Lerp(levantado, CentroDePantalla, MathHelper.SmoothStep(0f, 1f, viajar));
+                Vector2 ancla = AnclaSobrePortador(npc);
+                Vector2 destino = t >= 150 ? ancla
+                    : Vector2.Lerp(levantado, ancla, MathHelper.SmoothStep(0f, 1f, viajar));
                 float vaivén = t < 175 ? 1f : 0.4f;
                 destino += new Vector2(MathF.Sin(t * 0.31f) * 3f, MathF.Sin(t * 0.23f) * 4f) * vaivén;
                 npc.Center = destino;
@@ -581,6 +705,7 @@ namespace AethonMod.Content.Globals
             {
                 DevorarEstado = 2;
                 _cenaActiva = -1;
+                _cenaPortador = -1;
                 npc.life = 0;
                 npc.dontTakeDamage = false;
                 npc.netUpdate = true;
@@ -588,9 +713,10 @@ namespace AethonMod.Content.Globals
             }
             else if (t > LargoPrimeraCena + 60)
             {
-                // RED DE SEGURIDAD: jamás un jefe zombi colgado del centro
+                // RED DE SEGURIDAD: jamás un jefe zombi colgado del ancla
                 DevorarEstado = 2;
                 _cenaActiva = -1;
+                _cenaPortador = -1;
                 npc.life = 0;
                 npc.checkDead();
             }

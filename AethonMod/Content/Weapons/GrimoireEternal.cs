@@ -283,29 +283,75 @@ namespace AethonMod.Content.Weapons
                 }
                 _lastMinionFrame = currentFrame;
 
-                // v6.50.114 — EL TECHO DE LOS OJOS (la letra: «deberían
-                // tener un límite de 10, pero actualiza a que tengan un
-                // límite de 20 con el libro y más con items y armadura de
-                // invocador»): la compuerta lee el TECHO cacheado de
-                // ShardPlayer (20 + equipo de invocador + nivel) y NO
-                // player.maxMinions — el techo vivo de la promesa .111
-                // inflaba maxMinions con cada ojo vivo y la compuerta
-                // JAMÁS se cerraba (los ojos sin límite).
+                // v6.50.115 — EL ESCUADRÓN DE 10 Y EL FORTALECIMIENTO (la
+                // letra: «en el caso de los minions del grimorio, 30 son
+                // demasiado… cuando llegue a 11 minions del grimorio en
+                // la siguiente invocación no invoca minion, lo que hace
+                // es fortalecer a uno que ya existe con un 50% de daño»):
+                // el tope son 10 OJOS DEL ETERNO (TechoOjosDe — PLANO,
+                // ya sin equipo ni nivel) y SOLO se cuentan LOS OJOS (los
+                // minions vanilla no ocupan el escuadrón del libro); con
+                // el escuadrón LLENO, la invocación que sería la 11.ª NO
+                // invoca: FORTALECE a un ojo vivo (+50% daño y un anillo
+                // por mejora, 4 mejoras máximas — OjoEternoMinion).
                 int maxMinions = Players.ShardPlayer.TechoOjosDe(player, level);
+                int tipoOjo = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>();
                 int currentMinions = 0;
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
-                    if (Main.projectile[i].active && Main.projectile[i].owner == player.whoAmI &&
-                        Main.projectile[i].minion)
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active && p.owner == player.whoAmI &&
+                        p.type == tipoOjo)
                         currentMinions++;
                 }
 
                 if (currentMinions >= maxMinions)
                 {
+                    // === LA 11.ª INVOCACIÓN FORTALECE: se elige el ojo con
+                    //     MENOS mejoras de la banda (el reparto parejo hace
+                    // que TODO el escuadrón despierte sus anillos) ===
+                    Projectile objetivo = null;
+                    int mejorMenor = int.MaxValue;
+                    for (int i = 0; i < Main.maxProjectiles; i++)
+                    {
+                        Projectile p = Main.projectile[i];
+                        if (p == null || !p.active || p.owner != player.whoAmI ||
+                            p.type != tipoOjo) continue;
+                        int m = global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(p);
+                        if (m >= global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasMax)
+                            continue;                       // ya lleva sus 4 mejoras
+                        if (m < mejorMenor) { mejorMenor = m; objetivo = p; }
+                    }
+
+                    if (objetivo == null)
+                    {
+                        // los diez ojos ya llevan sus cuatro mejoras: no
+                        // queda nada que fortalecer (ni se cobra maná)
+                        if (Main.myPlayer == player.whoAmI)
+                            Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.OjosAlMaximo"),
+                                new Color(255, 120, 120));
+                        return false;
+                    }
+
+                    // el coste del conjuro (fortalecer TAMBIÉN cuesta —
+                    // es una invocación más)
+                    if (!ManaMinionGratis())
+                    {
+                        int minionCost = WeaponScaling.MinionManaCost(level);
+                        if (player.statMana < minionCost && !player.manaFlower) return false;
+                        if (player.statMana >= minionCost)
+                        {
+                            player.statMana -= minionCost;
+                            if (player.statMana < 0) player.statMana = 0;
+                        }
+                    }
+
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Fortalecer(objetivo);
                     if (Main.myPlayer == player.whoAmI)
-                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.SlotsMinionLlenos",
-                            currentMinions, maxMinions),
-                            new Color(255, 120, 120));
+                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.OjoFortalecido",
+                            global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(objetivo) * 50),
+                            new Color(196, 138, 255));
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                     return false;
                 }
 
@@ -583,7 +629,6 @@ namespace AethonMod.Content.Weapons
             //     su festín del primer jefe) ===
             if (ventanaFestin)
             {
-                int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
                 int minionCost = WeaponScaling.MinionManaCost(sl.Level);
                 float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
                 float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
@@ -599,7 +644,7 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
                     "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    $"[c/78FF96:Escuadrón de 20 ojos · +{bonusSlots} por nivel · +equipo de invocador]"));
+                    "[c/78FF96:Escuadrón de 10 ojos · lleno el escuadrón, cada invocación FORTALECE a un ojo (+50% daño · 4 mejoras)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
@@ -623,15 +668,17 @@ namespace AethonMod.Content.Weapons
                     "[c/78788C:Los ojos leen el nivel con el que fueron invocados]"));
 
                 // v6.50.110 — LA PRIMERA CENA: el festín del primer jefe
-                // (v6.50.114: la letra nueva — anillos de agujero negro +
-                // soles rúnicos, al centro y EL LIBRO lo absorbe)
+                // (v6.50.115: la letra nueva — los ANILLOS RÚNICOS de los
+                // agujeros negros + los de los soles lo aprisionan ENCIMA
+                // del portador, el libro a un costado lo mira fijo y LA
+                // SOMBRA DE LA PÁGINA lo devora)
                 tooltips.Add(new TooltipLine(Mod, "SectionCena", "[c/9B59FF:═══ LA PRIMERA CENA ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena",
-                    "[c/9B59FF:Al primer jefe de cada tipo: los anillos del agujero negro]"));
+                    "[c/9B59FF:Al primer jefe de cada tipo: los anillos rúnicos del agujero]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena2",
-                    "[c/9B59FF:y los soles rúnicos lo aprisionan, lo alzan al centro de la]"));
+                    "[c/9B59FF:negro y los soles lo alzan sobre tu cabeza; el libro, a un]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena3",
-                    "[c/9B59FF:pantalla y EL LIBRO lo absorbe entero — botín completo. UNA vez.]"));
+                    "[c/9B59FF:costado, lo mira fijo y LA SOMBRA DE LA PÁGINA lo devora. UNA vez.]"));
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.

@@ -66,7 +66,13 @@ namespace AethonMod.Content.Items
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             int olvidados = sp != null ? sp.JefesDevorados.Count : 0;
             if (sp != null)
+            {
                 sp.JefesDevorados.Clear();
+                // v6.50.115 — EL PACTO DEL GUARDIÁN también se borra: el
+                // easter egg de la Mazmorra vuelve a poder ocurrir (el
+                // probador de PRIMERAS VECES las borra TODAS)
+                sp.GuardianMazmorraDevorado = false;
+            }
 
             // LA VOZ del olvido (en la pantalla del portador): cuántos
             // festines se borraron… o que no había ninguno escrito.

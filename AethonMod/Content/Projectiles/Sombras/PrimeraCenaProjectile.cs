@@ -10,43 +10,56 @@ using AethonMod.Content.Globals;
 namespace AethonMod.Content.Projectiles.Sombras
 {
     /// <summary>
-    /// PRIMERACENAPROJECTILE — v6.50.114 — LA PELÍCULA DEL FESTÍN DEL
-    /// PRIMER JEFE, VERSIÓN EL LIBRO SE LO COME.
+    /// PRIMERACENAPROJECTILE — v6.50.115 — LA PELÍCULA DEL FESTÍN DEL
+    /// PRIMER JEFE: EL LIBRO A UN COSTADO MIRANDO FIJO, LA SOMBRA DE
+    /// LA PÁGINA DEVORA.
     ///
-    /// La letra del usuario (.114): «cuando es absorbido por el grimorio
-    /// no se activa correctamente la animación, el jefe debe ser rodeado
-    /// por anillos iguales a los de los proyectiles agujeros negro y
-    /// además también poner anillos como los de los soles runicos, ser
-    /// llevado al centro de la pantalla y ser absorbido por el libro,
-    /// todo esto en su primera muerte por el grimorio eterno, luego de
-    /// este no vuelve a ocurrir a no ser que vuelva a ser la primera
-    /// vez, esto se aplica a todos los jefes».
+    /// La letra del usuario (.115): «La sombra de la página es
+    /// necesaria ya que es la forma en la que el grimorio debe
+    /// comerse a los jefes… primero quita los 3 anillos de fotones,
+    /// eso no es de lo que estaba hablando, yo lo que me refería era
+    /// a los anillos de los agujeros rúnicos… más los anillos de los
+    /// soles que sí están bien, estos anillos de agujero negro rúnico
+    /// deben brillar… la mayor parte de la animación está bien, solo
+    /// que no está en el centro de la pantalla, se centra en el
+    /// jugador, creo que en este caso es mejor ubicar al jefe encima
+    /// del jugador y que el grimorio se ponga a un lado para devorar
+    /// al jefe, la misma animación pero con la sombra de la página
+    /// saliendo del libro y con el libro mirando fijamente a su
+    /// víctima».
     ///
-    /// LA COREOGRAFÍA (los relojes calzan con FaucesGlobalNPC, que mueve
-    /// al jefe y suelta la muerte real a los 430 t):
-    ///   0-40   EL SELLO — TRES ANILLOS DE FOTONES (los de los AGUJEROS
-    ///          NEGROS: Ring + aberración cromática RGB + el aro blanco
-    ///          caliente) y los ANILLOS RÚNICOS de los SOLES (el mismo
-    ///          emisor de la casa — SigiloLib.SistemaAnillos) se
-    ///          materializan alrededor del jefe detenido.
+    /// LA COREOGRAFÍA (los relojes calzan con FaucesGlobalNPC, que
+    /// mueve al jefe — ENCIMA DEL PORTADOR desde .115 — y suelta la
+    /// muerte real a los 430 t):
+    ///   0-40   EL SELLO — LA TRIPLE CORONA DE CONJURO (LOS ANILLOS
+    ///          RÚNICOS DE LOS AGUJEROS NEGROS: el círculo DORADO de 8
+    ///          runas + el VIOLETA de 6 contrarrotando + el BLANCO
+    ///          íntimo de 6, las runas DE PIE con sus perlas —
+    ///          OrbitaLib.CoronaConjuro, el círculo LITERAL de los
+    ///          vórtices) ABRILLANTADA con su resplandor pulsante, y
+    ///          los ANILLOS RÚNICOS DE LOS SOLES (los que SÍ estaban
+    ///          bien — SigiloLib.SistemaAnillos) se materializan
+    ///          alrededor del jefe detenido. LOS TRES ANILLOS DE
+    ///          FOTONES RGB DE LA .114 MUEREN (no eran los de la
+    ///          letra).
     ///   40-60  LA CONTRACCIÓN — los aros SE CIERRAN y lo aprisionan.
     ///   60-150 LA ELEVACIÓN — los anillos lo levantan (−90 px) y lo
-    ///          llevan al CENTRO DE LA PANTALLA (lo mueve
-    ///          FaucesGlobalNPC en la autoridad; aquí lo dibujamos
-    ///          colgado de sus aros).
-    ///   150-195 EL LIBRO DESPIERTA — EL GRIMORIO sale de la mano del
-    ///          portador, CRECE (×2,6) y vuela a colgarse DEBAJO del
-    ///          preso; se ABRE (el párpado Medio) y su iris se clava en
-    ///          la comida.
-    ///   195-345 EL FESTÍN — EL LIBRO ABSORBE: los anillos se encienden
-    ///          y exprimen al preso hacia abajo, la bruma y LAS ALMAS
-    ///          corren del jefe a la boca abierta del libro, que mastica
-    ///          (CicloMasticar) y traga con la herida roja encendida.
+    ///          llevan ENCIMA DEL PORTADOR (el ancla .115 del motor).
+    ///   150-195 EL LIBRO DESPIERTA — el Eterno sale de la mano del
+    ///          portador, CRECE ×2,6 y toma su puesto A UN COSTADO del
+    ///          preso, INCLINADO hacia él, MIRÁNDOLO FIJO.
+    ///   175-345 LA SOMBRA DE LA PÁGINA — sale DEL LIBRO (la raíz ya
+    ///          NO es la mano del portador): el cuerpo vivo
+    ///          (ColumnaViva + Masa + bruma + los OJOS que miran al
+    ///          preso + la cabeza de bruma) trepa hacia su víctima y
+    ///          la DEVORA (el Devorador v2, la elipse completa).
+    ///   195-345 EL FESTÍN — las ALMAS y la bruma corren del jefe a la
+    ///          BOCA DEL LIBRO, que mastica (CicloMasticar) con la
+    ///          herida roja encendida; los anillos se EXPRIMEN.
     ///   345-430 EL TRAGO — los anillos ENTEROS se deslizan y colapsan
-    ///          DENTRO del libro (radio → 0 en la boca); el último resto
-    ///          del jefe baja por el embudo; a los 400 EL LIBRO SE
-    ///          CIERRA de golpe (el párpado Cerrado + el chasquido + la
-    ///          onda de choque).
+    ///          DENTRO del libro (radio → 0 en la boca), la sombra
+    ///          VUELVE cargando la masa; a los 400 EL LIBRO SE CIERRA
+    ///          de golpe (el párpado Cerrado + el chasquido + la onda).
     ///   430    LA MUERTE REAL (la suelta FaucesGlobalNPC): loot completo
     ///          — el gore NO se ve (PurgaVisualMuerte lo tapa).
     ///   430-490 EL REGRESO — el libro, saciado, VUELVE a la mano del
@@ -61,9 +74,9 @@ namespace AethonMod.Content.Projectiles.Sombras
         private const float T_CONTRACCION = 40f;
         private const float T_ELEVACION = 60f;
         private const float T_CENTRO = 150f;
-        private const float T_LIBRO = 150f;     // el libro despierta (mismo t que el centro)
+        private const float T_LIBRO = 150f;     // el libro despierta (mismo t que el ancla)
         private const float T_LIBRO_LISTO = 195f;
-        private const float T_FESTIN = 195f;    // la boca ya está debajo: come desde la llegada
+        private const float T_FESTIN = 195f;    // la boca ya está lista: come desde la llegada
         private const float T_TRAGO = 345f;
         private const float T_CIERRE = 400f;    // EL LIBRO SE CIERRA de golpe
         private const float T_MUERTE = 430f;   // == FaucesGlobalNPC.LargoPrimeraCena
@@ -203,44 +216,79 @@ namespace AethonMod.Content.Projectiles.Sombras
             float radioJefe = MathHelper.Clamp(MathF.Max(jefe.width, jefe.height) * 0.62f, 70f, 320f);
 
             // ================================================================
-            //  EL PUNTO DEL LIBRO (mundo): colgado DEBAJO del preso — la
-            //  boca abierta mirando ARRIBA, a su comida
+            //  v6.50.115 — EL PUESTO DEL LIBRO: A UN COSTADO del preso (la
+            //  letra: «el grimorio se ponga a un lado para devorar al
+            //  jefe»), al lado que mira el portador, a la altura del
+            //  pecho del preso — para MIRARLO FIJO de costado
             // ================================================================
-            Vector2 anclaLibro = centroJefe + new Vector2(0f, radioJefe * 0.9f + 96f);
+            int lado = portador != null && portador.active && portador.direction != 0
+                ? portador.direction : 1;
+            Vector2 anclaLibro = centroJefe + new Vector2(lado * (radioJefe + 118f), radioJefe * 0.10f);
+
+            // === LA POSICIÓN VIVA DEL LIBRO (compartida: el dibujo del
+            //     libro Y la raíz de la sombra respiran igual) ===
+            Vector2 posLibro = PosicionVivaDelLibro(portador, anclaLibro, tiempo, t, vivo);
 
             // ================================================================
-            //  ACTO 1 — EL CERCO (0 → la muerte): LOS ANILLOS DE LOS
-            //  AGUJEROS NEGROS (fotones + aberración cromática) y LOS
-            //  ANILLOS RÚNICOS de los soles, aprisionando al jefe
+            //  ACTO 1 — EL CERCO (0 → la muerte): LA TRIPLE CORONA DE
+            //  CONJURO (los ANILLOS RÚNICOS de los AGUJEROS NEGROS,
+            //  ABRILLANTADOS) y LOS ANILLOS RÚNICOS de los soles,
+            //  aprisionando al jefe
             // ================================================================
             if (t < T_MUERTE && presencia > 0.02f)
             {
                 // EL LATIDO del vice (más rápido conforme exprime)
                 float latido = 1f + 0.06f * MathF.Sin(tiempo * (4f + 4f * exprime));
 
-                // los tres radios (×radioJefe): ANCHO → MEDIO → ÍNTIMO
-                float rGrande = MathHelper.Lerp(3.1f, 1.30f, ciñe) * (1f - 0.92f * exprime);
-                float rMedio = MathHelper.Lerp(2.5f, 1.05f, ciñe) * (1f - 0.95f * exprime);
-                float rIntimo = MathHelper.Lerp(1.8f, 0.80f, ciñe) * (1f - 0.97f * exprime);
+                // el radio del vórtice de la corona: se CIÑE al preso (40-60)
+                // y al TRAGO se lo lleva entero (345+)
+                float rBase = MathHelper.Lerp(1.10f, 0.46f, ciñe);
+                rBase = MathHelper.Lerp(rBase, 0.10f, inhala);
+                float rCorona = radioJefe * rBase * latido;
 
                 // durante EL TRAGO el cerco ENTERO se desliza a la boca del
                 // libro y muere ahí (los anillos se lo comen con él)
                 Vector2 centroAros = Vector2.Lerp(centroJefe, anclaLibro, inhala);
                 float alfaAros = presencia * (1f - 0.9f * inhala * inhala);
-
-                // --- 1a. LOS TRES ANILLOS DE FOTONES (lote crudo aditivo) ---
                 Vector2 posPantalla = centroAros - Main.screenPosition;
-                Texture2D ringTex = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Procedural/Ring").Value;
-                Vector2 origenRing = ringTex.Size() * 0.5f;
+
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
                 try
                 {
-                    AnilloFotones(ringTex, origenRing, posPantalla, radioJefe * rGrande * latido, manifiesta, alfaAros, 3.0f);
-                    AnilloFotones(ringTex, origenRing, posPantalla, radioJefe * rMedio * latido, manifiesta, alfaAros, 2.2f);
-                    AnilloFotones(ringTex, origenRing, posPantalla, radioJefe * rIntimo * latido, manifiesta, alfaAros, 1.5f);
+                    // --- 1a. EL ABRILLANTADO (la letra: «estos anillos de
+                    //     agujero negro rúnico deben brillar»): el
+                    //     resplandor DORADO + VIOLETA pulsando DETRÁS de la
+                    //     corona — y ARDE al comer y al tragar ---
+                    float brillo = 0.15f + 0.09f * MathF.Sin(tiempo * 3.1f)
+                        + 0.30f * exprime + 0.25f * inhala;
+                    float g = rCorona * 3.4f;
+                    if (g > 12f)
+                    {
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, posPantalla, null,
+                            new Color(255, 186, 92, 255) * (0.55f * brillo * alfaAros), 0f,
+                            VFXCore.SoftGlow.Size() * 0.5f, new Vector2(g / 64f, g / 64f),
+                            SpriteEffects.None, 0f);
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, posPantalla, null,
+                            new Color(150, 110, 255, 255) * (0.38f * brillo * alfaAros), 0f,
+                            VFXCore.SoftGlow.Size() * 0.5f, new Vector2(g * 1.15f / 64f, g * 1.15f / 64f),
+                            SpriteEffects.None, 0f);
+                    }
+
+                    // --- 1b. LA TRIPLE CORONA DE CONJURO — LOS ANILLOS
+                    //     RÚNICOS DE LOS AGUJEROS NEGROS (la letra .115: NO
+                    //     los fotones RGB de la .114 — el CÍRCULO DE CONJURO
+                    //     LITERAL de los vórtices: el dorado de 8 girando +
+                    //     el violeta de 6 contrarrotando + el blanco íntimo
+                    //     de 6 rápido, las runas DE PIE con sus perlas; y la
+                    //     rueda CORRE al comer) ---
+                    if (rCorona > 4f && alfaAros > 0.04f)
+                    {
+                        float giro = 1f + 0.9f * exprime;    // la rueda corre al comer
+                        OrbitaLib.CoronaConjuro(posPantalla, rCorona, tiempo * giro,
+                            alfaAros * 1.10f, 2.1f);
+                    }
 
                     // LA PLATAFORMA — el aro horizontal BAJO el jefe (el
                     // disco que lo LEVANTA, respirando) — se desliza con los aros
@@ -261,10 +309,11 @@ namespace AethonMod.Content.Projectiles.Sombras
                 }
                 finally { Main.spriteBatch.End(); }
 
-                // --- 1b. LOS ANILLOS RÚNICOS DE LOS SOLES (el emisor
-                //     compartido de la casa — coords de MUNDO en lote VFX):
-                //     tres aros de runas (6·8·10 glifos) que giran, se
-                //     inclinan y al exprimir CORREN más (la rueda viva) ---
+                // --- 1c. LOS ANILLOS RÚNICOS DE LOS SOLES (los que SÍ
+                //     estaban bien — la letra .115; el emisor compartido de
+                //     la casa, coords de MUNDO en lote VFX): tres aros de
+                //     runas (6·8·10 glifos) que giran, se inclinan y al
+                //     exprimir CORREN más (la rueda viva) ---
                 float rRunico = radioJefe * MathHelper.Lerp(2.45f, MathHelper.Lerp(1.45f, 0.15f, inhala), ciñe);
                 if (rRunico > 4f && alfaAros > 0.04f)
                 {
@@ -278,12 +327,94 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             // ================================================================
             //  ACTO 2 — EL LIBRO (T_LIBRO → el regreso): sale de la mano
-            //  del portador, CRECE, vuela a su ancla y ABSORBE al preso
+            //  del portador, CRECE, vuela a su puesto A UN COSTADO del
+            //  preso, se INCLINA hacia él y LO MIRA FIJO mientras come
             // ================================================================
             if (t >= T_LIBRO)
             {
-                DibujarElLibro(jefe, vivo, portador, centroJefe, anclaLibro,
+                DibujarElLibro(jefe, vivo, portador, centroJefe, anclaLibro, posLibro, lado,
                     tiempo, semilla, t, manifiesta, exprime, inhala, poso, presencia);
+            }
+
+            // ================================================================
+            //  ACTO 2b — LA SOMBRA DE LA PÁGINA (T_FESTIN−20 → el poso):
+            //  v6.50.115 — LA SOMBRA VUELVE y sale DEL LIBRO (la letra:
+            //  «con la sombra de la página saliendo del libro» — la raíz
+            //  ya NO es la mano del portador): el cuerpo vivo trepa a su
+            //  víctima y la DEVORA (el patrón .113, enraizado en el libro)
+            // ================================================================
+            if (t >= T_FESTIN - 20f && presencia > 0.02f && t >= T_LIBRO)
+            {
+                float sale = SombrasLib.DeGolpe(MathHelper.Clamp((t - (T_FESTIN - 20f)) / 30f, 0f, 1f));
+                float festin = MathHelper.Clamp((t - T_FESTIN) / 85f, 0f, 1f);     // la cobertura crece
+                float vivoF = vivo ? 1f - 0.75f * poso : 0.25f * (1f - poso);
+
+                // LA RAÍZ: EL LIBRO (la sombra brota de sus páginas abiertas)
+                Vector2 haciaJefe = centroJefe - posLibro;
+                Vector2 rumboRaiz = haciaJefe.LengthSquared() > 4f
+                    ? Vector2.Normalize(haciaJefe) : Vector2.UnitY;
+                Vector2 raiz = posLibro + rumboRaiz * 16f;
+
+                // EL CHARCO bajo el libro (la sombra que gotea de las páginas)
+                SombrasLib.Charco(posLibro + new Vector2(0f, 30f), 52f * sale, 0.7f * vivoF, tiempo, semilla);
+
+                // === EL CUERPO GIGANTE: libro → jefe — y durante EL TRAGO la
+                //     punta VUELVE al libro (la sombra se lleva la nube A CASA) ===
+                float alcance = sale * 0.35f + festin * 0.65f;
+                Vector2 destino = Vector2.Lerp(raiz + rumboRaiz * 42f, centroJefe, alcance);
+                destino = Vector2.Lerp(destino, raiz + rumboRaiz * 18f, inhala * 0.85f);
+                Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 22, 0.20f, gancho: 0.45f);
+                SombrasLib.Masa(col, 12f, 20f, 0.95f * vivoF, semilla, tiempo, grosorCentro: 54f);
+
+                // === LA BRUMA DEL CUERPO GIGANTE (dos capas) ===
+                SombrasLib.BrumaColumna(col, 50f, 0.50f * vivoF, tiempo, semilla, 14);
+                SombrasLib.BrumaColumna(col, 34f, 0.40f * vivoF, tiempo, semilla + 53, 11);
+
+                // === LOS OJOS: TODOS abiertos, TODOS mirando a la víctima ===
+                SombrasLib.OjosDeMasa(col, centroJefe, (0.4f + 0.6f * festin) * vivoF, semilla, tiempo, 7);
+
+                // === LA CABEZA ES BRUMA (la boca de la casa) ===
+                Vector2 punta = col[col.Length - 1];
+                Vector2 rumbo = vivo
+                    ? (centroJefe - punta).SafeNormalize(Vector2.UnitX)
+                    : (raiz - punta).SafeNormalize(-Vector2.UnitY);
+                float muerde = vivo && t >= T_FESTIN ? CicloMasticar(t) : 0.4f;
+                float vigor = MathHelper.Clamp(0.55f + 0.45f * muerde + 0.25f * inhala, 0f, 1f) * vivoF;
+                SombrasLib.CabezaDeBruma(punta, rumbo, vigor, vivoF, tiempo, semilla);
+
+                // === EL DEVORADOR v2 — LA CUBIERTA TOTAL (la elipse REAL
+                //     del preso) que crece con el festín y SE INHALA entera
+                //     hacia la punta durante el trago ===
+                if (vivo)
+                {
+                    float intensidad = MathHelper.Clamp(festin * 0.5f + MathHelper.Clamp((t - T_FESTIN - 85f) / 85f, 0f, 1f) * 0.5f, 0f, 1f);
+                    SombrasLib.Devorador(punta, jefe, intensidad, vivoF, tiempo, semilla, col, trago: inhala);
+
+                    // LA HERIDA: donde la punta ENTERRÓ brilla rojo (digestión)
+                    VFXCore.Begin();
+                    VFXCore.Quad(punta, SombrasLib.Alfa(SombrasLib.Rojo, (0.42f + 0.20f * inhala) * vivoF),
+                        new Vector2(110f, 110f), rumbo.ToRotation());
+                    VFXCore.FlushAdditive();
+                }
+
+                // === LA CORRIENTE DEL TRAGO — la bruma vuelve por el CUERPO
+                //     (la digestión corre hacia el libro) ===
+                if (inhala > 0.05f || !vivo)
+                {
+                    float flujo = MathHelper.Max(inhala, vivo ? 0f : 1f - poso);
+                    for (int k = 0; k < 5; k++)
+                    {
+                        float prog = SombrasLib.Frac(tiempo * 0.8f + k * 0.2f);
+                        float idxF = (1f - prog) * (col.Length - 1);
+                        int idx = Math.Min((int)idxF, col.Length - 2);
+                        if (idx < 0) idx = 0;
+                        Vector2 pos = Vector2.Lerp(col[idx], col[idx + 1], SombrasLib.Frac(idxF))
+                            + new Vector2(MathF.Sin(k * 2.1f + tiempo * 3f) * 14f, -8f);
+                        SombrasLib.Bruma(pos, 26f + 14f * SombrasLib.Frac(k * 0.73f),
+                            0.50f * flujo * vivoF, tiempo, semilla + k * 7,
+                            new Vector2(0f, -26f * flujo));
+                    }
+                }
             }
 
             // ================================================================
@@ -293,10 +424,10 @@ namespace AethonMod.Content.Projectiles.Sombras
             if (t >= T_FESTIN && presencia > 0.02f)
             {
                 float flujo = vivo ? 1f : 1f - poso;
-                Vector2 boca = anclaLibro + new Vector2(0f, -26f);
+                Vector2 boca = posLibro + (centroJefe - posLibro).SafeNormalize(Vector2.UnitX) * 14f;
 
                 // LA BRUMA DE LA CORRIENTE: puffs que nacen alrededor del
-                // preso y se deslizan ABAJO, hacia la boca abierta
+                // preso y se deslizan hacia la boca abierta del libro
                 for (int k = 0; k < 5; k++)
                 {
                     float prog = SombrasLib.Frac(tiempo * 0.55f + k * 0.2f);
@@ -340,42 +471,19 @@ namespace AethonMod.Content.Projectiles.Sombras
         }
 
         // ==================================================================
-        //  EL ANILLO DE FOTONES — el aro de los AGUJEROS NEGROS: la
-        //  aberración cromática (rojo/verde/azul desfasados) y el aro
-        //  BLANCO CALIENTE encima (el patrón exacto del proyectil, a la
-        //  escala del preso)
+        //  LA POSICIÓN VIVA DEL LIBRO (v6.50.115 — COMPARTIDA): el viaje
+        //  mano → el ancla AL COSTADO del preso, el vaivén sereno del
+        //  flotante (y el temblor al masticar), y EL REGRESO al poso.
+        //  El dibujo del libro Y la raíz de la sombra leen ESTA posición
+        //  — la sombra brota de DONDE ESTÁ el libro, no de un ancla muerta.
         // ==================================================================
-        private static void AnilloFotones(Texture2D ringTex, Vector2 origen, Vector2 pos,
-            float radioPx, float manifiesta, float alfa, float aberr)
+        private Vector2 PosicionVivaDelLibro(Player portador, Vector2 anclaLibro,
+            float tiempo, float t, bool vivo)
         {
-            if (radioPx < 2f || alfa <= 0.03f) return;
-            float escala = radioPx / (ringTex.Width * 0.5f);
-            float k = manifiesta * alfa;
-            // la aberración cromática: tres fantasmas RGB desfasados
-            Main.spriteBatch.Draw(ringTex, pos - new Vector2(aberr * 0.8f, 0f), null,
-                new Color(255, 0, 0, 80) * (0.55f * k), 0f, origen, escala, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, pos, null,
-                new Color(0, 255, 0, 80) * (0.55f * k), 0f, origen, escala, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, pos + new Vector2(aberr * 0.8f, 0f), null,
-                new Color(0, 100, 255, 80) * (0.55f * k), 0f, origen, escala, SpriteEffects.None, 0f);
-            // EL ARO CALIENTE (el fotón de verdad)
-            Main.spriteBatch.Draw(ringTex, pos, null,
-                new Color(255, 240, 200, 220) * (0.85f * k), 0f, origen, escala, SpriteEffects.None, 0f);
-        }
-
-        // ==================================================================
-        //  EL LIBRO — el sprite REAL del Eterno (la familia del ojo:
-        //  el mismo cuerpo del Nervioso), GRANDE, volando de la mano del
-        //  portador a su ancla bajo el preso, ABIERTO y comiendo — y al
-        //  final SE CIERRA de golpe y VUELVE
-        // ==================================================================
-        private void DibujarElLibro(NPC jefe, bool vivo, Player portador, Vector2 centroJefe,
-            Vector2 anclaLibro, float tiempo, int semilla, float t,
-            float manifiesta, float exprime, float inhala, float poso, float presencia)
-        {
-            // === EL VIAJE: mano del portador → el ancla bajo el preso ===
             float viaje = MathHelper.Clamp((t - T_LIBRO) / (T_LIBRO_LISTO - T_LIBRO), 0f, 1f);
-            Vector2 raiz = portador.MountedCenter + new Vector2(portador.direction * 12f, 6f);
+            Vector2 raiz = portador != null && portador.active
+                ? portador.MountedCenter + new Vector2(portador.direction * 12f, 6f)
+                : Projectile.Center;
 
             // === EL REGRESO (el poso): saciado, vuelve a la mano ===
             float regreso = vivo ? 0f : MathHelper.Clamp((t - (T_MUERTE + 5f)) / 55f, 0f, 1f);
@@ -386,8 +494,25 @@ namespace AethonMod.Content.Projectiles.Sombras
             float muerde = vivo && t >= T_FESTIN ? CicloMasticar(t) : 0f;
             posMundo += new Vector2(MathF.Sin(tiempo * 1.1f) * 4f,
                 MathF.Sin(tiempo * 1.4f) * 3f - muerde * 3f);
+            return posMundo;
+        }
+
+        // ==================================================================
+        //  EL LIBRO — el sprite REAL del Eterno (la familia del ojo:
+        //  el mismo cuerpo del Nervioso), GRANDE, volando de la mano del
+        //  portador a su puesto AL COSTADO del preso, INCLINADO hacia su
+        //  víctima, ABIERTO y comiendo — y al final SE CIERRA de golpe
+        //  y VUELVE
+        // ==================================================================
+        private void DibujarElLibro(NPC jefe, bool vivo, Player portador, Vector2 centroJefe,
+            Vector2 anclaLibro, Vector2 posMundo, int lado, float tiempo, int semilla, float t,
+            float manifiesta, float exprime, float inhala, float poso, float presencia)
+        {
+            float viaje = MathHelper.Clamp((t - T_LIBRO) / (T_LIBRO_LISTO - T_LIBRO), 0f, 1f);
+            float regreso = vivo ? 0f : MathHelper.Clamp((t - (T_MUERTE + 5f)) / 55f, 0f, 1f);
 
             // === LA ESCALA: crece al salir (1,0 → 2,6), mastica y TRAGA ===
+            float muerde = vivo && t >= T_FESTIN ? CicloMasticar(t) : 0f;
             float esc = MathHelper.Lerp(1.0f, 2.6f, MathHelper.SmoothStep(0f, 1f, viaje));
             esc *= 1f + 0.05f * muerde;                       // el bocado
             esc *= 1f + 0.10f * inhala;                       // el trago hincha
@@ -402,7 +527,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             Vector2 origen = frame.Size() * 0.5f;
             Vector2 pos = posMundo - Main.screenPosition;
             Color luz = Lighting.GetColor(posMundo.ToTileCoordinates());
-            float rot = 0.09f * MathF.Sin(tiempo * 1.25f);
+            // v6.50.115 — EL LIBRO SE INCLINA hacia su víctima (está A UN
+            // COSTADO y la MIRA): el vaivén de siempre + el sesgo del costado
+            float rot = 0.09f * MathF.Sin(tiempo * 1.25f) - lado * 0.30f;
 
             // EL PÁRPADO: ABIERTO comiendo (Medio) — y a los 400 SE CIERRA
             // de golpe (Cerrado): el chasquido del festín
@@ -419,13 +546,13 @@ namespace AethonMod.Content.Projectiles.Sombras
 
                 if (comiendo)
                 {
-                    // la boca: el párpado MEDIO — la página abierta mirando ARRIBA
+                    // la boca: el párpado MEDIO — la página abierta hacia su comida
                     var parpado = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Medio").Value;
                     Main.spriteBatch.Draw(parpado, pos, frame, luz * alfaLibro, rot, origen, esc,
                         SpriteEffects.None, 0f);
 
-                    // LA MIRADA: el iris CLAVADO en su comida (el preso de arriba)
+                    // LA MIRADA: el iris CLAVADO en su víctima (el preso del costado)
                     Vector2 d = centroJefe - posMundo;
                     Vector2 mirada = d.LengthSquared() > 4f
                         ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
@@ -465,7 +592,7 @@ namespace AethonMod.Content.Projectiles.Sombras
             finally { Main.spriteBatch.End(); }
 
             // === EL HALO DEL LIBRO (lote VFX, mundo): la presencia violeta
-            //     que se ENCIEende al comer y ARDE al tragar ===
+            //     que se ENCIENDE al comer y ARDE al tragar ===
             VFXCore.Begin();
             try
             {
@@ -475,11 +602,14 @@ namespace AethonMod.Content.Projectiles.Sombras
                     new Vector2(150f * esc, 150f * esc));
 
                 // LA HERIDA: la boca abierta brilla ROJA mientras come (la
-                // digestión del preso cayendo adentro) — y el destello del
+                // digestión del preso cayendo adentro) — hacia el PRESO
+                // (v6.50.115: el libro está al costado) — y el destello del
                 // CHASQUIDO al cerrarse (la onda que lo sella)
                 if (comiendo)
                 {
-                    VFXCore.Quad(posMundo + new Vector2(0f, -20f * esc),
+                    Vector2 hacia = centroJefe - posMundo;
+                    Vector2 dir = hacia.LengthSquared() > 4f ? Vector2.Normalize(hacia) : -Vector2.UnitY;
+                    VFXCore.Quad(posMundo + dir * 24f * esc,
                         SombrasLib.Alfa(SombrasLib.Rojo, (0.35f + 0.25f * muerde) * presencia),
                         new Vector2(90f * esc, 60f * esc));
                 }

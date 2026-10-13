@@ -119,6 +119,69 @@ namespace AethonMod.Content.Projectiles
         private static readonly Color SelloPunta = new(255, 205, 140);   // la punta pálida
 
         // ================================================================
+        //  v6.50.115 — LAS MEJORAS DEL ESCUADRÓN (la letra: «cuando
+        //  llegue a 11 minions del grimorio en la siguiente invocación
+        //  no invoca minion, lo que hace es fortalecer a uno que ya
+        //  existe con un 50% de daño y una mejora visual en su
+        //  proyectil… la máxima mejora sería cuando un minion gana 2
+        //  anillos rúnicos de agujero negro cada uno con un color
+        //  diferente y además 2 anillos rúnicos de sol a su alrededor…
+        //  por lo tanto 4 mejoras, cada mejora aumenta el ataque del
+        //  minion en un 50%"). Viven en la FRACCIÓN de ai[2] (entero =
+        //  nivel, centésimas = mejoras: 5.03 = nivel 5 con 3 mejoras)
+        //  y viajan solas con el netUpdate del proyectil.
+        // ================================================================
+
+        /// <summary>El tope de mejoras por ojo: 2 anillos rúnicos de
+        /// agujero negro (colores distintos) + 2 anillos rúnicos de sol.</summary>
+        public const int MejorasMax = 4;
+
+        /// <summary>Las mejoras de UN ojo (0..MejorasMax — la centésima de ai[2]).</summary>
+        public static int MejorasDe(Projectile p)
+        {
+            if (p == null || !p.active) return 0;
+            float frac = p.ai[2] - MathF.Floor(p.ai[2]);
+            int m = (int)Math.Round(frac * 100f);
+            if (m < 0) m = 0;
+            if (m > MejorasMax) m = MejorasMax;
+            return m;
+        }
+
+        /// <summary>El multiplicador de daño de las mejoras (+50% por
+        /// mejora — la letra: «cada mejora aumenta el ataque del minion
+        /// en un 50%»: con las 4, el triple del rayo de siempre).</summary>
+        public static float MultMejoras(Projectile p) => 1f + 0.5f * MejorasDe(p);
+
+        /// <summary>
+        /// +1 MEJORA a un ojo vivo (la llama la compuerta del Eterno
+        /// cuando el escuadrón de 10 ya está LLENO): +50% de daño y el
+        /// ANILLO NUEVO de la mejora (1: agujero negro DORADO · 2:
+        /// agujero negro VIOLETA · 3: SOL dorado · 4: SOL azul-estelar).
+        /// </summary>
+        public static void Fortalecer(Projectile p)
+        {
+            if (p == null || !p.active) return;
+            int nivel = (int)MathF.Floor(p.ai[2]);
+            int m = MejorasDe(p);
+            if (m >= MejorasMax) return;
+            m++;
+            p.ai[2] = nivel + m * 0.01f;   // sin deriva: se REESCRIBE entero
+            p.netUpdate = true;
+
+            // EL ESTALLIDO del anillo nuevo (chispas doradas y violetas)
+            if (Main.netMode != NetmodeID.Server)
+            {
+                for (int k = 0; k < 20; k++)
+                {
+                    Dust d = Dust.NewDustPerfect(p.Center,
+                        k % 2 == 0 ? DustID.GoldFlame : DustID.Shadowflame,
+                        Main.rand.NextVector2Circular(4.5f, 4.5f), 128, default, 1.3f);
+                    d.noGravity = true;
+                }
+            }
+        }
+
+        // ================================================================
         //  EL NIVEL (el patrón del Orbe Cósmico: ai[2] desde el spawn)
         // ================================================================
         public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
@@ -359,11 +422,13 @@ namespace AethonMod.Content.Projectiles
 
             // === EL GOLPE: el cauce del cetro (radio + cadena + GolpeMotor
             //     — resuelto por su dueño). El daño del minion escalado
-            //     por nivel, como el contacto de siempre. ===
+            //     por nivel, como el contacto de siempre — Y por SUS
+            //     MEJORAS (v6.50.115: +50% por mejora del escuadrón
+            //     lleno, hasta ×3 con las cuatro). ===
             if (Projectile.owner == Main.myPlayer)
             {
                 int dano = Math.Max(1, (int)(Projectile.damage *
-                    WeaponScaling.MinionContactDamageMult(nivel)));
+                    WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile)));
                 try
                 {
                     Projectile.NewProjectile(
@@ -658,6 +723,48 @@ namespace AethonMod.Content.Projectiles
                     2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
                     offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
 
+                // === v6.50.115 — LOS ANILLOS DE LAS MEJORAS (la letra:
+                //     «cada minion con máxima mejora tendría su anillo
+                //     rúnico de agujero negro con el que aparece al inicio
+                //     más 2 anillos rúnicos de agujero negro extra más 2
+                //     anillos rúnicos de sol») — el sello de arriba ES el
+                //     anillo con el que NACE; las mejoras añaden los
+                //     suyos, CADA UNO DE UN COLOR (los de agujero negro
+                //     aquí en el lote aditivo; los de sol, debajo, en el
+                //     lote VFX de sus elipses inclinadas) ===
+                int mejoras = MejorasDe(Projectile);
+                if (mejoras >= 1)
+                {
+                    // MEJORA 1 — EL ANILLO RÚNICO DE AGUJERO NEGRO DORADO
+                    //     (8 runas de pie girando CW — el círculo dorado
+                    //     de la triple corona, a escala de ojo)
+                    float g1 = Math.Max(15f / 52f, 0.25f) * 1.15f;
+                    OrbitaLib.CirculoRunico(pos, 15f, time, 1f, 8, 0.10f,
+                        OrbitaLib.RunaDorada, OrbitaLib.RunaDoradaTip, g1,
+                        null, 0, 1, 0.95f, 0.30f);
+                }
+                if (mejoras >= 2)
+                {
+                    // MEJORA 2 — EL ANILLO RÚNICO DE AGUJERO NEGRO VIOLETA
+                    //     (6 runas CONTRARROTANDO — el contrarroto arcano,
+                    //     OTRO color como pide la letra)
+                    float g2 = Math.Max(20f / 52f, 0.25f) * 1.15f;
+                    OrbitaLib.CirculoRunico(pos, 20f, time, 1f, 6, -0.075f,
+                        OrbitaLib.RunaVioleta, OrbitaLib.RunaVioletaTip, g2,
+                        null, 3, 1, 0.95f, 0.26f);
+                }
+                if (mejoras > 0)
+                {
+                    // EL RESPLANDOR de las mejoras: cada anillo ganado
+                    // hace al ojo BRILLAR más (la presencia crece)
+                    float brilloM = (0.05f + 0.035f * MathF.Sin(time * 3.2f + Projectile.whoAmI)) * mejoras;
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
+                        new Color(255, 200, 110, 255) * (brilloM * 0.8f), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2((14f + 5f * mejoras) / 64f, (14f + 5f * mejoras) / 64f),
+                        SpriteEffects.None, 0f);
+                }
+
                 // la presencia: el aliento violáceo DETRÁS del ojo (la
                 // lectura nocturna) — a la ESCALA del ojo (la mitad)
                 float pulso = 0.09f + 0.05f * MathF.Sin(time * 2.6f + Projectile.whoAmI);
@@ -667,6 +774,36 @@ namespace AethonMod.Content.Projectiles
                     SpriteEffects.None, 0f);
             }
             finally { Main.spriteBatch.End(); }
+
+            // === v6.50.115 — LOS ANILLOS RÚNICOS DE SOL de las mejoras
+            //     3 y 4 (la letra: «y además 2 anillos rúnicos de sol a
+            //     su alrededor»): las ELIPSES INCLINADAS de los soles
+            //     (SigiloLib — el mismo emisor de los anillos de los
+            //     soles rúnicos), en el lote VFX de coords de mundo ===
+            int mejorasSol = MejorasDe(Projectile);
+            if (mejorasSol >= 3)
+            {
+                VFXCore.Begin();
+                try
+                {
+                    Vector2 centroMundo = Projectile.Center;
+                    // MEJORA 3 — EL ANILLO DEL SOL DORADO (la elipse de los
+                    //     soles, 8 runas cabalgando la tangente)
+                    SigiloLib.AnilloRunico(centroMundo, 25f, 25f * 0.34f, -0.55f,
+                        time * 0.26f, 8, Math.Max(25f / 52f, 0.25f) * 1.45f,
+                        time, 0, SigiloLib.CuerpoOro, SigiloLib.PuntaOro, 0.95f);
+                    if (mejorasSol >= 4)
+                    {
+                        // MEJORA 4 — EL SEGUNDO ANILLO DEL SOL (azul-estelar,
+                        //     contrainclinado y CONTRARROTANDO — el sello frío)
+                        SigiloLib.AnilloRunico(centroMundo, 30f, 30f * 0.41f, 0.35f,
+                            -time * 0.31f, 6, Math.Max(30f / 52f, 0.25f) * 1.45f,
+                            time, 2, SigiloLib.CuerpoAzul, SigiloLib.PuntaAzul, 0.95f);
+                    }
+                    VFXCore.FlushAdditive();
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+            }
         }
 
         /// <summary>EL OJO — el sprite EXACTO del usuario (56×54, sin
