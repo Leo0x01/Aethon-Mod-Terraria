@@ -532,23 +532,54 @@ namespace AethonMod.Content.Projectiles
                 return centro + punto + deriva;
             }
 
-            // === LA CORONA: el arco sobre la cabeza — se abre con la
-            //     banda (más ojos = arco más largo) y se BALANCEA entero.
-            //     v6.50.109: radio apretado a la mitad (44+2,4n, tope 70)
-            //     — el ojo es la MITAD y la corona se le acerca ===
+            // === v6.50.116 — LA CORONA DOBLE (la letra: «debes mejorar
+            //     la animación sobre el jugador ya que se quedan muy
+            //     juntos uno de otros cuando están encima del jugador»):
+            //     UN arco de ~70 px para 11 ojos de 21 px era UNA FILA
+            //     APIÑADA (17 px por ojo — se pisaban las pestañas).
+            //     AHORA la banda se abre en DOS ARCOS ENTRELAZADOS (a lo
+            //     LADRILLO): la primera MITAD cuelga del arco EXTERIOR y
+            //     la segunda del INTERIOR (23 px más cerca, desfasado
+            //     MEDIO PASO) — cada ojo tiene el DOBLE de su cielo
+            //     (11 ojos: 6 fuera a ~35 px por paso + 5 dentro a
+            //     ~34 px). El arco se ABRE con la banda (más ojos = arco
+            //     más largo, ±9°), el radio RESPIRA (±4%, cada arco a su
+            //     reloj) y cada ojo CABECEA a SU propio tempo (±3 px) —
+            //     la corona viva de siempre, sin el embotellamiento ===
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
-            float f = (i + 0.5f) / n;
-            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 7f));  // ±1,5° por ojo, tope ±7°
-            float a0 = MathHelper.ToRadians(195f) - abre + MathF.Sin(time * 0.30f) * 0.20f;
-            float a1 = MathHelper.ToRadians(345f) + abre + MathF.Sin(time * 0.30f) * 0.20f;
+            int capaFuera = (n + 1) / 2;            // 6 si son 11
+            bool fuera = i < capaFuera;
+            int j = fuera ? i : i - capaFuera;      // el puesto DENTRO de su arco
+            int m = fuera ? capaFuera : n - capaFuera;
+            float f = (j + 0.5f) / m;
+
+            // EL ARCO QUE SE ABRE con la banda y se BALANCEA entero
+            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 9f));
+            float vaivén = MathF.Sin(time * 0.30f) * 0.20f;
+            float a0 = MathHelper.ToRadians(195f) - abre + vaivén;
+            float a1 = MathHelper.ToRadians(345f) + abre + vaivén;
+
+            // EL DESFASE DEL LADRILLO: el arco interior cuelga a MEDIAS
+            // entre dos ojos del exterior (nunca uno debajo de otro)
+            float paso = (a1 - a0) / Math.Max(1, m);
             float angC = MathHelper.Lerp(a0, a1, f);
-            float radioC = Math.Min(44f + n * 2.4f, 70f)
-                           + MathF.Sin(time * 0.23f) * 3f;       // el radio respira
+            if (!fuera) angC += paso * 0.5f;
+
+            // EL RADIO QUE RESPIRA (cada arco a SU reloj — el interior
+            // contracorriendo un compás, se leen DOS capas vivas)
+            float radioBase = Math.Min(46f + n * 2.6f, 80f);
+            float radioC = radioBase * (1f + 0.04f *
+                MathF.Sin(time * 0.23f + (fuera ? 0f : 1.2f)));
+            if (!fuera) radioC -= 23f;
+
             Vector2 pos = dueño.MountedCenter + new Vector2(
                 (float)Math.Cos(angC) * radioC,
-                (float)Math.Sin(angC) * radioC);
-            pos.Y += MathF.Sin(time * 1.1f + i * 1.63f) * 2f;    // el vaivén propio (mitad)
+                (float)Math.Sin(angC) * radioC * 0.92f);
+            // EL CABECEO PROPIO: cada ojo a SU reloj (±3 px, lento — la
+            // banda serena de siempre, ahora con aire entre las frentes)
+            pos.Y += MathF.Sin(time * 0.9f + i * 1.9f) * 3f;
+            pos.X += MathF.Sin(time * 0.7f + j * 2.3f + (fuera ? 0f : 0.8f)) * 2f;
             return pos;
         }
 

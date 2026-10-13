@@ -79,6 +79,18 @@ namespace AethonMod.Content.Players
         /// primeras veces).</summary>
         public bool GuardianMazmorraDevorado = false;
 
+        /// <summary>
+        /// v6.50.116 — LA GRACIA DEL GUARDIÁN (la letra: «debes bloquear
+        /// la aparición de guardianes… después de ser devorado por al
+        /// menos 2 minutos… luego hay 2 minutos de gracia antes de que
+        /// vuelvan a aparecer»): el reloj de la tregua — desde el
+        /// mordisco del easteregg, este contador de ticks (7200 = 2 min)
+        /// corre hacia atrás y mientras viva, la mazmorra NO engendra
+        /// guardianes (FaucesGlobalNPC.EditSpawnPool). NO viaja al .plr:
+        /// la gracia es de LA sesión (el pacto en sí es el que persiste).
+        /// </summary>
+        public int GuardianGracia = 0;
+
         // ================================================================
         // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
         // ================================================================
@@ -424,6 +436,13 @@ namespace AethonMod.Content.Players
         {
             try
             {
+                // v6.50.116 — EL RELOJ DE LA GRACIA: la tregua del guardián
+                //     corre hacia atrás en la AUTORIDAD (el pool de spawns
+                //     vive allí; en SP es la misma máquina).
+                if (GuardianGracia > 0 &&
+                    Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
+                    GuardianGracia--;
+
                 // v6.50.1 — FIX (EL HOST SORDO): en un listen server el host
                 // es netMode Server PERO tiene pantalla y es Main.myPlayer —
                 // el guard viejo lo excluía del Libro Celoso y del aura de

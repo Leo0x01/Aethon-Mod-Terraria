@@ -103,7 +103,13 @@ namespace AethonMod.Content.Weapons
         {
             if (presa == null || !presa.active)
                 return 0f;
-            if (presa.boss)
+            // v6.50.116 — EL SELLO VERDADERO: los jefes de oleada mueren
+            //     AISLADOS de vanilla (tipo/netID en 0 — OleadaNPC.
+            //     AislarJefeDeOleada) pero para el LIBRO siguen siendo
+            //     jefes: el festín de la oleada alimenta al Eterno igual
+            //     (la letra: los jefes de oleada «solo afectan al
+            //     grimorio… y al hambre»).
+            if (presa.boss || Globals.OleadaNPC.JefeVerdadero(presa))
                 return 0.10f;                        // EL JEFE: 10% entero
             int estrellas = ShardLevelSystem.EstrellasDe(presa);
             if (estrellas < 1) estrellas = 1;        // la chusma más común: el piso de la 1★
@@ -283,17 +289,17 @@ namespace AethonMod.Content.Weapons
                 }
                 _lastMinionFrame = currentFrame;
 
-                // v6.50.115 — EL ESCUADRÓN DE 10 Y EL FORTALECIMIENTO (la
-                // letra: «en el caso de los minions del grimorio, 30 son
-                // demasiado… cuando llegue a 11 minions del grimorio en
-                // la siguiente invocación no invoca minion, lo que hace
-                // es fortalecer a uno que ya existe con un 50% de daño»):
-                // el tope son 10 OJOS DEL ETERNO (TechoOjosDe — PLANO,
-                // ya sin equipo ni nivel) y SOLO se cuentan LOS OJOS (los
-                // minions vanilla no ocupan el escuadrón del libro); con
-                // el escuadrón LLENO, la invocación que sería la 11.ª NO
-                // invoca: FORTALECE a un ojo vivo (+50% daño y un anillo
-                // por mejora, 4 mejoras máximas — OjoEternoMinion).
+                // v6.50.116 — EL ESCUADRÓN DE 11 Y EL FORTALECIMIENTO (la
+                // letra: «en vez de 10 minion que sean 11, así se ve
+                // mejor en la animación de cuando está el libro fuera»):
+                // el tope son 11 OJOS DEL ETERNO (TechoOjosDe — PLANO,
+                // ya sin equipo ni nivel; con 11 las órbitas del libro
+                // cierran EXACTO: anillo interior de 5 + exterior de 6)
+                // y SOLO se cuentan LOS OJOS (los minions vanilla no
+                // ocupan el escuadrón del libro); con el escuadrón
+                // LLENO, la invocación que sería la 12.ª NO invoca:
+                // FORTALECE a un ojo vivo (+50% daño y un anillo por
+                // mejora, 4 mejoras máximas — OjoEternoMinion).
                 int maxMinions = Players.ShardPlayer.TechoOjosDe(player, level);
                 int tipoOjo = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>();
                 int currentMinions = 0;
@@ -307,7 +313,7 @@ namespace AethonMod.Content.Weapons
 
                 if (currentMinions >= maxMinions)
                 {
-                    // === LA 11.ª INVOCACIÓN FORTALECE: se elige el ojo con
+                    // === LA 12.ª INVOCACIÓN FORTALECE: se elige el ojo con
                     //     MENOS mejoras de la banda (el reparto parejo hace
                     // que TODO el escuadrón despierte sus anillos) ===
                     Projectile objetivo = null;
@@ -325,7 +331,7 @@ namespace AethonMod.Content.Weapons
 
                     if (objetivo == null)
                     {
-                        // los diez ojos ya llevan sus cuatro mejoras: no
+                        // los once ojos ya llevan sus cuatro mejoras: no
                         // queda nada que fortalecer (ni se cobra maná)
                         if (Main.myPlayer == player.whoAmI)
                             Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.OjosAlMaximo"),
@@ -644,7 +650,7 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
                     "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    "[c/78FF96:Escuadrón de 10 ojos · lleno el escuadrón, cada invocación FORTALECE a un ojo (+50% daño · 4 mejoras)]"));
+                    "[c/78FF96:Escuadrón de 11 ojos · lleno el escuadrón, cada invocación FORTALECE a un ojo (+50% daño · 4 mejoras)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",

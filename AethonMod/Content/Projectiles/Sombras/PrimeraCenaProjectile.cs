@@ -561,8 +561,33 @@ namespace AethonMod.Content.Projectiles.Sombras
                     Vector2 posOjo = pos + alOjo.RotatedBy(rot);
                     var iris = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
-                    Main.spriteBatch.Draw(iris, posOjo, null, luz * alfaLibro, rot,
-                        iris.Size() * 0.5f, esc * Weapons.GrimorioHambrientoNervioso.IrisEscala,
+
+                    // === v6.50.116 — EL RECORTES DEL IRIS (la letra:
+                    //     «en el momento en el que el grimorio está
+                    //     devorando este entrecierra los ojos, en ese
+                    //     momento el iris está por encima del ojo…
+                    //     deberías crear un recorte del iris para
+                    //     evitar eso, por ejemplo recortar el iris a la
+                    //     mitad, y que la mitad superior se haga
+                    //     invisible cuando el ojo esté medio cerrado»):
+                    //     con el párpado MEDIO puesto, el iris ya NO se
+                    //     dibuja ENTERO por encima de la página — se
+                    //     recorta DESDE ABAJO (la mitad inferior es la
+                    //     que vive) y la banda visible respira con el
+                    //     masticar: al MORDER (boca cerrada) queda a
+                    //     medias (la mitad superior invisible); al
+                    //     ABRIR el bocado, el recorte afloja hasta casi
+                    //     el iris completo. El recorte viaja en el
+                    //     rectángulo fuente y el origen compensa para
+                    //     que el BORDE INFERIOR del iris quede clavado
+                    //     donde SIEMPRE estuvo (la pupila no salta) ===
+                    float apertura = 0.45f + 0.50f * muerde;   // 0,45 mordida → 0,95 bocado
+                    int corte = (int)(iris.Height * (1f - apertura));
+                    var recorte = new Rectangle(0, corte, iris.Width, iris.Height - corte);
+                    var origenIris = new Vector2(iris.Width * 0.5f,
+                        iris.Height * 0.5f - corte);
+                    Main.spriteBatch.Draw(iris, posOjo, recorte, luz * alfaLibro, rot,
+                        origenIris, esc * Weapons.GrimorioHambrientoNervioso.IrisEscala,
                         SpriteEffects.None, 0f);
                 }
                 else if (cerrado)

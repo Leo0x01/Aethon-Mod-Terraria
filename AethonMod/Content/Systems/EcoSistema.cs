@@ -92,7 +92,14 @@ namespace AethonMod.Content.Systems
         {
             try
             {
-                if (npc == null || !npc.boss) return;
+                // v6.50.116 — EL SELLO VERDADERO: el jefe de oleada muere
+                //     AISLADO de vanilla (boss=false, type=0 — la letra:
+                //     «separados de los logros de sus versiones
+                //     originales») pero LA VOZ es del grimorio — el
+                //     festín derrotó a UN JEFE y el libro lo dice con
+                //     SU especie y SU color verdaderos.
+                if (npc == null ||
+                    !(npc.boss || Globals.OleadaNPC.JefeVerdadero(npc))) return;
                 // v6.50.3 — LA DERROTA COMPLETA (un helper, dos consumidores):
                 // la VOZ (aquí) y LA CRÓNICA del Testigo (GlobalNPCXP) aplican
                 // LAS MISMAS reglas — una derrota, una voz y UNA página. Antes
@@ -103,7 +110,7 @@ namespace AethonMod.Content.Systems
                 // MsgCronica por cada segmento muerto.
                 if (!EsDerrotaCompleta(npc)) return;
 
-                string clave = ClaveDeVoz(npc.type);
+                string clave = ClaveDeVoz(Globals.OleadaNPC.TipoVerdadero(npc));
 
                 // Anti-duplicado: si ambos gemelos caen en el MISMO tick,
                 // OnKill dispara dos veces y los dos ven "no queda gemelo"
@@ -122,7 +129,7 @@ namespace AethonMod.Content.Systems
                 if (string.IsNullOrEmpty(prueba) || prueba.StartsWith("Mods.AethonMod"))
                     claveBase = "Mods.AethonMod.Eco.VozJefe.Desconocido";
 
-                Color tinte = ColorDeVoz(npc.type);
+                Color tinte = ColorDeVoz(Globals.OleadaNPC.TipoVerdadero(npc));
 
                 // v6.50 — TODOS LOS PORTADORES CON LIBRO VISIBLE oyen a SU
                 // propio libro: la variante la reparte la AUTORIDAD

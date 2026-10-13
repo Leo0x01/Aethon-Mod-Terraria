@@ -351,7 +351,18 @@ namespace AethonMod.Content.Globals
         public override bool CheckDead(NPC npc)
         {
             // 2ª pasada (o muerte post-festín): la muerte REAL de vanilla.
-            if (DevorarEstado == 2) return true;
+            // v6.50.116 — EL AISLAMIENTO DEL JEFE DE OLEADA (la letra:
+            //     «los jefes de las oleadas no deben contar para los
+            //     cambios del mundo»): en TODA salida donde la muerte
+            //     de vanilla PROSIGE, el festín entrega al jefe con su
+            //     identidad en el sello y type/netID en 0 — NI flags,
+            //     NI meteorito, NI logros, NI loot vanilla (OleadaNPC.
+            //     AislarJefeDeOleada es un no-op para todo lo demás).
+            if (DevorarEstado == 2)
+            {
+                OleadaNPC.AislarJefeDeOleada(npc);
+                return true;
+            }
 
             // === v6.50.114 — EL DAÑO MASIVO TAMBIÉN CENA (la letra: «cuando
             //     el daño que recibe el jefe es masivo no se aplica eso de
@@ -380,7 +391,12 @@ namespace AethonMod.Content.Globals
             // ¿Marca viva de nuestras armas? (el golpe mortal fue NUESTRO)
             bool marcado = _marcas.TryGetValue(npc.whoAmI, out int caduca)
                 && caduca > 0;
-            if (!marcado) return true;                            // muerte ajena: normal
+            if (!marcado)
+            {
+                // muerte ajena: normal (y el jefe de oleada, aislado)
+                OleadaNPC.AislarJefeDeOleada(npc);
+                return true;
+            }
 
             // v6.50.66 — el estilo 1 (la pinza del gif) murió con su arma:
             // el festín por defecto es la sombra (3).
@@ -522,6 +538,62 @@ namespace AethonMod.Content.Globals
         /// (px — antes de que el guardián lo toque, la letra del easteregg).</summary>
         private const float GuardianPaso = 250f;
 
+        /// <summary>v6.50.116 — LA GRACIA DEL GUARDIÁN (la letra: «debes
+        /// bloquear la aparición de guardianes a solo 1 antes de ser
+        /// devorado y después de ser devorado por al menos 2 minutos…
+        /// luego hay 2 minutos de gracia antes de que vuelvan a
+        /// aparecer»): los ticks (60/s) que la mazmorra queda SIN
+        /// guardianes tras la devoración.</summary>
+        private const int GuardianGraciaTicks = 7200;   // 2 minutos
+
+        /// <summary>
+        /// v6.50.116 — EL GUARDIÁN NO SE AMONTONA (la letra: «si se
+        /// realizó la animación sobre el guardián pero salieron más
+        /// guardianes justo al instante, debes bloquear la aparición
+        /// de guardianes a solo 1 antes de ser devorado y después de
+        /// ser devorado por al menos 2 minutos»): LA PUERTA DEL POOL.
+        /// (1) LA GRACIA: desde el mordisco del easteregg, 2 minutos
+        /// sin NINGÚN guardián (incluye TODA la cena: el preso cuelga
+        /// sobre el portador mientras el libro come — el instante de
+        /// «salieron más guardianes» era justo AHÍ). (2) UNO SOLO:
+        /// mientras el easteregg está PENDIENTE (portador con el Eterno
+        /// a mano y sin pacto aún), no nace un SEGUNDO guardián si ya
+        /// hay uno vivo. El resto del mundo no nota nada: para quien
+        /// no carga el libro, la mazmorra sigue siendo la de siempre.
+        /// </summary>
+        public override void EditSpawnPool(IDictionary<int, float> pool, NPCSpawnInfo spawnInfo)
+        {
+            try
+            {
+                if (!pool.ContainsKey(NPCID.DungeonGuardian)) return;  // ni siquiera en carta
+
+                bool gracia = false;
+                bool pendiente = false;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player p = Main.player[i];
+                    if (p == null || !p.active || p.dead) continue;
+                    var sp = p.GetModPlayer<Players.ShardPlayer>();
+                    if (sp == null) continue;
+                    if (sp.GuardianGracia > 0) gracia = true;          // la tregua del devorado
+                    if (!sp.GuardianMazmorraDevorado && TieneEternoVisible(p))
+                        pendiente = true;                               // el pacto aún no se sella
+                }
+                if (gracia) { pool.Remove(NPCID.DungeonGuardian); return; }
+
+                if (pendiente)
+                {
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n != null && n.active && n.type == NPCID.DungeonGuardian)
+                        { pool.Remove(NPCID.DungeonGuardian); return; } // UNO y solo UNO
+                    }
+                }
+            }
+            catch { }
+        }
+
         /// <summary>
         /// EL EASTEREGG DEL GUARDIÁN (v6.50.115): el Guardián de la
         /// Mazmorra (la fase de defensa 9999) carga contra el jugador —
@@ -558,8 +630,13 @@ namespace AethonMod.Content.Globals
                 if (Vector2.Dot(npc.velocity, Vector2.Normalize(rumbo)) < 0.35f) continue;
 
                 // === LA MARCA DEL ÚNICO FESTÍN (antes del espectáculo:
-                // aunque el cine se interrumpiera, JAMÁS se repite) ===
+                // aunque el cine se interrumpiera, JAMÁS se repite) Y LA
+                // GRACIA DE LOS 2 MINUTOS (v6.50.116 — la letra: «luego
+                // hay 2 minutos de gracia antes de que vuelvan a
+                // aparecer»: desde ESTE instante la mazmorra no pare
+                // guardianes — ni durante la cena ni después) ===
                 sp.GuardianMazmorraDevorado = true;
+                sp.GuardianGracia = GuardianGraciaTicks;
 
                 // === LA VOZ DEL GRIMORIO («solo lo devorará una sola
                 //     vez ya que con eso es suficiente») ===

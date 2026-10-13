@@ -67,6 +67,12 @@ namespace AethonMod.Content.Globals
             if (npc.friendly || npc.townNPC) return;
 
             // === DROP DEL FRAGMENTO GÉNESIS ===
+            // (v6.50.116 — lee el type VIVO a propósito: el jefe de
+            // OLEADA aislado no entrega el fragmento — «los jefes de
+            // oleadas son de oleadas y están separados de sus
+            // versiones originales»: el Génesis es del jefe DE VERDAD,
+            // para el que aún no tiene libro; el festín paga platino y
+            // esencia, no atajos de historia)
             if (npc.type == NPCID.KingSlime || npc.type == NPCID.EyeofCthulhu)
             {
                 Player killer = FindKiller(npc);
@@ -160,9 +166,17 @@ namespace AethonMod.Content.Globals
                     // por si un mod externo los marca.) Ahora: solo derrota
                     // completa, y el paquete SOLO si la página es nueva
                     // (CronicaMarcar devuelve si añadió).
-                    if (npc.boss && EcoSistema.EsDerrotaCompleta(npc))
+                    // v6.50.116 — EL SELLO VERDADERO: el jefe de oleada
+                    //     muere con type/netID en 0 para vanilla (el
+                    //     aislamiento de la letra: «no deben contar para
+                    //     los cambios del mundo»), pero la CRÓNICA del
+                    //     Testigo es DEL GRIMORIO — se escribe con SU
+                    //     especie verdadera.
+                    if ((npc.boss || OleadaNPC.JefeVerdadero(npc)) &&
+                        EcoSistema.EsDerrotaCompleta(npc))
                     {
-                        if (player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type) == true)
+                        if (player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(
+                                OleadaNPC.TipoVerdadero(npc)) == true)
                             EcoRed.SincronizarCronica(player);
                     }
 
@@ -235,9 +249,9 @@ namespace AethonMod.Content.Globals
                     // libro FURIOSO ya no se calma con bocados.
                     if (cobro || xp > 0)
                         player.GetModPlayer<Players.ShardPlayer>()?.RegistrarKill(
-                            npc.type,
+                            OleadaNPC.TipoVerdadero(npc),
                             sello != null && sello.EsDeOleada,
-                            npc.boss);
+                            npc.boss || OleadaNPC.JefeVerdadero(npc));
 
                     // La barra dorada late en la pantalla del dueño del libro
                     // (v6.49: en MP el latido viaja por EcoRed al portador).
@@ -270,7 +284,7 @@ namespace AethonMod.Content.Globals
                     // criatura 5 estrellas que el libro se come merece su
                     // línea ("Lo más raro que ha comido jamás") — una sola
                     // vez por libro, en la primera copia visible.
-                    if (!npc.boss && cobro)
+                    if (!(npc.boss || OleadaNPC.JefeVerdadero(npc)) && cobro)
                     {
                         try
                         {
@@ -303,8 +317,10 @@ namespace AethonMod.Content.Globals
                 // mensaje se activa para todos"). Cada portador oye SOLO
                 // la línea de SU propio grimorio (EcoRed + variantes
                 // repartidas por la autoridad). La XP, arriba, sigue siendo
-                // del que mató.
-                if (npc.boss)
+                // del que mató. v6.50.116 — el jefe de oleada aislado
+                // (boss=false para vanilla) TAMBIÉN habla: su voz es del
+                // grimorio, no de la progresión.
+                if (npc.boss || OleadaNPC.JefeVerdadero(npc))
                     EcoSistema.AnunciarJefeMuerto(npc, player);
             }
             catch { }

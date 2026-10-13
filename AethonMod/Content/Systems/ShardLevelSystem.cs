@@ -97,7 +97,13 @@ namespace AethonMod.Content.Systems
             if (EsParteDeJefe(npc)) return 0;
 
             // === JEFES: XP FIJA, la fuente gorda del libro ===
-            if (npc.boss)
+            // v6.50.116 — EL SELLO VERDADERO: el jefe de oleada muere
+            // AISLADO (type/netID en 0 — Globals.OleadaNPC.AislarJefeDeOleada)
+            // pero su XP es DEL GRIMORIO: la letra manda que el festín
+            // «solo afecta al grimorio… y su propia progresión» — la
+            // fórmula de jefe se cobra IGUAL (lifeMax intacto: el
+            // escalado ×(k+1) del festín sigue pagando su fórmula).
+            if (npc.boss || Globals.OleadaNPC.JefeVerdadero(npc))
                 return XPDeJefe(npc, nivelGrimorio);
 
             // === MOBS: las ESTRELLAS del bestiario (0–5) valen la XP ===

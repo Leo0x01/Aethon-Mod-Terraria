@@ -896,8 +896,14 @@ namespace AethonMod.Content.Systems
             // PostUpdateWorld) queda fuera del festín por AMBAS puertas: no
             // roba el crédito de DerrotaOleada10 ni sufre el timeout como
             // si fuera el guardián.
+            // v6.50.116 — EL SELLO RESERVADO: el jefe muere AISLADO (type
+            // en 0 para vanilla — la letra: «los jefes de las oleadas no
+            // deben contar para los cambios del mundo») — la ESPECIE del
+            // festín se lee TAMBIÉN del sello reservado para que la
+            // victoria del JUICIO siga cobrando su DerrotaOleada10.
             bool esDelFestin = sello != null && sello.EsJefeDeOleada &&
-                _tipoJefeOleada > 0 && jefe.type == _tipoJefeOleada;
+                _tipoJefeOleada > 0 && (jefe.type == _tipoJefeOleada ||
+                sello.TipoReservado == _tipoJefeOleada);
 
             // EL JEFE CALLÓ (vida ≤ 0 con sello) → la oleada se completa
             if (esDelFestin && jefe.life <= 0)

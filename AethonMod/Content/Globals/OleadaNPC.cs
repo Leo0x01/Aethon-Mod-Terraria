@@ -129,6 +129,40 @@ namespace AethonMod.Content.Globals
         /// <summary>El perfil del aura que viste (null = sin aura).</summary>
         public AuraPerfil Aura = null;
 
+        // ================================================================
+        //  v6.50.116 — EL SELLO RESERVADO (la letra: «los jefes de las
+        //  oleadas no deben contar para los cambios del mundo… todos
+        //  los jefes de oleadas son de oleadas y están separados de
+        //  los logros de sus versiones originales así que no afectan
+        //  la progresión del juego, solo afectan al grimorio como tal
+        //  y su propia progresión así como al hambre entre otras cosas
+        //  del grimorio»). El jefe de oleada muere con su IDENTIDAD
+        //  vanilla guardada AQUÍ y el NPC entregado a vanilla con
+        //  type/netID en 0: NI flags de mundo (downedBoss3 y la
+        //  mazmorra abierta por el esqueletrón de la letra), NI
+        //  meteorito (downedBoss2/spawnMeteor), NI logros
+        //  (CountKillForAchievements→NotifyNPCKilled), NI
+        //  celebración, NI loot vanilla (el solver cae por netID) —
+        //  los SEIS jefes del festín pagan SOLO lo del grimorio:
+        //  platino, esencia, XP y hambre (todo el mod lee SU verdad
+        //  por TipoVerdadero/JefeVerdadero).
+        //  VERIFICADO al IL de ESTE tML (2026.08.3.0): NPCLoader.
+        //  CheckDead corre ANTES de NPCLoot; dentro de NPCLoot el
+        //  orden es CountKillForAchievements → bestiario → PreKill →
+        //  loot → OnKill (AQUÍ pagan el mod) → DoDeathEvents (los
+        //  flags — con type 0 el switch no casa NINGÚN caso) →
+        //  dinero (por value, intacto). El netID 0 tiene entrada en
+        //  ContentSamples.NpcBestiaryCreditIdsByNpcNetIds (el bucle
+        //  de Initialize arranca en −65: RegisterKill(0) no truena,
+        //  cuenta en una entrada invisible).
+        // ================================================================
+
+        /// <summary>El type REAL del jefe de oleada aislado (0 = sin
+        /// reservar — vivo o muerto por camino no aislado).</summary>
+        public int TipoReservado = 0;
+        /// <summary>El flag boss REAL del jefe de oleada aislado.</summary>
+        public bool JefeReservado = false;
+
         private int _tickAggro = 0;
         private int _tickAtaque = 0;   // el tempo de los dientes
         private int _tickLunge = 0;    // el tempo de los embites
@@ -1982,6 +2016,73 @@ namespace AethonMod.Content.Globals
             }
         }
         // ==================================================================
+        //  v6.50.116 — EL AISLAMIENTO (los lectores del sello reservado)
+        // ==================================================================
+
+        /// <summary>
+        /// LA PUERTA DEL AISLAMIENTO (la llama FaucesGlobalNPC.CheckDead
+        /// en CADA salida donde la muerte de vanilla PROSIGUE — la cena
+        /// y el festín clásico ya decidieron que NO procede y no la
+        /// llaman): si ESTE npc es un JEFE DEL FESTÍN (sello de oleada +
+        /// npc.boss — las seis unidades jefe: sus segmentos sin
+        /// boss=true jamás dispararon nada en DoDeathEvents), se guarda
+        /// SU identidad en el sello y el NPC se entrega a vanilla con
+        /// type=0/netID=0/boss=false. Idempotente (TipoReservado>0:
+        /// la red de seguridad del festín puede volver a llamar
+        /// checkDead). SOLO corre en la AUTORIDAD (checkDead jamás corre
+        /// en clientes de MP — nada que sincronizar).
+        /// </summary>
+        public static void AislarJefeDeOleada(NPC npc)
+        {
+            try
+            {
+                if (npc == null || !npc.active) return;
+                var sello = npc.GetGlobalNPC<OleadaNPC>();
+                if (sello == null || !sello.EsDeOleada) return;   // no es del festín
+                if (sello.TipoReservado > 0) return;               // ya aislado
+                if (!npc.boss && !sello.JefeReservado) return;     // la chusma muere normal
+
+                sello.TipoReservado = npc.type;
+                sello.JefeReservado = npc.boss;
+                npc.type = 0;
+                npc.netID = 0;
+                npc.boss = false;
+            }
+            catch { }
+        }
+
+        /// <summary>El type VERDADERO de un npc del festín: el del
+        /// sello si el jefe fue aislado, el suyo si no (para TODO el
+        /// mod que cobra por especie — esencias, crónica, registro).</summary>
+        public static int TipoVerdadero(NPC npc)
+        {
+            if (npc == null) return 0;
+            try
+            {
+                var sello = npc.GetGlobalNPC<OleadaNPC>();
+                if (sello != null && sello.TipoReservado > 0) return sello.TipoReservado;
+            }
+            catch { }
+            return npc.type;
+        }
+
+        /// <summary>¿Era un JEFE de verdad? El flag boss del sello si
+        /// fue aislado, el suyo si no (la XP, el hambre del 10%, la
+        /// crónica y la voz del libro lo leen — el festín de la oleada
+        /// sigue siendo UN JEFE para el grimorio).</summary>
+        public static bool JefeVerdadero(NPC npc)
+        {
+            if (npc == null) return false;
+            try
+            {
+                var sello = npc.GetGlobalNPC<OleadaNPC>();
+                if (sello != null && sello.TipoReservado > 0) return sello.JefeReservado;
+            }
+            catch { }
+            return npc.boss;
+        }
+
+        // ==================================================================
         //  LA MUERTE PAGA — monedas y esencias
         // ==================================================================
 
@@ -2024,8 +2125,12 @@ namespace AethonMod.Content.Globals
                         Item.NewItem(src, npc.Center, ItemID.PlatinumCoin, monedas);
 
                     // SU ESENCIA (un alma por guardián — el ítem que sube
-                    // un nivel COMPLETO al libro).
-                    int esencia = EsenciaDeJefeItem.DeNPC(npc.type);
+                    // un nivel COMPLETO al libro). v6.50.116 — EL TIPO
+                    // RESERVADO: el jefe muere aislado (type/netID en 0
+                    // para vanilla — AislarJefeDeOleada) pero SU alma se
+                    // paga con SU especie verdadera.
+                    int esencia = EsenciaDeJefeItem.DeNPC(
+                        TipoReservado > 0 ? TipoReservado : npc.type);
                     if (esencia > 0)
                         Item.NewItem(src, npc.Center, esencia, 1);
                 }
