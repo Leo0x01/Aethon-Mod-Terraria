@@ -1,6 +1,52 @@
-# AethonMod — ESTADO ACTUAL (v6.50.113)
+# AethonMod — ESTADO ACTUAL (v6.50.114)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
+> Última actualización: v6.50.114 (EL DAÑO MASIVO TAMBIÉN CENA,
+> LA PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS. La letra: «cuando el
+> daño que recibe el jefe es masivo no se aplica eso de que su primera
+> muerte sea absorbido por el grimorio» + «el jefe debe ser rodeado por
+> anillos iguales a los de los proyectiles agujeros negro y además
+> también poner anillos como los de los soles runicos, ser llevado al
+> centro de la pantalla y ser absorbido por el libro… esto se aplica a
+> todos los jefes» + «al parecer los minion no tienen limite…
+> deberían tener un limite de 10, pero actualiza a que tengan un limite
+> de 20 con el libro y más con items y armadura de invocador» + «mejora
+> la animación… alrededor del grimorio en su fase de caza… al atacar
+> tenga un pequeño retroceso»). Cuatro entregas: (1) EL FIX MASIVO —
+> el gatillo de PreAI exigía vida > 0 y el golpe que cruzaba a ≤0 sin
+> pasar por las 100 le robaba la cena al portador; ahora CheckDead
+> intercepta la muerte de un golpe ANTES de la marca (la cena tiene
+> prioridad sobre el festín clásico) e Iniciar ENTREGA a la cena en el
+> drain masivo — la primera muerte ES la cena, venga como venga.
+> (2) LA PELÍCULA NUEVA — TRES anillos de FOTONES (Ring + aberración
+> cromática RGB + aro blanco caliente, el patrón exacto del
+> BlackHoleProjectile) + LOS ANILLOS RÚNICOS de los soles
+> (SigiloLib.SistemaAnillos) aprisionan, elevan al centro (motor .110
+> intacto) y EL LIBRO ABSORBE: el Eterno sale de la mano, CRECE ×2,6,
+> cuelga bajo el preso, se ABRE (párpado Medio, iris clavado), come
+> (almas y bruma a SU boca), los anillos colapsan DENTRO del libro y a
+> los 400 SE CIERRA de golpe (Cerrado + chasquido + onda) y VUELVE a
+> la mano — la sombra de la página murió en la cena. (3) EL TECHO DE
+> LOS OJOS — el bug era el techo vivo .111 (cada ojo vivo subía
+> maxMinions → la compuerta jamás se cerraba); ahora
+> WeaponScaling.TechoOjosEterno (20 + equipo de invocador + escalera
+> por nivel tope +10), cacheado por tick en ShardPlayer._techoOjos, y
+> la compuerta lee ShardPlayer.TechoOjosDe (NO maxMinions) — la
+> promesa .111 sigue en pie (el techo nuevo es PISO). (4) LA ÓRBITA Y
+> EL RETROCESO — precesión ±0,30 rad (Saturno, contrarrotante) +
+> estela de tres fantasmas + patada 5,6 con estado de 14 t que la ley
+> del planeo respeta 8 t (la de 3,2 moría en 2-3 t) + pop 1,16 y
+> desplazamiento 6,5 px. .tmod 2.622.071 B md5
+> 887331145f60e46a4cba2282d99a6b43, 390 entradas, oráculo 0/0, build
+> real 0/0, headless 0 excepciones, audit_v650114 TODO OK (237 ✓).
+> PENDIENTE EN JUEGO: (a) matar a un jefe de UN golpe con daño
+> masivo → LA PRIMERA CENA arranca igual (el fix), (b) los anillos de
+> fotones + los rúnicos alrededor del preso, elevado al centro,
+> absorbido POR EL LIBRO (se cierra de golpe a los ~6,6 s y vuelve a
+> la mano), (c) el tope: 20 ojos con el libro (más con equipo de
+> invocador y nivel), la compuerta avisa «Espacios de esbirro llenos»,
+> (d) la órbita cabecea y deja estela, (e) cada disparo REBOTA al ojo,
+> (f) Página en Blanco reinicia la cena de un tipo ya devorado).
 > Última actualización: v6.50.113 (LA SOMBRA COME PLANO, EL
 > MEDIDOR CON DECIMALES Y LOS TRES ICONOS DEL USUARIO. La letra: «si el
 > libro se alimenta por si solo, cada muerte que el libro haga por si
@@ -50,24 +96,6 @@
 > Probador. .tmod 2.605.378 B
 > md5 d46aa5d53086005e12301a0059063ed9, 390 entradas, oráculo 0/0,
 > build real 0/0, headless 0 excepciones, audit 188 ✓.)
-> Última actualización: v6.50.111 (LA PROMESA CUMPLIDA Y EL ICONO DEL
-> OJO. La letra: «que raro, a veces los minion se desactivan por si
-> solo» + «el icono que muestra el buff del minion es demasiado grande
-> dame un prompt para crear un icono adecuado en una IA de arte»).
-> Dos entregas: (1) LA PROMESA CUMPLIDA — el fix de la masacre
-> invisible: vanilla CULLA minions CADA TICK en Projectile.Update
-> («slotsMinions + minionSlots > maxMinions → Kill()», decompilado del
-> tML real 2026.8.3.0); el bonus de slots del Eterno moría el tick en
-> que el libro salía de la barra rápida (AL CURSOR al reorganizar,
-> cofre, hucha, inventario profundo) y el escuadrón entero moría EN UN
-> TICK — ahora el techo de maxMinions JAMÁS baja de los slots YA EN
-> USO (la MISMA suma que vanilla hará: otros minions incluidos)
-> mientras el libro cuente o quede un OJO vivo. (2) EL ICONO DEL OJO —
-> el buff apuntaba al sprite del proyectil (56×54) y el HUD lo dibujaba
-> GIGANTE: icono propio 32×32 (el ojo COMPUESTO con su iris en reposo,
-> generado por tools/gen_icono_ojo_v650111.py, candidato FILO verificado
-> por VLM) + override Texture MUERTO (convención); el PROMPT para
-> reemplazarlo por arte de IA viajó en la conversación.
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1957,7 +1985,33 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
+1. **✅ v6.50.114 PUBLICADA — EL DAÑO MASIVO TAMBIÉN CENA, LA
+   PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS** (la letra: «cuando el
+   daño que recibe el jefe es masivo no se aplica eso de que su
+   primera muerte sea absorbido por el grimorio» + «anillos iguales a
+   los de los proyectiles agujeros negro y además… como los de los
+   soles runicos, ser llevado al centro de la pantalla y ser
+   absorbido por el libro» + «deberían tener un limite de 10, pero…
+   limite de 20 con el libro y más con items y armadura de invocador»
+   + «mejora la animación… alrededor del grimorio… al atacar tenga un
+   pequeño retroceso»). (1) CheckDead intercepta la muerte de un golpe
+   ANTES de la marca + Iniciar entrega a la cena — la primera muerte
+   ES la cena. (2) Anillos de fotones + rúnicos aprisionan, elevan y
+   EL LIBRO absorbe (crece ×2,6, se abre, come, SE CIERRA de golpe a
+   los 400 y vuelve a la mano — la sombra murió en la cena). (3) El
+   techo: ESCUADRÓN 20 + equipo de invocador + nivel (la compuerta ya
+   no lee maxMinions — el runaway del techo vivo .111 muerto; la
+   promesa .111 intacta). (4) Precesión Saturno + estela + el
+   retroceso del disparo de verdad (patada 5,6, 14 t, pop 1,16).
+   **PENDIENTE EN JUEGO**: (a) matar un jefe de UN golpe masivo → la
+   cena arranca igual, (b) los anillos de fotones + rúnicos, el preso
+   elevado al centro y EL LIBRO comiéndoselo (se cierra ~6,6 s y
+   vuelve), (c) 20 ojos con el libro (más con equipo/nivel) y el
+   aviso «Espacios de esbirro llenos», (d) la órbita cabecea con
+   estela, (e) el rebote de cada disparo, (f) Página en Blanco
+   reinicia la cena de un tipo ya devorado.
+
+2. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
    DECIMALES Y LOS TRES ICONOS DEL USUARIO**
    — la letra: «si el libro se alimenta por si solo, cada muerte que el
    libro haga por si mismo debe reducir 1 de hambre, actualmente solo
@@ -2007,7 +2061,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **410912156** + asset AethonMod.tmod **634680327** 2.621.290 B (md5
    b627b56ac0bfb58e6bc051de5c6cdb62), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.113, respaldo /home/sync/AethonMod-v6.50.113.tmod.
-2. **✅ v6.50.112 PUBLICADA — EL PEREZOSO Y LA PÁGINA EN BLANCO**
+3. **✅ v6.50.112 PUBLICADA — EL PEREZOSO Y LA PÁGINA EN BLANCO**
    — la letra: «el libro cuando esta fuera se mueve muy rapido, debe
    ser mas lento» + «necesito un item que reinicie el contador de los
    jefes para verificar como devora los jefes, este iten no debe ser
@@ -2049,7 +2103,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **410136787** + asset AethonMod.tmod **632578719** 2.605.378 B (md5
    d46aa5d53086005e12301a0059063ed9), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.112, respaldo /home/sync/AethonMod-v6.50.112.tmod.
-3. **✅ v6.50.111 PUBLICADA — LA PROMESA CUMPLIDA Y EL ICONO DEL OJO**
+4. **✅ v6.50.111 PUBLICADA — LA PROMESA CUMPLIDA Y EL ICONO DEL OJO**
    — la letra: «que raro, a veces los minion se desactivan por si solo»
    + «el icono que muestra el buff del minion es demasiado grande dame
    un prompt para crear un icono adecuado en una IA de arte».
@@ -2089,44 +2143,6 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **410107088** + asset AethonMod.tmod **632503332** 2.604.250 B (md5
    4987a56fb49f8e41ca294af1e61b5eeb), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.111, respaldo /home/sync/AethonMod-v6.50.111.tmod.
-4. **✅ v6.50.110 PUBLICADA — LA PRIMERA CENA, LAS TRES VENTANAS, LA
-   ESENCIA DE HAMBRE Y EL ANÁLISIS** — la letra: «analisa si las
-   estadisticas del grimorio eterno aplican realmente» + «la segunda
-   ventana de info del grimorio tiene demasiada informacion, crea una
-   nueva ventana de informacion para repartir mejor la informacion» +
-   «crea un item que le de hambre al grimorio eterno para comprobar si
-   funciona, que suba el hambre de 5 en 5 y que no sea consumible» +
-   «asegurate de que el grimorio eterno tenga la sombra de la pagina
-   para cuando sale a cazar y que ademas cuando se mata un jefe su
-   animacion de muerte se detenga y sea deborado por el grimorio usando
-   la sombra de la pagina… circulos magicos como los de los agujeros
-   negros aprisionan al jefe, lo levantan y llevan al centro de la
-   pantalla… la primera vez que se mate un jefe y solo la primera vez».
-   (1) EL ANÁLISIS: las 24 líneas verificadas UNA A UNA — TODAS aplican;
-   etiquetas honestas. (2) LAS TRES VENTANAS: clic der cicla BÁSICA →
-   EL ARMA → EL FESTÍN. (3) LA ESENCIA DE HAMBRE: +5% por uso, no
-   consumible, Bolsa Probador. (4) LA CAZA VERIFICADA. (5) LA PRIMERA
-   CENA: el jefe se detiene a 100 de vida, TRES sellos erosionados lo
-   aprisionan/levantan/llevan al CENTRO de la pantalla, LA SOMBRA DE LA
-   PÁGINA del grimorio lo devora y a los 430 t muere DE VERDAD (2ª
-   pasada de CheckDead: loot completo); sólo la primera vez por tipo de
-   jefe (ShardPlayer.JefesDevorados, persiste en el .plr).
-   VERIFICACIÓN: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
-   headless 0 excepciones · audit_v650110 TODO OK (184 ✓) — .tmod
-   2.601.415 B md5 e8f1ba78facfc4208a83c475c0cd1f7f, 388 entradas, EOF
-   exacto, hjson semántico ×3, el heap + los ldstr + las constantes del
-   IL verificados. CHECKLIST en juego: (a) con la Esencia de Hambre el
-   apetito sube de 5 en 5 y la voz lo dice, (b) el ciclo de ventanas
-   BÁSICA→EL ARMA→EL FESTÍN→BÁSICA con el indicador final, (c) al
-   PRIMER jefe de cada tipo llevado a 100 de vida: se detiene, los
-   círculos lo aprisionan, lo elevan al centro y la sombra lo devora
-   con el loot en el suelo, (d) al MATARLO OTRA VEZ: muerte NORMAL sin
-   intervención, (e) la sombra de la página sigue saliendo a cazar del
-   25% de hambre.
-   PUBLICACIÓN: commit 38e3f44 + tag v6.50.110 + push · release
-   **410075869** + asset AethonMod.tmod **632401101** 2.601.415 B (md5
-   e8f1ba78facfc4208a83c475c0cd1f7f), CDN VERIFICADO BYTE A BYTE,
-   /releases/latest = v6.50.110, respaldo /home/sync/AethonMod-v6.50.110.tmod.
 1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
@@ -2812,6 +2828,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.114** | ✅ Build-verificada (oráculo 0/0 sobre 311 .cs con 79 refs, build real 0/0, .tmod 2.622.071 B md5 887331145f60e46a4cba2282d99a6b43, 390 entradas (los mismos nombres de la .113: solo cambia código), EOF exacto, heap/ldstr/constantes .104–.114 (TechoOjosEterno/TechoOjosDe/_techoOjos/AnilloFotones/DibujarElLibro/T_CIERRE/anclaLibro/_retroceso VIVOS; los ldstr viejos « slot(s) de minion (máx +10)]» y los de la cena de la sombra MUERTOS; las constantes 195/400/5,6/14/2,6/0,30 VIVAS en el IL), el árbol con las 4 piezas + la regresión .110–.113 ÍNTEGRA (la compuerta vieja `int maxMinions = player.maxMinions;` MUERTA, el `+= BonusMinionSlots` MUERTO, la patada 3,2 MUERTA, ColumnaViva/CabezaDeBruma/SigiloErosionado MUERTOS en la cena, el plano 0.01 y el decimal "0.0" VIVOS), hjson ×3 sin cambios (es-MX byte a byte), iconos del usuario SIN cambios (PNG crudos byte a byte + rawimg píxel a píxel), headless «Sandboxing v6.50.114 → Adding Content → Server started» 0 excepciones (serverconfig114, mundo cena114, puerto 7783)), ✔ PUBLICADA (release 411803422 + asset AethonMod.tmod 637370231 2.622.071 B, CDN verificado byte a byte md5 887331145f60e46a4cba2282d99a6b43, /releases/latest = v6.50.114, respaldo /home/sync/AethonMod-v6.50.114.tmod), ⏳ en juego | LA LETRA (2026-10-13): «cuando el daño que recibe el jefe es masivo no se aplica eso de que su primera muerte sea absorbido por el grimorio» + «el jefe debe ser rodeado por anillos iguales a los de los proyectiles agujeros negro y además también poner anillos como los de los soles runicos, ser llevado al centro de la pantalla y ser absorbido por el libro… esto se aplica a todos los jefes» + «al parecer los minion no tienen limite… deberían tener un limite de 10, pero actualiza a que tengan un limite de 20 con el libro y más con items y armadura de invocador, además mejora las animación… alrededor del grimorio en su fase de caza y… al atacar tenga un pequeño retroceso». CUATRO ENTREGAS: (1) EL FIX MASIVO — el gatillo de la cena en PreAI exigía vida>0: el golpe que cruzaba de lleno a ≤0 robaba la cena; AHORA CheckDead intercepta la muerte de un golpe ANTES de la marca (la cena tiene prioridad sobre el festín) e Iniciar ENTREGA a la cena en el drain masivo — la primera muerte ES la cena venga como venga. (2) LA PELÍCULA NUEVA — TRES anillos de FOTONES (Ring+aberración RGB+aro blanco del BlackHoleProjectile) + ANILLOS RÚNICOS (SigiloLib.SistemaAnillos) aprisionan/elevan (motor .110 intacto) y EL LIBRO ABSORBE: sale de la mano, crece ×2,6, cuelga bajo el preso, se abre (Medio+iris clavado), come desde 195 (almas/bruma a SU boca), colapsa los anillos DENTRO y a los 400 SE CIERRA (Cerrado+chasquido+onda) y VUELVE — la sombra murió en la cena. (3) EL TECHO DE LOS OJOS — el bug era el techo vivo .111 (cada ojo vivo subía maxMinions → compuerta jamás cerrada); ahora TechoOjosEterno (20+equipo+nivel tope +10) cacheado por tick y la compuerta lee TechoOjosDe (NO maxMinions) — la promesa .111 intacta (techo = PISO). (4) ÓRBITA+RETROCESO — precesión ±0,30 rad contrarrotante + estela de 3 fantasmas + patada 5,6/estado 14 t respetado 8 t por la ley del planeo + pop 1,16 y 6,5 px. LECCIONES: (a) un gatillo de estado vitado en un hook con condición de vida>0 NUNCA atrapa las muertes de un golpe — el interceptor de la MUERTE vive en CheckDead; (b) un «techo vivo» que protege lo existente JAMÁS debe ser el mismo número que la compuerta de entrada (runaway por construcción): la protección y el límite son DOS números; (c) los strings interpolados de C# viajan PARTIDOS en el DLL (InterpolatedStringHandler) — auditar por TROZOS literales, jamás por el formato {0} completo; (d) --data-binary SIN @ sube la RUTA como cuerpo (asset de 60 B) — siempre @archivo |
 | **v6.50.113** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 — regenerado con tools/regen_oracle.py: 79 refs TODAS las DLLs gestionadas + tModLoader.dll, 311 .cs —, build real 0/0, .tmod 2.621.290 B md5 b627b56ac0bfb58e6bc051de5c6cdb62, 390 entradas (los mismos nombres de la .112 — los cuatro .png son REEMPLAZOS), EOF exacto, hjson semántico == árbol ×3 SIN cambios (es-MX byte a byte), icon.png + icon_small.png PNG crudos byte a byte con 80×80/30×30 EXACTOS (GetModIcon), OjoEternoBuff.rawimg + AethonMenorBuff.rawimg 32×32 píxel-idénticas al árbol NUEVO, el plano vivo (return 0.01f en ReduccionHambre; HambrePorPresa(presa) AUSENTE de la sombra, VIVO en GlobalNPCXP.OnKill), el decimal vivo (ToString("0.0") en barra y voz; los (int) truncadores MUERTOS del árbol) + la regresión .104–.112 ÍNTEGRA (heap, ldstr, constantes del muelle, Ceiling, la cena, las tres ventanas), headless «Sandboxing v6.50.113 → Adding Content → Server started» 0 excepciones), ✔ PUBLICADA (release 410912156 + asset AethonMod.tmod 634680327 2.621.290 B, CDN verificado byte a byte md5 b627b56a…, /releases/latest = v6.50.113, respaldo /home/sync/AethonMod-v6.50.113.tmod), ⏳ en juego | LA LETRA (2026-10-12): «si el libro se alimenta por si solo, cada muerte que el libro haga por si mismo debe reducir 1 de hambre, actualmente solo lo hace en 0%» + «tambien debes permitir que visualizar el medidor de hambre tenga decimales» + «el icono que debes usar para el buff cuando sale el minion es este… / para el icono del mod o sea lo que se ve cuando instala el mod es este… / ahora para el icono de la mascota de luz es este…». TRES ENTREGAS: (1) EL PLANO DEL AUTÓCTONO — ReduccionHambre (AbsorberPresa: la sombra de la página devora presas enteras cuando el libro sale a cazar solo) devolvía la dieta por rareza de la .104 (1★=0,1% — la chusma común no movía ni un entero del medidor); ahora 0.01f PLANO — cada muerte del libro POR SÍ MISMO baja 1% (Eterno y Nervioso por igual); la dieta por rareza SIGUE VIVA en la baja acreditada del jugador (GlobalNPCXP.OnKill → HambrePorPresa — la .104 intacta). (2) EL MEDIDOR CON DECIMALES — la barra del tooltip (GrimorioHambriento) y la voz de la Esencia (EsenciaHambre) usaban (int) truncador; ahora ToString("0.0") — un decimal SIEMPRE (47,3%), a juego barra y voz. (3) LOS TRES ICONOS DEL USUARIO — sus SPRITE_EXACTO 2048×2048 (base64 → tuplas 5B n,R,G,B,A) decodificados por tools/gen_iconos_v650113.py con filtro VLM (NEAREST 32×32, LANCZOS 80×80): OjoEternoBuff 32×32, AethonMenorBuff 32×32, icon.png 80×80 (el menú Mods — el viejo era de la .13: 924 B) y icon_small.png 30×30 (el viejo seguía mostrando el arte viejo); decompile verificado: ContentConverters EXIME icon.png del rawimg (viaja PNG crudo) y AddResource consume el stream de icon_small.png (ToRaw falla → PNG crudo); GetModIcon exige 80×80/30×30 EXACTOS. LECCIONES: (a) el sandbox AMANECIÓ REWIND-EADO otra vez (repo a v6.50.65 + /home/sync a la .99): la restauración fue fetch+reset desde GitHub (el .env con el token sobrevivió — la fuente de verdad es origin/main) y el oráculo se REGENERÓ con tools/regen_oracle.py (la lección de las DLLs sueltas: refs = TODAS menos tModCodeAssist/tModPorter/Tests/Native/runtimes); (b) los SPRITE_EXACTO del usuario traen SU PROPIO decodificador en el archivo (atob → tuplas 5B n,R,G,B,A): el formato se lee del propio .txt, cero adivinación; (c) el mod icon de tML 2026.08: icon.png 80×80 EXACTOS (GetModIcon) viaja PNG crudo (exención de ContentConverters) y icon_small.png 30×30 viaja PNG crudo POR BUG SERENDÍPICO (el template-compare consume el stream → ToRaw falla → copia cruda) |
 | **v6.50.112** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.605.378 B md5 d46aa5d53086005e12301a0059063ed9, 390 entradas (389 de la .111 + PaginaEnBlanco.rawimg 24×24 2316 B = 12+24×24×4 magic 1), EOF exacto, hjson semántico == árbol ×3 (es-MX byte a byte), PaginaEnBlanco VIVO en el heap #Strings + los ldstr «Mods.AethonMod.PaginaEnBlanco.Reset»·«Mods.AethonMod.PaginaEnBlanco.Nada» VIVOS en el heap #US (UTF-16LE), las constantes del muelle nuevo en el IL (0.009 el tirón · 0.88 el freno · 0.01/10/20 el tope graduado · 0.32/12 el planeo de vuelta), los muertos del muelle viejo AUSENTES del árbol (0.02/0.90 en velocity · 22), la rawimg píxel-idéntica al .png (RGB nulo sólo en alfa 0) + la regresión .104–.111 ÍNTEGRA (Ceiling vivo, el icono 32×32, la cena, las tres ventanas), headless «Sandboxing v6.50.112 → Adding Content → Server started» 0 excepciones), ✔ PUBLICADA (release 410136787 + asset AethonMod.tmod 632578719 2.605.378 B, CDN verificado byte a byte md5 d46aa5d5…, /releases/latest = v6.50.112, respaldo /home/sync/AethonMod-v6.50.112.tmod), ⏳ en juego | LA LETRA (2026-10-12): «el libro cuando esta fuera se mueve muy rapido, debe ser mas lento» + «necesito un item que reinicie el contador de los jefes para verificar como devora los jefes, este iten no debe ser consumible». DOS ENTREGAS: (1) EL MUELLE DEL PEREZOSO — GrimorioNerviosoFlotante: el muelle de la .111 (0.02/0.90/SIN tope en MODO_CAZA) tiraba al 27% más rápido que la carrera y convertía el libro en MISIL al teletransportarse (127 px/t — tools/sim_libro_v650112.py: caminar 3/correr 6,25/esprintar 9/caer 10,5/vagoneta 20 px/t + teletransporte 1500 px); el nuevo: tirón 0.009 (menos de la mitad — el libro se queda ATRÁS: 42/88/127 px), freno 0.88, TOPE GRADUADO MathHelper.Clamp(dist×0.01, 10, 20) — 10 px/t cerca del dueño (nunca más rápido que una caída), 20 lejos (un teletransporte NO lo pierde: 1500 px en ~110 t de deriva); LA VUELTA (MODO_VOLVER) planea: empuje 0.32 (era 0.90), tope 12 (era 22) — ~15 t desde la vela (era zumazo de 9); el perdedor de SoyDuplicado se DISUELVE EN POLVO de llama de sombra (antes: chasquido seco invisible). (2) LA PÁGINA EN BLANCO (ítem de pruebas): UseItem borra ShardPlayer.JefesDevorados del portador (la lista de LA PRIMERA CENA .110 «solo la primera vez», persiste en el .plr) — cada tipo de jefe vuelve a estrenar su cena completa (100 de vida → sellos → centro de pantalla → la sombra devora → loot normal); NO CONSUMIBLE (pila 1, el patrón de la Esencia), la voz Reset (cuántos festines borró)/Nada (lista ya vacía), autoridad SP/server + EcoRed.AnunciarAlPortador en MP; textura 24×24 tools/gen_pagina_blanca_v650112.py (el pliego de la Esencia con la tinta BORRÁNDOSE y las motas alzándose — la memoria en humo); hjson ×3 tools/insert_hjson_v650112.py (detecta el formato post-packager: es-ES/en-US planas, es-MX bloque); registrada en la BOLSA DEL PROBADOR (la lección v6.50.63). LECCIONES: (a) el muelle de un seguidor se DISEÑA con simulación (los números del tirón/freno/tope salen de tools/sim_libro_v650112.py, no del ojo); (b) el doc-rot del header del snapshot mantiene los ÚLTIMOS 3 bloques «Última actualización» (.112/.111/.110 — la .109 sale) y la cirugía de PRÓXIMOS es POR LÍNEAS con anclas únicas por versión (jamás regex «\nN. **») |
 | **v6.50.111** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.604.250 B md5 4987a56fb49f8e41ca294af1e61b5eeb, 389 entradas (388 de la .110 + OjoEternoBuff.rawimg 4108 B = 12+32×32×4 magic 1), EOF exacto, hjson semántico == árbol ×3 regresión (es-MX byte a byte), Ceiling VIVO en el heap #Strings (LA HUELLA DEL FIX — Math.Ceiling no existe en ningún otro .cs), el override Texture de OjoEternoBuff MUERTO, la mentira «se van al desinvocarlos» MUERTA del árbol, la rawimg del icono píxel-idéntica al .png (RGB nulo sólo en alfa 0 — conversión del packager), OjoEterno_Abierto.rawimg intacta (el ojo EN JUEGO no cambió) + la regresión .104–.110 ÍNTEGRA (heap, ldstr UTF-16 de las tres ventanas y la cena, constantes del IL), headless «Sandboxing v6.50.111 → world gen → Server started» 0 excepciones), ✔ PUBLICADA (release 410107088 + asset AethonMod.tmod 632503332 2.604.250 B, CDN verificado byte a byte md5 4987a56f…, /releases/latest = v6.50.111, respaldo /home/sync/AethonMod-v6.50.111.tmod), ⏳ en juego | LA LETRA (2026-10-12): «que raro, a veces los minion se desactivan por si solo» + «el icono que muestra el buff del minion es demasiado grande dame un prompt para crear un icono adecuado en una IA de arte». DOS ENTREGAS: (1) LA PROMESA CUMPLIDA — el fix de la masacre invisible: vanilla CULLA minions CADA TICK en Projectile.Update («slotsMinions + minionSlots > maxMinions → Kill()» — decompilado del tML real 2026.8.3.0; numMinions/slotsMinions se ponen a 0 cada tick en Player.Update 27272): el bonus de slots del Eterno solo vive SOSTENIDO/barra rápida y el tick en que el libro salía de ahí (AL CURSOR al reorganizar, cofre, hucha, inventario profundo) el escuadrón entero moría EN UN TICK — el fix en ShardPlayer.PostUpdateEquips: el techo de maxMinions JAMÁS baja de los slots YA EN USO (la suma de minionSlots de TODOS los minions del jugador — la misma cuenta de vanilla) mientras el libro cuente (nivel>0) o quede un OJO vivo; guardado el libro no se invocan MÁS pero los vivos PERMANECEN (la promesa del diseño, ahora de verdad). (2) EL ICONO DEL OJO — OjoEternoBuff apuntaba al sprite del proyectil (56×54) y el HUD lo dibujaba GIGANTE: icono propio 32×32 Content/Buffs/OjoEternoBuff.png (EL OJO COMPUESTO — base OjoEterno_Abierto + IRIS en reposo 13×13 en IRIS_REST (0,7 · 2,3), porque en runtime el iris se dibuja aparte), candidato FILO (BOX + alfa re-endurecido) verificado por VLM contra NEAREST/BOX; override Texture MUERTO (textura por convención). El PROMPT para reemplazarlo por arte de IA viajó en la conversación: mantener 32×32. |

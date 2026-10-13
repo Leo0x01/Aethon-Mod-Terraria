@@ -1,5 +1,77 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.114 — EL DAÑO MASIVO TAMBIÉN CENA, LA PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS
+
+**La letra**: «cuando el daño que recibe el jefe es masivo no se aplica
+eso de que su primera muerte sea absorbido por el grimorio» + «cuando
+es asborvido por el grimorio no se activa correctamente la animacion,
+el jefe de ser rodeado por anillos iguales a los de los proyectiles
+agujeros negro y ademas tambien poner anillos como los de los soles
+runicos, ser llevado al centro de la pantalla y ser absorvido por el
+libro, todo esto en su primera muerte por el grimorio eterno, luego de
+este no vuelve ocurrir a no ser que vuelva a ser la primera vez, esto
+se aplica a todos los jefes» + «al parecer los minion no tienen limite,
+revisa eso, deberian tener un limite de 10, pero actualiza a que
+tengan un limite de 20 con el libro y mas con items y armadura de
+invocador, ademas mejora las animacion en cuanto estan alrededor del
+grimorio en su fase de casa y sobre la animacion de ataque de los
+minion has que al atacar tenga un pequeño retroceso».
+
+**EL CAMBIO**: cuatro entregas — el fix del golpe masivo, la película
+nueva de la cena, el techo del escuadrón y las animaciones de los ojos:
+
+- **EL DAÑO MASIVO TAMBIÉN CENA**: el gatillo de LA PRIMERA CENA vivía
+  solo en `PreAI` y exigía `life > 0` — un golpe que cruzaba de lleno a
+  ≤ 0 sin pasar por las 100 de vida le robaba la cena al portador (el
+  jefe moría con su animación normal). Ahora la muerte también se
+  intercepta en `CheckDead` (ANTES de la marca: la cena tiene
+  PRIORIDAD sobre el festín clásico) y `Iniciar` ENTREGA a la cena
+  cuando el drain de las armas salta masivo: **la primera muerte de
+  cada jefe ES la cena, venga como venga** — todos los jefes, solo la
+  primera vez (la Página en Blanco la reinicia).
+- **LA PELÍCULA NUEVA — EL LIBRO SE LO COME**: los TRES ANILLOS DE
+  FOTONES de los agujeros negros (la textura Ring con aberración
+  cromática RGB y el aro blanco caliente — el patrón EXACTO del
+  `BlackHoleProjectile`) y LOS ANILLOS RÚNICOS de los soles (el emisor
+  compartido `SigiloLib.SistemaAnillos`, tres aros de runas 6·8·10 que
+  giran, se inclinan y CORREN al comer) aprisionan al jefe (0-60), lo
+  elevan al CENTRO DE LA PANTALLA (60-150, el motor de la .110
+  intacto)… y **EL LIBRO ABSORBE**: el Eterno sale de la mano del
+  portador, CRECE ×2,6, cuelga DEBAJO del preso, se ABRE (el párpado
+  Medio, el iris CLAVADO en su comida), come desde 195 (las almas y la
+  bruma corren a SU boca — ya no al jugador —, la herida roja, el
+  masticar), los anillos ENTEROS colapsan DENTRO del libro en el trago
+  (345-430) y a los 400 **SE CIERRA de golpe** (párpado Cerrado +
+  chasquido + onda de choque) y VUELVE a la mano en el poso. La sombra
+  de la página MURIÓ en la cena: el devorador es el libro.
+- **EL TECHO DE LOS OJOS**: los minions «sin límite» eran un BUG — el
+  techo vivo de la .111 (la promesa de no cullar lo vivo) subía
+  `maxMinions` con cada ojo vivo, y la compuerta de invocación leía
+  ESE número: JAMÁS se cerraba. Ahora `WeaponScaling.TechoOjosEterno`:
+  **ESCUADRÓN DE 20 + el equipo de invocador (lo que armadura y
+  accesorios sumen más allá de la base) + la escalera por nivel** (+1
+  cada 10, tope +10 — nivel 100 con equipo completo: ~34). El techo se
+  cachea por tick (`ShardPlayer._techoOjos`) y la compuerta del Eterno
+  lee `ShardPlayer.TechoOjosDe` — ya NO lee `maxMinions`. La promesa
+  de la .111 SIGUE EN PIE: lo ya invocado jamás se culla (el techo
+  nuevo es un PISO para `maxMinions`, nunca un recorte de lo vivo).
+- **LA ÓRBITA Y EL RETROCESO**: los anillos alrededor del grimorio en
+  fase de caza ahora CABECEN (precesión ±0,30 rad, contrarrotando
+  par/impar — la rueda viva se lee en tres dimensiones, como Saturno) y
+  cada ojo deja ESTELA (tres fantasmas ámbar en sus posiciones pasadas
+  del anillo, deterministas). Y el disparo tiene su PEQUEÑO RETROCESO
+  de verdad: patada 5,6 + estado de 14 ticks que la ley del planeo
+  RESPETA 8 ticks (la patada de 3,2 de la .109 moría en 2-3 t y no se
+  veía) + pop de escala 1,16 y desplazamiento de 6,5 px en la
+  dirección de la patada — el ojo REBOTA y la formación lo reincorpora.
+
+**VERIFICACIÓN**: oráculo 0/0 (79 refs, 311 .cs) · build real 0/0 ·
+.tmod 2.622.071 B md5 887331145f60e46a4cba2282d99a6b43 (390 entradas,
+EOF exacto) · headless 0 excepciones · `audit_v650114.py` TODO OK
+(237 ✓): heap/ldstr/constantes .104–.114, el árbol con las 4 piezas +
+la regresión .110–.113 ÍNTEGRA, hjson ×3 sin cambios, los iconos del
+usuario SIN cambios (PNG crudos byte a byte + rawimg píxel a píxel).
+
 ## Commit v6.50.113 — LA SOMBRA COME PLANO, EL MEDIDOR CON DECIMALES Y LOS TRES ICONOS DEL USUARIO
 
 **La letra**: «si el libro se alimenta por si solo, cada muerte que el
