@@ -123,6 +123,23 @@ namespace AethonMod.Content.Systems
             return extra;
         }
 
+        /// <summary>
+        /// v6.50.114 — EL TECHO DE LOS OJOS DEL ETERNO (la letra: «deberían
+        /// tener un límite de 10, pero actualiza a que tengan un límite de
+        /// 20 con el libro y más con items y armadura de invocador»):
+        /// ESCUADRÓN BASE 20 + lo que el EQUIPO DE INVOCADOR aporte
+        /// (armadura y accesorios: lo que vanilla suma MÁS ALLÁ de la
+        /// base 1) + la escalera por nivel (el +1 cada 10 de la .109, tope
+        /// +10). Este es el techo PARA INVOCAR (la compuerta del clic
+        /// derecho) — NO el techo vivo de ShardPlayer (la promesa de que
+        /// lo ya vivo no se culla es aparte y sigue en pie).
+        /// </summary>
+        public static int TechoOjosEterno(int equipoInvocador, int nivel)
+        {
+            if (equipoInvocador < 0) equipoInvocador = 0;
+            return 20 + equipoInvocador + BonusMinionSlots(nivel);
+        }
+
         // ================================================================
         //  KNOCKBACK (cada 10 niveles, máximo +100%)
         // ================================================================

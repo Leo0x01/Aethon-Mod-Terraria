@@ -42,6 +42,12 @@ namespace AethonMod.Content.Globals
     ///
     /// =================================================================
     /// v6.50.110 — ESTADO 3: LA PRIMERA CENA (el festín del primer jefe).
+    /// v6.50.114 — LA LETRA NUEVA: «el jefe debe ser rodeado por anillos
+    /// iguales a los de los proyectiles agujeros negro y además también
+    /// poner anillos como los de los soles runicos, ser llevado al centro
+    /// de la pantalla y ser absorbido por el libro» — y EL DAÑO MASIVO
+    /// TAMBIÉN CENA (CheckDead intercepta la muerte de un golpe: la
+    /// primera muerte ES la cena, venga como venga).
     /// La letra del usuario: «cuando se mata un jefe su animacion de
     /// muerte se detiene y sea deborado por el grimorio usando la sombra
     /// de la pagina, el jugador recibe loot ya que cuenta como una muerte
@@ -281,6 +287,20 @@ namespace AethonMod.Content.Globals
 
             NPC dueño = DueñoDelPool(npc);
             if (dueño == null || !dueño.active) return;
+
+            // === v6.50.114 — LA CENA TIENE PRIORIDAD SOBRE EL FESTÍN: el
+            //     drain que salta de lleno al suelo (daño masivo del arma)
+            //     no puede devorarse él solo al jefe — si a ESTE jefe aún
+            //     le estrena su primera cena, el drain lo ENTREGA a la
+            //     cena (la letra: la primera muerte es del LIBRO) ===
+            if (PrimeraCenaPendiente(dueño, out Player portadorCena))
+            {
+                _marcas.Remove(dueño.whoAmI);
+                _marcasEstilo.Remove(dueño.whoAmI);
+                ArrancarPrimeraCena(dueño, portadorCena);
+                return;
+            }
+
             if (!dueño.TryGetGlobalNPC<FaucesGlobalNPC>(out var g)) return;
             if (g.DevorarEstado != 0) return;                     // ya se lo están comiendo
 
@@ -317,6 +337,30 @@ namespace AethonMod.Content.Globals
         {
             // 2ª pasada (o muerte post-festín): la muerte REAL de vanilla.
             if (DevorarEstado == 2) return true;
+
+            // === v6.50.114 — EL DAÑO MASIVO TAMBIÉN CENA (la letra: «cuando
+            //     el daño que recibe el jefe es masivo no se aplica eso de
+            //     que su primera muerte sea absorbido por el grimorio»):
+            //     el gatillo de PreAI exige vida > 0 — un golpe que cruza
+            //     de lleno a ≤ 0 SIN pasar por las 100 robaba la cena (el
+            //     jefe moría normal). AHORA la muerte también se
+            //     intercepta AQUÍ: si a este jefe le estrena su primera
+            //     cena, la PRIMERA MUERTE ES LA CENA — venga como venga
+            //     (masiva, drenada o a cuotas). La cena tiene PRIORIDAD
+            //     sobre el festín clásico de las marcas. ===
+            if (DevorarEstado == 0 && npc.life <= 0 &&
+                Main.netMode != NetmodeID.MultiplayerClient && EsJefe(npc))
+            {
+                NPC dueñoCena = DueñoDelPool(npc);
+                if (dueñoCena != null && dueñoCena.active &&
+                    PrimeraCenaPendiente(dueñoCena, out Player portadorCena))
+                {
+                    _marcas.Remove(dueñoCena.whoAmI);
+                    _marcasEstilo.Remove(dueñoCena.whoAmI);
+                    ArrancarPrimeraCena(dueñoCena, portadorCena);
+                    return false;   // la muerte original NUNCA ARRANCA: primero la cena
+                }
+            }
 
             // ¿Marca viva de nuestras armas? (el golpe mortal fue NUESTRO)
             bool marcado = _marcas.TryGetValue(npc.whoAmI, out int caduca)
@@ -489,10 +533,11 @@ namespace AethonMod.Content.Globals
             if (t == 40) Sonar(SoundID.Item122.WithPitchOffset(-0.35f).WithVolumeScale(0.55f), npc.Center);  // la contracción
             if (t == 60) Sonar(SoundID.Roar.WithPitchOffset(-0.45f).WithVolumeScale(0.85f), npc.Center);      // se resiste
             if (t == 150) Sonar(SoundID.Item122.WithPitchOffset(0.10f).WithVolumeScale(0.6f), npc.Center);   // el vice
-            if (t == 175) Sonar(SoundID.Item122.WithPitchOffset(-0.30f).WithVolumeScale(0.6f), npc.Center);  // la sombra sale
+            if (t == 175) Sonar(SoundID.Item122.WithPitchOffset(-0.30f).WithVolumeScale(0.6f), npc.Center);  // EL LIBRO DESPIERTA (.114)
             if (t == 215 || t == 255 || t == 295 || t == 330)
                 Sonar(SoundID.NPCHit9.WithPitchOffset(-0.10f).WithVolumeScale(0.5f), npc.Center);             // mastica
             if (t == 345) Sonar(SoundID.Item122.WithPitchOffset(0.34f).WithVolumeScale(0.6f), npc.Center);   // el trago
+            if (t == 400) Sonar(SoundID.Item122.WithPitchOffset(0.48f).WithVolumeScale(0.8f), npc.Center);   // v6.50.114: EL LIBRO SE CIERRA
 
             // === LA ELEVACIÓN AL CENTRO DE LA PANTALLA (la letra: los
             //     círculos «lo levantan y llevan al centro de la

@@ -77,6 +77,18 @@ namespace AethonMod.Content.Projectiles
         //     ESTA constante ===
         private const float ESCALA = 0.375f;
 
+        // === v6.50.114 — EL RETROCESO DEL DISPARO (la letra: «sobre la
+        //     animación de ataque de los minion haz que al atacar tenga
+        //     un pequeño retroceso»): la patada de la .109 moría en 2-3
+        //     ticks (la ley del planeo la comía viva). AHORA el disparo
+        //     deja un ESTADO de retroceso (14 t) con su dirección: los
+        //     primeros 8 t SOLO fricción suave (el tirón SE VE — el ojo
+        //     rebota hacia atrás), luego la formación lo reincorpora;
+        //     el dibujo lo lee para el SQUASH (se estira en el eje del
+        //     tirón y se desplaza hacia atrás) ===
+        private float _retroceso;
+        private Vector2 _dirRetroceso;
+
         // === LA CADENCIA INDIVIDUAL (la .107: «cada ojo debe ser
         //     individual y deben tener la libertad de atacar cuando
         //     quieran y a la velocidad que deseen; la velocidad de ataque
@@ -267,6 +279,21 @@ namespace AethonMod.Content.Projectiles
             }
             else
             {
+                // === v6.50.114 — EL TIRÓN VIVE: mientras dura el retroceso
+                //     reciente (los primeros 8 t tras el disparo) la ley
+                //     del planeo NO toca la velocidad — solo fricción
+                //     suave: el rebote hacia atrás SE LEE completo; los
+                //     últimos 6 t la formación lo reincorpora (el glide
+                //     de siempre) ===
+                bool enTirón = _retroceso > 0f && _retroceso > 6f;
+                if (_retroceso > 0f) _retroceso--;
+
+                if (enTirón)
+                {
+                    Projectile.velocity *= 0.93f;
+                }
+                else
+                {
                 // === LA LEY DEL PLANEO (el Ruinous Staff): UNA ley para
                 //     todo el viaje — sin modos, sin frenos en seco, sin
                 //     rebote. Lejos: inercia con arranque suave (la
@@ -293,6 +320,7 @@ namespace AethonMod.Content.Projectiles
                 {
                     Projectile.velocity *= 0.6f;
                 }
+                }
 
                 // === EL DISPARO: si hay presa y la cadencia está lista ===
                 if (presa != null && Projectile.frame <= 0)
@@ -316,13 +344,17 @@ namespace AethonMod.Content.Projectiles
         // ================================================================
         private void Disparar(NPC presa, int nivel)
         {
-            // === LA PATADA («un pequeño retroceso») — la formación lo
-            //     reincorpora con la ley del planeo ===
+            // === v6.50.114 — EL RETROCESO (la letra: «un pequeño
+            //     retroceso»): patada atrás MÁS FUERTE (5,6) + estado de
+            //     retroceso que la ley del planeo RESPETA 8 ticks (antes
+            //     la patada de 3,2 se evaporaba en 2-3 t y no se veía) ===
             Vector2 atrás = Projectile.Center - presa.Center;
             if (atrás.LengthSquared() > 0.01f)
             {
                 atrás.Normalize();
-                Projectile.velocity = atrás * 3.2f;
+                _dirRetroceso = atrás;
+                _retroceso = 14f;
+                Projectile.velocity = atrás * 5.6f;
             }
 
             // === EL GOLPE: el cauce del cetro (radio + cadena + GolpeMotor
@@ -415,8 +447,18 @@ namespace AethonMod.Content.Projectiles
                 float fase = FaseOrbital(enAnillo, capAnillo, k);
                 // el anillo casi circular (0,94): la formación giratoria
                 // se lee como UNA RUEDA — sin precesión, sin tirones
+                // v6.50.114 — LA PRECESIÓN (la letra: «mejora la
+                // animación… alrededor del grimorio en su fase de
+                // caza»): el PLANO del anillo SE INCLINA despacio
+                // (±0,30 rad, ~14 s por vaivén, fase propia por anillo)
+                // — la rueda viva se lee en TRES dimensiones (el eje
+                // CABECEA como el de Saturno; contrarrota en anillos
+                // pares/impares)
+                float incl = 0.30f * MathF.Sin(time * 0.45f + k * 1.9f)
+                             * (k % 2 == 0 ? 1f : -1f);
                 Vector2 punto = new Vector2((float)Math.Cos(fase) * radio,
-                                             (float)Math.Sin(fase) * radio * 0.94f);
+                                             (float)Math.Sin(fase) * radio * 0.94f)
+                                .RotatedBy(incl);
                 // la micro-deriva propia: 1,6 px en 2D, DESPACIO (5–10 s
                 // por ciclo — el vaivén vivo del Forbidden Ruin)
                 Vector2 deriva = new Vector2(
@@ -565,12 +607,16 @@ namespace AethonMod.Content.Projectiles
         /// ≈ 7,5 — antes 12→15 del ojo grande de la .107).</summary>
         private void DrawElSello()
         {
-            Vector2 pos = Projectile.Center - Main.screenPosition;
+            // v6.50.114 — EL RETROCESO SE LEE: el sello se desplaza con el
+            // rebote del disparo (la dirección de la patada) y encoge con él
+            float squash = Math.Min(_retroceso / 14f, 1f);
+            Vector2 pos = Projectile.Center - Main.screenPosition
+                + _dirRetroceso * (6.5f * squash);
             float time = Main.GlobalTimeWrappedHourly;
             int seed = Projectile.whoAmI * 13 + 7;
 
             // la carga: el sello inhala (ESCALA·16 → ESCALA·20)
-            float r = ESCALA * 16f;
+            float r = ESCALA * 16f * (1f - 0.15f * squash);
             if (Projectile.ai[0] == MODO_APUNTANDO)
                 r = MathHelper.Lerp(ESCALA * 16f, ESCALA * 20f,
                     Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
@@ -582,6 +628,32 @@ namespace AethonMod.Content.Projectiles
                 null, Main.GameViewMatrix.TransformationMatrix);
             try
             {
+                // v6.50.114 — LA ESTELA DE LA ÓRBITA (la letra: «mejora la
+                // animación… alrededor del grimorio»): tres fantasmas de
+                // ESTE ojo en sus posiciones pasadas del anillo (rotadas
+                // ATRÁS según el omega del anillo — determinista): el giro
+                // se lee con MOVIMIENTO, no solo con posición
+                Player dueñoEstela = Main.player[Projectile.owner];
+                if (dueñoEstela != null && dueñoEstela.active &&
+                    PosicionDelLibro(dueñoEstela) is Vector2 centroEstela)
+                {
+                    Vector2 slotAhora = SlotDeFormacion(dueñoEstela, centroEstela);
+                    Vector2 off = slotAhora - centroEstela;
+                    int idxE = Math.Max(0, (int)Projectile.minionPos);
+                    AnilloDe(idxE, out int kE, out _, out _);
+                    float omega = (kE % 2 == 0) ? 0.42f : -0.36f;   // rad/s del anillo
+                    for (int j = 1; j <= 3; j++)
+                    {
+                        float dt = j * 0.085f;                       // ~5 t entre fantasma y fantasma
+                        Vector2 pasado = centroEstela + off.RotatedBy(-omega * dt);
+                        float s = ESCALA * (40f - j * 9f);           // encoge: 15→12→9 px
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, pasado - Main.screenPosition, null,
+                            new Color(240, 124, 65, 255) * (0.22f / j), 0f,
+                            VFXCore.SoftGlow.Size() * 0.5f, new Vector2(s / 64f, s / 64f),
+                            SpriteEffects.None, 0f);
+                    }
+                }
+
                 OrbitaLib.SigiloErosionado(pos, r, time, seed,
                     2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
                     offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
@@ -605,7 +677,13 @@ namespace AethonMod.Content.Projectiles
         /// arte; viaje ±7,5 × ±2,5 — TODO escalado con ESCALA).</summary>
         private void DrawElOjo()
         {
-            Vector2 pos = Projectile.Center - Main.screenPosition;
+            // v6.50.114 — EL RETROCESO SE LEE: el ojo REBOTA hacia atrás
+            // (la dirección de la patada, ~6,5 px) con un pop de escala
+            // que decae con el estado — el pequeño tirón del disparo
+            float squash = Math.Min(_retroceso / 14f, 1f);
+            Vector2 pos = Projectile.Center - Main.screenPosition
+                + _dirRetroceso * (6.5f * squash);
+            float escOjo = ESCALA * (1f + 0.16f * squash);
             Texture2D abierto = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
             Vector2 origen = abierto.Size() * 0.5f;
@@ -624,12 +702,12 @@ namespace AethonMod.Content.Projectiles
                     Texture2D parpado = ModContent.Request<Texture2D>(medio
                         ? "AethonMod/Content/Projectiles/OjoEterno_Medio"
                         : "AethonMod/Content/Projectiles/OjoEterno_Cerrado").Value;
-                    Main.spriteBatch.Draw(parpado, pos, null, color, 0f, origen, ESCALA,
+                    Main.spriteBatch.Draw(parpado, pos, null, color, 0f, origen, escOjo,
                         SpriteEffects.None, 0f);
                 }
                 else
                 {
-                    Main.spriteBatch.Draw(abierto, pos, null, color, 0f, origen, ESCALA,
+                    Main.spriteBatch.Draw(abierto, pos, null, color, 0f, origen, escOjo,
                         SpriteEffects.None, 0f);
 
                     // EL IRIS: el ángulo de la mirada → el desplazamiento en la
@@ -643,8 +721,8 @@ namespace AethonMod.Content.Projectiles
                     Texture2D iris = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
                     Main.spriteBatch.Draw(iris,
-                        pos + (IRIS_REST + mirada) * ESCALA, null, color, 0f,
-                        iris.Size() * 0.5f, IRIS_ESCALA * ESCALA, SpriteEffects.None, 0f);
+                        pos + (IRIS_REST + mirada) * escOjo, null, color, 0f,
+                        iris.Size() * 0.5f, IRIS_ESCALA * escOjo, SpriteEffects.None, 0f);
                 }
             }
             finally { Main.spriteBatch.End(); }

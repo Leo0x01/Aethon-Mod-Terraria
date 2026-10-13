@@ -283,7 +283,15 @@ namespace AethonMod.Content.Weapons
                 }
                 _lastMinionFrame = currentFrame;
 
-                int maxMinions = player.maxMinions;
+                // v6.50.114 — EL TECHO DE LOS OJOS (la letra: «deberían
+                // tener un límite de 10, pero actualiza a que tengan un
+                // límite de 20 con el libro y más con items y armadura de
+                // invocador»): la compuerta lee el TECHO cacheado de
+                // ShardPlayer (20 + equipo de invocador + nivel) y NO
+                // player.maxMinions — el techo vivo de la promesa .111
+                // inflaba maxMinions con cada ojo vivo y la compuerta
+                // JAMÁS se cerraba (los ojos sin límite).
+                int maxMinions = Players.ShardPlayer.TechoOjosDe(player, level);
                 int currentMinions = 0;
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
@@ -591,7 +599,7 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
                     "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
+                    $"[c/78FF96:Escuadrón de 20 ojos · +{bonusSlots} por nivel · +equipo de invocador]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
@@ -615,13 +623,15 @@ namespace AethonMod.Content.Weapons
                     "[c/78788C:Los ojos leen el nivel con el que fueron invocados]"));
 
                 // v6.50.110 — LA PRIMERA CENA: el festín del primer jefe
+                // (v6.50.114: la letra nueva — anillos de agujero negro +
+                // soles rúnicos, al centro y EL LIBRO lo absorbe)
                 tooltips.Add(new TooltipLine(Mod, "SectionCena", "[c/9B59FF:═══ LA PRIMERA CENA ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena",
-                    "[c/9B59FF:Al primer jefe de cada tipo: los sellos lo aprisionan,]"));
+                    "[c/9B59FF:Al primer jefe de cada tipo: los anillos del agujero negro]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena2",
-                    "[c/9B59FF:lo alzan al centro de la pantalla y LA SOMBRA DE LA PÁGINA]"));
+                    "[c/9B59FF:y los soles rúnicos lo aprisionan, lo alzan al centro de la]"));
                 tooltips.Add(new TooltipLine(Mod, "PrimeraCena3",
-                    "[c/9B59FF:lo devora entero — con botín completo. Solo UNA vez.]"));
+                    "[c/9B59FF:pantalla y EL LIBRO lo absorbe entero — botín completo. UNA vez.]"));
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.

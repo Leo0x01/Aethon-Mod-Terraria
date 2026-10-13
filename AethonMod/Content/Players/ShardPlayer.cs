@@ -68,6 +68,31 @@ namespace AethonMod.Content.Players
         /// </summary>
         public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
 
+        // ================================================================
+        // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
+        // ================================================================
+
+        /// <summary>El techo de invocación de los ojos para cada jugador
+        /// (cacheado en PostUpdateEquips: 20 + equipo + nivel). Lo lee la
+        /// compuerta del clic derecho del Eterno — NO maxMinions, que el
+        /// techo vivo de la promesa .111 infla (el runaway de los ojos
+        /// sin límite).</summary>
+        private static readonly int[] _techoOjos = new int[Main.maxPlayers];
+        /// <summary>El tick del cacheo (frío = aún no corrió el hook).</summary>
+        private static readonly uint[] _techoTick = new uint[Main.maxPlayers];
+
+        /// <summary>EL TECHO DE INVOCACIÓN de los ojos del Eterno para un
+        /// jugador (caliente del cache si el hook ya corrió este tick;
+        /// frío: 20 + nivel sin equipo — el primer tick de todos).</summary>
+        public static int TechoOjosDe(Player p, int nivel)
+        {
+            if (p == null) return WeaponScaling.TechoOjosEterno(0, nivel);
+            int i = p.whoAmI;
+            if (i >= 0 && i < _techoTick.Length && _techoTick[i] == Main.GameUpdateCount)
+                return _techoOjos[i];
+            return WeaponScaling.TechoOjosEterno(0, nivel);
+        }
+
         /// <summary>
         /// v6.48 — EL CURSOR DE LA CRÓNICA: cuántas derrotas ya están
         /// registradas (dato histórico del Testigo — sin narrador hoy,
@@ -204,6 +229,30 @@ namespace AethonMod.Content.Players
             int nivel = NivelLibro(false);   // sostenido O barra rápida
 
             // ============================================================
+            // v6.50.114 — EL EQUIPO LIMPIO (se captura ANTES de tocar
+            // maxMinions): lo que la armadura y los accesorios de
+            // INVOCADOR suman MÁS ALLÁ de la base 1 de vanilla. Es la
+            // materia prima del TECHO DE LOS OJOS (la letra: «un límite
+            // de 20 con el libro y más con items y armadura de
+            // invocador»). El cacheo por tick alimenta la compuerta de
+            // invocación del Eterno (TechoOjosDe) — que lee ESTE número
+            // y no maxMinions (el techo vivo de abajo lo infla, y era
+            // EL BUG de los ojos sin límite: cada ojo vivo subía el
+            // techo del siguiente).
+            // ============================================================
+            int equipoInvocador = Player.maxMinions - 1;
+            if (equipoInvocador < 0) equipoInvocador = 0;
+            int techoOjos = WeaponScaling.TechoOjosEterno(equipoInvocador, nivel);
+            {
+                int i = Player.whoAmI;
+                if (i >= 0 && i < _techoOjos.Length)
+                {
+                    _techoOjos[i] = techoOjos;
+                    _techoTick[i] = Main.GameUpdateCount;
+                }
+            }
+
+            // ============================================================
             // v6.50.111 — LA PROMESA CUMPLIDA (el fix de «a veces los
             // minion se desactivan por si solos").
             //
@@ -250,14 +299,16 @@ namespace AethonMod.Content.Players
 
             // === CAPACIDAD (sostener O barra rápida) ===
 
-            // Slots de minion: base del juego + los del libro (nivel/10,
-            // tope +10 al nivel 100). Se SUMA a lo que el resto del
-            // equipamiento dé. Guardado el libro, la capacidad baja —
-            // pero los minions YA invocados permanecen: LA PROMESA
-            // CUMPLIDA de arriba clava el techo en lo vivo (v6.50.111:
-            // vanilla SÍ los culla tick a tick si se pasa del máximo —
-            // el fix llega tras ver al escuadrón morir «solo").
-            Player.maxMinions += WeaponScaling.BonusMinionSlots(nivel);
+            // v6.50.114 — EL TECHO DE LOS OJOS: el ESCUADRÓN del libro
+            // (20 + equipo de invocador + la escalera por nivel) es un
+            // PISO para maxMinions — se aplica SOLO si está MÁS ALTO
+            // (el techo vivo de la promesa .111 puede estar más alto: lo
+            // vivo no se culla, pero la compuerta de invocación ya no
+            // lee maxMinions — lee el techo cacheado de arriba: JAMÁS
+            // otro runaway). Guardado el libro, la capacidad baja; los
+            // ojos YA invocados permanecen por la promesa.
+            if (Player.maxMinions < techoOjos)
+                Player.maxMinions = techoOjos;
 
             // === RECURSOS: completos al sostener, tope +100 en la barra ===
             int bonusVida = WeaponScaling.BonusLife(nivel);
