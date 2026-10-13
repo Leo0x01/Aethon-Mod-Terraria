@@ -1,6 +1,62 @@
-# AethonMod — ESTADO ACTUAL (v6.50.114)
+# AethonMod — ESTADO ACTUAL (v6.50.115)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
+> Última actualización: v6.50.115 (LA CORONA DE CONJURO, LA
+> SOMBRA VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10. La letra:
+> «quita los 3 anillos de fotones… yo me refería a los anillos de los
+> agujeros rúnicos… más los anillos de los soles que sí están bien,
+> estos anillos de agujero negro rúnico deben brillar» + «es mejor
+> ubicar al jefe encima del jugador y que el grimorio se ponga a un
+> lado para devorar al jefe, la misma animación pero con la sombra de
+> la página saliendo del libro y con el libro mirando fijamente a su
+> víctima» + «crea una animación especial para el guardián de la
+> mazmorra… antes de que toque al jugador el grimorio lo detiene y
+> hace la animación de devorarlo, esto solo lo hace una vez y el
+> grimorio lo dice… esta acción con el guardián le da 1 nivel
+> completo» + «en el caso de los minions del grimorio, 30 son
+> demasiado… cuando llegue a 11 minions del grimorio en la siguiente
+> invocación no invoca minion, lo que hace es fortalecer a uno que ya
+> existe con un 50% de daño… 4 mejoras, cada mejora aumenta el ataque
+> en un 50%»). Cuatro entregas: (1) LA CORONA DE CONJURO — los tres
+> anillos de fotones RGB de la .114 MUEREN: nace LA TRIPLE CORONA
+> RÚNICA LITERAL de los agujeros negros (OrbitaLib.CoronaConjuro: el
+> dorado de 8 + el violeta de 6 contrarrotando + el blanco íntimo de
+> 6, runas DE PIE con perlas, glyphMul 2,1) ABRILLANTADA (doble
+> resplandor dorado+violeta pulsante que ARDE al comer; la rueda corre
+> al comer y se ciñe 1,10→0,46) — los anillos de los soles se quedan.
+> (2) EL PUESTO NUEVO + LA SOMBRA VUELVE — el preso cuelga ENCIMA DEL
+> PORTADOR (AnclaSobrePortador: 0,62·jefe+120 px sobre su cabeza, lo
+> sigue si camina; _cenaPortador viaja con la cena) y el libro A UN
+> COSTADO (radioJefe+118, inclinado −0,30, iris clavado); LA SOMBRA DE
+> LA PÁGINA SALE DEL LIBRO (PosicionVivaDelLibro compartida:
+> ColumnaViva+Masa+bruma+OjosDeMasa+CabezaDeBruma+el Devorador v2 — el
+> patrón .113 enraizado en el libro gigante). (3) EL GUARDIÁN NO CRUZA
+> — IntentarDetenerGuardian en el PreAI del DungeonGuardian: a 250 px
+> del portador cargando, el grimorio LO DETIENE y arranca LA CENA
+> COMPLETA; +1 NIVEL COMPLETO (SubirNivelDirecto), LA VOZ
+> (Armas.GuardianDetenido ×3: «A ti solo te devoraré UNA vez… con eso
+> me basta») y la marca ShardPlayer.GuardianMazmorraDevorado persiste
+> en el .plr (UNA vez por portador; PaginaEnBlanco la borra); el
+> guardián excluido de la cena normal. (4) EL ESCUADRÓN DE 10 —
+> EscuadronEterno=10 LLANO (BonusMinionSlots muere; la compuerta
+> cuenta SOLO ojos) y LA 11.ª INVOCACIÓN FORTALECE al ojo con menos
+> mejoras: +50% daño por mejora (hasta ×3) y su anillo (1: agujero
+> negro DORADO · 2: VIOLETA contrarrotante · 3: SOL dorado · 4: segundo
+> sol AZUL-estelar) + el resplandor crece. .tmod 2.624.989 B md5
+> 63e76ada6466d3be5cd60ade32ae4dab, 390 entradas, oráculo 0/0, build
+> real 0/0, headless 0 excepciones, audit_v650115 TODO OK (307 ✓).
+> PENDIENTE EN JUEGO: (a) la cena: la CORONA RÚNICA brillante + los
+> soles, el preso ENCIMA del jugador, el libro A UN COSTADO mirándolo
+> fijo y LA SOMBRA DE LA PÁGINA saliendo del libro devorándolo, (b)
+> entrar a la Mazmorra sin matar a Skeletron con el Eterno a mano: el
+> guardián carga → el grimorio lo DETIENE, lo devora y el libro SUBE 1
+> NIVEL con su voz — y NUNCA más repite el truco, (c) invocar 11
+> veces: a la 11.ª NO aparece un ojo nuevo — uno existente GANA su
+> anillo dorado (+50%), a la 12.ª el violeta, a la 13.ª el sol dorado,
+> a la 14.ª el sol azul (×3 de daño al tope) y «Los diez ojos ya
+> llevan sus cuatro mejoras» cuando todo está al máximo, (d) el
+> escuadrón JAMÁS pasa de 10 (ni con equipo de invocador ni con nivel),
+> (e) Página en Blanco borra también el pacto del guardián.
 > Última actualización: v6.50.114 (EL DAÑO MASIVO TAMBIÉN CENA,
 > LA PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS. La letra: «cuando el
 > daño que recibe el jefe es masivo no se aplica eso de que su primera
@@ -75,27 +131,6 @@
 > GetModIcon exige 80×80/30×30 exactos. .tmod 2.621.290 B
 > md5 b627b56ac0bfb58e6bc051de5c6cdb62, 390 entradas, oráculo 0/0,
 > build real 0/0, headless 0 excepciones, audit 190 ✓.)
-> Última actualización: v6.50.112 (EL PEREZOSO Y LA PÁGINA EN
-> BLANCO. La letra: «el libro cuando esta fuera se mueve muy rapido,
-> debe ser mas lento» + «necesito un item que reinicie el contador de
-> los jefes para verificar como devora los jefes, este iten no debe ser
-> consumible»). Dos entregas: (1) EL MUELLE DEL PEREZOSO — el libro
-> flotante (tirón 0.02, freno 0.90, SIN TOPE) pegaba a la cabeza del
-> jugador con un tirón al 27% más rápido que la carrera y era MISIL al
-> teletransportarse (127 px/t medidos en tools/sim_libro_v650112.py,
-> la simulación con los escenarios reales): muelle nuevo tirón 0.009
-> (se queda ATRÁS: 42 px al caminar, 127 al esprintar) + freno 0.88 +
-> TOPE GRADUADO clamp(dist·0.01, 10, 20) — 10 px/t cerca del dueño, 20
-> sólo si quedó muy lejos; LA VUELTA planea (empuje 0.32, tope 12 —
-> era el misil 0.90/22); el perdedor del espíritu único se DISUELVE EN
-> POLVO. (2) LA PÁGINA EN BLANCO — el probador de LA PRIMERA CENA:
-> borra ShardPlayer.JefesDevorados («solo la primera vez») y cada tipo
-> de jefe vuelve a estrenar su cena completa con su loot; NO
-> CONSUMIBLE, la voz Reset/Nada, textura 24×24 (la tinta borrándose +
-> las motas — la hermana de la Esencia de Hambre), en la Bolsa
-> Probador. .tmod 2.605.378 B
-> md5 d46aa5d53086005e12301a0059063ed9, 390 entradas, oráculo 0/0,
-> build real 0/0, headless 0 excepciones, audit 188 ✓.)
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -1985,7 +2020,43 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.50.114 PUBLICADA — EL DAÑO MASIVO TAMBIÉN CENA, LA
+1. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
+   VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10** (la letra:
+   «quita los 3 anillos de fotones… yo me refería a los anillos de los
+   agujeros rúnicos… más los anillos de los soles que sí están bien,
+   estos anillos de agujero negro rúnico deben brillar» + «ubicar al
+   jefe encima del jugador y que el grimorio se ponga a un lado…
+   con la sombra de la página saliendo del libro y con el libro
+   mirando fijamente a su víctima» + «el guardia intenta atacar al
+   jugador pero antes de que toque al jugador el grimorio lo detiene y
+   hace la animación de devorarlo, esto solo lo hace una vez y el
+   grimorio lo dice… le da 1 nivel completo» + «30 son demasiado…
+   cuando llegue a 11 minions del grimorio en la siguiente invocación
+   no invoca minion, lo que hace es fortalecer a uno que ya existe con
+   un 50% de daño… 4 mejoras, cada mejora aumenta el ataque en un
+   50%»). (1) LA CORONA DE CONJURO — los fotones RGB mueren: la TRIPLE
+   CORONA RÚNICA de los agujeros negros (dorado 8 + violeta 6
+   contrarrotando + blanco íntimo, runas con perlas) ABRILLANTADA; los
+   soles se quedan. (2) El preso ENCIMA del portador + el libro A UN
+   COSTADO inclinado mirándolo fijo + LA SOMBRA DE LA PÁGINA sale DEL
+   LIBRO y lo devora. (3) El GUARDIÁN DE LA MAZMORRA: a 250 px de
+   tocar al portador el grimorio lo DETIENE, lo devora y el libro
+   gana +1 NIVEL COMPLETO — una sola vez por portador (la voz lo
+   anuncia; PaginaEnBlanco reinicia el pacto). (4) EL ESCUADRÓN DE 10:
+   la 11.ª invocación FORTALECE a un ojo (+50% daño por mejora, 4
+   mejoras = ×3): anillo de agujero negro DORADO → VIOLETA → SOL
+   dorado → segundo sol AZUL-estelar. **PENDIENTE EN JUEGO**: (a) la
+   cena con la corona rúnica BRILLANTE + los soles, el preso sobre tu
+   cabeza, el libro al costado y la sombra saliendo de él, (b) entrar
+   a la Mazmorra temprano con el Eterno a mano: el guardián carga →
+   DETENIDO → devorado → +1 nivel y su voz — y no repite jamás, (c)
+   invocar más allá de 10 ojos: cada cast FORTALECE (los anillos
+   aparecen de a uno, ×3 de daño al tope) y «Los diez ojos ya llevan
+   sus cuatro mejoras» al final, (d) el escuadrón nunca pasa de 10
+   (ni equipo ni nivel), (e) Página en Blanco borra también el pacto
+   del guardián.
+
+2. **✅ v6.50.114 PUBLICADA — EL DAÑO MASIVO TAMBIÉN CENA, LA
    PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS** (la letra: «cuando el
    daño que recibe el jefe es masivo no se aplica eso de que su
    primera muerte sea absorbido por el grimorio» + «anillos iguales a
@@ -2011,7 +2082,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    estela, (e) el rebote de cada disparo, (f) Página en Blanco
    reinicia la cena de un tipo ya devorado.
 
-2. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
+3. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
    DECIMALES Y LOS TRES ICONOS DEL USUARIO**
    — la letra: «si el libro se alimenta por si solo, cada muerte que el
    libro haga por si mismo debe reducir 1 de hambre, actualmente solo
@@ -2061,7 +2132,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **410912156** + asset AethonMod.tmod **634680327** 2.621.290 B (md5
    b627b56ac0bfb58e6bc051de5c6cdb62), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.113, respaldo /home/sync/AethonMod-v6.50.113.tmod.
-3. **✅ v6.50.112 PUBLICADA — EL PEREZOSO Y LA PÁGINA EN BLANCO**
+4. **✅ v6.50.112 PUBLICADA — EL PEREZOSO Y LA PÁGINA EN BLANCO**
    — la letra: «el libro cuando esta fuera se mueve muy rapido, debe
    ser mas lento» + «necesito un item que reinicie el contador de los
    jefes para verificar como devora los jefes, este iten no debe ser
@@ -2103,46 +2174,6 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    **410136787** + asset AethonMod.tmod **632578719** 2.605.378 B (md5
    d46aa5d53086005e12301a0059063ed9), CDN VERIFICADO BYTE A BYTE,
    /releases/latest = v6.50.112, respaldo /home/sync/AethonMod-v6.50.112.tmod.
-4. **✅ v6.50.111 PUBLICADA — LA PROMESA CUMPLIDA Y EL ICONO DEL OJO**
-   — la letra: «que raro, a veces los minion se desactivan por si solo»
-   + «el icono que muestra el buff del minion es demasiado grande dame
-   un prompt para crear un icono adecuado en una IA de arte».
-   (1) LA PROMESA CUMPLIDA: vanilla CULLA minions CADA TICK
-   (Projectile.Update: «slotsMinions + minionSlots > maxMinions →
-   Kill()» — decompilado del tML real 2026.8.3.0; numMinions/
-   slotsMinions se ponen a 0 cada tick en Player.Update): el bonus de
-   slots del Eterno moría el tick en que el libro salía de la barra
-   rápida (AL CURSOR al reorganizar el inventario, cofre, hucha,
-   inventario profundo) y el escuadrón de ojos moría EN UN TICK «solo»
-   — el fix: en PostUpdateEquips el techo de maxMinions JAMÁS baja de
-   los slots YA EN USO (la suma de minionSlots de TODOS los minions
-   del jugador — la misma cuenta de vanilla) mientras el libro cuente
-   (nivel>0) o quede un OJO vivo; guardado el libro no se invocan más
-   pero los vivos PERMANECEN. (2) EL ICONO DEL OJO: el buff apuntaba
-   al sprite del proyectil (56×54) y el HUD lo dibujaba GIGANTE sobre
-   los vecinos — icono propio 32×32 Content/Buffs/OjoEternoBuff.png
-   (el ojo COMPUESTO: base + iris en reposo 13×13 en IRIS_REST — en
-   runtime el iris va aparte), candidato FILO (BOX + alfa
-   re-endurecido) verificado por VLM; override Texture MUERTO
-   (convención). El PROMPT para arte de IA viajó en la conversación:
-   reemplazar el .png manteniendo 32×32.
-   VERIFICACIÓN: audit_texturas 0 · oráculo 0/0 · build real 0/0 ·
-   headless 0 excepciones · audit_v650111 TODO OK — .tmod 2.604.250 B
-   md5 4987a56fb49f8e41ca294af1e61b5eeb, 389 entradas (388 +
-   OjoEternoBuff.rawimg), EOF exacto, Ceiling VIVO en el heap (la
-   huella del fix), override Texture MUERTO, rawimg píxel-idéntica al
-   árbol, OjoEterno_Abierto.rawimg intacta + la regresión .104–.110
-   ÍNTEGRA. CHECKLIST en juego: (a) invocar el escuadrón COMPLETO y
-   MOVER el grimorio por el inventario (al cursor, a un cofre, a la
-   hucha, al inventario profundo) — los ojos YA NO mueren, (b) con el
-   libro guardado NO se pueden invocar más ojos (el mensaje de slots
-   llenos), (c) al volver el libro a la barra rápida se puede
-   re-llenar el escuadrón, (d) el icono del buff ahora es 32×32 —
-   del tamaño de los demás buffs, sin montarse sobre los vecinos.
-   PUBLICACIÓN: commit 2de0025 + tag v6.50.111 + push · release
-   **410107088** + asset AethonMod.tmod **632503332** 2.604.250 B (md5
-   4987a56fb49f8e41ca294af1e61b5eeb), CDN VERIFICADO BYTE A BYTE,
-   /releases/latest = v6.50.111, respaldo /home/sync/AethonMod-v6.50.111.tmod.
 1. **✅ v6.50.100 PUBLICADA — LAS TRES TEXTURAS QUE FALTABAN (la
    lección del client.log)** — la letra: «hay errores, recuerda
    siempre darle el arma al jugador y estas armas no usan mana ya que
@@ -2828,6 +2859,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.115** | ✅ Build-verificada (oráculo 0/0 sobre 311 .cs con 79 refs, build real 0/0, .tmod 2.624.989 B md5 63e76ada6466d3be5cd60ade32ae4dab, 390 entradas (los mismos nombres de la .114: solo cambia código), EOF exacto, heap/ldstr/constantes .104–.115 (AnclaSobrePortador/_cenaPortador/PosicionVivaDelLibro/IntentarDetenerGuardian/GuardianPaso/GuardianMazmorraDevorado/MejorasDe/Fortalecer/MultMejoras/EscuadronEterno VIVOS; AnilloFotones/CentroDePantalla/BonusMinionSlots MUERTOS; los ldstr «Mods.AethonMod.Armas.GuardianDetenido»·«OjoFortalecido»·«OjosAlMaximo»·«guardianDevorado»·«jefesDevorados» VIVOS en #US UTF-16; «Mods.AethonMod.Armas.SlotsMinionLlenos» y el tooltip del escuadrón de 20 MUERTOS; las constantes 250/0,35/120/118/1,10/0,46/2,1/15/20/25/30/−0,55 VIVAS en el IL), el árbol con las 4 piezas + la regresión .110–.114 ÍNTEGRA (la corona de conjuro en la cena, la sombra enraizada en el libro, el guardián excluido de la cena normal, la compuerta que cuenta solo ojos, el fix masivo y el retroceso .114 vivos), hjson ×3 semántico + es-MX byte a byte (3 claves nuevas: GuardianDetenido/OjoFortalecido/OjosAlMaximo; SlotsMinionLlenos muerta), iconos del usuario SIN cambios, headless «Sandboxing: Aethon, the Eternal Grimoire v6.50.115 → Adding Content → Server started» 0 excepciones (serverconfig115, mundo guardian115, puerto 7784)), ✔ PUBLICADA (release 411926874 + asset AethonMod.tmod 637722392 2.624.989 B, CDN verificado byte a byte md5 63e76ada…, /releases/latest = v6.50.115, respaldo /home/sync/AethonMod-v6.50.115.tmod), ⏳ en juego | LA LETRA (2026-10-13): «La sombra de la página es necesaria… primero quita los 3 anillos de fotones… yo me refería a los anillos de los agujeros rúnicos… más los anillos de los soles que sí están bien, estos anillos de agujero negro rúnico deben brillar» + «es mejor ubicar al jefe encima del jugador y que el grimorio se ponga a un lado para devorar al jefe, la misma animación pero con la sombra de la página saliendo del libro y con el libro mirando fijamente a su víctima» + «crea una animación especial para el guardián de la mazmorra en su fase de guardián… antes de que toque al jugador el grimorio lo detiene y hace la animación de devorarlo, esto solo lo hace una vez y el grimorio lo dice… le da 1 nivel completo» + «en el caso de los minions del grimorio, 30 son demasiado… cuando llegue a 11 minions… la siguiente invocación no invoca minion, fortalece a uno que ya existe con un 50% de daño… 2 anillos rúnicos de agujero negro cada uno con un color diferente y además 2 anillos rúnicos de sol… 4 mejoras, cada mejora aumenta el ataque en un 50%». CUATRO ENTREGAS: (1) LA CORONA DE CONJURO — los fotones RGB de la .114 mueren: OrbitaLib.CoronaConjuro (el dorado de 8 + violeta de 6 contrarrotando + blanco íntimo, runas DE PIE con perlas, glyphMul 2,1) ABRILLANTADA (doble resplandor dorado+violeta pulsante, rueda que corre al comer, radio 1,10→0,46) — los soles se quedan. (2) EL PUESTO + LA SOMBRA — AnclaSobrePortador (0,62·jefe+120 px sobre la cabeza, sigue al portador) + el libro A UN COSTADO (radioJefe+118, inclinado, iris clavado) + LA SOMBRA DE LA PÁGINA sale DEL LIBRO (PosicionVivaDelLibro compartida; ColumnaViva+Masa+OjosDeMasa+CabezaDeBruma+Devorador v2 — el patrón .113 enraizado en el libro). (3) EL GUARDIÁN NO CRUZA — IntentarDetenerGuardian (PreAI del DungeonGuardian, 250 px, rumbo>0,35): lo DETIENE, LA CENA completa, +1 NIVEL (SubirNivelDirecto), LA VOZ ×3 idiomas y ShardPlayer.GuardianMazmorraDevorado persiste (UNA vez por portador; PaginaEnBlanco la borra); el guardián excluido de la cena normal. (4) EL ESCUADRÓN DE 10 — EscuadronEterno=10 LLANO (BonusMinionSlots muere; compuerta cuenta SOLO ojos) y la 11.ª invocación FORTALECE al ojo con menos mejoras (la centésima de ai[2]): +50% daño por mejora (MultMejoras, hasta ×3) y su anillo (1: agujero negro DORADO CirculoRunico 8·CW·15 px · 2: VIOLETA 6·CCW·20 px · 3: SOL dorado SigiloLib.AnilloRunico 25 px · 4: segundo sol AZUL-estelar 30 px) + resplandor creciente. LECCIONES: (a) cuando la letra corrige UN anillo («no era eso, eran los RÚNICOS») el repositorio YA tiene el patrón exacto — OrbitaLib.CoronaConjuro era el círculo de conjuro LITERAL desde la v6.37: buscar en la PROPIA casa antes de inventar; (b) la raíz de una sombra que sale de un objeto MÓVIL debe leer la MISMA posición viva que su dibujo (PosicionVivaDelLibro compartida — un ancla estática desincroniza sombra y libro); (c) las mejoras de un minion viajan Gratis en la fracción de un ai[] YA sincronizado (nivel 5,03 = nivel 5 + 3 mejoras) — cero campos extra, cero paquetes nuevos; (d) un easteregg de UNA vez exige la marca ANTES del espectáculo (si el cine se interrumpe, el «solo una vez» ya está sellado) |
 | **v6.50.114** | ✅ Build-verificada (oráculo 0/0 sobre 311 .cs con 79 refs, build real 0/0, .tmod 2.622.071 B md5 887331145f60e46a4cba2282d99a6b43, 390 entradas (los mismos nombres de la .113: solo cambia código), EOF exacto, heap/ldstr/constantes .104–.114 (TechoOjosEterno/TechoOjosDe/_techoOjos/AnilloFotones/DibujarElLibro/T_CIERRE/anclaLibro/_retroceso VIVOS; los ldstr viejos « slot(s) de minion (máx +10)]» y los de la cena de la sombra MUERTOS; las constantes 195/400/5,6/14/2,6/0,30 VIVAS en el IL), el árbol con las 4 piezas + la regresión .110–.113 ÍNTEGRA (la compuerta vieja `int maxMinions = player.maxMinions;` MUERTA, el `+= BonusMinionSlots` MUERTO, la patada 3,2 MUERTA, ColumnaViva/CabezaDeBruma/SigiloErosionado MUERTOS en la cena, el plano 0.01 y el decimal "0.0" VIVOS), hjson ×3 sin cambios (es-MX byte a byte), iconos del usuario SIN cambios (PNG crudos byte a byte + rawimg píxel a píxel), headless «Sandboxing v6.50.114 → Adding Content → Server started» 0 excepciones (serverconfig114, mundo cena114, puerto 7783)), ✔ PUBLICADA (release 411803422 + asset AethonMod.tmod 637370231 2.622.071 B, CDN verificado byte a byte md5 887331145f60e46a4cba2282d99a6b43, /releases/latest = v6.50.114, respaldo /home/sync/AethonMod-v6.50.114.tmod), ⏳ en juego | LA LETRA (2026-10-13): «cuando el daño que recibe el jefe es masivo no se aplica eso de que su primera muerte sea absorbido por el grimorio» + «el jefe debe ser rodeado por anillos iguales a los de los proyectiles agujeros negro y además también poner anillos como los de los soles runicos, ser llevado al centro de la pantalla y ser absorbido por el libro… esto se aplica a todos los jefes» + «al parecer los minion no tienen limite… deberían tener un limite de 10, pero actualiza a que tengan un limite de 20 con el libro y más con items y armadura de invocador, además mejora las animación… alrededor del grimorio en su fase de caza y… al atacar tenga un pequeño retroceso». CUATRO ENTREGAS: (1) EL FIX MASIVO — el gatillo de la cena en PreAI exigía vida>0: el golpe que cruzaba de lleno a ≤0 robaba la cena; AHORA CheckDead intercepta la muerte de un golpe ANTES de la marca (la cena tiene prioridad sobre el festín) e Iniciar ENTREGA a la cena en el drain masivo — la primera muerte ES la cena venga como venga. (2) LA PELÍCULA NUEVA — TRES anillos de FOTONES (Ring+aberración RGB+aro blanco del BlackHoleProjectile) + ANILLOS RÚNICOS (SigiloLib.SistemaAnillos) aprisionan/elevan (motor .110 intacto) y EL LIBRO ABSORBE: sale de la mano, crece ×2,6, cuelga bajo el preso, se abre (Medio+iris clavado), come desde 195 (almas/bruma a SU boca), colapsa los anillos DENTRO y a los 400 SE CIERRA (Cerrado+chasquido+onda) y VUELVE — la sombra murió en la cena. (3) EL TECHO DE LOS OJOS — el bug era el techo vivo .111 (cada ojo vivo subía maxMinions → compuerta jamás cerrada); ahora TechoOjosEterno (20+equipo+nivel tope +10) cacheado por tick y la compuerta lee TechoOjosDe (NO maxMinions) — la promesa .111 intacta (techo = PISO). (4) ÓRBITA+RETROCESO — precesión ±0,30 rad contrarrotante + estela de 3 fantasmas + patada 5,6/estado 14 t respetado 8 t por la ley del planeo + pop 1,16 y 6,5 px. LECCIONES: (a) un gatillo de estado vitado en un hook con condición de vida>0 NUNCA atrapa las muertes de un golpe — el interceptor de la MUERTE vive en CheckDead; (b) un «techo vivo» que protege lo existente JAMÁS debe ser el mismo número que la compuerta de entrada (runaway por construcción): la protección y el límite son DOS números; (c) los strings interpolados de C# viajan PARTIDOS en el DLL (InterpolatedStringHandler) — auditar por TROZOS literales, jamás por el formato {0} completo; (d) --data-binary SIN @ sube la RUTA como cuerpo (asset de 60 B) — siempre @archivo |
 | **v6.50.113** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0 — regenerado con tools/regen_oracle.py: 79 refs TODAS las DLLs gestionadas + tModLoader.dll, 311 .cs —, build real 0/0, .tmod 2.621.290 B md5 b627b56ac0bfb58e6bc051de5c6cdb62, 390 entradas (los mismos nombres de la .112 — los cuatro .png son REEMPLAZOS), EOF exacto, hjson semántico == árbol ×3 SIN cambios (es-MX byte a byte), icon.png + icon_small.png PNG crudos byte a byte con 80×80/30×30 EXACTOS (GetModIcon), OjoEternoBuff.rawimg + AethonMenorBuff.rawimg 32×32 píxel-idénticas al árbol NUEVO, el plano vivo (return 0.01f en ReduccionHambre; HambrePorPresa(presa) AUSENTE de la sombra, VIVO en GlobalNPCXP.OnKill), el decimal vivo (ToString("0.0") en barra y voz; los (int) truncadores MUERTOS del árbol) + la regresión .104–.112 ÍNTEGRA (heap, ldstr, constantes del muelle, Ceiling, la cena, las tres ventanas), headless «Sandboxing v6.50.113 → Adding Content → Server started» 0 excepciones), ✔ PUBLICADA (release 410912156 + asset AethonMod.tmod 634680327 2.621.290 B, CDN verificado byte a byte md5 b627b56a…, /releases/latest = v6.50.113, respaldo /home/sync/AethonMod-v6.50.113.tmod), ⏳ en juego | LA LETRA (2026-10-12): «si el libro se alimenta por si solo, cada muerte que el libro haga por si mismo debe reducir 1 de hambre, actualmente solo lo hace en 0%» + «tambien debes permitir que visualizar el medidor de hambre tenga decimales» + «el icono que debes usar para el buff cuando sale el minion es este… / para el icono del mod o sea lo que se ve cuando instala el mod es este… / ahora para el icono de la mascota de luz es este…». TRES ENTREGAS: (1) EL PLANO DEL AUTÓCTONO — ReduccionHambre (AbsorberPresa: la sombra de la página devora presas enteras cuando el libro sale a cazar solo) devolvía la dieta por rareza de la .104 (1★=0,1% — la chusma común no movía ni un entero del medidor); ahora 0.01f PLANO — cada muerte del libro POR SÍ MISMO baja 1% (Eterno y Nervioso por igual); la dieta por rareza SIGUE VIVA en la baja acreditada del jugador (GlobalNPCXP.OnKill → HambrePorPresa — la .104 intacta). (2) EL MEDIDOR CON DECIMALES — la barra del tooltip (GrimorioHambriento) y la voz de la Esencia (EsenciaHambre) usaban (int) truncador; ahora ToString("0.0") — un decimal SIEMPRE (47,3%), a juego barra y voz. (3) LOS TRES ICONOS DEL USUARIO — sus SPRITE_EXACTO 2048×2048 (base64 → tuplas 5B n,R,G,B,A) decodificados por tools/gen_iconos_v650113.py con filtro VLM (NEAREST 32×32, LANCZOS 80×80): OjoEternoBuff 32×32, AethonMenorBuff 32×32, icon.png 80×80 (el menú Mods — el viejo era de la .13: 924 B) y icon_small.png 30×30 (el viejo seguía mostrando el arte viejo); decompile verificado: ContentConverters EXIME icon.png del rawimg (viaja PNG crudo) y AddResource consume el stream de icon_small.png (ToRaw falla → PNG crudo); GetModIcon exige 80×80/30×30 EXACTOS. LECCIONES: (a) el sandbox AMANECIÓ REWIND-EADO otra vez (repo a v6.50.65 + /home/sync a la .99): la restauración fue fetch+reset desde GitHub (el .env con el token sobrevivió — la fuente de verdad es origin/main) y el oráculo se REGENERÓ con tools/regen_oracle.py (la lección de las DLLs sueltas: refs = TODAS menos tModCodeAssist/tModPorter/Tests/Native/runtimes); (b) los SPRITE_EXACTO del usuario traen SU PROPIO decodificador en el archivo (atob → tuplas 5B n,R,G,B,A): el formato se lee del propio .txt, cero adivinación; (c) el mod icon de tML 2026.08: icon.png 80×80 EXACTOS (GetModIcon) viaja PNG crudo (exención de ContentConverters) y icon_small.png 30×30 viaja PNG crudo POR BUG SERENDÍPICO (el template-compare consume el stream → ToRaw falla → copia cruda) |
 | **v6.50.112** | ✅ Build-verificada (audit_texturas 0, oráculo 0/0, build real 0/0, .tmod 2.605.378 B md5 d46aa5d53086005e12301a0059063ed9, 390 entradas (389 de la .111 + PaginaEnBlanco.rawimg 24×24 2316 B = 12+24×24×4 magic 1), EOF exacto, hjson semántico == árbol ×3 (es-MX byte a byte), PaginaEnBlanco VIVO en el heap #Strings + los ldstr «Mods.AethonMod.PaginaEnBlanco.Reset»·«Mods.AethonMod.PaginaEnBlanco.Nada» VIVOS en el heap #US (UTF-16LE), las constantes del muelle nuevo en el IL (0.009 el tirón · 0.88 el freno · 0.01/10/20 el tope graduado · 0.32/12 el planeo de vuelta), los muertos del muelle viejo AUSENTES del árbol (0.02/0.90 en velocity · 22), la rawimg píxel-idéntica al .png (RGB nulo sólo en alfa 0) + la regresión .104–.111 ÍNTEGRA (Ceiling vivo, el icono 32×32, la cena, las tres ventanas), headless «Sandboxing v6.50.112 → Adding Content → Server started» 0 excepciones), ✔ PUBLICADA (release 410136787 + asset AethonMod.tmod 632578719 2.605.378 B, CDN verificado byte a byte md5 d46aa5d5…, /releases/latest = v6.50.112, respaldo /home/sync/AethonMod-v6.50.112.tmod), ⏳ en juego | LA LETRA (2026-10-12): «el libro cuando esta fuera se mueve muy rapido, debe ser mas lento» + «necesito un item que reinicie el contador de los jefes para verificar como devora los jefes, este iten no debe ser consumible». DOS ENTREGAS: (1) EL MUELLE DEL PEREZOSO — GrimorioNerviosoFlotante: el muelle de la .111 (0.02/0.90/SIN tope en MODO_CAZA) tiraba al 27% más rápido que la carrera y convertía el libro en MISIL al teletransportarse (127 px/t — tools/sim_libro_v650112.py: caminar 3/correr 6,25/esprintar 9/caer 10,5/vagoneta 20 px/t + teletransporte 1500 px); el nuevo: tirón 0.009 (menos de la mitad — el libro se queda ATRÁS: 42/88/127 px), freno 0.88, TOPE GRADUADO MathHelper.Clamp(dist×0.01, 10, 20) — 10 px/t cerca del dueño (nunca más rápido que una caída), 20 lejos (un teletransporte NO lo pierde: 1500 px en ~110 t de deriva); LA VUELTA (MODO_VOLVER) planea: empuje 0.32 (era 0.90), tope 12 (era 22) — ~15 t desde la vela (era zumazo de 9); el perdedor de SoyDuplicado se DISUELVE EN POLVO de llama de sombra (antes: chasquido seco invisible). (2) LA PÁGINA EN BLANCO (ítem de pruebas): UseItem borra ShardPlayer.JefesDevorados del portador (la lista de LA PRIMERA CENA .110 «solo la primera vez», persiste en el .plr) — cada tipo de jefe vuelve a estrenar su cena completa (100 de vida → sellos → centro de pantalla → la sombra devora → loot normal); NO CONSUMIBLE (pila 1, el patrón de la Esencia), la voz Reset (cuántos festines borró)/Nada (lista ya vacía), autoridad SP/server + EcoRed.AnunciarAlPortador en MP; textura 24×24 tools/gen_pagina_blanca_v650112.py (el pliego de la Esencia con la tinta BORRÁNDOSE y las motas alzándose — la memoria en humo); hjson ×3 tools/insert_hjson_v650112.py (detecta el formato post-packager: es-ES/en-US planas, es-MX bloque); registrada en la BOLSA DEL PROBADOR (la lección v6.50.63). LECCIONES: (a) el muelle de un seguidor se DISEÑA con simulación (los números del tirón/freno/tope salen de tools/sim_libro_v650112.py, no del ojo); (b) el doc-rot del header del snapshot mantiene los ÚLTIMOS 3 bloques «Última actualización» (.112/.111/.110 — la .109 sale) y la cirugía de PRÓXIMOS es POR LÍNEAS con anclas únicas por versión (jamás regex «\nN. **») |

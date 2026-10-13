@@ -1,5 +1,125 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.115 — LA CORONA DE CONJURO, LA SOMBRA VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10
+
+**La letra**: «La sombra de la página es necesaria ya que es la forma
+en la que el grimorio debe comerse a los jefes, en esta nueva
+animación de muerte primero quita los 3 anillos de fotones, eso no es
+de lo que estaba hablando, yo lo que me refería era a los anillos de
+los agujeros rúnicos, eran esos anillos los que tenías que poner más
+los anillos de los soles que sí están bien, estos anillos de agujero
+negro rúnico deben brillar» + «la mayor parte de la animación de
+devorar a un jefe está bien, solo que no está en el centro de la
+pantalla, se centra en el jugador, creo que en este caso es mejor
+ubicar al jefe encima del jugador y que el grimorio se ponga a un lado
+para devorar al jefe, la misma animación pero con la sombra de la
+página saliendo del libro y con el libro mirando fijamente a su
+víctima en este caso los jefes» + «también crea una animación
+especial para el guardián de la mazmorra en su fase de guardián, es la
+fase cuando tiene una defensa muy alta, esto sería como un easteregg
+donde el guardia intenta atacar al jugador pero antes de que toque al
+jugador el grimorio lo detiene y hace la animación de devorarlo, esto
+solo lo hace una vez y el grimorio lo dice, solo lo devorará una sola
+vez ya que con eso es suficiente, esta acción con el guardián le da 1
+nivel completo» + «sobre los minions, en el caso de los minions del
+grimorio, 30 son demasiado… cuando llegue a 11 minions del grimorio en
+la siguiente invocación no invoca minion, lo que hace es fortalecer a
+uno que ya existe con un 50% de daño y una mejora visual en su
+proyectil con efectos visuales, visualmente cada minion con cada
+mejora debe ganar un anillo rúnico de agujero negro extra, la máxima
+mejora sería cuando un minion gana 2 anillos rúnicos de agujero negro
+cada uno con un color diferente y además 2 anillos rúnicos de sol a su
+alrededor, así que en total cada minion tendría 4 mejoras… cada mejora
+aumenta el ataque del minion en un 50%».
+
+**EL CAMBIO**: cuatro entregas — la corona de conjuro, el puesto nuevo
+con la sombra de vuelta, el easteregg del guardián y el escuadrón de 10:
+
+- **LA CORONA DE CONJURO (NO LOS FOTONES)**: los TRES ANILLOS DE
+  FOTONES RGB de la .114 (la textura Ring con aberración cromática)
+  MURIERON — no eran los de la letra. Ahora el cerco es **LA TRIPLE
+  CORONA RÚNICA LITERAL de los agujeros negros** (`OrbitaLib.CoronaConjuro`,
+  la técnica exacta del halo dorsal): el círculo **DORADO** de 8 runas
+  girando, el **VIOLETA** de 6 contrarrotando (el contrarroto arcano)
+  y el **BLANCO** íntimo de 6 rápido — las runas DE PIE con sus
+  resplandores y sus PERLAS, `glyphMul 2,1` para que SE LEAN a escala
+  de jefe. Y **DEBEN BRILLAR** (la letra): el doble resplandor dorado
+  + violeta pulsando DETRÁS de la corona, que ARDE al comer y al
+  tragar; la rueda CORRE al comer (giro ×1,9) y se CIÑE (radio
+  1,10→0,46·radioJefe) hasta colapsar DENTRO del libro en el trago.
+  **LOS ANILLOS DE LOS SOLES SE QUEDAN** (`SigiloLib.SistemaAnillos` —
+  los que sí estaban bien, dijo la letra).
+- **EL PUESTO NUEVO Y LA SOMBRA DE LA PÁGINA VUELVE**: el preso ya no
+  vuela al centro de la pantalla — cuelga **ENCIMA DEL PORTADOR**
+  (`FaucesGlobalNPC.AnclaSobrePortador`: margen 0,62·jefe + 120 px
+  sobre su cabeza, lo SIGUE si camina; `_cenaPortador` viaja con la
+  cena), y el libro gigante toma su puesto **A UN COSTADO** (el lado
+  que mira el portador, a radioJefe + 118, INCLINADO −0,30 hacia su
+  víctima, el iris CLAVADO de siempre). Y **LA SOMBRA DE LA PÁGINA
+  SALE DEL LIBRO** (la raíz ya NO es la mano del portador:
+  `PosicionVivaDelLibro` es COMPARTIDA — el dibujo del libro y la
+  raíz de la sombra respiran IGUAL): el cuerpo vivo
+  (`ColumnaViva`+`Masa`+bruma doble+`OjosDeMasa` con TODOS los ojos
+  mirando a la víctima+`CabezaDeBruma`) trepa del libro al preso y lo
+  DEVORA (el `Devorador` v2: la elipse completa que crece con el
+  festín y se inhala al trago, la herida roja en la punta, la
+  corriente de bruma volviendo al libro) — el patrón .113 enraizado en
+  el libro gigante de la .114.
+- **EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el easteregg)**:
+  `IntentarDetenerGuardian` en el `PreAI` del DungeonGuardian — en su
+  fase guardián (la defensa 9999) carga contra el portador del Eterno,
+  y a **250 px** (un paso antes de tocarlo, rumbo > 0,35 y velocidad
+  viva) **EL GRIMORIO LO DETIENE EN SECO** y arranca LA CENA COMPLETA
+  (los anillos lo aprisionan encima del portador, el libro al costado,
+  la sombra lo devora, loot íntegro). **+1 NIVEL COMPLETO** al Eterno
+  del inventario (`SubirNivelDirecto` — con su celebración), **LA VOZ**
+  lo anuncia (`Armas.GuardianDetenido` ×3 idiomas: «A ti solo te
+  devoraré UNA vez… con eso me basta.») y la marca
+  `ShardPlayer.GuardianMazmorraDevorado` persiste en el .plr — **SOLO
+  UNA VEZ por portador** (la Página en Blanco también la borra: el
+  probador de primeras veces las borra TODAS). El guardián queda
+  EXCLUIDO de la cena normal (`PrimeraCenaPendiente` lo rechaza: su
+  festín es EXCLUSIVO del easteregg).
+- **EL ESCUADRÓN DE 10 Y EL FORTALECIMIENTO**: el 20+equipo+nivel de
+  la .114 (30 con todo puesto — «demasiado») MUERE con su escalera
+  `BonusMinionSlots`; ahora `WeaponScaling.EscuadronEterno = 10`
+  LLANO (ni el equipo de invocador ni el nivel inflan el escuadrón del
+  Eterno; los minions VANILLA siguen con su `maxMinions` de siempre) y
+  la compuerta cuenta **SOLO OJOS** del Eterno. **LA 11.ª INVOCACIÓN
+  YA NO INVOCA: FORTALECE** — se elige el ojo con MENOS mejoras de la
+  banda (`OjoEternoMinion.MejorasDe/Fortalecer`: las mejoras viven en
+  la centésima de `ai[2]` — nivel 5,03 = nivel 5 con 3 mejoras — y
+  viajan solas con el `netUpdate`): **CADA MEJORA +50% DE DAÑO DEL
+  RAYO** (`MultMejoras`, hasta ×3 con las cuatro) y su ANILLO: mejora
+  1 el **ANILLO RÚNICO DE AGUJERO NEGRO DORADO** (8 runas CW, 15 px),
+  mejora 2 el **VIOLETA contrarrotante** (6 runas, 20 px — OTRO color
+  como pide la letra), mejora 3 **EL ANILLO DEL SOL dorado**
+  (`SigiloLib.AnilloRunico`, la elipse inclinada de los soles, 25 px)
+  y mejora 4 **EL SEGUNDO SOL azul-estelar** contrainclinado (30 px) —
+  más el resplandor del ojo que CRECE con cada mejora (el sello con el
+  que NACE sigue siendo su anillo de siempre). Con las 4 mejoras en
+  los 10 ojos: la voz `Armas.OjosAlMaximo` y no se cobra maná.
+  Tooltips reescritos: «Escuadrón de 10 ojos · lleno el escuadrón,
+  cada invocación FORTALECE a un ojo (+50% daño · 4 mejoras)» y LA
+  PRIMERA CENA («los anillos rúnicos lo alzan sobre tu cabeza; el
+  libro, a un costado, lo mira fijo y LA SOMBRA DE LA PÁGINA lo
+  devora»).
+
+**VERIFICACIÓN**: oráculo 0/0 (79 refs, 311 .cs) · build real 0/0 ·
+.tmod 2.624.989 B md5 63e76ada6466d3be5cd60ade32ae4dab (390 entradas —
+los mismos nombres de la .114: solo cambia código —, EOF exacto) ·
+headless 0 excepciones (serverconfig115, mundo guardian115, puerto
+7784) · `audit_v650115.py` TODO OK (307 ✓): heap
+(`AnclaSobrePortador`/`_cenaPortador`/`PosicionVivaDelLibro`/
+`IntentarDetenerGuardian`/`GuardianPaso`/`GuardianMazmorraDevorado`/
+`MejorasDe`/`Fortalecer`/`MultMejoras`/`EscuadronEterno` VIVOS;
+`AnilloFotones`/`CentroDePantalla`/`BonusMinionSlots` MUERTOS), ldstr
+UTF-16 ×3 idiomas + `guardianDevorado`/`jefesDevorados`, constantes
+.104–.115 (250/0,35/120/118/1,10/0,46/2,1/15/20/25/30/−0,55 en el IL),
+el árbol con las 4 piezas + la regresión .110–.114 ÍNTEGRA, hjson ×3
+semántico + es-MX byte a byte (3 claves nuevas, `SlotsMinionLlenos`
+muerta), los iconos del usuario SIN cambios.
+
 ## Commit v6.50.114 — EL DAÑO MASIVO TAMBIÉN CENA, LA PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS
 
 **La letra**: «cuando el daño que recibe el jefe es masivo no se aplica
