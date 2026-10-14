@@ -1,3 +1,11 @@
+# v6.50.117 — LA CAÍDA, EL RECUERDO PARTIDO EN DOS Y LOS CHISMES DEL PUEBLO
+
+**Los 3 fixes** (hambre 0% que seguía cazando / corona de ojos dispareja / guardián de la mazmorra amontonado y cena que no disparaba) + **LA CAÍDA** (obtención canónica: cometa de tinta negro-morado por jugador la primera noche, grimorio dormido con Zzz en el cráter, ventana de diálogo vanilla, un grimorio por alma, PURGA TOTAL del Fragmento Génesis) + **el jefe renacido**: «Fragmentos de un recuerdo lejano - Aethon» pelea en pareja luz+oscuridad al mismo tiempo (batón de turnos, mediodía eterno), órbita intocable a 1000, FUSIÓN con explosión lenta → **EL RECUERDO COMPLETO** con 6 ataques nuevos (Eclipse Gemelo, Sol Moribundo que atrae, Rejilla Láser bicolor, Lluvia de Páginas, Anillos de Fusión, Último Aliento a 1%) + **el grimorio sale del pueblo** + **la cría gemela** (Aethon Menor oscuro sin luz, fusión en los equinoccios reales, anillos rúnicos, 3 mini ojos, molestar NPCs con AFK: 2 formas, 1 daño sin acreditación, tope 10 golpes, emotes) + **702 diálogos del pueblo** (25 NPCs × travesuras/terror/reclamos, ×3 idiomas).
+
+Oráculo 0/0 (316 .cs) · build real 0/0 ×2 · .tmod 386 entradas 2.703.197 B md5 `406879da4f6da360ab1fac91f883a089` · headless 0 excepciones. Release 412718298, asset 640387148, CDN verificado byte a byte.
+
+---
+
 # AethonMod — Historial de Cambios
 
 ## Commit v6.50.116 — EL ESCUADRÓN DE ONCE, LA CORONA DOBLE, EL FESTÍN AISLADO, LA GRACIA DEL GUARDIÁN Y EL RECORTES DEL IRIS
