@@ -1,12 +1,68 @@
-# v6.50.118 — EL COMETA CERCA, EL RASTRO OSCURO, LA CRÍA GARANTIZADA Y EL ACECHO DEL PUEBLO
+# v6.50.119 — LA FUSIÓN RESCATADA, EL SOL GIGANTE, LA BOLSA DE LA CRÍA Y EL ANOCHECER
 
-**La cría gemela garantizada** (el Recuerdo Completo deja al Aethon Menor SIEMPRE — la vía canónica de la mascota; el mismo ítem engendra a la pareja luz+oscuridad) + **el cometa cae cerca del jugador** (32–64 tiles a un lado del destinatario — la .117 lo medía desde el spawn a ~30 pantallas) + **el rastro oscuro del cráter** (piedra de ébano 80% + obsidiana 20%, esparcido con gradiente, corazón limpio para el libro dormido y el aro del borde tintado — bloques EXISTENTES de vanilla, sin ninguno nuevo) + **el acecho del pueblo** (el refugio de la .117 murió: el libro se queda dentro del área del jugador, merodea a un vecino mirándolo fijo, se le acerca demasiado cada tanto con el emote de susto, rota de víctima cada ~15 s, jamás lanza sombras en el pueblo y jamás sale de la correa de 850 px del dueño).
+**La fusión rescatada** (el golpe de gracia ya NO mata al gemelo mientras su hermano viva: el fragmento QUEDA A MIL, entra en órbita intocable y la cinemática funde a los dos en EL RECUERDO COMPLETO — la .117 solo veía la ventana si un tick intermedio pillaba la vida en (0,1000], cosa que un arma grande saltaba de >1000 a ≤0 en el mismo impacto) + **el sol gigante** (hitbox 220 → 550 px: ×2.5, un 150% MÁS grande; TODO el sol de código crece con EscalaCuerpo 2.50 y TODAS las órbitas del duelo escalaron con el cuerpo — sin envolver a la presa; los gemelos nacen a ±600) + **la bolsa de la cría** (ítem nuevo: la pareja luz+oscuridad duerme dentro — el Recuerdo Completo la suelta SIEMPRE y el 20% del jefe de luz viaja en su bolsa; se abre con clic derecho) + **el anochecer de La Caída** (el cometa de tinta cruza a los 8 s del ocaso, time > 480 — la .117 esperaba pasada la medianoche y el jugador se iba a dormir sin ver nada).
 
-Oráculo 0/0 (316 .cs) · build real 0/0 ×2 · .tmod 386 entradas 2.704.227 B md5 `001b3e077fe0ba136ae09d6e42595c6b` · headless 0 excepciones. Release 412790687, asset 640566830, CDN verificado byte a byte.
+Oráculo 0/0 (317 .cs) · build real 0/0 ×2 · .tmod 387 entradas 2.706.121 B md5 `6d437cc56c3d3db3e2906ed03c798579` · headless 0 excepciones. Release 412899048, asset 640851844, CDN verificado byte a byte.
 
 ---
-
 # AethonMod — Historial de Cambios
+
+## Commit v6.50.119 — LA FUSIÓN RESCATADA, EL SOL GIGANTE, LA BOLSA DE LA CRÍA Y EL ANOCHECER
+
+**La letra**: «nunca se fusionaron los jefes ni se hizo todo eso de quedar
+con 1000 de vida para una fusion y comenzar una nueva fase» + «ademas los
+jefes son pequeños, hacer que sean mas grande, al menos un 150% mas
+grande» + «crea una bolsa donde esten las mascotas, las 2» + «el evento
+de caída no parece activarse, debe activarse al caer la primera noche».
+
+**EL CAMBIO**: cuatro entregas — el rescate, el gigante, la bolsa y el
+anochecer:
+
+- **EL RESCATE DE LA FUSIÓN** (`AethonBoss.CheckDead`): la .117 solo veía
+  la ventana de la fusión si un tick de la IA pillaba la vida en
+  (0,1000] — pero el golpe de gracia de un arma grande SALTA de >1000 a
+  ≤0 en el MISMO impacto (checkDead corre dentro del daño, ANTES del
+  siguiente AI): el gemelo moría limpio… y el otro, ya SIN hermano
+  (`BuscarHermano` devolvía null), tampoco fusionaba jamás. AHORA:
+  mientras el hermano viva (y no esté en su cine de muerte), el golpe de
+  gracia NO mata — el fragmento **QUEDA A MIL** (`NPC.life =
+  VidaFusion`) y entra en órbita intocable; al tick siguiente
+  `PasoFusionPrevia` ve a los dos a mil, decreta la cinemática y **EL
+  RECUERDO COMPLETO** nace con la vida entera (la nueva fase). En el
+  mismo paquete: EL RESET de `FusionDecretada`/`TurnoAtaque` al
+  invocar (el estado huérfano insta-fusionaba a la pareja siguiente) y
+  EL GUARD DE LA PRESA MUERTA en la órbita (el jugador muerto dejaba a
+  los fragmentos girando eternos y el llamado no volvía a caber).
+- **EL CUERPO GIGANTE**: hitbox **220 → 550 px** (×2.5 — un 150% MÁS
+  grande: 34 tiles de sol) y TODO el sol de código crece con la nueva
+  `EscalaCuerpo = 2.50` (núcleo 130→325, velo 540→1350, halo 295→737,
+  coronas, chispas, rayos, la carga del rayo y la estela del destello).
+  En el Recuerdo Completo también su DISCO DEL ECLIPSE (150→375, rim
+  96→240) y las DOS SILUETAS del ÚLTIMO ALIENTO (±120→±300). TODAS las
+  órbitas del duelo escalaron (la de flotación — la vieja dejaba el sol
+  a −170 del jugador con 275 de radio: contacto perpetuo sin quererlo;
+  los flancos de los ataques, el círculo veloz, el decreto y la del
+  hermano 240→600 — dos soles casi tocándose) y los gemelos nacen a
+  **±600** en vez de ±300 (los ±300 con cuerpos de 550 los dejaba
+  ENCIMADOS al aparecer).
+- **LA BOLSA DE LA CRÍA** (`BolsaDeLaCria`, ítem nuevo): la pareja del
+  recuerdo duerme dentro — la cría de LUZ y su gemela de OSCURIDAD,
+  las DOS mascotas en un solo ítem adentro (el `AethonMenorItem`, el
+  que engendra a la pareja). El Recuerdo Completo la suelta SIEMPRE y
+  el 20% del jefe de luz también viaja en su bolsa. Se abre con CLIC
+  DERECHO (`CanRightClick`, el patrón de la casa): entrega al Aethon
+  Menor en la primera ranura libre (o cae a sus pies), mitad de chispas
+  doradas y mitad moradas (la pareja despertando). Textura 30×30
+  procedural: mitad dorada y mitad violeta cosidas por una costura
+  central, el lazo morado del grimorio y una chispa por mitad.
+- **LA CAÍDA AL ANOCHECER**: la ventana pasó de `time>12000` (pasada la
+  medianoche — el jugador esperaba TODA la primera mitad de la noche
+  sin ver nada) a `time>480` (apenas 8 s tras el ocaso: el cielo ya es
+  de noche y el cometa cruza AHORA).
+
+Verificación: oráculo 0/0 (317 .cs, 79 refs) · build real 0/0 ×2 ·
+.tmod 387 entradas 2.706.121 B md5 `6d437cc5…` · headless 0
+excepciones (mundo nuevo, ciclo completo) · `audit_v650119` TODO OK.
 
 ## Commit v6.50.118 — EL COMETA CERCA, EL RASTRO OSCURO, LA CRÍA GARANTIZADA Y EL ACECHO DEL PUEBLO
 
