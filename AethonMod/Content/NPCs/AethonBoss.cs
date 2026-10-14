@@ -197,7 +197,17 @@ namespace AethonMod.Content.NPCs
         private const int EST_LANZAS = 15;     // v6.50.54 — LAS LANZAS ETERNAS (ETHEREAL LANCE: la luz sembrada DETRÁS de tu carrera, telegrafiada y translúcida hasta volar — castiga la línea recta)
         private const int EST_CORONA = 16;     // v6.50.54 — LA CORONA ETERNA (EVERLASTING RAINBOW: el anillo de 14 plumas prismáticas espiralando alrededor de la presa)
         private const int EST_SOL = 17;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción — y LUEGO LO LANZA a la presa: persiga lenta + gravedad + la GIGANTE ROJA que estalla en luz, bruma y formas)
-        private const int EST_MURIENDO = 99;    // la contracción final
+        protected const int EST_MURIENDO = 99;    // la contracción final
+
+        // === v6.50.117 — LA FUSIÓN DE LOS GEMELOS DEL RECUERDO (la letra:
+        //     «el primer jefe que llegue a 1000 queda orbitando al que
+        //     sobrevive y además NO se le puede hacer daño, cuando ambos
+        //     lleguen a 1000, los dos jefes se fusionan en uno solo, ese
+        //     sería más fuerte con ataques más vistosos») ===
+        /// <summary>LA VIDA DE LA FUSIÓN: al caer aquí, el fragmento entra en órbita.</summary>
+        public const int VidaFusion = 1000;
+        internal const int EST_ORBITANDO = 90;    // a mil: gira alrededor del hermano, INTOCABLE
+        internal const int EST_FUSIONANDO = 91;   // ambos a mil: LA CINEMÁTICA (200 t) y el nacimiento del Recuerdo Completo
 
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
 //     además demora mucho la animación del suelo temblando y todo eso /
@@ -233,6 +243,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// <summary>EL TIEMPO CONGELADO: el sol clavado en el centro del cielo.</summary>
         public static bool TiempoCongelado = false;
 
+        /// <summary>v6.50.117 — EL BATÓN DE LOS GEMELOS: el índice del NPC
+        /// que tiene la palabra (−1 = nadie): los dos NUNCA ejecutan un
+        /// ataque grande a la vez — el que ataca TOMA el batón y el otro
+        /// reposiciona suave en su órbita hasta que se lo devuelva.</summary>
+        internal static int TurnoAtaque = -1;
+
+        /// <summary>v6.50.117 — LA FUSIÓN DECRETADA (compartida por el par):
+        /// la cinemática vive UNA sola vez — el gemelo de MENOR whoAmI la
+        /// decreta (solo la AUTORIDAD) y ambos la corren.</summary>
+        internal static bool FusionDecretada = false;
+
         /// <summary>
         /// LA POSICIÓN DEL SOL EN EL CIELO (espacio del fondo) — LITERAL
         /// del decompile de Main.DrawSunAndMoon (2026.07): x avanza lineal
@@ -261,8 +282,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             return new Vector2(x, y);
         }
 
-        private int _estado = EST_NACIENDO;
-        private int _tickEstado = 0;
+        protected int _estado = EST_NACIENDO;
+        protected int _tickEstado = 0;
         private bool _nacio = false;
         private int _subLlegada = SUB_PRESENTA;   // v6.50.49 — LA PRESENTACIÓN de la Emperatriz
 
@@ -271,7 +292,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private int _tickRayo = 0;
 
         // === LA ROTACIÓN (v6.50.34 — la luz nunca repite) ===
-        private int _ultimoAtaque = 0;          // 0 ninguno · 1 juicio · 2 rayo · 3 nova · 4 cruz · 5 destello · 6 eclipse
+        protected int _ultimoAtaque = 0;          // 0 ninguno · 1 juicio · 2 rayo · 3 nova · 4 cruz · 5 destello · 6 eclipse
         private int _cadenasDestello = 0;       // cuántos destellos lleva la cadena
         private float _angDestello = 0f;        // el rumbo del destello (viaja en ai[3])
 
@@ -308,10 +329,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         //     órbita) y LA MEMORIA DOBLE (nunca el mismo plato NI el de
         //     atrás) ===
         private readonly int[] _coreoCola = new int[6];
-        private int _coreoLargo = 0;
+        protected int _coreoLargo = 0;
         private int _ataquesDesdeCoreo = 0;
         private int _proximoCoreoEn = 999;
-        private int _anteultimoAtaque = 0;
+        protected int _anteultimoAtaque = 0;
 
         // === v6.50.60 — EL ATAQUE ESPECIAL DE CADA FASE (la letra:
         //     «intenta que el jefe tenga en cada fase un ataque especial»
@@ -338,7 +359,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private int _tickPierna = 0;
 
         // === LA FASE (los umbrales de siempre) ===
-        private int Phase = 1;
+        protected int Phase = 1;
 
         /// <summary>
         /// v6.50.59 — LA FASE PÚBLICA: el RELOJ PERMANENTE de fase 2 la
@@ -351,16 +372,60 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private int _relojPermanente = -1;
 
         /// <summary>LA FURIA: la fase final es MÁS RÁPIDA en todo.</summary>
-        private bool Furia => Phase >= 5;
+        protected bool Furia => Phase >= 5;
+
+        // === v6.50.117 — LOS GEMELOS DEL RECUERDO: los anclajes que
+        //     AethonBossOscuro (la mitad oscura) y AethonBossFusionado (el
+        //     recuerdo completo) re-escriben — la IA de la luz queda
+        //     INTACTA para el jefe original ===
+
+        /// <summary>¿Este dios corre LA LLEGADA? (el gemelo oscuro NUNCA:
+        /// no toca Main.time ni la coreografía — el reloj es del de luz).</summary>
+        protected virtual bool HaceLlegada => true;
+
+        /// <summary>¿Inunda el mundo con su luz? (el sol moribundo del gemelo NO ilumina).</summary>
+        protected virtual bool Ilumina => true;
+
+        /// <summary>LA PALETA DEL SOL: el gemelo la viste de negro y morado profundo.</summary>
+        protected virtual Color PaletaOro => OroLuz;
+        /// <summary>El velo/segunda corona (la nota oscura de la paleta).</summary>
+        protected virtual Color PaletaVioleta => VioletaLuz;
+        /// <summary>EL NÚCLEO (el corazón del sol).</summary>
+        protected virtual Color PaletaNucleo => NucleoBlanco;
+
+        /// <summary>La paleta de los PERNOS del dios (viaja en ai[1]: 0/1 =
+        /// luz balística/guiada · 2/3 = oscuridad): el gemelo escupe lluvia oscura.</summary>
+        protected virtual float PaletaPer => 0f;
+
+        /// <summary>¿Es EL RECUERDO COMPLETO (la fusión)? Sin hermano, sin
+        /// órbita — y con SU moveset propio.</summary>
+        protected virtual bool EsFusion => false;
+
+        /// <summary>El TIPO NPC del hermano (0 = no tiene: el fusionado).</summary>
+        protected virtual int TipoHermano => ModContent.NPCType<AethonBossOscuro>();
+
+        /// <summary>¿Los fondos de fase callan? (el ÚLTIMO ALIENTO del
+        /// fusionado: la despedida no dispara).</summary>
+        protected virtual bool SilencioFinal => false;
+
+        /// <summary>LOS ESTADOS PROPIOS DEL FUSIONADO (los ≥30): el switch
+        /// de la base se los pasa — devuelve false si no lo conoce.</summary>
+        protected virtual bool EstadoFusionado(int estado, Player target) => false;
 
         // === LA ÓRBITA DE FLOTACIÓN ===
         private float _angOrbita = -MathHelper.PiOver2;
         private int _sentidoOrbita = 1;
 
         // === EL CINE DE MUERTE ===
-        private bool _muriendo = false;
+        protected bool _muriendo = false;
         private int _tickMuerte = 0;
-        private bool _yaDropeo = false;
+        protected bool _yaDropeo = false;
+
+        // === v6.50.117 — LA FUSIÓN: el estado del par de gemelos ===
+        private bool _fusionando = false;       // órbita o cine activos (el guard de CheckDead)
+        private float _angHermano = 0f;         // el ángulo de la órbita alrededor del hermano
+        private int _hermanoIdx = -1;           // el cache del hermano (refresco cada 30 t)
+        private int _ticksBuscaHermano = 0;     // el reloj del cache
 
         // === LA PALETA DE LA LUZ PRIMORDIAL ===
         private static readonly Color OroLuz = new(255, 240, 190);
@@ -393,10 +458,69 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         }
 
         // ==================================================================
+        //  v6.50.117 — LA FUSIÓN A 1000 (la letra del gemelo): corre ANTES
+        //  de la IA de combate — el que cae a VidaFusion entra en ÓRBITA
+        //  (intocable, sin ataques) y cuando AMBOS están a mil, el de MENOR
+        //  whoAmI DECRETA la cinemática. Solo la AUTORIDAD decide (SP o
+        //  servidor); los remotos adoptan por el cable (ai[0] = 91).
+        // ==================================================================
+        protected virtual void PasoFusionPrevia()
+        {
+            if (EsFusion) return;                             // el Recuerdo Completo no se fusiona
+            if (_muriendo || _estado == EST_MURIENDO) return; // la muerte manda sobre todo
+            if (_estado == EST_FUSIONANDO) return;            // ya corre el cine
+
+            if (NPC.life > VidaFusion) return;                // todavía le queda memoria que quemar
+
+            NPC hermano = BuscarHermano();
+            if (hermano == null) return;                      // sin hermano no hay fusión (si orbitaba a uno que murió, el estado lo devuelve a la pelea)
+
+            // EL PRIMERO A MIL: órbita alrededor del que sobrevive +
+            // INTOCABLE (la letra: «queda orbitando al que sobrevive y
+            // además NO se le puede hacer daño»).
+            if (_estado != EST_ORBITANDO)
+            {
+                _estado = EST_ORBITANDO;
+                _tickEstado = 0;
+                _fusionando = true;
+                _angHermano = Main.rand.NextFloat(MathHelper.TwoPi);
+                NPC.dontTakeDamage = true;
+                NPC.netUpdate = true;      // MP: el cambio de estado viaja YA
+            }
+            NPC.life = Math.Max(NPC.life, VidaFusion);        // EL CLAMP: a mil no baja más
+
+            // ¿AMBOS A MIL? EL DECRETO — exactamente UNO (el de menor
+            // whoAmI, y solo la AUTORIDAD: la decisión de fusión no se
+            // decide dos veces ni en el cliente).
+            bool hermanoMuriendo = hermano.ai[0] == EST_MURIENDO;
+            bool hermanoListo = hermano.life <= VidaFusion && !hermanoMuriendo;
+            if (hermanoListo && !FusionDecretada &&
+                Main.netMode != NetmodeID.MultiplayerClient &&
+                NPC.whoAmI < hermano.whoAmI)
+            {
+                FusionDecretada = true;
+            }
+
+            if (FusionDecretada)
+            {
+                _estado = EST_FUSIONANDO;
+                _tickEstado = 0;
+                _fusionando = true;
+                NPC.dontTakeDamage = true;
+                NPC.velocity = Vector2.Zero;
+                NPC.netUpdate = true;
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item117.WithPitchOffset(-0.35f), NPC.Center);
+                OndaLib.Kick(9f, 20);
+            }
+        }
+
+        // ==================================================================
         //  LA IA — LA LUZ PRIMORDIAL
         // ==================================================================
         public override void AI()
         {
+            PasoFusionPrevia(); // v6.50.117 — el motor de la fusión corre ANTES de la IA de combate
             // === LA ADOPCIÓN DE LA MUERTE (v6.50.79 — el contrato MP de la
             //     casa): la autoridad apagó al dios por CheckDead, pero el
             //     cine vive en ai[0]=99/ai[1]=tickMuerte — el cliente que
@@ -415,6 +539,25 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             // === EL CINE DE MUERTE (CheckDead manda aquí) ===
             if (_muriendo) { CineMuerte(); return; }
+
+            // === v6.50.117 — LA ADOPCIÓN DE LA FUSIÓN (el contrato MP de
+            //     la casa, gemelo de la adopción de la muerte): la
+            //     AUTORIDAD decretó la fusión (ai[0]=91) — el remoto la
+            //     ADOPTA y corre SU cine local (los anillos, el abrazo) ===
+            if (!_fusionando && NPC.ai[0] == EST_FUSIONANDO)
+            {
+                _fusionando = true;
+                _estado = EST_FUSIONANDO;
+                _tickEstado = Math.Max(0, (int)NPC.ai[2]);
+                NPC.dontTakeDamage = true;
+                NPC.velocity = Vector2.Zero;
+            }
+
+            // === v6.50.117 — LA ÓRBITA Y EL CINE DE FUSIÓN tienen su
+            //     propio motor (nada del estado de combate corre mientras
+            //     tanto) ===
+            if (_estado == EST_ORBITANDO) { EstadoOrbitando(); SincronizarEstado(); return; }
+            if (_estado == EST_FUSIONANDO) { EstadoFusionando(); SincronizarEstado(); return; }
 
             // === LA PRESA (el despawn limpio de la casa) ===
             Player target = Main.player[NPC.target];
@@ -461,11 +604,25 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (!_nacio)
             {
                 NPC.velocity = Vector2.Zero;
-                NPC.alpha = 255;          // invisible hasta que la presentación lo traiga
-                NPC.dontTakeDamage = true;
-                _subLlegada = SUB_PRESENTA;
-                _tickEstado = 0;
-                _estado = EST_NACIENDO;
+                if (HaceLlegada)
+                {
+                    NPC.alpha = 255;          // invisible hasta que la presentación lo traiga
+                    NPC.dontTakeDamage = true;
+                    _subLlegada = SUB_PRESENTA;
+                    _tickEstado = 0;
+                    _estado = EST_NACIENDO;
+                }
+                else
+                {
+                    // v6.50.117 — EL GEMELO OSCURO (y el fusionado) NUNCA
+                    // hacen LA LLEGADA: nacen YA en la órbita de pelea —
+                    // el reloj del mundo y la coreografía son del hermano
+                    // de luz (nadie pelea por el mediodía).
+                    NPC.alpha = 0;
+                    _tickEstado = 0;
+                    _estado = EST_FLOTAR;
+                    _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                }
                 _nacio = true;
                 NPC.netUpdate = true;
             }
@@ -512,18 +669,45 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_LANZAS: EstadoLanzas(target); break;
                 case EST_CORONA: EstadoCorona(target); break;
                 case EST_SOL: EstadoSol(target); break;
+
+                default:
+                    // v6.50.117 — LOS ESTADOS DEL FUSIONADO (los ≥30: El
+                    // Recuerdo Completo reescribe el moveset): el que sabe,
+                    // lo corre; el que no, de vuelta a la órbita.
+                    if (!EstadoFusionado(_estado, target))
+                    {
+                        _estado = EST_FLOTAR;
+                        _tickEstado = 0;
+                    }
+                    break;
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
-            switch (Phase)
+            // v6.50.117 — SALIDA: en el ÚLTIMO ALIENTO del fusionado todo
+            // calla (la despedida no dispara).
+            if (!SilencioFinal)
             {
-                case 4: Fase4Runas(); break;
-                case 5: Fase5FuriaFondo(target); break;
+                switch (Phase)
+                {
+                    case 4: Fase4Runas(); break;
+                    case 5: Fase5FuriaFondo(target); break;
+                }
             }
 
+            // === v6.50.117 — EL BATÓN DE LOS GEMELOS: quien ataca, tiene
+            //     la palabra — el que espera reposiciona suave (los dos
+            //     NUNCA ejecutan un ataque grande a la vez) ===
+            bool enAtaqueGrande = _estado != EST_FLOTAR && _estado != EST_NACIENDO &&
+                _estado != EST_ORBITANDO && _estado != EST_FUSIONANDO && _estado != EST_MURIENDO;
+            if (enAtaqueGrande) TurnoAtaque = NPC.whoAmI;
+            else if (TurnoAtaque == NPC.whoAmI) TurnoAtaque = -1;
+
             // === LA LUZ DEL MUNDO: la luz inunda SIEMPRE (el eclipse y su
-            //     apagón MURIERON con la v6.50.46 — el sol no se apaga más) ===
-            Lighting.AddLight(NPC.Center, new Vector3(1.55f, 1.35f, 0.95f)); // el sol vivo (más grande)
+            //     apagón MURIERON con la v6.50.46 — el sol no se apaga más)
+            //     v6.50.117 — salvo el SOL MORIBUNDO del gemelo: la mitad
+            //     oscura del recuerdo NO ilumina ===
+            if (Ilumina)
+                Lighting.AddLight(NPC.Center, new Vector3(1.55f, 1.35f, 0.95f)); // el sol vivo (más grande)
 
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
@@ -567,13 +751,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         {
             if (_estado == EST_NACIENDO) return false;   // la llegada es cine (2 actos)
             if (_muriendo) return false;                 // la muerte es cine
+            if (_fusionando) return false;               // v6.50.117 — la fusión es cine (la órbita persigue al hermano: nunca queda huérfana)
             return base.CheckActive();
         }
 
         // ==================================================================
         //  LA PREDICCIÓN ADAPTATIVA (v6.50.44 — LA QUE LEE TU RITMO)
         // ==================================================================
-        private Vector2 PredPresa(Player target)
+        protected Vector2 PredPresa(Player target)
         {
             // v6.50.44 — LA PREDICCIÓN LEE TU RITMO, NO TU INSTANTE: la
             // velocidad MEDIA de las últimas 8 posiciones (el ritmo real
@@ -826,7 +1011,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                             DustID.GoldFlame,
                             new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
                                 Main.rand.NextFloat(1f, 3f)),
-                            180, OroLuz, 1.4f);
+                            180, PaletaOro, 1.4f);
                         d.noGravity = true;
                     }
 
@@ -964,10 +1149,22 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// del cielo) y pegarte invita a la CRUZ (los chorros barren).
         /// La luz no tiene patrón — tiene LECTURA.
         /// </summary>
-        private void ElegirAtaque(Player target)
+        protected virtual void ElegirAtaque(Player target)
         {
             // v6.50.57 — CADA ELECCIÓN CUENTA para el compás de la danza.
             _ataquesDesdeCoreo++;
+
+            // === v6.50.117 — LA COORDINACIÓN DE LOS GEMELOS: si el hermano
+            //     vivo está en pleno ataque grande (tiene el batón), este
+            //     ESPERA — sigue reposicionándose suave en su órbita y
+            //     reintenta cuando la paciencia vuelva a agotarse. Con los
+            //     dos naciendo a la vez, la primera paciencia (~120 t) ya
+            //     los deja alternando (el desfase de la letra) ===
+            if (TurnoAtaque >= 0 && TurnoAtaque != NPC.whoAmI && HermanoAtacando())
+            {
+                _tickEstado = 0;   // la órbita sigue viva: reintento en la próxima paciencia
+                return;
+            }
 
             // v6.50.60 — EL ESPECIAL DE LA FASE MANDA SOBRE TODO (la
             // letra: «intenta que el jefe tenga en cada fase un ataque
@@ -1183,7 +1380,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
                 if (primera)
                 {
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Juicio", OroLuz);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Juicio", PaletaOro);
                     OndaLib.Kick(8f, 16);
                 }
             }
@@ -1232,7 +1429,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     _rayo = 2;
                     _tickRayo = 0;
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Aliento", VioletaLuz);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Aliento", PaletaVioleta);
                     NPC.netUpdate = true;
                 }
                 return;
@@ -1258,7 +1455,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, v,
                             ModContent.ProjectileType<AtaqueJefeProjectile>(),
                             (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                            AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                             NPC.whoAmI * 97 + _tickRayo * 3 + l);
                     }
                 }
@@ -1293,7 +1490,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 if (_tickEstado == 1)
                 {
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Nova", OroLuz);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Nova", PaletaOro);
                     OndaLib.Kick(6f, 12);
                 }
                 return;
@@ -1329,7 +1526,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                                 NPC.Center, v,
                                 ModContent.ProjectileType<AtaqueJefeProjectile>(),
                                 (int)(NPC.damage * 0.60f), 2f, Main.myPlayer,
-                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                                 NPC.whoAmI * 71 + a * 19 + i);
                         }
                     }
@@ -1365,7 +1562,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                                 NPC.Center, v,
                                 ModContent.ProjectileType<AtaqueJefeProjectile>(),
                                 (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
-                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                                 NPC.whoAmI * 73 + a * 23 + i);
                         }
                     }
@@ -1413,7 +1610,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (_tickEstado == 1)
             {
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Estallido", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Estallido", PaletaOro);
                 OndaLib.Kick(5f, 10);
             }
 
@@ -1491,7 +1688,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Furia ? 1f : 0f, NPC.whoAmI);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Danza", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Danza", PaletaOro);
                 OndaLib.Kick(7f, 14);
                 NPC.netUpdate = true;
             }
@@ -1526,7 +1723,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     SoundID.Item122.WithPitchOffset(segunda ? 0.25f : -0.1f), NPC.Center);
                 if (primera)
                 {
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Lanzas", OroLuz);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Lanzas", PaletaOro);
                     OndaLib.Kick(6f, 12);
                 }
                 NPC.netUpdate = true;
@@ -1596,7 +1793,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Furia ? 1f : 0f, NPC.whoAmI * 53);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item70.WithPitchOffset(-0.3f), NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Corona", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Corona", PaletaOro);
                 OndaLib.Kick(6f, 13);
                 NPC.netUpdate = true;
             }
@@ -1639,7 +1836,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item117.WithPitchOffset(-0.25f), NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Sol", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Sol", PaletaOro);
                 OndaLib.Kick(8f, 16);
                 NPC.netUpdate = true;
             }
@@ -1672,7 +1869,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// cadena de la Emperatriz: los ataques se pasan el turno); si la
         /// cola está vacía, la órbita de siempre.
         /// </summary>
-        private void CerrarEstado()
+        protected void CerrarEstado()
         {
             if (_coreoLargo > 0)
             {
@@ -1768,7 +1965,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                             NPC.Center, v,
                             ModContent.ProjectileType<AtaqueJefeProjectile>(),
                             (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                            AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                             NPC.whoAmI * 83 + _tickEstado + b * 7);
                     }
                 }
@@ -1786,7 +1983,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                                 NPC.Center, v,
                                 ModContent.ProjectileType<AtaqueJefeProjectile>(),
                                 (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
-                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                                 NPC.whoAmI * 87 + _tickEstado + b * 11);
                         }
                     }
@@ -1816,7 +2013,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             _minaPuesta = false;   // la mina es una por cruzamiento
             NPC.velocity *= 0.25f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", OroLuz);
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", PaletaOro);
             OndaLib.Kick(7f, 14);
             NPC.netUpdate = true;
         }
@@ -1920,7 +2117,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (_tickEstado == 1)
             {
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Vortice", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Vortice", PaletaOro);
                 OndaLib.Kick(6f, 14);
             }
 
@@ -1967,7 +2164,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, v,
                         ModContent.ProjectileType<AtaqueJefeProjectile>(),
                         (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                        AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
                         NPC.whoAmI * 61 + indice * 29 + b * 13 + p);
                 }
             }
@@ -2034,7 +2231,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.4f), NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", PaletaOro);
                 OndaLib.Kick(8f, 18);
                 NPC.netUpdate = true;
             }
@@ -2091,7 +2288,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Furia ? 1f : 0f, NPC.whoAmI * 37);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item70.WithPitchOffset(-0.2f), NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Coro", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Coro", PaletaOro);
                 NPC.netUpdate = true;
             }
 
@@ -2118,7 +2315,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 SoltarManada(target);
                 if (_tickEstado == 30)
                 {
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Manada", VioletaLuz);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Manada", PaletaVioleta);
                     OndaLib.Kick(7f, 15);
                 }
             }
@@ -2195,7 +2392,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 _telarPaso = 0;
                 _tickPierna = 0;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Telar", OroLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Telar", PaletaOro);
                 OndaLib.Kick(8f, 16);
                 NPC.netUpdate = true;
             }
@@ -2247,7 +2444,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     NPC.Center + new Vector2(Main.rand.NextFloat(-60f, 60f),
                         Main.rand.NextFloat(-60f, 60f)),
                     DustID.GoldFlame,
-                    -NPC.velocity * 0.06f, 170, OroLuz, 1.1f);
+                    -NPC.velocity * 0.06f, 170, PaletaOro, 1.1f);
                 d.noGravity = true;
             }
 
@@ -2318,7 +2515,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Phase, NPC.whoAmI);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Decreto", VioletaLuz);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Decreto", PaletaVioleta);
                 NPC.netUpdate = true;
             }
 
@@ -2378,6 +2575,188 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             _coreoLargo = 0;        // la firma entra LIMPIA (sin cola vieja)
             NPC.netUpdate = true;
             return true;
+        }
+
+        // ==================================================================
+        //  v6.50.117 — LA ÓRBITA DEL QUE LLEGÓ A MIL (la letra): gira
+        //  alrededor del hermano que sobrevive — INTOCABLE, sin ataques,
+        //  un hilo de bruma hacia él. Si el hermano muere, el fragmento
+        //  VUELVE a la pelea con la vida que le quede.
+        // ==================================================================
+        private void EstadoOrbitando()
+        {
+            NPC hermano = BuscarHermano();
+            if (hermano == null)
+            {
+                // EL HERMANO MURIÓ: el fragmento vuelve a la pelea (ya sin
+                // el clamp ni la invulnerabilidad — la vida que le quede).
+                _estado = EST_FLOTAR;
+                _tickEstado = 0;
+                _fusionando = false;
+                NPC.dontTakeDamage = false;
+                NPC.netUpdate = true;
+                return;
+            }
+
+            // EL CLAMP ETERNO: a mil no baja más (la fusión lo decidirá).
+            NPC.life = Math.Max(NPC.life, VidaFusion);
+            NPC.dontTakeDamage = true;
+
+            // LA ÓRBITA: círculo de 240 px alrededor del hermano, giro
+            // 0.02 rad/t (una vuelta cada ~5,2 s) — el reposo del fragmento.
+            _angHermano += 0.02f;
+            Vector2 punto = hermano.Center + new Vector2(
+                MathF.Cos(_angHermano) * 240f,
+                MathF.Sin(_angHermano) * 240f * 0.86f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.10f, 0.18f);
+            _tickEstado++;
+
+            // LA BRUMA DEL FRAGMENTO (la hecha de luz la dibuja el PreDraw;
+            // esta es la de polvo que respira alrededor del que orbita).
+            if (!Main.dedServ && Main.rand.NextBool(4))
+            {
+                Dust d = Dust.NewDustPerfect(
+                    NPC.Center + Main.rand.NextVector2Circular(90f, 90f),
+                    DustID.PurpleTorch, -NPC.velocity * 0.05f, 150,
+                    PaletaVioleta, 1.1f);
+                d.noGravity = true;
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.117 — LA CINEMÁTICA DE FUSIÓN (la letra): «cuando ambos
+        //  lleguen a 1000, los dos jefes se fusionan en uno solo, ese
+        //  sería más fuerte con ataques más vistosos». 200 t: los dos
+        //  CONGELADOS atrayéndose lentamente, ANILLOS DE ONDA alternando
+        //  luz/oscuridad y un flash que CRECE… y al final ambos se apagan
+        //  SIN pasar por CheckDead (ni botín ni muerte doble) y EL
+        //  RECUERDO COMPLETO nace donde se abrazaron.
+        // ==================================================================
+        private void EstadoFusionando()
+        {
+            _tickEstado++;
+            NPC hermano = BuscarHermano();
+            if (hermano == null)
+            {
+                // el hermano se perdió a media cine: la fusión muere y
+                // este fragmento vuelve a la pelea.
+                FusionDecretada = false;
+                _estado = EST_FLOTAR;
+                _tickEstado = 0;
+                _fusionando = false;
+                NPC.dontTakeDamage = false;
+                NPC.netUpdate = true;
+                return;
+            }
+
+            // CONGELADOS E INTOCABLES: nada del mundo los mueve.
+            NPC.dontTakeDamage = true;
+            NPC.velocity = Vector2.Zero;
+
+            // LA ATRACCIÓN: cada fragmento se acerca a su espejo — el punto
+            // medio se alcanza solo (simetría: nadie mueve al otro).
+            Vector2 medio = (NPC.Center + hermano.Center) * 0.5f;
+            float tire = 0.012f + 0.0022f * Math.Min(200, _tickEstado);
+            NPC.Center = Vector2.Lerp(NPC.Center, medio, tire);
+
+            // EL FINAL (a los 200 t): SOLO la autoridad, SOLO el de menor
+            // whoAmI — ambos se apagan SIN CheckDead (el recuerdo NO
+            // muere, se COMPLETA) y el FUSIONADO nace con la vida entera.
+            if (_tickEstado >= 200 && Main.netMode != NetmodeID.MultiplayerClient &&
+                NPC.whoAmI < hermano.whoAmI)
+            {
+                Vector2 cuna = (NPC.Center + hermano.Center) * 0.5f;
+                FusionDecretada = false;
+                TurnoAtaque = -1;
+
+                // LA DESPEDIDA DOBLE (el patrón del cine de muerte de la
+                // casa: apagar + difundir el 23 A MANO — sin él, los
+                // clientes se quedan con un gemelo fantasma).
+                NPC.active = false;
+                hermano.active = false;
+                if (Main.netMode == NetmodeID.Server)
+                {
+                    Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                        -1, -1, null, NPC.whoAmI);
+                    Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                        -1, -1, null, hermano.whoAmI);
+                }
+
+                // EL NACIMIENTO DEL RECUERDO COMPLETO: en el punto exacto
+                // del abrazo, con la vida entera y la presa heredada.
+                int idx = NPC.NewNPC(NPC.GetSource_FromAI(), (int)cuna.X, (int)cuna.Y,
+                    ModContent.NPCType<AethonBossFusionado>(), 0, 0f, 0f, 0f, NPC.target);
+                if (idx >= 0 && idx < Main.maxNPCs)
+                {
+                    Main.npc[idx].life = Main.npc[idx].lifeMax;
+                    Main.npc[idx].netUpdate = true;
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, cuna);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, cuna);
+                OndaLib.Kick(16f, 34);
+                return;
+            }
+
+            // LA RED DE SEGURIDAD DEL CLIENTE (el patrón del cine de
+            // muerte): si la despedida del servidor se retrasa, el remoto
+            // se apaga solo a los 260 t — jamás un gemelo fantasma.
+            if (Main.netMode == NetmodeID.MultiplayerClient && _tickEstado > 260)
+            {
+                NPC.active = false;
+            }
+        }
+
+        /// <summary>v6.50.117 — EL CABLE de los estados de fusión (el
+        /// contrato del final de AI, resumido: estado + tick viajan).</summary>
+        private void SincronizarEstado()
+        {
+            NPC.ai[0] = _estado;
+            NPC.ai[1] = _rayo;
+            NPC.ai[2] = _tickEstado;
+            NPC.ai[3] = _angDestello;
+            if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
+        }
+
+        /// <summary>v6.50.117 — EL HERMANO: el otro fragmento del recuerdo
+        /// (para el de luz es el gemelo oscuro, y viceversa). El índice se
+        /// CACHEA y se refresca cada 30 ticks (la letra: buscar barato).</summary>
+        private NPC BuscarHermano()
+        {
+            int tipo = TipoHermano;
+            if (tipo <= 0) return null;
+
+            if (_hermanoIdx >= 0 && _hermanoIdx < Main.maxNPCs)
+            {
+                NPC c = Main.npc[_hermanoIdx];
+                if (c != null && c.active && c.type == tipo) return c;
+                _hermanoIdx = -1;
+            }
+
+            if (++_ticksBuscaHermano >= 30)
+            {
+                _ticksBuscaHermano = 0;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipo)
+                    {
+                        _hermanoIdx = i;
+                        return n;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>v6.50.117 — ¿El hermano está VIVO y en pleno ataque
+        /// grande? (lee su ai[0] — el contrato del cable: 0 naciendo · 1
+        /// flotando · 90/91 fusión · 99 muriendo = NO está atacando).</summary>
+        private bool HermanoAtacando()
+        {
+            NPC h = BuscarHermano();
+            if (h == null) return false;
+            float a = h.ai[0];
+            return a != 0f && a != 1f && a != EST_ORBITANDO && a != EST_FUSIONANDO && a != 99f;
         }
 
         // ==================================================================
@@ -2441,13 +2820,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         }
 
         /// <summary>EL CAMBIO DE FASE (v6.50.45: con EL DECRETO — el círculo nace en el JEFE y CABALGA con él; el jugador gana LA ventana de escape leyendo el aro en movimiento).</summary>
-        private void OnPhaseChange()
+        protected virtual void OnPhaseChange()
         {
             NPC.life = Math.Min(NPC.lifeMax, NPC.life + NPC.lifeMax / 20);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
             OndaLib.Kick(10f, 20);
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Fase",
-                OroLuz, Phase, PhaseName());
+                PaletaOro, Phase, PhaseName());
             NPC.netUpdate = true;
 
             // v6.50.54 — EL COMPÁS DEL ESTALLIDO SE RE-ARMA EN CADA FASE: el
@@ -2487,7 +2866,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         internal static float EscalaEstallido(int fase) =>
             1.15f + 0.06f * Math.Max(0, fase - 1);
 
-        private string PhaseName() => Phase switch
+        protected string PhaseName() => Phase switch
         {
             1 => Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Nombre1"),
             2 => Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Nombre2"),
@@ -2512,6 +2891,19 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         public override bool CheckDead()
         {
             if (_muriendo) return false;
+            // v6.50.117 — EL GUARD DE LA FUSIÓN: en plena órbita o cine el
+            // fragmento NO muere (la fusión apaga a los dos por su propio
+            // cauce — sin botín, sin muerte doble).
+            if (_fusionando) return false;
+            IniciarCineMuerte();
+            return false;
+        }
+
+        /// <summary>v6.50.117 — EL ARRANQUE DEL CINE DE MUERTE (extraído de
+        /// CheckDead: el FUSIONADO lo fuerza al final de su ÚLTIMO ALIENTO
+        /// sin necesidad de un golpe de gracia).</summary>
+        protected void IniciarCineMuerte()
+        {
             _muriendo = true;
             _tickMuerte = 0;
             NPC.life = 1;
@@ -2525,9 +2917,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             NPC.ai[0] = EST_MURIENDO;
             NPC.ai[1] = 0f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Muerte", OroLuz);
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Muerte", PaletaOro);
             NPC.netUpdate = true;
-            return false;
         }
 
         private void CineMuerte()
@@ -2708,8 +3099,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
         }
 
-        /// <summary>EL BOTÍN (el método de siempre, llamado por el cine).</summary>
-        private void DropBotin()
+        /// <summary>EL BOTÍN (el método de siempre, llamado por el cine —
+        /// v6.50.117: virtual, el gemelo NUNCA paga y el fusionado paga
+        /// TODO + una esencia extra).</summary>
+        protected virtual void DropBotin()
         {
             if (_yaDropeo) return;
             _yaDropeo = true;
@@ -2750,13 +3143,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     }
                 }
             }
-            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reconocimiento", OroLuz);
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reconocimiento", PaletaOro);
         }
 
         /// <summary>Fallback exótico (si algo mata por fuera del cine).</summary>
         public override void OnKill()
         {
             if (_yaDropeo) return;
+            if (_fusionando) return;   // v6.50.117 — la fusión no paga botín
             DropBotin();
         }
 
@@ -2812,11 +3206,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     float brillo = faseInt * brilloMuerte;
 
                     // === 1. EL VELO (el aura violeta de la profundidad) ===
-                    LumenLib.Bloom(spriteBatch, posC, 540f, VioletaLuz,
+                    LumenLib.Bloom(spriteBatch, posC, 540f, PaletaVioleta,
                         0.10f * brillo * visibilidad, 2);
 
                     // === 2. EL HALO DORADO (la corona del sol) ===
-                    LumenLib.BloomPulse(spriteBatch, posC, 295f * latido, OroLuz,
+                    LumenLib.BloomPulse(spriteBatch, posC, 295f * latido, PaletaOro,
                         0.50f * brillo * visibilidad, t, 1.6f);
 
                     // === 3. LOS RAYOS RADIALES (la rueda de luz girando —
@@ -2835,7 +3229,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                                 (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f)) * colapso;
                             float ancho = 34f - 12f * faseInt;
                             Color cR = (Phase >= 4) ?
-                                Color.Lerp(OroLuz, VioletaLuz, 0.45f) : OroLuz;
+                                Color.Lerp(PaletaOro, PaletaVioleta, 0.45f) : PaletaOro;
                             spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
                                 cR * (0.30f * brillo * visibilidad), ang, origen,
                                 new Vector2(largo / VFXCore.SoftGlow.Width * 2f,
@@ -2852,7 +3246,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         float rx = (anillo == 0 ? 218f : 300f) * colapso;
                         float ry = (anillo == 0 ? 134f : 90f) * colapso;
                         float w = anillo == 0 ? 0.55f : -0.38f;          // sentidos opuestos
-                        Color cP = anillo == 0 ? OroLuz : VioletaLuz;
+                        Color cP = anillo == 0 ? PaletaOro : PaletaVioleta;
                         int nPerlas = 13;
                         for (int i = 0; i < nPerlas; i++)
                         {
@@ -2873,7 +3267,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
                     // === 5. LAS CHISPAS ORBITANTES (el enjambre cercano) ===
                     int nChispas = 5 + Phase;
-                    Color cMota = Phase >= 4 ? VioletaLuz : OroLuz;
+                    Color cMota = Phase >= 4 ? PaletaVioleta : PaletaOro;
                     for (int m = 0; m < nChispas; m++)
                     {
                         float ang = t * (1.1f + m * 0.17f) + m * 2.1f;
@@ -2889,9 +3283,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     //     ARDE entero hasta el último tick) ===
                     float tamNucleo = 130f * latido * colapso;
                     {
-                        LumenLib.Bloom(spriteBatch, posC, tamNucleo, NucleoBlanco,
+                        LumenLib.Bloom(spriteBatch, posC, tamNucleo, PaletaNucleo,
                             1.0f * brillo * visibilidad, 3);
-                        LumenLib.Bloom(spriteBatch, posC, tamNucleo * 0.42f, OroLuz,
+                        LumenLib.Bloom(spriteBatch, posC, tamNucleo * 0.42f, PaletaOro,
                             0.65f * brillo * visibilidad, 2);
                     }
 
@@ -2900,7 +3294,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     {
                         float prog = Math.Min(1f, _tickRayoLocal / 40f);
                         LumenLib.Bloom(spriteBatch, posC, 88f + 132f * prog,
-                            NucleoBlanco, 0.45f * prog * visibilidad, 3);
+                            PaletaNucleo, 0.45f * prog * visibilidad, 3);
                     }
 
                     // === 8. LOS TELEGRAPHS (la casa: todo ataque se
@@ -2917,7 +3311,66 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         {
                             Vector2 fantasma = posC + atras * (g * 74f);
                             LumenLib.Bloom(spriteBatch, fantasma, 62f - g * 9f,
-                                OroLuz, 0.26f / g * visibilidad, 2);
+                                PaletaOro, 0.26f / g * visibilidad, 2);
+                        }
+                    }
+
+                    // === 9.5 v6.50.117 — EL HILO DE BRUMA DEL ÓRBITA: la
+                    //     hebra de blooms temblorosos que une al fragmento
+                    //     con su hermano (la memoria de que fueron uno) ===
+                    if (_estado == EST_ORBITANDO)
+                    {
+                        NPC hO = BuscarHermano();
+                        if (hO != null)
+                        {
+                            Vector2 bP = hO.Center - Main.screenPosition;
+                            Vector2 dH = bP - posC;
+                            if (dH.LengthSquared() > 1600f)
+                            {
+                                const int nH = 12;
+                                for (int iH = 0; iH <= nH; iH++)
+                                {
+                                    float f = iH / (float)nH;
+                                    Vector2 pH = posC + dH * f +
+                                        new Vector2(0f, MathF.Sin(t * 3f + f * 6f) * 9f);
+                                    LumenLib.Bloom(spriteBatch, pH,
+                                        15f + 9f * MathF.Sin(f * MathHelper.Pi),
+                                        PaletaVioleta,
+                                        0.30f * (0.6f + 0.4f * MathF.Sin(t * 2f + f * 5f)) * visibilidad, 2);
+                                }
+                            }
+                        }
+                    }
+
+                    // === 9.6 v6.50.117 — LA CINEMÁTICA DE FUSIÓN: ANILLOS
+                    //     DE ONDA alternando LUZ/OSCURIDAD (los pinta UNA
+                    //     sola vez el de MENOR whoAmI, en el punto medio
+                    //     del abrazo) y el FLASH que crece hasta el final ===
+                    if (_estado == EST_FUSIONANDO)
+                    {
+                        NPC hF = BuscarHermano();
+                        if (hF != null && NPC.whoAmI < hF.whoAmI)
+                        {
+                            Vector2 midP = (NPC.Center + hF.Center) * 0.5f - Main.screenPosition;
+                            int fT = Math.Min(200, _tickEstado);
+                            for (int r = 0; r < 5; r++)
+                            {
+                                int t0 = 20 + r * 40;
+                                if (fT >= t0 && fT <= t0 + 60)
+                                {
+                                    float progR = (fT - t0) / 60f;
+                                    Color cR2 = (r & 1) == 0
+                                        ? new Color(255, 220, 120)   // la LUZ
+                                        : new Color(90, 20, 140);    // la OSCURIDAD
+                                    OndaLib.Pulse(spriteBatch, midP, progR,
+                                        260f + 560f * progR, cR2, 0.75f, r * 7);
+                                }
+                            }
+                            // EL FLASH CRECIENTE (la luz del abrazo).
+                            float cargaF = fT / 200f;
+                            LumenLib.Bloom(spriteBatch, midP,
+                                120f + 640f * cargaF, PaletaNucleo,
+                                0.35f + 0.55f * cargaF, 4);
                         }
                     }
 
@@ -2931,10 +3384,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         float fp = (_tickMuerte - 110) / 50f;   // 0→1: la inundación
                         float engorda = 1f + 0.35f * MathF.Sin(fp * MathHelper.Pi);
                         LumenLib.Bloom(spriteBatch, posC,
-                            (1000f + 3800f * fp) * engorda, NucleoBlanco,
+                            (1000f + 3800f * fp) * engorda, PaletaNucleo,
                             0.95f * (1f - fp * 0.55f), 4);
                         LumenLib.Bloom(spriteBatch, posC,
-                            (680f + 3000f * fp) * engorda, OroLuz,
+                            (680f + 3000f * fp) * engorda, PaletaOro,
                             0.65f * (1f - fp * 0.45f), 3);
                     }
                 }
@@ -2961,7 +3414,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         float ancho = (1.2f + 3.4f * prog) * (cargando ? 0.6f : 1f);
                         int flick = (int)(Main.GameUpdateCount / 3u);
                         StormLib.PerlinBolt(spriteBatch, nucleo, pecho,
-                            NPC.whoAmI * 71 + 13, flick, ancho, OroLuz, NucleoBlanco,
+                            NPC.whoAmI * 71 + 13, flick, ancho, PaletaOro, PaletaNucleo,
                             (cargando ? 0.35f : 0.95f) * visibilidad);
                     }
                 }

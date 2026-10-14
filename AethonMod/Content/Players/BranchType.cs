@@ -2,7 +2,9 @@ namespace AethonMod.Content.Players
 {
     /// <summary>
     /// Las 3 ramas principales de combate del mod.
-    /// El Fragmento Génesis evoluciona según la rama que el jugador desarrolle primero.
+    /// v6.50.117 — LA PURGA DEL GÉNESIS: la mención del fragmento murió
+    /// con él (el enum se queda: las ramas siguen describiendo el estilo
+    /// del portador del grimorio).
     /// </summary>
     public enum BranchType
     {

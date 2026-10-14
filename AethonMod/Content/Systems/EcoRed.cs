@@ -84,7 +84,10 @@ namespace AethonMod.Content.Systems
         public const byte MsgLibro = 6;     // niveles/XP de los libros visibles → SU portador
         public const byte MsgCronica = 7;   // crónica del Testigo + DerrotaOleada10 → SU portador
         public const byte MsgPedirLibros = 8; // cliente → server: "dame mis libros" (al entrar)
-        public const byte MsgPedirFragmento = 9; // cliente → server: el Altar pide el Fragmento Génesis
+        // v6.50.117 — LA PURGA DEL GÉNESIS: MsgPedirFragmento (9) murió
+        // con el Altar Antiguo — el ID queda RETIRADO (no se reusa: los
+        // paquetes viejos en tránsito simplemente ya no encuentran
+        // receptor). LA CAÍDA no pide fragmentos: el cometa cae solo.
         // v6.50.2 — FIX (la selección de la carnada NO viajaba en MP):
         // OleadasPreparadas era un ESTÁTICO por máquina — el remoto ciclaba
         // SU contador y el server (que corre el clic izquierdo por el uso
@@ -106,6 +109,13 @@ namespace AethonMod.Content.Systems
         // tiempo, byte quiénLoGiró} — cada cliente aplica el reloj y siente
         // el giro (aviso + lluvia de tinta) en su propia pantalla.
         public const byte MsgCambiarHorario = 13;
+        // v6.50.117 — LA CAÍDA (bidireccional, como la voz): el
+        // destinatario del Grimorio Dormido EXTIENDE LA MANO. Cliente →
+        // server: el pedido (la AUTORIDAD revalida y entrega el libro —
+        // sin drops fantasma). Server → cliente: la DÁDIVA (la marca del
+        // .plr + la sensación del pacto). El 9 (Génesis) y el 11
+        // (Resonancia) siguen RETIRADOS: nada se renumera.
+        public const byte MsgTomarCaida = 14;
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -465,8 +475,8 @@ namespace AethonMod.Content.Systems
                 // v6.50.2 — también el pedido de la CARNADA (la selección
                 // del clic derecho viaja a la autoridad).
                 if (Main.netMode == NetmodeID.Server &&
-                    (tipo == MsgPedirLibros || tipo == MsgPedirFragmento ||
-                     tipo == MsgPrepararOleadas))
+                    (tipo == MsgPedirLibros || tipo == MsgPrepararOleadas ||
+                     tipo == MsgTomarCaida))
                 {
                     Player solicitante = quienEnvia >= 0 && quienEnvia < Main.player.Length
                         ? Main.player[quienEnvia] : null;
@@ -478,7 +488,16 @@ namespace AethonMod.Content.Systems
                             SincronizarCronica(solicitante);
                             SincronizarHambre(solicitante);
                         }
-                        else if (tipo == MsgPrepararOleadas)
+                        else if (tipo == MsgTomarCaida)
+                        {
+                            // v6.50.117 — LA MANO EXTENDIDA: el destinatario
+                            // clicó «Extender la mano» en la ventana del
+                            // Grimorio Dormido — el libro, el ítem y la marca
+                            // nacen de LA AUTORIDAD (LaCaidaSistema valida,
+                            // entrega y devuelve la dádiva).
+                            LaCaidaSistema.AtenderManoExtendida(solicitante);
+                        }
+                        else
                         {
                             // v6.50.2 — LA SELECCIÓN DE LA CARNADA CAMINA: el
                             // clic derecho cicla un estático LOCAL — este
@@ -486,53 +505,13 @@ namespace AethonMod.Content.Systems
                             // que SU UseItem (el uso sincronizado) lea el
                             // valor que el REMOTO preparó. Vive en el
                             // ShardPlayer (sesión completa, sin persistir).
+                            // v6.50.117 — LA PURGA DEL GÉNESIS: la rama del
+                            // Altar (el spawn del fragmento del server) murió
+                            // con el altar — solo queda la carnada.
                             byte oleadas = reader.ReadByte();
                             var spc = solicitante.GetModPlayer<Players.ShardPlayer>();
                             if (spc != null && oleadas >= 1 && oleadas <= 11)
                                 spc.OleadasPreparadasRemoto = oleadas;
-                        }
-                        else
-                        {
-                            // EL ALTAR HABLA CON EL SERVER: el RightClick de
-                            // tile corre SOLO en el cliente — el Fragmento
-                            // Génesis lo spawn-ea la AUTORIDAD (sin drops
-                            // fantasma) y vanilla lo difunde al mundo.
-                            // v6.50.1 — FIX: la AUTORIDAD revalida (el chequeo
-                            // del cliente no basta: un cliente modificado — o un
-                            // doble click antes de recoger el ítem del suelo —
-                            // pediría fragmentos infinitos).
-                            bool yaTiene = false;
-                            for (int k = 0; k < 58 && !yaTiene; k++)
-                            {
-                                Item inv = solicitante.inventory[k];
-                                if (inv != null && !inv.IsAir &&
-                                    inv.type == ModContent.ItemType<Content.Items.GenesisShard>())
-                                    yaTiene = true;
-                            }
-                            // v6.50.2 — FIX (anti-dupe del SUELO): el
-                            // escenario que el propio comentario de arriba
-                            // describe — el DOBLE CLICK antes de recoger el
-                            // ítem — dejaba nacer el segundo: la
-                            // revalidación solo miraba el inventario. Si YA
-                            // vive un Fragmento Génesis en el suelo a menos
-                            // de 400px del solicitante, no nace otro.
-                            bool enSuelo = false;
-                            for (int k = 0; k < Main.maxItems && !enSuelo; k++)
-                            {
-                                Item suelto = Main.item[k];
-                                if (suelto == null || !suelto.active || suelto.IsAir) continue;
-                                if (suelto.type != ModContent.ItemType<Content.Items.GenesisShard>()) continue;
-                                if (Vector2.DistanceSquared(suelto.Center, solicitante.Center) < 400f * 400f)
-                                    enSuelo = true;
-                            }
-                            if (!yaTiene && !enSuelo)
-                            {
-                                int idx = Item.NewItem(solicitante.GetSource_GiftOrReward(),
-                                    solicitante.Center,
-                                    ModContent.ItemType<Content.Items.GenesisShard>());
-                                if (idx >= 0 && idx < Main.item.Length)
-                                    Main.item[idx].noGrabDelay = 0;
-                            }
                         }
                     }
                     return;
@@ -732,6 +711,17 @@ namespace AethonMod.Content.Systems
                         sp.ResonanceShards = System.Math.Max(sp.ResonanceShards, reader.ReadInt32());
                         break;
                     }
+
+                    case MsgTomarCaida:
+                    {
+                        // v6.50.117 — LA DÁDIVA LLEGÓ: la autoridad entregó
+                        // el Grimorio del Eterno de LA CAÍDA — la marca local
+                        // (persiste en el .plr del portador) + la sensación
+                        // del pacto (sonido + bruma violeta).
+                        byte _ = reader.ReadByte(); // el destinatario (la doble puerta ya filtró)
+                        LaCaidaSistema.RecibirDadiva();
+                        break;
+                    }
                 }
             }
             catch { }
@@ -760,24 +750,6 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
-        /// v6.50 — EL ALTAR PIDE EL FRAGMENTO: el RightClick del tile corre
-        /// SOLO en el cliente; en MP el Fragmento Génesis debe nacer del
-        /// server (el drop client-side era fantasma — la auditoría nº5).
-        /// Llamado desde AncientAltar.RightClick (cliente MP).
-        /// </summary>
-        public static void PedirFragmentoGenesis()
-        {
-            try
-            {
-                if (Main.netMode != NetmodeID.MultiplayerClient) return;
-                ModPacket p = AethonMod.Instance.GetPacket();
-                p.Write(MsgPedirFragmento);
-                p.Send();
-            }
-            catch { }
-        }
-
-        /// <summary>
         /// v6.50.2 — LA CARNADA PREPARA: el clic derecho del ítem cicla un
         /// contador LOCAL (la UI del clic solo corre en el cliente que
         /// clica) — este paquete lleva la selección NUEVA a la AUTORIDAD
@@ -795,6 +767,46 @@ namespace AethonMod.Content.Systems
                 p.Write(MsgPrepararOleadas);
                 p.Write((byte)System.Math.Max(1, System.Math.Min(oleadas, 11)));
                 p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.117 — LA MANO SE EXTIENDE (cliente → server): el
+        /// destinatario clicó «Extender la mano» en la ventana del
+        /// Grimorio Dormido. El clic del botón de diálogo corre SOLO en
+        /// el cliente — sin este paquete, el libro sería un drop fantasma
+        /// en MP (la misma lección del Altar, auditoría nº5). Llamado
+        /// desde GrimorioDormido.OnChatButtonClicked (cliente MP).
+        /// </summary>
+        public static void PedirTomarCaida()
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgTomarCaida);
+                p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.117 — LA DÁDIVA VIAJA (server → SU portador): la
+        /// autoridad entregó el libro de LA CAÍDA — el cliente del
+        /// destinatario marca su .plr (CaidaRecibida) y siente el pacto.
+        /// Llamado desde LaCaidaSistema.TomarElLibro (rama server).
+        /// </summary>
+        public static void OtorgarCaida(Player portador)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                EnviarPaquete(portador, p =>
+                {
+                    p.Write(MsgTomarCaida);
+                    p.Write((byte)portador.whoAmI);
+                });
             }
             catch { }
         }

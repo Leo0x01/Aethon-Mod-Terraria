@@ -51,6 +51,16 @@ namespace AethonMod.Content.Projectiles.Nervioso
         // LA BUSCA: cada cuántos ticks mira si algo se mueve cerca
         private const int TICKS_BUSCA = 20;
 
+        // v6.50.117 — LA SACIEDAD DE LA VUELTA: el reloj del apetito
+        // (GrimorioHambriento) suma TasaHambre en CADA tick, así que tras
+        // clavar el hambre en 0 con la absorción, al tick siguiente ya es
+        // >0 y la comparación con el cero EXACTO nunca vuelve a cumplirse
+        // — el espíritu flotaba cazando para siempre con el medidor en 0%.
+        // Ahora la vuelta a casa se decide dentro de esta franja de
+        // saciedad (5% del medidor): hambre casi agotada = libro que
+        // se guarda.
+        public const float SaciedadVuelta = 0.05f;
+
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetStaticDefaults() { }
@@ -159,6 +169,65 @@ namespace AethonMod.Content.Projectiles.Nervioso
             Sonar(SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.4f), Projectile.Center);
         }
 
+        // ==================================================================
+        //  v6.50.117 — EL GRIMORIO SALE DEL PUEBLO (la idea 14 bis: «cuando
+        //  el grimorio detecta que está en el pueblo o dentro de una casa
+        //  este sale y se queda fuera hasta que el jugador se va del
+        //  pueblo o de la casa»). EL TERMÓMETRO DEL PUEBLO: si hay ALGÚN
+        //  town NPC a ≤800px del DUEÑO, el jugador está en pueblo o dentro
+        //  de una casa (la presencia de vecinos lo cubre — no hace falta
+        //  medir casas). EL REFUGIO: un punto a ~900px del dueño, en la
+        //  dirección OPUESTA al vecino más cercano, clampeado al mundo.
+        //  Allí flota esperando (mismo bobbing, SIN cazar), hasta que el
+        //  dueño sale del pueblo. La transición es suave de nacimiento:
+        //  el muelle de la .112 ya vuela ~10px/t — nada de misiles.
+        // ==================================================================
+
+        /// <summary>El radio del «pueblo»: vecinos a ≤800px del dueño.</summary>
+        private const float RADIO_PUEBLO = 800f;
+
+        /// <summary>La distancia del punto de espera: ~900px del dueño.</summary>
+        private const float DISTANCIA_ESPERA = 900f;
+
+        /// <summary>EL ESTADO DEL PUEBLO: el vecino más cercano al que el
+        /// espíritu VIGILA DE REOJO mientras espera afuera (null = no hay
+        /// pueblo: comportamiento normal de siempre). Reemplazable cada
+        /// tick — su lectura es la transición.</summary>
+        private NPC _vecinoVigilado;
+
+        /// <summary>¿EL DUEÑO ESTÁ EN EL PUEBLO? El town NPC más cercano
+        /// a ≤RADIO_PUEBLO de él (no mide el espíritu: mide al DUEÑO —
+        /// «el jugador está en el pueblo o dentro de una casa»).</summary>
+        private NPC VecinoCercano(Player dueño)
+        {
+            NPC mejor = null;
+            float mejorD = RADIO_PUEBLO * RADIO_PUEBLO;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || !n.townNPC) continue;
+                float d = Vector2.DistanceSquared(n.Center, dueño.Center);
+                if (d < mejorD) { mejorD = d; mejor = n; }
+            }
+            return mejor;
+        }
+
+        /// <summary>EL PUNTO DE ESPERA: ~900px del dueño en la dirección
+        /// OPUESTA al vecino más cercano (la huida sigue la línea
+        /// vecino→dueño MÁS ALLÁ del dueño), clampeado para no salir del
+        /// mundo (margen de 480px ≈ 30 tiles a cada borde).</summary>
+        private Vector2 PuntoFueraDelPueblo(Player dueño, NPC vecino)
+        {
+            Vector2 huida = dueño.Center - vecino.Center;   // del vecino hacia el dueño… y más allá
+            if (huida.LengthSquared() < 1f)
+                huida = -Vector2.UnitX;                     // vecino ENCIMA del dueño: cualquier lado vale
+            huida = Vector2.Normalize(huida);
+            Vector2 punto = dueño.Center + huida * DISTANCIA_ESPERA;
+            punto.X = MathHelper.Clamp(punto.X, 480f, Main.maxTilesX * 16f - 480f);
+            punto.Y = MathHelper.Clamp(punto.Y, 480f, Main.maxTilesY * 16f - 480f);
+            return punto;
+        }
+
         public override void AI()
         {
             Projectile.ai[1]++;
@@ -208,9 +277,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
                     // «la fuga simplemente la quitamos el libro no se fuga,
                     // solo queda flotando cerca del jugador cazando por si
                     // mismo»)
-                    if (hambre <= 0f) IrAVolver();
+                    if (hambre <= SaciedadVuelta) IrAVolver();
                 }
             }
+
+            // === v6.50.117 — EL PUEBLO (idea 14 bis): ¿el dueño entre
+            //     vecinos? Algún town NPC a ≤800px del DUEÑO = el jugador
+            //     está en el pueblo o dentro de una casa. En MODO_VOLVER
+            //     no aplica (va directo a guardarse). El espíritu NO
+            //     ENTRA: espera afuera hasta que el dueño se va del
+            //     pueblo o de la casa. ===
+            NPC vecinoPueblo = Modo != MODO_VOLVER ? VecinoCercano(dueño) : null;
+            _vecinoVigilado = vecinoPueblo;
+            Vector2? puntoPueblo = vecinoPueblo != null
+                ? PuntoFueraDelPueblo(dueño, vecinoPueblo)
+                : (Vector2?)null;
 
             // === EL MOVIMIENTO ===
             if (Modo == MODO_CAZA)
@@ -229,11 +310,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // rápido que una caída) subiendo a 20 sólo si quedó muy
                 // lejos (para que un teletransporte no lo pierda: cruza
                 // 1500 px en ~110 t de deriva serena, no en 15 de misil).
-                Vector2 destino = dueño.MountedCenter + new Vector2(0f, -ALTURA_VELA)
-                    + new Vector2(MathF.Sin(t * 0.07f) * 10f, MathF.Sin(t * 0.11f) * 14f);
+                // v6.50.117 — EL DESTINO DEL PUEBLO: si el dueño está entre
+                // vecinos, el libro NO se sienta en su vela — flota en EL
+                // PUNTO DE ESPERA (a ~900px, dirección contraria al vecino
+                // más cercano), con el MISMO bobbing flotando en el aire
+                // libre («se queda fuera hasta que el jugador se va»).
+                Vector2 destino = puntoPueblo.HasValue
+                    ? puntoPueblo.Value
+                    : dueño.MountedCenter + new Vector2(0f, -ALTURA_VELA);
+                destino += new Vector2(MathF.Sin(t * 0.07f) * 10f, MathF.Sin(t * 0.11f) * 14f);
                 Projectile.velocity += (destino - Projectile.Center) * 0.009f;
                 Projectile.velocity *= 0.88f;
-                float tope = MathHelper.Clamp(
+                // v6.50.117 — hacia el punto de espera vuela SERENO: tope
+                // plano de 10px/t (la letra del pueblo: nada de misiles —
+                // la transición suave que pide la idea 14 bis).
+                float tope = puntoPueblo.HasValue ? 10f : MathHelper.Clamp(
                     Vector2.Distance(destino, Projectile.Center) * 0.01f, 10f, 20f);
                 float velCaza = Projectile.velocity.Length();
                 if (velCaza > tope) Projectile.velocity *= tope / velCaza;
@@ -241,8 +332,11 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // v6.50.92 — el libro se INCLINA hacia lo que MIRA: su
                 // COMIDA mientras devora (la letra: «el libro debe mirar
                 // lo que esta comiendo»), su dueño el resto de la vela
+                // v6.50.117 — y mientras espera afuera MIRA AL PUEBLO con
+                // recelo (el vecino más cercano), no a su dueño: el libro
+                // no confía en las casas.
                 Vector2 atento = GrimorioHambrientoNervioso.FocoDelFestin(Projectile.owner)
-                    ?? dueño.MountedCenter;
+                    ?? (_vecinoVigilado != null ? _vecinoVigilado.Center : dueño.MountedCenter);
                 float lado = atento.X < Projectile.Center.X ? -1f : 1f;
                 Projectile.rotation = MathF.Sin(t * 0.045f) * 0.12f + lado * 0.10f;
 
@@ -256,7 +350,11 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // con el libro, el espíritu NO lanza sombras por su
                 // cuenta (la caza solitaria es del ausente: AFK o mucho
                 // tiempo sin atacar criaturas con el libro).
-                if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
+                // v6.50.117 — …Y SIN CAZA EN EL PUEBLO: mientras espera
+                // afuera NO lanza sombras nuevas («sin cazar presas dentro
+                // del pueblo») — la sombra que ya había salido termina su
+                // comida en paz.
+                if (puntoPueblo == null && autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
                     !EstadoDelLibro.AtacoReciente())
                 {
                     NPC presa = PresaCercana();

@@ -16,7 +16,8 @@ namespace AethonMod.Content.Globals
     ///   minions pagan igual (el minion acredita al dueño).
     /// - Aplica lifesteal si el Grimorio SOSTENIDO tiene nivel >= 7
     ///   (v6.46: el robo de vida es poder de combate — exige blandirlo).
-    /// - Hace que King Slime y Eye of Cthulhu dropeen el Fragmento Génesis.
+    /// - v6.50.117 — LA PURGA DEL GÉNESIS: el drop del Fragmento murió;
+    ///   LA CAÍDA (LaCaidaSistema) es la única vía del Grimorio Eterno.
     /// - Enciende el pulso de la barra dorada (ShardHUDSystem) y dispara
     ///   la VOZ del grimorio cuando cae un jefe (EcoSistema).
     /// </summary>
@@ -66,37 +67,10 @@ namespace AethonMod.Content.Globals
         {
             if (npc.friendly || npc.townNPC) return;
 
-            // === DROP DEL FRAGMENTO GÉNESIS ===
-            // (v6.50.116 — lee el type VIVO a propósito: el jefe de
-            // OLEADA aislado no entrega el fragmento — «los jefes de
-            // oleadas son de oleadas y están separados de sus
-            // versiones originales»: el Génesis es del jefe DE VERDAD,
-            // para el que aún no tiene libro; el festín paga platino y
-            // esencia, no atajos de historia)
-            if (npc.type == NPCID.KingSlime || npc.type == NPCID.EyeofCthulhu)
-            {
-                Player killer = FindKiller(npc);
-                if (killer != null)
-                {
-                    bool hasGrimoire = false;
-                    for (int i = 0; i < 58; i++)
-                    {
-                        if (killer.inventory[i] != null &&
-                            killer.inventory[i].type == ModContent.ItemType<Weapons.GrimoireEternal>())
-                        {
-                            hasGrimoire = true;
-                            break;
-                        }
-                    }
-                    if (!hasGrimoire)
-                    {
-                        int drop = Item.NewItem(npc.GetSource_Loot(), npc.Center,
-                            ModContent.ItemType<Items.GenesisShard>(), 1);
-                        if (drop >= 0 && drop < Main.item.Length)
-                            Main.item[drop].noGrabDelay = 0;
-                    }
-                }
-            }
+            // v6.50.117 — LA PURGA DEL GÉNESIS: el drop del
+            // Fragmento Génesis murió con el fragmento — LA CAÍDA es la
+            // única vía canónica del Grimorio del Eterno (un cometa de
+            // tinta por jugador, LaCaidaSistema).
 
             // === v6.46: OTORGAR XP AL GRIMORIO DE LA BARRA RÁPIDA ===
             // El libro come mientras esté en el INVENTARIO VISIBLE (la

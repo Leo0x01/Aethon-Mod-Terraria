@@ -147,15 +147,60 @@ namespace AethonMod.Content.Items.Llamados
         /// vanilla con la fórmula de la luciérnaga. El server manda
         /// (MP: el servidor convoca).
         /// </summary>
+        public override bool CanUseItem(Player player)
+        {
+            // v6.50.117 — EL DOBLE DEL RECUERDO: no se dobla el llamado si
+            // vive CUALQUIERA de los fragmentos (o el recuerdo completo).
+            // (El gate del día no aplica: ConvocableDeNoche es verdad.)
+            if (YaViveLaFamilia())
+            {
+                if (player.whoAmI == Main.myPlayer)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Llamado.YaVive"),
+                        new Color(170, 160, 150));
+                return false;
+            }
+            return true;
+        }
+
         public override bool? UseItem(Player player)
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
 
-            // LA FÓRMULA DE LA LUCIÉRNAGA (case 661, palabra por palabra):
-            // 200 px encima + jitter circular de 50 + SpawnBoss.
-            Vector2 pos = player.Center + new Vector2(0f, -200f) + Main.rand.NextVector2Circular(50f, 50f);
-            NPC.SpawnBoss((int)pos.X, (int)pos.Y, NpcConvocado, player.whoAmI);
+            // v6.50.117 — EL NOMBRE PARTIDO EN DOS (la letra): pronunciar
+            // el nombre trae AMBOS fragmentos del recuerdo — el de LUZ
+            // (300 px arriba-izquierda) y su GEMELO DE OSCURIDAD (300 px
+            // arriba-derecha), con la fórmula de la Emperatriz (SpawnBoss:
+            // el «ha despertado», el target fijado y el timeLeft ×20 de
+            // vanilla). El reloj del mundo lo toma el de luz; el gemelo
+            // nace YA en la órbita de pelea.
+            Vector2 posLuz = player.Center + new Vector2(-300f, -300f) +
+                Main.rand.NextVector2Circular(50f, 50f);
+            NPC.SpawnBoss((int)posLuz.X, (int)posLuz.Y, NpcConvocado, player.whoAmI);
+
+            Vector2 posOscuro = player.Center + new Vector2(300f, -300f) +
+                Main.rand.NextVector2Circular(50f, 50f);
+            NPC.SpawnBoss((int)posOscuro.X, (int)posOscuro.Y,
+                ModContent.NPCType<AethonBossOscuro>(), player.whoAmI);
             return true;
+        }
+
+        /// <summary>v6.50.117 — ¿Vive ya ALGUNO de los fragmentos del
+        /// recuerdo (o el recuerdo completo)? No se dobla el llamado.</summary>
+        private static bool YaViveLaFamilia()
+        {
+            int[] tipos =
+            {
+                ModContent.NPCType<AethonBoss>(),
+                ModContent.NPCType<AethonBossOscuro>(),
+                ModContent.NPCType<AethonBossFusionado>(),
+            };
+            for (int t = 0; t < tipos.Length; t++)
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipos[t]) return true;
+                }
+            return false;
         }
     }
 }

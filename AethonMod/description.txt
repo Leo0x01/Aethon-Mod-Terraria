@@ -2,9 +2,9 @@ Aethon, el Grimorio Eterno — el arma que come ES el jefe final.
 
 El Grimorio del Eterno que cargas no es un arma: es Aethon, una entidad primigenia atada en forma de libro. Come cada kill, sube de nivel, tiene hambre… y cuando pronuncias su nombre, el libro SE ABRE y se alza de sus propias páginas para probarte: cinco fases, el juicio del propio grimorio. Vence a la prueba y el libro te declarará digno.
 
-- Fragmento Génesis con niveles infinitos y 3 ramas (Distancia, Cuerpo a Cuerpo, Magia).
+- LA CAÍDA: la primera noche, un cometa de tinta negro-morado cae por cada jugador sin libro y deja al Grimorio Dormido en su cráter.
 - Árboles de habilidades procedurales y absorción de armas del juego + mods.
-- Bioma Sagrario Hueco con altar y mineral propios.
+- Bioma Sagrario Hueco con mineral propio.
 - LAS OLEADAS DEL HAMBRE: el festín del libro (oleadas que escalan por nivel y bioma).
 - AETHON, EL GRIMORIO ETERNO: el jefe final de 5 fases — la prueba del propio libro.
 - Economía de Fragmentos de Resonancia y 60+ armas cósmicas.

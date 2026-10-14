@@ -179,11 +179,15 @@ namespace AethonMod.Content.Weapons
 
         public override void AddRecipes()
         {
-            // LA ADQUISICIÓN CANÓNICA DEL ETERNO (NO hereda la receta de
-            // 5 maderas del Nervioso de prueba): la Bolsa de los
-            // Fundacionales lo entrega en cada entrada al mundo y el
-            // Génesis lo forja (GenesisShard) — el arma raíz del mod no
-            // se clava con madera.
+            // LA ADQUISICIÓN CANÓNICA DEL ETERNO (v6.50.117, LA CAÍDA):
+            // una noche avanzada, un cometa de tinta negro-morado cae a
+            // ~30 pantallas del spawn por cada jugador sin libro, excava
+            // su cráter y deja al GRIMORIO DORMIDO flotando — el
+            // destinatario extiende la mano y el libro habla por primera
+            // vez (LaCaidaSistema + GrimorioDormido). El Eterno ya NO se
+            // forja: nace. (La Bolsa de los Fundacionales sigue siendo la
+            // vía de pruebas del kit; esta receta sigue vacía a propósito
+            // — el arma raíz del mod no se clava con madera.)
         }
 
         // ================================================================

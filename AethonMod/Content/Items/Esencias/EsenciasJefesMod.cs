@@ -39,7 +39,12 @@ namespace AethonMod.Content.Items.Esencias
         /// <summary>El ítem de esencia del jefe (0 si no es Aethon).</summary>
         public static int DeNPC(int npcType)
         {
-            if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>())
+            // v6.50.117 — LA FAMILIA DEL RECUERDO paga la MISMA alma: el
+            // gemelo y el fusionado son el mismo Aethon (el contador del
+            // mundo sigue siendo SUYO — índice 4).
+            if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>() ||
+                npcType == ModContent.NPCType<Content.NPCs.AethonBossOscuro>() ||
+                npcType == ModContent.NPCType<Content.NPCs.AethonBossFusionado>())
                 return ModContent.ItemType<EsenciaDeAethon>();
             return 0;
         }
@@ -47,7 +52,9 @@ namespace AethonMod.Content.Items.Esencias
         /// <summary>El índice de conteo del jefe (para el límite de 10 por mundo).</summary>
         public static int IndiceDe(int npcType)
         {
-            if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>()) return 4;
+            if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>() ||
+                npcType == ModContent.NPCType<Content.NPCs.AethonBossOscuro>() ||
+                npcType == ModContent.NPCType<Content.NPCs.AethonBossFusionado>()) return 4;
             return -1;
         }
     }

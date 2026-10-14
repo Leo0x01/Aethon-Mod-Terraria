@@ -6,7 +6,8 @@ namespace AethonMod.Content.Biomes
     /// <summary>
     /// El Sagrario Hueco (The Hollow Sanctum) — sub-bioma cristalino
     /// que genera bajo tierra despues de que el jugador tenga 400 HP max.
-    /// Contiene el Altar Antiguo con el Fragmento Genesis.
+    /// v6.50.117 — LA PURGA DEL GÉNESIS: el Altar Antiguo murió con el
+    /// fragmento; el bioma queda como la cicatriz cristalina del mundo.
     /// </summary>
     public class HollowSanctumBiome : ModBiome
     {

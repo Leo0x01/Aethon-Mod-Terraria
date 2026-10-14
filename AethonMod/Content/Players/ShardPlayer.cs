@@ -91,6 +91,16 @@ namespace AethonMod.Content.Players
         /// </summary>
         public int GuardianGracia = 0;
 
+        /// <summary>
+        /// v6.50.117 — LA CAÍDA (la letra: «un grimorio por jugador, cada
+        /// jugador solo puede tener 1, si ya tiene uno no puede tomar
+        /// otro»): ¿ESTE portador ya recibió su Grimorio del Eterno de
+        /// LA CAÍDA? La marca persiste en el .plr (un guardado viejo trae
+        /// false: la primera noche avanzada le espera su cometa). La lee
+        /// LaCaidaSistema para decidir si el cielo aún le debe un libro.
+        /// </summary>
+        public bool CaidaRecibida = false;
+
         // ================================================================
         // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
         // ================================================================
@@ -913,6 +923,9 @@ namespace AethonMod.Content.Players
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
                 tag["guardianDevorado"] = GuardianMazmorraDevorado;
+                // v6.50.117 — LA CAÍDA: la marca del libro entregado por
+                // el cometa (un grimorio por jugador, para siempre).
+                tag["caidaRecibida"] = CaidaRecibida;
             }
             catch { }
         }
@@ -943,6 +956,9 @@ namespace AethonMod.Content.Players
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)
                 GuardianMazmorraDevorado = tag.GetBool("guardianDevorado");
+                // v6.50.117 — LA CAÍDA (ausente = false: el guardado viejo
+                // todavía puede recibir su cometa de tinta)
+                CaidaRecibida = tag.GetBool("caidaRecibida");
             }
             catch { }
         }

@@ -77,6 +77,8 @@ namespace AethonMod.Content.Systems
             AethonBoss.SubLlegada = 0;
             AethonBoss.TiempoCorriendo = false;
             AethonBoss.TiempoCongelado = false;
+            AethonBoss.TurnoAtaque = -1;         // v6.50.117 — el batón de los gemelos se suelta
+            AethonBoss.FusionDecretada = false;  // y la fusión decretada muere con el mundo
         }
 
         // ==================================================================
@@ -105,14 +107,49 @@ namespace AethonMod.Content.Systems
                 return;
             }
 
+            // v6.50.117 — ¿QUIÉN vive? Si solo queda el GEMELO OSCURO o el
+            // FUSIONADO, el mediodía sigue CLAVADO (la pelea no terminó —
+            // la noche ya no vuelve al morir «solo el de luz»)… pero SIN
+            // carrera ni temblor: la coreografía de llegada NUNCA fue de
+            // ellos — el reloj del mundo es del hermano de LUZ.
+            if (jefe.type != ModContent.NPCType<AethonBoss>())
+            {
+                AethonBoss.SubLlegada = 0;
+                AethonBoss.TiempoCorriendo = false;
+                AethonBoss.TiempoCongelado = true;
+                if (!Main.dayTime) { Main.dayTime = true; Main.time = 27000.0; }
+                else if (Main.time > 27001.0 || Main.time < 26999.0) Main.time = 27000.0;
+                return;
+            }
+
             bool enEntrada = jefe.ai[0] == 0f;                 // EST_NACIENDO
             int sub = enEntrada ? (int)jefe.ai[1] : 0;
             AethonBoss.SubLlegada = sub;
             // v6.50.45 — LOS ESTADOS NUEVOS (8 reloj · 9 coro · 10 manada
             // · 11 telar · 12 decreto) TAMBIÉN SON LA PELEA: el mediodía
             // clavado los cubre (si no, el sol se escapaba a media manada).
-            bool enPelea = jefe.ai[0] >= 1f && jefe.ai[0] <= 12f;
+            // v6.50.117 — TODOS los estados de pelea cuentan (13-17
+            // estallido/danza/lanzas/corona/sol — antes el cerrojo se
+            // abría a media danza y el sol se escapaba — y 90/91 la
+            // órbita y el cine de fusión).
+            bool enPelea = (jefe.ai[0] >= 1f && jefe.ai[0] <= 17f) ||
+                jefe.ai[0] == AethonBoss.EST_ORBITANDO ||
+                jefe.ai[0] == AethonBoss.EST_FUSIONANDO;
             bool muriendo = jefe.ai[0] == 99f;
+
+            // v6.50.117 — EL DE LUZ MUERE PERO LA FAMILIA VIVE (el gemelo
+            // o el fusionado siguen peleando): el mediodía se sostiene
+            // durante SU despedida — y cuando él ya no esté, el bloque de
+            // arriba lo mantiene clavado hasta el final final.
+            if (muriendo && FamiliaSinLaLuz())
+            {
+                AethonBoss.SubLlegada = 0;
+                AethonBoss.TiempoCorriendo = false;
+                AethonBoss.TiempoCongelado = true;
+                if (!Main.dayTime) { Main.dayTime = true; Main.time = 27000.0; }
+                else if (Main.time > 27001.0 || Main.time < 26999.0) Main.time = 27000.0;
+                return;
+            }
 
             // === EL ESTADO DEL RELOJ ===
             // «en el centro» es la VENTANA del mediodía [26999, 27001].
@@ -310,20 +347,55 @@ namespace AethonMod.Content.Systems
             }
         }
 
-        /// <summary>El jefe de la luz (o null si no está).</summary>
+        /// <summary>El jefe de la luz (o su heredero: el gemelo / el
+        /// fusionado — v6.50.117: el mediodía eterno los cubre a los tres).</summary>
         private static NPC BuscarJefe()
         {
             try
             {
-                int tipo = ModContent.NPCType<AethonBoss>();
+                // LA LUZ MANDA (la llegada y el cerrojo leen SUS ai[]).
+                int tipoLuz = ModContent.NPCType<AethonBoss>();
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
                     NPC n = Main.npc[i];
-                    if (n != null && n.active && n.type == tipo) return n;
+                    if (n != null && n.active && n.type == tipoLuz) return n;
                 }
+                // …y si la luz no está, su FAMILIA sostiene el mediodía.
+                int[] herederos =
+                {
+                    ModContent.NPCType<AethonBossOscuro>(),
+                    ModContent.NPCType<AethonBossFusionado>(),
+                };
+                for (int t = 0; t < herederos.Length; t++)
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n != null && n.active && n.type == herederos[t]) return n;
+                    }
             }
             catch { }
             return null;
+        }
+
+        /// <summary>v6.50.117 — ¿Vive el gemelo o el fusionado? (el de luz se está muriendo).</summary>
+        private static bool FamiliaSinLaLuz()
+        {
+            try
+            {
+                int[] herederos =
+                {
+                    ModContent.NPCType<AethonBossOscuro>(),
+                    ModContent.NPCType<AethonBossFusionado>(),
+                };
+                for (int t = 0; t < herederos.Length; t++)
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n != null && n.active && n.type == herederos[t]) return true;
+                    }
+            }
+            catch { }
+            return false;
         }
     }
 }

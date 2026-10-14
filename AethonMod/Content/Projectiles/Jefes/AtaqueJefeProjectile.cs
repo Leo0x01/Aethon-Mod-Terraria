@@ -841,7 +841,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // siniestra al acercarse — la oscuridad no dispara a un
                     // punto: TE BUSCA. Los pernos comunes (ai[1]=0) siguen
                     // siendo balística honesta.
-                    if (Par == 1f && _edad > 8 && presa != null &&
+                    if ((Par == 1f || Par == 3f) && _edad > 8 && presa != null &&
                         Vector2.Distance(presa.Center, Projectile.Center) < 900f)
                     {
                         float deseado = (presa.Center - Projectile.Center).ToRotation();
@@ -1903,7 +1903,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloTajoPortador or EstiloCuchillaOrbit or EstiloCorteRealidad
                     => new Vector3(0.45f, 0.16f, 0.07f),
                 EstiloNubeNebulosa => new Vector3(0.20f, 0.10f, 0.34f),
-                EstiloRunaMemorizada or EstiloPernoEstelar => new Vector3(0.38f, 0.28f, 0.10f),
+                EstiloRunaMemorizada or EstiloPernoEstelar => (Par >= 2f
+                    ? new Vector3(0.12f, 0.03f, 0.20f)   // v6.50.117 — el perno del GEMELO OSCURO: brasa violeta tenue (su sol no alumbra)
+                    : new Vector3(0.38f, 0.28f, 0.10f)),
                 EstiloPilarAparicion => Vector3.Zero,   // su luz la pone SU caso (la columna doble)
                 EstiloRelojGigante => Vector3.Zero,      // su luz la pone SU renderer (la del bastón)
                 EstiloCoroJefe => new Vector3(0.42f, 0.32f, 0.14f),
@@ -2136,11 +2138,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                         break;
 
                     case EstiloPernoEstelar:
-                        VFXCore.Quad(Projectile.Center, LuzPrimordial * 0.9f,
+                    {
+                        // v6.50.117 — LA PALETA DEL PERNO (ai[1] ≥ 2 = el
+                        // gemelo oscuro: la lluvia masiva del sol moribundo
+                        // se viste de negro y morado profundo).
+                        Color cLuzP = Par >= 2f ? new Color(110, 30, 170) : LuzPrimordial;
+                        Color cOroP = Par >= 2f ? new Color(48, 14, 76) : OroGrimorio;
+                        VFXCore.Quad(Projectile.Center, cLuzP * 0.9f,
                             new Vector2(16f, 16f), Projectile.rotation);
-                        VFXCore.Quad(Projectile.Center, OroGrimorio * 0.6f,
+                        VFXCore.Quad(Projectile.Center, cOroP * 0.6f,
                             new Vector2(8f, 8f), Projectile.rotation);
                         break;
+                    }
 
                     case EstiloColumnaJuicio:
                     {
@@ -2848,7 +2857,8 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // === EL PERNO: el latido estelar ===
                     case EstiloPernoEstelar:
                     {
-                        LumenLib.BloomPulse(Main.spriteBatch, pos, 20f, LuzPrimordial,
+                        LumenLib.BloomPulse(Main.spriteBatch, pos, 20f,
+                            Par >= 2f ? new Color(110, 30, 170) : LuzPrimordial,   // v6.50.117 — la paleta del gemelo
                             0.85f, t, 5f);
                         break;
                     }

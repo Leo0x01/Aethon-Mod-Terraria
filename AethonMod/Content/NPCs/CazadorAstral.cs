@@ -162,15 +162,23 @@ namespace AethonMod.Content.NPCs
             if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
         }
 
-        /// <summary>¿Vive aún Aethon?</summary>
+        /// <summary>¿Vive aún Aethon? (v6.50.117 — CUALQUIERA de sus
+        /// fragmentos: la luz, el gemelo oscuro o el recuerdo completo —
+        /// sin luz que los mande, los cazadores se apagan).</summary>
         private static bool ViveAethon()
         {
-            int tipo = ModContent.NPCType<AethonBoss>();
-            for (int i = 0; i < Main.maxNPCs; i++)
+            int[] tipos =
             {
-                NPC n = Main.npc[i];
-                if (n != null && n.active && n.type == tipo) return true;
-            }
+                ModContent.NPCType<AethonBoss>(),
+                ModContent.NPCType<AethonBossOscuro>(),
+                ModContent.NPCType<AethonBossFusionado>(),
+            };
+            for (int t = 0; t < tipos.Length; t++)
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipos[t]) return true;
+                }
             return false;
         }
 

@@ -264,7 +264,11 @@ namespace AethonMod.Content.Systems
             // Aethon, el grimorio mismo — la prueba superada).
             try
             {
-                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>()) return "Aethon";
+                // v6.50.117 — la voz habla por CUALQUIERA de los tres:
+                // son el mismo recuerdo (la luz, su mitad oscura, el completo).
+                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>() ||
+                    type == ModContent.NPCType<Content.NPCs.AethonBossOscuro>() ||
+                    type == ModContent.NPCType<Content.NPCs.AethonBossFusionado>()) return "Aethon";
             }
             catch { }
             return "Desconocido"; // jefes del mod desconocidos: la voz genérica
@@ -300,7 +304,9 @@ namespace AethonMod.Content.Systems
             // solo Aethon, la luz del propio grimorio)
             try
             {
-                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>())
+                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>() ||
+                    type == ModContent.NPCType<Content.NPCs.AethonBossOscuro>() ||
+                    type == ModContent.NPCType<Content.NPCs.AethonBossFusionado>())
                     return new Color(196, 150, 255);   // la luz del grimorio mismo
             }
             catch { }

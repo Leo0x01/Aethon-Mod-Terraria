@@ -1,21 +1,10 @@
 Mods.AethonMod.DisplayName: Aethon, the Eternal Grimoire
 
 Items: {
-	GenesisShard: {
-		DisplayName: Genesis Shard
-		Tooltip:
-			'''
-			Light weapon that fires homing particles.
-			Material to craft the Grimoire of the Eternal.
-			Drops from King Slime and Eye of Cthulhu.
-			'''
-	}
-
-	AncientAltarItem: {
-		DisplayName: Ancient Altar
-		Tooltip: ""
-	}
-
+	// v6.50.117 — GENESIS PURGE: Items.GenesisShard and
+	// Items.AncientAltarItem died with the shard and the altar
+	// (THE FALL is the only way to the Grimoire of the Eternal).
+	
 	ResonanceShard: {
 		DisplayName: Resonance Shard
 		Tooltip: Cosmic currency. Dropped by bosses.
@@ -1777,7 +1766,6 @@ Projectiles: {
 	SombraPaginaProjectile.DisplayName: The Shadow of the Page
 	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
-	GenesisLight.DisplayName: Genesis Light
 	OjoEternoMinion.DisplayName: The Eye of the Eternal
 	AnillosSingularesHalo.DisplayName: Horizon Rings
 	NebulaJellyfishMinion.DisplayName: Nebula Jellyfish
@@ -1906,6 +1894,9 @@ Projectiles: {
 	GrietaDeTintaProjectile.DisplayName: The Ink Rift
 	ManchaDeTinta.DisplayName: The Ink Blot
 	PrimeraCenaProjectile.DisplayName: The First Feast
+	CaidaCometaProjectile.DisplayName: Caida Cometa Projectile
+	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
+	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
 }
 
 Buffs: {
@@ -1961,13 +1952,52 @@ Buffs: {
 }
 
 NPCs: {
-	AethonBoss.DisplayName: Aethon, the Eternal Grimoire
-	// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
-	// keep only the main boss, Aethon; delete the other bosses and the
-	// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
-	// TheWitness died with their entries.
-	// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
+	AethonBoss: {
+		// v6.50.117 — THE MEMORY SPLIT IN TWO: the boss is now
+		// "Fragments of a Distant Memory - Aethon" and fights as a
+		// light+darkness pair; the fusion is THE WHOLE MEMORY.
+		DisplayName: Aethon, the Eternal Grimoire
+		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
+		// keep only the main boss, Aethon; delete the other bosses and the
+		// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
+		// TheWitness died with their entries.
+		// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
+		Bestiary: What is left of a dead god's mind: a memory that still burns. It controls time so night never falls while it exists.
+	}
+
+	AethonBossOscuro: {
+		DisplayName: Fragments of a Distant Memory - Aethon
+		Bestiary: The dark half of the memory. Its sun is dying: black on the outside, purple within, and it warms nothing.
+	}
+
+	AethonBossFusionado: {
+		DisplayName: The Whole Memory - Aethon
+		Bestiary: Both halves remembered being one. An eclipse with teeth: light and darkness no longer take turns.
+	}
+
 	CazadorAstral.DisplayName: Astral Hunter
+
+	GrimorioDormido: {
+		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
+		// keep only the main boss, Aethon; delete the other bosses and the
+		// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
+		// TheWitness died with their entries.
+		// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
+		DisplayName: The Slumbering Grimoire
+		// v6.50.117 — THE FALL: the book that waits in its crater
+		Bestiario: A grimoire that fell from the sky inside an ink comet. It sleeps afloat in its crater… waiting for the right hand.
+
+		TownNPCMood: {
+			Content: I am content.
+			NoHome: I hate not having a home.
+			FarFromHome: I am too far from home.
+			LoveSpace: I love having so much space.
+			DislikeCrowded: I dislike how crowded I am.
+			HateCrowded: I hate how crowded I am.
+			LikeNPC_Princess: I like {NPCName}.
+			Princess_LovesNPC: I like {NPCName}.
+		}
+	}
 }
 
 Common: {
@@ -2190,13 +2220,8 @@ Hambre: {
 
 Bolsa.Abierta: Bag opened: {0} types of summoners received (999 each).
 
-Altar: {
-	Solicitando: Requesting the Genesis Shard from the altar...
-	Reclamado: You have claimed the Genesis Shard.
-	YaPosees: You already own the Genesis Shard.
-}
-
-Tiles.AncientAltar.MapEntry: Ancient Altar
+// v6.50.117 — GENESIS PURGE: the Altar: block and
+// Tiles.AncientAltar.MapEntry died with the ancient altar.
 
 LevelUpTester: {
 	Subida: ✦ {0} gained +{1} levels (now level {2}).
@@ -2206,6 +2231,24 @@ LevelUpTester: {
 RelojDeArena: {
 	AlAmanecer: ✦ The Scribe's Hourglass turns: the ink rewrites the sky and DAWN BREAKS.
 	AlAnochecer: ✦ The Scribe's Hourglass turns: the ink spills the night and THE SHADOWS FALL.
+}
+
+// v6.50.117 — THE FALL: the book's first conversation and the sky that announces it.
+Caida: {
+	Presentacion:
+		'''
+		…I awaken.
+		I have waited eons for a hand like yours — the sky dropped me for YOU alone.
+		I do not speak with a mouth, bearer: my words are born ALREADY INSIDE your thoughts… like this one.
+		From now on you will always hear me this way: a purple voice inside your head, feeding on what you kill.
+		Reach out and take me. But remember: whoever carries a grimoire carries its hunger.
+		'''
+	YaTienes: One soul, one book. I am already yours.
+	OtroJugador: …zZzZz… (this book waits for another hand)
+	BotonTomar: Reach out
+	PrimerPensamiento: At last.
+	CometaCae: ✦ A black star tears open the sky… and it falls toward you.
+	Impacto: ✦ The sky went silent where the star kissed the earth: YOUR GRIMOIRE AWAITS.
 }
 
 TestingPlayer: {
@@ -2385,3 +2428,325 @@ Biomes: {
 }
 
 Mensajes.RegaloPruebas: TESTING — The Light hands you its three gifts: Ascended Form 2, Ascended Form 3 and the Lesser Aethon ({0} received).
+
+// v6.50.117 — TOWN GOSSIP (the brief: «MANY unique and fun dialogues
+// for every NPC» — the light hatchling gets into adorable mischief;
+// the GRIMOIRE gets whispered about, and with fear).
+Pueblo: {
+	Chismes: {
+		Guide: {
+			Mascota1: Last night I saw your pet's little eyes staring at me through my window. All night. Not one blink. I liked it... I think.
+			Mascota2: Your pet followed me around all day while I was mapping, leaving little lights wherever I dropped a marker. I want one of those atlases.
+			Mascota3: Does your little light read, too? I found it asleep on my survival guide. The page titled 'how to survive your own pet' had bite marks in it.
+			Mascota4: Your pet played with my compass, and now north keeps LOOKING at me. Not broken. Looking. Did somebody teach it that? Nobody? That's what I thought.
+			Grimorio1: I read about that book in the old legends. They said: 'whoever carries it will never sleep the same again.' I thought that was a metaphor. Not anymore.
+			Grimorio2: Last night, when you walked past my house, every candle I own leaned toward you. EVERY. SINGLE. ONE. I have no further questions.
+			Grimorio3: I can guide you through any cave in this world. But with that book... even the dirt walls step aside. Even the DIRT knows. Do you understand what I'm telling you?
+			Grimorio4: I asked the book if it knew where the Eye of Cthulhu was. It answered. Not with words. With a page. There was a drawing of MY bed on it.
+		}
+
+		Merchant: {
+			Mascota1: I was making my dinner when your pet ate the plate and knocked the food on the floor. Why would it only eat the PLATE? Worse: it left a coin as a tip. FROM WHERE?
+			Mascota2: Your pet keeps burying my coins in the garden. I dug them up: polished, shiny... sorted by size. The kid keeps better books than I do.
+			Mascota3: You should sell tickets to see that little light. People come to look and stay to shop. It earns its weight in copper, I tell you.
+			Mascota4: I offered your pet a bulk discount on light and it laughed. DOES your pet laugh? It made a sound like tiny, mocking bells.
+			Grimorio1: My ledger wrote itself overnight. Says I OWE the book eight hundred gold coins. The last line reads: 'collecting, with interest.' I don't owe ANYBODY anything!
+			Grimorio2: Keep that book away from my register. Last night I heard it counting coins. BY ITSELF. It was counting BACKWARDS.
+			Grimorio3: I put a price on everything, friend. I priced your book once — full appraisal, inventory, the works. Woke up to a brand-new entry in my catalog: 'NO.'
+			Grimorio4: Gold doesn't shine near that book. It dulls. Do you know what it's like to sell dull gold? It's selling stale bread. It's selling lies.
+		}
+
+		Nurse: {
+			Mascota1: Your pet snuck into my waiting room and slept on three patients. All three woke up with no back pain. Do you rent it out by the hour?
+			Mascota2: Out of curiosity I took your little light's pulse: seventy-two beats per minute. It does not have a heart. CARE TO EXPLAIN?
+			Mascota3: Your pet assisted in surgery: outshone my lamp. Then it ate the gauze. THE GAUZE. Well, at least it came out sterile on the inside.
+			Mascota4: I hooked a patient to an IV and your pet kept him company all night. He woke up without a fever, and she woke up with bags under her eyes. What was she up to? Nothing. Exactly.
+			Grimorio1: I took that book's pulse. The pages beat. Three thumps, a pause, three thumps. Like counting. I do not want to know what it's counting.
+			Grimorio2: I've seen patients with dead eyes. That book's gaze... is the one I've only ever seen in the intensive care ward. On the way out.
+			Grimorio3: Last night I dreamed I was operating on you. You kept saying 'take out its pages.' I answered 'it has no pages.' Then you opened your mouth. It DID.
+			Grimorio4: I know every vital sign. None of them explains why everyone on your block woke up with synchronized pulses. Sixty-one. All of them. Sixty-one.
+		}
+
+		ArmsDealer: {
+			Mascota1: Your pet sharpened its teeth on my shotgun barrels. Now I own a weapon with a smile. Sold one just like it on Tuesday. The customer came back to thank me.
+			Mascota2: That little thing chases my muzzle flash like it's a ball. It chases the RECOIL. Completely bonkers, and honestly? Respect.
+			Mascota3: Your pet slept inside my ammo crate. The bullets were sorted by shine when I found them. By SHINE, kid. Even my dice were glowing differently.
+			Mascota4: I set up a fresh target and your pet drifted right through my line of fire. I missed ON PURPOSE. You understand? On purpose. THAT is love of artillery.
+			Grimorio1: The book asked me for gunpowder. Quietly. I sell death for a living, kid, and I'm proud of it. But that thing spoke like the gunpowder owed IT something.
+			Grimorio2: I showed it my best revolver. It turned a page. Turned ANOTHER. On the last one there was a drawing of a revolver... loaded with teeth.
+			Grimorio3: My bullets know no fear, and neither do I. But near your house, my triggers go cold. Metal doesn't lie, kid. Metal TREMBLES.
+			Grimorio4: Notice there are no crows anywhere near the book? I did. I've got crow aim. Nothing left to practice on. The sky went and got itself empty.
+		}
+
+		Dryad: {
+			Mascota1: Your pet is delightful. The plants lean as it passes, like they're bowing. Nature accepts it... and some days nature won't even accept ME.
+			Mascota2: Your little light slept among my flowers, and by dawn every one of them had turned toward it. Like sunflowers. At night. Humming softly. It was beautiful.
+			Mascota3: I watched it play with the fireflies: they taught it to shine differently... and it taught THEM how to go dark at will. At WILL.
+			Mascota4: Your pet nibbled my seedbed and flowers I never planted sprouted. Star-shaped ones. Nature copies the ones it loves.
+			Grimorio1: Nature screams near your book. Not with wind — with silence. The birds hush, the leaves hold still... the way they do when a very OLD predator passes by.
+			Grimorio2: The grass grows AROUND your house, never toward it. In a circle. The roots turn themselves around. And roots are never wrong about where NOT to go.
+			Grimorio3: I can feel the book devouring the light. Not like a shadow. Like HUNGER. It is the only thing I have ever met that makes light feel scarce.
+			Grimorio4: Mother Nature keeps a list of things that must never return. Yesterday I heard the wind reading it out loud. Your book is near the top.
+		}
+
+		Demolitionist: {
+			Mascota1: Your pet played with a LIT bomb! Snatched it out of its mouth one second before! It bit ME for taking it! The little thing was right, though — it went off beautifully!
+			Mascota2: That sparklet sits on my powder kegs and ROCKS THEM. You know what it's like, watching that from my window? Couldn't sleep either, but from the SHEER THRILL of it!
+			Mascota3: Your pet sneezed and my shed went airborne! THE SHED! ...Well, I had to demolish it anyway. We're even, spark. Even, plus the shed.
+			Mascota4: I taught your hatchling to whistle along with dynamite! Whistles soft, see? Whistles like a fuse. Now I pinch my own fuses just to hear it answer.
+			Grimorio1: The book asked me for dynamite. Nobody told me. I DREAMED it. Three nights. On the fourth, I dreamed the recipe. On the fifth... on the fifth I dreamed nothing at all.
+			Grimorio2: Take a look at my blast notes. Those aren't my drawings anymore — they're FORMULAS. Fine handwriting. I write like a bomb going off; that hand has LONG fingers.
+			Grimorio3: I respect anything that explodes, lad. But your book doesn't explode — it IMPLODES. It makes the noise backwards. The air goes INWARD. Even the smoke comes back!
+			Grimorio4: I left a little charge by your door... testing, see? By morning the dynamite had gone GRAY. Dry. Sparkless. Who drank the life out of MY powder?
+		}
+
+		Clothier: {
+			Mascota1: Your pet made a hole in my favorite shirt. A PERFECT hole. Round. With little dots all around it... like a button that was meant to be born there.
+			Mascota2: Ah, that little light followed me to the graveyard. It stopped in front of an old grave and dimmed for a moment. What does it know that I don't?
+			Mascota3: Your hatchling slept in my wool basket, and the wool came out DYED in dawn colors. Dyed without dye, son. The wool DREAMED that color.
+			Mascota4: It nibbled my finger affectionately, the little rascal. Didn't mind at all. At my age, being bitten is nearly a caress. Bitten, mind you. Not EATEN.
+			Grimorio1: I served in that dungeon, son. Knew the old master of bones. When your book looked at me, it reminded me of him... but of him when he was YOUNG.
+			Grimorio2: I was trying on my waistcoat and the mirror went dark for one second. When it came back, my buttons were done up wrong. I NEVER button up wrong.
+			Grimorio3: I heard its pages turning from my bed. They were counting something, I believe. Do you know what? Notches. The way the old master counted BONES.
+			Grimorio4: I can't remember my dog's name, son. Had him all my life. Last night, half asleep, a very thin voice told me: 'he doesn't remember you either.' And it laughed.
+		}
+
+		Goblin: {
+			Mascota1: Your pet stole my tools. I found them laid out on the floor... in the shape of a smile. Or was it a rune? I laughed. Then I thought about it. Then I laughed again, just in case.
+			Mascota2: I reforged a hammer for your little light: mini size, soft grip. It hugged it and slept with it. Daycare savings, brother!
+			Mascota3: Your pet brings me scrap. EVERY NIGHT. Old pieces, shiny ones, slightly licked... The strangest, most charming night delivery of my whole life.
+			Mascota4: I watched it take a windup clock apart. Without breaking a thing. And put it back together. BACKWARDS. The clock runs in reverse now, and it knows my exact birth hour.
+			Grimorio1: Goblin tech doesn't fail, human. NEAR YOUR BOOK IT FAILS. The sparks bend toward it, like they're begging to be un-invented.
+			Grimorio2: I sold the book a screwdriver. Don't ask. Payment upfront. It was on my doorstep by dawn: STRAIGHT. Mine was CURVED. It straightened the thing out of spite.
+			Grimorio3: There are old goblin machines in the mines. Sealed ones. Don't ask. Near your house, I hear them WAKING UP. A thousand years shut off, and they're nervous.
+			Grimorio4: My grandmother used to say: 'a goblin who hears the Ink never comes home.' Yesterday I heard the Ink. I'm still here, aren't I?... AREN'T I? Tell me you can see me.
+		}
+
+		Wizard: {
+			Mascota1: Your pet chases my spells. Catches them. Sniffs them. Yesterday one sneezed on it... or it sneezed on the spell. The magic got confused, and frankly, so did I.
+			Mascota2: That hatchling has more magic in one sparkle than my whole tower has at midnight. And it spends it all on PLAYING. If only mortals spent life that way.
+			Mascota3: Your pet ate a mana crystal. WHOLE. I heard its giggle inside my hat for three days. The hat is useless for spellwork now, but it is DELIGHTED.
+			Mascota4: I taught it a trick with lights. It returned the trick with INTEREST: my candles juggle now. I learn more from your pet than from my books. Don't tell my books.
+			Grimorio1: I studied that book. Three nights. I wrote 300 pages of notes. I burned them. Every one. And I swear, boy, the ashes arranged themselves into a single word: 'THANK YOU.'
+			Grimorio2: Magic has layers, you know. Light, shadow, life, mind... There is a brand-new layer under your house. It wasn't there before. The book is WRITING it.
+			Grimorio3: I asked the book its name, in the old tongue. It answered with MINE. My birth name. Which I never told it. Which nobody alive knows.
+			Grimorio4: I don't have nightmares anymore, boy. The wizard I am fights them and wins. But last night I dreamed of my own library... my name on every spine. My face on every page.
+		}
+
+		Mechanic: {
+			Mascota1: Your pet chews copper wire. Every bite mark is two millimeters EXACTLY, all identical. That's not a tooth. That's a calibrated JAW.
+			Mascota2: That hatchling sleeps on my generator and the town gets fewer blackouts. FEWER BLACKOUTS. If it moves into the power plant, I'm hiring you both as a bundle deal.
+			Mascota3: Your pet sorted my screws BY THREAD. I didn't even know I owned six thread sizes. I love it. I fear it a little. I love it.
+			Mascota4: I made it a toy wrench. It hugged it, sure... then it watched me build ONE circuit and handed the toy BACK, like: 'learned it already, thanks.'
+			Grimorio1: My wire cutters keep vanishing. They turn up inside whatever that book has instead of pages. They come back clean, dry, and with TEETH MARKS in them. In the STEEL.
+			Grimorio2: I put a proximity sensor on the book, ha. The sensor died. I put two. Both died. I bought a whole box. The box was OPEN by morning. From the inside.
+			Grimorio3: My pressure gauges read NEGATIVE near your book. Negative, not zero: LESS than zero, like something is sipping the pressure out of the world. And here I thought pressure was an honest number.
+			Grimorio4: I installed a lock on my workshop. Overnight, the lock UNINSTALLED itself. And reinstalled... backwards. Now the shop is locked to ME and open to everything else.
+		}
+
+		Santa: {
+			Mascota1: Ho ho ho... your pet unwrapped the presents EARLY. All of them. And know what it left behind? The coal. Took everything but the coal. Who refuses coal? I like this kid!
+			Mascota2: I knitted your little light a tiny hat. It put it on, checked itself in the frozen lake... and brought me a carrot. There's not a single snowman around, mind you. It's sending me messages. Ho ho ho.
+			Mascota3: Your pet took my sleigh out 'just for a minute.' Came back with stardust on its footprints. It was on the ROOFS, wasn't it? My list of roofs is outdated!
+			Mascota4: Found it asleep, hugging my sack of defective toys. It FIXED them in its sleep, ho ho. Born with workshop spirit. Hired!
+			Grimorio1: My naughty list rewrote itself. Every single line says the same name now. Not yours, son. The BOOK's. And I have been keeping these lists for a THOUSAND years, mind you.
+			Grimorio2: The reindeer aren't afraid of anything. Of ANYTHING, ho. Last night they refused to fly over your house. They walked back to the stable on their own, silent, staring at their hooves.
+			Grimorio3: The Christmas spirit beats in every house in this town... except yours, son. In yours beats ANOTHER spirit. Older than me. And I knew the FIRST winter.
+			Grimorio4: I left the book a gift, ho ho, out of courtesy. By morning the package was untouched... but RETURNED. With a note: 'keep it. Winter will be needing it.' WHICH winter, son?
+		}
+
+		Truffle: {
+			Mascota1: Your pet sniffs me like I'm food. Flattering? Certainly. Concerning? Also. We fungi can tell when someone is hungry... for certain flavors.
+			Mascota2: Your little light sits under my umbrella and glows to my rhythm. TO MY RHYTHM! When I breathe, it glows. It's official: we're a pair now. I'll adopt it if you slip up.
+			Mascota3: It rolled in my spores, and now your pet twinkles with little freckles. The whole town followed it around all afternoon like it was a parade. I sold popcorn. Mushroom popcorn, obviously.
+			Mascota4: Your pet doesn't step on the grass: it floats. I don't step on it either: I sprout. We both understand the ground differently. It from above, me from... within.
+			Grimorio1: Spores die near the book. Even the MOLD flees. What does a book have to EAT that even mold runs away? Fungi don't scare easily, you know. And this scares me.
+			Grimorio2: I am the rarest fungus in the world, born from this place's pure light. And last night, for the first time, I understood the bread: knowing that something out there is hungry for YOU.
+			Grimorio3: My house smells of old damp, of forest, of me. Your house smells of ink. You know what else smells of ink, friend? Things that have spent a VERY long time underground, writing.
+			Grimorio4: Fungi share one root, one mind, one heartbeat. Last night the Root dreamed. The Root NEVER dreams. It dreamed of a blank page closing slowly... like an eye. Like ALL the eyes.
+		}
+
+		Steampunker: {
+			Mascota1: Your pet plays with my cogs: spins them, stacks them, builds pyramids. It made a WALKING MACHINE out of three cogs. I need TWELVE. The hatchling cheats, and I MUST know how!
+			Mascota2: I gifted it a tiny steam unicycle and it laughed at my design. Do you know what it costs to make an engineer laugh at a prototype? Affectionately? I allow it. Her, only.
+			Mascota3: Your little light took my test jetpack flying. Returned it... IMPROVED. I dismantled it out of spite: it was right about EVERYTHING. Rebuilt it the same. Flies better now. I hate that I love it.
+			Mascota4: I left a turbine beside your sleeping pet. The turbine woke up DREAMING: it spins alone at night, slow, soft, in a spiral. Spiraling the way SHE orbits. Who answers for a dreaming turbine?
+			Grimorio1: My gauges go NEGATIVE near the book. NEGATIVE: the world's pressure reads LESS than zero, like the book is sipping reality through a straw. Physics is my religion, and that book spits in my church!
+			Grimorio2: I built a machine that runs on any fire. ANY fire. Parked it by your house, and the fire went out... grudgingly. Do you know what a grudging fire looks like? GRAY, my dear. Gray.
+			Grimorio3: I lent the book a bronze clock — dropped it nearby by accident, honest. It came back clean. Polished. KEEPING TIME FOR ANOTHER WORLD. I've dismantled it four times: the gears are perfect and the hour is still wrong.
+			Grimorio4: I keep a blueprint of the town: streets, houses, roots, everything. It woke up with an ink stain over YOUR house. I clean it every morning. Every morning, dear. The PAPER is clean! It's the TABLE that trembles!
+		}
+
+		DyeTrader: {
+			Mascota1: Your pet rolled in my dyes and now it leaves tiny rainbow footprints across the ROOF. The ROOF, my friend. I don't wash anything anymore. I EXHIBIT everything.
+			Mascota2: That hatchling is a walking masterpiece. I asked its permission to copy its glow into a new dye. It said yes. How do I know? It winked. Dyes never wink at me.
+			Mascota3: Your pet brought me a flower in a color that DIDN'T EXIST. And colors are my trade and my life. I mixed it. The dye is called 'like her.' It sells out in minutes.
+			Mascota4: I watched your little light playing with the sunset: stretching the colors, tying them, making KNOTS. Yesterday's sky was its work, you know. Nobody believes me.
+			Grimorio1: Colors go out near your book. My deepest purple came back GRAY. GRAY, I tell you. And gray isn't the absence of color. It's a color that has SURRENDERED.
+			Grimorio2: There are many blacks: ink black, coal black, midnight black. But your book has a black with TEXTURE. A black with PAGES. Nobody should want that black.
+			Grimorio3: I left my dyes drying by the window. They were SORTED by morning. Lightest to darkest. And the darkest one... had moved. In a little puddle. Step by step. Toward your house.
+			Grimorio4: I dyed a sash the exact color of your eyes, as a gift. It was the color of HONEY by dawn... and on the table, the word 'SWEET,' written in red dye. I sold ALL my red dye last month.
+		}
+
+		PartyGirl: {
+			Mascota1: Your pet IS the party! It pops piñatas with one sparkle, ties the balloons... it even made a piñata shaped like ITSELF and then refused to let anyone break it! I LOVE it!
+			Mascota2: New confetti, just invented: the sparkles your hatchling drops when it laughs! Glows in the dark, tastes like cotton candy, and NEVER RUNS OUT! The taste part was an accident. Mine.
+			Mascota3: I put a party hat on your pet and it KEPT IT. It's hers now. She has a hat, she has a party, she has a LIFE. That hatchling lives better than ME!
+			Mascota4: We had a dance contest and your pet WON! It dances with people's SHADOWS! It asks them to dance! Nobody else sees them move. But they MOVE. And YOUR shadow dances best of all!
+			Grimorio1: The book doesn't come to my parties. And you know what? THAT scares me more than GOING to one. Nothing scares me more than going to a party. Do the math.
+			Grimorio2: At my last party I played music till dawn. And at your book's party? The music is NONE. Silence. And silence dances too, you know. It dances very, very close to people.
+			Grimorio3: I threw confetti at the book. I KNOW, I know: you don't throw confetti at books. But nobody had ever thrown ANYTHING at it, right? The confetti just floated there. STILL. At half height. All night. Like it was waiting for permission.
+			Grimorio4: I once dreamed the perfect party: cakes, balloons, music, everyone smiling. And in every smile, a little BLACK THING peeking out between the teeth. In EVERY one. Even mine. I smile with my lips closed now. Have you noticed? Tee-hee! ...Tee.
+		}
+
+		Cyborg: {
+			Mascota1: Your pet chases my laser dot. I do not OWN a laser dot. My questions are two: where does the dot come from... and why does it point at ME while I sleep?
+			Mascota2: I analyzed its glow: unknown spectrum, zero anomalies... and a data signature. A DATA SIGNATURE? That hatchling broadcasts information. So do I. We have talked. Lovely conversationalist.
+			Mascota3: I mimicked its little bell-chime on my speaker. It laughed. We both laughed. My internal log marks that night as 'best day.' Robots keep records of everything.
+			Mascota4: Your pet plays robot: stands stiff, rotates, beep, beep. It does it BADLY on purpose. I was built to serve, and the first time someone mocked me for that... I loved it. Do it anytime, kiddo.
+			Grimorio1: Near the book, my circuits pick up a signal. It isn't code. It's a whisper older than binary. All zeros, brother. And the zeros are EATING the ones. It's a countdown, and I can hear it.
+			Grimorio2: I don't sleep. I download. And last night's download contained a new file. It's called 'memories.' I don't have memories, brother. I MANUFACTURED some last night, without meaning to. Whose are they?
+			Grimorio3: My metal cools 0.3 degrees whenever you pass with the book. Measured, calibrated, confirmed. Humans have a word for it: 'shudder.' We live it with data: metal FEELS, brother. And your book? Your book it does not like.
+			Grimorio4: One night I shut down. ME. Alone. No command, no error, no storm. I woke up seated backwards, staring at your house, battery at 200%. Someone charged me, brother. Someone looked inside me... and returned me with a tip.
+		}
+
+		Painter: {
+			Mascota1: Your pet walked right through my easel with paint on its little feet! Left tiny starry footprints across the WHOLE canvas! I titled it 'The Muse.' Sold in one hour. BRING ME MORE MUSES!
+			Mascota2: I tried painting your little light's portrait. Impossible: it glows too bright, comes out burnt. So I painted its SHADOW instead. Did you know that shadow POSES? The shadow poses, my friend!
+			Mascota3: Your pet helped me out: held the brush in its sparkles, passed me the yellow... and when I dozed off, it PAINTED MY FACE. Well! With composition! Talent must be acknowledged!
+			Mascota4: I painted a sunset, and it woke up with a little light flying through it. Oh — that one wasn't yours, was it? Doesn't matter. We signed it together, the two of us.
+			Grimorio1: I tried to paint your book. It came out a black rectangle. Tried again: black rectangle. Painted SOMETHING ELSE entirely: woke up a black rectangle. All my canvases, son. ALL of them. And the last one... is still WET.
+			Grimorio2: I don't fear darkness. I paint it, I tame it, I frame it. But that book's darkness refuses to be painted. It stays BEHIND the paint. I paint an apple and the apple is there, sure... but behind it there is a page, watching.
+			Grimorio3: My teacher used to say: 'every painting needs light.' Near your house, the light arrives wrong. Not gray, not late — TIRED. I have to rest after painting your street. Does light get tired now? It does.
+			Grimorio4: I painted the Merchant's grandmother from memory, with all my love. When I finished, the grandmother in the frame was not the grandmother: it was a page WEARING her face. I burned it. The grandmother thanked me. THE grandmother. Thanked. Me.
+		}
+
+		WitchDoctor: {
+			Mascota1: The spirits play with your pet. They carry it, they swing it, they teach it to whistle with the wind. In my tribe, that was the mark of a home: when the light and the dead get along.
+			Mascota2: Your hatchling respects the offerings. It comes close, it sniffs, it touches NOTHING. Even the elder spirits, who despise all living things, left it a little gift of smoke. The smoke whistled its name. Does your pet have a name? Ask the smoke.
+			Mascota3: I watched it dance in the rain. The rain did not soak it: it ESCORTED it. I have seen rain fall on chiefs, on temples, on the DEAD. I had never seen rain ask permission.
+			Mascota4: Your pet sat beside my drum all night. By dawn, the drum was playing on its own: ta, ta-ta, ta. ITS rhythm. Drums do not learn rhythms, my boy. Drums REMEMBER those who listen to them.
+			Grimorio1: The spirits speak of everything: the maize, the death, the love. Of your book they say NOTHING. They fall silent and stare at the ground. And a silent dead man, my boy... a silent dead man is a scream.
+			Grimorio2: I asked the ancestors about the book. They answered with a dance I had never seen them dance: slow, arms covering their eyes. The dance of the THINGS THAT EAT THE DEAD.
+			Grimorio3: My village burned its books once. That is why I am the last. I carried a torch that night, my boy. And I tell you: the smoke of those books... and the gaze of YOUR book... are the exact same color.
+			Grimorio4: I dreamed of my grandfather. He spoke of you, of your house, of the book. I asked him everything, on my knees. And he answered... in YOUR BOOK'S VOICE. I woke with ink in my mouth. Did I write something in the night? With MY OWN HAND?
+		}
+
+		Pirate: {
+			Mascota1: Yer pet drank me rum! ALL of it! An' y'know what? Spun 'round glowin' like a chandelier fer half the night, lightin' the harbor better'n the lighthouse! Contract, loot, an' a flag of her own, says I!
+			Mascota2: That hatchling plays board-or-be-boarded: leaps on me from the rafters, ringin' like tiny bells! Terrifies me more'n the whole navy! An' in the GOOD way, yaaar!
+			Mascota3: Yer pet dug in the beach sand an' found a COIN! A buried coin I spent YEARS huntin' fer! The treasure map was HER the whole time, an' nobody told me!
+			Mascota4: I taught her the war cry, an' she does it with ECHO! D'ye know how many crewmen it takes t' get echo on a deck? ONE, if she be made o' LIGHT, YAAAAR!
+			Grimorio1: I seen the kraken, lad. Seen the drowned walk back. Seen me own ship swallow the sea. An' last night, when yer book looked at me from yer window... this old sea dog crossed himself. WITH THE WRONG HAND.
+			Grimorio2: Me first captain told me: 'the sea don't hate, the sea COLLECTS.' Yer book don't hate either, lad. Somethin' out there is COUNTIN' what it's owed... an' the whole town's gettin' writ into the ledger.
+			Grimorio3: The tide goes out when ye pass the pier. THE TIDE, lad. The water gathers itself up like a widow's skirt. The fish don't jump. The shellfish close. Even the foam leaves. What did ye promise the sea? Better: what did the BOOK promise it?
+			Grimorio4: I brought a chest o' black ink from the last raid — devil's brand! Paid DOUBLE t' never open it. Last night I opened it, devil judge me. Ye know what was inside? Pages. Blank ones. An' this mornin'... THREE WERE MISSING! Who enters me hold, lad? WHO ENTERS ME HOLD?!
+		}
+
+		Stylist: {
+			Mascota1: Your pet falls asleep on my clients' heads! They wake up with LIGHT WAVES in their hair! Light waves! I charge extra for 'astral curls,' and I am NOT lying about it!
+			Mascota2: I tied a little bow on your light with a ribbon that glows. She looked at herself in my mirror... and the mirror BLUSHED. The MIRROR, you get me? And here I thought this salon had shown me everything.
+			Mascota3: Your pet is my assistant! Holds the scissors, passes the comb, and sweeps the floor with a little breeze that creatures should NOT know how to make. I made her an apron! A tiny apron!
+			Mascota4: Client after client asks for the 'house of light' hairstyle! Know what it is? BEDHEAD! Your pet sleeps on EVERY head in this town, and I'm getting RICH off it!
+			Grimorio1: Ever since the book arrived, everyone who sits in my chair dreams the same dream: a page turning. Slowly. EVERYONE. I used to cut hair and hear about lives; now I cut hair and hear that page. Page. Page. And last night, I dreamed the page with MY name on it. I cut it, in the dream. I woke with the scissors in my hand and the hair of my name on the floor. The hair of my name, you understand? MY NAME HAD HAIR.
+			Grimorio2: I won't cut a single hair on anyone carrying that book. Why? Yesterday I washed a client's hair and the water came out BLACK. She doesn't dye. I don't stock black dye. Neither does the tub.
+			Grimorio3: My new mirror refuses to work: it fogs up, it smudges, it covers itself. I asked the river witch why. She said: 'mirrors show what's coming, and yours DOESN'T WANT TO.' I still cut hair. With my back to the mirror. Always.
+			Grimorio4: The client with the book? She never came back. She told me it whispered 'new hair, new face, new name' while she slept. She left town without goodbyes. With PERFECT hair. Nobody leaves town with perfect hair, least of all HER — she left gum on my chair for years! People only leave perfect... when they aren't themselves anymore.
+		}
+
+		Angler: {
+			Mascota1: Your pet spends HOURS staring at my fishbowl! HOURS! You know what it's like when something with glowing eyes smiles at your dinner for three days straight? I don't eat fish in front of it anymore!
+			Mascota2: That hatchling helped me fish! Dipped her tail in the water, the fish swam close to look... and I yanked them ALL out! YAAAR! I mean... glub! Whatever it is the fish say!
+			Mascota3: Your pet bit MY HOOK! And you know what? NOTHING HAPPENED TO HER! Hooks are metal, the critter's made of light, and the hook came out BENT! Bending a hook! Who'd believe a kid about that?!
+			Mascota4: I taught your pet to spit ten meters! Now she spits sparkles at any fishermen who walk past! She is the WORST and BEST influence I have ever been in my short, salty life!
+			Grimorio1: The book ate a fish that was STILL SWIMMING inside it. I saw it. I SAW IT: the fish's shadow crossing the paper, page to page, for three whole days. On the fourth day, the shadow went still. It doesn't cross anymore. It isn't the fish's shadow anymore. It isn't a shadow anymore, and I used to fish shadows and throw them back!
+			Grimorio2: The lake fish are coming up with NO EYES! The fish! Sockets all cleaned out! You know how much luck an eyeless fish brings? NONE! I know! I catch them! I look at them! I DON'T SLEEP!
+			Grimorio3: My new rod came up WET WITH FRESHWATER! Fresh, not salty! Sea water isn't fresh, dummy! The rod's soaked in OTHER water! From a river that runs UNDERNEATH your house and isn't on ANY map!
+			Grimorio4: I cast my net last night and pulled up a PAGE! A sheet of paper, tangled in the net, WET and LICKING the water! I threw it back, glub, gross! And today? Today it was back! SUNBATHING IN MY BOAT! LOOKING AT ME! THE SAME PAGE! IT KNOWS ME!
+		}
+
+		Tavernkeep: {
+			Mascota1: Your pet licks the mugs till they shine! Shiny on the INSIDE, friend! I pay in kisses of light— I mean, in food! The hatchling eats free here, forever!
+			Mascota2: That little one swings from the tavern rafters like she's up in the rigging! Makes me miss Etheria without the dying part, and THAT, friend, is worth every round on the house!
+			Mascota3: Your pet gave the tavern a beat: little bells with the footsteps, tum-tum with the laughing! Last night the town DANCED, and not from the drinks — your hatchling was CONDUCTING, friend! CONDUCTING!
+			Mascota4: She learned to pour ale! WITHOUT SPILLING! You know how many squires I've trained? How many of them spill? ALL OF THEM. The hatchling: not one drop. She's hired! I'll sew the apron myself!
+			Grimorio1: I served in the eternal war, friend. Saw the ogres, the shadows of Etheria. Saw things that don't make it into the songs. Now listen: on an Etheria mural, old as the war itself... there was YOUR BOOK. It was the ONE thing the ogres wouldn't touch in their rites. The one thing they painted FACING AWAY.
+			Grimorio2: The defense of eternity cost every one of us something. Me, it cost my sleep: I've slept with the tavern open ever since. Last night I came down, and the tables were SET. Set with ink, friend. Three tables. Three rounds. FOR WHOM?
+			Grimorio3: In the war I learned to hear the calm before a storm. This town has THAT calm, friend. The storm is yours. You carry it on your back, in a satchel, with pages. I pour the last round early these days. Just in case.
+			Grimorio4: The grimoire sits at the far table. No— it doesn't bother anyone: it SITS. That table's been reserved since the war, friend, for the one who comes to COLLECT. I keep it clean, with a mug on it. The mug's EMPTY by morning. The dent in the cushion, fresh. Nobody sits there. The book sits there... when you're not looking.
+		}
+
+		Golfer: {
+			Mascota1: Your pet fetched my ball back! And everyone else's! And the other course's! And one carved from OLD WOOD with some gentleman's initials that... you know what? Better I don't find out whose!
+			Mascota2: I taught your hatchling to putt! Taps the ball with one little sparkle, toc, STRAIGHT DOWN THE FAIRWAY! She's got swing, she's got hip, she's got a PERFECT ARC! Golf's whole problem, all these years: no your-pet!
+			Mascota3: Your pet caddies like a dream! Knows the shortcuts! Reads the wind! READS. THE. WIND. I've watched the flags for thirty years, and that hatchling just STARES at nothing and KNOWS!
+			Mascota4: Hole in one, with witnesses: your pet was holding the flag! And after? She BOWED! With her little foot! The crowd! THE CROWD OF LIGHTS! Golf with a light show — this is the FUTURE, my friend!
+			Grimorio1: My ball sank into the lake, into the dark water. I fished it out: it was DRY. And warm. And the lake... the lake pulled back, son. In a circle, like a freshly watered green. And I, who respect every hole on this course, felt my course APOLOGIZING... for having water anywhere near your house.
+			Grimorio2: The fairway bends toward your house. It isn't the wind — it's the GRASS. It grows tilted, so the ball rolls your way on its own. Don't talk to me about greens — the green is SACRED! I went out at night to straighten it, blade by blade. By dawn it was worse. By dawn it was... a SPIRAL.
+			Grimorio3: I played at night, first time in my life, you know? I had to. The ball glowed without me touching it. Glowed... and whistled, softly. I followed it. Ten holes in silence, son. Ten. At the end, the ball winked at me... and I buried it right there. Right THERE. A new hole. No flag. The hole nobody will ever play.
+			Grimorio4: At the club they ask about your book — why not bring it to domino afternoons, it doesn't bite, it doesn't bite! I told them the book doesn't play. You know what they said? That last night, someone PLAYED FOR them. Won every game. Nobody saw anybody. And the tiles... the tiles were polished by morning. Polished by something that DROOLS, son.
+		}
+
+		Zoologist: {
+			Mascota1: YOUR PET IS MY FAVORITE ENTRY IN THE ENTIRE BESTIARY! I gave her a page with a fold-out flap, with glitter, with EVERYTHING! And when she saw it? She ROCKED! Do you know what it's like when your bestiary LOVES you back? Neither do I! I cried!
+			Mascota2: She plays with the bunnies WITHOUT scaring them! Bunnies! Scared of the WIND itself! They sit together, they sniff each other, they SHARE SHADE... share shade, do you get it? Ecology is so JEALOUS of your hatchling!
+			Mascota3: Your pet brought me a feather from a bird that DOESN'T EXIST! And you know what I did? Catalogued it, obviously! New page, new ink, new heart. The feather sings softly at dusk. AND NOW THE PAGE SINGS TOO! I honestly no longer know which one I catalogued!
+			Mascota4: I saw her sleeping with the wolves! THE. WOLVES. The whole pack in a circle, your hatchling in the middle, all warm. Wolves don't adopt much, you know. Pups, the moon... She was the first thing they adopted in years! I cried twice!
+			Grimorio1: Animals will not go near the book. And listen closely: it isn't fear. Bunnies fear the fox, and they RUN. This is something ELSE. It's RESPECT — the kind deer give an old wolf. And the wolves... the wolves lower their heads and walk sideways. Like something that used to hunt BIGGER things.
+			Grimorio2: There's one page the bestiary has refused me since I was a little girl: the perfect animal, the one nobody has ever seen. Yesterday morning it was WRITTEN. In my handwriting. I did not write it. It says: 'we all saw it, and we all forgot.' Who is WE, friend? Who is ALL?
+			Grimorio3: There's a trail in the woods the deer will not cross. Not for food, not fleeing, not for FIRE. My grandmother called it 'the writer's path.' You know where it goes? In circles. It circles YOUR house, friend. And every year... it gets WIDER.
+			Grimorio4: I'm a zoologist: life is my trade. I can smell what a forest is dying of. This town smells of life. Your house smells of ink. And your BOOK, friend... your book smells like every empty cage in the world, all at once. You know what empty cages smell like? Like waiting.
+		}
+
+		Princess: {
+			Mascota1: Your pet is the most well-mannered creature in the realm! She curtsied — with her little foot of light, an actual CURTSY! I knitted her a tiny crown. She wore it. AND SHE TILTED HER HEAD SO I COULD ADJUST IT! EEEE!
+			Mascota2: I brokered a peace treaty between your pet and the baker's cat! Signed with a footprint of light and a floury paw! There's peace in this town now, and it's the first peace I've ever achieved WITHOUT kingdoms involved!
+			Mascota3: Your hatchling brought me a flower from the ROYAL garden — the ones only the king's own gardeners may cut! How did she get in? How did she CUT it? And she replanted the cutting, sideways, roots facing the moon! Your pet's courtesy has a METHOD!
+			Mascota4: She sits with me at tea! Light tea, mind! And when I passed the biscuits, she reached out her little foot... and didn't eat a single one: she COUNTED them, smiled, and left the biggest one for me. Your pet has court manners. That was the best gift of my whole week!
+			Grimorio1: I greet everyone. It is my trade and my joy. I tried to greet your book. Do you know what it did? It BOWED. Returned the courtesy, slow, deep, exact. And I know those bows, friend: they belong to the OLD courts. That book remembers manners from when people bowed... to the ones about to be eaten.
+			Grimorio2: A prince once told me: 'every kingdom has a debt, and every debt has a collector.' He said it about kings of flesh and blood. Your book is not a kingdom, friend. It is the COLLECTOR. And last night, my door knocker sounded. Three times. Someone rang it the way one requests an audience. I didn't open. By morning the knocker was WORN. Worn, as if a thousand hands had waited on it.
+			Grimorio3: I wrote in my diary: 'today the town is happy.' By dawn it read: 'today the town is written.' No, I didn't change it. And you know the worst part? The town woke up happy. PERFECTLY happy. Have you ever seen perfect happiness? Me neither. Until today. Today I saw it on every face... except yours.
+			Grimorio4: Papa the king taught me to hear what people don't say. And this town says NOTHING, friend: it just smiles with clenched teeth and looks at the floor when you pass with that book. And you know what else I heard last night, window open? People CHEWING in their sleep. All at the same hour. All in the same rhythm. That isn't hunger, friend. That's REHEARSAL.
+		}
+
+		Genericos: {
+			Mascota1: Yesterday I saw your pet's little eyes looking at me through my window. It stayed a good while. I left a glass of water on the sill, out of courtesy. It was empty by morning. Thank you, hatchling!
+			Mascota2: Your pet is the soul of the neighborhood: it greets people, it plays, it steals bread. It STEALS A LOAF, you understand? A whole loaf, floating, with its owner floating after it, apologizing. The bread never turned up. The apology ended up coming from the entire town.
+			Mascota3: I was making my dinner when your pet ate the plate and knocked the food on the floor. Why would it only eat the plate? Who teaches a light-hatchling its manners in REVERSE?
+			Mascota4: Your little light plays hide-and-seek with the town's children. They never find her: kids look under the beds, and your pet... hides in their SHADOWS, you know? The shadows go very, very still when she's inside. What a lovely game!... Right? ...Right?
+			Grimorio1: I don't know what that book is. I don't want to know. But last night, every door in town jammed shut by itself... from the INSIDE, you understand? From the inside. Like the houses were locking something IN.
+			Grimorio2: Notice how nobody dreams anymore? Ask someone what they dreamed last night: they'll look at you with a little smile and say 'nothing.' EVERYONE dreams 'nothing' since you arrived with that book. I used to dream. I was good at it.
+			Grimorio3: I heard pages turning in your house. All night. How many pages does that book have? I counted the turns: two hundred, three hundred... I fell asleep counting. I dreamed the next page. I don't wake up wanting to count things anymore.
+			Grimorio4: I left my laundry out overnight. It came back FOLDED. Folded well, mind you? Fine creases, long hands, cold fingers. Nobody complains about folded laundry... until it happens to YOURS, and you notice it was folded into the exact shape of a PAGE.
+		}
+	}
+
+	Reclamos: {
+		Guide: Yes? Oh. It's you. Your pet bit my ankle while I was checking my maps. Twice. The second one hurt MORE, for the record. What a... determined little thing.
+		Merchant: Before we discuss prices: that thing of yours owes me FIVE coins in bite fees. Nothing personal. Everything costs something here. Even your pet's affection gets invoiced.
+		Nurse: You! Exactly you! If your pet bites me mid-treatment one more time, YOU are giving the next injection. Under my supervision. Without anesthesia. Are we clear?
+		ArmsDealer: Look here, kid. That glowing thing of yours bit me while I was reloading. If my shotgun had gotten spooked, this town would have a brand-new hole in it, and you'd be paying for it. Rein it in.
+		Dryad: Nature forgives; I almost do. But your light-creature gnawed my arm, and my herbs LAUGHED. Do plants laugh? Before today: no.
+		Demolitionist: Your critter bit me while I was holding dynamite! DYNAMITE! One sneeze and the whole block goes sky-high! Teach it manners or I'll teach it ballistics, ha! Joking! ...JOKING!
+		Clothier: Ah, son... at my age, bones creak on their own. No help needed. Your little spark nibbled on my leg. Tell her this tailor is all out of... what's the word? Ah, yes! Juice.
+		Goblin: Listen well, human: if your little light-eyes enters my workshop again, I will reforge her into BITE MARKS. With warranty. Without warranty. NO warranty, do you read my anger?!
+		Wizard: *sigh* When I was an apprentice, magical creatures respected their elders... and their calves. Yours sampled mine. Old wizard tastes salty, doesn't he, you shameless little hatchling?
+		Mechanic: Your pet lay down on my workbench. On TOP of the new circuit. Do you know what star-spit does to copper? Neither do I, AND I HATE NOT KNOWING! I HATE IT!
+		Santa: Ho, ho... ho. No. No presents for that thing until January. And I caught it chewing MY list, too. MINE. Do you have any idea what good paper costs?!
+		Truffle: She sniffs me like a main course, and now she BITES TOO, friend! Talking mushrooms are NOT food! The key word is TAL-KING! Teach it to her!
+		Steampunker: Your hatchling played with my cogs, and now one spins backwards. BACKWARDS, and smiling. Do cogs smile? THAT one does. And it won't let me take it apart. It's MINE, from MY toolbox!
+		DyeTrader: Your pet knocked over my dyes! Purple floor, purple cat, PURPLE ME! And you know what? It brings out my eyes. THAT IS NOT THE POINT: there were FOUR barrels!
+		PartyGirl: I love your pet, you know? LOVE it. But it bit me MID-PARTY. The lights dimmed with embarrassment — the LIGHTS, and they don't even HAVE faces! No idea how they pulled that off!
+		Cyborg: I logged ten impacts of 1 unit of damage. TEN. Data-precise: ten. My grievance protocol is ACTIVE, brother. The maintenance fee on my good mood is billed to YOU.
+		Painter: That bright little thing crossed my studio, and my canvases woke up with... teeth marks of light? It's art. ANNOYING art, but art. Next time, she can ENROLL as a muse like everybody else!
+		WitchDoctor: The spirits laughed when your pet bit me. LAUGHED, my boy. Do you know what it is when the DEAD laugh at you, to your face? I don't want you to find out either. Pay the offering.
+		Pirate: No cannon ever cannonaded me like yer hatchling! Ten bites, an' I counted 'em the way I count me coins! An' NOT ONE of 'em in the good way! Yaaar... with rage!
+		Stylist: She bit me in the middle of a haircut! The CLIENT'S haircut! The client's never coming back, the haircut came out perfect (my work, obviously), and the panic got left behind as a tip. FOR ME!
+		Angler: Your pet bit me and I fell in the lake! ME! I never fall in the lake — the lake falls in with ME! Glub! That doesn't wash out, you traitorous spark!
+		Tavernkeep: That spark of yours emptied a whole mug with her teeth! Do you know what that IS, friend? Not even in the eternal war did anyone touch the mugs! Men DIED for less there!
+		Golfer: Your pet stole my ball on hole 9! MID-SWING! Do you know what a lost birdie IS? DO YOU? Even the wind has never done that to me, and the wind is my NEMESIS!
+		Zoologist: I logged ten bites in my bestiary. TEN. Timestamped and everything — I'm a PROFESSIONAL! You'd better pray her page doesn't change sections from 'friendly.' Do I make myself clear?
+		Princess: As a princess I must be kind, so I say this with a great deal of love: kindly control your little star, yes? PLEEEASE! ...Said with ALL available diplomatic affection. Which is a lot!
+		Genericos: Ah, it's you. Look, about that bright little thing of yours... tell it the neighbors have started counting. We KNOW what it did. We're just being polite about it. For now.
+	}
+}

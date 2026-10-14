@@ -11,7 +11,8 @@ namespace AethonMod.Content.Globals
     ///
     /// Esto permite que cada arma tenga su propio progreso independiente:
     /// - El Grimorio del Eterno del jugador sube de nivel comiendo XP.
-    /// - El Fragmento Génesis base NO sube (es material, no arma).
+    /// - v6.50.117 — LA PURGA DEL GÉNESIS: el fragmento material murió;
+    ///   ahora suben los DOS libros (el Eterno y el Nervioso de prueba).
     /// - Si el jugador consigue otra copia del mismo item, esa copia
     ///   empieza en nivel 1 con su propio progreso.
     /// </summary>
@@ -41,7 +42,7 @@ namespace AethonMod.Content.Globals
         public bool PrimeraCincoEstrellas = false;
 
         /// <summary>
-        /// Solo aplica a las armas Aethon (Grimorio + Fragmento Génesis).
+        /// Solo aplica a los libros Aethon (el Eterno y el Nervioso).
         /// v6.50.94 — EL NERVIOSO TAMBIÉN: la letra del usuario («el libro
         /// debe ser egoista y comer toda la criatura loot incluido por eso
         /// el libro recibe la exp y el jugador nada») — la XP de las presas
@@ -56,8 +57,7 @@ namespace AethonMod.Content.Globals
             try
             {
                 return item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
-                       item.type == ModContent.ItemType<Weapons.GrimorioHambrientoNervioso>() ||
-                       item.type == ModContent.ItemType<Items.GenesisShard>();
+                       item.type == ModContent.ItemType<Weapons.GrimorioHambrientoNervioso>();
             }
             catch
             {
@@ -98,8 +98,8 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
-                if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
+                // Solo suben de nivel los LIBROS (v6.50.117: el Fragmento
+                // Génesis ya no existe — la exclusión murió con él).
 
                 // v6.50.3 — MAXSHARDLEVEL CONECTADO (la config fantasma por
                 // fin respira): la opción existía desde el inicio y nadie la
@@ -320,7 +320,6 @@ namespace AethonMod.Content.Globals
             try
             {
                 if (niveles <= 0) return;
-                if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
 
                 int tope = NivelTope();
                 if (tope > 0 && Level >= tope) return; // ya EN el tope: nada que subir

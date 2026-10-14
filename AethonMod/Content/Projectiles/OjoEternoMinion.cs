@@ -532,54 +532,41 @@ namespace AethonMod.Content.Projectiles
                 return centro + punto + deriva;
             }
 
-            // === v6.50.116 — LA CORONA DOBLE (la letra: «debes mejorar
-            //     la animación sobre el jugador ya que se quedan muy
-            //     juntos uno de otros cuando están encima del jugador»):
-            //     UN arco de ~70 px para 11 ojos de 21 px era UNA FILA
-            //     APIÑADA (17 px por ojo — se pisaban las pestañas).
-            //     AHORA la banda se abre en DOS ARCOS ENTRELAZADOS (a lo
-            //     LADRILLO): la primera MITAD cuelga del arco EXTERIOR y
-            //     la segunda del INTERIOR (23 px más cerca, desfasado
-            //     MEDIO PASO) — cada ojo tiene el DOBLE de su cielo
-            //     (11 ojos: 6 fuera a ~35 px por paso + 5 dentro a
-            //     ~34 px). El arco se ABRE con la banda (más ojos = arco
-            //     más largo, ±9°), el radio RESPIRA (±4%, cada arco a su
-            //     reloj) y cada ojo CABECEA a SU propio tempo (±3 px) —
-            //     la corona viva de siempre, sin el embotellamiento ===
+            // === v6.50.117 — LA CORONA DOBLE, LADRILLO REAL (la letra:
+            //     «debes mejorar la animación sobre el jugador ya que se
+            //     quedan muy juntos uno de otros cuando están encima del
+            //     jugador»): la .116 repartía la banda en DOS BLOQUES
+            //     CONTIGUOS por minionPos (6 de fuera + 5 de dentro) y cada
+            //     arco usaba SU PROPIO paso para el «desfase ladrillo» —
+            //     medio paso de 5 ≠ medio paso de 6, así que los interiores
+            //     NO caían entre los exteriores; y un minionPos inestable
+            //     barajaba los arcos enteros. AHORA el reparto es GLOBAL e
+            //     INTERCALADO: los puestos PARES van al arco exterior y los
+            //     IMPARES al interior, sobre UNA sola regla de posición
+            //     (f = (i + 0,5) / n) — cada ojo interior cae EXACTAMENTE
+            //     entre sus dos vecinos exteriores y el desfase del ladrillo
+            //     sale SOLO (sin capaFuera, sin j, sin m, sin paso). El
+            //     arco se ABRE con la banda (más ojos = arco más largo, ±9°),
+            //     el radio RESPIRA (±4%, cada capa a su reloj; el interior
+            //     23 px más cerca) y cada ojo CABECEA a SU propio tempo ===
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
-            int capaFuera = (n + 1) / 2;            // 6 si son 11
-            bool fuera = i < capaFuera;
-            int j = fuera ? i : i - capaFuera;      // el puesto DENTRO de su arco
-            int m = fuera ? capaFuera : n - capaFuera;
-            float f = (j + 0.5f) / m;
-
-            // EL ARCO QUE SE ABRE con la banda y se BALANCEA entero
-            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 9f));
-            float vaivén = MathF.Sin(time * 0.30f) * 0.20f;
+            // LADRILLO REAL: puestos pares en el arco exterior, impares en el interior —
+            // cada ojo interior cae EXACTAMENTE entre sus dos vecinos exteriores.
+            bool fuera = (i % 2) == 0;
+            // Posición GLOBAL uniforme sobre el rango compartido (misma regla para ambos arcos)
+            float f = (i + 0.5f) / n;
+            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 9f));       // el arco se abre con la banda
+            float vaivén = MathF.Sin(time * 0.30f) * 0.20f;                  // balanceo entero
             float a0 = MathHelper.ToRadians(195f) - abre + vaivén;
             float a1 = MathHelper.ToRadians(345f) + abre + vaivén;
-
-            // EL DESFASE DEL LADRILLO: el arco interior cuelga a MEDIAS
-            // entre dos ojos del exterior (nunca uno debajo de otro)
-            float paso = (a1 - a0) / Math.Max(1, m);
             float angC = MathHelper.Lerp(a0, a1, f);
-            if (!fuera) angC += paso * 0.5f;
-
-            // EL RADIO QUE RESPIRA (cada arco a SU reloj — el interior
-            // contracorriendo un compás, se leen DOS capas vivas)
             float radioBase = Math.Min(46f + n * 2.6f, 80f);
-            float radioC = radioBase * (1f + 0.04f *
-                MathF.Sin(time * 0.23f + (fuera ? 0f : 1.2f)));
-            if (!fuera) radioC -= 23f;
-
-            Vector2 pos = dueño.MountedCenter + new Vector2(
-                (float)Math.Cos(angC) * radioC,
-                (float)Math.Sin(angC) * radioC * 0.92f);
-            // EL CABECEO PROPIO: cada ojo a SU reloj (±3 px, lento — la
-            // banda serena de siempre, ahora con aire entre las frentes)
-            pos.Y += MathF.Sin(time * 0.9f + i * 1.9f) * 3f;
-            pos.X += MathF.Sin(time * 0.7f + j * 2.3f + (fuera ? 0f : 0.8f)) * 2f;
+            float radioC = radioBase * (1f + 0.04f * MathF.Sin(time * 0.23f + (fuera ? 0f : 1.2f))); // respira a su reloj
+            if (!fuera) radioC -= 23f;                                       // el arco interior, 23 px más cerca
+            Vector2 pos = dueño.MountedCenter + new Vector2(MathF.Cos(angC) * radioC, MathF.Sin(angC) * radioC * 0.92f);
+            pos.Y += MathF.Sin(time * 0.9f + i * 1.9f) * 3f;                 // cabeceo a su propio tempo
+            pos.X += MathF.Sin(time * 0.7f + i * 2.3f) * 2f;                 // vaivén lateral
             return pos;
         }
 

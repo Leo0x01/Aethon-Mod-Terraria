@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -27,6 +28,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// en pantalla»), y EL GARANTE: a la hora exacta (216000 t) sale
     /// sí o sí — «al menos 1 vez cada hora».
     ///
+    /// v6.50.117 — EL LÍDER DE LA PAREJA (ideas 15/21): su gemelo
+    /// oscuro (AethonMenorOscuroPet) lo orbita — FUSIONADOS en los
+    /// equinoccios del mundo (amanecer/crepúsculo: Main.time &lt; 1500 o
+    /// &gt; 52500), separados el resto del día — y su PreDraw suma EL
+    /// MINI SOL RÚNICO dorado y LOS 3 MINI OJOS de la familia (los
+    /// anillos del gemelo los dibuja el gemelo). Y EL CEREBRO DE LA
+    /// PAREJA: si el dueño se queda quieto ~1 min (AFK), los dos vuelan
+    /// a MOLESTAR al vecino con casa más cercano (2 formas: la sombrilla
+    /// de página que muerde cada 90 t y los 3 mini ojos que embisten; 1
+    /// de daño SIN acreditación al jugador, tope 10 golpes y se
+    /// aburre) — la máquina entera vive en ParejaCerebro (AethonMenorPareja.cs).
     /// EL PATRÓN DE MASCOTA DE LUZ de vanilla (verificado contra el
     /// tML real): Main.projPet (persiste) + ProjectileID.Sets.LightPet
     /// (la familia del fuego fatuo — no la matan las mascotas ajenas) +
@@ -40,6 +52,19 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private float _tDesdeMini;   // ticks desde el último destello (o el nacimiento)
         private bool _saludoHecho;   // LO PRIMERO que hace la mascota ES la luz
         private bool _miniCerca;     // su propio destello está vivo a su lado (sincronizado: TODAS las pantallas lo ven igual)
+
+        // === v6.50.117 — EL CEREBRO DE LA PAREJA (el claro piensa por los
+        //     dos — la máquina vive en ParejaCerebro) ===
+
+        /// <summary>EL REGISTRO DEL PUEBLO (v6.50.117): npcIndex → el tick
+        /// (Main.GameUpdateCount) de la ÚLTIMA molestia. Se escribe en cada
+        /// golpe de la pareja — los diálogos de reclamo de los NPCs lo
+        /// leerán para protestar («¿otra vez tú?»).</summary>
+        public static readonly Dictionary<int, int> TicksMolestado = new();
+
+        /// <summary>El estado del cerebro (modos, AFK, golpes, formas) —
+        /// una instancia por mascota, TODO determinista.</summary>
+        private readonly ParejaCerebro.Estado _pareja = new ParejaCerebro.Estado();
 
         public override string Texture => "AethonMod/Content/NPCs/AethonBoss";
 
@@ -76,6 +101,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             float t = Main.GlobalTimeWrappedHourly;
 
+            // === v6.50.117 — EL CEREBRO DE LA PAREJA: el AFK del dueño, el
+            //     viaje al pueblo, LAS DOS FORMAS de molestar y el tope de
+            //     10 golpes. TODO determinista (posiciones sincronizadas y
+            //     monedas Hash01 — nada de Main.rand): el servidor y todos
+            //     los clientes evolucionan IGUAL sin gastar ancho de red.
+            ParejaCerebro.Tick(Projectile, duenio, _pareja);
+
             // === LA PERSECUCIÓN SUAVE (el vaivén de las mascotas de
             //     vanilla): orbita el hombro del dueño — el lado cambia
             //     LENTO con el seno (pasea de un hombro al otro) y sube
@@ -83,18 +115,35 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             float lado = MathF.Sin(t * 0.35f) * 46f - duenio.direction * 14f;
             float bob = MathF.Sin(t * 1.9f) * 9f;
             Vector2 meta = duenio.Center + new Vector2(lado, -46f + bob);
+            // v6.50.117 — si la pareja está de misión (viajar / molestar /
+            // volver), la meta la decide EL CEREBRO: el vecino, su órbita,
+            // o el lado del dueño.
+            ParejaCerebro.ElegirMeta(Projectile, duenio, _pareja, ref meta);
 
             // La búsqueda serena: nunca teletransporta, siempre alcanza.
             Vector2 hacia = meta - Projectile.Center;
             float dist = hacia.Length();
-            if (dist > 900f)            // el dueño se fue muy lejos: le alcanza volando
-                Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.05f, 0.20f);
-            else
-                Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.045f, 0.10f);
+            if (_pareja.Modo == ParejaCerebro.MODO_NORMAL)
+            {
+                if (dist > 900f)            // el dueño se fue muy lejos: le alcanza volando
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.05f, 0.20f);
+                else
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.045f, 0.10f);
 
-            // El freno al llegar (flota, no vibra encima del punto).
-            if (dist < 24f)
-                Projectile.velocity *= 0.80f;
+                // El freno al llegar (flota, no vibra encima del punto).
+                if (dist < 24f)
+                    Projectile.velocity *= 0.80f;
+            }
+            else
+            {
+                // v6.50.117 — LA MISIÓN VUELA: en viaje/molestia/vuelta la
+                // persecución es DIRECTA — crucero ~12 px/t (el pueblo queda
+                // a ~1 pantalla del dueño: llega en segundos, sin misil).
+                Vector2 dir = dist > 0.001f ? hacia / dist : Vector2.Zero;
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, dir * 12f, 0.10f);
+                if (dist < 30f)
+                    Projectile.velocity *= 0.85f;
+            }
 
             Projectile.rotation += 0.02f;   // el núcleo gira despacito (el sol en miniatura)
 
@@ -215,6 +264,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 float t = Main.GlobalTimeWrappedHourly;
                 Vector2 c = Projectile.Center;
 
+                // v6.50.117 — LA PAREJA, LOTE ALFA: la sombrilla de página
+                // bajo el vecino (FORMA 1) y los discos NEGROS de los 3
+                // mini ojos — lo negro NO vive en el aditivo (negro =
+                // suma 0 = invisible, la lección de la .66). Se vuelva y
+                // se cierra SOLO: el lote del cuerpo queda limpio.
+                ParejaCerebro.DibujarExtrasAlfa(Projectile, _pareja);
+
                 // === LA ESCALA: el jefe mide ~540 px de velo — la
                 //     mascota es SU RETRATO a 0.22 ===
                 const float S = 0.22f;
@@ -317,6 +373,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     new Vector2(tamNucleo * 0.42f * 1.5f, tamNucleo * 0.42f * 1.5f), 0f, VFXCore.SoftGlow);
                 VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.65f * brillo),
                     new Vector2(tamNucleo * 0.42f * 0.8f, tamNucleo * 0.42f * 0.8f), 0f, VFXCore.SoftGlow);
+
+                // v6.50.117 — LA PAREJA, LOTE ADITIVO: el mini sol rúnico
+                // dorado y los iris violeta de los mini ojos — se SUMAN al
+                // lote del cuerpo (un solo volcado, cero lotes extra).
+                ParejaCerebro.DibujarExtrasAditivos(Projectile, _pareja);
 
                 if (VFXCore.QuadCount > 0)
                 {

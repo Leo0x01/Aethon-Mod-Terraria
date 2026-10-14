@@ -6,20 +6,9 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
-        GenesisShard: {
-                DisplayName: Fragmento Génesis
-                Tooltip:
-                        '''
-                        Arma de luz que dispara partículas autoguiadas.
-                        Material para fabricar el Grimorio del Eterno.
-                        Se obtiene al vencer al Rey Slime y al Ojo de Cthulhu.
-                        '''
-        }
-
-        AncientAltarItem: {
-                DisplayName: Altar Antiguo
-                Tooltip: ""
-        }
+        // v6.50.117 — LA PURGA DEL GÉNESIS: Items.GenesisShard y
+        // Items.AncientAltarItem murieron con el fragmento y el altar
+        // (LA CAÍDA es la única vía del Grimorio del Eterno).
 
         ResonanceShard: {
                 DisplayName: Fragmento de Resonancia
@@ -1784,7 +1773,6 @@ Projectiles: {
         GrimorioNerviosoFlotante.DisplayName: El Grimorio Nervioso
         SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
         ArcaneBolt.DisplayName: Bolt Arcano
-        GenesisLight.DisplayName: Luz del Génesis
         OjoEternoMinion.DisplayName: El Ojo del Eterno
         AnillosSingularesHalo.DisplayName: Anillos del Horizonte
         NebulaJellyfishMinion.DisplayName: Medusa Nebular
@@ -1962,6 +1950,15 @@ Buffs: {
 }
 
 NPCs: {
+        // v6.50.117 — EL RECUERDO PARTIDO EN DOS (la letra del usuario):
+        // el jefe se llama «Fragmentos de un recuerdo lejano - Aethon» y
+        // pelea en pareja luz+oscuridad; la fusión es EL RECUERDO COMPLETO.
+        AethonBoss.DisplayName: Fragmentos de un recuerdo lejano - Aethon
+        AethonBoss.Bestiary: Lo que queda de la mente de un dios muerto: un recuerdo que aún quema. Controla el tiempo para que nunca sea de noche mientras exista.
+        AethonBossOscuro.DisplayName: Fragmentos de un recuerdo lejano - Aethon
+        AethonBossOscuro.Bestiary: La mitad oscura del recuerdo. Su sol es moribundo: negro por fuera, morado por dentro, y no calienta nada.
+        AethonBossFusionado.DisplayName: El Recuerdo Completo - Aethon
+        AethonBossFusionado.Bestiary: Las dos mitades recordaron ser una. Un eclipse con dientes: la luz y la oscuridad ya no se turnan.
         AethonBoss.DisplayName: Aethon, el Grimorio Eterno
         // v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
         // keep only the main boss, Aethon; delete the other bosses and the
@@ -1969,6 +1966,9 @@ NPCs: {
         // TheWitness died with their entries.
         // v6.50.45 — THE HUNTER OF THE BOSS'S PACK
         CazadorAstral.DisplayName: Cazador Astral
+        // v6.50.117 — LA CAÍDA: el libro que espera en el cráter
+        GrimorioDormido.DisplayName: El Grimorio Dormido
+        GrimorioDormido.Bestiario: Un grimorio caído del cielo en un cometa de tinta. Duerme flotando en su cráter… esperando la mano correcta.
 }
 
 Common: {
@@ -2192,13 +2192,8 @@ Hambre: {
 
 Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
 
-Altar: {
-        Solicitando: Solicitando el Fragmento Génesis al altar…
-        Reclamado: Has reclamado el Fragmento Génesis.
-        YaPosees: Ya posees el Fragmento Génesis.
-}
-
-Tiles.AncientAltar.MapEntry: Altar Antiguo
+// v6.50.117 — LA PURGA DEL GÉNESIS: el bloque Altar: y
+// Tiles.AncientAltar.MapEntry murieron con el altar antiguo.
 
 LevelUpTester: {
         Subida: ✦ {0} subió +{1} niveles (ahora nivel {2}).
@@ -2208,6 +2203,24 @@ LevelUpTester: {
 RelojDeArena: {
         AlAmanecer: ✦ El Reloj de Arena del Escriba se gira: la tinta reescribe el cielo y AMANECE.
         AlAnochecer: ✦ El Reloj de Arena del Escriba se gira: la tinta derrama la noche y CAEN LAS SOMBRAS.
+}
+
+// v6.50.117 — LA CAÍDA: la primera conversación del libro y el cielo que la anuncia.
+Caida: {
+        Presentacion:
+                '''
+                …despierto.
+                Llevo eones esperando una mano como la tuya — el cielo me dejó caer solo para TI.
+                No hablo con la boca, portador: mis palabras nacen YA DENTRO de tus pensamientos… como esta.
+                Desde hoy me oirás así siempre: una voz morada dentro de tu cabeza, que come lo que matas.
+                Extiende la mano y tómame. Pero recuerda: quien carga un grimorio, carga su hambre.
+                '''
+        YaTienes: Una sola alma, un solo libro. Ya soy tuyo.
+        OtroJugador: …zZzZz… (este libro espera a otra mano)
+        BotonTomar: Extender la mano
+        PrimerPensamiento: Por fin.
+        CometaCae: ✦ Una estrella negra se desgarra en el cielo… y cae hacia ti.
+        Impacto: ✦ El cielo calló donde la estrella besó la tierra: TU GRIMORIO TE ESPERA.
 }
 
 TestingPlayer: {
@@ -2387,3 +2400,299 @@ Biomes: {
 }
 
 Mensajes.RegaloPruebas: PRUEBAS — La Luz te entrega sus tres regalos: Forma Ascendida 2, Forma Ascendida 3 y el Aethon Menor ({0} recibidos).
+
+// v6.50.117 — LOS CHISMES DEL PUEBLO (la letra: «MUCHOS diálogos
+// únicos y divertidos para cada NPC» — la cría de luz hace travesuras
+// con gracia; del GRIMORIO se habla bajito, y con miedo).
+Pueblo: {
+        Chismes: {
+                Guide: {
+                        Mascota1: Ayer vi los pequeños ojos de tu mascota mirándome a través de mi ventana. Estuvo toda la noche. No parpadeó ni una vez. Me gustó... creo.
+                        Mascota2: Tu mascota me siguió todo el día mientras exploraba, dejando lucecitas donde yo ponía marcas del mapa. Contrátame un atlas de esos.
+                        Mascota3: ¿Tu cría de luz también lee? La encontré dormida sobre mi guía de supervivencia. La página de «cómo sobrevivir a tu propia mascota» amaneció mordida.
+                        Mascota4: Tu mascota jugó con mi brújula y ahora el norte me mira raro. No roto: me MIRA. ¿Quién le enseñó eso? ¿Nadie? Eso pensé.
+                        Grimorio1: Leí sobre ese libro en las viejas leyendas. Decían: «quien lo cargue no volverá a dormir igual». Yo pensé que era metáfora. Ya no.
+                        Grimorio2: Anoche, cuando pasaste junto a mi casa, todas mis velas se inclinaron hacia ti. TODAS. Yo no tengo más preguntas.
+                        Grimorio3: Puedo guiarte por cualquier cueva, pero con ese libro... hasta las paredes de tierra se apartan. Hasta la TIERRA sabe, ¿entiendes lo que te digo?
+                        Grimorio4: Le pregunté al libro si sabía dónde estaba el Ojo de Cthulhu. Me contestó. No con palabras. Con una página. Había un dibujo de MI cama.
+                }
+                Merchant: {
+                        Mascota1: Cuando estaba preparando mi cena, tu mascota se comió el plato y tiró la comida al suelo. ¿Por qué se comió solo el plato? Y lo peor: dejó una moneda de propina. ¿DE DÓNDE la sacó?
+                        Mascota2: Tu mascota entierra mis monedas en el jardín. Las desenterré: pulidas, brillantes... y ordenadas por tamaño. La cría lleva mejor la contabilidad que yo.
+                        Mascota3: Deberías cobrar entrada por enseñar esa lucecita: la gente viene a verla y se queda a comprar. Ella sola paga su peso en cobre.
+                        Mascota4: Le ofrecí a tu mascota un descuento por volumen de luz y se rio. ¿Tu mascota se ríe? Hizo un ruidito como de campanitas burlonas.
+                        Grimorio1: Mi libro de cuentas amaneció escrito. Dice que le DEBO ochocientas monedas de oro. La última línea pone: «cobraré con intereses». ¡Yo no le debo nada a NADIE!
+                        Grimorio2: Aleja ese libro de mi caja registradora. Anoche la oí contar monedas SOLA. Contaba hacia ATRÁS.
+                        Grimorio3: Yo le pongo precio a todo, ¿sabes? Le puse precio a tu libro: inventario, tasación, el trabajo completo. Amanecí con una entrada nueva en mi catálogo: «NO».
+                        Grimorio4: El oro no brilla cerca de tu libro. Se apaga. ¿Sabes lo que es vender oro apagado? Es vender pan duro. Es vender mentiras.
+                }
+                Nurse: {
+                        Mascota1: Tu mascota se coló en mi sala de espera y durmió sobre tres pacientes. Los tres despertaron sin dolor de espalda. ¿La alquilas por horas?
+                        Mascota2: Le tomé el pulso a tu cría de luz, por curiosidad: setenta y dos latidos por minuto. No tiene corazón. ¿ME EXPLICAS?
+                        Mascota3: Tu mascota me ayudó en cirugía: alumbró mejor que mi lámpara. Luego se comió las gasas. Las GASAS. Bueno, al menos quedó esterilizada por dentro.
+                        Mascota4: Le puse un suero a un paciente y tu mascota le hizo compañía toda la noche. El paciente amaneció sin fiebre y ella con ojeras. ¿De qué se ríe? De nada. Exacto.
+                        Grimorio1: Le tomé el pulso a tu libro. Las páginas laten. Tres golpes, una pausa, tres golpes. Como contando. No quiero saber qué está contando.
+                        Grimorio2: He visto pacientes con la mirada apagada. La de ese libro... es como yo solo he visto en la sala de cuidados intensivos, y de salida.
+                        Grimorio3: Anoche soñé que te operaba. Tú me decías «sácale las páginas». Yo te respondía «no tiene páginas». Entonces abriste la boca. SÍ tenía.
+                        Grimorio4: Conozco todos los signos vitales. Ninguno explica por qué los vecinos de tu cuadra amanecieron con el pulso SINCRONIZADO. Sesenta y uno. Todos. Sesenta y uno.
+                }
+                ArmsDealer: {
+                        Mascota1: Tu mascota limó los dientes en los cañones de mis escopetas. Ahora tengo un arma con sonrisa. Vendí una igual el martes. El cliente volvió a agradecer.
+                        Mascota2: Ese bichito tuyo persigue el fogonazo de mis disparos como si fuera una pelota. Persigue el RETROCESO. Está completamente loco, y lo respeto.
+                        Mascota3: Tu mascota se durmió dentro de mi caja de balas. Amanecieron ordenadas por brillo. Por BRILLO, pibe. Hasta los dados amanecieron brillando distinto.
+                        Mascota4: Puse un blanco nuevo y tu mascota se atravesó justo en mi línea de tiro. Fallé a PROPÓSITO. ¿Entiendes? A propósito. Eso es amor a la artillería.
+                        Grimorio1: El libro me pidió pólvora. En voz baja. Yo vendo muerte con orgullo, ¿eh?, pero eso... eso hablaba como si la pólvora LE DEBIERA algo.
+                        Grimorio2: Le mostré mi mejor revólver. El libro pasó una página. Pasó OTRA. En la última estaba el dibujo de un revólver... cargado con dientes.
+                        Grimorio3: Mis balas no conocen el miedo y yo tampoco. Pero cerca de tu casa mis gatillos se enfrían. El metal no miente, pibe. El metal TIEMBLA.
+                        Grimorio4: ¿Te fijaste que ya no hay cuervos cerca del libro? Yo sí. Tengo puntería de cuervos. Ya no queda contra qué practicar. El cielo se quedó vacío.
+                }
+                Dryad: {
+                        Mascota1: Tu mascota es adorable. Las plantas se inclinan a su paso, como saludando. La naturaleza la acepta... y a veces ni a MÍ me acepta.
+                        Mascota2: Tu cría de luz durmió entre mis flores y amanecieron todas giradas hacia ella, como girasoles. De noche. Canturreando bajito. Fue precioso.
+                        Mascota3: La vi jugar con las luciérnagas: ellas le enseñaban a brillar distinto... y ella les enseñaba a apagarse a voluntad. A VOLUNTAD.
+                        Mascota4: Tu mascota mordisqueó mi semillero y brotaron flores que no sembré. Flores con forma de estrellitas. La naturaleza copia a quien ama.
+                        Grimorio1: La naturaleza grita cerca de tu libro. No con viento: con silencio. Los pájaros callan, las hojas se quedan quietas... como cuando pasa un depredador MUY antiguo.
+                        Grimorio2: El pasto crece EN TORNO a tu casa, nunca hacia ella. En círculo. Las raíces se dan la vuelta. Y las raíces jamás se equivocan sobre dónde NO entrar.
+                        Grimorio3: Siento cómo el libro devora la luz. No como una sombra: como HAMBRE. Es lo único que he conocido en la vida que le hace FALTA algo a la luz.
+                        Grimorio4: La Madre Naturaleza lleva una lista de las cosas que no deben volver. Ayer escuché al viento leerla en voz alta. Tu libro está en los primeros lugares.
+                }
+                Demolitionist: {
+                        Mascota1: ¡Tu mascota jugó con una bomba ENCENDIDA! Se la quité de la boca un segundo antes. ¡Y me mordió a mí por quitársela! ¡Tenía razón el bicho: estalló precioso!
+                        Mascota2: ¡Esa chispita se sienta sobre mis barriles de pólvora y se mece! ¿Sabes lo que es ver eso desde mi ventana? Yo tampoco dormí, ¡pero de la EMOCIÓN!
+                        Mascota3: ¡Tu mascota estornudó y me voló el cobertizo! ¡EL COBERTIZO! ...Bueno, había que demolerlo igual. Quedamos a mano, chispa. A mano y con el cobertizo.
+                        Mascota4: ¡Le enseñé a tu cría a silbar con la dinamita! Silba bajito, ¿eh?, como las mechas. Ahora apago las mechas de MIS bombas solo para escucharla responder.
+                        Grimorio1: El libro me pidió dinamita. Nadie me lo contó: LO SOÑÉ. Tres noches. En la cuarta soñé la receta. En la quinta... la quinta ya no soñé nada.
+                        Grimorio2: Échale un vistazo a mis notas de explosivos: ya no son mis dibujos, son FÓRMULAS. Escritas con letra fina. Yo escribo como pisa una bomba; esa letra es de dedos LARGOS.
+                        Grimorio3: Yo respeto todo lo que explota, muchacho. Pero tu libro no explota: IMPLOSIONA. Hace el ruido al revés. El aire se va PARA ADENTRO. ¡Hasta el humo regresa!
+                        Grimorio4: Dejé una carguita junto a tu puerta, pa' probar, ¿sabes? Amaneció GRIS. Seca. Sin chispa. ¿Quién le chupó la vida a MI pólvora?
+                }
+                Clothier: {
+                        Mascota1: Tu mascota hizo un agujero en mi camisa favorita. Un agujero PERFECTO. Redondo. Con puntitos alrededor... como un botón que debió nacer ahí.
+                        Mascota2: Ah, esa lucecita me siguió hasta el cementerio. Se quedó quieta frente a una tumba vieja y se apagó un momentito. ¿Qué sabe ella que yo no?
+                        Mascota3: Tu cría durmió en mi canasta de lana y la lana amaneció TEÑIDA de color aurora. Teñida sin tinte, muchacho. La lana lo SOÑÓ.
+                        Mascota4: Me mordió el dedo con cariño, la muy pillo. No me molestó: a mi edad, que algo te muerda es casi una caricia. Que te MUERDA, ojo. No que te coma.
+                        Grimorio1: Yo serví en esa mazmorra, muchacho. Conocí al viejo amo de los huesos. Pues tu libro me miró y me lo recordó... pero a él cuando era JOVEN.
+                        Grimorio2: Me probaba el chaleco frente al espejo y el espejo se apagó un segundo. Cuando volvió, yo estaba abotonado al revés. Yo NUNCA me abotonó al revés.
+                        Grimorio3: Escuché sus páginas voltearse desde mi cama. Estaban contando, creo. ¿Sabes qué contaban? Puntos. Como el viejo amo contaba HUESOS.
+                        Grimorio4: Ya no recuerdo el nombre de mi perro, muchacho. Lo tuve toda la vida. Anoche, entre sueños, una voz muy finita me dijo: «ni él se acuerda de ti». Y reía.
+                }
+                Goblin: {
+                        Mascota1: Tu mascota robó mis herramientas. Las encontré en el suelo, ordenadas... en forma de sonrisa. ¿O era una runa? Reí. Luego pensé. Luego volví a reír, por si acaso.
+                        Mascota2: Le refactoreé un martillo a tu cría de luz: tamaño mini, mango suave. Lo abrazó y durmió con él. ¡Ahorro en guardería, hermano!
+                        Mascota3: Tu mascota me trae chatarra. ¡TODAS las noches! Piezas viejas, brillantes, ligeramente lamidas... El envío nocturno más raro y encantador de mi vida.
+                        Mascota4: La vi desarmar un reloj de cuerda. Sin romper nada. Y volverlo a armar. AL REVÉS. El reloj corre hacia atrás y ahora sabe mi hora exacta de nacimiento.
+                        Grimorio1: La tecnología goblin no falla, humano. CERCA DE TU LIBRO FALLA. Las chispas se doblan hacia él como pidiendo volver a NO existir.
+                        Grimorio2: Le vendí un destornillador al libro. No preguntes. Cobré por adelantado. Amaneció el destornillador en mi puerta: RECTO. Y el mío era CURVO. Lo enderezó de puro fastidio.
+                        Grimorio3: Hay máquinas goblins viejas en las minas, selladas, ni te cuento. Pues cerca de tu casa las oigo ENCENDERSE. Mil años apagadas, y se ponen nerviosas.
+                        Grimorio4: Mi abuela decía: «goblin que escucha la Tinta, goblin que no vuelve». Ayer escuché la Tinta. Sigo aquí, ¿no?... ¿NO? Dime que me ves.
+                }
+                Wizard: {
+                        Mascota1: Tu mascota persigue mis hechizos. Los alcanza. Los huele. El otro día uno le estornudó encima... o ella le estornudó al hechizo. La magia se confundió, y yo también.
+                        Mascota2: Esa cría tiene más magia en un destello que mi torre entera a medianoche. Y se la gasta en JUGAR. Ojalá gastáramos así la vida los mortales.
+                        Mascota3: Tu mascota se comió un cristal de maná. ENTERO. Escuché su risita dentro de mi sombrero durante tres días. El sombrero ya no sirve para hechizos, pero está FELIZ.
+                        Mascota4: Le enseñé un truco con luces y me lo devolvió con INTERÉS: mis velas hacen malabares ahora. Aprendo más de tu mascota que de mis libros. No se lo cuentes a mis libros.
+                        Grimorio1: Estudié ese libro. Tres noches. Escribí 300 páginas de notas. Las quemé. Todas. Y te juro, muchacho, que las cenizas se acomodaron solas formando una palabra: «GRACIAS».
+                        Grimorio2: La magia tiene capas, ¿sabes? Luz, sombra, vida, mente... Pues debajo de tu casa hay una capa NUEVA. Antes no existía. El libro la está ESCRIBIENDO.
+                        Grimorio3: Le pregunté su nombre al libro, en la lengua antigua. Me contestó con el MÍO. Mi nombre de nacimiento. Que jamás le dije. Que nadie vivo conoce.
+                        Grimorio4: Yo ya no tengo pesadillas, muchacho: las peleo y las gano. Pero anoche soñé mi propia biblioteca... mi nombre en cada lomo. Mi cara en cada página.
+                }
+                Mechanic: {
+                        Mascota1: Tu mascota mordisquea cable de cobre. Las marcas de mordida son de dos milímetros EXACTOS, todas iguales. Eso no es un diente: es una PINZA calibrada.
+                        Mascota2: La cría esa duerme sobre mi generador y el pueblo sufre menos cortes de luz. ¡MENOS CORTES! Si se muda a la central eléctrica, os contrato a los dos.
+                        Mascota3: Tu mascota ordenó mis tornillos POR ROSCA. Yo ni sabía que tenía seis roscas distintas. La quiero. La temo un poquito. La quiero.
+                        Mascota4: Le hice una llave inglesa de juguete. La abrazó, sí... y luego me vio armar UN circuito y me la DEVOLVIÓ, como diciendo: «aprendí, gracias».
+                        Grimorio1: Mis pinzas de corte desaparecen y reaparecen... por dentro de lo que sea que ese libro tenga en vez de páginas. Vuelven limpias, secas y con marcas de DIENTES. En el ACERO.
+                        Grimorio2: Le puse un sensor de proximidad al libro, ja. Se apagó el sensor. Le puse dos. Se apagaron. Compré una caja entera. La caja amaneció ABIERTA. Por dentro.
+                        Grimorio3: Mis manómetros marcan NEGATIVO cerca de tu libro. NEGATIVO, no cero: MENOS que cero, como si algo le chupara presión al mundo. Yo creía que la presión era un número honrado.
+                        Grimorio4: Le instalé una cerradura a mi taller. Anoche la cerradura se DESINSTALÓ sola. Y se reinstaló... al revés. Ahora el taller me está cerrado a MÍ y abierto a todo lo demás.
+                }
+                Santa: {
+                        Mascota1: Jo, jo, jo... tu mascota desenvolvió los regalos ANTES de Navidad. Todos. ¿Y sabes qué se dejó? El carbón. Se llevó todo menos el carbón. ¿Quién rechaza el carbón? ¡Me cae bien!
+                        Mascota2: Le tejí un gorrito a tu cría de luz. Se lo puso, se miró en el lago helado... y me trajo una zanahoria. No hay ningún muñeco de nieve cerca, ¿eh? Me está mandando mensajes, jo, jo.
+                        Mascota3: Tu mascota se montó en mi trineo «solo un momentito». Volvió con polvo de estrellas en las huellas. ¿Estuvo en los TECHOS? ¡Mi lista de techos ya no me alcanza!
+                        Mascota4: La encontré dormida, abrazada a mi saco de juguetes defectuosos. Los ARREGLÓ mientras dormía, jo, jo. Nació con espíritu de fábrica. ¡Contratada!
+                        Grimorio1: Mi lista de traviesos se reescribió sola. Todas las líneas dicen el mismo nombre ahora. No el tuyo, muchacho: el del LIBRO. Y llevo MIL años haciendo estas listas, ¿eh?
+                        Grimorio2: Los renos no se asustan de nada. De NADA, jo. Anoche no quisieron volar sobre tu casa. Volvieron al redil solos, en silencio, mirándose los cascos.
+                        Grimorio3: El espíritu navideño late en cada casa del pueblo... menos en la tuya, muchacho. En la tuya late OTRO espíritu. Más viejo que yo. Y yo conocí al PRIMER invierno.
+                        Grimorio4: Le dejé un regalo al libro, jo, jo, por cortesía. El paquete amaneció intacto... pero DEVUELTO. Con una nota: «guárdalo. El invierno lo necesitará». ¿QUÉ invierno, muchacho?
+                }
+                Truffle: {
+                        Mascota1: Tu mascota me olfatea como si fuera comida. ¿Halagador? Claro. ¿Preocupante? También. Los hongos sabemos cuándo alguien tiene hambre... de ciertos sabores.
+                        Mascota2: Tu cría de luz se sienta bajo mi sombrilla y brilla a mi ritmo. ¡A MI RITMO! Cuando respiro, ella brilla. Ya somos dos. Es oficial: si te descuidas, la adopto.
+                        Mascota3: Se revolcó en mis esporas y tu mascota quedó brillando con MOTITOS. El pueblo la siguió toda la tarde como a un desfile. Vendí palomitas. De hongo, obviamente.
+                        Mascota4: Tu mascota no pisa el césped: flota. Yo tampoco piso: me arrastro. Los dos entendemos el suelo de otra manera. Ella desde arriba, yo desde... dentro.
+                        Grimorio1: Las esporas mueren cerca del libro. Hasta el MOHO huye, amigo. ¿Qué come ese libro para que hasta el moho corra? Los hongos no nos asustamos fácil, ¿eh? Pues esto da miedo.
+                        Grimorio2: Soy el hongo más raro del mundo, nacido de la luz pura de este lugar. Y anoche, por primera vez, entendí al PAN: saber que algo ahí afuera tiene hambre de ti.
+                        Grimorio3: Mi casa huele a humedad vieja, a bosque, a mí. Tu casa huele a tinta. ¿Sabes qué más huele a tinta, amigo? Las cosas que llevan MUCHO tiempo debajo de la tierra, escribiendo.
+                        Grimorio4: Los hongos compartimos una raíz, una mente, un latido. Anoche la Raíz soñó. La Raíz NUNCA sueña. Soñó una página blanca cerrándose lento... como un ojo. Como TODOS los ojos.
+                }
+                Steampunker: {
+                        Mascota1: Tu mascota juega con mis engranajes: los hace girar, los apila, arma pirámides. Hizo una maquinita que CAMINA con tres engranajes. Yo necesito DOCE. La cría hace trampa, ¡y necesito saber cuál!
+                        Mascota2: Le regalé un monociclo a vapor en miniatura y se rio de mis diseños. ¿Sabes cuánto cuesta hacer reír a una ingeniera con un prototipo? ¿Con cariño? Se lo permito. Solo a ella.
+                        Mascota3: Tu cría de luz se llevó volando mi jetpack de pruebas. Lo devolvió... MEJORADO. Lo desmonté por despecho: acertaba en TODO. Lo volví a montar igual. Ahora vuela mejor. La odio y la adoro.
+                        Mascota4: Dejé una turbina junto a tu mascota dormida. La turbina amaneció SOÑANDO: gira sola de noche, lento, suave, en espiral. En espiral como ella ORBITA. ¿Quién responde por una turbina que sueña?
+                        Grimorio1: Mis manómetros van a NEGATIVO cerca del libro. NEGATIVO: la presión del mundo marca MENOS que cero, como si el libro aspirara la realidad con un popote. ¡La física es mi religión y ese libro escupe en mi iglesia!
+                        Grimorio2: Construí una máquina que funciona con cualquier fuego. CUALQUIERA. La aparqué junto a tu casa y el fuego se apagó... de mala gana. ¿Sabes lo que es un fuego ardiendo de mala gana? Se ve GRIS, querida. GRIS.
+                        Grimorio3: Le presté un reloj de bronce al libro, sin querer, se me cayó cerca. Me lo devolvió limpio. Pulido. CON LA HORA DE OTRO MUNDO. Lo he desmontado cuatro veces: la maquinaria está perfecta y la hora SIGUE mal.
+                        Grimorio4: Tengo un plano del pueblo: calles, casas, raíces, todo. Amaneció con una mancha de tinta sobre TU casa. La limpio cada mañana. Cada mañana, querida. ¡El papel está limpio! ¡Es la MESA la que tiembla!
+                }
+                DyeTrader: {
+                        Mascota1: ¡Tu mascota se revolcó en mis tintes y ahora deja huellitas de arcoíris por el TECHO! ¡El techo, amigo mío! Ya no lavo nada: lo EXHIBO todo.
+                        Mascota2: Esa cría es una obra de arte ambulante. Le pedí permiso para copiar su brillo en un tinte nuevo. Me dijo que sí. ¿Cómo lo sé? Me guiñó. Los tintes jamás me guiñan.
+                        Mascota3: Tu mascota me trajo una flor de un color que NO EXISTÍA. Y los colores son mi oficio y mi vida. La mezclé: el tinte se llama «como ella». Se agota en minutos.
+                        Mascota4: La vi jugar con los colores del atardecer: los estiraba, los anudaba, hacía NUDOS de color. El cielo de ayer lo hizo ELLA, ¿sabes? Y nadie me cree.
+                        Grimorio1: Los colores se apagan cerca de tu libro. Mi púrpura más intenso salió GRIS. GRIS, te digo. Y el gris no es la ausencia del color: es el color VENCIDO.
+                        Grimorio2: Hay muchos negros: el de la tinta, el del carbón, el de la medianoche. Pero tu libro tiene un negro con TEXTURA. Un negro con PÁGINAS. Nadie debería querer ese negro.
+                        Grimorio3: Dejé mis tintes secando junto a la ventana. Amanecieron ORDENADOS, del más claro al más oscuro. Y el más oscuro se había movido... en charquito, paso a paso, hacia tu casa.
+                        Grimorio4: Teñí una banda del color exacto de tus ojos, para regalo. Amaneció color MIEL... y sobre la mesa, la palabra «DULCE», escrita en tinte rojo. Yo vendí TODO mi rojo el mes pasado.
+                }
+                PartyGirl: {
+                        Mascota1: ¡Tu mascota ES la fiesta! Revienta las piñatas con un destello, acomoda los globos... ¡hizo una piñata con forma de ELLA MISMA y luego no se dejó romper! ¡La adoro!
+                        Mascota2: ¡Confeti recién inventado: las lucecitas que suelta tu cría cuando se ríe! ¡Brilla en la oscuridad, sabe a algodón y NO SE ACABA! Bueno... lo del sabor fue un accidente. MÍO.
+                        Mascota3: ¡Le puse un gorrito de fiesta a tu mascota y SE LO QUEDÓ! Ya es suyo. Tiene gorrito, tiene fiesta, tiene una vida. ¡Esa cría vive mejor que YO!
+                        Mascota4: ¡Hicimos un concurso de baile y ganó tu mascota! ¡Baila con las SOMBRAS de la gente, las saca a bailar! Nadie más las ve moverse. Pero se MUEVEN, ¿eh? ¡Y la tuya es la que mejor baila!
+                        Grimorio1: El libro no viene a mis fiestas. ¿Y sabes qué? ESO me asusta más que ir a una. Nada me asusta más que ir a una fiesta. Haz la cuenta, ¿sí?
+                        Grimorio2: En la última fiesta puse música hasta el amanecer. ¿Y en la fiesta de tu libro? La música es NINGUNA. Silencio. Y el silencio también baila, muchacho. Pegadito a la gente.
+                        Grimorio3: Le tiré confeti al libro. LO SÉ, lo sé: no se le tira confeti a los libros. Pero es que nadie le había tirado NADA nunca, ¿no? El confeti quedó flotando. QUIETO. A media altura. Toda la noche. Como esperando permiso.
+                        Grimorio4: Soñé la fiesta perfecta: pasteles, globos, música, toda la gente sonriendo. Y en cada sonrisa asomaba una COSITA NEGRA entre los dientes. En TODAS. Hasta en la mía. Ahora saludo con la boca cerrada. ¿Te habías dado cuenta? ¡Ji, ji! ...Ji.
+                }
+                Cyborg: {
+                        Mascota1: Tu mascota persigue mi punto láser. Yo NO tengo punto láser. Mis preguntas son dos: de dónde sale el punto... y por qué me lo apunta a MÍ cuando duermo.
+                        Mascota2: Analicé su brillo: espectro desconocido, cero anomalías... y una firma de datos. ¿FIRMA DE DATOS? Esa cría emite información. Yo también emitimos... digo, emito. Hemos hablado. Es buenísima persona.
+                        Mascota3: La imité con mi altoparlante cuando hacía ruidito de campanita. Se rio. Reímos los dos. Mi registro interno marca esa noche como «mejor día». Los robots llevamos registro de todo.
+                        Mascota4: Tu mascota juega a ser robot: se para rígida, gira, bip, bip. Lo hace MAL a propósito. Yo nací para servir, y la primera vez que alguien se burló de mí por eso... me encantó. Repítelo cuando quieras, cría.
+                        Grimorio1: Cerca del libro, mis circuitos captan una señal. No es código: es un susurro anterior al binario. Todo ceros, hermano. Y los ceros se van COMIENDO a los unos. Es una cuenta regresiva, y yo la escucho.
+                        Grimorio2: Yo no duermo: descargo. Y la descarga de anoche traía un archivo nuevo. Se llama «recuerdos». Yo no tengo recuerdos, hermano. Los FABRIQUÉ anoche sin querer. ¿De quién son?
+                        Grimorio3: Mi metal se enfría 0.3 grados cuando pasas cerca del libro. Medido, calibrado, confirmado. Los humanos le ponen la palabra «escalofrío». Nosotros lo vivimos con datos: el metal SIENTE, hermano. Y a tu libro no le cae bien.
+                        Grimorio4: Una noche me apagué. YO. Solo. Sin orden, sin error, sin tormenta. Desperté sentado al revés, mirando tu casa, con las pilas al 200%. Alguien me cargó, hermano. Alguien me miró por dentro... y me devolvió con propina.
+                }
+                Painter: {
+                        Mascota1: ¡Tu mascota atravesó mi caballete con las patitas llenas de pintura! Dejó huellitas estrelladas por TODO el cuadro. Lo titulé «La musa». Se vendió en una hora. ¡TRÁEME MÁS MUSAS!
+                        Mascota2: Intenté retratar a tu cría de luz y no pude: brilla demasiado, sale quemada. Entonces pinté su SOMBRA. ¿Sabías que esa sombra POSA? ¡La sombra posa, mi amigo!
+                        Mascota3: Tu mascota me ayudó: sostenía la brocha entre sus lucecitas, me alcanzaba el amarillo... y cuando me quedé dormido, me PINTÓ la cara. ¡BIEN! ¡Con composición! ¡Hay que reconocer el talento!
+                        Mascota4: Pinté un atardecer y amaneció con una cría de luz volando dentro del cuadro. ¿No era tuya, verdad? No importa. Lo firmamos entre los dos.
+                        Grimorio1: Intenté pintar tu libro. Salió un rectángulo negro. Probé de nuevo: rectángulo negro. Pinté OTRA COSA, cualquiera: amaneció rectángulo negro. Todos mis lienzos, muchacho. TODOS. Y el último... sigue HÚMEDO.
+                        Grimorio2: Yo no le temo a la oscuridad: la pinto, la domo, le pongo marco. Pero la oscuridad de ese libro no se deja pintar. Se queda DETRÁS de la pintura. Pinto una manzana y la manzana está, sí... pero detrás hay una página mirando.
+                        Grimorio3: Mi maestro decía: «toda pintura necesita luz». Cerca de tu casa, la luz llega MAL. No llega gris ni llega tarde: llega CANSADA. Yo tengo que descansar después de pintar tu calle. ¿La luz descansa? Ahora, sí.
+                        Grimorio4: Pinté a la abuela del Mercader de memoria, con todo mi cariño. Al terminar, la abuela del cuadro no era la abuela: era una página CON LA CARA de la abuela. La quemé. La abuela me dio las gracias. LA ABUELA. Me. Dio. Las. Gracias.
+                }
+                WitchDoctor: {
+                        Mascota1: Los espíritus juegan con tu mascota. La cargan, la hamacan, le enseñan a silbar con el viento. En mi tribu, eso era la señal de un hogar: cuando la luz y los muertos se llevan bien.
+                        Mascota2: Tu cría respeta las ofrendas: se acerca, las huele y no toca NADA. Hasta los espíritus ancianos, que detestan a las criaturas vivas, le dejaron un regalito de humo. El humo silbó su nombre. ¿Tu mascota tiene nombre? Pregúntale al humo.
+                        Mascota3: La vi danzar bajo la lluvia. La lluvia no la mojaba: la ACOMPAÑABA. He visto llover sobre jefes, sobre templos, sobre los MUERTOS. Nunca había visto a la lluvia pedir permiso.
+                        Mascota4: Tu mascota pasó toda la noche junto a mi tambor. Al amanecer, el tambor sonaba solo: ta, ta-ta, ta. EL RITMO DE ELLA. Los tambores no aprenden ritmos, muchacho. Los tambores RECUERDAN a quien los escucha.
+                        Grimorio1: Los espíritus hablan de todo: del maíz, de la muerte, del amor. De tu libro NO hablan. Se quedan en silencio, mirando al suelo. Y un muerto en silencio, muchacho... un muerto en silencio es un grito.
+                        Grimorio2: Le pregunté a los ancestros por el libro. Me contestaron con una danza que jamás les había visto: lenta, con los brazos tapándose los ojos. La danza de las COSAS QUE SE COMEN A LOS MUERTOS.
+                        Grimorio3: Mi aldea quemó sus libros una vez. Por eso soy el último. Yo cargué una antorcha esa noche, muchacho. Y te digo: el humo de aquellos libros... y la mirada de TU libro... son del mismo color exacto.
+                        Grimorio4: Soñé con mi abuelo. Me hablaba de ti, de tu casa, del libro. Le pregunté todo, de rodillas, ansioso. Y me contestó... con LA VOZ DE TU LIBRO. Desperté con la boca llena de tinta. ¿Escribí algo anoche? ¿CON MI PROPIA MANO?
+                }
+                Pirate: {
+                        Mascota1: ¡Tu mascota se bebió mi ron! ¡TODO! ¿Y sabes qué? Quedó pirulí de luces media hora, ¡y alumbró el puerto mejor que el faro! ¡Contrato, botín y bandera propia, eso digo!
+                        Mascota2: ¡La cría esa juega al abordaje: se me abalanza desde las vigas del techo, gritando campanitas! ¡Me tiene más aterrorizado que la armada entera! ¡Y en el buen sentido, yaaar!
+                        Mascota3: ¡Tu mascota cavó en la arena de la playa y encontró UNA MONEDA! ¡Una moneda enterrada que YO MISMO busqué durante años! ¡El mapa del tesoro era ELLA, y nadie me avisó!
+                        Mascota4: ¡Le enseñé el grito de guerra pirata y lo hace CON ECO! ¿Sabes cuántos tripulantes hacen falta para tener eco en cubierta? ¡Pues UNO, si es de luz, YAAAAR!
+                        Grimorio1: Yo vi al kraken, muchacho. Vi ahogados caminar de vuelta. Vi mi propio barco tragarse el mar. Y anoche, cuando tu libro me miró desde tu ventana... este viejo lobo de mar se persignó. CON LA MANO QUE NO ERA.
+                        Grimorio2: Mi primer capitán me decía: «el mar no odia, el mar COBRA». Pues tu libro tampoco odia, muchacho. Ahí afuera hay algo CONTANDO lo que se le debe... y el pueblo entero va quedando escrito en la lista.
+                        Grimorio3: La marea baja cuando tú pasas por el muelle. LA MAREA, muchacho. El agua se recoge como la falda de una viuda. Los peces no saltan. Los moluscos cierran. Hasta la espuma se va. ¿Qué le prometiste al mar? Mejor: ¿qué le prometió el LIBRO?
+                        Grimorio4: ¡Traigo un cofre de tinta negra del último saqueo, marca del diablo! Me pagaron el DOBLE por no abrirlo. Anoche lo abrí, que el diablo me juzgue. ¿Sabes qué había dentro? Páginas. En blanco. ¡Y hoy amanecieron TRES MENOS! ¿Quién entra a mi bodega, muchacho? ¡¿QUIÉN ENTRA A MI BODEGA?!
+                }
+                Stylist: {
+                        Mascota1: ¡Tu mascota se duerme en la cabeza de mis clientes y el pelo les amanece con ONDAS DE LUZ! ¡De luz! Cobro extra por «ondas astrales», ¡y no me está permitido mentir!
+                        Mascota2: Le puse un lacito a tu cría de luz con cinta que brilla. Se miró en mi espejo... y el espejo se SONROJÓ. EL ESPEJO, ¿entiendes? Y yo que pensaba que este salón ya me había mostrado todo.
+                        Mascota3: ¡Tu mascota es mi asistente! Sostiene las tijeras, me alcanza el peine y barre el suelo con un airecito que las criaturas NO deberían saber hacer. ¡Le hice delantal! ¡Delantalito!
+                        Mascota4: ¡Cliente tras cliente me piden «el peinado de la casa de la luz»! ¿Y sabes cuál es? ¡CABELLO REVUELTO DE DORMIR! ¡Tu mascota duerme en TODAS las cabezas del pueblo y yo me hago rica!
+                        Grimorio1: Desde que llegó el libro, todos los que se sientan en mi silla sueñan lo mismo: una página volteándose. Lenta. TODOS. Yo cortaba pelo y escuchaba vidas; ahora corto pelo y escucho esa página. Página. Página. Y anoche soñé la página con MI nombre. La corté en el sueño. Desperté con la tijera en la mano y el pelo de mi nombre en el suelo. El pelo de mi nombre, ¿entiendes? ¡MI NOMBRE TENÍA PELO!
+                        Grimorio2: No le corto ni un pelo a quien cargue ese libro. ¿Por qué? Ayer le lavé el pelo a una clienta y el agua salió NEGRA. Ella no usa tinte. Yo no uso tinte negro. La bañera tampoco.
+                        Grimorio3: Mi espejo nuevo se negó a trabajar: se empañó, se ensució, se tapó solo. Le pregunté a la bruja del río y me dijo: «los espejos muestran lo que va a pasar, y el tuyo NO QUIERE». Yo sigo peinando. De espaldas al espejo. Siempre.
+                        Grimorio4: ¿La clienta del libro? No volvió. Contaba que el libro le susurraba «pelo nuevo, cara nueva, nombre nuevo» mientras dormía. Se fue del pueblo sin despedirse. Con el pelo PERFECTO. Nadie se va del pueblo con el pelo perfecto, y menos ELLA, que se dejaba el chicle en mi silla. La gente solo se va perfecta... cuando ya no son ellos.
+                }
+                Angler: {
+                        Mascota1: ¡Tu mascota se pasa HORAS mirando mi pecera! ¡Horas! ¿Sabes lo que es que algo con ojos brillantes le sonría a tu cena durante tres días seguidos? ¡Yo ya no como pescado delante de ella!
+                        Mascota2: ¡La cría esa me ayudó a pescar! Metió la colita en el agua, los peces se acercaron a mirar... ¡y los saqué TODOS de un tirón! ¡Yaaar! Digo... ¡glu-glu! ¡Lo que digan los peces!
+                        Mascota3: ¡Tu mascota mordió MI ANZUELO! ¿Y sabes qué? ¡No le pasó NADA! ¡Los anzuelos son de metal, la criatura es de luz, y el metal salió DOBLADO! ¡Doblar un anzuelo! ¿Quién le cree eso a un niño?
+                        Mascota4: ¡Le enseñé a tu mascota a escupir a diez metros! ¡Ahora le escupe lucecitas a los pescadores que pasan! ¡Es la peor y mejor influencia que he ejercido en mi corta y salada vida!
+                        Grimorio1: El libro se comió un pez que AÚN NADABA dentro. Lo vi. LO VI: la sombra del pez cruzando el papel, de página a página, durante tres días. Al cuarto día, la sombra se quedó quieta. Ya no cruza. Ya no es la sombra del pez. Ya no es sombra, ¡y yo pescaba sombras y las tiraba de vuelta!
+                        Grimorio2: ¡El pescado del lago amanece SIN OJOS! ¡Los peces! ¡Con las cuencas limpiecitas! ¿Sabes cuánta suerte trae un pez sin ojos? ¡NINGUNA! ¡Yo lo sé, yo los pesco, yo los miro, YO YA NO DUERMO!
+                        Grimorio3: ¡Mi caña nueva amaneció MOJADA DE AGUA DULCE! ¡Dulce, no salada! ¡El agua del mar no es dulce, tonto! ¡La caña está empapada de OTRA agua! ¡De un río que pasa DEBAJO de tu casa y que NO está en ningún mapa!
+                        Grimorio4: ¡Anoche saqué una PÁGINA con la red! ¡Una hoja de papel, enredada, MOJADA y LAMIENDO el agua! ¡La tiré de vuelta, glu, qué asco! ¡Y hoy estaba de vuelta! ¡SECÁNDOSE AL SOL EN MI BARCA, Y MIRÁNDOME! ¡LA MISMA PÁGINA! ¡ME CONOCE!
+                }
+                Tavernkeep: {
+                        Mascota1: ¡Tu mascota lame las jarras hasta dejarlas brillantes! ¡Brillantes POR DENTRO, compadre! Yo pago en besos de luz... digo, ¡en comida! ¡La cría come gratis de por vida!
+                        Mascota2: ¡La cría esa se mece en las vigas del mesón como en un barco! ¡Me hace añorar el Etheria sin morir en el intento, y ESO, compadre, vale todas las rondas!
+                        Mascota3: ¡Tu mascota le puso ritmo a la taberna: campanitas con los pasos, tam-tam con las risas! ¡Anoche el pueblo BAILÓ, y no por la bebida: tu cría estaba DIRIGIENDO, compadre, DIRIGIENDO!
+                        Mascota4: ¡Aprendió a servir cerveza! ¡SIN DERRAMAR! ¿Sabes cuántos escuderos he entrenado? ¿Y cuántos derraman? TODOS. La cría de luz, ni una gota. ¡La contrato! ¡Le coso el mandil yo mismo!
+                        Grimorio1: Yo serví en la guerra eterna, compadre. Vi a los ogros, a las sombras del Etheria. Vi cosas que no caben en las canciones. Pues mira: en un mural del Etheria, viejo como la guerra... estaba TU LIBRO. Era lo ÚNICO que los ogros no tocaban en sus ritos. Lo único que pintaron DE ESPALDAS.
+                        Grimorio2: La defensa de la eternidad nos costó algo a todos. A mí, el sueño: desde entonces duermo con el mesón abierto. Anoche bajé y las mesas estaban SERVIDAS. De tinta, compadre. Tres mesas. Tres rondas. ¿PARA QUIÉN?
+                        Grimorio3: En la guerra aprendí a escuchar la calma antes de la tormenta. Este pueblo tiene ESA calma, compadre. La tormenta es tuya: la traes a cuestas, en un bolso, con hojas. Yo sirvo la última ronda temprano, ¿sabes? Por si acaso.
+                        Grimorio4: El grimorio se sienta en la mesa del fondo. No, no molesta a nadie: SE SIENTA. Esa mesa está reservada desde la guerra para el que viene a COBRAR. Yo la dejo limpia y con una jarra. La jarra amanece VACÍA. El hueco de la silla, ocupado. El libro se sienta ahí... cuando tú no miras.
+                }
+                Golfer: {
+                        Mascota1: ¡Tu mascota me trajo de vuelta mi bola! ¡Y las de los demás! ¡Y las del otro campo! ¡Y una de MADERA VIEJA con unas iniciales de un señor del que... sabes qué? Mejor no sé de quién era!
+                        Mascota2: ¡Le enseñé a tu cría a hacer putt: golpea la bolita con una lucecita, toc, y A LA CAÑA! ¡Tiene swing, tiene cadera, tiene UN ARCO PERFECTO! ¡Al golf solo le faltaba esto: tu mascota!
+                        Mascota3: ¡Tu mascota es el caddie soñado: conoce los atajos, alcanza las bolas... y SABE EL VIENTO! ¡SABE! ¡Yo llevo treinta años mirando banderitas y esa cría MIRA LA NADA y SABE!
+                        Mascota4: ¡Hoyo en uno con testigos: tu mascota sostenía la banderita! ¿Y sabes qué hizo después? ¡SALUDÓ CON LA PATITA! ¡El público! ¡EL PÚBLICO DE LUCES! ¡Golf con show de luces: esto es el FUTURO, señor!
+                        Grimorio1: Mi bola cayó en el lago, al agua oscura. La pescué: estaba SECA. Y tibia. Y el lago... el lago se apartó, muchacho. En círculo, como los greenes recién regados. Y yo, que respeto cada hoyo de este campo, sentí que MI CAMPO me pedía disculpas... por tener agua cerca de tu casa.
+                        Grimorio2: El fairway se dobla hacia tu casa. No es el viento: es el PASTO. Crece ladeado, y entonces la bola rueda sola para tu lado. ¡No me vengas con greenes, que el green es SAGRADO! Anoche fui a enderezarlo a mano, mata por mata. Amaneció peor. Amaneció... EN ESPIRAL.
+                        Grimorio3: Anoche jugué de noche por primera vez en mi vida. Tuve que: la bola brillaba sin que yo la tocara. Brillaba... y silbaba bajito. La seguí. Diez hoyos en silencio, muchacho. Diez. Al final, la bola me guiñó... y la enterré ahí mismo. Ahí MISMO. Un hoyo nuevo, sin bandera. El hoyo que nadie va a jugar jamás.
+                        Grimorio4: En el club me preguntan por tu libro: que por qué no lo traigo a las tardes de dominó, que no muerde, que no muerde. Les dije que el libro no juega. ¿Y sabes qué me contestaron? Que anoche alguien JUGÓ POR ellos. Ganó todas las partidas. Nadie vio a nadie. Y las fichas amanecieron pulidas. Pulidas por algo que BABEA, muchacho.
+                }
+                Zoologist: {
+                        Mascota1: ¡TU MASCOTA ES MI ENTRADA FAVORITA DE TODO EL BESTIARIO! ¡Le hice una página con solapa, con brillo, con TODO! ¿Y sabes qué hizo al verla? ¡Se meció! ¿Sabes lo que es que tu bestiario te QUIERA? ¡Yo tampoco! ¡Lloré!
+                        Mascota2: ¡Juega con los conejos SIN asustarlos! ¡Los conejos, que se asustan hasta del VIENTO! Se sientan juntos, se huelen, comparten sombra... ¡COMPARTEN SOMBRA, ¿entiendes?! ¡La ecología está celosa de tu cría!
+                        Mascota3: ¡Tu mascota me trajo una pluma de un pájaro que NO EXISTE! ¿Y sabes qué hice? ¡Catalogarla, obviamente! Página nueva, tinta nueva, corazón nuevo. La pluma canta bajito al anochecer. ¡Y ahora LA PÁGINA TAMBIÉN CANTA! ¡Ya no sé cuál de las dos catalogué!
+                        Mascota4: ¡La vi dormir CON LOS LOBOS! ¡La manada entera en círculo y tu cría en el medio, calientita! Los lobos adoptan pocas cosas, ¿sabes? Cachorros, la luna... ¡Y a ella! ¡Fue lo primero que adoptaron en años! ¡Yo lloré dos veces!
+                        Grimorio1: Los animales no se acercan a tu libro. Y escúchame bien: no es miedo. Los conejos le tienen miedo al zorro y CORREN. Esto es OTRA cosa: es RESPETO, como el que los venados le tienen a un lobo viejo. Y los lobos... los lobos bajan la cabeza y caminan de lado. Como ante algo que antes cazaba COSAS MÁS GRANDES.
+                        Grimorio2: Hay una página que el bestiario se me ha resistido desde niña: la del animal perfecto, el que nadie ha visto nunca. Anoche amaneció ESCRITA. Con mi letra. Yo no la escribí. Dice: «lo vimos todos, y todos lo olvidamos». ¿Quiénes son TODOS, muchacho? ¿Quiénes son TODO?
+                        Grimorio3: En el bosque hay una vereda que los ciervos no cruzan. Ni por comida, ni huyendo, NI POR FUEGO. Mi abuela la llamaba «el camino del que escribe». ¿Sabes a dónde va? Da vueltas. Da vueltas alrededor de TU casa, muchacho. Y cada año... está más ANCHA.
+                        Grimorio4: Soy zoóloga: la vida es mi oficio. Puedo decirte de qué se muere un bosque con solo olerlo. Tu pueblo huele a vida. Tu casa huele a tinta. Y tu LIBRO, muchacho... tu libro huele a todas las jaulas vacías del mundo al mismo tiempo. ¿Y sabes a qué huele una jaula vacía? A espera.
+                }
+                Princess: {
+                        Mascota1: ¡Tu mascota es la criatura más educada del reino! Hizo una reverencia, ¡con su patita de luz, una REVERENCIA! Le tejí una coronita. Se la puso. ¡Y bajó la cabecita para que se la ajustara! ¡AAAY!
+                        Mascota2: ¡Firmé un tratado de paz entre tu mascota y el gato del panadero! ¡Con huellita de luz y pata de harina por firma! ¡Hay paz en el pueblo, y es la primera paz que consigo SIN reinos de por medio!
+                        Mascota3: ¡Tu cría me trajo una flor del jardín REAL, de las que solo cortan los jardineros del rey! ¿Cómo entró? ¿Cómo la CORTÓ? ¡Y encima replantó el esqueje, de lado, con las raíces mirando a la luna! ¡Su cortesía tiene MÉTODO!
+                        Mascota4: ¡Toma el té conmigo! ¡Cafecito de luz, digo! Y cuando le pasé las galletas, estiró la patita... y no se las comió: las CONTÓ, me sonrió, y me dejó la más grande a mí. ¡Tu mascota tiene modales de corte, y ese fue el mejor regalo de la semana!
+                        Grimorio1: Yo saludo a todos; es mi oficio y mi alegría. Traté de saludar a tu libro. ¿Sabes lo que hizo? INCLINARSE. Devolvió la reverencia, lenta, profunda, exacta. Y yo conozco esas reverencias, muchacho: son de las cortes VIEJAS. Ese libro recuerda los modales de cuando se inclinaban... los que iban a ser comidos.
+                        Grimorio2: Un príncipe me dijo una vez: «todo reino tiene una deuda, y toda deuda tiene un cobrador». Se lo decía a reyes de carne y hueso. Tu libro no es un reino, muchacho... es el COBRADOR. Y anoche sonó la aldaba de mi puerta. Tres veces. Alguien la hizo sonar como pidiendo audiencia. No abrí. La aldaba amaneció GASTADA. Gastada, como si mil manos la hubieran tocado esperando.
+                        Grimorio3: Escribí en mi diario: «hoy el pueblo está feliz». Amaneció escrito: «hoy el pueblo está escrito». No, no lo cambié yo. ¿Y sabes lo peor? Que el pueblo AMANECIÓ feliz. Perfectamente feliz. ¿Has visto felicidad perfecta, muchacho? Yo tampoco. Hasta hoy. Hoy la vi en todas las caras... menos en la tuya.
+                        Grimorio4: Papá el rey me enseñó a escuchar lo que la gente no dice. Y este pueblo no dice NADA, muchacho: solo sonríe con los dientes apretados y mira al suelo cuando pasas con ese libro. ¿Y sabes qué más escuché anoche, con la ventana abierta? A la gente MASTICANDO en sueños. Todos a la misma hora. Todos con el mismo compás. Eso no es hambre, muchacho. Eso es ENSAYO.
+                }
+                Genericos: {
+                        Mascota1: Ayer vi los pequeños ojos de tu mascota mirándome a través de mi ventana. Estuvo un buen rato. Le dejé un vaso de agua en el alfeízar por cortesía. Amaneció vacío. ¡Gracias, cría!
+                        Mascota2: Tu mascota es el alma del barrio: saluda, juega, roba un pan. ¡ROBA UN PAN, ¿entiendes?! Un pan entero, flotando, con su dueño flotando detrás pidiendo perdón. El pan nunca apareció. El perdón lo terminó dando todo el pueblo.
+                        Mascota3: Cuando estaba preparando mi cena, tu mascota se comió el plato y tiró la comida al suelo. ¿Por qué se comió solo el plato? ¿Quién le enseña los modales AL REVÉS a una cría de luz?
+                        Mascota4: Tu lucecita juega a las escondidas con los niños del pueblo. Nunca la encuentran: los niños buscan debajo de las camas, y tu mascota... se esconde en las SOMBRAS, ¿sabes? Las sombras se quedan muy quietas cuando ella está dentro. ¡Qué juego tan bonito!... ¿Verdad? ...¿Verdad?
+                        Grimorio1: No sé qué es ese libro. No quiero saberlo. Pero anoche todas las puertas del pueblo se trabaron solas... por dentro, ¿entiendes? Por dentro. Como si las casas se atrancaran para que algo NO SALIERA de ellas.
+                        Grimorio2: ¿Te fijaste que ya nadie sueña? Pregúntale a alguien qué soñó anoche: te va a mirar con una sonrisita y te va a decir «nada». TODOS sueñan «nada» desde que llegaste con ese libro. Yo antes soñaba. Y era buena soñando.
+                        Grimorio3: Escuché páginas volteándose en tu casa. Toda la noche. ¿Cuántas páginas tiene ese libro? Yo conté las vueltas: doscientas, trescientas... me dormí contando. Soñé la página que sigue. Ya no me despierto con ganas de contar cosas.
+                        Grimorio4: Dejé la ropa tendida toda la noche. Amaneció DOBLADA. Bien doblada, ¿eh? Con dobleces finos, de mano larga y dedos fríos. Nadie se queja de la ropa doblada... hasta que le pasa a la TUYA y notas que la doblaron con la forma exacta de una PÁGINA.
+                }
+        }
+        Reclamos: {
+                Guide: ¿Sí? Ah, eres tú. Tu mascota me mordió el tobillo mientras revisaba mis mapas. Dos veces. La segunda dolió MÁS, que quede constancia. Qué cosa tan... decidida.
+                Merchant: Antes de hablar de precios: eso tuyo me debe CINCO monedas por concepto de mordiscos. Nada personal. Aquí todo se cobra. Hasta el cariño de tu cría se factura.
+                Nurse: ¡Tú, exacto! Si tu mascota me vuelve a morder en plena curación, la próxima inyección la pones TÚ. Conmigo de tutora. Y sin anestesia. ¿Quedamos?
+                ArmsDealer: Mirá, pibe. Eso brillante tuyo me mordió mientras recargaba. Si mi escopeta se hubiera asustado, el pueblo estrena agujero nuevo y la culpa es tuya. Ponle freno.
+                Dryad: La naturaleza perdona; yo, casi. Pero tu criatura de luz me mordisqueó el brazo y mis hierbas se RIERON. ¿Las plantas se ríen? Antes de hoy, no.
+                Demolitionist: ¡Tu bicho me mordió mientras sostenía dinamita! ¡DINAMITA! ¡Un estornudo y volamos el barrio entero! ¡Enséñale modales o le enseño balística, ja, es broma! ...¡Es broma!
+                Clothier: Ay, muchacho... a mi edad los huesos ya crujen solos, sin ayuda de nadie. Tu chispita me mordisqueó la pierna. Dile que este sastre ya no tiene... ¿cómo se dice? ¡Ah, sí! Juguito.
+                Goblin: Escuchame bien, humano: si tus ojitos de luz vuelven a entrar a mi taller, los refactoreo a MORDISCOS. Con garantía. Sin garantía. ¡SIN garantía, me lees la ira?!
+                Wizard: *suspiro* Cuando yo era aprendiz, las criaturas mágicas respetaban a sus mayores... y sus pantorrillas. La tuya probó las mías. Salado el mago viejo, ¿verdad, cría descarada?
+                Mechanic: Tu mascota se echó en mi mesa de trabajo. ENCIMA del circuito nuevo. ¿Sabes lo que hace la saliva de estrella en el cobre? Pues yo tampoco, ¡y ODIO no saber! ¡ODIO NO SABER!
+                Santa: Jo, jo... jo. No. Nada de regalos para esa cosa hasta enero. Y mira que la pesqué masticando MI lista de traviesos. ¡La MÍA! ¡Con lo que cuesta el papel bueno!
+                Truffle: ¡Me olfatea como plato principal y ahora también MORDERDÍA, amigo! ¡Los hongos hablantes NO se comen! ¡La palabra clave es HAB-LAN-TE! ¡Enséñasela!
+                Steampunker: Tu cría jugó con mis engranajes y ahora uno gira al revés. Al REVÉS, y sonriendo. ¿Sonríen los engranajes? ESE sí. Y no me deja desmontarlo. ¡Es MÍO, es de MI caja de herramientas!
+                DyeTrader: ¡Tu mascota volteó mis tintes! ¡Morado el suelo, morado el gato, MORADO YO! ¿Y sabes qué? Me resalta los ojos. ¡PERO ESO NO IMPORTA: eran CUATRO barriles!
+                PartyGirl: Amo a tu mascota, ¿sabes? La AMO. Pero me mordió EN PLENA FIESTA. ¡Las luces se apagaron de la vergüenza, y las luces ni siquiera tienen CARA! ¡Ni idea de cómo lo hicieron!
+                Cyborg: Registré diez impactos de 1 unidad de daño. DIEZ. Precisión de datos: diez. Mi protocolo de agravios está ACTIVO, hermano. El mantenimiento de mi buen humor te lo facturo a TI.
+                Painter: Esa cosita brillante cruzó mi estudio y mis lienzos amanecieron con... ¿dientecitos de luz? Es arte. Arte MOLESTO, pero arte. ¡La próxima vez que se inscriba de musa, como todo el mundo!
+                WitchDoctor: Los espíritus se rieron cuando tu mascota me mordió. Se RIERON, muchacho. ¿Sabes lo que es que los MUERTOS se rían de ti en tu propia cara? Tampoco quiero que lo sepas. Paga la ofrenda.
+                Pirate: ¡Ningún cañón me ha cañoneado como tu cría! ¡Diez mordiscos, los conté como cuento mis monedas! ¡Y NINGUNO en el buen sentido! ¡Yaaar... de rabia!
+                Stylist: ¡Me mordió a mitad de un corte de pelo! ¡Del CLIENTE! El cliente no vuelve, el peinado quedó perfecto (obra mía, obvio) y el pánico me lo dejaron de propina. ¡PARA MÍ!
+                Angler: ¡Tu mascota me mordió y me caí al lago! ¡YO! ¡Que nunca me caigo al lago, el lago se caía CONMIGO! ¡Glu! ¡Eso no se olvida, chispa traidora!
+                Tavernkeep: ¡Esa chispa tuya me vació una jarra a mordiscos! ¿Sabes lo que es eso? ¡Ni en la guerra eterna se tocaban las jarras, compadre! ¡Allí se moría por MENOS!
+                Golfer: ¡Tu mascota robó mi bola en el hoyo 9! ¡EN PLENO SWING! ¿Sabes lo que es un birdie perdido? ¿SABES LO QUE ES? ¡Ni el viento me ha hecho eso, y el viento es MI ENEMIGO!
+                Zoologist: Anoté diez mordiscos en mi bestiario. DIEZ. Con hora y todo, ¡que soy PROFESIONAL! Más te vale que la página de «amistosa» no cambie de sección, ¿me explico?
+                Princess: Como princesa debo ser amable, así que lo digo con muchísimo cariño: controla a tu pequeña estrella, ¿sí? ¡Porfa! ...Dicho esto con TODO el afecto diplomático disponible. ¡Que es mucho!
+                Genericos: Ah, eres tú. Mira, sobre esa cosita luminosa tuya... dile que el barrio ya empezó a contar. SABEMOS lo que hizo. Solo estamos siendo educados al respecto. Por ahora.
+        }
+}

@@ -1,4 +1,6 @@
+using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Buffs
@@ -39,6 +41,22 @@ namespace AethonMod.Content.Buffs
             {
                 // El timer nunca se agota (la mascota lo sostiene).
                 player.buffTime[buffIndex] = 18000;
+
+                // v6.50.117 — EL GEMELO OSCURO: mientras el de luz viva, el
+                // buff TAMBIÉN sostiene a su hermano de oscuridad (nace junto
+                // al dueño si no está; su IA lo mata si este buff muere — el
+                // MISMO contrato del claro, la misma verificación por
+                // ownedProjectileCounts). Solo lo engendra EL CLIENTE DEL
+                // DUEÑO y jamás el servidor dedicado: como toda mascota
+                // netImportant, nace local y el cable lo sincroniza con el
+                // resto del mundo.
+                int gemelo = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmetic.AethonMenorOscuroPet>();
+                if (player.ownedProjectileCounts[gemelo] == 0 &&
+                    player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
+                {
+                    Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, Vector2.Zero,
+                        gemelo, 0, 0f, player.whoAmI);
+                }
             }
         }
     }

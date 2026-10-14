@@ -34,7 +34,9 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<GenesisShard>(), 1));
+            // v6.50.117 — LA PURGA DEL GÉNESIS: el Fragmento Génesis salió
+            // de la bolsa del probador (murió con el fragmento — LA CAÍDA
+            // es la única vía del libro).
             l.Add((ItemID.GoldBar, 100));
             l.Add((ModContent.ItemType<LevelUpTester>(), 1));
             l.Add((ModContent.ItemType<BossSummonBag>(), 1));
@@ -46,12 +48,9 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.50.76 — EL PRISMA DE PAISAJES FUE RETIRADO: era el tester
             // de CieloLib (la librería del fondo eliminada — la que rompía
             // el fondo de las cuevas).
-            // v6.44 — EL LUGAR, COLÓCALO DONDE QUIERAS: el Altar Antiguo
-            // colocable (5) para montar un Sagrario de pruebas en cualquier
-            // mundo — los altares naturales solo generan en mundos NUEVOS,
-            // y el flujo del Fragmento Génesis debe poder probarse en el
-            // mundo de pruebas que ya tengas.
-            l.Add((ModContent.ItemType<Items.Placeables.AncientAltarItem>(), 5));
+            // v6.50.117 — LA PURGA DEL GÉNESIS: el Altar Antiguo
+            // colocable salió de la bolsa (murió con el altar — su flujo
+            // ya no existe: LA CAÍDA lo sustituye).
             // v6.47 — LA CARNADA DEL GRIMORIO: el probador del evento de las
             // oleadas del hambre (clic der prepara 1..10 oleadas, clic izq
             // desata la furia). Sin esperas: el festín a la carta.

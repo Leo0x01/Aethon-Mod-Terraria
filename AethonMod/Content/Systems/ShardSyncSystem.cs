@@ -52,19 +52,16 @@ namespace AethonMod.Content.Systems
                     case EcoRed.MsgLibro:
                     case EcoRed.MsgCronica:
                     case EcoRed.MsgPedirLibros:
-                    case EcoRed.MsgPedirFragmento:
                     case EcoRed.MsgPrepararOleadas:
                     case EcoRed.MsgAmbienteOleada:
-                        // v6.50.1 — FIX: MsgPedirFragmento (9) no estaba en
-                        // el switch — el paquete del Altar moría en silencio
-                        // y el Fragmento Génesis era inobtenible en MP (el
-                        // cliente veía el mensaje de reclamado sin que nada
-                        // naciera). Rewind 1 byte: EcoRed lee el TIPO de
+                    case EcoRed.MsgTomarCaida:
+                        // v6.50.1 — Rewind 1 byte: EcoRed lee el TIPO de
                         // nuevo (su propio switch lo necesita para el filtro).
-                        // v6.50.2 — FIX: MsgPrepararOleadas (10) en el mismo
-                        // grupo (el router de EcoRed lo cubre — sin case, la
-                        // selección de la carnada moriría igual que el
-                        // fragmento en su día).
+                        // v6.50.2 — MsgPrepararOleadas (10) en el mismo grupo
+                        // (el router de EcoRed lo cubre).
+                        // v6.50.117 — LA PURGA DEL GÉNESIS: el case de
+                        // MsgPedirFragmento (9) murió con el Altar — el
+                        // paquete huérfano ya no tiene router ni receptor.
                         reader.BaseStream.Position -= 1L;
                         EcoRed.Recibir(reader, whoAmI);
                         break;

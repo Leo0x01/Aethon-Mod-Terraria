@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -193,6 +194,25 @@ namespace AethonMod.Content.Globals
         {
             int tipo = ModContent.ItemType<Weapons.GrimoireEternal>();
             for (int i = 0; i < 10; i++)
+            {
+                Item inv = p.inventory[i];
+                if (inv != null && inv.type == tipo) return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.50.117 — ¿El jugador lleva un Grimorio del Eterno
+        /// en CUALQUIER parte del inventario (los 59 slots, 0..58)? La
+        /// letra del guardián: «mientras el grimorio esté en el
+        /// INVENTARIO, la primera aparición del guardián debe
+        /// controlarse a SOLO 1 a la vez» — el pacto se sella con el
+        /// libro CERCA, no hace falta tenerlo en la mano.
+        /// TieneEternoVisible queda INTACTO para los sistemas que exigen
+        /// «a la mano» (la primera cena, el pool de spawns).</summary>
+        private static bool TieneEternoEnInventario(Player p)
+        {
+            int tipo = ModContent.ItemType<Weapons.GrimoireEternal>();
+            for (int i = 0; i < 59; i++)
             {
                 Item inv = p.inventory[i];
                 if (inv != null && inv.type == tipo) return true;
@@ -428,6 +448,19 @@ namespace AethonMod.Content.Globals
 
         public override bool PreAI(NPC npc)
         {
+            // === v6.50.117 — AUTOCURACIÓN DE LA CENA ACTIVA: una cena
+            //     interrumpida por OTRA vía (el NPC desactivado SIN pasar
+            //     por el motor del festín — devorado por otra boca,
+            //     purgado, cambio de mundo) dejaba _cenaActiva apuntando
+            //     a un slot muerto y la mesa quedaba «servida» PARA
+            //     SIEMPRE: ninguna cena futura arrancaba (y el guardián
+            //     de la mazmorra JAMÁS volvía a ser detenido — se retira
+            //     con solo ver la mesa ocupada). Si el preso ya no está
+            //     activo, la mesa está LIBRE ===
+            if (_cenaActiva >= 0 &&
+                (_cenaActiva >= Main.maxNPCs || Main.npc[_cenaActiva] is not { active: true }))
+                _cenaActiva = -1;
+
             // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el
             //     easter egg de la letra: «en su fase de guardián… el
             //     guardia intenta atacar al jugador pero antes de que
@@ -534,9 +567,11 @@ namespace AethonMod.Content.Globals
         //  v6.50.115 — EL GUARDIÁN DE LA MAZMORRA: LA DETENCIÓN
         // ==================================================================
 
-        /// <summary>La distancia de la detención: a UN PASO del portador
-        /// (px — antes de que el guardián lo toque, la letra del easteregg).</summary>
-        private const float GuardianPaso = 250f;
+        /// <summary>La distancia de la detención (px): «el grimorio debe
+        /// devorar al primero APENAS se acerque a 100-300 px del jugador»
+        /// (la letra v6.50.117 — antes 250: un guardián en órbita ancha
+        /// pasaba de largo sin que el libro lo detuviera).</summary>
+        private const float GuardianPaso = 300f;
 
         /// <summary>v6.50.116 — LA GRACIA DEL GUARDIÁN (la letra: «debes
         /// bloquear la aparición de guardianes a solo 1 antes de ser
@@ -595,6 +630,60 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
+        /// v6.50.117 — LA PUERTA DEL SPAWN ESPECIAL: la mazmorra pare
+        /// DungeonGuardian POR SÍ MISMA (jugador adentro sin downedBoss3)
+        /// por una vía que NO pasa por EditSpawnPool — el pool de spawns
+        /// natural nunca lo trae a carta — y el guardián seguía
+        /// AMONTONÁNDOSE (la letra: «mientras el grimorio esté en el
+        /// INVENTARIO, la primera aparición del guardián debe
+        /// controlarse a SOLO 1 a la vez con periodo de gracia de 2
+        /// minutos»). Este guardián nace MUERTO si ya hay OTRO vivo o si
+        /// algún portador con el libro en el inventario está dentro de
+        /// la gracia de los 2 minutos.
+        /// </summary>
+        public override void OnSpawn(NPC npc, IEntitySource source)
+        {
+            try
+            {
+                if (npc.type != NPCID.DungeonGuardian) return;         // solo la puerta de la mazmorra
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;   // la autoridad decide
+
+                // ¿ya hay OTRO guardián vivo? (este nace de más)
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    if (i == npc.whoAmI) continue;
+                    NPC otro = Main.npc[i];
+                    if (otro != null && otro.active && otro.type == NPCID.DungeonGuardian)
+                    {
+                        // la puerta del pool no cubre el spawn especial de
+                        // la mazmorra — este guardián nace muerto: UNO y
+                        // solo UNO
+                        npc.active = false;
+                        return;
+                    }
+                }
+
+                // ¿algún portador con el libro en el inventario está en la
+                // gracia de los 2 minutos? (la tregua del devorado)
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player p = Main.player[i];
+                    if (p == null || !p.active) continue;
+                    if (!TieneEternoEnInventario(p)) continue;
+                    var sp = p.GetModPlayer<Players.ShardPlayer>();
+                    if (sp != null && sp.GuardianGracia > 0)
+                    {
+                        // …y JAMÁS durante la gracia
+                        npc.active = false;
+                        return;
+                    }
+                }
+            }
+            catch { }
+        }
+
+
+        /// <summary>
         /// EL EASTEREGG DEL GUARDIÁN (v6.50.115): el Guardián de la
         /// Mazmorra (la fase de defensa 9999) carga contra el jugador —
         /// pero ANTES de tocarlo, el grimorio lo DETIENE y lo devora.
@@ -614,7 +703,7 @@ namespace AethonMod.Content.Globals
             {
                 Player p = Main.player[i];
                 if (p == null || !p.active || p.dead) continue;
-                if (!TieneEternoVisible(p)) continue;   // el portador del libro, a la mano
+                if (!TieneEternoEnInventario(p)) continue;   // v6.50.117: basta con el libro en el INVENTARIO
 
                 var sp = p.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null) continue;
@@ -623,11 +712,14 @@ namespace AethonMod.Content.Globals
                 float d = Vector2.Distance(npc.Center, p.Center);
                 if (d > GuardianPaso) continue;             // aún no amenaza a nadie
 
-                // va a por él: la carga del guardián apunta AL portador
+                // va a por él: el guardián SIEMPRE carga contra el
+                // jugador (v6.50.117 — el gate cinético murió: exigía
+                // velocidad ≥ 2 px/t Y rumbo ≥ 0,35 hacia el portador,
+                // y bastaba un guardián frenándose o girando al pasar
+                // para que el libro NUNCA lo detuviera — con la
+                // distancia ≤ 300 px basta: apenas se acerque, se come)
                 Vector2 rumbo = p.Center - npc.Center;
-                if (rumbo.LengthSquared() < 1f) continue;
-                if (npc.velocity.LengthSquared() < 4f) continue;      // parado no carga
-                if (Vector2.Dot(npc.velocity, Vector2.Normalize(rumbo)) < 0.35f) continue;
+                if (rumbo.LengthSquared() < 1f) continue;   // solo el caso degenerado: ENCIMA del portador
 
                 // === LA MARCA DEL ÚNICO FESTÍN (antes del espectáculo:
                 // aunque el cine se interrumpiera, JAMÁS se repite) Y LA
