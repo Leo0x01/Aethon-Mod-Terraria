@@ -85,6 +85,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 return;
             }
 
+            // v6.50.121 — LA CURA DEL «LA MASCOTA SE DESACTIVA DESPUÉS DE
+            //     UN TIEMPO» (el mismo parche del hermano claro): el
+            //     patrón vanilla de TODA mascota — el reloj se refresca
+            //     A CADA TICK y la muerte la decide SOLO el buff; sin
+            //     esto el gemelo expiraba solo a los pocos minutos.
+            Projectile.timeLeft = 2;
+
             float t = Main.GlobalTimeWrappedHourly;
 
             // === EL HERMANO CLARO: el LÍDER de la pareja (NeedsUUID:

@@ -25,12 +25,21 @@ namespace AethonMod.Content.Systems
     // se había ido a dormir).
     //
     // EL CIRCUITO COMPLETO:
-    //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo SIN
-    //      Grimorio del Eterno en los 59 slots, SIN la marca
-    //      ShardPlayer.CaidaRecibida y SIN caída pendiente, en NOCHE
-    //      avanzada (time > 12000) y sin cometa YA esta noche → nace su
-    //      CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la .118:
-    //      32–64 tiles a un lado — antes ~30 pantallas del spawn).
+    //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo SIN la
+    //      marca ShardPlayer.CaidaRecibida y SIN caída pendiente, en
+    //      noche recién caída (time > 480) y sin cometa YA esta noche →
+    //      nace su CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la
+    //      .118: 32–64 tiles a un lado — antes ~30 pantallas del spawn).
+    //      v6.50.121 — EL COMETA ES DE TODOS: la .117-.120 exigían NO
+    //      llevar el Grimorio del Eterno encima para dispararlo… pero el
+    //      KIT DE PRUEBAS entrega la Bolsa Fundacional CON el grimorio
+    //      dentro: el jugador de pruebas SIEMPRE lo llevaba y EL COMETA
+    //      JAMÁS CAÍA (la letra: «La Caída nunca se activa al usar el
+    //      ítem de hacer de noche y luego de día»). Ahora el cielo cae
+    //      SIEMPRE en la primera noche de cada jugador (el ESPECTÁCULO
+    //      no se le niega a nadie) y la regla «un grimorio por alma»
+    //      vive donde siempre vivió: en LA TOMA — TomarElLibro rechaza
+    //      al portador y el Grimorio Dormido le habla de tú a tú.
     //   2. El cometa cruza el cielo, pica, excava su cráter y deja al
     //      GRIMORIO DORMIDO flotando en el centro (NPC town con ventana
     //      de diálogo vanilla) + registra aquí su CaidaPendiente.
@@ -239,7 +248,17 @@ namespace AethonMod.Content.Systems
 
                         var sp = p.GetModPlayer<Players.ShardPlayer>();
                         if (sp == null || sp.CaidaRecibida) continue;
-                        if (TieneGrimorio(p)) continue;
+                        // v6.50.121 — EL GATE DEL GRIMORIO MURIÓ: exigir
+                        //     «SIN Grimorio del Eterno en los 59 slots»
+                        //     mataba el evento para TODO jugador de
+                        //     pruebas (el kit de pruebas entrega la Bolsa
+                        //     Fundacional con el grimorio dentro — la
+                        //     letra: «La Caída nunca se activa al usar el
+                        //     ítem de hacer de noche y luego de día»).
+                        //     El cometa cae SIEMPRE en la primera noche:
+                        //     la regla del alma vive en LA TOMA
+                        //     (TomarElLibro rechaza al portador — el libro
+                        //     dormido le habla de tú a tú y no se entrega).
                         if (YaEsperaLibro(p.name)) continue;
 
                         DispararCometa(p);

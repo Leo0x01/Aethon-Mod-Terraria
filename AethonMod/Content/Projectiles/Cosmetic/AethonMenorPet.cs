@@ -99,6 +99,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 return;
             }
 
+            // v6.50.121 — LA CURA DEL «LA MASCOTA SE DESACTIVA DESPUÉS DE
+            //     UN TIEMPO»: el patrón vanilla de TODA mascota (Wisp,
+            //     Corazón Carmesí, Fuego Fatuo…): el reloj del proyectil
+            //     se refresca A CADA TICK — la muerte la decide SOLO el
+            //     buff (el contrato de arriba), jamás el timeLeft. Sin
+            //     este refresco, el reloj por defecto del proyectil
+            //     expiraba solo y la cría se apagaba a los pocos minutos
+            //     de invocarla (el buff moría con ella: ni rastro).
+            Projectile.timeLeft = 2;
+
             float t = Main.GlobalTimeWrappedHourly;
 
             // === v6.50.117 — EL CEREBRO DE LA PAREJA: el AFK del dueño, el

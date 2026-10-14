@@ -23,6 +23,14 @@ namespace AethonMod.Content.Items
     ///   centro, LA SOMBRA DE LA PÁGINA lo devora, el loot cae igual).
     /// · NO CONSUMIBLE (la letra): pila 1, no se gasta — el probador de
     ///   la devoración, las veces que haga falta.
+    /// · v6.50.121 — TAMBIÉN BORRA LA MARCA DE LA CAÍDA: la página en
+    ///   blanco borra TODO lo escrito del pasado del portador — los
+    ///   festines (.110), el pacto del guardián (.115) y ahora la marca
+    ///   del cometa (CaidaRecibida): con el cielo en blanco, LA CAÍDA
+    ///   vuelve a cruzar la primera noche del portador (la cura para
+    ///   probar el evento las veces que haga falta — si ya hay un libro
+    ///   dormido esperándolo en un cráter, ESO no se borra: el evento ya
+    ///   está servido, solo hay que ir por él).
     /// · Sin receta: llega con la Bolsa Probador (el kit de pruebas).
     /// </summary>
     public class PaginaEnBlanco : ModItem
@@ -65,6 +73,7 @@ namespace AethonMod.Content.Items
             // tipo de jefe vuelve a estrenar su primera cena.
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             int olvidados = sp != null ? sp.JefesDevorados.Count : 0;
+            bool borraCaida = false;
             if (sp != null)
             {
                 sp.JefesDevorados.Clear();
@@ -72,6 +81,17 @@ namespace AethonMod.Content.Items
                 // easter egg de la Mazmorra vuelve a poder ocurrir (el
                 // probador de PRIMERAS VECES las borra TODAS)
                 sp.GuardianMazmorraDevorado = false;
+                // v6.50.121 — LA MARCA DE LA CAÍDA también se borra: el
+                //     cielo vuelve a estar en blanco y el cometa cruzará
+                //     la primera noche del portador otra vez (las
+                //     PENDIENTES del mundo NO se tocan: si un libro
+                //     duerme en su cráter esperándolo, el evento ya está
+                //     servido — solo hay que ir por él).
+                if (sp.CaidaRecibida)
+                {
+                    sp.CaidaRecibida = false;
+                    borraCaida = true;
+                }
             }
 
             // LA VOZ del olvido (en la pantalla del portador): cuántos
@@ -92,6 +112,15 @@ namespace AethonMod.Content.Items
                     olvidados > 0 ? "Mods.AethonMod.PaginaEnBlanco.Reset"
                                   : "Mods.AethonMod.PaginaEnBlanco.Nada",
                     olvidados), color);
+            }
+            // v6.50.121 — Y EL CIELO TAMBIÉN QUEDÓ EN BLANCO (solo si había
+            //     marca que borrar): la voz extra del cometa.
+            if (borraCaida)
+            {
+                if (Main.netMode == NetmodeID.Server)
+                    EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.PaginaEnBlanco.Caida", color);
+                else
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.PaginaEnBlanco.Caida"), color);
             }
             return true;
         }

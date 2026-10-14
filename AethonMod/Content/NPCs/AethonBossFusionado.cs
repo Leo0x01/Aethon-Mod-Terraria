@@ -79,6 +79,22 @@ namespace AethonMod.Content.NPCs
     //        gira (F_TORMENTA = 38 — sin proyectil nuevo: anclas + los
     //        pernos de siempre).
     // ======================================================================
+    //  v6.50.121 — EL COLOSO FLOTA VIVO (la letra del usuario: «todas
+    //  las mecánicas de su combate se sienten mal» — la auditoría: el
+    //  gigante quedaba PLANTADO quieto en sus reposos mientras las
+    //  armas trabajan): TODOS los reposos de combate respiran con una
+    //  deriva lateral viva — puntoDeReposo + (sin(_tickEstado·0.028)·N, 0):
+    //  ±80 px en ECLIPSE/SOLMOR/REJILLA/PÁGINAS/RAYOS, ±40 en TORMENTA
+    //  (sus anclas acechan solas: el jefe no se aleja del centro del
+    //  cerco) y ±50 en ANILLOS (la contracción deriva en vez de
+    //  clavarse). SIN tocar: EL ÚLTIMO ALIENTO (la despedida quieta A
+    //  PROPÓSITO), la cinemática de nacimiento y la muerte. Y RECORTE
+    //  de las contemplaciones con colas muertas: ECLIPSE 340→300,
+    //  REJILLA 470→390 y RAYOS 615→570 (la danza de las ruedas muere a
+    //  ~t575 del estado: cierre limpio). El reposo vertical
+    //  (−640…−700) NO se toca: con hitbox 770 el borde inferior queda
+    //  a −255 del jugador — cerca sin contacto injusto.
+    // ======================================================================
     public class AethonBossFusionado : AethonBoss
     {
         // === LOS ESTADOS PROPIOS DEL RECUERDO COMPLETO (los que la base
@@ -323,7 +339,14 @@ namespace AethonMod.Content.NPCs
             // EL EJE DEL ECLIPSE: el dios se alza sobre la arena (la
             // izquierda es ORO, la derecha OSCURIDAD — los velos los
             // pinta el PreDraw en cada pantalla).
-            Vector2 punto = target.Center + new Vector2(0f, -640f);   // v6.50.120 — el coloso reposa más alto
+            // v6.50.121 — EL COLOSO FLOTA VIVO: el reposo respira con
+            // una deriva lateral de ±80 px (sin(_tickEstado·0.028)·80)
+            // mientras la lluvia trabaja — el gigante VAIVÉA sobre la
+            // arena en vez de clavarse como estatua (el eje del velo
+            // del PreDraw sigue a posC: la media pantalla que arde
+            // respira CON él).
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 80f, -640f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 1)
@@ -363,7 +386,11 @@ namespace AethonMod.Content.NPCs
                 }
             }
 
-            if (_tickEstado >= 340) CerrarEstado();
+            // v6.50.121 — RECORTE DE CONTEMPLACIÓN: 340→300 — la lluvia
+            // muere SOLA con la tercera ronda (su gate es _tickEstado <
+            // 300, la última siembra cae a t=295): los 40 t de cola
+            // muerta sobran, el eclipse suelta JUSTO al apagarse.
+            if (_tickEstado >= 300) CerrarEstado();
         }
 
         // ==================================================================
@@ -372,7 +399,11 @@ namespace AethonMod.Content.NPCs
         private void SolMoribundo(Player target)
         {
             // EL DIOS OBSERVA desde arriba: el sol negro caza solo.
-            Vector2 punto = target.Center + new Vector2(0f, -680f);   // v6.50.120 — el coloso reposa más alto
+            // v6.50.121 — EL COLOSO FLOTA VIVO: deriva lateral ±80 px
+            // (sin(_tickEstado·0.028)·80) mientras el sol negro caza
+            // solo — el gigante OBSERVA respirando, no clavado.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 80f, -680f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -420,7 +451,11 @@ namespace AethonMod.Content.NPCs
         private void RejillaLaser(Player target)
         {
             // EL DIOS SE CLAVA sobre la presa: la rejilla se teje alrededor.
-            Vector2 punto = target.Center + new Vector2(0f, -700f);   // v6.50.120 — el coloso reposa más alto
+            // v6.50.121 — EL COLOSO FLOTA VIVO: deriva lateral ±80 px
+            // (sin(_tickEstado·0.028)·80) mientras el tablero arde —
+            // el dios vela la rejilla VAIVÉANDO de lado a lado.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 80f, -700f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -454,9 +489,14 @@ namespace AethonMod.Content.NPCs
                 NPC.netUpdate = true;
             }
 
-            // La rejilla vive SOLA sus ~7 s (el proyectil se apaga a los
-            // 450 t) — el dios la vigila desde arriba TODO ese tiempo.
-            if (_tickEstado >= 470) CerrarEstado();
+            // La rejilla vive SOLA su reloj (el proyectil se apaga a los
+            // 450 t PROPIOS = ~t480 del estado). v6.50.121 — RECORTE DE
+            // CONTEMPLACIÓN: 470→390 — la única actividad del jefe aquí
+            // es la siembra del t=30; después de eso nada lo ata al
+            // tablero: el dios se va a los 390 y la rejilla SIGUE
+            // ardiendo sola (el hazardo persistente de la casa, como el
+            // sol del moribundo: el tablero es autónomo).
+            if (_tickEstado >= 390) CerrarEstado();
         }
 
         // ==================================================================
@@ -465,7 +505,11 @@ namespace AethonMod.Content.NPCs
         private void LluviaPaginas(Player target)
         {
             // EL DIOS SE ALZA y arranca las páginas de tinta.
-            Vector2 punto = target.Center + new Vector2(0f, -660f);   // v6.50.120 — el coloso reposa más alto
+            // v6.50.121 — EL COLOSO FLOTA VIVO: deriva lateral ±80 px
+            // (sin(_tickEstado·0.028)·80) mientras la biblioteca se
+            // vierte — el dios VAIVÉA sobre su lluvia de páginas.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 80f, -660f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 1)
@@ -534,8 +578,16 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         private void AnillosFusion(Player target)
         {
-            // LA CONTRACCIÓN: se detiene y se llena (la nova de siempre).
-            NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.15f);
+            // LA CONTRACCIÓN: se llena (la nova de siempre).
+            // v6.50.121 — EL COLOSO FLOTA VIVO: la nova ya no CLAVA al
+            // jefe — la contracción deriva ±50 px de lado a lado: la
+            // velocidad horizontal objetivo es LA DERIVADA de
+            // sin(_tickEstado·0.028)·50 (cos·1.4 px/t), el mismo compás
+            // de respiración de los otros reposos a la amplitud menor
+            // de los anillos; la vertical sigue muriendo a cero (la
+            // contracción apunta AL NÚCLEO, no a los lados).
+            NPC.velocity = Vector2.Lerp(NPC.velocity,
+                new Vector2(MathF.Cos(_tickEstado * 0.028f) * 1.4f, 0f), 0.15f);
 
             if (_tickEstado == 1)
             {
@@ -622,10 +674,19 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         private void JuicioFantasmal(Player target)
         {
-            // SE PLANTA a −700: el coloso MANTIENE la posición TODO el
-            // ataque — los rayos viven solos su reloj, como los ojos del
-            // Señor de la Luna orbitando a su dueño.
-            Vector2 punto = target.Center + new Vector2(0f, -700f);
+            // v6.50.121 — EL COLOSO FLOTA VIVO: el juicio ya no se
+            // contempla en estatua — deriva lateral ±80 px
+            // (sin(_tickEstado·0.028)·80) mientras las ruedas barren.
+            // OJO (verificado en AtaqueJefeProjectile): las ruedas NO
+            // cabalgan al jefe — sus semillas viajan FUERA del rango
+            // del cabalgador (ai[2] = maxNPCs+11+i ≥ 200 y el guard de
+            // la base exige ai[2] < maxNPCs), así que quedan ANCLADAS
+            // donde nacieron (los flancos del t=20): la deriva del
+            // coloso NO las arrastra — siguen barriendo su sitio
+            // CRUZADAS mientras el gigante respira encima, como los
+            // ojos del Señor de la Luna orbitando a su dueño.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 80f, -700f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -666,9 +727,15 @@ namespace AethonMod.Content.NPCs
                 NPC.netUpdate = true;
             }
 
-            // La danza vive ~555 t por su reloj propio — el estado suelta
-            // a los 615 (+60 de margen): el coloso contempla su juicio.
-            if (_tickEstado >= 615) CerrarEstado();
+            // La danza vive ~555 t por su reloj propio (ruedas nacidas
+            // a t=20 → mueren a ~t575 del estado). v6.50.121 — RECORTE
+            // DE CONTEMPLACIÓN: 615→570 — el corte a 510 dejaba la
+            // danza HUÉRFANA (66 t de ruedas barriendo con el jefe ya
+            // en su siguiente ataque: DOS armas grandes a la vez,
+            // contra la regla de la casa), así que el estado suelta 5 t
+            // antes de que las ruedas mueran solas: cierre LIMPIO de
+            // la danza contemplada.
+            if (_tickEstado >= 570) CerrarEstado();
         }
 
         // ==================================================================
@@ -750,7 +817,13 @@ namespace AethonMod.Content.NPCs
         private void TormentaAbismo(Player target)
         {
             // EL JEFE SUBE a −700: desde arriba contempla su tormenta.
-            Vector2 punto = target.Center + new Vector2(0f, -700f);
+            // v6.50.121 — EL COLOSO FLOTA VIVO, deriva MENOR: ±40 px
+            // (sin(_tickEstado·0.028)·40) — las anclas acechan por SU
+            // cuenta (nacen sobre la presa, no sobre el jefe) y el
+            // coloso no debe alejarse del centro del cerco: apenas un
+            // vaivén, el gigante CONTENIENDO la tormenta.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.028f) * 40f, -700f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)

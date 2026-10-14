@@ -68,6 +68,8 @@ Items: {
 			'''
 			Wipes the Eternal Grimoire's feast memory.
 			Every boss type will debut its FIRST DINNER again.
+			Also wipes the sky's mark: THE FALL will cross the
+			bearer's first night once more.
 			Reusable — not consumed.
 			Testing item — remove before publishing.
 			'''
@@ -175,16 +177,16 @@ Items: {
 	// Bearer's Shadow).
 	
 	NombreDeAethon: {
-		DisplayName: The Name of Aethon
+		DisplayName: Fragments of a Distant Memory - Aethon
 		Tooltip:
 			'''
-			"The book you carry has a name of its own.
-			Speak it… and it will open to test you."
-			Summons AETHON, THE ETERNAL GRIMOIRE — the book itself,
-			rising from its own pages: THE FINAL TEST.
-			The EMPRESS OF LIGHT's entrance, exact: born 200 feet
-			above your head, presenting herself before the fight.
-			Five phases await — the grimoire's own verdict.
+			"Not everything a book remembers fits on its pages.
+			What fell out of them… is still hungry."
+			Summons THE FRAGMENTS OF A DISTANT MEMORY: a dead god's
+			light and darkness, falling on the world TOGETHER.
+			While they live, noon never ends.
+			Bring both down… and THE WHOLE MEMORY will remember
+			who it was.
 			'''
 	}
 
@@ -1967,7 +1969,9 @@ NPCs: {
 		// v6.50.117 — THE MEMORY SPLIT IN TWO: the boss is now
 		// "Fragments of a Distant Memory - Aethon" and fights as a
 		// light+darkness pair; the fusion is THE WHOLE MEMORY.
-		DisplayName: Aethon, the Eternal Grimoire
+		// v6.50.121 — THE MISSING RENAME: .117 left the OLD name
+		// here — only the dark twin and the fusion had been renamed.
+		DisplayName: Fragments of a Distant Memory - Aethon
 		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
 		// keep only the main boss, Aethon; delete the other bosses and the
 		// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
@@ -2200,6 +2204,7 @@ EsenciaHambre.Sube: The Eternal Grimoire's appetite rises to {0}%.
 PaginaEnBlanco: {
 	Reset: The grimoire forgets its {0} feasts — every boss will debut its first dinner again.
 	Nada: The grimoire remembers no feasts — every first dinner is yet to come.
+	Caida: And the sky is blank again too: THE FALL will cross the first night once more.
 }
 
 Hambre: {

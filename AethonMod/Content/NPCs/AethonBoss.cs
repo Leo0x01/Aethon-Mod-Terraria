@@ -216,6 +216,15 @@ namespace AethonMod.Content.NPCs
         //     justo tras el switch de estados). ===
         internal const float CORREA_DUENO = 820f;
 
+        // === v6.50.121 — EL DÚO HOSTIGA (la letra: «sus IAs deben
+        //     atacar juntas y crear una coreografía perfecta»):
+        //     mientras un gemelo tiene el batón (TurnoAtaque) con su
+        //     ataque grande, el otro NO descansa — cada estos ticks
+        //     suelta una RÁFAGA DE APOYO ligera desde su órbita. El
+        //     plato fuerte sigue siendo uno a la vez (el batón manda),
+        //     pero NUNCA hay un gemelo inactivo. ===
+        internal const int TICKS_APOYO_DUO = 110;
+
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
 //     además demora mucho la animación del suelo temblando y todo eso /
 //     la presentación debe durar hasta que el sol llegue al centro, LUEGO
@@ -226,11 +235,14 @@ namespace AethonMod.Content.NPCs
 //          color luz) + el temblor creciendo + LA CARRERA del reloj
 //          bidireccional, TODO JUNTO desde el tick 1: la presentación ES
 //          la carrera — dura exactamente lo que tarda el sol en llegar
-//          al centro (mínimo 150 t para que respire) y la luz permanece
+//          al centro (mínimo 75 t — v6.50.121: la mitad, para que
+//          respire) y la luz permanece
 //          INVISIBLE («LUEGO aparece el jefe»). EL PARACAÍDAS a los
-//          570 t: si cualquier cosa mete el sol, la IA lo posa a mano —
+//          285 t (v6.50.121: la mitad — apertura más ágil): si cualquier
+//          cosa mete el sol, la IA lo posa a mano —
 //          el jefe APARECE SIEMPRE (la cura del «no aparece»);
-//       10 EL APARECER (80 t) — el sol YA está en el centro: EL PILAR
+//       10 EL APARECER (40 t — v6.50.121: la mitad): el sol YA está en
+//          el centro: EL PILAR
 //          cae, EL DESTELLO nace del sol y la luz SE MATERIALIZA dentro
 //          del pilar (fade 24 t) bajando a su órbita de pelea — y a
 //          PELEAR. ===
@@ -443,6 +455,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private float _angHermano = 0f;         // el ángulo de la órbita alrededor del hermano
         private int _hermanoIdx = -1;           // el cache del hermano (refresco cada 30 t)
         private int _ticksBuscaHermano = 0;     // el reloj del cache
+        private int _tickApoyoDuo = 0;          // v6.50.121 — el reloj de la RÁFAGA DE APOYO del dúo
 
         // === LA PALETA DE LA LUZ PRIMORDIAL ===
         private static readonly Color OroLuz = new(255, 240, 190);
@@ -1001,14 +1014,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // EL CAMBIO DE ACTO (manda el server / singleplayer;
                     // en MP cada cliente remata su propia carrera con el
                     // espejo — nadie salta): el sol EN EL CENTRO (con el
-                    // mínimo de 150 t de presentación)… o EL PARACAÍDAS
-                    // (570 t: cualquier cosa que meta el sol, la IA lo
+                    // mínimo de 75 t de presentación — v6.50.121: la
+                    // mitad)… o EL PARACAÍDAS (285 t — v6.50.121: la
+                    // mitad: cualquier cosa que meta el sol, la IA lo
                     // posa a mano — EL JEFE APARECE SIEMPRE).
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         bool solCentro = Main.dayTime &&
                             Main.time >= 26999.0 && Main.time <= 27001.0;
-                        if ((t >= 150 && solCentro) || t >= 570)
+                        if ((t >= 75 && solCentro) || t >= 285)
                         {
                             if (!solCentro)
                             {
@@ -1026,10 +1040,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
 
                 // ==============================================================
-                //  ACTO 2 — EL APARECER (80 t): el sol YA está en el
-                //  centro → EL PILAR cae, EL DESTELLO nace del sol y la
-                //  luz se materializa dentro del pilar bajando a su
-                //  órbita — y a PELEAR.
+                //  ACTO 2 — EL APARECER (40 t — v6.50.121: la mitad,
+                //  apertura más ágil): el sol YA está en el centro →
+                //  EL PILAR cae, EL DESTELLO nace del sol y la luz se
+                //  materializa dentro del pilar bajando a su órbita —
+                //  y a PELEAR.
                 // ==============================================================
                 case SUB_APARICION:
                 {
@@ -1094,7 +1109,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
                     }
 
-                    if (_tickEstado >= 80)
+                    // v6.50.121 — LA MITAD (80→40): el fade (24 t), el
+                    //     rugido (26) y la bajada (36) ya cabían todos
+                    //     dentro — el cine muerto sobraba.
+                    if (_tickEstado >= 40)
                     {
                         _estado = EST_FLOTAR;
                         _tickEstado = 0;
@@ -1180,16 +1198,34 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             //     gigante (.119) mandaba el reposo a 650-1100 px de la
             //     presa — media pantalla de duelo perdida. El sol gigante
             //     ahora reposa a 420 px (su borde, con 275 de radio, a un
-            //     paso del jugador) y a la altura de la vista (−300): la
-            //     pelea es un duelo, no un espectáculo a distancia.
+            //     paso del jugador): la pelea es un duelo, no un
+            //     espectáculo a distancia.
+            //     v6.50.121 — REPOSO SIN CONTACTO GRATIS: la altura sube
+            //     de (–300+sin·80) a (–420+sin·90) — con la hitbox de
+            //     550 (radio 275) el borde inferior del sol quedaba a
+            //     ~–25 px del jugador (contacto perpetuo de 120 sin
+            //     quererlo); a –420 el borde queda a ~–145: cerca,
+            //     imponente, pero justo.
             float radioBase = Furia ? 300f : (Phase >= 4 ? 360f : 420f);
             float radio = radioBase +
                 MathHelper.Clamp(distF - radioBase, -140f, 190f) * 0.35f;
             radio += MathF.Sin(_angOrbita * 3f) * 30f;
             Vector2 punto = target.Center + new Vector2(
                 MathF.Cos(_angOrbita) * radio,
-                -300f + MathF.Sin(_angOrbita) * 80f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.08f, 0.14f);
+                -420f + MathF.Sin(_angOrbita) * 90f);
+            // v6.50.121 — EL REPOSO PERSIGUE (catch-up, la letra: «deben
+            //     pelear cerca del jugador»): si la presa HUYE
+            //     (distF > 700) el muelle suave solo no llega — el
+            //     acercamiento extra crece con la distancia
+            //     ((distF–700)·0.02: suave al borde, ~14 px/t al doble
+            //     de 700 — el patrón de la correa) y vive DENTRO del
+            //     muelle: el lerp lo integra suave.
+            Vector2 acoso = Vector2.Zero;
+            if (distF > 700f)
+                acoso = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY) *
+                    ((distF - 700f) * 0.02f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity,
+                (punto - NPC.Center) * 0.08f + acoso, 0.14f);
 
             // v6.50.57 — EL QUIEBRO DEL DUELISTA (determinista — sin dados:
             // lee el EMBISTE y cam bia de lado): si la presa viene
@@ -1201,14 +1237,66 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 _sentidoOrbita = -_sentidoOrbita;
             }
 
+            // === v6.50.121 — EL DÚO: EL GEMELO SIN BATÓN HOSTIGA (la
+            //     letra: «sus IAs deben atacar juntas y crear una
+            //     coreografía perfecta»): mientras el hermano tiene el
+            //     batón con su ataque grande, este gemelo ya NO lo mira
+            //     pasivo desde la órbita — cada TICKS_APOYO_DUO suelta
+            //     DOS pernos ligeros hacia la presa (10 px/t, abanico
+            //     ±0.12 rad, 0.35× del daño: hostigio, no plato fuerte).
+            //     El gemelo NO cambia de estado: sigue flotando (esto
+            //     vive en EST_FLOTAR — jamás corre en órbita/fusión/
+            //     nacimiento/muerte ni en la llegada), solo la
+            //     AUTORIDAD dispara, y cuando el hermano suelta el
+            //     batón la paciencia normal retoma y este lo toma. ===
+            if (TurnoAtaque >= 0 && TurnoAtaque != NPC.whoAmI && HermanoAtacando())
+            {
+                _tickApoyoDuo++;
+                if (_tickApoyoDuo >= TICKS_APOYO_DUO)
+                {
+                    _tickApoyoDuo = 0;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        for (int p = 0; p < 2; p++)
+                        {
+                            float angA = (target.Center - NPC.Center).ToRotation() +
+                                (p == 0 ? -0.12f : 0.12f);
+                            Vector2 vA = new Vector2(MathF.Cos(angA), MathF.Sin(angA)) * 10f;
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                NPC.Center, vA,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.35f), 2f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, PaletaPer,
+                                NPC.whoAmI * 89 + _tickEstado + p * 5);
+                        }
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item4.WithPitchOffset(0.2f), NPC.Center);
+                        NPC.netUpdate = true;
+                    }
+                }
+            }
+            else
+            {
+                _tickApoyoDuo = 0;   // sin batón en juego: el reloj vuelve a cero
+            }
+
             // v6.50.57 — EL VOLTEO DE GRAVEDAD MURIÓ (la letra: «eso que
             // hace el jefe de cambiar la gravedad tiene que dejar de
             // hacerlo»): el suelo vuelve a ser tuyo PARA SIEMPRE.
 
             // LA PACIENCIA (heredada): cada fase flota MENOS… y la presa
             // quieta la derrite (anti-camping: el castigo llega YA).
-            int paciencia = Math.Max(50, 120 - (Phase - 1) * 14);
-            if (_ticksPresaQuieta > 90) paciencia = Math.Min(paciencia, 26);
+            // v6.50.121 — MENOS TIEMPO MUERTO (la letra: «todas las
+            //     mecanicas de su combate se sienten mal»): la paciencia
+            //     por fase pasa de 120/106/92/78/64 a 70/55/45/35/28 —
+            //     la órbita respira MENOS y el plato fuerte llega
+            //     ANTES; y la presa quieta la derrite hasta 20 (el
+            //     anti-camping pica YA).
+            int paciencia = Phase switch
+            {
+                1 => 70, 2 => 55, 3 => 45, 4 => 35, _ => 28
+            };
+            if (_ticksPresaQuieta > 90) paciencia = Math.Min(paciencia, 20);
 
             if (_tickEstado >= paciencia)
             {
@@ -1233,10 +1321,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             // === v6.50.117 — LA COORDINACIÓN DE LOS GEMELOS: si el hermano
             //     vivo está en pleno ataque grande (tiene el batón), este
-            //     ESPERA — sigue reposicionándose suave en su órbita y
-            //     reintenta cuando la paciencia vuelva a agotarse. Con los
-            //     dos naciendo a la vez, la primera paciencia (~120 t) ya
-            //     los deja alternando (el desfase de la letra) ===
+            //     ESPERA (el plato fuerte es uno a la vez) — pero
+            //     v6.50.121 ya NO lo deja pasivo: mientras espera en
+            //     EST_FLOTAR hostiga con la RÁFAGA DE APOYO (ver
+            //     EstadoFlotar). Con los dos naciendo a la vez, la
+            //     primera paciencia (~70 t) ya los deja alternando (el
+            //     desfase de la letra) ===
             if (TurnoAtaque >= 0 && TurnoAtaque != NPC.whoAmI && HermanoAtacando())
             {
                 _tickEstado = 0;   // la órbita sigue viva: reintento en la próxima paciencia
@@ -1427,7 +1517,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoJuicio(Player target)
         {
             // se ALZA sobre la órbita: el juez mira desde arriba.
-            Vector2 punto = target.Center + new Vector2(0f, -480f);
+            // v6.50.121 — LA DERIVA VIVA: el reposo clavado gana una
+            //     oscilación lateral de sin(t·0.03)·60 px — el coloso
+            //     flota VIVO mientras las columnas caen.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.03f) * 60f, -480f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             bool primera = _tickEstado == 30;
@@ -1560,10 +1654,18 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void EstadoNova(Player target)
         {
+            // v6.50.121 — LA DERIVA VIVA (la letra: «todas las mecanicas
+            //     de su combate se sienten mal»): el estado plantado ya
+            //     no es una estatua — el punto de reposo ondula LATERAL
+            //     ±60 px (sin(t·0.03)·60; su velocidad, cos(t·0.03)·1.8
+            //     px/t, es lo que el muelle persigue): el coloso flota
+            //     VIVO mientras se llena y mientras estalla.
+            NPC.velocity = Vector2.Lerp(NPC.velocity,
+                new Vector2(MathF.Cos(_tickEstado * 0.03f) * 1.8f, 0f), 0.15f);
+
             if (_tickEstado < 45)
             {
-                // LA CONTRACCIÓN: se detiene y se llena.
-                NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.15f);
+                // LA CONTRACCIÓN: se frena sobre su ondulación y se llena.
                 if (_tickEstado == 1)
                 {
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
@@ -1682,7 +1784,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoEstallido(Player target)
         {
             // LA RECOGIDA: la luz se detiene y se junta.
-            NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.15f);
+            // v6.50.121 — LA DERIVA VIVA: la misma ondulación lateral de
+            //     la nova (reposo ±60 px, sin(t·0.03); velocidad
+            //     cos·1.8 px/t) — el coloso flota VIVO mientras arde y
+            //     detona (el aro del telegrafo lo sigue: es suyo).
+            NPC.velocity = Vector2.Lerp(NPC.velocity,
+                new Vector2(MathF.Cos(_tickEstado * 0.03f) * 1.8f, 0f), 0.15f);
 
             if (_tickEstado == 1)
             {
@@ -1749,7 +1856,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoDanza(Player target)
         {
             // SE ALZA sobre la presa: la danza barre desde arriba.
-            Vector2 punto = target.Center + new Vector2(0f, -420f);
+            // v6.50.121 — LA DERIVA VIVA: sin(t·0.03)·60 lateral — el
+            //     coloso flota VIVO mientras la rueda gira.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.03f) * 60f, -420f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 1)
@@ -1785,10 +1895,16 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void EstadoLanzas(Player target)
         {
-            // A FLANCO (el arquero divino no dispara de frente) — a la
-            // escala del cuerpo nuevo (v6.50.119: la figura entera creció).
+            // A FLANCO (el arquero divino no dispara de frente).
+            // v6.50.121 — EL FLANCO ABSOLUTO (fin de la guerra
+            //     correa-vs-flancos: el flanco ×2.5 quedaba a 1250 px y
+            //     la CORREA_DUENO de 820 lo empujaba de vuelta CADA TICK
+            //     — jefe clavado con velocidad neta 0). Distancia
+            //     ABSOLUTA dentro de la correa: 620 px (EscalaCuerpo
+            //     queda para el CUERPO) + LA DERIVA VIVA sin(t·0.03)·60
+            //     lateral — el coloso flota VIVO mientras siembra.
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * (500f * EscalaCuerpo), -280f * EscalaCuerpo);
+                MathF.Cos(_angOrbita) * 620f + MathF.Sin(_tickEstado * 0.03f) * 60f, -280f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             bool primera = _tickEstado == 30;
@@ -1855,9 +1971,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoCorona(Player target)
         {
             // EL DIOS OBSERDA desde su flanco (la corona espira alrededor TUYO).
-            // v6.50.119 — el flanco del dios creció con el cuerpo (×2.5).
+            // v6.50.121 — EL FLANCO ABSOLUTO (fin de la guerra
+            //     correa-vs-flancos: 1350 px ×2.5 contra la correa de
+            //     820 cada tick = jefe clavado). 660 px ABSOLUTOS
+            //     dentro de la correa + LA DERIVA VIVA sin(t·0.03)·60
+            //     lateral — flota VIVO mientras el prisma espira.
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * (540f * EscalaCuerpo), -320f * EscalaCuerpo);
+                MathF.Cos(_angOrbita) * 660f + MathF.Sin(_tickEstado * 0.03f) * 60f, -320f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 30)
@@ -2024,8 +2144,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoCruz(Player target)
         {
             // se aparta de la presa: la cruz necesita espacio.
+            // v6.50.121 — EL FLANCO ABSOLUTO (fin de la guerra
+            //     correa-vs-flancos: 1300 px ×2.5 contra la correa de
+            //     820 cada tick = jefe clavado). 640 px ABSOLUTOS
+            //     dentro de la correa + LA DERIVA VIVA sin(t·0.03)·60
+            //     lateral — flota VIVO mientras la cruz barre.
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * (520f * EscalaCuerpo), -300f * EscalaCuerpo);
+                MathF.Cos(_angOrbita) * 640f + MathF.Sin(_tickEstado * 0.03f) * 60f, -300f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado >= 30 && (_tickEstado % (Furia ? 6 : 8)) == 0 && _tickEstado <= 200)
@@ -2190,7 +2315,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoVortice(Player target)
         {
             // SE ALZA y casi se clava: el sol que ordena su propia luz.
-            Vector2 punto = target.Center + new Vector2(0f, -480f);
+            // v6.50.121 — LA DERIVA VIVA: sin(t·0.03)·60 lateral — el
+            //     coloso flota VIVO mientras la galaxia gira.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.03f) * 60f, -480f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -2271,7 +2399,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoReloj(Player target)
         {
             // SE ALZA (el reloj necesita cielo sobre su presa).
-            Vector2 punto = target.Center + new Vector2(0f, -460f);
+            // v6.50.121 — LA DERIVA VIVA: sin(t·0.03)·60 lateral — el
+            //     coloso flota VIVO mientras la catedral pesa.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.03f) * 60f, -460f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 30)
@@ -2351,8 +2482,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         {
             // LA CANTORA: se aparta a flanco (el coro canta alrededor TUYO,
             // no de ella).
+            // v6.50.121 — EL FLANCO ABSOLUTO (fin de la guerra
+            //     correa-vs-flancos: 1400 px ×2.5 contra la correa de
+            //     820 cada tick = jefe clavado). 680 px ABSOLUTOS
+            //     dentro de la correa + LA DERIVA VIVA sin(t·0.03)·60
+            //     lateral — flota VIVO mientras el coro canta.
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * (560f * EscalaCuerpo), -320f * EscalaCuerpo);
+                MathF.Cos(_angOrbita) * 680f + MathF.Sin(_tickEstado * 0.03f) * 60f, -320f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 40)
@@ -2386,7 +2522,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoManada(Player target)
         {
             // LA CAMADA: el jefe se alza y abre las jaulas.
-            Vector2 punto = target.Center + new Vector2(0f, -560f);
+            // v6.50.121 — LA DERIVA VIVA: sin(t·0.03)·60 lateral — el
+            //     coloso flota VIVO mientras abre las jaulas.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.03f) * 60f, -560f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 30 || _tickEstado == 80)
@@ -2511,8 +2650,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 //     jaula (la luz vigila su trampa — el cometa de siempre) ===
                 _angOrbita += 0.058f * _sentidoOrbita;
                 Vector2 punto = centro + new Vector2(
-                    MathF.Cos(_angOrbita) * (470f * EscalaCuerpo),
-                    MathF.Sin(_angOrbita) * (470f * EscalaCuerpo) * 0.80f - 120f * EscalaCuerpo);
+                    // v6.50.121 — EL CÍRCULO ABSOLUTO (fin de la guerra
+                    //     correa-vs-flancos: la elipse ×2.5 de 1175 px
+                    //     peleaba contra la CORREA_DUENO de 820 cada
+                    //     tick). 600 px ABSOLUTOS dentro de la correa.
+                    MathF.Cos(_angOrbita) * 600f,
+                    MathF.Sin(_angOrbita) * 600f * 0.80f - 120f);
                 NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.24f, 0.38f);
             }
 
@@ -2574,8 +2717,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // EN MOVIMIENTO, como se lee a un dios de verdad.
             _angOrbita += 0.010f * _sentidoOrbita;
             Vector2 punto = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * (380f * EscalaCuerpo),
-                (-240f + MathF.Sin(_angOrbita) * 70f) * EscalaCuerpo);
+                // v6.50.121 — LA ÓRBITA ABSOLUTA (fin de la guerra
+                //     correa-vs-flancos: la órbita ×2.5 de 950 px
+                //     peleaba contra la CORREA_DUENO de 820 cada tick
+                //     — jefe clavado). 720 px ABSOLUTOS dentro de la
+                //     correa (sigue GIRANDO — el decreto cabalga).
+                MathF.Cos(_angOrbita) * 720f,
+                -240f + MathF.Sin(_angOrbita) * 70f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 24)

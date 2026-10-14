@@ -14,7 +14,7 @@ namespace AethonMod.Content.Players
     /// jugador también dale 99 Dummy para probar las armas"). OnEnterWorld
     /// entrega:
     ///
-    ///   · LAS DIECISIETE BOLSAS (una por categoría del arsenal — cada una se
+    ///   · LAS VEINTIUNA BOLSAS (una por categoría del arsenal — cada una se
     ///     abre con clic derecho y solo entrega lo que falte):
     ///       1. La Bolsa del Probador          (herramientas de prueba)
     ///       2. La Bolsa de los Fundacionales  (los 4 del alba)
@@ -37,6 +37,13 @@ namespace AethonMod.Content.Players
     ///      19. La Bolsa de las Sombras         (v6.50.63 — LAS FAUCES: las 3 armas
     ///          devoradoras de la v6.50.62 que nacieron sin kit — el feedback
     ///          "te olvidaste darle las armas al jugador", la lección v6.14.2 otra vez)
+    ///      20. La Bolsa de las Pruebas de la Emperatriz (v6.50.99)
+    ///      21. La Bolsa de la Cría (v6.50.121 — LA MISMA FORMA QUE TODAS: la
+    ///          letra del usuario: «la bolsa debe entregarse al jugador de la
+    ///          misma forma que todas las demás bolsas del mod» — la pareja de
+    ///          mascotas del recuerdo, garantizada en cada entrada al mundo,
+    ///          igual que sus veinte hermanas; la entrega tras la pelea de la
+    ///          .120 SIGUE viva — la vía canónica; esta es la de pruebas)
     ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
     ///     entrenamiento directo en el inventario).
     ///
@@ -58,7 +65,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS VEINTE BOLSAS (garantizadas en cada entrada) ===
+            // === LAS VEINTIUNA BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -80,6 +87,12 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
             bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63+: LAS FAUCES DEL GRIMORIO (las 3 sombras de la .62 + LA PÁGINA FINAL de la .64 — el arma 4)
             bolsas += Entregar(ModContent.ItemType<BolsaEmperatriz>());      // v6.50.99: LAS CUATRO PRUEBAS DE LA EMPERATRIZ (A/B/C + la dual Equinoccio)
+            // v6.50.121 — LA BOLSA DE LA CRÍA, LA MISMA FORMA QUE TODAS (la
+            //     letra: «la bolsa debe entregarse al jugador de la misma
+            //     forma que todas las demás bolsas del mod»): garantizada en
+            //     cada entrada al mundo como sus veinte hermanas — la pareja
+            //     luz+oscuridad nunca vuelve a perderse.
+            bolsas += Entregar(ModContent.ItemType<Items.Llamados.BolsaDeLaCria>());
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

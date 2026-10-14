@@ -68,6 +68,8 @@ Items: {
 			'''
 			Borra la memoria de festines del Grimorio del Eterno.
 			Cada tipo de jefe volverá a estrenar SU PRIMERA CENA.
+			También borra la marca del cielo: LA CAÍDA volverá a cruzar
+			la primera noche del portador.
 			Reutilizable — no se consume.
 			Objeto de pruebas — eliminar antes de publicar.
 			'''
@@ -175,16 +177,16 @@ Items: {
 	// Bearer's Shadow).
 	
 	NombreDeAethon: {
-		DisplayName: El Nombre de Aethon
+		DisplayName: Fragmentos de un recuerdo lejano - Aethon
 		Tooltip:
 			'''
-			«El libro que cargas tiene nombre propio.
-			Pronúncialo… y se abrirá para probarte.»
-			Convoca a AETHON, EL GRIMORIO ETERNO — el libro mismo,
-			levantándose de sus propias páginas: LA PRUEBA FINAL.
-			La entrada de la EMPERATRIZ DE LUZ, exacta: nace 200 pies
-			sobre tu cabeza y se presenta antes de la pelea.
-			Las cinco fases esperan — el veredicto del propio grimorio.
+			«No todo lo que un libro recuerda cabe en sus páginas.
+			Lo que se cayó de ellas… sigue teniendo hambre.»
+			Convoca a LOS FRAGMENTOS DE UN RECUERDO LEJANO: la luz
+			y la oscuridad de un dios muerto, cayendo JUNTAS sobre
+			el mundo. Mientras vivan, el mediodía no se acaba.
+			Derríbalos a los dos… y EL RECUERDO COMPLETO recordará
+			quién era.
 			'''
 	}
 
@@ -1966,7 +1968,9 @@ NPCs: {
 		// v6.50.117 — THE MEMORY SPLIT IN TWO: the boss is now
 		// "Fragments of a Distant Memory - Aethon" and fights as a
 		// light+darkness pair; the fusion is THE WHOLE MEMORY.
-		DisplayName: Aethon, el Grimorio Eterno
+		// v6.50.121 — THE MISSING RENAME: .117 left the OLD name
+		// here — only the dark twin and the fusion had been renamed.
+		DisplayName: Fragmentos de un recuerdo lejano - Aethon
 		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
 		// keep only the main boss, Aethon; delete the other bosses and the
 		// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
@@ -2199,6 +2203,7 @@ EsenciaHambre.Sube: El apetito del Grimorio del Eterno sube a {0}%.
 PaginaEnBlanco: {
 	Reset: El grimorio olvida sus {0} festines — cada jefe volverá a estrenar su primera cena.
 	Nada: El grimorio no recuerda ningún festín — toda primera cena está por ocurrir.
+	Caida: Y el cielo también quedó en blanco: LA CAÍDA volverá a cruzar la primera noche.
 }
 
 Hambre: {
