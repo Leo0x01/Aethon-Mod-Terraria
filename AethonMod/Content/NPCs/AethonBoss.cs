@@ -3112,7 +3112,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // v6.50.49 — EL AETHON MENOR (la mascota de luz: «una pequeña
             //     mascota de luz que sea Aethon original pero mas pequeño»)
             //     cae de su amo un 20% de las veces — su recuerdo vivo.
-            if (Main.rand.NextFloat() < 0.20f)
+            //     v6.50.118 — SOLO del jefe de luz: el Recuerdo Completo
+            //     (EsFusion) la deja GARANTIZADA en su propio DropBotin —
+            //     sin este gate caerían DOS (la canónica y la del azar).
+            if (!EsFusion && Main.rand.NextFloat() < 0.20f)
                 Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                     ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
 

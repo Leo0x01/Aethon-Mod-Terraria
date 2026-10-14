@@ -195,7 +195,12 @@ namespace AethonMod.Content.Projectiles
             Projectile.Kill();
         }
 
-        /// <summary>El cráter suave: radio 11 tiles, contenedores/mesas/puertas/pinturas intactos, bordes irregulares.</summary>
+        /// <summary>El cráter suave con su RASTRO OSCURO (v6.50.118): radio
+        /// 11 tiles, contenedores/mesas/puertas/pinturas intactos, bordes
+        /// irregulares — y la tinta que salpicó queda en la roca: PIEDRA DE
+        /// ÉBANO y OBSIDIANA (bloques EXISTENTES de vanilla, la letra: «no
+        /// necesita bloques nuevos se pueden reutilizar los bloques
+        /// existentes»).</summary>
         private static void ExcavarCrater(Vector2 centro)
         {
             try
@@ -214,17 +219,56 @@ namespace AethonMod.Content.Projectiles
                         if (d > radio) continue;
 
                         Tile tile = Main.tile[x, y];
-                        if (tile == null || !tile.HasTile) continue;
+                        if (tile == null) continue;
 
-                        int tipo = tile.TileType;
-                        if (EsCasaDelJugador(tipo)) continue;  // cofres, mesas, puertas, pinturas…
+                        // LA CASA DEL JUGADOR: intacta y SIN rastro encima.
+                        if (tile.HasTile && EsCasaDelJugador(tile.TileType)) continue;
 
                         // EL BORDE IRREGULAR: el corazón (≤8 tiles) se
                         // abre siempre; los 3 externos solo a medias.
-                        if (d > 8f && !Main.rand.NextBool(2)) continue;
+                        if (tile.HasTile && (d <= 8f || Main.rand.NextBool(2)))
+                        {
+                            WorldGen.KillTile(x, y, noItem: true);
+                            toco = true;
+                        }
 
-                        WorldGen.KillTile(x, y, noItem: true);
-                        toco = true;
+                        // v6.50.118 — EL RASTRO DEL COMETA (la letra: «el
+                        // cráter debe dejar algún rastro de algún bloque
+                        // oscuro… se pueden reutilizar los bloques
+                        // existentes»): donde la tinta golpeó queda PIEDRA
+                        // DE ÉBANO (el bloque oscuro de la Corrupción, con
+                        // sus vetas moradas — negro-morado como el cometa)
+                        // y algo de OBSIDIANA (la tinta quemada por la
+                        // caída). Esparcida y orgánica: más densa hacia el
+                        // fondo, jamás en el corazón exacto (el libro
+                        // duerme ahí, flotando).
+                        if (!tile.HasTile && d >= 2.5f)
+                        {
+                            float dentro = 1f - d / (float)radio;  // 1 centro → 0 borde
+                            if (Main.rand.NextFloat() < 0.26f + 0.34f * dentro)
+                            {
+                                tile.HasTile = true;
+                                tile.TileType = Main.rand.NextFloat() < 0.80f
+                                    ? TileID.Ebonstone
+                                    : TileID.Obsidian;
+                                tile.Slope = 0;
+                                tile.IsHalfBlock = false;
+                                tile.TileFrameX = 0;
+                                tile.TileFrameY = 0;
+                                WorldGen.SquareTileFrame(x, y, true);
+                                toco = true;
+                            }
+                        }
+                        else if (tile.HasTile && d > 8f &&
+                                 EsRocaNatural(tile.TileType) && Main.rand.NextFloat() < 0.35f)
+                        {
+                            // EL ARO TINTADO: el borde que no se abrió
+                            // amanece ÉBANO — desde lejos, el cráter
+                            // entero lee «aquí cayó algo oscuro».
+                            tile.TileType = TileID.Ebonstone;
+                            WorldGen.SquareTileFrame(x, y, true);
+                            toco = true;
+                        }
                     }
                 }
 
@@ -240,6 +284,15 @@ namespace AethonMod.Content.Projectiles
                 }
             }
             catch { }
+        }
+
+        /// <summary>¿Es la roca común del mundo? (piedra, tierra o pasto —
+        /// el aro se tintará SOLO sobre roca natural: ni minerales, ni
+        /// plantas, ni nada que el jugador haya puesto con intención).</summary>
+        private static bool EsRocaNatural(int tipo)
+        {
+            return tipo == TileID.Stone || tipo == TileID.Dirt ||
+                   tipo == TileID.Grass || tipo == TileID.Ebonstone;
         }
 
         /// <summary>¿Es la casa del jugador? (cofres, mesas, puertas, pinturas — la casa no se rompe).</summary>

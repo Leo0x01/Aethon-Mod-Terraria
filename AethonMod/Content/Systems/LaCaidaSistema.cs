@@ -16,16 +16,19 @@ namespace AethonMod.Content.Systems
     // MP uno por jugador)», «reusar la estética del meteorito de fondo de
     // Terraria pero en NEGRO y MORADO», «un grimorio por jugador, cada
     // jugador solo puede tener 1, si ya tiene uno no puede tomar otro»,
-    // «el cometa aterriza lejos del spawn (~30 pantallas) con cráter y
-    // bruma». LA PURGA DEL GÉNESIS mató el altar y su fragmento: ESTE es
-    // el camino del libro ahora — el día 1, la primera noche avanzada.
+    // v6.50.118 — «el cometa de tinta caiga CERCA DEL JUGADOR» (la cita
+    // vieja «lejos del spawn (~30 pantallas)» MURIÓ: 32–64 tiles a un
+    // lado del destinatario). LA PURGA DEL GÉNESIS mató el altar y su
+    // fragmento: ESTE es el camino del libro ahora — el día 1, la
+    // primera noche avanzada.
     //
     // EL CIRCUITO COMPLETO:
     //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo SIN
     //      Grimorio del Eterno en los 59 slots, SIN la marca
     //      ShardPlayer.CaidaRecibida y SIN caída pendiente, en NOCHE
     //      avanzada (time > 12000) y sin cometa YA esta noche → nace su
-    //      CaidaCometaProjectile apuntando a ~30 pantallas del spawn.
+    //      CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la .118:
+    //      32–64 tiles a un lado — antes ~30 pantallas del spawn).
     //   2. El cometa cruza el cielo, pica, excava su cráter y deja al
     //      GRIMORIO DORMIDO flotando en el centro (NPC town con ventana
     //      de diálogo vanilla) + registra aquí su CaidaPendiente.
@@ -266,25 +269,32 @@ namespace AethonMod.Content.Systems
             return sys.CaidasPendientes.Exists(c => c != null && c.Jugador == nombre);
         }
 
-        /// <summary>El punto de impacto: a ~30 pantallas del spawn, dirección NO vertical, clavado a los límites del mundo y a la superficie.</summary>
-        private static Vector2 PuntoDeImpacto()
+        /// <summary>v6.50.118 — LA LETRA: «el cometa de tinta caiga cerca
+        /// del jugador»: el punto de impacto vive a 32–64 tiles a un lado
+        /// DEL JUGADOR (lo ve cruzar el cielo y cae a la vista — un
+        /// momento caminando y ya está sobre su cráter). La .117 lo
+        /// medía desde el SPAWN DEL MUNDO (~30 pantallas): un jugador
+        /// con base lejos del spawn se perdía la caída y el cráter caía a
+        /// un océano de distancia. La dirección sigue siendo NO vertical
+        /// (la estética del picado), con los límites del mundo de
+        /// siempre y la superficie de esa columna.</summary>
+        private static Vector2 PuntoDeImpacto(Player p)
         {
-            Vector2 spawn = new Vector2(Main.spawnTileX * 16f, Main.spawnTileY * 16f);
-
-            // LA DIRECCIÓN: un ángulo NO vertical (±60° del horizonte) y un
-            // lado al azar — el cometa puede caer a oriente o a occidente.
-            float ang = Main.rand.NextFloat(-1f, 1f) * MathHelper.Pi / 3f;
+            // LA DIRECCIÓN: un lado al azar del JUGADOR y una distancia
+            // corta (32–64 tiles = 512–1024 px: en pantalla o a un paso
+            // de ella — «cerca del jugador», la letra).
             float lado = Main.rand.NextBool() ? 1f : -1f;
-            Vector2 dir = new Vector2(lado * MathF.Cos(ang), MathF.Sin(ang));
-            Vector2 destino = spawn + dir * (30f * 1920f);
+            float distTiles = Main.rand.NextFloat(32f, 64f);
+            Vector2 destino = new Vector2(p.Center.X + lado * distTiles * 16f, p.Center.Y);
 
             // LOS LÍMITES DEL MUNDO (margen de 200 tiles del borde).
             destino.X = MathHelper.Clamp(destino.X, 200f * 16f, (Main.maxTilesX - 200) * 16f);
 
             // LA SUPERFICIE: la primera tile SÓLIDA de esa columna, del
-            // cielo hacia abajo (la estrella besa la tierra, no la roca);
-            // si la columna es aire puro, la altura del spawn la salva.
-            destino.Y = spawn.Y;
+            // cielo hacia abajo (la estrella besa la tierra, no la
+            // roca); si la columna es aire puro, la altura DEL JUGADOR
+            // la salva (antes el spawn — el jugador manda ahora).
+            destino.Y = p.Center.Y;
             int tx = (int)(destino.X / 16f);
             int limite = Main.maxTilesY - 200;
             for (int y = 20; y < limite; y++)
@@ -299,7 +309,9 @@ namespace AethonMod.Content.Systems
         /// <summary>Dispara el cometa de tinta de este jugador y le canta su caída (solo a él).</summary>
         private static void DispararCometa(Player p)
         {
-            Vector2 destino = PuntoDeImpacto();
+            // v6.50.118 — el cráter nace CERCA DEL JUGADOR (la letra): la
+            // estrella cae a la vista de su destinatario.
+            Vector2 destino = PuntoDeImpacto(p);
 
             // NACE por encima de la cámara del destinatario, del lado del
             // impacto, viajando en DIAGONAL (la fase 0 del cometa).

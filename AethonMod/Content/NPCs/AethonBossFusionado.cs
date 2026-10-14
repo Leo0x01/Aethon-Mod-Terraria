@@ -473,13 +473,22 @@ namespace AethonMod.Content.NPCs
         /// EL BOTÍN DEL RECUERDO COMPLETO: TODO el de siempre (esencia,
         /// la Forma Ascendida, el Aethon Menor, los 250 fragmentos)…
         /// y UNA ESENCIA DE AETHON EXTRA — la compensación por los dos
-        /// fragmentos que se fusionaron sin dropear NADA.
+        /// fragmentos que se fusionaron sin dropear NADA. v6.50.118 —
+        /// LA CRÍA GEMELA GARANTIZADA (la letra: «asegúrate de que el
+        /// jugador pueda conseguir las mascotas»): el Aethon Menor ya
+        /// NO es un 20% de azar ni un regalo de pruebas — ESTA es su
+        /// vía canónica: el recuerdo recompuesto suelta a su cría, y el
+        /// mismo ítem engendra a la PAREJA (la de luz y su gemela
+        /// oscura — un solo ítem, las dos mascotas).
         /// </summary>
         protected override void DropBotin()
         {
             base.DropBotin();
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                 ModContent.ItemType<Items.Esencias.EsenciaDeAethon>(), 1);
+            // LA CRÍA GEMELA — SIEMPRE (la vía canónica de la mascota).
+            Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
+                ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
         }
 
         // ==================================================================
