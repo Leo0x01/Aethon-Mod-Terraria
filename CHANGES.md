@@ -1,11 +1,87 @@
-# v6.50.119 — LA FUSIÓN RESCATADA, EL SOL GIGANTE, LA BOLSA DE LA CRÍA Y EL ANOCHECER
+# v6.50.120 — LA CORREA DEL DUELO, LA FUSIÓN ES UNA FASE, EL COLOSO DEL FINAL Y LA BOLSA A LA MANO
 
-**La fusión rescatada** (el golpe de gracia ya NO mata al gemelo mientras su hermano viva: el fragmento QUEDA A MIL, entra en órbita intocable y la cinemática funde a los dos en EL RECUERDO COMPLETO — la .117 solo veía la ventana si un tick intermedio pillaba la vida en (0,1000], cosa que un arma grande saltaba de >1000 a ≤0 en el mismo impacto) + **el sol gigante** (hitbox 220 → 550 px: ×2.5, un 150% MÁS grande; TODO el sol de código crece con EscalaCuerpo 2.50 y TODAS las órbitas del duelo escalaron con el cuerpo — sin envolver a la presa; los gemelos nacen a ±600) + **la bolsa de la cría** (ítem nuevo: la pareja luz+oscuridad duerme dentro — el Recuerdo Completo la suelta SIEMPRE y el 20% del jefe de luz viaja en su bolsa; se abre con clic derecho) + **el anochecer de La Caída** (el cometa de tinta cruza a los 8 s del ocaso, time > 480 — la .117 esperaba pasada la medianoche y el jugador se iba a dormir sin ver nada).
+**La correa del duelo** (la órbita de reposo bajó de 650-1100 px a 300/360/420 absolutos y NINGÚN estado deja ya al dios a más de 820 px de la presa — el empuje de retorno vive en la IA tras el switch de estados) + **la fusión es una fase** (cuando la vida COMBINADA del par baja al 50% — o la red del overkill atrapa un gemelo — LA FUSIÓN SE DECRETA con anuncio épico mundial: el umbral de los 1000 absolutos exigía vaciar el 99,96% de 4,8 millones y la mitad de la pelea jamás se veía) + **el coloso del final** (el Recuerdo Completo: EscalaCuerpo 3.40, hitbox de 48 tiles, 3.000.000 de vida, LA NOCHE DEL ECLIPSE — el mundo se apaga, relámpagos cada 3-5 s, cada fase abre con trueno — y TRES ARMAS INVESTIGADAS en los finales de Terraria: EL JUICIO FANTASMAL del Moon Lord (P5, dos ruedas de rayos cruzadas), EL CONCILIO DE ESPEJOS del Lunatic Cultist (P3+, pernos que cargan quietos y convergen donde estabas) y LA TORMENTA DEL ABISMO del Duque Fishron (P4+, tres vórtices escupiendo espirales)) + **la bolsa a la mano** (el 20% de azar murió: la primera victoria de la familia ENTREGA LA BOLSA DE LA CRÍA directamente en el inventario del verdugo — una vez por jugador, para siempre — al abrirla despiertan las DOS mascotas: la cría de luz y su gemela oscura).
 
-Oráculo 0/0 (317 .cs) · build real 0/0 ×2 · .tmod 387 entradas 2.706.121 B md5 `6d437cc56c3d3db3e2906ed03c798579` · headless 0 excepciones. Release 412899048, asset 640851844, CDN verificado byte a byte.
-
+Oráculo 0/0 (317 .cs) · build real 0/0 ×3 · .tmod 387 entradas 2.709.698 B md5 `b5a2e1201c5354e365480b2b42694298` · headless 0 excepciones. Release 412963600, asset 641028165, CDN verificado byte a byte.
 ---
 # AethonMod — Historial de Cambios
+
+## Commit v6.50.120 — LA CORREA DEL DUELO, LA FUSIÓN ES UNA FASE, EL COLOSO DEL FINAL Y LA BOLSA A LA MANO
+
+**La letra**: «los jefes se alejan mucho del jugador» + «no se activa la
+mecanica, pongamosla como una fase, cuando tengan cierta cantidad de
+vida se activa y ambos se fucionen haciendose mas grandes, mas epicos e
+investiga jefes finales para crear ataques y escenarios que sirvan para
+eso» + «ademas no tengo las bolsa, no olvides que debes darcelo al
+jugador».
+
+**EL CAMBIO**: cuatro entregas — la correa, la fase, el coloso y la
+bolsa:
+
+- **LA CORREA DEL DUELO** (`AethonBoss`): la órbita de reposo de la
+  .119 escalaba con el cuerpo gigante (×2.5): 650-1100 px de radio y
+  −650 de altura — media pantalla de duelo perdida, el jefe flotando
+  inalcanzable. AHORA el reposo es ABSOLUTO: 300/360/420 px según la
+  furia (el borde del sol, con 275 de radio, a un paso del jugador) y
+  altura −300. Y LA CORREA GLOBAL: ningún estado de combate deja al
+  dios a más de `CORREA_DUENO = 820` px de la presa — el empuje de
+  retorno (crece con el exceso) vive en `AI()` justo tras el switch de
+  estados, cubriendo TODOS los flancos de ataque (1000-1400 px); no
+  aplica en órbita/fusión/muerte/llegada (cine o returns tempranos).
+- **LA FUSIÓN ES UNA FASE** (`PasoFusionPrevia` reescrito): el umbral
+  de los 1000 ABSOLUTOS exigía vaciar el 99,96% de 4,8 millones de
+  vida combinada — la mitad de la pelea JAMÁS se veía («no se activa
+  la mecánica»). AHORA, cuando la vida COMBINADA del par baja al **50%**
+  (o la red .119 del overkill atrapa a un gemelo: `rescatado`), LA
+  FUSIÓN SE DECRETA — solo la autoridad, solo el de menor whoAmI, UNA
+  vez — con ANUNCIO ÉPICO mundial (`Jefe.Aethon.Fusion` + Item74 +
+  Roar + Kick 12/24): ambos pasan a la cinemática intocables y EL
+  RECUERDO COMPLETO nace. El decreto MANDA sobre la órbita (orden:
+  fase → cine → red a mil); el bloque «ambos a mil» murió (la fase lo
+  cubre); la órbita individual a 1000 y el rescate de `CheckDead`
+  quedan como red intacta.
+- **EL COLOSO DEL FINAL** (`AethonBossFusionado` — la investigación
+  pedida: Moon Lord, el Lunatic Cultist, el Duque Fishron):
+  `EscalaCuerpo 3.40` (los gemelos 2.50), hitbox **770** (48 tiles de
+  sol), **3.000.000** de vida, las alturas de reposo suben con el
+  cuerpo (−640/−660/−680/−700). **LA NOCHE DEL ECLIPSE** (el
+  escenario): `Ilumina => false` — el mundo se APAGA (la mitad oscura
+  se comió el sol) — penumbra violeta propia y RELÁMPAGOS de fondo
+  cada 3-5 s (vena de 14 motas doradas + trueno grave + temblor
+  sutil), y cada FASE ABRE con trueno síncrono. **EL MENÚ QUE CRECE**:
+  P1-P2 los cinco clásicos · P3 +EL CONCILIO · P4 +LA TORMENTA · P5
+  +EL JUICIO (todo, la furia final). Las TRES ARMAS nuevas:
+  - **EL JUICIO FANTASMAL** (P5 · el Phantasmal Deathray del Moon
+    Lord): DOS ruedas de rayos a ±220 del coloso barriendo CRUZADAS
+    sobre la presa — reusa la primitiva `EstiloDanzaSolar` con seeds
+    fuera del rango del cabalgador (cada rueda anclada a su flanco).
+  - **EL CONCILIO DE ESPEJOS** (P3+ · el ritual del Cultista): dos
+    siembras de OCHO pernos `EstiloRitualConvergente` (estilo NUEVO
+    del `AtaqueFusionProjectile`) en círculo de 430/500 px alrededor
+    de la presa — CARGAN 55 t quietos brillando inofensivos y LUEGO
+    vuelan a 11,5 px/t al punto donde ESTABAS: el dodge legible.
+  - **LA TORMENTA DEL ABISMO** (P4+ · el sharknado del Duque): TRES
+    vórtices anclados a los flancos que acechan avanzando 2,2 px/t
+    (el cerco JAMÁS cierra a <600 px) escupiendo pernos en espiral
+    que gira 0,62 rad por ráfaga — polvo del vórtice: central ORO,
+    laterales violeta.
+- **LA BOLSA A LA MANO** (`AethonBoss.DropBotin` + `ShardPlayer`): el
+  20% de azar MURIÓ (dependía de RECOGER el drop del suelo y el azar
+  podía negarla por siempre — «no tengo la bolsa»). AHORA la primera
+  victoria de la familia (un gemelo final o EL RECUERDO COMPLETO)
+  ENTREGA LA BOLSA DE LA CRÍA **directamente al inventario** del
+  verdugo: flag `BolsaCriaEntregada` persistido en el .plr (una sola
+  vez por jugador para siempre), fanfarria de 26 chispas mitad
+  doradas mitad moradas + Item4 + el anuncio `Jefe.BolsaCria.
+  Entregada`; si no hay hueco, cae a sus pies con `noGrabDelay = 0`.
+  El Recuerdo Completo la sigue dropeando SIEMPRE al suelo (el botín
+  de la fusión es suyo).
+
+**Verificación**: oráculo 0/0 (317 .cs, 79 refs) · build real 0/0 ×3 ·
+.tmod 387 entradas 2.709.698 B md5 `b5a2e1201c5354e365480b2b42694298` ·
+headless 0 excepciones (mundo 120, puerto 7789, ciclo completo
+v6.50.120) · audit_v650120 TODO OK (heap + ldstr + constantes + árbol +
+hjson ×3 byte a byte + regresión .104-.119 intacta).
 
 ## Commit v6.50.119 — LA FUSIÓN RESCATADA, EL SOL GIGANTE, LA BOLSA DE LA CRÍA Y EL ANOCHECER
 
