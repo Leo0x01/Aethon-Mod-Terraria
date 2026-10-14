@@ -32,6 +32,18 @@ namespace AethonMod.Content.NPCs
     // reconectar) y en npc.GivenName (el nombre — el 56 lo viste en los
     // clientes; su primer tick de IA lo reconstruye de ai[1] si el cable
     // llegó tarde).
+    //
+    // v6.50.122 — LA DEVORACIÓN DEL DOBLE (la letra: «el grimorio siempre
+    // cae, pero si tienes uno en el inventario, el del inventario hace
+    // lo mismo que le hace a los jefes en la primera muerte, se lo come
+    // y lo devora como si fuera un jefe»): si el destinatario ya carga
+    // un Grimorio del Eterno y SE ACERCA (~420 px), el libro del
+    // inventario despierta — SELLOS RÚNICOS + LA SOMBRA DE LA PÁGINA se
+    // lo comen (CaidaDevoradaProjectile, el cine). El reloj del festín
+    // viaja en ai[2]: todas las pantallas ven temblar al devorado; la
+    // AUTORIDAD cierra a los 200 t (LaCaidaSistema.DevorarLibroCaido:
+    // marca el alma, apaga la pendiente y el Eterno dice su línea por
+    // los PENSAMIENTOS — EcoRed).
     // ======================================================================
     public class GrimorioDormido : ModNPC
     {
@@ -99,6 +111,7 @@ namespace AethonMod.Content.NPCs
             {
                 NPC.localAI[0] = 1f;
                 NPC.localAI[1] = NPC.position.Y; // la altura base (donde cayó)
+                NPC.localAI[2] = NPC.position.X; // v6.50.122 — la X base (el temblor del devorado)
                 NPC.ai[0] = 0f;                  // el reloj compartido del bobbing
                 NPC.netUpdate = true;
             }
@@ -119,21 +132,83 @@ namespace AethonMod.Content.NPCs
                     NPC.GivenName = Main.player[idx].name;
             }
 
+            // === v6.50.122 — LA DEVORACIÓN DEL DOBLE: cuando su
+            //     DESTINATARIO con un Grimorio del Eterno encima se acerca
+            //     (~420 px — justo antes del alcance de la charla), el
+            //     libro del inventario despierta y se lo COME. La
+            //     AUTORIDAD decide (SP/host/server); el reloj del festín
+            //     (ai[2]) viaja en el SyncNPC para que todas las pantallas
+            //     vean temblar al devorado. ===
+            if (NPC.ai[2] <= 0f && Main.netMode != NetmodeID.MultiplayerClient &&
+                NPC.ai[0] % 30f == 0f)
+            {
+                Player hambriento = DestinatarioVivo();
+                if (hambriento != null && !hambriento.dead &&
+                    Vector2.DistanceSquared(hambriento.Center, NPC.Center) < 420f * 420f &&
+                    LaCaidaSistema.TieneGrimorio(hambriento))
+                {
+                    NPC.ai[2] = 1f;              // el reloj del festín ARRANCA
+                    NPC.netUpdate = true;
+                    // LA PELÍCULA (netImportant: viaja sola a todas las pantallas)
+                    if (Main.projectile.Length > 0)
+                    {
+                        int pr = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Sombras.CaidaDevoradaProjectile>(),
+                            0, 0f, Main.myPlayer, NPC.whoAmI, hambriento.whoAmI);
+                        if (pr >= 0 && pr < Main.projectile.Length)
+                            Main.projectile[pr].timeLeft = 260;
+                    }
+                }
+            }
+
             // === EL RELOJ DEL SUEÑO (ai[0]: compartido con el cable) ===
             NPC.ai[0] += 1f;
 
-            // === EL BOBBING: Y ±6 px (sin(t·0.03)) — flota, no camina ===
             NPC.velocity = Vector2.Zero;
-            NPC.position.Y = NPC.localAI[1] + MathF.Sin(NPC.ai[0] * 0.03f) * 6f;
 
-            // === LA ROTACIÓN SUTIL: se mece como un péndulo perezoso ===
-            NPC.rotation = MathF.Sin(NPC.ai[0] * 0.021f) * 0.06f;
+            if (NPC.ai[2] <= 0f)
+            {
+                // === EL BOBBING: Y ±6 px (sin(t·0.03)) — flota, no camina ===
+                NPC.position.Y = NPC.localAI[1] + MathF.Sin(NPC.ai[0] * 0.03f) * 6f;
 
-            // === LA LUZ VIOLETA DEL SUEÑO (se ve en la noche del cráter) ===
-            Lighting.AddLight(NPC.Center, 0.32f, 0.24f, 0.50f);
+                // === LA ROTACIÓN SUTIL: se mece como un péndulo perezoso ===
+                NPC.rotation = MathF.Sin(NPC.ai[0] * 0.021f) * 0.06f;
 
-            // === LA RESPIRACIÓN DEL CABLE (posición por el cable, suave) ===
-            if (NPC.ai[0] % 45f == 0f) NPC.netUpdate = true;
+                // === LA LUZ VIOLETA DEL SUEÑO (se ve en la noche del cráter) ===
+                Lighting.AddLight(NPC.Center, 0.32f, 0.24f, 0.50f);
+
+                // === LA RESPIRACIÓN DEL CABLE (posición por el cable, suave) ===
+                if (NPC.ai[0] % 45f == 0f) NPC.netUpdate = true;
+            }
+            else
+            {
+                // === v6.50.122 — EL DEVORADO: el reloj del festín corre en
+                //     TODAS las máquinas y el libro TIEMBLA cada vez más
+                //     desesperado mientras se lo comen — determinista
+                //     (senos del reloj, jamás Main.rand: todas las
+                //     pantallas ven EL MISMO espasmo). ===
+                NPC.ai[2] += 1f;
+                float f = MathHelper.Clamp(NPC.ai[2] / 200f, 0f, 1f);
+                float temblor = 0.8f + 2.6f * f;
+                NPC.position.X = NPC.localAI[2]
+                    + MathF.Sin(NPC.ai[2] * 1.7f) * temblor
+                    + MathF.Sin(NPC.ai[2] * 3.1f) * temblor * 0.4f;
+                NPC.position.Y = NPC.localAI[1] + MathF.Sin(NPC.ai[2] * 2.3f) * temblor * 0.5f;
+                NPC.rotation = MathF.Sin(NPC.ai[2] * 0.35f) * 0.10f * f;
+
+                // LA LUZ SE LE MUERE mientras lo comen (la vida se le va
+                // por la boca de la sombra).
+                Lighting.AddLight(NPC.Center, 0.32f * (1f - f), 0.24f * (1f - f), 0.50f * (1f - f * 0.7f));
+
+                // LA AUTORIDAD CIERRA EL CUENTO a los 200 t (la película
+                // llega a su TRAGO y el Eterno se traga al doble).
+                if (Main.netMode != NetmodeID.MultiplayerClient && NPC.ai[2] >= 200f)
+                    LaCaidaSistema.DevorarLibroCaido(NPC, DestinatarioVivo());
+
+                // LA RESPIRACIÓN DEL CABLE (el temblor también viaja).
+                if (NPC.ai[0] % 15f == 0f) NPC.netUpdate = true;
+            }
         }
 
         // ================================================================
@@ -144,6 +219,20 @@ namespace AethonMod.Content.NPCs
         private bool EsDestinatario(Player p)
             => p != null && !string.IsNullOrEmpty(NPC.GivenName) && p.name == NPC.GivenName;
 
+        /// <summary>v6.50.122 — El destinatario VIVO de este libro (por
+        /// NOMBRE — el cable puede traer índices reciclados: el nombre es
+        /// la identidad del pacto).</summary>
+        private Player DestinatarioVivo()
+        {
+            if (string.IsNullOrEmpty(NPC.GivenName)) return null;
+            for (int i = 0; i < Main.maxPlayers; i++)
+            {
+                Player p = Main.player[i];
+                if (p != null && p.active && p.name == NPC.GivenName) return p;
+            }
+            return null;
+        }
+
         public override string GetChat()
         {
             Player yo = Main.LocalPlayer;
@@ -152,7 +241,14 @@ namespace AethonMod.Content.NPCs
             if (!EsDestinatario(yo))
                 return Language.GetTextValue("Mods.AethonMod.Caida.OtroJugador");
 
+            // v6.50.122 — LO ESTÁN DEVORANDO: el Eterno del inventario se
+            // lo está comiendo — ya no puede hablar (el festín corre).
+            if (NPC.ai[2] > 0f)
+                return Language.GetTextValue("Mods.AethonMod.Caida.Devorandose");
+
             // DESTINATARIO CON GRIMORIO YA: una sola alma, un solo libro.
+            // (El caso raro: charló ANTES del pulso de los 30 t del
+            // gatillo — al siguiente tick el Eterno lo devora igual.)
             if (LaCaidaSistema.TieneGrimorio(yo))
                 return Language.GetTextValue("Mods.AethonMod.Caida.YaTienes");
 
@@ -168,8 +264,9 @@ namespace AethonMod.Content.NPCs
             button2 = "";
             Player yo = Main.LocalPlayer;
 
-            // EL BOTÓN SOLO PARA LA MANO CORRECTA (y sin libro ya).
-            if (EsDestinatario(yo) && !LaCaidaSistema.TieneGrimorio(yo))
+            // EL BOTÓN SOLO PARA LA MANO CORRECTA (y sin libro ya — y sin
+            // festín en curso: mientras lo devoran no hay nada que tomar).
+            if (EsDestinatario(yo) && NPC.ai[2] <= 0f && !LaCaidaSistema.TieneGrimorio(yo))
                 button = Language.GetTextValue("Mods.AethonMod.Caida.BotonTomar");
         }
 
@@ -228,9 +325,14 @@ namespace AethonMod.Content.NPCs
             VFXCore.ReabrirLoteVanilla();
 
             // === 2. LAS "Z z z" (el sueño de los NPC de vanilla — tres Z
-            //     ascendentes, crecientes, con alpha pulsante) ===
-            try { DibujarZzz(spriteBatch, screenPos); }
-            catch { }
+            //     ascendentes, crecientes, con alpha pulsante). v6.50.122 —
+            //     SIN ZZZ MIENTRAS LO DEVORAN: al comérselo se le muere el
+            //     sueño (solo le queda el espasmo del cuerpo). ===
+            if (NPC.ai[2] <= 0f)
+            {
+                try { DibujarZzz(spriteBatch, screenPos); }
+                catch { }
+            }
 
             // === 3. EL LIBRO: se dibuja AQUÍ (violeta SIEMPRE — el aura
             //     del sueño no se apaga con la luz del mundo) ===
@@ -238,6 +340,10 @@ namespace AethonMod.Content.NPCs
             {
                 Texture2D tex = Terraria.GameContent.TextureAssets.Npc[Type].Value;
                 Color color = Color.Lerp(drawColor, new Color(205, 175, 255), 0.5f);
+                // v6.50.122 — EL DEVORADO SE APAGA: mientras se lo comen,
+                // el doble pierde cuerpo (la vida se le va por la boca).
+                float fDev = MathHelper.Clamp(NPC.ai[2] / 200f, 0f, 1f);
+                color *= 1f - 0.45f * fDev;
                 spriteBatch.Draw(tex, NPC.Center - screenPos, null, color,
                     NPC.rotation, tex.Size() * 0.5f, 1f, SpriteEffects.None, 0f);
             }

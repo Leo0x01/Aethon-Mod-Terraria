@@ -22,8 +22,8 @@ namespace AethonMod.Content.Globals
     /// voltean solas, cosas que se movieron de noche, SOMBRAS con
     /// ojos... al pueblo LE TIENE MIEDO al libro, y ya no lo disimula.
     ///
-    /// Además, EL RECLAMO GARANTIZADO: la pareja de mascotas registra
-    /// cada golpe de sus travesuras en AethonMenorPet.TicksMolestado
+    /// Además, EL RECLAMO GARANTIZADO: el mini grimorio registra
+    /// cada golpe de sus travesuras en ParejaCerebro.TicksMolestado
     /// (npcIndex → tick del último mordisco). El vecino molestado le
     /// reclama al jugador en su próxima charla, con cara de pocos
     /// amigos — UNA vez por pleito, sin repetir.
@@ -81,13 +81,13 @@ namespace AethonMod.Content.Globals
                 return;
 
             // === 1. EL RECLAMO GARANTIZADO: si ESTE vecino acaba de ser
-            //     molestado por la pareja (menos de 5400 ticks = minuto
-            //     y medio de rencor), le suelta su reclamo al jugador.
-            //     _reclamados.Add devuelve true solo la PRIMERA vez de
-            //     este pleito — después, el vecino se guarda la queja.
+            //     molestado por el mini grimorio (menos de 5400 ticks =
+            //     minuto y medio de rencor), le suelta su reclamo al
+            //     jugador. _reclamados.Add devuelve true solo la PRIMERA vez
+            //     de este pleito — después, el vecino se guarda la queja.
             //     (Antes de mirar nada: la limpieza del perdón.)
             LimpiarReclamosSiHayPerdon();
-            if (AethonMenorPet.TicksMolestado.TryGetValue(npc.whoAmI, out int tickGolpe))
+            if (ParejaCerebro.TicksMolestado.TryGetValue(npc.whoAmI, out int tickGolpe))
             {
                 long edad = (long)Main.GameUpdateCount - tickGolpe;
                 if (edad >= 0L && edad < 5400L && _reclamados.Add(npc.whoAmI))
@@ -122,12 +122,15 @@ namespace AethonMod.Content.Globals
             return _claves.TryGetValue(npc.type, out string clave) ? clave : "Genericos";
         }
 
-        /// <summary>¿El jugador local lleva puesta la MASCOTA? El buff
-        /// del Aethon Menor es quien sostiene a la pareja (el gemelo
-        /// oscuro nace y vive de ese mismo buff).</summary>
+        /// <summary>¿El jugador local lleva puesta alguna MASCOTA? Las
+        /// DOS cuentan: el Aethon Menor (la pareja luz+oscuridad) y el
+        /// Grimorio Menor (el mini libro de las travesuras — las
+        /// mordidas son suyas, pero la cría de luz también da de qué
+        /// hablar).</summary>
         private static bool TieneMascota()
         {
-            return Main.LocalPlayer.HasBuff(ModContent.BuffType<AethonMenorBuff>());
+            return Main.LocalPlayer.HasBuff(ModContent.BuffType<AethonMenorBuff>()) ||
+                Main.LocalPlayer.HasBuff(ModContent.BuffType<GrimorioMenorBuff>());
         }
 
         /// <summary>¿El jugador local carga el GRIMORIO? Con que esté
@@ -157,7 +160,7 @@ namespace AethonMod.Content.Globals
             if (_reclamados.Count == 0)
                 return;
             uint golpeMasReciente = 0u;
-            foreach (int t in AethonMenorPet.TicksMolestado.Values)
+            foreach (int t in ParejaCerebro.TicksMolestado.Values)
             {
                 if ((uint)t > golpeMasReciente)
                     golpeMasReciente = (uint)t;

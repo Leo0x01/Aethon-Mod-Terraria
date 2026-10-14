@@ -205,11 +205,27 @@ Items: {
 		DisplayName: Brood Pouch
 		Tooltip:
 			'''
-			The memory's pair sleeps inside: the brood of LIGHT
-			and its DARK twin — both pets in a single pouch.
-			Open it (right click) and they wake up together.
+			Both pets of the house sleep inside: the memory PAIR
+			(the brood of LIGHT and her DARK twin — the BOSS in
+			miniature) and the LESSER GRIMOIRE (the BOOK in
+			miniature, with its mini minions). Open it (right
+			click) and both of them wake up.
 			'''
-		Abierta: The memory's brood awakens — the light-and-dark pair follows you.
+		Abierta: Both pets awaken — the memory pair and the lesser grimoire follow you.
+	}
+
+	GrimorioMenorItem: {
+		DisplayName: Lesser Grimoire
+		Tooltip:
+			'''
+			The Eternal Grimoire… IN MINIATURE (the OTHER pet: the
+			BOOK miniature, not the light boss).
+			It floats by your shoulder with its eye awake; if you
+			stand still too long it gets bored and flies off to
+			PESTER the neighbors with its 3 mini minions and its
+			page umbrella (1 damage, 10 hits max… then it gets
+			bored again).
+			'''
 	}
 
 	MedusaNebularStaff: {
@@ -1901,6 +1917,8 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	GrimorioMenorPet.DisplayName: Lesser Grimoire (pet)
+	CaidaDevoradaProjectile.DisplayName: Devouring of the Double
 	// v6.50.91 — the Nervous One's spirit and its hunting shadow
 	GrimorioNerviosoFlotante.DisplayName: The Nervous Grimoire
 	SombraPaginaCaza.DisplayName: The Nervous Grimoire's Shadow of the Page
@@ -1921,6 +1939,11 @@ Buffs: {
 	AethonMenorBuff: {
 		DisplayName: Lesser Aethon
 		Description: A living spark of the grimoire itself lights your way with the rainbow
+	}
+
+	GrimorioMenorBuff: {
+		DisplayName: Lesser Grimoire
+		Description: A miniature grimoire floats by your shoulder — it gets bored, visits town and pesters the neighbors
 	}
 
 	NebulaJellyfishBuff: {
@@ -2265,6 +2288,13 @@ Caida: {
 	PrimerPensamiento: At last.
 	CometaCae: ✦ A black star tears open the sky… and it falls toward you.
 	Impacto: ✦ The sky went silent where the star kissed the earth: YOUR GRIMOIRE AWAITS.
+	Devorado:
+		'''
+		Hmm… the sky sent you a fallen DOUBLE — and everything fallen belongs to me.
+		One per soul, bearer: what the sky repeats, I EAT.
+		(It was delicious. The sky cooks just like before the breaking.)
+		'''
+	Devorandose: (the book trembles… something is devouring it — it can no longer speak)
 }
 
 TestingPlayer: {

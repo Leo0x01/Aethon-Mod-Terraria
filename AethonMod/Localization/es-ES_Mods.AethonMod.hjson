@@ -205,11 +205,26 @@ Items: {
 		DisplayName: Bolsa de la Cría
 		Tooltip:
 			'''
-			La pareja del recuerdo duerme dentro: la cría de LUZ
-			y su gemela de OSCURIDAD — las dos mascotas en una
-			sola bolsa. Ábrela (clic derecho) y despiertan juntas.
+			Las DOS mascotas de la casa duermen dentro: la PAREJA
+			del recuerdo (la cría de LUZ y su gemela de OSCURIDAD
+			— la miniatura del JEFE) y el GRIMORIO MENOR (la
+			miniatura del LIBRO, con sus mini minions). Ábrela
+			(clic derecho) y despiertan las dos.
 			'''
-		Abierta: La cría del recuerdo despierta — la pareja luz y oscuridad te sigue.
+		Abierta: Las dos mascotas despiertan — la pareja del recuerdo y el mini grimorio te siguen.
+	}
+
+	GrimorioMenorItem: {
+		DisplayName: Grimorio Menor
+		Tooltip:
+			'''
+			El Grimorio del Eterno… EN MINIATURA (la OTRA mascota:
+			la miniatura del LIBRO, no del jefe de luz).
+			Flota a tu hombro con su ojo despierto; si te quedas
+			quieto, se aburre y vuela a MOLESTAR a los vecinos con
+			sus 3 mini minions y su sombrilla de página (1 de daño,
+			tope 10 golpes… y luego se aburre).
+			'''
 	}
 
 	MedusaNebularStaff: {
@@ -1900,6 +1915,8 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
 	AethonMenorPet.DisplayName: Aethon Menor (mascota)
 	MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
+	GrimorioMenorPet.DisplayName: Grimorio Menor (mascota)
+	CaidaDevoradaProjectile.DisplayName: Devoración del Doble
 	// v6.50.91 — the Nervous One's spirit and its hunting shadow
 	GrimorioNerviosoFlotante.DisplayName: El Grimorio Nervioso
 	SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
@@ -1920,6 +1937,11 @@ Buffs: {
 	AethonMenorBuff: {
 		DisplayName: Aethon Menor
 		Description: Una chispa viva del propio grimorio alumbra tu camino con el arcoíris
+	}
+
+	GrimorioMenorBuff: {
+		DisplayName: Grimorio Menor
+		Description: La miniatura del grimorio flota a tu hombro — se aburre, viaja al pueblo y molesta a los vecinos
 	}
 
 	NebulaJellyfishBuff: {
@@ -2264,6 +2286,13 @@ Caida: {
 	PrimerPensamiento: Por fin.
 	CometaCae: ✦ Una estrella negra se desgarra en el cielo… y cae hacia ti.
 	Impacto: ✦ El cielo calló donde la estrella besó la tierra: TU GRIMORIO TE ESPERA.
+	Devorado:
+		'''
+		Mmm… el cielo te mandó un DOBLE caído — y todo lo caído me pertenece.
+		Uno por alma, portador: lo que el cielo repite, YO ME LO COMO.
+		(Estaba delicioso. El cielo cocina igual que antes de la rotura.)
+		'''
+	Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
 }
 
 TestingPlayer: {

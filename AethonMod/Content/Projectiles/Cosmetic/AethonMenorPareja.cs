@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -9,19 +10,22 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmetic
 {
     /// <summary>
-    /// ParejaCerebro — v6.50.117 — EL CEREBRO DE LA PAREJA DE MASCOTAS
-    /// (ideas 15 y 21 de la letra del usuario). El «cerebro» es el
-    /// AethonMenorPet (el claro): este archivo ES su cerebro extraído a
-    /// un bloque nuevo (la regla de la casa) — el claro lo llama desde
-    /// su AI (Tick + ElegirMeta) y desde su PreDraw (DibujarExtrasAlfa /
-    /// DibujarExtrasAditivos).
+    /// ParejaCerebro — v6.50.122 — EL CEREBRO DEL GRIMORIO MENOR (la
+    /// mascota minigrimorio — ideas 15/21 de la letra original). NACIÓ
+    /// en la .117 montado en la cría de luz… hasta que el usuario
+    /// desenredó los conceptos: la mascota de luz es la miniatura del
+    /// JEFE (solo alumbra, estalla y se fusiona) y ESTA máquina (los
+    /// mini minions, la sombrilla, el pueblo, el AFK) es el repertorio
+    /// del LIBRO en miniatura. El huésped es el GrimorioMenorPet: lo
+    /// llama desde su AI (Tick + ElegirMeta) y desde su PreDraw
+    /// (DibujarExtrasAlfa / DibujarExtrasAditivos).
     ///
     /// LA MÁQUINA (la letra, punto por punto):
     /// · EL AFK: si el dueño no se mueve (≥4 px contra su ANCLA) durante
-    ///   3600 ticks (~1 min), la pareja se aburre Y SALE A MOLESTAR al
-    ///   vecino CON CASA más cercano (townNPC + homeTileX ≥ 0 + !homeless)
-    ///   a ≤1200 px del JUGADOR. Cualquier movimiento real del dueño
-    ///   resetea el reloj — y si la pareja estaba de misión, ABORTA TODO
+    ///   3600 ticks (~1 min), el mini grimorio se aburre Y SALE A
+    ///   MOLESTAR al vecino CON CASA más cercano (townNPC + homeTileX ≥ 0
+    ///   + !homeless) a ≤1200 px del JUGADOR. Cualquier movimiento real
+    ///   del dueño resetea el reloj — y si estaba de misión, ABORTA TODO
     ///   y vuelve inmediatamente a su lado.
     /// · LAS DOS FORMAS (la letra: «tendrá 2 formas, usando sus pequeños
     ///   mini minions o usando su pequeña sombra de la página»), al
@@ -76,9 +80,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// <summary>El compás de la mordida de la sombrilla (FORMA 1).</summary>
         private const int TICKS_MORDIDA = 90;
 
+        /// <summary>EL REGISTRO DEL PUEBLO (v6.50.117 — nació en
+        /// AethonMenorPet; v6.50.122 se mudó AQUÍ, con la máquina que lo
+        /// escribe): npcIndex → el tick (Main.GameUpdateCount) de la
+        /// ÚLTIMA molestia. Lo escriben los golpes del mini grimorio —
+        /// los diálogos de reclamo de los NPCs (PuebloChismesNPC) lo leen
+        /// para protestar («¿otra vez tú?»).</summary>
+        public static readonly Dictionary<int, int> TicksMolestado = new();
+
         /// <summary>
-        /// EL ESTADO DE LA PAREJA — una instancia por AethonMenorPet (un
-        /// campo privado del claro). TODO determinista: sin Main.rand.
+        /// EL ESTADO DEL MINI GRIMORIO — una instancia por GrimorioMenorPet
+        /// (un campo privado de la mascota). TODO determinista: sin Main.rand.
         /// </summary>
         public sealed class Estado
         {
@@ -150,9 +162,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             {
                 e.AnclaDueño = dueño.Center;
                 e.TicksQuieto = 0;
-                // EL DUEÑO SE MOVIÓ y la pareja estaba de misión: ABORTA
-                // TODO y vuelve INMEDIATAMENTE a su lado (la letra: la
-                // mascota jamás se aleja de un dueño despierto).
+                // EL DUEÑO SE MOVIÓ y el mini grimorio estaba de misión:
+                // ABORTA TODO y vuelve INMEDIATAMENTE a su lado (la letra:
+                // la mascota jamás se aleja de un dueño despierto).
                 if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR)
                 {
                     e.Modo = MODO_VOLVER;
@@ -277,8 +289,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         NPC n = NpcValido(e.NpcObjetivo);
                         if (n != null)
                         {
-                            // LA PAREJA RODEA a su víctima: elipse a ~110 px
-                            // (la pareja entera — el gemelo orbita al claro).
+                            // EL MINI GRIMORIO RODEA a su víctima: elipse a
+                            // ~110 px (los mini ojos orbitan a ÉL — el
+                            // centro de la cacería es el libro).
                             float a = e.TicksEnModo * 0.045f;
                             meta = n.Center + new Vector2(MathF.Cos(a) * 110f,
                                 MathF.Sin(a) * 62f - 26f);
@@ -304,7 +317,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // EL REGISTRO DEL PUEBLO (lo leerán los diálogos de reclamo
             // de los NPCs): vecino → tick (GameUpdateCount) de la última
             // molestia.
-            AethonMenorPet.TicksMolestado[n.whoAmI] = (int)Main.GameUpdateCount;
+            TicksMolestado[n.whoAmI] = (int)Main.GameUpdateCount;
 
             // === 1 DE DAÑO, JAMÁS MÁS — Y SIN ACREDITACIÓN AL JUGADOR
             //     (la letra: «esto no afecta en nada al jugador»). LA
@@ -418,9 +431,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             e.Embestida = -1;
             e.TicksMordisco = 0;
             e.TicksEnModo = 0;
-            // El reloj del AFK vuelve a cero: entre misión y misión, la
-            // pareja espera SIEMPRE un minuto entero de quietud — así el
-            // bucle «molesta → vuelve → descansa → molesta» respira. (El
+            // El reloj del AFK vuelve a cero: entre misión y misión, el
+            // mini grimorio espera SIEMPRE un minuto entero de quietud —
+            // así el bucle «molesta → vuelve → descansa → molesta» respira. (El
             // ANCLA NO se toca: sigue midiéndose contra la quietud REAL
             // del dueño — si se movió durante la misión, el próximo tick
             // lo detecta y aborta como manda la letra.)
@@ -431,11 +444,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         //  EL DIBUJADO — LOTE ALFA (lo NEGRO: la sombrilla y los ojos)
         // ==================================================================
 
-        /// <summary>LOS EXTRAS DE LA PAREJA, LOTE ALFA: la sombrilla de
-        /// página bajo el vecino (FORMA 1) y los discos NEGROS de los 3
+        /// <summary>LOS EXTRAS DEL MINI GRIMORIO, LOTE ALFA: la sombrilla
+        /// de página bajo el vecino (FORMA 1) y los discos NEGROS de los 3
         /// mini ojos — lo negro NO vive en el aditivo (negro = suma 0 =
         /// invisible). Se vuelca SOLO (Begin→Quads→FlushAlpha) ANTES del
-        /// lote del cuerpo del claro: al salir, el búfer queda limpio.</summary>
+        /// lote del cuerpo del mini grimorio: al salir, el búfer queda
+        /// limpio.</summary>
         public static void DibujarExtrasAlfa(Projectile p, Estado e)
         {
             if (Main.netMode == NetmodeID.Server) return;
@@ -487,36 +501,38 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         // ==================================================================
-        //  EL DIBUJADO — LOTE ADITIVO (el sol rúnico y los iris)
+        //  EL DIBUJADO — LOTE ADITIVO (el anillo rúnico oscuro y los iris)
         // ==================================================================
 
-        /// <summary>LOS EXTRAS DE LA PAREJA, LOTE ADITIVO: EL MINI SOL
-        /// RÚNICO dorado (1, orbitando al claro) y EL IRIS VIOLETA de
-        /// los 3 mini ojos. NO vuelca nada: se suma al lote del cuerpo
-        /// del claro (un solo volcado — la llaman justo antes de su
-        /// FlushAdditive).</summary>
+        /// <summary>LOS EXTRAS DEL MINI GRIMORIO, LOTE ADITIVO: EL ANILLO
+        /// RÚNICO OSCURO (violeta, orbitando al libro) y EL IRIS VIOLETA
+        /// de los 3 mini ojos. NO vuelca nada: se suma al lote del cuerpo
+        /// del mini grimorio (un solo volcado — la llaman justo antes de
+        /// su FlushAdditive).</summary>
         public static void DibujarExtrasAditivos(Projectile p, Estado e)
         {
             float t = Main.GlobalTimeWrappedHourly;
 
-            // === EL MINI SOL RÚNICO (idea 15): un disco dorado con su
+            // === EL ANILLO RÚNICO OSCURO (idea 15, re-vestida en la .122:
+            //     nació como mini sol DORADO de la cría de luz — la máquina
+            //     cambió de dueño y de paleta): un disco VIOLETA con su
             //     anillo de 6 marcas rúnicas (pequeñas rayitas), orbitando
-            //     al claro — el sol en miniatura del sol en miniatura. ===
+            //     al mini grimorio — las runas del libro en miniatura. ===
             {
                 float ang = t * 0.6f + 0.7f;
-                Vector2 sol = p.Center + new Vector2(MathF.Cos(ang) * 26f, MathF.Sin(ang) * 26f * 0.8f);
+                Vector2 runa = p.Center + new Vector2(MathF.Cos(ang) * 26f, MathF.Sin(ang) * 26f * 0.8f);
                 float tam = 7f * (0.9f + 0.1f * MathF.Sin(t * 2.2f));
-                Color oro = new Color(245, 196, 81, 255);
-                VFXCore.Quad(sol, oro * 0.34f, new Vector2(tam * 3.2f, tam * 3.2f));
-                VFXCore.Quad(sol, oro * 0.60f, new Vector2(tam * 1.7f, tam * 1.7f));
-                VFXCore.Quad(sol, new Color(255, 250, 225, 255) * 0.80f, new Vector2(tam * 0.8f, tam * 0.8f));
-                // EL ANILLO RÚNICO: 6 rayitas girando con el sol.
+                Color violeta = new Color(150, 90, 225, 255);
+                VFXCore.Quad(runa, violeta * 0.34f, new Vector2(tam * 3.2f, tam * 3.2f));
+                VFXCore.Quad(runa, violeta * 0.60f, new Vector2(tam * 1.7f, tam * 1.7f));
+                VFXCore.Quad(runa, new Color(236, 210, 255, 255) * 0.80f, new Vector2(tam * 0.8f, tam * 0.8f));
+                // EL ANILLO RÚNICO: 6 rayitas girando con la runa.
                 float giro = t * 0.5f;
                 for (int m = 0; m < 6; m++)
                 {
                     float a = giro + m * MathHelper.TwoPi / 6f;
                     Vector2 dir = new Vector2(MathF.Cos(a), MathF.Sin(a));
-                    VFXCore.Line(sol + dir * (tam * 1.15f), sol + dir * (tam * 1.9f), oro * 0.5f, 1.5f);
+                    VFXCore.Line(runa + dir * (tam * 1.15f), runa + dir * (tam * 1.9f), violeta * 0.5f, 1.5f);
                 }
             }
 
@@ -553,12 +569,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             cerrados = new bool[3];
             float t = Main.GlobalTimeWrappedHourly;
 
-            // EL CENTRO DE LA PAREJA: el punto medio claro+oscuro (si el
-            // gemelo no llegó, el claro solito).
+            // v6.50.122 — EL CENTRO ES EL MINI GRIMORIO MISMO (antes era
+            // el punto medio de la pareja de luz: la máquina cambió de
+            // dueño — los mini ojos orbitan AL LIBRO).
             Vector2 centro = p.Center;
-            Projectile oscuro = BuscarOscuro(p.owner);
-            if (oscuro != null)
-                centro = (centro + oscuro.Center) * 0.5f;
 
             for (int i = 0; i < 3; i++)
             {
@@ -623,24 +637,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             return n != null && n.active && n.townNPC ? n : null;
         }
 
-        /// <summary>EL HERMANO CLARO de este dueño (el líder de la pareja).</summary>
+        /// <summary>EL HERMANO CLARO de este dueño (el líder de la pareja
+        /// de luz — lo usa AethonMenorOscuroPet para su órbita/fusión; el
+        /// mini grimorio NO lo usa: él es su propio centro).</summary>
         public static Projectile BuscarClaro(int dueño)
         {
             int tipo = ModContent.ProjectileType<AethonMenorPet>();
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile pr = Main.projectile[i];
-                if (pr != null && pr.active && pr.type == tipo && pr.owner == dueño)
-                    return pr;
-            }
-            return null;
-        }
-
-        /// <summary>EL HERMANO OSCURO de este dueño (para centrar la
-        /// órbita de los mini ojos en la PAREJA completa).</summary>
-        public static Projectile BuscarOscuro(int dueño)
-        {
-            int tipo = ModContent.ProjectileType<AethonMenorOscuroPet>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile pr = Main.projectile[i];

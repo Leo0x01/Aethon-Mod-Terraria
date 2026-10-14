@@ -38,8 +38,14 @@ namespace AethonMod.Content.Systems
     //      ítem de hacer de noche y luego de día»). Ahora el cielo cae
     //      SIEMPRE en la primera noche de cada jugador (el ESPECTÁCULO
     //      no se le niega a nadie) y la regla «un grimorio por alma»
-    //      vive donde siempre vivió: en LA TOMA — TomarElLibro rechaza
-    //      al portador y el Grimorio Dormido le habla de tú a tú.
+    //      vive donde siempre vivió: en LA TOMA. v6.50.122 — Y SI YA
+    //      TIENES UNO, TE LO COMEN: TomarElLibro ya no RECHAZA al
+    //      portador con una charla — el Eterno del inventario hace lo
+    //      mismo que con los jefes en la primera muerte: SELLOS + LA
+    //      SOMBRA DE LA PÁGINA devoran al doble caído (GrimorioDormido
+    //      gatilla al acercarse, CaidaDevoradaProjectile actúa,
+    //      DevorarLibroCaido cierra) y el libro dice su línea por los
+    //      PENSAMIENTOS (EcoRed).
     //   2. El cometa cruza el cielo, pica, excava su cráter y deja al
     //      GRIMORIO DORMIDO flotando en el centro (NPC town con ventana
     //      de diálogo vanilla) + registra aquí su CaidaPendiente.
@@ -495,6 +501,68 @@ namespace AethonMod.Content.Systems
                 {
                     // SP puro: la sensación es toda local.
                     SensacionDelPacto(p);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.122 — LA DEVORACIÓN DEL DOBLE (la letra: «si tienes uno
+        /// en el inventario, el del inventario hace lo mismo que le hace
+        /// a los jefes en la primera muerte, se lo come y lo devora como
+        /// si fuera un jefe»). La cierra GrimorioDormido a los 200 t del
+        /// festín (solo AUTORIDAD): marca el alma (el cielo no vuelve a
+        /// insistir), apaga la pendiente, suelta la VOZ del Eterno por
+        /// los PENSAMIENTOS (EcoRed) y despide al doble.
+        /// </summary>
+        public static void DevorarLibroCaido(NPC libro, Player p)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                if (libro == null || !libro.active) return;
+
+                // LA PENDIENTE SE APAGA (el doble ya cumplió su cuento).
+                QuitarPendiente(libro.Center);
+
+                if (p != null && p.active)
+                {
+                    // LA MARCA DEL ALMA: el cielo no vuelve a insistir con
+                    // quien ya carga su grimorio — la regla 1-por-alma vive
+                    // en la posesión Y en la toma… y el devorado TAMBIÉN
+                    // cuenta: esta fue SU caída.
+                    p.GetModPlayer<Players.ShardPlayer>().CaidaRecibida = true;
+
+                    // LA VOZ DEL ETERNO — directa a los PENSAMIENTOS
+                    // (EcoLib, morada): el libro comenta SU festín.
+                    EcoRed.HablarAlPortador(p, "Mods.AethonMod.Caida.Devorado",
+                        new Color(178, 110, 236), rugido: true, escala: 0.72f, prioridad: true);
+                }
+
+                // LA SENSACIÓN DEL TRAGO (la máquina con pantalla).
+                if (!Main.dedServ)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item113.WithPitchOffset(-0.45f), libro.Center);
+                    for (int i = 0; i < 22; i++)
+                    {
+                        Dust d = Dust.NewDustPerfect(libro.Center, DustID.Shadowflame,
+                            new Vector2(Main.rand.NextFloat(-2.6f, 2.6f),
+                                Main.rand.NextFloat(-3.4f, 0.4f)), 160,
+                            new Color(110, 40, 170), 0.9f);
+                        d.noGravity = true;
+                    }
+                }
+
+                // EL DOBLE SE MARCHA (su cita terminó en la boca del Eterno).
+                libro.active = false;
+                if (Main.netMode == NetmodeID.Server)
+                {
+                    Terraria.NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, libro.whoAmI);
+                    // LA MARCA del .plr del cliente (la dádiva por cable —
+                    // el trago también se siente allá).
+                    if (p != null && p.active)
+                        EcoRed.OtorgarCaida(p);
                 }
             }
             catch { }
