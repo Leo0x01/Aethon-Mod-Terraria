@@ -1,12 +1,125 @@
-# v6.50.117 — LA CAÍDA, EL RECUERDO PARTIDO EN DOS Y LOS CHISMES DEL PUEBLO
+# v6.50.118 — EL COMETA CERCA, EL RASTRO OSCURO, LA CRÍA GARANTIZADA Y EL ACECHO DEL PUEBLO
 
-**Los 3 fixes** (hambre 0% que seguía cazando / corona de ojos dispareja / guardián de la mazmorra amontonado y cena que no disparaba) + **LA CAÍDA** (obtención canónica: cometa de tinta negro-morado por jugador la primera noche, grimorio dormido con Zzz en el cráter, ventana de diálogo vanilla, un grimorio por alma, PURGA TOTAL del Fragmento Génesis) + **el jefe renacido**: «Fragmentos de un recuerdo lejano - Aethon» pelea en pareja luz+oscuridad al mismo tiempo (batón de turnos, mediodía eterno), órbita intocable a 1000, FUSIÓN con explosión lenta → **EL RECUERDO COMPLETO** con 6 ataques nuevos (Eclipse Gemelo, Sol Moribundo que atrae, Rejilla Láser bicolor, Lluvia de Páginas, Anillos de Fusión, Último Aliento a 1%) + **el grimorio sale del pueblo** + **la cría gemela** (Aethon Menor oscuro sin luz, fusión en los equinoccios reales, anillos rúnicos, 3 mini ojos, molestar NPCs con AFK: 2 formas, 1 daño sin acreditación, tope 10 golpes, emotes) + **702 diálogos del pueblo** (25 NPCs × travesuras/terror/reclamos, ×3 idiomas).
+**La cría gemela garantizada** (el Recuerdo Completo deja al Aethon Menor SIEMPRE — la vía canónica de la mascota; el mismo ítem engendra a la pareja luz+oscuridad) + **el cometa cae cerca del jugador** (32–64 tiles a un lado del destinatario — la .117 lo medía desde el spawn a ~30 pantallas) + **el rastro oscuro del cráter** (piedra de ébano 80% + obsidiana 20%, esparcido con gradiente, corazón limpio para el libro dormido y el aro del borde tintado — bloques EXISTENTES de vanilla, sin ninguno nuevo) + **el acecho del pueblo** (el refugio de la .117 murió: el libro se queda dentro del área del jugador, merodea a un vecino mirándolo fijo, se le acerca demasiado cada tanto con el emote de susto, rota de víctima cada ~15 s, jamás lanza sombras en el pueblo y jamás sale de la correa de 850 px del dueño).
 
-Oráculo 0/0 (316 .cs) · build real 0/0 ×2 · .tmod 386 entradas 2.703.197 B md5 `406879da4f6da360ab1fac91f883a089` · headless 0 excepciones. Release 412718298, asset 640387148, CDN verificado byte a byte.
+Oráculo 0/0 (316 .cs) · build real 0/0 ×2 · .tmod 386 entradas 2.704.227 B md5 `001b3e077fe0ba136ae09d6e42595c6b` · headless 0 excepciones. Release 412790687, asset 640566830, CDN verificado byte a byte.
 
 ---
 
 # AethonMod — Historial de Cambios
+
+## Commit v6.50.118 — EL COMETA CERCA, EL RASTRO OSCURO, LA CRÍA GARANTIZADA Y EL ACECHO DEL PUEBLO
+
+**La letra**: «Asegúrate de que el jugador pueda conseguir las mascotas,
+y que el cometa de tinta caiga cerca del jugador, además el cráter debe
+dejar algún rastro de algún bloque oscuro, en el juego de terraria hay
+métodos para eso, no necesita bloques nuevos se pueden reutilizar los
+bloques existentes» + «eso de que el grimorio sale del pueblo esta mal,
+el grimorio no debe salir del área del jugador, siempre debe estar cerca
+del jugador, lo que debe hacer es que si el jugador está en el pueblo,
+el grimorio sale como si fuera a cazar pero lo que hace es solo vigilar
+a los npc y acosarlos aterradormente».
+
+**EL CAMBIO**: cuatro entregas — la cría, el cometa, el rastro y el
+acecho:
+
+- **LA CRÍA GEMELA GARANTIZADA**: `AethonBossFusionado.DropBotin` deja
+  el `AethonMenorItem` **SIEMPRE** — el Recuerdo Completo (el resultado
+  de la fusión a 1000) suelta a su cría, y el mismo ítem engendra a la
+  pareja completa (la mascota de luz y su gemela oscura con su fusión
+  de equinoccio). Ya no es un 20% de azar del jefe de luz ni el regalo
+  de pruebas: **la vía canónica de las mascotas ES esta**. El 20%
+  histórico del jefe de luz queda gateado con `!EsFusion` (sin el
+  gate, el botín heredado dejaría DOS crías).
+- **EL COMETA CERCA DEL JUGADOR**: `PuntoDeImpacto(Player)` — la .117
+  medía el impacto desde el **spawn del mundo** (~30 pantallas): un
+  jugador con base lejos del spawn se perdía la caída y el cráter caía
+  a un océano de distancia. Ahora el punto vive a **32–64 tiles a un
+  lado del destinatario** (en pantalla o a un paso caminando — lo ve
+  cruzar el cielo y caer), con la superficie de esa columna (primera
+  tile sólida del cielo hacia abajo) y, si la columna es aire puro, la
+  **altura del jugador** como respaldo (antes la del spawn).
+- **EL RASTRO OSCURO DEL CRÁTER** (`ExcavarCrater`): donde la tinta
+  golpeó queda **piedra de ébano** (`TileID.Ebonstone = 25`,
+  verificado al IL de este tML — el bloque oscuro de la Corrupción,
+  con sus vetas moradas) al 80% y **obsidiana** (`TileID.Obsidian =
+  56`, la tinta quemada por la caída) al 20%, esparcida con gradiente
+  hacia el fondo (`0.26 + 0.34·dentro`), el **corazón limpio** (a
+  ≥2,5 tiles del centro: el Grimorio Dormido flota ahí) y **el aro
+  tintado** (los bordes que no se abrieron amanecen ébano al 35% —
+  solo sobre roca natural: piedra, tierra, pasto — ni minerales ni
+  plantas ni nada puesto con intención). La casa del jugador sigue
+  intacta y todo enmarca con `WorldGen.SquareTileFrame` + el
+  `SendTileSquare` único de siempre (la difusión MP atómica).
+- **EL ACECHO DEL PUEBLO** (`GrimorioNerviosoFlotante`): el refugio de
+  la .117 (volar a ~900 px FUERA del pueblo, dirección opuesta al
+  vecino) **MURIÓ**. Con el dueño entre vecinos (`RADIO_PUEBLO` 800 px
+  del dueño), el libro sale **como si fuera a cazar** pero hace otra
+  cosa: **LA VÍCTIMA** (`ElegirVictima`: el vecino más cercano al
+  espíritu que no sea el actual — rota cada `TURNO_VIGILANCIA` 900 t
+  ≈ 15 s, el terror se reparte entre el pueblo; si el pueblo es un
+  solo vecino, sigue él), **LA RONDA DE VIGILANCIA** (merodeo en
+  elipse achatada a 104 px con deriva de 0,012 rad/t — el paseo del
+  depredador paciente, sigue al vecino si camina), **LA INTIMIDACIÓN**
+  (cada 360 t, moneda determinista `Hash01 < 0.55` — todas las
+  máquinas eligen igual: se planta a 44 px mirando FIJO 300 t con el
+  **emote de miedo** estampado en la burbuja del vecino) y **LA
+  CORREA** (el punto de la ronda jamás a más de 850 px del dueño —
+  «siempre debe estar cerca del jugador», aunque la víctima camine
+  lejos). **Sin sombras** en el pueblo («solo vigilar»), el iris y la
+  inclinación clavados en la víctima (en la IA y el PreDraw), y la
+  víctima se limpia al salir del pueblo o al volverse.
+
+**VERIFICACIÓN**: oráculo 0/0 (316 .cs · 79 refs) · build real 0/0 ×2
+(build doble) · .tmod 386 entradas 2.704.227 B md5
+`001b3e077fe0ba136ae09d6e42595c6b` · headless 0 excepciones (mundo
+nuevo, ciclo completo) · `audit_v650118` TODO OK (126 ✓: heap con
+`ElegirVictima`/`EmoteMiedo`/`_victima` vivos y `PuntoFueraDelPueblo`/
+`_vecinoVigilado` muertos, constantes .104–.118, hjson ×3 empaquetado
+== fuente, iconos sin cambios).
+
+**PUBLICACIÓN**: release 412790687 + asset AethonMod.tmod 640566830
+2.704.227 B (md5 001b3e07…), CDN verificado byte a byte.
+
+## Commit v6.50.117 — LA CAÍDA, EL RECUERDO PARTIDO EN DOS Y LOS CHISMES DEL PUEBLO
+
+**La letra**: «el grimorio eterno pese a tener 0% de hambre se queda
+flotando y cazando, arregla eso» + «debes mejorar la distribución de
+los minion del grimorio sobre el jugador, está un poco dispareja» +
+«el guardián de la mazmorra se amontona y no se activa el [festín]» +
+LA CAÍDA (obtención canónica con purga del Génesis) + el jefe gemelo
+con fusión + la cría gemela + los diálogos del pueblo.
+
+**EL CAMBIO**: (1) los 3 fixes — el espíritu saciado vuelve al 5%
+(`SaciedadVuelta`: el reloj del hambre jamás da un 0 exacto), la
+corona doble a LADRILLO REAL intercalado (cada ojo interior cae
+exacto entre sus vecinos exteriores) y el guardián uno-solo jamás
+durante la gracia + cena con el libro en el inventario completo a
+300 px; (2) **LA CAÍDA**: cometa de tinta negro-morado por jugador la
+primera noche, cráter, Grimorio Dormido con Zzz y ventana de diálogo
+vanilla (habla con los pensamientos), un grimorio por alma, PURGA
+TOTAL del Fragmento Génesis; (3) **EL RECUERDO PARTIDO EN DOS**: jefe
+renombrado «Fragmentos de un recuerdo lejano - Aethon» + gemelo de
+oscuridad simultáneo bajo mediodía eterno con batón de turnos, el
+primero a 1000 queda orbitando e INTOCABLE, la FUSIÓN con anillos
+alternos → **EL RECUERDO COMPLETO** (6 ataques nuevos: Eclipse
+Gemelo, Sol Moribundo que atrae, Rejilla Láser, Lluvia de Páginas,
+Anillos de Fusión y el Último Aliento a 1%); (4) el grimorio fuera
+del pueblo (refinado en la .118 como EL ACECHO); (5) **LA CRIÁ
+GEMELA**: Aethon Menor oscuro sin luz con fusión en los equinoccios
+reales, 2 mini agujeros negros + 1 mini sol rúnico + 3 mini ojos,
+molestar NPCs tras 1 min de AFK (2 formas, 1 daño sin acreditación,
+tope 10 golpes, emotes de miedo/risa, valla anti-muerte); (6) **702
+DIÁLOGOS DEL PUEBLO**: 25 NPCs × (4 travesuras de la cría + 4
+terrores del grimorio) + 26 reclamos garantizados del vecino
+molestado, ×3 idiomas (es-MX primaria).
+
+**VERIFICACIÓN**: oráculo 0/0 (316 .cs · 79 refs) · build real 0/0 ×2
+· .tmod 386 entradas 2.703.197 B md5 `406879da4f6da360ab1fac91f883a089`
+· headless 0 excepciones (mundo nuevo, ciclo completo).
+
+**PUBLICACIÓN**: release 412718298 + asset AethonMod.tmod 640387148
+2.703.197 B (md5 406879da…), CDN verificado byte a byte.
 
 ## Commit v6.50.116 — EL ESCUADRÓN DE ONCE, LA CORONA DOBLE, EL FESTÍN AISLADO, LA GRACIA DEL GUARDIÁN Y EL RECORTES DEL IRIS
 
