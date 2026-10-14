@@ -397,6 +397,16 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// luz balística/guiada · 2/3 = oscuridad): el gemelo escupe lluvia oscura.</summary>
         protected virtual float PaletaPer => 0f;
 
+        /// <summary>v6.50.119 — EL CUERPO GIGANTE (la letra: «además los
+        /// jefes son pequeños, hacer que sean mas grande, al menos un 150%
+        /// mas grande»): TODO el sol de código crece ×2.5 (un 150% MÁS
+        /// grande): el núcleo 130→325, el velo 540→1350, el halo 295→737,
+        /// las coronas y las chispas con él — y las órbitas del duelo
+        /// escalan con el cuerpo. El OSCURO hereda (la misma mitad) y
+        /// EL RECUERDO COMPLETO nace YA gigante (la fusión no se
+        /// encoge: su disco del eclipse lo lee también).</summary>
+        protected virtual float EscalaCuerpo => 2.50f;
+
         /// <summary>¿Es EL RECUERDO COMPLETO (la fusión)? Sin hermano, sin
         /// órbita — y con SU moveset propio.</summary>
         protected virtual bool EsFusion => false;
@@ -439,8 +449,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
         public override void SetDefaults()
         {
-            NPC.width = 220;     // v6.50.37 — MÁS GRANDE (el sol creció ×1.5)
-            NPC.height = 220;
+            // v6.50.119 — EL CUERPO GIGANTE (la letra: «además los jefes
+            // son pequeños, hacer que sean mas grande, al menos un 150%
+            // mas grande»): la hitbox pasó de 220 a 550 px (×2.5 — un 150%
+            // MÁS grande: 34 tiles de sol). El dibujo creció con ella
+            // (EscalaCuerpo en el PreDraw) y TODAS las órbitas también
+            // (para no envolver a la presa en el reposo).
+            NPC.width = 550;
+            NPC.height = 550;
             NPC.damage = 120;    // TOCAR LA LUZ quema (devastador, decretado)
             NPC.defense = 50;
             NPC.lifeMax = 2_400_000;
@@ -1105,20 +1121,26 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // y si se APEGA TOMA ESPACIO — el dios ya no patrulla un
             // circuito muerto: MANTIENE su distancia de duelo.
             float distF = Vector2.Distance(NPC.Center, target.Center);
-            float radioBase = Furia ? 260f : (Phase >= 4 ? 380f : 440f);
+            // v6.50.119 — LA ÓRBITA CRECIÓ CON EL CUERPO (×2.5): con la
+            // hitbox a 550, la órbita vieja (260-440 de radio, −260 de
+            // altura) dejaba al sol ENVOLVIENDO a la presa en el reposo
+            // (−170 < 275 de radio del cuerpo) — contacto perpetuo sin
+            // quererlo. La geometría entera del duelo escala con
+            // EscalaCuerpo: la misma pelea, más grande.
+            float radioBase = (Furia ? 260f : (Phase >= 4 ? 380f : 440f)) * EscalaCuerpo;
             float radio = radioBase +
                 MathHelper.Clamp(distF - radioBase, -140f, 190f) * 0.35f;
             radio += MathF.Sin(_angOrbita * 3f) * 30f;
             Vector2 punto = target.Center + new Vector2(
                 MathF.Cos(_angOrbita) * radio,
-                -260f + MathF.Sin(_angOrbita) * 90f);
+                (-260f + MathF.Sin(_angOrbita) * 90f) * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.08f, 0.14f);
 
             // v6.50.57 — EL QUIEBRO DEL DUELISTA (determinista — sin dados:
             // lee el EMBISTE y cam bia de lado): si la presa viene
             // DISPUESTA a cruzarse, la luz VOLTEA el sentido de giro — el
             // dios que se esquiva vivo, no el patrón que se lee dormido.
-            if (_tickEstado > 0 && (_tickEstado % 45) == 0 && distF < 250f &&
+            if (_tickEstado > 0 && (_tickEstado % 45) == 0 && distF < 250f * EscalaCuerpo &&
                 Vector2.Dot(target.velocity, NPC.Center - target.Center) > 3f)
             {
                 _sentidoOrbita = -_sentidoOrbita;
@@ -1708,9 +1730,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void EstadoLanzas(Player target)
         {
-            // A FLANCO (el arquero divino no dispara de frente).
+            // A FLANCO (el arquero divino no dispara de frente) — a la
+            // escala del cuerpo nuevo (v6.50.119: la figura entera creció).
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 500f, -280f);
+                MathF.Cos(_angOrbita) * (500f * EscalaCuerpo), -280f * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             bool primera = _tickEstado == 30;
@@ -1777,8 +1800,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void EstadoCorona(Player target)
         {
             // EL DIOS OBSERDA desde su flanco (la corona espira alrededor TUYO).
+            // v6.50.119 — el flanco del dios creció con el cuerpo (×2.5).
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 540f, -320f);
+                MathF.Cos(_angOrbita) * (540f * EscalaCuerpo), -320f * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 30)
@@ -1946,7 +1970,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         {
             // se aparta de la presa: la cruz necesita espacio.
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 520f, -300f);
+                MathF.Cos(_angOrbita) * (520f * EscalaCuerpo), -300f * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado >= 30 && (_tickEstado % (Furia ? 6 : 8)) == 0 && _tickEstado <= 200)
@@ -2048,7 +2072,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // estabas deja de ser seguro (castiga el esquivo perezoso:
             // volver corriendo por donde viniste).
             if (Phase >= 3 && !_minaPuesta && _tickEstado > 20 &&
-                Vector2.Distance(NPC.Center, target.Center) < 240f)
+                Vector2.Distance(NPC.Center, target.Center) < 240f * EscalaCuerpo)
             {
                 _minaPuesta = true;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -2273,7 +2297,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // LA CANTORA: se aparta a flanco (el coro canta alrededor TUYO,
             // no de ella).
             Vector2 lejos = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 560f, -320f);
+                MathF.Cos(_angOrbita) * (560f * EscalaCuerpo), -320f * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 40)
@@ -2432,8 +2456,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 //     jaula (la luz vigila su trampa — el cometa de siempre) ===
                 _angOrbita += 0.058f * _sentidoOrbita;
                 Vector2 punto = centro + new Vector2(
-                    MathF.Cos(_angOrbita) * 470f,
-                    MathF.Sin(_angOrbita) * 470f * 0.80f - 120f);
+                    MathF.Cos(_angOrbita) * (470f * EscalaCuerpo),
+                    MathF.Sin(_angOrbita) * (470f * EscalaCuerpo) * 0.80f - 120f * EscalaCuerpo);
                 NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.24f, 0.38f);
             }
 
@@ -2495,8 +2519,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // EN MOVIMIENTO, como se lee a un dios de verdad.
             _angOrbita += 0.010f * _sentidoOrbita;
             Vector2 punto = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 380f,
-                -240f + MathF.Sin(_angOrbita) * 70f);
+                MathF.Cos(_angOrbita) * (380f * EscalaCuerpo),
+                (-240f + MathF.Sin(_angOrbita) * 70f) * EscalaCuerpo);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 24)
@@ -2598,16 +2622,38 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 return;
             }
 
+            // v6.50.119 — LA PRESA MUERTA TAMBIÉN ROMPE LA ÓRBITA: este
+            // estado saltaba el despawn de la casa (el return temprano de
+            // la IA) — el jugador muerto dejaba a los fragmentos girando
+            // eternos y el llamado no volvía a caber (YaViveLaFamilia).
+            // Con la presa caída, el fragmento vuelve a la pelea y el
+            // flujo normal la despawnea.
+            {
+                Player presa = Main.player[NPC.target];
+                if (presa == null || !presa.active || presa.dead)
+                {
+                    _estado = EST_FLOTAR;
+                    _tickEstado = 0;
+                    _fusionando = false;
+                    NPC.dontTakeDamage = false;
+                    NPC.netUpdate = true;
+                    return;
+                }
+            }
+
             // EL CLAMP ETERNO: a mil no baja más (la fusión lo decidirá).
             NPC.life = Math.Max(NPC.life, VidaFusion);
             NPC.dontTakeDamage = true;
 
-            // LA ÓRBITA: círculo de 240 px alrededor del hermano, giro
-            // 0.02 rad/t (una vuelta cada ~5,2 s) — el reposo del fragmento.
+            // LA ÓRBITA: círculo alrededor del hermano, giro 0.02 rad/t
+            // (una vuelta cada ~5,2 s) — el reposo del fragmento.
+            // v6.50.119 — el radio creció con el cuerpo (240·2.5 = 600):
+            // dos soles de 550 de hitbox casi tocándose — el pre-abrazo
+            // que la fusión vino a consumar.
             _angHermano += 0.02f;
             Vector2 punto = hermano.Center + new Vector2(
-                MathF.Cos(_angHermano) * 240f,
-                MathF.Sin(_angHermano) * 240f * 0.86f);
+                MathF.Cos(_angHermano) * (240f * EscalaCuerpo),
+                MathF.Sin(_angHermano) * (240f * EscalaCuerpo) * 0.86f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.10f, 0.18f);
             _tickEstado++;
 
@@ -2895,6 +2941,39 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // fragmento NO muere (la fusión apaga a los dos por su propio
             // cauce — sin botín, sin muerte doble).
             if (_fusionando) return false;
+
+            // v6.50.119 — EL RESCATE DE LA FUSIÓN (la letra: «nunca se
+            // fusionaron los jefes ni se hizo todo eso de quedar con 1000
+            // de vida para una fusion y comenzar una nueva fase»). LA
+            // CAUSA: la .117 solo veía la ventana de la fusión si un tick
+            // de la IA pillaba la vida en (0,1000] — pero el golpe de
+            // gracia de un arma grande SALTA de >1000 a ≤0 en el MISMO
+            // impacto (checkDead corre dentro del daño, ANTES del
+            // siguiente AI): el gemelo moría limpio… y el otro, ya SIN
+            // hermano, tampoco fusionaba jamás. LA CURA: mientras el
+            // hermano viva, el golpe de gracia NO mata — el fragmento
+            // QUEDA A MIL (la letra exacta: «quedar con 1000 de vida»)
+            // y entra en órbita; al tick siguiente la fusión SE DECRETA
+            // y la nueva fase nace como estaba escrita.
+            if (!EsFusion)
+            {
+                NPC hermano = BuscarHermano();
+                if (hermano != null && hermano.ai[0] != EST_MURIENDO)
+                {
+                    NPC.life = VidaFusion;          // queda a MIL, no muere
+                    if (_estado != EST_ORBITANDO)
+                    {
+                        _estado = EST_ORBITANDO;
+                        _tickEstado = 0;
+                        _fusionando = true;
+                        _angHermano = Main.rand.NextFloat(MathHelper.TwoPi);
+                        NPC.netUpdate = true;      // MP: el rescate viaja YA
+                    }
+                    NPC.dontTakeDamage = true;
+                    NPC.netUpdate = true;
+                    return false;                  // NO muere: la fusión lo espera
+                }
+            }
             IniciarCineMuerte();
             return false;
         }
@@ -3115,9 +3194,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             //     v6.50.118 — SOLO del jefe de luz: el Recuerdo Completo
             //     (EsFusion) la deja GARANTIZADA en su propio DropBotin —
             //     sin este gate caerían DOS (la canónica y la del azar).
+            //     v6.50.119 — LA CRÍA VIAJA EN SU BOLSA (la letra: «crea
+            //     una bolsa donde esten las mascotas, las 2»): el 20% del
+            //     jefe de luz ahora suelta LA BOLSA DE LA CRÍA — al
+            //     abrirla despierta la pareja (la de luz y su gemela
+            //     oscura: las DOS mascotas, un solo ítem adentro).
             if (!EsFusion && Main.rand.NextFloat() < 0.20f)
                 Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                    ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
+                    ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
 
             int killerWho = NPC.lastInteraction;
             if (killerWho < 0 || killerWho >= Main.player.Length)
@@ -3208,12 +3292,16 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // muere (antes: eclipse → 0.10 — el apagón de la letra).
                     float brillo = faseInt * brilloMuerte;
 
-                    // === 1. EL VELO (el aura violeta de la profundidad) ===
-                    LumenLib.Bloom(spriteBatch, posC, 540f, PaletaVioleta,
+                    // === 1. EL VELO (el aura violeta de la profundidad) —
+                    //     v6.50.119 — EL CUERPO GIGANTE: TODO el sol de
+                    //     código crece ×EscalaCuerpo (2.5 — un 150% MÁS
+                    //     grande, la letra: «hacer que sean mas grande,
+                    //     al menos un 150% mas grande») ===
+                    LumenLib.Bloom(spriteBatch, posC, 540f * EscalaCuerpo, PaletaVioleta,
                         0.10f * brillo * visibilidad, 2);
 
                     // === 2. EL HALO DORADO (la corona del sol) ===
-                    LumenLib.BloomPulse(spriteBatch, posC, 295f * latido, PaletaOro,
+                    LumenLib.BloomPulse(spriteBatch, posC, 295f * EscalaCuerpo * latido, PaletaOro,
                         0.50f * brillo * visibilidad, t, 1.6f);
 
                     // === 3. LOS RAYOS RADIALES (la rueda de luz girando —
@@ -3228,9 +3316,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         for (int i = 0; i < nRayos; i++)
                         {
                             float ang = giro + i * MathHelper.TwoPi / nRayos;
-                            float largo = (255f + 165f * faseInt) *
+                            float largo = (255f + 165f * faseInt) * EscalaCuerpo *
                                 (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f)) * colapso;
-                            float ancho = 34f - 12f * faseInt;
+                            float ancho = (34f - 12f * faseInt) * EscalaCuerpo;
                             Color cR = (Phase >= 4) ?
                                 Color.Lerp(PaletaOro, PaletaVioleta, 0.45f) : PaletaOro;
                             spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
@@ -3246,8 +3334,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     //     en sentidos opuestos — el efecto 3D) ===
                     for (int anillo = 0; anillo < 2; anillo++)
                     {
-                        float rx = (anillo == 0 ? 218f : 300f) * colapso;
-                        float ry = (anillo == 0 ? 134f : 90f) * colapso;
+                        float rx = (anillo == 0 ? 218f : 300f) * EscalaCuerpo * colapso;
+                        float ry = (anillo == 0 ? 134f : 90f) * EscalaCuerpo * colapso;
                         float w = anillo == 0 ? 0.55f : -0.38f;          // sentidos opuestos
                         Color cP = anillo == 0 ? PaletaOro : PaletaVioleta;
                         int nPerlas = 13;
@@ -3257,7 +3345,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                             Vector2 perla = posC + new Vector2(MathF.Cos(ang) * rx,
                                 MathF.Sin(ang) * ry);
                             float tw = 0.5f + 0.5f * MathF.Sin(t * 3f + i * 2.1f + anillo);
-                            LumenLib.Bloom(spriteBatch, perla, 12f * colapso, cP,
+                            LumenLib.Bloom(spriteBatch, perla, 12f * EscalaCuerpo * colapso, cP,
                                 0.42f * (0.5f + 0.5f * tw) *
                                 brillo * visibilidad, 2);
                         }
@@ -3274,17 +3362,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     for (int m = 0; m < nChispas; m++)
                     {
                         float ang = t * (1.1f + m * 0.17f) + m * 2.1f;
-                        float r = 176f * colapso + 16f * MathF.Sin(t * 2.4f + m);
+                        float r = 176f * EscalaCuerpo * colapso + 16f * MathF.Sin(t * 2.4f + m);
                         Vector2 mota = posC + new Vector2(MathF.Cos(ang) * r,
                             MathF.Sin(ang) * r * 0.72f);
-                        LumenLib.Bloom(spriteBatch, mota, 20f * colapso, cMota,
+                        LumenLib.Bloom(spriteBatch, mota, 20f * EscalaCuerpo * colapso, cMota,
                             0.40f * brillo * visibilidad, 2);
                     }
 
                     // === 6. EL NÚCLEO (el corazón blanco de Aethon —
                     //     v6.50.56: NUNCA más el rim del eclipse: el corazón
                     //     ARDE entero hasta el último tick) ===
-                    float tamNucleo = 130f * latido * colapso;
+                    float tamNucleo = 130f * EscalaCuerpo * latido * colapso;
                     {
                         LumenLib.Bloom(spriteBatch, posC, tamNucleo, PaletaNucleo,
                             1.0f * brillo * visibilidad, 3);
@@ -3296,7 +3384,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     if (NPC.ai[1] == 1f && !_muriendo)
                     {
                         float prog = Math.Min(1f, _tickRayoLocal / 40f);
-                        LumenLib.Bloom(spriteBatch, posC, 88f + 132f * prog,
+                        LumenLib.Bloom(spriteBatch, posC, (88f + 132f * prog) * EscalaCuerpo,
                             PaletaNucleo, 0.45f * prog * visibilidad, 3);
                     }
 
@@ -3312,8 +3400,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Vector2 atras = -Vector2.Normalize(NPC.velocity);
                         for (int g = 1; g <= 4; g++)
                         {
-                            Vector2 fantasma = posC + atras * (g * 74f);
-                            LumenLib.Bloom(spriteBatch, fantasma, 62f - g * 9f,
+                            Vector2 fantasma = posC + atras * (g * 74f * EscalaCuerpo);
+                            LumenLib.Bloom(spriteBatch, fantasma, (62f - g * 9f) * EscalaCuerpo,
                                 PaletaOro, 0.26f / g * visibilidad, 2);
                         }
                     }

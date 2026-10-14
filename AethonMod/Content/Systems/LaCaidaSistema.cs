@@ -19,8 +19,10 @@ namespace AethonMod.Content.Systems
     // v6.50.118 — «el cometa de tinta caiga CERCA DEL JUGADOR» (la cita
     // vieja «lejos del spawn (~30 pantallas)» MURIÓ: 32–64 tiles a un
     // lado del destinatario). LA PURGA DEL GÉNESIS mató el altar y su
-    // fragmento: ESTE es el camino del libro ahora — el día 1, la
-    // primera noche avanzada.
+    // fragmento: ESTE es el camino del libro ahora — el día 1, AL CAER
+    // LA PRIMERA NOCHE (v6.50.119: time > 480 — la .117 esperaba
+    // pasada la medianoche y el cometa llegaba cuando el jugador ya
+    // se había ido a dormir).
     //
     // EL CIRCUITO COMPLETO:
     //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo SIN
@@ -200,7 +202,7 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  EL CIELO DE LA NOCHE AVANZADA (solo AUTORIDAD)
+        //  EL CIELO DE LA NOCHE RECÉN CAÍDA (solo AUTORIDAD)
         // ================================================================
 
         public override void PreUpdateTime()
@@ -216,9 +218,14 @@ namespace AethonMod.Content.Systems
                     Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
                 _eraNoche = esNoche;
 
-                // LA NOCHE AVANZADA (time > 12000: pasada la primera mitad
-                // de la noche — el cielo ya está negro de verdad).
-                if (esNoche && Main.time > 12000.0)
+                // v6.50.119 — AL CAER LA PRIMERA NOCHE (la letra: «el
+                // evento de caída no parece activarse, debe activarse al
+                // caer la primera noche»): time > 480 — apenas 8 s tras
+                // el ocaso, el cielo ya es de noche y el cometa cruza
+                // AHORA (la .117 esperaba la medianoche: con la ventana
+                // a time>12000, el jugador esperaba TODA la primera
+                // mitad de la noche sin ver nada y se iba a dormir).
+                if (esNoche && Main.time > 480.0)
                 {
                     for (int i = 0; i < Main.maxPlayers; i++)
                     {

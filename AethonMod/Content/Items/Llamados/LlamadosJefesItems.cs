@@ -168,17 +168,31 @@ namespace AethonMod.Content.Items.Llamados
 
             // v6.50.117 — EL NOMBRE PARTIDO EN DOS (la letra): pronunciar
             // el nombre trae AMBOS fragmentos del recuerdo — el de LUZ
-            // (300 px arriba-izquierda) y su GEMELO DE OSCURIDAD (300 px
-            // arriba-derecha), con la fórmula de la Emperatriz (SpawnBoss:
-            // el «ha despertado», el target fijado y el timeLeft ×20 de
-            // vanilla). El reloj del mundo lo toma el de luz; el gemelo
-            // nace YA en la órbita de pelea.
-            Vector2 posLuz = player.Center + new Vector2(-300f, -300f) +
-                Main.rand.NextVector2Circular(50f, 50f);
+            // y su GEMELO DE OSCURIDAD, con la fórmula de la Emperatriz
+            // (SpawnBoss: el «ha despertado», el target fijado y el
+            // timeLeft ×20 de vanilla). El reloj del mundo lo toma el de
+            // luz; el gemelo nace YA en la órbita de pelea.
+            //
+            // v6.50.119 — DOS CURAS EN LA ENTRADA:
+            //  · LOS GEMELOS NACEN MÁS ABIERTOS (la letra: «al menos un
+            //    150% mas grande»): con la hitbox a 550 px, los ±300 de
+            //    la .117 los hacía nacer ENCIMADOS (600 de luz entre
+            //    centros < 550+550). El doble (±600, −600, jitter ×2)
+            //    los separa limpio a cada lado del portador.
+            //  · EL RESET DE LOS ESTÁTICOS DEL PAR (la cura del estado
+            //    huérfano): un decreto de fusión que quedó vivo de una
+            //    pelea anterior (despawn a media cine) insta-fusionaba
+            //    a la SIGUIENTE pareja en cuanto uno tocara los 1000;
+            //    y un batón de un whoAmI muerto esperaba para siempre.
+            AethonBoss.FusionDecretada = false;
+            AethonBoss.TurnoAtaque = -1;
+
+            Vector2 posLuz = player.Center + new Vector2(-600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
             NPC.SpawnBoss((int)posLuz.X, (int)posLuz.Y, NpcConvocado, player.whoAmI);
 
-            Vector2 posOscuro = player.Center + new Vector2(300f, -300f) +
-                Main.rand.NextVector2Circular(50f, 50f);
+            Vector2 posOscuro = player.Center + new Vector2(600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
             NPC.SpawnBoss((int)posOscuro.X, (int)posOscuro.Y,
                 ModContent.NPCType<AethonBossOscuro>(), player.whoAmI);
             return true;

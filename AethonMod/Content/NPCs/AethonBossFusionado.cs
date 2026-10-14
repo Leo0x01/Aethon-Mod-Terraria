@@ -452,9 +452,9 @@ namespace AethonMod.Content.NPCs
             if (!Main.dedServ && Main.rand.NextBool(2))
             {
                 int lado = Main.rand.NextBool() ? 1 : -1;
-                Vector2 silueta = NPC.Center + new Vector2(lado * 120f, 0f);
+                Vector2 silueta = NPC.Center + new Vector2(lado * (120f * EscalaCuerpo), 0f);
                 Dust d = Dust.NewDustPerfect(
-                    silueta + Main.rand.NextVector2Circular(70f, 70f),
+                    silueta + Main.rand.NextVector2Circular(70f * EscalaCuerpo, 70f * EscalaCuerpo),
                     DustID.PurpleTorch,
                     new Vector2(Main.rand.NextFloat(-0.5f, 0.5f), -Main.rand.NextFloat(0.5f, 1.6f)),
                     150, lado > 0 ? new Color(90, 20, 140) : PaletaOro, 1.2f);
@@ -480,15 +480,23 @@ namespace AethonMod.Content.NPCs
         /// vía canónica: el recuerdo recompuesto suelta a su cría, y el
         /// mismo ítem engendra a la PAREJA (la de luz y su gemela
         /// oscura — un solo ítem, las dos mascotas).
+        /// v6.50.119 — la cría ahora viaja EN SU BOLSA (la letra:
+        /// «crea una bolsa donde esten las mascotas, las 2»): el
+        /// recuerdo suelta LA BOLSA DE LA CRÍA, y la bolsa despierta
+        /// a la pareja al abrirse.
         /// </summary>
         protected override void DropBotin()
         {
             base.DropBotin();
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                 ModContent.ItemType<Items.Esencias.EsenciaDeAethon>(), 1);
-            // LA CRÍA GEMELA — SIEMPRE (la vía canónica de la mascota).
+            // LA CRÍA GEMELA — SIEMPRE, y EN SU BOLSA (la letra de la
+            // v6.50.119: «crea una bolsa donde esten las mascotas, las
+            // 2»): el recuerdo recompuesto suelta LA BOLSA DE LA CRÍA —
+            // al abrirla despierta la pareja completa: la de luz y su
+            // gemela oscura, LAS DOS MASCOTAS en un solo ítem adentro.
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
+                ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
         }
 
         // ==================================================================
@@ -519,16 +527,19 @@ namespace AethonMod.Content.NPCs
                     //     alrededor del núcleo: UN ECLIPSE VIVO ===
                     if (!_muriendo)
                     {
-                        Vector2 offD = new Vector2(MathF.Cos(t * 0.35f), MathF.Sin(t * 0.35f)) * 46f;
-                        LumenLib.Bloom(spriteBatch, posC + offD, 150f,
+                        // v6.50.119 — el disco creció con el cuerpo (×2.5):
+                        // la mitad oscura TAPA al sol gigante — un eclipse
+                        // a la escala del recuerdo completo.
+                        Vector2 offD = new Vector2(MathF.Cos(t * 0.35f), MathF.Sin(t * 0.35f)) * (46f * EscalaCuerpo);
+                        LumenLib.Bloom(spriteBatch, posC + offD, 150f * EscalaCuerpo,
                             new Color(45, 12, 70), 0.85f * visibilidad, 3);
-                        LumenLib.Bloom(spriteBatch, posC + offD, 92f,
+                        LumenLib.Bloom(spriteBatch, posC + offD, 92f * EscalaCuerpo,
                             new Color(90, 20, 140), 0.90f * visibilidad, 2);
                         // EL RIM DEL ECLIPSE (el borde morado que lo recorta).
                         Vector2 ringTam = new Vector2(VFXCore.Ring.Width, VFXCore.Ring.Height);
                         spriteBatch.Draw(VFXCore.Ring, posC + offD, null,
                             new Color(140, 60, 210) * (0.35f * visibilidad), 0f,
-                            ringTam * 0.5f, VFXCore.RingQuadSize(96f) / ringTam,
+                            ringTam * 0.5f, VFXCore.RingQuadSize(96f * EscalaCuerpo) / ringTam,
                             SpriteEffects.None, 0f);
                     }
 
@@ -578,9 +589,11 @@ namespace AethonMod.Content.NPCs
                     }
 
                     // === 3. EL ÚLTIMO ALIENTO: las DOS SILUETAS — la de
-                    //     luz y la de oscuridad, a ±120 px, AMBAS MIRANDO
-                    //     al jugador (el núcleo-ojo apunta) — deshaciéndose
-                    //     en bruma a medida que los 3 s se consumen ===
+                    //     luz y la de oscuridad, a ±120·EscalaCuerpo px
+                    //     (v6.50.119: la despedida creció con el cuerpo),
+                    //     AMBAS MIRANDO al jugador (el núcleo-ojo apunta)
+                    //     — deshaciéndose en bruma a medida que los 3 s se
+                    //     consumen ===
                     if (_estado == F_ALIENTO)
                     {
                         Player presa = Main.player[NPC.target];
@@ -591,19 +604,19 @@ namespace AethonMod.Content.NPCs
 
                         for (int lado = -1; lado <= 1; lado += 2)
                         {
-                            Vector2 silueta = posC + new Vector2(lado * 120f, 0f);
+                            Vector2 silueta = posC + new Vector2(lado * (120f * EscalaCuerpo), 0f);
                             Color cSil = lado < 0 ? PaletaOro : new Color(90, 20, 140);
 
-                            // EL CUERPO TENUE del fragmento.
-                            LumenLib.Bloom(spriteBatch, silueta, 84f, cSil, 0.40f * alfa, 3);
-                            LumenLib.Bloom(spriteBatch, silueta, 42f, cSil, 0.55f * alfa, 2);
+                            // EL CUERPO TENUE del fragmento (a la escala nueva).
+                            LumenLib.Bloom(spriteBatch, silueta, 84f * EscalaCuerpo, cSil, 0.40f * alfa, 3);
+                            LumenLib.Bloom(spriteBatch, silueta, 42f * EscalaCuerpo, cSil, 0.55f * alfa, 2);
 
                             // EL NÚCLEO-OJO QUE APUNTA: la pupila desplazada
                             // hacia la presa — las dos mitades MIRANDO al
                             // que las está matando.
                             Vector2 hacia = (mira - (silueta + Main.screenPosition))
-                                .SafeNormalize(Vector2.UnitY) * 13f;
-                            LumenLib.Bloom(spriteBatch, silueta + hacia, 20f,
+                                .SafeNormalize(Vector2.UnitY) * (13f * EscalaCuerpo);
+                            LumenLib.Bloom(spriteBatch, silueta + hacia, 20f * EscalaCuerpo,
                                 new Color(255, 250, 240), 0.85f * alfa, 3);
 
                             // LA BRUMA QUE SE DESHACE (las volutas subiendo).
@@ -611,8 +624,9 @@ namespace AethonMod.Content.NPCs
                             {
                                 float fV = (t * 0.8f + v * 0.33f + (lado + 1) * 0.5f) % 1f;
                                 Vector2 voluta = silueta + new Vector2(
-                                    MathF.Sin(fV * 6f + v * 2f) * 26f, -20f - fV * 90f);
-                                LumenLib.Bloom(spriteBatch, voluta, 26f * (0.4f + fV),
+                                    MathF.Sin(fV * 6f + v * 2f) * (26f * EscalaCuerpo),
+                                    -20f - fV * (90f * EscalaCuerpo));
+                                LumenLib.Bloom(spriteBatch, voluta, 26f * EscalaCuerpo * (0.4f + fV),
                                     cSil, 0.25f * alfa * (1f - fV), 2);
                             }
                         }

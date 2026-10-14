@@ -201,6 +201,17 @@ Objeto de pruebas — comparar con el original.
                         '''
         }
 
+        BolsaDeLaCria: {
+                DisplayName: Bolsa de la Cría
+                Tooltip:
+                        '''
+                        La pareja del recuerdo duerme dentro: la cría de LUZ
+                        y su gemela de OSCURIDAD — las dos mascotas en una
+                        sola bolsa. Ábrela (clic derecho) y despiertan juntas.
+                        '''
+                Abierta: La cría del recuerdo despierta — la pareja luz y oscuridad te sigue.
+        }
+
         MedusaNebularStaff: {
                 DisplayName: Báculo de la Medusa Nebular
                 Tooltip:

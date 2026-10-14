@@ -199,6 +199,17 @@ Items: {
 			'''
 	}
 
+	BolsaDeLaCria: {
+		DisplayName: Brood Pouch
+		Tooltip:
+			'''
+			The memory's pair sleeps inside: the brood of LIGHT
+			and its DARK twin — both pets in a single pouch.
+			Open it (right click) and they wake up together.
+			'''
+		Abierta: The memory's brood awakens — the light-and-dark pair follows you.
+	}
+
 	MedusaNebularStaff: {
 		DisplayName: Nebula Jellyfish Staff
 		Tooltip:
