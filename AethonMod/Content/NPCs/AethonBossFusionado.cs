@@ -46,6 +46,39 @@ namespace AethonMod.Content.NPCs
     //  hermano) y el mediodía eterno lo sostiene AethonLlegadaSistema
     //  (que ya cuenta al fusionado entre los vivos).
     // ======================================================================
+    //  v6.50.120 — EL JEFE FINAL DE VERDAD (la letra del usuario:
+    //  «haciéndose más grandes, más épicos e investiga jefes finales
+    //  para crear ataques y escenarios que sirvan para eso»):
+    //
+    //  EL COLOSO — EscalaCuerpo 3.40 (los gemelos son 2.50: el recuerdo
+    //  completo los DEVORA en tamaño — TODO su sol de código escala
+    //  solo: núcleo, velo, halo, disco, rim y siluetas), hitbox de 770
+    //  (48 tiles de sol) y 3.000.000 de vida (la fuerza de ambos).
+    //
+    //  LA NOCHE DEL ECLIPSE (EL ESCENARIO) — su mitad oscura SE COMIÓ
+    //  EL SOL: el mundo se apaga un pelo alrededor de la pelea (Ilumina
+    //  = false), solo la PENUMBRA violeta del recuerdo lo mantiene
+    //  legible… y sus RELÁMPAGOS de fondo cada ~3-5 s (Moon Lord trae
+    //  su cielo; el eclipse trae sus relámpagos — cada fase ABRE con
+    //  trueno).
+    //
+    //  EL MENÚ QUE CRECE CON LA FASE (la escalada de los finales de
+    //  Terraria — cada arma nueva es un homenaje investigado):
+    //    g · EL JUICIO FANTASMAL (P5) — Moon Lord, el Phantasmal
+    //        Deathray: DOS ruedas de rayos reusando la primitiva de la
+    //        danza solar, una por flanco, barriendo CRUZADAS sobre la
+    //        presa (F_RAYOS = 36).
+    //    h · EL CONCILIO DE ESPEJOS (P3+) — Lunatic Cultist, el ritual:
+    //        círculos de pernos que CARGAN quietos y CONVERGEN al punto
+    //        donde estabas (el dodge legible: salir del círculo antes
+    //        del cierre) — F_RITUAL = 37, el perno es el estilo NUEVO
+    //        EstiloRitualConvergente del AtaqueFusionProjectile.
+    //    i · LA TORMENTA DEL ABISMO (P4+) — Duke Fishron, el sharknado:
+    //        tres vórtices que acechan a los flancos (jamás cierran a
+    //        <600 px de la presa) escupiendo pernos en una espiral que
+    //        gira (F_TORMENTA = 38 — sin proyectil nuevo: anclas + los
+    //        pernos de siempre).
+    // ======================================================================
     public class AethonBossFusionado : AethonBoss
     {
         // === LOS ESTADOS PROPIOS DEL RECUERDO COMPLETO (los que la base
@@ -57,8 +90,23 @@ namespace AethonMod.Content.NPCs
         private const int F_ANILLOS = 34;    // e — LOS ANILLOS DE FUSIÓN
         private const int F_ALIENTO = 35;    // f — EL ÚLTIMO ALIENTO (≤1%)
 
+        // === v6.50.120 — LOS TRES ATAQUES DE JEFE FINAL (la letra:
+        //     «investiga jefes finales para crear ataques y escenarios
+        //     que sirvan para eso»): cada uno es un HOMENAJE con
+        //     mecánica propia, y el menú los va DESTAPANDO con la furia
+        //     de la fase (ElegirAtaque) ===
+        private const int F_RAYOS = 36;     // g — EL JUICIO FANTASMAL (Moon Lord · P5)
+        private const int F_RITUAL = 37;    // h — EL CONCILIO DE ESPEJOS (Cultista · P3+)
+        private const int F_TORMENTA = 38;  // i — LA TORMENTA DEL ABISMO (Duque · P4+)
+
         /// <summary>EL GATILLO DEL 1% vive UNA sola vez (la despedida no se repite).</summary>
         private bool _alientoDado = false;
+
+        // === v6.50.120 — LA NOCHE DEL ECLIPSE y LA TORMENTA (estado propio) ===
+        private int _tickRelampago = 120;       // el cielo del eclipse: cada ~3-5 s, UN relámpago
+        private Vector2[] _anclasTormenta = new Vector2[3];  // los TRES vórtices (izq · ojo · der)
+        private float _angTormenta = 0f;        // el ángulo de la espiral de ráfagas (+0.62 por ráfaga)
+        private bool _tormentaSembrada = false; // el sembrado corre UNA sola vez por estado
 
         // El cuerpo es 100% código: se reusa la textura del jefe de luz
         // como ancla del motor (jamás se ve — el PreDraw manda).
@@ -79,6 +127,21 @@ namespace AethonMod.Content.NPCs
         /// <summary>Su hermano no existe (0 = la IA de fusión lo salta).</summary>
         protected override int TipoHermano => 0;
 
+        /// <summary>v6.50.120 — LA NOCHE DEL ECLIPSE: el Recuerdo
+        /// Completo NO inunda el mundo con su luz — su mitad oscura SE
+        /// COMIÓ EL SOL (la letra: «más épicos… y escenarios que sirvan
+        /// para eso»): el mundo se apaga un pelo alrededor de la pelea,
+        /// y solo SU penumbra violeta lo mantiene legible (la enciende
+        /// PasoFusionPrevia, cada tick).</summary>
+        protected override bool Ilumina => false;
+
+        /// <summary>v6.50.120 — EL COLOSO (la letra: «haciéndose más
+        /// grandes, más épicos»): 3.40 — los gemelos son 2.50 y el
+        /// recuerdo completo los DEVORA en tamaño. TODO su sol de código
+        /// escala SOLO con esta cifra: núcleo, velo, halo, el disco del
+        /// eclipse, su rim y las siluetas del último aliento.</summary>
+        protected override float EscalaCuerpo => 3.40f;
+
         /// <summary>En el ÚLTIMO ALIENTO todo calla (la despedida no dispara).</summary>
         protected override bool SilencioFinal => _estado == F_ALIENTO;
 
@@ -93,7 +156,13 @@ namespace AethonMod.Content.NPCs
             base.SetDefaults();
             // LA FUERZA DE AMBOS (la letra: «más fuerte»): la vida entera
             // del dios original — pero con el moveset nuevo completo.
-            NPC.lifeMax = 2_400_000;
+            // v6.50.120 — EL COLOSO DE LA FASE FINAL (la letra:
+            // «haciéndose más grandes»): 48 tiles de sol (los gemelos
+            // son 34) y la fuerza de AMBOS en una sola barra — la letra
+            // de la .117: «más fuerte con ataques más vistosos».
+            NPC.width = 770;
+            NPC.height = 770;
+            NPC.lifeMax = 3_000_000;
         }
 
         protected override void PasoFusionPrevia()
@@ -117,17 +186,86 @@ namespace AethonMod.Content.NPCs
                     SoundID.Item117.WithPitchOffset(-0.5f), NPC.Center);
                 OndaLib.Kick(9f, 20);
             }
+
+            // v6.50.120 — LA PENUMBRA DEL ECLIPSE (la legibilidad de la
+            // noche): el Recuerdo Completo NO alumbra el mundo (Ilumina
+            // = false — su mitad oscura SE COMIÓ EL SOL), pero deja SU
+            // PROPIA luz mínima: la penumbra violeta del eclipse, para
+            // que el coloso jamás sea una silueta invisible.
+            Lighting.AddLight(NPC.Center, new Vector3(0.55f, 0.40f, 0.70f));
+
+            // v6.50.120 — LOS RELÁMPAGOS DE FONDO (el escenario de jefe
+            // final): la tormenta del recuerdo — Moon Lord trae su
+            // cielo; el eclipse trae sus relámpagos. Cada ~3-5 s UNA
+            // vena dorada cae del techo de la pantalla cerca del jefe,
+            // con su trueno grave y su temblor sutil (la pelea vive
+            // DENTRO de una tormenta). Es puro teatro LOCAL (polvo +
+            // sonido + temblor: nada viaja por el cable — cada máquina
+            // arma su propio cielo). La despedida y la muerte callan
+            // el firmamento.
+            if (!_muriendo && _estado != EST_MURIENDO)
+            {
+                _tickRelampago--;
+                if (_tickRelampago <= 0)
+                {
+                    _tickRelampago = 160 + Main.rand.Next(140);
+                    RelampagoFondo(2f, 6);
+                }
+            }
         }
 
         /// <summary>
-        /// EL MOVESET DEL RECUERDO COMPLETO: las CINCO armas de la fusión,
+        /// v6.50.120 — LA VENA DEL RELÁMPAGO (el cielo de la noche del
+        /// eclipse): UNA raya de 14 motas doradas cayendo del techo de
+        /// la pantalla cerca del jefe (un SOLO x para las catorce — una
+        /// vena, no una cortina), el trueno grave (Item122 bemol) y el
+        /// temblor sutil. Moon Lord trae su cielo; el eclipse trae sus
+        /// relámpagos.
+        /// </summary>
+        private void RelampagoFondo(float fuerza, int duracion)
+        {
+            if (Main.dedServ) return;   // el servidor no tiene cielo que partir
+            float xVena = NPC.Center.X + Main.rand.NextFloat(-600f, 600f);
+            for (int i = 0; i < 14; i++)
+            {
+                Dust d = Dust.NewDustPerfect(
+                    new Vector2(xVena + Main.rand.NextFloat(-9f, 9f),
+                        NPC.Center.Y - 900f + i * 24f),
+                    DustID.GoldFlame,
+                    new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
+                        Main.rand.NextFloat(2.5f, 5f)),
+                    150, new Color(255, 220, 120), 1.3f);
+                d.noGravity = true;
+            }
+            Terraria.Audio.SoundEngine.PlaySound(
+                SoundID.Item122.WithPitchOffset(-0.85f), NPC.Center);
+            OndaLib.Kick(fuerza, duracion);
+        }
+
+        /// <summary>
+        /// EL MOVESET DEL RECUERDO COMPLETO: las armas de la fusión (las
+        /// CINCO de siempre + las TRES de jefe final de la v6.50.120),
         /// rotando SIN repetir (ni el último plato ni el de atrás — la
         /// memoria doble de la casa). Máximo UN ataque grande a la vez:
         /// ya es así por estados.
         /// </summary>
         protected override void ElegirAtaque(Player target)
         {
-            int[] menu = { F_ECLIPSE, F_SOLMOR, F_REJILLA, F_PAGINAS, F_ANILLOS };
+            // v6.50.120 — EL MENÚ QUE CRECE CON LA FASE (la escalada de
+            // los finales de Terraria): P1-P2 los CINCO platos de la
+            // fusión; P3 (vida <60%) se destapa EL CONCILIO (el ritual
+            // del Cultista); P4 (<40%) LA TORMENTA (el sharknado del
+            // Duque); P5 (<20%) EL JUICIO (los rayos del Moon Lord) —
+            // TODO el menú, la furia final. El Cultista no abre con su
+            // ritual ni el Duque con su tormenta: cada arma llega con su
+            // furia (la Phase heredada ya lee la vida 80/60/40/20).
+            int[] menu = Phase >= 5
+                ? new[] { F_ECLIPSE, F_SOLMOR, F_REJILLA, F_PAGINAS, F_ANILLOS, F_RITUAL, F_TORMENTA, F_RAYOS }
+                : Phase == 4
+                    ? new[] { F_ECLIPSE, F_SOLMOR, F_REJILLA, F_PAGINAS, F_ANILLOS, F_RITUAL, F_TORMENTA }
+                    : Phase == 3
+                        ? new[] { F_ECLIPSE, F_SOLMOR, F_REJILLA, F_PAGINAS, F_ANILLOS, F_RITUAL }
+                        : new[] { F_ECLIPSE, F_SOLMOR, F_REJILLA, F_PAGINAS, F_ANILLOS };
             int elegido = menu[Main.rand.Next(menu.Length)];
             int intentos = 0;
             while ((elegido == _ultimoAtaque || elegido == _anteultimoAtaque) &&
@@ -150,6 +288,10 @@ namespace AethonMod.Content.NPCs
             NPC.life = Math.Min(NPC.lifeMax, NPC.life + NPC.lifeMax / 20);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
             OndaLib.Kick(10f, 20);
+            // v6.50.120 — EL FLASH DE FASE: cada fase ABRE con trueno
+            // (el relámpago síncrono — la noche del eclipse responde a
+            // la furia nueva: las mismas motas, el temblor más largo).
+            RelampagoFondo(6f, 10);
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Fase",
                 PaletaOro, Phase, PhaseName());
             NPC.netUpdate = true;
@@ -166,6 +308,9 @@ namespace AethonMod.Content.NPCs
                 case F_PAGINAS: LluviaPaginas(target); return true;
                 case F_ANILLOS: AnillosFusion(target); return true;
                 case F_ALIENTO: UltimoAliento(target); return true;
+                case F_RAYOS: JuicioFantasmal(target); return true;
+                case F_RITUAL: ConcilioEspejos(target); return true;
+                case F_TORMENTA: TormentaAbismo(target); return true;
             }
             return false;
         }
@@ -178,7 +323,7 @@ namespace AethonMod.Content.NPCs
             // EL EJE DEL ECLIPSE: el dios se alza sobre la arena (la
             // izquierda es ORO, la derecha OSCURIDAD — los velos los
             // pinta el PreDraw en cada pantalla).
-            Vector2 punto = target.Center + new Vector2(0f, -460f);
+            Vector2 punto = target.Center + new Vector2(0f, -640f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 1)
@@ -227,7 +372,7 @@ namespace AethonMod.Content.NPCs
         private void SolMoribundo(Player target)
         {
             // EL DIOS OBSERVA desde arriba: el sol negro caza solo.
-            Vector2 punto = target.Center + new Vector2(0f, -500f);
+            Vector2 punto = target.Center + new Vector2(0f, -680f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -275,7 +420,7 @@ namespace AethonMod.Content.NPCs
         private void RejillaLaser(Player target)
         {
             // EL DIOS SE CLAVA sobre la presa: la rejilla se teje alrededor.
-            Vector2 punto = target.Center + new Vector2(0f, -520f);
+            Vector2 punto = target.Center + new Vector2(0f, -700f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
@@ -320,7 +465,7 @@ namespace AethonMod.Content.NPCs
         private void LluviaPaginas(Player target)
         {
             // EL DIOS SE ALZA y arranca las páginas de tinta.
-            Vector2 punto = target.Center + new Vector2(0f, -480f);
+            Vector2 punto = target.Center + new Vector2(0f, -660f);   // v6.50.120 — el coloso reposa más alto
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 1)
@@ -467,6 +612,239 @@ namespace AethonMod.Content.NPCs
             {
                 IniciarCineMuerte();
             }
+        }
+
+        // ==================================================================
+        //  (g) EL JUICIO FANTASMAL — F_RAYOS (v6.50.120 · Moon Lord · el
+        //      Phantasmal Deathray: rayos gigantes que CARGAN
+        //      telegrafiados y luego BARREN en arco — y sus True Eyes
+        //      orbitando al dueño)
+        // ==================================================================
+        private void JuicioFantasmal(Player target)
+        {
+            // SE PLANTA a −700: el coloso MANTIENE la posición TODO el
+            // ataque — los rayos viven solos su reloj, como los ojos del
+            // Señor de la Luna orbitando a su dueño.
+            Vector2 punto = target.Center + new Vector2(0f, -700f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item117.WithPitchOffset(-0.5f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Rayo", PaletaOro);
+                OndaLib.Kick(10f, 22);
+                NPC.netUpdate = true;
+            }
+
+            // EL LANZAMIENTO (t=20, SOLO la autoridad — el contrato MP de
+            // la casa): DOS ruedas de rayos reusando LA PRIMITIVA de la
+            // danza solar de la base (AtaqueJefeProjectile.EstiloDanzaSolar
+            // — la rueda de SEIS rayos girando que BARRE en arco), una por
+            // FLANCO del jefe (±220 px ≈ ±0.28 del cuerpo de 770) para que
+            // sus rayos se CRUCEN barriendo sobre la presa. El giro de la
+            // danza vive en su propio reloj (0.0125 rad/t) y NO admite
+            // sentido por ai[] — dos semillas distintas, el giro natural
+            // de la casa. Y las semillas viajan FUERA del rango del
+            // cabalgador (≥ Main.maxNPCs): en la base la rueda CABALGA al
+            // jefe (ai[2] = su whoAmI) — DOS cabalgando se apilarían en
+            // una sola; así cada rueda queda ANCLADA a su flanco.
+            if (_tickEstado == 20 && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    float lado = i == 0 ? -1f : 1f;
+                    Vector2 pos = NPC.Center + new Vector2(lado * 220f, 0f);
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        pos.X, pos.Y, 0f, 0f,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.75f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloDanzaSolar,
+                        Furia ? 1f : 0f, Main.maxNPCs + 11 + i);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                NPC.netUpdate = true;
+            }
+
+            // La danza vive ~555 t por su reloj propio — el estado suelta
+            // a los 615 (+60 de margen): el coloso contempla su juicio.
+            if (_tickEstado >= 615) CerrarEstado();
+        }
+
+        // ==================================================================
+        //  (h) EL CONCILIO DE ESPEJOS — F_RITUAL (v6.50.120 · Lunatic
+        //      Cultist · el ritual: círculos de proyectiles ANCLADOS
+        //      alrededor del jugador que CONVERGEN al punto donde estabas)
+        // ==================================================================
+        private void ConcilioEspejos(Player target)
+        {
+            // SE ALZA a −680: el concilio se teje alrededor de la presa.
+            Vector2 punto = target.Center + new Vector2(0f, -680f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item70.WithPitchOffset(-0.4f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Ritual", PaletaOro);
+                OndaLib.Kick(7f, 16);
+                NPC.netUpdate = true;
+            }
+
+            // LA PRIMERA SIEMBRA (t=30, autoridad): OCHO pernos en círculo
+            // de 430 px alrededor de la presa, cada uno con el rumbo YA
+            // CLAVADO al centro — el perno CARGA quieto y a los 55 t VUELA
+            // (el dodge legible del Cultista: SALIR del círculo antes del
+            // cierre).
+            if (_tickEstado == 30 && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                SembrarRitual(target, 430f, 0);
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item4.WithPitchOffset(0.3f), NPC.Center);
+                NPC.netUpdate = true;
+            }
+
+            // LA SEGUNDA SIEMBRA (t=150, autoridad): el ritual SE REPITE —
+            // otro círculo de 8, radio 500 y desfase distinto (al que
+            // esquivó el primero leyéndolo, el segundo lo cobra moviéndose).
+            if (_tickEstado == 150 && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                SembrarRitual(target, 500f, 800);
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item4.WithPitchOffset(0.3f), NPC.Center);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 300) CerrarEstado();
+        }
+
+        /// <summary>v6.50.120 — LA SIEMBRA DEL CONCILIO: OCHO pernos
+        /// EstiloRitualConvergente en círculo alrededor de la presa, cada
+        /// uno con velocity YA APUNTANDO al centro (donde ESTÁS ahora)
+        /// × 11.5 px/t. La PARIDAD del índice viaja en ai[1] (el color del
+        /// perno: par ORO, impar OSCURIDAD) y la semilla determinista en
+        /// ai[2] (i×13 + whoAmI×7 + lote).</summary>
+        private void SembrarRitual(Player target, float radio, int lote)
+        {
+            float desfase = Main.rand.NextFloat(MathHelper.TwoPi);
+            for (int i = 0; i < 8; i++)
+            {
+                float ang = desfase + i * MathHelper.TwoPi / 8f;
+                Vector2 pos = target.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
+                Vector2 v = (target.Center - pos).SafeNormalize(Vector2.UnitY) * 11.5f;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    pos.X, pos.Y, v.X, v.Y,
+                    ModContent.ProjectileType<AtaqueFusionProjectile>(),
+                    (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
+                    AtaqueFusionProjectile.EstiloRitualConvergente, i,
+                    i * 13 + NPC.whoAmI * 7 + lote);
+            }
+        }
+
+        // ==================================================================
+        //  (i) LA TORMENTA DEL ABISMO — F_TORMENTA (v6.50.120 · Duke
+        //      Fishron · el sharknado: vórtices que emergen a los flancos
+        //      y avanzan escupiendo proyectiles en espiral — SIN
+        //      proyectil nuevo: anclas propias + los pernos de siempre)
+        // ==================================================================
+        private void TormentaAbismo(Player target)
+        {
+            // EL JEFE SUBE a −700: desde arriba contempla su tormenta.
+            Vector2 punto = target.Center + new Vector2(0f, -700f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                // El estado nace LIMPIO (el sembrado y la espiral se
+                // re-arma en cada visita — la contabilidad de la casa).
+                _tormentaSembrada = false;
+                _angTormenta = 0f;
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item117.WithPitchOffset(0.35f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Tormenta", PaletaOro);
+                OndaLib.Kick(9f, 20);
+                NPC.netUpdate = true;
+            }
+
+            // LA SIEMBRA (t=15, UNA vez): los TRES vórtices nacen a los
+            // flancos de la presa (±700 px) y sobre su cabeza (−300) —
+            // los sharknados del Duque emergiendo del agua a los costados.
+            // (Corre en TODAS las máquinas: las anclas alimentan el teatro
+            // local de cada pantalla; las ráfagas sí son de la autoridad.)
+            if (_tickEstado == 15 && !_tormentaSembrada)
+            {
+                _tormentaSembrada = true;
+                for (int a = 0; a < 3; a++)
+                    _anclasTormenta[a] = new Vector2(
+                        target.Center.X + (a - 1) * 700f, target.Center.Y - 300f);
+            }
+
+            if (_tormentaSembrada)
+            {
+                // EL ACECHO: cada ancla AVANZA horizontal hacia la presa
+                // (2.2 px/t) pero el cerco JAMÁS cierra a <600 px — la
+                // tormenta ACECHA, no envuelve (el tiburón no se traga la
+                // arena). La del CENTRO es el OJO: nació bajo la presa y
+                // la sigue suave; si la presa corre HACIA un vórtice, ese
+                // no retrocede — la tormenta no persigue de cerca.
+                for (int a = 0; a < 3; a++)
+                {
+                    float dx = _anclasTormenta[a].X - target.Center.X;
+                    if (a == 1)
+                        _anclasTormenta[a].X += MathHelper.Clamp(-dx, -2.2f, 2.2f);
+                    else if (dx > 600f)
+                        _anclasTormenta[a].X = Math.Max(target.Center.X + 600f,
+                            _anclasTormenta[a].X - 2.2f);
+                    else if (dx < -600f)
+                        _anclasTormenta[a].X = Math.Min(target.Center.X - 600f,
+                            _anclasTormenta[a].X + 2.2f);
+                }
+
+                // EL VÓRTICE (el teatro del tiburón): 2 motas por ancla en
+                // órbita espiral — la del CENTRO ORO, las de afuera violeta
+                // (la paridad de la casa).
+                if (!Main.dedServ)
+                {
+                    for (int a = 0; a < 3; a++)
+                    {
+                        for (int k = 0; k < 2; k++)
+                        {
+                            Vector2 off = Main.rand.NextVector2Circular(46f, 46f);
+                            Dust d = Dust.NewDustPerfect(_anclasTormenta[a] + off,
+                                DustID.PurpleTorch,
+                                new Vector2(-off.Y, off.X) * (1.4f / 46f), 150,
+                                a == 1 ? PaletaOro : new Color(90, 20, 140), 1.1f);
+                            d.noGravity = true;
+                        }
+                    }
+                }
+
+                // LAS RÁFAGAS (cada 14 t, SOLO la autoridad): UN perno por
+                // ancla, todos con el MISMO ángulo que gira 0.62 rad por
+                // ráfaga — la espiral que gira del sharknado. La primera
+                // llega a los 29 t: un compás para LEER los vórtices antes
+                // de que escupan (la regla de legibilidad de la casa). El
+                // perno del OJO es de LUZ (ai 0), los de afuera de
+                // OSCURIDAD (ai 2); semilla determinista anclaIdx×29+tick.
+                if (_tickEstado > 15 && ((_tickEstado - 15) % 14) == 0 &&
+                    Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    for (int a = 0; a < 3; a++)
+                    {
+                        Vector2 v = new Vector2(MathF.Cos(_angTormenta), MathF.Sin(_angTormenta)) * 7.5f;
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            _anclasTormenta[a].X, _anclasTormenta[a].Y, v.X, v.Y,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloPernoEstelar,
+                            a == 1 ? 0f : 2f, a * 29 + _tickEstado);
+                    }
+                    _angTormenta += 0.62f;
+                    NPC.netUpdate = true;
+                }
+            }
+
+            if (_tickEstado >= 340) CerrarEstado();
         }
 
         /// <summary>

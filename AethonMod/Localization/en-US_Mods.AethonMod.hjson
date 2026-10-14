@@ -2356,7 +2356,17 @@ Jefe: {
 		Corona: THE EVERLASTING CROWN — the rainbow besieges you: move with the feathers.
 		// v6.50.57 — THE SPECIAL ATTACK: THE GOD BECOMES A SUN AND THROWS IT
 		Sol: THE SUN OF THE GOD — Aethon BECOMES a sun and HURLS it: get away from the red giant.
+		// v6.50.120 — FUSION AS A PHASE + THE FINAL BOSS'S THREE WEAPONS
+		// (the final-boss research: Moon Lord, the Lunatic Cultist, Duke
+		// Fishron — the Complete Memory devours them all).
+		Fusion: THE MEMORY IS MADE WHOLE — both fragments embrace: HALF the fight is dead, the whole god awakens.
+		Rayo: THE PHANTASMAL JUDGMENT — the memory's rays sweep crossed: walk BETWEEN the blades of light.
+		Ritual: THE COUNCIL OF MIRRORS — the ring of bolts closes where you STOOD: leave the circle before the embrace.
+		Tormenta: THE ABYSS STORM — the vortices advance spitting spirals: move between the whirlpools.
 	}
+
+	// v6.50.120 — THE BAG TO YOUR HAND (the user's letter).
+	BolsaCria.Entregada: THE BROOD BAG REACHES YOUR HAND — BOTH pets sleep inside: the light hatchling and her dark twin.
 }
 
 Esencia: {

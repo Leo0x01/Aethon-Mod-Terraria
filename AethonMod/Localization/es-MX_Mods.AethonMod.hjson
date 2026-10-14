@@ -2328,6 +2328,20 @@ Jefe: {
                 Corona: LA CORONA ETERNA — el arcoíris te asedia: muévete con las plumas.
                 // v6.50.57 — THE SPECIAL ATTACK: THE GOD BECOMES A SUN AND THROWS IT
                 Sol: EL SOL DEL DIOS — Aethon SE CONVIERTE en sol y lo LANZA: aléjate de la gigante roja.
+                // v6.50.120 — LA FUSIÓN ES UNA FASE + LOS TRES ATAQUES DEL JEFE
+                // FINAL (la investigación de los finales: el Moon Lord, el
+                // Lunatic Cultist, el Duque Fishron — el Recuerdo Completo los
+                // devora a todos).
+                Fusion: EL RECUERDO SE COMPLETA — los dos fragmentos se abrazan: la MITAD de la pelea ha muerto, el dios entero despierta.
+                Rayo: EL JUICIO FANTASMAL — los rayos del recuerdo barren cruzados: camina ENTRE las hojas de luz.
+                Ritual: EL CONCILIO DE ESPEJOS — el círculo de pernos se cierra donde ESTABAS: sal del anillo antes del abrazo.
+                Tormenta: LA TORMENTA DEL ABISMO — los vórtices avanzan escupiendo espirales: muévete entre los remolinos.
+        }
+
+        BolsaCria: {
+                // v6.50.120 — LA BOLSA A LA MANO (la letra: «además no tengo
+                // la bolsa, no olvides que debes dárselo al jugador»).
+                Entregada: LA BOLSA DE LA CRÍA LLEGA A TU MANO — las DOS mascotas duermen dentro: la cría de luz y su gemela oscura.
         }
 }
 

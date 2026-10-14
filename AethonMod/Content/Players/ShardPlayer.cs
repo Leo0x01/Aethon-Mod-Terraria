@@ -101,6 +101,16 @@ namespace AethonMod.Content.Players
         /// </summary>
         public bool CaidaRecibida = false;
 
+        /// <summary>v6.50.120 — LA BOLSA A LA MANO (la letra: «además no
+        /// tengo la bolsa, no olvides que debes dárselo al jugador»):
+        /// ¿ESTE portador ya recibió LA BOLSA DE LA CRÍA directamente en
+        /// su inventario? La primera victoria de la familia de jefes (un
+        /// gemelo final o EL RECUERDO COMPLETO) se la ENTREGA a la mano
+        /// — una sola vez por jugador, para siempre: la pareja de mascotas
+        /// (la cría de luz y su gemela oscura) es suya aunque la pierda.
+        /// La lee AethonBoss.DropBotin para decidir si la entrega corre.</summary>
+        public bool BolsaCriaEntregada = false;
+
         // ================================================================
         // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
         // ================================================================
@@ -926,6 +936,9 @@ namespace AethonMod.Content.Players
                 // v6.50.117 — LA CAÍDA: la marca del libro entregado por
                 // el cometa (un grimorio por jugador, para siempre).
                 tag["caidaRecibida"] = CaidaRecibida;
+                // v6.50.120 — LA BOLSA A LA MANO: la marca de la cría
+                // entregada (la pareja es suya, una vez por portador).
+                tag["bolsaCriaEntregada"] = BolsaCriaEntregada;
             }
             catch { }
         }
@@ -959,6 +972,10 @@ namespace AethonMod.Content.Players
                 // v6.50.117 — LA CAÍDA (ausente = false: el guardado viejo
                 // todavía puede recibir su cometa de tinta)
                 CaidaRecibida = tag.GetBool("caidaRecibida");
+                // v6.50.120 — LA BOLSA A LA MANO (ausente = false: el
+                // guardado viejo aún puede recibir a la cría en su primera
+                // victoria de la familia de jefes)
+                BolsaCriaEntregada = tag.GetBool("bolsaCriaEntregada");
             }
             catch { }
         }

@@ -36,6 +36,14 @@ namespace AethonMod.Content.Projectiles.Jefes
     ///     DE PÁGINAS — cae con vaivén de papel, estela morada y TRES
     ///     LÍNEAS de escritura; contra el suelo SE ROMPE en tinta.
     ///
+    ///   3 · EL PERNO DEL CONCILIO (v6.50.120 — Lunatic Cultist · el
+    ///     ritual que CONVERGE): nace en el CÍRCULO alrededor de donde
+    ///     estaba el jugador, con el rumbo YA CLAVADO al centro; CARGA
+    ///     55 t BRILLANDO gordo y TENUE (la regla de legibilidad — lo
+    ///     que aún no duele se ve tenue, como el aviso de la Rejilla) y
+    ///     a los 55 t VUELA al punto donde estabas: el dodge legible es
+    ///     SALIR del círculo antes del cierre.
+    ///
     /// REGLAS DE LA CASA (heredadas del arsenal): daño por COLISIÓN del
     /// motor, cero Main.rand en el render, el contrato de lote
     /// cerrado→cerrado→vanilla, y LA AUTOCURACIÓN de talla/vida en la
@@ -47,6 +55,11 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloSolMoribundo = 0;
         public const int EstiloRejillaLaser = 1;
         public const int EstiloPaginaTinta = 2;
+        // v6.50.120 — EL PERNO RITUAL CONVERGENTE (Lunatic Cultist · el
+        // ritual): nace de AVISO en el círculo, CARGA quieto 55 t y a los
+        // 55 t VUELA al centro donde estabas — el dodge legible de
+        // siempre: SALIR del círculo antes del cierre.
+        public const int EstiloRitualConvergente = 3;
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -65,6 +78,9 @@ namespace AethonMod.Content.Projectiles.Jefes
         private float _edad;
         /// <summary>La nova del sol moribundo ya sonó (una sola vez).</summary>
         private bool _novaHecha;
+        /// <summary>v6.50.120 — el perno del concilio ya SOLTÓ su vuelo
+        /// (la descarga suena UNA sola vez por máquina).</summary>
+        private bool _ritualLanzado;
 
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
@@ -116,6 +132,17 @@ namespace AethonMod.Content.Projectiles.Jefes
                     Projectile.height = 40;
                     Projectile.tileCollide = true;
                     break;
+
+                case EstiloRitualConvergente:
+                    // v6.50.120 — EL PERNO DEL CONCILIO: nace de AVISO
+                    // (inofensivo — la regla de legibilidad: lo que aún
+                    // no duele se ve tenue) y JAMÁS toca el terreno (vuela
+                    // del círculo al centro por encima de todo).
+                    Projectile.width = 30;
+                    Projectile.height = 30;
+                    Projectile.hostile = false;
+                    Projectile.tileCollide = false;
+                    break;
             }
         }
 
@@ -128,6 +155,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 case EstiloSolMoribundo: SolTick(); break;
                 case EstiloRejillaLaser: RejillaTick(); break;
                 case EstiloPaginaTinta: PaginaTick(); break;
+                case EstiloRitualConvergente: RitualTick(); break;
             }
 
             // El cable respira (el patrón del arsenal).
@@ -264,6 +292,68 @@ namespace AethonMod.Content.Projectiles.Jefes
             }
 
             if (_edad >= 460f) Projectile.Kill();
+        }
+
+        // ==================================================================
+        //  v6.50.120 — EL PERNO RITUAL CONVERGENTE — el concilio que
+        //  cierra (Lunatic Cultist · el ritual: el círculo anclado
+        //  alrededor del jugador que CONVERGE al punto donde estabas)
+        // ==================================================================
+        private void RitualTick()
+        {
+            // LA AUTOCURACIÓN de talla (el msg 27 no lleva OnSpawn — la
+            // lección del sol del dios).
+            if (Projectile.width != 30 || Projectile.height != 30)
+            {
+                Vector2 c = Projectile.Center;
+                Projectile.Resize(30, 30);
+                Projectile.Center = c;
+            }
+
+            // LA FASE DE CARGA (<55 t): el perno BRILLA quieto — DESHACE
+            // su propio avance (telegrafía: el ritual acumulando su
+            // sentencia) mientras el polvo de SU color CONVERGE a él
+            // desde alrededor (la paridad del índice: par ORO, impar
+            // OSCURIDAD).
+            if (_edad < 55f)
+            {
+                Projectile.position -= Projectile.velocity;
+
+                if (!Main.dedServ && Main.rand.NextBool(2))
+                {
+                    bool oro = (Par % 2f) < 0.5f;
+                    Vector2 alrededor = Projectile.Center + Main.rand.NextVector2Circular(64f, 64f);
+                    Vector2 hacia = (Projectile.Center - alrededor).SafeNormalize(Vector2.UnitX) *
+                        Main.rand.NextFloat(1.5f, 3.5f);
+                    Dust d = Dust.NewDustPerfect(alrededor,
+                        oro ? DustID.GoldFlame : DustID.PurpleTorch,
+                        hacia, 150, oro ? OroLuz : Oscuridad, 1.0f);
+                    d.noGravity = true;
+                }
+            }
+            else if (!_ritualLanzado)
+            {
+                // LA DESCARGA (t=55): el perno VUELA al centro donde
+                // ESTABAS — el círculo entero se cierra de golpe (los
+                // ocho a la vez: el cierre del concilio).
+                _ritualLanzado = true;
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(0.4f), Projectile.Center);
+                OndaLib.Kick(3f, 8);
+                Projectile.netUpdate = true;
+            }
+
+            // La hostilidad se RECONSTRUYE del reloj en CADA máquina (el
+            // msg 27 no la lleva entera — la lección del pilar): la carga
+            // es AVISO, el vuelo es FILO.
+            Projectile.hostile = _edad >= 55f;
+
+            // LA PENUMBRA VIOLETA del perno (legible aun dentro de la
+            // noche del eclipse — el Recuerdo Completo ya no alumbra el
+            // mundo, sus armas tienen que alumbrarse solas).
+            Lighting.AddLight(Projectile.Center, 0.4f, 0.25f, 0.6f);
+
+            if (_edad > 240f) Projectile.Kill();
         }
 
         /// <summary>LA PÁGINA SE ROMPE CONTRA EL SUELO: se deshace en tinta.</summary>
@@ -430,6 +520,46 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 LumenLib.Bloom(Main.spriteBatch, fantasma, 14f - e * 3f,
                                     new Color(120, 60, 185), 0.35f / e, 2);
                             }
+                            break;
+                        }
+
+                        // === v6.50.120 — EL PERNO DEL CONCILIO: la carga
+                        //     BRILLA gorda y TENUE (el aviso legible de la
+                        //     Rejilla — lo que aún no duele se ve tenue,
+                        //     respirando) y al dispararse se AFILA en un
+                        //     perno PLENO en la dirección del vuelo: oro o
+                        //     violeta por paridad del índice, con su
+                        //     núcleo blanco al volar (el filo que mata) ===
+                        case EstiloRitualConvergente:
+                        {
+                            bool cargando = _edad < 55f;
+                            bool oro = (Par % 2f) < 0.5f;
+                            Color c = oro ? OroLuz : Oscuridad;
+                            float fade = _edad > 210f
+                                ? Math.Max(0f, 1f - (_edad - 210f) / 30f) : 1f;
+                            float alfa = cargando
+                                ? 0.26f + 0.12f * MathF.Sin(t * 9f)   // late juntando la sentencia
+                                : 0.92f;                               // PLENO al volar
+                            alfa *= fade;
+                            float largo = cargando ? 92f : 74f;
+                            float ancho = cargando ? 26f : 13f;
+                            float rot = Projectile.velocity.ToRotation();
+                            Vector2 origen = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
+
+                            Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null, c * alfa, rot, origen,
+                                new Vector2(largo / VFXCore.SoftGlow.Width,
+                                            ancho / VFXCore.SoftGlow.Height),
+                                SpriteEffects.None, 0f);
+                            // EL NÚCLEO BLANCO del perno disparado (el filo que mata).
+                            if (!cargando)
+                                Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
+                                    Color.White * (0.60f * fade), rot, origen,
+                                    new Vector2(34f / VFXCore.SoftGlow.Width,
+                                                5f / VFXCore.SoftGlow.Height),
+                                    SpriteEffects.None, 0f);
+                            // LA CABEZA (el corazón del perno, latiendo).
+                            LumenLib.Bloom(Main.spriteBatch, pos, cargando ? 30f : 20f, c,
+                                (cargando ? 0.55f : 0.85f) * fade, 2);
                             break;
                         }
                     }

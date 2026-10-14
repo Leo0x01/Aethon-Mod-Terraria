@@ -209,6 +209,13 @@ namespace AethonMod.Content.NPCs
         internal const int EST_ORBITANDO = 90;    // a mil: gira alrededor del hermano, INTOCABLE
         internal const int EST_FUSIONANDO = 91;   // ambos a mil: LA CINEMÁTICA (200 t) y el nacimiento del Recuerdo Completo
 
+        // === v6.50.120 — LA CORREA DEL DUELO (la letra: «los jefes se
+        //     alejan mucho del jugador»): el LÍMITE ABSOLUTO de la
+        //     distancia a la presa — NINGÚN estado de combate deja al
+        //     dios más lejos que esto (el empuje de retorno vive en AI,
+        //     justo tras el switch de estados). ===
+        internal const float CORREA_DUENO = 820f;
+
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
 //     además demora mucho la animación del suelo temblando y todo eso /
 //     la presentación debe durar hasta que el sol llegue al centro, LUEGO
@@ -479,6 +486,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         //  (intocable, sin ataques) y cuando AMBOS están a mil, el de MENOR
         //  whoAmI DECRETA la cinemática. Solo la AUTORIDAD decide (SP o
         //  servidor); los remotos adoptan por el cable (ai[0] = 91).
+        //  v6.50.120 — LA FUSIÓN ES UNA FASE (la letra: «no se activa la
+        //  mecanica, pongamosla como una fase, cuando tengan cierta
+        //  cantidad de vida se activa y ambos se fucionen»): el umbral
+        //  ya no son los 1000 ABSOLUTOS — es la vida COMBINADA del par
+        //  al 50% (ver LA FASE, abajo). La órbita a mil queda como la
+        //  red de siempre (el refugio del overkill).
         // ==================================================================
         protected virtual void PasoFusionPrevia()
         {
@@ -486,10 +499,58 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (_muriendo || _estado == EST_MURIENDO) return; // la muerte manda sobre todo
             if (_estado == EST_FUSIONANDO) return;            // ya corre el cine
 
-            if (NPC.life > VidaFusion) return;                // todavía le queda memoria que quemar
-
-            NPC hermano = BuscarHermano();
+            NPC hermano = BuscarHermano();   // v6.50.120 — EL HERMANO PRIMERO: la FASE lo necesita (sin él, el flujo viejo ya retornaba en el clamp individual)
             if (hermano == null) return;                      // sin hermano no hay fusión (si orbitaba a uno que murió, el estado lo devuelve a la pelea)
+
+            // === v6.50.120 — LA FUSIÓN ES UNA FASE (la letra: «no se
+            //     activa la mecanica, pongamosla como una fase, cuando
+            //     tengan cierta cantidad de vida se activa y ambos se
+            //     fucionen haciendose mas grandes, mas epicos»): el
+            //     umbral de los 1000 ABSOLUTOS exigía vaciar el 99,96%
+            //     de 4,8 millones de vida combinada — la mitad de la
+            //     pelea JAMÁS se veía. AHORA, cuando la vida COMBINADA
+            //     del par baja al 50% (o la red .119 atrapa un
+            //     overkill), LA FUSIÓN SE DECRETA: ambos se juntan
+            //     intocables y EL RECUERDO COMPLETO nace — la letra:
+            //     «cuando tengan cierta cantidad de vida se activa».
+            //     Solo la AUTORIDAD, solo el de MENOR whoAmI, UNA sola
+            //     vez (el contrato MP de la casa). ===
+            if (hermano.ai[0] != EST_MURIENDO && !FusionDecretada &&
+                Main.netMode != NetmodeID.MultiplayerClient &&
+                NPC.whoAmI < hermano.whoAmI)
+            {
+                float vidaPar = Math.Max(NPC.life, VidaFusion) + Math.Max(hermano.life, VidaFusion);
+                float maxPar = NPC.lifeMax + hermano.lifeMax;
+                bool rescatado = NPC.life <= VidaFusion || hermano.life <= VidaFusion;   // la red .119: un overkill también funde
+                if (vidaPar <= maxPar * 0.50f || rescatado)
+                {
+                    FusionDecretada = true;
+
+                    // EL ANUNCIO ÉPICO (una sola vez, en el instante del
+                    // decreto): el mundo ENTERO sabe que la fase cambió —
+                    // y el estruendo con él.
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Fusion", PaletaOro);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    OndaLib.Kick(12f, 24);
+                }
+            }
+
+            // EL DECRETO MANDA: la FASE se decretó — AMBOS a la cinemática,
+            // intocables y congelados (el sonido vive SOLO en el decreto
+            // épico de arriba: nada de doble estruendo).
+            if (FusionDecretada)
+            {
+                _estado = EST_FUSIONANDO;
+                _tickEstado = 0;
+                _fusionando = true;
+                NPC.dontTakeDamage = true;
+                NPC.velocity = Vector2.Zero;
+                NPC.netUpdate = true;      // MP: el cambio de estado viaja YA
+                return;
+            }
+
+            if (NPC.life > VidaFusion) return;                // todavía le queda memoria que quemar
 
             // EL PRIMERO A MIL: órbita alrededor del que sobrevive +
             // INTOCABLE (la letra: «queda orbitando al que sobrevive y
@@ -504,31 +565,6 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;      // MP: el cambio de estado viaja YA
             }
             NPC.life = Math.Max(NPC.life, VidaFusion);        // EL CLAMP: a mil no baja más
-
-            // ¿AMBOS A MIL? EL DECRETO — exactamente UNO (el de menor
-            // whoAmI, y solo la AUTORIDAD: la decisión de fusión no se
-            // decide dos veces ni en el cliente).
-            bool hermanoMuriendo = hermano.ai[0] == EST_MURIENDO;
-            bool hermanoListo = hermano.life <= VidaFusion && !hermanoMuriendo;
-            if (hermanoListo && !FusionDecretada &&
-                Main.netMode != NetmodeID.MultiplayerClient &&
-                NPC.whoAmI < hermano.whoAmI)
-            {
-                FusionDecretada = true;
-            }
-
-            if (FusionDecretada)
-            {
-                _estado = EST_FUSIONANDO;
-                _tickEstado = 0;
-                _fusionando = true;
-                NPC.dontTakeDamage = true;
-                NPC.velocity = Vector2.Zero;
-                NPC.netUpdate = true;
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item117.WithPitchOffset(-0.35f), NPC.Center);
-                OndaLib.Kick(9f, 20);
-            }
         }
 
         // ==================================================================
@@ -696,6 +732,24 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         _tickEstado = 0;
                     }
                     break;
+            }
+
+            // === v6.50.120 — LA CORREA DEL DUELO (la letra: «los jefes se alejan
+            //     mucho del jugador»): NINGÚN estado deja al dios a más de
+            //     CORREA_DUENO px de su presa — los flancos del cuerpo gigante
+            //     (×2.5) lo mandaban a 1000-1400 px: fuera de pantalla, inalcanzable.
+            //     El empuje crece con el exceso: suave al borde, firme al doble.
+            //     (No aplica en órbita/fusión/muerte/llegada: esos estados
+            //     corren antes con return temprano o son cine.) ===
+            if (!_fusionando && !_muriendo && _estado != EST_NACIENDO)
+            {
+                float distDuelo = Vector2.Distance(NPC.Center, target.Center);
+                if (distDuelo > CORREA_DUENO)
+                {
+                    Vector2 haciaPresa = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+                    float exceso = distDuelo - CORREA_DUENO;
+                    NPC.velocity += haciaPresa * (exceso * 0.035f + 2f);
+                }
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
@@ -1121,19 +1175,20 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // y si se APEGA TOMA ESPACIO — el dios ya no patrulla un
             // circuito muerto: MANTIENE su distancia de duelo.
             float distF = Vector2.Distance(NPC.Center, target.Center);
-            // v6.50.119 — LA ÓRBITA CRECIÓ CON EL CUERPO (×2.5): con la
-            // hitbox a 550, la órbita vieja (260-440 de radio, −260 de
-            // altura) dejaba al sol ENVOLVIENDO a la presa en el reposo
-            // (−170 < 275 de radio del cuerpo) — contacto perpetuo sin
-            // quererlo. La geometría entera del duelo escala con
-            // EscalaCuerpo: la misma pelea, más grande.
-            float radioBase = (Furia ? 260f : (Phase >= 4 ? 380f : 440f)) * EscalaCuerpo;
+            // v6.50.120 — LA CORREA DEL DUELO, LA ÓRBITA (la letra: «los
+            //     jefes se alejan mucho del jugador»): el ×2.5 del cuerpo
+            //     gigante (.119) mandaba el reposo a 650-1100 px de la
+            //     presa — media pantalla de duelo perdida. El sol gigante
+            //     ahora reposa a 420 px (su borde, con 275 de radio, a un
+            //     paso del jugador) y a la altura de la vista (−300): la
+            //     pelea es un duelo, no un espectáculo a distancia.
+            float radioBase = Furia ? 300f : (Phase >= 4 ? 360f : 420f);
             float radio = radioBase +
                 MathHelper.Clamp(distF - radioBase, -140f, 190f) * 0.35f;
             radio += MathF.Sin(_angOrbita * 3f) * 30f;
             Vector2 punto = target.Center + new Vector2(
                 MathF.Cos(_angOrbita) * radio,
-                (-260f + MathF.Sin(_angOrbita) * 90f) * EscalaCuerpo);
+                -300f + MathF.Sin(_angOrbita) * 80f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.08f, 0.14f);
 
             // v6.50.57 — EL QUIEBRO DEL DUELISTA (determinista — sin dados:
@@ -3188,20 +3243,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             EsenciasModSistema.SoltarEsencia(NPC);
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                 ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(), 1);
-            // v6.50.49 — EL AETHON MENOR (la mascota de luz: «una pequeña
-            //     mascota de luz que sea Aethon original pero mas pequeño»)
-            //     cae de su amo un 20% de las veces — su recuerdo vivo.
-            //     v6.50.118 — SOLO del jefe de luz: el Recuerdo Completo
-            //     (EsFusion) la deja GARANTIZADA en su propio DropBotin —
-            //     sin este gate caerían DOS (la canónica y la del azar).
-            //     v6.50.119 — LA CRÍA VIAJA EN SU BOLSA (la letra: «crea
-            //     una bolsa donde esten las mascotas, las 2»): el 20% del
-            //     jefe de luz ahora suelta LA BOLSA DE LA CRÍA — al
-            //     abrirla despierta la pareja (la de luz y su gemela
-            //     oscura: las DOS mascotas, un solo ítem adentro).
-            if (!EsFusion && Main.rand.NextFloat() < 0.20f)
-                Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                    ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
+            // v6.50.120 — EL 20% DE AZAR MURIÓ (la letra: «además no tengo
+            //     la bolsa, no olvides que debes dárselo al jugador»):
+            //     desde la .49 la cría vivía en un drop al suelo de 20%
+            //     (y desde la .119 en SU BOLSA) — dependía de que el
+            //     jugador lo RECOGIERA y el azar podía negarla por
+            //     siempre. AHORA la bolsa LLEGA A LA MANO (LA ENTREGA,
+            //     más abajo: la primera victoria de la familia la pone
+            //     DIRECTO en el inventario del verdugo, una sola vez
+            //     por jugador para siempre). El Recuerdo Completo la
+            //     sigue dropeando SIEMPRE al suelo en su propio
+            //     override — suyo es el botín de la fusión.
 
             int killerWho = NPC.lastInteraction;
             if (killerWho < 0 || killerWho >= Main.player.Length)
@@ -3227,6 +3279,58 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
                             new Color(245, 196, 81), NPC.FullName, 250);
                         EcoRed.SincronizarCronica(player);
+
+                        // v6.50.120 — LA BOLSA A LA MANO (la letra: «además
+                        //     no tengo la bolsa, no olvides que debes dárselo
+                        //     al jugador»): el drop al suelo dependía de que
+                        //     el jugador lo RECOGIERA — AHORA la primera
+                        //     victoria de la familia (un gemelo final o EL
+                        //     RECUERDO COMPLETO) ENTREGA LA BOLSA DE LA
+                        //     CRÍA directamente al inventario del verdugo,
+                        //     una sola vez por jugador para siempre (la
+                        //     pareja de mascotas es suya aunque la pierda).
+                        if (!sp.BolsaCriaEntregada)
+                        {
+                            sp.BolsaCriaEntregada = true;
+                            bool aLaMano = false;
+                            for (int i = 0; i < 58; i++)
+                            {
+                                if (player.inventory[i] == null || player.inventory[i].type == ItemID.None)
+                                {
+                                    player.inventory[i].SetDefaults(ModContent.ItemType<Items.Llamados.BolsaDeLaCria>());
+                                    player.inventory[i].stack = 1;
+                                    aLaMano = true;
+                                    break;
+                                }
+                            }
+                            if (!aLaMano)
+                            {
+                                int caida = Item.NewItem(player.GetSource_GiftOrReward(),
+                                    player.Center, ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
+                                if (caida >= 0 && caida < Main.item.Length)
+                                    Main.item[caida].noGrabDelay = 0;   // a sus pies: recogerla es instantáneo
+                            }
+                            // LA FANFARRIA (el momento de la casa): la MITAD
+                            // de las chispas DORADAS (la cría de luz) y la
+                            // MITAD MORADAS (la gemela oscura).
+                            if (!Main.dedServ)
+                            {
+                                for (int i = 0; i < 26; i++)
+                                {
+                                    float angF = Main.rand.NextFloat(MathHelper.TwoPi);
+                                    bool luzF = (i & 1) == 0;
+                                    Dust dF = Dust.NewDustPerfect(player.Center,
+                                        luzF ? DustID.GoldFlame : DustID.PurpleTorch,
+                                        new Vector2(MathF.Cos(angF), MathF.Sin(angF)) * Main.rand.NextFloat(1.6f, 4.2f),
+                                        180, luzF ? new Color(255, 222, 130) : new Color(150, 70, 220), 0.9f);
+                                    dF.noGravity = true;
+                                }
+                                Lighting.AddLight(player.Center, 0.75f, 0.62f, 0.95f);
+                            }
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4.WithPitchOffset(-0.25f), player.Center);
+                            EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.BolsaCria.Entregada",
+                                new Color(230, 196, 255));
+                        }
                     }
                 }
             }
