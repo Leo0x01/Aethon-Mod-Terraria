@@ -457,7 +457,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             NPC victima = e.Modo == MODO_MOLESTAR || e.Modo == MODO_VIAJAR
                 ? NpcValido(e.NpcObjetivo) : null;
 
-            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados);
+            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados, out Vector2[] miradas);
 
             VFXCore.Begin();
 
@@ -479,22 +479,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             }
 
             // === LOS 3 MINI OJOS (idea 15): los minions del grimorio en
-            //     miniatura — discos con iris violeta y pupila. Orbitan a
-            //     la PAREJA completa (radio ~58 px, 120° exactos entre
-            //     hermanos) y cada uno PARPADEA a su compás. (El iris
-            //     brillante va al lote aditivo del cuerpo.) ===
+            //     miniatura — discos con iris violeta y pupila. Orbitan AL
+            //     LIBRO (v6.50.124: radio ~44 px — antes 58: leían lejanos
+            //     y perdidos; AHORA son compañía pegada al tomo) a 120°
+            //     exactos entre hermanos y cada uno PARPADEA a su compás.
+            //     v6.50.124 — LA LETRA («el pequeño grimorio no tiene sus
+            //     minion»): los ojos eran discos de 9 px de un violeta
+            //     casi negro — INVISIBLES de noche (la lección .66). Ahora
+            //     miden 13 px, la pupila MIRA (se desplaza dentro del ojo
+            //     hacia el dueño o la víctima) y el rim violeta del lote
+            //     aditivo los lee en CUALQUIER fondo. (El iris brillante
+            //     va al lote aditivo del cuerpo.) ===
             for (int i = 0; i < 3; i++)
             {
                 if (cerrados[i])
                 {
                     // EL PÁRPADO CERRADO: una rayita oscura en vez del ojo.
-                    VFXCore.Line(ojos[i] - new Vector2(4f, 0f), ojos[i] + new Vector2(4f, 0f),
-                        SombrasLib.Alfa(SombrasLib.HumoNegro, 0.65f), 1.6f);
+                    VFXCore.Line(ojos[i] - new Vector2(5.5f, 0f), ojos[i] + new Vector2(5.5f, 0f),
+                        SombrasLib.Alfa(SombrasLib.HumoNegro, 0.70f), 2.0f);
                     continue;
                 }
-                // LA ESCLERÓTICA oscura (el disco) + LA PUPILA negra.
-                VFXCore.Quad(ojos[i], SombrasLib.Alfa(new Color(26, 12, 40), 0.85f), new Vector2(9f, 9f));
-                VFXCore.Quad(ojos[i], SombrasLib.Alfa(new Color(8, 3, 12), 0.95f), new Vector2(3.6f, 3.6f));
+                // LA ESCLERÓTICA oscura (el disco) + LA PUPILA negra QUE MIRA.
+                VFXCore.Quad(ojos[i], SombrasLib.Alfa(new Color(26, 12, 40), 0.85f), new Vector2(13f, 13f));
+                VFXCore.Quad(ojos[i] + miradas[i], SombrasLib.Alfa(new Color(8, 3, 12), 0.95f), new Vector2(5f, 5f));
             }
 
             VFXCore.FlushAlpha();
@@ -538,17 +545,37 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             if (Main.netMode == NetmodeID.Server) return;
 
+            // === v6.50.124 — EL DESPERTAR DE LOS MINIONS: al nacer el libro,
+            //     sus tres ojos BROTAN de las páginas (radio 0→44 en 36 t)
+            //     con un ANILLO violeta de nacimiento que se expande y muere
+            //     — el momento «los minions LLEGAN» que la .122 no tenía. ===
+            float brotar = MathHelper.Clamp(p.localAI[0] / 36f, 0f, 1f);
+            if (brotar < 1f)
+            {
+                float r = 22f + 48f * brotar;
+                VFXCore.Quad(p.Center,
+                    new Color(150, 90, 225, 255) * (0.45f * (1f - brotar)),
+                    new Vector2(r, r), 0f, VFXCore.Ring);
+            }
+
             // === EL IRIS VIOLETA de los 3 mini ojos (el brillo — el
             //     disco negro vive en el lote alfa) ===
             NPC victima = e.Modo == MODO_MOLESTAR || e.Modo == MODO_VIAJAR
                 ? NpcValido(e.NpcObjetivo) : null;
-            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados);
+            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados, out Vector2[] miradas);
             for (int i = 0; i < 3; i++)
             {
                 if (cerrados[i]) continue;
-                VFXCore.Quad(ojos[i], new Color(118, 74, 190, 255) * 0.55f, new Vector2(5.2f, 5.2f));
-                VFXCore.Quad(ojos[i] + new Vector2(-1.2f, -1.2f),
-                    new Color(230, 210, 255, 255) * 0.45f, new Vector2(1.6f, 1.6f));
+                // EL RIM VIOLETA (v6.50.124 — la lección .66: lo oscuro sin
+                // rim es INVISIBLE de noche): la aureola que lee al hermano
+                // en CUALQUIER fondo, día o cueva.
+                VFXCore.Quad(ojos[i], new Color(118, 74, 190, 255) * 0.34f, new Vector2(18f, 18f));
+                // EL IRIS (más grande que la .122: 5,2→9 px) siguiendo la mirada.
+                VFXCore.Quad(ojos[i] + miradas[i] * 0.7f,
+                    new Color(150, 96, 235, 255) * 0.58f, new Vector2(9f, 9f));
+                // EL DESTELLO de la córnea: el puntito blanco que hace VIVO al ojo.
+                VFXCore.Quad(ojos[i] + miradas[i] + new Vector2(-1.8f, -1.8f),
+                    new Color(236, 218, 255, 255) * 0.52f, new Vector2(2.4f, 2.4f));
             }
         }
 
@@ -556,32 +583,60 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         //  LA POSICIÓN DE LOS 3 MINI OJOS (compartida por ambos lotes)
         // ==================================================================
 
-        /// <summary>Dónde está cada ojo y si está parpadeando — TODO
-        /// determinista (el reloj del mundo): todas las pantallas ven los
-        /// MISMOS ojos. En FORMA 2 los ojos DEJAN la órbita y embisten al
-        /// vecino (ida ~40 t + vuelta ~40 t, cada hermano sale 5 t después
-        /// que el anterior — el primero toca en el tick 40 exacto, donde
-        /// el cerebro cobra el golpe).</summary>
+        /// <summary>Dónde está cada ojo, si está parpadeando y hacia
+        /// dónde MIRA su pupila — TODO determinista (el reloj del
+        /// mundo): todas las pantallas ven los MISMOS ojos. En FORMA 2
+        /// los ojos DEJAN la órbita y embisten al vecino (ida ~40 t +
+        /// vuelta ~40 t, cada hermano sale 5 t después que el anterior
+        /// — el primero toca en el tick 40 exacto, donde el cerebro
+        /// cobra el golpe). v6.50.124: la órbita BAJA a ~44 px con el
+        /// radio respirando (±3) y el vaivén propio de cada hermano —
+        /// y al NACER el libro los ojos BROTAN de las páginas (36 t,
+        /// la edad local del proyectil: el florecimiento es un teatro
+        /// de pantalla, cada máquina ve el suyo).</summary>
         private static void PosicionOjos(Projectile p, Estado e, NPC victima,
-            out Vector2[] pos, out bool[] cerrados)
+            out Vector2[] pos, out bool[] cerrados, out Vector2[] miradas)
         {
             pos = new Vector2[3];
             cerrados = new bool[3];
+            miradas = new Vector2[3];
             float t = Main.GlobalTimeWrappedHourly;
+
+            // v6.50.124 — EL DESPERTAR: los mini minions BROTAN del libro
+            // (radio 0 → completo en 36 t — p.localAI[0] la cuenta la IA
+            // del GrimorioMenorPet).
+            float brotar = MathHelper.Clamp(p.localAI[0] / 36f, 0f, 1f);
 
             // v6.50.122 — EL CENTRO ES EL MINI GRIMORIO MISMO (antes era
             // el punto medio de la pareja de luz: la máquina cambió de
             // dueño — los mini ojos orbitan AL LIBRO).
             Vector2 centro = p.Center;
 
+            // LA MIRADA DE LOS HERMANOS: su dueño… salvo de misión —
+            // entonces CLAVADA en la víctima (la vigilancia en miniatura).
+            Vector2 objetivo = Main.player[p.owner].MountedCenter;
+            if (victima != null) objetivo = victima.Center;
+
             for (int i = 0; i < 3; i++)
             {
                 float ang = t * 0.75f + i * MathHelper.TwoPi / 3f;   // 120° exactos
-                pos[i] = centro + new Vector2(MathF.Cos(ang) * 58f, MathF.Sin(ang) * 58f * 0.82f);
+                // v6.50.124 — LA ÓRBITA VIVA: radio 44 (antes 58 — los
+                // hermanos leían lejanos) RESPIRANDO ±3 y el vaivén propio
+                // de cada hermano (±2 px): compañía pegada al tomo.
+                float radio = (44f + MathF.Sin(t * 0.9f) * 3f) * brotar;
+                float bob = MathF.Sin(t * 1.6f + i * 2.4f) * 2f;
+                pos[i] = centro + new Vector2(MathF.Cos(ang) * radio,
+                    MathF.Sin(ang) * radio * 0.82f + bob);
 
-                // EL PARPADEO PROPIO de cada hermano.
+                // EL PARPADEO PROPIO de cada hermano (nacen cerrados:
+                // ABRREN los ojos al llegar a la órbita).
                 float parp = (t * 1.15f + i * 2.61f) % 6.5f;
-                cerrados[i] = parp < 0.30f;
+                cerrados[i] = parp < 0.30f || brotar < 0.55f;
+
+                // LA PUPILA MIRA (el desplazamiento dentro del ojo).
+                Vector2 d = objetivo - pos[i];
+                miradas[i] = d.LengthSquared() > 16f
+                    ? Vector2.Normalize(d) * 1.6f : Vector2.Zero;
             }
 
             // FORMA 2 — LA EMBESTIDA: los ojos salen de la órbita hacia

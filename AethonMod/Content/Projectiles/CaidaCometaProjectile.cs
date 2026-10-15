@@ -195,12 +195,42 @@ namespace AethonMod.Content.Projectiles
             Projectile.Kill();
         }
 
-        /// <summary>El cráter suave con su RASTRO OSCURO (v6.50.118): radio
-        /// 11 tiles, contenedores/mesas/puertas/pinturas intactos, bordes
-        /// irregulares — y la tinta que salpicó queda en la roca: PIEDRA DE
-        /// ÉBANO y OBSIDIANA (bloques EXISTENTES de vanilla, la letra: «no
-        /// necesita bloques nuevos se pueden reutilizar los bloques
-        /// existentes»).</summary>
+        /// <summary>v6.50.124 — LA FAUCE DE OBSIDIANA (la letra del
+        /// usuario: «cambiar el bloque, es mejor que sea obsidiana y que
+        /// además que siempre haya un lugar por donde el jugador pueda
+        /// pasar, en vez de una grieta en círculo de la caída, lo mejor
+        /// es que sean picos de obsidiana como la caída de IT en
+        /// pennywise, con picos hacia arriba y puntiagudos»).
+        ///
+        /// LA INVESTIGACIÓN (la pidió la letra): la caída de IT — el
+        /// Pennywise vencido CAYENDO al hoyo negro de la cisterna bajo
+        /// la casa de Neibolt (IT 2017) y la caída PRIMORDIAL que formó
+        /// Derry (el lore: IT llegó del cielo en un impacto) — el
+        /// lenguaje visual: un hoyo negro rodeado de FAUCES, dientes
+        /// hacia arriba. Y la técnica Terraria: los picos PUNTIAGUDOS
+        /// de verdad son PARES de medias-tiles en pendiente
+        /// (SlopeType.SlopeDownLeft + SlopeDownRight = el pico /\).
+        ///
+        /// EL DISEÑO (el cráter circular MUERE — nace LA FAUCE):
+        /// · EL CUENCO: la excavación de siempre (radio 11, la casa del
+        ///   jugador intacta).
+        /// · LAS DOS ESCALERAS — EL PASO GARANTIZADO: rampas de obsidiana
+        ///   a 45° desde cada borde hasta el fondo, construidas con
+        ///   TILES EN PENDIENTE (la técnica de las colinas de vanilla:
+        ///   se CAMINA, no se salta) — se baja, se toma el libro y se
+        ///   sube, siempre, por los dos lados.
+        /// · LA GARGANTA: los colmillos que apuntan al libro — LOS DOS
+        ///   GRANDES (±3, altura 6, la cornisa de la fauce) y el lecho
+        ///   central (±2, altura 3); el fondo exacto queda abierto (ahí
+        ///   cae la luz del sueño) y NINGÚN diente toca los
+        ///   aterrizajes de las escaleras (viven en ±4).
+        /// · TODO OBSIDIANA (la tinta quemada de la .118 se vestía de
+        ///   ébano al 80%: ahora es obsidiana del 100% — la letra).
+        /// · LA LECCIÓN 2D: en vista lateral TODO colmillo alto puesto
+        ///   sobre la línea de marcha BLOQUEA el paso — por eso los
+        ///   grandes viven en la GARGANTA (bajo el libro) y las rampas
+        ///   son el camino: «siempre hay un lugar por donde el jugador
+        ///   pueda pasar», de verdad y por construcción.</summary>
         private static void ExcavarCrater(Vector2 centro)
         {
             try
@@ -210,6 +240,8 @@ namespace AethonMod.Content.Projectiles
                 const int radio = 11;
                 bool toco = false;
 
+                // === FASE A — EL CUENCO (como la .118: el corazón se
+                //     abre, el borde a medias, la casa intacta) ===
                 for (int x = cx - radio; x <= cx + radio; x++)
                 {
                     for (int y = cy - radio; y <= cy + radio; y++)
@@ -220,70 +252,197 @@ namespace AethonMod.Content.Projectiles
 
                         Tile tile = Main.tile[x, y];
                         if (tile == null) continue;
-
-                        // LA CASA DEL JUGADOR: intacta y SIN rastro encima.
                         if (tile.HasTile && EsCasaDelJugador(tile.TileType)) continue;
 
-                        // EL BORDE IRREGULAR: el corazón (≤8 tiles) se
-                        // abre siempre; los 3 externos solo a medias.
                         if (tile.HasTile && (d <= 8f || Main.rand.NextBool(2)))
                         {
                             WorldGen.KillTile(x, y, noItem: true);
                             toco = true;
                         }
 
-                        // v6.50.118 — EL RASTRO DEL COMETA (la letra: «el
-                        // cráter debe dejar algún rastro de algún bloque
-                        // oscuro… se pueden reutilizar los bloques
-                        // existentes»): donde la tinta golpeó queda PIEDRA
-                        // DE ÉBANO (el bloque oscuro de la Corrupción, con
-                        // sus vetas moradas — negro-morado como el cometa)
-                        // y algo de OBSIDIANA (la tinta quemada por la
-                        // caída). Esparcida y orgánica: más densa hacia el
-                        // fondo, jamás en el corazón exacto (el libro
-                        // duerme ahí, flotando).
-                        if (!tile.HasTile && d >= 2.5f)
+                        // === FASE B — LA TINTA QUEMADA (TODO obsidiana — la
+                        //     letra: «es mejor que sea obsidiana»): esparcida
+                        //     SOLO dentro del cuenco (nada de escombros
+                        //     flotando en el cielo — la garganta de colmillos
+                        //     es la que cuenta la caída ahora) y el aro
+                        //     tintado del borde, también obsidiana. LA
+                        //     COLUMNA DEL LIBRO (±1) queda LIMPIA: ahí cae
+                        //     la luz violeta del sueño. ===
+                        if (!tile.HasTile && d >= 2.5f && y > cy + 2 && Math.Abs(x - cx) > 1)
                         {
                             float dentro = 1f - d / (float)radio;  // 1 centro → 0 borde
                             if (Main.rand.NextFloat() < 0.26f + 0.34f * dentro)
-                            {
-                                tile.HasTile = true;
-                                tile.TileType = Main.rand.NextFloat() < 0.80f
-                                    ? TileID.Ebonstone
-                                    : TileID.Obsidian;
-                                tile.Slope = 0;
-                                tile.IsHalfBlock = false;
-                                tile.TileFrameX = 0;
-                                tile.TileFrameY = 0;
-                                WorldGen.SquareTileFrame(x, y, true);
-                                toco = true;
-                            }
+                                toco |= PonerObsidiana(x, y);
                         }
-                        else if (tile.HasTile && d > 8f &&
+                        else if (tile.HasTile && y >= cy && d > 8f &&
                                  EsRocaNatural(tile.TileType) && Main.rand.NextFloat() < 0.35f)
                         {
-                            // EL ARO TINTADO: el borde que no se abrió
-                            // amanece ÉBANO — desde lejos, el cráter
-                            // entero lee «aquí cayó algo oscuro».
-                            tile.TileType = TileID.Ebonstone;
+                            tile.TileType = TileID.Obsidian;   // EL ARO ROTO: obsidiana (antes ébano)
                             WorldGen.SquareTileFrame(x, y, true);
                             toco = true;
                         }
                     }
                 }
 
+                // === FASE C — LAS DOS ESCALERAS (EL PASO GARANTIZADO): una
+                //     rampa de obsidiana a 45° desde cada borde del cuenco
+                //     hasta el fondo — la superficie de cada escalón es una
+                //     TILE EN PENDIENTE (la técnica de las colinas de
+                //     vanilla: SlopeDownLeft/SlopeDownRight se CAMINAN, no
+                //     se saltan) con dos filas de relleno debajo y tres de
+                //     aire limpio encima. El aterrizaje del fondo (±4) es
+                //     el balcón de la fauce: desde ahí se habla con el
+                //     libro. ===
+                for (int lado = -1; lado <= 1; lado += 2)
+                {
+                    for (int i = 0; i <= 8; i++)
+                    {
+                        int x = cx + lado * (12 - i);
+                        int ys = cy + i;    // la superficie del escalón (45° exactos)
+                        if (x < 10 || x >= Main.maxTilesX - 10) break;
+
+                        // LA SUPERFICIE CAMINABLE: la pendiente que baja
+                        // hacia el centro (lado −: hacia la derecha →
+                        // SlopeDownLeft; lado +: hacia la izquierda →
+                        // SlopeDownRight).
+                        toco |= Pender(x, ys,
+                            lado < 0 ? SlopeType.SlopeDownLeft : SlopeType.SlopeDownRight);
+                        toco |= PonerObsidiana(x, ys + 1);
+                        toco |= PonerObsidiana(x, ys + 2);
+
+                        // EL AIRE: tres filas de cabeza limpias sobre el escalón.
+                        for (int y = ys - 3; y <= ys - 1; y++)
+                        {
+                            Tile t = Main.tile[x, y];
+                            if (t != null && t.HasTile && !EsCasaDelJugador(t.TileType))
+                            {
+                                WorldGen.KillTile(x, y, noItem: true);
+                                toco = true;
+                            }
+                        }
+                    }
+                }
+
+                // === FASE D — LA GARGANTA: los colmillos que apuntan al
+                //     libro dormido. LOS DOS GRANDES (±3, altura 6 — la
+                //     cornisa de la fauce) y el lecho central (±2, altura
+                //     3); la columna exacta del libro queda abierta (ahí
+                //     cae la luz violeta del sueño). Ninguno toca las
+                //     escaleras: los grandes son de base 2 (columnas
+                //     ±2..±3) y los aterrizajes viven en ±4. ===
+                toco |= PonerColmillo(cx + 3, BaseSolida(cx + 3, cy + 3, cy + radio), 6, 2);
+                toco |= PonerColmillo(cx - 3, BaseSolida(cx - 3, cy + 3, cy + radio), 6, 2);
+                toco |= PonerColmillo(cx + 2, BaseSolida(cx + 2, cy + 3, cy + radio), 3, 2);
+                toco |= PonerColmillo(cx - 2, BaseSolida(cx - 2, cy + 3, cy + radio), 3, 2);
+
                 if (toco)
                 {
-                    // LA DIFUSIÓN: UN solo cuadrado que cubre el cráter
-                    // entero (más barato y más atómico que zona por zona).
+                    // LA DIFUSIÓN: UN solo cuadrado que cubre la fauce
+                    // entera (las escaleras llegan a ±12 y el aro a ±11).
                     if (Main.netMode == NetmodeID.Server)
                     {
-                        NetMessage.SendTileSquare(-1, cx - radio - 1, cy - radio - 1,
-                            (radio + 1) * 2 + 1, (radio + 1) * 2 + 1);
+                        NetMessage.SendTileSquare(-1, cx - 14, cy - 6, 29, 22);
                     }
                 }
             }
             catch { }
+        }
+
+        /// <summary>La primera tile de AIRE sobre la roca viva de la
+        /// columna (busca hacia ABAJO desde <paramref name="yDesde"/>
+        /// hasta <paramref name="yHasta"/>): dónde arraiga un colmillo.
+        /// −1 si la columna no tiene roca que lo sostenga.</summary>
+        private static int BaseSolida(int x, int yDesde, int yHasta)
+        {
+            if (x < 10 || x >= Main.maxTilesX - 10) return -1;
+            if (yDesde < 10) yDesde = 10;
+            if (yHasta >= Main.maxTilesY - 10) yHasta = Main.maxTilesY - 11;
+            for (int y = yDesde; y <= yHasta; y++)
+            {
+                Tile t = Main.tile[x, y];
+                if (t == null) continue;
+                if (t.HasTile && Main.tileSolid[t.TileType] && !EsCasaDelJugador(t.TileType))
+                    return y - 1;   // la tile de aire justo encima de la roca
+            }
+            return -1;
+        }
+
+        /// <summary>EL COLMILLO: columna de obsidiana que se AFILA al
+        /// subir (ancho <paramref name="anchoBase"/> en la base → 2 en
+        /// la punta) y REMATA en el PAR PUNTIAGUDO: la tile izquierda
+        /// con la esquina superior derecha cortada (SlopeDownLeft) y la
+        /// derecha con la superior izquierda (SlopeDownRight) — el pico
+        /// /\ de la letra, de verdad. <paramref name="topeY"/> corta el
+        /// crecimiento. IGNORA la casa del jugador (los dientes no
+        /// muerden muebles).</summary>
+        private static bool PonerColmillo(int bx, int yAire, int altura, int anchoBase, int? topeY = null)
+        {
+            if (yAire < 10 || yAire >= Main.maxTilesY - 10) return false;
+            if (bx < 10 || bx >= Main.maxTilesX - 10) return false;
+
+            bool toco = false;
+            int yPunta = yAire;
+            for (int h = 0; h < altura; h++)
+            {
+                int y = yAire - h;
+                if (y < 10) break;
+                if (topeY.HasValue && y <= topeY.Value) break;
+
+                float f = (h + 1f) / altura;                     // 0 base … 1 punta
+                int ancho = Math.Max(2, (int)MathF.Ceiling(anchoBase * (1f - f)));
+                int x0 = bx - ancho / 2;    // base 2 → bx-1..bx (la columna bx+1 queda libre)
+                for (int dx = 0; dx < ancho; dx++)
+                    toco |= PonerObsidiana(x0 + dx, y);
+
+                yPunta = y;
+            }
+
+            // LA PUNTA /\: las dos tiles del remate en pendiente — el
+            // colmillo TERMINA EN PICO, no en ladrillo.
+            for (int dx = 0; dx < 2; dx++)
+            {
+                int x = bx - 1 + dx;
+                if (x < 10 || x >= Main.maxTilesX - 10) continue;
+                Tile t = Main.tile[x, yPunta];
+                if (t == null || !t.HasTile) continue;
+                if (EsCasaDelJugador(t.TileType)) continue;
+                t.Slope = dx == 0
+                    ? SlopeType.SlopeDownLeft     // queda la mitad inferior-izquierda: /
+                    : SlopeType.SlopeDownRight;   // queda la mitad inferior-derecha: \
+                WorldGen.SquareTileFrame(x, yPunta, true);
+                toco = true;
+            }
+            return toco;
+        }
+
+        /// <summary>UNA TILE EN PENDIENTE de obsidiana — la superficie
+        /// CAMINABLE de las escaleras (la técnica de las colinas de
+        /// vanilla: se sube y se baja CAMINANDO).</summary>
+        private static bool Pender(int x, int y, SlopeType pendiente)
+        {
+            if (!PonerObsidiana(x, y)) return false;
+            Tile t = Main.tile[x, y];
+            if (t == null) return false;
+            t.Slope = pendiente;
+            WorldGen.SquareTileFrame(x, y, true);
+            return true;
+        }
+
+        /// <summary>Una tile de obsidiana limpia (respeta la casa del jugador).</summary>
+        private static bool PonerObsidiana(int x, int y)
+        {
+            if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) return false;
+            Tile t = Main.tile[x, y];
+            if (t == null) return false;
+            if (t.HasTile && EsCasaDelJugador(t.TileType)) return false;
+            t.HasTile = true;
+            t.TileType = TileID.Obsidian;
+            t.Slope = 0;
+            t.IsHalfBlock = false;
+            t.TileFrameX = 0;
+            t.TileFrameY = 0;
+            WorldGen.SquareTileFrame(x, y, true);
+            return true;
         }
 
         /// <summary>¿Es la roca común del mundo? (piedra, tierra o pasto —

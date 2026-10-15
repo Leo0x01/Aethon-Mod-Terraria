@@ -198,6 +198,7 @@ Items: {
 			Invoca al AETHON MENOR — la mascota de luz: una página
 			del libro hecha criatura, flotando a tu hombro, coronada
 			de perlas y alumbrando con el arcoíris del tomo.
+			Se EQUIPA en la ranura de mascota de LUZ del equipo.
 			'''
 	}
 
@@ -224,6 +225,8 @@ Items: {
 			quieto, se aburre y vuela a MOLESTAR a los vecinos con
 			sus 3 mini minions y su sombrilla de página (1 de daño,
 			tope 10 golpes… y luego se aburre).
+			Se EQUIPA en la ranura de mascota del equipo (y su
+			ojo vive hasta en el icono).
 			'''
 	}
 

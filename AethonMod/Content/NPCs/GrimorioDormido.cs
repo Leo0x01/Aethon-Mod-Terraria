@@ -53,7 +53,12 @@ namespace AethonMod.Content.NPCs
         /// <summary>La altura de la "Z" de la fuente (cacheada UNA vez — la casa no mide en render).</summary>
         private static float _altoZ = -1f;
 
-        public override string Texture => "AethonMod/Content/Weapons/GrimorioHambrientoNervioso";
+        // v6.50.124 — LA LETRA: «el grimorio de la caída debe tener el
+        // ojo cerrado»: el Nervioso (el libro con el ojo ABIERTO) se
+        // cambia por su hermano _Cerrado — el mismo cuerpo, el párpado
+        // bajado: DORMIDO de verdad (las Zzz y la luz violeta del sueño
+        // siguen intactas — el libro sueña a ojos cerrados).
+        public override string Texture => "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado";
 
         public override void SetStaticDefaults()
         {

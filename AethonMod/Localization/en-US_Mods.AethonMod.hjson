@@ -198,6 +198,7 @@ Items: {
 			Summons THE LESSER AETHON — the light pet: a page of
 			the book made creature, floating by your shoulder, crowned
 			with pearls and shining with the rainbow of the tome.
+			EQUIPS in the LIGHT pet slot of your equipment.
 			'''
 	}
 
@@ -225,6 +226,8 @@ Items: {
 			PESTER the neighbors with its 3 mini minions and its
 			page umbrella (1 damage, 10 hits max… then it gets
 			bored again).
+			EQUIPS in the pet slot of your equipment (and its
+			eye is alive even in the icon).
 			'''
 	}
 

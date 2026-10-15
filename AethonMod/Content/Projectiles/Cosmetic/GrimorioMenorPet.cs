@@ -84,6 +84,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // TICK — la muerte la decide SOLO el buff, jamás el timeLeft.
             Projectile.timeLeft = 2;
 
+            // v6.50.124 — LA EDAD LOCAL (el teatro del DESPERTAR: los 3
+            // mini minions BROTAN de las páginas en los primeros 36 t —
+            // la leen PosicionOjos/DibujarExtras; localAI no viaja en el
+            // cable y no hace falta: cada pantalla florece la suya).
+            Projectile.localAI[0] += 1f;
+
             float t = Main.GlobalTimeWrappedHourly;
 
             // === EL CEREBRO: el AFK del dueño, el viaje al pueblo, LAS DOS
