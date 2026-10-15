@@ -19,13 +19,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// miniatura y su repertorio es ALUMBRAR, ESTALLAR y FUSIONARSE con
     /// su gemela oscura. ESTE es el LIBRO en miniatura — y su repertorio
     /// es el del tomo hambriento: vigila, se aburre, viaja al pueblo y
-    /// MOLESTA a los vecinos con sus 3 MINI OJOS (los mini minions de
-    /// los Ojos del Eterno) y su SOMBRILLA DE PÁGINA que muerde (1 de
-    /// daño sin acreditación, tope 10 golpes, emotes, aburrimiento, el
-    /// AFK del dueño). TODA esa máquina vive en ParejaCerebro — el
-    /// cerebro que nació en la .117 montado en la cría de luz y que la
-    /// .122 devolvió a su dueño verdadero: el libro (véase
-    /// AethonMenorPareja.cs).
+    /// MOLESTA a los vecinos con sus 3 MINI OJOS (v6.50.125: LOS
+    /// MISMOS OJOS DEL GRIMORIO NORMAL EN MINIATURA — el sprite real del
+    /// Ojo Eterno del arma a escala 0,27, con su iris que mira y sus
+    /// párpados de textura; la letra: «los mismos minion que el grimorio
+    /// normal, o sea ojos, pero mas pequeños») y su SOMBRILLA DE PÁGINA
+    /// que muerde (1 de daño sin acreditación, tope 10 golpes, emotes,
+    /// aburrimiento, el AFK del dueño). TODA esa máquina vive en
+    /// ParejaCerebro — el cerebro que nació en la .117 montado en la
+    /// cría de luz y que la .122 devolvió a su dueño verdadero: el libro
+    /// (véase AethonMenorPareja.cs).
     ///
     /// EL CUERPO: el sprite REAL del Eterno (la familia del ojo: el
     /// mismo cuerpo del Nervioso) a escala 0.52, con su OJO VIVO — mira
@@ -207,6 +210,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 //     con su OJO VIVO y su párpado (el contrato del
                 //     GrimorioNerviosoFlotante, en miniatura). ===
                 DibujarElLibro(t);
+
+                // === 5. v6.50.125 — LOS TRES OJOS DE VERDAD: los mismos
+                //     minions del grimorio normal (los Ojos del Eterno — el
+                //     sprite real 56×54 del arma) en MINIATURA (escala 0,27;
+                //     el arma los usa a 0,375), con su iris que MIRA y sus
+                //     párpados de textura — la letra: «los mismos minion
+                //     que el grimorio normal, o sea ojos, pero mas
+                //     pequeños». ===
+                ParejaCerebro.DibujarLosTresOjos(Projectile, _cerebro);
 
                 return false;   // el cuerpo SE dibuja aquí (con su ojo)
             }

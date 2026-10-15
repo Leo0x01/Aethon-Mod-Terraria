@@ -25,10 +25,16 @@ namespace AethonMod.Content.Systems
     // se había ido a dormir).
     //
     // EL CIRCUITO COMPLETO:
-    //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo SIN la
-    //      marca ShardPlayer.CaidaRecibida y SIN caída pendiente, en
-    //      noche recién caída (time > 480) y sin cometa YA esta noche →
-    //      nace su CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la
+    //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo cuya caída
+    //      TODAVÍA NO sucedió EN ESTE MUNDO (v6.50.125: la lista
+    //      _cayoEnEsteMundo — la marca del .plr CaidaRecibida YA NO calla
+    //      al cielo: la ponían la toma de la .117 y la devoración de la
+    //      .122 y silenciaba el cometa PARA SIEMPRE y EN TODOS LOS MUNDOS
+    //      — el personaje de pruebas jamás volvía a ver el evento, la
+    //      letra: «la caída no parece activarse cuando pasa la primera
+    //      noche»), sin caída pendiente a su nombre, en noche recién caída
+    //      (time > 480) y sin cometa YA esta noche → nace su
+    //      CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la
     //      .118: 32–64 tiles a un lado — antes ~30 pantallas del spawn).
     //      v6.50.121 — EL COMETA ES DE TODOS: la .117-.120 exigían NO
     //      llevar el Grimorio del Eterno encima para dispararlo… pero el
@@ -73,6 +79,21 @@ namespace AethonMod.Content.Systems
         /// <summary>¿Ya cayó un cometa para este jugador ESTA noche? (índice → bool; se limpia al amanecer).</summary>
         private readonly bool[] _cayoEstaNoche = new bool[Main.maxPlayers];
 
+        /// <summary>v6.50.125 — LOS NOMBRES QUE YA VIVIERON SU CAÍDA EN ESTE
+        /// MUNDO (el silenciador VERDADERO del cielo). La letra: «la caída
+        /// no parece activarse cuando pasa la primera noche» — la marca del
+        /// .plr (CaidaRecibida, la puso la toma de la .117 o la devoración
+        /// del doble de la .122) callaba al cometa PARA SIEMPRE y EN TODOS
+        /// LOS MUNDOS: el personaje de pruebas, que ya lo tomó o devoró
+        /// todo, jamás volvía a ver el evento por muchos mundos nuevos que
+        /// abriera. AHORA el cielo calla SOLO por ESTE mundo: la primera
+        /// noche de cada jugador EN CADA MUNDO tiene su cometa (el espíritu
+        /// .121: «el espectáculo no se le niega a nadie») y la regla «un
+        /// grimorio por alma» sigue viva donde siempre vivió: en LA TOMA.
+        /// La Página en Blanco también borra ESTA lista (el probador puede
+        /// re-estrenar la caída en el mismo mundo).</summary>
+        private readonly HashSet<string> _cayoEnEsteMundo = new HashSet<string>();
+
         /// <summary>El estado del cielo del tick anterior (para sentir el amanecer).</summary>
         private bool _eraNoche;
 
@@ -97,6 +118,9 @@ namespace AethonMod.Content.Systems
                     });
                 }
                 tag["caidasPendientes"] = lista;
+                // v6.50.125 — el silenciador por-mundo viaja con el guardado
+                // (los nombres que ya vivieron su caída AQUÍ).
+                tag["cayosDelMundo"] = new List<string>(_cayoEnEsteMundo);
             }
             catch { }
         }
@@ -118,6 +142,13 @@ namespace AethonMod.Content.Systems
                         Jugador = jugador
                     });
                 }
+                // v6.50.125 — el silenciador por-mundo vuelve con el mundo
+                // (vacío en los mundos viejos: su primera noche bajo la
+                // .125 vuelve a cruzar el cielo — la cura de la letra).
+                foreach (string nombre in tag.GetList<string>("cayosDelMundo"))
+                {
+                    if (!string.IsNullOrEmpty(nombre)) _cayoEnEsteMundo.Add(nombre);
+                }
             }
             catch { }
         }
@@ -125,6 +156,7 @@ namespace AethonMod.Content.Systems
         public override void OnWorldUnload()
         {
             CaidasPendientes.Clear();
+            _cayoEnEsteMundo.Clear();
             Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
             _eraNoche = false;
         }
@@ -253,7 +285,19 @@ namespace AethonMod.Content.Systems
                         if ((Main.GameUpdateCount + (ulong)i * 7ul) % 30ul != 0ul) continue;
 
                         var sp = p.GetModPlayer<Players.ShardPlayer>();
-                        if (sp == null || sp.CaidaRecibida) continue;
+                        if (sp == null) continue;
+                        // v6.50.125 — LA MARCA DEL .PLR YA NO CALLA AL CIELO
+                        // (la letra: «la caída no parece activarse cuando
+                        // pasa la primera noche"): CaidaRecibida —la puso la
+                        // toma o la devoración del doble— silenciaba el
+                        // cometa PARA SIEMPRE y EN TODOS LOS MUNDOS, y el
+                        // personaje de pruebas jamás volvía a ver el evento.
+                        // AHORA el silenciador es ESTE mundo (la primera
+                        // noche de cada jugador EN CADA MUNDO tiene su
+                        // cometa — el espíritu .121 del espectáculo) y la
+                        // marca queda como la memoria del pacto (la borra la
+                        // Página en Blanco, como siempre).
+                        if (_cayoEnEsteMundo.Contains(p.name)) continue;
                         // v6.50.121 — EL GATE DEL GRIMORIO MURIÓ: exigir
                         //     «SIN Grimorio del Eterno en los 59 slots»
                         //     mataba el evento para TODO jugador de
@@ -269,6 +313,9 @@ namespace AethonMod.Content.Systems
 
                         DispararCometa(p);
                         _cayoEstaNoche[i] = true;
+                        // v6.50.125 — este mundo ya le dio su caída (aunque
+                        // el cometa muera en pleno vuelo, no repite).
+                        _cayoEnEsteMundo.Add(p.name);
                     }
                 }
 
@@ -475,6 +522,10 @@ namespace AethonMod.Content.Systems
                 // LA MARCA (la copia de la AUTORIDAD; la del .plr la trae la
                 // dádiva EcoRed.MsgTomarCaida en el cliente).
                 p.GetModPlayer<Players.ShardPlayer>().CaidaRecibida = true;
+                // v6.50.125 — y ESTE mundo queda servido para este nombre
+                // (cierra también las pendientes nacidas antes de la lista:
+                // mundos viejos con libros tomados hoy no repiten mañana).
+                RegistrarCaidaDelMundo(p.name);
 
                 // LA PENDIENTE SE APAGA (el cráter cumple su cuento).
                 QuitarPendiente(libro.Center);
@@ -532,6 +583,9 @@ namespace AethonMod.Content.Systems
                     // en la posesión Y en la toma… y el devorado TAMBIÉN
                     // cuenta: esta fue SU caída.
                     p.GetModPlayer<Players.ShardPlayer>().CaidaRecibida = true;
+                    // v6.50.125 — y ESTE mundo queda servido para este
+                    // nombre (el silenciador por-mundo de la letra .125).
+                    RegistrarCaidaDelMundo(p.name);
 
                     // LA VOZ DEL ETERNO — directa a los PENSAMIENTOS
                     // (EcoLib, morada): el libro comenta SU festín.
@@ -617,6 +671,35 @@ namespace AethonMod.Content.Systems
                 }
             }
             catch { }
+        }
+
+        /// <summary>v6.50.125 — Registra que ESTE mundo ya le dio su caída a
+        /// este nombre (lo llaman el disparo, la toma y la devoración — la
+        /// última cierra también los mundos viejos cuyas pendientes nacieron
+        /// antes de esta lista).</summary>
+        public static void RegistrarCaidaDelMundo(string nombre)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(nombre)) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys != null) sys._cayoEnEsteMundo.Add(nombre);
+            }
+            catch { }
+        }
+
+        /// <summary>v6.50.125 — LA PÁGINA EN BLANCO también blanquea el cielo
+        /// de ESTE mundo: ¿estaba este nombre entre los que ya vivieron su
+        /// caída aquí? (true si había algo que borrar — para el aviso).</summary>
+        public static bool OlvidarCaidaDelMundo(string nombre)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(nombre)) return false;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                return sys != null && sys._cayoEnEsteMundo.Remove(nombre);
+            }
+            catch { return false; }
         }
 
         /// <summary>La sensación del pacto (la máquina del portador): el sonido del libro + su bruma violeta.</summary>

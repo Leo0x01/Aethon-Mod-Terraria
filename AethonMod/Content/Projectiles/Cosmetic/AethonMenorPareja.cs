@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -79,6 +80,35 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         /// <summary>El compás de la mordida de la sombrilla (FORMA 1).</summary>
         private const int TICKS_MORDIDA = 90;
+
+        // === v6.50.125 — LOS MINIONS DE VERDAD (la letra: «los
+        //     miniminions del grimorio mascota deben ser los mismos minion
+        //     que el grimorio normal, o sea ojos, pero mas pequeños»): los
+        //     3 hermanos visten el MISMO sprite del Ojo Eterno del ARMA
+        //     (OjoEterno_Abierto 56×54, la familia del ojo) a ESCALA 0,27
+        //     (~15 px en pantalla — el arma los usa a 0,375: claramente
+        //     menores), con SU iris real (el mismo descanso y el mismo
+        //     viaje por la almendra) y SUS párpados de textura (Medio /
+        //     Cerrado — la convención de fases del arma, en miniatura). ===
+
+        /// <summary>La escala del mini ojo: 0,27 (el arma lo usa a 0,375 —
+        /// los hermanos son los mismos ojos, MENORES).</summary>
+        public const float MiniOjoEscala = 0.27f;
+
+        /// <summary>El descanso del iris dentro de la almendra (el del arma).</summary>
+        private static readonly Vector2 MiniIrisRest = new(0.7f, 2.3f);
+
+        /// <summary>La escala del iris (la del arma: caja 13 px → disco ~11).</summary>
+        private const float MiniIrisEscala = 0.41f;
+
+        /// <summary>El viaje del iris: media almendra (el ±7,5 del arma).</summary>
+        private const float MiniMiraX = 7.5f;
+
+        /// <summary>El viaje del iris: media altura (el ±2,5 del arma).</summary>
+        private const float MiniMiraY = 2.5f;
+
+        /// <summary>Las fases del párpado (la convención del arma).</summary>
+        private const int OJO_ABIERTO = 0, OJO_MEDIO = 1, OJO_CERRADO = 2;
 
         /// <summary>EL REGISTRO DEL PUEBLO (v6.50.117 — nació en
         /// AethonMenorPet; v6.50.122 se mudó AQUÍ, con la máquina que lo
@@ -457,8 +487,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             NPC victima = e.Modo == MODO_MOLESTAR || e.Modo == MODO_VIAJAR
                 ? NpcValido(e.NpcObjetivo) : null;
 
-            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados, out Vector2[] miradas);
-
             VFXCore.Begin();
 
             // === LA SOMBRILLA DE PÁGINA (FORMA 1): la «pequeña sombra de
@@ -478,44 +506,25 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     new Vector2(ancho * 0.72f, ancho * 0.20f));
             }
 
-            // === LOS 3 MINI OJOS (idea 15): los minions del grimorio en
-            //     miniatura — discos con iris violeta y pupila. Orbitan AL
-            //     LIBRO (v6.50.124: radio ~44 px — antes 58: leían lejanos
-            //     y perdidos; AHORA son compañía pegada al tomo) a 120°
-            //     exactos entre hermanos y cada uno PARPADEA a su compás.
-            //     v6.50.124 — LA LETRA («el pequeño grimorio no tiene sus
-            //     minion»): los ojos eran discos de 9 px de un violeta
-            //     casi negro — INVISIBLES de noche (la lección .66). Ahora
-            //     miden 13 px, la pupila MIRA (se desplaza dentro del ojo
-            //     hacia el dueño o la víctima) y el rim violeta del lote
-            //     aditivo los lee en CUALQUIER fondo. (El iris brillante
-            //     va al lote aditivo del cuerpo.) ===
-            for (int i = 0; i < 3; i++)
-            {
-                if (cerrados[i])
-                {
-                    // EL PÁRPADO CERRADO: una rayita oscura en vez del ojo.
-                    VFXCore.Line(ojos[i] - new Vector2(5.5f, 0f), ojos[i] + new Vector2(5.5f, 0f),
-                        SombrasLib.Alfa(SombrasLib.HumoNegro, 0.70f), 2.0f);
-                    continue;
-                }
-                // LA ESCLERÓTICA oscura (el disco) + LA PUPILA negra QUE MIRA.
-                VFXCore.Quad(ojos[i], SombrasLib.Alfa(new Color(26, 12, 40), 0.85f), new Vector2(13f, 13f));
-                VFXCore.Quad(ojos[i] + miradas[i], SombrasLib.Alfa(new Color(8, 3, 12), 0.95f), new Vector2(5f, 5f));
-            }
+            // (v6.50.125 — LOS 3 MINI OJOS YA NO VIVEN AQUÍ: los hermanos
+            // visten el SPRITE REAL del Ojo Eterno en miniatura y se
+            // dibujan con el libro, en el lote vanilla — DibujarLosTresOjos;
+            // aquí solo queda su RIM, en el lote aditivo.)
 
             VFXCore.FlushAlpha();
         }
 
         // ==================================================================
-        //  EL DIBUJADO — LOTE ADITIVO (el anillo rúnico oscuro y los iris)
+        //  EL DIBUJADO — LOTE ADITIVO (el anillo rúnico, el rim y el aliento)
         // ==================================================================
 
         /// <summary>LOS EXTRAS DEL MINI GRIMORIO, LOTE ADITIVO: EL ANILLO
-        /// RÚNICO OSCURO (violeta, orbitando al libro) y EL IRIS VIOLETA
-        /// de los 3 mini ojos. NO vuelca nada: se suma al lote del cuerpo
-        /// del mini grimorio (un solo volcado — la llaman justo antes de
-        /// su FlushAdditive).</summary>
+        /// RÚNICO OSCURO (violeta, orbitando al libro) y v6.50.125 — EL
+        /// RIM VIOLETA + EL ALIENTO ÁMBAR de los 3 ojos (el halo que los
+        /// lee de noche — los sprites reales viajan en el lote vanilla con
+        /// el libro: DibujarLosTresOjos). NO vuelca nada: se suma al lote
+        /// del cuerpo del mini grimorio (un solo volcado — la llaman justo
+        /// antes de su FlushAdditive).</summary>
         public static void DibujarExtrasAditivos(Projectile p, Estado e)
         {
             float t = Main.GlobalTimeWrappedHourly;
@@ -558,24 +567,25 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     new Vector2(r, r), 0f, VFXCore.Ring);
             }
 
-            // === EL IRIS VIOLETA de los 3 mini ojos (el brillo — el
-            //     disco negro vive en el lote alfa) ===
+            // === v6.50.125 — EL RIM VIOLETA de los 3 ojos (la lección .66:
+            //     lo oscuro sin rim es invisible de noche): la aureola que
+            //     lee a los hermanos en CUALQUIER fondo — ahora DETRÁS del
+            //     sprite real (este lote vuelca ANTES que el cuerpo: es el
+            //     halo) + EL ALIENTO ÁMBAR del iris abierto (el fulgor
+            //     cálido que asoma por dentro — el iris real viaja en el
+            //     lote vanilla con la luz del mundo; este aliento lo
+            //     mantiene VIVO de noche y el piso de luz hace el resto). ===
             NPC victima = e.Modo == MODO_MOLESTAR || e.Modo == MODO_VIAJAR
                 ? NpcValido(e.NpcObjetivo) : null;
-            PosicionOjos(p, e, victima, out Vector2[] ojos, out bool[] cerrados, out Vector2[] miradas);
+            PosicionOjos(p, e, victima, out Vector2[] ojos, out int[] estados, out Vector2[] miradas);
             for (int i = 0; i < 3; i++)
             {
-                if (cerrados[i]) continue;
-                // EL RIM VIOLETA (v6.50.124 — la lección .66: lo oscuro sin
-                // rim es INVISIBLE de noche): la aureola que lee al hermano
-                // en CUALQUIER fondo, día o cueva.
-                VFXCore.Quad(ojos[i], new Color(118, 74, 190, 255) * 0.34f, new Vector2(18f, 18f));
-                // EL IRIS (más grande que la .122: 5,2→9 px) siguiendo la mirada.
-                VFXCore.Quad(ojos[i] + miradas[i] * 0.7f,
-                    new Color(150, 96, 235, 255) * 0.58f, new Vector2(9f, 9f));
-                // EL DESTELLO de la córnea: el puntito blanco que hace VIVO al ojo.
-                VFXCore.Quad(ojos[i] + miradas[i] + new Vector2(-1.8f, -1.8f),
-                    new Color(236, 218, 255, 255) * 0.52f, new Vector2(2.4f, 2.4f));
+                // EL RIM (en TODOS los estados: hasta el párpado cerrado
+                // lleva su aureola — los hermanos nunca desaparecen).
+                VFXCore.Quad(ojos[i], new Color(118, 74, 190, 255) * 0.30f, new Vector2(17f, 17f));
+                if (estados[i] == OJO_ABIERTO)
+                    VFXCore.Quad(ojos[i] + miradas[i] * MiniOjoEscala,
+                        new Color(196, 140, 92, 255) * 0.22f, new Vector2(9f, 9f));
             }
         }
 
@@ -583,22 +593,24 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         //  LA POSICIÓN DE LOS 3 MINI OJOS (compartida por ambos lotes)
         // ==================================================================
 
-        /// <summary>Dónde está cada ojo, si está parpadeando y hacia
-        /// dónde MIRA su pupila — TODO determinista (el reloj del
-        /// mundo): todas las pantallas ven los MISMOS ojos. En FORMA 2
-        /// los ojos DEJAN la órbita y embisten al vecino (ida ~40 t +
-        /// vuelta ~40 t, cada hermano sale 5 t después que el anterior
-        /// — el primero toca en el tick 40 exacto, donde el cerebro
-        /// cobra el golpe). v6.50.124: la órbita BAJA a ~44 px con el
-        /// radio respirando (±3) y el vaivén propio de cada hermano —
-        /// y al NACER el libro los ojos BROTAN de las páginas (36 t,
-        /// la edad local del proyectil: el florecimiento es un teatro
-        /// de pantalla, cada máquina ve el suyo).</summary>
+        /// <summary>Dónde está cada ojo, en qué FASE de párpado va
+        /// (ABIERTO/MEDIO/CERRADO — v6.50.125: la convención de fases del
+        /// ARMA, con sus texturas) y hacia dónde VIAJA su iris — TODO
+        /// determinista (el reloj del mundo): todas las pantallas ven los
+        /// MISMOS ojos. En FORMA 2 los ojos DEJAN la órbita y embisten al
+        /// vecino (ida ~40 t + vuelta ~40 t, cada hermano sale 5 t después
+        /// que el anterior — el primero toca en el tick 40 exacto, donde el
+        /// cerebro cobra el golpe). v6.50.124: la órbita BAJA a ~44 px con
+        /// el radio respirando (±3) y el vaivén propio de cada hermano —
+        /// y al NACER el libro los ojos BROTAN de las páginas (36 t, la
+        /// edad local del proyectil: el florecimiento es un teatro de
+        /// pantalla, cada máquina ve el suyo): nacen CERRADOS y ABRREN los
+        /// ojos al llegar (el MEDIO de la floración es la apertura).</summary>
         private static void PosicionOjos(Projectile p, Estado e, NPC victima,
-            out Vector2[] pos, out bool[] cerrados, out Vector2[] miradas)
+            out Vector2[] pos, out int[] estados, out Vector2[] miradas)
         {
             pos = new Vector2[3];
-            cerrados = new bool[3];
+            estados = new int[3];
             miradas = new Vector2[3];
             float t = Main.GlobalTimeWrappedHourly;
 
@@ -628,15 +640,25 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 pos[i] = centro + new Vector2(MathF.Cos(ang) * radio,
                     MathF.Sin(ang) * radio * 0.82f + bob);
 
-                // EL PARPADEO PROPIO de cada hermano (nacen cerrados:
-                // ABRREN los ojos al llegar a la órbita).
+                // v6.50.125 — EL PARPADEO DE TRES FASES (la convención del
+                // ARMA: ABIERTO → MEDIO → CERRADO → MEDIO, con las mismas
+                // texturas): nacen CERRADOS (brotar) y ABRREN al llegar —
+                // el MEDIO de la floración ES la apertura del ojo.
                 float parp = (t * 1.15f + i * 2.61f) % 6.5f;
-                cerrados[i] = parp < 0.30f || brotar < 0.55f;
+                if (brotar < 0.55f) estados[i] = OJO_CERRADO;
+                else if (brotar < 0.75f) estados[i] = OJO_MEDIO;
+                else if (parp <= 0.26f) estados[i] = OJO_CERRADO;
+                else if (parp <= 0.42f || parp > 6.5f - 0.16f) estados[i] = OJO_MEDIO;
+                else estados[i] = OJO_ABIERTO;
 
-                // LA PUPILA MIRA (el desplazamiento dentro del ojo).
+                // v6.50.125 — LA MIRADA EN LA ALMENDRA (el formato del
+                // ARMA): el iris viaja ±7,5 × ±2,5 DENTRO del ojo hacia su
+                // objetivo (art-píxeles, escalados al dibujar).
                 Vector2 d = objetivo - pos[i];
-                miradas[i] = d.LengthSquared() > 16f
-                    ? Vector2.Normalize(d) * 1.6f : Vector2.Zero;
+                float len = d.Length();
+                miradas[i] = len > 4f
+                    ? new Vector2(d.X / len * MiniMiraX, d.Y / len * MiniMiraY)
+                    : Vector2.Zero;
             }
 
             // FORMA 2 — LA EMBESTIDA: los ojos salen de la órbita hacia
@@ -655,9 +677,72 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     Vector2 blanco = victima.Center + new Vector2((i - 1) * 5f, (i - 1) * -3f);
                     pos[i] = Vector2.Lerp(pos[i], blanco, suave);
                     if (prog > 0.05f)
-                        cerrados[i] = false;   // embistiendo NO parpadea: mirada fija
+                        estados[i] = OJO_ABIERTO;   // embistiendo NO parpadea: mirada fija
                 }
             }
+        }
+
+        // ==================================================================
+        //  v6.50.125 — LOS TRES OJOS DE VERDAD (los sprites reales del arma)
+        // ==================================================================
+
+        /// <summary>LOS 3 MINI MINIONS DE VERDAD (la letra de la .125: «los
+        /// mismos minion que el grimorio normal, o sea ojos, pero mas
+        /// pequeños»): el MISMO sprite del Ojo Eterno del ARMA a ESCALA
+        /// 0,27 (el arma lo usa a 0,375), con SU iris (el descanso + el
+        /// viaje de la almendra) y SUS párpados de textura (Medio/Cerrado).
+        /// Se dibuja en el LOTE VANILLA junto al libro (lo llama
+        /// GrimorioMenorPet.PreDraw justo después de DibujarElLibro) con un
+        /// PISO DE LUZ: los ojos del libro NUNCA se apagan del todo — son
+        /// mascota, la legibilidad manda (la lección .66).</summary>
+        public static void DibujarLosTresOjos(Projectile p, Estado e)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            try
+            {
+                NPC victima = e.Modo == MODO_MOLESTAR || e.Modo == MODO_VIAJAR
+                    ? NpcValido(e.NpcObjetivo) : null;
+                PosicionOjos(p, e, victima, out Vector2[] ojos, out int[] estados, out Vector2[] miradas);
+
+                Texture2D abierto = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
+                Texture2D medio = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Medio").Value;
+                Texture2D cerrado = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Cerrado").Value;
+                Texture2D iris = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+                if (abierto == null || iris == null) return;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    Texture2D cuerpo = estados[i] == OJO_CERRADO ? cerrado
+                        : estados[i] == OJO_MEDIO ? medio : abierto;
+                    if (cuerpo == null) cuerpo = abierto;
+                    Vector2 posScr = ojos[i] - Main.screenPosition;
+                    Vector2 origen = cuerpo.Size() * 0.5f;
+
+                    // EL PISO DE LUZ (mascota: jamás negra total — el ojo
+                    // ámbar del Eterno brilla hasta en la cueva profunda;
+                    // el rim violeta del lote aditivo hace el resto).
+                    Color luz = Lighting.GetColor(ojos[i].ToTileCoordinates());
+                    luz = new Color(Math.Max((int)luz.R, 130), Math.Max((int)luz.G, 104), Math.Max((int)luz.B, 96));
+
+                    Main.spriteBatch.Draw(cuerpo, posScr, null, luz, 0f, origen,
+                        MiniOjoEscala, SpriteEffects.None, 0f);
+
+                    if (estados[i] == OJO_ABIERTO)
+                    {
+                        // EL IRIS REAL (el descanso + el viaje del ARMA,
+                        // a escala mini) — mira al dueño… o a la víctima.
+                        Main.spriteBatch.Draw(iris,
+                            posScr + (MiniIrisRest + miradas[i]) * MiniOjoEscala, null, luz, 0f,
+                            iris.Size() * 0.5f, MiniIrisEscala * MiniOjoEscala,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+            }
+            catch { }
         }
 
         // ==================================================================

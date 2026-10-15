@@ -31,6 +31,11 @@ namespace AethonMod.Content.Items
     ///   probar el evento las veces que haga falta — si ya hay un libro
     ///   dormido esperándolo en un cráter, ESO no se borra: el evento ya
     ///   está servido, solo hay que ir por él).
+    /// · v6.50.125 — Y TAMBIÉN EL CIELO DE ESTE MUNDO: la página borra la
+    ///   memoria del MUNDO (los nombres que ya vivieron su caída aquí —
+    ///   _cayoEnEsteMundo, el silenciador por-mundo de la .125): el
+    ///   probador puede re-estrenar LA CAÍDA EN EL MISMO MUNDO sin abrir
+    ///   uno nuevo cada vez.
     /// · Sin receta: llega con la Bolsa Probador (el kit de pruebas).
     /// </summary>
     public class PaginaEnBlanco : ModItem
@@ -92,6 +97,12 @@ namespace AethonMod.Content.Items
                     sp.CaidaRecibida = false;
                     borraCaida = true;
                 }
+                // v6.50.125 — EL CIELO DE ESTE MUNDO TAMBIÉN QUEDA EN BLANCO:
+                // la página borra la memoria del mundo (los nombres que ya
+                // vivieron su caída aquí) — el probador re-estrena LA CAÍDA
+                // en el mismo mundo, sin abrir uno nuevo.
+                if (LaCaidaSistema.OlvidarCaidaDelMundo(player.name))
+                    borraCaida = true;
             }
 
             // LA VOZ del olvido (en la pantalla del portador): cuántos
