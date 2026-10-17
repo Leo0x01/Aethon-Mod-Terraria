@@ -1158,7 +1158,6 @@ namespace AethonMod.Content.Systems
                 "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             if (glow == null) return;
 
-            float p = MathHelper.Clamp((t - T_CONJURO) / (float)(T_BARRIDO + T_DISIPA), 0f, 1f);
             float vive = t <= T_CONJURO + T_BARRIDO
                 ? 1f
                 : 1f - (t - T_CONJURO - T_BARRIDO) / (float)T_DISIPA;

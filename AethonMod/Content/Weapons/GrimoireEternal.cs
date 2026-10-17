@@ -569,14 +569,17 @@ namespace AethonMod.Content.Weapons
             var spDevorado = portadorTip?.GetModPlayer<Players.ShardPlayer>();
             if (spDevorado != null && spDevorado.DevoracionPoder > 0)
             {
-                float pctDano = Players.ShardPlayer.BonusDanoDevorado(portadorTip) * 100f;
+                // El porcentaje como TEXTO a 2 decimales: 1 esencia = +0,25
+                // (un entero lo escondería — la misma cura del aviso).
+                string pctDanoTxt =
+                    (Players.ShardPlayer.BonusDanoDevorado(portadorTip) * 100f).ToString("0.##");
                 int ojosExtra = Players.ShardPlayer.OjosExtraDevorados(portadorTip);
                 string ojos = ojosExtra > 0
                     ? Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltipOjos", ojosExtra)
                     : "";
                 tooltips.Add(new TooltipLine(Mod, "DevoradoAltar",
                     Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltip",
-                        spDevorado.DevoracionPoder, (int)(pctDano + 0.5f), ojos)));
+                        spDevorado.DevoracionPoder, pctDanoTxt, ojos)));
             }
 
             // === v6.50.110 — LA VENTANA 1 · EL ARMA: el poder del libro

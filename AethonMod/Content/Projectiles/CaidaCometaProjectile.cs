@@ -370,11 +370,15 @@ namespace AethonMod.Content.Projectiles
                 if (toco)
                 {
                     // LA DIFUSIÓN: UN solo cuadrado que cubre la fauce
-                    // entera (las torres del umbral llegan a ±18 — la caja
-                    // creció con los picos pronunciados).
+                    // entera. Las torres del umbral arrancan en la roca
+                    // viva de ±17 — en una LADERA esa roca puede estar
+                    // HASTA cy-6 (el escaneo de BaseSolida arranca ahí),
+                    // así que la punta llega a cy-15: la caja tiene que
+                    // cubrirla (cy-16) o los clientes MP verían las torres
+                    // MORDIDAS hasta recargar la sección.
                     if (Main.netMode == NetmodeID.Server)
                     {
-                        NetMessage.SendTileSquare(-1, cx - 20, cy - 12, 41, 26);
+                        NetMessage.SendTileSquare(-1, cx - 20, cy - 16, 41, 30);
                     }
                 }
             }

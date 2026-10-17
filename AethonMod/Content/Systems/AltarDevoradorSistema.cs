@@ -339,10 +339,13 @@ namespace AethonMod.Content.Systems
                 EcoRed.HablarAlPortador(portador, clave,
                     new Color(178, 110, 236), rugido: true, escala: 0.72f, prioridad: true);
 
-                // LA CUENTA (el aviso de las estadísticas).
+                // LA CUENTA (el aviso de las estadísticas). El porcentaje
+                // viaja COMO TEXTO ya redondeado a 2 decimales: un bocado
+                // de 1 esencia es +0,25 % y el número ENTERO lo escondería
+                // («+0 %» leería como roto — el análisis v6.50.128).
                 EcoRed.AnunciarAlPortador(portador, "Mods.AethonMod.Caida.DevoradoCuenta",
                     new Color(150, 60, 220), total,
-                    (int)MathF.Round(Players.ShardPlayer.BonusDanoDevorado(portador) * 100f));
+                    (Players.ShardPlayer.BonusDanoDevorado(portador) * 100f).ToString("0.##"));
 
                 // EL POLVO DEL TRAGO (la máquina con pantalla).
                 if (!Main.dedServ)
