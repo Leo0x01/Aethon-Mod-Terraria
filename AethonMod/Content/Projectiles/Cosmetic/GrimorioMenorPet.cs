@@ -114,10 +114,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             // La búsqueda serena… y LA MISIÓN VUELA: en viaje/molestia/
             // vuelta la persecución es DIRECTA — crucero ~12 px/t (el
-            // mismo muelle dual de la .117).
+            // mismo muelle dual de la .117). v6.50.129 — LA CURIOSIDAD
+            // (MODO_CURIOSO) vuela con la SUAVIDAD del hombro: es un
+            // paseo, no una misión (la figura de Lissajous pide muelle
+            // gentil — el mismo de la vida serena).
             Vector2 hacia = meta - Projectile.Center;
             float dist = hacia.Length();
-            if (_cerebro.Modo == ParejaCerebro.MODO_NORMAL)
+            if (_cerebro.Modo == ParejaCerebro.MODO_NORMAL ||
+                _cerebro.Modo == ParejaCerebro.MODO_CURIOSO)
             {
                 if (dist > 900f)            // el dueño se fue muy lejos: le alcanza volando
                     Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.05f, 0.20f);

@@ -143,6 +143,152 @@ namespace AethonMod.Content.Players
             return Math.Min(sp.DevoracionPoder / 75, 3);
         }
 
+        // ================================================================
+        //  v6.50.129 — EL FESTÍN DE LAS ARMAS (la letra: «cuualquier arma
+        //  corrompida se vuelve exp para el grimorio a mayor la rareza
+        //  del arma mayor los exp. ademas cada arma debe subir algun
+        //  stats del grimorio ya sea un stats unico o no, en esto caso
+        //  puedes crear stats y efectos para las armas en caso de que
+        //  estas tengan efectos o sean especiales»). TODO persiste en
+        //  el .plr y viaja por EcoRed.MsgDevoracion (el mismo cauce del
+        //  poder — el daño del Eterno se calcula en la máquina del
+        //  portador: los números tienen que llegar).
+        // ================================================================
+
+        /// <summary>EL EXP DEVORADO (la rareza de cada arma comida —
+        /// el contador del festín, +0,02 % de daño por punto tope +40 %).</summary>
+        public long DevoracionExp = 0;
+
+        /// <summary>LA FUERZA VIOLENTA: cada arma CUERPO A CUERPO comida
+        /// suma 1 (+0,35 % daño del Eterno por punto, tope conjunto +45 %).</summary>
+        public int DevoracionFuerza = 0;
+
+        /// <summary>LA PRISA DEL VUELO: cada arma A DISTANCIA comida suma
+        /// 1 (+0,25 % velocidad de uso por punto, tope conjunto +35 %).</summary>
+        public int DevoracionPrisa = 0;
+
+        /// <summary>LA MIRADA PUNTERA: cada arma MÁGICA comida suma 1
+        /// (+0,30 % prob. de crítico por punto, tope conjunto +30 %).</summary>
+        public int DevoracionMirada = 0;
+
+        /// <summary>LA CORONA DE OJOS: cada arma DE INVOCACIÓN comida suma
+        /// 1 (cada 5 puntos despiertan UN OJO más en la corona, tope +3).</summary>
+        public int DevoracionCorona = 0;
+
+        /// <summary>LA MORDIDA: cada arma OTRA (lanzables y raridades)
+        /// comida suma 1 (+0,6 % empuje por punto, tope conjunto +75 %).</summary>
+        public int DevoracionMordida = 0;
+
+        // === LAS ALMAS ÚNICAS (las armas ESPECIALES de la letra: «puedes
+        //     crear stats y efectos para las armas en caso de que estas
+        //     tengan efectos o sean especiales») — cada copia comida
+        //     despierta SU alma en el libro, con SU efecto. ===
+
+        /// <summary>ALMA ÍGNEA (las armas de fuego: Fiery Greatsword,
+        /// Sunfury, Flamelash, Inferno Fork, Flamethrower, Volcano):
+        /// +6 % de prender por copia (tope 30 %).</summary>
+        public int AlmaIgnea = 0;
+
+        /// <summary>ALMA SALVAJE (las armas de veneno: Blade of Grass,
+        /// Thorn Chakram, Bee Gun, Beenade, Poison Staff): +6 % de
+        /// envenenar por copia (tope 30 %).</summary>
+        public int AlmaSalvaje = 0;
+
+        /// <summary>ALMA VAMPIRA (Vampire Knives): +2 % de robo de vida
+        /// por copia (tope 8 %).</summary>
+        public int AlmaVampira = 0;
+
+        /// <summary>CORAZÓN ESTELAR (Starfury, Star Wrath, Star Cannon):
+        /// +1,5 % crítico por copia (tope +7,5 % — suma con la Mirada).</summary>
+        public int CorazonEstelar = 0;
+
+        /// <summary>ALMA VELOZ (Muramasa, Katana, Fetid Baghnakhs): +2 %
+        /// velocidad de uso por copia (tope +10 % — suma con la Prisa).</summary>
+        public int AlmaVeloz = 0;
+
+        /// <summary>PUÑO TITÁN (Paladin's Hammer, Golem Fist): +12 %
+        /// empuje por copia (tope +60 % — suma con la Mordida).</summary>
+        public int PunoTitan = 0;
+
+        /// <summary>EL DAÑO DEL FESTÍN DE ARMAS: fuerza (+0,35 %/pto) + el
+        /// EXP (+0,02 %/pto, tope +40 %) — tope conjunto +45 %.</summary>
+        public static float BonusDanoArmasDevoradas(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.DevoracionFuerza * 0.0035f +
+                Math.Min(sp.DevoracionExp * 0.0002f, 0.40f), 0.45f);
+        }
+
+        /// <summary>LA VELOCIDAD DEL FESTÍN: prisa (+0,25 %/pto) + alma
+        /// veloz (+2 %/copa) — tope conjunto +35 %.</summary>
+        public static float BonusVelocidadArmasDevoradas(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.DevoracionPrisa * 0.0025f + sp.AlmaVeloz * 0.02f, 0.35f);
+        }
+
+        /// <summary>EL CRÍTICO DEL FESTÍN: mirada (+0,30 %/pto) + corazón
+        /// estelar (+1,5 %/copia) — tope conjunto +30 %.</summary>
+        public static float BonusCritArmasDevoradas(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.DevoracionMirada * 0.0030f + sp.CorazonEstelar * 0.015f, 0.30f);
+        }
+
+        /// <summary>EL EMPUJE DEL FESTÍN: mordida (+0,6 %/pto) + puño
+        /// titán (+12 %/copia) — tope conjunto +75 %.</summary>
+        public static float BonusEmpujeArmasDevoradas(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.DevoracionMordida * 0.006f + sp.PunoTitan * 0.12f, 0.75f);
+        }
+
+        /// <summary>LOS OJOS DE LA CORONA DEL FESTÍN: cada 5 armas de
+        /// invocación comidas, UN ojo más (tope +3 — suma con los del
+        /// poder devorado).</summary>
+        public static int OjosCoronaDevorados(Player p)
+        {
+            if (p == null) return 0;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0;
+            return Math.Min(sp.DevoracionCorona / 5, 3);
+        }
+
+        /// <summary>EL ROBO DE VIDA DEL ALMA VAMPIRA (+2 %/copia, tope 8 %).</summary>
+        public static float RoboVidaAlmas(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.AlmaVampira * 0.02f, 0.08f);
+        }
+
+        /// <summary>LA PROBABILIDAD DE PRENDER del alma ígnea (+6 %/copia, tope 30 %).</summary>
+        public static float ProbIgnea(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.AlmaIgnea * 0.06f, 0.30f);
+        }
+
+        /// <summary>LA PROBABILIDAD DE ENVENENAR del alma salvaje (+6 %/copia, tope 30 %).</summary>
+        public static float ProbSalvaje(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.AlmaSalvaje * 0.06f, 0.30f);
+        }
+
         /// <summary>v6.50.128 — EL SYNC MANUAL: el trago del altar tocó el
         /// poder de este portador (solo AUTORIDAD lo hace) — esto lo lleva
         /// por el cable AHORA (EcoRed.MsgDevoracion: el daño del Eterno se
@@ -336,6 +482,11 @@ namespace AethonMod.Content.Players
             // despierta ojos nuevos en la corona (+1 cada 75 esencias,
             // tope +3 — la mecánica que «dará más vida al mod»).
             techoOjos += OjosExtraDevorados(Player);
+            // v6.50.129 — LOS OJOS DE LA CORONA DEL FESTÍN: cada 5 armas
+            // de invocación comidas despierta OTRO ojo (tope +3 — suma
+            // con los del banquete: el escuadrón puede crecer de las dos
+            // mesas del cráter).
+            techoOjos += OjosCoronaDevorados(Player);
             {
                 int i = Player.whoAmI;
                 if (i >= 0 && i < _techoOjos.Length)
@@ -993,6 +1144,20 @@ namespace AethonMod.Content.Players
                 // para SIEMPRE — mejora permanente del Grimorio del Eterno).
                 tag["devoracionPoder"] = DevoracionPoder;
                 tag["devoracionV2"] = true;
+                // v6.50.129 — EL FESTÍN DE LAS ARMAS (EXP por rareza + los
+                // stats por clase + las almas únicas — todo permanente).
+                tag["devoracionExp"] = DevoracionExp;
+                tag["devoracionFuerza"] = DevoracionFuerza;
+                tag["devoracionPrisa"] = DevoracionPrisa;
+                tag["devoracionMirada"] = DevoracionMirada;
+                tag["devoracionCorona"] = DevoracionCorona;
+                tag["devoracionMordida"] = DevoracionMordida;
+                tag["almaIgnea"] = AlmaIgnea;
+                tag["almaSalvaje"] = AlmaSalvaje;
+                tag["almaVampira"] = AlmaVampira;
+                tag["corazonEstelar"] = CorazonEstelar;
+                tag["almaVeloz"] = AlmaVeloz;
+                tag["punoTitan"] = PunoTitan;
             }
             catch { }
         }
@@ -1034,6 +1199,20 @@ namespace AethonMod.Content.Players
                 // viejos estrenan el altar con el poder intacto; clamp
                 // anticornografía de siempre).
                 DevoracionPoder = Math.Max(0, Math.Min(999999, tag.GetInt("devoracionPoder")));
+                // v6.50.129 — EL FESTÍN DE LAS ARMAS (ausente = 0 en todos:
+                // el guardado viejo estrena el festín limpio; clamps).
+                DevoracionExp = Math.Max(0L, Math.Min(999999999L, tag.GetLong("devoracionExp")));
+                DevoracionFuerza = Math.Max(0, Math.Min(9999, tag.GetInt("devoracionFuerza")));
+                DevoracionPrisa = Math.Max(0, Math.Min(9999, tag.GetInt("devoracionPrisa")));
+                DevoracionMirada = Math.Max(0, Math.Min(9999, tag.GetInt("devoracionMirada")));
+                DevoracionCorona = Math.Max(0, Math.Min(9999, tag.GetInt("devoracionCorona")));
+                DevoracionMordida = Math.Max(0, Math.Min(9999, tag.GetInt("devoracionMordida")));
+                AlmaIgnea = Math.Max(0, Math.Min(99, tag.GetInt("almaIgnea")));
+                AlmaSalvaje = Math.Max(0, Math.Min(99, tag.GetInt("almaSalvaje")));
+                AlmaVampira = Math.Max(0, Math.Min(99, tag.GetInt("almaVampira")));
+                CorazonEstelar = Math.Max(0, Math.Min(99, tag.GetInt("corazonEstelar")));
+                AlmaVeloz = Math.Max(0, Math.Min(99, tag.GetInt("almaVeloz")));
+                PunoTitan = Math.Max(0, Math.Min(99, tag.GetInt("punoTitan")));
             }
             catch { }
         }

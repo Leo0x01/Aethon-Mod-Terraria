@@ -858,14 +858,28 @@ namespace AethonMod.Content.Systems
                 if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3))
                     return;
                 sys.Altares.Add(new AltarDelMundo { X = x, Y = y });
+                // v6.50.129 — LA BRUMA CAMINA: los clientes MP descubrían
+                // las zonas por la TILE DORADA (murió con el altar) — la
+                // lista nueva viaja al aire AHORA (y la foto de entrada
+                // la llevará a quien entre después).
+                if (Main.netMode == NetmodeID.Server)
+                    EcoRed.DifundirZonas();
             }
             catch { }
         }
 
-        /// <summary>EL BACKFILL DE LOS MUNDOS VIEJOS: cada caída pendiente
-        /// de un mundo cargado SIN su altar (cráteres de la .127) lo recibe
-        /// AHORA — pedestal de obsidiana + la tile dorada en el fondo de SU
-        /// cráter (la mecánica no se le niega a nadie). Solo AUTORIDAD.</summary>
+        /// <summary>v6.50.129 — LA LIMPIEZA DEL ALTAR DORADO + EL
+        /// BACKFILL (la letra: «quita eso amarillo que esta dentro del
+        /// crater» + «el centro debe estar vacio solo obsidiana y ademas
+        /// bruma»): (1) los mundos de la .128 tienen la TILE DORADA, su
+        /// pedestal y los COLMILLOS DE LA GARGANTA en el fondo de cada
+        /// cráter registrado — el minibioma LOS BARRE al cargar (la tile
+        /// dorada muere; el pedestal se queda: es obsidiana, el piso;
+        /// los colmillos del centro caen: «el centro debe estar VACÍO»).
+        /// La ZONA sigue VIVA — la puerta ahora es la BRUMA, no un
+        /// bloque. (2) cada caída pendiente de un mundo VIEJO sin zona
+        /// (cráteres .127) la recibe — sin tile, solo el registro (la
+        /// mecánica no se le niega a nadie). Solo AUTORIDAD.</summary>
         private static void ForjarAltaresFaltantes()
         {
             try
@@ -874,6 +888,46 @@ namespace AethonMod.Content.Systems
                 var sys = ModContent.GetInstance<LaCaidaSistema>();
                 if (sys == null) return;
 
+                // === (1) LA LIMPIEZA: nada dorado, centro vacío ===
+                int tipoAltar = ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
+                foreach (var altar in sys.Altares.ToArray())
+                {
+                    if (altar == null) continue;
+                    bool toco = false;
+                    for (int dx = -3; dx <= 3; dx++)
+                    {
+                        for (int dy = -9; dy <= 3; dy++)
+                        {
+                            int x = altar.X + dx, y = altar.Y + dy;
+                            if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 ||
+                                y >= Main.maxTilesY - 10) continue;
+                            Tile t = Main.tile[x, y];
+                            if (t == null || !t.HasTile) continue;
+
+                            // LA TILE DORADA: muere (nada amarillo en el cráter).
+                            if (t.TileType == tipoAltar)
+                            {
+                                WorldGen.KillTile(x, y, noItem: true);
+                                toco = true;
+                                continue;
+                            }
+
+                            // LOS COLMILLOS DE LA GARGANTA (.128: columnas
+                            // de obsidiana ±2/±3 SOBRE el fondo): caen — el
+                            // centro queda vacío para la bruma. El PEDERAL
+                            // (dy ≥ 0: el piso de obsidiana) se queda.
+                            if (dy <= -2 && t.TileType == TileID.Obsidian)
+                            {
+                                WorldGen.KillTile(x, y, noItem: true);
+                                toco = true;
+                            }
+                        }
+                    }
+                    if (toco && Main.netMode == NetmodeID.Server)
+                        NetMessage.SendTileSquare(-1, altar.X - 4, altar.Y - 10, 9, 15);
+                }
+
+                // === (2) EL BACKFILL: cráteres .127 sin zona la reciben ===
                 foreach (var pendiente in sys.CaidasPendientes)
                 {
                     if (pendiente == null || string.IsNullOrEmpty(pendiente.Jugador)) continue;
@@ -881,7 +935,7 @@ namespace AethonMod.Content.Systems
                     int cy = (int)(pendiente.Y / 16f);
                     if (cx < 12 || cy < 12 || cx >= Main.maxTilesX - 12 || cy >= Main.maxTilesY - 12) continue;
 
-                    // ¿El cráter ya tiene SU altar? (la lista manda).
+                    // ¿El cráter ya tiene SU zona? (la lista manda).
                     if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - cx) <= 6 && Math.Abs(a.Y - cy) <= 12))
                         continue;
 
@@ -894,35 +948,9 @@ namespace AethonMod.Content.Systems
                     }
                     if (piso < 10) continue;
 
-                    // EL PEDESTAL + EL ALTAR (la misma receta del cometa).
-                    for (int dx = -1; dx <= 1; dx++)
-                    {
-                        for (int dy = 0; dy <= 1; dy++)
-                        {
-                            Tile t = Main.tile[cx + dx, piso + dy];
-                            if (t == null) continue;
-                            t.HasTile = true;
-                            t.TileType = TileID.Obsidian;
-                            t.Slope = 0;
-                            t.IsHalfBlock = false;
-                            WorldGen.SquareTileFrame(cx + dx, piso + dy, true);
-                        }
-                    }
-                    Tile altar = Main.tile[cx, piso - 1];
-                    if (altar != null)
-                    {
-                        altar.HasTile = true;
-                        altar.TileType = (ushort)ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
-                        altar.Slope = 0;
-                        altar.IsHalfBlock = false;
-                        altar.TileFrameX = 0;
-                        altar.TileFrameY = 0;
-                        WorldGen.SquareTileFrame(cx, piso - 1, true);
-                    }
-                    sys.Altares.Add(new AltarDelMundo { X = cx, Y = piso - 1 });
-
-                    if (Main.netMode == NetmodeID.Server)
-                        NetMessage.SendTileSquare(-1, cx - 3, piso - 2, 7, 5);
+                    // SOLO EL REGISTRO (v6.50.129: sin pedestal, sin tile —
+                    // la bruma es la puerta del minibioma).
+                    sys.Altares.Add(new AltarDelMundo { X = cx, Y = piso });
                 }
             }
             catch { }

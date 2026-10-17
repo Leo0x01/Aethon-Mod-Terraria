@@ -63,9 +63,20 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         public const float MODO_MOLESTAR = 2f;  // ya llegado: las DOS FORMAS
         public const float MODO_VOLVER = 3f;    // de vuelta al lado del dueño
         public const float MODO_PLAGA = 4f;     // v6.50.126 — LA GUERRA DE LOS CONEJOS BLANCOS (Re:Zero)
+        /// <summary>v6.50.129 — LA CURIOSIDAD DE LA LETRA: «el grimorio
+        /// menor despues de varios segundos sin que el jugador se mueva
+        /// debe ser curioso y volar por ahi, en ese momento es cuando
+        /// vuela y molesta a los npc y es cuando se puede activar el
+        /// evento de conejos blancos». Es EL MODO CENTRAL del repertorio:
+        /// deambula alrededor del dueño (Lissajous perezoso), y DESDE AHÍ
+        /// salen las misiones al vecindario y la GUERRA DE LOS CONEJOS.
+        /// Es un evento que NO AFECTA EN NADA a nadie — puro teatro.</summary>
+        public const float MODO_CURIOSO = 5f;
 
-        /// <summary>El reloj del AFK: 3600 t quieto (~1 min) = «se aburrió».</summary>
-        private const int TICKS_AFK = 3600;
+        /// <summary>v6.50.129 — «varios segundos sin que el jugador se
+        /// mueva» (la .122 exigía UN MINUTO — ahora: 8 segundos y el libro
+        /// ya está curioseando por ahí).</summary>
+        private const int TICKS_CURIOSIDAD = 480;
 
         /// <summary>El tope de la letra: 10 golpes de 1 por vecino.</summary>
         private const int GOLPES_TOPE = 10;
@@ -123,10 +134,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// libro es más grande que la gula de Daphne).</summary>
         private const int PLAGA_MAX_RONDAS = 40;
 
-        /// <summary>La moneda del easteregg: 30% plaga / 70% vecinos (por
-        /// episodio de aburrimiento — el espanto es RARO, como todo
-        /// easteregg que se precie).</summary>
-        private const float PLAGA_PROBABILIDAD = 0.30f;
+        /// <summary>La moneda del easteregg: 35% plaga por tirada (por
+        /// episodio de curiosidad — el espanto es RARO, pero la letra
+        /// manda: el usuario TIENE QUE VERLO).</summary>
+        private const float PLAGA_PROBABILIDAD = 0.35f;
 
         /// <summary>Episodios de aburrimiento que deben pasar entre plaga
         /// y plaga (la horda no espanta dos veces seguidas).</summary>
@@ -233,6 +244,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             /// horda pueda volver a oler el maná del dueño.</summary>
             public int PlagaEnfriamiento;
 
+            /// <summary>v6.50.129 — LAS TIRADAS FALLIDAS de la moneda de
+            /// la horda en ESTA sesión de curiosidad: a la TERCERA la
+            /// horda viene GARANTIZADA («no veo que se active el evento» —
+            /// ahora el usuario la ve, SIEMPRE, en el peor caso ~1 min).</summary>
+            public int PlagaTiradasFallidas;
+
             /// <summary>LA HORDA (12 cuerpos, una sola conciencia — Re:Zero).</summary>
             public ConejoPlaga[] Conejos = new ConejoPlaga[PLAGA_MAX_CONEJOS];
         }
@@ -300,13 +317,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // disipó y la horda HUYE (los conejos de Re:Zero
                 // devoran al quieto… pero el libro jamás deja que el
                 // espectáculo toque a su dueño despierto).
-                if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR || e.Modo == MODO_PLAGA)
+                // v6.50.129 — también de LA CURIOSIDAD (la letra nueva:
+                // la curiosidad solo vive mientras el dueño está quieto).
+                if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR ||
+                    e.Modo == MODO_PLAGA || e.Modo == MODO_CURIOSO)
                 {
                     if (e.Modo == MODO_PLAGA) DispersarPlaga(e);
                     e.Modo = MODO_VOLVER;
                     e.NpcObjetivo = -1;
                     e.Embestida = -1;
                     e.TicksEnModo = 0;
+                    e.PlagaTiradasFallidas = 0;   // sesión de curiosidad nueva
                 }
             }
             else
@@ -317,50 +338,78 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             switch (e.Modo)
             {
                 case MODO_NORMAL:
-                    // v6.50.127 — LA MONEDA QUE NO SABÍA REINTENTAR (la
-                    // letra: «el evento de los conejos no se activa»):
-                    // la .126 la tiraba UNA sola vez, en el tick EXACTO
-                    // 3600 — si fallaba (70% de las veces) y no había
-                    // misión de vecinos que reseteara el reloj, la horda
-                    // JAMÁS volvía a oler el maná (el aburrimiento sin
-                    // vecinos es un túnel sin salida). Ahora: CADA
-                    // minuto completo de quietud continua (3600, 7200,
-                    // 10800…) tira OTRA moneda — con SEMILLA fresca por
-                    // tirada (TicksQuieto viaja en la mezcla: la misma
-                    // máquina saca la misma carta, la tirada siguiente
-                    // es otra baraja) — y a los CINCO minutos seguidos
-                    // sin guerra, la horda viene GARANTIZADA: tanto
-                    // maná quieto junto huele demasiado (la gula de
-                    // Daphne no se contiene).
-                    if (e.TicksQuieto >= TICKS_AFK && e.TicksQuieto % TICKS_AFK == 0)
+                    // v6.50.129 — LA CURIOSIDAD DE LA LETRA: «después de
+                    // varios segundos sin que el jugador se mueva debe ser
+                    // curioso y volar por ahí». OCHO SEGUNDOS (antes era
+                    // UN MINUTO entero) y el libro ya sale a curiosear.
+                    if (e.TicksQuieto >= TICKS_CURIOSIDAD)
                     {
-                        bool garantia = e.TicksQuieto >= TICKS_AFK * 5;
-                        if (e.PlagaEnfriamiento > 0)
-                            e.PlagaEnfriamiento--;
-                        else if (garantia || VFXCore.Hash01(p.whoAmI,
-                                  e.TotalGolpes * 11 + 7,
-                                  e.Viajes * 17 + 3 + e.TicksQuieto * 131)
-                                 < PLAGA_PROBABILIDAD)
-                        {
-                            ArrancarPlaga(p, e);
-                            break;
-                        }
+                        e.Modo = MODO_CURIOSO;
+                        e.TicksEnModo = 0;
+                        e.PlagaTiradasFallidas = 0;
                     }
-                    // EL DUEÑO LLEVA ~1 MIN QUIETO: busca vecino CON CASA
-                    // (escaneo barato cada 60 t — no hace falta más).
-                    if (e.TicksQuieto >= TICKS_AFK && e.TicksQuieto % 60 == 0)
+                    break;
+
+                case MODO_CURIOSO:
+                    // ====================================================
+                    //  v6.50.129 — EL VUELO CURIOSO: el libro deambula por
+                    //  ahí alrededor del dueño (ElegirMeta dibuja la
+                    //  figura)… y DESDE AQUÍ salen las dos travesuras de
+                    //  la letra: molestar a los npc Y la guerra de los
+                    //  conejos blancos («es cuando se puede activar el
+                    //  evento» — un evento que no afecta a nadie: puro
+                    //  teatro, como una cinemática curiosa del grimorio).
+                    // ====================================================
                     {
-                        NPC vecino = BuscarVecino(dueño.Center, RADIO_VECINO, -1);
-                        if (vecino != null)
+                        // LA MONEDA DE LA HORDA: 4 s tras arrancar la
+                        // curiosidad y cada 20 s de ella — 35% de plaga,
+                        // GARANTIZADA a la tercera tirada fallida (la
+                        // cura de «no veo que se active»: la .128 pedía un
+                        // minuto EXACTO para UNA moneda del 30% que, si
+                        // fallaba, la misión de vecinos se comía el reloj).
+                        if (e.TicksEnModo == 240 ||
+                            (e.TicksEnModo > 240 && (e.TicksEnModo - 240) % 1200 == 0))
                         {
-                            e.Modo = MODO_VIAJAR;
-                            e.NpcObjetivo = vecino.whoAmI;
-                            e.Golpes = 0;
-                            e.TicksEnModo = 0;
-                            e.TicksQuieto = 0;    // al volver a casa esperará OTRO minuto entero
-                            e.TicksMordisco = 0;
-                            e.FormaSombra = true; // llega con la FORMA 1 (la sombrilla)
-                            e.Embestida = -1;
+                            if (e.PlagaEnfriamiento > 0)
+                                e.PlagaEnfriamiento--;
+                            else if (e.PlagaTiradasFallidas >= 2 ||
+                                     VFXCore.Hash01(p.whoAmI,
+                                         e.TotalGolpes * 13 + 29,
+                                         e.Viajes * 19 + 7 + e.TicksQuieto * 131)
+                                     < PLAGA_PROBABILIDAD)
+                            {
+                                e.PlagaTiradasFallidas = 0;
+                                ArrancarPlaga(p, e);
+                                break;
+                            }
+                            else
+                                e.PlagaTiradasFallidas++;
+                        }
+
+                        // MOLESTAR AL VECINDARIO (la letra: «en ese
+                        // momento es cuando vuela y molesta a los npc»):
+                        // cada 10 s de curiosidad, moneda del 50% — si hay
+                        // vecino CON CASA cerca, la misión de siempre.
+                        if (e.TicksEnModo > 0 && e.TicksEnModo % 600 == 0)
+                        {
+                            NPC vecino = BuscarVecino(dueño.Center, RADIO_VECINO, -1);
+                            if (vecino != null && VFXCore.Hash01(p.whoAmI,
+                                  e.TotalGolpes * 23 + 5,
+                                  e.Viajes * 7 + 11 + e.TicksEnModo / 600) < 0.5f)
+                            {
+                                e.Modo = MODO_VIAJAR;
+                                e.NpcObjetivo = vecino.whoAmI;
+                                e.Golpes = 0;
+                                e.TicksEnModo = 0;
+                                e.TicksMordisco = 0;
+                                e.FormaSombra = true;
+                                e.Embestida = -1;
+                                // v6.50.129 — EL RELOJ DE LA QUIETUD NO SE
+                                // TOCA: la misión ES parte de la curiosidad
+                                // (el dueño sigue quieto — al volver, el
+                                // libro SIGUE curioseando, no espera otro
+                                // minuto entero como la .128).
+                            }
                         }
                     }
                     break;
@@ -424,10 +473,23 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 case MODO_VOLVER:
                     // «Al volver, se queda orbitando al dueño normal.»
+                    // v6.50.129 — ¿el dueño SIGUE quieto? La curiosidad
+                    // CONTINÚA (misiones y guerra incluidas — la letra:
+                    // todo vive DENTRO del estado curioso); si se movió,
+                    // la vida serena del hombro.
                     if (Vector2.DistanceSquared(p.Center, dueño.Center) < 90f * 90f)
                     {
-                        e.Modo = MODO_NORMAL;
-                        e.TicksEnModo = 0;
+                        if (e.TicksQuieto >= TICKS_CURIOSIDAD)
+                        {
+                            e.Modo = MODO_CURIOSO;
+                            e.TicksEnModo = 0;
+                            e.PlagaTiradasFallidas = 0;
+                        }
+                        else
+                        {
+                            e.Modo = MODO_NORMAL;
+                            e.TicksEnModo = 0;
+                        }
                     }
                     break;
 
@@ -480,10 +542,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             DispersarPlaga(e);
                             e.Modo = MODO_VOLVER;
                             e.TicksEnModo = 0;
-                            // El reloj del aburrimiento vuelve a cero: tras la
-                            // guerra, un minuto entero de paz antes de otra
-                            // misión (el mismo compás de la vuelta de vecinos).
-                            e.TicksQuieto = 0;
+                            // v6.50.129 — el reloj de la quietud ya NO se
+                            // resetea: si el dueño sigue quieto, la
+                            // curiosidad (y con el enfriamiento de por
+                            // medio, otra guerra algún día) continúa sola.
                             if (Main.netMode != NetmodeID.Server)
                             {
                                 try
@@ -532,6 +594,27 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 case MODO_VOLVER:
                     meta = dueño.Center;   // directo al lado del dueño
+                    break;
+
+                case MODO_CURIOSO:
+                    {
+                        // v6.50.129 — EL VUELO CURIOSO DE LA LETRA («debe
+                        // ser curioso y volar por ahí»): una figura de
+                        // LISSAJOUS perezosa alrededor del dueño — dos
+                        // senos inconmensurables (el rumbo JAMÁS se
+                        // repite) con el radio respirando (57..153 px) y
+                        // la altura siempre por encima de su cabeza (un
+                        // libro curiosea FLOTANDO). TODO determinista
+                        // (el reloj del modo): todas las máquinas ven el
+                        // mismo paseo.
+                        float sem = p.whoAmI * 0.618f;
+                        float t = e.TicksEnModo / 60f;
+                        float radio = 105f + MathF.Sin(t * 0.23f + sem) * 48f;
+                        float a = t * 0.9f + sem;
+                        meta = dueño.Center + new Vector2(
+                            MathF.Sin(a) * radio,
+                            MathF.Sin(a * 1.31f + 1.7f) * radio * 0.55f - 46f);
+                    }
                     break;
 
                 case MODO_PLAGA:
@@ -678,13 +761,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             e.Embestida = -1;
             e.TicksMordisco = 0;
             e.TicksEnModo = 0;
-            // El reloj del AFK vuelve a cero: entre misión y misión, el
-            // mini grimorio espera SIEMPRE un minuto entero de quietud —
-            // así el bucle «molesta → vuelve → descansa → molesta» respira. (El
-            // ANCLA NO se toca: sigue midiéndose contra la quietud REAL
-            // del dueño — si se movió durante la misión, el próximo tick
-            // lo detecta y aborta como manda la letra.)
-            e.TicksQuieto = 0;
+            // v6.50.129 — EL RELOJ DE LA QUIETUD YA NO SE RESETEA (la
+            // letra nueva: las misiones viven DENTRO de la curiosidad —
+            // si el dueño sigue quieto, al volver el libro SIGUE
+            // curioseando; el propio ancla detectará cualquier
+            // movimiento REAL y cortará todo, como siempre).
         }
 
         // ==================================================================
@@ -1038,7 +1119,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             e.NpcObjetivo = -1;
             e.Embestida = -1;
             e.TicksEnModo = 0;
-            e.TicksQuieto = 0;          // al volver a casa: OTRO minuto entero de quietud
+            // v6.50.129 — el reloj de la quietud ya NO se toca (la
+            // curiosidad continúa tras la guerra si el dueño sigue
+            // quieto — la tirada fallida también vuelve a cero: la
+            // garantía de la tercera cuenta DESDE la guerra).
+            e.PlagaTiradasFallidas = 0;
             e.PlagaRonda = 0;
             e.PlagaRondas = 0;
             e.PlagaEnfriamiento = PLAGA_ENFRIAMIENTO;   // la horda no espanta dos veces seguidas

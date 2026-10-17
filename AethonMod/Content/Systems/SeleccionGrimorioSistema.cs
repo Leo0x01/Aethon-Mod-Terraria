@@ -34,12 +34,17 @@ namespace AethonMod.Content.Systems
     //    un rincón de la pantalla), vuela hasta él EN ARCO, lo RODEA
     //    estudiándolo, le da un TOQUE con chispas… y si el punto era el
     //    cursor y éste se movió demasiado, se ASUSTA y sale disparado.
-    //  · EL SOL SE AGARRA CON LOS ANILLOS RÚNICOS: los anillos de los
-    //    agujeros negros (la matemática EXACTA de SigiloLib: RingA/RingFlat/
-    //    RingTilt/RingSpin/RunesOfRing, portada al espacio del menú) ciñen
-    //    al sol, lo sujetan… y se lo ARRASTRAN de verdad: sunModY tira
-    //    hacia abajo (+190 px visibles) y Main.time AVANZA — el sol se
-    //    DESLIZA por su arco. El ojo eterno abre sobre él mientras tira.
+    //  · EL SOL SE AGARRA CON LOS ANILLOS RÚNICOS (v6.50.129 — la
+    //    letra: «cuando agarra el sol lo que sale es un ojo, eso no
+    //    debe salir, lo que debe suceder es que lo agarra con anillos
+    //    runicos de agujero negro, no salir un ojo»): los anillos de los
+    //    agujeros negros (la matemática EXACTA de SigiloLib: RingA/
+    //    RingFlat/RingTilt/RingSpin/RunesOfRing, portada al espacio del
+    //    menú) ciñen al sol, lo APRIETAN y se lo ARRASTRAN de verdad:
+    //    sunModY tira hacia abajo (+190 px visibles) y Main.time AVANZA —
+    //    el sol se DESLIZA por su arco. EL OJO QUE SALÍA SOBRE EL SOL
+    //    MURIÓ: el secuestro lo cuentan SOLO los anillos (más vivos:
+    //    latido más fuerte en el tirón).
     //  · EL TÍTULO SE ATACA CON LAS ARMAS: golpe 1 = LA SOMBRA DE LA
     //    PÁGINA (una página de tinta lo BARRE en diagonal, dejando sus
     //    manchas); golpes 2-3 = LA ANDANADA DE LOS MINIMIONES (los tres
@@ -94,6 +99,16 @@ namespace AethonMod.Content.Systems
         private static int _tFase;
         private static Vector2 _pos;
         private static Vector2 _vel;
+        /// <summary>v6.50.129 — LA CURA DEL TELETRANSPORTE (la letra:
+        /// «a veces el minigrimorio se teletransporta en la pantalla de
+        /// seleccionar personaje"): la posición del frame ANTERIOR. Al
+        /// final de cada Actualizar, _vel se REESCRIBE con el
+        /// desplazamiento REAL (_pos − _posAnterior): las fases que fijan
+        /// la posición a mano (órbitas, agarres) ya no dejan una _vel
+        /// mentirosa (el cineo y el rastro fantasma leían saltos que no
+        /// existían)… y las propias fases ahora PERSIGUEN su destino con
+        /// catch-up suave en vez de escribirlo de golpe (ver MoverHacia).</summary>
+        private static Vector2 _posAnterior;
         private static Vector2 _objetivo;
         private static int _acto;              // el acto EN CURSO
         private static int _actoProximo = ACTO_LOGO;   // alterna logo ↔ cielo
@@ -249,6 +264,7 @@ namespace AethonMod.Content.Systems
             _tActo = 0;
             _pausa = 0;
             _vel = Vector2.Zero;
+            _posAnterior = _ancla;   // v6.50.129 — sin salto fantasma al renacer
             _manchas.Clear();
             _chispas.Clear();
             Array.Clear(_rastro, 0, _rastro.Length);
@@ -278,6 +294,10 @@ namespace AethonMod.Content.Systems
         {
             _tFase++;
             const float dt = 1f / 60f;
+            // v6.50.129 — EL PASO ANTERIOR (para reescribir _vel con el
+            // movimiento REAL al final del frame — la cura del cineo
+            // mentiroso de las fases que fijan la posición a mano).
+            _posAnterior = _pos;
 
             // LAS CHISPAS viven su vida (pantalla, siempre).
             for (int i = _chispas.Count - 1; i >= 0; i--)
@@ -334,6 +354,7 @@ namespace AethonMod.Content.Systems
                     if (_tFase == 1)
                     {
                         _pos = _ancla;
+                        _posAnterior = _ancla;   // nace AQUÍ: ni un pixel de salto
                         _objetivo = new Vector2(
                             Main.rand.NextFloat(Main.screenWidth * 0.15f, Main.screenWidth * 0.85f),
                             Main.rand.NextFloat(Main.screenHeight * 0.2f, Main.screenHeight * 0.55f));
@@ -422,12 +443,16 @@ namespace AethonMod.Content.Systems
                     }
 
                     // LA VUELTA: órbita de estudio (~2,4 s), respirando.
+                    // v6.50.129 — SIN TELEPORT: la órbita se PERSIGUE con
+                    // catch-up suave (antes el radio se escribía DE GOLPE
+                    // al llegar: si el punto de interés quedaba lejos, el
+                    // libro SALTABA cientos de píxeles de un frame al otro).
                     float velAng = _asustado ? 0.30f : 0.055f;
                     _angCurio += velAng;
                     float radio = 40f + MathF.Sin(_tCurio * 0.05f) * 7f;
-                    _pos = _puntoCurio + new Vector2(MathF.Cos(_angCurio) * radio,
+                    Vector2 deseo = _puntoCurio + new Vector2(MathF.Cos(_angCurio) * radio,
                         MathF.Sin(_angCurio) * radio * 0.86f - 6f);
-                    _vel = new Vector2(-MathF.Sin(_angCurio), MathF.Cos(_angCurio)) * radio * velAng;
+                    _pos += (deseo - _pos) * 0.26f;
 
                     // ¿EL CURSOR SE MOVIÓ DEMASIADO? (el susto).
                     if (_curioTipo == CURIO_CURSOR && !_asustado &&
@@ -473,14 +498,9 @@ namespace AethonMod.Content.Systems
                         _tFase = 0;
                         _tActo = 0;
                         _golpesLogo = 1;
-                        if (_acto == ACTO_LOGO)
-                        {
-                            // EL ESTACIONAMIENTO: un costado del logo, alternando.
-                            _reposoIzquierda = !_reposoIzquierda;
-                            _reposo = new Vector2(
-                                Main.screenWidth * 0.5f + (_reposoIzquierda ? -1f : 1f) * 175f,
-                                100f + Main.rand.NextFloat(-30f, 0f));
-                        }
+                        // v6.50.129 — EL ESTACIONAMIENTO YA SE ELIGIÓ AL
+                        // VOLAR (ElegirActo puso _objetivo = _reposo): el
+                        // libro llega DONDE debe golpear desde, sin saltos.
                     }
                     break;
                 }
@@ -494,6 +514,24 @@ namespace AethonMod.Content.Systems
                     break;
                 }
             }
+
+            // v6.50.129 — LA VELOCIDAD VERDADERA: el desplazamiento REAL
+            // del frame (para las fases que fijan la posición a mano, las
+            // órbitas y los agarres — antes _vel mentía y el cineo/rastro
+            // leían saltos fantasma). Para las fases de Volar es IDÉNTICO
+            // (dt = 1/60 ⇒ _pos += _vel): nadie cambia de física.
+            _vel = _pos - _posAnterior;
+        }
+
+        /// <summary>v6.50.129 — LA CURA DEL TELETRANSPORTE: PERSIGUIR un
+        /// destino en vez de escribirlo de golpe. Todas las fases que
+        /// antes hacían «_pos = destino» ahora hacen «_pos += (destino −
+        /// _pos) × mezcla» — el libro se ACOMODA a su puesto con un avance
+        /// exponencial suave (0,26-0,35: llega en ~10-15 frames, sin
+        /// resorte). NI UN SALTO MÁS en toda la pantalla.</summary>
+        private static void MoverHacia(Vector2 destino, float mezcla)
+        {
+            _pos += (destino - _pos) * mezcla;
         }
 
         /// <summary>LA PAUSA VIVA: 0,7–1,8 s de flotación mirando la pantalla.</summary>
@@ -547,6 +585,16 @@ namespace AethonMod.Content.Systems
             {
                 _acto = ACTO_LOGO;
                 _actoProximo = ACTO_SOL;
+                // v6.50.129 — EL ESTACIONAMIENTO SE ELIGE AL VOLAR (la
+                // cura del teleport más feo: antes _objetivo quedaba en el
+                // PUNTO VIEJO del vagare, el libro «llegaba» sin moverse y
+                // el golpe 1 LO ARROJABA 175 px hasta el costado del logo).
+                // Un costado del logo, alternando — y A ESO VUELA.
+                _reposoIzquierda = !_reposoIzquierda;
+                _reposo = new Vector2(
+                    Main.screenWidth * 0.5f + (_reposoIzquierda ? -1f : 1f) * 175f,
+                    100f + Main.rand.NextFloat(-30f, 0f));
+                _objetivo = _reposo;
                 return;
             }
 
@@ -657,9 +705,10 @@ namespace AethonMod.Content.Systems
                             Vida = Main.rand.NextFloat(0.35f, 0.7f),
                             Tam = Main.rand.NextFloat(16f, 30f)
                         });
-                    // El libro SIGUE a su página a distancia (la dirige).
-                    _pos = Vector2.Lerp(_reposo, _reposo + new Vector2(-lado * 90f, -20f), p);
-                    _vel = new Vector2(-lado * 3f, 0f);
+                    // El libro SIGUE a su página a distancia (la dirige) —
+                    // v6.50.129: PERSIGUIENDO el rumbo (antes lo escribía
+                    // de golpe: el arranque del golpe era un saltito).
+                    MoverHacia(Vector2.Lerp(_reposo, _reposo + new Vector2(-lado * 90f, -20f), p), 0.35f);
                 }
                 else if (t == T_CONJURO + T_BARRIDO + 1)
                 {
@@ -759,11 +808,16 @@ namespace AethonMod.Content.Systems
         /// «cuando agarra al sol no lo mueve, deberie por ejemplo
         /// atrazarlo o cambiar la posicion del sol, ademas al agarrar al
         /// sol deberia usar los anillos runicos de los agujeros negros
-        /// para sujetar al sol jajajaa»): LOS ANILLOS RÚNICOS ciñen al
-        /// sol (la matemática de SigiloLib, portada al menú), el OJO abre
-        /// sobre él… y se lo ARRASTRAN: sunModY lo hunde ~190 px en el
-        /// cielo y Main.time AVANZA — el sol se DESLIZA por su arco de
-        /// verdad, a la vista de todos.</summary>
+        /// para sujetar al sol jajajaa» · v6.50.129 — la letra nueva:
+        /// «cuando agarra el sol lo que sale es un ojo, eso no debe
+        /// salir… lo agarra con anillos runicos de agujero negro, no
+        /// salir un ojo»): LOS ANILLOS RÚNICOS ciñen al sol (la
+        /// matemática de SigiloLib, portada al menú), lo APRIETAN… y se
+        /// lo ARRASTRAN: sunModY lo hunde ~190 px en el cielo y Main.time
+        /// AVANZA — el sol se DESLIZA por su arco de verdad, a la vista
+        /// de todos. EL OJO GIGANTE MURIÓ: los anillos son los únicos
+        /// protagonistas del secuestro. v6.50.129 — todos los puestos se
+        /// PERSIGUEN (MoverHacia): ni un teleport entre agarre y arrastre.</summary>
         private static void ActuarSol()
         {
             const int T_ANILLOS = 46, T_AGARRE = 30, T_TIRON = 15, T_ARRASTRE = 115, T_SUELTA = 36;
@@ -780,8 +834,7 @@ namespace AethonMod.Content.Systems
             else if (t < T_ANILLOS + T_AGARRE)
             {
                 // EL AGARRE: los anillos APRIETAN — chispas de fricción.
-                _pos = sol + new Vector2(30f, -24f);
-                _vel = Vector2.Zero;
+                MoverHacia(sol + new Vector2(30f, -24f), 0.30f);
                 if ((t & 3) == 0)
                     Rafaga(sol + Main.rand.NextVector2Unit() * 22f, 2);
             }
@@ -789,8 +842,7 @@ namespace AethonMod.Content.Systems
             {
                 // EL TIRÓN ARRIBA (el primer jalón — el sol se estira).
                 Main.sunModY = (short)MathHelper.Clamp(Main.sunModY - 3, -320, 320);
-                _pos = sol + new Vector2(12f, -44f);
-                _vel = new Vector2(0f, -2.4f);
+                MoverHacia(sol + new Vector2(12f, -44f), 0.30f);
             }
             else if (t < T_ANILLOS + T_AGARRE + T_TIRON + T_ARRASTRE)
             {
@@ -800,8 +852,7 @@ namespace AethonMod.Content.Systems
                 // fuerza. Los anillos resbalan, el libro se recuesta.
                 Main.sunModY = (short)MathHelper.Clamp(Main.sunModY + 2, -320, 320);
                 Main.time += 26.0;
-                _pos = sol + new Vector2(26f, -28f);
-                _vel = new Vector2(3.2f, 1.4f);
+                MoverHacia(sol + new Vector2(26f, -28f), 0.30f);
                 if ((t & 5) == 0)
                     Rafaga(sol + new Vector2(-20f, 18f) + Main.rand.NextVector2Unit() * 14f, 2);
             }
@@ -834,8 +885,9 @@ namespace AethonMod.Content.Systems
             Vector2 luna = PosicionDeLaLuna();
             _foco = luna;
             float a = MathHelper.TwoPi * (_tActo / (float)T_VUELTA) - MathHelper.PiOver2;
-            _pos = luna + new Vector2(MathF.Cos(a) * 48f, MathF.Sin(a) * 48f * 0.9f);
-            _vel = new Vector2(-MathF.Sin(a), MathF.Cos(a)) * 3.2f;
+            // v6.50.129 — LA ÓRBITA SE PERSIGUE (MoverHacia): el arranque
+            // de la vuelta ya no es un salto de 48 px de un frame al otro.
+            MoverHacia(luna + new Vector2(MathF.Cos(a) * 48f, MathF.Sin(a) * 48f * 0.9f), 0.32f);
 
             if (_tActo == T_VUELTA / 2)
             {
@@ -1006,7 +1058,7 @@ namespace AethonMod.Content.Systems
                 DibujarPuffs(_lote);
                 if (_fase == FASE_ACTUAR && _acto == ACTO_SOL) DibujarActoDelSol(_lote);
                 if (_fase == FASE_ACTUAR && _acto == ACTO_LUNA) DibujarAnillosRunicos(_lote,
-                    PosicionDeLaLuna(), 20f, Main.GlobalTimeWrappedHourly, 0.55f);
+                    PosicionDeLaLuna(), 20f, Main.GlobalTimeWrappedHourly, 0.55f, 1f);
             }
             catch { }
             try { _lote.End(); } catch { }
@@ -1271,11 +1323,12 @@ namespace AethonMod.Content.Systems
             }
         }
 
-        /// <summary>EL ACTO DEL SOL (v6.50.128): LOS ANILLOS RÚNICOS de
+        /// <summary>EL ACTO DEL SOL (v6.50.129): LOS ANILLOS RÚNICOS de
         /// los agujeros negros sujetando al sol (la matemática de
         /// SigiloLib — RingA/RingFlat/RingTilt/RingSpin/RunesOfRing —
-        /// portada al espacio del menú) + EL OJO ETERNO que abre sobre él
-        /// mientras lo arrastran.</summary>
+        /// portada al espacio del menú) — LOS ÚNICOS PROTAGONISTAS (el
+        /// ojo que abría sobre el sol MURIÓ por la letra: «no salir un
+        /// ojo») — apretando más fuerte en el tirón y el arrastre.</summary>
         private static void DibujarActoDelSol(SpriteBatch sb)
         {
             const int T_ANILLOS = 46, T_AGARRE = 30, T_TIRON = 15, T_ARRASTRE = 115;
@@ -1309,69 +1362,51 @@ namespace AethonMod.Content.Systems
             }
             float alfaAnillos = t < T_ANILLOS ? t / (float)T_ANILLOS
                 : MathHelper.Clamp(1f - (t - T_ANILLOS - T_AGARRE - T_TIRON - T_ARRASTRE) / 30f, 0f, 1f);
+            // v6.50.129 — EL APRETÓN: cuánta FUERZA está haciendo el
+            // anillo ahora (1 = ciñendo; hasta 1,7 en pleno arrastre: las
+            // runas LATE más fuerte y el oro se enciende — el secuestro
+            // se cuenta con los anillos solos).
+            bool enPelea = t >= T_ANILLOS + T_AGARRE && t <= T_ANILLOS + T_AGARRE + T_TIRON + T_ARRASTRE;
+            float apreto = enPelea ? 1f + MathF.Sin(t * 0.55f) * 0.25f + 0.45f : 1f;
             if (alfaAnillos > 0.02f)
                 DibujarAnillosRunicos(sb, sol, 26f * ciñe, Main.GlobalTimeWrappedHourly,
-                    alfaAnillos);
+                    alfaAnillos, apreto);
 
-            // === EL AURA DEL SOL AGARRADO: la estrella "manoseada" brilla
-            //     violeta mientras la arrastran. ===
+            // === 3. v6.50.129 — EL LATIDO DEL AGARRE: la runa MAYOR de
+            //     cada aro LATE más fuerte en el tirón y el arrastre (el
+            //     anillo ES el secuestrador — el ojo que salía sobre el
+            //     sol MURIÓ por la letra: «lo agarra con anillos runicos
+            //     de agujero negro, no salir un ojo») ===
+            // (el latido vive en DibujarAnillosRunicos, que ciñe al sol
+            //  más abajo — los anillos son los ÚNICOS protagonistas).
+
+            // === 4. EL AURA DEL SOL AGARRADO: la estrella "manoseada"
+            //     brilla violeta mientras la arrastran (SIN ojo: solo el
+            //     resplandor del esfuerzo de los anillos). ===
             Texture2D glow = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             if (glow != null && t >= T_ANILLOS + T_AGARRE && t <= T_ANILLOS + T_AGARRE + T_TIRON + T_ARRASTRE)
-                sb.Draw(glow, sol, null, new Color(150, 70, 230) * 0.34f, 0f,
+            {
+                float jadeo = 0.26f + 0.14f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.2f);
+                sb.Draw(glow, sol, null, new Color(150, 70, 230) * jadeo, 0f,
                     glow.Size() * 0.5f, new Vector2(74f, 74f) / glow.Size(),
                     SpriteEffects.None, 0f);
-
-            // === EL OJO ETERNO: abre con el agarre, VIGILA el arrastre
-            //     (mira hacia donde tira) y se entorna al soltar. ===
-            float crece, alfa;
-            int tOjo = t - T_ANILLOS;
-            const int T_CRECE = 26, T_VIVE = T_AGARRE + T_TIRON + T_ARRASTRE - 10, T_MUERE = 30;
-            if (tOjo < 0) { crece = 0f; alfa = 0f; }
-            else if (tOjo < T_CRECE) { crece = tOjo / (float)T_CRECE; alfa = crece; }
-            else if (tOjo < T_CRECE + T_VIVE) { crece = 1f; alfa = 1f; }
-            else if (tOjo < T_CRECE + T_VIVE + T_MUERE)
-            {
-                float f = (tOjo - T_CRECE - T_VIVE) / (float)T_MUERE;
-                crece = 1f - f; alfa = 1f - f;
-            }
-            else { crece = 0f; alfa = 0f; }
-            if (alfa > 0.02f)
-            {
-                float suave = crece * crece * (3f - 2f * crece);
-                Texture2D ojo = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
-                if (ojo != null)
-                {
-                    float escala = 1.35f * suave * Main.ForcedMinimumZoom;
-                    sb.Draw(ojo, sol, null, Color.White * (0.92f * alfa), 0f,
-                        ojo.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                    var iris = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
-                    if (iris != null && alfa > 0.5f)
-                    {
-                        // LA MIRADA DEL SOL: hacia donde lo arrastran (abajo
-                        // y adelante — el rumbo del secuestro).
-                        Vector2 mirada = new Vector2(6.5f, 5.0f) *
-                            (t < T_ANILLOS + T_AGARRE + T_TIRON ? -1f : 1f);
-                        sb.Draw(iris, sol + (new Vector2(0.7f, 2.3f) + mirada) * escala, null,
-                            Color.White * alfa, 0f, iris.Size() * 0.5f,
-                            0.41f * escala, SpriteEffects.None, 0f);
-                    }
-                }
             }
         }
 
         /// <summary>LOS ANILLOS RÚNICOS DE LOS AGUJEROS NEGROS (v6.50.128
         /// — la letra: «al agarrar al sol deberia usar los anillos runicos
-        /// de los agujeros negros para sujetar al sol jajajaa»): la
-        /// geometría EXACTA de SigiloLib.SistemaAnillos (RingA, RingFlat,
-        /// RingTilt con precesión, RingSpin alterno, RunesOfRing y la
-        /// elipse girada EllipsePoint), portada al espacio del menú con
-        /// el oro de siempre (CuerpoOro/PuntaOro) — tier 3, como el
-        /// cerco del devorado.</summary>
+        /// de los agujeros negros para sujetar al sol jajajaa» · v6.50.129
+        /// — <paramref name="apreto"/>: la fuerza del momento — las runas
+        /// LATEN más fuerte y el oro se enciende cuando el anillo carga
+        /// con el sol a cuestas): la geometría EXACTA de
+        /// SigiloLib.SistemaAnillos (RingA, RingFlat, RingTilt con
+        /// precesión, RingSpin alterno, RunesOfRing y la elipse girada
+        /// EllipsePoint), portada al espacio del menú con el oro de
+        /// siempre (CuerpoOro/PuntaOro) — tier 3, como el cerco del
+        /// devorado.</summary>
         private static void DibujarAnillosRunicos(SpriteBatch sb, Vector2 centro,
-            float R, float time, float alpha)
+            float R, float time, float alpha, float apreto = 1f)
         {
             if (R < 2f || alpha <= 0.02f) return;
             Texture2D glow = ModContent.Request<Texture2D>(
@@ -1402,7 +1437,7 @@ namespace AethonMod.Content.Systems
                     float ang = i / 30f * MathHelper.TwoPi + spin * 0.4f;
                     Vector2 p = PuntoElipse(centro, a, b, tilt, ang);
                     float latir = 0.6f + 0.4f * MathF.Sin(time * 3f + i * 0.7f + k);
-                    sb.Draw(glow, p, null, cuerpo * (0.11f * alpha * latir), 0f,
+                    sb.Draw(glow, p, null, cuerpo * Math.Min(0.24f, 0.11f * apreto) * alpha * latir, 0f,
                         glow.Size() * 0.5f, new Vector2(3.4f, 3.4f) / glow.Size(),
                         SpriteEffects.None, 0f);
                 }
@@ -1416,11 +1451,11 @@ namespace AethonMod.Content.Systems
                     float tang = AnguloTangente(a, b, tilt, ang);
                     float latido = 0.7f + 0.3f * MathF.Sin(time * 2.2f + g * 1.9f + k * 2.4f);
                     // El trazo vertical de la runa…
-                    sb.Draw(glow, p, null, cuerpo * (0.30f * alpha * latido), tang,
+                    sb.Draw(glow, p, null, cuerpo * Math.Min(0.55f, 0.30f * apreto) * alpha * latido, tang,
                         glow.Size() * 0.5f, new Vector2(2.4f, 7.5f) / glow.Size(),
                         SpriteEffects.None, 0f);
                     // …y su cruce (el carácter completo).
-                    sb.Draw(glow, p, null, punta * (0.30f * alpha * latido), tang + 0.62f,
+                    sb.Draw(glow, p, null, punta * Math.Min(0.55f, 0.30f * apreto) * alpha * latido, tang + 0.62f,
                         glow.Size() * 0.5f, new Vector2(2.0f, 5.0f) / glow.Size(),
                         SpriteEffects.None, 0f);
                 }

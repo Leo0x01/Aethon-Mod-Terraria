@@ -1819,6 +1819,11 @@ Items: {
 			as long as its bearer is nearby.
 			'''
 	}
+
+	ArmaCorruptaTag: Corrupted
+	ArmaCorrupta1: THE FALL has defiled it: the crater's mist lives within.
+	ArmaCorrupta2: It no longer takes prefixes or reforges — the anvil is closed to it.
+	ArmaCorrupta3: The Eternal Grimoire may devour it at the place of the fall.
 }
 
 Projectiles: {
@@ -2336,14 +2341,31 @@ Caida: {
 	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS in its crater.
 	TintaEnVuelo: ✦ Your black star is ALREADY FLYING toward you — wait for its kiss with the earth.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
-	ItemCorrompido: ✦ The altar's beam ROTS your offering… {0} corrupted essences are born.
+	ItemCorrompido: ✦ The crater's mist ROTS your offering… {0} corrupt essences are born.
 	DevoradoSabor1: Hmm. Tastes like almost nothing. Air shaped like a memory. Still: gulp.
 	DevoradoSabor2: Passable. A hint of what it was. The corruption gives it an… interesting aftertaste.
 	DevoradoSabor3: ¡Tasty! Whatever it was, the beam COOKED it right. More of that, bearer.
 	DevoradoSabor4: EXQUISITE! Notes of gold, an eternal finish, a crunch of worlds. MORE!
 	DevoradoCuenta: ✦ The Eternal devoured {0} corrupted essences: +{1}% permanent damage.
-	DevoradoTooltip: Devoured at the altar: {0} corrupted essences (+{1}% damage{2})
+	DevoradoTooltip: Devoured in the mist: {0} corrupt essences (+{1}% damage{2})
 	DevoradoTooltipOjos: ", +{0} eyes"
+	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
+	// weapons that fall into the crater; the Eternal devours them: rarity
+	// EXP + one stat per class + the unique souls)
+	ArmaCorrompidaAviso: ✦ The crater's mist EMBRACES your {0}… it is now CORRUPTED.
+	ArmaDevorada: ✦ The Eternal devours the {0}: +{1} EXP · +1 {2}
+	AlmaDespertada: ✧ The soul of the {0} AWAKENS in the book: {1}!
+	StatFuerza: Violent Strength
+	StatPrisa: Flight Haste
+	StatMirada: Keen Gaze
+	StatCorona: Crown of Eyes
+	StatMordida: Bite
+	AlmaIgnea: Fiery Soul (its shots may ignite)
+	AlmaSalvaje: Wild Soul (its shots may poison)
+	AlmaVampira: Vampiric Soul (its shots steal life)
+	CorazonEstelar: Starry Heart (more crit)
+	AlmaVeloz: Swift Soul (more use speed)
+	PunoTitan: Titan Fist (more knockback)
 }
 
 TestingPlayer: {
@@ -2961,3 +2983,4 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall
+Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforge, no prefix, no workshop magic: whatever fell into that crater no longer belongs to this world.

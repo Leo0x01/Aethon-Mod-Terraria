@@ -55,6 +55,18 @@ namespace AethonMod.Content.Systems
                     case EcoRed.MsgPrepararOleadas:
                     case EcoRed.MsgAmbienteOleada:
                     case EcoRed.MsgTomarCaida:
+                    // v6.50.129 — LA CURA DEL ROUTER COJO (cazada al
+                    // auditar la sync de zonas): MsgCambiarHorario (13),
+                    // MsgForzarCaida (15) y MsgDevoracion (16) NUNCA
+                    // estuvieron en este switch — el server los enviaba
+                    // y el router del cliente los TIRABA en silencio (el
+                    // poder devorado, el giro del reloj del Escriba y la
+                    // Tinta del Cometa jamás llegaban en MP). MsgAltarZonas
+                    // (17) estrena con ellos en la lista.
+                    case EcoRed.MsgCambiarHorario:
+                    case EcoRed.MsgForzarCaida:
+                    case EcoRed.MsgDevoracion:
+                    case EcoRed.MsgAltarZonas:
                         // v6.50.1 — Rewind 1 byte: EcoRed lee el TIPO de
                         // nuevo (su propio switch lo necesita para el filtro).
                         // v6.50.2 — MsgPrepararOleadas (10) en el mismo grupo

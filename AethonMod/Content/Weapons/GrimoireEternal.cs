@@ -211,14 +211,33 @@ namespace AethonMod.Content.Weapons
             // PERMANENTE (tope +75 % — la letra: «la mecanica es la de
             // comerse los item y mejorar el grimorio del eterno»).
             damage *= 1f + Players.ShardPlayer.BonusDanoDevorado(player);
+
+            // v6.50.129 — EL FESTÍN DE LAS ARMAS (la letra: «cualquier arma
+            // corrompida se vuelve exp para el grimorio… cada arma debe
+            // subir algun stats del grimorio»): la Fuerza (armas melee
+            // comidas) + el EXP acumulado (la rareza de todo lo devorado).
+            damage *= 1f + Players.ShardPlayer.BonusDanoArmasDevoradas(player);
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
         {
             var sl = GetShard(Item);
-            if (sl == null) return;
-            // +10% knockback cada 10 niveles (tope +100%)
-            knockback *= WeaponScaling.KnockbackMult(sl.Level);
+            if (sl != null)
+            {
+                // +10% knockback cada 10 niveles (tope +100%)
+                knockback *= WeaponScaling.KnockbackMult(sl.Level);
+            }
+            // v6.50.129 — LA MORDIDA Y EL PUÑO TITÁN del festín de armas
+            // (las lanzables y los pesos comidos: +empuje permanente).
+            knockback *= 1f + Players.ShardPlayer.BonusEmpujeArmasDevoradas(player);
+        }
+
+        /// <summary>v6.50.129 — LA MIRADA DEL FESTÍN: el crítico de las
+        /// armas mágicas comidas (+ el Corazón Estelar de las armas de
+        /// estrellas) — la tercera mejora del festín de la bruma.</summary>
+        public override void ModifyWeaponCrit(Player player, ref float crit)
+        {
+            crit += Players.ShardPlayer.BonusCritArmasDevoradas(player) * 100f;
         }
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
@@ -236,7 +255,13 @@ namespace AethonMod.Content.Weapons
             if (sl == null) return 1f;
             // v5.25: base = Item.useTime para que UseSpeedMult redondee el
             // useTime efectivo a entero (evita el doble Shoot).
-            return WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
+            float factor = WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
+            // v6.50.129 — LA PRISA Y EL ALMA VELOZ del festín de armas (las
+            // armas a distancia comidas + las hojas rápidas): el uso se
+            // ACELERA por lo devorado (tope conjunto +35 % — con el factor
+            // del nivel, multiplicado: nunca por debajo del ciclo mínimo).
+            factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
+            return MathHelper.Clamp(factor, 0.35f, 1f);
         }
 
         /// <summary>
@@ -248,7 +273,11 @@ namespace AethonMod.Content.Weapons
         {
             var sl = GetShard(Item);
             if (sl == null) return 1f;
-            return WeaponScaling.UseSpeedMult(sl.Level, Item.useAnimation);
+            float factor = WeaponScaling.UseSpeedMult(sl.Level, Item.useAnimation);
+            // v6.50.129 — la misma PRISA del festín, para que la animación
+            // NUNCA quede por debajo del useTime (la regla anti-doble-Shoot).
+            factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
+            return MathHelper.Clamp(factor, 0.35f, 1f);
         }
 
         // ================================================================
@@ -580,6 +609,63 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "DevoradoAltar",
                     Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltip",
                         spDevorado.DevoracionPoder, pctDanoTxt, ojos)));
+            }
+
+            // === v6.50.129 — EL FESTÍN DE LAS ARMAS (la letra: «cualquier
+            //     arma corrompida se vuelve exp para el grimorio a mayor la
+            //     rareza del arma mayor los exp. ademas cada arma debe
+            //     subir algun stats del grimorio»): el contador del EXP +
+            //     los stats por clase + las almas únicas despiertas —
+            //     solo si el libro ya probó un arma (el nuevo calla). ===
+            if (spDevorado != null && (spDevorado.DevoracionExp > 0 ||
+                spDevorado.DevoracionFuerza > 0 || spDevorado.DevoracionPrisa > 0 ||
+                spDevorado.DevoracionMirada > 0 || spDevorado.DevoracionCorona > 0 ||
+                spDevorado.DevoracionMordida > 0 || spDevorado.AlmaIgnea > 0 ||
+                spDevorado.AlmaSalvaje > 0 || spDevorado.AlmaVampira > 0 ||
+                spDevorado.CorazonEstelar > 0 || spDevorado.AlmaVeloz > 0 ||
+                spDevorado.PunoTitan > 0))
+            {
+                string pctArmas = (Players.ShardPlayer.BonusDanoArmasDevoradas(portadorTip) * 100f)
+                    .ToString("0.##");
+                tooltips.Add(new TooltipLine(Mod, "FestinArmas",
+                    $"[c/B26EEC:El festín de las armas:] " +
+                    $"[c/E8D8FF:{spDevorado.DevoracionExp} EXP] " +
+                    $"[c/B26EEC:(+{pctArmas}% daño)]"));
+
+                // LOS STATS POR CLASE (solo los que existen).
+                var partes = new System.Collections.Generic.List<string>();
+                if (spDevorado.DevoracionFuerza > 0)
+                    partes.Add($"[c/E8D8FF:Fuerza +{(spDevorado.DevoracionFuerza * 0.35f):0.##}%]");
+                if (spDevorado.DevoracionPrisa > 0 || spDevorado.AlmaVeloz > 0)
+                    partes.Add($"[c/E8D8FF:Prisa +{(Players.ShardPlayer.BonusVelocidadArmasDevoradas(portadorTip) * 100f):0.##}%]");
+                if (spDevorado.DevoracionMirada > 0 || spDevorado.CorazonEstelar > 0)
+                    partes.Add($"[c/E8D8FF:Mirada +{(Players.ShardPlayer.BonusCritArmasDevoradas(portadorTip) * 100f):0.##}%]");
+                int ojosCorona = Players.ShardPlayer.OjosCoronaDevorados(portadorTip);
+                if (ojosCorona > 0)
+                    partes.Add($"[c/E8D8FF:Corona +{ojosCorona} ojos]");
+                if (spDevorado.DevoracionMordida > 0 || spDevorado.PunoTitan > 0)
+                    partes.Add($"[c/E8D8FF:Mordida +{(Players.ShardPlayer.BonusEmpujeArmasDevoradas(portadorTip) * 100f):0.##}%]");
+                if (partes.Count > 0)
+                    tooltips.Add(new TooltipLine(Mod, "FestinArmasStats",
+                        string.Join("[c/9B6EC8: · ]", partes)));
+
+                // LAS ALMAS ÚNICAS DESPIERTAS (las armas especiales).
+                var almas = new System.Collections.Generic.List<string>();
+                if (spDevorado.AlmaIgnea > 0)
+                    almas.Add($"[c/FF9A4D:Alma ígnea ×{spDevorado.AlmaIgnea}]");
+                if (spDevorado.AlmaSalvaje > 0)
+                    almas.Add($"[c/A8E063:Alma salvaje ×{spDevorado.AlmaSalvaje}]");
+                if (spDevorado.AlmaVampira > 0)
+                    almas.Add($"[c/E8638D:Alma vampírica ×{spDevorado.AlmaVampira}]");
+                if (spDevorado.CorazonEstelar > 0)
+                    almas.Add($"[c/F7D774:Corazón estelar ×{spDevorado.CorazonEstelar}]");
+                if (spDevorado.AlmaVeloz > 0)
+                    almas.Add($"[c/9BD4FF:Alma veloz ×{spDevorado.AlmaVeloz}]");
+                if (spDevorado.PunoTitan > 0)
+                    almas.Add($"[c/D9A066:Puño titán ×{spDevorado.PunoTitan}]");
+                if (almas.Count > 0)
+                    tooltips.Add(new TooltipLine(Mod, "FestinAlmas",
+                        string.Join(" ", almas)));
             }
 
             // === v6.50.110 — LA VENTANA 1 · EL ARMA: el poder del libro

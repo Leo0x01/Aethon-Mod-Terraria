@@ -2306,13 +2306,13 @@ Caida: {
         TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
         TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
         // v6.50.128 — EL ALTAR DEVORADOR (la mecánica de comer items)
-        ItemCorrompido: ✦ El haz del altar PUDRE tu ofrenda… {0} esencias corruptas nacen.
+        ItemCorrompido: ✦ La bruma del cráter PUDRE tu ofrenda… {0} esencias corruptas nacen.
         DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
         DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
         DevoradoSabor3: ¡Sabroso! Lo que sea que era, el haz lo COCINÓ bien. Más de eso, portador.
         DevoradoSabor4: ¡EXQUISITO! Notas de oro, final eterno, un crujido de mundos. ¡MÁS!
         DevoradoCuenta: ✦ El Eterno devoró {0} esencias corruptas: +{1}% de daño permanente.
-        DevoradoTooltip: Devorado en el altar: {0} esencias corruptas (+{1}% de daño{2})
+        DevoradoTooltip: Devorado en la bruma: {0} esencias corruptas (+{1}% de daño{2})
         DevoradoTooltipOjos: ', +{0} ojos'
 
 }
@@ -2914,3 +2914,26 @@ Tiles: {
                 MapEntry: Altar de la Caída
         }
 }
+
+// v6.50.129 — LA CORRUPCIÓN DE ARMAS (la bruma del minibioma corrompe a
+// las armas que caen al cráter; el Eterno las devora: EXP por rareza +
+// un stat por clase + las almas únicas)
+Caida.ArmaCorrompidaAviso: ✦ La bruma del cráter ABRAZA a {0}… queda CORRUPTA.
+Caida.ArmaDevorada: ✦ El Eterno devora a {0}: +{1} EXP · +1 {2}
+Caida.AlmaDespertada: ✧ ¡El alma de {0} DESPIERTA en el libro: {1}!
+Caida.StatFuerza: Fuerza violenta
+Caida.StatPrisa: Prisa del vuelo
+Caida.StatMirada: Mirada puntera
+Caida.StatCorona: Corona de ojos
+Caida.StatMordida: Mordida
+Caida.AlmaIgnea: Alma ígnea (sus disparos pueden prender)
+Caida.AlmaSalvaje: Alma salvaje (sus disparos pueden envenenar)
+Caida.AlmaVampira: Alma vampírica (sus disparos roban vida)
+Caida.CorazonEstelar: Corazón estelar (más crítico)
+Caida.AlmaVeloz: Alma veloz (más velocidad de uso)
+Caida.PunoTitan: Puño titán (más empuje)
+Items.ArmaCorruptaTag: Corrupto
+Items.ArmaCorrupta1: La CAÍDA la ha mancillado: la bruma del cráter vive en ella.
+Items.ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
+Items.ArmaCorrupta3: El Grimorio del Eterno puede devorarla en el lugar de la caída.
+Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que cayó en ese cráter ya no es de este mundo.

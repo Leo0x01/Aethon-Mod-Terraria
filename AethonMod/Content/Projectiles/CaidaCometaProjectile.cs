@@ -195,187 +195,149 @@ namespace AethonMod.Content.Projectiles
             Projectile.Kill();
         }
 
-        /// <summary>v6.50.124 — LA FAUCE DE OBSIDIANA (la letra del
-        /// usuario: «cambiar el bloque, es mejor que sea obsidiana y que
-        /// además que siempre haya un lugar por donde el jugador pueda
-        /// pasar, en vez de una grieta en círculo de la caída, lo mejor
-        /// es que sean picos de obsidiana como la caída de IT en
-        /// pennywise, con picos hacia arriba y puntiagudos»).
-        ///
-        /// LA INVESTIGACIÓN (la pidió la letra): la caída de IT — el
-        /// Pennywise vencido CAYENDO al hoyo negro de la cisterna bajo
-        /// la casa de Neibolt (IT 2017) y la caída PRIMORDIAL que formó
-        /// Derry (el lore: IT llegó del cielo en un impacto) — el
-        /// lenguaje visual: un hoyo negro rodeado de FAUCES, dientes
-        /// hacia arriba. Y la técnica Terraria: los picos PUNTIAGUDOS
-        /// de verdad son PARES de medias-tiles en pendiente
-        /// (SlopeType.SlopeDownLeft + SlopeDownRight = el pico /\).
-        ///
-        /// EL DISEÑO (el cráter circular MUERE — nace LA FAUCE):
-        /// · EL CUENCO: la excavación de siempre (radio 11, la casa del
-        ///   jugador intacta).
-        /// · LAS DOS ESCALERAS — EL PASO GARANTIZADO: rampas de obsidiana
-        ///   a 45° desde cada borde hasta el fondo, construidas con
-        ///   TILES EN PENDIENTE (la técnica de las colinas de vanilla:
-        ///   se CAMINA, no se salta) — se baja, se toma el libro y se
-        ///   sube, siempre, por los dos lados.
-        /// · LA GARGANTA: los colmillos que apuntan al libro — LOS DOS
-        ///   GRANDES (±3, altura 6, la cornisa de la fauce) y el lecho
-        ///   central (±2, altura 3); el fondo exacto queda abierto (ahí
-        ///   cae la luz del sueño) y NINGÚN diente toca los
-        ///   aterrizajes de las escaleras (viven en ±4).
-        /// · TODO OBSIDIANA (la tinta quemada de la .118 se vestía de
-        ///   ébano al 80%: ahora es obsidiana del 100% — la letra).
-        /// · LA LECCIÓN 2D: en vista lateral TODO colmillo alto puesto
-        ///   sobre la línea de marcha BLOQUEA el paso — por eso los
-        ///   grandes viven en la GARGANTA (bajo el libro) y las rampas
-        ///   son el camino: «siempre hay un lugar por donde el jugador
-        ///   pueda pasar», de verdad y por construcción.</summary>
+        /// <summary>v6.50.129 — EL CRÁTER SOMERO DEL MINIBIOMA (la
+        /// letra nueva: «el crater debe tener menos profundidad, el
+        /// centro debe estar vacio solo obsidiana y ademas bruma, que
+        /// sea como un pequeño minibioma» + «quita eso amarillo que esta
+        /// dentro del crater»). La .128 cavaba una FAUCE PROFUNDA (8
+        /// tiles) con escaleras, colmillos de garganta y un ALTAR
+        /// DORADO en el fondo — TODO ESO MUERE:
+        /// · LA LENTE: la excavación es una elipse ANCHA Y BAJA (semiejes
+        ///   9 × 4,6 — el doble de ancha que profunda: «menos
+        ///   profundidad»).
+        /// · LA CONCHA: el fondo es UNA CONCHA DE OBSIDIANA de 3 tiles
+        ///   que sigue la curva del cuenco, con cada escalón en
+        ///   PENDIENTE CAMINABLE (la técnica de las colinas de vanilla —
+        ///   el paso garantizado POR CONSTRUCCIÓN: el cráter SE CAMINA,
+        ///   sin escaleras).
+        /// · EL CENTRO VACÍO: ni altar, ni pedestal, ni colmillos — solo
+        ///   la concha y la BRUMA que respira encima (la zona de
+        ///   corrupción vive REGISTRADA en LaCaidaSistema, sin tile: la
+        ///   bruma ES la puerta — AltarDevoradorSistema la dibuja).
+        /// · LOS PICOS DEL BORDE siguen (la letra de la .128): LAS DOS
+        ///   TORRES DEL UMBRAL (±17, altura 9) — lejos del camino de
+        ///   salida (±10..±14 libre), el labio viste su aro de obsidiana.
+        /// · LA CASA DEL JUGADOR INTACTA (la lista de siempre).</summary>
         private static void ExcavarCrater(Vector2 centro)
         {
             try
             {
                 int cx = (int)(centro.X / 16f);
                 int cy = (int)(centro.Y / 16f);
-                const int radio = 11;
                 bool toco = false;
+                const int semiX = 9;
+                const float semiY = 4.6f;
 
-                // === FASE A — EL CUENCO (como la .118: el corazón se
-                //     abre, el borde a medias, la casa intacta) ===
-                for (int x = cx - radio; x <= cx + radio; x++)
+                // === LA CURVA DEL FONDO (el offset de cada columna,
+                //     pasos de ≤1 — la escalera suave del minibioma:
+                //     5,5,4,4,4,4,3,3,2,1): el bruto de la elipse
+                //     recortado a escalones de UN tile para que TODO el
+                //     descenso sea pendiente caminable. ===
+                int[] fondo = new int[semiX + 1];
+                for (int fx = 0; fx <= semiX; fx++)
                 {
-                    for (int y = cy - radio; y <= cy + radio; y++)
-                    {
-                        if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) continue;
-                        float d = MathF.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
-                        if (d > radio) continue;
+                    int bruto = (int)MathF.Round(semiY *
+                        MathF.Sqrt(1f - (fx / (float)semiX) * (fx / (float)semiX)));
+                    if (fx == 0) fondo[fx] = bruto;
+                    else fondo[fx] = (int)MathHelper.Clamp(bruto, fondo[fx - 1] - 1, fondo[fx - 1]);
+                }
 
+                for (int dx = -semiX; dx <= semiX; dx++)
+                {
+                    int x = cx + dx;
+                    if (x < 10 || x >= Main.maxTilesX - 10) continue;
+                    int prof = fondo[Math.Abs(dx)];
+
+                    // === FASE A — LA CAVIDAD (la lente se abre de arriba
+                    //     a la curva; la casa del jugador intacta) ===
+                    for (int y = cy - 6; y <= cy + prof; y++)
+                    {
+                        if (y < 10 || y >= Main.maxTilesY - 10) continue;
                         Tile tile = Main.tile[x, y];
                         if (tile == null) continue;
                         if (tile.HasTile && EsCasaDelJugador(tile.TileType)) continue;
-
-                        if (tile.HasTile && (d <= 8f || Main.rand.NextBool(2)))
+                        if (tile.HasTile)
                         {
                             WorldGen.KillTile(x, y, noItem: true);
                             toco = true;
                         }
-
-                        // === FASE B — LA TINTA QUEMADA (TODO obsidiana — la
-                        //     letra: «es mejor que sea obsidiana»): esparcida
-                        //     SOLO dentro del cuenco (nada de escombros
-                        //     flotando en el cielo — la garganta de colmillos
-                        //     es la que cuenta la caída ahora) y el aro
-                        //     tintado del borde, también obsidiana. LA
-                        //     COLUMNA DEL LIBRO (±1) queda LIMPIA: ahí cae
-                        //     la luz violeta del sueño. ===
-                        if (!tile.HasTile && d >= 2.5f && y > cy + 2 && Math.Abs(x - cx) > 1)
-                        {
-                            float dentro = 1f - d / (float)radio;  // 1 centro → 0 borde
-                            if (Main.rand.NextFloat() < 0.26f + 0.34f * dentro)
-                                toco |= PonerObsidiana(x, y);
-                        }
-                        else if (tile.HasTile && y >= cy && d > 8f &&
-                                 EsRocaNatural(tile.TileType) && Main.rand.NextFloat() < 0.35f)
-                        {
-                            tile.TileType = TileID.Obsidian;   // EL ARO ROTO: obsidiana (antes ébano)
-                            WorldGen.SquareTileFrame(x, y, true);
-                            toco = true;
-                        }
                     }
-                }
 
-                // === FASE C — LAS DOS ESCALERAS (EL PASO GARANTIZADO): una
-                //     rampa de obsidiana a 45° desde cada borde del cuenco
-                //     hasta el fondo — la superficie de cada escalón es una
-                //     TILE EN PENDIENTE (la técnica de las colinas de
-                //     vanilla: SlopeDownLeft/SlopeDownRight se CAMINAN, no
-                //     se saltan) con dos filas de relleno debajo y tres de
-                //     aire limpio encima. El aterrizaje del fondo (±4) es
-                //     el balcón de la fauce: desde ahí se habla con el
-                //     libro. ===
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    for (int i = 0; i <= 8; i++)
+                    // === FASE B — LA CONCHA DE OBSIDIANA (3 tiles de
+                    //     grosor siguiendo la curva: «el centro… solo
+                    //     obsidiana») con la superficie en PENDIENTE
+                    //     donde el siguiente escalón baja — el cráter SE
+                    //     CAMINA hacia el centro y hacia afuera. ===
+                    int sup = cy + prof;
+                    for (int dy = 0; dy < 3; dy++)
+                        toco |= PonerObsidiana(x, sup + dy);
+
+                    int haciaCentro = dx < 0 ? dx + 1 : dx - 1;
+                    if (haciaCentro != dx && Math.Abs(haciaCentro) <= semiX)
                     {
-                        int x = cx + lado * (12 - i);
-                        int ys = cy + i;    // la superficie del escalón (45° exactos)
-                        if (x < 10 || x >= Main.maxTilesX - 10) break;
-
-                        // LA SUPERFICIE CAMINABLE: la pendiente que baja
-                        // hacia el centro (lado −: hacia la derecha →
-                        // SlopeDownLeft; lado +: hacia la izquierda →
-                        // SlopeDownRight).
-                        toco |= Pender(x, ys,
-                            lado < 0 ? SlopeType.SlopeDownLeft : SlopeType.SlopeDownRight);
-                        toco |= PonerObsidiana(x, ys + 1);
-                        toco |= PonerObsidiana(x, ys + 2);
-
-                        // EL AIRE: tres filas de cabeza limpias sobre el escalón.
-                        for (int y = ys - 3; y <= ys - 1; y++)
+                        int profVecino = fondo[Math.Abs(haciaCentro)];
+                        if (profVecino > prof)
                         {
-                            Tile t = Main.tile[x, y];
+                            Tile t = Main.tile[x, sup];
                             if (t != null && t.HasTile && !EsCasaDelJugador(t.TileType))
                             {
-                                WorldGen.KillTile(x, y, noItem: true);
+                                // El mapa de la .124 (verificado con su
+                                // simulador): bajar hacia la DERECHA →
+                                // SlopeDownLeft; bajar hacia la IZQUIERDA
+                                // → SlopeDownRight.
+                                t.Slope = dx < 0 ? SlopeType.SlopeDownLeft
+                                    : SlopeType.SlopeDownRight;
+                                WorldGen.SquareTileFrame(x, sup, true);
                                 toco = true;
+                            }
+                        }
+                    }
+
+                    // EL ARO DEL LABIO (|dx| ≥ 8): la primera roca natural
+                    // de la salida viste obsidiana — el marco del
+                    // minibioma (el camino de salida ±10..±14 queda
+                    // LIBRE de dientes: las torres viven en ±15..±18).
+                    if (Math.Abs(dx) >= 8)
+                    {
+                        for (int y = cy - 2; y <= cy + 4; y++)
+                        {
+                            if (y < 10 || y >= Main.maxTilesY - 10) continue;
+                            Tile t = Main.tile[x, y];
+                            if (t != null && t.HasTile && EsRocaNatural(t.TileType))
+                            {
+                                t.TileType = TileID.Obsidian;
+                                WorldGen.SquareTileFrame(x, y, true);
+                                toco = true;
+                                break;
                             }
                         }
                     }
                 }
 
-                // === FASE D — LA FAUCE DE PICOS PRONUNCIADOS (v6.50.128 —
-                //     la letra: «sobre la caida, seria mejor que los picos
-                //     sean pronunciados y que el lugar de caida quede como
-                //     un altar» + la referencia: TRES torres escalonadas
-                //     de piedra oscura, la central la mayor — en 2D la
-                //     columna central es del ALTAR y del haz, así que las
-                //     DOS TORRES DEL UMBRAL (±17, altura 9, base 4 — el
-                //     pico escalonado de la referencia, cada peldaño un
-                //     bloque más estrecho, remate en /\) flanquean la
-                //     entrada del cráter A DISTANCIA SEGURA: sus columnas
-                //     (±15..±18) JAMÁS tocan las escaleras (±4..±12) ni
-                //     el corredor de salida (±13..±14 libre — el PASO
-                //     GARANTIZADO de la .124 sigue intacto), los colmillos
-                //     de la garganta CRECEN (±3 → altura 7) y el labio del
-                //     rim gana sus dientes (±9) ===
-                toco |= PonerColmillo(cx + 3, BaseSolida(cx + 3, cy + 3, cy + radio), 7, 2);
-                toco |= PonerColmillo(cx - 3, BaseSolida(cx - 3, cy + 3, cy + radio), 7, 2);
-                toco |= PonerColmillo(cx + 2, BaseSolida(cx + 2, cy + 3, cy + radio), 4, 2);
-                toco |= PonerColmillo(cx - 2, BaseSolida(cx - 2, cy + 3, cy + radio), 4, 2);
-                toco |= PonerColmillo(cx + 9, BaseSolida(cx + 9, cy - 4, cy + radio), 3, 2);
-                toco |= PonerColmillo(cx - 9, BaseSolida(cx - 9, cy - 4, cy + radio), 3, 2);
-                toco |= PonerColmillo(cx + 17, BaseSolida(cx + 17, cy - 6, cy + radio), 9, 4);
-                toco |= PonerColmillo(cx - 17, BaseSolida(cx - 17, cy - 6, cy + radio), 9, 4);
+                // === FASE C — LOS PICOS DEL BORDE (la letra de la .128
+                //     sigue viva: «los picos sean pronunciados»): LAS DOS
+                //     TORRES DEL UMBRAL (±17, altura 9, base 4 — el pico
+                //     escalonado de la referencia). Los colmillos de la
+                //     garganta (±2, ±3) y el labio dentado (±9) MURIERON:
+                //     bloqueaban la concha caminable — el centro y la
+                //     salida son del minibioma. ===
+                toco |= PonerColmillo(cx + 17, BaseSolida(cx + 17, cy - 6, cy + 8), 9, 4);
+                toco |= PonerColmillo(cx - 17, BaseSolida(cx - 17, cy - 6, cy + 8), 9, 4);
 
-                // === FASE E — EL ALTAR DE LA CAÍDA (v6.50.128 — la letra:
-                //     «el lugar de caida quede como un altar para añadir
-                //     una nueva mecanica… la de comerse los item y mejorar
-                //     el grimorio del eterno, para comer un item este debe
-                //     corromperse primero y para eso se usara el lugar de
-                //     caida» + la referencia: el bloque DORADO de espiral
-                //     negro con su haz de luz violeta): el pedestal de
-                //     obsidiana (3×2) en el fondo exacto… y la tile del
-                //     ALTAR levitando sobre él. La columna de encima queda
-                //     LIMPIA — ahí vive el haz que corrompe.) ===
-                int pisoAltar = BaseSolida(cx, cy + 4, cy + radio);
-                if (pisoAltar < 10 || pisoAltar >= Main.maxTilesY - 10) pisoAltar = cy + 8;
-                for (int dx = -1; dx <= 1; dx++)
-                {
-                    toco |= PonerObsidiana(cx + dx, pisoAltar);
-                    toco |= PonerObsidiana(cx + dx, pisoAltar + 1);
-                }
-                toco |= PonerAltar(cx, pisoAltar - 1);
-                LaCaidaSistema.RegistrarAltar(cx, pisoAltar - 1);
+                // === FASE D — EL MINIBIOMA QUEDA REGISTRADO (v6.50.129:
+                //     el ALTAR DORADO murió — «quita eso amarillo»; sin
+                //     pedestal, sin tile: el centro queda VACÍO, solo la
+                //     concha de obsidiana y la bruma encima. LA ZONA DE
+                //     CORRUPCIÓN vive en LaCaidaSistema: las armas que
+                //     caigan a la concha se corrompen — la puerta es la
+                //     BRUMA, no un bloque). ===
+                LaCaidaSistema.RegistrarAltar(cx, cy + fondo[0] - 1);
 
                 if (toco)
                 {
-                    // LA DIFUSIÓN: UN solo cuadrado que cubre la fauce
-                    // entera. Las torres del umbral arrancan en la roca
-                    // viva de ±17 — en una LADERA esa roca puede estar
-                    // HASTA cy-6 (el escaneo de BaseSolida arranca ahí),
-                    // así que la punta llega a cy-15: la caja tiene que
-                    // cubrirla (cy-16) o los clientes MP verían las torres
-                    // MORDIDAS hasta recargar la sección.
+                    // LA DIFUSIÓN: UN solo cuadrado que cubre torres +
+                    // cuenco (las torres arrancan en la roca viva de ±15:
+                    // en ladera su punta llega a cy-15 — la caja la cubre).
                     if (Main.netMode == NetmodeID.Server)
                     {
                         NetMessage.SendTileSquare(-1, cx - 20, cy - 16, 41, 30);
@@ -450,39 +412,6 @@ namespace AethonMod.Content.Projectiles
                 toco = true;
             }
             return toco;
-        }
-
-        /// <summary>UNA TILE EN PENDIENTE de obsidiana — la superficie
-        /// CAMINABLE de las escaleras (la técnica de las colinas de
-        /// vanilla: se sube y se baja CAMINANDO).</summary>
-        private static bool Pender(int x, int y, SlopeType pendiente)
-        {
-            if (!PonerObsidiana(x, y)) return false;
-            Tile t = Main.tile[x, y];
-            if (t == null) return false;
-            t.Slope = pendiente;
-            WorldGen.SquareTileFrame(x, y, true);
-            return true;
-        }
-
-        /// <summary>v6.50.128 — LA TILE DEL ALTAR: el bloque dorado de la
-        /// espiral (la referencia) plantado en el fondo del cráter. Es la
-        /// puerta de LA CORRUPCIÓN DE ITEMS — intocable (la protege un
-        /// GlobalTile) y con luz propia (el altar LATE).</summary>
-        private static bool PonerAltar(int x, int y)
-        {
-            if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) return false;
-            Tile t = Main.tile[x, y];
-            if (t == null) return false;
-            if (t.HasTile && EsCasaDelJugador(t.TileType)) return false;
-            t.HasTile = true;
-            t.TileType = (ushort)ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
-            t.Slope = 0;
-            t.IsHalfBlock = false;
-            t.TileFrameX = 0;
-            t.TileFrameY = 0;
-            WorldGen.SquareTileFrame(x, y, true);
-            return true;
         }
 
         /// <summary>Una tile de obsidiana limpia (respeta la casa del jugador).</summary>

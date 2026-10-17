@@ -1817,6 +1817,11 @@ Items: {
 			si su portador anda cerca.
 			'''
 	}
+
+	ArmaCorruptaTag: Corrupto
+	ArmaCorrupta1: La CAÍDA la ha mancillado: la bruma del cráter vive en ella.
+	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
+	ArmaCorrupta3: El Grimorio del Eterno puede devorarla en el lugar de la caída.
 }
 
 Projectiles: {
@@ -2334,14 +2339,31 @@ Caida: {
 	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
 	TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
-	ItemCorrompido: ✦ El haz del altar PUDRE tu ofrenda… {0} esencias corruptas nacen.
+	ItemCorrompido: ✦ La bruma del cráter PUDRE tu ofrenda… {0} esencias corruptas nacen.
 	DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
 	DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
 	DevoradoSabor3: ¡Sabroso! Lo que sea que era, el haz lo COCINÓ bien. Más de eso, portador.
 	DevoradoSabor4: ¡EXQUISITO! Notas de oro, final eterno, un crujido de mundos. ¡MÁS!
 	DevoradoCuenta: ✦ El Eterno devoró {0} esencias corruptas: +{1}% de daño permanente.
-	DevoradoTooltip: Devorado en el altar: {0} esencias corruptas (+{1}% de daño{2})
+	DevoradoTooltip: Devorado en la bruma: {0} esencias corruptas (+{1}% de daño{2})
 	DevoradoTooltipOjos: ", +{0} ojos"
+	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
+	// weapons that fall into the crater; the Eternal devours them: rarity
+	// EXP + one stat per class + the unique souls)
+	ArmaCorrompidaAviso: ✦ La bruma del cráter ABRAZA a {0}… queda CORRUPTA.
+	ArmaDevorada: ✦ El Eterno devora a {0}: +{1} EXP · +1 {2}
+	AlmaDespertada: ✧ ¡El alma de {0} DESPIERTA en el libro: {1}!
+	StatFuerza: Fuerza violenta
+	StatPrisa: Prisa del vuelo
+	StatMirada: Mirada puntera
+	StatCorona: Corona de ojos
+	StatMordida: Mordida
+	AlmaIgnea: Alma ígnea (sus disparos pueden prender)
+	AlmaSalvaje: Alma salvaje (sus disparos pueden envenenar)
+	AlmaVampira: Alma vampírica (sus disparos roban vida)
+	CorazonEstelar: Corazón estelar (más crítico)
+	AlmaVeloz: Alma veloz (más velocidad de uso)
+	PunoTitan: Puño titán (más empuje)
 }
 
 TestingPlayer: {
@@ -2959,3 +2981,4 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída
+Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que cayó en ese cráter ya no es de este mundo.

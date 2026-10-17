@@ -74,11 +74,43 @@ namespace AethonMod.Content.Globals
         //     derecho a reclamo.
         private static readonly HashSet<int> _reclamados = new();
 
+        // === v6.50.129 — ¿LLEVA UN ARMA CORROMPIDA? (para la disculpa
+        //     del duende: la estadística de la bruma viaja con el item). ===
+        private static bool LlevaArmaCorrompida(Player p)
+        {
+            try
+            {
+                for (int i = 0; i < p.inventory.Length; i++)
+                {
+                    Item it = p.inventory[i];
+                    if (it == null || it.IsAir) continue;
+                    var sello = it.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                    if (sello != null && sello.Corrompido) return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
         public override void GetChat(NPC npc, ref string chat)
         {
             // Solo los vecinos del pueblo chismean aquí
             if (!npc.townNPC)
                 return;
+
+            // === v6.50.129 — EL DUENDE Y LA CORRUPCIÓN (la letra: «y el
+            //     duende debe decir algo como esta arma esta corrompida
+            //     no puedo hacer nada con ella»): si el jugador que habla
+            //     lleva un ARMA CORROMPIDA (la estadística de la bruma del
+            //     cráter — sin prefijo y con el yunque cerrado), el duende
+            //     chapucero lo PRIMERO que suelta es la disculpa: no hay
+            //     reforge que valga contra lo que cayó en LA CAÍDA.
+            if (npc.type == NPCID.GoblinTinkerer && Main.LocalPlayer != null &&
+                Main.LocalPlayer.active && LlevaArmaCorrompida(Main.LocalPlayer))
+            {
+                chat = Language.GetTextValue("Mods.AethonMod.Duende.ArmaCorrompida");
+                return;
+            }
 
             // === 1. EL RECLAMO GARANTIZADO: si ESTE vecino acaba de ser
             //     molestado por el mini grimorio (menos de 5400 ticks =
