@@ -230,6 +230,21 @@ Items: {
 			'''
 	}
 
+	TintaDelCometa: {
+		DisplayName: Tinta del Cometa
+		Tooltip:
+			'''
+			EL ACTIVADOR DE LA CAÍDA (item de pruebas — la Bolsa de la Cría lo trae).
+			Rompe el frasco y el cielo RECUERDA: el cometa del Grimorio
+			del Eterno cruza otra vez hacia ti — de día o de noche.
+			Los caminos automáticos siguen su ley (la primera noche de
+			cada jugador en cada mundo + el primer vecino que no sea el
+			Guía); ESTA tinta es el camino MANUAL: el evento NUNCA se
+			pierde… y jamás duplica tu grimorio (si ya te espera o ya
+			vuela hacia ti, el cielo no insiste).
+			'''
+	}
+
 	MedusaNebularStaff: {
 		DisplayName: Báculo de la Medusa Nebular
 		Tooltip:
@@ -2296,6 +2311,8 @@ Caida: {
 		(Estaba delicioso. El cielo cocina igual que antes de la rotura.)
 		'''
 	Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
+	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
+	TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
 }
 
 TestingPlayer: {

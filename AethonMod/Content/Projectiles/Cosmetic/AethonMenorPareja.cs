@@ -62,6 +62,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         public const float MODO_VIAJAR = 1f;    // vuela hacia el vecino elegido
         public const float MODO_MOLESTAR = 2f;  // ya llegado: las DOS FORMAS
         public const float MODO_VOLVER = 3f;    // de vuelta al lado del dueño
+        public const float MODO_PLAGA = 4f;     // v6.50.126 — LA GUERRA DE LOS CONEJOS BLANCOS (Re:Zero)
 
         /// <summary>El reloj del AFK: 3600 t quieto (~1 min) = «se aburrió».</summary>
         private const int TICKS_AFK = 3600;
@@ -80,6 +81,64 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         /// <summary>El compás de la mordida de la sombrilla (FORMA 1).</summary>
         private const int TICKS_MORDIDA = 90;
+
+        // ==================================================================
+        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (el easteregg Re:Zero:
+        //  «sería interesante poner eso de los conejos blancos como un
+        //  easteregg algo así como minievento donde sea la minimascota con
+        //  sus miniminions quien luche con ellos cuando se está en afk»).
+        //
+        //  LA INVESTIGACIÓN (la pidió la letra): el GRAN CONEJO (大兎,
+        //  Ōusagi) de Re:Zero — una de las TRES bestias mágicas mayores,
+        //  creada por Daphne, la Bruja de la Gula: UNA SOLA conciencia
+        //  repartida en una HORDA de conejos blancos del tamaño de un
+        //  puño, HAMBRIENTOS SIN FIN (devoraron a Subaru en el Santuario
+        //  — una de sus muertes más brutales), atraídos por el MANA
+        //  (la nevada de Roswaal los convocó) y que se MULTIPLICAN al
+        //  ser atacados (cada conejo se divide infinitamente: matarlos a
+        //  golpes solo los hace MÁS).
+        //
+        //  LA TRADUCCIÓN AL MOD: el dueño quieto (AFK ~1 min) acumula
+        //  maná quieto — y la HORDA LO HUELE: una bandada de conejos
+        //  blancos de ojos rojos salta desde los bordes hacia él… y el
+        //  GRIMORIO MENOR con sus TRES OJOS les SALE AL PASO (la
+        //  minimascota y sus miniminions LUCHAN con ellos — la letra):
+        //  los ojos EMBISTEN en oleadas, cada conejo golpeado SE DIVIDE
+        //  (el gimmick de Re:Zero… la plaga crece) y el hambre del libro
+        //  TERMINA DEVORÁNDOLOS a todos (el festín de la casa). Teatro
+        //  100% determinista (la misma máquina de siempre: sin Main.rand
+        //  en el cerebro, sin daño real, sin NPCs reales — el mundo ni se
+        //  entera); si el dueño SE MUEVE, los conejos huyen y aborta.
+        // ==================================================================
+
+        /// <summary>La duración de una RONDA de combate (ticks) — el
+        /// compás de las oleadas de embestida.</summary>
+        private const int PLAGA_RONDA = 90;
+
+        /// <summary>El tope de la horda (Re:Zero: se multiplican — pero
+        /// el cielo solo presta doce cuerpos a una sola conciencia).</summary>
+        private const int PLAGA_MAX_CONEJOS = 12;
+
+        /// <summary>El tope de rondas (~1 minuto de guerra: el hambre del
+        /// libro es más grande que la gula de Daphne).</summary>
+        private const int PLAGA_MAX_RONDAS = 40;
+
+        /// <summary>La moneda del easteregg: 30% plaga / 70% vecinos (por
+        /// episodio de aburrimiento — el espanto es RARO, como todo
+        /// easteregg que se precie).</summary>
+        private const float PLAGA_PROBABILIDAD = 0.30f;
+
+        /// <summary>Episodios de aburrimiento que deben pasar entre plaga
+        /// y plaga (la horda no espanta dos veces seguidas).</summary>
+        private const int PLAGA_ENFRIAMIENTO = 2;
+
+        /// <summary>El radio del ANILLO DE AMENAZA: a dónde quiere llegar
+        /// la horda (pegada al dueño — lo rodean, lo babean… sin tocarlo:
+        /// el libro nunca los deja).</summary>
+        private const float PLAGA_ANILLO = 110f;
+
+        /// <summary>De dónde salen: el borde lejano de la pantalla.</summary>
+        private const float PLAGA_NACIMIENTO = 520f;
 
         // === v6.50.125 — LOS MINIONS DE VERDAD (la letra: «los
         //     miniminions del grimorio mascota deben ser los mismos minion
@@ -157,6 +216,48 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             /// <summary>La embestida de los ojos: −1 quieta; 0..89 ida/vuelta.</summary>
             public int Embestida = -1;
+
+            // === v6.50.126 — LA PLAGA DEL CONEJO BLANCO (Re:Zero) ===
+
+            /// <summary>El reloj de la ronda actual (0..PLAGA_RONDA−1).</summary>
+            public int PlagaRonda;
+
+            /// <summary>Las rondas completadas (el reloj de la guerra).</summary>
+            public int PlagaRondas;
+
+            /// <summary>La semilla de ESTA plaga (nace de whoAmI+golpes+viajes
+            /// — determinista: todas las máquinas simulan LA MISMA horda).</summary>
+            public int PlagaSemilla;
+
+            /// <summary>Los episodios de aburrimiento que faltan para que la
+            /// horda pueda volver a oler el maná del dueño.</summary>
+            public int PlagaEnfriamiento;
+
+            /// <summary>LA HORDA (12 cuerpos, una sola conciencia — Re:Zero).</summary>
+            public ConejoPlaga[] Conejos = new ConejoPlaga[PLAGA_MAX_CONEJOS];
+        }
+
+        /// <summary>UN CUERPO DE LA HORDA (v6.50.126 — Re:Zero: conejos
+        /// blancos del tamaño de un puño que se multiplican al ser
+        /// golpeados). TODO determinista: la posición evoluciona en Tick
+        /// desde las mismas entradas en todas las máquinas.</summary>
+        public struct ConejoPlaga
+        {
+            /// <summary>¿Vive este cuerpo?</summary>
+            public bool Vivo;
+
+            /// <summary>Su posición REAL (coordenadas del mundo — Tick la mueve).</summary>
+            public Vector2 Pos;
+
+            /// <summary>El ángulo de SU anillo de amenaza (a dónde salta).</summary>
+            public float Angulo;
+
+            /// <summary>La generación (0 la originals, 1-2 las divisiones —
+            /// cada división nace más pequeña).</summary>
+            public int Gen;
+
+            /// <summary>La fase de su salto (semilla determinista).</summary>
+            public float Fase;
         }
 
         // ==================================================================
@@ -195,8 +296,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // EL DUEÑO SE MOVIÓ y el mini grimorio estaba de misión:
                 // ABORTA TODO y vuelve INMEDIATAMENTE a su lado (la letra:
                 // la mascota jamás se aleja de un dueño despierto).
-                if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR)
+                // v6.50.126 — también de la GUERRA: el maná quieto se
+                // disipó y la horda HUYE (los conejos de Re:Zero
+                // devoran al quieto… pero el libro jamás deja que el
+                // espectáculo toque a su dueño despierto).
+                if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR || e.Modo == MODO_PLAGA)
                 {
+                    if (e.Modo == MODO_PLAGA) DispersarPlaga(e);
                     e.Modo = MODO_VOLVER;
                     e.NpcObjetivo = -1;
                     e.Embestida = -1;
@@ -211,6 +317,23 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             switch (e.Modo)
             {
                 case MODO_NORMAL:
+                    // v6.50.126 — EL PRIMER TICK DEL ABURRIMIENTO: la
+                    // moneda del easteregg (UNA VEZ por episodio — la
+                    // horda no espanta cada segundo): 30% LA PLAGA DEL
+                    // CONEJO BLANCO (Re:Zero — el maná quieto del dueño
+                    // la convoca), 70% la vida de siempre (vecinos…).
+                    if (e.TicksQuieto == TICKS_AFK)
+                    {
+                        if (e.PlagaEnfriamiento > 0)
+                            e.PlagaEnfriamiento--;
+                        else if (VFXCore.Hash01(p.whoAmI,
+                                  e.TotalGolpes * 11 + 7, e.Viajes * 17 + 3)
+                                 < PLAGA_PROBABILIDAD)
+                        {
+                            ArrancarPlaga(p, e);
+                            break;
+                        }
+                    }
                     // EL DUEÑO LLEVA ~1 MIN QUIETO: busca vecino CON CASA
                     // (escaneo barato cada 60 t — no hace falta más).
                     if (e.TicksQuieto >= TICKS_AFK && e.TicksQuieto % 60 == 0)
@@ -295,6 +418,72 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         e.TicksEnModo = 0;
                     }
                     break;
+
+                case MODO_PLAGA:
+                    // ====================================================
+                    //  v6.50.126 — LA GUERRA DE LOS CONEJOS BLANCOS:
+                    //  la horda salta hacia el anillo de amenaza y los
+                    //  TRES OJOS responden en oleadas (una ronda = 90 t:
+                    //  ~75 t de acecho + 15 t de embestida — y al caer la
+                    //  ronda, los golpes se cobran: divididos o devorados).
+                    // ====================================================
+                    {
+                        e.PlagaRonda++;
+
+                        // LA HORDA AVANZA: cada cuerpo salta hacia SU punto
+                        // del anillo (lerp perezoso — la convergencia lenta
+                        // de una horda hambrienta que rodea su maná).
+                        float anillo = PLAGA_ANILLO + MathF.Sin(Main.GlobalTimeWrappedHourly * 0.6f) * 8f;
+                        for (int c = 0; c < e.Conejos.Length; c++)
+                        {
+                            if (!e.Conejos[c].Vivo) continue;
+                            ConejoPlaga k = e.Conejos[c];
+                            // el anillo de cada conejo gira lentamente (la
+                            // rueda del asedio — determinista: el reloj).
+                            float aRueda = k.Angulo + Main.GlobalTimeWrappedHourly * 0.22f;
+                            Vector2 meta = dueño.Center + new Vector2(
+                                MathF.Cos(aRueda) * anillo,
+                                MathF.Sin(aRueda) * anillo * 0.72f - 14f);
+                            k.Pos = Vector2.Lerp(k.Pos, meta, 0.010f);
+                            e.Conejos[c] = k;
+                        }
+
+                        // LA RONDA CAE: los ojos cobran los golpes.
+                        if (e.PlagaRonda >= PLAGA_RONDA)
+                        {
+                            e.PlagaRonda = 0;
+                            e.PlagaRondas++;
+                            RondaDePlaga(p, dueño, e);
+                        }
+
+                        // EL FIN DE LA GUERRA: la horda aplastada (o el
+                        // reloj del hambre agotado — 40 rondas y el libro
+                        // se cansa de ganar). El festín termina: risa y a
+                        // casa (la sensación del deber cumplido).
+                        bool quedaAlguno = false;
+                        for (int c = 0; c < e.Conejos.Length; c++)
+                            if (e.Conejos[c].Vivo) { quedaAlguno = true; break; }
+                        if ((!quedaAlguno && e.PlagaRondas >= 6) || e.PlagaRondas >= PLAGA_MAX_RONDAS)
+                        {
+                            DispersarPlaga(e);
+                            e.Modo = MODO_VOLVER;
+                            e.TicksEnModo = 0;
+                            // El reloj del aburrimiento vuelve a cero: tras la
+                            // guerra, un minuto entero de paz antes de otra
+                            // misión (el mismo compás de la vuelta de vecinos).
+                            e.TicksQuieto = 0;
+                            if (Main.netMode != NetmodeID.Server)
+                            {
+                                try
+                                {
+                                    EmoteBubble.NewBubble(EmoteID.EmoteLaugh,
+                                        new WorldUIAnchor(p), 100);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
@@ -331,6 +520,22 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 case MODO_VOLVER:
                     meta = dueño.Center;   // directo al lado del dueño
+                    break;
+
+                case MODO_PLAGA:
+                    {
+                        // v6.50.126 — EL LIBRO GUARDA LA FRONTERA: entre su
+                        // dueño y el corazón de la horda, paseando la línea
+                        // (el pastor de la guerra — los ojos hacen el
+                        // trabajo sucio, el libro vigila y muerde el aire).
+                        Vector2 centroHorda = CentroDeLaHorda(e, dueño.Center);
+                        Vector2 frente = centroHorda - dueño.Center;
+                        float fl = frente.Length();
+                        frente = fl > 0.001f ? frente / fl : Vector2.UnitX;
+                        float a = Main.GlobalTimeWrappedHourly * 0.5f;
+                        meta = dueño.Center + frente * 62f
+                            + new Vector2(MathF.Cos(a) * 26f, MathF.Sin(a) * 18f - 22f);
+                    }
                     break;
             }
         }
@@ -511,6 +716,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // dibujan con el libro, en el lote vanilla — DibujarLosTresOjos;
             // aquí solo queda su RIM, en el lote aditivo.)
 
+            // v6.50.126 — LA HORDA (Re:Zero): los conejos blancos saltan
+            // BAJO el libro y sus ojos (la guerra se ve antes de que los
+            // ojos embistan: son parte del piso de la pelea).
+            if (e.Modo == MODO_PLAGA) DibujarLaHorda(e);
+
             VFXCore.FlushAlpha();
         }
 
@@ -587,6 +797,30 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     VFXCore.Quad(ojos[i] + miradas[i] * MiniOjoEscala,
                         new Color(196, 140, 92, 255) * 0.22f, new Vector2(9f, 9f));
             }
+
+            // === v6.50.126 — LOS OJOS ROJOS DE LA HORDA (Re:Zero): dos
+            //     puntos encendidos por conejo, MIRANDO al maná del dueño
+            //     — el detalle inquietante de la bestia (la sed). ===
+            if (e.Modo == MODO_PLAGA && Main.netMode != NetmodeID.Server)
+            {
+                Vector2 mira = Main.player[p.owner].MountedCenter;
+                for (int c = 0; c < e.Conejos.Length; c++)
+                {
+                    ConejoPlaga k = e.Conejos[c];
+                    if (!k.Vivo) continue;
+                    float ancho = 13f - k.Gen * 1.6f;
+                    Vector2 dir = mira - k.Pos;
+                    float dl = dir.Length();
+                    dir = dl > 0.001f ? dir / dl : Vector2.UnitX;
+                    Vector2 perp = new(-dir.Y, dir.X);
+                    Vector2 cabeza = PosicionDibujadaConejo(k, ancho);
+                    for (int o = -1; o <= 1; o += 2)
+                    {
+                        VFXCore.Quad(cabeza + dir * ancho * 0.22f + perp * (o * ancho * 0.22f),
+                            new Color(255, 46, 46, 255) * 0.85f, new Vector2(3.4f, 3.4f));
+                    }
+                }
+            }
         }
 
         // ==================================================================
@@ -629,13 +863,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Vector2 objetivo = Main.player[p.owner].MountedCenter;
             if (victima != null) objetivo = victima.Center;
 
+            // v6.50.126 — EN PLAGA: la mirada va a LA PRESA — el conejo
+            // vivo más cercano (los ojos de la guerra no parpadean por
+            // gusto: acechan).
+            if (e.Modo == MODO_PLAGA)
+            {
+                float mejorD = float.MaxValue;
+                for (int c = 0; c < e.Conejos.Length; c++)
+                {
+                    if (!e.Conejos[c].Vivo) continue;
+                    float d = Vector2.DistanceSquared(e.Conejos[c].Pos, centro);
+                    if (d < mejorD) { mejorD = d; objetivo = e.Conejos[c].Pos; }
+                }
+            }
+
             for (int i = 0; i < 3; i++)
             {
                 float ang = t * 0.75f + i * MathHelper.TwoPi / 3f;   // 120° exactos
-                // v6.50.124 — LA ÓRBITA VIVA: radio 44 (antes 58 — los
-                // hermanos leían lejanos) RESPIRANDO ±3 y el vaivén propio
-                // de cada hermano (±2 px): compañía pegada al tomo.
-                float radio = (44f + MathF.Sin(t * 0.9f) * 3f) * brotar;
+                // v6.50.126 — LA ÓRBITA SE ENCOGE (la letra: «sus pequeños
+                // minion están muy separados deben estar más juntos»):
+                // 44 → 27 px — una CORONA PEGADA al tomo (los hermanos
+                // casi rozan las tapas: manada, no constelación),
+                // respirando ±2 y el vaivén propio de cada hermano.
+                float radio = (27f + MathF.Sin(t * 0.9f) * 2f) * brotar;
                 float bob = MathF.Sin(t * 1.6f + i * 2.4f) * 2f;
                 pos[i] = centro + new Vector2(MathF.Cos(ang) * radio,
                     MathF.Sin(ang) * radio * 0.82f + bob);
@@ -678,6 +928,24 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     pos[i] = Vector2.Lerp(pos[i], blanco, suave);
                     if (prog > 0.05f)
                         estados[i] = OJO_ABIERTO;   // embistiendo NO parpadea: mirada fija
+                }
+            }
+
+            // v6.50.126 — LA EMBESTIDA DE LA PLAGA: en los ÚLTIMOS 15 t de
+            // cada ronda, los ojos SE LANZAN sobre los conejos que ESTA
+            // ronda golpeará (la misma moneda que cobrará RondaDePlaga —
+            // el golpe se VE llegar antes de caer: teatralidad).
+            if (e.Modo == MODO_PLAGA && e.PlagaRonda >= PLAGA_RONDA - 15)
+            {
+                float prog = (e.PlagaRonda - (PLAGA_RONDA - 15)) / 15f;
+                int golpe = 0;
+                for (int c = 0; c < e.Conejos.Length && golpe < 3; c++)
+                {
+                    if (!e.Conejos[c].Vivo || !ConejoGolpeado(e, c, e.PlagaRondas)) continue;
+                    int ojo = golpe++;
+                    float suave = prog * prog * (3f - 2f * prog);
+                    pos[ojo] = Vector2.Lerp(pos[ojo], e.Conejos[c].Pos, suave);
+                    estados[ojo] = OJO_ABIERTO;   // la carga: ojos CLAVADOS
                 }
             }
         }
@@ -743,6 +1011,242 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
             }
             catch { }
+        }
+
+        // ==================================================================
+        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (el motor Re:Zero)
+        // ==================================================================
+
+        /// <summary>LA PRIMERA OLA: la horda huele el maná quieto del
+        /// dueño y ARRANCA la guerra (5 cuerpos desde los bordes de la
+        /// pantalla, la semilla determinista, el susto del libro).</summary>
+        private static void ArrancarPlaga(Projectile p, Estado e)
+        {
+            e.Modo = MODO_PLAGA;
+            e.NpcObjetivo = -1;
+            e.Embestida = -1;
+            e.TicksEnModo = 0;
+            e.TicksQuieto = 0;          // al volver a casa: OTRO minuto entero de quietud
+            e.PlagaRonda = 0;
+            e.PlagaRondas = 0;
+            e.PlagaEnfriamiento = PLAGA_ENFRIAMIENTO;   // la horda no espanta dos veces seguidas
+            // LA SEMILLA (determinista — la misma en todas las máquinas:
+            // nace del estado compartido, jamás del reloj ni de Main.rand).
+            e.PlagaSemilla = unchecked((int)((p.whoAmI * 2654435761L
+                + e.TotalGolpes * 941L + e.Viajes * 131L) & 0x7FFFFFFFL));
+
+            Player dueño = Main.player[p.owner];
+            for (int c = 0; c < 5; c++)
+                NacerConejoEnElBorde(e, dueño.Center);
+
+            // EL LIBRO LO VE PRIMERO (solo pantallas): el susto del
+            // pastor antes de la guerra.
+            if (Main.netMode != NetmodeID.Server)
+            {
+                try
+                {
+                    EmoteBubble.NewBubble(EmoteID.EmoteFear, new WorldUIAnchor(p), 90);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>LA RONDA CAE: los ojos cobran los golpes de la ronda
+        /// que terminó — cada conejo golpeado SE DIVIDE (Re:Zero: dos
+        /// hijos más pequeños… la plaga crece) o ES DEVORADO (la tinta
+        /// del libro se lo traga). Y mientras la horda sea poca, la
+        /// conciencia manda REFUERZOS desde los bordes.</summary>
+        private static void RondaDePlaga(Projectile p, Player dueño, Estado e)
+        {
+            int vivos = ContarVivos(e);
+            // LA RONDA QUE ACABA DE CAER (PlagaRondas YA se incrementó —
+            // la dash de los ojos la leyó como PlagaRondas−1).
+            int ronda = e.PlagaRondas - 1;
+
+            for (int c = 0; c < e.Conejos.Length; c++)
+            {
+                if (!e.Conejos[c].Vivo) continue;
+                if (!ConejoGolpeado(e, c, ronda)) continue;
+
+                ConejoPlaga k = e.Conejos[c];
+                bool seDivide = k.Gen < 2 && vivos + 1 <= PLAGA_MAX_CONEJOS &&
+                    VFXCore.Hash01(e.PlagaSemilla, c * 29 + 5, ronda * 3 + 1) < 0.45f;
+
+                e.Conejos[c].Vivo = false;      // el cuerpo golpeado muere…
+                vivos--;
+                if (seDivide)
+                {
+                    // …PERO LA GULA SE REPARE: dos hijos nacen de él (el
+                    // gimmick de Re:Zero — golpearlos solo los hace MÁS).
+                    NacerConejo(e, k.Pos + new Vector2(-7f, -2f), k.Angulo - 0.28f, k.Gen + 1);
+                    NacerConejo(e, k.Pos + new Vector2(7f, -2f), k.Angulo + 0.28f, k.Gen + 1);
+                    vivos += 2;
+                    PolvoPlaga(k.Pos, dividido: true);
+                }
+                else
+                {
+                    // DEVORADO: el festín de la casa — tinta violeta.
+                    PolvoPlaga(k.Pos, dividido: false);
+                }
+            }
+
+            // LOS REFUERZOS: la conciencia no se rinde fácil (mientras
+            // queden rondas, los cuerpos siguen llegando).
+            if (vivos < 4 && e.PlagaRondas < PLAGA_MAX_RONDAS - 6)
+            {
+                NacerConejoEnElBorde(e, dueño.Center);
+                if (vivos < 2) NacerConejoEnElBorde(e, dueño.Center);
+            }
+        }
+
+        /// <summary>Un conejo vivo menos (y sus hermanos huyen): el fin de
+        /// la guerra — victoria (la horda aplastada), reloj agotado o el
+        /// dueño DESPIERTO (la horda huye del maná que se movió).</summary>
+        private static void DispersarPlaga(Estado e)
+        {
+            for (int c = 0; c < e.Conejos.Length; c++)
+                e.Conejos[c].Vivo = false;
+        }
+
+        /// <summary>NACE UN CUERPO DE LA HORDA en la primera ranura libre
+        /// (determinista: la fase de su salto nace de la semilla).</summary>
+        private static void NacerConejo(Estado e, Vector2 pos, float angulo, int gen)
+        {
+            for (int c = 0; c < e.Conejos.Length; c++)
+            {
+                if (e.Conejos[c].Vivo) continue;
+                e.Conejos[c] = new ConejoPlaga
+                {
+                    Vivo = true,
+                    Pos = pos,
+                    Angulo = angulo,
+                    Gen = gen,
+                    Fase = VFXCore.Hash01(e.PlagaSemilla, c * 7 + 13, gen * 31 + 5) * MathHelper.TwoPi
+                };
+                return;
+            }
+        }
+
+        /// <summary>NACE UN CUERPO EN EL BORDE: el ángulo (determinista) y
+        /// el salto desde lejos (la horda llega de FUERA de la pantalla).</summary>
+        private static void NacerConejoEnElBorde(Estado e, Vector2 centroDueño)
+        {
+            int nacidos = ContarVivos(e);
+            float a = VFXCore.Hash01(e.PlagaSemilla, nacidos * 17 + 3, 97) * MathHelper.TwoPi;
+            NacerConejo(e, centroDueño + new Vector2(MathF.Cos(a), MathF.Sin(a) * 0.7f)
+                * PLAGA_NACIMIENTO, a, 0);
+        }
+
+        /// <summary>LA MONEDA DEL GOLPE: ¿ESTE conejo recibe el zarpazo de
+        /// la ronda N? (determinista — la misma lectura en Tick, en la
+        /// dash de los ojos y en todas las máquinas).</summary>
+        private static bool ConejoGolpeado(Estado e, int idxConejo, int ronda)
+            => VFXCore.Hash01(e.PlagaSemilla, ronda * 31 + idxConejo * 7 + 11,
+                idxConejo * 13 + 3) < 0.55f;
+
+        /// <summary>¿Cuántos cuerpos vive la horda?</summary>
+        private static int ContarVivos(Estado e)
+        {
+            int vivos = 0;
+            for (int c = 0; c < e.Conejos.Length; c++)
+                if (e.Conejos[c].Vivo) vivos++;
+            return vivos;
+        }
+
+        /// <summary>EL CORAZÓN DE LA HORDA (el promedio de sus cuerpos —
+        /// o el propio dueño si no queda nadie: el frente de batalla).</summary>
+        private static Vector2 CentroDeLaHorda(Estado e, Vector2 respaldo)
+        {
+            Vector2 suma = Vector2.Zero;
+            int vivos = 0;
+            for (int c = 0; c < e.Conejos.Length; c++)
+            {
+                if (!e.Conejos[c].Vivo) continue;
+                suma += e.Conejos[c].Pos;
+                vivos++;
+            }
+            return vivos > 0 ? suma / vivos : respaldo;
+        }
+
+        /// <summary>El polvo del golpe (solo pantallas): el DESTELLO
+        /// BLANCO de la división (golpeaste uno… ahora son dos) o la TINTA
+        /// VIOLETA del devorado (el festín de la casa).</summary>
+        private static void PolvoPlaga(Vector2 pos, bool dividido)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
+            try
+            {
+                int n = dividido ? 7 : 9;
+                for (int i = 0; i < n; i++)
+                {
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    float rap = Main.rand.NextFloat(0.6f, 2.4f);
+                    Dust d = Dust.NewDustPerfect(pos,
+                        dividido ? DustID.PurpleTorch : DustID.Shadowflame,
+                        new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.8f) * rap, 150,
+                        dividido ? new Color(240, 236, 255) : new Color(110, 40, 170),
+                        Main.rand.NextFloat(0.7f, 1.2f));
+                    d.noGravity = !dividido;
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>La posición DIBUJADA de un conejo (su Pos + el salto
+        /// vivo del reloj — el rebote de la esperanza hambrienta).</summary>
+        private static Vector2 PosicionDibujadaConejo(ConejoPlaga k, float ancho)
+        {
+            float salto = MathF.Abs(MathF.Sin(Main.GlobalTimeWrappedHourly * 5.2f + k.Fase));
+            return k.Pos + new Vector2(0f, -salto * (5f + ancho * 0.25f));
+        }
+
+        /// <summary>LA HORDA EN PANTALLA (lote alfa): bolas blancas de
+        /// orejas largas y tamaño de puño (Re:Zero) con su SOMBRA violeta
+        /// bajo el cuerpo (la lección .66: lo blanco puro sobre cielo
+        /// claro necesita piso) y su contorno oscuro (legibles en CUALQUIER
+        /// fondo). El salto es del reloj del mundo — todas las pantallas
+        /// ven la MISMA horda botando.</summary>
+        private static void DibujarLaHorda(Estado e)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            float t = Main.GlobalTimeWrappedHourly;
+
+            for (int c = 0; c < e.Conejos.Length; c++)
+            {
+                ConejoPlaga k = e.Conejos[c];
+                if (!k.Vivo) continue;
+
+                float ancho = 13f - k.Gen * 1.6f;       // 13 / 11,4 / 9,8 px
+                Vector2 cuerpo = PosicionDibujadaConejo(k, ancho);
+
+                // EL PISO: la sombra violeta bajo el cuerpo (clara, plana).
+                VFXCore.Quad(k.Pos + new Vector2(0f, 5f),
+                    SombrasLib.Alfa(SombrasLib.HumoNegro, 0.32f),
+                    new Vector2(ancho * 1.5f, ancho * 0.42f));
+
+                // EL CONTORNO OSCURO (la legibilidad en cielo claro).
+                VFXCore.Quad(cuerpo, new Color(70, 34, 108, 255) * 0.42f,
+                    new Vector2(ancho * 2.35f, ancho * 2.35f), 0f, VFXCore.SoftGlow);
+
+                // EL CUERPO BLANCO (fuzzy — la bola de pelo del tamaño de
+                // un puño): halo + núcleo.
+                VFXCore.Quad(cuerpo, new Color(226, 224, 240, 255) * 0.62f,
+                    new Vector2(ancho * 1.9f, ancho * 1.9f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(cuerpo, new Color(252, 251, 255, 255) * 0.92f,
+                    new Vector2(ancho * 1.05f, ancho * 0.95f), 0f, VFXCore.SoftGlow);
+
+                // LAS OREJAS LARGAS (dos líneas vivas que se mecen con el
+                // salto — la firma del conejo).
+                float mecer = MathF.Sin(t * 5.2f + k.Fase) * 0.22f;
+                for (int o = -1; o <= 1; o += 2)
+                {
+                    float aOreja = -MathHelper.PiOver2 + o * 0.38f + mecer * o;
+                    Vector2 punta = cuerpo + new Vector2(MathF.Cos(aOreja), MathF.Sin(aOreja))
+                        * ancho * 1.25f;
+                    VFXCore.Line(cuerpo + new Vector2(o * ancho * 0.18f, -ancho * 0.35f),
+                        punta, new Color(240, 238, 250, 255) * 0.88f, 2.6f);
+                }
+            }
         }
 
         // ==================================================================

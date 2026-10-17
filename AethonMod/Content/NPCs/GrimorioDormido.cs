@@ -93,6 +93,23 @@ namespace AethonMod.Content.NPCs
         /// <summary>Vanilla JAMÁS lo engendra — solo LaCaidaSistema (y su lista persistente).</summary>
         public override bool CanTownNPCSpawn(int numTownNPCs) => false;
 
+        /// <summary>v6.50.126 — LA INTIMIDAD DEL PACTO (la letra: «en el
+        /// lugar de caída estarán todos los grimorios y cada jugador solo
+        /// podrá ver SU PROPIO grimorio, no el del resto»): en MP, la
+        /// ventana de diálogo (y su burbuja, y el nombre al pasar el
+        /// mouse) solo existe para el destinatario — los demás libros
+        /// duermen INVISIBLES e inalcanzables en sus cráters. En SP el
+        /// libro siempre es tuyo (la ranura del diálogo nunca se cierra).
+        /// La revalidación de fondo sigue viva: GetChat/OnChatButtonClicked
+        /// ya ignoraban al intruso desde la .117 — esto solo apaga la
+        /// puerta de vanilla (CanChat) para que ni la burbuja asome.</summary>
+        public override bool CanChat()
+        {
+            if (Main.netMode != NetmodeID.MultiplayerClient) return true;
+            Player yo = Main.LocalPlayer;
+            return yo != null && EsDestinatario(yo);
+        }
+
         /// <summary>El libro ESPERA (CheckActive false: ni noche ni distancia lo despide).</summary>
         public override bool CheckActive() => false;
 
@@ -317,6 +334,17 @@ namespace AethonMod.Content.NPCs
             Color drawColor)
         {
             if (Main.dedServ) return false;
+
+            // === v6.50.126 — LA INTIMIDAD DEL PACTO (la letra: «en el lugar
+            //     de caída estarán todos los grimorios y cada jugador solo
+            //     podrá ver SU PROPIO grimorio, no el del resto»): en MP,
+            //     el libro de OTRO destinatario NO SE DIBUJA — ni su bruma,
+            //     ni sus Zzz, ni su cuerpo: el cráter del otro queda como
+            //     el cielo lo dejó (y SIN ícono en el minimapa: el libro
+            //     no tiene textura de cabeza, el mapa nunca lo supo). En
+            //     SP el libro siempre es tuyo. ===
+            if (Main.netMode == NetmodeID.MultiplayerClient && !EsDestinatario(Main.LocalPlayer))
+                return false;
 
             // === 1. LA BRUMA MORADA (BrumaFX — la misma llamada de los
             //     jefes: la niebla fría del cráter lo abraza) ===

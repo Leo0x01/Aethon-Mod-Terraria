@@ -171,6 +171,25 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         {
             if (Main.dedServ) return false;
 
+            // === v6.50.126 — EL SELECCIONADOR DE PERSONAJE (la letra: «el
+            //     grimorio menor se sale del recuadro del personaje y no
+            //     se ubica como las otras mascotas»): la vista previa de
+            //     vanilla (UICharacter.DrawPets) crea un DUMMY de este
+            //     proyectil (isAPreviewDummy) y lo dibuja con
+            //     DrawProjDirect — PERO el dummy NUNCA corre la IA: su
+            //     localAI[0] queda en 0 para siempre (el brote eterno: el
+            //     anillo de nacimiento pegado al libro + los ojos en
+            //     radio 0 apilados y cerrados) y la órbita de siempre se
+            //     salía del recuadro de 59×58. LA VISTA PREVIA ES SU
+            //     PROPIA ESCENA: el libro en su sitio (abajo a la derecha
+            //     del personaje, como TODA mascota) + los tres ojos en
+            //     corona compacta DESPIERTOS — y a los ~5 s… EL LIBRO SE
+            //     ESCAPA DEL RECUADRO (el easteregg de la letra: sale a
+            //     DEAMBULAR por toda la pantalla — lo dibuja
+            //     SeleccionGrimorioSistema, sobre el logo y el cielo). ===
+            if (Projectile.isAPreviewDummy)
+                return PreDrawVistaPrevista();
+
             try
             {
                 float t = Main.GlobalTimeWrappedHourly;
@@ -283,6 +302,119 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     iris.Size() * 0.5f, esc * global::AethonMod.Content.Weapons.GrimorioHambrientoNervioso.IrisEscala,
                     SpriteEffects.None, 0f);
             }
+        }
+        // ==================================================================
+        //  v6.50.126 — LA VISTA PREVIA DEL SELECCIONADOR (el dummy de
+        //  vanilla): el libro POSEA en su recuadro como cualquier mascota
+        //  (bobbing del reloj del menú, ojo vivo que mira y parpadea) con
+        //  sus tres ojos en CORONA COMPACTA (18 px — pegados al tomo, la
+        //  letra de la órbita) DESPIERTOS desde el primer frame. NADA de
+        //  lotes VFXCore ni anillos de nacimiento: el menú no es lugar
+        //  para abrir lotes ajenos. A los ~5 s el libro SE VA (el sistema
+        //  del easteregg toma el control — TickPreview devuelve false).
+        // ==================================================================
+        private bool PreDrawVistaPrevista()
+        {
+            try
+            {
+                float t = Main.GlobalTimeWrappedHourly;
+
+                // EL LUGAR DE UI donde vanilla puso al dummy (position ya
+                // viene sumándole screenPosition — restando vuelve al
+                // espacio de pantalla del menú).
+                Vector2 pos = Projectile.Center - Main.screenPosition;
+
+                // EL RELOJ DEL EASTEREGG: < 5 s = posa en el recuadro;
+                // >= 5 s = el libro DESAPARECE DE AQUÍ (se fue a vagar por
+                // TODA la pantalla — SeleccionGrimorioSistema).
+                if (!Systems.SeleccionGrimorioSistema.TickVistaPrevista(pos))
+                    return false;
+
+                // EL LIBRO EN MINIATURA (la misma receta del mundo, en el
+                // lote corriente del menú — la luz es SUYA: en el menú no
+                // hay mundo que ilumine).
+                Texture2D tex = Terraria.GameContent.TextureAssets.Item[
+                    ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>()].Value;
+                if (tex != null)
+                {
+                    const float esc = 0.52f;
+                    float bob = MathF.Sin(t * 1.75f + 0.8f) * 2.2f;
+                    float giro = MathF.Sin(t * 1.2f) * 0.06f;
+                    Vector2 centro = pos + new Vector2(0f, bob);
+                    Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height);
+                    Vector2 origen = frame.Size() * 0.5f;
+                    Color luz = new Color(226, 220, 244);
+
+                    Main.spriteBatch.Draw(tex, centro, frame, luz, giro, origen, esc,
+                        SpriteEffects.None, 0f);
+
+                    // EL OJO VIVO: mira de lado a lado + parpadea (el
+                    // parpadeo con el overlay _Cerrado, como el mundo).
+                    float parp = (t * 0.9f) % 5.2f;
+                    if (parp > 4.90f)
+                    {
+                        var parpado = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
+                        Main.spriteBatch.Draw(parpado, centro, frame, luz, giro, origen, esc,
+                            SpriteEffects.None, 0f);
+                    }
+                    else
+                    {
+                        Vector2 mirada = new Vector2(MathF.Sin(t * 0.55f) * 2.6f,
+                            MathF.Sin(t * 0.41f + 0.6f) * 1.6f);
+                        Vector2 alOjo = (global::AethonMod.Content.Weapons.GrimorioHambrientoNervioso.OjoTexel
+                            + mirada - origen) * esc;
+                        Vector2 posOjo = centro + alOjo.RotatedBy(giro);
+                        var iris = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+                        Main.spriteBatch.Draw(iris, posOjo, null, luz, giro,
+                            iris.Size() * 0.5f, esc * global::AethonMod.Content.Weapons.GrimorioHambrientoNervioso.IrisEscala,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+
+                // LOS TRES OJOS EN CORONA COMPACTA (18 px — pegados al
+                // libro, la misma familia del arma, DESPIERTOS): la
+                // mascota se presenta ENTERA en su recuadro.
+                Texture2D ojoAbierto = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
+                Texture2D ojoCerrado = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Cerrado").Value;
+                Texture2D irisOjo = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+                if (ojoAbierto != null && ojoCerrado != null && irisOjo != null)
+                {
+                    const float escOjo = 0.22f;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        float ang = t * 0.75f + i * MathHelper.TwoPi / 3f;
+                        float radio = 17f + MathF.Sin(t * 0.9f) * 1.5f;
+                        Vector2 p = pos + new Vector2(MathF.Cos(ang) * radio,
+                            MathF.Sin(ang) * radio * 0.82f - 4f
+                            + MathF.Sin(t * 1.6f + i * 2.4f) * 1.5f);
+
+                        // el parpadeo propio de cada hermano (abierto casi
+                        // siempre, cerrado un instante).
+                        float parpOjo = (t * 1.15f + i * 2.61f) % 6.5f;
+                        bool cerrado = parpOjo <= 0.26f;
+                        Texture2D cuerpo = cerrado ? ojoCerrado : ojoAbierto;
+                        Color luz = new Color(232, 226, 246);
+                        Main.spriteBatch.Draw(cuerpo, p, null, luz, 0f,
+                            cuerpo.Size() * 0.5f, escOjo, SpriteEffects.None, 0f);
+                        if (!cerrado)
+                        {
+                            Main.spriteBatch.Draw(irisOjo,
+                                p + new Vector2(0.7f, 2.3f) * escOjo + new Vector2(
+                                    MathF.Sin(t * 0.5f + i) * 1.2f, 0.4f), null, luz, 0f,
+                                irisOjo.Size() * 0.5f, 0.41f * escOjo,
+                                SpriteEffects.None, 0f);
+                        }
+                    }
+                }
+
+                return false;   // el dibujado de vanilla del dummy NO corre
+            }
+            catch { return false; }
         }
     }
 }

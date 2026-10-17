@@ -231,6 +231,21 @@ Items: {
 			'''
 	}
 
+	TintaDelCometa: {
+		DisplayName: Comet Ink
+		Tooltip:
+			'''
+			THE FALL ACTIVATOR (test item — delivered by the Brood Pouch).
+			Break the vial and the sky REMEMBERS: the Eternal Grimoire's
+			comet crosses again toward you — day or night.
+			The automatic paths keep their law (each player's first night in
+			each world + the first neighbor that isn't the Guide); THIS ink
+			is the MANUAL path: the event is NEVER lost… and it never
+			duplicates your grimoire (if it already awaits you or already
+			flies toward you, the sky doesn't insist).
+			'''
+	}
+
 	MedusaNebularStaff: {
 		DisplayName: Nebula Jellyfish Staff
 		Tooltip:
@@ -2298,6 +2313,8 @@ Caida: {
 		(It was delicious. The sky cooks just like before the breaking.)
 		'''
 	Devorandose: (the book trembles… something is devouring it — it can no longer speak)
+	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS in its crater.
+	TintaEnVuelo: ✦ Your black star is ALREADY FLYING toward you — wait for its kiss with the earth.
 }
 
 TestingPlayer: {

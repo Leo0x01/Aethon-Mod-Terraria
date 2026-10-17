@@ -61,6 +61,14 @@ namespace AethonMod.Content.Items.Llamados
             Dar(player, ModContent.ItemType<AethonMenorItem>());
             Dar(player, ModContent.ItemType<GrimorioMenorItem>());
 
+            // v6.50.126 — LA TINTA DEL COMETA (la letra: «crea un item
+            // para activar el evento… como activador obligatorio para
+            // evitar que el evento del grimorio se pierda»): el frasco
+            // del cielo — el camino MANUAL a LA CAÍDA (la primera noche
+            // y el primer vecino son los automáticos; la tinta JAMÁS
+            // deja que el evento se pierda).
+            Dar(player, ModContent.ItemType<TintaDelCometa>());
+
             // LA APERTURA DE LA CASA (el momento): la MITAD de las
             // chispas DORADAS (la cría de luz) y la MITAD MORADAS (la
             // gemela oscura y el mini grimorio) — las mascotas

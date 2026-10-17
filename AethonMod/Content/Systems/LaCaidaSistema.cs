@@ -94,6 +94,15 @@ namespace AethonMod.Content.Systems
         /// re-estrenar la caída en el mismo mundo).</summary>
         private readonly HashSet<string> _cayoEnEsteMundo = new HashSet<string>();
 
+        /// <summary>v6.50.126 — EL FAILSAFE DEL PRIMER VECINO (la letra:
+        /// «este deberá activarse en caso de que otros métodos no lo hayan
+        /// activado en cuanto llegue el primer NPC diferente del guía»):
+        /// ¿ya llegó al mundo SU primer habitante que no es el Guía? El
+        /// momento queda grabado EN EL MUNDO — es la red de seguridad que
+        /// garantiza que LA CAÍDA nunca se pierde (primera noche → primer
+        /// vecino → Tinta del Cometa: TRES caminos al cielo).</summary>
+        private bool _llegoPrimerNpc;
+
         /// <summary>El estado del cielo del tick anterior (para sentir el amanecer).</summary>
         private bool _eraNoche;
 
@@ -121,6 +130,9 @@ namespace AethonMod.Content.Systems
                 // v6.50.125 — el silenciador por-mundo viaja con el guardado
                 // (los nombres que ya vivieron su caída AQUÍ).
                 tag["cayosDelMundo"] = new List<string>(_cayoEnEsteMundo);
+                // v6.50.126 — el failsafe del primer vecino también viaja
+                // (el momento quedó grabado en ESTE mundo).
+                tag["llegoPrimerNpc"] = _llegoPrimerNpc;
             }
             catch { }
         }
@@ -149,6 +161,11 @@ namespace AethonMod.Content.Systems
                 {
                     if (!string.IsNullOrEmpty(nombre)) _cayoEnEsteMundo.Add(nombre);
                 }
+                // v6.50.126 — el failsafe del primer vecino vuelve con el
+                // mundo (false en los mundos viejos: su «momento» se
+                // re-vive al cargar — el espectáculo no se le niega a nadie
+                // y el evento NUNCA se pierde).
+                _llegoPrimerNpc = tag.GetBool("llegoPrimerNpc");
             }
             catch { }
         }
@@ -157,6 +174,7 @@ namespace AethonMod.Content.Systems
         {
             CaidasPendientes.Clear();
             _cayoEnEsteMundo.Clear();
+            _llegoPrimerNpc = false;
             Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
             _eraNoche = false;
         }
@@ -286,35 +304,59 @@ namespace AethonMod.Content.Systems
 
                         var sp = p.GetModPlayer<Players.ShardPlayer>();
                         if (sp == null) continue;
-                        // v6.50.125 — LA MARCA DEL .PLR YA NO CALLA AL CIELO
-                        // (la letra: «la caída no parece activarse cuando
-                        // pasa la primera noche"): CaidaRecibida —la puso la
-                        // toma o la devoración del doble— silenciaba el
-                        // cometa PARA SIEMPRE y EN TODOS LOS MUNDOS, y el
-                        // personaje de pruebas jamás volvía a ver el evento.
-                        // AHORA el silenciador es ESTE mundo (la primera
-                        // noche de cada jugador EN CADA MUNDO tiene su
-                        // cometa — el espíritu .121 del espectáculo) y la
-                        // marca queda como la memoria del pacto (la borra la
-                        // Página en Blanco, como siempre).
+
+                        // v6.50.125 — LA MARCA DEL .PLR YA NO CALLA AL
+                        // CIELO (la letra: «la caída no parece activarse
+                        // cuando pasa la primera noche»): el silenciador
+                        // es ESTE mundo — la primera noche de cada jugador
+                        // EN CADA MUNDO tiene su cometa (el espíritu .121:
+                        // el espectáculo no se le niega a nadie) y la regla
+                        // «un grimorio por alma» vive donde siempre vivió:
+                        // en LA TOMA (el gate del grimorio murió en la
+                        // .121 — TomarElLibro rechaza al portador).
                         if (_cayoEnEsteMundo.Contains(p.name)) continue;
-                        // v6.50.121 — EL GATE DEL GRIMORIO MURIÓ: exigir
-                        //     «SIN Grimorio del Eterno en los 59 slots»
-                        //     mataba el evento para TODO jugador de
-                        //     pruebas (el kit de pruebas entrega la Bolsa
-                        //     Fundacional con el grimorio dentro — la
-                        //     letra: «La Caída nunca se activa al usar el
-                        //     ítem de hacer de noche y luego de día»).
-                        //     El cometa cae SIEMPRE en la primera noche:
-                        //     la regla del alma vive en LA TOMA
-                        //     (TomarElLibro rechaza al portador — el libro
-                        //     dormido le habla de tú a tú y no se entrega).
                         if (YaEsperaLibro(p.name)) continue;
+                        // v6.50.126 — ni cometa YA en vuelo: los TRES
+                        // caminos al cielo (primera noche · primer vecino ·
+                        // Tinta del Cometa) jamás se pisan entre sí.
+                        if (CometaEnVuelo(i)) continue;
 
                         DispararCometa(p);
                         _cayoEstaNoche[i] = true;
                         // v6.50.125 — este mundo ya le dio su caída (aunque
                         // el cometa muera en pleno vuelo, no repite).
+                        _cayoEnEsteMundo.Add(p.name);
+                    }
+                }
+
+                // ============================================================
+                //  v6.50.126 — EL FAILSAFE DEL PRIMER VECINO (la letra:
+                //  «este deberá activarse en caso de que otros métodos no
+                //  lo hayan activado en cuanto llegue el primer NPC
+                //  diferente del guía»). LA CAÍDA NUNCA SE PIERDE: si la
+                //  primera noche pasó de largo (jugador muerto en su
+                //  momento, desconectado a media noche, un mundo cargado a
+                //  media noche ya vivida…), el PRIMER habitante del mundo
+                //  que NO es el Guía trae el cometa consigo — de día o de
+                //  noche. El momento queda grabado EN EL MUNDO (una sola
+                //  vez); los mundos VIEJOS (con vecinos desde hace lunas)
+                //  lo re-viven al cargar: solo dispara para quien TODAVÍA
+                //  no vivió su caída aquí (las guardas de arriba protegen
+                //  a los demás).
+                // ============================================================
+                if (!_llegoPrimerNpc && HayVecinoQueNoEsElGuia())
+                {
+                    _llegoPrimerNpc = true;
+                    for (int i = 0; i < Main.maxPlayers; i++)
+                    {
+                        Player p = Main.player[i];
+                        if (p == null || !p.active || p.dead) continue;
+                        if (_cayoEnEsteMundo.Contains(p.name)) continue;
+                        if (YaEsperaLibro(p.name)) continue;
+                        if (CometaEnVuelo(i)) continue;
+
+                        DispararCometa(p);
+                        _cayoEstaNoche[i] = true;
                         _cayoEnEsteMundo.Add(p.name);
                     }
                 }
@@ -346,6 +388,71 @@ namespace AethonMod.Content.Systems
             var sys = ModContent.GetInstance<LaCaidaSistema>();
             if (sys == null) return false;
             return sys.CaidasPendientes.Exists(c => c != null && c.Jugador == nombre);
+        }
+
+        /// <summary>¿Tiene este jugador un cometa de LA CAÍDA en pleno
+        /// vuelo? (v6.50.126 — el guarda-choques de los TRES caminos: la
+        /// primera noche, el primer vecino y la Tinta del Cometa jamás
+        /// disparan dos cometas al mismo alma).</summary>
+        public static bool CometaEnVuelo(int idxJugador)
+        {
+            if (idxJugador < 0 || idxJugador >= Main.maxPlayers) return false;
+            int tipo = ModContent.ProjectileType<Projectiles.CaidaCometaProjectile>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.type != tipo) continue;
+                if (pr.owner == idxJugador) return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.50.126 — ¿ya vive en el mundo un vecino que NO es
+        /// el Guía? (el detector del failsafe: townNPC activo y de otro
+        /// tipo — el Mercader que llega con 50 monedas, la Enfermera que
+        /// sigue a la primera vida… el PRIMER HABITANTE de verdad).</summary>
+        private static bool HayVecinoQueNoEsElGuia()
+        {
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || !n.townNPC) continue;
+                if (n.type == NPCID.Guide) continue;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.50.126 — LA TINTA DEL COMETA (la letra: «crea un
+        /// item para activar el evento, este será un item de prueba,
+        /// además como activador obligatorio para evitar que el evento
+        /// del grimorio se pierda»). El camino MANUAL al cielo: rompe
+        /// TODAS las reglas del horario (de día, de noche, con la caída
+        /// de este mundo ya vivida — es un ítem DE PRUEBAS) PERO jamás
+        /// duplica: si un libro ya duerme para este nombre o un cometa
+        /// vuela hacia él, el cielo no insiste. Devuelve 0 = disparado ·
+        /// 1 = ya hay libro esperando · 2 = cometa en vuelo (para el
+        /// aviso de la tinta).</summary>
+        public static int ForzarCaida(Player p)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return -1;
+                if (p == null || !p.active || p.dead || string.IsNullOrEmpty(p.name)) return -1;
+
+                if (YaEsperaLibro(p.name)) return 1;
+                if (CometaEnVuelo(p.whoAmI)) return 2;
+
+                DispararCometa(p);
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys != null && p.whoAmI >= 0 && p.whoAmI < Main.maxPlayers)
+                    sys._cayoEstaNoche[p.whoAmI] = true;
+                // ESTE mundo queda servido para este nombre (los caminos
+                // automáticos no volverán a insistir tras la prueba).
+                RegistrarCaidaDelMundo(p.name);
+                return 0;
+            }
+            catch { return -1; }
         }
 
         /// <summary>v6.50.118 — LA LETRA: «el cometa de tinta caiga cerca

@@ -116,6 +116,13 @@ namespace AethonMod.Content.Systems
         // .plr + la sensación del pacto). El 9 (Génesis) y el 11
         // (Resonancia) siguen RETIRADOS: nada se renumera.
         public const byte MsgTomarCaida = 14;
+        // v6.50.126 — LA TINTA DEL COMETA (cliente → server): el uso del
+        // ítem de pruebas pide a la AUTORIDAD que dispare el cometa de
+        // LA CAÍDA para quien la sostiene (la misma lección de la mano
+        // extendida: sin este paquete, el cometa sería un fantasma en
+        // MP). Sin respuesta — el cometa mismo ES la respuesta (y el
+        // aviso privado viaja por AnunciarAlPortador desde la autoridad).
+        public const byte MsgForzarCaida = 15;
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -476,7 +483,7 @@ namespace AethonMod.Content.Systems
                 // del clic derecho viaja a la autoridad).
                 if (Main.netMode == NetmodeID.Server &&
                     (tipo == MsgPedirLibros || tipo == MsgPrepararOleadas ||
-                     tipo == MsgTomarCaida))
+                     tipo == MsgTomarCaida || tipo == MsgForzarCaida))
                 {
                     Player solicitante = quienEnvia >= 0 && quienEnvia < Main.player.Length
                         ? Main.player[quienEnvia] : null;
@@ -496,6 +503,14 @@ namespace AethonMod.Content.Systems
                             // nacen de LA AUTORIDAD (LaCaidaSistema valida,
                             // entrega y devuelve la dádiva).
                             LaCaidaSistema.AtenderManoExtendida(solicitante);
+                        }
+                        else if (tipo == MsgForzarCaida)
+                        {
+                            // v6.50.126 — LA TINTA DEL COMETA: el ítem de
+                            // pruebas pide el cielo — la AUTORIDAD decide
+                            // (dispara / ya espera un libro / cometa en
+                            // vuelo) y el aviso viaja solo al portador.
+                            Content.Items.Llamados.TintaDelCometa.AtenderPedido(solicitante);
                         }
                         else
                         {
@@ -786,6 +801,24 @@ namespace AethonMod.Content.Systems
                 if (Main.netMode != NetmodeID.MultiplayerClient) return;
                 ModPacket p = AethonMod.Instance.GetPacket();
                 p.Write(MsgTomarCaida);
+                p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.126 — LA TINTA SE DERRAMA (cliente → server): el uso de
+        /// la Tinta del Cometa en MP pide a la AUTORIDAD el cielo (el
+        /// cometa — y su cráter — nacen del server, como toda LA CAÍDA).
+        /// Llamado desde TintaDelCometa.UseItem (cliente MP).
+        /// </summary>
+        public static void PedirForzarCaida()
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgForzarCaida);
                 p.Send();
             }
             catch { }
