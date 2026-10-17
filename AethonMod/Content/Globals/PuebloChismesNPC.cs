@@ -97,20 +97,33 @@ namespace AethonMod.Content.Globals
                 }
             }
 
-            // === 2. LOS CHISMES: si el jugador lleva la mascota o el
-            //     grimorio, 45% de que el vecino suelte un chisme en
-            //     vez de su línea vanilla. De la MASCOTA: travesuras
-            //     con gracia. Del GRIMORIO: terror puro. Si lleva
-            //     ambos, la moneda al aire entre los dos temas.
-            bool mascota = TieneMascota();
-            bool grimorio = TieneGrimorio();
-            if (!mascota && !grimorio)
+            // === 2. LOS CHISMES: si el jugador lleva la mascota de luz,
+            //     el Grimorio Menor o el grimorio eterno, 45% de que el
+            //     vecino suelte un chisme en vez de su línea vanilla.
+            //     De la CRÍA DE LUZ: travesuras con gracia. Del GRIMORIO
+            //     MENOR (v6.50.127 — la letra: los diálogos sobre el
+            //     Grimorio Menor se refieren SIEMPRE al Grimorio Menor y
+            //     SOLO se activan cuando se usa como mascota): su propio
+            //     repertorio, con su nombre puesto. Del ETERNO (el libro
+            //     grande): terror puro. Con varios puestos: la moneda al
+            //     aire entre los temas disponibles.
+            bool luz = TieneMascotaLuz();
+            bool menor = TieneGrimorioMenor();
+            bool eterno = TieneGrimorio();
+            if (!luz && !menor && !eterno)
                 return;
             if (Main.rand.Next(100) >= 45)
                 return;
 
-            bool deMascota = mascota && (!grimorio || Main.rand.Next(2) == 0);
-            string prefijo = deMascota ? "Mascota" : "Grimorio";
+            string[] temas = luz
+                ? (menor ? (eterno ? new[] { "Mascota", "GrimorioMenor", "Grimorio" }
+                                   : new[] { "Mascota", "GrimorioMenor" })
+                         : (eterno ? new[] { "Mascota", "Grimorio" }
+                                   : new[] { "Mascota" }))
+                : (menor ? (eterno ? new[] { "GrimorioMenor", "Grimorio" }
+                                   : new[] { "GrimorioMenor" })
+                         : new[] { "Grimorio" });
+            string prefijo = temas[Main.rand.Next(temas.Length)];
             chat = Language.GetTextValue($"Mods.AethonMod.Pueblo.Chismes.{ClaveNPC(npc)}.{prefijo}{Main.rand.Next(1, 5)}");
         }
 
@@ -122,15 +135,22 @@ namespace AethonMod.Content.Globals
             return _claves.TryGetValue(npc.type, out string clave) ? clave : "Genericos";
         }
 
-        /// <summary>¿El jugador local lleva puesta alguna MASCOTA? Las
-        /// DOS cuentan: el Aethon Menor (la pareja luz+oscuridad) y el
-        /// Grimorio Menor (el mini libro de las travesuras — las
-        /// mordidas son suyas, pero la cría de luz también da de qué
-        /// hablar).</summary>
-        private static bool TieneMascota()
+        /// <summary>¿El jugador local lleva puesta la CRÍA DE LUZ (el
+        /// Aethon Menor, la pareja luz+oscuridad)? Sus chismes son los
+        /// del prefijo «Mascota» (la lucecita del pueblo).</summary>
+        private static bool TieneMascotaLuz()
         {
-            return Main.LocalPlayer.HasBuff(ModContent.BuffType<AethonMenorBuff>()) ||
-                Main.LocalPlayer.HasBuff(ModContent.BuffType<GrimorioMenorBuff>());
+            return Main.LocalPlayer.HasBuff(ModContent.BuffType<AethonMenorBuff>());
+        }
+
+        /// <summary>v6.50.127 — ¿El jugador local lleva puesto el GRIMORIO
+        /// MENOR como mascota? La letra: sus diálogos SOLO se activan
+        /// cuando el mini libro está siendo usado de mascota — y siempre
+        /// hablan de ÉL (prefijo «GrimorioMenor»), jamás de la cría de
+        /// luz ni del grande.</summary>
+        private static bool TieneGrimorioMenor()
+        {
+            return Main.LocalPlayer.HasBuff(ModContent.BuffType<GrimorioMenorBuff>());
         }
 
         /// <summary>¿El jugador local carga el GRIMORIO? Con que esté

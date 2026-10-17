@@ -2303,6 +2303,14 @@ Caida: {
 	YaTienes: One soul, one book. I am already yours.
 	OtroJugador: …zZzZz… (this book waits for another hand)
 	BotonTomar: Reach out
+	Dormido1: …zZz. Are you here already?… No. Not yet. Let the sky keep falling. zZz.
+	Dormido2: …I dreamed of a hand. In the dream it was yours. Its fingers came counted: five. Mine are pages. What a curious thing, those who sleep. zZz.
+	Dormido3: …the crater is warm. The craters of the other books were cold. This one looks a little bit like me. zZz.
+	Dormido4: …careful with the first night, bearer… pardon: you are not a bearer yet. My hunger gets ahead of me. That's the thing about sleep: it tells the future, and tells it WRONGLY. zZz.
+	Dormido5: …I've spent eons counting falls. This is the first one that smelled of someone. The rest smelled of no one. zZz.
+	Dormido6: …my Z's are running out. When they run out entirely, I will open my eye. Not yet. Not yet… zZz.
+	Dormido7: …the stars spoke to me: they say there are hands down below. I've only ever seen pages. Come closer, and we'll see who was right. zZz.
+	Dormido8: …are you still there? Good. Those who wait also feed me. A little. It's not the same, but hunger knows how to wait. zZz.
 	PrimerPensamiento: At last.
 	CometaCae: ✦ A black star tears open the sky… and it falls toward you.
 	Impacto: ✦ The sky went silent where the star kissed the earth: YOUR GRIMOIRE AWAITS.
@@ -2519,17 +2527,25 @@ Pueblo: {
 			Grimorio2: Last night, when you walked past my house, every candle I own leaned toward you. EVERY. SINGLE. ONE. I have no further questions.
 			Grimorio3: I can guide you through any cave in this world. But with that book... even the dirt walls step aside. Even the DIRT knows. Do you understand what I'm telling you?
 			Grimorio4: I asked the book if it knew where the Eye of Cthulhu was. It answered. Not with words. With a page. There was a drawing of MY bed on it.
+			GrimorioMenor1: Your Lesser Grimoire sat on my maps and the routes redrew themselves: every single one now ends at YOUR house. I made a new map and it happened again. What if that was always the true path?
+			GrimorioMenor2: Old school advice: never turn your back on a book. The Menor took it literally: now it follows me FACE-ON. I can't give advice while walking backwards.
+			GrimorioMenor3: Last night I dreamed the perfect survival guide. I woke up, and your Lesser Grimoire was on my desk — the page on 'how to survive your pet' had a correction: it crossed out 'pet' and wrote 'owner'.
+			GrimorioMenor4: I taught the Lesser Grimoire to read the stars for direction. It learned. Now the stars drift a little… to follow IT. Navigation will be the least of our worries once the whole sky is its compass.
 		}
 
 		Merchant: {
 			Mascota1: I was making my dinner when your pet ate the plate and knocked the food on the floor. Why would it only eat the PLATE? Worse: it left a coin as a tip. FROM WHERE?
-			Mascota2: Your pet keeps burying my coins in the garden. I dug them up: polished, shiny... sorted by size. The kid keeps better books than I do.
+			Mascota2: Your pet keeps burying my coins in the garden. I dug them up: polished, shiny... sorted by size. That little one keeps better books than I do.
 			Mascota3: You should sell tickets to see that little light. People come to look and stay to shop. It earns its weight in copper, I tell you.
 			Mascota4: I offered your pet a bulk discount on light and it laughed. DOES your pet laugh? It made a sound like tiny, mocking bells.
 			Grimorio1: My ledger wrote itself overnight. Says I OWE the book eight hundred gold coins. The last line reads: 'collecting, with interest.' I don't owe ANYBODY anything!
 			Grimorio2: Keep that book away from my register. Last night I heard it counting coins. BY ITSELF. It was counting BACKWARDS.
 			Grimorio3: I put a price on everything, friend. I priced your book once — full appraisal, inventory, the works. Woke up to a brand-new entry in my catalog: 'NO.'
 			Grimorio4: Gold doesn't shine near that book. It dulls. Do you know what it's like to sell dull gold? It's selling stale bread. It's selling lies.
+			GrimorioMenor1: Your Lesser Grimoire left three coins on my counter, sorted by shine. I counted them: they were the ones that 'went missing' on Tuesday. I no longer know if I'm a merchant or its accountant.
+			GrimorioMenor2: I offered the Menor credit. It opened a tiny page: there was a drawing of MY drawer, open, with a little arrow. That's not a yes: that's an 'already saw it.' I locked it. The key woke up bent.
+			GrimorioMenor3: The Lesser Grimoire doesn't buy or sell: it COLLECTS. It sat on my safe until I tipped it a coin. Did you teach it that… or did it already know?
+			GrimorioMenor4: Guild notice: never haggle with something that bites. I haggled with the Menor for sport, and the coin I offered came back with the face rubbed off. It's not a coin anymore: it's a circle that says 'no'.
 		}
 
 		Nurse: {
@@ -2541,6 +2557,10 @@ Pueblo: {
 			Grimorio2: I've seen patients with dead eyes. That book's gaze... is the one I've only ever seen in the intensive care ward. On the way out.
 			Grimorio3: Last night I dreamed I was operating on you. You kept saying 'take out its pages.' I answered 'it has no pages.' Then you opened your mouth. It DID.
 			Grimorio4: I know every vital sign. None of them explains why everyone on your block woke up with synchronized pulses. Sixty-one. All of them. Sixty-one.
+			GrimorioMenor1: I took your Lesser Grimoire's pulse: it hasn't got one. I took the pulse of its three little eyes: one beats. The middle one. Only when it looks at you. Diagnosis: that's not a heartbeat, that's a count.
+			GrimorioMenor2: The Menor sprawled over my patient log, and every line reading 'cause: pet bite' slid on its own into the 'symptoms' column. The book doesn't bite out of malice: it bites for the record.
+			GrimorioMenor3: I drew one drop of ink from the Lesser Grimoire to analyze it. The ink analyzed MY serum instead: it handed the vial back with a rewritten label. 'Healthy. For now.' The lab reopens when it feels like it.
+			GrimorioMenor4: If your Lesser Grimoire follows you around while you're hurt, that's not affection: that's dessert. Nurse's orders: heal quickly — dessert doesn't like to wait.
 		}
 
 		ArmsDealer: {
@@ -2552,6 +2572,10 @@ Pueblo: {
 			Grimorio2: I showed it my best revolver. It turned a page. Turned ANOTHER. On the last one there was a drawing of a revolver... loaded with teeth.
 			Grimorio3: My bullets know no fear, and neither do I. But near your house, my triggers go cold. Metal doesn't lie, kid. Metal TREMBLES.
 			Grimorio4: Notice there are no crows anywhere near the book? I did. I've got crow aim. Nothing left to practice on. The sky went and got itself empty.
+			GrimorioMenor1: Your Lesser Grimoire climbed onto my counter and every shotgun took its own safety off. One by one. Like they were asking its permission. I don't sell guns near your house anymore: I sell vests.
+			GrimorioMenor2: I showed the Menor my finest revolver. It sniffed it, cracked open a tiny page… and there was the revolver, drawn OWNERLESS. Gun dealers don't scare: gun dealers COMPLAIN. That drawing was a customer!
+			GrimorioMenor3: Your Lesser Grimoire bit a spare magazine. Nothing happened. But the rounds now aim a tiny bit upward on their own — toward the birds. My birds. Probably.
+			GrimorioMenor4: Rule of the trade: never point at anything that blinks. The Menor blinks THREE times at once. That's three targets… or a warning. I chose the warning and holstered the gun.
 		}
 
 		Dryad: {
@@ -2563,6 +2587,10 @@ Pueblo: {
 			Grimorio2: The grass grows AROUND your house, never toward it. In a circle. The roots turn themselves around. And roots are never wrong about where NOT to go.
 			Grimorio3: I can feel the book devouring the light. Not like a shadow. Like HUNGER. It is the only thing I have ever met that makes light feel scarce.
 			Grimorio4: Mother Nature keeps a list of things that must never return. Yesterday I heard the wind reading it out loud. Your book is near the top.
+			GrimorioMenor1: Nature talks to me, but about your Lesser Grimoire it only says one thing: 'nothing grows where it sleeps.' I saw it napping in the meadow: the grass around it had arranged itself in a circle. Neither inside nor out: around.
+			GrimorioMenor2: Your Menor doesn't dirty the earth: it inks it. Wherever it sits, the ground smells like an old page. The worms no longer flee the spade: they flee the smell of the library.
+			GrimorioMenor3: I asked an old oak what it thinks of the Lesser Grimoire. It answered slowly, the way oaks do: 'the small was always the largest.' I asked nothing else. Oaks don't give second answers.
+			GrimorioMenor4: The Lesser Grimoire bit my ankle and the grass around me LAUGHED. Do plants laugh? Before today: no. Today: once. On behalf of the book. New ledgers, old nature.
 		}
 
 		Demolitionist: {
@@ -2574,6 +2602,10 @@ Pueblo: {
 			Grimorio2: Take a look at my blast notes. Those aren't my drawings anymore — they're FORMULAS. Fine handwriting. I write like a bomb going off; that hand has LONG fingers.
 			Grimorio3: I respect anything that explodes, lad. But your book doesn't explode — it IMPLODES. It makes the noise backwards. The air goes INWARD. Even the smoke comes back!
 			Grimorio4: I left a little charge by your door... testing, see? By morning the dynamite had gone GRAY. Dry. Sparkless. Who drank the life out of MY powder?
+			GrimorioMenor1: Your Lesser Grimoire held MY dynamite without fear! And it didn't blow up ON him — it blew up NEARBY, like it was asking permission! I want permission too! From the dynamite, NOT from the book!
+			GrimorioMenor2: The Menor counted my fuse. THE FUSE! It counted the seconds it takes and looked at me like it was saying 'you've got two to spare.' AND I HAD TWO TO SPARE! Where did it get that? Not from the future — the future is ITS!
+			GrimorioMenor3: I gave the Lesser Grimoire a firecracker as a present. It kept it between the pages. When it opened the tiny page later, the THUNDER of the memory came out. Scared the whole block. The block forgives. I don't.
+			GrimorioMenor4: Guild notice! Do NOT leave cartridges near the Menor: it SORTS them! By size, by noise… BY NOISE? Who sorts by noise? Someone who has heard the end of everything and put it in a line!
 		}
 
 		Clothier: {
@@ -2585,6 +2617,10 @@ Pueblo: {
 			Grimorio2: I was trying on my waistcoat and the mirror went dark for one second. When it came back, my buttons were done up wrong. I NEVER button up wrong.
 			Grimorio3: I heard its pages turning from my bed. They were counting something, I believe. Do you know what? Notches. The way the old master counted BONES.
 			Grimorio4: I can't remember my dog's name, son. Had him all my life. Last night, half asleep, a very thin voice told me: 'he doesn't remember you either.' And it laughed.
+			GrimorioMenor1: Your Lesser Grimoire unpicked the seam of my favorite shirt and sewed it back with thread of ink. The seam tells a story: it was the list of everyone who's ever worn that shirt. I'm number FOUR.
+			GrimorioMenor2: I sewed the Menor a silk bookmark. It used it once and returned it with a little crease in the corner, like a used handkerchief. Books carry handkerchiefs now. I sewed that handkerchief. I'm old.
+			GrimorioMenor3: Your Menor sat in my sewing room and the needles lined up for it. In a row. Pointing at the door. I won't sew that door for any money: that door sews itself.
+			GrimorioMenor4: The Lesser Grimoire dropped a button in my lap. From a fabric no one weaves anymore, from an age before I was born. Old tailors know what lives in pockets: I don't ask, I SEW.
 		}
 
 		Goblin: {
@@ -2596,6 +2632,10 @@ Pueblo: {
 			Grimorio2: I sold the book a screwdriver. Don't ask. Payment upfront. It was on my doorstep by dawn: STRAIGHT. Mine was CURVED. It straightened the thing out of spite.
 			Grimorio3: There are old goblin machines in the mines. Sealed ones. Don't ask. Near your house, I hear them WAKING UP. A thousand years shut off, and they're nervous.
 			Grimorio4: My grandmother used to say: 'a goblin who hears the Ink never comes home.' Yesterday I heard the Ink. I'm still here, aren't I?... AREN'T I? Tell me you can see me.
+			GrimorioMenor1: Your Lesser Grimoire reforged my wrench: now it tightens in both directions at once. It's impossible. It's beautiful. It's mine and I'm not letting go.
+			GrimorioMenor2: The Menor watched me work and my little hands sped up on their own. I finished a TWO-day job in one afternoon. The client cried. So did I. The warranty covers the tears: it does NOT.
+			GrimorioMenor3: I showed the Lesser Grimoire the blueprint of a perfect machine. It drew the correction with its little eye. The blueprint worked. The blueprint is alive. I named it and sent it to bed.
+			GrimorioMenor4: Workshop rule: whatever bites, gets reforged. The Menor bit me and I reforged it one eye at a time. Kindly. The GOBLIN way, which is the only way.
 		}
 
 		Wizard: {
@@ -2607,6 +2647,10 @@ Pueblo: {
 			Grimorio2: Magic has layers, you know. Light, shadow, life, mind... There is a brand-new layer under your house. It wasn't there before. The book is WRITING it.
 			Grimorio3: I asked the book its name, in the old tongue. It answered with MINE. My birth name. Which I never told it. Which nobody alive knows.
 			Grimorio4: I don't have nightmares anymore, boy. The wizard I am fights them and wins. But last night I dreamed of my own library... my name on every spine. My face on every page.
+			GrimorioMenor1: The three little eyes of your Lesser Grimoire turn like a permanent incantation. I asked what it summons. They blinked in unison and my hat moved on its own. I no longer ask: I THEORIZE.
+			GrimorioMenor2: The Menor stole a spell from my grimoire. It returned it the next day: with half the words… and twice the effect. Magic hasn't been written that way since the breaking. Was IT there?
+			GrimorioMenor3: Your Lesser Grimoire and I played arcane chess. We drew three times. On the fourth, the game ended itself: every piece was looking at your house. I play. IT sets the board.
+			GrimorioMenor4: I showed the Menor my oldest staff. It sniffed it and the gem went dark. Not from fear: from RESPECT. There are hierarchies in the arcane, and your little book just reminded me of mine.
 		}
 
 		Mechanic: {
@@ -2618,10 +2662,14 @@ Pueblo: {
 			Grimorio2: I put a proximity sensor on the book, ha. The sensor died. I put two. Both died. I bought a whole box. The box was OPEN by morning. From the inside.
 			Grimorio3: My pressure gauges read NEGATIVE near your book. Negative, not zero: LESS than zero, like something is sipping the pressure out of the world. And here I thought pressure was an honest number.
 			Grimorio4: I installed a lock on my workshop. Overnight, the lock UNINSTALLED itself. And reinstalled... backwards. Now the shop is locked to ME and open to everything else.
+			GrimorioMenor1: Your Lesser Grimoire nibbles copper wire. The marks are exactly two millimeters apart, all identical. That's not a tooth: that's a gauge with three mouths.
+			GrimorioMenor2: The Menor stared at my circuit and the circuit fixed itself. Do you know what that means to an engineer? A WISH! And do you know the price? The wrench no longer obeys me.
+			GrimorioMenor3: I measured the blinking of its little eyes: a pattern. I translated it. It says 'still functioning.' Who taught a book to say 'still functioning'? And WHY does it say it to me every time I blink?
+			GrimorioMenor4: The Lesser Grimoire sorted my screws by size without touching them. I TOUCHED THEM. Fine. But I dreamed them sorted and woke up to them sorted. Engineering doesn't sleep anymore.
 		}
 
 		Santa: {
-			Mascota1: Ho ho ho... your pet unwrapped the presents EARLY. All of them. And know what it left behind? The coal. Took everything but the coal. Who refuses coal? I like this kid!
+			Mascota1: Ho ho ho... your pet unwrapped the presents EARLY. All of them. And know what it left behind? The coal. Took everything but the coal. Who refuses coal? I like this little one!
 			Mascota2: I knitted your little light a tiny hat. It put it on, checked itself in the frozen lake... and brought me a carrot. There's not a single snowman around, mind you. It's sending me messages. Ho ho ho.
 			Mascota3: Your pet took my sleigh out 'just for a minute.' Came back with stardust on its footprints. It was on the ROOFS, wasn't it? My list of roofs is outdated!
 			Mascota4: Found it asleep, hugging my sack of defective toys. It FIXED them in its sleep, ho ho. Born with workshop spirit. Hired!
@@ -2629,6 +2677,10 @@ Pueblo: {
 			Grimorio2: The reindeer aren't afraid of anything. Of ANYTHING, ho. Last night they refused to fly over your house. They walked back to the stable on their own, silent, staring at their hooves.
 			Grimorio3: The Christmas spirit beats in every house in this town... except yours, son. In yours beats ANOTHER spirit. Older than me. And I knew the FIRST winter.
 			Grimorio4: I left the book a gift, ho ho, out of courtesy. By morning the package was untouched... but RETURNED. With a note: 'keep it. Winter will be needing it.' WHICH winter, son?
+			GrimorioMenor1: Ho, ho, ho… your Lesser Grimoire unwrapped the presents BEFORE Christmas. It took everything except the coal. Who refuses coal? I like it!
+			GrimorioMenor2: I asked the Menor what it wanted for a present. It opened a tiny page: my list — the list of every present in the world… with a little star in the margin. I closed it. I closed it and locked it.
+			GrimorioMenor3: Your Lesser Grimoire sat in my empty sleigh and the reindeer looked at each other. They said nothing. Reindeer never shut up. That night they flew without me: THREE laps, and they left the sleigh warm.
+			GrimorioMenor4: I gave the Menor a jingle bell. It gave it back ringing on its own. Bells don't ring by themselves, friend: something rings them. And whatever rings it — which side of the bell was it standing on?
 		}
 
 		Truffle: {
@@ -2640,6 +2692,10 @@ Pueblo: {
 			Grimorio2: I am the rarest fungus in the world, born from this place's pure light. And last night, for the first time, I understood the bread: knowing that something out there is hungry for YOU.
 			Grimorio3: My house smells of old damp, of forest, of me. Your house smells of ink. You know what else smells of ink, friend? Things that have spent a VERY long time underground, writing.
 			Grimorio4: Fungi share one root, one mind, one heartbeat. Last night the Root dreamed. The Root NEVER dreams. It dreamed of a blank page closing slowly... like an eye. Like ALL the eyes.
+			GrimorioMenor1: Your Lesser Grimoire sniffs me like I'm food. Flattering? Yes. Concerning? Also. We mushrooms know when something is hungry for certain flavors.
+			GrimorioMenor2: Your Menor fell asleep among my spores and the spores dreamed. They dreamed PAGES. I've dreamed in spores forever: those were someone else's. The mushroom lent the dream and the book kept it.
+			GrimorioMenor3: I asked the Lesser Grimoire whether books eat mushrooms. It didn't answer: it licked its little page. Books don't have tongues. THAT was the detail that shut me up.
+			GrimorioMenor4: The Menor followed me all day and my mushroom hat came out shaped like a bookmark. I liked it. I liked it and it scared me, and in the forest those are the same thing.
 		}
 
 		Steampunker: {
@@ -2651,6 +2707,10 @@ Pueblo: {
 			Grimorio2: I built a machine that runs on any fire. ANY fire. Parked it by your house, and the fire went out... grudgingly. Do you know what a grudging fire looks like? GRAY, my dear. Gray.
 			Grimorio3: I lent the book a bronze clock — dropped it nearby by accident, honest. It came back clean. Polished. KEEPING TIME FOR ANOTHER WORLD. I've dismantled it four times: the gears are perfect and the hour is still wrong.
 			Grimorio4: I keep a blueprint of the town: streets, houses, roots, everything. It woke up with an ink stain over YOUR house. I clean it every morning. Every morning, dear. The PAPER is clean! It's the TABLE that trembles!
+			GrimorioMenor1: Your Lesser Grimoire built a walking machine with THREE cogs. I need twelve. It cheats and I need to know how. Is it engineering or is it magic? Both offend me!
+			GrimorioMenor2: The Menor spun my wheels backwards without touching them. The AIR near it touched them. I set a guard-cog on it and the cog resigned. Resigning cogs: that's new for the factory.
+			GrimorioMenor3: I showed the Lesser Grimoire my blueprint of the perfect vehicle. It corrected it: crossed out 'steering wheel' and wrote 'heading.' Crossed out 'seat' and wrote 'throne.' I built the rest as told. The vehicle FLIES. I ordered wheels.
+			GrimorioMenor4: The Menor perched on my boiler and the steam came out in rune shapes. Runes in the steam? That's a signature. My boiler no longer signs in English: it signs in BOOK.
 		}
 
 		DyeTrader: {
@@ -2662,6 +2722,10 @@ Pueblo: {
 			Grimorio2: There are many blacks: ink black, coal black, midnight black. But your book has a black with TEXTURE. A black with PAGES. Nobody should want that black.
 			Grimorio3: I left my dyes drying by the window. They were SORTED by morning. Lightest to darkest. And the darkest one... had moved. In a little puddle. Step by step. Toward your house.
 			Grimorio4: I dyed a sash the exact color of your eyes, as a gift. It was the color of HONEY by dawn... and on the table, the word 'SWEET,' written in red dye. I sold ALL my red dye last month.
+			GrimorioMenor1: Your Lesser Grimoire drips a violet that is NOT in my catalog. I call it 'Menor violet.' The catalog refuses it: the color was already sold before it existed.
+			GrimorioMenor2: The Menor rolled around in my dyes and left little inky footprints across the ceiling. I don't wash anything anymore: I exhibit it. The top dye is the most requested. Who orders the ceiling? People. Strange people.
+			GrimorioMenor3: I dyed a tiny page of the Lesser Grimoire cobalt blue. It woke up violet again, with the cobalt set in the corner like a tip. Do you know what that is? A customer teaching you the trade.
+			GrimorioMenor4: The Menor looked at my barrels and each barrel dyed itself whichever color it was missing. Barrels don't dye themselves. That day they did. I have witnesses: my witnesses don't discuss the matter.
 		}
 
 		PartyGirl: {
@@ -2673,6 +2737,10 @@ Pueblo: {
 			Grimorio2: At my last party I played music till dawn. And at your book's party? The music is NONE. Silence. And silence dances too, you know. It dances very, very close to people.
 			Grimorio3: I threw confetti at the book. I KNOW, I know: you don't throw confetti at books. But nobody had ever thrown ANYTHING at it, right? The confetti just floated there. STILL. At half height. All night. Like it was waiting for permission.
 			Grimorio4: I once dreamed the perfect party: cakes, balloons, music, everyone smiling. And in every smile, a little BLACK THING peeking out between the teeth. In EVERY one. Even mine. I smile with my lips closed now. Have you noticed? Tee-hee! ...Tee.
+			GrimorioMenor1: Your Lesser Grimoire IS the party! It refused the confetti and took the balloons: it holds them up with its stare. The BALLOONS, in the AIR, with a STARE! I adore it!
+			GrimorioMenor2: I put a party hat on the Menor. It took it off by itself, folded into origami, and returned it inside-out. The hat is a crane now. The crane flies. The party doesn't need me anymore!
+			GrimorioMenor3: The Lesser Grimoire dimmed my lights with one blink and lit them with two. Two? Lights come in TWOS? They do now: when IT lights them, they come in twos. I don't use switches anymore: I use invitations.
+			GrimorioMenor4: The Menor stared at my piñata and the piñata opened itself. INWARD. Who breaks a piñata inward? Something that wants to see what's inside… before everyone else sees it.
 		}
 
 		Cyborg: {
@@ -2684,6 +2752,10 @@ Pueblo: {
 			Grimorio2: I don't sleep. I download. And last night's download contained a new file. It's called 'memories.' I don't have memories, brother. I MANUFACTURED some last night, without meaning to. Whose are they?
 			Grimorio3: My metal cools 0.3 degrees whenever you pass with the book. Measured, calibrated, confirmed. Humans have a word for it: 'shudder.' We live it with data: metal FEELS, brother. And your book? Your book it does not like.
 			Grimorio4: One night I shut down. ME. Alone. No command, no error, no storm. I woke up seated backwards, staring at your house, battery at 200%. Someone charged me, brother. Someone looked inside me... and returned me with a tip.
+			GrimorioMenor1: Your Lesser Grimoire chases my laser dot. I do NOT have a laser dot. My questions are two: where does it come from… and why does it aim at ME when I sleep?
+			GrimorioMenor2: The Menor blinked in code. I decoded it: 'small unit: watched.' Watched by whom? By it. Watched for what? The code didn't say. The SILENCE after the code said it.
+			GrimorioMenor3: I logged ten bites from the Lesser Grimoire on my chassis. Unit by unit. My grievance protocol is ACTIVE, brother. The maintenance fee on my good mood is billed to YOU.
+			GrimorioMenor4: The Menor plugged into my diagnostic port and read EVERYTHING. Then it closed my chest plate softly, the way you close a book that's already been read. That was yesterday. Today I don't sleep.
 		}
 
 		Painter: {
@@ -2695,6 +2767,10 @@ Pueblo: {
 			Grimorio2: I don't fear darkness. I paint it, I tame it, I frame it. But that book's darkness refuses to be painted. It stays BEHIND the paint. I paint an apple and the apple is there, sure... but behind it there is a page, watching.
 			Grimorio3: My teacher used to say: 'every painting needs light.' Near your house, the light arrives wrong. Not gray, not late — TIRED. I have to rest after painting your street. Does light get tired now? It does.
 			Grimorio4: I painted the Merchant's grandmother from memory, with all my love. When I finished, the grandmother in the frame was not the grandmother: it was a page WEARING her face. I burned it. The grandmother thanked me. THE grandmother. Thanked. Me.
+			GrimorioMenor1: Your Lesser Grimoire crossed my easel and left three little inked footprints in a row! I titled it 'The Signature.' Sold within the hour. Bring me more — the market knows a master when it sees one!
+			GrimorioMenor2: The Menor looked at my still lifes and sighed. IT SIGHED. I repainted the still life with one extra page on the table. The sighing stopped. I now paint for the critic who never speaks: the best client in the house.
+			GrimorioMenor3: I painted the Lesser Grimoire's portrait. The three little eyes came out on their own, with their own light. I didn't mix that light: the canvas brought it. No one else paints on that canvas now.
+			GrimorioMenor4: The Menor corrected my perspective: one line, in the margin. The line was perfect. I've spent thirty years looking for that line. You borrowed it from a book, and the book just gave it away. BRING ME MORE!
 		}
 
 		WitchDoctor: {
@@ -2706,6 +2782,10 @@ Pueblo: {
 			Grimorio2: I asked the ancestors about the book. They answered with a dance I had never seen them dance: slow, arms covering their eyes. The dance of the THINGS THAT EAT THE DEAD.
 			Grimorio3: My village burned its books once. That is why I am the last. I carried a torch that night, my boy. And I tell you: the smoke of those books... and the gaze of YOUR book... are the exact same color.
 			Grimorio4: I dreamed of my grandfather. He spoke of you, of your house, of the book. I asked him everything, on my knees. And he answered... in YOUR BOOK'S VOICE. I woke with ink in my mouth. Did I write something in the night? With MY OWN HAND?
+			GrimorioMenor1: The spirits call your Lesser Grimoire 'the small hungry one.' Spirits do not baptize lightly. When they baptize, I take notes.
+			GrimorioMenor2: The Menor sat in my offering circle and the candles leaned toward it. ALL of them. Spirit candles don't lean: they TOWER. That night they leaned. The offering went to the book.
+			GrimorioMenor3: I asked the Lesser Grimoire about dreams. It answered with a blank page. The spirits laughed. The blank page is the answer: never ask hunger about sleep.
+			GrimorioMenor4: Your Menor followed me to the graveyard and the dead got comfortable. In graveyards the dead are NEVER comfortable. That day: they were. I closed the graveyard out of respect. The respect was for the book.
 		}
 
 		Pirate: {
@@ -2717,6 +2797,10 @@ Pueblo: {
 			Grimorio2: Me first captain told me: 'the sea don't hate, the sea COLLECTS.' Yer book don't hate either, lad. Somethin' out there is COUNTIN' what it's owed... an' the whole town's gettin' writ into the ledger.
 			Grimorio3: The tide goes out when ye pass the pier. THE TIDE, lad. The water gathers itself up like a widow's skirt. The fish don't jump. The shellfish close. Even the foam leaves. What did ye promise the sea? Better: what did the BOOK promise it?
 			Grimorio4: I brought a chest o' black ink from the last raid — devil's brand! Paid DOUBLE t' never open it. Last night I opened it, devil judge me. Ye know what was inside? Pages. Blank ones. An' this mornin'... THREE WERE MISSING! Who enters me hold, lad? WHO ENTERS ME HOLD?!
+			GrimorioMenor1: Your Lesser Grimoire marked my treasure map with an ink X! My X, my ink, my map… and the treasure WAS THERE! Who taught a book to bury? Who taught a PIRATE?
+			GrimorioMenor2: The Menor perched on my shoulder and the parrot moved out. THE PARROT! Twenty years on that shoulder. The shoulder belongs to the book now. Yaaar… apparently.
+			GrimorioMenor3: Your Menor bit my anchor claw and the claw came out BENT! You know what that means at sea? A bad omen. And you know what it means on my ship? A WARNING: whatever bends claws, bends ships.
+			GrimorioMenor4: The Lesser Grimoire read my logbook in one night. The next morning the log came back corrected: PERFECT spelling, the heading marked… toward your house. I didn't mark that heading. The heading marked itself.
 		}
 
 		Stylist: {
@@ -2728,6 +2812,10 @@ Pueblo: {
 			Grimorio2: I won't cut a single hair on anyone carrying that book. Why? Yesterday I washed a client's hair and the water came out BLACK. She doesn't dye. I don't stock black dye. Neither does the tub.
 			Grimorio3: My new mirror refuses to work: it fogs up, it smudges, it covers itself. I asked the river witch why. She said: 'mirrors show what's coming, and yours DOESN'T WANT TO.' I still cut hair. With my back to the mirror. Always.
 			Grimorio4: The client with the book? She never came back. She told me it whispered 'new hair, new face, new name' while she slept. She left town without goodbyes. With PERFECT hair. Nobody leaves town with perfect hair, least of all HER — she left gum on my chair for years! People only leave perfect... when they aren't themselves anymore.
+			GrimorioMenor1: Your Lesser Grimoire sleeps on my clients' heads and leaves them INK-WAVES! I charge extra for 'library waves,' and it's not even a lie!
+			GrimorioMenor2: The Menor stared at my comb and the comb combed itself. In MID-AIR. I've been styling hair since I was ten: never seen that. The comb isn't mine anymore: it belongs to whatever looks at it like that.
+			GrimorioMenor3: I trimmed a torn page for the Lesser Grimoire. The page woke up with bangs. Books with bangs! A new client saw it and asked for 'the book cut.' The book cut is ME.
+			GrimorioMenor4: The Menor picked my salon's color of the month: ink violet. Violet dye doesn't exist. I mixed it. It DOES now. The salon smells like an old page and the queue rounds the corner: the whole town wants to smell like a book.
 		}
 
 		Angler: {
@@ -2739,6 +2827,10 @@ Pueblo: {
 			Grimorio2: The lake fish are coming up with NO EYES! The fish! Sockets all cleaned out! You know how much luck an eyeless fish brings? NONE! I know! I catch them! I look at them! I DON'T SLEEP!
 			Grimorio3: My new rod came up WET WITH FRESHWATER! Fresh, not salty! Sea water isn't fresh, dummy! The rod's soaked in OTHER water! From a river that runs UNDERNEATH your house and isn't on ANY map!
 			Grimorio4: I cast my net last night and pulled up a PAGE! A sheet of paper, tangled in the net, WET and LICKING the water! I threw it back, glub, gross! And today? Today it was back! SUNBATHING IN MY BOAT! LOOKING AT ME! THE SAME PAGE! IT KNOWS ME!
+			GrimorioMenor1: Your Lesser Grimoire spends HOURS staring at my fish tank! Something with three eyes smiling at my dinner for three days straight! I don't eat fish in front of it anymore!
+			GrimorioMenor2: The Menor taught me to fish without a hook: it leaned over the water and the fish apologized. What did you say to them, book? Fish don't apologize! That day they did — I saw it, and I didn't catch a thing!
+			GrimorioMenor3: The Lesser Grimoire bit MY HOOK and the hook came out bent! You know what bending a hook in one bite takes? Not even the giant squid manages that! And the hook was a spare, alright!
+			GrimorioMenor4: The Menor sat on my bait box and the worms lined up. Worms don't line up. That day they did. I fished with respect and threw everything back: the lake knows who's in charge.
 		}
 
 		Tavernkeep: {
@@ -2750,6 +2842,10 @@ Pueblo: {
 			Grimorio2: The defense of eternity cost every one of us something. Me, it cost my sleep: I've slept with the tavern open ever since. Last night I came down, and the tables were SET. Set with ink, friend. Three tables. Three rounds. FOR WHOM?
 			Grimorio3: In the war I learned to hear the calm before a storm. This town has THAT calm, friend. The storm is yours. You carry it on your back, in a satchel, with pages. I pour the last round early these days. Just in case.
 			Grimorio4: The grimoire sits at the far table. No— it doesn't bother anyone: it SITS. That table's been reserved since the war, friend, for the one who comes to COLLECT. I keep it clean, with a mug on it. The mug's EMPTY by morning. The dent in the cushion, fresh. Nobody sits there. The book sits there... when you're not looking.
+			GrimorioMenor1: Your Lesser Grimoire licks the mugs until they shine! On the INSIDE, friend! The kid eats free for life!
+			GrimorioMenor2: The Menor perched on my mead barrel and the mead aged a whole season in one night. The house calls it 'the Menor barrel.' The barrel doesn't pour for everyone: the barrel pours for whoever the book looks at.
+			GrimorioMenor3: I served the Lesser Grimoire a single drop in a saucer. It didn't touch it: it SNIFFED it. And by morning the drop had gone old. How does a drop age overnight? Ask time itself: that night, time was on its side.
+			GrimorioMenor4: The Menor tells the saloon's stories better than I do. The regulars ask for 'the book's version.' I tell mine and the book puts on its ASTONISHED eyes. Three astonished eyes. THAT'S my audience!
 		}
 
 		Golfer: {
@@ -2761,6 +2857,10 @@ Pueblo: {
 			Grimorio2: The fairway bends toward your house. It isn't the wind — it's the GRASS. It grows tilted, so the ball rolls your way on its own. Don't talk to me about greens — the green is SACRED! I went out at night to straighten it, blade by blade. By dawn it was worse. By dawn it was... a SPIRAL.
 			Grimorio3: I played at night, first time in my life, you know? I had to. The ball glowed without me touching it. Glowed... and whistled, softly. I followed it. Ten holes in silence, son. Ten. At the end, the ball winked at me... and I buried it right there. Right THERE. A new hole. No flag. The hole nobody will ever play.
 			Grimorio4: At the club they ask about your book — why not bring it to domino afternoons, it doesn't bite, it doesn't bite! I told them the book doesn't play. You know what they said? That last night, someone PLAYED FOR them. Won every game. Nobody saw anybody. And the tiles... the tiles were polished by morning. Polished by something that DROOLS, son.
+			GrimorioMenor1: Your Lesser Grimoire brought me my ball! And everyone else's! And one made of OLD WOOD with initials it's better not to ask about!
+			GrimorioMenor2: The Menor swapped my ball for an EYE on hole 9. MID-SWING! The eye tracked the trajectory… and the trajectory corrected itself. The best shot of my life, and it WASN'T ME!
+			GrimorioMenor3: I taught the Lesser Grimoire to read the wind. It already knew: the wind TOLD it. Now the wind blows the wrong way for me on 18. The wind has an owner, and the owner has three eyelids.
+			GrimorioMenor4: The Menor wrote my handicap on a tiny page. The handicap went DOWN. The book is TRAINING me! You know what that is? A caddie that never talks, never charges… and watches. Whatever watches like that isn't charging: it's INVESTING.
 		}
 
 		Zoologist: {
@@ -2769,9 +2869,13 @@ Pueblo: {
 			Mascota3: Your pet brought me a feather from a bird that DOESN'T EXIST! And you know what I did? Catalogued it, obviously! New page, new ink, new heart. The feather sings softly at dusk. AND NOW THE PAGE SINGS TOO! I honestly no longer know which one I catalogued!
 			Mascota4: I saw her sleeping with the wolves! THE. WOLVES. The whole pack in a circle, your hatchling in the middle, all warm. Wolves don't adopt much, you know. Pups, the moon... She was the first thing they adopted in years! I cried twice!
 			Grimorio1: Animals will not go near the book. And listen closely: it isn't fear. Bunnies fear the fox, and they RUN. This is something ELSE. It's RESPECT — the kind deer give an old wolf. And the wolves... the wolves lower their heads and walk sideways. Like something that used to hunt BIGGER things.
-			Grimorio2: There's one page the bestiary has refused me since I was a little girl: the perfect animal, the one nobody has ever seen. Yesterday morning it was WRITTEN. In my handwriting. I did not write it. It says: 'we all saw it, and we all forgot.' Who is WE, friend? Who is ALL?
+			Grimorio2: There's one page the bestiary has refused me for years and years: the perfect animal, the one nobody has ever seen. Yesterday morning it was WRITTEN. In my handwriting. I did not write it. It says: 'we all saw it, and we all forgot.' Who is WE, friend? Who is ALL?
 			Grimorio3: There's a trail in the woods the deer will not cross. Not for food, not fleeing, not for FIRE. My grandmother called it 'the writer's path.' You know where it goes? In circles. It circles YOUR house, friend. And every year... it gets WIDER.
 			Grimorio4: I'm a zoologist: life is my trade. I can smell what a forest is dying of. This town smells of life. Your house smells of ink. And your BOOK, friend... your book smells like every empty cage in the world, all at once. You know what empty cages smell like? Like waiting.
+			GrimorioMenor1: Your Lesser Grimoire has its own bestiary page… written by ITSELF! In its own hand! And the handwriting changes when I look twice! That is the most BESTIARY thing I have ever bestiaried!
+			GrimorioMenor2: The Menor fits no category: not a bird, not a mammal, not even a book. I made a new category: 'lesser.' The bestiary accepted it without a murmur. The bestiary NEVER accepts without a murmur.
+			GrimorioMenor3: I watched the Lesser Grimoire all afternoon: its three little eyes blink in the order of the lunar phases. I noted the pattern. The next morning the page had a note: 'well observed.' THE BESTIARY GRADED ME!
+			GrimorioMenor4: The Menor and I played 'who blinks less.' It won. It ALWAYS wins. On the thirteenth match it winked one little eye at me… for sport. Books don't lose: they LET you win. That day I stopped counting blinks and started counting days.
 		}
 
 		Princess: {
@@ -2783,46 +2887,54 @@ Pueblo: {
 			Grimorio2: A prince once told me: 'every kingdom has a debt, and every debt has a collector.' He said it about kings of flesh and blood. Your book is not a kingdom, friend. It is the COLLECTOR. And last night, my door knocker sounded. Three times. Someone rang it the way one requests an audience. I didn't open. By morning the knocker was WORN. Worn, as if a thousand hands had waited on it.
 			Grimorio3: I wrote in my diary: 'today the town is happy.' By dawn it read: 'today the town is written.' No, I didn't change it. And you know the worst part? The town woke up happy. PERFECTLY happy. Have you ever seen perfect happiness? Me neither. Until today. Today I saw it on every face... except yours.
 			Grimorio4: Papa the king taught me to hear what people don't say. And this town says NOTHING, friend: it just smiles with clenched teeth and looks at the floor when you pass with that book. And you know what else I heard last night, window open? People CHEWING in their sleep. All at the same hour. All in the same rhythm. That isn't hunger, friend. That's REHEARSAL.
+			GrimorioMenor1: Your Lesser Grimoire is the most courteous creature in the realm! It bowed to me… with all THREE eyelids at once! And dipped its flight so my crown wouldn't slip! AAAY!
+			GrimorioMenor2: I signed a peace treaty between the Menor and the baker's cat: one inky paw-print and one floury paw-print! My first peace WITHOUT kingdoms! The book added a clause: the clause was a drawing of the cat ASLEEP.
+			GrimorioMenor3: The Lesser Grimoire takes tea with me. When I pass the cookies it doesn't eat them: it counts them, leaves me the biggest one… and keeps the CRUMB. The crumb is its. In this realm we respect the crumb.
+			GrimorioMenor4: I asked the Menor what it wishes for the realm. It opened a tiny page: my coronation portrait… with the crown just a little lower. I understood. In this realm, even crowns know how to bow.
 		}
 
 		Genericos: {
 			Mascota1: Yesterday I saw your pet's little eyes looking at me through my window. It stayed a good while. I left a glass of water on the sill, out of courtesy. It was empty by morning. Thank you, hatchling!
 			Mascota2: Your pet is the soul of the neighborhood: it greets people, it plays, it steals bread. It STEALS A LOAF, you understand? A whole loaf, floating, with its owner floating after it, apologizing. The bread never turned up. The apology ended up coming from the entire town.
 			Mascota3: I was making my dinner when your pet ate the plate and knocked the food on the floor. Why would it only eat the plate? Who teaches a light-hatchling its manners in REVERSE?
-			Mascota4: Your little light plays hide-and-seek with the town's children. They never find her: kids look under the beds, and your pet... hides in their SHADOWS, you know? The shadows go very, very still when she's inside. What a lovely game!... Right? ...Right?
+			Mascota4: Your little light plays hide-and-seek with the scarecrows of the wheat field. They never find her: she hides in their SHADOWS, you know? The shadows go very, very still when she's inside. What a lovely game!... Right? ...Right?
 			Grimorio1: I don't know what that book is. I don't want to know. But last night, every door in town jammed shut by itself... from the INSIDE, you understand? From the inside. Like the houses were locking something IN.
 			Grimorio2: Notice how nobody dreams anymore? Ask someone what they dreamed last night: they'll look at you with a little smile and say 'nothing.' EVERYONE dreams 'nothing' since you arrived with that book. I used to dream. I was good at it.
 			Grimorio3: I heard pages turning in your house. All night. How many pages does that book have? I counted the turns: two hundred, three hundred... I fell asleep counting. I dreamed the next page. I don't wake up wanting to count things anymore.
 			Grimorio4: I left my laundry out overnight. It came back FOLDED. Folded well, mind you? Fine creases, long hands, cold fingers. Nobody complains about folded laundry... until it happens to YOURS, and you notice it was folded into the exact shape of a PAGE.
+			GrimorioMenor1: Yesterday I saw the three little eyes of your Lesser Grimoire watching me through my window. All night. They didn't blink once. Neither did I, that night. What an… insistent little thing.
+			GrimorioMenor2: Your Menor followed me while I swept the street and left little lights wherever I'd swept. It saves me the night. The street came out cleaner than in daylight: whoever lights the way, also tidies it.
+			GrimorioMenor3: Does your Lesser Grimoire read? I found it asleep on the district ledger. The page on 'noisy pets' woke up bitten, and the one on 'noisy books' woke up UNDERLINED.
+			GrimorioMenor4: It played with the town hall weathervane and now the north stares at me funny. Not broken: it STARES. Who taught it that? Those of us from the north prefer not to know.
 		}
 	}
 
 	Reclamos: {
-		Guide: Yes? Oh. It's you. Your pet bit my ankle while I was checking my maps. Twice. The second one hurt MORE, for the record. What a... determined little thing.
-		Merchant: Before we discuss prices: that thing of yours owes me FIVE coins in bite fees. Nothing personal. Everything costs something here. Even your pet's affection gets invoiced.
-		Nurse: You! Exactly you! If your pet bites me mid-treatment one more time, YOU are giving the next injection. Under my supervision. Without anesthesia. Are we clear?
-		ArmsDealer: Look here, kid. That glowing thing of yours bit me while I was reloading. If my shotgun had gotten spooked, this town would have a brand-new hole in it, and you'd be paying for it. Rein it in.
-		Dryad: Nature forgives; I almost do. But your light-creature gnawed my arm, and my herbs LAUGHED. Do plants laugh? Before today: no.
-		Demolitionist: Your critter bit me while I was holding dynamite! DYNAMITE! One sneeze and the whole block goes sky-high! Teach it manners or I'll teach it ballistics, ha! Joking! ...JOKING!
-		Clothier: Ah, son... at my age, bones creak on their own. No help needed. Your little spark nibbled on my leg. Tell her this tailor is all out of... what's the word? Ah, yes! Juice.
-		Goblin: Listen well, human: if your little light-eyes enters my workshop again, I will reforge her into BITE MARKS. With warranty. Without warranty. NO warranty, do you read my anger?!
-		Wizard: *sigh* When I was an apprentice, magical creatures respected their elders... and their calves. Yours sampled mine. Old wizard tastes salty, doesn't he, you shameless little hatchling?
-		Mechanic: Your pet lay down on my workbench. On TOP of the new circuit. Do you know what star-spit does to copper? Neither do I, AND I HATE NOT KNOWING! I HATE IT!
-		Santa: Ho, ho... ho. No. No presents for that thing until January. And I caught it chewing MY list, too. MINE. Do you have any idea what good paper costs?!
-		Truffle: She sniffs me like a main course, and now she BITES TOO, friend! Talking mushrooms are NOT food! The key word is TAL-KING! Teach it to her!
-		Steampunker: Your hatchling played with my cogs, and now one spins backwards. BACKWARDS, and smiling. Do cogs smile? THAT one does. And it won't let me take it apart. It's MINE, from MY toolbox!
-		DyeTrader: Your pet knocked over my dyes! Purple floor, purple cat, PURPLE ME! And you know what? It brings out my eyes. THAT IS NOT THE POINT: there were FOUR barrels!
-		PartyGirl: I love your pet, you know? LOVE it. But it bit me MID-PARTY. The lights dimmed with embarrassment — the LIGHTS, and they don't even HAVE faces! No idea how they pulled that off!
+		Guide: Yes? Oh. It's you. Your Lesser Grimoire bit my ankle while I was checking my maps. Twice. The second one hurt MORE, for the record. What a... determined little thing.
+		Merchant: Before we discuss prices: the Lesser Grimoire owes me FIVE coins in bite fees. Nothing personal. Everything costs something here. Even your book's ink gets invoiced.
+		Nurse: You! Exactly you! If your Lesser Grimoire bites me mid-treatment one more time, YOU are giving the next injection. Under my supervision. Without anesthesia. Are we clear?
+		ArmsDealer: Look here, friend. Your mini book bit me while I was reloading. If my shotgun had gotten spooked, this town would have a brand-new hole in it, and you'd be paying for it. Rein it in.
+		Dryad: Nature forgives; I almost do. But your Lesser Grimoire gnawed my arm, and my herbs LAUGHED. Do plants laugh? Before today: no.
+		Demolitionist: The Lesser Grimoire bit me while I was holding dynamite! DYNAMITE! One sneeze and the whole block goes sky-high! Teach it manners or I'll teach it ballistics, ha! Joking! ...JOKING!
+		Clothier: Ah, friend... at my age, bones creak on their own. No help needed. The Lesser Grimoire nibbled on my leg. Tell it this tailor is all out of... what's the word? Ah, yes! Juice.
+		Goblin: Listen well, human: if the Lesser Grimoire enters my workshop again, I will reforge it into BITE MARKS. With warranty. Without warranty. NO warranty, do you read my anger?!
+		Wizard: *sigh* When I was an apprentice, grimoires respected their elders... and their calves. Yours, the Menor, sampled mine. Old wizard tastes salty, doesn't it, you shameless little book?
+		Mechanic: The Lesser Grimoire lay down on my workbench. On TOP of the new circuit. Do you know what page-ink does to copper? Neither do I, AND I HATE NOT KNOWING! I HATE IT!
+		Santa: Ho, ho... ho. No. No presents for that book until January. And I caught it chewing MY list, too. MINE. Do you have any idea what good paper costs?!
+		Truffle: It sniffs me like a main course, and now it BITES TOO, friend! Talking mushrooms are NOT food! The key word is TAL-KING! Teach it that!
+		Steampunker: Your Menor played with my cogs, and now one spins backwards. BACKWARDS, and smiling. Do cogs smile? THAT one does. And it won't let me take it apart. It's MINE, from MY toolbox!
+		DyeTrader: The Lesser Grimoire knocked over my dyes! Purple floor, purple cat, PURPLE ME! And you know what? It brings out my eyes. THAT IS NOT THE POINT: there were FOUR barrels!
+		PartyGirl: I love your mini book, you know? LOVE it. But it bit me MID-PARTY. The lights dimmed with embarrassment — the LIGHTS, and they don't even HAVE faces! No idea how it pulled that off!
 		Cyborg: I logged ten impacts of 1 unit of damage. TEN. Data-precise: ten. My grievance protocol is ACTIVE, brother. The maintenance fee on my good mood is billed to YOU.
-		Painter: That bright little thing crossed my studio, and my canvases woke up with... teeth marks of light? It's art. ANNOYING art, but art. Next time, she can ENROLL as a muse like everybody else!
-		WitchDoctor: The spirits laughed when your pet bit me. LAUGHED, my boy. Do you know what it is when the DEAD laugh at you, to your face? I don't want you to find out either. Pay the offering.
-		Pirate: No cannon ever cannonaded me like yer hatchling! Ten bites, an' I counted 'em the way I count me coins! An' NOT ONE of 'em in the good way! Yaaar... with rage!
-		Stylist: She bit me in the middle of a haircut! The CLIENT'S haircut! The client's never coming back, the haircut came out perfect (my work, obviously), and the panic got left behind as a tip. FOR ME!
-		Angler: Your pet bit me and I fell in the lake! ME! I never fall in the lake — the lake falls in with ME! Glub! That doesn't wash out, you traitorous spark!
-		Tavernkeep: That spark of yours emptied a whole mug with her teeth! Do you know what that IS, friend? Not even in the eternal war did anyone touch the mugs! Men DIED for less there!
-		Golfer: Your pet stole my ball on hole 9! MID-SWING! Do you know what a lost birdie IS? DO YOU? Even the wind has never done that to me, and the wind is my NEMESIS!
-		Zoologist: I logged ten bites in my bestiary. TEN. Timestamped and everything — I'm a PROFESSIONAL! You'd better pray her page doesn't change sections from 'friendly.' Do I make myself clear?
-		Princess: As a princess I must be kind, so I say this with a great deal of love: kindly control your little star, yes? PLEEEASE! ...Said with ALL available diplomatic affection. Which is a lot!
-		Genericos: Ah, it's you. Look, about that bright little thing of yours... tell it the neighbors have started counting. We KNOW what it did. We're just being polite about it. For now.
+		Painter: The Lesser Grimoire crossed my studio, and my canvases woke up with... teeth marks of ink? It's art. ANNOYING art, but art. Next time, it can ENROLL as a muse like everybody else!
+		WitchDoctor: The spirits laughed when the Menor bit me. LAUGHED, friend. Do you know what it is when the DEAD laugh at you, to your face? I don't want you to find out either. Pay the offering.
+		Pirate: No cannon ever cannonaded me like your Lesser Grimoire! Ten bites, an' I counted 'em the way I count me coins! An' NOT ONE of 'em in the good way! Yaaar... with rage!
+		Stylist: It bit me in the middle of a haircut! The CLIENT'S haircut! The client's never coming back, the haircut came out perfect (my work, obviously), and the panic got left behind as a tip. FOR ME!
+		Angler: The Lesser Grimoire bit me and I fell in the lake! ME! I never fall in the lake — the lake falls in with ME! Glub! That doesn't wash out, you traitorous book!
+		Tavernkeep: That Lesser Grimoire of yours emptied a whole mug with its teeth! Do you know what that IS, friend? Not even in the eternal war did anyone touch the mugs! Men DIED for less there!
+		Golfer: The Lesser Grimoire stole my ball on hole 9! MID-SWING! Do you know what a lost birdie IS? DO YOU? Even the wind has never done that to me, and the wind is my NEMESIS!
+		Zoologist: I logged ten bites from the Menor in my bestiary. TEN. Timestamped and everything — I'm a PROFESSIONAL! You'd better pray its page doesn't change sections. Do I make myself clear?
+		Princess: As a princess I must be kind, so I say this with a great deal of love: kindly control your Lesser Grimoire, yes? PLEEEASE! ...Said with ALL available diplomatic affection. Which is a lot!
+		Genericos: Ah, it's you. Look, about the Lesser Grimoire... tell it the neighbors have started counting. We KNOW what it did. We're just being polite about it. For now.
 	}
 }

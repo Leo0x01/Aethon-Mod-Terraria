@@ -64,6 +64,18 @@ namespace AethonMod.Content.NPCs
         {
             Main.npcFrameCount[Type] = 1;
             // El DisplayName vive en la localización (NPCs.GrimorioDormido).
+            // v6.50.127 — LA LETRA: «el botón de felicidad en el grimorio
+            // del eterno es inútil». El botón «Felicidad» de la ventana de
+            // diálogo lo dibuja vanilla SIEMPRE que el NPC trae
+            // HappinessReport (ShopHelper.ProcessMood — descompilado)… y
+            // para un libro DORMIDO el humor es un disparate. El apagón
+            // existe y es de fábrica: NoTownNPCHappiness →
+            // IsNotReallyTownNPC → ProcessMood retorna con el reporte EN
+            // BLANCO → el bloque del botón (que solo se dibuja si
+            // HappinessReport != "") se lo salta entero. Una línea, el
+            // mecanismo exacto de vanilla (el mismo del mercader
+            // esqueleto y las mascotas de pueblo).
+            NPCID.Sets.NoTownNPCHappiness[Type] = true;
         }
 
         public override void SetDefaults()
@@ -274,10 +286,26 @@ namespace AethonMod.Content.NPCs
             if (LaCaidaSistema.TieneGrimorio(yo))
                 return Language.GetTextValue("Mods.AethonMod.Caida.YaTienes");
 
-            // LA PRESENTACIÓN: el libro DESPIERTA al sentir la mano (4-6
-            // frases — habla por primera vez y promete hablar a los
-            // PENSAMIENTOS: los diálogos flotantes de EcoLib).
-            return Language.GetTextValue("Mods.AethonMod.Caida.Presentacion");
+            // v6.50.127 — LA LISTA EXCLUSIVA DEL DORMIDO (la letra:
+            // «mejorar el dialogo del grimorio eterno cuando este
+            // dormido y solo debe decir una lista de dialogos exclusiva
+            // de esa ocasion, no deben tener nada que ver con otros
+            // dialogos»). LA PRIMERA VEZ es la PRESENTACIÓN de siempre
+            // (habla por primera vez — el pacto de la .117); la marca
+            // viaja en ai[3] con el cable (netAlways: todas las
+            // pantallas y la próxima sesión la conocen). DESPUÉS: SOLO
+            // el sueño — Caida.Dormido1..8, un repertorio que no se
+            // cruza con NINGÚN otro diálogo del mod (ni la voz morada
+            // del Eterno despierto, ni los chismes del pueblo, ni los
+            // reclamos): puro libro soñando en su cráter.
+            if (NPC.ai[3] <= 0f)
+            {
+                NPC.ai[3] = 1f;
+                if (Main.netMode != NetmodeID.MultiplayerClient) NPC.netUpdate = true;
+                return Language.GetTextValue("Mods.AethonMod.Caida.Presentacion");
+            }
+            return Language.GetTextValue(
+                $"Mods.AethonMod.Caida.Dormido{1 + Main.rand.Next(8)}");
         }
 
         public override void SetChatButtons(ref string button, ref string button2)

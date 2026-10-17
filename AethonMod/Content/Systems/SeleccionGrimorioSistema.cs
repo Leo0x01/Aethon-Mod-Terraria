@@ -45,6 +45,16 @@ namespace AethonMod.Content.Systems
     //  FÓRMULAS EXACTAS de vanilla (DrawSunAndMoon descompilado: en el
     //  menú bgTopY = 0 — DrawBackground lo fija) para que el libro vuele
     //  a donde el cielo REAL tiene su estrella.
+    //
+    //  EL PLANO DEL DIBUJADO (v6.50.127 — descompilado del Main.Draw
+    //  real): el motor abre SU lote (Deferred·AlphaBlend·LinearClamp·
+    //  None·Rasterizer·UIScaleMatrix) ANTES de DrawMenu… pero la
+    //  ÚLTIMA instrucción de DrawMenu es un spriteBatch.End() (el lote
+    //  del cursor y el velo del fade se cierran ahí). A PostDrawMenu
+    //  se llega, pues, con el lote CERRADO: el vagabundo abre SUS dos
+    //  lotes propios encima de todo y devuelve el frame CERRADO, como
+    //  estaba (y si algún día llegara ABIERTO, se tantea y se reabre
+    //  al salir — el contrato de siempre).
     // ======================================================================
     public class SeleccionGrimorioSistema : ModSystem
     {
@@ -519,15 +529,24 @@ namespace AethonMod.Content.Systems
         {
             SpriteBatch sb = Main.spriteBatch;
 
-            // EL ESTADO DEL MENÚ (leído del Main.Draw descompilado): antes
-            // de DrawMenu el motor abre SU lote (Deferred·AlphaBlend·
-            // LinearClamp·None·Rasterizer·UIScaleMatrix) y JUSTO después
-            // de PostDrawMenu la rama del menú hace return — el lote que
-            // dejemos aquí es el lote que se lleva el frame. Se restaura
-            // EXACTO; y si por cualquier razón no hubiera lote abierto, el
-            // primer End falla y el vagabundo simplemente no molesta.
-            try { sb.End(); }
-            catch { return; }
+            // v6.50.127 — EL TANTEO DEL LOTE (el bug del VAGABUNDO MUDO,
+            // la letra del usuario: «la mascota solo desaparece del
+            // recuadro y no sucede nada»): la .126 asumía que a
+            // PostDrawMenu el lote del menú llegaba ABIERTO y hacía
+            // «try End catch return». PERO el Main.Draw descompilado
+            // (2026.08.3.0) cuenta OTRA cosa: la ÚLTIMA instrucción de
+            // DrawMenu es un spriteBatch.End() (el lote del cursor y el
+            // velo del fade se CIERRAN). A PostDrawMenu se llega, pues,
+            // con el lote CERRADO — el End estallaba en
+            // InvalidOperationException, el catch se lo tragaba y el
+            // vagabundo NO NACÍA: cada frame, en silencio, para siempre.
+            // AHORA SE TANTEA: si el lote llegó ABIERTO se cierra (y se
+            // REABRE al salir, como pedía el contrato); si llegó CERRADO
+            // — lo normal — se dibuja DIRECTO y se deja CERRADO: el
+            // estado EXACTO en el que vanilla entregó el frame.
+            bool abiertoAlLlegar;
+            try { sb.End(); abiertoAlLlegar = true; }
+            catch { abiertoAlLlegar = false; }
 
             // El lote ALFA (el cuerpo del libro, los ojos, las manchas del logo).
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -553,12 +572,16 @@ namespace AethonMod.Content.Systems
             }
             catch { }
 
-            // EL RETORNO EXACTO al estado del menú (la rama del menú
-            // devuelve el frame con este lote abierto).
+            // EL RETORNO al estado de llegada: si el lote llegó ABIERTO
+            // se reabre con el estado del menú (el contrato de siempre);
+            // si llegó CERRADO — lo que DrawMenu deja tras su último
+            // End — se queda CERRADO: el frame termina como vanilla lo
+            // terminó, y el vagabundo ya dibujó su plano encima.
             sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None,
-                Main.Rasterizer, null, Main.UIScaleMatrix);
+            if (abiertoAlLlegar)
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, Main.UIScaleMatrix);
         }
 
         /// <summary>Las MANCHAS DE TINTA sobre el título (acumuladas por

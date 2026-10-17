@@ -317,17 +317,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             switch (e.Modo)
             {
                 case MODO_NORMAL:
-                    // v6.50.126 — EL PRIMER TICK DEL ABURRIMIENTO: la
-                    // moneda del easteregg (UNA VEZ por episodio — la
-                    // horda no espanta cada segundo): 30% LA PLAGA DEL
-                    // CONEJO BLANCO (Re:Zero — el maná quieto del dueño
-                    // la convoca), 70% la vida de siempre (vecinos…).
-                    if (e.TicksQuieto == TICKS_AFK)
+                    // v6.50.127 — LA MONEDA QUE NO SABÍA REINTENTAR (la
+                    // letra: «el evento de los conejos no se activa»):
+                    // la .126 la tiraba UNA sola vez, en el tick EXACTO
+                    // 3600 — si fallaba (70% de las veces) y no había
+                    // misión de vecinos que reseteara el reloj, la horda
+                    // JAMÁS volvía a oler el maná (el aburrimiento sin
+                    // vecinos es un túnel sin salida). Ahora: CADA
+                    // minuto completo de quietud continua (3600, 7200,
+                    // 10800…) tira OTRA moneda — con SEMILLA fresca por
+                    // tirada (TicksQuieto viaja en la mezcla: la misma
+                    // máquina saca la misma carta, la tirada siguiente
+                    // es otra baraja) — y a los CINCO minutos seguidos
+                    // sin guerra, la horda viene GARANTIZADA: tanto
+                    // maná quieto junto huele demasiado (la gula de
+                    // Daphne no se contiene).
+                    if (e.TicksQuieto >= TICKS_AFK && e.TicksQuieto % TICKS_AFK == 0)
                     {
+                        bool garantia = e.TicksQuieto >= TICKS_AFK * 5;
                         if (e.PlagaEnfriamiento > 0)
                             e.PlagaEnfriamiento--;
-                        else if (VFXCore.Hash01(p.whoAmI,
-                                  e.TotalGolpes * 11 + 7, e.Viajes * 17 + 3)
+                        else if (garantia || VFXCore.Hash01(p.whoAmI,
+                                  e.TotalGolpes * 11 + 7,
+                                  e.Viajes * 17 + 3 + e.TicksQuieto * 131)
                                  < PLAGA_PROBABILIDAD)
                         {
                             ArrancarPlaga(p, e);

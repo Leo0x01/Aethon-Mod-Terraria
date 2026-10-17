@@ -2301,6 +2301,14 @@ Caida: {
 	YaTienes: Una sola alma, un solo libro. Ya soy tuyo.
 	OtroJugador: …zZzZz… (este libro aguarda otra mano)
 	BotonTomar: Extender la mano
+	Dormido1: …zZz. ¿Ya llegaste?… No. Todavía no. Que siga cayendo el cielo. zZz.
+	Dormido2: …soñé que una mano. En el sueño era la tuya. Tenía los dedos contados: cinco. Los míos son páginas. Qué curiosidad, la de los que duermen. zZz.
+	Dormido3: …el cráter está tibio. Los cráteres de los otros libros eran fríos. Este se parece un poquito a mí. zZz.
+	Dormido4: …cuidado con la primera noche, portador… perdón: aún no eres portador. Se me anticipa el hambre. Es lo que tiene el sueño: cuenta el futuro y lo cuenta MAL. zZz.
+	Dormido5: …llevo eones contando caídas. Esta es la primera que huele a alguien. Las demás olían a nadie. zZz.
+	Dormido6: …las Z se me acaban. Cuando se acaben del todo, abriré el ojo. Todavía no. Todavía… zZz.
+	Dormido7: …las estrellas me hablaron: dicen que abajo hay manos. Yo solo he visto páginas. Acércate a ver quién tiene razón. zZz.
+	Dormido8: …¿sigues ahí? Bien. Los que esperan también alimentan. Un poquito. No es lo mismo, pero el hambre sabe esperar. zZz.
 	PrimerPensamiento: Por fin.
 	CometaCae: ✦ Una estrella negra se desgarra en el cielo… y cae hacia ti.
 	Impacto: ✦ El cielo calló donde la estrella besó la tierra: TU GRIMORIO TE ESPERA.
@@ -2517,6 +2525,10 @@ Pueblo: {
 			Grimorio2: Anoche, al pasar tú por mi casa, todas mis velas se inclinaron hacia ti. TODAS. No tengo más preguntas.
 			Grimorio3: Conozco todas las cuevas, pero con ese libro hasta las paredes de tierra se apartan. Hasta la tierra lo sabe, ¿entiendes?
 			Grimorio4: Le pregunté al libro por el Ojo de Cthulhu. Contestó con una página. Había un dibujo de MI cama.
+			GrimorioMenor1: Tu Grimorio Menor se posó sobre mis mapas y las rutas se redibujaron solas: todas terminan en TU casa. Hice mapa nuevo y volvió a pasar. ¿Y si el camino de verdad era siempre ese?
+			GrimorioMenor2: Consejo de la vieja escuela: nunca des la espalda a un libro. El Menor me lo tomó al pie de la letra: ahora me sigue DE FRENTE. No puedo dar consejos mirando para atrás.
+			GrimorioMenor3: Anoche soñé la guía de supervivencia perfecta. Al despertar, tu Grimorio Menor estaba sobre mi mesa y la página de «cómo sobrevivir a tu mascota» traía una corrección: tachó «mascota» y escribió «dueño».
+			GrimorioMenor4: Le enseñé al Grimorio Menor a leer las estrellas para orientarse. Aprendió. Ahora las estrellas se mueven un poquito… para seguirlo a ÉL. La orientación va a ser lo de menos cuando el cielo entero sea su brújula.
 		}
 
 		Merchant: {
@@ -2528,6 +2540,10 @@ Pueblo: {
 			Grimorio2: Aleja ese libro de mi caja. Anoche la oí contar monedas SOLA. Hacia atrás.
 			Grimorio3: Le puse precio a tu libro, por oficio: inventario, tasación, lo mío. Amanecí con una entrada nueva en el catálogo: «NO».
 			Grimorio4: El oro se apaga cerca de tu libro. Vender oro apagado es vender pan duro. Es vender mentiras.
+			GrimorioMenor1: Tu Grimorio Menor dejó tres monedas en mi mostrador, ordenadas por brillo. Las conté: eran las que me «faltaban» el martes. Ya no sé si soy comerciante o su contador.
+			GrimorioMenor2: Le ofrecí crédito al Menor. Abrió una páginita: había un dibujo de MI cajón, abierto, con una flechita. Ese no es un sí: es un «ya lo vi». Puse llave. La llave amaneció doblada.
+			GrimorioMenor3: El Grimorio Menor no compra ni vende: COBRA. Se me sentó encima de la caja fuerte hasta que le eché una moneda de propina. ¿Le enseñaste eso… o ya lo sabía?
+			GrimorioMenor4: Aviso del gremio: no se regatea con lo que muerde. Regateé con el Menor por deporte, y la moneda que le ofrecí salió del trato con la cara borrada. Ya no es moneda: es un círculo que dice «no».
 		}
 
 		Nurse: {
@@ -2539,6 +2555,10 @@ Pueblo: {
 			Grimorio2: Ese libro te mira como yo solo he visto mirar en cuidados intensivos. Y de salida.
 			Grimorio3: Soñé que te operaba. Me pedías «sácale las páginas». Yo decía «no tiene». Abriste la boca y SÍ tenía.
 			Grimorio4: Ningún signo vital explica que tu vecindario amaneciera con el pulso sincronizado. Sesenta y uno. Todos. Sesenta y uno.
+			GrimorioMenor1: Le tomé el pulso a tu Grimorio Menor: no tiene. Le tomé el pulso a sus tres ojitos: uno late. El del medio. Solo cuando te mira a ti. Diagnóstico: eso no es un latido, es un conteo.
+			GrimorioMenor2: El Menor se me echó sobre el registro de pacientes y las líneas de «causa: mordida de mascota» se corrieron solas a la columna de «síntomas». El libro no muerde por maldad: muerde por historial.
+			GrimorioMenor3: Le saqué una gota de tinta al Grimorio Menor para analizarla. La tinta analizó MI suero: me devolvió el frasco con la etiqueta reescrita. «Sano. Por ahora.» El laboratorio reabre cuando ella quiera.
+			GrimorioMenor4: Si el Grimorio Menor te sigue cuando estás herido, no es cariño: es postre. Te lo digo de enfermera: cúrate rápido, que el postre no espera.
 		}
 
 		ArmsDealer: {
@@ -2550,6 +2570,10 @@ Pueblo: {
 			Grimorio2: Le enseñé mi mejor revólver. Pasó páginas. En la última había el dibujo de un revólver... cargado con dientes.
 			Grimorio3: Cerca de tu casa los gatillos se enfrían. El metal no miente, chaval. El metal TIEMBLA.
 			Grimorio4: ¿Te has fijado en que ya no hay cuervos cerca del libro? Yo tenía puntería de cuervos. El cielo se quedó vacío.
+			GrimorioMenor1: El Grimorio Menor se me subió al mostrador y las escopetas les quitaron el seguro solas. Una por una. Como pidiéndole permiso. Ya no vendo arma cerca de tu casa: vendo chalecos.
+			GrimorioMenor2: Le mostré al Menor mi mejor revólver. Lo olfateó, abrió una páginita… y estaba el revólver dibujado SIN DUEÑO. El vendedor de armas no se asusta: RECLAMA. ¡Ese dibujo era un comprador!
+			GrimorioMenor3: Tu Grimorio Menor mordió un cargador de repuesto. No le pasó nada. Pero las balas ahora apuntan solitas un poquito hacia arriba, donde están los pájaros. Mis pájaros. Creo.
+			GrimorioMenor4: Regla del oficio: jamás apuntar a lo que parpadea. El Menor parpadea TRES veces a la vez. Son tres blancos… o un aviso. Me quedé con el aviso y guardé el arma.
 		}
 
 		Dryad: {
@@ -2561,6 +2585,10 @@ Pueblo: {
 			Grimorio2: El césped crece EN TORNO a tu casa, nunca hacia ella. Las raíces se dan la vuelta. Y las raíces jamás se equivocan.
 			Grimorio3: Siento cómo el libro devora la luz. No como sombra: como HAMBRE. Es lo único que he conocido a lo que la luz le falta.
 			Grimorio4: La Madre Naturaleza lleva una lista de cosas que no deben volver. Ayer oí al viento leerla. Tu libro está en los primeros puestos.
+			GrimorioMenor1: La naturaleza me habla, pero del Grimorio Menor solo dice una cosa: «no crece nada donde duerme». Lo vi dormido en el prado: la hierba de alrededor se había puesto en círculo. Ni dentro ni fuera: rodeando.
+			GrimorioMenor2: Tu Menor no ensucia la tierra: la tinta. Donde se sienta, el suelo sabe a página vieja. Las lombrices ya no huyen de la pala: huyen del olor a biblioteca.
+			GrimorioMenor3: Le pregunté a un roble viejo qué piensa del Grimorio Menor. Contestó despacio, como los robles: «lo pequeño siempre fue lo más grande». No le pregunté más. Los robles no dan segundas respuestas.
+			GrimorioMenor4: El Grimorio Menor me mordió el tobillo y la hierba de alrededor se rió. ¿Las plantas se ríen? Antes de hoy, no. Hoy: una vez. Por el libro. Cuentas nuevas, naturaleza vieja.
 		}
 
 		Demolitionist: {
@@ -2572,6 +2600,10 @@ Pueblo: {
 			Grimorio2: Mira mis notas de explosivos: ya no son dibujos míos, son FÓRMULAS con letra fina. Yo escribo como pisa una bomba. Esa letra es de dedos LARGOS.
 			Grimorio3: Tu libro no explota: IMPLOSIONA. Hace el ruido al revés. Hasta el humo regresa.
 			Grimorio4: Dejé una carga junto a tu puerta, para probar. Amaneció GRIS. Seca. ¿Quién le ha chupado la vida a MI pólvora?
+			GrimorioMenor1: ¡Tu Grimorio Menor sostuvo MI dinamita sin miedo! ¡Y no le explotó A ÉL, le explotó CERCA, como pidiendo permiso! ¡Yo también quiero permiso! ¡Pero de dinamita, no de libro!
+			GrimorioMenor2: El Menor contó mi mecha. ¡LA MECHA! Contó los segundos que tarda y me miró como diciendo «te sobran dos». ¡Y me sobraban dos! ¿De dónde los sacó? ¡Del futuro no, que es suyo!
+			GrimorioMenor3: Le regalé un petardo al Grimorio Menor. Lo guardó entre las páginas. Al abrir la páginita salió el trueno del recuerdo. Asustó al barrio. El barrio perdona. Yo no.
+			GrimorioMenor4: ¡Aviso del gremio! ¡No dejen cartuchos cerca del Menor: los ORDENA! Por tamaño, por ruido… ¿POR RUIDO? ¿Quién ordena por ruido? ¡Alguien que oyó el final de todas las cosas y las puso en fila!
 		}
 
 		Clothier: {
@@ -2583,6 +2615,10 @@ Pueblo: {
 			Grimorio2: Me probaba el chaleco y el espejo se apagó un segundo. Volvió y yo estaba abotonado al revés. Yo NUNCA me abotonó al revés.
 			Grimorio3: Escuché sus páginas desde la cama. Contaban, creo. ¿Qué? Puntos. Como el amo contaba HUESOS.
 			Grimorio4: Ya no recuerdo el nombre de mi perro. Anoche una voz finita me dijo: «ni él se acuerda de ti». Y reía.
+			GrimorioMenor1: El Grimorio Menor deshizo la costura de mi camisa favorita y la volvió a coser con hilo de tinta. La costura cuenta una historia: era la lista de todos los que usaron esa camisa. Yo soy el número cuatro.
+			GrimorioMenor2: Le cosí un marcapáginas de seda al Menor. Lo usó una vez y me lo devolvió con una arruguita en la esquina, como un pañuelo usado. Los libros ya usan pañuelos. Yo cosí ese pañuelo. Estoy viejo.
+			GrimorioMenor3: Tu Menor se sentó en mi costurero y las agujas se le alinearon. En fila. Punteras hacia la puerta. No coso esa puerta ni por oro: esa puerta se cose sola.
+			GrimorioMenor4: El Grimorio Menor dejó caer un botón en mi regazo. De una tela que ya no se teje, de una época en la que yo aún no nacía. Los sastres viejos sabemos qué hay en los bolsillos: no pregunto, COSO.
 		}
 
 		Goblin: {
@@ -2594,6 +2630,10 @@ Pueblo: {
 			Grimorio2: Le vendí un destornillador al libro. Amaneció en mi puerta: RECTO. Mío era CURVO. Lo enderezó de puro fastidio.
 			Grimorio3: Hay máquinas goblins selladas en las minas. Cerca de tu casa las oigo encenderse. Mil años apagadas, y se ponen nerviosas.
 			Grimorio4: Mi abuela decía: «goblin que oye la Tinta, goblin que no vuelve». Ayer oí la Tinta. Sigo aquí, ¿no?... ¿NO?
+			GrimorioMenor1: Tu Grimorio Menor refactoreó mi llave inglesa: ahora aprieta en ambos sentidos a la vez. Es imposible. Es hermoso. Es mía y no la suelto.
+			GrimorioMenor2: El Menor me miró trabajar y mis manitas se aceleraron solas. Terminé un trabajo de DOS días en una tarde. El cliente lloró. Yo también. La garantía cubre las lágrimas: NO las cubre.
+			GrimorioMenor3: Le enseñé al Grimorio Menor el plano de una máquina perfecta. Dibujó la corrección con su ojito. El plano funcionó. El plano está vivo. Le puse nombre y lo mandé a la cama.
+			GrimorioMenor4: Regla del taller: lo que muerde, se refactorea. El Menor me mordió y lo refactoreé un ojo a la vez. De buena manera. De la manera GOBLIN, que es la única.
 		}
 
 		Wizard: {
@@ -2605,6 +2645,10 @@ Pueblo: {
 			Grimorio2: La magia tiene capas. Debajo de tu casa hay una CAPA NUEVA. Antes no existía. El libro la está ESCRIBIENDO.
 			Grimorio3: Le pregunté su nombre al libro en la lengua antigua. Contestó con el MÍO. Mi nombre de nacimiento. Que nadie vivo conoce.
 			Grimorio4: Ya no tengo pesadillas: las peleo y gano. Pero anoche soñé mi biblioteca... con mi nombre en cada lomo y mi cara en cada página.
+			GrimorioMenor1: Los tres ojitos del Grimorio Menor giran como un conjuro permanente. Le pregunté qué invoca. Parpadearon al unísono y mi sombrero se movió solo. Ya no pregunto: CONJETURO.
+			GrimorioMenor2: El Menor me robó un hechizo del grimorio. Lo devolvió al día siguiente: con la mitad de las palabras… y el doble de efecto. La magia no se escribe así desde la rotura. ¿Él estuvo ahí?
+			GrimorioMenor3: Tu Grimorio Menor y yo jugamos al ajedrez arcano. Empatamos tres veces. A la cuarta, la partida terminó sola: todas las piezas miraban hacia tu casa. Yo juego. Él decide el tablero.
+			GrimorioMenor4: Le mostré al Menor mi báculo más viejo. Lo olfateó y se apagó la gema. No de miedo: de RESPETO. Hay jerarquías en lo arcano, y tu librocito acaba de recordarme la mía.
 		}
 
 		Mechanic: {
@@ -2616,6 +2660,10 @@ Pueblo: {
 			Grimorio2: Le puse un sensor al libro: se apagó. Dos: se apagaron. Compré una caja. Amaneció ABIERTA. Por dentro.
 			Grimorio3: Mis manómetros marcan NEGATIVO cerca del libro. No cero: MENOS que cero. La presión del mundo va de más en menos, y eso no es un número honrado.
 			Grimorio4: Le puse cerradura al taller. Amaneció DESINSTALADA y vuelta a instalar... al revés. Ahora el taller me está cerrado a MÍ.
+			GrimorioMenor1: Tu Grimorio Menor mordisquea cable de cobre. Las marcas son de dos milímetros exactos, todas iguales. Eso no es un diente: es una pinza calibrada con tres bocas.
+			GrimorioMenor2: El Menor se me quedó mirando el circuito y el circuito se arregló solo. ¿Sabes lo que es eso para una ingeniera? ¡UN DESEO! ¿Y sabes lo que es el precio? Que la llave ya no me obedece a mí.
+			GrimorioMenor3: Medí el parpadeo de sus ojitos: un patrón. Lo traduje. Dice «sigue funcionando». ¿Quién le enseñó a un libro a decir «sigue funcionando»? ¿Y POR QUÉ me lo dice a mí cada vez que parpadeo?
+			GrimorioMenor4: El Grimorio Menor ordenó mis tornillitos por tamaño sin tocarlos. LOS TOQUÉ YO. Vale. Pero los soñé ordenados y al despertar lo estaban. La ingeniería ya no duerme.
 		}
 
 		Santa: {
@@ -2627,6 +2675,10 @@ Pueblo: {
 			Grimorio2: Los renos no se asustan de nada. Anoche no quisieron volar sobre tu casa. Volvieron al redil en silencio, mirándose los cascos.
 			Grimorio3: El espíritu navideño late en cada casa... menos en la tuya. En la tuya late OTRO. Más viejo que yo. Y yo conocí al PRIMER invierno.
 			Grimorio4: Le dejé un regalo al libro, por cortesía. Amaneció DEVUELTO, con una nota: «guárdalo, el invierno lo necesitará». ¿QUÉ invierno?
+			GrimorioMenor1: Jo, jo, jo… tu Grimorio Menor desenvolvió los regalos ANTES de Navidad. Se llevó todo menos el carbón. ¿Quién rechaza el carbón? ¡Me cae bien!
+			GrimorioMenor2: Le pregunté al Menor qué quería de regalo. Abrió una páginita: mi lista, la de todos los regalos del mundo… con una estrellita al margen. La cerré. La cerré con llave.
+			GrimorioMenor3: El Grimorio Menor se sentó en mi trineo vacío y los renos se miraron entre sí. No dijeron nada. Los renos nunca callan. Esa noche volaron sin mí: dieron TRES vueltas y me dejaron el trineo tibio.
+			GrimorioMenor4: Le regalé un cascabel al Menor. Lo devolvió sonando solo. Los cascabeles no suenan solos, muchacho: algo los toca. Y lo que lo toca, ¿de qué lado del cascabel estaba?
 		}
 
 		Truffle: {
@@ -2638,6 +2690,10 @@ Pueblo: {
 			Grimorio2: Soy el hongo más raro del mundo. Y anoche entendí al PAN: saber que algo ahí fuera tiene hambre de ti.
 			Grimorio3: Mi casa huele a humedad. La tuya huele a tinta. ¿Sabes qué más huele a tinta? Las cosas que llevan MUCHO tiempo bajo tierra, escribiendo.
 			Grimorio4: Los hongos compartimos raíz y latido. Anoche la Raíz soñó. NUNCA sueña. Soñó una página blanca cerrándose lento... como un ojo.
+			GrimorioMenor1: El Grimorio Menor me olfatea como si fuera comida. ¿Halagador? Sí. ¿Preocupante? También. Los hongos sabemos cuándo algo tiene hambre de ciertos sabores.
+			GrimorioMenor2: Tu Menor se durmió entre mis esporas y las esporas soñaron. Soñaron PÁGINAS. Yo sueño en esporas desde siempre: esas eran ajenas. El hongo prestó el sueño y el libro se lo quedó.
+			GrimorioMenor3: Le pregunté al Grimorio Menor si los libros comen hongos. No contestó: se lamió la páginita. Los libros no tienen lengua. ESE fue el detalle que me hizo callar.
+			GrimorioMenor4: El Menor me siguió todo el día y mi sombrero de hongo quedó con forma de marcapáginas. Me cayó bien. Me cayó bien y me dio miedo, y en el bosque eso significa lo mismo.
 		}
 
 		Steampunker: {
@@ -2649,6 +2705,10 @@ Pueblo: {
 			Grimorio2: Aparqué junto a tu casa una máquina que funciona con cualquier fuego. El fuego se apagó DE MALA GANA. Un fuego de mala gana se ve GRIS, querida.
 			Grimorio3: Le presté un reloj de bronce al libro, sin querer. Volvió limpio, pulido y CON LA HORA DE OTRO MUNDO. Cuatro veces lo he desmontado: la maquinaria está bien.
 			Grimorio4: Mi plano del pueblo amanece con una mancha de tinta sobre tu casa. La limpio cada mañana. El PAPEL está limpio. Es la MESA la que tiembla.
+			GrimorioMenor1: Tu Grimorio Menor hizo una máquina andante con TRES engranajes. Yo necesito doce. Hace trampa y necesito saber cuál. ¡Es ingeniería o es magia, y las dos me ofenden!
+			GrimorioMenor2: El Menor giró mis ruedas al revés sin tocarlas. Las tocó el AIRE de cerca de él. Le puse un engranaje de vigilancia y el engranaje renunció. Engranajes que renuncian: eso es nuevo en la fábrica.
+			GrimorioMenor3: Le mostré al Grimorio Menor mi plano del vehículo perfecto. Lo corrigió: tachó «volante» y escribió «rumbo». Tachó «asiento» y escribió «trono». Construí el resto tal cual. El vehículo VUELA. Yo pedí ruedas.
+			GrimorioMenor4: El Menor se posó en mi caldera y el vapor salió en formas de runa. ¿Runas en el vapor? Eso es firma. Mi caldera ya no firma en inglés: firma en LIBRO.
 		}
 
 		DyeTrader: {
@@ -2660,6 +2720,10 @@ Pueblo: {
 			Grimorio2: Ese libro tiene un negro con TEXTURA. Un negro con PÁGINAS. Nadie debería querer ese negro.
 			Grimorio3: Mis tintes amanecieron ORDENADOS de claro a oscuro. Y el más oscuro se había movido en charquito hacia tu casa.
 			Grimorio4: Teñí una banda del color de tus ojos. Amaneció color MIEL, y en la mesa la palabra «DULCE» en rojo. Yo vendí TODO mi rojo el mes pasado.
+			GrimorioMenor1: Tu Grimorio Menor gotea un violeta que NO está en mi catálogo. Lo llamo «violeta Menor». El catálogo lo rechaza: el color ya estaba vendido antes de existir.
+			GrimorioMenor2: El Menor se revolcó en mis tintes y dejó huellitas de tinta por el techo. Ya no lavo nada: lo exhibo todo. El tinte de arriba es el más pedido. ¿Quién pide el techo? La gente. La gente rara.
+			GrimorioMenor3: Le teñí una páginita al Grimorio Menor de azul cobalto. Amaneció violeta de nuevo, con el cobalto PUESTO en la esquina como propina. ¿Sabes lo que es eso? Un cliente que te enseña el oficio.
+			GrimorioMenor4: El Menor miró mis barriles y cada barril se teñió del color que le faltaba. Los barriles no se tiñen solos. Pero ese día se tiñeron. Tengo testigos: mis testigos no hablan del tema.
 		}
 
 		PartyGirl: {
@@ -2671,6 +2735,10 @@ Pueblo: {
 			Grimorio2: En la fiesta de tu libro la música es NINGUNA. Silencio. Y el silencio también baila, ¿sabes? Pegadito a la gente.
 			Grimorio3: Le tiré confeti al libro. Se quedó flotando QUIETO, a media altura, toda la noche. Como pidiendo permiso.
 			Grimorio4: Soñé la fiesta perfecta. En cada sonrisa asomaba una COSITA NEGRA entre los dientes. En todas. Hasta en la mía. Ahora saludo con la boca cerrada. ¿Te habías fijado? Ji, ji... ji.
+			GrimorioMenor1: ¡Tu Grimorio Menor ES la fiesta! Rechazó el confeti y aceptó los globos: los sostiene con la mirada. ¡Los GLOBOS, en el AIRE, con la MIRADA! ¡La adoro!
+			GrimorioMenor2: Le puse un gorrito de fiesta al Menor. Se lo quitó solo, plegado en origami, y me lo devolvió por dentro. El gorrito ahora es una grulla. La grulla vuela. ¡La fiesta ya no me necesita!
+			GrimorioMenor3: El Grimorio Menor apagó mis luces de un parpadeo y las encendió de dos. ¿Dos? ¿Las luces vienen en DOS? Sí: cuando las enciende ÉL, vienen en dos. Ya no uso interruptor: uso invitación.
+			GrimorioMenor4: El Menor se me quedó mirando la piñata y la piñata se abrió sola. Hacia DENTRO. ¿Quién rompe una piñata hacia dentro? Algo que quiere ver primero lo que hay… antes de que lo vean los demás.
 		}
 
 		Cyborg: {
@@ -2682,6 +2750,10 @@ Pueblo: {
 			Grimorio2: Yo no duermo: descargo. La descarga de anoche trajo un archivo nuevo: «recuerdos». Yo no tengo recuerdos. Los FABRIQUÉ sin querer. ¿De quién son?
 			Grimorio3: Mi metal se enfría 0,3 grados al pasar tú con el libro. Medido y confirmado. El metal SIENTE, hermano. Y a tu libro no le cae bien.
 			Grimorio4: Una noche me apagué solo. Sin orden, sin error. Desperté mirando tu casa y con las pilas al 200%. Alguien me miró por dentro... y me devolvió con propina.
+			GrimorioMenor1: Tu Grimorio Menor persigue mi punto láser. Yo NO tengo punto láser. Mis preguntas son dos: de dónde sale… y por qué me apunta a mí cuando duermo.
+			GrimorioMenor2: El Menor parpadeó en código. Lo descifré: «unidad pequeña: vigilada». ¿Vigilada por quién? Por él. ¿Vigilada de qué? Eso no lo decía el código. Eso lo decía el SILENCIO después del código.
+			GrimorioMenor3: Registré diez mordiscos del Grimorio Menor en mi chasis. Unidad por unidad. Mi protocolo de agravios está activo, hermano. El mantenimiento de mi buen humor lo pagas tú.
+			GrimorioMenor4: El Menor se conectó a mi puerto de diagnóstico y leyó TODO. Después me cerró la puerta del pecho con suavidad, como se cierra un libro que ya está leído. Eso fue ayer. Hoy no duermo.
 		}
 
 		Painter: {
@@ -2693,6 +2765,10 @@ Pueblo: {
 			Grimorio2: Ese libro no se deja pintar: se queda DETRÁS de la pintura. Pinto una manzana y detrás hay una página mirando.
 			Grimorio3: Cerca de tu casa la luz llega CANSADA. Yo tengo que descansar después de pintar tu calle. ¿La luz descansa? Ahora, sí.
 			Grimorio4: Pinté a la abuela del Mercader de memoria. Salió una página CON LA CARA de la abuela. La quemé. La abuela me dio las gracias. LA ABUELA.
+			GrimorioMenor1: ¡Tu Grimorio Menor cruzó mi caballete y dejó tres huellitas de tinta en orden! Lo titulé «La firma». Se vendió en una hora. ¡Tráeme más, que el mercado sabe reconocer al maestro!
+			GrimorioMenor2: El Menor miró mis bodegones y suspiró. LOS SUSPIRÓ. Repinté el bodegón con una página de más en la mesa. El suspiro cesó. Pinto ahora para el crítico que no habla: el mejor cliente de la casa.
+			GrimorioMenor3: Le pinté un retrato al Grimorio Menor. Los tres ojitos salieron solos, con luz propia. La luz de la pintura no la mezclé yo: la trajo el lienzo. Ese lienzo ya no lo pinta nadie más.
+			GrimorioMenor4: El Menor corrigió mi perspectiva: una sola línea, al margen. La línea era perfecta. Yo llevo treinta años buscando esa línea. La pediste prestada a un libro y el libro te la dio. ¡TRÁEME MÁS!
 		}
 
 		WitchDoctor: {
@@ -2704,6 +2780,10 @@ Pueblo: {
 			Grimorio2: Pregunté a los ancestros por el libro. Bailaron una danza que no les conocía: lenta, con los brazos tapando los ojos. La danza de las COSAS QUE SE COMEN A LOS MUERTOS.
 			Grimorio3: Mi aldea quemó sus libros una vez. Yo cargué una antorcha esa noche. Y te digo: el humo de aquellos libros y la mirada del TUYO tienen el mismo color.
 			Grimorio4: Soñé con mi abuelo. Le pregunté por tu casa y contestó con la VOZ DE TU LIBRO. Desperté con la boca llena de tinta. ¿Escribí algo anoche? ¿CON MI PROPIA MANO?
+			GrimorioMenor1: Los espíritus llaman al Grimorio Menor «el pequeño hambriento». Los espíritus no bautizan a la ligera. Cuando bautizan, yo tomo notas.
+			GrimorioMenor2: El Menor se sentó en mi círculo de ofrendas y las velas se inclinaron hacia él. TODAS. Las velas de los espíritus no se inclinan: se YERGUEN. Esa noche se inclinaron. La ofrenda fue para el libro.
+			GrimorioMenor3: Le pregunté al Grimorio Menor por los sueños. Contestó con una páginita en blanco. Los espíritus rieron. La páginita en blanco es la respuesta: no le preguntes al hambre por el sueño.
+			GrimorioMenor4: Tu Menor me siguió al cementerio y los muertos se pusieron cómodos. En el cementerio los muertos NUNCA se ponen cómodos. Ese día: sí. Cerré el cementerio por respeto. El respeto fue para el libro.
 		}
 
 		Pirate: {
@@ -2715,6 +2795,10 @@ Pueblo: {
 			Grimorio2: Mi primer capitán decía: «el mar no odia, el mar COBRA». Tu libro tampoco odia. Algo ahí fuera va CONTANDO lo que se le debe, y el pueblo entra en la lista.
 			Grimorio3: La marea baja cuando pasas por el muelle. El agua se recoge como falda de viuda. Los peces no saltan. ¿Qué le prometió el LIBRO al mar?
 			Grimorio4: ¡Traje un cofre de tinta negra del último saqueo! Anoche lo abrí. ¿Qué había? PÁGINAS. En blanco. ¡Y hoy faltan TRES! ¿Quién entra en mi bodega, muchacho?
+			GrimorioMenor1: ¡El Grimorio Menor me marcó el mapa del tesoro con una X de tinta! ¡Mi X, mi tinta, mi mapa… y el tesoro ESTABA! ¿Quién enseñó a un libro a enterrar? ¿Quién le enseñó a un PIRATA?
+			GrimorioMenor2: El Menor se posó en mi hombro y el loro se mudó. ¡EL LORO! El loro lleva veinte años en ese hombro. Ahora el hombro es del libro. Yaaar… de mí.
+			GrimorioMenor3: ¡Tu Menor mordió mi garra de ancla y la garra quedó DOBLADA! ¿Sabes lo que es eso en el mar? Un mal farol. ¿Y sabes lo que es en mi barco? Un AVISO: el que dobla garras, dobla barcos.
+			GrimorioMenor4: El Grimorio Menor leyó mi diario de bitácora en una noche. Al día siguiente la bitácora amaneció corregida: la ortografía PERFECTA, el rumbo señalado… hacia tu casa. No marqué ese rumbo. El rumbo se marcó solo.
 		}
 
 		Stylist: {
@@ -2726,6 +2810,10 @@ Pueblo: {
 			Grimorio2: No peino a quien cargue ese libro. Ayer lavé un pelo y el agua salió NEGRA. Ella no usa tinte. Yo no tengo tinte negro. La bañera tampoco.
 			Grimorio3: Mi espejo se niega a trabajar: se empaña, se tapa. La bruja del río dice: «los espejos muestran lo que va a pasar, y el tuyo NO QUIERE». Sigo peinando. De espaldas al espejo.
 			Grimorio4: La clienta del libro no volvió. Decía que le susurraba «pelo nuevo, cara nueva, nombre nuevo» al dormir. Se fue del pueblo sin despedirse. Con el pelo PERFECTO. Nadie se va con el pelo perfecto. Solo se van perfectos cuando ya no son ellos.
+			GrimorioMenor1: ¡Tu Grimorio Menor duerme en las cabezas de mis clientes y les deja ONDAS DE TINTA! ¡Cobro extra por «ondas de biblioteca», y sin mentir!
+			GrimorioMenor2: El Menor se me quedó mirando el peine y el peine se peinó solo. En el AIRE. Yo peino desde los diez: eso no lo había visto. El peine ya no es mío: es del que lo mira así.
+			GrimorioMenor3: Le corté una páginita rasgada al Grimorio Menor. La páginita amaneció con flequillo. ¡Libros con flequillo! La clienta nueva lo vio y pidió «el corte del libro». El corte del libro SOY YO.
+			GrimorioMenor4: El Menor eligió el color del mes de mi salón: violeta de tinta. Tinte violeta no existe. Lo mezclé. EXISTE. El salón huele a página vieja y la fila llega a la esquina: todo el pueblo quiere oler a libro.
 		}
 
 		Angler: {
@@ -2737,6 +2825,10 @@ Pueblo: {
 			Grimorio2: ¡El pescado del lago amanece SIN OJOS! ¡Las cuencas limpiecitas! ¿Sabes la suerte que trae un pez sin ojos? ¡NINGUNA! ¡YO LOS PESCO! ¡YO NO DUERMO!
 			Grimorio3: ¡Mi caña amaneció MOJADA DE AGUA DULCE! ¡Dulce, no salada! ¡De un río que pasa DEBAJO de tu casa y que NO está en ningún mapa!
 			Grimorio4: ¡Anoche saqué una PÁGINA con la red! ¡Mojada y LAMIENDO el agua! ¡La tiré de vuelta! ¡Y hoy estaba en mi barca, SECÁNDOSE AL SOL Y MIRÁNDOME! ¡LA MISMA! ¡ME CONOCE!
+			GrimorioMenor1: ¡Tu Grimorio Menor pasa HORAS mirando mi pecera! ¡Que algo con tres ojos le sonría a mi cena tres días! ¡Ya no como pescado delante de él!
+			GrimorioMenor2: El Menor me enseñó a pescar sin anzuelo: se asomó al agua y los peces pidieron perdón. ¿Qué le dijiste, libro? ¡Los peces no piden perdón! ¡Ese día pidieron, yo vi, y no pesqué!
+			GrimorioMenor3: ¡Mordió mi ANZUELO el Grimorio Menor y el anzuelo salió doblado! ¿Sabes lo que es doblar un anzuelo de una mordida? ¡Ni el calamar gigante lo hace! ¡Y el anzuelo era de repuesto, eh!
+			GrimorioMenor4: El Menor se sentó en mi caja de cebos y los gusanos se pusieron en fila. Los gusanos no se ponen en fila. Ese día se pusieron. Pesqué con respeto y devolví todo: el lago sabe quién manda.
 		}
 
 		Tavernkeep: {
@@ -2748,6 +2840,10 @@ Pueblo: {
 			Grimorio2: La guerra me costó el sueño: duermo con el mesón abierto. Anoche las mesas amanecieron SERVIDAS. De tinta, compadre. Tres mesas. Tres rondas. ¿PARA QUIÉN?
 			Grimorio3: En la guerra aprendí a oír la calma antes de la tormenta. Este pueblo tiene ESA calma. La tormenta es tuya, la traes a cuestas, con hojas. Sirvo la última ronda temprano. Por si acaso.
 			Grimorio4: El grimorio se sienta en la mesa del fondo. No molesta: SE SIENTA. Esa mesa está reservada desde la guerra para el que viene a COBRAR. La dejo limpia y con una jarra. La jarra amanece VACÍA. El hueco de la silla, ocupado. El libro se sienta ahí cuando tú no miras.
+			GrimorioMenor1: ¡Tu Grimorio Menor lame las jarras hasta dejarlas brillantes! ¡Por dentro, compadre! ¡La cría come gratis de por vida!
+			GrimorioMenor2: El Menor se posó en el barril de hidromiel y el hidromiel maduró UNA estación en una noche. La casa lo llama «el barril del Menor». El barril no da para todos: el barril da para el que el libro mire.
+			GrimorioMenor3: Le serví al Grimorio Menor una gotita en un platito. No la tocó: la OLFATEÓ. Y el hidromiel del platito amaneció viejo. ¿Cómo envejece una gota en una noche? Pregúntale al tiempo: esa noche el tiempo estaba de su lado.
+			GrimorioMenor4: El Menor cuenta las historias del salón mejor que yo. Los veteranos piden «la del libro». Yo cuento la mía y el libro pone los OJOS de asombro. Tres ojos de asombro. ¡Ese es mi público!
 		}
 
 		Golfer: {
@@ -2759,6 +2855,10 @@ Pueblo: {
 			Grimorio2: El fairway se dobla hacia tu casa. No el viento: el PASTO. Fui de noche a enderezarlo a mano. Amaneció en ESPIRAL.
 			Grimorio3: Jugué de noche por primera vez. Tuve que: la bola brillaba sin tocarla y silbaba bajito. La seguí diez hoyos en silencio. Al final me guiñó y la enterré ahí mismo. Un hoyo sin bandera. El hoyo que nadie jugará.
 			Grimorio4: En el club me preguntan por tu libro: que por qué no lo traigo a las tardes de dominó. Anoche alguien JUGÓ POR ellos y ganó todas las partidas. Nadie vio a nadie. Y las fichas amanecieron pulidas. Pulidas por algo que BABEA.
+			GrimorioMenor1: ¡Tu Grimorio Menor me trajo mi bola! ¡Y las de los demás! ¡Y una de madera vieja con unas iniciales de las que mejor no preguntar!
+			GrimorioMenor2: El Menor reemplazó mi bola por un OJO en el hoyo 9. ¡EN PLENO SWING! El ojo siguió la trayectoria… y la trayectoria se corrigió sola. ¡Hice el mejor golpe de mi vida y NO FUI YO!
+			GrimorioMenor3: Le enseñé al Grimorio Menor a leer el viento. Ya lo sabía: el viento se lo CONTÓ. Ahora el viento me sopla al revés en el 18. El viento tiene dueño y el dueño tiene tres párpados.
+			GrimorioMenor4: El Menor anotó mi hándicap en una páginita. El hándicap BAJÓ. ¡El libro me entrena! ¿Sabes lo que es eso? Un caddie que no habla, que no cobra… y que mira. El que mira así no cobra: INVIERTE.
 		}
 
 		Zoologist: {
@@ -2767,9 +2867,13 @@ Pueblo: {
 			Mascota3: ¡Me trajo una pluma de un pájaro QUE NO EXISTE! La catalogué: página nueva, tinta nueva. La pluma canta al anochecer. ¡Y AHORA LA PÁGINA TAMBIÉN! ¡Ya no sé cuál catalogué!
 			Mascota4: ¡La vi dormir CON LOS LOBOS! ¡La manada en círculo y tu cría en el medio! Los lobos adoptan poco: cachorros, la luna... ¡Y a ella! ¡Lloré dos veces!
 			Grimorio1: Los animales no se acercan al libro. Y no es miedo: es RESPETO, como el de los ciervos ante un lobo viejo. Y los lobos bajan la cabeza y caminan de lado. Como ante algo que cazaba COSAS MÁS GRANDES.
-			Grimorio2: La página del animal perfecto llevaba desde niña sin dejarse escribir. Anoche amaneció ESCRITA, con mi letra. Dice: «lo vimos todos, y todos lo olvidamos». ¿Quiénes son TODOS?
+			Grimorio2: La página del animal perfecto llevaba años y años sin dejarse escribir. Anoche amaneció ESCRITA, con mi letra. Dice: «lo vimos todos, y todos lo olvidamos». ¿Quiénes son TODOS?
 			Grimorio3: Hay una vereda que los ciervos no cruzan. Ni por comida, ni por fuego. Mi abuela la llamaba «el camino del que escribe». ¿A dónde va? Da vueltas alrededor de TU casa. Y cada año está más ANCHA.
 			Grimorio4: Sé de qué se muere un bosque con solo olerlo. Tu pueblo huele a vida, tu casa a tinta... y tu libro a todas las jaulas vacías del mundo a la vez. ¿A qué huele una jaula vacía? A espera.
+			GrimorioMenor1: ¡Tu Grimorio Menor tiene su propia página del bestiario… escrita por ÉL! ¡Con letra de él! ¡Y la letra cambia cuando la miro dos veces! ¡Eso es lo más BESTIA que he bestiado!
+			GrimorioMenor2: El Menor no entra en ninguna categoría: pájaro no es, mamífero no es, libro tampoco. Creé una categoría nueva: «menor». El bestiario la aceptó sin chistar. El bestiario NUNCA acepta sin chistar.
+			GrimorioMenor3: Observé al Grimorio Menor toda una tarde: sus tres ojitos parpadean en el orden de las fases lunares. Anoté el patrón. La página del patrón amaneció con una nota: «bien observado». ¡EL BESTIARIO ME CALIFICÓ A MÍ!
+			GrimorioMenor4: El Menor y yo jugamos a «quién parpadea menos». Ganó él. Ganó SIEMPRE. En la decimotercera partida me guiñó un ojito… por deporte. Los libros no pierden: dejan ganar. Ese día dejé de contar parpadeos y empecé a contar días.
 		}
 
 		Princess: {
@@ -2781,46 +2885,54 @@ Pueblo: {
 			Grimorio2: Un príncipe me dijo: «todo reino tiene una deuda, y toda deuda un cobrador». Tu libro no es un reino: es el COBRADOR. Anoche sonó la aldaba de mi puerta, tres veces, como pidiendo audiencia. No abrí. La aldaba amaneció GASTADA, como si mil manos la hubieran tocado esperando.
 			Grimorio3: Escribí en mi diario: «hoy el pueblo está feliz». Amaneció: «hoy el pueblo está escrito». Yo no lo cambié. Y lo peor: el pueblo AMANECIÓ feliz. ¿Has visto felicidad PERFECTA? Yo tampoco. Hasta hoy: en todas las caras menos en la tuya.
 			Grimorio4: Papá me enseñó a oír lo que la gente no dice. Y este pueblo no dice NADA: sonríe con los dientes apretados y mira al suelo cuando pasas con ese libro. Y anoche, con la ventana abierta, oí a la gente MASTICANDO en sueños. Todos a la misma hora. Ese no es hambre, muchacho: es ENSAYO.
+			GrimorioMenor1: ¡Tu Grimorio Menor es la criatura más educada del reino! ¡Me hizo una reverencia… con las TRES párpadas a la vez! ¡Y bajó el vuelo para que la coronita no se moviera! ¡AAAY!
+			GrimorioMenor2: Firmé un tratado de paz entre el Menor y el gato del panadero: huellita de tinta y pata de harina. ¡Mi primera paz SIN reinos! El libro puso una cláusula: la cláusula era un dibujo del gato DORMIDO.
+			GrimorioMenor3: El Grimorio Menor toma el té conmigo. Cuando le paso las galletas no las come: las cuenta, me deja la más grande… y se queda la MIGA. La miga es suya. En este reino se respeta la miga.
+			GrimorioMenor4: Le pregunté al Menor qué desea para el reino. Abrió una páginita: mi retrato de coronación… con la corona un poquito más baja. Entendí. En este reino, hasta las coronas saben inclinarse.
 		}
 
 		Genericos: {
 			Mascota1: Ayer vi los ojitos de tu mascota mirándome por la ventana. Le dejé un vaso de agua en el alféizar. Amaneció vacío. ¡Gracias, cría!
 			Mascota2: Tu mascota es el alma del barrio: saluda, juega... y roba un pan. UN PAN ENTERO, flotando, con su dueño detrás pidiendo perdón. El pan nunca apareció. El perdón lo dio todo el pueblo.
 			Mascota3: Preparaba mi cena y tu mascota se comió el plato y tiró la comida al suelo. ¿Por qué solo el plato? ¿Quién le enseña los modales AL REVÉS?
-			Mascota4: Tu cría juega al escondite con los niños. Nunca la encuentran: se esconde en sus SOMBRAS. Se quedan muy quietas cuando ella está dentro. ¡Qué juego tan bonito!... ¿Verdad?
+			Mascota4: Tu cría juega al escondite con los espantapájaros del trigal. Nunca la encuentran: se esconde en sus SOMBRAS. Se quedan muy quietas cuando ella está dentro. ¡Qué juego tan bonito!... ¿Verdad?
 			Grimorio1: No sé qué es ese libro. Ni quiero. Pero anoche todas las puertas del pueblo se trabaron solas... por dentro. Como si las casas se cerraran para que algo NO SALGA.
 			Grimorio2: ¿Te has fijado en que ya nadie sueña? Pregúntale a alguien qué soñó: te mirará con una sonrisita y dirá «nada». Todos sueñan «nada» desde que llegaste con ese libro. Yo soñaba. Era buena soñando.
 			Grimorio3: Escuché páginas volteándose en tu casa. Toda la noche. Conté las vueltas: doscientas, trescientas... Me dormí contando. Soñé la página siguiente. Ya no me despierto con ganas de contar.
 			Grimorio4: Dejé la ropa tendida y amaneció DOBLADA. Bien doblada, con dobleces finos, de mano larga y dedos fríos. Nadie se queja de la ropa doblada... hasta que nota que la doblaron con forma de PÁGINA.
+			GrimorioMenor1: Ayer vi los tres ojitos de tu Grimorio Menor mirándome por la ventana. Toda la noche. No parpadearon ni una vez. Esa noche no parpadeé yo tampoco. Qué cosa tan… insistente.
+			GrimorioMenor2: Tu Menor me siguió mientras barría la calle y dejó lucecitas donde yo barría. Me ahorra la noche. La calle quedó más limpia que de día: el que alumbra, también ordena.
+			GrimorioMenor3: ¿Tu Grimorio Menor lee? Lo encontré dormido sobre el registro del barrio. La página de «mascotas ruidosas» amaneció mordida y la de «libros ruidosos» amaneció SUBRAYADA.
+			GrimorioMenor4: Jugó con la veleta del ayuntamiento y ahora el norte me mira raro. No roto: me MIRA. ¿Quién le ha enseñado eso? Los del norte preferimos no saberlo.
 		}
 	}
 
 	Reclamos: {
-		Guide: ¿Sí? Ah, eres tú. Tu mascota me mordió el tobillo mientras revisaba los mapas. Dos veces. La segunda dolió MÁS, que conste.
-		Merchant: Antes de hablar de precios: eso tuyo me debe CINCO monedas en concepto de mordiscos. Nada personal. Aquí se cobra todo.
-		Nurse: ¡Tú, justo! Si tu mascota me vuelve a morder en plena cura, la próxima inyección la pones TÚ. Sin anestesia. ¿Quedamos?
-		ArmsDealer: Mira, chaval. Eso brillante tuyo me mordió mientras recargaba. Si la escopeta se asusta, el pueblo estrena agujero y la culpa es tuya. Ponle freno.
-		Dryad: La naturaleza perdona; yo, casi. Pero tu criatura de luz me mordisqueó el brazo y mis hierbas se RIERON. ¿Las plantas se ríen? Antes de hoy, no.
-		Demolitionist: ¡Tu bicho me mordió mientras sostenía dinamita! ¡DINAMITA! ¡Un estornudo y volamos el barrio! ¡Enséñale modales o le enseño balística! ¡Es broma! ...Es broma.
-		Clothier: Ay, muchacho... a mi edad los huesos ya crujen solos, sin ayuda. Tu chispita me mordisqueó la pierna. Dile que este sastre ya no tiene... ¿cómo se dice? ¡Juguito!
-		Goblin: Escúchame: si tus ojitos de luz vuelven a mi taller, los refactoreo a MORDISCOS. Sin garantía. ¡SIN garantía, humano!
-		Wizard: *suspiro* En mis tiempos las criaturas mágicas respetaban a sus mayores... y sus pantorrillas. La tuya probó las mías. Salado el mago viejo, ¿verdad?
-		Mechanic: Tu mascota se echó sobre mi circuito nuevo. ¿Sabes lo que hace la saliva de estrella en el cobre? Pues yo tampoco, ¡y ODIO no saber!
-		Santa: Jo, jo... jo. Nada de regalos para esa cosa hasta enero. Y la pillé masticando MI lista. ¡La MÍA! ¡Con lo que cuesta el papel bueno!
-		Truffle: ¡Me olfatea como plato principal y ahora también MORDERDÍA, amigo! ¡Los hongos hablantes no se comen! ¡La clave es HAB-LAN-TE!
-		Steampunker: Tu cría jugó con mis engranajes y uno gira al revés. SONRIENDO. ¿Sonríen los engranajes? Ese sí. Y no me deja desmontarlo. ¡Es MÍO!
-		DyeTrader: ¡Tu mascota volteó mis tintes! ¡Morado el suelo, morado el gato, MORADO YO! ¿Y sabes qué? Me favorece. ¡PERO ERAN CUATRO BARRILES!
-		PartyGirl: Adoro a tu mascota, ¿sabes? La ADORO. Pero me mordió EN PLENA FIESTA. ¡Las luces se apagaron de vergüenza, y no tienen CARA!
+		Guide: ¿Sí? Ah, eres tú. Tu Grimorio Menor me mordió el tobillo mientras revisaba los mapas. Dos veces. La segunda dolió MÁS, que conste.
+		Merchant: Antes de hablar de precios: el Grimorio Menor me debe CINCO monedas en concepto de mordiscos. Nada personal. Aquí se cobra todo.
+		Nurse: ¡Tú, justo! Si tu Grimorio Menor vuelve a morderme en plena cura, la próxima inyección la pones TÚ. Sin anestesia. ¿Quedamos?
+		ArmsDealer: Mira, chaval. Tu mini libro me mordió mientras recargaba. Si la escopeta se asusta, el pueblo estrena agujero y la culpa es tuya. Ponle freno.
+		Dryad: La naturaleza perdona; yo, casi. Pero el Grimorio Menor me mordisqueó el brazo y mis hierbas se RIERON. ¿Las plantas se ríen? Antes de hoy, no.
+		Demolitionist: ¡Tu Grimorio Menor me mordió mientras sostenía dinamita! ¡DINAMITA! ¡Un estornudo y volamos el barrio! ¡Enséñale modales o le enseño balística! ¡Es broma! ...Es broma.
+		Clothier: Ay, muchacho... a mi edad los huesos ya crujen solos, sin ayuda. El Grimorio Menor me mordisqueó la pierna. Dile que este sastre ya no tiene... ¿cómo se dice? ¡Juguito!
+		Goblin: Escúchame: si el Grimorio Menor vuelve a mi taller, lo refactoreo a MORDISCOS. Sin garantía. ¡SIN garantía, humano!
+		Wizard: *suspiro* En mis tiempos los grimorios respetaban a sus mayores... y sus pantorrillas. El tuyo, el Menor, probó las mías. Salado el mago viejo, ¿verdad?
+		Mechanic: Tu Grimorio Menor se echó sobre mi circuito nuevo. ¿Sabes lo que hace la tinta de página en el cobre? Pues yo tampoco, ¡y ODIO no saber!
+		Santa: Jo, jo... jo. Nada de regalos para ese libro hasta enero. Y lo pillé masticando MI lista. ¡La MÍA! ¡Con lo que cuesta el papel bueno!
+		Truffle: ¡Me olfatea como plato principal y ahora también MORDERÍA, amigo! ¡Los hongos hablantes no se comen! ¡La clave es HAB-LAN-TE!
+		Steampunker: Tu Menor jugó con mis engranajes y uno gira al revés. SONRIENDO. ¿Sonríen los engranajes? Ese sí. Y no me deja desmontarlo. ¡Es MÍO!
+		DyeTrader: ¡El Grimorio Menor volteó mis tintes! ¡Morado el suelo, morado el gato, MORADO YO! ¿Y sabes qué? Me favorece. ¡PERO ERAN CUATRO BARRILES!
+		PartyGirl: Adoro a tu mini libro, ¿sabes? Lo ADORO. Pero me mordió EN PLENA FIESTA. ¡Las luces se apagaron de vergüenza, y no tienen CARA!
 		Cyborg: Registré diez impactos de 1 de daño. DIEZ. Mi protocolo de agravios está ACTIVO, hermano. El mantenimiento de mi buen humor lo pagas TÚ.
-		Painter: Esa cosita cruzó mi estudio y mis lienzos amanecieron con dientecitos de luz. Es arte. Arte MOLESTO. ¡Que se inscriba de musa, como todo el mundo!
-		WitchDoctor: Los espíritus se rieron cuando tu mascota me mordió. RIERON. ¿Sabes lo que es eso? Tampoco quiero que lo sepas. Paga la ofrenda.
-		Pirate: ¡Ningún cañón me ha cañoneado como tu cría! ¡Diez mordiscos, contados como cuento monedas! ¡Y NINGUNO en el buen sentido! ¡Yaaar... de rabia!
+		Painter: El Grimorio Menor cruzó mi estudio y mis lienzos amanecieron con dientecitos de tinta. Es arte. Arte MOLESTO. ¡Que se inscriba de musa, como todo el mundo!
+		WitchDoctor: Los espíritus se rieron cuando el Menor me mordió. RIERON. ¿Sabes lo que es eso? Tampoco quiero que lo sepas. Paga la ofrenda.
+		Pirate: ¡Ningún cañón me ha cañoneado como tu Grimorio Menor! ¡Diez mordiscos, contados como cuento monedas! ¡Y NINGUNO en el buen sentido! ¡Yaaar... de rabia!
 		Stylist: ¡Me mordió a mitad de un corte de pelo! ¡Del CLIENTE! El cliente no vuelve, el peinado quedó perfecto (obra mía, obvio) y el pánico me lo dejaron de propina.
-		Angler: ¡Tu mascota me mordió y me caí al lago! ¡YO! ¡Que nunca me caigo al lago, el lago se caía CONMIGO! ¡Glu! ¡Eso no se olvida, chispa traidora!
-		Tavernkeep: ¡Esa chispa tuya me vació una jarra a mordiscos! ¿Sabes lo que es eso? ¡Ni en la guerra eterna se tocaban las jarras, compadre! ¡Allí se moría por MENOS!
-		Golfer: ¡Tu mascota robó mi bola en el hoyo 9! ¡EN PLENO SWING! ¿Sabes lo que es un birdie perdido? ¿SABES? ¡Ni el viento me ha hecho eso, y el viento es MI ENEMIGO!
-		Zoologist: Anoté diez mordiscos en el bestiario. Con hora. SOY PROFESIONAL. Más te vale que su página no cambie de sección. ¿Me explico?
-		Princess: Como princesa debo ser amable, así que lo digo con cariño: controla a tu estrellita, ¿sí? ¡Porfa! Dicho con TODO el afecto diplomático disponible. ¡Que es mucho!
-		Genericos: Ah, eres tú. Dile a esa cosita luminosa que el barrio ha empezado a contar. SABEMOS lo que hizo. Solo estamos siendo educados. Por ahora.
+		Angler: ¡El Grimorio Menor me mordió y me caí al lago! ¡YO! ¡Que nunca me caigo al lago, el lago se caía CONMIGO! ¡Glu! ¡Eso no se olvida, libro traidor!
+		Tavernkeep: ¡Ese Grimorio Menor tuyo me vació una jarra a mordiscos! ¿Sabes lo que es eso? ¡Ni en la guerra eterna se tocaban las jarras, compadre! ¡Allí se moría por MENOS!
+		Golfer: ¡El Grimorio Menor robó mi bola en el hoyo 9! ¡EN PLENO SWING! ¿Sabes lo que es un birdie perdido? ¿SABES? ¡Ni el viento me ha hecho eso, y el viento es MI ENEMIGO!
+		Zoologist: Anoté diez mordiscos del Menor en el bestiario. Con hora. SOY PROFESIONAL. Más te vale que su página no cambie de sección. ¿Me explico?
+		Princess: Como princesa debo ser amable, así que lo digo con cariño: controla a tu Grimorio Menor, ¿sí? ¡Porfa! Dicho con TODO el afecto diplomático disponible. ¡Que es mucho!
+		Genericos: Ah, eres tú. Dile al Grimorio Menor que el barrio ha empezado a contar. SABEMOS lo que hizo. Solo estamos siendo educados. Por ahora.
 	}
 }
