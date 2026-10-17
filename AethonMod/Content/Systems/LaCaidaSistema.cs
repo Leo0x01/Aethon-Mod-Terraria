@@ -79,6 +79,26 @@ namespace AethonMod.Content.Systems
         /// <summary>¿Ya cayó un cometa para este jugador ESTA noche? (índice → bool; se limpia al amanecer).</summary>
         private readonly bool[] _cayoEstaNoche = new bool[Main.maxPlayers];
 
+        /// <summary>v6.50.128 — UN ALTAR DEL MUNDO: la tile dorada que el
+        /// cráter dejó en el fondo (vive para SIEMPRE — es la puerta de LA
+        /// CORRUPCIÓN DE ITEMS del AltarDevoradorSistema).</summary>
+        public class AltarDelMundo
+        {
+            /// <summary>La columna de la tile del altar.</summary>
+            public int X;
+            /// <summary>La fila de la tile del altar.</summary>
+            public int Y;
+
+            /// <summary>El centro del altar en píxeles del mundo.</summary>
+            public Vector2 Posicion() => new(X * 16f + 8f, Y * 16f + 8f);
+        }
+
+        /// <summary>v6.50.128 — LOS ALTARES del mundo (nacen con cada
+        /// caída y JAMÁS mueren: aunque el libro dormido se marche, el
+        /// altar sigue corrompiendo items para el Eterno — la mecánica
+        /// que «dará más vida al mod», la letra).</summary>
+        public readonly List<AltarDelMundo> Altares = new List<AltarDelMundo>();
+
         /// <summary>v6.50.125 — LOS NOMBRES QUE YA VIVIERON SU CAÍDA EN ESTE
         /// MUNDO (el silenciador VERDADERO del cielo). La letra: «la caída
         /// no parece activarse cuando pasa la primera noche» — la marca del
@@ -133,6 +153,15 @@ namespace AethonMod.Content.Systems
                 // v6.50.126 — el failsafe del primer vecino también viaja
                 // (el momento quedó grabado en ESTE mundo).
                 tag["llegoPrimerNpc"] = _llegoPrimerNpc;
+                // v6.50.128 — los altares viajan con el mundo (la puerta de
+                // la corrupción es ETERNA — cada cráter guarda el suyo).
+                var altares = new List<TagCompound>();
+                foreach (var a in Altares)
+                {
+                    if (a == null) continue;
+                    altares.Add(new TagCompound { ["x"] = a.X, ["y"] = a.Y });
+                }
+                tag["altares"] = altares;
             }
             catch { }
         }
@@ -166,6 +195,21 @@ namespace AethonMod.Content.Systems
                 // re-vive al cargar — el espectáculo no se le niega a nadie
                 // y el evento NUNCA se pierde).
                 _llegoPrimerNpc = tag.GetBool("llegoPrimerNpc");
+
+                // v6.50.128 — los altares vuelven con el mundo (y los de
+                // las caídas VIEJAS sin altar — mundos de la .127 con su
+                // libro aún esperando — se FORJAN al cargar: nadie se
+                // queda sin su mecánica).
+                Altares.Clear();
+                foreach (var entrada in tag.GetList<TagCompound>("altares"))
+                {
+                    Altares.Add(new AltarDelMundo
+                    {
+                        X = entrada.GetInt("x"),
+                        Y = entrada.GetInt("y")
+                    });
+                }
+                ForjarAltaresFaltantes();
             }
             catch { }
         }
@@ -175,6 +219,7 @@ namespace AethonMod.Content.Systems
             CaidasPendientes.Clear();
             _cayoEnEsteMundo.Clear();
             _llegoPrimerNpc = false;
+            Altares.Clear();
             Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
             _eraNoche = false;
         }
@@ -791,6 +836,94 @@ namespace AethonMod.Content.Systems
                 if (string.IsNullOrEmpty(nombre)) return;
                 var sys = ModContent.GetInstance<LaCaidaSistema>();
                 if (sys != null) sys._cayoEnEsteMundo.Add(nombre);
+            }
+            catch { }
+        }
+
+        // ================================================================
+        //  v6.50.128 — LOS ALTARES DEL MUNDO (la puerta de la corrupción)
+        // ================================================================
+
+        /// <summary>Registra el altar nacido en un cráter (lo llama el
+        /// cometa al forjarlo — solo AUTORIDAD; la lista viaja con el
+        /// guardado del mundo). Sin duplicados: si YA hay un altar a menos
+        /// de 3 tiles, el cielo no insiste.</summary>
+        public static void RegistrarAltar(int x, int y)
+        {
+            try
+            {
+                if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+                if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3))
+                    return;
+                sys.Altares.Add(new AltarDelMundo { X = x, Y = y });
+            }
+            catch { }
+        }
+
+        /// <summary>EL BACKFILL DE LOS MUNDOS VIEJOS: cada caída pendiente
+        /// de un mundo cargado SIN su altar (cráteres de la .127) lo recibe
+        /// AHORA — pedestal de obsidiana + la tile dorada en el fondo de SU
+        /// cráter (la mecánica no se le niega a nadie). Solo AUTORIDAD.</summary>
+        private static void ForjarAltaresFaltantes()
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+
+                foreach (var pendiente in sys.CaidasPendientes)
+                {
+                    if (pendiente == null || string.IsNullOrEmpty(pendiente.Jugador)) continue;
+                    int cx = (int)(pendiente.X / 16f);
+                    int cy = (int)(pendiente.Y / 16f);
+                    if (cx < 12 || cy < 12 || cx >= Main.maxTilesX - 12 || cy >= Main.maxTilesY - 12) continue;
+
+                    // ¿El cráter ya tiene SU altar? (la lista manda).
+                    if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - cx) <= 6 && Math.Abs(a.Y - cy) <= 12))
+                        continue;
+
+                    // EL FONDO DEL CRÁTER: la primera roca viva bajo la caída.
+                    int piso = -1;
+                    for (int y = cy + 3; y < Math.Min(cy + 14, Main.maxTilesY - 10); y++)
+                    {
+                        Tile t = Main.tile[cx, y];
+                        if (t != null && t.HasTile && Main.tileSolid[t.TileType]) { piso = y - 1; break; }
+                    }
+                    if (piso < 10) continue;
+
+                    // EL PEDESTAL + EL ALTAR (la misma receta del cometa).
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        for (int dy = 0; dy <= 1; dy++)
+                        {
+                            Tile t = Main.tile[cx + dx, piso + dy];
+                            if (t == null) continue;
+                            t.HasTile = true;
+                            t.TileType = TileID.Obsidian;
+                            t.Slope = 0;
+                            t.IsHalfBlock = false;
+                            WorldGen.SquareTileFrame(cx + dx, piso + dy, true);
+                        }
+                    }
+                    Tile altar = Main.tile[cx, piso - 1];
+                    if (altar != null)
+                    {
+                        altar.HasTile = true;
+                        altar.TileType = (ushort)ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
+                        altar.Slope = 0;
+                        altar.IsHalfBlock = false;
+                        altar.TileFrameX = 0;
+                        altar.TileFrameY = 0;
+                        WorldGen.SquareTileFrame(cx, piso - 1, true);
+                    }
+                    sys.Altares.Add(new AltarDelMundo { X = cx, Y = piso - 1 });
+
+                    if (Main.netMode == NetmodeID.Server)
+                        NetMessage.SendTileSquare(-1, cx - 3, piso - 2, 7, 5);
+                }
             }
             catch { }
         }

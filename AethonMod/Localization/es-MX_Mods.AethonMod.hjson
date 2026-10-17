@@ -1804,6 +1804,18 @@ Objeto de pruebas — comparar con el original.
                         Clic derecho para desplegarla. Solo entrega lo que te falte.
                         '''
         }
+
+    // v6.50.128 — LA ESENCIA CORRUPTA (la comida del altar)
+            ItemCorrupto: {
+                    DisplayName: Esencia corrupta
+                    Tooltip:
+                            '''
+                            Lo que queda de un item tras el haz del ALTAR DE LA CAÍDA.
+                            No se usa con la mano: es COMIDA del Grimorio del Eterno.
+                            Suéltala de nuevo sobre el altar y el libro se la comerá…
+                            si su portador anda cerca.
+                            '''
+            }
 }
 
 Projectiles: {
@@ -2293,6 +2305,15 @@ Caida: {
         Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
         TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
         TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
+        // v6.50.128 — EL ALTAR DEVORADOR (la mecánica de comer items)
+        ItemCorrompido: ✦ El haz del altar PUDRE tu ofrenda… {0} esencias corruptas nacen.
+        DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
+        DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
+        DevoradoSabor3: ¡Sabroso! Lo que sea que era, el haz lo COCINÓ bien. Más de eso, portador.
+        DevoradoSabor4: ¡EXQUISITO! Notas de oro, final eterno, un crujido de mundos. ¡MÁS!
+        DevoradoCuenta: ✦ El Eterno devoró {0} esencias corruptas: +{1}% de daño permanente.
+        DevoradoTooltip: Devorado en el altar: {0} esencias corruptas (+{1}% de daño{2})
+        DevoradoTooltipOjos: ', +{0} ojos'
 
 }
 
@@ -2885,5 +2906,11 @@ Pueblo: {
                 Zoologist: Anoté diez mordiscos del Menor en mi bestiario. DIEZ. Con hora y todo, ¡que soy PROFESIONAL! Más te vale que su página no cambie de sección, ¿me explico?
                 Princess: Como princesa debo ser amable, así que lo digo con muchísimo cariño: controla a tu Grimorio Menor, ¿sí? ¡Porfa! ...Dicho esto con TODO el afecto diplomático disponible. ¡Que es mucho!
                 Genericos: Ah, eres tú. Mira, sobre el Grimorio Menor... dile que el barrio ya empezó a contar. SABEMOS lo que hizo. Solo estamos siendo educados al respecto. Por ahora.
+        }
+}
+
+Tiles: {
+        AltarDeLaCaida: {
+                MapEntry: Altar de la Caída
         }
 }

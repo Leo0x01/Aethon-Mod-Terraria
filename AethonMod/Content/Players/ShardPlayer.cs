@@ -111,6 +111,52 @@ namespace AethonMod.Content.Players
         /// La lee AethonBoss.DropBotin para decidir si la entrega corre.</summary>
         public bool BolsaCriaEntregada = false;
 
+        /// <summary>
+        /// v6.50.128 — EL PODER DEVORADO (la letra: «la mecanica es la de
+        /// comerse los item y mejorar el grimorio del eterno»): cada
+        /// esencia corrupta que el Eterno traga en EL ALTAR DE LA CAÍDA
+        /// suma UNO aquí — para SIEMPRE (persiste en el .plr). Cada punto
+        /// es +0,25 % de daño al Grimorio del Eterno (tope +75 %) y cada
+        /// 75 puntos despiertan UN OJO más en la corona (tope +3).
+        /// </summary>
+        public int DevoracionPoder = 0;
+
+        /// <summary>EL LÍMITE DEL PODER: 300 esencias = el +75 % entero.</summary>
+        public const int DevoracionTope = 300;
+
+        /// <summary>EL BONUS DE DAÑO del Eterno por lo devorado (0 → +0,75).
+        public static float BonusDanoDevorado(Player p)
+        {
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0f;
+            return Math.Min(sp.DevoracionPoder, DevoracionTope) * 0.0025f;
+        }
+
+        /// <summary>LOS OJOS EXTRA de la corona por lo devorado (+1 cada 75,
+        /// tope +3 — el escuadrón del banquete).</summary>
+        public static int OjosExtraDevorados(Player p)
+        {
+            if (p == null) return 0;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            if (sp == null) return 0;
+            return Math.Min(sp.DevoracionPoder / 75, 3);
+        }
+
+        /// <summary>v6.50.128 — EL SYNC MANUAL: el trago del altar tocó el
+        /// poder de este portador (solo AUTORIDAD lo hace) — esto lo lleva
+        /// por el cable AHORA (EcoRed.MsgDevoracion: el daño del Eterno se
+        /// calcula en la máquina del portador, el número tiene que llegar;
+        /// el host-local se entrega por el loopback de EnviarPaquete).</summary>
+        public void SyncAhoraDevoracion()
+        {
+            try
+            {
+                EcoRed.SincronizarDevoracion(Player);
+            }
+            catch { }
+        }
+
         // ================================================================
         // v6.50.114 — EL TECHO DE LOS OJOS (cacheado por tick, por jugador)
         // ================================================================
@@ -286,6 +332,10 @@ namespace AethonMod.Content.Players
             int equipoInvocador = Player.maxMinions - 1;
             if (equipoInvocador < 0) equipoInvocador = 0;
             int techoOjos = WeaponScaling.TechoOjosEterno(equipoInvocador, nivel);
+            // v6.50.128 — LOS OJOS DEL BANQUETE: lo devorado en el altar
+            // despierta ojos nuevos en la corona (+1 cada 75 esencias,
+            // tope +3 — la mecánica que «dará más vida al mod»).
+            techoOjos += OjosExtraDevorados(Player);
             {
                 int i = Player.whoAmI;
                 if (i >= 0 && i < _techoOjos.Length)
@@ -939,6 +989,10 @@ namespace AethonMod.Content.Players
                 // v6.50.120 — LA BOLSA A LA MANO: la marca de la cría
                 // entregada (la pareja es suya, una vez por portador).
                 tag["bolsaCriaEntregada"] = BolsaCriaEntregada;
+                // v6.50.128 — EL PODER DEVORADO (lo comido en el altar es
+                // para SIEMPRE — mejora permanente del Grimorio del Eterno).
+                tag["devoracionPoder"] = DevoracionPoder;
+                tag["devoracionV2"] = true;
             }
             catch { }
         }
@@ -976,6 +1030,10 @@ namespace AethonMod.Content.Players
                 // guardado viejo aún puede recibir a la cría en su primera
                 // victoria de la familia de jefes)
                 BolsaCriaEntregada = tag.GetBool("bolsaCriaEntregada");
+                // v6.50.128 — EL PODER DEVORADO (ausente = 0: los guardados
+                // viejos estrenan el altar con el poder intacto; clamp
+                // anticornografía de siempre).
+                DevoracionPoder = Math.Max(0, Math.Min(999999, tag.GetInt("devoracionPoder")));
             }
             catch { }
         }

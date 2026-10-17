@@ -240,6 +240,14 @@ namespace AethonMod.Content.NPCs
                 if (Main.netMode != NetmodeID.MultiplayerClient && NPC.ai[2] >= 200f)
                     LaCaidaSistema.DevorarLibroCaido(NPC, DestinatarioVivo());
 
+                // v6.50.128 — LA DESPEDIDA DEL DIALOGO: si el jugador local
+                // estaba HABLANDO con el libro cuando terminó el festín, la
+                // ventana se cierra suave (el libro ya no está — sin el
+                // crash del npc[-1]: la misma cura diferida de la toma).
+                if (NPC.ai[2] >= 200f && Main.LocalPlayer != null &&
+                    Main.LocalPlayer.talkNPC == NPC.whoAmI)
+                    CerrarVentana();
+
                 // LA RESPIRACIÓN DEL CABLE (el temblor también viaja).
                 if (NPC.ai[0] % 15f == 0f) NPC.netUpdate = true;
             }
@@ -344,13 +352,28 @@ namespace AethonMod.Content.NPCs
             CerrarVentana();
         }
 
-        /// <summary>Cierra la ventana de diálogo (el libro ya no está).</summary>
+        /// <summary>v6.50.128 — Cierra la ventana de diálogo SIN el
+        /// crash del client.log (la letra: «parece que hubo un error al
+        /// agarrar el grimorio del crater»): el clic del botón corre
+        /// DENTRO del dibujado del diálogo de vanilla (GUIChatDrawInner)
+        /// y la línea SIGUIENTE al OnChatButtonClicked lee
+        /// npc[LocalPlayer.talkNPC].type — si cerramos AQUÍ MISMO, vanilla
+        /// lee Main.npc[-1] y estalla IndexOutOfRangeException (la
+        /// «Excepción silenciosa» del log). LA CURA: el texto se apaga YA
+        /// (la caja desaparece este mismo frame — GUIChatDraw solo dibuja
+        /// si npcChatText != "") pero talkNPC se cierra EN EL PRÓXIMO
+        /// TICK, cuando GUIChatDrawInner ya terminó (QueueMainThreadAction
+        /// — la cola de acciones del hilo principal de tML).</summary>
         private static void CerrarVentana()
         {
             try
             {
                 Main.npcChatText = "";
-                Main.player[Main.myPlayer].SetTalkNPC(-1, true);
+                Main.QueueMainThreadAction(() =>
+                {
+                    try { Main.player[Main.myPlayer].SetTalkNPC(-1, true); }
+                    catch { }
+                });
             }
             catch { }
         }

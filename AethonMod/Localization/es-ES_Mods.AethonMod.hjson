@@ -1805,6 +1805,18 @@ Items: {
 			Clic derecho para desplegarla. Solo entrega lo que te falte.
 			'''
 	}
+
+	// v6.50.128 — LA ESENCIA CORRUPTA (la comida del altar)
+	ItemCorrupto: {
+		DisplayName: Esencia corrupta
+		Tooltip:
+			'''
+			Lo que queda de un item tras el haz del ALTAR DE LA CAÍDA.
+			No se usa con la mano: es COMIDA del Grimorio del Eterno.
+			Suéltala de nuevo sobre el altar y el libro se la comerá…
+			si su portador anda cerca.
+			'''
+	}
 }
 
 Projectiles: {
@@ -2321,6 +2333,15 @@ Caida: {
 	Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
 	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
 	TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
+	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
+	ItemCorrompido: ✦ El haz del altar PUDRE tu ofrenda… {0} esencias corruptas nacen.
+	DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
+	DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
+	DevoradoSabor3: ¡Sabroso! Lo que sea que era, el haz lo COCINÓ bien. Más de eso, portador.
+	DevoradoSabor4: ¡EXQUISITO! Notas de oro, final eterno, un crujido de mundos. ¡MÁS!
+	DevoradoCuenta: ✦ El Eterno devoró {0} esencias corruptas: +{1}% de daño permanente.
+	DevoradoTooltip: Devorado en el altar: {0} esencias corruptas (+{1}% de daño{2})
+	DevoradoTooltipOjos: ", +{0} ojos"
 }
 
 TestingPlayer: {
@@ -2936,3 +2957,5 @@ Pueblo: {
 		Genericos: Ah, eres tú. Dile al Grimorio Menor que el barrio ha empezado a contar. SABEMOS lo que hizo. Solo estamos siendo educados. Por ahora.
 	}
 }
+
+Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída

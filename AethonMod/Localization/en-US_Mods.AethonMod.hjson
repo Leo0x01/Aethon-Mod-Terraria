@@ -1807,6 +1807,18 @@ Items: {
 			Right-click to deploy it. Only delivers what you're missing.
 			'''
 	}
+
+	// v6.50.128 — LA ESENCIA CORRUPTA (la comida del altar)
+	ItemCorrupto: {
+		DisplayName: Corrupted Essence
+		Tooltip:
+			'''
+			What remains of an item after the FALLING ALTAR's beam.
+			Not used by hand: it is FOOD for the Eternal Grimoire.
+			Drop it back onto the altar and the book will eat it…
+			as long as its bearer is nearby.
+			'''
+	}
 }
 
 Projectiles: {
@@ -2323,6 +2335,15 @@ Caida: {
 	Devorandose: (the book trembles… something is devouring it — it can no longer speak)
 	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS in its crater.
 	TintaEnVuelo: ✦ Your black star is ALREADY FLYING toward you — wait for its kiss with the earth.
+	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
+	ItemCorrompido: ✦ The altar's beam ROTS your offering… {0} corrupted essences are born.
+	DevoradoSabor1: Hmm. Tastes like almost nothing. Air shaped like a memory. Still: gulp.
+	DevoradoSabor2: Passable. A hint of what it was. The corruption gives it an… interesting aftertaste.
+	DevoradoSabor3: ¡Tasty! Whatever it was, the beam COOKED it right. More of that, bearer.
+	DevoradoSabor4: EXQUISITE! Notes of gold, an eternal finish, a crunch of worlds. MORE!
+	DevoradoCuenta: ✦ The Eternal devoured {0} corrupted essences: +{1}% permanent damage.
+	DevoradoTooltip: Devoured at the altar: {0} corrupted essences (+{1}% damage{2})
+	DevoradoTooltipOjos: ", +{0} eyes"
 }
 
 TestingPlayer: {
@@ -2938,3 +2959,5 @@ Pueblo: {
 		Genericos: Ah, it's you. Look, about the Lesser Grimoire... tell it the neighbors have started counting. We KNOW what it did. We're just being polite about it. For now.
 	}
 }
+
+Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall

@@ -197,14 +197,20 @@ namespace AethonMod.Content.Weapons
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
             var sl = GetShard(Item);
-            if (sl == null) return;
 
             // +2.2% daño mágico por nivel (Infinito) — local a ESTE arma.
-            damage *= WeaponScaling.MagicDamageMult(sl.Level);
+            if (sl != null)
+                damage *= WeaponScaling.MagicDamageMult(sl.Level);
 
             // BONUS POR MANA FALTANTE — la mitad mágica es por-golpe (aquí);
             // la mitad de invocación vive en ShardPlayer (v6.45).
             damage *= WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
+
+            // v6.50.128 — LO DEVORADO EN EL ALTAR: cada esencia corrupta que
+            // el Eterno tragó en el ALTAR DE LA CAÍDA es +0,25 % de daño
+            // PERMANENTE (tope +75 % — la letra: «la mecanica es la de
+            // comerse los item y mejorar el grimorio del eterno»).
+            damage *= 1f + Players.ShardPlayer.BonusDanoDevorado(player);
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -554,6 +560,23 @@ namespace AethonMod.Content.Weapons
                     tooltips.Insert(ancla, summonLine);
                 else
                     tooltips.Add(summonLine);
+            }
+
+            // === v6.50.128 — LO DEVORADO EN EL ALTAR (la mejora permanente
+            //     de la mecánica nueva: esencias comidas → +daño, +ojos).
+            //     Solo si el portador ya comió ALGO (el libro nuevo calla). ===
+            Player portadorTip = Main.LocalPlayer;
+            var spDevorado = portadorTip?.GetModPlayer<Players.ShardPlayer>();
+            if (spDevorado != null && spDevorado.DevoracionPoder > 0)
+            {
+                float pctDano = Players.ShardPlayer.BonusDanoDevorado(portadorTip) * 100f;
+                int ojosExtra = Players.ShardPlayer.OjosExtraDevorados(portadorTip);
+                string ojos = ojosExtra > 0
+                    ? Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltipOjos", ojosExtra)
+                    : "";
+                tooltips.Add(new TooltipLine(Mod, "DevoradoAltar",
+                    Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltip",
+                        spDevorado.DevoracionPoder, (int)(pctDano + 0.5f), ojos)));
             }
 
             // === v6.50.110 — LA VENTANA 1 · EL ARMA: el poder del libro

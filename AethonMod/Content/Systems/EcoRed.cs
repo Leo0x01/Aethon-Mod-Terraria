@@ -116,6 +116,10 @@ namespace AethonMod.Content.Systems
         // .plr + la sensación del pacto). El 9 (Génesis) y el 11
         // (Resonancia) siguen RETIRADOS: nada se renumera.
         public const byte MsgTomarCaida = 14;
+        /// <summary>v6.50.128 — EL PODER DEVORADO → SU portador: lo que el
+        /// altar le hizo comer (el daño del Eterno se calcula en SU
+        /// máquina — el número tiene que llegar).</summary>
+        public const byte MsgDevoracion = 16;
         // v6.50.126 — LA TINTA DEL COMETA (cliente → server): el uso del
         // ítem de pruebas pide a la AUTORIDAD que dispare el cometa de
         // LA CAÍDA para quien la sostiene (la misma lección de la mano
@@ -406,6 +410,32 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
+        /// v6.50.128 — EL PODER DEVORADO → SU portador: lo que el ALTAR DE
+        /// LA CAÍDA le hizo comer (esencias corruptas tragadas por el
+        /// Eterno). El número manda en el CLIENTE (ModifyWeaponDamage y el
+        /// techo de ojos lo leen allá) — este paquete lo lleva. Lo llaman
+        /// la foto de entrada (MsgPedirLibros) y el propio trago del altar
+        /// (ShardPlayer.SyncAhoraDevoracion).
+        /// </summary>
+        public static void SincronizarDevoracion(Player portador)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                if (portador == null || !portador.active) return;
+                var sp = portador.GetModPlayer<Players.ShardPlayer>();
+                if (sp == null) return;
+
+                EnviarPaquete(portador, p =>
+                {
+                    p.Write(MsgDevoracion);
+                    p.Write(sp.DevoracionPoder);
+                });
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// EL ANUNCIO PRIVADO: chat de vanilla SOLO al portador (el
         /// derecho a las esencias, los avisos de su propio festín).
         /// </summary>
@@ -494,6 +524,10 @@ namespace AethonMod.Content.Systems
                             SincronizarLibros(solicitante);
                             SincronizarCronica(solicitante);
                             SincronizarHambre(solicitante);
+                            // v6.50.128 — EL PODER DEVORADO también llega
+                            // con la foto de entrada (el altar come aunque
+                            // el portador esté desconectado).
+                            SincronizarDevoracion(solicitante);
                         }
                         else if (tipo == MsgTomarCaida)
                         {
@@ -684,6 +718,19 @@ namespace AethonMod.Content.Systems
                             if (delta > 0)
                                 sl.CelebrarSubida(inv, delta);
                         }
+                        break;
+                    }
+
+                    // v6.50.128 — EL PODER DEVORADO: el altar alimentó a
+                    // ESTE portador (la foto de entrada o el trago recién
+                    // servido) — su copia local manda para el daño y los
+                    // ojos del Eterno.
+                    case MsgDevoracion:
+                    {
+                        int poder = reader.ReadInt32();
+                        var spd = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
+                        if (spd != null && poder >= 0)
+                            spd.DevoracionPoder = poder;
                         break;
                     }
 

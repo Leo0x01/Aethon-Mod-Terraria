@@ -323,25 +323,58 @@ namespace AethonMod.Content.Projectiles
                     }
                 }
 
-                // === FASE D — LA GARGANTA: los colmillos que apuntan al
-                //     libro dormido. LOS DOS GRANDES (±3, altura 6 — la
-                //     cornisa de la fauce) y el lecho central (±2, altura
-                //     3); la columna exacta del libro queda abierta (ahí
-                //     cae la luz violeta del sueño). Ninguno toca las
-                //     escaleras: los grandes son de base 2 (columnas
-                //     ±2..±3) y los aterrizajes viven en ±4. ===
-                toco |= PonerColmillo(cx + 3, BaseSolida(cx + 3, cy + 3, cy + radio), 6, 2);
-                toco |= PonerColmillo(cx - 3, BaseSolida(cx - 3, cy + 3, cy + radio), 6, 2);
-                toco |= PonerColmillo(cx + 2, BaseSolida(cx + 2, cy + 3, cy + radio), 3, 2);
-                toco |= PonerColmillo(cx - 2, BaseSolida(cx - 2, cy + 3, cy + radio), 3, 2);
+                // === FASE D — LA FAUCE DE PICOS PRONUNCIADOS (v6.50.128 —
+                //     la letra: «sobre la caida, seria mejor que los picos
+                //     sean pronunciados y que el lugar de caida quede como
+                //     un altar» + la referencia: TRES torres escalonadas
+                //     de piedra oscura, la central la mayor — en 2D la
+                //     columna central es del ALTAR y del haz, así que las
+                //     DOS TORRES DEL UMBRAL (±17, altura 9, base 4 — el
+                //     pico escalonado de la referencia, cada peldaño un
+                //     bloque más estrecho, remate en /\) flanquean la
+                //     entrada del cráter A DISTANCIA SEGURA: sus columnas
+                //     (±15..±18) JAMÁS tocan las escaleras (±4..±12) ni
+                //     el corredor de salida (±13..±14 libre — el PASO
+                //     GARANTIZADO de la .124 sigue intacto), los colmillos
+                //     de la garganta CRECEN (±3 → altura 7) y el labio del
+                //     rim gana sus dientes (±9) ===
+                toco |= PonerColmillo(cx + 3, BaseSolida(cx + 3, cy + 3, cy + radio), 7, 2);
+                toco |= PonerColmillo(cx - 3, BaseSolida(cx - 3, cy + 3, cy + radio), 7, 2);
+                toco |= PonerColmillo(cx + 2, BaseSolida(cx + 2, cy + 3, cy + radio), 4, 2);
+                toco |= PonerColmillo(cx - 2, BaseSolida(cx - 2, cy + 3, cy + radio), 4, 2);
+                toco |= PonerColmillo(cx + 9, BaseSolida(cx + 9, cy - 4, cy + radio), 3, 2);
+                toco |= PonerColmillo(cx - 9, BaseSolida(cx - 9, cy - 4, cy + radio), 3, 2);
+                toco |= PonerColmillo(cx + 17, BaseSolida(cx + 17, cy - 6, cy + radio), 9, 4);
+                toco |= PonerColmillo(cx - 17, BaseSolida(cx - 17, cy - 6, cy + radio), 9, 4);
+
+                // === FASE E — EL ALTAR DE LA CAÍDA (v6.50.128 — la letra:
+                //     «el lugar de caida quede como un altar para añadir
+                //     una nueva mecanica… la de comerse los item y mejorar
+                //     el grimorio del eterno, para comer un item este debe
+                //     corromperse primero y para eso se usara el lugar de
+                //     caida» + la referencia: el bloque DORADO de espiral
+                //     negro con su haz de luz violeta): el pedestal de
+                //     obsidiana (3×2) en el fondo exacto… y la tile del
+                //     ALTAR levitando sobre él. La columna de encima queda
+                //     LIMPIA — ahí vive el haz que corrompe.) ===
+                int pisoAltar = BaseSolida(cx, cy + 4, cy + radio);
+                if (pisoAltar < 10 || pisoAltar >= Main.maxTilesY - 10) pisoAltar = cy + 8;
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    toco |= PonerObsidiana(cx + dx, pisoAltar);
+                    toco |= PonerObsidiana(cx + dx, pisoAltar + 1);
+                }
+                toco |= PonerAltar(cx, pisoAltar - 1);
+                LaCaidaSistema.RegistrarAltar(cx, pisoAltar - 1);
 
                 if (toco)
                 {
                     // LA DIFUSIÓN: UN solo cuadrado que cubre la fauce
-                    // entera (las escaleras llegan a ±12 y el aro a ±11).
+                    // entera (las torres del umbral llegan a ±18 — la caja
+                    // creció con los picos pronunciados).
                     if (Main.netMode == NetmodeID.Server)
                     {
-                        NetMessage.SendTileSquare(-1, cx - 14, cy - 6, 29, 22);
+                        NetMessage.SendTileSquare(-1, cx - 20, cy - 12, 41, 26);
                     }
                 }
             }
@@ -424,6 +457,26 @@ namespace AethonMod.Content.Projectiles
             Tile t = Main.tile[x, y];
             if (t == null) return false;
             t.Slope = pendiente;
+            WorldGen.SquareTileFrame(x, y, true);
+            return true;
+        }
+
+        /// <summary>v6.50.128 — LA TILE DEL ALTAR: el bloque dorado de la
+        /// espiral (la referencia) plantado en el fondo del cráter. Es la
+        /// puerta de LA CORRUPCIÓN DE ITEMS — intocable (la protege un
+        /// GlobalTile) y con luz propia (el altar LATE).</summary>
+        private static bool PonerAltar(int x, int y)
+        {
+            if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) return false;
+            Tile t = Main.tile[x, y];
+            if (t == null) return false;
+            if (t.HasTile && EsCasaDelJugador(t.TileType)) return false;
+            t.HasTile = true;
+            t.TileType = (ushort)ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
+            t.Slope = 0;
+            t.IsHalfBlock = false;
+            t.TileFrameX = 0;
+            t.TileFrameY = 0;
             WorldGen.SquareTileFrame(x, y, true);
             return true;
         }
