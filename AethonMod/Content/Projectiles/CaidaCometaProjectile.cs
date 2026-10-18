@@ -333,6 +333,13 @@ namespace AethonMod.Content.Projectiles
                 //     BRUMA, no un bloque). ===
                 LaCaidaSistema.RegistrarAltar(cx, cy + fondo[0] - 1);
 
+                // v6.50.130 — EL CRÁTER SUELTA SU BRUMA (la letra: «en el
+                // crater debe estar un item invisible que es la bruma en
+                // si de esa forma los jugadores pueden tomarla y colocarla
+                // donde quieran»): el item de bruma nace flotando en el
+                // corazón del minibioma — la bruma que se ve ES el item.
+                LaCaidaSistema.EntregarBruma(cx, cy + fondo[0] - 1);
+
                 if (toco)
                 {
                     // LA DIFUSIÓN: UN solo cuadrado que cubre torres +

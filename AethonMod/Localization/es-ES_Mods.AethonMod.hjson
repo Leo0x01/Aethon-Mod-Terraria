@@ -1818,6 +1818,21 @@ Items: {
 			'''
 	}
 
+	// v6.50.130 — LA BRUMA DEL CRÁTER (el item invisible que ES la
+	// bruma: el altar principal portátil de la corrupción)
+	BrumaDelCrater: {
+		DisplayName: Bruma del cráter
+		Tooltip:
+			'''
+			La bruma del minibioma, EN PERSONA: tómala del cráter y COLOCA
+			el altar donde quieras.
+			Cualquier cosa que se lance a la bruma colocada se pudre en
+			Esencia corrupta — y las ARMAS ganan la etiqueta Corrupto.
+			Junto a la bruma, el apartado de creación permite corromper
+			armas y convertirlo TODO en Esencia corrupta, sin lanzar nada.
+			'''
+	}
+
 	ArmaCorruptaTag: Corrupto
 	ArmaCorrupta1: La CAÍDA la ha mancillado: la bruma del cráter vive en ella.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
@@ -2981,4 +2996,5 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída
+Tiles.BrumaAltar.MapEntry: Bruma del cráter
 Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que cayó en ese cráter ya no es de este mundo.

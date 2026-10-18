@@ -66,6 +66,12 @@ namespace AethonMod.Content.Globals
 
         public override bool CanReforge(Item item) => !Corrompido;
 
+        // === v6.50.130 — EL SELLO DEL APARTADO CREACIÓN: lo pone la
+        //     RECETA misma (RecetasCorrupcionSistema.MarcarCorrupta, vía
+        //     Recipe.AddOnCraftCallback — ESTE tML 2026.08 no trae el
+        //     hook OnCraft en GlobalItem: el callback vive en la receta,
+        //     firma (Recipe, Item, List<Item>, Item) verificada al IL). ===
+
         // === LA ETIQUETA Y EL LORE (donde vivía el prefijo) ===
 
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)

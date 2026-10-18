@@ -1820,6 +1820,21 @@ Items: {
 			'''
 	}
 
+	// v6.50.130 — THE CRATER MIST (the invisible item that IS the
+	// mist: the portable corruption altar)
+	BrumaDelCrater: {
+		DisplayName: Crater Mist
+		Tooltip:
+			'''
+			The minibiome's mist, IN THE FLESH: take it from the crater
+			and PLACE the altar wherever you want.
+			Anything thrown into the placed mist rots into Corrupted
+			Essence — and WEAPONS earn the Corrupted tag.
+			Next to the mist, the crafting menu corrupts weapons and
+			turns EVERYTHING into Corrupted Essence, no throwing needed.
+			'''
+	}
+
 	ArmaCorruptaTag: Corrupted
 	ArmaCorrupta1: THE FALL has defiled it: the crater's mist lives within.
 	ArmaCorrupta2: It no longer takes prefixes or reforges — the anvil is closed to it.
@@ -2983,4 +2998,5 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall
+Tiles.BrumaAltar.MapEntry: Crater Mist
 Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforge, no prefix, no workshop magic: whatever fell into that crater no longer belongs to this world.

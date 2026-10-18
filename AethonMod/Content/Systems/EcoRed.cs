@@ -132,6 +132,10 @@ namespace AethonMod.Content.Systems
         // MP). Sin respuesta — el cometa mismo ES la respuesta (y el
         // aviso privado viaja por AnunciarAlPortador desde la autoridad).
         public const byte MsgForzarCaida = 15;
+        // (v6.50.130 — LA BRUMA COLOCADA no necesita paquete: la AUTORIDAD
+        // la descubre sola con el escaneo periódico de LaCaidaSistema.
+        // DescubrirBrumasColocadas — sin hook de colocación en ESTE tML,
+        // la colocación SIEMPRE pasa cerca de un jugador.)
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más

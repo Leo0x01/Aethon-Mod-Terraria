@@ -284,11 +284,14 @@ namespace AethonMod.Content.Systems
             return dx <= RADIO_TILES * 16f && dy >= -170f && dy <= 40f;
         }
 
-        /// <summary>v6.50.129 — ¿Es un ARMA? («un arma de cualquier tipo»):
-        /// daño > 0, sin pico/hacha/martillo (las herramientas no son
-        /// armas), sin accesorios ni munición pura — melee, ranged,
-        /// magic, summon y lanzables.</summary>
-        private static bool EsArma(Item it)
+        /// <summary>v6.50.129→.130 — ¿Es un ARMA? («un arma de cualquier
+        /// tipo»): daño > 0, sin pico/hacha/martillo (las herramientas no
+        /// son armas), sin accesorios ni munición pura — melee, ranged,
+        /// magic, summon y lanzables. v6.50.130: PÚBLICO — las RECETAS de
+        /// la corrupción (RecetasCorrupcionSistema) y el sello del
+        /// apartado creación (CorruptoGlobalItem.OnCraft) leen la MISMA
+        /// definición (una sola verdad para la bruma entera).</summary>
+        public static bool EsArma(Item it)
         {
             return it != null && !it.IsAir && it.damage > 0 && !it.accessory &&
                 !it.vanity && it.pick == 0 && it.axe == 0 && it.hammer == 0 &&

@@ -79,15 +79,30 @@ namespace AethonMod.Content.Systems
         /// <summary>¿Ya cayó un cometa para este jugador ESTA noche? (índice → bool; se limpia al amanecer).</summary>
         private readonly bool[] _cayoEstaNoche = new bool[Main.maxPlayers];
 
-        /// <summary>v6.50.128 — UN ALTAR DEL MUNDO: la tile dorada que el
-        /// cráter dejó en el fondo (vive para SIEMPRE — es la puerta de LA
-        /// CORRUPCIÓN DE ITEMS del AltarDevoradorSistema).</summary>
+        /// <summary>v6.50.128→.130 — UN ALTAR DEL MUNDO: la ZONA de
+        /// corrupción del minibioma (vive para SIEMPRE — es la puerta de
+        /// LA CORRUPCIÓN DE ITEMS del AltarDevoradorSistema). v6.50.130 —
+        /// DOS clases de altar: el del CRÁTER (nació con la caída, no
+        /// tiene tile — la puerta es la bruma) y EL DE LA BRUMA COLOCADA
+        /// (la letra: «un item invisible que es la bruma en si… los
+        /// jugadores pueden tomarla y colocarla donde quieran, este item
+        /// de bruma sera usado como altar principal» — el jugador puso SU
+        /// bruma: la tile manda y si la quitan, la zona se va con ella).
+        /// v6.50.130 — BrumaEntregada: el cráter YA soltó SU item de
+        /// bruma (una sola vez por cráter — el respaldo de la letra).</summary>
         public class AltarDelMundo
         {
             /// <summary>La columna de la tile del altar.</summary>
             public int X;
             /// <summary>La fila de la tile del altar.</summary>
             public int Y;
+            /// <summary>v6.50.130 — TRUE si es una BRUMA COLOCADA por el
+            /// jugador (la zona vive y muere con SU tile).</summary>
+            public bool Colocada;
+            /// <summary>v6.50.130 — TRUE si el cráter ya entregó SU item
+            /// de bruma (los cráteres viejos también — nadie se queda sin
+            /// la suya, pero NADIE recibe dos).</summary>
+            public bool BrumaEntregada;
 
             /// <summary>El centro del altar en píxeles del mundo.</summary>
             public Vector2 Posicion() => new(X * 16f + 8f, Y * 16f + 8f);
@@ -155,11 +170,17 @@ namespace AethonMod.Content.Systems
                 tag["llegoPrimerNpc"] = _llegoPrimerNpc;
                 // v6.50.128 — los altares viajan con el mundo (la puerta de
                 // la corrupción es ETERNA — cada cráter guarda el suyo).
+                // v6.50.130 — Colocada/BrumaEntregada también viajan (la
+                // bruma colocada por el jugador ES su altar; el cráter que
+                // ya soltó su bruma no suelta otra).
                 var altares = new List<TagCompound>();
                 foreach (var a in Altares)
                 {
                     if (a == null) continue;
-                    altares.Add(new TagCompound { ["x"] = a.X, ["y"] = a.Y });
+                    var t = new TagCompound { ["x"] = a.X, ["y"] = a.Y };
+                    if (a.Colocada) t["col"] = true;
+                    if (a.BrumaEntregada) t["bruma"] = true;
+                    altares.Add(t);
                 }
                 tag["altares"] = altares;
             }
@@ -206,10 +227,16 @@ namespace AethonMod.Content.Systems
                     Altares.Add(new AltarDelMundo
                     {
                         X = entrada.GetInt("x"),
-                        Y = entrada.GetInt("y")
+                        Y = entrada.GetInt("y"),
+                        Colocada = entrada.GetBool("col"),
+                        BrumaEntregada = entrada.GetBool("bruma")
                     });
                 }
                 ForjarAltaresFaltantes();
+                // v6.50.130 — LA BRUMA EN LAS MANOS: cada cráter que aún
+                // no soltó SU item de bruma lo suelta ahora (los cráteres
+                // de la .129 reciben la suya al cargar el mundo).
+                EntregarBrumasPendientes();
             }
             catch { }
         }
@@ -321,6 +348,20 @@ namespace AethonMod.Content.Systems
             {
                 if (Main.gameMenu) return;
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
+
+                // v6.50.130 — LA VIGILANCIA DE LAS BRUMAS COLOCADAS (cada
+                // 10 s): la bruma cuya tile murió se despide — su zona se
+                // va con ella (la letra: el altar es la bruma COLOCADA).
+                if (Main.GameUpdateCount % 600ul == 0ul)
+                    ValidarBrumasColocadas();
+
+                // v6.50.130 — EL DESCUBRIMIENTO (cada 30 t): ESTE tML
+                // 2026.08 no trae hook de colocación — la AUTORIDAD mira
+                // alrededor de cada jugador y registra las brumas NUEVAS
+                // que encuentre (la colocación SIEMPRE pasa cerca de un
+                // jugador: la zona nace sola, en SP y en MP por igual).
+                if (Main.GameUpdateCount % 30ul == 0ul)
+                    DescubrirBrumasColocadas();
 
                 // EL AMANECER LIMPIA LA NOCHE: un cometa por jugador por noche.
                 bool esNoche = !Main.dayTime;
@@ -847,22 +888,200 @@ namespace AethonMod.Content.Systems
         /// <summary>Registra el altar nacido en un cráter (lo llama el
         /// cometa al forjarlo — solo AUTORIDAD; la lista viaja con el
         /// guardado del mundo). Sin duplicados: si YA hay un altar a menos
-        /// de 3 tiles, el cielo no insiste.</summary>
-        public static void RegistrarAltar(int x, int y)
+        /// de 3 tiles, el cielo no insiste.
+        /// v6.50.130 — <paramref name="colocada"/>: TRUE cuando es una
+        /// BRUMA COLOCADA por el jugador (su zona vive y muere con la
+        /// tile — la letra: «colocarla donde quieran… altar principal»).
+        /// Devuelve el altar registrado (o el que ya vivía ahí).</summary>
+        public static AltarDelMundo RegistrarAltar(int x, int y, bool colocada = false)
         {
             try
             {
-                if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10) return;
                 var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-                if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3))
-                    return;
-                sys.Altares.Add(new AltarDelMundo { X = x, Y = y });
+                if (sys == null) return null;
+                if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10)
+                    return null;
+                var existente = sys.Altares.Find(a => a != null &&
+                    Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3);
+                if (existente != null) return existente;
+                var nuevo = new AltarDelMundo { X = x, Y = y, Colocada = colocada, BrumaEntregada = colocada };
+                sys.Altares.Add(nuevo);
                 // v6.50.129 — LA BRUMA CAMINA: los clientes MP descubrían
                 // las zonas por la TILE DORADA (murió con el altar) — la
                 // lista nueva viaja al aire AHORA (y la foto de entrada
                 // la llevará a quien entre después).
                 if (Main.netMode == NetmodeID.Server)
+                    EcoRed.DifundirZonas();
+                return nuevo;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>v6.50.130 — LA BRUMA SE RECOGE: el jugador quitó SU
+        /// bruma colocada (picó la tile) — la zona se va con ella y la
+        /// lista nueva viaja al aire (solo AUTORIDAD difunde; en cliente
+        /// la lista local es teatro hasta la próxima foto del server).</summary>
+        public static void RemoverAltar(int x, int y)
+        {
+            try
+            {
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+                int antes = sys.Altares.Count;
+                sys.Altares.RemoveAll(a => a != null && a.Colocada &&
+                    Math.Abs(a.X - x) <= 2 && Math.Abs(a.Y - y) <= 2);
+                if (sys.Altares.Count != antes && Main.netMode == NetmodeID.Server)
+                    EcoRed.DifundirZonas();
+            }
+            catch { }
+        }
+
+        /// <summary>v6.50.130 — EL CRÁTER SUELTA SU BRUMA (la letra: «en el
+        /// crater debe estar un item invisible que es la bruma en si de
+        /// esa forma los jugadores pueden tomarla»): el ITEM DE BRUMA
+        /// nace en el corazón del minibioma — una sola vez por cráter
+        /// (BrumaEntregada). Solo AUTORIDAD.</summary>
+        public static void EntregarBruma(int x, int y)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+
+                var altar = sys.Altares.Find(a => a != null &&
+                    Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3);
+                if (altar == null || altar.Colocada || altar.BrumaEntregada) return;
+
+                // ¿Ya hay UNA bruma tirada en este cráter? (la red de
+                // seguridad del respawn — jamás dos).
+                int tipoBruma = ModContent.ItemType<global::AethonMod.Content.Items.Altar.BrumaDelCrater>();
+                for (int i = 0; i < Main.maxItems; i++)
+                {
+                    Item d = Main.item[i];
+                    if (d == null || !d.active || d.type != tipoBruma) continue;
+                    if (Math.Abs(d.Center.X / 16f - altar.X) <= 10 &&
+                        Math.Abs(d.Center.Y / 16f - altar.Y) <= 12)
+                    {
+                        altar.BrumaEntregada = true;
+                        return;
+                    }
+                }
+
+                altar.BrumaEntregada = true;
+                Vector2 pos = altar.Posicion() + new Vector2(0f, -18f);
+                int idx = Item.NewItem(new Terraria.DataStructures.EntitySource_WorldGen(),
+                    (int)pos.X, (int)pos.Y, 12, 12, tipoBruma, 1, true, -1);
+                if (idx >= 0 && Main.netMode == NetmodeID.Server)
+                    Terraria.NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+            }
+            catch { }
+        }
+
+        /// <summary>v6.50.130 — LA BARRIDA DE BRUMAS (al cargar el mundo):
+        /// cada cráter que nunca soltó su bruma la suelta AHORA (los
+        /// cráteres de la .129 la reciben en su primera carga bajo la
+        /// .130 — nadie se queda sin su altar portátil).</summary>
+        private static void EntregarBrumasPendientes()
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+                foreach (var a in sys.Altares.ToArray())
+                {
+                    if (a == null || a.Colocada || a.BrumaEntregada) continue;
+                    EntregarBruma(a.X, a.Y);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>v6.50.130 — LA VIGILANCIA DE LAS BRUMAS COLOCADAS (el
+        /// pulso de cada 10 s, solo AUTORIDAD): una bruma colocada cuya
+        /// tile YA NO EXISTE (explosión, mundo raro, el picoteo que SP
+        /// no vio) entrega su zona al olvido — la lista camina limpia.
+        /// (Los altares de CRÁTER no se tocan: su puerta es la bruma del
+        /// minibioma, no una tile.)</summary>
+        public static void ValidarBrumasColocadas()
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null || sys.Altares.Count == 0) return;
+
+                int tipoBruma = ModContent.TileType<global::AethonMod.Content.Tiles.BrumaAltarTile>();
+                bool toco = false;
+                foreach (var a in sys.Altares.ToArray())
+                {
+                    if (a == null || !a.Colocada) continue;
+                    if (a.X < 10 || a.Y < 10 || a.X >= Main.maxTilesX - 10 || a.Y >= Main.maxTilesY - 10)
+                    { sys.Altares.Remove(a); toco = true; continue; }
+                    Tile t = Main.tile[a.X, a.Y];
+                    if (t == null || !t.HasTile || t.TileType != tipoBruma)
+                    {
+                        sys.Altares.Remove(a);
+                        toco = true;
+                    }
+                }
+                if (toco && Main.netMode == NetmodeID.Server)
+                    EcoRed.DifundirZonas();
+            }
+            catch { }
+        }
+
+        /// <summary>v6.50.130 — EL DESCUBRIMIENTO DE LAS BRUMAS COLOCADAS
+        /// (la colocación sin hook): cada 30 t la AUTORIDAD escanea la
+        /// ventana alrededor de cada jugador vivo (±40×±25 tiles — la
+        /// colocación SIEMPRE pasa cerca de alguien) y registra las
+        /// tiles de bruma que aún no viven en la lista (RegistrarAltar
+        /// difunde solo — la zona nueva CAMINA a todas las máquinas).
+        /// Cubre SP, listen-server y dedicado con EL MISMO código: sin
+        /// paquetes, sin hooks, sin casos.</summary>
+        public static void DescubrirBrumasColocadas()
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return;
+
+                int tipoBruma = ModContent.TileType<global::AethonMod.Content.Tiles.BrumaAltarTile>();
+                bool toco = false;
+
+                for (int pj = 0; pj < Main.maxPlayers; pj++)
+                {
+                    Player p = Main.player[pj];
+                    if (p == null || !p.active || p.dead) continue;
+
+                    int cx = (int)(p.Center.X / 16f);
+                    int cy = (int)(p.Center.Y / 16f);
+                    int x0 = Math.Max(10, cx - 40), x1 = Math.Min(Main.maxTilesX - 11, cx + 40);
+                    int y0 = Math.Max(10, cy - 25), y1 = Math.Min(Main.maxTilesY - 11, cy + 25);
+
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        for (int y = y0; y <= y1; y++)
+                        {
+                            Tile t = Main.tile[x, y];
+                            if (t == null || !t.HasTile || t.TileType != tipoBruma) continue;
+
+                            // ¿Ya vive en la lista? (cráter o colocada —
+                            // cualquiera de las dos cuenta: la tile ya
+                            // tiene SU zona).
+                            if (sys.Altares.Exists(a => a != null &&
+                                Math.Abs(a.X - x) <= 1 && Math.Abs(a.Y - y) <= 1)) continue;
+
+                            var nueva = RegistrarAltar(x, y, colocada: true);
+                            if (nueva != null) toco = true;
+                        }
+                    }
+                }
+
+                // (RegistrarAltar ya difunde en el server — aquí nada más.)
+                if (toco && Main.netMode == NetmodeID.Server)
                     EcoRed.DifundirZonas();
             }
             catch { }

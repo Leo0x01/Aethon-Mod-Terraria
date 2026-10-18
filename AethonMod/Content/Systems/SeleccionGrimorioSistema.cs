@@ -521,6 +521,25 @@ namespace AethonMod.Content.Systems
             // leían saltos fantasma). Para las fases de Volar es IDÉNTICO
             // (dt = 1/60 ⇒ _pos += _vel): nadie cambia de física.
             _vel = _pos - _posAnterior;
+
+            // v6.50.130 — LA VALLA DE LA PANTALLA (la letra: «se sale de
+            // la pantalla a veces»): TODO el teatro del vagabundo vive
+            // DENTRO del monitor — el susto del cursor lo disparaba hasta
+            // 210 px fuera, el retroceso del sol lo empujaba, la andanada
+            // lo arrastraba tras el logo. AHORA la posición queda
+            // CLAMPED con margen (26 px: el libro se ASOMA al borde, no
+            // lo cruza) y la velocidad que apunta FUERA REBOTA suave
+            // hacia adentro (×−0,35: pierde el 65% — se nota el golpe
+            // contra el marco, sin quedarse pegado a él).
+            const float margenPantalla = 26f;
+            if (_pos.X < margenPantalla)
+            { _pos.X = margenPantalla; if (_vel.X < 0f) _vel.X *= -0.35f; }
+            if (_pos.Y < margenPantalla)
+            { _pos.Y = margenPantalla; if (_vel.Y < 0f) _vel.Y *= -0.35f; }
+            if (_pos.X > Main.screenWidth - margenPantalla)
+            { _pos.X = Main.screenWidth - margenPantalla; if (_vel.X > 0f) _vel.X *= -0.35f; }
+            if (_pos.Y > Main.screenHeight - margenPantalla)
+            { _pos.Y = Main.screenHeight - margenPantalla; if (_vel.Y > 0f) _vel.Y *= -0.35f; }
         }
 
         /// <summary>v6.50.129 — LA CURA DEL TELETRANSPORTE: PERSIGUIR un
@@ -1033,6 +1052,15 @@ namespace AethonMod.Content.Systems
                 DibujarManchas(_lote);
                 DibujarElLibro(_lote);
                 DibujarLaPagina(_lote);
+                // v6.50.130 — LOS VELOS DEL SOL: las bandas OSCURAS de
+                // contraste tras los anillos rúnicos (el sol de día es
+                // una lámpara: el ORO aditivo sobre su disco quedaba
+                // lavado a cero — la letra: «los anillos runicos no
+                // salen cuando intenta arrastrar al sol»). Los velos
+                // se dibujan aquí, en el lote ALFA, BAJO el lote
+                // aditivo: el oro ahora tiene NOCHE propia donde
+                // arder.
+                DibujarVelosDelSol(_lote);
             }
             catch { }
             try { _lote.End(); } catch { }
@@ -1323,6 +1351,82 @@ namespace AethonMod.Content.Systems
             }
         }
 
+        /// <summary>v6.50.130 — LOS VELOS DEL SOL (la cura de «los
+        /// anillos runicos de los agujeros negros no salen cuando
+        /// intenta arrastrar al sol»): la MISMA geometría de los anillos
+        /// (las 3 elipses de SigiloLib), pintada como BANDAS OSCURAS en
+        /// el lote ALFA — un cielo de sombra alrededor del disco para
+        /// que el ORO del lote aditivo tenga CONTRASTE de verdad. Sin
+        /// esto, el sol diurno (255, 255, 200 de brillo propio) se comía
+        /// puntos de oro a 0,11 de alfa sin que el ojo contara la
+        /// diferencia.</summary>
+        private static void DibujarVelosDelSol(SpriteBatch sb)
+        {
+            if (_fase != FASE_ACTUAR || _acto != ACTO_SOL) return;
+
+            const int T_ANILLOS = 46, T_AGARRE = 30, T_TIRON = 15, T_ARRASTRE = 115, T_SUELTA = 36;
+            int t = _tActo;
+            if (t >= T_ANILLOS + T_AGARRE + T_TIRON + T_ARRASTRE + T_SUELTA) return;
+
+            Texture2D glow = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            if (glow == null) return;
+
+            Vector2 sol = PosicionDelSol();
+            float time = Main.GlobalTimeWrappedHourly;
+
+            // LA MISMA CIÑE de DibujarActoDelSol (los velos abrazan
+            // donde los anillos están abrazando — mismo reloj).
+            float ciñe;
+            if (t < T_ANILLOS)
+            {
+                float p = t / (float)T_ANILLOS;
+                ciñe = MathHelper.Lerp(3.4f, 1.35f, p * p * (3f - 2f * p));
+            }
+            else if (t < T_ANILLOS + T_AGARRE)
+            {
+                float p = (t - T_ANILLOS) / (float)T_AGARRE;
+                ciñe = MathHelper.Lerp(1.35f, 1.05f, p);
+            }
+            else if (t < T_ANILLOS + T_AGARRE + T_TIRON + T_ARRASTRE)
+            {
+                ciñe = 1.05f + MathF.Sin(t * 0.55f) * 0.07f;
+            }
+            else
+            {
+                float p = MathHelper.Clamp(
+                    (t - T_ANILLOS - T_AGARRE - T_TIRON - T_ARRASTRE) / 36f, 0f, 1f);
+                ciñe = MathHelper.Lerp(1.05f, 2.6f, p);
+            }
+            float alphaVelo = t < T_ANILLOS ? t / (float)T_ANILLOS
+                : MathHelper.Clamp(1f - (t - T_ANILLOS - T_AGARRE - T_TIRON - T_ARRASTRE) / 30f, 0f, 1f);
+            if (alphaVelo <= 0.02f) return;
+
+            // EL VELO: la banda oscura (una sombra violácea profunda —
+            // la bruma del agujero negro filtrando la luz de la estrella).
+            Color velo = new Color(14, 6, 26);
+            for (int k = 0; k < 3; k++)
+            {
+                float a = (VFX.SigiloLib.RingA0 + VFX.SigiloLib.RingAStep * k) * 26f * ciñe * 0.42f;
+                float b = a * (0.34f + 0.07f * (k % 3));
+                float tilt = -0.55f + 0.20f * k
+                    + 0.10f * MathF.Sin(time * (0.35f + 0.06f * k) + k * 1.9f);
+                float spin = time * ((k % 2 == 0 ? 1f : -1f) *
+                    (VFX.SigiloLib.RingSpin0 + VFX.SigiloLib.RingSpinStep * k)) * 1.8f;
+
+                // La banda: 26 blobs gordos a lo largo de la elipse (un
+                // trazo GORDO y oscuro — el cielo donde el oro arderá).
+                for (int i = 0; i < 26; i++)
+                {
+                    float ang = i / 26f * MathHelper.TwoPi + spin * 0.4f;
+                    Vector2 p = PuntoElipse(sol, a, b, tilt, ang);
+                    sb.Draw(glow, p, null, velo * (0.42f * alphaVelo), 0f,
+                        glow.Size() * 0.5f, new Vector2(13f, 13f) / glow.Size(),
+                        SpriteEffects.None, 0f);
+                }
+            }
+        }
+
         /// <summary>EL ACTO DEL SOL (v6.50.129): LOS ANILLOS RÚNICOS de
         /// los agujeros negros sujetando al sol (la matemática de
         /// SigiloLib — RingA/RingFlat/RingTilt/RingSpin/RunesOfRing —
@@ -1415,6 +1519,11 @@ namespace AethonMod.Content.Systems
 
             Color cuerpo = new Color(255, 190, 80);    // SigiloLib.CuerpoOro
             Color punta = new Color(255, 240, 185);    // SigiloLib.PuntaOro
+            // v6.50.130 — EL ORO INTERIOR: la llama cálida del trazo (los
+            // anillos ya no son puntitos tímidos — son JOYAS sobre el
+            // velo oscuro: el halo de cada aro se LEE desde cualquier
+            // cielo, la letra de «los anillos no salen»).
+            Color brasa = new Color(255, 150, 40);
 
             // El spin del menú: un poco más vivo que el mundo (la letra
             // pidió ESPECTÁCULO — el vagabundo presume sus juguetes).
@@ -1431,19 +1540,35 @@ namespace AethonMod.Content.Systems
                     (VFX.SigiloLib.RingSpin0 + VFX.SigiloLib.RingSpinStep * k)) * spinUp;
                 int runas = VFX.SigiloLib.Runes0 + VFX.SigiloLib.RuneStep * k;
 
-                // EL ARO (el trazo elíptico): puntitos de oro a lo largo.
-                for (int i = 0; i < 30; i++)
+                // v6.50.130 — EL HALO DEL ARO: un resplandor cálido alargado
+                // a lo largo de la elipse (la NOCHE propia del velo le
+                // presta contraste: ahora el halo SE VE — antes el aro era
+                // 30 puntitos a 0,11 de alfa sobre un sol de 255).
+                for (int h = 0; h < 7; h++)
                 {
-                    float ang = i / 30f * MathHelper.TwoPi + spin * 0.4f;
+                    float angH = h / 7f * MathHelper.TwoPi + spin * 0.2f;
+                    Vector2 pH = PuntoElipse(centro, a, b, tilt, angH);
+                    sb.Draw(glow, pH, null, brasa * (0.16f * alpha * apreto), tilt,
+                        glow.Size() * 0.5f, new Vector2(a * 0.9f, 9f) / glow.Size(),
+                        SpriteEffects.None, 0f);
+                }
+
+                // EL ARO (el trazo elíptico): puntitos de oro a lo largo —
+                // v6.50.130: 42 puntos, MÁS gordos y al TRIPLE de alfa
+                // (0,30-0,62: antes 0,11-0,24 — invisibles sobre el sol).
+                for (int i = 0; i < 42; i++)
+                {
+                    float ang = i / 42f * MathHelper.TwoPi + spin * 0.4f;
                     Vector2 p = PuntoElipse(centro, a, b, tilt, ang);
                     float latir = 0.6f + 0.4f * MathF.Sin(time * 3f + i * 0.7f + k);
-                    sb.Draw(glow, p, null, cuerpo * Math.Min(0.24f, 0.11f * apreto) * alpha * latir, 0f,
-                        glow.Size() * 0.5f, new Vector2(3.4f, 3.4f) / glow.Size(),
+                    sb.Draw(glow, p, null, cuerpo * Math.Min(0.62f, 0.30f * apreto) * alpha * latir, 0f,
+                        glow.Size() * 0.5f, new Vector2(5.2f, 5.2f) / glow.Size(),
                         SpriteEffects.None, 0f);
                 }
 
                 // LAS RUNAS: glifos MAYORES (cápsulas cruzadas — cada una
-                // un carácter de la escritura mágica del sol).
+                // un carácter de la escritura mágica del sol) — v6.50.130:
+                // al ~DOBLE de alfa y tamaño (0,55-1,0: JOYAS legibles).
                 for (int g = 0; g < runas; g++)
                 {
                     float ang = g / (float)runas * MathHelper.TwoPi + spin;
@@ -1451,12 +1576,17 @@ namespace AethonMod.Content.Systems
                     float tang = AnguloTangente(a, b, tilt, ang);
                     float latido = 0.7f + 0.3f * MathF.Sin(time * 2.2f + g * 1.9f + k * 2.4f);
                     // El trazo vertical de la runa…
-                    sb.Draw(glow, p, null, cuerpo * Math.Min(0.55f, 0.30f * apreto) * alpha * latido, tang,
-                        glow.Size() * 0.5f, new Vector2(2.4f, 7.5f) / glow.Size(),
+                    sb.Draw(glow, p, null, cuerpo * Math.Min(1.0f, 0.55f * apreto) * alpha * latido, tang,
+                        glow.Size() * 0.5f, new Vector2(3.2f, 9.5f) / glow.Size(),
                         SpriteEffects.None, 0f);
                     // …y su cruce (el carácter completo).
-                    sb.Draw(glow, p, null, punta * Math.Min(0.55f, 0.30f * apreto) * alpha * latido, tang + 0.62f,
-                        glow.Size() * 0.5f, new Vector2(2.0f, 5.0f) / glow.Size(),
+                    sb.Draw(glow, p, null, punta * Math.Min(0.95f, 0.50f * apreto) * alpha * latido, tang + 0.62f,
+                        glow.Size() * 0.5f, new Vector2(2.6f, 6.6f) / glow.Size(),
+                        SpriteEffects.None, 0f);
+                    // …y SU CORAZÓN (el punto de luz blanco del glifo —
+                    // v6.50.130: la runa también LATE por dentro).
+                    sb.Draw(glow, p, null, punta * Math.Min(0.85f, 0.45f * apreto) * alpha * latido, 0f,
+                        glow.Size() * 0.5f, new Vector2(3.4f, 3.4f) / glow.Size(),
                         SpriteEffects.None, 0f);
                 }
             }
