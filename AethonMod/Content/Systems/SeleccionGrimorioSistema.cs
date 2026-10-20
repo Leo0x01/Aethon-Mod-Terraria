@@ -45,11 +45,13 @@ namespace AethonMod.Content.Systems
     //    el sol se DESLIZA por su arco. EL OJO QUE SALÍA SOBRE EL SOL
     //    MURIÓ: el secuestro lo cuentan SOLO los anillos (más vivos:
     //    latido más fuerte en el tirón).
-    //  · EL TÍTULO SE ATACA CON LAS ARMAS: golpe 1 = LA SOMBRA DE LA
-    //    PÁGINA (una página de tinta lo BARRE en diagonal, dejando sus
-    //    manchas); golpes 2-3 = LA ANDANADA DE LOS MINIMIONES (los tres
-    //    ojos de la corona se despliegan y DISPARAN virotes violetas que
-    //    salpican el logo) — y las manchas de tinta siguen acumulándose.
+    //  · v6.50.131 — EL TÍTULO SE ATACA CON UN SOLO ATAQUE (la letra:
+    //    «los ataques del minigrimorio y del vagabundo deben ser los
+    //    mismos… un solo ataque: atacar con los minimions usando
+    //    proyectiles como el vagabundo»): LA ANDANADA DE LOS MINIMIONES
+    //    (los tres ojos de la corona se despliegan y DISPARAN virotes
+    //    violetas que salpican el logo) — LA SOMBRA DE LA PÁGINA MURIÓ
+    //    en el menú (vive como arma del Eterno, donde siempre perteneció).
     //
     //  EL CIRCUITO (sin cambios):
     //  · GrimorioMenorPet.PreDraw detecta el DUMMY de vista previa del
@@ -176,7 +178,8 @@ namespace AethonMod.Content.Systems
 
         private static readonly List<Virote> _virotes = new();
 
-        // === v6.50.128 — LOS PUFFS DE BRUMA (la estela de la Sombra de la Página) ===
+        // === v6.50.131 — LOS PUFFS DE BRUMA (la estela de niebla del
+        // vagabundo al volar rápido: las páginas respiran) ===
         private struct Puff
         {
             public Vector2 Pos;
@@ -187,16 +190,24 @@ namespace AethonMod.Content.Systems
 
         private static readonly List<Puff> _puffs = new();
 
-        // === v6.50.128 — LA SOMBRA DE LA PÁGINA (el barrido del golpe 1) ===
-        private static Vector2 _pagDe, _pagHacia;
-        private static float _pagAng;
-
         // === v6.50.128 — LAS POSICIONES DE LA CORONA durante la andanada ===
         private static readonly Vector2[] _ojosActo = new Vector2[3];
 
         // === v6.50.128 — EL RASTRO (las estelas fantasma del vuelo rápido) ===
         private static readonly Vector2[] _rastro = new Vector2[7];
         private static int _idxRastro;
+
+        // === v6.50.131 — LAS ANIMACIONES VIVAS (la letra: «debes mejorar
+        // las animaciones y movimientos del vagabundo») ===
+        /// <summary>El BARREL ROLL: de tanto en cuando el vagabundo da una
+        /// vuelta completa de campana en pleno vuelo (un giro extra que
+        /// nace de golpe y se apaga solo — la travesura de las páginas).</summary>
+        private static float _giroExtra;
+        /// <summary>El ALETEO de páginas: una sacudida escamada durante
+        /// las pausas vivas (se estira, suelta motas y vuelve a su tamaño).</summary>
+        private static int _aleteo;
+        /// <summary>El RETROCESO del libro cuando la andanada dispara.</summary>
+        private static int _tRecoil;
 
         // === v6.50.128 — EL LOTE PROPIO (la cura del tanteo del client.log) ===
         private static SpriteBatch _lote;
@@ -264,6 +275,9 @@ namespace AethonMod.Content.Systems
             _tActo = 0;
             _pausa = 0;
             _vel = Vector2.Zero;
+            _giroExtra = 0f;         // v6.50.131 — animaciones a cero
+            _aleteo = 0;
+            _tRecoil = 0;
             _posAnterior = _ancla;   // v6.50.129 — sin salto fantasma al renacer
             _manchas.Clear();
             _chispas.Clear();
@@ -497,7 +511,10 @@ namespace AethonMod.Content.Systems
                         _fase = FASE_ACTUAR;
                         _tFase = 0;
                         _tActo = 0;
-                        _golpesLogo = 1;
+                        // v6.50.131 — LA ANDANADA ES EL PRIMER GOLPE (la
+                        // Sombra de la Página murió en el menú: un solo
+                        // ataque, el de los minimiones con proyectiles).
+                        _golpesLogo = 2;
                         // v6.50.129 — EL ESTACIONAMIENTO YA SE ELIGIÓ AL
                         // VOLAR (ElegirActo puso _objetivo = _reposo): el
                         // libro llega DONDE debe golpear desde, sin saltos.
@@ -514,6 +531,30 @@ namespace AethonMod.Content.Systems
                     break;
                 }
             }
+
+            // v6.50.131 — LAS ANIMACIONES VIVAS: el barrel roll se apaga
+            // solo (exponencial), el aleteo cuenta sus 26 t y el retroceso
+            // de la andanada decae.
+            _giroExtra *= 0.94f;
+            if (MathF.Abs(_giroExtra) < 0.015f) _giroExtra = 0f;
+            if (_tRecoil > 0) _tRecoil--;
+            if (_aleteo > 0)
+            {
+                _aleteo--;
+                if (_aleteo == 13) Rafaga(_pos + new Vector2(0f, -8f), 3);
+            }
+
+            // v6.50.131 — LA ESTELA DE BRUMA: volando rápido, el vagabundo
+            // gotea mechones de niebla de sus páginas (los puffs ya no son
+            // de la Sombra de la Página: ahora son SU rastro de vuelo).
+            if (_vel.LengthSquared() > 26f && (_tFase & 3) == 0)
+                _puffs.Add(new Puff
+                {
+                    Pos = _pos + Main.rand.NextVector2Unit() * 7f,
+                    Vel = -_vel * 0.14f + new Vector2(0f, 0.3f),
+                    Vida = Main.rand.NextFloat(0.4f, 0.85f),
+                    Tam = Main.rand.NextFloat(11f, 24f)
+                });
 
             // v6.50.129 — LA VELOCIDAD VERDADERA: el desplazamiento REAL
             // del frame (para las fases que fijan la posición a mano, las
@@ -559,6 +600,9 @@ namespace AethonMod.Content.Systems
             _pausa = Main.rand.Next(42, 108);
             _tMirada = 0;
             _tFase = 0;
+            // v6.50.131 — EL ALETEO: 1 de cada 3 pausas, el libro SACUDE
+            // sus páginas (se hincha, suelta motas y se asienta).
+            if (Main.rand.Next(3) == 0) _aleteo = 26;
         }
 
         /// <summary>EL PRÓXIMO RUMBO del vagar (un punto cualquiera, con margen).</summary>
@@ -568,6 +612,11 @@ namespace AethonMod.Content.Systems
                 Main.rand.NextFloat(50f, Main.screenWidth - 50f),
                 Main.rand.NextFloat(60f, Main.screenHeight - 60f));
             _tFase = 0;
+            // v6.50.131 — EL BARREL ROLL: 1 de cada 6 rumbos, el vagabundo
+            // viaja dando UNA VUELTA de campana (giro extra que nace
+            // entero y se apaga exponencial: ~1,2 s de pirueta).
+            if (Main.rand.Next(6) == 0)
+                _giroExtra = Main.rand.NextBool() ? MathHelper.TwoPi : -MathHelper.TwoPi;
         }
 
         /// <summary>v6.50.128 — EL PUNTO DE INTERÉS de la curiosidad: ¡el
@@ -678,74 +727,20 @@ namespace AethonMod.Content.Systems
         //  LOS ACTOS
         // ================================================================
 
-        /// <summary>ATACAR EL TÍTULO CON LAS ARMAS DEL GRIMORIO (v6.50.128
-        /// — la letra: «debe atacarlo con la sombra de la pagina o con el
-        /// ataque de los minimion»): GOLPE 1 = LA SOMBRA DE LA PÁGINA barre
-        /// el logo en diagonal dejando sus manchas; GOLPES 2-3 = los TRES
-        /// OJOS de la corona se despliegan y DISPARAN virotes violetas.</summary>
+        /// <summary>ATACAR EL TÍTULO CON LOS MINIMIONES (v6.50.131 — la
+        /// letra: «deben tener un solo ataque, este es que ataque con los
+        /// minimions usando proyectiles como el vagabundo»): DOS ANDANADAS
+        /// — los TRES OJOS de la corona se despliegan frente al logo y
+        /// DISPARAN sus virotes violetas. La Sombra de la Página ya no
+        /// vive en el menú (es arma del Eterno, no del vagabundo).</summary>
         private static void ActuarLogo()
         {
             _foco = new Vector2(Main.screenWidth * 0.5f, 100f);
 
-            if (_golpesLogo == 1)
             {
-                // ====== GOLPE 1 — LA SOMBRA DE LA PÁGINA ======
-                const int T_CONJURO = 26, T_BARRIDO = 22, T_DISIPA = 24;
-                int t = _tActo;
-                float lado = _reposoIzquierda ? 1f : -1f;
-
-                if (t <= T_CONJURO)
-                {
-                    // EL CONJURO: el libro se echa atrás y se le enciende
-                    // el aura (la página se está escribiendo).
-                    Volar(_reposo, 0.20f, 5f, 1f / 60f);
-                }
-                else if (t == T_CONJURO + 1)
-                {
-                    // EL BARRIDO NACE: cruza el logo EN DIAGONAL, de un
-                    // costado al otro, inclinada como un tajo.
-                    _pagDe = new Vector2(
-                        Main.screenWidth * 0.5f - lado * 300f, 100f + 34f);
-                    _pagHacia = new Vector2(
-                        Main.screenWidth * 0.5f + lado * 300f, 100f - 34f);
-                    _pagAng = lado * (0.62f + Main.rand.NextFloat(-0.08f, 0.08f));
-                }
-                else if (t <= T_CONJURO + T_BARRIDO)
-                {
-                    // LA PÁGINA VUELA: puffs de bruma tras de ella.
-                    float p = (t - T_CONJURO - 1) / (float)T_BARRIDO;
-                    Vector2 centro = Vector2.Lerp(_pagDe, _pagHacia, p);
-                    if ((t & 1) == 0)
-                        _puffs.Add(new Puff
-                        {
-                            Pos = centro + new Vector2(Main.rand.NextFloat(-18f, 18f),
-                                Main.rand.NextFloat(-14f, 14f)),
-                            Vel = new Vector2(-lado * 1.1f, 0.4f) + Main.rand.NextVector2Unit() * 0.4f,
-                            Vida = Main.rand.NextFloat(0.35f, 0.7f),
-                            Tam = Main.rand.NextFloat(16f, 30f)
-                        });
-                    // El libro SIGUE a su página a distancia (la dirige) —
-                    // v6.50.129: PERSIGUIENDO el rumbo (antes lo escribía
-                    // de golpe: el arranque del golpe era un saltito).
-                    MoverHacia(Vector2.Lerp(_reposo, _reposo + new Vector2(-lado * 90f, -20f), p), 0.35f);
-                }
-                else if (t == T_CONJURO + T_BARRIDO + 1)
-                {
-                    // EL TAJO: la página CORTÓ el logo — tres manchas a lo
-                    // largo del tajo y su ráfaga.
-                    for (int i = 0; i < 3; i++)
-                        Manchar(Vector2.Lerp(_pagDe, _pagHacia, 0.34f + i * 0.16f), 1.05f);
-                    Rafaga(Vector2.Lerp(_pagDe, _pagHacia, 0.5f), 15);
-                }
-                else if (t >= T_CONJURO + T_BARRIDO + T_DISIPA)
-                {
-                    // La página se disipó: al siguiente golpe.
-                    _golpesLogo = 2;
-                    _tActo = 0;
-                }
-            }
-            else
-            {
+                // ====== LA ANDANADA DE LOS MINIMIONES (v6.50.131 — EL
+                // ÚNICO ATAQUE del vagabundo, la letra: «un solo ataque:
+                // atacar con los minimions usando proyectiles») ======
                 // ====== GOLPES 2-3 — LA ANDANADA DE LOS MINIMIONES ======
                 const int T_DESPLIEGUE = 30, T_FUEGO = 66, T_RECOGIDA = 30;
                 int t = _tActo;
@@ -802,8 +797,10 @@ namespace AethonMod.Content.Systems
                         Llega = (int)viaje,
                         Objetivo = blanco
                     });
-                    // EL RETROCESO del ojo que dispara.
+                    // EL RETROCESO del ojo que dispara… y del LIBRO que
+                    // lo dirige (v6.50.131: el jadeo de la andanada).
                     _ojosActo[ojo] -= rumbo.SafeNormalize(Vector2.UnitX) * 3f;
+                    _tRecoil = 7;
                 }
 
                 if (t >= T_DESPLIEGUE + T_FUEGO + T_RECOGIDA)
@@ -1051,7 +1048,6 @@ namespace AethonMod.Content.Systems
             {
                 DibujarManchas(_lote);
                 DibujarElLibro(_lote);
-                DibujarLaPagina(_lote);
                 // v6.50.130 — LOS VELOS DEL SOL: las bandas OSCURAS de
                 // contraste tras los anillos rúnicos (el sol de día es
                 // una lámpara: el ORO aditivo sobre su disco quedaba
@@ -1129,9 +1125,22 @@ namespace AethonMod.Content.Systems
             const float esc = 0.52f;
             float bob = MathF.Sin(t * 1.75f + 0.8f) * 2.4f;
             // EL CINEO: la inclinación nace de la VELOCIDAD (se recuesta
-            // hacia donde vuela) + su vaivén perezoso de siempre.
+            // hacia donde vuela) + su vaivén perezoso de siempre + EL
+            // BARREL ROLL (v6.50.131: la pirueta completa de camino).
             float giro = MathHelper.Clamp(_vel.X * 0.028f, -0.30f, 0.30f)
-                + MathF.Sin(t * 1.2f) * 0.05f;
+                + MathF.Sin(t * 1.2f) * 0.05f + _giroExtra;
+
+            // v6.50.131 — LA RESPIRACIÓN Y EL TEATRO DE ESCALA: el libro
+            // late ±2 %; el ALETEO de las pausas lo hincha en campana; la
+            // andanada lo hace INHALAR al desplegar los ojos (anticipación)
+            // y lo empuja ATRÁS en cada disparo (retroceso).
+            float escViva = esc * (1f + 0.02f * MathF.Sin(t * 2.1f));
+            if (_aleteo > 0)
+                escViva *= 1f + 0.06f * MathF.Sin((26 - _aleteo) / 26f * MathHelper.Pi);
+            if (_fase == FASE_ACTUAR && _acto == ACTO_LOGO && _golpesLogo >= 2 && _tActo < 30)
+                escViva *= 1f + 0.04f * (_tActo / 30f);          // la inhalación
+            if (_tRecoil > 0)
+                escViva *= 1f - 0.025f * (_tRecoil / 7f);        // el jadeo
             Vector2 centro = _pos + new Vector2(0f, bob);
             Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height);
             Vector2 origen = frame.Size() * 0.5f;
@@ -1153,7 +1162,7 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            sb.Draw(tex, centro, frame, luz, giro, origen, esc, SpriteEffects.None, 0f);
+            sb.Draw(tex, centro, frame, luz, giro, origen, escViva, SpriteEffects.None, 0f);
 
             // EL OJO VIVO (mira hacia el FOCO de la curiosidad).
             float parp = (t * 0.9f) % 5.2f;
@@ -1161,7 +1170,7 @@ namespace AethonMod.Content.Systems
             {
                 var parpado = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
-                sb.Draw(parpado, centro, frame, luz, giro, origen, esc, SpriteEffects.None, 0f);
+                sb.Draw(parpado, centro, frame, luz, giro, origen, escViva, SpriteEffects.None, 0f);
             }
             else
             {
@@ -1170,7 +1179,7 @@ namespace AethonMod.Content.Systems
                     ? Vector2.Normalize(rumbo) * new Vector2(3.5f, 2.8f) * 0.9f
                     : Vector2.Zero;
                 Vector2 alOjo = (global::AethonMod.Content.Weapons.GrimorioHambrientoNervioso.OjoTexel
-                    + mirada - origen) * esc;
+                    + mirada - origen) * escViva;
                 Vector2 posOjo = centro + alOjo.RotatedBy(giro);
                 var iris = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
@@ -1220,73 +1229,6 @@ namespace AethonMod.Content.Systems
                         luz, 0f, irisOjo.Size() * 0.5f, 0.41f * escOjo, SpriteEffects.None, 0f);
                 }
             }
-        }
-
-        /// <summary>LA SOMBRA DE LA PÁGINA (v6.50.128 — el golpe 1 del
-        /// título): la página de tinta que BARRE el logo — un cuerpo
-        /// oscuro ALARGADO e inclinado (el tajo), borde dentado, su ojo
-        /// que mira hacia adelante y la bruma que le nace detrás. Vive
-        /// solo durante el barrido (los puffs duran un poco más).</summary>
-        private static void DibujarLaPagina(SpriteBatch sb)
-        {
-            const int T_CONJURO = 26, T_BARRIDO = 22, T_DISIPA = 24;
-            if (_fase != FASE_ACTUAR || _acto != ACTO_LOGO || _golpesLogo != 1) return;
-            int t = _tActo;
-            if (t < T_CONJURO || t > T_CONJURO + T_BARRIDO + T_DISIPA) return;
-
-            Texture2D glow = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            if (glow == null) return;
-
-            float vive = t <= T_CONJURO + T_BARRIDO
-                ? 1f
-                : 1f - (t - T_CONJURO - T_BARRIDO) / (float)T_DISIPA;
-            Vector2 centro = Vector2.Lerp(_pagDe, _pagHacia,
-                MathHelper.Clamp((t - T_CONJURO) / (float)T_BARRIDO, 0f, 1f));
-
-            // EL CUERPO: la página de tinta — cápsula oscura inclinada (el
-            // tajo). Negro con RIM violeta (la lección de la casa: el
-            // negro puro es invisible sobre fondo oscuro).
-            Color tinta = new Color(16, 6, 26) * (0.88f * vive);
-            Vector2 tam = new Vector2(150f, 74f);
-            sb.Draw(glow, centro, null, tinta, _pagAng, glow.Size() * 0.5f,
-                tam / glow.Size(), SpriteEffects.None, 0f);
-            sb.Draw(glow, centro, null, tinta * 0.85f, _pagAng, glow.Size() * 0.5f,
-                new Vector2(96f, 40f) / glow.Size(), SpriteEffects.None, 0f);
-
-            // EL BORDE DENTADO: colmillos a lo largo del borde inferior
-            // (los dientes de la fauce de la que nació).
-            Vector2 rumbo = new Vector2(MathF.Cos(_pagAng), MathF.Sin(_pagAng));
-            Vector2 normal = new Vector2(-rumbo.Y, rumbo.X);
-            for (int i = 0; i < 6; i++)
-            {
-                float f = (i - 2.5f) / 2.5f;
-                Vector2 diente = centro + rumbo * f * 66f + normal * 34f;
-                sb.Draw(glow, diente, null, tinta * 0.92f, _pagAng + f * 0.16f,
-                    glow.Size() * 0.5f, new Vector2(17f, 21f) / glow.Size(),
-                    SpriteEffects.None, 0f);
-            }
-
-            // EL OJO DE LA PÁGINA (mira hacia adelante del barrido).
-            var iris = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
-            Texture2D ojo = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
-            if (ojo != null)
-            {
-                sb.Draw(ojo, centro - normal * 6f, null, Color.White * (0.92f * vive),
-                    _pagAng, ojo.Size() * 0.5f, 0.55f, SpriteEffects.None, 0f);
-                if (iris != null)
-                    sb.Draw(iris, centro - normal * 6f + rumbo * 5f, null,
-                        Color.White * vive, _pagAng, iris.Size() * 0.5f, 0.24f,
-                        SpriteEffects.None, 0f);
-            }
-
-            // EL RIM VIOLETA (aditivo no disponible aquí: una orla tenue
-            // alfabeta — la firma de las sombras del mod).
-            sb.Draw(glow, centro, null, new Color(64, 42, 96) * (0.30f * vive), _pagAng,
-                glow.Size() * 0.5f, (tam + new Vector2(26f, 26f)) / glow.Size(),
-                SpriteEffects.None, 0f);
         }
 
         /// <summary>LA BRASA del vagabundo (el aura violeta de las páginas

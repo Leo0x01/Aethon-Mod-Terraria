@@ -217,6 +217,14 @@ namespace AethonMod.Content.Weapons
             // subir algun stats del grimorio»): la Fuerza (armas melee
             // comidas) + el EXP acumulado (la rareza de todo lo devorado).
             damage *= 1f + Players.ShardPlayer.BonusDanoArmasDevoradas(player);
+
+            // v6.51.0 — EL DESPERTAR (la letra: «consumir la esencia
+            // corrupta sigue aumentando un poquito el daño en %… ese
+            // daño aumentado es de TODOS los tipos de daño que tiene el
+            // grimorio, o sea mágico y de invocación»): +1 % por nivel
+            // de despertar.
+            damage *= 1f + Systems.DespertarGrimorio.BonusDano(
+                Systems.DespertarGrimorio.NivelDe(player));
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -341,6 +349,21 @@ namespace AethonMod.Content.Weapons
                 // mejora, 4 mejoras máximas — OjoEternoMinion).
                 int maxMinions = Players.ShardPlayer.TechoOjosDe(player, level);
                 int tipoOjo = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+
+                // v6.51.0 — LA ESCALERA DE LA LETRA: «en nivel 5 puede
+                // invocar su PRIMER minion» — antes del nivel 5 el
+                // escuadrón está cerrado (cada ojo nuevo se ANUNCIA al
+                // subir de nivel — ShardLevelItem.OnLevelUp).
+                int despertar = Systems.DespertarGrimorio.NivelDe(player);
+                int mejorasDesbloqueadas = Systems.DespertarGrimorio.MejorasDesbloqueadas(despertar);
+                if (maxMinions <= 0)
+                {
+                    if (Main.myPlayer == player.whoAmI)
+                        Main.NewText(Terraria.Localization.Language.GetTextValue(
+                            "Mods.AethonMod.Despertar.OjosCerrados", 5),
+                            new Color(255, 130, 130));
+                    return false;
+                }
                 int currentMinions = 0;
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
@@ -365,16 +388,31 @@ namespace AethonMod.Content.Weapons
                         int m = global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(p);
                         if (m >= global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasMax)
                             continue;                       // ya lleva sus 4 mejoras
+                        // v6.51.0 — LAS MEJORAS SON DEL DESPERTAR (la
+                        // letra: «con la nueva mecánica las mejoras están
+                        // sujetas a esa mecánica de corrupción» — nivel 5
+                        // → la 1 · 15 → la 2 · 30 → la 3 · 40 → la 4).
+                        if (m >= mejorasDesbloqueadas)
+                            continue;                       // el despertar aún no las presta
                         if (m < mejorMenor) { mejorMenor = m; objetivo = p; }
                     }
 
                     if (objetivo == null)
                     {
-                        // los once ojos ya llevan sus cuatro mejoras: no
-                        // queda nada que fortalecer (ni se cobra maná)
+                        // v6.51.0 — DOS CIERRES DISTINTOS: o todo el
+                        // escuadrón llevó sus 4 mejoras (el final de
+                        // verdad)… o el DESPERTAR aún no presta más.
                         if (Main.myPlayer == player.whoAmI)
-                            Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.OjosAlMaximo"),
-                                new Color(255, 120, 120));
+                        {
+                            if (mejorasDesbloqueadas >= global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasMax)
+                                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Armas.OjosAlMaximo"),
+                                    new Color(255, 120, 120));
+                            else
+                                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Despertar.MejorasSelladas", despertar),
+                                    new Color(255, 130, 130));
+                        }
                         return false;
                     }
 
@@ -415,10 +453,15 @@ namespace AethonMod.Content.Weapons
 
                 // Invocar el OJO (EXACTAMENTE una vez) — el nivel viaja en
                 // ai[2] desde el spawn (v6.50.2: el paquete 27 sí viaja).
+                // v6.51.0 — EL DAÑO ES DEL GRIMORIO SOLAMENTE (la letra:
+                // «sin importar la armadura o accesorios»): NO el damage
+                // del disparo (que ya lleva las stats del jugador) sino
+                // DanoOjosDelEterno — su base, su nivel, su despertar.
+                int danoOjo = WeaponScaling.DanoOjosDelEterno(Item.damage, level, player);
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.OjoEternoBuff>(), 18000);
                 Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>(),
-                    damage, knockback, player.whoAmI, 0f, 0f, level);
+                    danoOjo, knockback, player.whoAmI, 0f, 0f, level);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
             }
@@ -824,6 +867,58 @@ namespace AethonMod.Content.Weapons
                     "[c/78FF96:═══ PROGRESIÓN ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "Level",
                     $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
+
+                // === v6.51.0 — LA BARRA DEL DESPERTAR (la letra: «estos
+                //     niveles deben estar ubicados en la ventana de
+                //     información DEBAJO de la barra de niveles y ENCIMA
+                //     de la barra de hambre») + la LISTA PEQUEÑA de lo
+                //     que necesita el próximo nivel («para subirla de
+                //     nivel se presentará una lista pequeña de lo que
+                //     necesita»). ===
+                try
+                {
+                    Player portador = Main.LocalPlayer;
+                    int despertar = Systems.DespertarGrimorio.NivelDe(portador);
+                    int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(portador);
+
+                    // LA BARRA (el nivel de despertar es la propia barra:
+                    // 50 celdas, el nivel las llena).
+                    int celdas = 25;
+                    int llenas = (int)(celdas * despertar / (float)Systems.DespertarGrimorio.NivelMax);
+                    string barDesp = "";
+                    for (int i = 0; i < celdas; i++)
+                        barDesp += i < llenas ? "▓" : "·";
+
+                    tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
+                        $"[c/C49CFF:Despertar {despertar}/50]  [c/9B6FE8:{barDesp}]"));
+                    tooltips.Add(new TooltipLine(Mod, "DespertarDano",
+                        $"[c/9B6FE8:  +{(despertar)}% de daño a TODO el grimorio]"));
+
+                    // LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL (esencias ·
+                    // dinero · el arma del peldaño).
+                    if (despertar < Systems.DespertarGrimorio.NivelMax)
+                    {
+                        int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
+                        long monedas = Systems.DespertarGrimorio.MonedasPara(siguiente);
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
+                            $"[c/78788C:  Para Despertar {siguiente}:]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
+                            $"[c/C4A2FF:  • Devorar {esencias} Esencia{(esencias == 1 ? "" : "s")} Corrupta{(esencias == 1 ? "" : "s")}]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
+                            $"[c/C4A2FF:  • {Systems.DespertarGrimorioSistema.ItemToText(monedas)}]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
+                            $"[c/C4A2FF:  • Devorar 1 {Systems.DespertarGrimorio.NombreOfrenda(siguiente)} CORRUPTA]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
+                            "[c/78788C:  (suéltala con el grimorio en la mano)]"));
+                    }
+                    else
+                    {
+                        tooltips.Add(new TooltipLine(Mod, "DespertarMax",
+                            "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO (máximo por ahora)]"));
+                    }
+                }
+                catch { }
+
                 if (barraHambre != null) tooltips.Add(barraHambre);
                 if (estadoHambre != null) tooltips.Add(estadoHambre);
 

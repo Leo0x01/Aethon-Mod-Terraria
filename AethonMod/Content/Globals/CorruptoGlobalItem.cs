@@ -66,6 +66,39 @@ namespace AethonMod.Content.Globals
 
         public override bool CanReforge(Item item) => !Corrompido;
 
+        // ================================================================
+        //  v6.51.0 — LOS STATS EN % DE LAS ARMAS CORRUPTAS (la letra:
+        //  «las armas corruptas obtienen un 5% de daño extra, además de
+        //  otras estadísticas en porcentaje pero ya no pueden ser
+        //  modificables ni mejorables»): +5 % de daño, +5 % de empuje,
+        //  +2 % de crítico y 5 % MÁS RÁPIDAS — el precio de la eternidad
+        //  (sin reforge, sin prefijos, sin mejora alguna: para siempre).
+        // ================================================================
+
+        public override void ModifyWeaponDamage(Item item, Player player, ref StatModifier damage)
+        {
+            if (!Corrompido) return;
+            damage *= 1.05f;                 // +5 % de daño (la letra)
+        }
+
+        public override void ModifyWeaponKnockback(Item item, Player player, ref StatModifier knockback)
+        {
+            if (!Corrompido) return;
+            knockback *= 1.05f;              // +5 % de empuje
+        }
+
+        public override void ModifyWeaponCrit(Item item, Player player, ref float crit)
+        {
+            if (!Corrompido) return;
+            crit += 2f;                      // +2 % de crítico
+        }
+
+        public override float UseTimeMultiplier(Item item, Player player)
+        {
+            if (!Corrompido) return 1f;
+            return 0.95f;                    // 5 % más rápida
+        }
+
         // === v6.50.130 — EL SELLO DEL APARTADO CREACIÓN: lo pone la
         //     RECETA misma (RecetasCorrupcionSistema.MarcarCorrupta, vía
         //     Recipe.AddOnCraftCallback — ESTE tML 2026.08 no trae el

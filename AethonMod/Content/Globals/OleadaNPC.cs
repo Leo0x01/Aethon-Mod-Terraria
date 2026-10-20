@@ -2092,6 +2092,37 @@ namespace AethonMod.Content.Globals
         /// MONEDAS DE PLATINO + SU ESENCIA (la especial: 15). El festín
         /// del libro paga en los dos metales.
         /// </summary>
+        public override void Load()
+        {
+            // v6.51.0 — EL LOOT PELADO DE LAS OLEADAS (la letra:
+            // «recuerda que en las oleadas cada enemigo tiene las
+            // probabilidades de soltar sus ítems reducidos al mínimo
+            // posible y solo sueltan dinero al morir más las
+            // probabilidades de soltar esencia corrupta»): la CHUSMA
+            // sellada no corre el drop de items de vanilla — su pago es
+            // el ORO del OnKill + el 2 % de esencia corrupta (el jefe ya
+            // estaba aislado desde la .116: ni loot ni flags).
+            Terraria.On_NPC.NPCLoot_DropItems += PelarElLootDeLaChusma;
+        }
+
+        public override void Unload()
+        {
+            Terraria.On_NPC.NPCLoot_DropItems -= PelarElLootDeLaChusma;
+        }
+
+        private static void PelarElLootDeLaChusma(
+            Terraria.On_NPC.orig_NPCLoot_DropItems orig, NPC self, Player closestPlayer)
+        {
+            try
+            {
+                var sello = self?.GetGlobalNPC<OleadaNPC>();
+                if (sello != null && sello.EsDeOleada && !sello.EsJefeDeOleada)
+                    return;   // SIN items vanilla: solo dinero + esencia
+            }
+            catch { }
+            orig(self, closestPlayer);
+        }
+
         public override void OnKill(NPC npc)
         {
             if (!EsDeOleada) return;
@@ -2124,21 +2155,30 @@ namespace AethonMod.Content.Globals
                     if (monedas > 0)
                         Item.NewItem(src, npc.Center, ItemID.PlatinumCoin, monedas);
 
-                    // SU ESENCIA (un alma por guardián — el ítem que sube
-                    // un nivel COMPLETO al libro). v6.50.116 — EL TIPO
-                    // RESERVADO: el jefe muere aislado (type/netID en 0
-                    // para vanilla — AislarJefeDeOleada) pero SU alma se
-                    // paga con SU especie verdadera.
-                    int esencia = EsenciaDeJefeItem.DeNPC(
-                        TipoReservado > 0 ? TipoReservado : npc.type);
-                    if (esencia > 0)
-                        Item.NewItem(src, npc.Center, esencia, 1);
+                    // v6.51.0 — LAS 10 ESENCIAS CORRUPTAS DEL GUARDIÁN
+                    // (la letra: «cada jefe puede soltar 10 tras ser
+                    // vencido» — la esencia de jefe de la vieja era
+                    // MUERE, sustituida por la esencia corrupta: el
+                    // propio grimorio llama a estas criaturas).
+                    int tipoHusos = ModContent.ItemType
+                        <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                    Item.NewItem(src, npc.Center, tipoHusos, 10);
                 }
                 else
                 {
                     // EL ORO DE LA CHUSMA (k monedas — la 10: 10).
                     if (monedas > 0)
                         Item.NewItem(src, npc.Center, ItemID.GoldCoin, monedas);
+
+                    // v6.51.0 — EL 2 % DE ESENCIA (la letra: «en las
+                    // oleadas de hambre cada monstruo tiene una
+                    // probabilidad de 2% de soltar 1 esencia corrupta» —
+                    // las probabilidades de los ítems vanilla están
+                    // PELADAS al mínimo: solo dinero + esencia, ver el
+                    // detour de NPCLoot_DropItems en Load).
+                    if (Main.rand.Next(100) < 2)
+                        Item.NewItem(src, npc.Center, ModContent.ItemType
+                            <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 1);
                 }
             }
             catch { }

@@ -101,6 +101,19 @@ namespace AethonMod.Content.Players
         /// </summary>
         public bool CaidaRecibida = false;
 
+        /// <summary>v6.51.0 — EL DESPERTAR DEL GRIMORIO (la nueva
+        /// progresión, la letra: «empieza a nivel 0… máximo 50 por
+        /// ahora»): el nivel que desbloquea los poderes del grimorio
+        /// (mejoras de los ojos, el sol rúnico, los agujeros negros,
+        /// la mascota del nivel 20) y suma +1 % de daño por nivel a
+        /// TODOS los tipos de daño del grimorio.</summary>
+        public int NivelDespertar;
+
+        /// <summary>v6.51.0 — LA MASCOTA DEL ESCUPIDIZO (nivel 20 del
+        /// despertar: el grimorio la escupió UNA VEZ — la ceremonia no
+        /// se repite).</summary>
+        public bool PetDelDespertar;
+
         /// <summary>v6.50.120 — LA BOLSA A LA MANO (la letra: «además no
         /// tengo la bolsa, no olvides que debes dárselo al jugador»):
         /// ¿ESTE portador ya recibió LA BOLSA DE LA CRÍA directamente en
@@ -477,16 +490,14 @@ namespace AethonMod.Content.Players
             // ============================================================
             int equipoInvocador = Player.maxMinions - 1;
             if (equipoInvocador < 0) equipoInvocador = 0;
+            // v6.51.0 — EL TECHO ESTRICTO DE LA LETRA: «la cantidad de
+            // minions están sujetos a la subida normal de nivel del
+            // grimorio, cada 10 niveles 1 minion nuevo, en nivel 5 puede
+            // invocar su primer minion, en nivel 10 su segundo minion y a
+            // partir de aquí cada 10 niveles 1 nuevo» — NI el equipo NI
+            // lo devorado inflan el escuadrón (los ojos de banquete y de
+            // corona de la .128-.129 MURIERON con el despertar).
             int techoOjos = WeaponScaling.TechoOjosEterno(equipoInvocador, nivel);
-            // v6.50.128 — LOS OJOS DEL BANQUETE: lo devorado en el altar
-            // despierta ojos nuevos en la corona (+1 cada 75 esencias,
-            // tope +3 — la mecánica que «dará más vida al mod»).
-            techoOjos += OjosExtraDevorados(Player);
-            // v6.50.129 — LOS OJOS DE LA CORONA DEL FESTÍN: cada 5 armas
-            // de invocación comidas despierta OTRO ojo (tope +3 — suma
-            // con los del banquete: el escuadrón puede crecer de las dos
-            // mesas del cráter).
-            techoOjos += OjosCoronaDevorados(Player);
             {
                 int i = Player.whoAmI;
                 if (i >= 0 && i < _techoOjos.Length)
@@ -573,17 +584,18 @@ namespace AethonMod.Content.Players
 
             try
             {
-                // +1% daño de invocación por nivel (Infinito)
-                Player.GetDamage(DamageClass.Summon) += WeaponScaling.SummonDamageBonus(nivel);
+                // v6.51.0 — EL STACK DE INVOCACIÓN MURIÓ (la letra: «los
+                // minions del grimorio son INDEPENDIENTES de los minions
+                // del juego… sin importar la armadura o accesorios que
+                // lleve el jugador, los minions del grimorio estarán
+                // sujetos a las características del grimorios»): los ojos
+                // leen SOLO las stats del grimorio (DanoOjosDelEterno al
+                // invocarlos) — el crítico y la penetración mágicos son
+                // del propio libro (su clic izquierdo).
                 // +0.2% crítico mágico por nivel (Máximo 100%)
                 Player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(nivel);
                 // Armor penetration +2% cada 5 niveles (Máximo 50%)
                 Player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(nivel);
-                // v6.45: la mitad de invocación del bonus por mana
-                // faltante también es persistente (la mitad mágica
-                // sigue evaluándose por golpe en ModifyWeaponDamage).
-                Player.GetDamage(DamageClass.Summon) *=
-                    WeaponScaling.LowManaDamageMult(Player.statMana, Player.statManaMax2);
             }
             catch { }
         }
@@ -655,6 +667,15 @@ namespace AethonMod.Content.Players
         /// </summary>
         public override void PostUpdate()
         {
+            // v6.51.0 — LOS ATAQUES COMBINADOS DEL DESPERTAR (el sol
+            // rúnico y los agujeros negros de los ojos): el coordinador
+            // corre en la PANTALLA del dueño (cada jugador con SUS ojos).
+            try
+            {
+                Content.Systems.AtaquesCombinadosSistema.Tick(Player);
+            }
+            catch { }
+
             try
             {
                 // v6.50.116 — EL RELOJ DE LA GRACIA: la tregua del guardián
@@ -1158,6 +1179,9 @@ namespace AethonMod.Content.Players
                 tag["corazonEstelar"] = CorazonEstelar;
                 tag["almaVeloz"] = AlmaVeloz;
                 tag["punoTitan"] = PunoTitan;
+                // v6.51.0 — EL DESPERTAR (el nivel y la mascota del 20).
+                tag["nivelDespertar"] = NivelDespertar;
+                tag["petDespertar"] = PetDelDespertar;
             }
             catch { }
         }
@@ -1213,6 +1237,13 @@ namespace AethonMod.Content.Players
                 CorazonEstelar = Math.Max(0, Math.Min(99, tag.GetInt("corazonEstelar")));
                 AlmaVeloz = Math.Max(0, Math.Min(99, tag.GetInt("almaVeloz")));
                 PunoTitan = Math.Max(0, Math.Min(99, tag.GetInt("punoTitan")));
+                // v6.51.0 — EL DESPERTAR (ausente = 0: los guardados
+                // viejos estrenan la mecánica desde el nivel 0 — la
+                // letra: «siempre empieza desde nivel 0»).
+                NivelDespertar = Math.Max(0, Math.Min(
+                    Content.Systems.DespertarGrimorio.NivelMax,
+                    tag.GetInt("nivelDespertar")));
+                PetDelDespertar = tag.GetBool("petDespertar");
             }
             catch { }
         }

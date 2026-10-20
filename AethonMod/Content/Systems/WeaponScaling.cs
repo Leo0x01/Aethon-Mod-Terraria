@@ -140,7 +140,37 @@ namespace AethonMod.Content.Systems
         /// </summary>
         public static int TechoOjosEterno(int equipoInvocador, int nivel)
         {
-            return EscuadronEterno;
+            // v6.51.0 — LA ESCALERA DE LA LETRA: «la cantidad de minions
+            // están sujetos a la subida normal de nivel del grimorio:
+            // cada 10 niveles 1 minion nuevo, en nivel 5 puede invocar
+            // su primer minion, en nivel 10 su segundo minion y a partir
+            // de aquí cada 10 niveles 1 nuevo» — nivel 5 → 1 · nivel 10
+            // → 2 · nivel 20 → 3 · … nivel 100 → 11 (EscuadronEterno, el
+            // tope de las órbitas que cierran exacto).
+            if (nivel < 5) return 0;
+            if (nivel < 10) return 1;
+            int ojos = 2 + (nivel - 10) / 10;
+            return System.Math.Min(EscuadronEterno, ojos);
+        }
+
+        /// <summary>v6.51.0 — EL DAÑO DE LOS OJOS SIN ARMADURA (la
+        /// letra: «sin importar la armadura o accesorios que lleve el
+        /// jugador, los minions del grimorio estarán sujetos a las
+        /// características del grimorios»): el daño de nacimiento de un
+        /// ojo nace SOLO del grimorio — su base, su nivel, su despertar
+        /// y lo devorado (los banquetes de la .128-.129)… y el NIVEL 50
+        /// DEL DESPERTAR lo multiplica (la letra: «mejora TODO el ataque
+        /// de los minions y sus proyectiles»).</summary>
+        public static int DanoOjosDelEterno(int danoBase, int nivel, Player p)
+        {
+            float d = danoBase * (1f + SummonDamagePerLevel * System.Math.Max(0, nivel));
+            int despertar = Content.Systems.DespertarGrimorio.NivelDe(p);
+            d *= 1f + Content.Systems.DespertarGrimorio.BonusDano(despertar);
+            d *= 1f + Players.ShardPlayer.BonusDanoDevorado(p);
+            d *= 1f + Players.ShardPlayer.BonusDanoArmasDevoradas(p);
+            if (despertar >= Content.Systems.DespertarGrimorio.NivelMax)
+                d *= 1.25f;   // el nivel 50: TODO el ataque de los ojos
+            return System.Math.Max(1, (int)d);
         }
 
         // ================================================================

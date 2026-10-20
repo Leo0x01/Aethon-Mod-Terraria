@@ -8,38 +8,13 @@ using AethonMod.Content.Projectiles.Cosmic;
 
 namespace AethonMod.Content.Weapons.Cosmic
 {
-    public class BlackHoleStaff : ModItem
-    {
-        public override void SetStaticDefaults() { }
-        public override void SetDefaults()
-        {
-            Item.damage = 100;
-            Item.DamageType = DamageClass.Generic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 60; Item.useAnimation = 60;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<BlackHoleProjectile>();
-            Item.shootSpeed = 6f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item20;
-        }
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            return false;
-        }
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/9600FF:═══ AGUJERO NEGRO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lensing gravitacional real de 75 pasos + lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos (la lente va siempre DETRÁS del agujero y sus efectos)]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción de estelas orbitando + succión espiral con partículas de colores + devora el polvo del entorno]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px; su AURA DE DAÑO crece con él (35%→65% del daño a lo largo de su vida) y al explotar lanza una onda expansiva cromática que distorsiona el espacio]"));
-            tooltips.Add(new TooltipLine(Mod, "D4", "[c/9600FF:Al FINAL de la explosión nace el ANILLO DE EINSTEIN: un lente gravitacional anular que se expande curvando el fondo del juego]"));
-        }
-        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
-    }
+    // ==================================================================
+    //  v6.51.0 — EL AGUJERO NEGRO NORMAL MURIÓ (la letra del usuario:
+    //  «quiero que borres al agujero negro normal del paquete de armas,
+    //  solo deben estar los agujeros negros rúnicos para evitar
+    //  confusión, el agujero negro normal fue el primero que se creó,
+    //  el agujero negro realista por así decirlo»). EL SOL VIVE.
+    // ==================================================================
 
     public class SunStaff : ModItem
     {

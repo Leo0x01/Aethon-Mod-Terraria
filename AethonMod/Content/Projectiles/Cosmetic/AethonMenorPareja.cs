@@ -62,27 +62,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         public const float MODO_VIAJAR = 1f;    // vuela hacia el vecino elegido
         public const float MODO_MOLESTAR = 2f;  // ya llegado: las DOS FORMAS
         public const float MODO_VOLVER = 3f;    // de vuelta al lado del dueño
-        /// <summary>v6.50.126→.130 — nació como LA GUERRA DE LOS CONEJOS
-        /// BLANCOS (Re:Zero); la letra de la .130 la bautizó de VERDAD:
-        /// «no parecen conejos, parecen hadas… dejémoslo de esa forma,
-        /// sería mejor que el evento sean HADAS DE COLORES y que se
-        /// active después del muro de carne cuando las hadas estén
-        /// activas». EL CORO DE LAS HADAS: haditas de colores (la MISMA
-        /// silueta de siempre — ahora con su color propio) que acosan al
-        /// libro quieto, tras el Muro de Carne. Puro teatro.</summary>
-        public const float MODO_PLAGA = 4f;     // EL CORO DE LAS HADAS (hardmode)
-        /// <summary>v6.50.130 — EL VERDADERO EVENTO DE LOS CONEJOS (la
-        /// letra: «agreguemos un verdadero evento de conejos usando los
-        /// conejos reales de terraria, pero estos serían más pequeños y
-        /// estarían saltando siempre acercándose al minigrimorio mascota,
-        /// este ataca y los espanta»): los conejos REALES de Terraria
-        /// (el sprite de vanilla del Bunny, escala 0,55) saltando SIEMPRE
-        /// hacia el libro — y el libro los espanta con sus DOS ATAQUES
-        /// de siempre: los MINIMIONES (los tres ojos embisten) y LA
-        /// SOMBRA DE LA PÁGINA (la sombrilla que muerde — el ataque
-        /// original del Grimorio del Eterno real). Como el coro de las
-        /// hadas: se disipa si el dueño se mueve. Puro teatro.</summary>
-        public const float MODO_CONEJOS = 6f;
+        /// <summary>v6.50.126→.131 — nació como LA GUERRA DE LOS CONEJOS
+        /// BLANCOS (Re:Zero); la letra de la .130 la bautizó EL CORO DE
+        /// LAS HADAS (hadas de COLORES, la misma silueta de siempre,
+        /// cada una con su color); la letra de la .131 lo selló: «deja el
+        /// evento de las hadas como evento PREDERMINADO y que suceda DE
+        /// VEZ EN CUANDO» — el evento de los conejos reales murió y el
+        /// coro reina solo, sin muro de carne de por medio. Hadas de
+        /// colores que acosan al libro quieto. Puro teatro.</summary>
+        public const float MODO_PLAGA = 4f;     // EL CORO DE LAS HADAS (predeterminado)
         /// <summary>v6.50.129 — LA CURIOSIDAD DE LA LETRA: «el grimorio
         /// menor despues de varios segundos sin que el jugador se mueva
         /// debe ser curioso y volar por ahi, en ese momento es cuando
@@ -170,30 +158,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         /// <summary>De dónde salen: el borde lejano de la pantalla.</summary>
         private const float PLAGA_NACIMIENTO = 520f;
-
-        // === v6.50.130 — EL EVENTO DE LOS CONEJOS REALES (la letra: los
-        //     conejos de Terraria EN PERSONA, más pequeños, saltando
-        //     SIEMPRE hacia el minigrimorio — el libro los espanta con
-        //     sus minimiones y su sombra de página). ===
-
-        /// <summary>El tope de la bandada (los conejos REALES no se
-        /// dividen como el Gran Conejo: son vecinos curiosos, no una
-        /// plaga — la mitad de la horda de las hadas).</summary>
-        private const int CONEJOS_MAX = 7;
-
-        /// <summary>La duración de UN salto normal (ticks) — «saltando
-        /// siempre»: apenas aterrizan, el siguiente salto ya nació.</summary>
-        private const float CONEJO_SALTO_TICKS = 30f;
-
-        /// <summary>El salto del ESPANTO (más rápido y más largo).</summary>
-        private const float CONEJO_SALTO_PANICO = 19f;
-
-        /// <summary>La compás entre ataque y ataque del libro.</summary>
-        private const int CONEJO_PAUSA_ATAQUE = 72;
-
-        /// <summary>La escala del conejo REAL: 0,55 (el Bunny de vanilla
-        /// mide 34 px de alto — el evento lo quiere CHICO).</summary>
-        public const float ConejoEscala = 0.55f;
 
         // === v6.50.125 — LOS MINIONS DE VERDAD (la letra: «los
         //     miniminions del grimorio mascota deben ser los mismos minion
@@ -299,29 +263,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             /// cuerpo con SU color (ColorDeHada).</summary>
             public ConejoPlaga[] Conejos = new ConejoPlaga[PLAGA_MAX_CONEJOS];
 
-            // === v6.50.130 — EL EVENTO DE LOS CONEJOS REALES ===
-
-            /// <summary>La bandada de conejos REALES (los Bunny de vanilla
-            /// en miniatura — saltando siempre hacia el libro).</summary>
-            public ConejoReal[] ConejosReales = new ConejoReal[CONEJOS_MAX];
-
-            /// <summary>El reloj del evento (arranca en 0 con cada bandada).</summary>
-            public int ConejosTicks;
-
-            /// <summary>El ataque en curso: −1 ninguno; 0..70 el compás de
-            /// la sombrilla o de la embestida.</summary>
-            public int ConejosAtaque = -1;
-
-            /// <summary>TRUE = la sombrilla de página (FORMA 1), FALSE = los
-            /// ojos embisten (FORMA 2) — alterna golpe a golpe, igual que
-            /// con los vecinos del pueblo.</summary>
-            public bool ConejosFormaSombra = true;
-
-            /// <summary>El conejo que está siendo atacado (−1: ninguno).</summary>
-            public int ConejoObjetivo = -1;
-
-            /// <summary>Los espantados de la bandada (para la risa final).</summary>
-            public int ConejosEspantados;
         }
 
         /// <summary>UN CUERPO DE LA HORDA (v6.50.126 — Re:Zero: conejos
@@ -347,40 +288,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             /// <summary>La fase de su salto (semilla determinista).</summary>
             public float Fase;
-        }
-
-        /// <summary>v6.50.130 — UN CONEJO REAL DE TERRARIA (la letra: los
-        /// conejos de verdad, MÁS PEQUEÑOS y SALTANDO SIEMPRE hacia el
-        /// minigrimorio): salto parabólico determinista (misma física en
-        /// todas las máquinas — el rumbo nace de la semilla y del libro,
-        /// jamás de Main.rand).</summary>
-        public struct ConejoReal
-        {
-            /// <summary>¿Vive este conejo?</summary>
-            public bool Vivo;
-
-            /// <summary>Su posición REAL (el PISO del conejo — pies).</summary>
-            public Vector2 Pos;
-
-            /// <summary>La fase del salto: −0,12..0 (agachado, el impulso),
-            /// 0..1 (el arco — sin(π·fase) es la altura).</summary>
-            public float Salto;
-
-            /// <summary>Hacia dónde salta ESTE salto (1 derecha, −1 izquierda).</summary>
-            public float Dir;
-
-            /// <summary>La LONGITUD del salto actual (px horizontales).</summary>
-            public float Largo;
-
-            /// <summary>La ALTURA del salto actual (px del arco).</summary>
-            public float Alto;
-
-            /// <summary>El reloj del espanto: >0 = huyendo (al llegar a 0
-            /// se esfuma con un puf — el libro lo espantó).</summary>
-            public int Espantado;
-
-            /// <summary>Los saltos que lleva (la semilla de su moneda).</summary>
-            public int Saltos;
         }
 
         // === v6.50.130 — LA PALETA DEL CORO (hadas de COLORES: la letra
@@ -455,11 +362,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // dije que dejara también se desaparece el evento si el
                 // jugador se mueve» — TODO el teatro vive del dueño quieto).
                 if (e.Modo == MODO_VIAJAR || e.Modo == MODO_MOLESTAR ||
-                    e.Modo == MODO_PLAGA || e.Modo == MODO_CURIOSO ||
-                    e.Modo == MODO_CONEJOS)
+                    e.Modo == MODO_PLAGA || e.Modo == MODO_CURIOSO)
                 {
                     if (e.Modo == MODO_PLAGA) DispersarPlaga(e);
-                    if (e.Modo == MODO_CONEJOS) DispersarConejos(e);
                     e.Modo = MODO_VOLVER;
                     e.NpcObjetivo = -1;
                     e.Embestida = -1;
@@ -516,18 +421,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                                      < PLAGA_PROBABILIDAD)
                             {
                                 e.PlagaTiradasFallidas = 0;
-                                // v6.50.130 — EL REPARTO DE LOS DOS TEATROS:
-                                // tras el MURO DE CARNE reina EL CORO DE LAS
-                                // HADAS (la letra: «se active después del
-                                // muro de carne cuando las hadas estén
-                                // activas» — 65 % de los eventos); los
-                                // CONEJOS REALES son el teatro de SIEMPRE
-                                // (el 100 % antes del muro, el 35 % después
-                                // — las dos travesuras viven juntas).
-                                bool coro = Main.hardMode && VFXCore.Hash01(p.whoAmI,
-                                    e.TotalGolpes * 3 + 1, e.Viajes * 5 + 2) < 0.65f;
-                                if (coro) ArrancarPlaga(p, e);
-                                else ArrancarConejos(p, e);
+                                // v6.50.131 — EL CORO DE LAS HADAS ES EL
+                                // EVENTO PREDERMINADO (la letra: «deja el
+                                // evento de las hadas como evento
+                                // predeterminado y que suceda de vez en
+                                // cuando»): el evento de los conejos reales
+                                // MURIÓ — la misma moneda de siempre (35 %
+                                // y garantizada a la tercera), sin muro de
+                                // carne de por medio.
+                                ArrancarPlaga(p, e);
                                 break;
                             }
                             else
@@ -707,120 +609,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     }
                     break;
 
-                case MODO_CONEJOS:
-                    // ====================================================
-                    //  v6.50.130 — EL VERDADERO EVENTO DE LOS CONEJOS
-                    //  REALES: la bandada salta SIEMPRE acercándose al
-                    //  libro (el sprite REAL del Bunny de vanilla, escala
-                    //  0,55)… y el libro los ESPANTA con sus DOS ATAQUES
-                    //  de siempre — LA SOMBRA DE LA PÁGINA (la sombrilla
-                    //  que muerde: el ataque original del Eterno) y LOS
-                    //  MINIMIONES (los tres ojos embisten). Cada conejo
-                    //  golpeado sale DISPARADO en saltos de pánico y se
-                    //  esfuma con un puf; cuando la bandada entera huyó,
-                    //  el libro se ríe y vuelve a lo suyo.
-                    // ====================================================
-                    {
-                        e.ConejosTicks++;
-
-                        // LA BANDADA SALTA (la física de todos los conejos:
-                        // determinista — la misma en todas las máquinas).
-                        for (int c = 0; c < e.ConejosReales.Length; c++)
-                        {
-                            if (!e.ConejosReales[c].Vivo) continue;
-                            ConejoReal k = e.ConejosReales[c];
-                            FisicaDelConejo(p, e, ref k, c);
-                            e.ConejosReales[c] = k;
-                        }
-
-                        // ¿QUEDA ALGUNO? (los espantados se esfuman solos).
-                        bool quedanConejos = false;
-                        for (int c = 0; c < e.ConejosReales.Length; c++)
-                            if (e.ConejosReales[c].Vivo) { quedanConejos = true; break; }
-
-                        if (!quedanConejos)
-                        {
-                            if (e.ConejosTicks > 140)
-                            {
-                                // LA BANDADA ENTERA HUYÓ: la risa del deber
-                                // cumplido y a casa (el reloj de la quietud
-                                // intacto — la curiosidad continúa).
-                                e.Modo = MODO_VOLVER;
-                                e.TicksEnModo = 0;
-                                e.PlagaEnfriamiento = PLAGA_ENFRIAMIENTO;
-                                if (Main.netMode != NetmodeID.Server)
-                                {
-                                    try
-                                    {
-                                        EmoteBubble.NewBubble(EmoteID.EmoteLaugh,
-                                            new WorldUIAnchor(p), 100);
-                                    }
-                                    catch { }
-                                }
-                            }
-                            break;
-                        }
-
-                        // EL ATAQUE DEL LIBRO: cada 72 t (si no hay uno en
-                        // curso) carga contra el conejo MÁS CERCA —
-                        // alternando las DOS FORMAS de siempre (la sombra
-                        // de la página / los tres ojos).
-                        if (e.ConejosAtaque < 0 &&
-                            (e.ConejosTicks > 60 && (e.ConejosTicks - 60) % CONEJO_PAUSA_ATAQUE == 0))
-                        {
-                            int mejor = -1;
-                            float mejorD = float.MaxValue;
-                            for (int c = 0; c < e.ConejosReales.Length; c++)
-                            {
-                                if (!e.ConejosReales[c].Vivo) continue;
-                                float d = Vector2.DistanceSquared(
-                                    e.ConejosReales[c].Pos, p.Center);
-                                if (d < mejorD) { mejorD = d; mejor = c; }
-                            }
-                            if (mejor >= 0)
-                            {
-                                e.ConejoObjetivo = mejor;
-                                e.ConejosFormaSombra = !e.ConejosFormaSombra;
-                                e.ConejosAtaque = 0;
-                            }
-                        }
-
-                        // EL ATAQUE EN CURSO: la sombrilla muerde a los 50 t;
-                        // los ojos embisten (contacto a los 35, vuelta a los 70).
-                        if (e.ConejosAtaque >= 0)
-                        {
-                            e.ConejosAtaque++;
-
-                            if (e.ConejosFormaSombra)
-                            {
-                                if (e.ConejosAtaque == 50)
-                                    EspantarConejo(p, e, e.ConejoObjetivo);
-                                if (e.ConejosAtaque >= 66) e.ConejosAtaque = -1;
-                            }
-                            else
-                            {
-                                e.Embestida = e.ConejosAtaque;
-                                if (e.ConejosAtaque == 35)
-                                    EspantarConejo(p, e, e.ConejoObjetivo);
-                                if (e.ConejosAtaque >= 70)
-                                {
-                                    e.ConejosAtaque = -1;
-                                    e.Embestida = -1;
-                                }
-                            }
-
-                            // EL CONEJO MURIÓ (se esfumó) A MITAD DEL GOLPE:
-                            // el ataque se corta (no muerden al aire).
-                            if (e.ConejoObjetivo >= 0 &&
-                                (e.ConejoObjetivo >= e.ConejosReales.Length ||
-                                 !e.ConejosReales[e.ConejoObjetivo].Vivo))
-                            {
-                                e.ConejosAtaque = -1;
-                                e.Embestida = -1;
-                            }
-                        }
-                    }
-                    break;
             }
         }
 
@@ -896,21 +684,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     }
                     break;
 
-                case MODO_CONEJOS:
-                    {
-                        // v6.50.130 — EL LIBRO ESPERA A LA BANDADA: planea
-                        // ENCIMA del corazón de los conejos (los conejos
-                        // se acercan a ÉL — «acercándose al minigrimorio
-                        // mascota»), meciéndose con su vaivén de siempre
-                        // y MIRÁNDOLOS bajar (el pastor del evento: los
-                        // ataques caen desde aquí).
-                        Vector2 centroBandada = CentroDeLaBandada(e, p.Center);
-                        float aC = Main.GlobalTimeWrappedHourly * 0.7f;
-                        meta = centroBandada + new Vector2(
-                            MathF.Cos(aC) * 14f,
-                            -52f + MathF.Sin(aC) * 9f);
-                    }
-                    break;
             }
         }
 
@@ -1095,12 +868,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // silueta, colores propios — la letra de la .130).
             if (e.Modo == MODO_PLAGA) DibujarLaHorda(e);
 
-            // v6.50.130 — LOS CONEJOS REALES: la sombra del piso de cada
-            // uno + LA SOMBRILLA DE PÁGINA del ataque en curso (la sombra
-            // que muerde — la FORMA 1 contra la bandada). El SPRITE real
-            // del Bunny viaja en el lote vanilla con el libro
-            // (DibujarLosConejos — la llama GrimorioMenorPet.PreDraw).
-            if (e.Modo == MODO_CONEJOS) DibujarSombrasDeLosConejos(p, e);
 
             VFXCore.FlushAlpha();
         }
@@ -1263,27 +1030,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
             }
 
-            // v6.50.130 — CON LOS CONEJOS REALES: la mirada va a LA
-            // BANDADA — el conejo vivo más cercano (y si hay ataque en
-            // curso, AL BLANCO: los ojos del pastor nunca se distraen).
-            if (e.Modo == MODO_CONEJOS)
-            {
-                if (e.ConejoObjetivo >= 0 && e.ConejoObjetivo < e.ConejosReales.Length &&
-                    e.ConejosReales[e.ConejoObjetivo].Vivo)
-                {
-                    objetivo = e.ConejosReales[e.ConejoObjetivo].Pos + new Vector2(0f, -8f);
-                }
-                else
-                {
-                    float mejorD = float.MaxValue;
-                    for (int c = 0; c < e.ConejosReales.Length; c++)
-                    {
-                        if (!e.ConejosReales[c].Vivo) continue;
-                        float d = Vector2.DistanceSquared(e.ConejosReales[c].Pos, centro);
-                        if (d < mejorD) { mejorD = d; objetivo = e.ConejosReales[c].Pos; }
-                    }
-                }
-            }
 
             for (int i = 0; i < 3; i++)
             {
@@ -1364,33 +1110,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
             }
 
-            // v6.50.130 — LA EMBESTIDA CONTRA LOS CONEJOS REALES (la
-            // FORMA 2 del evento): los tres ojos SE LANZAN sobre el
-            // conejo blanco (contacto a los 35 t — donde el cerebro
-            // cobra el espanto) y vuelven a la corona a los 70.
-            if (e.Modo == MODO_CONEJOS && e.ConejosAtaque >= 0 && !e.ConejosFormaSombra &&
-                e.ConejoObjetivo >= 0 && e.ConejoObjetivo < e.ConejosReales.Length &&
-                e.ConejosReales[e.ConejoObjetivo].Vivo)
-            {
-                Vector2 blanco = e.ConejosReales[e.ConejoObjetivo].Pos + new Vector2(0f, -8f);
-                for (int i = 0; i < 3; i++)
-                {
-                    int salida = i * 5;
-                    float prog;
-                    if (e.ConejosAtaque <= 35 + salida)
-                        prog = MathHelper.Clamp((e.ConejosAtaque - salida) / 35f, 0f, 1f);
-                    else
-                        prog = 1f - MathHelper.Clamp((e.ConejosAtaque - (35 + salida)) / 35f, 0f, 1f);
-                    float suave = prog * prog * (3f - 2f * prog);
-                    pos[i] = Vector2.Lerp(pos[i], blanco + new Vector2((i - 1) * 6f, (i - 1) * -2f), suave);
-                    if (prog > 0.05f)
-                    {
-                        // LA ANTICIPACIÓN (v6.50.130): entrecerrados en el
-                        // arranque, CLAVADOS en la carga.
-                        estados[i] = e.ConejosAtaque <= 8 + salida ? OJO_MEDIO : OJO_ABIERTO;
-                    }
-                }
-            }
         }
 
         // ==================================================================
@@ -1713,317 +1432,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         punta, núcleo * 0.88f, 2.6f);
                 }
             }
-        }
-
-        // ==================================================================
-        //  v6.50.130 — EL EVENTO DE LOS CONEJOS REALES (la bandada de
-        //  Bunny de vanilla que salta hacia el libro — y el libro los
-        //  espanta con la sombrilla de página y los tres ojos)
-        // ==================================================================
-
-        /// <summary>LA BANDADA NACE: 5 conejos REALES (los sprites de
-        /// vanilla en miniatura) entran saltando desde los costados de la
-        /// pantalla, a la altura de los pies del dueño — «acercándose al
-        /// minigrimorio mascota». TODO determinista (la semilla del
-        /// proyecto y whoAmI: todas las máquinas ven la MISMA bandada).</summary>
-        private static void ArrancarConejos(Projectile p, Estado e)
-        {
-            e.Modo = MODO_CONEJOS;
-            e.NpcObjetivo = -1;
-            e.Embestida = -1;
-            e.TicksEnModo = 0;
-            e.PlagaTiradasFallidas = 0;
-            e.ConejosTicks = 0;
-            e.ConejosAtaque = -1;
-            e.ConejoObjetivo = -1;
-            e.ConejosEspantados = 0;
-            e.ConejosFormaSombra = true;
-            e.PlagaEnfriamiento = PLAGA_ENFRIAMIENTO;   // los dos teatros comparten el turno
-
-            Player dueño = Main.player[p.owner];
-            float piso = dueño.Bottom.Y - 2f;
-            int nacidos = 0;
-            for (int c = 0; c < e.ConejosReales.Length; c++)
-            {
-                e.ConejosReales[c].Vivo = false;
-                if (nacidos >= 5) continue;               // la primera ola: CINCO
-
-                float lado = (c % 2 == 0) ? 1f : -1f;
-                float dist = 330f + VFXCore.Hash01(p.whoAmI * 13 + c * 17, 3, 5) * 200f;
-                e.ConejosReales[c] = new ConejoReal
-                {
-                    Vivo = true,
-                    Pos = new Vector2(dueño.Center.X + lado * dist, piso),
-                    // Nacen a la mitad de un salto (llegan BOTANDO) o
-                    // agachados listos para el primero — cada quien a lo suyo.
-                    Salto = VFXCore.Hash01(p.whoAmI, c * 31 + 7, 11) * 0.6f,
-                    Dir = -lado,                          // mirando al dueño
-                    Largo = 42f,
-                    Alto = 24f,
-                    Espantado = 0,
-                    Saltos = 0,
-                };
-                nacidos++;
-            }
-
-            // EL LIBRO LOS VE LLEGAR (solo pantallas): qué cosa más curiosa.
-            if (Main.netMode != NetmodeID.Server)
-            {
-                try
-                {
-                    EmoteBubble.NewBubble(EmoteID.EmoteSilly, new WorldUIAnchor(p), 90);
-                }
-                catch { }
-            }
-        }
-
-        /// <summary>LA BANDADA SE ESFUMA (el dueño se movió — la letra:
-        /// «también se desaparece el evento si el jugador se mueve»):
-        /// cada conejo un puf de humo y fuera.</summary>
-        private static void DispersarConejos(Estado e)
-        {
-            for (int c = 0; c < e.ConejosReales.Length; c++)
-            {
-                if (!e.ConejosReales[c].Vivo) continue;
-                PolvoConejo(e.ConejosReales[c].Pos, esfumado: true);
-                e.ConejosReales[c].Vivo = false;
-            }
-            e.ConejosAtaque = -1;
-            e.ConejoObjetivo = -1;
-        }
-
-        /// <summary>LA FÍSICA DE UN CONEJO REAL: salto parabólico
-        /// determinista — «saltando SIEMPRE» (apenas aterriza, el
-        /// siguiente salto ya nació; el impulso de agacharse dura un
-        /// instante). El rumbo nace de la moneda del mundo (Hash01:
-        /// JAMÁS Main.rand — todas las máquinas ven la MISMA bandada):
-        /// hacia el LIBRO cuando curiosean, LEJOS del libro cuando el
-        /// espanto los corre.</summary>
-        private static void FisicaDelConejo(Projectile p, Estado e, ref ConejoReal k, int idx)
-        {
-            // EL RELOJ DEL ESPANTO: huyendo… y al agotarse, el puf.
-            if (k.Espantado > 0)
-            {
-                k.Espantado--;
-                if (k.Espantado == 0)
-                {
-                    PolvoConejo(k.Pos, esfumado: true);
-                    k.Vivo = false;
-                    return;
-                }
-            }
-
-            float dur = k.Espantado > 0 ? CONEJO_SALTO_PANICO : CONEJO_SALTO_TICKS;
-            k.Salto += 1f / dur;
-
-            // EL ATERRIZAJE: el salto siguiente nace YA (saltando siempre).
-            if (k.Salto >= 1f)
-            {
-                k.Salto = -0.10f;     // el impulso: agachado un instante
-                k.Saltos++;
-
-                float moneda = VFXCore.Hash01(p.whoAmI * 31 + idx * 7, k.Saltos * 13 + 5, 97);
-                if (k.Espantado > 0)
-                {
-                    // EL PÁNICO: saltos LARGOS y rápidos LEJOS del libro.
-                    float huida = k.Pos.X - p.Center.X;
-                    k.Dir = MathF.Abs(huida) < 1f ? (moneda < 0.5f ? -1f : 1f) : MathF.Sign(huida);
-                    k.Largo = 70f + moneda * 36f;
-                    k.Alto = 42f;
-                }
-                else
-                {
-                    // LA CURIOSIDAD: saltos cortos hacia el libro (con su
-                    // deambular — no se apilan: la moneda los reparte).
-                    float dx = p.Center.X - k.Pos.X;
-                    k.Dir = MathF.Abs(dx) < 12f ? (moneda < 0.5f ? -1f : 1f) : MathF.Sign(dx);
-                    k.Largo = 34f + moneda * 30f;
-                    k.Alto = 22f + moneda * 9f;
-                }
-            }
-
-            // EL AVANCE: en el arco (Salto ≥ 0) el conejo viaja; agachado
-            // (Salto < 0) solo carga el impulso. La ALTURA la dibuja el
-            // arco (PosicionDibujadaConejoReal) — el PISO no cambia.
-            if (k.Salto >= 0f)
-                k.Pos = new Vector2(k.Pos.X + k.Dir * (k.Largo / dur), k.Pos.Y);
-        }
-
-        /// <summary>EL ZARPAZO DEL LIBRO: el conejo golpeado sale
-        /// DISPARADO en saltos de pánico (espantado ~2,5 s) y al
-        /// agotarse se esfuma con su puf — «este ataca y los espanta».</summary>
-        private static void EspantarConejo(Projectile p, Estado e, int idx)
-        {
-            if (idx < 0 || idx >= e.ConejosReales.Length) return;
-            ConejoReal k = e.ConejosReales[idx];
-            if (!k.Vivo) return;
-
-            k.Espantado = 150;
-            k.Salto = MathHelper.Clamp(k.Salto, 0.15f, 0.6f);   // el susto lo pilla a media parábola
-            k.Alto = MathF.Max(k.Alto, 30f);                    // y el salto se estira del susto
-            e.ConejosReales[idx] = k;
-            e.ConejosEspantados++;
-
-            // EL PUF DEL ZARPAZO + la risa del libro (solo pantallas).
-            PolvoConejo(k.Pos + new Vector2(0f, -10f), esfumado: false);
-            if (Main.netMode != NetmodeID.Server)
-            {
-                try
-                {
-                    EmoteBubble.NewBubble(EmoteID.EmoteLaugh, new WorldUIAnchor(p), 80);
-                }
-                catch { }
-            }
-        }
-
-        /// <summary>EL POLVO DEL CONEJO (solo pantallas): el puf blanco
-        /// del esfumado o el zarpazo (el humito del espanto).</summary>
-        private static void PolvoConejo(Vector2 pos, bool esfumado)
-        {
-            if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
-            try
-            {
-                int n = esfumado ? 10 : 7;
-                for (int i = 0; i < n; i++)
-                {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    Dust d = Dust.NewDustPerfect(pos + new Vector2(
-                            Main.rand.NextFloat(-6f, 6f), Main.rand.NextFloat(-10f, 2f)),
-                        DustID.Smoke,
-                        new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) *
-                            Main.rand.NextFloat(0.5f, 1.8f),
-                        150, new Color(235, 232, 244), Main.rand.NextFloat(0.6f, 1.1f));
-                    d.noGravity = false;
-                }
-            }
-            catch { }
-        }
-
-        /// <summary>EL CORAZÓN DE LA BANDADA (el promedio de sus conejos
-        /// — o el propio libro si no queda nadie: donde planea el pastor).</summary>
-        private static Vector2 CentroDeLaBandada(Estado e, Vector2 respaldo)
-        {
-            Vector2 suma = Vector2.Zero;
-            int vivos = 0;
-            for (int c = 0; c < e.ConejosReales.Length; c++)
-            {
-                if (!e.ConejosReales[c].Vivo) continue;
-                suma += e.ConejosReales[c].Pos;
-                vivos++;
-            }
-            return vivos > 0 ? suma / vivos : respaldo;
-        }
-
-        /// <summary>LA ALTURA DIBUJADA de un conejo (el arco de su salto:
-        /// sin(π·fase)·alto — agachado en el impulso, parábola en vuelo).</summary>
-        private static Vector2 PosicionDibujadaConejoReal(ConejoReal k)
-        {
-            if (k.Salto < 0f)
-                return k.Pos + new Vector2(0f, 2f);   // el impulso: se hunde en el piso
-            return k.Pos + new Vector2(0f, -MathF.Sin(k.Salto * MathHelper.Pi) * k.Alto);
-        }
-
-        /// <summary>LOS CONEJOS EN PISO (lote alfa): la sombra plana bajo
-        /// cada uno (la lección .66) + LA SOMBRILLA DE PÁGINA del ataque
-        /// en curso (la FORMA 1 contra la bandada — la MISMA sombrilla
-        /// que muerde a los vecinos del pueblo, ahora bajo el conejo).</summary>
-        private static void DibujarSombrasDeLosConejos(Projectile p, Estado e)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-
-            // LA SOMBRA DE PISO de cada conejo vivo (plana, clara).
-            for (int c = 0; c < e.ConejosReales.Length; c++)
-            {
-                if (!e.ConejosReales[c].Vivo) continue;
-                ConejoReal k = e.ConejosReales[c];
-                Vector2 pies = PosicionDibujadaConejoReal(k) + new Vector2(0f, 4f);
-                VFXCore.Quad(pies, SombrasLib.Alfa(SombrasLib.HumoNegro, 0.30f),
-                    new Vector2(22f, 6.5f));
-            }
-
-            // LA SOMBRILLA DE PÁGINA (FORMA 1): bajo el conejo objetivo,
-            // hinchándose hasta MORDER (el mismo compás de la .117).
-            if (e.ConejosAtaque >= 0 && e.ConejosFormaSombra &&
-                e.ConejoObjetivo >= 0 && e.ConejoObjetivo < e.ConejosReales.Length &&
-                e.ConejosReales[e.ConejoObjetivo].Vivo)
-            {
-                ConejoReal k = e.ConejosReales[e.ConejoObjetivo];
-                Vector2 pies = PosicionDibujadaConejoReal(k) + new Vector2(0f, 4f);
-                float fase = MathHelper.Clamp(e.ConejosAtaque / 50f, 0f, 1f);
-                float cerca = fase > 0.82f ? (fase - 0.82f) / 0.18f : 0f;
-                float hinchazon = 1f + 0.34f * cerca;
-                VFXCore.Quad(pies, SombrasLib.Alfa(SombrasLib.HumoNegro, 0.55f),
-                    new Vector2(30f * hinchazon, 9f * hinchazon));
-                VFXCore.Quad(pies, SombrasLib.Alfa(SombrasLib.Negro, 0.36f + 0.20f * cerca),
-                    new Vector2(22f, 6f));
-            }
-        }
-
-        /// <summary>LOS CONEJOS REALES DE TERRARIA (v6.50.130 — la letra:
-        /// «usando los conejos reales de terraria, pero estos serían más
-        /// pequeños»): el SPRITE DE VANILLA del Bunny (TextureAssets.Npc)
-        /// a escala 0,55, con SU animación de salto (los frames del
-        /// sprite: agachado en el impulso, subiendo, bajando), su
-        /// squash &amp; stretch (estirado en el apex, aplastado en el
-        /// impulso — animación con intención), el PISO DE LUZ de las
-        /// mascotas (jamás negros totales de noche) y el parpadeo del
-        /// espanto (los últimos instantes se apagan). Se dibuja en el
-        /// LOTE VANILLA junto al libro (lo llama GrimorioMenorPet.PreDraw
-        /// justo después de DibujarLosTresOjos).</summary>
-        public static void DibujarLosConejos(Projectile p, Estado e)
-        {
-            if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;
-            if (e.Modo != MODO_CONEJOS) return;
-            try
-            {
-                Texture2D tex = Terraria.GameContent.TextureAssets.Npc[NPCID.Bunny].Value;
-                if (tex == null) return;
-                int frames = Main.npcFrameCount[NPCID.Bunny];
-                if (frames < 1) frames = 1;
-                int altoF = tex.Height / frames;
-
-                for (int c = 0; c < e.ConejosReales.Length; c++)
-                {
-                    ConejoReal k = e.ConejosReales[c];
-                    if (!k.Vivo) continue;
-
-                    // EL FRAME y la altura del arco (la animación del
-                    // salto: impulso → subida → caída).
-                    int frame;
-                    if (k.Salto < 0f) frame = 2;                       // el impulso (agachado)
-                    else frame = k.Salto < 0.5f ? 3 : 4;               // subiendo / cayendo
-                    if (frame >= frames) frame = frames - 1;
-
-                    Vector2 posMundo = PosicionDibujadaConejoReal(k);
-                    Vector2 posScr = posMundo - Main.screenPosition;
-                    Rectangle frameRect = new Rectangle(0, frame * altoF, tex.Width, altoF);
-                    Vector2 origen = new Vector2(tex.Width * 0.5f, altoF - 2f);
-
-                    // EL Bunny de vanilla mira a la IZQUIERDA: saltando a
-                    // la derecha se VOLTEA (la convención de vanilla).
-                    SpriteEffects fx = k.Dir > 0f
-                        ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-                    // EL PISO DE LUZ (la lección .66: jamás negros totales).
-                    Color luz = Lighting.GetColor(posMundo.ToTileCoordinates());
-                    luz = new Color(Math.Max((int)luz.R, 118), Math.Max((int)luz.G, 110),
-                        Math.Max((int)luz.B, 106));
-
-                    // EL PARPADEO DEL ESPANTO: los últimos ~45 t se apaga
-                    // (el conejo se está esfumando del mundo).
-                    if (k.Espantado > 0 && k.Espantado < 45)
-                        luz *= 0.35f + 0.65f * (k.Espantado / 45f);
-
-                    // EL SQUASH & STRETCH: estirado en el apex del salto,
-                    // aplastado en el impulso (la animación con intención).
-                    float escY = k.Salto < 0f ? 0.86f
-                        : 1f + 0.12f * MathF.Sin(k.Salto * MathHelper.Pi);
-
-                    Main.spriteBatch.Draw(tex, posScr, frameRect, luz, 0f, origen,
-                        new Vector2(ConejoEscala, ConejoEscala * escY), fx, 0f);
-                }
-            }
-            catch { }
         }
 
         // ==================================================================

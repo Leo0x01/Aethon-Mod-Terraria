@@ -239,17 +239,29 @@ Items: {
 	}
 
 	TintaDelCometa: {
-		DisplayName: Tinta del Cometa
+		DisplayName: Tinta de la Llegada
 		Tooltip:
 			'''
-			EL ACTIVADOR DE LA CAÍDA (item de pruebas — la Bolsa de la Cría lo trae).
-			Rompe el frasco y el cielo RECUERDA: el cometa del Grimorio
-			del Eterno cruza otra vez hacia ti — de día o de noche.
+			EL ACTIVADOR DE LA LLEGADA (item de pruebas — la Bolsa de la Cría lo trae).
+			Rompe el frasco y el mundo RECUERDA: la bruma del Grimorio
+			del Eterno nace otra vez frente a ti — de día o de noche.
 			Los caminos automáticos siguen su ley (la primera noche de
 			cada jugador en cada mundo + el primer vecino que no sea el
 			Guía); ESTA tinta es el camino MANUAL: el evento NUNCA se
-			pierde… y jamás duplica tu grimorio (si ya te espera o ya
-			vuela hacia ti, el cielo no insiste).
+			pierde… y jamás duplica tu grimorio (si ya te espera o su
+			bruma ya nació, el cielo no insiste).
+			'''
+	}
+	EcoDelDespertar: {
+		DisplayName: Eco del Despertar
+		Tooltip:
+			'''
+			LA LLAVE DE PRUEBAS DE EL DESPERTAR (no consumible): cada uso
+			despierta al grimorio UN NIVEL MÁS (con toda la ceremonia — y en
+			el 20, la película de la mascota).
+			El camino real son las tres ofrendas: esencias corruptas,
+			dinero y el arma corrupta del peldaño… pero el probador es del
+			probador.
 			'''
 	}
 
@@ -468,10 +480,6 @@ Items: {
 		Tooltip: ""
 	}
 
-	BlackHoleStaff: {
-		DisplayName: Agujero Negro
-		Tooltip: ""
-	}
 
 	SunStaff: {
 		DisplayName: Sol
@@ -1829,22 +1837,20 @@ Items: {
 	// v6.50.130 — LA BRUMA DEL CRÁTER (el item invisible que ES la
 	// bruma: el altar principal portátil de la corrupción)
 	BrumaDelCrater: {
-		DisplayName: Bruma del cráter
+		DisplayName: Bruma del cráter (vestigio)
 		Tooltip:
 			'''
-			La bruma del minibioma, EN PERSONA: tómala del cráter y COLOCA
-			el altar donde quieras.
-			Cualquier cosa que se lance a la bruma colocada se pudre en
-			Esencia corrupta — y las ARMAS ganan la etiqueta Corrupto.
-			Junto a la bruma, el apartado de creación permite corromper
-			armas y convertirlo TODO en Esencia corrupta, sin lanzar nada.
+			Un VESTIGIO de la vieja caída: la bruma que una vez fue altar.
+			LA LLEGADA ya no la necesita — la corrupción vive en el apartado
+			de creación mientras cargues el grimorio, y el Eterno devora las
+			armas corruptas que sueltes con él en la mano.
 			'''
 	}
 
 	ArmaCorruptaTag: Corrupto
-	ArmaCorrupta1: La CAÍDA la ha mancillado: la bruma del cráter vive en ella.
+	ArmaCorrupta1: LA LLEGADA la ha mancillado: la bruma del despertar vive en ella.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
-	ArmaCorrupta3: El Grimorio del Eterno puede devorarla en el lugar de la caída.
+	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
 }
 
 Projectiles: {
@@ -1869,7 +1875,6 @@ Projectiles: {
 	VersoVivoProjectile.DisplayName: Glifo Vivo
 	// v6.18: wings were removed from the mod (user request).
 	
-	BlackHoleProjectile.DisplayName: Agujero Negro
 	SunProjectile.DisplayName: Sol
 	CosmicShockwaveProjectile.DisplayName: Onda de Choque Cósmica
 	SupernovaProjectile.DisplayName: Supernova
@@ -2079,7 +2084,8 @@ NPCs: {
 		// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
 		DisplayName: El Grimorio Dormido
 		// v6.50.117 — THE FALL: the book that waits in its crater
-		Bestiario: Un grimorio caído del cielo en un cometa de tinta. Duerme flotando en su cráter… a la espera de la mano correcta.
+		Numero: ∞ · Nº ????? · FUERA DEL CATÁLOGO
+		Bestiario: Un grimorio que un día llegó envuelto en un mar de bruma — nadie vio cómo. Duerme flotando en el mismo aire… a la espera de la mano correcta.
 
 		TownNPCMood: {
 			// Content: I am content.
@@ -2333,7 +2339,7 @@ Caida: {
 	Presentacion:
 		'''
 		…despierto.
-		Llevo eones esperando una mano como la tuya — el cielo me dejó caer solo para TI.
+		Llevo eones esperando una mano como la tuya — la bruma me trajo hasta AQUÍ, solo para TI.
 		No hablo con la boca, portador: mis palabras nacen YA DENTRO de tus pensamientos… como esta.
 		Desde hoy me oirás así siempre: una voz morada dentro de tu cabeza, que se alimenta de lo que matas.
 		Tiende la mano y tómame. Pero recuerda: quien carga un grimorio, carga con su hambre.
@@ -2341,17 +2347,17 @@ Caida: {
 	YaTienes: Una sola alma, un solo libro. Ya soy tuyo.
 	OtroJugador: …zZzZz… (este libro aguarda otra mano)
 	BotonTomar: Extender la mano
-	Dormido1: …zZz. ¿Ya llegaste?… No. Todavía no. Que siga cayendo el cielo. zZz.
+	Dormido1: …zZz. ¿Ya llegaste?… No. Todavía no. Que siga hilando la bruma. zZz.
 	Dormido2: …soñé que una mano. En el sueño era la tuya. Tenía los dedos contados: cinco. Los míos son páginas. Qué curiosidad, la de los que duermen. zZz.
-	Dormido3: …el cráter está tibio. Los cráteres de los otros libros eran fríos. Este se parece un poquito a mí. zZz.
+	Dormido3: …el aire de la bruma está tibio. Las llegadas de los otros libros eran frías. Esta se parece un poquito a mí. zZz.
 	Dormido4: …cuidado con la primera noche, portador… perdón: aún no eres portador. Se me anticipa el hambre. Es lo que tiene el sueño: cuenta el futuro y lo cuenta MAL. zZz.
-	Dormido5: …llevo eones contando caídas. Esta es la primera que huele a alguien. Las demás olían a nadie. zZz.
+	Dormido5: …llevo eones contando llegadas. Esta es la primera que huele a alguien. Las demás olían a nadie. zZz.
 	Dormido6: …las Z se me acaban. Cuando se acaben del todo, abriré el ojo. Todavía no. Todavía… zZz.
 	Dormido7: …las estrellas me hablaron: dicen que abajo hay manos. Yo solo he visto páginas. Acércate a ver quién tiene razón. zZz.
 	Dormido8: …¿sigues ahí? Bien. Los que esperan también alimentan. Un poquito. No es lo mismo, pero el hambre sabe esperar. zZz.
 	PrimerPensamiento: Por fin.
-	CometaCae: ✦ Una estrella negra se desgarra en el cielo… y cae hacia ti.
-	Impacto: ✦ El cielo calló donde la estrella besó la tierra: TU GRIMORIO TE ESPERA.
+	CometaCae: ✦ El aire se espesa: UNA BRUMA INMENSA está naciendo cerca de ti… y algo llega dentro.
+	Impacto: ✦ La bruma se disipa… y algo flota en su lugar: TU GRIMORIO TE ESPERA.
 	Devorado:
 		'''
 		Mmm… el cielo te mandó un DOBLE caído — y todo lo caído me pertenece.
@@ -2359,8 +2365,8 @@ Caida: {
 		(Estaba delicioso. El cielo cocina igual que antes de la rotura.)
 		'''
 	Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
-	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA en su cráter.
-	TintaEnVuelo: ✦ Tu estrella negra YA VIAJA hacia ti — espera su beso con la tierra.
+	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA entre la bruma.
+	TintaEnVuelo: ✦ TU BRUMA YA NACE frente a ti — espera a que se disipe.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
 	ItemCorrompido: ✦ La bruma del cráter PUDRE tu ofrenda… {0} esencias corruptas nacen.
 	DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
@@ -2373,7 +2379,7 @@ Caida: {
 	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
 	// weapons that fall into the crater; the Eternal devours them: rarity
 	// EXP + one stat per class + the unique souls)
-	ArmaCorrompidaAviso: ✦ La bruma del cráter ABRAZA a {0}… queda CORRUPTA.
+	ArmaCorrompidaAviso: ✦ La corrupción del grimorio ABRAZA a {0}… queda CORRUPTA.
 	ArmaDevorada: ✦ El Eterno devora a {0}: +{1} EXP · +1 {2}
 	AlmaDespertada: ✧ ¡El alma de {0} DESPIERTA en el libro: {1}!
 	StatFuerza: Fuerza violenta
@@ -2387,6 +2393,44 @@ Caida: {
 	CorazonEstelar: Corazón estelar (más crítico)
 	AlmaVeloz: Alma veloz (más velocidad de uso)
 	PunoTitan: Puño titán (más empuje)
+}
+
+// v6.51.0 — EL DESPERTAR DEL GRIMORIO: la nueva progresión (nivel 0..50)
+// — las tres ofrendas por nivel (esencias corruptas + dinero + el arma
+// corrupta del peldaño de Terraria), los poderes que desbloquea y la
+// voz del libro al despertar.
+Despertar: {
+	Subida: ✦ El Grimorio DESPIERTA un poco más: nivel de despertar {0}.
+	Voz1: Mmm… otra página que se escribe sola. Sigue alimentándome, portador.
+	Voz2: Siento los anillos, portador. TODOS los anillos. Falta poco.
+	Voz3: Cada despertar me recuerda lo que era antes de la rotura. Casi todo.
+	Voz4: (el libro se estremece de gusto) Eso. MÁS de eso.
+	FaltaEsencia: ✦ El grimorio aparta el plato: le faltan {0} esencia(s) corrupta(s)… y {1}.
+	FaltaDinero: ✦ El grimorio aparta el plato: le faltan {0}.
+	OjosCerrados: ✦ El escuadrón aún duerme: el grimorio necesita NIVEL {0} para invocar su primer ojo.
+	MejorasSelladas: ✦ Las mejoras del escuadrón nacen con EL DESPERTAR (nivel 5 la primera, 15 la segunda, 30 la tercera, 40 la última). Despertar actual: {0}.
+	NuevoOjo: ✧ ¡El grimorio puede invocar un OJO NUEVO! (el ojo número {0} del escuadrón)
+	CerrojoEsbirros: ✦ El grimorio no comparte su cielo: mientras sus ojos velan, ningún otro esbirro responde.
+	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario
+	HitoMejora1: ✧ ¡DESPERTAR 5: la MEJORA 1 de los ojos desbloqueada! (la invocación de más ahora FORTALECE)
+	HitoSol: ✧ ¡DESPERTAR 7: DOS OJOS con mejora pueden crear un SOL RÚNICO de 1 anillo y lanzárselo al enemigo! (2 por minuto, al azar)
+	HitoAgujeros: ✧ ¡DESPERTAR 10: CINCO OJOS con mejora pueden abrir un AGUJERO NEGRO RÚNICO al azar sobre el enemigo! (1 por minuto)
+	HitoMejora2: ✧ ¡DESPERTAR 15: la MEJORA 2 de los ojos desbloqueada!
+	HitoSol2: ✧ ¡DESPERTAR 17: el sol rúnico gana su SEGUNDO anillo y nace 3 veces por minuto!
+	HitoMascota: ✧ ¡DESPERTAR 20: EL GRIMORIO TE ESCUPE AL MINIGRIMORIO como mascota!
+	HitoAscendidos: ✧ ¡DESPERTAR 25: los agujeros negros combinados ascienden — hacen AÚN MÁS daño!
+	HitoMejora3: ✧ ¡DESPERTAR 30: la MEJORA 3 de los ojos desbloqueada!
+	HitoSol3: ✧ ¡DESPERTAR 35: el sol rúnico gana su TERCER anillo y nace 4 veces por minuto!
+	HitoMejora4: ✧ ¡DESPERTAR 40: la MEJORA FINAL de los ojos desbloqueada!
+	HitoSupremo: ✧ ¡DESPERTAR 45: los agujeros negros son 2 por minuto… y OCHO OJOS con la MEJORA 4 pueden abrir el AGUJERO NEGRO SUPREMO o el SUPREMO AURORA! (1 por minuto)
+	HitoMaximo: ✧✧ ¡DESPERTAR 50: TODO el ataque de los ojos y sus proyectiles, MÁS FUERTE y MÁS RÁPIDO! (máximo por ahora)
+	Escupidizo:
+		'''
+		Ya somos tres, portador: tú, yo… y ÉL.
+		Una parte de mí siempre quiso volver al mundo pequeño — el de los
+		hombros y las travesuras. Toma: te lo escupo como mascota.
+		Aliméntalo con silencio y curiosidad. Es lo único que comemos los dos.
+		'''
 }
 
 TestingPlayer: {
@@ -3004,5 +3048,5 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída
-Tiles.BrumaAltar.MapEntry: Bruma del cráter
-Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que cayó en ese cráter ya no es de este mundo.
+Tiles.BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
+Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que la bruma del despertar tocó ya no es de este mundo.

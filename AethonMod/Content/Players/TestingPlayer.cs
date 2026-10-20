@@ -87,6 +87,12 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
             bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63+: LAS FAUCES DEL GRIMORIO (las 3 sombras de la .62 + LA PÁGINA FINAL de la .64 — el arma 4)
             bolsas += Entregar(ModContent.ItemType<BolsaEmperatriz>());      // v6.50.99: LAS CUATRO PRUEBAS DE LA EMPERATRIZ (A/B/C + la dual Equinoccio)
+
+            // v6.51.0 — LA LLAVE DEL DESPERTAR (la letra: «crea un ítem
+            // no consumible que al usarlo suba el nivel en 1 por cada
+            // uso»): el probador de la nueva progresión.
+            bolsas += Entregar(ModContent.ItemType
+                <global::AethonMod.Content.Items.Llamados.EcoDelDespertar>());
             // v6.50.121 — LA BOLSA DE LA CRÍA, LA MISMA FORMA QUE TODAS (la
             //     letra: «la bolsa debe entregarse al jugador de la misma
             //     forma que todas las demás bolsas del mod»): garantizada en

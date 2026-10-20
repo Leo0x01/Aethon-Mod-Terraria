@@ -140,6 +140,33 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     Projectile.velocity *= 0.85f;
             }
 
+            // v6.50.131 — LA PIRUETA DEL ARRANQUE: al emprender UNA
+            // MISIÓN (o la vuelta a casa) el libro celebra con UNA VUELTA
+            // de campana y un chorro de chispas — el entusiasmo de las
+            // páginas al volar.
+            int modoAhora = (int)_cerebro.Modo;
+            if (Projectile.localAI[1] <= 0f &&
+                modoAhora != (int)Projectile.localAI[2] &&
+                (modoAhora == (int)ParejaCerebro.MODO_VIAJAR ||
+                 modoAhora == (int)ParejaCerebro.MODO_VOLVER))
+            {
+                Projectile.localAI[1] = 34f;
+                for (int i = 0; i < 7; i++)
+                {
+                    Dust chispa = Dust.NewDustPerfect(Projectile.Center,
+                        DustID.Shadowflame,
+                        Main.rand.NextVector2Unit() * Main.rand.NextFloat(1.2f, 3.4f),
+                        140, new Color(196, 150, 255), 0.7f);
+                    chispa.noGravity = true;
+                }
+            }
+            Projectile.localAI[2] = modoAhora;
+            if (Projectile.localAI[1] > 0f) Projectile.localAI[1] -= 1f;
+            float pirueta = Projectile.localAI[1] > 0f
+                ? MathHelper.TwoPi * (1f - Projectile.localAI[1] / 34f)
+                  * (Projectile.whoAmI % 2 == 0 ? 1f : -1f)
+                : 0f;
+
             // v6.50.130 — EL CINEO DEL VUELO (la letra: «mejora las
             // animaciones del pequeño minigrimorio mascota»): el libro ya
             // no se mece como un péndulo ajeno al mundo — se RECUESTA
@@ -147,7 +174,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // aceleró a la derecha, se inclinó a la derecha) y encima
             // conserva el vaivén perezoso de su familia (el Dormido).
             Projectile.rotation = MathHelper.Clamp(Projectile.velocity.X * 0.020f, -0.24f, 0.24f)
-                + MathF.Sin(t * 1.2f) * 0.05f;
+                + MathF.Sin(t * 1.2f) * 0.05f + pirueta;
 
             // === EL RESPLANDOR DE LAS PÁGINAS: una brasa violeta, TENUE
             //     (0.24/0.17/0.40 — menos de la quinta parte de la cría de
@@ -265,12 +292,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 //     pequeños». ===
                 ParejaCerebro.DibujarLosTresOjos(Projectile, _cerebro);
 
-                // === 6. v6.50.130 — LOS CONEJOS REALES del evento (el
-                //     sprite de vanilla del Bunny a escala 0,55, saltando
-                //     hacia el libro — en el lote vanilla con el cuerpo y
-                //     los ojos: la misma familia de capas). ===
-                ParejaCerebro.DibujarLosConejos(Projectile, _cerebro);
-
                 return false;   // el cuerpo SE dibuja aquí (con su ojo)
             }
             catch
@@ -310,7 +331,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 if (victima != null && victima.active) objetivo = victima.Center;
             }
             else if (_cerebro.Modo == ParejaCerebro.MODO_CURIOSO ||
-                     _cerebro.Modo == ParejaCerebro.MODO_CONEJOS ||
                      _cerebro.Modo == ParejaCerebro.MODO_PLAGA)
             {
                 objetivo = Projectile.Center + new Vector2(

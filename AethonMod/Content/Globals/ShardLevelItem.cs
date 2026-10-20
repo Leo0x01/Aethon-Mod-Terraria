@@ -218,6 +218,25 @@ namespace AethonMod.Content.Globals
                         new Microsoft.Xna.Framework.Color(245, 196, 81));
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
                 }
+
+                // v6.51.0 — EL ANUNCIO DE CADA OJO NUEVO (la letra:
+                // «cada vez que puede invocar un nuevo minion este debe
+                // ser anunciado al jugador»): la escalera del escuadrón —
+                // nivel 5 el PRIMERO, nivel 10 el SEGUNDO y cada 10
+                // niveles uno nuevo (5 · 10 · 20 · 30 · … · 100).
+                int nivelAnterior = Level - nivelesGanados;
+                foreach (int umbral in new[] { 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 })
+                {
+                    if (nivelAnterior < umbral && Level >= umbral && notificar)
+                    {
+                        int numero = umbral == 5 ? 1 : (umbral == 10 ? 2 : 2 + (umbral - 10) / 10);
+                        Main.NewText(
+                            Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Despertar.NuevoOjo", numero),
+                            new Microsoft.Xna.Framework.Color(196, 138, 255));
+                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item113);
+                    }
+                }
             }
             catch
             {

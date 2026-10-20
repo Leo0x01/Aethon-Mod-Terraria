@@ -66,7 +66,9 @@ namespace AethonMod.Content.Items.Altar
             Item.useAnimation = 14;
             Item.consumable = true;
             Item.autoReuse = false;
-            Item.createTile = ModContent.TileType<global::AethonMod.Content.Tiles.BrumaAltarTile>();
+            // v6.51.0 — LA COLOCACIÓN MURIÓ: la bruma es SOLO ESTÉTICA en
+            // LA LLEGADA (la letra) — este item es un VESTIGIO de la
+            // vieja caída (ya no nace de cráter alguno).
         }
 
         /// <summary>LA COLOCACIÓN (v6.50.130): ESTE tML 2026.08 no trae

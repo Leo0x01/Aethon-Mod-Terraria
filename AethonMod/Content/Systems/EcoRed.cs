@@ -124,7 +124,6 @@ namespace AethonMod.Content.Systems
         /// (los cráteres registrados) → los clientes. La .128 descubría
         /// las zonas ESCANEANDO la tile dorada — la tile murió con el
         /// altar (la bruma es la puerta): ahora la lista CAMINA.</summary>
-        public const byte MsgAltarZonas = 17;
         // v6.50.126 — LA TINTA DEL COMETA (cliente → server): el uso del
         // ítem de pruebas pide a la AUTORIDAD que dispare el cometa de
         // LA CAÍDA para quien la sostiene (la misma lección de la mano
@@ -455,61 +454,10 @@ namespace AethonMod.Content.Systems
                     p.Write(sp.CorazonEstelar);
                     p.Write(sp.AlmaVeloz);
                     p.Write(sp.PunoTitan);
+                    // v6.51.0 — EL NIVEL DE DESPERTAR también (el daño y
+                    // los tooltips del portador lo leen en su máquina).
+                    p.Write(sp.NivelDespertar);
                 });
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// v6.50.129 — LAS ZONAS DE LA BRUMA → UN cliente (la foto de
-        /// entrada): los cráteres registrados del mundo, para la bruma y
-        /// la corrupción en la máquina de cada jugador (la .128 los
-        /// encontraba por la TILE DORADA — murió con el altar).
-        /// </summary>
-        public static void SincronizarZonas(Player quien)
-        {
-            try
-            {
-                if (Main.netMode != NetmodeID.Server) return;
-                if (quien == null || !quien.active) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-
-                EnviarPaquete(quien, p =>
-                {
-                    p.Write(MsgAltarZonas);
-                    int total = System.Math.Min(sys.Altares.Count, 512);
-                    p.Write((ushort)total);
-                    int escritos = 0;
-                    foreach (var a in sys.Altares)
-                    {
-                        if (a == null || escritos >= total) continue;
-                        p.Write(a.X);
-                        p.Write(a.Y);
-                        escritos++;
-                    }
-                });
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// v6.50.129 — LAS ZONAS AL AIRE (broadcast): un cráter nuevo se
-        /// registró en la autoridad — TODOS los clientes estrenan su
-        /// bruma ahora (los que entren después la recibirán en la foto
-        /// de entrada).
-        /// </summary>
-        public static void DifundirZonas()
-        {
-            try
-            {
-                if (Main.netMode != NetmodeID.Server) return;
-                for (int i = 0; i < Main.maxPlayers; i++)
-                {
-                    Player p = Main.player[i];
-                    if (p != null && p.active)
-                        SincronizarZonas(p);
-                }
             }
             catch { }
         }
@@ -607,10 +555,6 @@ namespace AethonMod.Content.Systems
                             // con la foto de entrada (el altar come aunque
                             // el portador esté desconectado).
                             SincronizarDevoracion(solicitante);
-                            // v6.50.129 — LAS ZONAS DE LA BRUMA también
-                            // (la .128 las encontraba por la tile dorada:
-                            // murió con el altar — ahora la lista camina).
-                            SincronizarZonas(solicitante);
                         }
                         else if (tipo == MsgTomarCaida)
                         {
@@ -825,6 +769,7 @@ namespace AethonMod.Content.Systems
                         int corazonEstelar = reader.ReadInt32();
                         int almaVeloz = reader.ReadInt32();
                         int punoTitan = reader.ReadInt32();
+                        int nivelDespertar = reader.ReadInt32();
                         var spd = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
                         if (spd != null && poder >= 0)
                         {
@@ -841,20 +786,9 @@ namespace AethonMod.Content.Systems
                             spd.CorazonEstelar = System.Math.Max(0, corazonEstelar);
                             spd.AlmaVeloz = System.Math.Max(0, almaVeloz);
                             spd.PunoTitan = System.Math.Max(0, punoTitan);
+                            spd.NivelDespertar = System.Math.Clamp(nivelDespertar, 0,
+                                Content.Systems.DespertarGrimorio.NivelMax);
                         }
-                        break;
-                    }
-
-                    // v6.50.129 — LAS ZONAS DE LA BRUMA: la foto del mundo
-                    // (los cráteres registrados — la bruma y la corrupción
-                    // viven en la máquina de cada jugador).
-                    case MsgAltarZonas:
-                    {
-                        int total = reader.ReadUInt16();
-                        var pares = new System.Collections.Generic.List<int[]>();
-                        for (int k = 0; k < total && k < 512; k++)
-                            pares.Add(new[] { reader.ReadInt32(), reader.ReadInt32() });
-                        AltarDevoradorSistema.RecibirZonas(pares);
                         break;
                     }
 

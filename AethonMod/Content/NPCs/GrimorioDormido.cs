@@ -28,10 +28,12 @@ namespace AethonMod.Content.NPCs
     // aiStyle = -1 (IA propia: FLOTA con bobbing, no camina, no pide
     // casa). Intocable: su cita es con UNA mano, no con espadas.
     //
-    // EL DESTINATARIO viaja en npc.ai[1] (el índice — se refresca al
-    // reconectar) y en npc.GivenName (el nombre — el 56 lo viste en los
-    // clientes; su primer tick de IA lo reconstruye de ai[1] si el cable
-    // llegó tarde).
+    // v6.51.0 — EL DESTINATARIO viaja en npc.ai[1] (el índice — se
+    // refresca al reconectar) y en LA PENDIENTE del mundo (el nombre):
+    // GivenName YA NO SE ESCRIBE NUNCA (la letra: al pasar el cursor el
+    // libro debe decir «El Grimorio Dormido», no el nombre del jugador —
+    // vanilla muestra GivenName si no está vacío: lo dejamos vacío para
+    // siempre y el rótulo cae al nombre localizado del NPC).
     //
     // v6.50.122 — LA DEVORACIÓN DEL DOBLE (la letra: «el grimorio siempre
     // cae, pero si tienes uno en el inventario, el del inventario hace
@@ -76,15 +78,36 @@ namespace AethonMod.Content.NPCs
             // mecanismo exacto de vanilla (el mismo del mercader
             // esqueleto y las mascotas de pueblo).
             NPCID.Sets.NoTownNPCHappiness[Type] = true;
+
+            // v6.51.0 — EL RETRATO EN SU CASILLA (la letra: «está mal
+            // colocado y fuera de su casilla»): el cuerpo del Eterno
+            // (30×42) se salía de la caja del bestiario — el retrato se
+            // ENCOGE a 0,72 y se CENTRA en su marco (la vía oficial de
+            // vanilla para acomodar retratos: Velocity 0 = posado
+            // quieto, sin la deriva de las mascotas voladoras).
+            NPCID.Sets.NPCBestiaryDrawOffset.Add(Type,
+                new NPCID.Sets.NPCBestiaryDrawModifiers()
+                {
+                    Velocity = 0f,
+                    PortraitScale = 0.72f,
+                    PortraitPositionXOverride = 0f,
+                    PortraitPositionYOverride = 0f,
+                });
         }
 
         public override void SetDefaults()
         {
             NPC.width = 30;                 // el cuerpo del Nervioso (la textura del Eterno)
             NPC.height = 42;
-            NPC.lifeMax = 5000;
+            // v6.51.0 — EL BESTIARIO DE LA LETRA: «tiene 3 estrellas de 5,
+            // el grimorio es algo súper raro, creo que NI 5 ESTRELLAS SON
+            // SUFICIENTES para marcar su rareza» — sus stats cuentan una
+            // criatura QUE NO DEBE DESPERTARSE (la escala de las estrellas
+            // nace de la vida/daño/defensa: 40.000 de vida lo ponen MÁS
+            // ALLÁ del Señor de la Luna; sigue sin hacer daño: DUERME).
+            NPC.lifeMax = 150000;
             NPC.damage = 0;                 // no hace daño: está DORMIDO
-            NPC.defense = 0;
+            NPC.defense = 120;
             NPC.dontTakeDamage = true;      // intocable — ni el héroe más tonto
             NPC.knockBackResist = 0f;
             NPC.townNPC = true;             // LA VENTANA DE DIÁLOGO VANILLA
@@ -127,10 +150,15 @@ namespace AethonMod.Content.NPCs
 
         public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
         {
-            // ENTRADA MÍNIMA (el patrón de la casa): una sola línea de
-            // sabor — el bestiario no necesita más de un libro dormido.
+            // v6.51.0 — EL BESTIARIO DE LA LETRA: «está mal colocado y
+            // fuera de su casilla… debería ser el último número o no
+            // tener número, tener algo como el símbolo ???? o algo como
+            // el símbolo de infinito» — EL RÓTULO: ni número ni casilla:
+            // ∞ · ????? (FUERA DEL CATÁLOGO), el sabor del libro y su
+            // rareza IMPOSIBLE (la línea del infinito antes que nada).
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
             {
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Numero"),
                 new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Bestiario"),
             });
         }
@@ -148,22 +176,6 @@ namespace AethonMod.Content.NPCs
                 NPC.localAI[2] = NPC.position.X; // v6.50.122 — la X base (el temblor del devorado)
                 NPC.ai[0] = 0f;                  // el reloj compartido del bobbing
                 NPC.netUpdate = true;
-            }
-
-            // === EL NOMBRE RECONSTRUIDO (MP): GivenName no viaja en el
-            //     cable — ai[1] (el destinatario) SÍ: cada máquina lo
-            //     traduce a nombre cada segundo PERO SOLO si aún no lo
-            //     conoce (nunca pisa el nombre bueno con el de un índice
-            //     reciclado — el libro sabe a quién espera). Así el cliente
-            //     que llegó tarde aprende el nombre (y el índice NUEVO de
-            //     una reconexión lo refresca el reconciliador del server).
-            if (NPC.ai[0] % 60f == 0f && string.IsNullOrEmpty(NPC.GivenName))
-            {
-                int idx = (int)NPC.ai[1];
-                if (idx >= 0 && idx < Main.maxPlayers &&
-                    Main.player[idx] != null && Main.player[idx].active &&
-                    !string.IsNullOrEmpty(Main.player[idx].name))
-                    NPC.GivenName = Main.player[idx].name;
             }
 
             // === v6.50.122 — LA DEVORACIÓN DEL DOBLE: cuando su
@@ -257,21 +269,50 @@ namespace AethonMod.Content.NPCs
         //  EL DIÁLOGO — la ventana vanilla habla
         // ================================================================
 
-        /// <summary>¿El jugador local es el destinatario de ESTE libro?</summary>
+        /// <summary>v6.51.0 — ¿El jugador local es el destinatario de
+        /// ESTE libro? (SIN GivenName: el índice de ai[1] — que viaja en
+        /// el SyncNPC y refresca el reconciliador — y de respaldo la
+        /// pregunta a LA CAÍDA, que consulta la pendiente del mundo).</summary>
         private bool EsDestinatario(Player p)
-            => p != null && !string.IsNullOrEmpty(NPC.GivenName) && p.name == NPC.GivenName;
+        {
+            if (p == null) return false;
+            // EL ÍNDICE (vivo en todas las máquinas por el cable).
+            if ((int)NPC.ai[1] == p.whoAmI && p.active) return true;
+            // EL RESPALDO (la pendiente del mundo — en la AUTORIDAD).
+            return Systems.LaCaidaSistema.EsElDestinatario(NPC, p);
+        }
 
-        /// <summary>v6.50.122 — El destinatario VIVO de este libro (por
-        /// NOMBRE — el cable puede traer índices reciclados: el nombre es
-        /// la identidad del pacto).</summary>
+        /// <summary>El destinatario VIVO de este libro (el índice de
+        /// ai[1] primero — el cable lo trae fresco; el respaldo pregunta
+        /// a LA CAÍDA por la pendiente).</summary>
         private Player DestinatarioVivo()
         {
-            if (string.IsNullOrEmpty(NPC.GivenName)) return null;
-            for (int i = 0; i < Main.maxPlayers; i++)
+            int idx = (int)NPC.ai[1];
+            if (idx >= 0 && idx < Main.maxPlayers &&
+                Main.player[idx] != null && Main.player[idx].active &&
+                !string.IsNullOrEmpty(Main.player[idx].name))
+                return Main.player[idx];
+            // EL RESPALDO: el nombre de la pendiente (solo AUTORIDAD).
+            try
             {
-                Player p = Main.player[i];
-                if (p != null && p.active && p.name == NPC.GivenName) return p;
+                var sys = ModContent.GetInstance<Systems.LaCaidaSistema>();
+                if (sys != null)
+                {
+                    foreach (var c in sys.CaidasPendientes)
+                    {
+                        if (c == null || string.IsNullOrEmpty(c.Jugador)) continue;
+                        if (System.Math.Abs(c.X - NPC.Center.X) > 64f ||
+                            System.Math.Abs(c.Y - NPC.Center.Y) > 80f) continue;
+                        for (int i = 0; i < Main.maxPlayers; i++)
+                        {
+                            Player p = Main.player[i];
+                            if (p != null && p.active && p.name == c.Jugador)
+                                return p;
+                        }
+                    }
+                }
             }
+            catch { }
             return null;
         }
 

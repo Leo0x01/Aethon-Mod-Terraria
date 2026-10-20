@@ -232,17 +232,29 @@ Items: {
 	}
 
 	TintaDelCometa: {
-		DisplayName: Comet Ink
+		DisplayName: Ink of the Arrival
 		Tooltip:
 			'''
-			THE FALL ACTIVATOR (test item — delivered by the Brood Pouch).
-			Break the vial and the sky REMEMBERS: the Eternal Grimoire's
-			comet crosses again toward you — day or night.
+			THE ARRIVAL'S ACTIVATOR (testing item — the Hatchling's Bag carries it).
+			Break the vial and the world REMEMBERS: the Eternal Grimoire's
+			mist is born again before you — day or night.
 			The automatic paths keep their law (each player's first night in
-			each world + the first neighbor that isn't the Guide); THIS ink
+			each world + the first neighbor who isn't the Guide); THIS ink
 			is the MANUAL path: the event is NEVER lost… and it never
-			duplicates your grimoire (if it already awaits you or already
-			flies toward you, the sky doesn't insist).
+			duplicates your grimoire (if it already awaits you, the sky
+			doesn't insist).
+			'''
+	}
+	EcoDelDespertar: {
+		DisplayName: Echo of Awakening
+		Tooltip:
+			'''
+			THE TESTING KEY OF THE AWAKENING (non-consumable): each use
+			wakes the grimoire ONE MORE LEVEL (full ceremony included — and
+			at 20, the pet's little movie).
+			The real path is the three offerings: corrupt essences, coins
+			and the corrupted weapon of the rung… but a tester's key
+			belongs to the tester.
 			'''
 	}
 
@@ -461,10 +473,6 @@ Items: {
 		Tooltip: ""
 	}
 
-	BlackHoleStaff: {
-		DisplayName: Black Hole
-		Tooltip: ""
-	}
 
 	SunStaff: {
 		DisplayName: Sun
@@ -1823,22 +1831,20 @@ Items: {
 	// v6.50.130 — THE CRATER MIST (the invisible item that IS the
 	// mist: the portable corruption altar)
 	BrumaDelCrater: {
-		DisplayName: Crater Mist
+		DisplayName: Crater mist (relic)
 		Tooltip:
 			'''
-			The minibiome's mist, IN THE FLESH: take it from the crater
-			and PLACE the altar wherever you want.
-			Anything thrown into the placed mist rots into Corrupted
-			Essence — and WEAPONS earn the Corrupted tag.
-			Next to the mist, the crafting menu corrupts weapons and
-			turns EVERYTHING into Corrupted Essence, no throwing needed.
+			A RELIC of the old fall: the mist that was once an altar.
+			THE ARRIVAL no longer needs it — corruption lives in your crafting
+			menu while you carry the grimoire, and the Eternal devours any
+			corrupted weapon you drop with it in hand.
 			'''
 	}
 
 	ArmaCorruptaTag: Corrupted
-	ArmaCorrupta1: THE FALL has defiled it: the crater's mist lives within.
+	ArmaCorrupta1: THE ARRIVAL has defiled it: the awakening's mist lives within.
 	ArmaCorrupta2: It no longer takes prefixes or reforges — the anvil is closed to it.
-	ArmaCorrupta3: The Eternal Grimoire may devour it at the place of the fall.
+	ArmaCorrupta3: Drop it with the grimoire IN HAND: the Eternal will devour it.
 }
 
 Projectiles: {
@@ -1863,7 +1869,6 @@ Projectiles: {
 	VersoVivoProjectile.DisplayName: Living Glyph
 	// v6.18: wings were removed from the mod (user request).
 	
-	BlackHoleProjectile.DisplayName: Black Hole
 	SunProjectile.DisplayName: Sun
 	CosmicShockwaveProjectile.DisplayName: Cosmic Shockwave
 	SupernovaProjectile.DisplayName: Supernova
@@ -2073,7 +2078,8 @@ NPCs: {
 		// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
 		DisplayName: The Slumbering Grimoire
 		// v6.50.117 — THE FALL: the book that waits in its crater
-		Bestiario: A grimoire that fell from the sky inside an ink comet. It sleeps afloat in its crater… waiting for the right hand.
+		Numero: ∞ · No. ????? · OUT OF THE CATALOGUE
+		Bestiario: A grimoire that one day arrived wrapped in a sea of mist — nobody saw how. It sleeps floating on the very air… waiting for the right hand.
 
 		TownNPCMood: {
 			Content: I am content.
@@ -2327,7 +2333,7 @@ Caida: {
 	Presentacion:
 		'''
 		…I awaken.
-		I have waited eons for a hand like yours — the sky dropped me for YOU alone.
+		I have waited eons for a hand like yours — the mist carried me HERE, for you alone.
 		I do not speak with a mouth, bearer: my words are born ALREADY INSIDE your thoughts… like this one.
 		From now on you will always hear me this way: a purple voice inside your head, feeding on what you kill.
 		Reach out and take me. But remember: whoever carries a grimoire carries its hunger.
@@ -2335,17 +2341,17 @@ Caida: {
 	YaTienes: One soul, one book. I am already yours.
 	OtroJugador: …zZzZz… (this book waits for another hand)
 	BotonTomar: Reach out
-	Dormido1: …zZz. Are you here already?… No. Not yet. Let the sky keep falling. zZz.
+	Dormido1: …zZz. Are you here already?… No. Not yet. Let the mist keep spinning. zZz.
 	Dormido2: …I dreamed of a hand. In the dream it was yours. Its fingers came counted: five. Mine are pages. What a curious thing, those who sleep. zZz.
-	Dormido3: …the crater is warm. The craters of the other books were cold. This one looks a little bit like me. zZz.
+	Dormido3: …the mist's air is warm. The arrivals of the other books were cold. This one looks a little bit like me. zZz.
 	Dormido4: …careful with the first night, bearer… pardon: you are not a bearer yet. My hunger gets ahead of me. That's the thing about sleep: it tells the future, and tells it WRONGLY. zZz.
-	Dormido5: …I've spent eons counting falls. This is the first one that smelled of someone. The rest smelled of no one. zZz.
+	Dormido5: …I've spent eons counting arrivals. This is the first one that smelled of someone. The rest smelled of no one. zZz.
 	Dormido6: …my Z's are running out. When they run out entirely, I will open my eye. Not yet. Not yet… zZz.
 	Dormido7: …the stars spoke to me: they say there are hands down below. I've only ever seen pages. Come closer, and we'll see who was right. zZz.
 	Dormido8: …are you still there? Good. Those who wait also feed me. A little. It's not the same, but hunger knows how to wait. zZz.
 	PrimerPensamiento: At last.
-	CometaCae: ✦ A black star tears open the sky… and it falls toward you.
-	Impacto: ✦ The sky went silent where the star kissed the earth: YOUR GRIMOIRE AWAITS.
+	CometaCae: ✦ The air thickens: A VAST MIST is being born near you… and something arrives within.
+	Impacto: ✦ The mist dissipates… and something floats in its place: YOUR GRIMOIRE AWAITS.
 	Devorado:
 		'''
 		Hmm… the sky sent you a fallen DOUBLE — and everything fallen belongs to me.
@@ -2353,10 +2359,10 @@ Caida: {
 		(It was delicious. The sky cooks just like before the breaking.)
 		'''
 	Devorandose: (the book trembles… something is devouring it — it can no longer speak)
-	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS in its crater.
-	TintaEnVuelo: ✦ Your black star is ALREADY FLYING toward you — wait for its kiss with the earth.
+	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS within the mist.
+	TintaEnVuelo: ✦ YOUR MIST IS ALREADY BEING BORN before you — wait for it to dissipate.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
-	ItemCorrompido: ✦ The crater's mist ROTS your offering… {0} corrupt essences are born.
+	ItemCorrompido: ✦ The grimoire's corruption ROTS your offering… {0} corrupt essences are born.
 	DevoradoSabor1: Hmm. Tastes like almost nothing. Air shaped like a memory. Still: gulp.
 	DevoradoSabor2: Passable. A hint of what it was. The corruption gives it an… interesting aftertaste.
 	DevoradoSabor3: ¡Tasty! Whatever it was, the beam COOKED it right. More of that, bearer.
@@ -2367,7 +2373,7 @@ Caida: {
 	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
 	// weapons that fall into the crater; the Eternal devours them: rarity
 	// EXP + one stat per class + the unique souls)
-	ArmaCorrompidaAviso: ✦ The crater's mist EMBRACES your {0}… it is now CORRUPTED.
+	ArmaCorrompidaAviso: ✦ The grimoire's corruption EMBRACES your {0}… it is now CORRUPTED.
 	ArmaDevorada: ✦ The Eternal devours the {0}: +{1} EXP · +1 {2}
 	AlmaDespertada: ✧ The soul of the {0} AWAKENS in the book: {1}!
 	StatFuerza: Violent Strength
@@ -2381,6 +2387,44 @@ Caida: {
 	CorazonEstelar: Starry Heart (more crit)
 	AlmaVeloz: Swift Soul (more use speed)
 	PunoTitan: Titan Fist (more knockback)
+}
+
+// v6.51.0 — THE GRIMOIRE'S AWAKENING: the new progression (level 0..50)
+// — three offerings per level (corrupt essences + coins + the corrupted
+// weapon of Terraria's ladder), the powers it unlocks, and the book's
+// voice as it wakes.
+Despertar: {
+	Subida: ✦ The Grimoire AWAKENS a little more: awakening level {0}.
+	Voz1: Mmm… another page writing itself. Keep feeding me, bearer.
+	Voz2: I can feel the rings, bearer. ALL the rings. We're close.
+	Voz3: Every awakening reminds me what I was before the breaking. Most of it.
+	Voz4: (the book shivers with delight) Yes. MORE of that.
+	FaltaEsencia: ✦ The grimoire pushes the dish away: it needs {0} more corrupt essence(s)… and {1}.
+	FaltaDinero: ✦ The grimoire pushes the dish away: it needs {0}.
+	OjosCerrados: ✦ The squad still sleeps: the grimoire needs LEVEL {0} to summon its first eye.
+	MejorasSelladas: ✦ The squad's upgrades are born with THE AWAKENING (level 5 the first, 15 the second, 30 the third, 40 the last). Current awakening: {0}.
+	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad eye number {0})
+	CerrojoEsbirros: ✦ The grimoire does not share its sky: while its eyes watch, no other minion answers.
+	CondicionRecetas: Requires the Eternal Grimoire in the inventory
+	HitoMejora1: ✧ AWAKENING 5: eye UPGRADE 1 unlocked! (extra summons now EMPOWER)
+	HitoSol: ✧ AWAKENING 7: TWO UPGRADED EYES can forge a 1-RING RUNIC SUN and hurl it at the enemy! (2 per minute, at random)
+	HitoAgujeros: ✧ AWAKENING 10: FIVE UPGRADED EYES can open a random RUNIC BLACK HOLE over the enemy! (1 per minute)
+	HitoMejora2: ✧ AWAKENING 15: eye UPGRADE 2 unlocked!
+	HitoSol2: ✧ AWAKENING 17: the runic sun gains its SECOND ring and is born 3 times per minute!
+	HitoMascota: ✧ AWAKENING 20: THE GRIMOIRE SPITS THE MINI-GRIMOIRE out as your pet!
+	HitoAscendidos: ✧ AWAKENING 25: the combined black holes ASCEND — dealing even MORE damage!
+	HitoMejora3: ✧ AWAKENING 30: eye UPGRADE 3 unlocked!
+	HitoSol3: ✧ AWAKENING 35: the runic sun gains its THIRD ring and is born 4 times per minute!
+	HitoMejora4: ✧ AWAKENING 40: the FINAL eye upgrade unlocked!
+	HitoSupremo: ✧ AWAKENING 45: black holes twice per minute… and EIGHT EYES with UPGRADE 4 can open the SUPREME BLACK HOLE or the SUPREME AURORA! (1 per minute)
+	HitoMaximo: ✧✧ AWAKENING 50: ALL the eyes' attacks and projectiles, STRONGER and FASTER! (max for now)
+	Escupidizo:
+		'''
+		There are three of us now, bearer: you, me… and HIM.
+		A part of me always wanted to return to the small world — the one
+		with shoulders and mischief. Here: I spit him out as your pet.
+		Feed him silence and curiosity. It's the only thing we both eat.
+		'''
 }
 
 TestingPlayer: {
@@ -2998,5 +3042,5 @@ Pueblo: {
 }
 
 Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall
-Tiles.BrumaAltar.MapEntry: Crater Mist
-Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforge, no prefix, no workshop magic: whatever fell into that crater no longer belongs to this world.
+Tiles.BrumaAltarTile.MapEntry: Mist (relic of the old fall)
+Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.

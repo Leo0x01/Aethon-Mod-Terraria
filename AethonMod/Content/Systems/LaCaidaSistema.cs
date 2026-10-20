@@ -10,7 +10,20 @@ using Terraria.ModLoader.IO;
 namespace AethonMod.Content.Systems
 {
     // ======================================================================
-    //  LA CAÍDA (v6.50.117) — LA OBTENCIÓN CANÓNICA DEL GRIMORIO ETERNO.
+    //  LA LLEGADA (v6.50.117 «LA CAÍDA» → v6.51.0 «LA LLEGADA») — LA
+    //  OBTENCIÓN CANÓNICA DEL GRIMORIO ETERNO.
+    //
+    //  v6.51.0 — LA LETRA NUEVA: «que el grimorio simplemente caiga sin
+    //  dañar el mapa, o sea NO HAY CRÁTERES NI CAÍDA, será algo como un
+    //  APARECIMIENTO, en vez de la caída será LA LLEGADA: mucha bruma
+    //  hasta el punto de que no se pueda ver cómo el grimorio aparece y
+    //  luego la bruma se disipa dejando al grimorio dormido flotando a
+    //  la espera del jugador. El jugador toma al grimorio y el lugar
+    //  donde estaba queda limpio, sin bruma, sin rastro de cómo llegó».
+    //  EL COMETA, EL CRÁTER, EL ALTAR Y LA TILE DE BRUMA MURIERON: la
+    //  escena la dirige LlegadaBrumaProjectile (el mar de niebla), el
+    //  mapa queda INTACTO y la corrupción vive DESDE EL INVENTARIO (las
+    //  recetas de RecetasCorrupcionSistema piden LLEVAR el grimorio).
     //
     // LA LETRA DEL USUARIO: «por cada jugador cae un cometa de tinta (en
     // MP uno por jugador)», «reusar la estética del meteorito de fondo de
@@ -24,7 +37,7 @@ namespace AethonMod.Content.Systems
     // pasada la medianoche y el cometa llegaba cuando el jugador ya
     // se había ido a dormir).
     //
-    // EL CIRCUITO COMPLETO:
+    // EL CIRCUITO COMPLETO (v6.51.0 — SIN CRÁTER):
     //   1. PreUpdateTime (solo AUTORIDAD): cada jugador activo cuya caída
     //      TODAVÍA NO sucedió EN ESTE MUNDO (v6.50.125: la lista
     //      _cayoEnEsteMundo — la marca del .plr CaidaRecibida YA NO calla
@@ -33,8 +46,9 @@ namespace AethonMod.Content.Systems
     //      — el personaje de pruebas jamás volvía a ver el evento, la
     //      letra: «la caída no parece activarse cuando pasa la primera
     //      noche»), sin caída pendiente a su nombre, en noche recién caída
-    //      (time > 480) y sin cometa YA esta noche → nace su
-    //      CaidaCometaProjectile apuntando CERCA DEL JUGADOR (la
+    //      (time > 480) y sin llegada YA esta noche → nace su
+    //      LlegadaBrumaProjectile (el mar de bruma) sobre el punto
+    //      CERCA DEL JUGADOR (la
     //      .118: 32–64 tiles a un lado — antes ~30 pantallas del spawn).
     //      v6.50.121 — EL COMETA ES DE TODOS: la .117-.120 exigían NO
     //      llevar el Grimorio del Eterno encima para dispararlo… pero el
@@ -78,41 +92,6 @@ namespace AethonMod.Content.Systems
 
         /// <summary>¿Ya cayó un cometa para este jugador ESTA noche? (índice → bool; se limpia al amanecer).</summary>
         private readonly bool[] _cayoEstaNoche = new bool[Main.maxPlayers];
-
-        /// <summary>v6.50.128→.130 — UN ALTAR DEL MUNDO: la ZONA de
-        /// corrupción del minibioma (vive para SIEMPRE — es la puerta de
-        /// LA CORRUPCIÓN DE ITEMS del AltarDevoradorSistema). v6.50.130 —
-        /// DOS clases de altar: el del CRÁTER (nació con la caída, no
-        /// tiene tile — la puerta es la bruma) y EL DE LA BRUMA COLOCADA
-        /// (la letra: «un item invisible que es la bruma en si… los
-        /// jugadores pueden tomarla y colocarla donde quieran, este item
-        /// de bruma sera usado como altar principal» — el jugador puso SU
-        /// bruma: la tile manda y si la quitan, la zona se va con ella).
-        /// v6.50.130 — BrumaEntregada: el cráter YA soltó SU item de
-        /// bruma (una sola vez por cráter — el respaldo de la letra).</summary>
-        public class AltarDelMundo
-        {
-            /// <summary>La columna de la tile del altar.</summary>
-            public int X;
-            /// <summary>La fila de la tile del altar.</summary>
-            public int Y;
-            /// <summary>v6.50.130 — TRUE si es una BRUMA COLOCADA por el
-            /// jugador (la zona vive y muere con SU tile).</summary>
-            public bool Colocada;
-            /// <summary>v6.50.130 — TRUE si el cráter ya entregó SU item
-            /// de bruma (los cráteres viejos también — nadie se queda sin
-            /// la suya, pero NADIE recibe dos).</summary>
-            public bool BrumaEntregada;
-
-            /// <summary>El centro del altar en píxeles del mundo.</summary>
-            public Vector2 Posicion() => new(X * 16f + 8f, Y * 16f + 8f);
-        }
-
-        /// <summary>v6.50.128 — LOS ALTARES del mundo (nacen con cada
-        /// caída y JAMÁS mueren: aunque el libro dormido se marche, el
-        /// altar sigue corrompiendo items para el Eterno — la mecánica
-        /// que «dará más vida al mod», la letra).</summary>
-        public readonly List<AltarDelMundo> Altares = new List<AltarDelMundo>();
 
         /// <summary>v6.50.125 — LOS NOMBRES QUE YA VIVIERON SU CAÍDA EN ESTE
         /// MUNDO (el silenciador VERDADERO del cielo). La letra: «la caída
@@ -168,21 +147,6 @@ namespace AethonMod.Content.Systems
                 // v6.50.126 — el failsafe del primer vecino también viaja
                 // (el momento quedó grabado en ESTE mundo).
                 tag["llegoPrimerNpc"] = _llegoPrimerNpc;
-                // v6.50.128 — los altares viajan con el mundo (la puerta de
-                // la corrupción es ETERNA — cada cráter guarda el suyo).
-                // v6.50.130 — Colocada/BrumaEntregada también viajan (la
-                // bruma colocada por el jugador ES su altar; el cráter que
-                // ya soltó su bruma no suelta otra).
-                var altares = new List<TagCompound>();
-                foreach (var a in Altares)
-                {
-                    if (a == null) continue;
-                    var t = new TagCompound { ["x"] = a.X, ["y"] = a.Y };
-                    if (a.Colocada) t["col"] = true;
-                    if (a.BrumaEntregada) t["bruma"] = true;
-                    altares.Add(t);
-                }
-                tag["altares"] = altares;
             }
             catch { }
         }
@@ -217,26 +181,17 @@ namespace AethonMod.Content.Systems
                 // y el evento NUNCA se pierde).
                 _llegoPrimerNpc = tag.GetBool("llegoPrimerNpc");
 
-                // v6.50.128 — los altares vuelven con el mundo (y los de
-                // las caídas VIEJAS sin altar — mundos de la .127 con su
-                // libro aún esperando — se FORJAN al cargar: nadie se
-                // queda sin su mecánica).
-                Altares.Clear();
+                // v6.51.0 — LA PURGA DE LA VIEJA ERA: los mundos de la
+                // .128-.130 traen altares, tiles doradas, tiles de bruma
+                // y colmillos en sus cráteres — TODO se barre al cargar
+                // (LA LLEGADA no deja rastro: ni altares, ni brumas
+                // colocadas, ni lo amarillo). Las coordenadas viejas se
+                // leen SOLO para limpiarlas.
+                var viejos = new List<System.ValueTuple<int, int>>();
                 foreach (var entrada in tag.GetList<TagCompound>("altares"))
-                {
-                    Altares.Add(new AltarDelMundo
-                    {
-                        X = entrada.GetInt("x"),
-                        Y = entrada.GetInt("y"),
-                        Colocada = entrada.GetBool("col"),
-                        BrumaEntregada = entrada.GetBool("bruma")
-                    });
-                }
-                ForjarAltaresFaltantes();
-                // v6.50.130 — LA BRUMA EN LAS MANOS: cada cráter que aún
-                // no soltó SU item de bruma lo suelta ahora (los cráteres
-                // de la .129 reciben la suya al cargar el mundo).
-                EntregarBrumasPendientes();
+                    viejos.Add(System.ValueTuple.Create(
+                        entrada.GetInt("x"), entrada.GetInt("y")));
+                PurgarLaViejaEra(viejos);
             }
             catch { }
         }
@@ -246,7 +201,6 @@ namespace AethonMod.Content.Systems
             CaidasPendientes.Clear();
             _cayoEnEsteMundo.Clear();
             _llegoPrimerNpc = false;
-            Altares.Clear();
             Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
             _eraNoche = false;
         }
@@ -289,9 +243,9 @@ namespace AethonMod.Content.Systems
                 NPC libro = (npcIdx >= 0 && npcIdx < Main.maxNPCs) ? Main.npc[npcIdx] : null;
                 if (libro != null && libro.active)
                 {
-                    // EL NOMBRE DEL ESPERADO: el libro lo lleva puesto (y
-                    // viaja por el cable — la ventana de diálogo lo usa).
-                    libro.GivenName = pendiente.Jugador;
+                    // v6.51.0 — SIN GivenName (el hover dice «El Grimorio
+                    // Dormido»): el nombre vive en la PENDIENTE y el
+                    // índice en ai[1] (viaja por el SyncNPC).
                     libro.netUpdate = true;
                     DifundirLibro(libro);
                 }
@@ -349,21 +303,7 @@ namespace AethonMod.Content.Systems
                 if (Main.gameMenu) return;
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
 
-                // v6.50.130 — LA VIGILANCIA DE LAS BRUMAS COLOCADAS (cada
-                // 10 s): la bruma cuya tile murió se despide — su zona se
-                // va con ella (la letra: el altar es la bruma COLOCADA).
-                if (Main.GameUpdateCount % 600ul == 0ul)
-                    ValidarBrumasColocadas();
-
-                // v6.50.130 — EL DESCUBRIMIENTO (cada 30 t): ESTE tML
-                // 2026.08 no trae hook de colocación — la AUTORIDAD mira
-                // alrededor de cada jugador y registra las brumas NUEVAS
-                // que encuentre (la colocación SIEMPRE pasa cerca de un
-                // jugador: la zona nace sola, en SP y en MP por igual).
-                if (Main.GameUpdateCount % 30ul == 0ul)
-                    DescubrirBrumasColocadas();
-
-                // EL AMANECER LIMPIA LA NOCHE: un cometa por jugador por noche.
+                // EL AMANECER LIMPIA LA NOCHE: una llegada por jugador por noche.
                 bool esNoche = !Main.dayTime;
                 if (_eraNoche && !esNoche)
                     Array.Clear(_cayoEstaNoche, 0, _cayoEstaNoche.Length);
@@ -405,9 +345,9 @@ namespace AethonMod.Content.Systems
                         // v6.50.126 — ni cometa YA en vuelo: los TRES
                         // caminos al cielo (primera noche · primer vecino ·
                         // Tinta del Cometa) jamás se pisan entre sí.
-                        if (CometaEnVuelo(i)) continue;
+                        if (LlegadaEnMarcha(i)) continue;
 
-                        DispararCometa(p);
+                        DispararLlegada(p);
                         _cayoEstaNoche[i] = true;
                         // v6.50.125 — este mundo ya le dio su caída (aunque
                         // el cometa muera en pleno vuelo, no repite).
@@ -439,9 +379,9 @@ namespace AethonMod.Content.Systems
                         if (p == null || !p.active || p.dead) continue;
                         if (_cayoEnEsteMundo.Contains(p.name)) continue;
                         if (YaEsperaLibro(p.name)) continue;
-                        if (CometaEnVuelo(i)) continue;
+                        if (LlegadaEnMarcha(i)) continue;
 
-                        DispararCometa(p);
+                        DispararLlegada(p);
                         _cayoEstaNoche[i] = true;
                         _cayoEnEsteMundo.Add(p.name);
                     }
@@ -480,10 +420,10 @@ namespace AethonMod.Content.Systems
         /// vuelo? (v6.50.126 — el guarda-choques de los TRES caminos: la
         /// primera noche, el primer vecino y la Tinta del Cometa jamás
         /// disparan dos cometas al mismo alma).</summary>
-        public static bool CometaEnVuelo(int idxJugador)
+        public static bool LlegadaEnMarcha(int idxJugador)
         {
             if (idxJugador < 0 || idxJugador >= Main.maxPlayers) return false;
-            int tipo = ModContent.ProjectileType<Projectiles.CaidaCometaProjectile>();
+            int tipo = ModContent.ProjectileType<Projectiles.LlegadaBrumaProjectile>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile pr = Main.projectile[i];
@@ -527,9 +467,9 @@ namespace AethonMod.Content.Systems
                 if (p == null || !p.active || p.dead || string.IsNullOrEmpty(p.name)) return -1;
 
                 if (YaEsperaLibro(p.name)) return 1;
-                if (CometaEnVuelo(p.whoAmI)) return 2;
+                if (LlegadaEnMarcha(p.whoAmI)) return 2;
 
-                DispararCometa(p);
+                DispararLlegada(p);
                 var sys = ModContent.GetInstance<LaCaidaSistema>();
                 if (sys != null && p.whoAmI >= 0 && p.whoAmI < Main.maxPlayers)
                     sys._cayoEstaNoche[p.whoAmI] = true;
@@ -578,36 +518,46 @@ namespace AethonMod.Content.Systems
             return destino;
         }
 
-        /// <summary>Dispara el cometa de tinta de este jugador y le canta su caída (solo a él).</summary>
-        private static void DispararCometa(Player p)
+        /// <summary>v6.51.0 — DISPARA LA LLEGADA (la letra: «no hay
+        /// cráteres ni caída… mucha bruma hasta el punto de que no se
+        /// pueda ver cómo el grimorio aparece»): el MAR DE BRUMA nace
+        /// DIRECTO sobre el punto elegido (32–64 tiles a un lado del
+        /// destinatario, la superficie de esa columna) — crece 3 s
+        /// (nadie ve NADA), al pico engendra al Grimorio Dormido DENTRO
+        /// (RegistrarLlegada) y luego se disipa solo. NI UNA TILE se
+        /// toca: el mapa queda INTACTO.</summary>
+        private static void DispararLlegada(Player p)
         {
-            // v6.50.118 — el cráter nace CERCA DEL JUGADOR (la letra): la
-            // estrella cae a la vista de su destinatario.
+            // v6.50.118 — el punto sigue CERCA DEL JUGADOR (la letra): la
+            /// bruma abre a la vista de su destinatario.
             Vector2 destino = PuntoDeImpacto(p);
 
-            // NACE por encima de la cámara del destinatario, del lado del
-            // impacto, viajando en DIAGONAL (la fase 0 del cometa).
-            float lado = destino.X > p.Center.X ? 1f : -1f;
-            Vector2 nace = p.Center + new Vector2(-lado * 1100f, -1400f);
-            Vector2 vel = new Vector2(lado * 13.5f, 1.5f);
-
-            int idx = Projectile.NewProjectile(new EntitySource_Misc("LaCaida"), nace, vel,
-                ModContent.ProjectileType<Projectiles.CaidaCometaProjectile>(),
+            // EL MAR DE BRUMA nace sobre el punto (la escena entera la
+            // dirige LlegadaBrumaProjectile — sin cometa, sin vuelo).
+            int idx = Projectile.NewProjectile(new EntitySource_Misc("LaLlegada"),
+                destino.X, destino.Y - 60f, 0f, 0f,
+                ModContent.ProjectileType<Projectiles.LlegadaBrumaProjectile>(),
                 0, 0f, p.whoAmI, 0f, destino.X / 1000f, destino.Y / 1000f);
             if (idx < 0 || idx >= Main.maxProjectiles) return;
 
-            // EL AVISO DEL CIELO — PRIVADO: solo el destinatario ve la
-            // estrella negra desgarrarse (SP: pantalla; MP: solo su chat).
+            // EL AVISO DEL CIELO — PRIVADO: solo el destinatario siente
+            // que el mundo va a cambiar de página (SP: pantalla; MP: su
+            // chat).
             EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.CometaCae",
                 new Color(150, 60, 220));
         }
 
         // ================================================================
-        //  EL IMPACTO — el cometa entrega el libro (lo llama el proyectil)
+        //  EL PICO DE LA BRUMA — la llegada entrega el libro (lo llama la
+        //  escena: LlegadaBrumaProjectile al llegar a su momento)
         // ================================================================
 
-        /// <summary>Registra la caída y engendra al Grimorio Dormido EXACTO en el centro del cráter (solo AUTORIDAD).</summary>
-        public static void RegistrarImpacto(Vector2 destino, int idxJugador)
+        /// <summary>v6.51.0 — Registra LA LLEGADA y engendra al Grimorio
+        /// Dormido DENTRO de la bruma (solo AUTORIDAD). EL NOMBRE YA NO
+        /// SE ESCRIBE en GivenName (la letra: al pasar el cursor debe
+        /// decir «El Grimorio Dormido», no el nombre del jugador): la
+        /// identidad del pacto viaja en ai[1] + la pendiente.</summary>
+        public static void RegistrarLlegada(Vector2 destino, int idxJugador)
         {
             try
             {
@@ -630,19 +580,73 @@ namespace AethonMod.Content.Systems
                     Jugador = p.name
                 });
 
-                // EL LIBRO FLOTANDO EN SU CRÁTER (ai[1] = el destinatario).
-                int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaCaida"),
-                    (int)destino.X, (int)destino.Y,
+                // EL LIBRO FLOTANDO EN SU BRUMA (ai[1] = el destinatario;
+                // flota 40 px sobre el suelo: el puesto de la espera).
+                int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaLlegada"),
+                    (int)destino.X, (int)destino.Y - 40,
                     ModContent.NPCType<NPCs.GrimorioDormido>(), 0, 0f, idxJugador);
                 NPC libro = (npcIdx >= 0 && npcIdx < Main.maxNPCs) ? Main.npc[npcIdx] : null;
                 if (libro != null && libro.active)
                 {
-                    libro.GivenName = p.name;
+                    // v6.51.0 — SIN GivenName: el hover dice «El Grimorio
+                    // Dormido» (la identidad la lleva ai[1] + la pendiente).
                     libro.netUpdate = true;
                     DifundirLibro(libro);
                 }
             }
             catch { }
+        }
+
+        /// <summary>v6.51.0 — ¿ES EL DESTINATARIO de este libro? (la
+        /// identidad del pacto SIN GivenName: el índice vivo de ai[1]…
+        /// o el nombre de la PENDIENTE que espera junto al libro — la
+        /// revalidación de la AUTORIDAD para la toma y la devoración).</summary>
+        public static bool EsElDestinatario(NPC libro, Player p)
+        {
+            try
+            {
+                if (libro == null || !libro.active || p == null || !p.active) return false;
+                if (string.IsNullOrEmpty(p.name)) return false;
+
+                // EL ÍNDICE VIVO (ai[1] viaja en el SyncNPC — el
+                // reconciliador lo refresca en cada reconexión).
+                int idx = (int)libro.ai[1];
+                if (idx == p.whoAmI) return true;
+
+                // EL NOMBRE DE LA PENDIENTE (la palabra escrita en el
+                // mundo: el libro espera JUNTO a ella).
+                var sys = ModContent.GetInstance<LaCaidaSistema>();
+                if (sys == null) return false;
+                return sys.CaidasPendientes.Exists(c => c != null && c.Jugador == p.name &&
+                    Math.Abs(c.X - libro.Center.X) <= 64f &&
+                    Math.Abs(c.Y - libro.Center.Y) <= 80f);
+            }
+            catch { return false; }
+        }
+
+        /// <summary>v6.51.0 — ¿EL PODER DEL GRIMORIO YA VIVE EN ESTE
+        /// MUNDO? (la puerta de los drops de Esencia Corrupta: «en el
+        /// momento en el que el grimorio hace su aparición en el mundo,
+        /// su poder se filtra entre las realidades»).</summary>
+        public bool ElPoderViveAqui()
+        {
+            try
+            {
+                // LA LLEGADA ocurrió aquí (alguien ya la vivió o la está
+                // esperando).
+                if (_cayoEnEsteMundo.Count > 0) return true;
+                foreach (var c in CaidasPendientes)
+                    if (c != null && !string.IsNullOrEmpty(c.Jugador)) return true;
+                // …o un Grimorio Dormido espera en este mundo.
+                int tipo = ModContent.NPCType<NPCs.GrimorioDormido>();
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipo) return true;
+                }
+                return false;
+            }
+            catch { return false; }
         }
 
         /// <summary>El reconciliador: pendientes sin libro vivo + destinatarios que entraron tarde reciben su libro igual.</summary>
@@ -674,7 +678,6 @@ namespace AethonMod.Content.Systems
                     if (idx >= 0 && (int)libro.ai[1] != idx)
                     {
                         libro.ai[1] = idx;
-                        libro.GivenName = pendiente.Jugador;
                         libro.netUpdate = true;
                         DifundirLibro(libro);
                     }
@@ -703,7 +706,9 @@ namespace AethonMod.Content.Systems
 
                 // LA REVALIDACIÓN DE LA CASA (el chequeo del cliente no
                 // basta — un cliente modificado no fabrica grimorios).
-                if (p.name != libro.GivenName) return;
+                // v6.51.0 — la identidad por ai[1]/pendiente (SIN
+                // GivenName: el hover dice «El Grimorio Dormido»).
+                if (!EsElDestinatario(libro, p)) return;
                 if (TieneGrimorio(p)) return;
 
                 // EL LIBRO NACE DE LA AUTORIDAD (sin drops fantasma): si el
@@ -720,8 +725,14 @@ namespace AethonMod.Content.Systems
                 // mundos viejos con libros tomados hoy no repiten mañana).
                 RegistrarCaidaDelMundo(p.name);
 
-                // LA PENDIENTE SE APAGA (el cráter cumple su cuento).
+                // LA PENDIENTE SE APAGA (la llegada cumple su cuento).
                 QuitarPendiente(libro.Center);
+
+                // v6.51.0 — EL LUGAR QUEDA LIMPIO (la letra: «el lugar
+                // donde estaba queda limpio sin bruma sin rastro de cómo
+                // llegó»): cualquier bruma de la llegada que aún viva
+                // junto al libro se disipa YA.
+                DisiparBrumaDeLaLlegada(libro.Center);
 
                 // LA PRIMERA PALABRA — directa a los PENSAMIENTOS (EcoLib,
                 // morada): «Por fin.»
@@ -837,7 +848,7 @@ namespace AethonMod.Content.Systems
                 {
                     NPC n = Main.npc[i];
                     if (n == null || !n.active || n.type != tipo) continue;
-                    if (n.GivenName != p.name) continue;
+                    if (!EsElDestinatario(n, p)) continue;   // v6.51.0 — SIN GivenName
                     float d = n.DistanceSQ(p.Center);
                     if (d < mejor) { mejor = d; libro = n; }
                 }
@@ -882,294 +893,84 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  v6.50.128 — LOS ALTARES DEL MUNDO (la puerta de la corrupción)
+        //  v6.51.0 — LA PURGA DE LA VIEJA ERA + LA LIMPIEZA DE LA LLEGADA
         // ================================================================
 
-        /// <summary>Registra el altar nacido en un cráter (lo llama el
-        /// cometa al forjarlo — solo AUTORIDAD; la lista viaja con el
-        /// guardado del mundo). Sin duplicados: si YA hay un altar a menos
-        /// de 3 tiles, el cielo no insiste.
-        /// v6.50.130 — <paramref name="colocada"/>: TRUE cuando es una
-        /// BRUMA COLOCADA por el jugador (su zona vive y muere con la
-        /// tile — la letra: «colocarla donde quieran… altar principal»).
-        /// Devuelve el altar registrado (o el que ya vivía ahí).</summary>
-        public static AltarDelMundo RegistrarAltar(int x, int y, bool colocada = false)
-        {
-            try
-            {
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return null;
-                if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 || y >= Main.maxTilesY - 10)
-                    return null;
-                var existente = sys.Altares.Find(a => a != null &&
-                    Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3);
-                if (existente != null) return existente;
-                var nuevo = new AltarDelMundo { X = x, Y = y, Colocada = colocada, BrumaEntregada = colocada };
-                sys.Altares.Add(nuevo);
-                // v6.50.129 — LA BRUMA CAMINA: los clientes MP descubrían
-                // las zonas por la TILE DORADA (murió con el altar) — la
-                // lista nueva viaja al aire AHORA (y la foto de entrada
-                // la llevará a quien entre después).
-                if (Main.netMode == NetmodeID.Server)
-                    EcoRed.DifundirZonas();
-                return nuevo;
-            }
-            catch { return null; }
-        }
-
-        /// <summary>v6.50.130 — LA BRUMA SE RECOGE: el jugador quitó SU
-        /// bruma colocada (picó la tile) — la zona se va con ella y la
-        /// lista nueva viaja al aire (solo AUTORIDAD difunde; en cliente
-        /// la lista local es teatro hasta la próxima foto del server).</summary>
-        public static void RemoverAltar(int x, int y)
-        {
-            try
-            {
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-                int antes = sys.Altares.Count;
-                sys.Altares.RemoveAll(a => a != null && a.Colocada &&
-                    Math.Abs(a.X - x) <= 2 && Math.Abs(a.Y - y) <= 2);
-                if (sys.Altares.Count != antes && Main.netMode == NetmodeID.Server)
-                    EcoRed.DifundirZonas();
-            }
-            catch { }
-        }
-
-        /// <summary>v6.50.130 — EL CRÁTER SUELTA SU BRUMA (la letra: «en el
-        /// crater debe estar un item invisible que es la bruma en si de
-        /// esa forma los jugadores pueden tomarla»): el ITEM DE BRUMA
-        /// nace en el corazón del minibioma — una sola vez por cráter
-        /// (BrumaEntregada). Solo AUTORIDAD.</summary>
-        public static void EntregarBruma(int x, int y)
+        /// <summary>v6.51.0 — LA PURGA (al cargar mundos de la .128-.130):
+        /// en las coordenadas de los VIEJOS ALTARES mueren la TILE DORADA,
+        /// LA TILE DE BRUMA y los COLMILLOS del centro (el fondo de
+        /// obsidiana se queda: es el suelo ya). Los cráteres abiertos
+        /// TAMBIÉN se quedan (la tierra ya movida es historia: LA LLEGADA
+        /// no daña NADA NUEVO, pero no rellena el pasado). Solo
+        /// AUTORIDAD.</summary>
+        private static void PurgarLaViejaEra(List<System.ValueTuple<int, int>> viejos)
         {
             try
             {
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
+                if (viejos == null || viejos.Count == 0) return;
 
-                var altar = sys.Altares.Find(a => a != null &&
-                    Math.Abs(a.X - x) <= 3 && Math.Abs(a.Y - y) <= 3);
-                if (altar == null || altar.Colocada || altar.BrumaEntregada) return;
+                int tipoDorada = ModContent.TileType
+                    <global::AethonMod.Content.Tiles.AltarDeLaCaida>();
+                int tipoBruma = ModContent.TileType
+                    <global::AethonMod.Content.Tiles.BrumaAltarTile>();
 
-                // ¿Ya hay UNA bruma tirada en este cráter? (la red de
-                // seguridad del respawn — jamás dos).
-                int tipoBruma = ModContent.ItemType<global::AethonMod.Content.Items.Altar.BrumaDelCrater>();
-                for (int i = 0; i < Main.maxItems; i++)
+                foreach (var (x, y) in viejos.ToArray())
                 {
-                    Item d = Main.item[i];
-                    if (d == null || !d.active || d.type != tipoBruma) continue;
-                    if (Math.Abs(d.Center.X / 16f - altar.X) <= 10 &&
-                        Math.Abs(d.Center.Y / 16f - altar.Y) <= 12)
-                    {
-                        altar.BrumaEntregada = true;
-                        return;
-                    }
-                }
-
-                altar.BrumaEntregada = true;
-                Vector2 pos = altar.Posicion() + new Vector2(0f, -18f);
-                int idx = Item.NewItem(new Terraria.DataStructures.EntitySource_WorldGen(),
-                    (int)pos.X, (int)pos.Y, 12, 12, tipoBruma, 1, true, -1);
-                if (idx >= 0 && Main.netMode == NetmodeID.Server)
-                    Terraria.NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
-            }
-            catch { }
-        }
-
-        /// <summary>v6.50.130 — LA BARRIDA DE BRUMAS (al cargar el mundo):
-        /// cada cráter que nunca soltó su bruma la suelta AHORA (los
-        /// cráteres de la .129 la reciben en su primera carga bajo la
-        /// .130 — nadie se queda sin su altar portátil).</summary>
-        private static void EntregarBrumasPendientes()
-        {
-            try
-            {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-                foreach (var a in sys.Altares.ToArray())
-                {
-                    if (a == null || a.Colocada || a.BrumaEntregada) continue;
-                    EntregarBruma(a.X, a.Y);
-                }
-            }
-            catch { }
-        }
-
-        /// <summary>v6.50.130 — LA VIGILANCIA DE LAS BRUMAS COLOCADAS (el
-        /// pulso de cada 10 s, solo AUTORIDAD): una bruma colocada cuya
-        /// tile YA NO EXISTE (explosión, mundo raro, el picoteo que SP
-        /// no vio) entrega su zona al olvido — la lista camina limpia.
-        /// (Los altares de CRÁTER no se tocan: su puerta es la bruma del
-        /// minibioma, no una tile.)</summary>
-        public static void ValidarBrumasColocadas()
-        {
-            try
-            {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null || sys.Altares.Count == 0) return;
-
-                int tipoBruma = ModContent.TileType<global::AethonMod.Content.Tiles.BrumaAltarTile>();
-                bool toco = false;
-                foreach (var a in sys.Altares.ToArray())
-                {
-                    if (a == null || !a.Colocada) continue;
-                    if (a.X < 10 || a.Y < 10 || a.X >= Main.maxTilesX - 10 || a.Y >= Main.maxTilesY - 10)
-                    { sys.Altares.Remove(a); toco = true; continue; }
-                    Tile t = Main.tile[a.X, a.Y];
-                    if (t == null || !t.HasTile || t.TileType != tipoBruma)
-                    {
-                        sys.Altares.Remove(a);
-                        toco = true;
-                    }
-                }
-                if (toco && Main.netMode == NetmodeID.Server)
-                    EcoRed.DifundirZonas();
-            }
-            catch { }
-        }
-
-        /// <summary>v6.50.130 — EL DESCUBRIMIENTO DE LAS BRUMAS COLOCADAS
-        /// (la colocación sin hook): cada 30 t la AUTORIDAD escanea la
-        /// ventana alrededor de cada jugador vivo (±40×±25 tiles — la
-        /// colocación SIEMPRE pasa cerca de alguien) y registra las
-        /// tiles de bruma que aún no viven en la lista (RegistrarAltar
-        /// difunde solo — la zona nueva CAMINA a todas las máquinas).
-        /// Cubre SP, listen-server y dedicado con EL MISMO código: sin
-        /// paquetes, sin hooks, sin casos.</summary>
-        public static void DescubrirBrumasColocadas()
-        {
-            try
-            {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-
-                int tipoBruma = ModContent.TileType<global::AethonMod.Content.Tiles.BrumaAltarTile>();
-                bool toco = false;
-
-                for (int pj = 0; pj < Main.maxPlayers; pj++)
-                {
-                    Player p = Main.player[pj];
-                    if (p == null || !p.active || p.dead) continue;
-
-                    int cx = (int)(p.Center.X / 16f);
-                    int cy = (int)(p.Center.Y / 16f);
-                    int x0 = Math.Max(10, cx - 40), x1 = Math.Min(Main.maxTilesX - 11, cx + 40);
-                    int y0 = Math.Max(10, cy - 25), y1 = Math.Min(Main.maxTilesY - 11, cy + 25);
-
-                    for (int x = x0; x <= x1; x++)
-                    {
-                        for (int y = y0; y <= y1; y++)
-                        {
-                            Tile t = Main.tile[x, y];
-                            if (t == null || !t.HasTile || t.TileType != tipoBruma) continue;
-
-                            // ¿Ya vive en la lista? (cráter o colocada —
-                            // cualquiera de las dos cuenta: la tile ya
-                            // tiene SU zona).
-                            if (sys.Altares.Exists(a => a != null &&
-                                Math.Abs(a.X - x) <= 1 && Math.Abs(a.Y - y) <= 1)) continue;
-
-                            var nueva = RegistrarAltar(x, y, colocada: true);
-                            if (nueva != null) toco = true;
-                        }
-                    }
-                }
-
-                // (RegistrarAltar ya difunde en el server — aquí nada más.)
-                if (toco && Main.netMode == NetmodeID.Server)
-                    EcoRed.DifundirZonas();
-            }
-            catch { }
-        }
-
-        /// <summary>v6.50.129 — LA LIMPIEZA DEL ALTAR DORADO + EL
-        /// BACKFILL (la letra: «quita eso amarillo que esta dentro del
-        /// crater» + «el centro debe estar vacio solo obsidiana y ademas
-        /// bruma»): (1) los mundos de la .128 tienen la TILE DORADA, su
-        /// pedestal y los COLMILLOS DE LA GARGANTA en el fondo de cada
-        /// cráter registrado — el minibioma LOS BARRE al cargar (la tile
-        /// dorada muere; el pedestal se queda: es obsidiana, el piso;
-        /// los colmillos del centro caen: «el centro debe estar VACÍO»).
-        /// La ZONA sigue VIVA — la puerta ahora es la BRUMA, no un
-        /// bloque. (2) cada caída pendiente de un mundo VIEJO sin zona
-        /// (cráteres .127) la recibe — sin tile, solo el registro (la
-        /// mecánica no se le niega a nadie). Solo AUTORIDAD.</summary>
-        private static void ForjarAltaresFaltantes()
-        {
-            try
-            {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                var sys = ModContent.GetInstance<LaCaidaSistema>();
-                if (sys == null) return;
-
-                // === (1) LA LIMPIEZA: nada dorado, centro vacío ===
-                int tipoAltar = ModContent.TileType<global::AethonMod.Content.Tiles.AltarDeLaCaida>();
-                foreach (var altar in sys.Altares.ToArray())
-                {
-                    if (altar == null) continue;
+                    if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 ||
+                        y >= Main.maxTilesY - 10) continue;
                     bool toco = false;
                     for (int dx = -3; dx <= 3; dx++)
                     {
                         for (int dy = -9; dy <= 3; dy++)
                         {
-                            int x = altar.X + dx, y = altar.Y + dy;
-                            if (x < 10 || y < 10 || x >= Main.maxTilesX - 10 ||
-                                y >= Main.maxTilesY - 10) continue;
-                            Tile t = Main.tile[x, y];
+                            int tx = x + dx, ty = y + dy;
+                            if (tx < 10 || ty < 10 || tx >= Main.maxTilesX - 10 ||
+                                ty >= Main.maxTilesY - 10) continue;
+                            Tile t = Main.tile[tx, ty];
                             if (t == null || !t.HasTile) continue;
 
-                            // LA TILE DORADA: muere (nada amarillo en el cráter).
-                            if (t.TileType == tipoAltar)
+                            // LA TILE DORADA Y LA TILE DE BRUMA: mueren SIN
+                            // soltar nada (la bruma colocada era un
+                            // vestigio de la vieja caída).
+                            if (t.TileType == tipoDorada || t.TileType == tipoBruma)
                             {
-                                WorldGen.KillTile(x, y, noItem: true);
+                                WorldGen.KillTile(tx, ty, noItem: true);
                                 toco = true;
                                 continue;
                             }
 
                             // LOS COLMILLOS DE LA GARGANTA (.128: columnas
-                            // de obsidiana ±2/±3 SOBRE el fondo): caen — el
-                            // centro queda vacío para la bruma. El PEDERAL
-                            // (dy ≥ 0: el piso de obsidiana) se queda.
+                            // de obsidiana SOBRE el fondo): caen — el
+                            // centro queda vacío. El PEDERAL (dy ≥ 0: el
+                            // piso de obsidiana) se queda.
                             if (dy <= -2 && t.TileType == TileID.Obsidian)
                             {
-                                WorldGen.KillTile(x, y, noItem: true);
+                                WorldGen.KillTile(tx, ty, noItem: true);
                                 toco = true;
                             }
                         }
                     }
                     if (toco && Main.netMode == NetmodeID.Server)
-                        NetMessage.SendTileSquare(-1, altar.X - 4, altar.Y - 10, 9, 15);
+                        NetMessage.SendTileSquare(-1, x - 4, y - 10, 9, 15);
                 }
+            }
+            catch { }
+        }
 
-                // === (2) EL BACKFILL: cráteres .127 sin zona la reciben ===
-                foreach (var pendiente in sys.CaidasPendientes)
+        /// <summary>v6.51.0 — LA BRUMA DE LA LLEGADA SE DISIPA: la toma del
+        /// libro limpia su sitio («sin bruma sin rastro»).</summary>
+        private static void DisiparBrumaDeLaLlegada(Vector2 punto)
+        {
+            try
+            {
+                int tipo = ModContent.ProjectileType<Projectiles.LlegadaBrumaProjectile>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
                 {
-                    if (pendiente == null || string.IsNullOrEmpty(pendiente.Jugador)) continue;
-                    int cx = (int)(pendiente.X / 16f);
-                    int cy = (int)(pendiente.Y / 16f);
-                    if (cx < 12 || cy < 12 || cx >= Main.maxTilesX - 12 || cy >= Main.maxTilesY - 12) continue;
-
-                    // ¿El cráter ya tiene SU zona? (la lista manda).
-                    if (sys.Altares.Exists(a => a != null && Math.Abs(a.X - cx) <= 6 && Math.Abs(a.Y - cy) <= 12))
-                        continue;
-
-                    // EL FONDO DEL CRÁTER: la primera roca viva bajo la caída.
-                    int piso = -1;
-                    for (int y = cy + 3; y < Math.Min(cy + 14, Main.maxTilesY - 10); y++)
-                    {
-                        Tile t = Main.tile[cx, y];
-                        if (t != null && t.HasTile && Main.tileSolid[t.TileType]) { piso = y - 1; break; }
-                    }
-                    if (piso < 10) continue;
-
-                    // SOLO EL REGISTRO (v6.50.129: sin pedestal, sin tile —
-                    // la bruma es la puerta del minibioma).
-                    sys.Altares.Add(new AltarDelMundo { X = cx, Y = piso });
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || pr.type != tipo) continue;
+                    if (pr.Center.DistanceSQ(punto) > 400f * 400f) continue;
+                    pr.Kill();
                 }
             }
             catch { }

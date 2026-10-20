@@ -83,7 +83,7 @@ namespace AethonMod.Content.Effects
     ///
     /// Arquitectura nueva (v5.89), pipeline completo de pantalla:
     ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del agujero
-    ///      (BlackHoleProjectile.PreDraw se salta su dibujado cuando la lente
+    ///      (los agujeros rúnicos saltan su dibujado cuando la lente
     ///      está activa — ver LensActive).
     ///   2. Se recopilan hasta 5 fuentes de distorsión: agujeros negros Y ondas
     ///      cromáticas (CosmicShockwaveProjectile, estilos 0/1).
@@ -335,7 +335,6 @@ namespace AethonMod.Content.Effects
             // === 1. Recopilar fuentes: agujeros + ondas cromáticas/de lente/
             //     anillo de Einstein + soles + MEDUSAS NEBULARES (v5.97) +
             //     COMETAS/PÚLSARES (v5.99) ===
-            int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int olvidoHoleType = ModContent.ProjectileType<OlvidoBlackHoleProjectile>();
             int cosmicHoleType = ModContent.ProjectileType<CosmicBlackHoleProjectile>();
             int umbralHoleType = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
@@ -378,7 +377,7 @@ namespace AethonMod.Content.Effects
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active) continue;
 
-                if (p.type == blackHoleType || p.type == olvidoHoleType ||
+                if (p.type == olvidoHoleType ||   // v6.51.0 — el agujero NORMAL murió
                     p.type == cosmicHoleType || p.type == umbralHoleType ||
                     p.type == brumaHoleType ||
                     p.type == supremoHoleType || p.type == supremoAuroraType ||
@@ -821,8 +820,9 @@ namespace AethonMod.Content.Effects
                         CosmicAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == olvidoAscType)
                         OlvidoAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
-                    else
-                        BlackHoleProjectile.DrawCoreVisuals(bh, false);
+                    // v6.51.0 — el agujero negro NORMAL murió: solo los
+                    // rúnicos viven en la lente (la vieja rama else era
+                    // SU DrawCoreVisuals).
                 }
             }
 

@@ -164,6 +164,13 @@ namespace AethonMod.Content.Projectiles
             int nivel = (int)MathF.Floor(p.ai[2]);
             int m = MejorasDe(p);
             if (m >= MejorasMax) return;
+            // v6.51.0 — LAS MEJORAS SON DEL DESPERTAR (la letra: «con la
+            // nueva mecánica las mejoras están sujetas a esa mecánica»):
+            // nivel 5 → la 1 · 15 → la 2 · 30 → la 3 · 40 → la 4.
+            Player dueño = Main.player[p.owner];
+            if (m >= Content.Systems.DespertarGrimorio.MejorasDesbloqueadas(
+                    Content.Systems.DespertarGrimorio.NivelDe(dueño)))
+                return;
             m++;
             p.ai[2] = nivel + m * 0.01f;   // sin deriva: se REESCRIBE entero
             p.netUpdate = true;
@@ -427,8 +434,14 @@ namespace AethonMod.Content.Projectiles
             //     lleno, hasta ×3 con las cuatro). ===
             if (Projectile.owner == Main.myPlayer)
             {
+                // v6.51.0 — EL NIVEL 50 DEL DESPERTAR (la letra: «mejora
+                // TODO el ataque de los minions y sus proyectiles así
+                // como la cadencia de disparo»): el rayo pega ×1,25.
+                float bonusFinal = Content.Systems.DespertarGrimorio.NivelDe(
+                    Main.player[Projectile.owner]) >= Content.Systems.DespertarGrimorio.NivelMax
+                    ? 1.25f : 1f;
                 int dano = Math.Max(1, (int)(Projectile.damage *
-                    WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile)));
+                    WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile) * bonusFinal));
                 try
                 {
                     Projectile.NewProjectile(
