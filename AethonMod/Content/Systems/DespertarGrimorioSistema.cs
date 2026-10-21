@@ -66,11 +66,61 @@ namespace AethonMod.Content.Systems
                     Item mano = p.HeldItem;
                     if (mano == null || mano.IsAir || mano.type != eterno) continue;
 
-                    // Los platos caídos alrededor del portador.
+                    // v6.51.1 — LAS ESENCIAS SOLTADAS (la letra: «se debe
+                    //     poder seguir devorando esencia corrupta»): con el
+                    //     Eterno EN LA MANO, cualquier pila de Esencia
+                    //     Corrupta caída a ≤200 px es un bocado INMEDIATO —
+                    //     +0,1% de daño PERMANENTE por esencia (sigue
+                    //     funcionando con el despertar AL MÁXIMO: el hambre
+                    //     del libro no termina con los niveles).
+                    int tipoEsencia = ModContent.ItemType
+                        <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                    for (int d = 0; d < Main.maxItems; d++)
+                    {
+                        Item drop = Main.item[d];
+                        if (drop == null || drop.IsAir) continue;
+                        if (drop.type != tipoEsencia) continue;
+                        if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
+                            continue;
+
+                        int comidas = drop.stack;
+                        var spBocado = p.GetModPlayer<Players.ShardPlayer>();
+                        if (spBocado != null && comidas > 0)
+                        {
+                            spBocado.DevoracionPoder += comidas;
+                            string nombre = drop.Name;
+                            drop.TurnToAir();
+                            int idd = Array.IndexOf(Main.item, drop);
+                            if (Main.netMode == NetmodeID.Server && idd >= 0)
+                                NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idd);
+
+                            if (!Main.dedServ)
+                            {
+                                for (int k = 0; k < Math.Min(20, 4 + comidas); k++)
+                                {
+                                    Dust dd = Dust.NewDustPerfect(p.Center, DustID.Shadowflame,
+                                        new Vector2(Main.rand.NextFloat(-2.4f, 2.4f),
+                                            Main.rand.NextFloat(-3.2f, 0.4f)), 150,
+                                        new Color(120, 40, 180), 0.95f);
+                                    dd.noGravity = true;
+                                }
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item113.WithPitchOffset(-0.45f), p.Center);
+                            }
+
+                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.EsenciaDevorada",
+                                new Color(196, 138, 255), nombre, comidas,
+                                (Players.ShardPlayer.BonusDanoDevorado(p) * 100f).ToString("0.##"));
+                            EcoRed.SincronizarDevoracion(p);
+                        }
+                    }
+
+                    // Los platos de ARMAS caídos alrededor del portador.
                     for (int d = 0; d < Main.maxItems; d++)
                     {
                         Item drop = Main.item[d];
                         if (drop == null || drop.IsAir) continue;   // SOLO items caídos vivos
+                        if (drop.type == tipoEsencia) continue;      // las esencias: su propia mesa
                         if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                             continue;
                         var sello = drop.GetGlobalItem

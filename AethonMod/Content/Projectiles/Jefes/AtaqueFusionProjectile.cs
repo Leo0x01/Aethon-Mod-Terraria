@@ -407,22 +407,34 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //     con SUS líneas de escritura) ===
                 if (Estilo == EstiloPaginaTinta)
                 {
+                    // v6.51.1 — LA CURA DE LOS CUADRADOS (la letra: «hay
+                    // un ataque que parece que lanza algo pero el sprite
+                    // está mal y solo se ven cuadrados»): el cuerpo de la
+                    // página era Pixel-rects duros (rectángulos LISOS de
+                    // 1×1 estirados — LITERALES cuadrados). Ahora es una
+                    // página de sombra: cuerpo y rim con SoftGlow (bordes
+                    // difusos) y las líneas de escritura como trazos
+                    // suaves — cero esquinas.
                     VFXCore.Begin();
                     try
                     {
                         Color cTinta = new(70, 30, 112);
                         Color cBorde = new(140, 80, 205);
-                        VFXCore.Quad(Projectile.Center, cBorde * 0.55f,
-                            new Vector2(34f, 46f), Projectile.rotation, VFXCore.Pixel);
+                        // EL RIM (el borde de la hoja — tinta clara difusa).
+                        VFXCore.Quad(Projectile.Center, cBorde * 0.30f,
+                            new Vector2(46f, 58f), Projectile.rotation, VFXCore.SoftGlow);
+                        // EL CUERPO (la hoja de tinta).
+                        VFXCore.Quad(Projectile.Center, cBorde * 0.40f,
+                            new Vector2(40f, 52f), Projectile.rotation, VFXCore.SoftGlow);
                         VFXCore.Quad(Projectile.Center, cTinta * 0.85f,
-                            new Vector2(26f, 38f), Projectile.rotation, VFXCore.Pixel);
-                        // LAS TRES LÍNEAS DE ESCRITURA (la letra de la página).
+                            new Vector2(30f, 42f), Projectile.rotation, VFXCore.SoftGlow);
+                        // LAS TRES LÍNEAS DE ESCRITURA (trazos suaves).
                         for (int l = 0; l < 3; l++)
                         {
                             Vector2 off = new Vector2(0f, (l - 1) * 9f)
                                 .RotatedBy(Projectile.rotation);
-                            VFXCore.Quad(Projectile.Center + off, cBorde * 0.35f,
-                                new Vector2(16f, 2f), Projectile.rotation, VFXCore.Pixel);
+                            VFXCore.Quad(Projectile.Center + off, cBorde * 0.42f,
+                                new Vector2(18f, 4f), Projectile.rotation, VFXCore.SoftGlow);
                         }
                     }
                     finally { VFXCore.FlushAdditive(); }

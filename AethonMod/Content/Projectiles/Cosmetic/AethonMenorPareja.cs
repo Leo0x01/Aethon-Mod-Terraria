@@ -142,10 +142,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// libro es más grande que la gula de Daphne).</summary>
         private const int PLAGA_MAX_RONDAS = 40;
 
-        /// <summary>La moneda del easteregg: 35% plaga por tirada (por
-        /// episodio de curiosidad — el espanto es RARO, pero la letra
-        /// manda: el usuario TIENE QUE VERLO).</summary>
-        private const float PLAGA_PROBABILIDAD = 0.35f;
+        /// <summary>v6.51.1 — La moneda del easteregg: 22% plaga por
+        /// tirada (la letra nueva: «que demore más en aparecer» — las
+        /// hadas visitan, no se mudan a vivir).</summary>
+        private const float PLAGA_PROBABILIDAD = 0.22f;
 
         /// <summary>Episodios de aburrimiento que deben pasar entre plaga
         /// y plaga (la horda no espanta dos veces seguidas).</summary>
@@ -403,18 +403,19 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     //  teatro, como una cinemática curiosa del grimorio).
                     // ====================================================
                     {
-                        // LA MONEDA DE LA HORDA: 4 s tras arrancar la
-                        // curiosidad y cada 20 s de ella — 35% de plaga,
-                        // GARANTIZADA a la tercera tirada fallida (la
-                        // cura de «no veo que se active»: la .128 pedía un
-                        // minuto EXACTO para UNA moneda del 30% que, si
-                        // fallaba, la misión de vecinos se comía el reloj).
-                        if (e.TicksEnModo == 240 ||
-                            (e.TicksEnModo > 240 && (e.TicksEnModo - 240) % 1200 == 0))
+                        // v6.51.1 — LA MONEDA PACIENTE (la letra: «el
+                        // evento de las hadas es muy seguido, que demore
+                        // más en aparecer»): la PRIMERA tirada espera 25 s
+                        // de curiosidad, luego tira cada 45 s — 22% y
+                        // GARANTIZADA a la quinta tirada fallida (peor
+                        // caso ~3,4 min: las hadas son una visita RARA,
+                        // no una inquilina).
+                        if (e.TicksEnModo == 1500 ||
+                            (e.TicksEnModo > 1500 && (e.TicksEnModo - 1500) % 2700 == 0))
                         {
                             if (e.PlagaEnfriamiento > 0)
                                 e.PlagaEnfriamiento--;
-                            else if (e.PlagaTiradasFallidas >= 2 ||
+                            else if (e.PlagaTiradasFallidas >= 4 ||
                                      VFXCore.Hash01(p.whoAmI,
                                          e.TotalGolpes * 13 + 29,
                                          e.Viajes * 19 + 7 + e.TicksQuieto * 131)

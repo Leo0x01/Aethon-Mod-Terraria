@@ -79,19 +79,17 @@ namespace AethonMod.Content.NPCs
             // esqueleto y las mascotas de pueblo).
             NPCID.Sets.NoTownNPCHappiness[Type] = true;
 
-            // v6.51.0 — EL RETRATO EN SU CASILLA (la letra: «está mal
-            // colocado y fuera de su casilla»): el cuerpo del Eterno
-            // (30×42) se salía de la caja del bestiario — el retrato se
-            // ENCOGE a 0,72 y se CENTRA en su marco (la vía oficial de
-            // vanilla para acomodar retratos: Velocity 0 = posado
-            // quieto, sin la deriva de las mascotas voladoras).
+            // v6.51.1 — EL CENTRADO DE VERDAD (la letra: «no está
+            // centrado en su casilla en ninguna de las dos»): la .51.0
+            // FORZABA la posición del retrato a (0,0) — el ORIGEN de la
+            // caja, no el centro — y eso lo descuadraba TODO. La cura:
+            // SIN overrides de posición ni escala — el centrado de
+            // vanilla es el correcto; solo se apaga la DERIVA flotante
+            // (Velocity 0: posado quieto en ambas casillas).
             NPCID.Sets.NPCBestiaryDrawOffset.Add(Type,
                 new NPCID.Sets.NPCBestiaryDrawModifiers()
                 {
                     Velocity = 0f,
-                    PortraitScale = 0.72f,
-                    PortraitPositionXOverride = 0f,
-                    PortraitPositionYOverride = 0f,
                 });
         }
 
@@ -158,6 +156,11 @@ namespace AethonMod.Content.NPCs
             // rareza IMPOSIBLE (la línea del infinito antes que nada).
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
             {
+                // v6.51.1 — LAS DIEZ ESTRELLAS NEGRAS, PRIMERAS (la letra:
+                // «10 estrellas negras brillantes y titilantes» — la fila
+                // titilante ANTES que todo: lo primero que lee el catálogo
+                // es lo que el grimorio ES).
+                new global::AethonMod.Content.Bestiary.EstrellasNegrasInfoElement(),
                 new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Numero"),
                 new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Bestiario"),
             });

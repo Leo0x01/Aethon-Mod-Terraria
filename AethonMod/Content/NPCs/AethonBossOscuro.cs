@@ -38,8 +38,10 @@ namespace AethonMod.Content.NPCs
     //  herencia — el pago entero es del recuerdo que se COMPLETA: el
     //  fusionado; o del hermano de luz si él es el que sobrevive).
     // ======================================================================
+    [AutoloadBossHead]   // v6.51.1 — los atributos NO se heredan: SU propia cabeza
     public class AethonBossOscuro : AethonBoss
     {
+
         // El cuerpo es 100% código (el PreDraw de la base): se reusa la
         // textura del jefe de luz como ancla del motor (jamás se ve).
         public override string Texture => "AethonMod/Content/NPCs/AethonBoss";

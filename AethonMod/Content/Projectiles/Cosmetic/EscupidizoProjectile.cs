@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Cosmetic
 {
@@ -163,26 +164,39 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height);
                 Vector2 origen = frame.Size() * 0.5f;
 
-                // === 1. EL MAR DE BRUMAS (la plataforma del evento:
-                //     jirones oscuros + rim violeta debajo del libro). ===
+                // === v6.51.1 — EL MAR DE BRUMAS DE VERDAD (la cura de los
+                //     óvalos planos: SombrasLib.Bruma, la librería fBm de
+                //     la casa — puffs que se desgarran, no discos lisos).
+                //     Se dibuja con SU propio lote (el patrón del Dormido):
+                //     cerrar → bruma → reabrir. ===
                 float escalaBruma = 0.7f + 0.5f * MathHelper.Clamp(t / (float)T_SUBE, 0f, 1f)
                     - 0.5f * despedida;
-                for (int i = 0; i < 10; i++)
+                float apertura = MathHelper.Clamp((t - T_SUBE) / (float)(T_ESCUPE - T_SUBE), 0f, 1f);
+                VFXCore.CerrarLoteSiAbierto();
+                try
                 {
-                    float ang = i / 10f * MathHelper.TwoPi + tiempo * (0.5f + 0.1f * (i % 3));
-                    float radio = (46f + 34f * ((i * 29) % 5) / 5f) * escalaBruma;
-                    Vector2 p = pos + new Vector2(MathF.Cos(ang) * radio,
-                        MathF.Sin(ang) * radio * 0.55f + 16f);
-                    Color jiron = new Color(24, 10, 42) * (0.8f * alfa *
-                        (0.7f + 0.3f * MathF.Sin(tiempo * 1.9f + i * 2.2f)));
-                    float tam = (52f + 26f * ((i * 41) % 7) / 7f) * escalaBruma;
-                    Main.spriteBatch.Draw(glow, p, null, jiron, ang,
-                        glow.Size() * 0.5f,
-                        new Vector2(tam, tam * 0.75f) / glow.Size(),
-                        SpriteEffects.None, 0f);
+                    if (escalaBruma > 0.1f && alfa > 0.05f)
+                    {
+                        Vector2 centroMundo = Projectile.Center + new Vector2(0f, 14f);
+                        // LA NUBE MADRE (debajo del libro, respirando).
+                        SombrasLib.Bruma(centroMundo, 84f * escalaBruma,
+                            alfa * (0.6f + 0.4f * apertura), tiempo, Projectile.identity % 89 + 5);
+                        // LOS DOS BRAZOS (a los costados — el mar no es un
+                        // punto: es una multitud que lo sostiene todo).
+                        SombrasLib.Bruma(centroMundo + new Vector2(-70f * escalaBruma, 6f),
+                            58f * escalaBruma, alfa * 0.8f, tiempo * 0.93f,
+                            Projectile.identity % 89 + 17);
+                        SombrasLib.Bruma(centroMundo + new Vector2(70f * escalaBruma, 6f),
+                            58f * escalaBruma, alfa * 0.8f, tiempo * 1.07f,
+                            Projectile.identity % 89 + 29);
+                    }
                 }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
+
+                // EL RIM VIOLETA (la membrana del evento — aditivo sutil).
                 Main.spriteBatch.Draw(glow, pos + new Vector2(0f, 14f), null,
-                    new Color(96, 52, 150) * (0.25f * alfa), 0f,
+                    new Color(96, 52, 150) * (0.22f * alfa), 0f,
                     glow.Size() * 0.5f,
                     new Vector2(190f, 130f) * escalaBruma / glow.Size(),
                     SpriteEffects.None, 0f);

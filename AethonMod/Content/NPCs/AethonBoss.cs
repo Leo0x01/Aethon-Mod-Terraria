@@ -178,6 +178,19 @@ namespace AethonMod.Content.NPCs
     [AutoloadBossHead]
     public class AethonBoss : ModNPC
     {
+        // v6.51.1 — LA CABEZA GARANTIZADA (la letra: «al fusionarse su
+        // barra de vida se pierde»): LOS ATRIBUTOS NO SE HEREDAN — el
+        // fusionado y el gemelo oscuro NO llevan el suyo, así que su
+        // cabeza JAMÁS se registró (la barra de vanilla SOLO valida jefes
+        // con cabeza: CommonBossBigProgressBar exige un índice ≠ −1). Las
+        // tres clases llevan ahora SU [AutoloadBossHead] y esta override
+        // de slot es la garantía de la base (BossHeadTexture por
+        // convención: AethonBoss_Head_Boss — el archivo existe).
+        public override void BossHeadSlot(ref int index)
+        {
+            index = NPCHeadLoader.GetBossHeadSlot("AethonMod/Content/NPCs/AethonBoss_Head_Boss");
+            if (index < 0) index = 0;   // jamás −1: la barra siempre vive
+        }
         // === LOS ESTADOS DE LA LUZ ===
         private const int EST_NACIENDO = 0;     // el cielo se enciende
         private const int EST_FLOTAR = 1;       // la órbita serena

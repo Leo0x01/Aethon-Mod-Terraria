@@ -90,7 +90,7 @@ namespace AethonMod.Content.Globals
         public override void ModifyWeaponCrit(Item item, Player player, ref float crit)
         {
             if (!Corrompido) return;
-            crit += 2f;                      // +2 % de crítico
+            crit *= 1.05f;                   // +5 % de crítico (TODAS las estadísticas en 5 %)
         }
 
         public override float UseTimeMultiplier(Item item, Player player)

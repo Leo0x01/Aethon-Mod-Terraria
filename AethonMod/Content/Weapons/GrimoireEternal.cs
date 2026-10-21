@@ -167,7 +167,11 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.knockBack = 3f;
             Item.value = Item.buyPrice(0, 10, 0, 0);
-            Item.rare = ItemRarityID.Quest;
+            // v6.51.1 — LA RAREZA CÓSMICA (la letra: «una rareza más que
+            // legendaria, más que mítica, más que única, una rareza cósmica
+            // además con la etiqueta de legendario supremo»).
+            Item.rare = ModContent.RarityType
+                <global::AethonMod.Content.Rarities.LegendarioSupremo>();
             Item.UseSound = SoundID.Item8;
             Item.autoReuse = true;         // v5.1: mantener click = disparo continuo
             Item.shoot = 931;              // Nightglow vanilla (el número — como el Equinoccio)
@@ -639,7 +643,10 @@ namespace AethonMod.Content.Weapons
             //     Solo si el portador ya comió ALGO (el libro nuevo calla). ===
             Player portadorTip = Main.LocalPlayer;
             var spDevorado = portadorTip?.GetModPlayer<Players.ShardPlayer>();
-            if (spDevorado != null && spDevorado.DevoracionPoder > 0)
+            // v6.51.1 — LO DEVORADO solo en SU ventana (la letra: la
+            // tercera ventana es SOLO estadísticas del escuadrón y su
+            // festín — nada de progresión ni descripciones).
+            if (ventanaFestin && spDevorado != null && spDevorado.DevoracionPoder > 0)
             {
                 // El porcentaje como TEXTO a 2 decimales: 1 esencia = +0,25
                 // (un entero lo escondería — la misma cura del aviso).
@@ -660,7 +667,7 @@ namespace AethonMod.Content.Weapons
             //     subir algun stats del grimorio»): el contador del EXP +
             //     los stats por clase + las almas únicas despiertas —
             //     solo si el libro ya probó un arma (el nuevo calla). ===
-            if (spDevorado != null && (spDevorado.DevoracionExp > 0 ||
+            if (ventanaFestin && spDevorado != null && (spDevorado.DevoracionExp > 0 ||
                 spDevorado.DevoracionFuerza > 0 || spDevorado.DevoracionPrisa > 0 ||
                 spDevorado.DevoracionMirada > 0 || spDevorado.DevoracionCorona > 0 ||
                 spDevorado.DevoracionMordida > 0 || spDevorado.AlmaIgnea > 0 ||
@@ -798,18 +805,33 @@ namespace AethonMod.Content.Weapons
                 float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
                 float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
                 float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
-                // la .107: la velocidad de ATAQUE de los ojos sube con el
-                // nivel del libro — 1,0× en nivel 1, +50% en nivel 100
                 float ritmoOjos = (1f + 0.5f * System.Math.Min(sl.Level - 1, 99) / 99f - 1f) * 100f;
-                // v6.50.109 — LA IRA EN CADENA: los rayos de los ojos saltan
-                // a +1 enemigo cada 20 niveles (base 2, tope 7 en nivel 100)
                 int cadenaOjos = WeaponScaling.MinionChainCount(sl.Level);
 
-                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ OJOS DEL ETERNO ═══]"));
-                tooltips.Add(new TooltipLine(Mod, "OjosFormacion",
-                    "[c/BE78FD:Corona sobre tu cabeza · con el libro fuera, órbitas al LIBRO]"));
+                // v6.51.1 — LOS NÚMEROS REALES DEL PORTADOR (la letra:
+                // «solo estadísticas de los minions… además de las
+                // estadísticas que ya están»).
+                int despertar = Systems.DespertarGrimorio.NivelDe(portadorTip);
+                int techoOjos = Players.ShardPlayer.TechoOjosDe(portadorTip, sl.Level);
+                int ojosVivos = 0;
+                int tipoOjoTip = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile pr = Main.projectile[i];
+                    if (pr != null && pr.active && pr.type == tipoOjoTip &&
+                        pr.owner == portadorTip.whoAmI) ojosVivos++;
+                }
+                int mejorasDesbloqueadas = Systems.DespertarGrimorio.MejorasDesbloqueadas(despertar);
+                float multMejoras = 1f + 0.5f * mejorasDesbloqueadas;
+
+                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ EL ESCUADRÓN ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    "[c/78FF96:Escuadrón de 11 ojos · lleno el escuadrón, cada invocación FORTALECE a un ojo (+50% daño · 4 mejoras)]"));
+                    $"[c/E8D8FF:Ojos: {ojosVivos}/{techoOjos}]  " +
+                    $"[c/78788C:(+1 ojo cada 10 niveles del grimorio)]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionMejoras",
+                    $"[c/E8D8FF:Mejoras desbloqueadas: {mejorasDesbloqueadas}/4]  " +
+                    $"[c/BE78FD:(+50% daño por mejora · ×{multMejoras:0.##} de daño con las mejoras — +200% con las 4)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
@@ -820,39 +842,68 @@ namespace AethonMod.Content.Weapons
                     $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRange",
                     $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionCd",
-                    "[c/BE78FD:El rayo Perlin negro, con bruma en la punta]"));
                 if (!ManaMinionGratis())
                 {
                     tooltips.Add(new TooltipLine(Mod, "ManaMinion",
                         $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
                 }
-                // LA NOTA AL PIE DEL ANÁLISIS (la .110): el nivel que leen
-                // los ojos es el de SU INVOCACIÓN (viaja con ellos)
-                tooltips.Add(new TooltipLine(Mod, "NotaOjos",
-                    "[c/78788C:Los ojos leen el nivel con el que fueron invocados]"));
 
-                // v6.50.110 — LA PRIMERA CENA: el festín del primer jefe
-                // (v6.50.115: la letra nueva — los ANILLOS RÚNICOS de los
-                // agujeros negros + los de los soles lo aprisionan ENCIMA
-                // del portador, el libro a un costado lo mira fijo y LA
-                // SOMBRA DE LA PÁGINA lo devora)
-                tooltips.Add(new TooltipLine(Mod, "SectionCena", "[c/9B59FF:═══ LA PRIMERA CENA ═══]"));
-                tooltips.Add(new TooltipLine(Mod, "PrimeraCena",
-                    "[c/9B59FF:Al primer jefe de cada tipo: los anillos rúnicos del agujero]"));
-                tooltips.Add(new TooltipLine(Mod, "PrimeraCena2",
-                    "[c/9B59FF:negro y los soles lo alzan sobre tu cabeza; el libro, a un]"));
-                tooltips.Add(new TooltipLine(Mod, "PrimeraCena3",
-                    "[c/9B59FF:costado, lo mira fijo y LA SOMBRA DE LA PÁGINA lo devora. UNA vez.]"));
+                // === LOS ATAQUES COMBINADOS (la letra: «si son capaces de
+                //     lanzar soles runicos y agujeros negros runicos,
+                //     cuanto pueden lanzar y eso») ===
+                tooltips.Add(new TooltipLine(Mod, "SectionCombinados",
+                    "[c/C49CFF:═══ ATAQUES COMBINADOS ═══]"));
+                if (Systems.DespertarGrimorio.SolDisponible(despertar))
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WSol",
+                        $"[c/E8D8FF:Sol Rúnico: {Systems.DespertarGrimorio.AnillosDelSol(despertar)} anillo(s) · " +
+                        $"{Systems.DespertarGrimorio.SolesPorMinuto(despertar)}/min]  " +
+                        "[c/78788C:(2+ ojos mejorados, al azar)]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WSol",
+                        "[c/78788C:Sol Rúnico: bloqueado — Despertar 7]"));
+                }
+                if (Systems.DespertarGrimorio.AgujerosDisponibles(despertar))
+                {
+                    string asc = Systems.DespertarGrimorio.AgujerosAscendidos(despertar)
+                        ? " · ASCENDIDOS" : "";
+                    tooltips.Add(new TooltipLine(Mod, "WAgujeros",
+                        $"[c/E8D8FF:Agujeros Negros Rúnicos: 4 al azar{asc} · " +
+                        $"{Systems.DespertarGrimorio.AgujerosPorMinuto(despertar)}/min]  " +
+                        "[c/78788C:(5+ ojos mejorados)]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WAgujeros",
+                        "[c/78788C:Agujeros Negros Rúnicos: bloqueado — Despertar 10]"));
+                }
+                if (Systems.DespertarGrimorio.SupremoDisponible(despertar))
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WSupremo",
+                        "[c/E8D8FF:Supremo / Supremo Aurora: 1/min]  " +
+                        "[c/78788C:(8+ ojos con la mejora 4)]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WSupremo",
+                        "[c/78788C:Supremo / Supremo Aurora: bloqueado — Despertar 45]"));
+                }
+                if (despertar >= Systems.DespertarGrimorio.NivelMax)
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WMaximo",
+                        "[c/C49CFF:Despertar 50: TODO el ataque del escuadrón ×1,25 y más rápido]"));
+                }
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.
+            //     v6.51.1 — SOLO EN LA VENTANA BÁSICA (la letra: la
+            //     tercera ventana es solo estadísticas — la progresión no
+            //     debe estar ahí).
             //     v6.50.108 — EL ORDEN DE LA LETRA: la BARRA de hambre
-            //     primero y el estado JUSTO DEBAJO. En la ventana EL ARMA
-            //     (.110) no está — la progresión es del FESTÍN.
-            //     Y de vuelta LAS ESTADÍSTICAS DEL PRÓXIMO NIVEL: el
-            //     próximo hito y su escalera de mejoras ===
-            if (!ventanaArma)
+            //     primero y el estado JUSTO DEBAJO. ===
+            if (vista == 0)
             {
                 int xpNeeded = sl.XPForNextLevel();
                 float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;

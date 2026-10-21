@@ -100,7 +100,14 @@ namespace AethonMod.Content.Systems
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
                     NPC n = Main.npc[i];
-                    if (n == null || !n.active || !n.friendly) continue;
+                    // v6.51.1 — LA CURA (la letra: «no son lanzados por los
+                    // minions cuando deben ser lanzados»): el filtro viejo
+                    // tenía el AMISTOSO invertido — SALTABA A LOS ENEMIGOS y
+                    // solo dejaba pasar a los vecinos del pueblo (que
+                    // EsObjetivo rechaza): el blanco era SIEMPRE null y los
+                    // ataques combinados JAMÁS disparaban. Ahora: solo vivos
+                    // — EsObjetivo hace el resto (ni amistosos ni intocables).
+                    if (n == null || !n.active) continue;
                     if (!VFXCore.EsObjetivo(n)) continue;
                     float d = n.Center.DistanceSQ(p.Center);
                     if (d < mejorD) { mejorD = d; blanco = n; }

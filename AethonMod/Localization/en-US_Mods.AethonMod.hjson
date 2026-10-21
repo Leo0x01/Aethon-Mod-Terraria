@@ -1841,9 +1841,9 @@ Items: {
 			'''
 	}
 
-	ArmaCorruptaTag: Corrupted
-	ArmaCorrupta1: THE ARRIVAL has defiled it: the awakening's mist lives within.
-	ArmaCorrupta2: It no longer takes prefixes or reforges — the anvil is closed to it.
+	ArmaCorruptaTag: Corrupt
+	ArmaCorrupta1: +5% to ALL its stats — more damage, more knockback, faster swings.
+	ArmaCorrupta2: It no longer accepts prefixes or reforging — the anvil is closed to it.
 	ArmaCorrupta3: Drop it with the grimoire IN HAND: the Eternal will devour it.
 }
 
@@ -2395,37 +2395,39 @@ Caida: {
 // voice as it wakes.
 Despertar: {
 	Subida: ✦ The Grimoire AWAKENS a little more: awakening level {0}.
-	Voz1: Mmm… another page writing itself. Keep feeding me, bearer.
-	Voz2: I can feel the rings, bearer. ALL the rings. We're close.
-	Voz3: Every awakening reminds me what I was before the breaking. Most of it.
+	Voz1: Mmm… another page writing itself.
+	Voz2: I can feel the rings, bearer. ALL the rings.
+	Voz3: Every awakening reminds me what I was.
 	Voz4: (the book shivers with delight) Yes. MORE of that.
-	FaltaEsencia: ✦ The grimoire pushes the dish away: it needs {0} more corrupt essence(s)… and {1}.
+	FaltaEsencia: ✦ The grimoire pushes the dish away: it needs {0} more essence(s)… and {1}.
 	FaltaDinero: ✦ The grimoire pushes the dish away: it needs {0}.
-	OjosCerrados: ✦ The squad still sleeps: the grimoire needs LEVEL {0} to summon its first eye.
-	MejorasSelladas: ✦ The squad's upgrades are born with THE AWAKENING (level 5 the first, 15 the second, 30 the third, 40 the last). Current awakening: {0}.
-	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad eye number {0})
+	OjosCerrados: ✦ The squad still sleeps: LEVEL {0} is needed for the first eye.
+	MejorasSelladas: ✦ Upgrades are born with THE AWAKENING (5/15/30/40). Current: {0}.
+	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad number {0})
 	CerrojoEsbirros: ✦ The grimoire does not share its sky: while its eyes watch, no other minion answers.
+	EsenciaDevorada: ✦ The Eternal devours {0} × {1}: +{2}% permanent damage.
+	ReqArmaLimpia: Requires an UNCORRUPTED weapon
+	NaceCorrupta: Born CORRUPT: +5% to ALL its stats · no prefixes or reforging
 	CondicionRecetas: Requires the Eternal Grimoire in the inventory
-	HitoMejora1: ✧ AWAKENING 5: eye UPGRADE 1 unlocked! (extra summons now EMPOWER)
-	HitoSol: ✧ AWAKENING 7: TWO UPGRADED EYES can forge a 1-RING RUNIC SUN and hurl it at the enemy! (2 per minute, at random)
-	HitoAgujeros: ✧ AWAKENING 10: FIVE UPGRADED EYES can open a random RUNIC BLACK HOLE over the enemy! (1 per minute)
+	HitoMejora1: ✧ AWAKENING 5: eye UPGRADE 1 unlocked!
+	HitoSol: ✧ AWAKENING 7: TWO UPGRADED EYES forge a 1-RING RUNIC SUN! (2/min)
+	HitoAgujeros: ✧ AWAKENING 10: FIVE UPGRADED EYES open a random RUNIC BLACK HOLE! (1/min)
 	HitoMejora2: ✧ AWAKENING 15: eye UPGRADE 2 unlocked!
-	HitoSol2: ✧ AWAKENING 17: the runic sun gains its SECOND ring and is born 3 times per minute!
-	HitoMascota: ✧ AWAKENING 20: THE GRIMOIRE SPITS THE MINI-GRIMOIRE out as your pet!
-	HitoAscendidos: ✧ AWAKENING 25: the combined black holes ASCEND — dealing even MORE damage!
+	HitoSol2: ✧ AWAKENING 17: the sun gains its SECOND ring, 3 times per minute!
+	HitoMascota: ✧ AWAKENING 20: THE GRIMORIO SPITS THE MINI-GRIMOIRE out as your pet!
+	HitoAscendidos: ✧ AWAKENING 25: the black holes ASCEND — even more damage!
 	HitoMejora3: ✧ AWAKENING 30: eye UPGRADE 3 unlocked!
-	HitoSol3: ✧ AWAKENING 35: the runic sun gains its THIRD ring and is born 4 times per minute!
-	HitoMejora4: ✧ AWAKENING 40: the FINAL eye upgrade unlocked!
-	HitoSupremo: ✧ AWAKENING 45: black holes twice per minute… and EIGHT EYES with UPGRADE 4 can open the SUPREME BLACK HOLE or the SUPREME AURORA! (1 per minute)
-	HitoMaximo: ✧✧ AWAKENING 50: ALL the eyes' attacks and projectiles, STRONGER and FASTER! (max for now)
+	HitoSol3: ✧ AWAKENING 35: the THREE-ring sun, 4 times per minute!
+	HitoMejora4: ✧ AWAKENING 40: the FINAL eye upgrade!
+	HitoSupremo: ✧ AWAKENING 45: holes 2/min… and EIGHT M4 EYES open the SUPREME or SUPREME AURORA!
+	HitoMaximo: ✧✧ AWAKENING 50: ALL the squad's attacks STRONGER and FASTER!
 	Escupidizo:
 		'''
 		There are three of us now, bearer: you, me… and HIM.
-		A part of me always wanted to return to the small world — the one
-		with shoulders and mischief. Here: I spit him out as your pet.
-		Feed him silence and curiosity. It's the only thing we both eat.
+		Here: I spit him out as your pet. Feed him silence.
 		'''
 }
+
 
 TestingPlayer: {
 	Bolsas: The arsenal bags arrive with you (one per category): right click to open each one.
@@ -3044,3 +3046,8 @@ Pueblo: {
 Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall
 Tiles.BrumaAltarTile.MapEntry: Mist (relic of the old fall)
 Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.
+
+// v6.51.1 — LA RAREZA CÓSMICA DEL ETERNO
+Rarities: {
+	LegendarioSupremo: Supreme Legendary
+}

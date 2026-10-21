@@ -515,34 +515,41 @@ namespace AethonMod.Content.Projectiles
 
             if (libro is Vector2 centro)
             {
-                // === LA ÓRBITA: el anillo k (5, 6, 7, …) GIRANDO LISO ===
-                AnilloDe(idx, out int k, out int enAnillo, out int capAnillo);
-                // v6.50.109: anillos más cerca del libro (46+34k — el ojo
-                // es la MITAD y las órbitas se aprietan en proporción) y el
-                // radio RESPIRA despacio (la formación viva del Ruinous)
-                float radio = (46f + 34f * k)
-                    * (1f + 0.035f * MathF.Sin(time * 0.9f + k * 1.7f));
-                float fase = FaseOrbital(enAnillo, capAnillo, k);
-                // el anillo casi circular (0,94): la formación giratoria
-                // se lee como UNA RUEDA — sin precesión, sin tirones
-                // v6.50.114 — LA PRECESIÓN (la letra: «mejora la
-                // animación… alrededor del grimorio en su fase de
-                // caza»): el PLANO del anillo SE INCLINA despacio
-                // (±0,30 rad, ~14 s por vaivén, fase propia por anillo)
-                // — la rueda viva se lee en TRES dimensiones (el eje
-                // CABECEA como el de Saturno; contrarrota en anillos
-                // pares/impares)
-                float incl = 0.30f * MathF.Sin(time * 0.45f + k * 1.9f)
-                             * (k % 2 == 0 ? 1f : -1f);
-                Vector2 punto = new Vector2((float)Math.Cos(fase) * radio,
-                                             (float)Math.Sin(fase) * radio * 0.94f)
-                                .RotatedBy(incl);
-                // la micro-deriva propia: 1,6 px en 2D, DESPACIO (5–10 s
-                // por ciclo — el vaivén vivo del Forbidden Ruin)
+                // === v6.51.1 — LAS FILAS DE CINCO (la letra: «la
+                //     colocación de los minions alrededor del grimorio
+                //     cuando este sale por hambre no está bien… son 2
+                //     filas de 5 y el minion sobrante se queda muy pegado
+                //     en la segunda fila»): el escuadrón forma DOS FILAS
+                //     DE 5 — una ARRIBA y una ABAJO del libro flotante —
+                //     y los sobrantes (el 11º) van a filas PROPIAS más
+                //     abajo, CENTRADOS y separados: nadie pegado a nadie.
+                //     Las filas respiran despacio y cada ojo lleva su
+                //     micro-deriva viva de siempre. ===
+                int totalOjos = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
+                int miPuesto = Math.Min(idx, totalOjos - 1);
+                const int POR_FILA = 5;
+
+                int fila = miPuesto / POR_FILA;       // 0 (arriba) · 1 (abajo) · 2+ (sobrantes)
+                int enFila = miPuesto % POR_FILA;
+                int enEstaFila = Math.Min(totalOjos - fila * POR_FILA, POR_FILA);
+                if (enEstaFila <= 0) enEstaFila = 1;
+
+                // LA POSICIÓN: la fila se CENTRA en el libro (los pocos de
+                // una fila corta también quedan al medio).
+                float paso = 42f;
+                float x = (enFila - (enEstaFila - 1) * 0.5f) * paso;
+                // LA ALTURA: fila 0 ENCIMA del libro · fila 1 DEBAJO · las
+                // filas de sobrantes, más abajo y a su aire.
+                float y = fila == 0 ? -46f : fila == 1 ? 46f : 46f + (fila - 1) * 44f;
+
+                // LA RESPIRACIÓN DE LA FORMACIÓN: todo el escuadrón se
+                // mece despacio (±3 px, filas alternadas — la bandada viva).
+                float mecer = MathF.Sin(time * 0.9f + fila * 1.7f) * 3f;
+                // la micro-deriva propia: 1,6 px en 2D, DESPACIO.
                 Vector2 deriva = new Vector2(
-                    MathF.Sin(time * 0.80f + enAnillo * 2.1f),
-                    MathF.Sin(time * 0.65f + enAnillo * 1.3f)) * 1.6f;
-                return centro + punto + deriva;
+                    MathF.Sin(time * 0.80f + miPuesto * 2.1f),
+                    MathF.Sin(time * 0.65f + miPuesto * 1.3f)) * 1.6f;
+                return centro + new Vector2(x, y + mecer) + deriva;
             }
 
             // === v6.50.117 — LA CORONA DOBLE, LADRILLO REAL (la letra:

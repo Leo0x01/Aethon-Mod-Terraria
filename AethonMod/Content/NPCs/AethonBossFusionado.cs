@@ -95,8 +95,10 @@ namespace AethonMod.Content.NPCs
     //  (−640…−700) NO se toca: con hitbox 770 el borde inferior queda
     //  a −255 del jugador — cerca sin contacto injusto.
     // ======================================================================
+    [AutoloadBossHead]   // v6.51.1 — LA CURA DE LA BARRA: los atributos NO se heredan — el fusionado jamás registró SU cabeza
     public class AethonBossFusionado : AethonBoss
     {
+
         // === LOS ESTADOS PROPIOS DEL RECUERDO COMPLETO (los que la base
         //     no conoce — su switch se los pasa a EstadoFusionado) ===
         private const int F_ECLIPSE = 30;    // a — EL ECLIPSE GEMELO
@@ -938,16 +940,20 @@ namespace AethonMod.Content.NPCs
         /// </summary>
         protected override void DropBotin()
         {
-            base.DropBotin();
-            Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                ModContent.ItemType<Items.Esencias.EsenciaDeAethon>(), 1);
-            // LA CRÍA GEMELA — SIEMPRE, y EN SU BOLSA (la letra de la
-            // v6.50.119: «crea una bolsa donde esten las mascotas, las
-            // 2»): el recuerdo recompuesto suelta LA BOLSA DE LA CRÍA —
-            // al abrirla despierta la pareja completa: la de luz y su
-            // gemela oscura, LAS DOS MASCOTAS en un solo ítem adentro.
-            Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
+            // v6.51.1 — EL BOTÍN DE LA LETRA: «cuando muere Aethon su
+            // loot debe ser su mascota de luz, 20 esencia corruptas y 10
+            // platino, al menos por ahora» — SOLO eso (el botín viejo —
+            // la esencia de Aethon, la Forma Ascendida, los 250
+            // fragmentos, la bolsa de la cría — se retira con el override
+            // completo: la carta nueva manda).
+            if (_yaDropeo) return;
+            _yaDropeo = true;
+            var src = NPC.GetSource_Loot();
+            Item.NewItem(src, NPC.Center,
+                ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
+            Item.NewItem(src, NPC.Center,
+                ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 20);
+            Item.NewItem(src, NPC.Center, ItemID.PlatinumCoin, 10);
         }
 
         // ==================================================================

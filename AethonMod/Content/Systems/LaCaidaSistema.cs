@@ -264,7 +264,13 @@ namespace AethonMod.Content.Systems
             return -1;
         }
 
-        /// <summary>El Grimorio Dormido vivo a menos de 64 px de un punto (null si nadie).</summary>
+        /// <summary>El Grimorio Dormido vivo cerca de un punto (null si
+        /// nadie). v6.51.1 — EL RADAR ANCHO (la cura de los DOS GRIMORIOS:
+        /// con la tolerancia vieja de ±64 y el libro flotando a −40−21±6
+        /// del punto, el bobbing lo sacaba del radar en algunos ticks — el
+        /// reconciliador no lo hallaba y ENGENDRABA OTRO justo al lado:
+        /// «en la llegada aparecen 2 grimorios en vez de 1». Ahora el
+        /// radar lee ±96/±140: TODO el rango del bobbing, siempre).</summary>
         private static NPC BuscarLibroCerca(float x, float y)
         {
             int tipo = ModContent.NPCType<NPCs.GrimorioDormido>();
@@ -272,7 +278,7 @@ namespace AethonMod.Content.Systems
             {
                 NPC n = Main.npc[i];
                 if (n == null || !n.active || n.type != tipo) continue;
-                if (Math.Abs(n.Center.X - x) <= 64f && Math.Abs(n.Center.Y - y) <= 64f)
+                if (Math.Abs(n.Center.X - x) <= 96f && Math.Abs(n.Center.Y - y) <= 140f)
                     return n;
             }
             return null;
@@ -580,10 +586,14 @@ namespace AethonMod.Content.Systems
                     Jugador = p.name
                 });
 
-                // EL LIBRO FLOTANDO EN SU BRUMA (ai[1] = el destinatario;
-                // flota 40 px sobre el suelo: el puesto de la espera).
+                // EL LIBRO FLOTANDO EN SU BRUMA — EXACTO EN EL PUNTO de la
+                // pendiente (v6.51.1: la cura de los DOS GRIMORIOS — el
+                // libro nace donde el reconciliador lo BUSCA; flota solo:
+                // noGravity + noTileCollide + su bobbing propio)… y JAMÁS
+                // dos: si YA vive uno cerca, el cielo no insiste.
+                if (BuscarLibroCerca(destino.X, destino.Y) != null) return;
                 int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaLlegada"),
-                    (int)destino.X, (int)destino.Y - 40,
+                    (int)destino.X, (int)destino.Y,
                     ModContent.NPCType<NPCs.GrimorioDormido>(), 0, 0f, idxJugador);
                 NPC libro = (npcIdx >= 0 && npcIdx < Main.maxNPCs) ? Main.npc[npcIdx] : null;
                 if (libro != null && libro.active)

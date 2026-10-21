@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles
 {
@@ -129,9 +130,6 @@ namespace AethonMod.Content.Projectiles
             try
             {
                 float t = Projectile.localAI[0];
-                Texture2D glow = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (glow == null) return false;
 
                 // LA INTENSIDAD DE LA ESCENA: crece hasta el pico (nadie
                 // ve NADA de lo que pasa dentro) y luego se disipa (el
@@ -144,65 +142,80 @@ namespace AethonMod.Content.Projectiles
                 float crecimiento = t < T_CRECE
                     ? vida * vida * (3f - 2f * vida)
                     : 1f;
-                float escala = 0.25f + 0.75f * crecimiento;
-                float alfa = 0.55f + 0.45f * crecimiento;
-                if (t > T_CRECE) alfa = vida;
+                if (vida <= 0.02f) return false;
 
-                Vector2 centro = Projectile.Center - Main.screenPosition;
-                float tiempo = (float)Main.time * 0.02f;
-                int semilla = Projectile.identity % 97;
-
-                // === EL CORAZÓN OSCURO (lo que no deja ver) ===
-                Color tinta = new Color(18, 8, 32) * (0.92f * alfa);
-                Main.spriteBatch.Draw(glow, centro, null, tinta, 0f,
-                    glow.Size() * 0.5f,
-                    new Vector2(RADIO * 1.5f, RADIO * 1.1f) * escala / glow.Size(),
-                    SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(glow, centro, null, tinta * 0.9f, 0f,
-                    glow.Size() * 0.5f,
-                    new Vector2(RADIO * 1.05f, RADIO * 0.85f) * escala / glow.Size(),
-                    SpriteEffects.None, 0f);
-
-                // === LOS JIRONES (la nube viva: 14 mechones que respiran
-                //     y derivan — cada uno SU tamaño y SU compás) ===
-                for (int i = 0; i < 14; i++)
+                // ============================================================
+                //  v6.51.1 — LA BRUMA DE VERDAD (la letra: «la bruma se ve
+                //  mal, en vez de bruma parecen óvalos casi planos»): la
+                //  cura es LA LIBRERÍA DE LA CASA — SombrasLib.Bruma, los
+                //  puffs de humo fBm que se DESGARRAN de verdad (los que
+                //  visten al Grimorio Dormido y a las fauces). Los óvalos
+                //  eran SoftGlow estirados (discos lisos); ahora cada
+                //  mechón es una NUBE VIVA con su rampa de enfriamiento y
+                //  su aliento violeta — un MAR de niebla de verdad.
+                // ============================================================
+                VFXCore.CerrarLoteSiAbierto();
+                try
                 {
-                    float f = (i + 1) / 15f;
-                    float ang = f * MathHelper.TwoPi + tiempo * (0.4f + 0.1f * (i % 3))
-                        + semilla;
-                    float radio = (0.45f + 0.55f * ((i * 37 + semilla * 11) % 10) / 10f)
-                        * RADIO * escala;
-                    float respira = 1f + 0.14f * MathF.Sin(tiempo * 2.1f + i * 2.4f);
-                    Vector2 pos = centro + new Vector2(
-                        MathF.Cos(ang) * radio,
-                        MathF.Sin(ang) * radio * 0.62f
-                        + MathF.Sin(tiempo * 1.3f + i) * 9f);
-                    float tam = (0.55f + 0.5f * ((i * 53) % 7) / 7f) * RADIO * escala * respira;
+                    float tiempo = Main.GlobalTimeWrappedHourly;
+                    int semilla = Projectile.identity % 97 + 3;
+                    Vector2 centro = Projectile.Center;
+                    float alfa = 0.35f + 0.65f * crecimiento;
 
-                    Color jiron = new Color(26, 12, 44) * (0.85f * alfa *
-                        (0.75f + 0.25f * MathF.Sin(tiempo * 1.7f + i * 1.9f)));
-                    Main.spriteBatch.Draw(glow, pos, null, jiron, ang,
-                        glow.Size() * 0.5f,
-                        new Vector2(tam, tam * 0.8f) / glow.Size(),
-                        SpriteEffects.None, 0f);
+                    // EL CORAZÓN: la nube madre (gruesa, respirando).
+                    SombrasLib.Bruma(centro, RADIO * (0.55f + 0.65f * crecimiento),
+                        alfa, tiempo, semilla);
+
+                    // LOS BRAZOS: cinco nubes satélite en corro alrededor
+                    // (cada una SU tamaño y SU deriva — el mar no es un
+                    // círculo: es una MULTITUD).
+                    for (int i = 0; i < 5; i++)
+                    {
+                        float ang = i / 5f * MathHelper.TwoPi + tiempo * 0.11f
+                            + semilla * 0.13f;
+                        float lejos = (0.55f + 0.35f * ((i * 37 + semilla * 11) % 10) / 10f)
+                            * RADIO * crecimiento;
+                        Vector2 pos = centro + new Vector2(
+                            MathF.Cos(ang) * lejos,
+                            MathF.Sin(ang) * lejos * 0.66f);
+                        SombrasLib.Bruma(pos,
+                            RADIO * (0.38f + 0.30f * ((i * 53) % 7) / 7f) * crecimiento,
+                            alfa * 0.85f, tiempo * 0.9f, semilla + i * 7 + 11);
+                    }
+
+                    // LA CÚPULA: dos nubes ALTAS (el techo del evento — la
+                    // bruma que SUBE, porque lo que llega no viene del
+                    // suelo).
+                    for (int i = 0; i < 2; i++)
+                    {
+                        SombrasLib.Bruma(
+                            centro + new Vector2((i == 0 ? -1f : 1f) * RADIO * 0.45f * crecimiento,
+                                -RADIO * 0.40f * crecimiento),
+                            RADIO * 0.5f * crecimiento, alfa * 0.7f,
+                            tiempo * 1.1f, semilla + 31 + i * 13);
+                    }
+
+                    // EL VACÍO CENTRAL (lo que no deja ver): un corazón
+                    // oscuro ALFA con rim violeta — sutil, la niebla manda.
+                    Texture2D glow = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                    if (glow != null)
+                    {
+                        Vector2 posScr = centro - Main.screenPosition;
+                        Main.spriteBatch.Draw(glow, posScr, null,
+                            new Color(16, 7, 28) * (0.85f * crecimiento),
+                            0f, glow.Size() * 0.5f,
+                            new Vector2(RADIO * 1.25f, RADIO * 0.92f) * crecimiento / glow.Size(),
+                            SpriteEffects.None, 0f);
+                        Main.spriteBatch.Draw(glow, posScr, null,
+                            new Color(70, 38, 120) * (0.16f * vida),
+                            0f, glow.Size() * 0.5f,
+                            new Vector2(RADIO * 1.9f, RADIO * 1.5f) * crecimiento / glow.Size(),
+                            SpriteEffects.None, 0f);
+                    }
                 }
-
-                // === EL RIM VIOLETA (la firma de la casa: el negro puro
-                //     no existe sin su orla — la membrana del evento) ===
-                Color rim = new Color(96, 52, 150) * (0.30f * alfa *
-                    (0.8f + 0.2f * MathF.Sin(tiempo * 3f)));
-                Main.spriteBatch.Draw(glow, centro, null, rim, 0f,
-                    glow.Size() * 0.5f,
-                    new Vector2(RADIO * 2.0f, RADIO * 1.5f) * escala / glow.Size(),
-                    SpriteEffects.None, 0f);
-
-                // === EL FULGOR INTERNO (algo se está ESCRIBIENDO dentro) ===
-                float nucleo = 0.10f + 0.08f * MathF.Sin(tiempo * 4.2f);
-                Color fulgor = new Color(150, 90, 230) * (nucleo * alfa * crecimiento);
-                Main.spriteBatch.Draw(glow, centro, null, fulgor, 0f,
-                    glow.Size() * 0.5f,
-                    new Vector2(RADIO * 0.6f, RADIO * 0.5f) * escala / glow.Size(),
-                    SpriteEffects.None, 0f);
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
 
                 return false;
             }

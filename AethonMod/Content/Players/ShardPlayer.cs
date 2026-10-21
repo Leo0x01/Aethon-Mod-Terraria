@@ -143,7 +143,12 @@ namespace AethonMod.Content.Players
             if (p == null) return 0f;
             var sp = p.GetModPlayer<ShardPlayer>();
             if (sp == null) return 0f;
-            return Math.Min(sp.DevoracionPoder, DevoracionTope) * 0.0025f;
+            // v6.51.1 — LA LETRA: «incluso con el despertar al máximo, se
+            // debe poder seguir devorando esencia corrupta y esta debe
+            // aumentar el daño del grimorio del eterno en 0.1% por cada
+            // esencia corrupta» — 0,1% por esencia, SIN techo práctico
+            // (el tope del .128 de 300 murió con el altar).
+            return Math.Min(sp.DevoracionPoder, 5000) * 0.001f;
         }
 
         /// <summary>LOS OJOS EXTRA de la corona por lo devorado (+1 cada 75,
