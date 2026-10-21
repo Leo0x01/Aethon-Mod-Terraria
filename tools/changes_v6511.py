@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import io
+
+RUTA = "/home/z/my-project/download/Aethon-Mod-Terraria/CHANGES.md"
+s = io.open(RUTA, encoding="utf-8").read()
+
+ENTRADA = """# v6.51.1 — LOS FIXES DEL PLAYTEST: LA LLEGADA ÚNICA + LOS ATAQUES QUE NO SALÍAN + LA BARRA DE AETHON + LAS PÁGINAS DE SOMBRA + LA RAREZA CÓSMICA + LAS DIEZ ESTRELLAS NEGRAS
+
+**La letra**: «los soles runicos y los agujeros negros runicos no son lanzados por los minions cuando deben ser lanzados, revisa bien eso» + «el evento del minigrimorio de las hadas es muy seguido, que demore mas en aparecer» + «en la llegada aparecen 2 grimorios en vez de 1, ademas la bruma en la llegada se ve mal en vez de bruma parecen ovalos casi plano» + «en la tercera ventana de informacion del grimorio del eterno hay informacion que no deberia estar ahi, por ejemplo la progresion… solo estadisticas de los minions como si son capaces de lanzar soles runicos y agujeros negros runicos, cuanto pueden lanzar y eso» + «la descripcion que dice escuadron de 11 ojos… eso esta mal ya que al tener 4 mejoras el aumento de daño es de 200%» + «incluso con el despertar al maximo, se debe poder seguir devorando esencia corrupta y esta debe aumentar el daño del grimorio del eterno en 0.1% por cada esencia corrupta» + «el jefe final Aethon en el momento de fusionarse su barra de vida se pierde» + «hay un ataque de Aethon fusionado que parece que lanza algo pero el sprite esta mal y solo se ven cuadrados» + «cuando muere Aethon su loot debe ser su mascota de luz, 20 esencia corruptas y 10 platino, al menos por ahora» + «mejorar la rareza del grimorio del eterno… una rareza cosmica ademas con la etiqueta de legendario supremo» + «en el bestiario el grimorio no esta centrado en su casilla en ninguna de las dos… ponle 10 estrellas negras brillantes y titilantes» + «algunos textos del grimorio como cuando lanza la mascota en nivel de despertar 20 son largos o estan mal recortados, ademas la bruma ahi tambien se ve como solo ovalos, analiza el sistema de bruma y arreglalo de raiz» + «mejor quitemos que cualquier cosa se convierta en esencia corrupta, dejemos que la esencia corrupta sea solo un loot de monstruo y jefes… un arma corrupta no puede volver a corromperse… un arma corrupta aumenta todas sus estadisticas en 5% y eso debe mostrarse con una etiqueta» + «la colocacion de los minions al rededor del grimorio cuando este sale por hambre no esta bien… son 2 filas de 5 y el minion sobrante se queda muy pegado en la segunda fila».
+
+**LOS ATAQUES COMBINADOS QUE NO SALÍAN (el bug de la condición invertida)**: `AtaquesCombinadosSistema` buscaba el blanco con `if (!n.friendly) continue;` — **el amistoso INVERTIDO**: SALTABA A LOS ENEMIGOS y solo dejaba pasar a los vecinos del pueblo (que `EsObjetivo` rechaza) — el blanco era SIEMPRE null y los soles/agujeros JAMÁS disparaban. La cura: solo vivos — EsObjetivo hace el resto. **Y EL ESCUADRÓN EN FILAS**: DOS FILAS DE CINCO alrededor del libro flotante (arriba y abajo) con los sobrantes (el 11º) en filas propias CENTRADOS — nadie pegado a nadie.
+
+**LAS HADAS PACIENTES**: la primera moneda espera **25 s** de curiosidad (antes 4), tira **cada 45 s** (antes 20), **22 %** (antes 35 %) y **garantizada a la quinta fallida** (antes la tercera) — peor caso ~3,4 min: las hadas son una visita RARA, no una inquilina.
+
+**LA LLEGADA: UN SOLO GRIMORIO**: el libro nacía a −40 px del punto de la pendiente y el radar del reconciliador (±64) lo PERDÍA en el bobbing (±6) — cuando el pulso de los 120 t caía en la fase baja, ENGENDRABA OTRO justo al lado: exactamente DOS grimorios apilados. LA CURA: nace EXACTO en el punto (flota solo: noGravity + noTileCollide), el radar lee **±96/±140** (todo el rango del bobbing) y `RegistrarLlegada` lleva guarda anti-doble.
+
+**LA BRUMA DE VERDAD (la cura de raíz de los óvalos planos)**: los óvalos eran SoftGlow estirados — discos LISOS. AHORA **SombrasLib.Bruma, LA LIBRERÍA fBm DE LA CASA** (la que viste al Grimorio Dormido desde la .65): puffs de humo que se DESGARRAN de verdad con su rampa de enfriamiento violácea y su aliento. En **LA LLEGADA**: la nube madre + CINCO brazos en corro (cada uno su tamaño y deriva) + DOS cúpulas altas (la bruma que SUBE) + el vacío central sutil. En **EL ESCUPIDIZO**: la nube madre debajo del libro + los dos brazos a los costados. El diagnóstico de raíz: mi código de la .51.0 inventó su propia bruma en vez de USAR la librería — las dos escenas corregidas.
+
+**LA TERCERA VENTANA (solo estadísticas)**: la PROGRESIÓN fuera (vive solo en la básica), las descripciones muertas (OjosFormacion/MinionCd/NotaOjos/La Primera Cena) y LAS ESTADÍSTICAS REALES del portador: Ojos vivos/techo, **Mejoras desbloqueadas con el multiplicador REAL (×1,5/×2/×2,5/×3 — «+200 % con las 4», el texto viejo decía «4 mejoras» sin el total)**, daño del rayo, velocidad de ataque, cadena, velocidad, rango, costo de maná + **LA SECCIÓN ATAQUES COMBINADOS**: Sol Rúnico (anillos y por minuto, o «bloqueado — Despertar 7»), Agujeros (4 al azar · Ascendidos · por minuto, o «bloqueado — 10») y Supremo/Aurora (o «bloqueado — 45»). AUDITORÍA COMPLETA de las stats: MinionChainCount/SpeedMult/DetectionRange/ContactDamageMult verificadas vivas en sus consumidores; el stack de invocación ya era solo-del-grimorio.
+
+**LA ESENCIA DEVORADA (SIEMPRE, 0,1 % cada una)**: con el Eterno EN LA MANO, cualquier pila de Esencia Corrupta SOLTADA a ≤200 px es un bocado inmediato — **+0,1 % de daño PERMANENTE por esencia** (`BonusDanoDevorado` 0,25 %→0,1 %, tope 300→5000), funciona a CUALQUIER nivel de despertar (el 50 incluido), con aviso desglosado, polvos y sync MP. **LA ESENCIA ES SOLO LOOT**: las recetas item→esencia MURIERON (la Esencia Corrupta solo cae de cuerpos).
+
+**AETHON — LA BARRA DE VIDA (la causa de raíz)**: **LOS ATRIBUTOS NO SE HEREDAN** — `[AutoloadBossHead]` vivía SOLO en la base (desde la .121); el fusionado y el gemelo oscuro JAMÁS registraron su cabeza y **la barra de vanilla SOLO valida jefes con cabeza registrada** (`CommonBossBigProgressBar.ValidateAndCollectNecessaryInfo` exige `GetBossHeadTextureIndex() != -1` — verificado al IL). LA CURA: `[AutoloadBossHead]` en los TRES + `BossHeadSlot` override con índice garantizado (jamás −1). **LAS PÁGINAS CUADRADAS**: la LLUVIA DE PÁGINAS del fusionado dibujaba su cuerpo con `VFXCore.Pixel` — rectángulos duros de 1×1 estirados, LITERALES cuadrados; ahora son páginas de sombra (rim + cuerpo + líneas de escritura con SoftGlow). **EL LOOT**: mascota de luz + 20 esencia corrupta + 10 platino — «al menos por ahora».
+
+**LA RAREZA CÓSMICA**: `LegendarioSupremo` (ModRarity) — más allá del maestro y de cualquier rareza: violeta primordial ↔ índigo del vacío ↔ magenta de la bruma, **calculado por frame** (el nombre del arma VIVE).
+
+**EL BESTIARIO**: (1) **LAS DIEZ ESTRELLAS NEGRAS** — `EstrellasNegrasInfoElement`: negro-violeta con halo, rim titilante y chispa al corazón, CADA UNA a su compás (tres senos inconmensurables), PRIMERAS en la entrada; (2) **EL CENTRADO** — la .51.0 FORZABA la posición del retrato a (0,0) (¡el ORIGEN de la caja, no el centro!): sin overrides, el centrado de vanilla + Velocity 0 en ambas casillas; (3) **EL ÚLTIMO NÚMERO** — `ContentSamples.NpcBestiarySortingId` empujado a 9.999.999 (el final del catálogo).
+
+**LOS TEXTOS CORTOS**: Voz1-4 a una línea y el Escupidizo a dos («Ya somos tres, portador: tú, yo… y ÉL. / Toma: te lo escupo como mascota. Aliméntalo de silencio.») — nada de poemas recortados.
+
+**LAS RECETAS DE LAS ARMAS**: el arma corrupta **NO puede volver a corromperse** (`QuedaUnaLimpia`: la receta se apaga cuando la única copia que llevas ya está sellada) y el menú muestra sus stats (`NaceCorrupta`, siempre verde: «+5 % a TODAS sus estadísticas · sin etiquetas ni reforge») — y la etiqueta del arma corrupta ahora dice el +5 % explícito (crítico ×1,05 relativo como el resto).
+
+Oráculo 0/0 · build real 0/0 · .tmod **v6.51.1, 2.780.477 B, md5 `d1dd2e6c03db11bb9c655327f6d9b438`** · headless **0 excepciones** (mundo511, seed fauces511: Adding Recipes → Listening 7813 → Server started) · es-MX == es-ES (**1.503 claves**) · release 419875158 + asset 663334044 + CDN **verificado byte a byte** · respaldo /home/sync/AethonMod-v6.51.1.tmod.
+
+---
+"""
+
+assert s.startswith("# v6.51.0"), s[:30]
+s = ENTRADA + s
+io.open(RUTA, "w", encoding="utf-8").write(s)
+print("OK — CHANGES.md con la entrada v6.51.1:", len(s.splitlines()), "líneas")
