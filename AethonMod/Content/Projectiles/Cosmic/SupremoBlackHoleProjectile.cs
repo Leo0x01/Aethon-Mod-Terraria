@@ -109,11 +109,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (toPrey.LengthSquared() > 120f)
                 {
                     toPrey.Normalize();
-                    Projectile.velocity += toPrey * 0.07f;
+                    // v6.51.2 — EL SEGUIMIENTO QUE CRECE CON EL NIVEL DEL
+                    //     GRIMORIO (la letra: simple y lento por defecto,
+                    //     más agresivo desde el nivel 100, MUY agresivo a
+                    //     nivel 1000).
+                    Projectile.velocity += toPrey * 0.07f *
+                        Content.Systems.WeaponScaling.HomingAcel(
+                            Content.Systems.WeaponScaling.NivelDelDuenio(Projectile));
                 }
                 float spd = Projectile.velocity.Length();
-                if (spd > 2.6f)
-                    Projectile.velocity *= 2.6f / spd;
+                float topeH = 2.6f * Content.Systems.WeaponScaling.HomingTope(
+                    Content.Systems.WeaponScaling.NivelDelDuenio(Projectile));
+                if (spd > topeH)
+                    Projectile.velocity *= topeH / spd;
             }
 
             float targetRotation = Projectile.velocity.X * 0.04f;

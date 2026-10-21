@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace AethonMod.Content.Systems
 {
@@ -318,6 +319,52 @@ namespace AethonMod.Content.Systems
             int extra = level / 20;
             if (extra > 5) extra = 5;
             return 2 + extra;
+        }
+
+        // ================================================================
+        //  EL SEGUIMIENTO QUE CRECE CON EL NIVEL (v6.51.2)
+        // ================================================================
+
+        /// <summary>EL NIVEL DEL GRIMORIO del dueño de un proyectil
+        /// (0 si no se puede leer — los proyectiles del mod que no
+        /// pertenecen a un portador del libro siguen al ritmo base).</summary>
+        public static int NivelDelDuenio(Projectile p)
+        {
+            if (p == null || p.owner < 0 || p.owner >= Main.maxPlayers) return 0;
+            Player pl = Main.player[p.owner];
+            if (pl == null || !pl.active) return 0;
+            var sp = pl.GetModPlayer<Players.ShardPlayer>();
+            return sp == null ? 0 : sp.NivelGrimorioPublico;
+        }
+
+        /// <summary>v6.51.2 — LA LETRA: «el seguimiento del agujero
+        /// negro rúnico y de los soles rúnicos debe ser un poco más
+        /// agresivo a medida que el nivel del grimorio aumente, por
+        /// defecto un seguimiento simple y lento después de ser
+        /// lanzado por los minions, y a partir de nivel 100 del
+        /// grimorio el seguimiento aumenta un poquito más hasta tener
+        /// un seguimiento muy agresivo a nivel 1000 del grimorio».
+        /// EL ACELERADOR: ×1 hasta nivel 100 (simple y lento), luego
+        /// crece SUAVE (raíz de la proporción) hasta ×9 en el 1000 —
+        /// el multiplicador de la ACELERACIÓN de la persecución.</summary>
+        public static float HomingAcel(int nivel)
+        {
+            if (nivel <= 100) return 1f;
+            double t = (nivel - 100) / 900.0;
+            if (t > 1.0) t = 1.0;
+            return 1f + 8f * (float)System.Math.Sqrt(t);
+        }
+
+        /// <summary>El TOPE DE VELOCIDAD de la persecución: ×1 hasta
+        /// nivel 100, hasta ×3,5 en el 1000 (el acelerón sin control
+        /// haría al agujero cruzarse de largo: el tope crece
+        /// acompasado).</summary>
+        public static float HomingTope(int nivel)
+        {
+            if (nivel <= 100) return 1f;
+            double t = (nivel - 100) / 900.0;
+            if (t > 1.0) t = 1.0;
+            return 1f + 2.5f * (float)System.Math.Sqrt(t);
         }
 
         // ================================================================

@@ -515,41 +515,39 @@ namespace AethonMod.Content.Projectiles
 
             if (libro is Vector2 centro)
             {
-                // === v6.51.1 — LAS FILAS DE CINCO (la letra: «la
-                //     colocación de los minions alrededor del grimorio
-                //     cuando este sale por hambre no está bien… son 2
-                //     filas de 5 y el minion sobrante se queda muy pegado
-                //     en la segunda fila»): el escuadrón forma DOS FILAS
-                //     DE 5 — una ARRIBA y una ABAJO del libro flotante —
-                //     y los sobrantes (el 11º) van a filas PROPIAS más
-                //     abajo, CENTRADOS y separados: nadie pegado a nadie.
-                //     Las filas respiran despacio y cada ojo lleva su
-                //     micro-deriva viva de siempre. ===
+                // === v6.51.2 — LA ÓRBITA DEL HAMBRE (la letra: «los
+                //     minion deben orbitar al grimorio cuando está en
+                //     estado de hambre»): MUEREN las filas de cinco — el
+                //     escuadrón RODEA al libro flotante en sus ANILLOS
+                //     GIRATORIOS de siempre (5+k ojos por anillo,
+                //     contrarrotando — la misma formación de la corona
+                //     sobre el jugador, ahora alrededor del LIBRO que
+                //     salió a cazar): cada anillo gira a velocidad
+                //     CONSTANTE (el paso lo avanza PasoOrbita en la AI —
+                //     aquí solo se LEE la fase), el radio RESPIRA y cada
+                //     ojo conserva su micro-deriva viva. ===
                 int totalOjos = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
                 int miPuesto = Math.Min(idx, totalOjos - 1);
-                const int POR_FILA = 5;
+                AnilloDe(miPuesto, out int k, out int enAnillo, out int capAnillo);
+                float fase = FaseOrbital(enAnillo, capAnillo, k);
 
-                int fila = miPuesto / POR_FILA;       // 0 (arriba) · 1 (abajo) · 2+ (sobrantes)
-                int enFila = miPuesto % POR_FILA;
-                int enEstaFila = Math.Min(totalOjos - fila * POR_FILA, POR_FILA);
-                if (enEstaFila <= 0) enEstaFila = 1;
+                // EL RADIO DEL ANILLO: crece con el índice del anillo (el
+                // interior abraza al libro; los de afuera lo escoltan) y
+                // RESPIRA despacio (±4,5% — a su reloj cada anillo).
+                float radio = (54f + k * 19f) *
+                    (1f + 0.045f * MathF.Sin(time * 0.23f + k * 1.25f));
 
-                // LA POSICIÓN: la fila se CENTRA en el libro (los pocos de
-                // una fila corta también quedan al medio).
-                float paso = 42f;
-                float x = (enFila - (enEstaFila - 1) * 0.5f) * paso;
-                // LA ALTURA: fila 0 ENCIMA del libro · fila 1 DEBAJO · las
-                // filas de sobrantes, más abajo y a su aire.
-                float y = fila == 0 ? -46f : fila == 1 ? 46f : 46f + (fila - 1) * 44f;
+                // LA ÓRBITA: ligeramente ELÍPTICA (×0,74 en Y — la
+                // formación se lee como un corro, no como un aro rígido).
+                Vector2 posOrbita = centro + new Vector2(
+                    MathF.Cos(fase) * radio,
+                    MathF.Sin(fase) * radio * 0.74f);
 
-                // LA RESPIRACIÓN DE LA FORMACIÓN: todo el escuadrón se
-                // mece despacio (±3 px, filas alternadas — la bandada viva).
-                float mecer = MathF.Sin(time * 0.9f + fila * 1.7f) * 3f;
                 // la micro-deriva propia: 1,6 px en 2D, DESPACIO.
                 Vector2 deriva = new Vector2(
                     MathF.Sin(time * 0.80f + miPuesto * 2.1f),
                     MathF.Sin(time * 0.65f + miPuesto * 1.3f)) * 1.6f;
-                return centro + new Vector2(x, y + mecer) + deriva;
+                return posOrbita + deriva;
             }
 
             // === v6.50.117 — LA CORONA DOBLE, LADRILLO REAL (la letra:

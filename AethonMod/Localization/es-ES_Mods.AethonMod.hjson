@@ -244,6 +244,7 @@ Items: {
 			bruma ya nació, el cielo no insiste).
 			'''
 	}
+
 	EcoDelDespertar: {
 		DisplayName: Eco del Despertar
 		Tooltip:
@@ -471,7 +472,6 @@ Items: {
 		DisplayName: Orbe del Vidente
 		Tooltip: ""
 	}
-
 
 	SunStaff: {
 		DisplayName: Sol
@@ -1826,8 +1826,8 @@ Items: {
 			'''
 	}
 
-	// v6.50.130 — LA BRUMA DEL CRÁTER (el item invisible que ES la
-	// bruma: el altar principal portátil de la corrupción)
+	// v6.50.130 — THE CRATER MIST (the invisible item that IS the
+	// mist: the portable corruption altar)
 	BrumaDelCrater: {
 		DisplayName: Bruma del cráter (vestigio)
 		Tooltip:
@@ -1981,6 +1981,10 @@ Projectiles: {
 	// CaidaCometaProjectile.DisplayName: Caida Cometa Projectile
 	// AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
 	// AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
+	// EscupidizoProjectile.DisplayName: Escupidizo Projectile
+	// RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
+	// TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
+	// LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
 }
 
 Buffs: {
@@ -2387,10 +2391,10 @@ Caida: {
 	PunoTitan: Puño titán (más empuje)
 }
 
-// v6.51.0 — EL DESPERTAR DEL GRIMORIO: la nueva progresión (nivel 0..50)
-// — las tres ofrendas por nivel (esencias corruptas + dinero + el arma
-// corrupta del peldaño de Terraria), los poderes que desbloquea y la
-// voz del libro al despertar.
+// v6.51.0 — THE GRIMOIRE'S AWAKENING: the new progression (level 0..50)
+// — three offerings per level (corrupt essences + coins + the corrupted
+// weapon of Terraria's ladder), the powers it unlocks, and the book's
+// voice as it wakes.
 Despertar: {
 	Subida: ✦ El Grimorio DESPIERTA un poco más: nivel de despertar {0}.
 	Voz1: Mmm… otra página que se escribe sola.
@@ -2425,7 +2429,6 @@ Despertar: {
 		Toma: te lo escupo como mascota. Aliméntalo de silencio.
 		'''
 }
-
 
 TestingPlayer: {
 	Bolsas: Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.
@@ -3041,11 +3044,10 @@ Pueblo: {
 	}
 }
 
-Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída
-Tiles.BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
-Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que la bruma del despertar tocó ya no es de este mundo.
-
-// v6.51.1 — LA RAREZA CÓSMICA DEL ETERNO
-Rarities: {
-	LegendarioSupremo: Legendario Supremo
+Tiles: {
+	AltarDeLaCaida.MapEntry: Altar de la Caída
+	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 }
+
+Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que la bruma del despertar tocó ya no es de este mundo.
+Rarities.LegendarioSupremo: Legendario Supremo

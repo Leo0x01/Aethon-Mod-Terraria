@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -511,29 +512,39 @@ namespace AethonMod.Content.Weapons
             return false;   // todos los spawns son nuestros
         }
 
-        /// <summary>EL DÍA Y LA NOCHE — la pareja del Equinoccio con los
-        /// parámetros del Eterno (el daño ya viene escalado por nivel):
-        /// EL DORADO con luz de sol y ocho rayos (ai[2]=9201) y EL NEGRO,
-        /// disco de eclipse con rim violeta (ai[2]=9202 — sin bruma desde
-        /// la .102, la letra del usuario).</summary>
+        /// <summary>EL DÍA Y LA NOCHE — LA FUSIÓN CON LA APATÍA NULA
+        /// (v6.51.2 — la letra: «quiero que conviertas el proyectil
+        /// actual del grimorio eterno en una fusion con el tomo de la
+        /// apatia nula, dejando el tema de luz y oscuridad del grimorio
+        /// pero con el toque de la apatia nula»): cada pareja sigue
+        /// siendo UN DÍA Y UNA NOCHE, pero ya NO son los discos del
+        /// Equinoccio — son TENTÁCULOS (TentaculoEquinoccioProjectile):
+        /// nacen con SU gestación de pulsos que imploden (el día suma
+        /// oro; la noche OSCURECE con vacío), azotan en TRES CURVAS
+        /// hacia la presa con chispas de cola y el SALTO con teleport
+        /// entre curva y curva. El daño y el empuje son LOS DE SIEMPRE
+        /// (el del disparo — ya lleva TODAS las stats del portador).</summary>
         private static void LanzarPareja(EntitySource_ItemUse_WithAmmo source, Vector2 pos,
             Vector2 vel, int damage, float knockback, Player player)
         {
-            // EL DORADO — EL DÍA: ai[1] = 0.64 → el render del 931 hace
-            // hslToRgb((hue+0.5)%1) → matiz 0.14 = DORADO de verdad
+            // EL DÍA — EL TENTÁCULO DORADO: el matiz de siempre (0.64 →
+            // oro vivo, luz cálida, las chispas que BRILLAN).
             Projectile.NewProjectile(source, pos, vel.RotatedBy(-0.35f),
-                931, damage, knockback, player.whoAmI,
-                -1f,      // ai[0]: sin objetivo aún
-                0.64f,    // ai[1]: EL MATIZ DORADO
-                9201f);   // ai[2]: la marca del FX del sol
+                ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.TentaculoEquinoccioProjectile>(),
+                damage, knockback, player.whoAmI,
+                0f,      // ai[0]: el reloj del tentáculo
+                0.64f,   // ai[1]: EL DÍA (el matiz dorado de la convención)
+                0f);
 
-            // EL NEGRO — LA NOCHE: ai[1] = 0.28 → matiz 0.78 = VIOLETA
-            // (el rim del eclipse que late en la oscuridad)
+            // LA NOCHE — EL TENTÁCULO DE ECLIPSE: el matiz de siempre
+            // (0.28 → negro-violeta, el vacío que oscurece su estela
+            // con su rim de brasa fría).
             Projectile.NewProjectile(source, pos, vel.RotatedBy(0.35f),
-                931, damage, knockback, player.whoAmI,
-                -1f,      // ai[0]: sin objetivo aún
-                0.28f,    // ai[1]: el matiz violeta (el rim)
-                9202f);   // ai[2]: la marca del FX del eclipse (SIN bruma)
+                ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.TentaculoEquinoccioProjectile>(),
+                damage, knockback, player.whoAmI,
+                0f,      // ai[0]: el reloj del tentáculo
+                0.28f,   // ai[1]: LA NOCHE (el matiz del eclipse)
+                0f);
         }
 
         // ================================================================
@@ -572,6 +583,36 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
+            // === v6.51.2 — LA ETIQUETA DE LA RAREZA CÓSMICA (la letra:
+            //     «una rareza cosmica ademas con la etiqueta de
+            //     legendario supremo» — y la pregunta del playtest
+            //     «donde esta la rareza Legendario Supremo»): el COLOR
+            //     vive en el nombre del arma (LegendarioSupremo respira
+            //     violeta-índigo-magenta), pero una rareza de esta
+            //     talla merece SU PROPIA LÍNEA — PRIMERA del tooltip,
+            //     con el mismo ciclo de color vivo: la etiqueta que se
+            //     VE, en la ventana básica y en las completas. ===
+            try
+            {
+                float t = Main.GlobalTimeWrappedHourly;
+                int r = (int)((0.62f + 0.20f * MathF.Sin(t * 0.9f)) * 255f);
+                int g = (int)((0.22f + 0.14f * MathF.Sin(t * 0.53f + 2.1f)) * 255f);
+                int b = (int)((0.95f + 0.05f * MathF.Sin(t * 1.7f + 0.6f)) * 255f);
+                string hex = string.Format("{0:X2}{1:X2}{2:X2}", r, g, b);
+                int nombre = -1;
+                for (int i = 0; i < tooltips.Count; i++)
+                {
+                    if (tooltips[i].Name == "ItemName") { nombre = i; break; }
+                }
+                var etiqueta = new TooltipLine(Mod, "LegendarioSupremo",
+                    $"[c/{hex}:✦ LEGENDARIO SUPREMO ✦]");
+                if (nombre >= 0 && nombre + 1 <= tooltips.Count)
+                    tooltips.Insert(nombre + 1, etiqueta);
+                else
+                    tooltips.Insert(0, etiqueta);
+            }
+            catch { }
+
             // === LA HERENCIA DEL NERVIOSO: la barra de hambre viva + el
             //     estado — rescatados y REUBICADOS al final, dentro de
             //     PROGRESIÓN (la letra: el hambre sale en la progresión,

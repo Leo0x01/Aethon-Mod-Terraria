@@ -158,11 +158,15 @@ namespace AethonMod.Content.Systems
         //  EL SOL RÚNICO COMBINADO
         // ================================================================
 
-        /// <summary>LA CEREMONIA DEL SOL: los DOS ojos con más mejoras
-        /// DISPARAN sus rayos de perlin al blanco (la animación de la
-        /// letra)… y de un punto ENCIMA DEL JUGADOR nace EL SOL RÚNICO
-        /// con sus anillos, LANZADO CON FUERZA al enemigo (el homing del
-        /// sol hace el resto: daño de área, quemadura y la nova final).</summary>
+        /// <summary>LA CEREMONIA DEL SOL (v6.51.2 — LA LETRA: «para
+        /// los soles rúnicos el rayo convergente tome 2 SEGUNDOS en
+        /// crearlo y lanzarlo al enemigo… deben aparecer encima del
+        /// jugador»): los DOS ojos con más mejoras DISPARAN sus rayos de
+        /// perlin (la reverencia de los celebrantes) y ENCIMA DEL
+        /// JUGADOR nace EL RAYO CONVERGENTE — 2 segundos de rayos que
+        /// convergen y CREAN el sol — y al cumplir, el sol sale
+        /// DISPARADO al enemigo (su homing hace el resto: daño de área,
+        /// quemadura y la nova final).</summary>
         private static void DispararElSol(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
@@ -182,15 +186,16 @@ namespace AethonMod.Content.Systems
                 int danoRayo = Math.Max(1, (int)(ojo1.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
 
-                // EL PUNTO DE LA CONVERGENCIA: un punto cercano ENCIMA del
-                // jugador (la letra) — los rayos de los dos celebrantes se
-                // cruzan ahí y el sol CREE.
-                Vector2 punto = p.Center + new Vector2(
-                    Main.rand.NextFloat(-40f, 40f), -150f);
+                // EL DAÑO DEL SOL QUE NACERÁ: crecido por la combinación
+                // y el despertar (viaja en ai[2] del ritual — ya lleva el
+                // grimorio Y las armaduras del portador).
+                int anillos = DespertarGrimorio.AnillosDelSol(despertar);
+                int danoSol = Math.Max(1, (int)(danoRayo * 3f *
+                    (1f + DespertarGrimorio.BonusDano(despertar))));
 
-                // LA ANIMACIÓN: los celebrantes disparan sus rayos al
-                // blanco (el cauce de siempre del ojo — TruenoPerlin) y
-                // estallan en chispas doradas (el esfuerzo del conjuro).
+                // LA ANIMACIÓN DE LOS CELEBRANTES: disparan sus rayos al
+                // blanco (la reverencia que ABRRE el ritual) y estallan en
+                // chispas doradas.
                 foreach (Projectile ojo in new[] { ojo1, ojo2 })
                 {
                     if (ojo == null || !ojo.active) continue;
@@ -208,27 +213,20 @@ namespace AethonMod.Content.Systems
                     }
                 }
 
-                // EL SOL NACE: sus ANILLOS por despertar (1 · 2 en el 17 ·
-                // 3 en el 35), su daño CRECIDO por la combinación, y
-                // LANZADO CON FUERZA al enemigo (velocidad inicial fuerte
-                // + el homing del sol de siempre).
-                int anillos = DespertarGrimorio.AnillosDelSol(despertar);
-                int danoSol = Math.Max(1, (int)(danoRayo * 3f *
-                    (1f + DespertarGrimorio.BonusDano(despertar))));
-                Vector2 rumbo = blanco.Center - punto;
-                if (rumbo.LengthSquared() < 1f) rumbo = -Vector2.UnitY;
-                rumbo.Normalize();
-                Projectile sol = Projectile.NewProjectileDirect(
+                // EL RAYO CONVERGENTE: 2 SEGUNDOS de ceremonia ENCIMA DEL
+                // JUGADOR — al cumplir, EL SOL nace y sale al enemigo.
+                Projectile.NewProjectile(
                     p.GetSource_Misc("SolCombinado"),
-                    punto, rumbo * 7.5f,
+                    p.Center + new Vector2(0f, -150f), Vector2.Zero,
                     ModContent.ProjectileType
-                        <global::AethonMod.Content.Projectiles.Cosmic.RuneSunProjectile>(),
-                    danoSol, 4f, p.whoAmI, anillos,
-                    (p.whoAmI * 31 + Main.rand.Next(9973)) * 1f);
-                sol.timeLeft = 480;   // 8 s de gloria (y su nova)
+                        <global::AethonMod.Content.Projectiles.Cosmic.RayoConvergenteProjectile>(),
+                    0, 0f, p.whoAmI,
+                    1f,                          // EL MODO: SOL
+                    blanco.whoAmI * 1f,          // el blanco elegido
+                    danoSol * 1f);               // el daño combinado
 
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.2f), punto);
+                    SoundID.Item122.WithPitchOffset(-0.2f), p.Center);
             }
             catch { }
         }
@@ -237,31 +235,18 @@ namespace AethonMod.Content.Systems
         //  LOS AGUJEROS NEGROS COMBINADOS
         // ================================================================
 
-        /// <summary>EL AGUJERO ALEATORIO DE LOS CUATRO (la letra): con 5+
-        /// ojos mejorados, el escuadrón abre UNO de los CUATRO RÚNICOS al
-        /// azar sobre el enemigo (nivel 25+: su versión ASCENDIDA — «hacen
-        /// aún más daño»). EL DAÑO nace de los ojos combinados.</summary>
+        /// <summary>EL RITUAL DEL AGUJERO (v6.51.2 — LA LETRA: «para
+        /// los agujeros negros rúnicos tome 3 SEGUNDOS»): con 5+ ojos
+        /// mejorados, el escuadrón abre ENCIMA DEL JUGADOR el RAYO
+        /// CONVERGENTE de 3 segundos — y al cumplir, uno de los CUATRO
+        /// RÚNICOS al azar (nivel 25+: su versión ASCENDIDA) se ABRE
+        /// sobre la presa. EL DAÑO nace de los ojos combinados.</summary>
         private static void LanzarElAgujero(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
             {
                 bool ascendidos = DespertarGrimorio.AgujerosAscendidos(despertar);
-                int tipo = (Main.rand.Next(4)) switch
-                {
-                    0 => ascendidos
-                        ? ModContent.ProjectileType<Projectiles.Cosmic.OlvidoAscendidoBlackHoleProjectile>()
-                        : ModContent.ProjectileType<Projectiles.Cosmic.OlvidoBlackHoleProjectile>(),
-                    1 => ascendidos
-                        ? ModContent.ProjectileType<Projectiles.Cosmic.CosmicAscendidoBlackHoleProjectile>()
-                        : ModContent.ProjectileType<Projectiles.Cosmic.CosmicBlackHoleProjectile>(),
-                    2 => ascendidos
-                        ? ModContent.ProjectileType<Projectiles.Cosmic.UmbralAscendidoBlackHoleProjectile>()
-                        : ModContent.ProjectileType<Projectiles.Cosmic.UmbralBlackHoleProjectile>(),
-                    _ => ascendidos
-                        ? ModContent.ProjectileType<Projectiles.Cosmic.BrumaAscendidoBlackHoleProjectile>()
-                        : ModContent.ProjectileType<Projectiles.Cosmic.BrumaBlackHoleProjectile>(),
-                };
 
                 // EL DAÑO COMBINADO: el rayo del ojo más despierto × los
                 // celebrantes que abren la puerta (×1,45 en ascendidos).
@@ -274,12 +259,21 @@ namespace AethonMod.Content.Systems
                 int dano = Math.Max(1, (int)(danoRayo * (ascendidos ? 4.5f : 3.2f) *
                     (1f + DespertarGrimorio.BonusDano(despertar))));
 
-                // LA PUERTA SE ABRE SOBRE EL ENEMIGO.
-                Projectile agujero = Projectile.NewProjectileDirect(
+                // EL RAYO CONVERGENTE: 3 SEGUNDOS de ceremonia — al
+                // cumplir, la puerta (el agujero rúnico al azar — los
+                // ascendidos si el despertar los trajo) se abre SOBRE la
+                // presa (la elección del tipo la hace el ritual al
+                // cumplir: es UN AZAR de cada lanzamiento, como manda la
+                // letra).
+                Projectile.NewProjectile(
                     p.GetSource_Misc("AgujeroCombinado"),
-                    blanco.Center - new Vector2(0f, 60f), Vector2.Zero,
-                    tipo, dano, 0f, p.whoAmI);
-                agujero.timeLeft = 600;
+                    p.Center + new Vector2(0f, -150f), Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Cosmic.RayoConvergenteProjectile>(),
+                    0, 0f, p.whoAmI,
+                    2f,                          // EL MODO: AGUJERO
+                    blanco.whoAmI * 1f,
+                    dano * 1f);
 
                 // EL TEATRO DE LA APERTURA (las chispas del escuadrón).
                 foreach (Projectile ojo in mejorados)
@@ -290,7 +284,7 @@ namespace AethonMod.Content.Systems
                     d.noGravity = true;
                 }
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(0.35f), blanco.Center);
+                    SoundID.Item122.WithPitchOffset(0.35f), p.Center);
             }
             catch { }
         }
@@ -300,16 +294,13 @@ namespace AethonMod.Content.Systems
         /// Aurora… su daño es aún mayor que el de los agujeros negros
         /// ascendidos y se necesitan el ataque combinado de 8 minions o
         /// más en su mejora número 4» — uno por minuto, al azar entre los
-        /// DOS, sobre el enemigo.</summary>
+        /// DOS. v6.51.2: SU RITUAL TAMBIÉN (el rayo convergente de 3
+        /// segundos — la carta fuerte se anuncia).</summary>
         private static void LanzarElSupremo(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
             {
-                int tipo = Main.rand.NextBool()
-                    ? ModContent.ProjectileType<Projectiles.Cosmic.SupremoBlackHoleProjectile>()
-                    : ModContent.ProjectileType<Projectiles.Cosmic.SupremoAuroraBlackHoleProjectile>();
-
                 Projectile lider = mejorados[0];
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
@@ -319,11 +310,17 @@ namespace AethonMod.Content.Systems
                 int dano = Math.Max(1, (int)(danoRayo * 6.5f *
                     (1f + DespertarGrimorio.BonusDano(despertar))));
 
-                Projectile agujero = Projectile.NewProjectileDirect(
+                // EL RAYO CONVERGENTE DEL SUPREMO: 3 segundos — al cumplir,
+                // el SUPREMO o el AURORA (al azar) se abre sobre la presa.
+                Projectile.NewProjectile(
                     p.GetSource_Misc("SupremoCombinado"),
-                    blanco.Center - new Vector2(0f, 90f), Vector2.Zero,
-                    tipo, dano, 0f, p.whoAmI);
-                agujero.timeLeft = 600;
+                    p.Center + new Vector2(0f, -150f), Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Cosmic.RayoConvergenteProjectile>(),
+                    0, 0f, p.whoAmI,
+                    3f,                          // EL MODO: SUPREMO
+                    blanco.whoAmI * 1f,
+                    dano * 1f);
 
                 // LA SOLEMNIDAD: TODO el escuadrón estalla (la carta
                 // fuerte del grimorio despierto).
@@ -338,8 +335,8 @@ namespace AethonMod.Content.Systems
                     }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.5f), blanco.Center);
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, blanco.Center);
+                    SoundID.Item122.WithPitchOffset(-0.5f), p.Center);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, p.Center);
             }
             catch { }
         }

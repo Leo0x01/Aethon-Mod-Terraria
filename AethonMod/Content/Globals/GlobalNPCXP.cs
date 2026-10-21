@@ -114,8 +114,9 @@ namespace AethonMod.Content.Globals
                     // — la oleada 1 paga ×2 … la 10 paga ×11, LA ESPECIAL
                     // paga ×15 (jefes incluidos: son las "versiones
                     // especiales" que prometen más XP).
-                    var sello = npc.GetGlobalNPC<OleadaNPC>();
-                    if (sello != null && sello.EsDeOleada)
+                    // v6.51.2 — TryGet (la lectura segura de siempre: el
+                    // aislado no rompe la XP de nadie).
+                    if (npc.TryGetGlobalNPC<OleadaNPC>(out var sello) && sello.EsDeOleada)
                         xp *= sello.MultiplicadorXP;
 
                     // v6.48 — LA CRÓNICA DEL TESTIGO: el libro devoró a ESTE

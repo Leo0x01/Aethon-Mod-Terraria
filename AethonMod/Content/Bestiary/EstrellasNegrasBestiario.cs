@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent.Bestiary;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -20,11 +21,31 @@ namespace AethonMod.Content.Bestiary
     //  así que el grimorio estrena SU PROPIA línea de rareza: DIEZ
     //  estrellas NEGRO-VIOLETAS que TITILAN (cada una a su compás:
     //  brillo, escala y latido propios — deterministas por índice) con
-    //  su chispa de luz. VAN PRIMERAS en la entrada: lo primero que
-    //  lee el catálogo es lo que el grimorio ES.
+    //  su chispa de luz.
+    //
+    //  v6.51.2 — LA CIRUGÍA DEL CATÁLOGO (el fix del playtest: «sigue
+    //  teniendo una rareza de 4 de 5 estrellas, no las 10 estrellas que
+    //  pedí» — las amarillas venían del NPCPortraitInfoElement de
+    //  vanilla, que GrimorioDormido.SetBestiary ahora sustituye por un
+    //  retrato SIN estrellas): este elemento VIVE en la categoría del
+    //  RETRATO (ICategorizedBestiaryInfoElement → Portrait — la MISMA
+    //  zona donde estaban las amarillas, bajo el nombre) y con
+    //  OrderPriority máxima va PRIMERO dentro de su categoría — lo
+    //  primero que lee la ficha es lo que el grimorio ES.
     // ======================================================================
-    public class EstrellasNegrasInfoElement : IBestiaryInfoElement, IProvideSearchFilterString
+    public class EstrellasNegrasInfoElement : IBestiaryInfoElement,
+        IProvideSearchFilterString, ICategorizedBestiaryInfoElement,
+        IBestiaryPrioritizedElement
     {
+        /// <summary>LA CATEGORÍA: el cuadro del RETRATO — donde vivían
+        /// las cinco estrellas amarillas de vanilla.</summary>
+        public UIBestiaryEntryInfoPage.BestiaryInfoCategory ElementCategory
+            => UIBestiaryEntryInfoPage.BestiaryInfoCategory.Portrait;
+
+        /// <summary>PRIMERA dentro de su categoría (las líneas de sabor
+        /// van después de la fila de estrellas).</summary>
+        public float OrderPriority => 10f;
+
         public UIElement ProvideUIElement(BestiaryUICollectionInfo info)
         {
             var elem = new EstrellasNegrasElemento();
@@ -95,28 +116,6 @@ namespace AethonMod.Content.Bestiary
                 }
                 catch { }
             }
-        }
-    }
-
-    // ======================================================================
-    //  EL ORDEN DEL CATÁLOGO (v6.51.1) — LA LETRA: «debería ser el
-    //  último número o no tener número». Su número de orden en el
-    //  bestiario viaja en ContentSamples.NpcBestiarySortingId — este
-    //  sistema lo empuja AL FINAL de la lista (el último número del
-    //  catálogo: donde se archiva lo que no debió catalogarse).
-    // ======================================================================
-    public class OrdenDelCatalogoSistema : ModSystem
-    {
-        public override void PostSetupContent()
-        {
-            try
-            {
-                int tipo = ModContent.NPCType<global::AethonMod.Content.NPCs.GrimorioDormido>();
-                if (ContentSamples.NpcBestiarySortingId != null &&
-                    ContentSamples.NpcBestiarySortingId.ContainsKey(tipo))
-                    ContentSamples.NpcBestiarySortingId[tipo] = 9_999_999;   // EL ÚLTIMO
-            }
-            catch { }
         }
     }
 }

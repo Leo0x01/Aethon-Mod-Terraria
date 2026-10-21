@@ -148,18 +148,40 @@ namespace AethonMod.Content.NPCs
 
         public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
         {
-            // v6.51.0 — EL BESTIARIO DE LA LETRA: «está mal colocado y
-            // fuera de su casilla… debería ser el último número o no
-            // tener número, tener algo como el símbolo ???? o algo como
-            // el símbolo de infinito» — EL RÓTULO: ni número ni casilla:
-            // ∞ · ????? (FUERA DEL CATÁLOGO), el sabor del libro y su
-            // rareza IMPOSIBLE (la línea del infinito antes que nada).
+            // v6.51.2 — LA CIRUGÍA DEL CATÁLOGO (las DOS curas del
+            // playtest: «el número 42 aparece» y «sigue teniendo una
+            // rareza de 4 de 5 estrellas, no las 10 estrellas que pedí»
+            // — investigado al IL de tModLoader 2026.08.3.0):
+            //
+            //  · EL NÚMERO: lo dibuja UIBestiaryEntryButton leyendo el
+            //    ÚNICO elemento NPCNetIdBestiaryInfoElement (su
+            //    BestiaryDisplayIndex = el ID de orden del catálogo).
+            //    REMOVE ALL: la tarjeta NACE sin número — y de propina
+            //    ordena al FINAL del sort por número («el último»).
+            //    (El intento v6.51.1 de escribir NpcBestiarySortingId
+            //    era código muerto: ModContent.SetupBestiary RECONSTRUYE
+            //    el diccionario DESPUÉS de PostSetupContent.)
+            //  · LAS ESTRELLAS AMARILLAS: NO las dibuja la tarjeta —
+            //    son el NPCPortraitInfoElement de la FICHA, alimentado
+            //    por ContentSamples.NpcBestiaryRarityStars (la fórmula
+            //    clamp(5): con 150.000 de vida el grimorio da 4). Se
+            //    SUSTITUYE por un retrato SIN estrellas (ctor null: el
+            //    elemento ni dibuja el contenedor) y las DIEZ NEGRAS
+            //    viven en SU elemento, ahora en la MISMA categoría del
+            //    retrato (UIBestiaryEntryInfoPage.BestiaryInfoCategory
+            //    .Portrait — antes caían en Misc, al fondo de la ficha).
+            bestiaryEntry.Info.RemoveAll(e => e is NPCNetIdBestiaryInfoElement);
+            int idxRetrato = bestiaryEntry.Info.FindIndex(e => e is NPCPortraitInfoElement);
+            if (idxRetrato >= 0)
+                bestiaryEntry.Info[idxRetrato] = new NPCPortraitInfoElement(null);
+
+            // v6.51.0 — EL RÓTULO DE SIEMPRE: ∞ · ????? (FUERA DEL
+            // CATÁLOGO), el sabor del libro y su rareza IMPOSIBLE.
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
             {
-                // v6.51.1 — LAS DIEZ ESTRELLAS NEGRAS, PRIMERAS (la letra:
-                // «10 estrellas negras brillantes y titilantes» — la fila
-                // titilante ANTES que todo: lo primero que lee el catálogo
-                // es lo que el grimorio ES).
+                // v6.51.1 — LAS DIEZ ESTRELLAS NEGRAS (la letra: «10
+                // estrellas negras brillantes y titilantes» — ahora en
+                // la categoría PORTRAIT: donde estaban las amarillas).
                 new global::AethonMod.Content.Bestiary.EstrellasNegrasInfoElement(),
                 new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Numero"),
                 new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.GrimorioDormido.Bestiario"),

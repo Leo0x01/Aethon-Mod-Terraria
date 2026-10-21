@@ -245,6 +245,7 @@ Items: {
 			doesn't insist).
 			'''
 	}
+
 	EcoDelDespertar: {
 		DisplayName: Echo of Awakening
 		Tooltip:
@@ -472,7 +473,6 @@ Items: {
 		DisplayName: Seer Orb
 		Tooltip: ""
 	}
-
 
 	SunStaff: {
 		DisplayName: Sun
@@ -1983,6 +1983,10 @@ Projectiles: {
 	CaidaCometaProjectile.DisplayName: Caida Cometa Projectile
 	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
 	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
+	EscupidizoProjectile.DisplayName: Escupidizo Projectile
+	RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
+	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
+	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
 }
 
 Buffs: {
@@ -2427,7 +2431,6 @@ Despertar: {
 		Here: I spit him out as your pet. Feed him silence.
 		'''
 }
-
 
 TestingPlayer: {
 	Bolsas: The arsenal bags arrive with you (one per category): right click to open each one.
@@ -3043,11 +3046,10 @@ Pueblo: {
 	}
 }
 
-Tiles.AltarDeLaCaida.MapEntry: Altar of the Fall
-Tiles.BrumaAltarTile.MapEntry: Mist (relic of the old fall)
-Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.
-
-// v6.51.1 — LA RAREZA CÓSMICA DEL ETERNO
-Rarities: {
-	LegendarioSupremo: Supreme Legendary
+Tiles: {
+	AltarDeLaCaida.MapEntry: Altar of the Fall
+	BrumaAltarTile.MapEntry: Mist (relic of the old fall)
 }
+
+Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.
+Rarities.LegendarioSupremo: Supreme Legendary

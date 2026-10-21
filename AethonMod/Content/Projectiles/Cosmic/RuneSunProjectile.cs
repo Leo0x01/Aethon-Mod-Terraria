@@ -159,7 +159,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === MOVIMIENTO: deriva lenta + persecución suave ===
+            // v6.51.2 — EL SEGUIMIENTO QUE CRECE CON EL NIVEL DEL
+            //     GRIMORIO (la letra: «por defecto un seguimiento simple
+            //     y lento después de ser lanzado por los minions, y a
+            //     partir de nivel 100 del grimorio el seguimiento aumenta
+            //     un poquito más hasta tener un seguimiento muy agresivo
+            //     a nivel 1000 del grimorio»).
             Projectile.velocity *= 0.97f;
+
+            int nivelLibro = Content.Systems.WeaponScaling.NivelDelDuenio(Projectile);
+            float homAcel = Content.Systems.WeaponScaling.HomingAcel(nivelLibro);
+            float homTope = Content.Systems.WeaponScaling.HomingTope(nivelLibro);
 
             NPC prey = FindNearestEnemy(560f);
             if (prey != null)
@@ -167,9 +177,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 toPrey = prey.Center - Projectile.Center;
                 float len = toPrey.Length();
                 if (len > 60f && len > 0.01f)
-                    Projectile.velocity += toPrey / len * 0.9f;
-                if (Projectile.velocity.Length() > 3f)
-                    Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 3f;
+                    Projectile.velocity += toPrey / len * 0.9f * homAcel;
+                float tope = 3f * homTope;
+                if (Projectile.velocity.Length() > tope)
+                    Projectile.velocity = Vector2.Normalize(Projectile.velocity) * tope;
             }
 
             // === LUZ DEL SOL (cálida, crece con la gigante) ===

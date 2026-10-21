@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.GameContent.Bestiary;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Systems;
 using AethonMod.Content.Projectiles.Jefes;
@@ -181,6 +182,17 @@ namespace AethonMod.Content.NPCs
             NPC.width = 770;
             NPC.height = 770;
             NPC.lifeMax = 3_000_000;
+        }
+
+        // v6.51.2 — SU LÍNEA DEL BESTIARIO (la kill se registra con la
+        // MUERTE REAL del cine — esta es la ficha del RECUERDO COMPLETO).
+        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+        {
+            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
+            {
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonBoss.Bestiary"),
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonBossFusionado.Bestiary"),
+            });
         }
 
         protected override void PasoFusionPrevia()

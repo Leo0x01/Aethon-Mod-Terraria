@@ -115,6 +115,16 @@ namespace AethonMod.Content.Systems
         // del libro (no la Carnada). Solo las victorias naturales suben
         // el FuriaNivel persistente del portador.
         private static bool _esNatural = false;
+
+        // v6.51.2 — LA NOCHE DEL FESTÍN (la letra: «el bioma no debe
+        // cambiar por nada hasta que las oleadas no terminen»): mientras
+        // el festín viva, el mundo vive en SU noche — prestada a nivel
+        // del SISTEMA (el préstamo por-AI de los guardianes nunca llega
+        // al render: se devuelve en su PostAI antes del dibujo). Ni la
+        // nova de un sol rúnico ni la caída del guardián apagan el
+        // ambiente: la noche y la bruma del festín mueren con el festín.
+        private static bool _prestaNoche = false;
+        private static bool _diaOriginalNoche = true;
         // v6.50.59 — LA MEZCLA DE BIOMAS DEL NIVEL (la letra: «a mayor
         // nivel de oleada mas monstruos de biomas diferentes aparecen,
         // siempre usando los biomas disponibles en el momento»): el festín
@@ -196,8 +206,7 @@ namespace AethonMod.Content.Systems
             {
                 NPC c = Main.npc[i];
                 if (c == null || !c.active || c.type < min || c.type > max) continue;
-                var sello = c.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.EsDeOleada) n++;
+                if (c.TryGetGlobalNPC<OleadaNPC>(out var sello) && sello.EsDeOleada) n++;
             }
             return n;
         }
@@ -483,6 +492,35 @@ namespace AethonMod.Content.Systems
         /// — y los guardados viejos se resetean a 1 una única vez (el
         /// marcador furiaV2 de ShardPlayer).
         /// </summary>
+        /// <summary>v6.51.2 — LA NOCHE DEL FESTÍN: se pide al arrancar y
+        /// se REFRESCA cada tick (si el reloj de vanilla cruzó el alba y
+        /// volteó el día, se re-afirma: el festín no conoce amaneceres).
+        /// La devolución vive en Terminar/OnWorldUnload.</summary>
+        private static void PrestarNocheDelFestin()
+        {
+            try
+            {
+                if (_prestaNoche) return;
+                _diaOriginalNoche = Main.dayTime;
+                _prestaNoche = true;
+                Main.dayTime = false;
+            }
+            catch { }
+        }
+
+        /// <summary>La noche se devuelve al mundo cuando el festín
+        /// muere (vencido, cancelado o mundo descargado).</summary>
+        private static void DevolverNocheDelFestin()
+        {
+            try
+            {
+                if (!_prestaNoche) return;
+                _prestaNoche = false;
+                Main.dayTime = _diaOriginalNoche;
+            }
+            catch { _prestaNoche = false; }
+        }
+
         public static void Provocar(Player jugador, int oleadas, bool natural = false)
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return; // el servidor manda
@@ -510,6 +548,11 @@ namespace AethonMod.Content.Systems
             _firmaBioma = "";
             _fase = Fase.Llamada;
             _ticksFase = 0;
+            // v6.51.2 — LA NOCHE DEL FESTÍN: el ambiente nace con el
+            // festín (oscurecido con bruma: el mundo es SU propio
+            // ambiente — «el bioma no debe cambiar por nada hasta que
+            // las oleadas no terminen»).
+            PrestarNocheDelFestin();
             // v6.50.2 — EL FESTÍN CAMINA (cada cambio de fase): el estado
             // viaja al portador dentro del MsgHambre para SU diagnóstico.
             EcoRed.SincronizarHambre(jugador); // no-op fuera del servidor
@@ -545,9 +588,58 @@ namespace AethonMod.Content.Systems
             // v6.50.48 - LA EXTENSION DEL DEVORADOR corre siempre que haya
             // un pendiente (la fase puede cambiar debajo).
             try { ProcesarExtensionDevorador(); } catch { _pendCabeza = -1; }
-            if (_fase == Fase.Inactivo) return;
+            if (_fase == Fase.Inactivo)
+            {
+                DevolverNocheDelFestin();   // v6.51.2 — la red de seguridad
+                return;
+            }
+            // v6.51.2 — LA NOCHE DEL FESTÍN: mientras el festín viva, el
+            // mundo ES su ambiente — la noche se mantiene (y se re-afirma
+            // si el reloj del juego volteó el alba) y la BRUMA AMBIENTE
+            // respira alrededor del portador: ni la nova de un sol rúnico
+            // ni la caída de un guardián pueden apagar el bioma del
+            // festín (la letra: «el bioma no debe cambiar por nada hasta
+            // que las oleadas no terminen»).
+            if (!_prestaNoche) PrestarNocheDelFestin();
+            else Main.dayTime = false;
+            try { BrumaAmbienteDelFestin(); } catch { }
             try { Paso(); }
             catch { Terminar(); }
+        }
+
+        /// <summary>v6.51.2 — LA BRUMA AMBIENTE DEL FESTÍN: el
+        /// oscurecido "con bruma y efectos" ya no depende de cuánta
+        /// chusma viva (la nova de un sol podía borrarla de un golpe —
+        /// "el bioma cambia a uno normal por unos segundos"): mientras
+        /// el festín viva, la bruma respira alrededor del portador,
+        /// SIEMPRE — las auras de la chusma son el EXTRA, no el piso.
+        /// Corre en el reloj del mundo (autoridad); los polvos nacen
+        /// en el mundo y viajan por su propio cable a todas las
+        /// pantallas.</summary>
+        private static void BrumaAmbienteDelFestin()
+        {
+            if (Main.gameMenu) return;
+            Player portador = Portador;
+            if (portador == null || !portador.active || portador.dead) return;
+            if (Main.netMode == NetmodeID.Server && Main.dedServ) return;   // sin polvos en el dedicado pelado
+            if (Main.GameUpdateCount % 5u != 0u) return;
+
+            // La nube PERMANENTE alrededor del portador (el aura del
+            // festín entero): jirones violetas que derivan hacia arriba.
+            int cuantos = 2;
+            for (int i = 0; i < cuantos; i++)
+            {
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                float lejos = Main.rand.NextFloat(120f, 620f);
+                Vector2 pos = portador.Center + new Vector2(
+                    MathF.Cos(ang) * lejos, MathF.Sin(ang) * lejos * 0.62f);
+                Dust d = Dust.NewDustPerfect(pos, DustID.Shadowflame,
+                    new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
+                        Main.rand.NextFloat(-0.9f, -0.25f)),
+                    130, new Color(96, 46, 150), Main.rand.NextFloat(0.9f, 1.6f));
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
         }
 
         private static void Paso()
@@ -794,8 +886,8 @@ namespace AethonMod.Content.Systems
                 {
                     NPC c = Main.npc[i];
                     if (c == null || !c.active || c.townNPC) continue;
-                    var sello = c.GetGlobalNPC<Globals.OleadaNPC>();
-                    if (sello != null && sello.EsDeOleada && !sello.EsJefeDeOleada)
+                    if (c.TryGetGlobalNPC<Globals.OleadaNPC>(out var sello) &&
+                        sello.EsDeOleada && !sello.EsJefeDeOleada)
                         vivos++;
                 }
                 if (vivos < 3)
@@ -879,6 +971,27 @@ namespace AethonMod.Content.Systems
         {
             NPC jefe = (_bossIdx >= 0 && _bossIdx < Main.maxNPCs) ? Main.npc[_bossIdx] : null;
 
+            // v6.51.2 — LA LECTURA SEGURA DEL SELLO (LA CURA DEL FESTÍN
+            // QUE MORÍA CON SU GUARDIÁN — el bug del playtest: «las
+            // oleadas terminan solo en la primera oleada sin importar el
+            // nivel»). LA CAUSA (verificada al IL de tModLoader
+            // 2026.08.3.0): el jefe de oleada muere AISLADO (v6.50.116 —
+            // type=0/netID=0 para que vanilla no cuente sus cambios de
+            // mundo)… y con type==0 el array de globals del NPC ya no
+            // contiene a OleadaNPC (GlobalLoaderUtils.SetDefaults retorna
+            // temprano con Type==0 y TryGetGlobal cae al singleton que no
+            // aplica): GetGlobalNPC lanzaba KeyNotFoundException —
+            // desnuda en FaseJefe — y el catch de PostUpdateWorld la
+            // convertía en Terminar(): EL FESTÍN ENTERO moría al caer el
+            // primer guardián, en cualquier nivel. AHORA la lectura es
+            // TryGetGlobalNPC (false sin excepción) y la VICTORIA del
+            // jefe aislado se valida por el SLOT: whoAmI nuestro + vida
+            // pagada + la especie que el sistema reservó al nacer (un
+            // slot reciclado por un NPC nuevo SIEMPRE llega con vida).
+            Globals.OleadaNPC sello = null;
+            if (jefe != null && jefe.TryGetGlobalNPC<Globals.OleadaNPC>(out var selloVivo))
+                sello = selloVivo;
+
             // v6.50.1 — FIX (EL SLOT HUÉRFANO + LA HUIDA QUE ERA VICTORIA):
             // (a) _bossIdx es un whoAmI reciclable — si el jefe moría y el
             // slot se re-llenaba con otro NPC, la furia miraba al EXTRAÑO
@@ -886,27 +999,19 @@ namespace AethonMod.Content.Systems
             // OleadaNPC valida que el slot siga siendo del festín.
             // (b) un jefe que se DESPAWNEA solo (amanecer, distancia) no
             // debe entregar el DerrotaOleada10: solo la MUERTE (life ≤ 0,
-            // confirmada por el sello) paga. La instancia muerta conserva
-            // el sello (solo NewNPC lo resetea) y el reciclado lo pierde.
-            var sello = jefe != null ? jefe.GetGlobalNPC<Globals.OleadaNPC>() : null;
-            // v6.50.2 — FIX (carrera del slot reciclado en FaseJefe): además
-            // del sello, la ESPECIE — el type del jefe se fija al spawnear
-            // (_tipoJefeOleada). Un town NPC que recicle el slot del jefe
-            // muerto en el MISMO tick (UpdateTime corre ANTES de
-            // PostUpdateWorld) queda fuera del festín por AMBAS puertas: no
-            // roba el crédito de DerrotaOleada10 ni sufre el timeout como
-            // si fuera el guardián.
-            // v6.50.116 — EL SELLO RESERVADO: el jefe muere AISLADO (type
-            // en 0 para vanilla — la letra: «los jefes de las oleadas no
-            // deben contar para los cambios del mundo») — la ESPECIE del
-            // festín se lee TAMBIÉN del sello reservado para que la
-            // victoria del JUICIO siga cobrando su DerrotaOleada10.
+            // confirmada) paga. v6.50.2 — la ESPECIE (_tipoJefeOleada) se
+            // fija al spawnear. v6.50.116 — el sello reservado guarda la
+            // especie del aislado. v6.51.2 — y el AISLADO (sin sello
+            // legible) paga por el SLOT: whoAmI + vida + especie.
             bool esDelFestin = sello != null && sello.EsJefeDeOleada &&
                 _tipoJefeOleada > 0 && (jefe.type == _tipoJefeOleada ||
                 sello.TipoReservado == _tipoJefeOleada);
+            bool slotDelFestin = jefe != null && _bossIdx >= 0 &&
+                jefe.whoAmI == _bossIdx && _tipoJefeOleada > 0 && jefe.life <= 0;
 
-            // EL JEFE CALLÓ (vida ≤ 0 con sello) → la oleada se completa
-            if (esDelFestin && jefe.life <= 0)
+            // EL JEFE CALLÓ (vida ≤ 0: con sello legible — o ya AISLADO,
+            // que también murió) → la oleada se completa
+            if ((esDelFestin && jefe != null && jefe.life <= 0) || slotDelFestin)
             {
                 // v6.48 — LA OLEADA 10 VENCIDA: el portador gana el
                 // DERECHO A LAS ESENCIAS (la marca persiste en SU
@@ -933,8 +1038,10 @@ namespace AethonMod.Content.Systems
             }
 
             // EL JEFE YA NO ESTÁ (slot reciclado, nunca nació o se fue
-            // solo) → la furia sigue SIN crédito de victoria.
-            if (!esDelFestin || !jefe.active)
+            // solo) → la furia sigue SIN crédito de victoria. (v6.51.2:
+            // con jefe==null el GetGlobal viejo NRE-aba → Terminar() —
+            // otro festín muerto si el spawn del guardián fallaba.)
+            if (jefe == null || !esDelFestin || !jefe.active)
             {
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
@@ -1056,7 +1163,8 @@ namespace AethonMod.Content.Systems
                 if (jefe == null || !jefe.active) return;
 
                 // EL SELLO DEL JUICIO: ×15 en TODO, aura del JUICIO.
-                jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, 11, jefe: true, especial: true);
+                if (jefe.TryGetGlobalNPC<OleadaNPC>(out var selloJuicio))
+                    selloJuicio.Marcar(jefe, 11, jefe: true, especial: true);
                 jefe.netUpdate = true;
 
                 _spawneados++;
@@ -1099,8 +1207,8 @@ namespace AethonMod.Content.Systems
             {
                 NPC n = Main.npc[i];
                 if (n == null || !n.active) continue;
-                var sello = n.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.EsDeOleada && sello.EsEspecial && sello.EsJefeDeOleada)
+                if (n.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
+                    sello.EsDeOleada && sello.EsEspecial && sello.EsJefeDeOleada)
                     vivos++;
             }
 
@@ -1436,7 +1544,8 @@ namespace AethonMod.Content.Systems
                 // ya no pasa por jefe del festín).
                 _tipoJefeOleada = tipo;
 
-                jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true, nivel: _nivelFuria);
+                if (jefe.TryGetGlobalNPC<OleadaNPC>(out var selloGuardian))
+                    selloGuardian.Marcar(jefe, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 jefe.netUpdate = true;
                 // v6.50.72 — LA REGLA DE LOS ÚLTIMOS DOS: el guardián que
                 // acaba de nacer queda VETADO para las DOS oleadas que
@@ -1495,7 +1604,8 @@ namespace AethonMod.Content.Systems
                 NPC raro = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
                 if (raro == null || !raro.active) return;
 
-                raro.GetGlobalNPC<OleadaNPC>().Marcar(raro, _oleadaActual, jefe: true, nivel: _nivelFuria);
+                if (raro.TryGetGlobalNPC<OleadaNPC>(out var selloRaro))
+                    selloRaro.Marcar(raro, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 raro.netUpdate = true;
 
                 // EL ANUNCIO DE LA RAREZA (color propio: la escarcha).
@@ -1526,6 +1636,10 @@ namespace AethonMod.Content.Systems
 
         private static void Terminar()
         {
+            // v6.51.2 — LA NOCHE SE DEVUELVE (el festín murió: el mundo
+            // recupera SU día — la saciedad también es visual).
+            DevolverNocheDelFestin();
+
             // v6.50.2 — EL FESTÍN CAMINA: el estado final (Inactivo) también
             // viaja — sin esto el F8 del portador mostraba el último festín
             // "en marcha" para siempre. ANTES de resetear _jugador (lo
@@ -1655,9 +1769,9 @@ namespace AethonMod.Content.Systems
                 {
                     NPC n = Main.npc[i];
                     if (n == null || !n.active) continue;
-                    var sello = n.GetGlobalNPC<OleadaNPC>();
-                    if (sello != null && sello.EsDeOleada && sello.EsEspecial &&
-                        sello.EsJefeDeOleada) vivos++;
+                    if (n.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
+                        sello.EsDeOleada && sello.EsEspecial && sello.EsJefeDeOleada)
+                        vivos++;
                 }
                 puntos = Math.Max(0, GuardianesJuicio - vivos);
                 requeridos = GuardianesJuicio;

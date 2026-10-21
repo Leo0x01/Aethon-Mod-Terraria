@@ -197,21 +197,34 @@ namespace AethonMod.Content.Projectiles
 
                     // EL VACÍO CENTRAL (lo que no deja ver): un corazón
                     // oscuro ALFA con rim violeta — sutil, la niebla manda.
+                    // v6.51.2 — LA CURA DEL DRAW DESNUDO (la excepción del
+                    // client.log: «Draw was called, but Begin has not yet
+                    // been called»): después de SombrasLib.Bruma el lote
+                    // de vanilla está CERRADO — estos dos Draws viven ahora
+                    // en SU PROPIO lote (abrir → dibujar → cerrar,
+                    // blindado try/finally).
                     Texture2D glow = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     if (glow != null)
                     {
-                        Vector2 posScr = centro - Main.screenPosition;
-                        Main.spriteBatch.Draw(glow, posScr, null,
-                            new Color(16, 7, 28) * (0.85f * crecimiento),
-                            0f, glow.Size() * 0.5f,
-                            new Vector2(RADIO * 1.25f, RADIO * 0.92f) * crecimiento / glow.Size(),
-                            SpriteEffects.None, 0f);
-                        Main.spriteBatch.Draw(glow, posScr, null,
-                            new Color(70, 38, 120) * (0.16f * vida),
-                            0f, glow.Size() * 0.5f,
-                            new Vector2(RADIO * 1.9f, RADIO * 1.5f) * crecimiento / glow.Size(),
-                            SpriteEffects.None, 0f);
+                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                            Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                            null, Main.GameViewMatrix.TransformationMatrix);
+                        try
+                        {
+                            Vector2 posScr = centro - Main.screenPosition;
+                            Main.spriteBatch.Draw(glow, posScr, null,
+                                new Color(16, 7, 28) * (0.85f * crecimiento),
+                                0f, glow.Size() * 0.5f,
+                                new Vector2(RADIO * 1.25f, RADIO * 0.92f) * crecimiento / glow.Size(),
+                                SpriteEffects.None, 0f);
+                            Main.spriteBatch.Draw(glow, posScr, null,
+                                new Color(70, 38, 120) * (0.16f * vida),
+                                0f, glow.Size() * 0.5f,
+                                new Vector2(RADIO * 1.9f, RADIO * 1.5f) * crecimiento / glow.Size(),
+                                SpriteEffects.None, 0f);
+                        }
+                        finally { Main.spriteBatch.End(); }
                     }
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }

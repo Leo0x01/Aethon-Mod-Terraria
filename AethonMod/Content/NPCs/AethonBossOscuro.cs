@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.GameContent.Bestiary;
 
 namespace AethonMod.Content.NPCs
 {
@@ -95,6 +96,17 @@ namespace AethonMod.Content.NPCs
             // LA MITAD OSCURA (la letra): 1.4 M de vida — la misma furia
             // (daño, defensa, IA y fases INTACTOS heredados de la base).
             NPC.lifeMax = 1_400_000;
+        }
+
+        // v6.51.2 — SU LÍNEA DEL BESTIARIO (la kill se registra con la
+        // MUERTE REAL del cine — esta es la ficha del GEMELO DE OSCURIDAD).
+        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+        {
+            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
+            {
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonBoss.Bestiary"),
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonBossOscuro.Bestiary"),
+            });
         }
 
         /// <summary>

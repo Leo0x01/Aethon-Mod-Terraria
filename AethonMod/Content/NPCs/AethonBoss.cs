@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.GameContent.Bestiary;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Systems;
 using AethonMod.Content.Projectiles.Jefes;
@@ -504,6 +505,27 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             NPC.netAlways = true;
             Music = MusicID.Boss5;
             SceneEffectPriority = SceneEffectPriority.BossHigh;
+        }
+
+        // ================================================================
+        //  v6.51.2 — EL BESTIARIO DE AETHON (la letra: «el jefe Aethon
+        //  debe estar también en el bestiario y no aparece»). LA CAUSA
+        //  (investigada al IL): el cine de muerte CERRABA al jefe con
+        //  NPC.active=false a mano — CheckDead devolvía false SIEMPRE,
+        //  NPCLoot jamás corría y el bestiario de tModLoader desbloquea
+        //  a los JEFES por MUERTE REGISTRADA (Main.BestiaryTracker.Kills
+        //  .RegisterKill, con quickUnlock: UNA kill = ficha completa).
+        //  Con la MUERTE REAL de abajo (la cura), la kill se registra
+        //  sola — y esta entrada le pone SU sabor al catálogo (los tres
+        //  cuerpos del dios comparten la ficha base; los gemelos y el
+        //  Recuerdo llevan SU línea propia en sus overrides).
+        // ================================================================
+        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+        {
+            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
+            {
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonBoss.Bestiary"),
+            });
         }
 
         // ==================================================================
@@ -2944,6 +2966,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         -1, -1, null, hermano.whoAmI);
                 }
 
+                // v6.51.2 — LOS GEMELOS TAMBIÉN ENTRAN AL CATÁLOGO: no
+                // mueren — se COMPLETAN — pero el bestiario los conoce
+                // desde hoy (la kill se registra por su cuenta; la ficha
+                // del RECUERDO llega con SU muerte real del cine).
+                try
+                {
+                    Main.BestiaryTracker.Kills.RegisterKill(NPC);
+                    Main.BestiaryTracker.Kills.RegisterKill(hermano);
+                }
+                catch { }
+
                 // EL NACIMIENTO DEL RECUERDO COMPLETO: en el punto exacto
                 // del abrazo, con la vida entera y la presa heredada.
                 int idx = NPC.NewNPC(NPC.GetSource_FromAI(), (int)cuna.X, (int)cuna.Y,
@@ -3152,7 +3185,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         public override bool CheckDead()
         {
-            if (_muriendo) return false;
+            // v6.51.2 — LA MUERTE REAL AL FINAL DEL CINE (la cura del
+            // bestiario): mientras agoniza, el cine manda (false)… PERO
+            // cuando el CineMuerte ya pagó su estallido y puso la vida
+            // en 0, la muerte de vanilla CORRE (true) — NPCLoot registra
+            // la kill (la ficha del bestiario, con quickUnlock de jefe),
+            // los banners y los downed. El OnKill de respaldo tiene el
+            // guard _yaDropeo: nada se paga dos veces.
+            if (_muriendo) return NPC.life <= 0;
             // v6.50.117 — EL GUARD DE LA FUSIÓN: en plena órbita o cine el
             // fragmento NO muere (la fusión apaga a los dos por su propio
             // cauce — sin botín, sin muerte doble).
@@ -3337,6 +3377,19 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
                     DropBotin();
                     DisolverManada();   // v6.50.45 — sin luz que los mande, los cazadores se apagan
+
+                    // v6.51.2 — LA MUERTE DE VERDAD (la letra: «el jefe
+                    // Aethon debe estar también en el bestiario»): la
+                    // vida a 0 + el checkDead de vanilla corren TODO el
+                    // funeral del motor — RegisterKill (bestiario,
+                    // quickUnlock de jefe: 1 kill = ficha completa),
+                    // banners, downed, la voz del libro (GlobalNPCXP) y
+                    // la XP del grimorio. Nuestro CheckDead devuelve
+                    // true (muriendo + vida pagada) y el OnKill de
+                    // respaldo calla por _yaDropeo: el botín ya cayó.
+                    NPC.life = 0;
+                    NPC.netUpdate = true;
+                    try { NPC.checkDead(); } catch { }
                 }
 
                 // v6.50.79 — LA DESPEDIDA DE VERDAD (la cura del jefe
@@ -3394,108 +3447,25 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
         }
 
-        /// <summary>EL BOTÍN (el método de siempre, llamado por el cine —
-        /// v6.50.117: virtual, el gemelo NUNCA paga y el fusionado paga
-        /// TODO + una esencia extra).</summary>
+        /// <summary>EL BOTÍN DE LA LETRA (v6.51.2): «cuando muere Aethon
+        /// su loot debe ser su mascota de luz, 20 esencia corruptas y 10
+        /// platino, al menos por ahora» — TODOS los caminos de muerte
+        /// pagan EXACTAMENTE eso (el Recuerdo Completo lo tiene en SU
+        /// override; este es el del fragmento que cae sin fusión). El
+        /// botín viejo — la esencia de Aethon, la Forma Ascendida, los
+        /// 250 fragmentos, la bolsa de la cría — RETIRADO: la carta
+        /// nueva manda. (v6.50.117: virtual, el gemelo oscuro NUNCA
+        /// paga y el fusionado paga TODO en SU override.)</summary>
         protected virtual void DropBotin()
         {
             if (_yaDropeo) return;
             _yaDropeo = true;
-            EsenciasModSistema.SoltarEsencia(NPC);
-            Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
-                ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(), 1);
-            // v6.50.120 — EL 20% DE AZAR MURIÓ (la letra: «además no tengo
-            //     la bolsa, no olvides que debes dárselo al jugador»):
-            //     desde la .49 la cría vivía en un drop al suelo de 20%
-            //     (y desde la .119 en SU BOLSA) — dependía de que el
-            //     jugador lo RECOGIERA y el azar podía negarla por
-            //     siempre. AHORA la bolsa LLEGA A LA MANO (LA ENTREGA,
-            //     más abajo: la primera victoria de la familia la pone
-            //     DIRECTO en el inventario del verdugo, una sola vez
-            //     por jugador para siempre). El Recuerdo Completo la
-            //     sigue dropeando SIEMPRE al suelo en su propio
-            //     override — suyo es el botín de la fusión.
-
-            int killerWho = NPC.lastInteraction;
-            if (killerWho < 0 || killerWho >= Main.player.Length)
-            {
-                for (int i = 0; i < Main.player.Length; i++)
-                {
-                    if (Main.player[i] != null && Main.player[i].active && NPC.playerInteraction[i])
-                    {
-                        killerWho = i;
-                        break;
-                    }
-                }
-            }
-            if (killerWho >= 0 && killerWho < Main.player.Length)
-            {
-                Player player = Main.player[killerWho];
-                if (player != null && player.active)
-                {
-                    var sp = player.GetModPlayer<Players.ShardPlayer>();
-                    if (sp != null)
-                    {
-                        sp.ResonanceShards += 250;
-                        EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
-                            new Color(245, 196, 81), NPC.FullName, 250);
-                        EcoRed.SincronizarCronica(player);
-
-                        // v6.50.120 — LA BOLSA A LA MANO (la letra: «además
-                        //     no tengo la bolsa, no olvides que debes dárselo
-                        //     al jugador»): el drop al suelo dependía de que
-                        //     el jugador lo RECOGIERA — AHORA la primera
-                        //     victoria de la familia (un gemelo final o EL
-                        //     RECUERDO COMPLETO) ENTREGA LA BOLSA DE LA
-                        //     CRÍA directamente al inventario del verdugo,
-                        //     una sola vez por jugador para siempre (la
-                        //     pareja de mascotas es suya aunque la pierda).
-                        if (!sp.BolsaCriaEntregada)
-                        {
-                            sp.BolsaCriaEntregada = true;
-                            bool aLaMano = false;
-                            for (int i = 0; i < 58; i++)
-                            {
-                                if (player.inventory[i] == null || player.inventory[i].type == ItemID.None)
-                                {
-                                    player.inventory[i].SetDefaults(ModContent.ItemType<Items.Llamados.BolsaDeLaCria>());
-                                    player.inventory[i].stack = 1;
-                                    aLaMano = true;
-                                    break;
-                                }
-                            }
-                            if (!aLaMano)
-                            {
-                                int caida = Item.NewItem(player.GetSource_GiftOrReward(),
-                                    player.Center, ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1);
-                                if (caida >= 0 && caida < Main.item.Length)
-                                    Main.item[caida].noGrabDelay = 0;   // a sus pies: recogerla es instantáneo
-                            }
-                            // LA FANFARRIA (el momento de la casa): la MITAD
-                            // de las chispas DORADAS (la cría de luz) y la
-                            // MITAD MORADAS (la gemela oscura).
-                            if (!Main.dedServ)
-                            {
-                                for (int i = 0; i < 26; i++)
-                                {
-                                    float angF = Main.rand.NextFloat(MathHelper.TwoPi);
-                                    bool luzF = (i & 1) == 0;
-                                    Dust dF = Dust.NewDustPerfect(player.Center,
-                                        luzF ? DustID.GoldFlame : DustID.PurpleTorch,
-                                        new Vector2(MathF.Cos(angF), MathF.Sin(angF)) * Main.rand.NextFloat(1.6f, 4.2f),
-                                        180, luzF ? new Color(255, 222, 130) : new Color(150, 70, 220), 0.9f);
-                                    dF.noGravity = true;
-                                }
-                                Lighting.AddLight(player.Center, 0.75f, 0.62f, 0.95f);
-                            }
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4.WithPitchOffset(-0.25f), player.Center);
-                            EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.BolsaCria.Entregada",
-                                new Color(230, 196, 255));
-                        }
-                    }
-                }
-            }
-            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reconocimiento", PaletaOro);
+            var srcLetra = NPC.GetSource_Loot();
+            Item.NewItem(srcLetra, NPC.Center,
+                ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
+            Item.NewItem(srcLetra, NPC.Center,
+                ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 20);
+            Item.NewItem(srcLetra, NPC.Center, ItemID.PlatinumCoin, 10);
         }
 
         /// <summary>Fallback exótico (si algo mata por fuera del cine).</summary>

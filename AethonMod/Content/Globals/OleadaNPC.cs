@@ -590,8 +590,10 @@ namespace AethonMod.Content.Globals
                 if (source is EntitySource_Parent padre && padre.Entity is NPC papi &&
                     papi.active)
                 {
-                    var selloPapi = papi.GetGlobalNPC<OleadaNPC>();
-                    if (selloPapi != null && selloPapi.EsDeOleada)
+                    // v6.51.2 — TryGet (la lectura segura: un padre aislado
+                    // ya no tiene el global legible y GetGlobal lanzaba).
+                    if (papi.TryGetGlobalNPC<OleadaNPC>(out var selloPapi) &&
+                        selloPapi.EsDeOleada)
                     {
                         Marcar(npc, selloPapi.Oleada, selloPapi.EsJefeDeOleada, selloPapi.EsEspecial,
                             selloPapi.Nivel);
@@ -1645,8 +1647,8 @@ namespace AethonMod.Content.Globals
             if (idx < 0 || idx >= Main.maxNPCs) return null;
             NPC n = Main.npc[idx];
             if (n == null || !n.active) return null;
-            var sello = n.GetGlobalNPC<OleadaNPC>();
-            if (sello != null && sello.EsDeOleada) sello.EsJefeDeOleada = false; // chusma: oro, no platino
+            if (n.TryGetGlobalNPC<OleadaNPC>(out var sello) && sello.EsDeOleada)
+                sello.EsJefeDeOleada = false; // chusma: oro, no platino
             n.netUpdate = true;
             return n;
         }
@@ -2037,7 +2039,9 @@ namespace AethonMod.Content.Globals
             try
             {
                 if (npc == null || !npc.active) return;
-                var sello = npc.GetGlobalNPC<OleadaNPC>();
+                // v6.51.2 — LA LECTURA SEGURA (un aislado re-aislando ya no
+                // puede leerse con GetGlobal: KeyNotFoundException).
+                if (!npc.TryGetGlobalNPC<OleadaNPC>(out var sello)) return;
                 if (sello == null || !sello.EsDeOleada) return;   // no es del festín
                 if (sello.TipoReservado > 0) return;               // ya aislado
                 if (!npc.boss && !sello.JefeReservado) return;     // la chusma muere normal
@@ -2059,8 +2063,8 @@ namespace AethonMod.Content.Globals
             if (npc == null) return 0;
             try
             {
-                var sello = npc.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.TipoReservado > 0) return sello.TipoReservado;
+                if (npc.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
+                    sello.TipoReservado > 0) return sello.TipoReservado;
             }
             catch { }
             return npc.type;
@@ -2075,8 +2079,8 @@ namespace AethonMod.Content.Globals
             if (npc == null) return false;
             try
             {
-                var sello = npc.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.TipoReservado > 0) return sello.JefeReservado;
+                if (npc.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
+                    sello.TipoReservado > 0) return sello.JefeReservado;
             }
             catch { }
             return npc.boss;
@@ -2115,9 +2119,18 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                var sello = self?.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.EsDeOleada && !sello.EsJefeDeOleada)
+                // v6.51.2 — TryGet: el GetGlobal viejo lanzaba
+                // KeyNotFoundException para el JEFE AISLADO (type=0 — el
+                // stack del client.log: la excepción era cazada aquí, pero
+                // ensuciaba el log Y el aislado corría el loot vanilla).
+                if (self != null && self.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
+                    sello.EsDeOleada && !sello.EsJefeDeOleada)
                     return;   // SIN items vanilla: solo dinero + esencia
+                // el JEFE aislado (sin sello legible) TAMPOCO suelta loot
+                // vanilla: su type ya es 0 (ninguna tabla lo conoce) y su
+                // pago lo hace el OnKill del sello — nada que pelar.
+                if (self != null && (self.type == 0 || self.netID == 0))
+                    return;
             }
             catch { }
             orig(self, closestPlayer);
