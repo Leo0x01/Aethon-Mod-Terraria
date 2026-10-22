@@ -60,7 +60,7 @@ La letra: «crea un arma nueva por cada una de estas ideas que diste y crea una 
 
 **LA BOLSA DE LOS PROYECTILES DIGNOS** (la 22ª — icono propio, el saco con la binaria estampada): entrega las SEIS y garantiza como sus hermanas (solo lo que falte, reabrible). Se entrega al entrar con el mod activo (TestingPlayer) junto a las demás.
 
-**LOS SEIS DIGNOS + la bolsa + el BrilloSolar en la bolsa de cosméticos + las 4 poses del bestiario + la bruma de verdad + el typo muerto — TODO verificado**: oráculo 0 errores/0 warnings · build real 0/0 · .tmod 2.839.272 B (md5 158c7886f09521bac989eb2c6801495e): 406 entradas (395+11: 4 poses + 6 iconos + 1 bolsa), tabla+EOF+SHA1 exactos, DLL 1.460.736 B con los 10 símbolos nuevos y el typo AUSENTE (UTF-16 verificado), hjson es-MX/es-ES/en-US con las 7 claves ×3 · headless: Sandboxing+Finalizing v6.51.4, Server started, 0 excepciones.
+**LOS SEIS DIGNOS + la bolsa + el BrilloSolar en la bolsa de cosméticos + las 4 poses del bestiario + la bruma de verdad + el typo muerto — TODO verificado**: oráculo 0 errores/0 warnings · build real 0/0 · .tmod 2.839.272 B (md5 158c7886f09521bac989eb2c6801495e): 406 entradas (395+11: 4 poses + 6 iconos + 1 bolsa), tabla+EOF+SHA1 exactos, DLL 1.460.736 B con los 10 símbolos nuevos y el typo AUSENTE (UTF-16 verificado), hjson es-MX/es-ES/en-US con las 7 claves ×3 · headless: Sandboxing+Finalizing v6.51.4, Server started, 0 excepciones. PUBLICADA: release 420645532, asset AethonMod.tmod 665673099 2.839.272 B, CDN verificado byte a byte + `/releases/latest` = v6.51.4 · respaldo /home/sync/AethonMod-v6.51.4.tmod.
 
 # v6.51.3 — EL DÍA Y LA NOCHE DE VERDAD + LA LENTE BAJO LOS FILTROS + LA MANADA DEL VAGABUNDO
 
@@ -131,7 +131,7 @@ La letra: «crea un arma nueva por cada una de estas ideas que diste y crea una 
 
 ---
 
-**Verificación**: oráculo 0 errores/0 warnings · -build REAL 0/0 ×2 · .tmod v6.51.3 (2.792.364 B, md5 122e40199bb4165bc147e67396b6d066): 395 ENTRADAS (379 rawimgs + el ícono nuevo), tabla+EOF EXACTOS, DLL 1.434.624 B con los 9 símbolos nuevos verificados dentro (AgujeroEnViajeProjectile · BrilloSolarHalo · EtiquetaSupremaInfoElement · ComponerLenteBajoFiltros · RecolectarFuentes · MANADA_CORRO · FASE_ESPECTADOR · AleteoVuelo · BoteAterrizaje) y PrestarNocheDelFestin AUSENTE · hjson es-MX empaquetado con BrilloSolarItem · servidor headless: Sandboxing + Finalizing de v6.51.3, Server started, 23.371 líneas CERO excepciones.
+**Verificación**: oráculo 0 errores/0 warnings · -build REAL 0/0 ×2 · .tmod v6.51.3 (2.792.364 B, md5 122e40199bb4165bc147e67396b6d066): 395 ENTRADAS (379 rawimgs + el ícono nuevo), tabla+EOF EXACTOS, DLL 1.434.624 B con los 9 símbolos nuevos verificados dentro (AgujeroEnViajeProjectile · BrilloSolarHalo · EtiquetaSupremaInfoElement · ComponerLenteBajoFiltros · RecolectarFuentes · MANADA_CORRO · FASE_ESPECTADOR · AleteoVuelo · BoteAterrizaje) y PrestarNocheDelFestin AUSENTE · hjson es-MX empaquetado con BrilloSolarItem · servidor headless: Sandboxing + Finalizing de v6.51.3, Server started, 23.371 líneas CERO excepciones. PUBLICADA: release 420441395, asset AethonMod.tmod 665106381 2.792.364 B, CDN verificado byte a byte (md5 122e40199bb4165bc147e67396b6d066 idéntico al build).
 
 # v6.51.2 — EL FESTÍN QUE NO MUERE + EL DAÑO DE VERDAD + EL TENTÁCULO DEL EQUINOCCIO
 
