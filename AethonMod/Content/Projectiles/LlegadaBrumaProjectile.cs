@@ -196,13 +196,22 @@ namespace AethonMod.Content.Projectiles
                     }
 
                     // EL VACÍO CENTRAL (lo que no deja ver): un corazón
-                    // oscuro ALFA con rim violeta — sutil, la niebla manda.
+                    // oscuro con rim violeta — sutil, la niebla manda.
                     // v6.51.2 — LA CURA DEL DRAW DESNUDO (la excepción del
                     // client.log: «Draw was called, but Begin has not yet
                     // been called»): después de SombrasLib.Bruma el lote
-                    // de vanilla está CERRADO — estos dos Draws viven ahora
+                    // de vanilla está CERRADO — estos Draws viven ahora
                     // en SU PROPIO lote (abrir → dibujar → cerrar,
                     // blindado try/finally).
+                    // v6.51.3 — LA MUERTE DEL ÓVALO (la letra: «al aparecer
+                    // todavia aparecen ovalados junto a la bruma» — la .51.1
+                    // curó los PUFFS pero el corazón seguía siendo un
+                    // SoftGlow ESTIRADO ×1,25/×0,92 = un óvalo liso y
+                    // plano): el corazón ahora es una CEBOLLA REDONDA —
+                    // TRES capas concéntricas isótropas (grandes, medianas,
+                    // pequeñas) con radios DESIGUALES (±7%) y un rim que
+                    // RESPIRA: se lee como un GLOBO de oscuridad con
+                    // profundidad, jamás como una elipse dibujada.
                     Texture2D glow = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     if (glow != null)
@@ -213,15 +222,30 @@ namespace AethonMod.Content.Projectiles
                         try
                         {
                             Vector2 posScr = centro - Main.screenPosition;
-                            Main.spriteBatch.Draw(glow, posScr, null,
-                                new Color(16, 7, 28) * (0.85f * crecimiento),
-                                0f, glow.Size() * 0.5f,
-                                new Vector2(RADIO * 1.25f, RADIO * 0.92f) * crecimiento / glow.Size(),
-                                SpriteEffects.None, 0f);
+                            // LAS TRES CAPAS DE LA CEBOLLA (cada una su
+                            // disimetría fija por semilla — un globo vivo,
+                            // no un círculo perfecto).
+                            float respiracion = 0.94f + 0.06f * MathF.Sin(
+                                Main.GlobalTimeWrappedHourly * 0.9f + semilla);
+                            for (int capa = 0; capa < 3; capa++)
+                            {
+                                float f = 1f - capa * 0.26f;                     // 1.0 · 0.74 · 0.48
+                                float asimetria = 0.93f + 0.07f *
+                                    (((semilla * 7 + capa * 13) % 10) / 10f);   // su disimetría
+                                float r = RADIO * (1.18f * f) * crecimiento * respiracion;
+                                Main.spriteBatch.Draw(glow, posScr, null,
+                                    new Color(16, 7, 28) * (0.62f * f * crecimiento),
+                                    0f, glow.Size() * 0.5f,
+                                    new Vector2(r * asimetria, r * (2f - asimetria)) / glow.Size(),
+                                    SpriteEffects.None, 0f);
+                            }
+                            // EL RIM VIOLETA (el borde del globo — un aro
+                            // tenue que también respira).
+                            float rRim = RADIO * 1.02f * crecimiento * respiracion;
                             Main.spriteBatch.Draw(glow, posScr, null,
                                 new Color(70, 38, 120) * (0.16f * vida),
                                 0f, glow.Size() * 0.5f,
-                                new Vector2(RADIO * 1.9f, RADIO * 1.5f) * crecimiento / glow.Size(),
+                                new Vector2(rRim, rRim) / glow.Size(),
                                 SpriteEffects.None, 0f);
                         }
                         finally { Main.spriteBatch.End(); }

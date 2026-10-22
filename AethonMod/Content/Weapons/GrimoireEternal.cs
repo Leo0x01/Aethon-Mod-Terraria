@@ -512,39 +512,36 @@ namespace AethonMod.Content.Weapons
             return false;   // todos los spawns son nuestros
         }
 
-        /// <summary>EL DÍA Y LA NOCHE — LA FUSIÓN CON LA APATÍA NULA
-        /// (v6.51.2 — la letra: «quiero que conviertas el proyectil
-        /// actual del grimorio eterno en una fusion con el tomo de la
-        /// apatia nula, dejando el tema de luz y oscuridad del grimorio
-        /// pero con el toque de la apatia nula»): cada pareja sigue
-        /// siendo UN DÍA Y UNA NOCHE, pero ya NO son los discos del
-        /// Equinoccio — son TENTÁCULOS (TentaculoEquinoccioProjectile):
-        /// nacen con SU gestación de pulsos que imploden (el día suma
-        /// oro; la noche OSCURECE con vacío), azotan en TRES CURVAS
-        /// hacia la presa con chispas de cola y el SALTO con teleport
-        /// entre curva y curva. El daño y el empuje son LOS DE SIEMPRE
-        /// (el del disparo — ya lleva TODAS las stats del portador).</summary>
+        /// <summary>EL DÍA Y LA NOCHE — LOS DISCOS DEL EQUINOCCIO DE
+        /// SIEMPRE. v6.51.3 — LA VUELTA A CASA (la letra: «ahora los
+        /// proyectiles del grimorio son horribles, necesitamos crear un
+        /// proyectil digno para el grimorio, de momento deja el que ya
+        /// teniamos antes»): la fusión con el Tentáculo del Equinoccio de
+        /// la v6.51.2 MUERE como disparo básico — vuelve EL PROYECTIL DE
+        /// ANTES (el 931 del Equinoccio, los discos día/noche de la
+        /// v6.51.1, con sus marcas 9201/9202 del FX). El tentáculo vive
+        /// en OTROS rincones del Eterno; el disparo básico del libro
+        /// vuelve a ser lo que era. (El proyectil DIGNO queda como el
+        /// pendiente de diseño — las ideas van en el mensaje de la
+        /// versión.)</summary>
         private static void LanzarPareja(EntitySource_ItemUse_WithAmmo source, Vector2 pos,
             Vector2 vel, int damage, float knockback, Player player)
         {
-            // EL DÍA — EL TENTÁCULO DORADO: el matiz de siempre (0.64 →
-            // oro vivo, luz cálida, las chispas que BRILLAN).
+            // EL DORADO — EL DÍA: ai[1] = 0.64 → el render del 931 hace
+            // hslToRgb((hue+0.5)%1) → matiz 0.14 = DORADO de verdad
             Projectile.NewProjectile(source, pos, vel.RotatedBy(-0.35f),
-                ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.TentaculoEquinoccioProjectile>(),
-                damage, knockback, player.whoAmI,
-                0f,      // ai[0]: el reloj del tentáculo
-                0.64f,   // ai[1]: EL DÍA (el matiz dorado de la convención)
-                0f);
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.64f,    // ai[1]: EL MATIZ DORADO
+                9201f);   // ai[2]: la marca del FX del sol
 
-            // LA NOCHE — EL TENTÁCULO DE ECLIPSE: el matiz de siempre
-            // (0.28 → negro-violeta, el vacío que oscurece su estela
-            // con su rim de brasa fría).
+            // EL NEGRO — LA NOCHE: ai[1] = 0.28 → matiz 0.78 = VIOLETA
+            // (el rim del eclipse que late en la oscuridad)
             Projectile.NewProjectile(source, pos, vel.RotatedBy(0.35f),
-                ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.TentaculoEquinoccioProjectile>(),
-                damage, knockback, player.whoAmI,
-                0f,      // ai[0]: el reloj del tentáculo
-                0.28f,   // ai[1]: LA NOCHE (el matiz del eclipse)
-                0f);
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.28f,    // ai[1]: el matiz violeta (el rim)
+                9202f);   // ai[2]: la marca del FX del eclipse (SIN bruma)
         }
 
         // ================================================================
@@ -583,35 +580,17 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // === v6.51.2 — LA ETIQUETA DE LA RAREZA CÓSMICA (la letra:
-            //     «una rareza cosmica ademas con la etiqueta de
-            //     legendario supremo» — y la pregunta del playtest
-            //     «donde esta la rareza Legendario Supremo»): el COLOR
-            //     vive en el nombre del arma (LegendarioSupremo respira
-            //     violeta-índigo-magenta), pero una rareza de esta
-            //     talla merece SU PROPIA LÍNEA — PRIMERA del tooltip,
-            //     con el mismo ciclo de color vivo: la etiqueta que se
-            //     VE, en la ventana básica y en las completas. ===
-            try
-            {
-                float t = Main.GlobalTimeWrappedHourly;
-                int r = (int)((0.62f + 0.20f * MathF.Sin(t * 0.9f)) * 255f);
-                int g = (int)((0.22f + 0.14f * MathF.Sin(t * 0.53f + 2.1f)) * 255f);
-                int b = (int)((0.95f + 0.05f * MathF.Sin(t * 1.7f + 0.6f)) * 255f);
-                string hex = string.Format("{0:X2}{1:X2}{2:X2}", r, g, b);
-                int nombre = -1;
-                for (int i = 0; i < tooltips.Count; i++)
-                {
-                    if (tooltips[i].Name == "ItemName") { nombre = i; break; }
-                }
-                var etiqueta = new TooltipLine(Mod, "LegendarioSupremo",
-                    $"[c/{hex}:✦ LEGENDARIO SUPREMO ✦]");
-                if (nombre >= 0 && nombre + 1 <= tooltips.Count)
-                    tooltips.Insert(nombre + 1, etiqueta);
-                else
-                    tooltips.Insert(0, etiqueta);
-            }
-            catch { }
+            // === v6.51.3 — LA ETIQUETA SE MUDÓ AL BESTIARIO (la letra:
+            //     «creo que la etiqueta ✦ LEGENDARIO SUPREMO ✦ deberia
+            //     estar mejor en el bestiario en la info del grimorio, por
+            //     lo tanto quita ✦ LEGENDARIO SUPREMO ✦ de la ventana de
+            //     info del grimorio»): MUERE la primera línea del tooltip —
+            //     la rareza suprema ahora vive en la FICHA DEL GRIMORIO
+            //     DEL BESTIARIO (EtiquetaSupremaInfoElement: el rótulo
+            //     NEGRO con los destellos de 4 puntas de los soles rúnicos
+            //     de 3 anillos, justo encima de las diez estrellas negras).
+            //     El COLOR del nombre del arma sigue respirando violeta
+            //     (LegendarioSupremo — la rareza de siempre). ===
 
             // === LA HERENCIA DEL NERVIOSO: la barra de hambre viva + el
             //     estado — rescatados y REUBICADOS al final, dentro de

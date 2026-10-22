@@ -120,6 +120,31 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center);
             }
 
+            // === v6.51.3 — LA BRUMA DE LA GESTACIÓN (la letra: «agrega un
+            //     poco de bruma en las animacions de nacimiento de
+            //     agujeros negros runicos y de soles runicos, claro con la
+            //     bruma del color correspondiente»): alrededor del punto
+            //     focal — donde la semilla crece — flota UN POCO de niebla
+            //     del color de lo que nace: ORO para el sol · VIOLETA para
+            //     el agujero (jirones lentos que giran y se disuelven — no
+            //     la niebla que CONVERGE de siempre: esta es la que
+            //     RESPIRA alrededor de la cuna). ===
+            if (Main.netMode != NetmodeID.Server && edad % 9f < 1f)
+            {
+                float angM = Main.rand.NextFloat(MathHelper.TwoPi);
+                float lejosM = Main.rand.NextFloat(46f, 120f) * (0.4f + 0.6f * prog);
+                Vector2 posM = Projectile.Center +
+                    new Vector2(MathF.Cos(angM), MathF.Sin(angM) * 0.8f) * lejosM;
+                Dust m = Dust.NewDustPerfect(posM,
+                    EsSol ? DustID.GoldFlame : DustID.Shadowflame,
+                    new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
+                                Main.rand.NextFloat(-1.0f, -0.2f)),
+                    70, EsSol ? new Color(255, 214, 120) : new Color(122, 60, 192),
+                    Main.rand.NextFloat(1.5f, 2.4f));
+                m.noGravity = true;
+                m.fadeIn = 0f;
+            }
+
             // === EL CUMPLIMIENTO: EL LANZAMIENTO. ===
             if (edad >= Duracion)
             {
@@ -198,12 +223,40 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 sol.timeLeft = 480;
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
+
+                // v6.51.3 — LA BRUMA DORADA DEL NACIMIENTO DEL SOL (la
+                //     letra: bruma del color correspondiente en las
+                //     animaciones de nacimiento): el sol estrena su vida
+                //     EXHALANDO un anillo de niebla dorada.
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    for (int b = 0; b < 14; b++)
+                    {
+                        float angB = b / 14f * MathHelper.TwoPi;
+                        Dust m = Dust.NewDustPerfect(Projectile.Center +
+                            new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * 18f,
+                            DustID.GoldFlame,
+                            new Vector2(MathF.Cos(angB), MathF.Sin(angB)) *
+                            Main.rand.NextFloat(1.2f, 2.8f),
+                            100, new Color(255, 214, 120), Main.rand.NextFloat(1.6f, 2.6f));
+                        m.noGravity = true;
+                        m.fadeIn = 0f;
+                    }
+                }
             }
             else
             {
-                // === EL AGUJERO: uno de los RÚNICOS al azar (los
-                //     ascendidos si el despertar los trajo) — o el
-                //     SUPREMO/AURORA del modo 3 — sobre la presa. ===
+                // === v6.51.3 — EL NACIMIENTO CONTINUO (la letra: «los
+                //     agujeros negros runicos no nacen correctamente donde
+                //     tienen que nacer, aunque la animacion se hace este
+                //     nace directamente en el enemigo»): el agujero YA NO
+                //     se materializa de golpe sobre la presa — su SEMILLA
+                //     nace AQUÍ, en el punto focal del ritual (donde la
+                //     ceremonia la gestó), y VIAJA hasta su cita
+                //     (AgujeroEnViajeProjectile): una semilla de vacío que
+                //     arrastra su bruma violeta y al llegar SE ABRE con su
+                //     niebla morada. Los 10 agujeros rúnicos quedan
+                //     INTACTOS (el viaje es solo el cordón umbilical). ===
                 int tipo;
                 if (Modo == MODO_SUPREMO)
                 {
@@ -227,16 +280,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                         : ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
                     };
                 }
-                Projectile agujero = Projectile.NewProjectileDirect(
+
+                // LA SEMILLA NACE EN EL PUNTO FOCAL (donde la animación la
+                // gestó) y vuela a su cita con la presa.
+                Vector2 rumboA = blanco.Center - Projectile.Center;
+                if (rumboA.LengthSquared() < 1f) rumboA = -Vector2.UnitY;
+                rumboA.Normalize();
+                Projectile.NewProjectileDirect(
                     Projectile.GetSource_FromAI(),
-                    blanco.Center - new Vector2(0f, Modo == MODO_SUPREMO ? 90f : 60f),
-                    Vector2.Zero, tipo, dano, 0f, Projectile.owner);
-                agujero.timeLeft = 600;
+                    Projectile.Center, rumboA * 13f,
+                    ModContent.ProjectileType<AgujeroEnViajeProjectile>(),
+                    0, 0f, Projectile.owner,
+                    tipo * 1f,              // el agujero que abrirá al llegar
+                    blanco.whoAmI * 1f,     // su cita
+                    dano * 1f);             // el daño combinado del ritual
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(Modo == MODO_SUPREMO ? -0.5f : 0.35f),
-                    blanco.Center);
+                    Projectile.Center);
                 if (Modo == MODO_SUPREMO)
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, blanco.Center);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, Projectile.Center);
             }
 
             // EL ESTALLIDO DEL LANZAMIENTO (la puerta que se abre).

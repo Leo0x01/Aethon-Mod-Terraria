@@ -374,7 +374,19 @@ namespace AethonMod.Content.Projectiles
                 //     sobrepasarlo nunca). ===
                 Vector2 alSlot = slot - Projectile.Center;
                 float dist = alSlot.Length();
-                if (dist > 90f)
+                // === v6.51.3 — LA LLEGADA EXACTA DE LA DANZA (la letra:
+                //     «mas exacta»): en la órbita del hambre, cerca del
+                //     puesto, el ojo lo PERSIGUE proporcional puro — SIN
+                //     inercia, SIN sobrepaso (el controlador viejo
+                //     conservaba velocidad y CRUZABA el hueco: los ojos
+                //     se pisaban y la danza se leía desordenada):
+                //     converge en subpíxel al hueco MÓVIL — cada ojo
+                //     clavado a su órbita, la danza PERFECTA. ===
+                if (libro is Vector2 && dist <= 30f && dist > 0.01f)
+                {
+                    Projectile.velocity = alSlot * 0.55f;
+                }
+                else if (dist > 90f)
                 {
                     float vmax = 13f * WeaponScaling.MinionSpeedMult(nivel);
                     Vector2 deseada = Vector2.Normalize(alSlot) *
@@ -515,39 +527,49 @@ namespace AethonMod.Content.Projectiles
 
             if (libro is Vector2 centro)
             {
-                // === v6.51.2 — LA ÓRBITA DEL HAMBRE (la letra: «los
-                //     minion deben orbitar al grimorio cuando está en
-                //     estado de hambre»): MUEREN las filas de cinco — el
-                //     escuadrón RODEA al libro flotante en sus ANILLOS
-                //     GIRATORIOS de siempre (5+k ojos por anillo,
-                //     contrarrotando — la misma formación de la corona
-                //     sobre el jugador, ahora alrededor del LIBRO que
-                //     salió a cazar): cada anillo gira a velocidad
-                //     CONSTANTE (el paso lo avanza PasoOrbita en la AI —
-                //     aquí solo se LEE la fase), el radio RESPIRA y cada
-                //     ojo conserva su micro-deriva viva. ===
+                // === v6.51.3 — LA DANZA ATÓMICA (la letra: «esa animacion
+                //     de orbitarlo como que no se ve bien, deberia ser
+                //     mejorada, una mejor animacion de orbita, mas exacta
+                //     o mejor dicho mejor animada y que un minion no se
+                //     solape sobre otro y que no este desordenada, que sea
+                //     todo como una danza sincronizada y bonita
+                //     geometricamente hablando, incluso como atomos»):
+                //     MUERE la rueda plana de anillos concéntricos (todos
+                //     en el MISMO plano — al apilarse radialmente se
+                //     pisaban) y nace EL ÁTOMO: cada anillo es una
+                //     ÓRBITA INCLINADA a su manera (como los electrones
+                //     del glifo atómico), con su PRECESIÓN lenta — los
+                //     planos giran y se CRUZAN sin tocarse. La escalera
+                //     de puestos es LA DE SIEMPRE (5+k ojos por anillo —
+                //     la letra de la .109) pero el paso radial sube a
+                //     30 px (el ojo mide ~28: ni los vecinos pueden
+                //     pisarse) y TODO el sistema RESPIRA JUNTO (un solo
+                //     latido — la danza sincronizada). La exactitud la
+                //     pone la LLEGADA EXACTA de la ley del planeo (abajo:
+                //     cerca del puesto, persecución proporcional SIN
+                //     inercia — cada ojo clavado a su hueco móvil). ===
                 int totalOjos = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
                 int miPuesto = Math.Min(idx, totalOjos - 1);
                 AnilloDe(miPuesto, out int k, out int enAnillo, out int capAnillo);
                 float fase = FaseOrbital(enAnillo, capAnillo, k);
 
-                // EL RADIO DEL ANILLO: crece con el índice del anillo (el
-                // interior abraza al libro; los de afuera lo escoltan) y
-                // RESPIRA despacio (±4,5% — a su reloj cada anillo).
-                float radio = (54f + k * 19f) *
-                    (1f + 0.045f * MathF.Sin(time * 0.23f + k * 1.25f));
+                // EL RADIO: la escalera con PASO ANCHO (30 px — jamás se
+                // tocan los anillos vecinos) y LA RESPIRACIÓN UNICA (un
+                // solo latido para TODA la danza: sincronía).
+                float radio = (52f + k * 30f) *
+                    (1f + 0.05f * MathF.Sin(time * 0.5f));
 
-                // LA ÓRBITA: ligeramente ELÍPTICA (×0,74 en Y — la
-                // formación se lee como un corro, no como un aro rígido).
-                Vector2 posOrbita = centro + new Vector2(
+                // EL PLANO DE ESTE ANILLO (la órbita del átomo): inclinación
+                // propia (k·0,55 — cada anillo mira a otro lado) + la
+                // PRECESIÓN lenta (el plano entero gira — el glifo vivo).
+                float incl = k * 0.55f + MathF.Sin(time * 0.11f + k * 1.7f) * 0.14f;
+
+                // LA ÓRBITA: elipse achatada (×0,62 — vista en
+                // perspectiva) ROTADA al plano del anillo.
+                Vector2 plano = new Vector2(
                     MathF.Cos(fase) * radio,
-                    MathF.Sin(fase) * radio * 0.74f);
-
-                // la micro-deriva propia: 1,6 px en 2D, DESPACIO.
-                Vector2 deriva = new Vector2(
-                    MathF.Sin(time * 0.80f + miPuesto * 2.1f),
-                    MathF.Sin(time * 0.65f + miPuesto * 1.3f)) * 1.6f;
-                return posOrbita + deriva;
+                    MathF.Sin(fase) * radio * 0.62f);
+                return centro + plano.RotatedBy(incl);
             }
 
             // === v6.50.117 — LA CORONA DOBLE, LADRILLO REAL (la letra:
@@ -620,13 +642,12 @@ namespace AethonMod.Content.Projectiles
         }
 
         /// <summary>v6.50.109 — EL PASO DE LA FORMACIÓN GIRATORIA (UNA
-        /// vez por tick, desde la AI): MUERE la 2ª ley de Kepler de la
-        /// .107 (dθ ∝ a²/r² aceleraba en el perigeo — el ojo LLEGABA y
-        /// se FRENABA y el giro leía a tirones); NACE EL GIRO CONSTANTE
-        /// del Ruinous Staff (la wiki: «a spinning orbital formation»):
-        /// cada anillo gira a velocidad angular FIJA — la formación
-        /// entera se lee como una rueda lisa. Contrarrotación par/impar;
-        /// el reloj NUNCA se para (ni en la carga del disparo).</summary>
+        /// vez por tick, desde la AI). v6.51.3 — EL GIRO ARMÓNICO DE LA
+        /// DANZA ATÓMICA: cada anillo a SU compás (razones simples entre
+        /// anillos — la danza se repite en cascada) y CONTRARROTANDO (los
+        /// planos pares suben, los impares bajan: el átomo gira en dos
+        /// sentidos a la vez). El reloj NUNCA se para (ni en la carga del
+        /// disparo).</summary>
         private void PasoOrbita(Vector2? libro)
         {
             if (!(libro is Vector2)) return;            // en la corona no hay luna
@@ -635,10 +656,11 @@ namespace AethonMod.Content.Projectiles
 
             float fase = FaseOrbital(enAnillo, capAnillo, k);
 
-            // GIRO CONSTANTE — la formación giratoria del Ruinous: el
-            // anillo par gira a 0,42 rad/s (una vuelta cada ~15 s) y el
-            // impar contrarrota a −0,36 — sin aceleraciones, sin frenos
-            float omega = (k % 2 == 0) ? 0.42f : -0.36f;   // rad/s
+            // GIRO ARMÓNICO — la danza sincronizada del átomo: el anillo 0
+            // marca el compás (0,42 rad/s) y cada anillo siguiente gira a
+            // razón simple con él (más lento — la cascada), contrarrotando
+            // par/impar: los cruces de planos SIEMPRE al mismo compás.
+            float omega = (k % 2 == 0 ? 0.42f : -0.36f) / (1f + k * 0.22f);
             float dFase = omega / 60f;                     // por tick
             fase += dFase;
             while (fase >= MathHelper.TwoPi) fase -= MathHelper.TwoPi;

@@ -111,6 +111,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true)) *
                                (Tier >= 20 ? 1.30f : 1f);
 
+            // === v6.51.3 — LA BRUMA DORADA DEL NACIMIENTO (la letra:
+            //     «agrega un poco de bruma en las animacions de nacimiento
+            //     de agujeros negros runicos y de soles runicos, claro con
+            //     la bruma del color correspondiente»): el primer segundo y
+            //     cuarto el sol EXHALA jirones de niebla DORADA — puffs
+            //     gordos y lentos que derivan hacia arriba y se deshacen
+            //     (el nacimiento del sol RESPIRA; el color del sol es el
+            //     ORO de sus anillos). ===
+            if (_age < 75f && _age % 6f < 1f && Main.netMode != NetmodeID.Server)
+            {
+                float angB = Main.rand.NextFloat(MathHelper.TwoPi);
+                float lejosB = Main.rand.NextFloat(34f, 96f) * Math.Max(Projectile.scale, 0.2f);
+                Vector2 posBruma = Projectile.Center +
+                    new Vector2(MathF.Cos(angB), MathF.Sin(angB) * 0.82f) * lejosB;
+                Dust m = Dust.NewDustPerfect(posBruma, DustID.GoldFlame,
+                    new Vector2(Main.rand.NextFloat(-0.5f, 0.5f),
+                                Main.rand.NextFloat(-1.3f, -0.3f)),
+                    80, new Color(255, 216, 130), Main.rand.NextFloat(1.7f, 2.7f));
+                m.noGravity = true;
+                m.fadeIn = 0f;
+            }
+
             // === LA GIGANTE FINAL: se hincha ×1.5 y el daño sube ×1.5
             // (v6.22: la copia 20 — EL GRAN SELLADO — se hincha ×1.75) ===
             float rg = RedGiant;

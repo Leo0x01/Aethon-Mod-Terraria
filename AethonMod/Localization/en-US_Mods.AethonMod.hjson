@@ -1768,6 +1768,19 @@ Items: {
 			'''
 	}
 
+	// v6.51.3 — THE RUNIC SUNS' SHINE (the 4-point twinkles of 3+ ring suns, made an adornment).
+	BrilloSolarItem: {
+		DisplayName: The Runic Suns' Shine
+		Tooltip:
+			'''
+			THE RUNIC SUNS' SPECIAL SHINE, DISTILLED.
+			Only THE 4-POINT TWINKLES of three-ring suns and beyond —
+			two crossed strokes of incandescent white and their golden
+			heart, being born and dying around you.
+			A piece of sun, walking the world.
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: The Eclipse Ember
 		Tooltip:
@@ -1987,6 +2000,8 @@ Projectiles: {
 	RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
 	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
 	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
+	BrilloSolarHalo.DisplayName: Brillo Solar Halo
+	AgujeroEnViajeProjectile.DisplayName: Agujero En Viaje Projectile
 }
 
 Buffs: {

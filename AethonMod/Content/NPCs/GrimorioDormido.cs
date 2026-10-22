@@ -179,6 +179,11 @@ namespace AethonMod.Content.NPCs
             // CATÁLOGO), el sabor del libro y su rareza IMPOSIBLE.
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
             {
+                // v6.51.3 — LA ETIQUETA ✦ LEGENDARIO SUPREMO ✦ (la letra:
+                // la etiqueta se muda del tooltip del arma AQUÍ — a la
+                // ficha del grimorio, en NEGRO con los destellos de 4
+                // puntas de los soles rúnicos de 3 anillos+).
+                new global::AethonMod.Content.Bestiary.EtiquetaSupremaInfoElement(),
                 // v6.51.1 — LAS DIEZ ESTRELLAS NEGRAS (la letra: «10
                 // estrellas negras brillantes y titilantes» — ahora en
                 // la categoría PORTRAIT: donde estaban las amarillas).
@@ -451,6 +456,38 @@ namespace AethonMod.Content.NPCs
             Color drawColor)
         {
             if (Main.dedServ) return false;
+
+            // === v6.51.3 — EL DUMMY DEL BESTIARIO (la letra: «el grimorio
+            //     sigue sin estar centrado en su casilla» + «al aparecer
+            //     todavia aparecen ovalados junto a la bruma» —
+            //     investigado al IL: la casilla y el retrato del catálogo
+            //     dibujan al NPC vía UnlockableNPCEntryIcon →
+            //     Main.DrawNPCDirect → ESTE PreDraw — es decir, el bestiario
+            //     también corría LA BRUMA (SombrasLib.Bruma mide con
+            //     Main.screenPosition del MUNDO: en el menú cae donde quiere
+            //     — el «óvalo junto a la bruma» de la casilla) y las ZZZ
+            //     clipeadas. LA CURA: en el bestiario el libro posa
+            //     LIMPIO — SOLO el cuerpo, CENTRADO en su casilla (vanilla
+            //     centra a los noGravity en el centro exacto de la caja —
+            //     UpdatePosition del IL), con su tinte violeta de siempre y
+            //     SIN bruma, SIN ZZZ, SIN el lote propio: ni un óvalo). ===
+            if (NPC.IsABestiaryIconDummy)
+            {
+                try
+                {
+                    Texture2D texBestiario = Terraria.GameContent.TextureAssets.Npc[Type].Value;
+                    if (texBestiario != null)
+                    {
+                        Color colorBestiario = Color.Lerp(drawColor,
+                            new Color(205, 175, 255), 0.5f);
+                        spriteBatch.Draw(texBestiario, NPC.Center - screenPos, null,
+                            colorBestiario, 0f, texBestiario.Size() * 0.5f, 1f,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+                catch { }
+                return false;
+            }
 
             // === v6.50.126 — LA INTIMIDAD DEL PACTO (la letra: «en el lugar
             //     de caída estarán todos los grimorios y cada jugador solo

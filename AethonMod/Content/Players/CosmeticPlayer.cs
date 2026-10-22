@@ -83,6 +83,16 @@ namespace AethonMod.Content.Players
         /// del trono)?</summary>
         public bool HaloArcoiris;
 
+        /// <summary>¿Lleva EL BRILLO DE LOS SOLES RÚNICOS (v6.51.3 — la
+        /// letra: «me acabo de dar cuenta que los soles runicos tienen
+        /// como un brillo especial… crea un item cosmetico que sea solo
+        /// ese brillo especial de los soles runicos, este brilo esta en
+        /// los soles runicos de 3 anillos en adelante»)? Los DESTELLOS
+        /// DE 4 PUNTAS de DrawTwinkles (blanco incandescente + corazón
+        /// dorado) flotando en la banda de la estrella alrededor del
+        /// portador — SOLO eso (BrilloSolarHalo).</summary>
+        public bool BrilloSolar;
+
         /// <summary>
         /// v6.50.48 — EL VUELO INFINITO (la letra: «ademas la forma
         /// ascendida y la forma ascendida 2 deben dar vuelo infinito») ·
@@ -117,6 +127,7 @@ namespace AethonMod.Content.Players
             FormaAscendidaCuatro = false;
             HaloArcoiris = false;
             BrasaDelEclipse = false;
+            BrilloSolar = false;
         }
 
         public override void PostUpdate()
@@ -132,6 +143,7 @@ namespace AethonMod.Content.Players
             int ascendidaCuatroType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>();
             int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
+            int brilloSolarType = ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -151,6 +163,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaCuatroType) FormaAscendidaCuatro = true;
                 else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
+                else if (item.type == brilloSolarType) BrilloSolar = true;
             }
 
             // v6.50.2 — FIX (host sin sus visuales en Host&Play): mismo error
@@ -294,6 +307,15 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 3f);
                 }
+                // v6.51.3 — EL BRILLO DE LOS SOLES RÚNICOS (los destellos de
+                // 4 puntas de los soles de 3 anillos+ — su propio halo).
+                if (BrilloSolar && !EspiarBrilloSolar())
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("BrilloSolar"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.BrilloSolarHalo>(),
+                        0, 0f, Player.whoAmI);
+                }
             }
 
             // === LA FORMA ASCENDIDA — v6.50.45, EL PATRÓN DIVINO ===
@@ -419,6 +441,19 @@ namespace AethonMod.Content.Players
         private bool EspiarHaloDorsal()
         {
             int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.AnilloRunicoDorsalHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.51.3 — ¿Ya vive mi halo de destellos solares?</summary>
+        private bool EspiarBrilloSolar()
+        {
+            int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.BrilloSolarHalo>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile p = Main.projectile[i];

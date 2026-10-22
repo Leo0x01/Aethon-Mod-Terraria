@@ -531,22 +531,49 @@ namespace AethonMod.Content.Players
             // JAMÁS por debajo de lo que YA ESTÁ VIVO: mientras el
             // libro siga contando (barra rápida) o quede algún OJO del
             // Eterno en el aire, los slots en uso son LEGALES.
+            //
+            // v6.51.3 — LA PROMESA COMPLETA (la letra del playtest: «es
+            // raro, a veces los minions del grimorio se desactivan solo,
+            // revisa eso, los minions deben persistir incluso si el
+            // grimorio deja el inventario, solo se deben desactivar si
+            // el jugador los quita usando su buff de minion»): la .111
+            // solo protegía al OJO ETERNO — el resto del escuadrón
+            // (Fragmento de Supernova, Living Pulsar, Nebula Jellyfish,
+            // Stellar Comet y la sierpe) moría igual en cuanto el libro
+            // salía de la mano/barra. AHORA la ley cubre a TODO el
+            // escuadrón: mientras viva CUALQUIERA de los SEIS, lo vivo
+            // es legal — el libro puede irse AL COFRE que los suyos
+            // siguen en el aire (la única despedida legítima es
+            // QUITAR EL BUFF, como manda la letra).
             // ============================================================
             {
+                // EL ESCUADRÓN ENTERO (los 6 minions de la casa).
                 int tipoOjo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                int tipoSupernova = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.FragmentoSupernovaMinion>();
+                int tipoPulsar = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.LivingPulsarMinion>();
+                int tipoMedusa = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.NebulaJellyfishMinion>();
+                int tipoCometa = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.StellarCometMinion>();
+                int tipoSierpe = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.SierpeEstelarProjectile>();
                 float slotsEnUso = 0f;
-                bool hayOjos = false;
+                bool hayEscuadron = false;
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile p = Main.projectile[i];
                     if (p == null || !p.active || !p.minion) continue;
                     if (p.owner != Player.whoAmI) continue;
                     slotsEnUso += p.minionSlots;      // lo que vanilla va a contar
-                    if (p.type == tipoOjo) hayOjos = true;
+                    if (p.type == tipoOjo || p.type == tipoSupernova || p.type == tipoPulsar ||
+                        p.type == tipoMedusa || p.type == tipoCometa || p.type == tipoSierpe)
+                        hayEscuadron = true;
                 }
-                // el techo vivo: libro a mano (nivel) O ojos viviendo
-                if (nivel > 0 || hayOjos)
+                // el techo vivo: libro a mano (nivel) O escuadrón viviendo
+                if (nivel > 0 || hayEscuadron)
                 {
                     int techoVivo = (int)Math.Ceiling(slotsEnUso);
                     if (techoVivo > Player.maxMinions)
@@ -1081,6 +1108,10 @@ namespace AethonMod.Content.Players
                 // hecho adorno: pequeño, alrededor de la cabeza).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.HaloArcoirisItem>());
+                // v6.51.3 — EL BRILLO DE LOS SOLES RÚNICOS (los destellos
+                // de 4 puntas de los soles de 3 anillos+, hechos adorno).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.BrilloSolarItem>());
 
                 if (entregados > 0)
                 {

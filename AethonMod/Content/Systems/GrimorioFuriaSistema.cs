@@ -116,15 +116,28 @@ namespace AethonMod.Content.Systems
         // el FuriaNivel persistente del portador.
         private static bool _esNatural = false;
 
-        // v6.51.2 — LA NOCHE DEL FESTÍN (la letra: «el bioma no debe
-        // cambiar por nada hasta que las oleadas no terminen»): mientras
-        // el festín viva, el mundo vive en SU noche — prestada a nivel
-        // del SISTEMA (el préstamo por-AI de los guardianes nunca llega
-        // al render: se devuelve en su PostAI antes del dibujo). Ni la
-        // nova de un sol rúnico ni la caída del guardián apagan el
-        // ambiente: la noche y la bruma del festín mueren con el festín.
-        private static bool _prestaNoche = false;
-        private static bool _diaOriginalNoche = true;
+        // v6.51.3 — LA NOCHE DEL FESTÍN MURIÓ (la letra del playtest:
+        // «al parecer las oleadas siempre son de noche, sabes que esto
+        // no es asi, las oleadas deben ser de dia y de noche, si el
+        // libro activa la oleada de dia es un eclipse como el que ya
+        // habiamos creado antes, si se activa de noche es luna de
+        // sangre teñida de morado… sobre los jefes de las oleadas,
+        // estos son independientes»): la v6.51.2 PRESTÓ la noche a
+        // nivel de SISTEMA (Main.dayTime=false mientras el festín
+        // viviera) y con eso CLAVÓ a las oleadas en la noche eterna.
+        // LA CURA: el préstamo sistema-level MUERE — el reloj del mundo
+        // sigue SU curso natural (amaneceres y atardeces incluidos) y
+        // el AMBIENTE ya sabe vestirse solo: AmbienteOleadaSistema
+        // (v6.50.74+) tinta el cielo EN VIVO — de DÍA es el ECLIPSE
+        // morado, de NOCHE la LUNA DE SANGRE morada, y el cruce
+        // amanecer/atardecer es SUAVE dentro de una misma oleada. Los
+        // jefes de oleada SIGUEN independientes: su préstamo por-AI de
+        // OleadaNPC (día/noche prestado SOLO durante su IA, devuelto
+        // en su PostAI) NO se toca — el que era el problema (el filtro
+        // del bioma apagado por la lente de los agujeros/novas) tiene
+        // SU cura de raíz en BlackHoleLensSystem (la lente ya compone
+        // DESPUÉS de los filtros: ni la nova de un sol ni un agujero
+        // vivo pueden apagar el eclipse ni la luna de sangre).
         // v6.50.59 — LA MEZCLA DE BIOMAS DEL NIVEL (la letra: «a mayor
         // nivel de oleada mas monstruos de biomas diferentes aparecen,
         // siempre usando los biomas disponibles en el momento»): el festín
@@ -492,34 +505,7 @@ namespace AethonMod.Content.Systems
         /// — y los guardados viejos se resetean a 1 una única vez (el
         /// marcador furiaV2 de ShardPlayer).
         /// </summary>
-        /// <summary>v6.51.2 — LA NOCHE DEL FESTÍN: se pide al arrancar y
-        /// se REFRESCA cada tick (si el reloj de vanilla cruzó el alba y
-        /// volteó el día, se re-afirma: el festín no conoce amaneceres).
-        /// La devolución vive en Terminar/OnWorldUnload.</summary>
-        private static void PrestarNocheDelFestin()
-        {
-            try
-            {
-                if (_prestaNoche) return;
-                _diaOriginalNoche = Main.dayTime;
-                _prestaNoche = true;
-                Main.dayTime = false;
-            }
-            catch { }
-        }
 
-        /// <summary>La noche se devuelve al mundo cuando el festín
-        /// muere (vencido, cancelado o mundo descargado).</summary>
-        private static void DevolverNocheDelFestin()
-        {
-            try
-            {
-                if (!_prestaNoche) return;
-                _prestaNoche = false;
-                Main.dayTime = _diaOriginalNoche;
-            }
-            catch { _prestaNoche = false; }
-        }
 
         public static void Provocar(Player jugador, int oleadas, bool natural = false)
         {
@@ -548,11 +534,10 @@ namespace AethonMod.Content.Systems
             _firmaBioma = "";
             _fase = Fase.Llamada;
             _ticksFase = 0;
-            // v6.51.2 — LA NOCHE DEL FESTÍN: el ambiente nace con el
-            // festín (oscurecido con bruma: el mundo es SU propio
-            // ambiente — «el bioma no debe cambiar por nada hasta que
-            // las oleadas no terminen»).
-            PrestarNocheDelFestin();
+            // v6.51.3 — SIN NOCHE PRESTADA (ver el comentario del campo
+            // muerto): el festín respeta el reloj del mundo — de día
+            // viste el ECLIPSE morado, de noche la LUNA DE SANGRE
+            // (AmbienteOleadaSistema, dinámico, ya existente y intacto).
             // v6.50.2 — EL FESTÍN CAMINA (cada cambio de fase): el estado
             // viaja al portador dentro del MsgHambre para SU diagnóstico.
             EcoRed.SincronizarHambre(jugador); // no-op fuera del servidor
@@ -590,18 +575,14 @@ namespace AethonMod.Content.Systems
             try { ProcesarExtensionDevorador(); } catch { _pendCabeza = -1; }
             if (_fase == Fase.Inactivo)
             {
-                DevolverNocheDelFestin();   // v6.51.2 — la red de seguridad
                 return;
             }
-            // v6.51.2 — LA NOCHE DEL FESTÍN: mientras el festín viva, el
-            // mundo ES su ambiente — la noche se mantiene (y se re-afirma
-            // si el reloj del juego volteó el alba) y la BRUMA AMBIENTE
-            // respira alrededor del portador: ni la nova de un sol rúnico
-            // ni la caída de un guardián pueden apagar el bioma del
-            // festín (la letra: «el bioma no debe cambiar por nada hasta
-            // que las oleadas no terminen»).
-            if (!_prestaNoche) PrestarNocheDelFestin();
-            else Main.dayTime = false;
+            // v6.51.3 — EL RELOJ DEL MUNDO SIGUE SU CURSO (la noche prestada
+            // de la v6.51.2 murió): el festín ya NO toca Main.dayTime — el
+            // ambiente (eclipse morado de día · luna de sangre morada de
+            // noche, con sus cruces suaves) es COSA de AmbienteOleadaSistema
+            // y el bioma no se apaga por nada: la BRUMA AMBIENTE sigue
+            // respirando alrededor del portador mientras el festín viva.
             try { BrumaAmbienteDelFestin(); } catch { }
             try { Paso(); }
             catch { Terminar(); }
@@ -1636,10 +1617,8 @@ namespace AethonMod.Content.Systems
 
         private static void Terminar()
         {
-            // v6.51.2 — LA NOCHE SE DEVUELVE (el festín murió: el mundo
-            // recupera SU día — la saciedad también es visual).
-            DevolverNocheDelFestin();
-
+            // v6.51.3 — ya no hay nada que devolver (la noche prestada de
+            // la v6.51.2 murió: el reloj del mundo jamás dejó de ser suyo).
             // v6.50.2 — EL FESTÍN CAMINA: el estado final (Inactivo) también
             // viaja — sin esto el F8 del portador mostraba el último festín
             // "en marcha" para siempre. ANTES de resetear _jugador (lo

@@ -98,6 +98,19 @@ namespace AethonMod.Content.Globals
             if (!npc.townNPC)
                 return;
 
+            // === v6.51.3 — LA INTIMIDAD DEL DORMIDO (la letra del playtest:
+            //     «los dialogos del grimorio dormido deben ser unicos y
+            //     deben estar separados de los dialogos de los NPC, ya que
+            //     vi un dialogo de un NPC en el grimorio dormido»): el
+            //     Grimorio Dormido ES townNPC (la ventana de diálogo de
+            //     vanilla lo exige) — y este GlobalNPC le robaba SU línea
+            //     exclusiva del sueño (Caida.Dormido1..8) para ponerle un
+            //     CHISME O UN RECLAMO DEL PUEBLO. La cura: los vecinos de
+            //     vanilla chismean; los libros del mod NUNCA (su repertorio
+            //     es SUYO — GetChat del ModNPC manda). ===
+            if (npc.type == ModContent.NPCType<global::AethonMod.Content.NPCs.GrimorioDormido>())
+                return;
+
             // === v6.50.129 — EL DUENDE Y LA CORRUPCIÓN (la letra: «y el
             //     duende debe decir algo como esta arma esta corrompida
             //     no puedo hacer nada con ella»): si el jugador que habla

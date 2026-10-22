@@ -317,9 +317,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // === LUZ ===
                 float alpha = WaveAlpha(age, Math.Max(Duration, 1f));
+                // v6.51.3 — LA NOVA YA NO LAVA EL BIOMA (la letra: «la
+                // explosión del sol sigue cambiando la iluminación o el
+                // filtro usado… modifica la explosion final del sol
+                // runico»): la luz de la nova se ADOMA (1,8 → 1,0) para
+                // que el fogonazo respire DENTRO del eclipse del festín y
+                // no lo tiña de blanco un segundo entero. (La causa raíz
+                // del filtro apagado — la lente — murió en
+                // BlackHoleLensSystem: la nova ya no puede borrar el filtro.)
                 if (Style == StyleFire || Style == StyleNova)
                     Lighting.AddLight(Projectile.Center,
-                        new Vector3(1f, 0.55f, 0.2f) * 1.8f * alpha);
+                        new Vector3(1f, 0.55f, 0.2f) *
+                        (Style == StyleNova ? 1.0f : 1.8f) * alpha);
                 else if (Style == StyleLens)
                     // v5.95 — onda de lente del sol: luz cálida blanquecina.
                     Lighting.AddLight(Projectile.Center,
