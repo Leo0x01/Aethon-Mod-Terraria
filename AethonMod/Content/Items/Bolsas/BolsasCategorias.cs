@@ -343,6 +343,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
+            // v6.51.4 — EL BRILLO DE LOS SOLES RÚNICOS también viaja en la
+            // bolsa (la letra: «este item añadelo a la bolsa de comsetico»).
+            l.Add((ModContent.ItemType<Cosmetics.BrilloSolarItem>(), 1));
             return l;
         }
     }
@@ -524,6 +527,39 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasLenguaTinta>(), 1));       // la sierpe de tinta
             l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasOjoTexto>(), 1));          // el ojo que lee
             l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasVersoVivo>(), 1));         // la palabra viva
+            return l;
+        }
+    }
+
+    /// <summary>22 — LOS PROYECTILES DIGNOS (v6.51.4): LOS SEIS CANDIDATOS
+    /// A PROYECTIL DEL GRIMORIO, YA MADUROS. La letra del usuario: «crea
+    /// un arma nueva por cada una de estas ideas que diste y crea una
+    /// nueva bolsa para darsela al jugador» — las seis ideas presentadas
+    /// con la v6.51.3 son ahora SEIS ARMAS COMPLETAS, cada una con su
+    /// mecánica final de una pieza: LA BINARIA día/noche (el equinoccio
+    /// que vive el reloj del mundo), LAS COMAS que muerden (el glifo
+    /// suspendido y su frase que detona), LA PÁGINA arrancada (la hoja-
+    /// cuchilla que se clava y encadena versos), EL OJO que caza (la
+    /// mirada del escuadrón y su parpadeo), LA LÍNEA de lectura (el rayo
+    /// de texto puro que se carga hojeando) y EL MARCAPÁGINAS (los
+    /// dardos-marca y el libro que se cierra de golpe). (La 21ª bolsa es
+    /// La Bolsa de la Cría — vive en Llamados.)</summary>
+    public class BolsaProyectilesDignos : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de los Proyectiles Dignos";
+        protected override string NombreCorto => "Bolsa de los Proyectiles Dignos";
+        protected override Color ColorFiesta => new(255, 196, 110);
+        protected override string Nota => "Seis candidatos a proyectil digno del Grimorio: la binaria, las comas, la página, el ojo, la línea y el marcapáginas";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosEquinoccioBinario>(), 1));  // CANDIDATO 1: LA BINARIA día/noche
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosComasQueMuerden>(), 1));     // CANDIDATO 2: LAS COMAS que muerden
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosPaginaArrancada>(), 1));     // CANDIDATO 3: LA PÁGINA arrancada
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosOjoQueCaza>(), 1));          // CANDIDATO 4: EL OJO que caza
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosLineaDeLectura>(), 1));      // CANDIDATO 5: LA LÍNEA de lectura
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosMarcapaginas>(), 1));        // CANDIDATO 6: EL MARCAPÁGINAS
             return l;
         }
     }

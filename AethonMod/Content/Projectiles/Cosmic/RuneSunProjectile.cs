@@ -111,15 +111,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true)) *
                                (Tier >= 20 ? 1.30f : 1f);
 
-            // === v6.51.3 — LA BRUMA DORADA DEL NACIMIENTO (la letra:
-            //     «agrega un poco de bruma en las animacions de nacimiento
-            //     de agujeros negros runicos y de soles runicos, claro con
-            //     la bruma del color correspondiente»): el primer segundo y
-            //     cuarto el sol EXHALA jirones de niebla DORADA — puffs
-            //     gordos y lentos que derivan hacia arriba y se deshacen
-            //     (el nacimiento del sol RESPIRA; el color del sol es el
-            //     ORO de sus anillos). ===
-            if (_age < 75f && _age % 6f < 1f && Main.netMode != NetmodeID.Server)
+            // === v6.51.3 → v6.51.4 — LA BRUMA DORADA DEL NACIMIENTO (la
+            //     letra: «agrega un poco de bruma en las animacions de
+            //     nacimiento… con la bruma del color correspondiente» — y
+            //     la de la .51.4: «teniamos ya una buena libreria de
+            //     brumas… solo se debe cubrir con bruma, nada geometria
+            //     plana»): el sol estrena su vida EXHALANDO SU NUBE
+            //     DORADA — BrumaNacimientoFX (BrumaFX de la casa, humo
+            //     fBm que se desgarra — ya no polvos sueltos) + unas
+            //     ascuas doradas que derivan arriba mientras arraiga. ===
+            if (_age == 1f && Projectile.owner == Main.myPlayer)
+            {
+                Projectile.NewProjectileDirect(
+                    Projectile.GetSource_FromAI(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<BrumaNacimientoFX>(),
+                    0, 0f, Projectile.owner,
+                    1f,                       // SOL: la nube DORADA
+                    MathHelper.Clamp(Tier / 20f, 0.7f, 1.5f)); // el GRAN SELLADO respira más
+            }
+            if (_age < 75f && _age % 9f < 1f && Main.netMode != NetmodeID.Server)
             {
                 float angB = Main.rand.NextFloat(MathHelper.TwoPi);
                 float lejosB = Main.rand.NextFloat(34f, 96f) * Math.Max(Projectile.scale, 0.2f);
@@ -128,7 +139,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Dust m = Dust.NewDustPerfect(posBruma, DustID.GoldFlame,
                     new Vector2(Main.rand.NextFloat(-0.5f, 0.5f),
                                 Main.rand.NextFloat(-1.3f, -0.3f)),
-                    80, new Color(255, 216, 130), Main.rand.NextFloat(1.7f, 2.7f));
+                    80, new Color(255, 216, 130), Main.rand.NextFloat(1.4f, 2.2f));
                 m.noGravity = true;
                 m.fadeIn = 0f;
             }

@@ -1808,6 +1808,31 @@ Items: {
 		Completa: La {0} ya está completa contigo.
 	}
 
+	// v6.51.4 — LOS SEIS CANDIDATOS DIGNOS DEL GRIMORIO (una arma por
+	// idea: la binaria, las comas, la página, el ojo, la línea y el
+	// marcapáginas) + LA BOLSA que los entrega.
+	DignosEquinoccioBinario: {
+		DisplayName: El Equinoccio Binario
+	}
+	DignosComasQueMuerden: {
+		DisplayName: Las Comas que Muerden
+	}
+	DignosPaginaArrancada: {
+		DisplayName: La Página Arrancada
+	}
+	DignosOjoQueCaza: {
+		DisplayName: El Ojo que Caza
+	}
+	DignosLineaDeLectura: {
+		DisplayName: La Línea de Lectura
+	}
+	DignosMarcapaginas: {
+		DisplayName: El Marcapáginas
+	}
+	BolsaProyectilesDignos: {
+		DisplayName: La Bolsa de los Proyectiles Dignos
+	}
+
 	// v6.50.99/.102 — THE FOURTH WEAPON — DUAL OPTION B — THE CHOSEN ONE
 	Equinoccio: {
 		DisplayName: El Equinoccio

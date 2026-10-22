@@ -88,6 +88,19 @@ namespace AethonMod.Content.NPCs
             Main.npcFrameCount[Type] = 1;
             // El DisplayName vive en la localización (NPCs.AethonBossOscuro):
             // EL MISMO NOMBRE que el de luz — son el mismo recuerdo partido.
+
+            // v6.51.4 — LA POSE DEL BESTIARIO (la letra: «los jefes no
+            // tiene sprite en el bestiario»): SU pose es EL SOL
+            // MORIBUNDO (halo morado profundo + la brasa violeta — el
+            // arte del Oscuro destilado en miniatura; el PreDraw es el
+            // del base y su guard ya lo defiende).
+            NPCID.Sets.NPCBestiaryDrawOffset[Type] =
+                new NPCID.Sets.NPCBestiaryDrawModifiers()
+                {
+                    CustomTexturePath = "AethonMod/Content/NPCs/AethonBossOscuro_PoseBestiario",
+                    Scale = 0.30f,
+                    PortraitScale = 0.95f,
+                };
         }
 
         public override void SetDefaults()

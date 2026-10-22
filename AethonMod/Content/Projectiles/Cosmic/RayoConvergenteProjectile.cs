@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -120,30 +121,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center);
             }
 
-            // === v6.51.3 — LA BRUMA DE LA GESTACIÓN (la letra: «agrega un
-            //     poco de bruma en las animacions de nacimiento de
-            //     agujeros negros runicos y de soles runicos, claro con la
-            //     bruma del color correspondiente»): alrededor del punto
-            //     focal — donde la semilla crece — flota UN POCO de niebla
-            //     del color de lo que nace: ORO para el sol · VIOLETA para
-            //     el agujero (jirones lentos que giran y se disuelven — no
-            //     la niebla que CONVERGE de siempre: esta es la que
-            //     RESPIRA alrededor de la cuna). ===
-            if (Main.netMode != NetmodeID.Server && edad % 9f < 1f)
-            {
-                float angM = Main.rand.NextFloat(MathHelper.TwoPi);
-                float lejosM = Main.rand.NextFloat(46f, 120f) * (0.4f + 0.6f * prog);
-                Vector2 posM = Projectile.Center +
-                    new Vector2(MathF.Cos(angM), MathF.Sin(angM) * 0.8f) * lejosM;
-                Dust m = Dust.NewDustPerfect(posM,
-                    EsSol ? DustID.GoldFlame : DustID.Shadowflame,
-                    new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
-                                Main.rand.NextFloat(-1.0f, -0.2f)),
-                    70, EsSol ? new Color(255, 214, 120) : new Color(122, 60, 192),
-                    Main.rand.NextFloat(1.5f, 2.4f));
-                m.noGravity = true;
-                m.fadeIn = 0f;
-            }
+            // === v6.51.3 → v6.51.4 — LA BRUMA DE LA GESTACIÓN (la
+            //     letra: «agrega un poco de bruma… con la bruma del
+            //     color correspondiente» — y la de la .51.4: «solo se
+            //     debe cubrir con bruma, nada geometria plana»): la
+            //     niebla de la cuna VIVE EN EL PreDraw (BrumaFX de la
+            //     casa — ver abajo); aquí solo queda LA CARGA (el
+            //     mundo le sopla partículas convergentes). ===
 
             // === EL CUMPLIMIENTO: EL LANZAMIENTO. ===
             if (edad >= Duracion)
@@ -225,24 +209,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
 
                 // v6.51.3 — LA BRUMA DORADA DEL NACIMIENTO DEL SOL (la
-                //     letra: bruma del color correspondiente en las
-                //     animaciones de nacimiento): el sol estrena su vida
-                //     EXHALANDO un anillo de niebla dorada.
-                if (Main.netMode != NetmodeID.Server)
-                {
-                    for (int b = 0; b < 14; b++)
-                    {
-                        float angB = b / 14f * MathHelper.TwoPi;
-                        Dust m = Dust.NewDustPerfect(Projectile.Center +
-                            new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * 18f,
-                            DustID.GoldFlame,
-                            new Vector2(MathF.Cos(angB), MathF.Sin(angB)) *
-                            Main.rand.NextFloat(1.2f, 2.8f),
-                            100, new Color(255, 214, 120), Main.rand.NextFloat(1.6f, 2.6f));
-                        m.noGravity = true;
-                        m.fadeIn = 0f;
-                    }
-                }
+                //     letra: bruma del color correspondiente — y la .51.4:
+                //     LA DE LA CASA, BrumaFX, nada de geometría plana): el
+                //     sol estrena su vida EXHALANDO su nube dorada.
+                Projectile.NewProjectileDirect(
+                    Projectile.GetSource_FromAI(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<BrumaNacimientoFX>(),
+                    0, 0f, Projectile.owner, 1f, 1f);
             }
             else
             {
@@ -331,6 +305,43 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int semilla = Projectile.identity % 89 + 7;
 
                 VFXCore.CerrarLoteSiAbierto();
+
+                // ============================================================
+                //  v6.51.4 — LA BRUMA DE LA CUNA (la letra: «teniamos ya
+                //  una buena libreria de brumas completamente funcional
+                //  que no ponen esos circulos planos… solo se debe cubrir
+                //  con bruma, nada geometria plana»): alrededor del punto
+                //  focal — donde la semilla crece — RESPIRA la niebla del
+                //  color de lo que nace (ORO para el sol · VIOLETA para el
+                //  agujero), BRUMAFX DE LA CASA (puffs fBm que se
+                //  desgarran — jamás discos lisos). Crece con el ritual:
+                //  al principio un susurro, al final la cuna entera.
+                // ============================================================
+                try
+                {
+                    Vector2 centroScr = centro - Main.screenPosition;
+                    float radioCuna = MathHelper.Lerp(34f, 92f, conver);
+                    Color masaCuna = EsSol
+                        ? new Color(98, 68, 24)      // el humo DORADO (la luz la pone el sol)
+                        : new Color(48, 22, 78);     // el humo VIOLETA (la bruma del vacío)
+                    BrumaFX.BeginMass();
+                    BrumaFX.Cloud(centroScr, radioCuna, masaCuna, semilla, time,
+                        Math.Max(4, (int)(7 * conver) + 3),
+                        alpha: 0.30f + 0.38f * conver);
+                    if (conver > 0.35f)
+                        BrumaFX.Cloud(centroScr + new Vector2(0f, -radioCuna * 0.2f),
+                            radioCuna * 0.6f,
+                            EsSol ? new Color(122, 90, 36) : new Color(70, 36, 106),
+                            semilla + 29, time * 0.85f, 4,
+                            alpha: (0.24f + 0.26f * conver));
+                }
+                catch { }
+                finally
+                {
+                    try { Main.spriteBatch.End(); } catch { }
+                    VFXCore.CerrarLoteSiAbierto();
+                }
+
                 VFXCore.Begin();
                 try
                 {
@@ -368,12 +379,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     if (EsSol)
                     {
-                        // EL SOL EN GESTACIÓN: el corazón dorado + sus
-                        // ANILLOS rúnicos que giran (los que llevará).
-                        VFXCore.Quad(centro, new Color(255, 236, 170) * (0.35f + 0.5f * prog),
-                            new Vector2(nucleo * 2.4f, nucleo * 2.4f));
+                        // EL SOL EN GESTACIÓN: el corazón dorado (v6.51.4 —
+                        //     YA NO son discos gordos: un núcleo de LUZ
+                        //     pequeño — la MASA la pone la bruma de arriba)
+                        //     + sus ANILLOS rúnicos que giran.
+                        VFXCore.Quad(centro, new Color(255, 236, 170) * (0.45f + 0.5f * prog),
+                            new Vector2(nucleo * 1.1f, nucleo * 1.1f));
                         VFXCore.Quad(centro, new Color(255, 170, 60) * (0.3f + 0.4f * prog),
-                            new Vector2(nucleo * 3.4f, nucleo * 3.4f));
+                            new Vector2(nucleo * 1.7f, nucleo * 1.7f));
                         for (int a = 0; a < 3; a++)
                         {
                             float rA = nucleo * (1.6f + a * 0.55f);
@@ -392,12 +405,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     else
                     {
                         // EL AGUJERO EN GESTACIÓN: el vórtice violeta que
-                        // TRAGA — aro exterior + vacío interior (la puerta
-                        // que se abre a lo desconocido).
+                        // TRAGA — corazón pequeño (la MASA la pone la
+                        // bruma de la casa de arriba) + sus runas.
                         VFXCore.Quad(centro, new Color(96, 40, 160) * (0.30f + 0.45f * prog),
-                            new Vector2(nucleo * 4.2f, nucleo * 4.2f));
+                            new Vector2(nucleo * 1.5f, nucleo * 1.5f));
                         VFXCore.Quad(centro, new Color(30, 10, 52) * (0.35f + 0.55f * prog),
-                            new Vector2(nucleo * 2.6f, nucleo * 2.6f));
+                            new Vector2(nucleo * 1.0f, nucleo * 1.0f));
                         for (int a = 0; a < 2; a++)
                         {
                             float rA = nucleo * (1.8f + a * 0.9f);
@@ -417,27 +430,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.FlushAdditive();
 
-                // === EL VACÍO QUE OSCURECE (los agujeros comen la luz
-                //     alrededor del ritual — pase ALFA propio). ===
+                // === EL VACÍO QUE OSCURECE (v6.51.4 — los agujeros comen
+                //     la luz alrededor del ritual — PERO CON BRUMA DE LA
+                //     CASA, la letra: «solo se debe cubrir con bruma, nada
+                //     geometria plana»: el disco oscuro liso MUERE; lo que
+                //     oscurece es UNA NUBE NEGRA-VIOLETA que se espesa con
+                //     el ritual — BrumaFX, puffs que se desgarran). ===
                 if (!EsSol)
                 {
                     try
                     {
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        Texture2D glow = ModContent.Request<Texture2D>(
-                            "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                        Vector2 posScr = centro - Main.screenPosition;
-                        float tama = MathHelper.Lerp(40f, 150f, conver);
-                        Main.spriteBatch.Draw(glow, posScr, null,
-                            new Color(18, 8, 30) * (0.55f * conver), 0f,
-                            glow.Size() * 0.5f,
-                            new Vector2(tama, tama) / glow.Size(),
-                            SpriteEffects.None, 0f);
+                        Vector2 centroScr = centro - Main.screenPosition;
+                        float radioVac = MathHelper.Lerp(40f, 150f, conver);
+                        BrumaFX.BeginMass();
+                        BrumaFX.Cloud(centroScr, radioVac,
+                            SombrasLib.HumoNegro, semilla + 61, time,
+                            Math.Max(5, (int)(8 * conver) + 4),
+                            alpha: 0.34f + 0.42f * conver);
+                        BrumaFX.Cloud(centroScr + new Vector2(0f, -radioVac * 0.15f),
+                            radioVac * 0.62f, SombrasLib.HumoVioleta,
+                            semilla + 83, time * 1.1f, 4,
+                            alpha: 0.26f + 0.30f * conver);
                     }
                     catch { }
-                    finally { Main.spriteBatch.End(); }
+                    finally
+                    {
+                        try { Main.spriteBatch.End(); } catch { }
+                        VFXCore.CerrarLoteSiAbierto();
+                    }
                 }
 
                 VFXCore.ReabrirLoteVanilla();

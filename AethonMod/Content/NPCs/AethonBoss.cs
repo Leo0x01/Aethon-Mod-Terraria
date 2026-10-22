@@ -479,6 +479,29 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 1;
+
+            // === v6.51.4 — LA POSE DEL BESTIARIO (la letra: «los jefes
+            //     no tiene sprite en el bestiario»). LA CAUSA (cazada al
+            //     IL del UnlockableNPCEntryIcon): el bestiario dibuja al
+            //     dummy con screenPos=Zero y su Center YA en coordenadas
+            //     de la caja — pero ESTE PreDraw mide con
+            //     Main.screenPosition (el del MUNDO: en el menú vale lo
+            //     que la última partida dejó) → el sol de código caía
+            //     donde quería y la casilla quedaba VACÍA; y de propina
+            //     la danza de lotes (End → aditivo → ReabrirLoteVanilla)
+            //     devolvía un lote con parámetros del MUNDO a mitad de
+            //     la UI. LA CURA VANILLA: NPCBestiaryDrawOffset con
+            //     CustomTexturePath — el icono dibuja LA POSE (el arte
+            //     del dios destilado en miniatura por
+            //     tools/gen_poses_bestiario_v6514.py) y JAMÁS llama a
+            //     DrawNPCDirect (el PreDraw ya no corre en el catálogo). ===
+            NPCID.Sets.NPCBestiaryDrawOffset[Type] =
+                new NPCID.Sets.NPCBestiaryDrawModifiers()
+                {
+                    CustomTexturePath = "AethonMod/Content/NPCs/AethonBoss_PoseBestiario",
+                    Scale = 0.30f,          // la cuadrícula: ~34 px de dios
+                    PortraitScale = 0.95f,  // el retrato: el sol entero
+                };
         }
 
         public override void SetDefaults()
@@ -3490,6 +3513,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.dedServ) return false;
+
+            // v6.51.4 — EL BESTIARIO NO corre la danza de lotes (la pose
+            // vive en su CustomTexturePath; esto es el cinturón de
+            // seguridad si algún otro camino dibujara al dummy).
+            if (NPC.IsABestiaryIconDummy) return false;
 
             VFXCore.CerrarLoteSiAbierto();
             try

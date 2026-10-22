@@ -49,6 +49,22 @@ namespace AethonMod.Content.NPCs
         {
             Main.npcFrameCount[Type] = 1;
             // El DisplayName vive en la localización (NPCs.CazadorAstral).
+
+            // v6.51.4 — LA POSE DEL BESTIARIO (la letra: «los jefes no
+            // tiene sprite en el bestiario»): el cazador es 100% luz
+            // (SierpesLib.ManadaAstral — y su PreDraw mide con
+            // Main.screenPosition): el icono dibuja SU POSE (el
+            // lobo-estrella con su ojo dorado y la corona del líder,
+            // destilado en miniatura) y jamás corre la danza de lotes
+            // en mitad de la UI (ver el comentario completo en
+            // AethonBoss.SetStaticDefaults).
+            NPCID.Sets.NPCBestiaryDrawOffset[Type] =
+                new NPCID.Sets.NPCBestiaryDrawModifiers()
+                {
+                    CustomTexturePath = "AethonMod/Content/NPCs/CazadorAstral_PoseBestiario",
+                    Scale = 0.34f,          // el lobo es más chico que los soles
+                    PortraitScale = 0.90f,
+                };
         }
 
         public override void SetDefaults()
@@ -224,6 +240,10 @@ namespace AethonMod.Content.NPCs
             Color drawColor)
         {
             if (Main.dedServ) return false;
+
+            // v6.51.4 — EL BESTIARIO NO corre la danza de lotes (la pose
+            // vive en su CustomTexturePath — cinturón de seguridad).
+            if (NPC.IsABestiaryIconDummy) return false;
 
             // EL CONTRATO DE LA CASA (el del proyectil del bastón):
             // cerrar el lote del pase → SierpesLib abre SU aditivo y

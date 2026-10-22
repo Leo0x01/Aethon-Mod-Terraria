@@ -168,6 +168,20 @@ namespace AethonMod.Content.NPCs
         {
             Main.npcFrameCount[Type] = 1;
             // El DisplayName vive en la localización (NPCs.AethonBossFusionado).
+
+            // v6.51.4 — LA POSE DEL BESTIARIO (la letra: «los jefes no
+            // tiene sprite en el bestiario»): el icono dibuja LA POSE
+            // (el sol dorado TAPADO por el disco de la oscuridad — UN
+            // ECLIPSE VIVO, el arte del Fusionado destilado en
+            // miniatura) y jamás llama a DrawNPCDirect (ver el
+            // comentario completo en AethonBoss.SetStaticDefaults).
+            NPCID.Sets.NPCBestiaryDrawOffset[Type] =
+                new NPCID.Sets.NPCBestiaryDrawModifiers()
+                {
+                    CustomTexturePath = "AethonMod/Content/NPCs/AethonBossFusionado_PoseBestiario",
+                    Scale = 0.30f,
+                    PortraitScale = 0.95f,
+                };
         }
 
         public override void SetDefaults()
@@ -973,6 +987,10 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
+            // v6.51.4 — EL BESTIARIO NO corre la danza (ni la del base ni
+            // la del eclipse): la pose vive en su CustomTexturePath.
+            if (NPC.IsABestiaryIconDummy) return false;
+
             // EL SOL DORADO DE LA BASE (intacto — la mitad de luz del
             // recuerdo; su propio PreDraw abre y cierra sus lotes).
             base.PreDraw(spriteBatch, screenPos, drawColor);

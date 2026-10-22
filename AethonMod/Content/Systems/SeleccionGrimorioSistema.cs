@@ -1466,7 +1466,13 @@ namespace AethonMod.Content.Systems
             Texture2D ojoAbierto = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
             Texture2D ojoCerrado = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Projectiles/OjoEterne_Cerrado").Value;
+                // v6.51.4 — LA CURA DEL ERROR DEL MENÚ (el client.log del
+                // playtest: «Excepción silenciosa:
+                // AssetLoadException: Content\Projectiles\OjoEterne_Cerrado»
+                // — un typo de la manada: faltaba la "o" de Eterno y el
+                // vagabundo REVIENTA el dibujo del menú de selección en
+                // cada parpadeo).
+                "AethonMod/Content/Projectiles/OjoEterno_Cerrado").Value;
             var irisOjo = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
             if (ojoAbierto == null || ojoCerrado == null || irisOjo == null) return;

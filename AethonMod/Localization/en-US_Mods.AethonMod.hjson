@@ -1801,6 +1801,44 @@ Items: {
 		Completa: The {0} is already complete with you.
 	}
 
+	// v6.51.4 — THE SIX WORTHY CANDIDATES of the Grimoire (one weapon
+	// per idea: the binary, the commas, the page, the eye, the line and
+	// the bookmark) + THE BAG that delivers them.
+	DignosEquinoccioBinario: {
+		DisplayName: The Binary Equinox
+		Tooltip: ""
+	}
+
+	DignosComasQueMuerden: {
+		DisplayName: The Biting Commas
+		Tooltip: ""
+	}
+
+	DignosPaginaArrancada: {
+		DisplayName: The Torn Page
+		Tooltip: ""
+	}
+
+	DignosOjoQueCaza: {
+		DisplayName: The Hunting Eye
+		Tooltip: ""
+	}
+
+	DignosLineaDeLectura: {
+		DisplayName: The Reading Line
+		Tooltip: ""
+	}
+
+	DignosMarcapaginas: {
+		DisplayName: The Bookmark
+		Tooltip: ""
+	}
+
+	BolsaProyectilesDignos: {
+		DisplayName: The Bag of Worthy Projectiles
+		Tooltip: ""
+	}
+
 	// v6.50.99/.102 — THE FOURTH WEAPON — DUAL OPTION B — THE CHOSEN ONE
 	Equinoccio: {
 		DisplayName: The Equinox
@@ -2002,6 +2040,14 @@ Projectiles: {
 	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
 	BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	AgujeroEnViajeProjectile.DisplayName: Agujero En Viaje Projectile
+	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
+	ComaRunicaProjectile.DisplayName: Coma Runica Projectile
+	DignosFXProjectile.DisplayName: Dignos F X Projectile
+	EquinoccioBinarioProjectile.DisplayName: Equinoccio Binario Projectile
+	LineaLecturaProjectile.DisplayName: Linea Lectura Projectile
+	MarcapaginasProjectile.DisplayName: Marcapaginas Projectile
+	OjoQueCazaProjectile.DisplayName: Ojo Que Caza Projectile
+	PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
 }
 
 Buffs: {

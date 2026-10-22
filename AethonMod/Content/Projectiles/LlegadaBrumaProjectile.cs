@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles
 {
@@ -195,60 +196,36 @@ namespace AethonMod.Content.Projectiles
                             tiempo * 1.1f, semilla + 31 + i * 13);
                     }
 
-                    // EL VACÍO CENTRAL (lo que no deja ver): un corazón
-                    // oscuro con rim violeta — sutil, la niebla manda.
-                    // v6.51.2 — LA CURA DEL DRAW DESNUDO (la excepción del
-                    // client.log: «Draw was called, but Begin has not yet
-                    // been called»): después de SombrasLib.Bruma el lote
-                    // de vanilla está CERRADO — estos Draws viven ahora
-                    // en SU PROPIO lote (abrir → dibujar → cerrar,
-                    // blindado try/finally).
-                    // v6.51.3 — LA MUERTE DEL ÓVALO (la letra: «al aparecer
-                    // todavia aparecen ovalados junto a la bruma» — la .51.1
-                    // curó los PUFFS pero el corazón seguía siendo un
-                    // SoftGlow ESTIRADO ×1,25/×0,92 = un óvalo liso y
-                    // plano): el corazón ahora es una CEBOLLA REDONDA —
-                    // TRES capas concéntricas isótropas (grandes, medianas,
-                    // pequeñas) con radios DESIGUALES (±7%) y un rim que
-                    // RESPIRA: se lee como un GLOBO de oscuridad con
-                    // profundidad, jamás como una elipse dibujada.
-                    Texture2D glow = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                    if (glow != null)
+                    // === v6.51.4 — EL CORAZÓN DE BRUMA (la letra: «te-
+                    //     niamos ya una buena libreria de brumas completa-
+                    //     mente funcional que no ponen esos circulos pla-
+                    //     nos… esos circulos planos estan mal, solo se de-
+                    //     be cubrir con bruma, nada geometria plana»): LA
+                    //     CEBOLLA MUERE — el "vacío central" de la .51.3
+                    //     eran TRES SoftGlow concéntricos (discos lisos).
+                    //     Lo que no deja ver adentro es ahora MÁS BRUMA DE
+                    //     LA CASA: una nube madre GORDA (BrumaFX.Cloud con
+                    //     el doble de puffs y alfa alta) anidada en el
+                    //     corazón — la oscuridad la pone el HUMO, no la
+                    //     geometría. ===
+                    try
                     {
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        try
-                        {
-                            Vector2 posScr = centro - Main.screenPosition;
-                            // LAS TRES CAPAS DE LA CEBOLLA (cada una su
-                            // disimetría fija por semilla — un globo vivo,
-                            // no un círculo perfecto).
-                            float respiracion = 0.94f + 0.06f * MathF.Sin(
-                                Main.GlobalTimeWrappedHourly * 0.9f + semilla);
-                            for (int capa = 0; capa < 3; capa++)
-                            {
-                                float f = 1f - capa * 0.26f;                     // 1.0 · 0.74 · 0.48
-                                float asimetria = 0.93f + 0.07f *
-                                    (((semilla * 7 + capa * 13) % 10) / 10f);   // su disimetría
-                                float r = RADIO * (1.18f * f) * crecimiento * respiracion;
-                                Main.spriteBatch.Draw(glow, posScr, null,
-                                    new Color(16, 7, 28) * (0.62f * f * crecimiento),
-                                    0f, glow.Size() * 0.5f,
-                                    new Vector2(r * asimetria, r * (2f - asimetria)) / glow.Size(),
-                                    SpriteEffects.None, 0f);
-                            }
-                            // EL RIM VIOLETA (el borde del globo — un aro
-                            // tenue que también respira).
-                            float rRim = RADIO * 1.02f * crecimiento * respiracion;
-                            Main.spriteBatch.Draw(glow, posScr, null,
-                                new Color(70, 38, 120) * (0.16f * vida),
-                                0f, glow.Size() * 0.5f,
-                                new Vector2(rRim, rRim) / glow.Size(),
-                                SpriteEffects.None, 0f);
-                        }
-                        finally { Main.spriteBatch.End(); }
+                        BrumaFX.BeginMass();
+                        BrumaFX.Cloud(centro - Main.screenPosition,
+                            RADIO * (0.62f + 0.5f * crecimiento),
+                            SombrasLib.HumoNegro, semilla + 57, tiempo,
+                            8, alpha: 0.80f * alfa);
+                        BrumaFX.Cloud(centro - Main.screenPosition +
+                            new Vector2(0f, -RADIO * 0.1f * crecimiento),
+                            RADIO * (0.40f + 0.3f * crecimiento),
+                            SombrasLib.HumoVioleta, semilla + 79, tiempo * 1.15f,
+                            5, alpha: 0.55f * alfa);
+                    }
+                    catch { }
+                    finally
+                    {
+                        try { Main.spriteBatch.End(); } catch { }
+                        VFXCore.CerrarLoteSiAbierto();
                     }
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }

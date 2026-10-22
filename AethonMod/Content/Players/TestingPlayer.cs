@@ -100,6 +100,12 @@ namespace AethonMod.Content.Players
             //     luz+oscuridad nunca vuelve a perderse.
             bolsas += Entregar(ModContent.ItemType<Items.Llamados.BolsaDeLaCria>());
 
+            // v6.51.4 — LA BOLSA DE LOS PROYECTILES DIGNOS (la letra: «crea un arma
+            // nueva por cada una de estas ideas que diste y crea una nueva bolsa
+            // para darsela al jugador»): los seis candidatos a proyectil del
+            // Grimorio del Eterno, garantizados como sus hermanas.
+            bolsas += Entregar(ModContent.ItemType<BolsaProyectilesDignos>());
+
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;
             if (!HasItem(ItemID.TargetDummy))
