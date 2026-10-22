@@ -1801,7 +1801,7 @@ Items: {
 		Completa: The {0} is already complete with you.
 	}
 
-	// v6.51.4 — THE SIX WORTHY CANDIDATES of the Grimoire (one weapon
+	// v6.51.4 → v6.51.5 — THE SIX WORTHY CANDIDATES of the Grimoire (one weapon
 	// per idea: the binary, the commas, the page, the eye, the line and
 	// the bookmark) + THE BAG that delivers them.
 	DignosEquinoccioBinario: {
@@ -1809,28 +1809,23 @@ Items: {
 		Tooltip: ""
 	}
 
-	DignosComasQueMuerden: {
-		DisplayName: The Biting Commas
+	DignosIndiceGrimorio: {
+		DisplayName: The Grimoire Index
 		Tooltip: ""
 	}
 
-	DignosPaginaArrancada: {
-		DisplayName: The Torn Page
+	DignosLluviaVersos: {
+		DisplayName: The Rain of Verses
 		Tooltip: ""
 	}
 
-	DignosOjoQueCaza: {
-		DisplayName: The Hunting Eye
+	DignosOjoQueJuzga: {
+		DisplayName: The Judging Eye
 		Tooltip: ""
 	}
 
-	DignosLineaDeLectura: {
-		DisplayName: The Reading Line
-		Tooltip: ""
-	}
-
-	DignosMarcapaginas: {
-		DisplayName: The Bookmark
+	DignosCorazonMagnetar: {
+		DisplayName: The Heart of the Magnetar
 		Tooltip: ""
 	}
 
@@ -2039,15 +2034,12 @@ Projectiles: {
 	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
 	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
 	BrilloSolarHalo.DisplayName: Brillo Solar Halo
-	AgujeroEnViajeProjectile.DisplayName: Agujero En Viaje Projectile
 	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
-	ComaRunicaProjectile.DisplayName: Coma Runica Projectile
 	DignosFXProjectile.DisplayName: Dignos F X Projectile
-	EquinoccioBinarioProjectile.DisplayName: Equinoccio Binario Projectile
-	LineaLecturaProjectile.DisplayName: Linea Lectura Projectile
-	MarcapaginasProjectile.DisplayName: Marcapaginas Projectile
-	OjoQueCazaProjectile.DisplayName: Ojo Que Caza Projectile
-	PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
+	CorazonMagnetarProjectile.DisplayName: Corazon Magnetar Projectile
+	IndiceGrimorioProjectile.DisplayName: Indice Grimorio Projectile
+	LluviaVersosProjectile.DisplayName: Lluvia Versos Projectile
+	OjoQueJuzgaProjectile.DisplayName: Ojo Que Juzga Projectile
 }
 
 Buffs: {

@@ -531,35 +531,39 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>22 — LOS PROYECTILES DIGNOS (v6.51.4): LOS SEIS CANDIDATOS
-    /// A PROYECTIL DEL GRIMORIO, YA MADUROS. La letra del usuario: «crea
-    /// un arma nueva por cada una de estas ideas que diste y crea una
-    /// nueva bolsa para darsela al jugador» — las seis ideas presentadas
-    /// con la v6.51.3 son ahora SEIS ARMAS COMPLETAS, cada una con su
-    /// mecánica final de una pieza: LA BINARIA día/noche (el equinoccio
-    /// que vive el reloj del mundo), LAS COMAS que muerden (el glifo
-    /// suspendido y su frase que detona), LA PÁGINA arrancada (la hoja-
-    /// cuchilla que se clava y encadena versos), EL OJO que caza (la
-    /// mirada del escuadrón y su parpadeo), LA LÍNEA de lectura (el rayo
-    /// de texto puro que se carga hojeando) y EL MARCAPÁGINAS (los
-    /// dardos-marca y el libro que se cierra de golpe). (La 21ª bolsa es
-    /// La Bolsa de la Cría — vive en Llamados.)</summary>
+    /// <summary>22 — LOS PROYECTILES DIGNOS (v6.51.4 → v6.51.5): LA
+    /// SEGUNDA AUDICIÓN. La letra de la .51.5: «están feas no me
+    /// gustan y no tienen estilo, ni efectos, ni brillos, ni glow, ni
+    /// nada, las puedes borrar, en cambio deja el El Equinoccio
+    /// Binario y modificalo… y crea otras armas en consecuencia que
+    /// creas que se sean buenas ideas, recuerda meterle tantos efectos
+    /// chulos como puedas, tienes todas las librerias a tu
+    /// disposicion». LAS CINCO que quedan (todas con las librerías de
+    /// la casa a tope): EL EQUINOCCIO BINARIO re-hecho (la pareja 931
+    /// de El Equinoccio con el efecto binario: día = mini eclipse en
+    /// área · noche = perfora y drena), EL ÍNDICE DEL GRIMORIO (el dedo
+    /// que planta la cita y la valla de rayos de Perlin), LA LLUVIA DE
+    /// VERSOS (la grieta que llueve versos y el capítulo que se cierra
+    /// con tapas y dientes de garra), EL OJO QUE JUZGA (el ojo colosal
+    /// con velo de cine y su veredicto: el rayo de la mirada) y EL
+    /// CORAZÓN DEL MAGNETAR (la mezcla pedida: la órbita del Bastón +
+    /// el Colapso del padre). (La 21ª bolsa es La Bolsa de la Cría —
+    /// vive en Llamados.)</summary>
     public class BolsaProyectilesDignos : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Proyectiles Dignos";
         protected override string NombreCorto => "Bolsa de los Proyectiles Dignos";
         protected override Color ColorFiesta => new(255, 196, 110);
-        protected override string Nota => "Seis candidatos a proyectil digno del Grimorio: la binaria, las comas, la página, el ojo, la línea y el marcapáginas";
+        protected override string Nota => "Cinco armas dignas del Grimorio: la binaria re-hecha, el índice que cita, la lluvia de versos, el ojo que juzga y el corazón del magnetar";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosEquinoccioBinario>(), 1));  // CANDIDATO 1: LA BINARIA día/noche
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosComasQueMuerden>(), 1));     // CANDIDATO 2: LAS COMAS que muerden
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosPaginaArrancada>(), 1));     // CANDIDATO 3: LA PÁGINA arrancada
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosOjoQueCaza>(), 1));          // CANDIDATO 4: EL OJO que caza
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosLineaDeLectura>(), 1));      // CANDIDATO 5: LA LÍNEA de lectura
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosMarcapaginas>(), 1));        // CANDIDATO 6: EL MARCAPÁGINAS
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosEquinoccioBinario>(), 1));  // LA BINARÍA re-hecha (la pareja 931 + el efecto binario)
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosIndiceGrimorio>(), 1));      // EL ÍNDICE (la cita y su valla de rayos)
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosLluviaVersos>(), 1));       // LA LLUVIA DE VERSOS (la grieta y el cierre del capítulo)
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosOjoQueJuzga>(), 1));        // EL OJO QUE JUZGA (el veredicto de la mirada)
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosCorazonMagnetar>(), 1));    // EL CORAZÓN DEL MAGNETAR (la mezcla pedida)
             return l;
         }
     }

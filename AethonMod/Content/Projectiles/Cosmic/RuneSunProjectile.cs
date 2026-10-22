@@ -104,12 +104,32 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             _age += 1f;
 
-            // === POP ELÁSTICO DE APARICIÓN ===
-            // (v6.26 — LA VEINTE nace GRANDE: sistema ×1.30 — el GRAN
-            // SELLADO merece un cielo entero para él solo.)
-            Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, _age, true)) *
-                               (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true)) *
-                               (Tier >= 20 ? 1.30f : 1f);
+            // === v6.51.5 — EL NACIMIENTO EN TRES ACTOS (la letra: «el
+            //     nacimiento del sol runico en la bruma es como demasiado
+            //     espontaneo, necesita una mejor animacion de
+            //     nacimiento»): el sol YA NO aparece de golpe — primero
+            //     SE ENCIENDE PEQUEÑO dentro de su nube (45 ticks — la
+            //     bruma de su nacimiento lo esconde y se sopla hacia
+            //     afuera en corona para revelarlo) y DESPUÉS REVIENTA a
+            //     su tamaño de verdad con el pop elástico de siempre
+            //     (EL ESTALLIDO, ticks 45→135).
+            //     (v6.26 — LA VEINTE nace GRANDE: sistema ×1.30 — el GRAN
+            //     SELLADO merece un cielo entero para él solo.) ===
+            float nacimiento;
+            if (_age < 45f)
+            {
+                // ACTO 3a — EL ENCENDIDO: una brasa pequeña que crece
+                // dentro de su nube (la corona de expulsión la abre).
+                nacimiento = 0.34f + 0.12f * (_age / 45f);
+            }
+            else
+            {
+                // ACTO 3b — EL ESTALLIDO: el pop elástico de siempre
+                // (la firma de la casa — ahora sí, a su tamaño de verdad).
+                nacimiento = MathHelper.Lerp(0.46f, 1f,
+                    ElasticOut(Utils.GetLerpValue(45f, 135f, _age, true)));
+            }
+            Projectile.scale = nacimiento * (Tier >= 20 ? 1.30f : 1f);
 
             // === v6.51.3 → v6.51.4 — LA BRUMA DORADA DEL NACIMIENTO (la
             //     letra: «agrega un poco de bruma en las animacions de
@@ -335,14 +355,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === LA EXPLOSIÓN DE LA LIBRERÍA DE PARTÍCULAS ===
+            // === v6.51.5 — LA NOVA DE BRUMA (la letra: «a la explosion
+            //     final del sol runico, en vez de ser un sprite de un
+            //     circulo de fuego, no seria mejor que sea un circulo de
+            //     bruma»): EL CÍRCULO DE FUEGO MURIÓ (los dos anillos de
+            //     polvos de llama y los pulsos circulares) — la nova
+            //     ahora EXHALA SU CÍRCULO DE BRUMA DORADA: DOCE cúmulos
+            //     que se expanden, se desgarran y se disuelven (BrumaFX
+            //     de la casa — BrumaNacimientoFX modo 3, con el radio
+            //     REAL de esta nova). Las runas de eco y la onda de
+            //     lente SIGUEN viviendo abajo. ===
+            Projectile.NewProjectileDirect(
+                Projectile.GetSource_FromThis(),
+                Projectile.Center, Vector2.Zero,
+                ModContent.ProjectileType<BrumaNacimientoFX>(),
+                0, 0f, Projectile.owner, 3f,
+                novaRadius / 340f);   // la escala del círculo (la VEINTE respira más)
+
+            // === LA CHISPA DE LA NOVA (el fogonazo central que enciende
+            //     el círculo — la primera luz del estallido). ===
             float scale = Math.Max(Projectile.scale, 0.4f);
-            ParticlePresets.Explosion(Projectile.Center, 170f * scale, 40,
-                new Color(255, 245, 200), new Color(255, 90, 20), 50);
-            ParticlePresets.RingPulse(Projectile.Center, 200f * scale,
-                new Color(255, 210, 100, 210), 34);
-            ParticlePresets.RingPulse(Projectile.Center, 270f * scale,
-                new Color(255, 80, 30, 150), 46);
+            ParticlePresets.Explosion(Projectile.Center, 150f * scale, 36,
+                new Color(255, 245, 200), new Color(255, 170, 60), 44);
 
             // === LAS RUNAS DE ECO: la nova escupe glifos de luz ===
             int echoRunes = 12 + 2 * tier;
@@ -358,28 +392,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.fadeIn = 0f;
             }
 
-            // === EL FUEGO DE LA NOVA (dusts del patrón del sol) ===
-            for (int i = 0; i < 60; i++)
-            {
-                float angle = (MathHelper.TwoPi / 60) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 14f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 14f)) * scale;
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    dir, 240, new Color(255, 200, 100), 1.7f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-            for (int i = 0; i < 35; i++)
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Torch,
-                    new Vector2((float)Math.Cos(angle) * Main.rand.NextFloat(4f, 9f),
-                                (float)Math.Sin(angle) * Main.rand.NextFloat(4f, 9f)) * scale,
-                    200, new Color(255, 150, 50), 1.4f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
+            // (v6.51.5 — EL FUEGO DE LA NOVA MURIÓ: los dos anillos de
+            //  polvos de llama ya no existen — el círculo es de BRUMA.)
 
             // === Screenshake coordinado (LA VEINTE sacude más: 12) ===
             try

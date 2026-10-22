@@ -966,19 +966,54 @@ namespace AethonMod.Content.Weapons
                         $"[c/9B6FE8:  +{(despertar)}% de daño a TODO el grimorio]"));
 
                     // LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL (esencias ·
-                    // dinero · el arma del peldaño).
+                    // dinero · el arma del peldaño) — v6.51.5 LA LISTA
+                    // VIVA (la letra: «los requisitos que aparecen en el
+                    // despertar para subir su nivel, deberia mostrar
+                    // cuando cumples uno de ellos, ademas deberia
+                    // mostrar el sprite del arma muy pequeño para saber
+                    // que arma se necesita»): cada requisito se pinta
+                    // VERDE al cumplirlo con su conteo vivo (3/5) y su
+                    // ✓ dorado latiendo (DespertarRequisitosGlobalItem),
+                    // y el arma del peldaño enseña sus sprites mini (las
+                    // corruptas que ya llevas ARDEN con halo dorado).
                     if (despertar < Systems.DespertarGrimorio.NivelMax)
                     {
                         int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
                         long monedas = Systems.DespertarGrimorio.MonedasPara(siguiente);
+
+                        // === EL REQUISITO 1 — LAS ESENCIAS (conteo vivo). ===
+                        int llevasEsencias = Systems.DespertarGrimorio.EsenciasEnManos(portador);
+                        bool esenciasOK = llevasEsencias >= esencias;
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
                             $"[c/78788C:  Para Despertar {siguiente}:]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
-                            $"[c/C4A2FF:  • Devorar {esencias} Esencia{(esencias == 1 ? "" : "s")} Corrupta{(esencias == 1 ? "" : "s")}]"));
+                            $"[c/{(esenciasOK ? "7FE89B" : "C4A2FF")}:  • Esencias Corruptas: {Math.Min(llevasEsencias, esencias)}/{esencias}{(esenciasOK ? "  [c/FFD678:✓]" : "")}]"));
+
+                        // === EL REQUISITO 2 — EL DINERO (lo que llevas). ===
+                        long llevasMonedas = Systems.DespertarGrimorioSistema.ContarMonedas(portador);
+                        bool monedasOK = llevasMonedas >= monedas;
+                        string textoMonedas = Systems.DespertarGrimorioSistema.ItemToText(monedas);
+                        if (!monedasOK && llevasMonedas > 0L)
+                            textoMonedas += $" — llevas {Systems.DespertarGrimorioSistema.ItemToText(llevasMonedas)}";
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
-                            $"[c/C4A2FF:  • {Systems.DespertarGrimorioSistema.ItemToText(monedas)}]"));
+                            $"[c/{(monedasOK ? "7FE89B" : "C4A2FF")}:  • {textoMonedas}{(monedasOK ? "  [c/FFD678:✓]" : "")}]"));
+
+                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (verde si
+                        //     ya llevas una CORRUPTA de este peldaño). ===
+                        bool armaOK = false;
+                        int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
+                        for (int pa = 0; pa < peldano.Length; pa++)
+                            if (Systems.DespertarGrimorio.LlevaCorrupta(portador, peldano[pa]))
+                            { armaOK = true; break; }
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
-                            $"[c/C4A2FF:  • Devorar 1 {Systems.DespertarGrimorio.NombreOfrenda(siguiente)} CORRUPTA]"));
+                            $"[c/{(armaOK ? "7FE89B" : "C4A2FF")}:  • Devorar 1 arma del peldaño CORRUPTA{(armaOK ? "  [c/FFD678:✓]" : "")}]"));
+
+                        // === LA FILA DE LOS SPRITES MINI (el espacio que
+                        //     reservan los espacios lo pinta
+                        //     DespertarRequisitosGlobalItem con los sprites
+                        //     de TODAS las alternativas del peldaño). ===
+                        tooltips.Add(new TooltipLine(Mod, "DespertarArmas",
+                            "[c/78788C:  " + new string(' ', 26) + "]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
                             "[c/78788C:  (suéltala con el grimorio en la mano)]"));
                     }

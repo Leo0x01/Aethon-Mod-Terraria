@@ -192,6 +192,25 @@ namespace AethonMod.Content.Systems
             return total;
         }
 
+        /// <summary>v6.51.5 — ¿Este jugador lleva UNA ARMA CORRUPTA de este
+        /// tipo en el inventario? (para la lista de requisitos VIVA: la
+        /// fila de sprites del peldaño arde con halo dorado en las que ya
+        /// lleva corruptas — la letra: «deberia mostrar cuando cumples uno
+        /// de ellos, ademas deberia mostrar el sprite del arma muy pequeño
+        /// para saber que arma se necesita»).</summary>
+        public static bool LlevaCorrupta(Player p, int tipoArma)
+        {
+            if (p == null) return false;
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir || it.type != tipoArma) continue;
+                if (it.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>().Corrompido)
+                    return true;
+            }
+            return false;
+        }
+
         /// <summary>Consume N esencias corruptas del inventario (devuelve
         /// false si no alcanzaban — nadie toca nada entonces).</summary>
         public static bool ConsumirEsencias(Player p, int cantidad)

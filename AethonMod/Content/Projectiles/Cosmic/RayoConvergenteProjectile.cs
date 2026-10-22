@@ -23,13 +23,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// nacen LOS RAYOS DE PERLIN que CONVERGEN al punto focal: 2
     /// SEGUNDOS para el SOL RÚNICO (120 t) y 3 SEGUNDOS para los
     /// AGUJEROS NEGROS (180 t — el supremo también). En el punto
-    /// focal la semilla CRECE (el sol con sus anillos dorados · el
-    /// agujero como un vórtice violeta que OSCURECE) mientras el
-    /// mundo entero le SOPA partículas. Al cumplir el plazo: EL
-    /// LANZAMIENTO — el sol sale DISPARADO al enemigo con toda su
-    /// fuerza; el agujero se ABRE encima de la presa. El daño viaja
-    /// en ai[2] (el combinado de los ojos: ya lleva el grimorio Y las
-    /// armaduras del portador).
+    /// focal la semilla CRECE mientras el mundo entero le SOPA
+    /// partículas. Al cumplir el plazo: EL LANZAMIENTO.
+    ///
+    /// v6.51.5 — LA LETRA DEL RENACIMIENTO (tres curas de una pieza):
+    ///   · EL HECHIZO NO SE CANCELA («eso no debe poder cancelarse si
+    ///     el nacimiento ya inició, se debe completar, eso es algo así
+    ///     como un hechizo»): si el dueño cae a media ceremonia, el
+    ///     ritual FLOTA en su último punto y CUMPLE IGUAL; si la presa
+    ///     muere, recuerda su ÚLTIMA MIRADA y nace igual hacia ese
+    ///     rumbo. Empezó → se completa.
+    ///   · EL AGUJERO NACE COMO EL SOL («el sol runico siempre nace en
+    ///     el lugar correcto, mira cómo lo lograste»): el sol siempre
+    ///     nació EN EL PUNTO FOCAL del ritual con impulso hacia su
+    ///     presa — el agujero ahora hace EXACTAMENTE lo mismo (nace en
+    ///     el foco con impulso y su propio homing hace el resto). La
+    ///     semilla viajera MUERE DEL TODO.
+    ///   · LA CONTRACCIÓN (los últimos 45 ticks): la cuna de bruma se
+    ///     CIÑE, los rayos se cierran y giran más rápido, el núcleo se
+    ///     aviva y el compás ACELERA — el parto se anuncia.
     ///
     /// ai[0] = modo (1 SOL · 2 AGUJERO · 3 SUPREMO) · ai[1] = el
     /// whoAmI del blanco · ai[2] = el daño combinado.
@@ -76,17 +88,41 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.localAI[0] = t + 1f;
             float edad = Projectile.localAI[0];
 
-            // === EL RITUAL CAMINA CON SU DUEÑO: el punto focal flota
-            //     ENCIMA del jugador (la letra) y lo persigue suave. ===
+            // === v6.51.5 — EL HECHIZO NO SE CANCELA (la letra: «eso no
+            //     debe poder cancelarse si el nacimiento ya inició, se
+            //     debe completar, es algo así como un hechizo»): el
+            //     ritual YA NO MUERE con su dueño — si el portador cae
+            //     a media ceremonia, el punto focal QUEDA FLOTANDO en
+            //     su último sitio y la ceremonia CUMPLE IGUAL. ===
             Player dueno = Main.player[Projectile.owner];
-            if (dueno == null || !dueno.active || dueno.dead) { Projectile.Kill(); return; }
-            Vector2 objetivo = dueno.Center + new Vector2(0f, -150f);
-            Projectile.Center = Vector2.Lerp(Projectile.Center, objetivo, 0.18f);
+            bool duenoVivo = dueno != null && dueno.active && !dueno.dead;
+            if (duenoVivo)
+            {
+                Vector2 objetivo = dueno.Center + new Vector2(0f, -150f);
+                Projectile.Center = Vector2.Lerp(Projectile.Center, objetivo, 0.18f);
+            }
+            // (dueño caído: el ritual flota en su último punto — se completa)
             Projectile.velocity = Vector2.Zero;
 
-            // === EL BLANCO (la presa que los ojos eligieron — si murió,
-            //     la más cercana al momento del lanzamiento). ===
+            // === EL BLANCO (la presa que los ojos eligieron). ===
             NPC blanco = BlancoVivo();
+
+            // === v6.51.5 — LA ÚLTIMA MIRADA: el ritual recuerda hacia
+            //     dónde miraba (localAI[2..3] = el centro de la última
+            //     presa viva que vio). Si la presa muere a media
+            //     ceremonia, el hechizo NACE IGUAL hacia ese rumbo —
+            //     nada cancela lo empezado. ===
+            if (blanco != null)
+            {
+                Projectile.localAI[2] = blanco.Center.X;
+                Projectile.localAI[3] = blanco.Center.Y;
+            }
+            else if (Projectile.localAI[2] == 0f && Projectile.localAI[3] == 0f && duenoVivo)
+            {
+                // nunca vio presa: la mirada inicial es hacia donde mira el dueño
+                Projectile.localAI[2] = dueno.Center.X + dueno.direction * 260f;
+                Projectile.localAI[3] = dueno.Center.Y - 40f;
+            }
 
             // === LA LUZ DEL RITUAL: el sol DORA el aire; el agujero lo
             //     APAGA con su violeta. ===
@@ -113,12 +149,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.noGravity = true;
             }
 
-            // === EL TIC-TAC DEL RITUAL (el compás que sube). ===
-            if (!Main.dedServ && edad % 20f == 0f && edad < Duracion)
+            // === EL TIC-TAC DEL RITUAL (el compás que sube — y en LA
+            //     CONTRACCIÓN final ACELERA: los últimos 45 ticks son
+            //     una CUENTA ATRÁS que aprieta). ===
+            if (!Main.dedServ && edad < Duracion)
             {
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.25f + 0.4f * prog),
-                    Projectile.Center);
+                float restante = Duracion - edad;
+                bool late = restante > 45f
+                    ? edad % 20f == 0f
+                    : restante == 45f || restante == 34f || restante == 25f ||
+                      restante == 18f || restante == 13f || restante == 9f ||
+                      restante == 6f || restante == 4f || restante == 2f;
+                if (late)
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item122.WithPitchOffset(-0.25f + 0.4f * prog +
+                            (restante <= 45f ? 0.25f : 0f)),
+                        Projectile.Center);
             }
 
             // === v6.51.3 → v6.51.4 — LA BRUMA DE LA GESTACIÓN (la
@@ -159,10 +205,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return mejor;
         }
 
+        /// <summary>EL RUMBO DEL HECHIZO: hacia la presa viva… y si la
+        /// presa murió a media ceremonia, hacia SU ÚLTIMA MIRADA (el
+        /// ritual recuerda — un hechizo empezado se cumple siempre).</summary>
+        private Vector2 RumboHacia(NPC blanco)
+        {
+            Vector2 destino = blanco != null && blanco.active
+                ? blanco.Center
+                : new Vector2(Projectile.localAI[2], Projectile.localAI[3]);
+            if (destino == Vector2.Zero)
+                destino = Projectile.Center - Vector2.UnitY * 120f;
+            Vector2 rumbo = destino - Projectile.Center;
+            if (rumbo.LengthSquared() < 1f) rumbo = -Vector2.UnitY;
+            rumbo.Normalize();
+            return rumbo;
+        }
+
         /// <summary>EL LANZAMIENTO — lo que la ceremonia estaba
         /// creando sale al mundo: el SOL con sus anillos disparado al
         /// enemigo · el AGUJERO (uno de los rúnicos al azar, o el
-        /// SUPREMO/AURORA) abierto sobre la presa.</summary>
+        /// SUPREMO/AURORA) nacido EN EL PUNTO FOCAL del ritual —
+        /// EXACTAMENTE como el sol (v6.51.5: donde la animación lo
+        /// gestó, ahí nace, con impulso hacia la presa; su propio
+        /// homing hace el resto).</summary>
         private void Lanzar(NPC blanco, Player dueno)
         {
             // v6.51.2 — SOLO LA MÁQUINA DUEÑA resuelve el lanzamiento (el
@@ -171,22 +236,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.owner != Main.myPlayer) return;
             int dano = Math.Max(1, (int)Projectile.ai[2]);
 
-            if (blanco == null || !blanco.active)
-            {
-                // sin presa: el ritual se disipa en la nada
-                if (!Main.dedServ)
-                {
-                    for (int i = 0; i < 18; i++)
-                    {
-                        Dust d = Dust.NewDustPerfect(Projectile.Center,
-                            EsSol ? DustID.GoldFlame : DustID.Shadowflame,
-                            Main.rand.NextVector2Circular(5f, 5f), 160,
-                            EsSol ? new Color(255, 214, 120) : new Color(120, 60, 190), 1.1f);
-                        d.noGravity = true;
-                    }
-                }
-                return;
-            }
+            // v6.51.5 — NADA SE DISIPA (la letra: un hechizo empezado se
+            //     cumple): sin presa viva, el rumbo es la ÚLTIMA MIRADA.
+            Vector2 rumbo = RumboHacia(blanco);
 
             if (EsSol)
             {
@@ -195,9 +247,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 //     siempre + el homing del sol hace el resto). ===
                 int despertar = Content.Systems.DespertarGrimorio.NivelDe(dueno);
                 int anillos = Content.Systems.DespertarGrimorio.AnillosDelSol(despertar);
-                Vector2 rumbo = blanco.Center - Projectile.Center;
-                if (rumbo.LengthSquared() < 1f) rumbo = -Vector2.UnitY;
-                rumbo.Normalize();
                 Projectile sol = Projectile.NewProjectileDirect(
                     Projectile.GetSource_FromAI(),
                     Projectile.Center, rumbo * 7.5f,
@@ -208,29 +257,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
 
-                // v6.51.3 — LA BRUMA DORADA DEL NACIMIENTO DEL SOL (la
-                //     letra: bruma del color correspondiente — y la .51.4:
-                //     LA DE LA CASA, BrumaFX, nada de geometría plana): el
-                //     sol estrena su vida EXHALANDO su nube dorada.
-                Projectile.NewProjectileDirect(
-                    Projectile.GetSource_FromAI(),
-                    Projectile.Center, Vector2.Zero,
-                    ModContent.ProjectileType<BrumaNacimientoFX>(),
-                    0, 0f, Projectile.owner, 1f, 1f);
+                // (LA BRUMA DORADA DEL NACIMIENTO la exhila EL PROPIO SOL en
+                //  su primer tick de vida — con su intensidad por anillos y
+                //  la corona de expulsión de la .51.5; este spawn era un
+                //  DOBLE de la .51.3 y murió.)
             }
             else
             {
-                // === v6.51.3 — EL NACIMIENTO CONTINUO (la letra: «los
-                //     agujeros negros runicos no nacen correctamente donde
-                //     tienen que nacer, aunque la animacion se hace este
-                //     nace directamente en el enemigo»): el agujero YA NO
-                //     se materializa de golpe sobre la presa — su SEMILLA
-                //     nace AQUÍ, en el punto focal del ritual (donde la
-                //     ceremonia la gestó), y VIAJA hasta su cita
-                //     (AgujeroEnViajeProjectile): una semilla de vacío que
-                //     arrastra su bruma violeta y al llegar SE ABRE con su
-                //     niebla morada. Los 10 agujeros rúnicos quedan
-                //     INTACTOS (el viaje es solo el cordón umbilical). ===
+                // === v6.51.5 — EL AGUJERO NACE COMO EL SOL (la letra:
+                //     «el sol runico siempre nace en el lugar correcto,
+                //     asi que mira como lograste que el sol nasca en el
+                //     lugar correcto y has que los agujeros negros
+                //     runicos nascan en el lugar correcto»): la SEMILLA
+                //     VIAJERA MUERE DEL TODO — el agujero rúnico nace
+                //     AQUÍ, EN EL PUNTO FOCAL del ritual (donde la
+                //     ceremonia lo gestó y donde la animación lo dijo),
+                //     con IMPULSO hacia su presa — y su propio homing
+                //     hace el resto, EXACTAMENTE como el sol. Los 10
+                //     agujeros rúnicos quedan INTACTOS. ===
                 int tipo;
                 if (Modo == MODO_SUPREMO)
                 {
@@ -255,19 +299,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     };
                 }
 
-                // LA SEMILLA NACE EN EL PUNTO FOCAL (donde la animación la
-                // gestó) y vuela a su cita con la presa.
-                Vector2 rumboA = blanco.Center - Projectile.Center;
-                if (rumboA.LengthSquared() < 1f) rumboA = -Vector2.UnitY;
-                rumboA.Normalize();
+                // EL AGUJERO NACE EN EL FOCO, con impulso hacia su presa
+                // (su propio homing hace el resto — el patrón del sol).
+                Projectile agujero = Projectile.NewProjectileDirect(
+                    Projectile.GetSource_FromAI(),
+                    Projectile.Center, rumbo * 13f,
+                    tipo, dano, 0f, Projectile.owner);
+                agujero.timeLeft = 600;
+
+                // LA BRUMA VIOLETA DE SU NACIMIENTO — en el mismo foco
+                // (con la corona de expulsión que revela al recién nacido).
                 Projectile.NewProjectileDirect(
                     Projectile.GetSource_FromAI(),
-                    Projectile.Center, rumboA * 13f,
-                    ModContent.ProjectileType<AgujeroEnViajeProjectile>(),
-                    0, 0f, Projectile.owner,
-                    tipo * 1f,              // el agujero que abrirá al llegar
-                    blanco.whoAmI * 1f,     // su cita
-                    dano * 1f);             // el daño combinado del ritual
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<BrumaNacimientoFX>(),
+                    0, 0f, Projectile.owner, 2f, 1f);
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(Modo == MODO_SUPREMO ? -0.5f : 0.35f),
                     Projectile.Center);
@@ -300,6 +346,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // (el mundo se cierra de golpe — la firma de la casa).
                 float conver = prog * prog * (3f - 2f * prog);
 
+                // v6.51.5 — LA CONTRACCIÓN (la letra: «el nacimiento del
+                //     sol runico en la bruma es como demasiado espontáneo,
+                //     necesita una mejor animación de nacimiento»): en los
+                //     ÚLTIMOS 45 TICKS el ritual SE CIÑE — la cuna se
+                //     cierra, los rayos se aprietan y giran MÁS RÁPIDO y el
+                //     núcleo se aviva. El parto se anuncia; no estalla de
+                //     golpe nada.
+                float contraccion = 1f - MathHelper.Clamp((Duracion - edad) / 45f, 0f, 1f);
+
                 float time = Main.GlobalTimeWrappedHourly;
                 Vector2 centro = Projectile.Center;
                 int semilla = Projectile.identity % 89 + 7;
@@ -320,20 +375,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 try
                 {
                     Vector2 centroScr = centro - Main.screenPosition;
-                    float radioCuna = MathHelper.Lerp(34f, 92f, conver);
+                    // LA CUNA: crece con el ritual… y en LA CONTRACCIÓN SE
+                    // CIÑE (se cierra sobre lo que está por nacer).
+                    float radioCuna = MathHelper.Lerp(34f, 92f, conver)
+                        * (1f - 0.58f * contraccion);
                     Color masaCuna = EsSol
                         ? new Color(98, 68, 24)      // el humo DORADO (la luz la pone el sol)
                         : new Color(48, 22, 78);     // el humo VIOLETA (la bruma del vacío)
                     BrumaFX.BeginMass();
                     BrumaFX.Cloud(centroScr, radioCuna, masaCuna, semilla, time,
                         Math.Max(4, (int)(7 * conver) + 3),
-                        alpha: 0.30f + 0.38f * conver);
+                        alpha: 0.30f + 0.38f * conver + 0.14f * contraccion);
                     if (conver > 0.35f)
                         BrumaFX.Cloud(centroScr + new Vector2(0f, -radioCuna * 0.2f),
                             radioCuna * 0.6f,
                             EsSol ? new Color(122, 90, 36) : new Color(70, 36, 106),
                             semilla + 29, time * 0.85f, 4,
-                            alpha: (0.24f + 0.26f * conver));
+                            alpha: (0.24f + 0.26f * conver + 0.10f * contraccion));
                 }
                 catch { }
                 finally
@@ -348,14 +406,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // === LOS RAYOS CONVERGENTES (la letra): nacen en una
                     //     corona de anillos giratorios y CONVERGEN al punto
                     //     focal — arrancan ANCHOS y lejanos, terminan
-                    //     FINOS y pegados: la vista es un EMBUDO de luz. ===
+                    //     FINOS y pegados: la vista es un EMBUDO de luz.
+                    //     En LA CONTRACCIÓN se CIERRAN y GIRAN MÁS RÁPIDO. ===
                     int rayos = EsSol ? 5 : 7;
-                    float lejania = MathHelper.Lerp(1.0f, 0.22f, conver);
-                    float grosor = MathHelper.Lerp(9f, 3.5f, conver);
+                    float lejania = MathHelper.Lerp(1.0f, 0.22f, conver)
+                        * (1f - 0.62f * contraccion);
+                    float grosor = MathHelper.Lerp(9f, 3.5f, conver)
+                        * (1f + 0.30f * contraccion);
+                    float giroRayos = 0.55f * (1f + 1.8f * contraccion);
                     for (int i = 0; i < rayos; i++)
                     {
                         float ang = i / (float)rayos * MathHelper.TwoPi
-                            + time * 0.55f * ((i % 2 == 0) ? 1f : -0.7f)
+                            + time * giroRayos * ((i % 2 == 0) ? 1f : -0.7f)
                             + semilla * 0.31f;
                         float radio = (150f + 60f * MathF.Sin(time * 0.9f + i * 1.7f)) * lejania;
                         Vector2 borde = centro + new Vector2(
@@ -374,8 +436,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             grosor * 0.35f);
                     }
 
-                    // === EL PUNTO FOCAL: la semilla que CRECE. ===
-                    float nucleo = MathHelper.Lerp(14f, EsSol ? 46f : 40f, conver);
+                    // === EL PUNTO FOCAL: la semilla que CRECE (y en
+                    //     la contracción ARDE — el núcleo se aviva). ===
+                    float nucleo = MathHelper.Lerp(14f, EsSol ? 46f : 40f, conver)
+                        * (1f + 0.22f * contraccion);
+                    float avivo = MathHelper.Clamp(prog + 0.55f * contraccion, 0f, 1f);
 
                     if (EsSol)
                     {
@@ -383,21 +448,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         //     YA NO son discos gordos: un núcleo de LUZ
                         //     pequeño — la MASA la pone la bruma de arriba)
                         //     + sus ANILLOS rúnicos que giran.
-                        VFXCore.Quad(centro, new Color(255, 236, 170) * (0.45f + 0.5f * prog),
+                        VFXCore.Quad(centro, new Color(255, 236, 170) * (0.45f + 0.5f * avivo),
                             new Vector2(nucleo * 1.1f, nucleo * 1.1f));
-                        VFXCore.Quad(centro, new Color(255, 170, 60) * (0.3f + 0.4f * prog),
+                        VFXCore.Quad(centro, new Color(255, 170, 60) * (0.3f + 0.4f * avivo),
                             new Vector2(nucleo * 1.7f, nucleo * 1.7f));
                         for (int a = 0; a < 3; a++)
                         {
                             float rA = nucleo * (1.6f + a * 0.55f);
-                            float giro = time * (1.1f - a * 0.25f) * (a % 2 == 0 ? 1f : -1f);
+                            float giro = time * (1.1f - a * 0.25f) * (1f + 1.4f * contraccion) * (a % 2 == 0 ? 1f : -1f);
                             int runas = 6 + a * 2;
                             for (int k = 0; k < runas; k++)
                             {
                                 float angR = giro + k / (float)runas * MathHelper.TwoPi;
                                 Vector2 posR = centro + new Vector2(
                                     MathF.Cos(angR) * rA, MathF.Sin(angR) * rA * 0.82f);
-                                VFXCore.Quad(posR, new Color(255, 208, 110) * (0.4f + 0.4f * prog),
+                                VFXCore.Quad(posR, new Color(255, 208, 110) * (0.4f + 0.4f * avivo),
                                     new Vector2(nucleo * 0.16f, nucleo * 0.30f), angR + MathHelper.PiOver2);
                             }
                         }
@@ -407,21 +472,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         // EL AGUJERO EN GESTACIÓN: el vórtice violeta que
                         // TRAGA — corazón pequeño (la MASA la pone la
                         // bruma de la casa de arriba) + sus runas.
-                        VFXCore.Quad(centro, new Color(96, 40, 160) * (0.30f + 0.45f * prog),
+                        VFXCore.Quad(centro, new Color(96, 40, 160) * (0.30f + 0.45f * avivo),
                             new Vector2(nucleo * 1.5f, nucleo * 1.5f));
-                        VFXCore.Quad(centro, new Color(30, 10, 52) * (0.35f + 0.55f * prog),
+                        VFXCore.Quad(centro, new Color(30, 10, 52) * (0.35f + 0.55f * avivo),
                             new Vector2(nucleo * 1.0f, nucleo * 1.0f));
                         for (int a = 0; a < 2; a++)
                         {
                             float rA = nucleo * (1.8f + a * 0.9f);
-                            float giro = -time * (0.9f + a * 0.4f);
+                            float giro = -time * (0.9f + a * 0.4f) * (1f + 1.5f * contraccion);
                             int runas = 8;
                             for (int k = 0; k < runas; k++)
                             {
                                 float angR = giro + k / (float)runas * MathHelper.TwoPi;
                                 Vector2 posR = centro + new Vector2(
                                     MathF.Cos(angR) * rA, MathF.Sin(angR) * rA * 0.85f);
-                                VFXCore.Quad(posR, new Color(190, 120, 255) * (0.35f + 0.4f * prog),
+                                VFXCore.Quad(posR, new Color(190, 120, 255) * (0.35f + 0.4f * avivo),
                                     new Vector2(nucleo * 0.14f, nucleo * 0.26f), angR + MathHelper.PiOver2);
                             }
                         }
@@ -441,16 +506,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     try
                     {
                         Vector2 centroScr = centro - Main.screenPosition;
-                        float radioVac = MathHelper.Lerp(40f, 150f, conver);
+                        // EL VACÍO TAMBIÉN SE CIÑE en la contracción.
+                        float radioVac = MathHelper.Lerp(40f, 150f, conver)
+                            * (1f - 0.45f * contraccion);
                         BrumaFX.BeginMass();
                         BrumaFX.Cloud(centroScr, radioVac,
                             SombrasLib.HumoNegro, semilla + 61, time,
                             Math.Max(5, (int)(8 * conver) + 4),
-                            alpha: 0.34f + 0.42f * conver);
+                            alpha: 0.34f + 0.42f * conver + 0.12f * contraccion);
                         BrumaFX.Cloud(centroScr + new Vector2(0f, -radioVac * 0.15f),
                             radioVac * 0.62f, SombrasLib.HumoVioleta,
                             semilla + 83, time * 1.1f, 4,
-                            alpha: 0.26f + 0.30f * conver);
+                            alpha: 0.26f + 0.30f * conver + 0.10f * contraccion);
                     }
                     catch { }
                     finally

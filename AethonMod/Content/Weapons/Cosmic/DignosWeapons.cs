@@ -9,38 +9,46 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     // ======================================================================
-    //  v6.51.4 — LAS SEIS ARMAS DIGNAS DEL GRIMORIO.
+    //  v6.51.4 → v6.51.5 — LAS ARMAS DIGNAS DEL GRIMORIO, LA SEGUNDA
+    //  AUDICIÓN.
     //
-    //  Petición del usuario: "crea un arma nueva por cada una de estas
-    //  ideas que diste y crea una nueva bolsa para darsela al jugador".
-    //  Las seis IDEAS de proyectil presentadas con la v6.50.19 (y re-
-    //  presentadas al usuario con la entrega de la v6.51.3: «la binaria
-    //  día/noche como evolución inmediata + las comas que muerden como
-    //  mecánica nueva») maduran aquí en SEIS ARMAS COMPLETAS — una por
-    //  idea, cada una con la mecánica final de una pieza (sin escaleras
-    //  de nivel del grimorio: la idea YA digna):
+    //  LA LETRA DE LA .51.5: «están feas no me gustan y no tienen
+    //  estilo, ni efectos, ni brillos, ni glow, ni nada, las puedes
+    //  borrar, en cambio deja el El Equinoccio Binario y modificalo,
+    //  para El Equinoccio Binario usa el mismo proyectil que El
+    //  Equinoccio, pero dale el efecto que El Equinoccio Binario // y
+    //  crea otras armas en consecuencia que creas que se sean buenas
+    //  ideas, recuerda meterle tantos efectos chulos como puedas».
     //
-    //    1 · EL EQUINOCCIO BINARIO — la estrella doble que vive el
-    //        reloj del mundo (día = eclipse en área · noche = perfora y
-    //        drena vida).
-    //    2 · LAS COMAS QUE MUERDEN — glifos suspendidos que azotan al
-    //        soltar; seis en el mismo enemigo: LA FRASE DETONA.
-    //    3 · LA PÁGINA ARRANCADA — la hoja-cuchilla de dos caras que se
-    //        clava flotando y arde en EL VERSO (con cadena de versos).
-    //    4 · EL OJO QUE CAZA — la mirada del escuadrón: viaja dormida,
-    //        abre el párpado y el impacto es un PARPADEO.
-    //    5 · LA LÍNEA DE LECTURA — hojea cargando; al soltar, un RAYO
-    //        de texto puro que atraviesa todo (más hojeo = más frase).
-    //    6 · EL MARCAPÁGINAS — dardos-marca clavados al enemigo; al
-    //        quinto: FIN DEL CAPÍTULO, el libro se cierra de golpe.
+    //  LA PURGA: LAS COMAS QUE MUERDEN, LA PÁGINA ARRANCADA, EL OJO
+    //  QUE CAZA, LA LÍNEA DE LECTURA y EL MARCAPÁGINAS murieron. Quedan
+    //  CINCO — todas con las librerías de la casa a tope:
+    //
+    //    1 · EL EQUINOCCIO BINARIO (RE-HECHO): la MISMA pareja 931 de
+    //        El Equinoccio con el efecto binario — de día el dorado
+    //        estalla en MINI ECLIPSE en área; de noche el violeta
+    //        PERFORA 4 y DRENA vida.
+    //    2 · EL ÍNDICE DEL GRIMORIO — el dedo de hueso que planta LA
+    //        CITA y la cita detona en VALLA de rayos de Perlin.
+    //    3 · LA LLUVIA DE VERSOS — la grieta de bruma con costura
+    //        dorada que llueve versos; al cerrar, EL CAPÍTULO SE
+    //        CIERRA con las dos tapas y los dientes de garra.
+    //    4 · EL OJO QUE JUZGA — el ojo colosal con velo de cine; su
+    //        VEREDICTO: el rayo de la mirada.
+    //    5 · EL CORAZÓN DEL MAGNETAR (la mezcla pedida): la órbita del
+    //        Bastón (aura + cadenas) y al soltar, EL COLAPSO del padre
+    //        (lanzamiento exacto, freno, STARQUAKE).
     //
     //  TODAS sin maná (la regla de las armas de pruebas de la casa),
     //  TODAS con receta de 5 madera (el protocolo v6.14.2) y TODAS en
-    //  LA BOLSA DE LOS PROYECTILES DIGNOS (la 22ª bolsa).
+    //  LA BOLSA DE LOS PROYECTILES DIGNOS.
     // ======================================================================
 
     // ======================================================================
-    //  1 · EL EQUINOCCIO BINARIO — la binaria día/noche
+    //  1 · EL EQUINOCCIO BINARIO — la binaria día/noche, RE-HECHA con
+    //  el proyectil de El Equinoccio (la letra: «usa el mismo
+    //  proyectil que El Equinoccio, pero dale el efecto que El
+    //  Equinoccio Binario»).
     // ======================================================================
     public class DignosEquinoccioBinario : ModItem
     {
@@ -49,34 +57,55 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.damage = 60;
             Item.DamageType = DamageClass.Magic;
             Item.width = 28; Item.height = 30;
-            Item.useTime = 26; Item.useAnimation = 26;
+            Item.useTime = 16; Item.useAnimation = 16;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<EquinoccioBinarioProjectile>();
-            Item.shootSpeed = 10f;
+            Item.shoot = 931;   // Nightglow — EL MISMO de El Equinoccio (el número)
+            Item.shootSpeed = 15f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item20;
+            Item.UseSound = SoundID.Item82;
             Item.value = 12000;
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // EL RELOJ DEL MUNDO decide quién manda: el modo viaja en ai[0]
-            // (la perforación de la noche la calza la IA del proyectil —
-            // así todas las copias de la red la ponen solas).
-            Projectile.NewProjectile(source, position, velocity, type,
-                damage, knockback, player.whoAmI, Main.dayTime ? 1f : 2f, 0f, 0f);
-            return false;
+            // === LA PAREJA DE EL EQUINOCCIO (el vanilla 931 — IA de
+            //     Terraria intacta), con el RELOJ DEL MUNDO decidiendo
+            //     quién GUIA: de DÍA el DORADO sale hacia el cursor y el
+            //     violeta lo escolta; de NOCHE el VIOLETA guía. ===
+            Vector2 pos = player.MountedCenter + new Vector2(player.direction * 15f, player.gravDir * 3f);
+
+            // EL RUMBO DEL GUÍA: hacia el cursor (la binaria APUNTA).
+            Vector2 guia = (Main.MouseWorld - pos).SafeNormalize(-Vector2.UnitY) * 15f;
+            Vector2 escolta = guia.RotatedBy((Main.dayTime ? 1f : -1f) * 0.55f) * 0.85f;
+
+            // === EL DORADO — EL DÍA (ai[2]=9211: la marca binaria del
+            //     FX — el sol en miniatura + EL MINI ECLIPSE en área). ===
+            Projectile.NewProjectile(source, pos, Main.dayTime ? guia : escolta,
+                931, damage, knockback, player.whoAmI,
+                -1f,     // ai[0]: sin objetivo aún (el homing del 931 decide)
+                0.64f,   // ai[1]: EL MATIZ DORADO
+                9211f);  // ai[2]: la marca binaria dorada
+
+            // === EL NEGRO — LA NOCHE (ai[2]=9212: la marca binaria — el
+            //     eclipse limpio + PERFORA 4 y DRENA vida). ===
+            Projectile.NewProjectile(source, pos, Main.dayTime ? escolta : guia,
+                931, damage, knockback, player.whoAmI,
+                -1f,
+                0.28f,   // ai[1]: el matiz violeta
+                9212f);  // ai[2]: la marca binaria violeta
+
+            return false;   // los dos spawns son nuestros
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/FFD678:El disparo es una estrella binaria: el disco dorado y el violeta orbitándose]"));
+                "[c/FFD678:El disparo de El Equinoccio — la pareja dorada y violeta— con el reloj del mundo:]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:DÍA: el oro guía y estalla en eclipse · NOCHE: el violeta guía, perfora y drena vida · sin maná]"));
+                "[c/78788C:DÍA: el dorado guía y su golpe estalla en MINI ECLIPSE en área · NOCHE: el violeta guía, PERFORA 4 y DRENA vida · sin maná]"));
         }
 
         public override void AddRecipes()
@@ -86,21 +115,20 @@ namespace AethonMod.Content.Weapons.Cosmic
     }
 
     // ======================================================================
-    //  2 · LAS COMAS QUE MUERDEN — el glifo suspendido
+    //  2 · EL ÍNDICE DEL GRIMORIO — el dedo que cita
     // ======================================================================
-    public class DignosComasQueMuerden : ModItem
+    public class DignosIndiceGrimorio : ModItem
     {
         public override void SetDefaults()
         {
-            Item.damage = 48;
+            Item.damage = 62;
             Item.DamageType = DamageClass.Magic;
             Item.width = 28; Item.height = 30;
-            Item.useTime = 18; Item.useAnimation = 18;
+            Item.useTime = 26; Item.useAnimation = 26;
             Item.useStyle = ItemUseStyleID.Shoot;
-            Item.channel = true;                 // el arma de canalización
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<ComaRunicaProjectile>();
-            Item.shootSpeed = 7f;
+            Item.shoot = ModContent.ProjectileType<IndiceGrimorioProjectile>();
+            Item.shootSpeed = 14f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item45;
@@ -110,10 +138,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // LA COMA sale a 7 exactos hacia el cursor (la velocidad del
-            // arma es el rumbo; el módulo lo pone la mecánica).
-            Vector2 vel = velocity.SafeNormalize(Vector2.UnitX) * 7f;
-            Projectile.NewProjectile(source, position, vel, type,
+            Projectile.NewProjectile(source, position, velocity, type,
                 damage, knockback, player.whoAmI, 0f, 0f, 0f);
             return false;
         }
@@ -121,9 +146,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/FFE8AA:Mantén el clic: el glifo viaja y queda SUSPENDIDO como una coma]"));
+                "[c/E8E2CE:El ÍNDICE del libro: el dedo de hueso vuela y se CLAVA en la presa]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Al soltar, TODAS azotan al enemigo más cercano · seis en el mismo: LA FRASE DETONA · sin maná]"));
+                "[c/78788C:Planta LA CITA (una línea de glifos)… y la cita DETONA: VALLA de CINCO rayos de Perlin caminando la frase · sin maná]"));
         }
 
         public override void AddRecipes()
@@ -133,20 +158,20 @@ namespace AethonMod.Content.Weapons.Cosmic
     }
 
     // ======================================================================
-    //  3 · LA PÁGINA ARRANCADA — la hoja-cuchilla de dos caras
+    //  3 · LA LLUVIA DE VERSOS — la grieta que llora el capítulo
     // ======================================================================
-    public class DignosPaginaArrancada : ModItem
+    public class DignosLluviaVersos : ModItem
     {
         public override void SetDefaults()
         {
-            Item.damage = 85;
+            Item.damage = 75;
             Item.DamageType = DamageClass.Magic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 30; Item.useAnimation = 30;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<PaginaArrancadaProjectile>();
-            Item.shootSpeed = 12.5f;
+            Item.shoot = ModContent.ProjectileType<LluviaVersosProjectile>();
+            Item.shootSpeed = 11f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
@@ -164,9 +189,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/FFD882:Una página del libro que vuela GIRANDO como cuchilla: una cara dorada, una cara violeta]"));
+                "[c/C9A2FF:Abre LA GRIETA de bruma con su costura dorada — y llueve VERSOS que estallan al caer]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Se clava y queda FLOTANDO… hasta EL VERSO: estalla en área · las páginas cercanas se ENCADENAN · sin maná]"));
+                "[c/78788C:Al morder: EL CAPÍTULO SE CIERRA DE GOLPE — las DOS TAPAS y NUEVE DIENTES DE GARRA mordiendo (golpe ×1,5 en área) · sin maná]"));
         }
 
         public override void AddRecipes()
@@ -176,20 +201,20 @@ namespace AethonMod.Content.Weapons.Cosmic
     }
 
     // ======================================================================
-    //  4 · EL OJO QUE CAZA — la mirada del escuadrón
+    //  4 · EL OJO QUE JUZGA — el veredicto de la mirada
     // ======================================================================
-    public class DignosOjoQueCaza : ModItem
+    public class DignosOjoQueJuzga : ModItem
     {
         public override void SetDefaults()
         {
-            Item.damage = 70;
+            Item.damage = 95;
             Item.DamageType = DamageClass.Magic;
             Item.width = 28; Item.height = 30;
-            Item.useTime = 22; Item.useAnimation = 22;
+            Item.useTime = 44; Item.useAnimation = 44;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<OjoQueCazaProjectile>();
-            Item.shootSpeed = 11f;
+            Item.shoot = ModContent.ProjectileType<OjoQueJuzgaProjectile>();
+            Item.shootSpeed = 12f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item4;
@@ -199,7 +224,63 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            Projectile.NewProjectile(source, position, velocity, type,
+            // EL OJO SE INSTALLA donde apuntas (la posición de la
+            // disparada — la velocidad solo le da la deriva).
+            Vector2 pos = Main.MouseWorld;
+            Projectile.NewProjectile(source, pos, velocity.SafeNormalize(-Vector2.UnitY) * 2f,
+                type, damage, knockback, player.whoAmI, 0f, 0f, 0f);
+            return false;
+        }
+
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "D1",
+                "[c/AEE8FF:El OJO COLOSAL se installa donde apuntas, corre su VELO DE CINE y JUZGA (el tono sube…)]"));
+            tooltips.Add(new TooltipLine(Mod, "D2",
+                "[c/78788C:EL VEREDICTO: el RAYO DE LA MIRADA — atraviesa TODO lo que vive en la línea (×1,35) · sin maná]"));
+        }
+
+        public override void AddRecipes()
+        {
+            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
+        }
+    }
+
+    // ======================================================================
+    //  5 · EL CORAZÓN DEL MAGNETAR — la mezcla pedida: la órbita del
+    //  Bastón + el Colapso del padre, en un solo arma.
+    // ======================================================================
+    public class DignosCorazonMagnetar : ModItem
+    {
+        public override void SetDefaults()
+        {
+            Item.damage = 130;
+            Item.DamageType = DamageClass.Magic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.channel = true;                 // MANTÉN: la órbita vive mientras cliques
+            Item.autoReuse = false;
+            Item.shoot = ModContent.ProjectileType<CorazonMagnetarProjectile>();
+            Item.shootSpeed = 10f;
+            Item.mana = 0; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest;
+            Item.UseSound = SoundID.Item122;
+            Item.value = 12000;
+        }
+
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
+            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            // EL CORAZÓN ÚNICO: si ya te orbita uno, el nuevo disparo lo
+            // ENTREGA al colapso (el handbrake de la casa — nunca dos).
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.owner != player.whoAmI) continue;
+                if (p.type == type && p.ai[0] == 0f) return false;
+            }
+            Projectile.NewProjectile(source, position, Vector2.Zero, type,
                 damage, knockback, player.whoAmI, 0f, 0f, 0f);
             return false;
         }
@@ -207,107 +288,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/AEE8FF:La mirada del escuadrón en miniatura: viaja dormida y ABRE el párpado a mitad de camino]"));
+                "[c/C9A0F5:MANTÉN el clic: el CORAZÓN te orbita — aura magnética y CADENAS DE RAYO (la vida del Bastón)]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:La pupila FIJA a su presa · el impacto es un PARPADEO con destello · sin maná]"));
-        }
-
-        public override void AddRecipes()
-        {
-            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
-        }
-    }
-
-    // ======================================================================
-    //  5 · LA LÍNEA DE LECTURA — la frase cargada
-    // ======================================================================
-    public class DignosLineaDeLectura : ModItem
-    {
-        public override void SetDefaults()
-        {
-            Item.damage = 55;
-            Item.DamageType = DamageClass.Magic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 20; Item.useAnimation = 20;
-            Item.useStyle = ItemUseStyleID.Shoot;
-            Item.channel = true;                 // hojea mientras mantengas
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<LineaLecturaProjectile>();
-            Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item8;       // la vuelta de página del hojeo
-            Item.value = 12000;
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
-            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            // LA CARGA ES ÚNICA (el patrón "viva" de la Vela Solar): cada
-            // vuelta de useTime re-intenta el disparo mientras se canaliza —
-            // solo la PRIMERA siembra la carga; las demás alimentan el hojeo.
-            bool viva = false;
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p == null || !p.active || p.owner != player.whoAmI) continue;
-                if (p.type == type && p.ai[0] == 0f) { viva = true; break; }
-            }
-            if (!viva)
-                Projectile.NewProjectile(source, position, Vector2.Zero, type,
-                    damage, knockback, player.whoAmI, 0f, 0f, 0f);
-            return false;
-        }
-
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/FFF0C0:Mantén para HOJEAR el libro; al soltar, dispara un RAYO de texto puro]"));
-            tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:La línea de glifos atraviesa todo en recta · más hojeo = frase más larga, daño ×1 → ×3 · sin maná]"));
-        }
-
-        public override void AddRecipes()
-        {
-            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
-        }
-    }
-
-    // ======================================================================
-    //  6 · EL MARCAPÁGINAS — el dardo que marca
-    // ======================================================================
-    public class DignosMarcapaginas : ModItem
-    {
-        public override void SetDefaults()
-        {
-            Item.damage = 40;
-            Item.DamageType = DamageClass.Magic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 24; Item.useAnimation = 24;
-            Item.useStyle = ItemUseStyleID.Shoot;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<MarcapaginasProjectile>();
-            Item.shootSpeed = 13f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item5;
-            Item.value = 12000;
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
-            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            Projectile.NewProjectile(source, position, velocity, type,
-                damage, knockback, player.whoAmI, -1f, 0f, 0f);
-            return false;
-        }
-
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "D1",
-                "[c/FFD678:Los disparos dejan marcadores brillantes CLAVADOS en el enemigo]"));
-            tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Al quinto marcador: FIN DEL CAPÍTULO — el libro se cierra de golpe sobre él · sin maná]"));
+                "[c/78788C:SUELTA: EL COLAPSO — sale al cursor, frena TEMBLANDO… y EL STARQUAKE (el anillo del padre que golpea con el frente) · sin maná]"));
         }
 
         public override void AddRecipes()
