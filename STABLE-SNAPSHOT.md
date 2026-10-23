@@ -1,156 +1,59 @@
-# AethonMod — ESTADO ACTUAL (v6.50.116)
+# AethonMod — ESTADO ACTUAL (v6.51.11)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.116 (EL ESCUADRÓN DE ONCE,
-> LA CORONA DOBLE, EL FESTÍN AISLADO, LA GRACIA DEL GUARDIÁN Y EL
-> RECORTES DEL IRIS. La letra: «en vez de 10 minion que sean 11, así
-> se ve mejor en la animación de cuando está el libro fuera» + «debes
-> mejorar la animación sobre el jugador ya que se quedan muy juntos
-> uno de otros cuando están encima del jugador» + «los jefes de las
-> oleadas no deben contar para los cambios del mundo… solo afectan al
-> grimorio como tal y su propia progresión así como al hambre» +
-> «bloquear la aparición de guardianes a solo 1 antes de ser devorado
-> y después de ser devorado por al menos 2 minutos» + «el iris está
-> por encima del ojo… recortar el iris a la mitad, y que la mitad
-> superior se haga invisible cuando el ojo esté medio cerrado»).
-> Cinco entregas: (1) EL ESCUADRÓN DE ONCE — EscuadronEterno=11: con
-> la banda completa las órbitas del libro cierran EXACTO (anillo
-> interior 5 + exterior 6, dos ruedas llenas); la 12.ª invocación
-> FORTALECE (+50% daño por mejora, 4 mejoras). (2) LA CORONA DOBLE —
-> dos arcos entrelazados a lo ladrillo (mitad fuera radio 46+2,6n
-> tope 80, mitad dentro a 23 px DESFASADA medio paso), el arco se abre
-> con la banda (±9°), el radio respira ±4% y cada ojo cabecea a su
-> tempo (±3 px) — el doble de cielo por ojo, FIN del apiñamiento.
-> (3) EL FESTÍN AISLADO — AislarJefeDeOleada (FaucesGlobalNPC.
-> CheckDead, en toda salida donde la muerte de vanilla prosigue):
-> identidad en el sello (TipoReservado/JefeReservado) y NPC con
-> type/netID 0 y boss=false — ni downedBoss3 (el Esqueletron de
-> oleada YA NO abre la mazmorra), ni meteorito, ni logros, ni
-> celebración, ni loot vanilla; el mod cobra TODO por el sello
-> verdadero (esencia, XP, hambre 10%, crónica, voz, DerrotaOleada10);
-> el Génesis NO cae de oleadas. (4) LA GRACIA DEL GUARDIÁN —
-> EditSpawnPool: GuardianGracia=7200 t (2 min) desde el mordisco
-> (cubre toda la cena) vacía al guardián del pool; con el pacto
-> pendiente, UNO y solo UNO. (5) EL RECORTES DEL IRIS — el iris del
-> libro gigante se dibuja con rectángulo fuente recortado desde abajo
-> (origen compensado: la pupila no salta) y la banda visible respira
-> con el masticar (0,45+0,50·muerde: al morder la mitad superior es
-> INVISIBLE, al abrir afloja hasta 0,95) — jamás asoma sobre el
-> párpado Medio. .tmod 2.626.076 B md5
-> 2a0adae0a46ecef64d42d400fc8f2143, 390 entradas, oráculo 0/0, build
-> real 0/0, headless 0 excepciones, audit_v650116 TODO OK (340 ✓).
-> PENDIENTE EN JUEGO: (a) invocar 11 ojos: con el libro FUERA, DOS
-> RUEDAS exactas (5+6); con el libro guardado, la CORONA DOBLE (seis
-> fuera, cinco dentro enladrillados), (b) la 12.ª invocación
-> fortalece (igual que siempre, ahora con 11 puestos), (c) matar al
-> Esqueletron de una oleada: la mazmorra SIGUE CERRADA, sin logro, sin
-> meteorito, sin loot vanilla — y el libro cobra esencia + XP + hambre
-> + crónica + voz, (d) el easteregg del guardián: durante y DESPUÉS de
-> la cena (2 minutos) no aparece NI UNO más, (e) la cena: el ojo
-> entrecerrado del libro gigante SIN iris asomando por encima de la
-> página (y el recorte respirando con cada mordida).
-> Última actualización: v6.50.115 (LA CORONA DE CONJURO, LA
-> SOMBRA VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10. La letra:
-> «quita los 3 anillos de fotones… yo me refería a los anillos de los
-> agujeros rúnicos… más los anillos de los soles que sí están bien,
-> estos anillos de agujero negro rúnico deben brillar» + «es mejor
-> ubicar al jefe encima del jugador y que el grimorio se ponga a un
-> lado para devorar al jefe, la misma animación pero con la sombra de
-> la página saliendo del libro y con el libro mirando fijamente a su
-> víctima» + «crea una animación especial para el guardián de la
-> mazmorra… antes de que toque al jugador el grimorio lo detiene y
-> hace la animación de devorarlo, esto solo lo hace una vez y el
-> grimorio lo dice… esta acción con el guardián le da 1 nivel
-> completo» + «en el caso de los minions del grimorio, 30 son
-> demasiado… cuando llegue a 11 minions del grimorio en la siguiente
-> invocación no invoca minion, lo que hace es fortalecer a uno que ya
-> existe con un 50% de daño… 4 mejoras, cada mejora aumenta el ataque
-> en un 50%»). Cuatro entregas: (1) LA CORONA DE CONJURO — los tres
-> anillos de fotones RGB de la .114 MUEREN: nace LA TRIPLE CORONA
-> RÚNICA LITERAL de los agujeros negros (OrbitaLib.CoronaConjuro: el
-> dorado de 8 + el violeta de 6 contrarrotando + el blanco íntimo de
-> 6, runas DE PIE con perlas, glyphMul 2,1) ABRILLANTADA (doble
-> resplandor dorado+violeta pulsante que ARDE al comer; la rueda corre
-> al comer y se ciñe 1,10→0,46) — los anillos de los soles se quedan.
-> (2) EL PUESTO NUEVO + LA SOMBRA VUELVE — el preso cuelga ENCIMA DEL
-> PORTADOR (AnclaSobrePortador: 0,62·jefe+120 px sobre su cabeza, lo
-> sigue si camina; _cenaPortador viaja con la cena) y el libro A UN
-> COSTADO (radioJefe+118, inclinado −0,30, iris clavado); LA SOMBRA DE
-> LA PÁGINA SALE DEL LIBRO (PosicionVivaDelLibro compartida:
-> ColumnaViva+Masa+bruma+OjosDeMasa+CabezaDeBruma+el Devorador v2 — el
-> patrón .113 enraizado en el libro gigante). (3) EL GUARDIÁN NO CRUZA
-> — IntentarDetenerGuardian en el PreAI del DungeonGuardian: a 250 px
-> del portador cargando, el grimorio LO DETIENE y arranca LA CENA
-> COMPLETA; +1 NIVEL COMPLETO (SubirNivelDirecto), LA VOZ
-> (Armas.GuardianDetenido ×3: «A ti solo te devoraré UNA vez… con eso
-> me basta») y la marca ShardPlayer.GuardianMazmorraDevorado persiste
-> en el .plr (UNA vez por portador; PaginaEnBlanco la borra); el
-> guardián excluido de la cena normal. (4) EL ESCUADRÓN DE 10 —
-> EscuadronEterno=10 LLANO (BonusMinionSlots muere; la compuerta
-> cuenta SOLO ojos) y LA 11.ª INVOCACIÓN FORTALECE al ojo con menos
-> mejoras: +50% daño por mejora (hasta ×3) y su anillo (1: agujero
-> negro DORADO · 2: VIOLETA contrarrotante · 3: SOL dorado · 4: segundo
-> sol AZUL-estelar) + el resplandor crece. .tmod 2.624.989 B md5
-> 63e76ada6466d3be5cd60ade32ae4dab, 390 entradas, oráculo 0/0, build
-> real 0/0, headless 0 excepciones, audit_v650115 TODO OK (307 ✓).
-> PENDIENTE EN JUEGO: (a) la cena: la CORONA RÚNICA brillante + los
-> soles, el preso ENCIMA del jugador, el libro A UN COSTADO mirándolo
-> fijo y LA SOMBRA DE LA PÁGINA saliendo del libro devorándolo, (b)
-> entrar a la Mazmorra sin matar a Skeletron con el Eterno a mano: el
-> guardián carga → el grimorio lo DETIENE, lo devora y el libro SUBE 1
-> NIVEL con su voz — y NUNCA más repite el truco, (c) invocar 11
-> veces: a la 11.ª NO aparece un ojo nuevo — uno existente GANA su
-> anillo dorado (+50%), a la 12.ª el violeta, a la 13.ª el sol dorado,
-> a la 14.ª el sol azul (×3 de daño al tope) y «Los diez ojos ya
-> llevan sus cuatro mejoras» cuando todo está al máximo, (d) el
-> escuadrón JAMÁS pasa de 10 (ni con equipo de invocador ni con nivel),
-> (e) Página en Blanco borra también el pacto del guardián.
-> Última actualización: v6.50.114 (EL DAÑO MASIVO TAMBIÉN CENA,
-> LA PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS. La letra: «cuando el
-> daño que recibe el jefe es masivo no se aplica eso de que su primera
-> muerte sea absorbido por el grimorio» + «el jefe debe ser rodeado por
-> anillos iguales a los de los proyectiles agujeros negro y además
-> también poner anillos como los de los soles runicos, ser llevado al
-> centro de la pantalla y ser absorbido por el libro… esto se aplica a
-> todos los jefes» + «al parecer los minion no tienen limite…
-> deberían tener un limite de 10, pero actualiza a que tengan un limite
-> de 20 con el libro y más con items y armadura de invocador» + «mejora
-> la animación… alrededor del grimorio en su fase de caza… al atacar
-> tenga un pequeño retroceso»). Cuatro entregas: (1) EL FIX MASIVO —
-> el gatillo de PreAI exigía vida > 0 y el golpe que cruzaba a ≤0 sin
-> pasar por las 100 le robaba la cena al portador; ahora CheckDead
-> intercepta la muerte de un golpe ANTES de la marca (la cena tiene
-> prioridad sobre el festín clásico) e Iniciar ENTREGA a la cena en el
-> drain masivo — la primera muerte ES la cena, venga como venga.
-> (2) LA PELÍCULA NUEVA — TRES anillos de FOTONES (Ring + aberración
-> cromática RGB + aro blanco caliente, el patrón exacto del
-> BlackHoleProjectile) + LOS ANILLOS RÚNICOS de los soles
-> (SigiloLib.SistemaAnillos) aprisionan, elevan al centro (motor .110
-> intacto) y EL LIBRO ABSORBE: el Eterno sale de la mano, CRECE ×2,6,
-> cuelga bajo el preso, se ABRE (párpado Medio, iris clavado), come
-> (almas y bruma a SU boca), los anillos colapsan DENTRO del libro y a
-> los 400 SE CIERRA de golpe (Cerrado + chasquido + onda) y VUELVE a
-> la mano — la sombra de la página murió en la cena. (3) EL TECHO DE
-> LOS OJOS — el bug era el techo vivo .111 (cada ojo vivo subía
-> maxMinions → la compuerta jamás se cerraba); ahora
-> WeaponScaling.TechoOjosEterno (20 + equipo de invocador + escalera
-> por nivel tope +10), cacheado por tick en ShardPlayer._techoOjos, y
-> la compuerta lee ShardPlayer.TechoOjosDe (NO maxMinions) — la
-> promesa .111 sigue en pie (el techo nuevo es PISO). (4) LA ÓRBITA Y
-> EL RETROCESO — precesión ±0,30 rad (Saturno, contrarrotante) +
-> estela de tres fantasmas + patada 5,6 con estado de 14 t que la ley
-> del planeo respeta 8 t (la de 3,2 moría en 2-3 t) + pop 1,16 y
-> desplazamiento 6,5 px. .tmod 2.622.071 B md5
-> 887331145f60e46a4cba2282d99a6b43, 390 entradas, oráculo 0/0, build
-> real 0/0, headless 0 excepciones, audit_v650114 TODO OK (237 ✓).
-> PENDIENTE EN JUEGO: (a) matar a un jefe de UN golpe con daño
-> masivo → LA PRIMERA CENA arranca igual (el fix), (b) los anillos de
-> fotones + los rúnicos alrededor del preso, elevado al centro,
-> absorbido POR EL LIBRO (se cierra de golpe a los ~6,6 s y vuelve a
-> la mano), (c) el tope: 20 ojos con el libro (más con equipo de
-> invocador y nivel), la compuerta avisa «Espacios de esbirro llenos»,
-> (d) la órbita cabecea y deja estela, (e) cada disparo REBOTA al ojo,
-> (f) Página en Blanco reinicia la cena de un tipo ya devorado).
+> Última actualización: v6.51.11 (LA MESA DEL SUELO · EL FESTÍN DEL
+> PORTADOR · LA REFORJA A LA VISTA · EL COLOR ÚNICO DEL NOMBRE · LAS
+> CIMAS 400/500 · EL TOPE DE VELOCIDAD. La letra: «el grimorio se come
+> toda la esencia corrupta que llega al inventario […] solo comer lo
+> que necesita para subir al siguiente nivel de despertar» + «mejor es
+> que el jugador suelte los items delante de el con el grimorio
+> seleccionado, pero que se vaya comiendo los item segun los necesite
+> para sus contadores» + «las esencia corrupta estas si las consume el
+> jugador aumentan su ataque… hasta un maximo de 100 %… entonces las
+> esencias se convierten en monedas de oro, 1 esencia 1 de oro» + «el
+> aumento que estos dan deben aparecer en la ventana de informacion
+> basica» + «al cerrar el inventario y poner el cursor encima del
+> grimorio en la barra de acceso rapido su nombre sale de colores
+> mostrando un nivel diferente, esto no debe ser» + «que (Legendario)
+> sea a nivel 400 y que (Legendario Supremo) sea a nivel 500» + «ponle
+> un tope para que nunca dispare el doble… incluso todos juntos
+> siempre se queden en el tope maximo y nada lo pueda romper»).
+> Siete entregas: (A) LA MESA DEL SUELO — la DEVORACIÓN DE LA MOCHILA
+> de la .51.10 murió entera (AutoDevorarOfrenda, DevoracionInventarioFX
+> y compañía, 11 símbolos ausentes de la DLL); la mochila ES SAGRADA y
+> la mesa ES EL SUELO: con el Eterno EN LA MANO, lo soltado delante
+> (≤200 px) es plato comido DE IGUAL FORMA QUE LOS JEFES, SOLO lo que
+> falta del peldaño (CONTADORES PARCIALES que persisten y viajan: 70
+> lingotes, sueltas 30, come 30, faltan 40); el dinero con CAMBIO
+> escupido en monedas de verdad (EscupirCambio: pilas ≤999 — sin el
+> desglose QuickSpawnItem clampa y ROBA); un despertar por pulso y la
+> mesa RENACE al subir. (B) EL FESTÍN DEL PORTADOR — ItemCorrupto ES
+> consumible: el jugador la come y cada esencia es +0,1 % de daño en
+> TODO (tope +100 % con 1000, EsenciasConsumidas en el .plr); al tope
+> cada esencia = 1 MONEDA DE ORO; lo que el LIBRO come SOLO despierta
+> (BonusDanoDevorado/OjosExtraDevorados muertos — MigrarViejoPoder
+> pasa el viejo poder de los libros .51.6-.51.10 al portador, una vez
+> por libro). (C) LA REFORJA EN LA VENTANA BÁSICA — la línea
+> «Reforja (Mítico): +15 % daño · …» con las stats coloreadas de la
+> wiki bajo el daño de invocación. (D) EL COLOR ÚNICO — la causa raíz
+> verificada al IL (Main.MouseText → RarityLoader.GetRarity(rare).
+> RarityColor): la rareza ahora VISTE EL COLOR DEL PELDAÑO del libro a
+> la vista (cursor → señalado → activo) — Ignorante GRIS en las DOS
+> pantallas. (E) LAS CIMAS — Legendario 400, Legendario Supremo 500.
+> (F) EL TOPE DE VELOCIDAD — FactorVelocidadTotal: nivel × festín ×
+> reforja JUNTAS, cuantizadas a ticks ENTEROS con TOPE DURO 7
+> (MinTicksUso) + reuseDelay 7 de correa final: NADA dispara doble,
+> ni todo junto lo rompe. .tmod 2.850.373 B md5
+> b09ff82bcd0b71728f1e3a10b02d6f3b, 401 entradas, oráculo 0/0, build
+> real ×2 0/0, headless ×3 Server started 0 excepciones,
+> audit_v65111 TODO OK. PENDIENTE EN JUEGO: el checklist de la .51.11
+> abajo (la comida en el suelo, el festín del portador, el oro al
+> tope, la reforja en la básica, el color del hotbar, las cimas
+> 400/500, el tope de velocidad) + el checklist .51.10/.51.9 aún
+> vigente en CHANGES.md (la refronja viva, el miedo del duende, el
+> loot del Fusionado, el Aethon Menor danzando, las cuatro ventanas,
+> la escalera del nombre).
+
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
   un commit nuevo arrastraría código de la .95 — lección del marcado .81.
@@ -2039,6 +1942,30 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    `CarnadaDelGrimorio`, `RelojDeArenaDelEscriba`, `BossSummonBag`, los 4 tests de VFX.
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
+
+1. **⏳ v6.51.11 PUBLICADA (release + CDN verificados) — EN JUEGO:
+   LA MESA DEL SUELO · EL FESTÍN DEL PORTADOR · EL TOPE DE VELOCIDAD.**
+   Checklist: (a) LA MESA — con el Eterno en la MANO, soltar esencias
+   delante: come SOLO las del peldaño (el aviso cuenta «(3/5 del
+   peldaño)», el resto QUEDA EN EL SUELO); lo mismo con monedas (con
+   cambio escupido si la moneda no cabe), lingotes (70 necesita,
+   30 sueltas → «faltan 40») y EL ARMA corrupta del peldaño (la devora
+   entera); al completar las TRES ofrendas DESPIERTA y los contadores
+   renacen — y NADA sale del inventario jamás (la mochila sagrada),
+   (b) EL FESTÍN DEL PORTADOR — comer esencia corrupta a mano (clic):
+   +0,1 % de daño en TODO por esencia, el tooltip de la esencia cuenta
+   vivo; a las 1000 el aviso del tope (+100 %) y cada esencia extra
+   comida = 1 moneda de oro, (c) LOS LIBROS VIEJOS — el poder devorado
+   de la .51.6-.51.10 migra al portador una sola vez (aviso
+   «MigracionPoder»), (d) LA REFORJA EN LA BÁSICA — la ventana básica
+   muestra «Reforja (X): stats» bajo el daño de invocación, (e) EL
+   COLOR — cerrar inventario y poner el cursor sobre el Eterno del
+   hotbar: el nombre con el color de SU peldaño (Ignorante GRIS, igual
+   que con el inventario abierto), (f) LAS CIMAS — (Legendario) al
+   400, (Legendario Supremo) al 500 (la lista de requisitos y EL ARMA
+   lo cuentan), (g) EL TOPE — con TODO apilado (nivel alto + festín de
+   prisa + reforja Suprema) el uso NUNCA baja de 7 ticks: mantener
+   clic y contar — jamás doble disparo.
 
 1. **✅ v6.50.116 PUBLICADA — EL ESCUADRÓN DE ONCE, LA CORONA DOBLE,
    EL FESTÍN AISLADO, LA GRACIA DEL GUARDIÁN Y EL RECORTES DEL IRIS**

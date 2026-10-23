@@ -463,6 +463,16 @@ namespace AethonMod.Content.Systems
                     // v6.51.0 — EL NIVEL DE DESPERTAR también (el daño y
                     // los tooltips del portador lo leen en su máquina).
                     p.Write(alma.NivelDespertar);
+                    // v6.51.11 — LA MESA DEL DESPERTAR + EL FESTÍN DEL
+                    //     PORTADOR: los contadores parciales de la
+                    //     ofrenda (la lista del despertar los lee VIVA)
+                    //     y las esencias que EL JUGADOR se comió (su
+                    //     daño: +0,1 % por esencia, tope +100 %).
+                    p.Write(alma.OfrendaEsencias);
+                    p.Write(alma.OfrendaMonedas);
+                    p.Write(alma.OfrendaMineral);
+                    p.Write(alma.OfrendaArma);
+                    p.Write(portador.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>().EsenciasConsumidas);
                 });
             }
             catch { }
@@ -776,6 +786,12 @@ namespace AethonMod.Content.Systems
                         int almaVeloz = reader.ReadInt32();
                         int punoTitan = reader.ReadInt32();
                         int nivelDespertar = reader.ReadInt32();
+                        // v6.51.11 — LA MESA + EL FESTÍN DEL PORTADOR.
+                        int ofrendaEsencias = reader.ReadInt32();
+                        long ofrendaMonedas = reader.ReadInt64();
+                        int ofrendaMineral = reader.ReadInt32();
+                        bool ofrendaArma = reader.ReadBoolean();
+                        int esenciasComidas = reader.ReadInt32();
                         // v6.51.6 — LOS NÚMEROS SE ESCRIBEN EN EL LIBRO
                         // ACTIVO del jugador local (el despertar y las
                         // estadísticas son del ITEM, no del jugador).
@@ -799,6 +815,16 @@ namespace AethonMod.Content.Systems
                             almaR.PunoTitan = System.Math.Max(0, punoTitan);
                             almaR.NivelDespertar = System.Math.Clamp(nivelDespertar, 0,
                                 Content.Systems.DespertarGrimorio.NivelMax);
+                            // v6.51.11 — LA MESA DEL DESPERTAR (contadores
+                            // parciales del peldaño vivo) + EL FESTÍN DEL
+                            // PORTADOR (sus esencias comidas — su daño).
+                            almaR.OfrendaEsencias = System.Math.Max(0, ofrendaEsencias);
+                            almaR.OfrendaMonedas = System.Math.Max(0L, ofrendaMonedas);
+                            almaR.OfrendaMineral = System.Math.Max(0, ofrendaMineral);
+                            almaR.OfrendaArma = ofrendaArma;
+                            var spLocal = Main.LocalPlayer.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+                            if (spLocal != null)
+                                spLocal.EsenciasConsumidas = System.Math.Max(0, esenciasComidas);
                         }
                         break;
                     }

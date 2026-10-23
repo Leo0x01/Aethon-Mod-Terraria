@@ -2392,18 +2392,14 @@ Caida: {
 	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA entre la bruma.
 	TintaEnVuelo: ✦ TU BRUMA YA NACE frente a ti — espera a que se disipe.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
-	ItemCorrompido: ✦ La bruma del cráter PUDRE tu ofrenda… {0} esencias corruptas nacen.
 	DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
 	DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
 	DevoradoSabor3: ¡Sabroso! Lo que sea que era, el haz lo COCINÓ bien. Más de eso, portador.
 	DevoradoSabor4: ¡EXQUISITO! Notas de oro, final eterno, un crujido de mundos. ¡MÁS!
-	DevoradoCuenta: ✦ El Eterno devoró {0} esencias corruptas: +{1}% de daño permanente.
-	DevoradoTooltip: Devorado en la bruma: {0} esencias corruptas (+{1}% de daño{2})
-	DevoradoTooltipOjos: ", +{0} ojos"
+	DevoradoTooltip: Festín del portador: {0} esencias corruptas comidas (+{1}% de daño a TODO tu ataque)
 	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
 	// weapons that fall into the crater; the Eternal devours them: rarity
 	// EXP + one stat per class + the unique souls)
-	ArmaCorrompidaAviso: ✦ La corrupción del grimorio ABRAZA a {0}… queda CORRUPTA.
 	ArmaDevorada: ✦ El Eterno devora a {0}: +{1} EXP · +1 {2}
 	AlmaDespertada: ✧ ¡El alma de {0} DESPIERTA en el libro: {1}!
 	StatFuerza: Fuerza violenta
@@ -2434,8 +2430,19 @@ Despertar: {
 	MejorasSelladas: ✦ Las mejoras nacen con EL DESPERTAR (5/15/30/40). Actual: {0}.
 	NuevoOjo: ✧ ¡El grimorio puede invocar un OJO NUEVO! (el número {0} del escuadrón)
 	CerrojoEsbirros: ✦ El grimorio no comparte su cielo: con sus ojos velando, ningún otro esbirro responde.
-	EsenciaDevorada: ✦ El Eterno devora {0} × {1}: +{2}% de daño permanente.
-	DevoraInventario: ✦ El Eterno SE SIRVIÓ SOLO: la ofrenda del despertar {0} salió derecha de tu inventario.
+	// v6.51.11 — LA MESA DEL SUELO + EL FESTÍN DEL PORTADOR: el libro
+	// come de los items CAÍDOS delante de él (con el Eterno en la mano),
+	// SOLO lo que le falta del peldaño; las esencias que EL JUGADOR come
+	// suben SU propio daño (+0,1% c/u, tope +100% con 1000 — al tope,
+	// cada esencia comida es 1 moneda de oro).
+	BocadoEsencias: ✦ El Eterno come {0} esencias del suelo ({1}/{2} del peldaño).
+	BocadoMonedas: ✦ El Eterno come las monedas del suelo — faltan {0}.
+	BocadoMineral: ✦ El Eterno come {0} lingotes del suelo ({1}/{2}).
+	BocadoArma: ✦ ¡El Eterno devora EL ARMA CORRUPTA del peldaño!
+	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
+	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
+	EsenciaTopeTooltip: Festín completo: +100% de daño — cada esencia comida se vuelve 1 moneda de oro
+	EsenciaProgresoTooltip: Festín del portador: {0}/{1} esencias comidas (+{2}% de daño a TODO)
 	ReqArmaLimpia: Requiere un arma SIN corromper
 	NaceCorrupta: Nace CORRUPTA: +5% a TODAS sus estadísticas · sin etiquetas ni reforge
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario

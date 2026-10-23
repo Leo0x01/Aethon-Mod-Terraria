@@ -161,7 +161,7 @@ namespace AethonMod.Content.Weapons
         //  LA ESCALERA — los 12 MODIFICADORES MÁGICOS de la wiki, del
         //  PEOR al MEJOR (columnas exactas de la tabla: Daño · Velocidad
         //  · % crítico · Costo de maná · Retroceso · Nivel · Valor), un
-        //  peldaño CADA 33 NIVELES y el Supremo a los 50 del Legendario:
+        //  peldaño CADA 33 NIVELES y el Supremo a los 100 del Legendario:
         //     1  → (Ignorante)     -10% daño · +20% maná · t-2 · -48,16%
         //    33  → (Transtornado)  -10% daño · -10% retroceso · t-1 · -34,39%
         //    66  → (Inepto)        +10% maná · t-1 · -19,00%
@@ -174,9 +174,9 @@ namespace AethonMod.Content.Weapons
         //   297  → (Místico)       +10% daño · -15% maná · t+2 · +60,02%
         //   330  → (Maestro)       +15% daño · -20% maná · +5% retro · +92,83%
         //   363  → (Mítico)        +15% daño · +10% vel · +5% crít · -10% maná · +15% retro · +209,85%
-        //   396  → (Legendario)    EL NUESTRO: Mítico +3% en cada stat
-        //   446  → (Legendario Supremo) LA EXCLUSIVA DEL MOD: Mítico +10%
-        //         en cada stat — 50 niveles tras el Legendario: cuando el
+        //   400  → (Legendario)    EL NUESTRO: Mítico +3% en cada stat
+        //   500  → (Legendario Supremo) LA EXCLUSIVA DEL MOD: Mítico +10%
+        //         en cada stat — 100 niveles tras el Legendario: cuando el
         //         nombre consigue EL BRILLO característico (morado y negro
         //         con bordes dorados, negros y morados —
         //         NombreEternoGlobalItem).
@@ -220,8 +220,8 @@ namespace AethonMod.Content.Weapons
         /// <summary>LA ESCALERA COMPLETA — los 12 modificadores mágicos de
         /// Terraria (de la tabla de la wiki, del peor al mejor por Valor)
         /// y las DOS cimas del mod: (Legendario) = Mítico con +3% extra
-        /// en cada estadística · (Legendario Supremo) = Mítico con +10%
-        /// extra — la exclusiva del libro (446 = 396 + 50).</summary>
+        /// en cada estadística (nivel 400) · (Legendario Supremo) = Mítico
+        /// con +10% extra (nivel 500) — la exclusiva del libro.</summary>
         public static readonly PeldanoReforja[] LaReforja =
         {
             new PeldanoReforja("Ignorante",          1,   -0.10f, 0f,     0f,    +0.20f, 0f,     -2, -0.4816f),
@@ -236,17 +236,18 @@ namespace AethonMod.Content.Weapons
             new PeldanoReforja("Místico",           297,  +0.10f, 0f,     0f,    -0.15f, 0f,     +2, +0.6002f),
             new PeldanoReforja("Maestro",           330,  +0.15f, 0f,     0f,    -0.20f, +0.05f, +2, +0.9283f),
             new PeldanoReforja("Mítico",            363,  +0.15f, +0.10f, +0.05f, -0.10f, +0.15f, +2, +2.0985f),
-            // LAS CIMAS DEL MOD (la letra): Legendario no existe para las
-            // armas mágicas de vanilla (el techo es Mítico) — el NUESTRO
-            // son las MISMAS estadísticas de Mítico con el extra prometido.
-            new PeldanoReforja("Legendario",        396,  +0.18f, +0.13f, +0.08f, -0.13f, +0.18f, +2, +2.4000f),
-            new PeldanoReforja("Legendario Supremo", 446,  +0.25f, +0.20f, +0.15f, -0.20f, +0.25f, +2, +3.1000f),
+            // LAS CIMAS DEL MOD (la letra de la .51.11): Legendario no
+            // existe para las armas mágicas de vanilla (el techo es
+            // Mítico) — el NUESTRO son las MISMAS estadísticas de Mítico
+            // con el extra prometido: nivel 400 y nivel 500.
+            new PeldanoReforja("Legendario",        400,  +0.18f, +0.13f, +0.08f, -0.13f, +0.18f, +2, +2.4000f),
+            new PeldanoReforja("Legendario Supremo", 500,  +0.25f, +0.20f, +0.15f, -0.20f, +0.25f, +2, +3.1000f),
         };
 
         /// <summary>El ÍNDICE del peldaño de la reforja por el nivel del
         /// libro: cada 33 niveles sube UN modificador (33 · 66 · 99 · …
-        /// · 396) y el (Legendario Supremo) a los 50 niveles del
-        /// Legendario (446). Empieza en (Ignorante) — el peor modificador
+        /// · 363)… (Legendario) en el nivel 400 y (Legendario Supremo)
+        /// en el 500. Empieza en (Ignorante) — el peor modificador
         /// mágico: así nace el arma mágica.</summary>
         public static int IndiceEtiqueta(int nivel)
         {
@@ -364,7 +365,7 @@ namespace AethonMod.Content.Weapons
             Item.shootSpeed = 12f;
             Item.mana = 0;                 // la regla de la casa — el hambre ES el coste
             Item.noMelee = true;
-            Item.reuseDelay = 10;          // v5.16: cooldown del TestStaff que funciona
+            Item.reuseDelay = 7;           // v6.51.11: LA CORREA FINAL del tope (7 ticks — igual que MinTicksUso: NADA dispara doble)
         }
 
         public override void AddRecipes()
@@ -440,12 +441,6 @@ namespace AethonMod.Content.Weapons
             // la mitad de invocación vive en ShardPlayer (v6.45).
             damage *= WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
 
-            // v6.50.128 — LO DEVORADO EN EL ALTAR: cada esencia corrupta que
-            // el Eterno tragó en el ALTAR DE LA CAÍDA es +0,25 % de daño
-            // PERMANENTE (tope +75 % — la letra: «la mecanica es la de
-            // comerse los item y mejorar el grimorio del eterno»).
-            damage *= 1f + Players.ShardPlayer.BonusDanoDevorado(player);
-
             // v6.50.129 — EL FESTÍN DE LAS ARMAS (la letra: «cualquier arma
             // corrompida se vuelve exp para el grimorio… cada arma debe
             // subir algun stats del grimorio»): la Fuerza (armas melee
@@ -467,6 +462,14 @@ namespace AethonMod.Content.Weapons
             //     Mítico +15% … Supremo +25%) — multiplica UNA vez con
             //     todo lo de arriba (nivel/despertar/festín).
             damage *= 1f + PeldanoDe(sl?.Level ?? 1).Dano;
+
+            // v6.51.11 — EL PODER DEVORADO MURIÓ como bonus del libro (la
+            //     letra: «las esencias consumidas por el grimorio no
+            //     cuentan para el aumento general de daño, solo cuentan
+            //     para su despertar»): el daño por esencias vive AHORA en
+            //     el PORTADOR que las come (ShardPlayer.ModifyWeaponDamage:
+            //     +0,1 % por esencia en TODO su daño, tope +100 % con
+            //     1000 — al tope, cada esencia es 1 moneda de oro).
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -507,47 +510,73 @@ namespace AethonMod.Content.Weapons
             mult = 0f;
         }
 
-        public override float UseTimeMultiplier(Player player)
+        // ================================================================
+        //  v6.51.11 — EL TOPE MÁXIMO DE VELOCIDAD (la letra del usuario:
+        //  «a la esta estadisticas de aqui, velocidad: Velocidad → el
+        //  tiempo de uso (animación y disparo juntos: nunca dispara
+        //  doble), ponle un tope para que nunca dispare el doble, un
+        //  tope maximo de velocidad y que de ahi no suba, tambien cambia
+        //  todas las estadisticas y sistema que afecten a la velocidad
+        //  para que incluso todos juntos siempre se queden en el tope
+        //  maximo y nada lo pueda romper»): TODAS las fuentes de
+        //  velocidad del Eterno — el NIVEL (WeaponScaling.UseSpeedMult),
+        //  el FESTÍN DE ARMAS (LA PRISA + EL ALMA VELOZ) y LA REFORJA
+        //  VIVA (la columna Velocidad de la wiki) — se multiplican
+        //  JUNTAS en UNA sola función… y el resultado NUNCA baja del
+        //  TOPE: con los 22 ticks de base, 7 TICKS POR USO, JAMÁS 6 (ni
+        //  el nivel infinito, ni el festín completo, ni la reforja
+        //  suprema — TODOS JUNTOS se quedan en el tope). El useTime y
+        //  la useAnimation comparten EL MISMO factor (la regla
+        //  anti-doble-Shoot de la v5.26): la animación NUNCA queda por
+        //  debajo del disparo, y el reuseDelay de 7 es la correa final.
+        // ================================================================
+
+        /// <summary>EL TOPE DURO en ticks: el uso del Eterno JAMÁS baja
+        /// de aquí (22 → 7 = ×3,14 de velocidad — nada lo rompe).</summary>
+        public const int MinTicksUso = 7;
+
+        /// <summary>EL FACTOR TOTAL de velocidad (useTime y useAnimation
+        /// JUNTOS — una sola fuente de verdad): nivel × festín × reforja,
+        /// topeado en ticks ENTEROS. NADA puede romper el tope.</summary>
+        private float FactorVelocidadTotal(Player player, int baseTicks)
         {
             var sl = GetShard(Item);
-            if (sl == null) return 1f;
-            // v5.25: base = Item.useTime para que UseSpeedMult redondee el
-            // useTime efectivo a entero (evita el doble Shoot).
-            float factor = WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
-            // v6.50.129 — LA PRISA Y EL ALMA VELOZ del festín de armas (las
-            // armas a distancia comidas + las hojas rápidas): el uso se
-            // ACELERA por lo devorado (tope conjunto +35 % — con el factor
-            // del nivel, multiplicado: nunca por debajo del ciclo mínimo).
+            if (sl == null || baseTicks <= 0) return 1f;
+
+            // 1) EL NIVEL (−0,3 %/nivel con tope interno del −25 % — y su
+            //    redondeo a entero de la v5.25, la cura del doble-Shoot).
+            float factor = WeaponScaling.UseSpeedMult(sl.Level, baseTicks);
+
+            // 2) EL FESTÍN DE ARMAS (LA PRISA de las armas a distancia +
+            //    EL ALMA VELOZ de las hojas rápidas — tope conjunto +35 %).
             factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
-            factor = MathHelper.Clamp(factor, 0.35f, 1f);
-            // v6.51.10 — LA REFORJA VIVA: la columna VELOCIDAD del peldaño
-            //     (Maníaco/Prohibido +10% … Celeste -10% … Supremo +20%)
-            //     — DESPUÉS del clamp del sistema (positiva = más rápido;
-            //     la lenta del Celeste puede pasar de 1: así es la tabla).
+
+            // 3) LA REFORJA VIVA (la columna Velocidad de la wiki:
+            //    Maníaco/Prohibido +10 % … Celeste −10 % … Supremo +20 %).
             factor *= 1f - PeldanoDe(sl.Level).Velocidad;
-            return factor;
+
+            // 4) LA CUANTIZACIÓN + EL TOPE: el uso efectivo SIEMPRE en
+            //    ticks ENTEROS (animación y disparo JUNTOS — jamás
+            //    fracciones que disparen doble)… y NUNCA por debajo del
+            //    TOPE DURO: ni todo junto lo rompe (la letra).
+            int ticks = (int)System.Math.Floor(baseTicks * factor);
+            if (ticks < MinTicksUso) ticks = MinTicksUso;
+            if (ticks > baseTicks * 2) ticks = baseTicks * 2;   // la lentitud del Celeste tampoco se desboca
+            return (float)ticks / baseTicks;
         }
+
+        public override float UseTimeMultiplier(Player player)
+            => FactorVelocidadTotal(player, Item.useTime);
 
         /// <summary>
         /// v5.26: reduce useAnimation proporcionalmente al useTime para que
         /// NUNCA sea menor (si lo fuera, tModLoader dispararía Shoot 2 veces
-        /// por ciclo de animación).
+        /// por ciclo de animación). v6.51.11 — EL MISMO FACTOR TOTAL del
+        /// useTime (FactorVelocidadTotal: la única fuente de verdad):
+        /// animación y disparo caminan JUNTOS, topeados JUNTOS.
         /// </summary>
         public override float UseAnimationMultiplier(Player player)
-        {
-            var sl = GetShard(Item);
-            if (sl == null) return 1f;
-            float factor = WeaponScaling.UseSpeedMult(sl.Level, Item.useAnimation);
-            // v6.50.129 — la misma PRISA del festín, para que la animación
-            // NUNCA quede por debajo del useTime (la regla anti-doble-Shoot).
-            factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
-            factor = MathHelper.Clamp(factor, 0.35f, 1f);
-            // v6.51.10 — LA REFORJA VIVA: el MISMO factor de velocidad del
-            //     peldaño que el useTime (animación y disparo caminan
-            //     JUNTOS: nunca animación < useTime — la regla de la casa).
-            factor *= 1f - PeldanoDe(sl.Level).Velocidad;
-            return factor;
-        }
+            => FactorVelocidadTotal(player, Item.useAnimation);
 
         // ================================================================
         //  USO DEL ARMA
@@ -974,36 +1003,52 @@ namespace AethonMod.Content.Weapons
                     tooltips.Insert(ancla, summonLine);
                 else
                     tooltips.Add(summonLine);
+
+                // === v6.51.11 — LA REFORJA EN LA VENTANA BÁSICA (la letra:
+                //     «ahora sobre los modificadores de forja, el aumento
+                //     que estos dan deben aparecer en la ventana de
+                //     informacion basica»): el modificador que viste el
+                //     libro con SUS estadísticas de la wiki — las mismas
+                //     líneas coloreadas de la ventana EL ARMA, compactas
+                //     aquí, para leerse de un vistazo. ===
+                {
+                    var rungB = PeldanoDe(sl.Level);
+                    tooltips.Add(new TooltipLine(Mod, "ReforjaBasica",
+                        $"[c/B26EEC:Reforja ({rungB.Nombre}):] {StatsEtiqueta(rungB)}"));
+                }
             }
 
-            // === v6.50.128 — LO DEVORADO EN EL ALTAR (la mejora permanente
-            //     de la mecánica nueva: esencias comidas → +daño, +ojos).
-            //     Solo si el portador ya comió ALGO (el libro nuevo calla). ===
+            // === v6.51.11 — EL FESTÍN DEL PORTADOR (la letra: «sobre las
+            //     esencia corrupta estas si las consume el jugador
+            //     aumentan su ataque siguen aumentando hasta un maximo
+            //     de 100 %… cuando el jugador cumpla con el limite de
+            //     esencias consumida y llegue al tope que es 100% de daño
+            //     o sea que el jugador consuma 1000 esencias corruptas,
+            //     entonces las esencias se convierten en monedas de oro,
+            //     1 esencia 1 de oro»): el contador de lo que EL JUGADOR
+            //     comió — lo que el LIBRO come solo despierta y NO sube
+            //     este número (el viejo poder devorado migró aquí). Solo
+            //     si el portador ya probó una (el nuevo calla). ===
             Player portadorTip = Main.LocalPlayer;
-            // v6.51.6 — LO DEVORADO ES DE ESTE LIBRO (la letra: «las
-            // estadísticas… son caracteristicas exclusivas del grimorio
-            // del eterno»): la ventana lee el ALMA DEL ITEM señalizado —
-            // cada Eterno cuenta SU propio festín.
             var spDevorado = Item != null && !Item.IsAir
                 ? Item.GetGlobalItem<Globals.AlmaEternoGlobalItem>()
                 : null;
+            var spPortador = portadorTip != null
+                ? portadorTip.GetModPlayer<Players.ShardPlayer>() : null;
+            int esenciasDelPortador = spPortador?.EsenciasConsumidas ?? 0;
             // v6.51.1 — LO DEVORADO solo en SU ventana (la letra: la
             // ventana del escuadrón es SOLO estadísticas del escuadrón y
             // su festín — nada de progresión ni descripciones; v6.51.9:
             // ahora es la CUARTA ventana, EL ESCUADRÓN).
-            if (ventanaFestin && spDevorado != null && spDevorado.DevoracionPoder > 0)
+            if (ventanaFestin && esenciasDelPortador > 0)
             {
-                // El porcentaje como TEXTO a 2 decimales: 1 esencia = +0,25
-                // (un entero lo escondería — la misma cura del aviso).
-                string pctDanoTxt =
-                    (Globals.AlmaEternoGlobalItem.BonusDanoDevorado(Item) * 100f).ToString("0.##");
-                int ojosExtra = Globals.AlmaEternoGlobalItem.OjosExtraDevorados(Item);
-                string ojos = ojosExtra > 0
-                    ? Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltipOjos", ojosExtra)
-                    : "";
+                int vistos = System.Math.Min(esenciasDelPortador,
+                    Players.ShardPlayer.EsenciasTope);
+                string pctDanoTxt = (vistos * 0.1f).ToString("0.#",
+                    System.Globalization.CultureInfo.InvariantCulture);
                 tooltips.Add(new TooltipLine(Mod, "DevoradoAltar",
                     Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltip",
-                        spDevorado.DevoracionPoder, pctDanoTxt, ojos)));
+                        vistos, pctDanoTxt)));
             }
 
             // === v6.50.129 — EL FESTÍN DE LAS ARMAS (la letra: «cualquier
@@ -1328,7 +1373,6 @@ namespace AethonMod.Content.Weapons
                 //     necesita»). ===
                 try
                 {
-                    Player portador = Main.LocalPlayer;
                     // v6.51.6 — LA ESCALERA ES DE ESTE LIBRO (la letra: el
                     // despertar es individual de cada grimorio): se lee el
                     // ALMA DEL ITEM señalizado — dos Eternos en la misma
@@ -1350,47 +1394,45 @@ namespace AethonMod.Content.Weapons
                         $"[c/9B6FE8:  +{(despertar)}% de daño a TODO el grimorio]"));
 
                     // LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL (esencias ·
-                    // dinero · el arma del peldaño) — v6.51.5 LA LISTA
-                    // VIVA (la letra: «los requisitos que aparecen en el
-                    // despertar para subir su nivel, deberia mostrar
-                    // cuando cumples uno de ellos, ademas deberia
-                    // mostrar el sprite del arma muy pequeño para saber
-                    // que arma se necesita»): cada requisito se pinta
-                    // VERDE al cumplirlo con su conteo vivo (3/5) y su
-                    // ✓ dorado latiendo (DespertarRequisitosGlobalItem),
-                    // y el arma del peldaño enseña sus sprites mini (las
-                    // corruptas que ya llevas ARDEN con halo dorado).
+                    // dinero · el arma del peldaño) — v6.51.11 LOS
+                    // CONTADORES DEL LIBRO (la comida se sirve EN EL
+                    // SUELO: la lista cuenta lo que el libro YA COMIÓ de
+                    // cada ofrenda — v6.51.5 la lista viva con su ✓
+                    // dorado latiendo (DespertarRequisitosGlobalItem) y
+                    // los sprites mini del arma del peldaño).
                     if (despertar < Systems.DespertarGrimorio.NivelMax)
                     {
                         int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
                         long monedas = Systems.DespertarGrimorio.MonedasPara(siguiente);
 
-                        // === v6.51.6 — LA LISTA DEL DESPERTAR, RE-DISEÑADA
-                        //     (la letra: «lo que debe decir es el nombre
-                        //     del arma y justo al lado un pequeño sprite de
-                        //     como es el arma» + el check que se veía como
-                        //     texto crudo [c/FFD678:✓] — el tag ANIDADO
-                        //     dentro de otro tag muere: tML lo imprime
-                        //     literal. AHORA: UN SOLO COLOR POR LÍNEA, el ✓
-                        //     DENTRO del mismo span, y el arma con SU
-                        //     NOMBRE + SU SPRITE INLINE [i:id] — el tag de
-                        //     item NATIVO de tML, a prueba de todo). ===
+                        // v6.51.11 — LA MESA DEL LIBRO (los contadores
+                        // parciales de la ofrenda: lo que YA comió de
+                        // este peldaño — persisten y viajan por el cable).
+                        var almaLista = Globals.AlmaEternoGlobalItem.De(Item);
+                        int comidasEsencias = almaLista?.OfrendaEsencias ?? 0;
+                        long comidasMonedas = almaLista?.OfrendaMonedas ?? 0L;
+                        int comidosMineral = almaLista?.OfrendaMineral ?? 0;
+                        bool devoradaArma = almaLista?.OfrendaArma ?? false;
+
+                        // (v6.51.6: UN SOLO COLOR POR LÍNEA, el ✓ DENTRO
+                        // del mismo span, y el arma con SU NOMBRE + SU
+                        // SPRITE INLINE [i:id] — el tag de item NATIVO de
+                        // tML, a prueba de todo).
                         string colOK = "7FE89B", colNo = "C4A2FF";
 
-                        // === EL REQUISITO 1 — LAS ESENCIAS (conteo vivo). ===
-                        int llevasEsencias = Systems.DespertarGrimorio.EsenciasEnManos(portador);
-                        bool esenciasOK = llevasEsencias >= esencias;
+                        // === EL REQUISITO 1 — LAS ESENCIAS (las comidas). ===
+                        bool esenciasOK = comidasEsencias >= esencias;
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
                             $"[c/78788C:  Para Despertar {siguiente}:]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
-                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias Corruptas: {Math.Min(llevasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
+                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias Corruptas: {Math.Min(comidasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 2 — EL DINERO (lo que llevas). ===
-                        long llevasMonedas = Systems.DespertarGrimorioSistema.ContarMonedas(portador);
-                        bool monedasOK = llevasMonedas >= monedas;
+                        // === EL REQUISITO 2 — EL DINERO (lo comido — y
+                        //     lo que falta, para saber cuánto soltar). ===
+                        bool monedasOK = comidasMonedas >= monedas;
                         string textoMonedas = Systems.DespertarGrimorioSistema.ItemToText(monedas);
-                        if (!monedasOK && llevasMonedas > 0L)
-                            textoMonedas += $" — llevas {Systems.DespertarGrimorioSistema.ItemToText(llevasMonedas)}";
+                        if (!monedasOK)
+                            textoMonedas += $" — faltan {Systems.DespertarGrimorioSistema.ItemToText(monedas - comidasMonedas)}";
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
@@ -1398,21 +1440,17 @@ namespace AethonMod.Content.Weapons
                         //     v6.51.8: LA OFRENDA MINERAL): SU NOMBRE +
                         //     SU SPRITE al lado (cada alternativa de este
                         //     peldaño, [i:id] = el icono del item
-                        //     RENDERIZADO POR EL PARSER DE tML — se puede
-                        //     hasta pasar el cursor por encima). ===
+                        //     RENDERIZADO POR EL PARSER DE tML). ===
                         if (Systems.DespertarGrimorio.EsNivelMineral(siguiente))
                         {
-                            // === v6.51.8 — LA OFRENDA MINERAL (la letra:
-                            //     «en caso de no haber mas arma usar cierta
-                            //     cantidad de lingotes de algun mineral… al
-                            //     ser minerales no necesitan estar
-                            //     corruptos»): el lingote del peldaño con
-                            //     SU conteo vivo — tags SEPARADOS, nada de
-                            //     anidados (la lección de la .51.6). ===
+                            // === v6.51.8 — LA OFRENDA MINERAL (la cima
+                            //     45-50: los lingotes del fin del mundo,
+                            //     sin corrupción) — el contador de los
+                            //     COMIDOS (v6.51.11: parcial — el libro
+                            //     come solo los que le faltan). ===
                             int tipoMin = Systems.DespertarGrimorio.MineralDe(siguiente);
                             int cantMin = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
-                            int llevasMin = Systems.DespertarGrimorio.MineralesEnManos(portador, siguiente);
-                            bool mineralOK = llevasMin >= cantMin;
+                            bool mineralOK = comidosMineral >= cantMin;
                             string colMin = mineralOK ? colOK : colNo;
                             string nombreMin = "—";
                             try
@@ -1424,20 +1462,18 @@ namespace AethonMod.Content.Weapons
                             var trozosMin = new System.Collections.Generic.List<string>();
                             trozosMin.Add($"[c/{colMin}:  • Ofrenda mineral:]");
                             trozosMin.Add($"[i:{tipoMin}]");
-                            trozosMin.Add($"[c/{colMin}:{Math.Min(llevasMin, cantMin)}/{cantMin} × {nombreMin}{(mineralOK ? "  ✓" : "")}]");
+                            trozosMin.Add($"[c/{colMin}:{Math.Min(comidosMineral, cantMin)}/{cantMin} × {nombreMin}{(mineralOK ? "  ✓" : "")}]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
                                 string.Join(" ", trozosMin)));
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                                "[c/78788C:  (en cualquier parte de TU inventario, sin corrupción — el libro los devora solo)]"));
+                                "[c/78788C:  (suelta los lingotes DELANTE del grimorio seleccionado — come solo los que faltan)]"));
                         }
                         else
                         {
-                        bool armaOK = false;
+                        // v6.51.11 — EL ARMA se devora ENTERA (una sola):
+                        // el ✓ es el sello del libro (la comió o no).
+                        string colArma = devoradaArma ? colOK : colNo;
                         int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
-                        for (int pa = 0; pa < peldano.Length; pa++)
-                            if (Systems.DespertarGrimorio.LlevaCorrupta(portador, peldano[pa]))
-                            { armaOK = true; break; }
-                        string colArma = armaOK ? colOK : colNo;
                         var trozosArma = new System.Collections.Generic.List<string>();
                         trozosArma.Add($"[c/{colArma}:  • Devorar 1 CORRUPTA:]");
                         for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
@@ -1453,31 +1489,25 @@ namespace AethonMod.Content.Weapons
                             catch { }
                             trozosArma.Add($"[c/{colArma}:{nombreArma}]");
                         }
-                        if (armaOK) trozosArma.Add($"[c/{colArma}: ✓]");
+                        if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓]");
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
                             string.Join(" ", trozosArma)));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                            "[c/78788C:  (corrupta, en cualquier parte de TU inventario — el libro la devora solo)]"));
+                            "[c/78788C:  (corrupta — suéltala DELANTE del grimorio seleccionado y la devorará)]"));
                         }
 
                         // === v6.51.9 — LA ALTERNATIVA MINERAL EN TODOS LOS
-                        //     PELDAÑOS DE ARMAS (la letra: «en caso de que
-                        //     la gente no pueda conseguir las armas,
-                        //     tambien dale una opcion de lingotes segun el
-                        //     nivel claro y siempre deben ser mas de 50
-                        //     lingotes para cada despertar no menos, ademas
-                        //     el numero de lingotes siempre debe ir
-                        //     aumentando por cada nivel de despertar»): si
-                        //     el arma del peldaño no llega, LA PILA DE
-                        //     LINGOTES del metal del nivel paga lo mismo
-                        //     (siempre más de 50, siempre creciente — ver
-                        //     DespertarGrimorio.MineralDe). ===
+                        //     PELDAÑOS DE ARMAS (si el arma del peldaño no
+                        //     llega, LA PILA DE LINGOTES del metal del
+                        //     nivel paga lo mismo — siempre más de 50,
+                        //     siempre creciente). v6.51.11 — CONTADOR
+                        //     PARCIAL: el ejemplo de la letra (necesita 70,
+                        //     comes 30, faltan 40). ===
                         if (!Systems.DespertarGrimorio.EsNivelMineral(siguiente))
                         {
                             int tipoAlt = Systems.DespertarGrimorio.MineralDe(siguiente);
                             int cantAlt = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
-                            int llevasAlt = Systems.DespertarGrimorio.MineralesEnManos(portador, siguiente);
-                            bool altOK = llevasAlt >= cantAlt;
+                            bool altOK = devoradaArma || comidosMineral >= cantAlt;
                             string colAlt = altOK ? colOK : colNo;
                             string nombreAlt = "—";
                             try
@@ -1489,25 +1519,19 @@ namespace AethonMod.Content.Weapons
                             var trozosAlt = new System.Collections.Generic.List<string>();
                             trozosAlt.Add($"[c/{colAlt}:  • O la ofrenda mineral:]");
                             trozosAlt.Add($"[i:{tipoAlt}]");
-                            trozosAlt.Add($"[c/{colAlt}:{Math.Min(llevasAlt, cantAlt)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
+                            trozosAlt.Add($"[c/{colAlt}:{Math.Min(comidosMineral, cantAlt)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq6",
                                 string.Join(" ", trozosAlt)));
                         }
 
-                        // === v6.51.10 — LA NOTA FINAL DE LA LETRA (la
-                        //     letra: «debes dejar claro que los items
-                        //     necesarios para subir el nivel del despertar
-                        //     deben estar en cualquier parte del
-                        //     inventario del jugador… al final de la
-                        //     ofrenda de lingotes debes decir que los
-                        //     items requeridos deben estar en el
-                        //     inventario para ser usados»): la aclaración
-                        //     que cierra la lista — el arma O los lingotes,
-                        //     con que se cumpla UNO basta, y TODO se cobra
-                        //     del inventario: al completarse, el Eterno
-                        //     SE SIRVE SOLO (la devoración de la mochila). ===
+                        // === v6.51.11 — LA NOTA FINAL (la comida se sirve
+                        //     EN EL SUELO — el gesto nuevo): con el arma O
+                        //     los lingotes basta; suelta la ofrenda
+                        //     DELANTE del grimorio SELECCIONADO y come SOLO
+                        //     lo que necesita (nada del inventario — el
+                        //     error de la mochila murió). ===
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
-                            "[c/78788C:  (con el arma O los lingotes basta; los items requeridos deben estar en TU inventario — al completarse, el Eterno los devora y despierta solo)]"));
+                            "[c/78788C:  (con el arma O los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
                     }
                     else
                     {

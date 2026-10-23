@@ -253,90 +253,13 @@ namespace AethonMod.Content.Systems
             return 51 + 2 * (nivel - 1);
         }
 
-        /// <summary>¿CUÁNTOS LINGOTES del peldaño lleva ESTE jugador en
-        /// el inventario? (el conteo VIVO del requisito — para la lista
-        /// del despertar y su ✓).</summary>
-        public static int MineralesEnManos(Player p, int nivel)
-        {
-            int tipo = MineralDe(nivel);
-            if (p == null || tipo < 0) return 0;
-            int total = 0;
-            for (int k = 0; k < 58; k++)
-            {
-                Item it = p.inventory[k];
-                if (it != null && !it.IsAir && it.type == tipo) total += it.stack;
-            }
-            return total;
-        }
-
-        /// <summary>¿LLEVA YA LA OFRENDA MINERAL COMPLETA? (el ✓ de la
-        /// lista — listo para soltar la pila ante el libro). v6.51.9:
-        /// vale en TODA la escalera — en los peldaños de armas es la
-        /// ALTERNATIVA («O la ofrenda mineral»), en la cima es la
-        /// ofrenda misma.</summary>
-        public static bool LlevaMineralCompleto(Player p, int nivel)
-            => nivel >= 1 && nivel <= NivelMax &&
-               MineralesEnManos(p, nivel) >= CantidadMineralDe(nivel);
-
-
-        /// <summary>El NOMBRE de la ofrenda del nivel N (para la lista de
-        /// requisitos de la ventana de información — la primera arma del
-        /// peldaño; en los peldaños MINERALES, el lingote de la ofrenda).</summary>
-        public static string NombreOfrenda(int nivel)
-        {
-            if (nivel < 1 || nivel > NivelMax) return "—";
-            if (EsNivelMineral(nivel))
-            {
-                try
-                {
-                    var proto = ContentSamples.ItemsByType[MineralDe(nivel)];
-                    if (proto != null) return proto.Name;
-                }
-                catch { }
-                return "—";
-            }
-            int[] peldano = ArmasDelNivel[nivel];
-            if (peldano.Length == 0) return "—";
-            int tipo = peldano[0];
-            Item proto2 = null;
-            try { proto2 = ContentSamples.ItemsByType[tipo]; } catch { }
-            return proto2 != null ? proto2.Name : "—";
-        }
-
-        /// <summary>¿Cuántas esencias de ESTE jugador hay en su inventario?</summary>
-        public static int EsenciasEnManos(Player p)
-        {
-            if (p == null) return 0;
-            int tipo = ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>();
-            int total = 0;
-            for (int k = 0; k < 58; k++)
-            {
-                Item it = p.inventory[k];
-                if (it != null && !it.IsAir && it.type == tipo) total += it.stack;
-            }
-            return total;
-        }
-
-        /// <summary>v6.51.5 — ¿Este jugador lleva UNA ARMA CORRUPTA de este
-        /// tipo en el inventario? (para la lista de requisitos VIVA: la
-        /// fila de sprites del peldaño arde con halo dorado en las que ya
-        /// lleva corruptas — la letra: «deberia mostrar cuando cumples uno
-        /// de ellos, ademas deberia mostrar el sprite del arma muy pequeño
-        /// para saber que arma se necesita»).</summary>
-        public static bool LlevaCorrupta(Player p, int tipoArma)
-        {
-            if (p == null) return false;
-            for (int k = 0; k < 58; k++)
-            {
-                Item it = p.inventory[k];
-                if (it == null || it.IsAir || it.type != tipoArma) continue;
-                if (it.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>().Corrompido)
-                    return true;
-            }
-            return false;
-        }
-
-
+        // ================================================================
+        //  v6.51.11 — LOS CONTADORES DE LA MESA: la comida se sirve EN
+        //  EL SUELO y el libro come SOLO lo que le falta del peldaño —
+        //  los contadores parciales viven en el ALMA DEL LIBRO
+        //  (AlmaEternoGlobalItem.Ofrenda*) y NADIE vuelve a mirar el
+        //  inventario (la mochila es sagrada — el bug de la cadena
+        //  silenciosa de la .51.10 murió con ella).
         // ================================================================
         //  LOS PODERES (los umbrales de la letra)
         // ================================================================

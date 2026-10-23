@@ -2353,7 +2353,6 @@ Bolsa.Abierta: Bag opened: {0} types of summoners received (999 each).
 
 LevelUpTester: {
 	Subida: ✦ {0} gained +{1} levels (now level {2}).
-	Migracion: ✦ The awakening and the feast now live IN THIS grimoire (each book, its own ladder).
 	SinGrimorio: No Grimoire of the Eternal found in the inventory.
 }
 
@@ -2396,18 +2395,14 @@ Caida: {
 	TintaYaEspera: ✦ The sky doesn't insist: YOUR GRIMOIRE ALREADY AWAITS within the mist.
 	TintaEnVuelo: ✦ YOUR MIST IS ALREADY BEING BORN before you — wait for it to dissipate.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
-	ItemCorrompido: ✦ The grimoire's corruption ROTS your offering… {0} corrupt essences are born.
 	DevoradoSabor1: Hmm. Tastes like almost nothing. Air shaped like a memory. Still: gulp.
 	DevoradoSabor2: Passable. A hint of what it was. The corruption gives it an… interesting aftertaste.
 	DevoradoSabor3: ¡Tasty! Whatever it was, the beam COOKED it right. More of that, bearer.
 	DevoradoSabor4: EXQUISITE! Notes of gold, an eternal finish, a crunch of worlds. MORE!
-	DevoradoCuenta: ✦ The Eternal devoured {0} corrupted essences: +{1}% permanent damage.
-	DevoradoTooltip: Devoured in the mist: {0} corrupt essences (+{1}% damage{2})
-	DevoradoTooltipOjos: ", +{0} eyes"
+	DevoradoTooltip: Bearer's feast: {0} corrupt essences eaten (+{1}% damage to ALL your attacks)
 	// v6.50.129 — THE WEAPON CORRUPTION (the mini-biome mist corrupts the
 	// weapons that fall into the crater; the Eternal devours them: rarity
 	// EXP + one stat per class + the unique souls)
-	ArmaCorrompidaAviso: ✦ The grimoire's corruption EMBRACES your {0}… it is now CORRUPTED.
 	ArmaDevorada: ✦ The Eternal devours the {0}: +{1} EXP · +1 {2}
 	AlmaDespertada: ✧ The soul of the {0} AWAKENS in the book: {1}!
 	StatFuerza: Violent Strength
@@ -2437,8 +2432,20 @@ Despertar: {
 	MejorasSelladas: ✦ Upgrades are born with THE AWAKENING (5/15/30/40). Current: {0}.
 	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad number {0})
 	CerrojoEsbirros: ✦ The grimoire does not share its sky: while its eyes watch, no other minion answers.
-	EsenciaDevorada: ✦ The Eternal devours {0} × {1}: +{2}% permanent damage.
-	DevoraInventario: ✦ The Eternal HELPED ITSELF: the awakening {0} offering came straight out of your inventory.
+	// v6.51.11 — THE GROUND TABLE + THE BEARER'S FEAST: the book eats
+	// from items DROPPED before it (with the Eternal in hand), ONLY what
+	// the rung still needs; the essences THE PLAYER eats raise THEIR own
+	// damage (+0.1% each, cap +100% at 1000 — at the cap, every essence
+	// eaten becomes 1 gold coin).
+	Migracion: ✦ The awakening and the feast now live IN THIS grimoire (each book, its own ladder).
+	BocadoEsencias: ✦ The Eternal eats {0} essences off the ground ({1}/{2} of the rung).
+	BocadoMonedas: ✦ The Eternal eats the coins off the ground — {0} still missing.
+	BocadoMineral: ✦ The Eternal eats {0} bars off the ground ({1}/{2}).
+	BocadoArma: ✦ The Eternal devours THE CORRUPTED WEAPON of the rung!
+	MigracionPoder: ✦ The old devoured power ({0} essences) passes to its bearer: +{1}% damage to ALL.
+	TopeEsencias: ✧ FEAST CAP REACHED: +{0}% damage FOREVER! From now on, every essence eaten becomes 1 gold coin.
+	EsenciaTopeTooltip: Feast complete: +100% damage — every essence eaten becomes 1 gold coin
+	EsenciaProgresoTooltip: Bearer's feast: {0}/{1} essences eaten (+{2}% damage to ALL)
 	ReqArmaLimpia: Requires an UNCORRUPTED weapon
 	NaceCorrupta: Born CORRUPT: +5% to ALL its stats · no prefixes or reforging
 	CondicionRecetas: Requires the Eternal Grimoire in the inventory

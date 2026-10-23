@@ -42,6 +42,28 @@ namespace AethonMod.Content.Globals
         /// ceremonia no se repite por libro.</summary>
         public bool PetDelDespertar = false;
 
+        // === v6.51.11 — LA MESA DEL DESPERTAR (los contadores PARCIALES
+        //     de la ofrenda del peldaño actual: la comida se sirve EN EL
+        //     SUELO — el libro come SOLO lo que le falta; la letra:
+        //     «necesita 70 lingotes de oro, y suelto 30… se come los 30…
+        //     ahora necesita 40»). Persisten en el guardado y viajan por
+        //     el cable: la lista del despertar los lee VIVA. ===
+
+        /// <summary>Las esencias corruptas ya comidas de ESTE peldaño.</summary>
+        public int OfrendaEsencias = 0;
+
+        /// <summary>El dinero ya comido de ESTE peldaño (en cobre).</summary>
+        public long OfrendaMonedas = 0L;
+
+        /// <summary>Los lingotes ya comidos de ESTE peldaño (la ofrenda
+        /// mineral — la alternativa de los peldaños de armas y LA
+        /// ofrenda de la cima 45-50).</summary>
+        public int OfrendaMineral = 0;
+
+        /// <summary>¿Ya devoró EL ARMA CORRUPTA de ESTE peldaño? (con el
+        /// arma O los lingotes basta — la regla de siempre).</summary>
+        public bool OfrendaArma = false;
+
         // === EL PODER DEVORADO (las esencias corruptas) ===
         /// <summary>Cada esencia corrupta tragada: +0,1 % de daño
         /// permanente (sin tope práctico).</summary>
@@ -199,11 +221,16 @@ namespace AethonMod.Content.Globals
         // ================================================================
 
         /// <summary>EL BONUS DE DAÑO por las esencias devoradas (0,1 %
-        /// por esencia, tope suave 500 %).</summary>
+        /// por esencia, tope suave 500 %). v6.51.11 — MUERTO COMO BONUS
+        /// DEL LIBRO (la letra: «las esencias consumidas por el grimorio
+        /// no cuentan para el aumento general de daño, solo cuentan
+        /// para su despertar»): el campo vive solo para la MIGRACIÓN de
+        /// los libros viejos (DespertarGrimorioSistema.MigrarViejoPoder
+        /// lo pasa al portador y lo deja en 0 para siempre) — este
+        /// cálculo ya no lo lee nadie.</summary>
         public static float BonusDanoDevorado(Item eterno)
         {
-            var a = De(eterno);
-            return a == null ? 0f : System.Math.Min(a.DevoracionPoder, 5000) * 0.001f;
+            return 0f;
         }
 
         /// <summary>EL DAÑO DEL FESTÍN DE ARMAS: fuerza + EXP (tope +45 %).</summary>
@@ -247,11 +274,13 @@ namespace AethonMod.Content.Globals
             return a == null ? 0 : System.Math.Min(a.DevoracionCorona / 5, 3);
         }
 
-        /// <summary>LOS OJOS EXTRA por el poder devorado (+1 cada 75, tope +3).</summary>
+        /// <summary>LOS OJOS EXTRA por el poder devorado (+1 cada 75, tope
+        /// +3). v6.51.11 — MUERTO con el poder devorado (la letra: lo que
+        /// el libro come SOLO despierta): el método queda para la forma —
+        /// ya no lo lee nadie.</summary>
         public static int OjosExtraDevorados(Item eterno)
         {
-            var a = De(eterno);
-            return a == null ? 0 : System.Math.Min(a.DevoracionPoder / 75, 3);
+            return 0;
         }
 
         /// <summary>EL ROBO DE VIDA del alma vampírica (+2 %/copia, tope 8 %).</summary>
@@ -287,6 +316,13 @@ namespace AethonMod.Content.Globals
                 if (NivelDespertar > 0) tag["almaDespertar"] = NivelDespertar;
                 if (PetDelDespertar) tag["almaPet"] = true;
                 if (DevoracionPoder > 0) tag["almaPoder"] = DevoracionPoder;
+                // v6.51.11 — LA MESA DEL DESPERTAR (los contadores
+                // parciales del peldaño vivo: la comida se sirve en el
+                // suelo y el libro come solo lo que le falta).
+                if (OfrendaEsencias > 0) tag["almaOfrendaEsencias"] = OfrendaEsencias;
+                if (OfrendaMonedas > 0L) tag["almaOfrendaMonedas"] = OfrendaMonedas;
+                if (OfrendaMineral > 0) tag["almaOfrendaMineral"] = OfrendaMineral;
+                if (OfrendaArma) tag["almaOfrendaArma"] = true;
                 if (DevoracionExp > 0) tag["almaExp"] = DevoracionExp;
                 if (DevoracionFuerza > 0) tag["almaFuerza"] = DevoracionFuerza;
                 if (DevoracionPrisa > 0) tag["almaPrisa"] = DevoracionPrisa;
@@ -312,6 +348,11 @@ namespace AethonMod.Content.Globals
                     tag.GetInt("almaDespertar")));
                 PetDelDespertar = tag.GetBool("almaPet");
                 DevoracionPoder = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPoder")));
+                // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales).
+                OfrendaEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEsencias")));
+                OfrendaMonedas = System.Math.Max(0L, System.Math.Min(9_999_999L, tag.GetLong("almaOfrendaMonedas")));
+                OfrendaMineral = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaMineral")));
+                OfrendaArma = tag.GetBool("almaOfrendaArma");
                 DevoracionExp = System.Math.Max(0L, System.Math.Min(999999999L, tag.GetLong("almaExp")));
                 DevoracionFuerza = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaFuerza")));
                 DevoracionPrisa = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaPrisa")));
@@ -330,6 +371,10 @@ namespace AethonMod.Content.Globals
                 NivelDespertar = 0;
                 PetDelDespertar = false;
                 DevoracionPoder = 0;
+                OfrendaEsencias = 0;
+                OfrendaMonedas = 0L;
+                OfrendaMineral = 0;
+                OfrendaArma = false;
                 DevoracionExp = 0;
                 DevoracionFuerza = 0;
                 DevoracionPrisa = 0;
@@ -353,10 +398,16 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                writer.Write((byte)1);                    // versión del alma
+                writer.Write((byte)2);                    // versión del alma (v6.51.11: la mesa)
                 writer.Write(NivelDespertar);
                 writer.Write(PetDelDespertar);
                 writer.Write(DevoracionPoder);
+                // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales
+                // del peldaño vivo — los tooltips del portador los leen).
+                writer.Write(OfrendaEsencias);
+                writer.Write(OfrendaMonedas);
+                writer.Write(OfrendaMineral);
+                writer.Write(OfrendaArma);
                 writer.Write(DevoracionExp);
                 writer.Write(DevoracionFuerza);
                 writer.Write(DevoracionPrisa);
@@ -383,6 +434,14 @@ namespace AethonMod.Content.Globals
                     Content.Systems.DespertarGrimorio.NivelMax, reader.ReadInt32()));
                 PetDelDespertar = reader.ReadBoolean();
                 DevoracionPoder = System.Math.Max(0, reader.ReadInt32());
+                if (ver >= 2)
+                {
+                    // v6.51.11 — LA MESA DEL DESPERTAR.
+                    OfrendaEsencias = System.Math.Max(0, reader.ReadInt32());
+                    OfrendaMonedas = System.Math.Max(0L, reader.ReadInt64());
+                    OfrendaMineral = System.Math.Max(0, reader.ReadInt32());
+                    OfrendaArma = reader.ReadBoolean();
+                }
                 DevoracionExp = System.Math.Max(0L, reader.ReadInt64());
                 DevoracionFuerza = System.Math.Max(0, reader.ReadInt32());
                 DevoracionPrisa = System.Math.Max(0, reader.ReadInt32());

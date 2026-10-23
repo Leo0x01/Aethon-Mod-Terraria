@@ -142,33 +142,64 @@ namespace AethonMod.Content.Players
         /// <summary>EL LÍMITE DEL PODER: 300 esencias = el +75 % entero.</summary>
         public const int DevoracionTope = 300;
 
-        /// <summary>EL BONUS DE DAÑO del Eterno por lo devorado (0 → +0,75).
-        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
-        /// las estadísticas son exclusivas de cada grimorio): esta lectura
-        /// resuelve el Eterno en la MANO (o el primero del inventario) y
-        /// devuelve SUS números — el cálculo real vive en
-        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
-        public static float BonusDanoDevorado(Player p)
+        // ================================================================
+        //  v6.51.11 — EL FESTÍN DEL PORTADOR (la letra del usuario: «sobre
+        //  las esencia corrupta estas si las consume el jugador aumentan
+        //  su ataque siguen aumentando hasta un maximo de 100 % en
+        //  esencia consumidas por el jugador independientemente de lo
+        //  que consuma el grimorio, las esencias consumidas por el
+        //  grimorio no cuentan para el aumento general de daño, solo
+        //  cuentan para su despertar, cuando el jugador cumpla con el
+        //  limite de esencias consumida y llegue al tope que es 100% de
+        //  daño o sea que el jugador consuma 1000 esencias corruptas,
+        //  entonces las esencias se convierten en monedas de oro, 1
+        //  esencia 1 de oro»): cada esencia corrupta que EL JUGADOR se
+        //  come (ItemCorrupto.UseItem) es +0,1 % de daño en TODO lo que
+        //  haga — SIN importar el arma. Lo que el GRIMORIO come no
+        //  cuenta aquí (solo despierta). Al tope (1000 = +100 %), cada
+        //  esencia consumida se vuelve 1 MONEDA DE ORO.
+        // ================================================================
+        public int EsenciasConsumidas = 0;
+
+        /// <summary>EL TOPE DEL FESTÍN DEL PORTADOR: 1000 esencias = el +100 % entero.</summary>
+        public const int EsenciasTope = 1000;
+
+        /// <summary>EL BONUS DE DAÑO del portador por las esencias que ÉL
+        /// comió (+0,1 % por esencia, tope +100 % — TODO su daño).</summary>
+        public static float BonusDanoEsencias(Player p)
         {
-            // v6.51.1 — LA LETRA: «incluso con el despertar al máximo, se
-            // debe poder seguir devorando esencia corrupta y esta debe
-            // aumentar el daño del grimorio del eterno en 0.1% por cada
-            // esencia corrupta» — 0,1% por esencia, SIN techo práctico.
-            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
-                .BonusDanoDevorado(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
+            if (p == null) return 0f;
+            var sp = p.GetModPlayer<ShardPlayer>();
+            return sp == null ? 0f
+                : System.Math.Min(sp.EsenciasConsumidas, EsenciasTope) * 0.001f;
         }
 
-        /// <summary>LOS OJOS EXTRA de la corona por lo devorado (+1 cada 75,
-        /// tope +3 — el escuadrón del banquete).</summary>
-        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
-        /// las estadísticas son exclusivas de cada grimorio): esta lectura
-        /// resuelve el Eterno en la MANO (o el primero del inventario) y
-        /// devuelve SUS números — el cálculo real vive en
-        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
+        /// <summary>v6.51.11 — LA COMIDA DEL PORTADOR: el daño de TODO lo
+        /// que usa sube +0,1 % por esencia corrupta consumida (tope
+        /// +100 % con 1000 — la letra: «aumentan su ataque… hasta un
+        /// maximo de 100 %»).</summary>
+        public override void ModifyWeaponDamage(Item item, ref StatModifier damage)
+        {
+            if (EsenciasConsumidas <= 0) return;
+            damage *= 1f + System.Math.Min(EsenciasConsumidas, EsenciasTope) * 0.001f;
+        }
+
+        /// <summary>EL BONUS DE DAÑO del Eterno por lo devorado. v6.51.11 —
+        /// MUERTO (la letra: lo que el grimorio come SOLO despierta — el
+        /// daño por esencias vive ahora en el PORTADOR que las come,
+        /// BonusDanoEsencias): la forma queda por compatibilidad y
+        /// devuelve 0.</summary>
+        public static float BonusDanoDevorado(Player p)
+        {
+            return 0f;
+        }
+
+        /// <summary>LOS OJOS EXTRA de la corona por lo devorado. v6.51.11 —
+        /// MUERTOS con el poder devorado (la letra: lo que el libro come
+        /// SOLO despierta): la forma queda por compatibilidad y devuelve 0.</summary>
         public static int OjosExtraDevorados(Player p)
         {
-            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
-                .OjosExtraDevorados(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
+            return 0;
         }
 
         // ================================================================
@@ -1311,6 +1342,9 @@ namespace AethonMod.Content.Players
                 // para SIEMPRE — mejora permanente del Grimorio del Eterno).
                 tag["devoracionPoder"] = DevoracionPoder;
                 tag["devoracionV2"] = true;
+                // v6.51.11 — EL FESTÍN DEL PORTADOR (las esencias que EL
+                // JUGADOR comió: +0,1 % de daño en todo, tope +100 %).
+                tag["esenciasConsumidas"] = EsenciasConsumidas;
                 // v6.50.129 — EL FESTÍN DE LAS ARMAS (EXP por rareza + los
                 // stats por clase + las almas únicas — todo permanente).
                 tag["devoracionExp"] = DevoracionExp;
@@ -1369,6 +1403,9 @@ namespace AethonMod.Content.Players
                 // viejos estrenan el altar con el poder intacto; clamp
                 // anticornografía de siempre).
                 DevoracionPoder = Math.Max(0, Math.Min(999999, tag.GetInt("devoracionPoder")));
+                // v6.51.11 — EL FESTÍN DEL PORTADOR (ausente = 0: el
+                // guardado viejo estrena el festín limpio).
+                EsenciasConsumidas = Math.Max(0, Math.Min(999999, tag.GetInt("esenciasConsumidas")));
                 // v6.50.129 — EL FESTÍN DE LAS ARMAS (ausente = 0 en todos:
                 // el guardado viejo estrena el festín limpio; clamps).
                 DevoracionExp = Math.Max(0L, Math.Min(999999999L, tag.GetLong("devoracionExp")));

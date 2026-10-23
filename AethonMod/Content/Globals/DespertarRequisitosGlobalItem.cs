@@ -63,23 +63,31 @@ namespace AethonMod.Content.Globals
                 //  cumplido (el sello del logro: dos cápsulas cruzadas
                 //  de blanco incandescente + el corazón dorado — la firma
                 //  de los soles de la casa, la técnica del nombre .51.4).
+                //  v6.51.11 — LOS CONTADORES SON DEL LIBRO (la comida se
+                //  sirve EN EL SUELO: la lista cuenta lo que el libro YA
+                //  COMIÓ de la ofrenda — no lo que el portador lleva).
                 // ============================================================
+                var almaReq = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(item);
                 bool? cumplido = line.Name switch
                 {
-                    "DespertarReq2" => Systems.DespertarGrimorio.EsenciasEnManos(portador)
-                        >= Systems.DespertarGrimorio.EsenciasPara(siguiente),
-                    "DespertarReq3" => Systems.DespertarGrimorioSistema.ContarMonedas(portador)
-                        >= Systems.DespertarGrimorio.MonedasPara(siguiente),
-                    // v6.51.8 — EL REQUISITO 3 ES DUAL: los peldaños de
-                    //     ARMAS cuentan las corruptas del peldaño… y los
-                    //     peldaños MINERALES, los lingotes del inventario
-                    //     (la ofrenda mineral — sin corrupción).
-                    "DespertarReq4" => RequisitoDeLaOfrenda(portador, siguiente),
+                    "DespertarReq2" => almaReq != null &&
+                        almaReq.OfrendaEsencias >=
+                        Systems.DespertarGrimorio.EsenciasPara(siguiente),
+                    "DespertarReq3" => almaReq != null &&
+                        almaReq.OfrendaMonedas >=
+                        Systems.DespertarGrimorio.MonedasPara(siguiente),
+                    // v6.51.11 — EL REQUISITO 3 ES DUAL: el ARMA DEL
+                    //     PELDAÑO devorada… o los LINGOTES comidos (la
+                    //     ofrenda mineral — contadores del libro).
+                    "DespertarReq4" => RequisitoDeLaOfrenda(almaReq, siguiente),
                     // v6.51.9 — LA ALTERNATIVA MINERAL de los peldaños de
-                    //     armas (la línea «O la ofrenda mineral»): cuenta
-                    //     los lingotes del metal del nivel — SIEMPRE >50 y
-                    //     creciente (la letra de la .51.9).
-                    "DespertarReq6" => Systems.DespertarGrimorio.LlevaMineralCompleto(portador, siguiente),
+                    //     armas (la línea «O la ofrenda mineral»): el ARMA
+                    //     devorada O los lingotes comidos (la MISMA regla
+                    //     dual de la línea del tooltip — el ✓ late igual
+                    //     que se pinta la letra).
+                    "DespertarReq6" => almaReq != null &&
+                        (almaReq.OfrendaArma || almaReq.OfrendaMineral >=
+                        Systems.DespertarGrimorio.CantidadMineralDe(siguiente)),
                     _ => null,
                 };
                 if (cumplido == true)
@@ -120,27 +128,18 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
-        /// <summary>¿Lleva alguna de las alternativas del peldaño
-        /// CORRUPTA? (el estado del requisito del arma).</summary>
-        private static bool LlevaAlgunaCorrupta(Player p, int nivel)
+        /// <summary>v6.51.11 — ¿LA OFRENDA ya está PAGA? (dual: el ARMA
+        /// DEL PELDAÑO devorada · los peldaños MINERALES, los lingotes
+        /// comidos — TODO del contador del libro, nada del inventario).</summary>
+        private static bool RequisitoDeLaOfrenda(
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int nivel)
         {
-            if (nivel < 1 || nivel > Systems.DespertarGrimorio.NivelMax) return false;
-            int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[nivel];
-            for (int k = 0; k < peldano.Length; k++)
-                if (Systems.DespertarGrimorio.LlevaCorrupta(p, peldano[k]))
-                    return true;
-            return false;
-        }
-
-        /// <summary>v6.51.8 — ¿EL REQUISITO DE LA OFRENDA ya está? (dual:
-        /// peldaño de ARMAS → alguna corrupta del peldaño · peldaño
-        /// MINERAL → los lingotes completos en el inventario).</summary>
-        private static bool RequisitoDeLaOfrenda(Player p, int nivel)
-        {
-            if (nivel < 1 || nivel > Systems.DespertarGrimorio.NivelMax) return false;
+            if (alma == null || nivel < 1 || nivel > Systems.DespertarGrimorio.NivelMax)
+                return false;
             if (Systems.DespertarGrimorio.EsNivelMineral(nivel))
-                return Systems.DespertarGrimorio.LlevaMineralCompleto(p, nivel);
-            return LlevaAlgunaCorrupta(p, nivel);
+                return alma.OfrendaMineral >=
+                    Systems.DespertarGrimorio.CantidadMineralDe(nivel);
+            return alma.OfrendaArma;
         }
     }
 }
