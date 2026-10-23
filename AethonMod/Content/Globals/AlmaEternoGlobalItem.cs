@@ -118,7 +118,37 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
-        public override bool CanReforge(Item item) => false;
+        // ================================================================
+        //  v6.51.10 — LA ESCENA DEL YUNQUE (la letra del usuario: «El
+        //  Duende Chapucero no puede reforjar el grimorio, cuando
+        //  intentas darselo el debe tener un dialogo en donde se asusta
+        //  y no quiere ni tocarlo, le da miedo a un nivel
+        //  indescriptible y el grimorio del eterno se burla de ello en
+        //  ese momento y lo menosprecia jajajaja»): el click en
+        //  REFORJAR con el Eterno en el yunque dispara EL PÁNICO — la
+        //  línea de chat del duende cambia AHORA (Miedo1..4) y el libro
+        //  SUENA A RISA (LaBurlaDelEterno). El Eterno NO se reforja
+        //  JAMÁS: su paréntesis es SU REFORJA VIVA (la escalera de los
+        //  modificadores mágicos cada 33 niveles — GrimoireEternal
+        //  .LaReforja), no la lotería del yunque.
+        // ================================================================
+        public override bool CanReforge(Item item)
+        {
+            try
+            {
+                if (Main.InReforgeMenu && !Main.dedServ && Main.netMode != 2)
+                {
+                    // EL DUENDE SE ASUSTA (su línea de la ventana de
+                    // diálogo cambia en el acto: no quiere NI tocarlo).
+                    Main.npcChatText = Terraria.Localization.Language.GetTextValue(
+                        "Mods.AethonMod.Duende.Miedo" + Main.rand.Next(1, 5));
+                    // Y EL ETERNO SE BURLA DE ÉL (en ese momento — lo menosprecia).
+                    PuebloChismesNPC.LaBurlaDelEterno();
+                }
+            }
+            catch { }
+            return false;
+        }
 
         // ================================================================
         //  EL GRIMORIO ACTIVO (el que manda: el de la MANO primero — si

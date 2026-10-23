@@ -966,12 +966,13 @@ namespace AethonMod.Content.NPCs
         /// </summary>
         protected override void DropBotin()
         {
-            // v6.51.1 — EL BOTÍN DE LA LETRA: «cuando muere Aethon su
-            // loot debe ser su mascota de luz, 20 esencia corruptas y 10
-            // platino, al menos por ahora» — SOLO eso (el botín viejo —
-            // la esencia de Aethon, la Forma Ascendida, los 250
-            // fragmentos, la bolsa de la cría — se retira con el override
-            // completo: la carta nueva manda).
+            // v6.51.10 — EL BOTÍN ES SUYO SOLO (la letra del usuario:
+            // «quien debe dar loot es aethon Fusionado ya que es el
+            // ultimo que siempre tendremos que vencer»): el Aethon
+            // normal ya NO paga (su DropBotin quedó vacío) — ESTE es el
+            // último eslabón y el ÚNICO que paga la carta de la v6.51.2:
+            // «cuando muere Aethon su loot debe ser su mascota de luz,
+            // 20 esencia corruptas y 10 platino, al menos por ahora».
             if (_yaDropeo) return;
             _yaDropeo = true;
             var src = NPC.GetSource_Loot();

@@ -47,7 +47,9 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>¿ESTE libro ya es LEGENDARIO SUPREMO? (la etiqueta
-        /// exclusiva del mod — nivel 95+: SOLO ahí vive el brillo del
+        /// exclusiva del mod — v6.51.10 LA REFORJA VIVA: el último
+        /// peldaño de la escalera de modificadores, nivel 446+ = 50
+        /// niveles tras el Legendario 396: SOLO ahí vive el brillo del
         /// nombre; la escalera anterior viste solo su color).</summary>
         private static bool EsSupremo(Item item)
         {
@@ -56,7 +58,8 @@ namespace AethonMod.Content.Globals
                 if (item == null || item.IsAir) return false;
                 var sl = item.GetGlobalItem<ShardLevelItem>();
                 return global::AethonMod.Content.Weapons.GrimoireEternal
-                    .IndiceEtiqueta(sl?.Level ?? 1) >= 5;
+                    .IndiceEtiqueta(sl?.Level ?? 1) >=
+                    global::AethonMod.Content.Weapons.GrimoireEternal.LaReforja.Length - 1;
             }
             catch { return false; }
         }

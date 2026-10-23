@@ -278,16 +278,6 @@ namespace AethonMod.Content.Systems
             => nivel >= 1 && nivel <= NivelMax &&
                MineralesEnManos(p, nivel) >= CantidadMineralDe(nivel);
 
-        /// <summary>¿Es ESTA arma la del peldaño del nivel N?</summary>
-        public static bool EsArmaDelNivel(int nivel, Item arma)
-        {
-            if (arma == null || arma.IsAir) return false;
-            if (nivel < 1 || nivel > NivelMax) return false;
-            int[] peldaño = ArmasDelNivel[nivel];
-            for (int i = 0; i < peldaño.Length; i++)
-                if (peldaño[i] == arma.type) return true;
-            return false;
-        }
 
         /// <summary>El NOMBRE de la ofrenda del nivel N (para la lista de
         /// requisitos de la ventana de información — la primera arma del
@@ -346,24 +336,6 @@ namespace AethonMod.Content.Systems
             return false;
         }
 
-        /// <summary>Consume N esencias corruptas del inventario (devuelve
-        /// false si no alcanzaban — nadie toca nada entonces).</summary>
-        public static bool ConsumirEsencias(Player p, int cantidad)
-        {
-            if (EsenciasEnManos(p) < cantidad) return false;
-            int tipo = ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>();
-            int falta = cantidad;
-            for (int k = 0; k < 58 && falta > 0; k++)
-            {
-                Item it = p.inventory[k];
-                if (it == null || it.IsAir || it.type != tipo) continue;
-                int quita = Math.Min(falta, it.stack);
-                it.stack -= quita;
-                falta -= quita;
-                if (it.stack <= 0) p.inventory[k].TurnToAir();
-            }
-            return falta <= 0;
-        }
 
         // ================================================================
         //  LOS PODERES (los umbrales de la letra)

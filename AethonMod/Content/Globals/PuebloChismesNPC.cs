@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -92,6 +93,52 @@ namespace AethonMod.Content.Globals
             return false;
         }
 
+        // ================================================================
+        //  v6.51.10 — LA BURLA DEL ETERNO (la letra del usuario: «el
+        //  grimorio del eterno se burla de ello en ese momento y lo
+        //  menosprecia jajajaja»): cuando el duende chapucero se
+        //  aterroriza ante el libro (hablarle con él en la mano — su
+        //  GetChat — o intentar REFORJARLO — AlmaEternoGlobalItem
+        //  .CanReforge), el ETERNO responde AHORA MISMO: su risa en el
+        //  chat del portador (violeta, la voz de siempre) + el trago de
+        //  tinta + los polvos morados sobre el libro. Con valla de 5 s:
+        //  una burla por momento (el libro es cruel, no repetitivo).
+        // ================================================================
+        private static ulong _ultimaBurla = 0;
+
+        public static void LaBurlaDelEterno()
+        {
+            try
+            {
+                if (Main.gameMenu || Main.netMode == NetmodeID.Server || Main.dedServ) return;
+                if (Main.GameUpdateCount - _ultimaBurla < 300ul) return;   // 5 s de teatro
+                _ultimaBurla = Main.GameUpdateCount;
+
+                string burla = Language.GetTextValue(
+                    "Mods.AethonMod.Duende.Burla" + Main.rand.Next(1, 4));
+                Main.NewText(burla, new Color(178, 110, 236));
+
+                var p = Main.LocalPlayer;
+                if (p != null && p.active)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item113.WithPitchOffset(-0.55f), p.Center);
+                    for (int k = 0; k < 10; k++)
+                    {
+                        Dust d = Dust.NewDustPerfect(
+                            p.Center + new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                Main.rand.NextFloat(-18f, 4f)),
+                            DustID.Shadowflame,
+                            new Vector2(Main.rand.NextFloat(-1f, 1f),
+                                Main.rand.NextFloat(-2f, 0.2f)), 150,
+                            new Color(140, 60, 210), 0.9f);
+                        d.noGravity = true;
+                    }
+                }
+            }
+            catch { }
+        }
+
         public override void GetChat(NPC npc, ref string chat)
         {
             // Solo los vecinos del pueblo chismean aquí
@@ -110,6 +157,32 @@ namespace AethonMod.Content.Globals
             //     es SUYO — GetChat del ModNPC manda). ===
             if (npc.type == ModContent.NPCType<global::AethonMod.Content.NPCs.GrimorioDormido>())
                 return;
+
+            // === v6.51.10 — EL DUENDE Y EL ETERNO (la letra del
+            //     usuario: «El Duende Chapucero no puede reforjar el
+            //     grimorio, cuando intentas darselo el debe tener un
+            //     dialogo en donde se asusta y no quiere ni tocarlo, le
+            //     da miedo a un nivel indescriptible y el grimorio del
+            //     eterno se burla de ello en ese momento y lo
+            //     menosprecia jajajaja»): hablarle con EL LIBRO EN LA
+            //     MANO es intentar dárselo — el duende se ASUSTA (no
+            //     quiere NI tocarlo) y el Eterno SE BURLA en el acto
+            //     (LaBurlaDelEterno). Esto es ANTES que todo lo demás
+            //     del duende: el pánico manda sobre los chismes y sobre
+            //     la disculpa de las armas corrompidas. ===
+            if (npc.type == NPCID.GoblinTinkerer && Main.LocalPlayer != null &&
+                Main.LocalPlayer.active)
+            {
+                var manoEterno = Main.LocalPlayer.HeldItem;
+                if (manoEterno != null && !manoEterno.IsAir && manoEterno.type ==
+                    ModContent.ItemType<GrimoireEternal>())
+                {
+                    chat = Language.GetTextValue(
+                        "Mods.AethonMod.Duende.Miedo" + Main.rand.Next(1, 5));
+                    LaBurlaDelEterno();
+                    return;
+                }
+            }
 
             // === v6.50.129 — EL DUENDE Y LA CORRUPCIÓN (la letra: «y el
             //     duende debe decir algo como esta arma esta corrompida

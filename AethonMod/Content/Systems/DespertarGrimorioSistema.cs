@@ -53,16 +53,32 @@ namespace AethonMod.Content.Systems
                 if ((Main.GameUpdateCount % (ulong)PULSO_DEVORAR) != 0ul) return;
 
                 int eterno = ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>();
-                int tipoOjo = ModContent.ProjectileType
-                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
 
                 for (int i = 0; i < Main.maxPlayers; i++)
                 {
                     Player p = Main.player[i];
                     if (p == null || !p.active || p.dead) continue;
 
-                    // EL GRIMORIO SELECCIONADO (la letra: «el grimorio
-                    // está seleccionado» — en la MANO, no en la bolsa).
+                    // ====================================================
+                    //  v6.51.10 — LA DEVORACIÓN DE LA MOCHILA, PRIMERO (la
+                    //  letra: «pese a que cumpli con los requisitos del
+                    //  despertar el grimorio no aumenta su nivel de
+                    //  despertar […] ahora cuando los requisistos se
+                    //  cumpla el grimorio los debe consumir automticamente
+                    //  del inventario y subir su nivel de despertar
+                    //  comiendo directamente del inventario […] los items
+                    //  necesarios para subir el nivel del despertar deben
+                    //  estar en cualquier parte del inventario del
+                    //  jugador»): el Eterno ACTIVO (en la MANO o en la
+                    //  BOLSA — cualquier rincón) revisa su mesa CADA PULSO;
+                    //  con las esencias + el dinero + LA OFRENDA (el arma
+                    //  corrupta del peldaño O los lingotes) completas, SE
+                    //  SIRVE SOLO y DESPIERTA (+1). Nada se tira al suelo.
+                    // ====================================================
+                    AutoDevorarOfrenda(p);
+
+                    // EL GRIMORIO SELECCIONADO (los platos CAÍDOS siguen
+                    // pidiendo el libro en la MANO — el gesto de siempre).
                     Item mano = p.HeldItem;
                     if (mano == null || mano.IsAir || mano.type != eterno) continue;
 
@@ -144,7 +160,14 @@ namespace AethonMod.Content.Systems
                         EcoRed.SincronizarDevoracion(p);
                     }
 
-                    // Los platos de ARMAS caídos alrededor del portador.
+                    // === v6.51.10 — LOS PLATOS DE ARMAS CAÍDAS (el festín
+                    //     de la .129 VIVE — el gesto de siempre): con el
+                    //     Eterno EN LA MANO, toda ARMA CORRUPTA soltada a
+                    //     su lado sigue siendo EL BOCADO DE SIEMPRE (EXP +
+                    //     stats + almas). Las OFRENDAS del despertar ya NO
+                    //     se tiran al suelo: la mesa se sirve sola del
+                    //     INVENTARIO (AutoDevorarOfrenda arriba) — la
+                    //     letra: «quitar esos item consumidos». ===
                     for (int d = 0; d < Main.maxItems; d++)
                     {
                         Item drop = Main.item[d];
@@ -153,106 +176,186 @@ namespace AethonMod.Content.Systems
                         if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                             continue;
 
-                        // === v6.51.9 — LA OFRENDA MINERAL EN TODA LA
-                        //     ESCALERA (la letra: «en caso de que la
-                        //     gente no pueda conseguir las armas, tambien
-                        //     dale una opcion de lingotes segun el nivel
-                        //     claro y siempre deben ser mas de 50 lingotes
-                        //     para cada despertar no menos, ademas el
-                        //     numero de lingotes siempre debe ir
-                        //     aumentando por cada nivel de despertar»):
-                        //     la PILA CAÍDA del metal del peldaño ES el
-                        //     plato en CUALQUIER nivel — la ALTERNATIVA de
-                        //     los peldaños de armas (1-44) y LA OFRENDA de
-                        //     la cima mineral (45-50) — SIN corrupción,
-                        //     con SU cantidad siempre >50 y creciente (el
-                        //     sobrante queda en el suelo: recogerlo es
-                        //     gratis). ===
-                        int proximoMin = System.Math.Min(
-                            DespertarGrimorio.NivelDespertarSiguiente(mano),
-                            DespertarGrimorio.NivelMax);
-                        if (DespertarGrimorio.MineralDe(proximoMin) == drop.type)
-                        {
-                            int cantidadMin = DespertarGrimorio.CantidadMineralDe(proximoMin);
-                            int esenciasMin = DespertarGrimorio.EsenciasPara(proximoMin);
-                            long monedasMin = DespertarGrimorio.MonedasPara(proximoMin);
-
-                            if (DespertarGrimorio.EsenciasEnManos(p) < esenciasMin)
-                            {
-                                RechazarOfrenda(p, drop, false, esenciasMin, monedasMin);
-                            }
-                            else if (drop.stack < cantidadMin)
-                            {
-                                RechazarMineral(p, drop, proximoMin, cantidadMin);
-                            }
-                            else if (!p.BuyItem(monedasMin, -1))
-                            {
-                                RechazarOfrenda(p, drop, true, esenciasMin, monedasMin);
-                            }
-                            else
-                            {
-                                // LA PILA SE PAGA: exactamente LA CANTIDAD del
-                                // peldaño — lo demás queda donde está.
-                                drop.stack -= cantidadMin;
-                                if (drop.stack <= 0) drop.TurnToAir();
-                                int idxMin = Array.IndexOf(Main.item, drop);
-                                if (Main.netMode == NetmodeID.Server && idxMin >= 0)
-                                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idxMin);
-
-                                DespertarGrimorio.ConsumirEsencias(p, esenciasMin);
-                                SubirNivel(p, mano, null);   // la ofrenda mineral ya está comida
-                            }
-                            break;   // un plato por pulso (con calma, que es un libro)
-                        }
-
                         var sello = drop.GetGlobalItem
                             <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                         if (sello == null || !sello.Corrompido) continue;
                         if (!EsArma(drop)) continue;
 
-                        // ¡UN PLATO! ¿Es la ofrenda del siguiente nivel?
-                        // (v6.51.6 — el nivel siguiente es el de ESTE libro
-                        // en la MANO, no el del jugador.)
-                        var alma = mano.GetGlobalItem
-                            <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
-                        int proximo = System.Math.Min(DespertarGrimorio.NivelDespertarSiguiente(mano),
-                            DespertarGrimorio.NivelMax);
-                        if (DespertarGrimorio.EsArmaDelNivel(proximo, drop))
-                        {
-                            // ¿Las tres ofrendas completas? (las esencias
-                            // primero: si faltan, el grimorio NI TOCA el
-                            // dinero — el rechazo no cobra nada).
-                            int esencias = DespertarGrimorio.EsenciasPara(proximo);
-                            long monedas = DespertarGrimorio.MonedasPara(proximo);
-                            bool tieneEsencias = DespertarGrimorio.EsenciasEnManos(p) >= esencias;
-
-                            if (!tieneEsencias)
-                            {
-                                RechazarOfrenda(p, drop, false, esencias, monedas);
-                            }
-                            else if (!p.BuyItem(monedas, -1))
-                            {
-                                // SIN DINERO: el rechazo educado (BuyItem ya
-                                // validó SIN cobrar — devolvió false).
-                                RechazarOfrenda(p, drop, true, esencias, monedas);
-                            }
-                            else
-                            {
-                                DespertarGrimorio.ConsumirEsencias(p, esencias);
-                                SubirNivel(p, mano, drop);
-                            }
-                        }
-                        else
-                        {
-                            // EL BOCADO DE SIEMPRE: el festín de la .129
-                            // (del LIBRO en la mano — su EXP, sus stats).
-                            DevorarComoBocado(p, mano, drop);
-                        }
+                        // EL BOCADO DE SIEMPRE: el festín de la .129
+                        // (del LIBRO en la mano — su EXP, sus stats).
+                        DevorarComoBocado(p, mano, drop);
                         break;   // un plato por pulso (con calma, que es un libro)
                     }
                 }
             }
             catch { }
+        }
+
+        // ================================================================
+        //  v6.51.10 — LA DEVORACIÓN DE LA MOCHILA (la letra del usuario:
+        //  «pese a que cumpli con los requisitos del despertar el
+        //  grimorio no aumenta su nivel de despertar […] ahora cuando
+        //  los requisistos se cumpla el grimorio los debe consumir
+        //  automticamente del inventario y subir su nivel de despertar
+        //  comiendo directamente del inventario por lo tanto quitar esos
+        //  item consumidos […] es o las armas o el lingote, con que se
+        //  cumpla uno de ellos es suficiente»): cada pulso, el ETERNO
+        //  ACTIVO del portador (en la mano o en la bolsa — «cualquier
+        //  parte del inventario») revisa su mesa: con las ESENCIAS, el
+        //  DINERO y LA OFRENDA (EL ARMA CORRUPTA del peldaño O LA PILA
+        //  DE LINGOTES — basta UNA de las dos), el libro SE LA COME
+        //  directamente del inventario y DESPIERTA (+1). Si el dueño ve
+        //  su inventario ABIERTO, LA SOMBRA DE SU PÁGINA se estira hasta
+        //  los platos y se los lleva a la boca (DevoracionInventarioFX —
+        //  la sorpresa de la letra); si está cerrado, sube en silencio.
+        // ================================================================
+        private static void AutoDevorarOfrenda(Player p)
+        {
+            try
+            {
+                if (p == null || !p.active || p.dead) return;
+
+                // EL LIBRO ACTIVO: en la MANO primero… si no, el primero
+                // de la bolsa (AlmaEternoGlobalItem.Activo) — «cualquier
+                // parte del inventario del jugador».
+                Item libro = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p);
+                var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(libro);
+                if (libro == null || alma == null) return;
+                if (alma.NivelDespertar >= DespertarGrimorio.NivelMax) return;
+
+                int siguiente = System.Math.Min(
+                    DespertarGrimorio.NivelDespertarSiguiente(libro),
+                    DespertarGrimorio.NivelMax);
+
+                // 1) LAS ESENCIAS — en cualquier parte del inventario
+                //    (consumidas «como cualquier consumible»: la letra).
+                int esencias = DespertarGrimorio.EsenciasPara(siguiente);
+                if (DespertarGrimorio.EsenciasEnManos(p) < esencias) return;
+
+                // 2) EL DINERO (BuyItem valida y cobra al final — si no
+                //    alcanza, no se toca NADA).
+                long monedas = DespertarGrimorio.MonedasPara(siguiente);
+                if (ContarMonedas(p) < monedas) return;
+
+                // 3) LA OFRENDA — el ARMA CORRUPTA del peldaño… O la PILA
+                //    de lingotes del metal del nivel (SIEMPRE >50 y
+                //    creciente): con que se cumpla UNA basta — la letra.
+                //    (El arma tiene preferencia: es el plato canónico.)
+                int slotArma = SlotArmaDelPeldano(p, siguiente);   // -1 si no la lleva
+                int tipoMin = DespertarGrimorio.MineralDe(siguiente);
+                int cantMin = DespertarGrimorio.CantidadMineralDe(siguiente);
+                bool porMineral = slotArma < 0 &&
+                    DespertarGrimorio.MineralesEnManos(p, siguiente) >= cantMin;
+                if (slotArma < 0 && !porMineral) return;
+
+                // — LA MESA ESTÁ COMPLETA: el Eterno SE SIRVE SOLO —
+                var victimas = new System.Collections.Generic.List<
+                    global::AethonMod.Content.Globals.DevoracionInventarioFX.Victima>();
+
+                if (!p.BuyItem(monedas, -1)) return;   // las monedas (de donde sean — vanilla)
+
+                ConsumirEsenciasConVictimas(p, esencias, victimas);
+                if (slotArma >= 0)
+                {
+                    Item plato = p.inventory[slotArma];
+                    victimas.Add(new global::AethonMod.Content.Globals.
+                        DevoracionInventarioFX.Victima(slotArma, plato.type, 1));
+                    plato.stack--;
+                    if (plato.stack <= 0) plato.TurnToAir();
+                }
+                else
+                {
+                    ConsumirMineralesConVictimas(p, tipoMin, cantMin, victimas);
+                }
+
+                // LA SOMBRA DE LA PÁGINA (solo en la pantalla del dueño —
+                // SP y anfitrión «Host & Play»; con el inventario ABIERTO:
+                // la letra: «seria interesante una animacion donde el
+                // grimorio del inventario extiende su sombra de la pagina
+                // hasta los items correctos y estos son automaticamente
+                // devorados en caso de que el inventario este abierto, si
+                // el inventario no esta abierto pues no pasa nada y solo
+                // sube su nivel de despertar»).
+                if (!Main.dedServ && p.whoAmI == Main.myPlayer && Main.playerInventory &&
+                    victimas.Count > 0)
+                {
+                    global::AethonMod.Content.Globals.DevoracionInventarioFX
+                        .Disparar(p, victimas, libro);
+                }
+
+                // EL AVISO DEL SERVICIO (el portador se entera igual con
+                // el inventario cerrado — y con él abierto, la sorpresa).
+                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.DevoraInventario",
+                    new Color(196, 138, 255), siguiente);
+
+                SubirNivel(p, libro, null);   // la ofrenda ya está comida
+            }
+            catch { }
+        }
+
+        /// <summary>¿Dónde lleva el arma CORRUPTA del peldaño? (el
+        /// PRIMER slot del inventario que la traiga — cualquier rincón;
+        /// -1 si no la lleva).</summary>
+        private static int SlotArmaDelPeldano(Player p, int nivel)
+        {
+            if (p == null || nivel < 1 || nivel > DespertarGrimorio.NivelMax) return -1;
+            int[] peldano = DespertarGrimorio.ArmasDelNivel[nivel];
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir) continue;
+                for (int a = 0; a < peldano.Length; a++)
+                {
+                    if (peldano[a] != it.type) continue;
+                    if (it.GetGlobalItem
+                        <global::AethonMod.Content.Globals.CorruptoGlobalItem>().Corrompido)
+                        return k;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>COME N esencias del inventario ANOTANDO los slots
+        /// (para que la sombra sepa a quién mordió — el FX).</summary>
+        private static void ConsumirEsenciasConVictimas(Player p, int cantidad,
+            System.Collections.Generic.List<global::AethonMod.Content.Globals.
+                DevoracionInventarioFX.Victima> victimas)
+        {
+            int tipo = ModContent.ItemType
+                <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+            int falta = cantidad;
+            for (int k = 0; k < 58 && falta > 0; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir || it.type != tipo) continue;
+                int quita = Math.Min(falta, it.stack);
+                victimas.Add(new global::AethonMod.Content.Globals.
+                    DevoracionInventarioFX.Victima(k, tipo, quita));
+                it.stack -= quita;
+                falta -= quita;
+                if (it.stack <= 0) p.inventory[k].TurnToAir();
+            }
+        }
+
+        /// <summary>COME los lingotes de la ofrenda del inventario
+        /// ANOTANDO los slots (exactamente LA CANTIDAD del peldaño — el
+        /// sobrante queda en la bolsa: recogerlo ya fue gratis).</summary>
+        private static void ConsumirMineralesConVictimas(Player p, int tipo, int cantidad,
+            System.Collections.Generic.List<global::AethonMod.Content.Globals.
+                DevoracionInventarioFX.Victima> victimas)
+        {
+            int falta = cantidad;
+            for (int k = 0; k < 58 && falta > 0; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir || it.type != tipo) continue;
+                int quita = Math.Min(falta, it.stack);
+                victimas.Add(new global::AethonMod.Content.Globals.
+                    DevoracionInventarioFX.Victima(k, tipo, quita));
+                it.stack -= quita;
+                falta -= quita;
+                if (it.stack <= 0) p.inventory[k].TurnToAir();
+            }
         }
 
         // ================================================================
@@ -339,89 +442,6 @@ namespace AethonMod.Content.Systems
                 // EL NUEVO NIVEL CAMINA (el daño del portador lo lee su
                 // máquina — el paquete del festín lleva el despertar).
                 EcoRed.SincronizarDevoracion(p);
-            }
-            catch { }
-        }
-
-        /// <summary>EL RECHAZO: falta esencia o dinero — el grimorio
-        /// aparta el plato y dice QUÉ falta (el arma queda en el suelo).</summary>
-        private static void RechazarOfrenda(Player p, Item drop,
-            bool tieneEsencias, int esencias, long monedas)
-        {
-            try
-            {
-                // El empujoncito: el plato vuelve hacia el portador (el
-                // grimorio lo escupió — no es hora de comer).
-                Vector2 empuje = p.Center - drop.Center;
-                if (empuje.LengthSquared() > 1f)
-                {
-                    empuje.Normalize();
-                    drop.velocity = -empuje * 3.2f + new Vector2(0f, -2.4f);
-                    drop.noGrabDelay = 45;
-                }
-
-                long faltanMonedas = Math.Max(0L, monedas - ContarMonedas(p));
-                if (Main.netMode != NetmodeID.Server && p == Main.LocalPlayer)
-                {
-                    string texto = tieneEsencias
-                        ? Language.GetTextValue("Mods.AethonMod.Despertar.FaltaDinero",
-                            ItemToText(monedas))
-                        : Language.GetTextValue("Mods.AethonMod.Despertar.FaltaEsencia",
-                            esencias, ItemToText(monedas));
-                    Main.NewText(texto, new Color(255, 130, 130));
-                }
-                else if (Main.netMode == NetmodeID.Server)
-                {
-                    EcoRed.AnunciarAlPortador(p,
-                        tieneEsencias ? "Mods.AethonMod.Despertar.FaltaDinero"
-                                      : "Mods.AethonMod.Despertar.FaltaEsencia",
-                        new Color(255, 130, 130),
-                        tieneEsencias ? new object[] { ItemToText(monedas) }
-                                      : new object[] { esencias, ItemToText(monedas) });
-                }
-            }
-            catch { }
-        }
-
-        /// <summary>v6.51.8 — EL RECHAZO MINERAL: la pila no alcanza —
-        /// el grimorio aparta el plato y dice CUÁNTO pide (los lingotes
-        /// caídos son del portador: recogerlos es gratis).</summary>
-        private static void RechazarMineral(Player p, Item drop, int nivel, int cantidad)
-        {
-            try
-            {
-                // El empujoncito de siempre (el plato vuelve al portador).
-                Vector2 empuje = p.Center - drop.Center;
-                if (empuje.LengthSquared() > 1f)
-                {
-                    empuje.Normalize();
-                    drop.velocity = -empuje * 3.2f + new Vector2(0f, -2.4f);
-                    drop.noGrabDelay = 45;
-                }
-
-                int faltan = Math.Max(1, cantidad - drop.stack);
-                string nombre = "—";
-                try
-                {
-                    var proto = Terraria.ID.ContentSamples.ItemsByType[
-                        DespertarGrimorio.MineralDe(nivel)];
-                    if (proto != null) nombre = proto.Name;
-                }
-                catch { }
-
-                if (Main.netMode != NetmodeID.Server && p == Main.LocalPlayer)
-                {
-                    Main.NewText(Language.GetTextValue(
-                        "Mods.AethonMod.Despertar.FaltaMineral",
-                        cantidad, nombre, faltan),
-                        new Color(255, 130, 130));
-                }
-                else if (Main.netMode == NetmodeID.Server)
-                {
-                    EcoRed.AnunciarAlPortador(p,
-                        "Mods.AethonMod.Despertar.FaltaMineral",
-                        new Color(255, 130, 130), cantidad, nombre, faltan);
-                }
             }
             catch { }
         }

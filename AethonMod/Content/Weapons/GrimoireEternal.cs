@@ -144,68 +144,173 @@ namespace AethonMod.Content.Weapons
         }
 
         // ================================================================
-        //  v6.51.9 — LA ESCALERA DE ETIQUETAS DEL NOMBRE (la letra:
-        //  «a medida que el grimorio suba de nivel esa etiqueta () debe
-        //  ir mejorando, siempre debe empezar con la peor etiqueta y
-        //  cada 11 niveles debe mejorar al siguiente nivel y asi hasta
-        //  llegar a Legendario y luego de llegar a Legendario entonces
-        //  50 niveles despues debe llegar a una nueva etiqueta del mod
-        //  esclusiva para el grimorio (Legendario Supremo)»).
+        //  v6.51.10 — LA REFORJA VIVA: LA ESCALERA DE LOS MODIFICADORES
+        //  MÁGICOS DE TERRARIA (la letra del usuario: «esta parte debes
+        //  cambiarla, estos son los modificadores de Terraria y deben
+        //  estar con sus modificadores de estadisticas correspondientes,
+        //  ademas no debe empezar en (comun), debe empezar en (Ignorante)
+        //  ya que es un arma magica y debe cambiar cada 33 niveles el
+        //  modificador y tambien sus estadisticas, de esta forma el
+        //  grimorio del eterno se reforja por si solo, asi que empieza en
+        //  nivel 1 con (Ignorante) a nivel 33 mejora a (Transtornado) y
+        //  asi ir mejorando hasta llegar a legendario… el legendario
+        //  tendra las mismas estadisticas de Mítico pero con un 3% extra
+        //  y luego el legendario supremo tendra las mismas estadisticas
+        //  que Mítico pero con un 10% extra»).
         //
-        //  LA ESCALERA (por NIVEL del libro — cada 11 niveles):
-        //    1  → (Común)      la peor — así nace el libro dormido
-        //    12 → (Raro)
-        //    23 → (Épico)
-        //    34 → (Mítico)
-        //    45 → (Legendario)         …y 50 niveles después:
-        //    95 → (Legendario Supremo) LA EXCLUSIVA DEL MOD — cuando el
-        //         nombre consigue EL BRILLO característico (morado y
-        //         negro con bordes dorados, negros y morados —
+        //  LA ESCALERA — los 12 MODIFICADORES MÁGICOS de la wiki, del
+        //  PEOR al MEJOR (columnas exactas de la tabla: Daño · Velocidad
+        //  · % crítico · Costo de maná · Retroceso · Nivel · Valor), un
+        //  peldaño CADA 33 NIVELES y el Supremo a los 50 del Legendario:
+        //     1  → (Ignorante)     -10% daño · +20% maná · t-2 · -48,16%
+        //    33  → (Transtornado)  -10% daño · -10% retroceso · t-1 · -34,39%
+        //    66  → (Inepto)        +10% maná · t-1 · -19,00%
+        //    99  → (Intenso)       +10% daño · +15% maná · t-1 · -12,58%
+        //   132  → (Furioso)       +15% daño · +20% maná · +15% retro · +11,94%
+        //   165  → (Maníaco)       -10% daño · +10% vel · -10% maná · +18,59%
+        //   198  → (Prohibido)     +10% vel · +10% maná · +10% retro · +18,59%
+        //   231  → (Experto)       -15% maná · t+1 · +32,25%
+        //   264  → (Celeste)       +10% daño · -10% vel · -10% maná · +10% retro · +43,50%
+        //   297  → (Místico)       +10% daño · -15% maná · t+2 · +60,02%
+        //   330  → (Maestro)       +15% daño · -20% maná · +5% retro · +92,83%
+        //   363  → (Mítico)        +15% daño · +10% vel · +5% crít · -10% maná · +15% retro · +209,85%
+        //   396  → (Legendario)    EL NUESTRO: Mítico +3% en cada stat
+        //   446  → (Legendario Supremo) LA EXCLUSIVA DEL MOD: Mítico +10%
+        //         en cada stat — 50 niveles tras el Legendario: cuando el
+        //         nombre consigue EL BRILLO característico (morado y negro
+        //         con bordes dorados, negros y morados —
         //         NombreEternoGlobalItem).
+        //
+        //  LAS ESTADÍSTICAS SON DE VERDAD (la letra: «asegurate de que
+        //  estas estadisticas de los modificadores de la reforja se
+        //  apliquen correctamente»): Daño en ModifyWeaponDamage ·
+        //  Velocidad en UseTime/UseAnimationMultiplier (positiva = más
+        //  rápido) · Crítico en ModifyWeaponCrit · Maná en el coste de
+        //  LOS OJOS (la invocación — el único maná que cobra el arma;
+        //  positivo = más caro) · Retroceso en ModifyWeaponKnockback ·
+        //  Valor en el precio del item (UpdateInventory). TODO suma UNA
+        //  vez con las estadísticas de siempre (nivel/despertar/festín).
         // ================================================================
 
-        /// <summary>El ÍNDICE de la etiqueta del libro por su nivel
-        /// (0 Común · 1 Raro · 2 Épico · 3 Mítico · 4 Legendario ·
-        /// 5 Legendario Supremo): cada 11 niveles un peldaño (12 · 23 ·
-        /// 34 · 45) y el Supremo a los 50 niveles del Legendario (95).</summary>
+        /// <summary>UN PELDAÑO DE LA REFORJA VIVA: el modificador mágico
+        /// de la wiki con SUS estadísticas exactas (las fracciones: +0.15
+        /// = +15%; Velocidad positiva = más rápido; Maná positivo = MÁS
+        /// caro; Valor = multiplicador del precio base del libro).</summary>
+        public sealed class PeldanoReforja
+        {
+            public readonly string Nombre;
+            public readonly int Nivel;         // nivel del libro que lo viste
+            public readonly float Dano;        // +0.15 = +15% daño
+            public readonly float Velocidad;   // +0.10 = +10% velocidad (− = lento)
+            public readonly float Critico;     // +0.05 = +5% crítico
+            public readonly float Mana;        // +0.20 = +20% coste de maná (− = rebaja)
+            public readonly float Retroceso;   // +0.15 = +15% retroceso
+            public readonly int Tier;          // el «Nivel» de la wiki (−2..+2)
+            public readonly float Valor;       // +2.0985 = +209,85% de valor
+            public PeldanoReforja(string nombre, int nivel, float dano,
+                float velocidad, float critico, float mana, float retroceso,
+                int tier, float valor)
+            {
+                Nombre = nombre; Nivel = nivel; Dano = dano;
+                Velocidad = velocidad; Critico = critico; Mana = mana;
+                Retroceso = retroceso; Tier = tier; Valor = valor;
+            }
+        }
+
+        /// <summary>LA ESCALERA COMPLETA — los 12 modificadores mágicos de
+        /// Terraria (de la tabla de la wiki, del peor al mejor por Valor)
+        /// y las DOS cimas del mod: (Legendario) = Mítico con +3% extra
+        /// en cada estadística · (Legendario Supremo) = Mítico con +10%
+        /// extra — la exclusiva del libro (446 = 396 + 50).</summary>
+        public static readonly PeldanoReforja[] LaReforja =
+        {
+            new PeldanoReforja("Ignorante",          1,   -0.10f, 0f,     0f,    +0.20f, 0f,     -2, -0.4816f),
+            new PeldanoReforja("Transtornado",      33,   -0.10f, 0f,     0f,     0f,    -0.10f, -1, -0.3439f),
+            new PeldanoReforja("Inepto",            66,    0f,    0f,     0f,    +0.10f, 0f,     -1, -0.1900f),
+            new PeldanoReforja("Intenso",           99,   +0.10f, 0f,     0f,    +0.15f, 0f,     -1, -0.1258f),
+            new PeldanoReforja("Furioso",          132,   +0.15f, 0f,     0f,    +0.20f, +0.15f, +1, +0.1194f),
+            new PeldanoReforja("Maníaco",           165,  -0.10f, +0.10f, 0f,    -0.10f, 0f,     +1, +0.1859f),
+            new PeldanoReforja("Prohibido",         198,   0f,    +0.10f, 0f,    +0.10f, +0.10f, +1, +0.1859f),
+            new PeldanoReforja("Experto",           231,   0f,    0f,     0f,    -0.15f, 0f,     +1, +0.3225f),
+            new PeldanoReforja("Celeste",           264,  +0.10f, -0.10f, 0f,    -0.10f, +0.10f, +1, +0.4350f),
+            new PeldanoReforja("Místico",           297,  +0.10f, 0f,     0f,    -0.15f, 0f,     +2, +0.6002f),
+            new PeldanoReforja("Maestro",           330,  +0.15f, 0f,     0f,    -0.20f, +0.05f, +2, +0.9283f),
+            new PeldanoReforja("Mítico",            363,  +0.15f, +0.10f, +0.05f, -0.10f, +0.15f, +2, +2.0985f),
+            // LAS CIMAS DEL MOD (la letra): Legendario no existe para las
+            // armas mágicas de vanilla (el techo es Mítico) — el NUESTRO
+            // son las MISMAS estadísticas de Mítico con el extra prometido.
+            new PeldanoReforja("Legendario",        396,  +0.18f, +0.13f, +0.08f, -0.13f, +0.18f, +2, +2.4000f),
+            new PeldanoReforja("Legendario Supremo", 446,  +0.25f, +0.20f, +0.15f, -0.20f, +0.25f, +2, +3.1000f),
+        };
+
+        /// <summary>El ÍNDICE del peldaño de la reforja por el nivel del
+        /// libro: cada 33 niveles sube UN modificador (33 · 66 · 99 · …
+        /// · 396) y el (Legendario Supremo) a los 50 niveles del
+        /// Legendario (446). Empieza en (Ignorante) — el peor modificador
+        /// mágico: así nace el arma mágica.</summary>
         public static int IndiceEtiqueta(int nivel)
         {
-            if (nivel >= 95) return 5;   // 45 + 50: la exclusiva del mod
-            if (nivel >= 45) return 4;   // Legendario — el final de la escalera normal
-            if (nivel >= 34) return 3;   // Mítico
-            if (nivel >= 23) return 2;   // Épico
-            if (nivel >= 12) return 1;   // Raro
-            return 0;                    // Común — la peor etiqueta: así empieza
+            int idx = 0;
+            for (int i = 0; i < LaReforja.Length; i++)
+                if (nivel >= LaReforja[i].Nivel) idx = i;
+            return idx;
         }
+
+        /// <summary>EL PELDAÑO ACTUAL del libro (modificador + estadísticas).
+        /// Null-safe: sin nivel, el (Ignorante) del nacimiento.</summary>
+        public static PeldanoReforja PeldanoDe(int nivel)
+            => LaReforja[IndiceEtiqueta(nivel)];
 
         /// <summary>EL TEXTO de la etiqueta (el paréntesis que SIEMPRE
         /// va AL FINAL del nombre).</summary>
         public static string NombreEtiqueta(int indice)
+            => (indice >= 0 && indice < LaReforja.Length)
+                ? LaReforja[indice].Nombre : LaReforja[0].Nombre;
+
+        /// <summary>LA LÍNEA DE ESTADÍSTICAS del peldaño para el tooltip
+        /// (los modificadores de la wiki, con sus colores: lo bueno
+        /// verde, lo malo rojo — el maná al revés: caro = rojo).</summary>
+        public static string StatsEtiqueta(PeldanoReforja p)
         {
-            switch (indice)
+            var partes = new System.Collections.Generic.List<string>();
+            void Trozo(float valor, string clave, bool invertir)
             {
-                case 5: return "Legendario Supremo";
-                case 4: return "Legendario";
-                case 3: return "Mítico";
-                case 2: return "Épico";
-                case 1: return "Raro";
-                default: return "Común";
+                if (MathF.Abs(valor) < 0.0005f) return;
+                float v = invertir ? -valor : valor;   // el maná: -15% es BUENO
+                string color = v > 0f ? "7FE89B" : "FF8C8C";
+                string signo = valor > 0f ? "+" : "-";
+                partes.Add("[c/" + color + ":" + signo +
+                    MathF.Round(MathF.Abs(valor) * 100f) + "% " + clave + "]");
             }
+            Trozo(p.Dano, "daño", false);
+            Trozo(p.Velocidad, "velocidad", false);
+            Trozo(p.Critico, "crítico", false);
+            Trozo(p.Mana, "coste de maná", true);
+            Trozo(p.Retroceso, "retroceso", false);
+            return partes.Count > 0 ? string.Join("[c/78788C: · ]", partes) : "—";
         }
 
-        /// <summary>EL COLOR del nombre por etiqueta — la escalera
-        /// cromática: la peor es gris pálida, Raro verde, Épico naranja,
-        /// Mítico el VIOLETA CÓSMICO que respira (la rareza de siempre),
-        /// Legendario el ORO clásico… y el SUPREMO lo dibuja
-        /// NombreEternoGlobalItem (morado y negro con bordes dorados,
-        /// negros y morados + sus destellos — este color es solo el
-        /// respaldo).</summary>
+        /// <summary>EL COLOR del nombre por peldaño — la escalera
+        /// cromática de la REFORJA (del gris roto del Ignorante al oro
+        /// del Legendario, pasando por el violeta cósmico que respira
+        /// del Mítico)… y el SUPREMO lo dibuja NombreEternoGlobalItem
+        /// (morado y negro con bordes dorados, negros y morados + sus
+        /// destellos — este color es solo el respaldo).</summary>
         public static Color ColorEtiqueta(int indice)
         {
             switch (indice)
             {
-                case 4: return new Color(255, 205, 92);    // el oro legendario
-                case 3:
+                case 0: return new Color(198, 198, 198);  // Ignorante — el gris pálido
+                case 1: return new Color(176, 148, 158);  // Transtornado — gris roto
+                case 2: return new Color(168, 178, 148);  // Inepto — verdoso apagado
+                case 3: return new Color(216, 196, 150);  // Intenso — ámbar sucio
+                case 4: return new Color(108, 212, 128);  // Furioso — el verde
+                case 5: return new Color(140, 220, 120);  // Maníaco — verde vivo
+                case 6: return new Color(120, 210, 190);  // Prohibido — turquesa
+                case 7: return new Color(110, 190, 235);  // Experto — celeste
+                case 8: return new Color(130, 175, 255);  // Celeste — azul cielo
+                case 9: return new Color(255, 158, 66);   // Místico — el naranja épico
+                case 10:
                     {
                         // el violeta cósmico que respira (LegendarioSupremo.cs)
                         float t = Main.GlobalTimeWrappedHourly;
@@ -214,10 +319,10 @@ namespace AethonMod.Content.Weapons
                         float b = 0.95f + 0.05f * MathF.Sin(t * 1.7f + 0.6f);
                         return new Color(r, g, b);
                     }
-                case 2: return new Color(255, 158, 66);    // el naranja épico
-                case 1: return new Color(108, 212, 128);   // el verde raro
-                case 5: return new Color(178, 120, 235);   // (lo pinta el PreDraw del Supremo)
-                default: return new Color(198, 198, 198);  // el gris pálido común
+                case 11: return new Color(255, 205, 92);  // Mítico — el oro clásico
+                case 12: return new Color(255, 220, 110); // Legendario — oro brillante
+                case 13: return new Color(178, 120, 235); // Supremo — (lo pinta el PreDraw)
+                default: return new Color(198, 198, 198);
             }
         }
 
@@ -309,6 +414,12 @@ namespace AethonMod.Content.Weapons
                 int idxEtiqueta = IndiceEtiqueta(sl?.Level ?? 1);
                 string nombreBase = Lang.GetItemNameValue(Item.type);
                 Item.SetNameOverride(nombreBase + " (" + NombreEtiqueta(idxEtiqueta) + ")");
+                // v6.51.10 — LA REFORJA VIVA TAMBIÉN PAGA EN TIENDA (la
+                //     columna «Valor» de la wiki): el precio del libro
+                //     escala con SU modificador (Mítico = +209,85% — el
+                //     múltiplo exacto de la tabla). Siempre recalculado
+                //     del precio base: idempotente, sin acumulación.
+                Item.value = (int)(100000L * (1f + LaReforja[idxEtiqueta].Valor));
             }
             catch { }
         }
@@ -348,6 +459,14 @@ namespace AethonMod.Content.Weapons
             // de despertar.
             damage *= 1f + Systems.DespertarGrimorio.BonusDano(
                 Systems.DespertarGrimorio.NivelDe(player));
+
+            // v6.51.10 — LA REFORJA VIVA (la letra: «estos son los
+            //     modificadores de Terraria y deben estar con sus
+            //     modificadores de estadisticas correspondientes»): la
+            //     columna DAÑO del peldaño actual (Ignorante -10% …
+            //     Mítico +15% … Supremo +25%) — multiplica UNA vez con
+            //     todo lo de arriba (nivel/despertar/festín).
+            damage *= 1f + PeldanoDe(sl?.Level ?? 1).Dano;
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -361,6 +480,10 @@ namespace AethonMod.Content.Weapons
             // v6.50.129 — LA MORDIDA Y EL PUÑO TITÁN del festín de armas
             // (las lanzables y los pesos comidos: +empuje permanente).
             knockback *= 1f + Players.ShardPlayer.BonusEmpujeArmasDevoradas(player);
+            // v6.51.10 — LA REFORJA VIVA: la columna RETROCESO del
+            //     peldaño (Transtornado -10% … Mítico +15% … Supremo
+            //     +25%).
+            knockback *= 1f + PeldanoDe(GetShard(Item)?.Level ?? 1).Retroceso;
         }
 
         /// <summary>v6.50.129 — LA MIRADA DEL FESTÍN: el crítico de las
@@ -369,6 +492,10 @@ namespace AethonMod.Content.Weapons
         public override void ModifyWeaponCrit(Player player, ref float crit)
         {
             crit += Players.ShardPlayer.BonusCritArmasDevoradas(player) * 100f;
+            // v6.51.10 — LA REFORJA VIVA: la columna % ATAQUE CRÍTICO del
+            //     peldaño (solo Mítico/Legendario/Supremo la traen: +5 /
+            //     +8 / +15).
+            crit += PeldanoDe(GetShard(Item)?.Level ?? 1).Critico * 100f;
         }
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
@@ -392,7 +519,13 @@ namespace AethonMod.Content.Weapons
             // ACELERA por lo devorado (tope conjunto +35 % — con el factor
             // del nivel, multiplicado: nunca por debajo del ciclo mínimo).
             factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
-            return MathHelper.Clamp(factor, 0.35f, 1f);
+            factor = MathHelper.Clamp(factor, 0.35f, 1f);
+            // v6.51.10 — LA REFORJA VIVA: la columna VELOCIDAD del peldaño
+            //     (Maníaco/Prohibido +10% … Celeste -10% … Supremo +20%)
+            //     — DESPUÉS del clamp del sistema (positiva = más rápido;
+            //     la lenta del Celeste puede pasar de 1: así es la tabla).
+            factor *= 1f - PeldanoDe(sl.Level).Velocidad;
+            return factor;
         }
 
         /// <summary>
@@ -408,7 +541,12 @@ namespace AethonMod.Content.Weapons
             // v6.50.129 — la misma PRISA del festín, para que la animación
             // NUNCA quede por debajo del useTime (la regla anti-doble-Shoot).
             factor *= 1f - Players.ShardPlayer.BonusVelocidadArmasDevoradas(player);
-            return MathHelper.Clamp(factor, 0.35f, 1f);
+            factor = MathHelper.Clamp(factor, 0.35f, 1f);
+            // v6.51.10 — LA REFORJA VIVA: el MISMO factor de velocidad del
+            //     peldaño que el useTime (animación y disparo caminan
+            //     JUNTOS: nunca animación < useTime — la regla de la casa).
+            factor *= 1f - PeldanoDe(sl.Level).Velocidad;
+            return factor;
         }
 
         // ================================================================
@@ -426,6 +564,13 @@ namespace AethonMod.Content.Weapons
             {
                 if (ManaMinionGratis()) return true;
                 int minionCost = WeaponScaling.MinionManaCost(level);
+                // v6.51.10 — LA REFORJA VIVA: la columna COSTO DE MANÁ del
+                //     peldaño se cobra en EL OJO — el único maná que cobra
+                //     esta arma (la regla de la casa: el clic izquierdo
+                //     vive del hambre, no del maná). Ignorante +20% …
+                //     Experto/Místico -15% … Supremo -20%.
+                minionCost = (int)System.Math.Ceiling(
+                    minionCost * (1f + PeldanoDe(level).Mana));
                 return player.statMana >= minionCost || player.manaFlower;
             }
             // Click izquierdo (el Equinoccio): siempre
@@ -926,6 +1071,30 @@ namespace AethonMod.Content.Weapons
             //     SOSTENIENDO el libro (la nota al pie lo aclara) ===
             if (ventanaArma)
             {
+                // === v6.51.10 — LA REFORJA VIVA (la letra: «de esta forma
+                //     el grimorio del eterno se reforja por si solo»):
+                //     el modificador mágico ACTUAL con SUS estadísticas
+                //     de la wiki (aplicadas de verdad — ver los hooks) y
+                //     el próximo peldaño de la escalera. ===
+                {
+                    var rungA = PeldanoDe(sl.Level);
+                    int idxA = IndiceEtiqueta(sl.Level);
+                    tooltips.Add(new TooltipLine(Mod, "SectionReforja",
+                        "[c/C49CFF:═══ LA REFORJA ═══]"));
+                    tooltips.Add(new TooltipLine(Mod, "ReforjaActual",
+                        $"[c/E8D8FF:({rungA.Nombre})]  " +
+                        $"[c/78788C:(viste en el nivel {rungA.Nivel})]"));
+                    tooltips.Add(new TooltipLine(Mod, "ReforjaStats",
+                        StatsEtiqueta(rungA)));
+                    if (idxA + 1 < LaReforja.Length)
+                    {
+                        var prox = LaReforja[idxA + 1];
+                        tooltips.Add(new TooltipLine(Mod, "ReforjaProxima",
+                            $"[c/78788C:Próxima reforja: ][c/9B6FE8:({prox.Nombre})]" +
+                            $"[c/78788C: en el nivel {prox.Nivel}]"));
+                    }
+                }
+
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
                 int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
                 float critPct = WeaponScaling.CritBonus(sl.Level);
@@ -1127,6 +1296,29 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "Level",
                     $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
 
+                // === v6.51.10 — LA REFORJA VIVA CAMINA CON EL NIVEL (la
+                //     letra: «debe cambiar cada 33 niveles el modificador
+                //     y tambien sus estadisticas»): UNA línea — dónde
+                //     está el libro y cuándo sube su modificador. ===
+                {
+                    var rungP = PeldanoDe(sl.Level);
+                    int idxP = IndiceEtiqueta(sl.Level);
+                    if (idxP + 1 < LaReforja.Length)
+                    {
+                        var proxP = LaReforja[idxP + 1];
+                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
+                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungP.Nombre})]" +
+                            $"[c/78788C: → ][c/9B6FE8:({proxP.Nombre})]" +
+                            $"[c/78788C: en el nivel {proxP.Nivel}]"));
+                    }
+                    else
+                    {
+                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
+                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungP.Nombre})]" +
+                            "[c/78788C: — la cima del mod]"));
+                    }
+                }
+
                 // === v6.51.0 — LA BARRA DEL DESPERTAR (la letra: «estos
                 //     niveles deben estar ubicados en la ventana de
                 //     información DEBAJO de la barra de niveles y ENCIMA
@@ -1236,7 +1428,7 @@ namespace AethonMod.Content.Weapons
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
                                 string.Join(" ", trozosMin)));
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                                "[c/78788C:  (suéltalos con el grimorio en la mano — sin corrupción)]"));
+                                "[c/78788C:  (en cualquier parte de TU inventario, sin corrupción — el libro los devora solo)]"));
                         }
                         else
                         {
@@ -1265,7 +1457,7 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
                             string.Join(" ", trozosArma)));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                            "[c/78788C:  (suéltala con el grimorio en la mano)]"));
+                            "[c/78788C:  (corrupta, en cualquier parte de TU inventario — el libro la devora solo)]"));
                         }
 
                         // === v6.51.9 — LA ALTERNATIVA MINERAL EN TODOS LOS
@@ -1301,6 +1493,21 @@ namespace AethonMod.Content.Weapons
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq6",
                                 string.Join(" ", trozosAlt)));
                         }
+
+                        // === v6.51.10 — LA NOTA FINAL DE LA LETRA (la
+                        //     letra: «debes dejar claro que los items
+                        //     necesarios para subir el nivel del despertar
+                        //     deben estar en cualquier parte del
+                        //     inventario del jugador… al final de la
+                        //     ofrenda de lingotes debes decir que los
+                        //     items requeridos deben estar en el
+                        //     inventario para ser usados»): la aclaración
+                        //     que cierra la lista — el arma O los lingotes,
+                        //     con que se cumpla UNO basta, y TODO se cobra
+                        //     del inventario: al completarse, el Eterno
+                        //     SE SIRVE SOLO (la devoración de la mochila). ===
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
+                            "[c/78788C:  (con el arma O los lingotes basta; los items requeridos deben estar en TU inventario — al completarse, el Eterno los devora y despierta solo)]"));
                     }
                     else
                     {

@@ -2433,14 +2433,12 @@ Despertar: {
 	Voz2: I can feel the rings, bearer. ALL the rings.
 	Voz3: Every awakening reminds me what I was.
 	Voz4: (the book shivers with delight) Yes. MORE of that.
-	FaltaEsencia: ✦ The grimoire pushes the dish away: it needs {0} more essence(s)… and {1}.
-	FaltaDinero: ✦ The grimoire pushes the dish away: it needs {0}.
-	FaltaMineral: ✦ The grimoire pushes the dish away: it demands {0} × {1} and that pile is {2} short.
 	OjosCerrados: ✦ The squad still sleeps: LEVEL {0} is needed for the first eye.
 	MejorasSelladas: ✦ Upgrades are born with THE AWAKENING (5/15/30/40). Current: {0}.
 	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad number {0})
 	CerrojoEsbirros: ✦ The grimoire does not share its sky: while its eyes watch, no other minion answers.
 	EsenciaDevorada: ✦ The Eternal devours {0} × {1}: +{2}% permanent damage.
+	DevoraInventario: ✦ The Eternal HELPED ITSELF: the awakening {0} offering came straight out of your inventory.
 	ReqArmaLimpia: Requires an UNCORRUPTED weapon
 	NaceCorrupta: Born CORRUPT: +5% to ALL its stats · no prefixes or reforging
 	CondicionRecetas: Requires the Eternal Grimoire in the inventory
@@ -3094,5 +3092,15 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Mist (relic of the old fall)
 }
 
-Duende.ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.
+Duende: {
+	ArmaCorrompida: That weapon is corrupted… there's nothing I can do with it. No reforging, no prefixes, no workshop magic: what the awakening's mist touched is no longer of this world.
+	Miedo1: WHAT IS THAT?! WHAT ARE YOU CARRYING?! Don't you DARE bring it near my anvil! That book LOOKED at me, you hear? IT LOOKED AT ME… AND BLINKED!
+	Miedo2: No-no-no. I reforge METAL, not… not… what even IS that thing?! I'm not touching it! The last “alive” thing I touched in this forge cost me two fingers AND my sleep!
+	Miedo3: Get that… that THING out of my shop! The anvil is for STEEL, not for whatever THAT has for pages… Did you hear that?! IT JUST LAUGHED! SACRED IRON, IT LAUGHED!
+	Miedo4: I'll tell you goblin to goblin: there are inks that never wash off and books that can't be fixed… and THAT THING IS BOTH! Out! OUT OF MY SHOP!
+	Burla1: «(The Eternal browses, bored) THIS was the great craftsman? A dwarf with a toy hammer… not even my index page fears him.»
+	Burla2: «(The Eternal laughs between its pages) Reforge ME?! HA! Tinkerer: your anvil is the cradle… I am the beast that ate the smith.»
+	Burla3: «(The Eternal whispers) Tremble, bearded scrap: your fear is the wisest thing you'll do today. At least the little man knows his betters.»
+}
+
 Rarities.LegendarioSupremo: Supreme Legendary

@@ -3470,25 +3470,22 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
         }
 
-        /// <summary>EL BOTÍN DE LA LETRA (v6.51.2): «cuando muere Aethon
-        /// su loot debe ser su mascota de luz, 20 esencia corruptas y 10
-        /// platino, al menos por ahora» — TODOS los caminos de muerte
-        /// pagan EXACTAMENTE eso (el Recuerdo Completo lo tiene en SU
-        /// override; este es el del fragmento que cae sin fusión). El
-        /// botín viejo — la esencia de Aethon, la Forma Ascendida, los
-        /// 250 fragmentos, la bolsa de la cría — RETIRADO: la carta
-        /// nueva manda. (v6.50.117: virtual, el gemelo oscuro NUNCA
-        /// paga y el fusionado paga TODO en SU override.)</summary>
+        /// <summary>EL BOTÍN ES DEL FUSIONADO (v6.51.10 — la letra del
+        /// usuario: «quien debe dar loot es aethon Fusionado ya que es
+        /// el ultimo que siempre tendremos que vencer»): el Aethon
+        /// normal YA NO PAGA — el botín completo (su mascota de luz,
+        /// 20 esencia corruptas y 10 platino — la carta de la v6.51.2)
+        /// lo paga SOLO EL RECUERDO RECOMPUESTO en SU override
+        /// (AethonBossFusionado.DropBotin): es el último eslabón, al
+        /// que siempre hay que vencer. El gemelo oscuro NUNCA pagó.
+        /// Este método queda VACÍO a propósito: el fragmento que cae
+        /// sin fusión solo cuenta la victoria (bestiario/XP/downed).</summary>
         protected virtual void DropBotin()
         {
             if (_yaDropeo) return;
             _yaDropeo = true;
-            var srcLetra = NPC.GetSource_Loot();
-            Item.NewItem(srcLetra, NPC.Center,
-                ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
-            Item.NewItem(srcLetra, NPC.Center,
-                ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 20);
-            Item.NewItem(srcLetra, NPC.Center, ItemID.PlatinumCoin, 10);
+            // v6.51.10 — SIN BOTÍN: el que paga es Aethon Fusionado (su
+            // override) — «el último que siempre tendremos que vencer».
         }
 
         /// <summary>Fallback exótico (si algo mata por fuera del cine).</summary>

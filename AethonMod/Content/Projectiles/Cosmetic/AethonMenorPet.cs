@@ -56,6 +56,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private bool _saludoHecho;   // LO PRIMERO que hace la mascota ES la luz
         private bool _miniCerca;     // su propio destello está vivo a su lado (sincronizado: TODAS las pantallas lo ven igual)
 
+        // === v6.51.10 — EL VUELO VIVO (la letra: «ademas creo que
+        //     deberias mejorar las animaciones de (Aethon Menor)»):
+        //     el sol en miniatura ya no flota tieso — VUELA. ===
+        // · LOS CAPRICHOS (ai[0]): de vez en cuando el dueño decide un
+        //   capricho y lo sincroniza (netUpdate — todas las pantallas
+        //   corren LA MISMA coreografía): 1 EL RIZO (una vuelta
+        //   completa alrededor del dueño) · 2 EL PASEO (dispara a un
+        //   punto y vuelve) · 3 LA PIROUETA (espiral apretada). ai[1]
+        //   cuenta atrás; ai[2] es la semilla (el ángulo del capricho).
+        // · LA EMPATÍA (leída del estado SINCRONIZADO del dueño — sin
+        //   paquetes nuevos, todas las pantallas de acuerdo): si el
+        //   dueño ACABA DE SUFRIR DAÑO, la cría SE ABRAZA a él y su luz
+        //   se apaga un poco (preocupación); si está PELEANDO, la cría
+        //   ARDE más y su rueda se acelera (ánimo).
+        // · LA INCLINACIÓN Y EL ESTIRO: el dibujo se inclina con la
+        //   velocidad del vuelo y respira MÁS GRANDE cuando corre
+        //   (PreDraw)… y EL RASTRO: un rastro de corazones dorados
+        //   cuando vuela rápido.
+        private bool _duenioHerido;    // la empatía: el dueño acaba de sufrir daño
+        private bool _duenioPeleando;  // la empatía: el dueño está usando un arma
+        private readonly Vector2[] _rastro = new Vector2[6];   // las posiciones recientes (EL RASTRO)
+        private int _tickRastro;
+
         // v6.50.122 — SIN CEREBRO DE TRAVESURAS: el registro del pueblo
         // (TicksMolestado) y toda la máquina de molestar NPCs viven AHORA
         // en ParejaCerebro, y su huésped es el GRIMORIO MENOR — la luz no
@@ -106,28 +129,101 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             float t = Main.GlobalTimeWrappedHourly;
 
+            // === v6.51.10 — LA EMPATÍA (leída del estado sincronizado del
+            //     dueño — sin paquetes, todas las pantallas iguales): la
+            //     cría de luz SIENTE a su portador. ===
+            _duenioHerido = duenio.immuneTime > 0;
+            _duenioPeleando = duenio.itemAnimation > 0 && duenio.HeldItem != null &&
+                !duenio.HeldItem.IsAir && duenio.HeldItem.damage > 0;
+
+            // === v6.51.10 — LOS CAPRICHOS (el vuelo vivo): el dueño
+            //     decide CUÁNDO y CUÁL, y el cable lo cuenta a todos.
+            //     (Después del saludo de luz — primero se presenta, luego
+            //     juega.) ===
+            if (Projectile.owner == Main.myPlayer && Projectile.ai[0] == 0f &&
+                _saludoHecho && Main.rand.NextBool(1800))   // ~un capricho cada 30 s
+            {
+                Projectile.ai[0] = Main.rand.Next(1, 4);   // 1 EL RIZO · 2 EL PASEO · 3 LA PIROUETA
+                Projectile.ai[1] = Projectile.ai[0] == 1f ? 130f :
+                    (Projectile.ai[0] == 2f ? 110f : 95f);
+                Projectile.ai[2] = Main.rand.NextFloat(MathHelper.TwoPi);
+                Projectile.netUpdate = true;
+            }
+            if (Projectile.ai[0] > 0f)
+            {
+                Projectile.ai[1] -= 1f;
+                if (Projectile.ai[1] <= 0f)
+                {
+                    Projectile.ai[0] = 0f;
+                    if (Projectile.owner == Main.myPlayer) Projectile.netUpdate = true;
+                }
+            }
+
             // === LA PERSECUCIÓN SUAVE (el vaivén de las mascotas de
             //     vanilla): orbita el hombro del dueño — el lado cambia
             //     LENTO con el seno (pasea de un hombro al otro) y sube
             //     y baja con su propio compás. v6.50.122 — SIN MISIONES:
             //     la criatura de luz ya no viaja a ningún pueblo (esa
             //     máquina es del Grimorio Menor) — su repertorio es la
-            //     luz, el estallido y la pareja, nada más. ===
+            //     luz, el estallido y la pareja, nada más.
+            //     v6.51.10 — Y SUS CAPRICHOS: cuando juega, la META es la
+            //     coreografía (y persigue con MÁS GANAS). ===
             float lado = MathF.Sin(t * 0.35f) * 46f - duenio.direction * 14f;
             float bob = MathF.Sin(t * 1.9f) * 9f;
             Vector2 meta = duenio.Center + new Vector2(lado, -46f + bob);
 
+            // LA EMPATÍA MUEVE LA META: dueño herido → la cría SE ABRAZA
+            // a él (la posición de un consuelo, encima de la cabeza).
+            if (_duenioHerido)
+                meta = duenio.Center + new Vector2(lado * 0.25f, -30f);
+
+            // EL CAPRICHO MANDA: su coreografía reemplaza la meta.
+            if (Projectile.ai[0] == 1f)          // EL RIZO: una vuelta alrededor del dueño
+            {
+                float ang = Projectile.ai[2] + (1f - Projectile.ai[1] / 130f) * MathHelper.TwoPi;
+                meta = duenio.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.72f) * 88f;
+            }
+            else if (Projectile.ai[0] == 2f)     // EL PASEO: dispara a un punto… y vuelve
+            {
+                float fase = 1f - Projectile.ai[1] / 110f;
+                Vector2 destino = duenio.Center + new Vector2(
+                    MathF.Cos(Projectile.ai[2]), MathF.Sin(Projectile.ai[2])) * 150f;
+                if (fase < 0.45f) meta = destino;
+                else meta = duenio.Center + new Vector2(0f, -44f);
+            }
+            else if (Projectile.ai[0] == 3f)     // LA PIROUETA: espiral apretada
+            {
+                float prog = 1f - Projectile.ai[1] / 95f;
+                float ang = Projectile.ai[2] + prog * 12f;
+                float radio = 42f * (1f - 0.55f * MathF.Sin(prog * MathHelper.Pi));
+                meta = duenio.Center + new Vector2(-duenio.direction * 28f, -46f) +
+                    new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
+            }
+
             // La búsqueda serena: nunca teletransporta, siempre alcanza.
+            // (v6.51.10 — jugando o consolando persigue con MÁS PRISA.)
+            float prisa = (Projectile.ai[0] > 0f || _duenioHerido) ? 1.8f : 1f;
             Vector2 hacia = meta - Projectile.Center;
             float dist = hacia.Length();
             if (dist > 900f)            // el dueño se fue muy lejos: le alcanza volando
                 Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.05f, 0.20f);
             else
-                Projectile.velocity = Vector2.Lerp(Projectile.velocity, hacia * 0.045f, 0.10f);
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity,
+                    hacia * 0.045f * prisa, 0.10f * prisa);
 
             // El freno al llegar (flota, no vibra encima del punto).
             if (dist < 24f)
                 Projectile.velocity *= 0.80f;
+
+            // === v6.51.10 — EL RASTRO (las posiciones recientes para el
+            //     rastro de luz cuando corre) ===
+            if (++_tickRastro >= 3)
+            {
+                _tickRastro = 0;
+                for (int r = _rastro.Length - 1; r > 0; r--)
+                    _rastro[r] = _rastro[r - 1];
+                _rastro[0] = Projectile.Center;
+            }
 
             Projectile.rotation += 0.02f;   // el núcleo gira despacito (el sol en miniatura)
 
@@ -138,8 +234,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             //     v6.50.56 — LA LETRA: «la mascota debe iluminar un poco
             //     mas el entorno, tiene poca iluminacion» — ×1.6: la
             //     criatura de luz ALUMBRA de verdad (1.35/1.15/0.78 —
-            //     el rango de un antorcha solar). ===
-            Lighting.AddLight(Projectile.Center, 1.35f, 1.15f, 0.78f);
+            //     el rango de un antorcha solar).
+            //     v6.51.10 — LA EMPATÍA TAMBIÉN ALUMBRÍA: con el dueño
+            //     herido la luz se ENCOGE (está asustada); peleando,
+            //     ARDE (le entra el fervor). ===
+            float luzAnimo = _duenioHerido ? 0.75f : (_duenioPeleando ? 1.20f : 1f);
+            Lighting.AddLight(Projectile.Center, 1.35f * luzAnimo, 1.15f * luzAnimo, 0.78f * luzAnimo);
 
             // === v6.50.55 — LA MINI-EXPLOSIÓN (el compás). Solo el cliente
             //     del dueño decide CUÁNDO (Main.rand del dueño, cero azar
@@ -257,6 +357,44 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 //     mascota es SU RETRATO a 0.22 ===
                 const float S = 0.22f;
 
+                // === v6.51.10 — EL VUELO VIVO DEL DIBUJO (la letra:
+                //     «mejorar las animaciones de (Aethon Menor)"):
+                //     · LA INCLINACIÓN — el sol se INCLINA hacia donde
+                //       vuela (como inclinaría la cabeza un pajarillo).
+                //     · EL ESTIRO — cuando corre, el cuerpo RESPIRA MÁS
+                //       GRANDE (el vivo de la velocidad).
+                //     · EL ÁNIMO — la rueda y las perlas corren al compás
+                //       del dueño: PELEANDO se aceleran (fervor), HERIDO
+                //       se aquietan (la cría se encoge de miedo)… y al
+                //       CARGAR su destello (miniCerca) la rueda gira más
+                //       rápido y las perlas se ACERCAN (la carga).
+                //     · EL RASTRO — corazones dorados apagándose donde
+                //       acaba de pasar (solo si corre de verdad). ===
+                float inclinacion = MathHelper.Clamp(Projectile.velocity.X * 0.018f,
+                    -0.30f, 0.30f);
+                float velocidad = Projectile.velocity.Length();
+                float estiro = 1f + MathHelper.Clamp(velocidad * 0.010f, 0f, 0.22f);
+                float animo = _duenioPeleando ? 1.8f : (_duenioHerido ? 0.55f : 1f);
+                float giroRueda = _miniCerca ? 1.35f : 1f;
+                float comprimePerlas = _miniCerca ? 0.82f : 1f;
+
+                // EL RASTRO (debajo del cuerpo: los corazones de hace un
+                // instante, apagándose — el recuerdo del vuelo).
+                if (velocidad > 7f && !Main.dedServ)
+                {
+                    for (int r = 0; r < _rastro.Length; r += 2)
+                    {
+                        Vector2 pos = _rastro[r];
+                        if (pos == Vector2.Zero) continue;
+                        float apaga = 1f - r / (float)_rastro.Length;   // viejo = tenue
+                        float tam = (46f * S) * apaga * estiro;
+                        VFXCore.Quad(pos, new Color(255, 236, 170, 255) * (0.16f * apaga),
+                            new Vector2(tam * 1.5f, tam * 1.5f), 0f, VFXCore.SoftGlow);
+                        VFXCore.Quad(pos, new Color(255, 252, 240, 255) * (0.20f * apaga),
+                            new Vector2(tam * 0.6f, tam * 0.6f), 0f, VFXCore.SoftGlow);
+                    }
+                }
+
                 // EL MISMO LATIDO y el MISMO BRILLO del jefe (su PreDraw).
                 float latido = 0.84f + 0.16f * MathF.Sin(t * 1.6f);
                 // v6.50.55 — EL BRILLO DEL QUE ARDE: cuando su destello vive
@@ -286,15 +424,18 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 //     jefe: 10 rayos de la fase 1 girando a 0.10 — el sol
                 //     de Aethon es una RUEDA DE LUZ; el quad mide 2×largo
                 //     × 2×ancho como el Draw del jefe: el rayo sale del
-                //     centro hacia AMBOS lados) ===
+                //     centro hacia AMBOS lados). v6.51.10 — LA RUEDA VIVA:
+                //     gira al ANIMO del dueño (fervor/miedo), se acelera
+                //     al CARGAR su destello… y el sol entero se INCLINA
+                //     hacia el vuelo. ===
                 {
                     int nRayos = 10;
-                    float giro = t * 0.10f;
+                    float giro = t * 0.10f * animo * giroRueda + inclinacion;
                     for (int i = 0; i < nRayos; i++)
                     {
                         float ang = giro + i * MathHelper.TwoPi / nRayos;
                         float largo = (255f + 165f * 0.55f) * S *          // faseInt 0.55 (la fase 2)
-                            (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f));
+                            (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f)) * estiro;
                         float ancho = (34f - 12f * 0.55f) * S;
                         VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.30f * brillo),
                             new Vector2(largo * 2f, ancho * 2f), ang, VFXCore.SoftGlow);
@@ -304,12 +445,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // === 4. LAS DOS CORONAS DE PERLAS (la sección 4 del jefe:
                 //     13 perlas por anillo, rx 218/ry 134 y rx 300/ry 90,
                 //     sentidos OPUESTOS +0.55/−0.38 — el efecto 3D de
-                //     Saturno) ===
+                //     Saturno). v6.51.10 — VIVEN AL ÁNIMO: giran con el
+                //     compás del dueño y se ACERCAN al centro cuando la
+                //     cría CARGA su destello (la espiral de la carga). ===
                 for (int anillo = 0; anillo < 2; anillo++)
                 {
-                    float rx = (anillo == 0 ? 218f : 300f) * S;
-                    float ry = (anillo == 0 ? 134f : 90f) * S;
-                    float w = anillo == 0 ? 0.55f : -0.38f;          // sentidos opuestos
+                    float rx = (anillo == 0 ? 218f : 300f) * S * comprimePerlas;
+                    float ry = (anillo == 0 ? 134f : 90f) * S * comprimePerlas;
+                    float w = (anillo == 0 ? 0.55f : -0.38f) * animo;  // sentidos opuestos, al ánimo
                     Color cP = anillo == 0 ? new Color(255, 240, 190) : new Color(196, 150, 255);
                     for (int i = 0; i < 13; i++)
                     {
@@ -343,8 +486,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 // === 6. EL NÚCLEO (la sección 6 del jefe: el corazón
                 //     BLANCO de 130·latido al 1.0 + su alma DORADA de
-                //     0.42× al 0.65 — el centro del dios) ===
-                float tamNucleo = 130f * latido * S;
+                //     0.42× al 0.65 — el centro del dios). v6.51.10 — Y
+                //     EL ESTIRO DEL VUELO: el corazón respira MÁS
+                //     GRANDE cuando corre (el vivo de la velocidad). ===
+                float tamNucleo = 130f * latido * S * estiro;
                 VFXCore.Quad(c, new Color(255, 252, 240, 255) * (1.0f * brillo),
                     new Vector2(tamNucleo * 2.85f, tamNucleo * 2.85f), 0f, VFXCore.SoftGlow);
                 VFXCore.Quad(c, new Color(255, 252, 240, 255) * (1.0f * brillo),

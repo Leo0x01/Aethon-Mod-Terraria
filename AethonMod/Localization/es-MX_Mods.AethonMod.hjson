@@ -2430,14 +2430,12 @@ Despertar: {
 	Voz2: Siento los anillos, portador. TODOS los anillos.
 	Voz3: Cada despertar me recuerda lo que era antes.
 	Voz4: (el libro se estremece de gusto) Eso. MÁS de eso.
-	FaltaEsencia: ✦ El grimorio aparta el plato: le faltan {0} esencia(s)… y {1}.
-	FaltaDinero: ✦ El grimorio aparta el plato: le faltan {0}.
-	FaltaMineral: ✦ El grimorio aparta el plato: pide {0} × {1} y a esa pila le faltan {2}.
 	OjosCerrados: ✦ El escuadrón aún duerme: se necesita NIVEL {0} para el primer ojo.
 	MejorasSelladas: ✦ Las mejoras nacen con EL DESPERTAR (5/15/30/40). Actual: {0}.
 	NuevoOjo: ✧ ¡El grimorio puede invocar un OJO NUEVO! (el número {0} del escuadrón)
 	CerrojoEsbirros: ✦ El grimorio no comparte su cielo: con sus ojos velando, ningún otro esbirro responde.
 	EsenciaDevorada: ✦ El Eterno devora {0} × {1}: +{2}% de daño permanente.
+	DevoraInventario: ✦ El Eterno SE SIRVIÓ SOLO: la ofrenda del despertar {0} salió derecha de tu inventario.
 	ReqArmaLimpia: Requiere un arma SIN corromper
 	NaceCorrupta: Nace CORRUPTA: +5% a TODAS sus estadísticas · sin etiquetas ni reforge
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario
@@ -3090,6 +3088,13 @@ Pueblo: {
 Tiles.AltarDeLaCaida.MapEntry: Altar de la Caída
 Tiles.BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 Duende.ArmaCorrompida: Esa arma está corrompida… no puedo hacer nada con ella. Ni reforge, ni prefijo, ni magia de taller: lo que la bruma del despertar tocó ya no es de este mundo.
+Duende.Miedo1: ¡¿QUÉ ES ESO?! ¡¿QUÉ LLEVAS?! ¡Ni lo acerques al yunque! Ese libro me MIRÓ, ¿eh? ¡ME MIRÓ… Y PARPADEÓ!
+Duende.Miedo2: Nononono. Yo reforjo METALES, no… no… ¿eso qué es? ¡No pienso tocarlo! La última cosa «viva» que toqué en la forja me dejó sin dos dedos ¡y sin el sueño!
+Duende.Miedo3: ¡Lárgate con ese… esa COSA de mi taller! El yunque es para ACERO, no para lo que sea que ESO tenga por páginas… ¿Oíste eso? ¡Acaba de REÍRSE! ¡POR EL HIERRO SAGRADO!
+Duende.Miedo4: Te lo digo de goblin a goblin: hay tintas que no se borran y libros que no se reparan… ¡y ESO es AMBAS COSAS! ¡Fuera! ¡FUERA DE MI TIENDA!
+Duende.Burla1: «(El Eterno hojea, aburrido) ¿ESTE era el gran artesano? Un enano con un martillo de juguete… ni mi página índice lo teme.»
+Duende.Burla2: «(El Eterno ríe entre páginas) ¿Reforjarme? ¡JA! Duende: tu yunque es la cuna… yo soy la bestia que se comió al herrero.»
+Duende.Burla3: «(El Eterno susurra) Tiembla, chatarra barbuda: tu miedo es lo más sabio que harás hoy. Al menos el enanito sabe reconocer a sus mayores.»
 
 // v6.51.1 — LA RAREZA CÓSMICA DEL ETERNO
 Rarities: {
