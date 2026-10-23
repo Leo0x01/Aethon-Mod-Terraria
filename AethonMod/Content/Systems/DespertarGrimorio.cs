@@ -193,51 +193,64 @@ namespace AethonMod.Content.Systems
         //  v6.51.8 — LA OFRENDA MINERAL (la letra: «en caso de no haber
         //  mas arma usar cierta cantidad de lingotes de algun mineral
         //  correspondiente con el nivel… al ser minerales no necesitan
-        //  estar corruptos ya que no se corrompen como las armas»): con
-        //  las armas de verdad agotadas (el Señor de la Luna entregó
-        //  TODAS en el 44), los peldaños de la cima piden LINGOTES — el
-        //  metal que corresponde al nivel, en cantidades que CRECEN con
-        //  el despertar. Se devuelven SOLTANDO LA PILA con el Eterno en
-        //  la mano (el mismo gesto del arma — sin corrupción: los
-        //  minerales no se corrompen).
+        //  estar corruptos ya que no se corrompen como las armas»).
+        //  v6.51.9 — LA OFRENDA MINERAL EN TODA LA ESCALERA (la letra:
+        //  «en caso de que la gente no pueda conseguir las armas,
+        //  tambien dale una opcion de lingotes segun el nivel claro y
+        //  siempre deben ser mas de 50 lingotes para cada despertar no
+        //  menos, ademas el numero de lingotes siempre debe ir
+        //  aumentando por cada nivel de despertar»): el metal que
+        //  corresponde a CADA nivel — en los peldaños de armas (1-44) es
+        //  la ALTERNATIVA cuando el arma no llega; en la cima (45-50,
+        //  agotadas las armas de verdad) es LA OFRENDA. Se devuelven
+        //  SOLTANDO LA PILA con el Eterno en la mano (el mismo gesto del
+        //  arma — sin corrupción: los minerales no se corrompen).
         // ================================================================
 
         /// <summary>¿EL NIVEL N ES DE MINERALES? (true = la ofrenda es
-        /// la pila de lingotes — no hay arma del peldaño).</summary>
+        /// SOLO la pila de lingotes — no hay arma del peldaño; los
+        /// peldaños de armas 1-44 ofrecen el mineral como ALTERNATIVA).</summary>
         public static bool EsNivelMineral(int nivel)
             => nivel >= 45 && nivel <= NivelMax;
 
-        /// <summary>EL MINERAL del peldaño N (el lingote que pide — la
-        /// luminita del Señor de la Luna en la escalera 45-48; la
-        /// hongonita y el espectro en la cima del mundo).</summary>
+        /// <summary>EL MINERAL DEL PELDAÑO N (el lingote que pide — la
+        /// escalera de metales QUE CORRESPONDE al nivel: el cobre del
+        /// primer peldaño… la luminita del Señor de la Luna en la cima
+        /// 37-48… la hongonita y el espectro en el final del mundo).
+        /// v6.51.9: definido EN TODA LA ESCALERA 1-50 — la alternativa
+        /// mineral vive en cada peldaño de armas.</summary>
         public static int MineralDe(int nivel)
         {
-            switch (nivel)
-            {
-                case 45: return ItemID.LunarBar;      // 36 lingotes de luminita
-                case 46: return ItemID.LunarBar;      // 45
-                case 47: return ItemID.LunarBar;      // 54
-                case 48: return ItemID.LunarBar;      // 63
-                case 49: return ItemID.ShroomiteBar;  // 33 de hongonita
-                case 50: return ItemID.SpectreBar;    // 33 de espectro (LA GRAN OFRENDA FINAL)
-                default: return -1;                   // no es peldaño mineral
-            }
+            if (nivel < 1 || nivel > NivelMax) return -1;   // no es peldaño
+            if (nivel == 50) return ItemID.SpectreBar;      // LA GRAN OFRENDA FINAL
+            if (nivel == 49) return ItemID.ShroomiteBar;    // la cima mineral del mundo vivo
+            if (nivel >= 45) return ItemID.LunarBar;        // 45-48: la luminita del Señor de la Luna
+            if (nivel >= 37) return ItemID.LunarBar;        // 37-44: las torres y el Señor de la Luna
+            if (nivel >= 30) return ItemID.ShroomiteBar;    // 30-36: la era post-Plantera
+            if (nivel >= 25) return ItemID.ChlorophyteBar;  // 25-29: la clorofita y sus verdaderas
+            if (nivel >= 24) return ItemID.HallowedBar;     // 24: la sagrada (Excalibur)
+            if (nivel >= 23) return ItemID.AdamantiteBar;   // 23: la adamantita/titanio
+            if (nivel >= 22) return ItemID.MythrilBar;      // 22: el mitril/oricalco
+            if (nivel >= 21) return ItemID.CobaltBar;       // 21: el cobalto/paladio (MODO DIFÍCIL)
+            if (nivel >= 7) return ItemID.HellstoneBar;     // 7-20: la era del infierno (la pre-difícil larga)
+            if (nivel >= 6) return ItemID.MeteoriteBar;     // 6: el meteorito
+            if (nivel >= 5) return ItemID.DemoniteBar;      // 5: la demonita/carmesí
+            if (nivel >= 4) return ItemID.GoldBar;          // 4: el oro/platino
+            if (nivel >= 3) return ItemID.SilverBar;        // 3: la plata/tungsteno
+            if (nivel >= 2) return ItemID.IronBar;          // 2: el hierro/plomo
+            return ItemID.CopperBar;                        // 1: el cobre/estaño de la letra
         }
 
-        /// <summary>CUÁNTOS LINGOTES exige el peldaño N (la cantidad
-        /// crece con el nivel — la luminita de la cima del mundo).</summary>
+        /// <summary>CUÁNTOS LINGOTES exige el peldaño N (la letra de la
+        /// .51.9: «siempre deben ser mas de 50 lingotes para cada
+        /// despertar no menos, ademas el numero de lingotes siempre debe
+        /// ir aumentando por cada nivel de despertar»): 51 en el nivel 1
+        /// y +2 POR NIVEL — siempre más de 50, siempre creciente (149
+        /// la gran ofrenda final del 50).</summary>
         public static int CantidadMineralDe(int nivel)
         {
-            switch (nivel)
-            {
-                case 45: return 36;
-                case 46: return 45;
-                case 47: return 54;
-                case 48: return 63;
-                case 49: return 33;
-                case 50: return 33;
-                default: return 0;
-            }
+            if (nivel < 1 || nivel > NivelMax) return 0;
+            return 51 + 2 * (nivel - 1);
         }
 
         /// <summary>¿CUÁNTOS LINGOTES del peldaño lleva ESTE jugador en
@@ -257,9 +270,13 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>¿LLEVA YA LA OFRENDA MINERAL COMPLETA? (el ✓ de la
-        /// lista — listo para soltar la pila ante el libro).</summary>
+        /// lista — listo para soltar la pila ante el libro). v6.51.9:
+        /// vale en TODA la escalera — en los peldaños de armas es la
+        /// ALTERNATIVA («O la ofrenda mineral»), en la cima es la
+        /// ofrenda misma.</summary>
         public static bool LlevaMineralCompleto(Player p, int nivel)
-            => MineralesEnManos(p, nivel) >= CantidadMineralDe(nivel) && EsNivelMineral(nivel);
+            => nivel >= 1 && nivel <= NivelMax &&
+               MineralesEnManos(p, nivel) >= CantidadMineralDe(nivel);
 
         /// <summary>¿Es ESTA arma la del peldaño del nivel N?</summary>
         public static bool EsArmaDelNivel(int nivel, Item arma)

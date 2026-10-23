@@ -306,11 +306,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int tier = Tier;
 
             // ============================================================
-            //  LA NOVA RÚNICA — UNA SOLA EXPLOSIÓN (la lección v5.97):
-            //  una onda nova (StyleNova, la de la familia del sol) + AoE
-            //  del núcleo + la RÁFAGA DE RUNAS DE ECO — escalado por copia.
-            //  v6.50 — GolpeMotor: el AoE del núcleo va por el cauce del
-            //  motor (cliente dueño); la onda y la quemadura siguen
+            //  LA NOVA RÚNICA — UNA SOLA EXPLOSIÓN (la lección v5.97).
+            //  v6.51.9 — LA NOVA ES SOLO BRUMA (la letra: «la explocion
+            //  final del sol runico sigue usando el sprite en vez de usar
+            //  solo bruma»): LA ONDA DE LENTE MURIÓ — los anillos
+            //  dibujados de la StyleNova (Ring/FireRing, SPRITES) ya no
+            //  existen en el sol rúnico. TODO el daño de la nova vive
+            //  AQUÍ, en UNA sola pasada: el AoE directo abrazando EL
+            //  RADIO COMPLETO de la explosión (el que la onda barría)…
+            //  y el círculo de BRUMA DORADA (BrumaNacimientoFX, modo 3)
+            //  ES la explosión entera. v6.50 — GolpeMotor: el AoE va por
+            //  el cauce del motor (cliente dueño); la quemadura sigue
             //  siendo autoridad.
             // ============================================================
             // v6.26 — LA NOVA DEL SELLADO: la VEINTE revienta ×1.6 con
@@ -319,32 +325,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int novaDamage = Math.Max(1, (int)(Projectile.damage * (supremo ? 1.6f : 1.25f)));
             float novaRadius = 380f + 14f * (tier - 1) + (supremo ? 120f : 0f);
 
-            // v6.50.2 — FIX (nova fantasma en MP): el gate netMode dejaba
-            // el spawn en el SERVER con owner=índice de jugador ≠ myPlayer(255)
-            // → NewProjectile JAMÁS lo difundía (solo difunde owner==myPlayer,
-            // verificado en el IL) y el cliente dueño tampoco lo engendraba:
-            // visual Y daño de la nova perdidos para cualquier jugador no-host.
-            // El patrón de los agujeros (BlackHoleProjectile): lo engendra la
-            // máquina DUEÑA y el propio NewProjectile sincroniza.
-            if (Projectile.owner == Main.myPlayer)
-            {
-                Projectile.NewProjectile(
-                    Projectile.GetSource_FromThis(),
-                    Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
-                    ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                    novaDamage, 0f, Projectile.owner,
-                    0f,                                  // sin retardo — TODO sucede YA
-                    CosmicShockwaveProjectile.StyleNova,
-                    novaRadius);                         // radio escalado por copia
-            }
-
-            // AoE del núcleo (el epicentro de la MISMA explosión).
-            float coreR = 260f + 12f * (tier - 1) + (supremo ? 90f : 0f);
+            // === EL AOE COMPLETO (el radio entero de la nova — el que la
+            //     onda de lente barría: TODO sucede YA, en UNA explosión;
+            //     la onda ya no existe). ===
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
-                float dist = (npc.Center - Projectile.Center).Length();
-                if (dist < coreR)
+                if ((npc.Center - Projectile.Center).Length() < novaRadius)
                 {
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDamage,
                         Projectile.knockBack, true);
@@ -355,22 +342,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === v6.51.5 — LA NOVA DE BRUMA (la letra: «a la explosion
-            //     final del sol runico, en vez de ser un sprite de un
-            //     circulo de fuego, no seria mejor que sea un circulo de
-            //     bruma»): EL CÍRCULO DE FUEGO MURIÓ (los dos anillos de
-            //     polvos de llama y los pulsos circulares) — la nova
-            //     ahora EXHALA SU CÍRCULO DE BRUMA DORADA: DOCE cúmulos
-            //     que se expanden, se desgarran y se disuelven (BrumaFX
-            //     de la casa — BrumaNacimientoFX modo 3, con el radio
-            //     REAL de esta nova). Las runas de eco y la onda de
-            //     lente SIGUEN viviendo abajo. ===
+            // === v6.51.5 → v6.51.9 — LA NOVA DE BRUMA ES LA EXPLOSIÓN
+            //     (la letra: «en vez de ser un sprite de un circulo de
+            //     fuego… que sea un circulo de bruma» + la de la .51.9:
+            //     «solo bruma»): LA DOBLE CAPA — el círculo COMPLETO al
+            //     radio de la nova (BrumaFX de la casa, modo 3) + un
+            //     anillo interior MÁS DENSO que se disipa antes (la
+            //     profundidad del estallido). Las runas de eco, la chispa
+            //     central, el temblor y los truenos SIGUEN viviendo. ===
             Projectile.NewProjectileDirect(
                 Projectile.GetSource_FromThis(),
                 Projectile.Center, Vector2.Zero,
                 ModContent.ProjectileType<BrumaNacimientoFX>(),
                 0, 0f, Projectile.owner, 3f,
-                novaRadius / 340f);   // la escala del círculo (la VEINTE respira más)
+                novaRadius / 340f);   // el círculo de la nova (la VEINTE respira más)
+            Projectile.NewProjectileDirect(
+                Projectile.GetSource_FromThis(),
+                Projectile.Center, Vector2.Zero,
+                ModContent.ProjectileType<BrumaNacimientoFX>(),
+                0, 0f, Projectile.owner, 3f,
+                (novaRadius * 0.55f) / 340f);   // el corazón de bruma — más cerca, más denso
 
             // === LA CHISPA DE LA NOVA (el fogonazo central que enciende
             //     el círculo — la primera luz del estallido). ===
@@ -392,8 +383,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.fadeIn = 0f;
             }
 
-            // (v6.51.5 — EL FUEGO DE LA NOVA MURIÓ: los dos anillos de
-            //  polvos de llama ya no existen — el círculo es de BRUMA.)
+            // (v6.51.9 — LA ONDA DE LENTE MURIÓ: los anillos de sprite de
+            //  la StyleNova ya no nacen del sol rúnico — solo bruma.)
 
             // === Screenshake coordinado (LA VEINTE sacude más: 12) ===
             try

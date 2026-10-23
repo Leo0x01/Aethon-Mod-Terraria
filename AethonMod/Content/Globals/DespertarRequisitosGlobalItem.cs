@@ -75,6 +75,11 @@ namespace AethonMod.Content.Globals
                     //     peldaños MINERALES, los lingotes del inventario
                     //     (la ofrenda mineral — sin corrupción).
                     "DespertarReq4" => RequisitoDeLaOfrenda(portador, siguiente),
+                    // v6.51.9 — LA ALTERNATIVA MINERAL de los peldaños de
+                    //     armas (la línea «O la ofrenda mineral»): cuenta
+                    //     los lingotes del metal del nivel — SIEMPRE >50 y
+                    //     creciente (la letra de la .51.9).
+                    "DespertarReq6" => Systems.DespertarGrimorio.LlevaMineralCompleto(portador, siguiente),
                     _ => null,
                 };
                 if (cumplido == true)

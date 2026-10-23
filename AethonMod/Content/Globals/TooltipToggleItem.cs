@@ -18,18 +18,30 @@ namespace AethonMod.Content.Globals
     /// grimorio tiene demasiada informacion, crea una nueva ventana de
     /// informacion para repartir mejor la informacion»): la vista completa
     /// de la .108 se PARTE en dos — el clic derecho cicla
-    /// BÁSICA → EL ARMA → EL FESTÍN → BÁSICA:
-    ///   · 0 BÁSICA   — la caja compacta de la .108 (daño, lore, progresión).
-    ///   · 1 EL ARMA  — DAÑO · RECURSOS · PROYECTIL · BONUS (el poder).
-    ///   · 2 EL FESTÍN — LOS OJOS DEL ETERNO · PROGRESIÓN · LA PRIMERA CENA
-    ///     (los minion y la vida del libro).
+    /// BÁSICA → EL ARMA → EL FESTÍN → BÁSICA.
+    ///
+    /// v6.51.9 — CUATRO VENTANAS (la letra: «poner en una nueva ventana de
+    /// informacion todo el apartado de Progresion, y que la ventana de
+    /// progresion sea la segunda ventana, primero la ventana normal, luego
+    /// la de progresion, luego la de las estadisticas del arma y por ultimo
+    /// la ventana de festin, la ventana de festin deberia tener otro nombre
+    /// ya que lo que muestra es informacion del escuadron y sus ataques
+    /// combinados»): el apartado PROGRESIÓN se muda a SU PROPIA ventana y
+    /// la vieja ventana del festín se llama EL ESCUADRÓN (eso es lo que
+    /// enseña: el escuadrón y sus ataques combinados). El clic derecho cicla
+    ///   · 0 BÁSICA       — la caja compacta (daño, lore).
+    ///   · 1 PROGRESIÓN   — nivel, despertar, requisitos, hambre, hitos.
+    ///   · 2 EL ARMA      — DAÑO · RECURSOS · PROYECTIL · BONUS (el poder).
+    ///   · 3 EL ESCUADRÓN — LOS OJOS DEL ETERNO · LO DEVORADO · LOS
+    ///     ATAQUES COMBINADOS (el escuadrón del libro y su festín).
     /// </summary>
     public class TooltipToggleItem : GlobalItem
     {
         public override bool InstancePerEntity => false;
 
         // Flag estático — NO se persiste por-item (igual que SeerOrbToggle)
-        /// <summary>La ventana activa: 0 = básica · 1 = EL ARMA · 2 = EL FESTÍN.</summary>
+        /// <summary>La ventana activa: 0 = básica · 1 = PROGRESIÓN ·
+        /// 2 = EL ARMA · 3 = EL ESCUADRÓN.</summary>
         public static int VistaEstadisticas = 0;
 
         /// <summary>Compat v6.50.108: ¿alguna ventana de estadísticas abierta?</summary>
@@ -66,8 +78,9 @@ namespace AethonMod.Content.Globals
             }
             _rightMouseLast = rightMouseNow;
 
-            // Ciclar la ventana (NO toca el inventario): básica → arma → festín → básica
-            VistaEstadisticas = (VistaEstadisticas + 1) % 3;
+            // Ciclar la ventana (NO toca el inventario):
+            // básica → progresión → arma → escuadrón → básica
+            VistaEstadisticas = (VistaEstadisticas + 1) % 4;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
     }

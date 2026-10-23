@@ -179,11 +179,14 @@ namespace AethonMod.Content.NPCs
             // CATÁLOGO), el sabor del libro y su rareza IMPOSIBLE.
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
             {
-                // v6.51.3 — LA ETIQUETA ✦ LEGENDARIO SUPREMO ✦ (la letra:
-                // la etiqueta se muda del tooltip del arma AQUÍ — a la
-                // ficha del grimorio, en NEGRO con los destellos de 4
-                // puntas de los soles rúnicos de 3 anillos+).
-                new global::AethonMod.Content.Bestiary.EtiquetaSupremaInfoElement(),
+                // (v6.51.9 — LA ETIQUETA ✦ LEGENDARIO SUPREMO ✦ MURIÓ de
+                // la ficha: la letra — «entonces ya puedes quitar el
+                // legendario supremo en el bestiario» — porque AHORA el
+                // rótulo vive EN EL NOMBRE DEL ARMA: la etiqueta de la
+                // escalera (Legendario Supremo, nivel 95+) con su traje
+                // morado-negro y sus destellos — GrimoireEternal +
+                // NombreEternoGlobalItem. La ficha queda con sus DIEZ
+                // ESTRELLAS NEGRAS de siempre.)
                 // v6.51.1 — LAS DIEZ ESTRELLAS NEGRAS (la letra: «10
                 // estrellas negras brillantes y titilantes» — ahora en
                 // la categoría PORTRAIT: donde estaban las amarillas).

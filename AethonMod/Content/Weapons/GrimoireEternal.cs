@@ -143,6 +143,84 @@ namespace AethonMod.Content.Weapons
             catch { return null; }
         }
 
+        // ================================================================
+        //  v6.51.9 — LA ESCALERA DE ETIQUETAS DEL NOMBRE (la letra:
+        //  «a medida que el grimorio suba de nivel esa etiqueta () debe
+        //  ir mejorando, siempre debe empezar con la peor etiqueta y
+        //  cada 11 niveles debe mejorar al siguiente nivel y asi hasta
+        //  llegar a Legendario y luego de llegar a Legendario entonces
+        //  50 niveles despues debe llegar a una nueva etiqueta del mod
+        //  esclusiva para el grimorio (Legendario Supremo)»).
+        //
+        //  LA ESCALERA (por NIVEL del libro — cada 11 niveles):
+        //    1  → (Común)      la peor — así nace el libro dormido
+        //    12 → (Raro)
+        //    23 → (Épico)
+        //    34 → (Mítico)
+        //    45 → (Legendario)         …y 50 niveles después:
+        //    95 → (Legendario Supremo) LA EXCLUSIVA DEL MOD — cuando el
+        //         nombre consigue EL BRILLO característico (morado y
+        //         negro con bordes dorados, negros y morados —
+        //         NombreEternoGlobalItem).
+        // ================================================================
+
+        /// <summary>El ÍNDICE de la etiqueta del libro por su nivel
+        /// (0 Común · 1 Raro · 2 Épico · 3 Mítico · 4 Legendario ·
+        /// 5 Legendario Supremo): cada 11 niveles un peldaño (12 · 23 ·
+        /// 34 · 45) y el Supremo a los 50 niveles del Legendario (95).</summary>
+        public static int IndiceEtiqueta(int nivel)
+        {
+            if (nivel >= 95) return 5;   // 45 + 50: la exclusiva del mod
+            if (nivel >= 45) return 4;   // Legendario — el final de la escalera normal
+            if (nivel >= 34) return 3;   // Mítico
+            if (nivel >= 23) return 2;   // Épico
+            if (nivel >= 12) return 1;   // Raro
+            return 0;                    // Común — la peor etiqueta: así empieza
+        }
+
+        /// <summary>EL TEXTO de la etiqueta (el paréntesis que SIEMPRE
+        /// va AL FINAL del nombre).</summary>
+        public static string NombreEtiqueta(int indice)
+        {
+            switch (indice)
+            {
+                case 5: return "Legendario Supremo";
+                case 4: return "Legendario";
+                case 3: return "Mítico";
+                case 2: return "Épico";
+                case 1: return "Raro";
+                default: return "Común";
+            }
+        }
+
+        /// <summary>EL COLOR del nombre por etiqueta — la escalera
+        /// cromática: la peor es gris pálida, Raro verde, Épico naranja,
+        /// Mítico el VIOLETA CÓSMICO que respira (la rareza de siempre),
+        /// Legendario el ORO clásico… y el SUPREMO lo dibuja
+        /// NombreEternoGlobalItem (morado y negro con bordes dorados,
+        /// negros y morados + sus destellos — este color es solo el
+        /// respaldo).</summary>
+        public static Color ColorEtiqueta(int indice)
+        {
+            switch (indice)
+            {
+                case 4: return new Color(255, 205, 92);    // el oro legendario
+                case 3:
+                    {
+                        // el violeta cósmico que respira (LegendarioSupremo.cs)
+                        float t = Main.GlobalTimeWrappedHourly;
+                        float r = 0.62f + 0.20f * MathF.Sin(t * 0.9f);
+                        float g = 0.22f + 0.14f * MathF.Sin(t * 0.53f + 2.1f);
+                        float b = 0.95f + 0.05f * MathF.Sin(t * 1.7f + 0.6f);
+                        return new Color(r, g, b);
+                    }
+                case 2: return new Color(255, 158, 66);    // el naranja épico
+                case 1: return new Color(108, 212, 128);   // el verde raro
+                case 5: return new Color(178, 120, 235);   // (lo pinta el PreDraw del Supremo)
+                default: return new Color(198, 198, 198);  // el gris pálido común
+            }
+        }
+
         /// <summary>
         /// v6.45: ¿el minion NO cuesta maná? Bandera de pruebas en config
         /// (ManaGratisEnPruebas, ON por defecto). Null-safe: sin config
@@ -195,6 +273,44 @@ namespace AethonMod.Content.Weapons
             // forja: nace. (La Bolsa de los Fundacionales sigue siendo la
             // vía de pruebas del kit; esta receta sigue vacía a propósito
             // — el arma raíz del mod no se clava con madera.)
+        }
+
+        // ================================================================
+        //  v6.51.9 — EL NOMBRE DEL LIBRO ES SUYO (la letra: «cuando
+        //  agarre al grimorio dormido al llegar al inventario decia
+        //  Grimorio del Eterno (Agil)»): los PREFIJOS DE VANILLA MURIERON
+        //  — QuickSpawnItem pasa Prefix(-1) y el 75 % de las veces el
+        //  libro nacía con un prefijo universal (en la localización
+        //  española se leen ENTRE PARÉNTESIS tras el nombre: «(Ágil)»).
+        //  El paréntesis del Eterno es SU ETIQUETA DE ESCALERA y NADA
+        //  MÁS — y el libro no se reforja: su poder es su nivel, su
+        //  despertar y su festín (el yunque se le niega en
+        //  AlmaEternoGlobalItem.CanReforge).
+        // ================================================================
+
+        public override bool? PrefixChance(int pre, Terraria.Utilities.UnifiedRandom rand)
+            => false;   // NUNCA un prefijo: ni al nacer (-1) ni reforge (-3)
+
+        /// <summary>EL PARÉNTESIS VIVE EN EL NOMBRE (y LA MIGRACIÓN):
+        /// el libro en la bolsa lleva SIEMPRE su etiqueta puesta (el
+        /// texto del nombre — se ve en el tooltip, en el chat de
+        /// recogida, en todas partes), y los Eternos viejos que ya
+        /// cargaban un prefijo de vanilla lo SUELTAN aquí al primer
+        /// tick.</summary>
+        public override void UpdateInventory(Player player)
+        {
+            base.UpdateInventory(player);   // EL RELOJ DEL HAMBRE de la familia — INTACTO
+            try
+            {
+                if (Item == null || Item.IsAir) return;
+                if (Item.prefix != 0)
+                    Item.ResetPrefix();     // la migración: fuera «(Ágil)»
+                var sl = GetShard(Item);
+                int idxEtiqueta = IndiceEtiqueta(sl?.Level ?? 1);
+                string nombreBase = Lang.GetItemNameValue(Item.type);
+                Item.SetNameOverride(nombreBase + " (" + NombreEtiqueta(idxEtiqueta) + ")");
+            }
+            catch { }
         }
 
         // ================================================================
@@ -466,9 +582,17 @@ namespace AethonMod.Content.Weapons
                 // DanoOjosDelEterno — su base, su nivel, su despertar.
                 int danoOjo = WeaponScaling.DanoOjosDelEterno(Item.damage, level, player);
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.OjoEternoBuff>(), 18000);
-                Projectile.NewProjectile(source, position, Vector2.Zero,
+                int ojoIdx = Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>(),
                     danoOjo, knockback, player.whoAmI, 0f, 0f, level);
+                // v6.51.9 — LA AUDITORÍA DEL ×1,25: si el daño nació con el
+                // bonus del DESPERTAR 50 HORNEADO (DanoOjosDelEterno lo
+                // hornea), se marca — las consumidoras (el rayo del ojo,
+                // los ataques combinados) NO vuelven a multiplicarlo.
+                if (ojoIdx >= 0 && Main.projectile[ojoIdx].ModProjectile
+                        is global::AethonMod.Content.Projectiles.OjoEternoMinion ojoNuevo)
+                    ojoNuevo.Bonus50Horneado =
+                        DespertarGrimorio.NivelDe(player) >= DespertarGrimorio.NivelMax;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
             }
@@ -567,11 +691,23 @@ namespace AethonMod.Content.Weapons
         //  La letra de la .110: «la segunda ventana de info del grimorio
         //  tiene demasiada informacion, crea una nueva ventana de
         //  informacion para repartir mejor la informacion» → la vista
-        //  completa SE PARTE EN DOS y el clic derecho cicla TRES ventanas
-        //  (TooltipToggleItem.VistaEstadisticas):
-        //    · 1 EL ARMA   — DAÑO · RECURSOS · PROYECTIL · BONUS.
-        //    · 2 EL FESTÍN — LOS OJOS DEL ETERNO · PROGRESIÓN · LA
-        //      PRIMERA CENA (el nuevo festín del primer jefe).
+        //  completa SE PARTE EN DOS.
+        //  v6.51.9 — CUATRO VENTANAS (la letra: «poner en una nueva
+        //  ventana de informacion todo el apartado de Progresion, y que
+        //  la ventana de progresion sea la segunda ventana, primero la
+        //  ventana normal, luego la de progresion, luego la de las
+        //  estadisticas del arma y por ultimo la ventana de festin, la
+        //  ventana de festin deberia tener otro nombre ya que lo que
+        //  muestra es informacion del escuadron y sus ataques
+        //  combinados») — el clic derecho cicla (TooltipToggleItem):
+        //    · 1 PROGRESIÓN   — EL NIVEL · EL DESPERTAR · SUS REQUISITOS
+        //      · EL HAMBRE · LOS HITOS (el apartado entero, en SU ventana:
+        //      la básica ya no lo lleva — y el camino solo enseña EL
+        //      PRÓXIMO hito, no la escalera completa).
+        //    · 2 EL ARMA      — DAÑO · RECURSOS · PROYECTIL · BONUS.
+        //    · 3 EL ESCUADRÓN — LOS OJOS DEL ETERNO · LO DEVORADO · LOS
+        //      ATAQUES COMBINADOS (antes «EL FESTÍN»: eso es lo que
+        //      enseña — el escuadrón del libro, y así se llama).
         //  Y el análisis de la .110 («analisa si las estadisticas del
         //  grimorio eterno aplican realmente») dejó las etiquetas
         //  HONESTAS: el crítico y la penetración son MÁGICOS y exigen
@@ -613,11 +749,46 @@ namespace AethonMod.Content.Weapons
             }
 
             var sl = GetShard(Item);
-            // v6.50.110 — LAS TRES VENTANAS: 0 básica · 1 EL ARMA · 2 EL FESTÍN
+            // v6.51.9 — LAS CUATRO VENTANAS: 0 básica · 1 PROGRESIÓN ·
+            // 2 EL ARMA · 3 EL ESCUADRÓN (la vieja ventana del festín se
+            // llama EL ESCUADRÓN — eso es lo que enseña: el escuadrón del
+            // libro y sus ataques combinados).
             int vista = Globals.TooltipToggleItem.VistaEstadisticas;
             bool completa = sl != null && vista != 0;
-            bool ventanaArma = sl != null && vista == 1;
-            bool ventanaFestin = sl != null && vista == 2;
+            bool ventanaProgresion = sl != null && vista == 1;
+            bool ventanaArma = sl != null && vista == 2;
+            bool ventanaFestin = sl != null && vista == 3;
+
+            // === v6.51.9 — EL COLOR DE LA ETIQUETA DEL NOMBRE (la letra:
+            //     «a medida que el grimorio suba de nivel esa etiqueta ()
+            //     debe ir mejorando… hasta llegar a Legendario»): el
+            //     paréntesis SIEMPRE AL FINAL del nombre es SU ETIQUETA DE
+            //     ESCALERA — Común → Raro → Épico → Mítico → Legendario →
+            //     y 50 niveles después LA EXCLUSIVA DEL MOD: Legendario
+            //     Supremo (cada 11 niveles un peldaño). El TEXTO vive en el
+            //     nombre del item (SetNameOverride en UpdateInventory y al
+            //     nacer en AlmaEternoGlobalItem.OnSpawn — se ve en el
+            //     tooltip, en el chat de recogida, en todas partes); aquí
+            //     se le viste SU COLOR de escalera (el Supremo lo dibuja
+            //     entero NombreEternoGlobalItem). ===
+            try
+            {
+                int idxEtiqueta = IndiceEtiqueta(sl?.Level ?? 1);
+                string etiquetaTxt = "(" + NombreEtiqueta(idxEtiqueta) + ")";
+                for (int i = 0; i < tooltips.Count; i++)
+                {
+                    if (tooltips[i].Mod != "Terraria" || tooltips[i].Name != "ItemName")
+                        continue;
+                    // (por si el libro se mira desde un cofre — sin
+                    // UpdateInventory que haya puesto el nombre: el
+                    // paréntesis se pone aquí, SIN duplicarlo)
+                    if (!tooltips[i].Text.EndsWith(etiquetaTxt))
+                        tooltips[i].Text = tooltips[i].Text + " " + etiquetaTxt;
+                    tooltips[i].OverrideColor = ColorEtiqueta(idxEtiqueta);
+                    break;
+                }
+            }
+            catch { }
 
             // === v6.50.108 — LA SEGUNDA VENTANA: en vista COMPLETA se
             //     ocultan las líneas vanilla básicas (el hueco lo llenan
@@ -672,8 +843,9 @@ namespace AethonMod.Content.Weapons
                 ? Item.GetGlobalItem<Globals.AlmaEternoGlobalItem>()
                 : null;
             // v6.51.1 — LO DEVORADO solo en SU ventana (la letra: la
-            // tercera ventana es SOLO estadísticas del escuadrón y su
-            // festín — nada de progresión ni descripciones).
+            // ventana del escuadrón es SOLO estadísticas del escuadrón y
+            // su festín — nada de progresión ni descripciones; v6.51.9:
+            // ahora es la CUARTA ventana, EL ESCUADRÓN).
             if (ventanaFestin && spDevorado != null && spDevorado.DevoracionPoder > 0)
             {
                 // El porcentaje como TEXTO a 2 decimales: 1 esencia = +0,25
@@ -746,7 +918,8 @@ namespace AethonMod.Content.Weapons
                         string.Join(" ", almas)));
             }
 
-            // === v6.50.110 — LA VENTANA 1 · EL ARMA: el poder del libro
+            // === v6.50.110 — LA VENTANA DEL ARMA (v6.51.9: la TERCERA de
+            //     las cuatro — tras la progresión): el poder del libro
             //     (DAÑO / RECURSOS / PROYECTIL / BONUS). El repertorio de
             //     la .106/.107 con las etiquetas HONESTAS del análisis:
             //     el crítico y la penetración son MÁGICOS y viven
@@ -824,9 +997,11 @@ namespace AethonMod.Content.Weapons
                     "[c/78788C:Barra rápida: vida/maná (tope +100) · slots de minion]"));
             }
 
-            // === v6.50.110 — LA VENTANA 2 · EL FESTÍN: LOS OJOS DEL
-            //     ETERNO + LA PRIMERA CENA (los sirvientes del libro y
-            //     su festín del primer jefe) ===
+            // === v6.50.110 — LA VENTANA DEL ESCUADRÓN (v6.51.9 — LA
+            //     CUARTA Y ÚLTIMA: antes «EL FESTÍN», pero lo que enseña
+            //     es el escuadrón del libro y sus ataques combinados — la
+            //     letra le puso SU NOMBRE VERDADERO): LOS OJOS DEL ETERNO
+            //     + LO DEVORADO + LOS ATAQUES COMBINADOS ===
             if (ventanaFestin)
             {
                 int minionCost = WeaponScaling.MinionManaCost(sl.Level);
@@ -884,10 +1059,13 @@ namespace AethonMod.Content.Weapons
                     "[c/C49CFF:═══ ATAQUES COMBINADOS ═══]"));
                 if (Systems.DespertarGrimorio.SolDisponible(despertar))
                 {
+                    // v6.51.9 — EL DAÑO POR ANILLO (la letra: «con cada
+                    //     anillo runico extra del sol runico este aumenta
+                    //     su daño tambien»): +50% por anillo de más.
                     tooltips.Add(new TooltipLine(Mod, "WSol",
                         $"[c/E8D8FF:Sol Rúnico: {Systems.DespertarGrimorio.AnillosDelSol(despertar)} anillo(s) · " +
                         $"{Systems.DespertarGrimorio.SolesPorMinuto(despertar)}/min]  " +
-                        "[c/78788C:(2+ ojos mejorados, al azar)]"));
+                        "[c/78788C:(2+ ojos mejorados, al azar · +50% daño por anillo extra)]"));
                 }
                 else
                 {
@@ -927,12 +1105,13 @@ namespace AethonMod.Content.Weapons
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.
-            //     v6.51.1 — SOLO EN LA VENTANA BÁSICA (la letra: la
-            //     tercera ventana es solo estadísticas — la progresión no
-            //     debe estar ahí).
+            //     v6.51.9 — EN SU PROPIA VENTANA, LA SEGUNDA (la letra:
+            //     «poner en una nueva ventana de informacion todo el
+            //     apartado de Progresion, y que la ventana de progresion
+            //     sea la segunda ventana» — la básica ya no la lleva).
             //     v6.50.108 — EL ORDEN DE LA LETRA: la BARRA de hambre
             //     primero y el estado JUSTO DEBAJO. ===
-            if (vista == 0)
+            if (ventanaProgresion)
             {
                 int xpNeeded = sl.XPForNextLevel();
                 float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
@@ -1088,6 +1267,40 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
                             "[c/78788C:  (suéltala con el grimorio en la mano)]"));
                         }
+
+                        // === v6.51.9 — LA ALTERNATIVA MINERAL EN TODOS LOS
+                        //     PELDAÑOS DE ARMAS (la letra: «en caso de que
+                        //     la gente no pueda conseguir las armas,
+                        //     tambien dale una opcion de lingotes segun el
+                        //     nivel claro y siempre deben ser mas de 50
+                        //     lingotes para cada despertar no menos, ademas
+                        //     el numero de lingotes siempre debe ir
+                        //     aumentando por cada nivel de despertar»): si
+                        //     el arma del peldaño no llega, LA PILA DE
+                        //     LINGOTES del metal del nivel paga lo mismo
+                        //     (siempre más de 50, siempre creciente — ver
+                        //     DespertarGrimorio.MineralDe). ===
+                        if (!Systems.DespertarGrimorio.EsNivelMineral(siguiente))
+                        {
+                            int tipoAlt = Systems.DespertarGrimorio.MineralDe(siguiente);
+                            int cantAlt = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
+                            int llevasAlt = Systems.DespertarGrimorio.MineralesEnManos(portador, siguiente);
+                            bool altOK = llevasAlt >= cantAlt;
+                            string colAlt = altOK ? colOK : colNo;
+                            string nombreAlt = "—";
+                            try
+                            {
+                                var protoAlt = Terraria.ID.ContentSamples.ItemsByType[tipoAlt];
+                                if (protoAlt != null) nombreAlt = protoAlt.Name;
+                            }
+                            catch { }
+                            var trozosAlt = new System.Collections.Generic.List<string>();
+                            trozosAlt.Add($"[c/{colAlt}:  • O la ofrenda mineral:]");
+                            trozosAlt.Add($"[i:{tipoAlt}]");
+                            trozosAlt.Add($"[c/{colAlt}:{Math.Min(llevasAlt, cantAlt)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReq6",
+                                string.Join(" ", trozosAlt)));
+                        }
                     }
                     else
                     {
@@ -1095,27 +1308,21 @@ namespace AethonMod.Content.Weapons
                             "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO (máximo por ahora)]"));
                     }
 
-                    // === v6.51.8 — EL CAMINO DEL DESPERTAR (la letra:
-                    //     «en cada nivel del despertar solo dice % de
-                    //     aumento de daño, pero no dicen nada mas,
-                    //     deberian decir cuando es que aparecen las
-                    //     mejoras en sus respectivos niveles y no solo
-                    //     aumento de daño»): la escalera de hitos QUE
-                    //     FALTA — cada mejora con SU nivel (la escalera
-                    //     se va acortando a medida que el libro sube; en
-                    //     el 50 ya no queda nada — solo el máximo).
-                    bool caminoPintado = false;
+                    // === v6.51.9 — SOLO EL PRÓXIMO HITO (la letra: «el
+                    //     despertar ocupa mucho espacio, solo debe salir
+                    //     el proximo hito cuando se completo el anterior»):
+                    //     la escalera COMPLETA de la .51.8 murió — vive UNA
+                    //     SOLA LÍNEA, el próximo hito del camino; cuando el
+                    //     libro lo completa, aparece el que sigue (y en el
+                    //     50 ya no queda nada). ===
                     foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
                     {
                         if (paso.Nivel <= despertar) continue;
-                        if (!caminoPintado)
-                        {
-                            tooltips.Add(new TooltipLine(Mod, "DespertarCamino",
-                                "[c/78788C:  El camino del despertar:]"));
-                            caminoPintado = true;
-                        }
-                        tooltips.Add(new TooltipLine(Mod, "DespertarCamino_" + paso.Nivel,
-                            $"[c/9B6FE8:  • Nivel {paso.Nivel}:] [c/C4A2FF:{Language.GetTextValue(paso.Clave)}]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarCamino",
+                            "[c/78788C:  Próximo hito del despertar:] " +
+                            $"[c/9B6FE8:Nivel {paso.Nivel}:] " +
+                            $"[c/C4A2FF:{Language.GetTextValue(paso.Clave)}]"));
+                        break;   // SOLO el próximo (la letra)
                     }
                 }
                 catch { }
@@ -1135,13 +1342,14 @@ namespace AethonMod.Content.Weapons
                 }
             }
 
-            // === EL CONMUTADOR (.110): el clic derecho cicla las TRES
-            //     ventanas — la línea dice SIEMPRE a cuál vas ===
+            // === EL CONMUTADOR (.110→.51.9): el clic derecho cicla las
+            //     CUATRO ventanas — la línea dice SIEMPRE a cuál vas ===
             tooltips.Add(new TooltipLine(Mod, "ModeIndicator", vista switch
             {
-                1 => "[c/78788C:═══ Click der para ver EL FESTÍN ═══]",
-                2 => "[c/78788C:═══ Click der para vista básica ═══]",
-                _ => "[c/78788C:═══ Click der para ver EL ARMA ═══]",
+                0 => "[c/78788C:═══ Click der para ver PROGRESIÓN ═══]",
+                1 => "[c/78788C:═══ Click der para ver EL ARMA ═══]",
+                2 => "[c/78788C:═══ Click der para ver EL ESCUADRÓN ═══]",
+                _ => "[c/78788C:═══ Click der para vista básica ═══]",
             }));
         }
     }

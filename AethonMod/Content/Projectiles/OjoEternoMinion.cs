@@ -143,6 +143,46 @@ namespace AethonMod.Content.Projectiles
         /// en un 50%»: con las 4, el triple del rayo de siempre).</summary>
         public static float MultMejoras(Projectile p) => 1f + 0.5f * MejorasDe(p);
 
+        // ================================================================
+        //  v6.51.9 — LA AUDITORÍA DEL ×1,25 DEL DESPERTAR 50 (la letra:
+        //  «asegurate de que todo los aumento de daño y estadisticas del
+        //  grimorio se cumpla realmente y todas sumen y cuente para todos
+        //  los calculos»): el bonus del nivel 50 («TODO el ataque del
+        //  escuadrón ×1,25») se HORNEA en el daño del ojo AL INVOCARLO
+        //  (DanoOjosDelEterno)… y las consumidoras (el rayo de aquí
+        //  abajo, los ataques combinados) lo VOLVÍAN A multiplicar:
+        //  contaba DOS veces. AHORA se marca al nacer si ya lo lleva
+        //  dentro, y las consumidoras solo lo cobran EN VIVO cuando el
+        //  ojo nació ANTES de que el libro llegara al 50 — UNA sola vez,
+        //  en todas partes.
+        // ================================================================
+
+        /// <summary>¿EL DAÑO DE ESTE OJO nació ya con el ×1,25 del
+        /// DESPERTAR 50 horneado dentro? (lo marca la invocación —
+        /// GrimoireEternal.Shoot — justo tras DanoOjosDelEterno).</summary>
+        public bool Bonus50Horneado = false;
+
+        /// <summary>EL ×1,25 DEL DESPERTAR 50 QUE FALTA: 1,25 si ESTE ojo
+        /// no trae el bonus horneado y el libro dueño YA está en el 50 —
+        /// 1,0 en cualquier otro caso (lo lleva dentro o todavía no
+        /// corresponde). LAS CONSUMIDORAS DEL DAÑO DEL OJO (el rayo, el
+        /// sol, los agujeros, el supremo) lo multiplican por AQUÍ — nunca
+        /// dos veces.</summary>
+        public static float Bonus50Vivo(Projectile p)
+        {
+            try
+            {
+                if (p == null || !p.active) return 1f;
+                if (!(p.ModProjectile is OjoEternoMinion ojo)) return 1f;
+                if (ojo.Bonus50Horneado) return 1f;   // ya lo lleva dentro
+                Player dueño = Main.player[p.owner];
+                if (dueño == null || !dueño.active) return 1f;
+                return Content.Systems.DespertarGrimorio.NivelDe(dueño) >=
+                    Content.Systems.DespertarGrimorio.NivelMax ? 1.25f : 1f;
+            }
+            catch { return 1f; }
+        }
+
         /// <summary>
         /// +1 MEJORA a un ojo vivo (la llama la compuerta del Eterno
         /// cuando el escuadrón de 10 ya está LLENO): +50% de daño y el
@@ -454,10 +494,11 @@ namespace AethonMod.Content.Projectiles
             {
                 // v6.51.0 — EL NIVEL 50 DEL DESPERTAR (la letra: «mejora
                 // TODO el ataque de los minions y sus proyectiles así
-                // como la cadencia de disparo»): el rayo pega ×1,25.
-                float bonusFinal = Content.Systems.DespertarGrimorio.NivelDe(
-                    Main.player[Projectile.owner]) >= Content.Systems.DespertarGrimorio.NivelMax
-                    ? 1.25f : 1f;
+                // como la cadencia de disparo»): el rayo pega ×1,25 —
+                // v6.51.9 — PERO SOLO SI NO LO LLEVA HORNEADO (la
+                // auditoría: antes se multiplicaba DOS veces en los ojos
+                // invocados ya en el 50).
+                float bonusFinal = Bonus50Vivo(Projectile);
                 int dano = Math.Max(1, (int)(Projectile.damage *
                     WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile) * bonusFinal));
                 try

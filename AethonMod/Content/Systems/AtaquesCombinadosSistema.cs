@@ -254,12 +254,20 @@ namespace AethonMod.Content.Systems
                 int danoRayo = Math.Max(1, (int)(lider.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
 
-                // EL DAÑO DEL SOL QUE NACERÁ: crecido por la combinación
-                // y el despertar (viaja en ai[2] del ritual — ya lleva el
-                // grimorio Y las armaduras del portador).
+                // EL DAÑO DEL SOL QUE NACERÁ (viaja en ai[2] del ritual):
+                // la combinación ×3… y CADA ANILLO EXTRA LO AUMENTA (la
+                // letra de la .51.9: «con cada anillo runico extra del sol
+                // runico este aumenta su daño tambien» — +50 % por anillo
+                // de más: ×3 con 1 · ×4,5 con 2 · ×6 con 3). El DESPERTAR
+                // ya viaja DENTRO del daño del ojo líder (se hornea al
+                // invocarlo — DanoOjosDelEterno: cuenta UNA vez), y el
+                // ×1,25 del 50 se cobra UNA vez vía Bonus50Vivo (la
+                // auditoría de la .51.9: antes el despertar se multiplicaba
+                // DOS veces aquí).
                 int anillos = DespertarGrimorio.AnillosDelSol(despertar);
                 int danoSol = Math.Max(1, (int)(danoRayo * 3f *
-                    (1f + DespertarGrimorio.BonusDano(despertar))));
+                    (1f + 0.5f * (anillos - 1)) *
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
 
                 // EL RAYO CONVERGENTE: 2 SEGUNDOS de ceremonia ENCIMA DEL
                 // JUGADOR — al cumplir, EL SOL nace EN SU PUNTO CENTRAL
@@ -324,6 +332,10 @@ namespace AethonMod.Content.Systems
 
                 // EL DAÑO COMBINADO: el rayo del ojo más despierto × los
                 // celebrantes que abren la puerta (×1,45 en ascendidos).
+                // v6.51.9 — LA AUDITORÍA: el DESPERTAR ya vive dentro del
+                // daño del ojo líder (horneado al invocarlo — DanoOjos
+                // DelEterno) y NO se vuelve a multiplicar aquí; el ×1,25
+                // del 50 se cobra UNA vez vía Bonus50Vivo.
                 Projectile lider = ElMasDespierto(mejorados);
                 if (lider == null) return;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
@@ -332,7 +344,7 @@ namespace AethonMod.Content.Systems
                 int danoRayo = Math.Max(1, (int)(lider.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
                 int dano = Math.Max(1, (int)(danoRayo * (ascendidos ? 4.5f : 3.2f) *
-                    (1f + DespertarGrimorio.BonusDano(despertar))));
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
 
                 // EL RAYO CONVERGENTE: 3 SEGUNDOS de ceremonia — al
                 // cumplir, la puerta (el agujero rúnico al azar — los
@@ -403,8 +415,11 @@ namespace AethonMod.Content.Systems
                     .MultMejoras(lider);
                 int danoRayo = Math.Max(1, (int)(lider.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
+                // v6.51.9 — LA AUDITORÍA: igual que el sol y los agujeros —
+                // el despertar vive DENTRO del daño del líder (horneado) y
+                // el ×1,25 del 50 se cobra UNA vez vía Bonus50Vivo.
                 int dano = Math.Max(1, (int)(danoRayo * 6.5f *
-                    (1f + DespertarGrimorio.BonusDano(despertar))));
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
 
                 // EL RAYO CONVERGENTE DEL SUPREMO: 3 segundos — al cumplir,
                 // el SUPREMO o el AURORA (al azar) se abre EN EL PUNTO

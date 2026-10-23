@@ -153,21 +153,25 @@ namespace AethonMod.Content.Systems
                         if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                             continue;
 
-                        // === v6.51.8 — LA OFRENDA MINERAL (la letra: «en
-                        //     caso de no haber mas arma usar cierta
-                        //     cantidad de lingotes de algun mineral… al
-                        //     ser minerales no necesitan estar corruptos
-                        //     ya que no se corrompen como las armas»):
-                        //     si el próximo peldaño de ESTE libro es de
-                        //     LINGOTES, la PILA CAÍDA del mineral correcto
-                        //     ES el plato — SIN corrupción, con SU
-                        //     cantidad (el sobrante queda en el suelo:
-                        //     recogerlo es gratis). ===
+                        // === v6.51.9 — LA OFRENDA MINERAL EN TODA LA
+                        //     ESCALERA (la letra: «en caso de que la
+                        //     gente no pueda conseguir las armas, tambien
+                        //     dale una opcion de lingotes segun el nivel
+                        //     claro y siempre deben ser mas de 50 lingotes
+                        //     para cada despertar no menos, ademas el
+                        //     numero de lingotes siempre debe ir
+                        //     aumentando por cada nivel de despertar»):
+                        //     la PILA CAÍDA del metal del peldaño ES el
+                        //     plato en CUALQUIER nivel — la ALTERNATIVA de
+                        //     los peldaños de armas (1-44) y LA OFRENDA de
+                        //     la cima mineral (45-50) — SIN corrupción,
+                        //     con SU cantidad siempre >50 y creciente (el
+                        //     sobrante queda en el suelo: recogerlo es
+                        //     gratis). ===
                         int proximoMin = System.Math.Min(
                             DespertarGrimorio.NivelDespertarSiguiente(mano),
                             DespertarGrimorio.NivelMax);
-                        if (DespertarGrimorio.EsNivelMineral(proximoMin) &&
-                            drop.type == DespertarGrimorio.MineralDe(proximoMin))
+                        if (DespertarGrimorio.MineralDe(proximoMin) == drop.type)
                         {
                             int cantidadMin = DespertarGrimorio.CantidadMineralDe(proximoMin);
                             int esenciasMin = DespertarGrimorio.EsenciasPara(proximoMin);

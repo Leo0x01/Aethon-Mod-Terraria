@@ -88,6 +88,39 @@ namespace AethonMod.Content.Globals
         }
 
         // ================================================================
+        //  v6.51.9 — EL PARÉNTESIS NACE CON EL LIBRO (la letra: «cuando
+        //  agarre al grimorio dormido al llegar al inventario decia
+        //  Grimorio del Eterno (Agil)»): dos curas de raíz —
+        //  · EL LIBRO NUEVO ya viste su etiqueta de escalera al nacer al
+        //    mundo («(Común)» — la peor: así empieza; el nombre la lleva
+        //    puesta desde el primer instante, en el chat de recogida y en
+        //    todas partes — GrimoireEternal la mantiene fresca por nivel).
+        //  · EL YUNQUE SE LE NIEGA: el libro no se reforja — su paréntesis
+        //    es SU escalera, no la lotería de vanilla (los prefijos
+        //    naturales ya los mata GrimoireEternal.PrefixChance).
+        // ================================================================
+
+        public override void OnSpawn(Item item, Terraria.DataStructures.IEntitySource source)
+        {
+            try
+            {
+                if (item == null || item.IsAir) return;
+                // El nivel REAL del item clonado (si venía de un clon con
+                // sus globals) o el 1 del recién nacido.
+                var sl = item.GetGlobalItem<ShardLevelItem>();
+                int nivel = sl?.Level ?? 1;
+                int idx = global::AethonMod.Content.Weapons.GrimoireEternal
+                    .IndiceEtiqueta(nivel);
+                string nombreBase = Terraria.Lang.GetItemNameValue(item.type);
+                item.SetNameOverride(nombreBase + " (" +
+                    global::AethonMod.Content.Weapons.GrimoireEternal.NombreEtiqueta(idx) + ")");
+            }
+            catch { }
+        }
+
+        public override bool CanReforge(Item item) => false;
+
+        // ================================================================
         //  EL GRIMORIO ACTIVO (el que manda: el de la MANO primero — si
         //  no, el primero del inventario). Los poderes, los ojos y el
         //  despertar leen SIEMPRE el libro ACTIVO del portador.
