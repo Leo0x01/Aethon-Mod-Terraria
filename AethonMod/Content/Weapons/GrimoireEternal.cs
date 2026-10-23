@@ -1023,11 +1023,44 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO: SU
-                        //     NOMBRE + SU SPRITE al lado (cada alternativa
-                        //     de este peldaño, [i:id] = el icono del item
+                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (o
+                        //     v6.51.8: LA OFRENDA MINERAL): SU NOMBRE +
+                        //     SU SPRITE al lado (cada alternativa de este
+                        //     peldaño, [i:id] = el icono del item
                         //     RENDERIZADO POR EL PARSER DE tML — se puede
                         //     hasta pasar el cursor por encima). ===
+                        if (Systems.DespertarGrimorio.EsNivelMineral(siguiente))
+                        {
+                            // === v6.51.8 — LA OFRENDA MINERAL (la letra:
+                            //     «en caso de no haber mas arma usar cierta
+                            //     cantidad de lingotes de algun mineral… al
+                            //     ser minerales no necesitan estar
+                            //     corruptos»): el lingote del peldaño con
+                            //     SU conteo vivo — tags SEPARADOS, nada de
+                            //     anidados (la lección de la .51.6). ===
+                            int tipoMin = Systems.DespertarGrimorio.MineralDe(siguiente);
+                            int cantMin = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
+                            int llevasMin = Systems.DespertarGrimorio.MineralesEnManos(portador, siguiente);
+                            bool mineralOK = llevasMin >= cantMin;
+                            string colMin = mineralOK ? colOK : colNo;
+                            string nombreMin = "—";
+                            try
+                            {
+                                var protoMin = Terraria.ID.ContentSamples.ItemsByType[tipoMin];
+                                if (protoMin != null) nombreMin = protoMin.Name;
+                            }
+                            catch { }
+                            var trozosMin = new System.Collections.Generic.List<string>();
+                            trozosMin.Add($"[c/{colMin}:  • Ofrenda mineral:]");
+                            trozosMin.Add($"[i:{tipoMin}]");
+                            trozosMin.Add($"[c/{colMin}:{Math.Min(llevasMin, cantMin)}/{cantMin} × {nombreMin}{(mineralOK ? "  ✓" : "")}]");
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
+                                string.Join(" ", trozosMin)));
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
+                                "[c/78788C:  (suéltalos con el grimorio en la mano — sin corrupción)]"));
+                        }
+                        else
+                        {
                         bool armaOK = false;
                         int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
                         for (int pa = 0; pa < peldano.Length; pa++)
@@ -1054,11 +1087,35 @@ namespace AethonMod.Content.Weapons
                             string.Join(" ", trozosArma)));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
                             "[c/78788C:  (suéltala con el grimorio en la mano)]"));
+                        }
                     }
                     else
                     {
                         tooltips.Add(new TooltipLine(Mod, "DespertarMax",
                             "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO (máximo por ahora)]"));
+                    }
+
+                    // === v6.51.8 — EL CAMINO DEL DESPERTAR (la letra:
+                    //     «en cada nivel del despertar solo dice % de
+                    //     aumento de daño, pero no dicen nada mas,
+                    //     deberian decir cuando es que aparecen las
+                    //     mejoras en sus respectivos niveles y no solo
+                    //     aumento de daño»): la escalera de hitos QUE
+                    //     FALTA — cada mejora con SU nivel (la escalera
+                    //     se va acortando a medida que el libro sube; en
+                    //     el 50 ya no queda nada — solo el máximo).
+                    bool caminoPintado = false;
+                    foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
+                    {
+                        if (paso.Nivel <= despertar) continue;
+                        if (!caminoPintado)
+                        {
+                            tooltips.Add(new TooltipLine(Mod, "DespertarCamino",
+                                "[c/78788C:  El camino del despertar:]"));
+                            caminoPintado = true;
+                        }
+                        tooltips.Add(new TooltipLine(Mod, "DespertarCamino_" + paso.Nivel,
+                            $"[c/9B6FE8:  • Nivel {paso.Nivel}:] [c/C4A2FF:{Language.GetTextValue(paso.Clave)}]"));
                     }
                 }
                 catch { }

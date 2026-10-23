@@ -70,7 +70,11 @@ namespace AethonMod.Content.Globals
                         >= Systems.DespertarGrimorio.EsenciasPara(siguiente),
                     "DespertarReq3" => Systems.DespertarGrimorioSistema.ContarMonedas(portador)
                         >= Systems.DespertarGrimorio.MonedasPara(siguiente),
-                    "DespertarReq4" => LlevaAlgunaCorrupta(portador, siguiente),
+                    // v6.51.8 — EL REQUISITO 3 ES DUAL: los peldaños de
+                    //     ARMAS cuentan las corruptas del peldaño… y los
+                    //     peldaños MINERALES, los lingotes del inventario
+                    //     (la ofrenda mineral — sin corrupción).
+                    "DespertarReq4" => RequisitoDeLaOfrenda(portador, siguiente),
                     _ => null,
                 };
                 if (cumplido == true)
@@ -121,6 +125,17 @@ namespace AethonMod.Content.Globals
                 if (Systems.DespertarGrimorio.LlevaCorrupta(p, peldano[k]))
                     return true;
             return false;
+        }
+
+        /// <summary>v6.51.8 — ¿EL REQUISITO DE LA OFRENDA ya está? (dual:
+        /// peldaño de ARMAS → alguna corrupta del peldaño · peldaño
+        /// MINERAL → los lingotes completos en el inventario).</summary>
+        private static bool RequisitoDeLaOfrenda(Player p, int nivel)
+        {
+            if (nivel < 1 || nivel > Systems.DespertarGrimorio.NivelMax) return false;
+            if (Systems.DespertarGrimorio.EsNivelMineral(nivel))
+                return Systems.DespertarGrimorio.LlevaMineralCompleto(p, nivel);
+            return LlevaAlgunaCorrupta(p, nivel);
         }
     }
 }

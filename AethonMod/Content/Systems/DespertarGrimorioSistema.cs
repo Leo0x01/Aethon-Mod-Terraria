@@ -152,6 +152,55 @@ namespace AethonMod.Content.Systems
                         if (drop.type == tipoEsencia) continue;      // las esencias: su propia mesa
                         if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                             continue;
+
+                        // === v6.51.8 — LA OFRENDA MINERAL (la letra: «en
+                        //     caso de no haber mas arma usar cierta
+                        //     cantidad de lingotes de algun mineral… al
+                        //     ser minerales no necesitan estar corruptos
+                        //     ya que no se corrompen como las armas»):
+                        //     si el próximo peldaño de ESTE libro es de
+                        //     LINGOTES, la PILA CAÍDA del mineral correcto
+                        //     ES el plato — SIN corrupción, con SU
+                        //     cantidad (el sobrante queda en el suelo:
+                        //     recogerlo es gratis). ===
+                        int proximoMin = System.Math.Min(
+                            DespertarGrimorio.NivelDespertarSiguiente(mano),
+                            DespertarGrimorio.NivelMax);
+                        if (DespertarGrimorio.EsNivelMineral(proximoMin) &&
+                            drop.type == DespertarGrimorio.MineralDe(proximoMin))
+                        {
+                            int cantidadMin = DespertarGrimorio.CantidadMineralDe(proximoMin);
+                            int esenciasMin = DespertarGrimorio.EsenciasPara(proximoMin);
+                            long monedasMin = DespertarGrimorio.MonedasPara(proximoMin);
+
+                            if (DespertarGrimorio.EsenciasEnManos(p) < esenciasMin)
+                            {
+                                RechazarOfrenda(p, drop, false, esenciasMin, monedasMin);
+                            }
+                            else if (drop.stack < cantidadMin)
+                            {
+                                RechazarMineral(p, drop, proximoMin, cantidadMin);
+                            }
+                            else if (!p.BuyItem(monedasMin, -1))
+                            {
+                                RechazarOfrenda(p, drop, true, esenciasMin, monedasMin);
+                            }
+                            else
+                            {
+                                // LA PILA SE PAGA: exactamente LA CANTIDAD del
+                                // peldaño — lo demás queda donde está.
+                                drop.stack -= cantidadMin;
+                                if (drop.stack <= 0) drop.TurnToAir();
+                                int idxMin = Array.IndexOf(Main.item, drop);
+                                if (Main.netMode == NetmodeID.Server && idxMin >= 0)
+                                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idxMin);
+
+                                DespertarGrimorio.ConsumirEsencias(p, esenciasMin);
+                                SubirNivel(p, mano, null);   // la ofrenda mineral ya está comida
+                            }
+                            break;   // un plato por pulso (con calma, que es un libro)
+                        }
+
                         var sello = drop.GetGlobalItem
                             <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                         if (sello == null || !sello.Corrompido) continue;
@@ -325,6 +374,49 @@ namespace AethonMod.Content.Systems
                         new Color(255, 130, 130),
                         tieneEsencias ? new object[] { ItemToText(monedas) }
                                       : new object[] { esencias, ItemToText(monedas) });
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>v6.51.8 — EL RECHAZO MINERAL: la pila no alcanza —
+        /// el grimorio aparta el plato y dice CUÁNTO pide (los lingotes
+        /// caídos son del portador: recogerlos es gratis).</summary>
+        private static void RechazarMineral(Player p, Item drop, int nivel, int cantidad)
+        {
+            try
+            {
+                // El empujoncito de siempre (el plato vuelve al portador).
+                Vector2 empuje = p.Center - drop.Center;
+                if (empuje.LengthSquared() > 1f)
+                {
+                    empuje.Normalize();
+                    drop.velocity = -empuje * 3.2f + new Vector2(0f, -2.4f);
+                    drop.noGrabDelay = 45;
+                }
+
+                int faltan = Math.Max(1, cantidad - drop.stack);
+                string nombre = "—";
+                try
+                {
+                    var proto = Terraria.ID.ContentSamples.ItemsByType[
+                        DespertarGrimorio.MineralDe(nivel)];
+                    if (proto != null) nombre = proto.Name;
+                }
+                catch { }
+
+                if (Main.netMode != NetmodeID.Server && p == Main.LocalPlayer)
+                {
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Despertar.FaltaMineral",
+                        cantidad, nombre, faltan),
+                        new Color(255, 130, 130));
+                }
+                else if (Main.netMode == NetmodeID.Server)
+                {
+                    EcoRed.AnunciarAlPortador(p,
+                        "Mods.AethonMod.Despertar.FaltaMineral",
+                        new Color(255, 130, 130), cantidad, nombre, faltan);
                 }
             }
             catch { }

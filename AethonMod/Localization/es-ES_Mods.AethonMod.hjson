@@ -2433,6 +2433,7 @@ Despertar: {
 	Voz4: (el libro se estremece de gusto) Eso. MÁS de eso.
 	FaltaEsencia: ✦ El grimorio aparta el plato: le faltan {0} esencia(s)… y {1}.
 	FaltaDinero: ✦ El grimorio aparta el plato: le faltan {0}.
+	FaltaMineral: ✦ El grimorio aparta el plato: pide {0} × {1} y a esa pila le faltan {2}.
 	OjosCerrados: ✦ El escuadrón aún duerme: se necesita NIVEL {0} para el primer ojo.
 	MejorasSelladas: ✦ Las mejoras nacen con EL DESPERTAR (5/15/30/40). Actual: {0}.
 	NuevoOjo: ✧ ¡El grimorio puede invocar un OJO NUEVO! (el número {0} del escuadrón)
@@ -2453,6 +2454,18 @@ Despertar: {
 	HitoMejora4: ✧ ¡DESPERTAR 40: la MEJORA FINAL de los ojos!
 	HitoSupremo: ✧ ¡DESPERTAR 45: agujeros 2/min… y OCHO OJOS M4 abren el SUPREMO o el SUPREMO AURORA!
 	HitoMaximo: ✧✧ ¡DESPERTAR 50: TODO el ataque del escuadrón MÁS FUERTE y MÁS RÁPIDO!
+	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño a un ojo)
+	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
+	CaminoAgujeros: los AGUJEROS NEGROS RÚNICOS (5 ojos mejorados, 1/min)
+	CaminoMejora2: la MEJORA 2 de los ojos
+	CaminoSol2: el sol de 2 ANILLOS (3/min)
+	CaminoMascota: LA MASCOTA — el grimorio escupe al minigrimorio
+	CaminoAscendidos: los agujeros ASCENDIDOS (más daño)
+	CaminoMejora3: la MEJORA 3 de los ojos
+	CaminoSol3: el sol de 3 ANILLOS (4/min)
+	CaminoMejora4: la MEJORA FINAL de los ojos
+	CaminoSupremo: agujeros 2/min… y EL SUPREMO/AURORA (8 ojos con la mejora 4)
+	CaminoMaximo: TODO el escuadrón MÁS FUERTE y MÁS RÁPIDO
 	Escupidizo:
 		'''
 		Ya somos tres, portador: tú, yo… y ÉL.

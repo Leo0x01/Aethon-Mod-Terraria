@@ -541,7 +541,21 @@ namespace AethonMod.Content.Projectiles
         /// 62 px de radio y ~27 px de paso, que con el cabeceo de ±1,5
         /// deja SIEMPRE aire entre sprites de 21 px) y la RESPIRACIÓN
         /// ÚNICA de la danza (un solo latido para TODOS — la sincronía
-        /// de la .51.3 vive).</summary>
+        /// de la .51.3 vive).
+        ///
+        /// v6.51.8 — EL CÍRCULO NO TIENE PUERTAS (la letra: «la orbita
+        /// alrededor del grimorio como esta girando queda siempre con un
+        /// agujero, asegurate de que los minion respeten la orbita pero
+        /// rodeen a todo el grimorio sin dejar agujeros»): el abanico
+        /// del Sanguine (252° de arco) dejaba SIEMPRE un hueco de 108°
+        /// girando alrededor del libro — el agujero de la letra. Mientras
+        /// el espíritu CAZA, el reparto ahora es el CÍRCULO COMPLETO
+        /// (2π/n por ojo — rodean TODO el grimorio, sin puertas); el
+        /// abanico EXACTO del murciélago 755 queda para la CASA (quieto
+        /// detrás del dueño, como los murciélagos del Sanguine sobre su
+        /// amo — esa parte de la letra .51.7 SIGUE intacta). Con el
+        /// círculo, la cuerda entre vecinos es MÁS holgada que el abanico
+        /// (2π·r/n: a 11 ojos, 61 px de paso — nadie se pisa).</summary>
         private Vector2 SlotDeFormacion(Player dueño, Vector2? libro)
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
@@ -550,19 +564,29 @@ namespace AethonMod.Content.Projectiles
             // EL CENTRO: el grimorio que caza si está fuera; el dueño si no
             Vector2 centro = libro is Vector2 c ? c : dueño.MountedCenter;
 
-            // EL PUESTO: el reparto EXACTO del murciélago 755 — 7π/5 es
-            // la constante de vanilla (4,39823: el abanico de ±126°)
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
-            float ang = 4.3982296f / n * (i - (n - 1) / 2f);
 
-            // LA ÓRBITA DEL LIBRO: mientras el espíritu caza, el abanico
-            // entero GIRA alrededor del grimorio (la letra: «entonces
-            // orbitan al grimorio» — la revolución lenta); en casa, el
-            // arco queda QUIETO sobre el dueño (la letra: «siempre van
-            // detrás del jugador»)
+            float ang;
             if (libro is Vector2)
-                ang += time * 0.30f;
+            {
+                // === v6.51.8 — LA CORONA COMPLETA: cada ojo a SU sector
+                //     del círculo (2π/n) y la corona entera GIRANDO
+                //     alrededor del grimorio (la revolución lenta de la
+                //     .51.7, ω 0,30 rad/s — el reloj GlobalTime:
+                //     determinista en MP sin netcode). Rodean TODO el
+                //     libro — SIN AGUJEROS. ===
+                ang = MathHelper.TwoPi / n * i + time * 0.30f;
+            }
+            else
+            {
+                // === EL PUESTO EN CASA: el reparto EXACTO del murciélago
+                //     755 — 7π/5 es la constante de vanilla (4,39823: el
+                //     abanico de ±126°), QUIETO sobre el dueño (la letra:
+                //     «los minions siempre deben ir detras del jugador» —
+                //     como los murciélagos del Sanguine sobre su amo). ===
+                ang = 4.3982296f / n * (i - (n - 1) / 2f);
+            }
 
             // EL RADIO: 40 de vanilla + el crecimiento de la banda (que
             // NADIE se pise, ni siquiera con el cabeceo) + la

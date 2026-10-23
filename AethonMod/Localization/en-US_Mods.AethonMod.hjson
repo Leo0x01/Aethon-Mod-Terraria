@@ -2435,6 +2435,7 @@ Despertar: {
 	Voz4: (the book shivers with delight) Yes. MORE of that.
 	FaltaEsencia: ✦ The grimoire pushes the dish away: it needs {0} more essence(s)… and {1}.
 	FaltaDinero: ✦ The grimoire pushes the dish away: it needs {0}.
+	FaltaMineral: ✦ The grimoire pushes the dish away: it demands {0} × {1} and that pile is {2} short.
 	OjosCerrados: ✦ The squad still sleeps: LEVEL {0} is needed for the first eye.
 	MejorasSelladas: ✦ Upgrades are born with THE AWAKENING (5/15/30/40). Current: {0}.
 	NuevoOjo: ✧ The grimoire can summon a NEW EYE! (squad number {0})
@@ -2455,6 +2456,18 @@ Despertar: {
 	HitoMejora4: ✧ AWAKENING 40: the FINAL eye upgrade!
 	HitoSupremo: ✧ AWAKENING 45: holes 2/min… and EIGHT M4 EYES open the SUPREME or SUPREME AURORA!
 	HitoMaximo: ✧✧ AWAKENING 50: ALL the squad's attacks STRONGER and FASTER!
+	CaminoMejora1: eye UPGRADE 1 (+50% damage to one eye)
+	CaminoSol: the 1-ring RUNIC SUN (2 upgraded eyes, 2/min)
+	CaminoAgujeros: the RUNIC BLACK HOLES (5 upgraded eyes, 1/min)
+	CaminoMejora2: eye UPGRADE 2
+	CaminoSol2: the 2-ring sun (3/min)
+	CaminoMascota: THE PET — the grimoire spits the mini-grimoire
+	CaminoAscendidos: the ASCENDED black holes (more damage)
+	CaminoMejora3: eye UPGRADE 3
+	CaminoSol3: the 3-ring sun (4/min)
+	CaminoMejora4: the FINAL eye upgrade
+	CaminoSupremo: holes 2/min… and THE SUPREME/AURORA (8 eyes with upgrade 4)
+	CaminoMaximo: ALL the squad STRONGER and FASTER
 	Escupidizo:
 		'''
 		There are three of us now, bearer: you, me… and HIM.

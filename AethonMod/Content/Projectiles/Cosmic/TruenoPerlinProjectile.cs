@@ -39,6 +39,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// cápsula!: el rayo leía como una NEBLINA gorda — la lección de
     /// «demasiado gruesos». Ahora: cápsulas de 19 px sobre la funda de
     /// 7,5 del cetro (el MISMO grosor del arma que el usuario referenció).
+    ///
+    /// v6.51.8 — EL MODO RITUAL (ai[0]=2): EL RAYO DEL NACIMIENTO (la
+    /// letra: «en el nacimiento de ambos [soles y agujeros] los ojos
+    /// correspondientes y de forma aleatoria, deben disparar su rayo de
+    /// perlin al punto central del nacimiento siendo de ahi donde nace
+    /// el sol runico y los agujeros negros runicos»): el MISMO rayo del
+    /// ojo, pero el ANCLA es EL RAYO CONVERGENTE (ai[2] = su whoAmI) —
+    /// el rayo se SOSTIENE clavado del ojo al PUNTO CENTRAL del ritual
+    /// durante TODA la ceremonia (2 s el sol · 3 s los agujeros) y muere
+    /// con él (disolución violenta del meandro de siempre). SIN golpe:
+    /// es la reverencia del celebrante, no un ataque — y con el ZAP
+    /// suave (nada de ruido: los supremos aprendieron a callar).
     /// </summary>
     public class TruenoPerlinProjectile : ModProjectile
     {
@@ -56,6 +68,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         private Vector2 _muzzle;        // la punta del bastón (coords de MUNDO)
         private bool _anchored;
+
+        // === v6.51.8 — EL MODO RITUAL (ai[0]=2): el rayo sostenido del ===
+        // === nacimiento — el ancla ES el ritual (ver el header)       ===
+        private bool ModoRitual => Projectile.ai[0] >= 2f;
+        private int _muerteRitual;      // ticks desde que la ceremonia cumplió
 
         // === LAS CADENAS — v6.50.109 LA IRA EN CADENA: en modo OJO el
         //     número de saltos lo manda el NIVEL del grimorio (base 2,
@@ -103,7 +120,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (!_anchored)
             {
                 _anchored = true;
-                if (modoOjo)
+                if (ModoRitual)
+                {
+                    // v6.51.8 — LA REVERENCIA DEL CELEBRANTE: el rayo se
+                    // clava del ojo al PUNTO CENTRAL del ritual — SIN
+                    // golpe (no es un ataque: es el nacimiento), con UN
+                    // zap suave (los ojos abren fuego con un susurro —
+                    // la ceremonia ya tiene su propio compás) y las
+                    // chispas de sombra en la CÓRNEA del ojo.
+                    Projectile.DamageType = DamageClass.Summon;
+                    _muzzle = BocaDelOjo();
+                    Projectile.velocity = Vector2.Zero;
+                    if (Main.netMode != NetmodeID.Server)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item12.WithPitchOffset(-0.3f).WithVolumeScale(0.35f),
+                            _muzzle);
+                        for (int i = 0; i < 6; i++)
+                        {
+                            float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                            Dust d = Dust.NewDustPerfect(_muzzle, DustID.Shadowflame,
+                                new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) *
+                                Main.rand.NextFloat(1.5f, 4f),
+                                128, new Color(128, 64, 200), 0.9f);
+                            d.noGravity = true;
+                        }
+                    }
+                }
+                else if (modoOjo)
                 {
                     // EL OJO: el golpe del cauce del cetro (radio + cadena +
                     // GolpeMotor — el DAÑO DE VERDAD) con el tipo de invocación
@@ -168,11 +212,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (modoOjo)
             {
-                // === EL ANCLA PEGADA: la punta SIGUE a su presa mientras
-                //     vive (la bruma en la punta que toca al monstruo) ===
-                NPC presa = PresaDelAncla();
-                if (presa != null)
-                    Projectile.Center = Vector2.Lerp(Projectile.Center, presa.Center, 0.55f);
+                if (ModoRitual)
+                {
+                    // === v6.51.8 — EL ANCLA ES EL RITUAL: la punta SIGUE al
+                    //     RAYO CONVERGENTE (el punto central del nacimiento
+                    //     — de ahí nacen el sol y los agujeros) y el rayo
+                    //     VIVE mientras la ceremonia vive; cumplida, se
+                    //     disuelve violento (el meandro revienta). ===
+                    Projectile ritual = RitualDelAncla();
+                    if (ritual != null)
+                    {
+                        Projectile.Center = Vector2.Lerp(Projectile.Center, ritual.Center, 0.55f);
+                        Projectile.timeLeft = 2;      // sostenido TODO el parto
+                        _muerteRitual = 0;
+                    }
+                    else
+                    {
+                        _muerteRitual++;
+                        if (Projectile.timeLeft > 8) Projectile.timeLeft = 8;
+                    }
+                }
+                else
+                {
+                    // === EL ANCLA PEGADA: la punta SIGUE a su presa mientras
+                    //     vive (la bruma en la punta que toca al monstruo) ===
+                    NPC presa = PresaDelAncla();
+                    if (presa != null)
+                        Projectile.Center = Vector2.Lerp(Projectile.Center, presa.Center, 0.55f);
+                }
 
                 // LA BOCA DEL ARCO sigue viva (el ojo planea de vuelta a la corona)
                 _muzzle = BocaDelOjo();
@@ -249,9 +316,37 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return null;
         }
 
-        /// <summary>La vida normalizada 0..1.</summary>
+        /// <summary>v6.51.8 — EL RITUAL DEL ANCLA (modo ritual): el RAYO
+        /// CONVERGENTE al que este rayo se clava (ai[2] = su whoAmI) —
+        /// el PUNTO CENTRAL del nacimiento. Null = la ceremonia ya
+        /// cumplió (y el rayo se disuelve).</summary>
+        private Projectile RitualDelAncla()
+        {
+            int idx = (int)Projectile.ai[2];
+            if (idx >= 0 && idx < Main.maxProjectiles)
+            {
+                Projectile r = Main.projectile[idx];
+                if (r != null && r.active &&
+                    r.type == ModContent.ProjectileType<RayoConvergenteProjectile>())
+                    return r;
+            }
+            return null;
+        }
+
+        /// <summary>La vida normalizada 0..1 (v6.51.8 — en MODO RITUAL la
+        /// curva es la del parto: encendido rápido, SOSTENIDO mientras la
+        /// ceremonia vive — el rayo no se apaga a media gestación — y
+        /// disolución violenta al cumplir, el meandro revienta).</summary>
         private float VidaT()
-            => MathHelper.Clamp(_age / TotalLife, 0f, 1f);
+        {
+            if (ModoRitual)
+            {
+                if (RitualDelAncla() != null)
+                    return 0.40f * MathHelper.Clamp(_age / 8f, 0f, 1f);
+                return 0.40f + 0.60f * MathHelper.Clamp(_muerteRitual / 8f, 0f, 1f);
+            }
+            return MathHelper.Clamp(_age / TotalLife, 0f, 1f);
+        }
 
         /// <summary>La punta del bastón del dueño (su Center si algo falla).</summary>
         private Vector2 MuzzleDelDueno()
@@ -383,6 +478,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 boca = _muzzle - screen;                 // EL OJO dispara
                 Vector2 ancla = Projectile.Center - screen;      // la punta PEGADA al monstruo
 
+                // v6.51.8 — en MODO RITUAL el ancla es EL PUNTO CENTRAL del
+                //     nacimiento: MUCHOS rayos convergen AL MISMO sitio — el
+                //     núcleo se ENCOGE (que no reviente la vista) y las
+                //     coronas/destellos/bruma de la punta se CALLAN (la cuna
+                //     del ritual ya tiene SU bruma — nada de apilar ×8).
+                bool ritual = ModoRitual;
+
                 float lifeT = VidaT();
                 float fade = 1f - MathHelper.Clamp((lifeT - 0.40f) / 0.60f, 0f, 1f);
                 if (fade <= 0.02f) return;
@@ -466,25 +568,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // el gorro del electrodo del OJO (la descarga en la córnea)
                     StormLib.EndCap(Main.spriteBatch, boca, 4.8f, OjoHalo, OjoCore, alpha * fade);
 
-                    // EL ANCLA: el núcleo de descarga en la presa (morado)
+                    // EL ANCLA: el núcleo de descarga en la presa (morado) —
+                    //     en ritual, a MEDIA ESCALA (todos al mismo punto).
                     Texture2D texAncla = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Projectiles/Cosmic/TruenoPerlinProjectile").Value;
                     float pulso = 0.80f + 0.20f * MathF.Sin(time * 22f);
+                    float escAncla = ritual ? 0.55f : 1.2f;
                     Main.spriteBatch.Draw(texAncla, ancla, null,
                         TintFijo(OjoHalo, 0.9f * alpha * fade * pulso), 0f,
-                        texAncla.Size() * 0.5f, 1.2f * pulso, SpriteEffects.None, 0f);
+                        texAncla.Size() * 0.5f, escAncla * pulso, SpriteEffects.None, 0f);
                     Main.spriteBatch.Draw(texAncla, ancla, null,
                         TintFijo(OjoCore, 0.95f * alpha * fade), 0f,
-                        texAncla.Size() * 0.5f, 0.65f, SpriteEffects.None, 0f);
+                        texAncla.Size() * 0.5f, escAncla * 0.54f, SpriteEffects.None, 0f);
 
-                    // EL ESTALLIDO DE IMPACTO (los primeros ticks)
+                    // EL ESTALLIDO DE IMPACTO (los primeros ticks — solo en
+                    // el modo presa: en ritual los destellos se apilan)
                     float flashI = MathHelper.Clamp(1f - _age / 6f, 0f, 1f);
-                    if (flashI > 0f)
+                    if (flashI > 0f && !ritual)
                         StormLib.ImpactFlash(Main.spriteBatch, ancla, 38f * (0.6f + 0.4f * flashI),
                             OjoHalo, flashI * alpha * fade, time * 1.1f);
 
-                    // LOS ARCOS DE CORONA (crispados alrededor del ancla)
-                    if (StormLib.IsLit(seed + 90, flick, 0.65f))
+                    // LOS ARCOS DE CORONA (crispados alrededor del ancla — en
+                    // ritual se callan: la corona la lleva LA CEREMONIA)
+                    if (!ritual && StormLib.IsLit(seed + 90, flick, 0.65f))
                     {
                         float arcR = 18f + 26f * lifeT;
                         StormLib.ArcRing(Main.spriteBatch, ancla, arcR,
@@ -495,11 +601,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 finally { Main.spriteBatch.End(); }
 
-                // === 4. LA BRUMA EN LA PUNTA (la que toca al monstruo) ===
-                float prog = Math.Min(1f, _age / (float)TotalLife);
-                SombrasLib.Bruma(Projectile.Center, 20f * (0.8f + 0.4f * prog),
-                    0.55f * alpha * fade, time, seed + 91,
-                    new Vector2(0f, -10f * prog));
+                // === 4. LA BRUMA EN LA PUNTA (la que toca al monstruo — en
+                //     ritual se calla: la CUNA del nacimiento ya respira su
+                //     propia bruma en ese punto exacto) ===
+                if (!ritual)
+                {
+                    float prog = Math.Min(1f, _age / (float)TotalLife);
+                    SombrasLib.Bruma(Projectile.Center, 20f * (0.8f + 0.4f * prog),
+                        0.55f * alpha * fade, time, seed + 91,
+                        new Vector2(0f, -10f * prog));
+                }
             }
             catch
             {

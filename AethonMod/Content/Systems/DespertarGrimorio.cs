@@ -115,7 +115,24 @@ namespace AethonMod.Content.Systems
         /// SIEMPRE la progresión de armas y minerales de Terraria (con sus
         /// minerales ALTERNATIVOS — «armas que a veces aparecen en un
         /// mundo sí y otro no» —, las de los jefes y las de la cima del
-        /// propio mod). El arma debe estar CORRUPTA al devorarla.</summary>
+        /// propio mod). El arma debe estar CORRUPTA al devorarla.
+        ///
+        /// v6.51.8 — LA CURA DE LOS PELDAÑOS IMPOSIBLES (la letra: «para
+        /// el despertar 42 piden el sol de israpony, eso es una pintura,
+        /// no es un arma no deberia pedir eso, siempre debe seguir
+        /// pidiendo un arma o en su defecto lingotes de algun mineral» +
+        /// «no creo que sea bueno que pida la cenit en ningun momento» +
+        /// «tambien pide armas propias del mod, estas armas no son
+        /// obtenibles»): MUEREN la pintura de Israpony (43), EL ZENIT
+        /// (44) y las SEIS armas del mod (45-50 — nunca obtenibles).
+        /// En su lugar: los CUATRO picos restantes del Señor de la Luna
+        /// (43: Terrariano y Celebration Mk2 · 44: Cetro de Cristal
+        /// Arcoíris y Destello Lunar — armas de VERDAD, obtenibles)… y
+        /// desde el 45, LA OFRENDA MINERAL (ver MineralDe): los
+        /// lingotes del fin del mundo, en cantidades que crecen con el
+        /// nivel — que NO necesitan corrupción («al ser minerales no
+        /// necesitan estar corruptos ya que no se corrompen como las
+        /// armas»).</summary>
         public static readonly int[][] ArmasDelNivel =
         {
             // (índice 0 vacío — el nivel 1 vive en [1])
@@ -162,15 +179,87 @@ namespace AethonMod.Content.Systems
             new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                                                             // 40 la Torre del Polvo Estelar
             new int[] { ItemID.Meowmere, ItemID.StarWrath },                                                                                 // 41 el Señor de la Luna
             new int[] { ItemID.LastPrism, ItemID.SDMG },                                                                                     // 42 el Señor de la Luna (los dos picos)
-            new int[] { ItemID.SunshineofIsrapony },                                                                                                // 43 la Emperatriz del DÍA (el nombre interno es broma de Re-Logic)
-            new int[] { ItemID.Zenith },                                                                                                     // 44 EL ZENIT
-            new int[] { ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>() },                                                       // 45 el Agujero del Olvido
-            new int[] { ModContent.ItemType<Weapons.Cosmic.CosmicBlackHoleStaff>() },                                                       // 46 el Agujero Cósmico
-            new int[] { ModContent.ItemType<Weapons.Cosmic.UmbralBlackHoleStaff>() },                                                       // 47 el Agujero del Umbral
-            new int[] { ModContent.ItemType<Weapons.Cosmic.BrumaBlackHoleStaff>() },                                                        // 48 el Agujero de la Bruma
-            new int[] { ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>() },                                                          // 49 LA SOMBRA DE LA PÁGINA (la fauce del Eterno)
-            new int[] { ModContent.ItemType<Weapons.Cosmic.SolRunico20Staff>() },                                                           // 50 EL GRAN SELLADO (el sol de 20 anillos)
+            new int[] { ItemID.Terrarian, ItemID.MoonlordTurretStaff },                                                                    // 43 el Señor de la Luna (el yoyó y el Celebration Mk2 — v6.51.8: la PINTURA de Israpony MURIÓ; el nombre interno del Mk2 es MoonlordTurretStaff)
+            new int[] { ItemID.RainbowCrystalStaff, ItemID.LunarFlareBook },                                                                // 44 el Señor de la Luna (cristal y destello — v6.51.8: EL ZENIT MUERE: «no creo que sea bueno que pida la cenit»)
+            new int[] { },                                                                                                                   // 45 LA OFRENDA MINERAL (v6.51.8 — ver MineralDe)
+            new int[] { },                                                                                                                   // 46 LA OFRENDA MINERAL
+            new int[] { },                                                                                                                   // 47 LA OFRENDA MINERAL
+            new int[] { },                                                                                                                   // 48 LA OFRENDA MINERAL
+            new int[] { },                                                                                                                   // 49 LA OFRENDA MINERAL
+            new int[] { },                                                                                                                   // 50 LA OFRENDA MINERAL (la gran ofrenda final)
         };
+
+        // ================================================================
+        //  v6.51.8 — LA OFRENDA MINERAL (la letra: «en caso de no haber
+        //  mas arma usar cierta cantidad de lingotes de algun mineral
+        //  correspondiente con el nivel… al ser minerales no necesitan
+        //  estar corruptos ya que no se corrompen como las armas»): con
+        //  las armas de verdad agotadas (el Señor de la Luna entregó
+        //  TODAS en el 44), los peldaños de la cima piden LINGOTES — el
+        //  metal que corresponde al nivel, en cantidades que CRECEN con
+        //  el despertar. Se devuelven SOLTANDO LA PILA con el Eterno en
+        //  la mano (el mismo gesto del arma — sin corrupción: los
+        //  minerales no se corrompen).
+        // ================================================================
+
+        /// <summary>¿EL NIVEL N ES DE MINERALES? (true = la ofrenda es
+        /// la pila de lingotes — no hay arma del peldaño).</summary>
+        public static bool EsNivelMineral(int nivel)
+            => nivel >= 45 && nivel <= NivelMax;
+
+        /// <summary>EL MINERAL del peldaño N (el lingote que pide — la
+        /// luminita del Señor de la Luna en la escalera 45-48; la
+        /// hongonita y el espectro en la cima del mundo).</summary>
+        public static int MineralDe(int nivel)
+        {
+            switch (nivel)
+            {
+                case 45: return ItemID.LunarBar;      // 36 lingotes de luminita
+                case 46: return ItemID.LunarBar;      // 45
+                case 47: return ItemID.LunarBar;      // 54
+                case 48: return ItemID.LunarBar;      // 63
+                case 49: return ItemID.ShroomiteBar;  // 33 de hongonita
+                case 50: return ItemID.SpectreBar;    // 33 de espectro (LA GRAN OFRENDA FINAL)
+                default: return -1;                   // no es peldaño mineral
+            }
+        }
+
+        /// <summary>CUÁNTOS LINGOTES exige el peldaño N (la cantidad
+        /// crece con el nivel — la luminita de la cima del mundo).</summary>
+        public static int CantidadMineralDe(int nivel)
+        {
+            switch (nivel)
+            {
+                case 45: return 36;
+                case 46: return 45;
+                case 47: return 54;
+                case 48: return 63;
+                case 49: return 33;
+                case 50: return 33;
+                default: return 0;
+            }
+        }
+
+        /// <summary>¿CUÁNTOS LINGOTES del peldaño lleva ESTE jugador en
+        /// el inventario? (el conteo VIVO del requisito — para la lista
+        /// del despertar y su ✓).</summary>
+        public static int MineralesEnManos(Player p, int nivel)
+        {
+            int tipo = MineralDe(nivel);
+            if (p == null || tipo < 0) return 0;
+            int total = 0;
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it != null && !it.IsAir && it.type == tipo) total += it.stack;
+            }
+            return total;
+        }
+
+        /// <summary>¿LLEVA YA LA OFRENDA MINERAL COMPLETA? (el ✓ de la
+        /// lista — listo para soltar la pila ante el libro).</summary>
+        public static bool LlevaMineralCompleto(Player p, int nivel)
+            => MineralesEnManos(p, nivel) >= CantidadMineralDe(nivel) && EsNivelMineral(nivel);
 
         /// <summary>¿Es ESTA arma la del peldaño del nivel N?</summary>
         public static bool EsArmaDelNivel(int nivel, Item arma)
@@ -185,14 +274,26 @@ namespace AethonMod.Content.Systems
 
         /// <summary>El NOMBRE de la ofrenda del nivel N (para la lista de
         /// requisitos de la ventana de información — la primera arma del
-        /// peldaño).</summary>
+        /// peldaño; en los peldaños MINERALES, el lingote de la ofrenda).</summary>
         public static string NombreOfrenda(int nivel)
         {
             if (nivel < 1 || nivel > NivelMax) return "—";
-            int tipo = ArmasDelNivel[nivel][0];
-            Item proto = null;
-            try { proto = ContentSamples.ItemsByType[tipo]; } catch { }
-            return proto != null ? proto.Name : "—";
+            if (EsNivelMineral(nivel))
+            {
+                try
+                {
+                    var proto = ContentSamples.ItemsByType[MineralDe(nivel)];
+                    if (proto != null) return proto.Name;
+                }
+                catch { }
+                return "—";
+            }
+            int[] peldano = ArmasDelNivel[nivel];
+            if (peldano.Length == 0) return "—";
+            int tipo = peldano[0];
+            Item proto2 = null;
+            try { proto2 = ContentSamples.ItemsByType[tipo]; } catch { }
+            return proto2 != null ? proto2.Name : "—";
         }
 
         /// <summary>¿Cuántas esencias de ESTE jugador hay en su inventario?</summary>
@@ -333,5 +434,46 @@ namespace AethonMod.Content.Systems
                 default: return null;
             }
         }
+
+        // ================================================================
+        //  v6.51.8 — EL CAMINO DEL DESPERTAR (la letra: «en cada nivel del
+        //  despertar solo dice % de aumento de daño, pero no dicen nada
+        //  mas, deberian decir cuando es que aparecen las mejoras en sus
+        //  respectivos niveles y no solo aumento de daño»): la escalera
+        //  COMPLETA de los hitos — cada MEJORA con SU nivel. La lee la
+        //  ventana de info del Eterno (los QUE FALTAN, con su número).
+        // ================================================================
+
+        /// <summary>UN PASO DEL CAMINO: el nivel que desbloquea y la
+        /// clave hjson de su descripción corta.</summary>
+        public readonly struct PasoDelCamino
+        {
+            public readonly int Nivel;
+            public readonly string Clave;
+            public PasoDelCamino(int nivel, string clave)
+            {
+                Nivel = nivel;
+                Clave = clave;
+            }
+        }
+
+        /// <summary>LA ESCALERA DE HITOS COMPLETA (5→50) — qué mejora
+        /// aparece y EN QUÉ NIVEL (la letra: «cuando es que aparecen las
+        /// mejoras en sus respectivos niveles»).</summary>
+        public static readonly PasoDelCamino[] ElCaminoDelDespertar =
+        {
+            new PasoDelCamino(5,  "Mods.AethonMod.Despertar.CaminoMejora1"),
+            new PasoDelCamino(7,  "Mods.AethonMod.Despertar.CaminoSol"),
+            new PasoDelCamino(10, "Mods.AethonMod.Despertar.CaminoAgujeros"),
+            new PasoDelCamino(15, "Mods.AethonMod.Despertar.CaminoMejora2"),
+            new PasoDelCamino(17, "Mods.AethonMod.Despertar.CaminoSol2"),
+            new PasoDelCamino(20, "Mods.AethonMod.Despertar.CaminoMascota"),
+            new PasoDelCamino(25, "Mods.AethonMod.Despertar.CaminoAscendidos"),
+            new PasoDelCamino(30, "Mods.AethonMod.Despertar.CaminoMejora3"),
+            new PasoDelCamino(35, "Mods.AethonMod.Despertar.CaminoSol3"),
+            new PasoDelCamino(40, "Mods.AethonMod.Despertar.CaminoMejora4"),
+            new PasoDelCamino(45, "Mods.AethonMod.Despertar.CaminoSupremo"),
+            new PasoDelCamino(50, "Mods.AethonMod.Despertar.CaminoMaximo"),
+        };
     }
 }

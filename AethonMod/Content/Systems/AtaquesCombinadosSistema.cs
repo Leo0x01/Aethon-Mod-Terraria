@@ -155,35 +155,103 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  v6.51.8 — LOS CELEBRANTES DEL NACIMIENTO (la letra: «en el
+        //  nacimiento de ambos [el sol y los agujeros] los ojos
+        //  correspondientes y de forma aleatoria, deben disparar su rayo
+        //  de perlin al punto central del nacimiento siendo de ahi donde
+        //  nace el sol runico y los agujeros negros runicos, siempre
+        //  teniendo en cuenta el numero de minion necesario para el
+        //  nacimiento de cada uno»): EL SOL pide 2 ojos mejorados · EL
+        //  AGUJERO 5 · EL SUPREMO 8 (en su mejora 4) — elegidos AL AZAR
+        //  entre los elegibles, y cada uno dispara SU RAYO DE PERLIN al
+        //  PUNTO CENTRAL del ritual (el rayo sostenido del modo ritual
+        //  del TruenoPerlin — de ahí nace todo).
+        // ================================================================
+
+        /// <summary>EL MÁS DESPIERTO del escuadrón (quien mide el daño
+        /// del conjuro — el azar elige quiénes REZAN, no cuánto pega).</summary>
+        private static Projectile ElMasDespierto(List<Projectile> ojos)
+        {
+            Projectile mejor = null;
+            int mejorM = -1;
+            foreach (Projectile ojo in ojos)
+            {
+                if (ojo == null || !ojo.active) continue;
+                int m = global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(ojo);
+                if (m > mejorM) { mejorM = m; mejor = ojo; }
+            }
+            return mejor;
+        }
+
+        /// <summary>CUÁNTOS ojos AL AZAR (Fisher-Yates sobre una copia —
+        /// la letra: «de forma aleatoria»).</summary>
+        private static List<Projectile> ElegirAlAzar(List<Projectile> piscina, int cuantos)
+        {
+            var copia = new List<Projectile>(piscina);
+            for (int i = copia.Count - 1; i > 0; i--)
+            {
+                int j = Main.rand.Next(i + 1);
+                Projectile tmp = copia[i]; copia[i] = copia[j]; copia[j] = tmp;
+            }
+            int n = Math.Min(cuantos, copia.Count);
+            return copia.GetRange(0, n);
+        }
+
+        /// <summary>LOS CELEBRANTES REZAN: cada ojo elegido dispara SU
+        /// RAYO DE PERLIN al PUNTO CENTRAL del ritual (el MODO RITUAL del
+        /// TruenoPerlin: sostenido TODO el parto, de la córnea del ojo al
+        /// punto donde el sol o el agujero nacerá — sin golpe: es la
+        /// reverencia del nacimiento, no un ataque).</summary>
+        private static void LosCelebrantesRezan(List<Projectile> celebrantes, Projectile ritual)
+        {
+            if (ritual == null || !ritual.active) return;
+            foreach (Projectile ojo in celebrantes)
+            {
+                if (ojo == null || !ojo.active) continue;
+                Projectile.NewProjectile(ojo.GetSource_FromAI(),
+                    ritual.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Cosmic.TruenoPerlinProjectile>(),
+                    0, 0f, ritual.owner,
+                    2f,                  // EL MODO: RITUAL (sostenido, sin golpe)
+                    ojo.whoAmI * 1f,     // la boca: ESTE ojo
+                    ritual.whoAmI * 1f); // el ancla: EL PUNTO CENTRAL del ritual
+            }
+        }
+
+        // ================================================================
         //  EL SOL RÚNICO COMBINADO
         // ================================================================
 
         /// <summary>LA CEREMONIA DEL SOL (v6.51.2 — LA LETRA: «para
         /// los soles rúnicos el rayo convergente tome 2 SEGUNDOS en
         /// crearlo y lanzarlo al enemigo… deben aparecer encima del
-        /// jugador»): los DOS ojos con más mejoras DISPARAN sus rayos de
-        /// perlin (la reverencia de los celebrantes) y ENCIMA DEL
-        /// JUGADOR nace EL RAYO CONVERGENTE — 2 segundos de rayos que
-        /// convergen y CREAN el sol — y al cumplir, el sol sale
-        /// DISPARADO al enemigo (su homing hace el resto: daño de área,
-        /// quemadura y la nova final).</summary>
+        /// jugador»): DOS ojos mejorados — AL AZAR entre el escuadrón
+        /// (v6.51.8: la letra de los celebrantes) — disparan SUS RAYOS
+        /// DE PERLIN al PUNTO CENTRAL del ritual y ENCIMA DEL JUGADOR
+        /// nace EL RAYO CONVERGENTE — 2 segundos de rayos que convergen
+        /// y CREAN el sol — y al cumplir, el sol sale DISPARADO al
+        /// enemigo (su homing hace el resto: daño de área, quemadura y
+        /// la nova final).</summary>
         private static void DispararElSol(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
             {
-                // LOS DOS CELEBRANTES (los más despiertos).
-                var celebrantes = new List<Projectile>(mejorados);
-                celebrantes.Sort((a, b) =>
-                    global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(b)
-                    - global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(a));
-                Projectile ojo1 = celebrantes[0];
-                Projectile ojo2 = celebrantes.Count > 1 ? celebrantes[1] : celebrantes[0];
+                // v6.51.8 — LOS DOS CELEBRANTES, AL AZAR (la letra: «los
+                // ojos correspondientes y de forma aleatoria… siempre
+                // teniendo en cuenta el numero de minion necesario para
+                // el nacimiento de cada uno»: el sol pide DOS).
+                var celebrantes = ElegirAlAzar(mejorados, 2);
 
-                int nivelOjo = (int)MathF.Floor(ojo1.ai[2]);
+                // EL DAÑO LO MIDE EL MÁS DESPIERTO (el azar elige quiénes
+                // rezan, no cuánto pega el conjuro — el patrón de siempre).
+                Projectile lider = ElMasDespierto(mejorados);
+                if (lider == null) return;
+                int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
-                    .MultMejoras(ojo1);
-                int danoRayo = Math.Max(1, (int)(ojo1.damage *
+                    .MultMejoras(lider);
+                int danoRayo = Math.Max(1, (int)(lider.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
 
                 // EL DAÑO DEL SOL QUE NACERÁ: crecido por la combinación
@@ -193,29 +261,11 @@ namespace AethonMod.Content.Systems
                 int danoSol = Math.Max(1, (int)(danoRayo * 3f *
                     (1f + DespertarGrimorio.BonusDano(despertar))));
 
-                // LA ANIMACIÓN DE LOS CELEBRANTES: disparan sus rayos al
-                // blanco (la reverencia que ABRRE el ritual) y estallan en
-                // chispas doradas.
-                foreach (Projectile ojo in new[] { ojo1, ojo2 })
-                {
-                    if (ojo == null || !ojo.active) continue;
-                    Projectile.NewProjectile(ojo.GetSource_FromAI(),
-                        blanco.Center, Vector2.Zero,
-                        ModContent.ProjectileType
-                            <global::AethonMod.Content.Projectiles.Cosmic.TruenoPerlinProjectile>(),
-                        danoRayo, ojo.knockBack * 0.6f, p.whoAmI,
-                        1f, ojo.whoAmI, blanco.whoAmI);
-                    for (int k = 0; k < 10; k++)
-                    {
-                        Dust d = Dust.NewDustPerfect(ojo.Center, DustID.GoldFlame,
-                            Main.rand.NextVector2Circular(3.5f, 3.5f), 128, default, 1.2f);
-                        d.noGravity = true;
-                    }
-                }
-
                 // EL RAYO CONVERGENTE: 2 SEGUNDOS de ceremonia ENCIMA DEL
-                // JUGADOR — al cumplir, EL SOL nace y sale al enemigo.
-                Projectile.NewProjectile(
+                // JUGADOR — al cumplir, EL SOL nace EN SU PUNTO CENTRAL
+                // (donde los celebrantes clavaron sus rayos) y sale al
+                // enemigo.
+                Projectile ritual = Projectile.NewProjectileDirect(
                     p.GetSource_Misc("SolCombinado"),
                     p.Center + new Vector2(0f, -150f), Vector2.Zero,
                     ModContent.ProjectileType
@@ -224,6 +274,23 @@ namespace AethonMod.Content.Systems
                     1f,                          // EL MODO: SOL
                     blanco.whoAmI * 1f,          // el blanco elegido
                     danoSol * 1f);               // el daño combinado
+
+                // LOS CELEBRANTES REZAN AL CENTRO (la letra de la .51.8):
+                // sus rayos de perlin SOSTENIDOS todo el ritual — de sus
+                // córneas al punto donde el sol nacerá.
+                LosCelebrantesRezan(celebrantes, ritual);
+
+                // EL BRILLO DE LOS ELEGIDOS (la reverencia los marca).
+                foreach (Projectile ojo in celebrantes)
+                {
+                    if (ojo == null || !ojo.active) continue;
+                    for (int k = 0; k < 10; k++)
+                    {
+                        Dust d = Dust.NewDustPerfect(ojo.Center, DustID.GoldFlame,
+                            Main.rand.NextVector2Circular(3.5f, 3.5f), 128, default, 1.2f);
+                        d.noGravity = true;
+                    }
+                }
 
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.2f), p.Center);
@@ -237,10 +304,12 @@ namespace AethonMod.Content.Systems
 
         /// <summary>EL RITUAL DEL AGUJERO (v6.51.2 — LA LETRA: «para
         /// los agujeros negros rúnicos tome 3 SEGUNDOS»): con 5+ ojos
-        /// mejorados, el escuadrón abre ENCIMA DEL JUGADOR el RAYO
-        /// CONVERGENTE de 3 segundos — y al cumplir, uno de los CUATRO
-        /// RÚNICOS al azar (nivel 25+: su versión ASCENDIDA) se ABRE
-        /// sobre la presa. EL DAÑO nace de los ojos combinados.</summary>
+        /// mejorados, CINCO de ellos — AL AZAR (v6.51.8: la letra de los
+        /// celebrantes) — disparan SUS RAYOS DE PERLIN al PUNTO CENTRAL
+        /// del ritual y ENCIMA DEL JUGADOR nace EL RAYO CONVERGENTE de 3
+        /// segundos — y al cumplir, uno de los CUATRO RÚNICOS al azar
+        /// (nivel 25+: su versión ASCENDIDA) nace EN ESE PUNTO CENTRAL.
+        /// EL DAÑO nace de los ojos combinados.</summary>
         private static void LanzarElAgujero(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
@@ -248,9 +317,15 @@ namespace AethonMod.Content.Systems
             {
                 bool ascendidos = DespertarGrimorio.AgujerosAscendidos(despertar);
 
+                // v6.51.8 — LOS CINCO CELEBRANTES, AL AZAR (la letra: el
+                // agujero pide CINCO ojos mejorados — los que el azar
+                // elija del escuadrón).
+                var celebrantes = ElegirAlAzar(mejorados, 5);
+
                 // EL DAÑO COMBINADO: el rayo del ojo más despierto × los
                 // celebrantes que abren la puerta (×1,45 en ascendidos).
-                Projectile lider = mejorados[0];
+                Projectile lider = ElMasDespierto(mejorados);
+                if (lider == null) return;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
@@ -261,11 +336,11 @@ namespace AethonMod.Content.Systems
 
                 // EL RAYO CONVERGENTE: 3 SEGUNDOS de ceremonia — al
                 // cumplir, la puerta (el agujero rúnico al azar — los
-                // ascendidos si el despertar los trajo) se abre SOBRE la
-                // presa (la elección del tipo la hace el ritual al
-                // cumplir: es UN AZAR de cada lanzamiento, como manda la
-                // letra).
-                Projectile.NewProjectile(
+                // ascendidos si el despertar los trajo) se abre EN EL
+                // PUNTO CENTRAL donde los celebrantes clavaron sus rayos
+                // (la elección del tipo la hace el ritual al cumplir: es
+                // UN AZAR de cada lanzamiento, como manda la letra).
+                Projectile ritual = Projectile.NewProjectileDirect(
                     p.GetSource_Misc("AgujeroCombinado"),
                     p.Center + new Vector2(0f, -150f), Vector2.Zero,
                     ModContent.ProjectileType
@@ -275,9 +350,13 @@ namespace AethonMod.Content.Systems
                     blanco.whoAmI * 1f,
                     dano * 1f);
 
-                // EL TEATRO DE LA APERTURA (las chispas del escuadrón).
-                foreach (Projectile ojo in mejorados)
+                // LOS CELEBRANTES REZAN AL CENTRO (la letra de la .51.8).
+                LosCelebrantesRezan(celebrantes, ritual);
+
+                // EL TEATRO DE LA APERTURA (las chispas de los elegidos).
+                foreach (Projectile ojo in celebrantes)
                 {
+                    if (ojo == null || !ojo.active) continue;
                     Dust d = Dust.NewDustPerfect(ojo.Center, DustID.Shadowflame,
                         Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
                         new Color(140, 60, 210), 1f);
@@ -295,13 +374,30 @@ namespace AethonMod.Content.Systems
         /// ascendidos y se necesitan el ataque combinado de 8 minions o
         /// más en su mejora número 4» — uno por minuto, al azar entre los
         /// DOS. v6.51.2: SU RITUAL TAMBIÉN (el rayo convergente de 3
-        /// segundos — la carta fuerte se anuncia).</summary>
+        /// segundos — la carta fuerte se anuncia). v6.51.8: OCHO ojos en
+        /// su mejora 4 — AL AZAR — disparan SUS RAYOS al PUNTO CENTRAL
+        /// (la letra de los celebrantes) y el SUPREMO/AURORA nace ahí.</summary>
         private static void LanzarElSupremo(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
             {
-                Projectile lider = mejorados[0];
+                // v6.51.8 — LA PISCINA DEL SUPREMO: solo los ojos en SU
+                // MEJORA 4 (la letra: «el ataque combinado de 8 minions
+                // o más en su mejora número 4») — y OCHO de ellos, AL
+                // AZAR, son los celebrantes.
+                var enLaCuarta = new List<Projectile>();
+                foreach (Projectile ojo in mejorados)
+                {
+                    if (ojo == null || !ojo.active) continue;
+                    if (global::AethonMod.Content.Projectiles.OjoEternoMinion
+                            .MejorasDe(ojo) >= 4)
+                        enLaCuarta.Add(ojo);
+                }
+                var celebrantes = ElegirAlAzar(enLaCuarta, 8);
+
+                Projectile lider = ElMasDespierto(enLaCuarta);
+                if (lider == null) return;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
@@ -311,8 +407,9 @@ namespace AethonMod.Content.Systems
                     (1f + DespertarGrimorio.BonusDano(despertar))));
 
                 // EL RAYO CONVERGENTE DEL SUPREMO: 3 segundos — al cumplir,
-                // el SUPREMO o el AURORA (al azar) se abre sobre la presa.
-                Projectile.NewProjectile(
+                // el SUPREMO o el AURORA (al azar) se abre EN EL PUNTO
+                // CENTRAL donde los ocho clavaron sus rayos.
+                Projectile ritual = Projectile.NewProjectileDirect(
                     p.GetSource_Misc("SupremoCombinado"),
                     p.Center + new Vector2(0f, -150f), Vector2.Zero,
                     ModContent.ProjectileType
@@ -322,10 +419,14 @@ namespace AethonMod.Content.Systems
                     blanco.whoAmI * 1f,
                     dano * 1f);
 
-                // LA SOLEMNIDAD: TODO el escuadrón estalla (la carta
-                // fuerte del grimorio despierto).
-                foreach (Projectile ojo in mejorados)
+                // LOS OCHO REZAN AL CENTRO (la letra de la .51.8).
+                LosCelebrantesRezan(celebrantes, ritual);
+
+                // LA SOLEMNIDAD: los elegidos estallan (la carta fuerte
+                // del grimorio despierto).
+                foreach (Projectile ojo in celebrantes)
                 {
+                    if (ojo == null || !ojo.active) continue;
                     for (int k = 0; k < 6; k++)
                     {
                         Dust d = Dust.NewDustPerfect(ojo.Center, DustID.PurpleTorch,
@@ -336,7 +437,11 @@ namespace AethonMod.Content.Systems
                 }
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.5f), p.Center);
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, p.Center);
+                // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
+                //     agujeros negros runicos supremos hace ruido de jefes
+                //     al aparecer, bueno no deben hacer ningun ruido, deben
+                //     ser como los otros»): el SoundID.Roar de la apertura
+                //     del ritual supremo MUERE — silenciosos como los otros.
             }
             catch { }
         }

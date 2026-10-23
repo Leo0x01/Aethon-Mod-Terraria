@@ -23,6 +23,19 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     //  el item si no lo tenía, el buff YA — el engendro lo hace el
     //  patrón canónico del buff). La bruma se disipa y el Eterno VUELVE
     //  a la mano del portador (visual: se desvanece hacia él).
+    //
+    //  v6.51.8 — LA ACTUACIÓN DEL OJO (la letra: «la animacion donde el
+    //  grimorio escupe a la mascota no esta bien creada ya que el ojo
+    //  del grimorio no reacciona correctamente, no tiene iris y se queda
+    //  todo blanco y con animacion del ojo pobre»): el ojo del libro
+    //  grande YA NO es el socket blanco quieto — ACTÚA TODO EL CINE con
+    //  las capas de la familia (el disco del IRIS + los párpados
+    //  Medio/Cerrado): mira al portador al subir, se clava en SU BOCA al
+    //  gestar (tiembllando), se ABRE DE PAR EN PAR en el empuje (iris
+    //  dilatado), se cierra LA SACIEDAD, se entreabre LA CONTEMPLACIÓN
+    //  mirando al hijo volar… y el pequeño nace con los ojos CERRADOS y
+    //  abre SU iris por primera vez a mitad del viaje (la primera
+    //  mirada del minigrimorio).
     // ======================================================================
     public class EscupidizoProjectile : ModProjectile
     {
@@ -148,6 +161,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>()].Value;
                 Texture2D cerrado = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
+                Texture2D medio = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Medio").Value;
+                Texture2D iris = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
                 Texture2D glow = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                 if (tex == null || glow == null) return false;
@@ -201,48 +218,62 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.ReabrirLoteVanilla();
 
-                // === v6.51.6 — EL RIM VIOLETA MUERE (la letra: «recuerda
-                //     no usar eso [el ovalado plano] y siempre usar
-                //     nuestro sistema de bruma»): el óvalo de glow
-                //     estirado 190×130 era geometría plana — la membrana
-                //     del evento ahora es UNA CUARTA NUBE de bruma fBm
-                //     de la casa (más ancha que las tres de arriba: es
-                //     el mar entero respirando). ===
-                // (la cuarta nube vive en el lote de bruma de arriba)
-
                 // === 2. EL LIBRO GRANDE: se ABRE conforme se acerca el
                 //     escupido (el cuerpo del Eterno mientras la boca
-                //     crece… y el párpado CERRADO ya escupido: duerme la
-                //     siesta de después de comer). ===
+                //     crece). v6.51.8 — EL CUERPO ES SIEMPRE EL MISMO y
+                //     ENCIMA VIVE EL OJO QUE ACTÚA (la letra: iris +
+                //     párpados + reacción — el socket blanco quieto
+                //     MURIÓ). ===
                 float abre = MathHelper.Clamp((t - T_SUBE) / (float)(T_ESCUPE - T_SUBE), 0f, 1f);
                 float esc = 1.15f + 0.10f * MathF.Sin(tiempo * 5f) * abre;
                 Color luzLibro = new Color(226, 214, 248) * alfa;
-                if (t < T_ESCUPE)
-                {
-                    Main.spriteBatch.Draw(tex, pos, frame, luzLibro,
-                        Projectile.rotation, origen, esc, SpriteEffects.None, 0f);
 
-                    // LA BOCA DE LUZ creciendo (por donde saldrá el mini).
-                    //     v6.51.6 — la boca también era un óvalo plano de
-                    //     glow estirado: ahora es UN PUNTO de luz REDONDO
-                    //     pequeño (la garganta que se enciende — nada de
-                    //     geometría plana) y la bruma creciente la tapa.
-                    if (abre > 0.2f)
-                        Main.spriteBatch.Draw(glow, pos + new Vector2(0f, 6f), null,
-                            new Color(190, 120, 255) * (0.55f * abre * alfa),
-                            0f, glow.Size() * 0.5f,
-                            new Vector2(22f + 16f * abre, 22f + 16f * abre) / glow.Size(),
-                            SpriteEffects.None, 0f);
-                }
-                else
+                Main.spriteBatch.Draw(tex, pos, frame, luzLibro,
+                    Projectile.rotation, origen, esc, SpriteEffects.None, 0f);
+
+                // LA BOCA DE LUZ creciendo (por donde saldrá el mini).
+                //     v6.51.6 — la boca también era un óvalo plano de
+                //     glow estirado: ahora es UN PUNTO de luz REDONDO
+                //     pequeño (la garganta que se enciende — nada de
+                //     geometría plana) y la bruma creciente la tapa.
+                if (t < T_ESCUPE && abre > 0.2f)
+                    Main.spriteBatch.Draw(glow, pos + new Vector2(0f, 6f), null,
+                        new Color(190, 120, 255) * (0.55f * abre * alfa),
+                        0f, glow.Size() * 0.5f,
+                        new Vector2(22f + 16f * abre, 22f + 16f * abre) / glow.Size(),
+                        SpriteEffects.None, 0f);
+
+                // === v6.51.8 — EL OJO DEL LIBRO GRANDE (la actuación de la
+                //     letra): el PÁRPADO (Medio/Cerrado) o el IRIS sobre el
+                //     socket — MISMA transform del cuerpo, el patrón de las
+                //     capas de la familia (Nervioso.PostDrawInWorld). ===
+                ActuacionDelOjo(t, out float parpado, out Vector2 despIris, out float irisEscala);
+                if (parpado > 0f)
                 {
-                    // ESCUPIÓ: el grande cierra el ojo (la saciedad).
-                    Main.spriteBatch.Draw(cerrado, pos, frame, luzLibro,
+                    bool medioCerrado = parpado > 7f || parpado < 4f;
+                    Texture2D capa = medioCerrado ? medio : cerrado;
+                    Main.spriteBatch.Draw(capa, pos, frame, luzLibro,
                         Projectile.rotation, origen, esc, SpriteEffects.None, 0f);
+                }
+                else if (iris != null)
+                {
+                    Vector2 texelOjo = global::AethonMod.Content.Weapons
+                        .GrimorioHambrientoNervioso.OjoTexel;
+                    float irisEsc = global::AethonMod.Content.Weapons
+                        .GrimorioHambrientoNervioso.IrisEscala;
+                    Vector2 posIris = pos + ((texelOjo + despIris - origen) * esc)
+                        .RotatedBy(Projectile.rotation);
+                    Main.spriteBatch.Draw(iris, posIris, null, luzLibro,
+                        Projectile.rotation, iris.Size() * 0.5f,
+                        esc * irisEsc * irisEscala, SpriteEffects.None, 0f);
                 }
 
                 // === 3. EL MINI NACIENDO (el escupido en persona: el
-                //     pequeño sale de la boca y viaja al hombro). ===
+                //     pequeño sale de la boca y viaja al hombro).
+                //     v6.51.8 — EL PEQUEÑO TAMBIÉN ACTÚA: nace con los ojos
+                //     CERRADOS (acaba de nacer) y a mitad del viaje ABRE
+                //     SU IRIS por primera vez — mirando al portador (la
+                //     primera mirada del hijo). ===
                 if (t >= T_ESCUPE - 6 && portador != null && portador.active)
                 {
                     float viaje = MathHelper.Clamp(
@@ -252,15 +283,120 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         pos + new Vector2(0f, 8f), hombro,
                         viaje * viaje * (3f - 2f * viaje)) - Main.screenPosition;
                     float escMini = 0.42f * (0.6f + 0.4f * viaje);
-                    Main.spriteBatch.Draw(tex, posMini, frame,
-                        new Color(232, 222, 250) * alfa,
-                        -0.25f + 0.5f * viaje, origen, escMini,
-                        SpriteEffects.None, 0f);
+                    float rotMini = -0.25f + 0.5f * viaje;
+                    Color luzMini = new Color(232, 222, 250) * alfa;
+                    Main.spriteBatch.Draw(tex, posMini, frame, luzMini,
+                        rotMini, origen, escMini, SpriteEffects.None, 0f);
+
+                    if (t < T_ESCUPE + 16f)
+                    {
+                        // EL RECIÉN NACIDO DUERME (el párpado cerrado).
+                        Main.spriteBatch.Draw(cerrado, posMini, frame, luzMini,
+                            rotMini, origen, escMini, SpriteEffects.None, 0f);
+                    }
+                    else if (iris != null)
+                    {
+                        // LA PRIMERA MIRADA (el iris del hijo, mirando abajo
+                        // — hacia el portador que lo recibirá).
+                        Vector2 texelOjoMini = global::AethonMod.Content.Weapons
+                            .GrimorioHambrientoNervioso.OjoTexel;
+                        float irisEscMini = global::AethonMod.Content.Weapons
+                            .GrimorioHambrientoNervioso.IrisEscala;
+                        Vector2 posIrisMini = posMini +
+                            ((texelOjoMini + new Vector2(0f, 1.6f) - origen) * escMini)
+                                .RotatedBy(rotMini);
+                        Main.spriteBatch.Draw(iris, posIrisMini, null, luzMini,
+                            rotMini, iris.Size() * 0.5f,
+                            escMini * irisEscMini, SpriteEffects.None, 0f);
+                    }
                 }
 
                 return false;
             }
             catch { return false; }
+        }
+
+        // ================================================================
+        //  v6.51.8 — LA ACTUACIÓN DEL OJO (la letra: «el ojo del grimorio
+        //  no reacciona correctamente, no tiene iris y se queda todo
+        //  blanco y con animacion del ojo pobre»): TODO el guion del ojo
+        //  del libro grande — UNA FUNCIÓN PURA DE t (determinista en
+        //  todas las pantallas, como el cine entero):
+        //    · LA SUBIDA: mira ABAJO al portador (acaba de dejar sus
+        //      manos) — con un parpadeo de camino.
+        //    · LA GESTACIÓN: el iris se CLAVA EN SU PROPIA BOCA (mira lo
+        //      que está haciendo) y vaga un latido.
+        //    · LA TENSIÓN: el iris TIEMBLA clavado y el párpado
+        //      ENTRECIERRA (el esfuerzo del parto se lee en el ojo).
+        //    · EL EMPUJE: el ojo SE ABRE DE PAR EN PAR — el iris
+        //      DILATADO (la fuerza del escupido).
+        //    · LA SACIEDAD: el párpado se cierra DEL TODO (lo dio todo).
+        //    · LA CONTEMPLACIÓN: entreabierto, mirando al HIJO volar.
+        //    · LA DESPEDIDA: abierto, siguiendo al pequeño en el hombro
+        //      — y un último parpadeo tranquilo antes de volver.
+        //  parpado: 0 = abierto · 10..1 = el parpadeo contando (la
+        //  convención de la familia: medio >7 ó <4 · cerrado 4..7) ·
+        //  los candados usan el valor de su capa (8 = MEDIO · 5 = CERRADO).
+        // ================================================================
+        private static void ActuacionDelOjo(float t,
+            out float parpado, out Vector2 despIris, out float irisEscala)
+        {
+            parpado = 0f;
+            despIris = new Vector2(0f, 2.6f);   // al arranque: mira ABAJO (al portador)
+            irisEscala = 1f;
+
+            if (t < T_SUBE)
+            {
+                // LA SUBIDA: mirando al portador que lo soltó — con su
+                // parpadeo de camino (la vida propia de la familia).
+                despIris = new Vector2(MathF.Sin(t * 0.11f) * 0.8f, 2.6f);
+                if (t >= 24f && t < 34f) parpado = 34f - t;
+            }
+            else if (t < T_ESCUPE - 60f)
+            {
+                // LA GESTACIÓN TEMPRANA: la boca se abre — el iris se
+                // clava en ELLA (el libro mira lo que está haciendo) y
+                // vaga un latido propio.
+                float h = (t - T_SUBE) / (T_ESCUPE - 60f - T_SUBE);
+                despIris = new Vector2(MathF.Sin(t * 0.07f) * 1.1f, 2.8f + 1.4f * h);
+                if (t >= 104f && t < 114f) parpado = 114f - t;
+            }
+            else if (t < T_ESCUPE)
+            {
+                // LA TENSIÓN: el iris TIEMBLA clavado en la boca y el
+                // párpado ENTRECIERRA el ojo (el esfuerzo del parto).
+                despIris = new Vector2(MathF.Sin(t * 2.7f) * 0.55f, 4.0f);
+                parpado = 8f;                    // EL CANDADO: MEDIO
+            }
+            else if (t < T_ESCUPE + 12f)
+            {
+                // EL EMPUJE: el ojo se ABRE DE PAR EN PAR — el iris DILATADO.
+                despIris = new Vector2(0f, 3.6f);
+                irisEscala = 1.28f;
+            }
+            else if (t < T_ESCUPE + 38f)
+            {
+                // LA SACIEDAD: el párpado se cierra DEL TODO (lo dio todo).
+                parpado = 5f;                    // EL CANDADO: CERRADO
+                despIris = new Vector2(0f, 2.2f);
+            }
+            else if (t < T_ESCUPE + 66f)
+            {
+                // LA CONTEMPLACIÓN: medio abierto, mirando al HIJO que
+                // vuela hacia el hombro (abajo-izquierda del libro).
+                parpado = 8f;                    // EL CANDADO: MEDIO
+                despIris = new Vector2(-1.6f, 2.6f);
+            }
+            else
+            {
+                // LA DESPEDIDA: el ojo abierto, la mirada sigue al pequeño
+                // en el hombro — un último parpadeo tranquilo… y la
+                // pesadez de la vuelta (el párpado cae a medio camino).
+                despIris = new Vector2(-1.8f, 2.4f);
+                if (t >= T_ESCUPE + 92f && t < T_ESCUPE + 102f)
+                    parpado = (T_ESCUPE + 102f) - t;
+                if (t >= T_FIN - 34f) parpado = 8f;
+            }
         }
     }
 }

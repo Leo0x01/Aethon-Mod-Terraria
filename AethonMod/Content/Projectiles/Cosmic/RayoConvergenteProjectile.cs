@@ -328,8 +328,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(Modo == MODO_SUPREMO ? -0.5f : 0.35f),
                     Projectile.Center);
-                if (Modo == MODO_SUPREMO)
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, Projectile.Center);
+                // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
+                //     agujeros negros runicos supremos hace ruido de
+                //     jefes al aparecer, bueno no deben hacer ningun
+                //     ruido, deben ser como los otros»): el SoundID.Roar
+                //     del nacimiento supremo MUERE — nacen CON EL MISMO
+                //     silencio de los otros agujeros (solo el trueno
+                //     grave del ritual, como todos).
             }
 
             // EL ESTALLIDO DEL LANZAMIENTO (la puerta que se abre).
