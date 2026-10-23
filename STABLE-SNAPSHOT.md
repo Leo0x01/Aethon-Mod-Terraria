@@ -1943,7 +1943,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.11 PUBLICADA (release + CDN verificados) — EN JUEGO:
+1. **⏳ v6.51.11 PUBLICADA (release 422393484 + asset 670703243 · CDN verificado byte a byte · `/releases/latest` = v6.51.11) — EN JUEGO:
    LA MESA DEL SUELO · EL FESTÍN DEL PORTADOR · EL TOPE DE VELOCIDAD.**
    Checklist: (a) LA MESA — con el Eterno en la MANO, soltar esencias
    delante: come SOLO las del peldaño (el aviso cuenta «(3/5 del
