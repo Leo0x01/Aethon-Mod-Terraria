@@ -1,4 +1,4 @@
-# v6.51.7 — EL ARCO DEL BÁCULO SANGUINARIO
+# v6.51.7 — EL ARCO DEL BÁCULO SANGUINARIO — PUBLICADA
 
 **La letra del usuario**: «es raro la orbita de los minions es rara, arreglemosla, los minions siempre deben ir detras del jugador, pero cuando el libro sale a cazar, los minions comienza a orbitar al grimorio eterno, en el juego terraria ya hay un arma que usa orbitas o similares, por ejemplo usa la forma en que se posicionan los murcielagos de El báculo sanguinario (Sanguine Staff, en inglés) para posicionar a los minions del grimorio en el grimorio del eterno cuando sale a cazar // entonces los minions siempre obitan al jugador, menos cuando el grimorio sale a cazar, entonces orbitan al grimorio».
 
@@ -18,6 +18,8 @@
 · 40 px de vanilla + 6,2·n con la banda completa, respiración única de la danza (±3,5 %) y cabeceo propio de ±1,5 px. **SIMULADO EL PEOR CASO n = 1..16** en 200 muestras de tiempo: separación mínima entre vecinos 23,7 px — SIEMPRE aire entre sprites de 21 px (la regla de la .51.3; la primera pasada con 5,5·n dejaba 21,8 px a n = 10: se pescó en la revisión y se corrigió antes de publicar).
 
 · **Verificación**: oráculo 0/0 · build ×2 0/0 · .tmod v6.51.7 (2.839.369 B, md5 00c116c519d4565967323aa444f81e01): 401 entradas (cero cambios de arte — mismas 401 rutas de la .51.6), EOF exacto, 401/401 inflan, hjson ×3 paquete==fuente BYTE A BYTE, DLL con los 5 muertos AUSENTES (nombre exacto del heap) + SlotDeFormacion/PosicionDelLibro presentes + las constantes 7π/5 · 6,2 · 0,30 en el IL · headless ×2 (mundo6517, seed fauces517, puertos 7817/7818): Sandboxing → Finalizing v6.51.7 → Server started, CERO excepciones · 5 pasadas de código (refs colgantes, matemática contra el decompile simulada n=1..16, flujo de AI + transiciones libro↔jugador + determinismo MP, contrato del lote VFX, diff completo + docs).
+
+**PUBLICADA**: release 421353031, asset AethonMod.tmod 667589454 2.839.369 B (md5 00c116c519d4565967323aa444f81e01), CDN verificado byte a byte + `/releases/latest` = v6.51.7 · respaldo /home/sync/AethonMod-v6.51.7.tmod.
 
 # v6.51.6 — EL DESPERTAR ES DEL LIBRO + LA TERCERA PURGA + EL RITUAL QUE REVIVIÓ — PUBLICADA
 
