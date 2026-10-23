@@ -44,11 +44,10 @@ namespace AethonMod.Content.Projectiles
     /// cae entre el 35% y el 100% del intervalo: la banda NUNCA dispara
     /// en bloque — cada ojo es INDIVIDUAL.
     ///
-    /// LA FASE ORBITAL vive en el CAMPO DE INSTANCIA _faseOrbital
-    /// (v6.50.108: localAI es float[3] en tML — localAI[3] tiraba
-    /// IndexOutOfRange y los ojos no aparecían) y sólo la avanza
-    /// PasoOrbita (UNA vez por tick, desde la AI — el draw la LEE,
-    /// jamás la mueve).
+    /// EL RELOJ DE LA ÓRBITA (v6.51.7): el ángulo del abanico
+    /// vive en GlobalTimeWrappedHourly — determinista en todos
+    /// los clientes, SIN campo por ojo, SIN netcode (la fase
+    /// orbital de instancia murió con la danza atómica).
     ///
     /// EL RAYO (la finura de la .107): el proyectil DEL CETRO DEL TRUENO
     /// PERLIN en su modo ojo, un POCO MÁS FINO — funda 6,0 (era 7,5),
@@ -57,7 +56,7 @@ namespace AethonMod.Content.Projectiles
     ///
     /// (El resto del repertorio hereda de la .106: el sprite del usuario
     /// SIN recorte con el iris ACOMODADO, la ley del planeo del Ruinous
-    /// Staff, la corona viva que se balancea, el iris que manda, el
+    /// Staff, el arco del Sanguine que respira, el iris que manda, el
     /// parpadeo independiente, el círculo mágico de los agujeros negros
     /// y el retroceso con reincorporación.)
     /// </summary>
@@ -97,14 +96,6 @@ namespace AethonMod.Content.Projectiles
         //     nivel 1»): BASE 110 ticks (1,83 s — la del Forbidden Ruin)
         //     dividida por la VELOCIDAD DE NIVEL y por el RITMO PROPIO ===
         private const int CADENCIA_BASE = 110;
-
-        // === v6.50.108 — LA FASE ORBITAL VIVE AQUÍ (no en localAI[3]):
-        //     el localAI de vanilla es float[3] (índices 0–2) — el [3]
-        //     de la .107 tiraba IndexOutOfRangeException en cada AI y los
-        //     ojos no aparecían. Campo de INSTANCIA: una fase POR OJO,
-        //     determinista (nace del puesto en el anillo y avanza por
-        //     PasoOrbita igual en todos los clientes) ===
-        private float _faseOrbital;
 
         // === EL IRIS ACOMODADO (la medición del arte del usuario) ===
         //     la almendra (136,197)-(389,346) de 512×500 → centro
@@ -288,14 +279,21 @@ namespace AethonMod.Content.Projectiles
 
             // === EL FOCO DE LA MIRADA: a dónde apunta el iris ===
             NPC presa = ObjetivoDelOjo(dueño, nivel);
+            // v6.51.7 — EL ARCO DEL BÁCULO SANGUINARIO (la letra: «los
+            //     minions siempre deben ir detras del jugador, pero
+            //     cuando el libro sale a cazar, los minions comienza a
+            //     orbitar al grimorio eterno… usa la forma en que se
+            //     posicionan los murcielagos de El báculo sanguinario
+            //     (Sanguine Staff) para posicionar a los minions del
+            //     grimorio en el grimorio del eterno cuando sale a
+            //     cazar»): el CENTRO de la formación es el ESPÍRITU
+            //     mientras está fuera (los ojos orbitan AL LIBRO que
+            //     caza) y EL JUGADOR mientras está en casa (el abanico
+            //     quieto detrás del dueño — como los murciélagos del
+            //     Sanguine). El libro EN LA MANO ya NO es centro: la
+            //     .51.6 ataba la danza al vaivén del brazo y la órbita
+            //     se leía rara.
             Vector2? libro = PosicionDelLibro(dueño);
-            // v6.51.6 — EL GRIMORIO EN LA MANO TAMBIÉN ES CENTRO (la
-            //     letra: «los minions no orbitan correctamente alrededor
-            //     del grimorio»): si el espíritu está DENTRO pero el
-            //     Eterno está SOSTENIDO, la DANZA ATÓMICA orbita EL LIBRO
-            //     EN LA MANO — los ojos siempre rodean a SU grimorio.
-            libro = CentroDeLaDanza(dueño, libro);
-            PasoOrbita(libro);   // v6.50.107: la fase de la luna avanza UNA vez por tick
             Vector2 slot = SlotDeFormacion(dueño, libro);
             Vector2 foco = modo == MODO_APUNTANDO && presa != null
                 ? presa.Center
@@ -381,14 +379,16 @@ namespace AethonMod.Content.Projectiles
                 Vector2 alSlot = slot - Projectile.Center;
                 float dist = alSlot.Length();
                 // === v6.51.3 — LA LLEGADA EXACTA DE LA DANZA (la letra:
-                //     «mas exacta»): en la órbita del hambre, cerca del
-                //     puesto, el ojo lo PERSIGUE proporcional puro — SIN
-                //     inercia, SIN sobrepaso (el controlador viejo
-                //     conservaba velocidad y CRUZABA el hueco: los ojos
-                //     se pisaban y la danza se leía desordenada):
-                //     converge en subpíxel al hueco MÓVIL — cada ojo
-                //     clavado a su órbita, la danza PERFECTA. ===
-                if (libro is Vector2 && dist <= 30f && dist > 0.01f)
+                //     «mas exacta»): cerca del puesto, el ojo lo PERSIGUE
+                //     proporcional puro — SIN inercia, SIN sobrepaso (el
+                //     controlador viejo conservaba velocidad y CRUZABA el
+                //     hueco: los ojos se pisaban y la danza se leía
+                //     desordenada): converge en subpíxel al hueco MÓVIL —
+                //     cada ojo clavado a su órbita, la danza PERFECTA.
+                //     v6.51.7: vale para el abanico del JUGADOR también
+                //     (ya no solo junto al libro) — el arco del Sanguine
+                //     se lee clavado en los DOS centros. ===
+                if (dist <= 30f && dist > 0.01f)
                 {
                     Projectile.velocity = alSlot * 0.55f;
                 }
@@ -506,177 +506,82 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  LA FORMACIÓN — la corona viva y las órbitas
+        //  LA FORMACIÓN — el arco del báculo sanguinario (v6.51.7)
         // ================================================================
 
-        /// <summary>LA FORMACIÓN — la corona viva y las órbitas.
-        /// v6.50.109 — LA FORMACIÓN GIRATORIA DEL RUINOUS (la letra:
-        /// «mejora la animación, que sea más parecida a Ruinous_Staff
-        /// en el momento en el que están alrededor del libro» — la wiki:
-        /// «when multiple Forbidden Ruins are summoned, they form a
-        /// spinning orbital formation»): MUERE la elipse kepleriana de
-        /// la .107 (la 2ª ley aceleraba el paso en el perigeo y lo leía
-        /// como un TIRÓN — el giro ya no es constante); NACE el anillo
-        /// que GIRA A VELOCIDAD CONSTANTE — cada anillo es una formación
-        /// giratoria lisa, el radio RESPIRA despacio (±3,5%, 7 s) y cada
-        /// ojo lleva su micro-deriva propia (1,6 px, 2D — antes el vaivén
-        /// era ±3 px verticales a 1,1 rad/s: nervioso). El ojo NUNCA va
-        /// sobre raíles: PERSIGUE su puesto con la ley del planeo (la de
-        /// abajo — la del Ruinous). La fase de cada ojo vive en
-        /// _faseOrbital (v6.50.108) y la avanza PasoOrbita (UNA vez por
-        /// tick, desde la AI); AQUÍ sólo se LEE. El anillo k lleva 5+k
-        /// ojos (5, 6, 7… — la letra), contrarrotando.</summary>
+        /// <summary>LA FORMACIÓN — v6.51.7 — EL ARCO DEL BÁCULO
+        /// SANGUINARIO (la letra: «los minions siempre deben ir detras
+        /// del jugador, pero cuando el libro sale a cazar, los minions
+        /// comienza a orbitar al grimorio eterno… en el juego terraria
+        /// ya hay un arma que usa orbitas o similares, por ejemplo usa
+        /// la forma en que se posicionan los murcielagos de El báculo
+        /// sanguinario (Sanguine Staff, en inglés) para posicionar a
+        /// los minions del grimorio en el grimorio del eterno cuando
+        /// sale a cazar»).
+        ///
+        /// LA GEOMETRÍA ES LA DE VANILLA (AI_156_GetIdlePosition, el
+        /// murciélago 755 del Sanguine Staff — extraída del decompile):
+        /// UN ABANICO de ±126° centrado ARRIBA del centro, radio 40,
+        /// con el puesto de cada ojo repartido PAR — ángulo =
+        /// (7π/5)/n·(i − (n−1)/2), la constante EXACTA de vanilla
+        /// (4,39823 rad). MUEREN la corona doble de la .117 (arcos
+        /// 195°-345°) y la danza atómica de la .51.3 (anillos 5, 6,
+        /// 7… inclinados): UN arco, DOS centros.
+        ///
+        /// EL CENTRO: el ESPÍRITU del Eterno mientras está fuera
+        /// cazando (los ojos ORBITAN al grimorio — el abanico entero
+        /// gira lento, ω = 0,30 rad/s ≈ 21 s por vuelta, reloj
+        /// GlobalTime: determinista en todos los clientes) y EL JUGADOR
+        /// mientras el libro está en casa (el abanico QUIETO detrás del
+        /// dueño — como los murciélagos del Sanguine sobre su amo: «los
+        /// minions siempre van detrás del jugador»).
+        ///
+        /// EL RADIO: 40 de vanilla, creciendo con la banda (6,2·n — la
+        /// regla de la .51.3: NINGÚN ojo pisa a su vecino: a 10 ojos,
+        /// 62 px de radio y ~27 px de paso, que con el cabeceo de ±1,5
+        /// deja SIEMPRE aire entre sprites de 21 px) y la RESPIRACIÓN
+        /// ÚNICA de la danza (un solo latido para TODOS — la sincronía
+        /// de la .51.3 vive).</summary>
         private Vector2 SlotDeFormacion(Player dueño, Vector2? libro)
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
             float time = Main.GlobalTimeWrappedHourly;
 
-            if (libro is Vector2 centro)
-            {
-                // === v6.51.3 — LA DANZA ATÓMICA (la letra: «esa animacion
-                //     de orbitarlo como que no se ve bien, deberia ser
-                //     mejorada, una mejor animacion de orbita, mas exacta
-                //     o mejor dicho mejor animada y que un minion no se
-                //     solape sobre otro y que no este desordenada, que sea
-                //     todo como una danza sincronizada y bonita
-                //     geometricamente hablando, incluso como atomos»):
-                //     MUERE la rueda plana de anillos concéntricos (todos
-                //     en el MISMO plano — al apilarse radialmente se
-                //     pisaban) y nace EL ÁTOMO: cada anillo es una
-                //     ÓRBITA INCLINADA a su manera (como los electrones
-                //     del glifo atómico), con su PRECESIÓN lenta — los
-                //     planos giran y se CRUZAN sin tocarse. La escalera
-                //     de puestos es LA DE SIEMPRE (5+k ojos por anillo —
-                //     la letra de la .109) pero el paso radial sube a
-                //     30 px (el ojo mide ~28: ni los vecinos pueden
-                //     pisarse) y TODO el sistema RESPIRA JUNTO (un solo
-                //     latido — la danza sincronizada). La exactitud la
-                //     pone la LLEGADA EXACTA de la ley del planeo (abajo:
-                //     cerca del puesto, persecución proporcional SIN
-                //     inercia — cada ojo clavado a su hueco móvil). ===
-                int totalOjos = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
-                int miPuesto = Math.Min(idx, totalOjos - 1);
-                AnilloDe(miPuesto, out int k, out int enAnillo, out int capAnillo);
-                float fase = FaseOrbital(enAnillo, capAnillo, k);
+            // EL CENTRO: el grimorio que caza si está fuera; el dueño si no
+            Vector2 centro = libro is Vector2 c ? c : dueño.MountedCenter;
 
-                // EL RADIO: la escalera con PASO ANCHO (30 px — jamás se
-                // tocan los anillos vecinos) y LA RESPIRACIÓN UNICA (un
-                // solo latido para TODA la danza: sincronía).
-                float radio = (52f + k * 30f) *
-                    (1f + 0.05f * MathF.Sin(time * 0.5f));
-
-                // EL PLANO DE ESTE ANILLO (la órbita del átomo): inclinación
-                // propia (k·0,55 — cada anillo mira a otro lado) + la
-                // PRECESIÓN lenta (el plano entero gira — el glifo vivo).
-                float incl = k * 0.55f + MathF.Sin(time * 0.11f + k * 1.7f) * 0.14f;
-
-                // LA ÓRBITA: elipse achatada (×0,62 — vista en
-                // perspectiva) ROTADA al plano del anillo.
-                Vector2 plano = new Vector2(
-                    MathF.Cos(fase) * radio,
-                    MathF.Sin(fase) * radio * 0.62f);
-                return centro + plano.RotatedBy(incl);
-            }
-
-            // === v6.50.117 — LA CORONA DOBLE, LADRILLO REAL (la letra:
-            //     «debes mejorar la animación sobre el jugador ya que se
-            //     quedan muy juntos uno de otros cuando están encima del
-            //     jugador»): la .116 repartía la banda en DOS BLOQUES
-            //     CONTIGUOS por minionPos (6 de fuera + 5 de dentro) y cada
-            //     arco usaba SU PROPIO paso para el «desfase ladrillo» —
-            //     medio paso de 5 ≠ medio paso de 6, así que los interiores
-            //     NO caían entre los exteriores; y un minionPos inestable
-            //     barajaba los arcos enteros. AHORA el reparto es GLOBAL e
-            //     INTERCALADO: los puestos PARES van al arco exterior y los
-            //     IMPARES al interior, sobre UNA sola regla de posición
-            //     (f = (i + 0,5) / n) — cada ojo interior cae EXACTAMENTE
-            //     entre sus dos vecinos exteriores y el desfase del ladrillo
-            //     sale SOLO (sin capaFuera, sin j, sin m, sin paso). El
-            //     arco se ABRE con la banda (más ojos = arco más largo, ±9°),
-            //     el radio RESPIRA (±4%, cada capa a su reloj; el interior
-            //     23 px más cerca) y cada ojo CABECEA a SU propio tempo ===
+            // EL PUESTO: el reparto EXACTO del murciélago 755 — 7π/5 es
+            // la constante de vanilla (4,39823: el abanico de ±126°)
             int n = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
             int i = Math.Min(idx, n - 1);
-            // LADRILLO REAL: puestos pares en el arco exterior, impares en el interior —
-            // cada ojo interior cae EXACTAMENTE entre sus dos vecinos exteriores.
-            bool fuera = (i % 2) == 0;
-            // Posición GLOBAL uniforme sobre el rango compartido (misma regla para ambos arcos)
-            float f = (i + 0.5f) / n;
-            float abre = MathHelper.ToRadians(Math.Min(1.5f * n, 9f));       // el arco se abre con la banda
-            float vaivén = MathF.Sin(time * 0.30f) * 0.20f;                  // balanceo entero
-            float a0 = MathHelper.ToRadians(195f) - abre + vaivén;
-            float a1 = MathHelper.ToRadians(345f) + abre + vaivén;
-            float angC = MathHelper.Lerp(a0, a1, f);
-            float radioBase = Math.Min(46f + n * 2.6f, 80f);
-            float radioC = radioBase * (1f + 0.04f * MathF.Sin(time * 0.23f + (fuera ? 0f : 1.2f))); // respira a su reloj
-            if (!fuera) radioC -= 23f;                                       // el arco interior, 23 px más cerca
-            Vector2 pos = dueño.MountedCenter + new Vector2(MathF.Cos(angC) * radioC, MathF.Sin(angC) * radioC * 0.92f);
-            pos.Y += MathF.Sin(time * 0.9f + i * 1.9f) * 3f;                 // cabeceo a su propio tempo
-            pos.X += MathF.Sin(time * 0.7f + i * 2.3f) * 2f;                 // vaivén lateral
-            return pos;
-        }
+            float ang = 4.3982296f / n * (i - (n - 1) / 2f);
 
-        /// <summary>EL ANILLO k: la escalera 5, 6, 7… (la letra) — el
-        /// índice global del minion se parte en anillo y puesto.</summary>
-        private static void AnilloDe(int idx, out int k, out int enAnillo, out int capAnillo)
-        {
-            k = 0;
-            int baseIdx = 0;
-            while (k < 9)
-            {
-                int cap = 5 + k;
-                if (idx < baseIdx + cap) break;
-                baseIdx += cap;
-                k++;
-            }
-            capAnillo = 5 + k;
-            enAnillo = idx - baseIdx;
-        }
+            // LA ÓRBITA DEL LIBRO: mientras el espíritu caza, el abanico
+            // entero GIRA alrededor del grimorio (la letra: «entonces
+            // orbitan al grimorio» — la revolución lenta); en casa, el
+            // arco queda QUIETO sobre el dueño (la letra: «siempre van
+            // detrás del jugador»)
+            if (libro is Vector2)
+                ang += time * 0.30f;
 
-        /// <summary>LA FASE ORBITAL de ESTE ojo (_faseOrbital — v6.50.108:
-        /// era localAI[3] y localAI es float[3] en tML — el índice 3
-        /// tiraba IndexOutOfRange): nace el día que el libro sale,
-        /// repartida por su puesto en el anillo. Determinista (hash de
-        /// whoAmI implícito en el puesto) — todos los clientes la
-        /// calculan IGUAL.</summary>
-        private float FaseOrbital(int enAnillo, int capAnillo, int k)
-        {
-            if (_faseOrbital <= 0f)
-                _faseOrbital = 0.37f
-                    + enAnillo / (float)capAnillo * MathHelper.TwoPi + k * 0.7f;
-            return _faseOrbital;
-        }
+            // EL RADIO: 40 de vanilla + el crecimiento de la banda (que
+            // NADIE se pise, ni siquiera con el cabeceo) + la
+            // respiración única de la danza
+            float radio = Math.Max(40f, 6.2f * n) *
+                (1f + 0.035f * MathF.Sin(time * 0.5f));
 
-        /// <summary>v6.50.109 — EL PASO DE LA FORMACIÓN GIRATORIA (UNA
-        /// vez por tick, desde la AI). v6.51.3 — EL GIRO ARMÓNICO DE LA
-        /// DANZA ATÓMICA: cada anillo a SU compás (razones simples entre
-        /// anillos — la danza se repite en cascada) y CONTRARROTANDO (los
-        /// planos pares suben, los impares bajan: el átomo gira en dos
-        /// sentidos a la vez). El reloj NUNCA se para (ni en la carga del
-        /// disparo).</summary>
-        private void PasoOrbita(Vector2? libro)
-        {
-            if (!(libro is Vector2)) return;            // en la corona no hay luna
-            int idx = Math.Max(0, (int)Projectile.minionPos);
-            AnilloDe(idx, out int k, out int enAnillo, out int capAnillo);
-
-            float fase = FaseOrbital(enAnillo, capAnillo, k);
-
-            // GIRO ARMÓNICO — la danza sincronizada del átomo: el anillo 0
-            // marca el compás (0,42 rad/s) y cada anillo siguiente gira a
-            // razón simple con él (más lento — la cascada), contrarrotando
-            // par/impar: los cruces de planos SIEMPRE al mismo compás.
-            float omega = (k % 2 == 0 ? 0.42f : -0.36f) / (1f + k * 0.22f);
-            float dFase = omega / 60f;                     // por tick
-            fase += dFase;
-            while (fase >= MathHelper.TwoPi) fase -= MathHelper.TwoPi;
-            while (fase < 0f) fase += MathHelper.TwoPi;
-            if (fase <= 0f) fase = 0.01f;                  // jamás volver a «sin nacer»
-            _faseOrbital = fase;
+            // EL PUESTO EN PERSONA + el cabeceo mínimo (la vida propia)
+            Vector2 slot = centro + (-Vector2.UnitY).RotatedBy(ang) * radio;
+            slot.Y += MathF.Sin(time * 0.9f + i * 1.9f) * 1.5f;
+            return slot;
         }
 
         /// <summary>¿DÓNDE ESTÁ EL LIBRO? (el espíritu fuera — el patrón
-        /// del Nervioso, cacheado por frame para la banda entera).</summary>
+        /// del Nervioso, cacheado por frame para la banda entera).
+        /// v6.51.7 — es EL CENTRO del abanico mientras está fuera: los
+        /// ojos orbitan AL LIBRO que caza; en casa (null) orbitan al
+        /// JUGADOR (el arco quieto detrás del dueño — el libro en la
+        /// mano ya NO es centro).</summary>
         private static int _frameLibro = -1;
         private static int _ownerLibro = -1;
         private static Vector2? _posLibro = null;
@@ -688,27 +593,6 @@ namespace AethonMod.Content.Projectiles
             _ownerLibro = dueño.whoAmI;
             _posLibro = Weapons.GrimorioHambrientoNervioso.PosicionDelLibro(dueño.whoAmI);
             return _posLibro;
-        }
-
-        /// <summary>v6.51.6 — EL CENTRO DE LA DANZA (la letra: «los
-        /// minions no orbitan correctamente alrededor del grimorio»):
-        /// el espíritu flotante SI ESTÁ FUERA… y si está DENTRO, el
-        /// GRIMORIO EN LA MANO del portador (los ojos son del LIBRO —
-        /// lo rodean siempre, no solo cuando sale a cazar).</summary>
-        private static Vector2? CentroDeLaDanza(Player dueño, Vector2? espiritu)
-        {
-            if (espiritu is Vector2) return espiritu;
-            try
-            {
-                if (dueño == null || !dueño.active || dueño.dead) return null;
-                Item mano = dueño.HeldItem;
-                if (mano == null || mano.IsAir || mano.type !=
-                    ModContent.ItemType<Weapons.GrimoireEternal>()) return null;
-                // LA MANO DEL PORTADOR (itemLocation = donde vanilla
-                // dibuja el item sostenido) — el libro en persona.
-                return dueño.itemLocation + new Vector2(dueño.direction * 4f, -10f);
-            }
-            catch { return null; }
         }
 
         /// <summary>LA PRESA: la más cercana válida en rango (el filtro del
@@ -778,26 +662,25 @@ namespace AethonMod.Content.Projectiles
                 null, Main.GameViewMatrix.TransformationMatrix);
             try
             {
-                // v6.50.114 — LA ESTELA DE LA ÓRBITA (la letra: «mejora la
-                // animación… alrededor del grimorio»): tres fantasmas de
-                // ESTE ojo en sus posiciones pasadas del anillo (rotadas
-                // ATRÁS según el omega del anillo — determinista): el giro
-                // se lee con MOVIMIENTO, no solo con posición
+                // v6.51.7 — LA ESTELA DE LA ÓRBITA (la letra de la .114:
+                // «mejora la animación… alrededor del grimorio»):
+                // tres fantasmas de ESTE ojo ATRÁS en la REVOLUCIÓN
+                // del abanico — SOLO mientras el espíritu está fuera
+                // (el arco en casa está quieto sobre el dueño: no hay
+                // giro que leer), rotados ATRÁS según el ω del abanico
+                // (0,30 rad/s — el reloj GlobalTime: determinista)
                 Player dueñoEstela = Main.player[Projectile.owner];
                 if (dueñoEstela != null && dueñoEstela.active &&
-                    CentroDeLaDanza(dueñoEstela, PosicionDelLibro(dueñoEstela))
-                        is Vector2 centroEstela)
+                    PosicionDelLibro(dueñoEstela) is Vector2 centroEstela)
                 {
                     Vector2 slotAhora = SlotDeFormacion(dueñoEstela, centroEstela);
                     Vector2 off = slotAhora - centroEstela;
-                    int idxE = Math.Max(0, (int)Projectile.minionPos);
-                    AnilloDe(idxE, out int kE, out _, out _);
-                    float omega = (kE % 2 == 0) ? 0.42f : -0.36f;   // rad/s del anillo
+                    float omega = 0.30f;                        // rad/s del abanico
                     for (int j = 1; j <= 3; j++)
                     {
-                        float dt = j * 0.085f;                       // ~5 t entre fantasma y fantasma
+                        float dt = j * 0.25f;                   // ~0,25 s de revolución por fantasma
                         Vector2 pasado = centroEstela + off.RotatedBy(-omega * dt);
-                        float s = ESCALA * (40f - j * 9f);           // encoge: 15→12→9 px
+                        float s = ESCALA * (40f - j * 9f);      // encoge: 15→12→9 px
                         Main.spriteBatch.Draw(VFXCore.SoftGlow, pasado - Main.screenPosition, null,
                             new Color(240, 124, 65, 255) * (0.22f / j), 0f,
                             VFXCore.SoftGlow.Size() * 0.5f, new Vector2(s / 64f, s / 64f),

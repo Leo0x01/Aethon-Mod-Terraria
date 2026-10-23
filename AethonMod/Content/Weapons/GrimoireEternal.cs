@@ -61,8 +61,10 @@ namespace AethonMod.Content.Weapons
     ///   cada 10 niveles, lifesteal del 7 en 7…), LOS OJOS DEL ETERNO en
     ///   el clic derecho (v6.50.105: los minions son los OJOS del libro —
     ///   la letra: «el minion que use el grimorio será su propio ojo»:
-    ///   corona sobre el dueño, órbitas concéntricas al libro flotante
-    ///   (anillos de 5, 6, 7…), el rayo Perlin NEGRO de bordes morados
+    ///   v6.51.7 EL ARCO DEL BÁCULO SANGUINARIO: el abanico quieto
+    ///   detrás del dueño (como los murciélagos del Sanguine Staff) que
+    ///   GIRA alrededor del libro flotante cuando sale a cazar, el rayo
+    ///   Perlin NEGRO de bordes morados
     ///   con bruma en la punta, el círculo mágico de los agujeros
     ///   negros, el retroceso al disparar y el parpadeo independiente)
     ///   y LOS TRES ESTADOS (sostenido/barra rápida/guardado).
