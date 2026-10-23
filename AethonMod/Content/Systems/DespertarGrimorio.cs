@@ -49,13 +49,23 @@ namespace AethonMod.Content.Systems
         /// nivel de la mecánica de corrupción por ahora»).</summary>
         public const int NivelMax = 50;
 
-        /// <summary>El nivel del DESPERTAR de este jugador (0 si nunca
-        /// despertó — seguro contra ModPlayer faltante).</summary>
+        /// <summary>v6.51.6 — EL DESPERTAR ES DEL LIBRO (la letra: «el
+        /// despertar se comparte entre todos los grimorios, eso debe ser
+        /// algo individual de cada grimorio del eterno»): el nivel vive
+        /// EN EL ITEM (AlmaEternoGlobalItem) — esta lectura resuelve el
+        /// GRIMORIO ACTIVO del portador (en la MANO primero; si no, el
+        /// primero de su inventario).</summary>
         public static int NivelDe(Player p)
         {
             if (p == null || !p.active) return 0;
-            var sp = p.GetModPlayer<Players.ShardPlayer>();
-            return sp == null ? 0 : System.Math.Clamp(sp.NivelDespertar, 0, NivelMax);
+            return NivelDe(Globals.AlmaEternoGlobalItem.Activo(p));
+        }
+
+        /// <summary>v6.51.6 — El nivel de despertar de UN grimorio
+        /// concreto (el item manda — cada libro es su propia escalera).</summary>
+        public static int NivelDe(Item grimorio)
+        {
+            return Globals.AlmaEternoGlobalItem.NivelDe(grimorio);
         }
 
         /// <summary>El nivel SIGUIENTE (el de la ofrenda pendiente): si ya
@@ -63,6 +73,13 @@ namespace AethonMod.Content.Systems
         public static int NivelDespertarSiguiente(Player p)
         {
             int nivel = NivelDe(p);
+            return nivel >= NivelMax ? NivelMax : nivel + 1;
+        }
+
+        /// <summary>v6.51.6 — El nivel siguiente de UN grimorio concreto.</summary>
+        public static int NivelDespertarSiguiente(Item grimorio)
+        {
+            int nivel = NivelDe(grimorio);
             return nivel >= NivelMax ? NivelMax : nivel + 1;
         }
 

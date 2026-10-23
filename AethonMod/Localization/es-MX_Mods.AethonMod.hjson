@@ -1814,22 +1814,6 @@ Items: {
 	DignosEquinoccioBinario: {
 		DisplayName: El Equinoccio Binario
 	}
-	DignosIndiceGrimorio: {
-		DisplayName: El Índice del Grimorio
-	}
-
-	DignosLluviaVersos: {
-		DisplayName: La Lluvia de Versos
-	}
-
-	DignosOjoQueJuzga: {
-		DisplayName: El Ojo que Juzga
-	}
-
-	DignosCorazonMagnetar: {
-		DisplayName: El Corazón del Magnetar
-	}
-
 	BolsaProyectilesDignos: {
 		DisplayName: La Bolsa de los Proyectiles Dignos
 	}
@@ -2441,6 +2425,7 @@ Caida: {
 // voz del libro al despertar.
 Despertar: {
 	Subida: ✦ El Grimorio DESPIERTA un poco más: nivel de despertar {0}.
+	Migracion: ✦ El despertar y el festín ahora viven EN ESTE grimorio (cada libro, su propia escalera).
 	Voz1: Mmm… otra página que se escribe sola.
 	Voz2: Siento los anillos, portador. TODOS los anillos.
 	Voz3: Cada despertar me recuerda lo que era antes.

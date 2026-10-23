@@ -46,6 +46,8 @@ namespace AethonMod.Content.Items.Llamados
         public override bool CanUseItem(Player player)
         {
             // En el tope ya no despierta más (la llave gira en vacío).
+            // v6.51.6 — el despertar es DEL LIBRO: se lee el Eterno
+            // ACTIVO (en la mano primero; si no, el del inventario).
             return Content.Systems.DespertarGrimorio.NivelDe(player)
                 < Content.Systems.DespertarGrimorio.NivelMax;
         }
@@ -53,8 +55,11 @@ namespace AethonMod.Content.Items.Llamados
         public override bool? UseItem(Player player)
         {
             // LA SUBIDA COMPLETA (la ceremonia de las tres ofrendas, sin
-            // cobrarlas — es el probador).
-            Content.Systems.DespertarGrimorioSistema.SubirNivel(player, null);
+            // cobrarlas — es el probador). v6.51.6 — sube el despertar
+            // DEL GRIMORIO ACTIVO (cada libro es su propia escalera).
+            Item eterno = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(player);
+            if (eterno == null) return false;
+            Content.Systems.DespertarGrimorioSistema.SubirNivel(player, eterno, null);
             return true;
         }
     }

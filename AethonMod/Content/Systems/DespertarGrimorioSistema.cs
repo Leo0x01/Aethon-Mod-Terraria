@@ -68,13 +68,23 @@ namespace AethonMod.Content.Systems
 
                     // v6.51.1 — LAS ESENCIAS SOLTADAS (la letra: «se debe
                     //     poder seguir devorando esencia corrupta»): con el
-                    //     Eterno EN LA MANO, cualquier pila de Esencia
-                    //     Corrupta caída a ≤200 px es un bocado INMEDIATO —
-                    //     +0,1% de daño PERMANENTE por esencia (sigue
-                    //     funcionando con el despertar AL MÁXIMO: el hambre
-                    //     del libro no termina con los niveles).
+                    //     Eterno EN LA MANO, la Esencia Corrupta caída a
+                    //     ≤200 px es un bocado INMEDIATO… PERO v6.51.6 —
+                    //     EL REQUISITO PRIMERO (la letra: «las escencia
+                    //     corrupta no se contabilizan correctamente como el
+                    //     requisito para el despertar» — el bocado viejo se
+                    //     comía TODO lo caído y el requisito quedaba en 0/2
+                    //     PARA SIEMPRE): mientras la ofrenda del próximo
+                    //     despertar de ESTE LIBRO no esté completa en el
+                    //     INVENTARIO, lo caído NO SE TOCA (el portador lo
+                    //     recoge y cuenta); SOLO el EXCESO se devora como
+                    //     +0,1 % de daño PERMANENTE — y ese poder es DEL
+                    //     LIBRO (v6.51.6: las estadísticas son exclusivas
+                    //     de cada grimorio).
                     int tipoEsencia = ModContent.ItemType
                         <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                    var almaMano = mano.GetGlobalItem
+                        <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
                     for (int d = 0; d < Main.maxItems; d++)
                     {
                         Item drop = Main.item[d];
@@ -84,35 +94,54 @@ namespace AethonMod.Content.Systems
                             continue;
 
                         int comidas = drop.stack;
-                        var spBocado = p.GetModPlayer<Players.ShardPlayer>();
-                        if (spBocado != null && comidas > 0)
+                        if (comidas <= 0 || almaMano == null) continue;
+
+                        // ¿LA OFRENDA YA ESTÁ COMPLETA en el inventario?
+                        // (al tope del despertar ya no hay ofrenda: todo es
+                        // exceso — el hambre del libro no termina.)
+                        int proximoNivel = System.Math.Min(
+                            DespertarGrimorio.NivelDespertarSiguiente(mano),
+                            DespertarGrimorio.NivelMax);
+                        bool ofrendaIncompleta = almaMano.NivelDespertar < DespertarGrimorio.NivelMax &&
+                            DespertarGrimorio.EsenciasEnManos(p) <
+                            DespertarGrimorio.EsenciasPara(proximoNivel);
+
+                        if (ofrendaIncompleta)
                         {
-                            spBocado.DevoracionPoder += comidas;
-                            string nombre = drop.Name;
-                            drop.TurnToAir();
-                            int idd = Array.IndexOf(Main.item, drop);
-                            if (Main.netMode == NetmodeID.Server && idd >= 0)
-                                NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idd);
-
-                            if (!Main.dedServ)
-                            {
-                                for (int k = 0; k < Math.Min(20, 4 + comidas); k++)
-                                {
-                                    Dust dd = Dust.NewDustPerfect(p.Center, DustID.Shadowflame,
-                                        new Vector2(Main.rand.NextFloat(-2.4f, 2.4f),
-                                            Main.rand.NextFloat(-3.2f, 0.4f)), 150,
-                                        new Color(120, 40, 180), 0.95f);
-                                    dd.noGravity = true;
-                                }
-                                Terraria.Audio.SoundEngine.PlaySound(
-                                    SoundID.Item113.WithPitchOffset(-0.45f), p.Center);
-                            }
-
-                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.EsenciaDevorada",
-                                new Color(196, 138, 255), nombre, comidas,
-                                (Players.ShardPlayer.BonusDanoDevorado(p) * 100f).ToString("0.##"));
-                            EcoRed.SincronizarDevoracion(p);
+                            // SE QUEDA EN EL SUELO (la recogida natural la
+                            // cuenta para el requisito): silencio — la
+                            // lista del despertar ya cuenta lo que falta.
+                            continue;
                         }
+
+                        // EL EXCESO: EL BOCADO DE PODER DE SIEMPRE (+0,1 %
+                        // PERMANENTE por esencia — del LIBRO en la mano).
+                        almaMano.DevoracionPoder += comidas;
+                        string nombre = drop.Name;
+                        drop.TurnToAir();
+                        int idd = Array.IndexOf(Main.item, drop);
+                        if (Main.netMode == NetmodeID.Server && idd >= 0)
+                            NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idd);
+
+                        if (!Main.dedServ)
+                        {
+                            for (int k = 0; k < Math.Min(20, 4 + comidas); k++)
+                            {
+                                Dust dd = Dust.NewDustPerfect(p.Center, DustID.Shadowflame,
+                                    new Vector2(Main.rand.NextFloat(-2.4f, 2.4f),
+                                        Main.rand.NextFloat(-3.2f, 0.4f)), 150,
+                                    new Color(120, 40, 180), 0.95f);
+                                dd.noGravity = true;
+                            }
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item113.WithPitchOffset(-0.45f), p.Center);
+                        }
+
+                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.EsenciaDevorada",
+                            new Color(196, 138, 255), nombre, comidas,
+                            (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                .BonusDanoDevorado(mano) * 100f).ToString("0.##"));
+                        EcoRed.SincronizarDevoracion(p);
                     }
 
                     // Los platos de ARMAS caídos alrededor del portador.
@@ -129,8 +158,12 @@ namespace AethonMod.Content.Systems
                         if (!EsArma(drop)) continue;
 
                         // ¡UN PLATO! ¿Es la ofrenda del siguiente nivel?
-                        var sp = p.GetModPlayer<Players.ShardPlayer>();
-                        int proximo = System.Math.Min(DespertarGrimorio.NivelDespertarSiguiente(p), DespertarGrimorio.NivelMax);
+                        // (v6.51.6 — el nivel siguiente es el de ESTE libro
+                        // en la MANO, no el del jugador.)
+                        var alma = mano.GetGlobalItem
+                            <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                        int proximo = System.Math.Min(DespertarGrimorio.NivelDespertarSiguiente(mano),
+                            DespertarGrimorio.NivelMax);
                         if (DespertarGrimorio.EsArmaDelNivel(proximo, drop))
                         {
                             // ¿Las tres ofrendas completas? (las esencias
@@ -153,13 +186,14 @@ namespace AethonMod.Content.Systems
                             else
                             {
                                 DespertarGrimorio.ConsumirEsencias(p, esencias);
-                                SubirNivel(p, drop);
+                                SubirNivel(p, mano, drop);
                             }
                         }
                         else
                         {
-                            // EL BOCADO DE SIEMPRE: el festín de la .129.
-                            DevorarComoBocado(p, drop);
+                            // EL BOCADO DE SIEMPRE: el festín de la .129
+                            // (del LIBRO en la mano — su EXP, sus stats).
+                            DevorarComoBocado(p, mano, drop);
                         }
                         break;   // un plato por pulso (con calma, que es un libro)
                     }
@@ -174,17 +208,20 @@ namespace AethonMod.Content.Systems
 
         /// <summary>SUBE EL DESPERTAR (+1) y celebra: la voz del libro,
         /// el aviso dorado, los polvos, el hito si el nivel desbloquea
-        /// algo… y en el 20, LA PELÍCULA DE LA MASCOTA.</summary>
-        public static void SubirNivel(Player p, Item ofrenda)
+        /// algo… y en el 20, LA PELÍCULA DE LA MASCOTA. v6.51.6 — el
+        /// despertar sube EN EL GRIMORIO que devoró la ofrenda (cada
+        /// libro es su propia escalera).</summary>
+        public static void SubirNivel(Player p, Item grimorio, Item ofrenda)
         {
             try
             {
-                var sp = p?.GetModPlayer<Players.ShardPlayer>();
-                if (sp == null) return;
-                if (sp.NivelDespertar >= DespertarGrimorio.NivelMax) return;
+                var alma = grimorio?.GetGlobalItem
+                    <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                if (alma == null) return;
+                if (alma.NivelDespertar >= DespertarGrimorio.NivelMax) return;
 
-                sp.NivelDespertar++;
-                int nivel = sp.NivelDespertar;
+                alma.NivelDespertar++;
+                int nivel = alma.NivelDespertar;
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
                 if (ofrenda != null && !ofrenda.IsAir)
@@ -238,10 +275,11 @@ namespace AethonMod.Content.Systems
                         EcoRed.AnunciarAlPortador(p, hito, new Color(255, 215, 120));
                 }
 
-                // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez).
-                if (nivel == 20 && !sp.PetDelDespertar)
+                // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez POR
+                // LIBRO — cada Eterno escupe al suyo).
+                if (nivel == 20 && !alma.PetDelDespertar)
                 {
-                    sp.PetDelDespertar = true;
+                    alma.PetDelDespertar = true;
                     EscupirMascota(p);
                 }
 
@@ -335,22 +373,24 @@ namespace AethonMod.Content.Systems
         /// <summary>EL BOCADO: un arma corrupta que NO era la ofrenda se
         /// la come igual — EXP por rareza, UN stat por clase y EL ALMA
         /// ÚNICA si era especial (el festín del cráter de la .129, ahora
-        /// servido en la mano del portador).</summary>
-        private static void DevorarComoBocado(Player p, Item drop)
+        /// servido EN EL LIBRO QUE COME — v6.51.6: su EXP, sus stats, sus
+        /// almas: cada grimorio su propio festín).</summary>
+        private static void DevorarComoBocado(Player p, Item grimorio, Item drop)
         {
             try
             {
-                var sp = p.GetModPlayer<Players.ShardPlayer>();
-                if (sp == null) return;
+                var alma = grimorio?.GetGlobalItem
+                    <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                if (alma == null) return;
 
                 // EL EXP por rareza (la tabla de la .129).
-                sp.DevoracionExp += ExpPorRareza(drop.rare);
+                alma.DevoracionExp += ExpPorRareza(drop.rare);
 
                 // EL STAT por clase.
-                string stat = SubirStatPorClase(sp, drop);
+                string stat = SubirStatPorClase(alma, drop);
 
                 // EL ALMA ÚNICA (si era especial).
-                string alma = DespertarAlma(sp, drop);
+                string almaUnica = DespertarAlma(alma, drop);
 
                 // LA MUERTE DEL PLATO (en todas las pantallas).
                 string nombre = drop.Name;
@@ -378,10 +418,10 @@ namespace AethonMod.Content.Systems
                 EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.ArmaDevorada",
                     new Color(196, 138, 255), nombre, ExpPorRareza(drop.rare),
                     Language.GetTextValue($"Mods.AethonMod.Caida.{stat}"));
-                if (alma != null)
+                if (almaUnica != null)
                     EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.AlmaDespertada",
                         new Color(255, 215, 120), nombre,
-                        Language.GetTextValue($"Mods.AethonMod.Caida.{alma}"));
+                        Language.GetTextValue($"Mods.AethonMod.Caida.{almaUnica}"));
 
                 // EL FESTÍN CAMINA (stats nuevos a la máquina del portador).
                 EcoRed.SincronizarDevoracion(p);
@@ -421,39 +461,42 @@ namespace AethonMod.Content.Systems
             }
         }
 
-        /// <summary>EL STAT QUE ESTA ARMA SUBE (por clase — la .129).</summary>
-        private static string SubirStatPorClase(Players.ShardPlayer sp, Item arma)
+        /// <summary>EL STAT QUE ESTA ARMA SUBE (por clase — la .129 — en
+        /// el alma del LIBRO que come: v6.51.6).</summary>
+        private static string SubirStatPorClase(
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, Item arma)
         {
-            if (arma.DamageType == DamageClass.Melee) { sp.DevoracionFuerza++; return "StatFuerza"; }
-            if (arma.DamageType == DamageClass.Ranged) { sp.DevoracionPrisa++; return "StatPrisa"; }
-            if (arma.DamageType == DamageClass.Magic) { sp.DevoracionMirada++; return "StatMirada"; }
-            if (arma.DamageType == DamageClass.Summon) { sp.DevoracionCorona++; return "StatCorona"; }
-            sp.DevoracionMordida++;
+            if (arma.DamageType == DamageClass.Melee) { alma.DevoracionFuerza++; return "StatFuerza"; }
+            if (arma.DamageType == DamageClass.Ranged) { alma.DevoracionPrisa++; return "StatPrisa"; }
+            if (arma.DamageType == DamageClass.Magic) { alma.DevoracionMirada++; return "StatMirada"; }
+            if (arma.DamageType == DamageClass.Summon) { alma.DevoracionCorona++; return "StatCorona"; }
+            alma.DevoracionMordida++;
             return "StatMordida";
         }
 
         /// <summary>EL ALMA ÚNICA (las armas especiales de la .129 — el
         /// fuego, el veneno, el vampiro, las estrellas, la velocidad, el
-        /// peso: VIVEN en los disparos del Eterno).</summary>
-        private static string DespertarAlma(Players.ShardPlayer sp, Item arma)
+        /// peso: VIVEN en los disparos del Eterno que las comió).</summary>
+        private static string DespertarAlma(
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, Item arma)
         {
             int t = arma.type;
             if (t == ItemID.FieryGreatsword || t == ItemID.Sunfury ||
                 t == ItemID.Flamelash || t == ItemID.InfernoFork ||
                 t == ItemID.Flamethrower || t == ItemID.VolcanoSmall ||
                 t == ItemID.VolcanoLarge)
-            { sp.AlmaIgnea++; return "AlmaIgnea"; }
+            { alma.AlmaIgnea++; return "AlmaIgnea"; }
             if (t == ItemID.BladeofGrass || t == ItemID.ThornChakram ||
                 t == ItemID.BeeGun || t == ItemID.Beenade || t == ItemID.PoisonStaff)
-            { sp.AlmaSalvaje++; return "AlmaSalvaje"; }
+            { alma.AlmaSalvaje++; return "AlmaSalvaje"; }
             if (t == ItemID.Muramasa || t == ItemID.Katana || t == ItemID.FetidBaghnakhs)
-            { sp.AlmaVeloz++; return "AlmaVeloz"; }
+            { alma.AlmaVeloz++; return "AlmaVeloz"; }
             if (t == ItemID.Starfury || t == ItemID.StarWrath || t == ItemID.StarCannon)
-            { sp.CorazonEstelar++; return "CorazonEstelar"; }
+            { alma.CorazonEstelar++; return "CorazonEstelar"; }
             if (t == ItemID.VampireKnives)
-            { sp.AlmaVampira++; return "AlmaVampira"; }
+            { alma.AlmaVampira++; return "AlmaVampira"; }
             if (t == ItemID.PaladinsHammer || t == ItemID.GolemFist)
-            { sp.PunoTitan++; return "PunoTitan"; }
+            { alma.PunoTitan++; return "PunoTitan"; }
             return null;
         }
 

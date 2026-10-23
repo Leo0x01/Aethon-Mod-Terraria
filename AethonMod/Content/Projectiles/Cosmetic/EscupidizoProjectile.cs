@@ -189,17 +189,26 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         SombrasLib.Bruma(centroMundo + new Vector2(70f * escalaBruma, 6f),
                             58f * escalaBruma, alfa * 0.8f, tiempo * 1.07f,
                             Projectile.identity % 89 + 29);
+                        // v6.51.6 — LA MEMBRANA DEL EVENTO (la que era un
+                        //     óvalo plano de glow): ahora es bruma fBm de
+                        //     la casa — la nube ANCHA que abraza a las tres
+                        //     (el mar entero, respirando lento).
+                        SombrasLib.Bruma(centroMundo,
+                            118f * escalaBruma, alfa * 0.55f, tiempo * 0.81f,
+                            Projectile.identity % 89 + 41);
                     }
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.ReabrirLoteVanilla();
 
-                // EL RIM VIOLETA (la membrana del evento — aditivo sutil).
-                Main.spriteBatch.Draw(glow, pos + new Vector2(0f, 14f), null,
-                    new Color(96, 52, 150) * (0.22f * alfa), 0f,
-                    glow.Size() * 0.5f,
-                    new Vector2(190f, 130f) * escalaBruma / glow.Size(),
-                    SpriteEffects.None, 0f);
+                // === v6.51.6 — EL RIM VIOLETA MUERE (la letra: «recuerda
+                //     no usar eso [el ovalado plano] y siempre usar
+                //     nuestro sistema de bruma»): el óvalo de glow
+                //     estirado 190×130 era geometría plana — la membrana
+                //     del evento ahora es UNA CUARTA NUBE de bruma fBm
+                //     de la casa (más ancha que las tres de arriba: es
+                //     el mar entero respirando). ===
+                // (la cuarta nube vive en el lote de bruma de arriba)
 
                 // === 2. EL LIBRO GRANDE: se ABRE conforme se acerca el
                 //     escupido (el cuerpo del Eterno mientras la boca
@@ -214,11 +223,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         Projectile.rotation, origen, esc, SpriteEffects.None, 0f);
 
                     // LA BOCA DE LUZ creciendo (por donde saldrá el mini).
+                    //     v6.51.6 — la boca también era un óvalo plano de
+                    //     glow estirado: ahora es UN PUNTO de luz REDONDO
+                    //     pequeño (la garganta que se enciende — nada de
+                    //     geometría plana) y la bruma creciente la tapa.
                     if (abre > 0.2f)
                         Main.spriteBatch.Draw(glow, pos + new Vector2(0f, 6f), null,
-                            new Color(190, 120, 255) * (0.5f * abre * alfa),
+                            new Color(190, 120, 255) * (0.55f * abre * alfa),
                             0f, glow.Size() * 0.5f,
-                            new Vector2(30f + 34f * abre, 20f + 22f * abre) / glow.Size(),
+                            new Vector2(22f + 16f * abre, 22f + 16f * abre) / glow.Size(),
                             SpriteEffects.None, 0f);
                 }
                 else

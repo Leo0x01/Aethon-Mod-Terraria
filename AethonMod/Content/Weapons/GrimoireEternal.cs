@@ -662,7 +662,13 @@ namespace AethonMod.Content.Weapons
             //     de la mecánica nueva: esencias comidas → +daño, +ojos).
             //     Solo si el portador ya comió ALGO (el libro nuevo calla). ===
             Player portadorTip = Main.LocalPlayer;
-            var spDevorado = portadorTip?.GetModPlayer<Players.ShardPlayer>();
+            // v6.51.6 — LO DEVORADO ES DE ESTE LIBRO (la letra: «las
+            // estadísticas… son caracteristicas exclusivas del grimorio
+            // del eterno»): la ventana lee el ALMA DEL ITEM señalizado —
+            // cada Eterno cuenta SU propio festín.
+            var spDevorado = Item != null && !Item.IsAir
+                ? Item.GetGlobalItem<Globals.AlmaEternoGlobalItem>()
+                : null;
             // v6.51.1 — LO DEVORADO solo en SU ventana (la letra: la
             // tercera ventana es SOLO estadísticas del escuadrón y su
             // festín — nada de progresión ni descripciones).
@@ -671,8 +677,8 @@ namespace AethonMod.Content.Weapons
                 // El porcentaje como TEXTO a 2 decimales: 1 esencia = +0,25
                 // (un entero lo escondería — la misma cura del aviso).
                 string pctDanoTxt =
-                    (Players.ShardPlayer.BonusDanoDevorado(portadorTip) * 100f).ToString("0.##");
-                int ojosExtra = Players.ShardPlayer.OjosExtraDevorados(portadorTip);
+                    (Globals.AlmaEternoGlobalItem.BonusDanoDevorado(Item) * 100f).ToString("0.##");
+                int ojosExtra = Globals.AlmaEternoGlobalItem.OjosExtraDevorados(Item);
                 string ojos = ojosExtra > 0
                     ? Language.GetTextValue("Mods.AethonMod.Caida.DevoradoTooltipOjos", ojosExtra)
                     : "";
@@ -695,7 +701,7 @@ namespace AethonMod.Content.Weapons
                 spDevorado.CorazonEstelar > 0 || spDevorado.AlmaVeloz > 0 ||
                 spDevorado.PunoTitan > 0))
             {
-                string pctArmas = (Players.ShardPlayer.BonusDanoArmasDevoradas(portadorTip) * 100f)
+                string pctArmas = (Globals.AlmaEternoGlobalItem.BonusDanoArmasDevoradas(Item) * 100f)
                     .ToString("0.##");
                 tooltips.Add(new TooltipLine(Mod, "FestinArmas",
                     $"[c/B26EEC:El festín de las armas:] " +
@@ -707,14 +713,14 @@ namespace AethonMod.Content.Weapons
                 if (spDevorado.DevoracionFuerza > 0)
                     partes.Add($"[c/E8D8FF:Fuerza +{(spDevorado.DevoracionFuerza * 0.35f):0.##}%]");
                 if (spDevorado.DevoracionPrisa > 0 || spDevorado.AlmaVeloz > 0)
-                    partes.Add($"[c/E8D8FF:Prisa +{(Players.ShardPlayer.BonusVelocidadArmasDevoradas(portadorTip) * 100f):0.##}%]");
+                    partes.Add($"[c/E8D8FF:Prisa +{(Globals.AlmaEternoGlobalItem.BonusVelocidadArmasDevoradas(Item) * 100f):0.##}%]");
                 if (spDevorado.DevoracionMirada > 0 || spDevorado.CorazonEstelar > 0)
-                    partes.Add($"[c/E8D8FF:Mirada +{(Players.ShardPlayer.BonusCritArmasDevoradas(portadorTip) * 100f):0.##}%]");
-                int ojosCorona = Players.ShardPlayer.OjosCoronaDevorados(portadorTip);
+                    partes.Add($"[c/E8D8FF:Mirada +{(Globals.AlmaEternoGlobalItem.BonusCritArmasDevoradas(Item) * 100f):0.##}%]");
+                int ojosCorona = Globals.AlmaEternoGlobalItem.OjosCoronaDevorados(Item);
                 if (ojosCorona > 0)
                     partes.Add($"[c/E8D8FF:Corona +{ojosCorona} ojos]");
                 if (spDevorado.DevoracionMordida > 0 || spDevorado.PunoTitan > 0)
-                    partes.Add($"[c/E8D8FF:Mordida +{(Players.ShardPlayer.BonusEmpujeArmasDevoradas(portadorTip) * 100f):0.##}%]");
+                    partes.Add($"[c/E8D8FF:Mordida +{(Globals.AlmaEternoGlobalItem.BonusEmpujeArmasDevoradas(Item) * 100f):0.##}%]");
                 if (partes.Count > 0)
                     tooltips.Add(new TooltipLine(Mod, "FestinArmasStats",
                         string.Join("[c/9B6EC8: · ]", partes)));
@@ -831,7 +837,8 @@ namespace AethonMod.Content.Weapons
                 // v6.51.1 — LOS NÚMEROS REALES DEL PORTADOR (la letra:
                 // «solo estadísticas de los minions… además de las
                 // estadísticas que ya están»).
-                int despertar = Systems.DespertarGrimorio.NivelDe(portadorTip);
+                // v6.51.6 — el despertar de ESTE libro (el item señalado).
+                int despertar = Systems.DespertarGrimorio.NivelDe(Item);
                 int techoOjos = Players.ShardPlayer.TechoOjosDe(portadorTip, sl.Level);
                 int ojosVivos = 0;
                 int tipoOjoTip = ModContent.ProjectileType
@@ -949,8 +956,12 @@ namespace AethonMod.Content.Weapons
                 try
                 {
                     Player portador = Main.LocalPlayer;
-                    int despertar = Systems.DespertarGrimorio.NivelDe(portador);
-                    int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(portador);
+                    // v6.51.6 — LA ESCALERA ES DE ESTE LIBRO (la letra: el
+                    // despertar es individual de cada grimorio): se lee el
+                    // ALMA DEL ITEM señalizado — dos Eternos en la misma
+                    // bolsa muestran DOS escaleras distintas.
+                    int despertar = Systems.DespertarGrimorio.NivelDe(Item);
+                    int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(Item);
 
                     // LA BARRA (el nivel de despertar es la propia barra:
                     // 50 celdas, el nivel las llena).
@@ -981,13 +992,25 @@ namespace AethonMod.Content.Weapons
                         int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
                         long monedas = Systems.DespertarGrimorio.MonedasPara(siguiente);
 
+                        // === v6.51.6 — LA LISTA DEL DESPERTAR, RE-DISEÑADA
+                        //     (la letra: «lo que debe decir es el nombre
+                        //     del arma y justo al lado un pequeño sprite de
+                        //     como es el arma» + el check que se veía como
+                        //     texto crudo [c/FFD678:✓] — el tag ANIDADO
+                        //     dentro de otro tag muere: tML lo imprime
+                        //     literal. AHORA: UN SOLO COLOR POR LÍNEA, el ✓
+                        //     DENTRO del mismo span, y el arma con SU
+                        //     NOMBRE + SU SPRITE INLINE [i:id] — el tag de
+                        //     item NATIVO de tML, a prueba de todo). ===
+                        string colOK = "7FE89B", colNo = "C4A2FF";
+
                         // === EL REQUISITO 1 — LAS ESENCIAS (conteo vivo). ===
                         int llevasEsencias = Systems.DespertarGrimorio.EsenciasEnManos(portador);
                         bool esenciasOK = llevasEsencias >= esencias;
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
                             $"[c/78788C:  Para Despertar {siguiente}:]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
-                            $"[c/{(esenciasOK ? "7FE89B" : "C4A2FF")}:  • Esencias Corruptas: {Math.Min(llevasEsencias, esencias)}/{esencias}{(esenciasOK ? "  [c/FFD678:✓]" : "")}]"));
+                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias Corruptas: {Math.Min(llevasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
 
                         // === EL REQUISITO 2 — EL DINERO (lo que llevas). ===
                         long llevasMonedas = Systems.DespertarGrimorioSistema.ContarMonedas(portador);
@@ -996,24 +1019,37 @@ namespace AethonMod.Content.Weapons
                         if (!monedasOK && llevasMonedas > 0L)
                             textoMonedas += $" — llevas {Systems.DespertarGrimorioSistema.ItemToText(llevasMonedas)}";
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
-                            $"[c/{(monedasOK ? "7FE89B" : "C4A2FF")}:  • {textoMonedas}{(monedasOK ? "  [c/FFD678:✓]" : "")}]"));
+                            $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (verde si
-                        //     ya llevas una CORRUPTA de este peldaño). ===
+                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO: SU
+                        //     NOMBRE + SU SPRITE al lado (cada alternativa
+                        //     de este peldaño, [i:id] = el icono del item
+                        //     RENDERIZADO POR EL PARSER DE tML — se puede
+                        //     hasta pasar el cursor por encima). ===
                         bool armaOK = false;
                         int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
                         for (int pa = 0; pa < peldano.Length; pa++)
                             if (Systems.DespertarGrimorio.LlevaCorrupta(portador, peldano[pa]))
                             { armaOK = true; break; }
+                        string colArma = armaOK ? colOK : colNo;
+                        var trozosArma = new System.Collections.Generic.List<string>();
+                        trozosArma.Add($"[c/{colArma}:  • Devorar 1 CORRUPTA:]");
+                        for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
+                        {
+                            if (pa > 0) trozosArma.Add($"[c/78788C:·]");
+                            trozosArma.Add($"[i:{peldano[pa]}]");
+                            string nombreArma = "—";
+                            try
+                            {
+                                var proto = Terraria.ID.ContentSamples.ItemsByType[peldano[pa]];
+                                if (proto != null) nombreArma = proto.Name;
+                            }
+                            catch { }
+                            trozosArma.Add($"[c/{colArma}:{nombreArma}]");
+                        }
+                        if (armaOK) trozosArma.Add($"[c/{colArma}: ✓]");
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
-                            $"[c/{(armaOK ? "7FE89B" : "C4A2FF")}:  • Devorar 1 arma del peldaño CORRUPTA{(armaOK ? "  [c/FFD678:✓]" : "")}]"));
-
-                        // === LA FILA DE LOS SPRITES MINI (el espacio que
-                        //     reservan los espacios lo pinta
-                        //     DespertarRequisitosGlobalItem con los sprites
-                        //     de TODAS las alternativas del peldaño). ===
-                        tooltips.Add(new TooltipLine(Mod, "DespertarArmas",
-                            "[c/78788C:  " + new string(' ', 26) + "]"));
+                            string.Join(" ", trozosArma)));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
                             "[c/78788C:  (suéltala con el grimorio en la mano)]"));
                     }

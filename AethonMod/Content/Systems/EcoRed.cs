@@ -435,28 +435,34 @@ namespace AethonMod.Content.Systems
             {
                 if (Main.netMode != NetmodeID.Server) return;
                 if (portador == null || !portador.active) return;
-                var sp = portador.GetModPlayer<Players.ShardPlayer>();
-                if (sp == null) return;
+
+                // v6.51.6 — LOS NÚMEROS SON DEL LIBRO (la letra: el
+                // despertar y las estadísticas son exclusivas de cada
+                // grimorio): se leen del ETERNO ACTIVO del portador (en
+                // la mano primero; si no, el primero del inventario).
+                var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                    .De(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(portador));
+                if (alma == null) return;
 
                 EnviarPaquete(portador, p =>
                 {
                     p.Write(MsgDevoracion);
-                    p.Write(sp.DevoracionPoder);
-                    p.Write(sp.DevoracionExp);
-                    p.Write(sp.DevoracionFuerza);
-                    p.Write(sp.DevoracionPrisa);
-                    p.Write(sp.DevoracionMirada);
-                    p.Write(sp.DevoracionCorona);
-                    p.Write(sp.DevoracionMordida);
-                    p.Write(sp.AlmaIgnea);
-                    p.Write(sp.AlmaSalvaje);
-                    p.Write(sp.AlmaVampira);
-                    p.Write(sp.CorazonEstelar);
-                    p.Write(sp.AlmaVeloz);
-                    p.Write(sp.PunoTitan);
+                    p.Write(alma.DevoracionPoder);
+                    p.Write(alma.DevoracionExp);
+                    p.Write(alma.DevoracionFuerza);
+                    p.Write(alma.DevoracionPrisa);
+                    p.Write(alma.DevoracionMirada);
+                    p.Write(alma.DevoracionCorona);
+                    p.Write(alma.DevoracionMordida);
+                    p.Write(alma.AlmaIgnea);
+                    p.Write(alma.AlmaSalvaje);
+                    p.Write(alma.AlmaVampira);
+                    p.Write(alma.CorazonEstelar);
+                    p.Write(alma.AlmaVeloz);
+                    p.Write(alma.PunoTitan);
                     // v6.51.0 — EL NIVEL DE DESPERTAR también (el daño y
                     // los tooltips del portador lo leen en su máquina).
-                    p.Write(sp.NivelDespertar);
+                    p.Write(alma.NivelDespertar);
                 });
             }
             catch { }
@@ -770,23 +776,28 @@ namespace AethonMod.Content.Systems
                         int almaVeloz = reader.ReadInt32();
                         int punoTitan = reader.ReadInt32();
                         int nivelDespertar = reader.ReadInt32();
-                        var spd = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
-                        if (spd != null && poder >= 0)
+                        // v6.51.6 — LOS NÚMEROS SE ESCRIBEN EN EL LIBRO
+                        // ACTIVO del jugador local (el despertar y las
+                        // estadísticas son del ITEM, no del jugador).
+                        var almaR = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                            .De(global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                .Activo(Main.LocalPlayer));
+                        if (almaR != null && poder >= 0)
                         {
-                            spd.DevoracionPoder = poder;
-                            spd.DevoracionExp = System.Math.Max(0L, exp);
-                            spd.DevoracionFuerza = System.Math.Max(0, fuerza);
-                            spd.DevoracionPrisa = System.Math.Max(0, prisa);
-                            spd.DevoracionMirada = System.Math.Max(0, mirada);
-                            spd.DevoracionCorona = System.Math.Max(0, corona);
-                            spd.DevoracionMordida = System.Math.Max(0, mordida);
-                            spd.AlmaIgnea = System.Math.Max(0, almaIgnea);
-                            spd.AlmaSalvaje = System.Math.Max(0, almaSalvaje);
-                            spd.AlmaVampira = System.Math.Max(0, almaVampira);
-                            spd.CorazonEstelar = System.Math.Max(0, corazonEstelar);
-                            spd.AlmaVeloz = System.Math.Max(0, almaVeloz);
-                            spd.PunoTitan = System.Math.Max(0, punoTitan);
-                            spd.NivelDespertar = System.Math.Clamp(nivelDespertar, 0,
+                            almaR.DevoracionPoder = poder;
+                            almaR.DevoracionExp = System.Math.Max(0L, exp);
+                            almaR.DevoracionFuerza = System.Math.Max(0, fuerza);
+                            almaR.DevoracionPrisa = System.Math.Max(0, prisa);
+                            almaR.DevoracionMirada = System.Math.Max(0, mirada);
+                            almaR.DevoracionCorona = System.Math.Max(0, corona);
+                            almaR.DevoracionMordida = System.Math.Max(0, mordida);
+                            almaR.AlmaIgnea = System.Math.Max(0, almaIgnea);
+                            almaR.AlmaSalvaje = System.Math.Max(0, almaSalvaje);
+                            almaR.AlmaVampira = System.Math.Max(0, almaVampira);
+                            almaR.CorazonEstelar = System.Math.Max(0, corazonEstelar);
+                            almaR.AlmaVeloz = System.Math.Max(0, almaVeloz);
+                            almaR.PunoTitan = System.Math.Max(0, punoTitan);
+                            almaR.NivelDespertar = System.Math.Clamp(nivelDespertar, 0,
                                 Content.Systems.DespertarGrimorio.NivelMax);
                         }
                         break;

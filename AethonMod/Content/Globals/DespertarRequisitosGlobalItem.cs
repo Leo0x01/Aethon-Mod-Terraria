@@ -50,7 +50,9 @@ namespace AethonMod.Content.Globals
             {
                 Player portador = Main.LocalPlayer;
                 if (portador == null) return;
-                int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(portador);
+                // v6.51.6 — la escalera es DEL ITEM señalizado (cada libro
+                // tiene SU siguiente peldaño).
+                int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(item);
                 if (siguiente < 1 || siguiente > Systems.DespertarGrimorio.NivelMax) return;
 
                 float t = Main.GlobalTimeWrappedHourly;
@@ -97,67 +99,14 @@ namespace AethonMod.Content.Globals
                 }
 
                 // ============================================================
-                //  LA FILA DE LOS SPRITES MINI (la línea «DespertarArmas»
-                //  — 26 espacios reservados): TODAS las alternativas del
-                //  peldaño a 16 px; las CORRUPTAS que ya llevas arden con
-                //  su HALO DORADO latiendo detrás (sabes CUÁL sirve y
-                //  CUÁL ya tienes lista).
+                //  v6.51.6 — LA FILA DE SPRITES POST-DRAW MURIÓ: los
+                //  sprites del arma ahora viven INLINE en la propia línea
+                //  («DespertarReq4») con el tag nativo [i:id] de tML —
+                //  nombre y sprite JUNTOS, renderizados por el parser de
+                //  vanilla (a prueba de builds locales). Queda SOLO el
+                //  ✓ dorado latiendo al inicio de cada requisito cumplido
+                //  (el jugo de siempre — decoración pura).
                 // ============================================================
-                if (line.Name == "DespertarArmas")
-                {
-                    int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
-                    Texture2D glow = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-
-                    float paso = 19f;
-                    float y = line.Y + 2f;
-                    for (int k = 0; k < peldano.Length && k < 6; k++)
-                    {
-                        int tipo = peldano[k];
-                        if (tipo <= 0) continue;
-
-                        Texture2D tex;
-                        try { tex = Terraria.GameContent.TextureAssets.Item[tipo].Value; }
-                        catch { continue; }
-                        if (tex == null) continue;
-
-                        float x = line.X + 6f + k * paso;
-                        float lado = Math.Max(tex.Width, tex.Height);
-                        float escala = 16f / Math.Max(lado, 1f);
-                        bool corrupta = Systems.DespertarGrimorio.LlevaCorrupta(portador, tipo);
-
-                        // EL HALO DORADO de las corruptas (late — «ya la
-                        // llevas»: el arma lista para la ofrenda).
-                        if (corrupta && glow != null)
-                        {
-                            float late = 0.55f + 0.45f * MathF.Sin(t * 3.6f + k * 1.3f);
-                            Vector2 centroS = new Vector2(x + 8f, y + 8f);
-                            Main.spriteBatch.Draw(glow, centroS, null,
-                                new Color(255, 214, 120) * (0.55f * late), 0f,
-                                glow.Size() * 0.5f,
-                                new Vector2(26f, 26f) / glow.Size(),
-                                SpriteEffects.None, 0f);
-                        }
-
-                        // EL SPRITE del arma (16 px — «muy pequeño para
-                        // saber qué arma se necesita»).
-                        Vector2 posS = new Vector2(x + 8f, y + 8f);
-                        Color colorS = corrupta ? Color.White : new Color(215, 205, 235);
-                        Main.spriteBatch.Draw(tex, posS, null, colorS, 0f,
-                            tex.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-
-                        // EL BROCHE de las corruptas (el puntito dorado
-                        // esquina — la marca de la lista).
-                        if (corrupta && glow != null)
-                        {
-                            Main.spriteBatch.Draw(glow, posS + new Vector2(7f, -7f), null,
-                                new Color(255, 240, 190) * 0.85f, 0f,
-                                glow.Size() * 0.5f,
-                                new Vector2(5.5f, 5.5f) / glow.Size(),
-                                SpriteEffects.None, 0f);
-                        }
-                    }
-                }
             }
             catch { }
         }

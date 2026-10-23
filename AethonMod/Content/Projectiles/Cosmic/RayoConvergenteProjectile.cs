@@ -64,6 +64,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private int Duracion => Modo == MODO_SOL ? T_SOL : T_AGUJERO;
         private bool EsSol => Modo == MODO_SOL;
 
+        // === v6.51.6 — LA ÚLTIMA MIRADA VIVE AQUÍ (no en localAI): el
+        //     localAI de vanilla es float[3] (índices 0–2) — el [2..3]
+        //     de la .51.5 tiraba IndexOutOfRange en CADA AI y el ritual
+        //     NUNCA cumplía (los soles y agujeros rúnicos no nacían:
+        //     el client.log lo confesó). Campo de INSTANCIA, el patrón
+        //     de la casa (v6.50.108, OjoEternoMinion._faseOrbital): el
+        //     ritual corre su AI en la máquina del dueño y ahí basta. ===
+        private Vector2 _ultimaMirada = Vector2.Zero;
+        private bool _vioMirada = false;
+
         public override void SetStaticDefaults()
         {
             Main.projFrames[Type] = 1;
@@ -108,20 +118,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
             NPC blanco = BlancoVivo();
 
             // === v6.51.5 — LA ÚLTIMA MIRADA: el ritual recuerda hacia
-            //     dónde miraba (localAI[2..3] = el centro de la última
-            //     presa viva que vio). Si la presa muere a media
-            //     ceremonia, el hechizo NACE IGUAL hacia ese rumbo —
-            //     nada cancela lo empezado. ===
+            //     dónde miraba (v6.51.6: campos de instancia — localAI
+            //     es float[3] y el [3] tiraba IndexOutOfRange en cada
+            //     AI, matando el ritual entero). Si la presa muere a
+            //     media ceremonia, el hechizo NACE IGUAL hacia ese
+            //     rumbo — nada cancela lo empezado. ===
             if (blanco != null)
             {
-                Projectile.localAI[2] = blanco.Center.X;
-                Projectile.localAI[3] = blanco.Center.Y;
+                _ultimaMirada = blanco.Center;
+                _vioMirada = true;
             }
-            else if (Projectile.localAI[2] == 0f && Projectile.localAI[3] == 0f && duenoVivo)
+            else if (!_vioMirada && duenoVivo)
             {
                 // nunca vio presa: la mirada inicial es hacia donde mira el dueño
-                Projectile.localAI[2] = dueno.Center.X + dueno.direction * 260f;
-                Projectile.localAI[3] = dueno.Center.Y - 40f;
+                _ultimaMirada = dueno.Center + new Vector2(dueno.direction * 260f, -40f);
+                _vioMirada = true;
             }
 
             // === LA LUZ DEL RITUAL: el sol DORA el aire; el agujero lo
@@ -212,7 +223,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Vector2 destino = blanco != null && blanco.active
                 ? blanco.Center
-                : new Vector2(Projectile.localAI[2], Projectile.localAI[3]);
+                : _ultimaMirada;
             if (destino == Vector2.Zero)
                 destino = Projectile.Center - Vector2.UnitY * 120f;
             Vector2 rumbo = destino - Projectile.Center;

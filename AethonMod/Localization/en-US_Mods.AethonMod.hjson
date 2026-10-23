@@ -1809,26 +1809,6 @@ Items: {
 		Tooltip: ""
 	}
 
-	DignosIndiceGrimorio: {
-		DisplayName: The Grimoire Index
-		Tooltip: ""
-	}
-
-	DignosLluviaVersos: {
-		DisplayName: The Rain of Verses
-		Tooltip: ""
-	}
-
-	DignosOjoQueJuzga: {
-		DisplayName: The Judging Eye
-		Tooltip: ""
-	}
-
-	DignosCorazonMagnetar: {
-		DisplayName: The Heart of the Magnetar
-		Tooltip: ""
-	}
-
 	BolsaProyectilesDignos: {
 		DisplayName: The Bag of Worthy Projectiles
 		Tooltip: ""
@@ -2036,10 +2016,6 @@ Projectiles: {
 	BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
 	DignosFXProjectile.DisplayName: Dignos F X Projectile
-	CorazonMagnetarProjectile.DisplayName: Corazon Magnetar Projectile
-	IndiceGrimorioProjectile.DisplayName: Indice Grimorio Projectile
-	LluviaVersosProjectile.DisplayName: Lluvia Versos Projectile
-	OjoQueJuzgaProjectile.DisplayName: Ojo Que Juzga Projectile
 }
 
 Buffs: {
@@ -2377,6 +2353,7 @@ Bolsa.Abierta: Bag opened: {0} types of summoners received (999 each).
 
 LevelUpTester: {
 	Subida: ✦ {0} gained +{1} levels (now level {2}).
+	Migracion: ✦ The awakening and the feast now live IN THIS grimoire (each book, its own ladder).
 	SinGrimorio: No Grimoire of the Eternal found in the inventory.
 }
 

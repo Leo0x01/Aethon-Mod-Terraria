@@ -289,6 +289,12 @@ namespace AethonMod.Content.Projectiles
             // === EL FOCO DE LA MIRADA: a dónde apunta el iris ===
             NPC presa = ObjetivoDelOjo(dueño, nivel);
             Vector2? libro = PosicionDelLibro(dueño);
+            // v6.51.6 — EL GRIMORIO EN LA MANO TAMBIÉN ES CENTRO (la
+            //     letra: «los minions no orbitan correctamente alrededor
+            //     del grimorio»): si el espíritu está DENTRO pero el
+            //     Eterno está SOSTENIDO, la DANZA ATÓMICA orbita EL LIBRO
+            //     EN LA MANO — los ojos siempre rodean a SU grimorio.
+            libro = CentroDeLaDanza(dueño, libro);
             PasoOrbita(libro);   // v6.50.107: la fase de la luna avanza UNA vez por tick
             Vector2 slot = SlotDeFormacion(dueño, libro);
             Vector2 foco = modo == MODO_APUNTANDO && presa != null
@@ -684,6 +690,27 @@ namespace AethonMod.Content.Projectiles
             return _posLibro;
         }
 
+        /// <summary>v6.51.6 — EL CENTRO DE LA DANZA (la letra: «los
+        /// minions no orbitan correctamente alrededor del grimorio»):
+        /// el espíritu flotante SI ESTÁ FUERA… y si está DENTRO, el
+        /// GRIMORIO EN LA MANO del portador (los ojos son del LIBRO —
+        /// lo rodean siempre, no solo cuando sale a cazar).</summary>
+        private static Vector2? CentroDeLaDanza(Player dueño, Vector2? espiritu)
+        {
+            if (espiritu is Vector2) return espiritu;
+            try
+            {
+                if (dueño == null || !dueño.active || dueño.dead) return null;
+                Item mano = dueño.HeldItem;
+                if (mano == null || mano.IsAir || mano.type !=
+                    ModContent.ItemType<Weapons.GrimoireEternal>()) return null;
+                // LA MANO DEL PORTADOR (itemLocation = donde vanilla
+                // dibuja el item sostenido) — el libro en persona.
+                return dueño.itemLocation + new Vector2(dueño.direction * 4f, -10f);
+            }
+            catch { return null; }
+        }
+
         /// <summary>LA PRESA: la más cercana válida en rango (el filtro del
         /// Orbe Cósmico, heredado) — la misma lista en todos los clientes.</summary>
         private NPC ObjetivoDelOjo(Player dueño, int nivel)
@@ -758,7 +785,8 @@ namespace AethonMod.Content.Projectiles
                 // se lee con MOVIMIENTO, no solo con posición
                 Player dueñoEstela = Main.player[Projectile.owner];
                 if (dueñoEstela != null && dueñoEstela.active &&
-                    PosicionDelLibro(dueñoEstela) is Vector2 centroEstela)
+                    CentroDeLaDanza(dueñoEstela, PosicionDelLibro(dueñoEstela))
+                        is Vector2 centroEstela)
                 {
                     Vector2 slotAhora = SlotDeFormacion(dueñoEstela, centroEstela);
                     Vector2 off = slotAhora - centroEstela;

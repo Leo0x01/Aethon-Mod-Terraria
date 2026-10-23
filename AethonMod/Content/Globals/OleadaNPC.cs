@@ -2183,13 +2183,14 @@ namespace AethonMod.Content.Globals
                     if (monedas > 0)
                         Item.NewItem(src, npc.Center, ItemID.GoldCoin, monedas);
 
-                    // v6.51.0 — EL 2 % DE ESENCIA (la letra: «en las
-                    // oleadas de hambre cada monstruo tiene una
-                    // probabilidad de 2% de soltar 1 esencia corrupta» —
-                    // las probabilidades de los ítems vanilla están
-                    // PELADAS al mínimo: solo dinero + esencia, ver el
-                    // detour de NPCLoot_DropItems en Load).
-                    if (Main.rand.Next(100) < 2)
+                    // v6.51.6 — EL 1 % DE ESENCIA (la letra: «en las
+                    // oleadas los monstruos deben tener una probabilidad
+                    // de 1% de soltar escencia corrupta» — la .51.0 la
+                    // puso al 2 %; la letra manda: 1 %) — las
+                    // probabilidades de los ítems vanilla están PELADAS
+                    // al mínimo: solo dinero + esencia, ver el detour de
+                    // NPCLoot_DropItems en Load).
+                    if (Main.rand.Next(100) < 1)
                         Item.NewItem(src, npc.Center, ModContent.ItemType
                             <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 1);
                 }

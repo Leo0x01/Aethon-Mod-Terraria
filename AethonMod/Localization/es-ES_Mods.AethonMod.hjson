@@ -1807,26 +1807,6 @@ Items: {
 		// Tooltip: ""
 	}
 
-	DignosIndiceGrimorio: {
-		DisplayName: El Índice del Grimorio
-		// Tooltip: ""
-	}
-
-	DignosLluviaVersos: {
-		DisplayName: La Lluvia de Versos
-		// Tooltip: ""
-	}
-
-	DignosOjoQueJuzga: {
-		DisplayName: El Ojo que Juzga
-		// Tooltip: ""
-	}
-
-	DignosCorazonMagnetar: {
-		DisplayName: El Corazón del Magnetar
-		// Tooltip: ""
-	}
-
 	BolsaProyectilesDignos: {
 		DisplayName: La Bolsa de los Proyectiles Dignos
 		// Tooltip: ""
@@ -2034,10 +2014,6 @@ Projectiles: {
 	// BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	// BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
 	// DignosFXProjectile.DisplayName: Dignos F X Projectile
-	// CorazonMagnetarProjectile.DisplayName: Corazon Magnetar Projectile
-	// IndiceGrimorioProjectile.DisplayName: Indice Grimorio Projectile
-	// LluviaVersosProjectile.DisplayName: Lluvia Versos Projectile
-	// OjoQueJuzgaProjectile.DisplayName: Ojo Que Juzga Projectile
 }
 
 Buffs: {
@@ -2375,6 +2351,7 @@ Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
 
 LevelUpTester: {
 	Subida: ✦ {0} subió +{1} niveles (ahora nivel {2}).
+	// Migracion: ✦ The awakening and the feast now live IN THIS grimoire (each book, its own ladder).
 	SinGrimorio: No se encontró un Grimorio del Eterno en el inventario.
 }
 

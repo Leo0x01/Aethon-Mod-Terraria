@@ -101,17 +101,22 @@ namespace AethonMod.Content.Players
         /// </summary>
         public bool CaidaRecibida = false;
 
-        /// <summary>v6.51.0 — EL DESPERTAR DEL GRIMORIO (la nueva
-        /// progresión, la letra: «empieza a nivel 0… máximo 50 por
-        /// ahora»): el nivel que desbloquea los poderes del grimorio
-        /// (mejoras de los ojos, el sol rúnico, los agujeros negros,
-        /// la mascota del nivel 20) y suma +1 % de daño por nivel a
-        /// TODOS los tipos de daño del grimorio.</summary>
+        /// <summary>v6.51.0 — EL DESPERTAR DEL GRIMORIO… v6.51.6 — ESTE
+        /// campo es LEGADO: el despertar VIVE EN EL ITEM (AlmaEternoGlobal
+        /// Item — la letra: «eso debe ser algo individual de cada
+        /// grimorio del eterno»). Solo sirve para la MIGRACIÓN de los
+        /// guardados de la .51.0–.51.5: al entrar al mundo, esto camina
+        /// AL PRIMER GRIMORIO del inventario (ver AlmaLegacyPendiente).</summary>
         public int NivelDespertar;
 
-        /// <summary>v6.51.0 — LA MASCOTA DEL ESCUPIDIZO (nivel 20 del
-        /// despertar: el grimorio la escupió UNA VEZ — la ceremonia no
-        /// se repite).</summary>
+        /// <summary>v6.51.6 — LA MIGRACIÓN PENDIENTE: el guardado trae el
+        /// despertar/festín del JUGADOR (la era .51.0–.51.5) — el primer
+        /// tick con un Eterno en el inventario lo hereda TODO y el jugador
+        /// queda limpio (una sola vez, para siempre).</summary>
+        public bool AlmaLegacyPendiente = false;
+
+        /// <summary>v6.51.0 — LA MASCOTA DEL ESCUPIDIZO… v6.51.6 — LEGADO
+        /// (vive en el item — ver AlmaEternoGlobalItem.PetDelDespertar).</summary>
         public bool PetDelDespertar;
 
         /// <summary>v6.50.120 — LA BOLSA A LA MANO (la letra: «además no
@@ -138,27 +143,32 @@ namespace AethonMod.Content.Players
         public const int DevoracionTope = 300;
 
         /// <summary>EL BONUS DE DAÑO del Eterno por lo devorado (0 → +0,75).
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float BonusDanoDevorado(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
             // v6.51.1 — LA LETRA: «incluso con el despertar al máximo, se
             // debe poder seguir devorando esencia corrupta y esta debe
             // aumentar el daño del grimorio del eterno en 0.1% por cada
-            // esencia corrupta» — 0,1% por esencia, SIN techo práctico
-            // (el tope del .128 de 300 murió con el altar).
-            return Math.Min(sp.DevoracionPoder, 5000) * 0.001f;
+            // esencia corrupta» — 0,1% por esencia, SIN techo práctico.
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BonusDanoDevorado(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>LOS OJOS EXTRA de la corona por lo devorado (+1 cada 75,
         /// tope +3 — el escuadrón del banquete).</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static int OjosExtraDevorados(Player p)
         {
-            if (p == null) return 0;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0;
-            return Math.Min(sp.DevoracionPoder / 75, 3);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .OjosExtraDevorados(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         // ================================================================
@@ -230,81 +240,104 @@ namespace AethonMod.Content.Players
 
         /// <summary>EL DAÑO DEL FESTÍN DE ARMAS: fuerza (+0,35 %/pto) + el
         /// EXP (+0,02 %/pto, tope +40 %) — tope conjunto +45 %.</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float BonusDanoArmasDevoradas(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.DevoracionFuerza * 0.0035f +
-                Math.Min(sp.DevoracionExp * 0.0002f, 0.40f), 0.45f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BonusDanoArmasDevoradas(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>LA VELOCIDAD DEL FESTÍN: prisa (+0,25 %/pto) + alma
         /// veloz (+2 %/copa) — tope conjunto +35 %.</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float BonusVelocidadArmasDevoradas(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.DevoracionPrisa * 0.0025f + sp.AlmaVeloz * 0.02f, 0.35f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BonusVelocidadArmasDevoradas(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>EL CRÍTICO DEL FESTÍN: mirada (+0,30 %/pto) + corazón
         /// estelar (+1,5 %/copia) — tope conjunto +30 %.</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float BonusCritArmasDevoradas(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.DevoracionMirada * 0.0030f + sp.CorazonEstelar * 0.015f, 0.30f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BonusCritArmasDevoradas(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>EL EMPUJE DEL FESTÍN: mordida (+0,6 %/pto) + puño
         /// titán (+12 %/copia) — tope conjunto +75 %.</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float BonusEmpujeArmasDevoradas(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.DevoracionMordida * 0.006f + sp.PunoTitan * 0.12f, 0.75f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BonusEmpujeArmasDevoradas(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>LOS OJOS DE LA CORONA DEL FESTÍN: cada 5 armas de
         /// invocación comidas, UN ojo más (tope +3 — suma con los del
         /// poder devorado).</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static int OjosCoronaDevorados(Player p)
         {
-            if (p == null) return 0;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0;
-            return Math.Min(sp.DevoracionCorona / 5, 3);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .OjosCoronaDevorados(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>EL ROBO DE VIDA DEL ALMA VAMPIRA (+2 %/copia, tope 8 %).</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float RoboVidaAlmas(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.AlmaVampira * 0.02f, 0.08f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .RoboVidaAlmas(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>LA PROBABILIDAD DE PRENDER del alma ígnea (+6 %/copia, tope 30 %).</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float ProbIgnea(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.AlmaIgnea * 0.06f, 0.30f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .ProbIgnea(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>LA PROBABILIDAD DE ENVENENAR del alma salvaje (+6 %/copia, tope 30 %).</summary>
+        /// <summary>v6.51.6 — LOS NÚMEROS SON DEL LIBRO ACTIVO (la letra:
+        /// las estadísticas son exclusivas de cada grimorio): esta lectura
+        /// resuelve el Eterno en la MANO (o el primero del inventario) y
+        /// devuelve SUS números — el cálculo real vive en
+        /// AlmaEternoGlobalItem (el patrón de siempre, ahora por item).</summary>
         public static float ProbSalvaje(Player p)
         {
-            if (p == null) return 0f;
-            var sp = p.GetModPlayer<ShardPlayer>();
-            if (sp == null) return 0f;
-            return Math.Min(sp.AlmaSalvaje * 0.06f, 0.30f);
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .ProbSalvaje(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p));
         }
 
         /// <summary>v6.50.128 — EL SYNC MANUAL: el trago del altar tocó el
@@ -699,6 +732,83 @@ namespace AethonMod.Content.Players
         /// </summary>
         public override void PostUpdate()
         {
+            // ============================================================
+            // v6.51.6 — LA MIGRACIÓN DEL ALMA (una sola vez): el guardado
+            // de la .51.0–.51.5 trae el despertar y el festín en el
+            // JUGADOR; la letra nueva manda: TODO eso es del GRIMORIO.
+            // El primer Eterno del inventario lo HEREDA todo y el jugador
+            // queda limpio — cada libro nuevo empieza su propia escalera.
+            // ============================================================
+            try
+            {
+                if (AlmaLegacyPendiente && !Main.gameMenu && Player.active)
+                {
+                    int eternoM = ModContent.ItemType
+                        <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                    Item heredero = null;
+                    for (int k = 0; k < 58 && heredero == null; k++)
+                    {
+                        Item it = Player.inventory[k];
+                        if (it != null && !it.IsAir && it.type == eternoM) heredero = it;
+                    }
+                    if (heredero != null)
+                    {
+                        var alma = heredero.GetGlobalItem
+                            <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                        if (alma != null)
+                        {
+                            // SOLO si el heredero está VIRGEN (nunca PISAR
+                            // el progreso de un libro que ya empezó).
+                            if (alma.NivelDespertar == 0 && alma.DevoracionPoder == 0 &&
+                                alma.DevoracionExp == 0)
+                            {
+                                alma.NivelDespertar = NivelDespertar;
+                                alma.PetDelDespertar = PetDelDespertar;
+                                alma.DevoracionPoder = DevoracionPoder;
+                                alma.DevoracionExp = DevoracionExp;
+                                alma.DevoracionFuerza = DevoracionFuerza;
+                                alma.DevoracionPrisa = DevoracionPrisa;
+                                alma.DevoracionMirada = DevoracionMirada;
+                                alma.DevoracionCorona = DevoracionCorona;
+                                alma.DevoracionMordida = DevoracionMordida;
+                                alma.AlmaIgnea = AlmaIgnea;
+                                alma.AlmaSalvaje = AlmaSalvaje;
+                                alma.AlmaVampira = AlmaVampira;
+                                alma.CorazonEstelar = CorazonEstelar;
+                                alma.AlmaVeloz = AlmaVeloz;
+                                alma.PunoTitan = PunoTitan;
+                                heredero.NetStateChanged();
+
+                                if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
+                                    Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                        "Mods.AethonMod.Despertar.Migracion"),
+                                        new Color(196, 138, 255));
+                            }
+                        }
+                        // EL JUGADOR QUEDA LIMPIO (la era del despertar por
+                        // jugador murió — el libro lo lleva todo ahora).
+                        NivelDespertar = 0;
+                        PetDelDespertar = false;
+                        DevoracionPoder = 0;
+                        DevoracionExp = 0;
+                        DevoracionFuerza = 0;
+                        DevoracionPrisa = 0;
+                        DevoracionMirada = 0;
+                        DevoracionCorona = 0;
+                        DevoracionMordida = 0;
+                        AlmaIgnea = 0;
+                        AlmaSalvaje = 0;
+                        AlmaVampira = 0;
+                        CorazonEstelar = 0;
+                        AlmaVeloz = 0;
+                        PunoTitan = 0;
+                        AlmaLegacyPendiente = false;
+                    }
+                    // sin libro aún: la marca espera al primer Eterno.
+                }
+            }
+            catch { AlmaLegacyPendiente = false; }
+
             // v6.51.0 — LOS ATAQUES COMBINADOS DEL DESPERTAR (el sol
             // rúnico y los agujeros negros de los ojos): el coordinador
             // corre en la PANTALLA del dueño (cada jugador con SUS ojos).
@@ -1276,10 +1386,23 @@ namespace AethonMod.Content.Players
                 // v6.51.0 — EL DESPERTAR (ausente = 0: los guardados
                 // viejos estrenan la mecánica desde el nivel 0 — la
                 // letra: «siempre empieza desde nivel 0»).
+                // v6.51.6 — LEGADO: estos valores ya no mandan — al
+                // entrar al mundo, la MIGRACIÓN los lleva AL PRIMER
+                // GRIMORIO del inventario (AlmaLegacyPendiente) y el
+                // jugador queda en cero.
                 NivelDespertar = Math.Max(0, Math.Min(
                     Content.Systems.DespertarGrimorio.NivelMax,
                     tag.GetInt("nivelDespertar")));
                 PetDelDespertar = tag.GetBool("petDespertar");
+                // v6.51.6 — LA MARCA DE LA MIGRACIÓN: si el guardado trae
+                // ALGO del viejo despertar/festín del jugador, caminará al
+                // primer Eterno del inventario (una sola vez).
+                if (NivelDespertar > 0 || PetDelDespertar || DevoracionPoder > 0 ||
+                    DevoracionExp > 0 || DevoracionFuerza > 0 || DevoracionPrisa > 0 ||
+                    DevoracionMirada > 0 || DevoracionCorona > 0 || DevoracionMordida > 0 ||
+                    AlmaIgnea > 0 || AlmaSalvaje > 0 || AlmaVampira > 0 ||
+                    CorazonEstelar > 0 || AlmaVeloz > 0 || PunoTitan > 0)
+                    AlmaLegacyPendiente = true;
             }
             catch { }
         }

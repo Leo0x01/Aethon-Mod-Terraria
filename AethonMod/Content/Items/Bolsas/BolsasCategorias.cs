@@ -554,16 +554,16 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "La Bolsa de los Proyectiles Dignos";
         protected override string NombreCorto => "Bolsa de los Proyectiles Dignos";
         protected override Color ColorFiesta => new(255, 196, 110);
-        protected override string Nota => "Cinco armas dignas del Grimorio: la binaria re-hecha, el índice que cita, la lluvia de versos, el ojo que juzga y el corazón del magnetar";
+        protected override string Nota => "El arma digna del Grimorio: la binaria re-hecha (la pareja 931 con el reloj del mundo)";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
             l.Add((ModContent.ItemType<Weapons.Cosmic.DignosEquinoccioBinario>(), 1));  // LA BINARÍA re-hecha (la pareja 931 + el efecto binario)
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosIndiceGrimorio>(), 1));      // EL ÍNDICE (la cita y su valla de rayos)
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosLluviaVersos>(), 1));       // LA LLUVIA DE VERSOS (la grieta y el cierre del capítulo)
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosOjoQueJuzga>(), 1));        // EL OJO QUE JUZGA (el veredicto de la mirada)
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DignosCorazonMagnetar>(), 1));    // EL CORAZÓN DEL MAGNETAR (la mezcla pedida)
+            // v6.51.6 — LA SEGUNDA PURGA (la letra: «las nuevas armas
+            //     creadas no sirven, asi que las puedes borrar»): el
+            //     ÍNDICE, LA LLUVIA DE VERSOS, EL OJO QUE JUZGA y EL
+            //     CORAZÓN DEL MAGNETAR murieron — la binaria queda sola.
             return l;
         }
     }
