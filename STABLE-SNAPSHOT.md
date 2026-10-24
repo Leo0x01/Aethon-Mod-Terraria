@@ -1,58 +1,57 @@
-# AethonMod — ESTADO ACTUAL (v6.51.11)
+# AethonMod — ESTADO ACTUAL (v6.51.12)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.51.11 (LA MESA DEL SUELO · EL FESTÍN DEL
-> PORTADOR · LA REFORJA A LA VISTA · EL COLOR ÚNICO DEL NOMBRE · LAS
-> CIMAS 400/500 · EL TOPE DE VELOCIDAD. La letra: «el grimorio se come
-> toda la esencia corrupta que llega al inventario […] solo comer lo
-> que necesita para subir al siguiente nivel de despertar» + «mejor es
-> que el jugador suelte los items delante de el con el grimorio
-> seleccionado, pero que se vaya comiendo los item segun los necesite
-> para sus contadores» + «las esencia corrupta estas si las consume el
-> jugador aumentan su ataque… hasta un maximo de 100 %… entonces las
-> esencias se convierten en monedas de oro, 1 esencia 1 de oro» + «el
-> aumento que estos dan deben aparecer en la ventana de informacion
-> basica» + «al cerrar el inventario y poner el cursor encima del
-> grimorio en la barra de acceso rapido su nombre sale de colores
-> mostrando un nivel diferente, esto no debe ser» + «que (Legendario)
-> sea a nivel 400 y que (Legendario Supremo) sea a nivel 500» + «ponle
-> un tope para que nunca dispare el doble… incluso todos juntos
-> siempre se queden en el tope maximo y nada lo pueda romper»).
-> Siete entregas: (A) LA MESA DEL SUELO — la DEVORACIÓN DE LA MOCHILA
-> de la .51.10 murió entera (AutoDevorarOfrenda, DevoracionInventarioFX
-> y compañía, 11 símbolos ausentes de la DLL); la mochila ES SAGRADA y
-> la mesa ES EL SUELO: con el Eterno EN LA MANO, lo soltado delante
-> (≤200 px) es plato comido DE IGUAL FORMA QUE LOS JEFES, SOLO lo que
-> falta del peldaño (CONTADORES PARCIALES que persisten y viajan: 70
-> lingotes, sueltas 30, come 30, faltan 40); el dinero con CAMBIO
-> escupido en monedas de verdad (EscupirCambio: pilas ≤999 — sin el
-> desglose QuickSpawnItem clampa y ROBA); un despertar por pulso y la
-> mesa RENACE al subir. (B) EL FESTÍN DEL PORTADOR — ItemCorrupto ES
-> consumible: el jugador la come y cada esencia es +0,1 % de daño en
-> TODO (tope +100 % con 1000, EsenciasConsumidas en el .plr); al tope
-> cada esencia = 1 MONEDA DE ORO; lo que el LIBRO come SOLO despierta
-> (BonusDanoDevorado/OjosExtraDevorados muertos — MigrarViejoPoder
-> pasa el viejo poder de los libros .51.6-.51.10 al portador, una vez
-> por libro). (C) LA REFORJA EN LA VENTANA BÁSICA — la línea
-> «Reforja (Mítico): +15 % daño · …» con las stats coloreadas de la
-> wiki bajo el daño de invocación. (D) EL COLOR ÚNICO — la causa raíz
-> verificada al IL (Main.MouseText → RarityLoader.GetRarity(rare).
-> RarityColor): la rareza ahora VISTE EL COLOR DEL PELDAÑO del libro a
-> la vista (cursor → señalado → activo) — Ignorante GRIS en las DOS
-> pantallas. (E) LAS CIMAS — Legendario 400, Legendario Supremo 500.
-> (F) EL TOPE DE VELOCIDAD — FactorVelocidadTotal: nivel × festín ×
-> reforja JUNTAS, cuantizadas a ticks ENTEROS con TOPE DURO 7
-> (MinTicksUso) + reuseDelay 7 de correa final: NADA dispara doble,
-> ni todo junto lo rompe. .tmod 2.850.373 B md5
-> b09ff82bcd0b71728f1e3a10b02d6f3b, 401 entradas, oráculo 0/0, build
-> real ×2 0/0, headless ×3 Server started 0 excepciones,
-> audit_v65111 TODO OK. PENDIENTE EN JUEGO: el checklist de la .51.11
-> abajo (la comida en el suelo, el festín del portador, el oro al
-> tope, la reforja en la básica, el color del hotbar, las cimas
-> 400/500, el tope de velocidad) + el checklist .51.10/.51.9 aún
-> vigente en CHANGES.md (la refronja viva, el miedo del duende, el
-> loot del Fusionado, el Aethon Menor danzando, las cuatro ventanas,
-> la escalera del nombre).
+> Última actualización: v6.51.12 (EL FESTÍN CHICO · EL ESCUADRÓN ETERNO
+> · LA PRESENCIA DEL LIBRO · EL LAZO DE LA SOMBRA · EL CONCIERTO DE LAS
+> DOS HORAS · LOS RAYITOS PERLIN · LA SOMBRA DE LA PÁGINA II. La letra:
+> «el grimorio devora los items correctamaente, pero necesita hacer la
+> animacion de devorar, es la misma animacion que usa con los jefes» +
+> «a veces los minions se desinvocan» + «el daño de invocacion es muy
+> inferior al daño magico […] el calculo para el daño de invocacion
+> debe ser el mismo que se usa para el daño magico» + «no puede
+> seleccionar nada con el cursor en la barra de acceso rapido del
+> inventario» + «solo con el grimorio se activa ese poder […] si esta
+> seleccionado el jugador tiene todo el poder, si no esta seleccionado
+> o esta guardado en el inventario el jugador solo obtiene 25%» + «el
+> grimorio no se puede dejar caer tan facilmente […] la sombra de la
+> pagina para pegarse al jugador y volver a entrar a su inventario» +
+> «la pequeña animación de las hadas […] al menos 1 vez cada 2 horas de
+> juego si es que el jugador pasa mas de 30 segundos sin moverse» +
+> «no debe lanzar los ojos, debe usar los rayos perling» + «la
+> informacion que aparece en la esencia corrupta […] cambiala» + «crea
+> la sombra de la pagina 2 […] usa nuestras librerias y nuestros iris,
+> tambien hacerlo lo mas detallado posible»).
+> Diez entregas: (A) EL FESTÍN CHICO — cada bocado de LA MESA DEL SUELO
+> dispara la ANIMACIÓN DE DEVORAR de los jefes en miniatura
+> (BocadoDelSueloProjectile: tentáculo del FauceDevorador a escala de
+> plato + EL PLATO FANTASMA viajando por dentro + SendExtraAI). (B) EL
+> ESCUADRÓN ETERNO — la cura de la desinvocación silenciosa: los
+> minions JAMÁS mueren por falta de buff (la barra llena de vanilla
+> reemplazaba el icono — EscuadronUtil.Sostener re-ancla SIN expulsar;
+> la única despedida: clic derecho en el icono ×6 buffs). (C) LA
+> PARIDAD — DanoOjosDelEterno = LA MISMA fórmula del mágico (nivel
+> +2,2 %, reforja, festín con presencia; lo exclusivo de clase queda
+> en GetTotalDamage). (D) EL FIX DEL HOTBAR — causa raíz al IL: el
+> reuseDelay de la .51.11 era una SEGUNDA animación (ApplyReuseDelay)
+> que mataba los clicks del ItemSlot.LeftClick — LA CORREA MURIÓ (el
+> tope MinTicksUso=7 cuantizado sigue siendo el muro). (E) LA
+> PRESENCIA — FactorDelLibro (1,0 mano · 0,25 inventario · 0,0
+> cofre/basura/suelo) multiplicando TODAS las stats: festín, vida,
+> maná, crítico, penetración, regeneración, reducción y el techo de
+> ojos (los vivos siguen vivos). (F) EL LAZO — el Eterno caído vuelve
+> SOLO: a los 20 px la sombra de la página se estira (tentáculo de
+> tinta dibujado en PreDrawInWorld) y lo arrastra; bolsa llena →
+> expulsa un item al azar y entra él. (G) EL CONCIERTO — las hadas: 2
+> h DE JUEGO (TicksSinCoro, persistente) + 30 s de quietud; la moneda
+> del 22 % murió. (H) LOS RAYITOS — las embestidas de los ojos
+> murieron: mini arcos Perlin REALES (StormLib) en la ventana del
+> golpe, la firma del escuadrón en miniatura. (I) LA ESENCIA — la
+> ventana re-escrita: ligadura + progreso real + el oro del tope.
+> (J) LA SOMBRA II — el segundo tomo: DOBLE HÉLICE trenzada + LOS
+> IRIS REALES del escuadrón por las hebras + RAYOS PERLIN entre ellas
+> + BOCA DE GARRAS + el MORDISCO con LA CORONA DE 9 GARRAS. .tmod
+> 2.852.359 B md5 b947a7bfe817a52ef1a642a6771bc31c, 401 entradas,
+> oráculo 0/0, build real 0/0, headless ×3 0 excepciones.
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1943,61 +1942,32 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.11 PUBLICADA (release 422393484 + asset 670703243 · CDN verificado byte a byte · `/releases/latest` = v6.51.11) — EN JUEGO:
-   LA MESA DEL SUELO · EL FESTÍN DEL PORTADOR · EL TOPE DE VELOCIDAD.**
-   Checklist: (a) LA MESA — con el Eterno en la MANO, soltar esencias
-   delante: come SOLO las del peldaño (el aviso cuenta «(3/5 del
-   peldaño)», el resto QUEDA EN EL SUELO); lo mismo con monedas (con
-   cambio escupido si la moneda no cabe), lingotes (70 necesita,
-   30 sueltas → «faltan 40») y EL ARMA corrupta del peldaño (la devora
-   entera); al completar las TRES ofrendas DESPIERTA y los contadores
-   renacen — y NADA sale del inventario jamás (la mochila sagrada),
-   (b) EL FESTÍN DEL PORTADOR — comer esencia corrupta a mano (clic):
-   +0,1 % de daño en TODO por esencia, el tooltip de la esencia cuenta
-   vivo; a las 1000 el aviso del tope (+100 %) y cada esencia extra
-   comida = 1 moneda de oro, (c) LOS LIBROS VIEJOS — el poder devorado
-   de la .51.6-.51.10 migra al portador una sola vez (aviso
-   «MigracionPoder»), (d) LA REFORJA EN LA BÁSICA — la ventana básica
-   muestra «Reforja (X): stats» bajo el daño de invocación, (e) EL
-   COLOR — cerrar inventario y poner el cursor sobre el Eterno del
-   hotbar: el nombre con el color de SU peldaño (Ignorante GRIS, igual
-   que con el inventario abierto), (f) LAS CIMAS — (Legendario) al
-   400, (Legendario Supremo) al 500 (la lista de requisitos y EL ARMA
-   lo cuentan), (g) EL TOPE — con TODO apilado (nivel alto + festín de
-   prisa + reforja Suprema) el uso NUNCA baja de 7 ticks: mantener
-   clic y contar — jamás doble disparo.
-
-1. **✅ v6.50.116 PUBLICADA — EL ESCUADRÓN DE ONCE, LA CORONA DOBLE,
-   EL FESTÍN AISLADO, LA GRACIA DEL GUARDIÁN Y EL RECORTES DEL IRIS**
-   (la letra: «en vez de 10 minion que sean 11, así se ve mejor en la
-   animación de cuando está el libro fuera» + «mejorar la animación
-   sobre el jugador ya que se quedan muy juntos» + «los jefes de las
-   oleadas no deben contar para los cambios del mundo… solo afectan al
-   grimorio» + «bloquear la aparición de guardianes a solo 1 antes de
-   ser devorado y después por al menos 2 minutos» + «recortar el iris
-   a la mitad, y que la mitad superior se haga invisible cuando el ojo
-   esté medio cerrado»). (1) EL ESCUADRÓN DE ONCE — con la banda
-   completa las órbitas del libro son DOS RUEDAS exactas (5+6); la
-   12.ª invocación FORTALECE. (2) LA CORONA DOBLE — dos arcos
-   entrelazados a lo ladrillo sobre el jugador: el doble de cielo por
-   ojo, el arco se abre con la banda, el radio respira y cada ojo
-   cabecea a su tempo. (3) EL FESTÍN AISLADO — el jefe de oleada muere
-   con su identidad en el sello y el NPC entregado con type/netID 0:
-   la mazmorra NO se abre por el Esqueletron de oleada, sin meteorito,
-   sin logros, sin loot vanilla — y el grimorio cobra esencia, XP,
-   hambre, crónica y voz IGUAL. (4) LA GRACIA DEL GUARDIÁN — desde el
-   mordisco del easteregg, 2 minutos sin guardianes (cubre toda la
-   cena); antes del pacto, UNO y solo UNO. (5) EL RECORTES DEL IRIS —
-   el iris del libro gigante entrecerrado se recorta desde abajo (la
-   mitad superior invisible al morder, el borde inferior clavado) y
-   respira con el masticar. **PENDIENTE EN JUEGO**: (a) 11 ojos con el
-   libro fuera (dos ruedas) y con el libro guardado (la corona doble,
-   sin apiñar), (b) matar al Esqueletron de una oleada y comprobar que
-   la mazmorra SIGUE cerrada (y el libro cobra igual), (c) el easteregg
-   del guardián: durante la cena y 2 minutos después, NI UN guardián
-   más, (d) la cena: el iris del libro grande SIN asomar sobre el
-   párpado, recortándose con cada mordida.
-
+1. **⏳ v6.51.12 PUBLICADA — EN JUEGO: EL FESTÍN CHICO · EL ESCUADRÓN
+   ETERNO · LA PRESENCIA DEL LIBRO · EL LAZO · EL CONCIERTO · LOS
+   RAYITOS · LA SOMBRA II.**
+   Checklist: (a) EL FESTÍN CHICO — soltar esencias/monedas/lingotes
+   delante del Eterno EN LA MANO: cada bocado dispara el tentáculo
+   chico que ENVUELVE el plato y SE LO LLEVA por dentro hacia el
+   jugador (el fantasma del item encogiéndose — la misma animación de
+   los jefes en miniatura), (b) EL ESCUADRÓN — invocar los ojos y
+   LLENAR la barra de buffs (22+): JAMÁS se desinvocan solos; el clic
+   derecho en el icono del buff los despide (la única despedida),
+   (c) LA PARIDAD — el daño de invocación del tooltip básico ahora
+   escala como el mágico (+2,2 %/nivel, la reforja y el festín
+   adentro), (d) EL HOTBAR — los clicks en la barra de acceso rápido
+   con el inventario abierto responden (la correa del reuseDelay
+   murió), (e) LA PRESENCIA — comer esencias: con el libro EN LA MANO
+   el festín entero · GUARDADO en la bolsa 25 % · en un COFRE nada
+   (la ventana de la esencia lo cuenta VIVO), (f) EL LAZO — soltar el
+   grimorio y alejarse: la sombra de la página se estira y lo
+   DEVUELVE; con la bolsa llena expulsa un item al azar y entra él,
+   (g) EL CONCIERTO — quieto 30 s tras 2 h de juego: el coro de hadas
+   garantizado (la moneda del 22 % murió), (h) LOS RAYITOS — la
+   mascota molesta NPCs/golpea hadas con MINI ARCOS PERLIN (los ojos
+   ya NO salen volando), (i) LA SOMBRA II — craftear La Sombra de la
+   Página II (tomo 1 + 10 madera): la DOBLE HÉLICE con iris reales,
+   rayos entre hebras, boca de garras y la corona de 9 garras al
+   morder.
 2. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
    VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10** (la letra:
    «quita los 3 anillos de fotones… yo me refería a los anillos de los

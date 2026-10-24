@@ -171,6 +171,7 @@ namespace AethonMod.Content.Systems
                         if (falta <= 0) continue;
 
                         int come = System.Math.Min(falta, drop.stack);
+                        AnimarElBocado(p, drop, 0f);   // v6.51.12: EL FESTÍN CHICO (antes del trago: el plato aún vive)
                         alma.OfrendaEsencias += come;
                         drop.stack -= come;
                         if (drop.stack <= 0) drop.TurnToAir();
@@ -193,6 +194,7 @@ namespace AethonMod.Content.Systems
                         if (falta <= 0) continue;
 
                         long valor = ValorDeMoneda(drop.type);
+                        AnimarElBocado(p, drop, 1f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
                         long enteras = System.Math.Min(drop.stack, falta / valor);
                         if (enteras > 0)
                         {
@@ -238,6 +240,7 @@ namespace AethonMod.Content.Systems
                         if (faltaMin <= 0) continue;
 
                         int comeMin = System.Math.Min(faltaMin, drop.stack);
+                        AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
                         alma.OfrendaMineral += comeMin;
                         drop.stack -= comeMin;
                         if (drop.stack <= 0) drop.TurnToAir();
@@ -260,6 +263,7 @@ namespace AethonMod.Content.Systems
                             <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                         if (sello == null || !sello.Corrompido) continue;
 
+                        AnimarElBocado(p, drop, 3f);   // v6.51.12: EL FESTÍN CHICO
                         alma.OfrendaArma = true;
                         drop.TurnToAir();
                         SincronizarDrop(d);
@@ -374,6 +378,42 @@ namespace AethonMod.Content.Systems
             }
             Terraria.Audio.SoundEngine.PlaySound(
                 SoundID.Item113.WithPitchOffset(-0.45f), p.Center);
+        }
+
+        // ================================================================
+        //  v6.51.12 — LA ANIMACIÓN DE DEVORAR (la letra: «el grimorio
+        //  devora los items correctamaente, pero necesita hacer la
+        //  animacion de devorar, es la misma animacion que usa con los
+        //  jefes»): cada bocado de LA MESA DEL SUELO dispara EL FESTÍN
+        //  CHICO — el tentáculo del FauceDevorador a escala de plato
+        //  (BocadoDelSueloProjectile: sale del portador, envuelve al
+        //  plato, se lo lleva por dentro y disipa). PURA PANTALLA: el
+        //  consumo ya ocurrió — esto es el teatro.
+        // ================================================================
+        private static void AnimarElBocado(Player p, Item drop, float estilo)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                if (p == null || drop == null || drop.IsAir) return;
+                int idx = Array.IndexOf(Main.item, drop);
+                if (idx < 0) return;
+
+                int pr = Projectile.NewProjectile(p.GetSource_Misc("MesaDelEterno"),
+                    drop.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Sombras.BocadoDelSueloProjectile>(),
+                    0, 0f, p.whoAmI, idx, estilo);
+                if (pr >= 0)
+                {
+                    var mp = Main.projectile[pr];
+                    mp.localAI[1] = drop.Center.X;
+                    mp.localAI[2] = drop.Center.Y;
+                    mp.localAI[3] = drop.type;
+                    mp.netUpdate = true;   // que el ExtraAI camine YA
+                }
+            }
+            catch { }
         }
 
         // ================================================================
@@ -565,6 +605,7 @@ namespace AethonMod.Content.Systems
 
                 // LA MUERTE DEL PLATO (en todas las pantallas).
                 string nombre = drop.Name;
+                AnimarElBocado(p, drop, 4f);   // v6.51.12: EL FESTÍN CHICO
                 drop.TurnToAir();
                 int idx = Array.IndexOf(Main.item, drop);
                 if (Main.netMode == NetmodeID.Server && idx >= 0)

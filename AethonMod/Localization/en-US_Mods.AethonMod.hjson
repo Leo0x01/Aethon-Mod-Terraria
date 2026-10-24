@@ -166,6 +166,23 @@ Items: {
 			'''
 	}
 
+	SombraPagina2: {
+		DisplayName: The Shadow of the Page II
+		Tooltip:
+			'''
+			"The page learned to FOLD in two — and to open its eyes."
+			THE SECOND VOLUME of the Shadow of the Page: the same feast
+			(hunts at any distance, bites, drains and at 1 HP it
+			DEVOURS), wearing the most detailed body of the house — the
+			twin helix of ink braided around its spine, THE SQUADRON'S
+			REAL EYES (with their watching irises and eyelids) spread
+			across both strands, PERLIN ARCS crackling between them, and
+			the CLAW MAW that opens and SNAPS SHUT. On the bite: THE
+			DEVOURER with its NINE-CLAW CROWN chewing the whole plane.
+			(Maw test weapon — volume 2.)
+			'''
+	}
+
 	// v6.50.91 — THE LIVING CODEX WAS DELETED ENTIRELY (the user's word:
 	// "El Codice Vivo lo puedes borrar por completo ya no es necesario").
 	// Its levitation — the book that leaves your hands and hovers — now
@@ -1871,6 +1888,11 @@ Items: {
 	ArmaCorrupta1: +5% to ALL its stats — more damage, more knockback, faster swings.
 	ArmaCorrupta2: It no longer accepts prefixes or reforging — the anvil is closed to it.
 	ArmaCorrupta3: Drop it with the grimoire IN HAND: the Eternal will devour it.
+
+	SombraDeLaPagina2: {
+		DisplayName: Sombra De La Pagina2
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2016,6 +2038,8 @@ Projectiles: {
 	BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
 	DignosFXProjectile.DisplayName: Dignos F X Projectile
+	BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
+	SombraPagina2Projectile.DisplayName: Sombra Pagina2 Projectile
 }
 
 Buffs: {
@@ -2444,8 +2468,12 @@ Despertar: {
 	BocadoArma: ✦ The Eternal devours THE CORRUPTED WEAPON of the rung!
 	MigracionPoder: ✦ The old devoured power ({0} essences) passes to its bearer: +{1}% damage to ALL.
 	TopeEsencias: ✧ FEAST CAP REACHED: +{0}% damage FOREVER! From now on, every essence eaten becomes 1 gold coin.
-	EsenciaTopeTooltip: Feast complete: +100% damage — every essence eaten becomes 1 gold coin
-	EsenciaProgresoTooltip: Bearer's feast: {0}/{1} essences eaten (+{2}% damage to ALL)
+	EsenciaTopeTooltip: ✦ Feast COMPLETE: +100% damage with the book in hand · 25% stored in your bag · nothing in a chest. Every extra essence eaten becomes 1 gold coin
+	EsenciaProgresoTooltip: ✦ Bearer's feast: {0}/{1} essences eaten (+{2}% total · active now: +{3}%)
+	EsenciaLigadaMano: ✧ The Eternal Grimoire is IN YOUR HAND: the whole feast (+100% at the cap)
+	EsenciaLigadaBolsa: ✧ The Eternal Grimoire is IN YOUR BAG: the feast at 25% (hold it for full power)
+	EsenciaLigadaNada: ✧ Without the Eternal Grimoire on you, the feast SLEEPS (in hand: all · in bag: 25% · in a chest: nothing)
+	LazoDevuelto: ✦ The page's shadow REACHES OUT, grabs the Eternal Grimoire and RETURNS it to your inventory — the book refuses to be dropped.
 	ReqArmaLimpia: Requires an UNCORRUPTED weapon
 	NaceCorrupta: Born CORRUPT: +5% to ALL its stats · no prefixes or reforging
 	CondicionRecetas: Requires the Eternal Grimoire in the inventory

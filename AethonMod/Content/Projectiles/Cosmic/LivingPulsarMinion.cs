@@ -261,19 +261,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         private void CheckMinionBuff(Player owner)
         {
+            // v6.51.12 — LA CURA DE LA DESINVOCACIÓN SILENCIOSA: JAMÁS
+            // muere por falta de buff (la barra llena de vanilla
+            // reemplazaba el icono y el escuadrón moría «de pronto» —
+            // EscuadronUtil.Sostener re-ancla SIN expulsar a nadie). La
+            // única despedida: el CLIC DERECHO del icono (LivingPulsarBuff.
+            // RightClick → EscuadronUtil.Despedir).
             int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.LivingPulsarBuff>();
-            bool hasBuff = false;
-            for (int i = 0; i < Player.MaxBuffs; i++)
-            {
-                if (owner.buffType[i] == buffType && owner.buffTime[i] > 0)
-                { hasBuff = true; break; }
-            }
-            if (!hasBuff) Projectile.Kill();
-            else
-            {
-                owner.AddBuff(buffType, 18000);
-                Projectile.timeLeft = 2;
-            }
+            global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, owner, buffType);
         }
 
         public override void OnKill(int timeLeft)

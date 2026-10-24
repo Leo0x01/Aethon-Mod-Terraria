@@ -91,7 +91,7 @@ namespace AethonMod.Content.Globals
                 // en las stats — una sola voz para una sola derrota).
                 int nivelGrimorio = 0;
                 bool libroVisible = false;
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 58; i++)
                 {
                     Item inv = player.inventory[i];
                     if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
@@ -163,7 +163,7 @@ namespace AethonMod.Content.Globals
                     int slotPrimero = -1, nivelPrimero = 0, xpPrimero = 0;
                     if (xp > 0)
                     {
-                        for (int i = 0; i < 10; i++)
+                        for (int i = 0; i < 58; i++)
                         {
                             Item inv = player.inventory[i];
                             if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
@@ -264,7 +264,7 @@ namespace AethonMod.Content.Globals
                         try
                         {
                             var slPrimero = player.inventory[0];
-                            for (int i = 0; i < 10; i++)
+                            for (int i = 0; i < 58; i++)
                             {
                                 Item inv = player.inventory[i];
                                 if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())

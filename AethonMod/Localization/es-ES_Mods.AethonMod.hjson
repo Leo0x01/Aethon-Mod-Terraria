@@ -166,6 +166,24 @@ Items: {
 			'''
 	}
 
+	SombraPagina2: {
+		DisplayName: La Sombra de la Página II
+		Tooltip:
+			'''
+			«La página aprendió a DOBLARSE en dos — y a abrir los ojos.»
+			EL SEGUNDO TOMO de la Sombra de la Página: el mismo festín
+			(caza a cualquier distancia, muerde, drena y a 1 de vida
+			DEVORA), con el cuerpo MÁS detallado de la casa — la DOBLE
+			HÉLICE de tinta trenzada alrededor de su espina, LOS OJOS
+			REALES DEL ESCUADRÓN (con su iris que MIRA y sus párpados)
+			repartidos por las dos hebras, LOS RAYOS PERLIN chispeando
+			entre ellas y la BOCA DE GARRAS que se abre y CIERRA DE
+			GOLPE. Al morder: EL DEVORADOR con la CORONA DE 9 GARRAS
+			mordiendo el plano entero.
+			(Arma de prueba de las fauces — tomo 2.)
+			'''
+	}
+
 	// v6.50.91 — THE LIVING CODEX WAS DELETED ENTIRELY (the user's word:
 	// "El Codice Vivo lo puedes borrar por completo ya no es necesario").
 	// Its levitation — the book that leaves your hands and hovers — now
@@ -1869,6 +1887,11 @@ Items: {
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
 	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
+
+	SombraDeLaPagina2: {
+		// DisplayName: Sombra De La Pagina2
+		// Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2014,6 +2037,8 @@ Projectiles: {
 	// BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	// BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
 	// DignosFXProjectile.DisplayName: Dignos F X Projectile
+	// BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
+	// SombraPagina2Projectile.DisplayName: Sombra Pagina2 Projectile
 }
 
 Buffs: {
@@ -2442,8 +2467,12 @@ Despertar: {
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA CORRUPTA del peldaño!
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
 	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
-	EsenciaTopeTooltip: Festín completo: +100% de daño — cada esencia comida se vuelve 1 moneda de oro
-	EsenciaProgresoTooltip: Festín del portador: {0}/{1} esencias comidas (+{2}% de daño a TODO)
+	EsenciaTopeTooltip: ✦ Festín COMPLETO: +100% de daño con el libro en la mano · 25% si lo guardas en la bolsa · nada en un cofre. Cada esencia comida extra se vuelve 1 moneda de oro
+	EsenciaProgresoTooltip: ✦ Festín del portador: {0}/{1} esencias comidas (+{2}% en total · ahora: +{3}%)
+	EsenciaLigadaMano: ✧ El Grimorio del Eterno está EN TU MANO: el festín entero (+100% al tope)
+	EsenciaLigadaBolsa: ✧ El Grimorio del Eterno está EN LA BOLSA: el festín al 25% (sácalo a la mano para todo su poder)
+	EsenciaLigadaNada: ✧ Sin el Grimorio del Eterno encima, el festín DUERME (en la mano: todo · en la bolsa: 25% · en cofre: nada)
+	LazoDevuelto: ✦ La sombra de la página se ESTIRA, agarra al Grimorio del Eterno y lo DEVUELVE a tu inventario — el libro no se deja caer.
 	ReqArmaLimpia: Requiere un arma SIN corromper
 	NaceCorrupta: Nace CORRUPTA: +5% a TODAS sus estadísticas · sin etiquetas ni reforge
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario

@@ -684,18 +684,19 @@ namespace AethonMod.Content.Projectiles
 
         private void CheckMinionBuff(Player dueño)
         {
+            // v6.51.12 — LA CURA DE LA DESINVOCACIÓN SILENCIOSA (la letra:
+            // «a veces los minions se desinvocan, o sea que estan
+            // invocados y de pronto dejan de estarlo»): el ojo JAMÁS
+            // muere por falta de buff — la barra de buffs llena de
+            // vanilla REEMPLAZABA el icono (nuestro 18000 era el más
+            // corto) y TODO el escuadrón moría en un tick, «de pronto».
+            // AHORA: EscuadronUtil.Sostener (el reloj nunca expira, el
+            // icono se re-ancla si hay hueco) — la única despedida es
+            // el CLIC DERECHO del icono (OjoEternoBuff.RightClick →
+            // EscuadronUtil.Despedir — «solo se deben desactivar si el
+            // jugador los quita usando su buff de minion»).
             int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.OjoEternoBuff>();
-            bool hasBuff = false;
-            for (int i = 0; i < Player.MaxBuffs; i++)
-                if (dueño.buffType[i] == buffType && dueño.buffTime[i] > 0) { hasBuff = true; break; }
-
-            if (!hasBuff) Projectile.Kill();
-            else
-            {
-                // el timeLeft nunca expira (el fix v6.50.3 del Orbe)
-                Projectile.timeLeft = 2;
-                dueño.AddBuff(buffType, 18000);
-            }
+            global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, dueño, buffType);
         }
 
         /// <summary>EL CÍRCULO MÁGICO — el sello erosionado de los agujeros

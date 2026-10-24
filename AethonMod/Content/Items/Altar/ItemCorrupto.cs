@@ -115,21 +115,37 @@ namespace AethonMod.Content.Items.Altar
             return true;
         }
 
-        /// <summary>EL CONTEO VIVO en el tooltip: cuántas llevas
-        /// comidas y cuánto daño te han dado (y al tope, el aviso del
-        /// oro).</summary>
+        /// <summary>LA VENTANA NUEVA (la letra: «la informacion que
+        /// aparece en la esencia corrupta en su ventana de informacion,
+        /// debes cambiarla ya que ahora es diferente»): el festín ya NO
+        /// es del jugador a secas — es del PORTADOR CON EL LIBRO: la
+        /// LIGADURA (qué tanto del festín está activo AHORA: en la mano
+        /// el 100 %, en la bolsa el 25 %, guardado NADA), el PROGRESO
+        /// vivo (X/1000 comidas y su porcentaje REAL vestido por la
+        /// ligadura) y al tope, EL ORO (cada esencia comida = 1 moneda).</summary>
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             try
             {
-                var sp = Main.LocalPlayer.GetModPlayer
+                Player portador = Main.LocalPlayer;
+                var sp = portador.GetModPlayer
                     <global::AethonMod.Content.Players.ShardPlayer>();
                 int n = sp == null ? 0 : sp.EsenciasConsumidas;
                 int vistos = System.Math.Min(n,
                     global::AethonMod.Content.Players.ShardPlayer.EsenciasTope);
-                string pct = (vistos * 0.1f).ToString("0.#",
-                    System.Globalization.CultureInfo.InvariantCulture);
 
+                // === LA LIGADURA (qué parte del festín vive AHORA) ===
+                float factor = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                    .FactorDelLibro(portador);
+                string claveLigadura = factor >= 0.99f
+                    ? "Mods.AethonMod.Despertar.EsenciaLigadaMano"
+                    : factor > 0.01f
+                        ? "Mods.AethonMod.Despertar.EsenciaLigadaBolsa"
+                        : "Mods.AethonMod.Despertar.EsenciaLigadaNada";
+                tooltips.Add(new TooltipLine(Mod, "EsenciaLigadura",
+                    Language.GetTextValue(claveLigadura)));
+
+                // === EL PROGRESO VIVO (o el ORO del tope) ===
                 if (n >= global::AethonMod.Content.Players.ShardPlayer.EsenciasTope)
                 {
                     tooltips.Add(new TooltipLine(Mod, "EsenciaTope",
@@ -137,10 +153,18 @@ namespace AethonMod.Content.Items.Altar
                 }
                 else
                 {
+                    // el porcentaje REAL: el festín vestido por la ligadura
+                    // (con el libro en la mano, el +34,2 % entero; en la
+                    // bolsa, su cuarta parte — la ventana cuenta la verdad)
+                    string pct = (vistos * 0.1f).ToString("0.#",
+                        System.Globalization.CultureInfo.InvariantCulture);
+                    string pctReal = (vistos * 0.1f * factor).ToString("0.#",
+                        System.Globalization.CultureInfo.InvariantCulture);
                     tooltips.Add(new TooltipLine(Mod, "EsenciaProgreso",
                         Language.GetTextValue("Mods.AethonMod.Despertar.EsenciaProgresoTooltip",
                             vistos,
-                            global::AethonMod.Content.Players.ShardPlayer.EsenciasTope, pct)));
+                            global::AethonMod.Content.Players.ShardPlayer.EsenciasTope,
+                            pct, pctReal)));
                 }
             }
             catch { }

@@ -161,6 +161,17 @@ namespace AethonMod.Content.Players
         // ================================================================
         public int EsenciasConsumidas = 0;
 
+        /// <summary>v6.51.12 — EL RELOJ LARGO DEL CORO (la letra: «la
+        /// pequeña animación de las hadas del minigrimorio que suceda
+        /// al menos 1 vez cada 2 horas de juego si es que el jugador
+        /// pasa mas de 30 segundos sin moverse, en cualquier caso si no
+        /// aparece esa posibildad simplemente no sucede»): los ticks de
+        /// juego desde el ÚLTIMO coro de hadas de la mascota — al llegar
+        /// a CoroTicks (2 h) y con el dueño quieto ≥30 s, el coro es
+        /// GARANTIZADO (la moneda de la .51.1 murió). Persiste en el
+        /// .plr: las 2 h son DE JUEGO, no de sesión.</summary>
+        public int TicksSinCoro = 0;
+
         /// <summary>EL TOPE DEL FESTÍN DEL PORTADOR: 1000 esencias = el +100 % entero.</summary>
         public const int EsenciasTope = 1000;
 
@@ -177,11 +188,20 @@ namespace AethonMod.Content.Players
         /// <summary>v6.51.11 — LA COMIDA DEL PORTADOR: el daño de TODO lo
         /// que usa sube +0,1 % por esencia corrupta consumida (tope
         /// +100 % con 1000 — la letra: «aumentan su ataque… hasta un
-        /// maximo de 100 %»).</summary>
+        /// maximo de 100 %»). v6.51.12 — LIGADO AL GRIMORIO (la letra
+        /// nueva: «aunque sea el jugador quien se coma 1000 esencias
+        /// corruptas solo con el grimorio se activa ese poder»): el
+        /// festín SOLO vive mientras el libro esté SELECCIONADO (100 %)
+        /// o EN EL INVENTARIO (25 %) — guardado en cofre o botado a la
+        /// basura, el poder APAGA (FactorDelLibro).</summary>
         public override void ModifyWeaponDamage(Item item, ref StatModifier damage)
         {
             if (EsenciasConsumidas <= 0) return;
-            damage *= 1f + System.Math.Min(EsenciasConsumidas, EsenciasTope) * 0.001f;
+            float factor = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .FactorDelLibro(Player);
+            if (factor <= 0f) return;   // sin libro encima: el festín duerme
+            damage *= 1f + System.Math.Min(EsenciasConsumidas, EsenciasTope)
+                * 0.001f * factor;
         }
 
         /// <summary>EL BONUS DE DAÑO del Eterno por lo devorado. v6.51.11 —
@@ -494,6 +514,13 @@ namespace AethonMod.Content.Players
         /// barra rápida (capacidades que no exigen blandir: slots, vida,
         /// maná topeado, y la propia XP que GlobalNPCXP cobra en 0–9).
         /// Devuelve 0 si el libro no está en ningún sitio que cuente.
+        /// v6.51.12 — LA PRESENCIA NUEVA (la letra: «si no esta
+        /// seleccionado o esta guardado en el inventario el jugador
+        /// solo obtiene 25 % del poder del grimorio»): el libro cuenta
+        /// desde CUALQUIER slot del inventario (0–57 — antes solo la
+        /// barra rápida 0–9). El 25 %/100 % lo aplica el FACTOR
+        /// (FactorDelLibro) en cada stat — el nivel aquí solo dice
+        /// «hay libro».
         /// </summary>
         private int NivelLibro(bool soloSostenido)
         {
@@ -509,7 +536,7 @@ namespace AethonMod.Content.Players
             }
             if (soloSostenido) return 0;
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 58; i++)
             {
                 Item inv = Player.inventory[i];
                 if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
@@ -520,30 +547,32 @@ namespace AethonMod.Content.Players
                     if (s != null) return s.Level;
                 }
                 catch { }
-                break; // la PRIMERA copia de la barra rápida manda
+                break; // la PRIMERA copia del inventario manda
             }
             return 0;
         }
 
         /// <summary>
-        /// PostUpdateEquips: los bonuses que persisten mientras el libro
-        /// esté SOSTENIDO o en la BARRA RÁPIDA. Corre tras ResetEffects:
-        /// las stats aquí escritas cuentan de verdad.
-        ///
-        /// v6.45: el bonus de invocación, el crítico mágico y la
-        /// penetración movidos desde GrimoireEternal.ModifyWeaponDamage
-        /// (el sitio EQUIVOCADO: ese hook solo corre al calcular el daño
-        /// del propio grimorio, así que los minions atacando en otros
-        /// ticks no recibían nada — letra muerta de la clase R44).
-        ///
-        /// v6.46: la separación de estados — el COMBATE (daño de
-        /// invocación, crítico, penetración) exige SOSTENER el libro; la
-        /// capacidad (slots de minion) y los recursos (vida/maná, tope
-        /// +100) sobreviven en la barra rápida.
+        /// PostUpdateEquips: los bonuses que da el libro al portador —
+        /// v6.51.12 — LA PRESENCIA NUEVA (la letra: «si esta seleccionado
+        /// el jugador tiene todo el poder del grimorio, si no esta
+        /// seleccionado o esta guardado en el inventario el jugador solo
+        /// obtiene 25 % del poder del grimorio, si el grimorio esta
+        /// guardado en cualquier tipo de cofre o este fue botado a la
+        /// basura entonces el jugador no obtiene nada»): TODAS las stats
+        /// multiplican por FactorDelLibro (1,0 / 0,25 / 0) — el techo de
+        /// ojos, la vida, el maná, el crítico, la penetración. La
+        /// separación sostenido/bolsa de la v6.46 MUERE: ahora es una
+        /// sola regla de presencia.
         /// </summary>
         public override void PostUpdateEquips()
         {
-            int nivel = NivelLibro(false);   // sostenido O barra rápida
+            int nivel = NivelLibro(false);   // sostenido O cualquier slot del inventario
+
+            // v6.51.12 — EL FACTOR DE PRESENCIA (la única regla nueva):
+            // 1,0 EN LA MANO · 0,25 EN LA BOLSA · 0,0 NADA (cofre/basura/suelo).
+            float factor = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .FactorDelLibro(Player);
 
             // ============================================================
             // v6.50.114 — EL EQUIPO LIMPIO (se captura ANTES de tocar
@@ -566,7 +595,9 @@ namespace AethonMod.Content.Players
             // partir de aquí cada 10 niveles 1 nuevo» — NI el equipo NI
             // lo devorado inflan el escuadrón (los ojos de banquete y de
             // corona de la .128-.129 MURIERON con el despertar).
-            int techoOjos = WeaponScaling.TechoOjosEterno(equipoInvocador, nivel);
+            // v6.51.12 — EL TECHO TAMBIÉN VISTE EL FACTOR: en la mano el
+            // escuadrón entero · en la bolsa el 25 % · guardado, cero.
+            int techoOjos = (int)(WeaponScaling.TechoOjosEterno(equipoInvocador, nivel) * factor);
             {
                 int i = Player.whoAmI;
                 if (i >= 0 && i < _techoOjos.Length)
@@ -645,10 +676,9 @@ namespace AethonMod.Content.Players
                 }
             }
 
-            if (nivel <= 0) return;
-            bool sostenido = NivelLibro(true) > 0;
+            if (nivel <= 0 || factor <= 0f) return;
 
-            // === CAPACIDAD (sostener O barra rápida) ===
+            // === CAPACIDAD (el techo del escuadrón, vestido por el factor) ===
 
             // v6.50.114 — EL TECHO DE LOS OJOS: el ESCUADRÓN del libro
             // (20 + equipo de invocador + la escalera por nivel) es un
@@ -661,23 +691,14 @@ namespace AethonMod.Content.Players
             if (Player.maxMinions < techoOjos)
                 Player.maxMinions = techoOjos;
 
-            // === RECURSOS: completos al sostener, tope +100 en la barra ===
-            int bonusVida = WeaponScaling.BonusLife(nivel);
-            int bonusMana = WeaponScaling.BonusMana(nivel);
-            if (!sostenido)
-            {
-                // v6.46: sin blandir el libro, el cuerpo solo tolera un
-                // préstamo de +100 vida y +100 maná — el resto exige
-                // sostenerlo.
-                if (bonusVida > 100) bonusVida = 100;
-                if (bonusMana > 100) bonusMana = 100;
-            }
+            // === RECURSOS: TODO vestido por el factor (la vida y el maná
+            //     del libro — 100 % en la mano, 25 % en la bolsa) ===
+            int bonusVida = (int)(WeaponScaling.BonusLife(nivel) * factor);
+            int bonusMana = (int)(WeaponScaling.BonusMana(nivel) * factor);
             Player.statLifeMax2 += bonusVida;
             Player.statManaMax2 += bonusMana;
 
-            // === PODER DE COMBATE: exige SOSTENER el libro ===
-            if (!sostenido) return;
-
+            // === PODER DE COMBATE: también vestido por el factor ===
             try
             {
                 // v6.51.0 — EL STACK DE INVOCACIÓN MURIÓ (la letra: «los
@@ -689,9 +710,9 @@ namespace AethonMod.Content.Players
                 // invocarlos) — el crítico y la penetración mágicos son
                 // del propio libro (su clic izquierdo).
                 // +0.2% crítico mágico por nivel (Máximo 100%)
-                Player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(nivel);
+                Player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(nivel) * factor;
                 // Armor penetration +2% cada 5 niveles (Máximo 50%)
-                Player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(nivel);
+                Player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(nivel) * factor;
             }
             catch { }
         }
@@ -704,12 +725,17 @@ namespace AethonMod.Content.Players
         /// del hook viejo eran letra muerta (ResetEffects las borra al
         /// tick siguiente sin que nadie las lea). PostUpdateBuffs corre
         /// entre ResetEffects y el consumo: aquí sí cuentan.
-        /// v6.46: la regeneración es poder del libro — SOLO sostenido.
+        /// v6.51.12 — la regeneración VISTE EL FACTOR DE PRESENCIA (100 %
+        /// en la mano · 25 % en la bolsa · 0 guardado — la letra nueva:
+        /// TODAS las stats del libro siguen la presencia).
         /// </summary>
         public override void PostUpdateBuffs()
         {
-            int level = NivelLibro(true);
+            int level = NivelLibro(false);
             if (level <= 0) return;
+            float factor = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .FactorDelLibro(Player);
+            if (factor <= 0f) return;
 
             // Regeneración de mana (por segundo)
             // v6.44 (auditoría R44): Player.manaRegen lo REESCRIBE
@@ -717,14 +743,14 @@ namespace AethonMod.Content.Players
             // ACUMULA aportes externos es manaRegenBonus. Unidades del
             // motor: 120 cuentas = 1 maná → para R maná/seg hay que
             // aportar 2·R cuentas por tick.
-            int manaRegen = WeaponScaling.ManaRegen(level);
+            int manaRegen = (int)(WeaponScaling.ManaRegen(level) * factor);
             if (manaRegen > 0 && Player.statMana < Player.statManaMax2)
             {
                 Player.manaRegenBonus += manaRegen * 2;
             }
 
             // Regeneración de vida (por segundo)
-            float lifeRegen = WeaponScaling.LifeRegen(level);
+            float lifeRegen = WeaponScaling.LifeRegen(level) * factor;
             if (lifeRegen > 0 && Player.statLife < Player.statLifeMax2)
             {
                 Player.lifeRegen += (int)(lifeRegen * 2); // lifeRegen es en 1/2 vida/seg
@@ -733,14 +759,18 @@ namespace AethonMod.Content.Players
 
         /// <summary>
         /// Modifica el daño recibido (reducción por nivel del Grimorio).
-        /// v6.46: reducción de daño = poder del libro — SOLO sostenido.
+        /// v6.51.12 — la reducción VISTE EL FACTOR DE PRESENCIA (100 % en
+        /// la mano · 25 % en la bolsa · 0 guardado — TODAS las stats).
         /// </summary>
         public override void ModifyHurt(ref Player.HurtModifiers modifiers)
         {
-            int level = NivelLibro(true);
+            int level = NivelLibro(false);
             if (level <= 0) return;
+            float factor = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .FactorDelLibro(Player);
+            if (factor <= 0f) return;
 
-            float reduction = WeaponScaling.DamageReduction(level);
+            float reduction = WeaponScaling.DamageReduction(level) * factor;
             if (reduction > 0f)
             {
                 modifiers.FinalDamage *= 1f - reduction;
@@ -839,6 +869,11 @@ namespace AethonMod.Content.Players
                 }
             }
             catch { AlmaLegacyPendiente = false; }
+
+            // v6.51.12 — EL RELOJ LARGO DEL CORO: un tick de juego más
+            // sin hadas (la garantía de las 2 h lo lee
+            // AethonMenorPareja — y ArrancarPlaga lo devuelve a cero).
+            try { if (TicksSinCoro < int.MaxValue - 1) TicksSinCoro++; } catch { }
 
             // v6.51.0 — LOS ATAQUES COMBINADOS DEL DESPERTAR (el sol
             // rúnico y los agujeros negros de los ojos): el coordinador
@@ -1345,6 +1380,9 @@ namespace AethonMod.Content.Players
                 // v6.51.11 — EL FESTÍN DEL PORTADOR (las esencias que EL
                 // JUGADOR comió: +0,1 % de daño en todo, tope +100 %).
                 tag["esenciasConsumidas"] = EsenciasConsumidas;
+                // v6.51.12 — EL RELOJ LARGO DEL CORO (las 2 h de juego
+                // entre coros de hadas — persiste: son horas DE JUEGO).
+                tag["ticksSinCoro"] = TicksSinCoro;
                 // v6.50.129 — EL FESTÍN DE LAS ARMAS (EXP por rareza + los
                 // stats por clase + las almas únicas — todo permanente).
                 tag["devoracionExp"] = DevoracionExp;
@@ -1406,6 +1444,8 @@ namespace AethonMod.Content.Players
                 // v6.51.11 — EL FESTÍN DEL PORTADOR (ausente = 0: el
                 // guardado viejo estrena el festín limpio).
                 EsenciasConsumidas = Math.Max(0, Math.Min(999999, tag.GetInt("esenciasConsumidas")));
+                // v6.51.12 — EL RELOJ LARGO DEL CORO (persistente).
+                TicksSinCoro = Math.Max(0, Math.Min(int.MaxValue - 1, tag.GetInt("ticksSinCoro")));
                 // v6.50.129 — EL FESTÍN DE LAS ARMAS (ausente = 0 en todos:
                 // el guardado viejo estrena el festín limpio; clamps).
                 DevoracionExp = Math.Max(0L, Math.Min(999999999L, tag.GetLong("devoracionExp")));

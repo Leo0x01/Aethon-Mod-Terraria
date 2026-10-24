@@ -147,6 +147,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// hadas visitan, no se mudan a vivir).</summary>
         private const float PLAGA_PROBABILIDAD = 0.22f;
 
+        /// <summary>v6.51.12 — EL CONCIERTO DE LAS DOS HORAS (la letra):
+        /// 2 horas DE JUEGO entre coros de hadas (7200 s × 60).</summary>
+        public const int CoroTicks = 432000;
+
+        /// <summary>LA QUIETUD DE LA LETRA: 30 s sin moverse abre la
+        /// ventana del coro.</summary>
+        public const int CoroQuieto = 1800;
+
         /// <summary>Episodios de aburrimiento que deben pasar entre plaga
         /// y plaga (la horda no espanta dos veces seguidas).</summary>
         private const int PLAGA_ENFRIAMIENTO = 2;
@@ -403,38 +411,35 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     //  teatro, como una cinemática curiosa del grimorio).
                     // ====================================================
                     {
-                        // v6.51.1 — LA MONEDA PACIENTE (la letra: «el
-                        // evento de las hadas es muy seguido, que demore
-                        // más en aparecer»): la PRIMERA tirada espera 25 s
-                        // de curiosidad, luego tira cada 45 s — 22% y
-                        // GARANTIZADA a la quinta tirada fallida (peor
-                        // caso ~3,4 min: las hadas son una visita RARA,
-                        // no una inquilina).
-                        if (e.TicksEnModo == 1500 ||
-                            (e.TicksEnModo > 1500 && (e.TicksEnModo - 1500) % 2700 == 0))
+                        // ====================================================
+                        //  v6.51.12 — EL CONCIERTO DE LAS DOS HORAS (la
+                        //  letra del usuario: «la pequeña animación de las
+                        //  hadas del minigrimorio que suceda al menos 1
+                        //  vez cada 2 horas de juego si es que el jugador
+                        //  pasa mas de 30 segundos sin moverse, en
+                        //  cualquier caso si no aparece esa posibildad
+                        //  simplemente no sucede»). LA MONEDA DE LA .51.1
+                        //  MURIÓ ENTERA (el 22 % cada 45 s, la garantía de
+                        //  la quinta): el coro ahora es UNA CITA — el
+                        //  RELOJ LARGO del portador (TicksSinCoro, 2 h DE
+                        //  JUEGO persistidas en el .plr) Y la QUIETUD de
+                        //  la letra (30 s sin moverse). Sin quietud no hay
+                        //  coro — y el reloj sigue su marcha para la
+                        //  próxima ventana. v6.50.131 sigue mandando en lo
+                        //  demás: el coro es EL evento (los conejos reales
+                        //  murieron con la .131).
+                        // ====================================================
+                        if (e.TicksQuieto >= CoroQuieto &&
+                            !Main.gameMenu && p != null && p.owner >= 0)
                         {
-                            if (e.PlagaEnfriamiento > 0)
-                                e.PlagaEnfriamiento--;
-                            else if (e.PlagaTiradasFallidas >= 4 ||
-                                     VFXCore.Hash01(p.whoAmI,
-                                         e.TotalGolpes * 13 + 29,
-                                         e.Viajes * 19 + 7 + e.TicksQuieto * 131)
-                                     < PLAGA_PROBABILIDAD)
+                            Player dueñoCoro = Main.player[p.owner];
+                            var spCoro = dueñoCoro != null && dueñoCoro.active
+                                ? dueñoCoro.GetModPlayer<Players.ShardPlayer>() : null;
+                            if (spCoro != null && spCoro.TicksSinCoro >= CoroTicks)
                             {
-                                e.PlagaTiradasFallidas = 0;
-                                // v6.50.131 — EL CORO DE LAS HADAS ES EL
-                                // EVENTO PREDERMINADO (la letra: «deja el
-                                // evento de las hadas como evento
-                                // predeterminado y que suceda de vez en
-                                // cuando»): el evento de los conejos reales
-                                // MURIÓ — la misma moneda de siempre (35 %
-                                // y garantizada a la tercera), sin muro de
-                                // carne de por medio.
                                 ArrancarPlaga(p, e);
                                 break;
                             }
-                            else
-                                e.PlagaTiradasFallidas++;
                         }
 
                         // MOLESTAR AL VECINDARIO (la letra: «en ese
@@ -1066,51 +1071,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     : Vector2.Zero;
             }
 
-            // FORMA 2 — LA EMBESTIDA: los ojos salen de la órbita hacia
-            // el vecino y vuelven (suave ida con smoothstep, golpe seco).
-            if (victima != null && e.Embestida >= 0)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    int salida = i * 5;    // el desfase entre hermanos
-                    float prog;
-                    if (e.Embestida <= EMBESTIDA_CONTACTO + salida)
-                        prog = MathHelper.Clamp((e.Embestida - salida) / 40f, 0f, 1f);          // la ida
-                    else
-                        prog = 1f - MathHelper.Clamp((e.Embestida - (EMBESTIDA_CONTACTO + salida)) / 40f, 0f, 1f); // la vuelta
-                    float suave = prog * prog * (3f - 2f * prog);
-                    Vector2 blanco = victima.Center + new Vector2((i - 1) * 5f, (i - 1) * -3f);
-                    pos[i] = Vector2.Lerp(pos[i], blanco, suave);
-                    if (prog > 0.05f)
-                    {
-                        // v6.50.130 — LA ANTICIPACIÓN: los primeros 8 t del
-                        // arranque los ojos ENTRECIERRAN (el wind-up del
-                        // golpe — se PREPARAN antes de lanzarse y abren de
-                        // golpe al despegar: animación con intención, la
-                        // letra de «mejora las animaciones»).
-                        estados[i] = e.Embestida <= 8 + salida ? OJO_MEDIO : OJO_ABIERTO;
-                    }
-                }
-            }
+            // v6.51.12 — LA EMBESTIDA DE LOS OJOS MURIÓ (la letra: «no
+            // debe lanzar los ojos, debe usar los rayos perling
+            // caracteristicos de los minions reales, pero a una escala
+            // menor ya que son miniminions»): los ojos JAMÁS salen de la
+            // órbita — el golpe lo pegan LOS RAYITOS PERLIN (DibujarRayitos:
+            // el mismo arco del escuadrón real, en miniatura). El wind-up
+            // queda en la MIRADA: clavados en la víctima, al acecho.
 
-            // v6.50.126 — LA EMBESTIDA DE LA PLAGA: en los ÚLTIMOS 15 t de
-            // cada ronda, los ojos SE LANZAN sobre los conejos que ESTA
-            // ronda golpeará (la misma moneda que cobrará RondaDePlaga —
-            // el golpe se VE llegar antes de caer: teatralidad).
+            // v6.51.12 — LA CARGA DE LA PLAGA MURIÓ con la embestida (la
+            // letra: los ojos NO se lanzan): en los últimos 15 t de cada
+            // ronda los ojos ACECHAN desde la órbita — mirada CLAVADA en
+            // los conejos que esta ronda golpeará — y LOS RAYITOS PERLIN
+            // cobran el golpe (DibujarRayitos: el arco del escuadrón real
+            // en miniatura, la firma de los miniminions del libro).
             if (e.Modo == MODO_PLAGA && e.PlagaRonda >= PLAGA_RONDA - 15)
             {
-                float prog = (e.PlagaRonda - (PLAGA_RONDA - 15)) / 15f;
                 int golpe = 0;
                 for (int c = 0; c < e.Conejos.Length && golpe < 3; c++)
                 {
                     if (!e.Conejos[c].Vivo || !ConejoGolpeado(e, c, e.PlagaRondas)) continue;
-                    int ojo = golpe++;
-                    float suave = prog * prog * (3f - 2f * prog);
-                    pos[ojo] = Vector2.Lerp(pos[ojo], e.Conejos[c].Pos, suave);
-                    estados[ojo] = OJO_ABIERTO;   // la carga: ojos CLAVADOS
+                    estados[golpe++] = OJO_ABIERTO;   // la mira: ojos CLAVADOS
                 }
             }
-
         }
 
         // ==================================================================
@@ -1172,6 +1155,90 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             SpriteEffects.None, 0f);
                     }
                 }
+
+                // === v6.51.12 — LOS RAYITOS PERLIN (la letra: «no debe
+                //     lanzar los ojos, debe usar los rayos perling
+                //     caracteristicos de los minions reales, pero a una
+                //     escala menor ya que son miniminions del minigrimorio
+                //     mascota jajajajaja»): en la ventana del golpe, cada
+                //     ojo dispara SU mini arco — el mismo Trueno Perlin
+                //     del escuadrón real (negro de bordes morados), a
+                //     escala mini. Los ojos YA NO se lanzan (la embestida
+                //     murió): se quedan en la corona y pegan a distancia.
+                DibujarRayitos(p, e, victima, ojos);
+            }
+            catch { }
+        }
+
+        // ==================================================================
+        //  v6.51.12 — LOS RAYITOS PERLIN DE LOS MINIMINIONS (la letra):
+        //  el arco eléctrico del TRUENO PERLIN real (StormLib.PerlinBolt
+        //  — el mismo canal fBm del cetro y de los ojos del arma), a
+        //  ESCALA MENOR: fino (2,4 px), corto de meandro y con el parpadeo
+        //  vivo (IsLit 7/10). Firma de colores del escuadrón: la funda
+        //  MORADA y la vena LAVANDA (los rayos negros de bordes morados
+        //  de los ojos del Eterno).
+        // ==================================================================
+
+        private static readonly Color RayitoHalo = new(190, 110, 255);   // morado vivo (la funda)
+        private static readonly Color RayitoCore = new(240, 224, 255);   // lavanda pálido (la vena)
+
+        /// <summary>LA VENTANA DEL ZAP: el contacto del mordisco (FORMA 2
+        /// — donde la .125 lanzaba los ojos) o los últimos 15 t de la
+        /// ronda de hadas (donde la .126 los lanzaba). Fuera de esas
+        /// ventanas los rayitos callan (los miniminions no gastan tinta).</summary>
+        private static void DibujarRayitos(Projectile p, Estado e, NPC victima, Vector2[] ojos)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            try
+            {
+                bool zapMolestar = e.Modo == MODO_MOLESTAR && victima != null &&
+                    e.Embestida >= EMBESTIDA_CONTACTO - 8 && e.Embestida <= EMBESTIDA_CONTACTO + 12;
+                bool zapPlaga = e.Modo == MODO_PLAGA &&
+                    e.PlagaRonda >= PLAGA_RONDA - 15 && e.PlagaRonda < PLAGA_RONDA;
+                if (!zapMolestar && !zapPlaga) return;
+
+                // LOS BLANCOS: la víctima (molestar) o los conejos que ESTA
+                // ronda golpeará (plaga — la misma selección del acecho).
+                var blancos = new System.Collections.Generic.List<Vector2>();
+                if (zapMolestar && victima != null && victima.active)
+                {
+                    blancos.Add(victima.Center);
+                    blancos.Add(victima.Center + new Vector2(-9f, 4f));
+                    blancos.Add(victima.Center + new Vector2(10f, -6f));
+                }
+                else
+                {
+                    for (int c = 0; c < e.Conejos.Length && blancos.Count < 3; c++)
+                    {
+                        if (!e.Conejos[c].Vivo || !ConejoGolpeado(e, c, e.PlagaRondas)) continue;
+                        blancos.Add(PosicionDibujadaConejo(e.Conejos[c], 11f));
+                    }
+                }
+                if (blancos.Count == 0) return;
+
+                // EL ARCO MINI por hermano→blanco (uno cada uno: tres ojos,
+                // tres rayos — la firma del escuadrón en miniatura)
+                float tiempo = Main.GlobalTimeWrappedHourly;
+                int flick = StormLib.FlickTick(tiempo, 17f);
+                for (int i = 0; i < 3 && i < blancos.Count; i++)
+                {
+                    int seed = p.whoAmI * 31 + i * 97 +
+                        (zapPlaga ? e.PlagaRonda * 13 : e.Embestida);
+                    bool lit = StormLib.IsLit(seed, flick, 0.70f);
+                    float alpha = lit ? 0.95f : 0.18f;
+                    // la intensidad respira con la ventana (nace, pega, se apaga)
+                    float ventana = zapMolestar
+                        ? 1f - MathF.Abs(e.Embestida - EMBESTIDA_CONTACTO) / 12f
+                        : (e.PlagaRonda - (PLAGA_RONDA - 15)) / 15f;
+                    if (ventana <= 0f) continue;
+
+                    StormLib.PerlinBolt(Main.spriteBatch,
+                        ojos[i] - Main.screenPosition,
+                        blancos[i] - Main.screenPosition,
+                        seed, flick, 2.4f, RayitoHalo, RayitoCore,
+                        alpha * ventana, 0.16f);
+                }
             }
             catch { }
         }
@@ -1203,6 +1270,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 + e.TotalGolpes * 941L + e.Viajes * 131L) & 0x7FFFFFFFL));
 
             Player dueño = Main.player[p.owner];
+            // v6.51.12 — EL RELOJ LARGO VUELVE A CERO (el coro acaba de
+            // sonar: las próximas 2 h de juego son de silencio — la cita
+            // se apunta EN EL PORTADOR: es SU sesión la que cuenta).
+            try
+            {
+                var spCoro = dueño != null && dueño.active
+                    ? dueño.GetModPlayer<Players.ShardPlayer>() : null;
+                if (spCoro != null) spCoro.TicksSinCoro = 0;
+            }
+            catch { }
             for (int c = 0; c < 5; c++)
                 NacerConejoEnElBorde(e, dueño.Center);
 

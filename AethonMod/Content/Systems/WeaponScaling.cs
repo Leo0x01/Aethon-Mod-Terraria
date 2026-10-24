@@ -161,16 +161,48 @@ namespace AethonMod.Content.Systems
         /// ojo nace SOLO del grimorio — su base, su nivel, su despertar
         /// y lo devorado (los banquetes de la .128-.129)… y el NIVEL 50
         /// DEL DESPERTAR lo multiplica (la letra: «mejora TODO el ataque
-        /// de los minions y sus proyectiles»).</summary>
+        /// de los minions y sus proyectiles»).
+        /// v6.51.12 — LA PARIDAD DE LA LETRA NUEVA («el daño de
+        /// invocacion es muy inferior al daño magico, parece que los
+        /// calculos no se aplican igual, el calculo para el daño de
+        /// invocacion debe ser el mismo que se usa para el daño magico
+        /// […] y para que todos los stats del grimorio tambien sumen al
+        /// daño de invocacion»): el cálculo es AHORA EL MISMO del clic
+        /// izquierdo — el NIVEL escala con MagicDamageMult (+2,2 %/nivel
+        /// — antes +1 %: LA BRECHA), LA REFORJA VIVA aporta SU columna
+        /// de daño (Ignorante −10 % … Mítico +15 % … Supremo +25 %) y EL
+        /// FESTÍN DEL PORTADOR suma (vestido por la presencia del libro,
+        /// FactorDelLibro). Lo que queda EXCLUSIVO de cada clase vive en
+        /// el pipeline de vanilla (GetTotalDamage: el accesorio que dice
+        /// «daño mágico» SOLO al mágico; el genérico y el de invocación
+        /// — a los ojos, MinionOriginalDamageGlobal).</summary>
         public static int DanoOjosDelEterno(int danoBase, int nivel, Player p)
         {
-            float d = danoBase * (1f + SummonDamagePerLevel * System.Math.Max(0, nivel));
+            // 1) EL NIVEL — EL MISMO del mágico (la brecha moría aquí:
+            //    +1 %/nivel contra +2,2 %/nivel del clic izquierdo).
+            float d = danoBase * MagicDamageMult(System.Math.Max(0, nivel));
+
+            // 2) EL DESPERTAR (+1 % por nivel — como el mágico).
             int despertar = Content.Systems.DespertarGrimorio.NivelDe(p);
             d *= 1f + Content.Systems.DespertarGrimorio.BonusDano(despertar);
+
+            // 3) LO DEVORADO (el festín de armas — como el mágico).
             d *= 1f + Players.ShardPlayer.BonusDanoDevorado(p);
             d *= 1f + Players.ShardPlayer.BonusDanoArmasDevoradas(p);
+
+            // 4) v6.51.12 — LA REFORJA VIVA (la columna DAÑO del peldaño
+            //    — el mismo multiplicador del clic izquierdo).
+            d *= 1f + Content.Weapons.GrimoireEternal.PeldanoDe(nivel).Dano;
+
+            // 5) v6.51.12 — EL FESTÍN DEL PORTADOR (las esencias que ÉL
+            //    comió — vestidas por la presencia del libro: 100 % en
+            //    la mano · 25 % en la bolsa · 0 guardado).
+            d *= 1f + Players.ShardPlayer.BonusDanoEsencias(p) *
+                Content.Globals.AlmaEternoGlobalItem.FactorDelLibro(p);
+
+            // 6) EL NIVEL 50 DEL DESPERTAR: TODO el ataque de los ojos.
             if (despertar >= Content.Systems.DespertarGrimorio.NivelMax)
-                d *= 1.25f;   // el nivel 50: TODO el ataque de los ojos
+                d *= 1.25f;
             return System.Math.Max(1, (int)d);
         }
 

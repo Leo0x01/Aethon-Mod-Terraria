@@ -365,7 +365,17 @@ namespace AethonMod.Content.Weapons
             Item.shootSpeed = 12f;
             Item.mana = 0;                 // la regla de la casa — el hambre ES el coste
             Item.noMelee = true;
-            Item.reuseDelay = 7;           // v6.51.11: LA CORREA FINAL del tope (7 ticks — igual que MinTicksUso: NADA dispara doble)
+            // v6.51.12 — LA CORREA DE reuseDelay MURIÓ (el fix del
+            // hotbar): vanilla CONVIERTE el reuseDelay en una SEGUNDA
+            // animación (ApplyReuseDelay: itemAnimation = itemTime =
+            // reuseDelay — verificado al IL de Player.cs)… y
+            // ItemSlot.LeftClick REBOTA todo click mientras
+            // itemAnimation != 0: cada disparo del Eterno dejaba la
+            // barra de acceso rápido MEDIA MUERTA el doble de tiempo (y
+            // con autoReuse, SIEMPRE). EL TOPE SIGUE INQUEBRANTABLE sin
+            // la correa: FactorVelocidadTotal cuantiza a ticks ENTEROS
+            // con tope duro MinTicksUso = 7 — NADA dispara doble (la
+            // matemática de la .51.11, intacta y suficiente).
         }
 
         public override void AddRecipes()
@@ -528,7 +538,9 @@ namespace AethonMod.Content.Weapons
         //  suprema — TODOS JUNTOS se quedan en el tope). El useTime y
         //  la useAnimation comparten EL MISMO factor (la regla
         //  anti-doble-Shoot de la v5.26): la animación NUNCA queda por
-        //  debajo del disparo, y el reuseDelay de 7 es la correa final.
+        //  debajo del disparo. v6.51.12 — sin la correa del reuseDelay
+        //  (murió con el fix del hotbar — ver SetDefaults): la
+        //  cuantización entera + el tope duro SON el muro.
         // ================================================================
 
         /// <summary>EL TOPE DURO en ticks: el uso del Eterno JAMÁS baja
@@ -987,11 +999,19 @@ namespace AethonMod.Content.Weapons
 
             // === EL DAÑO DE INVOCACIÓN — pegado al daño mágico del juego
             //     (la línea vanilla "Damage" ya dice «XX daño mágico»).
-            //     En la COMPLETA no: allí va por la sección DAÑO ===
+            //     En la COMPLETA no: allí va por la sección DAÑO.
+            //     v6.51.12 — EL NÚMERO DE VERDAD (la letra: «el cálculo
+            //     para el daño de invocación debe ser el mismo que se
+            //     usa para el daño mágico»): DanoOjosDelEterno AHORA es
+            //     la MISMA fórmula del clic izquierdo (nivel +2,2 %,
+            //     reforja, festín con presencia) — el tooltip cuenta lo
+            //     mismo que pegará el ojo al nacer (el equipo de
+            //     invocación del portador se suma vivo en el pipeline
+            //     de vanilla, como al mágico el suyo). ===
             if (!completa)
             {
-                int summonDmg = (int)(Item.damage *
-                    (1f + sl.Level * WeaponScaling.SummonDamagePerLevel));
+                int summonDmg = WeaponScaling.DanoOjosDelEterno(
+                    Item.damage, sl.Level, Main.LocalPlayer);
                 int ancla = -1;
                 for (int i = 0; i < tooltips.Count; i++)
                 {

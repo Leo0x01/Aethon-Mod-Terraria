@@ -386,24 +386,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         private void CheckMinionBuff(Player owner)
         {
+            // v6.51.12 — LA CURA DE LA DESINVOCACIÓN SILENCIOSA: JAMÁS
+            // muere por falta de buff (la barra llena de vanilla
+            // reemplazaba el icono y el escuadrón moría «de pronto» —
+            // EscuadronUtil.Sostener re-ancla SIN expulsar a nadie). La
+            // única despedida: el CLIC DERECHO del icono (NebulaJellyfishBuff.
+            // RightClick → EscuadronUtil.Despedir).
             int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.NebulaJellyfishBuff>();
-            bool hasBuff = false;
-            for (int i = 0; i < Player.MaxBuffs; i++)
-            {
-                if (owner.buffType[i] == buffType && owner.buffTime[i] > 0)
-                {
-                    hasBuff = true;
-                    break;
-                }
-            }
-            if (!hasBuff) Projectile.Kill();
-            else
-            {
-                owner.AddBuff(buffType, 18000);
-                // Inmortal mientras el buff viva (semántica vanilla de minion:
-                // el timeLeft nunca expira — solo muere si el buff se va).
-                Projectile.timeLeft = 2;
-            }
+            global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, owner, buffType);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)

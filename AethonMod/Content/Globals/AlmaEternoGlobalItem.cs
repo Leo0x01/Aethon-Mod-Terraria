@@ -1,7 +1,11 @@
 using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Globals
 {
@@ -170,6 +174,230 @@ namespace AethonMod.Content.Globals
             }
             catch { }
             return false;
+        }
+
+        // ================================================================
+        //  v6.51.12 — LA PRESENCIA DEL LIBRO (la letra del usuario: «el
+        //  daño aumentando por el festin… debe de tambien estar ligado
+        //  al grimorio del eterno, aunque sea el jugador quien se coma
+        //  1000 esencias corruptas solo con el grimorio se activa ese
+        //  poder y es lo mismo con todas las stats que da el grimorio,
+        //  solo mientras se use el grimorio o este en el inventario se
+        //  activan para el jugador, si esta seleccionado el jugador
+        //  tiene todo el poder del grimorio, si no esta seleccionado o
+        //  esta guardado en el inventario el jugador solo obtiene 25%
+        //  del poder del grimorio, si el grimorio esta guardado en
+        //  cualquier tipo de cofre o este fue botado a la basura
+        //  entonces el jugador no obtiene nada del poder del grimorio»).
+        //  LA ÚNICA VERDAD de la presencia: EN LA MANO = 1,0 · EN EL
+        //  INVENTARIO (cualquier slot, o al cursor) = 0,25 · NADA
+        //  (cofre, hucha, vaulta, basura, suelo) = 0. TODAS las stats
+        //  que el libro da al portador multiplican por aquí.
+        // ================================================================
+
+        /// <summary>EL FACTOR DE PRESENCIA del libro: 1,0 seleccionado ·
+        /// 0,25 en el inventario · 0,0 en ningún sitio que cuente.</summary>
+        public static float FactorDelLibro(Player p)
+        {
+            if (p == null || !p.active) return 0f;
+            int eterno = ModContent.ItemType
+                <global::AethonMod.Content.Weapons.GrimoireEternal>();
+
+            // 1) EN LA MANO (seleccionado): TODO el poder.
+            Item mano = p.HeldItem;
+            if (mano != null && !mano.IsAir && mano.type == eterno) return 1f;
+
+            // 2) AL CURSOR (moverlo entre slots también es "tenerlo"):
+            //    solo el libro del jugador LOCAL viaja por SU cursor.
+            if (p == Main.LocalPlayer && Main.mouseItem != null &&
+                !Main.mouseItem.IsAir && Main.mouseItem.type == eterno)
+                return 0.25f;
+
+            // 3) EN EL INVENTARIO (hotbar o bolsa profunda): 25 %.
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it != null && !it.IsAir && it.type == eterno) return 0.25f;
+            }
+
+            // 4) COFRE · HUCHA · VAULTA · BASURA · SUELO: NADA.
+            return 0f;
+        }
+
+        // ================================================================
+        //  v6.51.12 — EL LAZO DE LA SOMBRA DE LA PÁGINA (la letra: «algo
+        //  importante, el grimorio no se puede dejar caer tan facilmente,
+        //  si el jugador deja caer el grimorio y se aleja a mas de 20px
+        //  el grimorio usa la sombra de la pagina para pegarse al
+        //  jugador y volver a entrar a su inventario, si el inventario
+        //  esta lleno el grimorio deja caer un item aleatorio y entra
+        //  el grimorio»). El Eterno caído al suelo JAMÁS se queda: al
+        //  20 px de su portador la SOMBRA SE ESTIRA y lo ARRASTRA de
+        //  vuelta — y si la bolsa está llena, expulsa un item al azar
+        //  y entra él. (En el cofre y en la basura sí se queda: ahí el
+        //  poder apaga — la letra lo permite a propósito.)
+        // ================================================================
+
+        /// <summary>El umbral de la letra: a 20 px la sombra ya agarra.</summary>
+        private const float LazoUmbral = 20f;
+
+        /// <summary>La velocidad del arrastre (px/t del vuelo de vuelta).</summary>
+        private const float LazoVelocidad = 15f;
+
+        public override void PostUpdate(Item item)
+        {
+            try
+            {
+                if (item == null || item.IsAir || Main.gameMenu) return;
+
+                // EL PORTADOR MÁS CERCANO (el que lo soltó, en la
+                // práctica): el libro se pega a QUIEN lo tenga encima.
+                Player cercano = null;
+                float mejor = float.MaxValue;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player pl = Main.player[i];
+                    if (pl == null || !pl.active || pl.dead) continue;
+                    float d = Vector2.DistanceSquared(pl.Center, item.Center);
+                    if (d < mejor) { mejor = d; cercano = pl; }
+                }
+                if (cercano == null) return;
+
+                float dist = System.MathF.Sqrt(mejor);
+
+                // (NI EL SHIMMER LO SUELTA: la sombra lo pesca hasta de
+                // la piscina — el libro no sabe nadar, sabe volver.)
+                if (dist <= LazoUmbral)
+                {
+                    // AÚN A LOS PIES (≤20 px): espera quieta — la sombra
+                    // ya la sostiene (frena el rebote del drop).
+                    item.velocity *= 0.90f;
+                    return;
+                }
+
+                // > 20 PX: LA SOMBRA SE ESTIRA Y LO ARRASTRA (la velocidad
+                // se REESCRIBE cada tick: la gravedad no opina).
+                Vector2 hacia = cercano.Center - item.Center;
+                if (hacia.LengthSquared() > 0.01f)
+                {
+                    hacia.Normalize();
+                    item.velocity = Vector2.Lerp(item.velocity, hacia * LazoVelocidad, 0.28f);
+                }
+
+                // LA LLEGADA: entra al inventario (con expulsion si está lleno).
+                if (dist < 36f || item.Hitbox.Intersects(cercano.Hitbox))
+                    DevolverAlInventario(cercano, item);
+            }
+            catch { }
+        }
+
+        /// <summary>LA VUELTA A CASA: el libro ENTRA al inventario del
+        /// portador — y si la bolsa está LLENA, deja caer un item
+        /// aleatorio de la bolsa profunda y toma su sitio (la letra).</summary>
+        private static void DevolverAlInventario(Player p, Item item)
+        {
+            // 1) Un slot libre (primero el hotbar — que esté a mano).
+            int libre = -1;
+            for (int k = 0; k < 50; k++)
+            {
+                if (p.inventory[k] == null || p.inventory[k].IsAir) { libre = k; break; }
+            }
+
+            // 2) ¿BOLSA LLENA? EL LIBRO EXPULSA UN ITEM AL AZAR (de la
+            //    bolsa profunda 10..49 — jamás del hotbar ni de las
+            //    monedas) y toma su lugar (la letra: «deja caer un item
+            //    aleatorio y entra el grimorio»).
+            if (libre < 0)
+            {
+                libre = 10 + Main.rand.Next(40);
+                Item sacado = p.inventory[libre].Clone();
+                // el expulsado cae al mundo a los pies del portador
+                int caido = Item.NewItem(p.GetSource_Misc("LazoDelEterno"),
+                    p.Center, sacado, noBroadcast: false);
+                if (Main.netMode == NetmodeID.Server && caido >= 0)
+                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, caido);
+            }
+
+            // 3) EL LIBRO ENTRA (con SU alma — el clon lleva los globals).
+            p.inventory[libre] = item.Clone();
+
+            // 4) El item del mundo MUERE (en todas las pantallas).
+            int idx = System.Array.IndexOf(Main.item, item);
+            item.TurnToAir();
+            if (idx >= 0 && Main.netMode == NetmodeID.Server)
+                NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+
+            // 5) EL TEATRO DE LA VUELTA: chispas de sombra + el trago.
+            if (!Main.dedServ)
+            {
+                for (int k = 0; k < 16; k++)
+                {
+                    Dust d = Dust.NewDustPerfect(p.Center, DustID.Shadowflame,
+                        new Vector2(Main.rand.NextFloat(-2.4f, 2.4f),
+                            Main.rand.NextFloat(-3.4f, 0.4f)), 150,
+                        new Color(140, 60, 210), 1f);
+                    d.noGravity = true;
+                }
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item113.WithPitchOffset(-0.35f), p.Center);
+            }
+
+            // 6) EL AVISO (el libro nunca se despide en silencio).
+            if (p.whoAmI == Main.myPlayer && !Main.dedServ)
+            {
+                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                    "Mods.AethonMod.Despertar.LazoDevuelto"),
+                    new Color(196, 138, 255));
+            }
+        }
+
+        // ================================================================
+        //  v6.51.12 — EL DIBUJO DEL LAZO: mientras el libro caído vuelve
+        //  (o espera a los pies), LA SOMBRA DE LA PÁGINA lo tiene
+        //  agarrado — un tentáculo fino de tinta viva desde el portador
+        //  hasta la tapa, con su bruma y sus ojos entornados.
+        // ================================================================
+        public override bool PreDrawInWorld(Item item, SpriteBatch spriteBatch,
+            Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
+        {
+            try
+            {
+                if (Main.gameMenu) return true;
+                // ¿Hay portador a la vista con el lazo activo (>0 px)?
+                Player cercano = null;
+                float mejor = float.MaxValue;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player pl = Main.player[i];
+                    if (pl == null || !pl.active || pl.dead) continue;
+                    float d = Vector2.DistanceSquared(pl.Center, item.Center);
+                    if (d < mejor) { mejor = d; cercano = pl; }
+                }
+                if (cercano == null) return true;
+                float dist = System.MathF.Sqrt(mejor);
+                if (dist <= 0.5f || dist > 1200f) return true;  // muy lejos: el lazo no llega (y no se ve)
+
+                VFXCore.CerrarLoteSiAbierto();
+                try
+                {
+                    float tiempo = Main.GlobalTimeWrappedHourly;
+                    int semilla = 9001 + (int)(dist * 0.5f);
+                    Vector2 raiz = cercano.MountedCenter;
+
+                    // LA SOMBRA FINA: columna viva del portador al libro
+                    Vector2[] col = SombrasLib.ColumnaViva(raiz, item.Center,
+                        tiempo, semilla, 10, 0.22f, gancho: 0.4f);
+                    SombrasLib.Masa(col, 3f, 6f, 0.55f, semilla, tiempo, grosorCentro: 12f);
+                    SombrasLib.BrumaColumna(col, 18f, 0.30f, tiempo, semilla, 7);
+
+                    // LOS OJOS ENTORNADOS a lo largo del lazo (me vigilan volver)
+                    SombrasLib.OjosDeMasa(col, item.Center, 0.5f, semilla, tiempo, 4);
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
+            }
+            catch { }
+            return true;   // el sprite del libro lo dibuja vanilla
         }
 
         // ================================================================

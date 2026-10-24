@@ -34,5 +34,24 @@ namespace AethonMod.Content.Buffs
                 player.buffTime[buffIndex] = 18000;
             }
         }
+
+        // ================================================================
+        //  v6.51.12 — LA DESPEDIDA LEGÍTIMA (la letra del usuario: «solo
+        //  se deben desactivar si el jugador los quita usando su buff de
+        //  minion»): el CLIC DERECHO en ESTE icono despide al escuadrón
+        //  entero (se disuelven en tinta). Es la ÚNICA despedida que
+        //  queda — la barra de buffs llena ya NO los mata (ver
+        //  EscuadronUtil: la cura de la desinvocación silenciosa).
+        // ================================================================
+        public override bool RightClick(int buffIndex)
+        {
+            try
+            {
+                global::AethonMod.Content.Systems.EscuadronUtil.Despedir(
+                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.FragmentoSupernovaMinion>());
+            }
+            catch { }
+            return true;   // y el buff se cancela (vanilla lo retira)
+        }
     }
 }

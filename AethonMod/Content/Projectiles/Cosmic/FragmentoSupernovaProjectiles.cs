@@ -229,25 +229,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, Color.Orange.ToVector3() * 1.25f);
         }
 
-        /// <summary>El patrón de la casa (la cría estelar): el minion sostiene su propio buff.</summary>
+        /// <summary>El patrón de la casa (la cría estelar). v6.51.12 —
+        /// LA CURA DE LA DESINVOCACIÓN SILENCIOSA: JAMÁS muere por falta
+        /// de buff (la barra llena de vanilla reemplazaba el icono y el
+        /// escuadrón moría «de pronto» — EscuadronUtil.Sostener
+        /// re-ancla SIN expulsar a nadie). La única despedida: el CLIC
+        /// DERECHO del icono (FragmentoSupernovaBuff.RightClick →
+        /// EscuadronUtil.Despedir).</summary>
         private void CheckMinionBuff(Player duenio)
         {
             int tipoBuff = ModContent.BuffType<FragmentoSupernovaBuff>();
-            bool tieneBuff = false;
-            for (int i = 0; i < Player.MaxBuffs; i++)
-            {
-                if (duenio.buffType[i] == tipoBuff && duenio.buffTime[i] > 0)
-                {
-                    tieneBuff = true;
-                    break;
-                }
-            }
-            if (!tieneBuff) Projectile.Kill();
-            else
-            {
-                duenio.AddBuff(tipoBuff, 18000);
-                Projectile.timeLeft = 2;
-            }
+            global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, duenio, tipoBuff);
         }
 
         // ==================================================================

@@ -2659,22 +2659,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// </summary>
         private void CheckMinionBuff(Player duenio)
         {
+            // v6.51.12 — LA CURA DE LA DESINVOCACIÓN SILENCIOSA: JAMÁS
+            // muere por falta de buff (la barra llena de vanilla
+            // reemplazaba el icono y la camada moría «de pronto» —
+            // EscuadronUtil.Sostener re-ancla SIN expulsar a nadie). La
+            // única despedida: el CLIC DERECHO del icono
+            // (CriaEstelarBuff.RightClick → EscuadronUtil.Despedir).
             int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.CriaEstelarBuff>();
-            bool tieneBuff = false;
-            for (int i = 0; i < Player.MaxBuffs; i++)
-            {
-                if (duenio.buffType[i] == buffType && duenio.buffTime[i] > 0)
-                {
-                    tieneBuff = true;
-                    break;
-                }
-            }
-            if (!tieneBuff) Projectile.Kill();
-            else
-            {
-                duenio.AddBuff(buffType, 18000);
-                Projectile.timeLeft = 2;
-            }
+            global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, duenio, buffType);
         }
 
         /// <summary>El índice de esta cría dentro de la camada (por whoAmI).</summary>
