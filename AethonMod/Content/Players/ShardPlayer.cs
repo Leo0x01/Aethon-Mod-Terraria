@@ -1288,6 +1288,16 @@ namespace AethonMod.Content.Players
                 // de 4 puntas de los soles de 3 anillos+, hechos adorno).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.BrilloSolarItem>());
+                // v6.51.13 — LA SOMBRA DE LA PÁGINA II DESDE EL INICIO
+                // (la letra: «asegurate de que La Sombra de la Página II
+                // se le de al jugador desde el inicio y que no consuma
+                // mana ya que es de prueba»): el SEGUNDO TOMO entra con
+                // el regalo de pruebas — SIN MANÁ (SetDefaults:
+                // Item.mana = 0, y la línea del tooltip lo declara) y
+                // su VÍA DE SIEMPRE (la receta tomo 1 + 10 madera)
+                // queda para quien la pierda.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina2>());
 
                 if (entregados > 0)
                 {

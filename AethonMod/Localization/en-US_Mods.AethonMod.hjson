@@ -14,8 +14,8 @@ Items: {
 		DisplayName: Grimoire of the Eternal
 		Tooltip:
 			'''
-				An old book that devours whatever its bearer kills.
-				Keep its pages full... or your soul will be the one to fill the next.
+			        An old book that devours whatever its bearer kills.
+			        Keep its pages full... or your soul will be the one to fill the next.
 			'''
 	}
 
@@ -179,6 +179,7 @@ Items: {
 			across both strands, PERLIN ARCS crackling between them, and
 			the CLAW MAW that opens and SNAPS SHUT. On the bite: THE
 			DEVOURER with its NINE-CLAW CROWN chewing the whole plane.
+			NO MANA COST — a test weapon: swing away without fear.
 			(Maw test weapon — volume 2.)
 			'''
 	}

@@ -14,8 +14,8 @@ Items: {
 		DisplayName: Grimorio del Eterno
 		Tooltip:
 			'''
-				Un libro viejo que devora lo que su portador mata.
-				Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
+			        Un libro viejo que devora lo que su portador mata.
+			        Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
 			'''
 	}
 
@@ -180,6 +180,7 @@ Items: {
 			entre ellas y la BOCA DE GARRAS que se abre y CIERRA DE
 			GOLPE. Al morder: EL DEVORADOR con la CORONA DE 9 GARRAS
 			mordiendo el plano entero.
+			SIN COSTE DE MANÁ — arma de prueba: úsala sin miedo.
 			(Arma de prueba de las fauces — tomo 2.)
 			'''
 	}
