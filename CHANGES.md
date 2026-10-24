@@ -1,4 +1,4 @@
-# v6.51.14 — LA CURA DEL CRASH DE LA SOMBRA II — ⏳ PUBLICACIÓN PENDIENTE
+# v6.51.14 — LA CURA DEL CRASH DE LA SOMBRA II — PUBLICADA
 
 **La letra del usuario**: «intente revisar la sombra de la pagina 2 y el juego se cerro, no pude comprobar los otros puntos // no puede comprobar los otros cambios ya que desde la sombra 2 todo se cerro» — con el client.log de verdad adjunto.
 
@@ -12,7 +12,7 @@
 
 · **Verificación**: oráculo 0/0 (rebuild completo) · build REAL ×2 0/0 (BUILD DOBLE de la casa) → .tmod 2.855.235 B, md5 b4f97de7ce768ec7a9c67684f015a9f0 · tools/audit_v65114_tmod.py TODO LIMPIO (401 entradas — las mismas de la .51.13: cirugía de UN solo archivo + build.txt; EOF exacto, 401/401 inflan, hjson ×3 paquete==fuente BYTE A BYTE con la LÍNEA SIN MANÁ dentro de los TRES idiomas, los 40 VIVOS de la .51.13 presentes — TODA la cadena de la Task 81 intacta: Festín chico, Escuadrón, Paridad, Presencia, Lazo, Concierto, Rayitos, Sombra II, Regalo de pruebas — y los 7 muertos ausentes) · headless ×3 (Sandboxing→Finalizing→Recipes→Choose World, 0 EXCEPCIONES).
 
-**PUBLICADA**: ⏳ (esta línea se completa con los IDs REALES tras crear el release — la lección de Task 67).
+**PUBLICADA**: release 422974533 + asset AethonMod.tmod 673276658 2.855.235 B (md5 b4f97de7ce768ec7a9c67684f015a9f0), CDN verificado byte a byte + `/releases/latest` = v6.51.14 · respaldo /home/sync/AethonMod-v6.51.14.tmod + .tmod en la carpeta del juego.
 
 # v6.51.13 — LA SOMBRA II DESDE EL INICIO · SIN MANÁ — PUBLICADA
 

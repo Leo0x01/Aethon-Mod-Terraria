@@ -1913,7 +1913,9 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.14 PUBLICADA (LA CURA DEL CRASH DE LA SOMBRA II) — EN
+1. **⏳ v6.51.14 PUBLICADA (release 422974533 + asset 673276658 · CDN
+   verificado byte a byte · `/releases/latest` = v6.51.14) — LA CURA
+   DEL CRASH DE LA SOMBRA II — EN
    JUEGO: PRIMERO LA SOMBRA II (que ya no crashea) Y LUEGO EL CHECKLIST
    COMPLETO DE LA .51.13 QUE EL CRASH SE LLEVÓ.**
    Checklist: (0) LA SOMBRA II SIN CRASH — disparar La Sombra de la
