@@ -1,29 +1,28 @@
-# AethonMod — ESTADO ACTUAL (v6.51.13)
+# AethonMod — ESTADO ACTUAL (v6.51.14)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.51.13 (LA SOMBRA II DESDE EL INICIO · SIN
-> MANÁ. La letra: «verifica que esto esta aplicado y el codigo esta
-> bien, tambien asegurate de que La Sombra de la Página II se le de al
-> jugador desde el inicio y que no consuma mana ya que es de prueba»).
-> Dos entregas: (A) LA VERIFICACIÓN — los 9 puntos de la .51.12
-> auditados uno a uno en el árbol, todos presentes y sanos: el FESTÍN
-> CHICO (AnimarElBocado ANTES del trago en los 5 bocados), el ESCUADRÓN
-> (Sostener/Despedir + RightClick ×6), la PARIDAD (la MISMA cadena del
-> mágico), el HOTBAR (la correa muerta), la PRESENCIA (100/25/0 en
-> TODAS las stats), el LAZO (arrastre >20 px + expulsión), el
-> CONCIERTO (432.000 ticks + 1.800 de quietud) y los RAYITOS (ojos
-> clavados, mini arcos Perlin). (B) LA ENTREGA — la Sombra de la
-> Página II ENTRA CON EL REGALO DE PRUEBAS (EntregarRegaloDePruebas en
-> OnEnterWorld: una copia por jugador; la receta tomo 1 + 10 madera
-> vive para quien la pierda) y su maná YA ERA 0 (Item.mana = 0,
-> verificada toda la cadena); su tooltip estrena «SIN COSTE DE MANÁ —
-> arma de prueba: úsala sin miedo.» ×3 idiomas. .tmod 2.860.296 B md5
-> b3cab5c61770ab421b8219d9667f8e05, 401 entradas, oráculo 0/0, build
-> real ×2 0/0, headless ×3 0 excepciones, audit_v65113 TODO LIMPIO,
-> paridad de claves heredada de la .51.12 (sets y orden idénticos
-> contra git show). PENDIENTE EN JUEGO: el checklist de la .51.13
-> abajo (los 9 puntos de la .51.12 + la entrega y el maná de la
-> Sombra II).
+> Última actualización: v6.51.14 (LA CURA DEL CRASH DE LA SOMBRA II.
+> La letra: «intente revisar la sombra de la pagina 2 y el juego se
+> cerro, no pude comprobar los otros puntos // no puede comprobar los
+> otros cambios ya que desde la sombra 2 todo se cerro» — con el
+> client.log adjunto). LA AUTOPSIA: disparar la Sombra II mataba el
+> motor EN EL PRIMER FRAME — cada ojo de las hélices hacía su
+> FlushAdditive EN MEDIO del lote vanilla (lo CERRABA), el SEGUNDO
+> ojo lanzaba «Draw was called, but Begin has not yet been called»
+> (DibujarOjoReal:525 ← DibujarLosIrisReales:485) y el End de
+> Main.DrawProjectiles sobre el lote muerto era el «Main engine
+> crash». LA CURA (3 piezas): el ojo SOLO ENCOLA su halo (VFXCore.Quad,
+> cero manipulación del lote) · EL VOLCADO ÚNICO al final de los 4
+> ojos (un FlushAdditive + try/finally ReabrirLoteVanilla) · EL CATCH
+> BLINDADO del PreDraw (jamás salir con el lote cerrado). AUDITORÍA
+> DEL PATRÓN en TODOS los dibujados mixtos (Bocado, Caida, Grieta,
+> PrimeraCena, MenorPet, Rayitos, Fauce, Sombra 1, Emperatriz): SOLO
+> la Sombra II tenía el patrón letal. .tmod 2.855.235 B md5
+> b4f97de7ce768ec7a9c67684f015a9f0, 401 entradas, oráculo 0/0, build
+> real ×2 0/0, headless ×3 0 excepciones, audit_v65114 TODO LIMPIO
+> (los 40 VIVOS de la Task 81 intactos). PENDIENTE EN JUEGO: el
+> checklist de la .51.14 abajo — ahora SÍ se puede probar TODO (el
+> crash se llevaba la sesión entera).
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1914,32 +1913,46 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.13 PUBLICADA (release 422953749 + asset 673185667 · CDN verificado byte a byte · `/releases/latest` = v6.51.13) — EN JUEGO: LA VERIFICACIÓN DE LOS 9 PUNTOS + LA SOMBRA II DESDE EL INICIO · SIN MANÁ.**
-   Checklist: (a) EL FESTÍN CHICO — soltar esencias/monedas/lingotes
-   delante del Eterno EN LA MANO: cada bocado dispara el tentáculo
-   chico que ENVUELVE el plato y SE LO LLEVA por dentro hacia el
-   jugador (la misma animación de los jefes en miniatura), (b) EL
-   ESCUADRÓN — invocar los ojos y LLENAR la barra de buffs (22+):
-   JAMÁS se desinvocan solos; el clic derecho en el icono del buff
-   los despide (la única despedida), (c) LA PARIDAD — el daño de
-   invocación del tooltip básico escala como el mágico (+2,2 %/nivel,
-   la reforja y el festín adentro), (d) EL HOTBAR — los clicks en la
-   barra de acceso rápido con el inventario abierto responden, (e) LA
-   PRESENCIA — comer esencias: con el libro EN LA MANO el festín
-   entero · GUARDADO en la bolsa 25 % · en un COFRE nada (la ventana
-   de la esencia lo cuenta VIVO), (f) EL LAZO — soltar el grimorio y
-   alejarse: la sombra de la página se estira y lo DEVUELVE; con la
-   bolsa llena expulsa un item al azar y entra él, (g) EL CONCIERTO —
-   quieto 30 s tras 2 h de juego: el coro de hadas garantizado, (h)
-   LOS RAYITOS — la mascota molesta NPCs/golpea hadas con MINI ARCOS
-   PERLIN (los ojos ya NO salen volando), (i) LA SOMBRA II — La
-   Sombra de la Página II aparece EN EL INVENTARIO al entrar al mundo
-   (el regalo de pruebas — una copia; si ya la tienes, no se repite),
-   (j) SIN MANÁ — disparar la Sombra II TODO lo que quieras: el maná
-   JAMÁS baja (coste 0 + la línea «SIN COSTE DE MANÁ» visible en su
-   ventana de información), (k) LA RECETA — tomo 1 + 10 madera sigue
-   crafteando la Sombra II (la vía de repuesto para quien la pierda).
-2. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
+1. **⏳ v6.51.14 PUBLICADA (LA CURA DEL CRASH DE LA SOMBRA II) — EN
+   JUEGO: PRIMERO LA SOMBRA II (que ya no crashea) Y LUEGO EL CHECKLIST
+   COMPLETO DE LA .51.13 QUE EL CRASH SE LLEVÓ.**
+   Checklist: (0) LA SOMBRA II SIN CRASH — disparar La Sombra de la
+   Página II contra cualquier enemigo/jefe: la doble hélice con SUS
+   CUATRO OJOS REALES (sprites con iris que mira y párpados que
+   parpadean) muerde y drena 3 %/6 t SIN cerrar el juego — el crash
+   estaba en el segundo ojo (lote cerrado a mitad de dibujado) y murió
+   (halos en un solo volcado + lote SIEMPRE vivo). Luego EL CHECKLIST
+   DE LA .51.13 que quedó atrapado: (a) EL FESTÍN CHICO — soltar
+   esencias/monedas/lingotes delante del Eterno EN LA MANO: cada
+   bocado dispara el tentáculo chico que ENVUELVE el plato y SE LO
+   LLEVA por dentro hacia el jugador (la misma animación de los jefes
+   en miniatura), (b) EL ESCUADRÓN — invocar los ojos y LLENAR la
+   barra de buffs (22+): JAMÁS se desinvocan solos; el clic derecho en
+   el icono del buff los despide (la única despedida), (c) LA PARIDAD
+   — el daño de invocación del tooltip básico escala como el mágico
+   (+2,2 %/nivel, la reforja y el festín adentro), (d) EL HOTBAR —
+   los clicks en la barra de acceso rápido con el inventario abierto
+   responden, (e) LA PRESENCIA — comer esencias: con el libro EN LA
+   MANO el festín entero · GUARDADO en la bolsa 25 % · en un COFRE
+   nada (la ventana de la esencia lo cuenta VIVO), (f) EL LAZO —
+   soltar el grimorio y alejarse: la sombra de la página se estira y
+   lo DEVUELVE; con la bolsa llena expulsa un item al azar y entra
+   él, (g) EL CONCIERTO — quieto 30 s tras 2 h de juego: el coro de
+   hadas garantizado, (h) LOS RAYITOS — la mascota molesta
+   NPCs/golpea hadas con MINI ARCOS PERLIN (los ojos ya NO salen
+   volando), (i) LA SOMBRA II ENTREGADA — La Sombra de la Página II
+   aparece EN EL INVENTARIO al entrar al mundo (el regalo de pruebas
+   — una copia; si ya la tienes, no se repite), (j) SIN MANÁ —
+   disparar la Sombra II TODO lo que quieras: el maná JAMÁS baja
+   (coste 0 + la línea «SIN COSTE DE MANÁ» visible en su ventana de
+   información), (k) LA RECETA — tomo 1 + 10 madera sigue crafteando
+   la Sombra II (la vía de repuesto para quien la pierda).
+2. **✅ v6.51.13 PUBLICADA (release 422953749 + asset 673185667 · CDN
+   verificado byte a byte · `/releases/latest` = v6.51.14 AHORA) — LA
+   SOMBRA II DESDE EL INICIO · SIN MANÁ + LA AUDITORÍA DE LOS 9
+   PUNTOS.** *(Su checklist pasó al ítem 1: el crash de la Sombra II
+   impedía probarlo TODO — la .51.14 lo desbloquea.)*
+3. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
    VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10** (la letra:
    «quita los 3 anillos de fotones… yo me refería a los anillos de los
    agujeros rúnicos… más los anillos de los soles que sí están bien,
@@ -1975,7 +1988,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    (ni equipo ni nivel), (e) Página en Blanco borra también el pacto
    del guardián.
 
-3. **✅ v6.50.114 PUBLICADA — EL DAÑO MASIVO TAMBIÉN CENA, LA
+4. **✅ v6.50.114 PUBLICADA — EL DAÑO MASIVO TAMBIÉN CENA, LA
    PELÍCULA DEL LIBRO Y EL TECHO DE LOS OJOS** (la letra: «cuando el
    daño que recibe el jefe es masivo no se aplica eso de que su
    primera muerte sea absorbido por el grimorio» + «anillos iguales a
@@ -2001,7 +2014,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    estela, (e) el rebote de cada disparo, (f) Página en Blanco
    reinicia la cena de un tipo ya devorado.
 
-4. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
+5. **✅ v6.50.113 PUBLICADA — LA SOMBRA COME PLANO, EL MEDIDOR CON
    DECIMALES Y LOS TRES ICONOS DEL USUARIO**
    — la letra: «si el libro se alimenta por si solo, cada muerte que el
    libro haga por si mismo debe reducir 1 de hambre, actualmente solo

@@ -237,8 +237,13 @@ namespace AethonMod.Content.Projectiles.Sombras
             VFXCore.ReabrirLoteVanilla();
 
             // LOS IRIS REALES («nuestros iris») van en el LOTE VANILLA —
-            // el contrato de los sprites de la casa
-            try { DibujarLosIrisReales(); } catch { }
+            // el contrato de los sprites de la casa.
+            // v6.51.14 — Y EL CONTRATO SE BLINDA: el catch ya no traga y
+            // calla — SIEMPRE se sale del PreDraw con el lote vanilla
+            // VIVO (salir con el lote cerrado era el «Main engine crash»
+            // del End de DrawProjectiles — client.log 16:14:01).
+            try { DibujarLosIrisReales(); }
+            catch { VFXCore.ReabrirLoteVanilla(); }
             return false;
         }
 
@@ -488,6 +493,21 @@ namespace AethonMod.Content.Projectiles.Sombras
                 semilla + 23, disipa * 0.95f);
             DibujarOjoReal(hebraB, hebraB.Length - 6, abierto, medio, cerrado, iris, objetivo, tiempo,
                 semilla + 37, disipa);
+
+            // v6.51.14 — EL VOLCADO ÚNICO DE LOS AROS: los cuatro ojos
+            // SOLO ENCOLARON sus halos (el patrón por-ojo de la .51.12
+            // hacía Begin+FlushAdditive EN MEDIO del lote vanilla: el
+            // primer ojo CERRABA el Main.spriteBatch, el segundo lanzaba
+            // «Draw was called, but Begin has not yet been called» y el
+            // End de Main.DrawProjectiles MATABA EL MOTOR). UN solo
+            // FlushAdditive los vuelca TODOS y el finally garantiza el
+            // ReabrirLoteVanilla (el contrato de la casa: un PreDraw
+            // SIEMPRE sale con el lote ABIERTO).
+            if (VFXCore.QuadCount > 0)
+            {
+                try { VFXCore.FlushAdditive(); }
+                finally { VFXCore.ReabrirLoteVanilla(); }
+            }
         }
 
         /// <summary>UN OJO REAL DE LA HEBRA: el sprite del escuadrón con
@@ -530,11 +550,14 @@ namespace AethonMod.Content.Projectiles.Sombras
             {
                 Main.spriteBatch.Draw(iris, pantalla + mirada * esc, null, luz, 0f,
                     iris.Size() * 0.5f, 0.55f * esc, SpriteEffects.None, 0f);
-                // y el HALO aditivo pequeñito (la mirada BRILLA — el rim)
-                VFXCore.Begin();
+                // y el HALO aditivo pequeñito (la mirada BRILLA — el rim).
+                // v6.51.14 — EL OJO SOLO ENCOLA SU ARO: el volcado ÚNICO
+                // lo hace DibujarLosIrisReales al final de los cuatro
+                // ojos (un FlushAdditive AQUÍ, en medio del lote vanilla,
+                // cerraba el Main.spriteBatch y el SIGUIENTE ojo lanzaba
+                // la InvalidOperationException del client.log).
                 VFXCore.Quad(pos, SombrasLib.Alfa(new Color(178, 110, 236),
                     0.20f * alfa), new Vector2(26f, 26f), 0f);
-                VFXCore.FlushAdditive();
             }
         }
 
