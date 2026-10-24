@@ -1942,7 +1942,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.12 PUBLICADA — EN JUEGO: EL FESTÍN CHICO · EL ESCUADRÓN
+1. **⏳ v6.51.12 PUBLICADA (release 422932316 + asset 673091986 · CDN verificado byte a byte · `/releases/latest` = v6.51.12) — EN JUEGO: EL FESTÍN CHICO · EL ESCUADRÓN
    ETERNO · LA PRESENCIA DEL LIBRO · EL LAZO · EL CONCIERTO · LOS
    RAYITOS · LA SOMBRA II.**
    Checklist: (a) EL FESTÍN CHICO — soltar esencias/monedas/lingotes
