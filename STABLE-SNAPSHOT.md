@@ -1,57 +1,29 @@
-# AethonMod — ESTADO ACTUAL (v6.51.12)
+# AethonMod — ESTADO ACTUAL (v6.51.13)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.51.12 (EL FESTÍN CHICO · EL ESCUADRÓN ETERNO
-> · LA PRESENCIA DEL LIBRO · EL LAZO DE LA SOMBRA · EL CONCIERTO DE LAS
-> DOS HORAS · LOS RAYITOS PERLIN · LA SOMBRA DE LA PÁGINA II. La letra:
-> «el grimorio devora los items correctamaente, pero necesita hacer la
-> animacion de devorar, es la misma animacion que usa con los jefes» +
-> «a veces los minions se desinvocan» + «el daño de invocacion es muy
-> inferior al daño magico […] el calculo para el daño de invocacion
-> debe ser el mismo que se usa para el daño magico» + «no puede
-> seleccionar nada con el cursor en la barra de acceso rapido del
-> inventario» + «solo con el grimorio se activa ese poder […] si esta
-> seleccionado el jugador tiene todo el poder, si no esta seleccionado
-> o esta guardado en el inventario el jugador solo obtiene 25%» + «el
-> grimorio no se puede dejar caer tan facilmente […] la sombra de la
-> pagina para pegarse al jugador y volver a entrar a su inventario» +
-> «la pequeña animación de las hadas […] al menos 1 vez cada 2 horas de
-> juego si es que el jugador pasa mas de 30 segundos sin moverse» +
-> «no debe lanzar los ojos, debe usar los rayos perling» + «la
-> informacion que aparece en la esencia corrupta […] cambiala» + «crea
-> la sombra de la pagina 2 […] usa nuestras librerias y nuestros iris,
-> tambien hacerlo lo mas detallado posible»).
-> Diez entregas: (A) EL FESTÍN CHICO — cada bocado de LA MESA DEL SUELO
-> dispara la ANIMACIÓN DE DEVORAR de los jefes en miniatura
-> (BocadoDelSueloProjectile: tentáculo del FauceDevorador a escala de
-> plato + EL PLATO FANTASMA viajando por dentro + SendExtraAI). (B) EL
-> ESCUADRÓN ETERNO — la cura de la desinvocación silenciosa: los
-> minions JAMÁS mueren por falta de buff (la barra llena de vanilla
-> reemplazaba el icono — EscuadronUtil.Sostener re-ancla SIN expulsar;
-> la única despedida: clic derecho en el icono ×6 buffs). (C) LA
-> PARIDAD — DanoOjosDelEterno = LA MISMA fórmula del mágico (nivel
-> +2,2 %, reforja, festín con presencia; lo exclusivo de clase queda
-> en GetTotalDamage). (D) EL FIX DEL HOTBAR — causa raíz al IL: el
-> reuseDelay de la .51.11 era una SEGUNDA animación (ApplyReuseDelay)
-> que mataba los clicks del ItemSlot.LeftClick — LA CORREA MURIÓ (el
-> tope MinTicksUso=7 cuantizado sigue siendo el muro). (E) LA
-> PRESENCIA — FactorDelLibro (1,0 mano · 0,25 inventario · 0,0
-> cofre/basura/suelo) multiplicando TODAS las stats: festín, vida,
-> maná, crítico, penetración, regeneración, reducción y el techo de
-> ojos (los vivos siguen vivos). (F) EL LAZO — el Eterno caído vuelve
-> SOLO: a los 20 px la sombra de la página se estira (tentáculo de
-> tinta dibujado en PreDrawInWorld) y lo arrastra; bolsa llena →
-> expulsa un item al azar y entra él. (G) EL CONCIERTO — las hadas: 2
-> h DE JUEGO (TicksSinCoro, persistente) + 30 s de quietud; la moneda
-> del 22 % murió. (H) LOS RAYITOS — las embestidas de los ojos
-> murieron: mini arcos Perlin REALES (StormLib) en la ventana del
-> golpe, la firma del escuadrón en miniatura. (I) LA ESENCIA — la
-> ventana re-escrita: ligadura + progreso real + el oro del tope.
-> (J) LA SOMBRA II — el segundo tomo: DOBLE HÉLICE trenzada + LOS
-> IRIS REALES del escuadrón por las hebras + RAYOS PERLIN entre ellas
-> + BOCA DE GARRAS + el MORDISCO con LA CORONA DE 9 GARRAS. .tmod
-> 2.852.359 B md5 b947a7bfe817a52ef1a642a6771bc31c, 401 entradas,
-> oráculo 0/0, build real 0/0, headless ×3 0 excepciones.
+> Última actualización: v6.51.13 (LA SOMBRA II DESDE EL INICIO · SIN
+> MANÁ. La letra: «verifica que esto esta aplicado y el codigo esta
+> bien, tambien asegurate de que La Sombra de la Página II se le de al
+> jugador desde el inicio y que no consuma mana ya que es de prueba»).
+> Dos entregas: (A) LA VERIFICACIÓN — los 9 puntos de la .51.12
+> auditados uno a uno en el árbol, todos presentes y sanos: el FESTÍN
+> CHICO (AnimarElBocado ANTES del trago en los 5 bocados), el ESCUADRÓN
+> (Sostener/Despedir + RightClick ×6), la PARIDAD (la MISMA cadena del
+> mágico), el HOTBAR (la correa muerta), la PRESENCIA (100/25/0 en
+> TODAS las stats), el LAZO (arrastre >20 px + expulsión), el
+> CONCIERTO (432.000 ticks + 1.800 de quietud) y los RAYITOS (ojos
+> clavados, mini arcos Perlin). (B) LA ENTREGA — la Sombra de la
+> Página II ENTRA CON EL REGALO DE PRUEBAS (EntregarRegaloDePruebas en
+> OnEnterWorld: una copia por jugador; la receta tomo 1 + 10 madera
+> vive para quien la pierda) y su maná YA ERA 0 (Item.mana = 0,
+> verificada toda la cadena); su tooltip estrena «SIN COSTE DE MANÁ —
+> arma de prueba: úsala sin miedo.» ×3 idiomas. .tmod 2.860.296 B md5
+> b3cab5c61770ab421b8219d9667f8e05, 401 entradas, oráculo 0/0, build
+> real ×2 0/0, headless ×3 0 excepciones, audit_v65113 TODO LIMPIO,
+> paridad de claves heredada de la .51.12 (sets y orden idénticos
+> contra git show). PENDIENTE EN JUEGO: el checklist de la .51.13
+> abajo (los 9 puntos de la .51.12 + la entrega y el maná de la
+> Sombra II).
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1942,32 +1914,31 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.51.12 PUBLICADA (release 422932316 + asset 673091986 · CDN verificado byte a byte · `/releases/latest` = v6.51.12) — EN JUEGO: EL FESTÍN CHICO · EL ESCUADRÓN
-   ETERNO · LA PRESENCIA DEL LIBRO · EL LAZO · EL CONCIERTO · LOS
-   RAYITOS · LA SOMBRA II.**
+1. **⏳ v6.51.13 PUBLICADA (release 422953749 + asset 673185667 · CDN verificado byte a byte · `/releases/latest` = v6.51.13) — EN JUEGO: LA VERIFICACIÓN DE LOS 9 PUNTOS + LA SOMBRA II DESDE EL INICIO · SIN MANÁ.**
    Checklist: (a) EL FESTÍN CHICO — soltar esencias/monedas/lingotes
    delante del Eterno EN LA MANO: cada bocado dispara el tentáculo
    chico que ENVUELVE el plato y SE LO LLEVA por dentro hacia el
-   jugador (el fantasma del item encogiéndose — la misma animación de
-   los jefes en miniatura), (b) EL ESCUADRÓN — invocar los ojos y
-   LLENAR la barra de buffs (22+): JAMÁS se desinvocan solos; el clic
-   derecho en el icono del buff los despide (la única despedida),
-   (c) LA PARIDAD — el daño de invocación del tooltip básico ahora
-   escala como el mágico (+2,2 %/nivel, la reforja y el festín
-   adentro), (d) EL HOTBAR — los clicks en la barra de acceso rápido
-   con el inventario abierto responden (la correa del reuseDelay
-   murió), (e) LA PRESENCIA — comer esencias: con el libro EN LA MANO
-   el festín entero · GUARDADO en la bolsa 25 % · en un COFRE nada
-   (la ventana de la esencia lo cuenta VIVO), (f) EL LAZO — soltar el
-   grimorio y alejarse: la sombra de la página se estira y lo
-   DEVUELVE; con la bolsa llena expulsa un item al azar y entra él,
-   (g) EL CONCIERTO — quieto 30 s tras 2 h de juego: el coro de hadas
-   garantizado (la moneda del 22 % murió), (h) LOS RAYITOS — la
-   mascota molesta NPCs/golpea hadas con MINI ARCOS PERLIN (los ojos
-   ya NO salen volando), (i) LA SOMBRA II — craftear La Sombra de la
-   Página II (tomo 1 + 10 madera): la DOBLE HÉLICE con iris reales,
-   rayos entre hebras, boca de garras y la corona de 9 garras al
-   morder.
+   jugador (la misma animación de los jefes en miniatura), (b) EL
+   ESCUADRÓN — invocar los ojos y LLENAR la barra de buffs (22+):
+   JAMÁS se desinvocan solos; el clic derecho en el icono del buff
+   los despide (la única despedida), (c) LA PARIDAD — el daño de
+   invocación del tooltip básico escala como el mágico (+2,2 %/nivel,
+   la reforja y el festín adentro), (d) EL HOTBAR — los clicks en la
+   barra de acceso rápido con el inventario abierto responden, (e) LA
+   PRESENCIA — comer esencias: con el libro EN LA MANO el festín
+   entero · GUARDADO en la bolsa 25 % · en un COFRE nada (la ventana
+   de la esencia lo cuenta VIVO), (f) EL LAZO — soltar el grimorio y
+   alejarse: la sombra de la página se estira y lo DEVUELVE; con la
+   bolsa llena expulsa un item al azar y entra él, (g) EL CONCIERTO —
+   quieto 30 s tras 2 h de juego: el coro de hadas garantizado, (h)
+   LOS RAYITOS — la mascota molesta NPCs/golpea hadas con MINI ARCOS
+   PERLIN (los ojos ya NO salen volando), (i) LA SOMBRA II — La
+   Sombra de la Página II aparece EN EL INVENTARIO al entrar al mundo
+   (el regalo de pruebas — una copia; si ya la tienes, no se repite),
+   (j) SIN MANÁ — disparar la Sombra II TODO lo que quieras: el maná
+   JAMÁS baja (coste 0 + la línea «SIN COSTE DE MANÁ» visible en su
+   ventana de información), (k) LA RECETA — tomo 1 + 10 madera sigue
+   crafteando la Sombra II (la vía de repuesto para quien la pierda).
 2. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
    VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10** (la letra:
    «quita los 3 anillos de fotones… yo me refería a los anillos de los
