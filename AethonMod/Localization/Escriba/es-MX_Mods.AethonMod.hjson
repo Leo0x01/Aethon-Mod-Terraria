@@ -1,0 +1,252 @@
+// v6.52.0 — LA BOLSA DEL ESCRIBA: localización del ciclo nuevo
+// (Task 84). ARCHIVO NUEVO — los hjson de raíz NO se tocan (la
+// regla del ciclo). El prefijo del nombre (Mods.AethonMod) es el
+// MISMO que el de raíz: tML FUSIONA todos los archivos del idioma
+// (LocalizationLoader.TryGetCultureAndPrefixFromPath — verificado
+// contra el tModLoader.dll decompilado, Task 84).
+// ESPAÑOL LATINOAMÉRICA (es-MX) — la fuente del ciclo.
+
+Items: {
+	BolsaDelEscriba: {
+		DisplayName: "Bolsa del Escriba"
+		Tooltip: "El ciclo completo del Escriba en una bolsa: el arma del rayo masivo, la pluma viva con su árbol de inscripciones y la pluma que lo convoca. Ábrela con clic derecho (solo entrega lo que falte)."
+		Abierta: "Las palabras del Escriba despiertan en tu inventario."
+	}
+	PrimerTrazo: {
+		DisplayName: "El Primer Trazo"
+		Tooltip: "La pluma que escribió la primera línea del mundo, cargada de luz. MANTÉN el clic: cinco trazos convergen en UN rayo masivo de ruido de Perlin. A plena carga el daño se triplica."
+		Prueba: "SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo."
+	}
+	PlumaConsciente: {
+		DisplayName: "La Pluma Consciente"
+		Tooltip: "La última pluma del Escriba — con su conciencia atada dentro. Habla, recuerda y desbloquea sus propias palabras. Ábrelo con [P]: el árbol de inscripciones (Filigrana / Verso / Colofón). Cada jefe vencido con ella sube su nivel."
+		Nivel: "Nivel de la pluma: {0}"
+		Ranura0: "Filigrana: {0}"
+		Ranura1: "Verso: {0}"
+		Ranura2: "Colofón: {0}"
+		Arbol: "[P] — Árbol de inscripciones (sosteniendo la pluma)"
+	}
+	PlumaConvocadora: {
+		DisplayName: "Pluma Convocadora"
+		Tooltip: "La pluma que llama a quien la sostentó por última vez. Invoca a EL ESCRIBA — el jefe demo de la coreografía (340.000 de vida, post-Señor de la Luna)."
+	}
+}
+Projectiles: {
+	PrimerTrazoHeld: {
+		DisplayName: "El Primer Trazo"
+	}
+	PrimerTrazoFajo: {
+		DisplayName: "Trazo de luz"
+	}
+	TintaBolt: {
+		DisplayName: "Palabra de tinta"
+	}
+	EscribaGota: {
+		DisplayName: "Gota de tinta"
+	}
+	EscribaPagina: {
+		DisplayName: "Página del Escriba"
+	}
+	EscribaPluma: {
+		DisplayName: "Pluma del Escriba"
+	}
+	EscribaPared: {
+		DisplayName: "Pared de tinta"
+	}
+	EscribaVerso: {
+		DisplayName: "El Verso"
+	}
+}
+NPCs: {
+	EscribaJefe: {
+		DisplayName: "El Escriba, la Mano que Devoró el Libro"
+		Bestiary: "La mano que escribió las páginas que Aethon devoró. No murió: se quedó a terminar el libro — y tú estás escrito en la última página."
+	}
+}
+Keybinds: {
+	EscribaArbol: {
+		DisplayName: "Árbol de inscripciones (Pluma Consciente)"
+	}
+}
+UI: {
+	Arbol: {
+		Titulo: "LAS INSCRIPCIONES DE LA PLUMA"
+		Nivel: "Nivel del arma: {0}"
+		Ranura0: "FILIGRANA"
+		Ranura1: "VERSO"
+		Ranura2: "COLOFÓN"
+		Pista: "Señala una inscripción para leerla."
+		PistaHecho: "La gana el hecho: {0}"
+		PistaRegalo: "La regala el Escriba al vencer: {0}"
+		PistaNacimiento: "La pluma ya nace sabiéndola."
+	}
+}
+Escriba: {
+	Anuncio: "El Escriba alza la pluma: la historia no ha terminado."
+	BolsaEntregada: "La Bolsa del Escriba espera en tu inventario (clic derecho)."
+	Encuentro1: "El Escriba: «…Así que tú eres quien lleva mi pluma.»"
+	Encuentro2: "El Escriba: «Yo escribí las páginas que tu libro devoró. Todas.»"
+	Encuentro3: "El Escriba: «Graba mis palabras en la pluma y verás de qué soy capaz.»"
+	Encuentro4: "El Escriba: «[P]. Elige bien: todo poder tiene su carga.»"
+	Susurro1: "El Escriba murmura: «Las líneas torcidas también terminan.»"
+	Susurro2: "El Escriba murmura: «La tinta nunca olvida lo que escribió.»"
+	Susurro3: "El Escriba murmura: «Ese enemigo… ya lo había descrito yo.»"
+	Susurro4: "El Escriba murmura: «Sigue. La página se llena sola.»"
+	HechoCumplido: "HECHO CUMPLIDO — el Escriba desbloquea: {0}"
+	InscripcionDesbloqueada: "Nueva inscripción: {0}"
+	PruebaVencida: "La pluma sube al nivel {0} — el arma recuerda a quien venció."
+	AtaqueTrazo: "El Trazo"
+	AtaqueLluvia: "Lluvia de Versos"
+	AtaquePlumas: "Las Plumas"
+	AtaqueBorron: "El Borrón"
+	AtaqueCorregido: "El Trazo, Corregido"
+	AtaqueJaula: "La Jaula de Tinta"
+	AtaqueVerso: "El Verso"
+	AtaqueAnotacion: "La Anotación"
+	Transicion1: "La Corrección"
+	Transicion2: "El Interlineado"
+	Regalo: {
+		Subrayado: "El Escriba: «El Ojo cayó. Lo importante va SUBRAYADO.» (Subrayado desbloqueada)"
+		LetraCapital: "El Escriba: «El gusano/cerebro cayó. Todo título empieza con LETRA CAPITAL.» (Letra Capital desbloqueada)"
+		TintaCorrosiva: "El Escriba: «El hueso viejo cayó. Mi tinta CORROE hasta eso.» (Tinta Corrosiva desbloqueada)"
+		Firma: "El Escriba: «El Muro cayó. Lo escrito con sangre lleva FIRMA.» (Firma desbloqueada)"
+		VersoCiego: "El Escriba: «Las máquinas cayeron. Este VERSO CIEGO encuentra solo a quién leer.» (Verso Ciego desbloqueado)"
+		RimaInterna: "El Escriba: «La planta cayó. Escucha: la RIMA corre por dentro del trazo.» (Rima Interna desbloqueada)"
+		Caligrafia: "El Escriba: «El guardián de piedra cayó. La CALIGRAFÍA es paciencia.» (Caligrafía desbloqueada)"
+		Hemistiquio: "El Escriba: \"El fanático cayó. El HEMISTIQUIO atraviesa lo que divide.» (Hemistiquio desbloqueado)"
+		TintaMadre: "El Escriba: «¡El SEÑOR LUNAR cayó! Esta es la TINTA MADRE — la de donde salieron todas.» (Tinta Madre desbloqueada)"
+		ElColofon: "El Escriba: «…Me venciste con mi propia pluma. Toma EL COLOFÓN — la última palabra.» (El Colofón desbloqueado)"
+	}
+}
+Hechos: {
+	PrimerasPalabras: {
+		Nombre: "Primeras Palabras"
+		Descripcion: "Mata 20 enemigos llevando la pluma."
+	}
+	ManoFirme: {
+		Nombre: "Mano Firme"
+		Descripcion: "Golpea 25 veces al mismo jefe sin cambiar de presa."
+	}
+	AlMargen: {
+		Nombre: "Al Margen"
+		Descripcion: "Vence 5 jefes DISTINTOS llevando la pluma."
+	}
+	TintaSeca: {
+		Nombre: "Tinta Seca"
+		Descripcion: "Sostén la pluma 10 minutos en total."
+	}
+	RachaViva: {
+		Nombre: "Racha Viva"
+		Descripcion: "Encadena 8 muertes separadas por menos de 3 segundos."
+	}
+}
+Inscripciones: {
+	TintaLigera: {
+		Nombre: "Tinta Ligera"
+		Descripcion: "La tinta que fluye ligera."
+		Poder: "Poder: +10% de cadencia"
+		Carga: "Carga: -3% de daño"
+	}
+	PlumaAjena: {
+		Nombre: "Pluma Ajena"
+		Descripcion: "La pluma que aprendió a no gastarse."
+		Poder: "Poder: -40% de coste de maná"
+		Carga: "Carga: -4% de daño"
+	}
+	MargenEstrecho: {
+		Nombre: "Margen Estrecho"
+		Descripcion: "El margen donde nada sobra."
+		Poder: "Poder: +4 de crítico"
+		Carga: "Carga: -2% de daño"
+	}
+	Interlineado: {
+		Nombre: "Interlineado"
+		Descripcion: "Más líneas por página."
+		Poder: "Poder: +2 proyectiles"
+		Carga: "Carga: -10% de daño"
+	}
+	LetraCapital: {
+		Nombre: "Letra Capital"
+		Descripcion: "La letra con la que nacen los títulos."
+		Poder: "Poder: +15% de cadencia"
+		Carga: "Carga: +10% de maná"
+	}
+	Caligrafia: {
+		Nombre: "Caligrafía"
+		Descripcion: "La escritura perfecta, medida y paciente."
+		Poder: "Poder: +20% de cadencia"
+		Carga: "Carga: -3% de daño"
+	}
+	VersoSencillo: {
+		Nombre: "Verso Sencillo"
+		Descripcion: "El verso que aprende todo escriba."
+		Poder: "Poder: +12% de daño"
+		Carga: "Carga: +8% de maná"
+	}
+	VersoDoble: {
+		Nombre: "Verso Doble"
+		Descripcion: "El eco del verso: se dice dos veces."
+		Poder: "Poder: +1 proyectil"
+		Carga: "Carga: -5% de daño"
+	}
+	TintaCorrosiva: {
+		Nombre: "Tinta Corrosiva"
+		Descripcion: "La tinta que corroe el hueso."
+		Poder: "Poder: +20% de daño"
+		Carga: "Carga: +20% de maná"
+	}
+	VersoCiego: {
+		Nombre: "Verso Ciego"
+		Descripcion: "El verso que encuentra solo a quién leer."
+		Poder: "Poder: Los trazos persiguen"
+		Carga: "Carga: -7% de daño"
+	}
+	RimaInterna: {
+		Nombre: "Rima Interna"
+		Descripcion: "La rima que corre por dentro del trazo."
+		Poder: "Poder: Estela de tinta viva"
+		Carga: "Carga: +5% de daño"
+	}
+	Hemistiquio: {
+		Nombre: "Hemistiquio"
+		Descripcion: "El verso partido que atraviesa."
+		Poder: "Poder: +2 de perforación"
+		Carga: "Carga: +15% de maná"
+	}
+	ColofonHumilde: {
+		Nombre: "Colofón Humilde"
+		Descripcion: "El colofón en blanco: lo que todo libro lleva."
+		Poder: "Poder: +3 de crítico"
+		Carga: "Carga: Sin carga"
+	}
+	PuntoFinal: {
+		Nombre: "Punto Final"
+		Descripcion: "Lo que está casi muerto, MUERE."
+		Poder: "Poder: Ejecución (×2.5 bajo el 10% de vida)"
+		Carga: "Carga: -5% de daño"
+	}
+	Subrayado: {
+		Nombre: "Subrayado"
+		Descripcion: "Lo importante, subrayado."
+		Poder: "Poder: +8 de crítico"
+		Carga: "Carga: +12% de maná"
+	}
+	Firma: {
+		Nombre: "Firma"
+		Descripcion: "Lo escrito con sangre devuelve sangre."
+		Poder: "Poder: Robo de vida (4% del daño)"
+		Carga: "Carga: -8% de daño"
+	}
+	TintaMadre: {
+		Nombre: "Tinta Madre"
+		Descripcion: "La tinta de donde salieron TODAS."
+		Poder: "Poder: Buscapresas y +3 de perforación"
+		Carga: "Carga: +30% de maná"
+	}
+	ElColofon: {
+		Nombre: "El Colofón"
+		Descripcion: "La última palabra del libro."
+		Poder: "Poder: +35% de daño y +2 proyectiles"
+		Carga: "Carga: +35% de maná y -10% de cadencia"
+	}
+}
