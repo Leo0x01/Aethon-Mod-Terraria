@@ -1,11 +1,20 @@
-# AethonMod — ESTADO ACTUAL (v6.52.2)
+# AethonMod — ESTADO ACTUAL (v6.52.3)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.52.2 (LA BOLSA DEL DIOS ANTIGUO · EL HAZ DE VERDAD ·
-> LAS SOMBRAS III-IV. La letra: «solo hay 1 ala» + 4 errores del log + lazo 5 s
-> + tooltip esencia + «sombras 3 y 4 SOLO EL IRIS» + «el haz está mal creado —
-> cuadrados discontinuos» + «analiza el jefe del video y crea una bolsa con
-> todos los items que puedas copiar… copia exacta… concéntrate en su haz».
+> Última actualización: v6.52.3 (LA CARGA QUE VUELVE: LAS DOS TEXTURAS QUE
+> FALTABAN. La letra: «hay nuevos errores» + client.log con 3 sesiones →
+> LA .52.2 **NO CARGÓ EN ABSOLTO**: SombraDeLaPagina3/4 se registraron SIN
+> su .png → MissingResourceException → tML desactivó el mod ENTERO → el
+> usuario se quedó sin NADA de la .52.2 (ni el haz, ni la bolsa, ni el hotbar,
+> ni las sombras — TODO su checklist pasa a la .52.3). LA CURA: las 2
+> texturas generadas con la paleta EXACTA de la familia (muestreada de los
+> iris reales) + 3 rondas de crítica VLM (III 9/10 SHIP · IV 8/10 SHIP) +
+> LA LECCIÓN REINCIDIDA de la .99: ni el -build ni el headless validan
+> texturas de cliente — audit_texturas.py AHORA es paso obligatorio ANTES
+> de cada build (420/420). El log además confirma: la .52.1 JUGÓ 2,5 h con
+> las 6 excepciones que la .52.2/.53 ya curan, y la .52.0 VIEJA seguía en
+> la carpeta Mods del usuario (reventó a las 09:44 con los 9 errores ya
+> curados de la .51 — CONSEJO: UN SOLO AethonMod.tmod en la carpeta).
 > LO ARREGLADO: las 6 excepciones del log (la ANIMACIÓN DE DEVORAR moría en
 > localAI[3] — Projectile.localAI es float[3] —, la JAULA igual, la pluma
 > KeyNotFound, EL HOTBAR con IL hook al ItemSlot), el LAZO espera 5 s, el
@@ -21,8 +30,14 @@
 > ciclo de 60 t, el motor que hace que Goozma se vea como Goozma) + LAS
 > SOMBRAS DE LA PÁGINA III (EL CORO DE IRISES: siete iris flotando) y IV (EL
 > IRIS COLOSAL: el iris rojo gigante con la pupila que se dilata) — SOLO IRIS,
-> sin ojo completo. .tmod 2.952.499 B md5 ff277794f1e6b0d4358dcf390c4e6932,
-> 418 entradas, oráculo 0/0, build real 0/0, headless 0 excepciones.
+> sin ojo completo). .tmod 2.953.579 B md5 0a6fd0c9fdbcc44e9405e433d483098c,
+> 420 entradas, oráculo 0/0, build real 0/0, headless 0 excepciones — la
+> .52.2 era correcta EN CÓDIGO (todo su contenido llega intacto en la .53).
+> LO ENTREGADO EN LA .52.2/.53 (pendiente de probar EN JUEGO): LA BOLSA DEL
+> DIOS ANTIGUO (EL RAYO DE FUSIÓN/LÁSER ARCOÍRIS/DESTRUCTOR DE PRISMAS/
+> TRUENO DE GELATINA/MASA CROMÁTICA — ColorGoozma), EL HAZ DE VERDAD,
+> LAS ALAS EN PAR, LAS SOMBRAS III-IV, EL HOTBAR LIBRE, EL LAZO 5 s, EL
+> TOOLTIP DE LA ESENCIA, LA DEVORACIÓN VIVA Y LA JAULA QUE SE PLANTA.
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1913,9 +1928,15 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.52.2 PUBLICADA — LA BOLSA DEL DIOS ANTIGUO · EL HAZ DE VERDAD · LAS SOMBRAS III-IV — EN JUEGO.**
-   Checklist: (0) LA CARGA — el mod arranca SIN excepciones (la .52.1 tenía
-   6 silenciosas: la animación de devorar y la jaula morían en cada uso),
+1. **✅ v6.52.3 PUBLICADA — LA CARGA QUE VUELVE — EN JUEGO.**
+   (La .52.2 NO CARGÓ — le faltaban los 2 png de las Sombras 3/4; su
+   checklist COMPLETO pasa a esta versión. ANTES DE PROBAR: **borra las
+   .tmod viejas** de tu carpeta Mods — en tu último log la .52.0 vieja fue
+   la primera en cargar y reventó con errores ya curados; deja UN SOLO
+   AethonMod.tmod, la 6.52.3.)
+   Checklist: (0) LA CARGA — el mod arranca SIN excepciones (la .52.2 no
+   llegó a arrancar: MissingResourceException; la .51 tenía 6 silenciosas:
+   la animación de devorar y la jaula morían en cada uso),
    (a) LAS ALAS — equipa la Aurora de Tinta y salta: AHORA SE VEN **DOS ALAS**
    (el hueco central que las separa + las anclas a ±5 px de su lado + el
    barrido hacia atrás al girarte — antes se fundían en UNA sola capa),
