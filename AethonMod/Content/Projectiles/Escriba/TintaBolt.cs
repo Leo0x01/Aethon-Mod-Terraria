@@ -22,6 +22,10 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class TintaBolt : ModProjectile
     {
+        // v6.52.1 — LA CURA DE LAS 9 TEXTURAS: el placeholder de la
+        // casa (todo el cuerpo es código en PreDraw).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public bool BuscaPresa => Projectile.ai[0] >= 0.5f;
         public bool EstelaTinta => Projectile.ai[1] >= 0.5f;
 

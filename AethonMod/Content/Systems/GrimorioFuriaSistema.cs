@@ -1981,6 +1981,9 @@ namespace AethonMod.Content.Systems
             // de VFX y el anti-coros de audio también mueren con el mundo.
             try { VFXCore.Reiniciar(); } catch { }
             try { AudioLib.Reiniciar(); } catch { }
+            // v6.52.1 — LAS ALAS DE CÓDIGO: sus BasicEffect y su ruido
+            // también mueren con el mundo (el patrón de la casa).
+            try { VFX.AlasAuroraLib.Reiniciar(); } catch { }
             // v6.50.1 — FIX: el contador de la carnada era un ESTÁTICO que
             // sobrevivía al mundo (dato de mundo en campo de clase — la
             // deuda nº recurrente de las auditorías). Vuelve al default.

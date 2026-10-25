@@ -30,6 +30,10 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class PrimerTrazoFajo : ModProjectile
     {
+        // v6.52.1 — LA CURA DE LAS 9 TEXTURAS: el placeholder de la
+        // casa (el rayo ES BeamLib — el asset jamás se dibuja).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         /// <summary>El ÍNDICE del fajo (0..4) — su hue y su asiento en el anillo.</summary>
         public int Indice => (int)Projectile.ai[0];
 

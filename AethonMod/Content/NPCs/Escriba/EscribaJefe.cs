@@ -58,6 +58,15 @@ namespace AethonMod.Content.NPCs.Escriba
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
+        // v6.52.1 — LA CURA DE LAS 9 TEXTURAS: [AutoloadBossHead] llama
+        // a AddBossHeadTexture(BossHeadTexture, type) y el default ES
+        // Texture + "_Head_Boss" → pedía SoftGlow_Head_Boss (INEXISTENTE
+        // → el mod entero se desactivaba al cargar). EL PNG REAL del
+        // mapa vive en Content/NPCs/Escriba/EscribaJefe_Head_Boss.png —
+        // ahora la convención y el BossHeadSlot de abajo por fin
+        // apuntan al MISMO asset registrado.
+        public override string BossHeadTexture => "AethonMod/Content/NPCs/Escriba/EscribaJefe_Head_Boss";
+
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[NPC.type] = 1;

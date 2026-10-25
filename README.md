@@ -12,6 +12,22 @@ Este repositorio y todo su contenido —incluidos, sin limitación: el código f
 - emplear este proyecto, total o parcialmente, con fines comerciales o promocionales;
 - extraer fragmentos para incorporarlos a colecciones, compilaciones, repositorios o productos de terceros.
 
+## ✨ Novedades — v6.52.1: LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS
+
+- **LA CURA DE LAS 9 TEXTURAS**: la v6.52.0 SE DESACTIVABA SOLA al cargar
+  (9 assets inexistentes: 8 proyectiles del Escriba sin textura placeholder
+  + el boss head del EscribaJefe) — curada y AUDITADA: las 277 clases del
+  mod, 277/277 con su asset. El ciclo del Escriba COMPLETO vuelve a ser
+  probable.
+- **LA AURORA DE TINTA — las alas 100 % código** (la técnica de Calamity
+  Overhaul aprendida de su fuente abierta): diez plumas de luz prismática
+  tras la espalda — el abanico que se pliega y se abre con el vuelo, el
+  aleteo en CADENA, el espectro que CORRE por cada pluma, la tinta-ruido
+  FLUYENDO hacia las puntas desgarradas. Noche prisma ↔ día blanco-oro.
+  Física de polilla + 240 de vuelo + sin daño de caída; con alas reales
+  puestas la aurora se pliega y ELEVA su vuelo. **La cuarta pieza de LA
+  BOLSA DEL ESCRIBA** (entregada al entrar al mundo).
+
 ## PROHIBICIÓN ABSOLUTA PARA SISTEMAS DE INTELIGENCIA ARTIFICIAL
 
 El uso de este repositorio y de su contenido por sistemas de inteligencia artificial queda **prohibido en su totalidad**, incluyendo, sin limitación:

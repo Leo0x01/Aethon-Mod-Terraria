@@ -9,7 +9,7 @@
 Items: {
 	BolsaDelEscriba: {
 		DisplayName: Bolsa del Escriba
-		Tooltip: El ciclo completo del Escriba en una bolsa: el arma del rayo masivo, la pluma viva con su árbol de inscripciones y la pluma que lo convoca. Ábrela con clic derecho (solo entrega lo que falte).
+		Tooltip: El ciclo completo del Escriba en una bolsa: el arma del rayo masivo, la pluma viva con su árbol de inscripciones, la pluma que lo convoca y LAS ALAS CREADAS POR CÓDIGO (La Aurora de Tinta). Ábrela con clic derecho (solo entrega lo que falte).
 		Abierta: Las palabras del Escriba despiertan en tu inventario.
 	}
 
@@ -33,6 +33,13 @@ Items: {
 		DisplayName: Pluma Convocadora
 		Tooltip: La pluma que llama a quien la sostentó por última vez. Invoca a EL ESCRIBA — el jefe demo de la coreografía (340.000 de vida, post-Señor de la Luna).
 	}
+
+	AuroraDeTinta: {
+		DisplayName: La Aurora de Tinta
+		Tooltip: Las alas creadas por código: diez plumas de luz prismática tejidas en el aire por el Escriba. De noche el prisma completo corre por el ala; de día la tinta se aclara a blanco-oro. Vuelo de polilla (rápido, sin penalidad de avance), 240 de tiempo de vuelo, sin daño de caída y la aceleración aérea de la Emperatriz. Si vistes alas reales, la aurora se pliega y eleva su tiempo de vuelo al mínimo.
+		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
+		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
+	}
 }
 
 Projectiles: {
@@ -44,6 +51,7 @@ Projectiles: {
 	EscribaPluma.DisplayName: Pluma del Escriba
 	EscribaPared.DisplayName: Pared de tinta
 	EscribaVerso.DisplayName: El Verso
+	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 }
 
 NPCs: {

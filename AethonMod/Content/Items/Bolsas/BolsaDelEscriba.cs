@@ -12,7 +12,7 @@ namespace AethonMod.Content.Items.Bolsas
     /// BOLSADELESCRIBA — v6.52.0 — LA BOLSA DEL ESCRIBA: la bolsa nueva
     /// que pidió el usuario para TODO lo creado en este ciclo de
     /// investigación («todo lo creado nuevo lo puedes meter en una nueva
-    /// bolsa y dárselo al jugador»):
+    /// bolsa y dárselo al jugador"):
     ///
     ///   · EL PRIMER TRAZO — el arma del rayo masivo (la investigación
     ///     de los beams de 7 capas: Perlin, glow, motion-blur, luz).
@@ -20,6 +20,11 @@ namespace AethonMod.Content.Items.Bolsas
     ///     inscripciones (la investigación de Calamity Overhaul).
     ///   · LA PLUMA CONVOCADORA — el ítem del jefe demo EL ESCRIBA (la
     ///     investigación de coreografía del video de Lunar Veil).
+    ///   · LA AURORA DE TINTA — v6.52.1 — LAS ALAS CREADAS POR CÓDIGO
+    ///     (la investigación de las alas procedurales de Calamity
+    ///     Overhaul: el abanico de plumas-quad, la onda de aleteo, la
+    ///     dispersión de hue, el ruido que fluye y la física inyectada
+    ///     sin sprite).
     ///
     /// Se abre con CLIC DERECHO (el patrón de las veintiún bolsas de la
     /// casa: solo entrega lo que falte — la bolsa nunca duplica).
@@ -46,11 +51,12 @@ namespace AethonMod.Content.Items.Bolsas
 
         public override void RightClick(Player player)
         {
-            // LAS TRES PIEZAS DEL CICLO (el patrón de Dar de la casa:
+            // LAS CUATRO PIEZAS DEL CICLO (el patrón de Dar de la casa:
             // primera ranura libre; si no hay hueco, cae a sus pies).
             Dar(player, ModContent.ItemType<PrimerTrazo>());
             Dar(player, ModContent.ItemType<PlumaConsciente>());
             Dar(player, ModContent.ItemType<Items.Escriba.PlumaConvocadora>());
+            Dar(player, ModContent.ItemType<Items.Escriba.AuroraDeTinta>());
 
             // LA APERTURA: la tinta despierta alrededor tuyo (mitad
             // violeta, mitad blanca — la tinta y la página).

@@ -27,6 +27,11 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// <summary>LA GOTA: el chispazo de tinta hostil (radiales del Borrón, fuentes de página).</summary>
     public class EscribaGota : ModProjectile
     {
+        // v6.52.1 — LA CURA DE LAS 9 TEXTURAS: todo el cuerpo es código
+        // (PreDraw dibuja TODO) pero tML exige UN asset por clase — el
+        // placeholder de la casa (SoftGlow), como toda arma de sombras.
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public override void SetStaticDefaults() { }
 
         public override void SetDefaults()
@@ -74,6 +79,9 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class EscribaPagina : ModProjectile
     {
+        // v6.52.1 — placeholder de la casa (todo se dibuja en PreDraw).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public float YImpacto { get => Projectile.ai[1]; set => Projectile.ai[1] = value; }
 
         public override void SetStaticDefaults()
@@ -178,6 +186,9 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class EscribaPluma : ModProjectile
     {
+        // v6.52.1 — placeholder de la casa (todo se dibuja en PreDraw).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public int Fase { get => (int)Projectile.ai[0]; set => Projectile.ai[0] = value; }
         public float AnguloOrbita { get => Projectile.ai[1]; set => Projectile.ai[1] = value; }
         public int TicksOrbita { get => (int)Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
@@ -264,6 +275,9 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class EscribaPared : ModProjectile
     {
+        // v6.52.1 — placeholder de la casa (todo se dibuja en PreDraw).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public int Fase { get => (int)Projectile.ai[0]; set => Projectile.ai[0] = value; }
 
         public override void SetStaticDefaults()
@@ -331,6 +345,9 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class EscribaVerso : ModProjectile
     {
+        // v6.52.1 — placeholder de la casa (todo se dibuja en PreDraw).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         public int Fase { get => (int)Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
         public float Angulo { get => Projectile.ai[1]; set => Projectile.ai[1] = value; }
 

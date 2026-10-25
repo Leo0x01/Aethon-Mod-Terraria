@@ -1,28 +1,23 @@
-# AethonMod — ESTADO ACTUAL (v6.52.0)
+# AethonMod — ESTADO ACTUAL (v6.52.1)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.52.0 (LA BOLSA DEL ESCRIBA: EL RAYO MASIVO ·
-> EL ARMA VIVA · LA COREOGRAFÍA. La letra: «no toques nada del mod, en
-> su lugar crea algo nuevo… todo lo creado nuevo lo puedes meter en una
-> nueva bolsa y dárselo al jugador» — tras investigar Calamity Overhaul
-> (armas con conciencia + árboles de skills), los rayos masivos de
-> Calamity/Fargo's/Stars Above/CWR (decompilados) y el Meowzers Boss
-> Fight del dev de Lunar Veil (coreografía). CUMPLIDO AL BYTE: git diff
-> = build.txt y NADA MÁS — 26 archivos NUEVOS, los hjson de raíz
-> INTACTOS byte a byte. LO NUEVO: (1) EL PRIMER TRAZO — el arma del
-> rayo masivo de 7 capas (BeamLib: fBm, halo/cuerpo/core, diamantes
-> viajeros, luz, convergencia Last Prism — SIN maná), (2) LA PLUMA
-> CONSCIENTE — el arma viva con 18 inscripciones en 3 ranuras, árbol
-> con [P], hechos + regalos + el nivel que VIAJA CON EL ARMA, (3) EL
-> ESCRIBA — el jefe demo de la coreografía (CoreoGuion: telegraph→
-> activo→recuperación, barra de conjuro, luz escénica por beats,
-> cámara cine, 2 transiciones-evento, el fakeout, el nuke de 216 t,
-> el agarrón La Anotación y la muerte con firma caligráfica), TODO en
-> LA BOLSA DEL ESCRIBA entregada al entrar al mundo. .tmod 2.915.598 B
-> md5 4ed5c314bb6d8417f4d744800305968e, 411 entradas, oráculo 0/0,
-> build real 0/0, headless 0 excepciones, audit_v6520 TODO LIMPIO.
-> PENDIENTE EN JUEGO: el checklist de la .52.0 abajo (ítem 1) — y el
-> de la .51.14 (ítem 2, QUE NADIE HA PODIDO PROBAR AÚN).
+> Última actualización: v6.52.1 (LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS
+> 9 TEXTURAS. La letra: «analiza las alas de este mod… hay wings creadas por
+> codigo ahi… aprende la tecnica y luego crea alas con dicha tecnica y ponlas
+> en una bolsa y daselas al jugador // tambien hay varios errores, no pude ni
+> probar nada de lo nuevo creado ni los 9 puntos pasados». LO ARREGLADO: la
+> .52.0 SE DESACTIVABA SOLA al cargar — 9 texturas inexistentes (8 proyectiles
+> del Escriba sin Texture override + el boss head del EscribaJefe pedía
+> SoftGlow_Head_Boss por convención) → curadas + auditoría de las 277 clases
+> 277/277 OK. LO NUEVO: LA AURORA DE TINTA — las alas 100 % código con la
+> técnica de Calamity Overhaul (abanico de plumas-quad, aleteo en cadena,
+> espectro por vértice, ruido fluyendo, desgarre de punta, física inyectada
+> sin sprite; noche prisma ↔ día blanco-oro), la CUARTA pieza de LA BOLSA DEL
+> ESCRIBA. .tmod 2.931.226 B md5 5ae5d0066d617293decca905638d0dfe, 412
+> entradas, oráculo 0/0, build real 0/0, headless 0 excepciones en 22.761
+> líneas. PENDIENTE EN JUEGO: el checklist de la .52.1 abajo (ítem 1 — la
+> .52.0 COMPLETA vuelve a ser probable + las alas nuevas), el de la .52.0
+> (ítem 2) y el de la .51.14 (ítem 3, QUE NADIE HA PODIDO PROBAR AÚN).
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1913,13 +1908,37 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.52.0 PUBLICADA (release 423097464 + asset 673854166 · CDN verificado byte a byte · `/releases/latest` = v6.52.0) — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL
-   ARMA VIVA · LA COREOGRAFÍA — EN JUEGO (TODO ES NUEVO, NADA DE LO
-   ANTERIOR SE TOCÓ).**
+1. **✅ v6.52.1 PUBLICADA (release + asset · CDN verificado byte a byte · `/releases/latest` = v6.52.1) — LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS — EN
+   JUEGO (LA .52.0 SE DESACTIVABA SOLA: ahora TODO el ciclo es probable).**
+   Checklist: (0) LA CARGA — el mod ARRANCA en la lista (la .52.0 se
+   desactivaba sola con «Recurso esperado no encontrado» ×9 — si ves la
+   6.52.1 activa sin mensaje rojo, LA CURA FUNCIONÓ), (a) LA AURORA DE
+   TINTA — abre la Bolsa del Escriba (ahora CUATRO piezas): equipa la
+   aurora y SALTA: las DIEZ PLUMAS de luz se DESPLIEGAN tras tu espalda
+   (el abanico se abre con el vuelo, el aleteo corre en CADENA de la
+   pluma interior a la exterior, el ESPECTRO corre por cada pluma, la
+   tinta-ruido FLUYE hacia las puntas y estas se DESGARRAN en mechones
+   que titilan), (b) LA DUALIDAD — de NOCHE el prisma completo; espera
+   el AMANECER sin quitarla: la tinta se aclara LENTO a BLANCO-ORO (el
+   tooltip cambia de «la tinta es PRISMA» a «la tinta es BLANCO-ORO»),
+   (c) LA FÍSICA — vuela: sube RÁPIDO (física de polilla), 240 de
+   vuelo, SIN daño de caída al soltarte de alto, y en el aire aceleras
+   como con la insignia de la Emperatriz, (d) EL RESPETO — ponte unas
+   ALAS REALES encima: la aurora se PLEGÁ sola (ceden el visual) pero
+   el tiempo de vuelo queda ELEVADO a 240; quítatelas y DESPLIEGA de
+   nuevo, (e) LA VANIDAD — la aurora en el slot de vanidad es SOLO el
+   adorno (sin física), (f) LA LUZ — de noche el prisma te ILUMINA con
+   su color girando, (g) REGRESIÓN — todo el checklist de la .52.0
+   (ítem 2: el rayo masivo, la pluma viva, EL ESCRIBA) ahora SÍ se
+   puede probar.
+2. **⏳ v6.52.0 (release 423097464 + asset 673854166 · CDN
+   verificado byte a byte) — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL
+   ARMA VIVA · LA COREOGRAFÍA — AHORA PROBABLE (la .52.1 curó las 9
+   texturas que desactivaban el mod al cargar).**
    Checklist: (a) LA BOLSA — al entrar al mundo aparece «La Bolsa del
    Escriba» en el inventario (una copia; ábrela con CLIC DERECHO:
    entrega El Primer Trazo + La Pluma Consciente + la Pluma
-   Convocadora, solo lo que falte), (b) EL RAYO MASIVO — sostén El
+   Convocadora + LA AURORA DE TINTA, solo lo que falte), (b) EL RAYO MASIVO — sostén El
    Primer Trazo y MANTÉN clic: cinco trazos convergen en UN rayo de
    ruido Perlin vivo (3 s para el bloqueo: el daño se TRIPLICA y la
    pantalla destella), barre con el ratón (la punta se DESLIZA, no
@@ -1951,7 +1970,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    (g) LA LUZ ESCÉNICA — observa al Escriba en la oscuridad: violeta
    LATIENDO mientras telegrafía, DESTELLO blanco al golpear, ámbar
    tenue al recuperar — el «más luces» de la letra.
-2. **⏳ v6.51.14 (release 422974533 + asset 673276658 · CDN
+
+3. **⏳ v6.51.14 (release 422974533 + asset 673276658 · CDN
    verificado byte a byte · `/releases/latest` = v6.52.0 AHORA) — LA
    CURA DEL CRASH DE LA SOMBRA II — EN
    JUEGO: PRIMERO LA SOMBRA II (que ya no crashea) Y LUEGO EL CHECKLIST
@@ -1960,7 +1980,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    crash, (a) festín chico, (b) escuadrón, (c) paridad, (d) hotbar,
    (e) presencia 100/25/0, (f) lazo, (g) concierto, (h) rayitos,
    (i) Sombra II entregada, (j) sin maná, (k) receta.)*
-3. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
+4. **✅ v6.50.115 PUBLICADA — LA CORONA DE CONJURO, LA SOMBRA
    VUELVE, EL GUARDIÁN NO CRUZA Y EL ESCUADRÓN DE 10** (la letra:
    «quita los 3 anillos de fotones… yo me refería a los anillos de los
    agujeros rúnicos… más los anillos de los soles que sí están bien,

@@ -27,6 +27,10 @@ namespace AethonMod.Content.Projectiles.Escriba
     /// </summary>
     public class PrimerTrazoHeld : ModProjectile
     {
+        // v6.52.1 — LA CURA DE LAS 9 TEXTURAS: el placeholder de la
+        // casa (dibuja el sprite del ÍTEM, no su propio asset).
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         // LA CARGA: 0→1 en 180 ticks (3 s — el número del Prism vanilla).
         public float Carga => MathHelper.Clamp((Projectile.ai[0] - 1f) / 179f, 0f, 1f);
 

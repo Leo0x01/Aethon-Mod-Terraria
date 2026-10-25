@@ -9,7 +9,7 @@
 Items: {
 	BolsaDelEscriba: {
 		DisplayName: Bolsa del Escriba
-		Tooltip: El ciclo completo del Escriba en una bolsa: el arma del rayo masivo, la pluma viva con su árbol de inscripciones y la pluma que lo convoca. Ábrela con clic derecho (solo entrega lo que falte).
+		Tooltip: El ciclo completo del Escriba en una bolsa: el arma del rayo masivo, la pluma viva con su árbol de inscripciones, la pluma que lo convoca y LAS ALAS CREADAS POR CÓDIGO (La Aurora de Tinta). Ábrela con clic derecho (solo entrega lo que falte).
 		Abierta: Las palabras del Escriba despiertan en tu inventario.
 	}
 
@@ -33,6 +33,13 @@ Items: {
 		DisplayName: Pluma Convocadora
 		Tooltip: La pluma que llama a quien la sostentó por última vez. Invoca a EL ESCRIBA — el jefe demo de la coreografía (340.000 de vida, post-Señor de la Luna).
 	}
+
+	AuroraDeTinta: {
+		DisplayName: The Ink Aurora
+		Tooltip: The code-forged wings: ten feathers of prismatic light woven in the air by the Scribe. At night the full spectrum runs along the wing; at day the ink pales to white-gold. Mothron-speed flight (fast, no hover penalty), 240 flight time, no fall damage, and the Empress' mid-air acceleration. If you wear real wings, the aurora folds away and lifts their flight time to its floor.
+		FormaDia: The ink is WHITE-GOLD: the page bathes the wing.
+		FormaNoche: The ink is PRISM: the spectrum runs along the wing.
+	}
 }
 
 Projectiles: {
@@ -44,6 +51,7 @@ Projectiles: {
 	EscribaPluma.DisplayName: Pluma del Escriba
 	EscribaPared.DisplayName: Pared de tinta
 	EscribaVerso.DisplayName: El Verso
+	AlasAuroraHalo.DisplayName: The Ink Aurora
 }
 
 NPCs: {
