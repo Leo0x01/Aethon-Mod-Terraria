@@ -1,23 +1,28 @@
-# AethonMod — ESTADO ACTUAL (v6.52.1)
+# AethonMod — ESTADO ACTUAL (v6.52.2)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.52.1 (LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS
-> 9 TEXTURAS. La letra: «analiza las alas de este mod… hay wings creadas por
-> codigo ahi… aprende la tecnica y luego crea alas con dicha tecnica y ponlas
-> en una bolsa y daselas al jugador // tambien hay varios errores, no pude ni
-> probar nada de lo nuevo creado ni los 9 puntos pasados». LO ARREGLADO: la
-> .52.0 SE DESACTIVABA SOLA al cargar — 9 texturas inexistentes (8 proyectiles
-> del Escriba sin Texture override + el boss head del EscribaJefe pedía
-> SoftGlow_Head_Boss por convención) → curadas + auditoría de las 277 clases
-> 277/277 OK. LO NUEVO: LA AURORA DE TINTA — las alas 100 % código con la
-> técnica de Calamity Overhaul (abanico de plumas-quad, aleteo en cadena,
-> espectro por vértice, ruido fluyendo, desgarre de punta, física inyectada
-> sin sprite; noche prisma ↔ día blanco-oro), la CUARTA pieza de LA BOLSA DEL
-> ESCRIBA. .tmod 2.931.226 B md5 5ae5d0066d617293decca905638d0dfe, 412
-> entradas, oráculo 0/0, build real 0/0, headless 0 excepciones en 22.761
-> líneas. PENDIENTE EN JUEGO: el checklist de la .52.1 abajo (ítem 1 — la
-> .52.0 COMPLETA vuelve a ser probable + las alas nuevas), el de la .52.0
-> (ítem 2) y el de la .51.14 (ítem 3, QUE NADIE HA PODIDO PROBAR AÚN).
+> Última actualización: v6.52.2 (LA BOLSA DEL DIOS ANTIGUO · EL HAZ DE VERDAD ·
+> LAS SOMBRAS III-IV. La letra: «solo hay 1 ala» + 4 errores del log + lazo 5 s
+> + tooltip esencia + «sombras 3 y 4 SOLO EL IRIS» + «el haz está mal creado —
+> cuadrados discontinuos» + «analiza el jefe del video y crea una bolsa con
+> todos los items que puedas copiar… copia exacta… concéntrate en su haz».
+> LO ARREGLADO: las 6 excepciones del log (la ANIMACIÓN DE DEVORAR moría en
+> localAI[3] — Projectile.localAI es float[3] —, la JAULA igual, la pluma
+> KeyNotFound, EL HOTBAR con IL hook al ItemSlot), el LAZO espera 5 s, el
+> TOOLTIP de la esencia reescrito, LAS ALAS ahora son UN PAR (inclinación
+> base + anclas separadas + barrido atrás — VLM verificado) y EL HAZ
+> RECONSTRUIDO (RayoStrip.FajaTexturada: la tira continua texturizada con el
+> ruido fluyendo por UVs + RuidoTinta V2 con borde cero y tileable — VLM:
+> «continuo, suave, orgánico»). LO NUEVO: LA BOLSA DEL DIOS ANTIGUO — las
+> copias de GOOZMA (Hunt of the Old God, fuente abierta leída línea a línea):
+> EL RAYO DE FUSIÓN (el beam del video: carga→barrido coseno, el arcoíris A LO
+> LARGO, cono de daño), EL LÁSER ARCOÍRIS, EL DESTRUCTOR DE PRISMAS, EL TRUENO
+> DE GELATINA y LA MASA CROMÁTICA — todo con ColorGoozma (la paleta OIL en
+> ciclo de 60 t, el motor que hace que Goozma se vea como Goozma) + LAS
+> SOMBRAS DE LA PÁGINA III (EL CORO DE IRISES: siete iris flotando) y IV (EL
+> IRIS COLOSAL: el iris rojo gigante con la pupila que se dilata) — SOLO IRIS,
+> sin ojo completo. .tmod 2.952.499 B md5 ff277794f1e6b0d4358dcf390c4e6932,
+> 418 entradas, oráculo 0/0, build real 0/0, headless 0 excepciones.
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1908,29 +1913,39 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.52.1 PUBLICADA (release 423437947 + asset 675189039 · CDN verificado byte a byte · `/releases/latest` = v6.52.1) — LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS — EN
-   JUEGO (LA .52.0 SE DESACTIVABA SOLA: ahora TODO el ciclo es probable).**
-   Checklist: (0) LA CARGA — el mod ARRANCA en la lista (la .52.0 se
-   desactivaba sola con «Recurso esperado no encontrado» ×9 — si ves la
-   6.52.1 activa sin mensaje rojo, LA CURA FUNCIONÓ), (a) LA AURORA DE
-   TINTA — abre la Bolsa del Escriba (ahora CUATRO piezas): equipa la
-   aurora y SALTA: las DIEZ PLUMAS de luz se DESPLIEGAN tras tu espalda
-   (el abanico se abre con el vuelo, el aleteo corre en CADENA de la
-   pluma interior a la exterior, el ESPECTRO corre por cada pluma, la
-   tinta-ruido FLUYE hacia las puntas y estas se DESGARRAN en mechones
-   que titilan), (b) LA DUALIDAD — de NOCHE el prisma completo; espera
-   el AMANECER sin quitarla: la tinta se aclara LENTO a BLANCO-ORO (el
-   tooltip cambia de «la tinta es PRISMA» a «la tinta es BLANCO-ORO»),
-   (c) LA FÍSICA — vuela: sube RÁPIDO (física de polilla), 240 de
-   vuelo, SIN daño de caída al soltarte de alto, y en el aire aceleras
-   como con la insignia de la Emperatriz, (d) EL RESPETO — ponte unas
-   ALAS REALES encima: la aurora se PLEGÁ sola (ceden el visual) pero
-   el tiempo de vuelo queda ELEVADO a 240; quítatelas y DESPLIEGA de
-   nuevo, (e) LA VANIDAD — la aurora en el slot de vanidad es SOLO el
-   adorno (sin física), (f) LA LUZ — de noche el prisma te ILUMINA con
-   su color girando, (g) REGRESIÓN — todo el checklist de la .52.0
-   (ítem 2: el rayo masivo, la pluma viva, EL ESCRIBA) ahora SÍ se
-   puede probar.
+1. **✅ v6.52.2 PUBLICADA — LA BOLSA DEL DIOS ANTIGUO · EL HAZ DE VERDAD · LAS SOMBRAS III-IV — EN JUEGO.**
+   Checklist: (0) LA CARGA — el mod arranca SIN excepciones (la .52.1 tenía
+   6 silenciosas: la animación de devorar y la jaula morían en cada uso),
+   (a) LAS ALAS — equipa la Aurora de Tinta y salta: AHORA SE VEN **DOS ALAS**
+   (el hueco central que las separa + las anclas a ±5 px de su lado + el
+   barrido hacia atrás al girarte — antes se fundían en UNA sola capa),
+   (b) LA DEVORACIÓN — suelta una esencia/monedas/lingotes DELANTE del
+   grimorio seleccionado: EL FESTÍN CHICO por fin VIVE (el tentáculo sale de
+   ti, envuelve el plato, el SPRITE del item VIAJA por dentro hacia tu boca
+   encogiéndose y girando — antes crash silencioso), (c) EL HOTBAR — con el
+   Eterno en la mano DISPARANDO (autoReuse), abre el inventario y CLIC en
+   cualquier slot de la barra: AHORA SELECCIONA (el IL hook mató el rebote),
+   (d) EL LAZO — suelta el grimorio: yace 5 SEGUNDOS enteros (puedes
+   verlo/tocarlo) y solo entonces la sombra lo arrastra de vuelta,
+   (e) EL TOOLTIP — la esencia corrupta ya NO menciona el altar muerto:
+   cuenta la verdad (cómela +0,1% / suéltala para el despertar),
+   (f) EL HAZ — sostén EL PRIMER TRAZO y dispara: UNA LÍNEA CONTINUA de luz
+   (halo suave + cuerpo + núcleo blanco, la CARNE AVANZA raíz→punta, los
+   diamantes recorren, el telegraph es una aguja que se afina y blanquece al
+   95% — ya NO HAY cuadrados discontinuos), (g) LA JAULA — pelea al ESCRIBA:
+   las paredes de tinta CIERRAN hasta ±150 px y SE PLANTAN (antes crash),
+   (h) LA BOLSA DEL DIOS ANTIGUO — al entrar al mundo: ábrela → EL RAYO DE
+   FUSIÓN (carga 70 t con la aguja arcoíris y chispas que convergen → el haz
+   BARRE en coseno con el ARCOÍRIS CORRIENDO A LO LARGO del rayo + sacudón
+   de cámara), EL LÁSER ARCOÍRIS (balas curvas con estela arcoíris), EL
+   DESTRUCTOR DE PRISMAS (3 prismas orbitándote con 5 rayos en abanico), EL
+   TRUENO DE GELATINA (descargas perlin arcoíris al cursor) y LA MASA
+   CROMÁTICA (el material cuyo icono/nombre LATEN arcoíris), (i) LAS SOMBRAS
+   III-IV — en la Bolsa de las Sombras: EL CORO DE IRISES (siete iris SIN
+   ojo flotando en la cuerda, todos mirando la presa, convergen al morder) y
+   EL IRIS COLOSAL (el iris ROJO gigante colgando de dos nervios ópticos,
+   su PUPILA se DILATA al morder y los filamentos corren de la presa al
+   vacío).
 2. **⏳ v6.52.0 (release 423097464 + asset 673854166 · CDN
    verificado byte a byte) — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL
    ARMA VIVA · LA COREOGRAFÍA — AHORA PROBABLE (la .52.1 curó las 9

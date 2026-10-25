@@ -378,13 +378,18 @@ namespace AethonMod.Content.NPCs.Escriba
                         if (izq >= 0)
                         {
                             Main.projectile[izq].ai[1] = 62f;
-                            Main.projectile[izq].ai[3] = presa.Center.X - 150f;
+                            // v6.52.2 — LA CURA DE LA JAULA: Projectile.ai
+                            // es float[3] (índices 0..2 — Cecil: maxAI = 3);
+                            // el destino X vivía en ai[3] → IndexOutOfRange
+                            // EN CADA JAULA (client.log .52.1). AHORA el
+                            // destino viaja en localAI[0] (la pared lo lee).
+                            Main.projectile[izq].localAI[0] = presa.Center.X - 150f;
                             Main.projectile[izq].netUpdate = true;
                         }
                         if (der >= 0)
                         {
                             Main.projectile[der].ai[1] = -62f;
-                            Main.projectile[der].ai[3] = presa.Center.X + 150f;
+                            Main.projectile[der].localAI[0] = presa.Center.X + 150f;
                             Main.projectile[der].netUpdate = true;
                         }
                     }

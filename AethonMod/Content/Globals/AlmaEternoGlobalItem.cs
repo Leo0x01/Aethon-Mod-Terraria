@@ -244,11 +244,24 @@ namespace AethonMod.Content.Globals
         /// <summary>La velocidad del arrastre (px/t del vuelo de vuelta).</summary>
         private const float LazoVelocidad = 15f;
 
+        /// <summary>v6.52.2 — LA PACIENCIA DE LA SOMBRA (la letra: «esto
+        /// sucede muy rapido, deberia demorar al menos 5 segundos para
+        /// que suceda»): el libro caído DESCANSA en el suelo CINCO
+        /// SEGUNDOS enteros antes de que la sombra se estire — el
+        /// jugador puede verlo ahí, tocarlo, recogerlo a mano; solo tras
+        /// la paciencia la página vuelve a por él.</summary>
+        private const int LazoPaciencia = 300;   // 5 s × 60 t
+
         public override void PostUpdate(Item item)
         {
             try
             {
                 if (item == null || item.IsAir || Main.gameMenu) return;
+
+                // v6.52.2 — LA PACIENCIA: el reloj nace con el item al
+                // caer; mientras no cumpla los 5 segundos, la sombra NO
+                // se estira (el libro yace — la letra cumplida).
+                if (item.timeSinceItemSpawned < LazoPaciencia) return;
 
                 // EL PORTADOR MÁS CERCANO (el que lo soltó, en la
                 // práctica): el libro se pega a QUIEN lo tenga encima.

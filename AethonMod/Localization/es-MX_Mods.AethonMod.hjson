@@ -173,6 +173,92 @@ Items: {
                         (Arma de prueba de las fauces — v2.)
                         '''
         }
+        SombraDeLaPagina3: {
+                DisplayName: La Sombra de la Página III
+                Tooltip:
+                        '''
+                                «Siete iris sin rostro, y todos miran lo mismo que tú.»
+                                El tercer tomo: UNA cuerda de sombra que lleva SIETE IRISES
+                                flotando — SOLO el iris, sin párpados ni esclerótica — cada uno
+                                con su propio latido y TODOS clavados en la presa. En vuelo se
+                                abren en abanico; al morder, EL CORO CONVERGE sobre la herida
+                                y drena 3% cada 6 t. A 1 de vida: el festín de siempre.
+                        '''
+        }
+        SombraDeLaPagina4: {
+                DisplayName: La Sombra de la Página IV
+                Tooltip:
+                        '''
+                                «El ojo se cansó de ser ojo: ya solo queda el mirar.»
+                                El cuarto tomo: DOS NERVIOS ÓPTICOS de tinta cuelgan de ti y en
+                                su punta vive UN IRIS ROJO COLOSAL — su pupila se DILATA al
+                                morder y los filamentos de tinta corren desde la presa hasta el
+                                vacío. Drena 3% cada 6 t. A 1 de vida: el jefe, visto A TRAVÉS
+                                del iris.
+                        '''
+        }
+        RayoDeFusion: {
+                DisplayName: El Rayo de Fusión
+                Tooltip:
+                        '''
+                                «El dios de los slimes comprimió su hambre en una línea.»
+                                LA copia del ataque estrella de GOOZMA (Hunt of the Old
+                                God): carga 70 t — la aguja arcoíris que late y se afina —
+                                y FUEGO: el haz BARRE en coseno, el arcoíris CORRE a lo
+                                largo del rayo (una rebanada móvil de la paleta de aceite),
+                                el ruido fluye boca→punta y la boca florece cúbica.
+                                Daño en CONO, exacto como el original.
+                        '''
+        }
+
+        LaserArcoiris: {
+                DisplayName: El Láser Arcoíris
+                Tooltip:
+                        '''
+                                La copia del RainbowLaser de los Goozmitas: balas-láser
+                                CURVAS (extraUpdates 8, un giro diminuto por paso) cuya
+                                estela es una pila de sprites — núcleo fino estirado + halo
+                                ancho — con el arcoíris CORRIENDO a lo largo (5 ticks de
+                                paleta por segmento). Disparo rápido.
+                        '''
+        }
+
+        DestructorDePrismas: {
+                DisplayName: El Destructor de Prismas
+                Tooltip:
+                        '''
+                                La copia del PrismDestroyer de la Divina Gargoptuar:
+                                invoca TRES prismas que orbitan a tu alrededor (radio que
+                                respira hasta 300, giro que se CONGELA al disparar)
+                                barriendo 5 rayos de muerte en abanico; cada rayo choca en
+                                TRES tramos decrecientes (70/180/320 px) y todos viven en
+                                el arcoíris HSL giratorio.
+                        '''
+        }
+
+        TruenoDeGelatina: {
+                DisplayName: El Trueno de Gelatina
+                Tooltip:
+                        '''
+                                La copia del GooLightning de Goozma: descargas perlin
+                                arcoíris que saltan al cursor y golpean por línea. Doble
+                                pase (el canal + la vena) sobre la campana de glow, con el
+                                fade del original: (1 − t/30)^0.6.
+                        '''
+        }
+
+        MasaCromatica: {
+                DisplayName: La Masa Cromática
+                Tooltip:
+                        '''
+                                La copia del alma de creación de Goozma: el material
+                                gelatinoso arcoíris de todo su arsenal. El icono y el
+                                nombre VIVEN con el reloj de color del dios (la paleta
+                                de aceite, ciclo de 60 t).
+                        '''
+        }
+
+
 
         SombraPagina2: {
                 DisplayName: La Sombra de la Página II
@@ -1870,10 +1956,12 @@ Items: {
                 DisplayName: Esencia corrupta
                 Tooltip:
                         '''
-                        Lo que queda de un item tras el haz del ALTAR DE LA CAÍDA.
-                        No se usa con la mano: es COMIDA del Grimorio del Eterno.
-                        Suéltala de nuevo sobre el altar y el libro se la comerá…
-                        si su portador anda cerca.
+                        Un residuo del poder del grimorio: la esencia que las criaturas
+                        destilan desde su llegada (y los jefes, a raudales).
+                        CÓMELA (clic): +0,1% de daño PERMANENTE a todo lo que hagas,
+                        hasta +100% con 1000 esencias — después, cada una es 1 oro.
+                        O suéltala DELANTE del grimorio seleccionado: el libro se la
+                        come para su DESPERTAR.
                         '''
         }
 

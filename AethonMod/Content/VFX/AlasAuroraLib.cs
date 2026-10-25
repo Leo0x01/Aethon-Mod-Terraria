@@ -100,6 +100,19 @@ namespace AethonMod.Content.VFX
         /// <summary>Salto de hue entre pluma y pluma (el arcoíris del abanico).</summary>
         public const float HueEntrePlumas = 0.085f;
 
+        /// <summary>v6.52.2 — LA INCLINACIÓN BASE DE CADA ALA: el hueco
+        /// central que hace que el par se LEA como DOS alas (la letra:
+        /// «solo hay 1 ala»). La pluma interior de cada lado arranca ya
+        /// inclinada — sin este hueco ambos abanicos comparten la pluma
+        /// vertical y se funden en UN solo abanico de capa.</summary>
+        public const float InclinacionPar = 0.12f;
+
+        /// <summary>v6.52.2 — EL BARRIDO HACIA ATRÁS con la dirección de
+        /// vista: todo el par rota sutilmente hacia la espalda del
+        /// jugador (más abierto = más barrido — el par RESPONDE al
+        /// girarse, la firma del original).</summary>
+        public const float BarridoAtras = 0.14f;
+
         /// <summary>Dispersión del hue A LO LARGO de la pluma (el espectro corre).</summary>
         public const float HueALoLargo = 0.16f;
 
@@ -181,8 +194,11 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// Construye la pluma i del ala `lado` (−1/− derecha del sprite, +1 izquierda)
-        /// — la geometría EXACTA del original, con el par simétrico propio.
+        /// Construye la pluma i del ala `lado` (−1 derecha del sprite, +1
+        /// izquierda) — el abanico del original con EL PAR PROPIO DE LA
+        /// CASA (v6.52.2): cada ala vive su lado con la inclinación base
+        /// que abre el hueco central, y el par entero barre hacia atrás
+        /// con la dirección de vista.
         /// </summary>
         private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
             float grav, int direccion, int lado, float time)
@@ -200,10 +216,12 @@ namespace AethonMod.Content.VFX
             float amplitud = 0.05f + 0.11f * spread;
             off += MathF.Sin(flap - i * 0.45f) * amplitud;
 
-            // EL ÁNGULO: −π/2 (arriba) barrido por el abanico; el LADO
-            // espeja para el par completo (el original espeja con la
-            // dirección; aquí cada ala vive su propio espejo).
-            float angulo = -MathHelper.PiOver2 - direccion * lado * off;
+            // EL ÁNGULO (v6.52.2 — EL PAR QUE SE LEE): −π/2 (arriba) más
+            // la INCLINACIÓN propia del lado (el hueco central) barrido
+            // por el abanico — y todo el conjunto rotado hacia ATRÁS
+            // según mira el jugador (más abierto = más barrido).
+            float angulo = -MathHelper.PiOver2 + lado * (InclinacionPar + off)
+                - direccion * BarridoAtras * (0.35f + 0.65f * spread);
             Vector2 dir = new(MathF.Cos(angulo), MathF.Sin(angulo) * grav);
             Vector2 perp = new(-dir.Y, dir.X);
 
@@ -399,7 +417,7 @@ namespace AethonMod.Content.VFX
                 {
                     // EL ANCLA: la espalda, ligeramente hacia atrás (el
                     // original: MountedCenter + (−dir·7, −4·grav)).
-                    Vector2 ancla = pl.MountedCenter + new Vector2(-direccion * 7f, -4f * grav);
+                    Vector2 anclaBase = pl.MountedCenter + new Vector2(-direccion * 7f, -4f * grav);
 
                     Pluma[] plumas = _plumas;
                     float[] hues = _hues;
@@ -409,6 +427,10 @@ namespace AethonMod.Content.VFX
                     int k = 0;
                     for (int lado = -1; lado <= 1; lado += 2)
                     {
+                        // v6.52.2 — EL ANCLA PROPIA DE CADA ALA: ±5 px hacia
+                        // su lado (la raíz separada del par — junto con la
+                        // inclinación base, lo que hace que se LEAN DOS alas).
+                        Vector2 ancla = anclaBase + new Vector2(lado * 5f, 0f);
                         for (int i = 0; i < PlumasPorAla; i++)
                         {
                             plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav, direccion, lado, time);

@@ -409,7 +409,7 @@ namespace AethonMod.Content.Systems
                     var mp = Main.projectile[pr];
                     mp.localAI[1] = drop.Center.X;
                     mp.localAI[2] = drop.Center.Y;
-                    mp.localAI[3] = drop.type;
+                    mp.localAI[0] = drop.type;   // v6.52.2 — float[3]: índice 3 NO existe (la cura del festín invisible)
                     mp.netUpdate = true;   // que el ExtraAI camine YA
                 }
             }

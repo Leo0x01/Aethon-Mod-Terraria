@@ -106,6 +106,14 @@ namespace AethonMod.Content.Players
             // Grimorio del Eterno, garantizados como sus hermanas.
             bolsas += Entregar(ModContent.ItemType<BolsaProyectilesDignos>());
 
+            // v6.52.2 — LA BOLSA DEL DIOS ANTIGUO (la letra: «analiza el jefe
+            // y de ser posible crea una nueva bolsa con todos los items que
+            // puedas copiar de ese jefe, que sea una copia exacta para
+            // nuestra investigacion profunda»): las copias de GOOZMA (Hunt
+            // of the Old God) — el Rayo de Fusión, el Láser Arcoíris, el
+            // Destructor de Prismas, el Trueno de Gelatina y la Masa Cromática.
+            bolsas += Entregar(ModContent.ItemType<BolsaDelDiosAntiguo>());
+
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;
             if (!HasItem(ItemID.TargetDummy))

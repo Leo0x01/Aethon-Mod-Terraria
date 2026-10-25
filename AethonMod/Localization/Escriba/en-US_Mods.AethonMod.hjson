@@ -40,6 +40,11 @@ Items: {
 		FormaDia: The ink is WHITE-GOLD: the page bathes the wing.
 		FormaNoche: The ink is PRISM: the spectrum runs along the wing.
 	}
+
+	BolsaDelDiosAntiguo: {
+		DisplayName: Bolsa Del Dios Antiguo
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -52,6 +57,13 @@ Projectiles: {
 	EscribaPared.DisplayName: Pared de tinta
 	EscribaVerso.DisplayName: El Verso
 	AlasAuroraHalo.DisplayName: The Ink Aurora
+	GolpeFusion.DisplayName: Golpe Fusion
+	LaserArcoirisProjectile.DisplayName: Laser Arcoiris Projectile
+	PrismaDestructorProjectile.DisplayName: Prisma Destructor Projectile
+	RayoFusionProjectile.DisplayName: Rayo Fusion Projectile
+	TruenoGelatinaProjectile.DisplayName: Trueno Gelatina Projectile
+	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
+	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
 }
 
 NPCs: {

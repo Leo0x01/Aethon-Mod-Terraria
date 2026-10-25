@@ -115,17 +115,18 @@ namespace AethonMod.Content.VFX
             float calidad = MathHelper.Clamp(VFXCore.FactorCalidad, 0.5f, 1f);
             int n = (int)MathF.Round(MathHelper.Lerp(16f, 34f, (calidad - 0.5f) * 2f));
             bool conHalo = calidad > 0.72f;
-            int capas = conHalo ? 3 : 2;
             int diamantes = (int)(largo / 578f) + 1;   // un pico cada 92·2π px
-            int estimado = capas * (n - 1) + diamantes + 6;
+            // v6.52.2 — LAS TIRAS CONTINUAS no consumen el búfer de quads
+            // de VFXCore: el presupuesto ahora cuenta SOLO los diamantes y
+            // las tapas (los sprites del remate).
+            int estimado = diamantes + 8;
             if (!VFXCore.Presupuesto(estimado))
             {
                 // LA DEGRADACIÓN ELEGANTE (el blueprint B1): sin halo,
                 // espina a la mitad — el rayo VIVE aunque el frame esté caro.
                 conHalo = false;
-                capas = 2;
                 n = Math.Max(12, n / 2);
-                estimado = capas * (n - 1) + diamantes + 4;
+                estimado = 6;
                 if (!VFXCore.Presupuesto(estimado)) return;
             }
 
@@ -179,27 +180,51 @@ namespace AethonMod.Content.VFX
                 anchosCore[i] = baseW * 0.42f;
             }
 
-            float flujoV = (tiempo * flujo) % 1f;
-            if (flujoV < 0f) flujoV += 1f;
+            // === (4) v6.52.2 — LAS CAPAS CONTINUAS: TRES TIRAS DE
+            //     PRIMITIVAS TEXTURIZADAS (RayoStrip.FajaTexturada) en UN
+            //     solo baile de lote — el relevo de las cintas de
+            //     rectángulos de VFXCore.Ribbon (la cura de los «cuadrados
+            //     discontinuos»: UNA tira continua por capa, el ruido
+            //     AVANZA por las UVs, la gaussiana vive en la textura). ===
+            //     LAS COORDENAS: FajaTexturada toma PANTALLA (mundo −
+            //     screenPosition — el contrato de RayoStrip).
+            Vector2[] espinaP = new Vector2[m];
+            for (int i = 0; i < m; i++) espinaP[i] = espina[i] - Main.screenPosition;
 
-            // === (4) LAS CAPAS ADITIVAS — halo → cuerpo → core ===
-            if (conHalo)
-                VFXCore.Ribbon(espina, anchosHalo, StormLib.Tint(color, 0.16f * intensidad),
-                    VFXCore.SoftGlow, flujoV * 0.6f);
+            // LOS SEMIANCHOS por nodo (anchos[] es el ancho TOTAL).
+            float[] semiHalo = new float[m], semiCuerpo = new float[m], semiCore = new float[m];
+            for (int i = 0; i < m; i++)
+            {
+                semiHalo[i] = anchosHalo[i] * 0.5f;
+                semiCuerpo[i] = anchos[i] * 0.5f;
+                semiCore[i] = anchosCore[i] * 0.5f;
+            }
 
-            // EL CUERPO: la textura de ruido de tinta propia — la carne que
-            // AVANZA. Tinte con un pulso lento a lo largo (la receta
-            // AngelicBeam: hue gradient + sin(t·5)).
-            Texture2D cuerpo = RuidoTinta;
-            float pulso = 0.55f + 0.12f * MathF.Sin(tiempo * 5f);
-            VFXCore.Ribbon(espina, anchos, StormLib.Tint(color, pulso * intensidad),
-                cuerpo, flujoV);
+            Texture2D tex = RuidoTinta;
+            RayoStrip.AbrirLote();
+            try
+            {
+                // LA HALO ×2.3 — el tinte tenue que susurra (flujo lento).
+                if (conHalo)
+                    RayoStrip.FajaTexturadaEnLote(espinaP, semiHalo,
+                        StormLib.Tint(color, 0.20f * intensidad), tex,
+                        560f, flujo * 0.45f, tiempo, 0f, 1f);
 
-            // EL CORE: el pase blanco del Last Prism (escala /2 del vanilla,
-            // aquí 0.42) — la línea caliente que hace leer el rayo como LUZ.
-            VFXCore.Ribbon(espina, anchosCore,
-                StormLib.Tint(new Color(255, 250, 240), 0.85f * intensidad),
-                VFXCore.GlowOrb, flujoV * 1.6f);
+                // EL CUERPO — la carne que AVANZA (el pulso lento a lo
+                // largo, la receta AngelicBeam: hue gradient + sin(t·5)).
+                float pulso = 0.55f + 0.12f * MathF.Sin(tiempo * 5f);
+                RayoStrip.FajaTexturadaEnLote(espinaP, semiCuerpo,
+                    StormLib.Tint(color, pulso * intensidad), tex,
+                    420f, flujo, tiempo, 0f, 1f);
+
+                // EL CORE — SOLO LA VENA CENTRAL de la textura (V 0.36..0.64:
+                // la banda caliente) con flujo ×1.6: la línea BLANCA que hace
+                // leer el rayo como LUZ (el pase del Last Prism, calibrado).
+                RayoStrip.FajaTexturadaEnLote(espinaP, semiCore,
+                    StormLib.Tint(new Color(255, 250, 240), 0.85f * intensidad), tex,
+                    420f, flujo * 1.6f, tiempo, 0.36f, 0.64f);
+            }
+            finally { RayoStrip.CerrarLote(); }
 
             // === (5) LOS DIAMANTES VIAJEROS — sin(along/92 − t·9)^7 ===
             // Los PICOS viajan a 92·9 ≈ 828 px/s raíz→punta (los paquetes
@@ -256,14 +281,22 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL TELEGRAPH — la línea de aviso antes del disparo (la receta
-        //  ArtemisLaser de Calamity: banda tenue que late mientras carga)
+        //  EL TELEGRAPH — v6.52.2 — LA AGUJA DE AVISO (la receta completa
+        //  del TelegraphTech del EmpressLance de Calamity Overhaul, leída
+        //  de la fuente: línea UNIFORME a lo largo — la textura ya no es
+        //  radial como la del SoftGlow viejo que MORÍA A NEGRO en los
+        //  extremos — + los RUNNERS que aceleran con la carga + EL
+        //  COMPRESOR del último 20%: la línea se afina y BLANQUECE hasta
+        //  la aguja que anuncia el disparo).
         // ==================================================================
 
         /// <summary>
-        /// Encola la LÍNEA DE AVISO de un rayo que se avecina: banda fina
-        /// aditiva que LATA (2 Hz) y CRECE con la fase de carga — el
-        /// «telegraph» universal de los jefes modernos. Solo encola.
+        /// Encola la LÍNEA DE AVISO de un rayo que se avecina: la aguja
+        /// texturizada UNIFORME que LATA (2→4 Hz), los RUNNERS que
+        /// RECORREN la línea (acelerando con la carga) y EL COMPRESOR
+        /// (fase > 0.8: la línea colapsa a una aguja blanca — el
+        /// «smoothstep(0.80, 1.0)» del EmpressLance original). Solo
+        /// encola (las tiras hacen su propio baile de lote interno).
         /// </summary>
         /// <param name="faseCarga">0→1 — cuán cerca está el disparo.</param>
         public static void Telegrafo(Vector2 origen, Vector2 dir, float largo,
@@ -273,35 +306,65 @@ namespace AethonMod.Content.VFX
             dir = dir.SafeNormalize(Vector2.UnitX);
             largo = Math.Min(largo, 4200f);
             if (largo < 16f) return;
-            if (!VFXCore.Presupuesto(6)) return;
+            if (!VFXCore.Presupuesto(8)) return;
 
-            // LA LATIDOS: 2 Hz creciendo a 4 Hz al final (la escalada de
-            // tensión del blueprint R3 — el jugador SIENTE cuándo llega).
-            float hz = MathHelper.Lerp(2f, 4f, MathHelper.Clamp(faseCarga, 0f, 1f));
+            // LA ESCALADA DE TENSIÓN: 2 Hz creciendo a 4 Hz al final.
+            float fase = MathHelper.Clamp(faseCarga, 0f, 1f);
+            float hz = MathHelper.Lerp(2f, 4f, fase);
             float latido = 0.5f + 0.5f * MathF.Sin(tiempo * hz * MathHelper.TwoPi);
-            float alfa = (0.10f + 0.22f * faseCarga) * (0.55f + 0.45f * latido);
 
-            // LA BANDA: línea fina que ENGORDA hacia el ancho final —
-            // el rayo se ANUNCIA dibujándose antes de existir.
+            // EL COMPRESOR — el último 20%: la línea SE AFINA y BLANQUECE
+            // (la aguja — el pre-fuego del original).
+            float compres = Suave01((fase - 0.80f) / 0.20f);
+
+            // LA AGUJA: la tira texturizada UNIFORME (la banda central de
+            // la textura — brillo parejo a lo largo, la PROMESA del
+            // trayecto completa hasta la punta).
+            float w = MathHelper.Lerp(3f + anchoFinal * 0.18f * fase, 1.6f, compres);
+            Color tinte = Color.Lerp(color, new Color(255, 252, 245), compres * 0.75f);
+            float alfa = (0.10f + 0.24f * fase) * (0.55f + 0.45f * latido) + compres * 0.30f;
+
             Vector2 fin = origen + dir * largo;
-            VFXCore.Line(origen, fin, StormLib.Tint(color, alfa), 3f + anchoFinal * 0.18f * faseCarga);
+            Vector2[] espina =
+            {
+                origen - Main.screenPosition,
+                fin - Main.screenPosition,
+            };
+            RayoStrip.AbrirLote();
+            try
+            {
+                RayoStrip.FajaTexturadaEnLote(espina, new float[] { w * 0.5f, w * 0.5f },
+                    StormLib.Tint(tinte, alfa), RuidoTinta,
+                    480f, 0.6f + fase * 1.6f, tiempo, 0.40f, 0.60f);
+            }
+            finally { RayoStrip.CerrarLote(); }
 
-            // EL BORDE DE PLASMA: dos líneas pelos a los lados (la firma
-            // del telegraph de Artemis: doble dibujado interior+exterior).
-            Vector2 perp = new Vector2(-dir.Y, dir.X) * (4f + anchoFinal * 0.22f * faseCarga);
-            VFXCore.Line(origen + perp, fin + perp, StormLib.Tint(color, alfa * 0.5f), 1.5f);
-            VFXCore.Line(origen - perp, fin - perp, StormLib.Tint(color, alfa * 0.5f), 1.5f);
+            // LOS RUNNERS — los paquetes de luz que RECORREN la línea
+            // (raíz→punta, MÁS RÁPIDOS cuanto más cerca el disparo — el
+            // frac(along·1.4 − t·(0.7+progreso·1.6)) del original).
+            float velRunner = 0.7f + fase * 1.6f;
+            for (int i = 0; i < 3; i++)
+            {
+                float prog = (tiempo * velRunner + i * 0.3333f) % 1f;
+                float along = prog * largo;
+                Vector2 pos = origen + dir * along;
+                float alfaR = (0.10f + 0.20f * fase) * (1f - prog * 0.35f);
+                VFXCore.Quad(pos, StormLib.Tint(tinte, alfaR),
+                    new Vector2(6f + 7f * fase, 6f + 7f * fase), (float)dir.ToRotation(),
+                    VFXCore.GlowOrb);
+            }
 
-            // LA BOCA: el punto que SE ESTÁ CARGANDO (crece con la fase).
-            VFXCore.Quad(origen, StormLib.Tint(color, 0.25f + 0.35f * faseCarga),
-                new Vector2(10f + anchoFinal * 0.5f * faseCarga,
-                            10f + anchoFinal * 0.5f * faseCarga),
+            // LA BOCA: el punto que SE ESTÁ CARGANDO (crece con la fase +
+            // el DESTELLO del compresor — la chispa que anuncia el fuego).
+            VFXCore.Quad(origen, StormLib.Tint(tinte, 0.25f + 0.35f * fase + 0.30f * compres),
+                new Vector2(10f + anchoFinal * 0.5f * fase + 14f * compres,
+                            10f + anchoFinal * 0.5f * fase + 14f * compres),
                 VFXCore.GlowOrb);
 
             // La luz tenue de la línea (una sola pasada, 96 px).
             Vector3 luz = color.ToVector3();
             StormLib.AddLightAlong(new[] { origen, fin }, luz.X, luz.Y, luz.Z,
-                0.35f * (0.5f + 0.5f * faseCarga), 96f);
+                0.35f * (0.5f + 0.5f * fase), 96f);
         }
     }
 }

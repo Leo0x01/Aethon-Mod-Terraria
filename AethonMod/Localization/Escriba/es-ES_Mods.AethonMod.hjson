@@ -40,6 +40,11 @@ Items: {
 		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
 		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
 	}
+
+	BolsaDelDiosAntiguo: {
+		// DisplayName: Bolsa Del Dios Antiguo
+		// Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -52,6 +57,13 @@ Projectiles: {
 	EscribaPared.DisplayName: Pared de tinta
 	EscribaVerso.DisplayName: El Verso
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
+	// GolpeFusion.DisplayName: Golpe Fusion
+	// LaserArcoirisProjectile.DisplayName: Laser Arcoiris Projectile
+	// PrismaDestructorProjectile.DisplayName: Prisma Destructor Projectile
+	// RayoFusionProjectile.DisplayName: Rayo Fusion Projectile
+	// TruenoGelatinaProjectile.DisplayName: Trueno Gelatina Projectile
+	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
+	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
 }
 
 NPCs: {

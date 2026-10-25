@@ -166,6 +166,197 @@ namespace AethonMod.Content.VFX
         private static int _nVerts = 0;
 
         // ==================================================================
+        //  v6.52.2 — LA FAJA TEXTURIZADA (la tira del haz de verdad).
+        //
+        //  LA INVESTIGACIÓN DEL CICLO (la letra: «la nueva arma que se
+        //  supone que es de hazes como la de los mods populares esta mal
+        //  creada, en vez de un haz de luz con todo el conjunto… son
+        //  varias lineas con muchos cuadrados discontinuos»): la receta
+        //  de BeamLib era CORRECTA (boca 0.38/6% · punta 0.12 · core
+        //  0.42 · diamantes sin⁷/92/9 — todo calca el AriaGammaRay de
+        //  Calamity Overhaul) pero el RENDERER la traicionaba:
+        //  VFXCore.Ribbon dibujaba el haz como CADENA DE RECTÁNGULOS
+        //  rotados independientes con solape aditivo (bultos), la
+        //  textura ENTERA comprimida en cada segmento (cuadrados
+        //  periódicos), y los segmentos de <1.5 px SALTADOS (líneas
+        //  discontinuas literales). LOS MAESTROS (FusionRay de Hunt of
+        //  the Old God, GammaRayBeam de CWR): UNA TIRA CONTINUA con
+        //  UV.X = largo de arco (el flujo del ruido HORNEADO en las UVs
+        //  — el «shader» resuelto en CPU) y la caída gaussiana VIVA EN
+        //  LA TEXTURA (eje V de RuidoTinta: 0 en bordes → centro).
+        //
+        //  ESTE EMISOR: dos columnas (V 0..1 o la banda que el llamador
+        //  pida — el CORE muestrea 0.36..0.64, la vena caliente de la
+        //  textura), U = arcs/periodo + tiempo·flujo con LinearWrap (el
+        //  ruido AVANZA raíz→punta, continuo de punta a punta), el
+        //  color del vértice PRE-MULTIPLICADO como toda la casa.
+        // ==================================================================
+
+        private static BasicEffect _fxT;
+        private static VertexPositionColorTexture[] _vertsT = new VertexPositionColorTexture[8192];
+        private static int _nVertsT;
+
+        /// <summary>
+        /// LA FAJA TEXTURIZADA (el baile completo): abre lote, emite la
+        /// tira, cierra lote. <paramref name="pts"/> en COORDENADAS DE
+        /// PANTALLA (mundo − Main.screenPosition).
+        /// </summary>
+        /// <param name="pts">La espina del haz (pantalla).</param>
+        /// <param name="semiancho">Semiancho por nodo (px — la mitad del ancho total).</param>
+        /// <param name="color">El tinte PRE-MULTIPLICADO (StormLib.Tint(color, alfa)).</param>
+        /// <param name="tex">La textura del cuerpo (gaussiana en V, ruido en U, wrap).</param>
+        /// <param name="periodo">Px de haz por TILE de textura (el periodo del ruido).</param>
+        /// <param name="flujo">Tiles por SEGUNDO que avanza la carne (raíz→punta).</param>
+        /// <param name="tiempo">El reloj determinista (GlobalTimeWrappedHourly).</param>
+        /// <param name="vMin">Banda V inferior (0 para el cuerpo; 0.36 para el core).</param>
+        /// <param name="vMax">Banda V superior (1 para el cuerpo; 0.64 para el core).</param>
+        public static void FajaTexturada(Vector2[] pts, float[] semiancho, Color color,
+            Texture2D tex, float periodo, float flujo, float tiempo,
+            float vMin = 0f, float vMax = 1f)
+        {
+            AbrirLote();
+            try { FajaTexturadaEnLote(pts, semiancho, color, tex, periodo, flujo, tiempo, vMin, vMax); }
+            finally { CerrarLote(); }
+        }
+
+        /// <summary>La faja DENTRO de un lote ya abierto (el patrón de
+        /// FilamentoEnLote — BeamLib dibuja sus TRES capas en UN solo baile).</summary>
+        public static void FajaTexturadaEnLote(Vector2[] pts, float[] semiancho, Color color,
+            Texture2D tex, float periodo, float flujo, float tiempo,
+            float vMin = 0f, float vMax = 1f)
+            => FajaTexturadaEnLote(pts, semiancho, null, color, tex, periodo, flujo, tiempo, vMin, vMax);
+
+        /// <summary>v6.52.2 — LA FAJA DE GRADIENTE (la firma del
+        /// FusionRay de Goozma: el color VIAJA A LO LARGO del haz —
+        /// coloresPorNodo[i] tiñe cada segmento; null = el color fijo).
+        /// EL ARCOÍRIS A LO LARGO es lo que hacía el shader del original
+        /// con `ValueAt(localAI[0] − progress·100)` — aquí, resuelto por
+        /// vértice en CPU, como todo en la casa.</summary>
+        public static void FajaTexturadaEnLote(Vector2[] pts, float[] semiancho,
+            Color[] coloresPorNodo, Color color, Texture2D tex,
+            float periodo, float flujo, float tiempo,
+            float vMin = 0f, float vMax = 1f)
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return;
+            if (pts == null || pts.Length < 2 || semiancho == null || tex == null || tex.IsDisposed) return;
+            if (periodo < 16f) periodo = 16f;
+            int n = pts.Length;
+            if (semiancho.Length < n) n = semiancho.Length;
+            if (coloresPorNodo != null && coloresPorNodo.Length < n) coloresPorNodo = null;
+            if (n < 2) return;
+
+            // EL LARGO DE ARCO (el U del ruido — continuo de punta a punta).
+            float[] arcs = new float[n];
+            float total = 0f;
+            for (int i = 1; i < n; i++)
+            {
+                total += Vector2.Distance(pts[i - 1], pts[i]);
+                arcs[i] = total;
+            }
+            if (total < 1f) return;
+
+            // EL FLUJO: u = arco/periodo − tiempo·flujo → los rasgos del
+            // ruido AVANZAN raíz→punta (la «carne que camina» — el
+            // uTime NEGATIVO del FusionRay original, horneado en las UVs).
+            float uBase = -tiempo * flujo;
+
+            // LA EMISIÓN: un quad por segmento (dos triángulos, vértices
+            // COMPARTIDOS con los vecinos — la tira continua de la casa).
+            _nVertsT = 0;
+            for (int i = 0; i < n - 1; i++)
+            {
+                float s0 = semiancho[i], s1 = semiancho[i + 1];
+                if (s0 <= 0.05f && s1 <= 0.05f) continue;
+
+                // LA NORMAL MEDIA por nodo (la tira es continua por construcción).
+                Vector2 d0 = i > 0 ? pts[i] - pts[i - 1] : pts[i + 1] - pts[i];
+                Vector2 d1 = i < n - 2 ? pts[i + 2] - pts[i + 1] : pts[i + 1] - pts[i];
+                if (d0.LengthSquared() < 0.0001f) d0 = d1;
+                if (d1.LengthSquared() < 0.0001f) d1 = d0;
+                Vector2 m0 = Vector2.Normalize(Vector2.Normalize(d0) + Vector2.Normalize(d1));
+                if (!(m0.LengthSquared() >= 0.001f)) m0 = d1;
+                m0 = Vector2.Normalize(m0);
+                Vector2 n0 = new(-m0.Y, m0.X);
+                Vector2 n1 = n0;   // la normal media del segmento (suficiente a 34+ nodos)
+
+                float u0 = arcs[i] / periodo + uBase;
+                float u1 = arcs[i + 1] / periodo + uBase;
+
+                Vector2 a0 = pts[i] + n0 * s0, a1 = pts[i] - n0 * s0;
+                Vector2 b0 = pts[i + 1] + n1 * s1, b1 = pts[i + 1] - n1 * s1;
+
+                // EL GRADIENTE A LO LARGO: cada segmento SU color (null = fijo)
+                Color c0 = coloresPorNodo != null ? coloresPorNodo[i] : color;
+                Color c1 = coloresPorNodo != null ? coloresPorNodo[i + 1] : color;
+                EmitirQuadTex(a0, a1, b0, b1, c0, c1, u0, u1, vMin, vMax);
+            }
+            VolcarTextura(tex);
+        }
+
+        /// <summary>Apila el quad texturizado (2 triángulos) en el pozo —
+        /// con el color por vértice del gradiente (c0 el nodo i, c1 el i+1).</summary>
+        private static void EmitirQuadTex(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1,
+            Color c0, Color c1, float u0, float u1, float vMin, float vMax)
+        {
+            if (_nVertsT + 6 > _vertsT.Length) return;
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a0.X, a0.Y, 0f), c0, new Vector2(u0, vMin));
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a1.X, a1.Y, 0f), c0, new Vector2(u0, vMax));
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b0.X, b0.Y, 0f), c1, new Vector2(u1, vMin));
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a0.X, a0.Y, 0f), c0, new Vector2(u0, vMin));
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b0.X, b0.Y, 0f), c1, new Vector2(u1, vMin));
+            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b1.X, b1.Y, 0f), c1, new Vector2(u1, vMax));
+        }
+
+        /// <summary>El volcado de la tira texturizada (BasicEffect con
+        /// textura + LinearWrap — el flujo vive en las UVs, CERO shaders).</summary>
+        private static void VolcarTextura(Texture2D tex)
+        {
+            if (_nVertsT < 3) { _nVertsT = 0; return; }
+            try
+            {
+                GraphicsDevice gd = Main.graphics.GraphicsDevice;
+                if (_fxT == null)
+                {
+                    _fxT = new BasicEffect(gd)
+                    {
+                        LightingEnabled = false,
+                        VertexColorEnabled = true,
+                        TextureEnabled = true,
+                        Alpha = 1f
+                    };
+                }
+                _fxT.Texture = tex;
+                _fxT.World = Main.GameViewMatrix.TransformationMatrix;
+                _fxT.View = Matrix.Identity;
+                _fxT.Projection = Matrix.CreateOrthographicOffCenter(
+                    0, Main.screenWidth, Main.screenHeight, 0, 0, -1);
+
+                gd.BlendState = _pantalla;
+                gd.DepthStencilState = DepthStencilState.None;
+                gd.RasterizerState = RasterizerState.CullNone;
+                gd.SamplerStates[0] = SamplerState.LinearWrap;
+
+                foreach (EffectPass pass in _fxT.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    int porLote = (_vertsT.Length / 3) * 3;
+                    int inicio = 0;
+                    while (inicio < _nVertsT)
+                    {
+                        int cuenta = Math.Min(_nVertsT - inicio, porLote);
+                        int prims = cuenta / 3;
+                        if (prims > 0)
+                            gd.DrawUserPrimitives(PrimitiveType.TriangleList,
+                                _vertsT, inicio, prims);
+                        inicio += cuenta;
+                    }
+                }
+            }
+            catch { }
+            _nVertsT = 0;
+        }
+
+        // ==================================================================
         //  EL FILAMENTO (la entrada pública con su propio baile)
         // ==================================================================
 

@@ -634,6 +634,13 @@ namespace AethonMod.Content.Items.Bolsas
             // solo nos quedamos con La Sombra de la Página») — la familia
             // vuelve a ser UNA: la fauce tentacular aprobada.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA ÚNICA: la aprobada por el usuario
+            // v6.52.2 — LOS TOMOS NUEVOS (la letra: «crea un sombra de la
+            // pagina 3 y 4 pero para estos solo usa el iris no el ojo
+            // completo»): EL CORO DE IRISES (siete iris flotando en la
+            // cuerda, todos clavados en la presa) y EL IRIS COLOSAL (el
+            // iris rojo gigante con su pupila que se dilata al morder).
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina3>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina4>(), 1));
             // v6.50.102 — LA TINTA VIVA MURIÓ (la letra del usuario:
             // «borra también tinta viva»): su Grieta de Tinta sigue viva
             // en el grimorio que la abrió — el disparo pertenece al libro.
@@ -663,6 +670,41 @@ namespace AethonMod.Content.Items.Bolsas
             // Equinoccio, puedes borrar las otras»): las pruebas A/B/C
             // murieron — vive LA DUAL, ahora sin bruma.
             l.Add((ModContent.ItemType<Weapons.Emperatriz.Equinoccio>(), 1));
+            return l;
+        }
+    }
+
+    /// <summary>v6.52.2 — LA BOLSA DEL DIOS ANTIGUO (la letra: «el jefe
+    /// que aparece en este video tiene todo lo que he estado buscando…
+    /// analiza el jefe y de ser posible crea una nueva bolsa con todos
+    /// los items que puedas copiar de ese jefe, que sea una copia exacta
+    /// para nuestra investigacion profunda del codigo, tecnica y
+    /// visuales, centrate tambien en su ataque de haz de luz es muy
+    /// importante»). EL JEFE: GOOZMA, el antiguo Dios de los Slimes, del
+    /// mod «Hunt of the Old God» (Team Hypnos — UriBuilder/CalamityHunt,
+    /// fuente abierta, leída línea a línea). LA COPIA: EL RAYO DE FUSIÓN
+    /// (el beam del video — carga→barrido coseno, el arcoíris A LO LARGO
+    /// del haz, el cono de daño), EL LÁSER ARCOÍRIS (el RainbowLaser
+    /// curvo de los Goozmitas), EL DESTRUCTOR DE PRISMAS (el shuriken de
+    /// 5 rayos), EL TRUENO DE GELATINA (el GooLightning perlin) y LA
+    /// MASA CROMÁTICA (el material arcoíris) — todo con EL MOTOR DE
+    /// COLOR de Goozma (ColorGoozma: la paleta OIL en ciclo de 60 t, el
+    /// reloj compartido que hace que TODO el jefe se vea como se ve).</summary>
+    public class BolsaDelDiosAntiguo : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa del Dios Antiguo";
+        protected override string NombreCorto => "Bolsa del Dios Antiguo";
+        protected override Color ColorFiesta => new(174, 23, 189);
+        protected override string Nota => "Goozma, el Dios de los Slimes — la copia exacta para la investigación";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Weapons.Goozma.RayoDeFusion>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Goozma.LaserArcoiris>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Goozma.DestructorDePrismas>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Goozma.TruenoDeGelatina>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Goozma.MasaCromatica>(), 30));
             return l;
         }
     }

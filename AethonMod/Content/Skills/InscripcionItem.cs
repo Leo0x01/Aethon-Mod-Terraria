@@ -40,10 +40,15 @@ namespace AethonMod.Content.Skills
         /// <summary>El multiplicador de daño por nivel: +12% por prueba vencida.</summary>
         public float DañoPorNivel => 1f + 0.12f * Nivel;
 
-        /// <summary>El dato de un ítem cualquiera (null-safe).</summary>
+        /// <summary>El dato de un ítem cualquiera (null-safe y TOTAL —
+        /// v6.52.2: GetGlobalItem lanza KeyNotFoundException si el ítem
+        /// no es una Pluma; el hook ModifyWeaponDamage puede dispararse
+        /// con el HeldItem cambiado a mitad de vuelo — el client.log lo
+        /// confesó. AHORA De() JAMÁS revienta: no-Pluma = null).</summary>
         public static InscripcionItem De(Item item)
         {
             if (item == null || item.IsAir) return null;
+            if (item.type != ModContent.ItemType<PlumaConsciente>()) return null;
             return item.GetGlobalItem<InscripcionItem>();
         }
 

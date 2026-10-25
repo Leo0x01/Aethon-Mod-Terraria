@@ -299,10 +299,26 @@ namespace AethonMod.Content.Projectiles.Escriba
         public override void AI()
         {
             // EL MOVIMIENTO DE CIERRE (ai[1] = velocidad X en décimas).
-            if (Fase == 0)
-                Projectile.position.X += Projectile.ai[1] * 0.1f * 0.4f;   // lento mientras avisa
+            // v6.52.2 — LA JAULA SE CIERRA DE VERDAD: localAI[0] = el X
+            // destino (±150 de la presa — EscribaAtaques lo sembró); la
+            // pared camina hasta él y se PLANTA (Fase 1 = zona activa).
+            float destinoX = Projectile.localAI[0];
+            bool tieneDestino = destinoX != 0f;
+            float paso = Projectile.ai[1] * 0.1f * (Fase == 0 ? 0.4f : 1f);
+            if (tieneDestino)
+            {
+                float hacia = destinoX - Projectile.Center.X;
+                // ¿LLEGÓ? (el paso no lo pasa de largo)
+                if (MathF.Abs(hacia) <= MathF.Abs(paso) + 2f)
+                {
+                    Projectile.position.X = destinoX - Projectile.width * 0.5f;
+                    if (Fase == 0) { Fase = 1; Projectile.netUpdate = true; }
+                }
+                else
+                    Projectile.position.X += paso;
+            }
             else
-                Projectile.position.X += Projectile.ai[1] * 0.1f;
+                Projectile.position.X += paso;
 
             if (Main.netMode != NetmodeID.Server && Fase == 0)
                 Lighting.AddLight(Projectile.Center, 0.10f, 0.05f, 0.20f);

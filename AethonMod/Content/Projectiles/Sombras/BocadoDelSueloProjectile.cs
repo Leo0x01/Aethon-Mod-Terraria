@@ -68,19 +68,25 @@ namespace AethonMod.Content.Projectiles.Sombras
 
         /// <summary>v6.51.12 — EL CABLE EXTRA: el ancla y el tipo del
         /// fantasma viajan con el proyectil (las localAI NO cruzan —
-        /// SendExtraAI es el cauce de la casa).</summary>
+        /// SendExtraAI es el cauce de la casa).
+        /// v6.52.2 — LA CURA DEL FESTÍN INVISIBLE: Projectile.localAI es
+        /// float[3] (índices 0..2 — verificado al IL con Cecil: maxAI = 3);
+        /// el «tipo del fantasma» vivía en localAI[3] → IndexOutOfRange
+        /// EN CADA ANIMACIÓN (el client.log de la .52.1 lo confesó: seis
+        /// excepciones silenciosas — «animación de devorar no se ve»).
+        /// AHORA vive en localAI[0], que ESTE proyectil no usa.</summary>
         public override void SendExtraAI(System.IO.BinaryWriter writer)
         {
             writer.Write(Projectile.localAI[1]);   // ancla X
             writer.Write(Projectile.localAI[2]);   // ancla Y
-            writer.Write(Projectile.localAI[3]);   // tipo del fantasma
+            writer.Write(Projectile.localAI[0]);   // tipo del fantasma
         }
 
         public override void ReceiveExtraAI(System.IO.BinaryReader reader)
         {
             Projectile.localAI[1] = reader.ReadSingle();
             Projectile.localAI[2] = reader.ReadSingle();
-            Projectile.localAI[3] = reader.ReadSingle();
+            Projectile.localAI[0] = reader.ReadSingle();
         }
 
         /// <summary>El ANCLA del plato: mientras el item caído viva, su
@@ -95,7 +101,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                 Projectile.localAI[1] = Main.item[idx].Center.X;
                 Projectile.localAI[2] = Main.item[idx].Center.Y;
                 if (Main.item[idx].type > 0)
-                    Projectile.localAI[3] = Main.item[idx].type;
+                    Projectile.localAI[0] = Main.item[idx].type;   // v6.52.2 — float[3]: índice 3 NO existe
             }
             return new Vector2(Projectile.localAI[1], Projectile.localAI[2]);
         }
@@ -275,7 +281,7 @@ namespace AethonMod.Content.Projectiles.Sombras
             float progTrago = ProgresoTrago();
             if (progTrago <= 0.02f || progTrago >= 0.99f) return;
 
-            int tipo = (int)Projectile.localAI[3];
+            int tipo = (int)Projectile.localAI[0];   // v6.52.2 — float[3]: índice 3 NO existe
             if (tipo <= 0) return;
             Texture2D tex = Terraria.GameContent.TextureAssets.Item[tipo].Value;
             if (tex == null) return;

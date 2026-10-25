@@ -1865,10 +1865,12 @@ Items: {
 		DisplayName: Corrupted Essence
 		Tooltip:
 			'''
-			What remains of an item after the FALLING ALTAR's beam.
-			Not used by hand: it is FOOD for the Eternal Grimoire.
-			Drop it back onto the altar and the book will eat it…
-			as long as its bearer is nearby.
+			A residue of the grimoire's power: the essence creatures have
+			distilled since its arrival (and bosses, in spades).
+			EAT IT (click): +0.1% PERMANENT damage to everything you do,
+			up to +100% with 1000 essences — beyond that, each is 1 gold.
+			Or drop it BEFORE your selected grimoire: the book eats it
+			to fuel its AWAKENING.
 			'''
 	}
 
@@ -1893,6 +1895,92 @@ Items: {
 	SombraDeLaPagina2: {
 		DisplayName: Sombra De La Pagina2
 		Tooltip: ""
+	}
+
+	SombraDeLaPagina3: {
+		DisplayName: The Shadow of the Page III
+		Tooltip:
+			'''
+				"Seven faceless irises, all staring at what you stare."
+				The third tome: ONE shadow cord carrying SEVEN FLOATING IRISES —
+				the iris ALONE, no lids, no sclera — each with its own heartbeat
+				and ALL of them locked on the prey. They fan out in flight; on
+				the bite, THE CHORUS CONVERGES on the wound and drains 3%
+				every 6 t. At 1 HP: the feast, as always.
+			'''
+	}
+
+	SombraDeLaPagina4: {
+		DisplayName: The Shadow of the Page IV
+		Tooltip:
+			'''
+				"The eye grew tired of being an eye: only the gaze remains."
+				The fourth tome: TWO OPTIC NERVES of ink hang from you, and at
+				their end lives ONE COLOSSAL RED IRIS — its pupil DILATES as it
+				bites, and ink filaments stream from the prey into the void.
+				Drains 3% every 6 t. At 1 HP: the boss, seen THROUGH the iris.
+			'''
+	}
+
+	RayoDeFusion: {
+		DisplayName: The Fusion Ray
+		Tooltip:
+			'''
+				"The god of slimes compressed its hunger into a line."
+				THE copy of Goozma's signature attack (Hunt of the Old
+				God): charge 70 t — the rainbow needle that pulses and
+				sharpens — then FIRE: the beam SWEEPS in a cosine arc,
+				the rainbow RUNS ALONG its length (a moving slice of the
+				oil palette), the noise flows mouth→tip, the mouth blooms
+				cubic. Damage in a CONE, exactly like the original.
+			'''
+	}
+
+	LaserArcoiris: {
+		DisplayName: The Rainbow Laser
+		Tooltip:
+			'''
+				The copy of the Goozmites' RainbowLaser: curving laser-
+				bullets (extraUpdates 8, a tiny curve every step) whose
+				trail is a sprite stack — thin stretched core + wide
+				halo — with the rainbow RUNNING along it (5 ticks of
+				palette shift per segment). Fires fast.
+			'''
+	}
+
+	DestructorDePrismas: {
+		DisplayName: The Prism Destroyer
+		Tooltip:
+			'''
+				The copy of the Divine Gargooptuar's PrismDestroyer:
+				summons THREE prisms that orbit you (breathing radius
+				up to 300, spin that FREEZES when firing) sweeping 5
+				death rays in a fan; each ray collides in THREE
+				shrinking segments (70/180/320 px) and all of them
+				live in a rotating HSL rainbow.
+			'''
+	}
+
+	TruenoDeGelatina: {
+		DisplayName: The Gel Thunder
+		Tooltip:
+			'''
+				The copy of Goozma's GooLightning: rainbow perlin
+				discharges that jump to your cursor and strike by line.
+				Double pass (the bolt + the vein) over the glow bell,
+				fading like the original: (1 − t/30)^0.6.
+			'''
+	}
+
+	MasaCromatica: {
+		DisplayName: Chromatic Mass
+		Tooltip:
+			'''
+				The copy of Goozma's crafting soul: the gelatinous
+				rainbow material of its whole arsenal. The icon and
+				name LIVE with the god's color clock (the Oil palette,
+				60-tick cycle).
+			'''
 	}
 }
 
