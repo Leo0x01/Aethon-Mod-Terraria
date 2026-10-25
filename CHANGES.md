@@ -1,4 +1,4 @@
-# v6.52.0 — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL ARMA VIVA · LA COREOGRAFÍA — ⏳ PUBLICACIÓN PENDIENTE
+# v6.52.0 — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL ARMA VIVA · LA COREOGRAFÍA — PUBLICADA
 
 **La letra del usuario**: «no puedo revisar ninguno de los 9 puntos anteriores… mientras tanto deja todo eso sin tocar y ve recordando los 9 puntos… Estuve viendo un mod relacionado a Calamity… ese mod propone que la conciencia de un NPC del mod está en diferentes armas y además hay un árbol de habilidades completo y funcional para cada uno, recuerda que intentamos crear algo así y no funcionó… [video de YouTube] he visto en varios mods que sus jefes son capaces de lanzar rayos de energía masivos, que en teoría serían texturas de ruido de Perlin moviéndose en una dirección con iluminación, glow, desenfoque, desenfoque de movimiento… ¿por qué no podemos hacer eso?… para nuestro jefe siento que le falta una coreografía clara y precisa además de más efectos visuales, más luces… investiga a profundidad, pero NO toques nada del mod, en su lugar crea algo nuevo que podamos usar, algo por cada concepto investigado… todo lo creado nuevo lo puedes meter en una nueva bolsa y dárselo al jugador».
 
@@ -20,7 +20,7 @@
 
 · **Verificación**: oráculo 0/0 (3 checkpoints) · build REAL 0/0 (2.915.598 B, md5 4ed5c314bb6d8417f4d744800305968e) · tools/audit_v6520_tmod.py TODO LIMPIO (411 entradas — las 401 de la .51.14 + los 26 archivos del ciclo; EOF exacto, 411/411 inflan, hjson raíz ×3 INTACTOS contra HEAD + los 3 nuevos paquete==árbol BYTE A BYTE, paridad ×3, los 34 vivos del ciclo en la DLL + REGRESIÓN: los 13 vivos clave de la .51.14 intactos, las 7 texturas presentes) · headless (Sandboxing→Constructing→Adding→Resizing→Configuring→Finalizing→Recipes→Creando mundo, 0 EXCEPCIONES — el keybind, la reflexión de inscripciones y los hjson nuevos cargan limpios) · texturas verificadas con VLM (montaje 6 iconos: sin nada roto, 5-9/10).
 
-**PUBLICADA**: ⏳ PUBLICACIÓN PENDIENTE (los IDs REALES se escriben SOLO tras verificar el CDN — la lección refundida de Task 67/83).
+**PUBLICADA**: release 423097464 + asset AethonMod.tmod 673854166 2.915.598 B (md5 4ed5c314bb6d8417f4d744800305968e), CDN verificado byte a byte + `/releases/latest` = v6.52.0 · respaldo /home/sync/AethonMod-v6.52.0.tmod + .tmod en la carpeta del juego.
 
 # v6.51.14 — LA CURA DEL CRASH DE LA SOMBRA II — PUBLICADA
 

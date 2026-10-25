@@ -1913,7 +1913,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **⏳ v6.52.0 PUBLICADA — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL
+1. **✅ v6.52.0 PUBLICADA (release 423097464 + asset 673854166 · CDN verificado byte a byte · `/releases/latest` = v6.52.0) — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL
    ARMA VIVA · LA COREOGRAFÍA — EN JUEGO (TODO ES NUEVO, NADA DE LO
    ANTERIOR SE TOCÓ).**
    Checklist: (a) LA BOLSA — al entrar al mundo aparece «La Bolsa del
@@ -1951,7 +1951,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    (g) LA LUZ ESCÉNICA — observa al Escriba en la oscuridad: violeta
    LATIENDO mientras telegrafía, DESTELLO blanco al golpear, ámbar
    tenue al recuperar — el «más luces» de la letra.
-2. **⏳ v6.51.14 PUBLICADA (release 422974533 + asset 673276658 · CDN
+2. **⏳ v6.51.14 (release 422974533 + asset 673276658 · CDN
    verificado byte a byte · `/releases/latest` = v6.52.0 AHORA) — LA
    CURA DEL CRASH DE LA SOMBRA II — EN
    JUEGO: PRIMERO LA SOMBRA II (que ya no crashea) Y LUEGO EL CHECKLIST
