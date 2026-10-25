@@ -16,7 +16,7 @@
 
 · **Verificación**: oráculo 0/0 ×4 iteraciones (cazó 10 errores: using ModSystem, referencias Mono.Cecil/ILCursor/MonoMod.Utils del oráculo, Main.GameUpdateCounter inexistente → GlobalTimeWrappedHourly, StrikeNPC-6-args es INTERNAL en este tML → el patrón HitInfo de la casa, PunchCameraModifier en Terraria.Graphics.CameraModifiers) · build REAL 0/0 · .tmod v6.52.2 (2.952.499 B, md5 ff277794f1e6b0d4358dcf390c4e6932): 418 ENTRADAS (412 + 6 rawimg nuevos), EOF EXACTO, 394 deflate + 24 planas, **FORMATO TMOD v2 decodizado** (TMOD + 7bit + hash20 + firma256 + dataLen + nombre/versión + TABLA COMPLETA + blob concatenado — la auditoría propia reescrita) · hjson ×3: 7 claves nuevas por idioma + el tooltip viejo del altar MUERTO · **headless: 0 EXCEPCIONES** (Sandboxing→Finalizing→Adding Recipes→menú — cazó y curó un hjson malformado del propio ciclo: el ''' de apertura perdido en la sustitución del tooltip de la esencia, restaurado en los 3 idiomas) · VLM: las alas del par («dos alas claramente separadas» — antes «un solo abanico de capa»), el haz («continuo y suave, halo/cuerpo/core, orgánico»), el telégrafo («más fino y más blanco al 95%»), los 6 iconos del Dios Antiguo (los 2 débiles regenerados: 8-9/10) · DLL: 16 símbolos nuevos auditados (HotbarLibreSistema/ColorGoozma/las 4 armas/las Sombras 3-4/FajaTexturadaEnLote/los fixes LazoPaciencia+QuitarRebote+InclinacionPar).
 
-**PUBLICADA**: ⏳
+**PUBLICADA**: release 423503142 + asset AethonMod.tmod 675455746 2.952.499 B (md5 ff277794f1e6b0d4358dcf390c4e6932), CDN verificado byte a byte + `/releases/latest` = v6.52.2 · respaldo /home/sync/AethonMod-v6.52.2.tmod + .tmod en la carpeta del juego.
 
 # v6.52.1 — LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS — PUBLICADA
 
