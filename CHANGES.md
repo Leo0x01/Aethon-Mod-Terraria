@@ -10,7 +10,7 @@
 
 · **Verificación**: oráculo 0/0 (cazó 3: BlendState FNA usa ColorSourceBlend — la lección RayoStrip; canBePlacedInVanity inexistente en este tML) · build REAL 0/0 · .tmod v6.52.1 (2.931.226 B, md5 5ae5d0066d617293decca905638d0dfe): 412 ENTRADAS (411 + AuroraDeTinta.rawimg), EOF EXACTO, 412/412 blobs OK (388 deflate + 24 stored) · hjson Escriba ×3 con las 5 claves nuevas + la bolsa actualizada, SIMETRÍA EXACTA 132=132=132 (parser propio con resolución de bloques y raíz-punto) · DLL auditada con Cecil: las 4 clases nuevas (AlasAuroraLib/AlasAuroraHalo/AlasAuroraPlayer/AuroraDeTinta) + los métodos de la técnica (ConstruirPluma/EmitirCapa/EmitirCapaRuido/Dibujar/Volcar) + LAS CURAS (EscribaJefe::get_BossHeadTexture y EscribaGota::get_Texture PRESENTES) · **headless: Sandboxing→Finalizing→Server started CON 0 EXCEPCIONES en 22.761 líneas** (la .52.0 moría justo ahí — este test es el que caza esa clase de bug) · icono 30×30 de la casa (VLM: lectura 8/10, atractivo 9/10) · auditoría de texturas 277/277.
 
-**PUBLICADA**: release + asset AethonMod.tmod 2.931.226 B (md5 5ae5d0066d617293decca905638d0dfe), CDN verificado byte a byte + `/releases/latest` = v6.52.1 · respaldo /home/sync/AethonMod-v6.52.1.tmod + .tmod en la carpeta del juego.
+**PUBLICADA**: release 423437947 + asset AethonMod.tmod 675189039 2.931.226 B (md5 5ae5d0066d617293decca905638d0dfe), CDN verificado byte a byte + `/releases/latest` = v6.52.1 · respaldo /home/sync/AethonMod-v6.52.1.tmod + .tmod en la carpeta del juego.
 
 # v6.52.0 — LA BOLSA DEL ESCRIBA: EL RAYO MASIVO · EL ARMA VIVA · LA COREOGRAFÍA — PUBLICADA
 

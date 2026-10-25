@@ -1908,7 +1908,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.52.1 PUBLICADA (release + asset · CDN verificado byte a byte · `/releases/latest` = v6.52.1) — LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS — EN
+1. **✅ v6.52.1 PUBLICADA (release 423437947 + asset 675189039 · CDN verificado byte a byte · `/releases/latest` = v6.52.1) — LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS — EN
    JUEGO (LA .52.0 SE DESACTIVABA SOLA: ahora TODO el ciclo es probable).**
    Checklist: (0) LA CARGA — el mod ARRANCA en la lista (la .52.0 se
    desactivaba sola con «Recurso esperado no encontrado» ×9 — si ves la
