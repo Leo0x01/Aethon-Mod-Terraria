@@ -1,43 +1,42 @@
-# AethonMod — ESTADO ACTUAL (v6.52.3)
+# AethonMod — ESTADO ACTUAL (v6.52.4)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.52.3 (LA CARGA QUE VUELVE: LAS DOS TEXTURAS QUE
-> FALTABAN. La letra: «hay nuevos errores» + client.log con 3 sesiones →
-> LA .52.2 **NO CARGÓ EN ABSOLTO**: SombraDeLaPagina3/4 se registraron SIN
-> su .png → MissingResourceException → tML desactivó el mod ENTERO → el
-> usuario se quedó sin NADA de la .52.2 (ni el haz, ni la bolsa, ni el hotbar,
-> ni las sombras — TODO su checklist pasa a la .52.3). LA CURA: las 2
-> texturas generadas con la paleta EXACTA de la familia (muestreada de los
-> iris reales) + 3 rondas de crítica VLM (III 9/10 SHIP · IV 8/10 SHIP) +
-> LA LECCIÓN REINCIDIDA de la .99: ni el -build ni el headless validan
-> texturas de cliente — audit_texturas.py AHORA es paso obligatorio ANTES
-> de cada build (420/420). El log además confirma: la .52.1 JUGÓ 2,5 h con
-> las 6 excepciones que la .52.2/.53 ya curan, y la .52.0 VIEJA seguía en
-> la carpeta Mods del usuario (reventó a las 09:44 con los 9 errores ya
-> curados de la .51 — CONSEJO: UN SOLO AethonMod.tmod en la carpeta).
-> LO ARREGLADO: las 6 excepciones del log (la ANIMACIÓN DE DEVORAR moría en
-> localAI[3] — Projectile.localAI es float[3] —, la JAULA igual, la pluma
-> KeyNotFound, EL HOTBAR con IL hook al ItemSlot), el LAZO espera 5 s, el
-> TOOLTIP de la esencia reescrito, LAS ALAS ahora son UN PAR (inclinación
-> base + anclas separadas + barrido atrás — VLM verificado) y EL HAZ
-> RECONSTRUIDO (RayoStrip.FajaTexturada: la tira continua texturizada con el
-> ruido fluyendo por UVs + RuidoTinta V2 con borde cero y tileable — VLM:
-> «continuo, suave, orgánico»). LO NUEVO: LA BOLSA DEL DIOS ANTIGUO — las
-> copias de GOOZMA (Hunt of the Old God, fuente abierta leída línea a línea):
-> EL RAYO DE FUSIÓN (el beam del video: carga→barrido coseno, el arcoíris A LO
-> LARGO, cono de daño), EL LÁSER ARCOÍRIS, EL DESTRUCTOR DE PRISMAS, EL TRUENO
-> DE GELATINA y LA MASA CROMÁTICA — todo con ColorGoozma (la paleta OIL en
-> ciclo de 60 t, el motor que hace que Goozma se vea como Goozma) + LAS
-> SOMBRAS DE LA PÁGINA III (EL CORO DE IRISES: siete iris flotando) y IV (EL
-> IRIS COLOSAL: el iris rojo gigante con la pupila que se dilata) — SOLO IRIS,
-> sin ojo completo). .tmod 2.953.579 B md5 0a6fd0c9fdbcc44e9405e433d483098c,
-> 420 entradas, oráculo 0/0, build real 0/0, headless 0 excepciones — la
-> .52.2 era correcta EN CÓDIGO (todo su contenido llega intacto en la .53).
-> LO ENTREGADO EN LA .52.2/.53 (pendiente de probar EN JUEGO): LA BOLSA DEL
-> DIOS ANTIGUO (EL RAYO DE FUSIÓN/LÁSER ARCOÍRIS/DESTRUCTOR DE PRISMAS/
-> TRUENO DE GELATINA/MASA CROMÁTICA — ColorGoozma), EL HAZ DE VERDAD,
-> LAS ALAS EN PAR, LAS SOMBRAS III-IV, EL HOTBAR LIBRE, EL LAZO 5 s, EL
-> TOOLTIP DE LA ESENCIA, LA DEVORACIÓN VIVA Y LA JAULA QUE SE PLANTA.
+> Última actualización: v6.52.4 (LA CURA DEL INVENTARIO MUERTO. La letra:
+> «ahora literalmente ya no puedo interactuar con el inventario en ningun
+> estado usando el cursor […] revisa 10 commit anteriores […] como estaba
+> hace 10 commit atras […] si queda algun resto de ese codigo entonces
+> borralo por completo». LA INVESTIGACIÓN de los 10 commits (347b7ac→fe42b71):
+> SOLO UN cambio tocó el inventario — HotbarLibreSistema.cs, el IL hook de
+> la .52.2 (faf8888), la versión que NUNCA CARGÓ por los 2 png; la .52.3
+> (que solo añadió los png) lo ACTIVÓ por primera vez. LA AUTOPSIA
+> FORENSE, con el IL REAL volcado EN VIVO desde el pipeline de MonoMod
+> (dump instalado DESPUÉS del hook, capturado por el headless): la última
+> línea de cada edición — `c.Emit(Br, c.Next)` con el cursor PARADO sobre
+> el `ret` del rebote — emite un salto HACIA ese mismo `ret` (c.Next ES el
+> ret): LeftClick/RightClick quedaron en RETORNO INCONDICIONAL
+> (`ldloc.0; pop; br.s→ret; ret; …cuerpo inalcanzable…`) — cada clic del
+> juego tragado en silencio, sin excepción y sin rastro en el log (pila
+> balanceada → el JIT no protesta). Por eso la .52.3 «cargó limpia» y el
+> inventario murió. LA CURA (la letra al pie): BORRADO POR COMPLETO —
+> HotbarLibreSistema.cs eliminado (0 referencias en 386 .cs), ItemSlot
+> 100% vanilla, el inventario interactúa EXACTAMENTE como hace 10 commits.
+> Lecciones escritas: (a) jamás editar el prólogo de un método de vanilla
+> sin VOLCAR el IL resultante — un Br con target equivocado es un método
+> muerto que no deja rastro; (b) el guard de vanilla (no clickear slots a
+> mitad del uso de un item) es COMPORTAMIENTO DE FÁBRICA que el mod no
+> vuelve a tocar — en pleno combate la vía sigue siendo la RUEDA y las
+> TECLAS (así lo diseñó Re-Logic). Verificación: gate de texturas OK ·
+> oráculo 0/0 · build real 0/0 ×2 · .tmod 2.952.472 B md5
+> 887093683e47842f7edd9700aa935b2e (420 entradas, EOF exacto) · DLL
+> auditado POR BYTES: HotbarLibreSistema/QuitarRebote/IL_ItemSlot/
+> MonoMod.Cil AUSENTES + alas/haz-UI/sombras/grimorio/Escriba PRESENTES ·
+> headless 0 excepciones y 0 líneas «ILHook ItemSlot» (la .52.3 con el
+> veneno mostraba 2 pares — la prueba conductual de la cura).
+> TODO LO DEMÁS de la .52.2/.52.3 llega INTACTO (bolsa del dios, haz,
+> sombras III-IV, alas en par, lazo 5 s, tooltip, devoración, jaula) —
+> sigue pendiente de primera prueba en juego, SOLO el ítem (c) cambia de
+> sentido: ya no es «hotbar en pleno disparo» (vanilla lo prohíbe) sino
+> «el inventario responde con el cursor como siempre».
 
 - **Tag**: `stable-v6.50.94` → `80d4d7b` — apunta DIRECTO al commit de la
   versión (su ÁRBOL es la .94); el tag NO va en la punta de main porque
@@ -1928,24 +1927,26 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.52.3 PUBLICADA — LA CARGA QUE VUELVE — EN JUEGO.**
-   (La .52.2 NO CARGÓ — le faltaban los 2 png de las Sombras 3/4; su
-   checklist COMPLETO pasa a esta versión. ANTES DE PROBAR: **borra las
-   .tmod viejas** de tu carpeta Mods — en tu último log la .52.0 vieja fue
-   la primera en cargar y reventó con errores ya curados; deja UN SOLO
-   AethonMod.tmod, la 6.52.3.)
-   Checklist: (0) LA CARGA — el mod arranca SIN excepciones (la .52.2 no
-   llegó a arrancar: MissingResourceException; la .51 tenía 6 silenciosas:
-   la animación de devorar y la jaula morían en cada uso),
+1. **✅ v6.52.4 PUBLICADA — LA CURA DEL INVENTARIO MUERTO — EN JUEGO.**
+   (La .52.3 activó por primera vez el IL hook que la .52.2 dejó dentro:
+   HotbarLibreSistema convertía `ItemSlot.LeftClick/RightClick` en retorno
+   incondicional — CADA CLIC del juego tragado en silencio. La .52.4 lo
+   BORRA POR COMPLETO: ItemSlot 100% vanilla. ANTES DE PROBAR: **borra las
+   .tmod viejas** de tu carpeta Mods — deja UN SOLO AethonMod.tmod, la 6.52.4.)
+   Checklist: (0) LA CARGA — el mod arranca SIN excepciones,
    (a) LAS ALAS — equipa la Aurora de Tinta y salta: AHORA SE VEN **DOS ALAS**
    (el hueco central que las separa + las anclas a ±5 px de su lado + el
    barrido hacia atrás al girarte — antes se fundían en UNA sola capa),
    (b) LA DEVORACIÓN — suelta una esencia/monedas/lingotes DELANTE del
    grimorio seleccionado: EL FESTÍN CHICO por fin VIVE (el tentáculo sale de
    ti, envuelve el plato, el SPRITE del item VIAJA por dentro hacia tu boca
-   encogiéndose y girando — antes crash silencioso), (c) EL HOTBAR — con el
-   Eterno en la mano DISPARANDO (autoReuse), abre el inventario y CLIC en
-   cualquier slot de la barra: AHORA SELECCIONA (el IL hook mató el rebote),
+   encogiéndose y girando — antes crash silencioso),
+   (c) EL INVENTARIO — **el cursor vuelve a responder en TODOS los slots
+   como siempre** (abrir inventario, coger/soltar/mover items, tienda,
+   basura, cofres — la .52.3 lo mataba EN TODO ESTADO; la .52.4 lo deja
+   como hace 10 commits). NOTA de fábrica: clickear slots de la barra EN
+   PLENA animación de disparo NO es posible en vanilla (guard de
+   Re-Logic) — en combate usa la RUEDA o las TECLAS 1-0,
    (d) EL LAZO — suelta el grimorio: yace 5 SEGUNDOS enteros (puedes
    verlo/tocarlo) y solo entonces la sombra lo arrastra de vuelta,
    (e) EL TOOLTIP — la esencia corrupta ya NO menciona el altar muerto:
