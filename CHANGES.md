@@ -10,7 +10,7 @@
 
 · **Verificación**: `audit_texturas.py` gate OK (lección .52.3) · oráculo 0/0 · build REAL 0/0 ×2 · .tmod v6.52.4 (2.952.472 B, md5 887093683e47842f7edd9700aa935b2e): 420 ENTRADAS, EOF EXACTO, hjson ×3 paridad, Sombras III/IV png presentes · **DLL AUDITADO POR BYTES: `HotbarLibreSistema`/`QuitarRebote`/`IL_ItemSlot`/`MonoMod.Cil` AUSENTES; alas/haz-UI/sombras/grimorio/Escriba PRESENTES (controles positivos)** · **headless: 0 EXCEPCIONES y 0 líneas «ILHook Terraria.UI.ItemSlot»** (la .52.3 con el hook mostraba 2 pares — la prueba conductual de que el veneno salió) · respaldo /home/sync/AethonMod-v6.52.4.tmod + .tmod en la carpeta del juego.
 
-**PUBLICADA**: release + asset AethonMod.tmod (2.952.472 B, md5 887093683e47842f7edd9700aa935b2e), CDN verificado byte a byte + `/releases/latest` = v6.52.4.
+**PUBLICADA**: release 423557606 + asset AethonMod.tmod 675691122 (2.952.472 B, md5 887093683e47842f7edd9700aa935b2e), CDN verificado byte a byte (descarga == respaldo == carpeta del juego) + `/releases/latest` = v6.52.4.
 
 # v6.52.3 — LA CARGA QUE VUELVE: LAS DOS TEXTURAS QUE FALTABAN — PUBLICADA
 
