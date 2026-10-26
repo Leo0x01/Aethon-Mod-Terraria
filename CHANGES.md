@@ -14,7 +14,9 @@
 
 **(6) LOS TEXTOS QUE SE SALÍAN DE LA PANTALLA**: las ventanas de EL ARMA y EL ESCUADRÓN (líneas de 170-219 chars partidas en 2-3 líneas), los 6 tooltips de las Ideas del grimorio (líneas de 148-207 chars partidas por «·»), el tooltip del festín COMPLETO (160 chars → bloque multilínea), y TODA la localización nueva del Escriba reescrita en líneas ≤75 chars. Las 3 nuevas de Goozma nacen ya con líneas cortas.
 
-· **Verificación**: `audit_texturas.py` OK (extendido con la REDIRECCIÓN de texturas del puerto — SmartContentSource: `Content/GoozmaPort/{Content,Common}/**` → `Assets/Textures/**`, la convención de CalamityHunt; cazó el `PluripotentSpawn_Head_Boss.png` faltante — la clase de bug de la .52.1) · oráculo 0 errores (9 warnings HEREDADOS del original — documentados) · build REAL 0 errores ×4 · **.tmod v6.53.0 (48.297.319 B, md5 por verificar abajo): 739 ENTRADAS (321 del puerto), EOF EXACTO** · headless ×3: 0 EXCEPCIONES (cazó y curó el RecipeGroup faltante del lodo) · todos los assets del puerto auditados (sonidos 1..N, música, 16 shaders .fx compilados por el pipeline de tML).
+· **Verificación**: `audit_texturas.py` OK (extendido con la REDIRECCIÓN de texturas del puerto — SmartContentSource: `Content/GoozmaPort/{Content,Common}/**` → `Assets/Textures/**`, la convención de CalamityHunt; cazó el `PluripotentSpawn_Head_Boss.png` faltante — la clase de bug de la .52.1) · oráculo 0 errores (9 warnings HEREDADOS del original — documentados) · build REAL 0 errores ×4 · **.tmod v6.53.0 (48.297.319 B, md5 da1b088bd5d51ea0cdb3a7d42ff45ac1): 739 ENTRADAS (321 del puerto), EOF EXACTO** · headless ×3: 0 EXCEPCIONES (cazó y curó el RecipeGroup faltante del lodo) · todos los assets del puerto auditados (sonidos 1..N, música, 16 shaders .fx compilados por el pipeline de tML).
+
+**PUBLICADA**: release 423811697 + asset AethonMod.tmod 676799286 (48.297.319 B, md5 da1b088bd5d51ea0cdb3a7d42ff45ac1), CDN verificado byte a byte + `/releases/latest` = v6.53.0 · respaldo /home/sync/AethonMod-v6.53.0.tmod + .tmod en la carpeta del juego.
 
 # v6.52.4 — LA CURA DEL INVENTARIO MUERTO — PUBLICADA
 
