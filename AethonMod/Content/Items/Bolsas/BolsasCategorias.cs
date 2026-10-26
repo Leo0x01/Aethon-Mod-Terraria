@@ -780,7 +780,7 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
         protected override string NombreCorto => "El Cofre del Arsenal";
         protected override Color ColorFiesta => new(255, 196, 107);
-        protected override string Nota => "Las veintidós bolsas del arsenal, una dentro de la otra";
+        protected override string Nota => "Las veintitrés bolsas del arsenal, una dentro de la otra";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -807,6 +807,49 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<BolsaSombras>(), 1));
             l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
+            // v6.54.4 — EL VEREDICTO DE AETHON (la bolsa 23 del cofre)
+            l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
+            return l;
+        }
+    }
+// ======================================================================
+    //  v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS (bolsa 24): «El
+    //  Veredicto de Aethon» — las DOCE SENTENCIAS nacidas de la
+    //  investigación profunda de los jefes y armas finales de los mods
+    //  más populares y hermosos (Calamity, Fargo's Souls, el dios
+    //  antiguo y su rayo de fusión, Thorium, The Stars Above). El rayo
+    //  concentrado, el prisma, los versos gemelos, el filo de las
+    //  cuatro constelaciones, el partidor de mundos, la guadaña, el
+    //  sistema solar, la constelación del juicio, el vórtice devorador,
+    //  el réquiem, la ira del cielo… y EL TESTAMENTO, la corona que
+    //  rota las once sentencias.
+    // ======================================================================
+
+    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las doce sentencias del Veredicto.</summary>
+    public class BolsaDefinitivas : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Armas Definitivas";
+        protected override string NombreCorto => "Bolsa de las Definitivas";
+        protected override Color ColorFiesta => new(255, 214, 120);
+        protected override string Nota => "Las doce sentencias del Veredicto — el ataque definitivo vive aquí";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // v6.54.4 — LAS DOCE SENTENCIAS (la 1 es EL ATAQUE DEFINITIVO
+            // pedido por el usuario; la 12 es la corona que las rota todas)
+            l.Add((ModContent.ItemType<Weapons.Definitivas.OjoDelJuicio>(), 1));          // 1 — EL RAYO CONCENTRADO (la receta del rayo de fusión del dios antiguo)
+            l.Add((ModContent.ItemType<Weapons.Definitivas.PrismaPrimordial>(), 1));      // 2 — LOS SIETE HACES QUE CONVERGEN
+            l.Add((ModContent.ItemType<Weapons.Definitivas.LluviaDeVersos>(), 1));        // 3 — LOS PARES DE HOJAS QUE SE BUSCAN
+            l.Add((ModContent.ItemType<Weapons.Definitivas.FiloConstelado>(), 1));        // 4 — LAS CUATRO CONSTELACIONES
+            l.Add((ModContent.ItemType<Weapons.Definitivas.PartidorDeMundos>(), 1));      // 5 — LA COLUMNA QUE PARTE EL MUNDO
+            l.Add((ModContent.ItemType<Weapons.Definitivas.GuadanaViejoDios>(), 1));      // 6 — EL COMBO DE LOS TRES TAJOS
+            l.Add((ModContent.ItemType<Weapons.Definitivas.SistemaAethon>(), 1));         // 7 — TU PROPIO SISTEMA SOLAR
+            l.Add((ModContent.ItemType<Weapons.Definitivas.ConstelacionJuicio>(), 1));    // 8 — LAS SIETE ESTRELLAS QUE JUZGAN
+            l.Add((ModContent.ItemType<Weapons.Definitivas.VorticeDevorador>(), 1));      // 9 — EL REMOLINO QUE SE LO COME TODO
+            l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 10 — LA CAMPANA DE LOS TRES ANILLOS
+            l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 11 — LOS OCHO JUICIOS DEL CIELO
+            l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 12 — LA CORONA: rota las once sentencias
             return l;
         }
     }

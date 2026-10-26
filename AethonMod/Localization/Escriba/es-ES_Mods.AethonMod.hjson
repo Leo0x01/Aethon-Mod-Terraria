@@ -44,4 +44,22 @@ Projectiles: {
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
 	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
+	// ColumnaIraProjectile.DisplayName: Columna Ira Projectile
+	// ConstelacionJuicioProjectile.DisplayName: Constelacion Juicio Projectile
+	// EstrellaStrikeProjectile.DisplayName: Estrella Strike Projectile
+	// FiloConsteladoProjectile.DisplayName: Filo Constelado Projectile
+	// GuadanaViejoDiosProjectile.DisplayName: Guadana Viejo Dios Projectile
+	// IraDelCieloProjectile.DisplayName: Ira Del Cielo Projectile
+	// LluviaDeVersosProjectile.DisplayName: Lluvia De Versos Projectile
+	// LluviaHojaProjectile.DisplayName: Lluvia Hoja Projectile
+	// OjoDelJuicioProjectile.DisplayName: Ojo Del Juicio Projectile
+	// PartidorDeMundosProjectile.DisplayName: Partidor De Mundos Projectile
+	// PolarDardoProjectile.DisplayName: Polar Dardo Projectile
+	// PrismaPrimordialProjectile.DisplayName: Prisma Primordial Projectile
+	// RequiemEstelarProjectile.DisplayName: Requiem Estelar Projectile
+	// SistemaAethonProjectile.DisplayName: Sistema Aethon Projectile
+	// SistemaDetonacionProjectile.DisplayName: Sistema Detonacion Projectile
+	// SistemaTiroProjectile.DisplayName: Sistema Tiro Projectile
+	// TestamentoAethonProjectile.DisplayName: Testamento Aethon Projectile
+	// VorticeDevoradorProjectile.DisplayName: Vortice Devorador Projectile
 }

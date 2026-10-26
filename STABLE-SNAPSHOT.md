@@ -1,3 +1,56 @@
+# v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS — EL CHECKLIST
+
+**Qué pasó** (la letra: «quiero creer un ataque definitivo… investigación
+profunda a todos los jefes y armas finales de los mods más populares y
+de los visualmente más hermosos… una bolsa con un poco más de 10 armas
+que posean ataques definitivos, masivos y visualmente hermosos»): LA
+INVESTIGACIÓN COMPLETA (el código fuente real de Calamity/del dios
+antiguo/de Stars Above + ~70 búsquedas) convertida en LAS DOCE
+SENTENCIAS — doce armas definitivas con mecánica única cada una,
+construidas sobre las librerías de la casa (RayoStrip, EstelaLib,
+OndaLib, RayoSistema, SombrasLib) + la nueva DefinitivasLib.
+
+1. **EL MOD CARGA**: [ ] activar AethonMod v6.54.4 — cero errores; la
+   BOLSA DE LAS ARMAS DEFINITIVAS llega sola al entrar al mundo (aparte
+   del Cofre del Arsenal, que también la lleva dentro como bolsa 23).
+2. **EL OJO DEL JUICIO (EL ATAQUE DEFINITIVO)**: [ ] sostener el clic:
+   el OJO se abre sobre el jugador con sus halos apilados y las chispas
+   convergiendo; [ ] al soltar la carga, el CONO de luz BARRE el campo
+   de lado a lado (una onda completa) — con un jefe cerca, el momento
+   más grande del mod: núcleo blanco, gradiente que fluye, pulsos que
+   viajan por el rayo, la pantalla tiembla y el jugador NO CAE.
+3. **EL PRISMA PRIMORDIAL**: [ ] canalizar: los 7 haces de colores
+   convergen poco a poco y el HAZ CENTRAL engorda mientras más se
+   sostiene.
+4. **LA LLUVIA DE VERSOS**: [ ] las hojas nacen en pares (oro+violeta)
+   que se buscan y se CRUZAN; [ ] a los 12 pares, EL DESTELLO cubre la
+   pantalla.
+5. **EL FILO CONSTELADO**: [ ] clic derecho anuncia la constelación en
+   el chat y cambia el ataque (Sol = onda de fuego · Estrella Polar =
+   dardos fríos · Andrómeda = galaxia espiral · Aries = cadena larga).
+6. **EL PARTIDOR DE MUNDOS**: [ ] la línea vertical tiembla sobre el
+   cursor… y la COLUMNA cae partiendo todo, con doble onda y el temblor
+   más fuerte.
+7. **LA GUADAÑA DEL VIEJO DIOS**: [ ] tres tajos crecientes; el tercero
+   es LA CRUZ con onda negra-violeta y almas volando.
+8. **EL SISTEMA DE AETHON**: [ ] los 5 cuerpos orbitan y disparan
+   solos; [ ] CLIC DERECHO: los 5 vuelan al cursor y DETONAN en cadena.
+9. **LA CONSTELACIÓN DEL JUICIO**: [ ] cada clic siembra una estrella
+   dorada conectada por hilos; [ ] a la séptima, las COLUMNAS caen
+   sobre cada estrella y los relámpagos saltan entre ellas.
+10. **EL VÓRTICE DEVORADOR**: [ ] el remolino ARRASTRA a la chusma
+    hacia su ojo; [ ] al final IMPLODE en un estallido de almas.
+11. **EL RÉQUIEM ESTELAR**: [ ] los 3 anillos dorados cruzan el mundo;
+    el tercero es doble y siembra estrellas.
+12. **LA IRA DEL CIELO**: [ ] los 8 rayos caen uno a uno con sus ramas;
+    el último es LA COLUMNA doble.
+13. **EL TESTAMENTO DE AETHON (LA CORONA)**: [ ] el libro se abre sobre
+    el jugador y cada uso ANUNCIA en el chat la sentencia que dispara —
+    once usos = las once sentencias vistas, rotando para siempre.
+14. **EL RESTO DEL MOD IGUAL**: [ ] el Cofre del Arsenal ahora con 23
+    bolsas, la Bolsa de la Investigación intacta, todo lo anterior sin
+    cambios.
+
 # v6.54.3 — LA REHABILITACIÓN VISUAL — EL CHECKLIST
 
 **Qué pasó** (la letra: «el arma de rayos concentrado se ve horrible… son
