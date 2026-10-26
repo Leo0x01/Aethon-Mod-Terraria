@@ -12,7 +12,7 @@
 
 · **Verificación**: audit_texturas **575 clases, 0 faltantes** (586 − 11 retiradas, cuadra exacto) · oráculo regenerado (385 .cs) **0 errores / 0 warnings** · build REAL **0/0** · **.tmod v6.54.2 (6.236.945 B, md5 45bac305edcf0ccc57902d5af7a765e7): 472 ENTRADAS** (478 − 6 rawimg retiradas), EOF EXACTO, **CERO rastros de la palabra en TODO el paquete** · headless: `Sandboxing → Adding → Configuring → Finalizing: Aethon, the Eternal Grimoire v6.54.2 → Adding Recipes`, **0 EXCEPCIONES** · **PARIDAD hjson ×3: 1359==1359==1359** (1369 − las 10 hojas retiradas) · CERO claves retiradas presentes en cualquier idioma.
 
-**PUBLICACIÓN**: pendiente — se completa con los IDs reales tras el release.
+**PUBLICADA**: release 424442152 + asset AethonMod.tmod 678626700 (6.236.945 B, uploaded), CDN verificado byte a byte + `/releases/latest` = v6.54.2 · respaldo /home/sync/AethonMod-v6.54.2.tmod + .tmod en la carpeta del juego.
 
 # v6.54.1 — LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54) — PUBLICADA
 
