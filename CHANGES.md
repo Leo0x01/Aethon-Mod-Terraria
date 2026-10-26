@@ -14,7 +14,9 @@
 
 **(6) GOOZMAPORT BORRADO DEL REPOSITORIO POR COMPLETO**: terminada la investigación, `research/GoozmaPort/` entera (89 .cs + 43 MB) fue ELIMINADA del repo — la orden del usuario ejecutada. **El repositorio queda 100 % libre de material GPL.** Respaldo de protección FUERA del repo: /home/sync/GoozmaPort-research-respaldo-v6531.tar.gz (uso privado, jamás publicado; junto al .tmod v6.53.0 privado con el jefe funcional).
 
-· **Verificación**: audit_texturas OK · oráculo regenerado (387 .cs, 79 referencias) 0/0 · build REAL 0/0 ×3 · **.tmod v6.54.0 (6.249.989 B): 475 ENTRADAS (+60), EOF EXACTO, CERO GoozmaPort/research, CERO material GPL** · headless: Sandboxing v6.53.1→.54 → mundo generado → Server started, **0 EXCEPCIONES** · **PARIDAD ×3 CON PARSER REAL: 1369==1369==1369** (+66 claves nuevas) · iconos verificados por VLM (21/21 SHIP).
+· **Verificación**: audit_texturas OK · oráculo regenerado (387 .cs, 79 referencias) 0/0 · build REAL 0/0 ×3 · **.tmod v6.54.0 (6.249.989 B, md5 b82db9bb51ff65bd4c6a6d7d91b0888d): 475 ENTRADAS (+60), EOF EXACTO, CERO GoozmaPort/research, CERO material GPL** · headless: Sandboxing v6.54.0 → mundo generado → Server started, **0 EXCEPCIONES** · **PARIDAD ×3 CON PARSER REAL: 1369==1369==1369** (+66 claves nuevas) · iconos verificados por VLM (21/21 SHIP).
+
+**PUBLICADA**: release 423886521 + asset 677127868 (6.249.989 B, uploaded), CDN verificado byte a byte + `/releases/latest` = v6.54.0 · respaldo /home/sync/AethonMod-v6.54.0.tmod + .tmod en la carpeta del juego.
 
 # v6.53.1 — LA SEPARACIÓN DE GOOZMA: TODO EL MATERIAL DEL PUERTO FUERA DEL MOD — PUBLICADA
 
