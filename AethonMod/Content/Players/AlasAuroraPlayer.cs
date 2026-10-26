@@ -44,6 +44,11 @@ namespace AethonMod.Content.Players
         /// <summary>¿El portador ocultó el visual? (la vanidad del accesorio manda).</summary>
         public bool OcultarVisual;
 
+        /// <summary>v6.54.0 — QUÉ ALA lleva (el índice del catálogo:
+        /// 1 = la Aurora de Tinta histórica, 2..16 = las quince nuevas
+        /// de la investigación — lo marcan los ítems cada frame).</summary>
+        public byte AlaEstilo;
+
         /// <summary>¿El visual vive? (accesorio o vanidad — lo lee el halo).</summary>
         public bool VisualViva => Equipada || Vanidad;
 
@@ -58,6 +63,7 @@ namespace AethonMod.Content.Players
             Equipada = false;
             Vanidad = false;
             OcultarVisual = false;
+            AlaEstilo = 0;      // v6.54.0 — cada ítem la vuelve a marcar
         }
 
         public override void PostUpdateEquips()

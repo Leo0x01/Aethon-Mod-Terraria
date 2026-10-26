@@ -2009,6 +2009,266 @@ Items: {
         ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
         ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
         ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
+
+		// v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS (Task 74-a/b/c)
+
+		BolsaDeAlasPrisma: {
+			DisplayName: La Bolsa de las Alas
+			Tooltip:
+				'''
+					Las QUINCE alas de código de la investigación: el mismo
+					sistema de la Aurora de Tinta, cada una con SU paleta, SU
+					tempo y SU ruido (fBm, wisps, starfield, seda, vermiforme,
+					ridged, células, plasma). Vuelo 240, sin daño de caída.
+					Clic derecho para desplegarlas. Solo entrega lo que falte.
+				'''
+		}
+
+		BolsaInvestigacion: {
+			DisplayName: La Bolsa de la Investigación
+			Tooltip:
+				'''
+					Los items nacidos del estudio de las texturas del dios:
+					Rayos Concentrados, Trueno del Prisma, Lodo de Esencia,
+					Cetro de Constelaciones, Estela del Cosmos y Tinta Viva —
+					TODO re-escrito 100 % para el mod, cero material portado.
+					Dentro viaja la Bolsa de las Alas.
+					Clic derecho para desplegarla. Solo entrega lo que falte.
+				'''
+		}
+
+		BolsaMaestra: {
+			DisplayName: El Cofre del Arsenal
+			Tooltip:
+				'''
+					LAS VEINTITRÉS BOLSAS del arsenal dentro de una sola: la
+					del Probador, la de los Fundacionales, la de los Soles
+					Rúnicos… y todas las demás hasta la del Dios Antiguo.
+					Ábrela y despliega la que necesites.
+					Clic derecho. Solo entrega lo que te falte.
+				'''
+		}
+
+		RayosConcentrados: {
+			DisplayName: Rayos Concentrados
+			Tooltip:
+				'''
+					«Cuatro capas de luz multiplicadas: el rayo de fusión, tuyo.»
+					LA técnica del ataque estrella del dios, 100 % re-escrita:
+					el cuerpo de ruido, las chispas de doble muestreo, el perfil
+					de brillo y el núcleo+falda — multiplicados por vértice,
+					con el arcoíris corriendo y el núcleo blanco-caliente.
+					Carga 45 t (los soles rúnicos crecen) y FUEGO: 2000 px
+					de haz que respira. Daño por segmentos, como el original.
+				'''
+			Prueba: Arma de pruebas — la receta es 10 de madera.
+		}
+
+		TruenoDelPrisma: {
+			DisplayName: El Trueno del Prisma
+			Tooltip:
+				'''
+					El relámpago ramificado del dios, nacido de nuevo: DOS
+					muestras de la misma textura desfazadas 0.5 y multiplicadas
+					(solo las vetas que coinciden sobreviven), la polilínea que
+					se AQUIETA tras el impacto y el arcoíris desvaneciéndose.
+					1 rayo grande + hasta 2 pequeños a los vecinos.
+				'''
+			Prueba: Arma de pruebas — la receta es 10 de madera.
+		}
+
+		LodoDeEsencia: {
+			DisplayName: El Lodo de Esencia
+			Tooltip:
+				'''
+					Los charcos bioluminiscentes morados: la base oscura
+					ondulando (warp senoidal) y cientos de puntos violetas
+					latiendo encima. Los charcos SE HINCHAN al acumularse.
+					Daña a quien los pise.
+				'''
+			Prueba: Arma de pruebas — la receta es 10 de madera.
+		}
+
+		CetroConstelaciones: {
+			DisplayName: El Cetro de Constelaciones
+			Tooltip:
+				'''
+					Invoca estrellas que orbitan y se repelen; las cercanas se
+					unen con LÍNEAS de daño real (la constelación del esbirro
+					estelar del dios, 100 % casa). La primera dibuja la viñeta
+					del área girando doble. Hasta 5 estrellas vivas.
+				'''
+			Prueba: Arma de pruebas — la receta es 10 de madera.
+		}
+
+		EstelaDelCosmos: {
+			DisplayName: La Estela del Cosmos
+			Tooltip:
+				'''
+					El anillo tipo Saturno del esbirro estelar del dios, 100 %
+					casa y MORADO/NEGRO: la banda con auto-interferencia (la
+					misma textura a dos velocidades multiplicadas) y los
+					canales como máscaras — cuerpo violeta, línea lila
+					caliente, borde azul-violeta. Respira y gira tras de ti.
+				'''
+			Titulo: EL ANILLO SATURNO, MORADO Y NEGRO
+			Linea1: El anillo líquido del esbirro estelar del dios
+			Linea2: Puro adorno — accesorio o vanidad
+		}
+
+		TintaViva: {
+			DisplayName: La Tinta Viva
+			Tooltip:
+				'''
+					El cordón líquido del dios, hecho tuyo: DOS capas de tinta
+					multiplicadas (el encaje de agujeros que se abre y cierra),
+					el color nacido de la LUT negro→morado→lila y la onda que
+					se encrespa. La cola sigue TU rastro real de movimiento.
+				'''
+			Titulo: EL CORDÓN LÍQUIDO DEL DIOS, HECHO TUYO
+			Linea1: La cola de goo irisado que sigue tu rastro
+			Linea2: Puro adorno — accesorio o vanidad
+		}
+
+		AlasPrismaBase: {
+			Estilo: Alas de código — paleta, tempo y ruido propios
+		}
+
+		AlasDeTintaSerena: {
+			DisplayName: Alas de Tinta Serena
+			Tooltip:
+				'''
+					El lila de la página en calma. Aleteo lento, plumas largas.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeEclipse: {
+			DisplayName: Alas de Eclipse
+			Tooltip:
+				'''
+					El morado profundo del cielo tapado. Plumas anchas, barrido fuerte.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDePlasma: {
+			DisplayName: Alas de Plasma
+			Tooltip:
+				'''
+					Fucsia vibrante: aleteo nervioso y plumas cortas que titilan.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeNebulosa: {
+			DisplayName: Alas de Nebulosa
+			Tooltip:
+				'''
+					La nebulosa violeta fluye por las plumas — vuela entre estrellas.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeCometario: {
+			DisplayName: Alas de Cometario
+			Tooltip:
+				'''
+					La estela del cometa: blanco, cian y violeta corriendo.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeMedianoche: {
+			DisplayName: Alas de Medianoche
+			Tooltip:
+				'''
+					El cielo estrellado entero en cada pluma. Luz tenue.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDelPrisma: {
+			DisplayName: Alas del Prisma
+			Tooltip:
+				'''
+					El arcoíris del dios antiguo corre por el abanico completo.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeFuegoFrio: {
+			DisplayName: Alas de Fuego Frío
+			Tooltip:
+				'''
+					Ondas de hielo lila — curvas suaves que ondean despacio.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeTormenta: {
+			DisplayName: Alas de Tormenta
+			Tooltip:
+				'''
+					Violeta eléctrico: aleteo de trueno y puntas rasgadas.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeMarioneta: {
+			DisplayName: Alas de Marioneta
+			Tooltip:
+				'''
+					El carmesí de la Emperatriz. Filosas, plegadas, teatrales.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeAuroraArtica: {
+			DisplayName: Alas de Aurora Ártica
+			Tooltip:
+				'''
+					El telón verde-cian del norte — plumas larguísimas.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeOrquidea: {
+			DisplayName: Alas de Orquídea
+			Tooltip:
+				'''
+					El abanico rosa-magenta que se abre como una flor.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDelVacio: {
+			DisplayName: Alas del Vacío
+			Tooltip:
+				'''
+					Negro absoluto con borde violeta. Planea — casi fantasmal.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasSolaresRunicas: {
+			DisplayName: Alas Solares Rúnicas
+			Tooltip:
+				'''
+					El oro de los soles del grimorio. Luz cálida y densa.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
+		AlasDeSangreDeTinta: {
+			DisplayName: Alas de Sangre de Tinta
+			Tooltip:
+				'''
+					Magenta profundo que gotea células — la tinta que muerde.
+					Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+				'''
+		}
+
 }
 
 Projectiles: {
@@ -2159,6 +2419,14 @@ Projectiles: {
         DignosFXProjectile.DisplayName: El Destello de los Dignos
         BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
         SombraPagina2Projectile.DisplayName: La Sombra de la Página II
+		// v6.54.0 — LA INVESTIGACIÓN
+		RayosConcentradosHeld.DisplayName: Los Rayos Concentrados
+		TruenoPrismaRayo.DisplayName: El Rayo del Trueno del Prisma
+		LodoGlob.DisplayName: El Globo de Lodo
+		LodoCharco.DisplayName: El Charco de Esencia
+		EstrellaPrisma.DisplayName: La Estrella del Prisma
+		EstelaCosmosHalo.DisplayName: La Estela del Cosmos
+		TintaVivaHalo.DisplayName: La Tinta Viva
 }
 
 Buffs: {

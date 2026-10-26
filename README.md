@@ -14,10 +14,10 @@ Este repositorio y todo su contenido —incluidos, sin limitación: el código f
 
 ## ⚠️ Nota de licencia — la copia de investigación de Goozma
 
-La carpeta `research/GoozmaPort/` contiene una **copia verbatim de
+**v6.54.0 — BORRADO DEFINITIVO**: la carpeta `research/GoozmaPort/` (la copia verbatim de
 investigación** del jefe Goozma del mod *Calamity: Hunt of the Old God*
 (github.com/TohruKobayashi/CalamityHunt), que se distribuye bajo
-**GPL-3.0** (ver `research/GoozmaPort/LICENSE-GPL3.txt`). Créditos:
+**GPL-3.0**) fue **ELIMINADA COMPLETA del repositorio** en la v6.54.0 tras terminar la investigación de sus texturas — la orden del usuario ejecutada: **el repositorio está 100 % libre de material GPL** (existe un respaldo privado fuera del repo). Créditos históricos:
 Team Hypnos — caligulasAquarium, IbanPlay, THEREDSTONEBRO,
 AmmyanDocCiesh, Blockaroz. Esa carpeta está **FUERA del mod**: no se
 compila, no entra al `.tmod` y jamás sale en un release (decisión del

@@ -94,6 +94,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Projectile.timeLeft = 6;
 
             // === LOS DRIVERS DEL ORIGINAL (UpdateWingVisual, respetado) ===
+            // v6.54.0 — EL TEMPO DEL ALA: cada estilo trae su velocidad
+            // de aleteo (la Tormenta aletea nerviosa, el Vacío planea).
+            float flapVel = 1f;
+            byte estiloi = duenio.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
+            if (estiloi > 0)
+                flapVel = AlasCatalogo.De(estiloi).FlapVel;
             float objetivo = 0f;
             bool volando = false;
             if (!duenio.GetModPlayer<AlasAuroraPlayer>().OcultarVisual &&
@@ -104,7 +110,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 objetivo = MathHelper.Clamp(0.35f + rapidez * 0.055f + (volando ? 0.25f : 0f), 0.35f, 1f);
             }
             Spread = MathHelper.Lerp(Spread, objetivo, 0.085f);
-            Flap += 0.055f + (volando ? 0.15f : 0f) + Spread * 0.03f;
+            Flap += (0.055f + (volando ? 0.15f : 0f) + Spread * 0.03f) * flapVel;
             MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
 
             // === LA LUZ (el prisma que ilumina — la fórmula del original
@@ -112,14 +118,30 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             if (Spread > 0.05f && Main.netMode != NetmodeID.Server)
             {
                 float h = (Flap * 0.02f) % 1f;
-                Color prisma = ColorPrisma(h);
+                Color prisma = estiloi > 0
+                    ? ColorDe(AlasCatalogo.De(estiloi), h)
+                    : ColorPrisma(h);
+                float escala = estiloi > 0 ? AlasCatalogo.De(estiloi).Luz : 1f;
                 float d = MezclaDia;
                 Vector3 luz = new(
-                    (prisma.R / 255f * (1f - d) + 0.95f * d) * 0.42f * Spread,
-                    (prisma.G / 255f * (1f - d) + 0.88f * d) * 0.42f * Spread,
-                    (prisma.B / 255f * (1f - d) + 0.66f * d) * 0.42f * Spread);
+                    (prisma.R / 255f * (1f - d) + 0.95f * d) * 0.42f * Spread * escala,
+                    (prisma.G / 255f * (1f - d) + 0.88f * d) * 0.42f * Spread * escala,
+                    (prisma.B / 255f * (1f - d) + 0.66f * d) * 0.42f * Spread * escala);
                 Lighting.AddLight(duenio.Center, luz);
             }
+        }
+
+        /// <summary>v6.54.0 — El color del estilo (paleta con crossfade —
+        /// el mismo contrato de DePaleta de la lib).</summary>
+        private static Color ColorDe(in EstiloAlas estilo, float h)
+        {
+            if (estilo.Paleta == null || estilo.Paleta.Length == 0)
+                return ColorPrisma(h);
+            h -= MathF.Floor(h);
+            float seg = h * estilo.Paleta.Length;
+            int i = (int)seg % estilo.Paleta.Length;
+            int j = (i + 1) % estilo.Paleta.Length;
+            return Color.Lerp(estilo.Paleta[i], estilo.Paleta[j], seg - (int)seg);
         }
 
         /// <summary>¿La aurora sigue equipada y viva en su dueño?</summary>
@@ -185,7 +207,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             try
             {
-                AlasAuroraLib.Dibujar(duenio, Spread, Flap, MezclaDia);
+                // v6.54.0 — EL ESTILO DEL DUEÑO: la Aurora histórica pasa
+                // por el camino de siempre (Dibujar sin estilo = la
+                // entrada [1] del catálogo); las quince nuevas pasan SU
+                // alma (paleta, forma, tempo, ruido propio).
+                byte estilo = duenio.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
+                if (estilo == AlasCatalogo.Aurora || estilo == 0)
+                    AlasAuroraLib.Dibujar(duenio, Spread, Flap, MezclaDia);
+                else
+                    AlasAuroraLib.Dibujar(duenio, AlasCatalogo.De(estilo),
+                        Spread, Flap, MezclaDia);
             }
             catch { try { VFXCore.ReabrirLoteVanilla(); } catch { } }
 

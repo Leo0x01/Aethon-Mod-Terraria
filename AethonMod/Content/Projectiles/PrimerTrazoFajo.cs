@@ -206,7 +206,8 @@ namespace AethonMod.Content.Projectiles
         //  La letra: «esta parte de Goozma es solo para investigación,
         //  nunca lo usaré realmente y todo su material debería ser
         //  borrado antes del lanzamiento» — el puerto verbatim SALIÓ del
-        //  mod (vive en research/GoozmaPort, fuera de toda compilación) y
+        //  mod (retirado y BORRADO del repo en la v6.54.0 — la orden del
+        //  usuario tras terminar la investigación) y
         //  con él el shader y las texturas prestadas (que además JAMÁS
         //  habrían cargado: tML 2026.08 solo carga efectos .fxc
         //  compilados — los .fx del puerto viajaban crudos). LA TÉCNICA

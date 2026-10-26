@@ -128,6 +128,11 @@ namespace AethonMod.Content.VFX
         /// <summary>El blanco-oro de la forma de día (el «whiteGold» del original).</summary>
         private static readonly Color BlancoOro = new(255, 243, 214);
 
+        // === v6.54.0 — EL CACHÉ DE RUIDOS POR ESTILO (cada ala fluye con
+        //     SU textura de las 20 de la investigación) ===
+        private static readonly System.Collections.Generic.Dictionary<string, Texture2D> _ruidos =
+            new();
+
         // === EL DISPOSITIVO (BasicEffect cacheado ×2 + pozo de vértices) ===
 
         private static BasicEffect _fxPlano;
@@ -173,18 +178,42 @@ namespace AethonMod.Content.VFX
 
         /// <summary>El tono de la pluma: el prisma dispersado hacia el blanco-oro de día.</summary>
         private static Color TonoPluma(float hue, float mezclaDia, float haciaBlanco)
+            => TonoPluma(hue, mezclaDia, haciaBlanco, AlasCatalogo.De(AlasCatalogo.Aurora));
+
+        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO: el hue vive en la
+        /// PALETA del ala (crossfade continuo — el contrato ColorGoozma)
+        /// y la forma diurna funde hacia SU luz.</summary>
+        private static Color TonoPluma(float hue, float mezclaDia, float haciaBlanco,
+            in EstiloAlas estilo)
         {
-            Color prisma = ColorPrisma(hue);
+            Color prisma = DePaleta(estilo, hue);
+            Color dia = estilo.Paleta == null ? BlancoOro : estilo.ColorDia;
+            float fuerza = estilo.Paleta == null ? 0.62f : estilo.FuerzaDia;
             Color tinte = new(
-                (int)(prisma.R + (BlancoOro.R - prisma.R) * (0.62f * mezclaDia)),
-                (int)(prisma.G + (BlancoOro.G - prisma.G) * (0.62f * mezclaDia)),
-                (int)(prisma.B + (BlancoOro.B - prisma.B) * (0.62f * mezclaDia)));
+                (int)(prisma.R + (dia.R - prisma.R) * (fuerza * mezclaDia)),
+                (int)(prisma.G + (dia.G - prisma.G) * (fuerza * mezclaDia)),
+                (int)(prisma.B + (dia.B - prisma.B) * (fuerza * mezclaDia)));
             // HACIA BLANCO: el eje central de la pluma arde más claro
             // (el «axis» blanco-caliente del shader).
             return new(
                 (int)(tinte.R + (255 - tinte.R) * haciaBlanco),
                 (int)(tinte.G + (255 - tinte.G) * haciaBlanco),
                 (int)(tinte.B + (255 - tinte.B) * haciaBlanco));
+        }
+
+        /// <summary>v6.54.0 — EL HUE DE LA PALETA: null = el prisma
+        /// completo histórico; si no, la paleta del ala recorrida en
+        /// ciclo continuo con crossfade total (12/5 del ColorGoozma).</summary>
+        private static Color DePaleta(in EstiloAlas estilo, float h)
+        {
+            if (estilo.Paleta == null || estilo.Paleta.Length == 0)
+                return ColorPrisma(h);
+            Color[] pal = estilo.Paleta;
+            h -= MathF.Floor(h);
+            float seg = h * pal.Length;
+            int i = (int)seg % pal.Length;
+            int j = (i + 1) % pal.Length;
+            return Color.Lerp(pal[i], pal[j], seg - (int)seg);
         }
 
         // ==================================================================
@@ -208,6 +237,13 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
             float grav, int direccion, int lado, float time)
+            => ConstruirPluma(ancla, i, spread, flap, grav, direccion, lado, time,
+                AlasCatalogo.De(AlasCatalogo.Aurora));
+
+        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO: la forma del abanico
+        /// (largos, semianchos, inclinación y barrido) vive en el ala.</summary>
+        private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
+            float grav, int direccion, int lado, float time, in EstiloAlas estilo)
         {
             float t = i / (float)(PlumasPorAla - 1);
 
@@ -226,18 +262,19 @@ namespace AethonMod.Content.VFX
             // la INCLINACIÓN propia del lado (el hueco central) barrido
             // por el abanico — y todo el conjunto rotado hacia ATRÁS
             // según mira el jugador (más abierto = más barrido).
-            float angulo = -MathHelper.PiOver2 + lado * (InclinacionPar + off)
-                - direccion * BarridoAtras * (0.35f + 0.65f * spread);
+            float angulo = -MathHelper.PiOver2 + lado * (estilo.Inclinacion + off)
+                - direccion * estilo.Barrido * (0.35f + 0.65f * spread);
             Vector2 dir = new(MathF.Cos(angulo), MathF.Sin(angulo) * grav);
             Vector2 perp = new(-dir.Y, dir.X);
 
             // EL LARGO que respira (interior→exterior × apertura + la
             // vibración sutil del aleteo).
-            float largo = MathHelper.Lerp(LargoInterior, LargoExterior, t) * (0.5f + 0.5f * spread);
+            float largo = MathHelper.Lerp(estilo.LargoInterior, estilo.LargoExterior, t)
+                * (0.5f + 0.5f * spread);
             largo *= 1f + MathF.Sin(flap * 0.7f + i * 0.6f) * 0.045f;
 
-            float raizMedio = RaizSemiancho;
-            float puntaMedio = PuntaSemianchoBase + PuntaSemianchoAbierto * spread;
+            float raizMedio = estilo.RaizSemiancho;
+            float puntaMedio = estilo.PuntaSemianchoBase + estilo.PuntaSemianchoAbierto * spread;
 
             Pluma p;
             p.RaizMas = ancla + perp * raizMedio;
@@ -263,6 +300,13 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues,
             float[] fundidos, float mezclaDia, int capa)
+            => EmitirCapa(nVerts, plumas, hues, fundidos, mezclaDia, capa,
+                AlasCatalogo.De(AlasCatalogo.Aurora));
+
+        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO (las intensidades de
+        /// las capas viven en el ala).</summary>
+        private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues,
+            float[] fundidos, float mezclaDia, int capa, in EstiloAlas estilo)
         {
             // LAS COLUMNAS (la gaussiana de RayoStrip adaptada a la pluma):
             // el núcleo estrecho casi blanco, el cuerpo medio, el halo
@@ -271,9 +315,9 @@ namespace AethonMod.Content.VFX
             float frac, inten;
             switch (capa)
             {
-                case 0: frac = 0.30f; inten = 0.92f; break;   // el eje blanco-caliente
-                case 1: frac = 0.62f; inten = 0.34f; break;   // el cuerpo del prisma
-                default: frac = 1f; inten = 0.13f; break;     // el halo que muere suave
+                case 0: frac = 0.30f; inten = estilo.NucleoInten; break;   // el eje blanco-caliente
+                case 1: frac = 0.62f; inten = estilo.CuerpoInten; break;   // el cuerpo del prisma
+                default: frac = 1f; inten = estilo.HaloInten; break;       // el halo que muere suave
             }
 
             for (int i = 0; i < plumas.Length; i++)
@@ -286,8 +330,9 @@ namespace AethonMod.Content.VFX
                 // LOS CUATRO COLORES (hue que SE DISPERSA a lo largo de
                 // la pluma: la raíz y la punta viven hues distintos —
                 // el espectro corre del hombro a la punta).
-                Color cRaiz = TonoPluma(hues[i], mezclaDia, haciaBlanco);
-                Color cPunta = TonoPluma(hues[i] + HueALoLargo, mezclaDia, haciaBlanco * 0.7f);
+                Color cRaiz = TonoPluma(hues[i], mezclaDia, haciaBlanco, estilo);
+                Color cPunta = TonoPluma(hues[i] + estilo.HueLargo, mezclaDia,
+                    haciaBlanco * 0.7f, estilo);
 
                 // LOS FUNDIDOS: la raíz entra suave (rootFade), la punta
                 // se DESGARRA (el tear del original: el hash decide qué
@@ -326,6 +371,13 @@ namespace AethonMod.Content.VFX
         /// <summary>La versión texturizada: las UV del ruido FLUYEN por la pluma.</summary>
         private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues,
             float mezclaDia, float time, int pasada, float fold)
+            => EmitirCapaRuido(nVerts, plumas, hues, mezclaDia, time, pasada, fold,
+                AlasCatalogo.De(AlasCatalogo.Aurora));
+
+        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO (la intensidad del
+        /// ruido vive en el ala — el «caudal» de su flujo).</summary>
+        private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues,
+            float mezclaDia, float time, int pasada, float fold, in EstiloAlas estilo)
         {
             // LAS DOS FRECUENCIAS DEL ORIGINAL (f1 lenta que fluye HACIA
             // la punta, f2 fina que retrocede — el pliegue doble de la
@@ -341,6 +393,7 @@ namespace AethonMod.Content.VFX
                 escalaU = 3.4f; velU = -0.12f; escalaV = 1.15f; velV = 0f;
                 inten = 0.30f;
             }
+            inten *= estilo.RuidoInten;
 
             for (int i = 0; i < plumas.Length; i++)
             {
@@ -354,7 +407,7 @@ namespace AethonMod.Content.VFX
                 float v0 = fase * velV * 0.1f;
                 float v1 = escalaV + v0;
 
-                Color c = TonoPluma(hues[i], mezclaDia, 0.05f);
+                Color c = TonoPluma(hues[i], mezclaDia, 0.05f, estilo);
                 Color cr = Pre(c, inten * 0.30f);
                 Color cp = Pre(c, inten);
 
@@ -398,6 +451,17 @@ namespace AethonMod.Content.VFX
         /// <param name="flap">Fase acumulada del aleteo.</param>
         /// <param name="mezclaDia">0..1 la forma nocturna (prisma) ↔ diurna (blanco-oro).</param>
         public static bool Dibujar(Player pl, float spread, float flap, float mezclaDia)
+            => Dibujar(pl, AlasCatalogo.De(AlasCatalogo.Aurora), spread, flap, mezclaDia);
+
+        /// <summary>
+        /// v6.54.0 — EL DIBUJO CON ESTILO (la letra: «crea otras 15 alas
+        /// usando el mismo sistema»): MISMA técnica, MISMO contrato de
+        /// lote — solo cambian la paleta, la forma, el tempo, las
+        /// intensidades y la TEXTURA DE RUIDO que fluye por las plumas
+        /// (cada ala trae la suya de las 20 de la investigación).
+        /// </summary>
+        public static bool Dibujar(Player pl, in EstiloAlas estilo, float spread,
+            float flap, float mezclaDia)
         {
             if (Main.netMode == NetmodeID.Server || pl == null || pl.dead || spread <= 0.02f)
                 return false;
@@ -407,7 +471,7 @@ namespace AethonMod.Content.VFX
             try
             {
                 GraphicsDevice gd = Main.graphics.GraphicsDevice;
-                if (!AsegurarEfectos(gd))
+                if (!AsegurarEfectos(gd, estilo.Ruido))
                     return false;
 
                 float time = Main.GlobalTimeWrappedHourly;
@@ -432,7 +496,7 @@ namespace AethonMod.Content.VFX
                     Pluma[] plumas = _plumas;
                     float[] hues = _hues;
                     float[] fundidos = _fundidos;
-                    float hueBase = flap * 0.018f;
+                    float hueBase = flap * estilo.HueTiempo;
 
                     int k = 0;
                     for (int lado = -1; lado <= 1; lado += 2)
@@ -443,8 +507,9 @@ namespace AethonMod.Content.VFX
                         Vector2 ancla = anclaBase + new Vector2(lado * 5f, 0f);
                         for (int i = 0; i < PlumasPorAla; i++)
                         {
-                            plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav, direccion, lado, time);
-                            float hue = (hueBase + i * HueEntrePlumas) % 1f;
+                            plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav,
+                                direccion, lado, time, estilo);
+                            float hue = (hueBase + i * estilo.HueEntre) % 1f;
                             if (hue < 0f) hue += 1f;
                             hues[k] = hue;
 
@@ -463,16 +528,16 @@ namespace AethonMod.Content.VFX
                     // === 1. LAS TRES CAPAS DE GEOMETRÍA (núcleo + cuerpo + halo) ===
                     int n = 0;
                     for (int capa = 0; capa < 3; capa++)
-                        n = EmitirCapa(n, plumas, hues, fundidos, mezclaDia, capa);
+                        n = EmitirCapa(n, plumas, hues, fundidos, mezclaDia, capa, estilo);
                     if (n >= 3)
                         Volcar(gd, _fxPlano, n, false);
 
                     // === 2. LAS DOS PASADAS DE RUIDO (el pliegue de la aurora
                     //     FLUYENDO por cada pluma — el corazón del original) ===
-                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 0, fold);
+                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 0, fold, estilo);
                     if (n >= 3)
                         Volcar(gd, _fxTextura, n, true);
-                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 1, fold);
+                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 1, fold, estilo);
                     if (n >= 3)
                         Volcar(gd, _fxTextura, n, true);
                 }
@@ -491,7 +556,7 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        private static bool AsegurarEfectos(GraphicsDevice gd)
+        private static bool AsegurarEfectos(GraphicsDevice gd, string ruido)
         {
             if (_fxPlano == null)
             {
@@ -513,20 +578,27 @@ namespace AethonMod.Content.VFX
                     Alpha = 1f,
                 };
             }
-            if (_ruido == null || _ruido.IsDisposed)
+            if (_ruido == null || _ruido.IsDisposed || _ruido.Tag as string != ruido)
             {
-                if (_texturaProboFallar) return false;
-                try
+                // v6.54.0 — EL CACHÉ POR ESTILO: cada ala fluye con SU
+                // textura de ruido (las 20 de la investigación).
+                if (!_ruidos.TryGetValue(ruido, out Texture2D tex) || tex == null || tex.IsDisposed)
                 {
-                    _ruido = Terraria.ModLoader.ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/Noise",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                    if (_texturaProboFallar) return false;
+                    try
+                    {
+                        tex = Terraria.ModLoader.ModContent.Request<Texture2D>(
+                            ruido, ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                        _ruidos[ruido] = tex;
+                    }
+                    catch
+                    {
+                        _texturaProboFallar = true;
+                        return false;
+                    }
                 }
-                catch
-                {
-                    _texturaProboFallar = true;
-                    return false;
-                }
+                _ruido = tex;
+                _ruido.Tag = ruido;
             }
             _fxTextura.Texture = _ruido;
             return true;
@@ -573,6 +645,7 @@ namespace AethonMod.Content.VFX
             _fxPlano = null;
             _fxTextura = null;
             _ruido = null;
+            _ruidos.Clear();      // v6.54.0 — el caché de ruidos también muere
             if (plano != null || textura != null)
             {
                 Terraria.Main.QueueMainThreadAction(() =>

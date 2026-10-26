@@ -65,54 +65,27 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS VEINTIUNA BOLSAS (garantizadas en cada entrada) ===
+            // === v6.54.0 — LA REORGANIZACIÓN DE LAS BOLSAS (la letra del
+            //     27/10: «respecto a las bolsas anteriores, guardalas
+            //     todas en otra bolsa y de esa forma solo se entregara
+            //     esta bolsa con mas bolsas de las viejas, mientras que
+            //     la nueva bolsa aparece aparte»): el kit entrega
+            //     DOS cosas —
+            //       1. EL COFRE DEL ARSENAL (la Bolsa Maestra con las
+            //          VEINTITRÉS bolsas de siempre DENTRO), y
+            //       2. LA BOLSA DE LA INVESTIGACIÓN aparte (los items
+            //          nuevos del estudio de las texturas del dios +
+            //          la Bolsa de las Alas con las quince alas). ===
             int bolsas = 0;
-            bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
-            bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
-            bolsas += Entregar(ModContent.ItemType<BolsaClasicosCosmicos>());
-            bolsas += Entregar(ModContent.ItemType<BolsaAgujerosNegros>());
-            bolsas += Entregar(ModContent.ItemType<BolsaSolesRunicos>());
-            bolsas += Entregar(ModContent.ItemType<BolsaEstrellasReales>());
-            bolsas += Entregar(ModContent.ItemType<BolsaArmasLibrerias>());
-            bolsas += Entregar(ModContent.ItemType<BolsaBastonesCreativos>());
-            bolsas += Entregar(ModContent.ItemType<BolsaExhumados>());
-            bolsas += Entregar(ModContent.ItemType<BolsaCosmeticos>());
-            bolsas += Entregar(ModContent.ItemType<BolsaDosFormas>());      // v6.33: LAS 4 DE LAS DOS FORMAS
-            bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33+v6.35: LOS 9 DESGARROS
-            bolsas += Entregar(ModContent.ItemType<BolsaCodigosVivos>());   // v6.36: LOS 4 CÓDIGOS VIVOS
-            bolsas += Entregar(ModContent.ItemType<BolsaSierpes>());        // v6.38: LA FAMILIA DE LAS SIERPES
-            bolsas += Entregar(ModContent.ItemType<BolsaHuespedes>());      // v6.41: LAS RÉPLICAS DE PRUEBA
-            bolsas += Entregar(ModContent.ItemType<BolsaApuestas>());        // v6.42: LAS 5 APUESTAS + EL VERBO
-            bolsas += Entregar(ModContent.ItemType<BolsaIdeasGrimorio>());   // v6.50.19: LAS 6 IDEAS DEL GRIMORIO
-            bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
-            bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63+: LAS FAUCES DEL GRIMORIO (las 3 sombras de la .62 + LA PÁGINA FINAL de la .64 — el arma 4)
-            bolsas += Entregar(ModContent.ItemType<BolsaEmperatriz>());      // v6.50.99: LAS CUATRO PRUEBAS DE LA EMPERATRIZ (A/B/C + la dual Equinoccio)
+            bolsas += Entregar(ModContent.ItemType<BolsaMaestra>());
+            bolsas += Entregar(ModContent.ItemType<BolsaInvestigacion>());
 
-            // v6.51.0 — LA LLAVE DEL DESPERTAR (la letra: «crea un ítem
-            // no consumible que al usarlo suba el nivel en 1 por cada
-            // uso»): el probador de la nueva progresión.
+            // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
+            // (no es una bolsa — el probador de la progresión viaja suelto,
+            // igual que las dummies: la letra de la reorganización habla de
+            // LAS BOLSAS).
             bolsas += Entregar(ModContent.ItemType
                 <global::AethonMod.Content.Items.Llamados.EcoDelDespertar>());
-            // v6.50.121 — LA BOLSA DE LA CRÍA, LA MISMA FORMA QUE TODAS (la
-            //     letra: «la bolsa debe entregarse al jugador de la misma
-            //     forma que todas las demás bolsas del mod»): garantizada en
-            //     cada entrada al mundo como sus veinte hermanas — la pareja
-            //     luz+oscuridad nunca vuelve a perderse.
-            bolsas += Entregar(ModContent.ItemType<Items.Llamados.BolsaDeLaCria>());
-
-            // v6.51.4 — LA BOLSA DE LOS PROYECTILES DIGNOS (la letra: «crea un arma
-            // nueva por cada una de estas ideas que diste y crea una nueva bolsa
-            // para darsela al jugador»): los seis candidatos a proyectil del
-            // Grimorio del Eterno, garantizados como sus hermanas.
-            bolsas += Entregar(ModContent.ItemType<BolsaProyectilesDignos>());
-
-            // v6.52.2 — LA BOLSA DEL DIOS ANTIGUO (la letra: «analiza el jefe
-            // y de ser posible crea una nueva bolsa con todos los items que
-            // puedas copiar de ese jefe, que sea una copia exacta para
-            // nuestra investigacion profunda»): las copias de GOOZMA (Hunt
-            // of the Old God) — el Rayo de Fusión, el Láser Arcoíris, el
-            // Destructor de Prismas, el Trueno de Gelatina y la Masa Cromática.
-            bolsas += Entregar(ModContent.ItemType<BolsaDelDiosAntiguo>());
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

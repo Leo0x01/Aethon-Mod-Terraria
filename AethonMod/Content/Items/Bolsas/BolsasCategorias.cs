@@ -704,7 +704,7 @@ namespace AethonMod.Content.Items.Bolsas
     ///
     /// v6.53.1 — LA SEPARACIÓN: la copia verbatim del jefe salió del mod
     /// (la letra: «es solo para investigación… todo su material debería
-    /// ser borrado antes del lanzamiento» — vive en research/GoozmaPort,
+    /// ser borrado antes del lanzamiento» — BORRADO COMPLETO en la v6.54.0
     /// fuera de toda compilación y de todo release); esta bolsa queda
     /// con el ARSENAL PROPIO inspirado en el dios (las 5 armas de la
     /// .52.2, 100 % código de la casa).</summary>
@@ -725,8 +725,127 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Goozma.MasaCromatica>(), 30));
             // v6.53.1 — EL CONVOCADOR DEL PUERTO SE FUE con la separación
             // (el huevo PluripotentSpawnEgg del puerto verbatim salió del
-            // mod completo: research/GoozmaPort nunca se compila ni se
+            // mod completo: el material GPL se BORRÓ del repo entero (v6.54.0)
             // publica — la decisión GPL del usuario).
+            return l;
+        }
+    }
+
+    // ======================================================================
+    //  v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN (la letra del 27/10: «con
+    //  toda esta investigacion debes crear nuevos items ya sean
+    //  cosmeticos o armas para el jugador en una nueva bolsa … todos los
+    //  items nuevos que crees con esta investigacion profunda ponlos en
+    //  una unica bolsa y daselas al jugador») + LA BOLSA DE LAS ALAS
+    //  (las 15 alas del mismo sistema) + LA BOLSA MAESTRA («respecto a
+    //  las bolsas anteriores, guardalas todas en otra bolsa y de esa
+    //  forma solo se entregara esta bolsa con mas bolsas de las viejas,
+    //  mientras que la nueva bolsa aparece aparte»).
+    // ======================================================================
+
+    /// <summary>v6.54.0 — LA BOLSA DE LAS ALAS: las quince alas
+    /// procedurales de la investigación (el mismo sistema de la Aurora
+    /// de Tinta — cada una con SU paleta, SU tempo y SU ruido de las
+    /// veinte texturas nuevas).</summary>
+    public class BolsaDeAlasPrisma : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Alas";
+        protected override string NombreCorto => "Bolsa de las Alas";
+        protected override Color ColorFiesta => new(201, 166, 255);
+        protected override string Nota => "Quince alas de código — el mismo sistema de la Aurora de Tinta";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeTintaSerena>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeEclipse>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDePlasma>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeNebulosa>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeCometario>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeMedianoche>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDelPrisma>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeFuegoFrio>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeTormenta>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeMarioneta>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeAuroraArtica>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeOrquidea>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDelVacio>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasSolaresRunicas>(), 1));
+            l.Add((ModContent.ItemType<Items.Alas.AlasDeSangreDeTinta>(), 1));
+            return l;
+        }
+    }
+
+    /// <summary>v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN: los seis items
+    /// nacidos del estudio profundo de las texturas de efecto de
+    /// Goozma (FusionRay, SpaceTrail, LiquidTrail, Lightning ×2,
+    /// DarkSludge, Constellation, ColorMap, Glow, Noise, Space — TODO
+    /// re-implementado 100 % casa, cero material portado) + la Bolsa
+    /// de las Alas dentro.</summary>
+    public class BolsaInvestigacion : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de la Investigación";
+        protected override string NombreCorto => "Bolsa de la Investigación";
+        protected override Color ColorFiesta => new(140, 60, 210);
+        protected override string Nota => "Las técnicas de las texturas del dios — re-escritas 100 % para ti";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // LAS ARMAS.
+            l.Add((ModContent.ItemType<Weapons.Investigacion.RayosConcentrados>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Investigacion.TruenoDelPrisma>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Investigacion.LodoDeEsencia>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Investigacion.CetroConstelaciones>(), 1));
+            // LOS COSMÉTICOS.
+            l.Add((ModContent.ItemType<Items.Cosmetics.Investigacion.EstelaDelCosmos>(), 1));
+            l.Add((ModContent.ItemType<Items.Cosmetics.Investigacion.TintaViva>(), 1));
+            // LAS ALAS (la letra: «metelas en una bolsa de alas» — vive
+            // DENTRO de la bolsa única de la investigación).
+            l.Add((ModContent.ItemType<BolsaDeAlasPrisma>(), 1));
+            return l;
+        }
+    }
+
+    /// <summary>v6.54.0 — LA BOLSA MAESTRA: TODAS las bolsas anteriores
+    /// del mod guardadas DENTRO de una sola (la letra: «respecto a las
+    /// bolsas anteriores, guardalas todas en otra bolsa y de esa forma
+    /// solo se entregara esta bolsa con mas bolsas de las viejas,
+    /// mientras que la nueva bolsa aparece aparte») — el kit de pruebas
+    /// entrega ESTA maestra + la Bolsa de la Investigación aparte.</summary>
+    public class BolsaMaestra : BolsaCategoria
+    {
+        protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
+        protected override string NombreCorto => "El Cofre del Arsenal";
+        protected override Color ColorFiesta => new(255, 196, 107);
+        protected override string Nota => "Las veintitrés bolsas del arsenal, una dentro de la otra";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<BolsaProbador>(), 1));
+            l.Add((ModContent.ItemType<BolsaFundacionales>(), 1));
+            l.Add((ModContent.ItemType<BolsaClasicosCosmicos>(), 1));
+            l.Add((ModContent.ItemType<BolsaAgujerosNegros>(), 1));
+            l.Add((ModContent.ItemType<BolsaSolesRunicos>(), 1));
+            l.Add((ModContent.ItemType<BolsaEstrellasReales>(), 1));
+            l.Add((ModContent.ItemType<BolsaArmasLibrerias>(), 1));
+            l.Add((ModContent.ItemType<BolsaBastonesCreativos>(), 1));
+            l.Add((ModContent.ItemType<BolsaExhumados>(), 1));
+            l.Add((ModContent.ItemType<BolsaCosmeticos>(), 1));
+            l.Add((ModContent.ItemType<BolsaDosFormas>(), 1));
+            l.Add((ModContent.ItemType<BolsaDesgarros>(), 1));
+            l.Add((ModContent.ItemType<BolsaCodigosVivos>(), 1));
+            l.Add((ModContent.ItemType<BolsaSierpes>(), 1));
+            l.Add((ModContent.ItemType<BolsaHuespedes>(), 1));
+            l.Add((ModContent.ItemType<BolsaApuestas>(), 1));
+            l.Add((ModContent.ItemType<BolsaIdeasGrimorio>(), 1));
+            l.Add((ModContent.ItemType<BolsaProyectilesDignos>(), 1));
+            l.Add((ModContent.ItemType<BolsaArmasRayo>(), 1));
+            l.Add((ModContent.ItemType<BolsaSombras>(), 1));
+            l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
+            l.Add((ModContent.ItemType<BolsaDelDiosAntiguo>(), 1));
             return l;
         }
     }

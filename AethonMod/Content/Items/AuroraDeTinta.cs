@@ -51,12 +51,16 @@ namespace AethonMod.Content.Items
             AlasAuroraPlayer mp = player.GetModPlayer<AlasAuroraPlayer>();
             mp.Equipada = true;
             mp.OcultarVisual = hideVisual;
+            mp.AlaEstilo = global::AethonMod.Content.VFX.AlasCatalogo.Aurora;  // v6.54.0 — la histórica
         }
 
         public override void UpdateVanity(Player player)
         {
             // LA VANIDAD: la aurora como adorno (SOLO visual — sin física).
-            player.GetModPlayer<AlasAuroraPlayer>().Vanidad = true;
+            AlasAuroraPlayer mp = player.GetModPlayer<AlasAuroraPlayer>();
+            mp.Vanidad = true;
+            if (mp.AlaEstilo == 0)
+                mp.AlaEstilo = global::AethonMod.Content.VFX.AlasCatalogo.Aurora;
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)

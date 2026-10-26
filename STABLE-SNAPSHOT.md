@@ -1,3 +1,36 @@
+# v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS — EL CHECKLIST
+
+**Qué es nuevo** (todo 100 % re-escrito para el mod, cero material portado):
+
+1. **LA BOLSA DE LA INVESTIGACIÓN** (entrega aparte, junto al Cofre del Arsenal):
+   - **Rayos Concentrados** — EL rayo de fusión del jugador: carga 45 t con los
+     soles rúnicos creciendo + la aguja, y FUEGO: el haz de 2000 px con el
+     cuerpo de ruido, las chispas titilando hacia la punta, el núcleo
+     blanco-caliente y el arcoíris corriendo. [ ] ¿Se ve como el del jefe?
+   - **El Trueno del Prisma** — 1 rayo grande + 2 chicos cayendo del cielo; el
+     rayo CRUJE al nacer y se aquieta. [ ] ¿Se ve ramificado y vivo?
+   - **El Lodo de Esencia** — lanza globos; los charcos morados brillan y se
+     HINCHAN al acumularse. [ ] ¿La bioluminiscencia late?
+   - **El Cetro de Constelaciones** — hasta 5 estrellas orbitando; las cercanas
+     se unen con líneas que DAÑAN; la primera dibuja la viñeta girando. [ ]
+   - **La Estela del Cosmos** (cosmético) — el anillo Saturno MORADO/NEGRO que
+     respira y gira tras de ti. [ ]
+   - **La Tinta Viva** (cosmético) — la cola de goo que sigue TU rastro. [ ]
+2. **LA BOLSA DE LAS ALAS** (dentro de la Investigación): QUINCE alas nuevas
+   con el mismo sistema de la Aurora (que queda intacta): Tinta Serena, Eclipse,
+   Plasma, Nebulosa, Cometario, Medianoche, Prisma, Fuego Frío, Tormenta,
+   Marioneta, Aurora Ártica, Orquídea, Vacío, Solares Rúnicas y Sangre de
+   Tinta — cada una con SU paleta, SU tempo y SU ruido de las 20 texturas
+   nuevas. [ ] ¿Las 15 se ven y se distinguen? [ ] ¿La Aurora sigue igual?
+3. **EL COFRE DEL ARSENAL** — las 23 bolsas de siempre ahora DENTRO de una
+   sola; se entrega junto a la nueva (la letra de la reorganización). [ ]
+4. **Los 20 RUIDOS nuevos** alimentan alas y efectos (las familias del dios +
+   células, plasma y anillos — 3 familias nuevas de la casa).
+
+**GoozmaPort**: la investigación terminó y `research/GoozmaPort/` se BORRÓ del
+repositorio por completo (la orden del usuario) — el repo queda 100 % libre de
+material GPL. Respaldo privado fuera del repo documentado en CHANGES.
+
 # AethonMod — ESTADO ACTUAL (v6.53.1)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.

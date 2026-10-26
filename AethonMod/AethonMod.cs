@@ -12,8 +12,9 @@ namespace AethonMod
         // v6.53.1 — EL REDIRECT DEL PUERTO DE GOOZMA SE RETIRÓ con la
         // separación (la letra: el material del jefe es SOLO para
         // investigación y jamás debe salir en un lanzamiento — la copia
-        // verbatim vive ahora en research/GoozmaPort, fuera de la carpeta
-        // del mod: ni se compila ni se empaqueta). El
+        // verbatim fue BORRADA del repositorio entero en la v6.54.0 — la
+        // investigación de sus texturas terminó y la orden del usuario
+        // se ejecutó: cero material GPL en el repo). El
         // CreateDefaultContentSource vuelve a ser el de fábrica.
 
         public override void Load()
