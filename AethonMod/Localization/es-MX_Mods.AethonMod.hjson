@@ -173,6 +173,19 @@ Items: {
                         (Arma de prueba de las fauces — v2.)
                         '''
         }
+        SombraDeLaPagina2: {
+                DisplayName: La Sombra de la Página II
+                Tooltip:
+                        '''
+                                «La página doblada en dos: la sombra que aprendió a cerrarse.»
+                                El segundo tomo: la DOBLE HÉLICE de tinta trenzada sobre su
+                                espina, LOS IRIS REALES del Ojo Eterno repartidos por las hebras,
+                                los rayitos Perlin chispeando entre ambas y la BOCA DE GARRAS que
+                                cierra de golpe. Caza a cualquier distancia, drena 3% cada 6 t y
+                                a 1 de vida: el festín de siempre.
+                                SIN COSTE DE MANÁ — arma de prueba: úsala sin miedo.
+                        '''
+        }
         SombraDeLaPagina3: {
                 DisplayName: La Sombra de la Página III
                 Tooltip:
@@ -1930,9 +1943,11 @@ Items: {
         // marcapáginas) + LA BOLSA que los entrega.
         DignosEquinoccioBinario: {
                 DisplayName: El Equinoccio Binario
+                Tooltip: ""
         }
         BolsaProyectilesDignos: {
                 DisplayName: La Bolsa de los Proyectiles Dignos
+                Tooltip: ""
         }
 
         // v6.50.99/.102 — THE FOURTH WEAPON — DUAL OPTION B — THE CHOSEN ONE
@@ -2129,9 +2144,21 @@ Projectiles: {
         GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
         ManchaDeTinta.DisplayName: La Mancha de Tinta
         PrimeraCenaProjectile.DisplayName: La Primera Cena
-        // CaidaCometaProjectile.DisplayName: Caida Cometa Projectile
-        // AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
-        // AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
+        // v6.53.1 — LA PARIDAD ×3 (las 12 claves que solo vivían en en-US —
+        // los jugadores en español las leían en inglés): descomentadas y
+        // traducidas + las 9 que faltaban del todo.
+        CaidaCometaProjectile.DisplayName: La Caída Cometa
+        AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro (mascota)
+        AtaqueFusionProjectile.DisplayName: El Ataque de Fusión
+        EscupidizoProjectile.DisplayName: El Escupidizo
+        RayoConvergenteProjectile.DisplayName: El Rayo Convergente
+        TentaculoEquinoccioProjectile.DisplayName: El Tentáculo del Equinoccio
+        LlegadaBrumaProjectile.DisplayName: La Llegada de la Bruma
+        BrilloSolarHalo.DisplayName: El Halo de Brillo Solar
+        BrumaNacimientoFX.DisplayName: La Bruma del Nacimiento
+        DignosFXProjectile.DisplayName: El Destello de los Dignos
+        BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
+        SombraPagina2Projectile.DisplayName: La Sombra de la Página II
 }
 
 Buffs: {
@@ -2231,14 +2258,16 @@ NPCs: {
                 Bestiario: Un grimorio que un día llegó envuelto en un mar de bruma — nadie vio cómo. Duerme flotando en el mismo aire… a la espera de la mano correcta.
 
                 TownNPCMood: {
-                        // Content: I am content.
-                        // NoHome: I hate not having a home.
-                        // FarFromHome: I am too far from home.
-                        // LoveSpace: I love having so much space.
-                        // DislikeCrowded: I dislike how crowded I am.
-                        // HateCrowded: I hate how crowded I am.
-                        // LikeNPC_Princess: I like {NPCName}.
-                        // Princess_LovesNPC: I like {NPCName}.
+                        // v6.53.1 — LA PARIDAD ×3: los estados de ánimo del pueblo,
+                        // descomentados y traducidos.
+                        Content: Estoy a gusto.
+                        NoHome: Odio quedarme sin hogar.
+                        FarFromHome: Estoy demasiado lejos de casa.
+                        LoveSpace: Me encanta tener tanto espacio.
+                        DislikeCrowded: No me gusta estar tan apretado.
+                        HateCrowded: Odio estar tan apretado.
+                        LikeNPC_Princess: Me agrada {NPCName}.
+                        Princess_LovesNPC: Me agrada {NPCName}.
                 }
         }
 }
@@ -2561,11 +2590,11 @@ Despertar: {
         MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
         TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
         EsenciaTopeTooltip:
-        	'''
+                '''
                 ✦ Festín COMPLETO: +100% de daño con el libro en la mano
                 · 25% si lo guardas en la bolsa
                 · nada en un cofre. Cada esencia comida extra se vuelve 1 moneda de oro
-        	'''
+                '''
         EsenciaProgresoTooltip: ✦ Festín del portador: {0}/{1} esencias comidas (+{2}% en total · ahora: +{3}%)
         EsenciaLigadaMano: ✧ El Grimorio del Eterno está EN TU MANO: el festín entero (+100% al tope)
         EsenciaLigadaBolsa: ✧ El Grimorio del Eterno está EN LA BOLSA: el festín al 25% (sácalo a la mano para todo su poder)

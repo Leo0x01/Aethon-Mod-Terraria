@@ -700,13 +700,20 @@ namespace AethonMod.Content.Items.Bolsas
     /// 5 rayos), EL TRUENO DE GELATINA (el GooLightning perlin) y LA
     /// MASA CROMÁTICA (el material arcoíris) — todo con EL MOTOR DE
     /// COLOR de Goozma (ColorGoozma: la paleta OIL en ciclo de 60 t, el
-    /// reloj compartido que hace que TODO el jefe se vea como se ve).</summary>
+    /// reloj compartido que hace que TODO el jefe se vea como se ve).
+    ///
+    /// v6.53.1 — LA SEPARACIÓN: la copia verbatim del jefe salió del mod
+    /// (la letra: «es solo para investigación… todo su material debería
+    /// ser borrado antes del lanzamiento» — vive en research/GoozmaPort,
+    /// fuera de toda compilación y de todo release); esta bolsa queda
+    /// con el ARSENAL PROPIO inspirado en el dios (las 5 armas de la
+    /// .52.2, 100 % código de la casa).</summary>
     public class BolsaDelDiosAntiguo : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa del Dios Antiguo";
         protected override string NombreCorto => "Bolsa del Dios Antiguo";
         protected override Color ColorFiesta => new(174, 23, 189);
-        protected override string Nota => "Goozma, el Dios de los Slimes — la copia exacta para la investigación";
+        protected override string Nota => "Goozma, el Dios de los Slimes — el arsenal de la casa inspirado en el dios";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -716,12 +723,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Goozma.DestructorDePrismas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Goozma.TruenoDeGelatina>(), 1));
             l.Add((ModContent.ItemType<Weapons.Goozma.MasaCromatica>(), 30));
-            // v6.53 — EL CONVOCADOR DE GOOZMA: el huevo pluripotente del port
-            // verbatim (Content/GoozmaPort). Clic derecho con el huevo en la mano:
-            // nace el PluripotentSpawn, absorbe slimes y eclosiona en EL JEFE
-            // COMPLETO (las 3 fases, el Rayo de Fusión con su shader .fx, la
-            // música, TODO) — la copia de investigación del usuario.
-            l.Add((ModContent.ItemType<GoozmaPort.Content.Items.Misc.PluripotentSpawnEgg>(), 1));
+            // v6.53.1 — EL CONVOCADOR DEL PUERTO SE FUE con la separación
+            // (el huevo PluripotentSpawnEgg del puerto verbatim salió del
+            // mod completo: research/GoozmaPort nunca se compila ni se
+            // publica — la decisión GPL del usuario).
             return l;
         }
     }

@@ -1835,12 +1835,12 @@ Items: {
 	// the bookmark) + THE BAG that delivers them.
 	DignosEquinoccioBinario: {
 		DisplayName: El Equinoccio Binario
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	BolsaProyectilesDignos: {
 		DisplayName: La Bolsa de los Proyectiles Dignos
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	// v6.50.99/.102 — THE FOURTH WEAPON — DUAL OPTION B — THE CHOSEN ONE
@@ -1904,20 +1904,29 @@ Items: {
 	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
 
 	SombraDeLaPagina2: {
-		// DisplayName: Sombra De La Pagina2
-		// Tooltip: ""
+		DisplayName: La Sombra de la Página II
+		Tooltip:
+			'''
+			        «La página doblada en dos: la sombra que aprendió a cerrarse.»
+			        El segundo tomo: la DOBLE HÉLICE de tinta trenzada sobre su
+			        espina, LOS IRIS REALES del Ojo Eterno repartidos por las hebras,
+			        los rayitos Perlin chispeando entre ambas y la BOCA DE GARRAS que
+			        cierra de golpe. Caza a cualquier distancia, drena 3% cada 6 t y
+			        a 1 de vida: el festín de siempre.
+			        SIN COSTE DE MANÁ — arma de prueba: úsala sin miedo.
+			'''
 	}
 
 	SombraDeLaPagina3: {
 		DisplayName: La Sombra de la Página III
 		Tooltip:
 			'''
-				«Siete iris sin rostro, y todos miran lo mismo que tú.»
-				El tercer tomo: UNA cuerda de sombra que lleva SIETE IRISES
-				flotando — SOLO el iris, sin párpados ni esclerótica — cada uno
-				con su propio latido y TODOS clavados en la presa. En vuelo se
-				abren en abanico; al morder, EL CORO CONVERGE sobre la herida
-				y drena 3% cada 6 t. A 1 de vida: el festín de siempre.
+			        «Siete iris sin rostro, y todos miran lo mismo que tú.»
+			        El tercer tomo: UNA cuerda de sombra que lleva SIETE IRISES
+			        flotando — SOLO el iris, sin párpados ni esclerótica — cada uno
+			        con su propio latido y TODOS clavados en la presa. En vuelo se
+			        abren en abanico; al morder, EL CORO CONVERGE sobre la herida
+			        y drena 3% cada 6 t. A 1 de vida: el festín de siempre.
 			'''
 	}
 
@@ -1925,12 +1934,12 @@ Items: {
 		DisplayName: La Sombra de la Página IV
 		Tooltip:
 			'''
-				«El ojo se cansó de ser ojo: ya solo queda el mirar.»
-				El cuarto tomo: DOS NERVIOS ÓPTICOS de tinta cuelgan de ti y en
-				su punta vive UN IRIS ROJO COLOSAL — su pupila se DILATA al
-				morder y los filamentos de tinta corren desde la presa hasta el
-				vacío. Drena 3% cada 6 t. A 1 de vida: el jefe, visto A TRAVÉS
-				del iris.
+			        «El ojo se cansó de ser ojo: ya solo queda el mirar.»
+			        El cuarto tomo: DOS NERVIOS ÓPTICOS de tinta cuelgan de ti y en
+			        su punta vive UN IRIS ROJO COLOSAL — su pupila se DILATA al
+			        morder y los filamentos de tinta corren desde la presa hasta el
+			        vacío. Drena 3% cada 6 t. A 1 de vida: el jefe, visto A TRAVÉS
+			        del iris.
 			'''
 	}
 
@@ -1938,13 +1947,13 @@ Items: {
 		DisplayName: El Rayo de Fusión
 		Tooltip:
 			'''
-				«El dios de los slimes comprimió su hambre en una línea.»
-				LA copia del ataque estrella de GOOZMA (Hunt of the Old
-				God): carga 70 t — la aguja arcoíris que late y se afina —
-				y FUEGO: el haz BARRE en coseno, el arcoíris CORRE a lo
-				largo del rayo (una rebanada móvil de la paleta de aceite),
-				el ruido fluye boca→punta y la boca florece cúbica.
-				Daño en CONO, exacto como el original.
+			        «El dios de los slimes comprimió su hambre en una línea.»
+			        LA copia del ataque estrella de GOOZMA (Hunt of the Old
+			        God): carga 70 t — la aguja arcoíris que late y se afina —
+			        y FUEGO: el haz BARRE en coseno, el arcoíris CORRE a lo
+			        largo del rayo (una rebanada móvil de la paleta de aceite),
+			        el ruido fluye boca→punta y la boca florece cúbica.
+			        Daño en CONO, exacto como el original.
 			'''
 	}
 
@@ -1952,11 +1961,11 @@ Items: {
 		DisplayName: El Láser Arcoíris
 		Tooltip:
 			'''
-				La copia del RainbowLaser de los Goozmitas: balas-láser
-				CURVAS (extraUpdates 8, un giro diminuto por paso) cuya
-				estela es una pila de sprites — núcleo fino estirado + halo
-				ancho — con el arcoíris CORRIENDO a lo largo (5 ticks de
-				paleta por segmento). Disparo rápido.
+			        La copia del RainbowLaser de los Goozmitas: balas-láser
+			        CURVAS (extraUpdates 8, un giro diminuto por paso) cuya
+			        estela es una pila de sprites — núcleo fino estirado + halo
+			        ancho — con el arcoíris CORRIENDO a lo largo (5 ticks de
+			        paleta por segmento). Disparo rápido.
 			'''
 	}
 
@@ -1964,12 +1973,12 @@ Items: {
 		DisplayName: El Destructor de Prismas
 		Tooltip:
 			'''
-				La copia del PrismDestroyer de la Divina Gargoptuar:
-				invoca TRES prismas que orbitan a tu alrededor (radio que
-				respira hasta 300, giro que se CONGELA al disparar)
-				barriendo 5 rayos de muerte en abanico; cada rayo choca en
-				TRES tramos decrecientes (70/180/320 px) y todos viven en
-				el arcoíris HSL giratorio.
+			        La copia del PrismDestroyer de la Divina Gargoptuar:
+			        invoca TRES prismas que orbitan a tu alrededor (radio que
+			        respira hasta 300, giro que se CONGELA al disparar)
+			        barriendo 5 rayos de muerte en abanico; cada rayo choca en
+			        TRES tramos decrecientes (70/180/320 px) y todos viven en
+			        el arcoíris HSL giratorio.
 			'''
 	}
 
@@ -1977,10 +1986,10 @@ Items: {
 		DisplayName: El Trueno de Gelatina
 		Tooltip:
 			'''
-				La copia del GooLightning de Goozma: descargas perlin
-				arcoíris que saltan al cursor y golpean por línea. Doble
-				pase (el canal + la vena) sobre la campana de glow, con el
-				fade del original: (1 − t/30)^0.6.
+			        La copia del GooLightning de Goozma: descargas perlin
+			        arcoíris que saltan al cursor y golpean por línea. Doble
+			        pase (el canal + la vena) sobre la campana de glow, con el
+			        fade del original: (1 − t/30)^0.6.
 			'''
 	}
 
@@ -1988,10 +1997,10 @@ Items: {
 		DisplayName: La Masa Cromática
 		Tooltip:
 			'''
-				La copia del alma de creación de Goozma: el material
-				gelatinoso arcoíris de todo su arsenal. El icono y el
-				nombre VIVEN con el reloj de color del dios (la paleta
-				de aceite, ciclo de 60 t).
+			        La copia del alma de creación de Goozma: el material
+			        gelatinoso arcoíris de todo su arsenal. El icono y el
+			        nombre VIVEN con el reloj de color del dios (la paleta
+			        de aceite, ciclo de 60 t).
 			'''
 	}
 }
@@ -2129,18 +2138,18 @@ Projectiles: {
 	GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
 	ManchaDeTinta.DisplayName: La Mancha de Tinta
 	PrimeraCenaProjectile.DisplayName: La Primera Cena
-	// CaidaCometaProjectile.DisplayName: Caida Cometa Projectile
-	// AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
-	// AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
-	// EscupidizoProjectile.DisplayName: Escupidizo Projectile
-	// RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
-	// TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
-	// LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
-	// BrilloSolarHalo.DisplayName: Brillo Solar Halo
-	// BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
-	// DignosFXProjectile.DisplayName: Dignos F X Projectile
-	// BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
-	// SombraPagina2Projectile.DisplayName: Sombra Pagina2 Projectile
+	CaidaCometaProjectile.DisplayName: La Caída Cometa
+	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro (mascota)
+	AtaqueFusionProjectile.DisplayName: El Ataque de Fusión
+	EscupidizoProjectile.DisplayName: El Escupidizo
+	RayoConvergenteProjectile.DisplayName: El Rayo Convergente
+	TentaculoEquinoccioProjectile.DisplayName: El Tentáculo del Equinoccio
+	LlegadaBrumaProjectile.DisplayName: La Llegada de la Bruma
+	BrilloSolarHalo.DisplayName: El Halo de Brillo Solar
+	BrumaNacimientoFX.DisplayName: La Bruma del Nacimiento
+	DignosFXProjectile.DisplayName: El Destello de los Dignos
+	BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
+	SombraPagina2Projectile.DisplayName: La Sombra de la Página II
 }
 
 Buffs: {
@@ -2240,14 +2249,14 @@ NPCs: {
 		Bestiario: Un grimorio que un día llegó envuelto en un mar de bruma — nadie vio cómo. Duerme flotando en el mismo aire… a la espera de la mano correcta.
 
 		TownNPCMood: {
-			// Content: I am content.
-			// NoHome: I hate not having a home.
-			// FarFromHome: I am too far from home.
-			// LoveSpace: I love having so much space.
-			// DislikeCrowded: I dislike how crowded I am.
-			// HateCrowded: I hate how crowded I am.
-			// LikeNPC_Princess: I like {NPCName}.
-			// Princess_LovesNPC: I like {NPCName}.
+			Content: Estoy a gusto.
+			NoHome: Odio quedarme sin hogar.
+			FarFromHome: Estoy demasiado lejos de casa.
+			LoveSpace: Me encanta tener tanto espacio.
+			DislikeCrowded: No me gusta estar tan apretado.
+			HateCrowded: Odio estar tan apretado.
+			LikeNPC_Princess: Me agrada {NPCName}.
+			Princess_LovesNPC: Me agrada {NPCName}.
 		}
 	}
 }

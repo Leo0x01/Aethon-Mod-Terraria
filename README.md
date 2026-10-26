@@ -12,25 +12,26 @@ Este repositorio y todo su contenido —incluidos, sin limitación: el código f
 - emplear este proyecto, total o parcialmente, con fines comerciales o promocionales;
 - extraer fragmentos para incorporarlos a colecciones, compilaciones, repositorios o productos de terceros.
 
-## ⚠️ Nota de licencia — el puerto de Goozma (v6.53.0)
+## ⚠️ Nota de licencia — la copia de investigación de Goozma
 
-La carpeta `AethonMod/Content/GoozmaPort/` es una **copia verbatim de
+La carpeta `research/GoozmaPort/` contiene una **copia verbatim de
 investigación** del jefe Goozma del mod *Calamity: Hunt of the Old God*
 (github.com/TohruKobayashi/CalamityHunt), que se distribuye bajo
-**GPL-3.0** (ver `Content/GoozmaPort/LICENSE-GPL3.txt`). Créditos:
+**GPL-3.0** (ver `research/GoozmaPort/LICENSE-GPL3.txt`). Créditos:
 Team Hypnos — caligulasAquarium, IbanPlay, THEREDSTONEBRO,
-AmmyanDocCiesh, Blockaroz. Ese subsistema se rige por la GPL-3.0; el
-resto del mod mantiene su licencia. La decisión final (re-licenciar el
-conjunto o re-escribir el puerto tras la investigación) es del autor.
+AmmyanDocCiesh, Blockaroz. Esa carpeta está **FUERA del mod**: no se
+compila, no entra al `.tmod` y jamás sale en un release (decisión del
+autor: es solo material de estudio y se borrará antes del lanzamiento
+oficial). El mod publicado — todo lo que vive en `AethonMod/` — es 100 %
+código y assets propios de la casa; las técnicas aprendidas del jefe
+están re-implementadas desde cero (ColorGoozma, RayoStrip, el Primer
+Trazo fusionado).
 
-## ✨ Novedades — v6.53.0: EL GOOZMA VERBATIM + EL RAYO DE FUSIÓN REAL + LAS ALAS VISIBLES
+## ✨ Novedades — v6.53.1: LA SEPARACIÓN DE GOOZMA (todo el material del puerto fuera del mod)
 
-- **EL GOOZMA VERBATIM (copia de investigación)**: el jefe COMPLETO de *Calamity: Hunt of the Old God* (GPL-3.0, Team Hypnos — créditos en cada archivo) portado tal cual a `Content/GoozmaPort/`: las 3 fases, los 5 dioses slimes, los 27 proyectiles — con el RAYO DE FUSIÓN real y su shader —, la música (31 MB), 58 sonidos y todos los sprites. Su invocador (el **Huevo de Engendro Pluripotente**) llega en la **Bolsa del Dios Antiguo**.
-- **EL PRIMER TRAZO con la técnica del FusionRay**: los 5 trazos convergen en un rayo GORDO (250 px) con el arcoíris de aceite corriendo, el ruido fluyendo boca→punta y el núcleo blanco-caliente — el material del jefe, a escala del arma.
-- **LAS ALAS POR FIN SE VEN**: el bug de toda la v6.52 era de coordenadas (mundo vs pantalla) — una línea de cura.
-- **LA PURGA DEL ESCRIBA**: El Escriba, La Pluma Consciente, Pluma Convocadora, su bolsa y el árbol de inscripciones — BORRADOS.
-- **LA CADENA PROPIA DE INVOCACIÓN**: +1,5 %/nivel (antes viajaba en la del mágico, +2,2 %) y la ventana dice «(este libro)».
-- **TEXTOS ARREGLADOS**: ninguna ventana nueva se sale de la pantalla.
+- **LA DECISIÓN GPL EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research/GoozmaPort/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material GPL). La Bolsa del Dios Antiguo queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).
+- **EL PRIMER TRAZO, 100 % MATERIAL DE LA CASA**: mismo look de rayo de fusión (fórmula de ancho del jefe + arcoíris viajero + núcleo blanco-caliente) pero con el pipeline propio probado de RayoStrip ×3 capas — sin shader prestado (que además nunca habría cargado: tML 2026.08 solo carga efectos .fxc compilados). Bonus: LA FUSIÓN LITERAL — separados, cada fajo viste su color del prisma; al cargar, los 5 colores SE DISUELVEN en el arcoíris del dios.
+- **v6.53.0 (para el historial)**: alas visibles (cura de coordenadas), purga del Escriba, cadena propia de invocación +1,5 % «(este libro)», textos arreglados — todo eso SIGUE en la .53.1.
 
 
 ## PROHIBICIÓN ABSOLUTA PARA SISTEMAS DE INTELIGENCIA ARTIFICIAL

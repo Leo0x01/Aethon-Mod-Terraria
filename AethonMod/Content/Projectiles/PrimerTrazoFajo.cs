@@ -1,15 +1,12 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Graphics;
 using AethonMod.Content.VFX;
-using AethonMod.Content.GoozmaPort;
-using AethonMod.Content.GoozmaPort.Common.Utilities;
-using AethonMod.Content.GoozmaPort.Content.NPCs.Bosses.GoozmaBoss;
 
 namespace AethonMod.Content.Projectiles
 {
@@ -204,55 +201,40 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ==================================================================
-        //  v6.53 — EL RAYO DE FUSIÓN DE GOOZMA, LA TÉCNICA REAL
+        //  v6.53.1 — EL RAYO DE FUSIÓN, 100 % MATERIAL DE LA CASA
         //
-        //  La letra: «el ataque del primer trazo todavía se ve mal… la
-        //  respuesta es el rayo de fusión de Goozma pero necesitamos saber
-        //  cómo hacerlo, necesitamos conocer la técnica». AHORA LA SABEMOS
-        //  Y LA TENEMOS: el jefe fue portado verbatim (Content/GoozmaPort)
-        //  y este fajo dibuja con SU MISMO MATERIAL —
+        //  La letra: «esta parte de Goozma es solo para investigación,
+        //  nunca lo usaré realmente y todo su material debería ser
+        //  borrado antes del lanzamiento» — el puerto verbatim SALIÓ del
+        //  mod (vive en research/GoozmaPort, fuera de toda compilación) y
+        //  con él el shader y las texturas prestadas (que además JAMÁS
+        //  habrían cargado: tML 2026.08 solo carga efectos .fxc
+        //  compilados — los .fx del puerto viajaban crudos). LA TÉCNICA
+        //  APRENDIDA PERMANECE (las ideas no tienen dueño) y vive en el
+        //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión de la
+        //  Bolsa del Dios Antiguo):
         //
-        //    · LA ESPINA RECTA (VertexStrip de vanilla con padding
-        //      procedural — 1500 puntos en Goozma; 256 aquí para 2400 px).
-        //    · EL ANCHO es TODA la forma (la fórmula exacta del jefe):
-        //      p^0.8 crece de la boca · cbrt capa al 70 % y muere en la
-        //      punta · ×(1.1 + cos·(0.08 − p·0.06)) — el VIVO que respira.
-        //    · EL ARCOÍRIS VIAJA por el rayo: GradientColor(GoozColors)
-        //      evaluado en (reloj − progreso·100) — una REBANADA MÓVIL de
-        //      la paleta de aceite del dios.
-        //    · EL SHADER VERDADERO: FusionRayEffect.fx con sus CUATRO
-        //      texturas (ruido, bits, glow, segundo ruido) — el núcleo
-        //      BLANCO-CALIENTE (length(laser) > 0.4 → 1), el fade en
-        //      lente, el wobble vertical y los bits que chispean.
-        //    · uTime NEGATIVO: el ruido fluye de la BOCA a la PUNTA.
+        //    · LA ESPINA RECTA (48 nodos en coordenadas de PANTALLA —
+        //      el contrato de RayoStrip, la lección de las alas).
+        //    · EL ANCHO es TODA la forma (la fórmula del jefe): p^0.8
+        //      crece de la boca · cbrt capa al 70 % y muere en la punta ·
+        //      ×(1.1 + cos·(0.08 − p·0.06)) — el VIVO que respira.
+        //    · EL ARCOÍRIS VIAJA por el rayo: ColorGoozma.ALoLargo
+        //      evaluado en (reloj − progreso·100) POR NODO — una REBANADA
+        //      MÓVIL de la paleta de aceite, resuelta en CPU (cero
+        //      shaders, la firma de la casa).
+        //    · LA FUSIÓN LITERAL: separados, cada fajo viste SU hue del
+        //      prisma (la firma del arma); al cargar, los CINCO colores
+        //      se DISUELVEN en el arcoíris del dios (lerp por carga²).
+        //    · TRES CAPAS en un solo lote: halo ×2.3 · cuerpo ×1 ·
+        //      núcleo BLANCO-CALIENTE ×0.34 (banda V 0.36-0.64 de
+        //      RuidoTinta — el corazón del gaussiano) con el flujo
+        //      horneado en las UVs (periodo/flujo raíz→punta).
         // ==================================================================
 
-        /// <summary>La tira de vanilla (la misma del jefe).</summary>
-        private static readonly VertexStrip _tira = new();
-
-        /// <summary>El reloj compartido del arma (todas los fajos leen el
+        /// <summary>El reloj compartido del arma (todos los fajos leen el
         /// MISMO reloj global — la rebanada de paleta viaja coordinada).</summary>
         private static float Reloj => Main.GlobalTimeWrappedHourly * 2f;
-
-        /// <summary>LA REBANADA MÓVIL — el arcoíris corre a lo largo.</summary>
-        private Color StripColor(float progress)
-        {
-            Color color = new GradientColor(SlimeUtils.GoozColors, 0.2f, 0.2f)
-                .ValueAt(Reloj - progress * 100f);
-            color.A = 0;
-            return color * _intensidad;
-        }
-
-        /// <summary>LA FORMA DEL ANCHO — la fórmula del jefe, a escala del
-        /// arma: nace en la boca, engorda hasta el 70 % y muere en la
-        /// punta, respirando con el compás.</summary>
-        private float StripWidth(float progress)
-        {
-            float start = (float)System.Math.Pow(progress, 0.8f);
-            float cap = (float)System.Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
-            return start * cap * _anchoMax
-                * (1.1f + (float)System.Math.Cos(Reloj * 2f) * (0.08f - progress * 0.06f));
-        }
 
         // El estado vivo del frame (lo llena PreDraw).
         private float _anchoMax = 40f;
@@ -273,11 +255,11 @@ namespace AethonMod.Content.Projectiles
             // FUNDIRSE (carga 1) el rayo engorda a lo GRANDE (la escala
             // del arma — el jefe usa 3500; aquí 250 para el jugador).
             _anchoMax = MathHelper.Lerp(34f, 250f, carga);
+            float tiempo = Main.GlobalTimeWrappedHourly;
 
-            // === LA BOCA (los glows del jefe, a escala) ===
-            Color colorBoca = new GradientColor(SlimeUtils.GoozColors, 0.2f, 0.2f).ValueAt(Reloj);
-            colorBoca.A = 0;
-            Microsoft.Xna.Framework.Graphics.Texture2D glow = AssetDirectory.Textures.Glow[0].Value;
+            // === LA BOCA (el resplandor de la casa, a escala del dios) ===
+            Color colorBoca = ColorGoozma.ValueAt(Reloj);
+            Texture2D glow = VFXCore.SoftGlow;
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null,
                 colorBoca * 0.5f * _intensidad, 0f, glow.Size() * 0.5f,
                 1.6f * _intensidad, 0f, 0);
@@ -285,33 +267,64 @@ namespace AethonMod.Content.Projectiles
                 new Color(255, 255, 255, 0) * 0.4f * _intensidad, 0f, glow.Size() * 0.5f,
                 0.8f * _intensidad, 0f, 0);
 
-            // === LA ESPINA RECTA (256 puntos — la receta del jefe) ===
-            const int PUNTOS = 256;
-            Vector2[] posiciones = new Vector2[PUNTOS];
-            float[] rotaciones = new float[PUNTOS];
+            // === LA ESPINA RECTA (48 nodos — la receta del jefe) ===
+            const int NODOS = 48;
             Vector2 dir = Projectile.velocity.SafeNormalize(Vector2.UnitX);
-            float rumbo = dir.ToRotation();
-            for (int i = 0; i < PUNTOS; i++)
+            Vector2[] espina = new Vector2[NODOS];
+            float[] semiCuerpo = new float[NODOS];
+            float[] semiHalo = new float[NODOS];
+            float[] semiCore = new float[NODOS];
+            Color[] colCuerpo = new Color[NODOS];
+            Color[] colHalo = new Color[NODOS];
+            Color[] colCore = new Color[NODOS];
+
+            // EL HUE DEL PRISMA (la firma del fajo) que se disolverá en
+            // el arcoíris del dios con la carga — LA FUSIÓN LITERAL.
+            Color hue = Main.hslToRgb(Hue(), 1f, 0.72f);
+            float funde = carga * carga;   // la fusión acelera al final
+
+            for (int i = 0; i < NODOS; i++)
             {
-                posiciones[i] = Projectile.Center + dir * (Largo * (i / (float)(PUNTOS - 1)));
-                rotaciones[i] = rumbo;
+                float p = i / (float)(NODOS - 1);
+                espina[i] = Projectile.Center + dir * (Largo * p) - Main.screenPosition;
+
+                // LA FORMA DEL ANCHO — la fórmula del jefe, a escala del
+                // arma: nace en la boca, engorda hasta el 70 % y muere en
+                // la punta, respirando con el compás.
+                float rampa = (float)System.Math.Pow(p, 0.8f);
+                float tapa = (float)System.Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, p, true));
+                float vivo = 1.1f + (float)System.Math.Cos(Reloj * 2f) * (0.08f - p * 0.06f);
+                float baseW = _anchoMax * 0.5f * rampa * tapa * vivo * _intensidad;
+
+                semiCuerpo[i] = baseW;
+                semiHalo[i] = baseW * 2.3f;
+                semiCore[i] = MathF.Max(baseW * 0.34f, 1.2f);
+
+                // LA REBANADA MÓVIL — el arcoíris corre a lo largo (100
+                // ticks de paleta, del blanco de la boca al cian de la
+                // punta) fundiéndose con el hue del prisma.
+                Color c = Color.Lerp(hue, ColorGoozma.ALoLargo(Reloj, p, 100f), funde);
+                colCuerpo[i] = StormLib.Tint(c, 0.60f * _intensidad);
+                colHalo[i] = StormLib.Tint(c, 0.20f * _intensidad);
+                colCore[i] = StormLib.Tint(new Color(255, 252, 245), 0.85f * _intensidad);
             }
 
-            _tira.PrepareStripWithProceduralPadding(posiciones, rotaciones,
-                StripColor, StripWidth, -Main.screenPosition, true);
-
-            // === EL SHADER VERDADERO (FusionRayEffect + sus 4 texturas) ===
-            Microsoft.Xna.Framework.Graphics.Effect efecto = AssetDirectory.Effects.FusionRay.Value;
-            efecto.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            efecto.Parameters["uTexture0"].SetValue(AssetDirectory.Textures.Goozma.FusionRay[0].Value);
-            efecto.Parameters["uTexture1"].SetValue(AssetDirectory.Textures.Goozma.FusionRay[3].Value);
-            efecto.Parameters["uGlow"].SetValue(AssetDirectory.Textures.Goozma.FusionRay[2].Value);
-            efecto.Parameters["uBits"].SetValue(AssetDirectory.Textures.Goozma.FusionRay[1].Value);
-            efecto.Parameters["uTime"].SetValue(-Reloj * 0.0125f); // fluye boca→punta
-            efecto.Parameters["uFreq"].SetValue(1f);
-            efecto.CurrentTechnique.Passes[0].Apply();
-            _tira.DrawTrail();
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            // === LAS TRES CAPAS (el lote único de la casa — cero shaders,
+            //     el mismo baile probado del Rayo de Fusión de la .52.2) ===
+            Texture2D tex = BeamLib.RuidoTinta;
+            VFXCore.CerrarLoteSiAbierto();
+            RayoStrip.AbrirLote();
+            try
+            {
+                RayoStrip.FajaTexturadaEnLote(espina, semiHalo, colHalo, Color.White, tex,
+                    560f, 1.0f, tiempo, 0f, 1f);
+                RayoStrip.FajaTexturadaEnLote(espina, semiCuerpo, colCuerpo, Color.White, tex,
+                    420f, 1.3f, tiempo, 0f, 1f);
+                RayoStrip.FajaTexturadaEnLote(espina, semiCore, colCore, Color.White, tex,
+                    420f, 2.1f, tiempo, 0.36f, 0.64f);
+            }
+            finally { RayoStrip.CerrarLote(); }
+            VFXCore.ReabrirLoteVanilla();
 
             return false; // el sprite NUNCA: el rayo ES la tira
         }

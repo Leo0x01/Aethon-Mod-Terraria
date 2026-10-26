@@ -1,9 +1,40 @@
-# AethonMod — ESTADO ACTUAL (v6.53.0)
+# AethonMod — ESTADO ACTUAL (v6.53.1)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
+> Última actualización: v6.53.1 (LA SEPARACIÓN DE GOOZMA — LA DECISIÓN GPL
+> EJECUTADA. La letra: «esta parte de Goozma es solo para investigación,
+> nunca lo usaré realmente y todo su material debería ser borrado antes del
+> lanzamiento» + «recuerda siempre escribir en español todo». ENTREGADO:
+> (1) EL PUERTO VERBATIM SALIÓ DEL MOD COMPLETO — Content/GoozmaPort/ y
+> Localization/Goozma/ mudados a research/GoozmaPort/ (FUERA de la carpeta
+> que compila tModLoader: ni se compila, ni se empaqueta, ni se publica;
+> el material GPL jamás vuelve a salir en un release — quedará borrado del
+> todo antes del lanzamiento oficial, como pide la letra); (2) EL CABLEADO
+> RETIRADO: el override CreateDefaultContentSource (el redirect
+> SmartContentSource) y el huevo PluripotentSpawnEgg de la Bolsa del Dios
+> Antiguo — la bolsa queda con las 5 armas PROPIAS de la .52.2; (3) EL
+> PRIMER TRAZO REESCRITO 100 % CASA: mismo look del rayo de fusión (la
+> fórmula de ancho del jefe p^0.8·cbrt·respiración + el arcoíris viajero
+> + núcleo blanco-caliente) pero con el pipeline PROBADO de
+> RayoStrip.FajaTexturada ×3 capas (halo/cuerpo/core, color POR NODO en
+> CPU, cero shaders) — el shader prestado se fue con el puerto (y además
+> NUNCA habría cargado: tML 2026.08 solo carga efectos .fxc compilados,
+> verificado contra tModLoader.dll — los 16 .fx del puerto viajaban
+> crudos; bug latente de la .53.0 curado de paso); BONUS: LA FUSIÓN
+> LITERAL — separados cada fajo viste SU color del prisma, al cargar los
+> 5 colores se DISUELVEN en el arcoíris del dios (lerp carga²); (4) el
+> release v6.53.0 RETIRADO de GitHub (su .tmod llevaba el material GPL);
+> (5) research/GoozmaPort/INVESTIGACION.md — la guía con el cableado
+> exacto por si algún día se quiere ver al jefe en un build PRIVADO (uso
+> privado = legal; NUNCA público). Verificación: oráculo 0 errores · gate
+> de texturas OK · build real 0/0 · .tmod auditado SIN entradas GoozmaPort
+> · headless 0 excepciones.)
+
 > Última actualización: v6.53.0 (EL GOOZMA VERBATIM + LA TÉCNICA DEL RAYO DE
 > FUSIÓN + LAS ALAS POR FIN VISIBLES + LA PURGA DEL ESCRIBA + LA CADENA PROPIA
-> DE INVOCACIÓN 1,5 %. La letra: «debes copiar el jefe y todos sus assets y
+> DE INVOCACIÓN 1,5 %. **(NOTA v6.53.1: el puerto verbatim de esta versión
+> fue RETIRADO del mod y su release retirado de GitHub — ver la entrada
+> .53.1; TODO lo demás de esta lista SIGUE vigente.)** La letra: «debes copiar el jefe y todos sus assets y
 > sprite además del código, y llévalo a nuestro mod […] ponlo TAL CUAL como
 > está en su mod original, para investigación, y pon su invocador en la bolsa
 > Goozma» + «la respuesta es el rayo de fusión de goozma pero necesitamos

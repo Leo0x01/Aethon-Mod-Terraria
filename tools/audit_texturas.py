@@ -75,7 +75,9 @@ def ruta_textura(cs_file, name):
     """La ruta del .png de una clase: junto al .cs, o REDIRIGIDA para el
     puerto de Goozma (el SmartContentSource del mod mapea
     Content/GoozmaPort/{Content,Common}/** → Assets/Textures/** — la
-    convención de CalamityHunt, v6.53)."""
+    convención de CalamityHunt, v6.53). v6.53.1: el puerto VIVE en
+    research/GoozmaPort (fuera del mod, nunca se compila) — este redirect
+    quedó INERTE y se conserva como documentación histórica."""
     d = os.path.dirname(cs_file)
     for prefijo in ('Content/GoozmaPort/Content', 'Content/GoozmaPort/Common'):
         norm = d.replace(os.sep, '/')
