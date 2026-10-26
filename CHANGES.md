@@ -12,7 +12,7 @@
 
 · **Verificación**: audit_texturas **575 clases, 0 faltantes** · oráculo (385 .cs) **0/0** · build REAL tML **0/0** · **.tmod v6.54.3 (6.832.684 B, md5 43a6124e0472e83e944762356c2d27a7): EOF EXACTO, NubeRayo AUSENTES, DLL con el motor nuevo** · **22 texturas NUEVAS píxel-idénticas en el paquete** (decodificador rawimg propio; tolerancia documentada: tML premultiplica el RGB a 0 donde alfa=0 — solo píxeles invisibles) · headless: `Sandboxing → Adding → Configuring → Finalizing: v6.54.3 → Adding Recipes` → menú, **0 EXCEPCIONES** · montajes VLM: texturas **SHIP**, iconos **SHIP** · HALLAZGO preexistente (fuera de alcance, sin tocar): 8 líneas de tooltip asimétricas entre idiomas ya presentes en la .54.2 publicada (p. ej. `Despertar.Toma` solo en es-ES, `VenaTruenoStaff.Telegrafiada` falta en en-US).
 
-**PUBLICADA**: release + asset AethonMod.tmod (6.832.684 B), CDN verificado byte a byte + `/releases/latest` = v6.54.3 · respaldo /home/sync/AethonMod-v6.54.3.tmod + .tmod en la carpeta del juego.
+**PUBLICADA**: release 424518253 + asset AethonMod.tmod 678810291 (6.832.684 B, uploaded), CDN verificado byte a byte + `/releases/latest` = v6.54.3 · respaldo /home/sync/AethonMod-v6.54.3.tmod + .tmod en la carpeta del juego.
 
 # v6.54.2 — LA PURGA FINAL: CERO RASTROS DE LA PALABRA PROHIBIDA EN TODO EL PROYECTO
 
