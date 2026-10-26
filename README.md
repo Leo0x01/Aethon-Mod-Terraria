@@ -27,6 +27,11 @@ código y assets propios de la casa; las técnicas aprendidas del jefe
 están re-implementadas desde cero (ColorGoozma, RayoStrip, el Primer
 Trazo fusionado).
 
+## ✨ Novedades — v6.54.1: LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54)
+
+- **LA .54 SE CAÍA AL CARGAR**: las 3 bolsas nuevas (El Cofre del Arsenal, la Bolsa de la Investigación y la Bolsa de las Alas) nacieron sin su textura y tModLoader desactivaba el mod entero. Cura: los 3 iconos al estilo de la casa (cofre dorado con mini-sacos · saco púrpura con constelación y rayo · saco morado con alas aurora) + el gate de auditoría de texturas blindado (detecta solo la raíz del mod viva; jamás vuelve a cantar «OK» sobre una carpeta muerta).
+- **LO NUEVO DE LA .54 (ahora sí cargable)**: la investigación de las texturas del dios re-escrita 100 % en casa — Rayos Concentrados (el rayo de fusión del jugador), Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva, 15 alas nuevas con el sistema de la Aurora y las 23 bolsas consolidadas en El Cofre del Arsenal. `research/GoozmaPort/` borrada por completo (repo 100 % libre de GPL).
+
 ## ✨ Novedades — v6.53.1: LA SEPARACIÓN DE GOOZMA (todo el material del puerto fuera del mod)
 
 - **LA DECISIÓN GPL EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research/GoozmaPort/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material GPL). La Bolsa del Dios Antiguo queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).

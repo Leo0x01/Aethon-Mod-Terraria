@@ -1,3 +1,28 @@
+# v6.54.1 — LA CURA DE LAS TRES BOLSAS INVISIBLES — EL CHECKLIST
+
+**Qué pasó** (la letra: «hay errores» + client.log): la v6.54.0 DESACTIVABA el
+mod al cargarlo — las 3 bolsas nuevas (Alas/Investigación/Maestra) nacieron SIN
+su .png y tModLoader tira `AssetLoadException` y desactiva el mod ENTERO. Cura:
+los 3 iconos creados (estilo de la casa) + el gate de texturas blindado (la
+carpeta muerta del audit era la causa de la reincidencia — ver CHANGES).
+
+1. **EL MOD CARGA**: [ ] activar AethonMod v6.54.1 — SIN «Los mods se han
+   desactivado automáticamente», cero errores en consola.
+2. **EL COFRE DEL ARSENAL** (icono: cofre dorado abierto con 3 mini-sacos):
+   [ ] llega al entrar al mundo; [ ] clic derecho entrega las 23 bolsas.
+3. **LA BOLSA DE LA INVESTIGACIÓN** (icono: saco púrpura con constelación +
+   rayo en la ventana): [ ] llega APARTE; [ ] entrega los 6 items + la Bolsa
+   de las Alas.
+4. **LA BOLSA DE LAS ALAS** (icono: saco morado con dos alas aurora):
+   [ ] dentro de la Investigación; [ ] entrega las 15 alas.
+5. **EL RESTO DE LA .54** (el checklist de esa versión sigue vigente):
+   [ ] Rayos Concentrados, Trueno del Prisma, Lodo de Esencia, Cetro de
+   Constelaciones, Estela del Cosmos, Tinta Viva, las 15 alas.
+
+**Estado de la publicación**: .tmod v6.54.1 LISTO y verificado
+(6.246.465 B, md5 09b63f9de2a605aedbb99c7a813a58b5) — el push/release espera
+el NUEVO TOKEN GitHub (el anterior se perdió con el wipe del sandbox del 26/10).
+
 # v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS — EL CHECKLIST
 
 **Qué es nuevo** (todo 100 % re-escrito para el mod, cero material portado):
