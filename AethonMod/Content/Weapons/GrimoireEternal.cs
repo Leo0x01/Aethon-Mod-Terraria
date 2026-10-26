@@ -1178,7 +1178,11 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "MagicDamage",
                     $"[c/FF5555:+{magicDmgPct}% daño mágico (este libro)]"));
                 tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
-                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación]"));
+                    // v6.53 — «(este libro)» como el mágico (la letra:
+                    // «que el daño de invocación también diga lo mismo
+                    // (este libro) ya que esos potenciadores solo deben
+                    // afectar al propio grimorio pues es su poder»).
+                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación (este libro)]"));
                 tooltips.Add(new TooltipLine(Mod, "Crit",
                     $"[c/FFAA55:+{critPct:F1}% probabilidad de crítico mágico]"));
                 tooltips.Add(new TooltipLine(Mod, "ArmorPen",
@@ -1268,8 +1272,9 @@ namespace AethonMod.Content.Weapons
                     $"[c/E8D8FF:Ojos: {ojosVivos}/{techoOjos}]  " +
                     $"[c/78788C:(+1 ojo cada 10 niveles del grimorio)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionMejoras",
-                    $"[c/E8D8FF:Mejoras desbloqueadas: {mejorasDesbloqueadas}/4]  " +
-                    $"[c/BE78FD:(+50% daño por mejora · ×{multMejoras:0.##} de daño con las mejoras — +200% con las 4)]"));
+                    $"[c/E8D8FF:Mejoras desbloqueadas: {mejorasDesbloqueadas}/4]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionMejoras2",
+                    $"[c/BE78FD:(+50% daño por mejora · ×{multMejoras:0.##} con las mejoras — +200% con las 4)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
@@ -1298,7 +1303,8 @@ namespace AethonMod.Content.Weapons
                     //     su daño tambien»): +50% por anillo de más.
                     tooltips.Add(new TooltipLine(Mod, "WSol",
                         $"[c/E8D8FF:Sol Rúnico: {Systems.DespertarGrimorio.AnillosDelSol(despertar)} anillo(s) · " +
-                        $"{Systems.DespertarGrimorio.SolesPorMinuto(despertar)}/min]  " +
+                        $"{Systems.DespertarGrimorio.SolesPorMinuto(despertar)}/min]"));
+                    tooltips.Add(new TooltipLine(Mod, "WSol2",
                         "[c/78788C:(2+ ojos mejorados, al azar · +50% daño por anillo extra)]"));
                 }
                 else
@@ -1312,7 +1318,8 @@ namespace AethonMod.Content.Weapons
                         ? " · ASCENDIDOS" : "";
                     tooltips.Add(new TooltipLine(Mod, "WAgujeros",
                         $"[c/E8D8FF:Agujeros Negros Rúnicos: 4 al azar{asc} · " +
-                        $"{Systems.DespertarGrimorio.AgujerosPorMinuto(despertar)}/min]  " +
+                        $"{Systems.DespertarGrimorio.AgujerosPorMinuto(despertar)}/min]"));
+                    tooltips.Add(new TooltipLine(Mod, "WAgujeros2",
                         "[c/78788C:(5+ ojos mejorados)]"));
                 }
                 else

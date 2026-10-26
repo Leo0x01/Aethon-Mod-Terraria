@@ -895,7 +895,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 1 para el proyectil del grimorio: LA PÁGINA.
-			Una página que ondula y perfora (nivel 6: motas y más filo · nivel 12: se rompe en 3 mini-páginas homing · nivel 20: las rotas persiguen más duras).
+			Una página que ondula y perfora (nivel 6: motas y más filo
+			· nivel 12: se rompe en 3 mini-páginas homing
+			· nivel 20: las rotas persiguen más duras).
 			Sin maná — la evolución sigue al GRIMORIO que lleves encima.
 			'''
 	}
@@ -905,7 +907,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 2: LA PLUMA QUE ESCRIBIÓ EL LIBRO.
-			Dardo perforante (nivel 6: abanico de 3 · nivel 12: al clavar ESCRIBE una runa que arde · nivel 20: la pluma ORO escribe EL VERSO — seis glifos secuenciales).
+			Dardo perforante (nivel 6: abanico de 3
+			· nivel 12: al clavar ESCRIBE una runa que arde
+			· nivel 20: la pluma ORO escribe EL VERSO — seis glifos secuenciales).
 			Sin maná.
 			'''
 	}
@@ -915,7 +919,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 3: EL SELLO QUE CAMINA.
-			Un círculo lento que detona en aro (nivel 6: seis pernos radiales · nivel 12: ENCADENA — nace un sello junto al siguiente enemigo · nivel 20: TRES sellos).
+			Un círculo lento que detona en aro (nivel 6: seis pernos radiales
+			· nivel 12: ENCADENA — nace un sello junto al siguiente enemigo
+			· nivel 20: TRES sellos).
 			Sin maná.
 			'''
 	}
@@ -925,7 +931,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 4: LA SIERPE DE TINTA.
-			Una lengua que serpentea hacia la presa (nivel 6: 14 segmentos y más rápida · nivel 12: al morder SE BIFURCA en dos · nivel 20: LA HYDRA — tres lenguas desde el arranque).
+			Una lengua que serpentea hacia la presa (nivel 6: 14 segmentos y más rápida
+			· nivel 12: al morder SE BIFURCA en dos
+			· nivel 20: LA HYDRA — tres lenguas desde el arranque).
 			Sin maná.
 			'''
 	}
@@ -935,7 +943,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 5: EL OJO QUE LEE — el sucesor conceptual del proyectil actual.
-			Un ojo homing que mira a su presa (nivel 6: dos pupilas lo escoltan · nivel 12: cada 80 t dispara un glifo a lo que lee · nivel 20: LA MIRADA — lee a TRES presas a la vez).
+			Un ojo homing que mira a su presa (nivel 6: dos pupilas lo escoltan
+			· nivel 12: cada 80 t dispara un glifo a lo que lee
+			· nivel 20: LA MIRADA — lee a TRES presas a la vez).
 			Sin maná.
 			'''
 	}
@@ -945,7 +955,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 6: LA PALABRA HECHA PROYECTIL.
-			Glifos en formación que golpean por letra (nivel 6: la ola de 5 · nivel 12: EL PALÍNDROMO — la palabra rebota y vuelve a golpear · nivel 20: LA SENTENCIA — 7 glifos en dos filas y EL PUNTO FINAL que detona).
+			Glifos en formación que golpean por letra (nivel 6: la ola de 5
+			· nivel 12: EL PALÍNDROMO — la palabra rebota y vuelve a golpear
+			· nivel 20: LA SENTENCIA — 7 glifos en dos filas y EL PUNTO FINAL que detona).
 			Sin maná.
 			'''
 	}
@@ -2557,7 +2569,12 @@ Despertar: {
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA CORRUPTA del peldaño!
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
 	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
-	EsenciaTopeTooltip: ✦ Festín COMPLETO: +100% de daño con el libro en la mano · 25% si lo guardas en la bolsa · nada en un cofre. Cada esencia comida extra se vuelve 1 moneda de oro
+	EsenciaTopeTooltip:
+		'''
+		              ✦ Festín COMPLETO: +100% de daño con el libro en la mano
+		              · 25% si lo guardas en la bolsa
+		              · nada en un cofre. Cada esencia comida extra se vuelve 1 moneda de oro
+		'''
 	EsenciaProgresoTooltip: ✦ Festín del portador: {0}/{1} esencias comidas (+{2}% en total · ahora: +{3}%)
 	EsenciaLigadaMano: ✧ El Grimorio del Eterno está EN TU MANO: el festín entero (+100% al tope)
 	EsenciaLigadaBolsa: ✧ El Grimorio del Eterno está EN LA BOLSA: el festín al 25% (sácalo a la mano para todo su poder)

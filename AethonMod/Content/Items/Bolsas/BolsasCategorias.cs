@@ -346,6 +346,12 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.51.4 — EL BRILLO DE LOS SOLES RÚNICOS también viaja en la
             // bolsa (la letra: «este item añadelo a la bolsa de comsetico»).
             l.Add((ModContent.ItemType<Cosmetics.BrilloSolarItem>(), 1));
+            // v6.53 — LA AURORA DE TINTA (la purga del Escriba: las alas
+            // creadas por código mudan aquí — el accesorio de vuelo y
+            // adorno de la casa; v6.53 las vuelve VISIBLES: nacieron en
+            // coordenadas de mundo y el pipeline las dibujaba 17
+            // pantallas lejos).
+            l.Add((ModContent.ItemType<Items.AuroraDeTinta>(), 1));
             return l;
         }
     }
@@ -599,6 +605,11 @@ namespace AethonMod.Content.Items.Bolsas
             // LAS VIEJAS
             l.Add((ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>(), 1));        // el trueno rúnico del cielo
             l.Add((ModContent.ItemType<Weapons.Cosmic.TruenoPerlinStaff>(), 1));     // el arco de ruido Perlin
+            // v6.53 — EL PRIMER TRAZO (la purga del Escriba: el arma del
+            // rayo masivo muda a SU bolsa natural — la de las armas de
+            // rayo; su render ahora vive la técnica del Rayo de Fusión
+            // de Goozma).
+            l.Add((ModContent.ItemType<Weapons.PrimerTrazo>(), 1));             // el rayo masivo de fusión
             return l;
         }
     }
@@ -705,6 +716,12 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Goozma.DestructorDePrismas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Goozma.TruenoDeGelatina>(), 1));
             l.Add((ModContent.ItemType<Weapons.Goozma.MasaCromatica>(), 30));
+            // v6.53 — EL CONVOCADOR DE GOOZMA: el huevo pluripotente del port
+            // verbatim (Content/GoozmaPort). Clic derecho con el huevo en la mano:
+            // nace el PluripotentSpawn, absorbe slimes y eclosiona en EL JEFE
+            // COMPLETO (las 3 fases, el Rayo de Fusión con su shader .fx, la
+            // música, TODO) — la copia de investigación del usuario.
+            l.Add((ModContent.ItemType<GoozmaPort.Content.Items.Misc.PluripotentSpawnEgg>(), 1));
             return l;
         }
     }

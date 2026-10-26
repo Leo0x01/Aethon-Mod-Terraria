@@ -10,6 +10,23 @@ namespace AethonMod
     {
         public static AethonMod Instance => ModContent.GetInstance<AethonMod>();
 
+        // v6.53 — EL PUERTO DE GOOZMA (Calamity: Hunt of the Old God, copia
+        // de investigación): su mod REDIRIGE las texturas por defecto de
+        // "Content/**" y "Common/**" hacia "Assets/Textures/**" vía
+        // SmartContentSource (CreateDefaultContentSource de su Mod). Aquí el
+        // mismo truco PERO QUIRÚRGICO: solo el subárbol del puerto
+        // (Content/GoozmaPort/...) se redirige — el resto del mod ni se
+        // entera. Así las ~45 clases del puerto sin override de textura
+        // resuelven sus assets tal cual lo hacen en el mod original.
+        public override ReLogic.Content.Sources.IContentSource CreateDefaultContentSource()
+        {
+            var source = new Content.GoozmaPort.Common.Utilities.SmartContentSource(
+                base.CreateDefaultContentSource());
+            source.AddDirectoryRedirect("Content/GoozmaPort/Content", "Content/GoozmaPort/Assets/Textures");
+            source.AddDirectoryRedirect("Content/GoozmaPort/Common", "Content/GoozmaPort/Assets/Textures");
+            return source;
+        }
+
         public override void Load()
         {
             // Sistema simplificado: el SkillTree y el Codex fueron eliminados.

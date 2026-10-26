@@ -1,6 +1,36 @@
-# AethonMod — ESTADO ACTUAL (v6.52.4)
+# AethonMod — ESTADO ACTUAL (v6.53.0)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
+> Última actualización: v6.53.0 (EL GOOZMA VERBATIM + LA TÉCNICA DEL RAYO DE
+> FUSIÓN + LAS ALAS POR FIN VISIBLES + LA PURGA DEL ESCRIBA + LA CADENA PROPIA
+> DE INVOCACIÓN 1,5 %. La letra: «debes copiar el jefe y todos sus assets y
+> sprite además del código, y llévalo a nuestro mod […] ponlo TAL CUAL como
+> está en su mod original, para investigación, y pon su invocador en la bolsa
+> Goozma» + «la respuesta es el rayo de fusión de goozma pero necesitamos
+> saber cómo hacerlo» + «la aurora de tinta no se ve para nada» + «bórralas:
+> La Pluma Consciente, Pluma Convocadora, EL ESCRIBA y todo lo referente» +
+> «el daño de invocación tendrá un 1,5 % de crecimiento […] que también diga
+> (este libro)». ENTREGADO: (1) el jefe COMPLETO de Calamity: Hunt of the Old
+> God portado verbatim a Content/GoozmaPort/ (86 .cs, ~16.400 líneas, 321
+> entradas del .tmod: las 3 fases, los 5 esbirros, los 27 proyectiles con el
+> FUSION RAY REAL y su shader .fx, la música de 31 MB, 58 sonidos, todos los
+> sprites) con créditos + LICENSE-GPL3 — ⚠️ GPL-3.0: pendiente la decisión del
+> usuario de re-licencia o re-escritura; su invocador (el Huevo de Engendro
+> Pluripotente, invocación directa documentada) en la Bolsa del Dios Antiguo;
+> (2) EL PRIMER TRAZO redibujado con la técnica real del FusionRay (VertexStrip
+> + ancho p^0.8·cbrt·respiración + GradientColor viajero + el SHADER y sus 4
+> texturas del jefe portado); (3) LAS ALAS VISIBLES — el bug de toda la .52:
+> nacieron en coordenadas de MUNDO y el pipeline espera PANTALLA (se dibujaban
+> 17 pantallas a la derecha); cura de 1 línea (− Main.screenPosition); (4) LA
+> PURGA: El Escriba + Pluma Consciente + Pluma Convocadora + bolsa + árbol de
+> inscripciones BORRADOS (13 archivos); sobreviven El Primer Trazo (→ bolsa de
+> armas de rayo) y La Aurora de Tinta (→ cosméticos); (5) DanoOjosDelEterno con
+> SU cadena SummonDamageMult +1,5 %/nivel y la ventana dice «(este libro)»;
+> (6) los textos largos partidos (ventanas del grimorio, ideas, festín,
+> localización del Escriba). Verificación: oráculo 0 errores · build real 0/0 ·
+> .tmod 739 entradas EOF exacto · headless 0 excepciones · texturas y assets
+> del puerto auditados 100 %.
+
 > Última actualización: v6.52.4 (LA CURA DEL INVENTARIO MUERTO. La letra:
 > «ahora literalmente ya no puedo interactuar con el inventario en ningun
 > estado usando el cursor […] revisa 10 commit anteriores […] como estaba
@@ -1927,6 +1957,14 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ v6.53.0 PUBLICADA — EL GOOZMA VERBATIM + EL RAYO DE FUSIÓN REAL + LAS ALAS VISIBLES — EN JUEGO.** Checklist:
+   - **(a) LA BOLSA DEL DIOS ANTIGUO → EL HUEVO DE ENGENBRO PLURIPOTENTE**: sostenlo y clic — nace el PluripotentSpawn (absorbe slimes cercanos creciendo ~17 s y ECLOSIONA en GOOZMA: 1,7-4,2 M de vida, 3 fases + furia <10 %, invoca a los 4 dioses slimes uno a uno y ESPEJA sus ataques, EL RAYO DE FUSIÓN que barre en coseno ±2.5 rad con núcleo blanco-caliente, la monzón de slimes con su cielo y truenos, la MÚSICA, la cinemática de muerte con sus godrays). Con Calamity instalado se activan los extras guardados (sin él: standalone al 100 %).
+   - **(b) EL PRIMER TRAZO (bolsa de armas de rayo)**: mantener clic — 5 trazos convergen y al fundirse EL RAYO ENGORDA A 250 PX con el look EXACTO de Goozma (arcoíris de aceite corriendo, ruido fluyendo boca→punta, núcleo blanco, bits chispeantes, ancho que respira). YA NO son rectángulos ni triángulos: es el material del jefe.
+   - **(c) LAS ALAS (bolsa de cosméticos)**: equipa La Aurora de Tinta — AHORA SE VEN (diez plumas prismáticas de noche, blanco-oro de día, despliegue suave, aleteo en cadena, respeto por alas reales, vuelo Mothron + 240).
+   - **(d) LA PURGA**: confirma que ya NO existe El Escriba, ni La Pluma Consciente, ni Pluma Convocadora, ni el árbol [P] — y que el Reloj de Arena (bolsa del probador) sigue cambiando día/noche.
+   - **(e) LA VENTANA DEL ARMA del grimorio**: la línea de invocación ahora dice «+X % daño de invocación (este libro)» y el número crece +1,5 %/nivel (el mágico sigue a +2,2 %).
+   - **(f) LOS TEXTOS**: ventanas del grimorio, bolsas de ideas y tooltips nuevos — nada se sale de la pantalla.
+   - **⚠️ LICENCIA GPL-3.0 (decisión del usuario pendiente)**: el puerto es código GPL verbatim — para publicarlo en releases públicos hace falta re-licenciar AethonMod (o el subsistema) a GPL-3.0, o re-escribirlo tras la investigación. El usuario dijo que investigará el jefe y dirigirá su transformación.
 1. **✅ v6.52.4 PUBLICADA — LA CURA DEL INVENTARIO MUERTO — EN JUEGO.**
    (La .52.3 activó por primera vez el IL hook que la .52.2 dejó dentro:
    HotbarLibreSistema convertía `ItemSlot.LeftClick/RightClick` en retorno

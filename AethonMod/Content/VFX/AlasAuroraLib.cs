@@ -69,7 +69,13 @@ namespace AethonMod.Content.VFX
     /// CONTRATO DE LOTE (el de la casa, como RayoStrip): el llamador
     /// (el halo-proyectil) trae el lote del pase de entidades ABIERTO;
     /// Dibujar lo cierra (sonda), dibuja las primitivas y lo REABRE
-    /// (idempotente). Coordenadas de MUNDO (GameViewMatrix como World).
+    /// (idempotente). Coordenadas de PANTALLA (mundo − Main.screenPosition
+    /// — LA LECCIÓN v6.53: el pipeline de Volcar usa GameViewMatrix como
+    /// World, que SOLO aplica el zoom — la cámara la resta EL LLAMADOR,
+    /// exactamente como hacen todos los consumidores de RayoStrip; las
+    /// alas nacieron en coordenadas de mundo y se dibujaban ~17 pantallas
+    /// a la derecha — INVISIBLES por toda la .52, por eso «no se ve
+    /// ningún ala en ningún lugar»).
     /// </summary>
     public static class AlasAuroraLib
     {
@@ -416,8 +422,12 @@ namespace AethonMod.Content.VFX
                 try
                 {
                     // EL ANCLA: la espalda, ligeramente hacia atrás (el
-                    // original: MountedCenter + (−dir·7, −4·grav)).
-                    Vector2 anclaBase = pl.MountedCenter + new Vector2(-direccion * 7f, -4f * grav);
+                    // original: MountedCenter + (−dir·7, −4·grav)) — EN
+                    // PANTALLA (− Main.screenPosition: Volcar aplica SOLO
+                    // el zoom — la cámara la restamos aquí, la lección de
+                    // las alas invisibles de la .52).
+                    Vector2 anclaBase = pl.MountedCenter - Main.screenPosition
+                        + new Vector2(-direccion * 7f, -4f * grav);
 
                     Pluma[] plumas = _plumas;
                     float[] hues = _hues;

@@ -71,6 +71,19 @@ def base_requerida(name, seen=None):
     return None
 
 
+def ruta_textura(cs_file, name):
+    """La ruta del .png de una clase: junto al .cs, o REDIRIGIDA para el
+    puerto de Goozma (el SmartContentSource del mod mapea
+    Content/GoozmaPort/{Content,Common}/** → Assets/Textures/** — la
+    convención de CalamityHunt, v6.53)."""
+    d = os.path.dirname(cs_file)
+    for prefijo in ('Content/GoozmaPort/Content', 'Content/GoozmaPort/Common'):
+        norm = d.replace(os.sep, '/')
+        if norm.startswith(prefijo):
+            resto = norm[len(prefijo):].lstrip('/')
+            return os.path.join('Content/GoozmaPort/Assets/Textures', resto, name + '.png')
+    return os.path.join(d, name + '.png')
+
 faltan = []
 for name, d in sorted(info.items()):
     if d['abstract'] or d['tex'] or d['generic']:
@@ -78,7 +91,7 @@ for name, d in sorted(info.items()):
     base = base_requerida(name)
     if base is None:
         continue
-    tex = os.path.join(os.path.dirname(d['file']), name + '.png')
+    tex = ruta_textura(d['file'], name)
     if not os.path.exists(tex):
         faltan.append((base, name, d['file']))
 

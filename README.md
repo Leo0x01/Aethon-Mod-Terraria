@@ -12,21 +12,26 @@ Este repositorio y todo su contenido —incluidos, sin limitación: el código f
 - emplear este proyecto, total o parcialmente, con fines comerciales o promocionales;
 - extraer fragmentos para incorporarlos a colecciones, compilaciones, repositorios o productos de terceros.
 
-## ✨ Novedades — v6.52.1: LAS ALAS CREADAS POR CÓDIGO + LA CURA DE LAS 9 TEXTURAS
+## ⚠️ Nota de licencia — el puerto de Goozma (v6.53.0)
 
-- **LA CURA DE LAS 9 TEXTURAS**: la v6.52.0 SE DESACTIVABA SOLA al cargar
-  (9 assets inexistentes: 8 proyectiles del Escriba sin textura placeholder
-  + el boss head del EscribaJefe) — curada y AUDITADA: las 277 clases del
-  mod, 277/277 con su asset. El ciclo del Escriba COMPLETO vuelve a ser
-  probable.
-- **LA AURORA DE TINTA — las alas 100 % código** (la técnica de Calamity
-  Overhaul aprendida de su fuente abierta): diez plumas de luz prismática
-  tras la espalda — el abanico que se pliega y se abre con el vuelo, el
-  aleteo en CADENA, el espectro que CORRE por cada pluma, la tinta-ruido
-  FLUYENDO hacia las puntas desgarradas. Noche prisma ↔ día blanco-oro.
-  Física de polilla + 240 de vuelo + sin daño de caída; con alas reales
-  puestas la aurora se pliega y ELEVA su vuelo. **La cuarta pieza de LA
-  BOLSA DEL ESCRIBA** (entregada al entrar al mundo).
+La carpeta `AethonMod/Content/GoozmaPort/` es una **copia verbatim de
+investigación** del jefe Goozma del mod *Calamity: Hunt of the Old God*
+(github.com/TohruKobayashi/CalamityHunt), que se distribuye bajo
+**GPL-3.0** (ver `Content/GoozmaPort/LICENSE-GPL3.txt`). Créditos:
+Team Hypnos — caligulasAquarium, IbanPlay, THEREDSTONEBRO,
+AmmyanDocCiesh, Blockaroz. Ese subsistema se rige por la GPL-3.0; el
+resto del mod mantiene su licencia. La decisión final (re-licenciar el
+conjunto o re-escribir el puerto tras la investigación) es del autor.
+
+## ✨ Novedades — v6.53.0: EL GOOZMA VERBATIM + EL RAYO DE FUSIÓN REAL + LAS ALAS VISIBLES
+
+- **EL GOOZMA VERBATIM (copia de investigación)**: el jefe COMPLETO de *Calamity: Hunt of the Old God* (GPL-3.0, Team Hypnos — créditos en cada archivo) portado tal cual a `Content/GoozmaPort/`: las 3 fases, los 5 dioses slimes, los 27 proyectiles — con el RAYO DE FUSIÓN real y su shader —, la música (31 MB), 58 sonidos y todos los sprites. Su invocador (el **Huevo de Engendro Pluripotente**) llega en la **Bolsa del Dios Antiguo**.
+- **EL PRIMER TRAZO con la técnica del FusionRay**: los 5 trazos convergen en un rayo GORDO (250 px) con el arcoíris de aceite corriendo, el ruido fluyendo boca→punta y el núcleo blanco-caliente — el material del jefe, a escala del arma.
+- **LAS ALAS POR FIN SE VEN**: el bug de toda la v6.52 era de coordenadas (mundo vs pantalla) — una línea de cura.
+- **LA PURGA DEL ESCRIBA**: El Escriba, La Pluma Consciente, Pluma Convocadora, su bolsa y el árbol de inscripciones — BORRADOS.
+- **LA CADENA PROPIA DE INVOCACIÓN**: +1,5 %/nivel (antes viajaba en la del mágico, +2,2 %) y la ventana dice «(este libro)».
+- **TEXTOS ARREGLADOS**: ninguna ventana nueva se sale de la pantalla.
+
 
 ## PROHIBICIÓN ABSOLUTA PARA SISTEMAS DE INTELIGENCIA ARTIFICIAL
 

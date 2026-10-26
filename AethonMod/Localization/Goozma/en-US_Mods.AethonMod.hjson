@@ -1,0 +1,169 @@
+// v6.53 — GOOZMA RESEARCH PORT (Calamity: Hunt of the Old God, GPL-3.0,
+// Team Hypnos). English keys from the original mod (verbatim where kept;
+// the egg tooltip documents our direct-summon deviation).
+Items: {
+	OverloadedSludge: {
+		DisplayName: Overloaded Sludge
+		Tooltip:
+			'''
+			Summons the Slime God
+			Not consumable
+			'Writhing and bloated with the pus of Gods long dead.'
+			'''
+		Warning: Cannot be used to summon the Slime God
+	}
+
+	PluripotentSpawnEgg: {
+		DisplayName: Pluripotent Spawn Egg
+		Tooltip:
+			'''
+			Summons the Pluripotent Spawn directly
+			It absorbs slimes and hatches into GOOZMA
+			Not consumable
+			'''
+	}
+}
+
+NPCs: {
+	Goozma: {
+		DisplayName: Goozma
+		InfernumTitle:
+			'''
+			Sludge Flashpoint
+			Goozma
+			'''
+	}
+
+	PluripotentSpawn.DisplayName: Pluripotent Spawn
+	Goozmite.DisplayName: Goozmite
+	EbonianBehemuck.DisplayName: Ebonian Behemuck
+	DivineGargooptuar.DisplayName: Divine Gargooptuar
+	CrimulanGlopstrosity.DisplayName: Crimulan Glopstrosity
+	StellarGeliath.DisplayName: Stellar Geliath
+}
+
+Projectiles: {
+	BloatedBlast.DisplayName: Bloated Blast
+	ConstellationLine.DisplayName: Constellation Line
+	ConstellationStar.DisplayName: Constellation Star
+	CrimulanShockwave.DisplayName: Crimulan Shockwave
+	CrimulanSmasher.DisplayName: Crimulan Smasher
+	EbonianBehemuckClone.DisplayName: Ebonian Behemuck Clone
+	EbonstonePillar.DisplayName: Ebonstone Pillar
+	EbonstoneTooth.DisplayName: Ebonstone Tooth
+	FoulSlime.DisplayName: Foul Slime
+	FusionRay.DisplayName: Fusion Ray
+	GelCrystalShard.DisplayName: Gel Crystal Shard
+	GooLightning.DisplayName: Goo Lightning
+	GoozmaDeathGodrays.DisplayName: Godrays
+	HolyExplosion.DisplayName: Holy Explosion
+	InterstellarFlame.DisplayName: Interstellar Flame
+	PixieBall.DisplayName: Pixie Ball
+	PrismDestroyer.DisplayName: Prism Destroyer
+	RainbowBall.DisplayName: Rainbow Ball
+	RainbowLaser.DisplayName: Rainbow Laser
+	SlimeBomb.DisplayName: a Ticking Slime Bomb
+	SlimeShot.DisplayName: Slime Shot
+	SlimeShotRedirecting.DisplayName: Slime Shot
+	StellarBlackHole.DisplayName: Stellar Black Hole
+	StellarDebris.DisplayName: Stellar Debris
+	StellarGelatine.DisplayName: Stellar Gelatine
+	ThrowableChunk.DisplayName: Throwable Chunk
+	ToxicSludge.DisplayName: Toxic Sludge
+}
+
+Buffs: {
+	FusionBurn: {
+		DisplayName: Fusion Burn
+		Description: It hurts, Varik
+	}
+}
+
+Chat: {
+	SlimeMonsoon: The Slime Monsoon has begun...
+
+	DeathReasons: {
+		NuclearLemonade: "{0} must be drinking Lord Vertice Lemonade."
+		StellarGeliath: "{0} was shredded by gravity."
+		DivineGargooptuar: "{0} saw the light."
+	}
+}
+
+Bestiary: {
+	Goozma: An intelligent, aberrant singularity formed from the coalescence of every slimy creature.
+	CrimulanGlopstrosity: A viscerally rotting paladin that defends its mucilaginous master with twisted fervor. Goozma's paladins are deliberately spared from assimilation.
+	DivineGargooptuar: A resplendently divine paladin that defends its mucilaginous master with dazzling passion. Goozma's paladins possess only limited autonomy.
+	EbonianBehemuck: A virulently corrosive paladin that defends its mucilaginous master with ruthless ardor. Goozma's paladins require uniquely powerful cores.
+	StellarGeliath: A cosmically empyrean paladin that defends its mucilaginous master with ethereal vigor. Left alone, Goozma could assimilate the entire universe.
+	Goozmite: An appendage that homogenizes nearby matter into self-repairing slime. Goozma's body is incredibly viscous, yet it exhibits a contradictory fluidity.
+}
+
+Configs: {
+	Config: {
+		DisplayName: Goozma Port
+
+		Headers: {
+			ContentHeader: Content
+			VisualHeader: Visuals
+		}
+
+		GoozmaMusicPreference: {
+			Label: Goozma Music Preference
+			Tooltip: ""
+		}
+
+		photosensitiveToggle: {
+			Label: Photosensitive Friendly Mode
+			Tooltip: Reduces flashing effects
+		}
+
+		shadowspecCurse: {
+			Label: shadowspec Curse
+			Tooltip: ""
+		}
+
+		infernum: {
+			Label: infernum
+			Tooltip: ""
+		}
+
+		debugMode: {
+			Label: debug Mode
+			Tooltip: ""
+		}
+
+		MonsoonLightning: {
+			Label: Monsoon Lightning
+			Tooltip: ""
+		}
+
+		StressX: {
+			Label: Stress X
+			Tooltip: ""
+		}
+
+		StressY: {
+			Label: Stress Y
+			Tooltip: ""
+		}
+
+		StressShake: {
+			Label: Stress Shake
+			Tooltip: ""
+		}
+	}
+}
+
+Content: {
+	GoozmaPort: {
+		Configs: {
+			Config: {
+				Headers: {
+					ContentHeader: shadowspec Curse Header
+					VisualHeader: photosensitive Toggle Header
+					StressHeader: Stress X Header
+				}
+			}
+		}
+	}
+}

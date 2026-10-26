@@ -13,7 +13,15 @@ namespace AethonMod.Content.Systems
     {
         // === STATS BASE POR NIVEL ===
         public const float MagicDamagePerLevel = 0.022f;
-        public const float SummonDamagePerLevel = 0.01f;
+
+        /// <summary>v6.53 — LA CADENA PROPIA DE LA INVOCACIÓN (la letra:
+        /// «en vez de 2,2 % de crecimiento como el mágico, el daño de
+        /// invocación tendrá un 1,5 % de crecimiento»): la invocación
+        /// YA NO viaja en MagicDamageMult — tiene SU multiplicador propio,
+        /// con crecimiento MÁS LENTO (1,5 %/nivel) porque el pipeline de
+        /// vanilla además le suma el equipo de invocación del portador
+        /// (MinionOriginalDamageGlobal).</summary>
+        public const float SummonDamagePerLevel = 0.015f;
         public const float CritPerLevel = 0.002f;
         public const float UseSpeedPerLevel = 0.003f;
 
@@ -30,6 +38,13 @@ namespace AethonMod.Content.Systems
 
         /// <summary>Multiplicador de daño mágico (Infinito).</summary>
         public static float MagicDamageMult(int level) => 1f + level * MagicDamagePerLevel;
+
+        /// <summary>v6.53 — Multiplicador de daño de invocación PROPIO
+        /// (Infinito): la MISMA estructura del mágico pero con SU
+        /// crecimiento de 1,5 %/nivel (la cadena propia de la letra).
+        /// El reemplazo directo de SummonDamageBonus (muerto: cero
+        /// call sites tras la paridad .51.12).</summary>
+        public static float SummonDamageMult(int level) => 1f + level * SummonDamagePerLevel;
 
         /// <summary>Bonus de daño de invocación (Infinito).</summary>
         public static float SummonDamageBonus(int level) => level * SummonDamagePerLevel;
@@ -175,12 +190,24 @@ namespace AethonMod.Content.Systems
         /// FactorDelLibro). Lo que queda EXCLUSIVO de cada clase vive en
         /// el pipeline de vanilla (GetTotalDamage: el accesorio que dice
         /// «daño mágico» SOLO al mágico; el genérico y el de invocación
-        /// — a los ojos, MinionOriginalDamageGlobal).</summary>
+        /// — a los ojos, MinionOriginalDamageGlobal).
+        /// v6.53 — LA CADENA PROPIA (la letra nueva: «no debe ser igual,
+        /// mejor cambiarla a su propio cálculo, por supuesto, ya que los
+        /// items que mejoran invocación deben afectarlo […] en vez de
+        /// 2,2 % de crecimiento como el mágico, el daño de invocación
+        /// tendrá un 1,5 % de crecimiento»): la ESTRUCTURA sigue siendo
+        /// la del mágico (nivel + despertar + lo devorado + reforja +
+        /// festín × FactorDelLibro) pero el NIVEL escala con SU propio
+        /// SummonDamageMult (+1,5 %/nivel) — los potenciadores de
+        /// invocación del portador siguen sumando por el pipeline de
+        /// vanilla, SOLO para el grimorio (es su poder).</summary>
         public static int DanoOjosDelEterno(int danoBase, int nivel, Player p)
         {
-            // 1) EL NIVEL — EL MISMO del mágico (la brecha moría aquí:
-            //    +1 %/nivel contra +2,2 %/nivel del clic izquierdo).
-            float d = danoBase * MagicDamageMult(System.Math.Max(0, nivel));
+            // 1) EL NIVEL — LA CADENA PROPIA (v6.53: +1,5 %/nivel — antes
+            //    viajaba en MagicDamageMult +2,2 %: la letra pidió SU
+            //    propio cálculo más lento, porque el equipo de invocación
+            //    del portador ya suma por el pipeline de vanilla).
+            float d = danoBase * SummonDamageMult(System.Math.Max(0, nivel));
 
             // 2) EL DESPERTAR (+1 % por nivel — como el mágico).
             int despertar = Content.Systems.DespertarGrimorio.NivelDe(p);

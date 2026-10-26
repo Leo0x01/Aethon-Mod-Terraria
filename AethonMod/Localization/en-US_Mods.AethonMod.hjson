@@ -895,7 +895,8 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 1: THE PAGE.
-			A waving, piercing page (level 6: ink motes and more bite · level 12: tears into 3 homing mini-pages · level 20: the torn ones hunt harder).
+			A waving, piercing page (level 6: ink motes and more bite
+			· level 12: tears into 3 homing mini-pages · level 20: the torn ones hunt harder).
 			No mana — evolution follows the GRIMOIRE you carry.
 			'''
 	}
@@ -905,7 +906,8 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 2: THE QUILL THAT WROTE THE BOOK.
-			Piercing dart (level 6: fan of 3 · level 12: on hit it WRITES a burning rune · level 20: the GOLD quill writes THE VERSE — six sequential glyphs).
+			Piercing dart (level 6: fan of 3 · level 12: on hit it WRITES a burning rune
+			· level 20: the GOLD quill writes THE VERSE — six sequential glyphs).
 			No mana.
 			'''
 	}
@@ -915,7 +917,8 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 3: THE SEAL THAT WALKS.
-			A slow circle that detonates in a ring (level 6: six radial bolts · level 12: CHAINS — a new seal by the next enemy · level 20: THREE seals).
+			A slow circle that detonates in a ring (level 6: six radial bolts
+			· level 12: CHAINS — a new seal by the next enemy · level 20: THREE seals).
 			No mana.
 			'''
 	}
@@ -925,7 +928,8 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 4: THE INK SERPENT.
-			A tongue that slithers at prey (level 6: 14 segments and faster · level 12: FORKS on bite · level 20: THE HYDRA — three tongues from the start).
+			A tongue that slithers at prey (level 6: 14 segments and faster
+			· level 12: FORKS on bite · level 20: THE HYDRA — three tongues from the start).
 			No mana.
 			'''
 	}
@@ -935,7 +939,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 5: THE EYE THAT READS — the conceptual successor of the current projectile.
-			A homing eye that watches its prey (level 6: two pupil escorts · level 12: fires a glyph at what it reads · level 20: THE STARE — reads THREE prey at once).
+			A homing eye that watches its prey (level 6: two pupil escorts
+			· level 12: fires a glyph at what it reads
+			· level 20: THE STARE — reads THREE prey at once).
 			No mana.
 			'''
 	}
@@ -945,7 +951,9 @@ Items: {
 		Tooltip:
 			'''
 			IDEA 6: THE WORD AS PROJECTILE.
-			Glyphs in formation striking per letter (level 6: the wave of 5 · level 12: THE PALINDROME — the word bounces back · level 20: THE SENTENCE — 7 glyphs in two rows and the detonating FINAL PERIOD).
+			Glyphs in formation striking per letter (level 6: the wave of 5
+			· level 12: THE PALINDROME — the word bounces back
+			· level 20: THE SENTENCE — 7 glyphs in two rows and the detonating FINAL PERIOD).
 			No mana.
 			'''
 	}
@@ -2557,7 +2565,12 @@ Despertar: {
 	BocadoArma: ✦ The Eternal devours THE CORRUPTED WEAPON of the rung!
 	MigracionPoder: ✦ The old devoured power ({0} essences) passes to its bearer: +{1}% damage to ALL.
 	TopeEsencias: ✧ FEAST CAP REACHED: +{0}% damage FOREVER! From now on, every essence eaten becomes 1 gold coin.
-	EsenciaTopeTooltip: ✦ Feast COMPLETE: +100% damage with the book in hand · 25% stored in your bag · nothing in a chest. Every extra essence eaten becomes 1 gold coin
+	EsenciaTopeTooltip:
+		'''
+		              ✦ Feast COMPLETE: +100% damage with the book in hand
+		              · 25% if stored in your bag
+		              · nothing in a chest. Each extra essence eaten becomes 1 gold coin
+		'''
 	EsenciaProgresoTooltip: ✦ Bearer's feast: {0}/{1} essences eaten (+{2}% total · active now: +{3}%)
 	EsenciaLigadaMano: ✧ The Eternal Grimoire is IN YOUR HAND: the whole feast (+100% at the cap)
 	EsenciaLigadaBolsa: ✧ The Eternal Grimoire is IN YOUR BAG: the feast at 25% (hold it for full power)
