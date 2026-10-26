@@ -3,32 +3,31 @@ using Microsoft.Xna.Framework;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// COLORGOOZMA — v6.52.2 — EL MOTOR DE COLOR DEL DIOS ANTIGUO.
+    /// COLORPRISMA — v6.52.2 — EL MOTOR DE COLOR DEL DIOS ANTIGUO
+    /// (v6.54.2 — renombrado en la purga final: mismo motor, nombre de
+    /// la casa).
     ///
-    /// LA INVESTIGACIÓN (el jefe del video del usuario, identificado:
-    /// GOOZMA, el antiguo Dios de los Slimes, del mod «Hunt of the Old
-    /// God» de Team Hypnos — UriBuilder/CalamityHunt, código abierto,
-    /// leído de la fuente): la técnica número UNO que hace que TODO el
-    /// jefe se vea como se ve es UNA SOLA COSA — un RELOJ DE COLOR
-    /// COMPARTIDO que recorre una paleta de 5 colores en ciclo continuo,
-    /// y TODOS los efectos del combate leen de él con DISTINTO desfase:
-    /// el cuerpo, los proyectiles, los rayos, las partículas — todo vive
-    /// en el MISMO arcoíris desplazándose (GradientColor.cs del original:
-    /// 12 ticks por color, ciclo completo de 60 t = 1 s).
+    /// LA INVESTIGACIÓN (el jefe del video del usuario — el antiguo Dios
+    /// de los Slimes): la técnica número UNO que hace que TODO el jefe
+    /// se vea como se ve es UNA SOLA COSA — un RELOJ DE COLOR COMPARTIDO
+    /// que recorre una paleta de 5 colores en ciclo continuo, y TODOS
+    /// los efectos del combate leen de él con DISTINTO desfase: el
+    /// cuerpo, los proyectiles, los rayos, las partículas — todo vive
+    /// en el MISMO arcoíris desplazándose (12 ticks por color, ciclo
+    /// completo de 60 t = 1 s).
     ///
-    /// LA PALETA «OIL» (las entradas 3-7 de GoozmaColorUtils — la de
-    /// Goozma por defecto):
+    /// LA PALETA «OIL» (el arcoíris de mancha de aceite del original):
     ///   magenta (174,23,189) → naranja (237,128,60) → amarillo
     ///   (247,255,101) → verde (176,234,85) → cian (102,219,249)
     ///
-    /// EL GRADIENTE A LO LARGO (la firma del FusionRay): ValueAt(reloj −
+    /// EL GRADIENTE A LO LARGO (la firma del rayo de fusión): ValueAt(reloj −
     /// progress·100) — el haz es UNA REBANADA MÓVIL del arcoíris: 100
     /// ticks de paleta caben a lo largo del rayo, del blanco de la boca
     /// al cian de la punta, y TODO se desplaza cada frame.
     /// </summary>
-    public static class ColorGoozma
+    public static class ColorPrisma
     {
-        /// <summary>LA PALETA OIL de Goozma (la de serie — el arcoíris de
+        /// <summary>LA PALETA OIL (la de serie — el arcoíris de
         /// mancha de aceite: magenta → naranja → amarillo → verde → cian).</summary>
         public static readonly Color[] Oil =
         {
@@ -49,8 +48,7 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// EL COLOR DEL RELOJ: la paleta recorrida en ciclo continuo con
         /// crossfade total (cada color vive 12 t y funde con el siguiente
-        /// durante TODO su segmento — el «0.2f, 0.2f» del GradientColor
-        /// original: un ciclo PURO, sin pausas).
+        /// durante TODO su segmento — un ciclo PURO, sin pausas).
         /// </summary>
         /// <param name="reloj">El reloj de color (Main.GameUpdateCounter o
         /// GlobalTimeWrappedHourly — o cualquier desfase propio).</param>
@@ -65,7 +63,7 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL GRADIENTE A LO LARGO (la firma del FusionRay): el color que
+        /// EL GRADIENTE A LO LARGO (la firma del rayo de fusión): el color que
         /// vive a `progress` (0..1) de un haz cuyo reloj camina — la
         /// REBANADA MÓVIL: la boca y la punta viven 100 ticks de paleta
         /// de diferencia y TODO se desliza cada frame.

@@ -1,7 +1,7 @@
 // v6.53 — THE SCRIBE PURGE: the demo boss, The Conscious Feather,
 // the Summoner Feather, the bag and the inscriptions ALL DIED (the
 // user's word). THE FIRST TRACE SURVIVES (the beam weapon, now in
-// the Beam Weapons bag, rendered with GOOZMA'S FUSION RAY
+// the Beam Weapons bag, rendered with the old god's FUSION RAY
 // technique) and THE INK AURORA (the code-drawn wings, now in the
 // Cosmetics bag and finally VISIBLE).
 // ENGLISH (en-US).
@@ -14,7 +14,7 @@ Items: {
 			La pluma que escribió la primera línea del mundo, cargada de luz.
 			MANTÉN el clic: cinco trazos convergen en UN RAYO DE FUSIÓN
 			(el arcoíris de aceite corre a lo largo, el núcleo arde blanco
-			y el ruido fluye de la boca a la punta — la técnica de Goozma).
+			y el ruido fluye de la boca a la punta — la técnica del dios).
 			A plena carga el daño se triplica.
 			'''
 		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
@@ -36,22 +36,12 @@ Items: {
 		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
 		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
 	}
-
-	BolsaDelDiosAntiguo: {
-		// DisplayName: Bolsa Del Dios Antiguo
-		// Tooltip: ""
-	}
 }
 
 Projectiles: {
 	PrimerTrazoHeld.DisplayName: El Primer Trazo
 	PrimerTrazoFajo.DisplayName: Trazo de fusión
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
-	// GolpeFusion.DisplayName: Golpe Fusion
-	// LaserArcoirisProjectile.DisplayName: Laser Arcoiris Projectile
-	// PrismaDestructorProjectile.DisplayName: Prisma Destructor Projectile
-	// RayoFusionProjectile.DisplayName: Rayo Fusion Projectile
-	// TruenoGelatinaProjectile.DisplayName: Trueno Gelatina Projectile
 	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
 	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
 }

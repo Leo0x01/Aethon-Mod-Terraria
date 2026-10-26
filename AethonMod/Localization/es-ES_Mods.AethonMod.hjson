@@ -1943,67 +1943,6 @@ Items: {
 			'''
 	}
 
-	RayoDeFusion: {
-		DisplayName: El Rayo de Fusión
-		Tooltip:
-			'''
-			        «El dios de los slimes comprimió su hambre en una línea.»
-			        LA copia del ataque estrella de GOOZMA (Hunt of the Old
-			        God): carga 70 t — la aguja arcoíris que late y se afina —
-			        y FUEGO: el haz BARRE en coseno, el arcoíris CORRE a lo
-			        largo del rayo (una rebanada móvil de la paleta de aceite),
-			        el ruido fluye boca→punta y la boca florece cúbica.
-			        Daño en CONO, exacto como el original.
-			'''
-	}
-
-	LaserArcoiris: {
-		DisplayName: El Láser Arcoíris
-		Tooltip:
-			'''
-			        La copia del RainbowLaser de los Goozmitas: balas-láser
-			        CURVAS (extraUpdates 8, un giro diminuto por paso) cuya
-			        estela es una pila de sprites — núcleo fino estirado + halo
-			        ancho — con el arcoíris CORRIENDO a lo largo (5 ticks de
-			        paleta por segmento). Disparo rápido.
-			'''
-	}
-
-	DestructorDePrismas: {
-		DisplayName: El Destructor de Prismas
-		Tooltip:
-			'''
-			        La copia del PrismDestroyer de la Divina Gargoptuar:
-			        invoca TRES prismas que orbitan a tu alrededor (radio que
-			        respira hasta 300, giro que se CONGELA al disparar)
-			        barriendo 5 rayos de muerte en abanico; cada rayo choca en
-			        TRES tramos decrecientes (70/180/320 px) y todos viven en
-			        el arcoíris HSL giratorio.
-			'''
-	}
-
-	TruenoDeGelatina: {
-		DisplayName: El Trueno de Gelatina
-		Tooltip:
-			'''
-			        La copia del GooLightning de Goozma: descargas perlin
-			        arcoíris que saltan al cursor y golpean por línea. Doble
-			        pase (el canal + la vena) sobre la campana de glow, con el
-			        fade del original: (1 − t/30)^0.6.
-			'''
-	}
-
-	MasaCromatica: {
-		DisplayName: La Masa Cromática
-		Tooltip:
-			'''
-			        La copia del alma de creación de Goozma: el material
-			        gelatinoso arcoíris de todo su arsenal. El icono y el
-			        nombre VIVEN con el reloj de color del dios (la paleta
-			        de aceite, ciclo de 60 t).
-			'''
-	}
-
 	// v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS (Task 74-a/b/c)
 	
 	BolsaDeAlasPrisma: {
@@ -2035,9 +1974,9 @@ Items: {
 		DisplayName: El Cofre del Arsenal
 		Tooltip:
 			'''
-				LAS VEINTITRÉS BOLSAS del arsenal dentro de una sola: la
+				LAS VEINTIDÓS BOLSAS del arsenal dentro de una sola: la
 				del Probador, la de los Fundacionales, la de los Soles
-				Rúnicos… y todas las demás hasta la del Dios Antiguo.
+				Rúnicos… y todas las demás.
 				Ábrela y despliega la que necesites.
 				Clic derecho. Solo entrega lo que te falte.
 			'''

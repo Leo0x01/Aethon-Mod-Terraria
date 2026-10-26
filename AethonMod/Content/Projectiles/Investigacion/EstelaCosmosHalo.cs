@@ -133,11 +133,11 @@ namespace AethonMod.Content.Projectiles.Investigacion
     /// <summary>
     /// TINTAVIVAHALO — v6.54.0 — EL CORDÓN LÍQUIDO QUE SIGUE AL JUGADOR.
     ///
-    /// La técnica del cordón de Goozma (Task 74-b) con texturas 100 %
+    /// La técnica del cordón del dios (Task 74-b) con texturas 100 %
     /// casa: la cola sigue el RASTRO REAL del portador (un anillo de
     /// las últimas 36 posiciones, muestreadas cada 2 ticks), la espina
     /// se encrespa con la onda seno del original (±14 px decayendo) y
-    /// CADA NODO resuelve el shader GoozmaCordMap en CPU: DOS CAPAS de
+    /// CADA NODO resuelve el shader del cordón en CPU: DOS CAPAS de
     /// TintaViva.png a escalas ×(3,1) y ×(2,1) y velocidades distintas
     /// MULTIPLICADAS (el encaje de agujeros), y el COLOR nace de la
     /// LUT MapaColorTinta.png (fila clara u oscura según el producto,
@@ -240,7 +240,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                     // EL ANCHO (18 px máx decayendo — el del jefe).
                     _anchos[i] = 20f * MathF.Pow(1f - p, 0.8f) + 2f;
 
-                    // === EL SHADER GOOZMACORDMAP POR NODO: dos capas de
+                    // === EL SHADER DEL CORDÓN POR NODO: dos capas de
                     //     la MISMA tinta a escalas (3,1)/(2,1) y
                     //     velocidades 1×/3× MULTIPLICADAS ===
                     float c = p * 2.2f;   // a lo largo de la cola

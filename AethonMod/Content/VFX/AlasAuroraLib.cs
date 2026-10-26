@@ -181,7 +181,7 @@ namespace AethonMod.Content.VFX
             => TonoPluma(hue, mezclaDia, haciaBlanco, AlasCatalogo.De(AlasCatalogo.Aurora));
 
         /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO: el hue vive en la
-        /// PALETA del ala (crossfade continuo — el contrato ColorGoozma)
+        /// PALETA del ala (crossfade continuo — el contrato ColorPrisma)
         /// y la forma diurna funde hacia SU luz.</summary>
         private static Color TonoPluma(float hue, float mezclaDia, float haciaBlanco,
             in EstiloAlas estilo)
@@ -203,7 +203,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>v6.54.0 — EL HUE DE LA PALETA: null = el prisma
         /// completo histórico; si no, la paleta del ala recorrida en
-        /// ciclo continuo con crossfade total (12/5 del ColorGoozma).</summary>
+        /// ciclo continuo con crossfade total (12/5 del ColorPrisma).</summary>
         private static Color DePaleta(in EstiloAlas estilo, float h)
         {
             if (estilo.Paleta == null || estilo.Paleta.Length == 0)

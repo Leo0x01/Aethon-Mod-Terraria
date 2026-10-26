@@ -21,7 +21,7 @@ namespace AethonMod.Content.Items.Alas
     /// Mothron SIN sprite); lo que cambia es EL ALMA: cada ala declara
     /// su índice del catálogo (AlasCatalogo) — su paleta, su forma,
     /// su tempo y SU TEXTURA DE RUIDO de las veinte nacidas de la
-    /// investigación de las texturas de efecto de Goozma.
+    /// investigación de las texturas de efecto del dios antiguo.
     ///
     /// Llegan en LA BOLSA DE LAS ALAS (dentro de la Bolsa de la
     /// Investigación — la letra: «todos los items nuevos que crees con

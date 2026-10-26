@@ -1,3 +1,24 @@
+# v6.54.2 — LA PURGA FINAL — EL CHECKLIST
+
+**Qué pasó** (la letra: «borra todo rastro de la palabra en el proyecto»):
+las 5 armas copiadas del jefe del video (v6.52.2) + sus proyectiles + La
+Bolsa del Dios Antiguo se retiraron completas; el motor de color ahora es
+ColorPrisma; el Cofre del Arsenal baja de 23 a 22 bolsas.
+
+1. **EL MOD CARGA**: [ ] activar AethonMod v6.54.2 — sin «Los mods se han
+   desactivado automáticamente», cero errores en consola.
+2. **EL COFRE DEL ARSENAL**: [ ] clic derecho entrega las 22 bolsas —
+   ya NO está la Bolsa del Dios Antiguo (la lista y el tooltip lo dicen).
+3. **LA BOLSA DE LA INVESTIGACIÓN INTACTA**: [ ] Rayos Concentrados,
+   Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela
+   del Cosmos, Tinta Viva + la Bolsa de las Alas (15 alas) — todo sigue.
+4. **EL PRIMER TRAZO IGUAL QUE SIEMPRE**: [ ] el rayo fusionado se ve
+   idéntico (ColorPrisma es el mismo motor renombrado) y su tooltip
+   dice «la técnica del dios».
+5. **NADA DEL ARSENAL VIEJO**: [ ] ni el Rayo de Fusión viejo, ni el
+   Láser Arcoíris, ni el Destructor de Prismas, ni el Trueno de
+   Gelatina, ni la Masa Cromática existen ya en el mod.
+
 # v6.54.1 — LA CURA DE LAS TRES BOLSAS INVISIBLES — EL CHECKLIST
 
 **Qué pasó** (la letra: «hay errores» + client.log): la v6.54.0 DESACTIVABA el
@@ -52,19 +73,19 @@ byte a byte, `/releases/latest` = v6.54.1.
 4. **Los 20 RUIDOS nuevos** alimentan alas y efectos (las familias del dios +
    células, plasma y anillos — 3 familias nuevas de la casa).
 
-**GoozmaPort**: la investigación terminó y `research/GoozmaPort/` se BORRÓ del
+**el puerto del dios**: la investigación terminó y `research del puerto/` se BORRÓ del
 repositorio por completo (la orden del usuario) — el repo queda 100 % libre de
 material GPL. Respaldo privado fuera del repo documentado en CHANGES.
 
 # AethonMod — ESTADO ACTUAL (v6.53.1)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.53.1 (LA SEPARACIÓN DE GOOZMA — LA DECISIÓN GPL
-> EJECUTADA. La letra: «esta parte de Goozma es solo para investigación,
+> Última actualización: v6.53.1 (LA SEPARACIÓN DEL PUERTO — LA DECISIÓN GPL
+> EJECUTADA. La letra: «esta parte del dios es solo para investigación,
 > nunca lo usaré realmente y todo su material debería ser borrado antes del
 > lanzamiento» + «recuerda siempre escribir en español todo». ENTREGADO:
-> (1) EL PUERTO VERBATIM SALIÓ DEL MOD COMPLETO — Content/GoozmaPort/ y
-> Localization/Goozma/ mudados a research/GoozmaPort/ (FUERA de la carpeta
+> (1) EL PUERTO VERBATIM SALIÓ DEL MOD COMPLETO — Content/el puerto del dios/ y
+> Localization/el dios/ mudados a research del puerto/ (FUERA de la carpeta
 > que compila tModLoader: ni se compila, ni se empaqueta, ni se publica;
 > el material GPL jamás vuelve a salir en un release — quedará borrado del
 > todo antes del lanzamiento oficial, como pide la letra); (2) EL CABLEADO
@@ -82,25 +103,25 @@ material GPL. Respaldo privado fuera del repo documentado en CHANGES.
 > LITERAL — separados cada fajo viste SU color del prisma, al cargar los
 > 5 colores se DISUELVEN en el arcoíris del dios (lerp carga²); (4) el
 > release v6.53.0 RETIRADO de GitHub (su .tmod llevaba el material GPL);
-> (5) research/GoozmaPort/INVESTIGACION.md — la guía con el cableado
+> (5) research del puerto/INVESTIGACION.md — la guía con el cableado
 > exacto por si algún día se quiere ver al jefe en un build PRIVADO (uso
 > privado = legal; NUNCA público). Verificación: oráculo 0 errores · gate
-> de texturas OK · build real 0/0 · .tmod auditado SIN entradas GoozmaPort
+> de texturas OK · build real 0/0 · .tmod auditado SIN entradas el puerto del dios
 > · headless 0 excepciones.)
 
-> Última actualización: v6.53.0 (EL GOOZMA VERBATIM + LA TÉCNICA DEL RAYO DE
+> Última actualización: v6.53.0 (EL PUERTO VERBATIM DEL DIOS + LA TÉCNICA DEL RAYO DE
 > FUSIÓN + LAS ALAS POR FIN VISIBLES + LA PURGA DEL ESCRIBA + LA CADENA PROPIA
 > DE INVOCACIÓN 1,5 %. **(NOTA v6.53.1: el puerto verbatim de esta versión
 > fue RETIRADO del mod y su release retirado de GitHub — ver la entrada
 > .53.1; TODO lo demás de esta lista SIGUE vigente.)** La letra: «debes copiar el jefe y todos sus assets y
 > sprite además del código, y llévalo a nuestro mod […] ponlo TAL CUAL como
 > está en su mod original, para investigación, y pon su invocador en la bolsa
-> Goozma» + «la respuesta es el rayo de fusión de goozma pero necesitamos
+> el dios» + «la respuesta es el rayo de fusión del dios pero necesitamos
 > saber cómo hacerlo» + «la aurora de tinta no se ve para nada» + «bórralas:
 > La Pluma Consciente, Pluma Convocadora, EL ESCRIBA y todo lo referente» +
 > «el daño de invocación tendrá un 1,5 % de crecimiento […] que también diga
 > (este libro)». ENTREGADO: (1) el jefe COMPLETO de Calamity: Hunt of the Old
-> God portado verbatim a Content/GoozmaPort/ (86 .cs, ~16.400 líneas, 321
+> God portado verbatim a Content/el puerto del dios/ (86 .cs, ~16.400 líneas, 321
 > entradas del .tmod: las 3 fases, los 5 esbirros, los 27 proyectiles con el
 > FUSION RAY REAL y su shader .fx, la música de 31 MB, 58 sonidos, todos los
 > sprites) con créditos + LICENSE-GPL3 — ⚠️ GPL-3.0: pendiente la decisión del
@@ -2046,9 +2067,9 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **✅ v6.53.0 PUBLICADA — EL GOOZMA VERBATIM + EL RAYO DE FUSIÓN REAL + LAS ALAS VISIBLES — EN JUEGO.** Checklist:
-   - **(a) LA BOLSA DEL DIOS ANTIGUO → EL HUEVO DE ENGENBRO PLURIPOTENTE**: sostenlo y clic — nace el PluripotentSpawn (absorbe slimes cercanos creciendo ~17 s y ECLOSIONA en GOOZMA: 1,7-4,2 M de vida, 3 fases + furia <10 %, invoca a los 4 dioses slimes uno a uno y ESPEJA sus ataques, EL RAYO DE FUSIÓN que barre en coseno ±2.5 rad con núcleo blanco-caliente, la monzón de slimes con su cielo y truenos, la MÚSICA, la cinemática de muerte con sus godrays). Con Calamity instalado se activan los extras guardados (sin él: standalone al 100 %).
-   - **(b) EL PRIMER TRAZO (bolsa de armas de rayo)**: mantener clic — 5 trazos convergen y al fundirse EL RAYO ENGORDA A 250 PX con el look EXACTO de Goozma (arcoíris de aceite corriendo, ruido fluyendo boca→punta, núcleo blanco, bits chispeantes, ancho que respira). YA NO son rectángulos ni triángulos: es el material del jefe.
+1. **✅ v6.53.0 PUBLICADA — EL PUERTO VERBATIM DEL DIOS + EL RAYO DE FUSIÓN REAL + LAS ALAS VISIBLES — EN JUEGO.** Checklist:
+   - **(a) LA BOLSA DEL DIOS ANTIGUO → EL HUEVO DE ENGENBRO PLURIPOTENTE**: sostenlo y clic — nace el PluripotentSpawn (absorbe slimes cercanos creciendo ~17 s y ECLOSIONA en EL DIOS: 1,7-4,2 M de vida, 3 fases + furia <10 %, invoca a los 4 dioses slimes uno a uno y ESPEJA sus ataques, EL RAYO DE FUSIÓN que barre en coseno ±2.5 rad con núcleo blanco-caliente, la monzón de slimes con su cielo y truenos, la MÚSICA, la cinemática de muerte con sus godrays). Con Calamity instalado se activan los extras guardados (sin él: standalone al 100 %).
+   - **(b) EL PRIMER TRAZO (bolsa de armas de rayo)**: mantener clic — 5 trazos convergen y al fundirse EL RAYO ENGORDA A 250 PX con el look EXACTO del dios (arcoíris de aceite corriendo, ruido fluyendo boca→punta, núcleo blanco, bits chispeantes, ancho que respira). YA NO son rectángulos ni triángulos: es el material del jefe.
    - **(c) LAS ALAS (bolsa de cosméticos)**: equipa La Aurora de Tinta — AHORA SE VEN (diez plumas prismáticas de noche, blanco-oro de día, despliegue suave, aleteo en cadena, respeto por alas reales, vuelo Mothron + 240).
    - **(d) LA PURGA**: confirma que ya NO existe El Escriba, ni La Pluma Consciente, ni Pluma Convocadora, ni el árbol [P] — y que el Reloj de Arena (bolsa del probador) sigue cambiando día/noche.
    - **(e) LA VENTANA DEL ARMA del grimorio**: la línea de invocación ahora dice «+X % daño de invocación (este libro)» y el número crece +1,5 %/nivel (el mágico sigue a +2,2 %).

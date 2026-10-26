@@ -14,7 +14,7 @@ namespace AethonMod.Content.VFX
     /// del abanico, el tempo del aleteo, las intensidades de las capas y
     /// LA TEXTURA DE RUIDO propia (cada ala fluye con una de las 20
     /// texturas Ruido_N nacidas de la investigación de las texturas de
-    /// efecto de Goozma — familias fBm / wisps / turbulencia / starfield
+    /// efecto del dios antiguo — familias fBm / wisps / turbulencia / starfield
     /// / seda / vermiforme / ridged / células / plasma).
     ///
     /// LA AURORA DE TINTA (índice 1) es la entrada [0] del catálogo con
@@ -24,7 +24,7 @@ namespace AethonMod.Content.VFX
     public struct EstiloAlas
     {
         /// <summary>La paleta que corre por el abanico (muestreo por hue
-        /// con crossfade — el mismo contrato del ColorGoozma).</summary>
+        /// con crossfade — el mismo contrato del ColorPrisma).</summary>
         public Color[] Paleta;
 
         /// <summary>El tinte de la forma diurna (la aurora funde hacia
@@ -139,7 +139,7 @@ namespace AethonMod.Content.VFX
                 cuerpo: 0.22f, halo: 0.10f, ruidoInten: 0.9f, luz: 0.8f);
 
             t[8] = Ala("Prisma",
-                paleta: new[] {                          // el arcoíris del dios (ColorGoozma)
+                paleta: new[] {                          // el arcoíris del dios (ColorPrisma)
                     new Color(174, 23, 189), new Color(237, 128, 60),
                     new Color(247, 255, 101), new Color(176, 234, 85),
                     new Color(102, 219, 249) },

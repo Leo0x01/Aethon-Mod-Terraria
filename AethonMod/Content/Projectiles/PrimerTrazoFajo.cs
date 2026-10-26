@@ -203,7 +203,7 @@ namespace AethonMod.Content.Projectiles
         // ==================================================================
         //  v6.53.1 — EL RAYO DE FUSIÓN, 100 % MATERIAL DE LA CASA
         //
-        //  La letra: «esta parte de Goozma es solo para investigación,
+        //  La letra del usuario: «esta parte del jefe es solo para investigación,
         //  nunca lo usaré realmente y todo su material debería ser
         //  borrado antes del lanzamiento» — el puerto verbatim SALIÓ del
         //  mod (retirado y BORRADO del repo en la v6.54.0 — la orden del
@@ -212,15 +212,15 @@ namespace AethonMod.Content.Projectiles
         //  habrían cargado: tML 2026.08 solo carga efectos .fxc
         //  compilados — los .fx del puerto viajaban crudos). LA TÉCNICA
         //  APRENDIDA PERMANECE (las ideas no tienen dueño) y vive en el
-        //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión de la
-        //  Bolsa del Dios Antiguo):
+        //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión
+        //  histórico de esa versión):
         //
         //    · LA ESPINA RECTA (48 nodos en coordenadas de PANTALLA —
         //      el contrato de RayoStrip, la lección de las alas).
         //    · EL ANCHO es TODA la forma (la fórmula del jefe): p^0.8
         //      crece de la boca · cbrt capa al 70 % y muere en la punta ·
         //      ×(1.1 + cos·(0.08 − p·0.06)) — el VIVO que respira.
-        //    · EL ARCOÍRIS VIAJA por el rayo: ColorGoozma.ALoLargo
+        //    · EL ARCOÍRIS VIAJA por el rayo: ColorPrisma.ALoLargo
         //      evaluado en (reloj − progreso·100) POR NODO — una REBANADA
         //      MÓVIL de la paleta de aceite, resuelta en CPU (cero
         //      shaders, la firma de la casa).
@@ -259,7 +259,7 @@ namespace AethonMod.Content.Projectiles
             float tiempo = Main.GlobalTimeWrappedHourly;
 
             // === LA BOCA (el resplandor de la casa, a escala del dios) ===
-            Color colorBoca = ColorGoozma.ValueAt(Reloj);
+            Color colorBoca = ColorPrisma.ValueAt(Reloj);
             Texture2D glow = VFXCore.SoftGlow;
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null,
                 colorBoca * 0.5f * _intensidad, 0f, glow.Size() * 0.5f,
@@ -304,7 +304,7 @@ namespace AethonMod.Content.Projectiles
                 // LA REBANADA MÓVIL — el arcoíris corre a lo largo (100
                 // ticks de paleta, del blanco de la boca al cian de la
                 // punta) fundiéndose con el hue del prisma.
-                Color c = Color.Lerp(hue, ColorGoozma.ALoLargo(Reloj, p, 100f), funde);
+                Color c = Color.Lerp(hue, ColorPrisma.ALoLargo(Reloj, p, 100f), funde);
                 colCuerpo[i] = StormLib.Tint(c, 0.60f * _intensidad);
                 colHalo[i] = StormLib.Tint(c, 0.20f * _intensidad);
                 colCore[i] = StormLib.Tint(new Color(255, 252, 245), 0.85f * _intensidad);

@@ -227,7 +227,7 @@ namespace AethonMod.Content.VFX
             => FajaTexturadaEnLote(pts, semiancho, null, color, tex, periodo, flujo, tiempo, vMin, vMax);
 
         /// <summary>v6.52.2 — LA FAJA DE GRADIENTE (la firma del
-        /// FusionRay de Goozma: el color VIAJA A LO LARGO del haz —
+        /// EL RAYO DE FUSIÓN del dios: el color VIAJA A LO LARGO del haz —
         /// coloresPorNodo[i] tiñe cada segmento; null = el color fijo).
         /// EL ARCOÍRIS A LO LARGO es lo que hacía el shader del original
         /// con `ValueAt(localAI[0] − progress·100)` — aquí, resuelto por

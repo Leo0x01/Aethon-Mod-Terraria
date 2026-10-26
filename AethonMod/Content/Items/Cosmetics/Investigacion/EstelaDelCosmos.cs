@@ -10,16 +10,16 @@ namespace AethonMod.Content.Items.Cosmetics.Investigacion
     /// <summary>
     /// ESTELADELCOSMOS — v6.54.0 — EL ANILLO SATURNO DEL JUGADOR.
     ///
-    /// La letra: «goozma tambien tiene varias texturas interesantes
+    /// La letra: «el dios tambien tiene varias texturas interesantes
     /// como SpaceTrail.png y SpaceTrailGlow.png estas creo que son
-    /// usadas como una especia de aura de colores que rodea a goozma
+    /// usadas como una especia de aura de colores que rodea al dios
     /// de todas formas revisa como es que la usa y crea un item en
     /// concecuencia para el jugador que sea cosmetico, pero no uses
     /// las mismas texturas crea tu propia SpaceTrail.png centrada en
     /// el color morado y negro ya sabes los colores de nuestro mod».
     ///
     /// LA INVESTIGACIÓN (Task 74-a): es el ANILLO tipo Saturno del
-    /// StellarGeliath (el esbirro estelar — no de Goozma mismo): DOS
+    /// StellarGeliath (el esbirro estelar — no del dios mismo): DOS
     /// SEMIANILLOS de primitivas (el trasero se dibuja antes del
     /// cuerpo, el delantero después → el anillo CRUZA al portador),
     /// radio ondulante, squash Y ×0.1, y el shader StellarRing hace la
@@ -89,10 +89,10 @@ namespace AethonMod.Content.Items.Cosmetics.Investigacion
     /// texturas basadas en esas … y crea un item en consecuencia para
     /// el jugador».
     ///
-    /// LA INVESTIGACIÓN (Task 74-b): es el CORDÓN UMBILICAL que Goozma
+    /// LA INVESTIGACIÓN (Task 74-b): es el CORDÓN UMBILICAL que el dios
     /// arrastra detrás — una cola de 50 nodos (curva + onda seno ±20
     /// px, ancho máx 18) dibujada a un render target con el shader
-    /// GoozmaCordMap: DOS CAPAS de la MISMA textura LiquidTrail a
+    /// su shader de cordón: DOS CAPAS de la MISMA textura LiquidTrail a
     /// escalas UV ×(3,1) y ×(2,1) y velocidades uTime y 3·uTime
     /// MULTIPLICADAS → el encaje de agujeros de goo; el canal G decide
     /// la fila clara/oscura de la LUT ColorMap_0 y el canal R desplaza

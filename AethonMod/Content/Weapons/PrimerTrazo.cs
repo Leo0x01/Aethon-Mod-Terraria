@@ -21,8 +21,8 @@ namespace AethonMod.Content.Weapons
     /// que Pluma Convocadora y EL ESCRIBA y todo lo referente») — el TRAZO
     /// SOBREVIVE y muda de familia: ya no es del ciclo del Escriba, es EL
     /// ARMA DEL RAYO del arsenal de la casa (Bolsa de las Armas de Rayo).
-    /// Su render vive la técnica DEL RAYO DE FUSIÓN DE GOOZMA (Hunt of the
-    /// Old God — la letra: «la respuesta es el rayo de fusión de goozma
+    /// Su render vive la técnica DEL RAYO DE FUSIÓN DEL DIOS ANTIGUO (la
+    /// letra del usuario: «la respuesta es el rayo de fusión del jefe del video
     /// pero necesitamos saber cómo hacerlo»).
     ///
     /// LA RESPUESTA ARMADA: el Last Prism de vanilla llevado a la receta

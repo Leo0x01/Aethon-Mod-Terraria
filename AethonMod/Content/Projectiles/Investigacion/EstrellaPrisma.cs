@@ -93,7 +93,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                 {
                     Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.RainbowRod,
                         Main.rand.NextVector2Circular(0.6f, 0.6f), 180,
-                        ColorGoozma.ValueAt(Main.GlobalTimeWrappedHourly * 8f), 0.55f);
+                        ColorPrisma.ValueAt(Main.GlobalTimeWrappedHourly * 8f), 0.55f);
                     d.noGravity = true;
                 }
             }
@@ -144,7 +144,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                 }
 
                 float t = Main.GlobalTimeWrappedHourly;
-                Color arco = ColorGoozma.ValueAt(t * 8f + Projectile.whoAmI);
+                Color arco = ColorPrisma.ValueAt(t * 8f + Projectile.whoAmI);
 
                 // === EL ÁREA (la viñeta del marcador ×2 giros — la
                 //     técnica del StellarGeliath: tintes A=0 aditivos) ===
@@ -224,7 +224,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                     SpriteEffects.None, 0f);
             }
 
-            Color arco = ColorGoozma.ValueAt(t * 6f + a.X * 0.05f);
+            Color arco = ColorPrisma.ValueAt(t * 6f + a.X * 0.05f);
             Color glowOscuro = new Color(84, 42, 168);
             // EL GLOW (2 pasadas anchas tenues).
             Pasa(a, b, glowOscuro * 0.35f, 1.1f, 0.05f);

@@ -12,29 +12,34 @@ Este repositorio y todo su contenido —incluidos, sin limitación: el código f
 - emplear este proyecto, total o parcialmente, con fines comerciales o promocionales;
 - extraer fragmentos para incorporarlos a colecciones, compilaciones, repositorios o productos de terceros.
 
-## ⚠️ Nota de licencia — la copia de investigación de Goozma
+## ⚠️ Nota de licencia — material de terceros
 
-**v6.54.0 — BORRADO DEFINITIVO**: la carpeta `research/GoozmaPort/` (la copia verbatim de
-investigación** del jefe Goozma del mod *Calamity: Hunt of the Old God*
-(github.com/TohruKobayashi/CalamityHunt), que se distribuye bajo
-**GPL-3.0**) fue **ELIMINADA COMPLETA del repositorio** en la v6.54.0 tras terminar la investigación de sus texturas — la orden del usuario ejecutada: **el repositorio está 100 % libre de material GPL** (existe un respaldo privado fuera del repo). Créditos históricos:
-Team Hypnos — caligulasAquarium, IbanPlay, THEREDSTONEBRO,
-AmmyanDocCiesh, Blockaroz. Esa carpeta está **FUERA del mod**: no se
-compila, no entra al `.tmod` y jamás sale en un release (decisión del
-autor: es solo material de estudio y se borrará antes del lanzamiento
-oficial). El mod publicado — todo lo que vive en `AethonMod/` — es 100 %
-código y assets propios de la casa; las técnicas aprendidas del jefe
-están re-implementadas desde cero (ColorGoozma, RayoStrip, el Primer
-Trazo fusionado).
+**v6.54.0 + v6.54.2 — BORRADO DEFINITIVO Y PURGA FINAL**: la copia de
+investigación del jefe del video (un mod de terceros que se distribuye
+bajo **GPL-3.0**) fue **ELIMINADA COMPLETA del repositorio** en la
+v6.54.0 tras terminar la investigación de sus texturas, y la v6.54.2
+ejecutó la purga final ordenada por el autor: ni una sola mención de
+la fuente queda en el proyecto. **El repositorio está 100 % libre de
+material GPL** (existe un respaldo privado fuera del repo). El mod
+publicado — todo lo que vive en `AethonMod/` — es 100 % código y
+assets propios de la casa; las técnicas aprendidas están
+re-implementadas desde cero (ColorPrisma, RayoStrip, el Primer Trazo
+fusionado).
+
+## ✨ Novedades — v6.54.2: LA PURGA FINAL (cero rastros de la fuente)
+
+- **LA ORDEN EJECUTADA**: «borra todo rastro de la palabra en el proyecto» — las 5 armas copiadas del jefe del video (v6.52.2), sus 5 proyectiles y La Bolsa del Dios Antiguo se retiraron completas (El Cofre del Arsenal pasa de 23 a 22 bolsas; tooltip actualizado en los 3 idiomas). Las versiones 100 % casa (Rayos Concentrados, Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva y las 15 alas) siguen intactas en la Bolsa de la Investigación.
+- **EL MOTOR DE COLOR, CON NOMBRE DE LA CASA**: ColorPrisma (antes, el nombre prestado) — misma API, mismo arcoíris de aceite, y el binario compilado verificado por bytes: cero rastros del identificador viejo.
+- **REPO 100 % LIMPIO**: escaneo completo (código, assets, localización, tools y docs, nombres y contenidos): 0 menciones; el .tmod auditado con TODOS los blobs descomprimidos: 0.
 
 ## ✨ Novedades — v6.54.1: LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54)
 
 - **LA .54 SE CAÍA AL CARGAR**: las 3 bolsas nuevas (El Cofre del Arsenal, la Bolsa de la Investigación y la Bolsa de las Alas) nacieron sin su textura y tModLoader desactivaba el mod entero. Cura: los 3 iconos al estilo de la casa (cofre dorado con mini-sacos · saco púrpura con constelación y rayo · saco morado con alas aurora) + el gate de auditoría de texturas blindado (detecta solo la raíz del mod viva; jamás vuelve a cantar «OK» sobre una carpeta muerta).
-- **LO NUEVO DE LA .54 (ahora sí cargable)**: la investigación de las texturas del dios re-escrita 100 % en casa — Rayos Concentrados (el rayo de fusión del jugador), Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva, 15 alas nuevas con el sistema de la Aurora y las 23 bolsas consolidadas en El Cofre del Arsenal. `research/GoozmaPort/` borrada por completo (repo 100 % libre de GPL).
+- **LO NUEVO DE LA .54 (ahora sí cargable)**: la investigación de las texturas del dios re-escrita 100 % en casa — Rayos Concentrados (el rayo de fusión del jugador), Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva, 15 alas nuevas con el sistema de la Aurora y las 23 bolsas consolidadas en El Cofre del Arsenal. `research del puerto/` borrada por completo (repo 100 % libre de GPL).
 
-## ✨ Novedades — v6.53.1: LA SEPARACIÓN DE GOOZMA (todo el material del puerto fuera del mod)
+## ✨ Novedades — v6.53.1: LA SEPARACIÓN DEL PUERTO (todo el material del puerto fuera del mod)
 
-- **LA DECISIÓN GPL EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research/GoozmaPort/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material GPL). La Bolsa del Dios Antiguo queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).
+- **LA DECISIÓN GPL EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research del puerto/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material GPL). La Bolsa del Dios Antiguo queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).
 - **EL PRIMER TRAZO, 100 % MATERIAL DE LA CASA**: mismo look de rayo de fusión (fórmula de ancho del jefe + arcoíris viajero + núcleo blanco-caliente) pero con el pipeline propio probado de RayoStrip ×3 capas — sin shader prestado (que además nunca habría cargado: tML 2026.08 solo carga efectos .fxc compilados). Bonus: LA FUSIÓN LITERAL — separados, cada fajo viste su color del prisma; al cargar, los 5 colores SE DISUELVEN en el arcoíris del dios.
 - **v6.53.0 (para el historial)**: alas visibles (cura de coordenadas), purga del Escriba, cadena propia de invocación +1,5 % «(este libro)», textos arreglados — todo eso SIGUE en la .53.1.
 

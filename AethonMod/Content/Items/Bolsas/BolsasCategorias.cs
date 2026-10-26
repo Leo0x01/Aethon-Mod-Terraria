@@ -608,7 +608,7 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.53 — EL PRIMER TRAZO (la purga del Escriba: el arma del
             // rayo masivo muda a SU bolsa natural — la de las armas de
             // rayo; su render ahora vive la técnica del Rayo de Fusión
-            // de Goozma).
+            // del dios antiguo).
             l.Add((ModContent.ItemType<Weapons.PrimerTrazo>(), 1));             // el rayo masivo de fusión
             return l;
         }
@@ -685,51 +685,12 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>v6.52.2 — LA BOLSA DEL DIOS ANTIGUO (la letra: «el jefe
-    /// que aparece en este video tiene todo lo que he estado buscando…
-    /// analiza el jefe y de ser posible crea una nueva bolsa con todos
-    /// los items que puedas copiar de ese jefe, que sea una copia exacta
-    /// para nuestra investigacion profunda del codigo, tecnica y
-    /// visuales, centrate tambien en su ataque de haz de luz es muy
-    /// importante»). EL JEFE: GOOZMA, el antiguo Dios de los Slimes, del
-    /// mod «Hunt of the Old God» (Team Hypnos — UriBuilder/CalamityHunt,
-    /// fuente abierta, leída línea a línea). LA COPIA: EL RAYO DE FUSIÓN
-    /// (el beam del video — carga→barrido coseno, el arcoíris A LO LARGO
-    /// del haz, el cono de daño), EL LÁSER ARCOÍRIS (el RainbowLaser
-    /// curvo de los Goozmitas), EL DESTRUCTOR DE PRISMAS (el shuriken de
-    /// 5 rayos), EL TRUENO DE GELATINA (el GooLightning perlin) y LA
-    /// MASA CROMÁTICA (el material arcoíris) — todo con EL MOTOR DE
-    /// COLOR de Goozma (ColorGoozma: la paleta OIL en ciclo de 60 t, el
-    /// reloj compartido que hace que TODO el jefe se vea como se ve).
-    ///
-    /// v6.53.1 — LA SEPARACIÓN: la copia verbatim del jefe salió del mod
-    /// (la letra: «es solo para investigación… todo su material debería
-    /// ser borrado antes del lanzamiento» — BORRADO COMPLETO en la v6.54.0
-    /// fuera de toda compilación y de todo release); esta bolsa queda
-    /// con el ARSENAL PROPIO inspirado en el dios (las 5 armas de la
-    /// .52.2, 100 % código de la casa).</summary>
-    public class BolsaDelDiosAntiguo : BolsaCategoria
-    {
-        protected override string Titulo => "La Bolsa del Dios Antiguo";
-        protected override string NombreCorto => "Bolsa del Dios Antiguo";
-        protected override Color ColorFiesta => new(174, 23, 189);
-        protected override string Nota => "Goozma, el Dios de los Slimes — el arsenal de la casa inspirado en el dios";
-
-        protected override List<(int tipo, int pila)> Contenido()
-        {
-            var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<Weapons.Goozma.RayoDeFusion>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Goozma.LaserArcoiris>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Goozma.DestructorDePrismas>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Goozma.TruenoDeGelatina>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Goozma.MasaCromatica>(), 30));
-            // v6.53.1 — EL CONVOCADOR DEL PUERTO SE FUE con la separación
-            // (el huevo PluripotentSpawnEgg del puerto verbatim salió del
-            // mod completo: el material GPL se BORRÓ del repo entero (v6.54.0)
-            // publica — la decisión GPL del usuario).
-            return l;
-        }
-    }
+    // v6.54.2 — LA BOLSA DEL DIOS ANTIGUO SE RETIRÓ COMPLETA: era el
+    // arsenal de las 5 armas copiadas del jefe del video (v6.52.2);
+    // con la purga final de la palabra prohibida, las armas, sus
+    // proyectiles, la bolsa y su icono se fueron juntos — el Cofre
+    // del Arsenal baja de 23 a 22 bolsas (las versiones 100 % casa
+    // de la v6.54.0 viven en la Bolsa de la Investigación).
 
     // ======================================================================
     //  v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN (la letra del 27/10: «con
@@ -777,10 +738,11 @@ namespace AethonMod.Content.Items.Bolsas
     }
 
     /// <summary>v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN: los seis items
-    /// nacidos del estudio profundo de las texturas de efecto de
-    /// Goozma (FusionRay, SpaceTrail, LiquidTrail, Lightning ×2,
-    /// DarkSludge, Constellation, ColorMap, Glow, Noise, Space — TODO
-    /// re-implementado 100 % casa, cero material portado) + la Bolsa
+    /// nacidos del estudio profundo de las texturas de efecto del
+    /// dios antiguo (el rayo de fusión, la estela espacial, el cordón
+    /// líquido, los relámpagos ×2, el lodo, la constelación, el mapa
+    /// de color, el brillo, el ruido, el espacio — TODO re-implementado
+    /// 100 % casa, cero material portado) + la Bolsa
     /// de las Alas dentro.</summary>
     public class BolsaInvestigacion : BolsaCategoria
     {
@@ -818,7 +780,7 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
         protected override string NombreCorto => "El Cofre del Arsenal";
         protected override Color ColorFiesta => new(255, 196, 107);
-        protected override string Nota => "Las veintitrés bolsas del arsenal, una dentro de la otra";
+        protected override string Nota => "Las veintidós bolsas del arsenal, una dentro de la otra";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -845,7 +807,6 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<BolsaSombras>(), 1));
             l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
-            l.Add((ModContent.ItemType<BolsaDelDiosAntiguo>(), 1));
             return l;
         }
     }

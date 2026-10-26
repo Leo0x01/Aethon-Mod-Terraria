@@ -270,8 +270,8 @@ namespace AethonMod.Content.VFX
                 * (respiracion - p1 * 0.06f) * activacion;
             Vector2 c0 = boca + dir * (largo * p0 * activacion);
             Vector2 c1 = boca + dir * (largo * p1 * activacion);
-            Color arco0 = ColorGoozma.ALoLargo(t * 12f, p0 * activacion, 100f);
-            Color arco1 = ColorGoozma.ALoLargo(t * 12f, p1 * activacion, 100f);
+            Color arco0 = ColorPrisma.ALoLargo(t * 12f, p0 * activacion, 100f);
+            Color arco1 = ColorPrisma.ALoLargo(t * 12f, p1 * activacion, 100f);
 
             for (int j = 0; j < Col.Length - 1; j++)
             {

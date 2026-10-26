@@ -10,7 +10,7 @@ namespace AethonMod.Content.VFX
     /// FAJACPU — v6.54.0 — LA MINI-LIB DE LAS TEXTURAS DE LA INVESTIGACIÓN.
     ///
     /// El contrato compartido de los efectos nacidos de la investigación
-    /// de las texturas de Goozma (Task 74-a/b/c): cargar UNA textura a
+    /// de las texturas del dios antiguo (Task 74-a/b/c): cargar UNA textura a
     /// un array float (GetData lazy en el hilo de dibujo, una vez) y
     /// muestrearla BILINEAL con wrap (el sampler del shader original) —
     /// para luego pintar FAJAS DE TRIÁNGULOS con COLOR POR VÉRTICE (el

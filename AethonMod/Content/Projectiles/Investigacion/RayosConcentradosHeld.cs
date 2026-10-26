@@ -116,7 +116,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                     Vector2 dir = new(MathF.Cos(Projectile.rotation), MathF.Sin(Projectile.rotation));
                     float p = Main.rand.NextFloat(0.25f, 1f);
                     Vector2 pos = Projectile.Center + dir * (LargoHaz * p);
-                    Color chispa = ColorGoozma.ALoLargo(Reloj * 0.12f, p, 100f);
+                    Color chispa = ColorPrisma.ALoLargo(Reloj * 0.12f, p, 100f);
                     Dust d = Dust.NewDustPerfect(pos, DustID.RainbowRod,
                         -dir * Main.rand.NextFloat(0.5f, 2f) +
                         Main.rand.NextVector2Circular(1.5f, 1.5f),
@@ -205,7 +205,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                     // === LA CARGA (el jefe: 4 resplandores concéntricos de
                     //     los SOLES RÚNICOS + la aguja telegráfica) ===
                     float carga = Reloj / CargaTicks;
-                    Color color = ColorGoozma.ValueAt(Reloj * 0.12f);
+                    Color color = ColorPrisma.ValueAt(Reloj * 0.12f);
                     for (int i = 0; i < 4; i++)
                     {
                         float esc = (0.35f + carga * 1.3f) * (1f - i * 0.2f);
@@ -235,7 +235,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                         Reloj * 0.025f, activacion);
 
                     // LA BOCA ARDIENDO (los soles rúnicos — la letra).
-                    Color color = ColorGoozma.ValueAt(Reloj * 0.12f);
+                    Color color = ColorPrisma.ValueAt(Reloj * 0.12f);
                     for (int i = 0; i < 3; i++)
                         Main.spriteBatch.Draw(VFXCore.SoftGlow, boca, null,
                             color * ((0.5f - i * 0.13f) * activacion),

@@ -139,7 +139,7 @@ namespace AethonMod.Content.Projectiles.Investigacion
                         + anchoBase * 0.3f;
 
                     // EL ARCOÍRIS DEL DIOS a lo largo (el desvanecido del jefe).
-                    Color arco = ColorGoozma.ALoLargo(reloj * 6f, p, 60f);
+                    Color arco = ColorPrisma.ALoLargo(reloj * 6f, p, 60f);
 
                     // LA TÉCNICA DEL SHADER: dos muestras desfazadas 0.5
                     // en U MULTIPLICADAS — solo las vetas que coinciden.

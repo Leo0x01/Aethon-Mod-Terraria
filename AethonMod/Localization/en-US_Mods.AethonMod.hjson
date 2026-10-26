@@ -1939,67 +1939,6 @@ Items: {
 			'''
 	}
 
-	RayoDeFusion: {
-		DisplayName: The Fusion Ray
-		Tooltip:
-			'''
-			        "The god of slimes compressed its hunger into a line."
-			        THE copy of Goozma's signature attack (Hunt of the Old
-			        God): charge 70 t — the rainbow needle that pulses and
-			        sharpens — then FIRE: the beam SWEEPS in a cosine arc,
-			        the rainbow RUNS ALONG its length (a moving slice of the
-			        oil palette), the noise flows mouth→tip, the mouth blooms
-			        cubic. Damage in a CONE, exactly like the original.
-			'''
-	}
-
-	LaserArcoiris: {
-		DisplayName: The Rainbow Laser
-		Tooltip:
-			'''
-			        The copy of the Goozmites' RainbowLaser: curving laser-
-			        bullets (extraUpdates 8, a tiny curve every step) whose
-			        trail is a sprite stack — thin stretched core + wide
-			        halo — with the rainbow RUNNING along it (5 ticks of
-			        palette shift per segment). Fires fast.
-			'''
-	}
-
-	DestructorDePrismas: {
-		DisplayName: The Prism Destroyer
-		Tooltip:
-			'''
-			        The copy of the Divine Gargooptuar's PrismDestroyer:
-			        summons THREE prisms that orbit you (breathing radius
-			        up to 300, spin that FREEZES when firing) sweeping 5
-			        death rays in a fan; each ray collides in THREE
-			        shrinking segments (70/180/320 px) and all of them
-			        live in a rotating HSL rainbow.
-			'''
-	}
-
-	TruenoDeGelatina: {
-		DisplayName: The Gel Thunder
-		Tooltip:
-			'''
-			        The copy of Goozma's GooLightning: rainbow perlin
-			        discharges that jump to your cursor and strike by line.
-			        Double pass (the bolt + the vein) over the glow bell,
-			        fading like the original: (1 − t/30)^0.6.
-			'''
-	}
-
-	MasaCromatica: {
-		DisplayName: Chromatic Mass
-		Tooltip:
-			'''
-			        The copy of Goozma's crafting soul: the gelatinous
-			        rainbow material of its whole arsenal. The icon and
-			        name LIVE with the god's color clock (the Oil palette,
-			        60-tick cycle).
-			'''
-	}
-
 	// v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS (Task 74-a/b/c)
 	
 	BolsaDeAlasPrisma: {
@@ -2031,9 +1970,9 @@ Items: {
 		DisplayName: The Arsenal Chest
 		Tooltip:
 			'''
-				ALL TWENTY-THREE bags of the arsenal inside a single one:
+				ALL TWENTY-TWO bags of the arsenal inside a single one:
 				the Tester's, the Foundational, the Runic Suns'… every bag
-				up to the Old God's. Open it and deploy the one you need.
+				and the rest. Open it and deploy the one you need.
 				Right-click. Only delivers what you lack.
 			'''
 	}

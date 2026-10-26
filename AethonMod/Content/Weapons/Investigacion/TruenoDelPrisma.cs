@@ -62,8 +62,8 @@ namespace AethonMod.Content.Weapons.Investigacion
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             // EL BURST DEL JEFE: 1 rayo GRANDE al objetivo más cercano +
-            // hasta 2 pequeños a los vecinos (Goozma.cs:2179 — la letra
-            // del ataque BurstLightning).
+            // hasta 2 pequeños a los vecinos (el original del jefe — la
+            // letra del ataque BurstLightning).
             NPC objetivo = null;
             float mejor = 900f;
             for (int i = 0; i < Main.maxNPCs; i++)

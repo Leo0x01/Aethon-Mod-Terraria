@@ -9,7 +9,7 @@ namespace AethonMod
     {
         public static AethonMod Instance => ModContent.GetInstance<AethonMod>();
 
-        // v6.53.1 — EL REDIRECT DEL PUERTO DE GOOZMA SE RETIRÓ con la
+        // v6.53.1 — EL REDIRECT DEL PUERTO DEL DIOS SE RETIRÓ con la
         // separación (la letra: el material del jefe es SOLO para
         // investigación y jamás debe salir en un lanzamiento — la copia
         // verbatim fue BORRADA del repositorio entero en la v6.54.0 — la

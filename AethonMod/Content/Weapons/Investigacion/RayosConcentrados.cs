@@ -22,7 +22,7 @@ namespace AethonMod.Content.Weapons.Investigacion
     /// CPU (RayosConcentradosLib — tML 2026.08 no carga .fx crudos),
     /// con el fade en lente, el wobble sinusoidal, el núcleo
     /// blanco-caliente por umbral, las chispas de doble muestreo hacia
-    /// la punta y el ARCOÍRIS VIAJERO del ColorGoozma a lo largo del
+    /// la punta y el ARCOÍRIS VIAJERO del ColorPrisma a lo largo del
     /// haz — la rebanada móvil del dios.
     ///
     /// EL CICLO DEL JEFE, COMPLETO: clic → LA CARGA (45 t: los

@@ -15,7 +15,7 @@ namespace AethonMod.Content.Weapons.Investigacion
     /// tu propia version e investiga como las usa».
     ///
     /// LA INVESTIGACIÓN (Task 74-a): es el ataque StarSigns del
-    /// StellarGeliath — el esbirro estelar de Goozma: estrellas
+    /// StellarGeliath — el esbirro estelar del dios: estrellas
     /// (ConstellationStar, 34², dibujada EN CRUZ ×2 con wobble) que se
     /// REPELEN entre sí y orbitan al dueño; el sistema empareja las
     /// estrellas cercanas y traza LÍNEAS entre ellas (ConstellationLine,

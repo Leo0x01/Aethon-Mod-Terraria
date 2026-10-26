@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-gen_investigacion_v6540.py — v6.54.0 — LAS TEXTURAS DE LA INVESTIGACIÓN GOOZMA
+gen_investigacion_v6540.py — v6.54.0 — LAS TEXTURAS DE LA INVESTIGACIÓN EL DIOS
 RE-IMPLEMENTADAS 100 % CASA (procedurales, seed determinista).
 
-La letra del usuario (27/10): estudiar CÓMO usa Goozma sus texturas de
+La letra del usuario (27/10): estudiar CÓMO usa el dios sus texturas de
 efectos (FusionRay_0..3, SpaceTrail, LiquidTrail, Lightning ×2 pares,
 DarkSludge, Constellation, ColorMap, Glow, Noise_0..16, Space_0..1) y
 crear VERSIONES PROPIAS distintas — nada portado: todo nace de este
 script con las recetas documentadas por la investigación (worklog Task
 74-a/74-b/74-c). Los colores de la casa: MORADO y NEGRO (más el
-arcoíris del dios de ColorGoozma para lo prismático).
+arcoíris del dios de ColorPrisma para lo prismático).
 
 FAMILIAS GENERADAS (todo tileable donde el consumidor lo wrap-ea):
   · RayoConcentrado_0..3 — las 4 capas del haz (cuerpo fBm / bits de
