@@ -1,4 +1,4 @@
-# v6.54.1 — LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54) — .tmod LISTO (publicación pendiente del token GitHub, perdido en el wipe del sandbox del 26/10)
+# v6.54.1 — LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54) — PUBLICADA
 
 **La letra del usuario**: «hay errores» + el client.log de la v6.54.0 — tModLoader DESACTIVÓ el mod completo al cargarlo con TRES `AssetLoadException`: `Content\Items\Bolsas\BolsaDeAlasPrisma`, `BolsaInvestigacion` y `BolsaMaestra` **no existían** (las tres bolsas nuevas de la .54 nacieron SIN su .png).
 
@@ -10,7 +10,7 @@
 
 · **Verificación**: audit blindado 586 clases 0 faltantes · oráculo RECONSTRUIDO tras el wipe del sandbox (SDK 8.0.412 re-descargado — el tar.gz de my-project estaba TRUNCADO; tML 2026.08.3.0 re-descargado — el tml.zip también, md5 dac04c7a… exacto al histórico; verify.csproj regenerado con las 9 referencias) **0 errores / 0 warnings** · build REAL 0/0 · **.tmod v6.54.1 (6.246.465 B, md5 09b63f9de2a605aedbb99c7a813a58b5): 478 ENTRADAS (475 + las 3 rawimg nuevas), EOF EXACTO** · **las 3 texturas PÍXEL-IDÉNTICAS en el paquete** (decodificador rawimg propio: 12 B de cabecera + RGBA crudo 30×30, comparadas contra los PNG fuente — sanity check contra BolsaSombras publicada: idéntica) · headless: **Sandboxing → Adding → Configuring → Finalizing: Aethon, the Eternal Grimoire v6.54.1** → menú de mundos, **0 EXCEPCIONES** (lección de ruta: el enabled.json de este tML vive DENTRO de Mods/ y es un ARRAY simple `["AethonMod"]`, no el objeto `{"enabledMods":…}` de las versiones viejas) · paridad hjson ×3 con parser real: **1369==1369==1369** · iconos VLM SHIP.
 
-**PUBLICACIÓN**: pendiente — el token GitHub se PERDIÓ con el wipe del sandbox del 26/10 14:33 (el .env quedó solo con DATABASE_URL; el credential store vacío; el reflog enmascara los tokens). El .tmod VERIFICADO espera en /home/sync/AethonMod-v6.54.1.tmod (md5 09b63f9de2a605aedbb99c7a813a58b5) y en la carpeta del juego. Apenas el usuario repone el token: push + release + asset + verificación CDN (el flujo de la Task 67).
+**PUBLICADA**: release 424415888 + asset AethonMod.tmod 678559746 (6.246.465 B, uploaded), CDN verificado byte a byte + `/releases/latest` = v6.54.1 · respaldo /home/sync/AethonMod-v6.54.1.tmod + .tmod en la carpeta del juego.
 
 # v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS: TODO RE-ESCRITO 100 % CASA + LAS 15 ALAS + GOOZMAPORT BORRADO DEL REPO
 

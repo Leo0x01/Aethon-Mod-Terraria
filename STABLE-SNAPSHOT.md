@@ -19,9 +19,9 @@ carpeta muerta del audit era la causa de la reincidencia — ver CHANGES).
    [ ] Rayos Concentrados, Trueno del Prisma, Lodo de Esencia, Cetro de
    Constelaciones, Estela del Cosmos, Tinta Viva, las 15 alas.
 
-**Estado de la publicación**: .tmod v6.54.1 LISTO y verificado
-(6.246.465 B, md5 09b63f9de2a605aedbb99c7a813a58b5) — el push/release espera
-el NUEVO TOKEN GitHub (el anterior se perdió con el wipe del sandbox del 26/10).
+**Estado de la publicación**: PUBLICADA — release 424415888 + asset
+678559746 (6.246.465 B, md5 09b63f9de2a605aedbb99c7a813a58b5), CDN verificado
+byte a byte, `/releases/latest` = v6.54.1.
 
 # v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS — EL CHECKLIST
 
