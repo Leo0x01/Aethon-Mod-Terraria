@@ -1,3 +1,42 @@
+# v6.54.3 — LA REHABILITACIÓN VISUAL — EL CHECKLIST
+
+**Qué pasó** (la letra: «el arma de rayos concentrado se ve horrible… son
+todas una raya plana… las alas son las mismas solo que con color
+diferente… la Tinta Viva está vertical y debe estar horizontal»): TODAS
+las texturas de la investigación regeneradas con técnica profesional
+(fBm tileable con rango pleno, domain warping, metaballs, anisotropía);
+los 21 iconos rediseñados (15 alas = 15 anatomías distintas); el motor
+de alas con geometría por estilo; la Tinta Viva horizontal.
+
+1. **EL MOD CARGA**: [ ] activar AethonMod v6.54.3 — cero errores.
+2. **EL RAYO CONCENTRADO (EL ATAQUE DEFINITIVO)**: [ ] el haz ya NO es
+   una línea plana — se ve PLASMA: cuerpo ruidoso que fluye, chispas
+   que titilan hacia la punta, núcleo blanco-caliente y falda que
+   hierve alrededor; con el ciclo de carga de los soles rúnicos y la
+   aguja telegráfica.
+3. **EL TRUENO DEL PRISMA**: [ ] rayo ramificado CONTINUO (no línea
+   punteada): núcleo vivo con ramas que aparecen y desaparecen, halo
+   neón que acusa el zigzag.
+4. **LA TINTA VIVA HORIZONTAL**: [ ] el icono es un SPLAT alargado
+   HORIZONTAL con núcleo luminoso y goterones a los lados; [ ] al
+   equiparla, la cola que sigue al jugador fluye A LO LARGO (vetas
+   horizontales de tinta viva con el encaje de agujeros).
+5. **LAS 15 ALAS — QUINCE ANATOMÍAS**: [ ] equipar varias y comparar:
+   la Medianoche es MURCIÉLAGO (4 plumas anchas con garra + luna en el
+   icono), la Marioneta CUELGA (4 plumas larguísimas en garra cerrada),
+   el Vacío son SOLO 3 zarpas enormes tenues, la Nebulosa arrastra
+   vetas GRANDES y lentas, el Plasma son 7 plumas finas que corren,
+   la Aurora Ártica es una cortina de 7 plumas larguísimas — NINGUNA
+   se parece a otra; sus iconos del inventario son 15 diseños
+   distintos. [ ] La Aurora de Tinta original SIGUE IDÉNTICA.
+6. **LO DEMÁS DE LA INVESTIGACIÓN**: [ ] el Lodo de Esencia con
+   remolinos oscuros y puntos violetas que laten; [ ] el Cetro con su
+   área de viñeta estrellada; [ ] la Estela del Cosmos con su anillo
+   de interferencia; [ ] los iconos de las 4 armas ahora con contorno
+   y volumen (el Lodo sobre mango, el Cetro con constelación).
+7. **EL RESTO DEL MOD IGUAL**: [ ] 22 bolsas del Cofre, Primer Trazo
+   intacto, todo lo anterior sin cambios.
+
 # v6.54.2 — LA PURGA FINAL — EL CHECKLIST
 
 **Qué pasó** (la letra: «borra todo rastro de la palabra en el proyecto»):

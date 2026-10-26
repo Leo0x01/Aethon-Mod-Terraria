@@ -26,6 +26,14 @@ assets propios de la casa; las técnicas aprendidas están
 re-implementadas desde cero (ColorPrisma, RayoStrip, el Primer Trazo
 fusionado).
 
+## ✨ Novedades — v6.54.3: LA REHABILITACIÓN VISUAL (las texturas de la investigación, de verdad)
+
+- **LA QUEJA RESUELTA**: «el arma de rayos concentrado se ve horrible… son todas una raya plana» — las texturas de la v6.54.0 eran degradados planos sin técnica. Se re-estudiaron las referencias con medición cuantitativa (anisotropía, perfiles verticales, conteo de colores) y se reconstruyó TODO con un núcleo profesional: ruido de gradiente TILEABLE + fBm con rango pleno + domain warping (remolinos) + metaballs toroidales + anisotropía por celdas. El RAYO CONCENTRADO (el ataque definitivo) ahora tiene su plasma de verdad: cuerpo fBm anisotrópico warpeado, islas de chispas titilantes, perfil de brillo vivo y núcleo+falda que hierve; el TRUENO tiene núcleo continuo + 26 ramas serpenteantes (antes era una línea punteada — la causa: el arma muestrea solo la fila central y la textura tenía manchas).
+- **LA TINTA VIVA, HORIZONTAL**: «la textura está puesta de forma vertical cuando debe estar puesta de forma horizontal» — el efecto fluye ahora con metaballs estiradas y vetas A LO LARGO de la cola, y su icono es un SPLAT HORIZONTAL inequívoco (masa alargada con núcleo luminoso y goterones a los dos lados).
+- **LAS 15 ALAS: QUINCE ANATOMÍAS** — antes eran la MISMA silueta recolorizada («template + bucket fill»). Ahora cada ala declara su NÚMERO de plumas (3..7), sus ángulos de abanico, SU CURVA (la garra del murciélago, los hilos colgantes de la marioneta, el barrido de la tormenta), sus anchos de capa y su flujo de ruido; y sus iconos son 15 DISEÑOS distintos (murciélago con luna, agujero negro con anillo de fotones, cometa, cortina de aurora, cristales, marioneta, pétalos, llama rúnica…). La Aurora de Tinta original NO cambia ni un píxel (la promesa sigue en pie).
+- **LOS ICONOS DE ARMAS, ESTÁNDAR TERRARIA**: contorno de 1 px, 4 tonos con luz de arriba-izquierda, destellos — el cañón-emisor prismático, el prisma con zigzag, el cetro con constelación y el lodo SOBRE MANGO (ahora se lee como arma).
+- **LIMPIEZA**: Ruido_2/Ruido_3 (casi planos) regenerados; NubeRayo/NubeRayoBrillo (texturas muertas sin referencias) borradas.
+
 ## ✨ Novedades — v6.54.2: LA PURGA FINAL (cero rastros de la fuente)
 
 - **LA ORDEN EJECUTADA**: «borra todo rastro de la palabra en el proyecto» — las 5 armas copiadas del jefe del video (v6.52.2), sus 5 proyectiles y La Bolsa del Dios Antiguo se retiraron completas (El Cofre del Arsenal pasa de 23 a 22 bolsas; tooltip actualizado en los 3 idiomas). Las versiones 100 % casa (Rayos Concentrados, Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva y las 15 alas) siguen intactas en la Bolsa de la Investigación.

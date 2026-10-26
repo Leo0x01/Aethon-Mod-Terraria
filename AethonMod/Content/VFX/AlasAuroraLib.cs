@@ -82,8 +82,16 @@ namespace AethonMod.Content.VFX
         // === LAS CONSTANTES DEL ORIGINAL (calibradas por Calamity
         //     Overhaul — se respetan casi byte a byte) ===
 
-        /// <summary>Plumas por ala (el original: FeatherCount = 5).</summary>
+        /// <summary>Plumas por ala (el original: FeatherCount = 5) — el
+        /// VALOR HISTÓRICO; v6.54.3: cada estilo declara SU conteo
+        /// (EstiloAlas.Plumas, 3..7) y este queda como el tope de los
+        /// POZOS (7×2 alas = 14 plumas vivas).</summary>
         public const int PlumasPorAla = 5;
+
+        /// <summary>v6.54.3 — EL TOPE DE PLUMAS de cualquier estilo
+        /// (los pozos se dimensionan con esto; los estilos declaran
+        /// 3..7 — la Aurora mantiene sus 5 históricas).</summary>
+        private const int PlumasMax = 7;
 
         /// <summary>Pluma interior→exterior: ángulo PLEGADO (fan vertical).</summary>
         public const float OffPlegadoMin = 0.50f, OffPlegadoMax = 0.92f;
@@ -153,10 +161,11 @@ namespace AethonMod.Content.VFX
         private static VertexPositionColorTexture[] _verts = new VertexPositionColorTexture[1024];
 
         // LOS POZOS DE LA GEOMETRÍA (estáticos — la lección cero-GC de la casa:
-        // el original cachea TODO, nada nace por frame).
-        private static readonly Pluma[] _plumas = new Pluma[PlumasPorAla * 2];
-        private static readonly float[] _hues = new float[PlumasPorAla * 2];
-        private static readonly float[] _fundidos = new float[PlumasPorAla * 2];
+        // el original cachea TODO, nada nace por frame). v6.54.3: el tope
+        // es PlumasMax×2 (la Aurora usa 5×2 como siempre).
+        private static readonly Pluma[] _plumas = new Pluma[PlumasMax * 2];
+        private static readonly float[] _hues = new float[PlumasMax * 2];
+        private static readonly float[] _fundidos = new float[PlumasMax * 2];
 
         // ==================================================================
         //  EL COLOR PRISMA (el de la casa — el mismo algoritmo del
@@ -234,23 +243,19 @@ namespace AethonMod.Content.VFX
         /// CASA (v6.52.2): cada ala vive su lado con la inclinación base
         /// que abre el hueco central, y el par entero barre hacia atrás
         /// con la dirección de vista.
+        /// (v6.54.3: el overload sin estilo se retiró — TODO el dibujo
+        /// pasa por el estilo; la Aurora lleva sus valores históricos.)
         /// </summary>
-        private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
-            float grav, int direccion, int lado, float time)
-            => ConstruirPluma(ancla, i, spread, flap, grav, direccion, lado, time,
-                AlasCatalogo.De(AlasCatalogo.Aurora));
-
-        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO: la forma del abanico
-        /// (largos, semianchos, inclinación y barrido) vive en el ala.</summary>
         private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
             float grav, int direccion, int lado, float time, in EstiloAlas estilo)
         {
-            float t = i / (float)(PlumasPorAla - 1);
+            int n = estilo.Plumas < 2 ? 2 : (estilo.Plumas > PlumasMax ? PlumasMax : estilo.Plumas);
+            float t = i / (float)(n - 1);
 
-            // EL ABANICO: plegado estrecho ↔ abierto horizontal (la
-            // interpolación del original, respetada).
-            float offPlegado = MathHelper.Lerp(OffPlegadoMin, OffPlegadoMax, t);
-            float offAbierto = MathHelper.Lerp(OffAbiertoMin, OffAbiertoMax, t);
+            // EL ABANICO: plegado estrecho ↔ abierto horizontal (los
+            // ÁNGULOS del ala — la anatomía propia de v6.54.3).
+            float offPlegado = MathHelper.Lerp(estilo.PlegadoMin, estilo.PlegadoMax, t);
+            float offAbierto = MathHelper.Lerp(estilo.AbiertoMin, estilo.AbiertoMax, t);
             float off = MathHelper.Lerp(offPlegado, offAbierto, spread);
 
             // LA ONDA DE ALETEO: de la pluma interior a la exterior (el
@@ -279,7 +284,10 @@ namespace AethonMod.Content.VFX
             Pluma p;
             p.RaizMas = ancla + perp * raizMedio;
             p.RaizMenos = ancla - perp * raizMedio;
-            Vector2 punta = ancla + dir * largo;
+            // LA PUNTA: v6.54.3 — LA CURVA propia del ala (la garra): la
+            // punta se desplaza a lo largo de perp proporcional a su
+            // largo — el murciélago curva fuerte, el prisma es recto.
+            Vector2 punta = ancla + dir * largo + perp * (estilo.Curva * largo);
             p.PuntaMas = punta + perp * puntaMedio;
             p.PuntaMenos = punta - perp * puntaMedio;
             p.Largo = largo;
@@ -297,30 +305,26 @@ namespace AethonMod.Content.VFX
         /// triángulos compartiendo vértices — cero solapes, cero juntas
         /// (la lección de RayoStrip). `capa` elige el ancho y la
         /// intensidad: 0 núcleo · 1 cuerpo · 2 halo.
+        /// (v6.54.3: el overload sin estilo se retiró — TODO pasa por el
+        /// estilo; los ANCHOS de capa ahora son del ala.)
         /// </summary>
         private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues,
-            float[] fundidos, float mezclaDia, int capa)
-            => EmitirCapa(nVerts, plumas, hues, fundidos, mezclaDia, capa,
-                AlasCatalogo.De(AlasCatalogo.Aurora));
-
-        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO (las intensidades de
-        /// las capas viven en el ala).</summary>
-        private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues,
-            float[] fundidos, float mezclaDia, int capa, in EstiloAlas estilo)
+            float[] fundidos, float mezclaDia, int capa, in EstiloAlas estilo, int n)
         {
             // LAS COLUMNAS (la gaussiana de RayoStrip adaptada a la pluma):
             // el núcleo estrecho casi blanco, el cuerpo medio, el halo
             // ancho que susurra — la exp(−cruz²·k) del shader hecha
-            // tres anchos de geometría.
+            // tres anchos de geometría. v6.54.3: LOS ANCHOS VIVEN EN EL
+            // ESTILO (la pluma del murciélago es ancha, la del rayo fina).
             float frac, inten;
             switch (capa)
             {
-                case 0: frac = 0.30f; inten = estilo.NucleoInten; break;   // el eje blanco-caliente
-                case 1: frac = 0.62f; inten = estilo.CuerpoInten; break;   // el cuerpo del prisma
-                default: frac = 1f; inten = estilo.HaloInten; break;       // el halo que muere suave
+                case 0: frac = estilo.NucleoFrac; inten = estilo.NucleoInten; break;   // el eje blanco-caliente
+                case 1: frac = estilo.CuerpoFrac; inten = estilo.CuerpoInten; break;   // el cuerpo del prisma
+                default: frac = 1f; inten = estilo.HaloInten; break;                   // el halo que muere suave
             }
 
-            for (int i = 0; i < plumas.Length; i++)
+            for (int i = 0; i < n; i++)
             {
                 ref Pluma p = ref plumas[i];
                 if (nVerts + 6 > _verts.Length)
@@ -368,34 +372,37 @@ namespace AethonMod.Content.VFX
             return nVerts;
         }
 
-        /// <summary>La versión texturizada: las UV del ruido FLUYEN por la pluma.</summary>
+        /// <summary>La versión texturizada: las UV del ruido FLUYEN por la
+        /// pluma. (v6.54.3: el overload sin estilo se retiró; la ESCALA y
+        /// el FLUJO del ruido viven en el ala.)</summary>
         private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues,
-            float mezclaDia, float time, int pasada, float fold)
-            => EmitirCapaRuido(nVerts, plumas, hues, mezclaDia, time, pasada, fold,
-                AlasCatalogo.De(AlasCatalogo.Aurora));
-
-        /// <summary>v6.54.0 — LA VERSIÓN CON ESTILO (la intensidad del
-        /// ruido vive en el ala — el «caudal» de su flujo).</summary>
-        private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues,
-            float mezclaDia, float time, int pasada, float fold, in EstiloAlas estilo)
+            float mezclaDia, float time, int pasada, float fold, in EstiloAlas estilo, int n)
         {
             // LAS DOS FRECUENCIAS DEL ORIGINAL (f1 lenta que fluye HACIA
             // la punta, f2 fina que retrocede — el pliegue doble de la
             // aurora). El fold PLEGADO frena el flujo (la tinta quieta).
+            // v6.54.3: LA ESCALA y el FLUJO viven en el estilo (la
+            // nebulosa arrastra vetas grandes lentas; el plasma corre).
             float escalaU, velU, escalaV, velV, inten;
             if (pasada == 0)
             {
-                escalaU = 1.7f; velU = 0.20f - fold * 0.08f; escalaV = 0.6f; velV = 0.31f;
+                escalaU = 1.7f * estilo.RuidoEscala;
+                velU = (0.20f - fold * 0.08f) * estilo.RuidoFlujo;
+                escalaV = 0.6f * estilo.RuidoEscala;
+                velV = 0.31f * estilo.RuidoFlujo;
                 inten = 0.46f;
             }
             else
             {
-                escalaU = 3.4f; velU = -0.12f; escalaV = 1.15f; velV = 0f;
+                escalaU = 3.4f * estilo.RuidoEscala;
+                velU = -0.12f * estilo.RuidoFlujo;
+                escalaV = 1.15f * estilo.RuidoEscala;
+                velV = 0f;
                 inten = 0.30f;
             }
             inten *= estilo.RuidoInten;
 
-            for (int i = 0; i < plumas.Length; i++)
+            for (int i = 0; i < n; i++)
             {
                 ref Pluma p = ref plumas[i];
                 if (nVerts + 6 > _verts.Length)
@@ -498,14 +505,20 @@ namespace AethonMod.Content.VFX
                     float[] fundidos = _fundidos;
                     float hueBase = flap * estilo.HueTiempo;
 
+                    // v6.54.3 — EL CONTEO VIVO: las plumas del estilo
+                    // (3..7; la Aurora mantiene sus 5 históricas).
+                    int nAla = estilo.Plumas < 2 ? 2
+                        : (estilo.Plumas > PlumasMax ? PlumasMax : estilo.Plumas);
+
                     int k = 0;
                     for (int lado = -1; lado <= 1; lado += 2)
                     {
-                        // v6.52.2 — EL ANCLA PROPIA DE CADA ALA: ±5 px hacia
-                        // su lado (la raíz separada del par — junto con la
-                        // inclinación base, lo que hace que se LEAN DOS alas).
-                        Vector2 ancla = anclaBase + new Vector2(lado * 5f, 0f);
-                        for (int i = 0; i < PlumasPorAla; i++)
+                        // v6.52.2 — EL ANCLA PROPIA DE CADA ALA: la
+                        // separación del par vive en el estilo (v6.54.3
+                        // — la raíz separada es lo que hace que se LEAN
+                        // DOS alas).
+                        Vector2 ancla = anclaBase + new Vector2(lado * estilo.AnclajeSep, 0f);
+                        for (int i = 0; i < nAla; i++)
                         {
                             plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav,
                                 direccion, lado, time, estilo);
@@ -528,16 +541,19 @@ namespace AethonMod.Content.VFX
                     // === 1. LAS TRES CAPAS DE GEOMETRÍA (núcleo + cuerpo + halo) ===
                     int n = 0;
                     for (int capa = 0; capa < 3; capa++)
-                        n = EmitirCapa(n, plumas, hues, fundidos, mezclaDia, capa, estilo);
+                        n = EmitirCapa(n, plumas, hues, fundidos, mezclaDia, capa, estilo,
+                            nAla * 2);
                     if (n >= 3)
                         Volcar(gd, _fxPlano, n, false);
 
                     // === 2. LAS DOS PASADAS DE RUIDO (el pliegue de la aurora
                     //     FLUYENDO por cada pluma — el corazón del original) ===
-                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 0, fold, estilo);
+                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 0, fold, estilo,
+                        nAla * 2);
                     if (n >= 3)
                         Volcar(gd, _fxTextura, n, true);
-                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 1, fold, estilo);
+                    n = EmitirCapaRuido(0, plumas, hues, mezclaDia, time, 1, fold, estilo,
+                        nAla * 2);
                     if (n >= 3)
                         Volcar(gd, _fxTextura, n, true);
                 }
