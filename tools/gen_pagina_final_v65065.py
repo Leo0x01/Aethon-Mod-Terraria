@@ -51,7 +51,7 @@ for y in range(4, 7):
     for x in (13, 14, 15, 16):
         set_px(y, x, ROJO)
 set_px(5, 14, ROJO_CLARO, 230)   # el brillo de la córnea
-# las pestañas de sombra (dos picos negros arriba — la mirada de Pride)
+# las pestañas de sombra (dos picos negros arriba — la mirada de la sombra)
 set_px(1, 9, NEGRO); set_px(2, 8, NEGRO)
 set_px(1, 20, NEGRO); set_px(2, 21, NEGRO)
 

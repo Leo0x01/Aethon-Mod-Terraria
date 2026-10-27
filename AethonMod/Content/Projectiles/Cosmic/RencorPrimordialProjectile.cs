@@ -22,10 +22,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   FASE CARGA (180 ticks — los 3 s EXACTOS del ritual):
     ///     EL CÍRCULO DE TRANSMUTACIÓN — 10 runas doradas CW + 6 violetas
     ///     CCW encendiéndose UNA A UNA + LA ESTRELLA de 5 puntas (el
-    ///     homenaje FMA) + la bruma espiralando HACIA dentro + las ascuas
+    ///     homenaje al anime de referencia) + la bruma espiralando HACIA dentro + las ascuas
     ///     orbitando + el Telegraph carmesí del haz que va a venir.
     ///
-    ///   FASE HAZ (90 ticks — "The Angy Beam"):
+    ///   FASE HAZ (90 ticks — el haz furioso):
     ///     RiftLib.Tear con paleta carmesí-ámbar: UN SOLO QUAD continuo de
     ///     880 px × 44 que perfora TODO. Daño manual por línea (la escuela
     ///     A): golpe de apertura ×1.0 + DoT ×0.30 cada 5 ticks.
@@ -69,7 +69,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private bool _tileHallado;
         private Vector2 _puntoTile;    // dónde toca el haz la superficie
 
-        // === LA PALETA DEL RENCOR (v6.30 — MEDIDA del sprite real: "The Angy
+        // === LA PALETA DEL RENCOR (v6.30 — MEDIDA del sprite real: el haz
         //     Beam" = NÚCLEO BLANCO PURO + bordes ROSA-MAGENTA (204,77,112)) ===
         private static readonly Color[] PaletaRencor =
         {
@@ -597,7 +597,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 0.35f * charge, 0.8f);
         }
 
-        /// <summary>EL CÍRCULO DE TRANSMUTACIÓN (el homenaje FMA de la casa).</summary>
+        /// <summary>EL CÍRCULO DE TRANSMUTACIÓN (el homenaje al anime de referencia de la casa).</summary>
         private void DibujarCirculo(Vector2 center, float time, int seed,
             float charge, bool enCarga, float vida)
         {

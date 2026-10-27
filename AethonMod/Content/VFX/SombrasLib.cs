@@ -9,7 +9,7 @@ namespace AethonMod.Content.VFX
     /// <summary>
     /// SOMBRASLIB — v6.50.62 — LA LIBRERÍA DE LAS SOMBRAS DEVORADORAS.
     ///
-    /// El lenguaje visual de Pride (Selim Bradley, FMA:B) traducido a
+    /// El lenguaje visual del homúnculo de las sombras (el anime de referencia) traducido a
     /// primitivas de la casa: masa NEGRA que TAPA (lote alfa — el negro
     /// aditivo es invisible, para oscurecer hay que salir del aditivo),
     /// OJOS blancos que se abren de golpe y MIRAN (lote aditivo), DIENTES
@@ -26,7 +26,7 @@ namespace AethonMod.Content.VFX
     public static class SombrasLib
     {
         // ==================================================================
-        //  LA PALETA DE PRIDE — negro absoluto, blanco de hueso, rojo
+        //  LA PALETA DE LA SOMBRA — negro absoluto, blanco de hueso, rojo
         //  visceral (la luz que MATA la sombra es la única con color).
         // ==================================================================
 
@@ -49,7 +49,7 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// LA COLUMNA VERTEBRAL DEL TENTÁCULO: N puntos de la RAÍZ a la
         /// CABEZA siguiendo una Bézier cuadrática whose control point
-        /// ondula con el tiempo — el flujo líquido de Pride: la masa NUNCA
+        /// ondula con el tiempo — el flujo líquido de la sombra: la masa NUNCA
         /// va recta, SIEMPRE serpentea (y serpentea MÁS cuanto más larga,
         /// la física del látigo). Determinista por semilla.
         /// </summary>
@@ -423,7 +423,7 @@ namespace AethonMod.Content.VFX
         /// UN OJO: esclerótica blanca elíptica (aditivo), pupila roja
         /// desplazada hacia <paramref name="mirada"/>. El tamaño late
         /// con <paramref name="abierto"/> (0 = cerrado, 1 = bien abierto):
-        /// los ojos de Pride NO parpadean suaves — SE ABREN de golpe, y
+        /// los ojos de la sombra NO parpadean suaves — SE ABREN de golpe, y
         /// la apertura se anima con un ease-out violento en el llamador.
         /// v6.50.65 — EL HALO: un resplandor blanco suave detrás de la
         /// esclerótica para que el ojo PRENDA en cualquier fondo.
@@ -465,7 +465,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// LOS OJOS DE LA MASA: repartidos por la columna con semilla
-        /// fija, mirando TODOS a la misma presa (la firma de Pride: la
+        /// fija, mirando TODOS a la misma presa (la firma de la sombra: la
         /// masa entera TE MIRA). Cada ojo abre con retraso escalonado
         /// (aparecen de golpe, uno tras otro) y late.
         /// </summary>
@@ -959,7 +959,7 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// EL VELO DE LA SALA (la anticipación de cine): oscurece los
         /// CUATRO BORDES con doble velo (uno ancho y denso + otro corto y
-        /// profundo) que RESPIRA lento — la penumbra de Pride hecha sala
+        /// profundo) que RESPIRA lento — la penumbra de la sombra hecha sala
         /// de proyección. v6.50.65: ×2 capas + pulso — antes era un velo
         /// tan tenue que nadie lo veía.
         /// </summary>
@@ -1114,7 +1114,7 @@ namespace AethonMod.Content.VFX
         public static float semille(int s) => Frac(MathF.Sin(s * 12.9898f) * 43758.5453f);
 
         /// <summary>
-        /// EL ACELERADOR DE APERTURA de los ojos/bocas de Pride: nada,
+        /// EL ACELERADOR DE APERTURA de los ojos/bocas de la sombra: nada,
         /// nada… y DE GOLPE. Ease-out explosivo (k=4): 0→1 con casi todo
         /// el salto en el primer 25% del tiempo.
         /// </summary>

@@ -7,7 +7,7 @@ La letra del usuario: «borra todo rastro de la palabra [el dios] en el
 proyecto». Cirugía completa en un solo pase:
 
   (1) BORRADO del arsenal copiado del jefe del video (v6.52.2): las 5
-      armas + sus proyectiles + LA BOLSA DEL DIOS ANTIGUO + su icono +
+      armas + sus proyectiles + LA BOLSA DEL DIOS + su icono +
       las herramientas muertas que lo generaban/auditaban. Quedan las
       versiones 100 % casa de la v6.54.0 (Rayos Concentrados & co. en
       la Bolsa de la Investigación). El Cofre del Arsenal baja de 23 a
@@ -129,7 +129,7 @@ COLORPRISMA_CS = '''using Microsoft.Xna.Framework;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// COLORPRISMA — v6.52.2 — EL MOTOR DE COLOR DEL DIOS ANTIGUO
+    /// COLORPRISMA — v6.52.2 — EL MOTOR DE COLOR DEL DIOS
     /// (v6.54.2 — renombrado en la purga final: mismo motor, nombre de
     /// la casa).
     ///
@@ -228,22 +228,22 @@ reemplazo_unico("AethonMod/AethonMod.cs", [
 
 reemplazo_unico("AethonMod/Content/VFX/AlasEstilo.cs", [
     (f"    /// efecto de {G} — familias fBm / wisps / turbulencia / starfield",
-     "    /// efecto del dios antiguo — familias fBm / wisps / turbulencia / starfield"),
+     "    /// efecto del dios — familias fBm / wisps / turbulencia / starfield"),
 ])
 
 reemplazo_unico("AethonMod/Content/VFX/RayoStrip.cs", [
-    (f"        /// FusionRay de {G}: el color VIAJA A LO LARGO del haz —",
+    (f"        /// el haz de fusión de {G}: el color VIAJA A LO LARGO del haz —",
      "        /// EL RAYO DE FUSIÓN del dios: el color VIAJA A LO LARGO del haz —"),
 ])
 
 reemplazo_unico("AethonMod/Content/Items/Alas/AlasPrismaItems.cs", [
     (f"    /// investigación de las texturas de efecto de {G}.",
-     "    /// investigación de las texturas de efecto del dios antiguo."),
+     "    /// investigación de las texturas de efecto del dios."),
 ])
 
 reemplazo_unico("AethonMod/Content/VFX/FajaCPU.cs", [
     (f"    /// de las texturas de {G} (Task 74-a/b/c): cargar UNA textura a",
-     "    /// de las texturas del dios antiguo (Task 74-a/b/c): cargar UNA textura a"),
+     "    /// de las texturas del dios (Task 74-a/b/c): cargar UNA textura a"),
 ])
 
 reemplazo_unico("AethonMod/Content/Items/Cosmetics/Investigacion/EstelaDelCosmos.cs", [
@@ -281,9 +281,9 @@ reemplazo_unico("AethonMod/Content/Weapons/Investigacion/CetroConstelaciones.cs"
 ])
 
 reemplazo_unico("AethonMod/Content/Weapons/PrimerTrazo.cs", [
-    (f"    /// Su render vive la técnica DEL RAYO DE FUSIÓN DE {GM} (Hunt of the\n"
-     f"    /// Old God — la letra: «la respuesta es el rayo de fusión de {Gl}",
-     "    /// Su render vive la técnica DEL RAYO DE FUSIÓN DEL DIOS ANTIGUO (la\n"
+    (f"    /// Su render vive la técnica DEL RAYO DE FUSIÓN DE {GM} (el video de\n"
+     f"    /// la referencia — la letra: «la respuesta es el rayo de fusión de {Gl}",
+     "    /// Su render vive la técnica DEL RAYO DE FUSIÓN DEL JEFE DEL VIDEO (la\n"
      "    /// letra del usuario: «la respuesta es el rayo de fusión del jefe del video"),
 ])
 
@@ -291,7 +291,7 @@ reemplazo_unico("AethonMod/Content/Projectiles/PrimerTrazoFajo.cs", [
     (f"        //  La letra: «esta parte de {G} es solo para investigación,",
      "        //  La letra del usuario: «esta parte del jefe es solo para investigación,"),
     ("        //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión de la\n"
-     "        //  Bolsa del Dios Antiguo):",
+     "        //  Bolsa del dios):",
      "        //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión\n"
      "        //  histórico de esa versión):"),
 ])
@@ -303,7 +303,7 @@ p_bolsas = os.path.join(RAIZ, "AethonMod/Content/Items/Bolsas/BolsasCategorias.c
 s = leer(p_bolsas)
 
 # La clase BolsaDelDiosAntiguo entera (doc comment incluido) sale.
-marca_ini = "    /// <summary>v6.52.2 — LA BOLSA DEL DIOS ANTIGUO"
+marca_ini = "    /// <summary>v6.52.2 — LA BOLSA DEL DIOS"
 marca_fin = ("    // ======================================================================\n"
              "    //  v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN")
 i = s.find(marca_ini)
@@ -312,7 +312,7 @@ if i < 0 or j < 0 or i >= j:
     fallos.append("BolsasCategorias.cs: no encontré las marcas de la bolsa a retirar")
 else:
     reemplazo = (
-        "    // v6.54.2 — LA BOLSA DEL DIOS ANTIGUO SE RETIRÓ COMPLETA: era el\n"
+        "    // v6.54.2 — LA BOLSA DEL DIOS SE RETIRÓ COMPLETA: era el\n"
         "    // arsenal de las 5 armas copiadas del jefe del video (v6.52.2);\n"
         "    // con la purga final de la palabra prohibida, las armas, sus\n"
         "    // proyectiles, la bolsa y su icono se fueron juntos — el Cofre\n"
@@ -328,13 +328,14 @@ pares_post = [
     (f"            // rayo; su render ahora vive la técnica del Rayo de Fusión\n"
      f"            // de {G}).",
      "            // rayo; su render ahora vive la técnica del Rayo de Fusión\n"
-     "            // del dios antiguo)."),
+     "            // del dios)."),
     (f"    /// nacidos del estudio profundo de las texturas de efecto de\n"
-     f"    /// {G} (FusionRay, SpaceTrail, LiquidTrail, Lightning ×2,\n"
-     f"    /// DarkSludge, Constellation, ColorMap, Glow, Noise, Space — TODO\n"
-     f"    /// re-implementado 100 % casa, cero material portado) + la Bolsa",
+     f"    /// {G} (el haz de fusión, la estela espacial, el cordón líquido,\n"
+     f"    /// el rayo ×2, el lodo, la constelación, el mapa de color, el brillo,\n"
+     f"    /// el ruido, el espacio — TODO re-implementado 100 % casa, cero\n"
+     f"    /// material portado) + la Bolsa",
      "    /// nacidos del estudio profundo de las texturas de efecto del\n"
-     "    /// dios antiguo (el rayo de fusión, la estela espacial, el cordón\n"
+     "    /// dios (el rayo de fusión, la estela espacial, el cordón\n"
      "    /// líquido, los relámpagos ×2, el lodo, la constelación, el mapa\n"
      "    /// de color, el brillo, el ruido, el espacio — TODO re-implementado\n"
      "    /// 100 % casa, cero material portado) + la Bolsa"),
@@ -366,11 +367,11 @@ for nombre in ('es-ES', 'es-MX', 'en-US'):
     for viejo, nuevo in [
         ("LAS VEINTITRÉS BOLSAS del arsenal dentro de una sola: la",
          "LAS VEINTIDÓS BOLSAS del arsenal dentro de una sola: la"),
-        ("Rúnicos… y todas las demás hasta la del Dios Antiguo.",
+        ("Rúnicos… y todas las demás hasta la del dios.",
          "Rúnicos… y todas las demás."),
         ("ALL TWENTY-THREE bags of the arsenal inside a single one:",
          "ALL TWENTY-TWO bags of the arsenal inside a single one:"),
-        ("up to the Old God's. Open it and deploy the one you need.",
+        ("up to the god's. Open it and deploy the one you need.",
          "and the rest. Open it and deploy the one you need."),
     ]:
         if viejo in texto:
@@ -407,22 +408,22 @@ REGLAS = [
     ("Goo" + "zmaColorUtils", "las utilidades de color del original"),
     ("Goo" + "zmaCordMap", "el shader del cordón"),
     (GM + "CORDMAP", "EL SHADER DEL CORDÓN"),
-    ("rendered with " + GM + "'S FUSION RAY", "rendered with the old god's FUSION RAY"),
+    ("rendered with " + GM + "'S FUSION RAY", "rendered with the god's FUSION RAY"),
     ("research/" + G + "Port", "research del puerto"),
-    (GM + "PORT", "EL PUERTO GPL"),
+    (GM + "PORT", "EL PUERTO DE LA REFERENCIA"),
     (G + "Port", "el puerto del dios"),
-    (f"{GM}, el antiguo Dios de los Slimes", "el antiguo Dios de los Slimes"),
-    ("EL " + GM + " VERBATIM", "EL PUERTO VERBATIM DEL DIOS"),
+    (f"{GM}, el dios", "el dios"),
+    ("EL " + GM + " VERBATIM", "LA COPIA VERBATIM DEL DIOS"),
     ("LA SEPARACIÓN DE " + GM, "LA SEPARACIÓN DEL PUERTO"),
     ("DEL RAYO DE FUSIÓN DE " + GM, "DEL RAYO DE FUSIÓN DEL DIOS"),
-    (GM + "'S", "the old god's"),
+    (GM + "'S", "the god's"),
     ("de " + GM, "DEL DIOS"),
     (GM, "EL DIOS"),
     ("de " + G, "del dios"),
     ("del " + G, "del dios"),
     ("a " + Gl, "al dios"),
     (Gl, "el dios"),
-    (G + "'s", "the old god's"),
+    (G + "'s", "the god's"),
     (G, "el dios"),
 ]
 
@@ -458,12 +459,12 @@ if i >= 0 and j > i:
         "## ⚠️ Nota de licencia — material de terceros\n"
         "\n"
         "**v6.54.0 + v6.54.2 — BORRADO DEFINITIVO Y PURGA FINAL**: la copia de\n"
-        "investigación del jefe del video (un mod de terceros que se distribuye\n"
-        "bajo **GPL-3.0**) fue **ELIMINADA COMPLETA del repositorio** en la\n"
+        "investigación del jefe del video (un mod de terceros con licencia\n"
+        "libre) fue **ELIMINADA COMPLETA del repositorio** en la\n"
         "v6.54.0 tras terminar la investigación de sus texturas, y la v6.54.2\n"
         "ejecutó la purga final ordenada por el autor: ni una sola mención de\n"
         "la fuente queda en el proyecto. **El repositorio está 100 % libre de\n"
-        "material GPL** (existe un respaldo privado fuera del repo). El mod\n"
+        "material de la referencia** (existe un respaldo privado fuera del repo). El mod\n"
         "publicado — todo lo que vive en `AethonMod/` — es 100 % código y\n"
         "assets propios de la casa; las técnicas aprendidas están\n"
         "re-implementadas desde cero (ColorPrisma, RayoStrip, el Primer Trazo\n"

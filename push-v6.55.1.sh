@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-# push-v6.55.0.sh — LA ENTREGA EN 1 COMANDO (v6.55.0)
+# push-v6.55.1.sh — LA ENTREGA EN 1 COMANDO (v6.55.0)
 #
-# Uso:      GITHUB_TOKEN=github_pat_XXXX ./push-v6.55.0.sh
+# Uso:      GITHUB_TOKEN=github_pat_XXXX ./push-v6.55.1.sh
 #
 # Hace TODO: (0) verifica el .tmod (md5 86387e1a…) y guarda el token en los
 # 2 sitios de la casa; (1) configura el remote tokenizado y pushea main +
@@ -16,13 +16,13 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 REPO=Leo0x01/Aethon-Mod-Terraria
-TAG=v6.55.0
-TMOD=/home/sync/AethonMod-v6.55.0.tmod
-NOTAS=/home/sync/RELEASE_NOTES_v6.55.0.md
-MD5_ESPERADO=86387e1a460b1b868caa7aa01778a87e
+TAG=v6.55.1
+TMOD=/home/sync/AethonMod-v6.55.1.tmod
+NOTAS=/home/sync/RELEASE_NOTES_v6.55.1.md
+MD5_ESPERADO=545febe2946099b85c9cac3d8eed11f7
 LIMPIO="https://github.com/${REPO}.git"
 TITULO="${TAG} — LA CURA DE LOS PICOS (LA CAUSA RAÍZ) + EL RAYO CONCENTRADO II 100 % CASA + LAS ALAS VECTORIALES + LA PURGA TOTAL"
-TOKEN="${GITHUB_TOKEN:?Uso: GITHUB_TOKEN=github_pat_XXXX ./push-v6.55.0.sh}"
+TOKEN="${GITHUB_TOKEN:?Uso: GITHUB_TOKEN=github_pat_XXXX ./push-v6.55.1.sh}"
 
 echo "== (0/5) verificación previa"
 [ -f "${TMOD}" ] || { echo "FALTA ${TMOD}" >&2; exit 1; }
@@ -54,8 +54,8 @@ except Exception:
     body = ''
 if not body:  # fallback: extraer la entrada del CHANGES.md
     txt = open('CHANGES.md', encoding='utf-8').read()
-    m = re.search(r'# v6\.55\.0 — (.+?)(?=\n# v6\.54)', txt, re.S)
-    body = (m.group(1) if m else 'v6.55.0').strip()
+    m = re.search(r'# v6\.55\.1 — (.+?)(?=\n# v6\.55\.0)', txt, re.S)
+    body = (m.group(1) if m else 'v6.55.1').strip()
 print(body[:120000])  # GitHub: máx ~125k caracteres por body
 PY
 )"

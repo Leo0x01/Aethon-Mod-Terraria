@@ -11,7 +11,7 @@ using AethonMod.Content.Items.Cosmetics;
 namespace AethonMod.Content.Items.Bolsas
 {
     // ======================================================================
-    //  v6.29 — LAS BOLSAS POR CATEGORÍA (v6.50.3 — doc-rot: son DIECISÉIS)
+    //  v6.29 — LAS BOLSAS POR CATEGORÍA (v6.55.0: son VEINTICUATRO)
     //
     //  Petición del usuario: "crea varias bolsas para todas las armas que me
     //  tienes que dar no solo una y separalas por categorías, una categoría
@@ -615,7 +615,8 @@ namespace AethonMod.Content.Items.Bolsas
     }
 
     /// <summary>19 — LAS FAUCES DEL GRIMORIO (v6.50.63): LAS CUATRO ARMAS DE
-    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B). La
+    /// LAS SOMBRAS DEVORADORAS (el homenaje al homúnculo de las sombras del
+    /// anime de referencia). La
     /// lección anti-recurrencia de la v6.14.2 (cada arma nueva debe
     /// registrarse en el kit de entrega — el jugador NUNCA vuelve a
     /// quedarse sin sus armas). v6.50.71 — LOS ÚTILES DEL ESCRIBA (la
@@ -788,7 +789,7 @@ namespace AethonMod.Content.Items.Bolsas
             // dentro de la investigación retirada — ahora vive por su
             // cuenta: aquí y en la entrega directa del kit)
             l.Add((ModContent.ItemType<BolsaDeAlasPrisma>(), 1));
-            // v6.54.6 — EL VEREDICTO DE AETHON REFORMADO (la bolsa 23 del cofre:
+            // v6.54.6 — EL VEREDICTO DE AETHON REFORMADO (la bolsa 24 del cofre:
             // ahora LAS CINCO SENTENCIAS con sus siete capas)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
             return l;

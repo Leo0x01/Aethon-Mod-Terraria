@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # =============================================================================
-#  gen_slifer_sprites_v6533.py — LA RECONSTRUCCIÓN DEL DRAGÓN DEL CIELO
+#  gen_dragonsprites_v6533.py — LA RECONSTRUCCIÓN DEL DRAGÓN DEL CIELO
 #
 #  La petición del usuario (v6.50.33): «mejor rediseña al jefe completo,
-#  podrias crear sprite segmentados basados en slifer, por ejemplo puedes
-#  usar Devourer of Gods de Calamity sprites por segmento y rediseñarlos
+#  podrias crear sprite segmentados para el dragón, por ejemplo puedes
+#  usar el patrón de sprites por segmento del género y rediseñarlos
 #  cambiando el color y el arte». El enfoque de código puro de la v6.50.32
 #  no convenció («no se parece en nada») — los SPRITES POR SEGMENTO son
-#  ahora la vía (el patrón del DoG: cada segmento del gusano lleva su
+#  ahora la vía (el patrón del género: cada segmento del gusano lleva su
 #  propio sprite).
 #
 #  Este script genera TODO el set con un motor de pintura procedural
 #  (PIL + supersampling ×3 + AO por blur + rim light + contorno):
 #
-#    AethonSierpeCabeza.png    — el cráneo de Slifer (240×150, mira a la
+#    AethonSierpeCabeza.png    — el cráneo del dragón del cielo (240×150, mira a la
 #                                DERECHA): máscara plateada del hocico,
 #                                colmillos sable, corona de 5 llamas, ojo
 #                                dorado, gema azul, franja de garganta.
@@ -238,7 +238,7 @@ def posterizar(mask, niveles=(0.34, 0.62, 0.85)):
 
 
 # ----------------------------------------------------------------------------
-#  1. LA CABEZA — el cráneo de Slifer (mira a la DERECHA)
+#  1. LA CABEZA — el cráneo del dragón (mira a la DERECHA)
 # ----------------------------------------------------------------------------
 def gen_cabeza():
     W, H = 240, 152
@@ -260,7 +260,7 @@ def gen_cabeza():
 
     # ---- LA SILUETA SUPERIOR (cráneo + hocico), rojo base — v2: la
     #      nuca angular, la ceja en GANCHO y el hocico plano (el veredicto
-    #      VLM: nada de forma de globo; el perfil de Slifer es un PUÑAL)
+    #      VLM: nada de forma de globo; el perfil del dragón es un PUÑAL)
     # la nuca angular — v3: la MORDIDA DE AJUSTE (el cuello se ESTRECHA
     # hacia atrás en punta redondeada: la primera vértebra lo solapa y la
     # unión lee «cuello», no «corte de sierra»)
@@ -529,7 +529,7 @@ def gen_vertebra():
     m_fin = Image.new("L", (W * SS, H * SS), 0)
     m_belly = Image.new("L", (W * SS, H * SS), 0)
 
-    # ---- EL ANILLO (v3: ANGULOSO — el caparazón segmentado del DoG: los
+    # ---- EL ANILLO (v3: ANGULOSO — el caparazón segmentado de la sierpe: los
     #      costados APLANADOS y los hombros en CUÑA, no un óvalo de judía)
     ring = [(8, 62), (10, 46), (20, 34), (40, 28), (58, 27), (62, 27),
             (84, 27), (104, 34), (114, 46), (116, 62), (114, 80), (104, 94),
@@ -962,7 +962,7 @@ def montaje(sprites):
 
 # ----------------------------------------------------------------------------
 def main():
-    print("Generando el set de sprites de Slifer…")
+    print("Generando el set de sprites del dragón del cielo…")
     cabeza = gen_cabeza()
     mandibula = gen_mandibula()
     vertebra = gen_vertebra()

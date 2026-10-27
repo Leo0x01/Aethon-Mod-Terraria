@@ -142,7 +142,7 @@ Items: {
 	}
 
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
-	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	// weapons (test — the book is NOT touched). The shadow's power (the reference anime).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
 	// ("the gif doubled at the tip, one per corner, so it behaves like
 	// teeth" + "black mist on every tentacle and mouth").
@@ -838,12 +838,12 @@ Items: {
 	}
 
 	VenaTruenoStaff: {
-		// v6.50.24: THE THUNDERVEIN FANG — based on Coralite's Thundervein Dragon
-		DisplayName: Thundervein Fang
+		// v6.50.24: THE THUNDER FANG — based on the reference's thunder-vein dragon
+		DisplayName: Thunder-Vein Fang
 		Tooltip:
 			'''
-			Summons THE THUNDERVEIN DRAGON'S FALL upon the cursor.
-			Coralite's trio (1 orange + 2 yellows) falling from the sky.
+			Summons THE FALL OF THE THUNDER-VEIN DRAGON upon the cursor.
+			The dragon's trio (1 orange + 2 yellows) falling from the sky.
 			Telegraphed: the strike lands at the end of the fall · chains to 3.
 			No mana (test weapon).
 			'''
@@ -856,7 +856,7 @@ Items: {
 			'''
 			Terraria's true lightning and the whole electric arsenal.
 			The weather (Primordial Lightning), Arc Surge (Overvoltage Arc),
-			Coralite's dragon (Thundervein) and the old scepters.
+			The thunder-vein dragon and the old scepters.
 			Right-click to deploy them. Only delivers what you're missing.
 			'''
 	}
@@ -868,7 +868,7 @@ Items: {
 		DisplayName: Bag of Shadows
 		Tooltip:
 			'''
-			The four pages of the shadow (Pride style).
+			The four pages of the shadow (the devouring-shadows homage).
 			The untouched base (The Shadow of the Page) and her THREE
 			TENTACLE SISTERS: THE LASH (the whip that cracks through
 			everything), THE BITE (the glutton that chews with real
@@ -1538,7 +1538,7 @@ Items: {
 	}
 
 	FragmentoSupernovaStaff: {
-		DisplayName: Supernova Fragment
+		DisplayName: Fragment of the Supernova
 		Tooltip:
 			'''
 			The winged singularity made servant: the winged eye with
@@ -2259,7 +2259,7 @@ Projectiles: {
 	MeteoroProjectile.DisplayName: Meteor
 	AbrazoNebulosaProjectile.DisplayName: Nebula's Embrace
 	FiloHorizonteProjectile.DisplayName: Horizon's Edge
-	RayoGammaProjectile.DisplayName: Gamma Ray
+	RayoGammaProjectile.DisplayName: The Gamma Ray
 	NeutronStarProjectile.DisplayName: Neutron Star
 	PulsarProjectile.DisplayName: Pulsar
 	WhiteDwarfProjectile.DisplayName: White Dwarf
@@ -2306,7 +2306,7 @@ Projectiles: {
 	AnilloRunicoDorsalHalo.DisplayName: Dorsal Rune Ring
 	AuraPortadorHalo.DisplayName: Bearer's Aura
 	TentaculoCosmicoProjectile.DisplayName: Void Tentacle
-	FragmentoSupernovaMinion.DisplayName: Supernova Fragment
+	FragmentoSupernovaMinion.DisplayName: Fragment of the Supernova
 	RafagaNovaProjectile.DisplayName: Nova Burst
 	MetronomoPulsarHalo.DisplayName: Pulsar Metronome
 	PulsoPulsarProjectile.DisplayName: Pulsar Pulse
@@ -2404,7 +2404,7 @@ Buffs: {
 	}
 
 	FragmentoSupernovaBuff: {
-		DisplayName: Supernova Fragment
+		DisplayName: Fragment of the Supernova
 		Description: A winged singularity hovers at your shoulder, firing bursts and beams at your enemies
 	}
 }

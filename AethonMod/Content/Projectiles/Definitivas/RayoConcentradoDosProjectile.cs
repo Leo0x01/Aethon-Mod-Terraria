@@ -77,6 +77,38 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public float targetSize;
         public float realSize;
 
+        // v6.55.1 — LA BANDERA DE FALLO DEL SHADER: si el .fxc no cargara
+        // (asset ausente, driver sin soporte), NO se reintenta cada frame —
+        // el fallback de tiras asume el mando de inmediato y el log queda
+        // limpio de first-chance exceptions (el patrón _sunShaderFailed de
+        // la casa en RuneSunRenderer).
+        private static bool _shaderFallo;
+        private static Effect _shaderCache;
+
+        /// <summary>
+        /// Carga el shader UNA vez (con caché y bandera de fallo). Devuelve
+        /// null si no está disponible — el llamador usa el fallback.
+        /// </summary>
+        private static Effect ObtenerShader()
+        {
+            if (_shaderFallo)
+                return null;
+            if (_shaderCache != null && !_shaderCache.IsDisposed)
+                return _shaderCache;
+            try
+            {
+                _shaderCache = ModContent.Request<Effect>(
+                    "AethonMod/Content/Effects/Shaders/HazConcentradoShader",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                return _shaderCache;
+            }
+            catch
+            {
+                _shaderFallo = true;
+                return null;
+            }
+        }
+
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(Projectile.direction == 1);
@@ -358,17 +390,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VertexStrip strip = new VertexStrip();
                 strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
 
-                // EL SHADER DE LA CASA — HazConcentradoShader.fx (compilado
-                // al vuelo). Si no cargara, el fallback de tiras texturizadas
+                // EL SHADER DE LA CASA — HazConcentradoShader.fxc (el
+                // binario de efecto compilado; carga UNA vez con bandera de
+                // fallo). Si no cargara, el fallback de tiras texturizadas
                 // dibuja el haz — el arma NUNCA se rompe.
-                Effect lightningEffect = null;
-                try
-                {
-                    lightningEffect = ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/HazConcentradoShader",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                }
-                catch { lightningEffect = null; }
+                Effect lightningEffect = ObtenerShader();
 
                 if (lightningEffect != null)
                 {

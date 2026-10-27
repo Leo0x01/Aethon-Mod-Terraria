@@ -3,8 +3,8 @@
 """
 gen_beam_v6522.py — v6.52.2 — LA TEXTURA DEL HAZ DE VERDAD.
 
-La investigación del ciclo (Hunt of the Old God / FusionRay + Calamity
-Overhaul / AriaGammaRay, leídas de la fuente): la textura canónica de un
+La investigación del ciclo (los haces de los mods de referencia,
+leídas de la fuente): la textura canónica de un
 haz es un RUIDO DE NUBES con la CAÍDA GAUSSIANA HORIZONTAL HORNEADA en el
 eje V (0 en los bordes → 255 al centro) y ruido ELONGADO a lo largo de U,
 MUESTREADA CON WRAP. La RuidoTinta de la .52.0 fallaba en dos cosas:

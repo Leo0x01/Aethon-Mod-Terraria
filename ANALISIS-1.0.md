@@ -89,7 +89,7 @@
 Diseño con guardarraíles:
 
 - **Nutrición por rareza + daño normalizado**: cada arma tiene «calorías» = f(rareza, daño, tier de progresión detectada). Una arma de otro mod se mide por sus stats, no por su origen → nunca rota.
-- **Alimentar sacia hambre** (cantidad según calorías) y da **XP limitada** (tope por arma según rareza — comer un arma de Calamity endgame no da 40 niveles; da lo mismo que una Moon Lord vanilla por tier).
+- **Alimentar sacia hambre** (cantidad según calorías) y da **XP limitada** (tope por arma según rareza — comer un arma endgame de los mods grandes no da 40 niveles; da lo mismo que una Moon Lord vanilla por tier).
 - **El sabor**: comer un ARCO te presta su puntería (proyectiles del Equinoccio +velocidad), una ESPADA su filo (+daño contacto de los ojos), un LIBRO su maná… el buff dura «hasta la próxima comida». El grimorio es un libro: aprende lo que lee.
 - **Anti-explotación**: (a) un mismo «sabor» no se apila; (b) armas únicas/quest del propio mod NO comestibles; (c) confirmación con diálogo («¿Estás seguro? Esto no se puede deshacer»); (d) cooldown de digestión (30 s) con la voz comentando la textura.
 - **La excepción de 1 en 100**: al comer un arma, 1 % de que el libro escupe una **Página Asimilada** — versión mejorada del arma comida (+15 % daño, sprite del grimorio). El sueño del coleccionista y el pánico del que alimentó su arma favorita sin guardar.

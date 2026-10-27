@@ -5,7 +5,7 @@ gen_pagina_final_v65064.py — LA PÁGINA FINAL (v6.50.64) · ARMA 4.
 
 El icono del arma 4 (la evolución AAA de La Sombra de la Página): EL
 LIBRO — dos hojas negras con el lomo rojo entreabierto (la garganta), el
-OJO BLANCO de pupila roja que mira (Pride), tres colmillos blancos en el
+OJO BLANCO de pupila roja que mira (la sombra suprema), tres colmillos blancos en el
 borde inferior (la página MUERDE hacia abajo — es la boca que sube
 comiéndose al jefe) y la BRUMA NEGRA violeta exhalando por debajo (la
 petición del usuario hecha icono). Paleta de la casa (SombrasLib).

@@ -20,11 +20,18 @@ bajo **—**) fue **ELIMINADA COMPLETA del repositorio** en la
 v6.54.0 tras terminar la investigación de sus texturas, y la v6.54.2
 ejecutó la purga final ordenada por el autor: ni una sola mención de
 la fuente queda en el proyecto. **El repositorio está 100 % libre de
-material GPL** (existe un respaldo privado fuera del repo). El mod
+material de la referencia** (existe un respaldo privado fuera del repo). El mod
 publicado — todo lo que vive en `AethonMod/` — es 100 % código y
 assets propios de la casa; las técnicas aprendidas están
 re-implementadas desde cero (ColorPrisma, RayoStrip, el Primer Trazo
 fusionado).
+
+## ✨ Novedades — v6.55.1: EL SHADER DEL RAYO CONCENTRADO DE VERDAD + LA PURGA TOTAL DE MENCIONES
+
+- **El hallazgo crítico**: los .fx NO se compilan solos — el v6.55.0 empaquetaba el shader sin su .fxc y el arma vivía por el fallback. Esta versión trae el binario compilado (cadena vkd3d + ensamblador fx_2_0 propio, validado contra el parser de FNA de verdad).
+- **Purga final**: cero menciones externas en código, assets, localización, docs y herramientas — verificadas por barrido completo.
+- Las alas reabren el lote incondicionalmente y los conteos de bolsas están al día (24).
+- **Verificación**: oráculo 0/0 · build real 0/0 · .tmod v6.55.1 (6.402.938 B, md5 545febe2…): 461 entradas, EOF exacto · headless 0 excepciones.
 
 ## ✨ Novedades — v6.55.0: LA CURA DE LOS PICOS + EL RAYO CONCENTRADO II + LAS ALAS VECTORIALES
 
@@ -71,11 +78,11 @@ fusionado).
 ## ✨ Novedades — v6.54.1: LA CURA DE LAS TRES BOLSAS INVISIBLES (hotfix de la .54)
 
 - **LA .54 SE CAÍA AL CARGAR**: las 3 bolsas nuevas (El Cofre del Arsenal, la Bolsa de la Investigación y la Bolsa de las Alas) nacieron sin su textura y tModLoader desactivaba el mod entero. Cura: los 3 iconos al estilo de la casa (cofre dorado con mini-sacos · saco púrpura con constelación y rayo · saco morado con alas aurora) + el gate de auditoría de texturas blindado (detecta solo la raíz del mod viva; jamás vuelve a cantar «OK» sobre una carpeta muerta).
-- **LO NUEVO DE LA .54 (ahora sí cargable)**: la investigación de las texturas de referencia re-escrita 100 % en casa — Rayos Concentrados (el rayo de fusión del jugador), Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva, 15 alas nuevas con el sistema de la Aurora y las 23 bolsas consolidadas en El Cofre del Arsenal. `research del puerto/` borrada por completo (repo 100 % libre de GPL).
+- **LO NUEVO DE LA .54 (ahora sí cargable)**: la investigación de las texturas de referencia re-escrita 100 % en casa — Rayos Concentrados (el rayo de fusión del jugador), Trueno del Prisma, Lodo de Esencia, Cetro de Constelaciones, Estela del Cosmos, Tinta Viva, 15 alas nuevas con el sistema de la Aurora y las 23 bolsas consolidadas en El Cofre del Arsenal. `research del puerto/` borrada por completo (repo 100 % limpio de material externo).
 
 ## ✨ Novedades — v6.53.1: LA SEPARACIÓN DEL PUERTO (todo el material del puerto fuera del mod)
 
-- **LA DECISIÓN GPL EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research del puerto/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material GPL). La Bolsa del Referencia Original queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).
+- **LA DECISIÓN DE LA LICENCIA EJECUTADA**: la copia verbatim del jefe salió del mod COMPLETO (vive solo en `research del puerto/`, fuera de toda compilación y de todo release — ni el .tmod ni el código publicado contienen material de la referencia). La Bolsa del Referencia Original queda con el arsenal PROPIO de la casa (las 5 armas de la v6.52.2).
 - **EL PRIMER TRAZO, 100 % MATERIAL DE LA CASA**: mismo look de rayo de fusión (fórmula de ancho del jefe + arcoíris viajero + núcleo blanco-caliente) pero con el pipeline propio probado de RayoStrip ×3 capas — sin shader prestado (que además nunca habría cargado: tML 2026.08 solo carga efectos .fxc compilados). Bonus: LA FUSIÓN LITERAL — separados, cada fajo viste su color del prisma; al cargar, los 5 colores SE DISUELVEN en el arcoíris del dios.
 - **v6.53.0 (para el historial)**: alas visibles (cura de coordenadas), purga del Escriba, cadena propia de invocación +1,5 % «(este libro)», textos arreglados — todo eso SIGUE en la .53.1.
 

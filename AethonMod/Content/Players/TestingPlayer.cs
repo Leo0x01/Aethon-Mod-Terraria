@@ -14,7 +14,8 @@ namespace AethonMod.Content.Players
     /// jugador también dale 99 Dummy para probar las armas"). OnEnterWorld
     /// entrega:
     ///
-    ///   · LAS VEINTIUNA BOLSAS (una por categoría del arsenal — cada una se
+    ///   · LAS BOLSAS DEL ARSENAL (una por categoría — hoy son VEINTICUATRO
+    ///     tras la v6.55.0; cada una se
     ///     abre con clic derecho y solo entrega lo que falte):
     ///       1. La Bolsa del Probador          (herramientas de prueba)
     ///       2. La Bolsa de los Fundacionales  (los 4 del alba)

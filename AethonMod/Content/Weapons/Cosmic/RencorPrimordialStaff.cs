@@ -21,7 +21,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///   · 3 SEGUNDOS DE CARGA (180 ticks — el número exacto del ritual):
     ///     las runas se encienden UNA A UNA, la bruma espirala HACIA el
     ///     círculo, las ascuas orbitan y el Telegraph del haz avisa.
-    ///   · EL HAZ: "The Angy Beam" — un desgarro CONTINUO de núcleo BLANCO y filo ROSA (v6.30: medido del sprite real)
+    ///   · EL HAZ: el haz furioso — un desgarro CONTINUO de núcleo BLANCO y filo ROSA (v6.30: medido del sprite real)
     ///     (RiftLib.Tear: UN SOLO QUAD, cero juntas) de 880 px que perfora
     ///     INFINITO (atraviesa paredes y todo lo que viva).
     ///   · AL TOCAR TILE: LOS BRAZOS ESPECTRALES (×0.66 — 4 brazos de

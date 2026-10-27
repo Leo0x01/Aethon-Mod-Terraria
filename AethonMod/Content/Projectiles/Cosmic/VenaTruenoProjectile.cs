@@ -32,7 +32,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// sprites: el pincel es el pixel 1×1 del motor con la pila de
     /// pasadas sólidas.
     ///
-    /// LA CADENCIA DEL DRAGÓN: telegrafiada como su FallingThunder — el
+    /// LA CADENCIA DEL DRAGÓN: telegrafiada como su rayo caído — el
     /// canal cae durante 26 ticks (el frente desciende energizando) y el
     /// GOLPE aterriza al final: radial 130 px + CADENA de 3 (el
     /// LightningRaid: "3 cortos + 1 largo") + Electrified. Los que se

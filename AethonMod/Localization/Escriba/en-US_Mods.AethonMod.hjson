@@ -1,7 +1,7 @@
 // v6.53 — THE SCRIBE PURGE: the demo boss, The Conscious Feather,
 // the Summoner Feather, the bag and the inscriptions ALL DIED (the
 // user's word). THE FIRST TRACE SURVIVES (the beam weapon, now in
-// the Beam Weapons bag, rendered with the old god's FUSION RAY
+// the Beam Weapons bag, rendered with the god's fusion-ray
 // technique) and THE INK AURORA (the code-drawn wings, now in the
 // Cosmetics bag and finally VISIBLE).
 // ENGLISH (en-US).
@@ -14,7 +14,7 @@ Items: {
 			The quill that wrote the world's first line, charged with light.
 			HOLD the click: five traces converge into ONE FUSION RAY
 			(the oil-slick rainbow runs along it, the core burns white
-			and the noise flows from mouth to tip — the old god's technique).
+			and the noise flows from mouth to tip — the god's technique).
 			At full charge the damage triples.
 			'''
 		Prueba: NO MANA COST — test weapon: channel without fear.

@@ -15,7 +15,7 @@ namespace AethonMod.Content.Items.Llamados
     //
     //  Vive dentro de la Bolsa de la Cría junto a su hermana de luz —
     //  la bolsa llega en cada entrada al mundo (TestingPlayer, como las
-    //  veintiuna bolsas del kit) y tras la primera victoria de la
+    //  veinticuatro bolsas del kit) y tras la primera victoria de la
     //  familia (la vía canónica de la .120).
     //
     //  v6.50.124 — DOS CURAS DE LA MISMA LETRA:

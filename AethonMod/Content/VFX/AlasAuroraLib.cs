@@ -385,8 +385,6 @@ namespace AethonMod.Content.VFX
                 // EL COLOR POR NODO: el hue se dispersa a lo largo (el
                 // espectro corre del hombro a la punta) y el fundido
                 // vive en la PUNTA (el desgarre — el hash decide).
-                Color cRaiz = TonoPluma(hues[i], mezclaDia, haciaBlanco, estilo);
-
                 for (int j = 0; j < NodosPluma; j++)
                 {
                     float q0 = j / (float)NodosPluma;
@@ -416,7 +414,6 @@ namespace AethonMod.Content.VFX
                         haciaBlanco * (1f - 0.3f * q0), estilo), inten * f0);
                     Color c1 = Pre(TonoPluma(hues[i] + estilo.HueLargo * q1, mezclaDia,
                         haciaBlanco * (1f - 0.3f * q1), estilo), inten * f1);
-                    _ = cRaiz;
 
                     VertexPositionColorTexture a0 = new(new Vector3(p.Eje[j] + nrm * s0, 0f), c0, new Vector2(q0, 0f));
                     VertexPositionColorTexture a1 = new(new Vector3(p.Eje[j] - nrm * t0, 0f), c0, new Vector2(q0, 1f));
@@ -571,7 +568,7 @@ namespace AethonMod.Content.VFX
                 // EL BAILE ÚNICO DEL LOTE (el contrato de RayoStrip): se
                 // cierra UNA VEZ, van las TRES volcadas y se reabre UNA
                 // VEZ — el aditivo es conmutativo y el Deferred no ordena.
-                bool cerroLote = VFXCore.CerrarLoteSiAbierto();
+                VFXCore.CerrarLoteSiAbierto(); // v6.55.1: el retorno ya no decide — la reapertura es incondicional
                 try
                 {
                     // EL ANCLA: la espalda, ligeramente hacia atrás (el
@@ -644,8 +641,11 @@ namespace AethonMod.Content.VFX
                 }
                 finally
                 {
-                    if (cerroLote)
-                        VFXCore.ReabrirLoteVanilla();
+                    // v6.55.1 — INCONDICIONAL (la cura del revisor): aunque el
+                    // lote llegara YA cerrado (mod ajeno), salimos con el lote
+                    // vanilla ABIERTO — ReabrirLoteVanilla es idempotente por
+                    // sonda y tML mata el dibujado sobre lotes muertos.
+                    VFXCore.ReabrirLoteVanilla();
                 }
 
                 return true;

@@ -287,7 +287,7 @@ siembra de pernos fase 4+) → HUNDIÉNDOSE (gravedad; fase 4 al clavarse nace l
 2 filos de luz que giran con la abertura de mandíbula 0.05-0.55) + colmillos-estrella + 2 ojos
 (oro; violeta fase 3+) + 5 chispas orbitantes · vértebras = placas de vacío en CUENTAS + espina
 de oro + apófisis-estrella + aletas de varillas en 6/14/22 · fondo = ColaSierpeSky (proyección
-DoG entre capas del paisaje). **Los sprites viejos de la sierpe están MUERTOS** (sin
+del devorador entre capas del paisaje). **Los sprites viejos de la sierpe están MUERTOS** (sin
 referencias — candidatas a borrar).
 
 **Muerte**: cine de DESARTICULACIÓN (se yergue; cada 4 t muere un hueso cola→cabeza; a tick 220
@@ -335,8 +335,8 @@ el stack. `BoltRenderer` = primera generación, hoy montado sobre RayoStrip.
 
 Bastón de Rayo Primordial (`RayoParams.Tormenta`, impacto instantáneo + cadena) ·
 **Arco de Sobretensión** (el Arc Surge de vanilla 1.4.5 portado como arma: anclado a la mano,
-+2 hermanos a NPCs en cono 60°, carmesí) · **Colmillo de Vena Trueno** (la firma del Thundervein
-Wyvern de la referencia del dragón: **trío 1 naranja (219,114,22) + 2 amarillos (255,202,101)**, recada 4 t,
++2 hermanos a NPCs en cono 60°, carmesí) · **Colmillo de Vena Trueno** (la firma del wyvern de venas
+de trueno de la referencia del dragón: **trío 1 naranja (219,114,22) + 2 amarillos (255,202,101)**, recada 4 t,
 parpadeo 50 %, caída telegrafiada que golpea AL ATERRIZAR) · Cetro del Trueno Rúnico (StormLib
 clásico) · Cetro del Trueno Perlin (`PerlinBolt`, el arco sigue al cursor 10 t).
 

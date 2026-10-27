@@ -17,8 +17,13 @@
 //      return 1) dibujaba un CONTORNO FRACTAL: aquí la vena blanca nace
 //      de un smoothstep — el mismo latido blanco, el borde respira.
 //
-// El .fx viaja como fuente: tML lo compila al cargar (FxcReader) y si algo
-// fallara, el proyectil tiene el fallback de tiras texturizadas de la casa.
+// PIPELINE (la lección de la v6.55.0): el juego carga SOLO la versión
+// compilada (.fxc — tModLoader registra FxcReader para ".fxc"; los .fx NO
+// se compilan solos). Este .fxc se construye con tools/fx20_build.py: los
+// dos entry points se compilan a SM3 (vkd3d-shader) y el binario de efecto
+// se ensambla con el layout exacto de fxc /T fx_2_0, validado contra el
+// parser real de FNA (MojoShader). Si algo fallara en runtime, el proyectil
+// tiene el fallback de tiras texturizadas de la casa.
 // =============================================================================
 
 matrix uTransformMatrix;

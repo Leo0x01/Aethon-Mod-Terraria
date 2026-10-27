@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # mock_venatrueno_v65024.py — v6.50.24 — EL MOCK 1:1 DEL TRÍO VENA TRUENO.
 # Porta a Python la matemática EXACTA de RayoLib.cs (el LCG32 de vanilla +
-# GenerarBolt + la ola + el taper) y compone EL TRÍO DE CORALITE: TRES
+# GenerarBolt + la ola + el taper) y compone EL TRÍO DEL DRAGÓN DE VENA TRUENO: TRES
 # canales con semillas distintas (1 NARANJA 219,114,22 + 2 AMARILLOS
-# 255,202,101 — los colores EXACTOS de ThunderveinDragon.cs), cada uno
+# 255,202,101 — los colores EXACTOS del dragón de la referencia), cada uno
 # con LA PILA 6+1 del pixel del motor (pasadas sólidas de ancho
 # telescópico cuya SUMA es el degradado transversal + la VENA blanca) y
-# el tinte aditivo lineal de la casa. TRES FASES del ThunderFalling:
+# el tinte aditivo lineal de la casa. TRES FASES del rayo caído:
 # NACIENDO (el frente desciende, ancho fino), PLENO (la caída entera,
 # ancho ×2) y MURIENDO (la desintegración: el sobre del meandro ABIERTO
 # ×3.5, el ancho colapsando, la retirada de la ola).
@@ -172,7 +172,7 @@ ANIM_VENA = dict(oi=0.6, fi=0.04, fm=0.55, ff=1.0, of=0.0,
 PILA_W = [5.2, 3.6, 2.5, 1.7, 1.15, 0.72]
 PILA_F = [0.06, 0.09, 0.13, 0.19, 0.28, 0.42]
 
-# LA PALETA DEL DRAGÓN (ThunderveinDragon.cs de Coralite)
+# LA PALETA DEL DRAGÓN (la del dragón de la referencia)
 AMARILLO = (255, 202, 101)
 NARANJA = (219, 114, 22)
 NUCLEO = (255, 246, 215)
@@ -273,7 +273,7 @@ def main():
     semillas = [rng.randint(1, 2**30) for _ in range(3)]
     colores = [NARANJA, AMARILLO, AMARILLO]
 
-    # LAS TRES FASES del ThunderFalling:
+    # LAS TRES FASES del rayo caído:
     #  NACIENDO: progreso 0.42 de la vida (el frente desciende ~mitad),
     #            el ancho crecido a ~70% del máximo.
     #  PLENO: progreso 0.62 (la caída COMPLETA), ancho máximo.

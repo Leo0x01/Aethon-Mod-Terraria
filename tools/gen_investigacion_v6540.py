@@ -5,8 +5,9 @@ gen_investigacion_v6540.py — v6.54.0 — LAS TEXTURAS DE LA INVESTIGACIÓN EL 
 RE-IMPLEMENTADAS 100 % CASA (procedurales, seed determinista).
 
 La letra del usuario (27/10): estudiar CÓMO usa el dios sus texturas de
-efectos (FusionRay_0..3, SpaceTrail, LiquidTrail, Lightning ×2 pares,
-DarkSludge, Constellation, ColorMap, Glow, Noise_0..16, Space_0..1) y
+efectos (el haz de fusión ×4, la estela espacial, el cordón líquido,
+el rayo ×2 pares, el lodo oscuro, la constelación, el mapa de color,
+el brillo, el ruido ×17, el espacio ×2) y
 crear VERSIONES PROPIAS distintas — nada portado: todo nace de este
 script con las recetas documentadas por la investigación (worklog Task
 74-a/74-b/74-c). Los colores de la casa: MORADO y NEGRO (más el
@@ -14,7 +15,7 @@ arcoíris del dios de ColorPrisma para lo prismático).
 
 FAMILIAS GENERADAS (todo tileable donde el consumidor lo wrap-ea):
   · RayoConcentrado_0..3 — las 4 capas del haz (cuerpo fBm / bits de
-    células / glow perfil 1D / núcleo+falda) — el "FusionRay" propio.
+    células / glow perfil 1D / núcleo+falda) — el "haz de fusión" propio.
   · EstelaEspacial(+Brillo) — la banda-máscara del anillo Saturno
     (canales RGB = cuerpo/línea caliente/tinte frío) + barra glow 1D.
   · TintaViva + MapaColorTinta — el cordón líquido (alpha binaria,
@@ -102,7 +103,7 @@ def perfil_vertical(h, w, f_v):
     return np.repeat(prof[:, None], w, axis=1)
 
 # =====================================================================
-#  1. RAYO CONCENTRADO — LAS 4 CAPAS DEL HAZ (el FusionRay propio)
+#  1. RAYO CONCENTRADO — LAS 4 CAPAS DEL HAZ (el haz de fusión propio)
 # =====================================================================
 
 # _0 = CUERPO: envolvente vertical (banda 0.16..0.91, pico 240/255 en

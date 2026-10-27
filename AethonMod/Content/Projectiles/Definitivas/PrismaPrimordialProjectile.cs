@@ -660,7 +660,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         /// <summary>
         /// CAPA 3 — EL TELÉGRAFO DE LA CARGA: la AGUJA uniforme que LATA
-        /// (2→4 Hz, la técnica EmpressLance de la investigación) + LOS
+        /// (2→4 Hz, la técnica de la aguja de la investigación) + LOS
         /// CORREDORES que aceleran con la carga (técnica nº15: la promesa
         /// del trayecto completa ANTES del encendido).
         /// </summary>

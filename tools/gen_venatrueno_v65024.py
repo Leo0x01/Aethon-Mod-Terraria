@@ -7,8 +7,8 @@
 # DOMINA (cuerpo navy oscuro, filo de SOLO 1 px solo cuando el cuerpo
 # es ancho, punta convergente real) y EL TRÍO son TRES VENAS PARALELAS
 # SEPARADAS (columnas x=4/9/14 con meandro angular apretado ±2-3 px —
-# como las venas del costado del dragón de Coralite): naranja/amarillo/
-# amarillo, núcleo 1 px, halo 1 px. Paleta: ThunderveinDragon.cs.
+# como las venas del costado del dragón de la referencia): naranja/amarillo/
+# amarillo, núcleo 1 px, halo 1 px. Paleta: la del dragón de la referencia.
 
 from PIL import Image, ImageDraw
 
@@ -23,7 +23,7 @@ OUT_W = "/home/z/my-project/AethonMod/AethonMod/Content/Weapons/Cosmic"
 OUT_P = "/home/z/my-project/AethonMod/AethonMod/Content/Projectiles/Cosmic"
 
 AMARILLO = (255, 202, 101)
-NARANJA = (239, 134, 32)      # el 219,114,22 de Coralite aclarado 1 paso SOLO para el icono
+NARANJA = (239, 134, 32)      # el 219,114,22 de la referencia aclarado 1 paso SOLO para el icono
 NUCLEO = (255, 246, 215)
 
 

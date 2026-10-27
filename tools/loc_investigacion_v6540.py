@@ -42,7 +42,7 @@ def bloque_items(es):
         s += T("BolsaMaestra", "El Cofre del Arsenal", [
             "LAS VEINTITRÉS BOLSAS del arsenal dentro de una sola: la",
             "del Probador, la de los Fundacionales, la de los Soles",
-            "Rúnicos… y todas las demás hasta la del Dios Antiguo.",
+            "Rúnicos… y todas las demás hasta la del dios.",
             "Ábrela y despliega la que necesites.",
             "Clic derecho. Solo entrega lo que te falte."])
         s += T("RayosConcentrados", "Rayos Concentrados", [
@@ -105,7 +105,7 @@ def bloque_items(es):
             ("AlasDeMedianoche", "Alas de Medianoche",
              "El cielo estrellado entero en cada pluma. Luz tenue."),
             ("AlasDelPrisma", "Alas del Prisma",
-             "El arcoíris del dios antiguo corre por el abanico completo."),
+             "El arcoíris completo corre por el abanico."),
             ("AlasDeFuegoFrio", "Alas de Fuego Frío",
              "Ondas de hielo lila — curvas suaves que ondean despacio."),
             ("AlasDeTormenta", "Alas de Tormenta",
@@ -134,7 +134,7 @@ def bloque_items(es):
             "cells, plasma). 240 flight time, no fall damage.",
             "Right-click to deploy. Only delivers what you lack."])
         s += T("BolsaInvestigacion", "The Research Bag", [
-            "The items born from studying the old god's effect textures:",
+            "The items born from studying the god's effect textures:",
             "Concentrated Rays, Prism Thunder, Essence Sludge,",
             "Constellation Scepter, Cosmic Trail and Living Ink — all",
             "rewritten 100 % for the mod, zero ported material.",
@@ -143,11 +143,11 @@ def bloque_items(es):
         s += T("BolsaMaestra", "The Arsenal Chest", [
             "ALL TWENTY-THREE bags of the arsenal inside a single one:",
             "the Tester's, the Foundational, the Runic Suns'… every bag",
-            "up to the Old God's. Open it and deploy the one you need.",
+            "up to the god's. Open it and deploy the one you need.",
             "Right-click. Only delivers what you lack."])
         s += T("RayosConcentrados", "Concentrated Rays", [
             "\"Four layers of light multiplied: the fusion ray, yours.\"",
-            "The old god's signature attack technique, rewritten 100 %:",
+            "The god's signature attack technique, rewritten 100 %:",
             "the noise body, the double-sampled sparks, the glow profile",
             "and the core+skirt — multiplied per vertex, with the",
             "rainbow running and the white-hot core. 45 t of charge",
@@ -155,7 +155,7 @@ def bloque_items(es):
             "Segment damage, just like the original."],
             [PRUEBA_EN])
         s += T("TruenoDelPrisma", "The Prism Thunder", [
-            "The old god's branching bolt, born anew: TWO samples of the",
+            "The god's branching bolt, born anew: TWO samples of the",
             "same texture offset by 0.5 and multiplied (only the",
             "matching veins survive), the polyline that SETTLES after",
             "the strike, and the rainbow fading away. 1 big bolt + up",
@@ -168,12 +168,12 @@ def bloque_items(es):
             [PRUEBA_EN])
         s += T("CetroConstelaciones", "The Constellation Scepter", [
             "Summons stars that orbit and repel each other; the close",
-            "ones join through damage-dealing LINES (the old god's",
+            "ones join through damage-dealing LINES (the god's",
             "stellar minion's constellation, 100 % ours). The first one",
             "draws the double-spinning area vignette. Up to 5 stars."],
             [PRUEBA_EN])
         s += T("EstelaDelCosmos", "The Cosmic Trail", [
-            "The Saturn-like ring of the old god's stellar minion, 100 %",
+            "The Saturn-like ring of the god's stellar minion, 100 %",
             "ours and PURPLE/BLACK: the band with self-interference",
             "(the same texture at two speeds multiplied) and channels as",
             "masks — violet body, hot lilac line, blue-violet edge.",
@@ -182,11 +182,11 @@ def bloque_items(es):
              ("Linea1", "The stellar minion's liquid ring"),
              ("Linea2", "Pure decoration — accessory or vanity")])
         s += T("TintaViva", "The Living Ink", [
-            "The old god's liquid cord, made yours: TWO ink layers",
+            "The god's liquid cord, made yours: TWO ink layers",
             "multiplied (the lace of holes that opens and closes), the",
             "color born from the black→purple→lilac LUT, and the",
             "curling wave. The tail follows YOUR real trail of motion."],
-            [("Titulo", "THE OLD GOD'S LIQUID CORD, MADE YOURS"),
+            [("Titulo", "THE GOD'S LIQUID CORD, MADE YOURS"),
              ("Linea1", "The iridescent goo tail that follows your trail"),
              ("Linea2", "Pure decoration — accessory or vanity")])
         s += "\t\tAlasPrismaBase: {\n\t\t\tEstilo: Code-born wings — their own palette, tempo and noise\n\t\t}\n\n"
@@ -204,7 +204,7 @@ def bloque_items(es):
             ("AlasDeMedianoche", "Midnight Wings",
              "The whole starry sky on every feather. Faint light."),
             ("AlasDelPrisma", "Wings of the Prisma",
-             "The old god's rainbow runs across the full fan."),
+             "The full rainbow runs across the fan."),
             ("AlasDeFuegoFrio", "Cold Fire Wings",
              "Waves of lilac ice — soft curves swaying slowly."),
             ("AlasDeTormenta", "Storm Wings",

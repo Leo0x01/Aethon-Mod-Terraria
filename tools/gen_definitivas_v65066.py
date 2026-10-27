@@ -5,7 +5,7 @@ GEN_DEFINITIVAS_V65066.PY — LOS ICONOS DE LA BOLSA DE LAS ARMAS DEFINITIVAS.
 
 La lección de las rondas anteriores (la letra del usuario): «son todas
 una raya plana y no debe ser así… eran más elaboradas que eso». La
-investigación (Task 2-a) midió los sprites endgame de Calamity: núcleo
+investigación (Task 2-a) midió los sprites endgame del género: núcleo
 brillante + gradiente + motivo temático + borde con brillo para leerse
 de día y de noche. Este generador aplica ESA receta a los 13 iconos:
 

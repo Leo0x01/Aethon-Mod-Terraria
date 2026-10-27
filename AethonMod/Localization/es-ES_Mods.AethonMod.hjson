@@ -142,7 +142,7 @@ Items: {
 	}
 
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
-	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	// weapons (test — the book is NOT touched). The shadow's power (the reference anime).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
 	// ("the gif doubled at the tip, one per corner, so it behaves like
 	// teeth" + "black mist on every tentacle and mouth").
@@ -838,12 +838,12 @@ Items: {
 	}
 
 	VenaTruenoStaff: {
-		// v6.50.24: THE THUNDERVEIN FANG — based on Coralite's Thundervein Dragon
+		// v6.50.24: THE THUNDER FANG — based on the reference's thunder-vein dragon
 		DisplayName: Colmillo de Vena Trueno
 		Tooltip:
 			'''
 			Convoca LA CAÍDA DEL DRAGÓN DE VENA TRUENO sobre el cursor.
-			El trío de Coralite (1 naranja + 2 amarillos) que cae del cielo.
+			El trío del dragón (1 naranja + 2 amarillos) que cae del cielo.
 			Telegrafiada: el golpe aterriza al final de la caída · cadena de 3.
 			Sin maná (arma de pruebas).
 			'''
@@ -856,7 +856,7 @@ Items: {
 			'''
 			El rayo de Terraria de verdad y todo el arsenal eléctrico.
 			El clima (Rayo Primordial), el Arc Surge (Arco de Sobretensión),
-			el dragón de Coralite (Vena Trueno) y los cetros viejos.
+			el dragón de venas de trueno y los cetros viejos.
 			Clic derecho para desplegarlas. Solo entrega lo que te falte.
 			'''
 	}
@@ -868,7 +868,7 @@ Items: {
 		DisplayName: Bolsa de las Sombras
 		Tooltip:
 			'''
-			Las cuatro páginas de la sombra (estilo Pride).
+			Las cuatro páginas de la sombra (el homenaje a las sombras devoradoras).
 			La base intacta (La Sombra de la Página) y sus TRES HERMANAS
 			de tentáculos: EL AZOTE (el látigo que cruje atravesándolo
 			todo), LA MORDIDA (el glotón que mastica a mordidas de

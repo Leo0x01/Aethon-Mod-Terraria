@@ -6,8 +6,8 @@ gen_bolsa_sombras_v65063.py — LA BOLSA DE LAS SOMBRAS (v6.50.63) · v2.
 El icono de la bolsa 19 (LAS FAUCES DEL GRIMORIO). La silueta de la casa
 (la misma bolsa que BolsaArmasRayo) recolorida a la paleta de las sombras
 devoradoras de la v6.50.62 (SombrasLib): masa negro-violeta con dither,
-el OJO BLANCO de pupila roja que mira (Tsurime, Pride tras comerse a
-Gluttony), y en la ventana semitransparente del centro — que en la bolsa
+el OJO BLANCO de pupila roja que mira (ojos rasgados, la sombra
+suprema tras comerse a su hermano), y en la ventana semitransparente del centro — que en la bolsa
 del rayo era el glow — LA GARGANTA: boca negra con brillo rojo al fondo y
 colmillos de aguja blancos colgando de los bordes.
 
@@ -103,7 +103,7 @@ for y in range(9, 15):
             img[y, x] = (*BLANCO, 255)
         elif v <= 1.3:
             img[y, x] = (*VELO, 255)
-# el Tsurime: las comisuras SUBEN
+# el ojo rasgado: las comisuras SUBEN
 img[9, 8] = (*BLANCO, 255); img[9, 9] = (*BLANCO, 255)
 img[9, 20] = (*BLANCO, 255); img[9, 21] = (*BLANCO, 255)
 # LA PUPILA ROJA que mira (un píxel abajo-derecha: te mira A TI)
