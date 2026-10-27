@@ -245,21 +245,49 @@ namespace AethonMod.Content.VFX
             return t;
         }
 
-        /// <summary>
-        /// LA CARNE del haz — RuidoTinta de la casa: bandas de fBm en U
-        /// (elongadas a lo largo) con caída gaussiana en V (el perfil
-        /// transversal horneado). Al muestrearla con flujo, la carne
-        /// AVANZA raíz→punta: el «Perlin moviéndose en una dirección».
-        /// </summary>
-        public static Texture2D TexRuido => Tex("AethonMod/Content/Effects/Procedural/RuidoTinta");
+        // ================================================================
+        //  v6.54.8 — LA CURA DE LOS PICOS (Task 79-a + la letra del
+        //  usuario: «todo tiene esos picos... esa fea textura de picos
+        //  no ayuda en nada... el rayo de fusión tiene varias capas,
+        //  como distorsión, desenfoque, ruido perlin entre otras
+        //  tecnicas»). La autopsia: RuidoTinta era «bandas de fBm en U»
+        //  — GEOMETRÍA ANGULAR que al fluir por el haz se veía como
+        //  PICOS APILADOS (el VLM lo confirmó sobre el collage); y
+        //  RayoConcentrado_2 era una gaussiana casi sin detalle (0
+        //  transiciones) — el «segundo ruido» del original tiene 487
+        //  colores y el 22 % saturado. LA CURA: las cuatro texturas de
+        //  PLASMA de la receta del informe 79-a (fBm Perlin tileable con
+        //  domain warping ±6px, envolvente suave en V que SIEMPRE manda
+        //  sobre el ruido, blur direccional 0.5px, TODO EN GRISES — el
+        //  color es 100 % runtime). Test anti-picos en tools/
+        //  gen_plasma_v6548.py: peine=0, pendiente −1.5 — CERO picos
+        //  por construcción.
+        // ================================================================
 
         /// <summary>
-        /// EL SEGUNDO RUIDO — RayoConcentrado_2 (la gaussiana de la
-        /// investigación): una firma de ruido DISTINTA a la de TexRuido.
-        /// Con periodo fino y flujo más rápido, las dos capas se CRUZAN y
-        /// el haz HIERVE (el producto tex0·tex1 del shader original).
+        /// LA CARNE del haz — CarnePlasma (v6.54.8): plasma fBm orgánico
+        /// con el núcleo saturado a lo largo de TODO el canal (la fila
+        /// central del original está a 0.81..1.00) y los tonos medios
+        /// VIVIENDO dentro de la banda. Gris — el color va en runtime.
         /// </summary>
-        public static Texture2D TexRemolino => Tex("AethonMod/Content/Effects/Procedural/Investigacion/RayoConcentrado_2");
+        public static Texture2D TexRuido => Tex("AethonMod/Content/Effects/Procedural/CarnePlasma");
+
+        /// <summary>
+        /// EL SEGUNDO RUIDO — SegundoRuido (v6.54.8): más binario que la
+        /// carne (52 % negro + 22 % saturado, ~64 niveles), como el
+        /// FusionRay_3 del original. Con flujo más rápido las dos capas
+        /// se CRUZAN y el haz HIERVE (el producto tex0·tex1).
+        /// </summary>
+        public static Texture2D TexRemolino => Tex("AethonMod/Content/Effects/Procedural/SegundoRuido");
+
+        /// <summary>
+        /// LOS BITS — BitsChispa (v6.54.8): la máscara blanca de blobs
+        /// duros del original (uBits): ~16 blobs elongados 2-3:1 a lo
+        /// largo, cobertura 12 %, bordes 2-4px. NUNCA se dibuja sola: se
+        /// muestrea DOS veces con flujos distintos (el AND doble del
+        /// shader) y se cruza con la carne — chispas dispersas.
+        /// </summary>
+        public static Texture2D TexBits => Tex("AethonMod/Content/Effects/Procedural/BitsChispa");
 
         /// <summary>
         /// EL FLICKER INCONMENSURABLE (técnica nº11 de la investigación):
@@ -288,9 +316,15 @@ namespace AethonMod.Content.VFX
         ///   PASADA 4 — EL NÚCLEO EN BANDA: solo la vena central de la
         ///   textura (V 0.36..0.64) a 0.45× con flujo 2.6× — el canal
         ///   blanco-caliente que corre más rápido que su carne.
-        ///   PASADA 5 — LA VENA: el filamento blanco puro (el «return 1»
+        ///   PASADA 5 — LOS BITS (v6.54.8): la máscara de chispas duras
+        ///   muestreada DOS veces con flujos distintos (1.3× y 2.1× — el
+        ///   AND doble del shader: bitsTex(t·3+x) × bitsTex(t·5+x)): dos
+        ///   nubes de blobs cruzándose = chispas dispersas que NUNCA se
+        ///   alinean (la regla de oro nº5: los elementos duros jamás se
+        ///   dibujan solos ni periódicos).
+        ///   PASADA 6 — LA VENA: el filamento blanco puro (el «return 1»
         ///   del umbral del shader original).
-        ///   PASADA 6 — LA ABERRACIÓN CROMÁTICA: dos tiras finísimas
+        ///   PASADA 7 — LA ABERRACIÓN CROMÁTICA: dos tiras finísimas
         ///   rojo/cian desplazadas en la perpendicular (técnica nº8: el
         ///   borde prismático = energía extrema).
         /// </summary>
@@ -364,6 +398,26 @@ namespace AethonMod.Content.VFX
                     RayoStrip.FajaTexturadaEnLote(pts, semiC, Alfa(color, 0.42f * intensidad),
                         remolino, 240f, 1.9f * flujo, tiempo, 0f, 1f);
                 }
+
+                // PASADA 3.5 — LOS BITS (v6.54.8): el AND doble del shader —
+                // la misma máscara con DOS flujos que se cruzan: donde los
+                // blobs de ambas nubes coinciden, CHISPEA (y donde no, nada:
+                // la cobertura del 12 % de cada una se cruza en ~1.5 % de
+                // puntos brillantes — las chispas dispersas del original).
+                Texture2D bits = TexBits;
+                if (bits != null && intensidad > 0.35f)
+                {
+                    var semiBits = new float[n];
+                    for (int i = 0; i < n; i++) semiBits[i] = perfil[i] * 1.15f;
+                    Color cBits = arcoiris
+                        ? GradienteJuicio(tiempo * 0.07f - 0.30f)
+                        : color;
+                    RayoStrip.FajaTexturadaEnLote(pts, semiBits, Alfa(cBits, 0.30f * intensidad),
+                        bits, 210f, 1.3f * flujo, tiempo, 0.05f, 0.95f);
+                    RayoStrip.FajaTexturadaEnLote(pts, semiBits, Alfa(BlancoCalido, 0.22f * intensidad),
+                        bits, 150f, 2.1f * flujo, tiempo + 3.7f, 0.05f, 0.95f);
+                }
+
                 if (carne != null)
                 {
                     // PASADA 4 — EL NÚCLEO EN BANDA (la vena caliente de la textura).

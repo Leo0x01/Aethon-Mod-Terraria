@@ -2033,14 +2033,32 @@ Items: {
 					Cuatro arsenales en un solo objeto.
 '''
 		}
-		BolsaDefinitivas: {
+		RayoFusion: {
+		DisplayName: El Rayo de Fusión
+		Tooltip:
+			'''
+				LA RÉPLICA DE INVESTIGACIÓN — la copia exacta del ataque del dios,
+				con SUS texturas y SU shader originales: la boca de glows apilados
+				creciendo, el telegraph que apunta, el cono de 3500 px con su
+				barrido cosenoidal, LAS CUATRO TEXTURAS MULTIPLICADAS (la carne
+				fBm · el segundo ruido · la rampa · los bits en AND doble) y el
+				núcleo blanco por saturación. 300 ticks de carga + 800 de
+				láser — TAL CUAL ERA, con su kick de cámara, su música callada
+				al 30 % y sus polvos cromáticos recorriendo el conducto.
+				El patrón de calidad, en tu mano: compáralo con las sentencias.
+				Objeto de investigación — se retira antes de publicar.
+				'''
+	}
+
+	BolsaDefinitivas: {
 			DisplayName: La Bolsa de las Armas Definitivas
 			Tooltip:
 				'''
-					LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS de
-					efectos (la carne de ruido del rayo de fusión y las técnicas de la
-					investigación): el prisma, el partidor, el réquiem, la ira… y EL
-					TESTAMENTO, la corona que las dicta rotándolas.
+					LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS
+					de efectos (el plasma multicapa de la .54.8: carne fBm orgánica —
+					nunca más picos) + LA RÉPLICA de investigación, la copia exacta del
+					rayo de fusión con sus texturas originales: el prisma, el partidor,
+					el réquiem, la ira… y EL TESTAMENTO, la corona que las dicta.
 '''
 		}
 		BolsaInvestigacion: {

@@ -1957,7 +1957,6 @@ Items: {
 			'''
 	}
 
-
 	PrismaPrimordial: {
 		DisplayName: El Prisma Primordial
 		Tooltip:
@@ -1972,10 +1971,8 @@ Items: {
 				el iris que se abre, el sobrepaso elástico, el flicker inconmensurable
 				y la ZONA DE IMPACTO ardiendo al final del canal.
 				(El rayo de fusión, superado.)
-'''
+			'''
 	}
-
-
 
 	PartidorDeMundos: {
 		DisplayName: El Partidor de Mundos
@@ -1989,12 +1986,8 @@ Items: {
 				rechinido), las grietas se abren CON SUS ECOS, los ESCOMBROS saltan
 				girando y EL HUMO DE LA HERIDA sube de la base (la librería de brumas).
 				(El botón de apocalipsis: úsalo con respeto.)
-'''
+			'''
 	}
-
-
-
-
 
 	RequiemEstelar: {
 		DisplayName: El Réquiem Estelar
@@ -2008,7 +2001,7 @@ Items: {
 				campana al sonar. El tercero es LA CAMPANA MAYOR: doble, con el eco
 				fluyendo en contra y la lluvia de estrellas del cierre — y el aura que
 				queda SONANDO cuando todo pasó.
-'''
+			'''
 	}
 
 	IraDelCielo: {
@@ -2021,7 +2014,7 @@ Items: {
 				la línea que desciende y las chispas que CONVERGEN al blanco; la caída
 				envuelve su AURA DE CARNE, y la columna golpea con sus SEIS PASADAS, la
 				espiral triple del final, el humo del juicio y el suelo ardiendo.
-'''
+			'''
 	}
 
 	TestamentoAethon: {
@@ -2035,18 +2028,36 @@ Items: {
 				acrecentado (×1.3) — con la ONDA del dictado y la RÁFAGA de páginas — y
 				EL VÍNCULO, la faja de ruido vivo que corre del libro a su arma.
 				Cuatro arsenales en un solo objeto.
-'''
+			'''
+	}
+
+	RayoFusion: {
+		DisplayName: El Rayo de Fusión
+		Tooltip:
+			'''
+			LA RÉPLICA DE INVESTIGACIÓN — la copia exacta del ataque del dios,
+			con SUS texturas y SU shader originales: la boca de glows apilados
+			creciendo, el telegraph que apunta, el cono de 3500 px con su
+			barrido cosenoidal, LAS CUATRO TEXTURAS MULTIPLICADAS (la carne
+			fBm · el segundo ruido · la rampa · los bits en AND doble) y el
+			núcleo blanco por saturación. 300 ticks de carga + 800 de
+			láser — TAL CUAL ERA, con su kick de cámara, su música callada
+			al 30 % y sus polvos cromáticos recorriendo el conducto.
+			El patrón de calidad, en tu mano: compáralo con las sentencias.
+			Objeto de investigación — se retira antes de publicar.
+			'''
 	}
 
 	BolsaDefinitivas: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-				LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS de
-				efectos (la carne de ruido del rayo de fusión y las técnicas de la
-				investigación): el prisma, el partidor, el réquiem, la ira… y EL
-				TESTAMENTO, la corona que las dicta rotándolas.
-'''
+				LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS
+				de efectos (el plasma multicapa de la .54.8: carne fBm orgánica —
+				nunca más picos) + LA RÉPLICA de investigación, la copia exacta del
+				rayo de fusión con sus texturas originales: el prisma, el partidor,
+				el réquiem, la ira… y EL TESTAMENTO, la corona que las dicta.
+			'''
 	}
 
 	BolsaInvestigacion: {

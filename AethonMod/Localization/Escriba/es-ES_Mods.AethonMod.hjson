@@ -55,4 +55,5 @@ Projectiles: {
 	// SistemaDetonacionProjectile.DisplayName: Sistema Detonacion Projectile
 	// SistemaTiroProjectile.DisplayName: Sistema Tiro Projectile
 	// TestamentoAethonProjectile.DisplayName: Testamento Aethon Projectile
+	// RayoFusionCopiaProjectile.DisplayName: Rayo Fusion Copia Projectile
 }

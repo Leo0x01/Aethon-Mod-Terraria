@@ -840,6 +840,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 3 — LA CAMPANA DE LOS TRES ANILLOS
             l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 4 — LOS OCHO JUICIOS DEL CIELO
             l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 5 — LA CORONA: dicta las cuatro rotándolas
+            // v6.54.8 — LA RÉPLICA de investigación (la copia exacta del rayo
+            // de fusión con sus texturas originales — el patrón de calidad
+            // para comparar; se retira antes de publicar)
+            l.Add((ModContent.ItemType<Weapons.Definitivas.RayoFusion>(), 1));             // 6 — LA RÉPLICA: el estándar, tal cual era
             return l;
         }
     }

@@ -1953,7 +1953,6 @@ Items: {
 			'''
 	}
 
-
 	PrismaPrimordial: {
 		DisplayName: The Primordial Prism
 		Tooltip:
@@ -1967,10 +1966,8 @@ Items: {
 				charge telegraph, the opening iris, the elastic overshoot, the
 				incommensurable flicker and the IMPACT ZONE blazing at the end.
 				(The fusion beam, surpassed.)
-'''
+			'''
 	}
-
-
 
 	PartidorDeMundos: {
 		DisplayName: The World Splitter
@@ -1984,12 +1981,8 @@ Items: {
 				THEIR ECHOES, DEBRIS leaps spinning and THE WOUND'S SMOKE rises from
 				the base (the mist library).
 				(The apocalypse button: use with respect.)
-'''
+			'''
 	}
-
-
-
-
 
 	RequiemEstelar: {
 		DisplayName: The Stellar Requiem
@@ -2003,7 +1996,7 @@ Items: {
 				sounds. The third is THE GREATER BELL: double, with the echo flowing
 				against it and the closing starfall — and the aura that keeps RINGING
 				after everything passed.
-'''
+			'''
 	}
 
 	IraDelCielo: {
@@ -2016,7 +2009,7 @@ Items: {
 				descending line and the sparks CONVERGING on the target; the strike
 				wraps its NOISE-FLESH AURA, and the column hits with its SIX PASSES,
 				the final TRIPLE SPIRAL, the judgment's smoke and the ground ablaze.
-'''
+			'''
 	}
 
 	TestamentoAethon: {
@@ -2030,7 +2023,26 @@ Items: {
 				the dictation WAVE and the page BURST — and THE BOND, the living noise
 				ribbon running from the book to its weapon.
 				Four arsenals in a single item.
-'''
+			'''
+	}
+
+	RayoFusion: {
+		DisplayName: The Fusion Ray
+		Tooltip:
+			'''
+				THE RESEARCH REPLICA — the exact copy of the old god's attack,
+				with ITS original textures and shader: the growing stacked-glow
+				maw, the pointing telegraph, the 3500-px cone with its cosine
+				sweep, THE FOUR MULTIPLIED TEXTURES (fBm flesh · second noise ·
+				the ramp · the double-AND bits) and the saturation-white core.
+				300 ticks of charge + 800 of laser — EXACTLY AS IT WAS, with its
+				camera kick, its music hushed to 30 % and its chromatic dust
+				riding the conduit.
+				The quality pattern, in your hand: compare it with the
+				sentences.
+				Research item — removed before publishing.
+				
+			'''
 	}
 
 	BolsaDefinitivas: {
@@ -2038,10 +2050,11 @@ Items: {
 		Tooltip:
 			'''
 				THE FIVE SENTENCES of the Verdict of Aethon with their FULL EFFECT
-				STACKS (the fusion beam's noise flesh and the research techniques): the
-				prism, the splitter, the requiem, the wrath… and THE TESTAMENT, the
-				crown that dictates them in rotation.
-'''
+				stacks (the .54.8 multilayer plasma: organic fBm flesh — never again
+				jagged edges) + THE RESEARCH REPLICA, the exact copy of the fusion ray
+				with its original textures: the prism, the splitter, the requiem, the
+				wrath… and THE TESTAMENT, the crown that dictates them.
+			'''
 	}
 
 	BolsaInvestigacion: {
