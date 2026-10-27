@@ -6,11 +6,11 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Coreografia
 {
     // ======================================================================
-    //  v6.52.0 — CAMARACINE: LA CÁMARA CINEMÁTICA (el «FocusOn» de
-    //  Lunar Veil — el dev del video del usuario — re-implementado con
+    //  v6.52.0 — CAMARACINE: LA CÁMARA CINEMÁTICA (el «FocusOn»
+    //  del video del usuario, re-implementado con
     //  las reglas de la casa).
     //
-    //  LA RECETA (R3 §2.1 — Sylia: FocusOn + Screen_Black): en los
+    //  LA RECETA (R3 §2.1 — FocusOn + Screen_Black): en los
     //  momentos clave (transiciones de fase, el nuke, la muerte), la
     //  cámara SE ACERCA al jefe — SmoothStep 0.05/t hacia el objetivo,
     //  sostiene, y vuelve suave. Nunca si el jugador está muerto o el
@@ -31,7 +31,7 @@ namespace AethonMod.Content.Coreografia
 
         /// <summary>
         /// ENFOCA la cámara en un punto del mundo durante N segundos
-        /// (con ease-in/out suave — el «FocusOn» de Lunar Veil).
+        /// (con ease-in/out suave — el «FocusOn» del video del usuario).
         /// </summary>
         public static void Enfocar(Vector2 posMundo, float segundos)
         {

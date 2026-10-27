@@ -65,23 +65,24 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === v6.54.0 — LA REORGANIZACIÓN DE LAS BOLSAS (la letra del
-            //     27/10: «respecto a las bolsas anteriores, guardalas
-            //     todas en otra bolsa y de esa forma solo se entregara
-            //     esta bolsa con mas bolsas de las viejas, mientras que
-            //     la nueva bolsa aparece aparte»): el kit entrega
-            //     DOS cosas —
-            //       1. EL COFRE DEL ARSENAL (la Bolsa Maestra con las
-            //          VEINTITRÉS bolsas de siempre DENTRO), y
-            //       2. LA BOLSA DE LA INVESTIGACIÓN aparte (los items
-            //          nuevos del estudio de las texturas del dios +
-            //          la Bolsa de las Alas con las quince alas). ===
+            // === v6.55.0 — LA BOLSA DE LA INVESTIGACIÓN RETIRADA (la
+            //     letra: «borra la bolsa de investigación con todas sus
+            //     armas que ninguna sirve, deja la bolsa de definitiva y
+            //     la bolsa de alas»): el kit entrega ahora —
+            //       1. EL COFRE DEL ARSENAL (la Bolsa Maestra con TODAS
+            //          las bolsas — incluida la Bolsa de las Alas desde
+            //          esta versión),
+            //       2. LA BOLSA DE LAS ALAS aparte (las quince alas
+            //          procedurales — antes vivía dentro de la
+            //          investigación retirada), y
+            //       3. LA BOLSA DE LAS ARMAS DEFINITIVAS aparte (las cinco
+            //          sentencias + EL RAYO CONCENTRADO II). ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaMaestra>());
-            bolsas += Entregar(ModContent.ItemType<BolsaInvestigacion>());
+            bolsas += Entregar(ModContent.ItemType<BolsaDeAlasPrisma>());
             // v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS aparte (la
             // reforma: «El Veredicto de Aethon», las cinco sentencias
-            // con sus siete capas)
+            // con sus siete capas + el rayo concentrado)
             bolsas += Entregar(ModContent.ItemType<BolsaDefinitivas>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA

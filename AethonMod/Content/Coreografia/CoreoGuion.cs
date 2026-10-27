@@ -13,14 +13,12 @@ namespace AethonMod.Content.Coreografia
     //
     //  LA INVESTIGACIÓN (Task 84 / R3 — notas en
     //  download/research/notes/R3-boss-choreography.md): el video del
-    //  usuario («Terraria's NEWEST Mod Has a Crazy Boss Fight» — el
-    //  Meowzers Boss Fight de Zenovia, el dev de Lunar Veil) y CINCO
-    //  fuentes de código (LunarVeilLegacy + Calamity + Fargo's + Stars
-    //  Above + Calamity Overhaul) destiladas a UNA gramática:
+    //  usuario (la pelea de jefe cinematográfica que mostró) y CINCO
+    //  fuentes de código del género destiladas a UNA gramática:
     //
     //    CADA ATAQUE = TELEGRAPH → ACTIVO → RECUPERACIÓN
     //      · telegraph 20–30 t (rápido) · 45–60 (normal) · 90–120
-    //        (pesado) · 216 (el nuke estándar de Calamity/Ares)
+    //        (pesado) · 216 (el nuke estándar del género)
     //      · la recuperación es la VENTANA VISIBLE de oportunidad (el
     //        jefe «exhala»: se apaga, baja el ritmo)
     //      · UNA señal por ataque: un sonido, un anuncio, una sacudida,
@@ -81,7 +79,7 @@ namespace AethonMod.Content.Coreografia
         public bool Anunciar = true;
 
         /// <summary>EL BEAT DE SILENCIO: apaga el mundo un momento (la
-        /// ilusión de tiempo-detenido SIN detours — el sustituto CWR).</summary>
+        /// ilusión de tiempo-detenido SIN detours — el sustituto de la casa).</summary>
         public bool SilencioDramatico;
     }
 

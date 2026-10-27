@@ -110,7 +110,7 @@ namespace AethonMod.Content.VFX
     ///     PROFUNDO (banda que OCLUYE, lote NO-premultiplicado) con ESTRELLAS
     ///     que fluyen a lo largo del eje (scroll élite) y paralaje.
     ///   · LA APERTURA ES UN GOLPE (3-4 ticks, Kick perpendicular, Flash) y la
-    ///     ESTRELLA DE 4 PUNTAS del punto de ruptura (DoG: vertical ×8 +
+    ///     ESTRELLA DE 4 PUNTAS del punto de ruptura (la referencia: vertical ×8 +
     ///     horizontal ×5, todo ·3.25·charge).
     ///   · LA FRACTURA ES EL CLÍMAX ÓPTICO: tras la VIBRACIÓN (onda estacionaria
     ///     0→3.5 px a ~10 Hz creciendo 16 ticks), flash 0.30 + ancho ×1.35 +
@@ -397,7 +397,7 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// LA ESTRELLA DE 4 PUNTAS del punto de ruptura (lección DoG): la espiga
+        /// LA ESTRELLA DE 4 PUNTAS del punto de ruptura (lección de la referencia): la espiga
         /// vertical ×8 y la horizontal ×5 (ambas ·3.25·charge, respirando ±6%) +
         /// copia interior ×0.8 en el color de la paleta + núcleo blanco. Mientras
         /// <paramref name="charge"/> &lt; 1 dibuja además EL ANILLO QUE IMPLOSIONA
@@ -412,7 +412,7 @@ namespace AethonMod.Content.VFX
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
             if (charge <= 0.03f || intensity <= 0.02f) return;
 
-            // La respiración DoG: la estrella late ±6% en vez de ser un sprite plano.
+            // La respiración de la referencia: la estrella late ±6% en vez de ser un sprite plano.
             float k = 3.25f * charge * (1f + 0.06f * MathF.Sin(time * 7f + seed));
             const float EscalaArma = 2.4f;   // 620 px de desgarro piden una ruptura que se LEA
 
@@ -434,7 +434,7 @@ namespace AethonMod.Content.VFX
             Color nucleo = Pal(paleta, paleta.Length - 1);
 
             // === LA ESPIGA VERTICAL (×8): Star.png rotada π/2 para que el
-            //     degradado corra VERTICAL — la dimensión dominante del DoG. ===
+            //     degradado corra VERTICAL — la dimensión dominante de la referencia. ===
             StarQuad(batch, center, MathHelper.PiOver2,
                 8f * k * EscalaArma, MathF.Max(1.4f * k * 0.6f, 1.6f), Tint(nucleo, 0.90f * intensity));
 
@@ -482,7 +482,7 @@ namespace AethonMod.Content.VFX
             OndaLib.Flash(Pal(paleta, 1), MathHelper.Clamp(0.22f * fuerza, 0.15f, 0.34f), 8, origin);
 
             // El sonido de la ruptura: hondo, con el mundo "asentándose" después
-            // (pitch −0.65 apertura / −0.75 fractura — la lección DoG).
+            // (pitch −0.65 apertura / −0.75 fractura — la lección de la referencia).
             if (Main.netMode != NetmodeID.Server)
             {
                 try
@@ -897,7 +897,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// CHISPAS DE ANOMALÍA: paquete determinista de motas radiales (los
-        /// números DoG — vel 8-14 radial adaptados al ParticleManager), color
+        /// números de la referencia — vel 8-14 radial adaptados al ParticleManager), color
         /// Lerp(paleta, Blanco, 0.65), vida 30-45, mota 2-4 px.
         /// La librería NO spawnea: devuelve el paquete.
         /// </summary>
@@ -915,7 +915,7 @@ namespace AethonMod.Content.VFX
                 float h4 = H01(seed, k, 831);
 
                 float ang = h1 * MathHelper.TwoPi;
-                float speed = (8f + 6f * h2) / 5.5f;    // 8-14 DoG ÷ drag-equivalente casa
+                float speed = (8f + 6f * h2) / 5.5f;    // 8-14 de la referencia ÷ drag-equivalente casa
                 Color c = Color.Lerp(Pal(paleta, (int)(h3 * paleta.Length) % paleta.Length), Color.White, 0.65f);
                 int vida = 30 + (int)(15f * h4);
 
@@ -948,7 +948,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// PIDE el oscurecimiento del mundo mientras la realidad está desgarrada
-        /// (máx 0.35 — la mitad del FillProgress de DoG, arma no jefe). RiftMundoSystem
+        /// (máx 0.35 — la mitad del FillProgress de la referencia, arma no jefe). RiftMundoSystem
         /// lo aplica en ModifySunLightColor y lo deja decaer solo (~0.5 s).
         /// Solo afecta al CLIENTE (los servidores no ven pantallas).
         /// </summary>
@@ -1090,7 +1090,7 @@ namespace AethonMod.Content.VFX
                 if (halfVoid < 0.8f) continue;
 
                 // La lateral: dentro de la banda + el vaivén de paralaje
-                // (las cercanas se mueven MÁS — la lección X≠Y de DoG).
+                // (las cercanas se mueven MÁS — la lección X≠Y de la referencia).
                 float y = (h3 - 0.5f) * 2f * halfVoid * 0.85f;
                 y += VFXCore.Sway(time * 0.8f + h4 * 6.28f, 1f, j) * halfVoid * 0.22f * (1f - depth);
 
@@ -1176,7 +1176,7 @@ namespace AethonMod.Content.VFX
     /// <summary>
     /// RiftMundoSystem — v6.26 — EL OSCURECER DE LA REALIDAD DESGARRADA.
     ///
-    /// El complemento de mundo de RiftLib (lección DoG: cuando el espacio se
+    /// El complemento de mundo de RiftLib (lección de la referencia: cuando el espacio se
     /// abre, EL MUNDO SE OSCURECE — la luz "se cae" dentro de la herida).
     /// Un acumulador estático: los desgarros activos piden su oscuridad
     /// (<see cref="RiftLib.Oscurecer"/>) y el sistema la aplica SOLO en
@@ -1209,7 +1209,7 @@ namespace AethonMod.Content.VFX
             if (t != _lastTick)
             {
                 _lastTick = t;
-                // Decaimiento del pedido (DoG): sin desgarros, la luz vuelve en ~0.5 s.
+                // Decaimiento del pedido (la referencia): sin desgarros, la luz vuelve en ~0.5 s.
                 _pedido = MathF.Max(0f, _pedido - 0.012f);
                 _actual = MathHelper.Lerp(_actual, _pedido, 0.12f);
             }

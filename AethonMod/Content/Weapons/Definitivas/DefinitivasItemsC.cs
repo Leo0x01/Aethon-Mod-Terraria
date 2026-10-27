@@ -15,7 +15,7 @@ namespace AethonMod.Content.Weapons.Definitivas
 
     /// <summary>
     /// ARMA 5 — EL TESTAMENTO DE AETHON: LA CORONA DE LA BOLSA (el
-    /// patrón FUSIÓN de Fargo's — el «Soul of Eternity»): el libro abre
+    /// patrón de rotación de sentencias): el libro abre
     /// sus páginas con SU CINE DE SIETE CAPAS (el velo del dictado
     /// teñido con el color de la sentencia, los halos apilados, las
     /// páginas volando, el anillo de runas, LA PALABRA — la onda

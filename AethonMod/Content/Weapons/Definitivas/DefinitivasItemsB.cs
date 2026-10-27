@@ -14,8 +14,8 @@ namespace AethonMod.Content.Weapons.Definitivas
     // ======================================================================
 
     /// <summary>
-    /// ARMA 3 — EL RÉQUIEM ESTELAR (la receta del «The Set» de Thorium +
-    /// los anillos de Fargo's, en SIETE capas): LA CAMPANA DE LUZ — tres
+    /// ARMA 3 — EL RÉQUIEM ESTELAR (la receta del arma de anillos del
+    /// género, en SIETE capas): LA CAMPANA DE LUZ — tres
     /// anillos dorados que CRUZAN EL MUNDO expandiéndose desde el
     /// portador (1400 px, uno cada medio segundo), ahora CERRADOS DE
     /// VERDAD (la costura del loop enterrada bajo segmentos vivos — la

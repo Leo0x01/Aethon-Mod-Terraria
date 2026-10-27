@@ -24,17 +24,17 @@ namespace AethonMod.Content.VFX
     ///     offset por distancia, los CUATRO HALOS APILADOS (14×·5×·4×·2×),
     ///     15 partículas/frame a lo largo del canal y shake constante —
     ///     ahora ES EL PRISMA PRIMORDIAL (el ataque definitivo).
-    ///   · CALAMITY: trails primitivos (aquí RayoStrip con perfil
-    ///     gaussiano), «Yharim's Crystal» = haces que convergen,
-    ///     «Universe Splitter» = el partidor.
-    ///   · FARGO'S: el patrón FUSIÓN — EL TESTAMENTO rota las sentencias.
-    ///   · STARS ABOVE: «cada arma = UNA arquitectura única».
-    ///   · THORIUM: premiar el golpe con proyectiles secundarios (las
+    ///   · Los trails primitivos del género (aquí RayoStrip con perfil
+    ///     gaussiano), los haces que convergen,
+    ///     el partidor.
+    ///   · El patrón de rotación de sentencias — EL TESTAMENTO rota las sentencias.
+    ///   · Las armas de arquitectura única.
+    ///   · Premiar el golpe con proyectiles secundarios (las
     ///     ramas de la ira).
     ///
     /// LO QUE VIVE AQUÍ: la paleta del Juicio (el gradiente animado de la
     /// luz primordial), el buscador de presas, la colisión de CONO propia
-    /// (la del FusionRay usa una extensión de Calamity que aquí no existe),
+    /// (la del haz de referencia usa una extensión que aquí no existe),
     /// el giro de ángulo con tope, los accesos null-safe a las texturas
     /// procedurales y el estado compartido de la corona (la sentencia
     /// que toca).
@@ -71,7 +71,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// EL GRADIENTE DEL JUICIO: cicla suave oro → ámbar → blanco →
-        /// violeta → cian → oro… (la receta del gradiente Oil de el dios antiguo,
+        /// violeta → cian → oro… (la receta del gradiente Oil de la referencia,
         /// con la identidad cromática del grimorio). <paramref name="t"/>
         /// en vueltas (1.0 = un ciclo completo).
         /// </summary>
@@ -129,8 +129,8 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// LA COLISIÓN DE CONO — la receta del rayo de fusión sin la
-        /// extensión de Calamity: el punto del hitbox proyectado sobre el
+        /// LA COLISIÓN DE CONO — la receta del rayo de fusión sin
+        /// extensiones ajenas: el punto del hitbox proyectado sobre el
         /// eje del cono debe caer dentro del largo, y su distancia
         /// perpendicular debe caber en el semiancho creciente
         /// (dist·tan(semiángulo) + el radio del propio hitbox).
@@ -149,7 +149,7 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL GIRO CON TOPE (el AngleTowards de Calamity): gira el ángulo
+        /// EL GIRO CON TOPE (el AngleTowards del género): gira el ángulo
         /// actual hacia el objetivo SIN pasarse, envolviendo la diferencia
         /// a (−π, π].
         /// </summary>
@@ -221,7 +221,7 @@ namespace AethonMod.Content.VFX
         //
         //  LA AUTOPSIA: las fundas de la .54.6 eran FILAMENTOS DE COLOR
         //  SÓLIDO (RayoStrip.FilamentoEnLote) — el perfil gaussiano sin
-        //  textura. El rayo de fusión ORIGINAL multiplica CUATRO texturas
+        //  textura. El rayo de fusión DE REFERENCIA multiplica CUATRO texturas
         //  en el shader (cuerpo fBm · segundo ruido · glow · bits de
         //  chispas, estudiado en su fuente): el «hervir» vive en ESA
         //  multiplicación, no en el color. LA CURA: la pila de seis
@@ -254,7 +254,7 @@ namespace AethonMod.Content.VFX
         //  — GEOMETRÍA ANGULAR que al fluir por el haz se veía como
         //  PICOS APILADOS (el VLM lo confirmó sobre el collage); y
         //  RayoConcentrado_2 era una gaussiana casi sin detalle (0
-        //  transiciones) — el «segundo ruido» del original tiene 487
+        //  transiciones) — el «segundo ruido» de la referencia tiene 487
         //  colores y el 22 % saturado. LA CURA: las cuatro texturas de
         //  PLASMA de la receta del informe 79-a (fBm Perlin tileable con
         //  domain warping ±6px, envolvente suave en V que SIEMPRE manda
@@ -267,27 +267,36 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// LA CARNE del haz — CarnePlasma (v6.54.8): plasma fBm orgánico
         /// con el núcleo saturado a lo largo de TODO el canal (la fila
-        /// central del original está a 0.81..1.00) y los tonos medios
+        /// central de la referencia está a 0.81..1.00) y los tonos medios
         /// VIVIENDO dentro de la banda. Gris — el color va en runtime.
         /// </summary>
         public static Texture2D TexRuido => Tex("AethonMod/Content/Effects/Procedural/CarnePlasma");
 
         /// <summary>
         /// EL SEGUNDO RUIDO — SegundoRuido (v6.54.8): más binario que la
-        /// carne (52 % negro + 22 % saturado, ~64 niveles), como el
-        /// FusionRay_3 del original. Con flujo más rápido las dos capas
+        /// carne (52 % negro + 22 % saturado, ~64 niveles), como la
+        /// segunda capa del haz de referencia. Con flujo más rápido las dos capas
         /// se CRUZAN y el haz HIERVE (el producto tex0·tex1).
         /// </summary>
         public static Texture2D TexRemolino => Tex("AethonMod/Content/Effects/Procedural/SegundoRuido");
 
         /// <summary>
         /// LOS BITS — BitsChispa (v6.54.8): la máscara blanca de blobs
-        /// duros del original (uBits): ~16 blobs elongados 2-3:1 a lo
+        /// duros de la referencia (uBits): ~16 blobs elongados 2-3:1 a lo
         /// largo, cobertura 12 %, bordes 2-4px. NUNCA se dibuja sola: se
         /// muestrea DOS veces con flujos distintos (el AND doble del
         /// shader) y se cruza con la carne — chispas dispersas.
+        /// (v6.55.0 — la máscara regenerada: los blobs viven SOLO en el
+        /// corazón V 0.32..0.68 — jamás asoman al borde de la tira.)
         /// </summary>
         public static Texture2D TexBits => Tex("AethonMod/Content/Effects/Procedural/BitsChispa");
+
+        /// <summary>
+        /// LA RAMPA — RampaGlow (v6.54.8): el perfil de calor transversal
+        /// (la funda que envuelve el canal). La usa el shader del haz
+        /// concentrado como cuarta textura multiplicada.
+        /// </summary>
+        public static Texture2D TexRampa => Tex("AethonMod/Content/Effects/Procedural/RampaGlow");
 
         /// <summary>
         /// EL FLICKER INCONMENSURABLE (técnica nº11 de la investigación):
@@ -307,7 +316,7 @@ namespace AethonMod.Content.VFX
         ///   PASADA 1 — EL AURA: RuidoTinta a 2.4× con flujo lento — la
         ///   envoltura que respira y se deshace lejos del eje.
         ///   PASADA 2 — EL CUERPO: RuidoTinta a 1× con el COLOR QUE VIAJA
-        ///   a lo largo (el ValueAt(p) del original, por vértice) y EL
+        ///   a lo largo (el ValueAt(p) de la referencia, por vértice) y EL
         ///   FADE DE LENTE (el centro del haz sobrevive más que los
         ///   extremos — el smoothstep del shader, horneado por nodo).
         ///   PASADA 3 — EL REMOLINO: el SEGUNDO ruido a 0.78× con periodo
@@ -334,7 +343,7 @@ namespace AethonMod.Content.VFX
         /// <param name="intensidad">La envolvente global (conv / vida / potencia).</param>
         /// <param name="tiempo">El reloj determinista de la casa.</param>
         /// <param name="semilla">Semilla por-proyectil (la vena tiembla distinta en cada haz).</param>
-        /// <param name="arcoiris">True = el color VIAJA a lo largo (la firma del original); false = color fijo.</param>
+        /// <param name="arcoiris">True = el color VIAJA a lo largo (la firma de la referencia); false = color fijo.</param>
         /// <param name="flujo">Multiplicador del flujo (negativo = la carne hierve HACIA la raíz — las columnas hierven hacia arriba).</param>
         /// <param name="conAberracion">False para las columnas finas (las ramas no necesitan borde prismático).</param>
         public static void HazFusionEspina(Vector2[] espina, float[] perfil, Color color, float intensidad,
@@ -403,19 +412,28 @@ namespace AethonMod.Content.VFX
                 // la misma máscara con DOS flujos que se cruzan: donde los
                 // blobs de ambas nubes coinciden, CHISPEA (y donde no, nada:
                 // la cobertura del 12 % de cada una se cruza en ~1.5 % de
-                // puntos brillantes — las chispas dispersas del original).
+                // puntos brillantes — las chispas dispersas de la referencia).
+                // v6.55.0 — LA CURA DE LOS PICOS (2ª ronda): la pasada vivía
+                // a 1.15× el semiancho del CUERPO con la máscara llegando
+                // hasta V=0.09 — los blobs duros ASOMABAN en la funda tenue
+                // y el ojo los leía como PÚAS pegadas al borde (simulado:
+                // zigzag cada ~17 px). Ahora la máscara nueva vive SOLO en
+                // el corazón (V 0.32..0.68, gen_bits_v6550.py) y la pasada
+                // se dibuja DENTRO del cuerpo (0.98× y V 0.08..0.92 — por
+                // si una textura vieja anda suelta): las chispas son
+                // TEXTURA del canal, jamás silueta.
                 Texture2D bits = TexBits;
                 if (bits != null && intensidad > 0.35f)
                 {
                     var semiBits = new float[n];
-                    for (int i = 0; i < n; i++) semiBits[i] = perfil[i] * 1.15f;
+                    for (int i = 0; i < n; i++) semiBits[i] = perfil[i] * 0.98f;
                     Color cBits = arcoiris
                         ? GradienteJuicio(tiempo * 0.07f - 0.30f)
                         : color;
                     RayoStrip.FajaTexturadaEnLote(pts, semiBits, Alfa(cBits, 0.30f * intensidad),
-                        bits, 210f, 1.3f * flujo, tiempo, 0.05f, 0.95f);
+                        bits, 210f, 1.3f * flujo, tiempo, 0.08f, 0.92f);
                     RayoStrip.FajaTexturadaEnLote(pts, semiBits, Alfa(BlancoCalido, 0.22f * intensidad),
-                        bits, 150f, 2.1f * flujo, tiempo + 3.7f, 0.05f, 0.95f);
+                        bits, 150f, 2.1f * flujo, tiempo + 3.7f, 0.08f, 0.92f);
                 }
 
                 if (carne != null)

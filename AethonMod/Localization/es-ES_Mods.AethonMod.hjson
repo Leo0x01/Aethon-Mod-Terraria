@@ -1943,7 +1943,7 @@ Items: {
 			'''
 	}
 
-	// v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS (Task 74-a/b/c)
+	// v6.54.0 — LA INVESTIGACIÓN: LAS ALAS DE CÓDIGO (Task 74-a/b/c)
 	
 	BolsaDeAlasPrisma: {
 		DisplayName: La Bolsa de las Alas
@@ -2031,20 +2031,20 @@ Items: {
 			'''
 	}
 
-	RayoFusion: {
-		DisplayName: El Rayo de Fusión
+	RayoConcentradoDos: {
+		DisplayName: El Rayo Concentrado II
 		Tooltip:
 			'''
-			LA RÉPLICA DE INVESTIGACIÓN — la copia exacta del ataque del dios,
-			con SUS texturas y SU shader originales: la boca de glows apilados
-			creciendo, el telegraph que apunta, el cono de 3500 px con su
-			barrido cosenoidal, LAS CUATRO TEXTURAS MULTIPLICADAS (la carne
-			fBm · el segundo ruido · la rampa · los bits en AND doble) y el
-			núcleo blanco por saturación. 300 ticks de carga + 800 de
-			láser — TAL CUAL ERA, con su kick de cámara, su música callada
-			al 30 % y sus polvos cromáticos recorriendo el conducto.
-			El patrón de calidad, en tu mano: compáralo con las sentencias.
-			Objeto de investigación — se retira antes de publicar.
+				«El haz puro, en tu mano: 3500 px de plasma que respira.»
+				LA SEXTA DE LA BOLSA — el cono completo: 300 ticks de carga
+				(la boca de glows apilados creciendo + la aguja que apunta)
+				y 800 de láser con su barrido cosenoidal. Las CUATRO CAPAS
+				del plasma multiplicadas (la carne fBm · el segundo ruido ·
+				la rampa de calor · las chispas en doble AND) corren por el
+				shader propio de la casa — con la escala del ruido compensada
+				y el núcleo blanco suave: plasma orgánico, JAMÁS picos.
+				Con su kick de cámara, su música callada al 30 %, su vuelo
+				infinito y sus polvos cromáticos recorriendo el conducto.
 			'''
 	}
 
@@ -2052,24 +2052,11 @@ Items: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-				LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS
-				de efectos (el plasma multicapa de la .54.8: carne fBm orgánica —
-				nunca más picos) + LA RÉPLICA de investigación, la copia exacta del
-				rayo de fusión con sus texturas originales: el prisma, el partidor,
-				el réquiem, la ira… y EL TESTAMENTO, la corona que las dicta.
-			'''
-	}
-
-	BolsaInvestigacion: {
-		DisplayName: La Bolsa de la Investigación
-		Tooltip:
-			'''
-				Los items nacidos del estudio de las texturas del dios:
-				Rayos Concentrados, Trueno del Prisma, Lodo de Esencia,
-				Cetro de Constelaciones, Estela del Cosmos y Tinta Viva —
-				TODO re-escrito 100 % para el mod, cero material portado.
-				Dentro viaja la Bolsa de las Alas.
-				Clic derecho para desplegarla. Solo entrega lo que falte.
+				LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS
+				COMPLETAS de efectos (el plasma multicapa: carne fBm orgánica
+				— nunca más picos) + EL RAYO CONCENTRADO II, el haz puro con
+				su shader propio: el prisma, el partidor, el réquiem, la ira…
+				y EL TESTAMENTO, la corona que las dicta.
 			'''
 	}
 
@@ -2077,93 +2064,12 @@ Items: {
 		DisplayName: El Cofre del Arsenal
 		Tooltip:
 			'''
-				LAS VEINTIDÓS BOLSAS del arsenal dentro de una sola: la
+				LAS VEINTICUATRO BOLSAS del arsenal dentro de una sola: la
 				del Probador, la de los Fundacionales, la de los Soles
 				Rúnicos… y todas las demás.
 				Ábrela y despliega la que necesites.
 				Clic derecho. Solo entrega lo que te falte.
 			'''
-	}
-
-	RayosConcentrados: {
-		DisplayName: Rayos Concentrados
-		Tooltip:
-			'''
-				«Cuatro capas de luz multiplicadas: el rayo de fusión, tuyo.»
-				LA técnica del ataque estrella del dios, 100 % re-escrita:
-				el cuerpo de ruido, las chispas de doble muestreo, el perfil
-				de brillo y el núcleo+falda — multiplicados por vértice,
-				con el arcoíris corriendo y el núcleo blanco-caliente.
-				Carga 45 t (los soles rúnicos crecen) y FUEGO: 2000 px
-				de haz que respira. Daño por segmentos, como el original.
-			'''
-		Prueba: Arma de pruebas — la receta es 10 de madera.
-	}
-
-	TruenoDelPrisma: {
-		DisplayName: El Trueno del Prisma
-		Tooltip:
-			'''
-				El relámpago ramificado del dios, nacido de nuevo: DOS
-				muestras de la misma textura desfazadas 0.5 y multiplicadas
-				(solo las vetas que coinciden sobreviven), la polilínea que
-				se AQUIETA tras el impacto y el arcoíris desvaneciéndose.
-				1 rayo grande + hasta 2 pequeños a los vecinos.
-			'''
-		Prueba: Arma de pruebas — la receta es 10 de madera.
-	}
-
-	LodoDeEsencia: {
-		DisplayName: El Lodo de Esencia
-		Tooltip:
-			'''
-				Los charcos bioluminiscentes morados: la base oscura
-				ondulando (warp senoidal) y cientos de puntos violetas
-				latiendo encima. Los charcos SE HINCHAN al acumularse.
-				Daña a quien los pise.
-			'''
-		Prueba: Arma de pruebas — la receta es 10 de madera.
-	}
-
-	CetroConstelaciones: {
-		DisplayName: El Cetro de Constelaciones
-		Tooltip:
-			'''
-				Invoca estrellas que orbitan y se repelen; las cercanas se
-				unen con LÍNEAS de daño real (la constelación del esbirro
-				estelar del dios, 100 % casa). La primera dibuja la viñeta
-				del área girando doble. Hasta 5 estrellas vivas.
-			'''
-		Prueba: Arma de pruebas — la receta es 10 de madera.
-	}
-
-	EstelaDelCosmos: {
-		DisplayName: La Estela del Cosmos
-		Tooltip:
-			'''
-				El anillo tipo Saturno del esbirro estelar del dios, 100 %
-				casa y MORADO/NEGRO: la banda con auto-interferencia (la
-				misma textura a dos velocidades multiplicadas) y los
-				canales como máscaras — cuerpo violeta, línea lila
-				caliente, borde azul-violeta. Respira y gira tras de ti.
-			'''
-		Titulo: EL ANILLO SATURNO, MORADO Y NEGRO
-		Linea1: El anillo líquido del esbirro estelar del dios
-		Linea2: Puro adorno — accesorio o vanidad
-	}
-
-	TintaViva: {
-		DisplayName: La Tinta Viva
-		Tooltip:
-			'''
-				El cordón líquido del dios, hecho tuyo: DOS capas de tinta
-				multiplicadas (el encaje de agujeros que se abre y cierra),
-				el color nacido de la LUT negro→morado→lila y la onda que
-				se encrespa. La cola sigue TU rastro real de movimiento.
-			'''
-		Titulo: EL CORDÓN LÍQUIDO DEL DIOS, HECHO TUYO
-		Linea1: La cola de goo irisado que sigue tu rastro
-		Linea2: Puro adorno — accesorio o vanidad
 	}
 
 	AlasPrismaBase.Estilo: Alas de código — paleta, tempo y ruido propios
@@ -2226,7 +2132,7 @@ Items: {
 		DisplayName: Alas del Prisma
 		Tooltip:
 			'''
-				El arcoíris del dios antiguo corre por el abanico completo.
+				El arcoíris completo corre por el abanico.
 				Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -2449,14 +2355,7 @@ Projectiles: {
 	DignosFXProjectile.DisplayName: El Destello de los Dignos
 	BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
 	SombraPagina2Projectile.DisplayName: La Sombra de la Página II
-	// v6.54.0 — LA INVESTIGACIÓN
-	RayosConcentradosHeld.DisplayName: Los Rayos Concentrados
-	TruenoPrismaRayo.DisplayName: El Rayo del Trueno del Prisma
-	LodoGlob.DisplayName: El Globo de Lodo
-	LodoCharco.DisplayName: El Charco de Esencia
-	EstrellaPrisma.DisplayName: La Estrella del Prisma
-	EstelaCosmosHalo.DisplayName: La Estela del Cosmos
-	TintaVivaHalo.DisplayName: La Tinta Viva
+	// RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
 }
 
 Buffs: {

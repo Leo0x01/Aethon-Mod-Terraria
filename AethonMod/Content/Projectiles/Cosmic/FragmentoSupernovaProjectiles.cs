@@ -18,33 +18,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// pero cópialo como proyectil o minion y esto es solo para pruebas")
     /// de la SINGULARIDAD ALADA: el artefacto-divinidad "ojo alado" cuyo
     /// look, afterimages y ataques icónicos se calcaron de la fuente
-    /// original (investigación v6.41 en research/supernova_v641/ — el
+    /// de referencia (investigación v6.41 en research/supernova_v641/ — el
     /// informe con las medidas exactas de sprite, paleta y cerebro).
     ///
-    /// EL LOOK (las capas del original, sobre primitivas de la casa):
+    /// EL LOOK (las capas de la referencia, sobre primitivas de la casa):
     ///   · EL OJO ALADO: cuerpo crema-oro (110×40) + DOS ALAS naranjas
     ///     inclinadas con puntas rojo oscuro + LA PUPILA oscura (pase
     ///     alpha — el vacío del ojo) — se INCLINA con la velocidad
-    ///     (banking ×0.03, el número del original). v6.43: el cuerpo
+    ///     (banking ×0.03, el número de la referencia). v6.43: el cuerpo
     ///     compuesto YA ES UN MOLDE (MoldeLib.OjoAlado — EL PRIMER MOLDE
     ///     de la casa): este archivo solo ANCLA (centro+rotación+escala)
     ///     y PROYECTA; los números exactos viven en la librería.
     ///   · LAS AFTERIMAGES ORBITALES — LA FIRMA: 4 clones crema (alfa 50)
     ///     orbitando a 8px + 3 clones naranjas (alfa 77) a 16px, girando
     ///     y RESPIRANDO con el pulso triangular de 4 segundos (el bucle
-    ///     EXACTO del original, trasladado a EspectroLib).
+    ///     EXACTO de la referencia, trasladado a EspectroLib).
     ///   · EL HALO: anillo dorado + glow Goldenrod PULSANDO con periodo
     ///     1.4 s (el número exacto) + luz naranja ×1.25 (exacta).
     ///
-    /// EL CEREBRO (el temperamento del original, domado a minion):
+    /// EL CEREBRO (el temperamento de la referencia, domado a minion):
     ///   · HOVER suave y pesado al hombro (Lerp 0.1, amortiguación Y) —
     ///     la gravedad de singularidad, no un minion nervioso.
     ///   · CICLO DE 180 ticks alternando sus DOS ataques icónicos:
     ///     – LA VOLEA: 5 ráfagas nova en abanico ±1 rad (vel 6,
-    ///       acelerando ×1.01 — los números del original).
+    ///       acelerando ×1.01 — los números de la referencia).
     ///     – EL BEAM: 45 ticks de TELEGRAPH (la línea que se afila, el
     ///       anillo que se contrae) y 15 ticks de rayo de 900px con el
-    ///       núcleo blanco + halo dorado→naranja del original.
+    ///       núcleo blanco + halo dorado→naranja de la referencia.
     ///   · Al morir una ráfaga: LA FLOR DE FUEGO — el estallido radial de
     ///     seis lengüetas (PyraLib.Estallido, nacido de esta réplica).
     ///
@@ -66,7 +66,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private const int Ciclo = 180;
         private const int TickVolea = 40;          // el disparo de la volea
         private const int BeamTelegraph = 45;      // el aviso (≤45: legible)
-        private const float BeamLargo = 900f;      // px (el rayo del original)
+        private const float BeamLargo = 900f;      // px (el rayo de la referencia)
         private const int BeamTicks = 15;          // la ráfaga del beam
         private const float VelHover = 9f;
 
@@ -161,7 +161,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             float deseada = Math.Min(dist * 0.12f, VelHover);
             Projectile.velocity = Vector2.Lerp(Projectile.velocity, dir * deseada, 0.1f);
-            Projectile.velocity.Y *= 0.94f;      // la amortiguación del original
+            Projectile.velocity.Y *= 0.94f;      // la amortiguación de la referencia
             Projectile.rotation = Projectile.velocity.X * 0.03f;   // banking exacto
 
             // === EL CICLO DE ATAQUES (180 ticks, alternando). ===
@@ -225,7 +225,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === LA LUZ (la del original: naranja ×1.25). ===
+            // === LA LUZ (la de la referencia: naranja ×1.25). ===
             Lighting.AddLight(Projectile.Center, Color.Orange.ToVector3() * 1.25f);
         }
 
@@ -315,7 +315,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     interior ? 0.55f : 0.5f, tiempo, tinte);
             }
             // EL CUERPO VIVO (tinte blanco = sus colores propios). banking 0:
-            //  el banco del original (velocidad.X×0.03) ya vive HORNEADO en
+            //  el banco de la referencia (velocidad.X×0.03) ya vive HORNEADO en
             //  Projectile.rotation — pasarlo aquí además lo doblaría.
             molde.Proyectar(centro, rot, 0f, 1f, tiempo, Color.White, 1f);
             VFXCore.FlushAdditive(null, false);
@@ -358,7 +358,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 if (tBeam >= 0 && tBeam < BeamTicks)
                 {
-                    // EL RAYO: la campana sin(π·t/B) del original (nace a
+                    // EL RAYO: la campana sin(π·t/B) de la referencia (nace a
                     // tope y muere) — halo dorado→naranja + núcleo blanco.
                     float campana = MathF.Sin(tBeam / (float)BeamTicks * MathF.PI);
                     Color halo = Color.Lerp(Color.Goldenrod, Color.OrangeRed, 0.65f) * (0.55f * campana);
@@ -407,7 +407,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// RafagaNovaProjectile — v6.41 — LA RÁFAGA NOVA.
     ///
     /// El dardo ardiente de la volea del fragmento (el calco del
-    /// proyectil de ataque del original): vuela ACELERANDO ×1.01 por
+    /// proyectil de ataque de la referencia): vuela ACELERANDO ×1.01 por
     /// tick con su cola de fantasmas (EspectroLib — la memoria de la casa),
     /// y al morir FLORECE: la FLOR DE FUEGO radial de seis lengüetas
     /// (PyraLib.Estallido — nacido de esta réplica) con su daño en área.
@@ -464,11 +464,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (!_muriendo)
             {
-                // === EL VUELO: aceleración ×1.01 (el número del original). ===
+                // === EL VUELO: aceleración ×1.01 (el número de la referencia). ===
                 Projectile.velocity *= 1.01f;
                 Projectile.rotation = Projectile.velocity.ToRotation();
 
-                // La luz del dardo (naranja fuerte — la del original ×1.75).
+                // La luz del dardo (naranja fuerte — la de la referencia ×1.75).
                 Lighting.AddLight(Projectile.Center, Color.OrangeRed.ToVector3() * 1.75f);
 
                 EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
@@ -509,7 +509,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // El tercer golpe mata floreciendo (como la bomba del original:
+            // El tercer golpe mata floreciendo (como la bomba de la referencia:
             // el impacto ES la explosión) — con penetración infinita el
             // contador es NUESTRO y el dardo NUNCA muere sin flor.
             _golpes++;
@@ -581,7 +581,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else
                 {
-                    // === LA FLOR DE FUEGO (el estallido del original). ===
+                    // === LA FLOR DE FUEGO (el estallido de la referencia). ===
                     float progreso = 1f - Projectile.timeLeft / (float)MuerteTicks;
                     PyraLib.Estallido(Main.spriteBatch, Projectile.Center - Main.screenPosition,
                         RadioFlor, progreso, PyraPalettes.SolarFire, Seed,

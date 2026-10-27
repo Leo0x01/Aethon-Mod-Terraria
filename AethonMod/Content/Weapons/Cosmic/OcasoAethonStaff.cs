@@ -13,7 +13,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// OcasoAethonStaff — v6.27 — EL BASTÓN DEL OCASO DE AETHON.
     ///
     /// El ARMA SUPREMA del patrón gauge (petición del usuario: "aplica el
-    /// patrón gauge del Cosmic Destroyer a un arma suprema"). La trinidad
+    /// patrón gauge del arma de referencia a un arma suprema"). La trinidad
     /// del informe de investigación v6.26 (el informe de investigación v6.26,
     /// lección 10), traducida al lenguaje del arsenal:
     ///

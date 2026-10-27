@@ -89,7 +89,7 @@ namespace AethonMod.Content.Projectiles
             }
 
             // === LA LIBERACIÓN (el release de la receta: 12 t de fade con
-            // el widthMul → 0 del GammaRayBeam — el rayo EXPIRA, no muere) ===
+            // el widthMul → 0 del haz — el rayo EXPIRA, no muere) ===
             if (Soltado)
             {
                 Projectile.ai[2] += 1f;

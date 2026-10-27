@@ -580,8 +580,8 @@ namespace AethonMod.Content.Items.Bolsas
     /// Las TRES NUEVAS (el Rayo Primordial — el rayo del clima de Terraria
     /// 1.4.5 portado 1:1 con LA OLA de energizado; el Arco de Sobretensión
     /// — el Arc Surge de vanilla: arcos carmesí mano→cursor enganchados a
-    /// la mano; y v6.50.24 el Colmillo de Vena Trueno — la caída del dragón
-    /// de Coralite: el trío parpadeante) MÁS las VIEJAS (el Cetro del
+    /// la mano; y v6.50.24 el Colmillo de Vena Trueno — la caída del
+    /// dragón de la referencia: el trío parpadeante) MÁS las VIEJAS (el Cetro del
     /// Trueno Rúnico y el Cetro del Trueno Perlin).</summary>
     public class BolsaArmasRayo : BolsaCategoria
     {
@@ -597,18 +597,18 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.RayoPrimordialStaff>(), 1));   // el rayo del clima, de 1000 px
             l.Add((ModContent.ItemType<Weapons.Cosmic.ArcoSobretensionStaff>(), 1)); // el Arc Surge: arcos carmesí mano→cursor
             // v6.50.24 — EL COLMILLO DE VENA TRUENO (la petición: "para los
-            // rayos crea una nueva arma basada en thundervein dragon Coralite
-            // mod terraria"): la caída del dragón de Coralite — trío
+            // rayos crea una nueva arma basada en un dragón de venas de
+            // trueno"): la caída del dragón — trío
             // parpadeante 1 naranja + 2 amarillos que cae del cielo,
             // telegrafiada, con cadena de 3.
-            l.Add((ModContent.ItemType<Weapons.Cosmic.VenaTruenoStaff>(), 1));       // el dragón de Coralite: el trío de la caída
+            l.Add((ModContent.ItemType<Weapons.Cosmic.VenaTruenoStaff>(), 1));       // el dragón de venas: el trío de la caída
             // LAS VIEJAS
             l.Add((ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>(), 1));        // el trueno rúnico del cielo
             l.Add((ModContent.ItemType<Weapons.Cosmic.TruenoPerlinStaff>(), 1));     // el arco de ruido Perlin
             // v6.53 — EL PRIMER TRAZO (la purga del Escriba: el arma del
             // rayo masivo muda a SU bolsa natural — la de las armas de
-            // rayo; su render ahora vive la técnica del Rayo de Fusión
-            // del dios antiguo).
+            // rayo; su render ahora vive la técnica del haz de plasma
+            // de la investigación).
             l.Add((ModContent.ItemType<Weapons.PrimerTrazo>(), 1));             // el rayo masivo de fusión
             return l;
         }
@@ -685,28 +685,24 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    // v6.54.2 — LA BOLSA DEL DIOS ANTIGUO SE RETIRÓ COMPLETA: era el
-    // arsenal de las 5 armas copiadas del jefe del video (v6.52.2);
-    // con la purga final de la palabra prohibida, las armas, sus
-    // proyectiles, la bolsa y su icono se fueron juntos — el Cofre
-    // del Arsenal baja de 23 a 22 bolsas (las versiones 100 % casa
-    // de la v6.54.0 viven en la Bolsa de la Investigación).
+    // v6.54.2 — LA BOLSA DE LAS ARMAS COPIADAS SE RETIRÓ COMPLETA: era
+    // el arsenal de las 5 armas nacidas del video de referencia
+    // (v6.52.2); con la purga final del material ajeno, las armas, sus
+    // proyectiles, la bolsa y su icono se fueron juntos (las versiones
+    // 100 % casa vivían en la bolsa de la investigación — también
+    // retirada en la v6.55.0).
 
     // ======================================================================
-    //  v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN (la letra del 27/10: «con
-    //  toda esta investigacion debes crear nuevos items ya sean
-    //  cosmeticos o armas para el jugador en una nueva bolsa … todos los
-    //  items nuevos que crees con esta investigacion profunda ponlos en
-    //  una unica bolsa y daselas al jugador») + LA BOLSA DE LAS ALAS
-    //  (las 15 alas del mismo sistema) + LA BOLSA MAESTRA («respecto a
-    //  las bolsas anteriores, guardalas todas en otra bolsa y de esa
-    //  forma solo se entregara esta bolsa con mas bolsas de las viejas,
-    //  mientras que la nueva bolsa aparece aparte»).
+    //  v6.55.0 — LA BOLSA DE LAS ALAS VIVE POR SU CUENTA (la letra:
+    //  «borra la bolsa de investigación con todas sus armas que ninguna
+    //  sirve, deja la bolsa de definitiva y la bolsa de alas»): las
+    //  quince alas procedurales se entregan APARTE en el kit de pruebas
+    //  y viajan DENTRO del Cofre del Arsenal (la maestra).
     // ======================================================================
 
     /// <summary>v6.54.0 — LA BOLSA DE LAS ALAS: las quince alas
-    /// procedurales de la investigación (el mismo sistema de la Aurora
-    /// de Tinta — cada una con SU paleta, SU tempo y SU ruido de las
+    /// procedurales (el mismo sistema de la Aurora de Tinta — cada una
+    /// con SU paleta, SU silueta vectorial, SU tempo y SU ruido de las
     /// veinte texturas nuevas).</summary>
     public class BolsaDeAlasPrisma : BolsaCategoria
     {
@@ -737,50 +733,31 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>v6.54.0 — LA BOLSA DE LA INVESTIGACIÓN: los seis items
-    /// nacidos del estudio profundo de las texturas de efecto del
-    /// dios antiguo (el rayo de fusión, la estela espacial, el cordón
-    /// líquido, los relámpagos ×2, el lodo, la constelación, el mapa
-    /// de color, el brillo, el ruido, el espacio — TODO re-implementado
-    /// 100 % casa, cero material portado) + la Bolsa
-    /// de las Alas dentro.</summary>
-    public class BolsaInvestigacion : BolsaCategoria
-    {
-        protected override string Titulo => "La Bolsa de la Investigación";
-        protected override string NombreCorto => "Bolsa de la Investigación";
-        protected override Color ColorFiesta => new(140, 60, 210);
-        protected override string Nota => "Las técnicas de las texturas del dios — re-escritas 100 % para ti";
-
-        protected override List<(int tipo, int pila)> Contenido()
-        {
-            var l = new List<(int, int)>();
-            // LAS ARMAS.
-            l.Add((ModContent.ItemType<Weapons.Investigacion.RayosConcentrados>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Investigacion.TruenoDelPrisma>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Investigacion.LodoDeEsencia>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Investigacion.CetroConstelaciones>(), 1));
-            // LOS COSMÉTICOS.
-            l.Add((ModContent.ItemType<Items.Cosmetics.Investigacion.EstelaDelCosmos>(), 1));
-            l.Add((ModContent.ItemType<Items.Cosmetics.Investigacion.TintaViva>(), 1));
-            // LAS ALAS (la letra: «metelas en una bolsa de alas» — vive
-            // DENTRO de la bolsa única de la investigación).
-            l.Add((ModContent.ItemType<BolsaDeAlasPrisma>(), 1));
-            return l;
-        }
-    }
+    // ======================================================================
+    //  v6.55.0 — LA BOLSA DE LA INVESTIGACIÓN FUE RETIRADA (la letra:
+    //  «borra la bolsa de investigación con todas sus armas que ninguna
+    //  sirve, deja la bolsa de definitiva y la bolsa de alas»). Sus armas
+    //  (Rayos Concentrados, Trueno del Prisma, Lodo de Esencia, Cetro de
+    //  Constelaciones) y sus cosméticos (Estela del Cosmos, Tinta Viva)
+    //  se retiraron COMPLETOS del mod. LA BOLSA DE LAS ALAS vive ahora
+    //  por su cuenta: entrega directa del kit + dentro del Cofre del
+    //  Arsenal (la maestra).
+    // ======================================================================
 
     /// <summary>v6.54.0 — LA BOLSA MAESTRA: TODAS las bolsas anteriores
     /// del mod guardadas DENTRO de una sola (la letra: «respecto a las
     /// bolsas anteriores, guardalas todas en otra bolsa y de esa forma
     /// solo se entregara esta bolsa con mas bolsas de las viejas,
     /// mientras que la nueva bolsa aparece aparte») — el kit de pruebas
-    /// entrega ESTA maestra + la Bolsa de la Investigación aparte.</summary>
+    /// entrega ESTA maestra (con TODAS dentro, la de las Alas incluida
+    /// desde la v6.55.0) + la Bolsa de las Alas y la de las Definitivas
+    /// aparte.</summary>
     public class BolsaMaestra : BolsaCategoria
     {
         protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
         protected override string NombreCorto => "El Cofre del Arsenal";
         protected override Color ColorFiesta => new(255, 196, 107);
-        protected override string Nota => "Las veintitrés bolsas del arsenal, una dentro de la otra";
+        protected override string Nota => "Las veinticuatro bolsas del arsenal, una dentro de la otra";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -807,6 +784,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<BolsaSombras>(), 1));
             l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
+            // v6.55.0 — LA BOLSA DE LAS ALAS entra a la maestra (vivía
+            // dentro de la investigación retirada — ahora vive por su
+            // cuenta: aquí y en la entrega directa del kit)
+            l.Add((ModContent.ItemType<BolsaDeAlasPrisma>(), 1));
             // v6.54.6 — EL VEREDICTO DE AETHON REFORMADO (la bolsa 23 del cofre:
             // ahora LAS CINCO SENTENCIAS con sus siete capas)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
@@ -822,28 +803,29 @@ namespace AethonMod.Content.Items.Bolsas
     //  y EL TESTAMENTO, la corona que las dicta rotándolas ×1.3).
     // ======================================================================
 
-    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las cinco sentencias del Veredicto.</summary>
+    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las cinco sentencias del Veredicto + el rayo concentrado.</summary>
     public class BolsaDefinitivas : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Armas Definitivas";
         protected override string NombreCorto => "Bolsa de las Definitivas";
         protected override Color ColorFiesta => new(255, 214, 120);
-        protected override string Nota => "Las cinco sentencias del Veredicto — el ataque definitivo vive aquí";
+        protected override string Nota => "Las cinco sentencias del Veredicto y el haz puro — el ataque definitivo vive aquí";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
             // v6.54.6 — LAS CINCO SENTENCIAS (la 1 es EL ATAQUE DEFINITIVO
-            // con la receta completa del rayo de fusión; la 5 es la corona)
+            // con la receta completa del haz de fusión; la 5 es la corona)
             l.Add((ModContent.ItemType<Weapons.Definitivas.PrismaPrimordial>(), 1));      // 1 — EL ATAQUE DEFINITIVO: los 7 haces + el haz central de fusión
             l.Add((ModContent.ItemType<Weapons.Definitivas.PartidorDeMundos>(), 1));      // 2 — LA COLUMNA QUE PARTE EL MUNDO
             l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 3 — LA CAMPANA DE LOS TRES ANILLOS
             l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 4 — LOS OCHO JUICIOS DEL CIELO
             l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 5 — LA CORONA: dicta las cuatro rotándolas
-            // v6.54.8 — LA RÉPLICA de investigación (la copia exacta del rayo
-            // de fusión con sus texturas originales — el patrón de calidad
-            // para comparar; se retira antes de publicar)
-            l.Add((ModContent.ItemType<Weapons.Definitivas.RayoFusion>(), 1));             // 6 — LA RÉPLICA: el estándar, tal cual era
+            // v6.55.0 — LA SEXTA: EL RAYO CONCENTRADO II (antes la réplica de
+            // investigación de la .54.8 — ahora TODO casa: las texturas
+            // procedurales de la librería, el shader propio con la escala
+            // compensada y el núcleo suave, y el sonido sintetizado)
+            l.Add((ModContent.ItemType<Weapons.Definitivas.RayoConcentradoDos>(), 1));    // 6 — EL HAZ PURO: el cono de 3500 px con su barrido
             return l;
         }
     }

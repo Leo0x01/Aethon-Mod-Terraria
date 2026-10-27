@@ -17,8 +17,8 @@ namespace AethonMod.Content.Weapons.Definitivas
 
     /// <summary>
     /// ARMA 1 — EL PRISMA PRIMORDIAL: EL ATAQUE DEFINITIVO DEL MOD. La
-    /// evolución del «Yharim's Crystal» de Calamity con LA RECETA COMPLETA
-    /// del rayo de fusión estudiado en la fuente: siete haces del
+    /// evolución de los haces convergentes del género con LA RECETA COMPLETA
+    /// del haz de fusión estudiado a fondo: siete haces del
     /// espectro brotan alrededor del portador girando y CONVERGEN en un
     /// foco que se acerca a medida que el prisma se calienta — del foco
     /// sale EL HAZ CENTRAL de 2400 px con ANCHO CRECIENTE (la fórmula
@@ -76,8 +76,8 @@ namespace AethonMod.Content.Weapons.Definitivas
     }
 
     /// <summary>
-    /// ARMA 2 — EL PARTIDOR DE MUNDOS (la receta del «Universe Splitter»
-    /// de Calamity: un clic = un pilar, hecha ritual en SIETE capas): el
+    /// ARMA 2 — EL PARTIDOR DE MUNDOS (la receta del partidor de mundos
+    /// del género: un clic = un pilar, hecha ritual en SIETE capas): el
     /// velo de la contención, el telegrafo con sus cinco runas y sus
     /// chispas convergentes, LA COLUMNA de 260 px con sus cuatro fundas,
     /// el cráter de luz con los halos apilados, LAS TRES ONDAS de

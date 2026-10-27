@@ -136,7 +136,7 @@ namespace AethonMod.Content.Effects
         //
         //  EL CONTRATO DEL LOTE (la lección del client.log, v6.50.20):
         //  CustomSky.Draw corre DENTRO del lote del fondo de vanilla
-        //  (lote ABIERTO). El patrón del DoGSky: End del lote de vanilla
+        //  (lote ABIERTO). El patrón del cielo de jefe: End del lote de vanilla
         //  → lotes propios con LA MISMA MATRIZ del fondo → devolver el
         //  lote del fondo ABIERTO para el End de vanilla. Las sondas de
         //  la casa blindan cada cierre.
@@ -174,7 +174,7 @@ namespace AethonMod.Content.Effects
                 0f, 1f);
 
             // === LA MATRIZ DEL PAISAJE (la reconstrucción EXACTA del lote
-            //     del fondo — literal del DoGSky/Calamity) ===
+            //     del fondo — literal de la investigación) ===
             Matrix m = Main.BackgroundViewMatrix.TransformationMatrix;
             m.Translation -= Main.BackgroundViewMatrix.ZoomMatrix.Translation *
                 new Vector3(1f,
@@ -483,7 +483,7 @@ namespace AethonMod.Content.Effects
             finally
             {
                 // === 2. DEVOLVER EL LOTE DEL FONDO ABIERTO (el patrón del
-                //     DoGSky — el End de vanilla lo cerrará con naturalidad) ===
+                //     cielo de jefe — el End de vanilla lo cerrará con naturalidad) ===
                 if (!VFXCore.LoteAbierto)
                 {
                     try

@@ -312,7 +312,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 case EstiloLanzaEterna:
                     // v6.50.54 — LA LANZA: daño 100% MANUAL (ai[3] lo lleva:
                     // el telegrafo es INOFENSIVO — la regla de legibilidad de
-                    // Fargo's — y solo el VUELO corta).
+                    // la casa — y solo el VUELO corta).
                     Projectile.timeLeft = 150;
                     Projectile.hostile = false;
                     break;
@@ -1389,7 +1389,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //  con SU hitbox de barra honesta (dot/cruz contra los SEIS
                 //  rumbos — la geometría de la Espada Zenia). Los primeros
                 //  25 t de cada tanda los rayos son TRANSLÚCIDOS e
-                //  inofensivos (la regla Fargo's: lo que aún no daña se ve
+                //  inofensivos (la regla de la casa: lo que aún no daña se ve
                 //  translúcido — se ENCIENDEN al matar).
                 // =============================================================
                 case EstiloDanzaSolar:
@@ -2425,7 +2425,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // === v6.50.54 — LA DANZA SOLAR (fase mundo): LA RUEDA —
                     //     seis rayos de 860 px (núcleo blanco + halo dorado —
                     //     las primitivas del Estallido) girando LENTO; cada
-                    //     tanda nace TRANSLÚCIDA (alfa 0.35 — la regla Fargo)
+                    //     tanda nace TRANSLÚCIDA (alfa 0.35 — la regla de la casa)
                     //     y se ENCIENDE cuando mata ===
                     case EstiloDanzaSolar:
                     {

@@ -302,7 +302,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     float q = i / (float)(N - 1);
                     espina[i] = Vector2.Lerp(arriba, abajo, q);
-                    perfil[i] = MathHelper.Clamp(MathF.Sin(q * MathHelper.Pi) * 1.4f, 0.25f, 1f) *
+                    // v6.55.0 — LA CURA DE LAS ESQUINAS DEL CLAMP: el Clamp
+                    // duro (0.25..1) dejaba DOS QUIEBRES bruscos por lado en
+                    // la silueta de la columna — ahora la saturación es SUAVE
+                    // (SmoothStep: derivada cero en ambos extremos).
+                    float s = MathF.Sin(q * MathHelper.Pi) * 1.4f - 0.25f;
+                    float sat = MathHelper.SmoothStep(0f, 0.75f, MathHelper.Clamp(s, 0f, 0.75f));
+                    perfil[i] = (0.25f + 0.75f * sat) *
                         150f * potencia * flicker;
                 }
                 DefinitivasLib.HazFusionEspina(espina, perfil,

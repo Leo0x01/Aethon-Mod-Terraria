@@ -14,15 +14,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// TentaculoCosmicoProjectile — v6.41 — EL TENTÁCULO DEL VACÍO.
     ///
     /// RÉPLICA EXACTA (arma de pruebas — la petición literal del usuario)
-    /// del proyectil del "tomo de la apatía nula": el cerebro se portó
-    /// línea a línea del original (investigación v6.41 en
-    /// research/apatia_v641/); las partículas originales (pulsos de vacío
+    /// del proyectil de la investigación: el cerebro se recreó
+    /// línea a línea de la referencia (investigación v6.41 en
+    /// research/apatia_v641/); las partículas de la referencia (pulsos de vacío
     /// y chispas de cola) se replican con sus curvas EXACTAS (implosión
     /// PolyOut(4), opacidad en seno, decaimiento ×0.95/frame, muerte al
     /// cubo) sobre un búfer propio por instancia; y el polvo invertido
     /// del vacío tiene su calco propio en Content/Dusts.
     ///
-    /// EL CICLO VITAL (los números del original, sin tocar):
+    /// EL CICLO VITAL (los números de la referencia, sin tocar):
     ///   1. LA GESTACIÓN (ticks 0..120): el tentáculo frena suavemente
     ///      (vel ×0.96) mientras ESCUPE pulsos de vacío (negro + verde)
     ///      que IMPLOEN — sin dañar a nadie (CanDamage = false).
@@ -36,14 +36,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      la mira con el sentido de giro INVERTIDO y azota de nuevo.
     ///   4. La tercera curva muere matando: curvas agotadas → polvo final.
     ///
-    /// LA LEY DEL DAÑO (la del original): golpea TODO lo que toca su caja
+    /// LA LEY DEL DAÑO (la de la referencia): golpea TODO lo que toca su caja
     /// (penetración infinita, cooldown local de 64) y CADA golpe sucesivo
     /// pesa MENOS (×1.0 → ×0.7 tras 5 impactos — el tentáculo se aburre).
     ///
     /// NOTA MP: el estado de fase vive en campos de instancia SIN
     /// sincronizar (arma de pruebas para un jugador).
     /// NOTA DE RENDER: cero Main.rand en PreDraw (la variación de cada
-    /// partícula se fija al nacer, como el original guarda su rotación).
+    /// partícula se fija al nacer, como la referencia guarda su rotación).
     /// </summary>
     public class TentaculoCosmicoProjectile : ModProjectile
     {
@@ -55,7 +55,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
         // ==================================================================
-        //  EL CEREBRO (los campos del original, 1:1)
+        //  EL CEREBRO (los campos de la referencia, 1:1)
         // ==================================================================
 
         private ref float Time => ref Projectile.ai[0];
@@ -73,7 +73,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private static readonly Color InnerColor = Color.LightGreen;
 
         // ==================================================================
-        //  LAS PARTÍCULAS (los pulsos y chispas del original, curvas EXACTAS)
+        //  LAS PARTÍCULAS (los pulsos y chispas de la referencia, curvas EXACTAS)
         // ==================================================================
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==================================================================
-        //  LOS DEFAULTS (los del original, 1:1)
+        //  LOS DEFAULTS (los de la referencia, 1:1)
         // ==================================================================
 
         public override void SetStaticDefaults()
@@ -170,7 +170,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==================================================================
-        //  LA IA (el puerto línea a línea del original)
+        //  LA IA (la recreación línea a línea de la referencia)
         // ==================================================================
 
         public override void AI()
@@ -179,7 +179,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float distDuenio = Vector2.Distance(duenio.Center, Projectile.Center);
 
             // El rumbo: hacia la MIRA del dueño, girado por el sentido de la
-            // curva (el original re-apunta a cada tick al mundo del ratón).
+            // curva (la referencia re-apunta a cada tick al mundo del ratón).
             Vector2 rumbo = ((Main.MouseWorld - Projectile.Center).SafeNormalize(Vector2.UnitX) * 7f)
                 .RotatedBy(0.2f * _curvaDir);
 
@@ -311,7 +311,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==================================================================
-        //  LA LEY DEL DAÑO (la del original)
+        //  LA LEY DEL DAÑO (la de la referencia)
         // ==================================================================
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -396,7 +396,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// Un pase de partículas (alpha = el vacío que oscurece; aditivo =
-        /// la materia que brilla). Las curvas son las del original: el
+        /// la materia que brilla). Las curvas son las de la referencia: el
         /// pulso IMPLOE con PolyOut(4) y opacidad en seno; la chispa decae
         /// ×0.95/frame y muere al cubo.
         /// </summary>
@@ -421,10 +421,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (edad < 0 || edad >= p.Vida) continue;
 
                 float t = edad / (float)p.Vida;
-                // EL EASING POLYOUT(4) del original: implosión que frena.
+                // EL EASING POLYOUT(4) de la referencia: implosión que frena.
                 float prog = 1f - MathF.Pow(1f - t, 4f);
                 float escala = MathHelper.Lerp(p.Escala0 * 220f, 0f, prog);
-                // LA OPACIDAD EN SENO del original (nace viva, muere suave).
+                // LA OPACIDAD EN SENO de la referencia (nace viva, muere suave).
                 float op = MathF.Sin(MathHelper.PiOver2 + t * MathHelper.PiOver2);
                 if (op <= 0.01f) continue;
 

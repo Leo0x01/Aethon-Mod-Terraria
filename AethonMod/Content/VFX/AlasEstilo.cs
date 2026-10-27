@@ -54,6 +54,12 @@ namespace AethonMod.Content.VFX
         public float Curva;            // la punta se abre en garra (px × largo)
         public float AnclajeSep;       // la separación de las raíces del par
 
+        // === v6.55.0 — LA SILUETA VECTORIAL (la letra: «no solo
+        //     rectángulos planos — plumas, cuchillas») ===
+        public float Vientre;          // DÓNDE vive el ancho máximo (0.15..0.70 del largo — la pluma clásica ~0.35, la cuchilla ~0.20, la hoja ancha ~0.45)
+        public float Afilada;          // CÓMO muere la punta (0.5 redonda · 1 cuchilla recta · 2 aguja cóncava)
+        public float Filosa;           // v6.55.0-b — LA ASIMETRÍA DE CUCHILLA: el borde de fuga corre su vientre ANTES (0 = pluma simétrica · 1 = media luna afilada)
+
         // === EL COLOR EN MOVIMIENTO ===
         public float HueEntre;      // salto de hue pluma a pluma
         public float HueLargo;      // dispersión a lo largo de la pluma
@@ -113,6 +119,7 @@ namespace AethonMod.Content.VFX
                 AbiertoMin = 0.22f, AbiertoMax = 1.54f,
                 Inclinacion = 0.12f, Barrido = 0.14f,
                 Curva = 0f, AnclajeSep = 5f,
+                Vientre = 0.34f, Afilada = 1.1f, Filosa = 0.25f,   // v6.55.0 — la pluma clásica: vientre al 34 %, punta de cuchilla, leve asimetría
                 HueEntre = 0.085f, HueLargo = 0.16f, HueTiempo = 0.018f,
                 FlapVel = 1f, Desgarre = 1f,
                 NucleoInten = 0.92f, NucleoFrac = 0.30f,
@@ -135,7 +142,8 @@ namespace AethonMod.Content.VFX
                 plumas: 6, largoInt: 96f, largoExt: 52f, curva: 0.22f,
                 plegadoMin: 0.52f, plegadoMax: 0.98f,
                 abiertoMin: 0.18f, abiertoMax: 1.05f,
-                nucleo: 0.85f, cuerpo: 0.30f, halo: 0.14f);
+                nucleo: 0.85f, cuerpo: 0.30f, halo: 0.14f,
+                vientre: 0.42f, afilada: 0.7f, filosa: 0.35f);
 
             // 3 — ECLIPSE: CUATRO plumas anchas en abanico AMPLIO con
             //     garra curva — la penumbra que se despliega ancha.
@@ -145,7 +153,8 @@ namespace AethonMod.Content.VFX
                 plumas: 4, largoInt: 86f, largoExt: 46f, punta: 18f, barrido: 0.22f,
                 curva: 0.30f, plegadoMin: 0.46f, plegadoMax: 0.90f,
                 abiertoMin: 0.30f, abiertoMax: 1.70f,
-                nucleo: 0.80f, cuerpo: 0.38f, halo: 0.16f);
+                nucleo: 0.80f, cuerpo: 0.38f, halo: 0.16f,
+                vientre: 0.38f, afilada: 0.9f, filosa: 0.30f);
 
             // 4 — PLASMA: SIETE plumas finas curvadas HACIA ATRÁS — los
             //     arcos voltaicos que chisporrotean rápido.
@@ -157,7 +166,8 @@ namespace AethonMod.Content.VFX
                 abiertoMin: 0.20f, abiertoMax: 1.48f,
                 flap: 1.35f, desgarre: 1.3f,
                 nucleo: 1f, cuerpo: 0.42f, halo: 0.18f, ruidoInten: 1.2f,
-                ruidoFlujo: 1.6f);
+                ruidoFlujo: 1.6f,
+                vientre: 0.18f, afilada: 1.9f, filosa: 0.85f);
 
             // 5 — NEBULOSA: SEIS plumas larguísimas de flujo LENTO y
             //     vetas GRANDES — la nube estelar que se arrastra.
@@ -166,7 +176,8 @@ namespace AethonMod.Content.VFX
                 dia: new Color(240, 220, 255), ruido: "Investigacion/Espacio_1",
                 plumas: 6, largoInt: 100f, largoExt: 56f, curva: 0.12f,
                 nucleo: 0.82f, cuerpo: 0.40f, halo: 0.20f,
-                ruidoInten: 1.25f, ruidoEscala: 1.4f, ruidoFlujo: 0.7f, luz: 1.15f);
+                ruidoInten: 1.25f, ruidoEscala: 1.4f, ruidoFlujo: 0.7f, luz: 1.15f,
+                vientre: 0.30f, afilada: 1.0f, filosa: 0.15f);
 
             // 6 — COMETARIO: CINCO plumas con fuerte conicidad y leve
             //     garra atrás — la cola del cometa.
@@ -175,7 +186,8 @@ namespace AethonMod.Content.VFX
                 dia: new Color(255, 250, 240), ruido: "Ruido_12",
                 plumas: 5, largoInt: 96f, largoExt: 44f, curva: -0.10f,
                 hueLargo: 0.22f,
-                nucleo: 1f, cuerpo: 0.30f, halo: 0.12f);
+                nucleo: 1f, cuerpo: 0.30f, halo: 0.12f,
+                vientre: 0.25f, afilada: 1.5f, filosa: 0.70f);
 
             // 7 — MEDIANOCHE: CUATRO plumas ANCHAS con la GARRA fuerte
             //     del murciélago — la membrana nocturna.
@@ -187,7 +199,8 @@ namespace AethonMod.Content.VFX
                 plegadoMin: 0.48f, plegadoMax: 0.94f,
                 abiertoMin: 0.28f, abiertoMax: 1.62f,
                 nucleo: 0.70f, cuerpo: 0.22f, halo: 0.10f,
-                ruidoInten: 0.9f, luz: 0.8f);
+                ruidoInten: 0.9f, luz: 0.8f,
+                vientre: 0.50f, afilada: 0.65f, filosa: 0.20f);
 
             // 8 — PRISMA: SIETE plumas finas CORTAS y rectas — el
             //     racimo cristalino que gira rápido.
@@ -202,7 +215,8 @@ namespace AethonMod.Content.VFX
                 abiertoMin: 0.22f, abiertoMax: 1.44f,
                 hueEntre: 0.12f, hueTiempo: 0.026f,
                 nucleo: 0.95f, cuerpo: 0.38f, halo: 0.16f,
-                ruidoInten: 1.1f, luz: 1.2f);
+                ruidoInten: 1.1f, luz: 1.2f,
+                vientre: 0.20f, afilada: 1.8f, filosa: 0.60f);
 
             // 9 — FUEGO FRÍO: SEIS plumas de hielo con curva suave y
             //     flujo lento — la escarcha que brilla.
@@ -211,7 +225,8 @@ namespace AethonMod.Content.VFX
                 dia: new Color(250, 252, 255), ruido: "Ruido_8",
                 plumas: 6, largoInt: 90f, largoExt: 54f, curva: 0.16f,
                 punta: 16f, hueLargo: 0.24f, flap: 0.85f,
-                nucleo: 0.88f, cuerpo: 0.30f, halo: 0.15f);
+                nucleo: 0.88f, cuerpo: 0.30f, halo: 0.15f,
+                vientre: 0.40f, afilada: 0.9f, filosa: 0.30f);
 
             // 10 — TORMENTA: CINCO plumas desgarradas barridas hacia
             //     atrás — el chubasco eléctrico.
@@ -221,7 +236,8 @@ namespace AethonMod.Content.VFX
                 plumas: 5, largoInt: 82f, largoExt: 46f, punta: 11f,
                 curva: -0.22f, barrido: 0.22f,
                 flap: 1.5f, desgarre: 1.5f,
-                nucleo: 1f, cuerpo: 0.36f, halo: 0.14f, ruidoInten: 1.15f);
+                nucleo: 1f, cuerpo: 0.36f, halo: 0.14f, ruidoInten: 1.15f,
+                vientre: 0.24f, afilada: 1.7f, filosa: 0.80f);
 
             // 11 — MARIONETA: CUATRO plumas larguísimas COLGANTES en
             //     garra cerrada — los hilos que caen.
@@ -232,7 +248,8 @@ namespace AethonMod.Content.VFX
                 inclinacion: 0.2f, curva: 0.50f,
                 plegadoMin: 0.56f, plegadoMax: 1.02f,
                 abiertoMin: 0.24f, abiertoMax: 1.30f,
-                nucleo: 0.85f, cuerpo: 0.34f, halo: 0.12f, luz: 0.9f);
+                nucleo: 0.85f, cuerpo: 0.34f, halo: 0.12f, luz: 0.9f,
+                vientre: 0.35f, afilada: 1.3f, filosa: 0.40f);
 
             // 12 — AURORA ÁRTICA: SIETE plumas LARGUÍSIMAS en abanico
             //     vertical — la cortina de la aurora.
@@ -243,7 +260,8 @@ namespace AethonMod.Content.VFX
                 plegadoMin: 0.44f, plegadoMax: 0.84f,
                 abiertoMin: 0.20f, abiertoMax: 1.35f,
                 hueLargo: 0.28f, flap: 0.75f,
-                nucleo: 0.80f, cuerpo: 0.32f, halo: 0.18f, luz: 1.1f);
+                nucleo: 0.80f, cuerpo: 0.32f, halo: 0.18f, luz: 1.1f,
+                vientre: 0.32f, afilada: 1.0f, filosa: 0.10f);
 
             // 13 — ORQUÍDEA: CINCO plumas ANCHÍSIMAS redondeadas — los
             //     pétalos que se abren.
@@ -253,7 +271,8 @@ namespace AethonMod.Content.VFX
                 plumas: 5, largoInt: 88f, largoExt: 54f,
                 punta: 22f, puntaAbierta: 14f, curva: 0.20f,
                 hueEntre: 0.1f,
-                nucleo: 0.92f, cuerpo: 0.36f, halo: 0.16f, ruidoInten: 1.1f);
+                nucleo: 0.92f, cuerpo: 0.36f, halo: 0.16f, ruidoInten: 1.1f,
+                vientre: 0.50f, afilada: 0.6f, filosa: 0.05f);
 
             // 14 — VACÍO: TRES plumas ENORMES tenues — el vacío no
             //     necesita más que tres zarpas.
@@ -264,7 +283,8 @@ namespace AethonMod.Content.VFX
                 punta: 17f, anclajeSep: 6f,
                 flap: 0.65f, desgarre: 0.7f,
                 nucleo: 0.55f, cuerpo: 0.20f, halo: 0.08f,
-                ruidoInten: 0.85f, luz: 0.6f);
+                ruidoInten: 0.85f, luz: 0.6f,
+                vientre: 0.36f, afilada: 1.2f, filosa: 0.50f);
 
             // 15 — SOLARES RÚNICAS: SEIS plumas RÍGIDAS sin curva — la
             //     llama solar grabada que no se dobla.
@@ -273,7 +293,8 @@ namespace AethonMod.Content.VFX
                 dia: new Color(255, 252, 240), ruido: "Ruido_1",
                 plumas: 6, largoInt: 90f, largoExt: 48f,
                 curva: 0.02f, desgarre: 0.7f, hueTiempo: 0.014f,
-                nucleo: 1f, cuerpo: 0.34f, halo: 0.15f, luz: 1.25f);
+                nucleo: 1f, cuerpo: 0.34f, halo: 0.15f, luz: 1.25f,
+                vientre: 0.28f, afilada: 1.0f, filosa: 0.45f);
 
             // 16 — SANGRE DE TINTA: CINCO plumas PUNTIAGUDAS garras y
             //     goteando — la firma de la tinta oscura.
@@ -283,7 +304,8 @@ namespace AethonMod.Content.VFX
                 plumas: 5, largoInt: 86f, largoExt: 46f,
                 punta: 10f, puntaAbierta: 5f, curva: 0.34f,
                 desgarre: 1.2f,
-                nucleo: 0.9f, cuerpo: 0.38f, halo: 0.14f, ruidoInten: 1.2f);
+                nucleo: 0.9f, cuerpo: 0.38f, halo: 0.14f, ruidoInten: 1.2f,
+                vientre: 0.26f, afilada: 2.2f, filosa: 0.90f);
 
             return t;
         }
@@ -301,6 +323,7 @@ namespace AethonMod.Content.VFX
             float abiertoMin = 0.22f, float abiertoMax = 1.54f,
             float inclinacion = 0.12f, float barrido = 0.14f,
             float curva = 0f, float anclajeSep = 5f,
+            float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f,
             float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f,
             float flap = 1f, float desgarre = 1f,
             float nucleo = 0.92f, float nucleoFrac = 0.30f,
@@ -322,6 +345,7 @@ namespace AethonMod.Content.VFX
                 AbiertoMin = abiertoMin, AbiertoMax = abiertoMax,
                 Inclinacion = inclinacion, Barrido = barrido,
                 Curva = curva, AnclajeSep = anclajeSep,
+                Vientre = vientre, Afilada = afilada, Filosa = filosa,
                 HueEntre = hueEntre, HueLargo = hueLargo, HueTiempo = hueTiempo,
                 FlapVel = flap, Desgarre = desgarre,
                 NucleoInten = nucleo, NucleoFrac = nucleoFrac,

@@ -15,7 +15,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// LA PETICIÓN CON NOMBRE Y APELLIDOS: "investiga los rayos originales
     /// de terraria y crea un arma que los use". Este arma dispara EL RAYO
     /// DEL CLIMA DE TERRARIA — el sistema LightningGenerator/StormLightning
-    /// de 1.4.5, portado 1:1 en RayoLib (ver su cabecera): raymarch de 8 px
+    /// de 1.4.5, recreado 1:1 en RayoLib (ver su cabecera): raymarch de 8 px
     /// con 4 capas de ángulo, timón hacia el blanco, des-randomización al
     /// 80%, horquillas reflejadas del quiebre superior, LA OLA de
     /// energizado que nace arriba y se retira apagando el canal — y CERO

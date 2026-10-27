@@ -12,7 +12,7 @@ namespace AethonMod.Content.Coreografia
     //  más luces, más… que se vea mucho más avanzado en su visual»).
     //
     //  LA RECETA (R3 §1.6 + §4.2 — la semántica de color del bullet-hell
-    //  y el «stage lighting» de los cinemáticos de Lunar Veil): la luz
+    //  y el «stage lighting» de los cinemáticos del género): la luz
     //  del jefe NO es un constante — es un GUIÓN:
     //     · TELEGRAPH = violeta FRÍO latiendo a 4 Hz (crece con la fase)
     //     · ACTIVO    = destello BLANCO-CALIENTE (envolvente que decae)

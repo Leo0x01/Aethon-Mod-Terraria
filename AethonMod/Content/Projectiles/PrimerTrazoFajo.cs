@@ -12,7 +12,7 @@ namespace AethonMod.Content.Projectiles
 {
     /// <summary>
     /// PRIMERTRAZOFAJO — v6.52.0 — UNO DE LOS CINCO FAJOS del Primer
-    /// Trazo (la receta vanilla 632 + GammaBeam de Calamity, según el
+    /// Trazo (la receta vanilla 632 + el haz gamma de la investigación, según el
     /// blueprint R2 §B2):
     ///
     ///   · VIVE EN EL ANILLO DEL CONTROLADOR: boca = padre + anillo
@@ -175,7 +175,7 @@ namespace AethonMod.Content.Projectiles
             float carga = padre != null && padre.active
                 ? MathHelper.Clamp((padre.ai[0] - 1f) / 179f, 0f, 1f) : 1f;
             // v6.53 — EL GROSOR DE VERDAD: el rayo fusionado es GORDO (la
-            // hitbox respira con el ancho visual del FusionRay).
+            // hitbox respira con el ancho visual del haz fusionado).
             float grosor = MathHelper.Lerp(14f, 90f, carga);
             return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
                 Projectile.Center, fin, grosor, ref ignorado);
@@ -205,12 +205,12 @@ namespace AethonMod.Content.Projectiles
         //
         //  La letra del usuario: «esta parte del jefe es solo para investigación,
         //  nunca lo usaré realmente y todo su material debería ser
-        //  borrado antes del lanzamiento» — el puerto verbatim SALIÓ del
+        //  borrado antes del lanzamiento» — el material de referencia SALIÓ del
         //  mod (retirado y BORRADO del repo en la v6.54.0 — la orden del
         //  usuario tras terminar la investigación) y
         //  con él el shader y las texturas prestadas (que además JAMÁS
         //  habrían cargado: tML 2026.08 solo carga efectos .fxc
-        //  compilados — los .fx del puerto viajaban crudos). LA TÉCNICA
+        //  compilados — los .fx prestados viajaban crudos). LA TÉCNICA
         //  APRENDIDA PERMANECE (las ideas no tienen dueño) y vive en el
         //  pipeline propio PROBADO de la .52.2 (el Rayo de Fusión
         //  histórico de esa versión):

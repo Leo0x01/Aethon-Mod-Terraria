@@ -9,8 +9,8 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// ALASAURORAPLAYER — v6.52.1 — LA FÍSICA DE LAS ALAS DE CÓDIGO.
     ///
-    /// LA MITAD JUGABLE de la técnica aprendida (WingsOfInterferencePlayer
-    /// de Calamity Overhaul, leído de la fuente): las alas de código NO
+    /// LA MITAD JUGABLE de la técnica aprendida (el sistema de alas de
+    /// interferencia de la investigación): las alas de código NO
     /// son un ítem de slot de alas — son un ACCESORIO que INYECTA la
     /// física de alas de vanilla SIN el sprite:
     ///

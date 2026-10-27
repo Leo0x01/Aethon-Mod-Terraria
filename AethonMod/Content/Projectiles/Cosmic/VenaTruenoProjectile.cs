@@ -11,19 +11,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// VenaTruenoProjectile — v6.50.24 — LA CAÍDA DEL DRAGÓN DE VENA TRUENO.
     ///
     /// LA PETICIÓN CON NOMBRE Y APELLIDOS: "para los rayos crea una nueva
-    /// arma basada en thundervein dragon Coralite mod terraria". La
-    /// investigación (Task 2-a, repo oficial de Coralite descargado): el
-    /// Thundervein Dragon (荒雷龙) es el wyvern eléctrico del mod chino
-    /// Coralite — cuerpo negro con venas de trueno amarillas — y SU firma
-    /// visual es el ThunderFalling (落雷): TRES zigzags superpuestos (1
-    /// NARANJA + 2 AMARILLO — ThunderveinOrange 219,114,22 y
-    /// ThunderveinYellow 255,202,101, extraídas de su código) que caen del
+    /// arma basada en el dragón de venas de trueno". La
+    /// investigación (Task 2-a, el material de referencia descargado): el
+    /// DRAGÓN DE VENA TRUENO es el wyvern eléctrico de la referencia
+    /// — cuerpo negro con venas de trueno amarillas — y SU firma
+    /// visual es la caída del rayo: TRES zigzags superpuestos (1
+    /// NARANJA + 2 AMARILLO — naranja 219,114,22 y
+    /// amarillo 255,202,101, extraídas de su código) que caen del
     /// cielo creciendo de 50 a 120 px de ancho, PARPADEANDO (CanDraw =
     /// NextBool, re-random cada 4 ticks) y desintegrándose en la agonía
     /// (el zigzag se ABRE mientras el alfa muere con X2Ease).
     ///
-    /// ESTE proyectil ES ESO, montado sobre el RayoLib de la casa (el
-    /// puerto 1:1 del LightningGenerator de vanilla 1.4.5): el generador
+    /// ESTE proyectil ES ESO, montado sobre el RayoLib de la casa (la
+    /// recreación 1:1 del LightningGenerator de vanilla 1.4.5): el generador
     /// hace el zigzag (raymarch de 4 capas con timón y horquillas — los
     /// tres canales germinan con semillas distintas: el trío ligeramente
     /// desalineado del dragón), y la FIRMA VENA TRUENO del RayoSistema
@@ -41,7 +41,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class VenaTruenoProjectile : ModProjectile
     {
-        /// <summary>Los ticks de la caída (el LightingTime del ThunderFalling).</summary>
+        /// <summary>Los ticks de la caída (el LightingTime de la referencia).</summary>
         private const int CaidaTicks = 26;
 
         private bool _nacio;
@@ -65,8 +65,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.extraUpdates = 0;
         }
 
-        // LA PALETA DEL DRAGÓN (extraída del código de Coralite: las
-        // constantes de ThunderveinDragon.cs, líneas 72-74).
+        // LA PALETA DEL DRAGÓN (extraída del código de la referencia: las
+        // constantes del dragón, líneas 72-74).
         private static readonly Color AmarilloVena = new(255, 202, 101);
         private static readonly Color NaranjaVena = new(219, 114, 22);
         private static readonly Color NucleoVena = new(255, 246, 215);
@@ -92,7 +92,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === LA CAÍDA (el telegraph vivo): chispas amarillas corriendo
-            //     por el frente descendente (el SpawnDusts del original —
+            //     por el frente descendente (el SpawnDusts de la referencia —
             //     ElectricParticle/LightningShineBall en la casa: Electric
             //     amarillo) ===
             if (Main.netMode != NetmodeID.Server && !Main.dedServ)
@@ -121,7 +121,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// EL TRÍO VENA TRUENO: tres canales del RayoSistema sobre el mismo
-        /// blanco — 1 NARANJA + 2 AMARILLO (la receta Coralite), cada uno
+        /// blanco — 1 NARANJA + 2 AMARILLO (la receta del trío de la
+        /// referencia), cada uno
         /// con su propia semilla (zigzags desalineados), su PARPADEO del
         /// 50%, su RECADA de 4 ticks, el ANCHO creciendo 46→92 en la caída
         /// y la APERTURA del colapso (la desintegración del zigzag al

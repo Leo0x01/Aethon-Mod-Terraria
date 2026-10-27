@@ -13,14 +13,14 @@ namespace AethonMod.Content.VFX
     //
     //  LA INVESTIGACIÓN (Task 84 / R2 — notas completas en
     //  download/research/notes/R2-beam-techniques.md, extraídas de
-    //  Calamity + Fargo's + Stars Above + Calamity Overhaul DECOMPILADOS
-    //  y del vanilla decompilado al IL): los rayos masivos de los mods
-    //  populares NO son una técnica — son SIETE CAPAS apiladas:
+    //  las técnicas del género, diseccionadas a fondo,
+    //  y del vanilla decompilado al IL): los rayos masivos del género
+    //  NO son una técnica — son SIETE CAPAS apiladas:
     //    (1) el raycast (Collision.LaserScan) con longitud SUAVIZADA
     //        (Lerp 0.5–0.9 — EL motion-blur del barrido: la punta se
     //        desliza, no salta),
     //    (2) la geometría (aquí: CINTAS de VFXCore sobre una espina
-    //        ruidosa — el equivalente casa del triangle-strip de Calamity),
+    //        ruidosa — el equivalente casa del triangle-strip clásico),
     //    (3) el RUIDO (fBm CPU de StormLib con fases LENTAS y anclas
     //        exp(-1200·d^8): el mismo Fbm1D del PerlinBolt pero con la
     //        amplitud al 3.5% del largo — «vivo, no espástico»),
@@ -29,8 +29,8 @@ namespace AethonMod.Content.VFX
     //    (5) la LUZ DINÁMICA a lo largo de TODO el rayo (AddLightAlong
     //        cada 64 px — la MITAD del presupuesto vanilla de ~150/tick),
     //    (6) los DIAMANTES VIAJEROS (sin(along/92 − t·9)^7 — los paquetes
-    //        de energía que RECORREN el rayo: la firma del GammaRayBeam
-    //        de Calamity Overhaul),
+    //        de energía que RECORREN el rayo: la firma del haz gamma
+    //        de la investigación),
     //    (7) las TAPAS (boca + punta + estallido si toca pared).
     //
     //  EL CONTRATO DE LA CASA (la lección v6.51.14 — la cura del crash
@@ -228,7 +228,7 @@ namespace AethonMod.Content.VFX
 
             // === (5) LOS DIAMANTES VIAJEROS — sin(along/92 − t·9)^7 ===
             // Los PICOS viajan a 92·9 ≈ 828 px/s raíz→punta (los paquetes
-            // de energía del AriaGammaRay de CWR). Matemática exacta de
+            // de energía del haz gamma). Matemática exacta de
             // picos: along = 92·(π/2 − faseBase + 2π·k), sin bucle denso.
             float faseBase = -tiempo * 9f;
             float paso = 92f * MathHelper.TwoPi;
@@ -256,7 +256,7 @@ namespace AethonMod.Content.VFX
 
             // LA PUNTA: fina… salvo que CHOQUE — entonces el estallido de
             // impacto (bola de calor + anillo pulsante a 12 Hz, la receta
-            // CWR: exp(-dEnd²)·2.2 + splash sin(t·12)).
+            // de la investigación: exp(-dEnd²)·2.2 + splash sin(t·12)).
             Vector2 puntaPos = origen + dir * largo;
             if (choquePared)
             {
@@ -282,7 +282,7 @@ namespace AethonMod.Content.VFX
 
         // ==================================================================
         //  EL TELEGRAPH — v6.52.2 — LA AGUJA DE AVISO (la receta completa
-        //  del TelegraphTech del EmpressLance de Calamity Overhaul, leída
+        //  del telegraph de aguja de la investigación, leída
         //  de la fuente: línea UNIFORME a lo largo — la textura ya no es
         //  radial como la del SoftGlow viejo que MORÍA A NEGRO en los
         //  extremos — + los RUNNERS que aceleran con la carga + EL
@@ -295,7 +295,7 @@ namespace AethonMod.Content.VFX
         /// texturizada UNIFORME que LATA (2→4 Hz), los RUNNERS que
         /// RECORREN la línea (acelerando con la carga) y EL COMPRESOR
         /// (fase > 0.8: la línea colapsa a una aguja blanca — el
-        /// «smoothstep(0.80, 1.0)» del EmpressLance original). Solo
+        /// «smoothstep(0.80, 1.0)» de la referencia). Solo
         /// encola (las tiras hacen su propio baile de lote interno).
         /// </summary>
         /// <param name="faseCarga">0→1 — cuán cerca está el disparo.</param>
@@ -314,7 +314,7 @@ namespace AethonMod.Content.VFX
             float latido = 0.5f + 0.5f * MathF.Sin(tiempo * hz * MathHelper.TwoPi);
 
             // EL COMPRESOR — el último 20%: la línea SE AFINA y BLANQUECE
-            // (la aguja — el pre-fuego del original).
+            // (la aguja — el pre-fuego de la referencia).
             float compres = Suave01((fase - 0.80f) / 0.20f);
 
             // LA AGUJA: la tira texturizada UNIFORME (la banda central de
@@ -341,7 +341,7 @@ namespace AethonMod.Content.VFX
 
             // LOS RUNNERS — los paquetes de luz que RECORREN la línea
             // (raíz→punta, MÁS RÁPIDOS cuanto más cerca el disparo — el
-            // frac(along·1.4 − t·(0.7+progreso·1.6)) del original).
+            // frac(along·1.4 − t·(0.7+progreso·1.6)) de la referencia).
             float velRunner = 0.7f + fase * 1.6f;
             for (int i = 0; i < 3; i++)
             {

@@ -25,8 +25,8 @@ namespace AethonMod.Content.VFX
     ///
     /// Nació del análisis de huecos de v6.25 (research/humo_v625/
     /// ANALISIS_HUECOS.md): el ecosistema premium pone una onda expansiva
-    /// en TODO golpe importante (los grandes mods en cada hit de boss;
-    /// su ShockwaveShader de borde roto, SOTS con anillos por estilos) —
+    /// en TODO golpe importante (los grandes jefes en cada hit;
+    /// el borde roto del shader de onda, los anillos por estilos) —
     /// nosotros solo teníamos el proyectil pesado de las muertes
     /// cósmicas. Esta librería es "la onda de trabajo" reutilizable.
     ///
@@ -36,7 +36,7 @@ namespace AethonMod.Content.VFX
     ///     de presión" detrás del frente de choque.
     ///   · EL BORDE ROTO: el frente se dibuja en 12-16 segmentos de arco
     ///     con radio vivo (±8% por hash) — nunca un círculo perfecto
-    ///     (lección del ShockwaveShader del ecosistema).
+    ///     (lección del shader de onda de la investigación).
     ///   · EL GROSOR NACE FINO Y ENGORDA mientras el alpha muere (la
     ///     onda se "gasta" ensanchándose: 4px → 14px en una de 300px).
     ///   · LA EXPANSIÓN FAST-OUT: r(t) = maxR·(1−(1−t)^2.2) — sale como

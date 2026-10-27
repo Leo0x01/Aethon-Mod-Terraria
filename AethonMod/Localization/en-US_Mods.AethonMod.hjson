@@ -1939,7 +1939,7 @@ Items: {
 			'''
 	}
 
-	// v6.54.0 — LA INVESTIGACIÓN DE LAS TEXTURAS DEL DIOS (Task 74-a/b/c)
+	// v6.54.0 — LA INVESTIGACIÓN: LAS ALAS DE CÓDIGO (Task 74-a/b/c)
 	
 	BolsaDeAlasPrisma: {
 		DisplayName: The Wings Bag
@@ -2026,22 +2026,20 @@ Items: {
 			'''
 	}
 
-	RayoFusion: {
-		DisplayName: The Fusion Ray
+	RayoConcentradoDos: {
+		DisplayName: The Concentrated Ray II
 		Tooltip:
 			'''
-				THE RESEARCH REPLICA — the exact copy of the old god's attack,
-				with ITS original textures and shader: the growing stacked-glow
-				maw, the pointing telegraph, the 3500-px cone with its cosine
-				sweep, THE FOUR MULTIPLIED TEXTURES (fBm flesh · second noise ·
-				the ramp · the double-AND bits) and the saturation-white core.
-				300 ticks of charge + 800 of laser — EXACTLY AS IT WAS, with its
-				camera kick, its music hushed to 30 % and its chromatic dust
-				riding the conduit.
-				The quality pattern, in your hand: compare it with the
-				sentences.
-				Research item — removed before publishing.
-				
+				"The pure beam, in your hand: 3500 px of breathing plasma."
+				THE SIXTH OF THE BAG — the full cone: 300 ticks of charge
+				(the stacked glow mouth growing + the aiming needle) and
+				800 of laser with its sine sweep. The FOUR plasma layers
+				multiplied (the fBm flesh · the second noise · the heat
+				ramp · the double-AND sparks) run through the house's own
+				shader — with compensated noise scale and a soft white
+				core: organic plasma, NEVER spikes. With its camera kick,
+				its music ducked to 30 %, its infinite flight and its
+				chromatic motes running down the channel.
 			'''
 	}
 
@@ -2049,24 +2047,11 @@ Items: {
 		DisplayName: The Bag of Ultimate Weapons
 		Tooltip:
 			'''
-				THE FIVE SENTENCES of the Verdict of Aethon with their FULL EFFECT
-				stacks (the .54.8 multilayer plasma: organic fBm flesh — never again
-				jagged edges) + THE RESEARCH REPLICA, the exact copy of the fusion ray
-				with its original textures: the prism, the splitter, the requiem, the
-				wrath… and THE TESTAMENT, the crown that dictates them.
-			'''
-	}
-
-	BolsaInvestigacion: {
-		DisplayName: The Research Bag
-		Tooltip:
-			'''
-				The items born from studying the old god's effect textures:
-				Concentrated Rays, Prism Thunder, Essence Sludge,
-				Constellation Scepter, Cosmic Trail and Living Ink — all
-				rewritten 100 % for the mod, zero ported material.
-				The Wings Bag rides inside.
-				Right-click to deploy. Only delivers what you lack.
+				THE FIVE SENTENCES of Aethon's Verdict with their FULL
+				effect stacks (the multilayer plasma: organic fBm flesh —
+				no more spikes) + THE CONCENTRATED RAY II, the pure beam
+				with its own shader: the prism, the splitter, the requiem,
+				the wrath… and THE TESTAMENT, the crown that dictates them.
 			'''
 	}
 
@@ -2074,91 +2059,11 @@ Items: {
 		DisplayName: The Arsenal Chest
 		Tooltip:
 			'''
-				ALL TWENTY-TWO bags of the arsenal inside a single one:
+				ALL TWENTY-FOUR bags of the arsenal inside a single one:
 				the Tester's, the Foundational, the Runic Suns'… every bag
 				and the rest. Open it and deploy the one you need.
 				Right-click. Only delivers what you lack.
 			'''
-	}
-
-	RayosConcentrados: {
-		DisplayName: Concentrated Rays
-		Tooltip:
-			'''
-				"Four layers of light multiplied: the fusion ray, yours."
-				The old god's signature attack technique, rewritten 100 %:
-				the noise body, the double-sampled sparks, the glow profile
-				and the core+skirt — multiplied per vertex, with the
-				rainbow running and the white-hot core. 45 t of charge
-				(the runic suns grow) then FIRE: 2000 px of breathing beam.
-				Segment damage, just like the original.
-			'''
-		Prueba: Test weapon — the recipe is 10 wood.
-	}
-
-	TruenoDelPrisma: {
-		DisplayName: The Prism Thunder
-		Tooltip:
-			'''
-				The old god's branching bolt, born anew: TWO samples of the
-				same texture offset by 0.5 and multiplied (only the
-				matching veins survive), the polyline that SETTLES after
-				the strike, and the rainbow fading away. 1 big bolt + up
-				to 2 small ones on the neighbors.
-			'''
-		Prueba: Test weapon — the recipe is 10 wood.
-	}
-
-	LodoDeEsencia: {
-		DisplayName: The Essence Sludge
-		Tooltip:
-			'''
-				The bioluminescent purple puddles: the dark base rippling
-				(sine warp) with hundreds of violet dots pulsing on top.
-				Puddles SWELL as they stack. Hurts whoever steps in them.
-			'''
-		Prueba: Test weapon — the recipe is 10 wood.
-	}
-
-	CetroConstelaciones: {
-		DisplayName: The Constellation Scepter
-		Tooltip:
-			'''
-				Summons stars that orbit and repel each other; the close
-				ones join through damage-dealing LINES (the old god's
-				stellar minion's constellation, 100 % ours). The first one
-				draws the double-spinning area vignette. Up to 5 stars.
-			'''
-		Prueba: Test weapon — the recipe is 10 wood.
-	}
-
-	EstelaDelCosmos: {
-		DisplayName: The Cosmic Trail
-		Tooltip:
-			'''
-				The Saturn-like ring of the old god's stellar minion, 100 %
-				ours and PURPLE/BLACK: the band with self-interference
-				(the same texture at two speeds multiplied) and channels as
-				masks — violet body, hot lilac line, blue-violet edge.
-				It breathes and spins behind you.
-			'''
-		Titulo: THE SATURN RING, PURPLE AND BLACK
-		Linea1: The stellar minion's liquid ring
-		Linea2: Pure decoration — accessory or vanity
-	}
-
-	TintaViva: {
-		DisplayName: The Living Ink
-		Tooltip:
-			'''
-				The old god's liquid cord, made yours: TWO ink layers
-				multiplied (the lace of holes that opens and closes), the
-				color born from the black→purple→lilac LUT, and the
-				curling wave. The tail follows YOUR real trail of motion.
-			'''
-		Titulo: THE OLD GOD'S LIQUID CORD, MADE YOURS
-		Linea1: The iridescent goo tail that follows your trail
-		Linea2: Pure decoration — accessory or vanity
 	}
 
 	AlasPrismaBase.Estilo: Code-born wings — their own palette, tempo and noise
@@ -2221,7 +2126,7 @@ Items: {
 		DisplayName: Wings of the Prisma
 		Tooltip:
 			'''
-				The old god's rainbow runs across the full fan.
+				The full rainbow runs across the fan.
 				240 flight time · no fall damage · folds before real wings.
 			'''
 	}
@@ -2444,14 +2349,7 @@ Projectiles: {
 	DignosFXProjectile.DisplayName: The Worthy Ones' Flare
 	BocadoDelSueloProjectile.DisplayName: The Ground Bite
 	SombraPagina2Projectile.DisplayName: The Shadow of the Page II
-	// v6.54.0 — LA INVESTIGACIÓN
-	RayosConcentradosHeld.DisplayName: The Concentrated Rays
-	TruenoPrismaRayo.DisplayName: The Prism Thunder Bolt
-	LodoGlob.DisplayName: The Sludge Glob
-	LodoCharco.DisplayName: The Essence Puddle
-	EstrellaPrisma.DisplayName: The Prisma Star
-	EstelaCosmosHalo.DisplayName: The Cosmic Trail
-	TintaVivaHalo.DisplayName: The Living Ink
+	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
 }
 
 Buffs: {

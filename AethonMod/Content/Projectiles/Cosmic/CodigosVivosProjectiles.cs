@@ -21,7 +21,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// DanzaOrbesProjectile — LA DANZA DE LOS ORBES (v6.36 — IMAGEN 1).
     ///
-    /// EL PUERTO EXACTO DEL follow() DE LA IMAGEN 1 (JavaScript):
+    /// LA RECREACIÓN EXACTA DEL follow() DE LA IMAGEN 1:
     /// <code>
     ///   follow(iter) {
     ///       var x = this.parent.x;
@@ -41,7 +41,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </code>
     /// La traducción es <see cref="Follow"/> línea por línea (esta misma
     /// ley es el ADN compartido con la sierpe de la IMAGEN 4 — en las
-    /// demos originales el sistema solar y el pez usaban la misma
+    /// demos de referencia el sistema solar y el pez usaban la misma
     /// cadena de distancia constante).
     ///
     /// MECÁNICA: invoca UN MINISISTEMA SOLAR que orbita al jugador 12 s
@@ -64,7 +64,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Cadencia de la quemadura de los orbes.</summary>
         private const int CadaQuemadura = 10;
 
-        /// <summary>El NODO de la cadena (el "this" del follow original).</summary>
+        /// <summary>El NODO de la cadena (el "this" del follow de la demo).</summary>
         private struct Nodo
         {
             /// <summary>this.x, this.y — la posición en el mundo.</summary>
@@ -106,7 +106,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float dist = MathF.Sqrt(dx * dx + dy * dy);
 
             // El guard de la casa: un nodo nacido ENCIMA de su padre no
-            // puede dividir por cero (el original reventaría con NaN).
+            // puede dividir por cero (la demo reventaría con NaN).
             if (dist < 0.0001f) { dx = 1f; dy = 0f; dist = 1f; }
 
             // this.x = x + this.size * (this.x - x) / dist;
@@ -122,7 +122,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // this.updateRelative(false, true);  → vive en CodigosLib
             // (la estela tangencial perpendicular al radio — el sprite
-            // transform del original hecho luz).
+            // transform de la demo hecho luz).
 
             // if (iter) { for (i...) this.children[i].follow(true); }
             if (iter)
@@ -154,7 +154,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Seed = (int)Projectile.ai[0] % 9973;
 
-            // === LA CONSTRUCCIÓN DEL ÁRBOL (los children del original):
+            // === LA CONSTRUCCIÓN DEL ÁRBOL (los children de la demo):
             //     [0] el SOL (raíz) · [1] planeta A · [2] luna A1 ·
             //     [3] luna A2 · [4] planeta B · [5] luna B1 · [6] luna B2.
             //     Las fases iniciales salen del HASH determinista — la
@@ -217,7 +217,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 return;
             }
 
-            // === LA RAÍZ: su "padre" es el JUGADOR (en la demo original
+            // === LA RAÍZ: su "padre" es el JUGADOR (en la demo
             //     el sol seguía al puntero; aquí cabalga su órbita). ===
             _angRaiz += OmegaRaiz;
             _nodos[0].Pos = duenio.Center + Dir(_angRaiz) * DistRaiz;
@@ -234,7 +234,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === Y LA CADENA follow() MANTIENE LAS DISTANCIAS EXACTAS
-            //     (el puerto de la IMAGEN 1, recursivo como el original). ===
+            //     (la recreación de la IMAGEN 1, recursiva como la demo). ===
             for (int i = 1; i < _nodos.Length; i++)
             {
                 if (_nodos[i].Padre == 0)
@@ -338,8 +338,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// LenteAbismoProjectile — LA LENTE DEL ABISMO (v6.36 — IMAGEN 2).
     ///
-    /// EL PUERTO DEL animate() DEL AGUJERO NEGRO DE LA IMAGEN 2
-    /// (THREE.js):
+    /// LA RECREACIÓN DEL animate() DEL AGUJERO NEGRO DE LA IMAGEN 2:
     /// <code>
     ///   function animate() {
     ///       requestAnimationFrame(animate);
@@ -427,7 +426,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La luz del abismo (magenta con alma violeta).
             Lighting.AddLight(Projectile.Center, 0.42f, 0.06f, 0.30f);
 
-            // === LA LENSINGPASS DEL ORIGINAL: el fondo se curva alrededor
+            // === LA LENSINGPASS DE LA DEMO: el fondo se curva alrededor
             //     del agujero proyectado a coordenadas de pantalla — la
             //     lente de la casa, re-registrada cada tick (el patrón del
             //     portal estable). Fuerza 0.62: LA MÁS FUERTE del arsenal. ===
@@ -500,7 +499,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             try
             {
-                // EL OJO (los tres materiales del original esclavos del uTime).
+                // EL OJO (los tres materiales de la demo esclavos del uTime).
                 CodigosLib.OjoAbismo(Projectile.Center, Radio, Progress(),
                     Main.GlobalTimeWrappedHourly, Seed);
 
@@ -564,9 +563,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SolVivoProjectile — EL SOL VIVO (v6.36 — IMAGEN 3).
     ///
-    /// EL PUERTO DEL animate() DEL SOL DE LA IMAGEN 3 (THREE.js):
+    /// LA RECREACIÓN DEL animate() DEL SOL DE LA IMAGEN 3:
     /// <code>
-    ///   const clock = new THREE.Clock();
+    ///   const clock = new Clock();
     ///   function animate() {
     ///       requestAnimationFrame(animate);
     ///       const delta = clock.getDelta();
@@ -650,7 +649,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             float time = Main.GlobalTimeWrappedHourly;
 
-            // === LA LUZ CON EL BLOOM EXACTO DEL ORIGINAL:
+            // === LA LUZ CON EL BLOOM EXACTO DE LA DEMO:
             //     bloomPass.strength = 0.8 + 0.4 * pulse → 0.8..1.2. ===
             float pulse = 0.5f + 0.5f * MathF.Sin(time * CodigosLib.FrecuenciaPulso);
             float bloom = 0.8f + 0.4f * pulse;
@@ -674,7 +673,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     }
                 }
 
-                // === EL LATIDO DEL PICO: cuando el pulso del original
+                // === EL LATIDO DEL PICO: cuando el pulso de la demo
                 //     corona (cos cruza cero bajando), el sol LATE — una
                 //     ola quema a 170 px. ===
                 float c = MathF.Cos(time * CodigosLib.FrecuenciaPulso);
@@ -735,7 +734,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 float alpha = Progress();
 
-                // EL SOL (los seis materiales del original, el pulso exacto).
+                // EL SOL (los seis materiales de la demo, el pulso exacto).
                 CodigosLib.SolVivo(Projectile.Center, RadioNucleo,
                     Main.GlobalTimeWrappedHourly, Seed, alpha);
 
@@ -811,7 +810,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SierpeEstelarProjectile — LA SIERPE ESTELAR (v6.36 — IMAGEN 4).
     ///
-    /// EL PUERTO DE LOS elems DE LA IMAGEN 4 (JavaScript):
+    /// LA RECREACIÓN DE LOS elems DE LA IMAGEN 4:
     /// <code>
     ///   const elems = [];
     ///   for (let i = 0; i &lt; N; i++) elems[i] = { use: null, x: width / 2, y: 0 };
@@ -842,18 +841,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class SierpeEstelarProjectile : ModProjectile
     {
-        /// <summary>El N del original: 16 segmentos.</summary>
+        /// <summary>El N de la demo: 16 segmentos.</summary>
         private const int N = 16;
 
         private const int Vida = 480;
 
-        /// <summary>El radm del original: radio de la vuelta alrededor del puntero.</summary>
+        /// <summary>El radm de la demo: radio de la vuelta alrededor del puntero.</summary>
         private const float Radm = 110f;
 
         /// <summary>Velocidad de nado base (px/tick).</summary>
         private const float Velocidad = 11f;
 
-        /// <summary>La amplitud del vaivén (el frm/rad del original).</summary>
+        /// <summary>La amplitud del vaivén (el frm/rad de la demo).</summary>
         private const float Vaiven = 0.35f;
 
         /// <summary>La distancia EXACTA entre eslabones (el this.size de la cadena).</summary>
@@ -891,7 +890,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 ? Projectile.velocity.ToRotation()
                 : 0f;
 
-            // === EL INIT DEL ORIGINAL (elems[i] = { x: width/2, y: 0 }):
+            // === EL INIT DE LA DEMO (elems[i] = { x: width/2, y: 0 }):
             //     los segmentos nacen APILADOS tras la cabeza y la cadena
             //     los despliega en el primer latido. ===
             Vector2 atras = new Vector2(MathF.Cos(_rumbo + MathHelper.Pi),
@@ -922,7 +921,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             float time = Main.GlobalTimeWrappedHourly;
 
-            // === EL PUNTERO (el pointer del original): el dueño local
+            // === EL PUNTERO (el pointer de la demo): el dueño local
             //     manda — la velocidad se sincroniza sola (patrón de la
             //     congregación v6.29); el objetivo viaja en ai[0..1]. ===
             if (Projectile.owner == Main.myPlayer)
@@ -946,7 +945,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             Vector2 objetivo = new Vector2(Projectile.ai[0], Projectile.ai[1]);
 
-            // === EL NADO (el radm del original): la cabeza persigue el
+            // === EL NADO (el radm de la demo): la cabeza persigue el
             //     punto TANGENTE del círculo alrededor del puntero — el
             //     pez nada en VUELTAS, no embiste; lejos del círculo
             //     apunta directo para acercarse. ===
@@ -963,7 +962,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float delta = MathHelper.WrapAngle(deseado - _rumbo);
             _rumbo += MathHelper.Clamp(delta, -0.07f, 0.07f);
 
-            // === EL VAIVÉN (el frm/rad del original): la velocidad
+            // === EL VAIVÉN (el frm/rad de la demo): la velocidad
             //     respira — el pez empuja con la cola. ===
             float surge = 1f + Vaiven * MathF.Sin(time * MathHelper.TwoPi * 0.9f + Seed);
             Vector2 vel = new Vector2(MathF.Cos(_rumbo), MathF.Sin(_rumbo)) *

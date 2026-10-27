@@ -151,7 +151,7 @@ namespace AethonMod.Content.VFX
             /// <summary>
             /// Multiplicador del banking de entrada: cuánto rockea TODO
             /// el cuerpo cuando el llamador pasa banking (el ojo usa
-            /// 0.03 — el número exacto del original: velocity.X·0.03).
+            /// 0.03 — el número exacto de la referencia: velocity.X·0.03).
             /// </summary>
             public float AmplitudBanking = 1f;
 
@@ -546,7 +546,7 @@ namespace AethonMod.Content.VFX
             /// <param name="colorPuntas">Las puntas de las alas (default: rojo oscuro 168,48,48).</param>
             /// <param name="colorPupila">El vacío (default: negro al 55%).</param>
             /// <param name="amplitudAleteo">El latido de las alas en rad (default 0: la divinidad NO aletea).</param>
-            /// <param name="escalaAlas">La envergadura respecto al cuerpo (default 1: la del original).</param>
+            /// <param name="escalaAlas">La envergadura respecto al cuerpo (default 1: la de la referencia).</param>
             public static Molde CrearOjoAlado(float escalaBase = 1f,
                 Color? colorCuerpo = null, Color? colorAlas = null, Color? colorPuntas = null,
                 Color? colorPupila = null, float amplitudAleteo = 0f, float escalaAlas = 1f)
@@ -561,7 +561,7 @@ namespace AethonMod.Content.VFX
 
                 Molde m = new Molde()
                     .ConLongitudCuerpo(110f)       // la referencia: el eje +X del cuerpo
-                    .ConAmplitudBanking(0.03f)     // EL número del original (velocity.X·0.03)
+                    .ConAmplitudBanking(0.03f)     // EL número de la referencia (velocity.X·0.03)
                     .ConEscalaGlobal(escalaBase);
 
                 // EL CUERPO: crema-oro horizontal (110×40) — la cara del ojo.

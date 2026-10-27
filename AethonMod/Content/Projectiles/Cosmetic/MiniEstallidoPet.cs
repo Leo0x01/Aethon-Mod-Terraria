@@ -32,7 +32,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// de la carga ni el anillo segmentado del estallido — SOLO BRILLO
     /// (rayos, cruz, núcleo, estrella, onda y bokeh).
     ///
-    /// LA RECOGIDA (45 t): la regla Fargo de la casa — el telegrafo es
+    /// LA RECOGIDA (45 t): la regla de la casa — el telegrafo es
     /// TRANSLÚCIDO e inofensivo (el núcleo que se llena y LAS 6 AGUJAS
     /// convergiendo). EL ESTALLIDO: daño 15 (MUY poco — es decorativo)
     /// en la hitbox HONESTA de radio 135 SOLO los primeros 8 t de onda,

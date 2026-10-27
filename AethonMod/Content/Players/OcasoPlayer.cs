@@ -11,12 +11,12 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// OcasoPlayer — v6.27 — EL GAUGE DEL OCASO DE AETHON.
     ///
-    /// El patrón del Cosmic Destroyer (investigación v6.26, informe
+    /// El patrón del arma suprema (investigación v6.26, informe
     /// el informe de las armas supremas de referencia, lección 10): LA TRINIDAD
     /// carga → burst → lockout aplicada a un arma suprema:
     ///
     ///   · CARGA: cada impacto del proyectil NORMAL suma +3 al gauge
-    ///     (tope 100 → 34 impactos ≈ 12 s de fuego — el ritmo del TSA).
+    ///     (tope 100 → 34 impactos ≈ 12 s de fuego — el ritmo de la investigación).
     ///   · BURST: con el gauge lleno, CLIC DERECHO activa EL OCASO:
     ///     8 segundos (480 ticks) donde el arma dispara MUERTES DE
     ///     ESTRELLA a daño ×3 con ejecución bajo el 50% de vida.
@@ -26,7 +26,7 @@ namespace AethonMod.Content.Players
     /// La UI (el aro medidor de 20 segmentos sobre la cabeza) la dibuja
     /// OcasoSystem en PostDrawInterface leyendo ESTE estado. El fade-out
     /// de visibilidad (−0.05/tick tras 20 ticks sin disparar) es la
-    /// lección de UI ligera del Cosmic Destroyer.
+    /// lección de UI ligera del arma suprema.
     ///
     /// Nota MP: el mod es de pruebas en un jugador (TestingPlayer lo
     /// gatea); el gauge vive localmente en cada cliente.
@@ -90,7 +90,7 @@ namespace AethonMod.Content.Players
                 OverheatTime--;
             }
 
-            // === EL FADE DE LA UI (la lección del TSA: −0.05/tick) ===
+            // === EL FADE DE LA UI (la lección de la investigación: −0.05/tick) ===
             if (UiFade > 0f) UiFade -= 0.05f;
         }
 

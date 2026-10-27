@@ -9,7 +9,8 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     // ======================================================================
-    //  v6.50.18 — RayoLib: LOS RAYOS DE VERDAD (el puerto 1:1 de Terraria)
+    //  v6.50.18 — RayoLib: LOS RAYOS DE VERDAD (la recreación 1:1 del
+    //  sistema de Terraria)
     // ======================================================================
     //
     //  LA ORDEN DEL USUARIO: "recuerda que no debes usar sprite para los
@@ -19,11 +20,11 @@ namespace AethonMod.Content.VFX
     //
     //  LA INVESTIGACIÓN (R58-a, fuentes reales descargadas): el sistema de
     //  rayos de Terraria 1.4.5 es LightningGenerator + StormLightningDrawer
-    //  (decompilados de JonataOliveiraa/Terraria1.4.5, branch main) — y
+    //  (recreados a partir del 1.4.5) — y
     //  "Arc Surge" NO es de ningún mod: es el ARMA MÁGICA VANILLA 1.4.5
     //  (drop 1/50 del Platillo Marciano) que dispara ARCOS INSTANTÁNEOS
     //  ROJOS mano→cursor con el MISMO sistema. Esta librería ES ese
-    //  sistema, portado pieza a pieza:
+    //  sistema, recreado pieza a pieza:
     //
     //    · EL GENERADOR — raymarch DIRECCIONAL por pasos de 8 px con 4-5
     //      CAPAS DE ÁNGULO apiladas (la capa 0 tiemble fino en cada ~2
@@ -56,11 +57,11 @@ namespace AethonMod.Content.VFX
     //      v6.50.22. El LightningGenerator/Drawer originales dibujan un
     //      VertexStrip con shader propio (PixelShader "StormLightning",
     //      inexistente en tML 2026.07/1.4.4.9 y no compilable aquí): la
-    //      geometría, la ola, el taper y las horquillas son el puerto
-    //      EXACTO; la sección transversal es la PILA de pasadas sólidas
+    //      geometría, la ola, el taper y las horquillas son la recreación
+    //      EXACTA; la sección transversal es la PILA de pasadas sólidas
     //      con el tinte aditivo lineal de la casa.
     //
-    //  LOS PRESETS (los tres de vanilla, verbatim):
+    //  LOS PRESETS (los tres de vanilla, fieles):
     //    · RayoParams.Tormenta   — el rayo del clima (cae de 1000 px).
     //    · RayoParams.Arma       — LightningStrikeWeapon (cae de 750 px).
     //    · RayoParams.Arco(a, b) — GetArcSurgeWeaponGenerator (a→b, los
@@ -83,7 +84,7 @@ namespace AethonMod.Content.VFX
     }
 
     /// <summary>
-    /// EL LCG32 de vanilla 1.4.5 (Terraria.Utilities.LCG32Random, portado):
+    /// EL LCG32 de vanilla 1.4.5 (Terraria.Utilities.LCG32Random, recreado):
     /// state = state·2438992949 + 1 (el −1856014347 con signo). DETERMINISTA
     /// por semilla de 32 bits — la misma semilla engendra el MISMO rayo en
     /// todas las máquinas, y las horquillas heredan state+1.
@@ -124,7 +125,7 @@ namespace AethonMod.Content.VFX
         public int MaxProfundidad = 2;
         public RangoF HorquillaRango = new RangoF(0.3f, 0.8f);
 
-        /// <summary>EL RAYO DEL CLIMA (StormLightning de vanilla, verbatim): cae de 1000 px, choca con tiles y líquido.</summary>
+        /// <summary>EL RAYO DEL CLIMA (StormLightning de vanilla, fiel): cae de 1000 px, choca con tiles y líquido.</summary>
         public static RayoParams Tormenta => new RayoParams
         {
             LimiteRotacionOrigen = 0.34906587f,
@@ -212,7 +213,7 @@ namespace AethonMod.Content.VFX
         public bool EsTronco => Profundidad == 0;
     }
 
-    /// <summary>La curva de animación del canal (el AnimParams de StormLightningDrawer, verbatim).</summary>
+    /// <summary>La curva de animación del canal (el AnimParams de StormLightningDrawer, fiel).</summary>
     public struct AnimRayo
     {
         public float OpacidadInicial;   // al nacer
@@ -252,11 +253,11 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// v6.50.24 — LA ANIMACIÓN DE LA CAÍDA VENA TRUENO (el
-        /// ThunderFalling de Coralite): el frente ENERGIZA durante media
+        /// rayo caído de la referencia): el frente ENERGIZA durante media
         /// vida (el canal CRECE del cielo hacia el blanco — la caída
         /// telegrafiada del dragón), ARDE A TOPE hasta el 55% (el
         /// impacto: la caída completa) y muere SOLO en el colapso (el
-        /// X2Ease 1−f² del original se queda cerca de 1 casi toda la
+        /// X2Ease 1−f² de la referencia se queda cerca de 1 casi toda la
         /// agonía — la desintegración con el zigzag ABIERTO debe VERSE
         /// antes de apagarse; la lección del mock v1: fundir desde el
         /// 18% mataba la agonía antes de leerla).
@@ -292,7 +293,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  EL GENERADOR (LightningGenerator.GenerateBolt, portado)
+        //  EL GENERADOR (LightningGenerator.GenerateBolt, recreado)
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -677,7 +678,7 @@ namespace AethonMod.Content.VFX
         public int JugadorAncla;          // −1: sin ancla; si no: enganchado a la mano
         public Vector2 OrigenAncla;       // la mano en el nacimiento (la elasticidad)
 
-        // --- v6.50.24 — LA FIRMA VENA TRUENO (ThunderTrail del Coralite) ---
+        // --- v6.50.24 — LA FIRMA VENA TRUENO (el rastro de trueno de la referencia) ---
         public RayoParams Params;         // para la RECADA (re-germinar el zigzag)
         public Vector2 Blanco;            // el blanco de cada re-germinación
         public Vector2 Direccion;         // la dirección (Vector2.Zero = sin)
@@ -720,14 +721,14 @@ namespace AethonMod.Content.VFX
                 luzEstable, jugadorAncla, 0, false, 0f, false);
 
         /// <summary>
-        /// v6.50.24 — EL LANZAMIENTO CON LA FIRMA VENA TRUENO (el ThunderTrail
-        /// del Coralite, portado sobre el generador de vanilla): el canal
+        /// v6.50.24 — EL LANZAMIENTO CON LA FIRMA VENA TRUENO (el rastro
+        /// de trueno de la referencia, recreado sobre el generador de vanilla): el canal
         /// PARPADEA (50% de frames), se RE-GERMINA cada <paramref
-        /// name="recada"/> ticks (el zigzag re-random de Coralite — 4 en
+        /// name="recada"/> ticks (el zigzag re-random de la firma — 4 en
         /// vida, 6 en la agonía), puede CRECER de ancho
         /// (<paramref name="anchoFin"/>) y DESINTEGRARSE abriéndose al morir
         /// (<paramref name="aperturaColapso"/>: el sobre del meandro se
-        /// ensancha hasta ×3.5 en el colapso, la muerta del ThunderFalling).
+        /// ensancha hasta ×3.5 en el colapso, la muerte del rayo caído).
         /// </summary>
         public static bool Lanzar(RayoParams p, uint semilla, Vector2 blanco, Vector2? direccion,
             Color color, Color nucleo, float ancho, int vidaTicks, AnimRayo anim,
@@ -753,7 +754,7 @@ namespace AethonMod.Content.VFX
                 Vector2 origenAncla = Vector2.Zero;
                 if (jugadorAncla >= 0 && jugadorAncla < Main.maxPlayers &&
                     Main.player[jugadorAncla] != null && Main.player[jugadorAncla].active)
-                    origenAncla = Main.player[jugadorAncla].Center;   // la "mano" del ancla (el centro del jugador — el puerto del GetPlayerAnchorPos)
+                    origenAncla = Main.player[jugadorAncla].Center;   // la "mano" del ancla (el centro del jugador — la recreación del GetPlayerAnchorPos)
 
                 _pozo[slot] = new RayoActivo
                 {
@@ -788,7 +789,7 @@ namespace AethonMod.Content.VFX
         /// v6.50.24 — LA RECADA VENA TRUENO: re-germina el árbol del canal
         /// (otra semilla — el MISMO blanco y dirección) y, en el colapso,
         /// ABRE el sobre del meandro (FactorDesvio hasta ×3.5 del base, la
-        /// desintegración del ThunderFalling de Coralite: el zigzag se
+        /// desintegración del rayo caído: el zigzag se
         /// desparrama mientras muere).
         /// </summary>
         private static void Recadar(ref RayoActivo r)
@@ -828,10 +829,10 @@ namespace AethonMod.Content.VFX
                 r.Edad++;
                 if (r.Edad >= r.VidaTotal) { r.Vivo = false; _pozo[i] = r; continue; }
 
-                // v6.50.24 — LA RECADA VENA TRUENO (el re-random de Coralite):
+                // v6.50.24 — LA RECADA VENA TRUENO (el re-random de la firma):
                 // cada N ticks el zigzag GERMINA DE NUEVO (otra semilla, el
                 // MISMO blanco). En la agonía (p>0.62) la recada se RELAJA a
-                // cada 6 ticks — el flicker de la muerte del ThunderFalling.
+                // cada 6 ticks — el flicker de la muerte del rayo caído.
                 if (r.Recada > 0)
                 {
                     float p = r.Edad / (float)Math.Max(1, r.VidaTotal);
@@ -889,16 +890,16 @@ namespace AethonMod.Content.VFX
                     float progreso = r.Edad / (float)r.VidaTotal;
 
                     // v6.50.24 — EL PARPADEO VENA TRUENO (el CanDraw =
-                    // NextBool() de Coralite): el canal está vivo solo en
+                    // NextBool() de la referencia): el canal está vivo solo en
                     // el 50% de los frames — el flicker eléctrico del trío
                     // del dragón. (los canales de vanilla NO parpadean:
                     // solo aplica a quien lo pide).
                     if (r.Parpadeo && !Main.rand.NextBool()) continue;
 
                     // v6.50.24 — EL ANCHO VENA TRUENO (la receta del
-                    // ThunderFalling de Coralite): CRECE de Ancho a AnchoFin
+                    // rayo caído de la referencia): CRECE de Ancho a AnchoFin
                     // en la caída (primer 55% de la vida) y COLAPSA hacia
-                    // el 20% en la agonía (el 20+(1−f)·100 del original).
+                    // el 20% en la agonía (el 20+(1−f)·100 de la referencia).
                     float ancho = r.Ancho;
                     if (r.AnchoFin > 0f)
                     {

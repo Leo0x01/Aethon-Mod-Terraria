@@ -3,12 +3,11 @@ using Microsoft.Xna.Framework;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// COLORPRISMA — v6.52.2 — EL MOTOR DE COLOR DEL DIOS ANTIGUO
+    /// COLORPRISMA — v6.52.2 — EL MOTOR DE COLOR DEL PRISMA
     /// (v6.54.2 — renombrado en la purga final: mismo motor, nombre de
     /// la casa).
     ///
-    /// LA INVESTIGACIÓN (el jefe del video del usuario — el antiguo Dios
-    /// de los Slimes): la técnica número UNO que hace que TODO el jefe
+    /// LA INVESTIGACIÓN (el jefe del video del usuario): la técnica número UNO que hace que TODO el jefe
     /// se vea como se ve es UNA SOLA COSA — un RELOJ DE COLOR COMPARTIDO
     /// que recorre una paleta de 5 colores en ciclo continuo, y TODOS
     /// los efectos del combate leen de él con DISTINTO desfase: el
@@ -16,7 +15,7 @@ namespace AethonMod.Content.VFX
     /// en el MISMO arcoíris desplazándose (12 ticks por color, ciclo
     /// completo de 60 t = 1 s).
     ///
-    /// LA PALETA «OIL» (el arcoíris de mancha de aceite del original):
+    /// LA PALETA «OIL» (el arcoíris de mancha de aceite de la referencia):
     ///   magenta (174,23,189) → naranja (237,128,60) → amarillo
     ///   (247,255,101) → verde (176,234,85) → cian (102,219,249)
     ///
@@ -39,7 +38,7 @@ namespace AethonMod.Content.VFX
         };
 
         /// <summary>Los ticks por SEGMENTO de paleta (12 — el ciclo
-        /// completo son 60 t = 1 s, el tempo del original).</summary>
+        /// completo son 60 t = 1 s, el tempo de la referencia).</summary>
         public const float TicksPorSegmento = 12f;
 
         /// <summary>La longitud total del ciclo (60 t — la vuelta entera).</summary>

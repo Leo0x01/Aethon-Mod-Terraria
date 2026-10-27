@@ -12,11 +12,11 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// TomoApatiaNula — v6.41 — EL TOMO DE LA APATÍA NULA.
     ///
     /// ARMA DE PRUEBAS (la petición del usuario): la réplica exacta del
-    /// arma original cuyo proyectil se copió en TentaculoCosmicoProjectile
-    /// — hasta los NÚMEROS son los del original (daño 63,
+    /// arma de referencia cuyo proyectil se recreó en TentaculoCosmicoProjectile
+    /// — hasta los NÚMEROS son los de la referencia (daño 63,
     /// useTime 8 / useAnimation 20 / reuseDelay 8, knockback 5.5, rareza
-    /// Roja) y el disparo con la dispersión ±0.7 rad del Shoot original.
-    /// (v6.50.3 — doc honesta: el "maná 26" era del ORIGINAL; la réplica
+    /// Roja) y el disparo con la dispersión ±0.7 rad del Shoot de referencia.
+    /// (v6.50.3 — doc honesta: el "maná 26" era de la REFERENCIA; la réplica
     /// es maná 0 desde v6.42 — la regla del arsenal de pruebas.)
     ///
     /// La apatía nula: el tomo que ya no siente nada — escupe tentáculos
@@ -32,7 +32,7 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override void SetDefaults()
         {
-            // === LOS NÚMEROS DEL ORIGINAL (1:1 — arma de pruebas fiel). ===
+            // === LOS NÚMEROS DE LA REFERENCIA (1:1 — arma de pruebas fiel). ===
             Item.width = 28;
             Item.height = 30;
             Item.damage = 63;
@@ -49,7 +49,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<TentaculoCosmicoProjectile>();
             Item.shootSpeed = 12f;
-            // El sonido del original era un burn grave y rajado: el calco
+            // El sonido de la referencia era un burn grave y rajado: el calco
             // vanilla más cercano con el mismo perfil de pitch (-0.45..-0.6).
             Item.UseSound = SoundID.Item12.WithPitchOffset(-0.5f);
             Item.value = Item.buyPrice(0, 7, 50, 0);
@@ -58,7 +58,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // EL DISPARO DEL ORIGINAL: cada tentáculo nace con una desviación
+            // EL DISPARO DE LA REFERENCIA: cada tentáculo nace con una desviación
             // aleatoria de ±0.7 rad (la nube de gestación).
             Projectile.NewProjectileDirect(source, position, velocity.RotatedByRandom(0.7f),
                 ModContent.ProjectileType<TentaculoCosmicoProjectile>(), damage, knockback, player.whoAmI);

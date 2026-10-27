@@ -806,7 +806,7 @@ namespace AethonMod.Content.VFX
         /// («cristal roto»); EL PERLIN produce un CANAL que MEANDRA con
         /// curvatura continua — el arco eléctrico entre dos electrodos.
         /// La receta (investigación R57-a, defaults medidos de
-        /// SamyBlue/Lightning-Beams + NVIDIA + drilian):
+        /// las técnicas de referencia del género):
         ///
         ///   p(t) = lerp(A,B,t) + perp·a·(0.62·meandro + 0.38·jitter + 0.45·arco)·env(t)
         ///

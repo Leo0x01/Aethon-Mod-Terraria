@@ -1419,8 +1419,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             // v6.50.57 — EL COMPÁS DE LA COREOGRAFÍA (P3+): cada 6-9
             // ataques la luz NO elige — DANZA (la mejora de IA pedida: la
-            // cadena de la Emperatriz de vanilla y los god-bosses de
-            // Fargo's/Calamity — los ataques se pasan el turno SIN
+            // cadena de la Emperatriz de vanilla y los god-bosses del
+            // género — los ataques se pasan el turno SIN
             // respiro): EL SOL abre, las armas encadenan, EL ESTALLIDO
             // cierra. La fase escribe la danza (P3 corta · P4 completa ·
             // P5/FURIA entera).
@@ -1905,7 +1905,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// se cierne sobre la presa y despliega SU RUEDA — SEIS rayos
         /// largos (860 px) que GIRAN despacio (una vuelta cada ~8,4 s) en
         /// TRES tandas desfasadas, cada una naciendo TRANSLÚCIDA los
-        /// primeros 25 t (la regla de legibilidad de Fargo's: lo que aún
+        /// primeros 25 t (la regla de legibilidad de la casa: lo que aún
         /// no daña, se ve translúcido — el rayo se ENCIENDE de verdad
         /// cuando ya mata). La rueda CABALGA con el jefe (ai[2] = su
         /// whoAmI): hay que caminar ENTRE los rayos, moviéndose con el
@@ -2165,8 +2165,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
         /// <summary>
         /// v6.50.57 — LA DANZA ESCRITA (la investigación de los jefes-DIOS:
-        /// la Emperatriz de vanilla, el Mutante de Fargo's, la Supreme de
-        /// Calamity — TODOS encadenan ataques sin respiro): EL SOL abre la
+        /// la Emperatriz de vanilla y los jefes supremos del
+        /// género — TODOS encadenan ataques sin respiro): EL SOL abre la
         /// danza (el ataque especial), las armas del dios se pasan el turno
         /// SIN volver a la órbita y EL ESTALLIDO cierra con su firma. P3 la
         /// corta · P4 la completa · P5 (LA FURIA) la larga entera.

@@ -14,7 +14,7 @@ namespace AethonMod.Content.VFX
     /// OcasoSystem — v6.27 — EL ARO MEDIDOR DEL OCASO.
     ///
     /// La UI del gauge del Bastón del Ocaso de Aethon, 100% por código
-    /// (la lección de UI del Cosmic Destroyer: indicadores discretos +
+    /// (la lección de UI del arma suprema: indicadores discretos +
     /// fade-out de visibilidad −0.05/tick — nada de sprites fijos):
     ///
     ///   · CARGA: un arco de 20 segmentos tipo AUREOLA sobre la cabeza,
@@ -134,7 +134,7 @@ namespace AethonMod.Content.VFX
 
             if (!listo) return;
 
-            // === LAS TRES PUNTAS ORBITANDO (el aviso vivo del TSA) ===
+            // === LAS TRES PUNTAS ORBITANDO (el aviso vivo de la investigación) ===
             for (int k = 0; k < 3; k++)
             {
                 float ang = time * 1.9f * ((k & 1) == 0 ? 1f : -1f)

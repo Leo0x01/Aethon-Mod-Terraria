@@ -18,7 +18,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// dos lunas por planeta, cada uno con su deriva angular — y la
     /// cadena recursiva manteniéndolo todo atado mientras el conjunto
     /// gira. Los enlaces de luz, las estelas tangenciales (el
-    /// updateRelative del original) y las chispas del sol visten la
+    /// updateRelative de la demo) y las chispas del sol visten la
     /// danza.
     ///
     /// MECÁNICA: el sistema vive 12 s alrededor del jugador — TODO orbe
@@ -91,7 +91,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// el uTime, el HORIZONTE NEGRO se come la luz, LAS ESTRELLAS
     /// DOBLADAS caen en espiral acelerando y destellan al cruzar el
     /// anillo de fotones — y TODO el fondo se curva alrededor (la
-    /// lensingPass del original, la lente más fuerte del arsenal).
+    /// lensingPass de la demo, la lente más fuerte del arsenal).
     ///
     /// MECÁNICA: planta el ojo en el cursor 6 s — succión en 300 px
     /// (los jefes no se dejan), el que cruza el horizonte es devorado

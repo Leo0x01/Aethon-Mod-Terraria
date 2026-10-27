@@ -47,7 +47,7 @@ Todas sin maná (regla de la casa v6.26). Formato: **nombre `daño/cadencia`** �
 |---|---|---|
 | **Bastón de Rayo Primordial** | 130/22 | `RayoParams.Tormenta` (1000 px, clima de vanilla 1.4.5): rayo instantáneo sobre el cursor, radial 100 + cadena 2 + Electrified |
 | **Arco de Sobretensión** (Arc Surge portado) | 180/16 | `RayoParams.Arco(mano,blanco)`: 1 arco anclado a la mano + hasta 2 hermanos a NPCs en cono 60°, carmesí, 1 tick de vida |
-| **Colmillo de Vena Trueno** (firma Coralite) | 155/30 | **Trío 1 naranja + 2 amarillos** con recada 4 t, parpadeo 50 %, caída telegrafiada 26 t, golpe al aterrizar (radial 130 + cadena 3) |
+| **Colmillo de Vena Trueno** (firma la referencia del dragón) | 155/30 | **Trío 1 naranja + 2 amarillos** con recada 4 t, parpadeo 50 %, caída telegrafiada 26 t, golpe al aterrizar (radial 130 + cadena 3) |
 | **Cetro del Trueno Rúnico** | 95/26 | StormLib: rayos del cielo 700–980 px + salta 3 + electrifica |
 | **Cetro del Trueno Perlin** | 130/22 | `PerlinBolt` (fBm 1D, meandro + Chaikin): arco continuo bastón→cursor que SIGUE al cursor 10 t |
 

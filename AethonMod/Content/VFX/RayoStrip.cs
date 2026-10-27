@@ -8,7 +8,7 @@ namespace AethonMod.Content.VFX
     /// <summary>
     /// RayoStrip — v6.50.25 — EL FILAMENTO DE PRIMITIVAS DE VÉRTICES.
     /// v6.50.26 — LA LECCIÓN DE LA INVESTIGACIÓN (R63-a: rayos reales +
-    /// Calamity/drilian/jvm-gaming): (1) EL ALFA DEL VÉRTICE NO ESCALA
+    /// las técnicas del género): (1) EL ALFA DEL VÉRTICE NO ESCALA
     /// EL COLOR — el BasicEffect del motor pasa el COLOR sin pre-multiplicar
     /// y el lote aditivo (One,One) SUMA el rgb TAL CUAL: el alfa por
     /// columna era LETRA MUERTA y la funda salía como BANDA SÓLIDA de
@@ -122,7 +122,8 @@ namespace AethonMod.Content.VFX
 
         // v6.50.26 — EL BLEND DE PANTALLA (soft-add): dst += rgb·(1−dst).
         // La acumulación asintótica NUNCA clipea — el fix del «brillo que
-        // se rompe al cruzarse» (receta del foro jvm-gaming, verificada en
+        // se rompe al cruzarse» (receta clásica de los foros de gráficos,
+        // verificada en
         // la documentación de MonoGame: Blend.InverseDestinationColor).
         private static readonly BlendState _pantalla = new BlendState
         {
@@ -173,14 +174,14 @@ namespace AethonMod.Content.VFX
         //  creada, en vez de un haz de luz con todo el conjunto… son
         //  varias lineas con muchos cuadrados discontinuos»): la receta
         //  de BeamLib era CORRECTA (boca 0.38/6% · punta 0.12 · core
-        //  0.42 · diamantes sin⁷/92/9 — todo calca el AriaGammaRay de
-        //  Calamity Overhaul) pero el RENDERER la traicionaba:
+        //  0.42 · diamantes sin⁷/92/9 — todo calca el haz gamma de
+        //  la investigación) pero el RENDERER la traicionaba:
         //  VFXCore.Ribbon dibujaba el haz como CADENA DE RECTÁNGULOS
         //  rotados independientes con solape aditivo (bultos), la
         //  textura ENTERA comprimida en cada segmento (cuadrados
         //  periódicos), y los segmentos de <1.5 px SALTADOS (líneas
-        //  discontinuas literales). LOS MAESTROS (FusionRay de Hunt of
-        //  the Old God, GammaRayBeam de CWR): UNA TIRA CONTINUA con
+        //  discontinuas literales). LOS MAESTROS (los haces de
+        //  referencia): UNA TIRA CONTINUA con
         //  UV.X = largo de arco (el flujo del ruido HORNEADO en las UVs
         //  — el «shader» resuelto en CPU) y la caída gaussiana VIVA EN
         //  LA TEXTURA (eje V de RuidoTinta: 0 en bordes → centro).
@@ -229,7 +230,7 @@ namespace AethonMod.Content.VFX
         /// <summary>v6.52.2 — LA FAJA DE GRADIENTE (la firma del
         /// EL RAYO DE FUSIÓN del dios: el color VIAJA A LO LARGO del haz —
         /// coloresPorNodo[i] tiñe cada segmento; null = el color fijo).
-        /// EL ARCOÍRIS A LO LARGO es lo que hacía el shader del original
+        /// EL ARCOÍRIS A LO LARGO es lo que hacía el shader de la referencia
         /// con `ValueAt(localAI[0] − progress·100)` — aquí, resuelto por
         /// vértice en CPU, como todo en la casa.</summary>
         public static void FajaTexturadaEnLote(Vector2[] pts, float[] semiancho,
@@ -257,7 +258,7 @@ namespace AethonMod.Content.VFX
 
             // EL FLUJO: u = arco/periodo − tiempo·flujo → los rasgos del
             // ruido AVANZAN raíz→punta (la «carne que camina» — el
-            // uTime NEGATIVO del FusionRay original, horneado en las UVs).
+            // uTime NEGATIVO del haz de referencia, horneado en las UVs).
             float uBase = -tiempo * flujo;
 
             // LA EMISIÓN: un quad por segmento (dos triángulos, vértices

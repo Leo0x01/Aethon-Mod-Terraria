@@ -21,13 +21,13 @@ namespace AethonMod.Content.Weapons
     /// que Pluma Convocadora y EL ESCRIBA y todo lo referente») — el TRAZO
     /// SOBREVIVE y muda de familia: ya no es del ciclo del Escriba, es EL
     /// ARMA DEL RAYO del arsenal de la casa (Bolsa de las Armas de Rayo).
-    /// Su render vive la técnica DEL RAYO DE FUSIÓN DEL DIOS ANTIGUO (la
+    /// Su render vive la técnica DEL RAYO DE FUSIÓN DEL JEFE DEL VIDEO (la
     /// letra del usuario: «la respuesta es el rayo de fusión del jefe del video
     /// pero necesitamos saber cómo hacerlo»).
     ///
     /// LA RESPUESTA ARMADA: el Last Prism de vanilla llevado a la receta
-    /// moderna de 7 capas (la investigación R2: Calamity + Fargo's +
-    /// Stars Above + Calamity Overhaul decompilados). Canalizada (mantén
+    /// moderna de 7 capas (la investigación R2: las técnicas del género,
+    /// diseccionadas a fondo). Canalizada (mantén
     /// clic): CINCO fajos convergen en UN rayo masivo de ruido de Perlin
     /// — espina fBm viva, halo + cuerpo + core, diamantes de energía que
     /// RECORREN el rayo, luz dinámica a lo largo de TODO el cuerpo y la

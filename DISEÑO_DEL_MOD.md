@@ -336,7 +336,7 @@ el stack. `BoltRenderer` = primera generación, hoy montado sobre RayoStrip.
 Bastón de Rayo Primordial (`RayoParams.Tormenta`, impacto instantáneo + cadena) ·
 **Arco de Sobretensión** (el Arc Surge de vanilla 1.4.5 portado como arma: anclado a la mano,
 +2 hermanos a NPCs en cono 60°, carmesí) · **Colmillo de Vena Trueno** (la firma del Thundervein
-Wyvern de Coralite: **trío 1 naranja (219,114,22) + 2 amarillos (255,202,101)**, recada 4 t,
+Wyvern de la referencia del dragón: **trío 1 naranja (219,114,22) + 2 amarillos (255,202,101)**, recada 4 t,
 parpadeo 50 %, caída telegrafiada que golpea AL ATERRIZAR) · Cetro del Trueno Rúnico (StormLib
 clásico) · Cetro del Trueno Perlin (`PerlinBolt`, el arco sigue al cursor 10 t).
 

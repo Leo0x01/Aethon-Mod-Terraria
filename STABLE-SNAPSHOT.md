@@ -1,3 +1,47 @@
+# v6.55.0 — LA CURA DE LOS PICOS + EL RAYO CONCENTRADO II + LAS ALAS VECTORIALES — EL CHECKLIST
+
+**Qué pasó** (la letra): «en ambas hay picos… y esos picos están en todas
+las armas definitivas… es raro o una mala implementación de código» +
+«no uses texturas originales del rayo de fusión, cambia su nombre a rayo
+concentrado 2… el sonido debes recrearlo» + «nuestro proyecto no puede
+tener ninguna referencia externa de ningún tipo» + «borra la bolsa de
+investigación… deja la bolsa de definitiva y la bolsa de alas» + «las
+alas… todas son rectángulos, crea formas vectoriales: plumas, cuchillas».
+LA CURA: el diagnóstico por SIMULACIÓN numpy del pipeline completo (la
+causa raíz de los picos demostrada), el arma renombrada 100 % casa
+(shader propio + sonido sintetizado), las alas de tiras vectoriales y
+la purga completa de lo externo.
+
+1. **LA PRUEBA DE LOS PICOS (LA QUE IMPORTA)**: [ ] agarrar EL RAYO
+   CONCENTRADO II y disparar contra un jefe: el haz con el BORDE LISO
+   — el plasma hierve DENTRO pero la silueta ya NO tiene dientes de
+   sierra; [ ] EL PRISMA: los 7 haces pequeños ondean SUAVES (ya no
+   zigzaguean) y las chispas arden DENTRO del canal (no en el filo);
+   [ ] EL PARTIDOR: la columna con los bordes limpios y las esquinas
+   del perfil redondeadas (la saturación suave).
+2. **EL RAYO CONCENTRADO II (antes la réplica)**: [ ] el NOMBRE nuevo
+   en la bolsa de las definitivas (la 6ª arma); [ ] la carga: la boca
+   de glows apilados + la AGUJA que apunta; [ ] el láser: 3500 px con
+   el barrido cosenoidal, el kick cada 4 t, la música BAJA al 30 %;
+   [ ] EL SONIDO NUEVO: el zumbido grave que late (¡el loop sintetizado
+   — sin cortes al repetir!); [ ] el núcleo blanco SUAVE (el umbral ya
+   no recorta fractales).
+3. **LAS ALAS VECTORIALES**: [ ] equipar cualquier ala de la Bolsa de
+   las Alas: las plumas tienen FORMA de pluma (raíz estrecha → vientre
+   → PUNTA AFILADA) y el borde de fuga CÓNCAVO (la media luna) — ya NO
+   son rectángulos; [ ] comparar DOS alas distintas (p.ej. Medianoche
+   vs Plasma vs Orquídea): siluetas DIFERENTES (membranas anchas vs
+   agujas vs pétalos); [ ] la punta se DESGARRA viva al aletear.
+4. **LAS BOLSAS**: [ ] al entrar al mundo llegan: EL COFRE DEL ARSENAL
+   (ahora con la Bolsa de las Alas DENTRO) + LA BOLSA DE LAS ALAS aparte
+   + LA BOLSA DE LAS DEFINITIVAS aparte; [ ] la Bolsa de la Investigación
+   YA NO EXISTE (ni en el cofre ni aparte).
+5. **LA PURGA**: [ ] el mod carga limpio en el mundo (nada del material
+   retirado); [ ] el Cofre del Arsenal despliega sus bolsas sin la de
+   investigación.
+
+---
+
 # v6.54.7 — LA TRANSCENDENCIA VISUAL — EL CHECKLIST
 
 **Qué pasó** (la letra): las armas seguían «a nivel principiante» para

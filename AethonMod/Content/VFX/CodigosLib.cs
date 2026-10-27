@@ -11,7 +11,7 @@ namespace AethonMod.Content.VFX
     /// <summary>
     /// CodigosLib — v6.36 — LA LIBRERÍA DE LOS CÓDIGOS VIVOS.
     ///
-    /// CUATRO CÓDIGOS de demostraciones web (JavaScript / THREE.js), uno
+    /// CUATRO CÓDIGOS de demostraciones web de la investigación, uno
     /// por imagen del usuario, traducidos a las primitivas de la casa:
     /// cada compositor es la REPLICA VISUAL del algoritmo de su imagen —
     /// la FÍSICA (la simulación de nodos) vive en su proyectil, aquí
@@ -22,17 +22,17 @@ namespace AethonMod.Content.VFX
     ///     padre (this.size) y su ángulo absoluto/relativo se recalcula
     ///     cada frame (absAngle / relAngle) — los brazos orbitales con
     ///     su estela tangencial son el "updateRelative(false, true)"
-    ///     del original hecho luz.
+    ///     de la demo hecho luz.
     ///   · OjoAbismo(...)     — IMAGEN 2: animate() del agujero negro —
     ///     los tres materiales vivos del shader (discoDMaterial → el
     ///     anillo energético de 20 bandas, starMaterial → LAS ESTRELLAS
     ///     DOBLADAS cayendo en espiral hacia el horizonte,
     ///     eventHorizonMat → el núcleo negro absoluto) todos animados
     ///     por el uTime del reloj, y la lente de pantalla curvando el
-    ///     fondo alrededor (la lensingPass del original la pone
+    ///     fondo alrededor (la lensingPass de la demo la pone
     ///     GravLens desde el proyectil).
     ///   · SolVivo(...)       — IMAGEN 3: animate() del sol — EL PULSO
-    ///     EXACTO del original: pulse = 0.5 + 0.5·sin(time·2.15) y el
+    ///     EXACTO de la demo: pulse = 0.5 + 0.5·sin(time·2.15) y el
     ///     bloom = 0.8 + 0.4·pulse respirando TODA la luz; el núcleo
     ///     girando a 0.05 rad/s (coreGroup.rotation.y += delta·0.05) y
     ///     los seis materiales vivos: núcleo estelar, cáscara, disco
@@ -117,17 +117,17 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// LA DANZA DE LOS ORBES — el render del sistema encadenado de la
-        /// IMAGEN 1. Cada nodo llega con su posición YA resuelta por el
-        /// puerto C# del follow() que vive en el proyectil; aquí se viste:
+        /// IMAGEN 1. Cada nodo llega con su posición YA resuelta por la
+        /// recreación C# del follow() que vive en el proyectil; aquí se viste:
         /// el ENLACE ORBITAL (la cuerda de luz padre→hijo), la ESTELA
-        /// TANGENCIAL (el "updateRelative" del original: cada orbe
+        /// TANGENCIAL (el "updateRelative" de la demo: cada orbe
         /// estirado CONTRA su movimiento, perpendicular al radio que lo
         /// ata — así se lee la órbita), el CUERPO (núcleo sólido + halo)
         /// y las chispas del sol.
         /// </summary>
         /// <param name="pos">Posiciones de MUNDO de los nodos.</param>
         /// <param name="radio">Radio visual de cada nodo (px).</param>
-        /// <param name="absAngle">this.absAngle del original (rad — ángulo
+        /// <param name="absAngle">this.absAngle de la demo (rad — ángulo
         /// padre→nodo, recalculado por Follow cada tick).</param>
         /// <param name="tipo">0 = sol (raíz), 1 = planeta, 2 = luna.</param>
         /// <param name="padre">Índice del padre de cada nodo (la raíz se
@@ -164,7 +164,7 @@ namespace AethonMod.Content.VFX
                 }
 
                 // === 2. LOS CUERPOS: núcleo sólido + halo + ESTELA
-                //     TANGENCIAL (el updateRelative del original — el
+                //     TANGENCIAL (el updateRelative de la demo — el
                 //     estiramiento perpendicular al radio de la órbita). ===
                 for (int i = 0; i < n; i++)
                 {
@@ -225,7 +225,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// EL OJO DEL ABISMO — el render del agujero negro de la IMAGEN 2.
-        /// Los tres materiales del animate() original, todos esclavos del
+        /// Los tres materiales del animate() de la demo, todos esclavos del
         /// MISMO reloj (uTime → time):
         ///   · diskMaterial → el ANILLO ENERGÉTICO de 20 bandas viajando
         ///     (mitad trasera tenue, mitad delantera incandescente — la
@@ -236,14 +236,14 @@ namespace AethonMod.Content.VFX
         ///     cayendo en espiral hacia el horizonte, acelerando al
         ///     acercarse (la lente amplifica su brillo) y DESTELLANDO al
         ///     cruzar el anillo de fotones antes de renacer lejos.
-        /// La lensingPass del original (la pantalla curvándose alrededor
+        /// La lensingPass de la demo (la pantalla curvándose alrededor
         /// del agujero proyectado a coordenadas de pantalla) la registra
         /// el proyectil con GravLens cada tick.
         /// </summary>
         /// <param name="center">Centro en coords de MUNDO.</param>
         /// <param name="radius">Radio del vórtice (px — el anillo llega a ~1.9×).</param>
         /// <param name="progress">0..1 de la vida (apertura/cierre).</param>
-        /// <param name="time">El reloj (uTime del original).</param>
+        /// <param name="time">El reloj (uTime de la demo).</param>
         /// <param name="seed">Semilla determinista.</param>
         public static void OjoAbismo(Vector2 center, float radius, float progress,
             float time, int seed)
@@ -350,34 +350,34 @@ namespace AethonMod.Content.VFX
         //  COMPOSITOR 3 — EL SOL VIVO (imagen 3: el animate() del sol)
         // ==================================================================
 
-        /// <summary>LA FRECUENCIA EXACTA del pulso del animate() original.</summary>
+        /// <summary>LA FRECUENCIA EXACTA del pulso del animate() de la demo.</summary>
         public const float FrecuenciaPulso = 2.15f;
 
-        /// <summary>LA ROTACIÓN EXACTA del núcleo del original (rad/s:
+        /// <summary>LA ROTACIÓN EXACTA del núcleo de la demo (rad/s:
         /// coreGroup.rotation.y += delta · 0.05).</summary>
         public const float RotacionNucleo = 0.05f;
 
         /// <summary>
         /// EL SOL VIVO — el render del sol de la IMAGEN 3. EL PULSO
-        /// EXACTO del animate() original late en TODO:
+        /// EXACTO del animate() de la demo late en TODO:
         /// <code>
         ///   const pulse = 0.5 + 0.5 * Math.sin(time * 2.15);
         ///   bloomPass.strength = 0.8 + 0.4 * pulse;
         ///   coreGroup.rotation.y += delta * 0.05;
         /// </code>
-        /// Los seis materiales del original, uno a uno: el NÚCLEO
+        /// Los seis materiales de la demo, uno a uno: el NÚCLEO
         /// estelar girando (starMaterial + coreGroup), la CÁSCARA
         /// respirando (shellMaterial), el DISCO ecuatorial (diskMat),
         /// los ANILLOS que nacen en cada pico del pulso (ringMat), las
         /// PROMINENCIAS arqueándose desde la superficie (prominenceMat
         /// → PyraLib.Tongue, la llama de la casa) y las ASCUAS que
-        /// escapan y se apagan (emberMat). El bloom del original
+        /// escapan y se apagan (emberMat). El bloom de la demo
         /// (0.8..1.2) escala cada brillo Y la luz del mundo (la mide el
         /// proyectil con la MISMA fórmula).
         /// </summary>
         /// <param name="center">Centro en coords de MUNDO.</param>
         /// <param name="radius">Radio del núcleo solar (px).</param>
-        /// <param name="time">El reloj (elapsedTime del original).</param>
+        /// <param name="time">El reloj (elapsedTime de la demo).</param>
         /// <param name="seed">Semilla determinista.</param>
         /// <param name="alpha">Intensidad global (0..1).</param>
         public static void SolVivo(Vector2 center, float radius, float time,
@@ -387,7 +387,7 @@ namespace AethonMod.Content.VFX
 
             center -= Main.screenPosition;   // MUNDO → PANTALLA
 
-            // === EL PULSO EXACTO DEL ORIGINAL (línea por línea). ===
+            // === EL PULSO EXACTO DE LA DEMO (línea por línea). ===
             float pulse = 0.5f + 0.5f * (float)Math.Sin(time * FrecuenciaPulso);
             float bloom = 0.8f + 0.4f * pulse;
 
@@ -431,7 +431,7 @@ namespace AethonMod.Content.VFX
 
                 // === 3. EL NÚCLEO GIRANDO (starMaterial + coreGroup): el
                 //     corazón blanco rodeado de TRES LÓBULOS de plasma que
-                //     giran a la ROTACIÓN EXACTA del original. ===
+                //     giran a la ROTACIÓN EXACTA de la demo. ===
                 float rotNucleo = time * RotacionNucleo;
                 for (int l = 0; l < 3; l++)
                 {
@@ -451,7 +451,7 @@ namespace AethonMod.Content.VFX
 
                 // === 4. LOS ANILLOS DEL PULSO (ringMat): un anillo nace en
                 //     cada PICO del pulso y se expande apagándose — el
-                //     período EXACTO 2π/2.15 s del original. ===
+                //     período EXACTO 2π/2.15 s de la demo. ===
                 float periodo = MathHelper.TwoPi / FrecuenciaPulso;
                 for (int r = 0; r < 2; r++)
                 {
@@ -503,25 +503,25 @@ namespace AethonMod.Content.VFX
         //  COMPOSITOR 4 — LA SIERPE ESTELAR (imagen 4: los elems)
         // ==================================================================
 
-        /// <summary>EL ÍNDICE DE LA CABEZA en 0-based (la i==1 del original).</summary>
+        /// <summary>EL ÍNDICE DE LA CABEZA en 0-based (la i==1 de la demo).</summary>
         public const int IdxCabeza = 0;
 
         /// <summary>LOS ÍNDICES DE LAS ALETAS en 0-based (las i==8 e i==14).</summary>
         public static readonly int[] IdxAletas = { 7, 13 };
 
-        /// <summary>¿Es este segmento un ALETA? (las i==8 e i==14 del original).</summary>
+        /// <summary>¿Es este segmento un ALETA? (las i==8 e i==14 de la demo).</summary>
         public static bool EsAleta(int i) => i == IdxAletas[0] || i == IdxAletas[1];
 
         /// <summary>
         /// LA SIERPE ESTELAR — el render de la criatura segmentada de la
-        /// IMAGEN 4. La jerarquía EXACTA del prepend() original (índices
+        /// IMAGEN 4. La jerarquía EXACTA del prepend() de la demo (índices
         /// traducidos a 0-based: la i==1 → cabeza, las i==8 e i==14 →
         /// aletas, el resto → espina):
         ///   · LA CABEZA: el orbe brillante con la MANDÍBULA abierta en V,
         ///     sus DOS OJOS y la cresta;
         ///   · LAS ALETAS: abanicos de tres varillas frías perpendicular al
         ///     cuerpo (la aleta de la i==8 mira a un lado, la de la i==14
-        ///     al otro — la simetría del pez original);
+        ///     al otro — la simetría del pez de la demo);
         ///   · LA ESPINA: las vértebras — cápsula a lo largo del cuerpo +
         ///     la estrella de 4 puntas del pincel de la casa como apófisis.
         /// Las posiciones llegan resueltas por la cadena follow() del
@@ -556,7 +556,7 @@ namespace AethonMod.Content.VFX
                         new Vector2(RadioDe(i) * 4.4f, RadioDe(i) * 4.4f), 0f,
                         Tint(SierpeHalo, 0.10f * alpha));
 
-                // === 2. LA ESPINA (el prepend("Espina", i) del original):
+                // === 2. LA ESPINA (el prepend("Espina", i) de la demo):
                 //     cápsula a lo largo del cuerpo + la apófisis estelar. ===
                 for (int i = 1; i < n; i++)
                 {
@@ -593,7 +593,7 @@ namespace AethonMod.Content.VFX
                     }
                 }
 
-                // === 4. LA CABEZA (el prepend("Cabeza", 1) del original):
+                // === 4. LA CABEZA (el prepend("Cabeza", 1) de la demo):
                 //     el cráneo brillante, la MANDÍBULA abierta en V, los
                 //     DOS OJOS fríos y la cresta. ===
                 {

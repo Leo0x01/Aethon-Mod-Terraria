@@ -12,8 +12,8 @@ namespace AethonMod.Content.Items
     /// La pieza nueva del ciclo de investigación del usuario («analiza
     /// las alas de este mod… hay wings creadas por código ahí… aprende
     /// la técnica y luego crea alas con dicha técnica y ponlas en una
-    /// bolsa y dáselas al jugador»): las alas procedurales de CALAMITY
-    /// OVERHAUL (la técnica completa documentada en AlasAuroraLib —
+    /// bolsa y dáselas al jugador»): las alas procedurales de la
+    /// investigación (la técnica completa documentada en AlasAuroraLib —
     /// el abanico de plumas-quad, la onda de aleteo, la dispersión de
     /// hue por vértice, el ruido que fluye, el desgarre de punta y la
     /// física inyectada SIN sprite) vestidas con la TINTA DEL ESCRIBA:
@@ -65,7 +65,7 @@ namespace AethonMod.Content.Items
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // LA LÍNEA VIVA (la conducta del original — la forma actual
+            // LA LÍNEA VIVA (la conducta de la referencia — la forma actual
             // del ala se anuncia en el tooltip).
             string forma = Main.dayTime
                 ? Terraria.Localization.Language.GetTextValue("Mods.AethonMod.Items.AuroraDeTinta.FormaDia")

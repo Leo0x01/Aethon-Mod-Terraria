@@ -446,7 +446,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     float q = i / (float)(N - 1);
                     espina[i] = Vector2.Lerp(arriba, abajo, q);
-                    perfil[i] = MathHelper.Clamp(MathF.Sin(q * MathHelper.Pi) * 1.3f, 0.25f, 1f) *
+                    // v6.55.0 — LA CURA DE LAS ESQUINAS DEL CLAMP (como el
+                    // partidor): saturación suave en vez de Clamp duro.
+                    float s = MathF.Sin(q * MathHelper.Pi) * 1.3f - 0.25f;
+                    float sat = MathHelper.SmoothStep(0f, 0.65f, MathHelper.Clamp(s, 0f, 0.65f));
+                    perfil[i] = (0.25f + 0.75f * sat) *
                         (rama ? 40f : final ? 72f : 52f) * potencia * flicker;
                 }
                 DefinitivasLib.HazFusionEspina(espina, perfil, c, potencia,

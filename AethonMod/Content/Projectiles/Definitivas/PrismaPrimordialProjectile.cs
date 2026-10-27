@@ -285,14 +285,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 // LAS CHISPAS DE BORDE — los «bits» del shader original
                 // (técnica heredada del fuente: las motas que arden en el
-                // FILO del canal, donde el fade de lente las deja vivir)
+                // FILO del canal, donde el fade de lente las deja vivir).
+                // v6.55.0 — LA CURA: nacían a 0.92× el semiancho — PEGADAS
+                // al filo, cada polvo se leía como UNA PÚA. Ahora arden a
+                // 0.55× (DENTRO del canal, donde el cuerpo las abraza) —
+                // el mismo chisporroteo, sin silueta dentada.
                 if (conv > 0.5f && ++_tChispaBorde > 2)
                 {
                     _tChispaBorde = 0;
                     float prog = Main.rand.NextFloat(0.1f, 0.9f);
                     float semi = AnchoHazEn(prog, conv) * 0.5f;
                     float lado = Main.rand.NextBool() ? 1f : -1f;
-                    Vector2 posB = foco + dir * (LargoHaz * prog) + new Vector2(-dir.Y, dir.X) * lado * semi * 0.92f;
+                    Vector2 posB = foco + dir * (LargoHaz * prog) + new Vector2(-dir.Y, dir.X) * lado * semi * 0.55f;
                     Dust d = Dust.NewDustPerfect(posB, DustID.GoldFlame,
                         new Vector2(-dir.Y, dir.X) * lado * Main.rand.NextFloat(1f, 3f) + dir * Main.rand.NextFloat(2f), 0,
                         DefinitivasLib.BlancoCalido, 0.7f);
@@ -313,7 +317,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // ==================== CAPA 13 — LA ZONA DE IMPACTO ====================
                 // (técnica nº5: la punta ARDE — chispas con gravedad que
                 // rebotan en la perpendicular, como el estallido continuo del
-                // GammaRay de los jefes de Calamity)
+                // haz gamma de los jefes del género)
                 Vector2 punta = _espinaLista ? _espina[NEspina - 1] : foco + dir * LargoHaz;
                 int chispas = conv > 0.6f ? 3 : 1;
                 for (int i = 0; i < chispas; i++)
@@ -478,15 +482,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                     Color cHaz = ColorDePrisma(k, tiempo);
 
-                    // La espina con MEANDRO (la vida: el haz pequeño ondula al viajar)
-                    const int M = 12;
+                    // La espina con MEANDRO (la vida: el haz pequeño ondula al viajar).
+                    // v6.55.0 — LA CURA DEL MEANDRO SUB-MUESTREADO: 12 nodos
+                    // para una senoide de ~2.9 ondas (sin(q·9)) eran ~4 nodos
+                    // por onda — la interpolación lineal la convertía en
+                    // DIENTES DE SIERRA en los bordes del haz pequeño. Ahora:
+                    // 24 nodos y frecuencia q·5.5 (≤1.75 ondas — sobremuestreada).
+                    const int M = 24;
                     var pts = new Vector2[M];
                     var anchoK = new float[M];
                     for (int i = 0; i < M; i++)
                     {
                         float q = i / (float)(M - 1);
                         Vector2 base_ = Vector2.Lerp(nace, foco, q);
-                        float ondeo = MathF.Sin(q * MathHelper.Pi) * MathF.Sin(tiempo * 3f + k * 1.7f + q * 9f) * 8f * (1f - conv * 0.5f);
+                        float ondeo = MathF.Sin(q * MathHelper.Pi) * MathF.Sin(tiempo * 3f + k * 1.7f + q * 5.5f) * 8f * (1f - conv * 0.5f);
                         pts[i] = base_ + perp * ondeo - Main.screenPosition;
                         anchoK[i] = 0.35f + 0.65f * MathF.Sin(q * MathHelper.Pi);
                     }

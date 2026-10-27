@@ -20,8 +20,8 @@ namespace AethonMod.Content.Globals
     /// muerte se DETIENE y no avanza; en su lugar, la nueva animación: la
     /// sombra sale del libro y lo DEVORA.»
     ///
-    /// LA RECETA (investigación 2-b, verificada contra Fargo Mutant, TSA
-    /// Tsukiyomi, CalamityOverhaul y el propio AethonBoss de la casa —
+    /// LA RECETA (investigación 2-b, verificada contra los jefes del género
+    /// y el propio AethonBoss de la casa —
     /// que usa EXACTAMENTE este patrón desde hace 60 versiones):
     ///
     ///   CheckDead (1ª pasada) → life=1 · dontTakeDamage · damage=0 ·

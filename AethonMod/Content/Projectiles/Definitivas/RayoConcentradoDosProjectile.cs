@@ -1,51 +1,8 @@
-// ============================================================================
-// v6.54.8 — EL ARMA RÉPLICA: «EL RAYO DE FUSIÓN», LA COPIA EXACTA.
-// ============================================================================
-// LA LETRA: «intenta crear un arma que sea la copia exacta de el rayo de
-// fusión usando sus texturas para fines de investigacion» (la letra del
-// dueño, sobre el ataque del dios antiguo).
-//
-// Es la adaptación del ataque estrella del jefe (puerto de investigación,
-// Calamity: Hunt of the Old God · Team Hypnos · GPL-3.0), con SUS
-// texturas y SU shader originales — pedida por el dueño del proyecto
-// como PATRÓN DE CALIDAD para comparar, lado a lado, con las armas de
-// la casa. MATERIAL DE INVESTIGACIÓN: se retira antes de cualquier
-// publicación pública (la regla de la casa desde la .53.1).
-//
-// QUÉ SE COPIÓ EXACTO (del original, verbatim donde se pudo):
-//   · La fórmula de ancho del strip: p^0.8 · cbrt(lerp(1.01, 0.7, p)) ·
-//     3500 · (1.1 + cos(Time)·(0.08 − p·0.06)) — la respiración ±8 %.
-//   · EL BARRIDO: cos((T−Carga)/Duración·2π) · 2.5 rad con sus dos
-//     envolventes de entrada y salida.
-//   · El giro hacia el objetivo con paso decreciente (0.04 → 0.01).
-//   · LA BOCA: los cinco glows apilados (5× · 4× · 2× · 14× · el
-//     telegraph del rayo que apunta) con el color que viaja.
-//   · EL SHADER COMPLETO: FusionRayEffect.fx compilado al vuelo por
-//     FxcReader (verificado: Terraria.ModLoader.Assets.FxcReader existe
-//     en tML 2026.08 — así se vio en la .53.0): las CUATRO texturas
-//     multiplicadas (carne · segundo ruido · rampa · bits en AND doble),
-//     el scroll doble t·3/t·4, el warp sinusoidal ±0.05, el núcleo
-//     blanco por SATURACIÓN (length > 0.4 → return 1).
-//   · El gradiente arcoíris VIAJERO por vértice: ValueAt(reloj − p·100).
-//   · Los tiempos: 300 de carga + 800 de láser (EXACTOS — por eso el
-//     arma tarda: es la réplica, no un arma de uso diario).
-//   · El Kick de cámara cada 4 t, la música −30 % mientras vive, el
-//     sonido en loop con pitch animado, el vuelo infinito y el
-//     retroceso suave del portador.
-//   · Los polvos cromáticos que recorren el haz (15/frame a lo largo
-//     + los de la boca) — reimplementados locales, mismo tamaño y color.
-//
-// EL CAMBIO DE DUEÑO: el original vivía en el NPC (su boca a 13 px del
-// centro, −20 arriba); aquí vive en el JUGADOR y apunta al CURSOR —
-// el resto es el ataque tal cual era.
-// ============================================================================
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Utilities;
 using Terraria;
 using Terraria.Audio;
 using Terraria.Graphics;
@@ -56,9 +13,37 @@ using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
-    public class RayoFusionCopiaProjectile : ModProjectile
+    // =====================================================================
+    //  v6.55.0 — EL RAYO CONCENTRADO II, EL PROYECTIL.
+    // =====================================================================
+    //  La sexta arma de la bolsa de las definitivas (la letra: «cambia su
+    //  nombre a rayo concentrado 2 o algo así… no uses texturas originales…
+    //  el sonido debes recrearlo»). EL ATAQUE ES EL DE SIEMPRE — la carga
+    //  de 300 ticks con la boca de glows apilados y la aguja que apunta,
+    //  el láser de 800 con el cono de 3500 px y su barrido cosenoidal, el
+    //  kick de cámara, la música callada al 30 %, el vuelo infinito y los
+    //  polvos cromáticos del conducto.
+    //
+    //  LO QUE CAMBIÓ (TODO el material es de la casa):
+    //    · LAS CUATRO TEXTURAS DEL PLASMA: CarnePlasma · SegundoRuido ·
+    //      RampaGlow · BitsChispa — las procedurales de la librería
+    //      (DefinitivasLib), generadas por los scripts de tools/.
+    //    · EL SHADER: HazConcentradoShader.fx — la técnica del haz vivo
+    //      re-escrita 100 % para el mod: las cuatro texturas multiplicadas
+    //      con doble scroll cruzado, la deformación sinusoidal, las chispas
+    //      en doble AND — MÁS LAS DOS CURAS DE LOS PICOS: uEscalaV (la
+    //      escala del ruido compensada con el tamaño real — los rasgos del
+    //      plasma miden SIEMPRE lo mismo en pantalla) y el núcleo blanco
+    //      por smoothstep (el umbral duro dibujaba un contorno fractal).
+    //      Si el shader no cargara, el fallback de tiras texturizadas de
+    //      la casa dibuja el haz (jamás se rompe).
+    //    · EL SONIDO: RayoConcentradoLoop.ogg — la síntesis propia (el
+    //      grave que late, el motor, el plasma, el crujido) en bucle
+    //      periódico exacto.
+    // =====================================================================
+    public class RayoConcentradoDosProjectile : ModProjectile
     {
-        public override string Texture => "AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRay";
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
         public override void SetStaticDefaults()
         {
             ProjectileID.Sets.DrawScreenCheckFluff[Type] = 5000;
@@ -83,7 +68,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public ref float Modo => ref Projectile.ai[1];
         public ref float Owner => ref Projectile.ai[2];
 
-        // LOS TIEMPOS EXACTOS DEL ORIGINAL.
+        // LOS TIEMPOS DEL ATAQUE (la conducta intacta).
         private static readonly int ChargeTime = 300;
         private static readonly int LaserDuration = 800;
         private const float LargoCono = 3500f;
@@ -105,33 +90,37 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  EL CORAZÓN — la IA del ataque, adaptada al dueño jugador.
+        //  EL CORAZÓN — la IA del haz (el dueño es el jugador).
         // ================================================================
         public override void AI()
         {
-            // EL DUEÑO: el jugador que la disparó (la boca del original
-            // era la del jefe; esta es la del portador).
+            // EL DUEÑO: el jugador que la disparó (la boca se coloca sobre
+            // su hombro, mirando donde él mira).
+            if (Owner < 0 || Owner >= Main.maxPlayers)
+            {
+                Projectile.Kill();
+                return;
+            }
             Player dueno = Main.player[(int)Owner];
-            if (Owner < 0 || dueno == null || !dueno.active || dueno.dead)
+            if (dueno == null || !dueno.active || dueno.dead)
             {
                 Projectile.Kill();
                 return;
             }
 
-            // EL RUMBO del portador (el original orientaba a su jefe con el
-            // signo de la rotación ANTES de colocar la boca).
+            // EL RUMBO del portador (se orienta con el signo de la
+            // rotación ANTES de colocar la boca).
             dueno.direction = Math.Sign(Projectile.rotation.ToRotationVector2().X);
             dueno.itemLocation = dueno.MountedCenter;
 
-            // LA BOCA: el offset del original (13 px del centro, 20 arriba).
+            // LA BOCA: el offset (13 px del centro, 20 arriba).
             Projectile.Center = dueno.MountedCenter + new Vector2(13 * dueno.direction, -20f);
 
-            // EL RETROCESO SUAVE del portador (el original empujaba a su
-            // jefe hacia atrás mientras disparaba).
+            // EL RETROCESO SUAVE del portador mientras dispara.
             dueno.velocity += Projectile.rotation.ToRotationVector2() * -0.1f;
             dueno.velocity *= 0.98f;
-            // (la gravedad del juego pelea de vuelta — el efecto neto es
-            // el arrastre del original, no un empujón).
+            // (la gravedad del juego pelea de vuelta — el arrastre, no un
+            // empujón).
 
             if (!Main.dedServ && Time % 4 == 0 && Time > ChargeTime && Time < ChargeTime + LaserDuration)
             {
@@ -139,26 +128,26 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Main.instance.CameraModifiers.Add(new PunchCameraModifier(Projectile.Center, Main.rand.NextVector2CircularEdge(1, 1), shakeStrength * 8f, 12, 20, 5000));
             }
 
-            // EL BARRIDO — la fórmula EXACTA: un coseno completo de ida y
-            // vuelta (±2.5 rad) acotado por sus dos envolventes.
+            // EL BARRIDO — un coseno completo de ida y vuelta (±2.5 rad)
+            // acotado por sus dos envolventes.
             float totalOffRot = (float)Math.Cos((Time - ChargeTime) / LaserDuration * MathHelper.TwoPi) * 2.5f
                 * Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + LaserDuration * 0.1f, Time, true)
                 * Utils.GetLerpValue(ChargeTime + LaserDuration, ChargeTime + LaserDuration * 0.9f, Time, true);
 
-            if (Time < 3 && Main.netMode != NetmodeID.MultiplayerClient)
+            if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15 == 0 && Time < ChargeTime + LaserDuration * 0.6f)
             {
                 Projectile.direction = Main.rand.NextBool() ? -1 : 1;
                 Projectile.netUpdate = true;
             }
 
-            // EL GIRO HACIA EL CURSOR — el paso decreciente del original
-            // (0.04 al principio, 0.01 cuando el barrido manda).
+            // EL GIRO HACIA EL CURSOR — el paso decreciente (0.04 al
+            // principio, 0.01 cuando el barrido manda).
             targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
                 Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
                 + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
 
-            // EL TAMAÑO — la envolvente cúbica EXACTA (nace en 20 t, muere
-            // al final; realSize la persigue a 0.1).
+            // EL TAMAÑO — la envolvente cúbica (nace en 20 t, muere al
+            // final; realSize la persigue a 0.1).
             targetSize = (float)Math.Pow(
                 Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 60, Time, true) *
                 Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
@@ -171,13 +160,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
             realSize = MathHelper.Lerp(realSize, targetSize, 0.1f);
             Projectile.velocity = Projectile.rotation.ToRotationVector2();
 
-            // EL RELOJ DEL COLOR (el localAI[0] del jefe: el gradiente
-            // camina con el mundo).
+            // EL RELOJ DEL COLOR (el gradiente camina con el mundo).
             Projectile.localAI[0] += 1f;
 
-            // ============ LOS POLVOS CROMÁTICOS (los del original) ============
-            // Los de la boca: 1/frame con la probabilidad decreciente del
-            // original (1/(Time·0.5+15)).
+            // ============ LOS POLVOS CROMÁTICOS ============
+            // Los de la boca: 1/frame con probabilidad decreciente.
             if (!Main.rand.NextBool((int)(Time * 0.5f + 15)))
             {
                 SpawnPolvo(Projectile.Center,
@@ -185,8 +172,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     2f, Projectile.localAI[0]);
             }
             // Los del conducto: 15/frame mientras viva el láser — la firma
-            // cromática con el offset de color POR DISTANCIA (p/3500·100 el
-            // original en la boca; p/3300·60 en el conducto).
+            // cromática con el offset de color POR DISTANCIA.
             if (Time > ChargeTime - 15 && Time < ChargeTime + LaserDuration + 60)
             {
                 for (int i = 0; i < 15; i++)
@@ -204,7 +190,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // EL SIZZLE del final (el chisporroteo del original al apagarse).
+            // EL SIZZLE del final (el chisporroteo al apagarse).
             if (Time == ChargeTime + LaserDuration + 20)
                 DefinitivasLib.Sonar(SoundID.Item34.WithPitchOffset(-0.4f), Projectile.Center);
 
@@ -213,15 +199,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             HandleSound();
 
-            if (Time > ChargeTime + LaserDuration + 100)
+            // EL CIERRE del ciclo: cuando el láser muere, el sonido muere
+            // con él.
+            if (Time > ChargeTime + LaserDuration + 50)
             {
-                raySound.StopSound();
+                raySound?.StopSound();
                 Projectile.Kill();
                 return;
             }
 
-            // EL VUELO INFINFINITO del original: mientras el rayo vive,
-            // las alas del portador no se agotan.
+            // EL VUELO INFINITO: mientras el rayo vive, las alas del
+            // portador no se agotan.
             if (Main.netMode == NetmodeID.Server)
             {
                 foreach (Player player in Main.player)
@@ -237,8 +225,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  EL SONIDO EN LOOP — la clase del puerto (misma matemática:
-        //  volumen por realSize, pitch animado por fase).
+        //  EL SONIDO EN LOOP — la utilidad de la casa (la matemática
+        //  intacta: volumen por realSize, pitch animado por fase) sobre
+        //  EL SONIDO SINTETIZADO de la casa.
         // ================================================================
         internal SonidoEnLoop raySound;
         public float volume;
@@ -252,7 +241,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 + Utils.GetLerpValue(ChargeTime, ChargeTime + LaserDuration, Time, true) * 0.2f * realSize - 1f;
 
             raySound ??= new SonidoEnLoop(
-                new Terraria.Audio.SoundStyle("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRayLoop") { MaxInstances = 0 },
+                new Terraria.Audio.SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop") { MaxInstances = 0 },
                 new Terraria.Audio.ProjectileAudioTracker(Projectile).IsActiveAndInGame);
             raySound.PlaySound(() => Projectile.Center, () => volume, () => pitch);
         }
@@ -264,9 +253,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float grow = (float)Math.Pow(
                     Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 40, Time, true) *
                     Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
-                // EL CONO del original: 3500·(0.5+grow·0.5) con el
-                // semiángulo 0.28·grow — aquí con la colisión de cono
-                // propia de la casa.
+                // EL CONO: 3500·(0.5+grow·0.5) con el semiángulo 0.28·grow
+                // — la colisión de cono propia de la casa.
                 return DefinitivasLib.Cono(targetHitbox, Projectile.Center, LargoCono * (0.5f + grow * 0.5f),
                     Projectile.rotation, 0.28f * Math.Max(grow, 0.02f));
             }
@@ -274,8 +262,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  LA MÚSICA −30 % MIENTRAS VIVE (el original la callaba para que
-        //  el rayo MANDARA — On_Main.UpdateAudio).
+        //  LA MÚSICA −30 % MIENTRAS VIVE (el haz MANDA sobre la orquesta).
         // ================================================================
         public override void Load()
         {
@@ -319,20 +306,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
             => overPlayers.Add(index);
 
         // ================================================================
-        //  EL DIBUJO — verbatim del original: la boca de glows apilados,
-        //  el telegraph, el strip de 1500 puntos y EL SHADER con las
-        //  cuatro texturas multiplicadas.
+        //  EL DIBUJO — la boca de glows apilados, la aguja que apunta, el
+        //  strip de 1500 puntos y EL SHADER DE LA CASA con las cuatro
+        //  texturas procedurales multiplicadas.
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D texture = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRay_0");      // la carne
-            Texture2D textureBits = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRay_1");  // los bits
-            Texture2D textureGlow = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRay_2");  // la rampa
-            Texture2D textureSecond = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRay_3");// el 2º ruido
-            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/GlowRadial");          // Glow_0
-            Texture2D ray = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/GlowRayo");             // Glow_2 (el telegraph)
+            // LAS CUATRO TEXTURAS DEL PLASMA — las procedurales de la casa.
+            Texture2D texture = DefinitivasLib.TexRuido;        // la carne (CarnePlasma)
+            Texture2D textureBits = DefinitivasLib.TexBits;     // las chispas (BitsChispa)
+            Texture2D textureGlow = DefinitivasLib.TexRampa;    // la rampa (RampaGlow)
+            Texture2D textureSecond = DefinitivasLib.TexRemolino; // el 2º ruido (SegundoRuido)
+            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow"); // la boca
 
-            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || glow == null || ray == null)
+            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || glow == null)
                 return false;
 
             Color startColor = ColorPrisma.ValueAt(Projectile.localAI[0]);
@@ -343,13 +330,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
             float laserRayCharge = Utils.GetLerpValue(0, ChargeTime, Projectile.localAI[1], true)
                 * Utils.GetLerpValue(ChargeTime + 10, ChargeTime - 30, Time, true);
 
-            // LA BOCA — los cinco glows apilados del original (5× el color
-            // al 20 %, 4× al 60 %, 2× el blanco, 14× el color al 10 %).
+            // LA BOCA — los cinco glows apilados (5× el color al 20 %,
+            // 4× al 60 %, 2× el blanco, 14× el color al 10 %).
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null, startColor * 0.2f * laserCharge, 0, glow.Size() * 0.5f, 5f * laserCharge, 0, 0);
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null, startColor * 0.6f * laserCharge, 0, glow.Size() * 0.5f, 4f, 0, 0);
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, glow.Frame(), new Color(255, 255, 255, 0) * laserCharge, 0, glow.Size() * 0.5f, 2f * laserCharge, 0, 0);
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, glow.Frame(), startColor * 0.1f * laserCharge, 0, glow.Size() * 0.5f, 14f * laserCharge, 0, 0);
-            Main.EntitySpriteDraw(ray, Projectile.Center - Main.screenPosition, ray.Frame(), startColor * laserRayCharge * 0.5f, Projectile.rotation, ray.Size() * new Vector2(0.02f, 0.5f), new Vector2(3f, 2f), 0, 0);
+            // LA AGUJA QUE APUNTA — el SoftGlow de la casa estirado en la
+            // dirección del blanco (el telégrafo de la carga).
+            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition + Projectile.rotation.ToRotationVector2() * 900f * laserRayCharge,
+                glow.Frame(), startColor * laserRayCharge * 0.35f, Projectile.rotation,
+                glow.Size() * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * laserRayCharge), 0, 0);
 
             if (Time >= ChargeTime - 20)
             {
@@ -367,15 +358,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VertexStrip strip = new VertexStrip();
                 strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
 
-                // EL SHADER — el FusionRayEffect.fx original compilado al
-                // vuelo por FxcReader (como se vio en la .53.0). Si no
-                // cargara, el fallback de la casa (tres fajas texturizadas)
-                // dibuja el strip — el arma NUNCA tira el juego.
+                // EL SHADER DE LA CASA — HazConcentradoShader.fx (compilado
+                // al vuelo). Si no cargara, el fallback de tiras texturizadas
+                // dibuja el haz — el arma NUNCA se rompe.
                 Effect lightningEffect = null;
                 try
                 {
                     lightningEffect = ModContent.Request<Effect>(
-                        "AethonMod/Content/Weapons/Definitivas/RayoFusionTex/FusionRayEffect",
+                        "AethonMod/Content/Effects/Shaders/HazConcentradoShader",
                         ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
                 }
                 catch { lightningEffect = null; }
@@ -383,12 +373,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (lightningEffect != null)
                 {
                     lightningEffect.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                    lightningEffect.Parameters["uTexture0"].SetValue(texture);
-                    lightningEffect.Parameters["uTexture1"].SetValue(textureSecond);
-                    lightningEffect.Parameters["uGlow"].SetValue(textureGlow);
-                    lightningEffect.Parameters["uBits"].SetValue(textureBits);
+                    lightningEffect.Parameters["uTexturaCarne"].SetValue(texture);
+                    lightningEffect.Parameters["uTexturaSegunda"].SetValue(textureSecond);
+                    lightningEffect.Parameters["uTexturaRampa"].SetValue(textureGlow);
+                    lightningEffect.Parameters["uTexturaBits"].SetValue(textureBits);
                     lightningEffect.Parameters["uTime"].SetValue(-Projectile.localAI[0] * 0.025f);
-                    lightningEffect.Parameters["uFreq"].SetValue(1f);
+                    // v6.55.0 — LA ESCALA COMPENSADA: la ventana V se
+                    // encoge con el tamaño real — los rasgos del plasma
+                    // miden SIEMPRE lo mismo en pantalla (la cura de los
+                    // dientes de sierra del ruido fino).
+                    lightningEffect.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
                     lightningEffect.CurrentTechnique.Passes[0].Apply();
                     strip.DrawTrail();
                     Main.pixelShader.CurrentTechnique.Passes[0].Apply();
@@ -432,13 +426,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // recorren el haz (encima del strip, bajo la interfaz).
             DibujarPolvos();
 
-            // v6.54.5 — EL CONTRATO DEL LOTE: salir con el lote vivo.
+            // EL CONTRATO DEL LOTE: salir con el lote vivo.
             VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
         /// <summary>EL COLOR DEL STRIP — el gradiente que VIAJA a lo largo
-        /// (el ValueAt(reloj − p·100) del original) por el realSize.</summary>
+        /// por el realSize.</summary>
         public Color StripColor(float progress)
         {
             Color color = ColorPrisma.ValueAt(Projectile.localAI[0] - progress * 100f);
@@ -446,8 +440,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return color * realSize;
         }
 
-        /// <summary>EL ANCHO DEL STRIP — la fórmula EXACTA del original
-        /// (p^0.8 · cbrt · 3500 · (1.1 + cos·(0.08 − p·0.06))).</summary>
+        /// <summary>EL ANCHO DEL STRIP — p^0.8 · cbrt · realSize · 3500 ·
+        /// (1.1 + cos·(0.08 − p·0.06)) — nace estrecho, engorda y respira.</summary>
         public float StripWidth(float progress)
         {
             float start = (float)Math.Pow(progress, 0.8f);
@@ -463,9 +457,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  LOS POLVOS CROMÁTICOS — la reimplementación local de la
-        //  partícula del original (misma vida, mismo tamaño, mismo
-        //  color con offset; sin el pool del puerto).
+        //  LOS POLVOS CROMÁTICOS — la partícula de la casa (misma vida,
+        //  mismo tamaño, mismo color con offset).
         // ================================================================
         private struct PolvoCromatico
         {
@@ -516,7 +509,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static void DibujarPolvos()
         {
             if (_polvos.Count == 0) return;
-            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Weapons/Definitivas/RayoFusionTex/GlowRadial");
+            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow");
             if (glow == null) return;
             for (int i = 0; i < _polvos.Count; i++)
             {
@@ -537,22 +530,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
     }
 
     // ====================================================================
-    //  EL SONIDO EN LOOP — adaptación de la utilidad del puerto (el
-    //  LoopingSound original): un slot que se actualiza cada frame con
-    //  posición/volumen/pitch, y muere solo cuando el proyectil muere.
+    //  EL SONIDO EN LOOP — la utilidad de la casa: un slot que se
+    //  actualiza cada frame con posición/volumen/pitch, y muere solo
+    //  cuando el proyectil muere.
     // ====================================================================
     internal sealed class SonidoEnLoop
-        {
-            private readonly Terraria.Audio.SoundStyle _estilo;
-            private ReLogic.Utilities.SlotId _slot;
-            private readonly Func<bool> _condicion;
+    {
+        private readonly Terraria.Audio.SoundStyle _estilo;
+        private ReLogic.Utilities.SlotId _slot;
+        private readonly Func<bool> _condicion;
 
-            public SonidoEnLoop(Terraria.Audio.SoundStyle estilo, Func<bool> condicionViva)
-            {
-                _estilo = estilo with { IsLooped = true };
-                _condicion = condicionViva;
-                _slot = ReLogic.Utilities.SlotId.Invalid;
-            }
+        public SonidoEnLoop(Terraria.Audio.SoundStyle estilo, Func<bool> condicionViva)
+        {
+            _estilo = estilo with { IsLooped = true };
+            _condicion = condicionViva;
+            _slot = ReLogic.Utilities.SlotId.Invalid;
+        }
 
         public void PlaySound(Func<Vector2> posicion, Func<float> volumen, Func<float> pitch)
         {

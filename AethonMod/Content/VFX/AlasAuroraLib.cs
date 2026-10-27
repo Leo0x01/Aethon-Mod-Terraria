@@ -7,83 +7,58 @@ using Terraria.ID;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// AlasAuroraLib — v6.52.1 — LAS ALAS CREADAS POR CÓDIGO.
+    /// AlasAuroraLib — v6.55.0 — LAS ALAS CREADAS POR CÓDIGO, DE VERDAD.
     ///
-    /// LA TÉCNICA APRENDIDA (la investigación del usuario: «analiza las
-    /// alas de este mod Calamity, hay wings creadas por código ahí,
-    /// investiga bien cómo las creas, de ser posible decompila y aprende
-    /// la técnica»): el mod CALAMITY OVERHAUL (hocha113/CalamityOverhaul
-    /// en GitHub, abierto — se leyó la FUENTE, no hizo falta descompilar)
-    /// construye sus ALAS PROCEDURALES así (WingsOfInterference +
-    /// InterferenceWingRender.cs + BRelicAuroraWing.fx):
+    /// LA TÉCNICA (la investigación de la casa, aprendida y rehecha):
+    /// las alas procedurales nacen de PRIMITIVAS GPU — cero sprites.
     ///
-    ///   1. CINCO PLUMAS POR ALA son QUADS DE PRIMITIVAS GPU
-    ///      (DrawUserPrimitives, TriangleStrip) — CERO sprites: cada
-    ///      pluma nace de la espalda del jugador como un abanico que se
-    ///      PLEGADO (fan vertical estrecho, off 0.50→0.92) se ABRE en
-    ///      vuelo (fan casi horizontal, off 0.22→1.54) según
-    ///      WingSpread (0..1 con Lerp 0.085 — el ala se despliega suave).
+    ///   1. UN ABANICO DE PLUMAS POR ALA que se PLEGA (fan vertical
+    ///      estrecho) y se ABRE en vuelo (fan casi horizontal) según
+    ///      el spread (0..1 con Lerp suave — el ala se despliega).
     ///   2. LA ONDA DE ALETEO se PROPAGA de la pluma interior a la
-    ///      exterior: off += sin(WingFlap − i·0.45)·amplitud — las plumas
+    ///      exterior: off += sin(flap − i·0.45)·amplitud — las plumas
     ///      ondean EN CADENA, no en bloque (la firma visual).
-    ///   3. LA PLUMA se AFINA: larga 88→48 px (interior→exterior) ×
-    ///      (0.5+0.5·spread), raíz 3.5 px de semiancho → punta
-    ///      14+8·spread (la pluma se ENSANCHA al abrirse).
-    ///   4. EL COLOR VIAJA POR VÉRTICE (el «contrato de color de
-    ///      vértice» del original: R=hue G=blanco-día B=pliegue
-    ///      A=intensidad — allí lo lee el pixel shader; AQUÍ lo resuelve
-    ///      el CPU): cada pluma lleva su hue (base + i·0.085) y el hue
-    ///      SE DISPERSA a lo largo de la pluma (+along·0.16) y con el
-    ///      tiempo (+t·0.015) — el espectro CORRE por el ala.
-    ///   5. EL RUIDO DE PERLIN es el PLIEGUE VIVO: dos capas de ruido
-    ///      desplazándose a frecuencias y velocidades distintas a lo
-    ///      largo de la pluma (f1: along·1.7 − t·(0.20−fold·0.08),
-    ///      f2: along·3.4 + t·0.12) — la «aurora» es el ruido FLUYENDO
-    ///      por la superficie del ala.
-    ///   6. EL DESGARRE DE LA PUNTA: la punta se RASGA en mechones — el
-    ///      ruido decide dónde se abre el borde.
-    ///   7. LA FÍSICA SE INYECTA SIN SPRITE: wingsLogic = 45 (la
-    ///      Emperatriz) + wingTimeMax propio — el dibujado de alas de
-    ///      vanilla lee Player.wings (el slot), NO wingsLogic: CERO
-    ///      sprite vanilla, TODO el visual es el código (la casa ya lo
-    ///      había verificado en CosmeticPlayer v6.50.48).
+    ///   3. EL COLOR VIAJA POR VÉRTICE: cada pluma lleva su hue que SE
+    ///      DISPERSA a lo largo y con el tiempo — el espectro CORRE.
+    ///   4. EL RUIDO es el PLIEGUE VIVO: dos capas fluyendo a
+    ///      frecuencias y velocidades distintas por la pluma.
+    ///   5. EL DESGARRE DE LA PUNTA: la punta se RASGA — el hash
+    ///      determinista decide qué mechones viven.
+    ///   6. LA FÍSICA SE INYECTA SIN SPRITE: wingsLogic + wingTimeMax
+    ///      propio; TODO el visual es el código.
     ///
-    /// LA ADAPTACIÓN DE LA CASA (por qué no hay .fx nuevo): el original
-    /// lleva un pixel shader propio (BRelicAuroraWing.fx compilado a
-    /// .fxc con fxc.exe/fx_2_0 — el pipeline documentado en
-    /// COMPILACION.md: los .fx NO se compilan solos). Este entorno no
-    /// dispone del compilador fx_2_0, así que EL MISMO lenguaje visual
-    /// se resuelve con el pipeline DE PRIMITIVAS DE LA CASA (RayoStrip,
-    /// v6.50.26): columnas gaussianas por vértice (núcleo blanco-cálido
-    /// + cuerpo + halo tenue — la exp() del shader hecha geometría) +
-    /// DOS PASADAS DE RUIDO con UVs que se DESPLAZAN por vértice (el
-    /// Perlin fluyendo por la pluma — igual que el shader, pero el
-    /// desplazamiento lo computa el CPU) + el desgarre de punta por
-    /// hash determinista. El RESULTADO ES LA MISMA TÉCNICA: alas 100%
-    /// código, sin un solo sprite.
-    ///
-    /// EL PAR COMPLETO: el original dibuja UN abanico de 5 plumas que
-    /// se espeja con la dirección; AQUÍ son DIEZ plumas — 5 por CADA
-    /// ALA (los dos abanicos simétricos del par de verdad).
+    /// v6.55.0 — LA REFORMA VECTORIAL (la letra: «porque todas son
+    /// rectángulos, deberías crear formas vectoriales o por código para
+    /// las alas, como líneas, plumas, cuchillas o algo así, pero no solo
+    /// rectángulos planos»). LA AUTOPSIA: cada pluma era UN SOLO QUAD de
+    /// 4 esquinas — un trapecio plano entre raíz y punta (la «curva»
+    /// solo desplazaba la punta lateralmente; el borde seguía RECTO).
+    /// LA CURA — LA PLUMA ES UNA TIRA DE 9 NODOS:
+    ///   · EL EJE SE CURVA de verdad: la desviación perpendicular crece
+    ///     CUADRÁTICAMENTE a lo largo (la curva continua de la pluma
+    ///     viva, no un empujón en la punta).
+    ///   · EL PERFIL DE ANCHO es un perfil de PLUMA: raíz estrecha →
+    ///     el VIENTRE (ancho máximo en Vientre·largo — cada ala declara
+    ///     dónde) → la PUNTA AFILADA que muere en 0 (el exponente
+    ///     Afilada: 0.5 redondeada, 1 cuchilla, 2 aguja cóncava).
+    ///   · Vértices COMPARTIDOS entre segmentos (la lección de RayoStrip:
+    ///     cero juntas, cero solapes) y las UV del ruido fluyen POR
+    ///     NODO (continuas raíz→punta).
+    ///   · EL DESGARRE ahora talla la punta: los últimos nodos
+    ///     engordan/afilan con el hash — la punta respira.
     ///
     /// CONTRATO DE LOTE (el de la casa, como RayoStrip): el llamador
-    /// (el halo-proyectil) trae el lote del pase de entidades ABIERTO;
-    /// Dibujar lo cierra (sonda), dibuja las primitivas y lo REABRE
-    /// (idempotente). Coordenadas de PANTALLA (mundo − Main.screenPosition
-    /// — LA LECCIÓN v6.53: el pipeline de Volcar usa GameViewMatrix como
-    /// World, que SOLO aplica el zoom — la cámara la resta EL LLAMADOR,
-    /// exactamente como hacen todos los consumidores de RayoStrip; las
-    /// alas nacieron en coordenadas de mundo y se dibujaban ~17 pantallas
-    /// a la derecha — INVISIBLES por toda la .52, por eso «no se ve
-    /// ningún ala en ningún lugar»).
+    /// trae el lote del pase de entidades ABIERTO; Dibujar lo cierra
+    /// (sonda), dibuja las primitivas y lo REABRE (idempotente).
+    /// Coordenadas de PANTALLA (mundo − Main.screenPosition — la cámara
+    /// la resta EL LLAMADOR: el pipeline de Volcar solo aplica el zoom).
     /// </summary>
     public static class AlasAuroraLib
     {
-        // === LAS CONSTANTES DEL ORIGINAL (calibradas por Calamity
-        //     Overhaul — se respetan casi byte a byte) ===
+        // === LAS CONSTANTES (calibradas por la casa) ===
 
-        /// <summary>Plumas por ala (el original: FeatherCount = 5) — el
-        /// VALOR HISTÓRICO; v6.54.3: cada estilo declara SU conteo
+        /// <summary>Plumas por ala — el VALOR HISTÓRICO; v6.54.3: cada
+        /// estilo declara SU conteo
         /// (EstiloAlas.Plumas, 3..7) y este queda como el tope de los
         /// POZOS (7×2 alas = 14 plumas vivas).</summary>
         public const int PlumasPorAla = 5;
@@ -92,6 +67,11 @@ namespace AethonMod.Content.VFX
         /// (los pozos se dimensionan con esto; los estilos declaran
         /// 3..7 — la Aurora mantiene sus 5 históricas).</summary>
         private const int PlumasMax = 7;
+
+        /// <summary>v6.55.0 — LOS NODOS DE LA TIRA VECTORIAL: cada pluma
+        /// es una polilínea de EJE con NodosPluma+1 puntos (raíz→punta)
+        /// — el perfil de pluma vive en los semianchos por nodo.</summary>
+        public const int NodosPluma = 8;
 
         /// <summary>Pluma interior→exterior: ángulo PLEGADO (fan vertical).</summary>
         public const float OffPlegadoMin = 0.50f, OffPlegadoMax = 0.92f;
@@ -157,15 +137,38 @@ namespace AethonMod.Content.VFX
             AlphaDestinationBlend = Blend.One,
         };
 
-        /// <summary>El pozo de vértices del ala (triángulos planos — cero GC).</summary>
-        private static VertexPositionColorTexture[] _verts = new VertexPositionColorTexture[1024];
+        /// <summary>El pozo de vértices del ala (triángulos planos — cero GC).
+        /// v6.55.0 — 4096: las TRES capas acumulan hasta 3×(7·2·8·6)=2016
+        /// vértices antes del Volcar (con 1024 el ala derecha perdía el
+        /// cuerpo en los estilos de 6-7 plumas — el truncado silencioso
+        /// del agente revisor).</summary>
+        private static VertexPositionColorTexture[] _verts = new VertexPositionColorTexture[4096];
 
         // LOS POZOS DE LA GEOMETRÍA (estáticos — la lección cero-GC de la casa:
-        // el original cachea TODO, nada nace por frame). v6.54.3: el tope
-        // es PlumasMax×2 (la Aurora usa 5×2 como siempre).
+        // nada nace por frame). v6.54.3: el tope es PlumasMax×2 (la Aurora
+        // usa 5×2 como siempre). v6.55.0: cada pluma trae SU POLILÍNEA
+        // (eje + semianchos por nodo) — también del pozo.
         private static readonly Pluma[] _plumas = new Pluma[PlumasMax * 2];
         private static readonly float[] _hues = new float[PlumasMax * 2];
         private static readonly float[] _fundidos = new float[PlumasMax * 2];
+
+        private static readonly Vector2[][] _pozosEje = CrearPozosEje();
+        private static readonly float[][] _pozosSemi = CrearPozosSemi();
+        private static readonly float[][] _pozosSemi2 = CrearPozosSemi();
+
+        private static Vector2[][] CrearPozosEje()
+        {
+            var r = new Vector2[PlumasMax * 2][];
+            for (int i = 0; i < r.Length; i++) r[i] = new Vector2[NodosPluma + 1];
+            return r;
+        }
+
+        private static float[][] CrearPozosSemi()
+        {
+            var r = new float[PlumasMax * 2][];
+            for (int i = 0; i < r.Length; i++) r[i] = new float[NodosPluma + 1];
+            return r;
+        }
 
         // ==================================================================
         //  EL COLOR PRISMA (el de la casa — el mismo algoritmo del
@@ -229,31 +232,36 @@ namespace AethonMod.Content.VFX
         //  LA GEOMETRÍA DE UNA PLUMA (el corazón de la técnica)
         // ==================================================================
 
-        /// <summary>Los vértices vivos de una pluma (raíz y punta, con perp).</summary>
+        /// <summary>v6.55.0 — LA PLUMA VECTORIAL: una POLILÍNEA de
+        /// NodosPluma+1 nodos con su PERFIL de semiancho por nodo — el
+        /// eje curvado y la forma de pluma (vientre + punta afilada)
+        /// viven aquí. Los arrays son prestados de los POZOS estáticos
+        /// (cero GC por frame — la lección de la casa).</summary>
         private struct Pluma
         {
-            public Vector2 RaizMas, RaizMenos;   // raíz ± perp·semiancho
-            public Vector2 PuntaMas, PuntaMenos; // punta ± perp·semiancho
-            public float Largo;                  // 0..1 normalizado (para UV)
+            public Vector2[] Eje;       // NodosPluma+1 puntos raíz→punta (el eje CURVADO)
+            public float[] SemiMas;     // el semiancho del borde de ATAQUE por nodo (convexo)
+            public float[] SemiMenos;   // el semiancho del borde de FUGA por nodo (cóncavo — la cuchilla)
+            public float Largo;         // 0..1 normalizado (para UV)
         }
 
         /// <summary>
-        /// Construye la pluma i del ala `lado` (−1 derecha del sprite, +1
-        /// izquierda) — el abanico del original con EL PAR PROPIO DE LA
-        /// CASA (v6.52.2): cada ala vive su lado con la inclinación base
-        /// que abre el hueco central, y el par entero barre hacia atrás
-        /// con la dirección de vista.
-        /// (v6.54.3: el overload sin estilo se retiró — TODO el dibujo
-        /// pasa por el estilo; la Aurora lleva sus valores históricos.)
+        /// v6.55.0 — Construye la pluma i del ala `lado` como UNA TIRA
+        /// VECTORIAL: el EJE se curva cuadráticamente (la garra vive en
+        /// TODA la pluma, no solo en la punta) y el SEMIANCHO por nodo
+        /// sigue EL PERFIL DE PLUMA (raíz estrecha → el VIENTRE en
+        /// estilo.Vientre·largo → la PUNTA AFILADA que muere en 0).
+        /// El abanico, la onda de aleteo en cadena y el largo que
+        /// respiran quedan como siempre.
         /// </summary>
         private static Pluma ConstruirPluma(Vector2 ancla, int i, float spread, float flap,
-            float grav, int direccion, int lado, float time, in EstiloAlas estilo)
+            float grav, int direccion, int lado, float time, in EstiloAlas estilo,
+            Vector2[] pozoEje, float[] pozoSemi, float[] pozoSemi2, float fundido)
         {
             int n = estilo.Plumas < 2 ? 2 : (estilo.Plumas > PlumasMax ? PlumasMax : estilo.Plumas);
             float t = i / (float)(n - 1);
 
-            // EL ABANICO: plegado estrecho ↔ abierto horizontal (los
-            // ÁNGULOS del ala — la anatomía propia de v6.54.3).
+            // EL ABANICO: plegado estrecho ↔ abierto horizontal.
             float offPlegado = MathHelper.Lerp(estilo.PlegadoMin, estilo.PlegadoMax, t);
             float offAbierto = MathHelper.Lerp(estilo.AbiertoMin, estilo.AbiertoMax, t);
             float off = MathHelper.Lerp(offPlegado, offAbierto, spread);
@@ -263,10 +271,9 @@ namespace AethonMod.Content.VFX
             float amplitud = 0.05f + 0.11f * spread;
             off += MathF.Sin(flap - i * 0.45f) * amplitud;
 
-            // EL ÁNGULO (v6.52.2 — EL PAR QUE SE LEE): −π/2 (arriba) más
-            // la INCLINACIÓN propia del lado (el hueco central) barrido
-            // por el abanico — y todo el conjunto rotado hacia ATRÁS
-            // según mira el jugador (más abierto = más barrido).
+            // EL ÁNGULO: −π/2 (arriba) más la inclinación del lado (el
+            // hueco central) barrido por el abanico — y todo rotado
+            // hacia ATRÁS según mira el jugador.
             float angulo = -MathHelper.PiOver2 + lado * (estilo.Inclinacion + off)
                 - direccion * estilo.Barrido * (0.35f + 0.65f * spread);
             Vector2 dir = new(MathF.Cos(angulo), MathF.Sin(angulo) * grav);
@@ -278,19 +285,70 @@ namespace AethonMod.Content.VFX
                 * (0.5f + 0.5f * spread);
             largo *= 1f + MathF.Sin(flap * 0.7f + i * 0.6f) * 0.045f;
 
-            float raizMedio = estilo.RaizSemiancho;
-            float puntaMedio = estilo.PuntaSemianchoBase + estilo.PuntaSemianchoAbierto * spread;
+            // === LA ANATOMÍA VECTORIAL (v6.55.0) ===
+            float vientre = MathHelper.Clamp(estilo.Vientre, 0.15f, 0.70f);
+            float afilada = MathHelper.Clamp(estilo.Afilada, 0.35f, 2.5f);
+            float filosa = MathHelper.Clamp(estilo.Filosa, 0f, 1f);
+            float anchoMax = estilo.PuntaSemianchoBase + estilo.PuntaSemianchoAbierto * spread;
+            float raiz = estilo.RaizSemiancho;
+
+            // v6.55.0-b — LA ASIMETRÍA DE CUCHILLA (la revisión del mock):
+            // el borde de ATAQUE (+) vive su vientre en Vientre·largo; el
+            // de FUGA (−) lo corre ANTES (Vientre·(1−0.45·Filosa)) y algo
+            // más bajo — el filo convexo y el lomo cóncavo de la media
+            // luna (Filosa 0 = pluma simétrica).
+            float vientreMas = vientre;
+            float vientreMenos = vientre * (1f - 0.45f * filosa);
+            float anchoMas = anchoMax * (1f + 0.18f * filosa);
+            float anchoMenos = anchoMax * (1f - 0.30f * filosa);
 
             Pluma p;
-            p.RaizMas = ancla + perp * raizMedio;
-            p.RaizMenos = ancla - perp * raizMedio;
-            // LA PUNTA: v6.54.3 — LA CURVA propia del ala (la garra): la
-            // punta se desplaza a lo largo de perp proporcional a su
-            // largo — el murciélago curva fuerte, el prisma es recto.
-            Vector2 punta = ancla + dir * largo + perp * (estilo.Curva * largo);
-            p.PuntaMas = punta + perp * puntaMedio;
-            p.PuntaMenos = punta - perp * puntaMedio;
+            p.Eje = pozoEje;
+            p.SemiMas = pozoSemi;
+            p.SemiMenos = pozoSemi2;
             p.Largo = largo;
+
+            int nodos = NodosPluma + 1;
+            for (int j = 0; j < nodos; j++)
+            {
+                float q = j / (float)NodosPluma;
+
+                // EL EJE CURVADO: la desviación perpendicular crece
+                // CUADRÁTICAMENTE — la pluma se dobla CONTINUA (la garra
+                // del murciélago vive en todo el largo).
+                Vector2 eje = ancla + dir * (largo * q)
+                    + perp * (estilo.Curva * largo * q * q);
+
+                // EL PERFIL por nodo y por borde:
+                //   q < vientreX: raíz → anchoX (sin(π/2·w)^0.8)
+                //   q ≥ vientreX: anchoX → 0 ((1−w)^afilada — la punta)
+                static float Perfil(float q, float raiz, float vientre, float ancho, float afilada)
+                {
+                    if (q < vientre)
+                    {
+                        float w = q / vientre;
+                        return MathHelper.Lerp(raiz, ancho, MathF.Pow(MathF.Sin(w * MathHelper.PiOver2), 0.8f));
+                    }
+                    float wm = (q - vientre) / MathF.Max(1f - vientre, 0.001f);
+                    return ancho * MathF.Pow(1f - wm, afilada);
+                }
+                float semiMas = Perfil(q, raiz, vientreMas, anchoMas, afilada);
+                float semiMenos = Perfil(q, raiz, vientreMenos, anchoMenos, afilada);
+
+                // EL DESGARRE TALLA LA PUNTA: los últimos nodos engordan
+                // o afilan con el fundido del hash — la punta RESPIRA.
+                if (q > 0.70f)
+                {
+                    float g = (q - 0.70f) / 0.30f;
+                    float talla = MathHelper.Lerp(1f, 0.25f + 0.75f * fundido, g * g);
+                    semiMas *= talla;
+                    semiMenos *= talla;
+                }
+
+                pozoEje[j] = eje;
+                pozoSemi[j] = MathF.Max(semiMas, 0.30f);
+                pozoSemi2[j] = MathF.Max(semiMenos, 0.30f);
+            }
             return p;
         }
 
@@ -299,23 +357,16 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Vuelca las plumas como TRIÁNGULOS PLANOS: cada pluma es un quad
-        /// con las CUATRO ESQUINAS de color propio (el contrato de color
-        /// por vértice del original, resuelto en CPU) partido en dos
-        /// triángulos compartiendo vértices — cero solapes, cero juntas
-        /// (la lección de RayoStrip). `capa` elige el ancho y la
-        /// intensidad: 0 núcleo · 1 cuerpo · 2 halo.
-        /// (v6.54.3: el overload sin estilo se retiró — TODO pasa por el
-        /// estilo; los ANCHOS de capa ahora son del ala.)
+        /// v6.55.0 — Vuelca las plumas como TIRAS VECTORIALES: cada pluma
+        /// es una CADENA de quads (uno por segmento del eje) con vértices
+        /// COMPARTIDOS — la silueta de pluma (vientre + punta afilada) se
+        /// lee en el borde, y el color viaja por NODO (la raíz entra suave
+        /// y la punta se desgarra). `capa` elige la fracción del
+        /// semiancho y la intensidad: 0 núcleo · 1 cuerpo · 2 halo.
         /// </summary>
         private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues,
             float[] fundidos, float mezclaDia, int capa, in EstiloAlas estilo, int n)
         {
-            // LAS COLUMNAS (la gaussiana de RayoStrip adaptada a la pluma):
-            // el núcleo estrecho casi blanco, el cuerpo medio, el halo
-            // ancho que susurra — la exp(−cruz²·k) del shader hecha
-            // tres anchos de geometría. v6.54.3: LOS ANCHOS VIVEN EN EL
-            // ESTILO (la pluma del murciélago es ancha, la del rayo fina).
             float frac, inten;
             switch (capa)
             {
@@ -327,62 +378,72 @@ namespace AethonMod.Content.VFX
             for (int i = 0; i < n; i++)
             {
                 ref Pluma p = ref plumas[i];
-                if (nVerts + 6 > _verts.Length)
+                if (nVerts + 6 * NodosPluma > _verts.Length)
                     break;
                 float haciaBlanco = capa == 0 ? 0.72f : capa == 1 ? 0.30f : 0.12f;
 
-                // LOS CUATRO COLORES (hue que SE DISPERSA a lo largo de
-                // la pluma: la raíz y la punta viven hues distintos —
-                // el espectro corre del hombro a la punta).
+                // EL COLOR POR NODO: el hue se dispersa a lo largo (el
+                // espectro corre del hombro a la punta) y el fundido
+                // vive en la PUNTA (el desgarre — el hash decide).
                 Color cRaiz = TonoPluma(hues[i], mezclaDia, haciaBlanco, estilo);
-                Color cPunta = TonoPluma(hues[i] + estilo.HueLargo, mezclaDia,
-                    haciaBlanco * 0.7f, estilo);
 
-                // LOS FUNDIDOS: la raíz entra suave (rootFade), la punta
-                // se DESGARRA (el tear del original: el hash decide qué
-                // mechones viven — determinista, todas las máquinas
-                // iguales).
-                float fRaiz = 0.22f;
-                float fPunta = fundidos[i];
+                for (int j = 0; j < NodosPluma; j++)
+                {
+                    float q0 = j / (float)NodosPluma;
+                    float q1 = (j + 1) / (float)NodosPluma;
 
-                Color cr = Pre(cRaiz, inten * fRaiz);
-                Color cp = Pre(cPunta, inten * fPunta);
+                    // LA NORMAL MEDIA por nodo (la tira es continua por
+                    // construcción — la lección de RayoStrip).
+                    Vector2 d0 = j > 0 ? p.Eje[j] - p.Eje[j - 1] : p.Eje[j + 1] - p.Eje[j];
+                    Vector2 d1 = j < NodosPluma - 1 ? p.Eje[j + 2] - p.Eje[j + 1] : p.Eje[j + 1] - p.Eje[j];
+                    if (d0.LengthSquared() < 0.0001f) d0 = d1;
+                    if (d1.LengthSquared() < 0.0001f) d1 = d0;
+                    Vector2 m = Vector2.Normalize(Vector2.Normalize(d0) + Vector2.Normalize(d1));
+                    if (!(m.LengthSquared() >= 0.001f)) m = d1;
+                    Vector2 nrm = new(-m.Y, m.X);
 
-                // El quad de la capa: raíz±perp·frac y punta±perp·frac
-                // (los semianchos ya viven en las esquinas — aquí se
-                // ACHICAN hacia el centro por frac).
-                Vector2 rMas = Lerp(p.RaizMenos, p.RaizMas, (1f + frac) * 0.5f);
-                Vector2 rMen = Lerp(p.RaizMenos, p.RaizMas, (1f - frac) * 0.5f);
-                Vector2 pMas = Lerp(p.PuntaMenos, p.PuntaMas, (1f + frac) * 0.5f);
-                Vector2 pMen = Lerp(p.PuntaMenos, p.PuntaMas, (1f - frac) * 0.5f);
+                    float s0 = p.SemiMas[j] * frac;
+                    float s1 = p.SemiMas[j + 1] * frac;
+                    float t0 = p.SemiMenos[j] * frac;
+                    float t1 = p.SemiMenos[j + 1] * frac;
 
-                VertexPositionColorTexture vrA = new(new Vector3(rMas, 0f), cr, new Vector2(0f, 0f));
-                VertexPositionColorTexture vrB = new(new Vector3(rMen, 0f), cr, new Vector2(0f, 1f));
-                VertexPositionColorTexture vpA = new(new Vector3(pMas, 0f), cp, new Vector2(1f, 0f));
-                VertexPositionColorTexture vpB = new(new Vector3(pMen, 0f), cp, new Vector2(1f, 1f));
+                    // EL ALFA por nodo: la raíz entra suave (0.22) y la
+                    // punta se DESGARRA (el fundido del hash).
+                    float f0 = MathHelper.Lerp(0.22f, fundidos[i], q0 * q0);
+                    float f1 = MathHelper.Lerp(0.22f, fundidos[i], q1 * q1);
 
-                // DOS TRIÁNGULOS compartiendo la diagonal (cero juntas).
-                _verts[nVerts++] = vrA;
-                _verts[nVerts++] = vrB;
-                _verts[nVerts++] = vpA;
-                _verts[nVerts++] = vrA;
-                _verts[nVerts++] = vpA;
-                _verts[nVerts++] = vpB;
+                    Color c0 = Pre(TonoPluma(hues[i] + estilo.HueLargo * q0, mezclaDia,
+                        haciaBlanco * (1f - 0.3f * q0), estilo), inten * f0);
+                    Color c1 = Pre(TonoPluma(hues[i] + estilo.HueLargo * q1, mezclaDia,
+                        haciaBlanco * (1f - 0.3f * q1), estilo), inten * f1);
+                    _ = cRaiz;
+
+                    VertexPositionColorTexture a0 = new(new Vector3(p.Eje[j] + nrm * s0, 0f), c0, new Vector2(q0, 0f));
+                    VertexPositionColorTexture a1 = new(new Vector3(p.Eje[j] - nrm * t0, 0f), c0, new Vector2(q0, 1f));
+                    VertexPositionColorTexture b0 = new(new Vector3(p.Eje[j + 1] + nrm * s1, 0f), c1, new Vector2(q1, 0f));
+                    VertexPositionColorTexture b1 = new(new Vector3(p.Eje[j + 1] - nrm * t1, 0f), c1, new Vector2(q1, 1f));
+
+                    // DOS TRIÁNGULOS compartiendo la diagonal (cero juntas).
+                    _verts[nVerts++] = a0;
+                    _verts[nVerts++] = a1;
+                    _verts[nVerts++] = b0;
+                    _verts[nVerts++] = a0;
+                    _verts[nVerts++] = b0;
+                    _verts[nVerts++] = b1;
+                }
             }
             return nVerts;
         }
 
-        /// <summary>La versión texturizada: las UV del ruido FLUYEN por la
-        /// pluma. (v6.54.3: el overload sin estilo se retiró; la ESCALA y
-        /// el FLUJO del ruido viven en el ala.)</summary>
+        /// <summary>v6.55.0 — La versión texturizada: la TIRA de la pluma
+        /// con las UV del ruido FLUYENDO POR NODO (continuas raíz→punta —
+        /// antes un solo quad estiraba la textura de un tirón).</summary>
         private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues,
             float mezclaDia, float time, int pasada, float fold, in EstiloAlas estilo, int n)
         {
-            // LAS DOS FRECUENCIAS DEL ORIGINAL (f1 lenta que fluye HACIA
-            // la punta, f2 fina que retrocede — el pliegue doble de la
-            // aurora). El fold PLEGADO frena el flujo (la tinta quieta).
-            // v6.54.3: LA ESCALA y el FLUJO viven en el estilo (la
-            // nebulosa arrastra vetas grandes lentas; el plasma corre).
+            // LAS DOS FRECUENCIAS (f1 lenta que fluye HACIA la punta, f2
+            // fina que retrocede — el pliegue doble de la aurora). El
+            // fold PLEGADO frena el flujo (la tinta quieta).
             float escalaU, velU, escalaV, velV, inten;
             if (pasada == 0)
             {
@@ -405,30 +466,51 @@ namespace AethonMod.Content.VFX
             for (int i = 0; i < n; i++)
             {
                 ref Pluma p = ref plumas[i];
-                if (nVerts + 6 > _verts.Length)
+                if (nVerts + 6 * NodosPluma > _verts.Length)
                     break;
-                float fase = hues[i] * 7.3f; // el «phase» del original: cada pluma desfasa su ruido
+                float fase = hues[i] * 7.3f; // cada pluma desfasa su ruido
 
-                float u0 = -time * velU + fase;
-                float u1 = escalaU - time * velU + fase;
+                float uBase = -time * velU + fase;
                 float v0 = fase * velV * 0.1f;
                 float v1 = escalaV + v0;
 
-                Color c = TonoPluma(hues[i], mezclaDia, 0.05f, estilo);
-                Color cr = Pre(c, inten * 0.30f);
-                Color cp = Pre(c, inten);
+                Color cR = Pre(TonoPluma(hues[i], mezclaDia, 0.05f, estilo), inten * 0.30f);
+                Color cP = Pre(TonoPluma(hues[i] + estilo.HueLargo, mezclaDia, 0.05f, estilo), inten);
 
-                VertexPositionColorTexture vrA = new(new Vector3(p.RaizMas, 0f), cr, new Vector2(u0, v0));
-                VertexPositionColorTexture vrB = new(new Vector3(p.RaizMenos, 0f), cr, new Vector2(u0, v1));
-                VertexPositionColorTexture vpA = new(new Vector3(p.PuntaMas, 0f), cp, new Vector2(u1, v0));
-                VertexPositionColorTexture vpB = new(new Vector3(p.PuntaMenos, 0f), cp, new Vector2(u1, v1));
+                for (int j = 0; j < NodosPluma; j++)
+                {
+                    float q0 = j / (float)NodosPluma;
+                    float q1 = (j + 1) / (float)NodosPluma;
 
-                _verts[nVerts++] = vrA;
-                _verts[nVerts++] = vrB;
-                _verts[nVerts++] = vpA;
-                _verts[nVerts++] = vrA;
-                _verts[nVerts++] = vpA;
-                _verts[nVerts++] = vpB;
+                    // LA NORMAL MEDIA por nodo.
+                    Vector2 d0 = j > 0 ? p.Eje[j] - p.Eje[j - 1] : p.Eje[j + 1] - p.Eje[j];
+                    Vector2 d1 = j < NodosPluma - 1 ? p.Eje[j + 2] - p.Eje[j + 1] : p.Eje[j + 1] - p.Eje[j];
+                    if (d0.LengthSquared() < 0.0001f) d0 = d1;
+                    if (d1.LengthSquared() < 0.0001f) d1 = d0;
+                    Vector2 m = Vector2.Normalize(Vector2.Normalize(d0) + Vector2.Normalize(d1));
+                    if (!(m.LengthSquared() >= 0.001f)) m = d1;
+                    Vector2 nrm = new(-m.Y, m.X);
+
+                    // LAS UV FLUYEN POR NODO: u avanza con el arco de la
+                    // pluma y el tiempo — el ruido CAMINA raíz→punta.
+                    float u0 = uBase + escalaU * q0;
+                    float u1 = uBase + escalaU * q1;
+
+                    Color c0 = Color.Lerp(cR, cP, q0);
+                    Color c1 = Color.Lerp(cR, cP, q1);
+
+                    VertexPositionColorTexture a0 = new(new Vector3(p.Eje[j] + nrm * p.SemiMas[j], 0f), c0, new Vector2(u0, v0));
+                    VertexPositionColorTexture a1 = new(new Vector3(p.Eje[j] - nrm * p.SemiMenos[j], 0f), c0, new Vector2(u0, v1));
+                    VertexPositionColorTexture b0 = new(new Vector3(p.Eje[j + 1] + nrm * p.SemiMas[j + 1], 0f), c1, new Vector2(u1, v0));
+                    VertexPositionColorTexture b1 = new(new Vector3(p.Eje[j + 1] - nrm * p.SemiMenos[j + 1], 0f), c1, new Vector2(u1, v1));
+
+                    _verts[nVerts++] = a0;
+                    _verts[nVerts++] = a1;
+                    _verts[nVerts++] = b0;
+                    _verts[nVerts++] = a0;
+                    _verts[nVerts++] = b0;
+                    _verts[nVerts++] = b1;
+                }
             }
             return nVerts;
         }
@@ -520,20 +602,23 @@ namespace AethonMod.Content.VFX
                         Vector2 ancla = anclaBase + new Vector2(lado * estilo.AnclajeSep, 0f);
                         for (int i = 0; i < nAla; i++)
                         {
-                            plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav,
-                                direccion, lado, time, estilo);
-                            float hue = (hueBase + i * estilo.HueEntre) % 1f;
-                            if (hue < 0f) hue += 1f;
-                            hues[k] = hue;
-
                             // EL DESGARRE DE LA PUNTA (el «tear»): el hash
                             // determinista decide qué mechones de la punta
                             // viven en este instante — la punta se RASGA en
                             // filamentos que titilan (más violento al abrir).
+                            // v6.55.0: el desgarre TAMBIÉN talla el ancho
+                            // de los últimos nodos (va a ConstruirPluma).
                             float desgarre = VFXCore.Hash01(pl.whoAmI * 7 + i * 13 + (lado + 2) * 31,
                                 (int)(time * 24f), 5);
                             float vivo = 0.55f + 0.45f * desgarre;
                             fundidos[k] = vivo * (0.72f + 0.28f * spread);
+
+                            plumas[k] = ConstruirPluma(ancla, i, spread, flap, grav,
+                                direccion, lado, time, estilo,
+                                _pozosEje[k], _pozosSemi[k], _pozosSemi2[k], fundidos[k]);
+                            float hue = (hueBase + i * estilo.HueEntre) % 1f;
+                            if (hue < 0f) hue += 1f;
+                            hues[k] = hue;
                             k++;
                         }
                     }

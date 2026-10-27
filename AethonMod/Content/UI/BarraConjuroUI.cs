@@ -11,7 +11,7 @@ namespace AethonMod.Content.UI
 {
     // ======================================================================
     //  v6.52.0 — BARRACONJURO: LA BARRA DE CONJURO del jefe (el patrón
-    //  «cast bar» de The Stars Above — R3 §2.4: el telegraph más HONESTO
+    //  «cast bar» clásico del género — R3 §2.4: el telegraph más HONESTO
     //  que existe: el NOMBRE del ataque y SU reloj, a la vista).
     //
     //  LA RECETA: una barra 280×26 bajo el hotbar que se LLENA mientras

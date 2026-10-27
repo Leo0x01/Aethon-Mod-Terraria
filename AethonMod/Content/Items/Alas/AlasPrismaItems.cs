@@ -16,16 +16,16 @@ namespace AethonMod.Content.Items.Alas
     /// daselas al jugador».
     ///
     /// EL SISTEMA ES EL MISMO (AlasAuroraLib — el abanico de plumas
-    /// quad con la onda de aleteo en cadena, el color por vértice, el
-    /// ruido que fluye, el desgarre de punta y la física inyectada de
-    /// Mothron SIN sprite); lo que cambia es EL ALMA: cada ala declara
+    /// VECTORIALES con la onda de aleteo en cadena, el color por
+    /// vértice, el ruido que fluye, el desgarre de punta y la física
+    /// inyectada SIN sprite); lo que cambia es EL ALMA: cada ala declara
     /// su índice del catálogo (AlasCatalogo) — su paleta, su forma,
     /// su tempo y SU TEXTURA DE RUIDO de las veinte nacidas de la
-    /// investigación de las texturas de efecto del dios antiguo.
+    /// investigación de texturas de efecto de la casa.
     ///
-    /// Llegan en LA BOLSA DE LAS ALAS (dentro de la Bolsa de la
-    /// Investigación — la letra: «todos los items nuevos que crees con
-    /// esta investigacion profunda ponlos en una unica bolsa»).
+    /// Llegan en LA BOLSA DE LAS ALAS (v6.55.0: entrega directa del kit
+    /// y dentro del Cofre del Arsenal — antes viajaba dentro de la
+    /// bolsa de la investigación, retirada).
     /// </summary>
     public abstract class AlasPrismaBase : ModItem
     {
@@ -94,7 +94,7 @@ namespace AethonMod.Content.Items.Alas
     /// <summary>7 — MEDIANOCHE: el cielo estrellado entero.</summary>
     public class AlasDeMedianoche : AlasPrismaBase { protected override byte Estilo => 7; }
 
-    /// <summary>8 — PRISMA: el arcoíris del dios antiguo.</summary>
+    /// <summary>8 — PRISMA: el arcoíris completo.</summary>
     public class AlasDelPrisma : AlasPrismaBase { protected override byte Estilo => 8; }
 
     /// <summary>9 — FUEGO FRÍO: ondas de hielo lila.</summary>
