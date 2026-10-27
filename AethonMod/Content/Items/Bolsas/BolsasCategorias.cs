@@ -807,49 +807,39 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<BolsaSombras>(), 1));
             l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
-            // v6.54.4 — EL VEREDICTO DE AETHON (la bolsa 23 del cofre)
+            // v6.54.6 — EL VEREDICTO DE AETHON REFORMADO (la bolsa 23 del cofre:
+            // ahora LAS CINCO SENTENCIAS con sus siete capas)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
             return l;
         }
     }
 // ======================================================================
-    //  v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS (bolsa 24): «El
-    //  Veredicto de Aethon» — las DOCE SENTENCIAS nacidas de la
-    //  investigación profunda de los jefes y armas finales de los mods
-    //  más populares y hermosos (Calamity, Fargo's Souls, el dios
-    //  antiguo y su rayo de fusión, Thorium, The Stars Above). El rayo
-    //  concentrado, el prisma, los versos gemelos, el filo de las
-    //  cuatro constelaciones, el partidor de mundos, la guadaña, el
-    //  sistema solar, la constelación del juicio, el vórtice devorador,
-    //  el réquiem, la ira del cielo… y EL TESTAMENTO, la corona que
-    //  rota las once sentencias.
+    //  v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS (bolsa 24): «El
+    //  Veredicto de Aethon», LA REFORMA — LAS CINCO SENTENCIAS que
+    //  eligió el usuario tras probarlas, cada una con SUS SIETE CAPAS
+    //  de efectos (el prisma —el ataque definitivo con la receta
+    //  completa del rayo de fusión—, el partidor, el réquiem, la ira…
+    //  y EL TESTAMENTO, la corona que las dicta rotándolas ×1.3).
     // ======================================================================
 
-    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las doce sentencias del Veredicto.</summary>
+    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las cinco sentencias del Veredicto.</summary>
     public class BolsaDefinitivas : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Armas Definitivas";
         protected override string NombreCorto => "Bolsa de las Definitivas";
         protected override Color ColorFiesta => new(255, 214, 120);
-        protected override string Nota => "Las doce sentencias del Veredicto — el ataque definitivo vive aquí";
+        protected override string Nota => "Las cinco sentencias del Veredicto — el ataque definitivo vive aquí";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.54.4 — LAS DOCE SENTENCIAS (la 1 es EL ATAQUE DEFINITIVO
-            // pedido por el usuario; la 12 es la corona que las rota todas)
-            l.Add((ModContent.ItemType<Weapons.Definitivas.OjoDelJuicio>(), 1));          // 1 — EL RAYO CONCENTRADO (la receta del rayo de fusión del dios antiguo)
-            l.Add((ModContent.ItemType<Weapons.Definitivas.PrismaPrimordial>(), 1));      // 2 — LOS SIETE HACES QUE CONVERGEN
-            l.Add((ModContent.ItemType<Weapons.Definitivas.LluviaDeVersos>(), 1));        // 3 — LOS PARES DE HOJAS QUE SE BUSCAN
-            l.Add((ModContent.ItemType<Weapons.Definitivas.FiloConstelado>(), 1));        // 4 — LAS CUATRO CONSTELACIONES
-            l.Add((ModContent.ItemType<Weapons.Definitivas.PartidorDeMundos>(), 1));      // 5 — LA COLUMNA QUE PARTE EL MUNDO
-            l.Add((ModContent.ItemType<Weapons.Definitivas.GuadanaViejoDios>(), 1));      // 6 — EL COMBO DE LOS TRES TAJOS
-            l.Add((ModContent.ItemType<Weapons.Definitivas.SistemaAethon>(), 1));         // 7 — TU PROPIO SISTEMA SOLAR
-            l.Add((ModContent.ItemType<Weapons.Definitivas.ConstelacionJuicio>(), 1));    // 8 — LAS SIETE ESTRELLAS QUE JUZGAN
-            l.Add((ModContent.ItemType<Weapons.Definitivas.VorticeDevorador>(), 1));      // 9 — EL REMOLINO QUE SE LO COME TODO
-            l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 10 — LA CAMPANA DE LOS TRES ANILLOS
-            l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 11 — LOS OCHO JUICIOS DEL CIELO
-            l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 12 — LA CORONA: rota las once sentencias
+            // v6.54.6 — LAS CINCO SENTENCIAS (la 1 es EL ATAQUE DEFINITIVO
+            // con la receta completa del rayo de fusión; la 5 es la corona)
+            l.Add((ModContent.ItemType<Weapons.Definitivas.PrismaPrimordial>(), 1));      // 1 — EL ATAQUE DEFINITIVO: los 7 haces + el haz central de fusión
+            l.Add((ModContent.ItemType<Weapons.Definitivas.PartidorDeMundos>(), 1));      // 2 — LA COLUMNA QUE PARTE EL MUNDO
+            l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 3 — LA CAMPANA DE LOS TRES ANILLOS
+            l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 4 — LOS OCHO JUICIOS DEL CIELO
+            l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 5 — LA CORONA: dicta las cuatro rotándolas
             return l;
         }
     }

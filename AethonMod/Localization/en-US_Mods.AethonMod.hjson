@@ -1953,158 +1953,90 @@ Items: {
 			'''
 	}
 
-	// v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS: «El Veredicto de Aethon» — las doce sentencias
-	OjoDelJuicio: {
-		DisplayName: The Eye of Judgment
-		Tooltip:
-			'''
-				"Where the old god vomited his rainbow, the grimoire GATHERED the
-				light and returned it as a verdict."
-				THE CONCENTRATED RAY — the mod's ultimate attack: THE CHARGE — the
-				book's eye opens above you and drinks the room's light; THE VERDICT —
-				a PRIMORDIAL LIGHT CONE 2400 px long that SWEEPS the field side to
-				side with its white core and living gradient; THE JUICE — constant
-				screenshake and infinite flight while the sentence lasts.
-				(Hold the click: the eye fires as long as your arm holds.)
-			'''
-	}
 
 	PrismaPrimordial: {
-		DisplayName: The Primal Prism
+		DisplayName: The Primordial Prism
 		Tooltip:
 			'''
-				Seven spectrum beams sprout around you, spinning, and CONVERGE on the
-				focus; from the focus is born THE COLUMN of light, 2400 px long,
-				GROWING with the convergence — the longer you hold, the thicker the
-				verdict. (The moon prism's evolution: seven voices, one word.)
+				THE DEFINITIVE ATTACK OF THE MOD — the prism inherits the fusion
+				beam's crown: SEVEN spectrum beams bloom spinning around you and
+				CONVERGE on the focus; from it rises THE CENTRAL BEAM, 2400 px of
+				WIDENING light — born thin, fattening toward the far end, BREATHING
+				— with its four sheathes and white vein, THREE traveling pulses,
+				the chromatic rain with its color offset, the four stacked halos,
+				the prismatic veil and the tip's glow.
+				(Seven voices, one single word.)
 			'''
 	}
 
-	LluviaDeVersos: {
-		DisplayName: The Rain of Verses
-		Tooltip:
-			'''
-				Each pair of blades is born on opposite sides of the sky, SEEKS its
-				twin and CROSSES it, cutting the whole path — one gold, one violet.
-				AT TWELVE PAIRS: THE FLARE — the nova that covers the screen and
-				erases whatever still stands.
-			'''
-	}
 
-	FiloConstelado: {
-		DisplayName: The Constellated Edge
-		Tooltip:
-			'''
-				The sword of the FOUR CONSTELLATIONS — right-click to switch: THE
-				SUN — the solar wave that sweeps the front; THE NORTH STAR — the cold
-				darts that chase; ANDROMEDA — the spiral galaxy that swallows; ARIES —
-				the star chain that strikes at 650 px. Each with its palette, its
-				signature and its sound.
-			'''
-	}
 
 	PartidorDeMundos: {
 		DisplayName: The World Splitter
 		Tooltip:
 			'''
-				One click. One line. The world, in two. THE CONTAINMENT — the
-				vertical line trembles over the cursor and the room holds its breath;
-				THE SPLIT — the 260 px column FALLS end to end, the ground ERUPTS with
-				the double shockwave and the strongest screenshake of the bag.
+				One click. One line. The world, in two.
+				THE CONTAINMENT — the vertical line trembles over the cursor while
+				FIVE RUNES light up along its fall and the room holds its breath;
+				THE PARTITION — the 260 px column FALLS with its four sheathes, the
+				ground BURSTS with THREE shockwaves, THE CRACKS open at the sides
+				of the base and the wound bleeds sparks with real gravity.
 				(The apocalypse button: use with respect.)
 			'''
 	}
 
-	GuadanaViejoDios: {
-		DisplayName: The Old God's Scythe
-		Tooltip:
-			'''
-				THE THREE-SLASH COMBO — crescent, mirrored crescent bigger… and THE
-				CROSS: two perpendicular scythes crossing over the enemy with their
-				black-violet wave and the souls of the cut flying home.
-				(The edge is shadow inside and light at the rim.)
-			'''
-	}
 
-	SistemaAethon: {
-		DisplayName: Aethon's System
-		Tooltip:
-			'''
-				YOUR OWN SOLAR SYSTEM — five bodies in orbit: THE SUN (fireballs),
-				THE MOON (crescent blades), THE COMET (trailing bursts), THE STAR
-				(homing darts) and THE VOID (imploding sparks). Each body fires at its
-				own prey. RIGHT-CLICK with the system alive: THE BOMBARDMENT — all
-				five launch at the cursor and DETONATE.
-			'''
-	}
 
-	ConstelacionJuicio: {
-		DisplayName: The Constellation of Judgment
-		Tooltip:
-			'''
-				SOW up to SEVEN golden stars where you click — they connect
-				themselves with threads of light. At the seventh (or one more click
-				with the figure full): THE JUDGMENT — each star receives its column
-				from the sky, lightning leaps from star to star and the whole figure
-				flares, closing the case.
-			'''
-	}
 
-	VorticeDevorador: {
-		DisplayName: The Devouring Vortex
-		Tooltip:
-			'''
-				The ink seed flies, germinates into a black-violet whirlpool and
-				lives four seconds DEVOURING: enemies are DRAGGED into its maw while
-				the spiral turns with its eyes open and its claws out. AT THE END: THE
-				IMPLOSION — everything collapses inward and bursts into souls.
-				(Bosses resist the pull; the grinding forgives nothing.)
-			'''
-	}
 
 	RequiemEstelar: {
 		DisplayName: The Stellar Requiem
 		Tooltip:
 			'''
-				THE BELL OF LIGHT — three golden rings expanding from you, CROSSING
-				the world (1400 px, one every half second), each one lighting
-				everything in its path. The third is THE GREAT BELL: double, with its
-				closing starfall.
+				THE BELL OF LIGHT — three golden rings expand from you CROSSING the
+				world (1400 px, one every half second), now TRULY CLOSED: each ring
+				carries its NOTES riding the circumference and its clapper spinning
+				against it, and every toll brings its flash, its wave and its
+				tremor. The third is THE GREATER BELL: double, with its echo and
+				the closing starfall.
 			'''
 	}
 
 	IraDelCielo: {
-		DisplayName: The Sky's Wrath
+		DisplayName: The Wrath of Heaven
 		Tooltip:
 			'''
-				The sky COVERS for three seconds: THE EIGHT JUDGMENTS fall — one
-				sky-bolt on each nearby enemy, its branches sparking to the neighbors.
-				The LAST is THE COLUMN: the double bolt that finishes the biggest of
-				all, with flash and the greatest tremor.
+				The sky TRULY COVERS itself for three seconds — living clouds,
+				golden mist and ambient lightning. THE EIGHT JUDGMENTS announce
+				themselves with a descending line before falling with their twin
+				channel, three-sheathe column, nova and shockwave ring; THE BRANCHES
+				spark onto the neighbors. The LAST is THE COLUMN: two spiral veins,
+				flash and the greatest tremor.
 			'''
 	}
 
 	TestamentoAethon: {
-		DisplayName: Aethon's Testament
+		DisplayName: The Testament of Aethon
 		Tooltip:
 			'''
-				THE BAG'S CROWN — the souls' fusion pattern: the book opens, its
-				pages fly… and DICTATES the sentence due. EACH USE fires ONE OF THE
-				BAG'S ELEVEN SENTENCES with heightened power, rotating forever.
-				Eleven arsenals in a single object.
+				THE CROWN OF THE BAG — the book opens with its ring of runes, its
+				flying pages and the veil dyed with the color of the sentence it
+				speaks… and SPEAKS IT: EVERY USE fires ONE OF THE FOUR SENTENCES
+				with heightened power (x1.3), rotating forever — and THE BOND, the
+				living filament joining the book to its weapon, shows you which
+				one was born.
+				Four arsenals in a single object.
 			'''
 	}
 
 	BolsaDefinitivas: {
-		DisplayName: The Ultimate Weapons Bag
+		DisplayName: The Bag of Ultimate Weapons
 		Tooltip:
 			'''
-				The TWELVE SENTENCES of Aethon's Verdict, born from the research of
-				the final bosses and weapons of the most beautiful mods: the
-				concentrated ray, the prism, the twin verses, the four-constellation
-				edge, the world splitter, the scythe, the solar system, the judgment
-				constellation, the devouring vortex, the requiem, the sky's wrath… and
-				THE TESTAMENT, the crown that rotates them all.
+				THE FIVE SENTENCES of Aethon's Verdict, reformed with SEVEN LAYERS
+				of effects each: the prism (the definitive attack), the world
+				splitter, the requiem, the wrath of heaven… and THE TESTAMENT,
+				the crown that dictates them all in turn.
 			'''
 	}
 

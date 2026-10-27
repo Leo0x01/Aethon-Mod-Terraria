@@ -1,3 +1,56 @@
+# v6.54.6 — LA REFORMA DE LA BOLSA — EL CHECKLIST
+
+**Qué pasó** (la letra): el Testamento dejó el Prisma bugueado (el haz
+sentencia vivía PARA SIEMPRE: bloqueaba el arma y el juego quedaba
+«usándola» sin fin), el círculo del Réquiem tenía UN AGUJERO (la tira
+no cerraba el loop), y todas las armas estaban «a nivel principiante».
+LA REFORMA: las siete armas no elegidas se retiraron completas, los
+dos bugs se curaron (sentencia acotada a 192 t + failsafe global de
+1200 t; anillos de 56 puntos + 2 sobrantes) y LAS CINCO que quedaron
+estrenan SUS SIETE CAPAS de efectos cada una.
+
+1. **LO PRIMERO — EL BUG DEL TESTAMENTO CURADO**: [ ] usar EL
+   TESTAMENTO varias veces seguidas: cuando dicte EL PRISMA, el haz
+   vive su ciclo (~9 segundos, más corto que el canalizado) y SE APAGA
+   SOLO — el arma NO queda «siéndose usada» jamás.
+2. **EL PRISMA VUELVE A FUNCIONAR**: [ ] tras una sentencia del
+   Testamento, agarrar EL PRISMA y dispararlo NORMALES — ya NO está
+   bloqueado (el CanUseItem se libera cuando el haz muere).
+3. **EL PRISMA PRIMORDIAL — EL ATAQUE DEFINITIVO**: [ ] el velo de los
+   bordes respira con el color del momento; [ ] el foco con sus CUATRO
+   HALOS apilados + el ARO ARCOÍRIS girando; [ ] los 7 haces con su
+   color del espectro ONDULANDO al converger; [ ] el HAZ CENTRAL
+   ENGORDA hacia el fondo y RESPIRA (±8 %); [ ] las bandas de los TRES
+   PULSOS corriendo hacia afuera; [ ] la lluvia de polvo de colores a
+   lo largo de TODO el haz; [ ] el resplandor de la punta.
+4. **EL PARTIDOR DE MUNDOS**: [ ] las CINCO RUNAS se encienden UNA A
+   UNA por la línea del telegrafo; [ ] la COLUMNA con sus cuatro
+   fundas cae de golpe; [ ] LAS TRES ondas de choque del suelo; [ ]
+   LAS GRIETAS de luz abriéndose a los lados de la base; [ ] las
+   chispas de la base saltan y CAEN con gravedad de verdad.
+5. **EL RÉQUIEM ESTELAR**: [ ] LOS ANILLOS CERRADOS — sin NINGÚN
+   agujero ni costura (el bug del círculo roto); [ ] las NOTAS
+   (estrellas) cabalgando la circunferencia; [ ] EL BADAJO interior
+   girando en contra; [ ] el LATIDO central sincronizado con cada
+   tañido; [ ] el flash de cada campana; [ ] la lluvia de estrellas
+   del cierre.
+6. **LA IRA DEL CIELO**: [ ] la banda superior del cielo se CUBRE con
+   nubes que se arrastran; [ ] los RELÁMPAGOS AMBIENTALES saltan solos
+   entre juicio y juicio; [ ] cada juicio SE ANUNCIA con una línea
+   fina que desciende ANTES del rayo; [ ] las columnas de impacto con
+   su nova y su anillo de choque horizontal; [ ] el ÚLTIMO juicio: LA
+   COLUMNA con DOS VENAS EN ESPIRAL alrededor del eje.
+7. **EL TESTAMENTO DE AETHON (la corona)**: [ ] el velo de los bordes
+   toma EL COLOR de la sentencia que toca; [ ] las RUNAS orbitando el
+   libro; [ ] LA PALABRA — la onda + flash al dictar; [ ] EL VÍNCULO:
+   el filamento de luz que corre del libro a la sentencia invocada;
+   [ ] rota SOLO las cuatro: PRISMA → PARTIDOR → RÉQUIEM → IRA → …
+8. **LA BOLSA REFORMADA**: [ ] al abrirla: SOLO las 5 armas (las 7
+   retiradas ya NO aparecen); [ ] los tooltips nuevos hablan de las
+   siete capas y de las CUATRO sentencias.
+9. **EL PARQUE COMPLETO**: [ ] las 5 armas en la misma sesión, sin
+   cierres, sin haces eternos, sin armas bloqueadas.
+
 # v6.54.5 — LA CURA DEL CRASH — EL CHECKLIST
 
 **Qué pasó** (la letra: «no pude probar las armas, a penas agarre la

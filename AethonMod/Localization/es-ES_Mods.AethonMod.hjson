@@ -1957,126 +1957,53 @@ Items: {
 			'''
 	}
 
-	// v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS: «El Veredicto de Aethon» — las doce sentencias
-	OjoDelJuicio: {
-		DisplayName: El Ojo del Juicio
-		Tooltip:
-			'''
-				«Donde el dios antiguo vomitó su arcoíris, el grimorio CONCENTRÓ la
-				luz y la devolvió como veredicto.»
-				EL RAYO CONCENTRADO — el ataque definitivo del mod:
-				LA CARGA — el ojo del libro se abre sobre ti y succiona la luz de la
-				sala; EL VEREDICTO — un CONO DE LUZ PRIMORDIAL de 2400 px que BARRE el
-				campo de lado a lado con su núcleo blanco y su gradiente vivo; EL
-				JUICE — temblor constante y vuelo infinito mientras dura la sentencia.
-				(Sustenta el clic: el ojo escupe mientras el brazo aguante.)
-			'''
-	}
 
 	PrismaPrimordial: {
 		DisplayName: El Prisma Primordial
 		Tooltip:
 			'''
-				Siete haces del espectro brotan a tu alrededor girando y CONVERGEN en
-				el foco; del foco nace LA COLUMNA de luz de 2400 px que CRECE con la
-				convergencia — mientras más tiempo sostengas, más gordo el veredicto.
-				(La evolución del prisma lunar: siete voces, una sola palabra.)
+				EL ATAQUE DEFINITIVO DEL MOD — el prisma hereda la corona del rayo de
+				fusión: SIETE haces del espectro brotan girando a tu alrededor y
+				CONVERGEN al foco; del foco nace EL HAZ CENTRAL de 2400 px con ANCHO
+				CRECIENTE — nace fino, engorda hacia el fondo y RESPIRA — con sus
+				cuatro fundas y la vena blanca, TRES pulsos que viajan, la lluvia
+				cromática con su offset de color, los cuatro halos apilados del foco,
+				el velo prismático y el resplandor de la punta.
+				(Siete voces, una sola palabra.)
 			'''
 	}
 
-	LluviaDeVersos: {
-		DisplayName: La Lluvia de Versos
-		Tooltip:
-			'''
-				Cada par de hojas nace en lados opuestos del cielo, SE BUSCAN y SE
-				ATRAVIESAN cortando el camino entero — la una oro, la otra violeta.
-				A LOS DOCE PARES: EL DESTELLO — la nova que cubre la pantalla y borra
-				lo que quede de pie.
-			'''
-	}
 
-	FiloConstelado: {
-		DisplayName: El Filo Constelado
-		Tooltip:
-			'''
-				La espada de las CUATRO CONSTELACIONES — clic derecho para cambiar de
-				constelación: EL SOL — la onda solar que barre el frente; LA ESTRELLA
-				POLAR — los dardos fríos que persiguen; ANDRÓMEDA — la galaxia espiral
-				que engulle; ARIES — la cadena estelar que golpea a 650 px.
-				Cada una con su paleta, su firma y su sonido.
-			'''
-	}
 
 	PartidorDeMundos: {
 		DisplayName: El Partidor de Mundos
 		Tooltip:
 			'''
 				Un clic. Una línea. El mundo, en dos.
-				LA CONTENCIÓN — la línea vertical tiembla sobre el cursor y la sala
-				contiene la respiración; LA PARTICIÓN — la columna de 260 px CAE de
-				punta a punta, el suelo ESTALLA con la doble onda de choque y el
-				temblor más fuerte de la bolsa.
+				LA CONTENCIÓN — la línea vertical tiembla sobre el cursor mientras
+				CINCO RUNAS se encienden a lo largo de su caída y la sala contiene la
+				respiración; LA PARTICIÓN — la columna de 260 px CAE con sus cuatro
+				fundas, el suelo ESTALLA con las TRES ondas de choque, LAS GRIETAS se
+				abren a los lados de la base y la herida se desangra chispas con
+				gravedad de verdad.
 				(El botón de apocalipsis: úsalo con respeto.)
 			'''
 	}
 
-	GuadanaViejoDios: {
-		DisplayName: La Guadaña del Viejo Dios
-		Tooltip:
-			'''
-				EL COMBO DE LOS TRES TAJOS — media luna, media luna espejada más
-				grande… y LA CRUZ: dos guadañas perpendiculares que se cruzan sobre el
-				enemigo con su onda negra-violeta y las almas de lo cortado volando a
-				casa.
-				(El filo es sombra por dentro y luz por el borde.)
-			'''
-	}
 
-	SistemaAethon: {
-		DisplayName: El Sistema de Aethon
-		Tooltip:
-			'''
-				TU PROPIO SISTEMA SOLAR — cinco cuerpos en órbita: EL SOL (bolas de
-				fuego), LA LUNA (cuchillas crecientes), EL COMETA (ráfagas con
-				estela), LA ESTRELLA (dardos que persiguen) y EL VACÍO (chispas que
-				imploden). Cada cuerpo dispara solo a su presa. CLIC DERECHO con el
-				sistema vivo: EL BOMBARDEO — los cinco se lanzan al cursor y DETONAN.
-			'''
-	}
 
-	ConstelacionJuicio: {
-		DisplayName: La Constelación del Juicio
-		Tooltip:
-			'''
-				SIEMBRA hasta SIETE estrellas doradas donde cliques — se conectan
-				solas con hilos de luz. Con la séptima (o un clic más con la figura
-				llena): EL JUICIO — cada estrella recibe su columna del cielo, los
-				relámpagos saltan de estrella a estrella y la figura entera destella
-				cerrando el caso.
-			'''
-	}
 
-	VorticeDevorador: {
-		DisplayName: El Vórtice Devorador
-		Tooltip:
-			'''
-				La semilla de tinta vuela, germina en un remolino negro-violeta y
-				vive cuatro segundos DEVORANDO: los enemigos son ARRASTRADOS a la
-				garganta mientras la espiral gira con sus ojos abiertos y sus garras
-				afuera. AL FINAL: LA IMPLOSIÓN — todo colapsa hacia dentro y estalla
-				en almas.
-				(Los jefes resisten la succión; el triturado no perdona.)
-			'''
-	}
 
 	RequiemEstelar: {
 		DisplayName: El Réquiem Estelar
 		Tooltip:
 			'''
 				LA CAMPANA DE LUZ — tres anillos dorados que se expanden desde ti
-				CRUZANDO el mundo (1400 px, uno cada medio segundo), cada uno
-				iluminando todo a su paso. El tercero es LA CAMPANA MAYOR: doble, con
-				su lluvia de estrellas del cierre.
+				CRUZANDO el mundo (1400 px, uno cada medio segundo), ahora CERRADOS de
+				verdad: cada anillo lleva sus NOTAS cabalgando la circunferencia y su
+				badajo girando en contra, y cada tañido trae su flash, su onda y su
+				temblor. El tercero es LA CAMPANA MAYOR: doble, con su eco y la
+				lluvia de estrellas del cierre.
 			'''
 	}
 
@@ -2084,10 +2011,12 @@ Items: {
 		DisplayName: La Ira del Cielo
 		Tooltip:
 			'''
-				El cielo se CUBRE durante tres segundos: LOS OCHO JUICIOS caen — un
-				rayo del cielo sobre cada enemigo cercano, con sus ramas chispeando a
-				los vecinos. El ÚLTIMO es LA COLUMNA: el rayo doble que remata al más
-				grande de todos, con flash y el temblor mayor.
+				El cielo se CUBRE de verdad durante tres segundos — nubes vivas,
+				bruma dorada y relámpagos ambientales. LOS OCHO JUICIOS se ANUNCIAN
+				con una línea que desciende antes de caer con su canal doble, su
+				columna de tres fundas, la nova y el anillo de choque; LAS RAMAS
+				saltan chispeando a los vecinos. El ÚLTIMO es LA COLUMNA: dos venas
+				en espiral, flash y el temblor mayor.
 			'''
 	}
 
@@ -2095,11 +2024,12 @@ Items: {
 		DisplayName: El Testamento de Aethon
 		Tooltip:
 			'''
-				LA CORONA DE LA BOLSA — el patrón fusión de las almas: el libro se
-				abre, sus páginas vuelan… y DICTA la sentencia que toca. CADA USO
-				dispara UNA DE LAS ONCE SENTENCIAS de la bolsa con su poder
-				acrecentado, rotando para siempre.
-				Once arsenales en un solo objeto.
+				LA CORONA DE LA BOLSA — el libro se abre con su anillo de runas, sus
+				páginas volando y el velo teñido del color de la sentencia que
+				toca… y LA DICTA: CADA USO dispara UNA DE LAS CUATRO SENTENCIAS con
+				su poder acrecentado (×1.3), rotando para siempre — y EL VÍNCULO, el
+				filamento vivo que une el libro a su arma, te enseña cuál nació.
+				Cuatro arsenales en un solo objeto.
 			'''
 	}
 
@@ -2107,12 +2037,10 @@ Items: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-				Las DOCE SENTENCIAS del Veredicto de Aethon, nacidas de la
-				investigación de los jefes y armas finales de los mods más hermosos:
-				el rayo concentrado, el prisma, los versos gemelos, el filo de las
-				cuatro constelaciones, el partidor de mundos, la guadaña, el sistema
-				solar, la constelación del juicio, el vórtice devorador, el réquiem,
-				la ira del cielo… y EL TESTAMENTO, la corona que las rota todas.
+				LAS CINCO SENTENCIAS del Veredicto de Aethon, reformadas con SUS
+				SIETE CAPAS de efectos cada una: el prisma (el ataque definitivo),
+				el partidor de mundos, el réquiem, la ira del cielo… y EL
+				TESTAMENTO, la corona que las dicta rotándolas.
 			'''
 	}
 

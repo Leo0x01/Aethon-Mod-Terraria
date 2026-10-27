@@ -79,8 +79,9 @@ namespace AethonMod.Content.Players
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaMaestra>());
             bolsas += Entregar(ModContent.ItemType<BolsaInvestigacion>());
-            // v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS aparte (la nueva
-            // de esta versión: «El Veredicto de Aethon», las doce sentencias)
+            // v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS aparte (la
+            // reforma: «El Veredicto de Aethon», las cinco sentencias
+            // con sus siete capas)
             bolsas += Entregar(ModContent.ItemType<BolsaDefinitivas>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA

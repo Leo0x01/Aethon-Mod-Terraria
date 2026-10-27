@@ -9,37 +9,40 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Weapons.Definitivas
 {
     // ======================================================================
-    //  v6.50.66 — LA BOLSA DE LAS ARMAS DEFINITIVAS. Este archivo: LAS
-    //  SENTENCIAS 5 A 8.
+    //  v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS, LA REFORMA. Este
+    //  archivo: LAS SENTENCIAS 3 Y 4 (el réquiem y la ira).
     // ======================================================================
 
     /// <summary>
-    /// ARMA 5 — EL PARTIDOR DE MUNDOS (la receta del «Universe Splitter»
-    /// de Calamity: un clic = un pilar). La pantalla CONTIENE la respiración
-    /// (el telegrafo), el cielo se parte y UNA COLUMNA DE LUZ VERTICAL de
-    /// 260 px de ancho CAE sobre el cursor dividiendo el mundo — destello
-    /// blanco, doble onda de choque desde la base y el temblor más fuerte
-    /// de la bolsa.
+    /// ARMA 3 — EL RÉQUIEM ESTELAR (la receta del «The Set» de Thorium +
+    /// los anillos de Fargo's, en SIETE capas): LA CAMPANA DE LUZ — tres
+    /// anillos dorados que CRUZAN EL MUNDO expandiéndose desde el
+    /// portador (1400 px, uno cada medio segundo), ahora CERRADOS DE
+    /// VERDAD (la costura del loop enterrada bajo segmentos vivos — la
+    /// cura del agujero), con LAS NOTAS cabalgando la circunferencia, EL
+    /// BADAJO interior girando en contra, EL ECO del tercer anillo, el
+    /// LATIDO central sincronizado al tañido, la palabra de cada campana
+    /// (flash + onda + temblor) y LA LLUVIA DE ESTRELLAS del cierre.
     /// </summary>
-    public class PartidorDeMundos : ModItem
+    public class RequiemEstelar : ModItem
     {
         public override void SetDefaults()
         {
-            Item.damage = 600;
+            Item.damage = 220;
             Item.DamageType = DamageClass.Generic;
             Item.width = 40;
             Item.height = 40;
-            Item.useTime = 90;
-            Item.useAnimation = 90;
+            Item.useTime = 70;
+            Item.useAnimation = 70;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.noMelee = true;
-            Item.autoReuse = false;
-            Item.shoot = ModContent.ProjectileType<PartidorDeMundosProjectile>();
+            Item.autoReuse = true;
+            Item.shoot = ModContent.ProjectileType<RequiemEstelarProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 80;
+            Item.mana = 60;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
-            Item.UseSound = SoundID.Item122.WithPitchOffset(-0.3f);
+            Item.UseSound = SoundID.Item27.WithPitchOffset(-0.2f);
         }
 
         public override bool CanUseItem(Player player)
@@ -48,124 +51,10 @@ namespace AethonMod.Content.Weapons.Definitivas
             {
                 Projectile p = Main.projectile[i];
                 if (p != null && p.active && p.owner == player.whoAmI &&
-                    p.type == ModContent.ProjectileType<PartidorDeMundosProjectile>())
+                    p.type == ModContent.ProjectileType<RequiemEstelarProjectile>())
                     return false;
             }
             return true;
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
-            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            // el pilar cae sobre el cursor (el proyectil vuela hasta él y ancla)
-            Vector2 destino = Main.MouseWorld;
-            Vector2 rumbo = destino - player.MountedCenter;
-            float dist = rumbo.Length();
-            rumbo = dist > 1f ? rumbo / dist : Vector2.UnitX;
-            Projectile.NewProjectile(source, player.MountedCenter, rumbo * MathHelper.Clamp(dist, 6f, 900f),
-                type, damage, knockback, player.whoAmI);
-            return false;
-        }
-
-        public override void AddRecipes()
-        {
-            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
-        }
-    }
-
-    /// <summary>
-    /// ARMA 6 — LA GUADAÑA DEL VIEJO DIOS (la receta de la «Scythe of the
-    /// Old God» de el dios antiguo): el COMBO DE LOS TRES TAJOS — media luna,
-    /// media luna espejada MÁS GRANDE, y la CRUZ GIGANTE que remata con
-    /// onda de choque y almas. Cada arco de la guadaña viaja media
-    /// pantalla cortando TODO lo que toca.
-    /// </summary>
-    public class GuadanaViejoDios : ModItem
-    {
-        public override void SetDefaults()
-        {
-            Item.damage = 300;
-            Item.DamageType = DamageClass.Melee;
-            Item.width = 44;
-            Item.height = 44;
-            Item.useTime = 30;
-            Item.useAnimation = 30;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.noMelee = true;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<GuadanaViejoDiosProjectile>();
-            Item.shootSpeed = 1f;
-            Item.mana = 0;
-            Item.rare = ItemRarityID.Purple;
-            Item.value = Item.buyPrice(0, 0, 0, 0);
-            Item.UseSound = SoundID.Item71.WithPitchOffset(-0.4f);
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
-            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            // el combo vive en ai[1] (0 → 1 → 2 → 0…): el tercer tajo ES la cruz
-            Vector2 rumbo = (Main.MouseWorld - player.MountedCenter).SafeNormalize(Vector2.UnitX);
-            Projectile.NewProjectile(source, player.MountedCenter, rumbo * 6f, type, damage, knockback,
-                player.whoAmI, 0f, 0f);
-            return false;
-        }
-
-        public override void AddRecipes()
-        {
-            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
-        }
-    }
-
-    /// <summary>
-    /// ARMA 7 — EL SISTEMA DE AETHON (la receta de la «el dios antiguoga» de el dios antiguo
-    /// + el «Ultima Thule» de Stars Above): tu PROPIO sistema solar —
-    /// CINCO cuerpos en órbita (el Sol, la Luna, el Cometa, la Estrella y
-    /// el Vacío) que bombardean solos a los enemigos cercanos. CLIC
-    /// DERECHO: EL BOMBARDEO — los cinco se lanzan al cursor y DETONAN.
-    /// </summary>
-    public class SistemaAethon : ModItem
-    {
-        public override void SetDefaults()
-        {
-            Item.damage = 80;
-            Item.DamageType = DamageClass.Generic;
-            Item.width = 40;
-            Item.height = 40;
-            Item.useTime = 20;
-            Item.useAnimation = 20;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.noMelee = true;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<SistemaAethonProjectile>();
-            Item.shootSpeed = 1f;
-            Item.mana = 30;
-            Item.rare = ItemRarityID.Purple;
-            Item.value = Item.buyPrice(0, 0, 0, 0);
-            Item.UseSound = SoundID.Item44;
-        }
-
-        public override bool AltFunctionUse(Player player) => true;
-
-        public override bool CanUseItem(Player player)
-        {
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p != null && p.active && p.owner == player.whoAmI &&
-                    p.type == ModContent.ProjectileType<SistemaAethonProjectile>())
-                {
-                    // CLIC DERECHO con el sistema vivo: LA ORDEN DE BOMBARDEO
-                    if (player.altFunctionUse == 2 && p.ai[1] == 0f)
-                    {
-                        p.ai[1] = 1f;
-                        p.netUpdate = true;
-                        DefinitivasLib.Sonar(SoundID.Item122.WithPitchOffset(0.25f), player.Center);
-                    }
-                    return false;
-                }
-            }
-            return player.altFunctionUse != 2;      // clic derecho sin sistema: nada
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
@@ -182,32 +71,35 @@ namespace AethonMod.Content.Weapons.Definitivas
     }
 
     /// <summary>
-    /// ARMA 8 — LA CONSTELACIÓN DEL JUICIO (la receta de los «Star Signs»
-    /// del Stellar Geliath de el dios antiguo): SIEMBRA hasta SIETE estrellas
-    /// doradas donde cliques — se CONECTAN solas con hilos de luz y,
-    /// cuando la figura cierra (la séptima o un clic más), CADA ESTRELLA
-    /// recibe su rayo del cielo y los arcos saltan de estrella a estrella
-    /// juzgando todo lo que la figura abraza.
+    /// ARMA 4 — LA IRA DEL CIELO (el filamento de rayos de la casa en
+    /// SIETE capas): la tormenta dura tres segundos — EL CIELO SE CUBRE
+    /// con nubes vivas y bruma dorada, LOS RELÁMPAGOS AMBIENTALES
+    /// recorren el cielo entre juicio y juicio, cada uno de LOS OCHO
+    /// JUICIOS se ANUNCIA con una línea que desciende antes de caer con
+    /// su canal doble y su columna de tres fundas + nova + anillo de
+    /// choque, LAS RAMAS saltan a los vecinos chispeando… y el ÚLTIMO
+    /// es LA COLUMNA FINAL: dos venas EN ESPIRAL alrededor del eje, con
+    /// flash y el temblor mayor.
     /// </summary>
-    public class ConstelacionJuicio : ModItem
+    public class IraDelCielo : ModItem
     {
         public override void SetDefaults()
         {
-            Item.damage = 350;
+            Item.damage = 280;
             Item.DamageType = DamageClass.Generic;
             Item.width = 40;
             Item.height = 40;
-            Item.useTime = 16;
-            Item.useAnimation = 16;
+            Item.useTime = 110;
+            Item.useAnimation = 110;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.noMelee = true;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<ConstelacionJuicioProjectile>();
+            Item.autoReuse = false;
+            Item.shoot = ModContent.ProjectileType<IraDelCieloProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 25;
+            Item.mana = 75;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
-            Item.UseSound = SoundID.Item4.WithPitchOffset(0.15f);
+            Item.UseSound = SoundID.Item122.WithPitchOffset(-0.45f);
         }
 
         public override bool CanUseItem(Player player)
@@ -216,7 +108,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             {
                 Projectile p = Main.projectile[i];
                 if (p != null && p.active && p.owner == player.whoAmI &&
-                    p.type == ModContent.ProjectileType<ConstelacionJuicioProjectile>())
+                    p.type == ModContent.ProjectileType<IraDelCieloProjectile>())
                     return false;
             }
             return true;

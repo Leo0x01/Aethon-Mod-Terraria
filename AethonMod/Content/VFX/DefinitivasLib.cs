@@ -8,35 +8,36 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// DEFINITIVASLIB — v6.50.66 — LA LIBRERÍA DE LA BOLSA DE LAS ARMAS
-    /// DEFINITIVAS («El Veredicto de Aethon»).
+    /// DEFINITIVASLIB — v6.54.6 — LA LIBRERÍA DE LA BOLSA DE LAS ARMAS
+    /// DEFINITIVAS, LA REFORMA («El Veredicto de Aethon»: LAS CINCO
+    /// SENTENCIAS que eligió el usuario, cada una con sus SIETE CAPAS
+    /// de efectos).
     ///
     /// Nace de LA INVESTIGACIÓN PROFUNDA que pidió el usuario: «investiga
     /// a todos los jefes y armas finales de los mods más populares y de los
     /// visualmente más hermosos… sus técnicas y texturas usadas». Las
     /// conclusiones aplicadas aquí (Task 2-a/2-b del worklog):
     ///
-    ///   · EL RAYO DE FUSIÓN DE EL DIOS ANTIGUO (FusionRay.cs, leído en su fuente):
-    ///     cono de 3500 px con ANCHO CRECIENTE (progress^0.8 · cbrt · K ·
-    ///     (1.1 + cos(Time)·0.08)), BARRIDO SINUSOIDAL (cos(t/T·2π)·2.5 rad),
-    ///     núcleo blanco, gradiente ANIMADO con offset por distancia, shake
-    ///     constante y 15 partículas/frame a lo largo del cono.
-    ///   · CALAMITY: trails primitivos de 60 vértices (aquí RayoStrip con
-    ///     perfil gaussiano), glowmask por capa, sprites grandes y VIVOS,
-    ///     «Yharim's Crystal» = 6 haces que convergen, «Dance of Light» =
-    ///     pares de espadas que se buscan, «Galaxia» = 4 attunements.
-    ///   · FARGO'S: el patrón FUSIÓN (todas las armas de una familia en
-    ///     una final — aquí: EL TESTAMENTO, que rota las once sentencias).
-    ///   · STARS ABOVE: «cada arma = UNA arquitectura única» (medidores,
-    ///     combos, teletransportes) — cada definitiva tiene SU mecánica.
-    ///   · THORIUM: premiar el golpe con proyectiles secundarios.
+    ///   · EL RAYO DE FUSIÓN estudiado en su fuente (Task 2-b): cono de
+    ///     3500 px con ANCHO CRECIENTE (progress^0.8 · cbrt · K ·
+    ///     (1.1 + cos(Time)·0.08)), núcleo blanco, gradiente ANIMADO con
+    ///     offset por distancia, los CUATRO HALOS APILADOS (14×·5×·4×·2×),
+    ///     15 partículas/frame a lo largo del canal y shake constante —
+    ///     ahora ES EL PRISMA PRIMORDIAL (el ataque definitivo).
+    ///   · CALAMITY: trails primitivos (aquí RayoStrip con perfil
+    ///     gaussiano), «Yharim's Crystal» = haces que convergen,
+    ///     «Universe Splitter» = el partidor.
+    ///   · FARGO'S: el patrón FUSIÓN — EL TESTAMENTO rota las sentencias.
+    ///   · STARS ABOVE: «cada arma = UNA arquitectura única».
+    ///   · THORIUM: premiar el golpe con proyectiles secundarios (las
+    ///     ramas de la ira).
     ///
     /// LO QUE VIVE AQUÍ: la paleta del Juicio (el gradiente animado de la
     /// luz primordial), el buscador de presas, la colisión de CONO propia
     /// (la del FusionRay usa una extensión de Calamity que aquí no existe),
     /// el giro de ángulo con tope, los accesos null-safe a las texturas
-    /// procedurales y el estado compartido de las dos armas con memoria
-    /// (la constelación y el atavío del filo).
+    /// procedurales y el estado compartido de la corona (la sentencia
+    /// que toca).
     /// </summary>
     public static class DefinitivasLib
     {
@@ -128,7 +129,7 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// LA COLISIÓN DE CONO — la receta del FusionRay del dios antiguo sin la
+        /// LA COLISIÓN DE CONO — la receta del rayo de fusión sin la
         /// extensión de Calamity: el punto del hitbox proyectado sobre el
         /// eje del cono debe caer dentro del largo, y su distancia
         /// perpendicular debe caber en el semiancho creciente
@@ -175,10 +176,10 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL ANCHO CRECIENTE DEL CONO — la fórmula EXACTA del FusionRay:
-        /// progress^0.8 · cbrt(lerp(1.01, 0.7, progress)) · K ·
+        /// EL ANCHO CRECIENTE DEL CONO — la fórmula EXACTA del rayo de
+        /// fusión: progress^0.8 · cbrt(lerp(1.01, 0.7, progress)) · K ·
         /// (1.1 + cos(Time)·(0.08 − progress·0.06)). Nace estrecho en el
-        /// ojo, engorda hacia el fondo y RESPIRA (la senoide de ±8%).
+        /// origen, engorda hacia el fondo y RESPIRA (la senoide de ±8%).
         /// </summary>
         public static float AnchoCono(float progress, float time, float k)
         {
@@ -191,28 +192,10 @@ namespace AethonMod.Content.VFX
         //  LAS TEXTURAS PROCEDURALES (accesos null-safe, el patrón VFXCore)
         // ==================================================================
 
-        private static Texture2D _star, _lumenBlade, _crescent, _vortex, _cometHead, _fireRing, _slash;
+        private static Texture2D _star;
 
-        /// <summary>LA ESTRELLA de 4 puntas (núcleo caliente) — las semillas del arma 8.</summary>
+        /// <summary>LA ESTRELLA de 4 puntas (núcleo caliente) — las notas del réquiem, las runas y sellos del testamento, las pestañas del prisma.</summary>
         public static Texture2D TexStar => Pedir(ref _star, "AethonMod/Content/Effects/Procedural/Star");
-
-        /// <summary>LA HOJA DE LUZ — las hojas gemelas del arma 3 y los arcos del filo.</summary>
-        public static Texture2D TexLumenBlade => Pedir(ref _lumenBlade, "AethonMod/Content/Effects/Procedural/LumenBlade");
-
-        /// <summary>LA MEDIA LUNA — los tajos de la guadaña y las lunas del sistema.</summary>
-        public static Texture2D TexCrescent => Pedir(ref _crescent, "AethonMod/Content/Effects/Procedural/Crescent");
-
-        /// <summary>EL VÓRTICE — la espiral del devorador.</summary>
-        public static Texture2D TexVortex => Pedir(ref _vortex, "AethonMod/Content/Effects/Procedural/Vortex");
-
-        /// <summary>LA CABEZA DE COMETA — los cometas del sistema de Aethon.</summary>
-        public static Texture2D TexCometHead => Pedir(ref _cometHead, "AethonMod/Content/Effects/Procedural/CometHead");
-
-        /// <summary>EL ANILLO DE FUEGO — las detonaciones solares.</summary>
-        public static Texture2D TexFireRing => Pedir(ref _fireRing, "AethonMod/Content/Effects/Procedural/FireRing");
-
-        /// <summary>EL TAJO — los arcos de espada.</summary>
-        public static Texture2D TexSlash => Pedir(ref _slash, "AethonMod/Content/Effects/Procedural/Slash");
 
         private static Texture2D Pedir(ref Texture2D campo, string ruta)
         {
@@ -242,47 +225,10 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL ESTADO COMPARTIDO (armas con memoria de sesión)
+        //  EL ESTADO COMPARTIDO
         // ==================================================================
 
-        /// <summary>
-        /// LA CONSTELACIÓN DEL JUICIO (arma 8): las estrellas sembradas
-        /// viven aquí (la casa ya tiene precedentes de estado estático —
-        /// el pozo de RayoSistema). Máx 7 estrellas; expira sola.
-        /// </summary>
-        public static class Constelacion
-        {
-            public const int Max = 7;
-            /// <summary>Las posiciones (mundo) de las estrellas sembradas.</summary>
-            public static readonly Vector2[] Estrellas = new Vector2[Max];
-            /// <summary>El número de estrellas vivas (0..Max).</summary>
-            public static int Contador;
-            /// <summary>El tick de siembra de la última estrella (para expirar).</summary>
-            public static int TickUltima;
-
-            public static void Sembrar(Vector2 pos)
-            {
-                if (Contador >= Max) return;
-                Estrellas[Contador++] = pos;
-                TickUltima = (int)Main.GameUpdateCount;
-            }
-
-            public static void Reiniciar()
-            {
-                Contador = 0;
-                TickUltima = (int)Main.GameUpdateCount;
-            }
-        }
-
-        /// <summary>
-        /// EL ATAVÍO DEL FILO CONSTELADO (arma 4): la constelación activa
-        /// de cada jugador (0 = EL SOL, 1 = LA ESTRELLA POLAR,
-        /// 2 = ANDRÓMEDA, 3 = ARIES). Memoria de sesión (la casa: armas de
-        /// prueba, la bolsa las repone).
-        /// </summary>
-        public static byte[] AtavioFilo = new byte[Main.maxPlayers];
-
-        /// <summary>EL ÍNDICE DEL TESTAMENTO (arma 12): qué sentencia toca.</summary>
+        /// <summary>EL ÍNDICE DEL TESTAMENTO (la corona): qué sentencia toca (0..3).</summary>
         public static int SentenciaActual;
     }
 }
