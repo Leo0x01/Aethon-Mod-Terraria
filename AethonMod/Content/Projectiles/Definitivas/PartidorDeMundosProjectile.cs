@@ -5,35 +5,42 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
     /// <summary>
-    /// PARTIDORDEMUNDOSPROJECTILE — v6.54.6 — ARMA 3 DE LAS CINCO: EL
+    /// PARTIDORDEMUNDOSPROJECTILE — v6.54.7 — ARMA 3 DE LAS CINCO: EL
     /// PARTIDOR DE MUNDOS.
     ///
-    /// LA REFORMA (la letra del usuario: «me gusta su concepto pero es
-    /// lo mismo que las otras, visualmente está a nivel principiante»):
-    /// el botón de apocalipsis ahora tiene SU CINE COMPLETO en siete
-    /// capas — la partición del mundo se anuncia, se contiene, estalla,
-    /// AGRIETA el suelo a los lados y se desangra luz:
+    /// LA TRANSCENDENCIA (la letra: «tienes que mejorar aún más los
+    /// efectos visuales, hacerlos más impresionantes»): la columna de la
+    /// .54.6 eran fundas de color sólido — ahora es LA CARNE DE RUIDO
+    /// HIRVIENDO (la pila de seis pasadas texturizadas con el flujo
+    /// INVERTIDO: la carne hierve HACIA ARRIBA, como el calor de una
+    /// herida en el mundo), más las técnicas nuevas de la investigación:
     ///
-    ///   CAPA 1 — EL VELO DE LA CONTENCIÓN: la sala oscurece por los
-    ///   bordes, respirando, cada vez más densa hasta el estallido.
-    ///   CAPA 2 — EL TELEGRAFO VIVO: la línea vertical fina TIEMBLA
-    ///   sobre el cursor mientras CINCO RUNAS se encienden una a una a
-    ///   lo largo de su caída y las chispas CONVERGEN a la línea.
-    ///   CAPA 3 — LA COLUMNA: cuatro fundas + LA VENA blanca, con el
-    ///   perfil que engorda al centro — nace de golpe, blanca de rabia.
-    ///   CAPA 4 — EL CRÁTER DE LUZ: los CUATRO HALOS APILADOS del rayo
-    ///   de fusión + el destello de cuatro puntas girando en la base.
-    ///   CAPA 5 — LAS TRES ONDAS DE CHOQUE: la grande dorada, la media
-    ///   blanca, la fina ámbar retrasada — el suelo ESTALLA por triplicado.
-    ///   CAPA 6 — LAS GRIETAS: dos líneas de luz se ABREN en el suelo a
-    ///   ambos lados de la base creciendo con la vida, escupiendo polvo
-    ///   — el mundo no solo se parte: se le rompen los bordes.
-    ///   CAPA 7 — LA HEMORRAGIA: chispas con GRAVEDAD real saltan de la
-    ///   herida todo el rato + el temblor rítmico + la doble luz.
+    ///   CAPA 1 — EL VELO DE LA CONTENCIÓN (heredado, con el pulso a 12 Hz).
+    ///   CAPA 2 — EL TELEGRAFO VIVO: la aguja TEXTURIZADA (la carne corre
+    ///   por la línea antes del corte) + las cinco runas + las chispas
+    ///   convergentes + LOS CORREDORES (técnica nº15).
+    ///   CAPA 3 — LA COLUMNA DE CARNE: LA PILA DE SEIS PASADAS — aura ·
+    ///   cuerpo con el color que viaja · REMOLINO hirviendo hacia arriba ·
+    ///   núcleo en banda · la vena blanca · LA ABERRACIÓN CROMÁTICA (los
+    ///   bordes rojo/cian de la técnica nº8).
+    ///   CAPA 4 — EL CRÁTER DE LUZ: los cuatro halos apilados PULSANDO a
+    ///   12 Hz + el destello girando + LOS PINCHOS DE DIFRACCIÓN
+    ///   horizontales (técnica nº6 — el destello de lente del impacto).
+    ///   CAPA 5 — LAS TRES ONDAS DE CHOQUE (heredadas) + EL SEGUNDO
+    ///   GOLPE (nuevo): a los 8 t del corte la herida RECHINA — flash
+    ///   blanco + Kick + una cuarta onda fina retrasada.
+    ///   CAPA 6 — LAS GRIETAS: las dos de la .54.6 + DOS ECOS espectrales
+    ///   más finos a ±150 px (el mundo se astilla alrededor del corte).
+    ///   CAPA 7 — LA HEMORRAGIA: chispas con gravedad + LOS ESCOMBROS
+    ///   (nuevo): esquirlas doradas que saltan de la fisura girando y
+    ///   caen de verdad + EL HUMO DE LA HERIDA (nuevo, la librería de
+    ///   brumas: BrumaFX.Column — columnas de humo oscuro que suben de la
+    ///   base mientras el mundo sigue abierto) + el temblor rítmico.
     /// </summary>
     public class PartidorDeMundosProjectile : ModProjectile
     {
@@ -58,6 +65,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Projectile.netImportant = true;
         }
 
+        private bool _segundoGolpe;    // EL RECHINIDO (la herida vuelve a quejarse a los 8 t)
+
         public override void AI()
         {
             Projectile.ai[2]++;
@@ -80,6 +89,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // ¡LA PARTICIÓN!
                 Projectile.ai[0] = 1f;
                 Projectile.ai[2] = 0;
+                _segundoGolpe = false;
                 DefinitivasLib.Sonar(SoundID.Item122.WithPitchOffset(-0.2f).WithVolumeScale(1.2f), Projectile.Center);
                 DefinitivasLib.Sonar(SoundID.Item88.WithPitchOffset(-0.5f).WithVolumeScale(0.9f), Projectile.Center);
                 OndaLib.Flash(new Color(255, 250, 235), 0.44f, 14, Projectile.Center);
@@ -100,7 +110,30 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             bool particionado = Projectile.ai[0] >= 1f;
 
-            // ==================== CAPA 7 — LA HEMORRAGIA (chispas con gravedad) ====================
+            // ==================== CAPA 5b — EL SEGUNDO GOLPE (EL RECHINIDO) ====================
+            // (nuevo: a los 8 t del corte la herida vuelve a quejarse — el
+            // eco del apocalipsis, flash blanco + Kick + los escombros gruesos)
+            if (particionado && !_segundoGolpe && Projectile.ai[2] >= 8f)
+            {
+                _segundoGolpe = true;
+                DefinitivasLib.Sonar(SoundID.Item88.WithPitchOffset(-0.7f).WithVolumeScale(0.8f), Projectile.Center);
+                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                {
+                    OndaLib.Flash(new Color(255, 244, 210), 0.26f, 10, Projectile.Center);
+                    OndaLib.Kick(9, 14);
+                    // LOS ESCOMBROS GRUESOS: esquirlas doradas que saltan girando
+                    for (int i = 0; i < 16; i++)
+                    {
+                        Dust d = Dust.NewDustPerfect(Projectile.Center + new Vector2(Main.rand.NextFloat(-80f, 80f), -10f),
+                            DustID.FireworkFountain_Yellow,
+                            new Vector2(Main.rand.NextFloat(-11f, 11f), Main.rand.NextFloat(-13f, -4f)), 0,
+                            DefinitivasLib.Ambar, 1.5f);
+                        d.noGravity = false;        // giran y caen de verdad
+                    }
+                }
+            }
+
+            // ==================== CAPA 7 — LA HEMORRAGIA (chispas + escombros) ====================
             if (particionado && !Main.dedServ && Main.netMode != NetmodeID.Server && Projectile.ai[2] < TParticion)
             {
                 for (int i = 0; i < 4; i++)
@@ -166,10 +199,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             // ==================== CAPA 1 — EL VELO DE LA CONTENCIÓN ====================
             // (la sala contiene la respiración: densa hasta el estallido, se
-            // disuelve despacio durante la partición)
+            // disuelve despacio durante la partición — y PULSA a 12 Hz con la herida abierta)
             {
+                float latido = particionado ? 0.85f + 0.15f * MathF.Sin(tiempo * 12f) : 1f;
                 float ansiaVelo = particionado
-                    ? MathHelper.Clamp(1f - Projectile.ai[2] / (float)(TParticion + 10), 0f, 1f) * 0.30f
+                    ? MathHelper.Clamp(1f - Projectile.ai[2] / (float)(TParticion + 10), 0f, 1f) * 0.30f * latido
                     : 0.20f + 0.22f * (t / (float)TContencion);
                 SombrasLib.Vignette(ansiaVelo);
             }
@@ -181,21 +215,35 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Vector2 arriba = Projectile.Center + new Vector2(0f, -1400f);
                 Vector2 abajo = Projectile.Center + new Vector2(0f, 420f);
 
-                // === CAPA 2a — LA LÍNEA QUE TIEMBLA (dos fundas: fina blanca + halo) ===
+                // === CAPA 2a — LA LÍNEA QUE TIEMBLA (la aguja TEXTURIZADA: la
+                // carne ya corre por la línea antes del corte — técnica nº15) ===
                 var pts = new Vector2[14];
+                var semi = new float[14];
                 for (int i = 0; i < 14; i++)
                 {
                     float q = i / 13f;
                     float tiemblo = MathF.Sin(tiempo * 30f + q * 20f) * (2f + 8f * ansia) * q;
                     pts[i] = Vector2.Lerp(arriba, abajo, q) + new Vector2(tiemblo, 0f) - Main.screenPosition;
+                    semi[i] = (2f + 5f * ansia);
                 }
-                RayoStrip.AbrirLote();
-                try
+                Texture2D carne = DefinitivasLib.TexRuido;
+                if (carne != null)
                 {
-                    RayoStrip.FilamentoEnLote(pts, 4f + 10f * ansia, DefinitivasLib.Oro, DefinitivasLib.BlancoCalido,
-                        0.5f + 0.5f * ansia, StormTaper.Flat, 91, (int)(t * 0.5f), false, true, true, null, null);
+                    RayoStrip.AbrirLote();
+                    try
+                    {
+                        // EL HALO de la aguja
+                        RayoStrip.FajaTexturadaEnLote(pts, semi,
+                            DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.28f * (0.5f + 0.5f * ansia)),
+                            carne, 300f, 0.8f + ansia * 2.4f, tiempo, 0f, 1f);
+                        // LA AGUJA — la banda caliente que LATA
+                        float latidoA = 0.55f + 0.45f * MathF.Sin(tiempo * MathHelper.Lerp(2f, 4f, ansia) * MathHelper.TwoPi);
+                        RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.4f),
+                            DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, (0.30f + 0.40f * ansia) * latidoA),
+                            carne, 240f, 1.4f + ansia * 3f, tiempo, 0.36f, 0.64f);
+                    }
+                    finally { RayoStrip.CerrarLote(); }
                 }
-                finally { RayoStrip.CerrarLote(); }
 
                 // === CAPA 2b — LAS CINCO RUNAS (se encienden UNA A UNA por la línea) ===
                 VFXCore.Begin();
@@ -211,6 +259,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     if (DefinitivasLib.TexStar != null)
                         VFXCore.Quad(posR, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, alfaR),
                             new Vector2(34f, 34f), tiempo * 1.5f + r, DefinitivasLib.TexStar);
+                }
+                // LOS CORREDORES: los paquetes de luz que RECORREN la aguja
+                for (int i = 0; i < 3; i++)
+                {
+                    float prog = DefinitivasLib.Frac(tiempo * (0.5f + ansia * 1.8f) + i / 3f);
+                    VFXCore.Quad(Vector2.Lerp(abajo, arriba, prog),
+                        DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.35f * (1f - prog * 0.4f) * (0.4f + 0.6f * ansia)),
+                        new Vector2(12f, 12f));
                 }
                 VFXCore.FlushAdditive();
 
@@ -235,35 +291,23 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Vector2 arriba = Projectile.Center + new Vector2(0f, -1400f);
                 Vector2 abajo = Projectile.Center + new Vector2(0f, 420f);
 
-                // === CAPA 3 — LA COLUMNA (cuatro fundas + LA VENA, perfil que engorda al centro) ===
-                const int N = 24;
-                var pts = new Vector2[N];
-                var ancho = new float[N];
+                // === CAPA 3 — LA COLUMNA DE CARNE (LA PILA DE SEIS PASADAS con
+                // el flujo INVERTIDO: la carne HIERVE hacia arriba — el calor
+                // de la herida) + EL FLICKER inconmensurable de la técnica nº11 ===
+                const int N = 20;
+                var espina = new Vector2[N];
+                var perfil = new float[N];
+                float flicker = DefinitivasLib.Flicker(tiempo);
                 for (int i = 0; i < N; i++)
                 {
                     float q = i / (float)(N - 1);
-                    pts[i] = Vector2.Lerp(arriba, abajo, q) - Main.screenPosition;
-                    ancho[i] = MathHelper.Clamp(MathF.Sin(q * MathHelper.Pi) * 1.4f, 0.25f, 1f);
+                    espina[i] = Vector2.Lerp(arriba, abajo, q);
+                    perfil[i] = MathHelper.Clamp(MathF.Sin(q * MathHelper.Pi) * 1.4f, 0.25f, 1f) *
+                        150f * potencia * flicker;
                 }
-                Color gBorde = DefinitivasLib.GradienteJuicio(tiempo * 0.09f);
-
-                RayoStrip.AbrirLote();
-                try
-                {
-                    // LA FUNDA EXTERNA — el tsunami del gradiente
-                    RayoStrip.FilamentoEnLote(pts, 300f * potencia, gBorde, DefinitivasLib.Oro, 0.26f * potencia,
-                        StormTaper.Flat, 5, 0, false, false, false, null, ancho);
-                    // LA FUNDA GRUESA
-                    RayoStrip.FilamentoEnLote(pts, 210f * potencia, gBorde, DefinitivasLib.Oro, 0.34f * potencia,
-                        StormTaper.Flat, 5, 0, false, false, false, null, ancho);
-                    // LA FUNDA MEDIA — el cuerpo
-                    RayoStrip.FilamentoEnLote(pts, 120f * potencia, DefinitivasLib.Oro, DefinitivasLib.BlancoCalido,
-                        0.6f * potencia, StormTaper.Flat, 6, 0, false, false, false, null, ancho);
-                    // LA VENA — blanca de rabia
-                    RayoStrip.FilamentoEnLote(pts, 46f * potencia, DefinitivasLib.BlancoCalido, Color.White,
-                        0.97f * potencia, StormTaper.Flat, 7, 0, false, false, true, null, ancho);
-                }
-                finally { RayoStrip.CerrarLote(); }
+                DefinitivasLib.HazFusionEspina(espina, perfil,
+                    DefinitivasLib.GradienteJuicio(tiempo * 0.07f), potencia, tiempo, 5,
+                    true, -1.15f, true);
 
                 // === CAPA 3b — LAS MICRO-FRACTURAS (dos líneas espectrales a los lados) ===
                 for (int lado = -1; lado <= 1; lado += 2)
@@ -280,24 +324,49 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     try
                     {
                         RayoStrip.FilamentoEnLote(ptsF, 26f * potencia, cF, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.5f),
-                            0.40f * potencia, StormTaper.Flat, 9 + lado, 0, false, false, false, null, ancho);
+                            0.40f * potencia, StormTaper.Flat, 9 + lado, 0, false, false, false, null, null);
                     }
                     finally { RayoStrip.CerrarLote(); }
                 }
 
-                // === CAPA 4 — EL CRÁTER DE LUZ (los cuatro halos apilados + el destello) ===
+                // === CAPA 4 — EL CRÁTER DE LUZ (los cuatro halos PULSANDO a
+                // 12 Hz + el destello + LOS PINCHOS DE DIFRACCIÓN) ===
+                Color gBorde = DefinitivasLib.GradienteJuicio(tiempo * 0.09f);
+                float pulsoC = 0.8f + 0.2f * MathF.Sin(tiempo * 12f);
                 VFXCore.Begin();
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(gBorde, 0.20f * potencia), new Vector2(1300f, 1300f) * potencia);
+                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(gBorde, 0.20f * potencia), new Vector2(1300f, 1300f) * potencia * pulsoC);
                 VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(gBorde, 0.34f * potencia), new Vector2(700f, 700f) * potencia);
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * potencia), new Vector2(380f, 380f) * potencia);
+                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * potencia), new Vector2(380f, 380f) * potencia * pulsoC);
                 VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(Color.White, 0.65f * potencia), new Vector2(220f, 220f) * potencia);
                 if (VFXCore.DestelloFinal != null)
                     VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(Color.White, 0.9f * potencia),
                         new Vector2(620f, 620f) * potencia, vida * 0.8f, VFXCore.DestelloFinal);
+                // LOS PINCHOS DE DIFRACCIÓN HORIZONTALES (el destello de lente del impacto)
+                DefinitivasLib.PinchosDifraccion(Projectile.Center, 0f, 900f * potencia,
+                    DefinitivasLib.BlancoCalido, 0.5f * potencia, tiempo);
                 VFXCore.FlushAdditive();
 
-                // === CAPA 5 — LAS TRES ONDAS DE CHOQUE (por triplicado) ===
-                // === CAPA 6a — LAS GRIETAS (la luz se abre en el suelo a los lados) ===
+                // === CAPA 7b — EL HUMO DE LA HERIDA (la LIBRERÍA DE BRUMAS:
+                // columnas de humo oscuro subiendo de la base mientras el
+                // mundo sigue abierto — la letra: «para qué fabricar óvalos
+                // planos si tenemos las librerías de brumas») ===
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                    try
+                    {
+                        BrumaFX.BeginMass();
+                        Vector2 basePantalla = Projectile.Center - Main.screenPosition;
+                        BrumaFX.Column(basePantalla + new Vector2(-46f, -8f), 320f * potencia, 120f,
+                            new Color(34, 22, 12), 901, tiempo, 0.34f * potencia, 0.55f);
+                        BrumaFX.Column(basePantalla + new Vector2(46f, -8f), 280f * potencia, 100f,
+                            new Color(40, 26, 14), 902, tiempo * 1.1f, 0.30f * potencia, 0.65f);
+                        Main.spriteBatch.End();
+                    }
+                    catch { VFXCore.CerrarLoteSiAbierto(); }
+                    VFXCore.ReabrirLoteVanilla();
+                }
+
+                // === CAPA 5 — LAS ONDAS DE CHOQUE (por triplicado + la del RECHINIDO) ===
                 if (Main.spriteBatch != null && vida < 1f)
                 {
                     VFXCore.CerrarLoteSiAbierto();
@@ -313,13 +382,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
                             DefinitivasLib.BlancoCalido, 0.7f, 4, 12f, OndaFalloff.Quadratic, false);
                         OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition, MathF.Max(0f, vida - 0.25f), 800f,
                             DefinitivasLib.Ambar, 0.5f, 8, 8f, OndaFalloff.Slow, false);
+                        // LA ONDA DEL RECHINIDO (el segundo golpe: fina, blanca, desde el 8 t)
+                        if (_segundoGolpe)
+                            OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition,
+                                MathHelper.Clamp((Projectile.ai[2] - 8f) / 22f, 0f, 1f), 1900f,
+                                DefinitivasLib.BlancoCalido, 0.45f, 6, 10f, OndaFalloff.Slow, false);
                         Main.spriteBatch.End();
                     }
                     catch { VFXCore.CerrarLoteSiAbierto(); }
                     VFXCore.ReabrirLoteVanilla();
                 }
 
-                // === CAPA 6 — LAS GRIETAS DEL SUELO (crecen con la vida) ===
+                // === CAPA 6 — LAS GRIETAS DEL SUELO (las dos de verdad + los DOS ECOS) ======
                 for (int lado = -1; lado <= 1; lado += 2)
                 {
                     const int NG = 14;
@@ -342,6 +416,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                             StormTaper.Flat, 12 + lado, 0, false, true, true, null, anchoG);
                     }
                     finally { RayoStrip.CerrarLote(); }
+
+                    // EL ECO DE LA GRIETA (más lejos, más fino, espectral)
+                    var ptsE = new Vector2[NG];
+                    for (int i = 0; i < NG; i++)
+                    {
+                        float q = i / (float)(NG - 1);
+                        float yE = MathF.Sin(q * 7f - lado * 5f + tiempo * 1.6f) * 4f;
+                        ptsE[i] = Projectile.Center + new Vector2(lado * (150f + 360f * vida * q), yE) - Main.screenPosition;
+                    }
+                    Color cE = lado < 0 ? DefinitivasLib.Alfa(DefinitivasLib.Cian, 0.55f) : DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.55f);
+                    RayoStrip.AbrirLote();
+                    try
+                    {
+                        RayoStrip.FilamentoEnLote(ptsE, 16f * potencia * (1f - vida * 0.5f), cE,
+                            DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.4f), 0.30f * potencia,
+                            StormTaper.Flat, 16 + lado, 0, false, false, true, null, anchoG);
+                    }
+                    finally { RayoStrip.CerrarLote(); }
                 }
             }
 
@@ -349,6 +441,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // Vignette del velo, la contención, la partición con vida>=1).
             VFXCore.ReabrirLoteVanilla();
             return false;
+        }
+
+        /// <summary>LOS SEMIANCHOS de un perfil por un semiancho base.</summary>
+        private static float[] ArraySemis(float[] perfil, float semi)
+        {
+            var r = new float[perfil.Length];
+            for (int i = 0; i < perfil.Length; i++) r[i] = perfil[i] * semi;
+            return r;
         }
     }
 }

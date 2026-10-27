@@ -5,41 +5,47 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
     /// <summary>
-    /// REQUIEMESTELARPROJECTILE — v6.54.6 — ARMA 2 DE LAS CINCO: EL
+    /// REQUIEMESTELARPROJECTILE — v6.54.7 — ARMA 2 DE LAS CINCO: EL
     /// RÉQUIEM ESTELAR.
     ///
-    /// LA REFORMA (la letra del usuario: «su círculo está roto, hay una
-    /// zona donde hay un agujero y no está conectado; además es
-    /// visualmente simple, pero creo que en combinación con algo más se
-    /// vería genial»):
+    /// LA TRANSCENDENCIA (la letra: «tienes que mejorar aún más los
+    /// efectos visuales… la combinación con algo más se vería genial»):
+    /// los anillos de la .54.6 eran fundas de color sólido — ahora cada
+    /// anillo es UN RÍO DE BRONCE: la pila texturizada con EL RUIDO
+    /// FLUYENDO ALREDEDOR del círculo (la costura del loop queda cerrada
+    /// POR CONSTRUCCIÓN: el periodo se ajusta a un número ENTERO de tiles
+    /// de textura sobre la longitud del anillo — el ruido entra por un
+    /// lado y sale por el otro SIN costura), más las técnicas nuevas:
     ///
-    ///   · EL AGUJERO CURADO: la tira del anillo NO cerraba el loop —
-    ///     los 42 puntos iban del 0 al 41 y el segmento 41→0 no existía
-    ///     (y el suavizado Chaikin recortaba los extremos dejando la
-    ///     herida a la vista). Ahora el anillo se teje con SOBLANTES: el
-    ///     punto 0 y el 1 se REPITEN al final, así la costura queda
-    ///     enterrada bajo segmentos vivos — un anillo DE VERDAD cerrado.
-    ///
-    ///   SUS SIETE CAPAS (la «combinación con algo más» que pediste):
-    ///   CAPA 1 — LOS ANILLOS: la circunferencia con TRES fundas (halo,
-    ///   cuerpo, vena), ondulando como bronce vivo.
-    ///   CAPA 2 — EL ECO: el tercer anillo (LA CAMPANA MAYOR) lleva su
-    ///   gemelo interior al 82%, desfasado — el eco del bronce.
-    ///   CAPA 3 — LAS NOTAS: OCHO estrellas de cuatro puntas cabalgan la
-    ///   circunferencia girando, con su rastro de polvo dorado.
-    ///   CAPA 4 — EL BADAJO: un anillo interior fino (al 55%) girando
-    ///   EN CONTRA — la campana tiene maquinaria dentro.
-    ///   CAPA 5 — EL LATIDO CENTRAL: los CUATRO HALOS APILADOS del rayo
-    ///   de fusión pulsando SINCRONIZADOS con cada tañido.
-    ///   CAPA 6 — LA PALABRA DE CADA TAÑIDO: flash de pantalla suave +
-    ///   ONDA DE CHOQUE radial + el temblor — la campana se SIENTE.
-    ///   CAPA 7 — LA LLUVIA DE ESTRELLAS DEL CIERRE: al tercer tañido,
-    ///   estrellas de verdad (la textura de cuatro puntas) caen por
-    ///   todo el radio con su estela de polvo.
+    ///   CAPA 1 — EL RÍO DE BRONCE: cada anillo con TRES pasadas
+    ///   texturizadas (aura 2.2× · cuerpo con el flujo alrededor ·
+    ///   núcleo en banda) + la vena blanca heredada — el bronce CORRE.
+    ///   CAPA 2 — EL ECO: el gemelo interior de la campana mayor (al
+    ///   82 %, también texturizado, fluyendo EN CONTRA).
+    ///   CAPA 3 — LAS NOTAS Y SUS ESTELAS: las estrellas de cuatro
+    ///   puntas cabalgando con su ECO retardado (la nota de hace un
+    ///   instante aún se ve — el rastro de la voz).
+    ///   CAPA 4 — EL BADAJO: el anillo fino interior girando en contra.
+    ///   CAPA 5 — LOS PÉTALOS DE RESONANCIA (nuevo): ocho picos de
+    ///   estrella RADIALES en el frente del anillo, orientados hacia
+    ///   afuera — la onda tiene DIENTES de verdad.
+    ///   CAPA 6 — LA IMPLOSIÓN PREVIA (nuevo, técnica nº15): los 25 t
+    ///   antes de cada tañido, chispas CONVERGEN al centro desde el
+    ///   borde del radio — la campana ASPIRA antes de sonar.
+    ///   CAPA 7 — EL ALIENTO DE LA CAMPANA (nuevo): al tañir, una nube
+    ///   dorada de LA LIBRERÍA DE BRUMAS (BrumaFX en lote GLOW) respira
+    ///   desde el centro — el bronce tiene aliento.
+    ///   CAPA 8 — EL LATIDO + LA PALABRA + LA LLUVIA DE ESTRELLAS: los
+    ///   halos apilados sincronizados, el flash/onda/temblor de cada
+    ///   tañido y LAS ESTRELLAS DE VERDAD del cierre (estado propio:
+    ///   posición y velocidad por estrella, estela de polvo, textura de
+    ///   cuatro puntas girando) + EL AURA DE LA CAMPANA que queda
+    ///   sonando 30 t después del último tañido.
     /// </summary>
     public class RequiemEstelarProjectile : ModProjectile
     {
@@ -47,6 +53,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const int Cadencia = 32;
         private const float RadioFinal = 1400f;
         private const int VidaAnillo = 46;
+        private const int NEstrellas = 10;      // LAS ESTRELLAS DEL CIERRE (estado propio)
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
@@ -66,6 +73,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Projectile.netImportant = true;
         }
 
+        // EL ESTADO DE LAS ESTRELLAS DEL CIERRE (visual, solo cliente)
+        private readonly Vector2[] _estrellaPos = new Vector2[NEstrellas];
+        private readonly Vector2[] _estrellaVel = new Vector2[NEstrellas];
+        private readonly float[] _estrellaRot = new float[NEstrellas];
+        private readonly bool[] _estrellaViva = new bool[NEstrellas];
+
         /// <summary>El radio de un anillo k en su vida v (0..1).</summary>
         private static float RadioAnillo(float v) => RadioFinal * OndaLib.Expansion(v);
 
@@ -82,7 +95,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // EL ORIGEN: donde estaba el portador al tañer (la campana no se mueve con él)
             if (t < 2f) Projectile.Center = dueño.MountedCenter;
 
-            // EL TAÑIDO de cada anillo — CAPA 6: la palabra de la campana
+            // EL TAÑIDO de cada anillo — LA PALABRA de la campana
             for (int k = 0; k < NAnillos; k++)
             {
                 float momento = 6f + k * Cadencia;
@@ -105,33 +118,70 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // ==================== CAPA 7 — LA LLUVIA DE ESTRELLAS DEL CIERRE ====================
-            // (el tercer anillo siembra ESTRELLAS de verdad con estela)
-            float tCierre = 6f + (NAnillos - 1) * Cadencia;
-            if (t > tCierre && t < tCierre + 30 && !Main.dedServ && Main.netMode != NetmodeID.Server)
+            // ==================== CAPA 6 — LA IMPLOSIÓN PREVIA ====================
+            // (los 25 t antes de cada tañido: chispas CONVERGEN al centro —
+            // la campana ASPIRA su aire antes de sonar)
+            if (!Main.dedServ && Main.netMode != NetmodeID.Server)
             {
-                int cuantas = Main.rand.NextBool() ? 2 : 1;
-                for (int s = 0; s < cuantas; s++)
+                for (int k = 0; k < NAnillos; k++)
                 {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    float radio = Main.rand.NextFloat(200f, RadioFinal * 0.75f);
-                    Vector2 pos = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio - new Vector2(0f, 340f);
-                    float caida = Main.rand.NextFloat(4f, 9f);
-                    Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame, new Vector2(0f, caida), 0,
-                        DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 1.0f);
-                    d.noGravity = true;
-                    // LA ESTRELLA que cae (la textura de 4 puntas — polvo + trazo)
-                    if (DefinitivasLib.TexStar != null && Main.rand.NextBool(2))
+                    float momento = 6f + k * Cadencia;
+                    float falta = momento - t;
+                    if (falta > 0f && falta < 25f && Main.rand.NextBool(2))
                     {
-                        Dust e = Dust.NewDustPerfect(pos + new Vector2(0f, -10f), DustID.Enchanted_Pink,
-                            new Vector2(0f, caida * 0.8f), 0, DefinitivasLib.BlancoCalido, 0.6f);
-                        e.noGravity = true;
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float desde = 300f + falta * 26f;
+                        Vector2 pos = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * desde;
+                        Vector2 hacia = (Projectile.Center - pos).SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(9f, 16f);
+                        Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame, hacia, 0,
+                            DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.9f);
+                        d.noGravity = true;
                     }
                 }
             }
 
-            // ==================== CAPA 3b — EL RASTRO DE LAS NOTAS ====================
-            // (polvo dorado orbitando el frente de cada anillo vivo)
+            // ==================== CAPA 8 — LA LLUVIA DE ESTRELLAS DEL CIERRE ====================
+            // (el tercer anillo siembra ESTRELLAS DE VERDAD: estado propio por
+            // estrella — posición, velocidad y giro — con su estela de polvo)
+            float tCierre = 6f + (NAnillos - 1) * Cadencia;
+            if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+            {
+                if (t > tCierre && t < tCierre + 26)
+                {
+                    for (int s = 0; s < 2; s++)
+                    {
+                        int slot = -1;
+                        for (int i = 0; i < NEstrellas; i++) if (!_estrellaViva[i]) { slot = i; break; }
+                        if (slot < 0) break;
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float radio = Main.rand.NextFloat(200f, RadioFinal * 0.75f);
+                        _estrellaPos[slot] = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio - new Vector2(0f, 360f);
+                        _estrellaVel[slot] = new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(6f, 11f));
+                        _estrellaRot[slot] = Main.rand.NextFloat(MathHelper.TwoPi);
+                        _estrellaViva[slot] = true;
+                    }
+                }
+
+                // LA VIDA DE LAS ESTRELLAS: caen, giran, dejan estela
+                for (int i = 0; i < NEstrellas; i++)
+                {
+                    if (!_estrellaViva[i]) continue;
+                    _estrellaPos[i] += _estrellaVel[i];
+                    _estrellaRot[i] += 0.22f;
+                    if (Main.rand.NextBool(2))
+                    {
+                        Dust d = Dust.NewDustPerfect(_estrellaPos[i], DustID.GoldFlame,
+                            -_estrellaVel[i] * 0.2f + new Vector2(Main.rand.NextFloat(-1f, 1f), 0f), 0,
+                            DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 0.8f);
+                        d.noGravity = true;
+                    }
+                    if (_estrellaPos[i].Y > Projectile.Center.Y + 340f || _estrellaPos[i].Y > Main.screenPosition.Y + Main.screenHeight + 60f)
+                        _estrellaViva[i] = false;
+                }
+                Lighting.AddLight(Projectile.Center, 1.6f, 1.4f, 1.0f);
+            }
+
+            // EL RASTRO DE LAS NOTAS (polvo dorado orbitando el frente de cada anillo vivo)
             if (!Main.dedServ && Main.netMode != NetmodeID.Server)
             {
                 for (int k = 0; k < NAnillos; k++)
@@ -152,7 +202,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         d.noGravity = true;
                     }
                 }
-                Lighting.AddLight(Projectile.Center, 1.6f, 1.4f, 1.0f);
             }
         }
 
@@ -178,6 +227,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
             float t = Projectile.ai[2];
             float tiempo = Main.GlobalTimeWrappedHourly;
+            Texture2D carne = DefinitivasLib.TexRuido;
 
             for (int k = 0; k < NAnillos; k++)
             {
@@ -192,10 +242,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float alfaVida = OndaLib.Falloff(v, OndaFalloff.Quadratic);
                 Color c = doble ? DefinitivasLib.GradienteJuicio(tiempo * 0.06f) : DefinitivasLib.Oro;
 
-                // ==================== CAPA 1 — EL ANILLO (CERRADO DE VERDAD) ====================
-                // LA CURA DEL AGUJERO: 56 puntos + 2 SOBLANTES (el 0 y el 1
-                // REPETIDOS al final) — la costura del loop queda enterrada
-                // bajo segmentos vivos y el Chaikin ya no puede morderla.
+                // ==================== CAPA 1 — EL RÍO DE BRONCE (CERRADO DE VERDAD) ====================
+                // LA CURA DEL AGUJERO (.54.6): 56 puntos + 2 SOBLANTES (el 0 y
+                // el 1 REPETIDOS al final). LA NOVEDAD (.54.7): el ruido FLUYE
+                // alrededor — y el PERIODO se ajusta para que la longitud del
+                // anillo sea un número ENTERO de tiles de textura: el ruido
+                // entra por un lado y sale por el otro SIN COSTURA.
                 const int SEG = 56;
                 var pts = new Vector2[SEG + 2];
                 var anchoNodo = new float[SEG + 2];
@@ -210,26 +262,49 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 float anchoBase = (doble ? 34f : 22f) * (1f - v * 0.4f);
 
-                RayoStrip.AbrirLote();
-                try
+                if (carne != null)
                 {
-                    // LA FUNDA EXTERNA — el halo que envuelve al bronce
-                    RayoStrip.FilamentoEnLote(pts, anchoBase * 2.4f, DefinitivasLib.Alfa(c, 0.35f),
-                        DefinitivasLib.Oro, 0.35f * alfaVida,
-                        StormTaper.Flat, 100 + k, 0, true, true, false, null, anchoNodo);
-                    // EL CUERPO del anillo
-                    RayoStrip.FilamentoEnLote(pts, anchoBase, c, DefinitivasLib.BlancoCalido,
-                        0.85f * alfaVida,
-                        StormTaper.Flat, 101 + k, 0, true, true, false, null, anchoNodo);
-                    // LA VENA — el filo blanco que corre por el frente
-                    RayoStrip.FilamentoEnLote(pts, anchoBase * 0.4f, DefinitivasLib.BlancoCalido, Color.White,
-                        0.95f * alfaVida,
-                        StormTaper.Flat, 102 + k, 0, true, true, true, null, anchoNodo);
-                }
-                finally { RayoStrip.CerrarLote(); }
+                    // EL PERIODO QUE CIERRA EL LOOP: la longitud de la
+                    // circunferencia dividida en tiles ENTEROS (~170 px c/u)
+                    float circun = MathHelper.TwoPi * radio;
+                    int tiles = Math.Max(3, (int)MathF.Round(circun / 170f));
+                    float periodo = circun / tiles;
 
-                // ==================== CAPA 2 — EL ECO (el gemelo de la campana mayor) ====================
-                if (doble)
+                    RayoStrip.AbrirLote();
+                    try
+                    {
+                        // EL AURA DEL BRONCE (2.2×, flujo lento alrededor)
+                        RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(anchoNodo, anchoBase * 1.1f),
+                            DefinitivasLib.Alfa(c, 0.35f * alfaVida), carne,
+                            periodo, 0.45f, tiempo, 0f, 1f);
+                        // EL CUERPO DEL RÍO (la carne que CORRE alrededor)
+                        RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(anchoNodo, anchoBase * 0.5f),
+                            DefinitivasLib.Alfa(c, 0.75f * alfaVida), carne,
+                            periodo, 1.0f, tiempo, 0f, 1f);
+                        // EL NÚCLEO EN BANDA (la vena caliente del bronce)
+                        RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(anchoNodo, anchoBase * 0.21f),
+                            DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.85f * alfaVida), carne,
+                            periodo, 1.8f, tiempo, 0.36f, 0.64f);
+                        // LA VENA — el filo blanco que corre por el frente
+                        RayoStrip.FilamentoEnLote(pts, anchoBase * 0.4f, DefinitivasLib.BlancoCalido, Color.White,
+                            0.95f * alfaVida,
+                            StormTaper.Flat, 102 + k, 0, true, true, true, null, anchoNodo);
+                    }
+                    finally { RayoStrip.CerrarLote(); }
+                }
+                else
+                {
+                    RayoStrip.AbrirLote();
+                    try
+                    {
+                        RayoStrip.FilamentoEnLote(pts, anchoBase, c, DefinitivasLib.BlancoCalido,
+                            0.85f * alfaVida, StormTaper.Flat, 101 + k, 0, true, true, false, null, anchoNodo);
+                    }
+                    finally { RayoStrip.CerrarLote(); }
+                }
+
+                // ==================== CAPA 2 — EL ECO (el gemelo texturizado, fluyendo EN CONTRA) ====================
+                if (doble && carne != null)
                 {
                     var pts2 = new Vector2[SEG + 2];
                     for (int i = 0; i < SEG + 2; i++)
@@ -239,12 +314,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         pts2[i] = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (radio * 0.82f + ondula)
                             - Main.screenPosition;
                     }
+                    float circun2 = MathHelper.TwoPi * radio * 0.82f;
+                    int tiles2 = Math.Max(3, (int)MathF.Round(circun2 / 170f));
+                    var semiEco = new float[SEG + 2];
+                    for (int i = 0; i < SEG + 2; i++) semiEco[i] = anchoBase * 0.35f;
                     RayoStrip.AbrirLote();
                     try
                     {
-                        RayoStrip.FilamentoEnLote(pts2, anchoBase * 0.7f, DefinitivasLib.Ambar, DefinitivasLib.Oro,
-                            0.7f * alfaVida,
-                            StormTaper.Flat, 104, 0, true, true, true, null, null);
+                        RayoStrip.FajaTexturadaEnLote(pts2, semiEco,
+                            DefinitivasLib.Alfa(DefinitivasLib.Ambar, 0.7f * alfaVida), carne,
+                            circun2 / tiles2, -0.8f, tiempo, 0f, 1f);
                     }
                     finally { RayoStrip.CerrarLote(); }
                 }
@@ -269,7 +348,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     finally { RayoStrip.CerrarLote(); }
                 }
 
-                // ==================== CAPA 3 — LAS NOTAS (las estrellas que cabalgan) ====================
+                // ============ CAPA 3 — LAS NOTAS CON SU ECO + CAPA 5 — LOS PÉTALOS ============
                 VFXCore.Begin();
                 int nNotas = doble ? 8 : 5;
                 for (int j = 0; j < nNotas; j++)
@@ -283,11 +362,47 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     if (DefinitivasLib.TexStar != null)
                         VFXCore.Quad(pos, DefinitivasLib.Alfa(Color.White, 0.9f * (1f - v)),
                             new Vector2(esc, esc), tiempo * 2f + j, DefinitivasLib.TexStar);
+                    // EL ECO DE LA NOTA (la voz de hace un instante, más atrás en el giro)
+                    Vector2 posEco = Projectile.Center + new Vector2(MathF.Cos(ang - 0.22f), MathF.Sin(ang - 0.22f)) * radio;
+                    if (DefinitivasLib.TexStar != null)
+                        VFXCore.Quad(posEco, DefinitivasLib.Alfa(c, 0.35f * (1f - v)),
+                            new Vector2(esc * 0.6f, esc * 0.6f), tiempo * 2f + j - 0.4f, DefinitivasLib.TexStar);
+                }
+
+                // LOS PÉTALOS DE RESONANCIA: los picos radiales del frente (8
+                // dientes de estrella orientados hacia afuera — la onda MUERDE)
+                if (DefinitivasLib.TexStar != null)
+                {
+                    int nPetalos = doble ? 8 : 6;
+                    for (int j = 0; j < nPetalos; j++)
+                    {
+                        float ang = tiempo * (0.8f + k * 0.2f) - j * MathHelper.TwoPi / nPetalos;
+                        Vector2 pos = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
+                        float largo = (doble ? 120f : 84f) * (1f - v * 0.4f) * (0.8f + 0.2f * MathF.Sin(tiempo * 7f + j));
+                        VFXCore.Quad(pos, DefinitivasLib.Alfa(c, 0.5f * (1f - v)),
+                            new Vector2(largo, largo * 0.16f), ang, DefinitivasLib.TexStar);
+                    }
                 }
                 VFXCore.FlushAdditive();
             }
 
-            // ==================== CAPA 5 — EL LATIDO CENTRAL ====================
+            // ==================== CAPA 8 — LAS ESTRELLAS DEL CIERRE ====================
+            // (las de verdad: textura de cuatro puntas girando + estela de polvo)
+            if (DefinitivasLib.TexStar != null)
+            {
+                VFXCore.Begin();
+                for (int i = 0; i < NEstrellas; i++)
+                {
+                    if (!_estrellaViva[i]) continue;
+                    Color cE = DefinitivasLib.GradienteJuicio(i * 0.13f + tiempo * 0.2f);
+                    VFXCore.Quad(_estrellaPos[i], DefinitivasLib.Alfa(cE, 0.35f), new Vector2(90f, 90f));
+                    VFXCore.Quad(_estrellaPos[i], DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.95f),
+                        new Vector2(44f, 44f), _estrellaRot[i], DefinitivasLib.TexStar);
+                }
+                VFXCore.FlushAdditive();
+            }
+
+            // ==================== CAPA 8b — EL LATIDO CENTRAL ====================
             // (los CUATRO HALOS APILADOS del rayo de fusión, pulsando con el
             // tañido más reciente — la campana tiene corazón)
             VFXCore.Begin();
@@ -307,11 +422,60 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (DefinitivasLib.TexStar != null)
                 VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(Color.White, 0.85f),
                     new Vector2(70f, 70f) * late, tiempo, DefinitivasLib.TexStar);
+
+            // ==================== CAPA 8c — EL AURA DE LA CAMPANA (queda SONANDO) ====================
+            // (después del último tañido, la campana sigue resonando 30 t: un
+            // aro grande que se disuelve lento — el último suspiro del bronce)
+            float tUltimo = 6f + (NAnillos - 1) * Cadencia + VidaAnillo;
+            if (t > tUltimo && t < tUltimo + 30f)
+            {
+                float q = (t - tUltimo) / 30f;
+                if (VFXCore.Ring != null)
+                    VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * (1f - q)),
+                        new Vector2(600f, 600f) * (0.5f + q * 0.5f), q * 0.6f, VFXCore.Ring);
+                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.3f * (1f - q)),
+                    new Vector2(260f, 260f) * (1f + q * 0.4f));
+            }
             VFXCore.FlushAdditive();
+
+            // ==================== CAPA 7 — EL ALIENTO DE LA CAMPANA ====================
+            // (al tañir, una nube dorada de LA LIBRERÍA DE BRUMAS respira desde
+            // el centro — la letra: «para qué fabricar óvalos si hay brumas»)
+            {
+                float aliento = 0f;
+                for (int k = 0; k < NAnillos; k++)
+                {
+                    float nace = 6f + k * Cadencia;
+                    float tk = t - nace;
+                    if (tk >= 0f && tk < 16f) aliento = MathF.Max(aliento, 1f - tk / 16f);
+                }
+                if (aliento > 0.05f)
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                    try
+                    {
+                        BrumaFX.BeginGlow();
+                        Vector2 centroP = Projectile.Center - Main.screenPosition;
+                        BrumaFX.Cloud(centroP, 120f + 160f * (1f - aliento), new Color(255, 204, 120),
+                            777, tiempo * 0.4f, puffs: 5, alpha: 0.28f * aliento);
+                        Main.spriteBatch.End();
+                    }
+                    catch { VFXCore.CerrarLoteSiAbierto(); }
+                    VFXCore.ReabrirLoteVanilla();
+                }
+            }
 
             // v6.54.5/.6 — EL CONTRATO DEL LOTE: TODO PreDraw sale con el lote VIVO.
             VFXCore.ReabrirLoteVanilla();
             return false;
+        }
+
+        /// <summary>LOS SEMIANCHOS de un perfil por un semiancho base.</summary>
+        private static float[] ArraySemis(float[] perfil, float semi)
+        {
+            var r = new float[perfil.Length];
+            for (int i = 0; i < perfil.Length; i++) r[i] = perfil[i] * semi;
+            return r;
         }
     }
 }

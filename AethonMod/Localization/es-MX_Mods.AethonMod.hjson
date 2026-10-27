@@ -1969,74 +1969,79 @@ Items: {
 			Tooltip:
 				'''
 					EL ATAQUE DEFINITIVO DEL MOD — el prisma hereda la corona del rayo de
-					fusión: SIETE haces del espectro brotan girando a tu alrededor y
-					CONVERGEN al foco; del foco nace EL HAZ CENTRAL de 2400 px con ANCHO
-					CRECIENTE — nace fino, engorda hacia el fondo y RESPIRA — con sus
-					cuatro fundas y la vena blanca, TRES pulsos que viajan, la lluvia
-					cromática con su offset de color, los cuatro halos apilados del foco,
-					el velo prismático y el resplandor de la punta.
-					(Siete voces, una sola palabra.)
-				'''
+					fusión y la SUPERA: SIETE haces del espectro TEXTURIZADOS convergen al
+					foco; de él nace EL HAZ CENTRAL — una ESPINA VIVA que se rezaga y
+					LATIGUEA al barrer, vestida con LA PILA DE SEIS PASADAS: el aura lenta,
+					el cuerpo con el color que VIAJA a lo largo, el remolino HIRVIENDO, el
+					núcleo en banda, la vena blanca y la aberración cromática — con las
+					POSIMÁGENES del barrido, los ARCOS QUE TREPAN, el telégrafo de carga,
+					el iris que se abre, el sobrepaso elástico, el flicker inconmensurable
+					y la ZONA DE IMPACTO ardiendo al final del canal.
+					(El rayo de fusión, superado.)
+'''
 		}
 		PartidorDeMundos: {
 			DisplayName: El Partidor de Mundos
 			Tooltip:
 				'''
 					Un clic. Una línea. El mundo, en dos.
-					LA CONTENCIÓN — la línea vertical tiembla sobre el cursor mientras
-					CINCO RUNAS se encienden a lo largo de su caída y la sala contiene la
-					respiración; LA PARTICIÓN — la columna de 260 px CAE con sus cuatro
-					fundas, el suelo ESTALLA con las TRES ondas de choque, LAS GRIETAS se
-					abren a los lados de la base y la herida se desangra chispas con
-					gravedad de verdad.
+					LA CONTENCIÓN — la aguja TEXTURIZADA tiembla mientras cinco runas se
+					encienden y los corredores recorren la línea; LA PARTICIÓN — la columna
+					de CARNE DE RUIDO hirviendo hacia arriba con sus seis pasadas y la
+					aberración cromática, el suelo estalla con CUATRO ondas (la del
+					rechinido), las grietas se abren CON SUS ECOS, los ESCOMBROS saltan
+					girando y EL HUMO DE LA HERIDA sube de la base (la librería de brumas).
 					(El botón de apocalipsis: úsalo con respeto.)
-				'''
+'''
 		}
 		RequiemEstelar: {
 			DisplayName: El Réquiem Estelar
 			Tooltip:
 				'''
-					LA CAMPANA DE LUZ — tres anillos dorados que se expanden desde ti
-					CRUZANDO el mundo (1400 px, uno cada medio segundo), ahora CERRADOS de
-					verdad: cada anillo lleva sus NOTAS cabalgando la circunferencia y su
-					badajo girando en contra, y cada tañido trae su flash, su onda y su
-					temblor. El tercero es LA CAMPANA MAYOR: doble, con su eco y la
-					lluvia de estrellas del cierre.
-				'''
+					LA CAMPANA DE LUZ — tres anillos que ya no son aros de color: son RÍOS
+					DE BRONCE (el ruido FLUYE alrededor del círculo y la costura queda
+					cerrada por construcción), con sus NOTAS y sus ecos cabalgando, los
+					PÉTALOS de resonancia mordiendo al frente, el badajo girando en contra,
+					la IMPLOSIÓN que aspira antes de cada tañido y EL ALIENTO dorado de la
+					campana al sonar. El tercero es LA CAMPANA MAYOR: doble, con el eco
+					fluyendo en contra y la lluvia de estrellas del cierre — y el aura que
+					queda SONANDO cuando todo pasó.
+'''
 		}
 		IraDelCielo: {
 			DisplayName: La Ira del Cielo
 			Tooltip:
 				'''
-					El cielo se CUBRE de verdad durante tres segundos — nubes vivas,
-					bruma dorada y relámpagos ambientales. LOS OCHO JUICIOS se ANUNCIAN
-					con una línea que desciende antes de caer con su canal doble, su
-					columna de tres fundas, la nova y el anillo de choque; LAS RAMAS
-					saltan chispeando a los vecinos. El ÚLTIMO es LA COLUMNA: dos venas
-					en espiral, flash y el temblor mayor.
-				'''
+					El cielo se CUBRE con LA LIBRERÍA DE BRUMAS — racimos de nubes con
+					deriva orgánica y bandas de niebla con paralaje, y cada relámpago
+					ambiental ILUMINA las nubes cercanas. LOS OCHO JUICIOS se anuncian con
+					la línea que desciende y las chispas que CONVERGEN al blanco; la caída
+					envuelve su AURA DE CARNE, y la columna golpea con sus SEIS PASADAS, la
+					espiral triple del final, el humo del juicio y el suelo ardiendo.
+'''
 		}
 		TestamentoAethon: {
 			DisplayName: El Testamento de Aethon
 			Tooltip:
 				'''
-					LA CORONA DE LA BOLSA — el libro se abre con su anillo de runas, sus
-					páginas volando y el velo teñido del color de la sentencia que
-					toca… y LA DICTA: CADA USO dispara UNA DE LAS CUATRO SENTENCIAS con
-					su poder acrecentado (×1.3), rotando para siempre — y EL VÍNCULO, el
-					filamento vivo que une el libro a su arma, te enseña cuál nació.
+					LA CORONA DE LA BOLSA — el libro con su sándwich completo (halos
+					apilados, aro arcoíris y pestañas), EL ALIENTO de tinta de la librería
+					de brumas y el anillo de runas CON ARCOS que saltan entre sellos… y LA
+					DICTA: CADA USO dispara UNA DE LAS CUATRO SENTENCIAS con su poder
+					acrecentado (×1.3) — con la ONDA del dictado y la RÁFAGA de páginas — y
+					EL VÍNCULO, la faja de ruido vivo que corre del libro a su arma.
 					Cuatro arsenales en un solo objeto.
-				'''
+'''
 		}
 		BolsaDefinitivas: {
 			DisplayName: La Bolsa de las Armas Definitivas
 			Tooltip:
 				'''
-					LAS CINCO SENTENCIAS del Veredicto de Aethon, reformadas con SUS
-					SIETE CAPAS de efectos cada una: el prisma (el ataque definitivo),
-					el partidor de mundos, el réquiem, la ira del cielo… y EL
+					LAS CINCO SENTENCIAS del Veredicto de Aethon con SUS PILAS COMPLETAS de
+					efectos (la carne de ruido del rayo de fusión y las técnicas de la
+					investigación): el prisma, el partidor, el réquiem, la ira… y EL
 					TESTAMENTO, la corona que las dicta rotándolas.
-				'''
+'''
 		}
 		BolsaInvestigacion: {
 			DisplayName: La Bolsa de la Investigación

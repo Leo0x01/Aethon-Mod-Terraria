@@ -1958,15 +1958,16 @@ Items: {
 		DisplayName: The Primordial Prism
 		Tooltip:
 			'''
-				THE DEFINITIVE ATTACK OF THE MOD — the prism inherits the fusion
-				beam's crown: SEVEN spectrum beams bloom spinning around you and
-				CONVERGE on the focus; from it rises THE CENTRAL BEAM, 2400 px of
-				WIDENING light — born thin, fattening toward the far end, BREATHING
-				— with its four sheathes and white vein, THREE traveling pulses,
-				the chromatic rain with its color offset, the four stacked halos,
-				the prismatic veil and the tip's glow.
-				(Seven voices, one single word.)
-			'''
+				THE DEFINITIVE ATTACK OF THE MOD — the prism inherits the fusion beam's
+				crown and SURPASSES it: SEVEN textured spectrum beams converge on the
+				focus; from it rises THE CENTRAL BEAM — a LIVING SPINE that lags and
+				WHIPS as you sweep, dressed in THE SIX-PASS STACK: slow aura, body with
+				color TRAVELING along it, BOILING swirl, banded core, white vein and
+				chromatic aberration — with sweep AFTERIMAGES, CRAWLING ARCS, the
+				charge telegraph, the opening iris, the elastic overshoot, the
+				incommensurable flicker and the IMPACT ZONE blazing at the end.
+				(The fusion beam, surpassed.)
+'''
 	}
 
 
@@ -1976,13 +1977,14 @@ Items: {
 		Tooltip:
 			'''
 				One click. One line. The world, in two.
-				THE CONTAINMENT — the vertical line trembles over the cursor while
-				FIVE RUNES light up along its fall and the room holds its breath;
-				THE PARTITION — the 260 px column FALLS with its four sheathes, the
-				ground BURSTS with THREE shockwaves, THE CRACKS open at the sides
-				of the base and the wound bleeds sparks with real gravity.
+				THE CONTAINMENT — the TEXTURED needle trembles as five runes light up
+				and runners race the line; THE PARTITION — the column of BOILING NOISE
+				FLESH flowing upward in six passes with chromatic aberration, the ground
+				bursts with FOUR shockwaves (the grinding one), the fissures open WITH
+				THEIR ECHOES, DEBRIS leaps spinning and THE WOUND'S SMOKE rises from
+				the base (the mist library).
 				(The apocalypse button: use with respect.)
-			'''
+'''
 	}
 
 
@@ -1993,51 +1995,53 @@ Items: {
 		DisplayName: The Stellar Requiem
 		Tooltip:
 			'''
-				THE BELL OF LIGHT — three golden rings expand from you CROSSING the
-				world (1400 px, one every half second), now TRULY CLOSED: each ring
-				carries its NOTES riding the circumference and its clapper spinning
-				against it, and every toll brings its flash, its wave and its
-				tremor. The third is THE GREATER BELL: double, with its echo and
-				the closing starfall.
-			'''
+				THE BELL OF LIGHT — three rings that are no longer colored hoops: they
+				are RIVERS OF BRONZE (the noise FLOWS around the circle, the seam closed
+				by construction), with their RIDING NOTES and their echoes, the
+				resonance PETALS biting at the front, the counter-spinning clapper, the
+				IMPLOSION inhaling before each toll and the bell's golden BREATH as it
+				sounds. The third is THE GREATER BELL: double, with the echo flowing
+				against it and the closing starfall — and the aura that keeps RINGING
+				after everything passed.
+'''
 	}
 
 	IraDelCielo: {
 		DisplayName: The Wrath of Heaven
 		Tooltip:
 			'''
-				The sky TRULY COVERS itself for three seconds — living clouds,
-				golden mist and ambient lightning. THE EIGHT JUDGMENTS announce
-				themselves with a descending line before falling with their twin
-				channel, three-sheathe column, nova and shockwave ring; THE BRANCHES
-				spark onto the neighbors. The LAST is THE COLUMN: two spiral veins,
-				flash and the greatest tremor.
-			'''
+				The sky COVERS ITSELF with THE MIST LIBRARY — clusters of clouds with
+				organic drift and parallax fog bands, and every ambient lightning bolt
+				LIGHTS UP the nearby clouds. THE EIGHT JUDGMENTS are announced by the
+				descending line and the sparks CONVERGING on the target; the strike
+				wraps its NOISE-FLESH AURA, and the column hits with its SIX PASSES,
+				the final TRIPLE SPIRAL, the judgment's smoke and the ground ablaze.
+'''
 	}
 
 	TestamentoAethon: {
 		DisplayName: The Testament of Aethon
 		Tooltip:
 			'''
-				THE CROWN OF THE BAG — the book opens with its ring of runes, its
-				flying pages and the veil dyed with the color of the sentence it
-				speaks… and SPEAKS IT: EVERY USE fires ONE OF THE FOUR SENTENCES
-				with heightened power (x1.3), rotating forever — and THE BOND, the
-				living filament joining the book to its weapon, shows you which
-				one was born.
-				Four arsenals in a single object.
-			'''
+				THE CROWN OF THE BAG — the book with its full sandwich (stacked halos,
+				rainbow ring and lashes), the ink BREATH of the mist library and the
+				ring of runes WITH ARCS jumping between seals… and it DICTATES: EVERY
+				USE fires ONE OF THE FOUR SENTENCES at heightened power (×1.3) — with
+				the dictation WAVE and the page BURST — and THE BOND, the living noise
+				ribbon running from the book to its weapon.
+				Four arsenals in a single item.
+'''
 	}
 
 	BolsaDefinitivas: {
 		DisplayName: The Bag of Ultimate Weapons
 		Tooltip:
 			'''
-				THE FIVE SENTENCES of Aethon's Verdict, reformed with SEVEN LAYERS
-				of effects each: the prism (the definitive attack), the world
-				splitter, the requiem, the wrath of heaven… and THE TESTAMENT,
-				the crown that dictates them all in turn.
-			'''
+				THE FIVE SENTENCES of the Verdict of Aethon with their FULL EFFECT
+				STACKS (the fusion beam's noise flesh and the research techniques): the
+				prism, the splitter, the requiem, the wrath… and THE TESTAMENT, the
+				crown that dictates them in rotation.
+'''
 	}
 
 	BolsaInvestigacion: {

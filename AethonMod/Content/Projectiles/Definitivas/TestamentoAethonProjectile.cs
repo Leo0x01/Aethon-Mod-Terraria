@@ -5,38 +5,36 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
     /// <summary>
-    /// TESTAMENTOAETHONPROJECTILE — v6.54.6 — ARMA 5 DE LAS CINCO: EL
+    /// TESTAMENTOAETHONPROJECTILE — v6.54.7 — ARMA 5 DE LAS CINCO: EL
     /// TESTAMENTO DE AETHON — LA CORONA DE LA BOLSA.
     ///
-    /// LA REFORMA (la letra del usuario: «el testamento lo lanzó y lo
-    /// dejó bugueado» — el prisma sentencia vivía para siempre — y «deja
-    /// solo las armas que mencioné… al menos 7 capas de efectos visuales
-    /// a cada una»): el libro ahora dicta SOLO LAS CUATRO SENTENCIAS de
-    /// la bolsa reformada, con su cine completo en siete capas —
+    /// LA TRANSCENDENCIA (la letra: «mejorar aún más los efectos
+    /// visuales»): el libro ahora dicta con MÁS cine —
     ///
-    ///   CAPA 1 — EL VELO DEL DICTADO: los bordes respiran con el COLOR
-    ///   DE LA SENTENCIA QUE TOCA (cada arma tiene su acento).
-    ///   CAPA 2 — EL LIBRO DE VERDAD: el sprite real del Grimorio del
-    ///   Eterno, flotando con su vaivén, enmarcado por los CUATRO HALOS
-    ///   APILADOS del rayo de fusión.
-    ///   CAPA 3 — LAS PÁGINAS: hojas de luz que salen volando del libro
-    ///   girando sobre sí mismas (no solo polvo — PÁGINAS de verdad).
-    ///   CAPA 4 — EL ANILLO DE RUNAS: siete sellos orbitando el libro
-    ///   en elipse, cada uno latiendo con su color del gradiente.
-    ///   CAPA 5 — LA PALABRA: al dictar, la ONDA EXPANSIVA circular +
-    ///   el flash + el temblor — la palabra se OYE.
-    ///   CAPA 6 — EL SELLO: la estrella de cuatro puntas girando sobre
-    ///   el lomo, teñida del color de la sentencia.
-    ///   CAPA 7 — EL VÍNCULO: un filamento de luz vivo que corre del
-    ///   libro a la sentencia invocada — la palabra hecha arma.
-    ///
-    /// LA CURA DEL BUG: todas las sentencias invocadas viven en modo
-    /// autónomo ACOTADO (el prisma sentencia ahora muere a los 192 t —
-    /// v6.54.6) y el failsafe global de 1200 t las protege a todas.
+    ///   CAPA 1 — EL VELO DEL DICTADO (heredado, con el color de la sentencia).
+    ///   CAPA 2 — EL LIBRO: el sprite real + los CUATRO HALOS APILADOS +
+    ///   EL ARO ARCOÍRIS girando + LAS PESTAÑAS de estrella (nuevo — el
+    ///   sándwich completo del foco del prisma, ahora en el libro).
+    ///   CAPA 3 — LAS PÁGINAS: el polvo dorado + EL ALIENTO DE TINTA
+    ///   (nuevo: un puff de LA LIBRERÍA DE BRUMAS violeta que respira
+    ///   bajo el libro mientras dicta) + LA RÁFAGA DE PÁGINAS (nuevo):
+    ///   al dictar, SEIS hojas de estrella salen volando del libro
+    ///   girando y desvaneciéndose — la palabra se ESCONDE del libro.
+    ///   CAPA 4 — EL ANILLO DE RUNAS + LOS ARCOS ENTRE RUNAS (nuevo):
+    ///   cada tanto, un arco fino SALTA entre dos runas vecinas — el
+    ///   anillo está CARGADO, la máquina piensa.
+    ///   CAPA 5 — LA PALABRA: el flash + el Kick + LA ONDA DEL DICTADO
+    ///   (nuevo): un aro que se expande desde el libro durante 12 t —
+    ///   la palabra tiene frentes de onda.
+    ///   CAPA 6 — EL SELLO (heredado).
+    ///   CAPA 7 — EL VÍNCULO TEXTURIZADO (nuevo): el filamento del libro
+    ///   a la sentencia ahora es una FAJA DE RUIDO FLUYENDO con la carne
+    ///   corriendo del libro al arma + la vena blanca — la palabra viva.
     /// </summary>
     public class TestamentoAethonProjectile : ModProjectile
     {
@@ -58,6 +56,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         };
 
         private const int TApertura = 18;
+        private const int NPaginas = 6;     // LA RÁFAGA DE PÁGINAS (estado propio)
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
@@ -75,6 +74,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         private int _hijo = -1;         // el whoAmI de la sentencia invocada (para EL VÍNCULO)
+
+        // LA RÁFAGA DE PÁGINAS (visual, solo cliente)
+        private readonly Vector2[] _paginaPos = new Vector2[NPaginas];
+        private readonly Vector2[] _paginaVel = new Vector2[NPaginas];
+        private readonly float[] _paginaRot = new float[NPaginas];
+        private readonly bool[] _paginaViva = new bool[NPaginas];
+        private int _tPalabra = -1;     // LA ONDA DEL DICTADO (el aro que se expande)
+        private int _tArcoRunas;        // LOS ARCOS ENTRE RUNAS
 
         public override void AI()
         {
@@ -99,6 +106,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
+            // ==================== CAPA 4b — LOS ARCOS ENTRE RUNAS ====================
+            // (cada ~11 t, un arco fino salta entre dos runas vecinas: el
+            // anillo está CARGADO — la máquina piensa antes de hablar)
+            if (!Main.dedServ && Main.netMode != NetmodeID.Server && t > 4 && ++_tArcoRunas > 11)
+            {
+                _tArcoRunas = 0;
+                int r = Main.rand.Next(7);
+                float a0 = tiempo * 1.1f + r * MathHelper.TwoPi / 7f;
+                float a1 = tiempo * 1.1f + (r + 1) * MathHelper.TwoPi / 7f;
+                Vector2 bob0 = new(0f, -MathF.Sin(tiempo * 1.6f) * 6f);
+                Vector2 p0 = Projectile.Center + bob0 + new Vector2(MathF.Cos(a0) * 120f, MathF.Sin(a0) * 44f - 10f);
+                Vector2 p1 = Projectile.Center + bob0 + new Vector2(MathF.Cos(a1) * 120f, MathF.Sin(a1) * 44f - 10f);
+                RayoSistema.Lanzar(RayoParams.Arco(p0, p1),
+                    (uint)Main.rand.Next(1, int.MaxValue), p1, p0 - p1,
+                    DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.8f), DefinitivasLib.BlancoCalido,
+                    3.5f, 6, AnimRayo.Arco, false);
+            }
+
             // ==================== LA DICTADURA DE LA SENTENCIA ====================
             if (t == TApertura)
             {
@@ -107,11 +132,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Vector2 rumbo = (Main.MouseWorld - dueño.MountedCenter).SafeNormalize(Vector2.UnitX);
                 var src = Projectile.GetSource_FromAI();
 
-                // ==================== CAPA 5 — LA PALABRA (la onda que se oye) ====================
+                // ==================== CAPA 5 — LA PALABRA ====================
                 if (!Main.dedServ && Main.netMode != NetmodeID.Server)
                 {
                     OndaLib.Flash(DefinitivasLib.Alfa(Acentos[sentencia], 0.9f), 0.20f, 9, Projectile.Center);
                     OndaLib.Kick(6, 10);
+                    _tPalabra = 0;
+
+                    // LA RÁFAGA DE PÁGINAS: seis hojas de estrella salen volando
+                    for (int i = 0; i < NPaginas; i++)
+                    {
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        _paginaPos[i] = Projectile.Center + new Vector2(0f, -MathF.Sin(tiempo * 1.6f) * 6f);
+                        _paginaVel[i] = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f - 0.8f) * Main.rand.NextFloat(5f, 10f);
+                        _paginaRot[i] = Main.rand.NextFloat(MathHelper.TwoPi);
+                        _paginaViva[i] = true;
+                    }
                 }
 
                 switch (sentencia)
@@ -145,8 +181,29 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 DefinitivasLib.SentenciaActual = (DefinitivasLib.SentenciaActual + 1) % Sentencias.Length;
             }
 
-            // ==================== CAPA 3 — LAS PÁGINAS QUE VUELAN ====================
-            // (hojas de luz de verdad: quads estirados girando, no solo polvo)
+            // ==================== LA VIDA DE LAS PÁGINAS (vuelan, giran, mueren) ====================
+            if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+            {
+                if (_tPalabra >= 0) { _tPalabra++; if (_tPalabra > 12) _tPalabra = -1; }
+                for (int i = 0; i < NPaginas; i++)
+                {
+                    if (!_paginaViva[i]) continue;
+                    _paginaPos[i] += _paginaVel[i];
+                    _paginaVel[i] *= 0.94f;
+                    _paginaVel[i].Y += 0.12f;         // la gravedad suave de la hoja
+                    _paginaRot[i] += 0.28f;
+                    if (Main.rand.NextBool(3))
+                    {
+                        Dust d = Dust.NewDustPerfect(_paginaPos[i], DustID.GoldFlame,
+                            -_paginaVel[i] * 0.15f, 0, DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 0.7f);
+                        d.noGravity = true;
+                    }
+                    if ((_paginaPos[i] - Projectile.Center).LengthSquared() > 700f * 700f)
+                        _paginaViva[i] = false;
+                }
+            }
+
+            // ==================== CAPA 3 — LAS PÁGINAS QUE VUELAN (el polvo) ====================
             if (!Main.dedServ && Main.netMode != NetmodeID.Server && t > TApertura - 8 && t < TApertura + 30 && Main.rand.NextBool(2))
             {
                 Vector2 pos = Projectile.Center + new Vector2(Main.rand.NextFloat(-40f, 40f), Main.rand.NextFloat(-20f, 30f));
@@ -190,7 +247,23 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.FlushAlpha();
             }
 
-            // ==================== CAPA 2 — EL LIBRO CON SUS HALOS APILADOS ====================
+            // ==================== CAPA 3b — EL ALIENTO DE TINTA ====================
+            // (LA LIBRERÍA DE BRUMAS: el puff violeta que respira bajo el
+            // libro mientras dicta — la tinta tiene vapor)
+            {
+                VFXCore.CerrarLoteSiAbierto();
+                try
+                {
+                    BrumaFX.BeginGlow();
+                    BrumaFX.Puff(posLibro - Main.screenPosition + new Vector2(0f, 30f), 70f + 14f * MathF.Sin(tiempo * 1.3f),
+                        new Color(150, 96, 220), 501, tiempo * 0.5f, 0.16f * vida);
+                    Main.spriteBatch.End();
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
+            }
+
+            // ==================== CAPA 2 — EL LIBRO CON SU SÁNDWICH COMPLETO ====================
             VFXCore.Begin();
             Color grad = DefinitivasLib.GradienteJuicio(tiempo * 0.1f);
             Color grad2 = DefinitivasLib.GradienteJuicio(tiempo * 0.1f + 0.33f);
@@ -199,6 +272,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             VFXCore.Quad(posLibro, DefinitivasLib.Alfa(grad2, 0.20f * vida), new Vector2(520f, 520f) * vida);
             VFXCore.Quad(posLibro, DefinitivasLib.Alfa(grad, 0.38f * vida), new Vector2(360f, 360f) * vida);
             VFXCore.Quad(posLibro, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.45f * vida), new Vector2(210f, 210f) * vida);
+            // EL ARO ARCOÍRIS + LAS PESTAÑAS (el sándwich del foco del prisma, en el libro)
+            if (VFXCore.Arcoiris != null)
+                VFXCore.Quad(posLibro, DefinitivasLib.Alfa(Color.White, 0.4f * vida),
+                    new Vector2(280f, 280f) * vida, tiempo * 0.2f, VFXCore.Arcoiris);
+            if (DefinitivasLib.TexStar != null)
+                VFXCore.Quad(posLibro, DefinitivasLib.Alfa(Color.White, 0.4f * vida),
+                    new Vector2(300f, 300f) * vida, tiempo * 0.35f, DefinitivasLib.TexStar);
             VFXCore.FlushAdditive();
 
             // EL SPRITE REAL del Grimorio del Eterno
@@ -229,7 +309,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
             VFXCore.Begin();
 
             // ==================== CAPA 4 — EL ANILLO DE RUNAS ====================
-            // (siete sellos orbitando el libro en elipse, latiendo)
+            // (siete sellos orbitando el libro en elipse, latiendo — y los
+            // ARCOS entre runas ya viven en el AI, saltando entre estas
+            // mismas posiciones)
             for (int r = 0; r < 7; r++)
             {
                 float angR = tiempo * 1.1f + r * MathHelper.TwoPi / 7f;
@@ -253,10 +335,36 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.Quad(posLibro + new Vector2(0f, -70f), DefinitivasLib.Alfa(Color.White, 0.9f * vida),
                     new Vector2(64f, 64f) * vida, tiempo * 1.4f, DefinitivasLib.TexStar);
             }
+
+            // ==================== CAPA 5b — LA ONDA DEL DICTADO ====================
+            // (el aro que se EXPANDE desde el libro durante 12 t tras dictar —
+            // la palabra tiene frentes de onda)
+            if (_tPalabra >= 0)
+            {
+                float q = _tPalabra / 12f;
+                if (VFXCore.Ring != null)
+                    VFXCore.Quad(posLibro, DefinitivasLib.Alfa(acento, 0.55f * (1f - q)),
+                        new Vector2(140f, 140f) + new Vector2(560f, 560f) * DefinitivasLib.DeGolpe(q),
+                        q * 0.4f, VFXCore.Ring);
+            }
+
+            // ==================== CAPA 3c — LA RÁFAGA DE PÁGINAS ====================
+            // (las hojas de estrella que salen volando del libro al dictar)
+            if (DefinitivasLib.TexStar != null)
+            {
+                for (int i = 0; i < NPaginas; i++)
+                {
+                    if (!_paginaViva[i]) continue;
+                    float alfaP = MathHelper.Clamp(1f - (_paginaPos[i] - Projectile.Center).Length() / 600f, 0f, 1f);
+                    VFXCore.Quad(_paginaPos[i], DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.85f * alfaP),
+                        new Vector2(30f, 38f), _paginaRot[i], DefinitivasLib.TexStar);
+                }
+            }
             VFXCore.FlushAdditive();
 
-            // ==================== CAPA 7 — EL VÍNCULO (la palabra hecha arma) ====================
-            // (un filamento vivo del libro a la sentencia invocada, mientras viva)
+            // ==================== CAPA 7 — EL VÍNCULO TEXTURIZADO ====================
+            // (la palabra hecha arma: la FAJA DE RUIDO con la carne CORRIENDO
+            // del libro a la sentencia + la vena blanca — mientras viva)
             if (_hijo >= 0 && _hijo < Main.maxProjectiles)
             {
                 Projectile hijo = Main.projectile[_hijo];
@@ -271,11 +379,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         float ondeo = MathF.Sin(q * MathHelper.Pi) * MathF.Sin(tiempo * 5f + q * 12f) * 26f;
                         ptsV[i] = base_ + new Vector2(-ondeo * 0.3f, ondeo) - Main.screenPosition;
                     }
+                    Texture2D carne = DefinitivasLib.TexRuido;
                     RayoStrip.AbrirLote();
                     try
                     {
-                        RayoStrip.FilamentoEnLote(ptsV, 30f * vida, acento, DefinitivasLib.BlancoCalido,
-                            0.75f * vida, StormTaper.Center, 77, 0, false, true, true, null, null);
+                        if (carne != null)
+                        {
+                            // EL AURA — la carne del vínculo fluyendo libro→arma
+                            var semisV = new float[NV];
+                            for (int i = 0; i < NV; i++)
+                                semisV[i] = 16f * vida * (0.6f + 0.4f * MathF.Sin(i / (float)(NV - 1) * MathHelper.Pi));
+                            RayoStrip.FajaTexturadaEnLote(ptsV, semisV,
+                                DefinitivasLib.Alfa(acento, 0.35f * vida), carne,
+                                200f, 1.5f, tiempo, 0f, 1f);
+                        }
+                        // LA VENA blanca (heredada)
                         RayoStrip.FilamentoEnLote(ptsV, 10f * vida, DefinitivasLib.BlancoCalido, Color.White,
                             0.9f * vida, StormTaper.Center, 78, 0, false, true, true, null, null);
                     }
