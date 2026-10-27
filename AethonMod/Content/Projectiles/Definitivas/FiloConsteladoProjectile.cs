@@ -218,6 +218,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 case 2: DibujarGalaxia(t, tiempo); break;
                 case 3: DibujarCadena(dueño, rumbo, t, tiempo); break;
             }
+            // v6.54.5 — el contrato del lote: DibujarGalaxia termina en
+            // FlushAdditive y dejaba el lote CERRADO (crash del client.log).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -436,6 +439,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 catch { }
                 VFXCore.ReabrirLoteVanilla();
             }
+            // v6.54.5 — el contrato del lote (cubre el camino estrella == null).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

@@ -258,6 +258,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.ReabrirLoteVanilla();
                 }
             }
+            // v6.54.5 — el contrato del lote: el molino termina en FlushAdditive
+            // y dejaba el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

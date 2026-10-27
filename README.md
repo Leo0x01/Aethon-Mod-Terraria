@@ -26,6 +26,12 @@ assets propios de la casa; las técnicas aprendidas están
 re-implementadas desde cero (ColorPrisma, RayoStrip, el Primer Trazo
 fusionado).
 
+## ✨ Novedades — v6.54.5: LA CURA DEL CRASH (el juego ya NO se cierra con las armas definitivas)
+
+- **EL BUG**: «a penas agarre la primera arma el juego se cerro por completo» — el client.log lo confesó: `End was called, but Begin has not yet been called` en `Main.DrawProjectiles()`. Los PreDraw de las Doce Sentencias usan los Flush de las librerías de la casa, que CIERRAN el SpriteBatch del pase de entidades… y salían sin reabrirlo: el `End()` final de Terraria reventaba sobre un batch muerto y tML mataba el proceso (por eso el headless nunca lo vio: el servidor dedicado no dibuja).
+- **LA CURA EN 4 CAPAS**: (1) las **20 reaperturas** — TODO PreDraw de las Sentencias sale ahora con el lote VIVO (el contrato v6.50.11 que 131 archivos viejos ya cumplían); (2) el blindaje global **`LoteSeguroFX`** — un `GlobalProjectile.PostDraw` que cura el lote de cualquier proyectil del mod tras su dibujado, para siempre; (3) el **guard del lote muerto** en `Blit` (jamás dibujar sobre un batch cerrado); (4) los adornos del Ojo (TexStar/Ring/NovaBurst) ahora son **Quads del buffer** — se dibujan dentro del FlushAdditive en aditivo de verdad (antes ni se veían: dibujaban sobre el lote muerto).
+- **Verificación**: oráculo 0/0 · build real 0/0 · .tmod 6.899.242 B (483 entradas, EOF exacto) · headless `v6.54.5 → Server started`, 0 excepciones · audit 609 clases 0 faltantes · los 466 PNG del paquete válidos.
+
 ## ✨ Novedades — v6.54.4: LA BOLSA DE LAS ARMAS DEFINITIVAS («El Veredicto de Aethon»)
 
 - **EL PEDIDO CENTRAL**: «quiero crear un ataque definitivo… haz una investigación profunda a todos los jefes y armas finales de los mods más populares y de los visualmente más hermosos… una bolsa con un poco más de 10 armas que posean ataques definitivos, masivos y visualmente hermosos». LA INVESTIGACIÓN: ~70 búsquedas + el CÓDIGO FUENTE REAL de Calamity, del mod del dios antiguo y de The Stars Above leído en GitHub — el FUSIONRAY del dios diseccionado completo (su fórmula de ancho creciente, su barrido sinusoidal, sus 4 halos apilados, su truco de bajar la música 30 % y dar vuelo infinito).

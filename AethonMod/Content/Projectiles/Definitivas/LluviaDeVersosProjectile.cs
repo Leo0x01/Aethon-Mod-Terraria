@@ -205,6 +205,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
+            // v6.54.5 — el contrato del lote: cubre los caminos sin nova
+            // (el Flush del anillo dejaba el lote CERRADO).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }
@@ -312,6 +315,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 catch { }
                 VFXCore.ReabrirLoteVanilla();
             }
+            // v6.54.5 — el contrato del lote (cubre el camino hoja == null:
+            // el Flush del halo dejaba el lote CERRADO).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

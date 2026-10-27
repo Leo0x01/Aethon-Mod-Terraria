@@ -218,6 +218,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     posLibro + new Vector2(0f, -70f) - Main.screenPosition,
                     DefinitivasLib.Alfa(Color.White, 0.9f * vida), new Vector2(64f, 64f) * vida, tiempo * 1.4f);
             VFXCore.FlushAdditive();
+            // v6.54.5 — el contrato del lote: el Flush dejaba el lote CERRADO
+            // (la corona mataba el juego al rotar las once sentencias).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

@@ -278,6 +278,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (fase == FASE_RAYO || (fase == FASE_COLAPSO && _tamanoReal > 0.05f))
                 DibujarCono(Projectile.Center, Projectile.rotation, _tamanoReal, tiempo, fase, t);
 
+            // v6.54.5 — EL CONTRATO DEL LOTE (LA CURA DEL CRASH DEL CLIENT.LOG):
+            // los Flush* de VFXCore y RayoStrip dejan el SpriteBatch CERRADO —
+            // si un PreDraw sale así, el End final de DrawProjectiles lanza
+            // «End was called, but Begin has not yet been called» y el juego
+            // SE CIERRA. TODO PreDraw de la casa sale con el lote VIVO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -328,16 +334,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
             VFXCore.Quad(pos, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.50f * carga), new Vector2(215f, 215f) * carga);
 
             // EL DESTELLO DE RAYOS (las pestañas del ojo — el lens-flare de la casa)
+            // v6.54.5 — antes eran DOS Blit directos sobre el lote del llamador,
+            // que VeloDorado ya había CERRADO con FlushAlpha (Draw sobre un lote
+            // muerto). Ahora son Quads del buffer: se dibujan DENTRO del
+            // FlushAdditive de abajo, en su sitio exacto del sándwich, en aditivo.
             if (DefinitivasLib.TexStar != null)
-                DefinitivasLib.Blit(Main.spriteBatch, DefinitivasLib.TexStar, pos - Main.screenPosition,
-                    DefinitivasLib.Alfa(Color.White, 0.5f * carga), new Vector2(340f, 340f) * carga,
-                    tiempo * 0.4f);
+                VFXCore.Quad(pos, DefinitivasLib.Alfa(Color.White, 0.5f * carga),
+                    new Vector2(340f, 340f) * carga, tiempo * 0.4f, DefinitivasLib.TexStar);
 
             // LA PUPILA: anillo iris + núcleo
             if (VFXCore.Ring != null)
-                DefinitivasLib.Blit(Main.spriteBatch, VFXCore.Ring, pos - Main.screenPosition,
-                    DefinitivasLib.Alfa(grad2, 0.85f * carga), new Vector2(120f, 120f) * (0.8f + 0.2f * carga),
-                    tiempo * 0.9f);
+                VFXCore.Quad(pos, DefinitivasLib.Alfa(grad2, 0.85f * carga),
+                    new Vector2(120f, 120f) * (0.8f + 0.2f * carga), tiempo * 0.9f, VFXCore.Ring);
             VFXCore.Quad(pos, DefinitivasLib.Alfa(Color.White, 0.95f * carga), new Vector2(52f, 52f) * carga);
 
             VFXCore.FlushAdditive();
@@ -431,9 +439,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
             VFXCore.Begin();
             VFXCore.Quad(punta, DefinitivasLib.Alfa(g1, 0.22f * activo), new Vector2(700f, 700f) * activo);
             VFXCore.Quad(punta, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.30f * activo), new Vector2(320f, 320f) * activo);
+            // v6.54.5 — Blit → Quad del buffer (nunca dibujar fuera de un lote propio)
             if (VFXCore.NovaBurst != null)
-                DefinitivasLib.Blit(Main.spriteBatch, VFXCore.NovaBurst, punta - Main.screenPosition,
-                    DefinitivasLib.Alfa(Color.White, 0.5f * activo), new Vector2(420f, 420f) * activo, tiempo * 0.2f);
+                VFXCore.Quad(punta, DefinitivasLib.Alfa(Color.White, 0.5f * activo),
+                    new Vector2(420f, 420f) * activo, tiempo * 0.2f, VFXCore.NovaBurst);
             VFXCore.FlushAdditive();
         }
     }

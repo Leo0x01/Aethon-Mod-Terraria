@@ -230,6 +230,13 @@ namespace AethonMod.Content.VFX
             Vector2 escalaPx, float rot = 0f)
         {
             if (tex == null || batch == null) return;
+            // v6.54.5 — EL GUARD DEL LOTE MUERTO (la autopsia del client.log de
+            // la .54.4): el ojo del arma 1 dibujaba aquí con el SpriteBatch ya
+            // CERRADO por un Flush anterior — un Draw sobre un lote muerto que
+            // envenenaba el render. Si la sonda de la casa está disponible y
+            // dice que no hay Begin vivo, NO se dibuja (un adorno perdido jamás
+            // tirará el juego; un End sin Begin sí lo hace).
+            if (VFXCore.SondaActiva && !VFXCore.LoteAbierto) return;
             batch.Draw(tex, posPantalla, null, color, rot, tex.Size() * 0.5f,
                 new Vector2(escalaPx.X / tex.Width, escalaPx.Y / tex.Height), SpriteEffects.None, 0f);
         }

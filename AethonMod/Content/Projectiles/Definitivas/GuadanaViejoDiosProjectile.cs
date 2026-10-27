@@ -206,6 +206,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 SombrasLib.OndaChoque(Projectile.Center, 60f + t * 34f, 0.65f * (1f - t / 20f), false);
             }
+            // v6.54.5 — el contrato del lote: OndaChoque deja el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

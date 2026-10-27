@@ -237,6 +237,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.ReabrirLoteVanilla();
                 }
             }
+            // v6.54.5 — el contrato del lote: cubre el cuerpo 4 (EL VACÍO, sin
+            // textura — su Flush dejaba el lote CERRADO al salir del bucle).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }
@@ -337,6 +340,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.8f), new Vector2(tam * 0.45f, tam * 0.45f));
             }
             VFXCore.FlushAdditive();
+            // v6.54.5 — el contrato del lote: el Flush dejaba el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }
@@ -397,6 +402,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 catch { }
                 VFXCore.ReabrirLoteVanilla();
             }
+            // v6.54.5 — el contrato del lote (cubre el camino vida >= 1f).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

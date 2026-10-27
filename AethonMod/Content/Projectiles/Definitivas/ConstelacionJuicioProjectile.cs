@@ -236,6 +236,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     new Vector2(160f, 160f) * (0.4f + vida));
                 VFXCore.FlushAdditive();
             }
+            // v6.54.5 — el contrato del lote: salir SIEMPRE con el lote vivo.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }
@@ -316,6 +318,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 catch { }
                 VFXCore.ReabrirLoteVanilla();
             }
+            // v6.54.5 — el contrato del lote (cubre el camino vida >= 1f, que
+            // saltaba el bloque de arriba y salía con el lote CERRADO).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

@@ -220,6 +220,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.ReabrirLoteVanilla();
                 }
             }
+            // v6.54.5 — el contrato del lote: cubre la contención sin partición
+            // (Vignette) y la partición con vida >= 1f — ambos salían CERRADOS.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

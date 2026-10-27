@@ -190,6 +190,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     MathHelper.Clamp((TTormenta - t) / 30f, 0f, 1f);
                 SombrasLib.Vignette(intensidad);
             }
+            // v6.54.5 — el contrato del lote: Vignette deja el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }
@@ -255,6 +257,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 DefinitivasLib.Blit(Main.spriteBatch, VFXCore.DestelloFinal, Projectile.Center - Main.screenPosition,
                     DefinitivasLib.Alfa(Color.White, 0.8f * potencia), new Vector2(340f, 340f), vida * 1.4f);
             VFXCore.FlushAdditive();
+            // v6.54.5 — el contrato del lote: el Flush dejaba el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

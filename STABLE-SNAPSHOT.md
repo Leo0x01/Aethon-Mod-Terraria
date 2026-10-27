@@ -1,4 +1,55 @@
-# v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS — EL CHECKLIST
+# v6.54.5 — LA CURA DEL CRASH — EL CHECKLIST
+
+**Qué pasó** (la letra: «no pude probar las armas, a penas agarre la
+primera el juego se cerro por completo, analiza bien esos errores»): el
+client.log mostró `End was called, but Begin has not yet been called` en
+`Main.DrawProjectiles()` — los PreDraw de las Doce Sentencias cerraban
+el SpriteBatch del juego (Flush de las libs) y salían SIN reabrirlo, así
+que el End final de Terraria reventaba y tML cerraba el proceso. LA
+CURA en cuatro capas: las 20 reaperturas en los 12 archivos (el
+contrato del lote de la casa), el blindaje global `LoteSeguroFX`
+(cura el lote tras el dibujado de CUALQUIER proyectil del mod), el
+guard del lote muerto en `Blit` y los adornos del Ojo pasados a Quads
+del buffer (ahora SÍ se ven, en aditivo de verdad).
+
+1. **LO PRIMERO — EL CRASH CURADO**: [ ] agarrar EL OJO DEL JUICIO y
+   SOSTENERLO: el juego YA NO SE CIERRA — el ojo se abre sobre el
+   jugador con sus halos apilados, las chispas convergen y (novedad de
+   la .5) el destello de estrella y el anillo de la pupila ahora SÍ se
+   dibujan.
+2. **EL OJO DEL JUICIO (EL ATAQUE DEFINITIVO)**: [ ] al completar la
+   carga, el CONO de luz BARRE el campo de lado a lado — con un jefe
+   cerca, el momento más grande del mod: núcleo blanco, gradiente que
+   fluye, pulsos que viajan, temblor constante y el jugador NO CAE.
+3. **EL PRISMA PRIMORDIAL**: [ ] canalizar: los 7 haces convergen y el
+   HAZ CENTRAL engorda — ya sin cerrar el juego.
+4. **LA LLUVIA DE VERSOS**: [ ] pares oro+violeta que se cruzan; [ ] a
+   los 12 pares, EL DESTELLO de 1500 px.
+5. **EL FILO CONSTELADO**: [ ] clic derecho cambia la constelación
+   (Sol · Estrella Polar · **Andrómeda (la galaxia espiral — era uno de
+   los caminos que crasheaba)** · Aries).
+6. **EL PARTIDOR DE MUNDOS**: [ ] el telegrafo tiembla y la COLUMNA
+   cae con doble onda y el Kick 14.
+7. **LA GUADAÑA DEL VIEJO DIOS**: [ ] tres tajos crecientes; el tercero
+   LA CRUZ con onda negra-violeta y almas.
+8. **EL SISTEMA DE AETHON**: [ ] los 5 cuerpos orbitan y disparan;
+   [ ] CLIC DERECHO: EL BOMBARDEO — los 5 vuelan al cursor y detonan
+   en cadena (el cuerpo-4, EL VACÍO, era otro camino que crasheaba).
+9. **LA CONSTELACIÓN DEL JUICIO**: [ ] sembrar estrellas conectadas;
+   [ ] a la séptima, las COLUMNAS caen y los relámpagos saltan.
+10. **EL VÓRTICE DEVORADOR**: [ ] el remolino negro-violeta con sus
+    ojos y garras ARRASTRA a los enemigos… y LA IMPLOSIÓN final.
+11. **EL RÉQUIEM ESTELAR**: [ ] los tres anillos dorados cruzan el
+    mundo expandiéndose; el tercero DOBLE.
+12. **LA IRA DEL CIELO**: [ ] el velo cubre el cielo y LOS OCHO JUICIOS
+    caen con sus ramas; el último es LA COLUMNA doble.
+13. **EL TESTAMENTO DE AETHON**: [ ] el libro se abre y DICTA las once
+    sentencias rotando (×1.3) — sin cerrar el juego JAMÁS.
+14. **EL PARQUE COMPLETO**: [ ] con TODAS las armas de la bolsa usadas
+    en la misma sesión, cero cierres, cero parpadeos raros de pantalla
+    (ese era el síntoma del lote envenenado).
+
+# v6.54.4 — LA BOLSA DE LAS ARMAS DEFINITIVAS — EL CHECKLIST (crasheaba — curada en la .54.5)
 
 **Qué pasó** (la letra: «quiero creer un ataque definitivo… investigación
 profunda a todos los jefes y armas finales de los mods más populares y

@@ -239,6 +239,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.FlushAdditive();
             }
 
+            // v6.54.5 — el contrato del lote: TODOS los Flush de arriba (prisma,
+            // puntitos, cráter) dejaban el lote CERRADO al salir.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

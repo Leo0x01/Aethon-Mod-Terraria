@@ -183,6 +183,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 DefinitivasLib.Blit(Main.spriteBatch, DefinitivasLib.TexStar, Projectile.Center - Main.screenPosition,
                     DefinitivasLib.Alfa(Color.White, 0.8f), new Vector2(70f, 70f), tiempo);
             VFXCore.FlushAdditive();
+            // v6.54.5 — el contrato del lote: el Flush dejaba el lote CERRADO.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

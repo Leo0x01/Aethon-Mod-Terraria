@@ -977,6 +977,15 @@ namespace AethonMod.Content.VFX
             _fiBeginCalled.GetValue(Main.spriteBatch) is bool abierto && abierto;
 
         /// <summary>
+        /// v6.54.5 — True si la sonda de reflexión está disponible (el FNA
+        /// de este tML tiene el campo "beginCalled"). Los guards que dependen
+        /// de <see cref="LoteAbierto"/> deben consultarla PRIMERO: si la
+        /// sonda no existiera, LoteAbierto devolvería siempre false y un
+        /// guard ingenuo apagaría TODO el dibujado del mod.
+        /// </summary>
+        public static bool SondaActiva => _fiBeginCalled != null;
+
+        /// <summary>
         /// Cierra el lote del juego SOLO si hay un Begin vivo — cero
         /// excepciones, cero first-chance en el log (el End defensivo de
         /// la casa SIN su costo). DEVUELVE true si cerró un lote vivo (el
