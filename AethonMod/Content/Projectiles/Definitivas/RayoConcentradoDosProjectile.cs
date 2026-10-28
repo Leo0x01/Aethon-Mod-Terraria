@@ -10,96 +10,79 @@ using Terraria.Graphics.CameraModifiers;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using ReLogic.Content;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
-    // =====================================================================
-    //  v6.55.0 — EL RAYO CONCENTRADO II, EL PROYECTIL.
-    // =====================================================================
-    //  La sexta arma de la bolsa de las definitivas (la letra: «cambia su
-    //  nombre a rayo concentrado 2 o algo así… no uses texturas originales…
-    //  el sonido debes recrearlo»). EL ATAQUE ES EL DE SIEMPRE — la carga
-    //  de 300 ticks con la boca de glows apilados y la aguja que apunta,
-    //  el láser de 800 con el cono de 3500 px y su barrido cosenoidal, el
-    //  kick de cámara, la música callada al 30 %, el vuelo infinito y los
-    //  polvos cromáticos del conducto.
-    //
-    //  LO QUE CAMBIÓ (TODO el material es de la casa):
-    //    · LAS CUATRO TEXTURAS DEL PLASMA: CarnePlasma · SegundoRuido ·
-    //      RampaGlow · BitsChispa — las procedurales de la librería
-    //      (DefinitivasLib), generadas por los scripts de tools/.
-    //    · EL SHADER: HazConcentradoShader.fx — la técnica del haz vivo
-    //      re-escrita 100 % para el mod: las cuatro texturas multiplicadas
-    //      con doble scroll cruzado, la deformación sinusoidal, las chispas
-    //      en doble AND — MÁS LAS DOS CURAS DE LOS PICOS: uEscalaV (la
-    //      escala del ruido compensada con el tamaño real — los rasgos del
-    //      plasma miden SIEMPRE lo mismo en pantalla) y el núcleo blanco
-    //      por smoothstep (el umbral duro dibujaba un contorno fractal).
-    //      Si el shader no cargara, el fallback de tiras texturizadas de
-    //      la casa dibuja el haz (jamás se rompe).
-    //    · EL SONIDO: RayoConcentradoLoop.ogg — la síntesis propia (el
-    //      grave que late, el motor, el plasma, el crujido) en bucle
-    //      periódico exacto.
-    // =====================================================================
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class RayoConcentradoDosProjectile : ModProjectile
     {
+        private static readonly int ChargeTime = 300;
+
+        private static readonly int LaserDuration = 800;
+
+        private const float LargoCono = 3500f;
+
+        public float targetRotation;
+
+        public float targetSize;
+
+        public float realSize;
+
+        private static bool _shaderFallo;
+
+        private static Effect _shaderCache;
+
+        internal SonidoEnLoop raySound;
+
+        public float volume;
+
+        public float pitch;
+
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
+        public ref float Time => ref ((ModProjectile)this).Projectile.ai[0];
+
+        public ref float Modo => ref ((ModProjectile)this).Projectile.ai[1];
+
+        public ref float Owner => ref ((ModProjectile)this).Projectile.ai[2];
+
         public override void SetStaticDefaults()
         {
-            ProjectileID.Sets.DrawScreenCheckFluff[Type] = 5000;
-            ProjectileID.Sets.TrailingMode[Type] = 2;
-            ProjectileID.Sets.TrailCacheLength[Type] = 10;
+            ProjectileID.Sets.DrawScreenCheckFluff[((ModProjectile)this).Type] = 5000;
+            ProjectileID.Sets.TrailingMode[((ModProjectile)this).Type] = 2;
+            ProjectileID.Sets.TrailCacheLength[((ModProjectile)this).Type] = 10;
         }
 
         public override void SetDefaults()
         {
-            Projectile.width = 80;
-            Projectile.height = 80;
-            Projectile.tileCollide = false;
-            Projectile.friendly = true;
-            Projectile.hostile = false;
-            Projectile.penetrate = -1;
-            Projectile.aiStyle = -1;
-            Projectile.manualDirectionChange = true;
-            Projectile.netImportant = true;
+            ((Entity)((ModProjectile)this).Projectile).width = 80;
+            ((Entity)((ModProjectile)this).Projectile).height = 80;
+            ((ModProjectile)this).Projectile.tileCollide = false;
+            ((ModProjectile)this).Projectile.friendly = true;
+            ((ModProjectile)this).Projectile.hostile = false;
+            ((ModProjectile)this).Projectile.penetrate = -1;
+            ((ModProjectile)this).Projectile.aiStyle = -1;
+            ((ModProjectile)this).Projectile.manualDirectionChange = true;
+            ((ModProjectile)this).Projectile.netImportant = true;
         }
 
-        public ref float Time => ref Projectile.ai[0];
-        public ref float Modo => ref Projectile.ai[1];
-        public ref float Owner => ref Projectile.ai[2];
-
-        // LOS TIEMPOS DEL ATAQUE (la conducta intacta).
-        private static readonly int ChargeTime = 300;
-        private static readonly int LaserDuration = 800;
-        private const float LargoCono = 3500f;
-
-        public float targetRotation;
-        public float targetSize;
-        public float realSize;
-
-        // v6.55.1 — LA BANDERA DE FALLO DEL SHADER: si el .fxc no cargara
-        // (asset ausente, driver sin soporte), NO se reintenta cada frame —
-        // el fallback de tiras asume el mando de inmediato y el log queda
-        // limpio de first-chance exceptions (el patrón _sunShaderFailed de
-        // la casa en RuneSunRenderer).
-        private static bool _shaderFallo;
-        private static Effect _shaderCache;
-
-        /// <summary>
-        /// Carga el shader UNA vez (con caché y bandera de fallo). Devuelve
-        /// null si no está disponible — el llamador usa el fallback.
-        /// </summary>
         private static Effect ObtenerShader()
         {
             if (_shaderFallo)
+            {
                 return null;
-            if (_shaderCache != null && !_shaderCache.IsDisposed)
+            }
+            if (_shaderCache != null && !((GraphicsResource)_shaderCache).IsDisposed)
+            {
                 return _shaderCache;
+            }
             try
             {
-                _shaderCache = ModContent.Request<Effect>(
-                    "AethonMod/Content/Effects/Shaders/HazConcentradoShader",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                _shaderCache = ModContent.Request<Effect>("AethonMod/Content/Effects/Shaders/HazConcentradoShader", (AssetRequestMode)1).Value;
                 return _shaderCache;
             }
             catch
@@ -111,143 +94,122 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         public override void SendExtraAI(BinaryWriter writer)
         {
-            writer.Write(Projectile.direction == 1);
-            base.SendExtraAI(writer);
+            writer.Write(((Entity)((ModProjectile)this).Projectile).direction == 1);
+            ((ModProjectile)this).SendExtraAI(writer);
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
         {
-            Projectile.direction = reader.ReadBoolean() ? 1 : -1;
-            base.ReceiveExtraAI(reader);
+            ((Entity)((ModProjectile)this).Projectile).direction = (reader.ReadBoolean() ? 1 : (-1));
+            ((ModProjectile)this).ReceiveExtraAI(reader);
         }
 
-        // ================================================================
-        //  EL CORAZÓN — la IA del haz (el dueño es el jugador).
-        // ================================================================
         public override void AI()
         {
-            // EL DUEÑO: el jugador que la disparó (la boca se coloca sobre
-            // su hombro, mirando donde él mira).
-            if (Owner < 0 || Owner >= Main.maxPlayers)
+            //IL_0062: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0078: Unknown result type (might be due to invalid IL or missing references)
+            //IL_007d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0089: Unknown result type (might be due to invalid IL or missing references)
+            //IL_009d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00a2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00ae: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00be: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00c8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00cd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00d2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00d9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00e3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00e8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0298: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0425: Unknown result type (might be due to invalid IL or missing references)
+            //IL_042a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0461: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0466: Unknown result type (might be due to invalid IL or missing references)
+            //IL_046f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_047a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0172: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0186: Unknown result type (might be due to invalid IL or missing references)
+            //IL_019f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01a9: Expected O, but got Unknown
+            //IL_04df: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04e4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04f9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04fe: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0506: Unknown result type (might be due to invalid IL or missing references)
+            //IL_055b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0560: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0567: Unknown result type (might be due to invalid IL or missing references)
+            //IL_056c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05c1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05c6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05cd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05d2: Unknown result type (might be due to invalid IL or missing references)
+            if (Owner < 0f || Owner >= 255f)
             {
-                Projectile.Kill();
+                ((ModProjectile)this).Projectile.Kill();
                 return;
             }
-            Player dueno = Main.player[(int)Owner];
-            if (dueno == null || !dueno.active || dueno.dead)
+            Player val = Main.player[(int)Owner];
+            if (val == null || !((Entity)val).active || val.dead)
             {
-                Projectile.Kill();
+                ((ModProjectile)this).Projectile.Kill();
                 return;
             }
-
-            // EL RUMBO del portador (se orienta con el signo de la
-            // rotación ANTES de colocar la boca).
-            dueno.direction = Math.Sign(Projectile.rotation.ToRotationVector2().X);
-            dueno.itemLocation = dueno.MountedCenter;
-
-            // LA BOCA: el offset (13 px del centro, 20 arriba).
-            Projectile.Center = dueno.MountedCenter + new Vector2(13 * dueno.direction, -20f);
-
-            // EL RETROCESO SUAVE del portador mientras dispara.
-            dueno.velocity += Projectile.rotation.ToRotationVector2() * -0.1f;
-            dueno.velocity *= 0.98f;
-            // (la gravedad del juego pelea de vuelta — el arrastre, no un
-            // empujón).
-
-            if (!Main.dedServ && Time % 4 == 0 && Time > ChargeTime && Time < ChargeTime + LaserDuration)
+            ((Entity)val).direction = Math.Sign(Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation).X);
+            val.itemLocation = val.MountedCenter;
+            ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + new Vector2((float)(13 * ((Entity)val).direction), -20f);
+            ((Entity)val).velocity = ((Entity)val).velocity + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * -0.1f;
+            ((Entity)val).velocity = ((Entity)val).velocity * 0.98f;
+            if (!Main.dedServ && Time % 4f == 0f && Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
             {
-                float shakeStrength = Utils.GetLerpValue(ChargeTime - LaserDuration * 0.5f, ChargeTime + LaserDuration, Time, true);
-                Main.instance.CameraModifiers.Add(new PunchCameraModifier(Projectile.Center, Main.rand.NextVector2CircularEdge(1, 1), shakeStrength * 8f, 12, 20, 5000));
+                float lerpValue = Utils.GetLerpValue((float)ChargeTime - (float)LaserDuration * 0.5f, (float)(ChargeTime + LaserDuration), Time, true);
+                Main.instance.CameraModifiers.Add((ICameraModifier)new PunchCameraModifier(((Entity)((ModProjectile)this).Projectile).Center, Utils.NextVector2CircularEdge(Main.rand, 1f, 1f), lerpValue * 8f, 12f, 20, 5000f, (string)null));
             }
-
-            // EL BARRIDO — un coseno completo de ida y vuelta (±2.5 rad)
-            // acotado por sus dos envolventes.
-            float totalOffRot = (float)Math.Cos((Time - ChargeTime) / LaserDuration * MathHelper.TwoPi) * 2.5f
-                * Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + LaserDuration * 0.1f, Time, true)
-                * Utils.GetLerpValue(ChargeTime + LaserDuration, ChargeTime + LaserDuration * 0.9f, Time, true);
-
-            if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15 == 0 && Time < ChargeTime + LaserDuration * 0.6f)
+            float num = (float)Math.Cos((Time - (float)ChargeTime) / (float)LaserDuration * ((float)Math.PI * 2f)) * 2.5f * Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)ChargeTime + (float)LaserDuration * 0.1f, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration), (float)ChargeTime + (float)LaserDuration * 0.9f, Time, true);
+            if (Main.netMode != 1 && Time % 15f == 0f && Time < (float)ChargeTime + (float)LaserDuration * 0.6f)
             {
-                Projectile.direction = Main.rand.NextBool() ? -1 : 1;
-                Projectile.netUpdate = true;
+                ((Entity)((ModProjectile)this).Projectile).direction = ((!Utils.NextBool(Main.rand)) ? 1 : (-1));
+                ((ModProjectile)this).Projectile.netUpdate = true;
             }
-
-            // EL GIRO HACIA EL CURSOR — el paso decreciente (0.04 al
-            // principio, 0.01 cuando el barrido manda).
-            targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
-                Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
-                + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
-
-            // EL TAMAÑO — la envolvente cúbica (nace en 20 t, muere al
-            // final; realSize la persigue a 0.1).
-            targetSize = (float)Math.Pow(
-                Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 60, Time, true) *
-                Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
-
-            float waveChange = MathHelper.SmoothStep(0f, 1f,
-                Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + 20, Time, true) *
-                Utils.GetLerpValue(ChargeTime + LaserDuration * 0.9f, ChargeTime + LaserDuration * 0.5f, Time, true));
-            Projectile.rotation = targetRotation + totalOffRot * Projectile.direction * waveChange;
-
+            targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.1f, (float)ChargeTime, Time, true) * 0.04f + Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.3f, (float)ChargeTime + (float)LaserDuration * 0.6f, Time, true) * 0.01f);
+            targetSize = (float)Math.Pow(Utils.GetLerpValue((float)(ChargeTime - 20), (float)(ChargeTime + 60), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true), 3.0);
+            float num2 = MathHelper.SmoothStep(0f, 1f, Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)(ChargeTime + 20), Time, true) * Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.9f, (float)ChargeTime + (float)LaserDuration * 0.5f, Time, true));
+            ((ModProjectile)this).Projectile.rotation = targetRotation + num * (float)((Entity)((ModProjectile)this).Projectile).direction * num2;
             realSize = MathHelper.Lerp(realSize, targetSize, 0.1f);
-            Projectile.velocity = Projectile.rotation.ToRotationVector2();
-
-            // EL RELOJ DEL COLOR (el gradiente camina con el mundo).
-            Projectile.localAI[0] += 1f;
-
-            // ============ LOS POLVOS CROMÁTICOS ============
-            // Los de la boca: 1/frame con probabilidad decreciente.
-            if (!Main.rand.NextBool((int)(Time * 0.5f + 15)))
+            ((Entity)((ModProjectile)this).Projectile).velocity = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
+            ((ModProjectile)this).Projectile.localAI[0] += 1f;
+            if (Time == (float)(ChargeTime + LaserDuration + 20))
             {
-                SpawnPolvo(Projectile.Center,
-                    Projectile.rotation.ToRotationVector2().RotatedByRandom(1f) * Main.rand.NextFloat(5f, 15f),
-                    2f, Projectile.localAI[0]);
+                SoundStyle item = SoundID.Item34;
+                DefinitivasLib.Sonar((item).WithPitchOffset(-0.4f), ((Entity)((ModProjectile)this).Projectile).Center);
+                OndaLib.Kick(6f, 10);
             }
-            // Los del conducto: 15/frame mientras viva el láser — la firma
-            // cromática con el offset de color POR DISTANCIA.
-            if (Time > ChargeTime - 15 && Time < ChargeTime + LaserDuration + 60)
+            if (!Main.dedServ && Time > (float)(ChargeTime - 10) && Time < (float)(ChargeTime + LaserDuration))
             {
-                for (int i = 0; i < 15; i++)
-                {
-                    float grow = Utils.GetLerpValue(ChargeTime - 15, ChargeTime + 40, Time, true)
-                        * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration, Time, true);
-                    float progress = Main.rand.NextFloat(3300);
-                    Vector2 position = Projectile.Center + new Vector2(progress, Main.rand.NextFloat(-80f, 80f) * (progress / 3300f)).RotatedBy(Projectile.rotation);
-                    if (Main.rand.NextBool(5))
-                    {
-                        SpawnPolvo(position,
-                            Projectile.velocity.RotatedByRandom(0.4f) * Main.rand.NextFloat(15f, 45f),
-                            4f * grow, Projectile.localAI[0] - progress / 3300f * 60f);
-                    }
-                }
+                Color val2 = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
+                float num3 = realSize;
+                Vector2 val3 = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center, (float)(int)(val2).R / 255f * 1.8f * num3, (float)(int)(val2).G / 255f * 1.7f * num3, (float)(int)(val2).B / 255f * 1.5f * num3);
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + val3 * 1100f, (float)(int)(val2).R / 255f * 1.4f * num3, (float)(int)(val2).G / 255f * 1.3f * num3, (float)(int)(val2).B / 255f * 1.1f * num3);
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + val3 * 2400f, (float)(int)(val2).R / 255f * 1f * num3, (float)(int)(val2).G / 255f * 0.9f * num3, (float)(int)(val2).B / 255f * 0.8f * num3);
             }
-
-            // EL SIZZLE del final (el chisporroteo al apagarse).
-            if (Time == ChargeTime + LaserDuration + 20)
-                DefinitivasLib.Sonar(SoundID.Item34.WithPitchOffset(-0.4f), Projectile.Center);
-
-            Time++;
-            Projectile.timeLeft = 10;
-
+            Time += 1f;
+            ((ModProjectile)this).Projectile.timeLeft = 10;
             HandleSound();
-
-            // EL CIERRE del ciclo: cuando el láser muere, el sonido muere
-            // con él.
-            if (Time > ChargeTime + LaserDuration + 50)
+            if (Time > (float)(ChargeTime + LaserDuration + 50))
             {
                 raySound?.StopSound();
-                Projectile.Kill();
-                return;
+                ((ModProjectile)this).Projectile.Kill();
             }
-
-            // EL VUELO INFINITO: mientras el rayo vive, las alas del
-            // portador no se agotan.
-            if (Main.netMode == NetmodeID.Server)
+            else if (Main.netMode == 2)
             {
-                foreach (Player player in Main.player)
+                Player[] player = Main.player;
+                foreach (Player val4 in player)
                 {
-                    if (player != null && player.active && !player.dead)
-                        player.wingTime = player.wingTimeMax;
+                    if (val4 != null && ((Entity)val4).active && !val4.dead)
+                    {
+                        val4.wingTime = val4.wingTimeMax;
+                    }
                 }
             }
             else if (Main.LocalPlayer != null)
@@ -256,302 +218,306 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
         }
 
-        // ================================================================
-        //  EL SONIDO EN LOOP — la utilidad de la casa (la matemática
-        //  intacta: volumen por realSize, pitch animado por fase) sobre
-        //  EL SONIDO SINTETIZADO de la casa.
-        // ================================================================
-        internal SonidoEnLoop raySound;
-        public float volume;
-        public float pitch;
         public void HandleSound()
         {
-            volume = 1.3f * Utils.GetLerpValue(0, 0.05f, realSize, true);
-            pitch = MathHelper.SmoothStep(0.5f, 1.2f,
-                Utils.GetLerpValue(ChargeTime - 45, ChargeTime + 350, Time, true) *
-                Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true))
-                + Utils.GetLerpValue(ChargeTime, ChargeTime + LaserDuration, Time, true) * 0.2f * realSize - 1f;
-
-            raySound ??= new SonidoEnLoop(
-                new Terraria.Audio.SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop") { MaxInstances = 0 },
-                new Terraria.Audio.ProjectileAudioTracker(Projectile).IsActiveAndInGame);
-            raySound.PlaySound(() => Projectile.Center, () => volume, () => pitch);
+            //IL_00a3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00aa: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00ba: Expected O, but got Unknown
+            volume = 1.3f * Utils.GetLerpValue(0f, 0.05f, realSize, true);
+            pitch = MathHelper.SmoothStep(0.5f, 1.2f, Utils.GetLerpValue((float)(ChargeTime - 45), (float)(ChargeTime + 60), Time, true)) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true) - 1f;
+            if (raySound == null)
+            {
+                SoundStyle estilo = new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop", (SoundType)0);
+                (estilo).MaxInstances = 0;
+                raySound = new SonidoEnLoop(estilo, (Func<bool>)new ProjectileAudioTracker(((ModProjectile)this).Projectile).IsActiveAndInGame);
+            }
+            raySound.PlaySound(() => ((Entity)((ModProjectile)this).Projectile).Center, () => volume, () => pitch);
         }
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            if (Time > ChargeTime + 20 && Time < ChargeTime + LaserDuration + 10)
+            //IL_0089: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0090: Unknown result type (might be due to invalid IL or missing references)
+            if (Time > (float)(ChargeTime + 20) && Time < (float)(ChargeTime + LaserDuration + 10))
             {
-                float grow = (float)Math.Pow(
-                    Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 40, Time, true) *
-                    Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
-                // EL CONO: 3500·(0.5+grow·0.5) con el semiángulo 0.28·grow
-                // — la colisión de cono propia de la casa.
-                return DefinitivasLib.Cono(targetHitbox, Projectile.Center, LargoCono * (0.5f + grow * 0.5f),
-                    Projectile.rotation, 0.28f * Math.Max(grow, 0.02f));
+                float num = (float)Math.Pow(Utils.GetLerpValue((float)(ChargeTime - 20), (float)(ChargeTime + 40), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true), 3.0);
+                return DefinitivasLib.Cono(targetHitbox, ((Entity)((ModProjectile)this).Projectile).Center, 3500f * (0.5f + num * 0.5f), ((ModProjectile)this).Projectile.rotation, 0.28f * Math.Max(num, 0.02f));
             }
             return false;
         }
 
-        // ================================================================
-        //  LA MÚSICA −30 % MIENTRAS VIVE (el haz MANDA sobre la orquesta).
-        // ================================================================
         public override void Load()
         {
-            On_Main.UpdateAudio += CallarMusica;
+            //IL_0007: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0011: Expected O, but got Unknown
+            On_Main.UpdateAudio += new On_Main.hook_UpdateAudio(CallarMusica);
         }
 
         public override void Unload()
         {
-            On_Main.UpdateAudio -= CallarMusica;
+            //IL_0007: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0011: Expected O, but got Unknown
+            On_Main.UpdateAudio -= new On_Main.hook_UpdateAudio(CallarMusica);
         }
 
         private void CallarMusica(On_Main.orig_UpdateAudio orig, Main self)
         {
-            orig(self);
-
-            Projectile projectile = null;
+            orig.Invoke(self);
+            Projectile val = null;
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
-                if (Main.projectile[i] != null && Main.projectile[i].active && Main.projectile[i].type == Type)
+                if (Main.projectile[i] != null && ((Entity)Main.projectile[i]).active && Main.projectile[i].type == ((ModProjectile)this).Type)
                 {
-                    projectile = Main.projectile[i];
+                    val = Main.projectile[i];
                     break;
                 }
             }
-            if (projectile == null) return;
-
-            for (int i = 0; i < Main.musicFade.Length; i++)
+            if (val != null)
             {
-                float grow = Utils.GetLerpValue(ChargeTime - 15, ChargeTime + 40, projectile.ai[0], true)
-                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration, projectile.ai[0], true);
-
-                float vol = Main.musicFade[i] * Main.musicVolume * (1f - grow * 0.3f);
-                float tempFade = Main.musicFade[i];
-                Main.audioSystem.UpdateCommonTrackTowardStopping(i, vol, ref tempFade, Main.musicFade[i] > 0.15f);
-                Main.musicFade[i] = tempFade;
+                for (int j = 0; j < Main.musicFade.Length; j++)
+                {
+                    float num = Utils.GetLerpValue((float)(ChargeTime - 15), (float)(ChargeTime + 40), val.ai[0], true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration), val.ai[0], true);
+                    float num2 = Main.musicFade[j] * Main.musicVolume * (1f - num * 0.3f);
+                    float num3 = Main.musicFade[j];
+                    Main.audioSystem.UpdateCommonTrackTowardStopping(j, num2, ref num3, Main.musicFade[j] > 0.15f);
+                    Main.musicFade[j] = num3;
+                }
             }
         }
 
-        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,
-            List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-            => overPlayers.Add(index);
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index);
+        }
 
-        // ================================================================
-        //  EL DIBUJO — la boca de glows apilados, la aguja que apunta, el
-        //  strip de 1500 puntos y EL SHADER DE LA CASA con las cuatro
-        //  texturas procedurales multiplicadas.
-        // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            // LAS CUATRO TEXTURAS DEL PLASMA — las procedurales de la casa.
-            Texture2D texture = DefinitivasLib.TexRuido;        // la carne (CarnePlasma)
-            Texture2D textureBits = DefinitivasLib.TexBits;     // las chispas (BitsChispa)
-            Texture2D textureGlow = DefinitivasLib.TexRampa;    // la rampa (RampaGlow)
-            Texture2D textureSecond = DefinitivasLib.TexRemolino; // el 2º ruido (SegundoRuido)
-            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow"); // la boca
-
-            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || glow == null)
-                return false;
-
-            Color startColor = ColorPrisma.ValueAt(Projectile.localAI[0]);
-            startColor.A = 0;
-
-            float laserCharge = Utils.GetLerpValue(50, ChargeTime, Time, true)
-                * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration + 20, Time, true);
-            float laserRayCharge = Utils.GetLerpValue(0, ChargeTime, Projectile.localAI[1], true)
-                * Utils.GetLerpValue(ChargeTime + 10, ChargeTime - 30, Time, true);
-
-            // LA BOCA — los cinco glows apilados (5× el color al 20 %,
-            // 4× al 60 %, 2× el blanco, 14× el color al 10 %).
-            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null, startColor * 0.2f * laserCharge, 0, glow.Size() * 0.5f, 5f * laserCharge, 0, 0);
-            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, null, startColor * 0.6f * laserCharge, 0, glow.Size() * 0.5f, 4f, 0, 0);
-            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, glow.Frame(), new Color(255, 255, 255, 0) * laserCharge, 0, glow.Size() * 0.5f, 2f * laserCharge, 0, 0);
-            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, glow.Frame(), startColor * 0.1f * laserCharge, 0, glow.Size() * 0.5f, 14f * laserCharge, 0, 0);
-            // LA AGUJA QUE APUNTA — el SoftGlow de la casa estirado en la
-            // dirección del blanco (el telégrafo de la carga).
-            Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition + Projectile.rotation.ToRotationVector2() * 900f * laserRayCharge,
-                glow.Frame(), startColor * laserRayCharge * 0.35f, Projectile.rotation,
-                glow.Size() * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * laserRayCharge), 0, 0);
-
-            if (Time >= ChargeTime - 20)
+            //IL_005a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_005f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00f5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0112: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0136: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0142: Unknown result type (might be due to invalid IL or missing references)
+            //IL_014c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0158: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0162: Unknown result type (might be due to invalid IL or missing references)
+            //IL_017c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0188: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0195: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01a1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01ab: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0200: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0205: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0209: Unknown result type (might be due to invalid IL or missing references)
+            //IL_022e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_023b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_024d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0257: Unknown result type (might be due to invalid IL or missing references)
+            //IL_025c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_026f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0274: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0278: Unknown result type (might be due to invalid IL or missing references)
+            //IL_029d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02aa: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02c3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02cd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02d2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02e1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02ee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02f8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02ff: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0304: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0311: Unknown result type (might be due to invalid IL or missing references)
+            //IL_031b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0325: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0337: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0346: Unknown result type (might be due to invalid IL or missing references)
+            //IL_034b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_035d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0516: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0522: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0547: Unknown result type (might be due to invalid IL or missing references)
+            //IL_055c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0566: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0575: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0580: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0431: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0441: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0448: Unknown result type (might be due to invalid IL or missing references)
+            //IL_044d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0452: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0454: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0470: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0477: Unknown result type (might be due to invalid IL or missing references)
+            //IL_047c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0481: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0488: Unknown result type (might be due to invalid IL or missing references)
+            //IL_048a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04b2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04b7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0616: Unknown result type (might be due to invalid IL or missing references)
+            //IL_063e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0651: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0657: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0659: Unknown result type (might be due to invalid IL or missing references)
+            //IL_065e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0663: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0687: Unknown result type (might be due to invalid IL or missing references)
+            //IL_068e: Expected O, but got Unknown
+            //IL_069b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06a7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06ac: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06b1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06bd: Expected O, but got Unknown
+            //IL_06bd: Expected O, but got Unknown
+            //IL_06e1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_080a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_080f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0814: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0819: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0875: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0886: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08d6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08e7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_091e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_092f: Unknown result type (might be due to invalid IL or missing references)
+            Texture2D texRuido = DefinitivasLib.TexRuido;
+            Texture2D texBits = DefinitivasLib.TexBits;
+            Texture2D texRampa = DefinitivasLib.TexRampa;
+            Texture2D texRemolino = DefinitivasLib.TexRemolino;
+            Texture2D softGlow = VFXCore.SoftGlow;
+            Texture2D glowOrb = VFXCore.GlowOrb;
+            Texture2D ring = VFXCore.Ring;
+            if (texRuido == null || texBits == null || texRampa == null || texRemolino == null || softGlow == null || glowOrb == null || ring == null)
             {
-                float laserActive = Utils.GetLerpValue(ChargeTime - 30, ChargeTime + 70, Time, true)
-                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true);
-
-                Vector2[] positions = new Vector2[1500];
-                float[] rotations = new float[1500];
-                for (int i = 0; i < 1500; i++)
+                return false;
+            }
+            Color c = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
+            (c).A = 0;
+            float num = Utils.GetLerpValue(50f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration + 20), Time, true);
+            float num2 = Utils.GetLerpValue(0f, (float)ChargeTime, ((ModProjectile)this).Projectile.localAI[1], true) * Utils.GetLerpValue((float)(ChargeTime + 10), (float)(ChargeTime - 30), Time, true);
+            float num3 = ((Entity)((ModProjectile)this).Projectile).Center.X - Main.screenPosition.X;
+            float num4 = ((Entity)((ModProjectile)this).Projectile).Center.Y - Main.screenPosition.Y;
+            Vector2 val = new Vector2(num3, num4);
+            Main.EntitySpriteDraw(softGlow, val, (Rectangle?)null, DefinitivasLib.Alfa(c, 0.55f * num), 0f, Utils.Size(softGlow) * 0.5f, 2.2f * num, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(glowOrb, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.85f * num), 0f, Utils.Size(glowOrb) * 0.5f, 1.05f * num, (SpriteEffects)0, 0f);
+            float num5 = MathF.Pow(num, 0.8f);
+            float num6 = MathHelper.Lerp(150f, 56f, num5) * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
+            Vector2 val2 = VFXCore.RingQuadSize(num6);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
+            Vector2 val3 = VFXCore.RingQuadSize(num6 * 1.38f);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(softGlow, val + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * 900f * num2, (Rectangle?)Utils.Frame(softGlow, 1, 1, 0, 0, 0, 0), DefinitivasLib.Alfa(c, 0.35f * num2), ((ModProjectile)this).Projectile.rotation, Utils.Size(softGlow) * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * num2), (SpriteEffects)0, 0f);
+            if (Time < (float)ChargeTime && Time % 14f < 3f)
+            {
+                float lerpValue = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true);
+                int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
+                int num7 = 1 + (int)(lerpValue * 3.99f);
+                for (int i = 0; i < num7; i++)
                 {
-                    positions[i] = Projectile.Center + new Vector2(LargoCono * (i / 1500f) * (0.5f + laserActive * 0.5f), 0).RotatedBy(Projectile.rotation);
-                    rotations[i] = Projectile.rotation;
+                    int seed = (int)(Time * 0.017f) * 131 + i * 297;
+                    float num8 = VFXCore.Hash01(seed, i * 7 + 1, 3) * ((float)Math.PI * 2f);
+                    float num9 = 10f + 6f * lerpValue;
+                    float num10 = num9 + 26f + 34f * lerpValue;
+                    Vector2 start = val + new Vector2(MathF.Cos(num8), MathF.Sin(num8)) * num9;
+                    Vector2 end = val + new Vector2(MathF.Cos(num8 + 0.5f), MathF.Sin(num8 + 0.5f)) * num10;
+                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f, DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
                 }
-
-                VertexStrip strip = new VertexStrip();
-                strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
-
-                // EL SHADER DE LA CASA — HazConcentradoShader.fxc (el
-                // binario de efecto compilado; carga UNA vez con bandera de
-                // fallo). Si no cargara, el fallback de tiras texturizadas
-                // dibuja el haz — el arma NUNCA se rompe.
-                Effect lightningEffect = ObtenerShader();
-
-                if (lightningEffect != null)
+            }
+            if (Time > (float)ChargeTime && Time < (float)(ChargeTime + 8) && VFXCore.DestelloFinal != null)
+            {
+                Main.EntitySpriteDraw(VFXCore.DestelloFinal, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.9f * (1f - (Time - (float)ChargeTime) / 8f)), ((ModProjectile)this).Projectile.rotation, Utils.Size(VFXCore.DestelloFinal) * 0.5f, new Vector2(1.6f, 1.6f) * realSize, (SpriteEffects)0, 0f);
+            }
+            if (Time >= (float)(ChargeTime - 20))
+            {
+                float num11 = Utils.GetLerpValue((float)(ChargeTime - 30), (float)(ChargeTime + 70), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true);
+                Vector2[] array = (Vector2[])(object)new Vector2[1500];
+                float[] array2 = new float[1500];
+                for (int j = 0; j < 1500; j++)
                 {
-                    lightningEffect.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                    lightningEffect.Parameters["uTexturaCarne"].SetValue(texture);
-                    lightningEffect.Parameters["uTexturaSegunda"].SetValue(textureSecond);
-                    lightningEffect.Parameters["uTexturaRampa"].SetValue(textureGlow);
-                    lightningEffect.Parameters["uTexturaBits"].SetValue(textureBits);
-                    lightningEffect.Parameters["uTime"].SetValue(-Projectile.localAI[0] * 0.025f);
-                    // v6.55.0 — LA ESCALA COMPENSADA: la ventana V se
-                    // encoge con el tamaño real — los rasgos del plasma
-                    // miden SIEMPRE lo mismo en pantalla (la cura de los
-                    // dientes de sierra del ruido fino).
-                    lightningEffect.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
-                    lightningEffect.CurrentTechnique.Passes[0].Apply();
-                    strip.DrawTrail();
+                    array[j] = ((Entity)((ModProjectile)this).Projectile).Center + Utils.RotatedBy(new Vector2(3500f * ((float)j / 1500f) * (0.5f + num11 * 0.5f), 0f), (double)((ModProjectile)this).Projectile.rotation, default(Vector2));
+                    array2[j] = ((ModProjectile)this).Projectile.rotation;
+                }
+                VertexStrip val4 = new VertexStrip();
+                val4.PrepareStripWithProceduralPadding(array, array2, new VertexStrip.StripColorFunction(StripColor), new VertexStrip.StripHalfWidthFunction(StripWidth), -Main.screenPosition, true, true);
+                Effect val5 = ObtenerShader();
+                if (val5 != null)
+                {
+                    val5.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+                    val5.Parameters["uTexturaCarne"].SetValue((Texture)(object)texRuido);
+                    val5.Parameters["uTexturaSegunda"].SetValue((Texture)(object)texRemolino);
+                    val5.Parameters["uTexturaRampa"].SetValue((Texture)(object)texRampa);
+                    val5.Parameters["uTexturaBits"].SetValue((Texture)(object)texBits);
+                    val5.Parameters["uTime"].SetValue((0f - ((ModProjectile)this).Projectile.localAI[0]) * 0.025f);
+                    val5.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
+                    val5.CurrentTechnique.Passes[0].Apply();
+                    val4.DrawTrail();
                     Main.pixelShader.CurrentTechnique.Passes[0].Apply();
                 }
                 else
                 {
-                    // EL FALLBACK de la casa: el strip con la pila de la
-                    // librería (carne + remolino + núcleo) — el mismo haz
-                    // sin el .fx.
-                    var pts = new Vector2[64];
-                    var semi = new float[64];
-                    for (int i = 0; i < 64; i++)
+                    Vector2[] array3 = (Vector2[])(object)new Vector2[64];
+                    float[] array4 = new float[64];
+                    for (int k = 0; k < 64; k++)
                     {
-                        float p = i / 63f;
-                        pts[i] = positions[(int)(p * 1499)] - Main.screenPosition;
-                        semi[i] = MathF.Max(StripWidth(p) * 0.5f, 1f);
+                        float num12 = (float)k / 63f;
+                        array3[k] = array[(int)(num12 * 1499f)] - Main.screenPosition;
+                        array4[k] = MathF.Max(StripWidth(num12) * 0.5f, 1f);
                     }
                     RayoStrip.AbrirLote();
                     try
                     {
-                        Texture2D carne = DefinitivasLib.TexRuido;
-                        Texture2D remolino = DefinitivasLib.TexRemolino;
-                        if (carne != null)
-                            RayoStrip.FajaTexturadaEnLote(pts, semi,
-                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0]), 0.6f * realSize),
-                                carne, 420f, 1.0f, Main.GlobalTimeWrappedHourly, 0f, 1f);
-                        if (remolino != null)
-                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.7f),
-                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0]), 0.45f * realSize),
-                                remolino, 240f, 1.9f, Main.GlobalTimeWrappedHourly, 0f, 1f);
-                        if (carne != null)
-                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.4f),
-                                DefinitivasLib.Alfa(Color.White, 0.85f * realSize),
-                                carne, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
+                        Texture2D texRuido2 = DefinitivasLib.TexRuido;
+                        Texture2D texRemolino2 = DefinitivasLib.TexRemolino;
+                        if (texRuido2 != null)
+                        {
+                            RayoStrip.FajaTexturadaEnLote(array3, array4, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f), 0.6f * realSize), texRuido2, 420f, 1f, Main.GlobalTimeWrappedHourly);
+                        }
+                        if (texRemolino2 != null)
+                        {
+                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f), DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
+                        }
+                        if (texRuido2 != null)
+                        {
+                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.4f), DefinitivasLib.Alfa(Color.White, 0.85f * realSize), texRuido2, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
+                        }
                     }
-                    finally { RayoStrip.CerrarLote(); }
+                    finally
+                    {
+                        RayoStrip.CerrarLote();
+                    }
                 }
             }
-
-            // LOS POLVOS CROMÁTICOS — el pase de las partículas que
-            // recorren el haz (encima del strip, bajo la interfaz).
-            DibujarPolvos();
-
-            // EL CONTRATO DEL LOTE: salir con el lote vivo.
             VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
-        /// <summary>EL COLOR DEL STRIP — el gradiente que VIAJA a lo largo
-        /// por el realSize.</summary>
         public Color StripColor(float progress)
         {
-            Color color = ColorPrisma.ValueAt(Projectile.localAI[0] - progress * 100f);
-            color.A = 0;
-            return color * realSize;
+            //IL_001b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0020: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0029: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0030: Unknown result type (might be due to invalid IL or missing references)
+            Color val = DefinitivasLib.GradienteJuicio((((ModProjectile)this).Projectile.localAI[0] - progress * 100f) / 60f);
+            (val).A = 0;
+            return val * realSize;
         }
 
-        /// <summary>EL ANCHO DEL STRIP — p^0.8 · cbrt · realSize · 3500 ·
-        /// (1.1 + cos·(0.08 − p·0.06)) — nace estrecho, engorda y respira.</summary>
         public float StripWidth(float progress)
         {
-            float start = (float)Math.Pow(progress, 0.8f);
-            float cap = (float)Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
-            return start * cap * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
+            float num = (float)Math.Pow(progress, 0.800000011920929);
+            float num2 = (float)Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
+            return num * num2 * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
         }
 
         private static float[] ArraySemis(float[] perfil, float k)
         {
-            var r = new float[perfil.Length];
-            for (int i = 0; i < perfil.Length; i++) r[i] = perfil[i] * k;
-            return r;
-        }
-
-        // ================================================================
-        //  LOS POLVOS CROMÁTICOS — la partícula de la casa (misma vida,
-        //  mismo tamaño, mismo color con offset).
-        // ================================================================
-        private struct PolvoCromatico
-        {
-            public Vector2 Pos;
-            public Vector2 Vel;
-            public float Scale;
-            public float Offset;
-            public float Life;
-        }
-
-        private static readonly List<PolvoCromatico> _polvos = new();
-
-        private static void SpawnPolvo(Vector2 pos, Vector2 vel, float scale, float offset)
-        {
-            if (Main.dedServ || _polvos.Count > 220) return;
-            _polvos.Add(new PolvoCromatico
+            float[] array = new float[perfil.Length];
+            for (int i = 0; i < perfil.Length; i++)
             {
-                Pos = pos,
-                Vel = vel,
-                Scale = MathHelper.Clamp(scale, 0.2f, 4f),
-                Offset = offset,
-                Life = 0f
-            });
-        }
-
-        public override void PostAI()
-        {
-            ActualizarPolvos();
-        }
-
-        private static void ActualizarPolvos()
-        {
-            if (Main.dedServ) return;
-            for (int i = _polvos.Count - 1; i >= 0; i--)
-            {
-                var p = _polvos[i];
-                p.Life += 0.1f;
-                p.Scale *= 0.99f;
-                p.Vel *= 0.97f;
-                p.Vel = Vector2.Lerp(p.Vel, Main.rand.NextVector2Circular(5, 5), 0.02f + p.Life * 0.02f);
-                p.Pos += p.Vel;
-                if (p.Life > 4f) p.Scale *= 0.95f;
-                _polvos[i] = p;
-                if (p.Scale < 0.1f) _polvos.RemoveAt(i);
+                array[i] = perfil[i] * k;
             }
-        }
-
-        private static void DibujarPolvos()
-        {
-            if (_polvos.Count == 0) return;
-            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow");
-            if (glow == null) return;
-            for (int i = 0; i < _polvos.Count; i++)
-            {
-                var p = _polvos[i];
-                Color c = ColorPrisma.ValueAt(p.Offset + p.Life * 0.05f);
-                float alfa = MathHelper.Clamp(1f - p.Life / 6f, 0f, 1f);
-                Main.EntitySpriteDraw(glow, p.Pos - Main.screenPosition, null,
-                    DefinitivasLib.Alfa(c, 0.55f * alfa), 0, glow.Size() * 0.5f, p.Scale, 0, 0);
-                Main.EntitySpriteDraw(glow, p.Pos - Main.screenPosition, null,
-                    DefinitivasLib.Alfa(Color.White, 0.35f * alfa), 0, glow.Size() * 0.5f, p.Scale * 0.5f, 0, 0);
-            }
-        }
-
-        public override void OnKill(int timeLeft)
-        {
-            _polvos.Clear();
+            return array;
         }
     }
 

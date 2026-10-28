@@ -1,3 +1,62 @@
+# v6.56.0 — LA CURA DE LOS CÍRCULOS PLANOS + LA ESCALERA DEL RAYO + LAS ALAS CENTRADAS + EL PULSO CONSTANTE — EL CHECKLIST
+
+**Qué pasó** (la letra): «hay circulos planos al lanzar el ataque y al
+cargarlo antes de lanzarlo y despues… si es polvo ya sabes de donde
+conseguir el efecto» + «el sonido va y viene como si fueran ondas… hazlo
+un pulso constante y luego acabe» + «recuerdas los colores que usa el
+mod» + «las alas no estan centradas… se van hacia un lado o se rotan…
+crea alas runicas, varios ejemplos» + «la ira del cielo no tiene
+suficiente bruma, debe ser densa, el ataque atrae las nubes» + «el
+partidor… ni la bruma ni las particulas… de un extremo de la pantalla
+hasta el otro» + «el prisma… version inferior… crea 3 versiones
+inferiores mas» + «el primer trazo tambien esta llena de picos,
+investiga bien» + «crea al menos otras 3 armas definitivas, se
+creativo». LA CURA: LA LEY DEL CERO-DUST (los polvos de vanilla eran
+los círculos planos Y parte de los picos), el sonido v2 pulso constante,
+los colores del Juicio, las alas centradas + 7 nuevas, la escalera de
+5 niveles del Rayo Concentrado, el Partidor a pantalla completa, la Ira
+densa y 3 armas del grimorio nuevas.
+
+1. **LA PRUEBA DE LOS CÍRCULOS (LA QUE IMPORTA)**: [ ] agarrar EL RAYO
+   CONCENTRADO II y cargarlo: ya NO hay discos/círculos planos — el foco
+   es un bloom compacto con DOS ANILLOS DE CONTENCIÓN que se contraen
+   (150→56) contrarrotando + micro-arcos; [ ] al lanzar y después del
+   lanzamiento: CERO polvos cromáticos derivando — solo el canal vivo;
+   [ ] EL SONIDO: un PULSO constante (inicia → se mantiene → acaba) —
+   ya NO va y viene como ondas; [ ] LOS COLORES: el haz viste el
+   gradiente del Juicio (la paleta del mod, la de la Ira).
+2. **LA ESCALERA (bolsa de las definitivas — ahora 12)**: [ ] RAYO DEL
+   ALBA / VEREDICTO / JUICIO: el mismo haz escalado (0.45/0.60/0.75) —
+   el Juicio con aberración cromática; [ ] EL PRISMA REFORMADO (nivel
+   0.85): ya NO son 7 haces — es LA ESPINA VIVA verlet vestida de
+   plasma, con el color del Juicio viajando y cero polvos (la sentencia
+   del Testamento sigue al usarlo); [ ] no se pueden lanzar dos haces a
+   la vez (EscaleraDelRayo.HazLibre).
+3. **LAS ALAS (bolsa 15→22)**: [ ] cualquier ala de SIEMPRE: centrada
+   en la espalda (ya no se va a un lado) y SIGUEN la rotación del cuerpo
+   (rotarse con un carro/minijuego); [ ] LAS 4 RÚNICAS (Solares, del
+   Vacío, del Eclipse, del Juicio): runa en cada punta de pluma + anillo
+   de 8 glifos contrarrotante — la del Juicio con el gradiente caminando;
+   [ ] LAS 3 ANATOMÍAS (Agujas del Vacío, Cuchillas del Eclipse, Corolas
+   del Alba): siluetas radicalmente distintas.
+4. **EL PARTIDOR DE MUNDOS**: [ ] el corte CUBRE LA PANTALLA de extremo
+   a extremo (techo→piso) SIN importar dónde esté el cursor o el jugador;
+   [ ] mover al jugador/jefe durante el ataque: el ancla del corte NO se
+   mueve; [ ] ya NO hay bruma ni partículas de polvo — en su lugar
+   PULSOS viajeros por el canal + esquirlas-tira del corte.
+5. **LA IRA DEL CIELO**: [ ] el cielo se CUBRE de bruma densa ANTES del
+   juicio (racimos orgánicos convergiendo — el ataque ATRAE las nubes);
+   [ ] de día Y de noche la bruma se ve.
+6. **EL PRIMER TRAZO**: [ ] el trazo ya NO tiene picos de tinta — la
+   carne de plasma con el remolino cruzado y la punta viva ardiendo.
+7. **LAS 3 DEL GRIMORIO (bolsa de las definitivas)**: [ ] EL ÍNDICE DEL
+   JUICIO: el libro real + 8 páginas fantasma que salen volando y
+   cortan; [ ] LA PLUMA DEL VEREDICTO: el sello que se dibuja glifo a
+   glifo y DETONA en 12 lanzas + triple onda; [ ] EL OJO DEL JUICIO: el
+   ojo colosal en el cielo + el haz masivo de 7 capas.
+
+---
+
 # v6.55.0 — LA CURA DE LOS PICOS + EL RAYO CONCENTRADO II + LAS ALAS VECTORIALES — EL CHECKLIST
 
 **Qué pasó** (la letra): «en ambas hay picos… y esos picos están en todas

@@ -1,3 +1,45 @@
+# v6.56.0 — LA CURA DE LOS CÍRCULOS PLANOS + LA ESCALERA DEL RAYO + LAS ALAS CENTRADAS + EL PULSO CONSTANTE
+
+**La letra del usuario**: «hay circulos planos al lanzar el ataque y al cargarlo antes de lanzarlo y despues… si es polvo ya sabes de donde conseguir el efecto» + «el sonido va y viene como si fueran ondas… hazlo un pulso constante y luego acabe» + «recuerdas los colores que usa el mod» + «las alas no estan centradas… se van hacia un lado o se rotan… crea alas runicas, varios ejemplos» + «la ira del cielo no tiene suficiente bruma, debe ser densa, el ataque atrae las nubes» + «el partidor… ni la bruma ni las particulas… de un extremo de la pantalla hasta el otro» + «el prisma… version inferior… crea 3 versiones inferiores mas» + «el primer trazo tambien esta llena de picos, investiga bien» + «crea al menos otras 3 armas definitivas, se creativo».
+
+## (1) LA INVESTIGACIÓN — LA CAUSA RAÍZ DE LOS PICOS Y DE LOS CÍRCULOS PLANOS
+Tres matrices compartidas entre TODAS las armas afectadas: **(a) LOS DUST DE VANILLA dentro de los ataques** — los sprites redondos/chispas pegados al filo son LA SIERRA (cada Dust duro asoma en la funda tenue y el ojo lo lee como una púa) y los que derivan se leen como «círculos planos» — el reporte del usuario en el RC2 lo confirmó: los polvos cromáticos de la carga/lanzamiento ERAN los círculos. **NACE LA LEY DE LA CASA (códice §0): CERO DUST DE VANILLA EN ATAQUES DE HAZ/PLASMA — el plasma texturizado ES el efecto.** (b) **RuidoTinta en el Primer Trazo** — la autopsia v6.54.8 («bandas de fBm angulares») documentó la enfermedad pero la cura jamás le llegó al Trazo. (c) **EL COLOR PRISMA GENÉRICO en el RC2** — el arma definitiva vestía un arcoíris sin identidad.
+
+## (2) EL RAYO CONCENTRADO II — EL FOCO SIN DISCOS, EL SONIDO DE PULSO, LOS COLORES DEL JUICIO
+- **EL FOCO**: los 5 glows apilados (uno a 14× = 896 px de disco plano — parte de los «círculos») FUERON. Ahora: bloom compacto 140 px + GlowOrb + **DOS ANILLOS DE CONTENCIÓN que se contraen** (150→56, contrarrotando) durante la carga + micro-arcos **StormLib.Bolt** + DestelloFinal al encendido. Los polvos cromáticos retirados COMPLETOS (carga, lanzamiento y post-lanzamiento).
+- **EL SONIDO v2 — EL PULSO CONSTANTE**: la 1ª gen tenía TRES vaivenes de fábrica: el grave casi afinado (49.0/49.17 Hz) era un BATIDO de 4 ciclos/bucle; la mezcla respiraba 1 ciclo por bucle; y el ruido vivía en banda MÓVIL (640±280 Hz barriendo = la ilusión de onda). LA v2: **cero batido, cero respiración, banda fija** — inicia el pulso, se mantiene, acaba. Y en el láser el pitch va CONGELADO (el vaivén del pitch era el cuarto pecado).
+- **LOS COLORES DEL JUICIO**: todo el haz viste `GradienteJuicio` (la identidad cromática del grimorio, 60 t/ciclo — el mismo tempo de la Ira) — el RC2 es el ataque que el grimorio lanza en sus niveles más altos y AHORA lo parece.
+- **LA LUZ DEL CANAL**: 3 puntos de emisión a lo largo del haz (antes no había NINGUNA).
+
+## (3) LA ESCALERA DEL RAYO — 5 NIVELES HASTA EL RC2
+El arma Rayo Concentrado ahora sube por niveles hasta desembocar en el RC2 (la cima, con clase propia intacta). Los tres nuevos + el prisma reformado comparten **RayoConcentradoNivelProjectile** (el nivel viaja en `ai[1]` — el array `ai` real del tML llega hasta `ai2`; `ai[3]` es IndexOutOfRangeException): **el Rayo del Alba** (0.45) · **el Rayo del Veredicto** (0.60) · **el Rayo del Juicio** (0.75 + aberración) · **EL PRISMA PRIMORDIAL REFORMADO** (0.85: los 7 haces y TODOS los Dust fuera — ahora es LA ESPINA VIVA verlet (16 nodos que se rezagan y latiguean al barrer) vestida con LA PILA COMPLETA del plasma: aura lenta, cuerpo con el color del Juicio VIAJANDO, remolino hirviendo, núcleo en banda, vena blanca, aberración cromática; la sentencia del Testamento intacta). `EscaleraDelRayo.HazLibre` evita el doble haz.
+
+## (4) LAS ALAS — LA CURA DEL CENTRADO + 4 RÚNICAS + 3 ANATOMÍAS
+- **EL CENTRADO (la queja: «se van hacia un lado o se rotan»)**: el ancla del enjambre es ahora SIMÉTRICA al sprite del jugador (el barrido asimétrico que las desplazaba, eliminado) y las alas siguen la rotación del cuerpo con `pl.fullRotation` (camelCase — `FullRotation` no compila en tML 2026.08).
+- **EL OVERLAY RÚNICO `DibujarRunas`** (escuela A): una runa en cada punta de pluma + anillo de 8 glifos contrarrotante.
+- **CATÁLOGO 17-23**: las 4 RÚNICAS (Solares · del Vacío contrarrotante · del Eclipse · del Juicio con el gradiente caminando) + las 3 ANATOMÍAS (Agujas del Vacío · Cuchillas del Eclipse · Corolas del Alba). **Bolsa de las Alas: 15 → 22**.
+
+## (5) EL PARTIDOR DE MUNDOS — A PANTALLA COMPLETA
+La bruma de su ataque y las partículas FUERA (la letra fue explícita). El corte es ahora **UN RAYO DE ENERGÍA DE EXTREMO A EXTREMO DE LA PANTALLA** (techo−320 → piso+320), **INDEPENDIENTE de la posición del cursor y del jugador** (ancla congelada en el centro de pantalla al disparar, viaja por `SendExtraAI` para que clientes y servidor estén de acuerdo). En su lugar: **pulsos viajeros** a lo largo del canal + **esquirlas-tira** que se desprenden del corte.
+
+## (6) LA IRA DEL CIELO — BRUMA DENSA + LA ATRACCIÓN
+El ataque ATRAE LAS NUBES al juicio: **13 racimos BrumaFX** (170-490 px, 9 puffs, 0.62) + **3 bandas de 540 px** que convergen — el cielo se VUELVE tormenta antes del rayo.
+
+## (7) EL PRIMER TRAZO — CURADO
+`RuidoTinta` → **CarnePlasma** (la textura del plasma de la casa) + el remolino cruzado + la punta viva (GlowOrb/SparkleStar). Cero Dust. Los picos tinta murieron con el ruido que los dibujaba.
+
+## (8) LAS 3 ARMAS DEL GRIMORIO (NUEVAS — la bolsa 6 → 12)
+- **EL ÍNDICE DEL JUICIO** — el libro real (sprite del Grimorio del Eterno) + **8 páginas fantasma** (EspectroLib + TajoLib) que salen volando y cortan.
+- **LA PLUMA DEL VEREDICTO** — **el sello que se dibuja GLIFO A GLIFO** (SigiloLib) y al completarse DETONA en **12 lanzas LumenLib.Lance** + triple onda.
+- **EL OJO DEL JUICIO** — **SombrasLib.Ojo colosal (300 px)** en el cielo + **BeamLib.Rayo** — el haz masivo de 7 capas por fin con su primer usuario real (la lección: `VFXCore.Begin()` va ANTES de `BeamLib.Rayo` — Begin limpia el buffer).
+
+## (9) LOCALIZACIÓN Y REGISTRO
+hjson ×3 (13 claves nuevas + 3 tooltips rehechos) via el empalmador de anclas (la casa JAMÁS edita hjson con Edit/MultiEdit — normaliza tabs). Bolsas: Alas 15→22, Definitivas 6→12. Iconos 30×30 nuevos: 7 alas + 3 escalera + 3 armas (hoja `definitivas_v6560_hoja.png`).
+
+**Verificación**: oráculo 0/0 · audit_texturas 595 clases 0 faltantes · build REAL «Compilation finished with 0 errors and 0 warnings» · .tmod v6.56.0 (6.395.470 B, md5 3b45a5fe…): **474 entradas** (461 + 13 iconos nuevos), EOF exacto · headless «Sandboxing → Adding → Configuring → Finalizing v6.56.0 → Choose World» 0 EXCEPCIONES · barrido externo: la referencia del códice §4.1 neutralizada, cero restantes.
+
+> **NOTA DE RECUPERACIÓN (v6.56.0-reconstrucción)**: el commit fuente original de esta versión se perdió con el wipe del sandbox del 29-oct (el .tmod verificado y las notas de release sobrevivieron en el respaldo). La fuente del repo fue RECONSTRUIDA DEL BINARIO: los 21 tipos nuevos + los 11 tipos modificados se recuperaron por decompilación (ILSpy 9.1 + normalización de artefactos `fijar_decomp.py`) con el mapeo tipo→archivo EXACTO del PDB empaquetado; hjson ×3, sonido v2 e iconos extraídos del .tmod sin pérdida (rawimg→PNG píxel-idéntico). La prueba de equivalencia: recompilación 0/0 y decompilación del rebuild comparada contra la referencia — 373/391 archivos byte-idénticos, 13 idénticos tras normalizar los comentarios IL, los 5 restantes con diferencias de renderizado del decompilador (nombres de locales, orden de metadatos, caché de delegados) — y las 474 entradas del .tmod reconstruido byte-idénticas salvo DLL/PDB (equivalencia demostrada). Los comentarios de la fuente original no viajan en el .dll: se perdieron y se re-documentaron en el códice v1.1.
+
 # v6.55.1 — LA RONDA DE REVISIÓN: EL SHADER DE VERDAD + LA PURGA FINAL DE LAS MENCIONES
 
 **La letra del usuario**: «antes que nada deberías darle una revisada al código buscando errores que hayas pasado por alto y referencias no borradas o modificadas en cualquier contexto».

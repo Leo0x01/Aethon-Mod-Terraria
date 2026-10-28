@@ -1957,15 +1957,18 @@ Items: {
 		DisplayName: The Primordial Prism
 		Tooltip:
 			'''
-				THE DEFINITIVE ATTACK OF THE MOD — the prism inherits the fusion beam's
-				crown and SURPASSES it: SEVEN textured spectrum beams converge on the
-				focus; from it rises THE CENTRAL BEAM — a LIVING SPINE that lags and
-				WHIPS as you sweep, dressed in THE SIX-PASS STACK: slow aura, body with
-				color TRAVELING along it, BOILING swirl, banded core, white vein and
-				chromatic aberration — with sweep AFTERIMAGES, CRAWLING ARCS, the
-				charge telegraph, the opening iris, the elastic overshoot, the
-				incommensurable flicker and the IMPACT ZONE blazing at the end.
-				(The fusion beam, surpassed.)
+				TIER 4 of the Concentrated Ray ladder — the inferior version just
+				below RC2 (the Prisma should be an inferior version of the
+				Concentrated Ray 2).
+				One single thing: THE LIVING SPINE — 16 verlet nodes that lag
+				and WHIP as you sweep — dressed in the house PLASMA: the full
+				stack of textured passes (slow aura, body with the traveling
+				Judgment color, boiling swirl, banded core, white vein and
+				chromatic aberration).
+				Its sweep after-images, its focus with rings contracting with
+				the convergence, the charge micro-arcs and the channel light.
+				ZERO dust: the tip BURNS with plasma.
+				(The Testament still dictates it as a sentence.)
 			'''
 	}
 
@@ -2031,15 +2034,79 @@ Items: {
 		Tooltip:
 			'''
 				"The pure beam, in your hand: 3500 px of breathing plasma."
-				THE SIXTH OF THE BAG — the full cone: 300 ticks of charge
-				(the stacked glow mouth growing + the aiming needle) and
-				800 of laser with its sine sweep. The FOUR plasma layers
-				multiplied (the fBm flesh · the second noise · the heat
-				ramp · the double-AND sparks) run through the house's own
-				shader — with compensated noise scale and a soft white
-				core: organic plasma, NEVER spikes. With its camera kick,
-				its music ducked to 30 %, its infinite flight and its
-				chromatic motes running down the channel.
+				THE SUMMIT of the ladder — the full cone: 300 ticks of charge
+				(the aiming needle between TWO CONTAINMENT RINGS that contract)
+				and 800 of laser with its sine sweep.
+				v6.56.0: THE FOCUS WITHOUT DISCS (one compact bloom, one solid
+				core, fine rings — never flat circles), ZERO dust along the
+				conduit (the shader plasma IS the effect), THE CONSTANT-PULSE
+				SOUND (starts, holds, ends — no more wobble) and THE JUDGMENT
+				COLORS: the grimoire gradient running the whole beam.
+				With its camera kick, its music ducked 30% and infinite flight.
+			'''
+	}
+
+	RayoDelAlba: {
+		DisplayName: The Ray of Dawn
+		Tooltip:
+			'''
+				TIER 1 of the Concentrated Ray ladder: 90 charge, 300 laser,
+				a 1500 px cone — the dawn learning to burn.
+				The house plasma (anti-spike CarnePlasma) at 0.45 intensity,
+				with its containment rings and the Judgment gradient.
+			'''
+	}
+
+	RayoDelVeredicto: {
+		DisplayName: The Ray of the Verdict
+		Tooltip:
+			'''
+				TIER 2: 150 charge, 450 laser, a 2100 px cone — the verdict takes
+				shape. 0.60 intensity of the house plasma.
+				Contracting rings, telegraph needle and the traveling gradient.
+			'''
+	}
+
+	RayoDelJuicio: {
+		DisplayName: The Ray of Judgment
+		Tooltip:
+			'''
+				TIER 3: 210 charge, 600 laser, a 2800 px cone — one step below
+				the summit. 0.75 intensity + chromatic aberration at the edge.
+				The Judgment, almost complete.
+			'''
+	}
+
+	IndiceDelJuicio: {
+		DisplayName: The Index of Judgment
+		Tooltip:
+			'''
+				The REAL grimoire opens above your head and its EIGHT GHOST
+				PAGES fly out to hunt: each flies with its history tail and
+				cuts with the crescent born AFTER the pass.
+				120 damage per page — the index of the devouring book.
+			'''
+	}
+
+	PlumaDelVeredicto: {
+		DisplayName: The Quill of the Verdict
+		Tooltip:
+			'''
+				The quill DRAWS the seal in the air — glyph by glyph, 45 t — and
+				when it completes it DETONATES: triple shockwave, twelve light
+				lances in a fan, the seal BURNING two more seconds.
+				380 the seal · 60 per lance.
+			'''
+	}
+
+	OjoDelJuicio: {
+		DisplayName: The Eye of Judgment
+		Tooltip:
+			'''
+				A COLOSSAL EYE opens in the sky between the page mist: the pupil
+				follows you, contracts… and FIRES the massive house beam
+				sweeping the world. 900 per sweep hit.
+				The judgment looking down at you.
 			'''
 	}
 
@@ -2047,11 +2114,14 @@ Items: {
 		DisplayName: The Bag of Ultimate Weapons
 		Tooltip:
 			'''
-				THE FIVE SENTENCES of Aethon's Verdict with their FULL
-				effect stacks (the multilayer plasma: organic fBm flesh —
-				no more spikes) + THE CONCENTRATED RAY II, the pure beam
-				with its own shader: the prism, the splitter, the requiem,
-				the wrath… and THE TESTAMENT, the crown that dictates them.
+				THE CONCENTRATED RAY LADDER: Dawn, Verdict, Judgment, THE PRISMA
+				and THE CONCENTRATED RAY II (the summit) — plus the Verdict
+				sentences (the full-screen world splitter, the requiem, the sky
+				wrath with its dense brume)… and THE THREE NEW GRIMOIRE ARMS:
+				the Index of ghost pages, the Quill of the detonating seal and
+				THE EYE of judgment.
+				All with THE HOUSE PLASMA (anti-spike fBm flesh) and the JUDGMENT
+				COLORS. And THE TESTAMENT, the crown that dictates them.
 			'''
 	}
 
@@ -2059,14 +2129,12 @@ Items: {
 		DisplayName: The Arsenal Chest
 		Tooltip:
 			'''
-				ALL TWENTY-FOUR bags of the arsenal inside a single one:
+				ALL TWENTY-THREE bags of the arsenal inside a single one:
 				the Tester's, the Foundational, the Runic Suns'… every bag
-				and the rest. Open it and deploy the one you need.
+				up to the god's. Open it and deploy the one you need.
 				Right-click. Only delivers what you lack.
 			'''
 	}
-
-	AlasPrismaBase.Estilo: Code-born wings — their own palette, tempo and noise
 
 	AlasDeTintaSerena: {
 		DisplayName: Serene Ink Wings
@@ -2200,6 +2268,171 @@ Items: {
 			'''
 				Deep magenta dripping cells — the ink that bites.
 				240 flight time · no fall damage · folds before real wings.
+			'''
+	}
+
+	BolsaInvestigacion: {
+		DisplayName: The Research Bag
+		Tooltip:
+			'''
+				The items born from studying the god's effect textures:
+				Concentrated Rays, Prism Thunder, Essence Sludge,
+				Constellation Scepter, Cosmic Trail and Living Ink — all
+				rewritten 100 % for the mod, zero ported material.
+				The Wings Bag rides inside.
+				Right-click to deploy. Only delivers what you lack.
+			'''
+	}
+
+	RayosConcentrados: {
+		DisplayName: Concentrated Rays
+		Tooltip:
+			'''
+				"Four layers of light multiplied: the fusion ray, yours."
+				The god's signature attack technique, rewritten 100 %:
+				the noise body, the double-sampled sparks, the glow profile
+				and the core+skirt — multiplied per vertex, with the
+				rainbow running and the white-hot core. 45 t of charge
+				(the runic suns grow) then FIRE: 2000 px of breathing beam.
+				Segment damage, just like the original.
+			'''
+		Prueba: Test weapon — the recipe is 10 wood.
+	}
+
+	TruenoDelPrisma: {
+		DisplayName: The Prism Thunder
+		Tooltip:
+			'''
+				The god's branching bolt, born anew: TWO samples of the
+				same texture offset by 0.5 and multiplied (only the
+				matching veins survive), the polyline that SETTLES after
+				the strike, and the rainbow fading away. 1 big bolt + up
+				to 2 small ones on the neighbors.
+			'''
+		Prueba: Test weapon — the recipe is 10 wood.
+	}
+
+	LodoDeEsencia: {
+		DisplayName: The Essence Sludge
+		Tooltip:
+			'''
+				The bioluminescent purple puddles: the dark base rippling
+				(sine warp) with hundreds of violet dots pulsing on top.
+				Puddles SWELL as they stack. Hurts whoever steps in them.
+			'''
+		Prueba: Test weapon — the recipe is 10 wood.
+	}
+
+	CetroConstelaciones: {
+		DisplayName: The Constellation Scepter
+		Tooltip:
+			'''
+				Summons stars that orbit and repel each other; the close
+				ones join through damage-dealing LINES (the god's
+				stellar minion's constellation, 100 % ours). The first one
+				draws the double-spinning area vignette. Up to 5 stars.
+			'''
+		Prueba: Test weapon — the recipe is 10 wood.
+	}
+
+	EstelaDelCosmos: {
+		DisplayName: The Cosmic Trail
+		Tooltip:
+			'''
+				The Saturn-like ring of the god's stellar minion, 100 %
+				ours and PURPLE/BLACK: the band with self-interference
+				(the same texture at two speeds multiplied) and channels as
+				masks — violet body, hot lilac line, blue-violet edge.
+				It breathes and spins behind you.
+			'''
+		Titulo: THE SATURN RING, PURPLE AND BLACK
+		Linea1: The stellar minion's liquid ring
+		Linea2: Pure decoration — accessory or vanity
+	}
+
+	TintaViva: {
+		DisplayName: The Living Ink
+		Tooltip:
+			'''
+				The god's liquid cord, made yours: TWO ink layers
+				multiplied (the lace of holes that opens and closes), the
+				color born from the black→purple→lilac LUT, and the
+				curling wave. The tail follows YOUR real trail of motion.
+			'''
+		Titulo: THE GOD'S LIQUID CORD, MADE YOURS
+		Linea1: The iridescent goo tail that follows your trail
+		Linea2: Pure decoration — accessory or vanity
+	}
+
+	AlasPrismaBase.Estilo: Code-born wings — their own palette, tempo and noise
+
+	AlasRunicasSolares: {
+		DisplayName: Solar Rune Wings
+		Tooltip:
+			'''
+				Golden feathers of the runic suns — every tip carries a glyph
+				of the solar alphabet and a rune ring spins at the root.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasRunicasDelVacio: {
+		DisplayName: Rune Wings of the Void
+		Tooltip:
+			'''
+				Violet-cyan: the runes of the VOID ride each feather tip while
+				the counter-rotating ring drinks the light.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasRunicasDelEclipse: {
+		DisplayName: Rune Wings of the Eclipse
+		Tooltip:
+			'''
+				Amber on black: the ABYSS glyphs burn at the tips and the ring
+				breathes with the dusk of the eclipse.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasRunicasDelJuicio: {
+		DisplayName: Rune Wings of the Judgment
+		Tooltip:
+			'''
+				The Judgment gradient WALKS the glyphs: gold, amber, white,
+				violet and cyan spinning in the crown of the root.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AgujasDelVacio: {
+		DisplayName: Needles of the Void
+		Tooltip:
+			'''
+				Four concave needle-feathers curved like a claw — the sharpest
+				thing that ever flew. Thin, long, violet.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	CuchillasDelEclipse: {
+		DisplayName: Blades of the Eclipse
+		Tooltip:
+			'''
+				Crescent-moon blades: the convex edge lives early and the concave
+				spine follows — wings that CUT the air.
+				Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	CorolasDelAlba: {
+		DisplayName: Corollas of the Dawn
+		Tooltip:
+			'''
+				Seven rounded petals of gold and warm white, slow flap —
+				the open corolla of the dawn.
+				Flight 240 · no fall damage · folds before real wings.
 			'''
 	}
 }
@@ -2350,6 +2583,14 @@ Projectiles: {
 	BocadoDelSueloProjectile.DisplayName: The Ground Bite
 	SombraPagina2Projectile.DisplayName: The Shadow of the Page II
 	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
+	// v6.54.0 — LA INVESTIGACIÓN
+	RayosConcentradosHeld.DisplayName: The Concentrated Rays
+	TruenoPrismaRayo.DisplayName: The Prism Thunder Bolt
+	LodoGlob.DisplayName: The Sludge Glob
+	LodoCharco.DisplayName: The Essence Puddle
+	EstrellaPrisma.DisplayName: The Prisma Star
+	EstelaCosmosHalo.DisplayName: The Cosmic Trail
+	TintaVivaHalo.DisplayName: The Living Ink
 }
 
 Buffs: {

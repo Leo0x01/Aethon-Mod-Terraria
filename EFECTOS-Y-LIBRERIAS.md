@@ -9,7 +9,7 @@
 > que lo que necesitas YA EXISTE es altísima. **NO SE INVENTA NADA NUEVO SIN
 > ANTES HABER REVISADO ESTE CATÁLOGO.**
 
-**Versión del códice:** 1.0 (v6.55.1) · **Mantenimiento:** todo agente (IA o humano)
+**Versión del códice:** 1.1 (v6.56.0) · **Mantenimiento:** todo agente (IA o humano)
 que cree o modifique una librería, shader, textura, efecto visual o de sonido
 **DEBE documentarlo aquí en la misma entrega** (ver §10 — El Decálogo y §11 — Bitácora).
 
@@ -59,6 +59,17 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      StormLib, RayoStrip, BeamLib.
    - **`Main.rand` en render** → todo determinista por `Hash01`/semilla
      (multi-máquina sin red: el efecto se ve IGUAL en todos los clientes).
+   - **Dust de vanilla DENTRO de ataques de haz/plasma** → **CERO Dust**
+     (LEY v6.56.0). Los sprites redondos/chispas de Dust junto al filo son
+     LA SIERRA de los picos (cada Dust duro asoma en la funda y el ojo lo
+     lee como una púa) y los que derivan se leen como «círculos planos».
+     El plasma texturizado (CarnePlasma + BitsChispa + GlowOrb + SparkleStar)
+     **ES el efecto**. Caso ejemplar: el RC2 de la v6.56.0 cargaba polvos
+     cromáticos en la carga/lanzamiento — el usuario vio «círculos planos»;
+     la cura fue retirarlos COMPLETOS y vestir el foco con anillos de
+     contención + micro-arcos StormLib.Bolt. Lo mismo en el Primer Trazo
+     (RuidoTinta → CarnePlasma) y el Prisma (la espina verlet vestida de
+     plasma, cero polvos).
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -304,7 +315,7 @@ Lo usan **137 archivos** del mod.
 
 ### 4.1 SombrasLib.cs (1.127 líneas, v6.50.62) — EL LENGUAJE DE LAS SOMBRAS
 
-**Qué dibuja:** la estética Pride (FMA:B) — masa NEGRA que tapa, OJOS blancos que se abren y MIRAN, dientes, charcos, bruma que se come la luz. Paleta propia: `Negro(8,4,7)`, `Blanco(250,248,244)`, `Rojo(198,18,24)`, `RojoGarganta(120,8,12)`, `Violeta(118,74,190)`, `HumoNegro(18,10,28)`, `HumoVioleta(64,42,96)`.
+**Qué dibuja:** la estética de las sombras devoradoras (la investigación visual de la casa) — masa NEGRA que tapa, OJOS blancos que se abren y MIRAN, dientes, charcos, bruma que se come la luz. Paleta propia: `Negro(8,4,7)`, `Blanco(250,248,244)`, `Rojo(198,18,24)`, `RojoGarganta(120,8,12)`, `Violeta(118,74,190)`, `HumoNegro(18,10,28)`, `HumoVioleta(64,42,96)`.
 
 **API (todas coords MUNDO; gestionan sus lotes vía VFXCore.Flush* — escuela A):**
 - `Columna(raiz, cabeza, tiempo, semilla)` / `ColumnaViva(...)` → `Vector2[]` — la ESPINA del tentáculo (IK determinista hacia la presa)
@@ -430,7 +441,9 @@ Lista de `Pieza` (offset/escala/rotación/color/blend/Z) ancladas a un cuerpo vi
 
 ### 4.24 AlasAuroraLib.cs + AlasEstilo.cs (v6.52→v6.55) — LAS ALAS
 
-Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA pluma a pluma (`sin(flap − i·0.45)`), el color viaja por vértice dispersándose, ruido fluyendo en 2 capas, la punta se RASGA por hash. **v6.55 LA REFORMA VECTORIAL:** cada pluma = TIRA DE 9 NODOS con eje curvado y perfil raíz→vientre→punta afilada, ASIMETRÍA DE CUCHILLA (filo convexo, lomo cóncavo), vértices COMPARTIDOS (lección RayoStrip). `AlasCatalogo` declara las 15+ ANATOMÍAS (`De(byte indice)`, `Todos`). `Dibujar(player, estilo, spread, flap, mezclaDia)`. **Contrato C:** cierra el lote (sonda), dibuja con SUS BasicEffect y LO REABRE.
+Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA pluma a pluma (`sin(flap − i·0.45)`), el color viaja por vértice dispersándose, ruido fluyendo en 2 capas, la punta se RASGA por hash. **v6.55 LA REFORMA VECTORIAL:** cada pluma = TIRA DE 9 NODOS con eje curvado y perfil raíz→vientre→punta afilada, ASIMETRÍA DE CUCHILLA (filo convexo, lomo cóncavo), vértices COMPARTIDOS (lección RayoStrip). `AlasCatalogo` declara las anatomías (`De(byte indice)`, `Todos`). `Dibujar(player, estilo, spread, flap, mezclaDia)`. **Contrato C:** cierra el lote (sonda), dibuja con SUS BasicEffect y LO REABRE.
+
+**v6.56.0 — LA CURA DEL CENTRADO + LAS RÚNICAS + LAS ANATOMÍAS:** (1) EL CENTRADO: el ancla del enjambre es ahora SIMÉTRICA al sprite del jugador (el barrido asimétrico que las mandaba a un lado, FUERA) y las alas siguen la rotación del cuerpo con **`pl.fullRotation`** (camelCase — `FullRotation` NO compila en tML 2026.08, es campo de `Player`, no propiedad). (2) **EL OVERLAY RÚNICO `DibujarRunas`** (escuela A): una runa en cada PUNTA de pluma + el anillo de 8 glifos contrarrotante (SigiloLib). (3) **EL CATÁLOGO 17-23**: las 4 RÚNICAS (Solares · del Vacío contrarrotante · del Eclipse · del Juicio con el gradiente caminando) y las 3 ANATOMÍAS (Agujas del Vacío · Cuchillas del Eclipse · Corolas del Alba). Bolsa de las Alas: 15→22. Los ítems viven en `Content/Items/Alas/AlasNuevasV6560.cs`.
 
 ### 4.25 Las utilidades de soporte
 
@@ -438,6 +451,7 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 - **CompasLib.cs** — LA COREOGRAFÍA DECLARATIVA: `EnVentana(reloj, ciclo, inicio, dur, out fase01)` · `Cada(reloj, periodo)`; STATELESS = multi-instanciable gratis. + `DepurarDibujar` (F7).
 - **FormaLib.cs** — LAS COLISIONES DE FORMAS: segmento/banda/cápsula/anillo/sector, entidades NPC/Jugador/Proyectil, `RecorrerNPCs(centro, radioMax, Action)`. Todo MUNDO.
 - **DefinitivasLib.cs** (v6.54.6) — el soporte de las 6 sentencias: paleta del Juicio (`GradienteJuicio(t)`), `BuscarPresa`, `Cono(hitbox, origen, largo, ang, semiang)`, `AnchoCono(progress, time, k)` (la fórmula del haz de fusión), `DeGolpe`, `Sonar` blindado, `Tex(ruta)` null-safe **y las 4 texturas del plasma** (§6.A).
+- **RayoConcentradoNivelProjectile.cs** (v6.56.0) — **LA ESCALERA DEL RAYO**: UN solo proyectil para los CINCO niveles del Rayo Concentrado (el nivel viaja en **`ai[1]`** — el array `ai` del tML real llega hasta `ai2`; `ai[3]` es `IndexOutOfRangeException`). Escala 0.45 (Rayo del Alba) · 0.60 (Veredicto) · 0.75+aberración (Juicio) · 0.85 **EL PRISMA REFORMADO** (la ESPINA VIVA verlet vestida de la pila completa de plasma — los 7 haces y TODO Dust fuera; la sentencia del Testamento intacta) · 1.0 **EL RC2** (la cima, que conserva su clase propia). `EscaleraDelRayo.HazLibre(player)` evita el doble haz. Los ítems en `Content/Weapons/Definitivas/RayosConcentrados.cs`.
 
 ---
 
@@ -572,9 +586,9 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 
 ### 7.3 Capa 3 — EL ÚNICO AUDIO PROPIO: el bucle del Rayo Concentrado II
 
-- **Archivo:** `Content/Sounds/RayoConcentradoLoop.ogg` — 89.388 B, Vorbis q5, 44.1 kHz estéreo, **6.000 s EXACTOS de bucle periódico**. Es el único .ogg/.wav/.mp3 del mod.
-- **La receta** (`tools/gen_sonido_rayo_v6550.py`, numpy+scipy+ffmpeg): (1) EL GRAVE — dos senos casi afinados (49.0/49.17 Hz → batido de 4 ciclos por loop, "el corazón late") + subarmónico; (2) EL MOTOR — armónicos impares con detune de UN CICLO ENTERO (periódico exacto) modulados por el pulso; (3) EL PLASMA — ruido pardo en banda móvil (640±280 Hz, 14 tramos Blackman) vuelto periódico fundiendo cola con cabeza (costura 0.5 s); (4) EL CRUJIDO — ~156 impactos agudos high-pass 1.8 kHz que NUNCA caen en la costura; (5) mezcla con respiración de 1 ciclo exacto, −1.5 dBFS, estéreo con retardo cíclico 0.4 ms. **El truco del bucle perfecto: TODAS las frecuencias tonales son múltiplos enteros de 1/6 Hz.**
-- **La reproducción** (`RayoConcentradoDosProjectile.SonidoEnLoop`): un slot ActiveSound con `ProjectileAudioTracker`, `IsLooped`, `MaxInstances=0`; cada frame actualiza Position/Volume/Pitch por la fase del arma; muere con el proyectil. Extra: `On_Main.UpdateAudio` baja la MÚSICA −30% mientras vive el haz (el truco del jefe de referencia).
+- **Archivo:** `Content/Sounds/RayoConcentradoLoop.ogg` — 55.861 B, Vorbis q5, 44.1 kHz estéreo, **6.000 s EXACTOS de bucle periódico**. Es el único .ogg/.wav/.mp3 del mod.
+- **v2 (v6.56.0) — EL PULSO CONSTANTE.** La letra del usuario: *«el sonido va y viene como si fueran ondas, pero el ataque no son ondas — hazlo un pulso constante y luego acabe»*. LA AUTOPSIA DE LA 1ª GEN (el contrajemplo): su GRAVE casi afinado (49.0/49.17 Hz) era un **BATIDO** de 4 ciclos por bucle (el «va y viene»), y su mezcla llevaba **RESPIRACIÓN** de 1 ciclo (el vaivén) y una **BANDA MÓVIL** de ruido (640±280 Hz barriendo — la ilusión de onda). LA RECETA v2 (`gen_sonidopulso_v6560.py`, numpy+ffmpeg — el script se perdió con el wipe del 29-oct; solo sobrevivió el .ogg que empaqueta el .tmod, la receta documentada aquí es la fuente de verdad): **CERO batido** (un solo grave 48 Hz, sin pareja desafinada), **CERO respiración** (mezcla plana), **BANDA FIJA** (el plasma vive en su banda, no la barre), y el ARRANQUE-CONTENIDO-FINAL lo pone la reproducción, no el archivo. Mantiene el truco de la 1ª gen: bucle perfecto por construcción (frecuencias múltiplos de 1/6 Hz, costura del ruido fundida).
+- **La reproducción** (`RayoConcentradoDosProjectile.SonidoEnLoop`): un slot ActiveSound con `ProjectileAudioTracker`, `IsLooped`, `MaxInstances=0`; cada frame actualiza Position/Volume/Pitch por la fase del arma (en el láser el pitch va **CONGELADO** — otro de los vaivenes de la 1ª gen); muere con el proyectil. Extra: `On_Main.UpdateAudio` baja la MÚSICA −30% mientras vive el haz.
 - **Si mañana hace falta OTRO sonido propio en bucle:** replicar ESTE patrón (generador numpy con frecuencias múltiplos de 1/L + costura fundida del ruido + SonidoEnLoop con tracker) y documentarlo aquí.
 
 ---
@@ -658,6 +672,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 | v6.54.8 | Las 4 texturas del plasma (test anti-picos FFT) | §6.A |
 | v6.55.0 | HazConcentradoShader (sin .fxc — el bug), el sonido sintetizado, AlasAuroraLib vectorial | §5.4, §7.3, §4.24 |
 | **v6.55.1** | **EL DESCUBRIMIENTO .fx/.fxc + LA CADENA DE COMPILACIÓN (fx20_build/validate, vkd3d)** — y **ESTE CÓDICE (v1.0)** | §1, §10 |
+| **v6.56.0** | **LA LEY DEL CERO-DUST** (los Dust junto al filo son la sierra de los picos y los «círculos planos») · la CURA DEL CENTRADO de alas (`pl.fullRotation`) + DibujarRunas + catálogo 17-23 · **LA ESCALERA DEL RAYO** (RayoConcentradoNivelProjectile, nivel en `ai[1]`) · el SONIDO v2 pulso constante · el PARTIDOR a pantalla completa · la IRA DEL CIELO densa — y **ESTE CÓDICE (v1.1)** | §0, §4.24, §4.25, §7.3 |
 | *(siguiente fila: la tuya)* | | |
 
 ---

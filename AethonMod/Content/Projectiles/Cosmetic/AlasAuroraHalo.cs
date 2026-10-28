@@ -8,219 +8,252 @@ using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Cosmetic
 {
-    /// <summary>
-    /// ALASAURORAHALO — v6.52.1 — EL PORTADOR DE LAS ALAS DE CÓDIGO.
-    ///
-    /// El patrón probado de la casa (AuraPortadorHalo v6.49 / el contrato
-    /// documentado en AuraLib: «vanilla dibuja los proyectiles ANTES que
-    /// los jugadores → la capa queda DETRÁS del cuerpo» — la posición
-    /// EXACTA de unas alas): un proyectil cosmético pegado al dueño,
-    /// intocable, que vive mientras la LA AURORA DE TINTA esté equipada.
-    ///
-    /// LA ANIMACIÓN (los drivers del original, respetados):
-    ///   · WINGSPREAD — el ala SEMI-ABIERTA en el suelo (0.35), se abre
-    ///     con la velocidad y EL VUELO (techo 1), suavizada con Lerp
-    ///     0.085 (el despliegue es un acto, no un switch).
-    ///   · WINGFLAP — la fase acumulada: 0.055/t al descansar, +0.15 al
-    ///     volar, +spread·0.03 (aletea más fuerte cuanto más abierta).
-    ///   · LA MEZCLA DÍA/NOCHE — la forma diurna es TINTA BLANCO-ORO, la
-    ///     nocturna es el PRISMA COMPLETO (la dualidad del original
-    ///     adaptada a la tinta del Escriba), transición lenta (0.025).
-    ///
-    /// EL DESCANSO: si el portador pone ALAS REALES (Player.wings ≠ 0) o
-    /// oculta el visual, el ala se PLEGÁ suavemente (spread → 0) — la
-    /// aurora cede el sitio; la FÍSICA del accesorio sigue (ver
-    /// AlasAuroraPlayer).
-    ///
-    /// El estado visual vive en localAI (cada cliente lo aproxima de la
-    /// velocidad — como el original: «visual de cada extremo local»).
-    /// </summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class AlasAuroraHalo : ModProjectile
     {
-        // v6.52.1 — el placeholder de la casa (el cuerpo ES la librería).
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
+        private float Spread
+        {
+            get
+            {
+                return ((ModProjectile)this).Projectile.localAI[0];
+            }
+            set
+            {
+                ((ModProjectile)this).Projectile.localAI[0] = value;
+            }
+        }
+
+        private float Flap
+        {
+            get
+            {
+                return ((ModProjectile)this).Projectile.localAI[1];
+            }
+            set
+            {
+                ((ModProjectile)this).Projectile.localAI[1] = value;
+            }
+        }
+
+        private float MezclaDia
+        {
+            get
+            {
+                return ((ModProjectile)this).Projectile.localAI[2];
+            }
+            set
+            {
+                ((ModProjectile)this).Projectile.localAI[2] = value;
+            }
+        }
 
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Type] = 1;
+            Main.projFrames[((ModProjectile)this).Type] = 1;
         }
 
         public override void SetDefaults()
         {
-            Projectile.width = 16;
-            Projectile.height = 16;
-            Projectile.friendly = false;          // cosmético: no toca nada
-            Projectile.penetrate = -1;
-            Projectile.timeLeft = 6;              // el dueño lo refresca
-            Projectile.tileCollide = false;
-            Projectile.ignoreWater = true;
-            Projectile.netImportant = true;
+            ((Entity)((ModProjectile)this).Projectile).width = 16;
+            ((Entity)((ModProjectile)this).Projectile).height = 16;
+            ((ModProjectile)this).Projectile.friendly = false;
+            ((ModProjectile)this).Projectile.penetrate = -1;
+            ((ModProjectile)this).Projectile.timeLeft = 6;
+            ((ModProjectile)this).Projectile.tileCollide = false;
+            ((ModProjectile)this).Projectile.ignoreWater = true;
+            ((ModProjectile)this).Projectile.netImportant = true;
         }
 
-        // === EL ESTADO VISUAL (localAI: 0 spread · 1 flap · 2 mezcla día) ===
-        private float Spread
+        public override bool ShouldUpdatePosition()
         {
-            get => Projectile.localAI[0];
-            set => Projectile.localAI[0] = value;
+            return false;
         }
-        private float Flap
-        {
-            get => Projectile.localAI[1];
-            set => Projectile.localAI[1] = value;
-        }
-        private float MezclaDia
-        {
-            get => Projectile.localAI[2];
-            set => Projectile.localAI[2] = value;
-        }
-
-        public override bool ShouldUpdatePosition() => false;
 
         public override void AI()
         {
-            Player duenio = Main.player[Projectile.owner];
-            if (duenio == null || !duenio.active || duenio.dead || !SigueViva(duenio))
+            //IL_005b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_006b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0070: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01ca: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01bb: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01cf: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0289: Unknown result type (might be due to invalid IL or missing references)
+            //IL_028e: Unknown result type (might be due to invalid IL or missing references)
+            Player val = Main.player[((ModProjectile)this).Projectile.owner];
+            if (val == null || !((Entity)val).active || val.dead || !SigueViva(val))
             {
-                // LA DESPEDIDA: un suspiro de tinta prismática al morir.
-                if (Main.netMode != NetmodeID.Server && Spread > 0.05f)
+                if (Main.netMode != 2 && Spread > 0.05f)
+                {
                     SuspiroFinal();
-                Projectile.Kill();
+                }
+                ((ModProjectile)this).Projectile.Kill();
                 return;
             }
-
-            // Pegado al dueño, siempre.
-            Projectile.Center = duenio.Center;
-            Projectile.velocity = Vector2.Zero;
-            Projectile.timeLeft = 6;
-
-            // === LOS DRIVERS DEL ORIGINAL (UpdateWingVisual, respetado) ===
-            // v6.54.0 — EL TEMPO DEL ALA: cada estilo trae su velocidad
-            // de aleteo (la Tormenta aletea nerviosa, el Vacío planea).
-            float flapVel = 1f;
-            byte estiloi = duenio.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
-            if (estiloi > 0)
-                flapVel = AlasCatalogo.De(estiloi).FlapVel;
-            float objetivo = 0f;
-            bool volando = false;
-            if (!duenio.GetModPlayer<AlasAuroraPlayer>().OcultarVisual &&
-                duenio.wings == 0)   // alas reales puestas → la aurora DESCANSA
+            ((Entity)((ModProjectile)this).Projectile).Center = ((Entity)val).Center;
+            ((Entity)((ModProjectile)this).Projectile).velocity = Vector2.Zero;
+            ((ModProjectile)this).Projectile.timeLeft = 6;
+            float num = 1f;
+            byte alaEstilo = val.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
+            if (alaEstilo > 0)
             {
-                float rapidez = duenio.velocity.Length();
-                volando = duenio.velocity.Y != 0f;
-                objetivo = MathHelper.Clamp(0.35f + rapidez * 0.055f + (volando ? 0.25f : 0f), 0.35f, 1f);
+                num = AlasCatalogo.De(alaEstilo).FlapVel;
             }
-            Spread = MathHelper.Lerp(Spread, objetivo, 0.085f);
-            Flap += (0.055f + (volando ? 0.15f : 0f) + Spread * 0.03f) * flapVel;
-            MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
-
-            // === LA LUZ (el prisma que ilumina — la fórmula del original
-            //     adaptada a la tinta: violeta-noche ↔ blanco-oro-día) ===
-            if (Spread > 0.05f && Main.netMode != NetmodeID.Server)
+            float num2 = 0f;
+            bool flag = false;
+            if (!val.GetModPlayer<AlasAuroraPlayer>().OcultarVisual && val.wings == 0)
             {
-                float h = (Flap * 0.02f) % 1f;
-                Color prisma = estiloi > 0
-                    ? ColorDe(AlasCatalogo.De(estiloi), h)
-                    : ColorPrisma(h);
-                float escala = estiloi > 0 ? AlasCatalogo.De(estiloi).Luz : 1f;
-                float d = MezclaDia;
-                Vector3 luz = new(
-                    (prisma.R / 255f * (1f - d) + 0.95f * d) * 0.42f * Spread * escala,
-                    (prisma.G / 255f * (1f - d) + 0.88f * d) * 0.42f * Spread * escala,
-                    (prisma.B / 255f * (1f - d) + 0.66f * d) * 0.42f * Spread * escala);
-                Lighting.AddLight(duenio.Center, luz);
+                float num3 = (((Entity)val).velocity).Length();
+                flag = ((Entity)val).velocity.Y != 0f;
+                num2 = MathHelper.Clamp(0.35f + num3 * 0.055f + (flag ? 0.25f : 0f), 0.35f, 1f);
+            }
+            Spread = MathHelper.Lerp(Spread, num2, 0.085f);
+            Flap += (0.055f + (flag ? 0.15f : 0f) + Spread * 0.03f) * num;
+            MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
+            if (Spread > 0.05f && Main.netMode != 2)
+            {
+                float h = Flap * 0.02f % 1f;
+                Color val2 = ((alaEstilo > 0) ? ColorDe(in AlasCatalogo.De(alaEstilo), h) : ColorPrisma(h));
+                float num4 = ((alaEstilo > 0) ? AlasCatalogo.De(alaEstilo).Luz : 1f);
+                float mezclaDia = MezclaDia;
+                Vector3 val3 = new Vector3(((float)(int)(val2).R / 255f * (1f - mezclaDia) + 0.95f * mezclaDia) * 0.42f * Spread * num4, ((float)(int)(val2).G / 255f * (1f - mezclaDia) + 0.88f * mezclaDia) * 0.42f * Spread * num4, ((float)(int)(val2).B / 255f * (1f - mezclaDia) + 0.66f * mezclaDia) * 0.42f * Spread * num4);
+                Lighting.AddLight(((Entity)val).Center, val3);
             }
         }
 
-        /// <summary>v6.54.0 — El color del estilo (paleta con crossfade —
-        /// el mismo contrato de DePaleta de la lib).</summary>
         private static Color ColorDe(in EstiloAlas estilo, float h)
         {
+            //IL_0012: Unknown result type (might be due to invalid IL or missing references)
+            //IL_004e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_005a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0064: Unknown result type (might be due to invalid IL or missing references)
             if (estilo.Paleta == null || estilo.Paleta.Length == 0)
+            {
                 return ColorPrisma(h);
+            }
             h -= MathF.Floor(h);
-            float seg = h * estilo.Paleta.Length;
-            int i = (int)seg % estilo.Paleta.Length;
-            int j = (i + 1) % estilo.Paleta.Length;
-            return Color.Lerp(estilo.Paleta[i], estilo.Paleta[j], seg - (int)seg);
+            float num = h * (float)estilo.Paleta.Length;
+            int num2 = (int)num % estilo.Paleta.Length;
+            int num3 = (num2 + 1) % estilo.Paleta.Length;
+            return Color.Lerp(estilo.Paleta[num2], estilo.Paleta[num3], num - (float)(int)num);
         }
 
-        /// <summary>¿La aurora sigue equipada y viva en su dueño?</summary>
         private static bool SigueViva(Player duenio)
         {
             return duenio.GetModPlayer<AlasAuroraPlayer>().VisualViva;
         }
 
-        /// <summary>El color prisma (el de la casa).</summary>
         private static Color ColorPrisma(float h)
         {
+            //IL_00f0: Unknown result type (might be due to invalid IL or missing references)
             h -= MathF.Floor(h);
-            float r, g, b;
-            if (h < 1f / 6f) { r = 1f; g = h * 6f; b = 0f; }
-            else if (h < 2f / 6f) { r = 2f - h * 6f; g = 1f; b = 0f; }
-            else if (h < 3f / 6f) { r = 0f; g = 1f; b = h * 6f - 2f; }
-            else if (h < 4f / 6f) { r = 0f; g = 4f - h * 6f; b = 1f; }
-            else if (h < 5f / 6f) { r = h * 6f - 4f; g = 0f; b = 1f; }
-            else { r = 1f; g = 0f; b = 6f - h * 6f; }
-            return new Color((int)(r * 255f), (int)(g * 255f), (int)(b * 255f));
+            float num;
+            float num2;
+            float num3;
+            if (h < 1f / 6f)
+            {
+                num = 1f;
+                num2 = h * 6f;
+                num3 = 0f;
+            }
+            else if (h < 1f / 3f)
+            {
+                num = 2f - h * 6f;
+                num2 = 1f;
+                num3 = 0f;
+            }
+            else if (h < 0.5f)
+            {
+                num = 0f;
+                num2 = 1f;
+                num3 = h * 6f - 2f;
+            }
+            else if (h < 2f / 3f)
+            {
+                num = 0f;
+                num2 = 4f - h * 6f;
+                num3 = 1f;
+            }
+            else if (h < 5f / 6f)
+            {
+                num = h * 6f - 4f;
+                num2 = 0f;
+                num3 = 1f;
+            }
+            else
+            {
+                num = 1f;
+                num2 = 0f;
+                num3 = 6f - h * 6f;
+            }
+            return new Color((int)(num * 255f), (int)(num2 * 255f), (int)(num3 * 255f));
         }
 
-        /// <summary>La despedida: 14 gotas de tinta prismática cayendo.</summary>
         private void SuspiroFinal()
         {
+            //IL_001a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0030: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0049: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0060: Unknown result type (might be due to invalid IL or missing references)
             for (int i = 0; i < 14; i++)
             {
-                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                Dust d = Dust.NewDustPerfect(Projectile.Center,
-                    DustID.ShadowbeamStaff,
-                    new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * Main.rand.NextFloat(0.8f, 2.6f),
-                    160, ColorPrisma(i / 14f), 1.1f);
-                d.noGravity = true;
+                float x = Utils.NextFloat(Main.rand, (float)Math.PI * 2f);
+                Dust.NewDustPerfect(((Entity)((ModProjectile)this).Projectile).Center, 173, (Vector2?)(new Vector2(MathF.Cos(x), MathF.Sin(x)) * Utils.NextFloat(Main.rand, 0.8f, 2.6f)), 160, ColorPrisma((float)i / 14f), 1.1f).noGravity = true;
             }
         }
 
-        // ==================================================================
-        //  EL DIBUJO (el contrato del BOOL de la casa — AuraPortadorHalo
-        //  v6.49: la librería cierra el lote del pase, vuelca SUS
-        //  primitivas y el lote se reabre TAL CUAL)
-        // ==================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
-
-            Player duenio = Main.player[Projectile.owner];
-            if (duenio == null || !duenio.active || duenio.dead) return false;
-            if (Spread <= 0.02f) return false;
-
-            // LA TINTA QUE GOTEA: de vez en cuando una mota prismática
-            // cae de la punta de un ala (la vida de la aurora — el
-            // original siembra chispas de luz en su AI).
-            if (Main.rand.NextBool(22))
+            //IL_0059: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0097: Unknown result type (might be due to invalid IL or missing references)
+            //IL_009c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00b0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00c9: Unknown result type (might be due to invalid IL or missing references)
+            if (Main.dedServ || Main.netMode == 2)
             {
-                Vector2 punta = duenio.MountedCenter + new Vector2(
-                    -duenio.direction * Main.rand.NextFloat(20f, 60f),
-                    -Main.rand.NextFloat(30f, 80f) * duenio.gravDir);
-                Dust d = Dust.NewDustPerfect(punta, DustID.ShadowbeamStaff,
-                    new Vector2(0f, 0.4f), 140,
-                    ColorPrisma(Main.rand.NextFloat()), 0.8f);
-                d.noGravity = false;
+                return false;
             }
-
+            Player val = Main.player[((ModProjectile)this).Projectile.owner];
+            if (val == null || !((Entity)val).active || val.dead)
+            {
+                return false;
+            }
+            if (Spread <= 0.02f)
+            {
+                return false;
+            }
+            if (Utils.NextBool(Main.rand, 22))
+            {
+                Dust.NewDustPerfect(val.MountedCenter + new Vector2((float)(-((Entity)val).direction) * Utils.NextFloat(Main.rand, 20f, 60f), (0f - Utils.NextFloat(Main.rand, 30f, 80f)) * val.gravDir), 173, (Vector2?)new Vector2(0f, 0.4f), 140, ColorPrisma(Utils.NextFloat(Main.rand)), 0.8f).noGravity = false;
+            }
             try
             {
-                // v6.54.0 — EL ESTILO DEL DUEÑO: la Aurora histórica pasa
-                // por el camino de siempre (Dibujar sin estilo = la
-                // entrada [1] del catálogo); las quince nuevas pasan SU
-                // alma (paleta, forma, tempo, ruido propio).
-                byte estilo = duenio.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
-                if (estilo == AlasCatalogo.Aurora || estilo == 0)
-                    AlasAuroraLib.Dibujar(duenio, Spread, Flap, MezclaDia);
+                byte alaEstilo = val.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
+                if (alaEstilo == 1 || alaEstilo == 0)
+                {
+                    AlasAuroraLib.Dibujar(val, Spread, Flap, MezclaDia);
+                }
                 else
-                    AlasAuroraLib.Dibujar(duenio, AlasCatalogo.De(estilo),
-                        Spread, Flap, MezclaDia);
+                {
+                    AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
+                }
+                AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
             }
-            catch { try { VFXCore.ReabrirLoteVanilla(); } catch { } }
-
-            return false; // el halo SE dibuja solo (las primitivas fueron el dibujo)
+            catch
+            {
+                try
+                {
+                    VFXCore.ReabrirLoteVanilla();
+                }
+                catch
+                {
+                }
+            }
+            return false;
         }
     }
 }

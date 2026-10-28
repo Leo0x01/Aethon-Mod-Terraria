@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.55.1 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** es-MX (primario) + en-US (+ es-ES espejo)
+> **Versión actual:** 6.56.0 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** es-MX (primario) + en-US (+ es-ES espejo)
 
 ## Qué es (en 30 segundos)
 
@@ -21,10 +21,13 @@ Alrededor del jefe:
   jefes guardianes que escalan por nivel y bioma.
 - **LAS ESENCIAS** — devorar la esencia de un jefe = +1 nivel directo.
 - **LAS DOCE SENTENCIAS** («El Veredicto de Aethon») — las armas definitivas masivas:
-  el Rayo Concentrado II (shader propio de la casa), el Prisma Primordial, la Ira del
-  Cielo, el Partidor de Mundos, el Réquiem Estelar, el Testamento de Aethon…
-- **LAS ALAS AURORA** — 15+ alas 100% procedurales con anatomías propias (plumas
-  vectoriales, no rectángulos).
+  el Rayo Concentrado II (shader propio de la casa) con **SU ESCALERA DE 5 NIVELES**
+  (Rayo del Alba · Veredicto · Juicio · Prisma Primordial reformado), la Ira del
+  Cielo, el Partidor de Mundos (a pantalla completa), el Réquiem Estelar, el
+  Testamento de Aethon, el Índice del Juicio, la Pluma del Veredicto y el Ojo del
+  Juicio…
+- **LAS ALAS AURORA** — 22 alas 100% procedurales con anatomías propias (plumas
+  vectoriales, runas y anillos de glifos — nunca rectángulos).
 - **El arsenal completo** de armas de prueba organizado en **24 bolsas** dentro de
   **El Cofre del Arsenal** (llegan solas al entrar al mundo).
 
@@ -54,7 +57,7 @@ Alrededor del jefe:
 ```
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.55.1)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.56.0)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # ~384 .cs: Items, Weapons, NPCs, Projectiles, VFX (69 librerías), Systems…
 │   │   └── Effects/Shaders/   # Los 4 shaders (.fx fuente + .fxc compilado — LEER EFECTOS-Y-LIBRERIAS.md §1)

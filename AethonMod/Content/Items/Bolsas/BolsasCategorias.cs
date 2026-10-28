@@ -7,6 +7,8 @@ using AethonMod.Content.Weapons;
 using AethonMod.Content.Weapons.V20;
 using AethonMod.Content.Weapons.Cosmic;
 using AethonMod.Content.Items.Cosmetics;
+using AethonMod.Content.Items.Alas;
+using AethonMod.Content.Weapons.Definitivas;
 
 namespace AethonMod.Content.Items.Bolsas
 {
@@ -701,36 +703,47 @@ namespace AethonMod.Content.Items.Bolsas
     //  y viajan DENTRO del Cofre del Arsenal (la maestra).
     // ======================================================================
 
-    /// <summary>v6.54.0 — LA BOLSA DE LAS ALAS: las quince alas
-    /// procedurales (el mismo sistema de la Aurora de Tinta — cada una
-    /// con SU paleta, SU silueta vectorial, SU tempo y SU ruido de las
-    /// veinte texturas nuevas).</summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class BolsaDeAlasPrisma : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Alas";
+
         protected override string NombreCorto => "Bolsa de las Alas";
-        protected override Color ColorFiesta => new(201, 166, 255);
-        protected override string Nota => "Quince alas de código — el mismo sistema de la Aurora de Tinta";
+
+        protected override Color ColorFiesta => new Color(201, 166, 255);
+
+        protected override string Nota => "Veintidós alas de código — el mismo sistema de la Aurora de Tinta";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
-            var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeTintaSerena>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeEclipse>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDePlasma>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeNebulosa>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeCometario>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeMedianoche>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDelPrisma>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeFuegoFrio>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeTormenta>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeMarioneta>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeAuroraArtica>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeOrquidea>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDelVacio>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasSolaresRunicas>(), 1));
-            l.Add((ModContent.ItemType<Items.Alas.AlasDeSangreDeTinta>(), 1));
-            return l;
+            return new List<(int, int)>
+            {
+                (ModContent.ItemType<AlasDeTintaSerena>(), 1),
+                (ModContent.ItemType<AlasDeEclipse>(), 1),
+                (ModContent.ItemType<AlasDePlasma>(), 1),
+                (ModContent.ItemType<AlasDeNebulosa>(), 1),
+                (ModContent.ItemType<AlasDeCometario>(), 1),
+                (ModContent.ItemType<AlasDeMedianoche>(), 1),
+                (ModContent.ItemType<AlasDelPrisma>(), 1),
+                (ModContent.ItemType<AlasDeFuegoFrio>(), 1),
+                (ModContent.ItemType<AlasDeTormenta>(), 1),
+                (ModContent.ItemType<AlasDeMarioneta>(), 1),
+                (ModContent.ItemType<AlasDeAuroraArtica>(), 1),
+                (ModContent.ItemType<AlasDeOrquidea>(), 1),
+                (ModContent.ItemType<AlasDelVacio>(), 1),
+                (ModContent.ItemType<AlasSolaresRunicas>(), 1),
+                (ModContent.ItemType<AlasDeSangreDeTinta>(), 1),
+                (ModContent.ItemType<AlasRunicasSolares>(), 1),
+                (ModContent.ItemType<AlasRunicasDelVacio>(), 1),
+                (ModContent.ItemType<AlasRunicasDelEclipse>(), 1),
+                (ModContent.ItemType<AlasRunicasDelJuicio>(), 1),
+                (ModContent.ItemType<AgujasDelVacio>(), 1),
+                (ModContent.ItemType<CuchillasDelEclipse>(), 1),
+                (ModContent.ItemType<CorolasDelAlba>(), 1)
+            };
         }
     }
 
@@ -804,30 +817,37 @@ namespace AethonMod.Content.Items.Bolsas
     //  y EL TESTAMENTO, la corona que las dicta rotándolas ×1.3).
     // ======================================================================
 
-    /// <summary>24 — LA BOLSA DE LAS ARMAS DEFINITIVAS: las cinco sentencias del Veredicto + el rayo concentrado.</summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class BolsaDefinitivas : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Armas Definitivas";
+
         protected override string NombreCorto => "Bolsa de las Definitivas";
-        protected override Color ColorFiesta => new(255, 214, 120);
-        protected override string Nota => "Las cinco sentencias del Veredicto y el haz puro — el ataque definitivo vive aquí";
+
+        protected override Color ColorFiesta => new Color(255, 214, 120);
+
+        protected override string Nota => "La escalera del Rayo Concentrado y las armas del grimorio — el ataque definitivo vive aquí";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
-            var l = new List<(int, int)>();
-            // v6.54.6 — LAS CINCO SENTENCIAS (la 1 es EL ATAQUE DEFINITIVO
-            // con la receta completa del haz de fusión; la 5 es la corona)
-            l.Add((ModContent.ItemType<Weapons.Definitivas.PrismaPrimordial>(), 1));      // 1 — EL ATAQUE DEFINITIVO: los 7 haces + el haz central de fusión
-            l.Add((ModContent.ItemType<Weapons.Definitivas.PartidorDeMundos>(), 1));      // 2 — LA COLUMNA QUE PARTE EL MUNDO
-            l.Add((ModContent.ItemType<Weapons.Definitivas.RequiemEstelar>(), 1));        // 3 — LA CAMPANA DE LOS TRES ANILLOS
-            l.Add((ModContent.ItemType<Weapons.Definitivas.IraDelCielo>(), 1));           // 4 — LOS OCHO JUICIOS DEL CIELO
-            l.Add((ModContent.ItemType<Weapons.Definitivas.TestamentoAethon>(), 1));      // 5 — LA CORONA: dicta las cuatro rotándolas
-            // v6.55.0 — LA SEXTA: EL RAYO CONCENTRADO II (antes la réplica de
-            // investigación de la .54.8 — ahora TODO casa: las texturas
-            // procedurales de la librería, el shader propio con la escala
-            // compensada y el núcleo suave, y el sonido sintetizado)
-            l.Add((ModContent.ItemType<Weapons.Definitivas.RayoConcentradoDos>(), 1));    // 6 — EL HAZ PURO: el cono de 3500 px con su barrido
-            return l;
+            return new List<(int, int)>
+            {
+                (ModContent.ItemType<PrismaPrimordial>(), 1),
+                (ModContent.ItemType<PartidorDeMundos>(), 1),
+                (ModContent.ItemType<RequiemEstelar>(), 1),
+                (ModContent.ItemType<IraDelCielo>(), 1),
+                (ModContent.ItemType<TestamentoAethon>(), 1),
+                (ModContent.ItemType<RayoConcentradoDos>(), 1),
+                (ModContent.ItemType<RayoDelAlba>(), 1),
+                (ModContent.ItemType<RayoDelVeredicto>(), 1),
+                (ModContent.ItemType<RayoDelJuicio>(), 1),
+                (ModContent.ItemType<IndiceDelJuicio>(), 1),
+                (ModContent.ItemType<PlumaDelVeredicto>(), 1),
+                (ModContent.ItemType<OjoDelJuicio>(), 1)
+            };
         }
     }
 }

@@ -56,4 +56,10 @@ Projectiles: {
 	// SistemaTiroProjectile.DisplayName: Sistema Tiro Projectile
 	// TestamentoAethonProjectile.DisplayName: Testamento Aethon Projectile
 	// RayoFusionCopiaProjectile.DisplayName: Rayo Fusion Copia Projectile
+	// IndiceDelJuicioProjectile.DisplayName: Indice Del Juicio Projectile
+	// LanzaVeredictoProjectile.DisplayName: Lanza Veredicto Projectile
+	// OjoDelJuicioProjectile.DisplayName: Ojo Del Juicio Projectile
+	// PaginaIndiceProjectile.DisplayName: Pagina Indice Projectile
+	// PlumaDelVeredictoProjectile.DisplayName: Pluma Del Veredicto Projectile
+	// RayoConcentradoNivelProjectile.DisplayName: Rayo Concentrado Nivel Projectile
 }

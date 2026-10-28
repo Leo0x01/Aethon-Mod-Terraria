@@ -6,455 +6,591 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Effects.Bruma;
+using System.IO;
+using Terraria.Audio;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
-    /// <summary>
-    /// PARTIDORDEMUNDOSPROJECTILE — v6.54.7 — ARMA 3 DE LAS CINCO: EL
-    /// PARTIDOR DE MUNDOS.
-    ///
-    /// LA TRANSCENDENCIA (la letra: «tienes que mejorar aún más los
-    /// efectos visuales, hacerlos más impresionantes»): la columna de la
-    /// .54.6 eran fundas de color sólido — ahora es LA CARNE DE RUIDO
-    /// HIRVIENDO (la pila de seis pasadas texturizadas con el flujo
-    /// INVERTIDO: la carne hierve HACIA ARRIBA, como el calor de una
-    /// herida en el mundo), más las técnicas nuevas de la investigación:
-    ///
-    ///   CAPA 1 — EL VELO DE LA CONTENCIÓN (heredado, con el pulso a 12 Hz).
-    ///   CAPA 2 — EL TELEGRAFO VIVO: la aguja TEXTURIZADA (la carne corre
-    ///   por la línea antes del corte) + las cinco runas + las chispas
-    ///   convergentes + LOS CORREDORES (técnica nº15).
-    ///   CAPA 3 — LA COLUMNA DE CARNE: LA PILA DE SEIS PASADAS — aura ·
-    ///   cuerpo con el color que viaja · REMOLINO hirviendo hacia arriba ·
-    ///   núcleo en banda · la vena blanca · LA ABERRACIÓN CROMÁTICA (los
-    ///   bordes rojo/cian de la técnica nº8).
-    ///   CAPA 4 — EL CRÁTER DE LUZ: los cuatro halos apilados PULSANDO a
-    ///   12 Hz + el destello girando + LOS PINCHOS DE DIFRACCIÓN
-    ///   horizontales (técnica nº6 — el destello de lente del impacto).
-    ///   CAPA 5 — LAS TRES ONDAS DE CHOQUE (heredadas) + EL SEGUNDO
-    ///   GOLPE (nuevo): a los 8 t del corte la herida RECHINA — flash
-    ///   blanco + Kick + una cuarta onda fina retrasada.
-    ///   CAPA 6 — LAS GRIETAS: las dos de la .54.6 + DOS ECOS espectrales
-    ///   más finos a ±150 px (el mundo se astilla alrededor del corte).
-    ///   CAPA 7 — LA HEMORRAGIA: chispas con gravedad + LOS ESCOMBROS
-    ///   (nuevo): esquirlas doradas que saltan de la fisura girando y
-    ///   caen de verdad + EL HUMO DE LA HERIDA (nuevo, la librería de
-    ///   brumas: BrumaFX.Column — columnas de humo oscuro que suben de la
-    ///   base mientras el mundo sigue abierto) + el temblor rítmico.
-    /// </summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class PartidorDeMundosProjectile : ModProjectile
     {
         private const int TContencion = 22;
+
         private const int TParticion = 34;
+
+        private bool _segundoGolpe;
+
+        private float _ancho;
+
+        private float _techo;
+
+        private float _piso;
+
+        private bool _anclaLista;
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        public override void SetStaticDefaults() { }
+        public override void SetStaticDefaults()
+        {
+        }
 
         public override void SetDefaults()
         {
-            Projectile.width = 260;
-            Projectile.height = 1900;
-            Projectile.tileCollide = false;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.Generic;
-            Projectile.penetrate = -1;
-            Projectile.timeLeft = TContencion + TParticion + 20;
-            Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 50;
-            Projectile.netImportant = true;
+            ((Entity)((ModProjectile)this).Projectile).width = 260;
+            ((Entity)((ModProjectile)this).Projectile).height = 1900;
+            ((ModProjectile)this).Projectile.tileCollide = false;
+            ((ModProjectile)this).Projectile.friendly = true;
+            ((ModProjectile)this).Projectile.DamageType = DamageClass.Generic;
+            ((ModProjectile)this).Projectile.penetrate = -1;
+            ((ModProjectile)this).Projectile.timeLeft = 76;
+            ((ModProjectile)this).Projectile.usesLocalNPCImmunity = true;
+            ((ModProjectile)this).Projectile.localNPCHitCooldown = 50;
+            ((ModProjectile)this).Projectile.netImportant = true;
         }
 
-        private bool _segundoGolpe;    // EL RECHINIDO (la herida vuelve a quejarse a los 8 t)
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(_ancho);
+            writer.Write(_techo);
+            writer.Write(_piso);
+            writer.Write(_anclaLista);
+            ((ModProjectile)this).SendExtraAI(writer);
+        }
+
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            _ancho = reader.ReadSingle();
+            _techo = reader.ReadSingle();
+            _piso = reader.ReadSingle();
+            _anclaLista = reader.ReadBoolean();
+            ((ModProjectile)this).ReceiveExtraAI(reader);
+        }
 
         public override void AI()
         {
-            Projectile.ai[2]++;
-            float t = Projectile.ai[2];
-            Player dueño = Main.player[Projectile.owner];
-            float tiempo = Main.GlobalTimeWrappedHourly;
-
-            // v6.54.6 — el failsafe global de vida máxima.
-            if (t > 1200f) { Projectile.Kill(); return; }
-
-            if (t < 2f)
+            //IL_0197: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0156: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0166: Unknown result type (might be due to invalid IL or missing references)
+            //IL_016b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01d7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01dc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01e4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01e9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01f1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01fc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0206: Unknown result type (might be due to invalid IL or missing references)
+            //IL_020b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0213: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0218: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0220: Unknown result type (might be due to invalid IL or missing references)
+            //IL_022b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0244: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0256: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00e6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00f3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00f5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0101: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0113: Unknown result type (might be due to invalid IL or missing references)
+            //IL_00ee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02bc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02c1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02c9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02ce: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02d6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02e1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0373: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0392: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03a1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03a6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03c5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03d4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03d9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0309: Unknown result type (might be due to invalid IL or missing references)
+            //IL_031b: Unknown result type (might be due to invalid IL or missing references)
+            ((ModProjectile)this).Projectile.ai[2] += 1f;
+            float num = ((ModProjectile)this).Projectile.ai[2];
+            _ = Main.player[((ModProjectile)this).Projectile.owner];
+            _ = Main.GlobalTimeWrappedHourly;
+            if (num > 1200f)
             {
-                // EL ANCLAJE: vuela hasta el cursor y se planta
-                Projectile.Center = Main.MouseWorld;
-                Projectile.velocity = Vector2.Zero;
+                ((ModProjectile)this).Projectile.Kill();
+                return;
             }
-
-            if (t == TContencion)
+            if (num < 2f)
             {
-                // ¡LA PARTICIÓN!
-                Projectile.ai[0] = 1f;
-                Projectile.ai[2] = 0;
-                _segundoGolpe = false;
-                DefinitivasLib.Sonar(SoundID.Item122.WithPitchOffset(-0.2f).WithVolumeScale(1.2f), Projectile.Center);
-                DefinitivasLib.Sonar(SoundID.Item88.WithPitchOffset(-0.5f).WithVolumeScale(0.9f), Projectile.Center);
-                OndaLib.Flash(new Color(255, 250, 235), 0.44f, 14, Projectile.Center);
-                OndaLib.Kick(14, 22);
-                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                if (!_anclaLista)
                 {
-                    for (int i = 0; i < 50; i++)
+                    if (!Main.dedServ)
                     {
-                        float y = Main.rand.NextFloat(-1400f, 400f);
-                        Vector2 pos = Projectile.Center + new Vector2(Main.rand.NextFloat(-130f, 130f), y);
-                        Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame,
-                            new Vector2(Main.rand.NextFloat(-6f, 6f), Main.rand.NextFloat(-3f, 3f)), 0,
-                            DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 1.4f);
-                        d.noGravity = true;
+                        _ancho = Main.screenPosition.X + (float)Main.screenWidth * 0.5f;
+                        _techo = Main.screenPosition.Y - 320f;
+                        _piso = Main.screenPosition.Y + (float)Main.screenHeight + 320f;
                     }
+                    else
+                    {
+                        Player val = Main.player[((ModProjectile)this).Projectile.owner];
+                        Vector2 val2 = ((val != null && ((Entity)val).active) ? ((Entity)val).Center : ((Entity)((ModProjectile)this).Projectile).Center);
+                        _ancho = val2.X;
+                        _techo = val2.Y - 1100f;
+                        _piso = val2.Y + 1100f;
+                    }
+                    _anclaLista = true;
+                    ((ModProjectile)this).Projectile.netUpdate = true;
                 }
+                ((Entity)((ModProjectile)this).Projectile).Center = new Vector2(_ancho, (_techo + _piso) * 0.5f);
+                ((Entity)((ModProjectile)this).Projectile).velocity = Vector2.Zero;
             }
-
-            bool particionado = Projectile.ai[0] >= 1f;
-
-            // ==================== CAPA 5b — EL SEGUNDO GOLPE (EL RECHINIDO) ====================
-            // (nuevo: a los 8 t del corte la herida vuelve a quejarse — el
-            // eco del apocalipsis, flash blanco + Kick + los escombros gruesos)
-            if (particionado && !_segundoGolpe && Projectile.ai[2] >= 8f)
+            if (_anclaLista)
+            {
+                ((Entity)((ModProjectile)this).Projectile).Center = new Vector2(_ancho, (_techo + _piso) * 0.5f);
+            }
+            SoundStyle val3;
+            if (num == 22f)
+            {
+                ((ModProjectile)this).Projectile.ai[0] = 1f;
+                ((ModProjectile)this).Projectile.ai[2] = 0f;
+                _segundoGolpe = false;
+                val3 = SoundID.Item122;
+                val3 = (val3).WithPitchOffset(-0.2f);
+                DefinitivasLib.Sonar((val3).WithVolumeScale(1.2f), ((Entity)((ModProjectile)this).Projectile).Center);
+                val3 = SoundID.Item88;
+                val3 = (val3).WithPitchOffset(-0.5f);
+                DefinitivasLib.Sonar((val3).WithVolumeScale(0.9f), ((Entity)((ModProjectile)this).Projectile).Center);
+                OndaLib.Flash(new Color(255, 250, 235), 0.44f, 14, ((Entity)((ModProjectile)this).Projectile).Center);
+                OndaLib.Kick(14f, 22);
+            }
+            bool num2 = ((ModProjectile)this).Projectile.ai[0] >= 1f;
+            if (num2 && !_segundoGolpe && ((ModProjectile)this).Projectile.ai[2] >= 8f)
             {
                 _segundoGolpe = true;
-                DefinitivasLib.Sonar(SoundID.Item88.WithPitchOffset(-0.7f).WithVolumeScale(0.8f), Projectile.Center);
-                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                val3 = SoundID.Item88;
+                val3 = (val3).WithPitchOffset(-0.7f);
+                DefinitivasLib.Sonar((val3).WithVolumeScale(0.8f), ((Entity)((ModProjectile)this).Projectile).Center);
+                if (!Main.dedServ && Main.netMode != 2)
                 {
-                    OndaLib.Flash(new Color(255, 244, 210), 0.26f, 10, Projectile.Center);
-                    OndaLib.Kick(9, 14);
-                    // LOS ESCOMBROS GRUESOS: esquirlas doradas que saltan girando
-                    for (int i = 0; i < 16; i++)
-                    {
-                        Dust d = Dust.NewDustPerfect(Projectile.Center + new Vector2(Main.rand.NextFloat(-80f, 80f), -10f),
-                            DustID.FireworkFountain_Yellow,
-                            new Vector2(Main.rand.NextFloat(-11f, 11f), Main.rand.NextFloat(-13f, -4f)), 0,
-                            DefinitivasLib.Ambar, 1.5f);
-                        d.noGravity = false;        // giran y caen de verdad
-                    }
+                    OndaLib.Flash(new Color(255, 244, 210), 0.26f, 10, ((Entity)((ModProjectile)this).Projectile).Center);
+                    OndaLib.Kick(9f, 14);
                 }
             }
-
-            // ==================== CAPA 7 — LA HEMORRAGIA (chispas + escombros) ====================
-            if (particionado && !Main.dedServ && Main.netMode != NetmodeID.Server && Projectile.ai[2] < TParticion)
+            if (num2 && !Main.dedServ && Main.netMode != 2 && ((ModProjectile)this).Projectile.ai[2] < 34f)
             {
-                for (int i = 0; i < 4; i++)
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center, 2.2f, 2f, 1.5f);
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + new Vector2(0f, -700f), 1.6f, 1.4f, 1.1f);
+                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + new Vector2(0f, 700f), 1.6f, 1.4f, 1.1f);
+                if (((ModProjectile)this).Projectile.ai[2] % 6f == 0f)
                 {
-                    float y = Main.rand.NextFloat(-1100f, 300f);
-                    Vector2 pos = Projectile.Center + new Vector2(0f, y);
-                    Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame,
-                        new Vector2(Main.rand.NextFloat(-9f, 9f), Main.rand.NextFloat(-4f, 2f)), 0,
-                        DefinitivasLib.GradienteJuicio(tiempo * 0.2f + y * 0.001f), 1.1f);
-                    d.noGravity = true;
-                }
-                // LAS CHISPAS DE LA BASE ahora con GRAVEDAD (saltan y caen de verdad)
-                if (Main.rand.NextBool(2))
-                {
-                    Dust d = Dust.NewDustPerfect(Projectile.Center + new Vector2(Main.rand.NextFloat(-60f, 60f), 0f),
-                        DustID.FireworkFountain_Yellow, new Vector2(Main.rand.NextFloat(-5f, 5f), Main.rand.NextFloat(-9f, -3f)), 0,
-                        DefinitivasLib.Ambar, 1.2f);
-                    d.noGravity = false;          // la gravedad de verdad las trae de vuelta
-                }
-                Lighting.AddLight(Projectile.Center, 2.2f, 2.0f, 1.5f);
-                Lighting.AddLight(Projectile.Center + new Vector2(0f, -700f), 1.6f, 1.4f, 1.1f);
-                if (Projectile.ai[2] % 6 == 0) OndaLib.Kick(9, 10);
-
-                // ==================== CAPA 6b — EL POLVO DE LAS GRIETAS ====================
-                float vidaG = MathHelper.Clamp(Projectile.ai[2] / (float)TParticion, 0f, 1f);
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    if (Main.rand.NextBool(3))
-                    {
-                        float lejos = Main.rand.NextFloat(80f, 520f * vidaG);
-                        Vector2 posG = Projectile.Center + new Vector2(lado * lejos, Main.rand.NextFloat(-8f, 8f));
-                        Dust d = Dust.NewDustPerfect(posG, DustID.GoldFlame,
-                            new Vector2(lado * Main.rand.NextFloat(1f, 4f), Main.rand.NextFloat(-4f, -1f)), 0,
-                            DefinitivasLib.GradienteJuicio(lejos * 0.002f), 0.9f);
-                        d.noGravity = true;
-                    }
+                    OndaLib.Kick(9f, 10);
                 }
             }
-
-            // EL CIERRE: la columna se desvanece
-            if (particionado && Projectile.ai[2] > TParticion + 16)
-                Projectile.Kill();
+            if (num2 && ((ModProjectile)this).Projectile.ai[2] > 50f)
+            {
+                ((ModProjectile)this).Projectile.Kill();
+            }
         }
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            // SOLO durante la partición (la contención no corta)
-            if (Projectile.ai[0] >= 1f && Projectile.ai[2] < TParticion + 8)
+            //IL_0060: Unknown result type (might be due to invalid IL or missing references)
+            if (((ModProjectile)this).Projectile.ai[0] >= 1f && ((ModProjectile)this).Projectile.ai[2] < 42f && _anclaLista)
             {
-                var golpe = new Rectangle((int)(Projectile.Center.X - 130f), (int)(Projectile.Center.Y - 1400f),
-                    260, 1900);
-                return golpe.Intersects(targetHitbox);
+                Rectangle val = new Rectangle((int)(_ancho - 100f), (int)_techo, 200, (int)(_piso - _techo));
+                return (val).Intersects(targetHitbox);
             }
             return false;
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
-            float t = Projectile.ai[2];
-            float tiempo = Main.GlobalTimeWrappedHourly;
-            bool particionado = Projectile.ai[0] >= 1f;
-
-            // ==================== CAPA 1 — EL VELO DE LA CONTENCIÓN ====================
-            // (la sala contiene la respiración: densa hasta el estallido, se
-            // disuelve despacio durante la partición — y PULSA a 12 Hz con la herida abierta)
+            //IL_0cf4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d0a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d0f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d14: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d19: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d1e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d7b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d80: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0131: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0133: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0137: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0143: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0148: Unknown result type (might be due to invalid IL or missing references)
+            //IL_014d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0152: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0157: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04ee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04f0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04f4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_04f9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0574: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0df1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e0d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e12: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e17: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e1c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e21: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0195: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01ae: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0212: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0228: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e48: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e52: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e37: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e41: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0681: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0686: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06ad: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06b2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06bc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06cb: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06d2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06d9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06ee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06f3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_06fd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_070c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0713: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0728: Unknown result type (might be due to invalid IL or missing references)
+            //IL_072d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_073a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0749: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0750: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0757: Unknown result type (might be due to invalid IL or missing references)
+            //IL_076c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0771: Unknown result type (might be due to invalid IL or missing references)
+            //IL_077e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_078d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0794: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0285: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0287: Unknown result type (might be due to invalid IL or missing references)
+            //IL_028b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02bc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02c1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02c6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e57: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07f5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0807: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07b0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07b5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07c2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07d1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_07d8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e77: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e79: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e83: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05cd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05cf: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05d3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05df: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05e4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05e9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05ee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_05f3: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03ae: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03b0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03b4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03b9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03e1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03f0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_061a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0624: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0609: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0613: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0850: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0852: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0856: Unknown result type (might be due to invalid IL or missing references)
+            //IL_085b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_086e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0873: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0875: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0877: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0890: Unknown result type (might be due to invalid IL or missing references)
+            //IL_089f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08b2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0310: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02f8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0629: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08c8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08ca: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08e0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08ef: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0315: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0317: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0319: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0323: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0332: Unknown result type (might be due to invalid IL or missing references)
+            //IL_063a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_063c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0646: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0348: Unknown result type (might be due to invalid IL or missing references)
+            //IL_034a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0351: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0360: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b2c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b41: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b46: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b4b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b57: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b79: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b7e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b83: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0b95: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bb7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bbc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bc1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bdd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0c07: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0c0c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0c11: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0c43: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a0f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a1f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a29: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a2e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a43: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a48: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a4d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a52: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a57: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a9f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0aac: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ab1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0abe: Unknown result type (might be due to invalid IL or missing references)
+            if (Main.dedServ || Main.netMode == 2)
             {
-                float latido = particionado ? 0.85f + 0.15f * MathF.Sin(tiempo * 12f) : 1f;
-                float ansiaVelo = particionado
-                    ? MathHelper.Clamp(1f - Projectile.ai[2] / (float)(TParticion + 10), 0f, 1f) * 0.30f * latido
-                    : 0.20f + 0.22f * (t / (float)TContencion);
-                SombrasLib.Vignette(ansiaVelo);
+                return false;
             }
-
-            // ==================== LA CONTENCIÓN (el telegrafo vivo) ====================
-            if (!particionado)
+            float num = ((ModProjectile)this).Projectile.ai[2];
+            float globalTimeWrappedHourly = Main.GlobalTimeWrappedHourly;
+            bool flag = ((ModProjectile)this).Projectile.ai[0] >= 1f;
+            float num2 = (flag ? (0.85f + 0.15f * MathF.Sin(globalTimeWrappedHourly * 12f)) : 1f);
+            SombrasLib.Vignette(flag ? (MathHelper.Clamp(1f - ((ModProjectile)this).Projectile.ai[2] / 44f, 0f, 1f) * 0.3f * num2) : (0.2f + 0.22f * (num / 22f)));
+            if (!flag)
             {
-                float ansia = t / (float)TContencion;
-                Vector2 arriba = Projectile.Center + new Vector2(0f, -1400f);
-                Vector2 abajo = Projectile.Center + new Vector2(0f, 420f);
-
-                // === CAPA 2a — LA LÍNEA QUE TIEMBLA (la aguja TEXTURIZADA: la
-                // carne ya corre por la línea antes del corte — técnica nº15) ===
-                var pts = new Vector2[14];
-                var semi = new float[14];
+                float num3 = num / 22f;
+                Vector2 val = new Vector2(_ancho, _techo);
+                Vector2 val2 = new Vector2(_ancho, _piso);
+                Vector2[] array = (Vector2[])(object)new Vector2[14];
+                float[] array2 = new float[14];
                 for (int i = 0; i < 14; i++)
                 {
-                    float q = i / 13f;
-                    float tiemblo = MathF.Sin(tiempo * 30f + q * 20f) * (2f + 8f * ansia) * q;
-                    pts[i] = Vector2.Lerp(arriba, abajo, q) + new Vector2(tiemblo, 0f) - Main.screenPosition;
-                    semi[i] = (2f + 5f * ansia);
+                    float num4 = (float)i / 13f;
+                    float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + num4 * 20f) * (2f + 8f * num3) * num4;
+                    array[i] = Vector2.Lerp(val, val2, num4) + new Vector2(num5, 0f) - Main.screenPosition;
+                    array2[i] = 2f + 5f * num3;
                 }
-                Texture2D carne = DefinitivasLib.TexRuido;
-                if (carne != null)
+                Texture2D texRuido = DefinitivasLib.TexRuido;
+                if (texRuido != null)
                 {
                     RayoStrip.AbrirLote();
                     try
                     {
-                        // EL HALO de la aguja
-                        RayoStrip.FajaTexturadaEnLote(pts, semi,
-                            DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.28f * (0.5f + 0.5f * ansia)),
-                            carne, 300f, 0.8f + ansia * 2.4f, tiempo, 0f, 1f);
-                        // LA AGUJA — la banda caliente que LATA
-                        float latidoA = 0.55f + 0.45f * MathF.Sin(tiempo * MathHelper.Lerp(2f, 4f, ansia) * MathHelper.TwoPi);
-                        RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.4f),
-                            DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, (0.30f + 0.40f * ansia) * latidoA),
-                            carne, 240f, 1.4f + ansia * 3f, tiempo, 0.36f, 0.64f);
+                        RayoStrip.FajaTexturadaEnLote(array, array2, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.28f * (0.5f + 0.5f * num3)), texRuido, 300f, 0.8f + num3 * 2.4f, globalTimeWrappedHourly);
+                        float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * MathHelper.Lerp(2f, 4f, num3) * ((float)Math.PI * 2f));
+                        RayoStrip.FajaTexturadaEnLote(array, ArraySemis(array2, 0.4f), DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, (0.3f + 0.4f * num3) * num6), texRuido, 240f, 1.4f + num3 * 3f, globalTimeWrappedHourly, 0.36f, 0.64f);
                     }
-                    finally { RayoStrip.CerrarLote(); }
+                    finally
+                    {
+                        RayoStrip.CerrarLote();
+                    }
                 }
-
-                // === CAPA 2b — LAS CINCO RUNAS (se encienden UNA A UNA por la línea) ===
                 VFXCore.Begin();
-                int encendidas = 1 + (int)(ansia * 4.999f);
-                for (int r = 0; r < 5; r++)
+                int num7 = 1 + (int)(num3 * 4.999f);
+                for (int j = 0; j < 5; j++)
                 {
-                    float q = 0.12f + r * 0.19f;
-                    Vector2 posR = Vector2.Lerp(arriba, abajo, q) + new Vector2(MathF.Sin(tiempo * 26f + q * 20f) * (2f + 8f * ansia) * q, 0f);
-                    bool viva = r < encendidas;
-                    float alfaR = viva ? (0.55f + 0.35f * MathF.Sin(tiempo * 6f + r)) : 0.08f;
-                    Color cR = viva ? DefinitivasLib.GradienteJuicio(r * 0.2f + tiempo * 0.1f) : DefinitivasLib.Oro;
-                    VFXCore.Quad(posR, DefinitivasLib.Alfa(cR, alfaR * 0.35f), new Vector2(70f, 70f));
+                    float num8 = 0.12f + (float)j * 0.19f;
+                    Vector2 position = Vector2.Lerp(val, val2, num8) + new Vector2(MathF.Sin(globalTimeWrappedHourly * 26f + num8 * 20f) * (2f + 8f * num3) * num8, 0f);
+                    bool num9 = j < num7;
+                    float num10 = (num9 ? (0.55f + 0.35f * MathF.Sin(globalTimeWrappedHourly * 6f + (float)j)) : 0.08f);
+                    Color c = (num9 ? DefinitivasLib.GradienteJuicio((float)j * 0.2f + globalTimeWrappedHourly * 0.1f) : DefinitivasLib.Oro);
+                    VFXCore.Quad(position, DefinitivasLib.Alfa(c, num10 * 0.35f), new Vector2(70f, 70f));
                     if (DefinitivasLib.TexStar != null)
-                        VFXCore.Quad(posR, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, alfaR),
-                            new Vector2(34f, 34f), tiempo * 1.5f + r, DefinitivasLib.TexStar);
+                    {
+                        VFXCore.Quad(position, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, num10), new Vector2(34f, 34f), globalTimeWrappedHourly * 1.5f + (float)j, DefinitivasLib.TexStar);
+                    }
                 }
-                // LOS CORREDORES: los paquetes de luz que RECORREN la aguja
-                for (int i = 0; i < 3; i++)
+                for (int k = 0; k < 3; k++)
                 {
-                    float prog = DefinitivasLib.Frac(tiempo * (0.5f + ansia * 1.8f) + i / 3f);
-                    VFXCore.Quad(Vector2.Lerp(abajo, arriba, prog),
-                        DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.35f * (1f - prog * 0.4f) * (0.4f + 0.6f * ansia)),
-                        new Vector2(12f, 12f));
+                    float num11 = DefinitivasLib.Frac(globalTimeWrappedHourly * (0.5f + num3 * 1.8f) + (float)k / 3f);
+                    VFXCore.Quad(Vector2.Lerp(val2, val, num11), DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.35f * (1f - num11 * 0.4f) * (0.4f + 0.6f * num3)), new Vector2(12f, 12f));
                 }
                 VFXCore.FlushAdditive();
-
-                // === CAPA 2c — LAS CHISPAS CONVERGENTES (el aire se acerca a la línea) ===
-                if (Main.rand.NextBool(2))
-                {
-                    Vector2 posC = Projectile.Center + new Vector2(Main.rand.NextFloat(-320f, 320f), Main.rand.NextFloat(-900f, 300f));
-                    Dust d = Dust.NewDustPerfect(posC, DustID.GoldFlame,
-                        (Projectile.Center - posC) * 0.012f, 0, DefinitivasLib.Oro, 0.7f);
-                    d.noGravity = true;
-                }
             }
-
-            // ==================== LA PARTICIÓN (el cine completo) ====================
-            if (particionado)
+            if (flag)
             {
-                float vida = MathHelper.Clamp(Projectile.ai[2] / (float)TParticion, 0f, 1f);
-                float nace = DefinitivasLib.DeGolpe(MathHelper.Clamp(Projectile.ai[2] / 5f, 0f, 1f));
-                float muere = MathHelper.Clamp(1f - (Projectile.ai[2] - TParticion) / 16f, 0f, 1f);
-                float potencia = nace * muere;
-
-                Vector2 arriba = Projectile.Center + new Vector2(0f, -1400f);
-                Vector2 abajo = Projectile.Center + new Vector2(0f, 420f);
-
-                // === CAPA 3 — LA COLUMNA DE CARNE (LA PILA DE SEIS PASADAS con
-                // el flujo INVERTIDO: la carne HIERVE hacia arriba — el calor
-                // de la herida) + EL FLICKER inconmensurable de la técnica nº11 ===
-                const int N = 20;
-                var espina = new Vector2[N];
-                var perfil = new float[N];
-                float flicker = DefinitivasLib.Flicker(tiempo);
-                for (int i = 0; i < N; i++)
+                float num12 = MathHelper.Clamp(((ModProjectile)this).Projectile.ai[2] / 34f, 0f, 1f);
+                float num13 = DefinitivasLib.DeGolpe(MathHelper.Clamp(((ModProjectile)this).Projectile.ai[2] / 5f, 0f, 1f));
+                float num14 = MathHelper.Clamp(1f - (((ModProjectile)this).Projectile.ai[2] - 34f) / 16f, 0f, 1f);
+                float num15 = num13 * num14;
+                Vector2 val3 = new Vector2(_ancho, _techo);
+                Vector2 val4 = new Vector2(_ancho, _piso);
+                Vector2[] array3 = (Vector2[])(object)new Vector2[20];
+                float[] array4 = new float[20];
+                float num16 = DefinitivasLib.Flicker(globalTimeWrappedHourly);
+                for (int l = 0; l < 20; l++)
                 {
-                    float q = i / (float)(N - 1);
-                    espina[i] = Vector2.Lerp(arriba, abajo, q);
-                    // v6.55.0 — LA CURA DE LAS ESQUINAS DEL CLAMP: el Clamp
-                    // duro (0.25..1) dejaba DOS QUIEBRES bruscos por lado en
-                    // la silueta de la columna — ahora la saturación es SUAVE
-                    // (SmoothStep: derivada cero en ambos extremos).
-                    float s = MathF.Sin(q * MathHelper.Pi) * 1.4f - 0.25f;
-                    float sat = MathHelper.SmoothStep(0f, 0.75f, MathHelper.Clamp(s, 0f, 0.75f));
-                    perfil[i] = (0.25f + 0.75f * sat) *
-                        150f * potencia * flicker;
+                    float num17 = (float)l / 19f;
+                    array3[l] = Vector2.Lerp(val3, val4, num17);
+                    float num18 = MathF.Sin(num17 * (float)Math.PI) * 1.4f - 0.25f;
+                    float num19 = MathHelper.SmoothStep(0f, 0.75f, MathHelper.Clamp(num18, 0f, 0.75f));
+                    array4[l] = (0.25f + 0.75f * num19) * 150f * num15 * num16;
                 }
-                DefinitivasLib.HazFusionEspina(espina, perfil,
-                    DefinitivasLib.GradienteJuicio(tiempo * 0.07f), potencia, tiempo, 5,
-                    true, -1.15f, true);
-
-                // === CAPA 3b — LAS MICRO-FRACTURAS (dos líneas espectrales a los lados) ===
-                for (int lado = -1; lado <= 1; lado += 2)
+                DefinitivasLib.HazFusionEspina(array3, array4, DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f), num15, globalTimeWrappedHourly, 5, arcoiris: true, -1.15f);
+                for (int m = -1; m <= 1; m += 2)
                 {
-                    var ptsF = new Vector2[N];
-                    for (int i = 0; i < N; i++)
+                    Vector2[] array5 = (Vector2[])(object)new Vector2[20];
+                    for (int n = 0; n < 20; n++)
                     {
-                        float q = i / (float)(N - 1);
-                        float xF = lado * (90f + 40f * MathF.Sin(q * MathHelper.Pi));
-                        ptsF[i] = Vector2.Lerp(arriba, abajo, q) + new Vector2(xF, 0f) - Main.screenPosition;
+                        float num20 = (float)n / 19f;
+                        float num21 = (float)m * (90f + 40f * MathF.Sin(num20 * (float)Math.PI));
+                        array5[n] = Vector2.Lerp(val3, val4, num20) + new Vector2(num21, 0f) - Main.screenPosition;
                     }
-                    Color cF = lado < 0 ? DefinitivasLib.Alfa(DefinitivasLib.Cian, 0.5f) : DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.5f);
+                    Color halo = ((m < 0) ? DefinitivasLib.Alfa(DefinitivasLib.Cian, 0.5f) : DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.5f));
                     RayoStrip.AbrirLote();
                     try
                     {
-                        RayoStrip.FilamentoEnLote(ptsF, 26f * potencia, cF, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.5f),
-                            0.40f * potencia, StormTaper.Flat, 9 + lado, 0, false, false, false, null, null);
+                        RayoStrip.FilamentoEnLote(array5, 26f * num15, halo, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.5f), 0.4f * num15, StormTaper.Flat, 9 + m, 0, suavizar: false, crackle: false, vena: false);
                     }
-                    finally { RayoStrip.CerrarLote(); }
+                    finally
+                    {
+                        RayoStrip.CerrarLote();
+                    }
                 }
-
-                // === CAPA 4 — EL CRÁTER DE LUZ (los cuatro halos PULSANDO a
-                // 12 Hz + el destello + LOS PINCHOS DE DIFRACCIÓN) ===
-                Color gBorde = DefinitivasLib.GradienteJuicio(tiempo * 0.09f);
-                float pulsoC = 0.8f + 0.2f * MathF.Sin(tiempo * 12f);
+                Color c2 = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.09f);
+                float num22 = 0.8f + 0.2f * MathF.Sin(globalTimeWrappedHourly * 12f);
                 VFXCore.Begin();
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(gBorde, 0.20f * potencia), new Vector2(1300f, 1300f) * potencia * pulsoC);
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(gBorde, 0.34f * potencia), new Vector2(700f, 700f) * potencia);
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * potencia), new Vector2(380f, 380f) * potencia * pulsoC);
-                VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(Color.White, 0.65f * potencia), new Vector2(220f, 220f) * potencia);
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, DefinitivasLib.Alfa(c2, 0.2f * num15), new Vector2(1300f, 1300f) * num15 * num22);
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, DefinitivasLib.Alfa(c2, 0.34f * num15), new Vector2(700f, 700f) * num15);
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * num15), new Vector2(380f, 380f) * num15 * num22);
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, DefinitivasLib.Alfa(Color.White, 0.65f * num15), new Vector2(220f, 220f) * num15);
                 if (VFXCore.DestelloFinal != null)
-                    VFXCore.Quad(Projectile.Center, DefinitivasLib.Alfa(Color.White, 0.9f * potencia),
-                        new Vector2(620f, 620f) * potencia, vida * 0.8f, VFXCore.DestelloFinal);
-                // LOS PINCHOS DE DIFRACCIÓN HORIZONTALES (el destello de lente del impacto)
-                DefinitivasLib.PinchosDifraccion(Projectile.Center, 0f, 900f * potencia,
-                    DefinitivasLib.BlancoCalido, 0.5f * potencia, tiempo);
+                {
+                    VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, DefinitivasLib.Alfa(Color.White, 0.9f * num15), new Vector2(620f, 620f) * num15, num12 * 0.8f, VFXCore.DestelloFinal);
+                }
+                DefinitivasLib.PinchosDifraccion(((Entity)((ModProjectile)this).Projectile).Center, 0f, 900f * num15, DefinitivasLib.BlancoCalido, 0.5f * num15, globalTimeWrappedHourly);
                 VFXCore.FlushAdditive();
-
-                // === CAPA 7b — EL HUMO DE LA HERIDA (la LIBRERÍA DE BRUMAS:
-                // columnas de humo oscuro subiendo de la base mientras el
-                // mundo sigue abierto — la letra: «para qué fabricar óvalos
-                // planos si tenemos las librerías de brumas») ===
+                VFXCore.Begin();
+                for (int num23 = 0; num23 < 3; num23++)
                 {
-                    VFXCore.CerrarLoteSiAbierto();
-                    try
+                    float num24 = DefinitivasLib.Frac(globalTimeWrappedHourly * (0.42f + (float)num23 * 0.07f) + (float)num23 * 0.37f);
+                    Vector2 position2 = Vector2.Lerp(val3, val4, num24);
+                    Color c3 = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f + (float)num23 * 0.2f);
+                    VFXCore.Quad(position2, DefinitivasLib.Alfa(c3, 0.55f * num15 * (1f - num24 * 0.35f)), new Vector2(26f, 220f) * (0.5f + num15 * 0.5f));
+                    if (VFXCore.GlowOrb != null)
                     {
-                        BrumaFX.BeginMass();
-                        Vector2 basePantalla = Projectile.Center - Main.screenPosition;
-                        BrumaFX.Column(basePantalla + new Vector2(-46f, -8f), 320f * potencia, 120f,
-                            new Color(34, 22, 12), 901, tiempo, 0.34f * potencia, 0.55f);
-                        BrumaFX.Column(basePantalla + new Vector2(46f, -8f), 280f * potencia, 100f,
-                            new Color(40, 26, 14), 902, tiempo * 1.1f, 0.30f * potencia, 0.65f);
-                        Main.spriteBatch.End();
+                        VFXCore.Quad(position2, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.65f * num15 * (1f - num24)), new Vector2(18f, 120f), 0f, VFXCore.GlowOrb);
                     }
-                    catch { VFXCore.CerrarLoteSiAbierto(); }
-                    VFXCore.ReabrirLoteVanilla();
                 }
-
-                // === CAPA 5 — LAS ONDAS DE CHOQUE (por triplicado + la del RECHINIDO) ===
-                if (Main.spriteBatch != null && vida < 1f)
+                VFXCore.FlushAdditive();
+                if (_segundoGolpe && ((ModProjectile)this).Projectile.ai[2] < 26f)
+                {
+                    int num25 = (int)(((ModProjectile)this).Projectile.ai[2] - 8f);
+                    float num26 = MathHelper.Clamp(1f - (float)num25 / 18f, 0f, 1f);
+                    Vector2 val5 = default(Vector2);
+                    for (int num27 = 0; num27 < 4; num27++)
+                    {
+                        int seed = 4700 + num27 * 53;
+                        float x = VFXCore.Hash01(seed, 11, num27) * ((float)Math.PI * 2f);
+                        float num28 = (140f + 190f * VFXCore.Hash01(seed, 7, num27)) * num26;
+                        val5 = new Vector2(_ancho, _piso + (_techo - _piso) * (0.25f + 0.5f * VFXCore.Hash01(seed, 5, num27)));
+                        Vector2[] array6 = (Vector2[])(object)new Vector2[5];
+                        float[] array7 = new float[5];
+                        for (int num29 = 0; num29 < 5; num29++)
+                        {
+                            float num30 = (float)num29 / 4f;
+                            array6[num29] = val5 + new Vector2(MathF.Cos(x), MathF.Sin(x)) * (num28 * num30) + new Vector2(0f, -26f * num30 * num30) - Main.screenPosition;
+                            array7[num29] = MathF.Max(1f - num30 * 0.85f, 0.06f);
+                        }
+                        RayoStrip.AbrirLote();
+                        try
+                        {
+                            RayoStrip.FilamentoEnLote(array6, 9f * num26, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio((float)num27 * 0.24f), 0.6f * num26), DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.5f * num26), 0.55f * num26, StormTaper.Flat, seed, 0, suavizar: false, crackle: false, vena: true, null, array7);
+                        }
+                        finally
+                        {
+                            RayoStrip.CerrarLote();
+                        }
+                    }
+                }
+                if (Main.spriteBatch != null && num12 < 1f)
                 {
                     VFXCore.CerrarLoteSiAbierto();
                     try
                     {
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        // LAS ONDAS: la grande dorada, la media blanca, la fina ámbar retrasada
-                        OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition, vida, 1500f,
-                            DefinitivasLib.Oro, 1f, 3, 20f, OndaFalloff.Quadratic, true);
-                        OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition, vida * 0.75f, 1100f,
-                            DefinitivasLib.BlancoCalido, 0.7f, 4, 12f, OndaFalloff.Quadratic, false);
-                        OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition, MathF.Max(0f, vida - 0.25f), 800f,
-                            DefinitivasLib.Ambar, 0.5f, 8, 8f, OndaFalloff.Slow, false);
-                        // LA ONDA DEL RECHINIDO (el segundo golpe: fina, blanca, desde el 8 t)
+                        Main.spriteBatch.Begin((SpriteSortMode)0, BlendState.Additive, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, (Effect)null, Main.GameViewMatrix.TransformationMatrix);
+                        OndaLib.Shock(Main.spriteBatch, ((Entity)((ModProjectile)this).Projectile).Center - Main.screenPosition, num12, 1500f, DefinitivasLib.Oro, 1f, 3, 20f, OndaFalloff.Quadratic, chromatic: true);
+                        OndaLib.Shock(Main.spriteBatch, ((Entity)((ModProjectile)this).Projectile).Center - Main.screenPosition, num12 * 0.75f, 1100f, DefinitivasLib.BlancoCalido, 0.7f, 4, 12f);
+                        OndaLib.Shock(Main.spriteBatch, ((Entity)((ModProjectile)this).Projectile).Center - Main.screenPosition, MathF.Max(0f, num12 - 0.25f), 800f, DefinitivasLib.Ambar, 0.5f, 8, 8f, OndaFalloff.Slow);
                         if (_segundoGolpe)
-                            OndaLib.Shock(Main.spriteBatch, Projectile.Center - Main.screenPosition,
-                                MathHelper.Clamp((Projectile.ai[2] - 8f) / 22f, 0f, 1f), 1900f,
-                                DefinitivasLib.BlancoCalido, 0.45f, 6, 10f, OndaFalloff.Slow, false);
+                        {
+                            OndaLib.Shock(Main.spriteBatch, ((Entity)((ModProjectile)this).Projectile).Center - Main.screenPosition, MathHelper.Clamp((((ModProjectile)this).Projectile.ai[2] - 8f) / 22f, 0f, 1f), 1900f, DefinitivasLib.BlancoCalido, 0.45f, 6, 10f, OndaFalloff.Slow);
+                        }
                         Main.spriteBatch.End();
                     }
-                    catch { VFXCore.CerrarLoteSiAbierto(); }
+                    catch
+                    {
+                        VFXCore.CerrarLoteSiAbierto();
+                    }
                     VFXCore.ReabrirLoteVanilla();
                 }
-
-                // === CAPA 6 — LAS GRIETAS DEL SUELO (las dos de verdad + los DOS ECOS) ======
-                for (int lado = -1; lado <= 1; lado += 2)
+                for (int num31 = -1; num31 <= 1; num31 += 2)
                 {
-                    const int NG = 14;
-                    var ptsG = new Vector2[NG];
-                    var anchoG = new float[NG];
-                    float largoG = 560f * MathHelper.Clamp(vida * 2.2f, 0f, 1f) * muere;
-                    for (int i = 0; i < NG; i++)
+                    Vector2[] array8 = (Vector2[])(object)new Vector2[14];
+                    float[] array9 = new float[14];
+                    float num32 = 560f * MathHelper.Clamp(num12 * 2.2f, 0f, 1f) * num14;
+                    for (int num33 = 0; num33 < 14; num33++)
                     {
-                        float q = i / (float)(NG - 1);
-                        float yG = MathF.Sin(q * 9f + lado * 3f + tiempo * 2f) * 6f;
-                        ptsG[i] = Projectile.Center + new Vector2(lado * (60f + largoG * q), yG) - Main.screenPosition;
-                        anchoG[i] = 1f - q * 0.8f;
-                        if (anchoG[i] < 0.1f) anchoG[i] = 0.1f;
+                        float num34 = (float)num33 / 13f;
+                        float num35 = MathF.Sin(num34 * 9f + (float)num31 * 3f + globalTimeWrappedHourly * 2f) * 6f;
+                        array8[num33] = ((Entity)((ModProjectile)this).Projectile).Center + new Vector2((float)num31 * (60f + num32 * num34), num35) - Main.screenPosition;
+                        array9[num33] = 1f - num34 * 0.8f;
+                        if (array9[num33] < 0.1f)
+                        {
+                            array9[num33] = 0.1f;
+                        }
                     }
                     RayoStrip.AbrirLote();
                     try
                     {
-                        RayoStrip.FilamentoEnLote(ptsG, 34f * potencia, DefinitivasLib.GradienteJuicio(lado * 0.25f + tiempo * 0.1f),
-                            DefinitivasLib.BlancoCalido, 0.55f * potencia,
-                            StormTaper.Flat, 12 + lado, 0, false, true, true, null, anchoG);
+                        RayoStrip.FilamentoEnLote(array8, 34f * num15, DefinitivasLib.GradienteJuicio((float)num31 * 0.25f + globalTimeWrappedHourly * 0.1f), DefinitivasLib.BlancoCalido, 0.55f * num15, StormTaper.Flat, 12 + num31, 0, suavizar: false, crackle: true, vena: true, null, array9);
                     }
-                    finally { RayoStrip.CerrarLote(); }
-
-                    // EL ECO DE LA GRIETA (más lejos, más fino, espectral)
-                    var ptsE = new Vector2[NG];
-                    for (int i = 0; i < NG; i++)
+                    finally
                     {
-                        float q = i / (float)(NG - 1);
-                        float yE = MathF.Sin(q * 7f - lado * 5f + tiempo * 1.6f) * 4f;
-                        ptsE[i] = Projectile.Center + new Vector2(lado * (150f + 360f * vida * q), yE) - Main.screenPosition;
+                        RayoStrip.CerrarLote();
                     }
-                    Color cE = lado < 0 ? DefinitivasLib.Alfa(DefinitivasLib.Cian, 0.55f) : DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.55f);
+                    Vector2[] array10 = (Vector2[])(object)new Vector2[14];
+                    for (int num36 = 0; num36 < 14; num36++)
+                    {
+                        float num37 = (float)num36 / 13f;
+                        float num38 = MathF.Sin(num37 * 7f - (float)num31 * 5f + globalTimeWrappedHourly * 1.6f) * 4f;
+                        array10[num36] = ((Entity)((ModProjectile)this).Projectile).Center + new Vector2((float)num31 * (150f + 360f * num12 * num37), num38) - Main.screenPosition;
+                    }
+                    Color halo2 = ((num31 < 0) ? DefinitivasLib.Alfa(DefinitivasLib.Cian, 0.55f) : DefinitivasLib.Alfa(DefinitivasLib.Violeta, 0.55f));
                     RayoStrip.AbrirLote();
                     try
                     {
-                        RayoStrip.FilamentoEnLote(ptsE, 16f * potencia * (1f - vida * 0.5f), cE,
-                            DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.4f), 0.30f * potencia,
-                            StormTaper.Flat, 16 + lado, 0, false, false, true, null, anchoG);
+                        RayoStrip.FilamentoEnLote(array10, 16f * num15 * (1f - num12 * 0.5f), halo2, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.4f), 0.3f * num15, StormTaper.Flat, 16 + num31, 0, suavizar: false, crackle: false, vena: true, null, array9);
                     }
-                    finally { RayoStrip.CerrarLote(); }
+                    finally
+                    {
+                        RayoStrip.CerrarLote();
+                    }
                 }
             }
-
-            // v6.54.5/.6 — EL CONTRATO DEL LOTE: cubre TODOS los caminos (el
-            // Vignette del velo, la contención, la partición con vida>=1).
             VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
-        /// <summary>LOS SEMIANCHOS de un perfil por un semiancho base.</summary>
         private static float[] ArraySemis(float[] perfil, float semi)
         {
-            var r = new float[perfil.Length];
-            for (int i = 0; i < perfil.Length; i++) r[i] = perfil[i] * semi;
-            return r;
+            float[] array = new float[perfil.Length];
+            for (int i = 0; i < perfil.Length; i++)
+            {
+                array[i] = perfil[i] * semi;
+            }
+            return array;
         }
     }
 }

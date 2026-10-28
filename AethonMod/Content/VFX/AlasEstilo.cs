@@ -2,367 +2,497 @@ using Microsoft.Xna.Framework;
 
 namespace AethonMod.Content.VFX
 {
-    /// <summary>
-    /// ALASESTILO — v6.54.3 — EL CATÁLOGO DE ALAS PROCEDURALES.
-    ///
-    /// La letra del usuario: «las alas son las mismas solo que con
-    /// color diferente... usa texturas diferentes» — LA QUEJA CIERTA:
-    /// la v6.54.0 solo variaba la paleta; los ÁNGULOS del abanico y el
-    /// CONTEO de plumas eran CONSTANTES de la librería (todas las alas
-    /// eran EL MISMO ABANICO recolorizado).
-    ///
-    /// LA CURA: la forma completa del ala vive en su estilo — el
-    /// NÚMERO de plumas (4..7), los ángulos plegado/abierto del
-    /// abanico, LA CURVA de la pluma (la punta se abre en garra — el
-    /// ala de murciélago CURVA, la de hada es suave, la rígida no
-    /// curva), la separación de las raíces, los anchos de las capas y
-    /// el flujo del ruido. Quince alas = QUINCE ANATOMÍAS.
-    ///
-    /// LA AURORA DE TINTA (índice 1) es la entrada [1] con los
-    /// valores históricos EXACTOS en los campos nuevos (Plumas=5,
-    /// los ángulos de las constantes, Curva=0, las capas 0.30/0.62):
-    /// su dibujado NO cambia ni un píxel (la promesa de «deja esas
-    /// alas»).
-    /// </summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public struct EstiloAlas
     {
-        /// <summary>La paleta que corre por el abanico (muestreo por hue
-        /// con crossfade — el mismo contrato del ColorPrisma).</summary>
         public Color[] Paleta;
 
-        /// <summary>El tinte de la forma diurna (la aurora funde hacia
-        /// blanco-oro; cada ala funde hacia SU luz).</summary>
         public Color ColorDia;
 
-        /// <summary>La mezcla diurna (0.62 en la aurora) — cuánto funde
-        /// el día hacia ColorDia.</summary>
         public float FuerzaDia;
 
-        // === LA FORMA DEL ABANICO (v6.54.3: TODO vive en el estilo) ===
-        public int Plumas;             // 4..7 plumas por ala (la anatomía)
+        public int Plumas;
+
         public float LargoInterior;
+
         public float LargoExterior;
+
         public float RaizSemiancho;
+
         public float PuntaSemianchoBase;
+
         public float PuntaSemianchoAbierto;
-        public float PlegadoMin;       // el abanico PLEGADO (vertical)
+
+        public float PlegadoMin;
+
         public float PlegadoMax;
-        public float AbiertoMin;       // el abanico ABIERTO (horizontal)
+
+        public float AbiertoMin;
+
         public float AbiertoMax;
+
         public float Inclinacion;
+
         public float Barrido;
-        public float Curva;            // la punta se abre en garra (px × largo)
-        public float AnclajeSep;       // la separación de las raíces del par
 
-        // === v6.55.0 — LA SILUETA VECTORIAL (la letra: «no solo
-        //     rectángulos planos — plumas, cuchillas») ===
-        public float Vientre;          // DÓNDE vive el ancho máximo (0.15..0.70 del largo — la pluma clásica ~0.35, la cuchilla ~0.20, la hoja ancha ~0.45)
-        public float Afilada;          // CÓMO muere la punta (0.5 redonda · 1 cuchilla recta · 2 aguja cóncava)
-        public float Filosa;           // v6.55.0-b — LA ASIMETRÍA DE CUCHILLA: el borde de fuga corre su vientre ANTES (0 = pluma simétrica · 1 = media luna afilada)
+        public float Curva;
 
-        // === EL COLOR EN MOVIMIENTO ===
-        public float HueEntre;      // salto de hue pluma a pluma
-        public float HueLargo;      // dispersión a lo largo de la pluma
-        public float HueTiempo;     // velocidad del arcoíris
+        public float AnclajeSep;
 
-        // === EL TEMPO ===
-        public float FlapVel;       // multiplicador del aleteo
-        public float Desgarre;      // amplitud del desgarre de puntas
+        public float Vientre;
 
-        // === LAS INTENSIDADES Y ANCHOS DE LAS 3 CAPAS (0..1) ===
+        public float Afilada;
+
+        public float Filosa;
+
+        public byte Runas;
+
+        public float RunasInten;
+
+        public float HueEntre;
+
+        public float HueLargo;
+
+        public float HueTiempo;
+
+        public float FlapVel;
+
+        public float Desgarre;
+
         public float NucleoInten;
-        public float NucleoFrac;    // el ancho del núcleo (0.30 histórico)
+
+        public float NucleoFrac;
+
         public float CuerpoInten;
-        public float CuerpoFrac;    // el ancho del cuerpo (0.62 histórico)
+
+        public float CuerpoFrac;
+
         public float HaloInten;
 
-        // === EL RUIDO QUE FLUYE ===
         public string Ruido;
-        public float RuidoInten;
-        public float RuidoEscala;   // el tamaño de las vetas (× las 2 pasadas)
-        public float RuidoFlujo;    // la velocidad del flujo (× las 2 pasadas)
 
-        /// <summary>La escala de la luz que emite el ala.</summary>
+        public float RuidoInten;
+
+        public float RuidoEscala;
+
+        public float RuidoFlujo;
+
         public float Luz;
     }
 
-    /// <summary>
-    /// EL CATÁLOGO — el índice ES el byte que vive en AlasAuroraPlayer
-    /// (1 = la Aurora de Tinta histórica; 2..16 = las quince nuevas).
-    /// </summary>
+    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
+    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
+    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
+    // Los comentarios de la fuente original no viajan dentro del .dll.
     public static class AlasCatalogo
     {
         public const byte Aurora = 1;
 
-        private const string PrefijoRuido =
-            "AethonMod/Content/Effects/Procedural/";
+        private const string PrefijoRuido = "AethonMod/Content/Effects/Procedural/";
 
         public static readonly EstiloAlas[] Todos = Crear();
 
         private static EstiloAlas[] Crear()
         {
-            var t = new EstiloAlas[17];     // [0] se salta (1-indexado)
-
-            // === 1 — LA AURORA DE TINTA (histórica — NO TOCAR: los
-            //     campos nuevos llevan los valores EXACTOS de las
-            //     constantes históricas de la librería) ===
-            t[1] = new EstiloAlas
+            //IL_002b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0030: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01e1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01e6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01f9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_01fe: Unknown result type (might be due to invalid IL or missing references)
+            //IL_020b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0210: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0224: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02f0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_02f5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0302: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0307: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0313: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0318: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0329: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03f5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_03fa: Unknown result type (might be due to invalid IL or missing references)
+            //IL_040d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0412: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0422: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0427: Unknown result type (might be due to invalid IL or missing references)
+            //IL_043b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0507: Unknown result type (might be due to invalid IL or missing references)
+            //IL_050c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_051f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0524: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0534: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0539: Unknown result type (might be due to invalid IL or missing references)
+            //IL_054d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_061c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0621: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0634: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0639: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0649: Unknown result type (might be due to invalid IL or missing references)
+            //IL_064e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0662: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0731: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0736: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0743: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0748: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0754: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0759: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0767: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0833: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0838: Unknown result type (might be due to invalid IL or missing references)
+            //IL_084b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0850: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0863: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0868: Unknown result type (might be due to invalid IL or missing references)
+            //IL_087b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0880: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0893: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0898: Unknown result type (might be due to invalid IL or missing references)
+            //IL_08ac: Unknown result type (might be due to invalid IL or missing references)
+            //IL_097c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0981: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0997: Unknown result type (might be due to invalid IL or missing references)
+            //IL_099c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_09af: Unknown result type (might be due to invalid IL or missing references)
+            //IL_09b4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_09c8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a98: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0a9d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ab0: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ab5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ac2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ac7: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0adb: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ba8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bad: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bbd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bc2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bcf: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0bd4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0be8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0cb5: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0cba: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ccd: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0cd2: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ce8: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ced: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0d01: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0dd1: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0dd6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0de9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0dee: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e01: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e06: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0e1a: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ee4: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ee9: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ef6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0efb: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0f06: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0f0b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0f16: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0fe6: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0feb: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0ffe: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1003: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1019: Unknown result type (might be due to invalid IL or missing references)
+            //IL_101e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1032: Unknown result type (might be due to invalid IL or missing references)
+            //IL_10ff: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1104: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1111: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1116: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1122: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1127: Unknown result type (might be due to invalid IL or missing references)
+            //IL_113b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_11fc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1201: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1217: Unknown result type (might be due to invalid IL or missing references)
+            //IL_121c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1223: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1228: Unknown result type (might be due to invalid IL or missing references)
+            //IL_122d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_12fa: Unknown result type (might be due to invalid IL or missing references)
+            //IL_12ff: Unknown result type (might be due to invalid IL or missing references)
+            //IL_130f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1314: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1327: Unknown result type (might be due to invalid IL or missing references)
+            //IL_132c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1340: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1401: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1406: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1416: Unknown result type (might be due to invalid IL or missing references)
+            //IL_141b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1428: Unknown result type (might be due to invalid IL or missing references)
+            //IL_142d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_143b: Unknown result type (might be due to invalid IL or missing references)
+            //IL_14fc: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1501: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1508: Unknown result type (might be due to invalid IL or missing references)
+            //IL_150d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1514: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1519: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1520: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1525: Unknown result type (might be due to invalid IL or missing references)
+            //IL_152c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1531: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1536: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1603: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1608: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1618: Unknown result type (might be due to invalid IL or missing references)
+            //IL_161d: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1630: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1635: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1646: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1713: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1718: Unknown result type (might be due to invalid IL or missing references)
+            //IL_171f: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1724: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1730: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1735: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1746: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1807: Unknown result type (might be due to invalid IL or missing references)
+            //IL_180c: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1813: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1818: Unknown result type (might be due to invalid IL or missing references)
+            //IL_182e: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1833: Unknown result type (might be due to invalid IL or missing references)
+            //IL_1847: Unknown result type (might be due to invalid IL or missing references)
+            return new EstiloAlas[24]
             {
-                Paleta = null,              // null = el prisma completo de la casa
-                ColorDia = new Color(255, 243, 214),
-                FuerzaDia = 0.62f,
-                Plumas = 5,
-                LargoInterior = 88f, LargoExterior = 48f,
-                RaizSemiancho = 3.5f,
-                PuntaSemianchoBase = 14f, PuntaSemianchoAbierto = 8f,
-                PlegadoMin = 0.50f, PlegadoMax = 0.92f,
-                AbiertoMin = 0.22f, AbiertoMax = 1.54f,
-                Inclinacion = 0.12f, Barrido = 0.14f,
-                Curva = 0f, AnclajeSep = 5f,
-                Vientre = 0.34f, Afilada = 1.1f, Filosa = 0.25f,   // v6.55.0 — la pluma clásica: vientre al 34 %, punta de cuchilla, leve asimetría
-                HueEntre = 0.085f, HueLargo = 0.16f, HueTiempo = 0.018f,
-                FlapVel = 1f, Desgarre = 1f,
-                NucleoInten = 0.92f, NucleoFrac = 0.30f,
-                CuerpoInten = 0.34f, CuerpoFrac = 0.62f,
-                HaloInten = 0.13f,
-                Ruido = PrefijoRuido + "Noise",
-                RuidoInten = 1f, RuidoEscala = 1f, RuidoFlujo = 1f,
-                Luz = 1f,
+                default(EstiloAlas),
+                new EstiloAlas
+                {
+                    Paleta = null,
+                    ColorDia = new Color(255, 243, 214),
+                    FuerzaDia = 0.62f,
+                    Plumas = 5,
+                    LargoInterior = 88f,
+                    LargoExterior = 48f,
+                    RaizSemiancho = 3.5f,
+                    PuntaSemianchoBase = 14f,
+                    PuntaSemianchoAbierto = 8f,
+                    PlegadoMin = 0.5f,
+                    PlegadoMax = 0.92f,
+                    AbiertoMin = 0.22f,
+                    AbiertoMax = 1.54f,
+                    Inclinacion = 0.12f,
+                    Barrido = 0.14f,
+                    Curva = 0f,
+                    AnclajeSep = 5f,
+                    Vientre = 0.34f,
+                    Afilada = 1.1f,
+                    Filosa = 0.25f,
+                    HueEntre = 0.085f,
+                    HueLargo = 0.16f,
+                    HueTiempo = 0.018f,
+                    FlapVel = 1f,
+                    Desgarre = 1f,
+                    NucleoInten = 0.92f,
+                    NucleoFrac = 0.3f,
+                    CuerpoInten = 0.34f,
+                    CuerpoFrac = 0.62f,
+                    HaloInten = 0.13f,
+                    Ruido = "AethonMod/Content/Effects/Procedural/Noise",
+                    RuidoInten = 1f,
+                    RuidoEscala = 1f,
+                    RuidoFlujo = 1f,
+                    Luz = 1f
+                },
+                Ala("Tinta Serena", (Color[])(object)new Color[3]
+                {
+                    new Color(201, 166, 255),
+                    new Color(140, 60, 210),
+                    new Color(75, 30, 122)
+                }, new Color(232, 214, 255), "Ruido_7", 6, 96f, 52f, 3.5f, 14f, 8f, 0.52f, 0.98f, 0.18f, 1.05f, 0.12f, 0.14f, 0.22f, 5f, 0.42f, 0.7f, 0.35f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.85f, 0.3f, 0.3f, 0.62f, 0.14f, 1f, 1f, 1f, 1f, 0),
+                Ala("Eclipse", (Color[])(object)new Color[3]
+                {
+                    new Color(157, 92, 232),
+                    new Color(75, 18, 119),
+                    new Color(20, 6, 31)
+                }, new Color(140, 100, 190), "Ruido_4", 4, 86f, 46f, 3.5f, 18f, 8f, 0.46f, 0.9f, 0.3f, 1.7f, 0.12f, 0.22f, 0.3f, 5f, 0.38f, 0.9f, 0.3f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.8f, 0.3f, 0.38f, 0.62f, 0.16f, 1f, 1f, 1f, 1f, 0),
+                Ala("Plasma", (Color[])(object)new Color[3]
+                {
+                    new Color(255, 61, 219),
+                    new Color(199, 36, 184),
+                    new Color(122, 47, 209)
+                }, new Color(255, 214, 246), "Ruido_5", 7, 70f, 40f, 3.5f, 10f, 8f, 0.54f, 0.96f, 0.2f, 1.48f, 0.12f, 0.14f, -0.18f, 5f, 0.18f, 1.9f, 0.85f, 0.085f, 0.16f, 0.018f, 1.35f, 1.3f, 1f, 0.3f, 0.42f, 0.62f, 0.18f, 1.2f, 1f, 1.6f, 1f, 0),
+                Ala("Nebulosa", (Color[])(object)new Color[3]
+                {
+                    new Color(184, 127, 232),
+                    new Color(209, 92, 255),
+                    new Color(110, 123, 232)
+                }, new Color(240, 220, 255), "Investigacion/Espacio_1", 6, 100f, 56f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.12f, 5f, 0.3f, 1f, 0.15f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.82f, 0.3f, 0.4f, 0.62f, 0.2f, 1.25f, 1.4f, 0.7f, 1.15f, 0),
+                Ala("Cometario", (Color[])(object)new Color[3]
+                {
+                    new Color(255, 243, 214),
+                    new Color(125, 232, 255),
+                    new Color(92, 59, 209)
+                }, new Color(255, 250, 240), "Ruido_12", 5, 96f, 44f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, -0.1f, 5f, 0.25f, 1.5f, 0.7f, 0.085f, 0.22f, 0.018f, 1f, 1f, 1f, 0.3f, 0.3f, 0.62f, 0.12f, 1f, 1f, 1f, 1f, 0),
+                Ala("Medianoche", (Color[])(object)new Color[3]
+                {
+                    new Color(245, 240, 255),
+                    new Color(48, 26, 96),
+                    new Color(14, 8, 30)
+                }, new Color(120, 110, 160), "Ruido_2", 4, 92f, 50f, 3.5f, 20f, 12f, 0.48f, 0.94f, 0.28f, 1.62f, 0.12f, 0.14f, 0.38f, 5f, 0.5f, 0.65f, 0.2f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.7f, 0.3f, 0.22f, 0.62f, 0.1f, 0.9f, 1f, 1f, 0.8f, 0),
+                Ala("Prisma", (Color[])(object)new Color[5]
+                {
+                    new Color(174, 23, 189),
+                    new Color(237, 128, 60),
+                    new Color(247, 255, 101),
+                    new Color(176, 234, 85),
+                    new Color(102, 219, 249)
+                }, new Color(255, 243, 214), "Ruido_11", 7, 72f, 42f, 3.5f, 11f, 8f, 0.52f, 0.95f, 0.22f, 1.44f, 0.12f, 0.14f, 0f, 5f, 0.2f, 1.8f, 0.6f, 0.12f, 0.16f, 0.026f, 1f, 1f, 0.95f, 0.3f, 0.38f, 0.62f, 0.16f, 1.1f, 1f, 1f, 1.2f, 0),
+                Ala("Fuego Frío", (Color[])(object)new Color[3]
+                {
+                    new Color(234, 246, 255),
+                    new Color(185, 166, 255),
+                    new Color(125, 209, 232)
+                }, new Color(250, 252, 255), "Ruido_8", 6, 90f, 54f, 3.5f, 16f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.16f, 5f, 0.4f, 0.9f, 0.3f, 0.085f, 0.24f, 0.018f, 0.85f, 1f, 0.88f, 0.3f, 0.3f, 0.62f, 0.15f, 1f, 1f, 1f, 1f, 0),
+                Ala("Tormenta", (Color[])(object)new Color[3]
+                {
+                    new Color(240, 230, 255),
+                    new Color(178, 76, 232),
+                    new Color(61, 26, 92)
+                }, new Color(226, 216, 246), "Ruido_9", 5, 82f, 46f, 3.5f, 11f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.22f, -0.22f, 5f, 0.24f, 1.7f, 0.8f, 0.085f, 0.16f, 0.018f, 1.5f, 1.5f, 1f, 0.3f, 0.36f, 0.62f, 0.14f, 1.15f, 1f, 1f, 1f, 0),
+                Ala("Marioneta", (Color[])(object)new Color[3]
+                {
+                    new Color(227, 92, 133),
+                    new Color(138, 26, 61),
+                    new Color(26, 10, 20)
+                }, new Color(210, 140, 160), "Ruido_15", 4, 84f, 38f, 3.5f, 9f, 8f, 0.56f, 1.02f, 0.24f, 1.3f, 0.2f, 0.14f, 0.5f, 5f, 0.35f, 1.3f, 0.4f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.85f, 0.3f, 0.34f, 0.62f, 0.12f, 1f, 1f, 1f, 0.9f, 0),
+                Ala("Aurora Ártica", (Color[])(object)new Color[3]
+                {
+                    new Color(125, 232, 154),
+                    new Color(125, 232, 224),
+                    new Color(185, 166, 255)
+                }, new Color(235, 255, 250), "Ruido_0", 7, 112f, 64f, 3.5f, 14f, 8f, 0.44f, 0.84f, 0.2f, 1.35f, 0.12f, 0.14f, 0.06f, 5f, 0.32f, 1f, 0.1f, 0.085f, 0.28f, 0.018f, 0.75f, 1f, 0.8f, 0.3f, 0.32f, 0.62f, 0.18f, 1f, 1f, 1f, 1.1f, 0),
+                Ala("Orquídea", (Color[])(object)new Color[3]
+                {
+                    new Color(255, 138, 209),
+                    new Color(232, 79, 199),
+                    new Color(166, 61, 232)
+                }, new Color(255, 224, 242), "Ruido_18", 5, 88f, 54f, 3.5f, 22f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.2f, 5f, 0.5f, 0.6f, 0.05f, 0.1f, 0.16f, 0.018f, 1f, 1f, 0.92f, 0.3f, 0.36f, 0.62f, 0.16f, 1.1f, 1f, 1f, 1f, 0),
+                Ala("Vacío", (Color[])(object)new Color[3]
+                {
+                    new Color(107, 47, 160),
+                    new Color(40, 14, 66),
+                    new Color(8, 3, 13)
+                }, new Color(70, 50, 100), "Ruido_10", 3, 120f, 70f, 3.5f, 17f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.28f, 6f, 0.36f, 1.2f, 0.5f, 0.085f, 0.16f, 0.018f, 0.65f, 0.7f, 0.55f, 0.3f, 0.2f, 0.62f, 0.08f, 0.85f, 1f, 1f, 0.6f, 0),
+                Ala("Solares Rúnicas", (Color[])(object)new Color[3]
+                {
+                    new Color(255, 246, 220),
+                    new Color(232, 166, 61),
+                    new Color(255, 232, 154)
+                }, new Color(255, 252, 240), "Ruido_1", 6, 90f, 48f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.02f, 5f, 0.28f, 1f, 0.45f, 0.085f, 0.16f, 0.014f, 1f, 0.7f, 1f, 0.3f, 0.34f, 0.62f, 0.15f, 1f, 1f, 1f, 1.25f, 0),
+                Ala("Sangre de Tinta", (Color[])(object)new Color[3]
+                {
+                    new Color(209, 47, 166),
+                    new Color(122, 26, 77),
+                    new Color(20, 6, 20)
+                }, new Color(224, 130, 190), "Ruido_17", 5, 86f, 46f, 3.5f, 10f, 5f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.26f, 2.2f, 0.9f, 0.085f, 0.16f, 0.018f, 1f, 1.2f, 0.9f, 0.3f, 0.38f, 0.62f, 0.14f, 1.2f, 1f, 1f, 1f, 0),
+                Ala("Runas Solares", (Color[])(object)new Color[3]
+                {
+                    DefinitivasLib.Oro,
+                    new Color(255, 214, 130),
+                    DefinitivasLib.BlancoCalido
+                }, DefinitivasLib.BlancoCalido, "Ruido_13", 5, 92f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.3f, 1f, 0.35f, 0.05f, 0.1f, 0.018f, 0.85f, 1f, 0.95f, 0.3f, 0.34f, 0.62f, 0.16f, 1f, 1f, 1f, 1.2f, 1, 1f),
+                Ala("Runas del Vacío", (Color[])(object)new Color[3]
+                {
+                    new Color(150, 92, 255),
+                    new Color(96, 52, 190),
+                    new Color(96, 200, 255)
+                }, new Color(150, 170, 230), "Ruido_6", 5, 88f, 44f, 3.5f, 10f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, -0.15f, 5f, 0.22f, 1.6f, 0.75f, 0.085f, 0.16f, 0.018f, 0.7f, 0.8f, 0.85f, 0.3f, 0.32f, 0.62f, 0.14f, 1f, 1f, 1f, 0.9f, 2, 1.05f),
+                Ala("Runas del Eclipse", (Color[])(object)new Color[3]
+                {
+                    DefinitivasLib.Ambar,
+                    new Color(158, 78, 22),
+                    new Color(64, 28, 10)
+                }, new Color(180, 120, 70), "Ruido_14", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 3, 1f),
+                Ala("Runas del Juicio", (Color[])(object)new Color[5]
+                {
+                    DefinitivasLib.Oro,
+                    DefinitivasLib.Ambar,
+                    DefinitivasLib.BlancoCalido,
+                    DefinitivasLib.Violeta,
+                    DefinitivasLib.Cian
+                }, DefinitivasLib.BlancoCalido, "Ruido_16", 5, 94f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.26f, 5f, 0.32f, 1.2f, 0.55f, 0.16f, 0.2f, 0.024f, 1.1f, 1f, 0.95f, 0.3f, 0.36f, 0.62f, 0.16f, 1f, 1f, 1f, 1.25f, 4, 1.1f),
+                Ala("Agujas del Vacío", (Color[])(object)new Color[3]
+                {
+                    new Color(130, 74, 220),
+                    new Color(84, 40, 150),
+                    new Color(110, 216, 255)
+                }, new Color(140, 120, 200), "Ruido_19", 4, 96f, 40f, 3.5f, 9f, 5f, 0.5f, 0.92f, 0.22f, 1.54f, 0.2f, 0.14f, 0.42f, 5f, 0.24f, 2.4f, 0.55f, 0.085f, 0.16f, 0.018f, 1.15f, 1.2f, 1f, 0.3f, 0.3f, 0.62f, 0.13f, 1f, 1f, 1f, 1f, 0),
+                Ala("Cuchillas del Eclipse", (Color[])(object)new Color[3]
+                {
+                    new Color(255, 196, 110),
+                    DefinitivasLib.Ambar,
+                    new Color(70, 26, 8)
+                }, new Color(230, 180, 120), "Ruido_3", 5, 90f, 48f, 3.5f, 22f, 13f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.1f, 5f, 0.18f, 1.35f, 1f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.92f, 0.3f, 0.38f, 0.62f, 0.15f, 1.1f, 1f, 1f, 1f, 0),
+                Ala("Corolas del Alba", (Color[])(object)new Color[3]
+                {
+                    DefinitivasLib.BlancoCalido,
+                    DefinitivasLib.Oro,
+                    new Color(255, 226, 160)
+                }, new Color(255, 250, 240), "Ruido_6", 7, 86f, 54f, 3.5f, 16f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.14f, 9f, 0.4f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.7f, 0.6f, 0.9f, 0.3f, 0.34f, 0.62f, 0.17f, 1f, 1f, 1f, 1.1f, 0)
             };
-
-            // === 2..16 — LAS QUINCE (v6.54.3: QUINCE ANATOMÍAS — la
-            //     letra: «las alas son las mismas solo que con color
-            //     diferente»; ahora NINGUNA se parece a otra) ===
-
-            // 2 — TINTA SERENA: SEIS plumas líquidas curvadas suaves —
-            //     el abanico estrecho y elegante del hada de tinta.
-            t[2] = Ala("Tinta Serena",
-                paleta: new[] { new Color(201, 166, 255), new Color(140, 60, 210), new Color(75, 30, 122) },
-                dia: new Color(232, 214, 255), ruido: "Ruido_7",
-                plumas: 6, largoInt: 96f, largoExt: 52f, curva: 0.22f,
-                plegadoMin: 0.52f, plegadoMax: 0.98f,
-                abiertoMin: 0.18f, abiertoMax: 1.05f,
-                nucleo: 0.85f, cuerpo: 0.30f, halo: 0.14f,
-                vientre: 0.42f, afilada: 0.7f, filosa: 0.35f);
-
-            // 3 — ECLIPSE: CUATRO plumas anchas en abanico AMPLIO con
-            //     garra curva — la penumbra que se despliega ancha.
-            t[3] = Ala("Eclipse",
-                paleta: new[] { new Color(157, 92, 232), new Color(75, 18, 119), new Color(20, 6, 31) },
-                dia: new Color(140, 100, 190), ruido: "Ruido_4",
-                plumas: 4, largoInt: 86f, largoExt: 46f, punta: 18f, barrido: 0.22f,
-                curva: 0.30f, plegadoMin: 0.46f, plegadoMax: 0.90f,
-                abiertoMin: 0.30f, abiertoMax: 1.70f,
-                nucleo: 0.80f, cuerpo: 0.38f, halo: 0.16f,
-                vientre: 0.38f, afilada: 0.9f, filosa: 0.30f);
-
-            // 4 — PLASMA: SIETE plumas finas curvadas HACIA ATRÁS — los
-            //     arcos voltaicos que chisporrotean rápido.
-            t[4] = Ala("Plasma",
-                paleta: new[] { new Color(255, 61, 219), new Color(199, 36, 184), new Color(122, 47, 209) },
-                dia: new Color(255, 214, 246), ruido: "Ruido_5",
-                plumas: 7, largoInt: 70f, largoExt: 40f, punta: 10f,
-                curva: -0.18f, plegadoMin: 0.54f, plegadoMax: 0.96f,
-                abiertoMin: 0.20f, abiertoMax: 1.48f,
-                flap: 1.35f, desgarre: 1.3f,
-                nucleo: 1f, cuerpo: 0.42f, halo: 0.18f, ruidoInten: 1.2f,
-                ruidoFlujo: 1.6f,
-                vientre: 0.18f, afilada: 1.9f, filosa: 0.85f);
-
-            // 5 — NEBULOSA: SEIS plumas larguísimas de flujo LENTO y
-            //     vetas GRANDES — la nube estelar que se arrastra.
-            t[5] = Ala("Nebulosa",
-                paleta: new[] { new Color(184, 127, 232), new Color(209, 92, 255), new Color(110, 123, 232) },
-                dia: new Color(240, 220, 255), ruido: "Investigacion/Espacio_1",
-                plumas: 6, largoInt: 100f, largoExt: 56f, curva: 0.12f,
-                nucleo: 0.82f, cuerpo: 0.40f, halo: 0.20f,
-                ruidoInten: 1.25f, ruidoEscala: 1.4f, ruidoFlujo: 0.7f, luz: 1.15f,
-                vientre: 0.30f, afilada: 1.0f, filosa: 0.15f);
-
-            // 6 — COMETARIO: CINCO plumas con fuerte conicidad y leve
-            //     garra atrás — la cola del cometa.
-            t[6] = Ala("Cometario",
-                paleta: new[] { new Color(255, 243, 214), new Color(125, 232, 255), new Color(92, 59, 209) },
-                dia: new Color(255, 250, 240), ruido: "Ruido_12",
-                plumas: 5, largoInt: 96f, largoExt: 44f, curva: -0.10f,
-                hueLargo: 0.22f,
-                nucleo: 1f, cuerpo: 0.30f, halo: 0.12f,
-                vientre: 0.25f, afilada: 1.5f, filosa: 0.70f);
-
-            // 7 — MEDIANOCHE: CUATRO plumas ANCHAS con la GARRA fuerte
-            //     del murciélago — la membrana nocturna.
-            t[7] = Ala("Medianoche",
-                paleta: new[] { new Color(245, 240, 255), new Color(48, 26, 96), new Color(14, 8, 30) },
-                dia: new Color(120, 110, 160), ruido: "Ruido_2",
-                plumas: 4, largoInt: 92f, largoExt: 50f,
-                punta: 20f, puntaAbierta: 12f, curva: 0.38f,
-                plegadoMin: 0.48f, plegadoMax: 0.94f,
-                abiertoMin: 0.28f, abiertoMax: 1.62f,
-                nucleo: 0.70f, cuerpo: 0.22f, halo: 0.10f,
-                ruidoInten: 0.9f, luz: 0.8f,
-                vientre: 0.50f, afilada: 0.65f, filosa: 0.20f);
-
-            // 8 — PRISMA: SIETE plumas finas CORTAS y rectas — el
-            //     racimo cristalino que gira rápido.
-            t[8] = Ala("Prisma",
-                paleta: new[] {                          // el arcoíris del dios (ColorPrisma)
-                    new Color(174, 23, 189), new Color(237, 128, 60),
-                    new Color(247, 255, 101), new Color(176, 234, 85),
-                    new Color(102, 219, 249) },
-                dia: new Color(255, 243, 214), ruido: "Ruido_11",
-                plumas: 7, largoInt: 72f, largoExt: 42f, punta: 11f,
-                plegadoMin: 0.52f, plegadoMax: 0.95f,
-                abiertoMin: 0.22f, abiertoMax: 1.44f,
-                hueEntre: 0.12f, hueTiempo: 0.026f,
-                nucleo: 0.95f, cuerpo: 0.38f, halo: 0.16f,
-                ruidoInten: 1.1f, luz: 1.2f,
-                vientre: 0.20f, afilada: 1.8f, filosa: 0.60f);
-
-            // 9 — FUEGO FRÍO: SEIS plumas de hielo con curva suave y
-            //     flujo lento — la escarcha que brilla.
-            t[9] = Ala("Fuego Frío",
-                paleta: new[] { new Color(234, 246, 255), new Color(185, 166, 255), new Color(125, 209, 232) },
-                dia: new Color(250, 252, 255), ruido: "Ruido_8",
-                plumas: 6, largoInt: 90f, largoExt: 54f, curva: 0.16f,
-                punta: 16f, hueLargo: 0.24f, flap: 0.85f,
-                nucleo: 0.88f, cuerpo: 0.30f, halo: 0.15f,
-                vientre: 0.40f, afilada: 0.9f, filosa: 0.30f);
-
-            // 10 — TORMENTA: CINCO plumas desgarradas barridas hacia
-            //     atrás — el chubasco eléctrico.
-            t[10] = Ala("Tormenta",
-                paleta: new[] { new Color(240, 230, 255), new Color(178, 76, 232), new Color(61, 26, 92) },
-                dia: new Color(226, 216, 246), ruido: "Ruido_9",
-                plumas: 5, largoInt: 82f, largoExt: 46f, punta: 11f,
-                curva: -0.22f, barrido: 0.22f,
-                flap: 1.5f, desgarre: 1.5f,
-                nucleo: 1f, cuerpo: 0.36f, halo: 0.14f, ruidoInten: 1.15f,
-                vientre: 0.24f, afilada: 1.7f, filosa: 0.80f);
-
-            // 11 — MARIONETA: CUATRO plumas larguísimas COLGANTES en
-            //     garra cerrada — los hilos que caen.
-            t[11] = Ala("Marioneta",
-                paleta: new[] { new Color(227, 92, 133), new Color(138, 26, 61), new Color(26, 10, 20) },
-                dia: new Color(210, 140, 160), ruido: "Ruido_15",
-                plumas: 4, largoInt: 84f, largoExt: 38f, punta: 9f,
-                inclinacion: 0.2f, curva: 0.50f,
-                plegadoMin: 0.56f, plegadoMax: 1.02f,
-                abiertoMin: 0.24f, abiertoMax: 1.30f,
-                nucleo: 0.85f, cuerpo: 0.34f, halo: 0.12f, luz: 0.9f,
-                vientre: 0.35f, afilada: 1.3f, filosa: 0.40f);
-
-            // 12 — AURORA ÁRTICA: SIETE plumas LARGUÍSIMAS en abanico
-            //     vertical — la cortina de la aurora.
-            t[12] = Ala("Aurora Ártica",
-                paleta: new[] { new Color(125, 232, 154), new Color(125, 232, 224), new Color(185, 166, 255) },
-                dia: new Color(235, 255, 250), ruido: "Ruido_0",
-                plumas: 7, largoInt: 112f, largoExt: 64f, curva: 0.06f,
-                plegadoMin: 0.44f, plegadoMax: 0.84f,
-                abiertoMin: 0.20f, abiertoMax: 1.35f,
-                hueLargo: 0.28f, flap: 0.75f,
-                nucleo: 0.80f, cuerpo: 0.32f, halo: 0.18f, luz: 1.1f,
-                vientre: 0.32f, afilada: 1.0f, filosa: 0.10f);
-
-            // 13 — ORQUÍDEA: CINCO plumas ANCHÍSIMAS redondeadas — los
-            //     pétalos que se abren.
-            t[13] = Ala("Orquídea",
-                paleta: new[] { new Color(255, 138, 209), new Color(232, 79, 199), new Color(166, 61, 232) },
-                dia: new Color(255, 224, 242), ruido: "Ruido_18",
-                plumas: 5, largoInt: 88f, largoExt: 54f,
-                punta: 22f, puntaAbierta: 14f, curva: 0.20f,
-                hueEntre: 0.1f,
-                nucleo: 0.92f, cuerpo: 0.36f, halo: 0.16f, ruidoInten: 1.1f,
-                vientre: 0.50f, afilada: 0.6f, filosa: 0.05f);
-
-            // 14 — VACÍO: TRES plumas ENORMES tenues — el vacío no
-            //     necesita más que tres zarpas.
-            t[14] = Ala("Vacío",
-                paleta: new[] { new Color(107, 47, 160), new Color(40, 14, 66), new Color(8, 3, 13) },
-                dia: new Color(70, 50, 100), ruido: "Ruido_10",
-                plumas: 3, largoInt: 120f, largoExt: 70f, curva: 0.28f,
-                punta: 17f, anclajeSep: 6f,
-                flap: 0.65f, desgarre: 0.7f,
-                nucleo: 0.55f, cuerpo: 0.20f, halo: 0.08f,
-                ruidoInten: 0.85f, luz: 0.6f,
-                vientre: 0.36f, afilada: 1.2f, filosa: 0.50f);
-
-            // 15 — SOLARES RÚNICAS: SEIS plumas RÍGIDAS sin curva — la
-            //     llama solar grabada que no se dobla.
-            t[15] = Ala("Solares Rúnicas",
-                paleta: new[] { new Color(255, 246, 220), new Color(232, 166, 61), new Color(255, 232, 154) },
-                dia: new Color(255, 252, 240), ruido: "Ruido_1",
-                plumas: 6, largoInt: 90f, largoExt: 48f,
-                curva: 0.02f, desgarre: 0.7f, hueTiempo: 0.014f,
-                nucleo: 1f, cuerpo: 0.34f, halo: 0.15f, luz: 1.25f,
-                vientre: 0.28f, afilada: 1.0f, filosa: 0.45f);
-
-            // 16 — SANGRE DE TINTA: CINCO plumas PUNTIAGUDAS garras y
-            //     goteando — la firma de la tinta oscura.
-            t[16] = Ala("Sangre de Tinta",
-                paleta: new[] { new Color(209, 47, 166), new Color(122, 26, 77), new Color(20, 6, 20) },
-                dia: new Color(224, 130, 190), ruido: "Ruido_17",
-                plumas: 5, largoInt: 86f, largoExt: 46f,
-                punta: 10f, puntaAbierta: 5f, curva: 0.34f,
-                desgarre: 1.2f,
-                nucleo: 0.9f, cuerpo: 0.38f, halo: 0.14f, ruidoInten: 1.2f,
-                vientre: 0.26f, afilada: 2.2f, filosa: 0.90f);
-
-            return t;
         }
 
-        /// <summary>El constructor con los valores de la casa por defecto
-        /// (los de la Aurora histórica) — cada ala solo declara su alma;
-        /// v6.54.3: los parámetros de la ANATOMÍA (plumas, ángulos del
-        /// abanico, curva, anclaje, anchos de capa, flujo del ruido).</summary>
-        private static EstiloAlas Ala(string _,
-            Color[] paleta, Color dia, string ruido,
-            int plumas = 5,
-            float largoInt = 88f, float largoExt = 48f,
-            float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f,
-            float plegadoMin = 0.50f, float plegadoMax = 0.92f,
-            float abiertoMin = 0.22f, float abiertoMax = 1.54f,
-            float inclinacion = 0.12f, float barrido = 0.14f,
-            float curva = 0f, float anclajeSep = 5f,
-            float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f,
-            float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f,
-            float flap = 1f, float desgarre = 1f,
-            float nucleo = 0.92f, float nucleoFrac = 0.30f,
-            float cuerpo = 0.34f, float cuerpoFrac = 0.62f,
-            float halo = 0.13f,
-            float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f,
-            float luz = 1f)
+        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f)
         {
+            //IL_0012: Unknown result type (might be due to invalid IL or missing references)
+            //IL_0013: Unknown result type (might be due to invalid IL or missing references)
             return new EstiloAlas
             {
                 Paleta = paleta,
                 ColorDia = dia,
                 FuerzaDia = 0.62f,
                 Plumas = plumas,
-                LargoInterior = largoInt, LargoExterior = largoExt,
+                LargoInterior = largoInt,
+                LargoExterior = largoExt,
                 RaizSemiancho = raiz,
-                PuntaSemianchoBase = punta, PuntaSemianchoAbierto = puntaAbierta,
-                PlegadoMin = plegadoMin, PlegadoMax = plegadoMax,
-                AbiertoMin = abiertoMin, AbiertoMax = abiertoMax,
-                Inclinacion = inclinacion, Barrido = barrido,
-                Curva = curva, AnclajeSep = anclajeSep,
-                Vientre = vientre, Afilada = afilada, Filosa = filosa,
-                HueEntre = hueEntre, HueLargo = hueLargo, HueTiempo = hueTiempo,
-                FlapVel = flap, Desgarre = desgarre,
-                NucleoInten = nucleo, NucleoFrac = nucleoFrac,
-                CuerpoInten = cuerpo, CuerpoFrac = cuerpoFrac,
+                PuntaSemianchoBase = punta,
+                PuntaSemianchoAbierto = puntaAbierta,
+                PlegadoMin = plegadoMin,
+                PlegadoMax = plegadoMax,
+                AbiertoMin = abiertoMin,
+                AbiertoMax = abiertoMax,
+                Inclinacion = inclinacion,
+                Barrido = barrido,
+                Curva = curva,
+                AnclajeSep = anclajeSep,
+                Vientre = vientre,
+                Afilada = afilada,
+                Filosa = filosa,
+                HueEntre = hueEntre,
+                HueLargo = hueLargo,
+                HueTiempo = hueTiempo,
+                FlapVel = flap,
+                Desgarre = desgarre,
+                NucleoInten = nucleo,
+                NucleoFrac = nucleoFrac,
+                CuerpoInten = cuerpo,
+                CuerpoFrac = cuerpoFrac,
                 HaloInten = halo,
-                Ruido = PrefijoRuido + ruido,
+                Ruido = "AethonMod/Content/Effects/Procedural/" + ruido,
                 RuidoInten = ruidoInten,
-                RuidoEscala = ruidoEscala, RuidoFlujo = ruidoFlujo,
+                RuidoEscala = ruidoEscala,
+                RuidoFlujo = ruidoFlujo,
                 Luz = luz,
+                Runas = runas,
+                RunasInten = runasInten
             };
         }
 
-        /// <summary>El estilo seguro (fuera de rango → la Aurora).</summary>
         public static ref readonly EstiloAlas De(byte indice)
         {
             if (indice <= 0 || indice >= Todos.Length)
+            {
                 return ref Todos[1];
+            }
             return ref Todos[indice];
         }
     }
