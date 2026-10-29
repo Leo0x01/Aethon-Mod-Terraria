@@ -1,3 +1,9 @@
+// v6.56.4 — LA FUENTE ÚNICA DEL ESPAÑOL (la letra del usuario: «por ahora
+// no es necesario que hayan varios, solo deja español es_es ya que es
+// suficiente con eso»). Este es-ES es EL archivo que se edita; su espejo
+// es-MX se genera con tools/sync_es_mx_v6564.py (el juego en «Español
+// (Latinoamérica)» lee el es-MX); el paquete en-US fue RETIRADO — el mod
+// es monolingüe por decisión de la casa.
 // v6.53 — THE SCRIBE PURGE: the demo boss, The Conscious Feather,
 // the Summoner Feather, the bag and the inscriptions ALL DIED (the
 // user's word). THE FIRST TRACE SURVIVES (the beam weapon, now in
@@ -5,7 +11,6 @@
 // technique) and THE INK AURORA (the code-drawn wings, now in the
 // Cosmetics bag and finally VISIBLE).
 // ENGLISH (en-US).
-
 Items: {
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo

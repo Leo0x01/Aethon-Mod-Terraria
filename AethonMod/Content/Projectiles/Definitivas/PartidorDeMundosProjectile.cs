@@ -31,6 +31,15 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         private bool _anclaLista;
 
+        // v6.56.4 — LOS POZOS DEL PARTIDOR (cero-GC, la ley de la casa): la
+        // carga (14 nodos) y el corte (20) son fases SECUENCIALES — comparten
+        // un solo set (antes: dos `new` por frame + el ArraySemis alocando).
+        private static readonly Vector2[] _cacheNodos = new Vector2[20];
+
+        private static readonly float[] _cachePerf = new float[20];
+
+        private static readonly Color[] _cacheColores = new Color[20];
+
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetStaticDefaults()
@@ -378,8 +387,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float num3 = num / 22f;
                 Vector2 val = new Vector2(_ancho, _techo);
                 Vector2 val2 = new Vector2(_ancho, _piso);
-                Vector2[] array = (Vector2[])(object)new Vector2[14];
-                float[] array2 = new float[14];
+                // v6.56.4 — LA CARGA POR EL CAMINO GPU DEL RC2 (la letra:
+                // «solo debes adaptar el código del rayo concentrado 2…»):
+                // las dos FajaTextura directas (la senoide de telegrafía)
+                // MUEREN — la senoide viste el Oro y el shader pone el núcleo
+                // blanco (la ley de los 6 nodos/onda q·9 se conserva: la
+                // misma carne, sin dientes). Coordenadas de MUNDO (el contrato
+                // de la librería — sin `- Main.screenPosition`).
+                Vector2[] array = _cacheNodos;
+                float[] array2 = _cachePerf;
+                Color[] coloresC = _cacheColores;
                 for (int i = 0; i < 14; i++)
                 {
                     float num4 = (float)i / 13f;
@@ -388,24 +405,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // la autopsia de la 3ª ronda de picos). A q·9 son 9.8 nodos
                     // por onda: la misma carne latiendo, SIN dientes.
                     float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + num4 * 9f) * (2f + 8f * num3) * num4;
-                    array[i] = Vector2.Lerp(val, val2, num4) + new Vector2(num5, 0f) - Main.screenPosition;
+                    array[i] = Vector2.Lerp(val, val2, num4) + new Vector2(num5, 0f);
                     array2[i] = 2f + 5f * num3;
+                    coloresC[i] = DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * (0.5f + 0.5f * num3));
                 }
-                Texture2D texRuido = DefinitivasLib.TexRuido;
-                if (texRuido != null)
-                {
-                    RayoStrip.AbrirLote();
-                    try
-                    {
-                        RayoStrip.FajaTexturadaEnLote(array, array2, DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.28f * (0.5f + 0.5f * num3)), texRuido, 300f, 0.8f + num3 * 2.4f, globalTimeWrappedHourly);
-                        float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * MathHelper.Lerp(2f, 4f, num3) * ((float)Math.PI * 2f));
-                        RayoStrip.FajaTexturadaEnLote(array, ArraySemis(array2, 0.4f), DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, (0.3f + 0.4f * num3) * num6), texRuido, 240f, 1.4f + num3 * 3f, globalTimeWrappedHourly, 0.36f, 0.64f);
-                    }
-                    finally
-                    {
-                        RayoStrip.CerrarLote();
-                    }
-                }
+                HazConcentradoLib.Dibujar(array, 14, array2, coloresC,
+                    -globalTimeWrappedHourly * 0.025f * (0.8f + num3 * 2.4f));
                 VFXCore.Begin();
                 int num7 = 1 + (int)(num3 * 4.999f);
                 for (int j = 0; j < 5; j++)
@@ -436,8 +441,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float num15 = num13 * num14;
                 Vector2 val3 = new Vector2(_ancho, _techo);
                 Vector2 val4 = new Vector2(_ancho, _piso);
-                Vector2[] array3 = (Vector2[])(object)new Vector2[20];
-                float[] array4 = new float[20];
+                // v6.56.4 — EL CORTE POR EL CAMINO GPU DEL RC2 (cero-GC: los
+                // pozos compartidos con la carga): HazFusionEspina MUERE para
+                // el Partidor — el borde vertical del juicio lo funde ahora el
+                // shader POR PÍXEL. El flujo propio (−1.15: la carne hierve
+                // HACIA ARRIBA) viaja en uTime (positivo = hacia la raíz).
+                Vector2[] array3 = _cacheNodos;
+                float[] array4 = _cachePerf;
+                Color[] coloresJ = _cacheColores;
                 float num16 = DefinitivasLib.Flicker(globalTimeWrappedHourly);
                 for (int l = 0; l < 20; l++)
                 {
@@ -446,8 +457,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float num18 = MathF.Sin(num17 * (float)Math.PI) * 1.4f - 0.25f;
                     float num19 = MathHelper.SmoothStep(0f, 0.75f, MathHelper.Clamp(num18, 0f, 0.75f));
                     array4[l] = (0.25f + 0.75f * num19) * 150f * num15 * num16;
+                    // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
+                    // de la vieja HazFusionEspina — la identidad del corte).
+                    float lente = 0.85f + 0.30f * MathF.Sin(num17 * MathHelper.Pi);
+                    coloresJ[l] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f - num17 * 0.16f), 0.55f * num15 * lente);
                 }
-                DefinitivasLib.HazFusionEspina(array3, array4, DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f), num15, globalTimeWrappedHourly, 5, arcoiris: true, -1.15f);
+                HazConcentradoLib.Dibujar(array3, 20, array4, coloresJ,
+                    globalTimeWrappedHourly * 0.025f * 1.15f);
                 for (int m = -1; m <= 1; m += 2)
                 {
                     Vector2[] array5 = (Vector2[])(object)new Vector2[20];
@@ -593,14 +609,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return false;
         }
 
-        private static float[] ArraySemis(float[] perfil, float semi)
-        {
-            float[] array = new float[perfil.Length];
-            for (int i = 0; i < perfil.Length; i++)
-            {
-                array[i] = perfil[i] * semi;
-            }
-            return array;
-        }
+        // v6.56.4 — ArraySemis MUERE (0 consumidores tras el porte al camino
+        // GPU; alocaba un array nuevo por llamada — deuda GC de la carga).
     }
 }

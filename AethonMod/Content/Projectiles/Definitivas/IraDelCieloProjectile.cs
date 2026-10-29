@@ -572,6 +572,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Projectile.localNPCHitCooldown = 40;
         }
 
+        // v6.56.4 — LOS POZOS DE LA COLUMNA (cero-GC): antes `new Vector2[16]`
+        // + `new float[16]` por frame de la columna.
+        private static readonly Vector2[] _cacheEspina = new Vector2[16];
+
+        private static readonly float[] _cachePerfil = new float[16];
+
+        private static readonly Color[] _cacheColoresI = new Color[16];
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
@@ -585,14 +593,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = final ? DefinitivasLib.Ambar : DefinitivasLib.Oro;
             Color gBorde = DefinitivasLib.GradienteJuicio(Main.GlobalTimeWrappedHourly * 0.1f);
 
-            // ==================== LA COLUMNA DE CARNE (LA PILA DE SEIS PASADAS) ====================
-            // (flujo NEGATIVO: la carne HIERVE hacia arriba — el calor del
-            // juicio sube; el remolino y el núcleo corren en contra)
+            // ==================== LA COLUMNA DE CARNE (EL CAMINO GPU DEL RC2) ====================
+            // v6.56.4 — la letra: «solo debes adaptar el código del rayo
+            // concentrado 2 a las características de las armas con pico»:
+            // HazFusionEspina MUERE para la Columna — el borde lo funde ahora
+            // el shader POR PÍXEL. El flujo NEGATIVO (−1.2: la carne HIERVE
+            // hacia arriba — el calor del juicio sube) viaja en uTime
+            // (positivo = hacia la raíz).
             {
                 const int N = 16;
-                var espina = new Vector2[N];
-                var perfil = new float[N];
-                float flicker = DefinitivasLib.Flicker(Main.GlobalTimeWrappedHourly);
+                Vector2[] espina = _cacheEspina;
+                float[] perfil = _cachePerfil;
+                Color[] coloresI = _cacheColoresI;
+                float tiempo = Main.GlobalTimeWrappedHourly;
+                float flicker = DefinitivasLib.Flicker(tiempo);
                 for (int i = 0; i < N; i++)
                 {
                     float q = i / (float)(N - 1);
@@ -603,9 +617,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float sat = MathHelper.SmoothStep(0f, 0.65f, MathHelper.Clamp(s, 0f, 0.65f));
                     perfil[i] = (0.25f + 0.75f * sat) *
                         (rama ? 40f : final ? 72f : 52f) * potencia * flicker;
+                    // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
+                    // de la vieja HazFusionEspina — la identidad de la columna).
+                    float lente = 0.85f + 0.30f * MathF.Sin(q * MathHelper.Pi);
+                    coloresI[i] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(tiempo * 0.07f - q * 0.16f), 0.55f * potencia * lente);
                 }
-                DefinitivasLib.HazFusionEspina(espina, perfil, c, potencia,
-                    Main.GlobalTimeWrappedHourly, 110, true, -1.2f, !rama);
+                HazConcentradoLib.Dibujar(espina, N, perfil, coloresI,
+                    tiempo * 0.025f * 1.2f);
             }
 
             // ==================== LA ESPIRAL TRIPLE DEL FINAL ====================

@@ -42,6 +42,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // en la polilínea (la lección v6.55-f) y ahora es SUAVE.
         private static readonly Vector2[] _renderEspina = new Vector2[44];
 
+        // v6.56.4 — LOS POZOS DEL RENDER DEL PRISMA (cero-GC): antes el
+        // PreDraw alocaba `new float[44]` (y `new Vector2[16]` en el arranque)
+        // cada frame del látigo.
+        private static readonly float[] _renderPerf = new float[44];
+
+        private static readonly Color[] _renderColores = new Color[44];
+
         private static Vector2[] ResampleCatmullRom(Vector2[] src, int nSrc, Vector2[] dest)
         {
             int nDest = dest.Length;
@@ -531,20 +538,34 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 else
                 {
-                    array = (Vector2[])(object)new Vector2[16];
-                    for (int k = 0; k < 16; k++)
+                    // v6.56.4 — cero-GC: la recta de arranque también vive en el
+                    // pozo _renderEspina (44 nodos, la misma línea, más densa).
+                    for (int k = 0; k < 44; k++)
                     {
-                        array[k] = val2 + val * (2400f * (float)k / 15f);
+                        _renderEspina[k] = val2 + val * (2400f * (float)k / 43f);
                     }
+                    array = _renderEspina;
                 }
                 int nRender = array.Length;
-                float[] array2 = new float[nRender];
+                float[] array2 = _renderPerf;
+                Color[] coloresP = _renderColores;
                 for (int l = 0; l < nRender; l++)
                 {
                     float p = (float)l / (nRender - 1);
                     array2[l] = MathF.Max(AnchoHazEn(p, num) * 0.5f, 0.5f);
+                    // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
+                    // de la vieja HazFusionEspina — la identidad del Prisma:
+                    // el Juicio caminando por la espina viva).
+                    float lente = 0.85f + 0.30f * MathF.Sin(p * MathHelper.Pi);
+                    coloresP[l] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f - p * 0.16f), 0.55f * (num * 0.9f) * lente);
                 }
-                DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f), num * 0.9f, globalTimeWrappedHourly, _semilla + 20);
+                // v6.56.4 — LA ESPINA VIVA POR EL CAMINO GPU DEL RC2 (la letra:
+                // «solo debes adaptar el código del rayo concentrado 2…»):
+                // HazFusionEspina MUERE para el Prisma — el borde del látigo
+                // lo funde ahora el shader POR PÍXEL (envV smoothstep). El
+                // Catmull-Rom 44 ya era el insumo perfecto para el strip.
+                HazConcentradoLib.Dibujar(array, nRender, array2, coloresP,
+                    -globalTimeWrappedHourly * 0.025f);
             }
             VFXCore.RestaurarLoteVanilla();
             return false;

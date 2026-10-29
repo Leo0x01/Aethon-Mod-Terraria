@@ -153,10 +153,13 @@ y el worklog del entorno de desarrollo):
 4. **Inspección de la DLL** — extraer el ensamblado del `.tmod` (magic MZ) y
    verificar que las firmas nuevas de la versión están presentes (y las
    muertas, ausentes).
-5. **hjson simétricos** — es-MX y en-US con las mismas claves en el paquete
-   (y es-ES = espejo GENERADO de es-MX: correr
-   `python3 tools/sync_es_es_v65071.py` tras CADA edición del es-MX —
-   v6.50.71: todas las variantes de español caen en la nuestra).
+5. **hjson** — v6.56.4: **MONOLINGÜE**. es-ES es LA FUENTE ÚNICA (se edita
+    solo él); es-MX es un ESPEJO GENERADO (`python3 tools/sync_es_mx_v6564.py`
+    tras CADA edición del es-ES — el juego en «Español (Latinoamérica)» lee el
+    es-MX; el paquete en-US NO EXISTE desde la v6.56.4, por la letra del
+    usuario: «solo deja español es_es». Verificación del paquete: es-ES ==
+    es-MX con cuerpos IDÉNTICOS y en-US AUSENTE (lo comprueba
+    `tools/audit_v6564_tmod.py`).
 6. **Servidor headless** — arrancar el server dedicado con el mod: debe cargar
    SIN excepciones (Sandboxing → Adding → Configuring → Finalizing → menú de
    mundos).

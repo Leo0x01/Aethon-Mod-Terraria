@@ -174,10 +174,57 @@ namespace AethonMod.Content.Projectiles.Definitivas
             ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + new Vector2((float)(13 * ((Entity)val).direction), -20f);
             ((Entity)val).velocity = ((Entity)val).velocity + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * -0.1f;
             ((Entity)val).velocity = ((Entity)val).velocity * 0.98f;
-            if (!Main.dedServ && Time % 4f == 0f && Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
+            if (!Main.dedServ)
             {
-                float lerpValue = Utils.GetLerpValue((float)ChargeTime - (float)LaserDuration * 0.5f, (float)(ChargeTime + LaserDuration), Time, true);
-                Main.instance.CameraModifiers.Add((ICameraModifier)new PunchCameraModifier(((Entity)((ModProjectile)this).Projectile).Center, Utils.NextVector2CircularEdge(Main.rand, 1f, 1f), lerpValue * 8f, 12f, 20, 5000f, (string)null));
+                // v6.56.4 — EL PAQUETE DEL PODER (la letra: «mientras el rayo
+                // concentrado 2 está siendo disparado el mundo debe temblar un
+                // poco así el jugador nota el poder» + el reemplazo de la
+                // aguja + el sonido de la carga). El Punch cada 4 ticks de la
+                // v6.56.3 se sentía irregular y usaba Main.rand (ley §0.4).
+                // Ahora: EL TEMBLOR por el modelo de trauma de la casa
+                // (Pantalla.Sacudir: una sacudida fuerte al encendido y un
+                // temblor sostenido suave durante el láser, muriendo solo
+                // cuando el rayo se apaga); LOS DESTELLOS de los soles
+                // rúnicos (se reúnen a gran velocidad en el centro durante
+                // la carga y estallan hacia la dirección del rayo al
+                // disparar — el reemplazo de la aguja: «esa línea debes
+                // quitar, se ve horrible»); LA LENTE (GravLens: el espacio
+                // se curva alrededor del conjuro) y EL SONIDO DE CARGA
+                // (one-shot generado — gen_sonido_v6564.py: «en el momento
+                // de carga necesita sonar que está cargando»).
+                if (Time == 2f)
+                {
+                    SoundStyle carga = new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoCarga", SoundType.Sound)
+                    {
+                        MaxInstances = 1,
+                        Volume = 1f
+                    };
+                    DefinitivasLib.Sonar(carga, ((Entity)((ModProjectile)this).Projectile).Center);
+                }
+                if (Time < (float)ChargeTime)
+                {
+                    if (Time % 3f < 1f)
+                    {
+                        HazConcentradoLib.DestellosDeCarga(((Entity)((ModProjectile)this).Projectile).Center, Time / (float)ChargeTime, (int)(Time * 7f) + 11, 1f);
+                    }
+                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, MathHelper.Lerp(240f, 150f, Time / (float)ChargeTime), 0.3f, 0.6f);
+                }
+                else if (Time < (float)(ChargeTime + 60))
+                {
+                    if (Time % 2f < 1f)
+                    {
+                        HazConcentradoLib.DestellosDeEstallido(((Entity)((ModProjectile)this).Projectile).Center, ((ModProjectile)this).Projectile.rotation, (int)(Time * 13f) + 29, 1f);
+                    }
+                }
+                if (Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
+                {
+                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, 150f, 0.25f, 0.6f);
+                    Pantalla.Sacudir(2.6f, 0.4f, "RC2-sostenido");
+                }
+                if (Time == (float)(ChargeTime + 1))
+                {
+                    Pantalla.Sacudir(7f, 0.8f, "RC2-encendido");
+                }
             }
             float num = (float)Math.Cos((Time - (float)ChargeTime) / (float)LaserDuration * ((float)Math.PI * 2f)) * 2.5f * Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)ChargeTime + (float)LaserDuration * 0.1f, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration), (float)ChargeTime + (float)LaserDuration * 0.9f, Time, true);
             if (Main.netMode != 1 && Time % 15f == 0f && Time < (float)ChargeTime + (float)LaserDuration * 0.6f)
@@ -241,7 +288,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //IL_00aa: Unknown result type (might be due to invalid IL or missing references)
             //IL_00ba: Expected O, but got Unknown
             volume = 1.3f * Utils.GetLerpValue(0f, 0.05f, realSize, true);
-            pitch = MathHelper.SmoothStep(0.5f, 1.2f, Utils.GetLerpValue((float)(ChargeTime - 45), (float)(ChargeTime + 60), Time, true)) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true) - 1f;
+            // v6.56.4 — EL PITCH DEL HAZ (la letra: «el sonido actual es muy
+            // agudo para el tipo de haz de luz, el sonido que debe hacer tiene
+            // que ser un poco más grave mientras se dispara y mantiene el rayo
+            // concentrado, y en el momento en que el rayo comienza a apagarse
+            // el sonido también debe [apagarse]"). Antes quedaba CONGELADO en
+            // +0.2 durante todo el láser (SmoothStep(0.5,1.2)·1 − 1: el piche
+            // agudo de la .56.3). Ahora: SOSTENIDO grave (−0.22) y plane a
+            // −0.70 en los últimos 60 ticks — y el volumen ya viaja con
+            // realSize, así que muere con el rayo. La 1ª gen del loop además
+            // se re-sintetitzó una octava más oscura (gen_sonido_v6564.py).
+            pitch = MathHelper.Lerp(-0.22f, -0.7f, 1f - Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true));
             if (raySound == null)
             {
                 SoundStyle estilo = new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop", (SoundType)0);
@@ -412,22 +469,60 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
             (c).A = 0;
             float num = Utils.GetLerpValue(50f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration + 20), Time, true);
-            // v6.56.1 — LA AGUJA RECUPERADA: localAI[1] jamás se asignaba
-            // (la aguja de puntería llevaba alfa 0 desde la v6.56.0). El
-            // gemelo RayoConcentradoNivel usa Time aquí — esta era la idea.
-            float num2 = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + 10), (float)(ChargeTime - 30), Time, true);
+            // v6.56.4 — LA AGUJA MUERE (la letra: «en el momento de carga hay
+            // como una animación de una línea colorida que avanza y luego va
+            // rápido hacia atrás y entonces el rayo se lanza, esa línea debes
+            // quitar, se ve horrible»): era un SoftGlow estirado a 900 px que
+            // avanzaba y retrocedía (la v6.56.1 lo había recuperado — fue un
+            // error de criterio). Su reemplazo: LOS DESTELLOS DE LA CARGA
+            // (HazConcentradoLib.DestellosDeCarga, en AI).
             float num3 = ((Entity)((ModProjectile)this).Projectile).Center.X - Main.screenPosition.X;
             float num4 = ((Entity)((ModProjectile)this).Projectile).Center.Y - Main.screenPosition.Y;
             Vector2 val = new Vector2(num3, num4);
             Main.EntitySpriteDraw(softGlow, val, (Rectangle?)null, DefinitivasLib.Alfa(c, 0.55f * num), 0f, Utils.Size(softGlow) * 0.5f, 2.2f * num, (SpriteEffects)0, 0f);
-            Main.EntitySpriteDraw(glowOrb, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.85f * num), 0f, Utils.Size(glowOrb) * 0.5f, 1.05f * num, (SpriteEffects)0, 0f);
+            // v6.56.4 — EL PORTAL DEL CONJURO (la letra: «nada de círculos
+            // planos… haz que este círculo plano sea sustituido por varios
+            // círculos runicos de agujeros negros, eso tendría más sentido»).
+            // El GlowOrb de núcleo sólido (el disco relleno de ~135 px — EL
+            // círculo plano sobre el jugador) MUERE. La boca del RC2 mientras
+            // vive es un agujero negro de verdad:
+            //   · EL HORIZONTE — BlackDisk en AlphaBlend (lo que el aditivo
+            //     no puede dibujar: OSCURECER), sobre el bloom del renglón
+            //     de arriba → el resplandor se lee como la corona del eclipse;
+            //   · LA TRIPLE CORONA — OrbitaLib.CoronaConjuro (el círculo
+            //     dorado de 8 + el violeta de 6 contrarrotando + el blanco
+            //     íntimo de 6 rápido: VARIOS círculos rúnicos — los del
+            //     agujero SUPREMO), a la MISMA altura de contención que los
+            //     anillos finos de abajo;
+            //   · (en AI) LA LENTE — GravLens curva el espacio alrededor.
+            {
+                float numP = MathF.Pow(num, 0.8f);
+                float breathe = 1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
+                float horizon = MathHelper.Lerp(96f, 132f, numP) * breathe;
+                VFXCore.Begin();
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, new Color(12, 5, 20, 240) * 0.95f,
+                    new Vector2(horizon / 0.88f, horizon / 0.88f), 0f, HazConcentradoLib.DiscoNegro);
+                VFXCore.FlushAlpha();
+                float rCorona = MathHelper.Lerp(150f, 56f, numP) * breathe;
+                try
+                {
+                    OrbitaLib.AbrirAdditive();
+                    OrbitaLib.CoronaConjuro(val, rCorona, Main.GlobalTimeWrappedHourly,
+                        alphaMul: 0.28f + 0.62f * num, glyphMul: 1.8f);
+                    OrbitaLib.CerrarBatch();
+                }
+                catch
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                }
+                VFXCore.ReabrirLoteVanilla();
+            }
             float num5 = MathF.Pow(num, 0.8f);
             float num6 = MathHelper.Lerp(150f, 56f, num5) * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
             Vector2 val2 = VFXCore.RingQuadSize(num6);
             Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
             Vector2 val3 = VFXCore.RingQuadSize(num6 * 1.38f);
             Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
-            Main.EntitySpriteDraw(softGlow, val + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * 900f * num2, (Rectangle?)Utils.Frame(softGlow, 1, 1, 0, 0, 0, 0), DefinitivasLib.Alfa(c, 0.35f * num2), ((ModProjectile)this).Projectile.rotation, Utils.Size(softGlow) * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * num2), (SpriteEffects)0, 0f);
             if (Time < (float)ChargeTime && Time % 14f < 3f)
             {
                 float lerpValue = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true);
@@ -463,16 +558,37 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Effect val5 = ObtenerShader();
                 if (val5 != null)
                 {
-                    val5.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                    val5.Parameters["uTexturaCarne"].SetValue((Texture)(object)texRuido);
-                    val5.Parameters["uTexturaSegunda"].SetValue((Texture)(object)texRemolino);
-                    val5.Parameters["uTexturaRampa"].SetValue((Texture)(object)texRampa);
-                    val5.Parameters["uTexturaBits"].SetValue((Texture)(object)texBits);
-                    val5.Parameters["uTime"].SetValue((0f - ((ModProjectile)this).Projectile.localAI[0]) * 0.025f);
-                    val5.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
-                    val5.CurrentTechnique.Passes[0].Apply();
-                    val4.DrawTrail();
-                    Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+                    // v6.56.4 — EL LOTE ADITIVO DEL HAZ (la letra: «al
+                    // disparar el haz de luz… en el momento de agrandarse y
+                    // hacerse ancho en los bordes hay franjas negras»). El
+                    // shader nació ADITIVO (su propio .fx lo declara) pero se
+                    // dibujaba bajo el lote de entidades (AlphaBlend): las 4
+                    // texturas multiplicadas llevan bordes V NEGRO PURO y bajo
+                    // AlphaBlend el borde del haz OSCURECE lo de debajo — la
+                    // franja negra justo donde el haz se ensancha. Se cierra
+                    // el lote de entidades (lo encolado queda DEBAJO del haz),
+                    // el dispositivo pasa a aditivo para el DrawTrail y la
+                    // salida vuelve al pase vanilla (RestaurarLoteVanilla).
+                    VFXCore.CerrarLoteSiAbierto();
+                    GraphicsDevice gd = Main.graphics.GraphicsDevice;
+                    gd.BlendState = BlendState.Additive;
+                    try
+                    {
+                        val5.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+                        val5.Parameters["uTexturaCarne"].SetValue((Texture)(object)texRuido);
+                        val5.Parameters["uTexturaSegunda"].SetValue((Texture)(object)texRemolino);
+                        val5.Parameters["uTexturaRampa"].SetValue((Texture)(object)texRampa);
+                        val5.Parameters["uTexturaBits"].SetValue((Texture)(object)texBits);
+                        val5.Parameters["uTime"].SetValue((0f - ((ModProjectile)this).Projectile.localAI[0]) * 0.025f);
+                        val5.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
+                        val5.CurrentTechnique.Passes[0].Apply();
+                        val4.DrawTrail();
+                        Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+                    }
+                    finally
+                    {
+                        gd.BlendState = BlendState.AlphaBlend;
+                    }
                 }
                 else
                 {

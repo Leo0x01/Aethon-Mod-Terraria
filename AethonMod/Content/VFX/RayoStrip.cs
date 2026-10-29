@@ -257,47 +257,24 @@ namespace AethonMod.Content.VFX
             if (total < 1f) return;
 
             // ==============================================================
-            //  v6.56.3 — LA uEscalaV DE LA CPU (LA CURA DE LOS PICOS, 3ª
-            //  ronda — la letra: «el partidor de mundos tiene picos
-            //  todavía… el prisma… el rayo del juicio… el veredicto… el
-            //  alba»). LA AUTOPSIA: la vía CPU (esta faja) muestrea la
-            //  ventana V COMPLETA a múltiplos fijos del perfil — los haces
-            //  ANGOSTOS quedaban a 0.11-0.56 px/texel y los rasgos del
-            //  plasma (2-4 texels) se leían como SIERRA temporal al fluir.
-            //  El RC2 se curó esto en su SHADER (uEscalaV — CHANGES v6.55);
-            //  la escalera NUNCA recibió la cura. AQUÍ está el puerto:
-            //
-            //  · LA VENTANA V se ENCOGE centrada en el corazón de la
-            //    textura (k· ventana) hasta que cada texel mide ≥2.2 px
-            //    en pantalla — «los rasgos del plasma miden SIEMPRE lo
-            //    mismo» (los haces ANCHOS quedan intactos: k→1).
-            //  · EL PERÍODO U sube al suelo del texel (cada texel U ≥
-            //    2.2 px): la carne no gatea a lo largo del conducto.
-            //  · EL SOBRE TRAPEZOIDAL (3 quads por segmento): la ventana
-            //    encogida ya no alcanza la banda de fundido del borde de
-            //    la textura — el borde muere suave GEOMÉTRICO (bandas
-            //    externas que se apagan a cero), el equivalente CPU del
-            //    envV smoothstep del shader del RC2.
-            //  · LA MITRA VERDADERA: normales por NODO (ver abajo) — las
-            //    aristas se comparten EXACTAS y las juntas curvas dejan
-            //    de morderse (2·sin(Δθ/2)·semiancho de muesca antes).
+            //  v6.56.4 — LA REVERSIÓN EDUCADA DE LA v6.56.3: la «cura de los
+            //  picos» de la 3ª ronda curó en el dominio EQUIVOCADO y el
+            //  usuario reportó AÚN MÁS PICOS. Encoger la ventana V contra
+            //  la fila saturada de la textura dejaba el haz como BARRA
+            //  PLANA cuya silueta es la polilínea mitrada desnuda; pisar el
+            //  período U a 563 px degeneraba el hervor en bandas de baja
+            //  frecuencia que viajan (leídas como sierra); y el sobre
+            //  trapezoidal dejaba un micro-escalón al 12.5% justo en el
+            //  filo. EL DEFAULT VUELVE AL PRE-v6.56.3: ventana V COMPLETA
+            //  (la propia textura funde el borde), período de sintonía tal
+            //  cual, UN quad por segmento. Las armas con picos YA NO PASAN
+            //  POR AQUÍ (el camino GPU del RC2 portado — HazConcentradoLib,
+            //  el borde fundido por píxel); los consumidores CPU (Réquiem,
+            //  Ojo, Primer Trazo, Ira-telégrafo, Partidor-carga, Prisma-ecos
+            //  y el fallback del RC2) recuperan su estado pre-regresión.
+            //  LO ÚNICO QUE SE QUEDA DE LA v6.56.3: LA MITRA POR NODO (abajo)
+            //  — la arista compartida exacta era la mejora de verdad.
             // ==============================================================
-            float anchoMedio = 0f;
-            for (int w = 0; w < n; w++) anchoMedio += semiancho[w];
-            anchoMedio = MathF.Max((anchoMedio / n) * 2f, 2f);
-            const float TexelObjetivo = 2.2f;   // px/texel — el umbral de la autopsia v6.55
-            float vSpan = MathF.Max(vMax - vMin, 0.02f);
-            float kV = MathHelper.Clamp(anchoMedio / (tex.Height * vSpan * TexelObjetivo), 0.05f, 1f);
-            float vMid = (vMin + vMax) * 0.5f;
-            float vMinE = vMid + (vMin - vMid) * kV;
-            float vMaxE = vMid + (vMax - vMid) * kV;
-            float hVent = (vMaxE - vMinE) * 0.5f;
-            // EL CRUCE DEL SOBRE: el centro lleno ocupa el 55% interior; las
-            // bandas exteriores (45%) apagan el color a cero en el borde.
-            const float CruceSobre = 0.55f;
-            float vCruceP = vMid + hVent * CruceSobre;
-            float vCruceM = vMid - hVent * CruceSobre;
-            float periodoE = MathF.Max(periodo, tex.Width * TexelObjetivo);
 
             // EL FLUJO: u = arco/periodo − tiempo·flujo → los rasgos del
             // ruido AVANZAN raíz→punta (la «carne que camina» — el
@@ -325,8 +302,11 @@ namespace AethonMod.Content.VFX
                 norm[i] = new Vector2(-avg.Y, avg.X);
             }
 
-            // LA EMISIÓN: TRES quads por segmento (centro lleno + dos
-            // bandas de borde que mueren a cero) — el sobre trapezoidal.
+            // LA EMISIÓN: UN quad por segmento (el original pre-v6.56.3)
+            // con la MITRA POR NODO: aP/aM usan norm[i] y bP/bM norm[i+1]
+            // — la arista del nodo compartido es LA MISMA para los quads
+            // vecinos → tira continua (antes de la v6.56.3 era n1 = n0:
+            // muesca de 2·sin(Δθ/2)·semiancho en cada junta curva).
             _nVertsT = 0;
             for (int i = 0; i < n - 1; i++)
             {
@@ -336,64 +316,25 @@ namespace AethonMod.Content.VFX
                 Vector2 n0 = norm[i];
                 Vector2 n1 = norm[i + 1];
 
-                float u0 = arcs[i] / periodoE + uBase;
-                float u1 = arcs[i + 1] / periodoE + uBase;
+                float u0 = arcs[i] / periodo + uBase;
+                float u1 = arcs[i + 1] / periodo + uBase;
 
-                // Los CINCO puntos por nodo: borde−, interior−, borde+,
-                // interior+ (el centro del canal lo cierra el quad central).
-                Vector2 aM = pts[i] - n0 * s0;          // nodo i, borde −
-                Vector2 aMn = pts[i] - n0 * (s0 * CruceSobre);  // nodo i, interior −
                 Vector2 aP = pts[i] + n0 * s0;          // nodo i, borde +
-                Vector2 aPn = pts[i] + n0 * (s0 * CruceSobre);  // nodo i, interior +
+                Vector2 aM = pts[i] - n0 * s0;          // nodo i, borde −
+                Vector2 bP = pts[i + 1] + n1 * s1;      // nodo i+1, borde +
                 Vector2 bM = pts[i + 1] - n1 * s1;      // nodo i+1, borde −
-                Vector2 bMn = pts[i + 1] - n1 * (s1 * CruceSobre);
-                Vector2 bP = pts[i + 1] + n1 * s1;
-                Vector2 bPn = pts[i + 1] + n1 * (s1 * CruceSobre);
 
-                // EL GRADIENTE A LO LARGO (null = fijo).
                 Color c0 = coloresPorNodo != null ? coloresPorNodo[i] : color;
                 Color c1 = coloresPorNodo != null ? coloresPorNodo[i + 1] : color;
-                Color c0e = ApagarColor(c0);
-                Color c1e = ApagarColor(c1);
-
-                // EL CENTRO (lleno, ventana media) — b0 = lado + del nodo
-                // i+1 (vMin) y b1 = lado − (vMax), igual que a0/a1.
-                EmitirQuadTex(tex, aPn, aMn, bPn, bMn, c0, c1, u0, u1, vCruceP, vCruceM);
-                // LA BANDA − (borde que muere a cero): a0/b0 = el borde
-                // (v = vMinE, color apagado), a1/b1 = el interior (v = vCruceM).
-                EmitirQuadTexBorde(tex, aM, aMn, bM, bMn, c0e, c0, c1e, c1, u0, u1, vMinE, vCruceM);
-                // LA BANDA + (el espejo del otro lado).
-                EmitirQuadTexBorde(tex, aPn, aP, bPn, bP, c0, c0e, c1, c1e, u0, u1, vCruceP, vMaxE);
+                EmitirQuadTex(tex, aP, aM, bP, bM, c0, c1, u0, u1, vMax, vMin);
             }
             VolcarTextura(tex);
         }
 
         /// <summary>El pozo de normales por nodo de la faja (v6.56.3 —
-        /// crece a demanda, cero-GC en régimen).</summary>
+        /// crece a demanda, cero-GC en régimen). LA MITRA POR NODO es lo
+        /// único que sobrevivió a la reversión de la v6.56.4.</summary>
         private static Vector2[] _normFaja = new Vector2[128];
-
-        /// <summary>El color apagado del borde del sobre (canal a canal —
-        /// el contrato premultiplicado de la casa).</summary>
-        private static Color ApagarColor(Color c)
-        {
-            return new Color((byte)(c.R >> 3), (byte)(c.G >> 3), (byte)(c.B >> 3), (byte)(c.A >> 3));
-        }
-
-        /// <summary>El quad de la BANDA DE BORDE: cuatro colores
-        /// independientes (borde→interior por nodo) — el sobre
-        /// trapezoidal de v6.56.3.</summary>
-        private static void EmitirQuadTexBorde(Texture2D tex, Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1,
-            Color cA0, Color cA1, Color cB0, Color cB1, float u0, float u1, float vMin, float vMax)
-        {
-            if (_nVertsT + 6 > _vertsT.Length) VolcarTextura(tex);
-            if (_nVertsT + 6 > _vertsT.Length) return;
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a0.X, a0.Y, 0f), cA0, new Vector2(u0, vMin));
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a1.X, a1.Y, 0f), cA1, new Vector2(u0, vMax));
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b0.X, b0.Y, 0f), cB0, new Vector2(u1, vMin));
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a0.X, a0.Y, 0f), cA0, new Vector2(u0, vMin));
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b0.X, b0.Y, 0f), cB0, new Vector2(u1, vMin));
-            _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(b1.X, b1.Y, 0f), cB1, new Vector2(u1, vMax));
-        }
 
         /// <summary>Apila el quad texturizado (2 triángulos) en el pozo —
         /// con el color por vértice del gradiente (c0 el nodo i, c1 el i+1).</summary>

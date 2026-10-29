@@ -1,13 +1,8 @@
-// v6.53 — LA PURGA DEL ESCRIBA: el jefe demo, La Pluma Consciente,
-// la Pluma Convocadora, la bolsa y las inscripciones MURIERON (la
-// letra: «el arma La Pluma Consciente no sirve, también la puedes
-// borrar al igual que Pluma Convocadora → EL ESCRIBA y todo lo
-// referente a él»). SOBREVIVEN EL PRIMER TRAZO (el arma del rayo,
-// ahora en la Bolsa de las Armas de Rayo y con el render del RAYO
-// DE FUSIÓN del dios) y LA AURORA DE TINTA (las alas de código,
-// ahora en la Bolsa de los Cosméticos y por fin VISIBLES).
-// ESPAÑOL LATINOAMÉRICA (es-MX) — la fuente del ciclo.
-
+// v6.56.4 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
+// única del español de la casa). Este archivo existe porque el juego en
+// «Español (Latinoamérica)» lee el es-MX: sin él caería al fallback (y el
+// en-US ya no existe). Contenido IDÉNTICO al es-ES: editar SOLO el es-ES
+// y correr tools/sync_es_mx_v6564.py.
 Items: {
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo
@@ -21,6 +16,7 @@ Items: {
 			'''
 		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
 	}
+
 	AuroraDeTinta: {
 		DisplayName: La Aurora de Tinta
 		Tooltip:
@@ -38,53 +34,22 @@ Items: {
 		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
 	}
 }
+
 Projectiles: {
-	PrimerTrazoHeld: {
-		DisplayName: El Primer Trazo
-	}
-	PrimerTrazoFajo: {
-		DisplayName: Trazo de fusión
-	}
-	AlasAuroraHalo: {
-		DisplayName: La Aurora de Tinta
-	}
-	SombraPagina3Projectile: {
-		DisplayName: La Sombra de la Página III
-	}
-	SombraPagina4Projectile: {
-		DisplayName: La Sombra de la Página IV
-	}
-	ColumnaIraProjectile: {
-		DisplayName: La Columna de la Ira
-	}
-	IraDelCieloProjectile: {
-		DisplayName: La Ira del Cielo
-	}
-	PartidorDeMundosProjectile: {
-		DisplayName: El Partidor de Mundos
-	}
-	PrismaPrimordialProjectile: {
-		DisplayName: El Prisma Primordial
-	}
-	RequiemEstelarProjectile: {
-		DisplayName: El Réquiem Estelar
-	}
-	IndiceDelJuicioProjectile: {
-		DisplayName: El Índice del Juicio
-	}
-	LanzaVeredictoProjectile: {
-		DisplayName: La Lanza del Veredicto
-	}
-	OjoDelJuicioProjectile: {
-		DisplayName: El Ojo del Juicio
-	}
-	PaginaIndiceProjectile: {
-		DisplayName: La Página del Índice
-	}
-	PlumaDelVeredictoProjectile: {
-		DisplayName: La Pluma del Veredicto
-	}
-	RayoConcentradoNivelProjectile: {
-		DisplayName: El Rayo Concentrado
-	}
+	PrimerTrazoHeld.DisplayName: El Primer Trazo
+	PrimerTrazoFajo.DisplayName: Trazo de fusión
+	AlasAuroraHalo.DisplayName: La Aurora de Tinta
+	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
+	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
+	ColumnaIraProjectile.DisplayName: La Columna de la Ira
+	IraDelCieloProjectile.DisplayName: La Ira del Cielo
+	PartidorDeMundosProjectile.DisplayName: El Partidor de Mundos
+	PrismaPrimordialProjectile.DisplayName: El Prisma Primordial
+	RequiemEstelarProjectile.DisplayName: El Réquiem Estelar
+	IndiceDelJuicioProjectile.DisplayName: El Índice del Juicio
+	LanzaVeredictoProjectile.DisplayName: La Lanza del Veredicto
+	OjoDelJuicioProjectile.DisplayName: El Ojo del Juicio
+	PaginaIndiceProjectile.DisplayName: La Página del Índice
+	PlumaDelVeredictoProjectile.DisplayName: La Pluma del Veredicto
+	RayoConcentradoNivelProjectile.DisplayName: El Rayo Concentrado
 }

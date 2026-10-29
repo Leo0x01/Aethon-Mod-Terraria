@@ -41,6 +41,15 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // aberración (solo Veredicto y Juicio), los tres por fin son TRES.
         private static readonly float[] Flujo = new float[3] { 0.8f, 1f, 1.25f };
 
+        // v6.56.4 — LOS POZOS DE LA ESCALERA (cero-GC, la ley de la casa):
+        // antes el PreDraw alocaba `new Vector2[24]` + `new float[24]` CADA
+        // FRAME del láser. Nodos, perfil y colores por nodo.
+        private static readonly Vector2[] _cacheNodos = new Vector2[24];
+
+        private static readonly float[] _cachePerf = new float[24];
+
+        private static readonly Color[] _cacheColores = new Color[24];
+
         public float targetRotation;
 
         public float targetSize;
@@ -172,6 +181,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
             ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + new Vector2((float)(13 * ((Entity)val).direction), -20f);
             ((Entity)val).velocity = ((Entity)val).velocity + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * (0f - (0.04f + 0.02f * (float)Niv));
             ((Entity)val).velocity = ((Entity)val).velocity * 0.98f;
+            // v6.56.4 — LOS DESTELLOS DEL PELDAÑO (el reemplazo de la aguja de
+            // puntería, a escala del escalón — la letra del RC2 aplica a toda
+            // la escalera: «esa línea debes quitar, se ve horrible»).
+            if (!Main.dedServ)
+            {
+                if (Time < (float)Carga && Time % 3f < 1f)
+                {
+                    HazConcentradoLib.DestellosDeCarga(((Entity)((ModProjectile)this).Projectile).Center, Time / (float)Carga, (int)(Time * 7f) + 13 + Niv * 977, 0.6f + 0.2f * (float)Niv);
+                }
+                else if (Time < (float)(Carga + 36) && Time % 2f < 1f)
+                {
+                    HazConcentradoLib.DestellosDeEstallido(((Entity)((ModProjectile)this).Projectile).Center, ((ModProjectile)this).Projectile.rotation, (int)(Time * 13f) + 31 + Niv * 977, 0.6f + 0.2f * (float)Niv);
+                }
+            }
             if (!Main.dedServ && Time % 4f == 0f && Time > (float)Carga && Time < (float)(Carga + Laser))
             {
                 float lerpValue = Utils.GetLerpValue((float)Carga - (float)Laser * 0.5f, (float)(Carga + Laser), Time, true);
@@ -344,17 +367,49 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f);
             (c).A = 0;
             float num2 = Utils.GetLerpValue((float)Carga * 0.25f, (float)Carga, Time, true) * Utils.GetLerpValue((float)(Carga + Laser + 50), (float)(Carga + Laser + 20), Time, true);
-            float num3 = Utils.GetLerpValue(0f, (float)Carga, Time, true) * Utils.GetLerpValue((float)(Carga + 10), (float)(Carga - 30), Time, true);
+            // v6.56.4 — LA AGUJA DEL PELDAÑO MUERE (igual que la del RC2 —
+            // la letra: «esa línea debes quitar, se ve horrible»; su
+            // reemplazo son LOS DESTELLOS, en AI).
             Vector2 val = ((Entity)((ModProjectile)this).Projectile).Center - Main.screenPosition;
             Main.EntitySpriteDraw(softGlow, val, (Rectangle?)null, DefinitivasLib.Alfa(c, 0.55f * num2), 0f, Utils.Size(softGlow) * 0.5f, 2.2f * num * num2, (SpriteEffects)0, 0f);
-            Main.EntitySpriteDraw(glowOrb, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.85f * num2), 0f, Utils.Size(glowOrb) * 0.5f, 1.05f * num * num2, (SpriteEffects)0, 0f);
+            // v6.56.4 — EL PORTAL DEL PELDAÑO (la ley de la casa: «nada de
+            // círculos planos»): el GlowOrb de núcleo sólido MUERE también
+            // aquí. EL HORIZONTE (BlackDisk en AlphaBlend — lo que el
+            // aditivo no puede: OSCURECER) + LA TRIPLE CORONA con el ALMA
+            // DEL PELDAÑO (el mismo portal del RC2 a escala del escalón:
+            // la firma rúnica que sube por la escalera).
+            {
+                float numH = MathF.Pow(num2, 0.8f);
+                float breathe = 1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
+                float horizon = MathHelper.Lerp(70f, 96f, numH) * num * breathe;
+                VFXCore.Begin();
+                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, new Color(12, 5, 20, 235) * 0.95f,
+                    new Vector2(horizon / 0.88f, horizon / 0.88f), 0f, HazConcentradoLib.DiscoNegro);
+                VFXCore.FlushAlpha();
+                float rCorona = MathHelper.Lerp(120f, 46f, numH) * num * breathe;
+                float relojC = ((ModProjectile)this).Projectile.localAI[0] / 60f;
+                try
+                {
+                    OrbitaLib.AbrirAdditive();
+                    OrbitaLib.CoronaConjuro(val, rCorona, Main.GlobalTimeWrappedHourly,
+                        alphaMul: 0.26f + 0.6f * num2, glyphMul: 1.6f,
+                        blanco: DefinitivasLib.GradienteEscalera(Niv + 1, relojC + 0.66f),
+                        dorado: DefinitivasLib.GradienteEscalera(Niv + 1, relojC),
+                        violeta: DefinitivasLib.GradienteEscalera(Niv + 1, relojC + 0.33f));
+                    OrbitaLib.CerrarBatch();
+                }
+                catch
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                }
+                VFXCore.ReabrirLoteVanilla();
+            }
             float num4 = MathF.Pow(num2, 0.8f);
             float num5 = MathHelper.Lerp(150f, 56f, num4) * num * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
             Vector2 val2 = VFXCore.RingQuadSize(num5);
             Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num2), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
             Vector2 val3 = VFXCore.RingQuadSize(num5 * 1.38f);
             Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num2), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
-            Main.EntitySpriteDraw(softGlow, val + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * (Largo * 0.26f) * num3, (Rectangle?)Utils.Frame(softGlow, 1, 1, 0, 0, 0, 0), DefinitivasLib.Alfa(c, 0.35f * num3), ((ModProjectile)this).Projectile.rotation, Utils.Size(softGlow) * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * num * num3), (SpriteEffects)0, 0f);
             if (Time < (float)Carga && Time % 14f < 3f)
             {
                 float lerpValue = Utils.GetLerpValue(0f, (float)Carga, Time, true);
@@ -379,23 +434,46 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (Time >= (float)(Carga - 20))
             {
                 float num11 = Utils.GetLerpValue((float)(Carga - 30), (float)(Carga + 70), Time, true) * Utils.GetLerpValue((float)(Carga + Laser + 60), (float)(Carga + Laser), Time, true);
-                Vector2[] array = (Vector2[])(object)new Vector2[24];
-                float[] array2 = new float[24];
+                // v6.56.4 — LOS POZOS (cero-GC): antes `new Vector2[24]` +
+                // `new float[24]` por frame.
+                Vector2[] array = _cacheNodos;
+                float[] array2 = _cachePerf;
+                Color[] coloresN = _cacheColores;
                 Vector2 val4 = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
+                float reloj = ((ModProjectile)this).Projectile.localAI[0];
                 for (int j = 0; j < 24; j++)
                 {
                     float num12 = (float)j / 23f;
                     array[j] = ((Entity)((ModProjectile)this).Projectile).Center + val4 * (Largo * num12 * (0.5f + num11 * 0.5f));
-                    // v6.56.3 — LA CAÍDA DE LA PUNTA (la «caida» del shader del
-                    // RC2, portada a la vía CPU): antes el perfil crecía hasta
-                    // q=1 a ANCHO MÁXIMO — la punta era un CORTE PLANO. Ahora el
-                    // último 12% del conducto se estrecha a 15% (smoothstep):
-                    // el haz TERMINA, no se corta.
+                    // v6.56.3 — LA CAÍDA DE LA PUNTA (se conserva: la fórmula
+                    // del perfil del arma viaja intacta al camino GPU — la
+                    // «caida» del shader del RC2, ya horneada en el perfil).
                     float caidaPunta = MathHelper.Lerp(1f, 0.15f, MathHelper.SmoothStep(0.88f, 1f, num12));
                     array2[j] = MathF.Max(DefinitivasLib.AnchoCono(num12, Time, KAncho[Niv]) * num * realSize * caidaPunta, 0.5f);
+                    // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
+                    // de la vieja HazFusionEspina — la identidad del peldaño).
+                    float lente = 0.85f + 0.30f * MathF.Sin(num12 * MathHelper.Pi);
+                    coloresN[j] = DefinitivasLib.Alfa(DefinitivasLib.GradienteEscalera(Niv + 1, reloj * 0.07f - num12 * 0.16f), 0.55f * Intensidad[Niv] * num11 * lente);
                 }
-                DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f), Intensidad[Niv] * num11, Main.GlobalTimeWrappedHourly, (int)Owner * 131 + Niv * 977 + 17, arcoiris: true, Flujo[Niv], Niv >= 1,
-                    (float t) => DefinitivasLib.GradienteEscalera(Niv + 1, t));
+                // v6.56.4 — EL CONDUCTO POR EL CAMINO GPU DEL RC2 (la letra:
+                // «solo debes adaptar el código del rayo concentrado 2 a las
+                // características de las armas con pico»): HazFusionEspina
+                // (la vía CPU) MUERE para la escalera — el borde lo funde
+                // ahora el shader POR PÍXEL, y el flujo propio del peldaño
+                // viaja en uTime (Alba 0.8 · Veredicto 1.0 · Juicio 1.25:
+                // la v6.56.3 les dio el alma; la .56.4 les da el cuerpo).
+                HazConcentradoLib.Dibujar(array, 24, array2, coloresN,
+                    -reloj * 0.025f * Flujo[Niv]);
+                if (Niv >= 1)
+                {
+                    // LA ABERRACIÓN CROMÁTICA (la PASADA 6 vieja, extraída a
+                    // la librería): el Veredicto y el Juicio la conservan;
+                    // el Alba nace limpio.
+                    HazConcentradoLib.AberracionCromatica(array, 24, array2,
+                        DefinitivasLib.Alfa(new Color(255, 70, 70), 0.30f * Intensidad[Niv] * num11),
+                        DefinitivasLib.Alfa(new Color(70, 210, 255), 0.30f * Intensidad[Niv] * num11),
+                        Flujo[Niv], Main.GlobalTimeWrappedHourly, Intensidad[Niv] * num11);
+                }
             }
             VFXCore.RestaurarLoteVanilla();
             return false;

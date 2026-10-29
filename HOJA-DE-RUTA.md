@@ -2,7 +2,9 @@
 
 > **Espejo compacto del worklog** (que vive en el sandbox y los wipes se lo han comido
 > dos veces — lecciones de las Tasks 68-84). La especificación gorda de cada tarea está
-> en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2.
+> en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2 — actualizado en la
+> Task 108 (era v6.56.4: el camino GPU del RC2 portado a las armas + el espejo completo
+> de las alas + el portal del conjuro + localización monolingüe).
 >
 > **La tesis**: las Definitivas son los fragmentos del poder de un dios, y el Testamento
 > es, literalmente, SU testamento. ¿Quién firma un testamento? Alguien que va a morir…

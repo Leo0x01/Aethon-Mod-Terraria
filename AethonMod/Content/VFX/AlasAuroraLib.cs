@@ -271,8 +271,27 @@ namespace AethonMod.Content.VFX
                     num15 *= num17;
                 }
                 pozoEje[j] = val3;
-                pozoSemi[j] = MathF.Max(num14, 0.3f);
-                pozoSemi2[j] = MathF.Max(num15, 0.3f);
+                // v6.56.4 — EL FILO DEL LADO (la asimetría que sobrevivió a la
+                // v6.56.3): el ala izquierda ponía su borde GRUESO donde el
+                // espejo pondría el fino de la derecha — perp(Mirror(T)) =
+                // −Mirror(perp(T)): la perpendicular del ala izquierda es la
+                // anti-espejada de la derecha, y el filo caía en el lado
+                // anatómico EQUIVOCADO (3.5-14 px por pluma; hasta 68 px al
+                // mirar a la izquierda). La PERMUTA: cada ala abre su filo
+                // hacia AFUERA — el par queda espejo-simétrico de verdad (la
+                // cura v6.56.3 solo simetrizó el EJE; la TIRA seguía sin
+                // espejarse). Validado 1:1 en /home/z/sim/sim_alas.py:
+                // par Δ=0.000px en eje y bordes; girar == espejo exacto.
+                if (lado < 0)
+                {
+                    pozoSemi[j] = MathF.Max(num15, 0.3f);
+                    pozoSemi2[j] = MathF.Max(num14, 0.3f);
+                }
+                else
+                {
+                    pozoSemi[j] = MathF.Max(num14, 0.3f);
+                    pozoSemi2[j] = MathF.Max(num15, 0.3f);
+                }
             }
             return result;
             static float Perfil(float q, float raiz, float num18, float num20, float y)
@@ -703,7 +722,11 @@ namespace AethonMod.Content.VFX
                         }
                         for (int j = 0; j < num2; j++)
                         {
-                            float num4 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + j * 13 + (i + 2) * 31, (int)(globalTimeWrappedHourly * 24f), 5);
+                            // v6.56.4 — EL CENTELLEO SIMÉTRICO: la semilla por
+                            // lado ((i+2)*31) hacía brillar más un ala que otra —
+                            // el par parpadeaba DESPAREJO. Sin el término por lado,
+                            // la pluma j de ambas alas centellea IGUAL.
+                            float num4 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + j * 13, (int)(globalTimeWrappedHourly * 24f), 5);
                             float num5 = 0.55f + 0.45f * num4;
                             fundidos[num3] = num5 * (0.72f + 0.28f * spread);
                             plumas[num3] = ConstruirPluma(val3, j, spread, flap, gravDir, i, globalTimeWrappedHourly, in estilo, _pozosEje[num3], _pozosSemi[num3], _pozosSemi2[num3], fundidos[num3], fullRotation);
@@ -719,17 +742,43 @@ namespace AethonMod.Content.VFX
                     _geoAnclaCentral = ((fullRotation != 0f) ? (val + Utils.RotatedBy(val2 - val, (double)fullRotation, default(Vector2))) : val2);
                     _geoN = num2 * 2;
                     _geoRunasValida = true;
+                    // v6.56.4 — EL BARRIDO DEL HEREDERO (revive el campo muerto
+                    // de la v6.52.2 — la letra: «cuando el personaje se mueve en
+                    // una dirección, las alas no cambian la dirección junto al
+                    // personaje»). El par es simétrico: el espejo solo produce
+                    // la MISMA imagen — lo que faltaba es RESPUESTA DIRECCIONAL.
+                    // Todo el enjambre se INCLINA hacia atrás respecto al
+                    // MOVIMIENTO, calculado en el MARCO DE LA DERECHA (la
+                    // velocidad se espeja con la dirección: velFrame =
+                    // velX·direction — si el término de dirección entrase en la
+                    // fórmula, se DOUBLE-VOLTEARÍA con el espejo y girar no
+                    // cambiaría nada; el sim lo cazó: Δ 0.0px). 0.4 de reposo
+                    // (el rake natural del ala plegada) + 0.6·velocidad
+                    // saturada a 6 px/tick. Validado en /home/z/sim/sim_alas.py:
+                    // corriendo, la punta se barre 11-13 px; girar en plena
+                    // carrera la mueve 32-42 px; backpedal, 10-13 px.
+                    float velFrame = ((Entity)pl).velocity.X * (float)((Entity)pl).direction;
+                    float velN = MathHelper.Clamp(velFrame / 6f, -1f, 1f);
+                    float barrido = estilo.Barrido * 1.6f * (0.4f + 0.6f * velN);
+                    if (barrido != 0f && float.IsFinite(barrido))
+                    {
+                        for (int m = 0; m < num3; m++)
+                        {
+                            Vector2[] eje = _pozosEje[m];
+                            for (int k2 = 0; k2 < eje.Length; k2++)
+                            {
+                                eje[k2] = val + Utils.RotatedBy(eje[k2] - val, (double)(-barrido), default(Vector2));
+                            }
+                        }
+                        _geoAnclaCentral = val + Utils.RotatedBy(_geoAnclaCentral - val, (double)(-barrido), default(Vector2));
+                    }
                     // v6.56.3 — EL ESPEJO DEL HEREDERO (la letra: «cuando el
                     // personaje se mueve derecha o izquierda las alas siguen
                     // en la misma posición»): la reconstrucción v6.56.0 perdió
                     // el barrido direccional de la v6.52.2 (Barrido/BarridoAtras
-                    // quedaron código muerto). Aquí no hay SpriteBatch que
-                    // voltear — el espejo es GEOMÉTRICO: P → (2·cx − P.x, P.y)
-                    // sobre el centro del jugador. Equivale a negar offsets X y
-                    // rotaciones (mirror(R(φ)·v) = R(−φ)·mirror(v)); las anchuras
-                    // y tangentes se derivan de los puntos YA espejados → cada
-                    // pluma conserva su filo del lado anatómico correcto, las
-                    // runas de punta heredan gratis y el anillo central también.
+                    // quedaron código muerto — v6.56.4 lo revive ARRIBA). Aquí
+                    // no hay SpriteBatch que voltear — el espejo es GEOMÉTRICO:
+                    // P → (2·cx − P.x, P.y) sobre el centro del jugador.
                     if (((Entity)pl).direction < 0)
                     {
                         float cx2 = val.X;
@@ -739,6 +788,23 @@ namespace AethonMod.Content.VFX
                             for (int k2 = 0; k2 < eje.Length; k2++)
                             {
                                 eje[k2].X = 2f * cx2 - eje[k2].X;
+                            }
+                            // v6.56.4 — EL ESPEJO COMPLETO: solo negar X INVIERTE
+                            // el filo/lomo — la perpendicular se recalcula sobre
+                            // puntos espejados (perp(Mirror(T)) = −Mirror(perp(T)))
+                            // y el +borde caía del lado opuesto: mirando a la
+                            // izquierda cada pluma NO era el espejo de sí misma
+                            // mirando a la derecha (Δ ≈ 2·SemiMas = 50-68 px).
+                            // Con la PERMUTA, el filo conserva su lado anatómico
+                            // bajo el espejo (girar == espejo exacto, Δ 0.000px
+                            // en el sim).
+                            float[] semiMas = _pozosSemi[m];
+                            float[] semiMenos = _pozosSemi2[m];
+                            for (int k3 = 0; k3 < semiMas.Length; k3++)
+                            {
+                                float intercambio = semiMas[k3];
+                                semiMas[k3] = semiMenos[k3];
+                                semiMenos[k3] = intercambio;
                             }
                         }
                         _geoAnclaCentral.X = 2f * cx2 - _geoAnclaCentral.X;
@@ -890,7 +956,13 @@ namespace AethonMod.Content.VFX
                         {
                             cuerpo = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f + (float)i / (float)_geoN);
                         }
-                        SigiloLib.Runa(val3 + screenPosition, globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) + num5, array, (i * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6);
+                        // v6.56.4 — EL GIRO DE RUNAS ESPEJADO: el giro alternaba por
+                        // índice de pluma — con Plumas impar el patrón de rotación no
+                        // se reflejaba entre el par. La primera mitad (ala izquierda,
+                        // construida primero) gira al revés: el patrón ES el espejo
+                        // del ala gemela.
+                        float espejoLado = ((i < num4) ? -1f : 1f);
+                    SigiloLib.Runa(val3 + screenPosition, globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) * espejoLado + num5, array, (i * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6);
                     }
                     for (int j = 0; j < 8; j++)
                     {

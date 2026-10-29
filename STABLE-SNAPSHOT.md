@@ -1,3 +1,18 @@
+# v6.56.4 — EL CAMINO GPU DEL RC2 + EL ESPEJO COMPLETO DE LAS ALAS + EL PORTAL DEL CONJURO — EL CHECKLIST
+
+> ⏳ **PUBLICACIÓN** — release pendiente (el ID del release solo se conoce DESPUÉS de crearlo — la lección de la .65: marcarlo sin copiar el ID del anterior).
+
+**Qué pasó** (la letra): «solo deja español es_es» + «las alas no son simétricas y no cambian la dirección [al moverse] — todas las alas del mod» + «las armas con picos tienen aún más picos: adapta el código del rayo concentrado 2» + la aguja de carga «se ve horrible» (→ los brillos de los soles rúnicos), el círculo plano del RC2 (→ varios círculos rúnicos de agujeros negros), las franjas negras del haz, el sonido (carga generada + más grave + fade) y el temblor del mundo.
+
+1. **LOS PICOS (la 4ª ronda — EL CAMINO GPU)**: [ ] el Rayo del ALBA liso al fluir; [ ] el VEREDICTO liso (con SU aberración); [ ] el JUICIO liso; [ ] el PRISMA: el látigo verlet sin quiebres; [ ] el PARTIDOR: la CARGA (senoide) y el CORTE lisos; [ ] la COLUMNA de la Ira lisa; [ ] el RC2 intacto (su camino GPU era el que se portó). Los conductos ahora pasan por el shader POR PÍXEL — el borde funde suave, sin sierra.
+2. **LAS ALAS (todas — incluidas las rúnicas)**: [ ] el par ES SIMÉTRICO en reposo (el filo/lomo ya no cruza lados); [ ] al GIRAR a la izquierda el render es el ESPEJO exacto; [ ] al MOVERSE, el enjambre se INCLINA hacia atrás (correr barre la punta ~12 px; girar en plena carrera la mueve ~32-42 px); [ ] el centelleo es parejo entre alas; [ ] las runas de las rúnicas giran espejadas.
+3. **EL RC2**: [ ] al USAR el arma, SUENA LA CARGA (crece y desemboca en el disparo — antes era silencio); [ ] durante la carga, BRILLOS DE SOL se reúnen a gran velocidad en el centro (la aguja de la «línea que avanza y retrocede» MUERE); [ ] al disparar, los brillos estallan hacia la dirección del rayo; [ ] en la boca del arma hay UN PORTAL: disco negro + VARIOS CÍRCULOS RÚNICOS (el círculo plano MUERE) + el espacio se CURVA alrededor (lente); [ ] el HAZ SIN FRANJAS NEGRAS al ensancharse; [ ] el sonido del láser es MÁS GRAVE, se mantiene, y se apaga con el rayo; [ ] el MUNDO TIEMBLA un poco mientras dispara (fuerte al encendido).
+4. **LA ESCALERA**: [ ] cada peldaño conserva SU paleta y SU flujo (el alma de la .56.3) ahora sobre el cuerpo nuevo del shader; [ ] los peldaños también tienen su portal rúnico a su escala (coronas con el alma del peldaño).
+5. **IDIOMAS**: [ ] el juego en «Español (España)» Y en «Español (Latinoamérica)» ven el mod EN ESPAÑOL (el es-MX es espejo del es-ES); [ ] el paquete en-US ya NO EXISTE (el mod es monolingüe — el juego en inglés mostrará claves sin traducir, aceptado).
+6. **REGRESIÓN GENERAL**: [ ] Réquiem/Ojo/Primer Trazo/telégrafo de la Ira: como en su mejor época (la reversión de RayoStrip les devolvió el estado pre-regresión); [ ] MP si pruebas: todo lo anterior; [ ] F8: el presupuesto sano.
+
+---
+
 # v6.56.3 — LA RONDA DEL PERSONAJE NUEVO — EL CHECKLIST
 
 > **PUBLICADA** — release [428376306](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.3) + CDN verificado byte a byte (md5 `28d0bf10f831c24e9d968e283a2119e6`, 6.374.841 B).

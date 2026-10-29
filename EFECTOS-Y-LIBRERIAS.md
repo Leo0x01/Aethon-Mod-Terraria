@@ -9,7 +9,7 @@
 > que lo que necesitas YA EXISTE es altísima. **NO SE INVENTA NADA NUEVO SIN
 > ANTES HABER REVISADO ESTE CATÁLOGO.**
 
-**Versión del códice:** 1.2 (v6.56.1) · **Mantenimiento:** todo agente (IA o humano)
+**Versión del códice:** 1.3 (v6.56.4) · **Mantenimiento:** todo agente (IA o humano)
 que cree o modifique una librería, shader, textura, efecto visual o de sonido
 **DEBE documentarlo aquí en la misma entrega** (ver §10 — El Decálogo y §11 — Bitácora).
 
@@ -446,6 +446,8 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 
 **v6.56.0 — LA CURA DEL CENTRADO + LAS RÚNICAS + LAS ANATOMÍAS:** (1) EL CENTRADO: el ancla del enjambre es ahora SIMÉTRICA al sprite del jugador (el barrido asimétrico que las mandaba a un lado, FUERA) y las alas siguen la rotación del cuerpo con **`pl.fullRotation`** (camelCase — `FullRotation` NO compila en tML 2026.08, es campo de `Player`, no propiedad). (2) **EL OVERLAY RÚNICO `DibujarRunas`** (escuela A): una runa en cada PUNTA de pluma + el anillo de 8 glifos contrarrotante (SigiloLib). (3) **EL CATÁLOGO 17-23**: las 4 RÚNICAS (Solares · del Vacío contrarrotante · del Eclipse · del Juicio con el gradiente caminando) y las 3 ANATOMÍAS (Agujas del Vacío · Cuchillas del Eclipse · Corolas del Alba). Bolsa de las Alas: 15→22. Los ítems viven en `Content/Items/Alas/AlasNuevasV6560.cs`.
 
+**v6.56.4 — EL ESPEJO COMPLETO + EL BARRIDO** (la letra: «las alas no son simétricas y cuando el personaje se mueve en una dirección, las alas no cambian la dirección junto al personaje» — TODAS las alas): (1) **EL FILO DEL LADO**: el ala izquierda ponía su borde GRUESO donde el espejo pondría el fino de la derecha — `perp(Mirror(T)) = −Mirror(perp(T))` — la PERMUTA por lado en `ConstruirPluma` hace el par espejo-simétrico DE VERDAD (la cura v6.56.3 solo simetrizó el EJE; la TIRA seguía torcida: 3.5-14 px por pluma). (2) **EL ESPEJO COMPLETO**: el bloque `direction<0` ahora PERMUTA también los semianchos — antes solo negaba X y el filo se INVERTÍA al mirar a la izquierda (Δ ≈ 2·SemiMas = 50-68 px). (3) **EL BARRIDO DEL HEREDERO** (revive el campo `Barrido` muerto de la v6.52.2): todo el enjambre se INCLINA hacia atrás respecto al MOVIMIENTO, calculado en el MARCO DE LA DERECHA (`velFrame = velX·direction` — si el término de dirección entrase en la fórmula se doble-voltearía con el espejo y girar no cambiaría NADA; el sim lo cazó): 0.4 de reposo + 0.6·velocidad saturada a 6 px/t. (4) EL CENTELLEO SIMÉTRICO (semilla sin término por lado) y EL GIRO DE RUNAS ESPEJADO por ala. **Validado 1:1 en simulación numérica (`/home/z/sim/sim_alas.py` — la réplica exacta del pipeline): par Δ=0.000px eje y bordes; girar == espejo exacto del render; corriendo, la punta se barre 11-13 px y girar en plena carrera la mueve 32-42 px.**
+
 ### 4.25 Las utilidades de soporte
 
 - **EcoLib.cs** — LAS VOCES: `Hablar(texto, tinte, rugido, prioridad)` (cola acotada, la voz del libro SE CUELA al frente), `ElegirVariante` (reparto sin repetición), `Update/Dibujar` (capa tras "Vanilla: Death Text", NUNCA abre lotes propios).
@@ -489,10 +491,29 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 
 - **Qué hace:** el plasma del **Rayo Concentrado II** — 4 texturas multiplicadas (`CarnePlasma × SegundoRuido × RampaGlow + BitsChispa` en doble AND) con doble scroll cruzado, deformación sinusoidal transversal, chispas solo donde ambas nubes de blobs coinciden. **Las dos curas de la casa:** `uEscalaV` (los rasgos miden SIEMPRE lo mismo en pantalla — cura los dientes de sierra) y EL NÚCLEO SUAVE (smoothstep, no umbral duro — el borde RESPIRA sin contorno fractal).
 - **Perfil:** vs_3_0 + ps_3_0 (el único con vertex shader y matrix). 4 samplers con `sampler_state` completo: `texCarne` s0 · `texSegunda` s1 · `texRampa` s2 · `texBits` s3. Params: `uTransformMatrix` (GameViewMatrix), `uTime`, `uEscalaV` + las 4 texturas.
-- **Loader:** `RayoConcentradoDosProjectile.ObtenerShader()` — caché `_shaderCache` + `_shaderFallo` (el patrón de la casa, v6.55.1).
-- **Uso:** strip de 1500 puntos con color prismático viajero (ColorPrisma) y ancho `p^0.8·cbrt·realSize·3500·(1.1+cos·respira)`.
-- **Fallback:** tiras RayoStrip ×3 (carne 420px/1.0× · remolino 240px/1.9× · núcleo en banda 380px/2.6×) — el arma NUNCA se rompe.
-- **Historia:** v6.55.0 (nació SIN .fxc — §1) → **v6.55.1 compilado con la cadena propia** (validado: 0 errores, 11 params, técnica VS+PS, 4 samplers × 6 estados, GLSL transpilado verificado).
+- **Loader:** `HazConcentradoLib.ObtenerShader()` — caché `_cache` + `_fallo` (el patrón de la casa, v6.55.1; el RC2 conserva el suyo — mismo asset, dos caches, cero costo).
+- **Uso (v6.56.4 — EL CAMINO GPU PORTADO A LAS ARMAS):** el RC2 conserva su
+  strip de 1500 puntos (color prismático viajero, ancho `p^0.8·cbrt·realSize·3500·(1.1+cos·respira)`);
+  **HazConcentradoLib.Dibujar(ptsMundo, n, perfil, colores, uTime, uEscalaV)**
+  lo trae a escala de arma: remuestrea a 128, rotaciones por tangente,
+  `uEscalaV` AUTOMÁTICA por ancho (2·perfilMáx/(texel·2.2), piso 0.18) y el
+  COLOR QUE VIAJA + FADE DE LENTE por nodo (la fórmula porNodo de la vieja
+  HazFusionEspina, que vive ahora en los llamadores). Los consumidores:
+  **la escalera (Alba/Veredicto/Juicio — uTime con SU Flujo), el Prisma (la
+  espina verlet Catmull-Rom 44), el Partidor (la carga senoide + el corte
+  vertical, flujo −1.15) y la Columna de la Ira (flujo −1.2)**.
+- **v6.56.4 — LA LECCIÓN DEL LOTE ADITIVO:** el shader nació aditivo (su .fx
+  lo declara) pero se dibujaba bajo el pase de entidades (AlphaBlend): las
+  texturas del plasma llevan bordes V NEGRO PURO y bajo AlphaBlend el borde
+  del haz OSCURECE lo de debajo — las «franjas negras al ensancharse». Toda
+  DrawTrail del shader va ahora DENTRO de un lote aditivo explícito
+  (`CerrarLoteSiAbierto` + `gd.BlendState = Additive` + `ReabrirLoteVanilla`
+  a la salida) — tanto en el RC2 como en la librería.
+- **Fallback:** tiras RayoStrip ×3 (carne 420px/1.0× · remolino 240px/1.9× ·
+  núcleo en banda 380px/2.6×, con los colores por nodo del llamador) — el arma
+  NUNCA se rompe. La aberración cromática del borde prismático vive en
+  `HazConcentradoLib.AberracionCromatica` (vía CPU, fina y lisa).
+- **Historia:** v6.55.0 (nació SIN .fxc — §1) → **v6.55.1 compilado con la cadena propia** (validado: 0 errores, 11 params, técnica VS+PS, 4 samplers × 6 estados, GLSL transpilado verificado) → **v6.56.4 portado a las armas** (HazConcentradoLib + la reversión educada de RayoStrip, §6.A).
 
 ---
 
@@ -515,7 +536,14 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 | `BitsChispa.png` | 512² | LOS BITS: blobs duros elongados 2-3:1, cobertura 12%, SOLO en el corazón V 0.32..0.68 (cura de los picos v6.55.0) | `DefinitivasLib.TexBits` (doble AND) |
 
 Generadores: `tools/gen_plasma_v6548.py` (las 4 + test anti-picos) y `tools/gen_bits_v6550.py`.
-La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viajero → remolino → núcleo en banda → bits doble AND → vena blanca → aberración cromática) la usan PrismaPrimordial, IraDelCielo y PartidorDeMundos.
+**v6.56.4 — LA PILA CPU HERMANA (`HazFusionEspina`) FUE RETIRADA** (0
+consumidores): la letra del usuario («solo debes adaptar el código del rayo
+concentrado 2 a las características de las armas con pico») mandó los
+conductos al camino GPU (§5.4). Su fórmula de color viajero + lente vive en
+los llamadores; su aberración en `HazConcentradoLib.AberracionCromatica`; y
+`RayoStrip.FajaTexturadaEnLote` volvió a su estado pre-v6.56.3 (ventana V
+completa, período de sintonía, UN quad por segmento) conservando SOLO la
+mitra por nodo — la lección completa en el propio RayoStrip.cs.
 
 ### 6.B Las texturas del sol (familia SunShader, `Content/Effects/Textures/`)
 
@@ -530,7 +558,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 
 - `Ruido_0.png` (1024², fBm 8 octavas) + `Ruido_1..19.png` (512² c/u: fBm de contraste variado, células, plasma, anillos) — uno por estilo de ala (`AlasEstilo`). **v6.56.1: las Ruido_3/6/13/14/16/19 YA NO SON HUÉRFANAS** — las alas rúnicas y anatómicas 17-23 las usan TODAS (Runas Solares→13 · del Vacío→6 · del Eclipse→14 · del Juicio→16 · Agujas→19 · Cuchillas→3 · Corolas→6). La lista vieja de huérfanas de esta sección era un boomerang de purga: borrarlas habría ROTO siete alas.
 - `Investigacion/Espacio_1.png` (512², nebulosa violeta — ala Vía Láctea).
-- `RuidoTinta.png` (256×64, fBm tileable en U + caída gaussiana en V) — BeamLib + pasadas 1-2 de HazFusionEspina.
+- `RuidoTinta.png` (256×64, fBm tileable en U + caída gaussiana en V) — BeamLib (y el Primer Trazo).
 - Generadores: `gen_investigacion_v6540.py`, `gen_texturas_pro_v6543.py`, `gen_beam_v6522.py`.
 
 ### 6.D Primitivas de partículas y VFX (las que usan las librerías)
@@ -585,11 +613,31 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 
 294 llamadas `SoundEngine.PlaySound` en 108 archivos (jefes: AethonBoss 36, AethonBossFusionado 19, AtaqueJefe 17). Top: **Item122 ×111** (zumbido grave), Item8 ×40, Item14 ×38, Item4 ×33, Item12 ×33, Item88 ×17 (succión), Roar ×16, Item117 ×16… Helpers blindados por archivo: `DefinitivasLib.Sonar` (try/catch, jamás tumba el frame — las 6 definitivas) y 11 copias privadas del mismo patrón. **Regla de colocación:** en proyectiles, sonar en `AI()` gated `!= Server`; no duplicar los del NPC PreAI.
 
-### 7.3 Capa 3 — EL ÚNICO AUDIO PROPIO: el bucle del Rayo Concentrado II
+### 7.3 Capa 3 — EL AUDIO PROPIO DEL RC2: el bucle + LA CARGA (v6.56.4)
 
-- **Archivo:** `Content/Sounds/RayoConcentradoLoop.ogg` — 55.861 B, Vorbis q5, 44.1 kHz estéreo, **6.000 s EXACTOS de bucle periódico**. Es el único .ogg/.wav/.mp3 del mod.
-- **v2 (v6.56.0) — EL PULSO CONSTANTE.** La letra del usuario: *«el sonido va y viene como si fueran ondas, pero el ataque no son ondas — hazlo un pulso constante y luego acabe»*. LA AUTOPSIA DE LA 1ª GEN (el contrajemplo): su GRAVE casi afinado (49.0/49.17 Hz) era un **BATIDO** de 4 ciclos por bucle (el «va y viene»), y su mezcla llevaba **RESPIRACIÓN** de 1 ciclo (el vaivén) y una **BANDA MÓVIL** de ruido (640±280 Hz barriendo — la ilusión de onda). LA RECETA v2 (`gen_sonidopulso_v6560.py`, numpy+ffmpeg — el script se perdió con el wipe del 29-oct; solo sobrevivió el .ogg que empaqueta el .tmod, la receta documentada aquí es la fuente de verdad): **CERO batido** (un solo grave 48 Hz, sin pareja desafinada), **CERO respiración** (mezcla plana), **BANDA FIJA** (el plasma vive en su banda, no la barre), y el ARRANQUE-CONTENIDO-FINAL lo pone la reproducción, no el archivo. Mantiene el truco de la 1ª gen: bucle perfecto por construcción (frecuencias múltiplos de 1/6 Hz, costura del ruido fundida).
-- **La reproducción** (`RayoConcentradoDosProjectile.SonidoEnLoop`): un slot ActiveSound con `ProjectileAudioTracker`, `IsLooped`, `MaxInstances=0`; cada frame actualiza Position/Volume/Pitch por la fase del arma (en el láser el pitch va **CONGELADO** — otro de los vaivenes de la 1ª gen); muere con el proyectil. Extra: `On_Main.UpdateAudio` baja la MÚSICA −30% mientras vive el haz.
+- **El bucle** (`Content/Sounds/RayoConcentradoLoop.ogg`): Vorbis q5, 44.1 kHz estéreo, **6.000 s EXACTOS de bucle periódico**.
+- **v2 (v6.56.0) — EL PULSO CONSTANTE.** La letra del usuario: *«el sonido va y viene como si fueran ondas, pero el ataque no son ondas — hazlo un pulso constante y luego acabe»*. LA AUTOPSIA DE LA 1ª GEN (el contrajemplo): su GRAVE casi afinado (49.0/49.17 Hz) era un **BATIDO** de 4 ciclos por bucle (el «va y viene»), y su mezcla llevaba **RESPIRACIÓN** de 1 ciclo (el vaivén) y una **BANDA MÓVIL** de ruido (640±280 Hz barriendo — la ilusión de onda). LA RECETA v2: **CERO batido** (un solo grave 48 Hz, sin pareja desafinada), **CERO respiración** (mezcla plana), **BANDA FIJA**, y el ARRANQUE-CONTENIDO-FINAL lo pone la reproducción, no el archivo. Mantiene el truco de la 1ª gen: bucle perfecto por construcción (frecuencias múltiplos de 1/6 Hz, costura del ruido fundida).
+- **v3 (v6.56.4) — UN POCO MÁS GRAVE.** La letra: *«el sonido actual es muy agudo
+  para el tipo de haz de luz; tiene que ser un poco más grave mientras se
+  dispara y mantiene el rayo, y cuando comienza a apagarse el sonido también
+  debe [apagarse]»*. La 1ª gen era aguda de FÁBRICA (motor de armónicos en
+  588-2352 Hz, plasma en 640±280). La v3 baja el registro una octava+: motor
+  en 172-688 Hz, plasma en BANDA FIJA a 340 Hz, crujido una octava abajo (HP
+  1200, más quedado) y la mezcla inclinada al grave (0.46/0.30/0.34/0.10).
+  El pitch en juego: **−0.22 sostenido** durante el láser y **plane a −0.70**
+  en los últimos 60 ticks (antes quedaba CONGELADO en +0.2 — el «muy agudo»);
+  el volumen ya viaja con `realSize` → muere con el rayo.
+- **EL SONIDO DE CARGA (NUEVO, `Content/Sounds/RayoConcentradoCarga.ogg`):**
+  one-shot de 5.15 s (la letra: *«en el momento de carga necesita sonar que
+  está cargando, debes generar ése sonido»*). La carga era el ÚNICO silencio
+  del arma: el volumen del bucle viaja con realSize (0 hasta el tick ~280),
+  así que la carga sonaba a NADA. El one-shot toca desde el tick 2 y su
+  CRESCENDO desemboca justo en la ignición: EL GRAVE QUE DESPIERTA (44→55 Hz
+  en glide), EL CORO ARMÓNICO QUE SUBE (172-688 Hz deslizándose +15% — nada
+  de agudos), EL PULSO ACELERANDO (1.8→4.0 latidos/s) y EL AIRE (succión
+  parda); el finale (0.45 s) rampa al pico y corta en 25 ms — la ignición
+  la pone el bucle. Generador: `tools/gen_sonido_v6564.py` (ambos .ogg).
+- **La reproducción** (`RayoConcentradoDosProjectile.SonidoEnLoop`): un slot ActiveSound con `ProjectileAudioTracker`, `IsLooped`, `MaxInstances=0`; cada frame actualiza Position/Volume/Pitch por la fase del arma; muere con el proyectil. La carga va por `DefinitivasLib.Sonar` (one-shot, `MaxInstances=1`). Extra: `On_Main.UpdateAudio` baja la MÚSICA −30% mientras vive el haz.
 - **Si mañana hace falta OTRO sonido propio en bucle:** replicar ESTE patrón (generador numpy con frecuencias múltiplos de 1/L + costura fundida del ruido + SonidoEnLoop con tracker) y documentarlo aquí.
 
 ---
@@ -675,6 +723,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 | **v6.55.1** | **EL DESCUBRIMIENTO .fx/.fxc + LA CADENA DE COMPILACIÓN (fx20_build/validate, vkd3d)** — y **ESTE CÓDICE (v1.0)** | §1, §10 |
 | **v6.56.0** | **LA LEY DEL CERO-DUST** (los Dust junto al filo son la sierra de los picos y los «círculos planos») · la CURA DEL CENTRADO de alas (`pl.fullRotation`) + DibujarRunas + catálogo 17-23 · **LA ESCALERA DEL RAYO** (RayoConcentradoNivelProjectile, nivel en `ai[1]`) · el SONIDO v2 pulso constante · el PARTIDOR a pantalla completa · la IRA DEL CIELO densa — y **ESTE CÓDICE (v1.1)** | §0, §4.24, §4.25, §7.3 |
 | **v6.56.1** | **LA RONDA DE CURACIÓN de la auditoría 4×**: la recursión `SendExtraAI` del decompilador (StackOverflow MP), el `ai[2]`=whoAmI envenenando los relojes de las 3 armas nuevas, el switch del Testamento sin gate (sentencia doble en MP), `RestaurarLoteVanilla` (la cura del lote aditivo), la exclusión cruzada de la escalera, el vuelo/mira del RC2 solo del dueño, la aguja de carga recuperada, los pozos cero-GC del RC2, las 4 horneadas con funeral, el latch eterno de las alas, la marca del festín con caducidad, el es-MX deduplicado (−636 líneas) con paridad 1369=1369=1369 al parser REAL, 5 PNG huérfanos purgados y ESTE CÓDICE puesto al día (§3.1/§4.25/§6/§7.1) | §3.1, §4.25, §6, §7.1, §11 |
+| **v6.56.4** | **EL CAMINO GPU PORTADO A LAS ARMAS**: `HazConcentradoLib` (§5.4 — la letra: «adapta el código del rayo concentrado 2») con la LECCIÓN DEL LOTE ADITIVO (las franjas negras del RC2) · **LA REVERSIÓN EDUCADA** de `FajaTexturadaEnLote` (mitra por nodo se queda) y `HazFusionEspina` RETIRADA · **EL ESPEJO COMPLETO de las alas** (permuta filo/lomo por lado + permuta de semianchos bajo el espejo + EL BARRIDO revivido con acople a velocidad — validado Δ 0.000px en sim) · **EL PORTAL DEL CONJURO** del RC2 (BlackDisk + CoronaConjuro + GravLens en la boca; la aguja y el GlowOrb planos MUEREN; destellos de soles rúnicos convergentes/estallido) · **LOS SONIDOS v3** (bucle grave + carga one-shot) + `Pantalla.Sacudir` · **LA LOCALIZACIÓN MONOLINGÜE** (es-ES fuente + espejo es-MX generado, en-US retirado) | §5.4, §6.A, §7.3, §4.24, §11 |
 | *(siguiente fila: la tuya)* | | |
 
 ---
