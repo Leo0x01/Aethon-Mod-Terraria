@@ -39,7 +39,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<RequiemEstelarProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 60;
+            Item.mana = 10;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
             Item.UseSound = SoundID.Item27.WithPitchOffset(-0.2f);
@@ -96,7 +96,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Item.autoReuse = false;
             Item.shoot = ModContent.ProjectileType<IraDelCieloProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 75;
+            Item.mana = 10;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
             Item.UseSound = SoundID.Item122.WithPitchOffset(-0.45f);

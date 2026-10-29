@@ -803,7 +803,10 @@ namespace AethonMod.Content.Items.Bolsas
             // cuenta: aquí y en la entrega directa del kit)
             l.Add((ModContent.ItemType<BolsaDeAlasPrisma>(), 1));
             // v6.54.6 — EL VEREDICTO DE AETHON REFORMADO (la bolsa 24 del cofre:
-            // ahora LAS CINCO SENTENCIAS con sus siete capas)
+            // ahora LAS SENTENCIAS con sus siete capas — v6.56.3: EL TESTAMENTO
+            // RETIRADO por la letra del usuario: «la puedes borrar, no es
+            // necesaria» — era la corona que rotaba las 4 sentencias ×1.3;
+            // las 4 viven por sí mismas, sin dictador.)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
             return l;
         }
@@ -814,7 +817,7 @@ namespace AethonMod.Content.Items.Bolsas
     //  eligió el usuario tras probarlas, cada una con SUS SIETE CAPAS
     //  de efectos (el prisma —el ataque definitivo con la receta
     //  completa del rayo de fusión—, el partidor, el réquiem, la ira…
-    //  y EL TESTAMENTO, la corona que las dicta rotándolas ×1.3).
+    //  — la corona que las dictaba se retiró en la v6.56.3.)
     // ======================================================================
 
     // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
@@ -839,7 +842,6 @@ namespace AethonMod.Content.Items.Bolsas
                 (ModContent.ItemType<PartidorDeMundos>(), 1),
                 (ModContent.ItemType<RequiemEstelar>(), 1),
                 (ModContent.ItemType<IraDelCielo>(), 1),
-                (ModContent.ItemType<TestamentoAethon>(), 1),
                 (ModContent.ItemType<RayoConcentradoDos>(), 1),
                 (ModContent.ItemType<RayoDelAlba>(), 1),
                 (ModContent.ItemType<RayoDelVeredicto>(), 1),

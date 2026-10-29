@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Particles;
 using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Definitivas
@@ -127,15 +128,33 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     float momento = 6f + k * Cadencia;
                     float falta = momento - t;
-                    if (falta > 0f && falta < 25f && Main.rand.NextBool(2))
+                    // v6.56.3 — LA LEY DEL CERO-DUST (§0): la lluvia que
+                    // anuncia a la estrella vive en el motor de la casa
+                    // (Hash01 — ley §0.4, determinista).
+                    if (falta > 0f && falta < 25f && VFXCore.Hash01(k * 7 + 1, (int)Main.GlobalTimeWrappedHourly * 61, 13) < 0.5f)
                     {
-                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float ang = VFXCore.Hash01(k * 13 + 5, (int)Main.GlobalTimeWrappedHourly * 37, 3) * MathHelper.TwoPi;
                         float desde = 300f + falta * 26f;
                         Vector2 pos = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * desde;
-                        Vector2 hacia = (Projectile.Center - pos).SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(9f, 16f);
-                        Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame, hacia, 0,
-                            DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.9f);
-                        d.noGravity = true;
+                        Vector2 hacia = (Projectile.Center - pos).SafeNormalize(Vector2.UnitX) *
+                            (9f + VFXCore.Hash01(k, 41, (int)Main.GlobalTimeWrappedHourly * 29) * 7f);
+                        var p = new ParticleData
+                        {
+                            Position = pos,
+                            Velocity = hacia,
+                            Scale = Vector2.One * 0.9f,
+                            PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.9f)),
+                            PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.9f)),
+                            PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.2f)),
+                            TimeLeft = 26,
+                            Duration = 26,
+                            TextureId = ParticleTex.SoftGlow,
+                            BlendMode = 1,
+                            LayerPriority = LayerPriorities.BeforeProjectiles,
+                        };
+                        p.EnableComponent(ComponentFlag.FadeOut);
+                        p.EnableComponent(ComponentFlag.ScaleDown);
+                        ParticleManager.Spawn(p);
                     }
                 }
             }
@@ -168,12 +187,28 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     if (!_estrellaViva[i]) continue;
                     _estrellaPos[i] += _estrellaVel[i];
                     _estrellaRot[i] += 0.22f;
-                    if (Main.rand.NextBool(2))
+                    // v6.56.3 — LA ESTELA EN EL MOTOR DE LA CASA (antes Dust
+                    // GoldFlame — ley §0; Hash01 — ley §0.4).
+                    if (VFXCore.Hash01(i * 17 + 3, (int)Main.GlobalTimeWrappedHourly * 53, 7) < 0.5f)
                     {
-                        Dust d = Dust.NewDustPerfect(_estrellaPos[i], DustID.GoldFlame,
-                            -_estrellaVel[i] * 0.2f + new Vector2(Main.rand.NextFloat(-1f, 1f), 0f), 0,
-                            DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 0.8f);
-                        d.noGravity = true;
+                        float hAng = VFXCore.Hash01(i * 5, (int)Main.GlobalTimeWrappedHourly * 31, 11);
+                        var p = new ParticleData
+                        {
+                            Position = _estrellaPos[i],
+                            Velocity = -_estrellaVel[i] * 0.2f + new Vector2(hAng * 2f - 1f, 0f),
+                            Scale = Vector2.One * 0.8f,
+                            PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(hAng), 0.8f)),
+                            PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(hAng), 0.8f)),
+                            PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.15f)),
+                            TimeLeft = 22,
+                            Duration = 22,
+                            TextureId = ParticleTex.SoftGlow,
+                            BlendMode = 1,
+                            LayerPriority = LayerPriorities.BeforeProjectiles,
+                        };
+                        p.EnableComponent(ComponentFlag.FadeOut);
+                        p.EnableComponent(ComponentFlag.ScaleDown);
+                        ParticleManager.Spawn(p);
                     }
                     if (_estrellaPos[i].Y > Projectile.Center.Y + 340f || _estrellaPos[i].Y > Main.screenPosition.Y + Main.screenHeight + 60f)
                         _estrellaViva[i] = false;
@@ -191,15 +226,33 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     if (tk < 0f || tk > VidaAnillo) continue;
                     float v = MathHelper.Clamp(tk / VidaAnillo, 0f, 1f);
                     float radio = RadioAnillo(v);
-                    if (Main.rand.NextBool(3))
+                    // v6.56.3 — LAS NOTAS YA NO SON POLVO: este sitio orbitaba
+                    // EXACTAMENTE sobre el borde del anillo — el GoldFlame de
+                    // vanilla ASOMANDO en el filo era la sierra clásica de la
+                    // ley §0. Viven en el motor de la casa, DENTRO del anillo
+                    // (velocidad tangencial), con Hash01 (ley §0.4).
+                    if (VFXCore.Hash01(k * 11 + 7, (int)Main.GlobalTimeWrappedHourly * 47, 5) < 0.3334f)
                     {
-                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float ang = VFXCore.Hash01(k * 23, (int)Main.GlobalTimeWrappedHourly * 43, 19) * MathHelper.TwoPi;
                         Vector2 pos = Projectile.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
-                        Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame,
-                            new Vector2(MathF.Cos(ang + MathHelper.PiOver2), MathF.Sin(ang + MathHelper.PiOver2)) *
-                            Main.rand.NextFloat(1f, 3f), 0,
-                            DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.8f);
-                        d.noGravity = true;
+                        float vtan = 1f + VFXCore.Hash01(k * 3, (int)Main.GlobalTimeWrappedHourly * 17, 23) * 2f;
+                        var p = new ParticleData
+                        {
+                            Position = pos,
+                            Velocity = new Vector2(MathF.Cos(ang + MathHelper.PiOver2), MathF.Sin(ang + MathHelper.PiOver2)) * vtan,
+                            Scale = Vector2.One * 0.75f,
+                            PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.8f)),
+                            PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(ang / MathHelper.TwoPi), 0.8f)),
+                            PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.15f)),
+                            TimeLeft = 24,
+                            Duration = 24,
+                            TextureId = ParticleTex.SoftGlow,
+                            BlendMode = 1,
+                            LayerPriority = LayerPriorities.BeforeProjectiles,
+                        };
+                        p.EnableComponent(ComponentFlag.FadeOut);
+                        p.EnableComponent(ComponentFlag.ScaleDown);
+                        ParticleManager.Spawn(p);
                     }
                 }
             }

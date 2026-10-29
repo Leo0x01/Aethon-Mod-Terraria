@@ -254,7 +254,13 @@ namespace AethonMod.Content.VFX
             for (int j = 0; j < num12; j++)
             {
                 float num13 = (float)j / 8f;
-                Vector2 val3 = ancla + val * (num8 * num13) + val2 * (estilo.Curva * num8 * num13 * num13);
+                // v6.56.3 — LA CURVA ESPEJO: val2 (la perpendicular) apunta a +X
+                // de pantalla en AMBOS lados — con Curva ≠ 0 las dos alas se
+                // encorvaban hacia el MISMO lado (la izquierda se enganchaba
+                // sobre el cuerpo: «no están bien centradas y están ligeramente
+                // rotadas», la letra del usuario). Multiplicar por lado hace el
+                // par espejo-simétrico: cada ala abre su garra hacia AFUERA.
+                Vector2 val3 = ancla + val * (num8 * num13) + val2 * (estilo.Curva * (float)lado * num8 * num13 * num13);
                 float num14 = Perfil(num13, raizSemiancho, vientre, ancho, afilada);
                 float num15 = Perfil(num13, raizSemiancho, vientre2, ancho2, afilada);
                 if (num13 > 0.7f)
@@ -713,6 +719,30 @@ namespace AethonMod.Content.VFX
                     _geoAnclaCentral = ((fullRotation != 0f) ? (val + Utils.RotatedBy(val2 - val, (double)fullRotation, default(Vector2))) : val2);
                     _geoN = num2 * 2;
                     _geoRunasValida = true;
+                    // v6.56.3 — EL ESPEJO DEL HEREDERO (la letra: «cuando el
+                    // personaje se mueve derecha o izquierda las alas siguen
+                    // en la misma posición»): la reconstrucción v6.56.0 perdió
+                    // el barrido direccional de la v6.52.2 (Barrido/BarridoAtras
+                    // quedaron código muerto). Aquí no hay SpriteBatch que
+                    // voltear — el espejo es GEOMÉTRICO: P → (2·cx − P.x, P.y)
+                    // sobre el centro del jugador. Equivale a negar offsets X y
+                    // rotaciones (mirror(R(φ)·v) = R(−φ)·mirror(v)); las anchuras
+                    // y tangentes se derivan de los puntos YA espejados → cada
+                    // pluma conserva su filo del lado anatómico correcto, las
+                    // runas de punta heredan gratis y el anillo central también.
+                    if (((Entity)pl).direction < 0)
+                    {
+                        float cx2 = val.X;
+                        for (int m = 0; m < num3; m++)
+                        {
+                            Vector2[] eje = _pozosEje[m];
+                            for (int k2 = 0; k2 < eje.Length; k2++)
+                            {
+                                eje[k2].X = 2f * cx2 - eje[k2].X;
+                            }
+                        }
+                        _geoAnclaCentral.X = 2f * cx2 - _geoAnclaCentral.X;
+                    }
                     int num7 = 0;
                     for (int k = 0; k < 3; k++)
                     {

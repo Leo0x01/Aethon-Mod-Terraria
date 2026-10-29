@@ -1,3 +1,20 @@
+# v6.56.3 — LA RONDA DEL PERSONAJE NUEVO — EL CHECKLIST
+
+> ⏳ PUBLICACIÓN: pendiente de subir el release (el .tmod está listo: md5 `28d0bf10f831c24e9d968e283a2119e6`, 6.374.841 B).
+
+**Qué pasó** (la letra): un personaje nuevo destapó la ronda — la llegada del grimorio jamás se mostraba en el mapa, las alas descentradas/rotadas/sin flip, el RC2 y el Ojo «no funcionaban» (el muro invisible de maná: costaban 100), picos en Partidor/Prisma/los 3 rayos, los 3 rayos idénticos, y el Testamento retirado.
+
+1. **EL FARO DEL MAPA (la nueva estrella)**: [ ] con un personaje que AÚN NO recibe el grimorio, dejar pasar la primera noche → cuando la bruma se disipe, el minimapa y el mapa completo muestran el ICONO DEL GRIMORIO pulsando en su ubicación; [ ] al EXTENDER LA MANO el icono desaparece; [ ] si sales y vuelves a entrar al mundo, el icono sigue ahí mientras no lo tomes; [ ] el hover del icono dice «El Grimorio espera a su destinatario…».
+2. **EL MURO DE MANÁ**: [ ] con el maná BAJO (o el personaje nuevo), el Rayo Concentrado II ahora SÍ dispara (cuesta 10); [ ] el Ojo del Juicio SÍ se coloca arriba y barre; [ ] TODAS las definitivas disparan con 20 de maná base.
+3. **LAS ALAS**: [ ] centradas en el personaje (las 23 — incluidas las rúnicas); [ ] sin la inclinación rara; [ ] al girar a la IZQUIERDA las alas se espejan (cada garra abre hacia AFUERA); [ ] las runas de las alas rúnicas siguen las puntas al voltearse.
+4. **LOS PICOS (la 3ª ronda)**: [ ] el Rayo del ALBA liso al fluir (era el peor); [ ] el VEREDICTO liso; [ ] el JUICIO liso; [ ] el PARTIDOR sin dientes en la CARGA (la senoide) y en el corte; [ ] el PRISMA sin quiebres angulares cuando latiguea (la espina se remuestrea suave); [ ] LA PUNTA de los rayos se estrecha (ya no corte plano).
+5. **LAS ALMAS DE LA ESCALERA**: [ ] el Alba es DORADO-AMANECER; [ ] el Veredicto es ÁMBAR-VIOLETA; [ ] el Juicio conserva el arcoíris; [ ] hierve cada uno a su velocidad; [ ] el Veredicto tiene SU aberración de borde.
+6. **EL TESTAMENTO, RETIRADO**: [ ] la bolsa de definitivas entrega 11 (ya no 12); [ ] nada lo referencia en ningún tooltip; [ ] si tenías uno en un cofre del mundo viejo, desaparece al recargar (esperado — el tipo murió).
+7. **LA IRA Y EL RÉQUIEM SIN POLVOS**: [ ] la tormenta de la Ira cae con partículas de la casa (la lluvia ámbar viva, la convergencia al marcado en espiral); [ ] los anillos del Réquiem orbitan SIN la sierrita dorada del borde.
+8. **REGRESIÓN GENERAL**: [ ] el Verbo Primordial en su movimiento VII (La Sinfonía) ahora SÍ dibuja su concierto (la excepción del client.log murió); [ ] el RC2 con su aguja y su láser intactos; [ ] MP si pruebas: todo lo anterior + el faro del mapa SOLO lo ve el destinatario.
+
+---
+
 # v6.56.2 — LA CURA QUE FALTÓ (la 6ª recursión del Partidor) — EL CHECKLIST
 
 > **PUBLICADA** — release [427672847](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.2) + CDN verificado byte a byte (md5 `22dfb5202c3399e610e7f07c9cb0eba1`, 6.377.522 B).

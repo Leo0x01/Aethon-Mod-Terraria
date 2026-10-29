@@ -1972,7 +1972,6 @@ Items: {
 				Sus POSIMÁGENES del barrido, su foco con anillos que se contraen
 				con la convergencia, los micro-arcos de la carga y la luz del
 				canal. CERO polvos: la punta ARDE de plasma.
-				(El Testamento lo sigue dictando como sentencia.)
 			'''
 	}
 
@@ -2016,20 +2015,6 @@ Items: {
 				la línea que desciende y las chispas que CONVERGEN al blanco; la caída
 				envuelve su AURA DE CARNE, y la columna golpea con sus SEIS PASADAS, la
 				espiral triple del final, el humo del juicio y el suelo ardiendo.
-			'''
-	}
-
-	TestamentoAethon: {
-		DisplayName: El Testamento de Aethon
-		Tooltip:
-			'''
-				LA CORONA DE LA BOLSA — el libro con su sándwich completo (halos
-				apilados, aro arcoíris y pestañas), EL ALIENTO de tinta de la librería
-				de brumas y el anillo de runas CON ARCOS que saltan entre sellos… y LA
-				DICTA: CADA USO dispara UNA DE LAS CUATRO SENTENCIAS con su poder
-				acrecentado (×1.3) — con la ONDA del dictado y la RÁFAGA de páginas — y
-				EL VÍNCULO, la faja de ruido vivo que corre del libro a su arma.
-				Cuatro arsenales en un solo objeto.
 			'''
 	}
 
@@ -2126,7 +2111,7 @@ Items: {
 				Índice de las páginas fantasma, la Pluma del sello que detona y
 				EL OJO del juicio.
 				Todo con EL PLASMA DE LA CASA (carne fBm anti-picos) y los COLORES
-				DEL JUICIO. Y EL TESTAMENTO, la corona que las dicta.
+				DEL JUICIO.
 			'''
 	}
 

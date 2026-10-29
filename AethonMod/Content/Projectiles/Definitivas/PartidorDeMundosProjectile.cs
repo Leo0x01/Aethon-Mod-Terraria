@@ -383,7 +383,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 for (int i = 0; i < 14; i++)
                 {
                     float num4 = (float)i / 13f;
-                    float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + num4 * 20f) * (2f + 8f * num3) * num4;
+                    // v6.56.3 — LA LEY DE LOS 6 NODOS/ONDA: la senoide vivía a
+                    // q·20 (3.18 ciclos en 14 nodos = 4.4 nodos/onda = SIERRA,
+                    // la autopsia de la 3ª ronda de picos). A q·9 son 9.8 nodos
+                    // por onda: la misma carne latiendo, SIN dientes.
+                    float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + num4 * 9f) * (2f + 8f * num3) * num4;
                     array[i] = Vector2.Lerp(val, val2, num4) + new Vector2(num5, 0f) - Main.screenPosition;
                     array2[i] = 2f + 5f * num3;
                 }

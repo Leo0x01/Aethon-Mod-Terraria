@@ -27,7 +27,7 @@ namespace AethonMod.Content.VFX
     ///   · Los trails primitivos del género (aquí RayoStrip con perfil
     ///     gaussiano), los haces que convergen,
     ///     el partidor.
-    ///   · El patrón de rotación de sentencias — EL TESTAMENTO rota las sentencias.
+    ///   · El patrón de rotación de sentencias (retirado con el Testamento, v6.56.3).
     ///   · Las armas de arquitectura única.
     ///   · Premiar el golpe con proyectiles secundarios (las
     ///     ramas de la ira).
@@ -69,6 +69,31 @@ namespace AethonMod.Content.VFX
             new Color(120, 220, 255),   // cian
         };
 
+        // v6.56.3 — LAS PALETAS DE LA ESCALERA: la letra del usuario: «el
+        // rayo del juicio, rayo del veredicto y rayo del alba son exactamente
+        // iguales» — compartían renderizador Y paleta (el GradienteJuicio
+        // hardcodeado). Cada PELDAÑO recupera SU alma: el Alba es la primera
+        // luz del amanecer (oro pálido → durazno → blanco), el Veredicto es
+        // la tarde que se vuelve noche (ámbar → magenta → violeta) y el
+        // Juicio conserva el arcoíris completo de la casa.
+        private static readonly Color[] _paradasAlba =
+        {
+            new Color(255, 236, 179),   // oro pálido
+            new Color(255, 213, 150),   // durazno suave
+            new Color(255, 248, 235),   // blanco cálido
+            new Color(255, 222, 173),   // luz de miel
+            new Color(255, 240, 200),   // crema del alba
+        };
+
+        private static readonly Color[] _paradasVeredicto =
+        {
+            new Color(255, 190, 92),    // ámbar de tarde
+            new Color(255, 140, 96),    // brasa
+            new Color(255, 244, 224),   // blanco cálido
+            new Color(214, 96, 214),    // magenta
+            new Color(150, 96, 240),    // violeta de noche
+        };
+
         /// <summary>
         /// EL GRADIENTE DEL JUICIO: cicla suave oro → ámbar → blanco →
         /// violeta → cian → oro… (la receta del gradiente Oil de la referencia,
@@ -82,6 +107,41 @@ namespace AethonMod.Content.VFX
             int i = (int)x;
             int j = (i + 1) % _paradasJuicio.Length;
             return Color.Lerp(_paradasJuicio[i], _paradasJuicio[j], x - i);
+        }
+
+        /// <summary>v6.56.3 — EL GRADIENTE DEL ALBA: la primera luz (oro
+        /// pálido → durazno → blanco → miel → crema). EL ALMA DEL PELDAÑO 1.</summary>
+        public static Color GradienteAlba(float t)
+        {
+            t = t - MathF.Floor(t);
+            float x = t * _paradasAlba.Length;
+            int i = (int)x;
+            int j = (i + 1) % _paradasAlba.Length;
+            return Color.Lerp(_paradasAlba[i], _paradasAlba[j], x - i);
+        }
+
+        /// <summary>v6.56.3 — EL GRADIENTE DEL VEREDICTO: la tarde que se
+        /// vuelve noche (ámbar → brasa → blanco → magenta → violeta). EL
+        /// ALMA DEL PELDAÑO 2.</summary>
+        public static Color GradienteVeredicto(float t)
+        {
+            t = t - MathF.Floor(t);
+            float x = t * _paradasVeredicto.Length;
+            int i = (int)x;
+            int j = (i + 1) % _paradasVeredicto.Length;
+            return Color.Lerp(_paradasVeredicto[i], _paradasVeredicto[j], x - i);
+        }
+
+        /// <summary>v6.56.3 — EL GRADIENTE DE LA ESCALERA: la paleta del
+        /// peldaño (1=Alba · 2=Veredicto · 3=Juicio).</summary>
+        public static Color GradienteEscalera(int nivel, float t)
+        {
+            return nivel switch
+            {
+                1 => GradienteAlba(t),
+                2 => GradienteVeredicto(t),
+                _ => GradienteJuicio(t),
+            };
         }
 
         /// <summary>La versión OSCURECIDA del gradiente (para halos).</summary>
@@ -347,7 +407,8 @@ namespace AethonMod.Content.VFX
         /// <param name="flujo">Multiplicador del flujo (negativo = la carne hierve HACIA la raíz — las columnas hierven hacia arriba).</param>
         /// <param name="conAberracion">False para las columnas finas (las ramas no necesitan borde prismático).</param>
         public static void HazFusionEspina(Vector2[] espina, float[] perfil, Color color, float intensidad,
-            float tiempo, int semilla, bool arcoiris = true, float flujo = 1f, bool conAberracion = true)
+            float tiempo, int semilla, bool arcoiris = true, float flujo = 1f, bool conAberracion = true,
+            Func<float, Color> gradiente = null)
         {
             if (espina == null || espina.Length < 2 || perfil == null || perfil.Length < espina.Length) return;
             if (intensidad <= 0.02f) return;
@@ -374,6 +435,9 @@ namespace AethonMod.Content.VFX
 
             // EL COLOR QUE VIAJA + EL FADE DE LENTE (por nodo — el smoothstep
             // del shader: el centro del haz brilla más que los extremos).
+            // v6.56.3 — EL GRADIENTE ES PARÁMETRO: la escalera pasa SU paleta
+            // (Alba/Veredicto/Juicio); null = el Juicio de toda la vida.
+            Color Grad(float t) => gradiente != null ? gradiente(t) : GradienteJuicio(t);
             Color[] porNodo = null;
             if (arcoiris)
             {
@@ -382,7 +446,7 @@ namespace AethonMod.Content.VFX
                 {
                     float q = i / (float)(n - 1);
                     float lente = 0.85f + 0.30f * MathF.Sin(q * MathHelper.Pi);
-                    porNodo[i] = Alfa(GradienteJuicio(tiempo * 0.07f - q * 0.16f), 0.55f * intensidad * lente);
+                    porNodo[i] = Alfa(Grad(tiempo * 0.07f - q * 0.16f), 0.55f * intensidad * lente);
                 }
             }
 
@@ -423,12 +487,20 @@ namespace AethonMod.Content.VFX
                 // si una textura vieja anda suelta): las chispas son
                 // TEXTURA del canal, jamás silueta.
                 Texture2D bits = TexBits;
-                if (bits != null && intensidad > 0.35f)
+                // v6.56.3 — LA PUERTA DE LOS BITS: en haces angostos (perfil
+                // medio ≤ 40 px) los blobs del doble-AND son púas puras a
+                // 0.11-0.33 px/texel — no aportan nada a 46 px de ancho
+                // (la autopsia de la 3ª ronda de picos). El Alba los suelta;
+                // el Veredicto y el Juicio los conservan.
+                float perfilMedio = 0f;
+                for (int i = 0; i < n; i++) perfilMedio += perfil[i];
+                perfilMedio /= n;
+                if (bits != null && intensidad > 0.35f && perfilMedio > 40f)
                 {
                     var semiBits = new float[n];
                     for (int i = 0; i < n; i++) semiBits[i] = perfil[i] * 0.98f;
                     Color cBits = arcoiris
-                        ? GradienteJuicio(tiempo * 0.07f - 0.30f)
+                        ? Grad(tiempo * 0.07f - 0.30f)
                         : color;
                     RayoStrip.FajaTexturadaEnLote(pts, semiBits, Alfa(cBits, 0.30f * intensidad),
                         bits, 210f, 1.3f * flujo, tiempo, 0.08f, 0.92f);
@@ -506,10 +578,11 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL ESTADO COMPARTIDO
+        //  v6.56.3 — EL ESTADO COMPARTIDO, RETIRADO: SentenciaActual solo lo
+        //  avanzaba el Testamento (borrado por la letra del usuario) y nadie
+        //  más lo leía — el dictador muerto no deja huérfanos. Si el tercer
+        //  acto (HOJA-DE-RUTA Task 99) necesita sentencias compartidas, nace
+        //  DERIVADA del ExtraAI ya sincronizado («computar, no sincronizar»).
         // ==================================================================
-
-        /// <summary>EL ÍNDICE DEL TESTAMENTO (la corona): qué sentencia toca (0..3).</summary>
-        public static int SentenciaActual;
     }
 }

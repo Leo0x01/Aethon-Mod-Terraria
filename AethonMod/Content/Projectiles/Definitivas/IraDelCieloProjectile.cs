@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Particles;
 using AethonMod.Content.Effects.Bruma;
 using Terraria.Audio;
 
@@ -155,14 +156,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         Vector2 val5 = new Vector2(((Entity)val4).Center.X + Utils.NextFloat(Main.rand, -30f, 30f), ((Entity)val4).Center.Y - 1300f);
                         Vector2 val6 = new Vector2(((Entity)val4).Center.X + Utils.NextFloat(Main.rand, -14f, 14f), ((Entity)val4).Center.Y - 30f);
                         RayoSistema.Lanzar(RayoParams.Arco(val5, val6), (uint)Main.rand.Next(1, int.MaxValue), val6, val5 - val6, DefinitivasLib.Oro, DefinitivasLib.BlancoCalido, 3.5f, 10, AnimRayo.Arco, luzEstable: false);
-                        for (int i = 0; i < 10; i++)
-                        {
-                            float x = Utils.NextFloat(Main.rand, (float)Math.PI * 2f);
-                            float num3 = 380f;
-                            Vector2 val7 = ((Entity)val4).Center + new Vector2(MathF.Cos(x), MathF.Sin(x)) * num3;
-                            Vector2 value = Utils.SafeNormalize(((Entity)val4).Center - val7, Vector2.UnitX) * (num3 / 10f);
-                            Dust.NewDustPerfect(val7, 228, (Vector2?)value, 0, DefinitivasLib.Oro, 0.9f).noGravity = true;
-                        }
+                        // v6.56.3 — LA LEY DEL CERO-DUST (§0): los 10 polvos de
+                        // vanilla que convergían al marcado viven AHORA en el
+                        // sistema de partículas de la casa — el preset
+                        // Implosion es ESTA semántica exacta (radio 380,
+                        // espiral hacia el centro, Oro, fundido de salida).
+                        ParticlePresets.Implosion(((Entity)val4).Center, 380f, 10, DefinitivasLib.Oro, 36);
                     }
                     Golpear(val4, final);
                 }
@@ -173,10 +172,36 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
             if (!Main.dedServ && Main.netMode != 2 && num < 150f)
             {
+                // v6.56.3 — LA LLUVIA ÁMBAR EN PARTÍCULAS DE LA CASA (antes
+                // 3 Dust.NewDustPerfect por tick — ley §0). La tormenta que
+                // convoca el cielo: cae desde lo alto, ámbar, sin gravedad
+                // (la velocidad constante del original), con semillas Hash01
+                // (ley §0.4 — determinista en todas las máquinas).
                 int num4 = 3;
                 for (int j = 0; j < num4; j++)
                 {
-                    Dust.NewDustPerfect(new Vector2(Utils.NextFloat(Main.rand, Main.screenPosition.X, Main.screenPosition.X + (float)Main.screenWidth), Main.screenPosition.Y + Utils.NextFloat(Main.rand, 0f, 160f)), 228, (Vector2?)new Vector2(0f, Utils.NextFloat(Main.rand, 2f, 5f)), 0, DefinitivasLib.Ambar, 0.8f).noGravity = true;
+                    float sem = VFXCore.Hash01((int)Main.GlobalTimeWrappedHourly * 97 + j * 31, 11, 7);
+                    float sem2 = VFXCore.Hash01((int)Main.GlobalTimeWrappedHourly * 57 + j * 13, 5, 29);
+                    var p = new ParticleData
+                    {
+                        Position = new Vector2(
+                            Main.screenPosition.X + sem * Main.screenWidth,
+                            Main.screenPosition.Y + sem2 * 160f),
+                        Velocity = new Vector2(0f, 2f + sem2 * 3f),
+                        Scale = Vector2.One * (0.5f + sem * 0.5f),
+                        PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Ambar, 0.8f)),
+                        PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Ambar, 0.8f)),
+                        PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.4f)),
+                        TimeLeft = 46,
+                        Duration = 46,
+                        TextureId = ParticleTex.SoftGlow,
+                        BlendMode = 1,
+                        LayerPriority = LayerPriorities.BeforeProjectiles,
+                    };
+                    p.EnableComponent(ComponentFlag.FadeOut);
+                    p.EnableComponent(ComponentFlag.ColorShift);
+                    p.EnableComponent(ComponentFlag.ScaleDown);
+                    ParticleManager.Spawn(p);
                 }
             }
         }
@@ -245,9 +270,30 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 _tZona = 0;
                 if (final)
                 {
+                    // v6.56.3 — LOS ESCOMBROS DE LA MARCA (antes 14 Dust con
+                    // gravedad — ley §0): la casa tiene componente Gravity y
+                    // esta lluvia ahora vive en el motor propio.
                     for (int i = 0; i < 14; i++)
                     {
-                        Dust.NewDustPerfect(((Entity)presa).Center + new Vector2(Utils.NextFloat(Main.rand, -200f, 200f), Utils.NextFloat(Main.rand, -240f, -40f)), 222, (Vector2?)new Vector2(Utils.NextFloat(Main.rand, -2f, 2f), Utils.NextFloat(Main.rand, 2f, 6f)), 0, DefinitivasLib.Ambar, 1f).noGravity = false;
+                        float sx = VFXCore.Hash01(i * 17 + 3, (int)Main.GlobalTimeWrappedHourly * 13, 1) * 2f - 1f;
+                        float sy = VFXCore.Hash01(i * 29 + 5, (int)Main.GlobalTimeWrappedHourly * 7, 3);
+                        var p = new ParticleData
+                        {
+                            Position = ((Entity)presa).Center + new Vector2(sx * 200f, -240f + sy * 200f),
+                            Velocity = new Vector2(sx * 2f, 2f + sy * 4f),
+                            Scale = Vector2.One * (0.6f + sy * 0.6f),
+                            PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Ambar, 1f)),
+                            PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Ambar, 1f)),
+                            PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.Ambar, 0.1f)),
+                            TimeLeft = 52,
+                            Duration = 52,
+                            TextureId = ParticleTex.SoftGlow,
+                            BlendMode = 1,
+                            LayerPriority = LayerPriorities.BeforeProjectiles,
+                        };
+                        p.EnableComponent(ComponentFlag.Gravity);
+                        p.EnableComponent(ComponentFlag.FadeOut);
+                        ParticleManager.Spawn(p);
                     }
                 }
             }
@@ -269,9 +315,32 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (!Main.dedServ && Main.netMode != 2)
                 {
                     RayoSistema.Lanzar(RayoParams.Arco(((Entity)presa).Center, ((Entity)val2).Center), (uint)Main.rand.Next(1, int.MaxValue), ((Entity)val2).Center, ((Entity)presa).Center - ((Entity)val2).Center, DefinitivasLib.Oro, DefinitivasLib.BlancoCalido, 8f, 14, AnimRayo.Arco, luzEstable: false);
+                    // v6.56.3 — LAS CHISPAS DEL IMPACTO (antes 4 Dust —
+                    // ley §0): SparkleStar de la casa, cada una con SU color
+                    // del gradiente (Hash01 — ley §0.4).
                     for (int k = 0; k < 4; k++)
                     {
-                        Dust.NewDustPerfect(((Entity)val2).Center, 228, (Vector2?)new Vector2(Utils.NextFloat(Main.rand, -4f, 4f), Utils.NextFloat(Main.rand, -5f, 1f)), 0, DefinitivasLib.GradienteJuicio(Utils.NextFloat(Main.rand, 1f)), 0.9f).noGravity = true;
+                        float ang = VFXCore.Hash01(k * 43 + 9, (int)Main.GlobalTimeWrappedHourly * 31, 17) * MathHelper.TwoPi;
+                        float vel = 1.5f + VFXCore.Hash01(k * 71 + 2, 23, (int)Main.GlobalTimeWrappedHourly * 11) * 2.5f;
+                        Color cCh = DefinitivasLib.GradienteJuicio(VFXCore.Hash01(k * 13, 61, (int)Main.GlobalTimeWrappedHourly * 3));
+                        var p = new ParticleData
+                        {
+                            Position = ((Entity)val2).Center,
+                            Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * vel,
+                            Scale = Vector2.One * (0.8f + vel * 0.3f),
+                            PackedColor = ParticleManager.PackColor(DefinitivasLib.Alfa(cCh, 0.9f)),
+                            PackedStartColor = ParticleManager.PackColor(DefinitivasLib.Alfa(cCh, 0.9f)),
+                            PackedEndColor = ParticleManager.PackColor(DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.5f)),
+                            TimeLeft = 34,
+                            Duration = 34,
+                            TextureId = ParticleTex.SparkleStar,
+                            BlendMode = 1,
+                            LayerPriority = LayerPriorities.BeforeProjectiles,
+                        };
+                        p.EnableComponent(ComponentFlag.FadeOut);
+                        p.EnableComponent(ComponentFlag.ColorShift);
+                        p.EnableComponent(ComponentFlag.ScaleDown);
+                        ParticleManager.Spawn(p);
                     }
                 }
                 if (Main.netMode != 1)
@@ -442,14 +511,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float num8 = 1f - (float)_tZona / 12f;
                     Vector2 val4 = _zonaCaida + new Vector2(0f, -900f);
                     Vector2 zonaCaida = _zonaCaida;
-                    Vector2[] array = (Vector2[])(object)new Vector2[8];
-                    for (int j = 0; j < 8; j++)
+                    // v6.56.3 — LA LEY DE LOS 6 NODOS/ONDA: la senoide del
+                    // telégrafo vivía a 8 nodos (sin(q·6) = 8.4 nodos/onda,
+                    // justo al borde de la sierra) — a 14 nodos respira.
+                    Vector2[] array = (Vector2[])(object)new Vector2[14];
+                    for (int j = 0; j < 14; j++)
                     {
-                        float num9 = (float)j / 7f;
+                        float num9 = (float)j / 13f;
                         array[j] = Vector2.Lerp(val4, zonaCaida, num9) + new Vector2(MathF.Sin(num9 * 6f + globalTimeWrappedHourly * 22f) * 10f * (1f - num9), 0f) - Main.screenPosition;
                     }
-                    float[] array2 = new float[8];
-                    for (int k = 0; k < 8; k++)
+                    float[] array2 = new float[14];
+                    for (int k = 0; k < 14; k++)
                     {
                         array2[k] = _zonaGrosor * (0.9f + 0.6f * ((float)k / 7f)) * num8;
                     }

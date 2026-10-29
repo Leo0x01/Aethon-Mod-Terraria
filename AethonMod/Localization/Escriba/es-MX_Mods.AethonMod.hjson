@@ -69,9 +69,6 @@ Projectiles: {
 	RequiemEstelarProjectile: {
 		DisplayName: El Réquiem Estelar
 	}
-	TestamentoAethonProjectile: {
-		DisplayName: El Testamento de Aethon
-	}
 	IndiceDelJuicioProjectile: {
 		DisplayName: El Índice del Juicio
 	}

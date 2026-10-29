@@ -50,7 +50,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<RayoConcentradoDosProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 100;
+            Item.mana = 10;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
             Item.UseSound = SoundID.Item74.WithPitchOffset(-0.3f);

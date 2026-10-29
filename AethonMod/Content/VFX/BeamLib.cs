@@ -137,6 +137,12 @@ namespace AethonMod.Content.VFX
             // amplitud 3.5% del largo, meandro 1.4 ciclos, jitter ×0.25 a 6,
             // fases en tiempo CONTINUO (no por flick) — la tabla R2 §B3.
             float amp = largo * 0.035f;
+            // v6.56.3 — LA LEY DE LOS 6 NODOS/ONDA: el jitter vivía a 6
+            // ciclos FIJOS — a calidad baja (n=16) eran 2.7 nodos/onda =
+            // SIERRA (la autopsia de la 3ª ronda: el haz del Ojo del
+            // Juicio, no reportado por el usuario pero misma enfermedad).
+            // La frecuencia ahora ESCALA con el conteo: ciclos ≤ n/6.
+            float jitCiclos = MathF.Max(2.5f, n / 6f);
             Vector2[] espina = new Vector2[n];
             for (int i = 0; i < n; i++)
             {
@@ -144,7 +150,7 @@ namespace AethonMod.Content.VFX
                 float d = t - 0.5f;
                 float env = MathF.Exp(-1200f * MathF.Pow(d * d, 4f)); // exp(-1200·d^8)
                 float meandro = (StormLib.Fbm1D(t * 1.4f + tiempo * 0.35f, semilla, 3) - 0.5f) * 2f;
-                float jitter = (StormLib.Fbm1D(t * 6f + tiempo * 1.9f, semilla + 77, 2) - 0.5f) * 2f;
+                float jitter = (StormLib.Fbm1D(t * jitCiclos + tiempo * 1.9f, semilla + 77, 2) - 0.5f) * 2f;
                 espina[i] = origen + dir * (largo * t) + perp * ((meandro + jitter * 0.25f) * amp * env);
             }
             espina = StormLib.Chaikin(espina, 1);      // el suavizado de la casa

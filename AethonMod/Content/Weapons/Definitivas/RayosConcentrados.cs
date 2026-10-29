@@ -56,7 +56,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             ((ModItem)this).Item.autoReuse = true;
             ((ModItem)this).Item.shoot = ModContent.ProjectileType<RayoConcentradoNivelProjectile>();
             ((ModItem)this).Item.shootSpeed = 1f;
-            ((ModItem)this).Item.mana = 40;
+            ((ModItem)this).Item.mana = 10;
             ((ModItem)this).Item.rare = 5;
             ((ModItem)this).Item.value = Item.buyPrice(0, 0, 0, 0);
             Item item = ((ModItem)this).Item;
@@ -101,7 +101,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             ((ModItem)this).Item.autoReuse = true;
             ((ModItem)this).Item.shoot = ModContent.ProjectileType<RayoConcentradoNivelProjectile>();
             ((ModItem)this).Item.shootSpeed = 1f;
-            ((ModItem)this).Item.mana = 60;
+            ((ModItem)this).Item.mana = 10;
             ((ModItem)this).Item.rare = 5;
             ((ModItem)this).Item.value = Item.buyPrice(0, 0, 0, 0);
             Item item = ((ModItem)this).Item;
@@ -146,7 +146,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             ((ModItem)this).Item.autoReuse = true;
             ((ModItem)this).Item.shoot = ModContent.ProjectileType<RayoConcentradoNivelProjectile>();
             ((ModItem)this).Item.shootSpeed = 1f;
-            ((ModItem)this).Item.mana = 80;
+            ((ModItem)this).Item.mana = 10;
             ((ModItem)this).Item.rare = 11;
             ((ModItem)this).Item.value = Item.buyPrice(0, 0, 0, 0);
             Item item = ((ModItem)this).Item;

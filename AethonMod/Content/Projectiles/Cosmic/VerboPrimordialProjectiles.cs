@@ -312,7 +312,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // ==============================================================
                 //  FASE 3 — EL LOTE PROPIO (coords de PANTALLA): el resto
                 //  del concierto, movimiento a movimiento.
+                // --------------------------------------------------------------
+                //  v6.56.3 — LA SONDA ENTRE FASES (la excepción del client.log):
+                //  los compositores de FASE 2 (SolVivo/CriaEstelar) salen con
+                //  el lote ABIERTO-VANILLA (el contrato CerrarBatch → Reabrir),
+                //  NO «cerrado→cerrado» como decía el comentario — y el Begin
+                //  de aquí abajo chocaba CADA FRAME del movimiento VII (la
+                //  InvalidOperationException deduplicada a una línea por tML
+                //  — primera-chance CAPTURADA, pero La Sinfonía jamás se
+                //  dibujaba). La sonda cierra lo que haya quedado vivo.
                 // ==============================================================
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);

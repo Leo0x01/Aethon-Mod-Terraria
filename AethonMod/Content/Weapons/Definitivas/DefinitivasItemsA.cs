@@ -44,7 +44,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<PrismaPrimordialProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 14;
+            Item.mana = 10;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
             Item.UseSound = SoundID.Item13;
@@ -94,7 +94,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Item.autoReuse = false;
             Item.shoot = ModContent.ProjectileType<PartidorDeMundosProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 80;
+            Item.mana = 10;
             Item.rare = ItemRarityID.Purple;
             Item.value = Item.buyPrice(0, 0, 0, 0);
             Item.UseSound = SoundID.Item122.WithPitchOffset(-0.3f);

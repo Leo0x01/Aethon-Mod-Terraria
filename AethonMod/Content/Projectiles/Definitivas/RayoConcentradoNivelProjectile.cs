@@ -34,6 +34,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         private static readonly float[] SemiAng = new float[3] { 0.03f, 0.036f, 0.042f };
 
+        // v6.56.3 — EL CARÁCTER DE LA ESCALERA (la letra: «son exactamente
+        // iguales»): cada peldaño hierve a SU velocidad — el Alba fluye
+        // sereno (0.8), el Veredicto marca el paso (1.0) y el Juicio hierve
+        // a toda máquina (1.25). Junto a SU paleta (GradienteEscalera) y SU
+        // aberración (solo Veredicto y Juicio), los tres por fin son TRES.
+        private static readonly float[] Flujo = new float[3] { 0.8f, 1f, 1.25f };
+
         public float targetRotation;
 
         public float targetSize;
@@ -332,7 +339,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 return false;
             }
             float num = Escala[Niv];
-            Color c = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
+            // v6.56.3 — LA PALETA DEL PELDAÑO: Alba (amanecer dorado) ·
+            // Veredicto (ámbar-violeta) · Juicio (el arcoíris de la casa).
+            Color c = DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f);
             (c).A = 0;
             float num2 = Utils.GetLerpValue((float)Carga * 0.25f, (float)Carga, Time, true) * Utils.GetLerpValue((float)(Carga + Laser + 50), (float)(Carga + Laser + 20), Time, true);
             float num3 = Utils.GetLerpValue(0f, (float)Carga, Time, true) * Utils.GetLerpValue((float)(Carga + 10), (float)(Carga - 30), Time, true);
@@ -342,9 +351,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
             float num4 = MathF.Pow(num2, 0.8f);
             float num5 = MathHelper.Lerp(150f, 56f, num4) * num * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
             Vector2 val2 = VFXCore.RingQuadSize(num5);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num2), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num2), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
             Vector2 val3 = VFXCore.RingQuadSize(num5 * 1.38f);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num2), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num2), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
             Main.EntitySpriteDraw(softGlow, val + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * (Largo * 0.26f) * num3, (Rectangle?)Utils.Frame(softGlow, 1, 1, 0, 0, 0, 0), DefinitivasLib.Alfa(c, 0.35f * num3), ((ModProjectile)this).Projectile.rotation, Utils.Size(softGlow) * new Vector2(0.5f, 0.5f), new Vector2(0.06f, 5.2f * num * num3), (SpriteEffects)0, 0f);
             if (Time < (float)Carga && Time % 14f < 3f)
             {
@@ -360,7 +369,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float num10 = num9 + (26f + 34f * lerpValue) * num7;
                     Vector2 start = val + new Vector2(MathF.Cos(num8), MathF.Sin(num8)) * num9;
                     Vector2 end = val + new Vector2(MathF.Cos(num8 + 0.5f), MathF.Sin(num8 + 0.5f)) * num10;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 1.6f + 0.3f * (float)Niv, DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
+                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 1.6f + 0.3f * (float)Niv, DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
                 }
             }
             if (Time > (float)Carga && Time < (float)(Carga + 8) && VFXCore.DestelloFinal != null)
@@ -377,9 +386,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     float num12 = (float)j / 23f;
                     array[j] = ((Entity)((ModProjectile)this).Projectile).Center + val4 * (Largo * num12 * (0.5f + num11 * 0.5f));
-                    array2[j] = MathF.Max(DefinitivasLib.AnchoCono(num12, Time, KAncho[Niv]) * num * realSize, 0.5f);
+                    // v6.56.3 — LA CAÍDA DE LA PUNTA (la «caida» del shader del
+                    // RC2, portada a la vía CPU): antes el perfil crecía hasta
+                    // q=1 a ANCHO MÁXIMO — la punta era un CORTE PLANO. Ahora el
+                    // último 12% del conducto se estrecha a 15% (smoothstep):
+                    // el haz TERMINA, no se corta.
+                    float caidaPunta = MathHelper.Lerp(1f, 0.15f, MathHelper.SmoothStep(0.88f, 1f, num12));
+                    array2[j] = MathF.Max(DefinitivasLib.AnchoCono(num12, Time, KAncho[Niv]) * num * realSize * caidaPunta, 0.5f);
                 }
-                DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f), Intensidad[Niv] * num11, Main.GlobalTimeWrappedHourly, (int)Owner * 131 + Niv * 977 + 17, arcoiris: true, 1f, Niv == 2);
+                DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteEscalera(Niv + 1, ((ModProjectile)this).Projectile.localAI[0] / 60f), Intensidad[Niv] * num11, Main.GlobalTimeWrappedHourly, (int)Owner * 131 + Niv * 977 + 17, arcoiris: true, Flujo[Niv], Niv >= 1,
+                    (float t) => DefinitivasLib.GradienteEscalera(Niv + 1, t));
             }
             VFXCore.RestaurarLoteVanilla();
             return false;

@@ -34,6 +34,35 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         private bool _espinaLista;
 
+        // v6.56.3 — EL REMUESTREO DE RENDER (la cura de los picos del Prisma):
+        // la FÍSICA verlet vive a 16 nodos (160 px/nodo — la polilínea se leía
+        // como quiebres angulares al latiguear: «casi no se notan por la
+        // separación, pero los tiene», la letra). La física INTACTA; el RENDER
+        // muestrea la misma curva a 44 nodos con Catmull-Rom — la forma vive
+        // en la polilínea (la lección v6.55-f) y ahora es SUAVE.
+        private static readonly Vector2[] _renderEspina = new Vector2[44];
+
+        private static Vector2[] ResampleCatmullRom(Vector2[] src, int nSrc, Vector2[] dest)
+        {
+            int nDest = dest.Length;
+            for (int j = 0; j < nDest; j++)
+            {
+                float t = j * (nSrc - 1) / (float)(nDest - 1);
+                int i = (int)t;
+                if (i >= nSrc - 1) { dest[j] = src[nSrc - 1]; continue; }
+                float f = t - i;
+                Vector2 p0 = src[Math.Max(i - 1, 0)];
+                Vector2 p1 = src[i];
+                Vector2 p2 = src[Math.Min(i + 1, nSrc - 1)];
+                Vector2 p3 = src[Math.Min(i + 2, nSrc - 1)];
+                dest[j] = 0.5f * ((2f * p1)
+                    + (-p0 + p2) * f
+                    + (2f * p0 - 5f * p1 + 4f * p2 - p3) * (f * f)
+                    + (-p0 + 3f * p1 - 3f * p2 + p3) * (f * f * f));
+            }
+            return dest;
+        }
+
         private readonly float[] _ecoRot = new float[4];
 
         private readonly float[] _ecoConv = new float[4];
@@ -497,7 +526,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Vector2[] array;
                 if (_espinaLista)
                 {
-                    array = _espina;
+                    // v6.56.3 — la física verlet a 16, el RENDER a 44 (Catmull-Rom).
+                    array = ResampleCatmullRom(_espina, 16, _renderEspina);
                 }
                 else
                 {
@@ -507,10 +537,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         array[k] = val2 + val * (2400f * (float)k / 15f);
                     }
                 }
-                float[] array2 = new float[16];
-                for (int l = 0; l < 16; l++)
+                int nRender = array.Length;
+                float[] array2 = new float[nRender];
+                for (int l = 0; l < nRender; l++)
                 {
-                    float p = (float)l / 15f;
+                    float p = (float)l / (nRender - 1);
                     array2[l] = MathF.Max(AnchoHazEn(p, num) * 0.5f, 0.5f);
                 }
                 DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f), num * 0.9f, globalTimeWrappedHourly, _semilla + 20);
