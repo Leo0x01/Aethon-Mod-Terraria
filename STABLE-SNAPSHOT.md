@@ -1,6 +1,6 @@
 # v6.56.3 — LA RONDA DEL PERSONAJE NUEVO — EL CHECKLIST
 
-> ⏳ PUBLICACIÓN: pendiente de subir el release (el .tmod está listo: md5 `28d0bf10f831c24e9d968e283a2119e6`, 6.374.841 B).
+> **PUBLICADA** — release [428376306](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.3) + CDN verificado byte a byte (md5 `28d0bf10f831c24e9d968e283a2119e6`, 6.374.841 B).
 
 **Qué pasó** (la letra): un personaje nuevo destapó la ronda — la llegada del grimorio jamás se mostraba en el mapa, las alas descentradas/rotadas/sin flip, el RC2 y el Ojo «no funcionaban» (el muro invisible de maná: costaban 100), picos en Partidor/Prisma/los 3 rayos, los 3 rayos idénticos, y el Testamento retirado.
 
