@@ -1,6 +1,6 @@
 # v6.56.4 — EL CAMINO GPU DEL RC2 + EL ESPEJO COMPLETO DE LAS ALAS + EL PORTAL DEL CONJURO — EL CHECKLIST
 
-> ⏳ **PUBLICACIÓN** — release pendiente (el ID del release solo se conoce DESPUÉS de crearlo — la lección de la .65: marcarlo sin copiar el ID del anterior).
+> **PUBLICADA** — release [428511425](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.4) + CDN verificado byte a byte (md5 `70b29ef940fa84dbac8c4ed18cfe92da`, 6.349.490 B; asset id 690309919).
 
 **Qué pasó** (la letra): «solo deja español es_es» + «las alas no son simétricas y no cambian la dirección [al moverse] — todas las alas del mod» + «las armas con picos tienen aún más picos: adapta el código del rayo concentrado 2» + la aguja de carga «se ve horrible» (→ los brillos de los soles rúnicos), el círculo plano del RC2 (→ varios círculos rúnicos de agujeros negros), las franjas negras del haz, el sonido (carga generada + más grave + fade) y el temblor del mundo.
 
