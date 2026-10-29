@@ -23,10 +23,12 @@ def cirugia(ruta_relativa, fixes, obligatorios=None):
         src = f.read()
     original = src
     for nombre, viejo, nuevo, veces in fixes:
-        if src.count(nuevo) >= veces:
-            # ya aplicado en una corrida anterior (script idempotente:
-            # se mira PRIMERO si el texto nuevo ya está — el viejo puede
-            # seguir presente como subcadena del nuevo)
+        # v6.56.2 — LECCIÓN: las curas de PURA ELIMINACIÓN (nuevo ⊂ viejo)
+        # NO pueden usar este chequeo — el texto "nuevo" existe como subcadena
+        # del viejo y el fix se salta en silencio (así sobrevivió la 6ª
+        # recursión del Partidor). Para eliminaciones: aserción de conteo
+        # directa, sin atajo de idempotencia.
+        if src.count(nuevo) >= veces and src.count(viejo) == 0:
             reporte.append((ruta_relativa, nombre + " [ya estaba]", veces))
             continue
         encontrados = src.count(viejo)

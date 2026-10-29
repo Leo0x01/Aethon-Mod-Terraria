@@ -68,7 +68,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
             _techo = reader.ReadSingle();
             _piso = reader.ReadSingle();
             _anclaLista = reader.ReadBoolean();
-            ((ModProjectile)this).ReceiveExtraAI(reader);
+            // v6.56.2 — LA CURA QUE FALTÓ: esta auto-llamada virtual (artefacto
+            // del decompilador) sobrevivió a la ronda .56.1 — el chequeo de
+            // idempotencia del script saltó esta cura de pura eliminación
+            // (el texto nuevo era subcadena del viejo). En MP: EndOfStream en
+            // el primer sync del Partidor. La base es vacía: nada que llamar.
         }
 
         public override void AI()

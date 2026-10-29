@@ -1,3 +1,18 @@
+# v6.56.2 — LA CURA QUE FALTÓ (la 6ª recursión del Partidor) — EL CHECKLIST
+
+**Qué pasó**: la pasada de verificación tras publicar la .56.1 cazó la última
+recursión del decompilador viva en `ReceiveExtraAI` del Partidor de Mundos
+(la cura se aplicó a medias: el Send sí, el Receive no — el chequeo de
+idempotencia del cirujano saltó una eliminación pura). En MP mataba el sync;
+en SP dormía.
+
+1. **MP (si pruebas con servidor)**: [ ] disparar el PARTIDOR DE MUNDOS ya no
+   tumba nada (era el único de los 3 netImportant que conservaba la
+   recursión del lado Receive); [ ] el corte a pantalla completa se ve igual
+   en el cliente del dueño y en el servidor.
+
+---
+
 # v6.56.1 — LA RONDA DE CURACIÓN (LA AUDITORÍA DE LOS 4 AGENTES) — EL CHECKLIST
 
 > **PUBLICADA** — release [427665989](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.1) + CDN verificado byte a byte (md5 `65ef3f22c11150718760bb2845fa6f05`, 6.380.548 B).

@@ -1,3 +1,17 @@
+# v6.56.2 — LA CURA QUE FALTÓ: la 6ª recursión del Partidor
+
+**La letra del usuario**: «la sesión anterior se cerró de forma inesperada, continua lo que hacías y revisa errores».
+
+LA CAZA FINAL: la pasada de verificación post-publicación cazó que la cura de la recursión del **Partidor de Mundos** se aplicó **a medias** — el `SendExtraAI` quedó curado pero el `ReceiveExtraAI` conservaba la auto-llamada virtual del decompilador (`((ModProjectile)this).ReceiveExtraAI(reader)`). En MP: el primer sync del Partidor leía sus 4 campos y se llamaba a sí misma contra un stream agotado → `EndOfStreamException`. En SP dormida (ExtraAI es solo de red — por eso el headless de la .56.1 pasó).
+
+LA CAUSA (lección de casa, documentada en `tools/fix_v6561.py`): el chequeo de idempotencia del cirujano («si el texto nuevo ya está, saltar») traiciona a las curas de **pura eliminación** — el texto nuevo (4 lecturas) es subcadena del viejo (4 lecturas + auto-llamada), así que en la corrida limpia tras el revertido el fix se saltó en silencio. Las eliminaciones exigen aserción de conteo directa, sin atajo.
+
+Es la ÚLTIMA de las 6 (barrido exhaustivo del mod completo: 0 auto-llamadas virtuales restantes en cualquier override).
+
+**VERIFICACIÓN**: oráculo 0/0 (full rebuild contra el tML 2026.08.3.0 real) · `-build` REAL 0/0 · `.tmod` v6.56.2 (6.377.522 B, md5 22dfb520…): 469 entradas, EOF exacto, paridad hjson perfecta al parser REAL (también dentro del paquete) · headless: 0 EXCEPCIONES.
+
+---
+
 # v6.56.1 — LA RONDA DE CURACIÓN: LA AUDITORÍA DE LOS CUATRO AGENTES
 
 **La letra del usuario**: «Espero que hayas tomado en cuenta EFECTOS-Y-LIBRERIAS.md ya que es fundamental» + «Quiero que también analices el código en busca de errores no detectados antes».
