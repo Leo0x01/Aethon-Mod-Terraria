@@ -1,5 +1,7 @@
 # v6.56.2 — LA CURA QUE FALTÓ (la 6ª recursión del Partidor) — EL CHECKLIST
 
+> **PUBLICADA** — release [427672847](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.2) + CDN verificado byte a byte (md5 `22dfb5202c3399e610e7f07c9cb0eba1`, 6.377.522 B).
+
 **Qué pasó**: la pasada de verificación tras publicar la .56.1 cazó la última
 recursión del decompilador viva en `ReceiveExtraAI` del Partidor de Mundos
 (la cura se aplicó a medias: el Send sí, el Receive no — el chequeo de
