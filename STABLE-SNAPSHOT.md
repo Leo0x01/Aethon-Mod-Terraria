@@ -1,5 +1,7 @@
 # v6.56.1 — LA RONDA DE CURACIÓN (LA AUDITORÍA DE LOS 4 AGENTES) — EL CHECKLIST
 
+> **PUBLICADA** — release [427665989](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.1) + CDN verificado byte a byte (md5 `65ef3f22c11150718760bb2845fa6f05`, 6.380.548 B).
+
 **Qué pasó** (la letra): «Espero que hayas tomado en cuenta EFECTOS-Y-LIBRERIAS.md
 ya que es fundamental» + «Quiero que también analices el código en busca de
 errores no detectados antes». LA CAZA: 4 agentes en paralelo con el códice
