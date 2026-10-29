@@ -562,6 +562,25 @@ namespace AethonMod.Content.Systems
         //  LA MÁQUINA (PostUpdateWorld: el reloj del mundo)
         // ==================================================================
 
+        /// <summary>v6.56.1 — LA PROMESA DEL CÓDICE §7.1: al cambiar de
+        /// arma la voz nueva suena YA (AudioLib.SilenciarZona estaba
+        /// documentado pero NADIE lo llamaba). Corre en todas las
+        /// máquinas, gated a la máquina local.</summary>
+        private static int _ultimoItemEnMano = -1;
+
+        public override void PostUpdateEverything()
+        {
+            if (!Main.dedServ && Main.netMode != 2 && Main.LocalPlayer != null && Main.LocalPlayer.HeldItem != null)
+            {
+                int itemActual = Main.LocalPlayer.HeldItem.type;
+                if (_ultimoItemEnMano >= 0 && _ultimoItemEnMano != itemActual)
+                {
+                    try { AudioLib.SilenciarZona(); } catch { }
+                }
+                _ultimoItemEnMano = itemActual;
+            }
+        }
+
         public override void PostUpdateWorld()
         {
             // v6.50.73 — EL VIGÍA DEL AMBIENTE PRESTADO (la red del mundo:

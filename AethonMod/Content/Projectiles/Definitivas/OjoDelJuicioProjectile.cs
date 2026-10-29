@@ -109,7 +109,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 ((ModProjectile)this).Projectile.Kill();
                 return;
             }
-            if (num < 2f)
+            // v6.56.1 — LA COLOCACIÓN LA DECIDE EL DUEÑO (su ratón); el
+            // servidor y el resto la reciben por sync (antes el servidor
+            // peleaba la rotación con su MouseWorld basura).
+            if (num < 2f && Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
             {
                 ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + new Vector2(0f, -430f);
                 ((Entity)((ModProjectile)this).Projectile).velocity = Vector2.Zero;

@@ -289,16 +289,20 @@ namespace AethonMod.Content.VFX
                 // EL GRADIENTE A LO LARGO: cada segmento SU color (null = fijo)
                 Color c0 = coloresPorNodo != null ? coloresPorNodo[i] : color;
                 Color c1 = coloresPorNodo != null ? coloresPorNodo[i + 1] : color;
-                EmitirQuadTex(a0, a1, b0, b1, c0, c1, u0, u1, vMin, vMax);
+                EmitirQuadTex(tex, a0, a1, b0, b1, c0, c1, u0, u1, vMin, vMax);
             }
             VolcarTextura(tex);
         }
 
         /// <summary>Apila el quad texturizado (2 triángulos) en el pozo —
         /// con el color por vértice del gradiente (c0 el nodo i, c1 el i+1).</summary>
-        private static void EmitirQuadTex(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1,
+        private static void EmitirQuadTex(Texture2D tex, Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1,
             Color c0, Color c1, float u0, float u1, float vMin, float vMax)
         {
+            // v6.56.1 — VACIAR-Y-CONTINUAR (el contrato de EmitirTri):
+            // antes el pozo lleno DESCARTABA el quad en silencio — la
+            // PUNTA del haz desaparecería sin síntoma con espinas largas.
+            if (_nVertsT + 6 > _vertsT.Length) VolcarTextura(tex);
             if (_nVertsT + 6 > _vertsT.Length) return;
             _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a0.X, a0.Y, 0f), c0, new Vector2(u0, vMin));
             _vertsT[_nVertsT++] = new VertexPositionColorTexture(new Vector3(a1.X, a1.Y, 0f), c0, new Vector2(u0, vMax));

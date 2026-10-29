@@ -9,7 +9,7 @@
 > que lo que necesitas YA EXISTE es altísima. **NO SE INVENTA NADA NUEVO SIN
 > ANTES HABER REVISADO ESTE CATÁLOGO.**
 
-**Versión del códice:** 1.1 (v6.56.0) · **Mantenimiento:** todo agente (IA o humano)
+**Versión del códice:** 1.2 (v6.56.1) · **Mantenimiento:** todo agente (IA o humano)
 que cree o modifique una librería, shader, textura, efecto visual o de sonido
 **DEBE documentarlo aquí en la misma entrega** (ver §10 — El Decálogo y §11 — Bitácora).
 
@@ -273,6 +273,7 @@ Lo usan **137 archivos** del mod.
 **EL CONTRATO DEL LOTE DEL LLAMADOR (crítico — crash v6.54.5):**
 - `LoteAbierto` / `CerrarLoteSiAbierto()` — la **sonda de reflexión** que lee el `beginCalled` del SpriteBatch de FNA: nunca `Begin` sobre `Begin` (mató 27 first-chance del client.log en v6.50.11).
 - `ReabrirLoteVanilla()` — **EL CONTRATO DE CURACIÓN**: reabre con los parámetros EXACTOS del pase de entidades de vanilla (`Deferred·AlphaBlend·DefaultSamplerState·None·Main.Rasterizer·null·Main.Transform`). **Todo PreDraw de la casa sale con el lote ABIERTO** (si llegó roto, se CURA). Idempotente por sonda. 121 archivos lo cumplen (183 llamadas).
+- `RestaurarLoteVanilla()` — **v6.56.1, LA CURA DEL LOTE ADITIVO**: `RayoStrip.CerrarLote()` reabre en ADITIVO (para los gorros); si un PreDraw SALÍA así, el resto de proyectiles del pase se dibujaba LAVADO. Este termina el lote abierto (sonda) y reabre con los parámetros del pase de entidades — los sprites en cola vuelcan con SU blend y el pase continúa limpio. **LA SALIDA de todo PreDraw que usó RayoStrip/StormLib** (la ley del lote ahora es: abierto Y en estado vanilla).
 
 **Utilidades:** `Breathe(t, speed, phase, amplitude)` (0.94..1.06), `Sway(t)`, **`Hash01(seed, a, b)`** → [0,1) determinista multi-máquina (h = seed·374761393 + a·668265263 + b·1911520717, mezcla xor-shift — **cero `Main.rand` en render, jamás**), `Ellipse(center, a, b, tilt, t)`, `EsObjetivo(NPC)` (el predicado de la puerta de daño de vanilla: `active && !dontTakeDamage && !friendly` — úsalo para TODA la detección de presas).
 
@@ -451,7 +452,7 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 - **CompasLib.cs** — LA COREOGRAFÍA DECLARATIVA: `EnVentana(reloj, ciclo, inicio, dur, out fase01)` · `Cada(reloj, periodo)`; STATELESS = multi-instanciable gratis. + `DepurarDibujar` (F7).
 - **FormaLib.cs** — LAS COLISIONES DE FORMAS: segmento/banda/cápsula/anillo/sector, entidades NPC/Jugador/Proyectil, `RecorrerNPCs(centro, radioMax, Action)`. Todo MUNDO.
 - **DefinitivasLib.cs** (v6.54.6) — el soporte de las 6 sentencias: paleta del Juicio (`GradienteJuicio(t)`), `BuscarPresa`, `Cono(hitbox, origen, largo, ang, semiang)`, `AnchoCono(progress, time, k)` (la fórmula del haz de fusión), `DeGolpe`, `Sonar` blindado, `Tex(ruta)` null-safe **y las 4 texturas del plasma** (§6.A).
-- **RayoConcentradoNivelProjectile.cs** (v6.56.0) — **LA ESCALERA DEL RAYO**: UN solo proyectil para los CINCO niveles del Rayo Concentrado (el nivel viaja en **`ai[1]`** — el array `ai` del tML real llega hasta `ai2`; `ai[3]` es `IndexOutOfRangeException`). Escala 0.45 (Rayo del Alba) · 0.60 (Veredicto) · 0.75+aberración (Juicio) · 0.85 **EL PRISMA REFORMADO** (la ESPINA VIVA verlet vestida de la pila completa de plasma — los 7 haces y TODO Dust fuera; la sentencia del Testamento intacta) · 1.0 **EL RC2** (la cima, que conserva su clase propia). `EscaleraDelRayo.HazLibre(player)` evita el doble haz. Los ítems en `Content/Weapons/Definitivas/RayosConcentrados.cs`.
+- **RayoConcentradoNivelProjectile.cs** (v6.56.0) — **LA ESCALERA DEL RAYO**: un proyectil para los niveles 1-3 (el nivel viaja en **`ai[1]`** — el array `ai` del tML real llega hasta `ai2`; `ai[3]` es `IndexOutOfRangeException`); la cima son clases propias (el Prisma reformado y el RC2). **v6.56.1: `EscaleraDelRayo.HazLibre` es CRUZADO** — UN solo haz definitivo a la vez entre TODAS las familias de la escalera (niveles + RC2 + Prisma). Escala 0.45 (Rayo del Alba) · 0.60 (Veredicto) · 0.75+aberración (Juicio) · 0.85 **EL PRISMA REFORMADO** (la ESPINA VIVA verlet vestida de la pila completa de plasma — los 7 haces y TODO Dust fuera; la sentencia del Testamento intacta) · 1.0 **EL RC2** (la cima, que conserva su clase propia). `EscaleraDelRayo.HazLibre(player)` evita el doble haz. Los ítems en `Content/Weapons/Definitivas/RayosConcentrados.cs`.
 
 ---
 
@@ -500,8 +501,8 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 > **Regla de generación:** TODA textura de efectos nace de un script Python en
 > `tools/` (determinista, con tests de verificación incorporados cuando aplica —
 > p.ej. el test anti-picos FFT del `gen_plasma_v6548.py`). Nada de imágenes
-> descargadas o pintadas a mano. **441 PNG en el mod: 94 son de efectos, 347
-> son iconos/sprites.** Los scripts viven FUERA del mod (buildIgnore) y cada
+> descargadas o pintadas a mano. **449 PNG en el mod (v6.56.1): 91 son de
+> efectos, 358 son iconos/sprites.** Los scripts viven FUERA del mod (buildIgnore) y cada
 > uno se nombra `gen_<cosa>_v<versión>.py`.
 
 ### 6.A El plasma del Rayo Concentrado (`Content/Effects/Procedural/`, 100% casa)
@@ -527,7 +528,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 
 ### 6.C Ruido base y alas (`Content/Effects/Procedural/`)
 
-- `Ruido_0.png` (1024², fBm 8 octavas) + `Ruido_1..19.png` (512² c/u: fBm de contraste variado, células, plasma, anillos) — uno por estilo de ala (`AlasEstilo`); huérfanas actuales: 3, 6, 13, 14, 16, 19.
+- `Ruido_0.png` (1024², fBm 8 octavas) + `Ruido_1..19.png` (512² c/u: fBm de contraste variado, células, plasma, anillos) — uno por estilo de ala (`AlasEstilo`). **v6.56.1: las Ruido_3/6/13/14/16/19 YA NO SON HUÉRFANAS** — las alas rúnicas y anatómicas 17-23 las usan TODAS (Runas Solares→13 · del Vacío→6 · del Eclipse→14 · del Juicio→16 · Agujas→19 · Cuchillas→3 · Corolas→6). La lista vieja de huérfanas de esta sección era un boomerang de purga: borrarlas habría ROTO siete alas.
 - `Investigacion/Espacio_1.png` (512², nebulosa violeta — ala Vía Láctea).
 - `RuidoTinta.png` (256×64, fBm tileable en U + caída gaussiana en V) — BeamLib + pasadas 1-2 de HazFusionEspina.
 - Generadores: `gen_investigacion_v6540.py`, `gen_texturas_pro_v6543.py`, `gen_beam_v6522.py`.
@@ -563,7 +564,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 
 ### 6.F Huérfanas conocidas (empaquetadas, sin referencias — candidatas a purga)
 
-`BeamGold, GlowRay(×3), Shield(×2), HexGold, OblivionBlob, RiftLip, RingShieldNebula, FireNoiseB, Ruido_3/6/13/14/16/19, GlowCircle Green/Magenta/Purple/Red, GlowOrb Cyan/Gold/Green/Magenta/Purple/White` — 27 en total. Si una purga las borra, tacharlas aquí.
+`BeamGold, GlowRay(×3), Shield(×2), HexGold, OblivionBlob, RiftLip, RingShieldNebula, FireNoiseB, GlowCircle Green/Magenta/Purple/Red, GlowOrb Cyan/Gold/Green/Magenta/Purple/White` — 20 en total (**v6.56.1**: las 6 Ruido_N rehabilitadas por las alas 17-23 salen de la lista; los 5 huérfanos nuevos hallados por la auditoría — `GlowCircle.png` base, `CosmicOrbBuff.png`, `InvisiblePixel.png`, `BlackHoleProjectile.png`, `BlackHoleStaff.png` — fueron PURGADOS en la misma entrega). Si una purga las borra, tacharlas aquí.
 
 ---
 
@@ -578,7 +579,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 - `SilenciarZona()` — reset del anti-spam (al cambiar de arma, la voz nueva suena YA).
 - `Reiniciar()` — higiene entre mundos (lección v6.49 AUD-C).
 - El catálogo interno `Elegir(f, m)` documenta el pedigrí de cada SoundID vanilla (p.ej. Solar/impacto = Item45 "el yunque del sol").
-- **Adopción actual: 9 llamadas en 4 archivos** (VerboPrimordial, SierpesNuevas, ApuestasStaffs, GrimorioFuriaSistema). **TODO sonido de combate NUEVO debería pasar por aquí.**
+- **Adopción actual: 21 llamadas en 6 archivos** (v6.56.1 — la auditoría contó las reales: VerboPrimordial, SierpesNuevas, ApuestasStaffs, GrimorioFuriaSistema + las 3 armas del grimorio v6.56.0 vía `AudioLib.Sonar`). **TODO sonido de combate NUEVO debería pasar por aquí.** `SilenciarZona()` está cableado desde la v6.56.1 (al cambiar de arma, la voz nueva suena YA — `GrimorioFuriaSistema.PostUpdateEverything`).
 
 ### 7.2 Capa 2 — Sonidos vanilla directos
 
@@ -673,6 +674,7 @@ La pila CPU hermana `HazFusionEspina` (7 pasadas: aura → cuerpo con color viaj
 | v6.55.0 | HazConcentradoShader (sin .fxc — el bug), el sonido sintetizado, AlasAuroraLib vectorial | §5.4, §7.3, §4.24 |
 | **v6.55.1** | **EL DESCUBRIMIENTO .fx/.fxc + LA CADENA DE COMPILACIÓN (fx20_build/validate, vkd3d)** — y **ESTE CÓDICE (v1.0)** | §1, §10 |
 | **v6.56.0** | **LA LEY DEL CERO-DUST** (los Dust junto al filo son la sierra de los picos y los «círculos planos») · la CURA DEL CENTRADO de alas (`pl.fullRotation`) + DibujarRunas + catálogo 17-23 · **LA ESCALERA DEL RAYO** (RayoConcentradoNivelProjectile, nivel en `ai[1]`) · el SONIDO v2 pulso constante · el PARTIDOR a pantalla completa · la IRA DEL CIELO densa — y **ESTE CÓDICE (v1.1)** | §0, §4.24, §4.25, §7.3 |
+| **v6.56.1** | **LA RONDA DE CURACIÓN de la auditoría 4×**: la recursión `SendExtraAI` del decompilador (StackOverflow MP), el `ai[2]`=whoAmI envenenando los relojes de las 3 armas nuevas, el switch del Testamento sin gate (sentencia doble en MP), `RestaurarLoteVanilla` (la cura del lote aditivo), la exclusión cruzada de la escalera, el vuelo/mira del RC2 solo del dueño, la aguja de carga recuperada, los pozos cero-GC del RC2, las 4 horneadas con funeral, el latch eterno de las alas, la marca del festín con caducidad, el es-MX deduplicado (−636 líneas) con paridad 1369=1369=1369 al parser REAL, 5 PNG huérfanos purgados y ESTE CÓDICE puesto al día (§3.1/§4.25/§6/§7.1) | §3.1, §4.25, §6, §7.1, §11 |
 | *(siguiente fila: la tuya)* | | |
 
 ---

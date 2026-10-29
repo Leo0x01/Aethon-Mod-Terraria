@@ -464,7 +464,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                 }
             }
-            VFXCore.ReabrirLoteVanilla();
+            // v6.56.1 — CerrarLote deja el lote en ADITIVO: restaurar el
+            // pase de entidades o el resto de proyectiles sale LAVADO.
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
     }

@@ -353,7 +353,7 @@ namespace AethonMod.Content.Projectiles
                     Main.EntitySpriteDraw(val6, val5 - Main.screenPosition, (Rectangle?)null, StormLib.Tint(ColorPrisma.ValueAt(Reloj + 0.1f), 0.8f * _intensidad), globalTimeWrappedHourly * 3f, Utils.Size(val6) * 0.5f, 1.3f * _intensidad, (SpriteEffects)0, 0f);
                 }
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
     }

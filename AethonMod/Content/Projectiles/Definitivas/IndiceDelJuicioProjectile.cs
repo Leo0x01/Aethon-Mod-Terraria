@@ -131,7 +131,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 else
                 {
-                    Vector2 val5 = Main.MouseWorld - val2;
+                    // v6.56.1 — el servidor no tiene ratón: las páginas van
+                    // por la rotación sincronizada del dueño.
+                    Vector2 val5 = (Main.netMode == 2)
+                        ? Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * 300f
+                        : (Main.MouseWorld - val2);
                     float num4 = (((val5).LengthSquared() > 1f) ? Utils.ToRotation(val5) : Utils.ToRotation(new Vector2((float)((Entity)val).direction, -0.3f)));
                     val4 = new Vector2(MathF.Cos(num4 + num3), MathF.Sin(num4 + num3));
                 }

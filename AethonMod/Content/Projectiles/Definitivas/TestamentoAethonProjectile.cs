@@ -129,7 +129,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 int sentencia = DefinitivasLib.SentenciaActual;
                 int daño = (int)(Projectile.damage * 1.3f);
-                Vector2 rumbo = (Main.MouseWorld - dueño.MountedCenter).SafeNormalize(Vector2.UnitX);
+                // v6.56.1 — el servidor no tiene ratón: usa el rumbo del
+                // dueño que llega sincronizado (dirección + elevación).
+                Vector2 rumbo = (Main.netMode == NetmodeID.Server)
+                    ? new Vector2(dueño.direction, -0.35f)
+                    : (Main.MouseWorld - dueño.MountedCenter).SafeNormalize(Vector2.UnitX);
                 var src = Projectile.GetSource_FromAI();
 
                 // ==================== CAPA 5 — LA PALABRA ====================
@@ -150,31 +154,43 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                 }
 
-                switch (sentencia)
+                // v6.56.1 — EL GATE DE RED: la sentencia la spawnea la
+                // AUTORIDAD (server/SP). Antes el switch corría también en
+                // el cliente dueño y la sentencia nacía DOS veces en MP.
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    case 0:     // EL PRISMA PRIMORDIAL (sentencia: vive su ciclo acotado)
-                        _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
-                            ModContent.ProjectileType<PrismaPrimordialProjectile>(), daño, Projectile.knockBack,
-                            Projectile.owner, 1f, 0f, 0f);
-                        break;
+                    switch (sentencia)
+                    {
+                        case 0:     // EL PRISMA PRIMORDIAL (sentencia: vive su ciclo acotado)
+                            _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
+                                ModContent.ProjectileType<PrismaPrimordialProjectile>(), daño, Projectile.knockBack,
+                                Projectile.owner, 1f, 0f, 0f);
+                            break;
 
-                    case 1:     // EL PARTIDOR DE MUNDOS
-                        _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, rumbo * 10f,
-                            ModContent.ProjectileType<PartidorDeMundosProjectile>(), daño, Projectile.knockBack,
-                            Projectile.owner, 0f, 0f, 0f);
-                        break;
+                        case 1:     // EL PARTIDOR DE MUNDOS
+                            _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, rumbo * 10f,
+                                ModContent.ProjectileType<PartidorDeMundosProjectile>(), daño, Projectile.knockBack,
+                                Projectile.owner, 0f, 0f, 0f);
+                            break;
 
-                    case 2:     // EL RÉQUIEM ESTELAR
-                        _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
-                            ModContent.ProjectileType<RequiemEstelarProjectile>(), daño, Projectile.knockBack,
-                            Projectile.owner, 0f, 0f, 0f);
-                        break;
+                        case 2:     // EL RÉQUIEM ESTELAR
+                            _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
+                                ModContent.ProjectileType<RequiemEstelarProjectile>(), daño, Projectile.knockBack,
+                                Projectile.owner, 0f, 0f, 0f);
+                            break;
 
-                    default:    // LA IRA DEL CIELO
-                        _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
-                            ModContent.ProjectileType<IraDelCieloProjectile>(), daño, Projectile.knockBack,
-                            Projectile.owner, 0f, 0f, 0f);
-                        break;
+                        default:    // LA IRA DEL CIELO
+                            _hijo = Projectile.NewProjectile(src, dueño.MountedCenter, Vector2.Zero,
+                                ModContent.ProjectileType<IraDelCieloProjectile>(), daño, Projectile.knockBack,
+                                Projectile.owner, 0f, 0f, 0f);
+                            break;
+                    }
+                }
+                else if (Main.myPlayer == Projectile.owner)
+                {
+                    // el cliente dueño NO spawnea (el servidor ya lo hizo):
+                    // BUSCA al hijo para el vínculo visual del libro.
+                    _hijo = BuscarHijoDeSentencia();
                 }
 
                 // LA VUELTA (la próxima sentencia queda servida)
@@ -212,6 +228,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     DefinitivasLib.GradienteJuicio(Main.rand.NextFloat(1f)), 0.8f);
                 d.noGravity = true;
             }
+        }
+
+        /// <summary>v6.56.1 — En MP el hijo lo spawnea el servidor; el
+        /// cliente dueño lo BUSCA para el vínculo visual (el filamento
+        /// libro→arma de la CAPA 7).</summary>
+        private int BuscarHijoDeSentencia()
+        {
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.owner != Projectile.owner) continue;
+                if (p.type == ModContent.ProjectileType<PrismaPrimordialProjectile>() ||
+                    p.type == ModContent.ProjectileType<PartidorDeMundosProjectile>() ||
+                    p.type == ModContent.ProjectileType<RequiemEstelarProjectile>() ||
+                    p.type == ModContent.ProjectileType<IraDelCieloProjectile>())
+                    return i;
+            }
+            return -1;
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -365,6 +399,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // ==================== CAPA 7 — EL VÍNCULO TEXTURIZADO ====================
             // (la palabra hecha arma: la FAJA DE RUIDO con la carne CORRIENDO
             // del libro a la sentencia + la vena blanca — mientras viva)
+            // v6.56.1 — en MP el hijo puede llegar 1-2 ticks tarde:
+            // ventana de reintento de la búsqueda para el vínculo.
+            if (_hijo < 0 && Projectile.ai[2] > TApertura && Projectile.ai[2] < TApertura + 90
+                && Main.myPlayer == Projectile.owner)
+            {
+                _hijo = BuscarHijoDeSentencia();
+            }
             if (_hijo >= 0 && _hijo < Main.maxProjectiles)
             {
                 Projectile hijo = Main.projectile[_hijo];
@@ -403,7 +444,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
 
             // v6.54.5/.6 — EL CONTRATO DEL LOTE: TODO PreDraw sale con el lote VIVO.
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
     }

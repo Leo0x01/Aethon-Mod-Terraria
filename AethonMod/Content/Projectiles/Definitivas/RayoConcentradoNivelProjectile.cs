@@ -97,13 +97,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(((Entity)((ModProjectile)this).Projectile).direction == 1);
-            ((ModProjectile)this).SendExtraAI(writer);
+            // v6.56.1 — LA CURA DE LA RECURSIÓN: el decompilador convirtió
+            // el base-call en auto-llamada virtual (callvirt) — StackOverflow
+            // en el primer sync de MP. La base es vacía: NO hay nada que llamar.
+            writer.Write(targetRotation);   // v6.56.1: la mira del dueño viaja al server
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
         {
             ((Entity)((ModProjectile)this).Projectile).direction = (reader.ReadBoolean() ? 1 : (-1));
-            ((ModProjectile)this).ReceiveExtraAI(reader);
+            targetRotation = reader.ReadSingle();   // v6.56.1: la mira sincronizada
         }
 
         public override void AI()
@@ -173,7 +176,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 ((Entity)((ModProjectile)this).Projectile).direction = ((!Utils.NextBool(Main.rand)) ? 1 : (-1));
                 ((ModProjectile)this).Projectile.netUpdate = true;
             }
-            targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)Carga + (float)Laser * 0.1f, (float)Carga, Time, true) * 0.04f + Utils.GetLerpValue((float)Carga + (float)Laser * 0.3f, (float)Carga + (float)Laser * 0.6f, Time, true) * 0.01f);
+            // v6.56.1 — LA MIRA EN MP: solo el DUEÑO apunta con SU ratón; el
+            // servidor y el resto usan la rotación que viaja por ExtraAI.
+            if (Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
+            {
+                targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)Carga + (float)Laser * 0.1f, (float)Carga, Time, true) * 0.04f + Utils.GetLerpValue((float)Carga + (float)Laser * 0.3f, (float)Carga + (float)Laser * 0.6f, Time, true) * 0.01f);
+            }
             targetSize = (float)Math.Pow(Utils.GetLerpValue((float)(Carga - 20), (float)(Carga + 60), Time, true) * Utils.GetLerpValue((float)(Carga + Laser + 60), (float)(Carga + Laser), Time, true), 3.0);
             float num2 = MathHelper.SmoothStep(0f, 1f, Utils.GetLerpValue((float)Carga * 0.8f, (float)(Carga + 20), Time, true) * Utils.GetLerpValue((float)Carga + (float)Laser * 0.9f, (float)Carga + (float)Laser * 0.5f, Time, true));
             ((ModProjectile)this).Projectile.rotation = targetRotation + num * (float)((Entity)((ModProjectile)this).Projectile).direction * num2;
@@ -373,7 +381,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f), Intensidad[Niv] * num11, Main.GlobalTimeWrappedHourly, (int)Owner * 131 + Niv * 977 + 17, arcoiris: true, 1f, Niv == 2);
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
     }

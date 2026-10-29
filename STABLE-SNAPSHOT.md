@@ -1,3 +1,40 @@
+# v6.56.1 — LA RONDA DE CURACIÓN (LA AUDITORÍA DE LOS 4 AGENTES) — EL CHECKLIST
+
+**Qué pasó** (la letra): «Espero que hayas tomado en cuenta EFECTOS-Y-LIBRERIAS.md
+ya que es fundamental» + «Quiero que también analices el código en busca de
+errores no detectados antes». LA CAZA: 4 agentes en paralelo con el códice
+como vara + verificación runtime contra los assemblies reales del juego.
+Salieron 2 CRÍTICOS de multijugador (la recursión SendExtraAI del
+decompilador y el ai[2] envenenado de las 3 armas nuevas), 6 ALTOS (la
+sentencia doble del Testamento, el lote aditivo que lavaba los proyectiles,
+la escalera sin exclusión cruzada, la aguja invisible del RC2, el GC del
+láser, las miras del servidor), el derrame del es-MX (−636 líneas de
+duplicados, paridad 1369=1369=1369 al parser REAL) y el códice puesto al
+día (la lista de huérfanas era un boomerang de purga).
+
+1. **EN JUEGO (SP — nada debe cambiar, todo debe MEJORAR)**: [ ] el RC2
+   carga con SU AGUJA de puntería apuntando y creciendo (vivía invisible
+   desde la .56.0); [ ] el RC2/Alba/Veredicto/Juicio/Prisma NO se pueden
+   superponer (un solo haz a la vez, cruzado); [ ] un proyectil cualquiera
+   (flecha, esbirro) en pantalla DURANTE un láser se ve NORMAL (el lote
+   ya no lava); [ ] Ira/Partidor/Réquiem/Testamento/Primer Trazo idénticos
+   a como los dejaste en la .56.0.
+2. **LOS NOMBRES EN ESPAÑOL**: [ ] con el juego en Español (LatAm o
+   España), las 3 armas nuevas + la escalera + las sentencias ya no
+   muestran nombres en inglés; [ ] el aviso al entrar al mundo habla del
+   COFRE del Arsenal (ya no «una por categoría»).
+3. **MP (si pruebas con servidor)**: [ ] disparar Alba/Veredicto/Juicio/
+   RC2/Partidor YA NO TUMBA nada (la recursión ExtraAI murió); [ ] el Ojo
+   del Juicio se coloca y barre bien con CUALQUIER slot de jugador; [ ] el
+   Testamento dicta UNA sola sentencia; [ ] el vuelo infinito del RC2 solo
+   lo siente quien dispara; [ ] el haz apunta donde mira el DUEÑO.
+4. **HIGIENE**: [ ] recargar el mod en juego (Mods → Reload) sin fugas
+   raras; [ ] la bolsa de alas sigue entregando las 22; [ ] la marca del
+   festín: mata un jefe marcado DESPUÉS de 6+ s por otra causa → la muerte
+   es de esa causa (ya no hay cine eterno).
+
+---
+
 # v6.56.0 — LA CURA DE LOS CÍRCULOS PLANOS + LA ESCALERA DEL RAYO + LAS ALAS CENTRADAS + EL PULSO CONSTANTE — EL CHECKLIST
 
 **Qué pasó** (la letra): «hay circulos planos al lanzar el ataque y al

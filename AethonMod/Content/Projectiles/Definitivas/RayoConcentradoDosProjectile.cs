@@ -70,6 +70,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
             ((ModProjectile)this).Projectile.netImportant = true;
         }
 
+        // v6.56.1 — LOS POZOS DEL RC2 (cero-GC): antes cada frame del láser
+        // alocaba 2 arrays de 1500 + un VertexStrip nuevo (~36 KB/frame de
+        // basura Gen0 mientras vivía el arma cima). Tamaños constantes.
+        private static readonly Vector2[] _cachePuntos = (Vector2[])(object)new Vector2[1500];
+        private static readonly float[] _cacheRotas = new float[1500];
+        private static readonly Vector2[] _cachePuntos64 = (Vector2[])(object)new Vector2[64];
+        private static readonly float[] _cacheSemis64 = new float[64];
+        private static readonly float[] _cacheSemisA = new float[64];
+        private static readonly float[] _cacheSemisB = new float[64];
+        private static readonly VertexStrip _strip = new VertexStrip();
+
         private static Effect ObtenerShader()
         {
             if (_shaderFallo)
@@ -95,13 +106,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(((Entity)((ModProjectile)this).Projectile).direction == 1);
-            ((ModProjectile)this).SendExtraAI(writer);
+            // v6.56.1 — LA CURA DE LA RECURSIÓN: el decompilador convirtió
+            // el base-call en auto-llamada virtual (callvirt) — StackOverflow
+            // en el primer sync de MP. La base es vacía: NO hay nada que llamar.
+            writer.Write(targetRotation);   // v6.56.1: la mira del dueño viaja al server
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
         {
             ((Entity)((ModProjectile)this).Projectile).direction = (reader.ReadBoolean() ? 1 : (-1));
-            ((ModProjectile)this).ReceiveExtraAI(reader);
+            targetRotation = reader.ReadSingle();   // v6.56.1: la mira sincronizada
         }
 
         public override void AI()
@@ -171,7 +185,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 ((Entity)((ModProjectile)this).Projectile).direction = ((!Utils.NextBool(Main.rand)) ? 1 : (-1));
                 ((ModProjectile)this).Projectile.netUpdate = true;
             }
-            targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.1f, (float)ChargeTime, Time, true) * 0.04f + Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.3f, (float)ChargeTime + (float)LaserDuration * 0.6f, Time, true) * 0.01f);
+            // v6.56.1 — LA MIRA EN MP: solo el DUEÑO apunta con SU ratón.
+            if (Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
+            {
+                targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.1f, (float)ChargeTime, Time, true) * 0.04f + Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.3f, (float)ChargeTime + (float)LaserDuration * 0.6f, Time, true) * 0.01f);
+            }
             targetSize = (float)Math.Pow(Utils.GetLerpValue((float)(ChargeTime - 20), (float)(ChargeTime + 60), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true), 3.0);
             float num2 = MathHelper.SmoothStep(0f, 1f, Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)(ChargeTime + 20), Time, true) * Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.9f, (float)ChargeTime + (float)LaserDuration * 0.5f, Time, true));
             ((ModProjectile)this).Projectile.rotation = targetRotation + num * (float)((Entity)((ModProjectile)this).Projectile).direction * num2;
@@ -201,18 +219,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 raySound?.StopSound();
                 ((ModProjectile)this).Projectile.Kill();
             }
+            // v6.56.1 — EL VUELO ES DEL DUEÑO: antes cualquier RC2 vivo en
+            // el mundo le rellenaba el wingTime a TODOS los jugadores.
             else if (Main.netMode == 2)
             {
-                Player[] player = Main.player;
-                foreach (Player val4 in player)
+                Player val4 = Main.player[(int)Owner];
+                if (val4 != null && ((Entity)val4).active && !val4.dead)
                 {
-                    if (val4 != null && ((Entity)val4).active && !val4.dead)
-                    {
-                        val4.wingTime = val4.wingTimeMax;
-                    }
+                    val4.wingTime = val4.wingTimeMax;
                 }
             }
-            else if (Main.LocalPlayer != null)
+            else if (Main.LocalPlayer != null && ((Entity)Main.LocalPlayer).whoAmI == (int)Owner)
             {
                 Main.LocalPlayer.wingTime = Main.LocalPlayer.wingTimeMax;
             }
@@ -395,7 +412,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
             (c).A = 0;
             float num = Utils.GetLerpValue(50f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration + 20), Time, true);
-            float num2 = Utils.GetLerpValue(0f, (float)ChargeTime, ((ModProjectile)this).Projectile.localAI[1], true) * Utils.GetLerpValue((float)(ChargeTime + 10), (float)(ChargeTime - 30), Time, true);
+            // v6.56.1 — LA AGUJA RECUPERADA: localAI[1] jamás se asignaba
+            // (la aguja de puntería llevaba alfa 0 desde la v6.56.0). El
+            // gemelo RayoConcentradoNivel usa Time aquí — esta era la idea.
+            float num2 = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + 10), (float)(ChargeTime - 30), Time, true);
             float num3 = ((Entity)((ModProjectile)this).Projectile).Center.X - Main.screenPosition.X;
             float num4 = ((Entity)((ModProjectile)this).Projectile).Center.Y - Main.screenPosition.Y;
             Vector2 val = new Vector2(num3, num4);
@@ -431,14 +451,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (Time >= (float)(ChargeTime - 20))
             {
                 float num11 = Utils.GetLerpValue((float)(ChargeTime - 30), (float)(ChargeTime + 70), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true);
-                Vector2[] array = (Vector2[])(object)new Vector2[1500];
-                float[] array2 = new float[1500];
+                Vector2[] array = _cachePuntos;
+                float[] array2 = _cacheRotas;
                 for (int j = 0; j < 1500; j++)
                 {
                     array[j] = ((Entity)((ModProjectile)this).Projectile).Center + Utils.RotatedBy(new Vector2(3500f * ((float)j / 1500f) * (0.5f + num11 * 0.5f), 0f), (double)((ModProjectile)this).Projectile.rotation, default(Vector2));
                     array2[j] = ((ModProjectile)this).Projectile.rotation;
                 }
-                VertexStrip val4 = new VertexStrip();
+                VertexStrip val4 = _strip;
                 val4.PrepareStripWithProceduralPadding(array, array2, new VertexStrip.StripColorFunction(StripColor), new VertexStrip.StripHalfWidthFunction(StripWidth), -Main.screenPosition, true, true);
                 Effect val5 = ObtenerShader();
                 if (val5 != null)
@@ -456,8 +476,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 else
                 {
-                    Vector2[] array3 = (Vector2[])(object)new Vector2[64];
-                    float[] array4 = new float[64];
+                    Vector2[] array3 = _cachePuntos64;
+                    float[] array4 = _cacheSemis64;
                     for (int k = 0; k < 64; k++)
                     {
                         float num12 = (float)k / 63f;
@@ -475,11 +495,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         }
                         if (texRemolino2 != null)
                         {
-                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f), DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
+                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f, _cacheSemisA), DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
                         }
                         if (texRuido2 != null)
                         {
-                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.4f), DefinitivasLib.Alfa(Color.White, 0.85f * realSize), texRuido2, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
+                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.4f, _cacheSemisB), DefinitivasLib.Alfa(Color.White, 0.85f * realSize), texRuido2, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
                         }
                     }
                     finally
@@ -488,7 +508,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                 }
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
 
@@ -510,14 +530,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return num * num2 * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
         }
 
-        private static float[] ArraySemis(float[] perfil, float k)
+        private static float[] ArraySemis(float[] perfil, float k, float[] destino)
         {
-            float[] array = new float[perfil.Length];
+            // v6.56.1 — escribe en el pozo del llamador (cero alocaciones)
             for (int i = 0; i < perfil.Length; i++)
             {
-                array[i] = perfil[i] * k;
+                destino[i] = perfil[i] * k;
             }
-            return array;
+            return destino;
         }
     }
 

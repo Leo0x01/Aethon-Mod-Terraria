@@ -1,3 +1,50 @@
+# v6.56.1 — LA RONDA DE CURACIÓN: LA AUDITORÍA DE LOS CUATRO AGENTES
+
+**La letra del usuario**: «Espero que hayas tomado en cuenta EFECTOS-Y-LIBRERIAS.md ya que es fundamental» + «Quiero que también analices el código en busca de errores no detectados antes».
+
+**El método**: 4 agentes de auditoría en paralelo (VFX/librerías · armas/proyectiles · sistemas/items/localización · shaders/assets/empaquetado), TODOS con el códice EFECTOS-Y-LIBRERIAS.md como vara de medir (leído COMPLETO antes de tocar nada), verificación runtime contra los assemblies REALES del juego (Hjson.dll de tML 2026.08, IL del build, instancias de Player) y curación por cirugía Python asertiva (`tools/fix_v6561.py`, `tools/hjson_v6561.py` — idempotentes, con aserciones duras que ABORTAN ante cualquier sorpresa).
+
+## (1) LOS DOS CRÍTICOS DE MULTIJUGADOR (dormidos en SP — por eso el headless estaba verde)
+- **LA RECURSIÓN SendExtraAI**: el decompilador de la reconstrucción v6.56.0 convirtió el base-call en `((ModProjectile)this).SendExtraAI(writer)` — una AUTO-LLAMADA VIRTUAL (callvirt, verificado en el IL) que se llama a sí mismo incondicionalmente. En los 3 proyectiles netImportant (escalera, RC2, Partidor): **StackOverflow inatrapable en el primer sync de MP**. La base es vacía: la cura es borrar las 6 líneas — y de regalo la mira del dueño (`targetRotation`) ahora viaja al server por ExtraAI.
+- **EL ai[2] ENVENENADO**: los 3 Shoot de las armas nuevas (Índice/Pluma/Ojo) pasaban `whoAmI` en `ai[2]` (la convención del RC2, donde es el DUEÑO) — pero estos proyectiles usan `ai[2]` como RELOJ (umbrales num==2/30/60/104/150/178). En SP whoAmI==0 lo disimulaba; en MP cualquier jugador con slot≠0 arrancaba el reloj desplazado: el Ojo jamás se colocaba a −430 ni capturaba el barrido, el Índice saltaba su apertura, la Pluma no anclaba el sello.
+
+## (2) LA RED DEL TESTAMENTO Y LAS MIRAS DEL SERVIDOR
+- El switch de sentencias corría SIN gate de red → en MP la sentencia nacía DOS veces (server + cliente dueño, doble daño). Ahora la spawnea la autoridad (`netMode != MultiplayerClient`) y el cliente dueño BUSCA al hijo para el vínculo visual (`BuscarHijoDeSentencia`, con ventana de reintento de 90 t).
+- **Main.MouseWorld en el servidor**: 5 armas apuntaban con «el ratón del servidor» (basura — su daño en MP iba a donde no miraba nadie). Ahora solo el dueño apunta y el resto usa lo sincronizado: RC2/escalera vía ExtraAI; Ojo/Pluma/Prisma por gate de dueño; Índice/Testamento con fallback de rotación.
+- **EL VUELO INFINITO GLOBAL**: cualquier RC2 vivo en el mundo le rellenaba el `wingTime` a TODOS los jugadores — ahora es solo del dueño (server: `Main.player[owner]`; cliente: solo si `whoAmI == owner`).
+
+## (3) EL LOTE ADITIVO — LA FUGA INVISIBLE DEL RENDER
+`RayoStrip.CerrarLote()` reabre el SpriteBatch en ADITIVO (para los gorros); los PreDraw que salían así dejaban el pase de entidades en ADITIVO — **todo proyectil dibujado después en el frame salía LAVADO** (sin alfa). Nace `VFXCore.RestaurarLoteVanilla()` (termina el lote abierto — la sonda decide — y reabre con los parámetros EXACTOS del pase de entidades; los sprites en cola vuelcan con SU blend). Aplicado a la salida de los 7 PreDraw afectados: RC2, escalera, Prisma, Partidor, Ira (zona), Testamento, Primer Trazo. La ley del lote (códice §3.1) ahora es: ABIERTO **Y** en estado vanilla.
+
+## (4) LA ESCALERA CRUZADA + LA AGUJA + EL CERO-GC DEL RC2
+- **`EscaleraDelRayo.HazLibre` ahora es CRUZADO**: un solo haz definitivo entre TODAS las familias (niveles 1-3 + RC2 + Prisma — el CanUseItem del RC2 y del Prisma ya lo usan). Antes cada familia solo se excluía a sí misma y cabían hasta 3 haces simultáneos apilando daño.
+- **LA AGUJA DEL RC2 RECUPERADA**: `localAI[1]` jamás se asignaba → la aguja de puntería de la carga llevaba alfa 0 y escala 0 desde la v6.56.0 (la clase hermana usa `Time` ahí — esa era la idea).
+- **LOS POZOS DEL RC2**: cada frame del láser alocaba 2 arrays de 1500 + un `VertexStrip` nuevo (~36 KB/frame de basura Gen0, ~2 MB/s durante los 13 s del láser). Pozos estáticos (cero-GC, la ley de la casa).
+
+## (5) HIGIENE DE LA CASA (las lecciones menores de la auditoría)
+- **LAS 4 HORNEADAS CON FUNERAL**: `VFXCore.Reiniciar` disponía el arcoíris pero fugaba Carne/Colmillo/Ventosa/OjoRasgado en cada recarga del mod (VRAM). Helper `SoltarTexturaHorneada` (el patrón del arcoíris, extraído).
+- **EL LATCH ETERNO DE LAS ALAS**: un solo fallo de carga de textura mataba las alas de TODOS los estilos hasta reiniciar el JUEGO (`_texturaProboFallar` jamás se perdonaba) — el Reiniciar lo resetea; y las alas entran al barrendero del Unload (sus 2 BasicEffect solo se limpiaban al salir del MUNDO).
+- **LA MARCA DEL FESTÍN ETERNA**: `FaucesGlobalNPC.PodarMarcas` estaba SIN llamador desde una purga — la marca de 5 s vivía PARA SIEMPRE y la muerte del jefe se interceptaba como festín (18 s de cine) minutos después por cualquier otra causa. El podador vive de nuevo (BrumaSystem.PostUpdateWorld, cada 60 t, como documentaba su propio comentario huérfano).
+- **`RayoStrip.EmitirQuadTex`** descartaba quads EN SILENCIO al llenarse el pozo (la punta de un haz largo desaparecería sin síntoma) — ahora vacía-y-continúa (el contrato de `EmitirTri`).
+- **DETERMINISMO**: el parpadeo VenaTrueno (RayoLib) y el brillo del aura de alas usaban `Main.rand` EN RENDER (ley §0.4 rota) → `Hash01` con semilla viva (misma probabilidad y rangos).
+- Menores: `CosmicProjectileFX.AI` sin guard de servidor (polvos+luces cada tick en el dedicado) · `ShardSyncSystem.SyncResonance` (protocolo MUERTO con el único TODO real del mod — retirado) · el slot 58 (el cursor) invisible para la garantía de las bolsas (duplicaba si tu única copia iba en la mano) · `AudioLib.SilenciarZona` documentado en §7.1 pero NADIE lo llamaba — cableado al cambio de arma (GrimorioFuriaSistema.PostUpdateEverything).
+
+## (6) LA LOCALIZACIÓN — EL DERRAME DEL es-MX (validado con el parser REAL)
+- **es-MX arrastraba 235 claves duplicadas** (~636 líneas pegadas 3-4 veces: las alas ×4, la maestra ×4, los bloques de NPC ×2…) — el fix «VEINTICUATRO» de la BolsaMaestra vivía SEPULTADO por 3 copias viejas con «VEINTITRÉS» (last-wins). Dedupe por ámbito conservando la PRIMERA copia (la buena — verificada contra en-US).
+- **Conteos viejos**: «QUINCE alas»→«veintidós» · «FIFTEEN»→«TWENTY-TWO» · «TWENTY-THREE»→«TWENTY-FOUR».
+- **La purga v6.55.0 dejó restos en los hjson** (su grep final solo miró .cs): BolsaInvestigacion + las 6 armas muertas + 8 DisplayNames huérfanos + el nombre PROHIBIDO «Rayo Fusion» ACTIVO en el Escriba en-US — retirado de los 3 idiomas.
+- **14 claves solo en inglés** (las 3 armas nuevas, la escalera, las sentencias, SombraPagina 3-4…) portadas al español con los nombres reales de los ítems. El Escriba es-ES tenía las 20 COMENTADAS — vivas ahora. Espejo es-ES regenerado.
+- **VALIDACIÓN CON EL Hjson.dll REAL de tML 2026.08**: paridad 1369=1369=1369 (main) y 24=24=24 (Escriba), CERO diferencias — también dentro del .tmod empaquetado. El mensaje del kit actualizado al modelo del cofre maestro («una por categoría» era la v6.29).
+
+## (7) EL CÓDICE Y EL EMPAQUETADO
+- **EFECTOS-Y-LIBRERIAS.md v1.2** (la regla §10: misma entrega): §6.C/§6.F — las Ruido_3/6/13/14/16/19 YA NO son huérfanas (las alas 17-23 las usan TODAS — la lista vieja era un BOOMERANG DE PURGA: borrarlas habría roto 7 alas); §3.1 + `RestaurarLoteVanilla`; §4.25 la escalera real (niveles 1-3 + Prisma/RC2 propios) y el HazLibre cruzado; §7.1 la adopción real de AudioLib (21 llamadas/6 archivos); §11 la bitácora v6.56.1.
+- **5 PNG huérfanos purgados** (GlowCircle, CosmicOrbBuff, InvisiblePixel, BlackHoleProjectile, BlackHoleStaff — 0 referencias verificadas por doble método); **buildIgnore endurecido** (+ *.bat/*.mjs/*.ps1/*.cmd — la lección *.sh de las .33/.34/.50/.52).
+- **La cabecera del .tmod**: la auditoría cazó que el entorno de este sandbox traía tML 2026.07.3.0 — rehecho contra el **2026.08.3.0 REAL** (zip md5 dac04c7a… verificado contra el worklog de la casa).
+
+**VERIFICACIÓN**: oráculo 0/0 (full rebuild contra las referencias del tML 2026.08.3.0 real) · `-build` REAL 0/0 · `.tmod` v6.56.1 (6.380.548 B, md5 65ef3f22…): 469 entradas (−5 huérfanos), EOF exacto, todos los blobs inflan, 447 rawimgs + 2 iconos, 4 pares .fx+.fxc, DLL con los 5 símbolos nuevos PRESENTES y el muerto AUSENTE · hjson del PAQUETE paridad perfecta al parser REAL · servidor headless: Sandboxing→Adding→Configuring→Finalizing→Adding Recipes→Choose World, **0 EXCEPCIONES**.
+
+---
+
 # v6.56.0 — LA CURA DE LOS CÍRCULOS PLANOS + LA ESCALERA DEL RAYO + LAS ALAS CENTRADAS + EL PULSO CONSTANTE
 
 **La letra del usuario**: «hay circulos planos al lanzar el ataque y al cargarlo antes de lanzarlo y despues… si es polvo ya sabes de donde conseguir el efecto» + «el sonido va y viene como si fueran ondas… hazlo un pulso constante y luego acabe» + «recuerdas los colores que usa el mod» + «las alas no estan centradas… se van hacia un lado o se rotan… crea alas runicas, varios ejemplos» + «la ira del cielo no tiene suficiente bruma, debe ser densa, el ataque atrae las nubes» + «el partidor… ni la bruma ni las particulas… de un extremo de la pantalla hasta el otro» + «el prisma… version inferior… crea 3 versiones inferiores mas» + «el primer trazo tambien esta llena de picos, investiga bien» + «crea al menos otras 3 armas definitivas, se creativo».

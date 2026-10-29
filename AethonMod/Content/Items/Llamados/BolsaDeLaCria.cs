@@ -22,8 +22,8 @@ namespace AethonMod.Content.Items.Llamados
     //  LA VÍA (la canónica de la .118, ahora con su envoltura): el
     //  RECUERDO COMPLETO la suelta SIEMPRE al morir — y el jefe de luz
     //  un 20% de las veces (su recuerdo vivo). Y la vía de pruebas de
-    //  la casa: garantizada en cada ENTRADA AL MUNDO (TestingPlayer,
-    //  como las veinticuatro bolsas del kit). Se abre con CLIC DERECHO
+    //  la casa: garantizada en cada ENTRADA AL MUNDO (dentro del
+    //  Cofre del Arsenal del probador, como sus veintitrés hermanas). Se abre con CLIC DERECHO
     //  (el patrón de la casa: la apertura corre SOLO en el cliente que
     //  clica — el inventario es client-authoritative y se sincroniza
     //  solo, la lección v6.50.2 de las 16 bolsas).

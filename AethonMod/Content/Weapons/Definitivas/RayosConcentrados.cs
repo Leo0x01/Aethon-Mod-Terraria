@@ -18,11 +18,18 @@ namespace AethonMod.Content.Weapons.Definitivas
     {
         public static bool HazLibre(Player player)
         {
-            int num = ModContent.ProjectileType<RayoConcentradoNivelProjectile>();
+            // v6.56.1 — LA EXCLUSIÓN CRUZADA DE LA ESCALERA: UN solo haz
+            // definitivo a la vez, CRUZANDO clases (niveles 1-3 + RC2 +
+            // Prisma). Antes cada familia solo se excluía a sí misma y
+            // cabían hasta 3 haces simultáneos apilando daño.
+            int nivel = ModContent.ProjectileType<RayoConcentradoNivelProjectile>();
+            int rc2 = ModContent.ProjectileType<RayoConcentradoDosProjectile>();
+            int prisma = ModContent.ProjectileType<PrismaPrimordialProjectile>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile val = Main.projectile[i];
-                if (val != null && ((Entity)val).active && val.owner == ((Entity)player).whoAmI && val.type == num)
+                if (val != null && ((Entity)val).active && val.owner == ((Entity)player).whoAmI
+                    && (val.type == nivel || val.type == rc2 || val.type == prisma))
                 {
                     return false;
                 }

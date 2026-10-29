@@ -894,7 +894,10 @@ namespace AethonMod.Content.VFX
                     // el 50% de los frames — el flicker eléctrico del trío
                     // del dragón. (los canales de vanilla NO parpadean:
                     // solo aplica a quien lo pide).
-                    if (r.Parpadeo && !Main.rand.NextBool()) continue;
+                    // v6.56.1 — DETERMINISMO (ley §0.4): el parpadeo ya no
+                    // tira de Main.rand en render — cada máquina ve el
+                    // MISMO canal vivo/muerto (Hash01 con el tick).
+                    if (r.Parpadeo && VFXCore.Hash01(i * 17 + 3, (int)Main.GameUpdateCount, 911) < 0.5f) continue;
 
                     // v6.50.24 — EL ANCHO VENA TRUENO (la receta del
                     // rayo caído de la referencia): CRECE de Ancho a AnchoFin

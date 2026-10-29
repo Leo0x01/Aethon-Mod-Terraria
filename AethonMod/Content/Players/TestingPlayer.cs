@@ -8,48 +8,24 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// TestingPlayer — el kit de pruebas del arsenal.
     ///
-    /// v6.29 — LAS BOLSAS POR CATEGORÍA + LAS DUMMIES: petición del usuario
-    /// ("crea varias bolsas para todas las armas que me tienes que dar no
-    /// solo una y separalas por categorías, una categoría por bolsa · al
-    /// jugador también dale 99 Dummy para probar las armas"). OnEnterWorld
-    /// entrega:
+    /// v6.56.1 — EL MODELO ACTUAL (la purga v6.55.0 retiró la investigación
+    /// y su bolsa; v6.56.0 subió el arsenal): OnEnterWorld (SP + jugador
+    /// local) entrega:
     ///
-    ///   · LAS BOLSAS DEL ARSENAL (una por categoría — hoy son VEINTICUATRO
-    ///     tras la v6.55.0; cada una se
-    ///     abre con clic derecho y solo entrega lo que falte):
-    ///       1. La Bolsa del Probador          (herramientas de prueba)
-    ///       2. La Bolsa de los Fundacionales  (los 4 del alba)
-    ///       3. La Bolsa de los Clásicos       (el sol y sus criaturas)
-    ///       4. La Bolsa de los Agujeros Negros (los 11)
-    ///       5. La Bolsa de los Soles Rúnicos  (los 20)
-    ///       6. La Bolsa de las Estrellas Reales (las 19)
-    ///       7. La Bolsa de las Librerías      (las 6 VFX)
-    ///       8. La Bolsa de los Creativos      (los 6 experimentos)
-    ///       9. La Bolsa de los Exhumados      (el rencor + la eminencia)
-    ///      10. La Bolsa de los Cosméticos    (las coronas)
-    ///      11. La Bolsa de las Dos Formas    (v6.33)
-    ///      12. La Bolsa de los Desgarros     (v6.33 + v6.35)
-    ///      13. La Bolsa de los Códigos Vivos (v6.36 — los 4 de las imágenes)
-    ///      14. La Bolsa de las Sierpes     (v6.38 — la familia)
-    ///      15. La Bolsa de los Huéspedes   (v6.41 — las réplicas de prueba)
-    ///      16. La Bolsa de las Apuestas   (v6.42 — las 5 apuestas + el Verbo)
-    ///      17. La Bolsa de las Ideas del Grimorio (v6.50.19 — los 6 futuros del proyectil)
-    ///      18. La Bolsa de las Armas de Rayo   (v6.50.18+24 — las armas de rayo)
-    ///      19. La Bolsa de las Sombras         (v6.50.63 — LAS FAUCES: las 3 armas
-    ///          devoradoras de la v6.50.62 que nacieron sin kit — el feedback
-    ///          "te olvidaste darle las armas al jugador", la lección v6.14.2 otra vez)
-    ///      20. La Bolsa de las Pruebas de la Emperatriz (v6.50.99)
-    ///      21. La Bolsa de la Cría (v6.50.121 — LA MISMA FORMA QUE TODAS: la
-    ///          letra del usuario: «la bolsa debe entregarse al jugador de la
-    ///          misma forma que todas las demás bolsas del mod» — la pareja de
-    ///          mascotas del recuerdo, garantizada en cada entrada al mundo,
-    ///          igual que sus veinte hermanas; la entrega tras la pelea de la
-    ///          .120 SIGUE viva — la vía canónica; esta es la de pruebas)
-    ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
-    ///     entrenamiento directo en el inventario).
+    ///   1. EL COFRE DEL ARSENAL (la Bolsa Maestra: dentro van las
+    ///      VEINTICUATRO bolsas de categoría — la de las alas incluida
+    ///      desde la v6.55.0; cada una con semántica de garantía: clic
+    ///      derecho y solo entrega lo que falte),
+    ///   2. LA BOLSA DE LAS ALAS aparte (las veintidós alas procedurales),
+    ///   3. LA BOLSA DE LAS ARMAS DEFINITIVAS aparte (la escalera del rayo:
+    ///      Alba/Veredicto/Juicio/Prisma/RC2 · las cuatro sentencias · y
+    ///      las tres del grimorio v6.56.0: Índice/Pluma/Ojo),
+    ///   4. LA LLAVE DEL DESPERTAR (EcoDelDespertar, el probador de la
+    ///      progresión — va suelta) y
+    ///   5. 99 DUMMIES DE PRUEBA (Target Dummy de vanilla).
     ///
     /// Histórico: v5.98 kit congelado + 40+ EnsureItem; v6.27 UNA bolsa
-    /// (ArsenalBag); v6.29 la bolsa única RETIRADA — una por categoría.
+    /// (ArsenalBag); v6.29 una por categoría; v6.55.0 el cofre maestro.
     /// </summary>
     public class TestingPlayer : ModPlayer
     {
@@ -125,10 +101,11 @@ namespace AethonMod.Content.Players
             return 1;
         }
 
-        /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>
+        /// <summary>¿El jugador tiene este ítem? (incluido el slot del
+        /// cursor — v6.56.1, la misma cura de BolsaCategoria.Tiene).</summary>
         private bool HasItem(int itemType)
         {
-            for (int i = 0; i < 58; i++)
+            for (int i = 0; i < Player.inventory.Length; i++)
             {
                 if (Player.inventory[i] != null &&
                     Player.inventory[i].type == itemType)

@@ -769,7 +769,9 @@ namespace AethonMod.Content.VFX
         public static void FlushAdditive(Texture2D texture = null, bool endActiveBatch = true)
         {
             if (_quads.Count == 0) return;
-            if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
+            // v6.56.1 — limpiar el búfer también en el server (antes el
+            // return lo dejaba crecer y el presupuesto mentía).
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) { _quads.Clear(); return; }
 
             Texture2D defaultTex = texture ?? SoftGlow;
 
@@ -861,7 +863,9 @@ namespace AethonMod.Content.VFX
         public static void FlushAlpha(Texture2D texture = null, bool endActiveBatch = true)
         {
             if (_quads.Count == 0) return;
-            if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
+            // v6.56.1 — limpiar el búfer también en el server (antes el
+            // return lo dejaba crecer y el presupuesto mentía).
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) { _quads.Clear(); return; }
 
             Texture2D defaultTex = texture ?? SoftGlow;
 
@@ -1038,6 +1042,24 @@ namespace AethonMod.Content.VFX
                     Main.Rasterizer, null, Main.Transform);
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.56.1 — LA CURA DEL LOTE ADITIVO. RayoStrip.CerrarLote()
+        /// reabre el SpriteBatch en ADITIVO (para que el llamador dibuje
+        /// sus gorros con el lote vivo); pero si un PreDraw SALÍA así, el
+        /// resto de proyectiles del pase se dibujaba con blend aditivo
+        /// (LAVADOS, sin alfa). Este helper termina el lote abierto (sea
+        /// cual sea su blend — la sonda decide) y reabre con los
+        /// parámetros EXACTOS del pase de entidades. Los sprites ya en
+        /// cola se vuelcan con el blend con el que fueron encolados y el
+        /// pase continúa limpio. Es LA SALIDA correcta de todo PreDraw
+        /// que haya usado RayoStrip (gorros de StormLib incluidos).
+        /// </summary>
+        public static void RestaurarLoteVanilla()
+        {
+            CerrarLoteSiAbierto();
+            ReabrirLoteVanilla();
         }
 
         // ------------------------------------------------------------------
@@ -1365,33 +1387,46 @@ namespace AethonMod.Content.VFX
         public static void Reiniciar()
         {
             try { _quads.Clear(); } catch { }
-            // v6.50.51 — el anillo horneado también se suelta (la textura
-            // perezosa se rehornea sola al próximo uso — 1 ms).
-            Texture2D arcoirisViejo = _arcoiris;
-            _arcoiris = null;
-            if (arcoirisViejo != null)
-            {
-                try
-                {
-                    if (Main.dedServ ||
-                        System.Threading.Thread.CurrentThread.ManagedThreadId == _hiloPrincipal)
-                    {
-                        arcoirisViejo.Dispose();
-                    }
-                    else
-                    {
-                        Main.QueueMainThreadAction(() =>
-                        {
-                            try { arcoirisViejo.Dispose(); } catch { }
-                        });
-                    }
-                }
-                catch { }
-            }
+            // v6.50.51 — el anillo horneado se suelta (se rehornea solo al
+            // próximo uso — 1 ms). v6.56.1 — LAS 4 HORNEADAS TAMBIÉN
+            // (Carne/Colmillo/Ventosa/OjoRasgado): el comentario viejo decía
+            // "se repiden solas" pero NADIE las disponía — fuga de VRAM en
+            // cada recarga del mod. El funeral encolado, ahora en helper.
+            SoltarTexturaHorneada(ref _arcoiris);
+            SoltarTexturaHorneada(ref _carne);
+            SoltarTexturaHorneada(ref _colmillo);
+            SoltarTexturaHorneada(ref _ventosa);
+            SoltarTexturaHorneada(ref _ojoRasgado);
             _quadsDelFrame = 0;
             _frameDelPresupuesto = 0;
             _factorCalidad = 1f;
             _fpsSuave = 60f;
+        }
+
+        /// <summary>v6.56.1 — EL FUNERAL ENCOLADO de una textura horneada
+        /// (el patrón del arcoiris de la v6.50.51, extraído a helper: capturar,
+        /// despegar y dejar que el hilo principal la entierre).</summary>
+        private static void SoltarTexturaHorneada(ref Texture2D campo)
+        {
+            Texture2D vieja = campo;
+            campo = null;
+            if (vieja == null) return;
+            try
+            {
+                if (Main.dedServ ||
+                    System.Threading.Thread.CurrentThread.ManagedThreadId == _hiloPrincipal)
+                {
+                    vieja.Dispose();
+                }
+                else
+                {
+                    Main.QueueMainThreadAction(() =>
+                    {
+                        try { vieja.Dispose(); } catch { }
+                    });
+                }
+            }
+            catch { }
         }
 
         /// <summary>

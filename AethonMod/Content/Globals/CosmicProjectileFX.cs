@@ -33,6 +33,11 @@ namespace AethonMod.Content.Globals
 
         public override void AI(Projectile projectile)
         {
+            // v6.56.1 — el servidor no dibuja polvos ni luces (trabajo
+            // tirado a la basura cada tick; el patrón de referencia de la
+            // casa — CalaveraPotenciadaFX — SÍ tenía el guard).
+            if (Main.dedServ) return;
+
             // === ESTELA CÓSMICA (v5.2: duración CORTA) ===
             // El usuario reportó que la estela magenta duraba demasiado.
             // Fix: configurar cada dust con noGravity=true, fadeIn=0, y alpha alto

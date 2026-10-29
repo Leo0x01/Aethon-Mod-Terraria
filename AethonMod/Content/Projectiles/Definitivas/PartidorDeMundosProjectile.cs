@@ -57,7 +57,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
             writer.Write(_techo);
             writer.Write(_piso);
             writer.Write(_anclaLista);
-            ((ModProjectile)this).SendExtraAI(writer);
+            // v6.56.1 — LA CURA DE LA RECURSIÓN (StackOverflow en MP):
+            // el base-call del decompilador era una auto-llamada virtual.
+            // La base es vacía: no hay nada que llamar.
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
@@ -579,7 +581,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                 }
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
 

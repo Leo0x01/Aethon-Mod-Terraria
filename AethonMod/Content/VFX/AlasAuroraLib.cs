@@ -997,6 +997,10 @@ namespace AethonMod.Content.VFX
             _fxTextura = null;
             _ruido = null;
             _ruidos.Clear();
+            // v6.56.1 — EL LATCH ETERNO: si UNA carga de textura fallaba
+            // una vez, las alas de TODOS los estilos dejaban de intentar
+            // cargar hasta reiniciar el juego. La descarga lo perdona.
+            _texturaProboFallar = false;
             if (plano == null && textura == null)
             {
                 return;

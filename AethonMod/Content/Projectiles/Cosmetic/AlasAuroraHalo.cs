@@ -226,9 +226,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             {
                 return false;
             }
-            if (Utils.NextBool(Main.rand, 22))
+            // v6.56.1 — DETERMINISMO DEL AURA (ley §0.4 del códice): el
+            // brillo ya no tira de Main.rand en render — Hash01 con
+            // semilla viva (misma probabilidad 1/22 y mismos rangos).
+            if (VFXCore.Hash01(((Entity)val).whoAmI * 17 + 5, (int)Main.GameUpdateCount, 311) < 0.0455f)
             {
-                Dust.NewDustPerfect(val.MountedCenter + new Vector2((float)(-((Entity)val).direction) * Utils.NextFloat(Main.rand, 20f, 60f), (0f - Utils.NextFloat(Main.rand, 30f, 80f)) * val.gravDir), 173, (Vector2?)new Vector2(0f, 0.4f), 140, ColorPrisma(Utils.NextFloat(Main.rand)), 0.8f).noGravity = false;
+                int semillaAura = ((Entity)val).whoAmI * 31 + 7;
+                int tick = (int)Main.GameUpdateCount;
+                float dx = 20f + 40f * VFXCore.Hash01(semillaAura, tick, 313);
+                float dy = 30f + 50f * VFXCore.Hash01(semillaAura + 1, tick, 317);
+                Dust.NewDustPerfect(val.MountedCenter + new Vector2((float)(-((Entity)val).direction) * dx, (0f - dy) * val.gravDir), 173, (Vector2?)new Vector2(0f, 0.4f), 140, ColorPrisma(VFXCore.Hash01(semillaAura + 2, tick, 319)), 0.8f).noGravity = false;
             }
             try
             {

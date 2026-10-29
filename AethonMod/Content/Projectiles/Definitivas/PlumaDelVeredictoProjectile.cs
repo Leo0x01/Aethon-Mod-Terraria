@@ -211,7 +211,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 ((ModProjectile)this).Projectile.Kill();
                 return;
             }
-            if (num < 2f)
+            // v6.56.1 — el sello lo ancla el DUEÑO con su ratón (sync al resto).
+            if (num < 2f && Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
             {
                 Vector2 val2 = Main.MouseWorld - val.MountedCenter;
                 if ((val2).LengthSquared() < 1f)

@@ -13,7 +13,9 @@ namespace AethonMod.Content.Systems
     /// </summary>
     public class ShardSyncSystem : ModSystem
     {
-        public const byte SyncResonance = 2;
+        // v6.56.1 — SyncResonance (const 2) ERA UN PROTOCOLO MUERTO: cero
+        // emisores y un case vacío con TODO. Retirado (era el único
+        // TODO-tarea real de todo el mod).
 
         public override void NetSend(BinaryWriter writer)
         {
@@ -42,10 +44,6 @@ namespace AethonMod.Content.Systems
                 byte msgType = reader.ReadByte();
                 switch (msgType)
                 {
-                    case SyncResonance:
-                        // TODO: implementar sync de resonancia.
-                        break;
-
                     case EcoRed.MsgVoz:
                     case EcoRed.MsgHambre:
                     case EcoRed.MsgLatidoXp:

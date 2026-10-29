@@ -30,9 +30,21 @@ namespace AethonMod.Content.Effects.Bruma
     public class BrumaSystem : ModSystem
     {
         /// <summary>v6.49 — la purga del pool de Cinta (cada 120 ticks, barata).</summary>
+        /// <summary>v6.56.1 — el podador de las marcas del festín: la
+        /// caducidad de 5 s de FaucesGlobalNPC vivía SIN llamador desde
+        /// una purga antigua — una marca sobreviviente interceptaba la
+        /// muerte del jefe PARA SIEMPRE (18 s de cine por cualquier otra
+        /// causa de muerte minutos después).</summary>
+        private int _tickPodaMarcas;
+
         public override void PostUpdateWorld()
         {
             Cinta.TickPurga();
+            if (++_tickPodaMarcas >= 60)
+            {
+                _tickPodaMarcas = 0;
+                try { global::AethonMod.Content.Globals.FaucesGlobalNPC.PodarMarcas(); } catch { }
+            }
         }
 
         public override void Unload()
@@ -49,6 +61,11 @@ namespace AethonMod.Content.Effects.Bruma
             // eran limpiados por NADIE (hallazgo AUD-C).
             try { Cinta.Purgar(); } catch { }
             try { VFXCore.Reiniciar(); } catch { }
+
+            // v6.56.1 — las ALAS también: sus 2 BasicEffect solo se
+            // limpiaban al salir del MUNDO (OnWorldUnload) — en la
+            // descarga del mod fugaban en cada recarga.
+            try { global::AethonMod.Content.VFX.AlasAuroraLib.Reiniciar(); } catch { }
         }
     }
 }

@@ -45,17 +45,11 @@ Projectiles: {
 	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
 	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
 	ColumnaIraProjectile.DisplayName: Columna Ira Projectile
-	EstrellaStrikeProjectile.DisplayName: Estrella Strike Projectile
 	IraDelCieloProjectile.DisplayName: Ira Del Cielo Projectile
-	LluviaHojaProjectile.DisplayName: Lluvia Hoja Projectile
 	PartidorDeMundosProjectile.DisplayName: Partidor De Mundos Projectile
-	PolarDardoProjectile.DisplayName: Polar Dardo Projectile
 	PrismaPrimordialProjectile.DisplayName: Prisma Primordial Projectile
 	RequiemEstelarProjectile.DisplayName: Requiem Estelar Projectile
-	SistemaDetonacionProjectile.DisplayName: Sistema Detonacion Projectile
-	SistemaTiroProjectile.DisplayName: Sistema Tiro Projectile
 	TestamentoAethonProjectile.DisplayName: Testamento Aethon Projectile
-	RayoFusionCopiaProjectile.DisplayName: Rayo Fusion Copia Projectile
 	IndiceDelJuicioProjectile.DisplayName: Indice Del Juicio Projectile
 	LanzaVeredictoProjectile.DisplayName: Lanza Veredicto Projectile
 	OjoDelJuicioProjectile.DisplayName: Ojo Del Juicio Projectile

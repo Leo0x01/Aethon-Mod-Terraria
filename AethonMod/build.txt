@@ -1,7 +1,7 @@
 author = AethonModTeam
-version = 6.56.0
+version = 6.56.1
 displayName = Aethon, the Eternal Grimoire
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
-buildIgnore = *.csproj, *.csproj.user, obj/*, bin/*, *.bak, *.md, *.py, *.sh, research/*, tools/*, tests, _masters/*
+buildIgnore = *.csproj, *.csproj.user, obj/*, bin/*, *.bak, *.md, *.py, *.sh, *.bat, *.mjs, *.ps1, *.cmd, research/*, tools/*, tests, _masters/*
 side = Both

@@ -219,9 +219,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     return;
                 }
             }
-            Vector2 val2 = Utils.SafeNormalize(Main.MouseWorld - val.MountedCenter, Vector2.UnitX);
-            ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + val2 * 26f + new Vector2(0f, -8f);
-            ((ModProjectile)this).Projectile.rotation = Utils.ToRotation(val2);
+            // v6.56.1 — LA MIRA EN MP: solo el dueño apunta con su ratón;
+            // el servidor y los demás usan el Center/rotation sincronizados.
+            if (Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
+            {
+                Vector2 val2 = Utils.SafeNormalize(Main.MouseWorld - val.MountedCenter, Vector2.UnitX);
+                ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + val2 * 26f + new Vector2(0f, -8f);
+                ((ModProjectile)this).Projectile.rotation = Utils.ToRotation(val2);
+            }
             float num2 = MathHelper.Clamp(num / (flag ? 70f : 150f), 0f, 1f);
             float num3 = (_muriendo ? MathHelper.Clamp(1f - (float)_tMuerte / 12f, 0f, 1f) : 1f);
             ((ModProjectile)this).Projectile.localAI[1] = MathHelper.Lerp(((ModProjectile)this).Projectile.localAI[1], num2 * num3, 0.12f);
@@ -510,7 +515,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 DefinitivasLib.HazFusionEspina(array, array2, DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f), num * 0.9f, globalTimeWrappedHourly, _semilla + 20);
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
 

@@ -3,6 +3,13 @@
 // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
 // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
 // Los comentarios de la fuente original no viajan dentro del .dll.
+//
+// v6.56.1 — LA CURA DEL TEMPORIZADOR: los 3 Shoot pasaban whoAmI en ai[2]
+// (la convención del RC2, donde ai[2] es el DUEÑO), pero estos 3 proyectiles
+// usan ai[2] como RELOJ (umbrales num==2/30/60/104/150/178…). En SP quienI==0
+// lo disimulaba; en MP cualquier jugador con slot != 0 arrancaba el reloj
+// desplazado (el Ojo jamás se colocaba, el Índice saltaba su apertura…).
+// El dueño ya viaja en Projectile.owner — ai[2] arranca en 0.
 
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -57,7 +64,7 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             //IL_0002: Unknown result type (might be due to invalid IL or missing references)
             //IL_0007: Unknown result type (might be due to invalid IL or missing references)
-            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, (float)((Entity)player).whoAmI);
+            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, 0f);
             return false;
         }
 
@@ -110,7 +117,7 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             //IL_0002: Unknown result type (might be due to invalid IL or missing references)
             //IL_0007: Unknown result type (might be due to invalid IL or missing references)
-            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, (float)((Entity)player).whoAmI);
+            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, 0f);
             return false;
         }
 
@@ -163,7 +170,7 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             //IL_0002: Unknown result type (might be due to invalid IL or missing references)
             //IL_0007: Unknown result type (might be due to invalid IL or missing references)
-            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, (float)((Entity)player).whoAmI);
+            Projectile.NewProjectile((IEntitySource)(object)source, player.MountedCenter, Vector2.Zero, type, damage, knockback, ((Entity)player).whoAmI, 0f, 0f, 0f);
             return false;
         }
 

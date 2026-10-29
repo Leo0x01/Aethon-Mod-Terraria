@@ -58,15 +58,9 @@ namespace AethonMod.Content.Weapons.Definitivas
 
         public override bool CanUseItem(Player player)
         {
-            // UN solo haz a la vez: su ciclo completo dura 1200 ticks (20 s).
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p != null && p.active && p.owner == player.whoAmI &&
-                    p.type == ModContent.ProjectileType<RayoConcentradoDosProjectile>())
-                    return false;
-            }
-            return true;
+            // v6.56.1 — UN solo haz a la vez, cruzando TODA la escalera
+            // (niveles 1-3 + RC2 + Prisma): EscaleraDelRayo.HazLibre.
+            return EscaleraDelRayo.HazLibre(player);
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,

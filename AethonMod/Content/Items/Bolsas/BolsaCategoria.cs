@@ -138,10 +138,12 @@ namespace AethonMod.Content.Items.Bolsas
         //  LOS HELPERS (la semántica de "garantía" de la casa)
         // ==================================================================
 
-        /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>
+        /// <summary>¿El jugador tiene este ítem? (incluido el slot 58 del
+        /// cursor: si su ÚNICA copia va en la mano, la garantía no debe
+        /// duplicarla — v6.56.1).</summary>
         protected static bool Tiene(Player player, int itemType)
         {
-            for (int i = 0; i < 58; i++)
+            for (int i = 0; i < player.inventory.Length; i++)
             {
                 if (player.inventory[i] != null &&
                     player.inventory[i].type == itemType)

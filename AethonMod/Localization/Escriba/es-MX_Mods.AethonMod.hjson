@@ -48,4 +48,46 @@ Projectiles: {
 	AlasAuroraHalo: {
 		DisplayName: La Aurora de Tinta
 	}
+	SombraPagina3Projectile: {
+		DisplayName: La Sombra de la Página III
+	}
+	SombraPagina4Projectile: {
+		DisplayName: La Sombra de la Página IV
+	}
+	ColumnaIraProjectile: {
+		DisplayName: La Columna de la Ira
+	}
+	IraDelCieloProjectile: {
+		DisplayName: La Ira del Cielo
+	}
+	PartidorDeMundosProjectile: {
+		DisplayName: El Partidor de Mundos
+	}
+	PrismaPrimordialProjectile: {
+		DisplayName: El Prisma Primordial
+	}
+	RequiemEstelarProjectile: {
+		DisplayName: El Réquiem Estelar
+	}
+	TestamentoAethonProjectile: {
+		DisplayName: El Testamento de Aethon
+	}
+	IndiceDelJuicioProjectile: {
+		DisplayName: El Índice del Juicio
+	}
+	LanzaVeredictoProjectile: {
+		DisplayName: La Lanza del Veredicto
+	}
+	OjoDelJuicioProjectile: {
+		DisplayName: El Ojo del Juicio
+	}
+	PaginaIndiceProjectile: {
+		DisplayName: La Página del Índice
+	}
+	PlumaDelVeredictoProjectile: {
+		DisplayName: La Pluma del Veredicto
+	}
+	RayoConcentradoNivelProjectile: {
+		DisplayName: El Rayo Concentrado
+	}
 }
