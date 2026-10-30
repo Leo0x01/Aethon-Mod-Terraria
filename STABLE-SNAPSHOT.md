@@ -1,5 +1,7 @@
 # v6.56.7 — EL RC2 VUELVE A SU TÉCNICA (607df36): LA CURA DE LOS PICOS — EL CHECKLIST
 
+> **PUBLICADA** — release [429356315](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.7) + CDN verificado byte a byte (md5 `b6f37c7f12d21fc14d175725b7782d2c`, 6.363.051 B; asset id 693010906).
+
 **Qué pasó** (la letra): «primero borrar las variantes de rayo concentrado 2» + «ahora tiene picos y antes no, ¿por qué se hacen esos picos?, acaso es que se usan mal las texturas» + «el commit donde estaba correcta la técnica de haz es el 607df36… usa el código de 607df36 para reparar el problema de los picos y la falta de efecto» + «recuerda cual es el color del mod» + «los círculos rúnicos como en la versión actual» + «en la fase de carga también pusiste un círculo plano… usa los mismos anillos rúnicos» + «te olvidaste de usar los brillos de soles rúnicos del accesorio» + «dale una mejora de shaders» + «documentar la solución de los picos».
 
 1. **LAS VARIANTES (muertas)**: [ ] la Bolsa de las Definitivas entrega SOLO el Rayo Concentrado 2; [ ] ni rastro de Prisma/Eclipse/Tormenta/Solar/Vórtice/Espectro/Sierpe/Cuántico/Nova (ni ítems ni iconos ni textos).
