@@ -10,7 +10,6 @@
 // the Beam Weapons bag, rendered with the god's fusion-ray
 // technique) and THE INK AURORA (the code-drawn wings, now in the
 // Cosmetics bag and finally VISIBLE).
-// ENGLISH (en-US).
 Items: {
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo

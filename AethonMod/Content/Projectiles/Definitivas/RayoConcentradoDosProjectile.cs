@@ -38,6 +38,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         internal SonidoEnLoop raySound;
 
+        // v6.56.5 — EL SLOT DE LA CARGA (auditoría B, MENOR-2): el one-shot
+        // de 5.15 s quedaba huérfano si el dueño moría a mitad de carga
+        // (seguía sonando hasta el final). Ahora viaja con el proyectil y
+        // la muerte del dueño lo corta (CortarCarga).
+        private ReLogic.Utilities.SlotId _cargaSlot;
+
         public float volume;
 
         public float pitch;
@@ -68,6 +74,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             ((ModProjectile)this).Projectile.aiStyle = -1;
             ((ModProjectile)this).Projectile.manualDirectionChange = true;
             ((ModProjectile)this).Projectile.netImportant = true;
+            // v6.56.5 — LA AUDITORÍA B (MENOR-4): tML recicla las instancias
+            // ModProjectile sin limpiar campos — un re-disparo tras una
+            // muerte temprana encontraba el SonidoEnLoop (y su slot) de la
+            // vida anterior. La pizarra nace limpia.
+            raySound = null;
+            _cargaSlot = default;
         }
 
         // v6.56.1 — LOS POZOS DEL RC2 (cero-GC): antes cada frame del láser
@@ -160,12 +172,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //IL_05d2: Unknown result type (might be due to invalid IL or missing references)
             if (Owner < 0f || Owner >= 255f)
             {
+                CortarCarga();
                 ((ModProjectile)this).Projectile.Kill();
                 return;
             }
             Player val = Main.player[(int)Owner];
             if (val == null || !((Entity)val).active || val.dead)
             {
+                CortarCarga();
                 ((ModProjectile)this).Projectile.Kill();
                 return;
             }
@@ -199,7 +213,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         MaxInstances = 1,
                         Volume = 1f
                     };
-                    DefinitivasLib.Sonar(carga, ((Entity)((ModProjectile)this).Projectile).Center);
+                    // v6.56.5 — el slot VIAJA con el proyectil (auditoría B,
+                    // MENOR-2): si el dueño cae a mitad de carga, CortarCarga()
+                    // lo apaga con él en vez de dejar 5 s de carga huérfana.
+                    // (El .ogg además fue regenerado SIN el pitido del finale —
+                    // gen_sonido_v6565.py: el seno puro de 1376 Hz a -37 dBFS
+                    // con 31 dB de prominencia que el usuario oyó al final.)
+                    try
+                    {
+                        _cargaSlot = Terraria.Audio.SoundEngine.PlaySound(carga, ((Entity)((ModProjectile)this).Projectile).Center);
+                    }
+                    catch { }
                 }
                 if (Time < (float)ChargeTime)
                 {
@@ -207,7 +231,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     {
                         HazConcentradoLib.DestellosDeCarga(((Entity)((ModProjectile)this).Projectile).Center, Time / (float)ChargeTime, (int)(Time * 7f) + 11, 1f);
                     }
-                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, MathHelper.Lerp(240f, 150f, Time / (float)ChargeTime), 0.3f, 0.6f);
+                    // v6.56.5 — LA AUDITORÍA B (MEDIO-2): la vida de la lente
+                    // bajó de 0.6 s a 0.06 s — con 1 registro/tick y 0.6 s de
+                    // vida el RC2 pedía 36 lentes vivas contra una mesa de 8:
+                    // se autodesalojaba a los 8 ticks y MONOPOLIZABA las 8
+                    // butacas (las ondas de choque y demás lentes del mod
+                    // morían sin recorrer su ventana). Con 0.06 s (≈4 ticks)
+                    // cada lente muere sola: el compuesto visual se mantiene
+                    // (la rampa de nacimiento es el 15% = 0.6 ticks) y quedan
+                    // 4 butacas libres para el resto del mundo.
+                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, MathHelper.Lerp(240f, 150f, Time / (float)ChargeTime), 0.3f, 0.06f);
                 }
                 else if (Time < (float)(ChargeTime + 60))
                 {
@@ -218,12 +251,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 if (Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
                 {
-                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, 150f, 0.25f, 0.6f);
-                    Pantalla.Sacudir(2.6f, 0.4f, "RC2-sostenido");
+                    // v6.56.5 — la vida corta de la lente (auditoría B, MEDIO-2).
+                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, 150f, 0.25f, 0.06f);
+                    // v6.56.5 — LA AUDITORÍA B (MEDIO-1): EL TEMBLOR ERA
+                    // SUB-PÍXEL. La escala de la casa es trauma²·min(i,14) px
+                    // con trauma = i/10 — el 2.6 sostenido de la .56.4 daba
+                    // 0.26²·2.6 = 0.18 px constantes: invisible. La letra
+                    // pedía «el mundo debe temblar un poco así el jugador
+                    // nota el poder»: 6.5 sostenido → 0.4225·6.5 ≈ 2.75 px
+                    // constantes (rumble perceptible, sin marear), y el
+                    // encendido sube a 9 → 0.81·9 ≈ 7.3 px de pico (el golpe
+                    // de la ignición, por debajo del trauma máximo de la casa).
+                    Pantalla.Sacudir(6.5f, 0.4f, "RC2-sostenido");
                 }
                 if (Time == (float)(ChargeTime + 1))
                 {
-                    Pantalla.Sacudir(7f, 0.8f, "RC2-encendido");
+                    Pantalla.Sacudir(9f, 0.8f, "RC2-encendido");
                 }
             }
             float num = (float)Math.Cos((Time - (float)ChargeTime) / (float)LaserDuration * ((float)Math.PI * 2f)) * 2.5f * Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)ChargeTime + (float)LaserDuration * 0.1f, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration), (float)ChargeTime + (float)LaserDuration * 0.9f, Time, true);
@@ -287,6 +330,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //IL_00a3: Unknown result type (might be due to invalid IL or missing references)
             //IL_00aa: Unknown result type (might be due to invalid IL or missing references)
             //IL_00ba: Expected O, but got Unknown
+            // v6.56.5 — LA AUDITORÍA B (MENOR-4): el servidor dedicado no
+            // tiene audio — antes allocaba el SonidoEnLoop + su tracker en
+            // vano en cada disparo del servidor.
+            if (Main.dedServ)
+            {
+                return;
+            }
             volume = 1.3f * Utils.GetLerpValue(0f, 0.05f, realSize, true);
             // v6.56.4 — EL PITCH DEL HAZ (la letra: «el sonido actual es muy
             // agudo para el tipo de haz de luz, el sonido que debe hacer tiene
@@ -306,6 +356,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 raySound = new SonidoEnLoop(estilo, (Func<bool>)new ProjectileAudioTracker(((ModProjectile)this).Projectile).IsActiveAndInGame);
             }
             raySound.PlaySound(() => ((Entity)((ModProjectile)this).Projectile).Center, () => volume, () => pitch);
+        }
+
+        // v6.56.5 — LA CARGA MUERE CON SU DUEÑO (auditoría B, MENOR-2): si
+        // el jugador cae a mitad de carga, el one-shot de 5.15 s seguía
+        // sonando hasta el final, huérfano. Este corte lo apaga con él.
+        private void CortarCarga()
+        {
+            try
+            {
+                if (_cargaSlot.IsValid && Terraria.Audio.SoundEngine.TryGetActiveSound(_cargaSlot, out Terraria.Audio.ActiveSound sonidoActivo) && sonidoActivo != null)
+                {
+                    sonidoActivo.Stop();
+                }
+            }
+            catch
+            {
+            }
+            _cargaSlot = default;
         }
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
@@ -500,8 +568,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float breathe = 1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
                 float horizon = MathHelper.Lerp(96f, 132f, numP) * breathe;
                 VFXCore.Begin();
+                // v6.56.5 — LA AUDITORÍA B (MEDIO-3): EL HORIZONTE SALÍA A LA
+                // MITAD. La convención de la casa para BlackDisk (Supremo/
+                // Bruma: «sólido hasta ~0.88 del semiancho → tamaño 2.28·R
+                // da un radio visible de R»): la Scale del Quad es el ANCHO
+                // TOTAL — horizon/0.88 = 1.14·horizon dejaba el radio sólido
+                // en 0.5·horizon (48-66 px en vez de 96-132: el núcleo negro
+                // quedaba MÁS PEQUEÑO que su propia corona de 56 px — el
+                // eclipse se leía al revés). 2.28·horizon lo pone exacto.
                 VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, new Color(12, 5, 20, 240) * 0.95f,
-                    new Vector2(horizon / 0.88f, horizon / 0.88f), 0f, HazConcentradoLib.DiscoNegro);
+                    new Vector2(2.28f * horizon, 2.28f * horizon), 0f, HazConcentradoLib.DiscoNegro);
                 VFXCore.FlushAlpha();
                 float rCorona = MathHelper.Lerp(150f, 56f, numP) * breathe;
                 try
@@ -588,6 +664,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     finally
                     {
                         gd.BlendState = BlendState.AlphaBlend;
+                        // v6.56.5 — LA AUDITORÍA B (MENOR-1): si algo tronara
+                        // entre el cierre del lote (CerrarLoteSiAbierto) y la
+                        // salida, el lote quedaba CERRADO — y tML mata al
+                        // proyectil que dibuja con el lote cerrado. La cura
+                        // ahora también corre por el camino de la excepción.
+                        VFXCore.RestaurarLoteVanilla();
                     }
                 }
                 else

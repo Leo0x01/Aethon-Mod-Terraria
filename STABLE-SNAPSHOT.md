@@ -1,3 +1,21 @@
+# v6.56.5 — LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES — EL CHECKLIST
+
+> **PUBLICADA** — release por confirmar (el ID se conoce después de crear el release — la lección del snapshot).
+
+**Qué pasó** (la letra): «en el sonido de carga escucho un pitido al final» + «haz una auditoría en los últimos cambios en busca de errores no detectados».
+
+1. **EL PITIDO DE LA CARGA**: [ ] al final de la carga (últimos ~0.45 s) ya NO suena ningún tono puro — solo el crescendo grave con un soplo de presión al final; [ ] el final del one-shot EXHALA (fade 60 ms — antes un golpecillo); [ ] el bucle del láser suena IGUAL que en la .56.4 (no se tocó).
+2. **EL TEMBLOR (antes sub-píxel — invisible)**: [ ] al DISPARAR el RC2 se siente el golpe de encendido (~7 px); [ ] mientras MANTIENES el rayo el mundo RUMBLEA sutil (~2.75 px constantes — «un poco», sin marear); [ ] al apagarse muere solo.
+3. **EL PORTAL DEL CONJURO**: [ ] el núcleo negro ahora es GRANDE (96-132 px de radio a plena potencia — antes salía a la mitad y su corona lo superaba: el eclipse se leía al revés).
+4. **LAS ARMAS DE PICOS (la espina al revés)**: [ ] la COLUMNA de la Ira brilla en el PUNTO DE IMPACTO (antes se fundía a negro justo al llegar al suelo); [ ] la telegrafía y el CORTE del Partidor iluminan su mitad INFERIOR (donde muerde el juicio); [ ] el color sigue viajando en su dirección original y el hervor conserva su sentido; [ ] el Prisma/escalera/RC2 IGUAL que la .56.4.
+5. **LAS ALAS RÚNICAS (Solares/Vacío/Eclipse/Juicio)**: [ ] las runas de las plumas gemelas giran en SENTIDO OPUESTO (el par se lee como un espejo — antes giraban al mismo sentido); [ ] al mirar a la IZQUIERDA el giro de las runas también se espeja; [ ] las plumas gemelas centellean y muestran EL MISMO glifo (antes diferían); [ ] el anillo central de 8 glifos REVERSA su orbital al girar el personaje.
+6. **LA CARGA MUERE CON SU DUEÑO**: [ ] morir a mitad de carga corta el sonido de carga al instante ( antes seguía sonando 5 s huérfano).
+7. **IDIOMAS/PAQUETE**: [ ] el mod sigue monolingüe (es-ES == es-MX, sin en-US); [ ] la descripción del navegador de mods dice «Localización ES (es-ES + es-MX)»; [ ] el .tmod pesa ~4.7 KB menos (los .fx fuente fuera; los shaders cargan igual).
+8. **REGRESIÓN GENERAL**: [ ] el RC2 completo como la .56.4 (destellos, portal, haz sin franjas, sonido grave); [ ] las alas no-rúnicas como la .56.4; [ ] Réquiem/Ojo/Primer Trazo intactos; [ ] F8: presupuesto sano.
+
+---
+
+
 # v6.56.4 — EL CAMINO GPU DEL RC2 + EL ESPEJO COMPLETO DE LAS ALAS + EL PORTAL DEL CONJURO — EL CHECKLIST
 
 > **PUBLICADA** — release [428511425](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.4) + CDN verificado byte a byte (md5 `70b29ef940fa84dbac8c4ed18cfe92da`, 6.349.490 B; asset id 690309919).

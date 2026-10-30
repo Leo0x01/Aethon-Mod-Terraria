@@ -133,7 +133,7 @@ namespace AethonMod.Content.VFX
         /// <param name="ptsMundo">La espina, coords de MUNDO, n nodos (2..128).</param>
         /// <param name="perfil">Semiancho por nodo (px) — la fórmula propia del arma (AnchoCono y familia).</param>
         /// <param name="colores">Color por nodo (la convención de la casa: el gradiente viajero + lente).</param>
-        /// <param name="uTime">El reloj del flujo: −reloj·0.025·flujoPropio (negativo = hierve hacia la raíz).</param>
+        /// <param name="uTime">El reloj del flujo: −reloj·0.025·flujoPropio (positivo = hierve hacia la raíz — el nodo 0; la .56.4 documentaba el signo AL REVÉS, auditoría A-2).</param>
         /// <param name="uEscalaV">La compensación de escala V del shader; −1 = automática por ancho (2·perfilMáx/(texel·2.2), piso 0.18 — la curva uEscalaV de la v6.55, aquí por PÍXELES de ancho).</param>
         public static void Dibujar(Vector2[] ptsMundo, int n, float[] perfil, Color[] colores, float uTime, float uEscalaV = -1f)
         {
@@ -145,9 +145,13 @@ namespace AethonMod.Content.VFX
             {
                 return;
             }
-            if (perfil.Length < n || colores.Length < n)
+            if (perfil.Length < n || colores.Length < n || ptsMundo.Length < n)
             {
-                n = Math.Min(Math.Min(n, perfil.Length), colores.Length);
+                // v6.56.5 — LA AUDITORÍA A (MENOR-4): faltaba ptsMundo en el
+                // clamp — un llamador futuro con n mayor que la espina leía
+                // más allá del array (los 5 actuales pasan tamaños exactos,
+                // pero el contrato lo promete para cualquiera).
+                n = Math.Min(Math.Min(Math.Min(n, perfil.Length), colores.Length), ptsMundo.Length);
             }
             if (n < 2)
             {
@@ -231,14 +235,23 @@ namespace AethonMod.Content.VFX
                 finally
                 {
                     gd.BlendState = BlendState.AlphaBlend;
+                    // v6.56.5 — LA AUDITORÍA B (MENOR-1): el Reabrir vivía
+                    // FUERA del finally — una excepción dentro del try dejaba
+                    // el lote CERRADO (ya se había corrido CerrarLoteSiAbierto)
+                    // y tML mata al proyectil que dibuja así. La cura ahora
+                    // también corre por el camino de la excepción.
+                    VFXCore.ReabrirLoteVanilla();
                 }
-                VFXCore.ReabrirLoteVanilla();
                 return;
             }
 
             // 4) EL FALLBACK ×3 (la red de seguridad de la casa — el mismo
             //    del RC2: carne 420/1.0 · remolino 240/1.9 · núcleo 380/2.6
             //    V 0.36..0.64), con los colores POR NODO del llamador.
+            //    (v6.56.5, auditoría A-3, documentado: el fallback NO consume
+            //    uTime — usa flujos fijos con GlobalTime. Solo visible si el
+            //    .fxc falla; los sentidos de hervor de GPU y fallback pueden
+            //    discrepar en los conductos que negaron uTime.)
             Vector2 sp = Main.screenPosition;
             for (int k = 0; k < NFallback; k++)
             {

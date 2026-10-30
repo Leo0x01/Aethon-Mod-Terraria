@@ -942,31 +942,51 @@ namespace AethonMod.Content.VFX
                 try
                 {
                     Vector2 screenPosition = Main.screenPosition;
+                    // v6.56.5 — LA AUDITORÍA C (MEDIO-1): EL GIRO DE RUNAS
+                    // ESPEJADO, LA SEGUNDA VUELTA. La .56.4 añadió espejoLado
+                    // (−1 izquierda / +1 derecha) — pero con Plumas IMPAR (las
+                    // 4 alas rúnicas tienen 5) la paridad del índice YA se
+                    // auto-invierte entre gemelas (parity(n4+j) = −parity(j))
+                    // y el factor EXTRA dejaba a ambas girando AL MISMO
+                    // SENTIDO — y un espejo geométrico INVIERTE el sentido de
+                    // giro. La .56.3 (sin factor) era la correcta para impar;
+                    // la .56.4 arregló par y rompió impar. La cuenta exacta:
+                    // L_B = −(−1)^num4 con L_A = +1 — impar: ambas +1 (la
+                    // paridad hace el trabajo); par: +1/−1. Además: el giro
+                    // viaja con direction (al mirar a la izquierda TODO el
+                    // enjambre se espeja — el glifo también, o las runas no
+                    // eran el espejo de sí mismas) y las gemelas COMPARTEN
+                    // semilla de fase, centelleo y glifo (antes el índice
+                    // crudo i hacía que las plumas gemelas centellearan y
+                    // giraran distinto — asimetría visible del par).
+                    float dirGiro = (float)((Entity)pl).direction;
                     for (int i = 0; i < _geoN; i++)
                     {
                         Vector2 val3 = _pozosEje[i][8];
-                        float num5 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + i, 3, 5) * ((float)Math.PI * 2f);
+                        int gemela = i % num4;
+                        float num5 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + gemela, 3, 5) * ((float)Math.PI * 2f);
                         float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * 2.3f + num5 + flap * 0.35f);
-                        num6 *= 0.8f + 0.2f * VFXCore.Hash01(((Entity)pl).whoAmI * 13 + i, (int)(globalTimeWrappedHourly * 12f), 17);
-                        float num7 = (float)(i % num4) / (float)(num4 - 1);
+                        num6 *= 0.8f + 0.2f * VFXCore.Hash01(((Entity)pl).whoAmI * 13 + gemela, (int)(globalTimeWrappedHourly * 12f), 17);
+                        float num7 = (float)gemela / (float)(num4 - 1);
                         float escala = 1.45f + 0.35f * num7;
                         Color cuerpo = val;
                         Color punta = val2;
                         if (estilo.Runas == 4)
                         {
-                            cuerpo = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f + (float)i / (float)_geoN);
+                            cuerpo = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f + (float)gemela / (float)num4);
                         }
-                        // v6.56.4 — EL GIRO DE RUNAS ESPEJADO: el giro alternaba por
-                        // índice de pluma — con Plumas impar el patrón de rotación no
-                        // se reflejaba entre el par. La primera mitad (ala izquierda,
-                        // construida primero) gira al revés: el patrón ES el espejo
-                        // del ala gemela.
-                        float espejoLado = ((i < num4) ? -1f : 1f);
-                    SigiloLib.Runa(val3 + screenPosition, globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) * espejoLado + num5, array, (i * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6);
+                        float espejoLado = ((i < num4) || ((num4 & 1) == 1)) ? 1f : (-1f);
+                    SigiloLib.Runa(val3 + screenPosition, (globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) * espejoLado + num5) * dirGiro, array, (gemela * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6);
                     }
                     for (int j = 0; j < 8; j++)
                     {
-                        float num8 = (float)j / 8f * ((float)Math.PI * 2f) + globalTimeWrappedHourly * num;
+                        // v6.56.5 — LA AUDITORÍA C: el anillo central TAMBIÉN
+                        // se espeja al mirar a la izquierda: π−θ es el espejo X
+                        // de θ (cos(π−θ) = −cos θ), así el orbital REVERSA con
+                        // la dirección (un espejo invierte el sentido de giro)
+                        // y las posiciones estáticas quedan espejadas — el
+                        // giro del glifo cae exacto (−θ−π/2 ≡ π−θ+π/2, mod 2π).
+                        float num8 = ((float)j / 8f * ((float)Math.PI * 2f) + globalTimeWrappedHourly * num) * dirGiro + MathHelper.Pi * (1f - dirGiro) * 0.5f;
                         Vector2 val4 = _geoAnclaCentral + new Vector2(MathF.Cos(num8), MathF.Sin(num8) * 0.86f) * 46f;
                         float fase = VFXCore.Hash01(((Entity)pl).whoAmI * 11 + j, 5, 7) * ((float)Math.PI * 2f);
                         float brillo = num3 * (0.42f + 0.3f * MathF.Sin(globalTimeWrappedHourly * 2f + (float)j * 1.3f)) * (0.55f + 0.45f * spread);

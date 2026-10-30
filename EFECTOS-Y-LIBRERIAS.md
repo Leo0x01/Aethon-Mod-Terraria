@@ -448,6 +448,8 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 
 **v6.56.4 — EL ESPEJO COMPLETO + EL BARRIDO** (la letra: «las alas no son simétricas y cuando el personaje se mueve en una dirección, las alas no cambian la dirección junto al personaje» — TODAS las alas): (1) **EL FILO DEL LADO**: el ala izquierda ponía su borde GRUESO donde el espejo pondría el fino de la derecha — `perp(Mirror(T)) = −Mirror(perp(T))` — la PERMUTA por lado en `ConstruirPluma` hace el par espejo-simétrico DE VERDAD (la cura v6.56.3 solo simetrizó el EJE; la TIRA seguía torcida: 3.5-14 px por pluma). (2) **EL ESPEJO COMPLETO**: el bloque `direction<0` ahora PERMUTA también los semianchos — antes solo negaba X y el filo se INVERTÍA al mirar a la izquierda (Δ ≈ 2·SemiMas = 50-68 px). (3) **EL BARRIDO DEL HEREDERO** (revive el campo `Barrido` muerto de la v6.52.2): todo el enjambre se INCLINA hacia atrás respecto al MOVIMIENTO, calculado en el MARCO DE LA DERECHA (`velFrame = velX·direction` — si el término de dirección entrase en la fórmula se doble-voltearía con el espejo y girar no cambiaría NADA; el sim lo cazó): 0.4 de reposo + 0.6·velocidad saturada a 6 px/t. (4) EL CENTELLEO SIMÉTRICO (semilla sin término por lado) y EL GIRO DE RUNAS ESPEJADO por ala. **Validado 1:1 en simulación numérica (`/home/z/sim/sim_alas.py` — la réplica exacta del pipeline): par Δ=0.000px eje y bordes; girar == espejo exacto del render; corriendo, la punta se barre 11-13 px y girar en plena carrera la mueve 32-42 px.**
 
+**v6.56.5 — LA PARIDAD DE LAS RUNAS (la 2ª vuelta del espejo rúnico, auditoría C):** el factor `espejoLado` de la .56.4 (−1 izquierda/+1 derecha) rompía el giro espejado con **Plumas IMPAR** — la paridad del índice YA se auto-invierte entre gemelas (`parity(n₄+j) = −parity(j)` cuando n₄ es impar) y el factor EXTRA dejaba ambas alas girando AL MISMO SENTIDO (las 4 alas rúnicas tienen 5 plumas; la .56.3 sin factor era la correcta para impar, la .56.4 arregló par y rompió impar). **La regla:** `L_B = −(−1)^num₄` con `L_A = +1` — impar: ambas +1 (la paridad hace el trabajo); par: +1/−1 (`(i < num4) || ((num4 & 1) == 1) ? 1 : -1`). Además: el giro del glifo VIAJA CON `direction` (al mirar a la izquierda todo el enjambre se espeja — el glifo también, o las runas no eran el espejo de sí mismas), las GEMELAS comparten semilla de fase/centelleo/glifo (semilla por `i % num4`, no por `i` crudo — antes las plumas gemelas centelleaban y giraban distinto: asimetría visible del par) y el ANILLO CENTRAL se espeja con la transformación **π−θ** (el espejo X de un ángulo — el orbital REVERSA con la dirección y el giro del glifo cae exacto: −θ−π/2 ≡ π−θ+π/2, mod 2π).
+
 ### 4.25 Las utilidades de soporte
 
 - **EcoLib.cs** — LAS VOCES: `Hablar(texto, tinte, rugido, prioridad)` (cola acotada, la voz del libro SE CUELA al frente), `ElegirVariante` (reparto sin repetición), `Update/Dibujar` (capa tras "Vanilla: Death Text", NUNCA abre lotes propios).
@@ -509,6 +511,20 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
   DrawTrail del shader va ahora DENTRO de un lote aditivo explícito
   (`CerrarLoteSiAbierto` + `gd.BlendState = Additive` + `ReabrirLoteVanilla`
   a la salida) — tanto en el RC2 como en la librería.
+- **v6.56.5 — LA REGLA DE LA CAÍDA LONGITUDINAL (auditoría A):** el shader
+  apaga el extremo `Coord.x→1` (bordes al 42% de la longitud, corazón al
+  76%) — la «pluma» intencional del RC2/escalera (su extremo lejano se
+  disipa en la distancia, documentado). **PERO el nodo 0 es la RAÍZ que
+  brilla: un conducto cuyo extremo de ACCIÓN es el lejano debe ordenar la
+  espina con el extremo de acción en el nodo 0** — la Ira (la columna se
+  fundía a negro JUSTO al llegar al punto de impacto, donde viven las
+  novas) y el Partidor (la telegrafía y el corte perdían su mitad inferior)
+  v6.56.5 invierten la espina (`Lerp(abajo, arriba)` / `Lerp(piso, techo)`) y
+  TODO lo dependiente se evalúa en la posición física original `p = 1−q`
+  (el color viaja hacia el punto de acción como siempre) con uTime NEGADO
+  (para conservar el sentido físico del hervor: positivo = hacia la raíz).
+  El Prisma conserva su fade hacia la punta (el lenguaje de la pluma del
+  RC2 — decisión de diseño documentada).
 - **Fallback:** tiras RayoStrip ×3 (carne 420px/1.0× · remolino 240px/1.9× ·
   núcleo en banda 380px/2.6×, con los colores por nodo del llamador) — el arma
   NUNCA se rompe. La aberración cromática del borde prismático vive en
@@ -724,6 +740,7 @@ mitra por nodo — la lección completa en el propio RayoStrip.cs.
 | **v6.56.0** | **LA LEY DEL CERO-DUST** (los Dust junto al filo son la sierra de los picos y los «círculos planos») · la CURA DEL CENTRADO de alas (`pl.fullRotation`) + DibujarRunas + catálogo 17-23 · **LA ESCALERA DEL RAYO** (RayoConcentradoNivelProjectile, nivel en `ai[1]`) · el SONIDO v2 pulso constante · el PARTIDOR a pantalla completa · la IRA DEL CIELO densa — y **ESTE CÓDICE (v1.1)** | §0, §4.24, §4.25, §7.3 |
 | **v6.56.1** | **LA RONDA DE CURACIÓN de la auditoría 4×**: la recursión `SendExtraAI` del decompilador (StackOverflow MP), el `ai[2]`=whoAmI envenenando los relojes de las 3 armas nuevas, el switch del Testamento sin gate (sentencia doble en MP), `RestaurarLoteVanilla` (la cura del lote aditivo), la exclusión cruzada de la escalera, el vuelo/mira del RC2 solo del dueño, la aguja de carga recuperada, los pozos cero-GC del RC2, las 4 horneadas con funeral, el latch eterno de las alas, la marca del festín con caducidad, el es-MX deduplicado (−636 líneas) con paridad 1369=1369=1369 al parser REAL, 5 PNG huérfanos purgados y ESTE CÓDICE puesto al día (§3.1/§4.25/§6/§7.1) | §3.1, §4.25, §6, §7.1, §11 |
 | **v6.56.4** | **EL CAMINO GPU PORTADO A LAS ARMAS**: `HazConcentradoLib` (§5.4 — la letra: «adapta el código del rayo concentrado 2») con la LECCIÓN DEL LOTE ADITIVO (las franjas negras del RC2) · **LA REVERSIÓN EDUCADA** de `FajaTexturadaEnLote` (mitra por nodo se queda) y `HazFusionEspina` RETIRADA · **EL ESPEJO COMPLETO de las alas** (permuta filo/lomo por lado + permuta de semianchos bajo el espejo + EL BARRIDO revivido con acople a velocidad — validado Δ 0.000px en sim) · **EL PORTAL DEL CONJURO** del RC2 (BlackDisk + CoronaConjuro + GravLens en la boca; la aguja y el GlowOrb planos MUEREN; destellos de soles rúnicos convergentes/estallido) · **LOS SONIDOS v3** (bucle grave + carga one-shot) + `Pantalla.Sacudir` · **LA LOCALIZACIÓN MONOLINGÜE** (es-ES fuente + espejo es-MX generado, en-US retirado) | §5.4, §6.A, §7.3, §4.24, §11 |
+| **v6.56.5** | **LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES**: el seno puro de 1376 Hz del finale de la carga MUERE (→ soplo de presión sin pitch, detector anti-pitido calibrado en el generador) · **EL TEMBLOR PERCEPTIBLE** (el sostenido era SUB-PÍXEL: trauma²·i — 2.6 daba 0.18 px; ahora 6.5/9) · **GravLens SIN MONOPOLIO** (vida 0.06 s — antes pedía 36 lentes contra una mesa de 8) · **EL HORIZONTE DEL PORTAL A TAMAÑO REAL** (2.28·R, la convención BlackDisk — salía a la mitad) · **LA CARGA MUERE CON SU DUEÑO** (`CortarCarga` + `_cargaSlot`) · **LA REGLA DE LA CAÍDA LONGITUDINAL** (§5.4 — la espina de la Ira/Partidor vivía al revés) · **LA PARIDAD DE LAS RUNAS** (§4.24 — `L_B = −(−1)^num₄` + direction + gemelas compartiendo semilla) · los `.fx` fuera del .tmod (buildIgnore) | §5.4, §4.24, §7.3, §3.1 |
 | *(siguiente fila: la tuya)* | | |
 
 ---

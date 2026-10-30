@@ -400,17 +400,27 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 for (int i = 0; i < 14; i++)
                 {
                     float num4 = (float)i / 13f;
+                    // v6.56.5 — LA AUDITORÍA A (MEDIO-1): la caída del shader
+                    // apagaba la MITAD INFERIOR de la telegrafía (el extremo
+                    // Coord.x→1 era el PISO — donde va a caer el juicio; la
+                    // vieja CPU no tenía NINGUNA caída). Espina invertida
+                    // (nodo 0 = val2 = piso) y la senoide evaluada en la
+                    // posición física original p = 1−num4 (el vaivén sigue
+                    // creciendo hacia el piso, como siempre); uTime pasa a
+                    // POSITIVO (la raíz ahora es el piso: el hervor sigue
+                    // bajando hacia él, como en la .56.4).
+                    float p = 1f - num4;
                     // v6.56.3 — LA LEY DE LOS 6 NODOS/ONDA: la senoide vivía a
                     // q·20 (3.18 ciclos en 14 nodos = 4.4 nodos/onda = SIERRA,
                     // la autopsia de la 3ª ronda de picos). A q·9 son 9.8 nodos
                     // por onda: la misma carne latiendo, SIN dientes.
-                    float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + num4 * 9f) * (2f + 8f * num3) * num4;
-                    array[i] = Vector2.Lerp(val, val2, num4) + new Vector2(num5, 0f);
+                    float num5 = MathF.Sin(globalTimeWrappedHourly * 30f + p * 9f) * (2f + 8f * num3) * p;
+                    array[i] = Vector2.Lerp(val2, val, num4) + new Vector2(num5, 0f);
                     array2[i] = 2f + 5f * num3;
                     coloresC[i] = DefinitivasLib.Alfa(DefinitivasLib.Oro, 0.5f * (0.5f + 0.5f * num3));
                 }
                 HazConcentradoLib.Dibujar(array, 14, array2, coloresC,
-                    -globalTimeWrappedHourly * 0.025f * (0.8f + num3 * 2.4f));
+                    globalTimeWrappedHourly * 0.025f * (0.8f + num3 * 2.4f));
                 VFXCore.Begin();
                 int num7 = 1 + (int)(num3 * 4.999f);
                 for (int j = 0; j < 5; j++)
@@ -444,8 +454,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // v6.56.4 — EL CORTE POR EL CAMINO GPU DEL RC2 (cero-GC: los
                 // pozos compartidos con la carga): HazFusionEspina MUERE para
                 // el Partidor — el borde vertical del juicio lo funde ahora el
-                // shader POR PÍXEL. El flujo propio (−1.15: la carne hierve
-                // HACIA ARRIBA) viaja en uTime (positivo = hacia la raíz).
+                // shader POR PÍXEL.
+                // v6.56.5 — LA AUDITORÍA A (MEDIO-1): mismo hallazgo que la
+                // carga — la caída apagaba la MITAD INFERIOR del CORTE (el
+                // juicio muerde el piso, no el techo). Espina invertida (nodo
+                // 0 = val4 = piso); las fórmulas simétricas (perfil, lente)
+                // no cambian; el color se evalúa en p = 1−num17 (viaja hacia
+                // el piso como siempre) y uTime se NIEGA (el hervor sigue
+                // subiendo hacia el techo — la raíz ahora es el piso).
                 Vector2[] array3 = _cacheNodos;
                 float[] array4 = _cachePerf;
                 Color[] coloresJ = _cacheColores;
@@ -453,17 +469,19 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 for (int l = 0; l < 20; l++)
                 {
                     float num17 = (float)l / 19f;
-                    array3[l] = Vector2.Lerp(val3, val4, num17);
+                    float p = 1f - num17;
+                    array3[l] = Vector2.Lerp(val4, val3, num17);
                     float num18 = MathF.Sin(num17 * (float)Math.PI) * 1.4f - 0.25f;
                     float num19 = MathHelper.SmoothStep(0f, 0.75f, MathHelper.Clamp(num18, 0f, 0.75f));
                     array4[l] = (0.25f + 0.75f * num19) * 150f * num15 * num16;
                     // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
-                    // de la vieja HazFusionEspina — la identidad del corte).
+                    // de la vieja HazFusionEspina — la identidad del corte,
+                    // evaluada en la posición física original p).
                     float lente = 0.85f + 0.30f * MathF.Sin(num17 * MathHelper.Pi);
-                    coloresJ[l] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f - num17 * 0.16f), 0.55f * num15 * lente);
+                    coloresJ[l] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f - p * 0.16f), 0.55f * num15 * lente);
                 }
                 HazConcentradoLib.Dibujar(array3, 20, array4, coloresJ,
-                    globalTimeWrappedHourly * 0.025f * 1.15f);
+                    -globalTimeWrappedHourly * 0.025f * 1.15f);
                 for (int m = -1; m <= 1; m += 2)
                 {
                     Vector2[] array5 = (Vector2[])(object)new Vector2[20];

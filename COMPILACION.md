@@ -3,7 +3,7 @@
 Este documento explica cómo recibir las versiones del mod de forma fiable y
 cómo compilarlo en un `.tmod` jugable en tModLoader 2026.07.3.0 (.NET 8).
 
-> **Versión actual: 6.50.30** (tag y release publicados). El mod vive en la
+> **Versión actual: 6.56.5** (tag y release publicados). El mod vive en la
 > subcarpeta `AethonMod/` del repo — 297 `.cs`, ~106.500 líneas, sin dependencias.
 
 ---

@@ -597,9 +597,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // v6.56.4 — la letra: «solo debes adaptar el código del rayo
             // concentrado 2 a las características de las armas con pico»:
             // HazFusionEspina MUERE para la Columna — el borde lo funde ahora
-            // el shader POR PÍXEL. El flujo NEGATIVO (−1.2: la carne HIERVE
-            // hacia arriba — el calor del juicio sube) viaja en uTime
-            // (positivo = hacia la raíz).
+            // el shader POR PÍXEL.
+            // v6.56.5 — LA AUDITORÍA A (MEDIO-1): LA ESPINA VIVÍA AL REVÉS. La
+            // caída longitudinal del shader apaga el extremo Coord.x→1 — con
+            // la espina techo→suelo el extremo apagado era el PUNTO DE
+            // IMPACTO: la columna se fundía a negro JUSTO al llegar al suelo,
+            // donde viven las novas y los halos del pie (la vieja CPU no tenía
+            // NINGUNA caída). Espina invertida (nodo 0 = abajo): el juicio
+            // nace brillando en el impacto y se disipa hacia el cielo; TODO lo
+            // dependiente se evalúa en la posición física original p = 1−q (el
+            // color viaja hacia el impacto como siempre) y uTime se NIEGA (el
+            // hervor sigue subiendo — ahora la raíz es el suelo: positivo
+            // herviría hacia abajo).
             {
                 const int N = 16;
                 Vector2[] espina = _cacheEspina;
@@ -610,20 +619,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 for (int i = 0; i < N; i++)
                 {
                     float q = i / (float)(N - 1);
-                    espina[i] = Vector2.Lerp(arriba, abajo, q);
+                    float p = 1f - q;
+                    espina[i] = Vector2.Lerp(abajo, arriba, q);
                     // v6.55.0 — LA CURA DE LAS ESQUINAS DEL CLAMP (como el
                     // partidor): saturación suave en vez de Clamp duro.
-                    float s = MathF.Sin(q * MathHelper.Pi) * 1.3f - 0.25f;
+                    float s = MathF.Sin(p * MathHelper.Pi) * 1.3f - 0.25f;
                     float sat = MathHelper.SmoothStep(0f, 0.65f, MathHelper.Clamp(s, 0f, 0.65f));
                     perfil[i] = (0.25f + 0.75f * sat) *
                         (rama ? 40f : final ? 72f : 52f) * potencia * flicker;
                     // EL COLOR QUE VIAJA + EL FADE DE LENTE (la fórmula porNodo
-                    // de la vieja HazFusionEspina — la identidad de la columna).
-                    float lente = 0.85f + 0.30f * MathF.Sin(q * MathHelper.Pi);
-                    coloresI[i] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(tiempo * 0.07f - q * 0.16f), 0.55f * potencia * lente);
+                    // de la vieja HazFusionEspina — la identidad de la columna,
+                    // evaluada en la posición física original p).
+                    float lente = 0.85f + 0.30f * MathF.Sin(p * MathHelper.Pi);
+                    coloresI[i] = DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(tiempo * 0.07f - p * 0.16f), 0.55f * potencia * lente);
                 }
                 HazConcentradoLib.Dibujar(espina, N, perfil, coloresI,
-                    tiempo * 0.025f * 1.2f);
+                    -tiempo * 0.025f * 1.2f);
             }
 
             // ==================== LA ESPIRAL TRIPLE DEL FINAL ====================
@@ -707,7 +718,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
 
             // v6.54.5/.6 — EL CONTRATO DEL LOTE: TODO PreDraw sale con el lote VIVO.
-            VFXCore.ReabrirLoteVanilla();
+            // v6.56.5 — LA AUDITORÍA A (MENOR-5): era ReabrirLoteVanilla — que
+            // NO CURA un lote abierto en ADITIVO (la guarda lo respeta y
+            // sale): si el fallback de Dibujar dejaba aditivo vivo y algún
+            // bloque de arriba dejara de pasar por su Reabrir, el resto del
+            // pase de entidades se lavaba. RestaurarLoteVanilla cierra-por-
+            // sonda Y reabre vanilla: la salida es curativa por sí misma.
+            VFXCore.RestaurarLoteVanilla();
             return false;
         }
     }
