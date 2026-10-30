@@ -742,36 +742,26 @@ namespace AethonMod.Content.VFX
                     _geoAnclaCentral = ((fullRotation != 0f) ? (val + Utils.RotatedBy(val2 - val, (double)fullRotation, default(Vector2))) : val2);
                     _geoN = num2 * 2;
                     _geoRunasValida = true;
-                    // v6.56.4 — EL BARRIDO DEL HEREDERO (revive el campo muerto
-                    // de la v6.52.2 — la letra: «cuando el personaje se mueve en
-                    // una dirección, las alas no cambian la dirección junto al
-                    // personaje»). El par es simétrico: el espejo solo produce
-                    // la MISMA imagen — lo que faltaba es RESPUESTA DIRECCIONAL.
-                    // Todo el enjambre se INCLINA hacia atrás respecto al
-                    // MOVIMIENTO, calculado en el MARCO DE LA DERECHA (la
-                    // velocidad se espeja con la dirección: velFrame =
-                    // velX·direction — si el término de dirección entrase en la
-                    // fórmula, se DOUBLE-VOLTEARÍA con el espejo y girar no
-                    // cambiaría nada; el sim lo cazó: Δ 0.0px). 0.4 de reposo
-                    // (el rake natural del ala plegada) + 0.6·velocidad
-                    // saturada a 6 px/tick. Validado en /home/z/sim/sim_alas.py:
-                    // corriendo, la punta se barre 11-13 px; girar en plena
-                    // carrera la mueve 32-42 px; backpedal, 10-13 px.
-                    float velFrame = ((Entity)pl).velocity.X * (float)((Entity)pl).direction;
-                    float velN = MathHelper.Clamp(velFrame / 6f, -1f, 1f);
-                    float barrido = estilo.Barrido * 1.6f * (0.4f + 0.6f * velN);
-                    if (barrido != 0f && float.IsFinite(barrido))
-                    {
-                        for (int m = 0; m < num3; m++)
-                        {
-                            Vector2[] eje = _pozosEje[m];
-                            for (int k2 = 0; k2 < eje.Length; k2++)
-                            {
-                                eje[k2] = val + Utils.RotatedBy(eje[k2] - val, (double)(-barrido), default(Vector2));
-                            }
-                        }
-                        _geoAnclaCentral = val + Utils.RotatedBy(_geoAnclaCentral - val, (double)(-barrido), default(Vector2));
-                    }
+                    // v6.56.6 — EL BARRIDO DEL HEREDERO MUERE ENTERO (la letra:
+                    // «no están simétricas y siguen teniendo esa ligera rotación
+                    // en el sentido contrario que no deben tener»). El sim de la
+                    // casa (/home/z/sim/sim_alas_v6566.py, puerto 1:1) lo cazó:
+                    // UNA ROTACIÓN RÍGIDA NO CONMUTA CON EL ESPEJO —
+                    // Mirror(Rot(θ)) = Rot(−θ) espejado: al girar TODO el
+                    // enjambre −barrido antes de espejar, el ala izquierda dejaba
+                    // de ser el espejo de la derecha (Δ 12.0 px en reposo, 42.6 px
+                    // a plena velocidad — el par se leía TORCIDO: «no están
+                    // simétricas»). Y el término 0.4 fijo dejaba un RAKE de
+                    // +5.13° incluso PARADO — «ESA ligera rotación en el sentido
+                    // contrario» que el usuario ve desde la v6.50. Tampoco puede
+                    // ser una traslación (Mirror(x+d) = x−d: el par quedaría
+                    // DESCENTRADO — la queja original «no están bien centradas»).
+                    // LA RESPUESTA AL MOVIMIENTO YA EXISTE y es 100 % simétrica:
+                    // Spread (las alas se ABREN con la velocidad — el halo mide
+                    // |vel|) y Flap (el aleteo se acelera al moverse/volar). El
+                    // barrido era redundancia dañina. Validado: Δ par = 0.0000 px
+                    // en reposo/vuelo/backpedal × ambas direcciones (VLM: par
+                    // mariposa perfecto, sin rotaciones espurias).
                     // v6.56.3 — EL ESPEJO DEL HEREDERO (la letra: «cuando el
                     // personaje se mueve derecha o izquierda las alas siguen
                     // en la misma posición»): la reconstrucción v6.56.0 perdió

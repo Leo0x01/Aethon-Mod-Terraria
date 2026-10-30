@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.56.0 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** es-MX (primario) + en-US (+ es-ES espejo)
+> **Versión actual:** 6.56.6 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
 
 ## Qué es (en 30 segundos)
 
@@ -57,7 +57,7 @@ Alrededor del jefe:
 ```
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.56.0)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.56.6)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # ~384 .cs: Items, Weapons, NPCs, Projectiles, VFX (69 librerías), Systems…
 │   │   └── Effects/Shaders/   # Los 4 shaders (.fx fuente + .fxc compilado — LEER EFECTOS-Y-LIBRERIAS.md §1)

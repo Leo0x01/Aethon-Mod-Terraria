@@ -1,15 +1,6 @@
-// v6.56.4 — LA FUENTE ÚNICA DEL ESPAÑOL (la letra del usuario: «por ahora
-// no es necesario que hayan varios, solo deja español es_es ya que es
-// suficiente con eso»). Este es-ES es EL archivo que se edita; su espejo
-// es-MX se genera con tools/sync_es_mx_v6564.py (el juego en «Español
-// (Latinoamérica)» lee el es-MX); el paquete en-US fue RETIRADO — el mod
-// es monolingüe por decisión de la casa.
-// v6.53 — THE SCRIBE PURGE: the demo boss, The Conscious Feather,
-// the Summoner Feather, the bag and the inscriptions ALL DIED (the
-// user's word). THE FIRST TRACE SURVIVES (the beam weapon, now in
-// the Beam Weapons bag, rendered with the god's fusion-ray
-// technique) and THE INK AURORA (the code-drawn wings, now in the
-// Cosmetics bag and finally VISIBLE).
+// v6.56.6 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
+// única del español de la casa). Contenido IDÉNTICO al es-ES: editar SOLO
+// el es-ES y correr tools/sync_es_mx_v6564.py.
 Items: {
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo
@@ -48,15 +39,4 @@ Projectiles: {
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
 	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
-	ColumnaIraProjectile.DisplayName: La Columna de la Ira
-	IraDelCieloProjectile.DisplayName: La Ira del Cielo
-	PartidorDeMundosProjectile.DisplayName: El Partidor de Mundos
-	PrismaPrimordialProjectile.DisplayName: El Prisma Primordial
-	RequiemEstelarProjectile.DisplayName: El Réquiem Estelar
-	IndiceDelJuicioProjectile.DisplayName: El Índice del Juicio
-	LanzaVeredictoProjectile.DisplayName: La Lanza del Veredicto
-	OjoDelJuicioProjectile.DisplayName: El Ojo del Juicio
-	PaginaIndiceProjectile.DisplayName: La Página del Índice
-	PlumaDelVeredictoProjectile.DisplayName: La Pluma del Veredicto
-	RayoConcentradoNivelProjectile.DisplayName: El Rayo Concentrado
 }

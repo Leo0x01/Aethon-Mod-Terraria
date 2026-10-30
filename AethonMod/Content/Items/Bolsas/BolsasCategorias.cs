@@ -813,17 +813,14 @@ namespace AethonMod.Content.Items.Bolsas
     }
 // ======================================================================
     //  v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS (bolsa 24): «El
-    //  Veredicto de Aethon», LA REFORMA — LAS CINCO SENTENCIAS que
-    //  eligió el usuario tras probarlas, cada una con SUS SIETE CAPAS
-    //  de efectos (el prisma —el ataque definitivo con la receta
-    //  completa del rayo de fusión—, el partidor, el réquiem, la ira…
-    //  — la corona que las dictaba se retiró en la v6.56.3.)
+    //  Veredicto de Aethon», LA REFORMA. v6.56.6 — LA PURGA (la letra del
+    //  usuario: «borra todas las nuevas armas y solo deja al rayo
+    //  concentrado 2»): la escalera, el Prisma, el Partidor, el Réquiem,
+    //  la Ira, el Índice, la Pluma y el Ojo MUEREN — la bolsa entrega
+    //  EL RAYO CONCENTRADO 2 y las variantes que nacen de él (Task de la
+    //  .56.6: 9 variantes VFX del RC2 viven aquí junto al original).
     // ======================================================================
 
-    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
-    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
-    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
-    // Los comentarios de la fuente original no viajan dentro del .dll.
     public class BolsaDefinitivas : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Armas Definitivas";
@@ -832,23 +829,22 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(255, 214, 120);
 
-        protected override string Nota => "La escalera del Rayo Concentrado y las armas del grimorio — el ataque definitivo vive aquí";
+        protected override string Nota => "El Rayo Concentrado 2 y sus 9 variantes — el ataque definitivo vive aquí";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             return new List<(int, int)>
             {
-                (ModContent.ItemType<PrismaPrimordial>(), 1),
-                (ModContent.ItemType<PartidorDeMundos>(), 1),
-                (ModContent.ItemType<RequiemEstelar>(), 1),
-                (ModContent.ItemType<IraDelCielo>(), 1),
                 (ModContent.ItemType<RayoConcentradoDos>(), 1),
-                (ModContent.ItemType<RayoDelAlba>(), 1),
-                (ModContent.ItemType<RayoDelVeredicto>(), 1),
-                (ModContent.ItemType<RayoDelJuicio>(), 1),
-                (ModContent.ItemType<IndiceDelJuicio>(), 1),
-                (ModContent.ItemType<PlumaDelVeredicto>(), 1),
-                (ModContent.ItemType<OjoDelJuicio>(), 1)
+                (ModContent.ItemType<RayoConcentradoPrisma>(), 1),
+                (ModContent.ItemType<RayoConcentradoEclipse>(), 1),
+                (ModContent.ItemType<RayoConcentradoTormenta>(), 1),
+                (ModContent.ItemType<RayoConcentradoSolar>(), 1),
+                (ModContent.ItemType<RayoConcentradoVortice>(), 1),
+                (ModContent.ItemType<RayoConcentradoEspectro>(), 1),
+                (ModContent.ItemType<RayoConcentradoSierpe>(), 1),
+                (ModContent.ItemType<RayoConcentradoCuantico>(), 1),
+                (ModContent.ItemType<RayoConcentradoNova>(), 1)
             };
         }
     }

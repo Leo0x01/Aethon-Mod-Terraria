@@ -1,8 +1,6 @@
-// v6.56.4 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
-// única del español de la casa). Este archivo existe porque el juego en
-// «Español (Latinoamérica)» lee el es-MX: sin él caería al fallback (y el
-// en-US ya no existe). Contenido IDÉNTICO al es-ES: editar SOLO el es-ES
-// y correr tools/sync_es_mx_v6564.py.
+// v6.56.6 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
+// única del español de la casa). Contenido IDÉNTICO al es-ES: editar SOLO
+// el es-ES y correr tools/sync_es_mx_v6564.py.
 Items: {
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo
@@ -41,15 +39,4 @@ Projectiles: {
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
 	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
-	ColumnaIraProjectile.DisplayName: La Columna de la Ira
-	IraDelCieloProjectile.DisplayName: La Ira del Cielo
-	PartidorDeMundosProjectile.DisplayName: El Partidor de Mundos
-	PrismaPrimordialProjectile.DisplayName: El Prisma Primordial
-	RequiemEstelarProjectile.DisplayName: El Réquiem Estelar
-	IndiceDelJuicioProjectile.DisplayName: El Índice del Juicio
-	LanzaVeredictoProjectile.DisplayName: La Lanza del Veredicto
-	OjoDelJuicioProjectile.DisplayName: El Ojo del Juicio
-	PaginaIndiceProjectile.DisplayName: La Página del Índice
-	PlumaDelVeredictoProjectile.DisplayName: La Pluma del Veredicto
-	RayoConcentradoNivelProjectile.DisplayName: El Rayo Concentrado
 }

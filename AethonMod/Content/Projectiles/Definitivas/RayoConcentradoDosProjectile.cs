@@ -56,6 +56,19 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         public ref float Owner => ref ((ModProjectile)this).Projectile.ai[2];
 
+        // v6.56.6 — LA VARIANTE (la letra: «quiero que hagas otra variantes
+        // del rayo concentrado 2, al menos 9 variantes mas con diferentes
+        // efectos y tecnicas vfx»): 0 = EL ORIGINAL (el juicio violeta-oro);
+        // 1-9 = las variantes (Prisma · Eclipse · Tormenta · Solar ·
+        // Vórtice · Espectro · Sierpe · Cuántico · Nova). Viaja en ai[1]
+        // — el campo Modo, SIEMPRE 0 en el RC2 desde su nacimiento (la
+        // escalera muerta lo usaba como nivel; el RC2 jamás lo tocó) —
+        // porque Projectile.ai en este tML solo tiene 3 slots y NewProjectile
+        // alimenta ai0-ai2: la variante viaja en el aire DEL MODO y tML la
+        // sincroniza solo en MP. Tiñe gradiente, boca, luz y las capas
+        // extra de cada técnica.
+        public int Variante => (int)Modo;
+
         public override void SetStaticDefaults()
         {
             ProjectileID.Sets.DrawScreenCheckFluff[((ModProjectile)this).Type] = 5000;
@@ -225,43 +238,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                     catch { }
                 }
-                if (Time < (float)ChargeTime)
-                {
-                    if (Time % 3f < 1f)
-                    {
-                        HazConcentradoLib.DestellosDeCarga(((Entity)((ModProjectile)this).Projectile).Center, Time / (float)ChargeTime, (int)(Time * 7f) + 11, 1f);
-                    }
-                    // v6.56.5 — LA AUDITORÍA B (MEDIO-2): la vida de la lente
-                    // bajó de 0.6 s a 0.06 s — con 1 registro/tick y 0.6 s de
-                    // vida el RC2 pedía 36 lentes vivas contra una mesa de 8:
-                    // se autodesalojaba a los 8 ticks y MONOPOLIZABA las 8
-                    // butacas (las ondas de choque y demás lentes del mod
-                    // morían sin recorrer su ventana). Con 0.06 s (≈4 ticks)
-                    // cada lente muere sola: el compuesto visual se mantiene
-                    // (la rampa de nacimiento es el 15% = 0.6 ticks) y quedan
-                    // 4 butacas libres para el resto del mundo.
-                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, MathHelper.Lerp(240f, 150f, Time / (float)ChargeTime), 0.3f, 0.06f);
-                }
-                else if (Time < (float)(ChargeTime + 60))
-                {
-                    if (Time % 2f < 1f)
-                    {
-                        HazConcentradoLib.DestellosDeEstallido(((Entity)((ModProjectile)this).Projectile).Center, ((ModProjectile)this).Projectile.rotation, (int)(Time * 13f) + 29, 1f);
-                    }
-                }
+                // v6.56.6 — LA CIRUGÍA DE LA LETRA: «no debe de haber
+                // ningún círculo que cubra al personaje» (EL DISCO NEGRO
+                // muere en PreDraw) · «tampoco tiene que tener lente
+                // gravitación» (GravLens MUERE por completo — el registro
+                // de la carga y el del láser) · «los brillos de soles
+                // rúnicos absorbidos… los mismos del accesorio» (LOS
+                // DESTELLOS DE 4 PUNTAS ahora viven en PreDraw:
+                // HazConcentradoLib.SolesRunicosCarga/Estallido — puros,
+                // deterministas, sin partículas genéricas).
+                // LO QUE VIVE: EL TEMBLOR (la letra: «debe mantener un
+                // pequeño temblor de la pantalla mientras el rayo
+                // concentrado se esté ejecutando» — el 6.5 sostenido
+                // ≈2.75 px constantes + el 9 de encendido ≈7.3 px de pico).
                 if (Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
                 {
-                    // v6.56.5 — la vida corta de la lente (auditoría B, MEDIO-2).
-                    GravLens.Registrar(((Entity)((ModProjectile)this).Projectile).Center, 150f, 0.25f, 0.06f);
-                    // v6.56.5 — LA AUDITORÍA B (MEDIO-1): EL TEMBLOR ERA
-                    // SUB-PÍXEL. La escala de la casa es trauma²·min(i,14) px
-                    // con trauma = i/10 — el 2.6 sostenido de la .56.4 daba
-                    // 0.26²·2.6 = 0.18 px constantes: invisible. La letra
-                    // pedía «el mundo debe temblar un poco así el jugador
-                    // nota el poder»: 6.5 sostenido → 0.4225·6.5 ≈ 2.75 px
-                    // constantes (rumble perceptible, sin marear), y el
-                    // encendido sube a 9 → 0.81·9 ≈ 7.3 px de pico (el golpe
-                    // de la ignición, por debajo del trauma máximo de la casa).
                     Pantalla.Sacudir(6.5f, 0.4f, "RC2-sostenido");
                 }
                 if (Time == (float)(ChargeTime + 1))
@@ -294,7 +285,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
             if (!Main.dedServ && Time > (float)(ChargeTime - 10) && Time < (float)(ChargeTime + LaserDuration))
             {
-                Color val2 = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
+                Color val2 = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
                 float num3 = realSize;
                 Vector2 val3 = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
                 Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center, (float)(int)(val2).R / 255f * 1.8f * num3, (float)(int)(val2).G / 255f * 1.7f * num3, (float)(int)(val2).B / 255f * 1.5f * num3);
@@ -534,52 +525,62 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 return false;
             }
-            Color c = DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f);
+            Color c = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
             (c).A = 0;
             float num = Utils.GetLerpValue(50f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration + 20), Time, true);
-            // v6.56.4 — LA AGUJA MUERE (la letra: «en el momento de carga hay
-            // como una animación de una línea colorida que avanza y luego va
-            // rápido hacia atrás y entonces el rayo se lanza, esa línea debes
-            // quitar, se ve horrible»): era un SoftGlow estirado a 900 px que
-            // avanzaba y retrocedía (la v6.56.1 lo había recuperado — fue un
-            // error de criterio). Su reemplazo: LOS DESTELLOS DE LA CARGA
-            // (HazConcentradoLib.DestellosDeCarga, en AI).
+            // v6.56.4 — LA AGUJA MUERE (la letra: «esa línea debes quitar, se
+            // ve horrible»): era un SoftGlow estirado a 900 px que avanzaba y
+            // retrocedía. v6.56.6 — su reemplazo DEFINITIVO: LOS SOLES RÚNICOS
+            // DE 4 PUNTAS del accesorio (abajo en este mismo PreDraw — la
+            // banda elíptica encoge hacia el arma y el estallido los expulsa).
             float num3 = ((Entity)((ModProjectile)this).Projectile).Center.X - Main.screenPosition.X;
             float num4 = ((Entity)((ModProjectile)this).Projectile).Center.Y - Main.screenPosition.Y;
             Vector2 val = new Vector2(num3, num4);
             Main.EntitySpriteDraw(softGlow, val, (Rectangle?)null, DefinitivasLib.Alfa(c, 0.55f * num), 0f, Utils.Size(softGlow) * 0.5f, 2.2f * num, (SpriteEffects)0, 0f);
-            // v6.56.4 — EL PORTAL DEL CONJURO (la letra: «nada de círculos
-            // planos… haz que este círculo plano sea sustituido por varios
-            // círculos runicos de agujeros negros, eso tendría más sentido»).
-            // El GlowOrb de núcleo sólido (el disco relleno de ~135 px — EL
-            // círculo plano sobre el jugador) MUERE. La boca del RC2 mientras
-            // vive es un agujero negro de verdad:
-            //   · EL HORIZONTE — BlackDisk en AlphaBlend (lo que el aditivo
-            //     no puede dibujar: OSCURECER), sobre el bloom del renglón
-            //     de arriba → el resplandor se lee como la corona del eclipse;
-            //   · LA TRIPLE CORONA — OrbitaLib.CoronaConjuro (el círculo
-            //     dorado de 8 + el violeta de 6 contrarrotando + el blanco
-            //     íntimo de 6 rápido: VARIOS círculos rúnicos — los del
-            //     agujero SUPREMO), a la MISMA altura de contención que los
-            //     anillos finos de abajo;
-            //   · (en AI) LA LENTE — GravLens curva el espacio alrededor.
+            // v6.56.6 — EL PORTAL DEL CONJURO MUERE (la letra: «hay un
+            // circulo negro, no debe de haber ningun circulo que cubra al
+            // personaje… tampoco tiene que tener lente gravitación, lo
+            // unico que debe tener son los circulos runicos y ademas deben
+            // ser al menos un 50% mas pequeños»). EL DISCO NEGRO (el
+            // horizonte AlphaBlend que OSCURECÍA al personaje) y LA LENTE
+            // (GravLens, muerta también en AI) se RETIRAN. Lo que queda y
+            // brilla: LOS SOLES RÚNICOS DE LA CARGA (el brillo de 4 puntas
+            // del accesorio — absorbidos por el arma, expulsados al
+            // disparar) + LA CORONA RÚNICA (OrbitaLib.CoronaConjuro) al
+            // 53% de su tamaño + los dos anillos finos, igual de pequeños.
             {
+                VFXCore.CerrarLoteSiAbierto();
+                VFXCore.Begin();
+                try
+                {
+                    if (Time < (float)ChargeTime)
+                    {
+                        // LOS SOLES ABSORBIDOS: la banda elíptica ENCOJE con
+                        // la carga (el hervidero de 4 puntas se aviva).
+                        HazConcentradoLib.SolesRunicosCarga(val,
+                            Utils.GetLerpValue(20f, (float)ChargeTime, Time, true),
+                            Main.GlobalTimeWrappedHourly);
+                    }
+                    else if (Time < (float)(ChargeTime + 22))
+                    {
+                        // EL ESTALLIDO: lo absorbido SALE en abanico.
+                        HazConcentradoLib.SolesRunicosEstallido(val,
+                            ((ModProjectile)this).Projectile.rotation,
+                            (Time - (float)ChargeTime) / 22f,
+                            Main.GlobalTimeWrappedHourly);
+                    }
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.FlushAdditive();
+                VFXCore.ReabrirLoteVanilla();
+
+                // LA CORONA RÚNICA — el ÚNICO círculo permitido, al 53% del
+                // tamaño de la .56.5 (Lerp(150,56) → Lerp(70,26)): «varios
+                // círculos rúnicos de agujeros negros» a escala de conjuro
+                // íntimo, no de eclipse.
                 float numP = MathF.Pow(num, 0.8f);
                 float breathe = 1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
-                float horizon = MathHelper.Lerp(96f, 132f, numP) * breathe;
-                VFXCore.Begin();
-                // v6.56.5 — LA AUDITORÍA B (MEDIO-3): EL HORIZONTE SALÍA A LA
-                // MITAD. La convención de la casa para BlackDisk (Supremo/
-                // Bruma: «sólido hasta ~0.88 del semiancho → tamaño 2.28·R
-                // da un radio visible de R»): la Scale del Quad es el ANCHO
-                // TOTAL — horizon/0.88 = 1.14·horizon dejaba el radio sólido
-                // en 0.5·horizon (48-66 px en vez de 96-132: el núcleo negro
-                // quedaba MÁS PEQUEÑO que su propia corona de 56 px — el
-                // eclipse se leía al revés). 2.28·horizon lo pone exacto.
-                VFXCore.Quad(((Entity)((ModProjectile)this).Projectile).Center, new Color(12, 5, 20, 240) * 0.95f,
-                    new Vector2(2.28f * horizon, 2.28f * horizon), 0f, HazConcentradoLib.DiscoNegro);
-                VFXCore.FlushAlpha();
-                float rCorona = MathHelper.Lerp(150f, 56f, numP) * breathe;
+                float rCorona = MathHelper.Lerp(70f, 26f, numP) * breathe;
                 try
                 {
                     OrbitaLib.AbrirAdditive();
@@ -593,12 +594,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 VFXCore.ReabrirLoteVanilla();
             }
+            // v6.56.6 — los anillos finos acompañan a la corona al 53%.
             float num5 = MathF.Pow(num, 0.8f);
-            float num6 = MathHelper.Lerp(150f, 56f, num5) * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
+            float num6 = MathHelper.Lerp(70f, 26f, num5) * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
             Vector2 val2 = VFXCore.RingQuadSize(num6);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
             Vector2 val3 = VFXCore.RingQuadSize(num6 * 1.38f);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
+            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
             if (Time < (float)ChargeTime && Time % 14f < 3f)
             {
                 float lerpValue = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true);
@@ -612,7 +614,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float num10 = num9 + 26f + 34f * lerpValue;
                     Vector2 start = val + new Vector2(MathF.Cos(num8), MathF.Sin(num8)) * num9;
                     Vector2 end = val + new Vector2(MathF.Cos(num8 + 0.5f), MathF.Sin(num8 + 0.5f)) * num10;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f, DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
+                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f, VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
                 }
             }
             if (Time > (float)ChargeTime && Time < (float)(ChargeTime + 8) && VFXCore.DestelloFinal != null)
@@ -624,9 +626,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float num11 = Utils.GetLerpValue((float)(ChargeTime - 30), (float)(ChargeTime + 70), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true);
                 Vector2[] array = _cachePuntos;
                 float[] array2 = _cacheRotas;
+                // v6.56.6 — LA TÉCNICA DE LA SIERPE (V7): el eje entero
+                // ONDULA — una serpiente de luz que se desliza por el cielo
+                // (SierpesLib vive en la casa; aquí el eje del conducto es el
+                // cuerpo). Perpendicular al haz, sin fase por nodo corrupta:
+                // q·3π − localAI·0.11 recorre la onda a lo largo.
+                bool esSierpe = Variante == 7;
+                float ondaSierpe = esSierpe ? 34f * realSize : 0f;
+                Vector2 perpHaz = new((0f - MathF.Sin(((ModProjectile)this).Projectile.rotation)), MathF.Cos(((ModProjectile)this).Projectile.rotation));
                 for (int j = 0; j < 1500; j++)
                 {
-                    array[j] = ((Entity)((ModProjectile)this).Projectile).Center + Utils.RotatedBy(new Vector2(3500f * ((float)j / 1500f) * (0.5f + num11 * 0.5f), 0f), (double)((ModProjectile)this).Projectile.rotation, default(Vector2));
+                    float qj = (float)j / 1500f;
+                    array[j] = ((Entity)((ModProjectile)this).Projectile).Center + Utils.RotatedBy(new Vector2(3500f * qj * (0.5f + num11 * 0.5f), 0f), (double)((ModProjectile)this).Projectile.rotation, default(Vector2));
+                    if (esSierpe)
+                    {
+                        float fase = MathF.Sin(qj * 9.42f - ((ModProjectile)this).Projectile.localAI[0] * 0.11f)
+                                     * MathF.Sin(qj * MathF.PI);   // anclado: 0 en la boca y la punta
+                        array[j] += perpHaz * (fase * ondaSierpe);
+                    }
                     array2[j] = ((ModProjectile)this).Projectile.rotation;
                 }
                 VertexStrip val4 = _strip;
@@ -689,11 +706,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         Texture2D texRemolino2 = DefinitivasLib.TexRemolino;
                         if (texRuido2 != null)
                         {
-                            RayoStrip.FajaTexturadaEnLote(array3, array4, DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f), 0.6f * realSize), texRuido2, 420f, 1f, Main.GlobalTimeWrappedHourly);
+                            RayoStrip.FajaTexturadaEnLote(array3, array4, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f), 0.6f * realSize), texRuido2, 420f, 1f, Main.GlobalTimeWrappedHourly);
                         }
                         if (texRemolino2 != null)
                         {
-                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f, _cacheSemisA), DefinitivasLib.Alfa(DefinitivasLib.GradienteJuicio(((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
+                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f, _cacheSemisA), DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
                         }
                         if (texRuido2 != null)
                         {
@@ -706,17 +723,145 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     }
                 }
             }
+            // ============================================================
+            //  v6.56.6 — LA PILA DE CAPAS DEL HAZ (la letra: «le quitaste
+            //  los efectos y otras texturas, ahora solo usa 1 textura, le
+            //  faltan mas texturas y mas efectos, como el desenfoque, el
+            //  glow, el brillo entre otras cosas… es un ataque definitivo,
+            //  debe ser lo mas vistoso posible, lleno de efectos visuales,
+            //  profesional y poderoso»). La tira del shader (las 4 texturas
+            //  del plasma) NO basta sola: encima viaja LA PILA —
+            //    · EL DESENFOQUE: remolino a 1.8× de semiancho, al 30% —
+            //      el halo difuso que desdibuja los bordes;
+            //    · EL GLOW: carne fBm a 1.35×, la rampa del gradiente que
+            //      respira a lo largo;
+            //    · EL BRILLO: la vena central blanca (ventana V 0.36-0.64)
+            //      — el corazón incandescente del conducto;
+            //    · LOS SOLES DEL CONDUCTO: destellos de 4 puntas corriendo
+            //      por dentro (la firma de la carga, ahora en el haz);
+            //    · LA TÉCNICA DE LA VARIANTE: cada RC2 su propio monstruo.
+            // ============================================================
+            if (Time >= (float)(ChargeTime - 20))
+            {
+                DibujarPilaDeCapas();
+            }
             VFXCore.RestaurarLoteVanilla();
             return false;
         }
 
+        // v6.56.6 — LOS POZOS DE LAS RAMAS CUÁNTICAS (V8): cero-GC.
+        private static readonly Vector2[] _pozoRamaPts = (Vector2[])(object)new Vector2[16];
+        private static readonly float[] _pozoRamaSemis = new float[16];
+
+        /// <summary>LA PILA: desenfoque + glow + brillo + soles del conducto
+        /// + la técnica de la variante. Se dibuja SIEMPRE que el haz vive
+        /// (con shader GPU o sin él — las capas son el equipaje propio).</summary>
+        private void DibujarPilaDeCapas()
+        {
+            Texture2D texRuido2 = DefinitivasLib.TexRuido;
+            Texture2D texRemolino2 = DefinitivasLib.TexRemolino;
+            if (texRuido2 == null || texRemolino2 == null) return;
+
+            // el eje remuestreado a 64 nodos (los pozos de la casa)
+            Vector2[] array3 = _cachePuntos64;
+            float[] array4 = _cacheSemis64;
+            for (int k = 0; k < 64; k++)
+            {
+                float num12 = (float)k / 63f;
+                array3[k] = _cachePuntos[(int)(num12 * 1499f)] - Main.screenPosition;
+                array4[k] = MathF.Max(StripWidth(num12) * 0.5f, 1f);
+            }
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Color cGrad = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
+            Color cGrad2 = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.25f);
+
+            RayoStrip.AbrirLote();
+            try
+            {
+                // (1) EL DESENFOQUE — el halo difuso del borde.
+                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 1.8f, _cacheSemisA),
+                    DefinitivasLib.Alfa(cGrad2, 0.30f * realSize), texRemolino2, 240f, 1.9f, t);
+                // (2) EL GLOW — la carne que respira el gradiente.
+                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 1.35f, _cacheSemisB),
+                    DefinitivasLib.Alfa(cGrad, 0.50f * realSize), texRuido2, 420f, 1.0f, t);
+                // (3) EL BRILLO — la vena central blanca.
+                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.55f, _cacheSemisA),
+                    DefinitivasLib.Alfa(Color.White, 0.90f * realSize), texRuido2, 380f, 2.6f, t, 0.36f, 0.64f);
+            }
+            finally
+            {
+                RayoStrip.CerrarLote();
+            }
+
+            // (4) LA TÉCNICA DE LA VARIANTE — cada haz su monstruo. FUERA
+            // del lote de RayoStrip: algunas técnicas administran sus
+            // propios lotes (AberracionCromatica abre el suyo; Nube y Bruma
+            // manejan VFXCore por dentro) y las de SpriteBatch directo
+            // heredan el lote vanilla de entidades (el camino probado de
+            // los bolts de la carga).
+            switch (Variante)
+            {
+                case 1:
+                    VariantesRC2.Prisma(array3, array4, this, realSize);
+                    break;
+                case 2:
+                    VariantesRC2.Eclipse(array3, array4, this, realSize);
+                    break;
+                case 3:
+                    VariantesRC2.Tormenta(array3, array4, this, realSize);
+                    break;
+                case 4:
+                    VariantesRC2.Solar(array3, array4, this, realSize);
+                    break;
+                case 5:
+                    VariantesRC2.Vortice(array3, array4, this, realSize);
+                    break;
+                case 6:
+                    VariantesRC2.Espectro(array3, array4, this, realSize);
+                    break;
+                case 8:
+                    VariantesRC2.Cuantico(array3, array4, this, realSize);
+                    break;
+                case 9:
+                    VariantesRC2.Nova(array3, array4, this, realSize);
+                    break;
+            }
+
+            // (5) LOS SOLES DEL CONDUCTO — destellos de 4 puntas corriendo
+            // por dentro del haz (aditivo puro, lote VFXCore).
+            VFXCore.CerrarLoteSiAbierto();
+            VFXCore.Begin();
+            try
+            {
+                int semilla = ((Entity)((ModProjectile)this).Projectile).whoAmI * 17 + 3;
+                for (int i = 0; i < 7; i++)
+                {
+                    float h = VFXCore.Hash01(semilla, 600 + i, 7);
+                    float viaje = (h + ((ModProjectile)this).Projectile.localAI[0] * (0.0022f + 0.0035f * h)) % 1f;
+                    int nodo = (int)(viaje * 63f);
+                    Vector2 pos = array3[nodo];
+                    float vida = (t * 1.4f + h * 3f) % 1f;
+                    float arde = MathF.Sin(vida * MathHelper.Pi);
+                    float anchoNodo = array4[nodo];
+                    HazConcentradoLib.SolRunico4Puntas(pos,
+                        MathF.Max(2.5f, anchoNodo * 0.42f) * (0.7f + 0.5f * h), arde);
+                }
+            }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+            VFXCore.FlushAdditive();
+            VFXCore.ReabrirLoteVanilla();
+        }
+
         public Color StripColor(float progress)
         {
+            // v6.56.6 — EL COLOR VIAJA CON LA VARIANTE (cada técnica tiene
+            // su identidad cromática — ver VariantesRC2.Gradiente).
             //IL_001b: Unknown result type (might be due to invalid IL or missing references)
             //IL_0020: Unknown result type (might be due to invalid IL or missing references)
             //IL_0029: Unknown result type (might be due to invalid IL or missing references)
             //IL_0030: Unknown result type (might be due to invalid IL or missing references)
-            Color val = DefinitivasLib.GradienteJuicio((((ModProjectile)this).Projectile.localAI[0] - progress * 100f) / 60f);
+            Color val = VariantesRC2.Gradiente(Variante, (((ModProjectile)this).Projectile.localAI[0] - progress * 100f) / 60f);
             (val).A = 0;
             return val * realSize;
         }

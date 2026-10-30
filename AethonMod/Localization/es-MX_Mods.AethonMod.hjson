@@ -1,8 +1,6 @@
-// v6.56.4 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
-// única del español de la casa). Este archivo existe porque el juego en
-// «Español (Latinoamérica)» lee el es-MX: sin él caería al fallback (y el
-// en-US ya no existe). Contenido IDÉNTICO al es-ES: editar SOLO el es-ES
-// y correr tools/sync_es_mx_v6564.py.
+// v6.56.6 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
+// única del español de la casa). Contenido IDÉNTICO al es-ES: editar SOLO
+// el es-ES y correr tools/sync_es_mx_v6564.py.
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
@@ -1962,67 +1960,6 @@ Items: {
 			'''
 	}
 
-	PrismaPrimordial: {
-		DisplayName: El Prisma Primordial
-		Tooltip:
-			'''
-				NIVEL 4 de la escalera del Rayo Concentrado — la versión inferior
-				inmediata del RC2 («el prisma primordial sería una versión inferior
-				que el rayo concentrado 2»).
-				Una sola cosa: LA ESPINA VIVA — 16 nodos verlet que se rezagan y
-				LATIGUEA al barrer — vestida con EL PLASMA de la casa: la pila
-				completa de pasadas texturizadas (aura lenta, cuerpo con el color
-				del Juicio VIAJANDO, remolino hirviendo, núcleo en banda, vena
-				blanca y aberración cromática).
-				Sus POSIMÁGENES del barrido, su foco con anillos que se contraen
-				con la convergencia, los micro-arcos de la carga y la luz del
-				canal. CERO polvos: la punta ARDE de plasma.
-			'''
-	}
-
-	PartidorDeMundos: {
-		DisplayName: El Partidor de Mundos
-		Tooltip:
-			'''
-				Un clic. Una línea. El mundo, en dos.
-				LA CONTENCIÓN — la aguja TEXTURIZADA tiembla mientras cinco runas se
-				encienden y los corredores recorren la línea; LA PARTICIÓN — la columna
-				de CARNE DE RUIDO hirviendo hacia arriba con sus seis pasadas y la
-				aberración cromática, el suelo estalla con CUATRO ondas (la del
-				rechinido), las grietas se abren CON SUS ECOS, los ESCOMBROS saltan
-				girando y EL HUMO DE LA HERIDA sube de la base (la librería de brumas).
-				(El botón de apocalipsis: úsalo con respeto.)
-			'''
-	}
-
-	RequiemEstelar: {
-		DisplayName: El Réquiem Estelar
-		Tooltip:
-			'''
-				LA CAMPANA DE LUZ — tres anillos que ya no son aros de color: son RÍOS
-				DE BRONCE (el ruido FLUYE alrededor del círculo y la costura queda
-				cerrada por construcción), con sus NOTAS y sus ecos cabalgando, los
-				PÉTALOS de resonancia mordiendo al frente, el badajo girando en contra,
-				la IMPLOSIÓN que aspira antes de cada tañido y EL ALIENTO dorado de la
-				campana al sonar. El tercero es LA CAMPANA MAYOR: doble, con el eco
-				fluyendo en contra y la lluvia de estrellas del cierre — y el aura que
-				queda SONANDO cuando todo pasó.
-			'''
-	}
-
-	IraDelCielo: {
-		DisplayName: La Ira del Cielo
-		Tooltip:
-			'''
-				El cielo se CUBRE con LA LIBRERÍA DE BRUMAS — racimos de nubes con
-				deriva orgánica y bandas de niebla con paralaje, y cada relámpago
-				ambiental ILUMINA las nubes cercanas. LOS OCHO JUICIOS se anuncian con
-				la línea que desciende y las chispas que CONVERGEN al blanco; la caída
-				envuelve su AURA DE CARNE, y la columna golpea con sus SEIS PASADAS, la
-				espiral triple del final, el humo del juicio y el suelo ardiendo.
-			'''
-	}
-
 	RayoConcentradoDos: {
 		DisplayName: El Rayo Concentrado II
 		Tooltip:
@@ -2041,67 +1978,100 @@ Items: {
 			'''
 	}
 
-	RayoDelAlba: {
-		DisplayName: El Rayo del Alba
+	// v6.56.6 — LAS NUEVE VARIANTES DEL RAYO CONCENTRADO 2 (la letra del
+	// usuario: «quiero que hagas otra variantes del rayo concentrado 2,
+	// al menos 9 variantes mas con diferentes efectos y tecnicas vfx»).
+	RayoConcentradoPrisma: {
+		DisplayName: RC2: Prisma
 		Tooltip:
 			'''
-				NIVEL 1 de la escalera del Rayo Concentrado: 90 de carga, 300 de
-				láser, cono de 1500 px — el alba aprendiendo a arder.
-				El plasma de la casa (CarnePlasma anti-picos) a intensidad 0.45,
-				con sus anillos de contención y el gradiente del Juicio.
+			El Rayo Concentrado 2 partido en DOS ESPECTROS: rojo y cian
+			cremallera al costado del conducto (la aberración cromática
+			de la casa) y el gradiente es el ARCOÍRIS completo.
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
-	RayoDelVeredicto: {
-		DisplayName: El Rayo del Veredicto
+	RayoConcentradoEclipse: {
+		DisplayName: RC2: Eclipse
 		Tooltip:
 			'''
-				NIVEL 2: 150 de carga, 450 de láser, cono de 2100 px — el veredicto
-				toma forma. Intensidad 0.60 del plasma de la casa.
-				Anillos que se contraen, aguja telégrafo y el gradiente viajero.
+			El haz violeta OSCURO que exhala BRUMA NEGRA por el conducto:
+			un dios apagándose a su paso. Lila ceniza donde toca.
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
-	RayoDelJuicio: {
-		DisplayName: El Rayo del Juicio
+	RayoConcentradoTormenta: {
+		DisplayName: RC2: Tormenta
 		Tooltip:
 			'''
-				NIVEL 3: 210 de carga, 600 de láser, cono de 2800 px — un peldaño
-				bajo la cima. Intensidad 0.75 + aberración cromática en el borde.
-				El Juicio casi completo.
+			RAYOS QUE REPTAN por el conducto — arcos azules parpadeando
+			de la boca a la punta (la técnica StormLib de la casa).
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
-	IndiceDelJuicio: {
-		DisplayName: El Índice del Juicio
+	RayoConcentradoSolar: {
+		DisplayName: RC2: Solar
 		Tooltip:
 			'''
-				El grimorio REAL se abre sobre tu cabeza y sus OCHO PÁGINAS
-				fantasma salen a cazar: cada una vuela con su cola de historia
-				y corta con su media luna que nace TRAS el paso.
-				120 de daño por página — el índice del libro devorador.
+			LENGUAS DE FUEGO SOLAR brotan a lo largo del conducto
+			(PyraLib, la rampa SolarFire) — el rayo que quema al pasar.
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
-	PlumaDelVeredicto: {
-		DisplayName: La Pluma del Veredicto
+	RayoConcentradoVortice: {
+		DisplayName: RC2: Vórtice
 		Tooltip:
 			'''
-				La pluma DIBUJA el sello en el aire — glifo a glifo, 45 t — y al
-				completarse DETONA: triple onda de choque, doce lanzas de luz
-				en abanico y el sello ARDIENDO en el sitio dos segundos más.
-				380 el sello · 60 cada lanza.
+			NEBULOSAS cian y violeta ORBITAN el conducto — el gas circula,
+			no oscila (la advección de curl de NebulaLib).
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
-	OjoDelJuicio: {
-		DisplayName: El Ojo del Juicio
+	RayoConcentradoEspectro: {
+		DisplayName: RC2: Espectro
 		Tooltip:
 			'''
-				En el cielo se abre UN OJO COLOSAL entre la bruma de la página:
-				la pupila te sigue, se contrae… y DISPARA el haz masivo de la
-				casa barriendo el mundo. 900 por golpe del barrido.
-				El juicio que te mira desde arriba.
+			El haz tiene ECOS: dos fajas fantasma verdes pálidas lo
+			escoltan desfasadas, con el flujo al revés — el rayo que
+			ya murió y todavía brilla.
+			La carga absorbe soles rúnicos; el disparo los escupe.
+			'''
+	}
+
+	RayoConcentradoSierpe: {
+		DisplayName: RC2: Sierpe
+		Tooltip:
+			'''
+			EL EJE ONDULA: el conducto entero se desliza como una
+			serpiente de luz ámbar (la técnica verlet de la casa,
+			destilada en la fase del eje).
+			La carga absorbe soles rúnicos; el disparo los escupe.
+			'''
+	}
+
+	RayoConcentradoCuantico: {
+		DisplayName: RC2: Cuántico
+		Tooltip:
+			'''
+			El conducto se RAMIFICA: fajitas cortas nacen y mueren a lo
+			largo del haz — la superposición de caminos, magenta contra
+			cian.
+			La carga absorbe soles rúnicos; el disparo los escupe.
+			'''
+	}
+
+	RayoConcentradoNova: {
+		DisplayName: RC2: Nova
+		Tooltip:
+			'''
+			ANILLOS DE PULSO viajan por el conducto hacia afuera — la
+			onda que camina (OndaLib), rosa nova sobre blanco dorado.
+			La carga absorbe soles rúnicos; el disparo los escupe.
 			'''
 	}
 
@@ -2109,14 +2079,11 @@ Items: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-				LA ESCALERA DEL RAYO CONCENTRADO: el Alba, el Veredicto, el Juicio,
-				EL PRISMA y EL RAYO CONCENTRADO II (la cima) — más las sentencias
-				del Veredicto (el partidor a pantalla completa, el réquiem, la ira
-				del cielo con su bruma densa)… y LAS TRES NUEVAS DEL GRIMORIO: el
-				Índice de las páginas fantasma, la Pluma del sello que detona y
-				EL OJO del juicio.
-				Todo con EL PLASMA DE LA CASA (carne fBm anti-picos) y los COLORES
-				DEL JUICIO.
+			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa
+			y sus NUEVE VARIANTES VFX (cada una con su técnica y su
+			carácter: prisma, filo, eclipse, tormenta, vórtice…).
+			El plasma de la casa (carne fBm anti-picos) y los COLORES
+			DEL JUICIO siguen siendo ley.
 			'''
 	}
 

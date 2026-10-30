@@ -1,0 +1,42 @@
+// v6.56.6 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente
+// única del español de la casa). Contenido IDÉNTICO al es-ES: editar SOLO
+// el es-ES y correr tools/sync_es_mx_v6564.py.
+Items: {
+	PrimerTrazo: {
+		DisplayName: El Primer Trazo
+		Tooltip:
+			'''
+			La pluma que escribió la primera línea del mundo, cargada de luz.
+			MANTÉN el clic: cinco trazos convergen en UN RAYO DE FUSIÓN
+			(el arcoíris de aceite corre a lo largo, el núcleo arde blanco
+			y el ruido fluye de la boca a la punta — la técnica del dios).
+			A plena carga el daño se triplica.
+			'''
+		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
+	}
+
+	AuroraDeTinta: {
+		DisplayName: La Aurora de Tinta
+		Tooltip:
+			'''
+			Las alas creadas por código: diez plumas de luz prismática
+			tejidas en el aire.
+			De noche el prisma completo corre por el ala; de día la tinta
+			se aclara a blanco-oro.
+			Vuelo de polilla (rápido, sin penalidad), 240 de vuelo,
+			sin daño de caída y la aceleración aérea de la Emperatriz.
+			Si vistes alas reales, la aurora se pliega y eleva su
+			tiempo de vuelo al mínimo.
+			'''
+		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
+		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
+	}
+}
+
+Projectiles: {
+	PrimerTrazoHeld.DisplayName: El Primer Trazo
+	PrimerTrazoFajo.DisplayName: Trazo de fusión
+	AlasAuroraHalo.DisplayName: La Aurora de Tinta
+	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
+	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
+}

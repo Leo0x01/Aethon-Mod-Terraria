@@ -412,87 +412,87 @@ namespace AethonMod.Content.VFX
         //  sistema de partículas de la casa (SparkleStar + FadeIn/FadeOut/
         //  EmitLight — el patrón SpawnLibraryTwinkles de SunProjectile).
 
-        /// <summary>LOS DESTELLOS CONVERGENTES de la carga: 2-4 por pulso,
-        /// nacen a un radio que ENCOGE con el progreso (260→60 px) y se
-        /// lanzan al centro cada vez más rápido (26→10 ticks de llegada).</summary>
-        public static void DestellosDeCarga(Vector2 centro, float progreso, int semilla, float escala)
+        // ====================================================================
+        //  v6.56.6 — LOS SOLES RÚNICOS DE LA CARGA (la letra del usuario:
+        //  «sobre los brillos de soles runicos que deben ser absorbidos por
+        //  el arma al realizar la carga… debes usar los mismos brillos que
+        //  usa el accesorio de El brillo de soles runicos»). LA RECETA ES
+        //  DE BrilloSolarHalo (DrawTwinkles de los soles de 3 anillos+):
+        //  EL DESTELLO DE 4 PUNTAS — dos cápsulas cruzadas de blanco
+        //  incandescente + el corazón dorado, que nacen, arden y mueren.
+        //  Los antiguos DestellosDeCarga/Estallido (SparkleStar genérico)
+        //  MURIERON: no eran «ese brillo».
+        // ====================================================================
+
+        /// <summary>EL DESTELLO DE 4 PUNTAS — la firma del sol rúnico:
+        /// dos cápsulas cruzadas de blanco incandescente + el corazón
+        /// dorado. Se dibuja en el LOTE ADITIVO de VFXCore (el llamador
+        /// abre Begin/FlushAdditive). Receta verbatim de BrilloSolarHalo.
+        /// [size] en px: cápsulas 2.2·size, núcleo 1.5·size.</summary>
+        public static void SolRunico4Puntas(Vector2 pos, float size, float arde,
+            float doradoExtra = 0f)
         {
-            if (Main.netMode == NetmodeID.Server || Main.dedServ)
-            {
-                return;
-            }
+            if (arde <= 0.03f || size <= 0.4f) return;
+            float fino = MathF.Max(1.6f, 0.035f * 34f) * arde;
+            Color blanco = new Color(255, 248, 225) * (0.55f * arde);
+            Color dorado = new Color(255, 214, 120) * ((0.50f + doradoExtra) * arde);
+            VFXCore.Quad(pos, blanco, new Vector2(size * 2.2f, fino));
+            VFXCore.Quad(pos, blanco, new Vector2(fino, size * 2.2f));
+            VFXCore.Quad(pos, dorado, new Vector2(size * 1.5f, size * 1.5f));
+        }
+
+        /// <summary>LA CARGA ABSORBE SOLES: los destellos de 4 puntas del
+        /// accesorio nacen en la banda elíptica de siempre, pero la banda
+        /// ENCOGE con el progreso (se absorben hacia el arma: 170→22 px) y
+        /// el ciclo nace-arde-muere ACELERA (el hervidero se aviva). Pura
+        /// función de (progreso, tiempo): determinista, sin estado.</summary>
+        public static void SolesRunicosCarga(Vector2 centro, float progreso, float tiempo)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             progreso = MathHelper.Clamp(progreso, 0f, 1f);
-            float radio = MathHelper.Lerp(260f, 60f, progreso) * escala;
-            float llegada = MathHelper.Lerp(26f, 10f, progreso);
-            int cuenta = 2 + (int)(VFXCore.Hash01(semilla, 1, 3) * 2.99f);
-            for (int k = 0; k < cuenta; k++)
+            const int cuenta = 11;
+            float banda = MathHelper.Lerp(170f, 22f, progreso * progreso);
+            float velocidad = 0.5f + 2.1f * progreso;      // el hervidero acelera
+            for (int i = 0; i < cuenta; i++)
             {
-                float ang = VFXCore.Hash01(semilla, k * 13 + 5, 7) * MathF.Tau;
-                float r = radio * (0.8f + 0.4f * VFXCore.Hash01(semilla, k * 29 + 11, 13));
-                Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r;
-                Vector2 vel = (centro - pos) / llegada;
-                Color c = Color.Lerp(DefinitivasLib.Oro, DefinitivasLib.BlancoCalido, VFXCore.Hash01(semilla, k * 7 + 3, 17));
-                var p = new ParticleData
-                {
-                    Position = pos,
-                    Velocity = vel,
-                    Scale = Vector2.One * (0.55f + 0.6f * VFXCore.Hash01(semilla, k * 3 + 1, 19)) * escala,
-                    Rotation = ang,
-                    RotationSpeed = (VFXCore.Hash01(semilla, k * 17 + 9, 23) - 0.5f) * 0.2f,
-                    PackedColor = ParticleManager.PackColor(new Color(c.R, c.G, c.B, 205)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(c.R, c.G, c.B, 205)),
-                    TimeLeft = (int)llegada + 6,
-                    Duration = (int)llegada + 6,
-                    TextureId = ParticleTex.SparkleStar,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
-                };
-                p.UserData0 = 7f;
-                p.EnableComponent(ComponentFlag.FadeIn);
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.EmitLight);
-                ParticleManager.Spawn(p);
+                float h = VFXCore.Hash01(31, 300 + i, 7);
+                float vida = (tiempo * velocidad * 0.5f + h * 3f) % 1f;
+                float arde = MathF.Sin(vida * MathHelper.Pi);
+                if (arde < 0.05f) continue;
+
+                float ang = VFXCore.Hash01(31, 310 + i, 11) * MathHelper.TwoPi
+                            + tiempo * (0.07f + 0.35f * progreso);
+                float dist = (1.25f + 1.55f * VFXCore.Hash01(31, 320 + i, 13))
+                             * banda * (1f - 0.35f * vida);   // la última mirada se acerca
+                Vector2 pos = centro + new Vector2(MathF.Cos(ang) * dist,
+                    MathF.Sin(ang) * dist * 0.72f);
+                float size = (0.30f + 0.25f * VFXCore.Hash01(31, 330 + i, 17))
+                             * 34f * (0.55f + 0.45f * progreso);
+                SolRunico4Puntas(pos, size, arde);
             }
         }
 
-        /// <summary>LOS DESTELLOS DEL ESTALLIDO: al disparar, salen de forma
-        /// aleatoria hacia la dirección del rayo (±0.45 rad del eje, 6-14
-        /// px/tick, vida corta) — el rayo suelta chispas de sol.</summary>
-        public static void DestellosDeEstallido(Vector2 centro, float angulo, int semilla, float escala)
+        /// <summary>EL ESTALLIDO DE SOLES: al disparar, los destellos de 4
+        /// puntas salen EXPULSADOS en abanico por la dirección del rayo
+        /// (±0.5 rad) y arden muriendo — el arma escupe lo que absorbió.
+        /// [edad01] 0→1 durante los primeros ~22 ticks del disparo.</summary>
+        public static void SolesRunicosEstallido(Vector2 centro, float angulo, float edad01,
+            float tiempo)
         {
-            if (Main.netMode == NetmodeID.Server || Main.dedServ)
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
+            edad01 = MathHelper.Clamp(edad01, 0f, 1f);
+            const int cuenta = 16;
+            for (int i = 0; i < cuenta; i++)
             {
-                return;
-            }
-            int cuenta = 3 + (int)(VFXCore.Hash01(semilla, 2, 5) * 2.99f);
-            for (int k = 0; k < cuenta; k++)
-            {
-                float a = angulo + (VFXCore.Hash01(semilla, k * 13 + 5, 7) - 0.5f) * 0.9f;
-                float v = (6f + 8f * VFXCore.Hash01(semilla, k * 19 + 1, 11)) * escala;
-                Vector2 dir = new(MathF.Cos(a), MathF.Sin(a));
-                Vector2 pos = centro + dir * (14f * escala);
-                Color c = Color.Lerp(DefinitivasLib.BlancoCalido, DefinitivasLib.Oro, VFXCore.Hash01(semilla, k * 7 + 3, 17));
-                int vida = 16 + (int)(VFXCore.Hash01(semilla, k * 23 + 2, 29) * 10f);
-                var p = new ParticleData
-                {
-                    Position = pos,
-                    Velocity = dir * v,
-                    Scale = Vector2.One * (0.5f + 0.7f * VFXCore.Hash01(semilla, k * 3 + 1, 19)) * escala,
-                    Rotation = a,
-                    RotationSpeed = (VFXCore.Hash01(semilla, k * 17 + 9, 23) - 0.5f) * 0.25f,
-                    PackedColor = ParticleManager.PackColor(new Color(c.R, c.G, c.B, 210)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(c.R, c.G, c.B, 210)),
-                    TimeLeft = vida,
-                    Duration = vida,
-                    TextureId = ParticleTex.SparkleStar,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
-                };
-                p.UserData0 = 7f;
-                p.EnableComponent(ComponentFlag.FadeIn);
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.EmitLight);
-                ParticleManager.Spawn(p);
+                float a = angulo + (VFXCore.Hash01(77, 500 + i, 7) - 0.5f) * 1.0f;
+                float v = 6f + 9f * VFXCore.Hash01(77, 510 + i, 11);
+                float arr = 14f + 26f * VFXCore.Hash01(77, 520 + i, 13);
+                float arde = MathF.Sin((1f - edad01) * MathHelper.Pi)
+                             * (0.6f + 0.4f * VFXCore.Hash01(77, 530 + i, 17));
+                Vector2 pos = centro + new Vector2(MathF.Cos(a), MathF.Sin(a))
+                              * (arr + v * edad01 * 22f);
+                float size = (0.34f + 0.30f * VFXCore.Hash01(77, 540 + i, 19)) * 34f;
+                SolRunico4Puntas(pos, size, arde);
             }
         }
     }

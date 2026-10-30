@@ -7,6 +7,13 @@ using AethonMod.Content.Projectiles.Definitivas;
 
 namespace AethonMod.Content.Weapons.Definitivas
 {
+    // v6.56.6 — LA PURGA DE LAS ARMAS NUEVAS (la letra del usuario: «borra
+    // todas las nuevas armas y solo deja al rayo concentrado 2»). La
+    // escalera del Rayo (Alba/Veredicto/Juicio), el Prisma, el Partidor,
+    // el Réquiem, la Ira, el Índice, la Pluma y el Ojo MUEREN con sus
+    // proyectiles y sprites. El RC2 queda como LA ÚNICA arma definitiva —
+    // y la exclusión de haces que vivía en EscaleraDelRayo (clase
+    // borrada) se incrusta aquí: UN solo RC2 a la vez.
     // ======================================================================
     //  v6.55.0 — EL RAYO CONCENTRADO II (antes «la réplica de investigación»
     //  de la v6.54.8 — LA REFORMA de la letra: «no uses texturas originales
@@ -58,9 +65,19 @@ namespace AethonMod.Content.Weapons.Definitivas
 
         public override bool CanUseItem(Player player)
         {
-            // v6.56.1 — UN solo haz a la vez, cruzando TODA la escalera
-            // (niveles 1-3 + RC2 + Prisma): EscaleraDelRayo.HazLibre.
-            return EscaleraDelRayo.HazLibre(player);
+            // v6.56.6 — UN solo RC2 a la vez (antes: EscaleraDelRayo.HazLibre
+            // cruzaba las 5 familias de haces — las otras 4 murieron con la
+            // purga de armas nuevas; la exclusión queda reducida a sí misma).
+            int rc2 = ModContent.ProjectileType<RayoConcentradoDosProjectile>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.owner == player.whoAmI && p.type == rc2)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,

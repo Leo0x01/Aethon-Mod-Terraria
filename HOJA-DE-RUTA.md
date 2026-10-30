@@ -3,11 +3,12 @@
 > **Espejo compacto del worklog** (que vive en el sandbox y los wipes se lo han comido
 > dos veces — lecciones de las Tasks 68-84). La especificación gorda de cada tarea está
 > en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2 — actualizado en la
-> Task 108 (era v6.56.4: el camino GPU del RC2 portado a las armas + el espejo completo
-> de las alas + el portal del conjuro + localización monolingüe) y en la Task 109
-> (era v6.56.5: la cura del pitido de la carga + la auditoría de los 4 agentes — el
-> temblor perceptible, el portal a tamaño real, la espina de la Ira/Partidor al derecho,
-> la paridad de las runas y el empaquetado sin .fx).
+> Task 108 (era v6.56.4), la 109 (era v6.56.5) y la **Task 110 (era v6.56.6: LA PURGA de
+> las armas nuevas —solo el RC2 queda— + la cura REAL de la simetría de las alas —el
+> barrido rígido murió: Δ 0.0000 px— + el RC2 desnudo —sin disco negro ni lente, coronas
+> al 53%, la pila de capas y LOS SOLES RÚNICOS del accesorio— + LAS 9 VARIANTES con una
+> técnica VFX cada una + la cura de los textos crudos —el en-US espejo de seguridad— +
+> la auditoría de las 33 librerías con su top 10).
 >
 > **La tesis**: las Definitivas son los fragmentos del poder de un dios, y el Testamento
 > es, literalmente, SU testamento. ¿Quién firma un testamento? Alguien que va a morir…

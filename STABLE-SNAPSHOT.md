@@ -1,3 +1,18 @@
+# v6.56.6 — LA PURGA + LAS ALAS SIMÉTRICAS + EL RC2 DESNUDO + LAS 9 VARIANTES — EL CHECKLIST
+
+> **PUBLICADA** — release pendiente de llenar al publicar.
+
+**Qué pasó** (la letra): textos crudos («mods.aethonmod.nivel» en la barra de exp) · alas aún asimétricas con «esa ligera rotación en el sentido contrario» · «borra todas las nuevas armas y solo deja al rayo concentrado 2» · el RC2 sin círculo negro, sin lente, coronas −50%, más texturas/efectos y LOS MISMOS brillos del accesorio de soles rúnicos · «al menos 9 variantes más con diferentes efectos y técnicas vfx» · auditoría de librerías.
+
+1. **LOS TEXTOS CRUDOS (la cura del fallback)**: [ ] con el juego EN INGLÉS el mod se lee ENTERO en español (la barra de exp dice «Grimorio · Nv X», no «Mods.AethonMod.HUD.Nivel»); [ ] con el juego en Español idéntico que antes; [ ] ningún texto crudo «Mods.AethonMod…» en ninguna parte (el en-US espejo es la red de seguridad del motor).
+2. **LA PURGA**: [ ] en la bolsa de las Definitivas SOLO el RC2 y sus 9 variantes; [ ] la escalera/Prisma/Partidor/Réquiem/Ira/Índice/Pluma/Ojo GONE (ni en recetas ni en el bestiario raro); [ ] los personajes con las armas viejas las ven como items desaparecidos (esperado — la purga es la purga).
+3. **LAS ALAS**: [ ] el par ESPEJO PERFECTO parado (nada de un ala más abierta que otra); [ ] SIN rotación rara en reposo (el rake de 5° murió); [ ] al correr/volar responden igual que antes (Spread abre, Flap acelera) pero SIN torcerse el par.
+4. **EL RC2 DESNUDO**: [ ] SIN círculo negro sobre el personaje (el disco murió); [ ] SIN lente gravitacional (la curvatura del espacio murió); [ ] las coronas rúnicas VISIBLES pero pequeñas (~la mitad); [ ] LA CARGA: destellos de 4 PUNTAS (cápsulas cruzadas + corazón dorado — LOS MISMOS del accesorio El brillo de soles rúnicos) reuniéndose/acelerando hacia el arma; [ ] AL DISPARAR: los destellos salen EXPULSADOS en abanico hacia el rayo; [ ] EL HAZ: desenfoque difuso en los bordes + glow del gradiente + vena central BLANCA incandescente + soles de 4 puntas corriendo por dentro (muchas texturas, muchos efectos); [ ] el temblor sostenido mientras el rayo vive + el golpe de encendido.
+5. **LAS 9 VARIANTES** (todas cargan/disparan/temblan igual; SOLO cambia la piel): [ ] **PRISMA** rojo+cian cremando el costado, gradiente arcoíris; [ ] **ECLIPSE** violeta oscuro exhalando bruma negra; [ ] **TORMENTA** rayos azules reptando por el conducto; [ ] **SOLAR** lenguas de fuego doradas brotando; [ ] **VÓRTICE** nebulosas cian-violeta orbitando; [ ] **ESPECTRO** dos fajas fantasma verdes escoltando; [ ] **SIERPE** el haz entero ondulando como serpiente ámbar; [ ] **CUÁNTICO** ramitas magenta/cian naciendo y muriendo; [ ] **NOVA** anillos rosas viajando hacia afuera; [ ] solo UN haz a la vez (el original y las variantes se excluyen entre sí).
+6. **REGRESIÓN**: [ ] el RC2 original (variante 0) conserva SU juicio violeta-oro; [ ] los sonidos idénticos (carga + bucle — el bucle byte a byte intacto); [ ] las demás armas del mod intactas; [ ] F8: presupuesto sano.
+
+---
+
 # v6.56.5 — LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES — EL CHECKLIST
 
 > **PUBLICADA** — release [428546845](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.5) + CDN verificado byte a byte (md5 `6bfda3d02cdfc7bd438c43e7d3404484`, 6.344.773 B; asset id 690452563).

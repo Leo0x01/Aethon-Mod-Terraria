@@ -8,4 +8,4 @@ El Grimorio del Eterno que cargas no es un arma: es Aethon, una entidad primigen
 - LAS OLEADAS DEL HAMBRE: el festín del libro (oleadas que escalan por nivel y bioma).
 - AETHON, EL GRIMORIO ETERNO: el jefe final de 5 fases — la prueba del propio libro.
 - Economía de Fragmentos de Resonancia y 60+ armas cósmicas.
-- Localización ES (es-ES + es-MX).
+- Localización ES (es-ES + espejos es-MX/en-US: español en cualquier idioma del juego).
