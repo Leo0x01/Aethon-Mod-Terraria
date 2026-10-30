@@ -70,6 +70,21 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      contención + micro-arcos StormLib.Bolt. Lo mismo en el Primer Trazo
      (RuidoTinta → CarnePlasma) y el Prisma (la espina verlet vestida de
      plasma, cero polvos).
+   - **Quads CPU ENCIMA de un strip GPU (la «pila de capas»)** → **LEY
+     v6.56.7**. Para «dar más efecto» a un haz de shader NUNCA se dibujan
+     fajitas texturizadas arriba del strip: los quads tienen borde
+     POLIGONAL duro (64 nodos = un 64-gono) y las texturas crudas (el
+     remolino BINARIO sobre todo) dibujan peines de blobs fuera del borde
+     — LOS PICOS de la v6.56.6, cazados por el sim 1:1 y confirmados por
+     verificación visual (§5.4). TODO lo extra (desenfoque, glow,
+     filamentos, aberración) se hace **PER-PIXEL DENTRO DEL .fx** — una
+     curva smoothstep/pow no puede producir picos.
+   - **Glow de UNA capa con alfa lleno como «boca» de un arma** → la boca
+     del RC2 son CUATRO glows apilados con el alfa a CERO (la suma pura
+     bajo `(One, InvSrcAlpha)` — §5.4). Un único glow con alfa lleno hace
+     LERP contra el fondo: UN CÍRCULO PLANO QUE TAPA (el bug de la carga
+     de la v6.56.4-.56.6 — la letra: «en la fase de carga tambien
+     pusiste un circulo plano»).
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -525,6 +540,67 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
   (para conservar el sentido físico del hervor: positivo = hacia la raíz).
   El Prisma conserva su fade hacia la punta (el lenguaje de la pluma del
   RC2 — decisión de diseño documentada).
+- **v6.56.7 — LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD):** el
+  RC2 de la v6.56.6 dibujaba «LA PILA DE CAPAS» — tres fajitas CPU
+  (`RayoStrip.FajaTexturadaEnLote`) SIEMPRE ENCIMA del strip GPU para
+  dar «desenfoque, glow y brillo». **ESA PILA ERA LA CAUSA DE LOS PICOS**,
+  cazada por el simulador 1:1 de la casa (`/home/z/sim/sim_picaros.py`,
+  texturas reales + la matemática exacta del .fx) y confirmada por
+  verificación visual:
+  1. **LAS FAJITAS SON QUADS DE BORDE POLIGONAL DURO.** Su silueta es la
+     arista del polígono — una línea recta por segmento que corta el
+     borde del haz a hachazos (64 nodos = un 64-gono a escala de cono).
+  2. **LA TEXTURA DEL «DESENFOQUE» ERA `SegundoRuido` — UNA TEXTURA
+     BINARIA** (52 % negro / 22 % saturado, blobs duros; §6.A) diseñada
+     para MULTIPLICARSE dentro del shader. Vista cruda en una faja al
+     1.8× del semiancho, sus blobs duros flotan FUERA del borde del haz:
+     peines de dientes (el sim lo midió: pico-valle 222 px contra 163 px
+     de la técnica correcta; «dientes rectangulares duros saliendo del
+     borde», dijo la verificación visual).
+  3. **En el commit 607df36 las fajitas solo vivían en el FALLBACK sin
+     shader** — con el .fxc cargado el jugador jamás las veía: POR ESO
+     «antes no había picos». LA TÉCNICA CORRECTA ES LA DE 607df36 y
+     volvió ENTERA al RC2: strip de 1500 puntos + el shader de las
+     cuatro texturas EN LOTE ADITIVO (la cura v6.56.4 de los bordes
+     oscuros) + la boca de glows apilados (cuatro, con el alfa a CERO:
+     bajo el pase de entidades de FNA `(One, InvSrcAlpha)`, A=0 con
+     rgb>0 = SUMA PURA — un bloom de verdad, jamás un disco que tapa) +
+     el gradiente `ColorPrisma.ValueAt` (EL COLOR DEL MOD, perdido en la
+     reconstrucción binaria de la v6.56.0) + los polvos cromáticos
+     MUERTOS (eran los «círculos planos» de esa era). **LA LEY QUE
+     QUEDA: todo lo que un haz necesite de más — desenfoque, glow,
+     brillo, filamentos, aberración — SE HACE PER-PIXEL DENTRO DEL
+     .fx (una curva smoothstep/pow no puede producir picos) O NO SE
+     HACE.** Jamás quads CPU encima de un strip GPU.
+- **v6.56.7 — EL SHADER MEJORADO (la letra: «dale una mejora de shaders
+  tambien»):** cuatro mejoras PER-PIXEL dentro del mismo .fx (receta
+  completa en los comentarios del archivo):
+  · **EL HALO — el desenfoque de verdad:** la falda geométrica `pow³` que
+    muere EXACTAMENTE en el borde del polígono del strip, texturada con
+    la carne a su propio flujo (`uTime·1.3 + Coord.x·0.7`) — vive FUERA
+    de la envolvente del núcleo (`color.rgb = núcleo·envV + halo`).
+  · **LOS FILAMENTOS — la auto-interferencia:** la carne multiplicada por
+    una copia de sí misma a MEDIA escala (`VentanaV(Coord.y·0.5+0.25)`,
+    flujo inverso `−Coord.x·0.6`) al 60 % — cordones grandes que
+    serpentean bajo el hervor fino (la técnica del recetario v6.54.8).
+  · **EL NÚCLEO QUE LATE:** el umbral de la vena blanca respira con
+    `sin(uTime·4.65)` (≈54 ticks con el `uTime=−localAI·0.025` de la
+    casa) — el corazón se hincha y afloja.
+  · **LA FRANJA PRISMÁTICA:** el halo se muestrea TRES veces con un
+    microdesfase por canal en la zona del filo (`±0.035·(1−envV)`) —
+    rojo afuera, azul adentro, la aberración de la casa en el borde.
+- **v6.56.7 — EL CONTRATO DE COORDENADAS DE VFXCore (el bug de los soles
+  invisibles):** `VFXCore.Quad` recibe coordenadas de **MUNDO** (el
+  volcado resta `Main.screenPosition` — §3.1); `OrbitaLib.CoronaConjuro`
+  y `Main.EntitySpriteDraw` reciben coordenadas de **PANTALLA** (mundo −
+  screenPosition). La v6.56.6 le pasaba PANTALLA a los soles rúnicos de
+  la carga (`SolesRunicosCarga/Estallido` → `SolRunico4Puntas` →
+  `Quad`): nacían desplazados por `screenPosition` completo — FUERA de
+  la pantalla, jamás vistos (por eso la letra «te olvidaste de usar los
+  brillos de soles runicos del accesorio»: la receta ESTABA, invisible).
+  **REGLA: cada API de dibujo declara su sistema de coordenadas en su
+  `<summary>` — leerlo antes de llamar. Los quads VFXCore son MUNDO,
+  SIEMPRE.**
 - **Fallback:** tiras RayoStrip ×3 (carne 420px/1.0× · remolino 240px/1.9× ·
   núcleo en banda 380px/2.6×, con los colores por nodo del llamador) — el arma
   NUNCA se rompe. La aberración cromática del borde prismático vive en
@@ -560,6 +636,22 @@ los llamadores; su aberración en `HazConcentradoLib.AberracionCromatica`; y
 `RayoStrip.FajaTexturadaEnLote` volvió a su estado pre-v6.56.3 (ventana V
 completa, período de sintonía, UN quad por segmento) conservando SOLO la
 mitra por nodo — la lección completa en el propio RayoStrip.cs.
+
+**v6.56.7 — LA LEY DE USO DE LAS CUATRO TEXTURAS (cómo se usan BIEN, la
+forma correcta del RC2):** las cuatro texturas del plasma son PIEZAS DE UNA
+MULTIPLICACIÓN DE SHADER, no sprites autosuficientes:
+
+| Textura | Para qué NACIÓ | Cómo se usa BIEN | Jamás |
+|---|---|---|---|
+| `CarnePlasma` (TexRuido) | LA CARNE — el fBm que define el cuerpo | sampler s0 del shader (`uTexturaCarne`) · el núcleo del fallback (faja 420px) · EL HALO del .fx v6.56.7 (3 muestras con desfase prismático) | — |
+| `SegundoRuido` (TexRemolino) | EL HERVOR — **textura BINARIA** (52 % negro / 22 % saturado): SOLO para MULTIPLICAR contra la carne (donde ambas son brillantes, el haz arde) | sampler s1 (`uTexturaSegunda`) · la 2ª capa del fallback (faja 240px) | **JAMÁS dibujada cruda como capa ancha «de desenfoque»** — sus blobs duros fuera del borde del haz son LOS PICOS (§5.4, la ley v6.56.7) |
+| `RampaGlow` (TexRampa) | EL PERFIL DE CALOR transversal (la funda del canal) | sampler s2 (`uTexturaRampa`) — la falda del núcleo | — |
+| `BitsChispa` (TexBits) | LAS CHISPAS — blobs duros SOLO en el corazón V 0.32-0.68 (la cura v6.55.0) | sampler s3 (`uTexturaBits`) muestreada DOS veces con flujos distintos — el DOBLE AND (arden solo donde ambas nubes coinciden) | muestrearla una sola vez (chispas «apagadas») o fuera del corazón V |
+
+El RC2 completo es EL ejemplar vivo: strip 1500 puntos + el .fx con las
+cuatro en su papel + la boca de 4 glows apilados + la corona rúnica + los
+soles de 4 puntas del accesorio (§5.4 para el diagnóstico de los picos y
+el contrato de coordenadas).
 
 ### 6.B Las texturas del sol (familia SunShader, `Content/Effects/Textures/`)
 
@@ -741,7 +833,8 @@ mitra por nodo — la lección completa en el propio RayoStrip.cs.
 | **v6.56.1** | **LA RONDA DE CURACIÓN de la auditoría 4×**: la recursión `SendExtraAI` del decompilador (StackOverflow MP), el `ai[2]`=whoAmI envenenando los relojes de las 3 armas nuevas, el switch del Testamento sin gate (sentencia doble en MP), `RestaurarLoteVanilla` (la cura del lote aditivo), la exclusión cruzada de la escalera, el vuelo/mira del RC2 solo del dueño, la aguja de carga recuperada, los pozos cero-GC del RC2, las 4 horneadas con funeral, el latch eterno de las alas, la marca del festín con caducidad, el es-MX deduplicado (−636 líneas) con paridad 1369=1369=1369 al parser REAL, 5 PNG huérfanos purgados y ESTE CÓDICE puesto al día (§3.1/§4.25/§6/§7.1) | §3.1, §4.25, §6, §7.1, §11 |
 | **v6.56.4** | **EL CAMINO GPU PORTADO A LAS ARMAS**: `HazConcentradoLib` (§5.4 — la letra: «adapta el código del rayo concentrado 2») con la LECCIÓN DEL LOTE ADITIVO (las franjas negras del RC2) · **LA REVERSIÓN EDUCADA** de `FajaTexturadaEnLote` (mitra por nodo se queda) y `HazFusionEspina` RETIRADA · **EL ESPEJO COMPLETO de las alas** (permuta filo/lomo por lado + permuta de semianchos bajo el espejo + EL BARRIDO revivido con acople a velocidad — validado Δ 0.000px en sim) · **EL PORTAL DEL CONJURO** del RC2 (BlackDisk + CoronaConjuro + GravLens en la boca; la aguja y el GlowOrb planos MUEREN; destellos de soles rúnicos convergentes/estallido) · **LOS SONIDOS v3** (bucle grave + carga one-shot) + `Pantalla.Sacudir` · **LA LOCALIZACIÓN MONOLINGÜE** (es-ES fuente + espejo es-MX generado, en-US retirado) | §5.4, §6.A, §7.3, §4.24, §11 |
 | **v6.56.5** | **LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES**: el seno puro de 1376 Hz del finale de la carga MUERE (→ soplo de presión sin pitch, detector anti-pitido calibrado en el generador) · **EL TEMBLOR PERCEPTIBLE** (el sostenido era SUB-PÍXEL: trauma²·i — 2.6 daba 0.18 px; ahora 6.5/9) · **GravLens SIN MONOPOLIO** (vida 0.06 s — antes pedía 36 lentes contra una mesa de 8) · **EL HORIZONTE DEL PORTAL A TAMAÑO REAL** (2.28·R, la convención BlackDisk — salía a la mitad) · **LA CARGA MUERE CON SU DUEÑO** (`CortarCarga` + `_cargaSlot`) · **LA REGLA DE LA CAÍDA LONGITUDINAL** (§5.4 — la espina de la Ira/Partidor vivía al revés) · **LA PARIDAD DE LAS RUNAS** (§4.24 — `L_B = −(−1)^num₄` + direction + gemelas compartiendo semilla) · los `.fx` fuera del .tmod (buildIgnore) | §5.4, §4.24, §7.3, §3.1 |
-| *(siguiente fila: la tuya)* | | |
+| **v6.56.6** | **LA PURGA + LAS 9 VARIANTES + EL RC2 «desnudo»** (coronas rúnicas al 53 %, el disco negro y la lente MUERTOS, los soles de 4 puntas de la carga) + **LA AUDITORÍA DE LAS 33 LIBRERÍAS** (3 fusiones recomendadas, ~40 métodos muertos, 57 copias privadas de Tint/Hash01, TiemposLib/PostFXLib para el futuro) · *el RC2 de esta versión traía LA PILA DE CAPAS — la causa de los picos, curada en la .56.7* | §5.4, §11 |
+| **v6.56.7** | **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
 
 ---
 

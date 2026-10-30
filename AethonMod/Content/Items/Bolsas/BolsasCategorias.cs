@@ -811,14 +811,16 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
-// ======================================================================
+
+    // ======================================================================
     //  v6.54.6 — LA BOLSA DE LAS ARMAS DEFINITIVAS (bolsa 24): «El
     //  Veredicto de Aethon», LA REFORMA. v6.56.6 — LA PURGA (la letra del
     //  usuario: «borra todas las nuevas armas y solo deja al rayo
     //  concentrado 2»): la escalera, el Prisma, el Partidor, el Réquiem,
     //  la Ira, el Índice, la Pluma y el Ojo MUEREN — la bolsa entrega
-    //  EL RAYO CONCENTRADO 2 y las variantes que nacen de él (Task de la
-    //  .56.6: 9 variantes VFX del RC2 viven aquí junto al original).
+    //  EL RAYO CONCENTRADO 2. v6.56.7 — LAS NUEVE VARIANTES TAMBIÉN
+    //  MUEREN (la letra: «primero borrar las variantes de rayo
+    //  concentrado 2»): el ataque definitivo vuelve a ser UNO.
     // ======================================================================
 
     public class BolsaDefinitivas : BolsaCategoria
@@ -829,22 +831,13 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(255, 214, 120);
 
-        protected override string Nota => "El Rayo Concentrado 2 y sus 9 variantes — el ataque definitivo vive aquí";
+        protected override string Nota => "El Rayo Concentrado 2 — el ataque definitivo vive aquí";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             return new List<(int, int)>
             {
-                (ModContent.ItemType<RayoConcentradoDos>(), 1),
-                (ModContent.ItemType<RayoConcentradoPrisma>(), 1),
-                (ModContent.ItemType<RayoConcentradoEclipse>(), 1),
-                (ModContent.ItemType<RayoConcentradoTormenta>(), 1),
-                (ModContent.ItemType<RayoConcentradoSolar>(), 1),
-                (ModContent.ItemType<RayoConcentradoVortice>(), 1),
-                (ModContent.ItemType<RayoConcentradoEspectro>(), 1),
-                (ModContent.ItemType<RayoConcentradoSierpe>(), 1),
-                (ModContent.ItemType<RayoConcentradoCuantico>(), 1),
-                (ModContent.ItemType<RayoConcentradoNova>(), 1)
+                (ModContent.ItemType<RayoConcentradoDos>(), 1)
             };
         }
     }

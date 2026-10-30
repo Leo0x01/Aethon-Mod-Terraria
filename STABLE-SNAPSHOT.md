@@ -1,3 +1,18 @@
+# v6.56.7 — EL RC2 VUELVE A SU TÉCNICA (607df36): LA CURA DE LOS PICOS — EL CHECKLIST
+
+**Qué pasó** (la letra): «primero borrar las variantes de rayo concentrado 2» + «ahora tiene picos y antes no, ¿por qué se hacen esos picos?, acaso es que se usan mal las texturas» + «el commit donde estaba correcta la técnica de haz es el 607df36… usa el código de 607df36 para reparar el problema de los picos y la falta de efecto» + «recuerda cual es el color del mod» + «los círculos rúnicos como en la versión actual» + «en la fase de carga también pusiste un círculo plano… usa los mismos anillos rúnicos» + «te olvidaste de usar los brillos de soles rúnicos del accesorio» + «dale una mejora de shaders» + «documentar la solución de los picos».
+
+1. **LAS VARIANTES (muertas)**: [ ] la Bolsa de las Definitivas entrega SOLO el Rayo Concentrado 2; [ ] ni rastro de Prisma/Eclipse/Tormenta/Solar/Vórtice/Espectro/Sierpe/Cuántico/Nova (ni ítems ni iconos ni textos).
+2. **LOS PICOS (LA CURA)**: [ ] el haz del RC2 tiene el borde ORGÁNICO de siempre — sin dientes, sin sierra, sin peines de blobs (la PILA de capas murió: nada de fajitas CPU encima del strip); [ ] al ENSANCHARSE el cono a plena potencia sigue liso (donde la sierra era peor); [ ] SIN franjas negras en los bordes (el lote aditivo de la .56.4 se mantiene).
+3. **LA TÉCNICA DE 607df36 (la que funcionaba)**: [ ] EL COLOR DEL MOD: el gradiente PRISMÁTICO oil (magenta→naranja→amarillo→verde→cian) VIAJANDO a lo largo del haz — no el violeta-oro del juicio; [ ] LA BOCA: un bloom de VARIOS glows apilados con NÚCLEO BLANCO caliente (no un solo círculo); [ ] el plasma de las 4 texturas HIRVIENDO (la carne × el segundo ruido × la rampa + las chispas del doble AND); [ ] la PLUMA del extremo lejano (el cono se disipa a lo lejos, como siempre).
+4. **LOS CÍRCULOS RÚNICOS (de la versión actual, al 53 %)**: [ ] la TRIPLE CORONA (dorado de 8 + violeta de 6 contrarrotando + blanco íntimo) pequeña alrededor de la boca; [ ] los DOS ANILLOS finos contrarrotando; [ ] LA CORONA ENCOGE con la carga (70→26 px) — EL INDICADOR DE CARGA SON LOS ANILLOS, no un disco plano; [ ] SIN círculo negro, SIN lente, SIN aguja.
+5. **LOS SOLES RÚNICOS DEL ACCESORIO (ahora VISIBLES — el bug de coordenadas curado)**: [ ] durante la carga, destellos de 4 PUNTAS (cápsulas cruzadas + corazón dorado — LOS MISMOS de El brillo de soles rúnicos) reunirse y ACELERAR hacia el arma en la banda que encoge; [ ] AL DISPARAR: los destellos salen EXPULSADOS en abanico hacia el rayo.
+6. **EL SHADER MEJORADO**: [ ] EL HALO difuso alrededor del haz (el desenfoque per-pixel — más ancho y suave que antes); [ ] LOS FILAMENTOS: cordones grandes serpentean bajo el hervor fino; [ ] EL NÚCLEO QUE LATE: la vena blanca respira (~1 s de ciclo); [ ] LA FRANJA PRISMÁTICA: el borde del halo con micro-desfase rojo/azul.
+7. **LO QUE VIVE**: [ ] el temblor sostenido + el golpe de encendido; [ ] el sonido de carga y el bucle grave (intactos); [ ] los micro-arcos de la carga; [ ] el destello de la ignición; [ ] el vuelo infinito mientras dispara.
+8. **REGRESIÓN**: [ ] las demás armas del mod intactas; [ ] F8: presupuesto sano; [ ] MP si pruebas: la mira del dueño, un solo RC2 a la vez.
+
+---
+
 # v6.56.6 — LA PURGA + LAS ALAS SIMÉTRICAS + EL RC2 DESNUDO + LAS 9 VARIANTES — EL CHECKLIST
 
 > **PUBLICADA** — release [429218656](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.6) + CDN verificado byte a byte (md5 `8bd69344bdefa480bd722021eabe6382`, 6.385.674 B; asset id 692603464).

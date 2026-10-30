@@ -1965,117 +1965,16 @@ Items: {
 	}
 
 	RayoConcentradoDos: {
-		DisplayName: El Rayo Concentrado II
+		DisplayName: Rayo Concentrado 2
 		Tooltip:
 			'''
-				«El haz puro, en tu mano: 3500 px de plasma que respira.»
-				LA CIMA de la escalera — el cono completo: 300 ticks de carga
-				(la aguja que apunta entre DOS ANILLOS DE CONTENCIÓN que se
-				contraen) y 800 de láser con su barrido cosenoidal.
-				v6.56.0: EL FOCO SIN DISCOS (un bloom compacto, un núcleo sólido
-				y anillos finos — jamás círculos planos), CERO polvos por el
-				conducto (el plasma del shader ES el efecto), EL SONIDO DE PULSO
-				CONSTANTE (inicia, se mantiene, acaba — sin el vaivén de ondas)
-				y LOS COLORES DEL JUICIO: el gradiente del grimorio recorriendo
-				el haz entero.
-				Con su kick de cámara, su música callada al 30 % y su vuelo infinito.
-			'''
-	}
-
-	// v6.56.6 — LAS NUEVE VARIANTES DEL RAYO CONCENTRADO 2 (la letra del
-	// usuario: «quiero que hagas otra variantes del rayo concentrado 2,
-	// al menos 9 variantes mas con diferentes efectos y tecnicas vfx»).
-	RayoConcentradoPrisma: {
-		DisplayName: RC2: Prisma
-		Tooltip:
-			'''
-			El Rayo Concentrado 2 partido en DOS ESPECTROS: rojo y cian
-			cremallera al costado del conducto (la aberración cromática
-			de la casa) y el gradiente es el ARCOÍRIS completo.
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoEclipse: {
-		DisplayName: RC2: Eclipse
-		Tooltip:
-			'''
-			El haz violeta OSCURO que exhala BRUMA NEGRA por el conducto:
-			un dios apagándose a su paso. Lila ceniza donde toca.
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoTormenta: {
-		DisplayName: RC2: Tormenta
-		Tooltip:
-			'''
-			RAYOS QUE REPTAN por el conducto — arcos azules parpadeando
-			de la boca a la punta (la técnica StormLib de la casa).
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoSolar: {
-		DisplayName: RC2: Solar
-		Tooltip:
-			'''
-			LENGUAS DE FUEGO SOLAR brotan a lo largo del conducto
-			(PyraLib, la rampa SolarFire) — el rayo que quema al pasar.
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoVortice: {
-		DisplayName: RC2: Vórtice
-		Tooltip:
-			'''
-			NEBULOSAS cian y violeta ORBITAN el conducto — el gas circula,
-			no oscila (la advección de curl de NebulaLib).
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoEspectro: {
-		DisplayName: RC2: Espectro
-		Tooltip:
-			'''
-			El haz tiene ECOS: dos fajas fantasma verdes pálidas lo
-			escoltan desfasadas, con el flujo al revés — el rayo que
-			ya murió y todavía brilla.
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoSierpe: {
-		DisplayName: RC2: Sierpe
-		Tooltip:
-			'''
-			EL EJE ONDULA: el conducto entero se desliza como una
-			serpiente de luz ámbar (la técnica verlet de la casa,
-			destilada en la fase del eje).
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoCuantico: {
-		DisplayName: RC2: Cuántico
-		Tooltip:
-			'''
-			El conducto se RAMIFICA: fajitas cortas nacen y mueren a lo
-			largo del haz — la superposición de caminos, magenta contra
-			cian.
-			La carga absorbe soles rúnicos; el disparo los escupe.
-			'''
-	}
-
-	RayoConcentradoNova: {
-		DisplayName: RC2: Nova
-		Tooltip:
-			'''
-			ANILLOS DE PULSO viajan por el conducto hacia afuera — la
-			onda que camina (OndaLib), rosa nova sobre blanco dorado.
-			La carga absorbe soles rúnicos; el disparo los escupe.
+			EL ATAQUE DEFINITIVO: 300 ticks de carga absorbiendo soles
+			rúnicos, 800 de láser — el cono de 3500 px con el plasma
+			de la casa (CarnePlasma × SegundoRuido × RampaGlow +
+			BitsChispa en doble AND) y EL GRADIENTE PRISMÁTICO que
+			viaja a lo largo (el color del mod, de punta a punta).
+			Círculos rúnicos de conjuro en la boca, temblor sostenido,
+			música callada al 30 % y vuelo infinito mientras vive.
 			'''
 	}
 
@@ -2083,11 +1982,9 @@ Items: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa
-			y sus NUEVE VARIANTES VFX (cada una con su técnica y su
-			carácter: prisma, filo, eclipse, tormenta, vórtice…).
-			El plasma de la casa (carne fBm anti-picos) y los COLORES
-			DEL JUICIO siguen siendo ley.
+			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa.
+			El plasma de la casa (carne fBm anti-picos), el gradiente
+			PRISMÁTICO que viaja y los soles rúnicos de la carga.
 			'''
 	}
 

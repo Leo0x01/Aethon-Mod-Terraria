@@ -10,115 +10,167 @@ using Terraria.Graphics.CameraModifiers;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
-using ReLogic.Content;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
-    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
-    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
-    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
-    // Los comentarios de la fuente original no viajan dentro del .dll.
+    // =====================================================================
+    //  v6.56.7 — EL RC2 VUELVE A SU TÉCNICA (commit 607df36) + LOS CÍRCULOS
+    //  RÚNICOS + LOS SOLES DEL ACCESORIO + EL SHADER MEJORADO.
+    // =====================================================================
+    //  LA LETRA del usuario: «el commit donde estaba correcta la tecnica de
+    //  haz es el commit 607df36, solo que aqui tenia los circulos planos que
+    //  estaban incorrecto y los bordes oscuros… usa el codigo de 607df36
+    //  para reparar el problema de los picos y la falta de efecto que tenia
+    //  ya que en el commit 607df36 estaba correcta esa parte y solo
+    //  necesitaba que le quitaran los circulos planos, y agregaras los
+    //  circulos runicos como en la version actual».
+    //
+    //  EL DIAGNÓSTICO DE LOS PICOS (forense, documentado en el códice §5.4):
+    //  el RC2 de la v6.56.6 dibujaba LA PILA DE CAPAS — tres fajitas CPU
+    //  (RayoStrip.FajaTexturadaEnLote) SIEMPRE ENCIMA del strip GPU. Las
+    //  fajitas son tiras de QUADS de borde POLIGONAL duro, y su capa
+    //  «desenfoque» usaba SegundoRuido — una textura BINARIA (52 % negro /
+    //  22 % saturado, blobs duros) diseñada para MULTIPLICARSE dentro del
+    //  shader, jamás para verse cruda. El resultado: peines de blobs duros
+    //  flotando fuera del borde del haz (el simulador 1:1 de la casa lo
+    //  midió: pico-valle 222 px contra 163 px de la técnica correcta, y la
+    //  verificación visual lo confirmó: «dientes rectangulares duros
+    //  saliendo del borde»). En 607df36 las fajitas solo vivían en el
+    //  FALLBACK sin shader — con el .fxc cargado, el usuario jamás las vio:
+    //  POR ESO «antes no había picos».
+    //
+    //  LA CURA (la letra aplicada punto por punto):
+    //    · LA TÉCNICA DE 607df36 EXACTA: el strip de 1500 puntos con EL
+    //      SHADER DE LAS CUATRO TEXTURAS (CarnePlasma × SegundoRuido ×
+    //      RampaGlow + BitsChispa en doble AND), la boca de glows
+    //      APILADOS (cuatro: 5× color al 20 %, 4× al 60 %, 2× blanco,
+    //      14× al 10 % — un bloom de verdad, JAMÁS un círculo plano),
+    //      PrepareStripWithProceduralPadding de 6 argumentos y el fallback
+    //      de fajitas SOLO si el .fxc no cargó.
+    //    · LOS POLVOS CROMÁTICOS MUEREN (eran LOS «círculos planos» de
+    //      607df36 — la cura que la v6.56.0 ya había hecho): nada de
+    //      partículas genéricas en el conducto.
+    //    · LOS BORDES OSCUROS: el strip se dibuja en LOTE ADITIVO explícito
+    //      (la cura v6.56.4 — el shader nació aditivo y bajo el pase de
+    //      entidades sus bordes V negros OSCURECÍAN lo de debajo).
+    //    · EL COLOR DEL MOD: ColorPrisma.ValueAt — el reloj de la paleta
+    //      oil (magenta → naranja → amarillo → verde → cian) que recorre
+    //      TODO el mod, el gradiente que viaja a lo largo del haz (100
+    //      ticks de paleta de la boca a la punta). La reconstrucción
+    //      binaria de la v6.56.0 lo cambió por el gradiente del juicio sin
+    //      que nadie lo pidiera — EL RC2 VUELVE AL COLOR DEL MOD.
+    //    · LOS CÍRCULOS RÚNICOS de la versión actual (la letra: «agregaras
+    //      los circulos runicos como en la version actual»): LA CORONA
+    //      RÚNICA (OrbitaLib.CoronaConjuro — los círculos dorado/violeta/
+    //      blanco de los agujeros negros) al 53 % de su tamaño + los dos
+    //      anillos finos — y son ELLOS el indicador de la carga (la letra:
+    //      «si necesitas un indicador de carga usa los mismos anillos
+    //      runicos»): la corona ENCOJE con la carga (70 → 26 px).
+    //    · LOS SOLES RÚNICOS DEL ACCESORIO (la letra: «debes usar los
+    //      mismos brillos que usa el accesorio de El brillo de soles
+    //      runicos»): el destello de 4 PUNTAS (dos cápsulas cruzadas de
+    //      blanco incandescente + el corazón dorado — la receta verbatim
+    //      de BrilloSolarHalo.DrawTwinkles) absorbiéndose en la banda
+    //      elíptica que encoge (170 → 22 px) y el estallido en abanico al
+    //      disparar. LA CURA DE LAS COORDENADAS: VFXCore.Quad vive en
+    //      coordenadas de MUNDO (el volcado resta screenPosition) — la
+    //      v6.56.6 le pasaba PANTALLA y los destellos nacían FUERA de
+    //      pantalla: jamás se vieron. Ahora viven de verdad.
+    //    · EL SHADER MEJORADO (la letra: «dale una mejora de shaders
+    //      tambien»): EL HALO per-pixel (el desenfoque que la .56.6 buscó
+    //      con fajitas — aquí es una curva pow³ que muere exactamente en
+    //      el borde del polígono: picos IMPOSIBLES), LOS FILAMENTOS (la
+    //      carne multiplicada por una copia de sí misma a media escala —
+    //      cordones grandes que serpentean bajo el hervor fino), EL
+    //      NÚCLEO QUE LATE (el umbral de la vena blanca respira) y LA
+    //      FRANJA PRISMÁTICA (el halo muestreado tres veces con
+    //      microdesfase por canal en el filo).
+    //    · LO QUE VIVE DE LAS VERSIONES SANAS: el temblor sostenido
+    //      (Pantalla.Sacudir — «el mundo debe temblar un poco»), el
+    //      sonido de carga + el bucle grave, la música al −30 %, el vuelo
+    //      infinito DEL DUEÑO, la mira en MP, los pozos cero-GC y la
+    //      exclusión de un solo RC2 a la vez.
+    // =====================================================================
     public class RayoConcentradoDosProjectile : ModProjectile
     {
+        // LOS TIEMPOS DEL ATAQUE (la conducta intacta desde su nacimiento).
         private static readonly int ChargeTime = 300;
-
         private static readonly int LaserDuration = 800;
-
         private const float LargoCono = 3500f;
 
         public float targetRotation;
-
         public float targetSize;
-
         public float realSize;
 
+        // v6.55.1 — LA BANDERA DE FALLO DEL SHADER: si el .fxc no cargara
+        // (asset ausente, driver sin soporte), NO se reintenta cada frame —
+        // el fallback de tiras asume el mando de inmediato.
         private static bool _shaderFallo;
-
         private static Effect _shaderCache;
 
         internal SonidoEnLoop raySound;
+        public float volume;
+        public float pitch;
 
         // v6.56.5 — EL SLOT DE LA CARGA (auditoría B, MENOR-2): el one-shot
-        // de 5.15 s quedaba huérfano si el dueño moría a mitad de carga
-        // (seguía sonando hasta el final). Ahora viaja con el proyectil y
-        // la muerte del dueño lo corta (CortarCarga).
+        // de 5.15 s quedaba huérfano si el dueño moría a mitad de carga.
         private ReLogic.Utilities.SlotId _cargaSlot;
-
-        public float volume;
-
-        public float pitch;
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        public ref float Time => ref ((ModProjectile)this).Projectile.ai[0];
-
-        public ref float Modo => ref ((ModProjectile)this).Projectile.ai[1];
-
-        public ref float Owner => ref ((ModProjectile)this).Projectile.ai[2];
-
-        // v6.56.6 — LA VARIANTE (la letra: «quiero que hagas otra variantes
-        // del rayo concentrado 2, al menos 9 variantes mas con diferentes
-        // efectos y tecnicas vfx»): 0 = EL ORIGINAL (el juicio violeta-oro);
-        // 1-9 = las variantes (Prisma · Eclipse · Tormenta · Solar ·
-        // Vórtice · Espectro · Sierpe · Cuántico · Nova). Viaja en ai[1]
-        // — el campo Modo, SIEMPRE 0 en el RC2 desde su nacimiento (la
-        // escalera muerta lo usaba como nivel; el RC2 jamás lo tocó) —
-        // porque Projectile.ai en este tML solo tiene 3 slots y NewProjectile
-        // alimenta ai0-ai2: la variante viaja en el aire DEL MODO y tML la
-        // sincroniza solo en MP. Tiñe gradiente, boca, luz y las capas
-        // extra de cada técnica.
-        public int Variante => (int)Modo;
+        public ref float Time => ref Projectile.ai[0];
+        public ref float Owner => ref Projectile.ai[2];
 
         public override void SetStaticDefaults()
         {
-            ProjectileID.Sets.DrawScreenCheckFluff[((ModProjectile)this).Type] = 5000;
-            ProjectileID.Sets.TrailingMode[((ModProjectile)this).Type] = 2;
-            ProjectileID.Sets.TrailCacheLength[((ModProjectile)this).Type] = 10;
+            ProjectileID.Sets.DrawScreenCheckFluff[Type] = 5000;
+            ProjectileID.Sets.TrailingMode[Type] = 2;
+            ProjectileID.Sets.TrailCacheLength[Type] = 10;
         }
 
         public override void SetDefaults()
         {
-            ((Entity)((ModProjectile)this).Projectile).width = 80;
-            ((Entity)((ModProjectile)this).Projectile).height = 80;
-            ((ModProjectile)this).Projectile.tileCollide = false;
-            ((ModProjectile)this).Projectile.friendly = true;
-            ((ModProjectile)this).Projectile.hostile = false;
-            ((ModProjectile)this).Projectile.penetrate = -1;
-            ((ModProjectile)this).Projectile.aiStyle = -1;
-            ((ModProjectile)this).Projectile.manualDirectionChange = true;
-            ((ModProjectile)this).Projectile.netImportant = true;
-            // v6.56.5 — LA AUDITORÍA B (MENOR-4): tML recicla las instancias
-            // ModProjectile sin limpiar campos — un re-disparo tras una
-            // muerte temprana encontraba el SonidoEnLoop (y su slot) de la
-            // vida anterior. La pizarra nace limpia.
+            Projectile.width = 80;
+            Projectile.height = 80;
+            Projectile.tileCollide = false;
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.penetrate = -1;
+            Projectile.aiStyle = -1;
+            Projectile.manualDirectionChange = true;
+            Projectile.netImportant = true;
+            // v6.56.5 — tML recicla las instancias sin limpiar campos: la
+            // pizarra nace limpia (ni el slot ni el loop de la vida anterior).
             raySound = null;
             _cargaSlot = default;
         }
 
         // v6.56.1 — LOS POZOS DEL RC2 (cero-GC): antes cada frame del láser
         // alocaba 2 arrays de 1500 + un VertexStrip nuevo (~36 KB/frame de
-        // basura Gen0 mientras vivía el arma cima). Tamaños constantes.
-        private static readonly Vector2[] _cachePuntos = (Vector2[])(object)new Vector2[1500];
+        // basura Gen0). Tamaños constantes, reutilizados por siempre.
+        private static readonly Vector2[] _cachePuntos = new Vector2[1500];
         private static readonly float[] _cacheRotas = new float[1500];
-        private static readonly Vector2[] _cachePuntos64 = (Vector2[])(object)new Vector2[64];
+        private static readonly Vector2[] _cachePuntos64 = new Vector2[64];
         private static readonly float[] _cacheSemis64 = new float[64];
         private static readonly float[] _cacheSemisA = new float[64];
         private static readonly float[] _cacheSemisB = new float[64];
         private static readonly VertexStrip _strip = new VertexStrip();
 
+        /// <summary>
+        /// Carga el shader UNA vez (caché + bandera de fallo). Devuelve
+        /// null si no está disponible — el llamador usa el fallback.
+        /// </summary>
         private static Effect ObtenerShader()
         {
             if (_shaderFallo)
-            {
                 return null;
-            }
-            if (_shaderCache != null && !((GraphicsResource)_shaderCache).IsDisposed)
-            {
+            if (_shaderCache != null && !_shaderCache.IsDisposed)
                 return _shaderCache;
-            }
             try
             {
-                _shaderCache = ModContent.Request<Effect>("AethonMod/Content/Effects/Shaders/HazConcentradoShader", (AssetRequestMode)1).Value;
+                _shaderCache = ModContent.Request<Effect>(
+                    "AethonMod/Content/Effects/Shaders/HazConcentradoShader",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
                 return _shaderCache;
             }
             catch
@@ -130,95 +182,55 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         public override void SendExtraAI(BinaryWriter writer)
         {
-            writer.Write(((Entity)((ModProjectile)this).Projectile).direction == 1);
-            // v6.56.1 — LA CURA DE LA RECURSIÓN: el decompilador convirtió
-            // el base-call en auto-llamada virtual (callvirt) — StackOverflow
-            // en el primer sync de MP. La base es vacía: NO hay nada que llamar.
+            writer.Write(Projectile.direction == 1);
             writer.Write(targetRotation);   // v6.56.1: la mira del dueño viaja al server
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
         {
-            ((Entity)((ModProjectile)this).Projectile).direction = (reader.ReadBoolean() ? 1 : (-1));
+            Projectile.direction = reader.ReadBoolean() ? 1 : -1;
             targetRotation = reader.ReadSingle();   // v6.56.1: la mira sincronizada
         }
 
+        // ================================================================
+        //  EL CORAZÓN — la IA del haz (el dueño es el jugador).
+        // ================================================================
         public override void AI()
         {
-            //IL_0062: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0078: Unknown result type (might be due to invalid IL or missing references)
-            //IL_007d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0089: Unknown result type (might be due to invalid IL or missing references)
-            //IL_009d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00a2: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00ae: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00be: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00c8: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00cd: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00d2: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00d9: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00e3: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00e8: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0298: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0425: Unknown result type (might be due to invalid IL or missing references)
-            //IL_042a: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0461: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0466: Unknown result type (might be due to invalid IL or missing references)
-            //IL_046f: Unknown result type (might be due to invalid IL or missing references)
-            //IL_047a: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0172: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0186: Unknown result type (might be due to invalid IL or missing references)
-            //IL_019f: Unknown result type (might be due to invalid IL or missing references)
-            //IL_01a9: Expected O, but got Unknown
-            //IL_04df: Unknown result type (might be due to invalid IL or missing references)
-            //IL_04e4: Unknown result type (might be due to invalid IL or missing references)
-            //IL_04f9: Unknown result type (might be due to invalid IL or missing references)
-            //IL_04fe: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0506: Unknown result type (might be due to invalid IL or missing references)
-            //IL_055b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0560: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0567: Unknown result type (might be due to invalid IL or missing references)
-            //IL_056c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_05c1: Unknown result type (might be due to invalid IL or missing references)
-            //IL_05c6: Unknown result type (might be due to invalid IL or missing references)
-            //IL_05cd: Unknown result type (might be due to invalid IL or missing references)
-            //IL_05d2: Unknown result type (might be due to invalid IL or missing references)
-            if (Owner < 0f || Owner >= 255f)
+            // EL DUEÑO: el jugador que la disparó (la boca se coloca sobre
+            // su hombro, mirando donde él mira).
+            if (Owner < 0 || Owner >= Main.maxPlayers)
             {
                 CortarCarga();
-                ((ModProjectile)this).Projectile.Kill();
+                Projectile.Kill();
                 return;
             }
-            Player val = Main.player[(int)Owner];
-            if (val == null || !((Entity)val).active || val.dead)
+            Player dueno = Main.player[(int)Owner];
+            if (dueno == null || !dueno.active || dueno.dead)
             {
                 CortarCarga();
-                ((ModProjectile)this).Projectile.Kill();
+                Projectile.Kill();
                 return;
             }
-            ((Entity)val).direction = Math.Sign(Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation).X);
-            val.itemLocation = val.MountedCenter;
-            ((Entity)((ModProjectile)this).Projectile).Center = val.MountedCenter + new Vector2((float)(13 * ((Entity)val).direction), -20f);
-            ((Entity)val).velocity = ((Entity)val).velocity + Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation) * -0.1f;
-            ((Entity)val).velocity = ((Entity)val).velocity * 0.98f;
+
+            // EL RUMBO del portador (se orienta con el signo de la
+            // rotación ANTES de colocar la boca).
+            dueno.direction = Math.Sign(Projectile.rotation.ToRotationVector2().X);
+            dueno.itemLocation = dueno.MountedCenter;
+
+            // LA BOCA: el offset (13 px del centro, 20 arriba).
+            Projectile.Center = dueno.MountedCenter + new Vector2(13 * dueno.direction, -20f);
+
+            // EL RETROCESO SUAVE del portador mientras dispara (el arrastre,
+            // no un empujón — la gravedad del juego pelea de vuelta).
+            dueno.velocity += Projectile.rotation.ToRotationVector2() * -0.1f;
+            dueno.velocity *= 0.98f;
+
             if (!Main.dedServ)
             {
-                // v6.56.4 — EL PAQUETE DEL PODER (la letra: «mientras el rayo
-                // concentrado 2 está siendo disparado el mundo debe temblar un
-                // poco así el jugador nota el poder» + el reemplazo de la
-                // aguja + el sonido de la carga). El Punch cada 4 ticks de la
-                // v6.56.3 se sentía irregular y usaba Main.rand (ley §0.4).
-                // Ahora: EL TEMBLOR por el modelo de trauma de la casa
-                // (Pantalla.Sacudir: una sacudida fuerte al encendido y un
-                // temblor sostenido suave durante el láser, muriendo solo
-                // cuando el rayo se apaga); LOS DESTELLOS de los soles
-                // rúnicos (se reúnen a gran velocidad en el centro durante
-                // la carga y estallan hacia la dirección del rayo al
-                // disparar — el reemplazo de la aguja: «esa línea debes
-                // quitar, se ve horrible»); LA LENTE (GravLens: el espacio
-                // se curva alrededor del conjuro) y EL SONIDO DE CARGA
-                // (one-shot generado — gen_sonido_v6564.py: «en el momento
-                // de carga necesita sonar que está cargando»).
+                // EL SONIDO DE CARGA (one-shot de 5.15 s — el slot VIAJA con
+                // el proyectil: si el dueño cae a mitad de carga,
+                // CortarCarga() lo apaga con él).
                 if (Time == 2f)
                 {
                     SoundStyle carga = new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoCarga", SoundType.Sound)
@@ -226,366 +238,293 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         MaxInstances = 1,
                         Volume = 1f
                     };
-                    // v6.56.5 — el slot VIAJA con el proyectil (auditoría B,
-                    // MENOR-2): si el dueño cae a mitad de carga, CortarCarga()
-                    // lo apaga con él en vez de dejar 5 s de carga huérfana.
-                    // (El .ogg además fue regenerado SIN el pitido del finale —
-                    // gen_sonido_v6565.py: el seno puro de 1376 Hz a -37 dBFS
-                    // con 31 dB de prominencia que el usuario oyó al final.)
                     try
                     {
-                        _cargaSlot = Terraria.Audio.SoundEngine.PlaySound(carga, ((Entity)((ModProjectile)this).Projectile).Center);
+                        _cargaSlot = SoundEngine.PlaySound(carga, Projectile.Center);
                     }
                     catch { }
                 }
-                // v6.56.6 — LA CIRUGÍA DE LA LETRA: «no debe de haber
-                // ningún círculo que cubra al personaje» (EL DISCO NEGRO
-                // muere en PreDraw) · «tampoco tiene que tener lente
-                // gravitación» (GravLens MUERE por completo — el registro
-                // de la carga y el del láser) · «los brillos de soles
-                // rúnicos absorbidos… los mismos del accesorio» (LOS
-                // DESTELLOS DE 4 PUNTAS ahora viven en PreDraw:
-                // HazConcentradoLib.SolesRunicosCarga/Estallido — puros,
-                // deterministas, sin partículas genéricas).
-                // LO QUE VIVE: EL TEMBLOR (la letra: «debe mantener un
-                // pequeño temblor de la pantalla mientras el rayo
-                // concentrado se esté ejecutando» — el 6.5 sostenido
-                // ≈2.75 px constantes + el 9 de encendido ≈7.3 px de pico).
-                if (Time > (float)ChargeTime && Time < (float)(ChargeTime + LaserDuration))
+
+                // EL TEMBLOR (la letra: «debe mantener un pequeño temblor de
+                // la pantalla mientras el rayo concentrado se esté
+                // ejecutando»): el modelo de trauma de la casa — una
+                // sacudida al encendido (≈7.3 px de pico) y el sostenido
+                // suave (≈2.75 px constantes) hasta que el rayo se apaga.
+                if (Time > ChargeTime && Time < ChargeTime + LaserDuration)
                 {
                     Pantalla.Sacudir(6.5f, 0.4f, "RC2-sostenido");
                 }
-                if (Time == (float)(ChargeTime + 1))
+                if (Time == ChargeTime + 1)
                 {
                     Pantalla.Sacudir(9f, 0.8f, "RC2-encendido");
                 }
             }
-            float num = (float)Math.Cos((Time - (float)ChargeTime) / (float)LaserDuration * ((float)Math.PI * 2f)) * 2.5f * Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)ChargeTime + (float)LaserDuration * 0.1f, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration), (float)ChargeTime + (float)LaserDuration * 0.9f, Time, true);
-            if (Main.netMode != 1 && Time % 15f == 0f && Time < (float)ChargeTime + (float)LaserDuration * 0.6f)
+
+            // EL BARRIDO — un coseno completo de ida y vuelta (±2.5 rad)
+            // acotado por sus dos envolventes.
+            float totalOffRot = (float)Math.Cos((Time - ChargeTime) / LaserDuration * MathHelper.TwoPi) * 2.5f
+                * Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + LaserDuration * 0.1f, Time, true)
+                * Utils.GetLerpValue(ChargeTime + LaserDuration, ChargeTime + LaserDuration * 0.9f, Time, true);
+
+            if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15 == 0 && Time < ChargeTime + LaserDuration * 0.6f)
             {
-                ((Entity)((ModProjectile)this).Projectile).direction = ((!Utils.NextBool(Main.rand)) ? 1 : (-1));
-                ((ModProjectile)this).Projectile.netUpdate = true;
+                Projectile.direction = Main.rand.NextBool() ? -1 : 1;
+                Projectile.netUpdate = true;
             }
-            // v6.56.1 — LA MIRA EN MP: solo el DUEÑO apunta con SU ratón.
-            if (Main.netMode != 2 && Main.myPlayer == ((ModProjectile)this).Projectile.owner)
+
+            // EL GIRO HACIA EL CURSOR — v6.56.1: solo el DUEÑO apunta con SU
+            // ratón (el paso decreciente: 0.04 al principio, 0.01 cuando el
+            // barrido manda).
+            if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
             {
-                targetRotation = Utils.AngleLerp(targetRotation, ((Entity)((ModProjectile)this).Projectile).AngleTo(Main.MouseWorld), Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.1f, (float)ChargeTime, Time, true) * 0.04f + Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.3f, (float)ChargeTime + (float)LaserDuration * 0.6f, Time, true) * 0.01f);
+                targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
+                    Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
+                    + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
             }
-            targetSize = (float)Math.Pow(Utils.GetLerpValue((float)(ChargeTime - 20), (float)(ChargeTime + 60), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true), 3.0);
-            float num2 = MathHelper.SmoothStep(0f, 1f, Utils.GetLerpValue((float)ChargeTime * 0.8f, (float)(ChargeTime + 20), Time, true) * Utils.GetLerpValue((float)ChargeTime + (float)LaserDuration * 0.9f, (float)ChargeTime + (float)LaserDuration * 0.5f, Time, true));
-            ((ModProjectile)this).Projectile.rotation = targetRotation + num * (float)((Entity)((ModProjectile)this).Projectile).direction * num2;
+
+            // EL TAMAÑO — la envolvente cúbica (nace en 20 t, muere al
+            // final; realSize la persigue a 0.1).
+            targetSize = (float)Math.Pow(
+                Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 60, Time, true) *
+                Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
+
+            float waveChange = MathHelper.SmoothStep(0f, 1f,
+                Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + 20, Time, true) *
+                Utils.GetLerpValue(ChargeTime + LaserDuration * 0.9f, ChargeTime + LaserDuration * 0.5f, Time, true));
+            Projectile.rotation = targetRotation + totalOffRot * Projectile.direction * waveChange;
+
             realSize = MathHelper.Lerp(realSize, targetSize, 0.1f);
-            ((Entity)((ModProjectile)this).Projectile).velocity = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
-            ((ModProjectile)this).Projectile.localAI[0] += 1f;
-            if (Time == (float)(ChargeTime + LaserDuration + 20))
+            Projectile.velocity = Projectile.rotation.ToRotationVector2();
+
+            // EL RELOJ DEL COLOR (el gradiente camina con el mundo).
+            Projectile.localAI[0] += 1f;
+
+            // LA LUZ DEL CONDUCTO — el color del mod en tres puntos (la
+            // boca, el medio y la punta del cono).
+            if (!Main.dedServ && Time > ChargeTime - 10 && Time < ChargeTime + LaserDuration)
             {
-                SoundStyle item = SoundID.Item34;
-                DefinitivasLib.Sonar((item).WithPitchOffset(-0.4f), ((Entity)((ModProjectile)this).Projectile).Center);
+                Color cLuz = ColorPrisma.ValueAt(Projectile.localAI[0]);
+                float k = realSize;
+                Vector2 dir = Projectile.rotation.ToRotationVector2();
+                Lighting.AddLight(Projectile.Center,
+                    cLuz.R / 255f * 1.8f * k, cLuz.G / 255f * 1.7f * k, cLuz.B / 255f * 1.5f * k);
+                Lighting.AddLight(Projectile.Center + dir * 1100f,
+                    cLuz.R / 255f * 1.4f * k, cLuz.G / 255f * 1.3f * k, cLuz.B / 255f * 1.1f * k);
+                Lighting.AddLight(Projectile.Center + dir * 2400f,
+                    cLuz.R / 255f * 1.0f * k, cLuz.G / 255f * 0.9f * k, cLuz.B / 255f * 0.8f * k);
+            }
+
+            // EL SIZZLE del final (el chisporroteo al apagarse).
+            if (Time == ChargeTime + LaserDuration + 20)
+            {
+                DefinitivasLib.Sonar(SoundID.Item34.WithPitchOffset(-0.4f), Projectile.Center);
                 OndaLib.Kick(6f, 10);
             }
-            if (!Main.dedServ && Time > (float)(ChargeTime - 10) && Time < (float)(ChargeTime + LaserDuration))
-            {
-                Color val2 = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
-                float num3 = realSize;
-                Vector2 val3 = Utils.ToRotationVector2(((ModProjectile)this).Projectile.rotation);
-                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center, (float)(int)(val2).R / 255f * 1.8f * num3, (float)(int)(val2).G / 255f * 1.7f * num3, (float)(int)(val2).B / 255f * 1.5f * num3);
-                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + val3 * 1100f, (float)(int)(val2).R / 255f * 1.4f * num3, (float)(int)(val2).G / 255f * 1.3f * num3, (float)(int)(val2).B / 255f * 1.1f * num3);
-                Lighting.AddLight(((Entity)((ModProjectile)this).Projectile).Center + val3 * 2400f, (float)(int)(val2).R / 255f * 1f * num3, (float)(int)(val2).G / 255f * 0.9f * num3, (float)(int)(val2).B / 255f * 0.8f * num3);
-            }
-            Time += 1f;
-            ((ModProjectile)this).Projectile.timeLeft = 10;
+
+            Time++;
+            Projectile.timeLeft = 10;
+
             HandleSound();
-            if (Time > (float)(ChargeTime + LaserDuration + 50))
+
+            // EL CIERRE del ciclo: cuando el láser muere, el sonido muere
+            // con él.
+            if (Time > ChargeTime + LaserDuration + 50)
             {
                 raySound?.StopSound();
-                ((ModProjectile)this).Projectile.Kill();
+                Projectile.Kill();
+                return;
             }
-            // v6.56.1 — EL VUELO ES DEL DUEÑO: antes cualquier RC2 vivo en
-            // el mundo le rellenaba el wingTime a TODOS los jugadores.
-            else if (Main.netMode == 2)
+
+            // EL VUELO INFINITO: mientras el rayo vive, las alas del
+            // PORTADOR no se agotan (v6.56.1: solo el dueño — antes
+            // cualquier RC2 vivo rellenaba el ala de TODO el mundo).
+            if (Main.netMode == NetmodeID.Server)
             {
-                Player val4 = Main.player[(int)Owner];
-                if (val4 != null && ((Entity)val4).active && !val4.dead)
-                {
-                    val4.wingTime = val4.wingTimeMax;
-                }
+                Player p = Main.player[(int)Owner];
+                if (p != null && p.active && !p.dead)
+                    p.wingTime = p.wingTimeMax;
             }
-            else if (Main.LocalPlayer != null && ((Entity)Main.LocalPlayer).whoAmI == (int)Owner)
+            else if (Main.LocalPlayer != null && Main.LocalPlayer.whoAmI == (int)Owner)
             {
                 Main.LocalPlayer.wingTime = Main.LocalPlayer.wingTimeMax;
             }
         }
 
+        // ================================================================
+        //  EL SONIDO EN LOOP — el volumen por realSize, el pitch grave
+        //  sostenido (−0.22) planeando a −0.70 en el apagado.
+        // ================================================================
         public void HandleSound()
         {
-            //IL_00a3: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00aa: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00ba: Expected O, but got Unknown
-            // v6.56.5 — LA AUDITORÍA B (MENOR-4): el servidor dedicado no
-            // tiene audio — antes allocaba el SonidoEnLoop + su tracker en
-            // vano en cada disparo del servidor.
             if (Main.dedServ)
-            {
                 return;
-            }
             volume = 1.3f * Utils.GetLerpValue(0f, 0.05f, realSize, true);
-            // v6.56.4 — EL PITCH DEL HAZ (la letra: «el sonido actual es muy
-            // agudo para el tipo de haz de luz, el sonido que debe hacer tiene
-            // que ser un poco más grave mientras se dispara y mantiene el rayo
-            // concentrado, y en el momento en que el rayo comienza a apagarse
-            // el sonido también debe [apagarse]"). Antes quedaba CONGELADO en
-            // +0.2 durante todo el láser (SmoothStep(0.5,1.2)·1 − 1: el piche
-            // agudo de la .56.3). Ahora: SOSTENIDO grave (−0.22) y plane a
-            // −0.70 en los últimos 60 ticks — y el volumen ya viaja con
-            // realSize, así que muere con el rayo. La 1ª gen del loop además
-            // se re-sintetitzó una octava más oscura (gen_sonido_v6564.py).
-            pitch = MathHelper.Lerp(-0.22f, -0.7f, 1f - Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true));
-            if (raySound == null)
-            {
-                SoundStyle estilo = new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop", (SoundType)0);
-                (estilo).MaxInstances = 0;
-                raySound = new SonidoEnLoop(estilo, (Func<bool>)new ProjectileAudioTracker(((ModProjectile)this).Projectile).IsActiveAndInGame);
-            }
-            raySound.PlaySound(() => ((Entity)((ModProjectile)this).Projectile).Center, () => volume, () => pitch);
+            pitch = MathHelper.Lerp(-0.22f, -0.7f, 1f - Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true));
+
+            raySound ??= new SonidoEnLoop(
+                new SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop") { MaxInstances = 0 },
+                new ProjectileAudioTracker(Projectile).IsActiveAndInGame);
+            raySound.PlaySound(() => Projectile.Center, () => volume, () => pitch);
         }
 
-        // v6.56.5 — LA CARGA MUERE CON SU DUEÑO (auditoría B, MENOR-2): si
-        // el jugador cae a mitad de carga, el one-shot de 5.15 s seguía
-        // sonando hasta el final, huérfano. Este corte lo apaga con él.
+        // v6.56.5 — LA CARGA MUERE CON SU DUEÑO: el one-shot de 5.15 s no
+        // suena huérfano si el dueño cae a mitad de carga.
         private void CortarCarga()
         {
             try
             {
-                if (_cargaSlot.IsValid && Terraria.Audio.SoundEngine.TryGetActiveSound(_cargaSlot, out Terraria.Audio.ActiveSound sonidoActivo) && sonidoActivo != null)
-                {
+                if (_cargaSlot.IsValid && SoundEngine.TryGetActiveSound(_cargaSlot, out ActiveSound sonidoActivo) && sonidoActivo != null)
                     sonidoActivo.Stop();
-                }
             }
-            catch
-            {
-            }
+            catch { }
             _cargaSlot = default;
         }
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            //IL_0089: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0090: Unknown result type (might be due to invalid IL or missing references)
-            if (Time > (float)(ChargeTime + 20) && Time < (float)(ChargeTime + LaserDuration + 10))
+            if (Time > ChargeTime + 20 && Time < ChargeTime + LaserDuration + 10)
             {
-                float num = (float)Math.Pow(Utils.GetLerpValue((float)(ChargeTime - 20), (float)(ChargeTime + 40), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true), 3.0);
-                return DefinitivasLib.Cono(targetHitbox, ((Entity)((ModProjectile)this).Projectile).Center, 3500f * (0.5f + num * 0.5f), ((ModProjectile)this).Projectile.rotation, 0.28f * Math.Max(num, 0.02f));
+                float grow = (float)Math.Pow(
+                    Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 40, Time, true) *
+                    Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
+                // EL CONO: 3500·(0.5+grow·0.5) con el semiángulo 0.28·grow
+                // — la colisión de cono propia de la casa.
+                return DefinitivasLib.Cono(targetHitbox, Projectile.Center, LargoCono * (0.5f + grow * 0.5f),
+                    Projectile.rotation, 0.28f * Math.Max(grow, 0.02f));
             }
             return false;
         }
 
+        // ================================================================
+        //  LA MÚSICA −30 % MIENTRAS VIVE (el haz MANDA sobre la orquesta).
+        // ================================================================
         public override void Load()
         {
-            //IL_0007: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0011: Expected O, but got Unknown
-            On_Main.UpdateAudio += new On_Main.hook_UpdateAudio(CallarMusica);
+            On_Main.UpdateAudio += CallarMusica;
         }
 
         public override void Unload()
         {
-            //IL_0007: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0011: Expected O, but got Unknown
-            On_Main.UpdateAudio -= new On_Main.hook_UpdateAudio(CallarMusica);
+            On_Main.UpdateAudio -= CallarMusica;
         }
 
         private void CallarMusica(On_Main.orig_UpdateAudio orig, Main self)
         {
-            orig.Invoke(self);
-            Projectile val = null;
+            orig(self);
+
+            Projectile projectile = null;
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
-                if (Main.projectile[i] != null && ((Entity)Main.projectile[i]).active && Main.projectile[i].type == ((ModProjectile)this).Type)
+                if (Main.projectile[i] != null && Main.projectile[i].active && Main.projectile[i].type == Type)
                 {
-                    val = Main.projectile[i];
+                    projectile = Main.projectile[i];
                     break;
                 }
             }
-            if (val != null)
+            if (projectile == null) return;
+
+            for (int i = 0; i < Main.musicFade.Length; i++)
             {
-                for (int j = 0; j < Main.musicFade.Length; j++)
-                {
-                    float num = Utils.GetLerpValue((float)(ChargeTime - 15), (float)(ChargeTime + 40), val.ai[0], true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration), val.ai[0], true);
-                    float num2 = Main.musicFade[j] * Main.musicVolume * (1f - num * 0.3f);
-                    float num3 = Main.musicFade[j];
-                    Main.audioSystem.UpdateCommonTrackTowardStopping(j, num2, ref num3, Main.musicFade[j] > 0.15f);
-                    Main.musicFade[j] = num3;
-                }
+                float grow = Utils.GetLerpValue(ChargeTime - 15, ChargeTime + 40, projectile.ai[0], true)
+                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration, projectile.ai[0], true);
+
+                float vol = Main.musicFade[i] * Main.musicVolume * (1f - grow * 0.3f);
+                float tempFade = Main.musicFade[i];
+                Main.audioSystem.UpdateCommonTrackTowardStopping(i, vol, ref tempFade, Main.musicFade[i] > 0.15f);
+                Main.musicFade[i] = tempFade;
             }
         }
 
-        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-        {
-            overPlayers.Add(index);
-        }
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,
+            List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+            => overPlayers.Add(index);
 
+        // ================================================================
+        //  EL DIBUJO — LA TÉCNICA DE 607df36 (la boca de glows apilados,
+        //  el strip de 1500 puntos y EL SHADER DE LAS CUATRO TEXTURAS en
+        //  lote aditivo) + LOS CÍRCULOS RÚNICOS + LOS SOLES DEL ACCESORIO.
+        //  NADA ENCIMA DEL STRIP: sin pila de capas, sin polvos, sin aguja.
+        // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            //IL_005a: Unknown result type (might be due to invalid IL or missing references)
-            //IL_005f: Unknown result type (might be due to invalid IL or missing references)
-            //IL_00f5: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0112: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0136: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0142: Unknown result type (might be due to invalid IL or missing references)
-            //IL_014c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0158: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0162: Unknown result type (might be due to invalid IL or missing references)
-            //IL_017c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0188: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0195: Unknown result type (might be due to invalid IL or missing references)
-            //IL_01a1: Unknown result type (might be due to invalid IL or missing references)
-            //IL_01ab: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0200: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0205: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0209: Unknown result type (might be due to invalid IL or missing references)
-            //IL_022e: Unknown result type (might be due to invalid IL or missing references)
-            //IL_023b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_024d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0257: Unknown result type (might be due to invalid IL or missing references)
-            //IL_025c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_026f: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0274: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0278: Unknown result type (might be due to invalid IL or missing references)
-            //IL_029d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02aa: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02c3: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02cd: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02d2: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02e1: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02ee: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02f8: Unknown result type (might be due to invalid IL or missing references)
-            //IL_02ff: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0304: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0311: Unknown result type (might be due to invalid IL or missing references)
-            //IL_031b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0325: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0337: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0346: Unknown result type (might be due to invalid IL or missing references)
-            //IL_034b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_035d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0516: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0522: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0547: Unknown result type (might be due to invalid IL or missing references)
-            //IL_055c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0566: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0575: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0580: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0431: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0441: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0448: Unknown result type (might be due to invalid IL or missing references)
-            //IL_044d: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0452: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0454: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0470: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0477: Unknown result type (might be due to invalid IL or missing references)
-            //IL_047c: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0481: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0488: Unknown result type (might be due to invalid IL or missing references)
-            //IL_048a: Unknown result type (might be due to invalid IL or missing references)
-            //IL_04b2: Unknown result type (might be due to invalid IL or missing references)
-            //IL_04b7: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0616: Unknown result type (might be due to invalid IL or missing references)
-            //IL_063e: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0651: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0657: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0659: Unknown result type (might be due to invalid IL or missing references)
-            //IL_065e: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0663: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0687: Unknown result type (might be due to invalid IL or missing references)
-            //IL_068e: Expected O, but got Unknown
-            //IL_069b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_06a7: Unknown result type (might be due to invalid IL or missing references)
-            //IL_06ac: Unknown result type (might be due to invalid IL or missing references)
-            //IL_06b1: Unknown result type (might be due to invalid IL or missing references)
-            //IL_06bd: Expected O, but got Unknown
-            //IL_06bd: Expected O, but got Unknown
-            //IL_06e1: Unknown result type (might be due to invalid IL or missing references)
-            //IL_080a: Unknown result type (might be due to invalid IL or missing references)
-            //IL_080f: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0814: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0819: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0875: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0886: Unknown result type (might be due to invalid IL or missing references)
-            //IL_08d6: Unknown result type (might be due to invalid IL or missing references)
-            //IL_08e7: Unknown result type (might be due to invalid IL or missing references)
-            //IL_091e: Unknown result type (might be due to invalid IL or missing references)
-            //IL_092f: Unknown result type (might be due to invalid IL or missing references)
-            Texture2D texRuido = DefinitivasLib.TexRuido;
-            Texture2D texBits = DefinitivasLib.TexBits;
-            Texture2D texRampa = DefinitivasLib.TexRampa;
-            Texture2D texRemolino = DefinitivasLib.TexRemolino;
-            Texture2D softGlow = VFXCore.SoftGlow;
-            Texture2D glowOrb = VFXCore.GlowOrb;
-            Texture2D ring = VFXCore.Ring;
-            if (texRuido == null || texBits == null || texRampa == null || texRemolino == null || softGlow == null || glowOrb == null || ring == null)
-            {
-                return false;
-            }
-            Color c = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
-            (c).A = 0;
-            float num = Utils.GetLerpValue(50f, (float)ChargeTime, Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 50), (float)(ChargeTime + LaserDuration + 20), Time, true);
-            // v6.56.4 — LA AGUJA MUERE (la letra: «esa línea debes quitar, se
-            // ve horrible»): era un SoftGlow estirado a 900 px que avanzaba y
-            // retrocedía. v6.56.6 — su reemplazo DEFINITIVO: LOS SOLES RÚNICOS
-            // DE 4 PUNTAS del accesorio (abajo en este mismo PreDraw — la
-            // banda elíptica encoge hacia el arma y el estallido los expulsa).
-            float num3 = ((Entity)((ModProjectile)this).Projectile).Center.X - Main.screenPosition.X;
-            float num4 = ((Entity)((ModProjectile)this).Projectile).Center.Y - Main.screenPosition.Y;
-            Vector2 val = new Vector2(num3, num4);
-            Main.EntitySpriteDraw(softGlow, val, (Rectangle?)null, DefinitivasLib.Alfa(c, 0.55f * num), 0f, Utils.Size(softGlow) * 0.5f, 2.2f * num, (SpriteEffects)0, 0f);
-            // v6.56.6 — EL PORTAL DEL CONJURO MUERE (la letra: «hay un
-            // circulo negro, no debe de haber ningun circulo que cubra al
-            // personaje… tampoco tiene que tener lente gravitación, lo
-            // unico que debe tener son los circulos runicos y ademas deben
-            // ser al menos un 50% mas pequeños»). EL DISCO NEGRO (el
-            // horizonte AlphaBlend que OSCURECÍA al personaje) y LA LENTE
-            // (GravLens, muerta también en AI) se RETIRAN. Lo que queda y
-            // brilla: LOS SOLES RÚNICOS DE LA CARGA (el brillo de 4 puntas
-            // del accesorio — absorbidos por el arma, expulsados al
-            // disparar) + LA CORONA RÚNICA (OrbitaLib.CoronaConjuro) al
-            // 53% de su tamaño + los dos anillos finos, igual de pequeños.
-            {
-                VFXCore.CerrarLoteSiAbierto();
-                VFXCore.Begin();
-                try
-                {
-                    if (Time < (float)ChargeTime)
-                    {
-                        // LOS SOLES ABSORBIDOS: la banda elíptica ENCOJE con
-                        // la carga (el hervidero de 4 puntas se aviva).
-                        HazConcentradoLib.SolesRunicosCarga(val,
-                            Utils.GetLerpValue(20f, (float)ChargeTime, Time, true),
-                            Main.GlobalTimeWrappedHourly);
-                    }
-                    else if (Time < (float)(ChargeTime + 22))
-                    {
-                        // EL ESTALLIDO: lo absorbido SALE en abanico.
-                        HazConcentradoLib.SolesRunicosEstallido(val,
-                            ((ModProjectile)this).Projectile.rotation,
-                            (Time - (float)ChargeTime) / 22f,
-                            Main.GlobalTimeWrappedHourly);
-                    }
-                }
-                catch { VFXCore.CerrarLoteSiAbierto(); }
-                VFXCore.FlushAdditive();
-                VFXCore.ReabrirLoteVanilla();
+            // LAS CUATRO TEXTURAS DEL PLASMA — las procedurales de la casa.
+            Texture2D texture = DefinitivasLib.TexRuido;          // la carne (CarnePlasma)
+            Texture2D textureBits = DefinitivasLib.TexBits;       // las chispas (BitsChispa)
+            Texture2D textureGlow = DefinitivasLib.TexRampa;      // la rampa (RampaGlow)
+            Texture2D textureSecond = DefinitivasLib.TexRemolino; // el 2º ruido (SegundoRuido)
+            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow"); // la boca
+            Texture2D ring = VFXCore.Ring;                         // los anillos finos
 
-                // LA CORONA RÚNICA — el ÚNICO círculo permitido, al 53% del
-                // tamaño de la .56.5 (Lerp(150,56) → Lerp(70,26)): «varios
-                // círculos rúnicos de agujeros negros» a escala de conjuro
-                // íntimo, no de eclipse.
-                float numP = MathF.Pow(num, 0.8f);
+            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || glow == null || ring == null)
+                return false;
+
+            // EL COLOR DEL MOD — ColorPrisma: el reloj de la paleta oil que
+            // recorre TODO el mod (v6.56.7: de vuelta tras la .56.0).
+            Color startColor = ColorPrisma.ValueAt(Projectile.localAI[0]);
+            startColor.A = 0;
+
+            float laserCharge = Utils.GetLerpValue(50, ChargeTime, Time, true)
+                * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration + 20, Time, true);
+
+            Vector2 posPantalla = Projectile.Center - Main.screenPosition;
+
+            // ============ LA BOCA DE GLOWS APILADOS (607df36) ============
+            // Cuatro SoftGlow apilados con el alfa a CERO (el truco de la
+            // casa: bajo el pase de entidades, A=0 y rgb>0 = suma pura) —
+            // un bloom con NÚCLEO BLANDO y halo ancho. La .56.4-.56.6 lo
+            // había reducido a UN glow con alfa lleno: UN CÍRCULO PLANO
+            // que TAPABA (el «círculo de la carga» de la letra). NUNCA MÁS.
+            Main.EntitySpriteDraw(glow, posPantalla, null, startColor * 0.2f * laserCharge, 0f, glow.Size() * 0.5f, 5f * laserCharge, SpriteEffects.None, 0f);
+            Main.EntitySpriteDraw(glow, posPantalla, null, startColor * 0.6f * laserCharge, 0f, glow.Size() * 0.5f, 4f, SpriteEffects.None, 0f);
+            Main.EntitySpriteDraw(glow, posPantalla, glow.Frame(), new Color(255, 255, 255, 0) * laserCharge, 0f, glow.Size() * 0.5f, 2f * laserCharge, SpriteEffects.None, 0f);
+            Main.EntitySpriteDraw(glow, posPantalla, glow.Frame(), startColor * 0.1f * laserCharge, 0f, glow.Size() * 0.5f, 14f * laserCharge, SpriteEffects.None, 0f);
+
+            // ============ LOS SOLES RÚNICOS DEL ACCESORIO ============
+            // EL DESTELLO DE 4 PUNTAS de BrilloSolarHalo (las cápsulas
+            // cruzadas + el corazón dorado): en la carga, la banda elíptica
+            // ENCOGE absorbiéndolos hacia el arma; al disparar, el ESTALLIDO
+            // los escupe en abanico. v6.56.7 — LA CURA DE LAS COORDENADAS:
+            // VFXCore.Quad vive en MUNDO (el volcado resta screenPosition);
+            // la .56.6 pasaba PANTALLA y nacían fuera de la pantalla —
+            // ahora se ven DE VERDAD.
+            VFXCore.CerrarLoteSiAbierto();
+            VFXCore.Begin();
+            try
+            {
+                if (Time < ChargeTime)
+                {
+                    HazConcentradoLib.SolesRunicosCarga(Projectile.Center,
+                        Utils.GetLerpValue(20f, ChargeTime, Time, true),
+                        Main.GlobalTimeWrappedHourly);
+                }
+                else if (Time < ChargeTime + 22)
+                {
+                    HazConcentradoLib.SolesRunicosEstallido(Projectile.Center,
+                        Projectile.rotation,
+                        (Time - ChargeTime) / 22f,
+                        Main.GlobalTimeWrappedHourly);
+                }
+            }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+            VFXCore.FlushAdditive();
+            VFXCore.ReabrirLoteVanilla();
+
+            // ============ LOS CÍRCULOS RÚNICOS (la .56.6, al 53 %) ============
+            // LA CORONA RÚNICA — el ÚNICO círculo del conjuro (la letra:
+            // «lo unico que debe tener son los circulos runicos y ademas
+            // deben ser al menos un 50 % mas pequeños»): el círculo dorado
+            // de 8 runas + el violeta de 6 contrarrotando + el blanco
+            // íntimo — y ENCOGE con la carga (70 → 26 px): EL INDICADOR
+            // DE CARGA SON LOS ANILLOS RÚNICOS (la letra), no un disco.
+            {
+                float numP = MathF.Pow(laserCharge, 0.8f);
                 float breathe = 1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
                 float rCorona = MathHelper.Lerp(70f, 26f, numP) * breathe;
                 try
                 {
                     OrbitaLib.AbrirAdditive();
-                    OrbitaLib.CoronaConjuro(val, rCorona, Main.GlobalTimeWrappedHourly,
-                        alphaMul: 0.28f + 0.62f * num, glyphMul: 1.8f);
+                    OrbitaLib.CoronaConjuro(posPantalla, rCorona, Main.GlobalTimeWrappedHourly,
+                        alphaMul: 0.28f + 0.62f * laserCharge, glyphMul: 1.8f);
                     OrbitaLib.CerrarBatch();
                 }
                 catch
@@ -593,293 +532,180 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.CerrarLoteSiAbierto();
                 }
                 VFXCore.ReabrirLoteVanilla();
+
+                // LOS DOS ANILLOS FINOS — acompañan a la corona al 53 %,
+                // contrarrotando, con el color del mod viajero.
+                Vector2 tamAnillo = VFXCore.RingQuadSize(rCorona);
+                Main.EntitySpriteDraw(ring, posPantalla, null,
+                    DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 6f), 0.55f * laserCharge),
+                    Main.GlobalTimeWrappedHourly * 0.7f, ring.Size() * 0.5f, tamAnillo, SpriteEffects.None, 0f);
+                Vector2 tamAnillo2 = VFXCore.RingQuadSize(rCorona * 1.38f);
+                Main.EntitySpriteDraw(ring, posPantalla, null,
+                    DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 18f), 0.3f * laserCharge),
+                    -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
-            // v6.56.6 — los anillos finos acompañan a la corona al 53%.
-            float num5 = MathF.Pow(num, 0.8f);
-            float num6 = MathHelper.Lerp(70f, 26f, num5) * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
-            Vector2 val2 = VFXCore.RingQuadSize(num6);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.1f), 0.55f * num), Main.GlobalTimeWrappedHourly * 0.7f, Utils.Size(ring) * 0.5f, val2, (SpriteEffects)0, 0f);
-            Vector2 val3 = VFXCore.RingQuadSize(num6 * 1.38f);
-            Main.EntitySpriteDraw(ring, val, (Rectangle?)null, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.3f), 0.3f * num), (0f - Main.GlobalTimeWrappedHourly) * 0.5f + 2.1f, Utils.Size(ring) * 0.5f, val3, (SpriteEffects)0, 0f);
-            if (Time < (float)ChargeTime && Time % 14f < 3f)
+
+            // ============ LOS MICRO-ARCOS DE LA CARGA ============
+            // Los arcos de StormLib (cero sprites, deterministas por hash)
+            // que chisporrotean alrededor de la boca mientras carga — más
+            // avivados cuanto más llena está la carga.
+            if (Time < ChargeTime && Time % 14f < 3f)
             {
-                float lerpValue = Utils.GetLerpValue(0f, (float)ChargeTime, Time, true);
+                float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
                 int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-                int num7 = 1 + (int)(lerpValue * 3.99f);
-                for (int i = 0; i < num7; i++)
+                int cuenta = 1 + (int)(progreso * 3.99f);
+                for (int i = 0; i < cuenta; i++)
                 {
                     int seed = (int)(Time * 0.017f) * 131 + i * 297;
-                    float num8 = VFXCore.Hash01(seed, i * 7 + 1, 3) * ((float)Math.PI * 2f);
-                    float num9 = 10f + 6f * lerpValue;
-                    float num10 = num9 + 26f + 34f * lerpValue;
-                    Vector2 start = val + new Vector2(MathF.Cos(num8), MathF.Sin(num8)) * num9;
-                    Vector2 end = val + new Vector2(MathF.Cos(num8 + 0.5f), MathF.Sin(num8 + 0.5f)) * num10;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f, VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + (float)i * 0.13f), DefinitivasLib.BlancoCalido, 0.35f + 0.45f * lerpValue, 5, 12f);
+                    float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
+                    float r0 = 10f + 6f * progreso;
+                    float r1 = r0 + 26f + 34f * progreso;
+                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
+                    Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
+                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f,
+                        ColorPrisma.ValueAt(Projectile.localAI[0] + i * 8f),
+                        DefinitivasLib.BlancoCalido,
+                        0.35f + 0.45f * progreso, 5, 12f);
                 }
             }
-            if (Time > (float)ChargeTime && Time < (float)(ChargeTime + 8) && VFXCore.DestelloFinal != null)
+
+            // ============ EL DESTELLO DE LA IGNICIÓN ============
+            // La cruz de 8 brazos de la casa en el tick del disparo — el
+            // golpe de luz al nacer el conducto.
+            if (Time > ChargeTime && Time < ChargeTime + 8 && VFXCore.DestelloFinal != null)
             {
-                Main.EntitySpriteDraw(VFXCore.DestelloFinal, val, (Rectangle?)null, DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.9f * (1f - (Time - (float)ChargeTime) / 8f)), ((ModProjectile)this).Projectile.rotation, Utils.Size(VFXCore.DestelloFinal) * 0.5f, new Vector2(1.6f, 1.6f) * realSize, (SpriteEffects)0, 0f);
+                Main.EntitySpriteDraw(VFXCore.DestelloFinal, posPantalla, null,
+                    DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.9f * (1f - (Time - ChargeTime) / 8f)),
+                    Projectile.rotation, VFXCore.DestelloFinal.Size() * 0.5f,
+                    new Vector2(1.6f, 1.6f) * realSize, SpriteEffects.None, 0f);
             }
-            if (Time >= (float)(ChargeTime - 20))
+
+            // ============ EL STRIP DEL SHADER (607df36 EXACTO) ============
+            // 1500 puntos, la llamada de 6 argumentos de 607df36, el shader
+            // de las cuatro texturas con su uTime y su uEscalaV — y TODO EL
+            // HAZ DENTRO DE UN LOTE ADITIVO EXPLÍCITO (la cura v6.56.4 de
+            // los bordes oscuros: el shader nació aditivo y bajo el pase de
+            // entidades sus bordes V negros OSCURECÍAN lo de debajo).
+            if (Time >= ChargeTime - 20)
             {
-                float num11 = Utils.GetLerpValue((float)(ChargeTime - 30), (float)(ChargeTime + 70), Time, true) * Utils.GetLerpValue((float)(ChargeTime + LaserDuration + 60), (float)(ChargeTime + LaserDuration), Time, true);
-                Vector2[] array = _cachePuntos;
-                float[] array2 = _cacheRotas;
-                // v6.56.6 — LA TÉCNICA DE LA SIERPE (V7): el eje entero
-                // ONDULA — una serpiente de luz que se desliza por el cielo
-                // (SierpesLib vive en la casa; aquí el eje del conducto es el
-                // cuerpo). Perpendicular al haz, sin fase por nodo corrupta:
-                // q·3π − localAI·0.11 recorre la onda a lo largo.
-                bool esSierpe = Variante == 7;
-                float ondaSierpe = esSierpe ? 34f * realSize : 0f;
-                Vector2 perpHaz = new((0f - MathF.Sin(((ModProjectile)this).Projectile.rotation)), MathF.Cos(((ModProjectile)this).Projectile.rotation));
-                for (int j = 0; j < 1500; j++)
+                float laserActive = Utils.GetLerpValue(ChargeTime - 30, ChargeTime + 70, Time, true)
+                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true);
+
+                Vector2[] positions = _cachePuntos;
+                float[] rotations = _cacheRotas;
+                for (int i = 0; i < 1500; i++)
                 {
-                    float qj = (float)j / 1500f;
-                    array[j] = ((Entity)((ModProjectile)this).Projectile).Center + Utils.RotatedBy(new Vector2(3500f * qj * (0.5f + num11 * 0.5f), 0f), (double)((ModProjectile)this).Projectile.rotation, default(Vector2));
-                    if (esSierpe)
-                    {
-                        float fase = MathF.Sin(qj * 9.42f - ((ModProjectile)this).Projectile.localAI[0] * 0.11f)
-                                     * MathF.Sin(qj * MathF.PI);   // anclado: 0 en la boca y la punta
-                        array[j] += perpHaz * (fase * ondaSierpe);
-                    }
-                    array2[j] = ((ModProjectile)this).Projectile.rotation;
+                    positions[i] = Projectile.Center + new Vector2(LargoCono * (i / 1500f) * (0.5f + laserActive * 0.5f), 0f).RotatedBy(Projectile.rotation);
+                    rotations[i] = Projectile.rotation;
                 }
-                VertexStrip val4 = _strip;
-                val4.PrepareStripWithProceduralPadding(array, array2, new VertexStrip.StripColorFunction(StripColor), new VertexStrip.StripHalfWidthFunction(StripWidth), -Main.screenPosition, true, true);
-                Effect val5 = ObtenerShader();
-                if (val5 != null)
+
+                _strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
+
+                Effect lightningEffect = ObtenerShader();
+                if (lightningEffect != null)
                 {
-                    // v6.56.4 — EL LOTE ADITIVO DEL HAZ (la letra: «al
-                    // disparar el haz de luz… en el momento de agrandarse y
-                    // hacerse ancho en los bordes hay franjas negras»). El
-                    // shader nació ADITIVO (su propio .fx lo declara) pero se
-                    // dibujaba bajo el lote de entidades (AlphaBlend): las 4
-                    // texturas multiplicadas llevan bordes V NEGRO PURO y bajo
-                    // AlphaBlend el borde del haz OSCURECE lo de debajo — la
-                    // franja negra justo donde el haz se ensancha. Se cierra
-                    // el lote de entidades (lo encolado queda DEBAJO del haz),
-                    // el dispositivo pasa a aditivo para el DrawTrail y la
-                    // salida vuelve al pase vanilla (RestaurarLoteVanilla).
                     VFXCore.CerrarLoteSiAbierto();
                     GraphicsDevice gd = Main.graphics.GraphicsDevice;
                     gd.BlendState = BlendState.Additive;
                     try
                     {
-                        val5.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                        val5.Parameters["uTexturaCarne"].SetValue((Texture)(object)texRuido);
-                        val5.Parameters["uTexturaSegunda"].SetValue((Texture)(object)texRemolino);
-                        val5.Parameters["uTexturaRampa"].SetValue((Texture)(object)texRampa);
-                        val5.Parameters["uTexturaBits"].SetValue((Texture)(object)texBits);
-                        val5.Parameters["uTime"].SetValue((0f - ((ModProjectile)this).Projectile.localAI[0]) * 0.025f);
-                        val5.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
-                        val5.CurrentTechnique.Passes[0].Apply();
-                        val4.DrawTrail();
+                        lightningEffect.Parameters["uTransformMatrix"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+                        lightningEffect.Parameters["uTexturaCarne"].SetValue(texture);
+                        lightningEffect.Parameters["uTexturaSegunda"].SetValue(textureSecond);
+                        lightningEffect.Parameters["uTexturaRampa"].SetValue(textureGlow);
+                        lightningEffect.Parameters["uTexturaBits"].SetValue(textureBits);
+                        lightningEffect.Parameters["uTime"].SetValue(-Projectile.localAI[0] * 0.025f);
+                        // LA ESCALA COMPENSADA (la cura de los dientes de
+                        // sierra del ruido fino): los rasgos del plasma
+                        // miden SIEMPRE lo mismo en pantalla.
+                        lightningEffect.Parameters["uEscalaV"].SetValue(MathHelper.Clamp(realSize, 0.18f, 1f));
+                        lightningEffect.CurrentTechnique.Passes[0].Apply();
+                        _strip.DrawTrail();
                         Main.pixelShader.CurrentTechnique.Passes[0].Apply();
                     }
                     finally
                     {
                         gd.BlendState = BlendState.AlphaBlend;
-                        // v6.56.5 — LA AUDITORÍA B (MENOR-1): si algo tronara
-                        // entre el cierre del lote (CerrarLoteSiAbierto) y la
-                        // salida, el lote quedaba CERRADO — y tML mata al
-                        // proyectil que dibuja con el lote cerrado. La cura
-                        // ahora también corre por el camino de la excepción.
+                        // El lote se restaura TAMBIÉN por el camino de la
+                        // excepción (auditoría v6.56.5: tML mata al
+                        // proyectil que dibuja con el lote cerrado).
                         VFXCore.RestaurarLoteVanilla();
                     }
                 }
                 else
                 {
-                    Vector2[] array3 = _cachePuntos64;
-                    float[] array4 = _cacheSemis64;
-                    for (int k = 0; k < 64; k++)
+                    // EL FALLBACK de la casa (SOLO si el .fxc no cargó —
+                    // jamás junto al shader): el strip de 64 nodos con la
+                    // pila de tiras de la librería (carne + remolino +
+                    // núcleo) — el mismo haz sin el .fx.
+                    Vector2[] pts = _cachePuntos64;
+                    float[] semi = _cacheSemis64;
+                    for (int i = 0; i < 64; i++)
                     {
-                        float num12 = (float)k / 63f;
-                        array3[k] = array[(int)(num12 * 1499f)] - Main.screenPosition;
-                        array4[k] = MathF.Max(StripWidth(num12) * 0.5f, 1f);
+                        float p = i / 63f;
+                        pts[i] = positions[(int)(p * 1499)] - Main.screenPosition;
+                        semi[i] = MathF.Max(StripWidth(p) * 0.5f, 1f);
                     }
                     RayoStrip.AbrirLote();
                     try
                     {
-                        Texture2D texRuido2 = DefinitivasLib.TexRuido;
-                        Texture2D texRemolino2 = DefinitivasLib.TexRemolino;
-                        if (texRuido2 != null)
-                        {
-                            RayoStrip.FajaTexturadaEnLote(array3, array4, DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f), 0.6f * realSize), texRuido2, 420f, 1f, Main.GlobalTimeWrappedHourly);
-                        }
-                        if (texRemolino2 != null)
-                        {
-                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.7f, _cacheSemisA), DefinitivasLib.Alfa(VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.2f), 0.45f * realSize), texRemolino2, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
-                        }
-                        if (texRuido2 != null)
-                        {
-                            RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.4f, _cacheSemisB), DefinitivasLib.Alfa(Color.White, 0.85f * realSize), texRuido2, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
-                        }
+                        if (texture != null)
+                            RayoStrip.FajaTexturadaEnLote(pts, semi,
+                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0]), 0.6f * realSize),
+                                texture, 420f, 1.0f, Main.GlobalTimeWrappedHourly);
+                        if (textureSecond != null)
+                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.7f, _cacheSemisA),
+                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 12f), 0.45f * realSize),
+                                textureSecond, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
+                        if (texture != null)
+                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.4f, _cacheSemisB),
+                                DefinitivasLib.Alfa(Color.White, 0.85f * realSize),
+                                texture, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
                     }
-                    finally
-                    {
-                        RayoStrip.CerrarLote();
-                    }
+                    finally { RayoStrip.CerrarLote(); }
                 }
             }
-            // ============================================================
-            //  v6.56.6 — LA PILA DE CAPAS DEL HAZ (la letra: «le quitaste
-            //  los efectos y otras texturas, ahora solo usa 1 textura, le
-            //  faltan mas texturas y mas efectos, como el desenfoque, el
-            //  glow, el brillo entre otras cosas… es un ataque definitivo,
-            //  debe ser lo mas vistoso posible, lleno de efectos visuales,
-            //  profesional y poderoso»). La tira del shader (las 4 texturas
-            //  del plasma) NO basta sola: encima viaja LA PILA —
-            //    · EL DESENFOQUE: remolino a 1.8× de semiancho, al 30% —
-            //      el halo difuso que desdibuja los bordes;
-            //    · EL GLOW: carne fBm a 1.35×, la rampa del gradiente que
-            //      respira a lo largo;
-            //    · EL BRILLO: la vena central blanca (ventana V 0.36-0.64)
-            //      — el corazón incandescente del conducto;
-            //    · LOS SOLES DEL CONDUCTO: destellos de 4 puntas corriendo
-            //      por dentro (la firma de la carga, ahora en el haz);
-            //    · LA TÉCNICA DE LA VARIANTE: cada RC2 su propio monstruo.
-            // ============================================================
-            if (Time >= (float)(ChargeTime - 20))
-            {
-                DibujarPilaDeCapas();
-            }
+
+            // v6.56.7 — NADA ENCIMA DEL STRIP. La «pila de capas» de la
+            // v6.56.6 (las fajitas CPU SIEMPRE visibles) ERA LA CAUSA DE
+            // LOS PICOS: quads de borde poligonal duro y el remolino
+            // BINARIO visto crudo — peines de blobs fuera del borde del
+            // haz. TODO lo que el haz necesita de más (el desenfoque, el
+            // glow, la riqueza de textura) vive AHORA PER-PIXEL dentro del
+            // shader mejorado — un borde fundido por curva no puede
+            // producir picos. (El diagnóstico completo: códice §5.4.)
+
+            // EL CONTRATO DEL LOTE: salir con el lote vivo y en estado vanilla.
             VFXCore.RestaurarLoteVanilla();
             return false;
         }
 
-        // v6.56.6 — LOS POZOS DE LAS RAMAS CUÁNTICAS (V8): cero-GC.
-        private static readonly Vector2[] _pozoRamaPts = (Vector2[])(object)new Vector2[16];
-        private static readonly float[] _pozoRamaSemis = new float[16];
-
-        /// <summary>LA PILA: desenfoque + glow + brillo + soles del conducto
-        /// + la técnica de la variante. Se dibuja SIEMPRE que el haz vive
-        /// (con shader GPU o sin él — las capas son el equipaje propio).</summary>
-        private void DibujarPilaDeCapas()
-        {
-            Texture2D texRuido2 = DefinitivasLib.TexRuido;
-            Texture2D texRemolino2 = DefinitivasLib.TexRemolino;
-            if (texRuido2 == null || texRemolino2 == null) return;
-
-            // el eje remuestreado a 64 nodos (los pozos de la casa)
-            Vector2[] array3 = _cachePuntos64;
-            float[] array4 = _cacheSemis64;
-            for (int k = 0; k < 64; k++)
-            {
-                float num12 = (float)k / 63f;
-                array3[k] = _cachePuntos[(int)(num12 * 1499f)] - Main.screenPosition;
-                array4[k] = MathF.Max(StripWidth(num12) * 0.5f, 1f);
-            }
-
-            float t = Main.GlobalTimeWrappedHourly;
-            Color cGrad = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f);
-            Color cGrad2 = VariantesRC2.Gradiente(Variante, ((ModProjectile)this).Projectile.localAI[0] / 60f + 0.25f);
-
-            RayoStrip.AbrirLote();
-            try
-            {
-                // (1) EL DESENFOQUE — el halo difuso del borde.
-                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 1.8f, _cacheSemisA),
-                    DefinitivasLib.Alfa(cGrad2, 0.30f * realSize), texRemolino2, 240f, 1.9f, t);
-                // (2) EL GLOW — la carne que respira el gradiente.
-                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 1.35f, _cacheSemisB),
-                    DefinitivasLib.Alfa(cGrad, 0.50f * realSize), texRuido2, 420f, 1.0f, t);
-                // (3) EL BRILLO — la vena central blanca.
-                RayoStrip.FajaTexturadaEnLote(array3, ArraySemis(array4, 0.55f, _cacheSemisA),
-                    DefinitivasLib.Alfa(Color.White, 0.90f * realSize), texRuido2, 380f, 2.6f, t, 0.36f, 0.64f);
-            }
-            finally
-            {
-                RayoStrip.CerrarLote();
-            }
-
-            // (4) LA TÉCNICA DE LA VARIANTE — cada haz su monstruo. FUERA
-            // del lote de RayoStrip: algunas técnicas administran sus
-            // propios lotes (AberracionCromatica abre el suyo; Nube y Bruma
-            // manejan VFXCore por dentro) y las de SpriteBatch directo
-            // heredan el lote vanilla de entidades (el camino probado de
-            // los bolts de la carga).
-            switch (Variante)
-            {
-                case 1:
-                    VariantesRC2.Prisma(array3, array4, this, realSize);
-                    break;
-                case 2:
-                    VariantesRC2.Eclipse(array3, array4, this, realSize);
-                    break;
-                case 3:
-                    VariantesRC2.Tormenta(array3, array4, this, realSize);
-                    break;
-                case 4:
-                    VariantesRC2.Solar(array3, array4, this, realSize);
-                    break;
-                case 5:
-                    VariantesRC2.Vortice(array3, array4, this, realSize);
-                    break;
-                case 6:
-                    VariantesRC2.Espectro(array3, array4, this, realSize);
-                    break;
-                case 8:
-                    VariantesRC2.Cuantico(array3, array4, this, realSize);
-                    break;
-                case 9:
-                    VariantesRC2.Nova(array3, array4, this, realSize);
-                    break;
-            }
-
-            // (5) LOS SOLES DEL CONDUCTO — destellos de 4 puntas corriendo
-            // por dentro del haz (aditivo puro, lote VFXCore).
-            VFXCore.CerrarLoteSiAbierto();
-            VFXCore.Begin();
-            try
-            {
-                int semilla = ((Entity)((ModProjectile)this).Projectile).whoAmI * 17 + 3;
-                for (int i = 0; i < 7; i++)
-                {
-                    float h = VFXCore.Hash01(semilla, 600 + i, 7);
-                    float viaje = (h + ((ModProjectile)this).Projectile.localAI[0] * (0.0022f + 0.0035f * h)) % 1f;
-                    int nodo = (int)(viaje * 63f);
-                    Vector2 pos = array3[nodo];
-                    float vida = (t * 1.4f + h * 3f) % 1f;
-                    float arde = MathF.Sin(vida * MathHelper.Pi);
-                    float anchoNodo = array4[nodo];
-                    HazConcentradoLib.SolRunico4Puntas(pos,
-                        MathF.Max(2.5f, anchoNodo * 0.42f) * (0.7f + 0.5f * h), arde);
-                }
-            }
-            catch { VFXCore.CerrarLoteSiAbierto(); }
-            VFXCore.FlushAdditive();
-            VFXCore.ReabrirLoteVanilla();
-        }
-
+        /// <summary>EL COLOR DEL STRIP — el gradiente del mod que VIAJA a lo
+        /// largo (100 ticks de paleta de la boca a la punta, TODO se
+        /// desplaza cada frame) por el realSize.</summary>
         public Color StripColor(float progress)
         {
-            // v6.56.6 — EL COLOR VIAJA CON LA VARIANTE (cada técnica tiene
-            // su identidad cromática — ver VariantesRC2.Gradiente).
-            //IL_001b: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0020: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0029: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0030: Unknown result type (might be due to invalid IL or missing references)
-            Color val = VariantesRC2.Gradiente(Variante, (((ModProjectile)this).Projectile.localAI[0] - progress * 100f) / 60f);
-            (val).A = 0;
-            return val * realSize;
+            Color color = ColorPrisma.ValueAt(Projectile.localAI[0] - progress * 100f);
+            color.A = 0;
+            return color * realSize;
         }
 
+        /// <summary>EL ANCHO DEL STRIP — p^0.8 · cbrt · realSize · 3500 ·
+        /// (1.1 + cos·(0.08 − p·0.06)) — nace estrecho, engorda y respira.
+        /// Idéntico desde 607df36 (verificado por diff).</summary>
         public float StripWidth(float progress)
         {
-            float num = (float)Math.Pow(progress, 0.800000011920929);
-            float num2 = (float)Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
-            return num * num2 * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
+            float start = (float)Math.Pow(progress, 0.8f);
+            float cap = (float)Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
+            return start * cap * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
         }
 
+        /// <summary>Escala un perfil de semianchos (escribe en el pozo del
+        /// llamador — cero alocaciones, la ley de la casa).</summary>
         private static float[] ArraySemis(float[] perfil, float k, float[] destino)
         {
-            // v6.56.1 — escribe en el pozo del llamador (cero alocaciones)
             for (int i = 0; i < perfil.Length; i++)
-            {
                 destino[i] = perfil[i] * k;
-            }
             return destino;
         }
     }
@@ -891,11 +717,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
     // ====================================================================
     internal sealed class SonidoEnLoop
     {
-        private readonly Terraria.Audio.SoundStyle _estilo;
+        private readonly SoundStyle _estilo;
         private ReLogic.Utilities.SlotId _slot;
         private readonly Func<bool> _condicion;
 
-        public SonidoEnLoop(Terraria.Audio.SoundStyle estilo, Func<bool> condicionViva)
+        public SonidoEnLoop(SoundStyle estilo, Func<bool> condicionViva)
         {
             _estilo = estilo with { IsLooped = true };
             _condicion = condicionViva;
@@ -904,10 +730,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         public void PlaySound(Func<Vector2> posicion, Func<float> volumen, Func<float> pitch)
         {
-            bool activo = Terraria.Audio.SoundEngine.TryGetActiveSound(_slot, out Terraria.Audio.ActiveSound sonidoActivo);
+            bool activo = SoundEngine.TryGetActiveSound(_slot, out ActiveSound sonidoActivo);
             if ((!activo || !_slot.IsValid) && _condicion.Invoke())
             {
-                _slot = Terraria.Audio.SoundEngine.PlaySound(_estilo, posicion.Invoke(), sonido =>
+                _slot = SoundEngine.PlaySound(_estilo, posicion.Invoke(), sonido =>
                 {
                     if (sonido != null)
                     {
@@ -928,7 +754,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         public void StopSound()
         {
-            if (Terraria.Audio.SoundEngine.TryGetActiveSound(_slot, out Terraria.Audio.ActiveSound sonidoActivo) && sonidoActivo != null)
+            if (SoundEngine.TryGetActiveSound(_slot, out ActiveSound sonidoActivo) && sonidoActivo != null)
                 sonidoActivo.Stop();
             _slot = ReLogic.Utilities.SlotId.Invalid;
         }

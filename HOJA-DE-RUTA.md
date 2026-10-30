@@ -3,12 +3,19 @@
 > **Espejo compacto del worklog** (que vive en el sandbox y los wipes se lo han comido
 > dos veces — lecciones de las Tasks 68-84). La especificación gorda de cada tarea está
 > en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2 — actualizado en la
-> Task 108 (era v6.56.4), la 109 (era v6.56.5) y la **Task 110 (era v6.56.6: LA PURGA de
+> Task 108 (era v6.56.4), la 109 (era v6.56.5), la **Task 110 (era v6.56.6: LA PURGA de
 > las armas nuevas —solo el RC2 queda— + la cura REAL de la simetría de las alas —el
 > barrido rígido murió: Δ 0.0000 px— + el RC2 desnudo —sin disco negro ni lente, coronas
 > al 53%, la pila de capas y LOS SOLES RÚNICOS del accesorio— + LAS 9 VARIANTES con una
 > técnica VFX cada una + la cura de los textos crudos —el en-US espejo de seguridad— +
-> la auditoría de las 33 librerías con su top 10).
+> la auditoría de las 33 librerías con su top 10) y la **Task 111 (era v6.56.7: LAS 9
+> VARIANTES PURGADAS por la letra + LA CURA DE LOS PICOS —la técnica del commit 607df36
+> vuelve ENTERA: la PILA DE CAPAS de la .56.6 era la causa, quads poligonales + el
+> remolino BINARIO crudo; LEY DEL PIXEL vs EL QUAD en el códice— + EL COLOR DEL MOD
+> (ColorPrisma, perdido en la reconstrucción .56.0) + LOS SOLES RÚNICOS VISIBLES —el
+> contrato de coordenadas VFXCore: nacían fuera de pantalla— + LA BOCA de 4 glows con
+> alfa a CERO contra el «círculo plano» de la carga + EL SHADER MEJORADO: halo per-pixel,
+> filamentos por auto-interferencia, núcleo que late y franja prismática)**.
 >
 > **La tesis**: las Definitivas son los fragmentos del poder de un dios, y el Testamento
 > es, literalmente, SU testamento. ¿Quién firma un testamento? Alguien que va a morir…
