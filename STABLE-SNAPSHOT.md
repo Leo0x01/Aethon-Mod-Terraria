@@ -1,6 +1,6 @@
 # v6.56.5 — LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES — EL CHECKLIST
 
-> **PUBLICADA** — release por confirmar (el ID se conoce después de crear el release — la lección del snapshot).
+> **PUBLICADA** — release [428546845](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.5) + CDN verificado byte a byte (md5 `6bfda3d02cdfc7bd438c43e7d3404484`, 6.344.773 B; asset id 690452563).
 
 **Qué pasó** (la letra): «en el sonido de carga escucho un pitido al final» + «haz una auditoría en los últimos cambios en busca de errores no detectados».
 
