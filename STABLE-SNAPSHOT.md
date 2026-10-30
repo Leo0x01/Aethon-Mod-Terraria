@@ -1,6 +1,6 @@
 # v6.56.6 — LA PURGA + LAS ALAS SIMÉTRICAS + EL RC2 DESNUDO + LAS 9 VARIANTES — EL CHECKLIST
 
-> **PUBLICADA** — release pendiente de llenar al publicar.
+> **PUBLICADA** — release [429218656](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.6) + CDN verificado byte a byte (md5 `8bd69344bdefa480bd722021eabe6382`, 6.385.674 B; asset id 692603464).
 
 **Qué pasó** (la letra): textos crudos («mods.aethonmod.nivel» en la barra de exp) · alas aún asimétricas con «esa ligera rotación en el sentido contrario» · «borra todas las nuevas armas y solo deja al rayo concentrado 2» · el RC2 sin círculo negro, sin lente, coronas −50%, más texturas/efectos y LOS MISMOS brillos del accesorio de soles rúnicos · «al menos 9 variantes más con diferentes efectos y técnicas vfx» · auditoría de librerías.
 
