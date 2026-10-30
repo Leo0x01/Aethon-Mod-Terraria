@@ -1,3 +1,20 @@
+# v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA AUDITORÍA — EL CHECKLIST
+
+> PUBLICACIÓN PENDIENTE (el ID del release se llena tras publicar — la lección del snapshot).
+
+**Qué pasó** (la letra): «bueno ahora esta igual, sin glow, sin desenfoque, es solo una sola capa y se ve simple, necesita mas capas pero aplicadas correctamente y sin picos, siempre analisa lo que haces para ver si crea picos o no» + «los colores del mod son principalmente morado, rojo, negro, no olvides lo que es el mod realmente» + «ademas estan los circulos planos… nada de circulos planos, si necesita efectos o shader usa las librerias existentes» + «no me diste el analisis que hicieste de las librerias» + «dale una mejora de shader».
+
+1. **LA BANDA PLANA (la cura)**: [ ] el haz muestra el PLASMA DE TEXTURA de siempre (nubes/filamentos del fBm — NO una banda lisa de color plano); [ ] HAY GLOW alrededor (el halo difuso per-pixel); [ ] HAY DESENFOQUE en el borde (la falda pow³ fundiéndose); [ ] se ven VARIAS CAPAS (cuerpo + venas + núcleo + halo), no una sola.
+2. **LA PALETA DEL CONJURO (morado · rojo · negro)**: [ ] el haz es VIOLETA/MORADO con VENAS ROJAS hirviendo (no amarillo/verde/cian arcoíris); [ ] el color VIAJA a lo largo del conducto (la boca y la punta en distinta fase del ciclo violeta→morado→rojo→magenta); [ ] la LUZ del mundo morada/roja; [ ] la corona rúnica con el aro rojo-dorado.
+3. **SIN CÍRCULOS PLANOS**: [ ] la BOCA no tiene NINGÚN disco (los 4 glows apilados murieron — en las capturas se leía como disco con anillos concéntricos); [ ] la boca = corona rúnica (que ENCOGE con la carga: el indicador son los anillos) + soles de 4 puntas del accesorio + micro-arcos + LA ESTRELLA CONDUCTO (el destello de 4 puntas latiendo en la boca mientras dispara).
+4. **SIN PICOS (la prueba del análisis siempre)**: [ ] el borde del haz LISO a toda potencia (la rugosidad medida en sim: 1.64 px de media — una curva no puede producir picos); [ ] el pulso viajero corriendo hacia la punta SIN sierra.
+5. **EL FALLBACK (el seguro)**: [ ] si el shader no cargara en tu GPU, el haz se ve DIGNO igual (4 tiras suaves morado/rojo con núcleo blanco — sin peine de picos).
+6. **LO QUE VIVE**: [ ] temblor sostenido + golpe de encendido; [ ] sonidos intactos (carga + bucle); [ ] destello de ignición; [ ] vuelo infinito del dueño; [ ] un solo RC2 a la vez.
+7. **LA AUDITORÍA DE LIBRERÍAS (entregada)**: `AUDITORIA-LIBRERIAS.md` en el repo — 69 librerías/43.600 líneas: 2 muertas, 3 grupos de fusión, ~3.900 líneas recuperables, 3 librerías nuevas propuestas.
+8. **REGRESIÓN**: [ ] las demás armas intactas; [ ] F8 presupuesto sano.
+
+---
+
 # v6.56.7 — EL RC2 VUELVE A SU TÉCNICA (607df36): LA CURA DE LOS PICOS — EL CHECKLIST
 
 > **PUBLICADA** — release [429356315](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.7) + CDN verificado byte a byte (md5 `b6f37c7f12d21fc14d175725b7782d2c`, 6.363.051 B; asset id 693010906).

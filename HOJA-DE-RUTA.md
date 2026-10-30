@@ -57,6 +57,12 @@
 7. **101** — EL JEFE ESPEJO (la puerta solo abre con las 7 pruebas completas).
 8. **102 → 103** — NG+ y el estreno del servidor: el círculo se cierra con gente jugando junto.
 
+## v6.56.8 — LA CURA DE LA BANDA PLANA (30-oct)
+
+- **Qué pasó**: el .fxc recompilado de la .56.7 (reescritura completa del PS, 9 muestreos) no renderizaba el plasma en la GPU del jugador — banda plana sin textura. LA CURA: esqueleto .55.1 PROBADO + cirugía de deltas (venas rojas/pulso/halo/latido) + `ColorConjuro` (morado/rojo/negro — ColorPrisma muere en el RC2) + la boca de glows apilados PROHIBIDA (era el círculo plano) + fallback hermoso. **AUDITORÍA DE LIBRERÍAS entregada** (`AUDITORIA-LIBRERIAS.md`).
+- **Lecciones**: (1) el .fx del RC2 se cambia CON CIRUGÍA, jamás reescritura completa — cada delta se compila/valida/inspecciona su GLSL/se simula; (2) una pila de glows «con alfa a cero» también es UN CÍRCULO PLANO para el ojo; (3) MojoShader-parsear bien NO garantiza renderizar bien en la GPU del jugador — el esqueleto probado es la única vara; (4) el tML 2026.8 guarda los blobs incomprimibles CRUDOS y el resto en deflate-raw (el auditor aprendió).
+- **Siguientes candidatos** (de la auditoría): purgar BeamLib+BoltRenderer (496 líneas muertas), consolidar helpers en VFXCore (~900 líneas), decidir HazConcentradoLib muerto, TiemposLib (hitstop), PostFXLib, ImpactoLib.
+
 ## Reglas del backlog
 
 - Cada tarea se ejecuta con el RITUAL COMPLETO de la casa: oráculo 0/0 → -build REAL 0/0 →

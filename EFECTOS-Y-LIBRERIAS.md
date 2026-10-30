@@ -9,7 +9,7 @@
 > que lo que necesitas YA EXISTE es altísima. **NO SE INVENTA NADA NUEVO SIN
 > ANTES HABER REVISADO ESTE CATÁLOGO.**
 
-**Versión del códice:** 1.3 (v6.56.4) · **Mantenimiento:** todo agente (IA o humano)
+**Versión del códice:** 1.4 (v6.56.8) · **Mantenimiento:** todo agente (IA o humano)
 que cree o modifique una librería, shader, textura, efecto visual o de sonido
 **DEBE documentarlo aquí en la misma entrega** (ver §10 — El Decálogo y §11 — Bitácora).
 
@@ -79,12 +79,17 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      verificación visual (§5.4). TODO lo extra (desenfoque, glow,
      filamentos, aberración) se hace **PER-PIXEL DENTRO DEL .fx** — una
      curva smoothstep/pow no puede producir picos.
-   - **Glow de UNA capa con alfa lleno como «boca» de un arma** → la boca
-     del RC2 son CUATRO glows apilados con el alfa a CERO (la suma pura
-     bajo `(One, InvSrcAlpha)` — §5.4). Un único glow con alfa lleno hace
-     LERP contra el fondo: UN CÍRCULO PLANO QUE TAPA (el bug de la carga
-     de la v6.56.4-.56.6 — la letra: «en la fase de carga tambien
-     pusiste un circulo plano»).
+   - **Glow apilado como «boca» de un arma — TAMBIÉN PROHIBIDO (v6.56.8)** →
+     la boca del RC2 fueron CUATRO SoftGlow apilados «con el alfa a cero»
+     desde 607df36, y el jugador vio UN CÍRCULO PLANO CON ANILLOS
+     CONCÉNTRICOS en cada captura (el ojo lee una pila de glows como un
+     disco — verificado por visión independiente en la v6.56.8). LA BOCA
+     DEL CONJURO SON SUS RUNAS Y SUS SOLES: la corona rúnica que encoge
+     (el indicador de carga), los soles de 4 puntas del accesorio, los
+     micro-arcos StormLib y la estrella conducto. CERO discos, apilados
+     o no. (El bug de la v6.56.4-.56.6 era UN glow con alfa lleno que
+     hacía LERP contra el fondo — también prohibido, pero la pila entera
+     salió del mod.)
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -601,8 +606,8 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
   **REGLA: cada API de dibujo declara su sistema de coordenadas en su
   `<summary>` — leerlo antes de llamar. Los quads VFXCore son MUNDO,
   SIEMPRE.**
-- **Fallback:** tiras RayoStrip ×3 (carne 420px/1.0× · remolino 240px/1.9× ·
-  núcleo en banda 380px/2.6×, con los colores por nodo del llamador) — el arma
+- **v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA:** la .56.7 reescribió el PS completo (9 muestreos) — validó contra MojoShader pero en la GPU del jugador el haz era UNA BANDA PLANA sin textura (RGB constante ±3, borde duro, cero fBm — las capturas analizadas píxel a píxel). LA CURA: **el .fx vuelve al ESQUELETO EXACTO DE LA v6.55.1** (el bytecode PROBADO en la máquina del jugador durante toda la era 607df36 — mismos constructos, 6 muestreos) y las mejoras viven como DELTAS MÍNIMOS: **LAS VENAS ROJAS** (`SegundoRuido` promovido de multiplicador a SELECTOR de color — el tono salta del violeta profundo al rojo vivo donde su máscara enciende), **EL PULSO VIAJERO** (bandas de brillo que corren a la punta), **EL HALO** (pow³ con UNA muestra de carne, el filo teñido de rojo) y **EL NÚCLEO QUE LATE**. **LA PALETA DEL CONJURO** (la letra: «los colores del mod son principalmente morado, rojo, negro»): `ColorPrisma` MUERE en el RC2 — `RayoConcentradoDosProjectile.ColorConjuro` (violeta arcano → morado profundo → rojo sangre → magenta, ciclo 48 t, viaja a lo largo) alimenta el `input.Color` del shader, la luz del mundo, los anillos, los arcos y la corona. **LA REGLA QUE QUEDA: el .fx del RC2 se cambia CON CIRUGÍA — cada delta se compila, se valida contra MojoShader, se INSPECCIONA SU GLSL transpilado y se verifica en el sim 1:1 ANTES de empaquetar. JAMÁS reescritura completa del PS.** LA BOCA DE GLOWS APILADOS MURIÓ COMPLETA (§0 — era EL círculo plano de las capturas): la boca son la corona + los soles + los arcos + LA ESTRELLA CONDUCTO (`SolRunico4Puntas` latiendo en la boca). Sim 1:1: rugosidad del borde media 1.64 px (shader) / 4.09 px (fallback); 17 % del cuerpo son venas rojas, 16 % violetas.
+- **Fallback:** tiras RayoStrip ×4 SUAVES (funda violeta carne 420px · cuerpo paleta-por-nodo carne 300px · venas rojas rampa 240px · núcleo blanco banda 380px — SIN remolino binario, v6.56.8) — el arma
   NUNCA se rompe. La aberración cromática del borde prismático vive en
   `HazConcentradoLib.AberracionCromatica` (vía CPU, fina y lisa).
 - **Historia:** v6.55.0 (nació SIN .fxc — §1) → **v6.55.1 compilado con la cadena propia** (validado: 0 errores, 11 params, técnica VS+PS, 4 samplers × 6 estados, GLSL transpilado verificado) → **v6.56.4 portado a las armas** (HazConcentradoLib + la reversión educada de RayoStrip, §6.A).
@@ -644,14 +649,15 @@ MULTIPLICACIÓN DE SHADER, no sprites autosuficientes:
 | Textura | Para qué NACIÓ | Cómo se usa BIEN | Jamás |
 |---|---|---|---|
 | `CarnePlasma` (TexRuido) | LA CARNE — el fBm que define el cuerpo | sampler s0 del shader (`uTexturaCarne`) · el núcleo del fallback (faja 420px) · EL HALO del .fx v6.56.7 (3 muestras con desfase prismático) | — |
-| `SegundoRuido` (TexRemolino) | EL HERVOR — **textura BINARIA** (52 % negro / 22 % saturado): SOLO para MULTIPLICAR contra la carne (donde ambas son brillantes, el haz arde) | sampler s1 (`uTexturaSegunda`) · la 2ª capa del fallback (faja 240px) | **JAMÁS dibujada cruda como capa ancha «de desenfoque»** — sus blobs duros fuera del borde del haz son LOS PICOS (§5.4, la ley v6.56.7) |
+| `SegundoRuido` (TexRemolino) | EL SELECTOR DE VENAS — **textura BINARIA** (52 % negro / 22 % saturado): su máscara elige el TONO del plasma (violeta ↔ rojo) dentro del shader (v6.56.8 — antes multiplicaba y mataba media textura a negro) | sampler s1 (`uTexturaSegunda`) — la máscara `saturate(r·1.6−0.05)` de LAS VENAS ROJAS | **JAMÁS dibujada cruda como capa ancha «de desenfoque»** — sus blobs duros fuera del borde del haz son LOS PICOS (§5.4, la ley v6.56.7) — y el fallback YA NO LA USA (v6.56.8) |
 | `RampaGlow` (TexRampa) | EL PERFIL DE CALOR transversal (la funda del canal) | sampler s2 (`uTexturaRampa`) — la falda del núcleo | — |
 | `BitsChispa` (TexBits) | LAS CHISPAS — blobs duros SOLO en el corazón V 0.32-0.68 (la cura v6.55.0) | sampler s3 (`uTexturaBits`) muestreada DOS veces con flujos distintos — el DOBLE AND (arden solo donde ambas nubes coinciden) | muestrearla una sola vez (chispas «apagadas») o fuera del corazón V |
 
 El RC2 completo es EL ejemplar vivo: strip 1500 puntos + el .fx con las
-cuatro en su papel + la boca de 4 glows apilados + la corona rúnica + los
-soles de 4 puntas del accesorio (§5.4 para el diagnóstico de los picos y
-el contrato de coordenadas).
+cuatro en su papel (el esqueleto .55.1 + venas/halo/pulso como cirugía) +
+la corona rúnica + los soles de 4 puntas del accesorio + la estrella
+conducto (§5.4 para el diagnóstico de los picos, la banda plana y el
+contrato de coordenadas). CERO discos en la boca (la ley §0).
 
 ### 6.B Las texturas del sol (familia SunShader, `Content/Effects/Textures/`)
 
@@ -835,6 +841,8 @@ el contrato de coordenadas).
 | **v6.56.5** | **LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES**: el seno puro de 1376 Hz del finale de la carga MUERE (→ soplo de presión sin pitch, detector anti-pitido calibrado en el generador) · **EL TEMBLOR PERCEPTIBLE** (el sostenido era SUB-PÍXEL: trauma²·i — 2.6 daba 0.18 px; ahora 6.5/9) · **GravLens SIN MONOPOLIO** (vida 0.06 s — antes pedía 36 lentes contra una mesa de 8) · **EL HORIZONTE DEL PORTAL A TAMAÑO REAL** (2.28·R, la convención BlackDisk — salía a la mitad) · **LA CARGA MUERE CON SU DUEÑO** (`CortarCarga` + `_cargaSlot`) · **LA REGLA DE LA CAÍDA LONGITUDINAL** (§5.4 — la espina de la Ira/Partidor vivía al revés) · **LA PARIDAD DE LAS RUNAS** (§4.24 — `L_B = −(−1)^num₄` + direction + gemelas compartiendo semilla) · los `.fx` fuera del .tmod (buildIgnore) | §5.4, §4.24, §7.3, §3.1 |
 | **v6.56.6** | **LA PURGA + LAS 9 VARIANTES + EL RC2 «desnudo»** (coronas rúnicas al 53 %, el disco negro y la lente MUERTOS, los soles de 4 puntas de la carga) + **LA AUDITORÍA DE LAS 33 LIBRERÍAS** (3 fusiones recomendadas, ~40 métodos muertos, 57 copias privadas de Tint/Hash01, TiemposLib/PostFXLib para el futuro) · *el RC2 de esta versión traía LA PILA DE CAPAS — la causa de los picos, curada en la .56.7* | §5.4, §11 |
 | **v6.56.7** | **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
+ **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
+| **v6.56.8** | **LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA** (el .fx vuelve al esqueleto PROBADO .55.1; los deltas: venas rojas/pulso/halo/latido) · **LA BOCA DE GLOWS APILADOS PROHIBIDA** (§0 — era EL círculo plano de las capturas; la boca = corona + soles + arcos + estrella conducto) · **`ColorConjuro`** (violeta→morado→rojo→magenta — ColorPrisma muere en el RC2) · **EL FALLBACK HERMOSO** (4 tiras suaves, sin remolino) · **LA AUDITORÍA DE LIBRERÍAS entregada** (`AUDITORIA-LIBRERIAS.md`: 2 librerías muertas, ~3.900 líneas recuperables, ~125 copias de helpers, 3 librerías nuevas propuestas — TiemposLib/PostFXLib/ImpactoLib) — y **ESTE CÓDICE (v1.4) RECONCILIADO CON LA REALIDAD** | §0, §5.4, §6.A, AUDITORIA-LIBRERIAS.md |
 
 ---
 

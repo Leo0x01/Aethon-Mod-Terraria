@@ -14,82 +14,62 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Definitivas
 {
     // =====================================================================
-    //  v6.56.7 — EL RC2 VUELVE A SU TÉCNICA (commit 607df36) + LOS CÍRCULOS
-    //  RÚNICOS + LOS SOLES DEL ACCESORIO + EL SHADER MEJORADO.
+    //  v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO.
     // =====================================================================
-    //  LA LETRA del usuario: «el commit donde estaba correcta la tecnica de
-    //  haz es el commit 607df36, solo que aqui tenia los circulos planos que
-    //  estaban incorrecto y los bordes oscuros… usa el codigo de 607df36
-    //  para reparar el problema de los picos y la falta de efecto que tenia
-    //  ya que en el commit 607df36 estaba correcta esa parte y solo
-    //  necesitaba que le quitaran los circulos planos, y agregaras los
-    //  circulos runicos como en la version actual».
+    //  LA LETRA del usuario: «bueno ahora esta igual, sin glow, sin
+    //  desenfoque, es solo una sola capa y se ve simple, necesita mas
+    //  capas pero aplicadas correctamente y sin picos… los colores del
+    //  mod son principalmente morado, rojo, negro… ademas estan los
+    //  circulos planos, nada de circulos planos, si necesita efectos o
+    //  shader usa las librerias existentes».
     //
-    //  EL DIAGNÓSTICO DE LOS PICOS (forense, documentado en el códice §5.4):
-    //  el RC2 de la v6.56.6 dibujaba LA PILA DE CAPAS — tres fajitas CPU
-    //  (RayoStrip.FajaTexturadaEnLote) SIEMPRE ENCIMA del strip GPU. Las
-    //  fajitas son tiras de QUADS de borde POLIGONAL duro, y su capa
-    //  «desenfoque» usaba SegundoRuido — una textura BINARIA (52 % negro /
-    //  22 % saturado, blobs duros) diseñada para MULTIPLICARSE dentro del
-    //  shader, jamás para verse cruda. El resultado: peines de blobs duros
-    //  flotando fuera del borde del haz (el simulador 1:1 de la casa lo
-    //  midió: pico-valle 222 px contra 163 px de la técnica correcta, y la
-    //  verificación visual lo confirmó: «dientes rectangulares duros
-    //  saliendo del borde»). En 607df36 las fajitas solo vivían en el
-    //  FALLBACK sin shader — con el .fxc cargado, el usuario jamás las vio:
-    //  POR ESO «antes no había picos».
+    //  EL DIAGNÓSTICO DE LA BANDA PLANA (forense sobre las capturas del
+    //  jugador, píxel a píxel): el haz se veía como UNA BANDA DE COLOR
+    //  PLANO (RGB constante, ±3, a lo largo de cientos de píxeles), de
+    //  borde duro y SIN rastro del fBm de CarnePlasma (std 86-106 — el
+    //  shader habría dibujado textura SIEMPRE). El .fxc de la v6.56.7
+    //  validaba contra el parser de MojoShader pero en la GPU del
+    //  jugador NO renderizaba el plasma. LA CURA: el .fx vuelve AL
+    //  ESQUELETO EXACTO DE LA v6.55.1 — el bytecode que el jugador VIO
+    //  renderizar correcto toda la era 607df36 (mismo orden de
+    //  operaciones, mismos constructos, 6 muestreos contra los 9 de la
+    //  .56.7) — y las capas nuevas se agregaron como DELTAS MÍNIMOS
+    //  (venas · halo · pulso · latido), cada uno compilado, validado e
+    //  inspeccionado en el GLSL transpilado. LA REGLA QUE QUEDA: el .fx
+    //  del RC2 se cambia CON CIRUGÍA, jamás con reescritura completa.
     //
-    //  LA CURA (la letra aplicada punto por punto):
-    //    · LA TÉCNICA DE 607df36 EXACTA: el strip de 1500 puntos con EL
-    //      SHADER DE LAS CUATRO TEXTURAS (CarnePlasma × SegundoRuido ×
-    //      RampaGlow + BitsChispa en doble AND), la boca de glows
-    //      APILADOS (cuatro: 5× color al 20 %, 4× al 60 %, 2× blanco,
-    //      14× al 10 % — un bloom de verdad, JAMÁS un círculo plano),
-    //      PrepareStripWithProceduralPadding de 6 argumentos y el fallback
-    //      de fajitas SOLO si el .fxc no cargó.
-    //    · LOS POLVOS CROMÁTICOS MUEREN (eran LOS «círculos planos» de
-    //      607df36 — la cura que la v6.56.0 ya había hecho): nada de
-    //      partículas genéricas en el conducto.
-    //    · LOS BORDES OSCUROS: el strip se dibuja en LOTE ADITIVO explícito
-    //      (la cura v6.56.4 — el shader nació aditivo y bajo el pase de
-    //      entidades sus bordes V negros OSCURECÍAN lo de debajo).
-    //    · EL COLOR DEL MOD: ColorPrisma.ValueAt — el reloj de la paleta
-    //      oil (magenta → naranja → amarillo → verde → cian) que recorre
-    //      TODO el mod, el gradiente que viaja a lo largo del haz (100
-    //      ticks de paleta de la boca a la punta). La reconstrucción
-    //      binaria de la v6.56.0 lo cambió por el gradiente del juicio sin
-    //      que nadie lo pidiera — EL RC2 VUELVE AL COLOR DEL MOD.
-    //    · LOS CÍRCULOS RÚNICOS de la versión actual (la letra: «agregaras
-    //      los circulos runicos como en la version actual»): LA CORONA
-    //      RÚNICA (OrbitaLib.CoronaConjuro — los círculos dorado/violeta/
-    //      blanco de los agujeros negros) al 53 % de su tamaño + los dos
-    //      anillos finos — y son ELLOS el indicador de la carga (la letra:
-    //      «si necesitas un indicador de carga usa los mismos anillos
-    //      runicos»): la corona ENCOJE con la carga (70 → 26 px).
-    //    · LOS SOLES RÚNICOS DEL ACCESORIO (la letra: «debes usar los
-    //      mismos brillos que usa el accesorio de El brillo de soles
-    //      runicos»): el destello de 4 PUNTAS (dos cápsulas cruzadas de
-    //      blanco incandescente + el corazón dorado — la receta verbatim
-    //      de BrilloSolarHalo.DrawTwinkles) absorbiéndose en la banda
-    //      elíptica que encoge (170 → 22 px) y el estallido en abanico al
-    //      disparar. LA CURA DE LAS COORDENADAS: VFXCore.Quad vive en
-    //      coordenadas de MUNDO (el volcado resta screenPosition) — la
-    //      v6.56.6 le pasaba PANTALLA y los destellos nacían FUERA de
-    //      pantalla: jamás se vieron. Ahora viven de verdad.
-    //    · EL SHADER MEJORADO (la letra: «dale una mejora de shaders
-    //      tambien»): EL HALO per-pixel (el desenfoque que la .56.6 buscó
-    //      con fajitas — aquí es una curva pow³ que muere exactamente en
-    //      el borde del polígono: picos IMPOSIBLES), LOS FILAMENTOS (la
-    //      carne multiplicada por una copia de sí misma a media escala —
-    //      cordones grandes que serpentean bajo el hervor fino), EL
-    //      NÚCLEO QUE LATE (el umbral de la vena blanca respira) y LA
-    //      FRANJA PRISMÁTICA (el halo muestreado tres veces con
-    //      microdesfase por canal en el filo).
-    //    · LO QUE VIVE DE LAS VERSIONES SANAS: el temblor sostenido
-    //      (Pantalla.Sacudir — «el mundo debe temblar un poco»), el
-    //      sonido de carga + el bucle grave, la música al −30 %, el vuelo
-    //      infinito DEL DUEÑO, la mira en MP, los pozos cero-GC y la
-    //      exclusión de un solo RC2 a la vez.
+    //  LA BOCA DE GLOWS MUERE — «nada de círculos planos»: las capturas
+    //  lo clavaron (disco de relleno radial + 2-3 ANILLOS concéntricos
+    //  en la boca = los CUATRO SoftGlow apilados de 607df36). El
+    //  indicador de la carga y la vida de la boca son LOS CÍRCULOS
+    //  RÚNICOS (la corona que ENCOGE 70→26 px con la carga — la letra:
+    //  «si necesitas un indicador de carga usa los mismos anillos
+    //  runicos») + LOS SOLES RÚNICOS del accesorio (absorbidos en la
+    //  carga, escupidos al disparar) + LOS MICRO-ARCOS de StormLib +
+    //  LA ESTRELLA CONDUCTO (el destello de 4 puntas latiendo en la
+    //  boca mientras arde). CERO discos en la boca del conjuro.
+    //
+    //  LA PALETA DEL CONJURO — «los colores del mod son principalmente
+    //  morado, rojo, negro»: ColorPrisma (el reloj arcoíris magenta→
+    //  naranja→amarillo→verde→cian) MUERE en el RC2. NACE la paleta del
+    //  grimorio: VIOLETA ARCANO → MORADO PROFUNDO (el «negro») → ROJO
+    //  SANGRE → MAGENTA, viajando a lo largo del haz (48 ticks de paleta
+    //  de la boca a la punta, TODO se desplaza cada frame). El shader la
+    //  parte en tonos: el CUERPO violeta profundo, LAS VENAS ROJAS
+    //  (donde el segundo ruido enciende — ya no multiplica: SELECCIONA),
+    //  el NÚCLEO blanco-violeta y el FILO del halo rojo.
+    //
+    //  EL FALLBACK HERMOSO — si el .fxc no cargara en una máquina, el
+    //  haz SIGUE siendo digno: CUATRO tiras suaves (funda violeta +
+    //  cuerpo con la paleta por NODO + venas rojas de rampa + núcleo
+    //  blanco) — el remolino BINARIO murió también aquí (sus blobs
+    //  duros eran el peine de picos del fallback) y el haz es RECTO:
+    //  la polilínea de las tiras no tiene facetado posible.
+    //
+    //  LO QUE VIVE: el temblor sostenido (Pantalla.Sacudir — «el mundo
+    //  debe temblar un poco»), el sonido de carga + el bucle grave, la
+    //  música al −30 %, el vuelo infinito del dueño, la mira en MP, los
+    //  pozos cero-GC y la exclusión de un solo RC2 a la vez.
     // =====================================================================
     public class RayoConcentradoDosProjectile : ModProjectile
     {
@@ -117,6 +97,35 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private ReLogic.Utilities.SlotId _cargaSlot;
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
+        // v6.56.8 — LA PALETA DEL CONJURO (la letra: «los colores del mod
+        // son principalmente morado, rojo, negro»): el reloj arcoíris de
+        // ColorPrisma MUERE en el RC2 — el grimorio pinta su conducto con
+        // VIOLETA ARCANO → MORADO PROFUNDO (el «negro») → ROJO SANGRE →
+        // MAGENTA, en ciclo continuo con fundido total (12 ticks por color,
+        // vuelta completa en 48 t) y VIAJANDO a lo largo del haz.
+        private static readonly Color[] PaletaConjuro =
+        {
+            new(150, 62, 235),    // violeta arcano
+            new(104, 34, 182),    // morado profundo — el «negro» del conjuro
+            new(208, 46, 88),     // rojo sangre
+            new(178, 52, 214),    // magenta del conjuro
+        };
+
+        private const float CicloConjuro = 48f;
+
+        /// <summary>EL COLOR DEL CONJURO — la paleta morado/rojo del
+        /// grimorio recorrida en ciclo con fundido total (la respuesta de
+        /// la casa a ColorPrisma para el RC2).</summary>
+        public static Color ColorConjuro(float reloj)
+        {
+            float t = reloj % CicloConjuro;
+            if (t < 0f) t += CicloConjuro;
+            float seg = t / 12f;
+            int i = (int)seg % PaletaConjuro.Length;
+            int j = (i + 1) % PaletaConjuro.Length;
+            return Color.Lerp(PaletaConjuro[i], PaletaConjuro[j], seg - (int)seg);
+        }
 
         public ref float Time => ref Projectile.ai[0];
         public ref float Owner => ref Projectile.ai[2];
@@ -155,6 +164,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static readonly float[] _cacheSemisA = new float[64];
         private static readonly float[] _cacheSemisB = new float[64];
         private static readonly VertexStrip _strip = new VertexStrip();
+        private static readonly float[] _cacheSemisC = new float[64];
+        private static readonly Color[] _cacheColores64 = new Color[64];
 
         /// <summary>
         /// Carga el shader UNA vez (caché + bandera de fallo). Devuelve
@@ -299,11 +310,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // EL RELOJ DEL COLOR (el gradiente camina con el mundo).
             Projectile.localAI[0] += 1f;
 
-            // LA LUZ DEL CONDUCTO — el color del mod en tres puntos (la
-            // boca, el medio y la punta del cono).
+            // LA LUZ DEL CONDUCTO — LA PALETA DEL CONJURO en tres puntos
+            // (la boca, el medio y la punta del cono): morado y rojo vivo.
             if (!Main.dedServ && Time > ChargeTime - 10 && Time < ChargeTime + LaserDuration)
             {
-                Color cLuz = ColorPrisma.ValueAt(Projectile.localAI[0]);
+                Color cLuz = ColorConjuro(Projectile.localAI[0]);
                 float k = realSize;
                 Vector2 dir = Projectile.rotation.ToRotationVector2();
                 Lighting.AddLight(Projectile.Center,
@@ -440,10 +451,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
             => overPlayers.Add(index);
 
         // ================================================================
-        //  EL DIBUJO — LA TÉCNICA DE 607df36 (la boca de glows apilados,
-        //  el strip de 1500 puntos y EL SHADER DE LAS CUATRO TEXTURAS en
-        //  lote aditivo) + LOS CÍRCULOS RÚNICOS + LOS SOLES DEL ACCESORIO.
-        //  NADA ENCIMA DEL STRIP: sin pila de capas, sin polvos, sin aguja.
+        //  EL DIBUJO — LA TÉCNICA DE 607df36 (el strip de 1500 puntos y EL
+        //  SHADER DE LAS CUATRO TEXTURAS en lote aditivo — el esqueleto
+        //  PROBADO) + LOS CÍRCULOS RÚNICOS + LOS SOLES DEL ACCESORIO + LA
+        //  ESTRELLA CONDUCTO. NADA ENCIMA DEL STRIP y NINGÚN DISCO EN LA
+        //  BOCA: la boca del conjuro son sus runas y sus soles.
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
@@ -451,33 +463,25 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Texture2D texture = DefinitivasLib.TexRuido;          // la carne (CarnePlasma)
             Texture2D textureBits = DefinitivasLib.TexBits;       // las chispas (BitsChispa)
             Texture2D textureGlow = DefinitivasLib.TexRampa;      // la rampa (RampaGlow)
-            Texture2D textureSecond = DefinitivasLib.TexRemolino; // el 2º ruido (SegundoRuido)
-            Texture2D glow = DefinitivasLib.Tex("AethonMod/Content/Effects/Procedural/SoftGlow"); // la boca
+            Texture2D textureSecond = DefinitivasLib.TexRemolino; // el 2º ruido (SegundoRuido — LAS VENAS)
             Texture2D ring = VFXCore.Ring;                         // los anillos finos
 
-            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || glow == null || ring == null)
+            if (texture == null || textureBits == null || textureGlow == null || textureSecond == null || ring == null)
                 return false;
-
-            // EL COLOR DEL MOD — ColorPrisma: el reloj de la paleta oil que
-            // recorre TODO el mod (v6.56.7: de vuelta tras la .56.0).
-            Color startColor = ColorPrisma.ValueAt(Projectile.localAI[0]);
-            startColor.A = 0;
 
             float laserCharge = Utils.GetLerpValue(50, ChargeTime, Time, true)
                 * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration + 20, Time, true);
 
             Vector2 posPantalla = Projectile.Center - Main.screenPosition;
 
-            // ============ LA BOCA DE GLOWS APILADOS (607df36) ============
-            // Cuatro SoftGlow apilados con el alfa a CERO (el truco de la
-            // casa: bajo el pase de entidades, A=0 y rgb>0 = suma pura) —
-            // un bloom con NÚCLEO BLANDO y halo ancho. La .56.4-.56.6 lo
-            // había reducido a UN glow con alfa lleno: UN CÍRCULO PLANO
-            // que TAPABA (el «círculo de la carga» de la letra). NUNCA MÁS.
-            Main.EntitySpriteDraw(glow, posPantalla, null, startColor * 0.2f * laserCharge, 0f, glow.Size() * 0.5f, 5f * laserCharge, SpriteEffects.None, 0f);
-            Main.EntitySpriteDraw(glow, posPantalla, null, startColor * 0.6f * laserCharge, 0f, glow.Size() * 0.5f, 4f, SpriteEffects.None, 0f);
-            Main.EntitySpriteDraw(glow, posPantalla, glow.Frame(), new Color(255, 255, 255, 0) * laserCharge, 0f, glow.Size() * 0.5f, 2f * laserCharge, SpriteEffects.None, 0f);
-            Main.EntitySpriteDraw(glow, posPantalla, glow.Frame(), startColor * 0.1f * laserCharge, 0f, glow.Size() * 0.5f, 14f * laserCharge, SpriteEffects.None, 0f);
+            // ============ LA BOCA DE GLOWS MUERE (v6.56.8) ============
+            // Los CUATRO SoftGlow apilados de 607df36 eran EL CÍRCULO
+            // PLANO de las capturas (disco de relleno radial + 2-3 anillos
+            // concéntricos — exactamente lo que el ojo lee como «círculo
+            // plano», la letra: «nada de circulos planos»). La boca del
+            // conjuro son SUS RUNAS y SUS SOLES: la corona que encoge, los
+            // soles del accesorio, los micro-arcos y la estrella conducto.
+            // AQUÍ NO VIVE NINGÚN DISCO.
 
             // ============ LOS SOLES RÚNICOS DEL ACCESORIO ============
             // EL DESTELLO DE 4 PUNTAS de BrilloSolarHalo (las cápsulas
@@ -523,8 +527,15 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 try
                 {
                     OrbitaLib.AbrirAdditive();
+                    // v6.56.8 — LA CORONA CON LOS COLORES DEL CONJURO: el
+                    // aro «dorado» se vuelve ROJO DORADO y el violeta es el
+                    // de la casa — los círculos rúnicos VIVEN (la letra) y
+                    // ahora respiran la paleta del grimorio.
                     OrbitaLib.CoronaConjuro(posPantalla, rCorona, Main.GlobalTimeWrappedHourly,
-                        alphaMul: 0.28f + 0.62f * laserCharge, glyphMul: 1.8f);
+                        alphaMul: 0.28f + 0.62f * laserCharge, glyphMul: 1.8f,
+                        blanco: new Color(255, 248, 235),
+                        dorado: new Color(255, 128, 104),
+                        violeta: new Color(176, 118, 255));
                     OrbitaLib.CerrarBatch();
                 }
                 catch
@@ -534,14 +545,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.ReabrirLoteVanilla();
 
                 // LOS DOS ANILLOS FINOS — acompañan a la corona al 53 %,
-                // contrarrotando, con el color del mod viajero.
+                // contrarrotando, con LA PALETA DEL CONJURO viajando.
                 Vector2 tamAnillo = VFXCore.RingQuadSize(rCorona);
                 Main.EntitySpriteDraw(ring, posPantalla, null,
-                    DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 6f), 0.55f * laserCharge),
+                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 6f), 0.55f * laserCharge),
                     Main.GlobalTimeWrappedHourly * 0.7f, ring.Size() * 0.5f, tamAnillo, SpriteEffects.None, 0f);
                 Vector2 tamAnillo2 = VFXCore.RingQuadSize(rCorona * 1.38f);
                 Main.EntitySpriteDraw(ring, posPantalla, null,
-                    DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 18f), 0.3f * laserCharge),
+                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 18f), 0.3f * laserCharge),
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
@@ -563,7 +574,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
                     Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
                     StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f,
-                        ColorPrisma.ValueAt(Projectile.localAI[0] + i * 8f),
+                        ColorConjuro(Projectile.localAI[0] + i * 8f),
                         DefinitivasLib.BlancoCalido,
                         0.35f + 0.45f * progreso, 5, 12f);
                 }
@@ -578,6 +589,26 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.9f * (1f - (Time - ChargeTime) / 8f)),
                     Projectile.rotation, VFXCore.DestelloFinal.Size() * 0.5f,
                     new Vector2(1.6f, 1.6f) * realSize, SpriteEffects.None, 0f);
+            }
+
+            // ============ LA ESTRELLA CONDUCTO (v6.56.8) ============
+            // EL DESTELLO DE 4 PUNTAS del accesorio (la receta verbatim de
+            // BrilloSolarHalo — las cápsulas cruzadas + el corazón dorado)
+            // latiendo en la boca mientras el conducto arde: la boca del
+            // conjuro son sus RUNAS y sus SOLES — jamás un disco plano.
+            if (Time > ChargeTime && laserCharge > 0.1f)
+            {
+                VFXCore.CerrarLoteSiAbierto();
+                VFXCore.Begin();
+                try
+                {
+                    float late = 0.60f + 0.40f * MathF.Sin(Main.GlobalTimeWrappedHourly * 9.3f);
+                    HazConcentradoLib.SolRunico4Puntas(Projectile.Center,
+                        12f + 26f * realSize, late * laserCharge, doradoExtra: 0.35f);
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.FlushAdditive();
+                VFXCore.ReabrirLoteVanilla();
             }
 
             // ============ EL STRIP DEL SHADER (607df36 EXACTO) ============
@@ -634,32 +665,47 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 else
                 {
-                    // EL FALLBACK de la casa (SOLO si el .fxc no cargó —
-                    // jamás junto al shader): el strip de 64 nodos con la
-                    // pila de tiras de la librería (carne + remolino +
-                    // núcleo) — el mismo haz sin el .fx.
+                    // v6.56.8 — EL FALLBACK HERMOSO (SOLO si el .fxc no
+                    // cargó — jamás junto al shader): CUATRO tiras de la
+                    // casa siguiendo LA LEY — solo texturas SUAVES (carne y
+                    // rampa; el remolino BINARIO murió aquí: sus blobs
+                    // duros eran el peine de picos del fallback), LA PALETA
+                    // DEL CONJURO por nodo (el color morado/rojo VIAJA a lo
+                    // largo del haz) y el núcleo blanco-violeta en la banda
+                    // central. El haz es RECTO: la polilínea de las tiras
+                    // no tiene facetado posible.
                     Vector2[] pts = _cachePuntos64;
                     float[] semi = _cacheSemis64;
+                    Color[] colores = _cacheColores64;
                     for (int i = 0; i < 64; i++)
                     {
                         float p = i / 63f;
                         pts[i] = positions[(int)(p * 1499)] - Main.screenPosition;
                         semi[i] = MathF.Max(StripWidth(p) * 0.5f, 1f);
+                        colores[i] = DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] - p * CicloConjuro), 0.55f * realSize);
                     }
                     RayoStrip.AbrirLote();
                     try
                     {
+                        // LA FUNDA — violeta profundo, la sombra del conducto
                         if (texture != null)
                             RayoStrip.FajaTexturadaEnLote(pts, semi,
-                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0]), 0.6f * realSize),
+                                DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0]), 0.42f * realSize),
                                 texture, 420f, 1.0f, Main.GlobalTimeWrappedHourly);
-                        if (textureSecond != null)
-                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.7f, _cacheSemisA),
-                                DefinitivasLib.Alfa(ColorPrisma.ValueAt(Projectile.localAI[0] + 12f), 0.45f * realSize),
-                                textureSecond, 240f, 1.9f, Main.GlobalTimeWrappedHourly);
+                        // EL CUERPO — la paleta morado/rojo VIAJA a lo largo
                         if (texture != null)
-                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.4f, _cacheSemisB),
-                                DefinitivasLib.Alfa(Color.White, 0.85f * realSize),
+                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.72f, _cacheSemisA),
+                                colores, Color.White,
+                                texture, 300f, 1.6f, Main.GlobalTimeWrappedHourly);
+                        // LAS VENAS — la rampa de calor en rojo vivo
+                        if (textureGlow != null)
+                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.5f, _cacheSemisB),
+                                DefinitivasLib.Alfa(new Color(224, 60, 96), 0.42f * realSize),
+                                textureGlow, 240f, 2.2f, Main.GlobalTimeWrappedHourly);
+                        // EL NÚCLEO — blanco-violeta en la banda central
+                        if (texture != null)
+                            RayoStrip.FajaTexturadaEnLote(pts, ArraySemis(semi, 0.3f, _cacheSemisC),
+                                DefinitivasLib.Alfa(new Color(255, 246, 255), 0.8f * realSize),
                                 texture, 380f, 2.6f, Main.GlobalTimeWrappedHourly, 0.36f, 0.64f);
                     }
                     finally { RayoStrip.CerrarLote(); }
@@ -680,12 +726,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return false;
         }
 
-        /// <summary>EL COLOR DEL STRIP — el gradiente del mod que VIAJA a lo
-        /// largo (100 ticks de paleta de la boca a la punta, TODO se
-        /// desplaza cada frame) por el realSize.</summary>
+        /// <summary>EL COLOR DEL STRIP — LA PALETA DEL CONJURO que VIAJA a
+        /// lo largo (48 ticks de paleta de la boca a la punta — violeta →
+        /// morado → rojo → magenta, TODO se desplaza cada frame) por el
+        /// realSize. El shader la parte en tonos: cuerpo violeta profundo,
+        /// venas rojas, núcleo blanco-violeta, filo rojo.</summary>
         public Color StripColor(float progress)
         {
-            Color color = ColorPrisma.ValueAt(Projectile.localAI[0] - progress * 100f);
+            Color color = ColorConjuro(Projectile.localAI[0] - progress * CicloConjuro);
             color.A = 0;
             return color * realSize;
         }

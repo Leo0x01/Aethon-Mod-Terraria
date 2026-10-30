@@ -3,7 +3,7 @@
 Este documento explica cómo recibir las versiones del mod de forma fiable y
 cómo compilarlo en un `.tmod` jugable en tModLoader 2026.07.3.0 (.NET 8).
 
-> **Versión actual: 6.56.7** (tag y release publicados). El mod vive en la
+> **Versión actual: 6.56.8** (tag y release publicados). El mod vive en la
 > subcarpeta `AethonMod/` del repo — 297 `.cs`, ~106.500 líneas, sin dependencias.
 
 ---
@@ -43,7 +43,7 @@ Rutas habituales:
    `AethonMod.tmod` viejo.
 4. tModLoader → **Mods** → activa *Aethon, la Luz Primordial*.
 5. **Verifica en la lista de mods que la versión sea la del release**
-   (la 6.50.30 a día de hoy).
+   (la 6.56.8 a día de hoy).
 
 El `.tmod` ya lleva dentro el nombre `AethonMod` y la versión correcta:
 es la vía sin riesgo de identidad.
