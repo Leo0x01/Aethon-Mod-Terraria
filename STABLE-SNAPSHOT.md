@@ -1,6 +1,6 @@
 # v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA AUDITORÍA — EL CHECKLIST
 
-> PUBLICACIÓN PENDIENTE (el ID del release se llena tras publicar — la lección del snapshot).
+> **PUBLICADA** — release [429441323](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.8) + CDN verificado byte a byte (md5 `b04172a1f883eb9da60f29ce07b88b72`, 6.364.679 B; asset id 693270961).
 
 **Qué pasó** (la letra): «bueno ahora esta igual, sin glow, sin desenfoque, es solo una sola capa y se ve simple, necesita mas capas pero aplicadas correctamente y sin picos, siempre analisa lo que haces para ver si crea picos o no» + «los colores del mod son principalmente morado, rojo, negro, no olvides lo que es el mod realmente» + «ademas estan los circulos planos… nada de circulos planos, si necesita efectos o shader usa las librerias existentes» + «no me diste el analisis que hicieste de las librerias» + «dale una mejora de shader».
 
