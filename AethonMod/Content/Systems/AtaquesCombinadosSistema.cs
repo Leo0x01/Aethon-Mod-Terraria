@@ -69,6 +69,42 @@ namespace AethonMod.Content.Systems
         /// de red — «al menos 5 segundos», nunca menos).</summary>
         private const ulong IRA_COLA_TICKS = 300ul + 15ul;
 
+        /// <summary>v6.63 — LA LEY DE UNO A LA VEZ (la letra: «cuando se
+        /// esta formando un agujero negro runico, o un sol runico no se
+        /// puede formar nada mas, siempre se debe formar 1 cosa a la vez
+        /// y luego de que esta se forme necesita 2 segundo de gracia»):
+        /// mientras UN ritual del escuadrón vive (el RayoConvergente que
+        /// gesta un sol, un agujero o un supremo — CUALQUIERA de los
+        /// tres: es UNA cosa formándose) NADA más puede empezar, ni
+        /// otro conjuro NI LA IRA — y al cumplir (la criatura nace), la
+        /// llave guarda 135 ticks (2 s + 15 de colchón de red — «al
+        /// menos 2 segundos», nunca menos): la ley cubre la gestación Y
+        /// su resaca. El patrón es el de _iraColaHasta: mientras vive,
+        /// el reloj se empuja SIEMPRE adelante.</summary>
+        private static readonly Dictionary<int, ulong> _ritualColaHasta = new();
+
+        /// <summary>LA GRACIA en ticks: 2 segundos POST-NACIMIENTO (+15 de
+        /// colchón de red).</summary>
+        private const ulong RITUAL_GRACIA_TICKS = 120ul + 15ul;
+
+        /// <summary>v6.63 — ¿SE ESTÁ FORMANDO ALGO? El RayoConvergente
+        /// vivo del jugador (el ritual que gesta un sol, un agujero o
+        /// un supremo). Lo lee LA LEY DE UNO A LA VEZ del Tick — un
+        /// escaneo barato sobre la lista de siempre.</summary>
+        private static bool RitualVivoDe(int jugador)
+        {
+            int tipoRitual = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Cosmic.RayoConvergenteProjectile>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.type != tipoRitual) continue;
+                if (pr.owner != jugador) continue;
+                return true;
+            }
+            return false;
+        }
+
         // ================================================================
         //  v6.60 — LA LETRA NUEVA DE LA IRA, COMPLETA: «la cantidad de
         //  minions necesarios para lanzar el ataque es de 11 y con
@@ -129,6 +165,7 @@ namespace AethonMod.Content.Systems
             _supremoHasta.Clear();
             _iraHasta.Clear();
             _iraColaHasta.Clear();
+            _ritualColaHasta.Clear();
         }
 
         /// <summary>UN TICK DEL COORDINADOR (lo llama ShardPlayer.PostUpdate
@@ -207,7 +244,25 @@ namespace AethonMod.Content.Systems
                 bool iraEnCola = _iraColaHasta.TryGetValue(p.whoAmI, out ulong hastaCola)
                     && ahora < hastaCola;
 
-                if (!iraViva && !iraEnCola)
+                // === v6.63 — LA LEY DE UNO A LA VEZ (la letra: «cuando
+                //     se esta formando un agujero negro runico, o un sol
+                //     runico no se puede formar nada mas, siempre se
+                //     debe formar 1 cosa a la vez y luego de que esta se
+                //     forme necesita 2 segundo de gracia»): mientras UN
+                //     ritual del escuadrón se está FORMANDO, NADA más
+                //     abre — y al nacer la criatura, la GRACIA de 2
+                //     segundos. El reloj se empuja mientras vive (el
+                //     patrón de la ira): cumplido el ritual, la llave
+                //     expira 135 ticks después de su ÚLTIMO tick vivo.
+                //     ===
+                bool ritualFormandose = RitualVivoDe(p.whoAmI);
+                if (ritualFormandose)
+                    _ritualColaHasta[p.whoAmI] = ahora + RITUAL_GRACIA_TICKS;
+                bool ritualEnGracia = _ritualColaHasta.TryGetValue(p.whoAmI, out ulong hastaRitual)
+                    && ahora < hastaRitual;
+                bool circuloLibre = !ritualFormandose && !ritualEnGracia;
+
+                if (!iraViva && !iraEnCola && circuloLibre)
                 {
                     // === EL SOL RÚNICO (2+ ojos mejorados, nivel 7+) ===
                     int solesMin = DespertarGrimorio.SolesPorMinuto(despertar);
@@ -216,31 +271,50 @@ namespace AethonMod.Content.Systems
                         ulong hasta = _solHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
                         if (ahora >= hasta && Main.rand.Next(DADO) == 0)
                         {
-                            _solHasta[p.whoAmI] = ahora + 3600ul / (ulong)solesMin;
-                            DispararElSol(p, blanco, mejorados, despertar);
+                            // v6.63 — el reloj SOLO se consume si el ritual
+                            //     NACIÓ de verdad — y al nacer, la ley de
+                            //     uno a la vez cierra el resto del tick
+                            //     (nadie más se forma en este frame).
+                            if (DispararElSol(p, blanco, mejorados, despertar))
+                            {
+                                _solHasta[p.whoAmI] = ahora + 3600ul / (ulong)solesMin;
+                                circuloLibre = false;   // YA se está formando UNA cosa
+                            }
                         }
                     }
 
-                    // === LOS AGUJEROS NEGROS (5+ ojos mejorados, nivel 10+) ===
-                    int agujerosMin = DespertarGrimorio.AgujerosPorMinuto(despertar);
-                    if (agujerosMin > 0 && mejorados.Count >= 5)
+                    if (circuloLibre)
                     {
-                        ulong hasta = _agujeroHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                        if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                        // === LOS AGUJEROS NEGROS (5+ ojos mejorados, nivel 10+) ===
+                        int agujerosMin = DespertarGrimorio.AgujerosPorMinuto(despertar);
+                        if (agujerosMin > 0 && mejorados.Count >= 5)
                         {
-                            _agujeroHasta[p.whoAmI] = ahora + 3600ul / (ulong)agujerosMin;
-                            LanzarElAgujero(p, blanco, mejorados, despertar);
+                            ulong hasta = _agujeroHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                            if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                            {
+                                if (LanzarElAgujero(p, blanco, mejorados, despertar))
+                                {
+                                    _agujeroHasta[p.whoAmI] = ahora + 3600ul / (ulong)agujerosMin;
+                                    circuloLibre = false;
+                                }
+                            }
                         }
                     }
 
-                    // === EL SUPREMO (8+ ojos en su MEJORA 4, nivel 45+) ===
-                    if (DespertarGrimorio.SupremoDisponible(despertar) && mejoras4 >= 8)
+                    if (circuloLibre)
                     {
-                        ulong hasta = _supremoHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                        if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                        // === EL SUPREMO (8+ ojos en su MEJORA 4, nivel 45+) ===
+                        if (DespertarGrimorio.SupremoDisponible(despertar) && mejoras4 >= 8)
                         {
-                            _supremoHasta[p.whoAmI] = ahora + 3600ul;   // 1/min SIEMPRE
-                            LanzarElSupremo(p, blanco, mejorados, despertar);
+                            ulong hasta = _supremoHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                            if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                            {
+                                if (LanzarElSupremo(p, blanco, mejorados, despertar))
+                                {
+                                    _supremoHasta[p.whoAmI] = ahora + 3600ul;   // 1/min SIEMPRE
+                                    circuloLibre = false;
+                                }
+                            }
                         }
                     }
                 }
@@ -265,7 +339,13 @@ namespace AethonMod.Content.Systems
                     // libro — su reloj ES el compás (el dado era el eco
                     // del patrón aleatorio del sol y los agujeros; con el
                     // compás de 5/min desfasaba el conteo a ~4,6/min).
-                    if (ahora >= hasta)
+                    // v6.63 — Y LA IRA RESPETA LA LEY DE UNO A LA VEZ
+                    //     (la letra: «no se puede formar nada mas»): si
+                    //     un sol o un agujero se está formando (o vive su
+                    //     gracia de 2 s), la ceremonia de la ira NO
+                    //     abre — su reloj queda LISTO y arranca en
+                    //     cuanto el círculo se libera.
+                    if (ahora >= hasta && circuloLibre)
                     {
                         // NADA DE HACES SOLAPADOS (el RC2/C del portador —
                         // SU arma): en EL COMPÁS FINAL la ira ESPERA el
@@ -407,8 +487,10 @@ namespace AethonMod.Content.Systems
         /// nace EL RAYO CONVERGENTE — 2 segundos de rayos que convergen
         /// y CREAN el sol — y al cumplir, el sol sale DISPARADO al
         /// enemigo (su homing hace el resto: daño de área, quemadura y
-        /// la nova final).</summary>
-        private static void DispararElSol(Player p, NPC blanco,
+        /// la nova final).
+        /// v6.63 — devuelve SI EL RITUAL NACIÓ (la ley de uno a la vez
+        /// del Tick solo consume el reloj cuando de verdad se abrió).</summary>
+        private static bool DispararElSol(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
@@ -422,7 +504,7 @@ namespace AethonMod.Content.Systems
                 // EL DAÑO LO MIDE EL MÁS DESPIERTO (el azar elige quiénes
                 // rezan, no cuánto pega el conjuro — el patrón de siempre).
                 Projectile lider = ElMasDespierto(mejorados);
-                if (lider == null) return;
+                if (lider == null) return false;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
@@ -475,26 +557,16 @@ namespace AethonMod.Content.Systems
                     }
                 }
 
-                // v6.62 — LA VOZ ORIGINAL DEL NACIMIENTO (la letra: «el
-                //     sonido que se usa al crear los agujeros negros
-                //     runicos y los soles runicos por los minions, ese
-                //     sonido original de terraria es horrible comparado
-                //     con el sonido del haz, debes crear un sonido
-                //     original para cuando se crea un agujero negro
-                //     runico y un sol runico por los minions»): el
-                //     Item122 de Terraria MUERE en los TRES nacimientos
-                //     — el sol enciende con RunaNaceSol (el brillo
-                //     ascendente) y las puertas (agujero y supremo)
-                //     abren con RunaNaceVacio (el pozo que cae). Sintet
-                //     izados por la casa (Content/Sounds): voz propia.
-                Terraria.Audio.SoundEngine.PlaySound(
-                    new Terraria.Audio.SoundStyle(
-                        "AethonMod/Content/Sounds/RunaNaceSol",
-                        Terraria.Audio.SoundType.Sound)
-                    { MaxInstances = 2, Volume = 0.95f },
-                    p.Center);
+                // v6.63 — LA VOZ YA NO VIVE AQUÍ (la letra: «mejora los
+                //     sonidos de CUANDO APARECEN los agujeros negros
+                //     runicos y los soles runicos»): el sonido del sol
+                //     suena EN EL NACIMIENTO — RayoConvergente.Lanzar
+                //     dispara RunaNaceSol en el tick exacto en que el
+                //     sol APARECE. Al abrir el ritual queda el cine de
+                //     los ojos, su brillo y EL COMPÁS RÚNICO (RunaCompas).
+                return true;
             }
-            catch { }
+            catch { return false; }
         }
 
         // ================================================================
@@ -508,8 +580,10 @@ namespace AethonMod.Content.Systems
         /// del ritual y ENCIMA DEL JUGADOR nace EL RAYO CONVERGENTE de 3
         /// segundos — y al cumplir, uno de los CUATRO RÚNICOS al azar
         /// (nivel 25+: su versión ASCENDIDA) nace EN ESE PUNTO CENTRAL.
-        /// EL DAÑO nace de los ojos combinados.</summary>
-        private static void LanzarElAgujero(Player p, NPC blanco,
+        /// EL DAÑO nace de los ojos combinados.
+        /// v6.63 — devuelve SI EL RITUAL NACIÓ (la ley de uno a la vez
+        /// del Tick solo consume el reloj cuando de verdad se abrió).</summary>
+        private static bool LanzarElAgujero(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
@@ -528,7 +602,7 @@ namespace AethonMod.Content.Systems
                 // DelEterno) y NO se vuelve a multiplicar aquí; el ×1,25
                 // del 50 se cobra UNA vez vía Bonus50Vivo.
                 Projectile lider = ElMasDespierto(mejorados);
-                if (lider == null) return;
+                if (lider == null) return false;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
@@ -565,16 +639,13 @@ namespace AethonMod.Content.Systems
                         new Color(140, 60, 210), 1f);
                     d.noGravity = true;
                 }
-                // v6.62 — LA VOZ ORIGINAL: RunaNaceVacio — el pozo que
-                //     cae (ver el comentario de DispararElSol).
-                Terraria.Audio.SoundEngine.PlaySound(
-                    new Terraria.Audio.SoundStyle(
-                        "AethonMod/Content/Sounds/RunaNaceVacio",
-                        Terraria.Audio.SoundType.Sound)
-                    { MaxInstances = 2, Volume = 0.95f },
-                    p.Center);
+                // v6.63 — LA VOZ YA NO VIVE AQUÍ: RunaNaceVacio suena
+                //     EN EL NACIMIENTO (RayoConvergente.Lanzar, el tick
+                //     exacto en que la puerta SE ABRE — ver el comentario
+                //     de DispararElSol).
+                return true;
             }
-            catch { }
+            catch { return false; }
         }
 
         /// <summary>EL SUPREMO (nivel 45+): «un nuevo tipo de agujero negro
@@ -585,8 +656,10 @@ namespace AethonMod.Content.Systems
         /// DOS. v6.51.2: SU RITUAL TAMBIÉN (el rayo convergente de 3
         /// segundos — la carta fuerte se anuncia). v6.51.8: OCHO ojos en
         /// su mejora 4 — AL AZAR — disparan SUS RAYOS al PUNTO CENTRAL
-        /// (la letra de los celebrantes) y el SUPREMO/AURORA nace ahí.</summary>
-        private static void LanzarElSupremo(Player p, NPC blanco,
+        /// (la letra de los celebrantes) y el SUPREMO/AURORA nace ahí.
+        /// v6.63 — devuelve SI EL RITUAL NACIÓ (la ley de uno a la vez
+        /// del Tick solo consume el reloj cuando de verdad se abrió).</summary>
+        private static bool LanzarElSupremo(Player p, NPC blanco,
             List<Projectile> mejorados, int despertar)
         {
             try
@@ -606,7 +679,7 @@ namespace AethonMod.Content.Systems
                 var celebrantes = ElegirAlAzar(enLaCuarta, 8);
 
                 Projectile lider = ElMasDespierto(enLaCuarta);
-                if (lider == null) return;
+                if (lider == null) return false;
                 int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
@@ -647,21 +720,18 @@ namespace AethonMod.Content.Systems
                         d.noGravity = true;
                     }
                 }
-                // v6.62 — LA VOZ ORIGINAL: RunaNaceVacio, una octava
-                //     más abajo — el supremo es la puerta más honda.
-                Terraria.Audio.SoundEngine.PlaySound(
-                    new Terraria.Audio.SoundStyle(
-                        "AethonMod/Content/Sounds/RunaNaceVacio",
-                        Terraria.Audio.SoundType.Sound)
-                    { MaxInstances = 2, Volume = 1f, Pitch = -0.25f },
-                    p.Center);
+                // v6.63 — LA VOZ YA NO VIVE AQUÍ: el supremo también
+                //     recibe SU RunaNaceVacio en el nacimiento (una
+                //     octava más abajo — RayoConvergente.Lanzar, el tick
+                //     exacto en que la puerta más honda SE ABRE).
                 // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
                 //     agujeros negros runicos supremos hace ruido de jefes
                 //     al aparecer, bueno no deben hacer ningun ruido, deben
                 //     ser como los otros»): el SoundID.Roar de la apertura
                 //     del ritual supremo MUERE — silenciosos como los otros.
+                return true;
             }
-            catch { }
+            catch { return false; }
         }
 
         // ================================================================

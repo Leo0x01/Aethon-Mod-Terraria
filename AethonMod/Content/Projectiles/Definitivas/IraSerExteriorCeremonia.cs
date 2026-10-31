@@ -424,78 +424,129 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public override bool PreDraw(ref Color lightColor) => false;
 
         // ================================================================
+        //  v6.63 — EL CÍRCULO SEGÚN LOS PROPIOS MINIONS: el centro y el
+        //  radio del anillo NO los dicta el ancla — los dicta EL
+        //  ESCUADRÓN (la letra: «debes usar los propios minions para
+        //  saber como pocisionar los pequeños rayos electricos» y «toda
+        //  la bruma solo puede estar dentro del circulo formado por los
+        //  minions»): EL CENTROIDE de los ojos vivos (el centro del
+        //  círculo que ellos ESTÁN formando — no el del ancla que
+        //  persiguen) y su RADIO MEDIO. Con el jugador corriendo, el
+        //  ancla va adelante y los ojos le siguen rezagados: el círculo
+        //  VISIBLE es el de ELLOS — este es el que mandan los arcos y
+        //  las brumas. (Cacheo por frame, el patrón de RitualDe: lo
+        //  comparten arcos y brumas en el mismo frame de dibujado.)
+        // ================================================================
+        private static int _frameCirc = -1;
+        private static int _ownerCirc = -1;
+        private static Vector2 _centroCirc = Vector2.Zero;
+        private static float _radioCirc = 0f;
+        private static int _nCirc = 0;
+        private static readonly Vector2[] _circPos = new Vector2[16];
+
+        /// <summary>EL CÍRCULO DE LOS MINIONS — el centroide y el radio
+        /// medio de los ojos vivos del dueño: LA VERDAD de dónde está el
+        /// anillo que el escuadrón ESTÁ formando. Lo leen LOS ARCOS (sus
+        /// rayitos cruzan ESE centro) y LAS BRUMAS (viven dentro de ESE
+        /// anillo) — los propios minions posicionan su ceremonia.</summary>
+        internal static bool CirculoDelEscuadron(int owner,
+            out Vector2 centro, out float radio, out int n)
+        {
+            if (_frameCirc != (int)Main.GameUpdateCount || _ownerCirc != owner)
+            {
+                _frameCirc = (int)Main.GameUpdateCount;
+                _ownerCirc = owner;
+                _centroCirc = Vector2.Zero;
+                _radioCirc = 0f;
+                _nCirc = 0;
+                int tipoOjo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                int m = 0;
+                Vector2 suma = Vector2.Zero;
+                for (int i = 0; i < Main.maxProjectiles && m < 16; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.type != tipoOjo) continue;
+                    if (p.owner != owner) continue;
+                    _circPos[m] = p.Center;
+                    suma += p.Center;
+                    m++;
+                }
+                if (m > 0)
+                {
+                    _centroCirc = suma / m;
+                    float acc = 0f;
+                    for (int i = 0; i < m; i++)
+                        acc += Vector2.Distance(_circPos[i], _centroCirc);
+                    _radioCirc = Math.Max(40f, acc / m);
+                }
+                _nCirc = m;
+            }
+            centro = _centroCirc;
+            radio = _radioCirc;
+            n = _nCirc;
+            return n > 0;
+        }
+
+        // ================================================================
         //  v6.61 — LOS ARCOS DEL ESCUADRÓN: los rayitos eléctricos son
         //  DE LOS MINIONS (la letra: «los pequeños rayos electricos
         //  deben concentrarce en el centro del circulo formado por los
         //  minions, la forma para gatillar la creacion de pequeños
         //  rayos electrico es la misma animacion de los minions,
         //  ademas cada rayito debe ir de un minion a otro de forma
-        //  aleatorio mientras el haz se carga y se lanza»). Cada arco
-        //  une DOS ojos del círculo que gira — uno AL AZAR y su
-        //  OPUESTO del otro lado (la cuerda CRUZA EL MEDIO: la
-        //  electricidad se CONCENTRA en el centro del círculo) — y los
-        //  gatilla LA MISMA ANIMACIÓN de la órbita: viven mientras el
-        //  escuadrón gira, en la CEREMONIA (la carga) y en el DISPARO
-        //  (los ojos siguen el círculo alrededor de la boca del haz).
+        //  aleatorio mientras el haz se carga y se lanza»).
         // ================================================================
 
-        // LOS POZOS cero-GC de la casa (las posiciones y ángulos de los
-        // ojos vivos, reusados cada frame — nunca un new por frame).
+        // EL POZO cero-GC de la casa (las posiciones de los ojos vivos,
+        // reusado cada frame — nunca un new por frame).
         private static readonly Vector2[] _arcosPos = new Vector2[16];
-        private static readonly float[] _arcosAng = new float[16];
-        private static readonly int[] _arcosOp = new int[16];
 
-        /// <summary>LOS RAYITOS DE UN MINION A OTRO: dibuja 2-5 arcos
-        /// (60-100 % de alfa según la intensidad) entre ojos AL AZAR y
-        /// sus OPUESTOS del círculo. La llama la ceremonia (su carga) y
-        /// el haz de la ira (su disparo) — el MISMO traje en las dos
-        /// fases, como manda la letra. Es puro cine de cliente: el par
-        /// lo elige el reloj del juego de cada pantalla (nada que
-        /// sincronizar).
-        /// v6.62 — LA LEY DEL CÍRCULO (la letra: «los pequeños rayos
-        /// electricos funcionan fuera del circulo formado por los
-        /// minions, los pequeños rayos siempre deben estar dentro del
-        /// circulo formado por los minions, justo ahora aparecen abajo a
-        /// la derecha fuera del circulo de minions»): SOLO dibujan
-        /// arcos los ojos PUESTOS en la corona (a ≤28 px de SU puesto de
-        /// la órbita — la MISMA matemática de la formación, viva en
-        /// OjoEternoMinion.SlotDelRitual). El ojo que está DE CAMINO
-        /// (cerrando el círculo, volando al puesto) NO está en el
-        /// círculo: su arco nacería FUERA — abajo a la derecha, donde el
-        /// ojo vaya. Hasta sentarse en la corona, no hay electricidad
-        /// entre él y nadie.</summary>
-        internal static void DibujarArcosDelEscuadron(Vector2 centroMundo,
-            int owner, float intensidad, float relojColor)
+        /// <summary>LOS RAYITOS DE UN MINION A OTRO — v6.63: LA LEY DEL
+        /// REFLEJO (la letra: «todavia los pequeños rayos no estan en el
+        /// centro del circulo, debes usar los propios minions para saber
+        /// como pocisionar los pequeños rayos electricos»): el par YA NO
+        /// se elige con ángulos teóricos del ancla (la v6.62: filtro de
+        /// puesto ≤28 px + umbral de 2,4 rad + fallback de ÍNDICE — con
+        /// el jugador en movimiento los ojos rezagados fallaban el
+        /// filtro, los sobrevivientes quedaban AMONTONADOS de un lado y
+        /// el fallback de índice unía VECINOS: arcos abrazando el borde
+        /// del círculo, lejos del centro — lo de la foto). AHORA: se
+        /// toma UN ojo al azar y SU PAREJA ES EL OJO MÁS CERCANO A SU
+        /// REFLEJO a través del CENTROIDE del escuadrón (el punto del
+        /// otro lado exacto) — la cuerda CRUZA EL CENTRO del círculo que
+        /// los minions están formando, SIEMPRE: con 11 ojos o con 3,
+        /// quietos o corriendo. LOS PROPIOS MINIONS posicionan sus
+        /// rayitos. Es puro cine de cliente: el par lo elige el reloj
+        /// del juego de cada pantalla (nada que sincronizar).</summary>
+        internal static void DibujarArcosDelEscuadron(int owner,
+            float intensidad, float relojColor)
         {
             if (Main.dedServ) return;
 
-            // EL ANCLA VIVA (el círculo ES de quien el escuadrón orbita
-            // HOY) y SU dueño — sin ellos no hay corona que respetar.
-            Projectile ancla = RitualDe(owner);
-            Player duenoArcos = Main.player[owner];
-            if (ancla == null || !ancla.active || duenoArcos == null || !duenoArcos.active)
+            // EL CÍRCULO, SEGÚN LOS PROPIOS MINIONS (el centroide de los
+            // ojos vivos y su radio medio).
+            if (!CirculoDelEscuadron(owner, out Vector2 centro, out float radio, out int n))
                 return;
+            if (n < 2) return;
 
-            // EL ESCUADRÓN VIVO: los ojos del dueño — pero SOLO los
-            // PUESTOS en su puesto de la corona (la MISMA animación que
-            // gatilla los arcos es la que ellos todavía no terminaron).
+            // LOS OJOS DEL CÍRCULO: los vivos del dueño DENTRO de la
+            // banda del anillo (≤ radio×1,75 del centroide — el que va
+            // MUY rezagado, volando desde lejos, todavía no es del
+            // círculo; el que sigue al ancla en marcha, sí).
             int tipoOjo = ModContent.ProjectileType
                 <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
-            int n = 0;
-            for (int i = 0; i < Main.maxProjectiles && n < 16; i++)
+            int m = 0;
+            for (int i = 0; i < Main.maxProjectiles && m < 16; i++)
             {
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active || p.type != tipoOjo) continue;
                 if (p.owner != owner) continue;
-                Vector2? puesto = global::AethonMod.Content.Projectiles.OjoEternoMinion
-                    .SlotDelRitual(p, ancla, duenoArcos);
-                if (!(puesto is Vector2 puestoOk)) continue;   // sin puesto no hay corona
-                if ((p.Center - puestoOk).LengthSquared() > 28f * 28f) continue; // de camino: fuera
-                _arcosPos[n] = p.Center;
-                _arcosAng[n] = (p.Center - centroMundo).ToRotation();
-                n++;
+                if (Vector2.Distance(p.Center, centro) > radio * 1.75f) continue;
+                _arcosPos[m] = p.Center;
+                m++;
             }
-            if (n < 2) return;
+            if (m < 2) return;
 
             float intens = MathHelper.Clamp(intensidad, 0f, 1f);
             int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
@@ -509,35 +560,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // horas de partida) — cada cliente dibuja SU par (es
                 // puro cine: nada que sincronizar).
                 int seed = (int)((Main.GameUpdateCount % 960ul) * 0.125f) * 131 + i * 297;
-                int a = (int)(VFXCore.Hash01(seed, 11, 7) * n);
-                if (a >= n) a = n - 1;
+                int a = (int)(VFXCore.Hash01(seed, 11, 7) * m);
+                if (a >= m) a = m - 1;
 
-                // SU OPUESTO DEL CÍRCULO: los ojos del OTRO LADO — la
-                // cuerda CRUZA EL MEDIO (si el par saliera del mismo
-                // lado, el arco abrazaría el BORDE y el centro quedaría
-                // vacío — justo lo que la letra prohibe). El umbral de
-                // 2,4 rad (137°) deja SOLO los pares casi-diametrales
-                // — con el escuadrón de 11 (32,7° por puesto) son los
-                // ±5/±6 puestos (164°): la cuerda pasa a ~10 px del
-                // CENTRO exacto. Sin opuestos (un círculo muy chico),
-                // el más lejano del sorteo.
-                float angA = _arcosAng[a];
-                int nOp = 0;
-                for (int j = 0; j < n; j++)
+                // SU REFLEJO A TRAVÉS DEL CENTRO (LA LEY NUEVA): la
+                // pareja es el ojo MÁS CERCANO al punto OPUESTO de A a
+                // través del centroide — la cuerda CRUZA EL CENTRO del
+                // círculo de los minions, sin umbrales que fallen, sin
+                // fallbacks que abracen el borde.
+                Vector2 reflejo = centro * 2f - _arcosPos[a];
+                int b = -1;
+                float mejorD = float.MaxValue;
+                for (int j = 0; j < m; j++)
                 {
                     if (j == a) continue;
-                    if (Math.Abs(MathHelper.WrapAngle(_arcosAng[j] - angA)) >= 2.4f)
-                        _arcosOp[nOp++] = j;
+                    float d = Vector2.DistanceSquared(_arcosPos[j], reflejo);
+                    if (d < mejorD) { mejorD = d; b = j; }
                 }
-                int b;
-                if (nOp > 0)
-                {
-                    int ele = (int)(VFXCore.Hash01(seed, 23, 13) * nOp);
-                    if (ele >= nOp) ele = nOp - 1;
-                    b = _arcosOp[ele];
-                }
-                else
-                    b = (a + Math.Max(1, n / 2)) % n;
+                if (b < 0) continue;
 
                 Vector2 start = _arcosPos[a] - Main.screenPosition;
                 Vector2 end = _arcosPos[b] - Main.screenPosition;
@@ -577,17 +617,32 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //     a 12-30 y la morada de 4 a 12 — LA MISMA geometría
             //     (radio, alfas, respiración) con EL TRIPLE de masa: la
             //     carga respira TRES veces más gruesa.
+            // v6.63 — LA LEY DEL CÍRCULO TAMBIÉN PARA LA BRUMA (la letra:
+            //     «toda la bruma solo puede estar dentro del circulo
+            //     formado por los minions»): el centro y el TECHO del
+            //     radio los pone EL PROPIO ESCUADRÓN (CirculoDelEscuadron:
+            //     el centroide de los ojos vivos y su radio medio — con
+            //     el jugador corriendo, la nube viaja con el círculo
+            //     VISIBLE, no con el ancla) y la nube JAMÁS pasa del
+            //     anillo: radio ≤ 0,72 del círculo (los puffs de BrumaFX
+            //     cubren ~1,3× su radio — así NADA asoma fuera). El
+            //     TRIPLE de masa vive ahora CONCENTRADO dentro.
             try
             {
-                float radioCuna = MathHelper.Lerp(30f, 95f, prog)
+                bool hayCirculo = CirculoDelEscuadron(Projectile.owner,
+                    out Vector2 centroMin, out float radioMin, out int nMin);
+                Vector2 centroNube = hayCirculo && nMin >= 3 ? centroMin : centro;
+                float techo = (hayCirculo ? Math.Max(40f, radioMin) : 68f) * 0.72f;
+                float radioCuna = MathHelper.Lerp(28f, Math.Min(95f, techo), prog)
                     * (1f - 0.55f * contraccion);
+                Vector2 nubeScr = centroNube - Main.screenPosition;
                 VFXCore.CerrarLoteSiAbierto();
                 BrumaFX.BeginMass();
-                BrumaFX.Cloud(posPantalla, radioCuna, new Color(205, 195, 238),
+                BrumaFX.Cloud(nubeScr, radioCuna, new Color(205, 195, 238),
                     semilla, time,
                     Math.Max(12, (int)(21 * prog) + 9),
                     alpha: 0.24f + 0.38f * prog + 0.14f * contraccion);
-                BrumaFX.Cloud(posPantalla + new Vector2(0f, -radioCuna * 0.2f),
+                BrumaFX.Cloud(nubeScr + new Vector2(0f, -radioCuna * 0.2f),
                     radioCuna * 0.62f, new Color(86, 44, 150),
                     semilla + 29, time * 0.85f, 12,
                     alpha: 0.20f + 0.28f * prog + 0.10f * contraccion);
@@ -642,8 +697,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // en el disparo los hereda el haz (su boca ES el centro).
             if (prog > 0.04f && edad % 5f < 3f)
             {
-                DibujarArcosDelEscuadron(Projectile.Center, Projectile.owner,
-                    prog, semilla);
+                DibujarArcosDelEscuadron(Projectile.owner, prog, semilla);
             }
 
             // ============ LA IMPLOSIÓN DE SOLES DE LA CARGA ============

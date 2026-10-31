@@ -124,33 +124,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     // v6.51.8 — LA REVERENCIA DEL CELEBRANTE: el rayo se
                     // clava del ojo al PUNTO CENTRAL del ritual — SIN
-                    // golpe (no es un ataque: es el nacimiento), con UN
-                    // zap suave (los ojos abren fuego con un susurro —
-                    // la ceremonia ya tiene su propio compás) y las
+                    // golpe (no es un ataque: es el nacimiento), con las
                     // chispas de sombra en la CÓRNEA del ojo.
-                    // v6.61 — EL ZAP ES SOLO DE LOS OTROS RITUALES (la
-                    // letra: «la creacion del haz no necesita sonidos de
-                    // terraria, ya tiene su propio sonido»): cuando el
-                    // ancla es LA CEREMONIA DE LA IRA, los ojos abren
-                    // fuego EN SILENCIO — la ira YA tiene su voz (la
-                    // carga del RC2 a los 150 ticks y su bucle). El zap
-                    // de Terraria vive SOLO en los rituales del sol y
-                    // los agujeros (sus nacimientos de siempre).
+                    // v6.63 — EL ZAP MURIÓ ENTERO (la letra: «todavía
+                    //     sigue apareciendo el original de terraria»):
+                    //     el Item12 que sonaba al clavar cada rayo
+                    //     celebrante era UN SONIDO DE VANILLA más en el
+                    //     parto — calla también (la v6.61 lo había callado
+                    //     SOLO para la ceremonia de la ira). El ritual
+                    //     entero queda con LA VOZ PROPIA: el compás rúnico
+                    //     (RunaCompas) TODO el parto y el nacimiento
+                    //     (RunaNaceSol / RunaNaceVacio) en su tick.
                     Projectile.DamageType = DamageClass.Summon;
                     _muzzle = BocaDelOjo();
                     Projectile.velocity = Vector2.Zero;
                     if (Main.netMode != NetmodeID.Server)
                     {
-                        Projectile anclaIra = RitualDelAncla();
-                        bool esLaIra = anclaIra != null && anclaIra.type == ModContent
-                            .ProjectileType<global::AethonMod.Content.Projectiles
-                                .Definitivas.IraSerExteriorCeremoniaProjectile>();
-                        if (!esLaIra)
-                        {
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                SoundID.Item12.WithPitchOffset(-0.3f).WithVolumeScale(0.35f),
-                                _muzzle);
-                        }
                         for (int i = 0; i < 6; i++)
                         {
                             float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);

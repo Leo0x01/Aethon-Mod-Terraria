@@ -160,9 +160,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.noGravity = true;
             }
 
-            // === EL TIC-TAC DEL RITUAL (el compás que sube — y en LA
-            //     CONTRACCIÓN final ACELERA: los últimos 45 ticks son
-            //     una CUENTA ATRÁS que aprieta). ===
+            // === v6.63 — EL COMPÁS RÚNICO (la letra: «todavía sigue
+            //     apareciendo el original de terraria»): el tic-tac de
+            //     Item122 — EL SONIDO DE VANILLA que sonaba TODO el
+            //     parto, el que la letra manda matar — MUERE. Lo
+            //     reemplaza LA VOZ PROPIA: RunaCompas, el pulso
+            //     sintetizado de la casa (Content/Sounds), con el MISMO
+            //     compás de siempre (cada 20 ticks, y en la contracción
+            //     final la CUENTA ATRÁS que aprieta) y el pitch SUBIENDO
+            //     con el ritual — ReplaceOldest para que la metralleta
+            //     final siempre suene. ===
             if (!Main.dedServ && edad < Duracion)
             {
                 float restante = Duracion - edad;
@@ -172,10 +179,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
                       restante == 18f || restante == 13f || restante == 9f ||
                       restante == 6f || restante == 4f || restante == 2f;
                 if (late)
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item122.WithPitchOffset(-0.25f + 0.4f * prog +
-                            (restante <= 45f ? 0.25f : 0f)),
-                        Projectile.Center);
+                {
+                    try
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            new Terraria.Audio.SoundStyle(
+                                "AethonMod/Content/Sounds/RunaCompas",
+                                Terraria.Audio.SoundType.Sound)
+                            {
+                                MaxInstances = 3,
+                                SoundLimitBehavior = Terraria.Audio.SoundLimitBehavior.ReplaceOldest,
+                                Volume = 0.60f,
+                                Pitch = -0.25f + 0.40f * prog +
+                                    (restante <= 45f ? 0.25f : 0f)
+                            },
+                            Projectile.Center);
+                    }
+                    catch { }
+                }
             }
 
             // === v6.51.3 → v6.51.4 — LA BRUMA DE LA GESTACIÓN (la
@@ -265,8 +286,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     dano, 4f, Projectile.owner, anillos,
                     (Projectile.owner * 31 + Main.rand.Next(9973)) * 1f);
                 sol.timeLeft = 480;
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
+                // v6.63 — LA VOZ DEL NACIMIENTO (la letra: «mejorar los
+                //     sonidos de cuando aparecen los agujeros negros
+                //     runicos y los soles runicos»): el Item122 de
+                //     vanilla MUERE en el momento en que el sol APARECE
+                //     — RunaNaceSol, la campana del encendido
+                //     (sintetizada por la casa), suena AQUÍ: en el
+                //     NACIMIENTO, donde la letra la pide (la v6.62 la
+                //     ponía al ABRIR el ritual: se oía fuera de lugar y
+                //     el nacimiento quedaba con la voz de vanilla).
+                try
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        new Terraria.Audio.SoundStyle(
+                            "AethonMod/Content/Sounds/RunaNaceSol",
+                            Terraria.Audio.SoundType.Sound)
+                        { MaxInstances = 2, Volume = 1f },
+                        Projectile.Center);
+                }
+                catch { }
 
                 // (LA BRUMA DORADA DEL NACIMIENTO la exhila EL PROPIO SOL en
                 //  su primer tick de vida — con su intensidad por anillos y
@@ -325,9 +363,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, Vector2.Zero,
                     ModContent.ProjectileType<BrumaNacimientoFX>(),
                     0, 0f, Projectile.owner, 2f, 1f);
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(Modo == MODO_SUPREMO ? -0.5f : 0.35f),
-                    Projectile.Center);
+                // v6.63 — LA VOZ DEL NACIMIENTO: RunaNaceVacio — el
+                //     pozo que cae (el golpe seco + el descenso + la
+                //     inhalación), en el momento en que la puerta SE
+                //     ABRE (el Item122 murió aquí también). El SUPREMO
+                //     lo dice una octava más abajo: es la puerta más
+                //     honda.
+                try
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        new Terraria.Audio.SoundStyle(
+                            "AethonMod/Content/Sounds/RunaNaceVacio",
+                            Terraria.Audio.SoundType.Sound)
+                        { MaxInstances = 2, Volume = 1f,
+                          Pitch = Modo == MODO_SUPREMO ? -0.25f : 0f },
+                        Projectile.Center);
+                }
+                catch { }
                 // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
                 //     agujeros negros runicos supremos hace ruido de
                 //     jefes al aparecer, bueno no deben hacer ningun

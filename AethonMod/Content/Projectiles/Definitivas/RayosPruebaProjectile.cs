@@ -726,58 +726,131 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             Vector2 posPantalla = Projectile.Center - Main.screenPosition;
 
-            // ============ v6.62 — LA BRUMA HEREDADA: LA MITAD COLAPSA ============
-            // (la letra: «la bruma que se crea al cargar desaparece la
-            // lanzar el haz, lo que deberia pasar es que … cuando lanza
-            // el haz la mitad de esa bruma colapsa hacia el centro dando
-            // a entender que es la bruma la que colapsa en un haz»): la
-            // ceremonia murió y EL HAZ hereda su bruma — los primeros 48
-            // ticks del disparo, la MITAD de la nube cae al centro (se
-            // apura al final, se encoge y se apaga AL LLEGAR: la boca del
-            // conducto la escupe — la bruma ES la que colapsa en un haz)
-            // y la otra mitad se disipa hacia fuera (se adelgaza y se
-            // disuelve — lo que el círculo ya no necesita). Puro cine de
-            // cliente: las posiciones nacen del reloj de cada pantalla.
-            if (EsIra && Time >= ChargeTime && Time < ChargeTime + 48f)
+            // ============ v6.63 — LA BRUMA DEL DISPARO: LA CINTA QUE NO
+            //            TERMINA ============
+            // (la letra: «en el momento de naciemiento del haz la bruma
+            // colapsa en el centro, pero una vez es lanzado el haz ya no
+            // hay mas bruma y la bruma deberia seguir colapsando hacia el
+            // centro y ademas un poco de bruma tambien debe cubrir el
+            // centro de naciemiento del haz, y en todo momento mas bruma
+            // colapsa hacia el centro, toda la bruma solo puede estar
+            // dentro del circulo formado por los minions al igual que los
+            // pequeños rayos electricos») TODO EL LANZAMIENTO (800 ticks
+            // — la v6.62 solo dibujaba los primeros 48):
+            //   · LA CUNA — un poco de bruma CUBRE el centro de
+            //     nacimiento TODO el disparo (respirando).
+            //   · LA CINTA CONTINUA — en TODO momento nace bruma nueva
+            //     dentro del anillo y CAE al centro (succión que se apura
+            //     t²; el alfa se entrega EN LA LLEGADA 1−t³: la bruma SE
+            //     VUELVE el haz) — un bucle sin fin con el reloj de cada
+            //     pantalla.
+            //   · EL TRAGO DEL NACIMIENTO — los primeros 48 ticks: la
+            //     MITAD colapsa y la otra mitad SE DISIPA EN SU SITIO
+            //     (la v6.62 la echaba a volar FUERA del círculo — la ley
+            //     nueva la detiene: NADA asoma del anillo).
+            // Y LA LEY DEL CÍRCULO: el anillo lo pone EL PROPIO ESCUADRÓN
+            // (CirculoDelEscuadron): las bocanadas NACEN dentro del
+            // círculo de los minions y mueren en LA BOCA del haz.
+            if (EsIra && Time >= ChargeTime && Time < ChargeTime + LaserDuration)
             {
+                // EL CÍRCULO DE LOS MINIONS (la ley: la bruma vive DENTRO).
+                IraSerExteriorCeremoniaProjectile.CirculoDelEscuadron(
+                    (int)Owner, out Vector2 centroMin, out float radioMin, out int nMin);
+                float anillo = Math.Max(40f, radioMin) * 0.82f;   // el techo del anillo
+                Vector2 boca = posPantalla;                        // el centro de nacimiento
+                Vector2 centroMinScr = nMin > 0 ? centroMin - Main.screenPosition : boca;
+
+                // LA RESPIRACIÓN GLOBAL: nace con el disparo, se apaga
+                // SUAVE en los últimos 90 ticks (nada de corte en seco).
+                float aliento = Utils.GetLerpValue(ChargeTime, ChargeTime + 20f, Time, true)
+                    * Utils.GetLerpValue(ChargeTime + LaserDuration,
+                        ChargeTime + LaserDuration - 90f, Time, true);
+
                 float tCol = Utils.GetLerpValue(ChargeTime, ChargeTime + 48f, Time, true);
+                bool naciendo = Time < ChargeTime + 48f;
+
                 try
                 {
                     VFXCore.CerrarLoteSiAbierto();
                     BrumaFX.BeginMass();
-                    // ——— LA MITAD QUE COLAPSA: ocho bocanadas caen al
-                    //      centro. La caída arranca lenta y SE APURA al
-                    //      final (1−t²: se lee como succión) y el alfa
-                    //      se entrega en la LLEGADA (1−t³). ———
-                    for (int i = 0; i < 8; i++)
+
+                    // ——— LA CUNA DEL NACIMIENTO: un poco de bruma CUBRE
+                    //      el centro donde el haz nace, TODO el disparo
+                    //      (respirando, blanco-violeta). ———
+                    BrumaFX.Cloud(boca, anillo * 0.34f, new Color(214, 205, 244),
+                        77, Main.GlobalTimeWrappedHourly * 0.8f,
+                        puffs: 5,
+                        alpha: (0.20f + (naciendo ? 0.14f * (1f - tCol) : 0f)) * aliento);
+
+                    // ——— LA CINTA CONTINUA: diez bocanadas en bucle —
+                    //      cada una NACE dentro del anillo de los
+                    //      minions y CAE a la boca del haz (la succión
+                    //      se apura: t²) — el alfa se entrega EN LA
+                    //      LLEGADA (1−t³): la bruma SE VUELVE el haz.
+                    //      El reloj de cada pantalla (nada que
+                    //      sincronizar). ———
+                    const int ciclo = 72;   // 1,2 s por bocanada
+                    for (int i = 0; i < 10; i++)
                     {
                         int h = i * 37 + 11;
-                        float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
-                        float r0 = 40f + 24f * VFXCore.Hash01(h, 7, 11);
-                        Vector2 pos = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
-                            * r0 * (1f - tCol * tCol);
-                        float radio = (22f + 14f * VFXCore.Hash01(h, 13, 17)) * (1f - 0.72f * tCol);
-                        BrumaFX.Cloud(pos, Math.Max(6f, radio),
+                        float desfase = VFXCore.Hash01(h, 5, 3) * ciclo;
+                        float t = ((Main.GameUpdateCount % (ulong)ciclo) + desfase)
+                            % ciclo / (float)ciclo;
+                        float ang = VFXCore.Hash01(h, 7, 11) * MathHelper.TwoPi;
+                        float r0 = anillo * (0.55f + 0.30f * VFXCore.Hash01(h, 13, 17));
+                        Vector2 naceEn = centroMinScr +
+                            new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
+                        Vector2 pos = Vector2.Lerp(naceEn, boca, t * t);
+                        float radio = (13f + 9f * VFXCore.Hash01(h, 19, 23)) * (1f - 0.62f * t);
+                        float nace = Utils.GetLerpValue(0f, 0.12f, t, true);
+                        BrumaFX.Cloud(pos, Math.Max(5f, radio),
                             i % 2 == 0 ? new Color(212, 202, 244) : new Color(138, 86, 214),
                             h, Main.GlobalTimeWrappedHourly,
-                            puffs: 2 + (i & 1),
-                            alpha: 0.50f * (1f - tCol * tCol * tCol));
-                    }
-                    // ——— LA MITAD QUE SE DISIPA: siete bocanadas se
-                    //      alejan (×2,15) y mueren en el aire. ———
-                    for (int i = 0; i < 7; i++)
-                    {
-                        int h = 900 + i * 41 + 29;
-                        float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
-                        float r0 = 36f + 20f * VFXCore.Hash01(h, 7, 11);
-                        Vector2 pos = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
-                            * r0 * (1f + 1.15f * tCol);
-                        float radio = (18f + 12f * VFXCore.Hash01(h, 13, 17)) * (1f + 0.9f * tCol);
-                        BrumaFX.Cloud(pos, radio,
-                            i % 2 == 0 ? new Color(196, 186, 232) : new Color(120, 72, 196),
-                            h, Main.GlobalTimeWrappedHourly * 0.9f,
                             puffs: 2,
-                            alpha: 0.34f * (1f - tCol) * (1f - tCol));
+                            alpha: 0.42f * nace * (1f - t * t * t) * aliento);
+                    }
+
+                    if (naciendo)
+                    {
+                        // ——— LA MITAD QUE COLAPSA (el trago): ocho
+                        //      bocanadas nacen en el anillo y caen a la
+                        //      boca — el alfa se entrega EN LA LLEGADA
+                        //      (1−t³). ———
+                        for (int i = 0; i < 8; i++)
+                        {
+                            int h = i * 41 + 211;
+                            float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
+                            float r0 = anillo * (0.55f + 0.35f * VFXCore.Hash01(h, 7, 11));
+                            Vector2 naceEn = centroMinScr +
+                                new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
+                            Vector2 pos = Vector2.Lerp(naceEn, boca, tCol * tCol);
+                            float radio = (18f + 12f * VFXCore.Hash01(h, 13, 17))
+                                * (1f - 0.68f * tCol);
+                            BrumaFX.Cloud(pos, Math.Max(6f, radio),
+                                i % 2 == 0 ? new Color(212, 202, 244) : new Color(138, 86, 214),
+                                h, Main.GlobalTimeWrappedHourly,
+                                puffs: 2 + (i & 1),
+                                alpha: 0.50f * (1f - tCol * tCol * tCol));
+                        }
+                        // ——— LA MITAD QUE SE DISIPA: siete bocanadas SE
+                        //      DISUELVEN EN SU SITIO (adentro del anillo
+                        //      — la ley del círculo: nada sale volando).
+                        for (int i = 0; i < 7; i++)
+                        {
+                            int h = 900 + i * 43 + 29;
+                            float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
+                            float r0 = anillo * (0.50f + 0.30f * VFXCore.Hash01(h, 7, 11));
+                            Vector2 pos = centroMinScr +
+                                new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0
+                                * (1f - 0.18f * tCol);
+                            float radio = (16f + 11f * VFXCore.Hash01(h, 13, 17))
+                                * (1f + 0.35f * tCol);
+                            BrumaFX.Cloud(pos, radio,
+                                i % 2 == 0 ? new Color(196, 186, 232) : new Color(120, 72, 196),
+                                h, Main.GlobalTimeWrappedHourly * 0.9f,
+                                puffs: 2,
+                                alpha: 0.34f * (1f - tCol) * (1f - tCol));
+                        }
                     }
                 }
                 catch { }
@@ -894,8 +967,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (anclaCirculo == Projectile && laserCharge > 0.05f && Time % 5f < 3f)
                 {
                     IraSerExteriorCeremoniaProjectile.DibujarArcosDelEscuadron(
-                        Projectile.Center, (int)Owner, laserCharge,
-                        Projectile.localAI[0]);
+                        (int)Owner, laserCharge, Projectile.localAI[0]);
                 }
             }
             else if (laserCharge > 0.05f && Time % 5f < 3f)
