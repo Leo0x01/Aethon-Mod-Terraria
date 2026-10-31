@@ -844,6 +844,36 @@ namespace AethonMod.Content.Projectiles
 
             float glyph = Math.Max(r / 52f, 0.25f) * 1.75f;
 
+            // ============================================================
+            //  v6.69 — EL CÍRCULO LIMPIO (la letra, SÉPTIMA ronda: «no se
+            //  si lo puedes ver, pero en la parte inferior derecha del
+            //  circulo hay unos rayitos que tienes que quitar»). EL
+            //  DIAGNÓSTICO QUE POR FIN CALZA: los rayitos que sobrevivieron
+            //  a CINCO curas (la bola del corazón v6.66 · el nacimiento
+            //  único v6.67 · los rayos de plegaria muertos v6.68) NUNCA
+            //  fueron arcos de la ceremonia — son LOS ANILLOS RÚNICOS DEL
+            //  PROPIO OJO: el sello erosionado (el aro roto + 8 glifos a
+            //  15 px) y los CUATRO anillos de las mejoras (el dorado de
+            //  15 · el violeta de 20 · la ELIPSE DE SOL 25×8,5 INCLINADA
+            //  −0,55 rad · la azul 30×12,3 a +0,35) — 36 glifos girando y
+            //  contrarrotando alrededor de CADA ojo. La Ira exige ONCE
+            //  ojos TODOS en su mejora máxima: 396 glifos enjambrando el
+            //  círculo — y las CADENAS DIAGONALES de las elipses inclinadas
+            //  (fijas al mundo, −31,5° y +20°) son exactamente los
+            //  «rayitos» que el usuario ve escapar de cada ojo hacia
+            //  abajo-derecha, imposibles de reconocer como «los anillos»
+            //  a la distancia del ritual. LA CURA: mientras el ritual de
+            //  la Ira vive (la ceremonia gestando O el haz disparando —
+            //  RitualDe, el mismo ancla del círculo), el ojo orbita
+            //  LIMPIO — solo su sprite y sus brillos suaves: el disco
+            //  pertenece a la bruma, la corona y la bola del corazón.
+            //  Muerto el ritual, los anillos VUELVEN enteros (siguen
+            //  siendo la insignia del escuadrón mejorado de siempre —
+            //  la letra de la v6.50.115 vive fuera del ritual).
+            // ============================================================
+            bool enRitualIra = global::AethonMod.Content.Projectiles.Definitivas
+                .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner) != null;
+
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -875,9 +905,14 @@ namespace AethonMod.Content.Projectiles
                     }
                 }
 
-                OrbitaLib.SigiloErosionado(pos, r, time, seed,
-                    2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
-                    offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
+                // v6.69 — EL SELLO TAMBIÉN DESCANSA en el ritual: sus 8
+                //     glifos a 15 px son la mitad del enjambre de rayitos.
+                if (!enRitualIra)
+                {
+                    OrbitaLib.SigiloErosionado(pos, r, time, seed,
+                        2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
+                        offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
+                }
 
                 // === v6.50.115 — LOS ANILLOS DE LAS MEJORAS (la letra:
                 //     «cada minion con máxima mejora tendría su anillo
@@ -889,7 +924,13 @@ namespace AethonMod.Content.Projectiles
                 //     aquí en el lote aditivo; los de sol, debajo, en el
                 //     lote VFX de sus elipses inclinadas) ===
                 int mejoras = MejorasDe(Projectile);
-                if (mejoras >= 1)
+                // v6.69 — LOS ANILLOS DE LAS MEJORAS ESPERAN FUERA DEL
+                //     RITUAL: en el círculo de la Ira, los 28 glifos de
+                //     las cuatro coronas de cada ojo se leen como rayitos
+                //     sueltos escapando del anillo (la elipse inclinada
+                //     −0,55 rad dibuja su cadena DIAGONAL hacia
+                //     abajo-derecha — la marca exacta de la letra).
+                if (!enRitualIra && mejoras >= 1)
                 {
                     // MEJORA 1 — EL ANILLO RÚNICO DE AGUJERO NEGRO DORADO
                     //     (8 runas de pie girando CW — el círculo dorado
@@ -899,7 +940,7 @@ namespace AethonMod.Content.Projectiles
                         OrbitaLib.RunaDorada, OrbitaLib.RunaDoradaTip, g1,
                         null, 0, 1, 0.95f, 0.30f);
                 }
-                if (mejoras >= 2)
+                if (!enRitualIra && mejoras >= 2)
                 {
                     // MEJORA 2 — EL ANILLO RÚNICO DE AGUJERO NEGRO VIOLETA
                     //     (6 runas CONTRARROTANDO — el contrarroto arcano,
@@ -937,7 +978,13 @@ namespace AethonMod.Content.Projectiles
             //     (SigiloLib — el mismo emisor de los anillos de los
             //     soles rúnicos), en el lote VFX de coords de mundo ===
             int mejorasSol = MejorasDe(Projectile);
-            if (mejorasSol >= 3)
+            // v6.69 — LAS ELIPSES DE SOL TAMBIÉN ESPERAN: sus cadenas de
+            //     runas sobre elipses INCLINADAS (−0,55 y +0,35 rad, fijas
+            //     al mundo) son las cadenas DIAGONALES de chispas que se
+            //     leen como rayitos escapando del anillo — la marca exacta
+            //     de la letra («en la parte inferior derecha del circulo
+            //     hay unos rayitos que tienes que quitar»).
+            if (!enRitualIra && mejorasSol >= 3)
             {
                 VFXCore.Begin();
                 try
