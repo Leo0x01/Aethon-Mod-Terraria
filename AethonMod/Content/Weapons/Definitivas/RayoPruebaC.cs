@@ -8,11 +8,11 @@ using AethonMod.Content.Projectiles.Definitivas;
 namespace AethonMod.Content.Weapons.Definitivas
 {
     // ======================================================================
-    //  v6.56.9 — RAYO DE PRUEBA C — EL SUEÑO (la receta 2 de la pila de
-    //  capas): el DESENFOQUE MÁXIMO — bruma ×3.6 al 20%, DOBLE glow
-    //  (×2.5 al 24% + ×1.9 al 12%), núcleo suave ×0.28 al 65% y 6 soles
-    //  conducto. El conducto onírico, todo fundido. Ver RayoPruebaA para
-    //  el contrato.
+    //  v6.56.9 — RAYO DE PRUEBA C — EL SUEÑO (LA receta del conducto — la
+    //  única que quedó de las tres de prueba): el DESENFOQUE MÁXIMO —
+    //  bruma ×3.6 al 20%, DOBLE glow (×2.5 al 24% + ×1.9 al 12%), núcleo
+    //  suave ×0.28 al 65% y 6 soles conducto. El conducto onírico, todo
+    //  fundido. (v6.59.1 — las recetas A y B murieron con sus armas.)
     // ======================================================================
     public class RayoPruebaC : ModItem
     {
@@ -52,7 +52,8 @@ namespace AethonMod.Content.Weapons.Definitivas
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // LA RECETA C (2): EL SUEÑO.
+            // EL SUEÑO — LA RECETA ÚNICA (ai[1]=2: legado del contrato
+            // de las tres recetas; el slot ya no se lee en el haz).
             Projectile.NewProjectile(source, player.MountedCenter, Vector2.Zero, type,
                 damage, knockback, player.whoAmI, 0f, 2f, player.whoAmI);
             return false;

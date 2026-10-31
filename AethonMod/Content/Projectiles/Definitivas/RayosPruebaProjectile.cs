@@ -180,20 +180,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         // ================================================================
-        //  LAS TRES RECETAS — A: LA EQUILIBRADA · B: EL TITÁN · C: EL
-        //  SUEÑO. Cada columna es un mundo de look; el usuario dispara
-        //  las tres y la casa copia la ganadora al RC2 original.
+        //  v6.59.1 — LA RECETA ÚNICA — C: EL SUEÑO (la letra: «me quedare
+        //  con rayo de prueba C el sueño, el resto los puedes borrar»):
+        //  las recetas A (LA EQUILIBRADA) y B (EL TITÁN) MURIERON con sus
+        //  armas — sus columnas se BORRAN de los planos. Estos son LOS
+        //  VALORES DE LA C, exactos, como constantes únicas.
         // ================================================================
-        private static readonly float[] KBruma = { 2.60f, 3.10f, 3.60f };
-        private static readonly float[] AlfaBruma = { 0.09f, 0.14f, 0.20f };
-        private static readonly float[] KGlow = { 1.75f, 2.10f, 2.50f };
-        private static readonly float[] AlfaGlow = { 0.20f, 0.28f, 0.24f };
-        private static readonly bool[] DobleGlow = { false, false, true };
-        private static readonly float[] KGlow2 = { 1.30f, 1.55f, 1.90f };
-        private static readonly float[] AlfaGlow2 = { 0.00f, 0.00f, 0.12f };
-        private static readonly float[] KNucleo = { 0.34f, 0.42f, 0.28f };
-        private static readonly float[] AlfaNucleo = { 0.80f, 0.95f, 0.65f };
-        private static readonly int[] SolesConducto = { 5, 8, 6 };
+        private const float KBruma = 3.60f;
+        private const float AlfaBruma = 0.20f;
+        private const float KGlow = 2.50f;
+        private const float AlfaGlow = 0.24f;
+        private const float KGlow2 = 1.90f;
+        private const float AlfaGlow2 = 0.12f;
+        private const float KNucleo = 0.28f;
+        private const float AlfaNucleo = 0.65f;
+        private const int SolesConducto = 6;
 
         // v6.57 — EL ALMA (la letra: «debe tener otra textura como esa
         // pero que ocupe todo el haz en ancho»): la MISMA RampaGlow
@@ -201,8 +202,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // el centro) ABIERTA A TODO EL ANCHO del conducto — el haz
         // entero viste la tela blanca incandescente y la vena arde
         // ENCIMA. Misma polilínea, mismo shader vanilla: cero picos.
-        private static readonly float[] KAlma = { 0.88f, 0.92f, 0.96f };
-        private static readonly float[] AlfaAlma = { 0.20f, 0.26f, 0.30f };
+        private const float KAlma = 0.96f;
+        private const float AlfaAlma = 0.30f;
 
         // LA PALETA DEL CONJURO (la del RC2, intacta): violeta arcano →
         // morado profundo (el «negro») → rojo sangre → magenta, viajando.
@@ -229,9 +230,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
         public ref float Time => ref Projectile.ai[0];
         public ref float Owner => ref Projectile.ai[2];
 
-        /// <summary>LA RECETA (ai[1]): 0 = A LA EQUILIBRADA · 1 = B EL
-        /// TITÁN · 2 = C EL SUEÑO. La elige el arma al disparar.</summary>
-        public ref float Receta => ref Projectile.ai[1];
+        // v6.59.1 — ai[1] (LA RECETA) MURIÓ: las recetas A y B se
+        // borraron con sus armas y la C es LA ÚNICA — el slot viaja en
+        // los engendros como legado (nadie lo lee) y YA NO se serializa
+        // en el ExtraAI.
 
         // ================================================================
         //  v6.59 — EL MODO IRA DE UN SER EXTERIOR: cuando EL GRIMORIO
@@ -331,7 +333,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
         {
             writer.Write(Projectile.direction == 1);
             writer.Write(targetRotation);
-            writer.Write(Receta);              // la receta viaja al server
             // v6.59 — EL MODO IRA: la bandera, el blanco y el centro del
             // ritual viajan en el paquete del spawn.
             writer.Write(EsIra);
@@ -344,7 +345,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
         {
             Projectile.direction = reader.ReadBoolean() ? 1 : -1;
             targetRotation = reader.ReadSingle();
-            Receta = reader.ReadSingle();
             // v6.59 — EL MODO IRA (el mismo orden del Send).
             EsIra = reader.ReadBoolean();
             BlancoIra = reader.ReadInt32();
@@ -827,9 +827,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     rotations[i] = Projectile.rotation;
                 }
 
-                int receta = (int)Receta;
-                if (receta < 0 || receta > 2) receta = 0;
-
                 VFXCore.CerrarLoteSiAbierto();
                 GraphicsDevice gd = Main.graphics.GraphicsDevice;
                 gd.BlendState = BlendState.Additive;
@@ -839,17 +836,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // profundo casi disuelto, la banda más ancha de todas
                     // (×2.6..3.6). Es el «bloom» que tiñe el fondo alrededor
                     // del conducto.
-                    CapaRampa(gd, textureGlow, KBruma[receta], ColorBruma, positions, rotations);
+                    CapaRampa(gd, textureGlow, KBruma, ColorBruma, positions, rotations);
 
                     // (2) EL GLOW — la envolvente DIFUSA: la paleta del
                     // conjuro VIAJANDO (violeta→morado→rojo→magenta, de
                     // boca a punta) al 20-28%.
-                    CapaRampa(gd, textureGlow, KGlow[receta], ColorGlow, positions, rotations);
+                    CapaRampa(gd, textureGlow, KGlow, ColorGlow, positions, rotations);
 
-                    // (3) EL GLOW² (receta C — EL SUEÑO): la segunda
-                    // envolvente interior, más caliente y más suave.
-                    if (DobleGlow[receta])
-                        CapaRampa(gd, textureGlow, KGlow2[receta], ColorGlow2, positions, rotations);
+                    // (3) EL GLOW² (EL SUEÑO): la segunda envolvente
+                    // interior, más caliente y más suave.
+                    CapaRampa(gd, textureGlow, KGlow2, ColorGlow2, positions, rotations);
 
                     // (4) EL CUERPO — el strip del HazConcentradoShader del
                     // RC2 (el esqueleto 607df36 INTACTO). Si el .fxc no
@@ -889,13 +885,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // RampaGlow del núcleo (la textura blanca que el
                     // usuario ve en el centro) abierta hasta la silueta
                     // del cuerpo — el haz entero viste la tela blanca.
-                    CapaRampa(gd, textureGlow, KAlma[receta], ColorAlma, positions, rotations);
+                    CapaRampa(gd, textureGlow, KAlma, ColorAlma, positions, rotations);
 
                     // (6) EL NÚCLEO — la vena ardiente: blanco-violeta al
                     // 65-95% en la banda más estrecha (×0.28..0.42). El
                     // «láser dentro de la explosión de energía» — arde
                     // ENCIMA del alma.
-                    CapaRampa(gd, textureGlow, KNucleo[receta], ColorNucleo, positions, rotations);
+                    CapaRampa(gd, textureGlow, KNucleo, ColorNucleo, positions, rotations);
                 }
                 finally
                 {
@@ -913,7 +909,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.Begin();
                 try
                 {
-                    SolesDelConducto(SolesConducto[receta], positions);
+                    SolesDelConducto(SolesConducto, positions);
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.FlushAdditive();
@@ -949,15 +945,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // OSCURECIDA — el «negro» del conjuro: la bruma es la sombra
             // luminosa (violeta profundo con un pulso de rojo al final).
             Color sombra = new Color((byte)(c.R * 0.42f), (byte)(c.G * 0.34f), (byte)(c.B * 0.52f));
-            int receta = Math.Clamp((int)Receta, 0, 2);
-            return sombra * (AlfaBruma[receta] * _laserActivo);
+            return sombra * (AlfaBruma * _laserActivo);
         }
 
         private Color ColorGlow(float p)
         {
             Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
-            int receta = Math.Clamp((int)Receta, 0, 2);
-            return c * (AlfaGlow[receta] * _laserActivo);
+            return c * (AlfaGlow * _laserActivo);
         }
 
         private Color ColorGlow2(float p)
@@ -965,8 +959,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
             // más caliente: medio tono hacia el blanco-violeta.
             Color caliente = Color.Lerp(c, new Color(255, 246, 255), 0.28f);
-            int receta = Math.Clamp((int)Receta, 0, 2);
-            return caliente * (AlfaGlow2[receta] * _laserActivo);
+            return caliente * (AlfaGlow2 * _laserActivo);
         }
 
         private Color ColorCuerpo(float p)
@@ -977,20 +970,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
         private Color ColorAlma(float p)
         {
-            int receta = Math.Clamp((int)Receta, 0, 2);
             // LA TELA BLANCA (v6.57) — la misma mezcla blanco-violeta del
             // núcleo, un tono más violeta (la vena de encima es la que
             // llega al blanco puro): la textura blanca A TODO EL ANCHO.
             Color alma = Color.Lerp(new Color(255, 250, 255), new Color(222, 196, 255), 0.42f);
-            return alma * (AlfaAlma[receta] * _laserActivo);
+            return alma * (AlfaAlma * _laserActivo);
         }
 
         private Color ColorNucleo(float p)
         {
-            int receta = Math.Clamp((int)Receta, 0, 2);
             // BLANCO-VIOLETA incandescente — la vena del conducto.
             Color nucleo = Color.Lerp(new Color(255, 246, 255), new Color(214, 170, 255), 0.35f);
-            return nucleo * (AlfaNucleo[receta] * _laserActivo);
+            return nucleo * (AlfaNucleo * _laserActivo);
         }
 
         /// <summary>EL ANCHO DE LA CAPA ACTIVA — el perfil del RC2 (p^0.8 ·

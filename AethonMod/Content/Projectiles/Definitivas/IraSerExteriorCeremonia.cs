@@ -380,7 +380,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 ModContent.ProjectileType<RayosPruebaProjectile>(),
                 dano, 4f, Projectile.owner,
                 RayosPruebaProjectile.ChargeTime * 1f,  // Time = ChargeTime: YA DISPARA
-                2f,                                      // LA RECETA C — EL SUEÑO
+                2f,                                      // ai[1] — legado del slot de receta (la C, la única)
                 Projectile.owner * 1f);                  // el dueño
 
             // EL MODO IRA (viaja por SendExtraAI en el paquete del spawn):

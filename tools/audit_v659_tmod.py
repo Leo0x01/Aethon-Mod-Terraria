@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """v6.59 — LA AUDITORÍA DEL .tmod: LA IRA DE UN SER EXTERIOR.
-Verifica: versión 6.59.0, EOF exacto, blobs sanos, los archivos NUEVOS
+Verifica: versión 6.59.1, EOF exacto, blobs sanos, los archivos NUEVOS
 dentro (IraSerExteriorCeremonia, HazSobreElMundoSistema), los muertos
 AUSENTES (RayoPruebaA/B cs+png, RayosPruebaEncimaSistema), la DLL con
 las firmas vivas de la Ira, paridad hjson de espejos y el loop ogg."""
@@ -20,8 +20,8 @@ print(f"tML {tmlver} | {name} v{ver} | {len(entries)} entradas | blobs {tend} | 
 md5 = hashlib.md5(d).hexdigest()
 print(f"md5: {md5} · {fsize} bytes")
 
-if ver != "6.59.0":
-    errores.append(f"versión del paquete: {ver} != 6.59.0")
+if ver != "6.59.1":
+    errores.append(f"versión del paquete: {ver} != 6.59.1")
 
 total_comp = sum(c for _, _, c in entries)
 if tend + total_comp != fsize:
