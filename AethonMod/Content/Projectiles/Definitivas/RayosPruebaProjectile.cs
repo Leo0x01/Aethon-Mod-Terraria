@@ -15,6 +15,50 @@ namespace AethonMod.Content.Projectiles.Definitivas
     // =====================================================================
     //  v6.56.9 — LAS COPIAS DEL RC2: LA PILA DE CAPAS GPU-UNIVERSAL.
     // =====================================================================
+    //
+    //  v6.57 — LA VUELTA DEL HAZ C (el ganador de las tres copias, a
+    //  pedido del usuario). LA LETRA, punto por punto:
+    //  (1) LOS CÍRCULOS AMARILLOS («son como circulos amarillos que
+    //      aparecen a veces y son demasiado grandes, no deben
+    //      aparecer»): era EL CORAZÓN DORADO del sol rúnico — un Quad
+    //      de glow radial a ×1.5 del tamaño: a escala de haz (boca
+    //      ~57 px, márgenes ~60 px) se lee como un círculo amarillo
+    //      gigante. LA LEY DEL CORAZÓN DORADO: los haces dibujan sus
+    //      soles con corazon: 0 — queda la estrella blanca de 4 puntas
+    //      pura (el accesorio BrilloSolarHalo conserva SU corazón a SU
+    //      escala; el RC2 original tampoco se toca).
+    //  (2) EL ALMA — LA TEXTURA BLANCA A TODO EL ANCHO («veo una especia
+    //      de textura blanca en el centro… debe tener otra textura como
+    //      esa pero que ocupe todo el haz en ancho»): la MISMA RampaGlow
+    //      gaussiana del núcleo, abierta a ×0.88..0.96 del cuerpo — el
+    //      haz entero viste la tela blanca incandescente y la vena del
+    //      núcleo arde ENCIMA. La pila ahora son SIETE capas.
+    //  (3) LOS SOLES NACEN MÁS LEJOS («debe aparecer mas lejos del
+    //      jugador, y a medida que se carga el ataque, estos caen hacia
+    //      el centro»): la banda de nacimiento pasa de 150..240 px a
+    //      320..520 px — la implosión cae desde el borde lejano del
+    //      conjuro (y sigue cayendo recta, sin dar vueltas).
+    //  (4) EL TEMBLOR SUAVE DEL LANZAMIENTO («al lanzar el haz la
+    //      pantalla debe temblar un poco… un temblor de unos pocos
+    //      pixeles y con movimiento suaves»): la ignición va por LA VÍA
+    //      DULCE de ImpactoLib (Pantalla.Sacudir — 3.2 px de DOBLES
+    //      SENOS suaves, nada de kick seco) y el temblor sostenido
+    //      baja la voz (6.5 → 2.6 px) para que el momento del disparo
+    //      SE LEA.
+    //  (5) LA CORONA VISTE EL HAZ («el color de los circulos runicos
+    //      debe ser el mismo que el del haz C»): las tres vueltas de la
+    //      corona viajan LA PALETA DEL CONJURO (la misma del conducto:
+    //      violeta arcano → morado profundo → rojo sangre → magenta),
+    //      cada aro en su fase del ciclo — antes iban blanco/dorado/
+    //      violeta fijos y se leían ajenas al haz.
+    //  (6) LA AGUJA Y LA ESTRANGULACIÓN («al final del haz este como que
+    //      se hace estrecho pero no lo suficiente… al terminar de
+    //      lanzar el haz este debe hacerse estrecho y luego
+    //      desaparecer»): la punta se afila de ×0.32 a ×0.06 (LA AGUJA)
+    //      y en la ventana de muerte TODO el conducto colapsa a ×0.07
+    //      antes de apagarse (LA ESTRANGULACIÓN) — el haz se cierra
+    //      como una boca y muere. Curvas monótonas suaves: cero picos
+    //      por construcción (misma polilínea, mismo pipeline vanilla).
     //  LA LETRA del usuario: «lo que le faltan son varias capas de
     //  texturas con mas difuminado, glow entre demas efectos visuales…
     //  copia ese rc2 en varias armas con los cambios diseñados asi no
@@ -32,7 +76,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //  está roto — le falta MUNDO alrededor.
     //
     //  LA CURA — LA PILA DE CAPAS: la MISMA polilínea de 1500 puntos de
-    //  la técnica 607df36 se dibuja SEIS veces, de atrás hacia adelante,
+    //  la técnica 607df36 se dibuja SIETE veces, de atrás hacia adelante,
     //  cada una con su propio ancho y su propio color:
     //    (1) LA BRUMA — ×2.6..3.6, RampaGlow, violeta profundo al 9-20%:
     //        el resplandor AMBIENTAL que tiñe el fondo (el bloom).
@@ -41,10 +85,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //    (3) EL GLOW² (receta C) — una segunda envolvente interior.
     //    (4) EL CUERPO — el strip del HazConcentradoShader EXACTO del
     //        RC2 (el esqueleto 607df36, INTACTO): el plasma que hierve.
-    //    (5) EL NÚCLEO — ×0.28..0.42, RampaGlow, blanco-violeta al
-    //        65-95%: la vena ardiente en el corazón del conducto.
-    //    (6) LOS SOLES CONDUCTO — los destellos de 4 puntas del
-    //        accesorio corriendo por las márgenes del haz hacia la punta.
+    //    (5) EL ALMA (v6.57) — ×0.88..0.96, la MISMA RampaGlow del
+    //        núcleo ABIERTA A TODO EL ANCHO: la tela blanca del haz.
+    //    (6) EL NÚCLEO — ×0.28..0.42, RampaGlow, blanco-violeta al
+    //        65-95%: la vena ardiente ENCIMA del alma.
+    //    (7) LOS SOLES CONDUCTO — los destellos de 4 puntas del
+    //        accesorio corriendo por las márgenes del haz hacia la punta
+    //        (v6.57: SIN corazón dorado — la ley del corazón).
     //
     //  POR QUÉ NO PUEDE PRODUCIR PICOS (la ley §5.4 del códice): las
     //  capas 1, 2, 3 y 5 se dibujan con el SHADER VANILLA de sprites
@@ -57,12 +104,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //  visto crudo, jamás del strip).
     //
     //  GPU-UNIVERSAL (la letra: «necesito que cualquier gpu incluso los
-    //  que no son dedicadas deben ver el shader»): las capas 1, 2, 3, 5
-    //  y 6 usan el pipeline de sprites VANILLA — el mismo que dibuja
+    //  que no son dedicadas deben ver el shader»): las capas 1, 2, 3, 5,
+    //  6 y 7 usan el pipeline de sprites VANILLA — el mismo que dibuja
     //  todo Terraria, presente en CUALQUIER GPU (integrada, vieja, lo
     //  que sea). El .fx del cuerpo es un PLUS: si carga, el plasma
     //  hierve; si no carga, el cuerpo cae a una tira de CarnePlasma por
-    //  el shader vanilla y LA PILA SE VE IGUAL — seis capas visibles en
+    //  el shader vanilla y LA PILA SE VE IGUAL — siete capas visibles en
     //  cualquier máquina, shader o no shader.
     //
     //  LAS TRES RECETAS (la letra: «cambiamos las copias hasta tener la
@@ -116,6 +163,15 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static readonly float[] KNucleo = { 0.34f, 0.42f, 0.28f };
         private static readonly float[] AlfaNucleo = { 0.80f, 0.95f, 0.65f };
         private static readonly int[] SolesConducto = { 5, 8, 6 };
+
+        // v6.57 — EL ALMA (la letra: «debe tener otra textura como esa
+        // pero que ocupe todo el haz en ancho»): la MISMA RampaGlow
+        // gaussiana del núcleo (la «textura blanca» que el usuario ve en
+        // el centro) ABIERTA A TODO EL ANCHO del conducto — el haz
+        // entero viste la tela blanca incandescente y la vena arde
+        // ENCIMA. Misma polilínea, mismo shader vanilla: cero picos.
+        private static readonly float[] KAlma = { 0.88f, 0.92f, 0.96f };
+        private static readonly float[] AlfaAlma = { 0.20f, 0.26f, 0.30f };
 
         // LA PALETA DEL CONJURO (la del RC2, intacta): violeta arcano →
         // morado profundo (el «negro») → rojo sangre → magenta, viajando.
@@ -257,17 +313,26 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 if (Time > ChargeTime && Time < ChargeTime + LaserDuration)
                 {
-                    Pantalla.Sacudir(6.5f, 0.4f, "RC2P-sostenido");
+                    // v6.57 — EL TEMBLOR SOSTENIDO BAJA LA VOZ (6.5 → 2.6
+                    // px): antes la pantalla temblaba fuerte DURANTE todo
+                    // el disparo y el momento del LANZAMIENTO no se leía
+                    // — ahora la conversación sostenida es un susurro y
+                    // el golpe suave de la ignición ES el momento.
+                    Pantalla.Sacudir(2.6f, 0.4f, "RC2P-sostenido");
                 }
                 if (Time == ChargeTime + 1)
                 {
-                    // v6.56.9 — LA IGNICIÓN DE CINE (la letra: el momento
-                    // del disparo): EL FACADE del golpe de la casa — kick
-                    // escalado + flash local + baño de luz + EL HITSTOP de
-                    // TiemposLib (el mundo CONTIENE LA RESPIRACIÓN 6 ticks
-                    // mientras el conducto se enciende; solo un jugador).
+                    // v6.57 — LA IGNICIÓN DE CINE, POR LA VÍA DULCE (la
+                    // letra: «al lanzar el haz la pantalla debe temblar
+                    // un poco, tal vez un temblor de unos pocos pixeles
+                    // y con movimiento suaves»): EL FACADE del golpe de
+                    // la casa en modo SUAVE — 3.2 px de DOBLES SENOS
+                    // suaves (nada de kick seco) + flash local + baño de
+                    // luz + EL HITSTOP de TiemposLib (el mundo contiene
+                    // la respiración 6 ticks mientras el conducto se
+                    // enciende; solo un jugador).
                     ImpactoLib.GolpeDeCine(Projectile.Center, 1.25f, 6,
-                        new Color(255, 248, 235));
+                        new Color(255, 248, 235), suave: true);
                 }
             }
 
@@ -455,16 +520,23 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 if (Time < ChargeTime)
                 {
+                    // v6.57 — LA IMPLOSIÓN NACE MÁS LEJOS (la letra: «el
+                    // pequeño brillo de soles runicos debe aparecer mas
+                    // lejos del jugador»): 320..520 px (antes 150..240) —
+                    // y SIN corazón dorado (la ley del corazón: nada de
+                    // círculos amarillos en el haz).
                     HazConcentradoLib.SolesRunicosCarga(Projectile.Center,
                         Utils.GetLerpValue(20f, ChargeTime, Time, true),
-                        Main.GlobalTimeWrappedHourly);
+                        Main.GlobalTimeWrappedHourly,
+                        radioLejos: 320f, radioVar: 200f, corazon: 0f);
                 }
                 else if (Time < ChargeTime + 22)
                 {
                     HazConcentradoLib.SolesRunicosEstallido(Projectile.Center,
                         Projectile.rotation,
                         (Time - ChargeTime) / 22f,
-                        Main.GlobalTimeWrappedHourly);
+                        Main.GlobalTimeWrappedHourly,
+                        corazon: 0f);
                 }
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
@@ -478,12 +550,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float rCorona = MathHelper.Lerp(70f, 26f, numP) * breathe;
                 try
                 {
+                    // v6.57 — LA CORONA VISTE EL COLOR DEL HAZ (la letra:
+                    // «el color de los circulos runicos debe ser el mismo
+                    // que el del haz C»): las tres vueltas viajan LA
+                    // MISMA PALETA DEL CONJURO del conducto (violeta
+                    // arcano → morado profundo → rojo sangre → magenta),
+                    // cada aro en su fase del ciclo — la íntima caliente
+                    // (mezclada al blanco-violeta del núcleo), la media y
+                    // la externa desfasadas. Los aros finos ya iban con
+                    // ColorConjuro; ahora la corona entera canta con el
+                    // haz.
                     OrbitaLib.AbrirAdditive();
                     OrbitaLib.CoronaConjuro(posPantalla, rCorona, Main.GlobalTimeWrappedHourly,
                         alphaMul: 0.28f + 0.62f * laserCharge, glyphMul: 1.8f,
-                        blanco: new Color(255, 248, 235),
-                        dorado: new Color(255, 128, 104),
-                        violeta: new Color(176, 118, 255));
+                        blanco: Color.Lerp(ColorConjuro(Projectile.localAI[0] + 6f), new Color(255, 246, 255), 0.40f),
+                        dorado: ColorConjuro(Projectile.localAI[0] + 18f),
+                        violeta: ColorConjuro(Projectile.localAI[0] + 30f));
                     OrbitaLib.CerrarBatch();
                 }
                 catch
@@ -540,8 +622,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 try
                 {
                     float late = 0.60f + 0.40f * MathF.Sin(Main.GlobalTimeWrappedHourly * 9.3f);
+                    // v6.57 — SIN CORAZÓN DORADO (la ley del corazón):
+                    // la estrella de 4 puntas PURA — el corazón a escala
+                    // de boca (~57 px) era EL círculo amarillo gigante de
+                    // la captura del usuario.
                     HazConcentradoLib.SolRunico4Puntas(Projectile.Center,
-                        12f + 26f * realSize, late * laserCharge, doradoExtra: 0.35f);
+                        12f + 26f * realSize, late * laserCharge, corazon: 0f);
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.FlushAdditive();
@@ -550,9 +636,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             // ================================================================
             //  ============ LA PILA DE CAPAS DEL CONDUCTO ============
-            //  La MISMA polilínea de 1500 puntos, SEIS pasadas: bruma →
+            //  La MISMA polilínea de 1500 puntos, SIETE pasadas: bruma →
             //  glow → (glow²) → CUERPO (el shader del RC2, o su fallback
-            //  vanilla) → núcleo → soles conducto.
+            //  vanilla) → ALMA → núcleo → soles conducto.
             // ================================================================
             if (Time >= ChargeTime - 20)
             {
@@ -623,9 +709,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         CapaRampa(gd, texture ?? textureGlow, 1.0f, ColorCuerpo, positions, rotations);
                     }
 
-                    // (5) EL NÚCLEO — la vena ardiente: blanco-violeta al
+                    // (5) EL ALMA (v6.57) — LA TEXTURA BLANCA A TODO EL
+                    // ANCHO (la letra: «debe tener otra textura como esa
+                    // pero que ocupe todo el haz en ancho»): la MISMA
+                    // RampaGlow del núcleo (la textura blanca que el
+                    // usuario ve en el centro) abierta hasta la silueta
+                    // del cuerpo — el haz entero viste la tela blanca.
+                    CapaRampa(gd, textureGlow, KAlma[receta], ColorAlma, positions, rotations);
+
+                    // (6) EL NÚCLEO — la vena ardiente: blanco-violeta al
                     // 65-95% en la banda más estrecha (×0.28..0.42). El
-                    // «láser dentro de la explosión de energía».
+                    // «láser dentro de la explosión de energía» — arde
+                    // ENCIMA del alma.
                     CapaRampa(gd, textureGlow, KNucleo[receta], ColorNucleo, positions, rotations);
                 }
                 finally
@@ -634,10 +729,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.RestaurarLoteVanilla();
                 }
 
-                // (6) LOS SOLES CONDUCTO — los destellos de 4 puntas del
+                // (7) LOS SOLES CONDUCTO — los destellos de 4 puntas del
                 // accesorio corriendo por las MÁRGENES del conducto (sobre
                 // la envolvente del glow, donde se leen contra el violeta),
-                // viajando hacia la punta al ritmo de cada sol.
+                // viajando hacia la punta al ritmo de cada sol — SIN
+                // corazón dorado (v6.57: la ley del corazón; a escala de
+                // margen se leía como círculo amarillo).
                 VFXCore.CerrarLoteSiAbierto();
                 VFXCore.Begin();
                 try
@@ -705,6 +802,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return c * (0.62f * _laserActivo);
         }
 
+        private Color ColorAlma(float p)
+        {
+            int receta = Math.Clamp((int)Receta, 0, 2);
+            // LA TELA BLANCA (v6.57) — la misma mezcla blanco-violeta del
+            // núcleo, un tono más violeta (la vena de encima es la que
+            // llega al blanco puro): la textura blanca A TODO EL ANCHO.
+            Color alma = Color.Lerp(new Color(255, 250, 255), new Color(222, 196, 255), 0.42f);
+            return alma * (AlfaAlma[receta] * _laserActivo);
+        }
+
         private Color ColorNucleo(float p)
         {
             int receta = Math.Clamp((int)Receta, 0, 2);
@@ -750,7 +857,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (arde <= 0.04f) continue;
 
                 float size = MathF.Max(9f, medio * (0.085f + 0.045f * VFXCore.Hash01(97, 630 + i, 13)));
-                HazConcentradoLib.SolRunico4Puntas(pos, size, arde * _laserActivo, doradoExtra: 0.30f);
+                HazConcentradoLib.SolRunico4Puntas(pos, size, arde * _laserActivo, corazon: 0f);
             }
         }
 
@@ -763,14 +870,35 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return color * realSize;
         }
 
-        /// <summary>EL ANCHO DEL STRIP — idéntico al RC2 desde 607df36
-        /// (verificado por diff): p^0.8 · cbrt · realSize · 3500 ·
-        /// (1.1 + cos·(0.08 − p·0.06)).</summary>
+        /// <summary>EL ANCHO DEL STRIP — el perfil del RC2 (607df36) más
+        /// LAS DOS AFILADAS de la v6.57: p^0.8 · cbrt · AGUJA · CIERRE ·
+        /// realSize · 3500 · (1.1 + cos·(0.08 − p·0.06)).</summary>
         public float StripWidth(float progress)
         {
             float start = (float)Math.Pow(progress, 0.8f);
             float cap = (float)Math.Cbrt(Utils.GetLerpValue(1.01f, 0.7f, progress, true));
-            return start * cap * realSize * 3500f * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
+
+            // LA AGUJA DE LA PUNTA (v6.57 — la letra: «al final del haz
+            // este como que se hace estrecho pero no lo suficiente»): el
+            // cap del 607df36 solo afilaba a ×0.32 — la punta se leía
+            // ROMA. El último 16 % del conducto se afila ahora hasta
+            // ×0.06: punta de aguja. Curva MONÓTONA suave (sin saltos):
+            // cero picos por construcción — misma polilínea.
+            float aguja = MathHelper.Lerp(1f, 0.06f,
+                (float)Math.Pow(Utils.GetLerpValue(0.84f, 1f, progress, true), 1.35f));
+
+            // LA ESTRANGULACIÓN FINAL (v6.57 — la letra: «al terminar de
+            // lanzar el haz este debe hacerse estrecho y luego
+            // desaparecer»): en la ventana de muerte (últimos ~45
+            // ticks) TODO el conducto colapsa a una aguja (×0.07,
+            // ease-in ²) ANTES de apagarse — TODAS las capas comparten
+            // este ancho: el haz entero se cierra como una boca y muere.
+            float cierre01 = Utils.GetLerpValue(ChargeTime + LaserDuration,
+                ChargeTime + LaserDuration + 45f, Time, true);
+            float cierre = MathHelper.Lerp(1f, 0.07f, cierre01 * cierre01);
+
+            return start * cap * aguja * cierre * realSize * 3500f
+                * (1.1f + (float)Math.Cos(Time) * (0.08f - progress * 0.06f));
         }
     }
 }

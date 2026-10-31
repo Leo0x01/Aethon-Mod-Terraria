@@ -47,16 +47,30 @@ namespace AethonMod.Content.VFX
         /// kick de cámara escalado + flash local de la paleta + golpe de
         /// luz en tres focos. [intensidad] 1 = el estándar de la casa;
         /// 0.5 sutil; 2 contundente (tope interno 2.5).
+        /// [suave] (v6.57) — LA VÍA DULCE: en vez del kick de impulso, la
+        /// sacudida determinista de DOBLES SENOS de PantallaLib — unos
+        /// pocos píxeles, movimiento suave (la letra del RC2: «un temblor
+        /// de unos pocos pixeles y con movimientos suaves» al lanzar).
         /// </summary>
-        public static void Golpe(Vector2 pos, float intensidad, Color? color = null)
+        public static void Golpe(Vector2 pos, float intensidad, Color? color = null, bool suave = false)
         {
             if (Main.netMode == NetmodeID.Server) return;
             float i = MathHelper.Clamp(intensidad, 0.1f, 2.5f);
             Color c = color ?? new Color(255, 248, 235);
 
             // LA SACUDIDA — el kick de OndaLib (el alias delgado de la
-            // auditoría Grupo B: PantallaLib es el dueño del pipeline).
-            OndaLib.Kick(7f * i, (int)(8 + 6 * i));
+            // auditoría Grupo B: PantallaLib es el dueño del pipeline)…
+            if (suave)
+            {
+                // …o LA VÍA DULCE (v6.57): ~2.6 px por intensidad, medio
+                // segundo de decaído, DOBLES SENOS inconmensurables —
+                // determinista y suave, nada de sacudidas secas.
+                Pantalla.Sacudir(2.6f * i, 0.55f, "ImpactoLib-suave");
+            }
+            else
+            {
+                OndaLib.Kick(7f * i, (int)(8 + 6 * i));
+            }
 
             // EL FLASH LOCAL — el gradiente centrado en el golpe.
             OndaLib.Flash(c, 0.16f * i, 8, pos);
@@ -70,11 +84,13 @@ namespace AethonMod.Content.VFX
         /// TiemposLib: el mundo CONTIENE LA RESPIRACIÓN [ticksCongelar]
         /// ticks (solo un jugador; en MP el hitstop es no-op y el golpe
         /// queda igual). LA IGNICIÓN de las copias del RC2 nació con esto.
+        /// [suave] (v6.57) — el temblor va por LA VÍA DULCE de PantallaLib
+        /// (pocos px, dobles senos): el lanzamiento del RC2 lo usa.
         /// </summary>
         public static void GolpeDeCine(Vector2 pos, float intensidad, int ticksCongelar = 6,
-            Color? color = null)
+            Color? color = null, bool suave = false)
         {
-            Golpe(pos, intensidad, color);
+            Golpe(pos, intensidad, color, suave);
             if (ticksCongelar > 0)
                 TiemposLib.Congelar(ticksCongelar);
         }

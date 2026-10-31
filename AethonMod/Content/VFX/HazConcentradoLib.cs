@@ -45,9 +45,17 @@ namespace AethonMod.Content.VFX
         /// dos cápsulas cruzadas de blanco incandescente + el corazón
         /// dorado. Se dibuja en el LOTE ADITIVO de VFXCore (el llamador
         /// abre Begin/FlushAdditive). Receta verbatim de BrilloSolarHalo.
-        /// [size] en px: cápsulas 2.2·size, núcleo 1.5·size.</summary>
+        /// [size] en px: cápsulas 2.2·size, núcleo 1.5·size.
+        /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: la escala del
+        /// corazón (1 = el calibre del accesorio). El usuario clavó el
+        /// síntoma en el haz: «son como circulos amarillos que aparecen
+        /// a veces y son demasiado grandes, no deben aparecer» — el
+        /// corazón dorado es un Quad de glow radial a ×1.5 del tamaño:
+        /// a escala de HAZ (soles de 30-40 px) se lee como un CÍRCULO
+        /// AMARILLO gigante flotando en el conducto. Los haces lo pasan
+        /// a 0 — queda la estrella blanca de 4 puntas pura.</summary>
         public static void SolRunico4Puntas(Vector2 pos, float size, float arde,
-            float doradoExtra = 0f)
+            float doradoExtra = 0f, float corazon = 1f)
         {
             if (arde <= 0.03f || size <= 0.4f) return;
             float fino = MathF.Max(1.6f, 0.035f * 34f) * arde;
@@ -55,22 +63,34 @@ namespace AethonMod.Content.VFX
             Color dorado = new Color(255, 214, 120) * ((0.50f + doradoExtra) * arde);
             VFXCore.Quad(pos, blanco, new Vector2(size * 2.2f, fino));
             VFXCore.Quad(pos, blanco, new Vector2(fino, size * 2.2f));
-            VFXCore.Quad(pos, dorado, new Vector2(size * 1.5f, size * 1.5f));
+            if (corazon > 0.02f)
+            {
+                float lado = size * 1.5f * corazon;
+                VFXCore.Quad(pos, dorado, new Vector2(lado, lado));
+            }
         }
 
         /// <summary>LA IMPLOSIÓN DE SOLES (v6.56.9): cada destello de 4
-        /// puntas NACE LEJOS (150..240 px, ángulo FIJO de su hash — NADA
-        /// de orbitar) y se CONTRAE RECTO hacia el centro durante su vida
-        /// (ease-in vida²: el tirón de la absorción). La banda lejana se
-        /// aprieta con la carga (×1.15→×0.55) y el hervidero aviva. Pura
-        /// función de (progreso, tiempo): determinista, sin estado.</summary>
-        public static void SolesRunicosCarga(Vector2 centro, float progreso, float tiempo)
+        /// puntas NACE LEJOS (por defecto 150..240 px, ángulo FIJO de su
+        /// hash — NADA de orbitar) y se CONTRAE RECTO hacia el centro
+        /// durante su vida (ease-in vida²: el tirón de la absorción). La
+        /// banda lejana se aprieta con la carga (×1.15→×0.55) y el
+        /// hervidero aviva. Pura función de (progreso, tiempo):
+        /// determinista, sin estado.
+        /// [radioLejos]/[radioVar] (v6.57) — LA LEJANÍA DEL NACIMIENTO:
+        /// el usuario pidió soles «mas lejos del jugador» — las copias
+        /// del RC2 nacen a 320..520 px (el original conserva 150/90:
+        /// comportamiento intacto por defecto).
+        /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: 0 = sin corazón
+        /// (el haz NO dibuja círculos amarillos).</summary>
+        public static void SolesRunicosCarga(Vector2 centro, float progreso, float tiempo,
+            float radioLejos = 150f, float radioVar = 90f, float corazon = 1f)
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             progreso = MathHelper.Clamp(progreso, 0f, 1f);
             const int cuenta = 11;
-            // LA BANDA LEJANA: nace a 150..240 px y TODO el enjambre cae
-            // adentro conforme el conjuro madura (la implosión se aprieta).
+            // LA BANDA LEJANA: nace lejos y TODO el enjambre cae adentro
+            // conforme el conjuro madura (la implosión se aprieta).
             float banda = MathHelper.Lerp(1.15f, 0.55f, progreso);
             float velocidad = 0.42f + 1.5f * progreso;   // el hervidero aviva
             for (int i = 0; i < cuenta; i++)
@@ -87,23 +107,24 @@ namespace AethonMod.Content.VFX
 
                 // LA CONTRACCIÓN: lejos → cerca con ease-in (vida²) —
                 // lento en el borde, acelerando hacia la boca: el tirón.
-                float rLejos = (150f + 90f * VFXCore.Hash01(31, 320 + i, 13)) * banda;
+                float rLejos = (radioLejos + radioVar * VFXCore.Hash01(31, 320 + i, 13)) * banda;
                 float caida = vida * vida;
                 float dist = MathHelper.Lerp(rLejos, 8f, caida);
 
                 Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
                 float size = (0.30f + 0.25f * VFXCore.Hash01(31, 330 + i, 17))
                              * 34f * (0.55f + 0.45f * progreso);
-                SolRunico4Puntas(pos, size, arde);
+                SolRunico4Puntas(pos, size, arde, corazon: corazon);
             }
         }
 
         /// <summary>EL ESTALLIDO DE SOLES: al disparar, los destellos de 4
         /// puntas salen EXPULSADOS en abanico por la dirección del rayo
         /// (±0.5 rad) y arden muriendo — el arma escupe lo que absorbió.
-        /// [edad01] 0→1 durante los primeros ~22 ticks del disparo.</summary>
+        /// [edad01] 0→1 durante los primeros ~22 ticks del disparo.
+        /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: 0 = sin corazón.</summary>
         public static void SolesRunicosEstallido(Vector2 centro, float angulo, float edad01,
-            float tiempo)
+            float tiempo, float corazon = 1f)
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             edad01 = MathHelper.Clamp(edad01, 0f, 1f);
@@ -118,7 +139,7 @@ namespace AethonMod.Content.VFX
                 Vector2 pos = centro + new Vector2(MathF.Cos(a), MathF.Sin(a))
                               * (arr + v * edad01 * 22f);
                 float size = (0.34f + 0.30f * VFXCore.Hash01(77, 540 + i, 19)) * 34f;
-                SolRunico4Puntas(pos, size, arde);
+                SolRunico4Puntas(pos, size, arde, corazon: corazon);
             }
         }
     }

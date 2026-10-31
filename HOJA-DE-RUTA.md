@@ -63,6 +63,12 @@
 - **Lecciones**: (1) el .fx del RC2 se cambia CON CIRUGÍA, jamás reescritura completa — cada delta se compila/valida/inspecciona su GLSL/se simula; (2) una pila de glows «con alfa a cero» también es UN CÍRCULO PLANO para el ojo; (3) MojoShader-parsear bien NO garantiza renderizar bien en la GPU del jugador — el esqueleto probado es la única vara; (4) el tML 2026.8 guarda los blobs incomprimibles CRUDOS y el resto en deflate-raw (el auditor aprendió).
 - **Siguientes candidatos** (de la auditoría): purgar BeamLib+BoltRenderer (496 líneas muertas), consolidar helpers en VFXCore (~900 líneas), decidir HazConcentradoLib muerto, TiemposLib (hitstop), PostFXLib, ImpactoLib.
 
+## v6.57 — LA VUELTA DEL HAZ C (31-oct)
+
+- **Qué pasó**: el usuario eligió EL HAZ C como ganador de las tres copias y afinó la letra en 6 puntos: círculos amarillos gigantes que no deben aparecer (era EL CORAZÓN DORADO del sol rúnico a escala de haz → `corazon: 0`, LA LEY DEL CORAZÓN DORADO en el códice §0), la textura blanca a TODO EL ANCHO (EL ALMA — la 7ª capa: la misma RampaGlow del núcleo a ×0.88-0.96), los soles rúnicos naciendo más lejos (150-240 → 320-520 px), el temblor suave de pocos píxeles al lanzar (`suave:` en ImpactoLib — la vía dulce de PantallaLib; sostenido 6.5→2.6), la corona rúnica del color del haz (la paleta del conjuro viajando) y la punta afilada + la muerte estrechándose (LA AGUJA ×0.06 + LA ESTRANGULACIÓN ×0.07 en `StripWidth`).
+- **Lecciones**: (1) los efectos reciclados de accesorio a haz SE PARAMETRIZAN — lo que a escala de amuleto es una firma, a escala de cataclismo es un defecto; (2) el kick de impulso no es la única sacudida: para el momento del disparo, los DOBLES SENOS suaves de PantallaLib leen mejor que el golpe seco; (3) las curvas de ancho del strip aceptan factores MONÓTONOS nuevos (aguja/cierre) sin crear picos — verificado sim en vida Y en muerte.
+- **Siguientes candidatos**: portar la receta C ganadora al RC2 original cuando el usuario dé el visto bueno visual · el resto del plan de la auditoría (AgujeroBase para los 10 agujeros negros, PostFXLib).
+
 ## Reglas del backlog
 
 - Cada tarea se ejecuta con el RITUAL COMPLETO de la casa: oráculo 0/0 → -build REAL 0/0 →

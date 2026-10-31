@@ -1,4 +1,4 @@
-# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.5)
+# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.6)
 
 > **ESTE ES EL ARCHIVO DE CONSULTA OBLIGATORIA PARA CUALQUIER EFECTO.**
 > Antes de crear UN SOLO efecto — visual, de sonido, de pantalla, de partícula,
@@ -9,7 +9,7 @@
 > que lo que necesitas YA EXISTE es altísima. **NO SE INVENTA NADA NUEVO SIN
 > ANTES HABER REVISADO ESTE CATÁLOGO.**
 
-**Versión del códice:** 1.4 (v6.56.8) · **Mantenimiento:** todo agente (IA o humano)
+**Versión del códice:** 1.6 (v6.57.0) · **Mantenimiento:** todo agente (IA o humano)
 que cree o modifique una librería, shader, textura, efecto visual o de sonido
 **DEBE documentarlo aquí en la misma entrega** (ver §10 — El Decálogo y §11 — Bitácora).
 
@@ -107,6 +107,19 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      POLILÍNEAS: si las capas siguen polilíneas DIFERENTES (una curva y
      otra recta), sus bordes se CRUZAN y nacen picos nuevos — misma
      polilínea SIEMPRE. Caso ejemplar: las copias del RC2 (v6.56.9).
+   - **LA LEY DEL CORAZÓN DORADO (v6.57)** → el corazón dorado del sol
+     rúnico (`SolRunico4Puntas`) es la FIRMA del accesorio A SU ESCALA
+     (soles de ~20 px: un Quad de glow radial dorado a ×1.5 del
+     tamaño). A ESCALA DE HAZ (la estrella conducto de la boca ~57 px,
+     los soles de margen ~60 px) ese mismo corazón se lee como UN
+     CÍRCULO AMARILLO GIGANTE flotando en el conducto (la letra:
+     *«son como circulos amarillos que aparecen a veces y son
+     demasiado grandes, no deben aparecer»*). REGLA: los efectos
+     reciclados de accesorio a haz SE PARAMETRIZAN — el corazón escala
+     con `corazon:` y los haces lo pasan a 0 (queda la estrella blanca
+     de 4 puntas pura; BrilloSolarHalo conserva SU corazón: valor por
+     defecto 1). Lo que a escala de amuleto es una firma, a escala de
+     cataclismo es un defecto.
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -586,6 +599,40 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
   FIJO por hash, cero deriva angular; nacen a 150-240 px y CAEN al centro
   con ease-in vida² — «aparecer lejos y contraerse sin dar vueltas» — +
   `SolesRunicosEstallido`.)*
+- **v6.57 — LA VUELTA DEL HAZ C (el ganador de las tres copias):** la
+  letra del usuario sobre la receta C, punto por punto, y sus curas:
+  1. **LA LEY DEL CORAZÓN DORADO (§0):** «son como circulos amarillos
+     que aparecen a veces y son demasiado grandes» — era el corazón
+     dorado del sol rúnico a escala de haz (Quad de glow radial ×1.5:
+     boca ~57 px, márgenes ~60 px). Los haces pasan `corazon: 0` —
+     queda la estrella blanca de 4 puntas pura.
+  2. **EL ALMA — LA TELA BLANCA A TODO EL ANCHO:** «debe tener otra
+     textura como esa pero que ocupe todo el haz en ancho» — la MISMA
+     RampaGlow del núcleo abierta a ×0.88..0.96 del cuerpo,
+     blanco-violeta al 20-30%: la pila pasa de seis a SIETE capas
+     (…cuerpo → ALMA → núcleo…, la vena arde ENCIMA del alma).
+  3. **LOS SOLES NACEN MÁS LEJOS:** 150-240 px → 320-520 px
+     (`radioLejos`/`radioVar` en `SolesRunicosCarga`): la implosión
+     cae desde el borde lejano del conjuro y se aprieta con la carga.
+  4. **EL TEMBLOR SUAVE DEL LANZAMIENTO:** `ImpactoLib.Golpe`/
+     `GolpeDeCine` ganan `suave:` — LA VÍA DULCE de PantallaLib
+     (Pantalla.Sacudir: 3.2 px de DOBLES SENOS suaves, nada de kick
+     seco) + el temblor sostenido baja de 6.5 a 2.6 px para que el
+     momento del disparo SE LEA.
+  5. **LA CORONA VISTE EL HAZ:** las tres vueltas de la corona viajan
+     LA PALETA DEL CONJURO (fases +6/+18/+30, la íntima mezclada al
+     blanco-violeta del núcleo) — antes blanco/dorado/violeta fijos y
+     se leían ajenas al conducto.
+  6. **LA AGUJA Y LA ESTRANGULACIÓN:** `StripWidth` gana dos factores
+     MONÓTONOS — `aguja` (el último 16 % se afila a ×0.06: la punta
+     roma de ×0.32 ya no) y `cierre` (los últimos 45 ticks colapsan
+     TODO el conducto a ×0.07 con ease-in ², TODAS las capas juntas:
+     el haz se estrecha como una boca y muere — «hacerse estrecho y
+     luego desaparecer»). Verificado: sim 1:1 (`tools/sim_pila_v657.py`)
+     — 0 picos de borde en el SOBRE de las 3 recetas EN VIDA Y EN
+     MUERTE, aguja monótona (0 rebotes, punta ×0.027 del ancho en
+     p=0.84) + verificación visual (tela blanca a todo el ancho, punta
+     de aguja, cero círculos amarillos, sobre liso).
 - **v6.56.9 — LA PILA DE CAPAS DEL CONDUCTO (las copias del RC2):** el
   diagnóstico forense de la captura del jugador: el núcleo saturado ocupaba
   el 99% del halo medido — TODO el universo visual vivía DENTRO de un solo
@@ -918,6 +965,7 @@ contrato de coordenadas). CERO discos en la boca (la ley §0).
 | **v6.56.6** | **LA PURGA + LAS 9 VARIANTES + EL RC2 «desnudo»** (coronas rúnicas al 53 %, el disco negro y la lente MUERTOS, los soles de 4 puntas de la carga) + **LA AUDITORÍA DE LAS 33 LIBRERÍAS** (3 fusiones recomendadas, ~40 métodos muertos, 57 copias privadas de Tint/Hash01, TiemposLib/PostFXLib para el futuro) · *el RC2 de esta versión traía LA PILA DE CAPAS — la causa de los picos, curada en la .56.7* | §5.4, §11 |
 | **v6.56.7** | **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
 | **v6.56.9** | **LA PILA DE CAPAS GPU-UNIVERSAL** (strips múltiples sobre la MISMA polilínea + Main.pixelShader + RampaGlow — la cura de «una sola capa»: el núcleo ocupaba el 99% del halo, no había envolvente; 3 recetas A/B/C en las COPIAS del RC2, el original intacto) · **LA IMPLOSIÓN DE SOLES** (ángulo fijo, caída radial ease-in — «sin dar vueltas») · **LA AUDITORÍA EJECUTADA**: BeamLib+BoltRenderer+HazConcentradoLib-muerta ENTERRADAS (−1.809 l), 40 métodos muertos purgados (−1.317 l), **LOS HELPERS CANÓNICOS** en VFXCore (Tint/TintAlfa/AbrirAdditive/AbrirAlpha/Capsule/RingQuad — 96 cuerpos delegados) · **TiemposLib (EL HITSTOP) + ImpactoLib (EL GOLPE)** con la ignición de cine de las copias · **LA LEY DEL CÓDICE SINCRONIZADO** (§0.6, la anti-recurrencia del desync de 6 puntos) — y **ESTE CÓDICE (v1.5)** | §0, §4.5-4.6, §4.25, §5.4, §11, AUDITORIA-LIBRERIAS.md |
+| **v6.57** | **LA VUELTA DEL HAZ C (el ganador)**: **LA LEY DEL CORAZÓN DORADO** (§0 — `corazon:` parametrizado, los haces a 0: cero círculos amarillos) · **EL ALMA** (la 7ª capa: la misma RampaGlow del núcleo a TODO el ancho) · **LOS SOLES NACEN MÁS LEJOS** (320-520 px) · **EL TEMBLOR SUAVE** (`suave:` en ImpactoLib — la vía dulce de PantallaLib, 3.2 px de dobles senos; sostenido 6.5→2.6) · **LA CORONA VISTE EL HAZ** (la paleta del conjuro viajando por los tres aros) · **LA AGUJA Y LA ESTRANGULACIÓN** de `StripWidth` (punta ×0.06, muerte ×0.07 — sim 0 picos en vida Y muerte) — y **ESTE CÓDICE (v1.6)** | §0, §5.4, §11 |
 | **v6.56.8** | **LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA** (el .fx vuelve al esqueleto PROBADO .55.1; los deltas: venas rojas/pulso/halo/latido) · **LA BOCA DE GLOWS APILADOS PROHIBIDA** (§0 — era EL círculo plano de las capturas; la boca = corona + soles + arcos + estrella conducto) · **`ColorConjuro`** (violeta→morado→rojo→magenta — ColorPrisma muere en el RC2) · **EL FALLBACK HERMOSO** (4 tiras suaves, sin remolino) · **LA AUDITORÍA DE LIBRERÍAS entregada** (`AUDITORIA-LIBRERIAS.md`: 2 librerías muertas, ~3.900 líneas recuperables, ~125 copias de helpers, 3 librerías nuevas propuestas — TiemposLib/PostFXLib/ImpactoLib) — y **ESTE CÓDICE (v1.4) RECONCILIADO CON LA REALIDAD** | §0, §5.4, §6.A, AUDITORIA-LIBRERIAS.md |
 
 ---
