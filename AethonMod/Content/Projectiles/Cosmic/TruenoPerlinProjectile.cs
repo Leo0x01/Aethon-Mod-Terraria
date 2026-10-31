@@ -132,8 +132,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     //     celebrante era UN SONIDO DE VANILLA más en el
                     //     parto — calla también (la v6.61 lo había callado
                     //     SOLO para la ceremonia de la ira). El ritual
-                    //     entero queda con LA VOZ PROPIA: el compás rúnico
-                    //     (RunaCompas) TODO el parto y el nacimiento
+                    //     entero queda con LA VOZ PROPIA: la carga rúnica
+                    //     (RunaCarga, v6.64 — el rugido sostenido que
+                    //     SUBE TODO el parto) y el nacimiento
                     //     (RunaNaceSol / RunaNaceVacio) en su tick.
                     Projectile.DamageType = DamageClass.Summon;
                     _muzzle = BocaDelOjo();

@@ -563,7 +563,8 @@ namespace AethonMod.Content.Systems
                 //     suena EN EL NACIMIENTO — RayoConvergente.Lanzar
                 //     dispara RunaNaceSol en el tick exacto en que el
                 //     sol APARECE. Al abrir el ritual queda el cine de
-                //     los ojos, su brillo y EL COMPÁS RÚNICO (RunaCompas).
+                //     los ojos, su brillo y LA CARGA RÚNICA (RunaCarga,
+                //     v6.64 — el rugido que sube, ya sin campana).
                 return true;
             }
             catch { return false; }

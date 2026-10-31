@@ -727,30 +727,44 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Vector2 posPantalla = Projectile.Center - Main.screenPosition;
 
             // ============ v6.63 — LA BRUMA DEL DISPARO: LA CINTA QUE NO
-            //            TERMINA ============
-            // (la letra: «en el momento de naciemiento del haz la bruma
-            // colapsa en el centro, pero una vez es lanzado el haz ya no
-            // hay mas bruma y la bruma deberia seguir colapsando hacia el
-            // centro y ademas un poco de bruma tambien debe cubrir el
-            // centro de naciemiento del haz, y en todo momento mas bruma
-            // colapsa hacia el centro, toda la bruma solo puede estar
-            // dentro del circulo formado por los minions al igual que los
-            // pequeños rayos electricos») TODO EL LANZAMIENTO (800 ticks
-            // — la v6.62 solo dibujaba los primeros 48):
-            //   · LA CUNA — un poco de bruma CUBRE el centro de
-            //     nacimiento TODO el disparo (respirando).
+            //            TERMINA · v6.64 — LA CUNA QUE VISTE LOS
+            //            CÍRCULOS + EL VELO DEL LANZAMIENTO ============
+            // (la letra v6.63: «en el momento de naciemiento del haz la
+            // bruma colapsa en el centro, pero una vez es lanzado el haz
+            // ya no hay mas bruma y la bruma deberia seguir colapsando
+            // hacia el centro y ademas un poco de bruma tambien debe
+            // cubrir el centro de naciemiento del haz, y en todo momento
+            // mas bruma colapsa hacia el centro, toda la bruma solo puede
+            // estar dentro del circulo formado por los minions al igual
+            // que los pequeños rayos electricos»):
+            //   · LA CUNA (v6.64 REFORZADA — la letra: «le falta bruma en
+            //     los circulos del centro»): la cuna era un susurro de
+            //     19 px — MÁS CHICA que los círculos rúnicos que vestía
+            //     (corona 26 px + aro 36 px con el anillo a ~56 px).
+            //     AHORA VISTE los círculos (×0,60 del anillo, puffs 5→7,
+            //     alfa 0,20→0,30) y lleva EL CORAZÓN: una capa interior
+            //     más blanca que DENSIFICA el medio, TODO el disparo.
+            //   · EL VELO DEL LANZAMIENTO (v6.64 — la letra: «la bruma
+            //     que esta en el centro debe cubrir el punto de
+            //     nacimiento en el momento en el que el haz es
+            //     lanzado»): los primeros 55 ticks, el punto donde el
+            //     haz NACE queda CUBIERTO — el velo grande que se cierra
+            //     sobre la boca + el corazón blanco encima del punto
+            //     exacto — y se DISUELVE en la cuna de siempre.
             //   · LA CINTA CONTINUA — en TODO momento nace bruma nueva
             //     dentro del anillo y CAE al centro (succión que se apura
             //     t²; el alfa se entrega EN LA LLEGADA 1−t³: la bruma SE
             //     VUELVE el haz) — un bucle sin fin con el reloj de cada
             //     pantalla.
             //   · EL TRAGO DEL NACIMIENTO — los primeros 48 ticks: la
-            //     MITAD colapsa y la otra mitad SE DISIPA EN SU SITIO
+            //     MITAD colapsa y la otra mitad SE DISUELVE EN SU SITIO
             //     (la v6.62 la echaba a volar FUERA del círculo — la ley
             //     nueva la detiene: NADA asoma del anillo).
             // Y LA LEY DEL CÍRCULO: el anillo lo pone EL PROPIO ESCUADRÓN
             // (CirculoDelEscuadron): las bocanadas NACEN dentro del
-            // círculo de los minions y mueren en LA BOCA del haz.
+            // círculo de los minions y mueren en LA BOCA del haz (y el
+            // velo, en su pico ×0,75 del anillo, alcanza ~0,80 del
+            // círculo REAL — el margen del 0,82 lo cubre: jamás asoma).
             if (EsIra && Time >= ChargeTime && Time < ChargeTime + LaserDuration)
             {
                 // EL CÍRCULO DE LOS MINIONS (la ley: la bruma vive DENTRO).
@@ -768,19 +782,60 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 float tCol = Utils.GetLerpValue(ChargeTime, ChargeTime + 48f, Time, true);
                 bool naciendo = Time < ChargeTime + 48f;
+                // v6.64 — EL RELOJ DEL VELO: la ventana del lanzamiento
+                // (55 ticks — un poco más larga que la del trago: el
+                // velo ENTREGA la cobertura del nacimiento y se disuelve
+                // suave en la cuna).
+                float tVelo = Utils.GetLerpValue(ChargeTime, ChargeTime + 55f, Time, true);
 
                 try
                 {
                     VFXCore.CerrarLoteSiAbierto();
                     BrumaFX.BeginMass();
 
-                    // ——— LA CUNA DEL NACIMIENTO: un poco de bruma CUBRE
-                    //      el centro donde el haz nace, TODO el disparo
-                    //      (respirando, blanco-violeta). ———
-                    BrumaFX.Cloud(boca, anillo * 0.34f, new Color(214, 205, 244),
+                    // ——— LA CUNA QUE VISTE LOS CÍRCULOS (v6.64 — la
+                    //      letra: «le falta bruma en los circulos del
+                    //      centro»): ×0,60 del anillo (≈34 px con el
+                    //      escuadrón de 11 — VISTE la corona de 26 px y
+                    //      su aro de 36 px), 7 puffs y alfa 0,30 TODO el
+                    //      disparo (respirando, blanco-violeta) ———
+                    BrumaFX.Cloud(boca, anillo * 0.60f, new Color(214, 205, 244),
                         77, Main.GlobalTimeWrappedHourly * 0.8f,
-                        puffs: 5,
-                        alpha: (0.20f + (naciendo ? 0.14f * (1f - tCol) : 0f)) * aliento);
+                        puffs: 7,
+                        alpha: 0.30f * aliento);
+                    // ——— EL CORAZÓN DE LA CUNA: la capa interior MÁS
+                    //      BLANCA (×0,34) que DENSIFICA el medio de los
+                    //      círculos — el centro HIERVE de bruma ———
+                    BrumaFX.Cloud(boca, anillo * 0.34f, new Color(228, 220, 250),
+                        83, Main.GlobalTimeWrappedHourly * 1.1f,
+                        puffs: 4,
+                        alpha: 0.24f * aliento);
+
+                    // ——— EL VELO DEL LANZAMIENTO (v6.64 — la letra:
+                    //      «la bruma que esta en el centro debe cubrir
+                    //      el punto de nacimiento en el momento en el
+                    //      que el haz es lanzado»): JUSTO al lanzarse,
+                    //      el punto donde el haz nace queda CUBIERTO —
+                    //      el VELO grande (×0,75→×0,55 cerrándose sobre
+                    //      la boca, 9 puffs) y EL CORAZÓN BLANCO encima
+                    //      del punto exacto (×0,40→×0,28) — y en ~0,9 s
+                    //      se DISUELVE en la cuna de siempre. ———
+                    if (tVelo < 1f)
+                    {
+                        float retirada = 1f - tVelo;
+                        BrumaFX.Cloud(boca,
+                            MathHelper.Lerp(anillo * 0.75f, anillo * 0.55f, tVelo),
+                            new Color(218, 208, 246),
+                            91, Main.GlobalTimeWrappedHourly * 1.4f,
+                            puffs: 9,
+                            alpha: 0.50f * retirada * (1f - 0.35f * tVelo) * aliento);
+                        BrumaFX.Cloud(boca,
+                            MathHelper.Lerp(anillo * 0.40f, anillo * 0.28f, tVelo),
+                            new Color(232, 226, 252),
+                            97, Main.GlobalTimeWrappedHourly * 1.7f,
+                            puffs: 5,
+                            alpha: 0.55f * retirada * retirada * aliento);
+                    }
 
                     // ——— LA CINTA CONTINUA: diez bocanadas en bucle —
                     //      cada una NACE dentro del anillo de los

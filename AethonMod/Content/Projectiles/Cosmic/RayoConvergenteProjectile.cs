@@ -160,43 +160,42 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.noGravity = true;
             }
 
-            // === v6.63 — EL COMPÁS RÚNICO (la letra: «todavía sigue
-            //     apareciendo el original de terraria»): el tic-tac de
-            //     Item122 — EL SONIDO DE VANILLA que sonaba TODO el
-            //     parto, el que la letra manda matar — MUERE. Lo
-            //     reemplaza LA VOZ PROPIA: RunaCompas, el pulso
-            //     sintetizado de la casa (Content/Sounds), con el MISMO
-            //     compás de siempre (cada 20 ticks, y en la contracción
-            //     final la CUENTA ATRÁS que aprieta) y el pitch SUBIENDO
-            //     con el ritual — ReplaceOldest para que la metralleta
-            //     final siempre suene. ===
-            if (!Main.dedServ && edad < Duracion)
+            // === v6.64 — LA CARGA RÚNICA (la letra: «su sonido de
+            //     campana al cargar, tanto para el sol runico como
+            //     para los agujeros negros esta horrible, la campana
+            //     no es el sonido correcto»): EL COMPÁS DE CAMPANITA
+            //     MUERE ENTERO (RunaCompas, el tic-tac cada 20 ticks —
+            //     una campana no es cómo CARGA un ritual). Lo
+            //     reemplaza RunaCarga: EL RUGIDO QUE SUBE (2,85 s
+            //     sostenidos — el rumble del útero 44→98 Hz + EL
+            //     PULSO QUE APRIETA (AM 3,2→8,5 Hz) + el aire + LA
+            //     CUERDA que gana tono + las chispas + EL VACÍO ANTES
+            //     DE LA PUERTA), UNA SOLA VOZ al abrir el ritual que
+            //     SUBE SOLA hasta el nacimiento (la LEY DE UNO A LA
+            //     VEZ de la v6.63 garantiza que jamás se solapan dos
+            //     cargas). El pitch la CALZA con el plazo del ritual:
+            //     el sol (120 t = 2 s) la sube media octava (+0,50 →
+            //     2,02 s) y el agujero (180 t = 3 s) la deja hondita
+            //     (−0,06 → 2,97 s; el supremo −0,10 → 3,06 s: la
+            //     puerta más honda se toma su hush). ===
+            if (!Main.dedServ && edad == 1f)
             {
-                float restante = Duracion - edad;
-                bool late = restante > 45f
-                    ? edad % 20f == 0f
-                    : restante == 45f || restante == 34f || restante == 25f ||
-                      restante == 18f || restante == 13f || restante == 9f ||
-                      restante == 6f || restante == 4f || restante == 2f;
-                if (late)
+                try
                 {
-                    try
-                    {
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            new Terraria.Audio.SoundStyle(
-                                "AethonMod/Content/Sounds/RunaCompas",
-                                Terraria.Audio.SoundType.Sound)
-                            {
-                                MaxInstances = 3,
-                                SoundLimitBehavior = Terraria.Audio.SoundLimitBehavior.ReplaceOldest,
-                                Volume = 0.60f,
-                                Pitch = -0.25f + 0.40f * prog +
-                                    (restante <= 45f ? 0.25f : 0f)
-                            },
-                            Projectile.Center);
-                    }
-                    catch { }
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        new Terraria.Audio.SoundStyle(
+                            "AethonMod/Content/Sounds/RunaCarga",
+                            Terraria.Audio.SoundType.Sound)
+                        {
+                            MaxInstances = 1,
+                            SoundLimitBehavior = Terraria.Audio.SoundLimitBehavior.ReplaceOldest,
+                            Volume = 0.70f,
+                            Pitch = Modo == MODO_SOL ? 0.50f
+                                : Modo == MODO_SUPREMO ? -0.10f : -0.06f
+                        },
+                        Projectile.Center);
                 }
+                catch { }
             }
 
             // === v6.51.3 → v6.51.4 — LA BRUMA DE LA GESTACIÓN (la
@@ -286,12 +285,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     dano, 4f, Projectile.owner, anillos,
                     (Projectile.owner * 31 + Main.rand.Next(9973)) * 1f);
                 sol.timeLeft = 480;
-                // v6.63 — LA VOZ DEL NACIMIENTO (la letra: «mejorar los
-                //     sonidos de cuando aparecen los agujeros negros
-                //     runicos y los soles runicos»): el Item122 de
+                // v6.63 → v6.64 — LA VOZ DEL NACIMIENTO (la letra:
+                //     «mejorar los sonidos de cuando aparecen los
+                //     agujeros negros runicos y los soles runicos» y
+                //     la del .64: «¿crees que una campana es el sonido
+                //     de nacimiento de un sol runico?»): el Item122 de
                 //     vanilla MUERE en el momento en que el sol APARECE
-                //     — RunaNaceSol, la campana del encendido
-                //     (sintetizada por la casa), suena AQUÍ: en el
+                //     — RunaNaceSol, EL HORNO QUE ENCIENDE (REESCRITO
+                //     SIN campana: la v6.63 era una campana inarmónica
+                //     C5 — el timbre que la letra manda matar; el nuevo
+                //     es EL ESPEJO SOLAR del pozo que gustó: el golpe
+                //     cálido que SUBE 58→112 Hz + el horno 42→175 Hz +
+                //     la llama + el cuerpo dorado ARMÓNICO con ataque
+                //     lento + los rayos con vibrato), suena AQUÍ: en el
                 //     NACIMIENTO, donde la letra la pide (la v6.62 la
                 //     ponía al ABRIR el ritual: se oía fuera de lugar y
                 //     el nacimiento quedaba con la voz de vanilla).
