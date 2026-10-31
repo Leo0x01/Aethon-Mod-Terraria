@@ -629,29 +629,16 @@ namespace AethonMod.Content.Projectiles
                 .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
             if (ritual != null)
             {
-                int nR = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
-                int iR = Math.Min(idx, nR - 1);
-                // LA VUELTA DEL RITUAL: ω 0,30 → 1,05 conforme el círculo
-                // cierra (los primeros 150 ticks — la ceremonia).
-                // v6.60.2 — Y SIGUE EN EL DISPARO (la letra: «estos deben
-                // seguir dando vueltas en circulos mientras el haz esta
-                // siendo lanzado y cuando termine el lanzamiento es que
-                // regresan a su posicion normal»): muerta la ceremonia,
-                // el ANCLA es EL HAZ (RitualDe cae a él) — el círculo YA
-                // cerró: la vuelta se queda A TOPE (ω 1,05) TODO el
-                // lanzamiento. (ai[2] del haz es el dueño, NO la edad:
-                // por eso la rama — la ceremonia acelera, el haz YA llegó.)
-                float omega = 1.05f;
-                if (ritual.ModProjectile is global::AethonMod.Content.Projectiles
-                        .Definitivas.IraSerExteriorCeremoniaProjectile)
-                    omega = MathHelper.Lerp(0.30f, 1.05f, MathHelper.Clamp(
-                        ritual.ai[2] / 150f, 0f, 1f));
-                float angR = MathHelper.TwoPi / nR * iR + time * omega;
-                float radioR = Math.Max(40f, 6.2f * nR)
-                    * (1f + 0.035f * MathF.Sin(time * 0.5f));
-                Vector2 slotR = ritual.Center + (-Vector2.UnitY).RotatedBy(angR) * radioR;
-                slotR.Y += MathF.Sin(time * 0.9f + iR * 1.9f) * 1.5f;
-                return slotR;
+                // v6.62 — EL PUESTO DEL RITUAL, COMPARTIDO: la matemática
+                //     de la corona vive AHORA en SlotDelRitual (UN solo
+                //     lugar de la verdad) — la leen los ojos (SU puesto en
+                //     el círculo) y los arcos del escuadrón (los rayitos
+                //     solo cuentan ojos PUESTOS en la corona). La conducta
+                //     es BYTE-IDÉNTICA a la rama que vivía aquí.
+                Vector2? slotR = SlotDelRitual(Projectile, ritual, dueño);
+                if (slotR is Vector2 sr) return sr;
+                // (caída imposible con ritual y dueño vivos — sigue abajo
+                // al puesto en persona: la guarda de siempre)
             }
 
             // EL CENTRO: el grimorio que caza si está fuera; el dueño si no
@@ -710,6 +697,46 @@ namespace AethonMod.Content.Projectiles
             _ownerLibro = dueño.whoAmI;
             _posLibro = Weapons.GrimorioHambrientoNervioso.PosicionDelLibro(dueño.whoAmI);
             return _posLibro;
+        }
+
+        // ================================================================
+        //  v6.62 — EL PUESTO DEL RITUAL, COMPARTIDO: la matemática de la
+        //  corona del ritual (la rama de SlotDeFormacion), viva en UN
+        //  solo lugar de la verdad — la leen los ojos (SU puesto en el
+        //  círculo, la conducta de siempre, BYTE-IDÉNTICA) y los arcos
+        //  del escuadrón (IraSerExteriorCeremonia.DibujarArcosDel
+        //  Escuadron: los rayitos solo cuentan los ojos PUESTOS en la
+        //  corona — a ≤28 px de SU puesto). Null = no hay ritual.
+        // ================================================================
+        internal static Vector2? SlotDelRitual(Projectile ojo, Projectile ancla, Player dueño)
+        {
+            if (ojo == null || !ojo.active || ancla == null || !ancla.active ||
+                dueño == null || !dueño.active) return null;
+
+            int idx = Math.Max(0, (int)ojo.minionPos);
+            int nR = Math.Max(1, dueño.ownedProjectileCounts[ojo.type]);
+            int iR = Math.Min(idx, nR - 1);
+            float time = Main.GlobalTimeWrappedHourly;
+
+            // LA VUELTA DEL RITUAL: ω 0,30 → 1,05 conforme el círculo
+            // cierra (los primeros 150 ticks — la ceremonia).
+            // v6.60.2 — Y SIGUE EN EL DISPARO: muerta la ceremonia, el
+            // ANCLA es EL HAZ (RitualDe cae a él) — el círculo YA cerró:
+            // la vuelta se queda A TOPE (ω 1,05) TODO el lanzamiento.
+            // (ai[2] del haz es el dueño, NO la edad: por eso la rama —
+            // la ceremonia acelera, el haz YA llegó.)
+            float omega = 1.05f;
+            if (ancla.ModProjectile is global::AethonMod.Content.Projectiles
+                    .Definitivas.IraSerExteriorCeremoniaProjectile)
+                omega = MathHelper.Lerp(0.30f, 1.05f, MathHelper.Clamp(
+                    ancla.ai[2] / 150f, 0f, 1f));
+
+            float angR = MathHelper.TwoPi / nR * iR + time * omega;
+            float radioR = Math.Max(40f, 6.2f * nR)
+                * (1f + 0.035f * MathF.Sin(time * 0.5f));
+            Vector2 slot = ancla.Center + (-Vector2.UnitY).RotatedBy(angR) * radioR;
+            slot.Y += MathF.Sin(time * 0.9f + iR * 1.9f) * 1.5f;
+            return slot;
         }
 
         /// <summary>LA PRESA: la más cercana válida en rango (el filtro del

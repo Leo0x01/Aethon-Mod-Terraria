@@ -55,6 +55,20 @@ namespace AethonMod.Content.Systems
         /// 30 minutos.</summary>
         private static readonly Dictionary<int, ulong> _iraHasta = new();
 
+        /// <summary>v6.62 — LA COLA DEL SILENCIO (la letra: «debes hacer
+        /// que en el momento en el que el haz comienza la carga ya no
+        /// pueden lanzarse ni agujeros negros runicos ni soles runicos
+        /// hasta que el haz se acabe y hayan pasado al menos 5 segundos
+        /// de acabado el haz»): mientras la ira VIVE (ceremonia o haz)
+        /// el reloj se empuja SIEMPRE ADELANTE; muerto el haz, la llave
+        /// expira 300 ticks (5 s) después de su ÚLTIMO tick vivo — el
+        /// silencio cubre la creación, el disparo Y la cola.</summary>
+        private static readonly Dictionary<int, ulong> _iraColaHasta = new();
+
+        /// <summary>LA COLA en ticks: 5 segundos POST-HAZ (+15 de colchón
+        /// de red — «al menos 5 segundos», nunca menos).</summary>
+        private const ulong IRA_COLA_TICKS = 300ul + 15ul;
+
         // ================================================================
         //  v6.60 — LA LETRA NUEVA DE LA IRA, COMPLETA: «la cantidad de
         //  minions necesarios para lanzar el ataque es de 11 y con
@@ -114,6 +128,7 @@ namespace AethonMod.Content.Systems
             _agujeroHasta.Clear();
             _supremoHasta.Clear();
             _iraHasta.Clear();
+            _iraColaHasta.Clear();
         }
 
         /// <summary>UN TICK DEL COORDINADOR (lo llama ShardPlayer.PostUpdate
@@ -170,19 +185,29 @@ namespace AethonMod.Content.Systems
 
                 ulong ahora = Main.GameUpdateCount;
 
-                // === v6.61 — EL SILENCIO DE LA IRA (la letra: «mientras
-                //     se esta creando el haz o mientras el haz se esta
-                //     disparando no pueden crearce ni agujeros negros
-                //     runicos, ni soles runicos»): mientras la ceremonia
-                //     vive (la creación) o el haz de la ira dispara, los
-                //     OTROS conjuros del escuadrón ESPERAN — y sus
-                //     relojes NO se consumen (cada uno retoma SU turno
-                //     cuando la ira termina). RitualDe encuentra
-                //     EXACTAMENTE eso: la ceremonia viva… o el haz de
-                //     la ira disparando (v6.60.2 — el ancla del círculo). ===
+                // === v6.61/v6.62 — EL SILENCIO DE LA IRA Y SU COLA (la
+                //     letra v6.61: «mientras se esta creando el haz o
+                //     mientras el haz se esta disparando no pueden
+                //     crearce ni agujeros negros runicos, ni soles
+                //     runicos» + la letra v6.62: «hasta que el haz se
+                //     acabe y hayan pasado al menos 5 segundos de
+                //     acabado el haz»): mientras la ceremonia vive (la
+                //     creación) o el haz de la ira dispara, los OTROS
+                //     conjuros del escuadrón ESPERAN — y sus relojes NO
+                //     se consumen (cada uno retoma SU turno cuando la
+                //     ira termina). RitualDe encuentra EXACTAMENTE eso:
+                //     la ceremonia viva… o el haz de
+                //     la ira disparando (v6.60.2 — el ancla del círculo).
+                //     Y mientras vive, LA COLA se empuja siempre adelante:
+                //     muerto el haz, la llave guarda 315 ticks más — el
+                //     silencio cubre TODO el ciclo y su resaca. ===
                 bool iraViva = IraSerExteriorCeremoniaProjectile.RitualDe(p.whoAmI) != null;
+                if (iraViva)
+                    _iraColaHasta[p.whoAmI] = ahora + IRA_COLA_TICKS;
+                bool iraEnCola = _iraColaHasta.TryGetValue(p.whoAmI, out ulong hastaCola)
+                    && ahora < hastaCola;
 
-                if (!iraViva)
+                if (!iraViva && !iraEnCola)
                 {
                     // === EL SOL RÚNICO (2+ ojos mejorados, nivel 7+) ===
                     int solesMin = DespertarGrimorio.SolesPorMinuto(despertar);
@@ -450,8 +475,24 @@ namespace AethonMod.Content.Systems
                     }
                 }
 
+                // v6.62 — LA VOZ ORIGINAL DEL NACIMIENTO (la letra: «el
+                //     sonido que se usa al crear los agujeros negros
+                //     runicos y los soles runicos por los minions, ese
+                //     sonido original de terraria es horrible comparado
+                //     con el sonido del haz, debes crear un sonido
+                //     original para cuando se crea un agujero negro
+                //     runico y un sol runico por los minions»): el
+                //     Item122 de Terraria MUERE en los TRES nacimientos
+                //     — el sol enciende con RunaNaceSol (el brillo
+                //     ascendente) y las puertas (agujero y supremo)
+                //     abren con RunaNaceVacio (el pozo que cae). Sintet
+                //     izados por la casa (Content/Sounds): voz propia.
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.2f), p.Center);
+                    new Terraria.Audio.SoundStyle(
+                        "AethonMod/Content/Sounds/RunaNaceSol",
+                        Terraria.Audio.SoundType.Sound)
+                    { MaxInstances = 2, Volume = 0.95f },
+                    p.Center);
             }
             catch { }
         }
@@ -524,8 +565,14 @@ namespace AethonMod.Content.Systems
                         new Color(140, 60, 210), 1f);
                     d.noGravity = true;
                 }
+                // v6.62 — LA VOZ ORIGINAL: RunaNaceVacio — el pozo que
+                //     cae (ver el comentario de DispararElSol).
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(0.35f), p.Center);
+                    new Terraria.Audio.SoundStyle(
+                        "AethonMod/Content/Sounds/RunaNaceVacio",
+                        Terraria.Audio.SoundType.Sound)
+                    { MaxInstances = 2, Volume = 0.95f },
+                    p.Center);
             }
             catch { }
         }
@@ -600,8 +647,14 @@ namespace AethonMod.Content.Systems
                         d.noGravity = true;
                     }
                 }
+                // v6.62 — LA VOZ ORIGINAL: RunaNaceVacio, una octava
+                //     más abajo — el supremo es la puerta más honda.
                 Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.5f), p.Center);
+                    new Terraria.Audio.SoundStyle(
+                        "AethonMod/Content/Sounds/RunaNaceVacio",
+                        Terraria.Audio.SoundType.Sound)
+                    { MaxInstances = 2, Volume = 1f, Pitch = -0.25f },
+                    p.Center);
                 // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
                 //     agujeros negros runicos supremos hace ruido de jefes
                 //     al aparecer, bueno no deben hacer ningun ruido, deben

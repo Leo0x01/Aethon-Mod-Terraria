@@ -9,6 +9,7 @@ using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.Projectiles.Definitivas
 {
@@ -384,11 +385,32 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (EsIra)
             {
                 // ============================================================
-                //  v6.59 — LA BOCA DEL SER EXTERIOR: el conducto vive en EL
-                //  CENTRO DEL CÍRCULO del ritual — FIJO donde el escuadrón
-                //  lo gestó. El portador queda LIBRE (nada de cadenas, ni
-                //  de empujones, ni de dirección forzada): la ira es suya.
+                //  v6.62 — LA BOCA VIAJA CON SU PORTADOR (la letra: «otro
+                //  detalle importante es que cuando se lanza el haz por
+                //  los minions, si el personaje se mueve los minions no lo
+                //  siguen, el jugador se mueve y los minions se quedan
+                //  quieto en su sitio disparando el haz sin moverse con
+                //  el jugador»): la boca del Ser Exterior YA no queda
+                //  CLAVADA al punto donde nació — SIGUE AL DUEÑO con el
+                //  MISMO lerp de la ceremonia (0,18/tick: el círculo
+                //  entero, que orbita ESTE punto — RitualDe cae a él —,
+                //  viaja con el jugador y el conducto nace de donde el
+                //  círculo ESTÁ, no de donde estaba). El portador sigue
+                //  LIBRE (nada de cadenas ni empujones): solo su CÍRCULO
+                //  lo acompaña. El dueño caído: la boca flota en su
+                //  último punto (un hechizo empezado se cumple — la regla
+                //  de la casa de la v6.51.5).
                 // ============================================================
+                bool duenoVivo = dueno != null && dueno.active && !dueno.dead;
+                if (duenoVivo)
+                {
+                    Vector2? libro = global::AethonMod.Content.Projectiles.OjoEternoMinion
+                        .PosicionDelLibro(dueno);
+                    Vector2 objetivo = libro is Vector2 c
+                        ? c
+                        : dueno.MountedCenter + new Vector2(0f, -100f);
+                    CentroIra = Vector2.Lerp(CentroIra, objetivo, 0.18f);
+                }
                 Projectile.Center = CentroIra;
             }
             else
@@ -704,6 +726,68 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             Vector2 posPantalla = Projectile.Center - Main.screenPosition;
 
+            // ============ v6.62 — LA BRUMA HEREDADA: LA MITAD COLAPSA ============
+            // (la letra: «la bruma que se crea al cargar desaparece la
+            // lanzar el haz, lo que deberia pasar es que … cuando lanza
+            // el haz la mitad de esa bruma colapsa hacia el centro dando
+            // a entender que es la bruma la que colapsa en un haz»): la
+            // ceremonia murió y EL HAZ hereda su bruma — los primeros 48
+            // ticks del disparo, la MITAD de la nube cae al centro (se
+            // apura al final, se encoge y se apaga AL LLEGAR: la boca del
+            // conducto la escupe — la bruma ES la que colapsa en un haz)
+            // y la otra mitad se disipa hacia fuera (se adelgaza y se
+            // disuelve — lo que el círculo ya no necesita). Puro cine de
+            // cliente: las posiciones nacen del reloj de cada pantalla.
+            if (EsIra && Time >= ChargeTime && Time < ChargeTime + 48f)
+            {
+                float tCol = Utils.GetLerpValue(ChargeTime, ChargeTime + 48f, Time, true);
+                try
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                    BrumaFX.BeginMass();
+                    // ——— LA MITAD QUE COLAPSA: ocho bocanadas caen al
+                    //      centro. La caída arranca lenta y SE APURA al
+                    //      final (1−t²: se lee como succión) y el alfa
+                    //      se entrega en la LLEGADA (1−t³). ———
+                    for (int i = 0; i < 8; i++)
+                    {
+                        int h = i * 37 + 11;
+                        float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
+                        float r0 = 40f + 24f * VFXCore.Hash01(h, 7, 11);
+                        Vector2 pos = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                            * r0 * (1f - tCol * tCol);
+                        float radio = (22f + 14f * VFXCore.Hash01(h, 13, 17)) * (1f - 0.72f * tCol);
+                        BrumaFX.Cloud(pos, Math.Max(6f, radio),
+                            i % 2 == 0 ? new Color(212, 202, 244) : new Color(138, 86, 214),
+                            h, Main.GlobalTimeWrappedHourly,
+                            puffs: 2 + (i & 1),
+                            alpha: 0.50f * (1f - tCol * tCol * tCol));
+                    }
+                    // ——— LA MITAD QUE SE DISIPA: siete bocanadas se
+                    //      alejan (×2,15) y mueren en el aire. ———
+                    for (int i = 0; i < 7; i++)
+                    {
+                        int h = 900 + i * 41 + 29;
+                        float ang = VFXCore.Hash01(h, 5, 3) * MathHelper.TwoPi;
+                        float r0 = 36f + 20f * VFXCore.Hash01(h, 7, 11);
+                        Vector2 pos = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                            * r0 * (1f + 1.15f * tCol);
+                        float radio = (18f + 12f * VFXCore.Hash01(h, 13, 17)) * (1f + 0.9f * tCol);
+                        BrumaFX.Cloud(pos, radio,
+                            i % 2 == 0 ? new Color(196, 186, 232) : new Color(120, 72, 196),
+                            h, Main.GlobalTimeWrappedHourly * 0.9f,
+                            puffs: 2,
+                            alpha: 0.34f * (1f - tCol) * (1f - tCol));
+                    }
+                }
+                catch { }
+                finally
+                {
+                    try { Main.spriteBatch.End(); } catch { }
+                    VFXCore.CerrarLoteSiAbierto();
+                }
+            }
+
             // ============ LA IMPLOSIÓN DE SOLES DE LA CARGA ============
             // (v6.56.9 — la letra: «aparecer lejos y contraerse hacia el
             // centro pero sin dar vueltas»: cada sol nace LEJOS en su
@@ -978,13 +1062,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // OSCURECIDA — el «negro» del conjuro: la bruma es la sombra
             // luminosa (violeta profundo con un pulso de rojo al final).
             Color sombra = new Color((byte)(c.R * 0.42f), (byte)(c.G * 0.34f), (byte)(c.B * 0.52f));
-            return sombra * (AlfaBruma * _laserActivo);
+            return sombra * (AlfaBruma * _laserActivo) * ColaSuave(p);
         }
 
         private Color ColorGlow(float p)
         {
             Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
-            return c * (AlfaGlow * _laserActivo);
+            return c * (AlfaGlow * _laserActivo) * ColaSuave(p);
         }
 
         private Color ColorGlow2(float p)
@@ -992,13 +1076,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
             // más caliente: medio tono hacia el blanco-violeta.
             Color caliente = Color.Lerp(c, new Color(255, 246, 255), 0.28f);
-            return caliente * (AlfaGlow2 * _laserActivo);
+            return caliente * (AlfaGlow2 * _laserActivo) * ColaSuave(p);
         }
 
         private Color ColorCuerpo(float p)
         {
             Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
-            return c * (0.62f * _laserActivo);
+            return c * (0.62f * _laserActivo) * ColaSuave(p);
         }
 
         private Color ColorAlma(float p)
@@ -1007,14 +1091,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // núcleo, un tono más violeta (la vena de encima es la que
             // llega al blanco puro): la textura blanca A TODO EL ANCHO.
             Color alma = Color.Lerp(new Color(255, 250, 255), new Color(222, 196, 255), 0.42f);
-            return alma * (AlfaAlma * _laserActivo);
+            return alma * (AlfaAlma * _laserActivo) * ColaSuave(p);
         }
 
         private Color ColorNucleo(float p)
         {
             // BLANCO-VIOLETA incandescente — la vena del conducto.
             Color nucleo = Color.Lerp(new Color(255, 246, 255), new Color(214, 170, 255), 0.35f);
-            return nucleo * (AlfaNucleo * _laserActivo);
+            return nucleo * (AlfaNucleo * _laserActivo) * ColaSuave(p);
         }
 
         /// <summary>EL ANCHO DE LA CAPA ACTIVA — el perfil del RC2 (p^0.8 ·
@@ -1029,12 +1113,38 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // el conducto lanzado es la pila de capas y su boca rúnica, LIMPIO.
 
         /// <summary>EL COLOR DEL CUERPO (el strip del shader): la paleta
-        /// del conjuro que VIAJA a lo largo — idéntico al RC2.</summary>
+        /// del conjuro que VIAJA a lo largo — idéntico al RC2, con LA
+        /// COLA (v6.62): el cuerpo también se entrega al final.</summary>
         public Color StripColor(float progress)
         {
             Color color = ColorConjuro(Projectile.localAI[0] - progress * CicloConjuro);
             color.A = 0;
-            return color * realSize;
+            return color * realSize * ColaSuave(progress);
+        }
+
+        // ================================================================
+        //  v6.62 — LA COLA QUE SE DISUELVE: el final del conducto NO se
+        //  corta en seco — las texturas LLEGAN hasta el final y SE
+        //  DIFUMINAN hasta perderse al llegar al final del recorrido
+        //  (la letra: «el haz deberia tener un final suave, o sea si
+        //  estas en multijugador un jugador veria el final del haz con
+        //  el final cortado como en la segunda imagen, debe tener un
+        //  final donde las texturas llegen hasta el final y se
+        //  difuminen hasta perderse al llegar al final del recorrido»).
+        //  La AGUJA de la v6.57 afila el ANCHO de la punta; la COLA
+        //  entrega el ALFA: el último 22 % del conducto se disuelve en
+        //  curva suave — pleno hasta el 78 %, un susurro al 92 %, NADA
+        //  en la punta. La llevan TODAS las capas (la misma polilínea:
+        //  cero esquinas nuevas, cero picos por construcción).
+        // ================================================================
+        private static float ColaSuave(float p)
+        {
+            if (p <= 0.78f) return 1f;
+            float t = Utils.GetLerpValue(0.78f, 1f, p, true);
+            // ease-in 1,7: se mantiene casi pleno hasta bien entrado el
+            // tramo y se entrega en los últimos píxeles — ni corte, ni
+            // escalón: la punta se disuelve, no se amputa.
+            return 1f - (float)Math.Pow(t, 1.7);
         }
 
         /// <summary>EL ANCHO DEL STRIP — el perfil del RC2 (607df36) más

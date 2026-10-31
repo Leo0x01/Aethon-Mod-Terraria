@@ -451,16 +451,34 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// el haz de la ira (su disparo) — el MISMO traje en las dos
         /// fases, como manda la letra. Es puro cine de cliente: el par
         /// lo elige el reloj del juego de cada pantalla (nada que
-        /// sincronizar).</summary>
+        /// sincronizar).
+        /// v6.62 — LA LEY DEL CÍRCULO (la letra: «los pequeños rayos
+        /// electricos funcionan fuera del circulo formado por los
+        /// minions, los pequeños rayos siempre deben estar dentro del
+        /// circulo formado por los minions, justo ahora aparecen abajo a
+        /// la derecha fuera del circulo de minions»): SOLO dibujan
+        /// arcos los ojos PUESTOS en la corona (a ≤28 px de SU puesto de
+        /// la órbita — la MISMA matemática de la formación, viva en
+        /// OjoEternoMinion.SlotDelRitual). El ojo que está DE CAMINO
+        /// (cerrando el círculo, volando al puesto) NO está en el
+        /// círculo: su arco nacería FUERA — abajo a la derecha, donde el
+        /// ojo vaya. Hasta sentarse en la corona, no hay electricidad
+        /// entre él y nadie.</summary>
         internal static void DibujarArcosDelEscuadron(Vector2 centroMundo,
             int owner, float intensidad, float relojColor)
         {
             if (Main.dedServ) return;
 
-            // EL ESCUADRÓN VIVO: los ojos del dueño, donde estén — la
-            // órbita del ritual los pone en el círculo alrededor del
-            // centro (SlotDeFormacion: la MISMA animación que gatilla
-            // los arcos).
+            // EL ANCLA VIVA (el círculo ES de quien el escuadrón orbita
+            // HOY) y SU dueño — sin ellos no hay corona que respetar.
+            Projectile ancla = RitualDe(owner);
+            Player duenoArcos = Main.player[owner];
+            if (ancla == null || !ancla.active || duenoArcos == null || !duenoArcos.active)
+                return;
+
+            // EL ESCUADRÓN VIVO: los ojos del dueño — pero SOLO los
+            // PUESTOS en su puesto de la corona (la MISMA animación que
+            // gatilla los arcos es la que ellos todavía no terminaron).
             int tipoOjo = ModContent.ProjectileType
                 <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
             int n = 0;
@@ -469,6 +487,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active || p.type != tipoOjo) continue;
                 if (p.owner != owner) continue;
+                Vector2? puesto = global::AethonMod.Content.Projectiles.OjoEternoMinion
+                    .SlotDelRitual(p, ancla, duenoArcos);
+                if (!(puesto is Vector2 puestoOk)) continue;   // sin puesto no hay corona
+                if ((p.Center - puestoOk).LengthSquared() > 28f * 28f) continue; // de camino: fuera
                 _arcosPos[n] = p.Center;
                 _arcosAng[n] = (p.Center - centroMundo).ToRotation();
                 n++;
@@ -549,6 +571,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // discos lisos): una nube BLANCA (la luz del exterior) y su
             // sombra MORADA (el conjuro), creciendo con el ritual y
             // ciñéndose en la contracción.
+            // v6.62 — EL TRIPLE DE BRUMA (la letra: «se crea bruma al
+            //     cargar el haz, pero se crea 3 veces mas bruma que la
+            //     que se crea ahora»): la nube blanca pasa de 4-10 puffs
+            //     a 12-30 y la morada de 4 a 12 — LA MISMA geometría
+            //     (radio, alfas, respiración) con EL TRIPLE de masa: la
+            //     carga respira TRES veces más gruesa.
             try
             {
                 float radioCuna = MathHelper.Lerp(30f, 95f, prog)
@@ -557,11 +585,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 BrumaFX.BeginMass();
                 BrumaFX.Cloud(posPantalla, radioCuna, new Color(205, 195, 238),
                     semilla, time,
-                    Math.Max(4, (int)(7 * prog) + 3),
+                    Math.Max(12, (int)(21 * prog) + 9),
                     alpha: 0.24f + 0.38f * prog + 0.14f * contraccion);
                 BrumaFX.Cloud(posPantalla + new Vector2(0f, -radioCuna * 0.2f),
                     radioCuna * 0.62f, new Color(86, 44, 150),
-                    semilla + 29, time * 0.85f, 4,
+                    semilla + 29, time * 0.85f, 12,
                     alpha: 0.20f + 0.28f * prog + 0.10f * contraccion);
             }
             catch { }
