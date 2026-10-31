@@ -75,6 +75,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
     // =====================================================================
     public class IraSerExteriorCeremoniaProjectile : ModProjectile
     {
+        /// <summary>LA TEXTURA DE CARGA (el patrón de la casa — el mismo
+        /// SoftGlow del RC2): la ceremonia es 100 % procedimental (su
+        /// PreDraw devuelve false: NUNCA dibuja esta textura) pero tML
+        /// EXIGE una textura resuelta para cada ModProjectile al cargar
+        /// — sin este override el mod entero muere en el cliente con
+        /// «Recurso esperado no encontrado» (el headless no lo caza:
+        /// los servers NO cargan texturas — la lección v6.60.1).</summary>
+        public override string Texture =>
+            "AethonMod/Content/Effects/Procedural/SoftGlow";
+
         /// <summary>LOS TIEMPOS: cerrar el círculo + rayos (150) · la
         /// carga (300 — la misma del RC2) · al cumplir, EL HAZ.</summary>
         private const int T_CEREMONIA = 150;

@@ -1,3 +1,31 @@
+# v6.60.1 — LA TEXTURA FANTASMA DE LA CEREMONIA (el mod no cargaba)
+
+**La letra del usuario**: «vaya, dio un error, no pude ni abrir el mod jajajajajaj» + el client.log.
+
+## EL DIAGNÓSTICO (leído del client.log, línea por línea)
+```
+AssetLoadException: Asset could not be found:
+  "Content\Projectiles\Definitivas\IraSerExteriorCeremoniaProjectile"
+→ MissingResourceException: Recurso esperado no encontrado
+→ Disabling Mod: AethonMod — el mod entero desactivado.
+```
+`IraSerExteriorCeremoniaProjectile` (nacida en la v6.59) es 100 % procedimental — su `PreDraw` devuelve `false` y NUNCA dibuja textura… pero **tML EXIGE una textura resuelta para cada ModProjectile al cargar** (`ModProjectile.AutoStaticDefaults`): sin override de `Texture`, busca el path por defecto (`Content/Projectiles/Definitivas/IraSerExteriorCeremoniaProjectile`), no existe, y **mata el mod entero en el cliente**.
+
+**Por qué no lo cazamos antes**: la v6.59/v6.60 solo se verificó con oráculo + `-build` + **headless** — y **LOS SERVERS NO CARGAN TEXTURAS**: el headless cargó v6.60 sin una excepción mientras el cliente moría. La v6.59/v6.60 nunca se había probado en cliente (el usuario estaba por probarla cuando pidió el cambio de los 11 minions). Bug nacido en la v6.59, descubierto en la primera carga de cliente de la v6.60.
+
+## LA CURA — el patrón de la casa que la ceremonia no traía
+```csharp
+public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+```
+El MISMO SoftGlow del RC2 (`RayosPruebaProjectile.Texture`, su hermana de carpeta): una textura que existe desde siempre en el paquete, puramente decorativa para tML — la ceremonia sigue dibujándose 100 % procedimental (su `PreDraw` nunca la toca). Verificado: `Content/Effects/Procedural/SoftGlow.rawimg` VIAJA en el .tmod (16.396 B).
+
+## LA VACUNA — `tools/audit_texturas_v6601.py`: el auditor de texturas
+El hueco del pipeline está tapado para siempre: el auditor **simula la carga del cliente** resolviendo la textura de **las 298 clases de contenido** del mod (ModItem/ModProjectile/ModNPC/ModDust/ModBuff/ModTile/ModWall/ModPylon/ModMount) EXACTAMENTE como tML (el override `Texture` — literal, computada o vanilla — o el path por defecto namespace+clase) y comprobando que el asset exista en la fuente (.png/.rawimg) — **resultado: 298 escaneadas, 0 faltantes reales** (único aviso: `HollowSanctumBiome` sin textura — falso positivo BENIGNO: los ModBiome no exigen textura al cargar, tML la pide perezosamente para el bestiario; vive así desde la v6.50 y el cliente lo ha cargado bien en TODAS las versiones, incluida la v6.58 del mismo log del usuario). El auditor queda en el pipeline para SIEMPRE: se corre con cada versión y sustituye al headless en lo que el headless no puede ver.
+
+**Verificación**: auditor de texturas **298/298 OK** · oráculo **0/0** · `-build` REAL **0/0** · **.tmod v6.60.1** auditado (456 entradas, EOF exacto, blobs 456/456, `SoftGlow.rawimg` DENTRO, el override UTF-16 en la DLL, md5 3bcd9349741ddeeb41bbfe96b6f330c1) · headless v6.60.1 carga sin excepciones.
+
+---
+
 # v6.60 — EL ESCUADRÓN DE LOS ONCE: LA CONDICIÓN DE LA IRA + EL COMPÁS DE PRUEBA
 
 **La letra del usuario**: «la cantidad de minions necesarios para lanzar el ataque es de 11 y con todas las mejoras, ese es el requisito, si hay menos de 11 minions o no estan mejorados al maximo entonces no pueden lanzar la ira del ser exterior» + «por ahora y como prueba se debe lanzar 5 hazes por minuto, cuando termine la prueba pasara a 1 cada 30 minutos».
