@@ -614,7 +614,44 @@ namespace AethonMod.Content.Weapons
                     minionCost * (1f + PeldanoDe(level).Mana));
                 return player.statMana >= minionCost || player.manaFlower;
             }
-            // Click izquierdo (el Equinoccio): siempre
+            // Click izquierdo (el Equinoccio): siempre — SALVO EL RITO.
+            //
+            // v6.70 — EL LIBRO REZA (la letra, OCTAVA ronda: «los
+            //     pequeños rayitos siguen apareciendo en la parte
+            //     inferior derecha del circulo» + «los rayitos estan
+            //     fuera del circulo de los ojos, analisa bien la
+            //     imagen»). EL DIAGNÓSTICO QUE CIERRA LAS OCHO RONDAS:
+            //     los rayitos de la parte inferior derecha NUNCA
+            //     fueron de la ceremonia — SON LOS DISPAROS BÁSICOS
+            //     DEL PROPIO GRIMORIO: los discos día/noche del
+            //     Equinoccio (el 931 Nightglow de vanilla — un trazo
+            //     de luz BLANCO zigzagueante) que el dueño escupe con
+            //     el clic izquierdo MIENTRAS el ritual vive. Nacen DEL
+            //     LIBRO — que en el ritual ES EL ANCLA, el centro
+            //     exacto del círculo — y el homing de vanilla los
+            //     curva hacia las presas de abajo-derecha, cruzando
+            //     el anillo por FUERA: destellos blancos en movimiento
+            //     radiando del centro, exactamente lo que el forense
+            //     y la visión leyeron en SU captura (múltiples
+            //     trayectorias independientes, origen el centro,
+            //     destino abajo-derecha). Por eso sobrevivieron a las
+            //     SIETE curas (la bola del corazón · el nacimiento
+            //     único · los rayos de plegaria · los anillos): nadie
+            //     los tocó nunca — son el disparo de SIEMPRE.
+            // LA CURA — LA SIMETRÍA DEL RITUAL: mientras la Ira vive
+            //     (la ceremonia gestando O el haz disparando —
+            //     RitualDe), el libro REZA: el clic izquierdo
+            //     descansa. Los ojos ya no cazan en el ritual (la
+            //     v6.59: «no interrumpen la ceremonia con su caza») —
+            //     ahora el libro tampoco escupe: el círculo queda
+            //     LIMPIO de verdad — solo la bruma, la corona, la
+            //     bola del corazón y el haz. Muerto el ritual, el
+            //     Equinoccio dispara como siempre. El clic derecho
+            //     (los refuerzos del escuadrón) SIGUE VIVO en el
+            //     ritual — la guarda es SOLO del clic izquierdo.
+            if (global::AethonMod.Content.Projectiles.Definitivas
+                .IraSerExteriorCeremoniaProjectile.RitualDe(player.whoAmI) != null)
+                return false;
             return true;
         }
 
