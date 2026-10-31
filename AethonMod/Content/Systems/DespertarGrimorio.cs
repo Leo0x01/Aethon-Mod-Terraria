@@ -490,133 +490,26 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  v6.67 — EL PODER DEL ESCUADRÓN NACE DEL DESPERTAR (la letra
-        //  del usuario: «todos los buff de daños ganados por niveles que
-        //  sean buff para minion se desbloquean con el despertar,
-        //  dejemos para el nivel normal del libro desbloquear solo los
-        //  minion y la cantidad de minion, todos los buff de daño para
-        //  minion y otros buff para minion seran obtenido en el
-        //  despertar a travez de los 50 niveles»).
-        //
-        //  LA SEPARACIÓN (la frontera nueva de la casa):
-        //   · EL NIVEL DEL LIBRO → desbloquea LOS OJOS y SU CANTIDAD
-        //     (TechoOjosEterno: nivel 5 el primero, +1 cada 10 — lo
-        //     único que el libro sigue mandando).
-        //   · EL DESPERTAR (0..50) → TODO lo demás del escuadrón: el
-        //     daño del rayo y del contacto, la velocidad, el alcance de
-        //     la mirada, la cadena… y los micropoderes (abajo).
+        //  v6.68 — LA VUELTA A CASA (la letra del usuario: «volvamos a
+        //  esto donde todos los buff aumentaran solo con el nivel del
+        //  libro, dejemos al despertar para habilidades y poderes como
+        //  soles agujeros negros y el haz»): LA SEPARACIÓN de la v6.67
+        //  MURIÓ — todo el poder del escuadrón (daño del rayo y del
+        //  contacto, velocidad, rango, cadena, cadencia) vuelve al
+        //  NIVEL DEL LIBRO (WeaponScaling: la casa de siempre) y el
+        //  DESPERTAR queda para LO QUE ABRE: las mejoras de los ojos,
+        //  el sol rúnico, los agujeros negros, los ascendidos, el
+        //  supremo… y EL HAZ de la Ira. (Las funciones de la v6.67 —
+        //  DanoEscuadronMult · ContactoEscuadronMult ·
+        //  VelocidadEscuadronMult · RangoEscuadron · CadenaEscuadron —
+        //  y LOS MICROPODERES murieron de raíz.)
         // ================================================================
-
-        /// <summary>EL DAÑO DEL RAYO DE LOS OJOS por despertar (+2 % por
-        /// nivel — ×2 en el 50): la cadena propia de invocación que
-        /// vivía en el nivel del libro (+1,5 %/nivel infinito) MUERE —
-        /// el escuadrón golpea fuerte SOLO cuando el libro despierta.</summary>
-        public static float DanoEscuadronMult(int despertar)
-            => 1f + MathF.Max(0, Math.Min(NivelMax, despertar)) * 0.02f;
-
-        /// <summary>EL DAÑO DE CONTACTO/ARCO del escuadrón por despertar
-        /// (+3 % por nivel — +150 % en el 50): la escalera de +50 %
-        /// cada 15 niveles del LIBRO murió con la separación.</summary>
-        public static float ContactoEscuadronMult(int despertar)
-            => 1f + MathF.Max(0, Math.Min(NivelMax, despertar)) * 0.03f;
-
-        /// <summary>LA VELOCIDAD DEL ESCUADRÓN por despertar (+1,8 % por
-        /// nivel — +90 % en el 50).</summary>
-        public static float VelocidadEscuadronMult(int despertar)
-            => 1f + MathF.Max(0, Math.Min(NivelMax, despertar)) * 0.018f;
-
-        /// <summary>EL RANGO DE DETECCIÓN de los ojos por despertar (base
-        /// 500 px · +2 % por nivel · +3 % por cada micro OJO AGUDO — el
-        /// micropoder de abajo: ~+124 % con todo el camino andado).</summary>
-        public static float RangoEscuadron(int despertar)
-        {
-            int d = Math.Max(0, Math.Min(NivelMax, despertar));
-            return 500f * (1f + d * 0.02f + ContarMicro(d, MicroPoder.OjoAgudo) * 0.03f);
-        }
-
-        /// <summary>LOS SALTOS DE CADENA del rayo de los ojos por
-        /// despertar (base 2 · +1 cada 10 niveles — 7 en el 50: la IRA
-        /// EN CADENA que vivía en el nivel del libro camina ahora con
-        /// el despertar).</summary>
-        public static int CadenaEscuadron(int despertar)
-        {
-            int d = Math.Max(0, Math.Min(NivelMax, despertar));
-            return Math.Min(7, 2 + d / 10);
-        }
-
-        // ================================================================
-        //  v6.67 — LOS MICROPODERES: ningún nivel del despertar es
-        //  «plano» (la letra: «esto que dijiste es buena idea: para cada
-        //  nivel darle micropoderes» — la cura de la escalera muda:
-        //  subir del 43 al 44 YA no se siente igual que nada).
-        //
-        //  LOS NIVELES LLANOS (los que no abren una MEJORA ni una PUERTA
-        //  DE CAZA) entregan UN MICROPOTENCIA cada uno, rotando las tres
-        //  familias de la propuesta aprobada:
-        //   · OJO AGUDO  — +3 % de rango de detección del escuadrón.
-        //   · VELA VIVA  — +2 % a la velocidad de vuelo del libro (la
-        //                  vela del espíritu lo acompaña más lista).
-        //   · IRIS TONAL — el iris del escuadrón brilla un tono más
-        //                  (dorado → blanco incandescente).
-        // ================================================================
-
-        /// <summary>Las tres familias de micropoderes (la rotación de los
-        /// niveles llanos).</summary>
-        public enum MicroPoder : byte
-        {
-            OjoAgudo = 0,
-            VelaViva = 1,
-            IrisTono = 2,
-        }
 
         /// <summary>¿ES ESTE nivel un HITO (abre un poder de la letra)?</summary>
         public static bool EsNivelHito(int nivel) => ClaveHito(nivel) != null;
 
         /// <summary>¿ES ESTE nivel una PUERTA DE CAZA (exige un jefe)?</summary>
         public static bool EsNivelDeCaza(int nivel) => JefeDeNivel(nivel) != null;
-
-        /// <summary>¿ES ESTE nivel LLANO? (ni hito ni caza — el nivel que
-        /// antes solo daba «+1 % de daño» y ahora entrega SU
-        /// micropoder).</summary>
-        public static bool EsNivelLlano(int nivel)
-            => nivel >= 1 && nivel <= NivelMax &&
-               !EsNivelHito(nivel) && !EsNivelDeCaza(nivel);
-
-        /// <summary>EL MICROPODER DE UN NIVEL LLANO (la rotación por
-        /// orden de escalera: ojo · vela · iris · ojo…). Null si el
-        /// nivel no es llano.</summary>
-        public static MicroPoder? MicroPoderDe(int nivel)
-        {
-            if (!EsNivelLlano(nivel)) return null;
-            int i = 0;
-            for (int n = 1; n < nivel; n++)
-                if (EsNivelLlano(n)) i++;
-            return (MicroPoder)(i % 3);
-        }
-
-        /// <summary>CUÁNTOS micropoderes de UNA familia ya están
-        /// desbloqueados (los niveles llanos ≤ despertar).</summary>
-        public static int ContarMicro(int despertar, MicroPoder familia)
-        {
-            int d = Math.Max(0, Math.Min(NivelMax, despertar));
-            int cuenta = 0;
-            for (int n = 1; n <= d; n++)
-                if (MicroPoderDe(n) == familia)
-                    cuenta++;
-            return cuenta;
-        }
-
-        /// <summary>LA VELOCIDAD DE LA VELA del libro (la multiplicadora
-        /// que lee el espíritu del Nervioso: +2 % por cada micro VELA
-        /// VIVA desbloqueado).</summary>
-        public static float MultVelaDelLibro(int despertar)
-            => 1f + ContarMicro(despertar, MicroPoder.VelaViva) * 0.02f;
-
-        /// <summary>LOS TONOS DEL IRIS (cuántas veces brilló un tono más:
-        /// 0 dorado apagado … 10 blanco incandescente — lo lee el
-        /// dibujo del iris del escuadrón).</summary>
-        public static int TonosDeIris(int despertar)
-            => ContarMicro(despertar, MicroPoder.IrisTono);
 
         // ================================================================
         //  v6.51.8 — EL CAMINO DEL DESPERTAR (la letra: «en cada nivel del

@@ -14,14 +14,14 @@ namespace AethonMod.Content.Systems
         // === STATS BASE POR NIVEL ===
         public const float MagicDamagePerLevel = 0.022f;
 
-        // (v6.53 — SummonDamagePerLevel (+1,5 %/nivel del LIBRO) MURIÓ en
-        // la v6.67 con la separación de la letra: «todos los buff de
-        // daños ganados por niveles que sean buff para minion se
-        // desbloquean con el despertar, dejemos para el nivel normal del
-        // libro desbloquear solo los minion y la cantidad de minion» —
-        // la cadena propia de invocación vive AHORA en el DESPERTAR:
-        // DespertarGrimorio.DanoEscuadronMult (+2 % por nivel de
-        // despertar). El nivel del libro ya NO alimenta al escuadrón.)
+        /// <summary>v6.53 — LA CADENA PROPIA DE LA INVOCACIÓN (la letra:
+        /// «en vez de 2,2 % de crecimiento como el mágico, el daño de
+        /// invocación tendrá un 1,5 % de crecimiento»): la invocación
+        /// YA NO viaja en MagicDamageMult — tiene SU multiplicador propio,
+        /// con crecimiento MÁS LENTO (1,5 %/nivel) porque el pipeline de
+        /// vanilla además le suma el equipo de invocación del portador
+        /// (MinionOriginalDamageGlobal).</summary>
+        public const float SummonDamagePerLevel = 0.015f;
         public const float CritPerLevel = 0.002f;
         public const float UseSpeedPerLevel = 0.003f;
 
@@ -39,13 +39,15 @@ namespace AethonMod.Content.Systems
         /// <summary>Multiplicador de daño mágico (Infinito).</summary>
         public static float MagicDamageMult(int level) => 1f + level * MagicDamagePerLevel;
 
-        // (v6.53 — SummonDamageMult/SummonDamageBonus (+1,5 %/nivel del
-        // LIBRO) MURIERON en la v6.67 con la separación: el daño del
-        // escuadrón nace del DESPERTAR — DespertarGrimorio
-        // .DanoEscuadronMult. La estructura de la cadena (despertar + lo
-        // devorado + reforja + festín × FactorDelLibro) vive intacta en
-        // DanoOjosDelEterno — SOLO cambió quién alimenta el primer
-        // eslabón.)
+        /// <summary>v6.53 — Multiplicador de daño de invocación PROPIO
+        /// (Infinito): la MISMA estructura del mágico pero con SU
+        /// crecimiento de 1,5 %/nivel (la cadena propia de la letra).
+        /// El reemplazo directo de SummonDamageBonus (muerto: cero
+        /// call sites tras la paridad .51.12).</summary>
+        public static float SummonDamageMult(int level) => 1f + level * SummonDamagePerLevel;
+
+        /// <summary>Bonus de daño de invocación (Infinito).</summary>
+        public static float SummonDamageBonus(int level) => level * SummonDamagePerLevel;
 
         /// <summary>Bonus de crítico (Máximo 100%).</summary>
         public static float CritBonus(int level)
@@ -171,34 +173,44 @@ namespace AethonMod.Content.Systems
         /// letra: «sin importar la armadura o accesorios que lleve el
         /// jugador, los minions del grimorio estarán sujetos a las
         /// características del grimorios»): el daño de nacimiento de un
-        /// ojo nace SOLO del grimorio — su base, SU DESPERTAR y lo
-        /// devorado (los banquetes de la .128-.129)… y el NIVEL 50
+        /// ojo nace SOLO del grimorio — su base, su nivel, su despertar
+        /// y lo devorado (los banquetes de la .128-.129)… y el NIVEL 50
         /// DEL DESPERTAR lo multiplica (la letra: «mejora TODO el ataque
         /// de los minions y sus proyectiles»).
-        /// v6.67 — LA SEPARACIÓN (la letra nueva: «todos los buff de
-        /// daños ganados por niveles que sean buff para minion se
-        /// desbloquean con el despertar, dejemos para el nivel normal
-        /// del libro desbloquear solo los minion y la cantidad de
-        /// minion»): EL NIVEL DEL LIBRO YA NO ALIMENTA AL ESCUADRÓN —
-        /// el primer eslabón de la cadena es EL DESPERTAR
-        /// (DanoEscuadronMult: +2 % por nivel, ×2 en el 50 — el +1,5
-        /// %/nivel de libro de la v6.53 murió). Lo demás (despertar
-        /// general +1 %, lo devorado, la reforja, el festín ×
-        /// FactorDelLibro) sigue IGUAL — y el pipeline de vanilla
-        /// (GetTotalDamage) viste al escuadrón con el equipo de
-        /// invocación del portador como siempre.</summary>
+        /// v6.51.12 — LA PARIDAD DE LA LETRA NUEVA («el daño de
+        /// invocacion es muy inferior al daño magico, parece que los
+        /// calculos no se aplican igual, el calculo para el daño de
+        /// invocacion debe ser el mismo que se usa para el daño magico
+        /// […] y para que todos los stats del grimorio tambien sumen al
+        /// daño de invocacion»): el cálculo es AHORA EL MISMO del clic
+        /// izquierdo — el NIVEL escala con MagicDamageMult (+2,2 %/nivel
+        /// — antes +1 %: LA BRECHA), LA REFORJA VIVA aporta SU columna
+        /// de daño (Ignorante −10 % … Mítico +15 % … Supremo +25 %) y EL
+        /// FESTÍN DEL PORTADOR suma (vestido por la presencia del libro,
+        /// FactorDelLibro). Lo que queda EXCLUSIVO de cada clase vive en
+        /// el pipeline de vanilla (GetTotalDamage: el accesorio que dice
+        /// «daño mágico» SOLO al mágico; el genérico y el de invocación
+        /// — a los ojos, MinionOriginalDamageGlobal).
+        /// v6.53 — LA CADENA PROPIA (la letra nueva: «no debe ser igual,
+        /// mejor cambiarla a su propio cálculo, por supuesto, ya que los
+        /// items que mejoran invocación deben afectarlo […] en vez de
+        /// 2,2 % de crecimiento como el mágico, el daño de invocación
+        /// tendrá un 1,5 % de crecimiento»): la ESTRUCTURA sigue siendo
+        /// la del mágico (nivel + despertar + lo devorado + reforja +
+        /// festín × FactorDelLibro) pero el NIVEL escala con SU propio
+        /// SummonDamageMult (+1,5 %/nivel) — los potenciadores de
+        /// invocación del portador siguen sumando por el pipeline de
+        /// vanilla, SOLO para el grimorio (es su poder).</summary>
         public static int DanoOjosDelEterno(int danoBase, int nivel, Player p)
         {
-            // 0) EL DESPERTAR (la llave de la cadena nueva).
+            // 1) EL NIVEL — LA CADENA PROPIA (v6.53: +1,5 %/nivel — antes
+            //    viajaba en MagicDamageMult +2,2 %: la letra pidió SU
+            //    propio cálculo más lento, porque el equipo de invocación
+            //    del portador ya suma por el pipeline de vanilla).
+            float d = danoBase * SummonDamageMult(System.Math.Max(0, nivel));
+
+            // 2) EL DESPERTAR (+1 % por nivel — como el mágico).
             int despertar = Content.Systems.DespertarGrimorio.NivelDe(p);
-
-            // 1) EL DESPERTAR MANDA — la cadena propia del escuadrón
-            //    (+2 % por nivel de despertar: ×2 en el 50 — el nivel
-            //    del libro SOLO desbloquea los ojos y su cantidad).
-            float d = danoBase * Content.Systems.DespertarGrimorio
-                .DanoEscuadronMult(despertar);
-
-            // 2) EL DESPERTAR GENERAL (+1 % por nivel — como el mágico).
             d *= 1f + Content.Systems.DespertarGrimorio.BonusDano(despertar);
 
             // 3) LO DEVORADO (el festín de armas — como el mágico).
@@ -327,15 +339,46 @@ namespace AethonMod.Content.Systems
         //  STATS DEL MINION
         // ================================================================
 
-        // (v6.67 — LA SEPARACIÓN MURIÓ AQUÍ: MinionHitCooldown,
-        // MinionContactDamageMult, MinionSpeedMult, MinionDetectionRange
-        // y MinionChainCount — TODO lo que el NIVEL DEL LIBRO le daba al
-        // escuadrón — se MUDÓ al DESPERTAR (la letra: «todos los buff de
-        // daño para minion y otros buff para minion seran obtenido en el
-        // despertar a travez de los 50 niveles»). Sus nuevas casas:
-        // DespertarGrimorio.ContactoEscuadronMult · VelocidadEscuadronMult
-        // · RangoEscuadron · CadenaEscuadron. El nivel del libro SOLO
-        // desbloquea LOS OJOS y SU CANTIDAD — TechoOjosEterno.)
+        /// <summary>Hit cooldown: 15 - 1 cada 10 niveles (min 1).</summary>
+        public static int MinionHitCooldown(int level) => System.Math.Max(1, 15 - level / 10);
+
+        /// <summary>+50% daño de contacto cada 15 niveles (tope +500%).</summary>
+        public static float MinionContactDamageMult(int level)
+        {
+            float bonus = (level / 15) * 0.5f;
+            if (bonus > 5f) bonus = 5f;
+            return 1f + bonus;
+        }
+
+        /// <summary>+50% velocidad del minion cada 30 niveles (tope +200%).</summary>
+        public static float MinionSpeedMult(int level)
+        {
+            float bonus = (level / 30) * 0.5f;
+            if (bonus > 2f) bonus = 2f;
+            return 1f + bonus;
+        }
+
+        /// <summary>+100px rango de detección cada 10 niveles (tope 1500px, base 500).</summary>
+        public static float MinionDetectionRange(int level)
+        {
+            float range = 500f + (level / 10) * 100f;
+            if (range > 1500f) range = 1500f;
+            return range;
+        }
+
+        /// <summary>v6.50.109 — LA IRA EN CADENA (la letra: «añadir una
+        /// estadística para el grimorio eterno que mejore a los minion»):
+        /// los rayos de los ojos saltan a +1 enemigo extra cada 20 niveles
+        /// — base 2 saltos en nivel 1, tope 7 saltos en nivel 100. El
+        /// cetro propio (TruenoPerlinStaff) NO lee esto: su cadena sigue
+        /// fija en 2 — la estadística es del GRIMORIO y sólo mejoran LOS
+        /// OJOS.</summary>
+        public static int MinionChainCount(int level)
+        {
+            int extra = level / 20;
+            if (extra > 5) extra = 5;
+            return 2 + extra;
+        }
 
         // ================================================================
         //  EL SEGUIMIENTO QUE CRECE CON EL NIVEL (v6.51.2)
@@ -454,11 +497,35 @@ namespace AethonMod.Content.Systems
             // Como los hitos son cada 5, agregamos mana en niveles que son múltiplos de 4
             // Esto se maneja en PostUpdateEquips, no en hitos.
 
-            // (v6.67 — LAS LÍNEAS DEL ESCUADRÓN MURIERON AQUÍ: daño de
-            // contacto · velocidad · rango · cadena — TODO es del
-            // DESPERTAR ahora, no de los hitos del libro: la ventana del
-            // escuadrón en el tooltip del Eterno las enseña con SU
-            // despertar.)
+            // Daño de contacto minion +50% cada 15 niveles
+            if (milestone % 3 == 0) // nivel 15, 30, 45...
+            {
+                float dmg = MinionContactDamageMult(level);
+                if (dmg < 6f)
+                    rewards.Add("+50% daño contacto minion");
+            }
+
+            // Velocidad minion +50% cada 30 niveles
+            if (milestone % 6 == 0) // nivel 30, 60, 90...
+            {
+                float spd = MinionSpeedMult(level);
+                if (spd < 3f)
+                    rewards.Add("+50% velocidad minion");
+            }
+
+            // Rango detección minion +100px cada 10 niveles
+            if (milestone % 2 == 0)
+            {
+                float range = MinionDetectionRange(level);
+                if (range < 1500f)
+                    rewards.Add("+100px rango detección");
+            }
+
+            // v6.50.109 — LA IRA EN CADENA: +1 salto de cadena del rayo de
+            // los ojos cada 20 niveles (nivel 20, 40, 60, 80, 100 — de 2 a 7)
+            if (milestone % 4 == 0
+                && MinionChainCount(level - 5) < MinionChainCount(level))
+                rewards.Add("+1 salto de cadena del rayo");
 
             // Lifesteal +0.1% cada 7 niveles (en hitos cercanos)
             // Nivel 7, 14, 21, 28, 35... = hitos 1.4, 2.8, 4.2, 5.6, 7...

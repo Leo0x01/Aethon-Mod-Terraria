@@ -533,8 +533,10 @@ namespace AethonMod.Content.UI
             }
         }
 
-        /// <summary>EL TEXTO DEL PODER de un nivel (el hito que abre · el
-        /// micropoder que entrega · null si es un peldaño de solo caza).</summary>
+        /// <summary>EL TEXTO DEL PODER de un nivel (el hito que abre ·
+        /// null si es un peldaño de solo caza). v6.68 — EL MICROPOTENCIA
+        /// (✧) MURIÓ con la letra nueva: los niveles llanos vuelven a
+        /// ser llanos («eliminalo LOS MICROPODERES»).</summary>
         private static string TextoDelPoder(int n)
         {
             // EL HITO (el camino de siempre — la descripción corta).
@@ -543,19 +545,7 @@ namespace AethonMod.Content.UI
                 if (camino[i].Nivel == n)
                     return "★ " + Language.GetTextValue(camino[i].Clave);
 
-            // EL MICROPODER (el nivel llano).
-            var micro = Systems.DespertarGrimorio.MicroPoderDe(n);
-            if (micro != null)
-            {
-                string clave = micro == Systems.DespertarGrimorio.MicroPoder.OjoAgudo
-                    ? "CieloMicroOjoAgudo"
-                    : micro == Systems.DespertarGrimorio.MicroPoder.VelaViva
-                        ? "CieloMicroVelaViva"
-                        : "CieloMicroIrisTono";
-                return "✧ " + Language.GetTextValue(Clave(clave));
-            }
-
-            // LA PUERTA DE CAZA (nivel de solo jefe — sin micro ni hito).
+            // LA PUERTA DE CAZA (nivel de solo jefe — sin hito).
             if (Systems.DespertarGrimorio.EsNivelDeCaza(n))
                 return "⚔ " + Language.GetTextValue(Clave("CieloPuertaDeCaza"));
 

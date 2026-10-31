@@ -251,28 +251,11 @@ namespace AethonMod.Content.Projectiles
             }
         }
 
-        /// <summary>EL DESPERTAR DEL DUEÑO (v6.67 — LA SEPARACIÓN: el
-        /// nivel del libro ya NO alimenta al escuadrón — SOLO desbloquea
-        /// los ojos y su cantidad; TODO lo demás del escuadrón nace del
-        /// DESPERTAR del grimorio activo del dueño).</summary>
-        private int DespertarDelDuenio
-        {
-            get
-            {
-                Player dueño = Main.player[Projectile.owner];
-                return dueño != null && dueño.active
-                    ? global::AethonMod.Content.Systems.DespertarGrimorio.NivelDe(dueño)
-                    : 0;
-            }
-        }
-
-        /// <summary>LA VELOCIDAD DE NIVEL (la .107 — v6.67: LA
-        /// SEPARACIÓN): 1,0× en despertar 0 subiendo LINEAL hasta 1,5×
-        /// (+50 % más rápido) en el despertar 50 — y CLAVADA ahí (el
-        /// tope de la letra). La cadencia del escuadrón camina con el
-        /// DESPERTAR, no con el nivel del libro.</summary>
+        /// <summary>LA VELOCIDAD DE NIVEL (la .107): 1,0× en nivel 1
+        /// subiendo LINEAL hasta 1,5× (un 50% más rápido) en nivel 100 —
+        /// y CLAVADA ahí (el tope de la letra).</summary>
         private float VelocidadNivel =>
-            1f + 0.5f * Math.Min(DespertarDelDuenio, 50) / 50f;
+            1f + 0.5f * Math.Min(Level - 1, 99) / 99f;
 
         /// <summary>EL RITMO PROPIO: cada ojo hereda una velocidad
         /// personal (0,85–1,15) de su whoAmI — la banda JAMÁS dispara en
@@ -415,8 +398,7 @@ namespace AethonMod.Content.Projectiles
                         Vector2 ancla = refPt + Vector2.Normalize(aLaPresa)
                             * Math.Min(dP * 0.35f, 220f);
                         Vector2 deseada = (ancla - Projectile.Center) * 0.12f;
-                        float vmax = 6f * global::AethonMod.Content.Systems.DespertarGrimorio
-                            .VelocidadEscuadronMult(DespertarDelDuenio);
+                        float vmax = 6f * WeaponScaling.MinionSpeedMult(nivel);
                         if (deseada.Length() > vmax)
                             deseada = Vector2.Normalize(deseada) * vmax;
                         Projectile.velocity = Vector2.Lerp(
@@ -500,8 +482,7 @@ namespace AethonMod.Content.Projectiles
                 }
                 else if (dist > 90f)
                 {
-                    float vmax = 13f * global::AethonMod.Content.Systems.DespertarGrimorio
-                        .VelocidadEscuadronMult(DespertarDelDuenio);
+                    float vmax = 13f * WeaponScaling.MinionSpeedMult(nivel);
                     Vector2 deseada = Vector2.Normalize(alSlot) *
                         Math.Min(vmax, dist * 0.22f);
                     Projectile.velocity = Vector2.Lerp(Projectile.velocity, deseada, 0.15f);
@@ -570,8 +551,7 @@ namespace AethonMod.Content.Projectiles
                 // invocados ya en el 50).
                 float bonusFinal = Bonus50Vivo(Projectile);
                 int dano = Math.Max(1, (int)(Projectile.damage *
-                    global::AethonMod.Content.Systems.DespertarGrimorio
-                        .ContactoEscuadronMult(DespertarDelDuenio) * MultMejoras(Projectile) * bonusFinal));
+                    WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile) * bonusFinal));
                 try
                 {
                     Projectile.NewProjectile(
@@ -805,8 +785,7 @@ namespace AethonMod.Content.Projectiles
         /// Orbe Cósmico, heredado) — la misma lista en todos los clientes.</summary>
         private NPC ObjetivoDelOjo(Player dueño, int nivel)
         {
-            float rango = global::AethonMod.Content.Systems.DespertarGrimorio
-                .RangoEscuadron(global::AethonMod.Content.Systems.DespertarGrimorio.NivelDe(dueño));
+            float rango = WeaponScaling.MinionDetectionRange(nivel);
             NPC mejor = null;
             float mejorD = rango;
             foreach (NPC npc in Main.ActiveNPCs)
@@ -1037,29 +1016,6 @@ namespace AethonMod.Content.Projectiles
                     Main.spriteBatch.Draw(iris,
                         pos + (IRIS_REST + mirada) * escOjo, null, color, 0f,
                         iris.Size() * 0.5f, IRIS_ESCALA * escOjo, SpriteEffects.None, 0f);
-
-                    // === v6.67 — EL IRIS TONAL (el micropoder de los
-                    //     niveles llanos: «el iris del escuadrón brilla un
-                    //     tono más»): cada micro IRIS TONO del despertar
-                    //     aviva el halo del iris un tono — del dorado
-                    //     apagado de siempre al BLANCO INCANDESCENTE del
-                    //     50. La luz del ojo ES el termómetro del
-                    //     despertar: se lee a lo lejos, sin números. ===
-                    int tonos = global::AethonMod.Content.Systems.DespertarGrimorio
-                        .TonosDeIris(DespertarDelDuenio);
-                    if (tonos > 0 && VFXCore.SoftGlow != null)
-                    {
-                        float tTono = Math.Min(1f, tonos / 10f);
-                        Color tono = Color.Lerp(
-                            new Color(255, 196, 92),    // el dorado del iris
-                            new Color(255, 250, 235),    // el blanco incandescente
-                            tTono);
-                        float alfa = 0.14f + 0.30f * tTono;
-                        Vector2 posIris = pos + (IRIS_REST + mirada) * escOjo;
-                        Main.spriteBatch.Draw(VFXCore.SoftGlow, posIris, null,
-                            tono * alfa, 0f, VFXCore.SoftGlow.Size() * 0.5f,
-                            (0.55f + 0.45f * tTono) * escOjo, SpriteEffects.None, 0f);
-                    }
                 }
             }
             finally { Main.spriteBatch.End(); }

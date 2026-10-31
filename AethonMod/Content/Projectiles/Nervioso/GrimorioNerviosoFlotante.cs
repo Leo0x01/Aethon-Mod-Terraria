@@ -448,16 +448,8 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 Projectile.velocity *= 0.88f;
                 // En el acecho vuela SERENO: tope plano de 10 px/t (la
                 // ronda es un paseo, no una cacería — nada de misiles).
-                // v6.67 — LA VELA VIVA (el micropoder de los niveles
-                // llanos del despertar: «+2 % velocidad de la vela del
-                // libro»): el tope respira con el DESPERTAR del dueño —
-                // el espíritu acompaña más listo a quien más despierta
-                // su grimorio (hasta +20 % con las 10 velas).
-                float multVela = Content.Systems.DespertarGrimorio
-                    .MultVelaDelLibro(Content.Systems.DespertarGrimorio.NivelDe(dueño));
-                float tope = (enPueblo ? 10f : MathHelper.Clamp(
-                    Vector2.Distance(destino, Projectile.Center) * 0.01f, 10f, 20f))
-                    * multVela;
+                float tope = enPueblo ? 10f : MathHelper.Clamp(
+                    Vector2.Distance(destino, Projectile.Center) * 0.01f, 10f, 20f);
                 float velCaza = Projectile.velocity.Length();
                 if (velCaza > tope) Projectile.velocity *= tope / velCaza;
 

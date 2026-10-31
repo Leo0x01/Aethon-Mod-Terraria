@@ -2899,9 +2899,6 @@ Despertar: {
         CieloEsencias: esencias {0}/{1}
         CieloMonedas: dinero: falta {0}
         CieloMonedasPagadas: dinero pagado ✓
-        CieloMicroOjoAgudo: OJO AGUDO — +3% de rango de detección
-        CieloMicroVelaViva: VELA VIVA — +2% de velocidad del libro
-        CieloMicroIrisTono: IRIS TONAL — el iris brilla un tono más
         CieloPuertaDeCaza: la puerta de la caza
 }
 
