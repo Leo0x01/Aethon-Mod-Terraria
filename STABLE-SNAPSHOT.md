@@ -1,3 +1,20 @@
+# v6.57 — LA VUELTA DEL HAZ C: EL CORAZÓN DORADO MUERE, EL ALMA NACE Y LA MUERTE ESTRECHA — EL CHECKLIST
+
+> **PUBLICADA** — release [429635856](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.57.0) + CDN verificado byte a byte (md5 `4df379dd4870807e7e1001aaf9d5651c`, 6.365.240 B; asset id 693964616).
+
+**Qué pasó** (la letra): «el mejor es el C, pero hay algo raro, son como circulos amarillos que aprecen a veces y son demasiado grandes, no deben aparecer» + «debe tener otra textura como esa pero que ocupe todo el haz en ancho» + «el pequeño brillo de soles runicos debe aparecer mas lejos del jugador, y a medida que se carga el ataque, estos caen hacia el centro» + «al lanzar el haz la pantalla debe temblar un poco, tal vez un temblor de unos pocos pixeles y con movimiento suaves» + «el color de los circulos runicos debe ser el mismo que el del haz C» + «al final del haz este como que se hace estrecho pero no lo sucifiente, al terminar de lanzar el haz este debe hacerse estrecho y luego desaparecer».
+
+1. **CERO CÍRCULOS AMARILLOS (la ley del corazón dorado)**: [ ] en NINGÚN momento del ataque (carga, disparo, boca, márgenes del haz) aparece un círculo/blob AMARILLO grande — los soles son ahora ESTRELLAS BLANCAS de 4 puntas puras. Si ves algo amarillo y redondo: captura y reporta.
+2. **EL ALMA — LA TELA BLANCA A TODO EL ANCHO (el haz C)**: [ ] la textura blanca que antes vivía SOLO en el centro ahora TIÑE EL HAZ DE PUNTA A PUNTA Y DE BORDE A BORDE (una tela blanca incandescente sobre el plasma); [ ] la vena central MÁS BRILLANTE sigue ardiendo encima (el «láser dentro de la explosión»).
+3. **LA PUNTA DE AGUJA**: [ ] el extremo lejano del haz termina en PUNTA FINA (como una aguja/lanza) — ya NO es un extremo romo/cortado.
+4. **LA MUERTE ESTRECHA**: [ ] al TERMINAR de lanzar (último segundo), TODO el haz SE ESTRECHA visiblemente hasta volverse un hilo delgado y LUEGO desaparece — como una boca que se cierra.
+5. **LOS SOLES RÚNICOS DE LA CARGA**: [ ] nacen AHORA MUCHO MÁS LEJOS del jugador (del borde lejano del conjuro); [ ] caen RECTOS hacia el centro (sin orbitar); [ ] la caída ACELERA al final (el tirón) y el enjambre se aprieta con la carga; [ ] al disparar salen escupidos en abanico.
+6. **EL TEMBLOR SUAVE DEL LANZAMIENTO**: [ ] al DISPARAR, la pantalla tiembla UN POCO — unos pocos píxeles, movimiento SUAVE (nada de sacudidas secas) + el instante congelado de cine; [ ] durante el resto del disparo el temblor es un susurro (ya no domina).
+7. **LA CORONA DEL COLOR DEL HAZ**: [ ] los círculos rúnicos de la carga son VIOLETA/MORADO/ROJO/MAGENTA — LA MISMA paleta que viaja por el haz C (ya NO se ven blancos/cian ajenos).
+8. **CERO PICOS (siempre)**: [ ] todos los bordes LISOS en carga, disparo Y muerte (la sim 1:1 dio 0 picos en el sobre en vida y en muerte); si algo se ve dentado: captura y reporta.
+
+---
+
 # v6.56.9 — LA PILA DE CAPAS GPU-UNIVERSAL + LA IMPLOSIÓN DE SOLES + LA AUDITORÍA EJECUTADA — EL CHECKLIST
 
 > **PUBLICADA** — release [429618372](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.9) + CDN verificado byte a byte (md5 `ba7f6bf57c23f02fee3617551986f3e3`, 6.364.617 B; asset id 693887337).

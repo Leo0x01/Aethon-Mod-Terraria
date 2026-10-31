@@ -28,6 +28,8 @@ Sim 1:1 (`tools/sim_pila_v657.py`) con la matemática EXACTA de las nuevas curva
 ## (8) EL PIPELINE COMPLETO DE LA CASA
 Oráculo 0/0 (el mod entero contra el tML 2026.08.3.0 real) · `-build` REAL 0/0 · `.tmod` v6.57.0 auditado (458 entradas, EOF exacto, 458/458 blobs OK, firmas vivas TODAS — `ColorAlma` la nueva —, muertos AUSENTES, 3 iconos DENTRO, 0 .fx/4 .fxc, hjson espejos IDÉNTICOS, loop ogg intacto) · headless: **0 EXCEPCIONES** (Sandboxing→Constructing→Configuring→Finalizing) · códice **v1.6** con LA LEY DEL CORAZÓN DORADO (§0) + la bitácora v6.57 (§5.4) + la fila de §11 · HOJA-DE-RUTA.md con la sección v6.57.
 
+**PUBLICADA**: release 429635856 + asset AethonMod.tmod 693964616 (6.365.240 B, uploaded), CDN verificado byte a byte (md5 `4df379dd4870807e7e1001aaf9d5651c`) + `/releases/latest` = v6.57.0 · respaldo /home/sync/AethonMod-v6.57.0.tmod + .tmod en la carpeta del juego.
+
 ---
 
 # v6.56.9 — LA PILA DE CAPAS GPU-UNIVERSAL, LA IMPLOSIÓN DE SOLES Y LA AUDITORÍA EJECUTADA
