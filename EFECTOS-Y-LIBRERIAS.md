@@ -1,4 +1,4 @@
-# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.6)
+# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.7)
 
 > **ESTE ES EL ARCHIVO DE CONSULTA OBLIGATORIA PARA CUALQUIER EFECTO.**
 > Antes de crear UN SOLO efecto — visual, de sonido, de pantalla, de partícula,
@@ -120,6 +120,35 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      de 4 puntas pura; BrilloSolarHalo conserva SU corazón: valor por
      defecto 1). Lo que a escala de amuleto es una firma, a escala de
      cataclismo es un defecto.
+   - **EL ATAQUE VIVE DONDE SE LEE (LEY v6.58)** → vanilla dibuja los
+     proyectiles ANTES del polvo, el gore y las partículas ambientales
+     (las hojitas de los árboles viven en esos pases tardíos) — TODO lo
+     que cae después del pase de proyectiles pasa POR ENCIMA del ataque
+     (la letra: «algunas sprites del juego como las hojitas que caen de
+     los árboles se ven sobre el ataque… el ataque debe estar sobre
+     todo»). UN ATAQUE QUE DEBE ESTAR SOBRE TODO NO VIVE EN EL PREDRAW
+     DEL PROYECTIL: su dibujado entero se muda a un ModSystem con
+     `PostDrawInterface` (el punto aprobado de la casa — PantallaSistema/
+     OndaSystem/OcasoSystem) con EL BAILE DEL LOTE documentado:
+     cerrar el lote de UI → abrir lote de MUNDO con los parámetros del
+     pase de entidades (GameViewMatrix.TransformationMatrix — en el tML
+     2026.08 `Main.Transform` es SOLO-LECTURA y SIEMPRE devuelve ESA
+     matriz, así que los `ReabrirLoteVanilla` internos reabran EN MUNDO
+     solos) → dibujar → cerrar → reabrir el lote de interfaz con los
+     parámetros del fix v6.50.2. **OJO: los `PlayerInput.SetZoom_*` de
+     este tML son REMAPEADORES DE RATÓN** (mouseX/mouseY/screenWidth —
+     verificado en su IL), NO de transform: llamarlos para "prestar el
+     zoom" CORROMPE EL PUNTERO. Caso ejemplar: las copias del RC2
+     (`RayosPruebaEncimaSistema`).
+   - **EL MOMENTO PUEDE LEERSE SIN LUZ (v6.58)** → la ignición del haz
+     llevaba DOS luces blancas heredadas del golpe genérico (el flash
+     de pantalla de OndaLib + el baño `AddLight` ×2.75) MÁS un sprite
+     DestelloFinal a 0.9 de alfa — la letra: «justo en el primer
+     segundo de lanzar el rayo hay un pequeño destello blanco… no
+     debería estar ahí… es solo de iluminación». Un momento de ignición
+     puede leerse SOLO por el MOVIMIENTO (temblor suave + hitstop +
+     estallido de soles): `ImpactoLib.Golpe/GolpeDeCine` ganan
+     `destello:` para apagar flash+luz SIN perder la sacudida.
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -521,6 +550,8 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 
 **v6.56.5 — LA PARIDAD DE LAS RUNAS (la 2ª vuelta del espejo rúnico, auditoría C):** el factor `espejoLado` de la .56.4 (−1 izquierda/+1 derecha) rompía el giro espejado con **Plumas IMPAR** — la paridad del índice YA se auto-invierte entre gemelas (`parity(n₄+j) = −parity(j)` cuando n₄ es impar) y el factor EXTRA dejaba ambas alas girando AL MISMO SENTIDO (las 4 alas rúnicas tienen 5 plumas; la .56.3 sin factor era la correcta para impar, la .56.4 arregló par y rompió impar). **La regla:** `L_B = −(−1)^num₄` con `L_A = +1` — impar: ambas +1 (la paridad hace el trabajo); par: +1/−1 (`(i < num4) || ((num4 & 1) == 1) ? 1 : -1`). Además: el giro del glifo VIAJA CON `direction` (al mirar a la izquierda todo el enjambre se espeja — el glifo también, o las runas no eran el espejo de sí mismas), las GEMELAS comparten semilla de fase/centelleo/glifo (semilla por `i % num4`, no por `i` crudo — antes las plumas gemelas centelleaban y giraban distinto: asimetría visible del par) y el ANILLO CENTRAL se espeja con la transformación **π−θ** (el espejo X de un ángulo — el orbital REVERSA con la dirección y el giro del glifo cae exacto: −θ−π/2 ≡ π−θ+π/2, mod 2π).
 
+**v6.58 — NOTA ACLARATORIA (la pregunta: «todas las alas tienen picos, ¿esos picos son intencionales o es un error como el de las armas?»): SON EL DISEÑO — LOS «PICOS» DE LAS ALAS SON LAS PLUMAS.** Cada ala es un abanico de 2-7 PLUMAS (`estilo.Plumas`, la tira vectorial de 8 nodos con perfil raíz→vientre→**PUNTA AFILADA** de `Afilada`/`Filosa`/`PuntaSemiancho` del `EstiloAlas`): lo que el ojo lee como «picos» en los bordes es LA SILUETA DEL ALA MISMA — las puntas separadas de sus plumas, el lenguaje de las alas emplumadas (Stardust/Fishron en vanilla). **NO es el bug de los picos de las armas de la v6.56.6** (aquellos eran quads poligonales + remolino binario crudo dibujando peines FUERA de la silueta intencional — §0, LA LEY DEL PIXEL vs EL QUAD): aquí cada pluma ES la geometría intencional, dibujada con el pipeline vectorial de tiras suaves de la casa. Las alas puntiagudas llevan el nombre a cuestas por DISEÑO — Agujas del Vacío, Cuchillas del Eclipse — y el catálogo parametriza la afilación por anatomía (`AlasCatalogo.De(i)`): si el usuario pide alas más REDONDAS, se afina `Afilada`/`Plumas`/`PuntaSemiancho` del estilo — es un cambio de DISEÑO, no una cura de bug.
+
 ### 4.25 Las utilidades de soporte
 
 - **EcoLib.cs** — LAS VOCES: `Hablar(texto, tinte, rugido, prioridad)` (cola acotada, la voz del libro SE CUELA al frente), `ElegirVariante` (reparto sin repetición), `Update/Dibujar` (capa tras "Vanilla: Death Text", NUNCA abre lotes propios).
@@ -730,6 +761,7 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
   `<summary>` — leerlo antes de llamar. Los quads VFXCore son MUNDO,
   SIEMPRE.**
 - **v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA:** la .56.7 reescribió el PS completo (9 muestreos) — validó contra MojoShader pero en la GPU del jugador el haz era UNA BANDA PLANA sin textura (RGB constante ±3, borde duro, cero fBm — las capturas analizadas píxel a píxel). LA CURA: **el .fx vuelve al ESQUELETO EXACTO DE LA v6.55.1** (el bytecode PROBADO en la máquina del jugador durante toda la era 607df36 — mismos constructos, 6 muestreos) y las mejoras viven como DELTAS MÍNIMOS: **LAS VENAS ROJAS** (`SegundoRuido` promovido de multiplicador a SELECTOR de color — el tono salta del violeta profundo al rojo vivo donde su máscara enciende), **EL PULSO VIAJERO** (bandas de brillo que corren a la punta), **EL HALO** (pow³ con UNA muestra de carne, el filo teñido de rojo) y **EL NÚCLEO QUE LATE**. **LA PALETA DEL CONJURO** (la letra: «los colores del mod son principalmente morado, rojo, negro»): `ColorPrisma` MUERE en el RC2 — `RayoConcentradoDosProjectile.ColorConjuro` (violeta arcano → morado profundo → rojo sangre → magenta, ciclo 48 t, viaja a lo largo) alimenta el `input.Color` del shader, la luz del mundo, los anillos, los arcos y la corona. **LA REGLA QUE QUEDA: el .fx del RC2 se cambia CON CIRUGÍA — cada delta se compila, se valida contra MojoShader, se INSPECCIONA SU GLSL transpilado y se verifica en el sim 1:1 ANTES de empaquetar. JAMÁS reescritura completa del PS.** LA BOCA DE GLOWS APILADOS MURIÓ COMPLETA (§0 — era EL círculo plano de las capturas): la boca son la corona + los soles + los arcos + LA ESTRELLA CONDUCTO (`SolRunico4Puntas` latiendo en la boca). Sim 1:1: rugosidad del borde media 1.64 px (shader) / 4.09 px (fallback); 17 % del cuerpo son venas rojas, 16 % violetas.
+- **v6.58 — EL CONDUCTO MUDA DE PASE (LA LEY DEL ATAQUE ENCIMA, §0):** el dibujado entero de las copias (la boca del conjuro + la pila de 7 capas) sale del `PreDraw` del proyectil y vive en `RayosPruebaEncimaSistema` (`PostDrawInterface`) — las hojitas/gore/polvos de vanilla ya no caen SOBRE el conducto (la letra: «el ataque debe estar sobre todo»; los proyectiles se dibujan ANTES de esos pases). MISMA polilínea, mismos lotes, MISMO volumen de dibujado — solo cambia el punto del frame (cero costo nuevo, cero picos nuevos). EL DATO DEL IL: en el tML 2026.08 `Main.Transform` es solo-lectura y SIEMPRE devuelve `GameViewMatrix.TransformationMatrix` — los `ReabrirLoteVanilla` reabren en mundo desde CUALQUIER contexto (y los `SetZoom_*` son remapeadores de ratón: intocables). **LA IGNICIÓN A CIEGAS** (la letra: «justo en el primer segundo de lanzar el rayo hay un pequeño destello blanco… es solo de iluminación»): el `GolpeDeCine` de la ignición va con `destello: false` (sin flash de pantalla ni baño AddLight — quedan temblor suave + hitstop) y el sprite `DestelloFinal` de la ignición MUERE ENTERO.
 - **Fallback:** tiras RayoStrip ×4 SUAVES (funda violeta carne 420px · cuerpo paleta-por-nodo carne 300px · venas rojas rampa 240px · núcleo blanco banda 380px — SIN remolino binario, v6.56.8) — el arma
   NUNCA se rompe. La aberración cromática del borde prismático vive en
   `HazConcentradoLib.AberracionCromatica` (vía CPU, fina y lisa).
@@ -966,6 +998,7 @@ contrato de coordenadas). CERO discos en la boca (la ley §0).
 | **v6.56.7** | **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
 | **v6.56.9** | **LA PILA DE CAPAS GPU-UNIVERSAL** (strips múltiples sobre la MISMA polilínea + Main.pixelShader + RampaGlow — la cura de «una sola capa»: el núcleo ocupaba el 99% del halo, no había envolvente; 3 recetas A/B/C en las COPIAS del RC2, el original intacto) · **LA IMPLOSIÓN DE SOLES** (ángulo fijo, caída radial ease-in — «sin dar vueltas») · **LA AUDITORÍA EJECUTADA**: BeamLib+BoltRenderer+HazConcentradoLib-muerta ENTERRADAS (−1.809 l), 40 métodos muertos purgados (−1.317 l), **LOS HELPERS CANÓNICOS** en VFXCore (Tint/TintAlfa/AbrirAdditive/AbrirAlpha/Capsule/RingQuad — 96 cuerpos delegados) · **TiemposLib (EL HITSTOP) + ImpactoLib (EL GOLPE)** con la ignición de cine de las copias · **LA LEY DEL CÓDICE SINCRONIZADO** (§0.6, la anti-recurrencia del desync de 6 puntos) — y **ESTE CÓDICE (v1.5)** | §0, §4.5-4.6, §4.25, §5.4, §11, AUDITORIA-LIBRERIAS.md |
 | **v6.57** | **LA VUELTA DEL HAZ C (el ganador)**: **LA LEY DEL CORAZÓN DORADO** (§0 — `corazon:` parametrizado, los haces a 0: cero círculos amarillos) · **EL ALMA** (la 7ª capa: la misma RampaGlow del núcleo a TODO el ancho) · **LOS SOLES NACEN MÁS LEJOS** (320-520 px) · **EL TEMBLOR SUAVE** (`suave:` en ImpactoLib — la vía dulce de PantallaLib, 3.2 px de dobles senos; sostenido 6.5→2.6) · **LA CORONA VISTE EL HAZ** (la paleta del conjuro viajando por los tres aros) · **LA AGUJA Y LA ESTRANGULACIÓN** de `StripWidth` (punta ×0.06, muerte ×0.07 — sim 0 picos en vida Y muerte) — y **ESTE CÓDICE (v1.6)** | §0, §5.4, §11 |
+| **v6.58** | **EL ATAQUE SOBRE TODO EL MUNDO** (§0/§5.4 — las hojitas/gore/polvos ya no tapan el conducto: `RayosPruebaEncimaSistema` dibuja las copias en PostDrawInterface con el baile del lote mundo↔UI) · **EL DATO DEL IL** (Main.Transform siempre = GameViewMatrix.TransformationMatrix en tML 2026.08; los SetZoom_* son remapeadores de RATÓN — intocables) · **LA IGNICIÓN A CIEGAS** (`destello:` en ImpactoLib — sin flash blanco ni baño de luz; el sprite DestelloFinal de la ignición muere) · **LA NOTA DE LAS PLUMAS** (§4.24 — los «picos» de las alas son LAS PLUMAS, el diseño; NO el bug de los quads) — y **ESTE CÓDICE (v1.7)** | §0, §4.24, §5.4, §11 |
 | **v6.56.8** | **LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA** (el .fx vuelve al esqueleto PROBADO .55.1; los deltas: venas rojas/pulso/halo/latido) · **LA BOCA DE GLOWS APILADOS PROHIBIDA** (§0 — era EL círculo plano de las capturas; la boca = corona + soles + arcos + estrella conducto) · **`ColorConjuro`** (violeta→morado→rojo→magenta — ColorPrisma muere en el RC2) · **EL FALLBACK HERMOSO** (4 tiras suaves, sin remolino) · **LA AUDITORÍA DE LIBRERÍAS entregada** (`AUDITORIA-LIBRERIAS.md`: 2 librerías muertas, ~3.900 líneas recuperables, ~125 copias de helpers, 3 librerías nuevas propuestas — TiemposLib/PostFXLib/ImpactoLib) — y **ESTE CÓDICE (v1.4) RECONCILIADO CON LA REALIDAD** | §0, §5.4, §6.A, AUDITORIA-LIBRERIAS.md |
 
 ---

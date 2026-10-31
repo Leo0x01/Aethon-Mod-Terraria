@@ -18,6 +18,28 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //
     //  v6.57 — LA VUELTA DEL HAZ C (el ganador de las tres copias, a
     //  pedido del usuario). LA LETRA, punto por punto:
+    //  (0) LA IGNICIÓN A CIEGAS (v6.58 — la letra: «justo en el primer
+    //      segundo de lanzar el rayo hay un pequeño destello blanco…
+    //      eso no debería pasar… es solo de iluminación»): DOS fuentes
+    //      de luz blanca morían en el arranque — el baño de AddLight +
+    //      flash de pantalla del GolpeDeCine de la ignición (blanco
+    //      255,248,235 ×2.75) y EL DESTELLO sprite (la estrella
+    //      DestelloFinal a 0.9 de alfa durante 8 ticks en la boca).
+    //      AMBAS MUEREN: la ignición va con destello: false (ImpactoLib
+    //      — quedan el temblor suave y el hitstop) y el bloque del
+    //      sprite se borra ENTERO. El momento se lee por el MOVIMIENTO
+    //      (temblor + hitstop + estallido de soles), no por la luz.
+    //  (0.b) EL HAZ SOBRE TODO EL MUNDO (v6.58 — la letra: «algunas
+    //      sprites del juego como las hojitas que caen de los árboles
+    //      se ven sobre el ataque y eso no debe ser así, el ataque debe
+    //      estar sobre todo»): los proyectiles se dibujan ANTES del
+    //      polvo/gore/hojas de vanilla — TODO lo que cae después del
+    //      pase de proyectiles tapa el conducto. LA CURA: el dibujado
+    //      entero (boca + pila) se muda a RayosPruebaEncimaSistema
+    //      (PostDrawInterface — ENCIMA de todo el mundo, el patrón
+    //      PantallaSistema/OcasoSystem de la casa); este PreDraw ya no
+    //      dibuja NADA. Misma geometría, mismo volumen, otro punto del
+    //      frame: cero costo nuevo, cero picos nuevos.
     //  (1) LOS CÍRCULOS AMARILLOS («son como circulos amarillos que
     //      aparecen a veces y son demasiado grandes, no deben
     //      aparecer»): era EL CORAZÓN DORADO del sol rúnico — un Quad
@@ -322,17 +344,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
                 if (Time == ChargeTime + 1)
                 {
-                    // v6.57 — LA IGNICIÓN DE CINE, POR LA VÍA DULCE (la
-                    // letra: «al lanzar el haz la pantalla debe temblar
-                    // un poco, tal vez un temblor de unos pocos pixeles
-                    // y con movimiento suaves»): EL FACADE del golpe de
-                    // la casa en modo SUAVE — 3.2 px de DOBLES SENOS
-                    // suaves (nada de kick seco) + flash local + baño de
-                    // luz + EL HITSTOP de TiemposLib (el mundo contiene
-                    // la respiración 6 ticks mientras el conducto se
-                    // enciende; solo un jugador).
-                    ImpactoLib.GolpeDeCine(Projectile.Center, 1.25f, 6,
-                        new Color(255, 248, 235), suave: true);
+                    // v6.58 — LA IGNICIÓN A CIEGAS (la letra: «justo en el
+                    // primer segundo de lanzar el rayo hay un pequeño
+                    // destello blanco… no debería estar ahí… es solo de
+                    // iluminación»): el golpe de cine SIN destello — ni
+                    // el flash blanco de pantalla ni el baño de AddLight
+                    // (los tres focos blancos ×2.75 que iluminaban el
+                    // mundo un frame). QUEDAN el temblor suave de la vía
+                    // dulce (3.2 px de dobles senos) y el hitstop de
+                    // TiemposLib: el momento del disparo se lee por el
+                    // MOVIMIENTO, no por la luz.
+                    ImpactoLib.GolpeDeCine(Projectile.Center, 1.25f, 6, suave: true, destello: false);
                 }
             }
 
@@ -493,8 +515,30 @@ namespace AethonMod.Content.Projectiles.Definitivas
         //  EL DIBUJO — LA BOCA DEL CONJURO (idéntica al RC2: implosión de
         //  soles + corona rúnica + micro-arcos + estrella conducto) y LA
         //  PILA DE CAPAS en el conducto.
+        //
+        //  v6.58 — ESTE CUERPO VIVE ENCAPSULADO EN DibujarAtaque(): lo
+        //  llama RayosPruebaEncimaSistema desde PostDrawInterface (encima
+        //  de TODO el mundo — hojas, polvos y gore ya no pueden tapar el
+        //  conducto). El PreDraw de abajo NO dibuja nada.
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
+        {
+            // v6.58 — EL HAZ VIVE ENCIMA DE TODO (la letra: «el ataque debe
+            // estar sobre todo»): el pase de proyectiles corre ANTES del
+            // polvo/gore/hojas de vanilla y esas sprites caían ENCIMA del
+            // conducto. Ya no se dibuja aquí NADA — todo vive en
+            // RayosPruebaEncimaSistema.PostDrawInterface, sobre el mundo
+            // entero, con la MISMA matemática y el MISMO volumen de
+            // dibujado (cero costo nuevo, cero picos nuevos).
+            return false;
+        }
+
+        /// <summary>EL DIBUJO COMPLETO DEL ATAQUE (la boca + la pila de
+        /// capas) — lo llama RayosPruebaEncimaSistema desde su
+        /// PostDrawInterface, ENCIMA de todo el mundo. Contrato de lote:
+        /// entra con un lote de mundo ABIERTO y sale dejando el lote en
+        /// estado vanilla válido (RestaurarLoteVanilla).</summary>
+        internal void DibujarAtaque()
         {
             Texture2D texture = DefinitivasLib.TexRuido;
             Texture2D textureBits = DefinitivasLib.TexBits;
@@ -503,7 +547,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Texture2D ring = VFXCore.Ring;
 
             if (textureGlow == null || ring == null)
-                return false;
+                return;
 
             float laserCharge = Utils.GetLerpValue(50, ChargeTime, Time, true)
                 * Utils.GetLerpValue(ChargeTime + LaserDuration + 50, ChargeTime + LaserDuration + 20, Time, true);
@@ -603,15 +647,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         DefinitivasLib.BlancoCalido,
                         0.35f + 0.45f * progreso, 5, 12f);
                 }
-            }
-
-            // ============ EL DESTELLO DE LA IGNICIÓN ============
-            if (Time > ChargeTime && Time < ChargeTime + 8 && VFXCore.DestelloFinal != null)
-            {
-                Main.EntitySpriteDraw(VFXCore.DestelloFinal, posPantalla, null,
-                    DefinitivasLib.Alfa(DefinitivasLib.BlancoCalido, 0.9f * (1f - (Time - ChargeTime) / 8f)),
-                    Projectile.rotation, VFXCore.DestelloFinal.Size() * 0.5f,
-                    new Vector2(1.6f, 1.6f) * realSize, SpriteEffects.None, 0f);
             }
 
             // ============ LA ESTRELLA CONDUCTO (la boca arde) ============
@@ -747,7 +782,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
 
             VFXCore.RestaurarLoteVanilla();
-            return false;
         }
 
         /// <summary>UNA CAPA DE LA PILA: el shader VANILLA de sprites

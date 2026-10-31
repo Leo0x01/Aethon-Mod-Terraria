@@ -51,8 +51,15 @@ namespace AethonMod.Content.VFX
         /// sacudida determinista de DOBLES SENOS de PantallaLib — unos
         /// pocos píxeles, movimiento suave (la letra del RC2: «un temblor
         /// de unos pocos pixeles y con movimientos suaves» al lanzar).
+        /// [destello] (v6.58) — EL GOLPE A CIEGAS: false = NI flash local
+        /// NI baño de luz — solo queda la sacudida (y el hitstop en
+        /// GolpeDeCine). La letra del RC2: «justo en el primer segundo de
+        /// lanzar el rayo hay un pequeño destello blanco… no debería
+        /// estar ahí… es solo de iluminación» — hay momentos que se leen
+        /// por el MOVIMIENTO, no por la luz.
         /// </summary>
-        public static void Golpe(Vector2 pos, float intensidad, Color? color = null, bool suave = false)
+        public static void Golpe(Vector2 pos, float intensidad, Color? color = null, bool suave = false,
+            bool destello = true)
         {
             if (Main.netMode == NetmodeID.Server) return;
             float i = MathHelper.Clamp(intensidad, 0.1f, 2.5f);
@@ -72,11 +79,17 @@ namespace AethonMod.Content.VFX
                 OndaLib.Kick(7f * i, (int)(8 + 6 * i));
             }
 
-            // EL FLASH LOCAL — el gradiente centrado en el golpe.
-            OndaLib.Flash(c, 0.16f * i, 8, pos);
+            // EL FLASH LOCAL + LA LUZ — solo si el golpe pide verse
+            // (v6.58: destello: false = la ignición del haz, que se lee
+            // por el temblor y el hitstop, no por la luz blanca).
+            if (destello)
+            {
+                // EL FLASH LOCAL — el gradiente centrado en el golpe.
+                OndaLib.Flash(c, 0.16f * i, 8, pos);
 
-            // LA LUZ — el baño del frame.
-            LuzDelGolpe(pos, i, c);
+                // LA LUZ — el baño del frame.
+                LuzDelGolpe(pos, i, c);
+            }
         }
 
         /// <summary>
@@ -86,11 +99,14 @@ namespace AethonMod.Content.VFX
         /// queda igual). LA IGNICIÓN de las copias del RC2 nació con esto.
         /// [suave] (v6.57) — el temblor va por LA VÍA DULCE de PantallaLib
         /// (pocos px, dobles senos): el lanzamiento del RC2 lo usa.
+        /// [destello] (v6.58) — pasa intacto a Golpe: la ignición del haz
+        /// va A CIEGAS (sin flash blanco ni baño de luz — la letra: «ese
+        /// pequeño destello blanco de luz no debería estar ahí»).
         /// </summary>
         public static void GolpeDeCine(Vector2 pos, float intensidad, int ticksCongelar = 6,
-            Color? color = null, bool suave = false)
+            Color? color = null, bool suave = false, bool destello = true)
         {
-            Golpe(pos, intensidad, color, suave);
+            Golpe(pos, intensidad, color, suave, destello);
             if (ticksCongelar > 0)
                 TiemposLib.Congelar(ticksCongelar);
         }
