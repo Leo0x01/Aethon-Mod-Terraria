@@ -493,32 +493,27 @@ namespace AethonMod.Content.Projectiles.Definitivas
         //  DE LOS MINIONS (la letra: «los pequeños rayos electricos
         //  deben concentrarce en el centro del circulo formado por los
         //  minions, la forma para gatillar la creacion de pequeños
-        //  rayos electrico es la misma animacion de los minions,
-        //  ademas cada rayito debe ir de un minion a otro de forma
-        //  aleatorio mientras el haz se carga y se lanza»).
+        //  rayos electrico es la misma animacion de los minions»).
         // ================================================================
 
-        // EL POZO cero-GC de la casa (las posiciones de los ojos vivos,
-        // reusado cada frame — nunca un new por frame).
-        private static readonly Vector2[] _arcosPos = new Vector2[16];
-
-        /// <summary>LOS RAYITOS DE UN MINION A OTRO — v6.63: LA LEY DEL
-        /// REFLEJO (la letra: «todavia los pequeños rayos no estan en el
-        /// centro del circulo, debes usar los propios minions para saber
-        /// como pocisionar los pequeños rayos electricos»): el par YA NO
-        /// se elige con ángulos teóricos del ancla (la v6.62: filtro de
-        /// puesto ≤28 px + umbral de 2,4 rad + fallback de ÍNDICE — con
-        /// el jugador en movimiento los ojos rezagados fallaban el
-        /// filtro, los sobrevivientes quedaban AMONTONADOS de un lado y
-        /// el fallback de índice unía VECINOS: arcos abrazando el borde
-        /// del círculo, lejos del centro — lo de la foto). AHORA: se
-        /// toma UN ojo al azar y SU PAREJA ES EL OJO MÁS CERCANO A SU
-        /// REFLEJO a través del CENTROIDE del escuadrón (el punto del
-        /// otro lado exacto) — la cuerda CRUZA EL CENTRO del círculo que
-        /// los minions están formando, SIEMPRE: con 11 ojos o con 3,
-        /// quietos o corriendo. LOS PROPIOS MINIONS posicionan sus
-        /// rayitos. Es puro cine de cliente: el par lo elige el reloj
-        /// del juego de cada pantalla (nada que sincronizar).</summary>
+        /// <summary>LOS RAYITOS EN EL CENTRO DEL CÍRCULO — v6.65: LA
+        /// CONCENTRACIÓN (la letra: «los pequeños rayitos electricos
+        /// siguen sin estar centrados y no estan donde deben estar, en
+        /// el centro del circulo de que hacen los mininion para lanzar
+        /// el haz»): LAS CUERDAS MURIERON. La v6.63 unía cada ojo con su
+        /// reflejo — la cuerda CRUZABA el centro pero NACÍA y MORÍA en
+        /// el BORDE del círculo: de borde a borde (dos ojos separados
+        /// por el diámetro entero), se leía «entre los ojos», jamás «en
+        /// el centro». AHORA cada arco vive ENTERO en el disco central
+        /// — el MISMO lenguaje de la boca del arma (que ya cruza el
+        /// medio y gusta): nace a UN lado del CENTROIDE (15-22 px del
+        /// punto exacto) y muere en el OPUESTO (±0,4 rad de vaivén
+        /// orgánico) — la bola de chispazos en el punto que el escuadrón
+        /// custodia, del primer tick al último. El círculo lo sigue
+        /// poniendo EL PROPIO ESCUADRÓN (CirculoDelEscuadron: el
+        /// centroide de los ojos vivos). Es puro cine de cliente: el
+        /// par lo elige el reloj del juego de cada pantalla (nada que
+        /// sincronizar).</summary>
         internal static void DibujarArcosDelEscuadron(int owner,
             float intensidad, float relojColor)
         {
@@ -529,24 +524,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (!CirculoDelEscuadron(owner, out Vector2 centro, out float radio, out int n))
                 return;
             if (n < 2) return;
-
-            // LOS OJOS DEL CÍRCULO: los vivos del dueño DENTRO de la
-            // banda del anillo (≤ radio×1,75 del centroide — el que va
-            // MUY rezagado, volando desde lejos, todavía no es del
-            // círculo; el que sigue al ancla en marcha, sí).
-            int tipoOjo = ModContent.ProjectileType
-                <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
-            int m = 0;
-            for (int i = 0; i < Main.maxProjectiles && m < 16; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p == null || !p.active || p.type != tipoOjo) continue;
-                if (p.owner != owner) continue;
-                if (Vector2.Distance(p.Center, centro) > radio * 1.75f) continue;
-                _arcosPos[m] = p.Center;
-                m++;
-            }
-            if (m < 2) return;
 
             float intens = MathHelper.Clamp(intensidad, 0f, 1f);
             int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
@@ -560,27 +537,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // horas de partida) — cada cliente dibuja SU par (es
                 // puro cine: nada que sincronizar).
                 int seed = (int)((Main.GameUpdateCount % 960ul) * 0.125f) * 131 + i * 297;
-                int a = (int)(VFXCore.Hash01(seed, 11, 7) * m);
-                if (a >= m) a = m - 1;
 
-                // SU REFLEJO A TRAVÉS DEL CENTRO (LA LEY NUEVA): la
-                // pareja es el ojo MÁS CERCANO al punto OPUESTO de A a
-                // través del centroide — la cuerda CRUZA EL CENTRO del
-                // círculo de los minions, sin umbrales que fallen, sin
-                // fallbacks que abracen el borde.
-                Vector2 reflejo = centro * 2f - _arcosPos[a];
-                int b = -1;
-                float mejorD = float.MaxValue;
-                for (int j = 0; j < m; j++)
-                {
-                    if (j == a) continue;
-                    float d = Vector2.DistanceSquared(_arcosPos[j], reflejo);
-                    if (d < mejorD) { mejorD = d; b = j; }
-                }
-                if (b < 0) continue;
-
-                Vector2 start = _arcosPos[a] - Main.screenPosition;
-                Vector2 end = _arcosPos[b] - Main.screenPosition;
+                // v6.65 — LA CONCENTRACIÓN: el arco nace a UN lado del
+                // CENTRO y muere en el OPUESTO (±0,4 rad de vaivén) —
+                // vive ENTERO en el disco central (15-22 px del punto
+                // exacto que el escuadrón custodia): la electricidad
+                // ES el corazón del círculo, no una cuerda de borde a
+                // borde. (El círculo lo ponen los propios minions:
+                // CirculoDelEscuadron — su centroide.)
+                float ang = VFXCore.Hash01(seed, 11, 7) * MathHelper.TwoPi;
+                float rArco = 15f + 7f * intens;
+                float angOpuesto = ang + MathHelper.Pi
+                    + (VFXCore.Hash01(seed, 29, 17) - 0.5f) * 0.8f;
+                Vector2 start = centro - Main.screenPosition
+                    + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
+                Vector2 end = centro - Main.screenPosition
+                    + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
                 StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
                     RayosPruebaProjectile.ColorConjuro(relojColor + i * 8f),
                     DefinitivasLib.BlancoCalido,
@@ -684,17 +656,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // ============ v6.61 — LOS ARCOS DEL ESCUADRÓN ============
             // (la letra: «los pequeños rayos electricos deben
             // concentrarce en el centro del circulo formado por los
-            // minions, la forma para gatillar la creacion de pequeños
-            // rayos electrico es la misma animacion de los minions,
-            // ademas cada rayito debe ir de un minion a otro de forma
-            // aleatorio mientras el haz se carga y se lanza»): los
-            // rayitos YA NO nacen alrededor del centro — nacen DE LOS
-            // OJOS QUE GIRAN: cada arco une DOS ojos del círculo (uno
-            // al azar y su OPUESTO del otro lado — la cuerda CRUZA EL
-            // MEDIO: la electricidad se CONCENTRA en el centro) y los
-            // gatilla LA MISMA ANIMACIÓN de la órbita: viven desde que
-            // el círculo gira, TODO el ritual (ceremonia y carga) — y
-            // en el disparo los hereda el haz (su boca ES el centro).
+            // minions… mientras el haz se carga y se lanza» — v6.65:
+            // la CONCENTRACIÓN que por fin lo cumple): los rayitos viven
+            // ENTEROS en el disco central del círculo (nacen a un lado
+            // del centroide y mueren en el opuesto — la bola de
+            // chispazos en el punto exacto) y los gatilla LA MISMA
+            // ANIMACIÓN de la órbita: viven desde que el círculo gira,
+            // TODO el ritual (ceremonia y carga) — y en el disparo los
+            // hereda el haz (su boca ES el centro).
             if (prog > 0.04f && edad % 5f < 3f)
             {
                 DibujarArcosDelEscuadron(Projectile.owner, prog, semilla);

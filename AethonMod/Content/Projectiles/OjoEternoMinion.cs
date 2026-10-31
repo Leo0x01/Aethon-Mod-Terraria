@@ -325,6 +325,21 @@ namespace AethonMod.Content.Projectiles
             //     normales ESPERAN: están rezando, no cazando).
             Projectile ritualIra = global::AethonMod.Content.Projectiles.Definitivas
                 .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
+            // v6.65 — EL RITUAL RECLAMA A SUS OJOS (la letra: «a veces al
+            //     comenzar la animacion los mininion no cierran el circulo
+            //     correctamente, ya luego de unos segundos ya se ponen en
+            //     circulo como debe ser»): LA FUGA (a) — un ojo que estaba
+            //     a MITAD DE LA PUNTERÍA cuando nace la ceremonia seguía SU
+            //     ciclo de caza (hasta AIM_TICKS + el tirón del retroceso)
+            //     y caía al círculo TARDE: el círculo nacía cojo. El ritual
+            //     lo reclama YA: aborta la puntería (vuelve al crucero) —
+            //     cae a la LEY DEL RITUAL de abajo (la convergencia) y su
+            //     mirada va al centro del círculo desde este mismo tick.
+            if (ritualIra != null && modo == MODO_APUNTANDO)
+            {
+                SalirDeFuego();
+                modo = MODO_CRUCERO;
+            }
             // v6.51.7 — EL ARCO DEL BÁCULO SANGUINARIO (la letra: «los
             //     minions siempre deben ir detras del jugador, pero
             //     cuando el libro sale a cazar, los minions comienza a
@@ -437,6 +452,33 @@ namespace AethonMod.Content.Projectiles
                 if (dist <= 30f && dist > 0.01f)
                 {
                     Projectile.velocity = alSlot * 0.55f;
+                }
+                else if (ritualIra != null && dist > 0.01f)
+                {
+                    // === v6.65 — LA CONVERGENCIA DEL RITUAL (la FUGA (b)
+                    //     de la letra: «a veces al comenzar la animacion
+                    //     los mininion no cierran el circulo correctamente,
+                    //     ya luego de unos segundos ya se ponen en circulo
+                    //     como debe ser»): la ley del planeo del crucero es
+                    //     de TODOS los días — su techo de 13 px/t con blenda
+                    //     0,15 dejaba al escuadrón colgando tras sus
+                    //     puestos (el ojo asentaba a ~60 px del hueco
+                    //     mientras el dueño corriera) y el círculo se leía
+                    //     ABIERTO hasta que el dueño paraba. Mientras el
+                    //     ritual vive, el ojo vuela a su puesto con la LEY
+                    //     DEL RITUAL: el MISMO proporcional de la llegada
+                    //     exacta (0,55 de la distancia que falta) con TOPE
+                    //     26 px/t y blenda 0,35 — el círculo SE CIERRA en
+                    //     el primer cuarto de segundo y SIGUE CERRADO
+                    //     aunque el dueño corra; a ≤30 px lo recibe la
+                    //     llegada exacta de siempre (clavado a la órbita).
+                    //     ===
+                    Vector2 deseadaR = alSlot * 0.55f;
+                    const float vmaxR = 26f;
+                    if (deseadaR.Length() > vmaxR)
+                        deseadaR = Vector2.Normalize(deseadaR) * vmaxR;
+                    Projectile.velocity = Vector2.Lerp(
+                        Projectile.velocity, deseadaR, 0.35f);
                 }
                 else if (dist > 90f)
                 {

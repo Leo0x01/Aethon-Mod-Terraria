@@ -514,8 +514,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // === 1. LA FUNDA MORADA (aditiva — el borde que arde):
                 //     v6.50.107 — UN POCO MÁS FINO (la letra: «el proyectil
-                //     que usan los minion es muy grueso»): 6,0 (era 7,5) ===
-                RayoStrip.Filamento(canal, 6.0f, OjoHalo, OjoCore,
+                //     que usan los minion es muy grueso»): 6,0 (era 7,5).
+                //     v6.65 — LIGERAMENTE MÁS DELGADO (la letra: «necesito
+                //     que el rayo de perling de los mininion sea ligeramente
+                //     mas delgado»): 4,8 — el filo del rayo afina un paso
+                //     más sin perder el cuerpo. ===
+                RayoStrip.Filamento(canal, 4.8f, OjoHalo, OjoCore,
                     alpha * fade, StormTaper.Center, seed, flick,
                     suavizar: false, crackle: true);
                 VFXCore.CerrarLoteSiAbierto();
@@ -524,9 +528,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 //     OSCURECEN el centro — el morado asoma en los bordes).
                 //     LA LECCIÓN de la .105: SoftGlow a escala 5,5 = 352 px
                 //     por cápsula — el rayo leía como NEBLINA gorda. La
-                //     .106 lo bajó a 19 px; la .107 lo AFILA un paso más:
-                //     15 px (escala 0,235) sobre la funda de 6,0 — el
-                //     filo negro ~4,5 px con el borde morado asomando. ===
+                //     .106 lo bajó a 19 px; la .107 lo AFILÓ: 15 px (escala
+                //     0,235) sobre la funda de 6,0 — y v6.65 lo acompaña:
+                //     12 px (escala 0,19) sobre la funda de 4,8 — el filo
+                //     negro ~3,6 px con el borde morado asomando (el rayo
+                //     ligeramente más delgado de la letra). ===
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -553,7 +559,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Vector2 p = Vector2.Lerp(canal[seg], canal[seg + 1],
                             MathHelper.Clamp(fseg, 0f, 1f));
                         Main.spriteBatch.Draw(glow, p, null, OjoNegro * (alpha * fade), 0f,
-                            medio, new Vector2(0.235f, 0.235f), SpriteEffects.None, 0f);
+                            medio, new Vector2(0.19f, 0.19f), SpriteEffects.None, 0f);
                     }
                 }
                 finally { Main.spriteBatch.End(); }
@@ -571,13 +577,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (!StormLib.IsLit(seed + 47 + c * 31, flick, 0.60f)) continue;
                         Vector2[] canalC = CanalOjo(ancla, _chainTo[c] - screen,
                             seed + 47 + c * 31, flick, 0.10f);
-                        RayoStrip.Filamento(canalC, 2.9f, OjoHalo, OjoCore,
+                        RayoStrip.Filamento(canalC, 2.4f, OjoHalo, OjoCore,
                             0.85f * alpha * fade, StormTaper.Center,
                             seed + 47 + c * 31, flick, suavizar: false, crackle: true);
                     }
 
                     // el gorro del electrodo del OJO (la descarga en la córnea)
-                    StormLib.EndCap(Main.spriteBatch, boca, 4.8f, OjoHalo, OjoCore, alpha * fade);
+                    //     v6.65 — acompaña el afinado: 3,9 (era 4,8).
+                    StormLib.EndCap(Main.spriteBatch, boca, 3.9f, OjoHalo, OjoCore, alpha * fade);
 
                     // EL ANCLA: el núcleo de descarga en la presa (morado) —
                     //     en ritual, a MEDIA ESCALA (todos al mismo punto).
