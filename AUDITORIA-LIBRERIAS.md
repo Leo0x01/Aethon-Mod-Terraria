@@ -1,5 +1,26 @@
 # AUDITORÍA DE LIBRERÍAS VFX — AethonMod (Task C)
 
+> ## ⚡ ANEXO v6.56.9 — ESTADO DE EJECUCIÓN DEL PLAN
+>
+> **Ejecutado en la v6.56.9** (cada punto verificado con el oráculo 0/0):
+>
+> | # del top-10 | Estado | Detalle |
+> |---|---|---|
+> | 1. Purgar BeamLib + BoltRenderer | ✅ HECHO | Enterradas (−496 l) + el catálogo del códice corregido (§4.5/§4.6 ya no mienten) |
+> | 5. Destino de HazConcentradoLib | ✅ HECHO | La parte muerta purgada (−313 l: Dibujar/AberracionCromatica/DiscoNegro); viven los soles rúnicos (con LA IMPLOSIÓN v6.56.9) |
+> | 6. Purga de métodos muertos | ✅ HECHO | 40 métodos en 19 librerías (−1.317 l netas); 1 falso muerto cazado (FormaLib.PuntoEnBanda — vivo); restos huérfanos documentados abajo |
+> | 2. Consolidar helpers en VFXCore | ✅ HECHO (v1) | Canónicas Tint/TintAlfa/AbrirAdditive/AbrirAlpha (CON SONDA)/Capsule/RingQuad + **96 cuerpos delegados** en 30 archivos (−201 l netas, la lógica vive UNA vez); Begin Immediate de shader y familias con guard quedan INTACTAS por semántica distinta; faltan ~22 Tint en Projectiles/Cosmic (tarea futura) |
+> | 8. TiemposLib (nueva) | ✅ NACIÓ | EL HITSTOP — Congelar(ticks), solo SP, solo IA de NPC, cola priorizada; consumidor: la ignición de cine de las copias del RC2 |
+> | 5.3 ImpactoLib (nueva) | ✅ NACIÓ | EL MOMENTO DEL GOLPE — Golpe/GolpeDeCine (kick+flash+luz+hitstop); consumidor de nacimiento: las copias del RC2; la migración de los 88 Kick/18 Flash/244 AddLight a mano es DEUDA documentada |
+> | 10. Reconciliar el códice | ✅ HECHO | v1.4 reconciliada (.56.8) + **LA LEY DEL CÓDICE SINCRONIZADO (§0.6, la anti-recurrencia)** en la v1.5: el mismo commit + la muestra por auditoría |
+> | 4. Unificar gestos de pantalla | ⏳ SIGUIENTE | PantallaLib dueño único del pipeline; Kick/Flash como alias delgados (no se tocan los 106 llamadores) |
+> | 3. AgujeroBase (los 10 agujeros) | ⏳ SIGUIENTE | ~1.250 l recuperables; sim 1:1 antes/después obligatorio (regresión visual) |
+> | 9. PostFXLib | ⏳ MÁS ADELANTE | El patrón RT de BlackHoleLensSystem + techo FactorCalidad |
+>
+> **Restos muertos huérfanos encontrados al purgar** (sin warning del compilador, tarea futura): PyraLib.Simular/CapCeldas/SeedCell, PulsoLib.Material (enum)/Marcar/Liquidar/VeredictoDe/CerrarVeredictosVencidos (el juicio diferido — conectar a TiemposLib o enterrar), FormaLib.PlanoLiangBarsky, EstelaLib.PuntoEnCamino.
+
+# AUDITORÍA DE LIBRERÍAS VFX — AethonMod (Task C)
+
 **Fecha:** sobre el árbol v6.56.7 · **Alcance:** `AethonMod/Content/VFX/` — **69 archivos .cs, 43.600 líneas** (de 379 .cs del mod).
 **Método:** conteo de referencias por archivo (rg sobre todo `AethonMod/`), análisis de métodos públicos muertos (búsqueda negativa en TODO el mod, distinguiendo "sin llamador externo" de "muerto de verdad" — sin llamador NI externo NI interno), y conteo de definiciones duplicadas por nombre.
 

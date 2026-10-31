@@ -86,52 +86,6 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// ¿Está el reloj dentro de la ventana [inicio, inicio+duración) del
-        /// ciclo? El patrón más común (una sola ventana, sin declarar compás
-        /// entero): si está dentro, entrega la fase 0..1 y el tick dentro del
-        /// movimiento — la MISMA matemática que <see cref="Compas.En"/> usa
-        /// para resolver el instante (una sola fuente de verdad, cero
-        /// divergencia entre la consulta suelta y la declarada).
-        ///
-        /// Convención de ventanas (la de toda la librería): el tick de
-        /// inicio CUENTA, el de fin NO (pertenece al siguiente tramo). Una
-        /// ventana que CRUZA el borde del ciclo (p. ej. [28..4) en un ciclo
-        /// de 30) se recorre por el final — cíclica de verdad.
-        /// </summary>
-        /// <param name="reloj">El reloj del que llama (cualquier valor, también negativo: se envuelve al ciclo).</param>
-        /// <param name="ciclo">Ticks totales del ciclo (se protege si llega vacío).</param>
-        /// <param name="inicio">Tick del ciclo donde ARRANCA la ventana.</param>
-        /// <param name="dur">Duración de la ventana en ticks.</param>
-        /// <param name="fase01">La fase 0..1 dentro del movimiento (0 si no está dentro).</param>
-        /// <param name="tickEnMov">Ticks desde el inicio del movimiento (−1 si no está dentro — el centinela distingue "fuera" de "en el tick 0").</param>
-        public static bool EnVentana(float reloj, float ciclo, float inicio, float dur, out float fase01, out int tickEnMov)
-        {
-            fase01 = 0f;
-            tickEnMov = -1;
-            if (ciclo <= 0f || dur <= 0f) return false;
-
-            float tc = reloj % ciclo;
-            if (tc < 0f) tc += ciclo;   // relojes que nacen antes de empezar → rango [0, ciclo)
-
-            float fase;
-            if (inicio + dur <= ciclo)
-            {
-                fase = tc - inicio;
-                if (fase < 0f || fase >= dur) return false;
-            }
-            else
-            {
-                // LA VENTANA CRUZA EL BORDE: [inicio..ciclo) ∪ [0..fin−ciclo)
-                fase = tc >= inicio ? tc - inicio : tc + ciclo - inicio;
-                if (fase < 0f || fase >= dur) return false;
-            }
-
-            fase01 = fase / dur;
-            tickEnMov = (int)fase;
-            return true;
-        }
-
-        /// <summary>
         /// EL METRÓNOMO SUELTO: dispara cuando el reloj cae en el tick 0 de
         /// cada periodo (cada 30, cada 120...). La comparación es por TICK
         /// ENTERO — (int)reloj % (int)periodo == 0 — y no por módulo
@@ -607,22 +561,6 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public bool En(int indiceMovimiento)
             => NombreActivo != null && NombreActivo.Length > 0 && Movimiento.Indice == indiceMovimiento;
-
-        /// <summary>
-        /// EASE-IN SUAVE desde el arranque del movimiento: 0 en su tick 0, 1
-        /// a los <paramref name="ticks"/> ticks, con el smoothstep
-        /// (p·p·(3−2·p) — pendiente nula en ambos extremos: el arranque no
-        /// "salta" ni "frena" de golpe). Basado en TickEnMovimiento — el
-        /// RELOJ DEL JUEGO, no el del render: la lección de la casa (el
-        /// render late distinto que el juego).
-        /// </summary>
-        public float SuavizadoInicio(float ticks)
-        {
-            float p = TickEnMovimiento / MathF.Max(1f, ticks);
-            if (p < 0f) p = 0f;
-            if (p > 1f) p = 1f;
-            return p * p * (3f - 2f * p);
-        }
 
         /// <summary>
         /// PULSO determinista 0..1: el seno de TickEnMovimiento por la

@@ -98,32 +98,15 @@ namespace AethonMod.Content.VFX
 
         /// <summary>Hash determinista [0,1).</summary>
         private static float H01(int seed, int a, int b)
-        {
-            int h = unchecked(seed * 374761393 + a * 668265263 + b * 1911520717);
-            h = unchecked(h ^ (h >> 13));
-            h = unchecked(h * 1274126177);
-            h = unchecked(h ^ (h >> 16));
-            return (h & 0xFFFFFF) / 16777216f;
-        }
+            => VFXCore.Hash01(seed, a, b); // v6.56.9 — delegación a la canónica (auditoría §4)
 
         /// <summary>Tinte de intensidad LINEAL de la casa (v6.50.3 — el Additive
         /// de FNA es (SourceAlpha, One): el alfa GATEA; RGB intacto, alfa=f).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
-            // estaba incompleta): el pipeline REAL premultiplica los PNG al
-            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
-            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
-            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
-            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
-            // color SIN escalar en los lotes de masa (bruma fantasma
-            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
-            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
-            // correcto para AMBOS presets de FNA.
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // PREMULTIPLICADA (RGB·f, A·f) — la fórmula vive en VFXCore.
+            return VFXCore.Tint(c, f);
         }
 
         // ==================================================================
@@ -309,71 +292,6 @@ namespace AethonMod.Content.VFX
                 new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
                 new Vector2(s, s) / new Vector2(RingTex.Width, RingTex.Height),
                 SpriteEffects.None, 0f);
-        }
-
-        /// <summary>
-        /// v6.49 — EL TELEGRAPH DE ANILLO (la idea nº1 de la auditoría
-        /// AUD-B: el Telegrafo de línea era el ÚNICO del arsenal y los
-        /// tres jefes con AoE repetían lógica a mano). El aviso de un
-        /// GOLPE DE ÁREA: el anillo EXTERIOR (la frontera del golpe, fija
-        /// y seria), el anillo INTERIOR que SE CIERRA al ritmo de la
-        /// carga (radio ×(1−progress) → 0 — cuando el interior toca al
-        /// exterior, el golpe cae: la señal más legible del repertorio),
-        /// el disco tenue del interior y EL CHILLIDO final (parpadeo a
-        /// 18 Hz en el último cuarto, igual que el Telegrafo de línea).
-        ///
-        /// CONTRATO: idéntico al de línea — batch ABIERTO (aditivo
-        /// recomendado), progress 0..1 (1 = golpe YA), cero Main.rand,
-        /// cero alocaciones (dos RingTex + un disco por llamada).
-        /// </summary>
-        /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
-        /// <param name="centro">Centro del área (espacio del lote del llamador).</param>
-        /// <param name="radio">Radio EXTERIOR del golpe (la frontera).</param>
-        /// <param name="progress">0..1 del aviso (1 = el golpe dispara YA).</param>
-        /// <param name="color">El color del ataque que viene.</param>
-        public static void TelegrafoAnillo(SpriteBatch batch, Vector2 centro, float radio,
-            float progress, Color color)
-        {
-            if (batch == null || radio < 4f) return;
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-
-            // EL CHILLIDO (el mismo del Telegrafo de línea).
-            float flick = 1f;
-            if (progress > 0.75f)
-            {
-                float t = (progress - 0.75f) / 0.25f;
-                flick = 0.6f + 0.4f * MathF.Sin(Main.GlobalTimeWrappedHourly * 18f * MathF.PI) * t + 0.4f * t;
-            }
-
-            float aExt = (0.12f + 0.55f * progress) * flick;
-            float aInt = (0.35f + 0.5f * progress) * flick;
-            float aDisco = 0.06f + 0.10f * progress;
-
-            // 1. LA FRONTERA: el anillo exterior (donde termina el golpe).
-            float sExt = radio * 2.174f;
-            batch.Draw(RingTex, centro, null, Tint(color, aExt), 0f,
-                new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
-                new Vector2(sExt, sExt) / new Vector2(RingTex.Width, RingTex.Height),
-                SpriteEffects.None, 0f);
-
-            // 2. EL CUERPO: el disco tenue del área entera.
-            float sDisco = radio * 2f;
-            batch.Draw(GlowTex, centro, null, Tint(color, aDisco), 0f,
-                new Vector2(GlowTex.Width, GlowTex.Height) * 0.5f,
-                new Vector2(sDisco, sDisco) / new Vector2(GlowTex.Width, GlowTex.Height),
-                SpriteEffects.None, 0f);
-
-            // 3. EL CUENTO: el anillo interior SE CIERRA con la carga —
-            //    cuando el interior alcanza la frontera, el golpe cae.
-            float rInt = radio * (1f - progress);
-            if (rInt > 2f)
-            {
-                float sInt = rInt * 2.174f;
-                batch.Draw(RingTex, centro, null, Tint(color, aInt), 0f,
-                    new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
-                    new Vector2(sInt, sInt) / new Vector2(RingTex.Width, RingTex.Height),
-                    SpriteEffects.None, 0f);
-            }
         }
 
         // ==================================================================

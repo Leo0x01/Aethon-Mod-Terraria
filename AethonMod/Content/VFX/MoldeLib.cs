@@ -218,30 +218,6 @@ namespace AethonMod.Content.VFX
             /// <summary>Ver <see cref="EscalaGlobal"/>.</summary>
             public Molde ConEscalaGlobal(float escala) { EscalaGlobal = escala; return this; }
 
-            /// <summary>
-            /// RE-ESCALA el molde entero a una nueva longitud de cuerpo:
-            /// offsets Y escalas se re-proporcionan por
-            /// nueva/LongitudCuerpo (las proporciones anatómicas quedan
-            /// CLAVADAS — la envergadura acompaña al cuerpo). Mutar el
-            /// molde COMPARTIDO (OjoAlado) afectaría a todos sus usuarios:
-            /// re-escala solo moldes PROPIOS (o usa la factory).
-            /// </summary>
-            public Molde ReEscalar(float nuevaLongitud)
-            {
-                if (LongitudCuerpo <= 0f || nuevaLongitud <= 0f) return this;
-                float factor = nuevaLongitud / LongitudCuerpo;
-                for (int i = 0; i < Piezas.Count; i++)
-                {
-                    Pieza p = Piezas[i];
-                    p.Offset *= factor;
-                    p.Escala *= factor;
-                    Piezas[i] = p;
-                }
-                LongitudCuerpo = nuevaLongitud;
-                _ordenadas = null;      // el cuerpo mutó: el orden se re-computa
-                return this;
-            }
-
             /// <summary>Commit interno del builder (AlFinal).</summary>
             internal void Añadir(Pieza pieza)
             {
@@ -309,16 +285,6 @@ namespace AethonMod.Content.VFX
                 ProyectarNucleo(centro, rotacionCuerpo, banking, escala, escala, tiempo,
                     tinteMult, alfaGlobal, null);
             }
-
-            /// <summary>
-            /// EL NOMBRE DEL CONTRATO — alias literal de <see cref="Proyectar"/>
-            /// (mismo mecanismo): recuerda que UNA llamada son DOS pases —
-            /// el aditivo cae YA al búfer de VFXCore y las piezas alpha
-            /// esperan al <see cref="FlushPaseAlpha"/> posterior.
-            /// </summary>
-            public void EmitirPases(Vector2 centro, float rotacionCuerpo, float banking,
-                float escala, float tiempo, Color tinteMult, float alfaGlobal)
-                => Proyectar(centro, rotacionCuerpo, banking, escala, tiempo, tinteMult, alfaGlobal);
 
             /// <summary>
             /// EL FANTASMA: el molde entero en UN color sólido (la
@@ -665,9 +631,6 @@ namespace AethonMod.Content.VFX
             /// <summary>El color de la pieza (con su alfa horneada).</summary>
             public ConstructorPieza ConColor(Color color) { _pieza.Color = color; return this; }
 
-            /// <summary>Textura propia (null = SoftGlow de la casa).</summary>
-            public ConstructorPieza ConTextura(Texture2D textura) { _pieza.Textura = textura; return this; }
-
             /// <summary>
             /// Marca la pieza para el PASE ALPHA: oscurece al final (el
             /// vacío, la sombra) en vez de brillar en el aditivo.
@@ -676,9 +639,6 @@ namespace AethonMod.Content.VFX
 
             /// <summary>El orden de emisión (menor = antes: 0 cuerpo, 10 alas, 100 pupila).</summary>
             public ConstructorPieza ConOrdenZ(float z) { _pieza.OrdenZ = z; return this; }
-
-            /// <summary>FALSE = la pieza se queda vertical aunque el cuerpo gire.</summary>
-            public ConstructorPieza ConSeguirDireccion(bool seguir) { _pieza.SeguirDireccion = seguir; return this; }
 
             /// <summary>EL ALETEO propio: amplitud (rad) y fase (rad; las
             /// alas espejo van separadas π). Velocidad default 6 rad/s.</summary>

@@ -509,9 +509,6 @@ namespace AethonMod.Content.VFX
         /// <summary>LOS ÍNDICES DE LAS ALETAS en 0-based (las i==8 e i==14).</summary>
         public static readonly int[] IdxAletas = { 7, 13 };
 
-        /// <summary>¿Es este segmento un ALETA? (las i==8 e i==14 de la demo).</summary>
-        public static bool EsAleta(int i) => i == IdxAletas[0] || i == IdxAletas[1];
-
         /// <summary>
         /// LA SIERPE ESTELAR — el render de la criatura segmentada de la
         /// IMAGEN 4. La jerarquía EXACTA del prepend() de la demo (índices

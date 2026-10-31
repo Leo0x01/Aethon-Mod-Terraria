@@ -427,22 +427,6 @@ namespace AethonMod.Content.VFX
                 MathHelper.Clamp(40f * escala, 8f, 160f));
         }
 
-        /// <summary>
-        /// EL PRESET DE GOLPE SECO (sin onda — para impactos en cadena o
-        /// espacios cerrados): sacudida corta + la CRUZ corta de
-        /// <see cref="Flash"/>. El latido, no la explosión.
-        /// </summary>
-        /// <param name="escala">La fuerza del golpe (0.25..3).</param>
-        /// <param name="color">El color de la cruz (null = blanco cálido).</param>
-        public static void PresetGolpeSeco(float escala = 1f, Color? color = null)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-            escala = MathHelper.Clamp(escala, 0.1f, 4f);
-            Color c = color ?? new Color(255, 236, 200);
-            Sacudir(3.5f * escala, 0.16f);
-            Flash(c, 0.10f, MathHelper.Clamp(0.3f * escala, 0.15f, 0.6f));
-        }
-
         // ==================================================================
         //  RESET (recargas limpias y cambios de mundo)
         // ==================================================================

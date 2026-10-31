@@ -1,4 +1,4 @@
-# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA
+# EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.5)
 
 > **ESTE ES EL ARCHIVO DE CONSULTA OBLIGATORIA PARA CUALQUIER EFECTO.**
 > Antes de crear UN SOLO efecto — visual, de sonido, de pantalla, de partícula,
@@ -56,7 +56,7 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      (SoftGlow/NovaBurst/DestelloFinal). Un círculo de color plano es un
      bug de la casa, no un efecto.
    - **Sprites de rayos** → cero sprites de rayo en la vida: RayoLib,
-     StormLib, RayoStrip, BeamLib.
+     StormLib, RayoStrip. (BeamLib fue enterrada en la v6.56.9 — §4.5.)
    - **`Main.rand` en render** → todo determinista por `Hash01`/semilla
      (multi-máquina sin red: el efecto se ve IGUAL en todos los clientes).
    - **Dust de vanilla DENTRO de ataques de haz/plasma** → **CERO Dust**
@@ -90,6 +90,23 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      o no. (El bug de la v6.56.4-.56.6 era UN glow con alfa lleno que
      hacía LERP contra el fondo — también prohibido, pero la pila entera
      salió del mod.)
+   - **LA PILA DE CAPAS HECHA BIEN — STRIPS, NO QUADS (LEY v6.56.9)** →
+     la prohibición de la .56.7 era sobre los QUADS CPU (borde poligonal
+     duro + texturas crudas = peines). La forma SANCIONADA de darle capas
+     a un haz de shader: **DIBUJAR EL MISMO STRIP VARIAS VECES** (la MISMA
+     polilínea, mismos arrays — solo cambia el factor de ancho por capa)
+     con **EL SHADER VANILLA DE SPRITES (`Main.pixelShader`)** + una
+     textura de PERFIL SUAVE (RampaGlow: 0 en el borde, pico al centro):
+     bruma ×2.6-3.6 al 9-20% → glow ×1.75-2.5 con la paleta viajando →
+     EL CUERPO del .fx → núcleo ×0.28-0.42 blanco-violeta. Cada borde se
+     funde EN CURVA por píxel (cero picos por construcción — verificado
+     sim 1:1) y el pipeline es el de TODO Terraria: **GPU-UNIVERSAL**, se
+     ve en CUALQUIER máquina (integrada, vieja, sin soporte de .fx — la
+     letra: «necesito que cualquier gpu incluso los que no son
+     dedicadas deben ver el shader»). LA REGLA DE LAS DISTINTAS
+     POLILÍNEAS: si las capas siguen polilíneas DIFERENTES (una curva y
+     otra recta), sus bordes se CRUZAN y nacen picos nuevos — misma
+     polilínea SIEMPRE. Caso ejemplar: las copias del RC2 (v6.56.9).
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -97,6 +114,19 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
 5. **Los sonidos van en `AI()` gated `!= Server`** en proyectiles (suena en
    SP y en clientes), sin duplicar los del NPC (que corren server-side);
    los de combate pasan por **AudioLib.Sonar** (anti-spam incluido).
+6. **LA LEY DEL CÓDICE SINCRONIZADO (v6.56.9 — la anti-recurrencia del
+   DESYNC de la .56.8)**: la auditoría encontró este códice desincronizado
+   del código en 6 puntos (librerías «con usuarios» que no tenían, la
+   «paleta estrella» VoidQueen con 0 usos, la escalera del rayo documentada
+   viva tras la purga…) — y como la Ley Primera OBLIGA a consultarlo antes
+   de crear efectos, UN CÓDICE QUE MIENTE ES EL MAYOR GENERADOR DE
+   DUPLICACIÓN FUTURA. LAS DOS REGLAS QUE QUEDAN: **(a) EL MISMO COMMIT** —
+   toda librería/método que nazca, muera o se purgue actualiza SU entrada
+   del catálogo (§2-§4) EN LA MISMA ENTREGA (el funeral y la partida de
+   nacimiento van juntos); **(b) LA MUESTRA POR AUDITORÍA** — cada
+   auditoría de librerías verifica una muestra de entradas del catálogo
+   contra `rg` (¿la librería vive? ¿los usuarios listados existen?). Una
+   entrada sin verificación reciente es una entrada bajo sospecha.
 
 ---
 
@@ -384,12 +414,20 @@ Lo usan **137 archivos** del mod.
 - Presets `RayoParams.Tormenta/.Arma/.Arco(origen, destino)` · `AnimRayo.Clima/.Arco/.VenaTrueno` · `Generar(p, bolts, semilla)` → `RayoBolt` · `Dibujar(batch, bolt, …)` · **`RayoSistema.Lanzar(p, semilla, blanco, dir)`** — la puerta de alto nivel
 **Usuarios:** RayoPrimordial, VenaTrueno, ArcoSobretension + Testamento/IraDelCielo/PrismaPrimordial (vía RayoSistema).
 
-### 4.5 BeamLib.cs (v6.52.0) — EL RAYO MASIVO DE 7 CAPAS
+### 4.5 BeamLib.cs — ⚰️ ENTERRADA (v6.56.9, auditoría §3)
 
-Raycast suavizado (lerp 0.5-0.9 = motion blur del barrido), cintas de VFXCore sobre espina fBm (3.5% del largo — "vivo, no espástico"), halo ×2.3 → cuerpo → core blanco, luz a lo largo cada 64 px, DIAMANTES VIAJEROS `sin(along/92 − t·9)^7`, tapas y telegraph. `Rayo(origen, dir, largo, ancho, …)` · `Telegrafo(...)`. **Escuela A: NUNCA toca el lote** — encola al buffer de VFXCore. **Usuarios:** PrimerTrazoFajo, RayoConvergente.
+El rayo masivo de 7 capas (v6.52.0) murió con 0 usuarios: sus consumidores
+documentados (PrimerTrazoFajo, RayoConvergente) ya no existen — la búsqueda
+negativa de la auditoría lo certificó y esta entrada mintió hasta la v1.4
+reconciliada. **Borrada del mod (376 líneas).** Si algún día se necesita un
+haz masivo por raycast: el camino GPU del RC2 (§5.4) o RayoLib/RayoStrip.
 
-### 4.6 BoltRenderer.cs (v6.50.25) — el relámpago determinista 1ª gen
-Montado sobre RayoStrip (la cura de los bultos). `ComputeQuads(start, end, seed, flick, …)`. Mundo. **Usuarios:** RunicLightning, NebulaLightning, armas de rayo antiguas.
+### 4.6 BoltRenderer.cs — ⚰️ ENTERRADO (v6.56.9, auditoría §3)
+
+El relámpago determinista de 1ª gen (v6.50.25, montado sobre RayoStrip):
+todas sus menciones eran comentarios históricos — el propio StormLib lo
+sustituyó. **Borrado del mod (120 líneas).** El chisporroteo eléctrico
+vivo es StormLib.Bolt (§4.3).
 
 ### 4.7 EstelaLib.cs (v6.25) — LAS ESTELAS
 
@@ -476,7 +514,31 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 - **CompasLib.cs** — LA COREOGRAFÍA DECLARATIVA: `EnVentana(reloj, ciclo, inicio, dur, out fase01)` · `Cada(reloj, periodo)`; STATELESS = multi-instanciable gratis. + `DepurarDibujar` (F7).
 - **FormaLib.cs** — LAS COLISIONES DE FORMAS: segmento/banda/cápsula/anillo/sector, entidades NPC/Jugador/Proyectil, `RecorrerNPCs(centro, radioMax, Action)`. Todo MUNDO.
 - **DefinitivasLib.cs** (v6.54.6) — el soporte de las 6 sentencias: paleta del Juicio (`GradienteJuicio(t)`), `BuscarPresa`, `Cono(hitbox, origen, largo, ang, semiang)`, `AnchoCono(progress, time, k)` (la fórmula del haz de fusión), `DeGolpe`, `Sonar` blindado, `Tex(ruta)` null-safe **y las 4 texturas del plasma** (§6.A).
-- **RayoConcentradoNivelProjectile.cs** (v6.56.0) — **LA ESCALERA DEL RAYO**: un proyectil para los niveles 1-3 (el nivel viaja en **`ai[1]`** — el array `ai` del tML real llega hasta `ai2`; `ai[3]` es `IndexOutOfRangeException`); la cima son clases propias (el Prisma reformado y el RC2). **v6.56.1: `EscaleraDelRayo.HazLibre` es CRUZADO** — UN solo haz definitivo a la vez entre TODAS las familias de la escalera (niveles + RC2 + Prisma). Escala 0.45 (Rayo del Alba) · 0.60 (Veredicto) · 0.75+aberración (Juicio) · 0.85 **EL PRISMA REFORMADO** (la ESPINA VIVA verlet vestida de la pila completa de plasma — los 7 haces y TODO Dust fuera; la sentencia del Testamento intacta) · 1.0 **EL RC2** (la cima, que conserva su clase propia). `EscaleraDelRayo.HazLibre(player)` evita el doble haz. Los ítems en `Content/Weapons/Definitivas/RayosConcentrados.cs`.
+- **RayoConcentradoNivelProjectile.cs** — ⚰️ **PURGADA en la v6.56.6** (la
+  letra: «borra todas las nuevas armas y solo deja al rayo concentrado 2»):
+  la escalera (Alba/Veredicto/Juicio), el Prisma, el Partidor, el Réquiem,
+  la Ira, el Índice, la Pluma y el Ojo MURIERON con sus proyectiles. El RC2
+  es LA ÚNICA arma definitiva y su exclusión vive en su propio CanUseItem.
+  (Esta entrada mintió desde la .56.6 — la v1.5 la corrige: LEY DEL CÓDICE
+  SINCRONIZADO §0.6.)
+- **TiemposLib.cs + TiemposSistema + TiemposGlobalNPC** (v6.56.9) — **EL
+  HITSTOP DE LA CASA** (la librería nueva nº1 de la auditoría §5.1):
+  `Congelar(ticks)` — el mundo CONTIENE LA RESPIRACIÓN. Solo SP (MP = no-op
+  documentado), solo la IA de los NPC (PreAI → false): los proyectiles del
+  jugador siguen vivos, los golpes siguen conectando. Cola priorizada por
+  duración. Consumidor de nacimiento: la ignición de las copias del RC2.
+- **ImpactoLib.cs** (v6.56.9) — **EL MOMENTO DEL GOLPE UNIFICADO** (la
+  librería nueva nº3 de la auditoría §5.3): `Golpe(pos, intensidad,
+  color)` = kick escalado + flash local + baño de luz en 3 focos;
+  `GolpeDeCine(pos, i, ticks, color)` = el golpe + EL HITSTOP. La fachada
+  que ordena OndaLib/PantallaLib/TiemposLib (Ley Primera §0: no se inventa
+  nada, se compone). Hoy: 88 Kick + 18 Flash + 244 AddLight a mano son LA
+  DEUDA — cada migración a esta fachada se documenta aquí.
+- **RayosPruebaProjectile.cs** (v6.56.9) — **LAS COPIAS DEL RC2**: el
+  mismo conducto con LA PILA DE CAPAS (§0 LEY v6.56.9) y LA RECETA en
+  `ai[1]` (0=A equilibrada · 1=B titán · 2=C sueño). El RC2 original
+  queda INTACTO; las copias se ajustan hasta el look correcto y la
+  ganadora se porta al original. Ignición con ImpactoLib.GolpeDeCine.
 
 ---
 
@@ -514,16 +576,30 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 - **Qué hace:** el plasma del **Rayo Concentrado II** — 4 texturas multiplicadas (`CarnePlasma × SegundoRuido × RampaGlow + BitsChispa` en doble AND) con doble scroll cruzado, deformación sinusoidal transversal, chispas solo donde ambas nubes de blobs coinciden. **Las dos curas de la casa:** `uEscalaV` (los rasgos miden SIEMPRE lo mismo en pantalla — cura los dientes de sierra) y EL NÚCLEO SUAVE (smoothstep, no umbral duro — el borde RESPIRA sin contorno fractal).
 - **Perfil:** vs_3_0 + ps_3_0 (el único con vertex shader y matrix). 4 samplers con `sampler_state` completo: `texCarne` s0 · `texSegunda` s1 · `texRampa` s2 · `texBits` s3. Params: `uTransformMatrix` (GameViewMatrix), `uTime`, `uEscalaV` + las 4 texturas.
 - **Loader:** `HazConcentradoLib.ObtenerShader()` — caché `_cache` + `_fallo` (el patrón de la casa, v6.55.1; el RC2 conserva el suyo — mismo asset, dos caches, cero costo).
-- **Uso (v6.56.4 — EL CAMINO GPU PORTADO A LAS ARMAS):** el RC2 conserva su
-  strip de 1500 puntos (color prismático viajero, ancho `p^0.8·cbrt·realSize·3500·(1.1+cos·respira)`);
-  **HazConcentradoLib.Dibujar(ptsMundo, n, perfil, colores, uTime, uEscalaV)**
-  lo trae a escala de arma: remuestrea a 128, rotaciones por tangente,
-  `uEscalaV` AUTOMÁTICA por ancho (2·perfilMáx/(texel·2.2), piso 0.18) y el
-  COLOR QUE VIAJA + FADE DE LENTE por nodo (la fórmula porNodo de la vieja
-  HazFusionEspina, que vive ahora en los llamadores). Los consumidores:
-  **la escalera (Alba/Veredicto/Juicio — uTime con SU Flujo), el Prisma (la
-  espina verlet Catmull-Rom 44), el Partidor (la carga senoide + el corte
-  vertical, flujo −1.15) y la Columna de la Ira (flujo −1.2)**.
+- **Uso:** el RC2 (y sus copias de prueba v6.56.9) dibujan SU strip de
+  1500 puntos (color del conjuro viajero, ancho `p^0.8·cbrt·realSize·3500·(1.1+cos·respira)`).
+  *(El «camino GPU portado a las armas» — `HazConcentradoLib.Dibujar` —
+  fue PURGADO en la v6.56.9: sus consumidores la escalera/Prisma/Partidor/
+  Ira murieron en la purga de la .56.6 y la búsqueda negativa de la
+  auditoría lo certificó. Lo que vive de esa librería son LOS SOLES RÚNICOS:
+  `SolRunico4Puntas` + `SolesRunicosCarga` — LA IMPLOSIÓN v6.56.9: ángulo
+  FIJO por hash, cero deriva angular; nacen a 150-240 px y CAEN al centro
+  con ease-in vida² — «aparecer lejos y contraerse sin dar vueltas» — +
+  `SolesRunicosEstallido`.)*
+- **v6.56.9 — LA PILA DE CAPAS DEL CONDUCTO (las copias del RC2):** el
+  diagnóstico forense de la captura del jugador: el núcleo saturado ocupaba
+  el 99% del halo medido — TODO el universo visual vivía DENTRO de un solo
+  strip y NO EXISTÍA envolvente luminosa fuera de la banda (por eso el ojo
+  leía «una sola capa», con shader perfecto). LA CURA (LEY §0 v6.56.9): la
+  MISMA polilínea dibujada 6 veces — bruma ×2.6-3.6 (RampaGlow, violeta
+  profundo al 9-20%) → glow ×1.75-2.5 (la paleta viajando) → glow² (receta
+  C) → **EL CUERPO del .fx** → núcleo ×0.28-0.42 (blanco-violeta) → soles
+  conducto en las márgenes. Las capas de rampa van con **Main.pixelShader
+  (EL VANILLA)** + textura en `gd.Textures[0]` → **GPU-UNIVERSAL**: si el
+  .fxc no carga, el cuerpo cae a una tira de CarnePlasma por el vanilla y
+  LA PILA SE VE IGUAL — seis capas en cualquier máquina. Verificado: sim
+  1:1 con CERO picos de borde (el único salto es el borde de ataque del
+  cono, empinado por diseño) + verificación visual 5 capas legibles.
 - **v6.56.4 — LA LECCIÓN DEL LOTE ADITIVO:** el shader nació aditivo (su .fx
   lo declara) pero se dibujaba bajo el pase de entidades (AlphaBlend): las
   texturas del plasma llevan bordes V NEGRO PURO y bajo AlphaBlend el borde
@@ -841,7 +917,7 @@ contrato de coordenadas). CERO discos en la boca (la ley §0).
 | **v6.56.5** | **LA CURA DEL PITIDO + LA AUDITORÍA DE LOS 4 AGENTES**: el seno puro de 1376 Hz del finale de la carga MUERE (→ soplo de presión sin pitch, detector anti-pitido calibrado en el generador) · **EL TEMBLOR PERCEPTIBLE** (el sostenido era SUB-PÍXEL: trauma²·i — 2.6 daba 0.18 px; ahora 6.5/9) · **GravLens SIN MONOPOLIO** (vida 0.06 s — antes pedía 36 lentes contra una mesa de 8) · **EL HORIZONTE DEL PORTAL A TAMAÑO REAL** (2.28·R, la convención BlackDisk — salía a la mitad) · **LA CARGA MUERE CON SU DUEÑO** (`CortarCarga` + `_cargaSlot`) · **LA REGLA DE LA CAÍDA LONGITUDINAL** (§5.4 — la espina de la Ira/Partidor vivía al revés) · **LA PARIDAD DE LAS RUNAS** (§4.24 — `L_B = −(−1)^num₄` + direction + gemelas compartiendo semilla) · los `.fx` fuera del .tmod (buildIgnore) | §5.4, §4.24, §7.3, §3.1 |
 | **v6.56.6** | **LA PURGA + LAS 9 VARIANTES + EL RC2 «desnudo»** (coronas rúnicas al 53 %, el disco negro y la lente MUERTOS, los soles de 4 puntas de la carga) + **LA AUDITORÍA DE LAS 33 LIBRERÍAS** (3 fusiones recomendadas, ~40 métodos muertos, 57 copias privadas de Tint/Hash01, TiemposLib/PostFXLib para el futuro) · *el RC2 de esta versión traía LA PILA DE CAPAS — la causa de los picos, curada en la .56.7* | §5.4, §11 |
 | **v6.56.7** | **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
- **LA SOLUCIÓN DE LOS PICOS (LA LEY DEL PIXEL vs EL QUAD)**: la técnica del commit 607df36 vuelve ENTERA al RC2 (strip + shader de las 4 texturas en lote aditivo + boca de 4 glows apilados + `ColorPrisma` — EL COLOR DEL MOD — y los polvos/círculos planos MUERTOS) tras el diagnóstico forense de la PILA de la .56.6 (quads poligonales + remolino binario crudo = peines de blobs; sim 1:1 + verificación visual) · **EL CONTRATO DE COORDENADAS DE VFXCore** (los soles rúnicos nacían fuera de pantalla — PANTALLA vs MUNDO) · **EL SHADER MEJORADO**: EL HALO per-pixel + LOS FILAMENTOS (auto-interferencia) + EL NÚCLEO QUE LATE + LA FRANJA PRISMÁTICA · **LA LEY DE USO DE LAS 4 TEXTURAS** (§6.A) · **LAS 9 VARIANTES PURGADAS** (la letra: «primero borrar las variantes») | §0, §5.4, §6.A, §11 |
+| **v6.56.9** | **LA PILA DE CAPAS GPU-UNIVERSAL** (strips múltiples sobre la MISMA polilínea + Main.pixelShader + RampaGlow — la cura de «una sola capa»: el núcleo ocupaba el 99% del halo, no había envolvente; 3 recetas A/B/C en las COPIAS del RC2, el original intacto) · **LA IMPLOSIÓN DE SOLES** (ángulo fijo, caída radial ease-in — «sin dar vueltas») · **LA AUDITORÍA EJECUTADA**: BeamLib+BoltRenderer+HazConcentradoLib-muerta ENTERRADAS (−1.809 l), 40 métodos muertos purgados (−1.317 l), **LOS HELPERS CANÓNICOS** en VFXCore (Tint/TintAlfa/AbrirAdditive/AbrirAlpha/Capsule/RingQuad — 96 cuerpos delegados) · **TiemposLib (EL HITSTOP) + ImpactoLib (EL GOLPE)** con la ignición de cine de las copias · **LA LEY DEL CÓDICE SINCRONIZADO** (§0.6, la anti-recurrencia del desync de 6 puntos) — y **ESTE CÓDICE (v1.5)** | §0, §4.5-4.6, §4.25, §5.4, §11, AUDITORIA-LIBRERIAS.md |
 | **v6.56.8** | **LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA REGLA DE LA CIRUGÍA** (el .fx vuelve al esqueleto PROBADO .55.1; los deltas: venas rojas/pulso/halo/latido) · **LA BOCA DE GLOWS APILADOS PROHIBIDA** (§0 — era EL círculo plano de las capturas; la boca = corona + soles + arcos + estrella conducto) · **`ColorConjuro`** (violeta→morado→rojo→magenta — ColorPrisma muere en el RC2) · **EL FALLBACK HERMOSO** (4 tiras suaves, sin remolino) · **LA AUDITORÍA DE LIBRERÍAS entregada** (`AUDITORIA-LIBRERIAS.md`: 2 librerías muertas, ~3.900 líneas recuperables, ~125 copias de helpers, 3 librerías nuevas propuestas — TiemposLib/PostFXLib/ImpactoLib) — y **ESTE CÓDICE (v1.4) RECONCILIADO CON LA REALIDAD** | §0, §5.4, §6.A, AUDITORIA-LIBRERIAS.md |
 
 ---

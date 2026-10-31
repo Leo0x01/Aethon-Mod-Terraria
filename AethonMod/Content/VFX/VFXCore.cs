@@ -1138,83 +1138,15 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// LAS CAPAS DE DIBUJO del motor (v6.31): los efectos que OCULLEN (el
-        /// vacío de un desgarro, el horizonte de un agujero negro) necesitan
-        /// dibujarse DEBAJO de los NPCs — que el cuerpo del enemigo TAPE el
-        /// horizonte de sucesos vende la profundidad que el aditivo no puede.
-        /// </summary>
-        public enum VFXLayer
-        {
-            /// <summary>Debajo de todo (detrás de tiles y NPCs).</summary>
-            DetrasDeTodo = 0,
-            /// <summary>Sobre los tiles, DEBAJO de los NPCs (la capa de la oclusión).</summary>
-            DetrasDeNPCs = 1,
-            /// <summary>Sobre los NPCs (el brillo final).</summary>
-            SobreNPCs = 2,
-        }
-
-        // (delegados por capa: el llamador registra su dibujo del frame).
-        // v6.50.5 — SIN readonly: el barrendero de Unload lo anula por
-        // reflexión y .NET 8 prohíbe escribir campos initonly (la traza
-        // del client.log v6.50.4 — FieldAccessException) — el ancla se
-        // quedaba viva tras la descarga ("mod class still using memory").
-        private static List<Action<SpriteBatch>>[] _capas =
-        {
-            new List<Action<SpriteBatch>>(32),
-            new List<Action<SpriteBatch>>(32),
-            new List<Action<SpriteBatch>>(32),
-        };
-
-        /// <summary>
-        /// REGISTRA un dibujo con CAPA para este frame (v6.31): el delegado se
-        /// ejecuta en <see cref="FlushOcclusion"/> en orden de capa. El dibujo
-        /// debe abrir/cerrar SUS lotes (el batch que recibe ya está preparado
-        /// en NonPremultiplied). Para la luz normal sigue habiendo
-        /// <see cref="FlushAdditive"/> — esto es SOLO para lo que OCULLE.
-        /// </summary>
-        public static void RegisterLayer(Action<SpriteBatch> draw, VFXLayer layer)
-        {
-            if (draw == null || Main.netMode == NetmodeID.Server) return;
-            _capas[(int)layer].Add(draw);
-            if (_capas[(int)layer].Count > 64)       // techo de seguridad
-                _capas[(int)layer].RemoveAt(0);
-        }
-
-        /// <summary>
-        /// VUELCA las capas registradas (v6.31): los dibujos oclusivos en su
-        /// orden (detrás de todo → detrás de NPCs). El llamador decide DÓNDE
-        /// del pipeline lo invoca (p. ej. un ModSystem.PostDrawTiles para que
-        /// los NPCs tapen la oclusión). Limpia los registros del frame.
-        /// </summary>
-        public static void FlushOcclusion()
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-            for (int c = 0; c < _capas.Length; c++)
-            {
-                if (_capas[c].Count == 0) continue;
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                for (int i = 0; i < _capas[c].Count; i++)
-                {
-                    try { _capas[c][i](Main.spriteBatch); }
-                    catch { }
-                }
-                Main.spriteBatch.End();
-                _capas[c].Clear();
-            }
-            Janitor();
-        }
-
-        /// <summary>
         /// EL CONSERJE DE ESTADO (v6.31 — la lección de higiene de pipeline de
         /// la super investigación): los shaders que registran texturas en los
         /// SLOTS 1..3 del dispositivo los dejan PEGADOS si el frame termina a
         /// mitad de pase (pausa, teleport, excepción) — y el siguiente dibujo
         /// que use esos slots sale CORROMPIDO. Este barrido los anula al
-        /// terminar el volcado de capas: un solo lugar, cero víctimas.
+        /// cerrar el pase de tiles (lo llama VFXCoreSystem.PostDrawTiles):
+        /// un solo lugar, cero víctimas.
         /// </summary>
-        private static void Janitor()
+        internal static void Janitor()
         {
             try
             {
@@ -1444,6 +1376,108 @@ namespace AethonMod.Content.VFX
 
         /// <summary>v6.49 — EL DIAGNÓSTICO del núcleo (lo pinta el overlay F8).</summary>
         public static int QuadsDelFrame => _quadsDelFrame;
+
+        // ================ v6.56.9 — LOS HELPERS CANÓNICOS (la auditoría §4) ================
+        //
+        // La auditoría de librerías §4 contó ~125 copias PRIVADAS de los
+        // mismos helpers repartidas por los renderizadores (Tint ×35,
+        // BeginAdditive ×23, Hash01 ×12+3, BeginAlpha ×14, Capsule ×15,
+        // RingQuad ×12, Ellipse ×9). La cura NO borra las copias (los
+        // call-sites quedan intactos, cero riesgo de romper nombres): cada
+        // copia privada se convierte en un delegado de 1 línea a SU
+        // canónica aquí — la lógica vive UNA sola vez.
+
+        /// <summary>
+        /// v6.56.9 — EL TINTE PREMULTIPLICADO CANÓNICO: la fusión de las
+        /// ~35 copias privadas "Tint" de la familia (RGB·f, A·f) — la
+        /// reversión v6.50.7, la correcta para el compositing
+        /// premultiplicado de FNA en lotes de masa y aditivos. La fórmula
+        /// es idéntica a DefinitivasLib.Alfa y delega internamente en ella
+        /// (una sola fuente de verdad para la fórmula). OJO: existe OTRA
+        /// familia — el alpha-gate, TintAlfa — y JAMÁS se mezclan (cambian
+        /// el brillo percibido).
+        /// </summary>
+        public static Color Tint(Color c, float f)
+            => DefinitivasLib.Alfa(c, f);
+
+        /// <summary>
+        /// v6.56.9 — EL TINTE ALPHA-GATE CANÓNICO: la SEGUNDA familia de
+        /// "Tint" — RGB INTACTO, alfa = intensidad (la familia del vacío:
+        /// UmbralBlackHoleRenderer, OrbitaLib.Tint…). Fusión de las ~13
+        /// copias privadas detectadas. JAMÁS intercambiable con el
+        /// premultiplicado Tint(c, f).
+        /// </summary>
+        public static Color TintAlfa(Color c, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f);
+            return new Color(c.R, c.G, c.B, (byte)(255f * f + 0.5f));
+        }
+
+        /// <summary>
+        /// v6.56.9 — EL ABRIR ADDITIVE CANÓNICO: el patrón CON SONDA de la
+        /// casa desde v6.50.58 (antes vivía solo en OrbitaLib.AbrirAdditive,
+        /// que ahora es un alias delgado de este). Cierra cualquier lote
+        /// ajeno vivo ANTES del Begin (CerrarLoteSiAbierto — cero
+        /// first-chance) y abre el SpriteBatch en ADITIVO con la matriz del
+        /// juego. Comportamiento idéntico al Begin crudo cuando no hay lote
+        /// abierto; estrictamente más seguro cuando lo hay (el crudo
+        /// lanzaría Begin-sobre-Begin). Fusión de las copias privadas
+        /// "BeginAdditive" de la familia Deferred+LinearClamp.
+        /// </summary>
+        public static void AbrirAdditive()
+        {
+            // v6.50.58 — SONDA: el End defensivo SOLO si hay un Begin vivo.
+            CerrarLoteSiAbierto();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>
+        /// v6.56.9 — EL ABRIR ALPHA CANÓNICO: el mismo patrón con sonda
+        /// para el pase ALFA (BlendState.AlphaBlend). Fusión de las copias
+        /// privadas "BeginAlpha" de la familia Deferred+LinearClamp.
+        /// </summary>
+        public static void AbrirAlpha()
+        {
+            CerrarLoteSiAbierto();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>
+        /// v6.56.9 — LA CÁPSULA CANÓNICA: la familia dominante de las 15
+        /// copias privadas "Capsule" (11 idénticas) — SoftGlow estirado,
+        /// tamaño total (len+width) × width·1.9, dibujo DIRECTO al lote
+        /// activo (no usa el buffer de FlushAdditive). Las otras 4 copias
+        /// (guard de subpíxel width&lt;0.5, o geometría propia) NO migran.
+        /// </summary>
+        public static void Capsule(Vector2 mid, float len, float width, float rot, Color tint)
+        {
+            if (tint.A == 0) return;
+            Texture2D tex = SoftGlow;
+            Main.spriteBatch.Draw(tex, mid, null, tint, rot,
+                new Vector2(tex.Width, tex.Height) * 0.5f,
+                new Vector2(len + width, width * 1.9f) / new Vector2(tex.Width, tex.Height),
+                SpriteEffects.None, 0f);
+        }
+
+        /// <summary>
+        /// v6.56.9 — EL ANILLO CANÓNICO: la familia de las 10 copias
+        /// privadas "RingQuad" idénticas — Ring.png calibrado para radio
+        /// VISIBLE (la constante 2.174 medida del pincel del proyecto,
+        /// RingQuadSize). Dibujo directo al lote activo.
+        /// </summary>
+        public static void RingQuad(Vector2 pos, float visibleRadius, float rot, Color tint)
+        {
+            if (tint.A == 0) return;
+            Texture2D tex = Ring;
+            Main.spriteBatch.Draw(tex, pos, null, tint, rot,
+                new Vector2(tex.Width, tex.Height) * 0.5f,
+                RingQuadSize(visibleRadius) / new Vector2(tex.Width, tex.Height),
+                SpriteEffects.None, 0f);
+        }
     }
 
     /// <summary>
@@ -1457,32 +1491,33 @@ namespace AethonMod.Content.VFX
     /// prometía higiene que no existía).
     ///
     /// Este ModSystem la CONECTA en PostDrawTiles — el punto exacto que
-    /// la documentación de <see cref="VFXCore.FlushOcclusion"/> propone
-    /// («p. ej. un ModSystem.PostDrawTiles para que los NPCs tapen la
-    /// oclusión»): vanilla llama SystemLoader.PostDrawTiles() justo
-    /// después de cerrar el lote de tiles y ANTES de dibujar los
-    /// proyectiles (decompile: spriteBatch.End() → PostDrawTiles() →
-    /// DrawProjectiles()), así que el barrido del Janitor despeja los
-    /// slots ANTES del pase de entidades de cada frame (las texturas
-    /// bind-eadas por los renderizadores del frame anterior ya no
-    /// contaminan el dibujado siguiente).
+    /// la documentación del barrido propone (vanilla llama
+    /// SystemLoader.PostDrawTiles() justo después de cerrar el lote de
+    /// tiles y ANTES de dibujar los proyectiles (decompile:
+    /// spriteBatch.End() → PostDrawTiles() → DrawProjectiles()), así que
+    /// el barrido del Janitor despeja los slots ANTES del pase de
+    /// entidades de cada frame (las texturas bind-eadas por los
+    /// renderizadores del frame anterior ya no contaminan el dibujado
+    /// siguiente). (v6.56 — la purga de la auditoría §3 retiró las capas
+    /// de oclusión muertas — enum VFXLayer, registro, RegisterLayer y el
+    /// FlushOcclusion vacío, nadie registraba capas — y con ellas la
+    /// llamada: lo que queda conectado aquí es el barrendero de los
+    /// slots, el Janitor.)
     ///
     /// EL GUARD (netMode == Server) es el MISMO de todo el stack VFX de
     /// la casa (ParticleManager.PostDrawTiles, RuneSun, auras…): devuelve
     /// al servidor dedicado Y AL HOST del listen-server (netMode 2), donde
     /// este mod no renderiza nada — no hay slots que limpiar ahí
-    /// (FlushOcclusion se auto-guarda igual, doble puerta). En el menú no
+    /// (el Janitor se auto-guarda igual, doble puerta). En el menú no
     /// hay mundo ni renderizadores registrando nada.
     /// </summary>
     public class VFXCoreSystem : ModSystem
     {
         /// <summary>
-        /// EL PUNTO ÚNICO DEL VOLCADO DE CAPAS + LA HIGIENE: vuelca las
-        /// capas de oclusión registradas (nadie hoy: los _capas quedan
-        /// vacíos y el volcado es no-op) y corre el Janitor — la limpieza
+        /// EL PUNTO ÚNICO DE LA HIGIENE: corre el Janitor — la limpieza
         /// de los slots de textura que los shaders del mod dejan pegados.
-        /// Con las capas vacías el coste es el barrido del Janitor (tres
-        /// asignaciones de slot nulas) — cero lotes abiertos.
+        /// El coste es el barrido del Janitor (tres asignaciones de slot
+        /// nulas) — cero lotes abiertos.
         /// </summary>
         public override void PostDrawTiles()
         {
@@ -1494,7 +1529,7 @@ namespace AethonMod.Content.VFX
             // v6.50.2 — FIX (subsistema muerto): la llamada que faltaba.
             // Solo procesos que dibujan; jamás romper el frame por higiene.
             if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;
-            try { VFXCore.FlushOcclusion(); }
+            try { VFXCore.Janitor(); }
             catch { }
         }
     }

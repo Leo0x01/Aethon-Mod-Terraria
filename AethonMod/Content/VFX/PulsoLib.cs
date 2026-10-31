@@ -53,40 +53,20 @@ namespace AethonMod.Content.VFX
             public float Knockback;
         }
 
-        /// <summary>UN veredicto abierto: las marcas acumuladas de un dueño.</summary>
+        /// <summary>UN veredicto abierto: las marcas acumuladas de un dueño.
+        /// (v6.56 — AbrirVeredicto, el único escritor de Dueño/TickLiquidación,
+        /// murió en la purga de la auditoría §3; los campos quedan con su
+        /// valor centinela para que Marcar/Liquidar — aún vivos de palabra —
+        /// sigan compilando sin aviso.)</summary>
         private sealed class Veredicto
         {
-            public int Dueño;
-            public int TickLiquidación;
+            public int Dueño = -1;
+            public int TickLiquidación = -1;
             public readonly List<Marca> Marcas = new List<Marca>(16);
         }
 
         // (los veredictos abiertos, por dueño — a lo sumo un puñado)
         private static readonly List<Veredicto> _veredictos = new List<Veredicto>(8);
-
-        /// <summary>
-        /// ABRE UN VEREDICTO para este proyectil: a partir de ahora,
-        /// <see cref="Marcar"/> anota objetivos en silencio y
-        /// <see cref="Liquidar"/> los liquidará TODOS a la vez. Devuelve el
-        /// id del veredicto (o −1 en cliente puro, donde el juicio es solo
-        /// visual).
-        /// </summary>
-        /// <param name="dueño">El proyectil que juzga.</param>
-        /// <param name="ticksHastaLiquidar">Ticks de gracia: si nadie llama a
-        /// Liquidar, el veredicto vence solo (las marcas se disipan CALLADAS).</param>
-        public static int AbrirVeredicto(Projectile dueño, int ticksHastaLiquidar = 90)
-        {
-            if (dueño == null || !dueño.active) return -1;
-            CerrarVeredictosVencidos();
-
-            var v = new Veredicto
-            {
-                Dueño = dueño.whoAmI,
-                TickLiquidación = (int)Main.GameUpdateCount + Math.Max(5, ticksHastaLiquidar),
-            };
-            _veredictos.Add(v);
-            return _veredictos.Count - 1;
-        }
 
         /// <summary>
         /// MARCA un objetivo (SILENCIOSO): el daño se apunta pero NO se aplica;
@@ -166,20 +146,6 @@ namespace AethonMod.Content.VFX
             return víctimas;
         }
 
-        /// <summary>¿Tiene este dueño un veredicto ABIERTO con marcas?</summary>
-        public static bool TieneMarcas(Projectile dueño)
-        {
-            Veredicto v = VeredictoDe(dueño);
-            return v != null && v.Marcas.Count > 0;
-        }
-
-        /// <summary>Cuántas marcas lleva el veredicto de este dueño (para escalar visuales).</summary>
-        public static int ContarMarcas(Projectile dueño)
-        {
-            Veredicto v = VeredictoDe(dueño);
-            return v?.Marcas.Count ?? 0;
-        }
-
         private static Veredicto VeredictoDe(Projectile dueño)
         {
             if (dueño == null || !dueño.active) return null;
@@ -239,36 +205,6 @@ namespace AethonMod.Content.VFX
                     hzWobble: 9f - 5.5f * peso,                       // ligera = rápida
                     pesado: peso > 0.62f);
             }
-        }
-
-        /// <summary>
-        /// APLICA el retroceso al jugador (solo visual — la posición del ítem
-        /// la dibuja el llamador con <see cref="OffsetRetroceso"/>): la
-        /// PANTALLA empuja en dirección OPUESTA al disparo y las armas
-        /// pesadas sacuden una vez.
-        /// </summary>
-        public static void Retroceder(Player p, in Retroceso r, Vector2 dirDisparo)
-        {
-            if (p == null || !p.active || Main.netMode == NetmodeID.Server) return;
-            Vector2 dir = dirDisparo.LengthSquared() > 0.0001f ? Vector2.Normalize(dirDisparo) : -Vector2.UnitX;
-            GolpearCamara(-dir, 1.2f + r.Patada * 2.4f, 8);
-            if (r.Pesado)
-                EmpujarPantalla(new Color(255, 245, 230), 0.05f + 0.03f * r.Patada, 6);
-        }
-
-        /// <summary>
-        /// EL OFFSET VISUAL del arma en este instante (px, en coords de mundo):
-        /// la patada inicial amortiguada + el WOBBLE residual — determinista
-        /// por whoAmI (mismaarma = mismo temblor en todas las máquinas).
-        /// </summary>
-        public static Vector2 OffsetRetroceso(int whoAmI, in Retroceso r, float time, int ticksDesdeDisparo)
-        {
-            // La patada: exponencial amortiguada (fuerte y corta).
-            float k = MathF.Exp(-ticksDesdeDisparo * 0.22f);
-            // El wobble: seno amortiguado con la semilla del dueño.
-            float wobble = MathF.Sin(time * r.HzWobble * MathHelper.TwoPi + whoAmI * 2.4f)
-                           * MathF.Exp(-ticksDesdeDisparo * 0.06f) * r.Desplazamiento * 0.25f;
-            return new Vector2(0f, -1f) * (r.Desplazamiento * k + wobble);
         }
 
         // ==================================================================
@@ -368,41 +304,6 @@ namespace AethonMod.Content.VFX
             Piedra,
             /// <summary>Vacío: el silencio que duele.</summary>
             Vacio,
-        }
-
-        private static int _sonidosDelFrame;
-        private static uint _frameDeSonido;
-
-        /// <summary>
-        /// LA VOZ DEL GOLPE por material — con PRESUPUESTO (máx 2/frame: las
-        /// ráfagas no ensordecen) y pitch por COMBO (la racha sube el tono:
-        /// el contador musical del juego).
-        /// </summary>
-        public static void Sonido(Material m, Vector2 pos, int combo = 0)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-            uint frame = Main.GameUpdateCount;
-            if (frame != _frameDeSonido)
-            {
-                _frameDeSonido = frame;
-                _sonidosDelFrame = 0;
-            }
-            if (_sonidosDelFrame >= 2) return;   // EL PRESUPUESTO
-            _sonidosDelFrame++;
-
-            float pitch = MathHelper.Clamp(combo * 0.06f, 0f, 0.55f);
-            try
-            {
-                var estilo = m switch
-                {
-                    Material.Carne => SoundID.Item167.WithPitchOffset(-0.25f + pitch).WithVolumeScale(0.5f),
-                    Material.Acero => SoundID.Item90.WithPitchOffset(0.10f + pitch).WithVolumeScale(0.45f),
-                    Material.Piedra => SoundID.Item70.WithPitchOffset(-0.40f + pitch).WithVolumeScale(0.5f),
-                    _ => SoundID.Item8.WithPitchOffset(-0.60f + pitch).WithVolumeScale(0.4f),
-                };
-                Terraria.Audio.SoundEngine.PlaySound(estilo, pos);
-            }
-            catch { }
         }
 
         // ==================================================================

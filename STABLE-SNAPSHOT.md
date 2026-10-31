@@ -1,3 +1,20 @@
+# v6.56.9 — LA PILA DE CAPAS GPU-UNIVERSAL + LA IMPLOSIÓN DE SOLES + LA AUDITORÍA EJECUTADA — EL CHECKLIST
+
+> ⏳ **PUBLICACIÓN PENDIENTE** — el release ID se anota al publicar (la lección de la fila pre-rellena de la .65: JAMÁS copiar el ID de la versión anterior).
+
+**Qué pasó** (la letra): «ahora se ve igual pero con un color diferente… lo que le faltan son varias capas de texturas con mas difuminado, glow entre demas efectos» + «los brillos de soles… aparecer lejos y contraerse hacia el centro pero sin dar vueltas, como una implosion» + «copia ese rc2 en varias armas con los cambios diseñados asi no dañamos el codigo original» + «cualquier gpu incluso los que no son dedicadas deben ver el shader» + «es momento de mejorar las librerias».
+
+1. **LA PILA DE CAPAS (la cura de «una sola capa»)**: [ ] el RAYO DE PRUEBA A muestra BRUMA ambiental alrededor del conducto (violeta difuso que tiñe el fondo); [ ] ENVOLVENTE de glow con la paleta viajando (violeta→morado→rojo→magenta); [ ] el CUERPO de plasma del shader de siempre; [ ] la VENA NÚCLEO blanca-violeta en el centro; [ ] SOLES DE 4 PUNTAS corriendo por las márgenes hacia la punta. **Cómo debe verse: 5-6 capas distinguibles, glow que se extiende MUCHO más allá del núcleo saturado, bordes difuminados.**
+2. **LAS TRES RECETAS (elige la ganadora)**: [ ] **A LA EQUILIBRADA** (elegante, el diseño base); [ ] **B EL TITÁN** (el más gordo y dramático — bruma y glow al máximo); [ ] **C EL SUEÑO** (todo fundido, máximo desenfoque, doble glow). El RC2 original queda INTACTO para comparar.
+3. **CERO PICOS**: [ ] los bordes de todas las capas son LISOS (sin dientes de sierra ni peines) — la sim 1:1 dio 0 picos; si ves algo raro, captura y reporta.
+4. **GPU-INTEGRADA**: [ ] en la máquina del jugador (sin GPU dedicada) la PILA SE VE COMPLETA — las capas usan el pipeline vanilla de Terraria (el .fx es un plus: si falla, la pila sigue).
+5. **LA IMPLOSIÓN DE SOLES (la carga)**: [ ] los soles de 4 puntas APARECEN LEJOS y CAEN RECTOS hacia la boca (NADIE da vueltas/orbita); [ ] la caída ACELERA al acercarse; [ ] el enjambre se aprieta conforme la carga llena; [ ] al disparar salen ESCUPIDOS en abanico hacia el rayo.
+6. **LA IGNICIÓN DE CINE (las copias)**: [ ] al disparar: EL MUNDO SE CONGELA un instante (los NPC quietos ~6 ticks — solo en un jugador) + kick + flash + baño de luz.
+7. **LAS LIBRERÍAS**: [ ] TODO el mod se ve igual que siempre (la purga de 40 métodos muertos + BeamLib/BoltRenderer enterradas + helpers canónicos NO cambió NI UN efecto — solo borró lo muerto y unificó la lógica); [ ] el F8 sin errores nuevos.
+8. **LOS CHECKLIST VIEJOS**: el de la .56.8 (paleta del conjuro, boca sin discos) y el de la .56.7 (cero picos en el RC2 original) siguen vigentes.
+
+---
+
 # v6.56.8 — LA CURA DE LA BANDA PLANA + LA PALETA DEL CONJURO + LA AUDITORÍA — EL CHECKLIST
 
 > **PUBLICADA** — release [429441323](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.8) + CDN verificado byte a byte (md5 `b04172a1f883eb9da60f29ce07b88b72`, 6.364.679 B; asset id 693270961).

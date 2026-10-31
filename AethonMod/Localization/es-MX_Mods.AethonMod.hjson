@@ -1974,13 +1974,55 @@ Items: {
 			'''
 	}
 
+	RayoPruebaA: {
+		DisplayName: Rayo de Prueba A — La Equilibrada
+		Tooltip:
+			'''
+			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA A
+			(el original queda intacto; esta copia se ajusta hasta
+			dar con el look correcto). LA PILA DE CAPAS EQUILIBRADA:
+			bruma ambiental ×2.6, envolvente de glow ×1.75, el plasma
+			del shader y la vena núcleo ×0.34, con 5 soles de 4 puntas
+			corriendo por las márgenes del conducto. La misma carga de
+			300 ticks (los soles IMPLOTAN hacia la boca) y el mismo
+			cono de 3500 px. Compara con B y C y elige la ganadora.
+			'''
+	}
+
+	RayoPruebaB: {
+		DisplayName: Rayo de Prueba B — El Titán
+		Tooltip:
+			'''
+			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA B
+			(el original queda intacto). EL TITÁN: TODO al máximo —
+			bruma ambiental ×3.1, envolvente de glow ×2.1, vena núcleo
+			×0.42 casi blanca y 8 soles de 4 puntas. El haz más gordo
+			y dramático de la familia: el conducto como una tormenta
+			violeta. La misma conducta del RC2. Compara con A y C.
+			'''
+	}
+
+	RayoPruebaC: {
+		DisplayName: Rayo de Prueba C — El Sueño
+		Tooltip:
+			'''
+			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA C
+			(el original queda intacto). EL SUEÑO: el desenfoque
+			máximo — bruma ambiental ×3.6, DOBLE envolvente de glow
+			(×2.5 + ×1.9), núcleo suave ×0.28 y 6 soles. El conducto
+			onírico: todo fundido, como mirar el rayo a través de
+			un velo. La misma conducta del RC2. Compara con A y B.
+			'''
+	}
+
 	BolsaDefinitivas: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa.
-			El plasma de la casa (carne fBm anti-picos), el gradiente
-			PRISMÁTICO que viaja y los soles rúnicos de la carga.
+			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa —
+			más LAS TRES COPIAS DE PRUEBA de la pila de capas (A la
+			equilibrada · B el titán · C el sueño): el original queda
+			intacto y las copias se ajustan hasta el look correcto.
 			'''
 	}
 
@@ -2350,6 +2392,7 @@ Projectiles: {
 	BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
 	SombraPagina2Projectile.DisplayName: La Sombra de la Página II
 	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
+	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
 }
 
 Buffs: {

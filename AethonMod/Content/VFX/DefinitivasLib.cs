@@ -132,25 +132,6 @@ namespace AethonMod.Content.VFX
             return Color.Lerp(_paradasVeredicto[i], _paradasVeredicto[j], x - i);
         }
 
-        /// <summary>v6.56.3 — EL GRADIENTE DE LA ESCALERA: la paleta del
-        /// peldaño (1=Alba · 2=Veredicto · 3=Juicio).</summary>
-        public static Color GradienteEscalera(int nivel, float t)
-        {
-            return nivel switch
-            {
-                1 => GradienteAlba(t),
-                2 => GradienteVeredicto(t),
-                _ => GradienteJuicio(t),
-            };
-        }
-
-        /// <summary>La versión OSCURECIDA del gradiente (para halos).</summary>
-        public static Color GradienteJuicioOscuro(float t, float f = 0.55f)
-        {
-            Color c = GradienteJuicio(t);
-            return new Color((byte)(c.R * f), (byte)(c.G * f), (byte)(c.B * f));
-        }
-
         /// <summary>El contrato de alfa de la casa (rgb premultiplicado).</summary>
         public static Color Alfa(Color c, float f)
         {
@@ -206,19 +187,6 @@ namespace AethonMod.Content.VFX
             float perp = MathF.Abs(v.X * -dir.Y + v.Y * dir.X);
             float semi = along > 0f ? along * MathF.Tan(semiangulo) : semiangulo * 60f;
             return perp <= semi + radioH;
-        }
-
-        /// <summary>
-        /// EL GIRO CON TOPE (el AngleTowards del género): gira el ángulo
-        /// actual hacia el objetivo SIN pasarse, envolviendo la diferencia
-        /// a (−π, π].
-        /// </summary>
-        public static float AnguloHacia(float actual, float objetivo, float pasoMax)
-        {
-            float d = objetivo - actual;
-            while (d > MathHelper.Pi) d -= MathHelper.TwoPi;
-            while (d <= -MathHelper.Pi) d += MathHelper.TwoPi;
-            return actual + MathHelper.Clamp(d, -pasoMax, pasoMax);
         }
 
         /// <summary>El Sonar blindado de la casa (jamás tumba el frame).</summary>
@@ -372,47 +340,16 @@ namespace AethonMod.Content.VFX
         //  murió con 0 consumidores: la letra del usuario («solo debes
         //  adaptar el código del rayo concentrado 2 a las características
         //  de las armas con pico») mandó los conductos al CAMINO GPU del
-        //  RC2 (HazConcentradoLib: VertexStrip + HazConcentradoShader, el
-        //  borde fundido POR PÍXEL). Sus fórmulas viven en los llamadores
+        //  RC2 (el strip del proyectil + HazConcentradoShader, el borde
+        //  fundido POR PÍXEL). Sus fórmulas viven en los llamadores
         //  (el perfil AnchoCono y el COLOR QUE VIAJA con el FADE DE
-        //  LENTE, por nodo) y su aberración en
-        //  HazConcentradoLib.AberracionCromatica. La LECCIÓN completa de
-        //  por qué la vía CPU no podía curar los picos, en RayoStrip.cs
-        //  (la reversión educada de la v6.56.3) y en el códice §5.4.
+        //  LENTE, por nodo). La LECCIÓN completa de por qué la vía CPU
+        //  no podía curar los picos, en RayoStrip.cs (la reversión
+        //  educada de la v6.56.3) y en el códice §5.4. (v6.56.9: la
+        //  aberración por-tira que vivía en HazConcentradoLib murió con
+        //  la purga de la parte muerta de esa librería — auditoría §3.)
         // ==================================================================
 
-
-        /// <summary>
-        /// v6.54.7 — LOS PINCHOS DE DIFRACCIÓN (técnica nº6 de la
-        /// investigación): el destello anamórfico de lente ALINEADO al
-        /// ángulo del haz — el largo ×8 del ancho en el eje, el corto
-        /// perpendicular, respirando EN FASE con el conjunto. Va DENTRO de
-        /// un VFXCore.Begin() abierto por el llamador.
-        /// </summary>
-        public static void PinchosDifraccion(Vector2 pos, float angulo, float largo, Color color, float alfa, float tiempo)
-        {
-            if (TexStar == null || alfa <= 0.02f) return;
-            float respira = 0.9f + 0.1f * MathF.Sin(tiempo * 3f);
-            VFXCore.Quad(pos, Alfa(color, alfa), new Vector2(largo, largo * 0.13f) * respira, angulo, TexStar);
-            VFXCore.Quad(pos, Alfa(color, alfa * 0.65f), new Vector2(largo * 0.34f, largo * 0.34f) * respira,
-                angulo + MathHelper.PiOver2, TexStar);
-        }
-
-        /// <summary>Dibuja una textura de la librería centrada en pantalla-coordenadas (blindado).</summary>
-        public static void Blit(SpriteBatch batch, Texture2D tex, Vector2 posPantalla, Color color,
-            Vector2 escalaPx, float rot = 0f)
-        {
-            if (tex == null || batch == null) return;
-            // v6.54.5 — EL GUARD DEL LOTE MUERTO (la autopsia del client.log de
-            // la .54.4): el ojo del arma 1 dibujaba aquí con el SpriteBatch ya
-            // CERRADO por un Flush anterior — un Draw sobre un lote muerto que
-            // envenenaba el render. Si la sonda de la casa está disponible y
-            // dice que no hay Begin vivo, NO se dibuja (un adorno perdido jamás
-            // tirará el juego; un End sin Begin sí lo hace).
-            if (VFXCore.SondaActiva && !VFXCore.LoteAbierto) return;
-            batch.Draw(tex, posPantalla, null, color, rot, tex.Size() * 0.5f,
-                new Vector2(escalaPx.X / tex.Width, escalaPx.Y / tex.Height), SpriteEffects.None, 0f);
-        }
 
         // ==================================================================
         //  v6.56.3 — EL ESTADO COMPARTIDO, RETIRADO: SentenciaActual solo lo

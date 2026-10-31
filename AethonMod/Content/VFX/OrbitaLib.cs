@@ -163,46 +163,24 @@ namespace AethonMod.Content.VFX
         //  SECCIÓN A · LOS HELPERS DE BATCH (el patrón del agujero negro)
         // ==================================================================
 
-        /// <summary>
-        /// v6.50.11 — ¿cerramos un lote AJENO al abrir? (la sonda de
-        /// VFXCore.LoteAbierto reemplaza al End defensivo de v6.49, que
-        /// disparaba una first-chance por llamada en el flujo NORMAL —
-        /// el PreDraw del llamador ya había cerrado el lote — y tML
-        /// 2026.07 las registraba como "Excepción silenciosa"). El
-        /// rastreo es EXACTO: true solo si de verdad había un Begin vivo
-        /// — y CerrarBatch aplica el CONTRATO DE CURACIÓN (lote vanilla
-        /// ABIERTO al salir, siempre — la restauración exacta de v6.49
-        /// devolvía el veneno cuando encontraba el lote cerrado).
-        /// </summary>
-        private static bool _loteAjenoAbierto;
+        // v6.56.9 — EL FIELD _loteAjenoAbierto SE RETIRA (auditoría §4):
+        // era de SOLO-ESCRITURA desde v6.50.11 (la curación incondicional
+        // de CerrarBatch dejó de leerlo — verificado) y la lógica de
+        // apertura con sonda ahora vive UNA sola vez en
+        // VFXCore.AbrirAdditive/AbrirAlpha, de los que estos son alias.
 
-        /// <summary>Abre el SpriteBatch en ADITIVO con la matriz del juego.</summary>
+        /// <summary>Abre el SpriteBatch en ADITIVO con la matriz del juego
+        /// (v6.56.9 — alias delgado: la lógica con sonda vive en VFXCore).</summary>
         public static void AbrirAdditive()
         {
-            // v6.50.11 — SONDA (adiós a la first-chance): el End defensivo
-            // solo cuando hay un Begin vivo — la pareja try{End}catch de
-            // v6.49 disparaba una first-chance CADA VEZ que el PreDraw del
-            // llamador ya había cerrado el lote (el flujo NORMAL de la
-            // casa), y tML 2026.07 las registra como "Excepción
-            // silenciosa" — 27 stacks únicos en el client.log del
-            // usuario, todas capturadas por el propio catch: ruido puro.
-            // El rastreo del lote ajeno ahora es EXACTO (la sonda no
-            // miente; y el helper lleva el fallback clásico por si un FNA
-            // futuro renombra el campo).
-            _loteAjenoAbierto = VFXCore.CerrarLoteSiAbierto();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            VFXCore.AbrirAdditive();
         }
 
-        /// <summary>Abre el SpriteBatch en ALFA (el pase de lo oscuro).</summary>
+        /// <summary>Abre el SpriteBatch en ALFA (el pase de lo oscuro)
+        /// (v6.56.9 — alias delgado: la lógica con sonda vive en VFXCore).</summary>
         public static void AbrirAlpha()
         {
-            // v6.50.11 — mismo blindaje por sonda (ver AbrirAdditive).
-            _loteAjenoAbierto = VFXCore.CerrarLoteSiAbierto();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            VFXCore.AbrirAlpha();
         }
 
         /// <summary>
@@ -226,7 +204,6 @@ namespace AethonMod.Content.VFX
             // v6.50.11 — sonda: cierra NUESTRO lote (el del efecto) sin
             // first-chance.
             VFXCore.CerrarLoteSiAbierto();
-            _loteAjenoAbierto = false;
             // La curación incondicional (los parámetros vanilla exactos).
             VFXCore.ReabrirLoteVanilla();
         }

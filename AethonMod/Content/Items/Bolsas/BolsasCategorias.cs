@@ -821,6 +821,11 @@ namespace AethonMod.Content.Items.Bolsas
     //  EL RAYO CONCENTRADO 2. v6.56.7 — LAS NUEVE VARIANTES TAMBIÉN
     //  MUEREN (la letra: «primero borrar las variantes de rayo
     //  concentrado 2»): el ataque definitivo vuelve a ser UNO.
+    //  v6.56.9 — LAS COPIAS DE PRUEBA (la letra: «copia ese rc2 en
+    //  varias armas con los cambios diseñados asi no dañamos el codigo
+    //  original»): el RC2 original INTACTO + las TRES recetas de LA
+    //  PILA DE CAPAS (A la equilibrada · B el titán · C el sueño) para
+    //  elegir la ganadora en juego.
     // ======================================================================
 
     public class BolsaDefinitivas : BolsaCategoria
@@ -837,7 +842,10 @@ namespace AethonMod.Content.Items.Bolsas
         {
             return new List<(int, int)>
             {
-                (ModContent.ItemType<RayoConcentradoDos>(), 1)
+                (ModContent.ItemType<RayoConcentradoDos>(), 1),
+                (ModContent.ItemType<RayoPruebaA>(), 1),
+                (ModContent.ItemType<RayoPruebaB>(), 1),
+                (ModContent.ItemType<RayoPruebaC>(), 1)
             };
         }
     }

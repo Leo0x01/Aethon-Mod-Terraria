@@ -137,31 +137,14 @@ namespace AethonMod.Content.VFX
         /// de FNA es (SourceAlpha, One): el alfa GATEA; RGB intacto, alfa=f).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
-            // estaba incompleta): el pipeline REAL premultiplica los PNG al
-            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
-            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
-            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
-            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
-            // color SIN escalar en los lotes de masa (bruma fantasma
-            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
-            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
-            // correcto para AMBOS presets de FNA.
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // PREMULTIPLICADA (RGB·f, A·f) — la fórmula vive en VFXCore.
+            return VFXCore.Tint(c, f);
         }
 
         /// <summary>Hash determinista [0,1).</summary>
         private static float H01(int seed, int a, int b)
-        {
-            int h = unchecked(seed * 374761393 + a * 668265263 + b * 1911520717);
-            h = unchecked(h ^ (h >> 13));
-            h = unchecked(h * 1274126177);
-            h = unchecked(h ^ (h >> 16));
-            return (h & 0xFFFFFF) / 16777216f;
-        }
+            => VFXCore.Hash01(seed, a, b); // v6.56.9 — delegación a la canónica (auditoría §4)
 
         // ==================================================================
         //  LA LENGUA — la unidad de llama
@@ -384,103 +367,6 @@ namespace AethonMod.Content.VFX
 
         /// <summary>Celdas activas máximas dibujadas por campo (el cap de la casa).</summary>
         private const int CapCeldas = 600;
-
-        /// <summary>El tick de la última simulación (30 Hz — un sí un no).</summary>
-        private static uint _simTick;
-
-        /// <summary>
-        /// DIBUJA UN CAMPO DE BRASAS de <paramref name="w"/>×<paramref name="h"/>
-        /// celdas (celda = <paramref name="cellSize"/> px) con esquina inferior
-        /// en <paramref name="basePos"/>: rejilla de temperaturas 0..36 que
-        /// PROPAGA hacia arriba (cada celda toma el valor de abajo−1 con
-        /// desfase lateral ±1 por hash determinista — la técnica PSX
-        /// clásica, SIN textura dinámica: cada celda ES un quad pequeño
-        /// con el SoftGlow y el color de la tabla). Simulación a 30 Hz,
-        /// celdas con temp ≤ 3 mueren, cap 600 activas.
-        /// Los FOCOS los enciende el llamador con SeedCell(...) en su AI.
-        /// </summary>
-        /// <param name="basePos">Esquina INFERIOR-IZQUIERDA del campo (espacio del lote).</param>
-        public static void EmberField(SpriteBatch batch, Vector2 basePos, int w, int h,
-            float cellSize, Color[] ramp, int seed, float time, float intensity = 1f,
-            float gravDir = 1f)
-        {
-            if (batch == null || w < 4 || h < 4 || cellSize < 2f) return;
-            Texture2D tex = GlowTex;
-            if (tex == null) return;
-
-            // --- El campo (crecimiento/realineación por semilla). ---
-            if (!_campos.TryGetValue(seed, out sbyte[] campo) ||
-                !_dims.TryGetValue(seed, out int[] dims) ||
-                dims[0] != w || dims[1] != h)
-            {
-                campo = new sbyte[w * h];
-                _campos[seed] = campo;
-                _dims[seed] = new[] { w, h };
-                _ultimoToque[seed] = Main.GameUpdateCount;
-            }
-            _ultimoToque[seed] = Main.GameUpdateCount;
-
-            // --- LA SIMULACIÓN a 30 Hz (un tick sí un no — imperceptible
-            //     a 60 fps de dibujado, mitad de coste). ---
-            uint now = Main.GameUpdateCount;
-            if (now / 2u != _simTick)
-            {
-                _simTick = now / 2u;
-                Simular(campo, w, h, seed);
-            }
-
-            // --- EL RENDER: solo celdas VIVAS (temp > 3), hasta el cap. ---
-            int dibujadas = 0;
-            float pulse = 0.9f + 0.1f * MathF.Sin(time * 6.2f + seed);
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    int temp = campo[y * w + x];
-                    if (temp <= 3) continue;
-                    if (dibujadas >= CapCeldas) break;
-
-                    Color col = PyraPalettes.Sample(ramp, temp / 36f);
-                    // Las brasas PARPADEAN por celda (fase propia por hash).
-                    float celPulse = 0.8f + 0.2f *
-                        MathF.Sin(time * (5f + 3f * H01(seed, x, y)) + H01(seed, y, x) * 6.28f);
-
-                    Vector2 pos = new(
-                        basePos.X + (x + 0.5f) * cellSize,
-                        basePos.Y - (y + 0.5f) * cellSize * gravDir);
-
-                    batch.Draw(tex, pos, null,
-                        Tint(col, 0.5f * pulse * celPulse * intensity), 0f,
-                        new Vector2(tex.Width, tex.Height) * 0.5f,
-                        new Vector2(cellSize * 1.6f, cellSize * 1.6f) / new Vector2(tex.Width, tex.Height),
-                        SpriteEffects.None, 0f);
-                    dibujadas++;
-                }
-                if (dibujadas >= CapCeldas) break;
-            }
-
-            // --- LA AUTOLIMPIEZA: campos sin tocar 600 ticks (10 s) mueren. ---
-            if (_campos.Count > 4)
-            {
-                List<int> muertos = null;
-                foreach (KeyValuePair<int, uint> kv in _ultimoToque)
-                {
-                    if (now > kv.Value + 600u)
-                    {
-                        muertos ??= new List<int>();
-                        muertos.Add(kv.Key);
-                    }
-                }
-                if (muertos != null)
-                    for (int i = 0; i < muertos.Count; i++)
-                    {
-                        _campos.Remove(muertos[i]);
-                        _dims.Remove(muertos[i]);
-                        _ultimoToque.Remove(muertos[i]);
-                    }
-            }
-        }
 
         /// <summary>Enciende la celda (x,y) del campo por semilla (el FOCO).</summary>
         public static void SeedCell(int seed, int x, int y, int temperature)

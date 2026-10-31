@@ -169,16 +169,16 @@ namespace AethonMod.Content.VFX
 
         private static void BeginAdditive()
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            // v6.56.9 — delegación a la canónica CON SONDA (estándar
+            // v6.50.58): idéntico sin lote ajeno abierto (auditoría §4).
+            VFXCore.AbrirAdditive();
         }
 
         private static void BeginAlpha()
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            // v6.56.9 — delegación a la canónica CON SONDA (estándar
+            // v6.50.58): idéntico sin lote ajeno abierto (auditoría §4).
+            VFXCore.AbrirAlpha();
         }
 
         /// <summary>Quad centrado (tamaño total = size px), rotación opcional.</summary>
@@ -194,33 +194,27 @@ namespace AethonMod.Content.VFX
         /// <summary>Cápsula de luz: SoftGlow estirado (largo × ancho px).</summary>
         private static void Capsule(Vector2 mid, float len, float width, float rot, Color tint)
         {
-            if (tint.A == 0) return;
-            Quad(Glow, mid, new Vector2(len + width, width * 1.9f), rot, tint);
+            // v6.56.9 — delegación a la canónica (auditoría §4).
+            VFXCore.Capsule(mid, len, width, rot, tint);
         }
 
         /// <summary>Anillo fino: Ring.png calibrado para radio visible.</summary>
         private static void RingQuad(Vector2 pos, float visibleRadius, float rot, Color tint)
         {
-            if (tint.A == 0) return;
-            float s = visibleRadius * 2.174f;
-            Quad(Ring, pos, new Vector2(s, s), rot, tint);
+            // v6.56.9 — delegación a la canónica (auditoría §4).
+            VFXCore.RingQuad(pos, visibleRadius, rot, tint);
         }
 
         /// <summary>Hash determinista [0,1).</summary>
         private static float Hash01(int seed, int a, int b)
-        {
-            int h = unchecked(seed * 374761393 + a * 668265263 + b * 1911520717);
-            h = unchecked(h ^ (h >> 13));
-            h = unchecked(h * 1274126177);
-            h = unchecked(h ^ (h >> 16));
-            return (h & 0xFFFFFF) / 16777216f;
-        }
+            => VFXCore.Hash01(seed, a, b); // v6.56.9 — delegación a la canónica (auditoría §4)
 
         /// <summary>Tinte de INTENSIDAD LINEAL (patrón validado del Cometa).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // ALPHA-GATE (RGB intacto, alfa = intensidad).
+            return VFXCore.TintAlfa(c, f);
         }
 
         /// <summary>Punto sobre la elipse del disco (param t en rad).</summary>

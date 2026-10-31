@@ -92,24 +92,6 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// El punto del segmento a→b más cercano a <paramref name="punto"/>
-        /// (la proyección clampeada a [0, 1]). Para knockbacks DIRECCIONALES:
-        /// el empuje nace donde el golpe rozó de verdad, no en el centro de
-        /// la forma.
-        /// </summary>
-        public static Vector2 PuntoMasCercanoEnSegmento(Vector2 punto, Vector2 a, Vector2 b)
-        {
-            Vector2 ab = b - a;
-            float largo2 = ab.LengthSquared();
-            if (largo2 < EpsilonDegenerado)
-                return a;
-
-            float t = Vector2.Dot(punto - a, ab) / largo2;
-            t = MathHelper.Clamp(t, 0f, 1f);
-            return a + ab * t;
-        }
-
-        /// <summary>
         /// ¿Está el punto en la BANDA de <paramref name="ancho"/> px (ANCHO
         /// TOTAL) alrededor del segmento a→b — la "calle" que recorre la
         /// línea? |distancia al segmento| ≤ ancho/2, con la distancia
@@ -118,29 +100,6 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static bool PuntoEnBanda(Vector2 punto, Vector2 a, Vector2 b, float ancho)
             => DistanciaASegmento(punto, a, b) <= ancho * 0.5f;
-
-        /// <summary>
-        /// ¿Está el punto en la CÁPSULA de radio <paramref name="radio"/>
-        /// alrededor del segmento a→b? Mismo test que
-        /// <see cref="PuntoEnBanda"/> con ancho = 2·radio — existen las dos
-        /// porque el llamador piensa "banda de 64" o "cápsula de 32" según
-        /// el arma; el convenio del parámetro es la única diferencia.
-        /// </summary>
-        public static bool PuntoEnCapsula(Vector2 punto, Vector2 a, Vector2 b, float radio)
-            => DistanciaASegmento(punto, a, b) <= radio;
-
-        /// <summary>
-        /// ¿Está el punto en el ANILLO [radioInterno, radioExterno] alrededor
-        /// del centro? dist ∈ [ri, re] — la forma de las ondas expansivas que
-        /// golpean por el FRENTE (ni el cráter interior ni más allá del
-        /// frente). Si ri &gt; re el anillo es vacío y devuelve false.
-        /// </summary>
-        public static bool PuntoEnAnillo(Vector2 punto, Vector2 centro,
-            float radioInterno, float radioExterno)
-        {
-            float d = Vector2.Distance(punto, centro);
-            return d >= radioInterno && d <= radioExterno;
-        }
 
         /// <summary>
         /// Diferencia de ángulos a−b NORMALIZADA a [−π, π] (el camino corto:
@@ -156,49 +115,6 @@ namespace AethonMod.Content.VFX
             else if (d < -MathF.PI)
                 d += MathHelper.TwoPi;
             return d;
-        }
-
-        /// <summary>
-        /// ¿Está el punto en el SECTOR (arco/abanico) de vértice
-        /// <paramref name="centro"/>? Radio: dist ≤
-        /// <paramref name="radio"/>. Ángulo: |DeltaAngle(atan2(punto−centro),
-        /// anguloCentro)| ≤ <paramref name="apertura"/>/2, con el wrap
-        /// correcto de <see cref="DeltaAngle"/> (un abanico que cruza el
-        /// ±π funciona igual que uno que no).
-        /// </summary>
-        public static bool PuntoEnSector(Vector2 punto, Vector2 centro, float radio,
-            float anguloCentro, float apertura)
-        {
-            if (Vector2.DistanceSquared(punto, centro) > radio * radio)
-                return false;
-            return Math.Abs(DeltaAngle((punto - centro).ToRotation(), anguloCentro)) <= apertura * 0.5f;
-        }
-
-        /// <summary>
-        /// ¿Cruza el segmento a→b el AABB <paramref name="rect"/>?
-        /// Algoritmo: LIANG-BARSKY (recorte paramétrico por planos): el
-        /// parámetro t ∈ [0, 1] del segmento se recorta contra los 4 planos
-        /// del rectángulo; si queda un intervalo no vacío, hay cruce.
-        /// Elegido sobre Cohen-Sutherland por ser TODO ramas y divisiones
-        /// — sin tablas de códigos, sin intersecciones calculadas que no se
-        /// usan, cero alocaiones. Tocar el borde CUENTA como cruce (los
-        /// planos son inclusivos). Un segmento degenerado (punto) se
-        /// resuelve con los mismos planos: dentro → true.
-        /// </summary>
-        public static bool SegmentoIntersecaAABB(Vector2 a, Vector2 b, Rectangle rect)
-        {
-            float t0 = 0f, t1 = 1f;
-            float dx = b.X - a.X;
-            float dy = b.Y - a.Y;
-
-            // Los 4 planos del AABB en pares (p, q) de Liang-Barsky:
-            // x ≥ Left, x ≤ Right, y ≥ Top, y ≤ Bottom.
-            if (!PlanoLiangBarsky(-dx, a.X - rect.Left, ref t0, ref t1)) return false;
-            if (!PlanoLiangBarsky(dx, rect.Right - a.X, ref t0, ref t1)) return false;
-            if (!PlanoLiangBarsky(-dy, a.Y - rect.Top, ref t0, ref t1)) return false;
-            if (!PlanoLiangBarsky(dy, rect.Bottom - a.Y, ref t0, ref t1)) return false;
-
-            return t0 <= t1;
         }
 
         /// <summary>
@@ -283,51 +199,6 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// ¿Está el NPC en la BANDA de <paramref name="ancho"/> px (ancho
-        /// total) alrededor del segmento a→b? Distancia del CENTRO del NPC
-        /// al segmento ≤ ancho/2 + <see cref="RadioMedio"/> — la
-        /// aproximación conservadora para hitboxes alargadas: el cuerpo
-        /// entero cuenta, no solo el centro, sin pagar el giro del AABB.
-        /// </summary>
-        public static bool NPCEnBanda(NPC npc, Vector2 a, Vector2 b, float ancho)
-        {
-            if (npc == null || !npc.active)
-                return false;
-            return DistanciaASegmento(npc.Center, a, b) <= ancho * 0.5f + RadioMedio(npc);
-        }
-
-        /// <summary>
-        /// ¿Está el NPC en el ANILLO [radioInterno, radioExterno] con su
-        /// cuerpo? Distancia del centro del NPC ∈ [ri − radioMedio, re +
-        /// radioMedio] — el FRENTE de la onda golpea a quien ASOMA al
-        /// anillo, no solo a quien el centro dentro.
-        /// </summary>
-        public static bool NPCEnAnillo(NPC npc, Vector2 centro, float radioInterno, float radioExterno)
-        {
-            if (npc == null || !npc.active)
-                return false;
-            float d = Vector2.Distance(npc.Center, centro);
-            return d >= radioInterno - RadioMedio(npc) && d <= radioExterno + RadioMedio(npc);
-        }
-
-        /// <summary>
-        /// ¿Está el NPC en el SECTOR (abanico) con su cuerpo? Combina el
-        /// radio (dist ≤ radio + radioMedio) con el ángulo
-        /// (|DeltaAngle| ≤ apertura/2 sobre el centro→NPC) — la forma de
-        /// los barridos con abanico.
-        /// </summary>
-        public static bool NPCEnSector(NPC npc, Vector2 centro, float radio,
-            float anguloCentro, float apertura)
-        {
-            if (npc == null || !npc.active)
-                return false;
-            float alcance = radio + RadioMedio(npc);
-            if (Vector2.DistanceSquared(npc.Center, centro) > alcance * alcance)
-                return false;
-            return Math.Abs(DeltaAngle((npc.Center - centro).ToRotation(), anguloCentro)) <= apertura * 0.5f;
-        }
-
-        /// <summary>
         /// ¿Está el JUGADOR en la banda de <paramref name="ancho"/> px
         /// alrededor del segmento? La gemela de <see cref="NPCEnBanda"/>
         /// para los jefes futuros: la media de los semiejes del jugador +
@@ -354,39 +225,6 @@ namespace AethonMod.Content.VFX
             if (pr == null || !pr.active || !pr.hostile || pr.damage <= 0)
                 return false;
             return PuntoEnBanda(pr.Center, a, b, ancho);
-        }
-
-        /// <summary>
-        /// Recorre los NPCs VIVOS y cercanos y llama a la acción por cada
-        /// uno — el iterador de la casa con culling barato: patrón
-        /// npc.active &amp;&amp; VFXCore.EsObjetivo (la puerta de bando ya
-        /// aplicada) y distancia centro→npc.Center ≤ radioMax +
-        /// npc.Size.Length()/2 (el cuerpo entero cuenta para el culling,
-        /// no solo el centro). El bucle NO aloca: la delegación la aporta
-        /// el llamador (pasa una lambda que capture lo suyo o un delegado
-        /// cachado); las 200 vueltas son dos comparaciones para el muerto
-        /// lejano.
-        /// </summary>
-        /// <param name="centro">Centro de la búsqueda (coords de mundo).</param>
-        /// <param name="radioMax">Radio de culling en px.</param>
-        /// <param name="accion">Qué hacer con cada NPC vivo y cercano.</param>
-        public static void RecorrerNPCs(Vector2 centro, float radioMax, Action<NPC> accion)
-        {
-            if (accion == null)
-                return;
-
-            for (int i = 0; i < Main.maxNPCs; i++)
-            {
-                NPC npc = Main.npc[i];
-                if (npc == null || !npc.active || !VFXCore.EsObjetivo(npc))
-                    continue;
-
-                float alcance = radioMax + npc.Size.Length() * 0.5f;
-                if (Vector2.DistanceSquared(centro, npc.Center) > alcance * alcance)
-                    continue;
-
-                accion(npc);
-            }
         }
 
         // ==================================================================

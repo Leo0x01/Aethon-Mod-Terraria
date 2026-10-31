@@ -286,22 +286,6 @@ namespace AethonMod.Content.VFX
         /// <summary>Glifos del anillo k (la cuenta LITERAL de la familia).</summary>
         public static int RunesOfRing(int k) => SigiloLib.RunesOfRing(k);
 
-        /// <summary>
-        /// Posición MUNDIAL del glifo g del anillo k (las chispas de las
-        /// coronas) — la MISMA matemática de la emisión, jams una copia.
-        /// </summary>
-        public static Vector2 RingGlyphWorld(Vector2 center, float R, float time,
-            int tier, int k, int g)
-        {
-            float a = SigiloLib.RingA(k) * R;
-            float b = a * SigiloLib.RingFlat(k);
-            float tilt = SigiloLib.RingTilt(k, time, tier >= SigiloLib.TierPrecesion);
-            float spin = time * SigiloLib.RingSpin(k);
-            float ang = g / (float)SigiloLib.RunesOfRing(k) * MathHelper.TwoPi + spin;
-            float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
-            return SigiloLib.EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
-        }
-
         // ==================================================================
         //  LAS MEJORAS PROGRESIVAS (una capa nueva por tier)
         // ==================================================================
@@ -623,47 +607,6 @@ namespace AethonMod.Content.VFX
                 Vector2 jetTip = center + dir * (R * 0.85f + 1.45f * R);
                 Quad(Glow, jetTip, new Vector2(0.50f * R, 0.50f * R), 0f,
                     Tint(WhiteIncan, 0.42f * pulse));
-            }
-        }
-
-        // ==================================================================
-        //  v6.22 — LA PUERTA PÚBLICA: el sistema orbital SIN el cuerpo solar
-        //  (para el ECLIPSE PRIMORDIAL: los 20 anillos rúnicos orbitando un
-        //  agujero negro). El batch debe llegar ABIERTO en modo aditivo.
-        // ==================================================================
-
-        /// <summary>
-        /// Dibuja el SISTEMA ORBITAL de la copia `tier` (anillos + runas +
-        /// chispas + destellos + erupción + lluvia + sellado) alrededor de
-        /// `center` (coords de PANTALLA, como el resto de la casa) con radio
-        /// base `R` — SIN el cuerpo solar (el llamador pone debajo lo que
-        /// quiera: un sol, un agujero negro...).
-        /// CONTRATO: batch ABIERTO en modo aditivo (queda ABIERTO).
-        /// </summary>
-        public static void DrawOrbitalSystem(Vector2 center, float R, float time,
-            int seed, int tier, float alphaMul)
-        {
-            if (alphaMul <= 0.02f) return;
-
-            // v6.26 — LOS ANILLOS VAN POR EL EMISOR COMPARTIDO (coords de
-            // MUNDO — el MISMO código que viste a los soles y a las coronas):
-            // cerrar el batch del llamador, volcar la tanda propia y REABRIR
-            // el aditivo para las capas restantes (salida: ABIERTO).
-            VFXCore.CerrarLoteSiAbierto();
-            VFXCore.Begin();
-            EmitRingSystem(center + Main.screenPosition, R, time, seed,
-                tier, 0f, 0f, alphaMul);
-            VFXCore.FlushAdditive(null, false);
-
-            // Las capas secundarias (coords de pantalla, batch ABIERTO).
-            BeginAdditive();
-            if (alphaMul > 0.55f)
-            {
-                if (tier >= 2) DrawOrbitSparks(center, R, time, seed, tier);
-                if (tier >= 3) DrawTwinkles(center, R, time, seed, tier);
-                if (tier >= 12) DrawRuneRain(center, R, time, seed);
-                if (tier >= 11) DrawOrbitComet(center, R, time, seed);
-                if (tier >= 20) DrawGrandSeal(center, R, time, seed);
             }
         }
 
@@ -1086,8 +1029,8 @@ namespace AethonMod.Content.VFX
 
         private static void Capsule(Vector2 mid, float len, float width, float rot, Color tint)
         {
-            if (tint.A == 0) return;
-            Quad(Glow, mid, new Vector2(len + width, width * 1.9f), rot, tint);
+            // v6.56.9 — delegación a la canónica (auditoría §4).
+            VFXCore.Capsule(mid, len, width, rot, tint);
         }
 
         private static void RingQuad(Vector2 pos, float visibleRadius, float rot, Color tint)
@@ -1125,19 +1068,14 @@ namespace AethonMod.Content.VFX
 
         /// <summary>Hash determinista [0,1).</summary>
         private static float Hash01(int seed, int a, int b)
-        {
-            int h = unchecked(seed * 374761393 + a * 668265263 + b * 1911520717);
-            h = unchecked(h ^ (h >> 13));
-            h = unchecked(h * 1274126177);
-            h = unchecked(h ^ (h >> 16));
-            return (h & 0xFFFFFF) / 16777216f;
-        }
+            => VFXCore.Hash01(seed, a, b); // v6.56.9 — delegación a la canónica (auditoría §4)
 
         /// <summary>Tinte de INTENSIDAD LINEAL (patrón validado del proyecto).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // ALPHA-GATE (RGB intacto, alfa = intensidad).
+            return VFXCore.TintAlfa(c, f);
         }
 
         // ==================================================================

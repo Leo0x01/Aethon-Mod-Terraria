@@ -811,14 +811,6 @@ namespace AethonMod.Content.VFX
             catch { }
         }
 
-        /// <summary>La posición del tronco final (el punto de impacto, para las armas).</summary>
-        public static Vector2 PuntoImpacto(RayoParams p, uint semilla, Vector2 blanco, Vector2? direccion)
-        {
-            var tronco = RayoLib.Generar(p, null, semilla, blanco, direccion);
-            return tronco.Puntos != null && tronco.Puntos.Length > 0
-                ? tronco.Puntos[tronco.Puntos.Length - 1] : blanco;
-        }
-
         public override void PostUpdateWorld()
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;

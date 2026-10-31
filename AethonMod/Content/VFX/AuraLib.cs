@@ -151,26 +151,12 @@ namespace AethonMod.Content.VFX
         /// <summary>Vida en segundos.</summary>
         public float Vida = 1.1f;
 
-        /// <summary>Cantidad máxima de partículas vivas.</summary>
-        public ParticulasAura ConCantidad(int v) { Cantidad = v; return this; }
         /// <summary>La forma de las partículas.</summary>
         public ParticulasAura ConForma(FormaParticula v) { Forma = v; return this; }
         /// <summary>El color de las partículas.</summary>
         public ParticulasAura ConColor(Color v) { Color = v; return this; }
         /// <summary>La transparencia (0..1) de las partículas.</summary>
         public ParticulasAura ConAlfa(float v) { Alfa = v; return this; }
-        /// <summary>¿Partículas SÓLIDAS (opacas) o veladas?</summary>
-        public ParticulasAura ConSolidas(bool v) { Solidas = v; return this; }
-        /// <summary>Emisiones por segundo.</summary>
-        public ParticulasAura ConTasa(float v) { Tasa = v; return this; }
-        /// <summary>Velocidad radial (px/s).</summary>
-        public ParticulasAura ConVelocidad(float v) { Velocidad = v; return this; }
-        /// <summary>Ascenso vertical (px/s).</summary>
-        public ParticulasAura ConAscenso(float v) { Ascenso = v; return this; }
-        /// <summary>Tamaño en px.</summary>
-        public ParticulasAura ConTamano(float v) { Tamano = v; return this; }
-        /// <summary>Vida en segundos.</summary>
-        public ParticulasAura ConVida(float v) { Vida = v; return this; }
     }
 
     // ======================================================================
@@ -334,28 +320,16 @@ namespace AethonMod.Content.VFX
 
         /// <summary>Radio del aura en px.</summary>
         public AuraPerfil ConRadio(float v) { Radio = v; return this; }
-        /// <summary>Anillos de gajos.</summary>
-        public AuraPerfil ConAnillos(int v) { Anillos = Math.Max(1, v); return this; }
-        /// <summary>Gajos por anillo.</summary>
-        public AuraPerfil ConGajos(int v) { Gajos = Math.Max(4, v); return this; }
         /// <summary>El patrón de la energía (Perlin / Poligono / Anillos).</summary>
         public AuraPerfil ConPatron(PatronAura v) { Patron = v; return this; }
         /// <summary>Lados del N-gono del patrón Poligono.</summary>
         public AuraPerfil ConLados(int v) { Lados = Math.Max(3, v); return this; }
-        /// <summary>Velocidad de giro del polígono (rad/s).</summary>
-        public AuraPerfil ConGiro(float v) { Giro = v; return this; }
         /// <summary>Los TRES colores de la capa trasera: centro, medio, borde.</summary>
         public AuraPerfil ConTrasera(Color centro, Color medio, Color borde)
         { TCentro = centro; TMedio = medio; TBorde = borde; return this; }
         /// <summary>Los TRES colores del velo frontal: centro, medio, borde.</summary>
         public AuraPerfil ConFrontal(Color centro, Color medio, Color borde)
         { FCentro = centro; FMedio = medio; FBorde = borde; VeloFrontal = true; return this; }
-        /// <summary>Alfa global de la capa trasera.</summary>
-        public AuraPerfil ConAlfaTrasera(float v) { AlfaTrasera = v; return this; }
-        /// <summary>¿Dibujar el velo frontal?</summary>
-        public AuraPerfil ConVelo(bool v) { VeloFrontal = v; return this; }
-        /// <summary>Alfa del velo frontal (0.05–0.10 = 90–95% de transparencia).</summary>
-        public AuraPerfil ConAlfaFrontal(float v) { AlfaFrontal = v; return this; }
         /// <summary>El comportamiento de HUMO: churn, deriva radial y ascenso.</summary>
         public AuraPerfil ConHumo(float fluir, float deriva, float ascenso)
         { Fluir = fluir; Deriva = deriva; Ascenso = ascenso; return this; }
@@ -365,22 +339,6 @@ namespace AethonMod.Content.VFX
         public AuraPerfil ConBlur(float v) { Blur = v; return this; }
         /// <summary>Multiplicador del halo de glow.</summary>
         public AuraPerfil ConGlow(float v) { Glow = v; return this; }
-        /// <summary>v6.50.12 — El borde caliente (la cáscara de energía, 0..1).</summary>
-        public AuraPerfil ConBorde(float v) { Borde = v; return this; }
-        /// <summary>v6.50.12 — El parpadeo orgánico del brillo (0 = quieto).</summary>
-        public AuraPerfil ConParpadeo(float v) { Parpadeo = v; return this; }
-        /// <summary>v6.50.12 — El ritmo de ebullición del ruido (0 = estático).</summary>
-        public AuraPerfil ConHervor(float v) { Hervor = v; return this; }
-        /// <summary>v6.50.12 — Los rayos radiales del contorno (0 = sin agujas).</summary>
-        public AuraPerfil ConRayos(int v) { Rayos = Math.Max(0, v); return this; }
-        /// <summary>v6.50.12 — El latido del corazón (true = doble golpe).</summary>
-        public AuraPerfil ConLatido(bool v) { Latido = v; return this; }
-        /// <summary>v6.50.23 — El alfa de la bruma oscura del patrón Bruma.</summary>
-        public AuraPerfil ConAlfaBruma(float v) { AlfaBruma = v; return this; }
-        /// <summary>v6.50.23 — Las pasadas de la escalera de bloom (0..3).</summary>
-        public AuraPerfil ConBloom(int v) { Bloom = Math.Clamp(v, 0, 3); return this; }
-        /// <summary>Semilla determinista del aura.</summary>
-        public AuraPerfil ConSemilla(int v) { Semilla = v; return this; }
         /// <summary>La configuración de partículas (null = sin partículas).</summary>
         public AuraPerfil ConParticulas(ParticulasAura v) { Particulas = v; return this; }
 

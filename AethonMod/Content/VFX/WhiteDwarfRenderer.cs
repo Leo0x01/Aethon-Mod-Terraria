@@ -245,29 +245,18 @@ namespace AethonMod.Content.VFX
         /// <summary>Abre el lote ADITIVO de la casa (brillos).</summary>
         private static void BeginAdditive()
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            // v6.56.9 — delegación a la canónica CON SONDA (estándar
+            // v6.50.58): idéntico sin lote ajeno abierto (auditoría §4).
+            VFXCore.AbrirAdditive();
         }
 
         /// <summary>Tinte de intensidad LINEAL de la casa (v6.50.3 — el Additive
         /// de FNA es (SourceAlpha, One): el alfa GATEA; RGB intacto, alfa=f).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
-            // estaba incompleta): el pipeline REAL premultiplica los PNG al
-            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
-            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
-            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
-            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
-            // color SIN escalar en los lotes de masa (bruma fantasma
-            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
-            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
-            // correcto para AMBOS presets de FNA.
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // PREMULTIPLICADA (RGB·f, A·f) — la fórmula vive en VFXCore.
+            return VFXCore.Tint(c, f);
         }
     }
 }

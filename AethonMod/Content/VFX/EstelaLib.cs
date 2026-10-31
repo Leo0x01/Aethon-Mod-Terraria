@@ -411,66 +411,9 @@ namespace AethonMod.Content.VFX
         /// premultiplicado v6.25 atenuaba ×f²).</summary>
         private static Color Tint(Color c, float f)
         {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
-            // estaba incompleta): el pipeline REAL premultiplica los PNG al
-            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
-            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
-            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
-            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
-            // color SIN escalar en los lotes de masa (bruma fantasma
-            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
-            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
-            // correcto para AMBOS presets de FNA.
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
-        }
-
-        // ==================================================================
-        //  LOS FANTASMAS — afterimages con squash (lección élite)
-        // ==================================================================
-
-        /// <summary>
-        /// FANTASMAS: N transformaciones a lo largo del camino (desde la
-        /// cabeza hacia atrás) para que el llamador dibuje su sprite con
-        /// ellas: alpha decreciente (0.6 − i/15 — élite), escala X creciendo
-        /// ×1.0→×1.4 hacia atrás (Emperatriz vanilla) y SQUASH vertical
-        /// Y ×0.55 — leen "rasguño de luz", no "cola de sprites".
-        /// La librería NO conoce el sprite: devuelve la transform.
-        /// </summary>
-        /// <param name="pts">El camino (el ÚLTIMO punto es la cabeza).</param>
-        /// <param name="ghosts">Número de fantasmas (4..8 recomendado).</param>
-        /// <param name="squashY">Factor de aplastado vertical (0.55 = la casa).</param>
-        public static void GhostTransforms(Vector2[] pts, int ghosts, float squashY,
-            out Vector2[] positions, out float[] alphas, out float[] scales)
-        {
-            ghosts = Math.Clamp(ghosts, 1, 12);
-            positions = new Vector2[ghosts];
-            alphas = new float[ghosts];
-            scales = new float[ghosts];
-
-            if (pts == null || pts.Length < 2) return;
-
-            float total = 0f;
-            for (int i = 1; i < pts.Length; i++)
-                total += Vector2.Distance(pts[i - 1], pts[i]);
-            if (total < 1f) total = 1f;
-
-            for (int g = 0; g < ghosts; g++)
-            {
-                // El fantasma g vive al fracción (1 − g·0.11) del camino
-                // (desde la cabeza hacia atrás, uniforme).
-                float f = MathHelper.Clamp(1f - g * 0.11f, 0f, 1f);
-                positions[g] = PuntoEnCamino(pts, f * total);
-
-                // Alpha élite: 0.6 − i/15 (nunca negativo).
-                alphas[g] = MathF.Max(0.6f - g / 15f, 0f);
-                // Escala X creciente hacia atrás (la Emperatriz: ×1.4).
-                scales[g] = 1f + 0.4f * g / MathF.Max(ghosts - 1f, 1f);
-                // (El squash va en la Y: el llamador usa scale.Y = scales[g]·squashY.)
-                _ = squashY;   // documentado arriba; se aplica en el llamador
-            }
+            // v6.56.9 — delegación a la canónica (auditoría §4): familia
+            // PREMULTIPLICADA (RGB·f, A·f) — la fórmula vive en VFXCore.
+            return VFXCore.Tint(c, f);
         }
 
         /// <summary>Punto a <paramref name="dist"/> px del inicio de la polilínea.</summary>
