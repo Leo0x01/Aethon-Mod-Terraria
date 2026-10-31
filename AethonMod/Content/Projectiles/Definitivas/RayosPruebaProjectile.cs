@@ -447,7 +447,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 * Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + LaserDuration * 0.1f, Time, true)
                 * Utils.GetLerpValue(ChargeTime + LaserDuration, ChargeTime + LaserDuration * 0.9f, Time, true);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15 == 0 && Time < ChargeTime + LaserDuration * 0.6f)
+            // v6.61 — LA IRA NO ECHA MONEDAS AL AIRE (la letra: «el haz
+            // debe seguir al cursor siempre, pero actualmente solo da
+            // vueltas aleatoriamente lo cual esta mal»): la DIRECCIÓN AL
+            // AZAR que se sorteaba cada 15 ticks era UNO de los dos
+            // tiranos del vaivén (el otro: el totalOffRot de ±2,5 rad —
+            // ±143° — del arma, ABAJO) — la ira NO la sortea: su rumbo
+            // es SOLO el cursor. El sync del rumbo viaja cada 15 ticks
+            // por el canal de siempre (los demás cables ven la vuelta).
+            if (EsIra)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15f == 0f)
+                    Projectile.netUpdate = true;
+            }
+            else if (Main.netMode != NetmodeID.MultiplayerClient && Time % 15f == 0f
+                && Time < ChargeTime + LaserDuration * 0.6f)
             {
                 Projectile.direction = Main.rand.NextBool() ? -1 : 1;
                 Projectile.netUpdate = true;
@@ -457,18 +471,47 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //  v6.60.2 — EL RUMBO ES DEL JUGADOR (la letra: «el haz debe
             //  apuntar a donde vaya el cursor y siempre seguir el cursor,
             //  creo que asi sera mejor»): LA IRA YA NO PERSIGUE BLANCOS —
-            //  su conducto SIGUE AL CURSOR del dueño TODO el disparo,
-            //  EXACTO como el arma de siempre (el barrido amado: las
-            //  MISMAS tasas de giro). La boca de la ira queda FIJA en el
-            //  centro del círculo; el RUMBO es la mano del portador.
-            //  Corre SOLO en la máquina del dueño (el cursor es SU ratón
-            //  — los demás cables ven el rumbo en el sync de siempre).
+            //  su conducto SIGUE AL CURSOR del dueño TODO el disparo. La
+            //  boca de la ira queda FIJA en el centro del círculo; el
+            //  RUMBO es la mano del portador. Corre SOLO en la máquina
+            //  del dueño (el cursor es SU ratón — los demás cables ven
+            //  el rumbo en el sync de siempre).
             // ============================================================
             if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
             {
-                targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
-                    Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
-                    + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
+                if (EsIra)
+                {
+                    // ========================================================
+                    //  v6.61 — CLAVADO AL CURSOR, SIN TITEREADAS: la cura
+                    //  de la v6.60.2 dejó DOS tiranos vivos — el VAIVÉN
+                    //  del arma (totalOffRot ±2,5 rad × la dirección que
+                    //  se SORTEABA cada 15 ticks: el conducto BAILABA
+                    //  alrededor del cursor hasta ±143°) y la persecución
+                    //  LENTA (tasas 0,04→0,01: tardaba SEGUNDOS en
+                    //  alcanzar al ratón). AHORA: el rumbo PERSIGUE al
+                    //  cursor a MEDIA VUELTA por frame (llega en 2-3
+                    //  frames y se CLAVA al llegar) y la rotación ES el
+                    //  rumbo — SIN vaivén, SIN azar: donde está el
+                    //  cursor, está el haz. (La guarda de los 10 px: con
+                    //  el cursor ENCIMA de la boca el ángulo no existe —
+                    //  el haz conserva su última mirada en vez de dar
+                    //  bandazos de 180°.)
+                    // ========================================================
+                    Vector2 alCursor = Main.MouseWorld - Projectile.Center;
+                    if (alCursor.LengthSquared() > 100f)
+                    {
+                        float objetivo = alCursor.ToRotation();
+                        targetRotation = targetRotation.AngleLerp(objetivo, 0.55f);
+                        if (Math.Abs(MathHelper.WrapAngle(objetivo - targetRotation)) < 0.02f)
+                            targetRotation = objetivo;
+                    }
+                }
+                else
+                {
+                    targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
+                        Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
+                        + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
+                }
             }
 
             targetSize = (float)Math.Pow(
@@ -478,7 +521,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             float waveChange = MathHelper.SmoothStep(0f, 1f,
                 Utils.GetLerpValue(ChargeTime * 0.8f, ChargeTime + 20, Time, true) *
                 Utils.GetLerpValue(ChargeTime + LaserDuration * 0.9f, ChargeTime + LaserDuration * 0.5f, Time, true));
-            Projectile.rotation = targetRotation + totalOffRot * Projectile.direction * waveChange;
+            // v6.61 — LA IRA NO VAGUEA: el conducto ES el rumbo del
+            // cursor — el vaivén (totalOffRot × dirección × ola) es la
+            // firma del ARMA de siempre, NO de la ira.
+            Projectile.rotation = EsIra
+                ? targetRotation
+                : targetRotation + totalOffRot * Projectile.direction * waveChange;
 
             realSize = MathHelper.Lerp(realSize, targetSize, 0.1f);
             Projectile.velocity = Projectile.rotation.ToRotationVector2();
@@ -738,17 +786,35 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
-            // ============ LOS MICRO-ARCOS DE LA CARGA ============
-            // v6.59 — LA CURA DE LOS RAYITOS INVISIBLES (la letra: «tampoco
-            // los rayitos electricos en el centro de los ciruculos runicos
-            // [se ven]»): antes vivían SOLO 3 ticks de cada 14 (el 21 % del
-            // tiempo — un parpadeo que el ojo perdía) y arrancaban al 35 %
-            // de alfa con 2,2 px de grosor. AHORA: (1) VIVEN mientras la
-            // corona vive (la carga Y el disparo — ventana %5<3, el 60 %
-            // del ciclo), (2) son DOS A CINCO (el doble de la carga de
-            // siempre), (3) arden al 60-100 % de alfa con 3,2 px de grosor
-            // — LA CORONA HIERVE de arcos desde el primer tick.
-            if (laserCharge > 0.05f && Time % 5f < 3f)
+            // ============ v6.61 — LOS ARCOS: DEL ESCUADRÓN (IRA) O DE LA
+            // BOCA (ARMA) ============
+            // LA IRA (la letra: «los pequeños rayos electricos deben
+            // concentrarce en el centro del circulo formado por los
+            // minions… cada rayito debe ir de un minion a otro de forma
+            // aleatorio mientras el haz se carga y se lanza»): su boca NO
+            // lleva micro-arcos propios — su electricidad son LOS OJOS
+            // QUE LA ORBITAN (el círculo sigue vivo TODO el disparo,
+            // v6.60.2): arco a arco, de un ojo a su OPUESTO, cruzando el
+            // centro. EL ARMA de siempre conserva SUS micro-arcos de
+            // boca (la firma del RC2 — la cura de la v6.59: el 60 % del
+            // ciclo, dos a cinco, al 60-100 %, cruzando el medio).
+            if (EsIra)
+            {
+                // EL ANCLA VIVA (el círculo ES de quien el escuadrón
+                // orbita HOY): solo el haz que SOSTIENE el círculo viste
+                // los arcos — en el solape de la prueba (la ceremonia
+                // nueva ya nació), los arcos se van CON ELLA (el círculo
+                // es suyo) y el haz viejo muere limpio.
+                Projectile anclaCirculo = IraSerExteriorCeremoniaProjectile
+                    .RitualDe((int)Owner);
+                if (anclaCirculo == Projectile && laserCharge > 0.05f && Time % 5f < 3f)
+                {
+                    IraSerExteriorCeremoniaProjectile.DibujarArcosDelEscuadron(
+                        Projectile.Center, (int)Owner, laserCharge,
+                        Projectile.localAI[0]);
+                }
+            }
+            else if (laserCharge > 0.05f && Time % 5f < 3f)
             {
                 float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
                 int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;

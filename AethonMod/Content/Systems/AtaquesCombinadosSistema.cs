@@ -170,38 +170,53 @@ namespace AethonMod.Content.Systems
 
                 ulong ahora = Main.GameUpdateCount;
 
-                // === EL SOL RÚNICO (2+ ojos mejorados, nivel 7+) ===
-                int solesMin = DespertarGrimorio.SolesPorMinuto(despertar);
-                if (solesMin > 0 && mejorados.Count >= 2)
-                {
-                    ulong hasta = _solHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                    if (ahora >= hasta && Main.rand.Next(DADO) == 0)
-                    {
-                        _solHasta[p.whoAmI] = ahora + 3600ul / (ulong)solesMin;
-                        DispararElSol(p, blanco, mejorados, despertar);
-                    }
-                }
+                // === v6.61 — EL SILENCIO DE LA IRA (la letra: «mientras
+                //     se esta creando el haz o mientras el haz se esta
+                //     disparando no pueden crearce ni agujeros negros
+                //     runicos, ni soles runicos»): mientras la ceremonia
+                //     vive (la creación) o el haz de la ira dispara, los
+                //     OTROS conjuros del escuadrón ESPERAN — y sus
+                //     relojes NO se consumen (cada uno retoma SU turno
+                //     cuando la ira termina). RitualDe encuentra
+                //     EXACTAMENTE eso: la ceremonia viva… o el haz de
+                //     la ira disparando (v6.60.2 — el ancla del círculo). ===
+                bool iraViva = IraSerExteriorCeremoniaProjectile.RitualDe(p.whoAmI) != null;
 
-                // === LOS AGUJEROS NEGROS (5+ ojos mejorados, nivel 10+) ===
-                int agujerosMin = DespertarGrimorio.AgujerosPorMinuto(despertar);
-                if (agujerosMin > 0 && mejorados.Count >= 5)
+                if (!iraViva)
                 {
-                    ulong hasta = _agujeroHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                    if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                    // === EL SOL RÚNICO (2+ ojos mejorados, nivel 7+) ===
+                    int solesMin = DespertarGrimorio.SolesPorMinuto(despertar);
+                    if (solesMin > 0 && mejorados.Count >= 2)
                     {
-                        _agujeroHasta[p.whoAmI] = ahora + 3600ul / (ulong)agujerosMin;
-                        LanzarElAgujero(p, blanco, mejorados, despertar);
+                        ulong hasta = _solHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                        if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                        {
+                            _solHasta[p.whoAmI] = ahora + 3600ul / (ulong)solesMin;
+                            DispararElSol(p, blanco, mejorados, despertar);
+                        }
                     }
-                }
 
-                // === EL SUPREMO (8+ ojos en su MEJORA 4, nivel 45+) ===
-                if (DespertarGrimorio.SupremoDisponible(despertar) && mejoras4 >= 8)
-                {
-                    ulong hasta = _supremoHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                    if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                    // === LOS AGUJEROS NEGROS (5+ ojos mejorados, nivel 10+) ===
+                    int agujerosMin = DespertarGrimorio.AgujerosPorMinuto(despertar);
+                    if (agujerosMin > 0 && mejorados.Count >= 5)
                     {
-                        _supremoHasta[p.whoAmI] = ahora + 3600ul;   // 1/min SIEMPRE
-                        LanzarElSupremo(p, blanco, mejorados, despertar);
+                        ulong hasta = _agujeroHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                        if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                        {
+                            _agujeroHasta[p.whoAmI] = ahora + 3600ul / (ulong)agujerosMin;
+                            LanzarElAgujero(p, blanco, mejorados, despertar);
+                        }
+                    }
+
+                    // === EL SUPREMO (8+ ojos en su MEJORA 4, nivel 45+) ===
+                    if (DespertarGrimorio.SupremoDisponible(despertar) && mejoras4 >= 8)
+                    {
+                        ulong hasta = _supremoHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                        if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                        {
+                            _supremoHasta[p.whoAmI] = ahora + 3600ul;   // 1/min SIEMPRE
+                            LanzarElSupremo(p, blanco, mejorados, despertar);
+                        }
                     }
                 }
 
@@ -659,9 +674,13 @@ namespace AethonMod.Content.Systems
                     }
                 }
 
-                // LA VOZ DEL EXTERIOR: el trueno grave del conjuro mayor.
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.55f), p.Center);
+                // v6.61 — LA VOZ DEL EXTERIOR MURIÓ (la letra: «la
+                //     creacion del haz no necesita sonidos de terraria,
+                //     ya tiene su propio sonido»): el Item122 de
+                //     Terraria calla — la ira YA tiene su voz (la carga
+                //     del RC2 a los 150 ticks de la ceremonia y su bucle
+                //     de disparo). El nacimiento del ritual es MUDO:
+                //     solo el cine de los ojos y el polvo blanco-morado.
             }
             catch { }
         }

@@ -36,17 +36,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //              ritual con la VUELTA DEL RITUAL (ω 0,30→1,05 rad/s —
     //              arranca como la órbita del libro y ACELERA). La bruma
     //              blanca y morada respira y crece; los círculos rúnicos
-    //              se encienden.
+    //              se encienden. TODO EN SILENCIO (v6.61: la creación
+    //              del haz NO lleva sonidos de Terraria — ni el zap de
+    //              los rayos rituales ni el compás: la ceremonia YA
+    //              tiene su propia voz, la carga del RC2).
     //   12 ── 112  LOS RAYOS DE PERLIN: cada ojo del escuadrón, uno a
     //              uno (uno cada 10 ticks — el orden del escuadrón),
     //              dispara SU RAYO RITUAL (TruenoPerlin modo ritual: la
     //              boca SIGUE al ojo que gira, la punta clavada al
-    //              centro — sostenido TODO el ritual).
+    //              centro — sostenido TODO el ritual, MUDO en la ira).
+    //    · ── 450  LOS ARCOS DEL ESCUADRÓN (v6.61): TODO el ritual, los
+    //              rayitos eléctricos van DE UN OJO A OTRO del círculo
+    //              (uno al azar y su OPUESTO — la cuerda CRUZA EL
+    //              MEDIO) — los gatilla la MISMA animación de la órbita.
     //  150 ── 449  LA CARGA: el sonido amado de la carga del RC2 suena
     //              entero (5,15 s), la implosión de soles rúnicos NACE
-    //              LEJOS y cae al centro, la corona hierve de micro-arcos
-    //              y TODO se CIÑE en los últimos 45 ticks (la
-    //              contracción de la casa — el parto se anuncia).
+    //              LEJOS y cae al centro y TODO se CIÑE en los últimos
+    //              45 ticks (la contracción de la casa — el parto se
+    //              anuncia).
     //  450 ──────  EL DISPARO: la ceremonia MUERE y nace EL HAZ (el rayo
     //              de prueba C — EL SUEÑO, el ganador) YA EN el momento
     //              del disparo (Time = ChargeTime: la ceremonia FUE su
@@ -295,22 +302,15 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 d.noGravity = true;
             }
 
-            // === EL COMPÁS DEL RITUAL (el tic-tac de la casa — sube con
-            //     el ritual y ACELERA en la contracción final).
-            if (!Main.dedServ && edad < T_TOTAL)
-            {
-                float restante = T_TOTAL - edad;
-                bool late = restante > 45f
-                    ? edad % 20f == 0f
-                    : restante == 45f || restante == 34f || restante == 25f ||
-                      restante == 18f || restante == 13f || restante == 9f ||
-                      restante == 6f || restante == 4f || restante == 2f;
-                if (late)
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item122.WithPitchOffset(
-                            -0.25f + 0.4f * prog + (restante <= 45f ? 0.25f : 0f)),
-                        Projectile.Center);
-            }
+            // v6.61 — EL COMPÁS DEL RITUAL MURIÓ (la letra: «la
+            //     creacion del haz no necesita sonidos de terraria, ya
+            //     tiene su propio sonido»): el tic-tac de Item122 era
+            //     UN SONIDO DE TERRARIA sonando TODO el nacimiento del
+            //     haz — calla entero. La ceremonia queda con SU voz
+            //     propia: el SILENCIO del círculo que cierra (0-150) y
+            //     LA CARGA DEL RC2 (150-450, 5,15 s — el sonido amado
+            //     que calza exacto con los 300 ticks de la carga);
+            //     después, el bucle del disparo. Nada de Terraria.
 
             // === LA EDAD SINCRONIZADA: cada medio segundo el ritual
             //     avisa SU edad (los demás cables dibujan el progreso).
@@ -417,10 +417,114 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // ================================================================
         //  EL DIBUJO — vive en HazSobreElMundoSistema (encima de TODO el
         //  mundo, debajo de la interfaz): la bruma blanca y morada, los
-        //  círculos rúnicos, los micro-arcos, la implosión de soles y la
-        //  semilla del haz que crece. El PreDraw NO dibuja nada.
+        //  círculos rúnicos, los arcos del escuadrón, la implosión de
+        //  soles y la semilla del haz que crece. El PreDraw NO dibuja
+        //  nada.
         // ================================================================
         public override bool PreDraw(ref Color lightColor) => false;
+
+        // ================================================================
+        //  v6.61 — LOS ARCOS DEL ESCUADRÓN: los rayitos eléctricos son
+        //  DE LOS MINIONS (la letra: «los pequeños rayos electricos
+        //  deben concentrarce en el centro del circulo formado por los
+        //  minions, la forma para gatillar la creacion de pequeños
+        //  rayos electrico es la misma animacion de los minions,
+        //  ademas cada rayito debe ir de un minion a otro de forma
+        //  aleatorio mientras el haz se carga y se lanza»). Cada arco
+        //  une DOS ojos del círculo que gira — uno AL AZAR y su
+        //  OPUESTO del otro lado (la cuerda CRUZA EL MEDIO: la
+        //  electricidad se CONCENTRA en el centro del círculo) — y los
+        //  gatilla LA MISMA ANIMACIÓN de la órbita: viven mientras el
+        //  escuadrón gira, en la CEREMONIA (la carga) y en el DISPARO
+        //  (los ojos siguen el círculo alrededor de la boca del haz).
+        // ================================================================
+
+        // LOS POZOS cero-GC de la casa (las posiciones y ángulos de los
+        // ojos vivos, reusados cada frame — nunca un new por frame).
+        private static readonly Vector2[] _arcosPos = new Vector2[16];
+        private static readonly float[] _arcosAng = new float[16];
+        private static readonly int[] _arcosOp = new int[16];
+
+        /// <summary>LOS RAYITOS DE UN MINION A OTRO: dibuja 2-5 arcos
+        /// (60-100 % de alfa según la intensidad) entre ojos AL AZAR y
+        /// sus OPUESTOS del círculo. La llama la ceremonia (su carga) y
+        /// el haz de la ira (su disparo) — el MISMO traje en las dos
+        /// fases, como manda la letra. Es puro cine de cliente: el par
+        /// lo elige el reloj del juego de cada pantalla (nada que
+        /// sincronizar).</summary>
+        internal static void DibujarArcosDelEscuadron(Vector2 centroMundo,
+            int owner, float intensidad, float relojColor)
+        {
+            if (Main.dedServ) return;
+
+            // EL ESCUADRÓN VIVO: los ojos del dueño, donde estén — la
+            // órbita del ritual los pone en el círculo alrededor del
+            // centro (SlotDeFormacion: la MISMA animación que gatilla
+            // los arcos).
+            int tipoOjo = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+            int n = 0;
+            for (int i = 0; i < Main.maxProjectiles && n < 16; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.type != tipoOjo) continue;
+                if (p.owner != owner) continue;
+                _arcosPos[n] = p.Center;
+                _arcosAng[n] = (p.Center - centroMundo).ToRotation();
+                n++;
+            }
+            if (n < 2) return;
+
+            float intens = MathHelper.Clamp(intensidad, 0f, 1f);
+            int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
+            int cuenta = 2 + (int)(intens * 3.99f);
+
+            for (int i = 0; i < cuenta; i++)
+            {
+                // EL PAR CAMBIA cada 8 ticks («de forma aleatoria»): el
+                // reloj se parte en módulo 960 ANTES de escalar (el
+                // GameUpdateCount crudo pierde precisión en float tras
+                // horas de partida) — cada cliente dibuja SU par (es
+                // puro cine: nada que sincronizar).
+                int seed = (int)((Main.GameUpdateCount % 960ul) * 0.125f) * 131 + i * 297;
+                int a = (int)(VFXCore.Hash01(seed, 11, 7) * n);
+                if (a >= n) a = n - 1;
+
+                // SU OPUESTO DEL CÍRCULO: los ojos del OTRO LADO — la
+                // cuerda CRUZA EL MEDIO (si el par saliera del mismo
+                // lado, el arco abrazaría el BORDE y el centro quedaría
+                // vacío — justo lo que la letra prohibe). El umbral de
+                // 2,4 rad (137°) deja SOLO los pares casi-diametrales
+                // — con el escuadrón de 11 (32,7° por puesto) son los
+                // ±5/±6 puestos (164°): la cuerda pasa a ~10 px del
+                // CENTRO exacto. Sin opuestos (un círculo muy chico),
+                // el más lejano del sorteo.
+                float angA = _arcosAng[a];
+                int nOp = 0;
+                for (int j = 0; j < n; j++)
+                {
+                    if (j == a) continue;
+                    if (Math.Abs(MathHelper.WrapAngle(_arcosAng[j] - angA)) >= 2.4f)
+                        _arcosOp[nOp++] = j;
+                }
+                int b;
+                if (nOp > 0)
+                {
+                    int ele = (int)(VFXCore.Hash01(seed, 23, 13) * nOp);
+                    if (ele >= nOp) ele = nOp - 1;
+                    b = _arcosOp[ele];
+                }
+                else
+                    b = (a + Math.Max(1, n / 2)) % n;
+
+                Vector2 start = _arcosPos[a] - Main.screenPosition;
+                Vector2 end = _arcosPos[b] - Main.screenPosition;
+                StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
+                    RayosPruebaProjectile.ColorConjuro(relojColor + i * 8f),
+                    DefinitivasLib.BlancoCalido,
+                    0.60f + 0.40f * intens, 5, 12f);
+            }
+        }
 
         /// <summary>EL DIBUJO COMPLETO DEL RITUAL — lo llama
         /// HazSobreElMundoSistema desde su capa de interfaz, ENCIMA de
@@ -494,36 +598,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.ReabrirLoteVanilla();
             }
 
-            // ============ LOS MICRO-ARCOS DE LA CORONA ============
-            // (los rayitos eléctricos del centro — la cura de la v6.59:
-            // presentes el 60 % del ciclo, DOS A CINCO, al 60-100 %.)
+            // ============ v6.61 — LOS ARCOS DEL ESCUADRÓN ============
+            // (la letra: «los pequeños rayos electricos deben
+            // concentrarce en el centro del circulo formado por los
+            // minions, la forma para gatillar la creacion de pequeños
+            // rayos electrico es la misma animacion de los minions,
+            // ademas cada rayito debe ir de un minion a otro de forma
+            // aleatorio mientras el haz se carga y se lanza»): los
+            // rayitos YA NO nacen alrededor del centro — nacen DE LOS
+            // OJOS QUE GIRAN: cada arco une DOS ojos del círculo (uno
+            // al azar y su OPUESTO del otro lado — la cuerda CRUZA EL
+            // MEDIO: la electricidad se CONCENTRA en el centro) y los
+            // gatilla LA MISMA ANIMACIÓN de la órbita: viven desde que
+            // el círculo gira, TODO el ritual (ceremonia y carga) — y
+            // en el disparo los hereda el haz (su boca ES el centro).
             if (prog > 0.04f && edad % 5f < 3f)
             {
-                int flick = (int)(time * 60f) & 0x3FF;
-                int cuenta = 2 + (int)(prog * 3.99f);
-                for (int i = 0; i < cuenta; i++)
-                {
-                    int seed = (int)(edad * 0.017f) * 131 + i * 297;
-                    float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                    // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
-                    // pequeños rayos electricos no estan centrados en el
-                    // medio de los circulos runicos»): antes nacían al
-                    // borde del centro (r0 10-16) y corrían HACIA FUERA
-                    // (r1 36-76) — un anillo de radios con el medio
-                    // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
-                    // lado del círculo y muere en el OPUESTO (con ±0,4 rad
-                    // de vaivén orgánico) — el MEDIO de los círculos
-                    // rúnicos HIERVE de electricidad.
-                    float rArco = 16f + 6f * prog;
-                    float angOpuesto = ang + MathHelper.Pi
-                        + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
-                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
-                    Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
-                        RayosPruebaProjectile.ColorConjuro(semilla + i * 8f),
-                        DefinitivasLib.BlancoCalido,
-                        0.60f + 0.40f * prog, 5, 12f);
-                }
+                DibujarArcosDelEscuadron(Projectile.Center, Projectile.owner,
+                    prog, semilla);
             }
 
             // ============ LA IMPLOSIÓN DE SOLES DE LA CARGA ============
