@@ -1,6 +1,6 @@
 # v6.56.9 — LA PILA DE CAPAS GPU-UNIVERSAL + LA IMPLOSIÓN DE SOLES + LA AUDITORÍA EJECUTADA — EL CHECKLIST
 
-> ⏳ **PUBLICACIÓN PENDIENTE** — el release ID se anota al publicar (la lección de la fila pre-rellena de la .65: JAMÁS copiar el ID de la versión anterior).
+> **PUBLICADA** — release [429618372](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.56.9) + CDN verificado byte a byte (md5 `ba7f6bf57c23f02fee3617551986f3e3`, 6.364.617 B; asset id 693887337).
 
 **Qué pasó** (la letra): «ahora se ve igual pero con un color diferente… lo que le faltan son varias capas de texturas con mas difuminado, glow entre demas efectos» + «los brillos de soles… aparecer lejos y contraerse hacia el centro pero sin dar vueltas, como una implosion» + «copia ese rc2 en varias armas con los cambios diseñados asi no dañamos el codigo original» + «cualquier gpu incluso los que no son dedicadas deben ver el shader» + «es momento de mejorar las librerias».
 
