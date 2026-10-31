@@ -53,20 +53,33 @@ namespace AethonMod.Content.VFX
         /// corazón dorado es un Quad de glow radial a ×1.5 del tamaño:
         /// a escala de HAZ (soles de 30-40 px) se lee como un CÍRCULO
         /// AMARILLO gigante flotando en el conducto. Los haces lo pasan
-        /// a 0 — queda la estrella blanca de 4 puntas pura.</summary>
+        /// a 0 — queda la estrella blanca de 4 puntas pura.
+        /// [colorCorazon] (v6.59) — LA CURA DE LOS BRILLITOS APAGADOS
+        /// (la letra: «los brillitos ahora casi no se ven»): al quitar
+        /// el corazón dorado (v6.57) los soles quedaron SOLO dos cápsulas
+        /// de 1,6 px al 55 % — un titileo casi invisible. Sin devolver
+        /// el círculo amarillo: (1) las cápsulas ARDEN de verdad (95 %
+        /// y GROSOR QUE ESCALA con el tamaño: 0,055·size — el destello
+        /// se LEE a cualquier escala) y (2) el corazón puede vestir OTRO
+        /// color (blanco-violeta en el haz): un NÚCLEO pequeño que
+        /// aviva el centro SIN leerse como círculo amarillo. El dorado
+        /// por defecto NO cambia (el accesorio y el RC2 original siguen
+        /// exactamente igual).</summary>
         public static void SolRunico4Puntas(Vector2 pos, float size, float arde,
-            float doradoExtra = 0f, float corazon = 1f)
+            float doradoExtra = 0f, float corazon = 1f, Color? colorCorazon = null)
         {
             if (arde <= 0.03f || size <= 0.4f) return;
-            float fino = MathF.Max(1.6f, 0.035f * 34f) * arde;
-            Color blanco = new Color(255, 248, 225) * (0.55f * arde);
+            // v6.59 — EL GROSOR VIVE: 0,055·size (mín. 1,8 px) — antes el
+            // clamp fijo de 1,6 px dejaba los soles grandes casi filamentos.
+            float fino = MathF.Max(1.8f, 0.055f * size) * arde;
+            Color blanco = new Color(255, 248, 225) * (0.95f * arde);
             Color dorado = new Color(255, 214, 120) * ((0.50f + doradoExtra) * arde);
             VFXCore.Quad(pos, blanco, new Vector2(size * 2.2f, fino));
             VFXCore.Quad(pos, blanco, new Vector2(fino, size * 2.2f));
             if (corazon > 0.02f)
             {
                 float lado = size * 1.5f * corazon;
-                VFXCore.Quad(pos, dorado, new Vector2(lado, lado));
+                VFXCore.Quad(pos, colorCorazon ?? dorado, new Vector2(lado, lado));
             }
         }
 
@@ -82,9 +95,12 @@ namespace AethonMod.Content.VFX
         /// del RC2 nacen a 320..520 px (el original conserva 150/90:
         /// comportamiento intacto por defecto).
         /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: 0 = sin corazón
-        /// (el haz NO dibuja círculos amarillos).</summary>
+        /// (el haz NO dibuja círculos amarillos). [colorCorazon] (v6.59)
+        /// — el corazón pequeño que AVIVA sin leerse amarillo (el haz
+        /// pasa blanco-violeta).</summary>
         public static void SolesRunicosCarga(Vector2 centro, float progreso, float tiempo,
-            float radioLejos = 150f, float radioVar = 90f, float corazon = 1f)
+            float radioLejos = 150f, float radioVar = 90f, float corazon = 1f,
+            Color? colorCorazon = null)
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             progreso = MathHelper.Clamp(progreso, 0f, 1f);
@@ -114,7 +130,7 @@ namespace AethonMod.Content.VFX
                 Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
                 float size = (0.30f + 0.25f * VFXCore.Hash01(31, 330 + i, 17))
                              * 34f * (0.55f + 0.45f * progreso);
-                SolRunico4Puntas(pos, size, arde, corazon: corazon);
+                SolRunico4Puntas(pos, size, arde, corazon: corazon, colorCorazon: colorCorazon);
             }
         }
 
@@ -122,9 +138,11 @@ namespace AethonMod.Content.VFX
         /// puntas salen EXPULSADOS en abanico por la dirección del rayo
         /// (±0.5 rad) y arden muriendo — el arma escupe lo que absorbió.
         /// [edad01] 0→1 durante los primeros ~22 ticks del disparo.
-        /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: 0 = sin corazón.</summary>
+        /// [corazon] (v6.57) — LA LEY DEL CORAZÓN DORADO: 0 = sin corazón.
+        /// [colorCorazon] (v6.59) — el corazón pequeño que AVIVA sin
+        /// leerse amarillo.</summary>
         public static void SolesRunicosEstallido(Vector2 centro, float angulo, float edad01,
-            float tiempo, float corazon = 1f)
+            float tiempo, float corazon = 1f, Color? colorCorazon = null)
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             edad01 = MathHelper.Clamp(edad01, 0f, 1f);
@@ -139,7 +157,7 @@ namespace AethonMod.Content.VFX
                 Vector2 pos = centro + new Vector2(MathF.Cos(a), MathF.Sin(a))
                               * (arr + v * edad01 * 22f);
                 float size = (0.34f + 0.30f * VFXCore.Hash01(77, 540 + i, 19)) * 34f;
-                SolRunico4Puntas(pos, size, arde, corazon: corazon);
+                SolRunico4Puntas(pos, size, arde, corazon: corazon, colorCorazon: colorCorazon);
             }
         }
     }

@@ -149,10 +149,19 @@ namespace AethonMod.Content.Projectiles.Definitivas
     // =====================================================================
     public class RayosPruebaProjectile : ModProjectile
     {
-        // LOS TIEMPOS DEL ATAQUE (idénticos al RC2).
-        private static readonly int ChargeTime = 300;
+        // LOS TIEMPOS DEL ATAQUE (idénticos al RC2). v6.59 — ChargeTime
+        // es internal: la CEREMONIA de la Ira lo usa para engendrar el
+        // haz YA EN el disparo (Time = ChargeTime: la ceremonia FUE la
+        // carga; el haz nace disparando).
+        internal static readonly int ChargeTime = 300;
         private static readonly int LaserDuration = 800;
         private const float LargoCono = 3500f;
+
+        // v6.59 — EL NÚCLEO BLANCO-VIOLETA de los soles del haz (la letra:
+        // «los brillitos ahora casi no se ven»): el corazón que AVIVA el
+        // centro de cada sol sin leerse como el círculo amarillo de la
+        // v6.57 — blanco-violáceo incandescente, a media escala.
+        private static readonly Color CorazonRunico = new Color(240, 228, 255);
 
         public float targetRotation;
         public float targetSize;
@@ -224,6 +233,48 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// TITÁN · 2 = C EL SUEÑO. La elige el arma al disparar.</summary>
         public ref float Receta => ref Projectile.ai[1];
 
+        // ================================================================
+        //  v6.59 — EL MODO IRA DE UN SER EXTERIOR: cuando EL GRIMORIO
+        //  dispara este haz (la ceremonia del despertar 50), el conducto
+        //  NO vive en la boca del jugador — vive en EL CENTRO DEL CÍRCULO
+        //  que el escuadrón formó, apunta AL ENEMIGO que están cazando
+        //  (jefes SIEMPRE primero — la letra) y NO encadena al portador
+        //  (el jugador queda LIBRE: la ira es del Ser Exterior, no del
+        //  que lo porta). Viaja por SendExtraAI (el paquete del spawn).
+        // ================================================================
+        internal bool EsIra;
+        internal int BlancoIra = -1;
+        internal Vector2 CentroIra = Vector2.Zero;
+
+        /// <summary>v6.59 — EL BLANCO DE LA IRA (la letra: «si hay un
+        /// jefe presente este siempre tendra prioridad por sobre todas
+        /// las cosas»): el JEFE más cercano manda sobre todo; sin
+        /// jefes, el enemigo válido más cercano. Lo usan la ceremonia
+        /// (al elegir presa) y el haz (al apuntar y re-adquirir).</summary>
+        internal static NPC BuscarBlancoIra(Vector2 desde, float radio)
+        {
+            NPC mejorJefe = null;
+            float dJ = radio * radio;
+            NPC mejor = null;
+            float dM = radio * radio;
+            foreach (NPC n in Main.ActiveNPCs)
+            {
+                if (n == null || !n.active) continue;
+                if (!VFXCore.EsObjetivo(n)) continue;
+                // v6.50.116 — EL SELLO VERDADERO: los jefes de oleada
+                // mueren AISLADOS (tipo/netID en 0) pero siguen siendo
+                // jefes para TODO lo que importa.
+                bool esJefe = n.boss || Globals.OleadaNPC.JefeVerdadero(n);
+                float d = n.Center.DistanceSQ(desde);
+                if (esJefe)
+                {
+                    if (d < dJ) { dJ = d; mejorJefe = n; }
+                }
+                else if (d < dM) { dM = d; mejor = n; }
+            }
+            return mejorJefe ?? mejor;
+        }
+
         public override void SetStaticDefaults()
         {
             ProjectileID.Sets.DrawScreenCheckFluff[Type] = 5000;
@@ -281,6 +332,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             writer.Write(Projectile.direction == 1);
             writer.Write(targetRotation);
             writer.Write(Receta);              // la receta viaja al server
+            // v6.59 — EL MODO IRA: la bandera, el blanco y el centro del
+            // ritual viajan en el paquete del spawn.
+            writer.Write(EsIra);
+            writer.Write(BlancoIra);
+            writer.Write(CentroIra.X);
+            writer.Write(CentroIra.Y);
         }
 
         public override void ReceiveExtraAI(BinaryReader reader)
@@ -288,6 +345,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Projectile.direction = reader.ReadBoolean() ? 1 : -1;
             targetRotation = reader.ReadSingle();
             Receta = reader.ReadSingle();
+            // v6.59 — EL MODO IRA (el mismo orden del Send).
+            EsIra = reader.ReadBoolean();
+            BlancoIra = reader.ReadInt32();
+            CentroIra = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         }
 
         // ================================================================
@@ -302,20 +363,40 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 return;
             }
             Player dueno = Main.player[(int)Owner];
+            // v6.59 — LA IRA NO MUERE CON SU PORTADOR: un hechizo empezado
+            // se cumple (la regla de la casa de la v6.51.5) — la ira es del
+            // Ser Exterior, no del que lo porta. El arma de siempre sigue
+            // muriendo con su dueño (conducta intacta).
             if (dueno == null || !dueno.active || dueno.dead)
             {
-                CortarCarga();
-                Projectile.Kill();
-                return;
+                if (!EsIra)
+                {
+                    CortarCarga();
+                    Projectile.Kill();
+                    return;
+                }
             }
 
-            dueno.direction = Math.Sign(Projectile.rotation.ToRotationVector2().X);
-            dueno.itemLocation = dueno.MountedCenter;
+            if (EsIra)
+            {
+                // ============================================================
+                //  v6.59 — LA BOCA DEL SER EXTERIOR: el conducto vive en EL
+                //  CENTRO DEL CÍRCULO del ritual — FIJO donde el escuadrón
+                //  lo gestó. El portador queda LIBRE (nada de cadenas, ni
+                //  de empujones, ni de dirección forzada): la ira es suya.
+                // ============================================================
+                Projectile.Center = CentroIra;
+            }
+            else
+            {
+                dueno.direction = Math.Sign(Projectile.rotation.ToRotationVector2().X);
+                dueno.itemLocation = dueno.MountedCenter;
 
-            Projectile.Center = dueno.MountedCenter + new Vector2(13 * dueno.direction, -20f);
+                Projectile.Center = dueno.MountedCenter + new Vector2(13 * dueno.direction, -20f);
 
-            dueno.velocity += Projectile.rotation.ToRotationVector2() * -0.1f;
-            dueno.velocity *= 0.98f;
+                dueno.velocity += Projectile.rotation.ToRotationVector2() * -0.1f;
+                dueno.velocity *= 0.98f;
+            }
 
             if (!Main.dedServ)
             {
@@ -368,7 +449,36 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile.netUpdate = true;
             }
 
-            if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
+            if (EsIra)
+            {
+                // ============================================================
+                //  v6.59 — EL APUNTE DE LA IRA: el conducto PERSIGUE al
+                //  enemigo que el escuadrón está cazando (jefes SIEMPRE
+                //  primero — BuscarBlancoIra re-adquiere si el blanco
+                //  cae a media ira). Corre en TODOS los cables (el NPC
+                // es estado sincronizado — todos ven al mismo blanco).
+                //  MISMAS tasas de giro del arma (el barrido amado).
+                // ============================================================
+                NPC blanco = null;
+                if (BlancoIra >= 0 && BlancoIra < Main.maxNPCs)
+                {
+                    NPC n = Main.npc[BlancoIra];
+                    if (n != null && n.active && n.life > 0 && VFXCore.EsObjetivo(n))
+                        blanco = n;
+                }
+                if (blanco == null)
+                {
+                    blanco = BuscarBlancoIra(Projectile.Center, 2400f);
+                    if (blanco != null) BlancoIra = blanco.whoAmI;
+                }
+                if (blanco != null)
+                {
+                    targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(blanco.Center),
+                        Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
+                        + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
+                }
+            }
+            else if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
             {
                 targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
                     Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
@@ -420,15 +530,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 return;
             }
 
-            if (Main.netMode == NetmodeID.Server)
+            // v6.59 — LA IRA NO REGALA EL VUELO: el vuelo infinito es la
+            // experiencia del ARMA (el conjuro del jugador); el Ser
+            // Exterior no sostiene a su portador — él vuela solo.
+            if (!EsIra)
             {
-                Player p = Main.player[(int)Owner];
-                if (p != null && p.active && !p.dead)
-                    p.wingTime = p.wingTimeMax;
-            }
-            else if (Main.LocalPlayer != null && Main.LocalPlayer.whoAmI == (int)Owner)
-            {
-                Main.LocalPlayer.wingTime = Main.LocalPlayer.wingTimeMax;
+                if (Main.netMode == NetmodeID.Server)
+                {
+                    Player p = Main.player[(int)Owner];
+                    if (p != null && p.active && !p.dead)
+                        p.wingTime = p.wingTimeMax;
+                }
+                else if (Main.LocalPlayer != null && Main.LocalPlayer.whoAmI == (int)Owner)
+                {
+                    Main.LocalPlayer.wingTime = Main.LocalPlayer.wingTimeMax;
+                }
             }
         }
 
@@ -566,13 +682,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     // v6.57 — LA IMPLOSIÓN NACE MÁS LEJOS (la letra: «el
                     // pequeño brillo de soles runicos debe aparecer mas
-                    // lejos del jugador»): 320..520 px (antes 150..240) —
-                    // y SIN corazón dorado (la ley del corazón: nada de
-                    // círculos amarillos en el haz).
+                    // lejos del jugador»): 320..520 px (antes 150..240).
+                    // v6.59 — EL CORAZÓN QUE AVIVA SIN SER AMARILLO: un
+                    // núcleo blanco-violeta a media escala (la cura de los
+                    // brillitos apagados — la letra: «los brillitos ahora
+                    // casi no se ven»; el círculo AMARILLO grande no vuelve).
                     HazConcentradoLib.SolesRunicosCarga(Projectile.Center,
                         Utils.GetLerpValue(20f, ChargeTime, Time, true),
                         Main.GlobalTimeWrappedHourly,
-                        radioLejos: 320f, radioVar: 200f, corazon: 0f);
+                        radioLejos: 320f, radioVar: 200f, corazon: 0.5f,
+                        colorCorazon: CorazonRunico);
                 }
                 else if (Time < ChargeTime + 22)
                 {
@@ -580,7 +699,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         Projectile.rotation,
                         (Time - ChargeTime) / 22f,
                         Main.GlobalTimeWrappedHourly,
-                        corazon: 0f);
+                        corazon: 0.5f, colorCorazon: CorazonRunico);
                 }
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
@@ -604,10 +723,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // la externa desfasadas. Los aros finos ya iban con
                     // ColorConjuro; ahora la corona entera canta con el
                     // haz.
+                    // v6.59 — LA CURA DE LA TRANSPARENCIA (la letra:
+                    // «los circulos runicos se ven mas transparente lo
+                    // cual no debe ser asi»): el alfa piso sube del 28 %
+                    // al 55 % (antes la corona nacía casi invisible y solo
+                    // maduraba al final) y la íntima viaja MÁS BLANCA
+                    // (0,40 → 0,58 de mezcla) para LEERSE desde el primer
+                    // tick.
                     OrbitaLib.AbrirAdditive();
                     OrbitaLib.CoronaConjuro(posPantalla, rCorona, Main.GlobalTimeWrappedHourly,
-                        alphaMul: 0.28f + 0.62f * laserCharge, glyphMul: 1.8f,
-                        blanco: Color.Lerp(ColorConjuro(Projectile.localAI[0] + 6f), new Color(255, 246, 255), 0.40f),
+                        alphaMul: 0.55f + 0.45f * laserCharge, glyphMul: 1.8f,
+                        blanco: Color.Lerp(ColorConjuro(Projectile.localAI[0] + 6f), new Color(255, 246, 255), 0.58f),
                         dorado: ColorConjuro(Projectile.localAI[0] + 18f),
                         violeta: ColorConjuro(Projectile.localAI[0] + 30f));
                     OrbitaLib.CerrarBatch();
@@ -620,20 +746,29 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 Vector2 tamAnillo = VFXCore.RingQuadSize(rCorona);
                 Main.EntitySpriteDraw(ring, posPantalla, null,
-                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 6f), 0.55f * laserCharge),
+                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 6f), 0.80f * laserCharge),
                     Main.GlobalTimeWrappedHourly * 0.7f, ring.Size() * 0.5f, tamAnillo, SpriteEffects.None, 0f);
                 Vector2 tamAnillo2 = VFXCore.RingQuadSize(rCorona * 1.38f);
                 Main.EntitySpriteDraw(ring, posPantalla, null,
-                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 18f), 0.3f * laserCharge),
+                    DefinitivasLib.Alfa(ColorConjuro(Projectile.localAI[0] + 18f), 0.50f * laserCharge),
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
             // ============ LOS MICRO-ARCOS DE LA CARGA ============
-            if (Time < ChargeTime && Time % 14f < 3f)
+            // v6.59 — LA CURA DE LOS RAYITOS INVISIBLES (la letra: «tampoco
+            // los rayitos electricos en el centro de los ciruculos runicos
+            // [se ven]»): antes vivían SOLO 3 ticks de cada 14 (el 21 % del
+            // tiempo — un parpadeo que el ojo perdía) y arrancaban al 35 %
+            // de alfa con 2,2 px de grosor. AHORA: (1) VIVEN mientras la
+            // corona vive (la carga Y el disparo — ventana %5<3, el 60 %
+            // del ciclo), (2) son DOS A CINCO (el doble de la carga de
+            // siempre), (3) arden al 60-100 % de alfa con 3,2 px de grosor
+            // — LA CORONA HIERVE de arcos desde el primer tick.
+            if (laserCharge > 0.05f && Time % 5f < 3f)
             {
                 float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
                 int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-                int cuenta = 1 + (int)(progreso * 3.99f);
+                int cuenta = 2 + (int)(progreso * 3.99f);
                 for (int i = 0; i < cuenta; i++)
                 {
                     int seed = (int)(Time * 0.017f) * 131 + i * 297;
@@ -642,10 +777,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float r1 = r0 + 26f + 34f * progreso;
                     Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
                     Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f,
+                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
                         ColorConjuro(Projectile.localAI[0] + i * 8f),
                         DefinitivasLib.BlancoCalido,
-                        0.35f + 0.45f * progreso, 5, 12f);
+                        0.60f + 0.40f * progreso, 5, 12f);
                 }
             }
 
@@ -661,8 +796,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // la estrella de 4 puntas PURA — el corazón a escala
                     // de boca (~57 px) era EL círculo amarillo gigante de
                     // la captura del usuario.
+                    // v6.59 — PERO EL NÚCLEO QUE AVIVA VIVE (la cura de
+                    // los brillitos): corazón BLANCO-VIOLETA a media
+                    // escala — arde sin leerse amarillo.
                     HazConcentradoLib.SolRunico4Puntas(Projectile.Center,
-                        12f + 26f * realSize, late * laserCharge, corazon: 0f);
+                        12f + 26f * realSize, late * laserCharge,
+                        corazon: 0.5f, colorCorazon: CorazonRunico);
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.FlushAdditive();
@@ -891,7 +1030,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (arde <= 0.04f) continue;
 
                 float size = MathF.Max(9f, medio * (0.085f + 0.045f * VFXCore.Hash01(97, 630 + i, 13)));
-                HazConcentradoLib.SolRunico4Puntas(pos, size, arde * _laserActivo, corazon: 0f);
+                // v6.59 — EL NÚCLEO QUE AVIVA (la cura de los brillitos):
+                // corazón blanco-violeta a media escala en los soles del
+                // conducto — arden sin leerse como círculos amarillos.
+                HazConcentradoLib.SolRunico4Puntas(pos, size, arde * _laserActivo,
+                    corazon: 0.5f, colorCorazon: CorazonRunico);
             }
         }
 

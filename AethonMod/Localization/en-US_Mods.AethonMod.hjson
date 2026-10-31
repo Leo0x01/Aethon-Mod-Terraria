@@ -1978,44 +1978,19 @@ Items: {
 			'''
 	}
 
-	RayoPruebaA: {
-		DisplayName: Rayo de Prueba A — La Equilibrada
-		Tooltip:
-			'''
-			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA A
-			(el original queda intacto; esta copia se ajusta hasta
-			dar con el look correcto). LA PILA DE CAPAS EQUILIBRADA:
-			bruma ambiental ×2.6, envolvente de glow ×1.75, el plasma
-			del shader y la vena núcleo ×0.34, con 5 soles de 4 puntas
-			corriendo por las márgenes del conducto. La misma carga de
-			300 ticks (los soles IMPLOTAN hacia la boca) y el mismo
-			cono de 3500 px. Compara con B y C y elige la ganadora.
-			'''
-	}
-
-	RayoPruebaB: {
-		DisplayName: Rayo de Prueba B — El Titán
-		Tooltip:
-			'''
-			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA B
-			(el original queda intacto). EL TITÁN: TODO al máximo —
-			bruma ambiental ×3.1, envolvente de glow ×2.1, vena núcleo
-			×0.42 casi blanca y 8 soles de 4 puntas. El haz más gordo
-			y dramático de la familia: el conducto como una tormenta
-			violeta. La misma conducta del RC2. Compara con A y C.
-			'''
-	}
-
 	RayoPruebaC: {
 		DisplayName: Rayo de Prueba C — El Sueño
 		Tooltip:
 			'''
-			COPIA DE PRUEBA DEL RAYO CONCENTRADO 2 — RECETA C
-			(el original queda intacto). EL SUEÑO: el desenfoque
-			máximo — bruma ambiental ×3.6, DOBLE envolvente de glow
-			(×2.5 + ×1.9), núcleo suave ×0.28 y 6 soles. El conducto
-			onírico: todo fundido, como mirar el rayo a través de
-			un velo. La misma conducta del RC2. Compara con A y B.
+			EL RAYO DE PRUEBA C — EL SUEÑO: LA GANADORA (las copias A y B
+			murieron con la elección: esta ES la definitiva). El desenfoque
+			máximo: bruma ambiental ×3.6, DOBLE envolvente de glow (×2.5 +
+			×1.9), núcleo suave ×0.28 y 6 soles de 4 puntas con su núcleo
+			blanco-violeta. El conducto onírico: todo fundido, como mirar
+			el rayo a través de un velo.
+			Y es EL HAZ DE LA IRA DE UN SER EXTERIOR: el ataque del
+			despertar 50 del grimorio eterno — el círculo del escuadrón,
+			la bruma blanco-morada, los círculos rúnicos y EL HAZ.
 			'''
 	}
 
@@ -2023,10 +1998,10 @@ Items: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa —
-			más LAS TRES COPIAS DE PRUEBA de la pila de capas (A la
-			equilibrada · B el titán · C el sueño): el original queda
-			intacto y las copias se ajustan hasta el look correcto.
+			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa — y
+			LA COPIA GANADORA de la pila de capas: el RAYO DE PRUEBA C —
+			EL SUEÑO (A y B murieron con la elección). C es el haz de la
+			IRA DE UN SER EXTERIOR, el ataque del despertar 50 del Eterno.
 			'''
 	}
 
@@ -2397,6 +2372,7 @@ Projectiles: {
 	SombraPagina2Projectile.DisplayName: La Sombra de la Página II
 	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
 	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
+	IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
 }
 
 Buffs: {
@@ -2850,7 +2826,7 @@ Despertar: {
 	HitoSol3: ✧ ¡DESPERTAR 35: el sol de TRES anillos, 4 veces por minuto!
 	HitoMejora4: ✧ ¡DESPERTAR 40: la MEJORA FINAL de los ojos!
 	HitoSupremo: ✧ ¡DESPERTAR 45: agujeros 2/min… y OCHO OJOS M4 abren el SUPREMO o el SUPREMO AURORA!
-	HitoMaximo: ✧✧ ¡DESPERTAR 50: TODO el ataque del escuadrón MÁS FUERTE y MÁS RÁPIDO!
+	HitoMaximo: ✧✧ ¡DESPERTAR 50: LA IRA DE UN SER EXTERIOR — el escuadrón cierra el círculo y EL HAZ responde!
 	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño a un ojo)
 	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
 	CaminoAgujeros: los AGUJEROS NEGROS RÚNICOS (5 ojos mejorados, 1/min)
@@ -2862,7 +2838,7 @@ Despertar: {
 	CaminoSol3: el sol de 3 ANILLOS (4/min)
 	CaminoMejora4: la MEJORA FINAL de los ojos
 	CaminoSupremo: agujeros 2/min… y EL SUPREMO/AURORA (8 ojos con la mejora 4)
-	CaminoMaximo: TODO el escuadrón MÁS FUERTE y MÁS RÁPIDO
+	CaminoMaximo: LA IRA DE UN SER EXTERIOR — el círculo del escuadrón invoca EL HAZ (daño 1000 + mágico + 50% invocación)
 	Escupidizo:
 		'''
 		Ya somos tres, portador: tú, yo… y ÉL.

@@ -1338,6 +1338,24 @@ namespace AethonMod.Content.Weapons
                     tooltips.Add(new TooltipLine(Mod, "WSupremo",
                         "[c/78788C:Supremo / Supremo Aurora: bloqueado — Despertar 45]"));
                 }
+                // v6.59 — LA IRA DE UN SER EXTERIOR (el ataque del
+                //     DESPERTAR 50 — LO que consigue el grimorio al final
+                //     del camino): el escuadrón entero cierra el círculo,
+                //     reza sus rayos de perlin al centro y de la bruma
+                //     blanco-morada nace EL HAZ (daño 1000 + mágico + 50 %
+                //     invocación — ver AtaquesCombinadosSistema.DanoDeLaIra).
+                if (Systems.DespertarGrimorio.IraDisponible(despertar))
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WIra",
+                        "[c/E8D8FF:Ira de un Ser Exterior: EL HAZ · 1 cada 2 min]"));
+                    tooltips.Add(new TooltipLine(Mod, "WIra2",
+                        "[c/78788C:(el escuadrón entero cierra el círculo · daño 1000 + mágico + 50% invocación)]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "WIra",
+                        "[c/78788C:Ira de un Ser Exterior: bloqueado — Despertar 50]"));
+                }
                 if (despertar >= Systems.DespertarGrimorio.NivelMax)
                 {
                     tooltips.Add(new TooltipLine(Mod, "WMaximo",

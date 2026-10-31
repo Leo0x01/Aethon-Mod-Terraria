@@ -319,6 +319,12 @@ namespace AethonMod.Content.Projectiles
 
             // === EL FOCO DE LA MIRADA: a dónde apunta el iris ===
             NPC presa = ObjetivoDelOjo(dueño, nivel);
+            // v6.59 — EL RITUAL DE LA IRA: mientras la ceremonia vive, el
+            //     iris del escuadrón se CLAVA en el centro del círculo (la
+            //     mirada colectiva alimenta el conjuro — y sus ataques
+            //     normales ESPERAN: están rezando, no cazando).
+            Projectile ritualIra = global::AethonMod.Content.Projectiles.Definitivas
+                .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
             // v6.51.7 — EL ARCO DEL BÁCULO SANGUINARIO (la letra: «los
             //     minions siempre deben ir detras del jugador, pero
             //     cuando el libro sale a cazar, los minions comienza a
@@ -337,7 +343,7 @@ namespace AethonMod.Content.Projectiles
             Vector2 slot = SlotDeFormacion(dueño, libro);
             Vector2 foco = modo == MODO_APUNTANDO && presa != null
                 ? presa.Center
-                : slot;
+                : (ritualIra != null ? ritualIra.Center : slot);
 
             // el ángulo de la mirada barre suave (0,22 rad/t) hacia el foco —
             // el iris LLEGA mucho antes que el cuerpo: «primero mira»
@@ -451,7 +457,10 @@ namespace AethonMod.Content.Projectiles
                 }
 
                 // === EL DISPARO: si hay presa y la cadencia está lista ===
-                if (presa != null && Projectile.frame <= 0)
+                // v6.59 — SALVO EN EL RITUAL DE LA IRA (la letra: los ojos
+                //     están GIRANDO y rezando sus rayos al centro del
+                //     círculo — no interrumpen la ceremonia con su caza).
+                if (ritualIra == null && presa != null && Projectile.frame <= 0)
                 {
                     Projectile.ai[0] = MODO_APUNTANDO;
                     Projectile.ai[1] = 0f;
@@ -601,6 +610,39 @@ namespace AethonMod.Content.Projectiles
         {
             int idx = Math.Max(0, (int)Projectile.minionPos);
             float time = Main.GlobalTimeWrappedHourly;
+
+            // === v6.59 — EL RITUAL DE LA IRA DE UN SER EXTERIOR (la letra:
+            //     «independientemente de donde esten los minions ya sean
+            //     sobre el jugador o sobre el grimorio, estos deben
+            //     comenzar a girar en circulos, o sea el circulo que forman
+            //     debe cerrarse en caso de que este en el jugador al inicio
+            //     de la animacion»): mientras la ceremonia vive, el puesto
+            //     es LA CORONA COMPLETA alrededor de SU centro — el círculo
+            //     SE CIERRA (2π/n: nada de abanico trasero) y GIRA, con la
+            //     VUELTA DEL RITUAL que ACELERA (arranca como la órbita del
+            //     libro, ω 0,30, y sube a 1,05 rad/s cuando el círculo ya
+            //     cerró — el giro que se lee). El centro de la ceremonia
+            //     YA nace elevado sobre el jugador (los ojos SE ELEVAN al
+            //     orbitarlo) y ES el libro cuando el libro está fuera (no
+            //     hace falta elevarse: ya giraban ahí).
+            Projectile ritual = global::AethonMod.Content.Projectiles.Definitivas
+                .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
+            if (ritual != null)
+            {
+                int nR = Math.Max(1, dueño.ownedProjectileCounts[Projectile.type]);
+                int iR = Math.Min(idx, nR - 1);
+                // LA VUELTA DEL RITUAL: ω 0,30 → 1,05 conforme el círculo
+                // cierra (los primeros 150 ticks — la ceremonia).
+                float progCeremonia = MathHelper.Clamp(
+                    ritual.ai[2] / 150f, 0f, 1f);
+                float omega = MathHelper.Lerp(0.30f, 1.05f, progCeremonia);
+                float angR = MathHelper.TwoPi / nR * iR + time * omega;
+                float radioR = Math.Max(40f, 6.2f * nR)
+                    * (1f + 0.035f * MathF.Sin(time * 0.5f));
+                Vector2 slotR = ritual.Center + (-Vector2.UnitY).RotatedBy(angR) * radioR;
+                slotR.Y += MathF.Sin(time * 0.9f + iR * 1.9f) * 1.5f;
+                return slotR;
+            }
 
             // EL CENTRO: el grimorio que caza si está fuera; el dueño si no
             Vector2 centro = libro is Vector2 c ? c : dueño.MountedCenter;

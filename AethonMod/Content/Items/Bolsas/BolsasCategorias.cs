@@ -843,8 +843,10 @@ namespace AethonMod.Content.Items.Bolsas
             return new List<(int, int)>
             {
                 (ModContent.ItemType<RayoConcentradoDos>(), 1),
-                (ModContent.ItemType<RayoPruebaA>(), 1),
-                (ModContent.ItemType<RayoPruebaB>(), 1),
+                // v6.59 — LA COPIA GANADORA: los rayos de prueba A y B
+                // murieron con la elección («me quedare con rayo de prueba
+                // C el sueño, el resto los puedes borrar»); C — EL SUEÑO —
+                // es LA definitiva (y el haz de la Ira de un Ser Exterior).
                 (ModContent.ItemType<RayoPruebaC>(), 1)
             };
         }

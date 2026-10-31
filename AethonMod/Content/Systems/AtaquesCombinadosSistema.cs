@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Projectiles.Definitivas;
 
 namespace AethonMod.Content.Systems
 {
@@ -48,6 +49,10 @@ namespace AethonMod.Content.Systems
         /// <summary>EL RELOJ del supremo de cada jugador (independiente).</summary>
         private static readonly Dictionary<int, ulong> _supremoHasta = new();
 
+        /// <summary>v6.59 — EL RELOJ de la IRA de cada jugador (el ataque
+        /// del despertar 50 — EL FINAL DEL CAMINO: una ira cada 2 minutos).</summary>
+        private static readonly Dictionary<int, ulong> _iraHasta = new();
+
         /// <summary>El ruido de la moneda aleatoria (por tick, cuando el
         /// reloj ya está listo: 1 de cada ~75 t dispara).</summary>
         private const int DADO = 75;
@@ -60,6 +65,7 @@ namespace AethonMod.Content.Systems
             _solHasta.Clear();
             _agujeroHasta.Clear();
             _supremoHasta.Clear();
+            _iraHasta.Clear();
         }
 
         /// <summary>UN TICK DEL COORDINADOR (lo llama ShardPlayer.PostUpdate
@@ -148,6 +154,56 @@ namespace AethonMod.Content.Systems
                     {
                         _supremoHasta[p.whoAmI] = ahora + 3600ul;   // 1/min SIEMPRE
                         LanzarElSupremo(p, blanco, mejorados, despertar);
+                    }
+                }
+
+                // === v6.59 — LA IRA DE UN SER EXTERIOR (DESPERTAR 50: el
+                //     ataque que consigue el grimorio al final del camino)
+                //     — EL ESCUADRÓN ENTERO cierra el círculo, reza sus
+                //     rayos de perlin al centro, y de la bruma blanco-morada
+                //     y los círculos rúnicos nace EL HAZ (el rayo C — EL
+                //     SUEÑO) disparado al enemigo que cazan (jefes
+                //     SIEMPRE primero). Daño: base 1000 + la cadena mágica
+                //     del grimorio + el 50 % del daño total de invocación.
+                //     UNA IRA CADA 2 MINUTOS. ===
+                if (DespertarGrimorio.IraDisponible(despertar))
+                {
+                    ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+                    if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                    {
+                        // NADA DE HACES SOLAPADOS: si un haz del RC2/C del
+                        // portador ya vive (su arma, otra ira), la ira
+                        // ESPERA el próximo reloj.
+                        int tipoHaz = ModContent.ProjectileType<RayosPruebaProjectile>();
+                        bool hazVivo = false;
+                        for (int i = 0; i < Main.maxProjectiles; i++)
+                        {
+                            Projectile ph = Main.projectile[i];
+                            if (ph != null && ph.active && ph.type == tipoHaz &&
+                                ph.owner == p.whoAmI)
+                            {
+                                hazVivo = true;
+                                break;
+                            }
+                        }
+                        // EL ESCUADRÓN: TODOS los ojos vivos (mejorados o no
+                        // — la letra: «independientemente de donde esten los
+                        // minions»); un círculo de 3+ ya se lee.
+                        int ojosVivos = 0;
+                        if (!hazVivo)
+                        {
+                            for (int i = 0; i < Main.maxProjectiles; i++)
+                            {
+                                Projectile pr = Main.projectile[i];
+                                if (pr == null || !pr.active || pr.type != tipoOjo) continue;
+                                if (pr.owner == p.whoAmI) ojosVivos++;
+                            }
+                        }
+                        if (!hazVivo && ojosVivos >= 3)
+                        {
+                            _iraHasta[p.whoAmI] = ahora + 7200ul;   // UNA IRA CADA 2 MINUTOS
+                            DispararLaIra(p, mejorados, despertar);
+                        }
                     }
                 }
             }
@@ -459,6 +515,119 @@ namespace AethonMod.Content.Systems
                 //     del ritual supremo MUERE — silenciosos como los otros.
             }
             catch { }
+        }
+
+        // ================================================================
+        //  v6.59 — LA IRA DE UN SER EXTERIOR (el despertar 50)
+        // ================================================================
+
+        /// <summary>LA CEREMONIA DE LA IRA: nace el ritual (el proyectil
+        /// que cierra el círculo del escuadrón, recibe los rayos de perlin
+        /// y gesta la bruma blanco-morada + los círculos rúnicos) con el
+        /// blanco elegido y EL DAÑO DEL HAZ calculado AQUÍ — al cumplir
+        /// sus 450 ticks, EL engendra EL HAZ (el rayo C — EL SUEÑO) ya
+        /// disparando. La letra: «el daño base del rayo que es 1000, mas
+        /// el calculo correspondiente para el aumento de daño magico, mas
+        /// el 50% del total del daño de invocacion».</summary>
+        private static void DispararLaIra(Player p, List<Projectile> mejorados, int despertar)
+        {
+            try
+            {
+                // EL BLANCO — PRIORIDAD DE JEFES SIEMPRE (la letra: «si hay
+                // un jefe presente este siempre tendra prioridad por sobre
+                // todas las cosas»): el jefe más cercano manda; sin jefes,
+                // el enemigo que el escuadrón está cazando (el más cercano).
+                NPC blanco = RayosPruebaProjectile.BuscarBlancoIra(p.Center, 2400f);
+                if (blanco == null) return;
+
+                // EL DAÑO (la letra, exacta): base 1000 + cadena mágica +
+                // 50 % del daño total de invocación.
+                Projectile lider = ElMasDespierto(mejorados);
+                if (lider == null) return;
+                int nivel = (int)MathF.Floor(lider.ai[2]);
+                int dano = DanoDeLaIra(p, nivel, lider, despertar);
+
+                // LA CEREMONIA: el ritual nace sobre el jugador (o el libro
+                // si está fuera cazando — el centro lo decide ella) — el
+                // haz saldrá de SU centro al cumplir.
+                Projectile.NewProjectile(p.GetSource_Misc("IraSerExterior"),
+                    p.Center, Vector2.Zero,
+                    ModContent.ProjectileType<IraSerExteriorCeremoniaProjectile>(),
+                    0, 0f, p.whoAmI,
+                    blanco.whoAmI * 1f,   // ai[0]: el blanco del escuadrón
+                    dano * 1f,            // ai[1]: EL DAÑO DEL HAZ
+                    0f);                  // ai[2]: la edad (la llena su IA)
+
+                // LA SOLEMNIDAD: el escuadrón entero estalla en polvo
+                // blanco-morado — el círculo empieza.
+                int tipoOjoIra = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || pr.type != tipoOjoIra) continue;
+                    if (pr.owner != p.whoAmI) continue;
+                    for (int k = 0; k < 5; k++)
+                    {
+                        bool blanca = Main.rand.NextBool(2);
+                        Dust d = Dust.NewDustPerfect(pr.Center,
+                            blanca ? DustID.PurpleTorch : DustID.Shadowflame,
+                            Main.rand.NextVector2Circular(3.5f, 3.5f), 150,
+                            blanca ? new Color(235, 225, 255) : new Color(150, 90, 220), 1.1f);
+                        d.noGravity = true;
+                    }
+                }
+
+                // LA VOZ DEL EXTERIOR: el trueno grave del conjuro mayor.
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(-0.55f), p.Center);
+            }
+            catch { }
+        }
+
+        /// <summary>EL DAÑO DE LA IRA (la letra, EXACTA): «el daño base
+        /// del rayo que es 1000, mas el calculo correspondiente para el
+        /// aumento de daño magico, mas el 50% del total del daño de
+        /// invocacion, ese total es lo que se obtiene al terminar todos
+        /// los calculos».
+        ///
+        /// (1) LA PARTE MÁGICA — la cadena EXACTA del clic izquierdo del
+        ///     Eterno (GrimoireEternal.ModifyWeaponDamage, multiplicador
+        ///     por multiplicador) aplicada sobre la BASE 1000: el nivel
+        ///     (+2,2 %/nivel — MagicDamageMult), el bonus de maná bajo
+        ///     (LowManaDamageMult), el festín de armas
+        ///     (BonusDanoArmasDevoradas), el despertar (+1 %/nivel —
+        ///     BonusDano), la reforja viva (la columna Daño del peldaño)
+        ///     y las esencias del portador vestidas por la presencia del
+        ///     libro (BonusDanoEsencias × FactorDelLibro — como DanoOjos
+        ///     DelEterno).
+        /// (2) LA PARTE DE INVOACIÓN — el 50 % del daño TOTAL del
+        ///     escuadrón: el rayo del ojo MÁS DESPIERTO (el patrón de la
+        ///     casa — lider.damage YA trae SU cadena horneada: la suya
+        ///     propia de invocación +1,5 %/nivel, el despertar, lo
+        ///     devorado, la reforja, las esencias y el ×1,25 del 50)
+        ///     escalado por MinionContactDamageMult y SUS mejoras — el
+        ///     daño completo del ataque de invocación, al 50 %.</summary>
+        private static int DanoDeLaIra(Player p, int nivel, Projectile lider, int despertar)
+        {
+            // (1) LA CADENA MÁGICA DEL GRIMORIO sobre la base 1000.
+            float magica = 1000f
+                * WeaponScaling.MagicDamageMult(Math.Max(0, nivel))
+                * WeaponScaling.LowManaDamageMult(p.statMana, p.statManaMax2)
+                * (1f + Players.ShardPlayer.BonusDanoArmasDevoradas(p))
+                * (1f + DespertarGrimorio.BonusDano(despertar))
+                * (1f + Content.Weapons.GrimoireEternal.PeldanoDe(Math.Max(1, nivel)).Dano)
+                * (1f + Players.ShardPlayer.BonusDanoEsencias(p)
+                    * Content.Globals.AlmaEternoGlobalItem.FactorDelLibro(p));
+
+            // (2) EL 50 % DEL DAÑO TOTAL DE INVOACIÓN (el rayo del ojo más
+            //     despierto — el ataque del escuadrón, completo).
+            float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
+                .MultMejoras(lider);
+            float danoOjo = lider.damage
+                * WeaponScaling.MinionContactDamageMult(nivel) * multMejoras;
+
+            return Math.Max(1, (int)(magica + danoOjo * 0.5f));
         }
     }
 }

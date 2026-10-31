@@ -325,6 +325,18 @@ namespace AethonMod.Content.Systems
         /// 8 minions o más en su mejora número 4»).</summary>
         public static bool SupremoDisponible(int despertar) => despertar >= 45;
 
+        /// <summary>v6.59 — ¿LA IRA DE UN SER EXTERIOR ya vive? (DESPERTAR
+        /// 50 — el final del camino): LO que consigue el grimorio al
+        /// completar su despertar — el ataque definitivo del escuadrón:
+        /// el círculo que SE CIERRA girando sobre el jugador (elevándose)
+        /// o alrededor del libro, los rayos de perlin de TODO el
+        /// escuadrón clavados al centro, la bruma blanca y morada, los
+        /// círculos rúnicos… y EL HAZ — el rayo concentrado definitivo —
+        /// disparado al enemigo que cazan (jefes SIEMPRE primero). Daño:
+        /// base 1000 + la cadena mágica del grimorio + el 50 % del daño
+        /// total de invocación. Una ira cada 2 minutos.</summary>
+        public static bool IraDisponible(int despertar) => despertar >= NivelMax;
+
         /// <summary>La CLAVE del anuncio del hito de este nivel (o null si
         /// el nivel no desbloquea nada — la lista pequeña de la letra).</summary>
         public static string ClaveHito(int nivel)

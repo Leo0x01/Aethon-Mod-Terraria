@@ -319,7 +319,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>v6.51.8 — EL RITUAL DEL ANCLA (modo ritual): el RAYO
         /// CONVERGENTE al que este rayo se clava (ai[2] = su whoAmI) —
         /// el PUNTO CENTRAL del nacimiento. Null = la ceremonia ya
-        /// cumplió (y el rayo se disuelve).</summary>
+        /// cumplió (y el rayo se disuelve).
+        /// v6.59 — LA CEREMONIA DE LA IRA TAMBIÉN ES ANCLA: los rayos
+        /// rituales del escuadrón se sostienen contra la ceremonia de la
+        /// Ira de un Ser Exterior (la boca sigue al ojo que gira, la
+        /// punta clavada al centro del círculo — TODO el ritual).</summary>
         private Projectile RitualDelAncla()
         {
             int idx = (int)Projectile.ai[2];
@@ -327,7 +331,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 Projectile r = Main.projectile[idx];
                 if (r != null && r.active &&
-                    r.type == ModContent.ProjectileType<RayoConvergenteProjectile>())
+                    (r.type == ModContent.ProjectileType<RayoConvergenteProjectile>() ||
+                     r.type == ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Definitivas.IraSerExteriorCeremoniaProjectile>()))
                     return r;
             }
             return null;

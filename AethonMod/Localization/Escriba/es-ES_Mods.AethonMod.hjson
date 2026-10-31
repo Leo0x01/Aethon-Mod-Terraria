@@ -39,4 +39,5 @@ Projectiles: {
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
 	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
+	// IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
 }
