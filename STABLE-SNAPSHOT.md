@@ -1,3 +1,20 @@
+# v6.58 — EL ATAQUE SOBRE TODO EL MUNDO + LA IGNICIÓN A CIEGAS — EL CHECKLIST
+
+> **PUBLICADA** — release [429662862](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.58.0) + CDN verificado byte a byte (md5 `05bd91d1002b4881714d75acf3cf2ff0`, 6.365.818 B; asset id 694089669).
+
+**Qué pasó** (la letra): «en el rayo C hay algo curioso, justo en el primer segundo de lanzar el rayo hay un pequeño destello blanco, eso no deberia pasar ese pequeño destello blanco de luz no deberia estar ahi, el destello es pequeño es solo de iluminación» + «algunas sprite del juego como las hojitas que caen de los arboles se ven sobre el ataque y eso no debe ser asi, el ataque debe estar sobre todo» + «todas las alas tienen picos, esos picos son intencionales o es un error como el de las armas».
+
+1. **CERO DESTELLO BLANCO EN LA IGNICIÓN**: [ ] al DISPARAR el rayo C, NO aparece ningún destello blanco de luz (ni el mundo iluminándose blanco un instante, ni la estrella blanca de la boca) — el momento se lee solo con el TEMBLOR suave + el instante congelado + el estallido de soles.
+2. **EL ATAQUE SOBRE TODO**: [ ] las HOJITAS que caen de los árboles (y cualquier polvo/gore/partícula del juego) ya NO se ven SOBRE el haz — el conducto pasa POR ENCIMA de todo el mundo; [ ] lanza el rayo junto a árboles con viento y las hojas cruzan POR DETRÁS del haz.
+3. **EL HAZ SOBRE LA INTERFAZ (DECISIÓN)**: [ ] el haz ahora también pasa por ENCIMA del hotbar/corazones (es el punto «sobre todo» de la casa). Si lo prefieres por DEBAJO de la interfaz (que el hotbar se vea encima del haz): dilo — es un cambio de minutos.
+4. **LO DEMÁS IGUAL QUE LA .57**: [ ] la tela blanca a todo el ancho, la punta de aguja, la muerte estrecha, los soles lejanos cayendo, el temblor suave, la corona del color del haz — TODO se ve igual (nada de la pila se tocó: solo se mudó de lugar en el frame).
+5. **CERO PICOS (siempre)**: [ ] bordes lisos como siempre — la mudanza de pase NO añadió ni una capa (mismo volumen, mismo punto del frame distinto).
+6. **EL RATÓN BIEN (la cura silenciosa)**: [ ] durante TODO el ataque el PUNTERO responde perfecto — el bug del puntero corrupto (los SetZoom_* del tML son remapeadores de ratón) se cazó ANTES de publicar, pero verifica que la cámara/mira/uso de items funciona normal con el haz activo.
+
+**La respuesta a la pregunta de las alas**: los «picos» de TODAS las alas SON LAS PLUMAS — el diseño (abanico de 2-7 plumas vectoriales de punta afilada; las puntiagudas se llaman Agujas del Vacío y Cuchillas del Eclipse). NO es el bug de los quads de las armas (v6.56.6, curado en la .56.7). ¿Las quieres más redondas? Es un cambio de diseño — pedirlo y se afina.
+
+---
+
 # v6.57 — LA VUELTA DEL HAZ C: EL CORAZÓN DORADO MUERE, EL ALMA NACE Y LA MUERTE ESTRECHA — EL CHECKLIST
 
 > **PUBLICADA** — release [429635856](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.57.0) + CDN verificado byte a byte (md5 `4df379dd4870807e7e1001aaf9d5651c`, 6.365.240 B; asset id 693964616).
