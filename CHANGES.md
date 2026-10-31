@@ -1,3 +1,22 @@
+# v6.60 — EL ESCUADRÓN DE LOS ONCE: LA CONDICIÓN DE LA IRA + EL COMPÁS DE PRUEBA
+
+**La letra del usuario**: «la cantidad de minions necesarios para lanzar el ataque es de 11 y con todas las mejoras, ese es el requisito, si hay menos de 11 minions o no estan mejorados al maximo entonces no pueden lanzar la ira del ser exterior» + «por ahora y como prueba se debe lanzar 5 hazes por minuto, cuando termine la prueba pasara a 1 cada 30 minutos».
+
+## (1) EL REQUISITO — EL CÍRCULO SOLO SE CIERRA CON LOS ONCE AL MÁXIMO
+La v6.59 abría la ira con **cualquier escuadrón de 3+ ojos** (mejorados o no). LA LETRA NUEVA la cierra: **ONCE ojos vivos — el escuadrón ENTERO, el tope EXACTO del Eterno (v6.50.116: anillo interior de 5 + exterior de 6, «así se ve mejor en la animación» del libro fuera) — y TODOS en su MEJORA MÁXIMA (la 4 de 4, la que se desbloquea en el despertar 40)**. La máquina cuenta los ojos vivos y los que llevan `MejorasMax`, y exige `ojosVivos >= 11 && ojosVivos == ojosAlMax`: **un solo ojo sin su última mejora y el círculo NO se cierra** — ni con 11 ojos si uno cojea, ni con 10 aunque los diez ardan. El reloj NO consume el enfriamiento mientras no se cumpla: la ira estalla EL TICK en que el último ojo despierta su cuarto anillo.
+
+## (2) EL COMPÁS — LA PRUEBA DE 5 HACES/MIN Y EL FINAL DE 1 CADA 30 MIN
+`IRA_MODO_PRUEBA` (un `static readonly bool` — con `const` el compilador horneaba la rama muerta del modo final y escupía el CS0162 de código inalcanzable: el oráculo de la casa vive en el 0/0) marca el compás: **true (HOY, la prueba) = 5 haces por minuto** (3600/5 = cada **720 ticks**); **false (CUANDO LA PRUEBA TERMINE) = 1 cada 30 minutos** (3600×30 = **108.000 ticks**) — para terminar la prueba SOLO se voltea ese bool, nada más cambia (el tooltip lo lee solo). Dos cirugías para que el compás sea EXACTO:
+- **EL DADO MUERE PARA LA IRA**: era el eco del patrón aleatorio del sol y los agujeros — con el compás de 5/min desfasaba el conteo a ~4,6/min. La ira es EL ATAQUE AGENDADO del libro: su reloj ES el compás.
+- **LA REGLA DE NO-SOLAPE SE SUSPENDE SOLO EN LA PRUEBA**: el ciclo completo (450 de ceremonia + 800 de haz = **1.250 ticks**) sería un cuello de botella de ~2,9/min y la letra pide 5/min — en la prueba la ceremonia nueva arranca mientras el haz viejo vive sus **últimos 80 ticks** (dos haces 80 ticks: el dibujado los lleva TODOS — `HazSobreElMundoSistema` escanea la lista entera; nunca dos ceremonias: 720 > 450). **EN EL MODO FINAL LA REGLA VUELVE** (si el RC2/C del portador — SU arma — vive, la ira espera el próximo reloj: con 30 min de compás el haz propio ya murió hacía rato).
+
+## (3) EL TOOLTIP DEL GRIMORIO — SIEMPRE DICE LA VERDAD
+El bloque de la ira del tooltip (WIra/WIra2) se reescribe: **WIra lee el compás del propio sistema** (`AtaquesCombinadosSistema.IraRitmoTexto()`: «prueba: 5 haces/min» / «1 cada 30 min») — al voltear el bool del final el tooltip cambia SOLO, sin editar el arma jamás; **WIra2 declara el requisito**: «el escuadrón de 11, TODOS al máximo, cierra el círculo · daño 1000 + mágico + 50% invocación».
+
+**Verificación**: oráculo verify.csproj **0/0** (el CS0162 de la rama muerta cazado y curado con `static readonly`) · fuente re-sincronizada a ModSources (la carpeta amaneció vacía — wipe del sandbox; `actualizar-fuente.sh` otra vez) · `-build` REAL **0 errores 0 warnings** (el WARN «Image loading failed» del packaging es el cosmético conocido de la sonda del .ogg) · **.tmod v6.60 auditado** (456 entradas, EOF exacto, blobs 456/456, las firmas `IraRitmoTexto`/`IRA_OJOS_MINIMOS`/`IRA_MODO_PRUEBA`/`IRA_ENFRIAMIENTO_PRUEBA`/`IRA_ENFRIAMIENTO_FINAL` TODAS PRESENTES en la DLL, los muertos A/B AUSENTES, los textos del compás y del requisito DENTRO de la DLL en UTF-16, md5 8d86f8dd7211876e7f251554bdc1f99e) · servidor headless **v6.60 CARGA sin excepciones** (Finding→Constructing→Adding→Resizing→Configuring→**Finalizing**→Adding Recipes).
+
+---
+
 # v6.59.1 — LA ÚLTIMA PALA DE TIERRA: LOS PLANOS DE A Y B MUEREN
 
 **La letra del usuario**: «me quedare con rayo de prueba C el sueño, el resto los puedes borrar» + «ten cuidado especial de eso y revisa errores y repetir comprobaciones para asegurar de que todo este bien».

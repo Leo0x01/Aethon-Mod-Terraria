@@ -334,7 +334,9 @@ namespace AethonMod.Content.Systems
         /// círculos rúnicos… y EL HAZ — el rayo concentrado definitivo —
         /// disparado al enemigo que cazan (jefes SIEMPRE primero). Daño:
         /// base 1000 + la cadena mágica del grimorio + el 50 % del daño
-        /// total de invocación. Una ira cada 2 minutos.</summary>
+        /// total de invocación. v6.60 — el REQUISITO y el COMPÁS los
+        /// pone AtaquesCombinadosSistema: ONCE ojos TODOS en su mejora
+        /// máxima (la prueba: 5 haces/min; el final: 1 cada 30 min).</summary>
         public static bool IraDisponible(int despertar) => despertar >= NivelMax;
 
         /// <summary>La CLAVE del anuncio del hito de este nivel (o null si

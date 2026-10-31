@@ -1346,10 +1346,21 @@ namespace AethonMod.Content.Weapons
                 //     invocación — ver AtaquesCombinadosSistema.DanoDeLaIra).
                 if (Systems.DespertarGrimorio.IraDisponible(despertar))
                 {
+                    // v6.60 — EL REQUISITO NUEVO Y EL COMPÁS REAL (la
+                    //     letra: «la cantidad de minions necesarios para
+                    //     lanzar el ataque es de 11 y con todas las
+                    //     mejoras… si hay menos de 11 minions o no están
+                    //     mejorados al máximo entonces no pueden lanzar
+                    //     la ira del ser exterior» + «por ahora y como
+                    //     prueba se debe lanzar 5 haces por minuto,
+                    //     cuando termine la prueba pasará a 1 cada 30
+                    //     minutos»): el texto lee EL MISMO reloj del
+                    //     sistema — la prueba y el final dicen cada uno
+                    //     su verdad, sin editar este tooltip jamás.
                     tooltips.Add(new TooltipLine(Mod, "WIra",
-                        "[c/E8D8FF:Ira de un Ser Exterior: EL HAZ · 1 cada 2 min]"));
+                        $"[c/E8D8FF:Ira de un Ser Exterior: EL HAZ · {Systems.AtaquesCombinadosSistema.IraRitmoTexto()}]"));
                     tooltips.Add(new TooltipLine(Mod, "WIra2",
-                        "[c/78788C:(el escuadrón entero cierra el círculo · daño 1000 + mágico + 50% invocación)]"));
+                        "[c/78788C:(el escuadrón de 11, TODOS al máximo, cierra el círculo · daño 1000 + mágico + 50% invocación)]"));
                 }
                 else
                 {

@@ -50,8 +50,56 @@ namespace AethonMod.Content.Systems
         private static readonly Dictionary<int, ulong> _supremoHasta = new();
 
         /// <summary>v6.59 — EL RELOJ de la IRA de cada jugador (el ataque
-        /// del despertar 50 — EL FINAL DEL CAMINO: una ira cada 2 minutos).</summary>
+        /// del despertar 50 — EL FINAL DEL CAMINO). v6.60 — el ritmo lo
+        /// pone IRA_MODO_PRUEBA: la PRUEBA 5 haces/min, el FINAL 1 cada
+        /// 30 minutos.</summary>
         private static readonly Dictionary<int, ulong> _iraHasta = new();
+
+        // ================================================================
+        //  v6.60 — LA LETRA NUEVA DE LA IRA, COMPLETA: «la cantidad de
+        //  minions necesarios para lanzar el ataque es de 11 y con
+        //  todas las mejoras, ese es el requisito, si hay menos de 11
+        //  minions o no están mejorados al máximo entonces no pueden
+        //  lanzar la ira del ser exterior» — EL ESCUADRÓN ENTERO (el
+        //  tope del Eterno ES 11: v6.50.116, «así se ve mejor en la
+        //  animación» — anillo interior de 5 + exterior de 6) y CADA
+        //  ojo con sus 4 MEJORAS (la última se desbloquea en el
+        //  despertar 40): el círculo solo se cierra con el escuadrón
+        //  en su máximo absoluto. Y «por ahora y como prueba se debe
+        //  lanzar 5 haces por minuto, cuando termine la prueba pasará
+        //  a 1 cada 30 minutos» — el MODO PRUEBA marca el compás; al
+        //  terminar la prueba SOLO hay que pasar IRA_MODO_PRUEBA a
+        //  false (nada más cambia: el tooltip lo lee solo).
+        // ================================================================
+
+        /// <summary>EL REQUISITO DE LA IRA: el escuadrón entero — ONCE
+        /// ojos (el tope exacto del Eterno) TODOS en su mejora final.
+        /// </summary>
+        private const int IRA_OJOS_MINIMOS = 11;
+
+        /// <summary>EL MODO PRUEBA de la ira (la letra: «por ahora y
+        /// como prueba»): true = el compás de la PRUEBA (5 haces por
+        /// minuto); AL TERMINAR LA PRUEBA se pasa a false y sola cae a
+        /// 1 cada 30 minutos — NADA MÁS cambia. (static readonly y no
+        /// const: con const el compilador hornea la rama muerta del
+        /// modo final y escupe el CS0162 de código inalcanzable — el
+        /// oráculo de la casa vive en el 0/0.)</summary>
+        private static readonly bool IRA_MODO_PRUEBA = true;
+
+        /// <summary>EL COMPÁS DE PRUEBA: 5 haces por minuto (3600/5 =
+        /// cada 720 ticks — 12 s).</summary>
+        private const ulong IRA_ENFRIAMIENTO_PRUEBA = 3600ul / 5ul;
+
+        /// <summary>EL COMPÁS FINAL (cuando la prueba termine): 1 haz
+        /// cada 30 minutos (3600 × 30 = 108.000 ticks).</summary>
+        private const ulong IRA_ENFRIAMIENTO_FINAL = 3600ul * 30ul;
+
+        /// <summary>EL RITMO DE LA IRA EN TEXTO — lo lee el tooltip del
+        /// grimorio (GrimoireEternal): SIEMPRE dice la verdad de los
+        /// const de arriba, el de la prueba y el del final.</summary>
+        public static string IraRitmoTexto() => IRA_MODO_PRUEBA
+            ? "prueba: 5 haces/min"
+            : "1 cada 30 min";
 
         /// <summary>El ruido de la moneda aleatoria (por tick, cuando el
         /// reloj ya está listo: 1 de cada ~75 t dispara).</summary>
@@ -165,43 +213,73 @@ namespace AethonMod.Content.Systems
                 //     SUEÑO) disparado al enemigo que cazan (jefes
                 //     SIEMPRE primero). Daño: base 1000 + la cadena mágica
                 //     del grimorio + el 50 % del daño total de invocación.
-                //     UNA IRA CADA 2 MINUTOS. ===
+                //     v6.60 — LA LETRA NUEVA: ONCE ojos y TODOS en su
+                //     MEJORA MÁXIMA (el requisito), y el compás lo marca
+                //     el MODO PRUEBA (5 haces/min) hasta que la prueba
+                //     termine (1 cada 30 min). ===
                 if (DespertarGrimorio.IraDisponible(despertar))
                 {
                     ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
-                    if (ahora >= hasta && Main.rand.Next(DADO) == 0)
+                    // v6.60 — SIN DADO: la ira es EL ATAQUE AGENDADO del
+                    // libro — su reloj ES el compás (el dado era el eco
+                    // del patrón aleatorio del sol y los agujeros; con el
+                    // compás de 5/min desfasaba el conteo a ~4,6/min).
+                    if (ahora >= hasta)
                     {
-                        // NADA DE HACES SOLAPADOS: si un haz del RC2/C del
-                        // portador ya vive (su arma, otra ira), la ira
-                        // ESPERA el próximo reloj.
+                        // NADA DE HACES SOLAPADOS (el RC2/C del portador —
+                        // SU arma): en EL COMPÁS FINAL la ira ESPERA el
+                        // próximo reloj si un haz vive; EN LA PRUEBA la
+                        // regla se suspende — el ciclo completo (450 de
+                        // ceremonia + 800 de haz = 1.250 ticks) sería un
+                        // cuello de botella de ~2,9/min y la letra pide
+                        // 5/min: la ceremonia nueva arranca mientras el
+                        // haz viejo vive sus últimos 80 ticks (dos haces
+                        // 80 ticks, sí — el dibujado los lleva TODOS:
+                        // HazSobreElMundoSistema escanea la lista entera).
                         int tipoHaz = ModContent.ProjectileType<RayosPruebaProjectile>();
                         bool hazVivo = false;
-                        for (int i = 0; i < Main.maxProjectiles; i++)
+                        if (!IRA_MODO_PRUEBA)
                         {
-                            Projectile ph = Main.projectile[i];
-                            if (ph != null && ph.active && ph.type == tipoHaz &&
-                                ph.owner == p.whoAmI)
+                            for (int i = 0; i < Main.maxProjectiles; i++)
                             {
-                                hazVivo = true;
-                                break;
+                                Projectile ph = Main.projectile[i];
+                                if (ph != null && ph.active && ph.type == tipoHaz &&
+                                    ph.owner == p.whoAmI)
+                                {
+                                    hazVivo = true;
+                                    break;
+                                }
                             }
                         }
-                        // EL ESCUADRÓN: TODOS los ojos vivos (mejorados o no
-                        // — la letra: «independientemente de donde esten los
-                        // minions»); un círculo de 3+ ya se lee.
+                        // v6.60 — EL ESCUADRÓN DE LA IRA (la letra nueva,
+                        //     exacta): ONCE ojos vivos — el escuadrón
+                        //     ENTERO, el tope del Eterno ES 11 — y TODOS
+                        //     en su MEJORA MÁXIMA: «si hay menos de 11
+                        //     minions o no están mejorados al máximo
+                        //     entonces no pueden lanzar la ira del ser
+                        //     exterior» — un solo ojo sin su última
+                        //     mejora y el círculo NO se cierra.
                         int ojosVivos = 0;
+                        int ojosAlMax = 0;
                         if (!hazVivo)
                         {
                             for (int i = 0; i < Main.maxProjectiles; i++)
                             {
                                 Projectile pr = Main.projectile[i];
                                 if (pr == null || !pr.active || pr.type != tipoOjo) continue;
-                                if (pr.owner == p.whoAmI) ojosVivos++;
+                                if (pr.owner != p.whoAmI) continue;
+                                ojosVivos++;
+                                if (global::AethonMod.Content.Projectiles.OjoEternoMinion
+                                        .MejorasDe(pr) >= global::AethonMod.Content.Projectiles
+                                        .OjoEternoMinion.MejorasMax)
+                                    ojosAlMax++;
                             }
                         }
-                        if (!hazVivo && ojosVivos >= 3)
+                        if (!hazVivo && ojosVivos >= IRA_OJOS_MINIMOS &&
+                            ojosVivos == ojosAlMax)
                         {
-                            _iraHasta[p.whoAmI] = ahora + 7200ul;   // UNA IRA CADA 2 MINUTOS
+                            _iraHasta[p.whoAmI] = ahora + (IRA_MODO_PRUEBA
+                                ? IRA_ENFRIAMIENTO_PRUEBA : IRA_ENFRIAMIENTO_FINAL);
                             DispararLaIra(p, mejorados, despertar);
                         }
                     }
