@@ -373,30 +373,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return _muzzle != Vector2.Zero ? _muzzle : Projectile.Center;
         }
 
-        /// <summary>EL NIVEL DEL OJO (v6.50.109 — la IRA EN CADENA): el
-        /// nivel del grimorio vive en el ai[2] del OJO que disparó (lo
-        /// planta OjoEternoMinion al nacer); con el ojo muerto o
-        /// reciclado, nivel 1 (la base de 2 saltos).</summary>
-        private int NivelDelOjo()
+        /// <summary>EL DESPERTAR DEL DUEÑO (v6.67 — LA SEPARACIÓN: la IRA
+        /// EN CADENA del rayo del ojo camina con el DESPERTAR del
+        /// grimorio activo del dueño — ya no con el nivel del libro:
+        /// «todos los buff de daño para minion y otros buff para minion
+        /// seran obtenido en el despertar»).</summary>
+        private int DespertarDelDuenio()
         {
-            int idx = (int)Projectile.ai[1];
-            if (idx >= 0 && idx < Main.maxProjectiles)
-            {
-                Projectile m = Main.projectile[idx];
-                if (m != null && m.active &&
-                    m.type == ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>()
-                    && m.ai[2] >= 1f)
-                    return (int)m.ai[2];
-            }
-            return 1;
+            if (Projectile.owner < 0 || Projectile.owner >= Main.maxPlayers) return 0;
+            Player dueno = Main.player[Projectile.owner];
+            return dueno != null && dueno.active
+                ? Content.Systems.DespertarGrimorio.NivelDe(dueno)
+                : 0;
         }
 
         /// <summary>
         /// EL GOLPE: radio 100 en el ancla + cadena (2 saltos — el CETRO;
-        /// en MODO OJO la IRA EN CADENA: +1 salto cada 20 niveles del
-        /// grimorio, tope 7) + Electrified. v6.50 — GolpeMotor (el cauce
-        /// del motor: crítica real, varianza, on-hit y sync MP — resuelto
-        /// en el cliente dueño).
+        /// en MODO OJO la IRA EN CADENA: +1 salto cada 10 niveles de
+        /// DESPERTAR, tope 7 — v6.67) + Electrified. v6.50 — GolpeMotor
+        /// (el cauce del motor: crítica real, varianza, on-hit y sync MP
+        /// — resuelto en el cliente dueño).
         /// </summary>
         private void Strike()
         {
@@ -415,10 +411,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === LA CADENA: hasta 2 saltos (60% del daño) — el CETRO. En
-            //     el MODO OJO, LA IRA EN CADENA del grimorio: 2 → 7 saltos
-            //     según el nivel (2 + nivel/20, tope 7) ===
+            //     el MODO OJO, LA IRA EN CADENA del escuadrón: 2 → 7 saltos
+            //     según EL DESPERTAR (2 + despertar/10, tope 7 — v6.67:
+            //     LA SEPARACIÓN, la cadena ya no lee el nivel del libro) ===
             int numCadenas = Projectile.ai[0] >= 1f
-                ? Content.Systems.WeaponScaling.MinionChainCount(NivelDelOjo())
+                ? Content.Systems.DespertarGrimorio.CadenaEscuadron(DespertarDelDuenio())
                 : 2;
             int chainDamage = Math.Max(1, (int)(Projectile.damage * 0.60f));
             Vector2 origin = Projectile.Center;

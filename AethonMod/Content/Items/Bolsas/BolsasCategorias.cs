@@ -42,6 +42,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ItemID.GoldBar, 100));
             l.Add((ModContent.ItemType<LevelUpTester>(), 1));
             l.Add((ModContent.ItemType<BossSummonBag>(), 1));
+            // v6.67 — EL OJO DEL CIELO: la ventana de misiones del
+            // despertar (el checklist de la caza y de los peldaños —
+            // para ver el camino entero sin salir del mundo).
+            l.Add((ModContent.ItemType<Llamados.OjoDelCieloItem>(), 1));
             l.Add((ModContent.ItemType<Items.SeerOrb>(), 1));
             l.Add((ModContent.ItemType<Weapons.TestMagicRing>(), 1));
             l.Add((ModContent.ItemType<Weapons.TestSparkle>(), 1));

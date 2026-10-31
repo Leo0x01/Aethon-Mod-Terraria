@@ -274,11 +274,17 @@ namespace AethonMod.Content.Systems
                         mordisco = true;
                     }
 
-                    // === ¿LA MESA ESTÁ COMPLETA? EL DESPERTAR (una
-                    //     sola vez por pulso — con calma, que es un
-                    //     libro). ===
+                    // === v6.67 — ¿LA MESA ESTÁ COMPLETA? EL DESPERTAR (una
+                    //     sola vez por pulso — con calma, que es un libro)...
+                    //     PERO LA PUERTA DE LA CAZA PRIMERO (la letra: los
+                    //     jefes principales de Terraria también se pagan
+                    //     para subir): si el peldaño exige un jefe y su
+                    //     puerta sigue cerrada, el libro NO despierta —
+                    //     exige su presa y sigue esperando (con el aviso
+                    //     con calma: cada 5 s, no cada pulso). ===
                     if (LaMesaEstaCompleta(alma, siguiente))
                     {
+                        if (!PuedePasarLaPuerta(p, siguiente)) return true;   // la puerta manda: ni un bocado más
                         SubirNivel(p, libro, null);   // SubirNivel RENACE los contadores
                         return true;
                     }
@@ -288,8 +294,11 @@ namespace AethonMod.Content.Systems
                 // seguro del pulso: si el último bocado murió a mitad de
                 // camino —excepción, cable— el despertar NO se pierde:
                 // el próximo pulso con el libro en la mano lo cobra).
+                // v6.67 — Y TAMBIÉN LA PUERTA DE LA CAZA (el jefe del
+                // peldaño, si lo hay, ya caído — o el aviso con calma).
                 if (LaMesaEstaCompleta(alma, siguiente))
                 {
+                    if (!PuedePasarLaPuerta(p, siguiente)) return true;
                     SubirNivel(p, libro, null);
                     return true;
                 }
@@ -326,7 +335,9 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>¿LAS TRES OFRENDAS del peldaño están PAGAS? (las
-        /// esencias + el dinero + el arma O los lingotes).</summary>
+        /// esencias + el dinero + el arma O los lingotes). v6.67 — SOLO
+        /// las ofrendas: la PUERTA DE LA CAZA (el jefe del peldaño) es
+        /// un candado aparte y lo revisa PuedePasarLaPuerta.</summary>
         private static bool LaMesaEstaCompleta(
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
@@ -335,6 +346,45 @@ namespace AethonMod.Content.Systems
             if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
             if (alma.OfrendaArma) return true;
             return alma.OfrendaMineral >= DespertarGrimorio.CantidadMineralDe(siguiente);
+        }
+
+        // ================================================================
+        //  v6.67 — LA PUERTA DE LA CAZA (la letra: «para ciertos niveles
+        //  se tomen en cuenta los bosses principales de terraria para
+        //  la subida de nivel del despertar»): los 17 jefes del camino
+        //  (DespertarGrimorio.LosJefesDelDespertar) son candados de sus
+        //  peldaños. EL CRÉDITO ES RETROACTIVO (la bandera del mundo de
+        //  vanilla O el registro del cazador): mátalo cuando quieras —
+        //  ANTES o DESPUÉS de llegar al nivel — que la puerta ya está
+        //  paga cuando llegues.
+        // ================================================================
+
+        /// <summary>EL ÚLTIMO AVISO de la puerta por portador (GameUpdateCount
+        /// — el aviso con CALMA: cada 5 s, no cada pulso de 15 t).</summary>
+        private static readonly Dictionary<int, ulong> _ultimoAvisoPuerta = new Dictionary<int, ulong>();
+
+        /// <summary>¿PUEDE PASAR LA PUERTA de este peldaño? Si el nivel no
+        /// exige jefe: siempre true. Si lo exige y ya cayó: true. Si lo
+        /// exige y VIVE: el aviso con calma (qué presa quiere el libro) y
+        /// false — el despertar espera su caza.</summary>
+        private static bool PuedePasarLaPuerta(Player p, int siguiente)
+        {
+            DespertarGrimorio.JefeDelCamino? jefe = DespertarGrimorio.JefeDeNivel(siguiente);
+            if (jefe == null) return true;
+            if (DespertarGrimorio.JefeYaCaido(p, siguiente)) return true;
+
+            // EL AVISO CON CALMA (la presa que el libro exige — el hambre
+            // de caza no grita cada cuarto de segundo).
+            ulong ahora = Main.GameUpdateCount;
+            if (!_ultimoAvisoPuerta.TryGetValue(p.whoAmI, out ulong ultimo) ||
+                ahora - ultimo >= 300ul)
+            {
+                _ultimoAvisoPuerta[p.whoAmI] = ahora;
+                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.PuertaDeCaza",
+                    new Color(255, 120, 120), siguiente,
+                    Terraria.Localization.Language.GetTextValue(jefe.Value.Clave));
+            }
+            return false;
         }
 
         /// <summary>¿Es ESTA arma una de las del peldaño?</summary>

@@ -505,11 +505,10 @@ namespace AethonMod.Content.Systems
                 // rezan, no cuánto pega el conjuro — el patrón de siempre).
                 Projectile lider = ElMasDespierto(mejorados);
                 if (lider == null) return false;
-                int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
                 int danoRayo = Math.Max(1, (int)(lider.damage *
-                    WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
+                    DespertarGrimorio.ContactoEscuadronMult(despertar) * multMejoras));
 
                 // EL DAÑO DEL SOL QUE NACERÁ (viaja en ai[2] del ritual):
                 // la combinación ×3… y CADA ANILLO EXTRA LO AUMENTA (la
@@ -604,11 +603,14 @@ namespace AethonMod.Content.Systems
                 // del 50 se cobra UNA vez vía Bonus50Vivo.
                 Projectile lider = ElMasDespierto(mejorados);
                 if (lider == null) return false;
-                int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
+                // v6.67 — LA SEPARACIÓN: el daño del conjuro lee el
+                // DESPERTAR del dueño (el +50 %/15 niveles del libro
+                // murió — ContactoEscuadronMult: +3 % por nivel de
+                // despertar).
                 int danoRayo = Math.Max(1, (int)(lider.damage *
-                    WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
+                    DespertarGrimorio.ContactoEscuadronMult(despertar) * multMejoras));
                 int dano = Math.Max(1, (int)(danoRayo * (ascendidos ? 4.5f : 3.2f) *
                     global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
 
@@ -681,11 +683,11 @@ namespace AethonMod.Content.Systems
 
                 Projectile lider = ElMasDespierto(enLaCuarta);
                 if (lider == null) return false;
-                int nivelOjo = (int)MathF.Floor(lider.ai[2]);
                 float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                     .MultMejoras(lider);
+                // v6.67 — LA SEPARACIÓN (igual que el sol y los agujeros).
                 int danoRayo = Math.Max(1, (int)(lider.damage *
-                    WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
+                    DespertarGrimorio.ContactoEscuadronMult(despertar) * multMejoras));
                 // v6.51.9 — LA AUDITORÍA: igual que el sol y los agujeros —
                 // el despertar vive DENTRO del daño del líder (horneado) y
                 // el ×1,25 del 50 se cobra UNA vez vía Bonus50Vivo.
@@ -767,11 +769,31 @@ namespace AethonMod.Content.Systems
                 int nivel = (int)MathF.Floor(lider.ai[2]);
                 int dano = DanoDeLaIra(p, nivel, lider, despertar);
 
-                // LA CEREMONIA: el ritual nace sobre el jugador (o el libro
-                // si está fuera cazando — el centro lo decide ella) — el
-                // haz saldrá de SU centro al cumplir.
+                // v6.67 — LA CEREMONIA NACE EN EL PUNTO DE NACIMIENTO
+                //     (la letra del usuario: «para centrar los pequeños
+                //     rayos electricos, toma como pocision el lugar de
+                //     nacimiento del haz, tambien puedes tomar como posicion
+                //     las mismas brumas del lugar de nacimiento»): la
+                //     ceremonia YA NO nace a los pies del jugador para
+                //     «subir» flotando 20 ticks hasta su altura — nace
+                //     DIRECTAMENTE donde el haz nacerá (el libro si está
+                //     fuera cazando · −100 px sobre el dueño si está en
+                //     casa). LA FUGA que esto mata: durante la subida vieja
+                //     el ancla VIAJABA, los puestos del círculo viajaban
+                //     con ella y los ojos llegaban TARDE — la bola de
+                //     rayitos (clavada al ancla) quedaba DESCENTRADA del
+                //     anillo VISIBLE unos 15-20 px TODO el arranque. AHORA
+                //     el ancla es UN PUNTO FIJO desde el tick 0: rayitos ·
+                //     brumas · puestos del círculo · el haz que nacerá —
+                //     TODO lo que el jugador ve vive en EL MISMO punto.
+                Vector2? libroNace = global::AethonMod.Content.Projectiles.OjoEternoMinion
+                    .PosicionDelLibro(p);
+                Vector2 nacimiento = libroNace is Vector2 lc
+                    ? lc
+                    : p.MountedCenter + new Vector2(0f, -100f);
+
                 Projectile.NewProjectile(p.GetSource_Misc("IraSerExterior"),
-                    p.Center, Vector2.Zero,
+                    nacimiento, Vector2.Zero,
                     ModContent.ProjectileType<IraSerExteriorCeremoniaProjectile>(),
                     0, 0f, p.whoAmI,
                     0f,                   // ai[0]: LIBRE (v6.60.2: el rumbo es del cursor — el blanco murió con la mira)
@@ -827,11 +849,12 @@ namespace AethonMod.Content.Systems
         ///     DelEterno).
         /// (2) LA PARTE DE INVOACIÓN — el 50 % del daño TOTAL del
         ///     escuadrón: el rayo del ojo MÁS DESPIERTO (el patrón de la
-        ///     casa — lider.damage YA trae SU cadena horneada: la suya
-        ///     propia de invocación +1,5 %/nivel, el despertar, lo
-        ///     devorado, la reforja, las esencias y el ×1,25 del 50)
-        ///     escalado por MinionContactDamageMult y SUS mejoras — el
-        ///     daño completo del ataque de invocación, al 50 %.</summary>
+        ///     casa — lider.damage YA trae SU cadena horneada: la del
+        ///     DESPERTAR del escuadrón (+2 %/nivel), el despertar
+        ///     general, lo devorado, la reforja y las esencias)
+        ///     escalado por ContactoEscuadronMult (el despertar otra
+        ///     vez — la cadena de la v6.67) y SUS mejoras — el daño
+        ///     completo del ataque de invocación, al 50 %.</summary>
         private static int DanoDeLaIra(Player p, int nivel, Projectile lider, int despertar)
         {
             // (1) LA CADENA MÁGICA DEL GRIMORIO sobre la base 1000.
@@ -846,10 +869,13 @@ namespace AethonMod.Content.Systems
 
             // (2) EL 50 % DEL DAÑO TOTAL DE INVOACIÓN (el rayo del ojo más
             //     despierto — el ataque del escuadrón, completo).
+            //     v6.67 — LA SEPARACIÓN: el daño del escuadrón lee el
+            //     DESPERTAR (ContactoEscuadronMult: +3 %/nivel — no el
+            //     nivel del libro).
             float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                 .MultMejoras(lider);
             float danoOjo = lider.damage
-                * WeaponScaling.MinionContactDamageMult(nivel) * multMejoras;
+                * DespertarGrimorio.ContactoEscuadronMult(despertar) * multMejoras;
 
             return Math.Max(1, (int)(magica + danoOjo * 0.5f));
         }

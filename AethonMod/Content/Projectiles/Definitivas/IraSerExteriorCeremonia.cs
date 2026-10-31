@@ -617,23 +617,29 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //     carga respira TRES veces más gruesa.
             // v6.63 — LA LEY DEL CÍRCULO TAMBIÉN PARA LA BRUMA (la letra:
             //     «toda la bruma solo puede estar dentro del circulo
-            //     formado por los minions»): el centro y el TECHO del
-            //     radio los pone EL PROPIO ESCUADRÓN (CirculoDelEscuadron:
-            //     el centroide de los ojos vivos y su radio medio — con
-            //     el jugador corriendo, la nube viaja con el círculo
-            //     VISIBLE, no con el ancla) y la nube JAMÁS pasa del
-            //     anillo: radio ≤ 0,72 del círculo (los puffs de BrumaFX
-            //     cubren ~1,3× su radio — así NADA asoma fuera). El
-            //     TRIPLE de masa vive ahora CONCENTRADO dentro.
+            //     formado por los minions»): el TECHO del radio lo pone
+            //     EL PROPIO ESCUADRÓN (CirculoDelEscuadron: su radio
+            //     medio — la nube JAMÁS pasa del anillo: radio ≤ 0,72
+            //     del círculo; los puffs de BrumaFX cubren ~1,3× su
+            //     radio — así NADA asoma fuera). El TRIPLE de masa
+            //     vive CONCENTRADO dentro.
+            // v6.67 — LA CUNA VIVE EN EL NACIMIENTO (la letra: «tambien
+            //     puedes tomar como posicion las mismas brumas del lugar
+            //     de nacimiento»): el CENTRO de la nube YA NO es el
+            //     centroide de los ojos (viajaba CON la manada mientras
+            //     el círculo cerraba y quedaba DESCENTRADA del punto que
+            //     la ceremonia gesta) — es EL PUNTO DE NACIMIENTO del
+            //     haz: la MISMA posición de los rayitos, de los puestos
+            //     del círculo y del haz que nacerá. BRUMAS = RAYITOS =
+            //     NACIMIENTO: UN SOLO PUNTO, desde el tick 0.
             try
             {
                 bool hayCirculo = CirculoDelEscuadron(Projectile.owner,
                     out Vector2 centroMin, out float radioMin, out int nMin);
-                Vector2 centroNube = hayCirculo && nMin >= 3 ? centroMin : centro;
                 float techo = (hayCirculo ? Math.Max(40f, radioMin) : 68f) * 0.72f;
                 float radioCuna = MathHelper.Lerp(28f, Math.Min(95f, techo), prog)
                     * (1f - 0.55f * contraccion);
-                Vector2 nubeScr = centroNube - Main.screenPosition;
+                Vector2 nubeScr = posPantalla;   // EL PUNTO DE NACIMIENTO (donde el haz nacerá)
                 VFXCore.CerrarLoteSiAbierto();
                 BrumaFX.BeginMass();
                 BrumaFX.Cloud(nubeScr, radioCuna, new Color(205, 195, 238),

@@ -1,0 +1,71 @@
+using System.Collections.Generic;
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
+
+namespace AethonMod.Content.Players
+{
+    // ======================================================================
+    //  v6.67 — EL REGISTRO DEL CAZADOR (la letra del usuario: «en caso de
+    //  no tener el nivel necesario que lo pida y mates el jefe, este debe
+    //  contar»): las puertas de la caza del DESPERTAR exigen que su jefe
+    //  haya caído — y el crédito es RETROACTIVO. Este registro guarda,
+    //  POR PERSONAJE, las puertas cuyos jefes tiró ESTE cazador con el
+    //  mod vivo (viaja con el .plr a cualquier mundo).
+    //
+    //  LA SEGUNDA FUENTE (la principal): las BANDERAS DEL MUNDO de
+    //  vanilla (DespertarGrimorio.BanderaDelMundo — NPC.downed*), que
+    //  Terraria escribe SIEMPRE que un jefe muere en el mundo, por
+    //  quien sea, incluso ANTES de que el mod existiera. Basta
+    //  CUALQUIERA de las dos: mátalo hoy a nivel 1, o lo mataste hace
+    //  un año en este mundo — cuando llegues al nivel que lo pide, YA
+    //  ESTÁ MARCADO.
+    //
+    //  LA CLAVE del registro es el NÚMERO DE NIVEL de la puerta (cada
+    //  peldaño de la caza pide UN jefe — la llave canónica de la casa).
+    // ======================================================================
+    public class CazaJefesPlayer : ModPlayer
+    {
+        /// <summary>LAS PUERTAS PAGAS: los niveles de la caza cuyos jefes
+        /// ya tiró ESTE cazador (persiste en el .plr).</summary>
+        public readonly HashSet<int> PuertasPagas = new HashSet<int>();
+
+        /// <summary>¿YA CAÍDO el jefe de esta puerta (por ESTE cazador)?</summary>
+        public bool Caido(int nivelPuerta) => PuertasPagas.Contains(nivelPuerta);
+
+        /// <summary>LA PUERTA SE PAGA (la llama CazaJefesGlobalNPC al morir
+        /// el jefe — en todas las pantallas vivas: una cacería es del que
+        /// la ve... y de su escuadrón).</summary>
+        public void Pagar(int nivelPuerta)
+        {
+            if (nivelPuerta > 0) PuertasPagas.Add(nivelPuerta);
+        }
+
+        // ================================================================
+        //  LA PERSISTENCIA (el .plr del cazador — la lista viaja con el
+        //  personaje a todos los mundos).
+        // ================================================================
+        public override void SaveData(TagCompound tag)
+        {
+            try
+            {
+                if (PuertasPagas.Count > 0)
+                    tag["cazaPuertas"] = new List<int>(PuertasPagas);
+            }
+            catch { }
+        }
+
+        public override void LoadData(TagCompound tag)
+        {
+            try
+            {
+                PuertasPagas.Clear();
+                var lista = tag.GetList<int>("cazaPuertas");
+                foreach (int nivel in lista)
+                    if (nivel > 0 && nivel <= Content.Systems.DespertarGrimorio.NivelMax)
+                        PuertasPagas.Add(nivel);
+            }
+            catch { PuertasPagas.Clear(); }
+        }
+    }
+}

@@ -1161,7 +1161,12 @@ namespace AethonMod.Content.Weapons
                 }
 
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
-                int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
+                // v6.67 — LA SEPARACIÓN: el daño del escuadrón nace del
+                // DESPERTAR (+2 %/nivel — ×2 en el 50), no del nivel del
+                // libro (el libro SOLO desbloquea los ojos y su cantidad).
+                int despertarArma = Systems.DespertarGrimorio.NivelDe(Item);
+                int summonDmgPct = (int)((Systems.DespertarGrimorio
+                    .DanoEscuadronMult(despertarArma) - 1f) * 100f);
                 float critPct = WeaponScaling.CritBonus(sl.Level);
                 float armorPenPct = WeaponScaling.ArmorPenBonus(sl.Level);
                 int bonusMana = WeaponScaling.BonusMana(sl.Level);
@@ -1178,11 +1183,12 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "MagicDamage",
                     $"[c/FF5555:+{magicDmgPct}% daño mágico (este libro)]"));
                 tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
-                    // v6.53 — «(este libro)» como el mágico (la letra:
-                    // «que el daño de invocación también diga lo mismo
-                    // (este libro) ya que esos potenciadores solo deben
-                    // afectar al propio grimorio pues es su poder»).
-                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación (este libro)]"));
+                    // v6.67 — LA SEPARACIÓN: el daño de invocación es del
+                    // DESPERTAR (la letra: «todos los buff de daños ganados
+                    // por niveles que sean buff para minion se desbloquean
+                    // con el despertar» — el nivel del libro solo trae los
+                    // ojos y su cantidad).
+                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación (despertar {despertarArma})]"));
                 tooltips.Add(new TooltipLine(Mod, "Crit",
                     $"[c/FFAA55:+{critPct:F1}% probabilidad de crítico mágico]"));
                 tooltips.Add(new TooltipLine(Mod, "ArmorPen",
@@ -1242,18 +1248,31 @@ namespace AethonMod.Content.Weapons
             //     + LO DEVORADO + LOS ATAQUES COMBINADOS ===
             if (ventanaFestin)
             {
+                // v6.67 — LA SEPARACIÓN (la letra: «todos los buff de
+                //     daños ganados por niveles que sean buff para minion
+                //     se desbloquean con el despertar, dejemos para el
+                //     nivel normal del libro desbloquear solo los minion y
+                //     la cantidad de minion»): TODA la ventana del
+                //     escuadrón lee el DESPERTAR del libro — el nivel del
+                //     libro solo trae los OJOS y SU CANTIDAD.
                 int minionCost = WeaponScaling.MinionManaCost(sl.Level);
-                float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
-                float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
-                float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
-                float ritmoOjos = (1f + 0.5f * System.Math.Min(sl.Level - 1, 99) / 99f - 1f) * 100f;
-                int cadenaOjos = WeaponScaling.MinionChainCount(sl.Level);
+                // v6.51.6 — el despertar de ESTE libro (el item señalado) —
+                // v6.67 leído AL PRINCIPIO: TODA la ventana del escuadrón
+                // cuelga de él.
+                int despertar = Systems.DespertarGrimorio.NivelDe(Item);
+                float contactDmg = (Systems.DespertarGrimorio
+                    .ContactoEscuadronMult(despertar) - 1f) * 100f;
+                float minionSpd = (Systems.DespertarGrimorio
+                    .VelocidadEscuadronMult(despertar) - 1f) * 100f;
+                float detectRange = Systems.DespertarGrimorio
+                    .RangoEscuadron(despertar);
+                float ritmoOjos = (0.5f * Math.Min(despertar, 50) / 50f) * 100f;
+                int cadenaOjos = Systems.DespertarGrimorio
+                    .CadenaEscuadron(despertar);
 
                 // v6.51.1 — LOS NÚMEROS REALES DEL PORTADOR (la letra:
                 // «solo estadísticas de los minions… además de las
                 // estadísticas que ya están»).
-                // v6.51.6 — el despertar de ESTE libro (el item señalado).
-                int despertar = Systems.DespertarGrimorio.NivelDe(Item);
                 int techoOjos = Players.ShardPlayer.TechoOjosDe(portadorTip, sl.Level);
                 int ojosVivos = 0;
                 int tipoOjoTip = ModContent.ProjectileType
@@ -1278,9 +1297,9 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño del rayo]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRitmo",
-                    $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (tope +50% en nivel 100)]"));
+                    $"[c/BE78FD:+{ritmoOjos:F0}% velocidad de ataque (del despertar — tope +50% en el 50)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionCadena",
-                    $"[c/BE78FD:Rayo en cadena: {cadenaOjos} enemigos (base 2, +1 cada 20 niveles)]"));
+                    $"[c/BE78FD:Rayo en cadena: {cadenaOjos} enemigos (base 2, +1 cada 10 niveles de despertar)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
                     $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionRange",
