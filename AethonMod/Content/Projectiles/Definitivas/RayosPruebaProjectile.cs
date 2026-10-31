@@ -194,7 +194,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const float AlfaGlow2 = 0.12f;
         private const float KNucleo = 0.28f;
         private const float AlfaNucleo = 0.65f;
-        private const int SolesConducto = 6;
+        // v6.60.2 — SolesConducto (6) MURIÓ con los soles del conducto
+        // (la letra: las estrellitas solo en la fase de carga).
 
         // v6.57 — EL ALMA (la letra: «debe tener otra textura como esa
         // pero que ocupe todo el haz en ancho»): la MISMA RampaGlow
@@ -239,13 +240,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
         //  v6.59 — EL MODO IRA DE UN SER EXTERIOR: cuando EL GRIMORIO
         //  dispara este haz (la ceremonia del despertar 50), el conducto
         //  NO vive en la boca del jugador — vive en EL CENTRO DEL CÍRCULO
-        //  que el escuadrón formó, apunta AL ENEMIGO que están cazando
-        //  (jefes SIEMPRE primero — la letra) y NO encadena al portador
-        //  (el jugador queda LIBRE: la ira es del Ser Exterior, no del
-        //  que lo porta). Viaja por SendExtraAI (el paquete del spawn).
+        //  que el escuadrón formó y NO encadena al portador (el jugador
+        //  queda LIBRE: la ira es del Ser Exterior, no del que lo porta).
+        //  v6.60.2 — EL RUMBO ES DEL JUGADOR (la letra: «el haz debe
+        //  apuntar a donde vaya el cursor y siempre seguir el cursor,
+        //  creo que asi sera mejor»): la boca queda FIJA en el centro,
+        //  pero el conducto SIGUE AL CURSOR del dueño TODO el disparo —
+        //  el blanco-perseguido de la v6.59 murió con la letra nueva
+        //  (BlancoIra ya no viaja: el rumbo se sincroniza solo).
+        //  Viaja por SendExtraAI (el paquete del spawn).
         // ================================================================
         internal bool EsIra;
-        internal int BlancoIra = -1;
         internal Vector2 CentroIra = Vector2.Zero;
 
         /// <summary>v6.59 — EL BLANCO DE LA IRA (la letra: «si hay un
@@ -333,10 +338,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
         {
             writer.Write(Projectile.direction == 1);
             writer.Write(targetRotation);
-            // v6.59 — EL MODO IRA: la bandera, el blanco y el centro del
-            // ritual viajan en el paquete del spawn.
+            // v6.59 — EL MODO IRA: la bandera y el centro del ritual viajan
+            // en el paquete del spawn. v6.60.2 — el blanco YA NO viaja: el
+            // rumbo es del cursor y targetRotation se sincroniza sola.
             writer.Write(EsIra);
-            writer.Write(BlancoIra);
             writer.Write(CentroIra.X);
             writer.Write(CentroIra.Y);
         }
@@ -347,7 +352,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             targetRotation = reader.ReadSingle();
             // v6.59 — EL MODO IRA (el mismo orden del Send).
             EsIra = reader.ReadBoolean();
-            BlancoIra = reader.ReadInt32();
             CentroIra = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         }
 
@@ -449,36 +453,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile.netUpdate = true;
             }
 
-            if (EsIra)
-            {
-                // ============================================================
-                //  v6.59 — EL APUNTE DE LA IRA: el conducto PERSIGUE al
-                //  enemigo que el escuadrón está cazando (jefes SIEMPRE
-                //  primero — BuscarBlancoIra re-adquiere si el blanco
-                //  cae a media ira). Corre en TODOS los cables (el NPC
-                // es estado sincronizado — todos ven al mismo blanco).
-                //  MISMAS tasas de giro del arma (el barrido amado).
-                // ============================================================
-                NPC blanco = null;
-                if (BlancoIra >= 0 && BlancoIra < Main.maxNPCs)
-                {
-                    NPC n = Main.npc[BlancoIra];
-                    if (n != null && n.active && n.life > 0 && VFXCore.EsObjetivo(n))
-                        blanco = n;
-                }
-                if (blanco == null)
-                {
-                    blanco = BuscarBlancoIra(Projectile.Center, 2400f);
-                    if (blanco != null) BlancoIra = blanco.whoAmI;
-                }
-                if (blanco != null)
-                {
-                    targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(blanco.Center),
-                        Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
-                        + Utils.GetLerpValue(ChargeTime + LaserDuration * 0.3f, ChargeTime + LaserDuration * 0.6f, Time, true) * 0.01f);
-                }
-            }
-            else if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
+            // ============================================================
+            //  v6.60.2 — EL RUMBO ES DEL JUGADOR (la letra: «el haz debe
+            //  apuntar a donde vaya el cursor y siempre seguir el cursor,
+            //  creo que asi sera mejor»): LA IRA YA NO PERSIGUE BLANCOS —
+            //  su conducto SIGUE AL CURSOR del dueño TODO el disparo,
+            //  EXACTO como el arma de siempre (el barrido amado: las
+            //  MISMAS tasas de giro). La boca de la ira queda FIJA en el
+            //  centro del círculo; el RUMBO es la mano del portador.
+            //  Corre SOLO en la máquina del dueño (el cursor es SU ratón
+            //  — los demás cables ven el rumbo en el sync de siempre).
+            // ============================================================
+            if (Main.netMode != NetmodeID.Server && Main.myPlayer == Projectile.owner)
             {
                 targetRotation = targetRotation.AngleLerp(Projectile.AngleTo(Main.MouseWorld),
                     Utils.GetLerpValue(ChargeTime + LaserDuration * 0.1f, ChargeTime, Time, true) * 0.04f
@@ -693,14 +679,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         radioLejos: 320f, radioVar: 200f, corazon: 0.5f,
                         colorCorazon: CorazonRunico);
                 }
-                else if (Time < ChargeTime + 22)
-                {
-                    HazConcentradoLib.SolesRunicosEstallido(Projectile.Center,
-                        Projectile.rotation,
-                        (Time - ChargeTime) / 22f,
-                        Main.GlobalTimeWrappedHourly,
-                        corazon: 0.5f, colorCorazon: CorazonRunico);
-                }
+                // v6.60.2 — EL ESTALLIDO DE SOLES MUERE (la letra: «las
+                // estrellitas o brillo solo deben aparecer en la fase de
+                // carga, cuando el haz es lanzado no necesita cosas como
+                // las estrellitas o brillo»): la implosión de la carga
+                // (arriba) es la ÚLTIMA vez que se ven soles — el
+                // lanzamiento es LIMPIO.
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.FlushAdditive();
@@ -773,10 +757,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     int seed = (int)(Time * 0.017f) * 131 + i * 297;
                     float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                    float r0 = 10f + 6f * progreso;
-                    float r1 = r0 + 26f + 34f * progreso;
-                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
-                    Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
+                    // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
+                    // pequeños rayos electricos no estan centrados en el
+                    // medio de los circulos runicos»): antes nacían al
+                    // borde del centro (r0 10-16) y corrían HACIA FUERA
+                    // (r1 36-76) — un anillo de radios con el medio
+                    // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
+                    // lado del círculo y muere en el OPUESTO (con ±0,4 rad
+                    // de vaivén orgánico) — el MEDIO de los círculos
+                    // rúnicos HIERVE de electricidad.
+                    float rArco = 16f + 6f * progreso;
+                    float angOpuesto = ang + MathHelper.Pi
+                        + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
+                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
+                    Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
                     StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
                         ColorConjuro(Projectile.localAI[0] + i * 8f),
                         DefinitivasLib.BlancoCalido,
@@ -784,29 +778,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // ============ LA ESTRELLA CONDUCTO (la boca arde) ============
-            if (Time > ChargeTime && laserCharge > 0.1f)
-            {
-                VFXCore.CerrarLoteSiAbierto();
-                VFXCore.Begin();
-                try
-                {
-                    float late = 0.60f + 0.40f * MathF.Sin(Main.GlobalTimeWrappedHourly * 9.3f);
-                    // v6.57 — SIN CORAZÓN DORADO (la ley del corazón):
-                    // la estrella de 4 puntas PURA — el corazón a escala
-                    // de boca (~57 px) era EL círculo amarillo gigante de
-                    // la captura del usuario.
-                    // v6.59 — PERO EL NÚCLEO QUE AVIVA VIVE (la cura de
-                    // los brillitos): corazón BLANCO-VIOLETA a media
-                    // escala — arde sin leerse amarillo.
-                    HazConcentradoLib.SolRunico4Puntas(Projectile.Center,
-                        12f + 26f * realSize, late * laserCharge,
-                        corazon: 0.5f, colorCorazon: CorazonRunico);
-                }
-                catch { VFXCore.CerrarLoteSiAbierto(); }
-                VFXCore.FlushAdditive();
-                VFXCore.ReabrirLoteVanilla();
-            }
+            // v6.60.2 — LA ESTRELLA DE LA BOCA MUERE (la letra: «las
+            // estrellitas o brillo solo deben aparecer en la fase de
+            // carga»): vivía SOLO durante el disparo (Time > ChargeTime)
+            // — exactamente lo que la letra nueva prohíbe. La boca del
+            // disparo queda con SU corona rúnica, sus aros y sus arcos
+            // (que ahora cruzan EL CENTRO) — sin brillo prestado.
 
             // ================================================================
             //  ============ LA PILA DE CAPAS DEL CONDUCTO ============
@@ -899,21 +876,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.RestaurarLoteVanilla();
                 }
 
-                // (7) LOS SOLES CONDUCTO — los destellos de 4 puntas del
-                // accesorio corriendo por las MÁRGENES del conducto (sobre
-                // la envolvente del glow, donde se leen contra el violeta),
-                // viajando hacia la punta al ritmo de cada sol — SIN
-                // corazón dorado (v6.57: la ley del corazón; a escala de
-                // margen se leía como círculo amarillo).
-                VFXCore.CerrarLoteSiAbierto();
-                VFXCore.Begin();
-                try
-                {
-                    SolesDelConducto(SolesConducto, positions);
-                }
-                catch { VFXCore.CerrarLoteSiAbierto(); }
-                VFXCore.FlushAdditive();
-                VFXCore.ReabrirLoteVanilla();
+                // v6.60.2 — (7) LOS SOLES CONDUCTO MUEREN (la letra:
+                // «las estrellitas o brillo solo deben aparecer en la fase
+                // de carga»): corrían por las márgenes SOLO durante el
+                // disparo — el conducto lanzado queda LIMPIO: la pila de
+                // capas y su boca rúnica, nada más.
             }
 
             VFXCore.RestaurarLoteVanilla();
@@ -989,45 +956,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// TODAS las capas respiran JUNTAS (cohesión del conjunto).</summary>
         private float AnchoCapa(float p) => StripWidth(p) * _kCapa;
 
-        // ============ LOS SOLES CONDUCTO ============
-        //  Cada sol vive en una MARGEN del conducto (sobre la envolvente
-        //  del glow, alternando arriba/abajo), CORRE hacia la punta a su
-        //  propio ritmo y late. Determinista por Hash01 (ley §0.4), cero
-        //  estado, cero Dust (ley §0).
-        private void SolesDelConducto(int cuenta, Vector2[] ptsMundo)
-        {
-            if (cuenta <= 0 || _laserActivo <= 0.05f) return;
-            float t = Main.GlobalTimeWrappedHourly;
-            Vector2 perp = new(-MathF.Sin(Projectile.rotation), MathF.Cos(Projectile.rotation));
-            for (int i = 0; i < cuenta; i++)
-            {
-                float ritmo = 0.045f + 0.05f * VFXCore.Hash01(97, 610 + i, 7);
-                float p = DefinitivasLib.Frac(VFXCore.Hash01(97, 600 + i, 5) * 0.88f + t * ritmo);
-                float medio = StripWidth(p);
-                if (medio < 4f) continue;
-
-                // LA MARGEN: entre el filo del cuerpo y la envolvente del
-                // glow — ahí el sol se LEE contra el violeta (sobre el
-                // núcleo saturado sería invisible).
-                float lado = (i % 2 == 0) ? 1f : -1f;
-                float margen = (0.62f + 0.30f * VFXCore.Hash01(97, 620 + i, 11)) * medio;
-                Vector2 pos = ptsMundo[(int)(p * 1499f)] + perp * (margen * lado);
-
-                // ARDE: el pulso propio + el nacimiento/muerte en los
-                // extremos del eje (no asoman fuera del conducto).
-                float arde = (0.42f + 0.58f * MathF.Sin(t * 6.3f + i * 2.39f))
-                             * Utils.GetLerpValue(0f, 0.07f, p, true)
-                             * Utils.GetLerpValue(1f, 0.86f, p, true);
-                if (arde <= 0.04f) continue;
-
-                float size = MathF.Max(9f, medio * (0.085f + 0.045f * VFXCore.Hash01(97, 630 + i, 13)));
-                // v6.59 — EL NÚCLEO QUE AVIVA (la cura de los brillitos):
-                // corazón blanco-violeta a media escala en los soles del
-                // conducto — arden sin leerse como círculos amarillos.
-                HazConcentradoLib.SolRunico4Puntas(pos, size, arde * _laserActivo,
-                    corazon: 0.5f, colorCorazon: CorazonRunico);
-            }
-        }
+        // v6.60.2 — LOS SOLES CONDUCTO MURIERON ENTEROS (la letra: «las
+        // estrellitas o brillo solo deben aparecer en la fase de carga,
+        // cuando el haz es lanzado no necesita cosas como las estrellitas
+        // o brillo»): su método y su constante murieron con la llamada —
+        // el conducto lanzado es la pila de capas y su boca rúnica, LIMPIO.
 
         /// <summary>EL COLOR DEL CUERPO (el strip del shader): la paleta
         /// del conjuro que VIAJA a lo largo — idéntico al RC2.</summary>

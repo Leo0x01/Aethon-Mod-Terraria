@@ -633,9 +633,19 @@ namespace AethonMod.Content.Projectiles
                 int iR = Math.Min(idx, nR - 1);
                 // LA VUELTA DEL RITUAL: ω 0,30 → 1,05 conforme el círculo
                 // cierra (los primeros 150 ticks — la ceremonia).
-                float progCeremonia = MathHelper.Clamp(
-                    ritual.ai[2] / 150f, 0f, 1f);
-                float omega = MathHelper.Lerp(0.30f, 1.05f, progCeremonia);
+                // v6.60.2 — Y SIGUE EN EL DISPARO (la letra: «estos deben
+                // seguir dando vueltas en circulos mientras el haz esta
+                // siendo lanzado y cuando termine el lanzamiento es que
+                // regresan a su posicion normal»): muerta la ceremonia,
+                // el ANCLA es EL HAZ (RitualDe cae a él) — el círculo YA
+                // cerró: la vuelta se queda A TOPE (ω 1,05) TODO el
+                // lanzamiento. (ai[2] del haz es el dueño, NO la edad:
+                // por eso la rama — la ceremonia acelera, el haz YA llegó.)
+                float omega = 1.05f;
+                if (ritual.ModProjectile is global::AethonMod.Content.Projectiles
+                        .Definitivas.IraSerExteriorCeremoniaProjectile)
+                    omega = MathHelper.Lerp(0.30f, 1.05f, MathHelper.Clamp(
+                        ritual.ai[2] / 150f, 0f, 1f));
                 float angR = MathHelper.TwoPi / nR * iR + time * omega;
                 float radioR = Math.Max(40f, 6.2f * nR)
                     * (1f + 0.035f * MathF.Sin(time * 0.5f));

@@ -1,3 +1,23 @@
+# v6.60.2 — EL RUMBO DEL CURSOR + EL CENTRO QUE HIERVE + EL CÍRCULO QUE SIGUE
+
+**La letra del usuario**: «los pequeños rayos electricos no estan centrados en el medio de los circulos runicos, las estrellitas o brillo solo deben aparecer en la fase de carga, cuando el haz es lanzado no necesita cosas como las estrellitas o brillo» + «el haz cuando es lanzado va a cualquier lado de forma aleatoria, pero eso esta mal, el haz debe a puntar a donde vaya el cursor y siempre seguir el cursor, creo que asi sera mejor» + «en la animacion de los minions, estos debe seguir dando vueltas en circulos mientras el haz esta siendo lanzado y cuando termine el lanzamiento es que regresan a su posicion normal».
+
+## (1) LOS ARCOS CRUZAN EL CENTRO — «centrados en el medio de los circulos runicos»
+**El diagnóstico**: los micro-arcos nacían AL BORDE del centro (r0 10-16 px) y corrían HACIA FUERA (r1 36-76 px) — un ANILLO de radios con el medio VACÍO: la electricidad rodeaba el centro sin tocarlo. **LA CURA** (en la ceremonia Y en la boca del haz): cada arco ahora **CRUZA EL CENTRO** — nace en un lado del círculo (rArco 16-22 px) y muere en el **OPUESTO** (ángulo + π con ±0,4 rad de vaivén orgánico por Hash01) — el MEDIO de los círculos rúnicos HIERVE de electricidad. Misma cuenta (2-5), mismo alfa (60-100 %), mismo grosor (3,2 px): solo cambió la GEOMETRÍA.
+
+## (2) LAS ESTRELLITAS SOLO EN LA CARGA — tres muertes
+La letra es exacta: «cuando el haz es lanzado no necesita cosas como las estrellitas o brillo». Tres efectos vivían SOLO en el disparo y mueren enteros: **EL ESTALLIDO DE SOLES** (el nacimiento: `SolesRunicosEstallido` — los primeros 22 ticks del disparo), **LA ESTRELLA DE LA BOCA** (la estrella conducto de 4 puntas que ardía en la boca TODO el disparo) y **LOS SOLES DEL CONDUCTO** (los 6 destellos corriendo por las márgenes — método y constante `SolesConducto` murieron con la llamada). **LO QUE VIVE**: la implosión de soles de la CARGA (nacen lejos y caen — es la fase de carga, la letra la quiere), la semilla del haz de la ceremonia (la estrella que crece gestándose — carga), la corona rúnica, los aros y los arcos (que ahora cruzan el centro). El disparo queda LIMPIO: la pila de capas + la boca rúnica hirviendo — nada más.
+
+## (3) EL RUMBO ES DEL JUGADOR — el haz sigue al cursor
+**El diagnóstico**: la ira apuntaba al enemigo que el escuadrón cazaba (re-adquiriendo al más cercano dentro de 2400 px con prioridad de jefes) — con blancos repartidos y re-adquisiciones, el haz parecía ir «a cualquier lado de forma aleatoria». **LA CURA — la letra nueva**: la boca queda FIJA en el centro del círculo, pero el conducto **NACE apuntando al CURSOR** (la ceremonia engendra con rumbo a `Main.MouseWorld` en la máquina del dueño) y **LO PERSIGUE TODO el disparo** con las MISMAS tasas de giro del arma (el barrido amado — ahora la ira y el arma apuntan EXACTO igual: un solo bloque, el `if (EsIra)…else` murió fundido). **EL BLANCO ES SOLO EL GATILLO**: la ira se DISPARA cuando el escuadrón tiene a quién cazar, pero se APUNTA con la mano del portador. `BlancoIra` muere entero (campo + SendExtraAI/ReceiveExtraAI + el chase de la IA); `BuscarBlancoIra` vive (el gatillo); la ÚLTIMA MIRADA muere (campos + `BlancoVivo` + la propiedad `Blanco` — ai[0] queda libre, el spawn ya no la escribe).
+
+## (4) EL CÍRCULO SIGUE DURANTE EL DISPARO — los ojos no se sientan
+**`RitualDe` aprende a caer al haz**: mientras vive la ceremonia, el ancla del círculo es ella (como siempre); muerta ella, el ancla es **EL HAZ DE LA IRA mientras dispare** (su boca ES el centro del círculo — el mismo punto que el escuadrón gestó). La mirada sigue clavada al centro, la caza sigue suspendida (siguen rezando) y `SlotDeFormacion` orbita el mismo punto — **con la vuelta A TOPE (ω 1,05: el círculo YA cerró — la ceremonia acelera, el haz llegó)**. Cuando el haz muere, el ancla muere y los ojos vuelven a su formación de siempre. (En el compás de prueba, si una ceremonia nueva nace mientras el haz viejo vive, la ceremonia manda: el escaneo la encuentra PRIMERO.)
+
+**Verificación**: oráculo **0/0** · `-build` REAL **0 errores 0 warnings** · **.tmod v6.60.2** auditado (456 entradas, EOF exacto, blobs 456/456, `SolesDelConducto` y el campo `BlancoIra` AUSENTES de la DLL, `EsIra`/`CentroIra`/`RitualDe` vivos, md5 090db1ceb8fc28103b6d9f5820931b31) · headless v6.60.2 carga sin excepciones.
+
+---
+
 # v6.60.1 — LA TEXTURA FANTASMA DE LA CEREMONIA (el mod no cargaba)
 
 **La letra del usuario**: «vaya, dio un error, no pude ni abrir el mod jajajajajaj» + el client.log.

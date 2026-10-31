@@ -210,9 +210,10 @@ namespace AethonMod.Content.Systems
                 //     — EL ESCUADRÓN ENTERO cierra el círculo, reza sus
                 //     rayos de perlin al centro, y de la bruma blanco-morada
                 //     y los círculos rúnicos nace EL HAZ (el rayo C — EL
-                //     SUEÑO) disparado al enemigo que cazan (jefes
-                //     SIEMPRE primero). Daño: base 1000 + la cadena mágica
-                //     del grimorio + el 50 % del daño total de invocación.
+                //     SUEÑO) apuntando AL CURSOR del dueño y siguiéndolo
+                //     TODO el lanzamiento (v6.60.2 — la letra nueva).
+                //     Daño: base 1000 + la cadena mágica del grimorio +
+                //     el 50 % del daño total de invocación.
                 //     v6.60 — LA LETRA NUEVA: ONCE ojos y TODOS en su
                 //     MEJORA MÁXIMA (el requisito), y el compás lo marca
                 //     el MODO PRUEBA (5 haces/min) hasta que la prueba
@@ -611,10 +612,12 @@ namespace AethonMod.Content.Systems
         {
             try
             {
-                // EL BLANCO — PRIORIDAD DE JEFES SIEMPRE (la letra: «si hay
-                // un jefe presente este siempre tendra prioridad por sobre
-                // todas las cosas»): el jefe más cercano manda; sin jefes,
-                // el enemigo que el escuadrón está cazando (el más cercano).
+                // v6.60.2 — EL BLANCO ES SOLO EL GATILLO: la ira SE
+                // DISPARA cuando el escuadrón tiene a quién cazar (un
+                // enemigo de verdad cerca — jefes primero, la ley de
+                // BuscarBlancoIra), pero el haz YA NO lo persigue: se
+                // APUNTA con el cursor del dueño y lo sigue TODO el
+                // lanzamiento (la letra nueva).
                 NPC blanco = RayosPruebaProjectile.BuscarBlancoIra(p.Center, 2400f);
                 if (blanco == null) return;
 
@@ -632,7 +635,7 @@ namespace AethonMod.Content.Systems
                     p.Center, Vector2.Zero,
                     ModContent.ProjectileType<IraSerExteriorCeremoniaProjectile>(),
                     0, 0f, p.whoAmI,
-                    blanco.whoAmI * 1f,   // ai[0]: el blanco del escuadrón
+                    0f,                   // ai[0]: LIBRE (v6.60.2: el rumbo es del cursor — el blanco murió con la mira)
                     dano * 1f,            // ai[1]: EL DAÑO DEL HAZ
                     0f);                  // ai[2]: la edad (la llena su IA)
 

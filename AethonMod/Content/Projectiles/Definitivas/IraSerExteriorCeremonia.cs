@@ -50,9 +50,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //  450 ──────  EL DISPARO: la ceremonia MUERE y nace EL HAZ (el rayo
     //              de prueba C — EL SUEÑO, el ganador) YA EN el momento
     //              del disparo (Time = ChargeTime: la ceremonia FUE su
-    //              carga), disparado al enemigo que el escuadrón apunta
-    //              EN ESE MOMENTO — con PRIORIDAD DE JEFES SIEMPRE. El
-    //              jugador queda LIBRE: la ira es del Ser Exterior.
+    //              carga), apuntando AL CURSOR del dueño y siguiéndolo
+    //              TODO el lanzamiento (v6.60.2 — la letra nueva). El
+    //              jugador queda LIBRE: la ira es del Ser Exterior. Y
+    //              el círculo SIGUE: los ojos no vuelven a su puesto
+    //              hasta que el haz MUERE (v6.60.2).
     //
     //  EL DAÑO (la letra, exacta): «el daño base del rayo que es 1000,
     //  mas el calculo correspondiente para el aumento de daño magico,
@@ -91,8 +93,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const int T_CARGA = 300;
         private const int T_TOTAL = T_CEREMONIA + T_CARGA;
 
-        /// <summary>El blanco elegido al nacer (ai[0] — su whoAmI).</summary>
-        public ref float Blanco => ref Projectile.ai[0];
+        // v6.60.2 — LA PROPIEDAD Blanco MURIÓ con la mira al cursor:
+        // ai[0] queda libre (nadie la escribe, nadie la lee).
 
         /// <summary>EL DAÑO DEL HAZ (ai[1] — calculado por el sistema: la
         /// base 1000 + la cadena mágica + el 50 % de invocación).</summary>
@@ -102,10 +104,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// cables dibujan la ceremonia con SU progreso real).</summary>
         public ref float Edad => ref Projectile.ai[2];
 
-        // LA ÚLTIMA MIRADA (el rumbo si el blanco muere a media ceremonia
-        // — la regla de la casa v6.51.5: un hechizo empezado se cumple).
-        private Vector2 _ultimaMirada = Vector2.Zero;
-        private bool _vioMirada = false;
+        // v6.60.2 — LA ÚLTIMA MIRADA MURIÓ (los campos también): el
+        // rumbo de nacimiento es el CURSOR del dueño — siempre existe,
+        // no hace falta recordar a nadie.
 
         // EL ESCUADRÓN: los whoAmI de los ojos vivos al nacer el ritual
         // (disparan sus rayos uno a uno, en orden de escuadrón).
@@ -135,8 +136,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static int _ownerCache = -1;
         private static Projectile _ritualCache = null;
 
-        /// <summary>LA CEREMONIA VIVA del dueño (o null): los ojos la
-        /// orbitan en corona cerrada mientras vive — es SU círculo.</summary>
+        /// <summary>EL ANCLA VIVA del dueño (o null): los ojos orbitan en
+        /// corona cerrada el punto que ella marca — es SU círculo.
+        /// v6.60.2 — LA VUELTA SIGUE EN EL DISPARO (la letra: «estos
+        /// deben seguir dando vueltas en circulos mientras el haz esta
+        /// siendo lanzado y cuando termine el lanzamiento es que regresan
+        /// a su posicion normal»): mientras vive, el ancla es LA
+        /// CEREMONIA; muerta ella, el ancla es EL HAZ DE LA IRA mientras
+        /// dispare (su boca ES el centro del círculo — el mismo punto que
+        /// el escuadrón gestó). Cuando el haz muere, el ancla muere y los
+        /// ojos vuelven a su formación de siempre.</summary>
         internal static Projectile RitualDe(int ownerWhoAmI)
         {
             if (_frameCache == (int)Main.GameUpdateCount && _ownerCache == ownerWhoAmI)
@@ -152,6 +161,25 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     _ritualCache = p;
                     break;
+                }
+            }
+            // v6.60.2 — EL HAZ ES EL ANCLA EN EL DISPARO: la ceremonia
+            // murió pero EL HAZ vive — el círculo NO se abre hasta que el
+            // lanzamiento termine (la ceremonia nueva, si nace, manda: el
+            // escaneo de arriba la encuentra PRIMERO).
+            if (_ritualCache == null)
+            {
+                int tipoHaz = ModContent.ProjectileType<RayosPruebaProjectile>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.type != tipoHaz ||
+                        p.owner != ownerWhoAmI) continue;
+                    if (p.ModProjectile is RayosPruebaProjectile haz && haz.EsIra)
+                    {
+                        _ritualCache = p;
+                        break;
+                    }
                 }
             }
             return _ritualCache;
@@ -186,18 +214,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile.Center = Vector2.Lerp(Projectile.Center, objetivo, 0.18f);
             }
 
-            // === LA ÚLTIMA MIRADA: hacia dónde apunta el escuadrón.
-            NPC blanco = BlancoVivo();
-            if (blanco != null)
-            {
-                _ultimaMirada = blanco.Center;
-                _vioMirada = true;
-            }
-            else if (!_vioMirada && duenoVivo)
-            {
-                _ultimaMirada = dueno.Center + new Vector2(dueno.direction * 260f, -40f);
-                _vioMirada = true;
-            }
+            // v6.60.2 — LA ÚLTIMA MIRADA MURIÓ: el rumbo del haz YA no
+            // es el enemigo del escuadrón — es EL CURSOR del dueño (la
+            // letra: «el haz debe apuntar a donde vaya el cursor y
+            // siempre seguir el cursor»); no hay nada que recordar.
 
             // === EL ESCUADRÓN se reúne al nacer el ritual (los que estén
             //     — «independientemente de donde esten los minions»).
@@ -298,8 +318,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile.netUpdate = true;
 
             // === EL CUMPLIMIENTO: EL HAZ (la ceremonia FUE la carga — el
-            //     haz nace YA DISPARANDO, al enemigo que el escuadrón
-            //     apunta EN ESTE MOMENTO, jefes siempre primero).
+            //     haz nace YA DISPARANDO, apuntando AL CURSOR del dueño
+            //     — v6.60.2, la letra nueva — y el círculo SIGUE hasta
+            //     que el haz muera).
             if (edad >= (float)T_TOTAL)
             {
                 LanzarElHaz();
@@ -310,18 +331,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Edad = edad + 1f;
         }
 
-        /// <summary>El blanco guardado (vivo y dañable, o null).</summary>
-        private NPC BlancoVivo()
-        {
-            int idx = (int)Blanco;
-            if (idx >= 0 && idx < Main.maxNPCs)
-            {
-                NPC n = Main.npc[idx];
-                if (n != null && n.active && n.life > 0 && VFXCore.EsObjetivo(n))
-                    return n;
-            }
-            return null;
-        }
+        // v6.60.2 — BlancoVivo MURIÓ: nadie lee el blanco de la
+        // ceremonia ya (el rumbo es del cursor — la letra nueva).
 
         /// <summary>EL RAYO RITUAL DE UN OJO (el modo ritual del
         /// TruenoPerlin — el patrón de LosCelebrantesRezan: la boca sigue
@@ -349,8 +360,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// nace EL RAYO DE PRUEBA C (EL SUEÑO — el ganador, intacto) YA EN
         /// el momento del disparo (Time = ChargeTime: su carga FUE la
         /// ceremonia), en el MODO IRA: boca fija en el centro del círculo,
-        /// apuntando al enemigo que el escuadrón caza EN ESTE MOMENTO
-        /// (PRIORIDAD DE JEFES SIEMPRE — la letra), y el portador LIBRE.
+        /// apuntando AL CURSOR del dueño (v6.60.2 — la letra nueva: «el
+        /// haz debe apuntar a donde vaya el cursor y siempre seguir el
+        /// cursor, creo que asi sera mejor») y el portador LIBRE. La ira
+        /// se DISPARA cuando el escuadrón caza, pero se APUNTA con la
+        /// mano del portador — y la persigue TODO el lanzamiento.
         /// «este ataque se considera ataque magico» — su tipo de daño es
         /// MÁGICO.</summary>
         private void LanzarElHaz()
@@ -359,31 +373,25 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // la casa): el dueño engendra y NewProjectile sincroniza.
             if (Projectile.owner != Main.myPlayer) return;
 
-            // EL BLANCO DEL DISPARO — evaluado EN EL MOMENTO («en el
-            // momento de disparo los minion lanzan el haz hacia el enemigo
-            // al que estan apuntando en ese momento»): el blanco de la
-            // ceremonia si sigue vivo… y si no, RE-ADQUIRIR con la ley de
-            // la letra: «si hay un jefe presente este siempre tendra
-            // prioridad por sobre todas las cosas».
-            NPC objetivo = BlancoVivo();
-            if (objetivo == null)
-                objetivo = RayosPruebaProjectile.BuscarBlancoIra(Projectile.Center, 2400f);
-
-            // EL RUMBO: hacia el blanco… y si todo murió esperando, hacia
-            // la ÚLTIMA MIRADA (un hechizo empezado se cumple).
-            Vector2 destino = objetivo != null ? objetivo.Center : _ultimaMirada;
-            if (destino == Vector2.Zero)
-                destino = Projectile.Center - Vector2.UnitY * 120f;
-            Vector2 rumbo = destino - Projectile.Center;
+            // v6.60.2 — EL RUMBO DE NACIMIENTO ES EL CURSOR (la letra:
+            // «el haz debe apuntar a donde vaya el cursor y siempre
+            // seguir el cursor, creo que asi sera mejor»): nace apuntando
+            // a DONDE APUNTA EL JUGADOR y lo persigue TODO el lanzamiento
+            // (el blanco-persa de la v6.59 murió con la letra nueva — la
+            // ira se DISPARA cuando el escuadrón caza, pero se APUNTA con
+            // la mano del portador). Esto corre SOLO en la máquina del
+            // dueño (la guarda de arriba): el cursor es SU ratón.
+            Vector2 rumbo = Main.MouseWorld - Projectile.Center;
             if (rumbo.LengthSquared() < 1f) rumbo = -Vector2.UnitY;
             rumbo.Normalize();
 
             int dano = Math.Max(1, (int)Dano);
 
             // EL HAZ — LA RECETA C (2 = EL SUEÑO) con Time YA EN el
-            // disparo (ChargeTime): su primer tick dibuja EL ESTALLIDO de
-            // soles y el segundo suena LA IGNICIÓN — la transición
-            // ceremonia→conducto es UN SOLO GOLPE.
+            // disparo (ChargeTime): el estallido de soles MURIÓ con la
+            // letra nueva (v6.60.2: nada de estrellitas en el disparo) —
+            // la transición ceremonia→conducto se lee con LA IGNICIÓN del
+            // segundo tick (el hitstop y el temblor: MOVIMIENTO, no luz).
             Projectile haz = Projectile.NewProjectileDirect(
                 Projectile.GetSource_FromAI(),
                 Projectile.Center, Vector2.Zero,
@@ -398,7 +406,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (haz.ModProjectile is RayosPruebaProjectile rp)
             {
                 rp.EsIra = true;
-                rp.BlancoIra = objetivo != null ? objetivo.whoAmI : -1;
                 rp.CentroIra = Projectile.Center;
                 rp.targetRotation = rumbo.ToRotation();
             }
@@ -498,10 +505,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 {
                     int seed = (int)(edad * 0.017f) * 131 + i * 297;
                     float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                    float r0 = 10f + 6f * prog;
-                    float r1 = r0 + 26f + 34f * prog;
-                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
-                    Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
+                    // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
+                    // pequeños rayos electricos no estan centrados en el
+                    // medio de los circulos runicos»): antes nacían al
+                    // borde del centro (r0 10-16) y corrían HACIA FUERA
+                    // (r1 36-76) — un anillo de radios con el medio
+                    // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
+                    // lado del círculo y muere en el OPUESTO (con ±0,4 rad
+                    // de vaivén orgánico) — el MEDIO de los círculos
+                    // rúnicos HIERVE de electricidad.
+                    float rArco = 16f + 6f * prog;
+                    float angOpuesto = ang + MathHelper.Pi
+                        + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
+                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
+                    Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
                     StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
                         RayosPruebaProjectile.ColorConjuro(semilla + i * 8f),
                         DefinitivasLib.BlancoCalido,
