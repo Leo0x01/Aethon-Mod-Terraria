@@ -998,31 +998,31 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
-            // ============ v6.61 — LOS ARCOS: DEL ESCUADRÓN (IRA) O DE LA
+            // ============ v6.66 — LOS RAYITOS: DEL CORAZÓN (IRA) O DE LA
             // BOCA (ARMA) ============
             // LA IRA (la letra: «los pequeños rayos electricos deben
             // concentrarce en el centro del circulo formado por los
-            // minions… cada rayito debe ir de un minion a otro de forma
-            // aleatorio mientras el haz se carga y se lanza»): su boca NO
-            // lleva micro-arcos propios — su electricidad son LOS OJOS
-            // QUE LA ORBITAN (el círculo sigue vivo TODO el disparo,
-            // v6.60.2): arco a arco, de un ojo a su OPUESTO, cruzando el
-            // centro. EL ARMA de siempre conserva SUS micro-arcos de
+            // minions… mientras el haz se carga y se lanza» — REESCRITOS
+            // DE CERO en la v6.66): su boca NO lleva micro-arcos propios
+            // — su electricidad son LOS RAYITOS DEL CORAZÓN: la bola de
+            // chispazos clavada al CENTRO EXACTO del círculo (la boca de
+            // ESTE haz ES el ancla del anillo que los ojos orbitan).
+            // EL ARMA de siempre conserva SUS micro-arcos de
             // boca (la firma del RC2 — la cura de la v6.59: el 60 % del
             // ciclo, dos a cinco, al 60-100 %, cruzando el medio).
             if (EsIra)
             {
                 // EL ANCLA VIVA (el círculo ES de quien el escuadrón
                 // orbita HOY): solo el haz que SOSTIENE el círculo viste
-                // los arcos — en el solape de la prueba (la ceremonia
-                // nueva ya nació), los arcos se van CON ELLA (el círculo
-                // es suyo) y el haz viejo muere limpio.
+                // los rayitos — en el solape de la prueba (la ceremonia
+                // nueva ya nació), se van CON ELLA (el círculo es suyo) y
+                // el haz viejo muere limpio.
                 Projectile anclaCirculo = IraSerExteriorCeremoniaProjectile
                     .RitualDe((int)Owner);
                 if (anclaCirculo == Projectile && laserCharge > 0.05f && Time % 5f < 3f)
                 {
-                    IraSerExteriorCeremoniaProjectile.DibujarArcosDelEscuadron(
-                        (int)Owner, laserCharge, Projectile.localAI[0]);
+                    IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
+                        Projectile, laserCharge, Projectile.localAI[0]);
                 }
             }
             else if (laserCharge > 0.05f && Time % 5f < 3f)

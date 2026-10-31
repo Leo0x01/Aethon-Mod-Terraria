@@ -489,41 +489,72 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  v6.61 — LOS ARCOS DEL ESCUADRÓN: los rayitos eléctricos son
-        //  DE LOS MINIONS (la letra: «los pequeños rayos electricos
-        //  deben concentrarce en el centro del circulo formado por los
-        //  minions, la forma para gatillar la creacion de pequeños
-        //  rayos electrico es la misma animacion de los minions»).
+        //  v6.66 — LOS RAYITOS DEL CORAZÓN (REESCRITOS DE CERO): la
+        //  letra, por tercera vez: «sigo sin entender porque los
+        //  pequeños rayos electricos siguen sin estar dentro del
+        //  circulo de minion, creo que es mejor borrarlo y reescribir
+        //  esos pequeños rayos electricos» — BORRADO Y REESCRITO.
+        //
+        //  LA LECCIÓN DE LAS TRES VERSIONES MUERTAS (v6.61 cuerdas entre
+        //  ojos · v6.63 reflexión · v6.65 bola en el CENTROIDE): TODAS
+        //  medían el círculo a partir de DÓNDE ESTÁN LOS OJOS — y los
+        //  ojos, en el arranque del ritual, están DE CAMINO (venían de
+        //  la puntería, cruzaban el centro, se amontonaban): la medición
+        //  (el centroide) viajaba CON LA MANADA y los rayitos nacían
+        //  donde la manada estaba, NO en el centro del círculo.
+        //
+        //  LA VERDAD NUEVA — EL ANCLA: el centro del círculo NO se
+        //  mide: ES. Cada puesto de la corona nace de
+        //  SlotDelRitual → ancla.Center + dir·radio — el ANCLA del
+        //  ritual (esta ceremonia mientras gesta · el haz mientras
+        //  dispara) es el centro MATEMÁTICO EXACTO del anillo, por
+        //  definición, SIEMPRE — lleguen tarde o a tiempo los ojos,
+        //  corra el dueño o merodee el libro. Los rayitos viven
+        //  clavados a ESE punto, a un radio PROPORCIONAL al círculo
+        //  real (máx(40, 6,2·n) — la misma fórmula de los puestos):
+        //  dentro del anillo HOY, MAÑANA Y SIEMPRE. Puro cine de
+        //  cliente (el reloj de cada pantalla elige los pares).
         // ================================================================
 
-        /// <summary>LOS RAYITOS EN EL CENTRO DEL CÍRCULO — v6.65: LA
-        /// CONCENTRACIÓN (la letra: «los pequeños rayitos electricos
-        /// siguen sin estar centrados y no estan donde deben estar, en
-        /// el centro del circulo de que hacen los mininion para lanzar
-        /// el haz»): LAS CUERDAS MURIERON. La v6.63 unía cada ojo con su
-        /// reflejo — la cuerda CRUZABA el centro pero NACÍA y MORÍA en
-        /// el BORDE del círculo: de borde a borde (dos ojos separados
-        /// por el diámetro entero), se leía «entre los ojos», jamás «en
-        /// el centro». AHORA cada arco vive ENTERO en el disco central
-        /// — el MISMO lenguaje de la boca del arma (que ya cruza el
-        /// medio y gusta): nace a UN lado del CENTROIDE (15-22 px del
-        /// punto exacto) y muere en el OPUESTO (±0,4 rad de vaivén
-        /// orgánico) — la bola de chispazos en el punto que el escuadrón
-        /// custodia, del primer tick al último. El círculo lo sigue
-        /// poniendo EL PROPIO ESCUADRÓN (CirculoDelEscuadron: el
-        /// centroide de los ojos vivos). Es puro cine de cliente: el
-        /// par lo elige el reloj del juego de cada pantalla (nada que
-        /// sincronizar).</summary>
-        internal static void DibujarArcosDelEscuadron(int owner,
+        /// <summary>LOS RAYITOS DEL CORAZÓN — v6.66, REESCRITOS DE CERO
+        /// (la letra: «mejor borrarlo y reescribir»): la bola de
+        /// chispazos vive clavada al CENTRO EXACTO del círculo — el
+        /// ANCLA del ritual (la ceremonia mientras gesta, el haz
+        /// mientras dispara), el punto del que nace CADA puesto de la
+        /// corona. Nace a un lado del centro, muere en el opuesto (±0,4
+        /// rad de vaivén), a un radio PROPORCIONAL al círculo real
+        /// (×0,30 de máx(40, 6,2·n)): DENTRO del anillo pase lo que
+        /// pase con los ojos. El mismo lenguaje visual que gusta (Bolt
+        /// 3,2 px, la paleta ColorConjuro, 2-5 arcos según la
+        /// intensidad, pares que cambian cada 8 ticks).</summary>
+        internal static void RayitosDelCorazon(Projectile ancla,
             float intensidad, float relojColor)
         {
-            if (Main.dedServ) return;
+            if (Main.dedServ || ancla == null || !ancla.active) return;
 
-            // EL CÍRCULO, SEGÚN LOS PROPIOS MINIONS (el centroide de los
-            // ojos vivos y su radio medio).
-            if (!CirculoDelEscuadron(owner, out Vector2 centro, out float radio, out int n))
-                return;
+            // CUÁNTOS OJOS TIENE EL ESCUADRÓN (solo para el TAMAÑO del
+            // círculo — la misma fórmula de sus puestos: máx(40, 6,2·n),
+            // con la respiración al máximo para el techo).
+            int n = 0;
+            int tipoOjo = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.type == tipoOjo &&
+                    p.owner == ancla.owner)
+                    n++;
+            }
             if (n < 2) return;
+
+            // EL CENTRO EXACTO: el ANCLA (no se mide — ES el punto del
+            // que nacen todos los puestos). EL TECHO: el radio del
+            // círculo REAL — los rayitos a ×0,30: con los 11 (68 px de
+            // anillo) viven a ±21 px del centro, y su meandro (±0,55 del
+            // radio del rayito) NUNCA asoma del anillo.
+            float radioCirculo = Math.Max(40f, 6.2f * n) * 1.035f;
+            float radioRayito = radioCirculo * 0.30f;
+            Vector2 centroScr = ancla.Center - Main.screenPosition;
 
             float intens = MathHelper.Clamp(intensidad, 0f, 1f);
             int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
@@ -538,25 +569,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // puro cine: nada que sincronizar).
                 int seed = (int)((Main.GameUpdateCount % 960ul) * 0.125f) * 131 + i * 297;
 
-                // v6.65 — LA CONCENTRACIÓN: el arco nace a UN lado del
-                // CENTRO y muere en el OPUESTO (±0,4 rad de vaivén) —
-                // vive ENTERO en el disco central (15-22 px del punto
-                // exacto que el escuadrón custodia): la electricidad
-                // ES el corazón del círculo, no una cuerda de borde a
-                // borde. (El círculo lo ponen los propios minions:
-                // CirculoDelEscuadron — su centroide.)
+                // EL RAYITO: nace a UN lado del CENTRO EXACTO y muere en
+                // el OPUESTO (±0,4 rad de vaivén orgánico) — la bola de
+                // chispazos en el corazón del círculo.
                 float ang = VFXCore.Hash01(seed, 11, 7) * MathHelper.TwoPi;
-                float rArco = 15f + 7f * intens;
                 float angOpuesto = ang + MathHelper.Pi
                     + (VFXCore.Hash01(seed, 29, 17) - 0.5f) * 0.8f;
-                Vector2 start = centro - Main.screenPosition
-                    + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
-                Vector2 end = centro - Main.screenPosition
-                    + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
+                Vector2 start = centroScr
+                    + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radioRayito;
+                Vector2 end = centroScr
+                    + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * radioRayito;
                 StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
                     RayosPruebaProjectile.ColorConjuro(relojColor + i * 8f),
                     DefinitivasLib.BlancoCalido,
-                    0.60f + 0.40f * intens, 5, 12f);
+                    0.60f + 0.40f * intens, 5, radioRayito * 0.55f);
             }
         }
 
@@ -653,20 +679,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.ReabrirLoteVanilla();
             }
 
-            // ============ v6.61 — LOS ARCOS DEL ESCUADRÓN ============
+            // ============ v6.66 — LOS RAYITOS DEL CORAZÓN ============
             // (la letra: «los pequeños rayos electricos deben
             // concentrarce en el centro del circulo formado por los
-            // minions… mientras el haz se carga y se lanza» — v6.65:
-            // la CONCENTRACIÓN que por fin lo cumple): los rayitos viven
-            // ENTEROS en el disco central del círculo (nacen a un lado
-            // del centroide y mueren en el opuesto — la bola de
-            // chispazos en el punto exacto) y los gatilla LA MISMA
+            // minions… mientras el haz se carga y se lanza» —
+            // REESCRITOS DE CERO): la bola de chispazos vive clavada
+            // al CENTRO EXACTO del círculo — ESTA ceremonia es el
+            // ANCLA del anillo (el punto del que nacen todos los
+            // puestos de la corona) — y los gatilla LA MISMA
             // ANIMACIÓN de la órbita: viven desde que el círculo gira,
             // TODO el ritual (ceremonia y carga) — y en el disparo los
             // hereda el haz (su boca ES el centro).
             if (prog > 0.04f && edad % 5f < 3f)
             {
-                DibujarArcosDelEscuadron(Projectile.owner, prog, semilla);
+                RayitosDelCorazon(Projectile, prog, semilla);
             }
 
             // ============ LA IMPLOSIÓN DE SOLES DE LA CARGA ============

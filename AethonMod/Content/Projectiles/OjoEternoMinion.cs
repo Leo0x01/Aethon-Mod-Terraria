@@ -439,6 +439,33 @@ namespace AethonMod.Content.Projectiles
                 //     sobrepasarlo nunca). ===
                 Vector2 alSlot = slot - Projectile.Center;
                 float dist = alSlot.Length();
+                // === v6.66 — LA ANIMACIÓN DIRECTA (la letra: «ahora
+                //     parecen quedarse en el centro y despues de unos
+                //     segundos es cuando se ponen en circulo, no debe ser
+                //     asi, lo que deben hacer es hacer la animacion
+                //     directamente»): mientras el ritual vive, el ojo va
+                //     a SU PUESTO con ASIGNACIÓN DIRECTA de velocidad —
+                //     CERO herencia. La convergencia v6.65 blendeaba la
+                //     velocidad VIEJA (la de la puntería, que apuntaba a
+                //     la PRESA) con la nueva a razón de 0,35/tick: esa
+                //     inercia heredada llevaba al escuadrón CRUZANDO EL
+                //     CENTRO y amontonado unos segundos antes de abrirse
+                //     al anillo — «se quedan en el centro y después se
+                //     ponen en círculo». AHORA la velocidad ES el vector
+                //     al puesto (la MISMA asignación de la llegada
+                //     exacta, que siempre funcionó): la velocidad vieja
+                //     MUERE en el primer tick, el ojo se GIRA hacia su
+                //     puesto al nacer el ritual y lo alcanza en 2-3
+                //     ticks — el círculo SE CIERRA AL NACER y la
+                //     animación (el giro) corre DIRECTO desde el primer
+                //     momento. k crece con la distancia: 0,55 clavado a
+                //     la órbita giratoria · 0,85 en el arranque lejano
+                //     (un barrido legible, no un teletransporte). ===
+                if (ritualIra != null && dist > 0.01f)
+                {
+                    float kDirecto = MathHelper.Clamp(dist * 0.02f, 0.55f, 0.85f);
+                    Projectile.velocity = alSlot * kDirecto;
+                }
                 // === v6.51.3 — LA LLEGADA EXACTA DE LA DANZA (la letra:
                 //     «mas exacta»): cerca del puesto, el ojo lo PERSIGUE
                 //     proporcional puro — SIN inercia, SIN sobrepaso (el
@@ -449,36 +476,9 @@ namespace AethonMod.Content.Projectiles
                 //     v6.51.7: vale para el abanico del JUGADOR también
                 //     (ya no solo junto al libro) — el arco del Sanguine
                 //     se lee clavado en los DOS centros. ===
-                if (dist <= 30f && dist > 0.01f)
+                else if (dist <= 30f && dist > 0.01f)
                 {
                     Projectile.velocity = alSlot * 0.55f;
-                }
-                else if (ritualIra != null && dist > 0.01f)
-                {
-                    // === v6.65 — LA CONVERGENCIA DEL RITUAL (la FUGA (b)
-                    //     de la letra: «a veces al comenzar la animacion
-                    //     los mininion no cierran el circulo correctamente,
-                    //     ya luego de unos segundos ya se ponen en circulo
-                    //     como debe ser»): la ley del planeo del crucero es
-                    //     de TODOS los días — su techo de 13 px/t con blenda
-                    //     0,15 dejaba al escuadrón colgando tras sus
-                    //     puestos (el ojo asentaba a ~60 px del hueco
-                    //     mientras el dueño corriera) y el círculo se leía
-                    //     ABIERTO hasta que el dueño paraba. Mientras el
-                    //     ritual vive, el ojo vuela a su puesto con la LEY
-                    //     DEL RITUAL: el MISMO proporcional de la llegada
-                    //     exacta (0,55 de la distancia que falta) con TOPE
-                    //     26 px/t y blenda 0,35 — el círculo SE CIERRA en
-                    //     el primer cuarto de segundo y SIGUE CERRADO
-                    //     aunque el dueño corra; a ≤30 px lo recibe la
-                    //     llegada exacta de siempre (clavado a la órbita).
-                    //     ===
-                    Vector2 deseadaR = alSlot * 0.55f;
-                    const float vmaxR = 26f;
-                    if (deseadaR.Length() > vmaxR)
-                        deseadaR = Vector2.Normalize(deseadaR) * vmaxR;
-                    Projectile.velocity = Vector2.Lerp(
-                        Projectile.velocity, deseadaR, 0.35f);
                 }
                 else if (dist > 90f)
                 {
