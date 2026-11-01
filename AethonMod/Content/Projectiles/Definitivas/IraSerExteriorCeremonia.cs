@@ -53,9 +53,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //              ritual: la boca SIGUE al ojo que gira, la punta
     //              clavada al centro — sostenido TODO el ritual, MUDO
     //              en la ira).
-    //    · ── 450  LA BOLA DEL CORAZÓN (v6.66 — RayitosDelCorazon en la
-    //              bruma del nacimiento, TODO el ritual) y los brazos de
-    //              perlin del escuadrón alimentando el centro.
+    //    · ── 450  LA ORACIÓN DEL ESCUADRÓN: los brazos de perlin
+    //              alimentando el centro TODO el ritual (v6.71 — la
+    //              creación del haz, INTACTA). LA BOLA DEL CORAZÓN
+    //              (los chispazos al centro) MURIÓ en la v6.75 — el
+    //              círculo queda limpio: bruma, soles y semilla.
     //  150 ── 449  LA CARGA: el sonido amado de la carga del RC2 suena
     //              entero (5,15 s), la implosión de soles rúnicos NACE
     //              LEJOS y cae al centro y TODO se CIÑE en los últimos
@@ -504,102 +506,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
         }
 
         // ================================================================
-        //  v6.66 — LOS RAYITOS DEL CORAZÓN (REESCRITOS DE CERO): la
-        //  letra, por tercera vez: «sigo sin entender porque los
-        //  pequeños rayos electricos siguen sin estar dentro del
-        //  circulo de minion, creo que es mejor borrarlo y reescribir
-        //  esos pequeños rayos electricos» — BORRADO Y REESCRITO.
-        //
-        //  LA LECCIÓN DE LAS TRES VERSIONES MUERTAS (v6.61 cuerdas entre
-        //  ojos · v6.63 reflexión · v6.65 bola en el CENTROIDE): TODAS
-        //  medían el círculo a partir de DÓNDE ESTÁN LOS OJOS — y los
-        //  ojos, en el arranque del ritual, están DE CAMINO (venían de
-        //  la puntería, cruzaban el centro, se amontonaban): la medición
-        //  (el centroide) viajaba CON LA MANADA y los rayitos nacían
-        //  donde la manada estaba, NO en el centro del círculo.
-        //
-        //  LA VERDAD NUEVA — EL ANCLA: el centro del círculo NO se
-        //  mide: ES. Cada puesto de la corona nace de
-        //  SlotDelRitual → ancla.Center + dir·radio — el ANCLA del
-        //  ritual (esta ceremonia mientras gesta · el haz mientras
-        //  dispara) es el centro MATEMÁTICO EXACTO del anillo, por
-        //  definición, SIEMPRE — lleguen tarde o a tiempo los ojos,
-        //  corra el dueño o merodee el libro. Los rayitos viven
-        //  clavados a ESE punto, a un radio PROPORCIONAL al círculo
-        //  real (máx(40, 6,2·n) — la misma fórmula de los puestos):
-        //  dentro del anillo HOY, MAÑANA Y SIEMPRE. Puro cine de
-        //  cliente (el reloj de cada pantalla elige los pares).
+        //  v6.75 — LA BOLA DEL CORAZÓN, MUERTA (la letra: «ya puedes
+        //  arreglar el código del Haz de los minions en el grimorio, ya
+        //  sabes quitar esos rayitos»): el método RayitosDelCorazon
+        //  (v6.66 — la bola de chispazos al centro del círculo, nacida
+        //  de la letra «los pequeños rayos electricos deben
+        //  concentrarce en el centro del circulo formado por los
+        //  minions») MUERE ENTERO con esta versión — la sentencia que
+        //  empezó con la boca del arma-C (v6.74) corona aquí: el HAZ DE
+        //  LOS MINIONS queda LIMPIO de electricidad suelta. Lo que vive
+        //  en el centro es LA CREACIÓN: los brazos de perlin del
+        //  escuadrón (la oración que gesta el haz), la bruma del
+        //  nacimiento, la implosión de soles y la semilla que crece.
+        //  (El método murió con sus tres llamadas: la de ESTA ceremonia
+        //  en DibujarRitual, la del haz de la Ira y la del arma-C
+        //  durante la ceremonia — ambas en RayosPruebaProjectile.)
         // ================================================================
-
-        /// <summary>LOS RAYITOS DEL CORAZÓN — v6.66, REESCRITOS DE CERO
-        /// (la letra: «mejor borrarlo y reescribir»): la bola de
-        /// chispazos vive clavada al CENTRO EXACTO del círculo — el
-        /// ANCLA del ritual (la ceremonia mientras gesta, el haz
-        /// mientras dispara), el punto del que nace CADA puesto de la
-        /// corona. Nace a un lado del centro, muere en el opuesto (±0,4
-        /// rad de vaivén), a un radio PROPORCIONAL al círculo real
-        /// (×0,30 de máx(40, 6,2·n)): DENTRO del anillo pase lo que
-        /// pase con los ojos. El mismo lenguaje visual que gusta (Bolt
-        /// 3,2 px, la paleta ColorConjuro, 2-5 arcos según la
-        /// intensidad, pares que cambian cada 8 ticks).</summary>
-        internal static void RayitosDelCorazon(Projectile ancla,
-            float intensidad, float relojColor)
-        {
-            if (Main.dedServ || ancla == null || !ancla.active) return;
-
-            // CUÁNTOS OJOS TIENE EL ESCUADRÓN (solo para el TAMAÑO del
-            // círculo — la misma fórmula de sus puestos: máx(40, 6,2·n),
-            // con la respiración al máximo para el techo).
-            int n = 0;
-            int tipoOjo = ModContent.ProjectileType
-                <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p != null && p.active && p.type == tipoOjo &&
-                    p.owner == ancla.owner)
-                    n++;
-            }
-            if (n < 2) return;
-
-            // EL CENTRO EXACTO: el ANCLA (no se mide — ES el punto del
-            // que nacen todos los puestos). EL TECHO: el radio del
-            // círculo REAL — los rayitos a ×0,30: con los 11 (68 px de
-            // anillo) viven a ±21 px del centro, y su meandro (±0,55 del
-            // radio del rayito) NUNCA asoma del anillo.
-            float radioCirculo = Math.Max(40f, 6.2f * n) * 1.035f;
-            float radioRayito = radioCirculo * 0.30f;
-            Vector2 centroScr = ancla.Center - Main.screenPosition;
-
-            float intens = MathHelper.Clamp(intensidad, 0f, 1f);
-            int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-            int cuenta = 2 + (int)(intens * 3.99f);
-
-            for (int i = 0; i < cuenta; i++)
-            {
-                // EL PAR CAMBIA cada 8 ticks («de forma aleatoria»): el
-                // reloj se parte en módulo 960 ANTES de escalar (el
-                // GameUpdateCount crudo pierde precisión en float tras
-                // horas de partida) — cada cliente dibuja SU par (es
-                // puro cine: nada que sincronizar).
-                int seed = (int)((Main.GameUpdateCount % 960ul) * 0.125f) * 131 + i * 297;
-
-                // EL RAYITO: nace a UN lado del CENTRO EXACTO y muere en
-                // el OPUESTO (±0,4 rad de vaivén orgánico) — la bola de
-                // chispazos en el corazón del círculo.
-                float ang = VFXCore.Hash01(seed, 11, 7) * MathHelper.TwoPi;
-                float angOpuesto = ang + MathHelper.Pi
-                    + (VFXCore.Hash01(seed, 29, 17) - 0.5f) * 0.8f;
-                Vector2 start = centroScr
-                    + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radioRayito;
-                Vector2 end = centroScr
-                    + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * radioRayito;
-                StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
-                    RayosPruebaProjectile.ColorConjuro(relojColor + i * 8f),
-                    DefinitivasLib.BlancoCalido,
-                    0.60f + 0.40f * intens, 5, radioRayito * 0.55f);
-            }
-        }
 
         /// <summary>EL DIBUJO COMPLETO DEL RITUAL — lo llama
         /// HazSobreElMundoSistema desde su capa de interfaz, ENCIMA de
@@ -700,21 +622,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 VFXCore.ReabrirLoteVanilla();
             }
 
-            // ============ v6.66 — LOS RAYITOS DEL CORAZÓN ============
-            // (la letra: «los pequeños rayos electricos deben
-            // concentrarce en el centro del circulo formado por los
-            // minions… mientras el haz se carga y se lanza» —
-            // REESCRITOS DE CERO): la bola de chispazos vive clavada
-            // al CENTRO EXACTO del círculo — ESTA ceremonia es el
-            // ANCLA del anillo (el punto del que nacen todos los
-            // puestos de la corona) — y los gatilla LA MISMA
-            // ANIMACIÓN de la órbita: viven desde que el círculo gira,
-            // TODO el ritual (ceremonia y carga) — y en el disparo los
-            // hereda el haz (su boca ES el centro).
-            if (prog > 0.04f && edad % 5f < 3f)
-            {
-                RayitosDelCorazon(Projectile, prog, semilla);
-            }
+            // ============ v6.75 — LA BOLA DEL CORAZÓN, MUERTA EN LA
+            // ============ CEREMONIA (la letra: «ya puedes arreglar el
+            // ============ código del Haz de los minions en el grimorio,
+            // ============ ya sabes quitar esos rayitos»): la bola de
+            // ============ chispazos al centro del círculo (la llamada
+            // ============ de RayitosDelCorazon que vivía aquí TODO el
+            // ============ ritual) MUERE — el círculo queda LIMPIO: la
+            // ============ creación del haz la cuentan los brazos de
+            // ============ perlin del escuadrón, la bruma, los soles y
+            // ============ la semilla. NADA MÁS.
 
             // ============ LA IMPLOSIÓN DE SOLES DE LA CARGA ============
             // (desde que el círculo cerró: los soles rúnicos NACEN LEJOS y

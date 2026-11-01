@@ -998,74 +998,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
-            // ============ v6.66 — LOS RAYITOS: SOLO DEL CORAZÓN (IRA) ===
-            // LA IRA (la letra: «los pequeños rayos electricos deben
-            // concentrarce en el centro del circulo formado por los
-            // minions… mientras el haz se carga y se lanza» — REESCRITOS
-            // DE CERO en la v6.66): su boca NO lleva micro-arcos propios
-            // — su electricidad son LOS RAYITOS DEL CORAZÓN: la bola de
-            // chispazos clavada al CENTRO EXACTO del círculo (la boca de
-            // ESTE haz ES el ancla del anillo que los ojos orbitan).
             // ============================================================
-            //  v6.74 — LOS RAYITOS DEL ARMA-C, BORRADOS (la letra: «bueno
-            //  los rayitos fueron modificados, eso quiere decir que ya
-            //  sabes cual es el codigo, entonces borra esos rayitos en el
-            //  arma de prueba C»). La v6.73 vistió la boca del arma-C con
-            //  la firma exacta del RC2 (solo durante la carga, chispas
-            //  radiales sutiles) — y el usuario LA VIO CAMBIAR en el
-            //  playtest: el código culpable quedaba CONFIRMADO con la
-            //  prueba en mano. La sentencia nueva no es reubicar ni
-            //  disfrazar: es EL BORRADO. EL ARMA-C EN PAZ NO EMITE NI UN
-            //  RAYITO — ni en la carga, ni en el disparo, ni nunca: su
-            //  boca queda con SU corona rúnica, sus aros y su conducto,
-            //  NADA MÁS. Las chispas del RC2 de la v6.73 MUEREN AQUÍ (y
-            //  con ellas la última vida de las cuerdas de la v6.60.2).
-            //  LA LEY DE LA IRA, INTACTA (v6.72): disparada DURANTE la
-            //  ceremonia, la electricidad del arma sigue mudándose AL
-            //  CORAZÓN DEL CÍRCULO — y el haz de la Ira (EsIra) sigue
-            //  vistiendo la bola del corazón mientras carga y lanza.
+            //  v6.75 — LA BOLA DEL CORAZÓN, MUERTA EN TODOS LOS HACES (la
+            //  letra: «con el problema de los rayitos identificados, ya
+            //  puedes arreglar el código del Haz de los minions en el
+            //  grimorio, ya sabes quitar esos rayitos»). Con el culpable
+            //  de la cacería CONFESO y ejecutado (la boca del arma-C,
+            //  v6.74), la misma sentencia llega AL HAZ DE LOS MINIONS:
+            //  LA BOLA DEL CORAZÓN (RayitosDelCorazon — la bola de
+            //  chispazos al centro del círculo) MUERE en sus TRES vidas:
+            //  la ceremonia que gesta, el haz de la Ira que dispara y el
+            //  arma-C disparada durante la ceremonia. El círculo de los
+            //  minions queda LIMPIO de electricidad suelta — lo que vive
+            //  en su centro es LA CREACIÓN DEL HAZ: los brazos de perlin
+            //  del escuadrón (la oración que gesta el haz — INTACTA, los
+            //  minions son los responsables de la creación), la bruma
+            //  del nacimiento, la implosión de soles y la semilla que
+            //  crece. NADA MÁS.
             // ============================================================
-            if (EsIra)
-            {
-                // EL ANCLA VIVA (el círculo ES de quien el escuadrón
-                // orbita HOY): solo el haz que SOSTIENE el círculo viste
-                // los rayitos — en el solape de la prueba (la ceremonia
-                // nueva ya nació), se van CON ELLA (el círculo es suyo) y
-                // el haz viejo muere limpio.
-                Projectile anclaCirculo = IraSerExteriorCeremoniaProjectile
-                    .RitualDe((int)Owner);
-                if (anclaCirculo == Projectile && laserCharge > 0.05f && Time % 5f < 3f)
-                {
-                    IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
-                        Projectile, laserCharge, Projectile.localAI[0]);
-                }
-            }
-            else
-            {
-                // ——— v6.72 — DURANTE LA IRA: la electricidad del arma-C
-                //      NO vive en la boca del jugador (la parte inferior
-                //      derecha, FUERA del círculo de los minions) — se
-                //      muda AL CORAZÓN DEL CÍRCULO (el ancla viva) y se
-                //      funde en LA MISMA BOLA DEL CORAZÓN de la Ira
-                //      (RayitosDelCorazon: el mismo punto, la misma
-                //      bola, la misma ley). ———
-                Projectile anclaViva = IraSerExteriorCeremoniaProjectile
-                    .RitualDe((int)Owner);
-                if (anclaViva != null && anclaViva.active && anclaViva != Projectile)
-                {
-                    if (laserCharge > 0.05f && Time % 5f < 3f)
-                    {
-                        IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
-                            anclaViva, laserCharge, Projectile.localAI[0]);
-                    }
-                }
-                // ——— v6.74 — EN PAZ: NADA. Los rayitos de la boca del
-                //      arma-C están MUERTOS por orden del usuario («borra
-                //      esos rayitos en el arma de prueba C»): ni la firma
-                //      del RC2 de la v6.73 ni las cuerdas de la v6.60.2 —
-                //      la boca del arma en paz es solo corona, aros y
-                //      conducto. ———
-            }
 
             // v6.60.2 — LA ESTRELLA DE LA BOCA MUERE (la letra: «las
             // estrellitas o brillo solo deben aparecer en la fase de

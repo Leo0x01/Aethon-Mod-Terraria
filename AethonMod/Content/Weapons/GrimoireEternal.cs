@@ -345,7 +345,18 @@ namespace AethonMod.Content.Weapons
 
         public override void SetDefaults()
         {
-            Item.damage = 11;
+            // v6.75 — EL ARMA INICIAL (la letra: «debes ajustar el daño
+            //     inicial del grimorio a 1 tanto el daño magico como el
+            //     daño de invocacion, ya que al inicio es como un arma
+            //     inicial, dejemos que con la subida de nivel ese daño
+            //     vaya mejorando solo con los calculos actuales y los
+            //     buffos ganados»): la base de AMBOS caminos nace en 1 —
+            //     el mágico (por ModifyWeaponDamage) y el de invocación
+            //     (por DanoOjosDelEterno, que lee ESTE número). TODO el
+            //     crecimiento es del NIVEL del libro, el despertar, la
+            //     reforja viva y los festines (los cálculos de siempre,
+            //     SIN tocar) — el Eterno nace humilde y se vuelve Dios.
+            Item.damage = 1;
             Item.DamageType = DamageClass.Magic;
             Item.width = 30;               // el cuerpo del Nervioso (textura 36×49)
             Item.height = 42;

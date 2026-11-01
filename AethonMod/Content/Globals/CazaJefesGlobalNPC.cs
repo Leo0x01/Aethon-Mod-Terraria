@@ -14,9 +14,11 @@ namespace AethonMod.Content.Globals
     //  El mapa NPC→puerta es el ESPEJO EXACTO de
     //  DespertarGrimorio.LosJefesDelDespertar (la escalera de la caza):
     //  el Rey Gelatina paga la puerta del 3 · Plantera la del 32 · el
-    //  Señor de la Luna la del 45. Los segmentos del Devorador y los dos
-    //  Gemelos comparten puerta (la pareja ES el jefe — la casa de
-    //  EcoSistema ya los trataba igual).
+    //  Señor de la Luna LA DEL 50 — LA CIMA (v6.75: la letra pidió al
+    //  dios final como requisito del nivel máximo del despertar).
+    //  Los segmentos del Devorador y los dos Gemelos comparten puerta
+    //  (la pareja ES el jefe — la casa de EcoSistema ya los trataba
+    //  igual).
     //
     //  (La banda del mundo de vanilla — NPC.downed* — se escribe sola:
     //  es la OTRA fuente del crédito, la que ya cubría las muertes de
@@ -70,9 +72,9 @@ namespace AethonMod.Content.Globals
                 NPCID.Golem                => 35,
                 NPCID.DukeFishron          => 38,
                 NPCID.HallowBoss           => 40,  // la Emperatriz de la Luz
-                NPCID.CultistBoss          => 43,  // el Cultista Lunático
-                NPCID.MoonLordCore         => 45,  // el corazón del Señor de la Luna
-                NPCID.MoonLordHead         => 45,  // (la cabeza cuenta si el núcleo voló raro)
+                NPCID.CultistBoss          => 45,  // el Cultista Lunático (v6.75 — la antesala de la cima)
+                NPCID.MoonLordCore         => 50,  // el corazón del Señor de la Luna — LA CIMA (v6.75)
+                NPCID.MoonLordHead         => 50,  // (la cabeza cuenta si el núcleo voló raro)
                 _ => 0,
             };
         }

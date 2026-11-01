@@ -1,3 +1,30 @@
+# v6.75 — LA BOLA DEL CORAZÓN MUERTA + LA ANIMACIÓN DE LA ORACIÓN + LA LUNA EN LA CIMA + EL ARMA INICIAL (cuatro frentes de la letra del usuario)
+
+**La letra del usuario**: «ya puedes arreglar el codifo del Haz de los minions en el grimorio, ya sabes quitar esos rayitos» + «tambien debes revisar la animacion de los minions cuando intentan lanzar el haz y al cargar el haz e intentar mejorarla de ser posible» + «debes poner tambien como requisito los bosses principales de terraria, aquellos que son importante para el progreso del juego… debes dejar a moon lord como requisito para el nivel 50 de despertar» + «debes ajustar el daño inicial del grimorio a 1 tanto el daño magico como el daño de invocacion, ya que al inicio es como un arma inicial».
+
+## (1) LOS RAYITOS DEL HAZ DE LOS MINIONS, MUERTOS — la bola del corazón en sus TRES vidas
+Con el culpable de la cacería confeso y ejecutado (la boca del arma-C, v6.74), la misma sentencia llega al **HAZ DE LOS MINIONS del grimorio**: `RayitosDelCorazon` (la bola de chispazos al centro del círculo) **MUERE ENTERO** — método y TRES llamadas: la **ceremonia** que gesta (`DibujarRitual`), el **haz de la Ira** que dispara (rama `EsIra` de `RayosPruebaProjectile`) y el **arma-C disparada durante la ceremonia** (la ley v6.72 — su electricidad ya no se muda a ningún corazón: no hay corazón). El círculo de los minions queda **LIMPIO de electricidad suelta**: lo que vive en su centro es LA CREACIÓN DEL HAZ — los **brazos de perlin del escuadrón (INTACTOS — los minions son los responsables de la creación)**, la bruma del nacimiento, la implosión de soles y la semilla que crece. NADA MÁS.
+
+## (2) LA ANIMACIÓN DE LA ORACIÓN — el cuerpo del minion al rezar (mejora pedida)
+Revisada la animación de los minions en la ceremonia (antes: solo orbitar y mirar al centro), cada ojo con SU rayo ritual vivo juega ahora **LA ANIMACIÓN DE LA ORACIÓN** (`OjoEternoMinion` + el mapa `EstaRezando` — UNA pasada por frame compartida, cero netcode):
+- **EL EMPUJÓN DE NACIMIENTO**: cuando su rayo ritual nace (el estremecimiento de soltarlo) — pop de escala +16 % y empuje de 2,2 px hacia el centro, decayendo en 9 ticks.
+- **LA INCLINACIÓN SOSTENIDA**: el ojo se inclina hacia el centro respirando (~1,4-2 px, fase propia por ojo) — la plegaria tiene cuerpo.
+- **LA TENSIÓN CRECIENTE**: una vibración fina (senos rápidos desfasados por ojo) que SUBE con el progreso de la ceremonia (0 → 1,1 px en el parto) — la carga SE SIENTE en el orante.
+- **EL SELLO SE AVIVA**: el anillo rúnico del ojo crece hasta +22 % con la tensión del ritual.
+- **EL ALIENTO ARDE**: la presencia violácea del que reza alumbra el DOBLE.
+- **EL IRIS SE DILATA**: el iris crece hasta +30 % — el ojo se ABRE para ver el centro que alimenta.
+Todo es **cine local de dibujado** (offsets como el retroceso de siempre — la órbita NO se toca): cero cambios de conducta, daño o flujo.
+
+## (3) LA LUNA EN LA CIMA — Moon Lord como requisito del nivel 50
+Verificada la escalera de LA CAZA contra la **progresión canónica de la wiki de Terraria** (los 11 principales: Ojo de Cthulhu · el Mal del Mundo · Skeletron · la Muralla · las tres mecánicas · Plantera · Gólem · el Cultista · el Señor de la Luna — TODOS con puerta, en orden de progresión, más los seis sabores opcionales de siempre), la cima se corona: **el Cultista Lunático baja al 45 y EL SEÑOR DE LA LUNA CUSTODIA EL NIVEL 50** — la cima del despertar (donde nace LA IRA) exige al dios final de Terraria MUERTO. Actualizados los TRES espejos: `LosJefesDelDespertar` (escalera) · `BanderaDelMundo` (45 → downedAncientCultist, 50 → downedMoonlord) · `CazaJefesGlobalNPC.PuertaDe` (el testigo que paga las puertas). El crédito sigue RETROACTIVO (bandera del mundo O registro del cazador) y la ventana del Cielo lo pinta sola (lee la escalera).
+
+## (4) EL ARMA INICIAL — el daño del grimorio nace en 1
+`GrimoireEternal.SetDefaults`: `Item.damage` pasa de 11 a **1** — y como `DanoOjosDelEterno` lee ESTE número, **AMBOS caminos nacen en 1** (el mágico por `ModifyWeaponDamage` y el de invocación). TODO el crecimiento queda en **los cálculos actuales y los buffos ganados**: el nivel del libro (+2,2 %/nivel mágico · +1,5 % invocación), el despertar (+1 %/nivel), la reforja viva, los festines y el maná bajo — «al inicio es como un arma inicial… dejemos que con la subida de nivel ese daño vaya mejorando». (El Equinoccio conserva SU 85 propio; LA IRA conserva su base 1000 — el poder del despertar 50.)
+
+**VERIFICACIÓN**: oráculo 0 errores/0 warnings (dotnet 8.0.412) · `-build` REAL 0/0 con RUTA ABSOLUTA a ModSources · `.tmod` v6.75 auditado (`tools/audit_v675_tmod.py`: 460 entradas, blobs 460/460, EOF exacto, sonidos vorbis dentro, RunaCompas ausente, «RayitosDelCorazon» AUSENTE de DLL y PDB — la bola muerta en los tres haces —, DispararRayoRitual/_rayosLanzados/TruenoPerlin VIVOS — la creación intacta —, EstaRezando/FactoresDeOracion/_oleadaRitual/_rayoRitualVivo VIVOS — la oración nueva —, Cultista 45 + Luna 50 en escalera/bandera/testigo, Item.damage = 1, hjson ×3, cadena de custodia byte-idéntica en los seis archivos) · texturas TODAS (AVISO-BIOME preexistente) · headless: `Sandboxing: Aethon, the Eternal Grimoire v6.75` → `Server started` CERO excepciones · el `.tmod` instalado en `~/.local/share/Terraria/tModLoader/Mods/` para el playtest.
+
+---
+
 # v6.74 — LOS RAYITOS DEL ARMA-C, MUERTOS (la prueba en mano del usuario: los rayitos «fueron modificados» — el código culpable confirmado — y la sentencia: borrarlos)
 
 **La letra del usuario**: «bueno los rayitos fueron modificados, eso quiere decir que ya sabes cual es el codigo, entonces borra esos rayitos en el arma de prueba C» — LA CONFIRMACIÓN DEFINITIVA y la sentencia final. El usuario playtesteó la v6.73 y **VIO los rayitos cambiar** (ya no eran las cuerdas gruesas de toda la vida: ahora eran las chispas radiales sutiles del RC2, solo durante la carga) — prueba en mano de que el bloque identificado ES el código culpable. Y la orden nueva no es reubicar ni disfrazar: **es EL BORRADO**.

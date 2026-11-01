@@ -410,7 +410,20 @@ namespace AethonMod.Content.Systems
         /// <summary>LOS DIECISIETE JEFES DEL CAMINO — la escalera de la
         /// caza, puerta por puerta (la progresión EXACTA de Terraria:
         /// la que también caminan las armas del peldaño). Plantera
-        /// espera en el 32 — alto, como manda la letra.</summary>
+        /// espera en el 32 — alto, como manda la letra.
+        /// v6.75 — LA CIMA ES DEL SEÑOR DE LA LUNA (la letra: «debes
+        /// poner tambien como requisito los bosses principales de
+        /// terraria, aquellos que son importante para el progreso del
+        /// juego, para saber cuales son debes investigar en las wikis
+        /// de terraria, debes dejar a moon lord como requisito para el
+        /// nivel 50 de despertar»): verificada la escalera contra la
+        /// progresión CANÓNICA de la wiki (los 11 principales — Ojo de
+        /// Cthulhu · el Mal del Mundo · Skeletron · la Muralla · las
+        /// tres mecánicas · Plantera · Gólem · el Cultista · el Señor
+        /// de la Luna — TODOS tienen su puerta, en orden), el Cultista
+        /// baja al 45 y EL SEÑOR DE LA LUNA CORONA EL NIVEL 50 — la
+        /// cima del despertar (donde nace LA IRA) exige al dios final
+        /// de Terraria MUERTO.</summary>
         public static readonly JefeDelCamino[] LosJefesDelDespertar =
         {
             new JefeDelCamino(3,  "Mods.AethonMod.Despertar.JefeReyGelatina",     NPCID.KingSlime),
@@ -428,8 +441,8 @@ namespace AethonMod.Content.Systems
             new JefeDelCamino(35, "Mods.AethonMod.Despertar.JefeGolem",           NPCID.Golem),
             new JefeDelCamino(38, "Mods.AethonMod.Despertar.JefeDuqueFishron",    NPCID.DukeFishron),
             new JefeDelCamino(40, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss),
-            new JefeDelCamino(43, "Mods.AethonMod.Despertar.JefeCultistaLunatico",NPCID.CultistBoss),
-            new JefeDelCamino(45, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore),
+            new JefeDelCamino(45, "Mods.AethonMod.Despertar.JefeCultistaLunatico",NPCID.CultistBoss),
+            new JefeDelCamino(50, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore),
         };
 
         /// <summary>¿ESTE nivel exige un jefe? (la puerta de la caza — o
@@ -446,7 +459,10 @@ namespace AethonMod.Content.Systems
         /// vanilla: la escribió Terraria al morir el jefe, en este
         /// mundo, por quien fuera — la fuente del crédito retroactivo
         /// de SIEMPRE). La Muralla no tiene bandera propia: su lápida
-        /// ES el modo difícil (la única puerta al hardmode).</summary>
+        /// ES el modo difícil (la única puerta al hardmode).
+        /// v6.75 — LA CIMA SE CORONA: el Cultista custodia el 45 y EL
+        /// SEÑOR DE LA LUNA EL 50 (la letra: «debes dejar a moon lord
+        /// como requisito para el nivel 50 de despertar»).</summary>
         public static bool BanderaDelMundo(int nivel)
         {
             return nivel switch
@@ -466,8 +482,8 @@ namespace AethonMod.Content.Systems
                 35 => NPC.downedGolemBoss,
                 38 => NPC.downedFishron,
                 40 => NPC.downedEmpressOfLight,
-                43 => NPC.downedAncientCultist,
-                45 => NPC.downedMoonlord,
+                45 => NPC.downedAncientCultist, // v6.75 — la antesala de la cima
+                50 => NPC.downedMoonlord,       // v6.75 — LA CIMA: el Señor de la Luna
                 _  => false,
             };
         }

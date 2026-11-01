@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -87,6 +88,23 @@ namespace AethonMod.Content.Projectiles
         //     tirón y se desplaza hacia atrás) ===
         private float _retroceso;
         private Vector2 _dirRetroceso;
+
+        // === v6.75 — LA ORACIÓN VIVA (la letra: «también debes revisar
+        //     la animacion de los minions cuando intentan lanzar el haz
+        //     y al cargar el haz e intentar mejorarla de ser posible»):
+        //     mientras el ritual de la Ira vive, cada ojo con SU rayo
+        //     rezando al centro juega LA ANIMACIÓN DE LA ORACIÓN — el
+        //     EMPUJÓN DE NACIMIENTO (su rayo ritual nace y el ojo SE
+        //     ESTREMECE: un pop de escala y un empuje hacia el centro),
+        //     LA INCLINACIÓN SOSTENIDA (el ojo se inclina al centro,
+        //     respirando — la plegaria tiene cuerpo), LA TENSIÓN
+        //     CRECIENTE (una vibración fina que SUBE con el progreso de
+        //     la ceremonia — el parto se siente en el orante) y la
+        //     MIRADA DILATADA (el iris crece: el foco de la plegaria).
+        //     Todo es CINE LOCAL (dibujado): cada cliente lo lee del
+        //     rayo ritual sincronizado — CERO netcode nuevo. ===
+        private float _oleadaRitual;      // el empujón del nacimiento (9→0)
+        private bool _rayoRitualVivo;     // ¿MI rayo ritual está vivo HOY?
 
         // === LA CADENCIA INDIVIDUAL (la .107: «cada ojo debe ser
         //     individual y deben tener la libertad de atacar cuando
@@ -513,6 +531,16 @@ namespace AethonMod.Content.Projectiles
             Projectile.ai[1]++;
             if (Projectile.frame > 0) Projectile.frame--;         // la cadencia (frame prestado)
 
+            // === v6.75 — LA ORACIÓN VIVA: el estado del rezo. El
+            //     empujón nace cuando MI rayo ritual NACE (el flip
+            //     false→true del mapa de la oración — el estremecimiento
+            //     de soltar el rayo) y decae en 9 ticks; el resto de la
+            //     animación la lee el dibujado (FactoresDeOracion). ===
+            bool rezandoAhora = EstaRezando(Projectile.whoAmI);
+            if (rezandoAhora && !_rayoRitualVivo) _oleadaRitual = 9f;
+            _rayoRitualVivo = rezandoAhora;
+            if (_oleadaRitual > 0f) _oleadaRitual--;
+
             // === LA PRESENCIA: el halo suave del ojo ===
             Lighting.AddLight(Projectile.Center, new Vector3(0.45f, 0.34f, 0.18f));
         }
@@ -781,6 +809,72 @@ namespace AethonMod.Content.Projectiles
             return slot;
         }
 
+        // ================================================================
+        //  v6.75 — EL MAPA DE LA ORACIÓN (cache por frame, el patrón de
+        //  la casa): qué ojos tienen SU rayo ritual vivo — el
+        //  TruenoPerlin en modo ritual (ai[0]=2) lleva la boca en ai[1]
+        //  (el whoAmI del ojo). UNA sola pasada por frame compartida
+        //  por todo el escuadrón; cada cliente lo computa de SUS
+        //  proyectiles sincronizados (cero netcode).
+        // ================================================================
+        private static int _frameRezo = -1;
+        private static readonly HashSet<int> _ojosRezando = new HashSet<int>();
+
+        /// <summary>¿ESTE ojo tiene su rayo ritual vivo (está rezando al
+        /// centro)? — el mapa del rezo del frame, compartido.</summary>
+        internal static bool EstaRezando(int whoAmIOjo)
+        {
+            if (_frameRezo != (int)Main.GameUpdateCount)
+            {
+                _frameRezo = (int)Main.GameUpdateCount;
+                _ojosRezando.Clear();
+                int tipo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Cosmic.TruenoPerlinProjectile>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.type != tipo) continue;
+                    if (p.ai[0] < 2f) continue;          // solo los RITUALES
+                    int boca = (int)p.ai[1];
+                    if (boca >= 0) _ojosRezando.Add(boca);
+                }
+            }
+            return _ojosRezando.Contains(whoAmIOjo);
+        }
+
+        /// <summary>v6.75 — LOS FACTORES DE LA ORACIÓN (los lee el
+        /// dibujado): ¿reza? · la TENSIÓN de la ceremonia (0→1 — la
+        /// vibración crece con el parto) · el EMPUJÓN de nacimiento
+        /// (0→1, decae) · el vector HACIA EL CENTRO (la inclinación de
+        /// la plegaria — el ancla viva del ritual).</summary>
+        private bool FactoresDeOracion(out float tension, out float empujon,
+            out Vector2 haciaElCentro)
+        {
+            tension = 0f;
+            empujon = Math.Min(_oleadaRitual / 9f, 1f);
+            haciaElCentro = Vector2.Zero;
+            if (!_rayoRitualVivo) return false;
+            Projectile ancla = global::AethonMod.Content.Projectiles.Definitivas
+                .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
+            if (ancla == null || !ancla.active) return false;
+            Vector2 dir = ancla.Center - Projectile.Center;
+            if (dir.LengthSquared() > 0.01f)
+            {
+                dir.Normalize();
+                haciaElCentro = dir;
+            }
+            // LA TENSIÓN: el progreso de la ceremonia (su edad ai[2] de
+            // 0→450). Si el ancla ya es EL HAZ (la ceremonia cumplió y
+            // los rayos se disuelven): tensión al máximo — el último
+            // estertor del rezo.
+            if (ancla.ModProjectile is global::AethonMod.Content.Projectiles
+                    .Definitivas.IraSerExteriorCeremoniaProjectile)
+                tension = MathHelper.Clamp(ancla.ai[2] / 450f, 0f, 1f);
+            else
+                tension = 1f;
+            return true;
+        }
+
         /// <summary>LA PRESA: la más cercana válida en rango (el filtro del
         /// Orbe Cósmico, heredado) — la misma lista en todos los clientes.</summary>
         private NPC ObjetivoDelOjo(Player dueño, int nivel)
@@ -831,16 +925,40 @@ namespace AethonMod.Content.Projectiles
             // v6.50.114 — EL RETROCESO SE LEE: el sello se desplaza con el
             // rebote del disparo (la dirección de la patada) y encoge con él
             float squash = Math.Min(_retroceso / 14f, 1f);
-            Vector2 pos = Projectile.Center - Main.screenPosition
-                + _dirRetroceso * (6.5f * squash);
             float time = Main.GlobalTimeWrappedHourly;
             int seed = Projectile.whoAmI * 13 + 7;
+
+            // === v6.75 — LA ORACIÓN VIVE EN EL SELLO: mientras MI rayo
+            //     reza al centro, el ojo SE INCLINA hacia él (el empujón
+            //     del nacimiento + la inclinación respirada de la
+            //     plegaria sostenida) y una VIBRACIÓN FINA crece con la
+            //     tensión de la ceremonia — el parto se siente en el
+            //     cuerpo del orante (mismo patrón del retroceso: un
+            //     offset de dibujado, la órbita NO se toca) ===
+            bool reza = FactoresDeOracion(out float tension, out float empujon,
+                out Vector2 alCentro);
+            Vector2 rezo = Vector2.Zero;
+            if (reza)
+            {
+                float respiracion = 1.4f + 0.6f * MathF.Sin(time * 2.4f + Projectile.whoAmI * 1.7f);
+                rezo = alCentro * (2.2f * empujon + respiracion * 0.5f);
+                rezo += new Vector2(
+                    MathF.Sin(time * 23.7f + Projectile.whoAmI * 2.1f),
+                    MathF.Cos(time * 19.3f + Projectile.whoAmI * 1.7f))
+                    * (0.25f + 0.85f * tension);
+            }
+            Vector2 pos = Projectile.Center - Main.screenPosition
+                + _dirRetroceso * (6.5f * squash) + rezo;
 
             // la carga: el sello inhala (ESCALA·16 → ESCALA·20)
             float r = ESCALA * 16f * (1f - 0.15f * squash);
             if (Projectile.ai[0] == MODO_APUNTANDO)
                 r = MathHelper.Lerp(ESCALA * 16f, ESCALA * 20f,
                     Math.Min(Projectile.ai[1] / (float)AIM_TICKS, 1f));
+            // v6.75 — Y EN LA ORACIÓN el sello CRECE con la tensión del
+            //     ritual (el anillo del orante se AVIVA conforme el haz
+            //     se gesta — hasta +22 % al final del parto)
+            if (reza) r *= 1f + 0.22f * tension;
 
             float glyph = Math.Max(r / 52f, 0.25f) * 1.75f;
 
@@ -922,8 +1040,12 @@ namespace AethonMod.Content.Projectiles
                 }
 
                 // la presencia: el aliento violáceo DETRÁS del ojo (la
-                // lectura nocturna) — a la ESCALA del ojo (la mitad)
+                // lectura nocturna) — a la ESCALA del ojo (la mitad).
+                // v6.75 — Y EN LA ORACIÓN EL ALIENTO ARDE: el que reza
+                //     alumbra el DOBLE (el canal vive en su cuerpo — la
+                //     plegaria se VE desde la noche).
                 float pulso = 0.09f + 0.05f * MathF.Sin(time * 2.6f + Projectile.whoAmI);
+                if (reza) pulso += 0.10f + 0.06f * tension;
                 Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
                     new Color(96, 48, 150, 255) * pulso, 0f,
                     VFXCore.SoftGlow.Size() * 0.5f, new Vector2(ESCALA * 3.33f, ESCALA * 2.8f),
@@ -974,9 +1096,28 @@ namespace AethonMod.Content.Projectiles
             // (la dirección de la patada, ~6,5 px) con un pop de escala
             // que decae con el estado — el pequeño tirón del disparo
             float squash = Math.Min(_retroceso / 14f, 1f);
+            float time = Main.GlobalTimeWrappedHourly;
+
+            // === v6.75 — EL CUERPO DEL ORANTE: la MISMA oración del
+            //     sello (empujón de nacimiento + inclinación respirada
+            //     + vibración de tensión) vive en el ojo — y el pop del
+            //     nacimiento (el rayo nace y el ojo SE ESTREMECE:
+            //     +16 % de escala que decae en 9 ticks) ===
+            bool reza = FactoresDeOracion(out float tension, out float empujon,
+                out Vector2 alCentro);
+            Vector2 rezo = Vector2.Zero;
+            if (reza)
+            {
+                float respiracion = 1.4f + 0.6f * MathF.Sin(time * 2.4f + Projectile.whoAmI * 1.7f);
+                rezo = alCentro * (2.2f * empujon + respiracion * 0.5f);
+                rezo += new Vector2(
+                    MathF.Sin(time * 23.7f + Projectile.whoAmI * 2.1f),
+                    MathF.Cos(time * 19.3f + Projectile.whoAmI * 1.7f))
+                    * (0.25f + 0.85f * tension);
+            }
             Vector2 pos = Projectile.Center - Main.screenPosition
-                + _dirRetroceso * (6.5f * squash);
-            float escOjo = ESCALA * (1f + 0.16f * squash);
+                + _dirRetroceso * (6.5f * squash) + rezo;
+            float escOjo = ESCALA * (1f + 0.16f * squash + 0.16f * empujon);
             Texture2D abierto = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
             Vector2 origen = abierto.Size() * 0.5f;
@@ -1013,9 +1154,13 @@ namespace AethonMod.Content.Projectiles
 
                     Texture2D iris = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+                    // v6.75 — EL IRIS DEL ORANTE SE DILATA: el foco de la
+                    //     plegaria (hasta +30 % con la tensión del parto —
+                    //     el ojo se ABRE para ver el centro que alimenta)
+                    float escIris = IRIS_ESCALA * (reza ? 1f + 0.30f * tension : 1f);
                     Main.spriteBatch.Draw(iris,
                         pos + (IRIS_REST + mirada) * escOjo, null, color, 0f,
-                        iris.Size() * 0.5f, IRIS_ESCALA * escOjo, SpriteEffects.None, 0f);
+                        iris.Size() * 0.5f, escIris * escOjo, SpriteEffects.None, 0f);
                 }
             }
             finally { Main.spriteBatch.End(); }
