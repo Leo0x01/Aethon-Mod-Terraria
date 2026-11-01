@@ -979,6 +979,181 @@ Items: {
                         '''
         }
 
+        // v6.77 — LA BOLSA DEL CRECIMIENTO (bolsa 26) — las 14 armas que
+        // CRECEN (la letra: «porque elegir una cuando se pueden hacer
+        // todas jajajajajaja»).
+        BolsaDelCrecimiento: {
+                DisplayName: La Bolsa del Crecimiento
+                Tooltip:
+                        '''
+                        Las 14 armas que CRECEN — una por cada idea, todas.
+                        Cada arma es una idea distinta de crecimiento: germinación, fusión, carga,
+                        distancia, rebote, mordida, caída, órbita, eco, contacto…
+                        Clic derecho para desplegarlas. Solo entrega lo que te falte.
+                        '''
+        }
+
+        CrecimientoSemillaRunica: {
+                DisplayName: La Semilla Rúnica
+                Tooltip:
+                        '''
+                        IDEA 1: LA RUNA QUE GERMINA (la favorita).
+                        El ataque base planta una runa diminuta donde apuntas; la runa GERMINA
+                        (de glifo pequeño a sello completo en ~1 s) dañando en área creciente.
+                        Clic sobre una runa MADURA la detona con la esfera de luz
+                        (nivel 12: la runa madura vive más · nivel 20: al detentar siembra DOS hijas).
+                        Sin maná — la evolución sigue al GRIMORIO que lleves encima.
+                        '''
+        }
+
+        CrecimientoPalabraHueca: {
+                DisplayName: La Palabra Hueca
+                Tooltip:
+                        '''
+                        IDEA 2: LA PALABRA QUE CRECE POR FUSIÓN.
+                        El libro escupe una palabra brillante pequeña y lenta; cada disparo nuevo
+                        la ABSORBE y la palabra CRECE — al cuarto refuerzo es un VERBO DE PODER enorme.
+                        Escalar el daño = alimentar la oración.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoVelaEngrine: {
+                DisplayName: La Vela que Engreñe
+                Tooltip:
+                        '''
+                        IDEA 3: LA VELA QUE ENGREÑE.
+                        Mantén el clic: la llama del libro CRECE (la carga en el propio ataque base).
+                        Al soltar, escupe la llama con tamaño y daño según lo cargado — sin ser el haz.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoCometaPalabras: {
+                DisplayName: El Cometa de Palabras
+                Tooltip:
+                        '''
+                        IDEA 4: EL COMETA QUE CRECE CON LA DISTANCIA.
+                        Nace diminuto al salir del libro: a 5 bloques es una chispa,
+                        a 30 bloques es un cometa. Recompensa el apuntado lejano,
+                        castiga el punto-blanco.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoSelloDigital: {
+                DisplayName: El Sello Digital
+                Tooltip:
+                        '''
+                        IDEA 5: EL CLICKER PURO ADAPTADO.
+                        Cada clic planta un sello rúnico instantáneo en el cursor (dentro de un radio
+                        que crece con el nivel del libro); cada sello suma PÁGINAS — a las 10,
+                        una PALABRA DE PODER (área, cadena, empuje).
+                        El radio se dibuja como un círculo rúnico tenue alrededor del jugador.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoLatigoPerlin: {
+                DisplayName: El Látigo de Perlin
+                Tooltip:
+                        '''
+                        IDEA 6: EL LÁTIGO DE PERLIN.
+                        Un brazo corto de rayo perlin (¡el idioma visual de los ojos!) que sale del libro
+                        y crece de 20 a 96 px con el nivel — el ataque base que ya habla tu estética.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoDevoradorMenor: {
+                DisplayName: El Devorador Menor
+                Tooltip:
+                        '''
+                        IDEA 7: LA BOQUITA QUE CRECE MORDIENDO.
+                        Una boquita diminuta que vuela, muerde varias veces y crece un 15 % con cada
+                        mordida hasta REVENTAR en una nube de bruma — el hambre del libro en miniatura.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoEstrellaDomestica: {
+                DisplayName: La Estrella Doméstica
+                Tooltip:
+                        '''
+                        IDEA 8: LA ESTRELLA QUE CAE CRECIENDO.
+                        Nace como puntito sobre el libro abierto y cae hacia el cursor creciendo durante
+                        la caída (la gravedad la alimenta); estalla en el punto exacto. Precisión pura.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoPaginaCortante: {
+                DisplayName: La Página Cortante
+                Tooltip:
+                        '''
+                        IDEA 9: LA HOJA QUE CRECE REBOTANDO.
+                        Una hoja voladora doblada como daga que crece con cada rebote en las paredes
+                        (hasta ×3) — estilo ninja de biblioteca maldita.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoPrismaFragmentado: {
+                DisplayName: El Prisma Fragmentado
+                Tooltip:
+                        '''
+                        IDEA 10: EL CRECIMIENTO POR FUSIÓN.
+                        El primer clic lanza un fragmento; el siguiente lo divide en dos menores
+                        que se RE-FUSIONAN en uno MAYOR que golpea — la ciencia del grimorio.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoRunaOrbital: {
+                DisplayName: La Runa Orbital
+                Tooltip:
+                        '''
+                        IDEA 11: LOS GLIFOS QUE ESPERAN.
+                        3-5 glifos orbitan el libro mientras lo llevas (visibles incluso en idle:
+                        el libro siempre listo); al clicar, uno sale disparado girando hacia el cursor.
+                        Los glifos crecen con la órbita del tiempo.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoEsporaDelEscriba: {
+                DisplayName: La Espora del Escriba
+                Tooltip:
+                        '''
+                        IDEA 12: LAS TRAMPAS VIVAS.
+                        Un proyectil lento que va plantando esporas en su camino; las esporas crecen
+                        en silencio y DETONAN cuando un enemigo se acerca — campos de trampas vivas.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoEcoDelTrazo: {
+                DisplayName: El Eco del Trazo
+                Tooltip:
+                        '''
+                        IDEA 13: LA ESTELA QUE SE VUELVE CUERPO.
+                        El proyectil deja un trazo de tinta que crece hacia atrás; mientras más lejos
+                        viaja, más grueso es el látigo de tinta que barre A SU REGRESO.
+                        Sin maná.
+                        '''
+        }
+
+        CrecimientoTintaViva: {
+                DisplayName: La Tinta Viva
+                Tooltip:
+                        '''
+                        IDEA 14: EL SNOWBALL CON TOPE.
+                        Una gota de tinta semitransparente que se AVIVA con cada enemigo que toca
+                        (cada golpe la hace más grande y más opaca) — controlado, con tope.
+                        Sin maná.
+                        '''
+        }
+
         DesgarroRealityStaff: {
                 // v6.26 — The new arsenal: the reality tear, the real stars,
                 // the stellar life cycle and the five creative staves
@@ -2879,8 +3054,8 @@ Despertar: {
         // v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
         // piden que maten a los jefes»): la línea de la puerta de caza en
         // la LISTA DE REQUISITOS del tooltip — con SU estado.
-        ReqJefeCaido: La presa del peldaño: {0} — CAÍDA
-        ReqJefeViva: La presa del peldaño: {0} — ¡VIVA! El grimorio exige su caza
+        ReqJefeCaido: La presa del peldaño: {0} — DEVORADO
+        ReqJefeViva: La presa del peldaño: {0} — Todavía VIVO. El grimorio exige su caza
         // v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
         // ítem El Ojo del Cielo — la textura del cielo de la letra).
         CieloTitulo: EL CIELO DEL DESPERTAR

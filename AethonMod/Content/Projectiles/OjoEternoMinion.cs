@@ -106,6 +106,20 @@ namespace AethonMod.Content.Projectiles
         private float _oleadaRitual;      // el empujón del nacimiento (9→0)
         private bool _rayoRitualVivo;     // ¿MI rayo ritual está vivo HOY?
 
+        // === v6.77 — EL PEGUE AL ANCLA (la letra: «los minions ahora
+        //     cuando estan creando el haz o cuando lo estan lanzando si
+        //     el jugador se mueve el seguimiento de los minions es muy
+        //     lento y entonces dejan de estar centrados con el haz»):
+        //     el ojo HEREDA el movimiento del ancla del ritual — el
+        //     círculo entero viaja RÍGIDO con su centro (la ceremonia
+        //     que gesta o el haz que dispara) y la ley suave de la v6.76
+        //     solo corrige el GIRO y el resto. La guardia del whoAmI:
+        //     si el ancla CAMBIA de proyectil (la ceremonia muere y nace
+        //     el haz), el delta entre proyectiles NO se hereda (sería un
+        //     salto falso). ===
+        private int _anclaWho = -1;
+        private Vector2? _anclaPrev;
+
         // === LA CADENCIA INDIVIDUAL (la .107: «cada ojo debe ser
         //     individual y deben tener la libertad de atacar cuando
         //     quieran y a la velocidad que deseen; la velocidad de ataque
@@ -457,6 +471,36 @@ namespace AethonMod.Content.Projectiles
                 //     sobrepasarlo nunca). ===
                 Vector2 alSlot = slot - Projectile.Center;
                 float dist = alSlot.Length();
+                // === v6.77 — EL PEGUE AL ANCLA (la letra: «si el jugador
+                //     se mueve el seguimiento de los minions es muy lento
+                //     y entonces dejan de estar centrados con el haz» —
+                //     la captura: los ojos arriba, los círculos rúnicos
+                //     del haz abajo): la ley suave de la v6.76 (k 0,10,
+                //     tope 9 px/t) persigue el PUESTO, pero cuando el
+                //     ANCLA viaja (el jugador corre o cae — hasta 11
+                //     px/t) el puesto se mueve MÁS RÁPIDO que el tope y
+                //     el círculo entero se queda ATRÁS. LA CURA: el ojo
+                //     HEREDA el movimiento del ancla de ESTE tick — el
+                //     círculo viaja RÍGIDO con su centro (pegue total al
+                //     haz) y la ley suave de abajo solo corrige el giro
+                //     lento y el resto: SUAVIDAD en la formación (la de
+                //     la v6.76, INTACTA) + PEGUE en el seguimiento. ===
+                if (ritualIra != null)
+                {
+                    if (_anclaWho == ritualIra.whoAmI && _anclaPrev.HasValue)
+                    {
+                        Vector2 deltaAncla = ritualIra.Center - _anclaPrev.Value;
+                        if (deltaAncla.X != 0f || deltaAncla.Y != 0f)
+                            Projectile.position += deltaAncla;
+                    }
+                    _anclaWho = ritualIra.whoAmI;
+                    _anclaPrev = ritualIra.Center;
+                }
+                else
+                {
+                    _anclaWho = -1;
+                    _anclaPrev = null;
+                }
                 // === v6.76 — EL VIAJE SUAVE AL CÍRCULO (la letra: «el
                 //     movimiento de los minions del jugador a volverse
                 //     un circulo para comenzar a cargar el haz es un

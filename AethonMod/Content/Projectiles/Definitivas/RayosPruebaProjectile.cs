@@ -1000,18 +1000,28 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         * Utils.GetLerpValue(ChargeTime + LaserDuration,
                             ChargeTime + LaserDuration - 60f, Time, true);
                     const float rE = 13f;
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
-                        new Color(216, 198, 255) * (0.30f * lateE * alientoE), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE * 3.1f / 64f, rE * 3.1f / 64f), SpriteEffects.None, 0f);
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
-                        new Color(246, 238, 255) * (0.55f * lateE * alientoE), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE * 1.8f / 64f, rE * 1.8f / 64f), SpriteEffects.None, 0f);
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
-                        new Color(255, 252, 255) * (0.85f * lateE * alientoE), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE / 64f, rE / 64f), SpriteEffects.None, 0f);
+                    // === v6.77 — LA CURA DEL client.log (la letra:
+                    //     «tambien parece que hubo algun error»): la esfera
+                    //     de la boca dibujaba con Main.spriteBatch DIRECTO
+                    //     justo después de CerrarLoteSiAbierto — con el
+                    //     lote CERRADO el Draw lanzaba «Begin has not yet
+                    //     been called» y la esfera JAMÁS se dibujó (la
+                    //     Excepción silenciosa del log). AHORA viaja en EL
+                    //     PIPELINE DE QUADS de la casa: VFXCore.Quad la
+                    //     encola (coords de mundo, px finales — la MISMA
+                    //     matemática) y el FlushAdditive de abajo la
+                    //     vuelca ADITIVA junto a los soles de la carga —
+                    //     la boca del haz viste SU corazón luminoso TODO
+                    //     el lanzamiento, de verdad. ===
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(216, 198, 255) * (0.30f * lateE * alientoE),
+                        new Vector2(rE * 3.1f, rE * 3.1f));
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(246, 238, 255) * (0.55f * lateE * alientoE),
+                        new Vector2(rE * 1.8f, rE * 1.8f));
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(255, 252, 255) * (0.85f * lateE * alientoE),
+                        new Vector2(rE, rE));
                 }
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }

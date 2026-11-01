@@ -1504,7 +1504,14 @@ namespace AethonMod.Content.Weapons
                         // del mismo span, y el arma con SU NOMBRE + SU
                         // SPRITE INLINE [i:id] — el tag de item NATIVO de
                         // tML, a prueba de todo).
-                        string colOK = "7FE89B", colNo = "C4A2FF";
+                        // v6.77 — LA LETRA: «los colores rojo para
+                        //     cuando no esta completado y verde para
+                        //     cuando esta completado deberian ser usados
+                        //     para todos los requisistos de nivel del
+                        //     Despertar»: colNo pasa del LILA (C4A2FF) al
+                        //     ROJO — y TODO el peldaño lo lee (esencias,
+                        //     dinero, arma, mineral y LA PRESA).
+                        string colOK = "7FE89B", colNo = "FF7B7B";
 
                         // === EL REQUISITO 1 — LAS ESENCIAS (las comidas). ===
                         bool esenciasOK = comidasEsencias >= esencias;
@@ -1623,9 +1630,14 @@ namespace AethonMod.Content.Weapons
                         //     del Cielo — pero la LISTA DE REQUISITOS
                         //     también lo dice: cuando el peldaño
                         //     siguiente es UNA PUERTA DE CAZA, su línea
-                        //     propia — EL JEFE con SU estado (CAÍDA ✓
-                        //     verde latiente / ¡VIVA! roja). El crédito
-                        //     es RETROACTIVO (JefeYaCaido: la bandera
+                        //     propia — EL JEFE con SU estado (v6.77 — la
+                        //     letra: «en caso de que ya mataste al jefe
+                        //     debe decir DEVORADO… recuerda que la
+                        //     primera muerte de cada jefe el grimorio se
+                        //     los come jajajajajaja; y si todavia no lo
+                        //     has matado debe decir algo como Todavia
+                        //     VIVO»: DEVORADO ✓ verde / Todavía VIVO
+                        //     roja). El crédito es RETROACTIVO (JefeYaCaido: la bandera
                         //     del mundo O el registro del cazador que
                         //     viaja con el personaje): si YA lo mataste
                         //     — aunque haya sido hace meses o en otro
@@ -1642,20 +1654,22 @@ namespace AethonMod.Content.Weapons
                                 string lineaJefe = presaCaida
                                     ? Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeCaido", nombreJefe)
                                     : Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeViva", nombreJefe);
-                                string colJefe = presaCaida ? colOK : "FFA3A3";
+                                string colJefe = presaCaida ? colOK : colNo;   // v6.77 — el MISMO rojo de todo el peldaño
                                 tooltips.Add(new TooltipLine(Mod, "DespertarReqJefe",
                                     $"[c/{colJefe}:  • {lineaJefe}{(presaCaida ? "  ✓" : "")}]"));
                             }
                         }
 
                         // === v6.51.11 — LA NOTA FINAL (la comida se sirve
-                        //     EN EL SUELO — el gesto nuevo): con el arma O
-                        //     los lingotes basta; suelta la ofrenda
-                        //     DELANTE del grimorio SELECCIONADO y come SOLO
-                        //     lo que necesita (nada del inventario — el
-                        //     error de la mochila murió). ===
+                        //     EN EL SUELO — el gesto nuevo): con el arma o
+                        //     los lingotes basta (v6.77 — la letra: «esa O
+                        //     esta mayuscula, deberia estar en minuscula
+                        //     ya que se confunde con un cero"); suelta la
+                        //     ofrenda DELANTE del grimorio SELECCIONADO y
+                        //     come SOLO lo que necesita (nada del
+                        //     inventario — el error de la mochila murió). ===
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
-                            "[c/78788C:  (con el arma O los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
+                            "[c/78788C:  (con el arma o los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
                     }
                     else
                     {

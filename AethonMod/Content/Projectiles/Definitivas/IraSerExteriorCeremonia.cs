@@ -678,21 +678,29 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     float lateE = 0.72f + 0.28f * MathF.Sin(time * 6.4f);
                     float rE = MathHelper.Lerp(6f, 15f, prog * prog);
                     float creceE = 0.30f + 0.70f * prog;
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
-                        new Color(214, 196, 255) * (0.30f * lateE * creceE), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE * 3.2f / 64f, rE * 3.2f / 64f),
-                        SpriteEffects.None, 0f);
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
-                        new Color(246, 238, 255) * (0.55f * lateE * creceE), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE * 1.8f / 64f, rE * 1.8f / 64f),
-                        SpriteEffects.None, 0f);
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
-                        new Color(255, 252, 255) * (0.85f * lateE * (0.25f + 0.75f * prog)), 0f,
-                        VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(rE / 64f, rE / 64f),
-                        SpriteEffects.None, 0f);
+                    // === v6.77 — LA CURA DEL client.log (la letra:
+                    //     «tambien parece que hubo algun error»): la esfera
+                    //     dibujaba con Main.spriteBatch DIRECTO justo
+                    //     después de CerrarLoteSiAbierto — con el lote
+                    //     CERRADO el Draw lanzaba «Begin has not yet been
+                    //     called» (la Excepción silenciosa del log, 4
+                    //     veces en la partida) y la esfera JAMÁS se
+                    //     dibujó. AHORA viaja en EL PIPELINE DE QUADS de
+                    //     la casa: VFXCore.Quad la encola (coords de
+                    //     mundo, escala en px finales — la MISMA
+                    //     matemática) y el FlushAdditive de abajo la
+                    //     vuelca ADITIVA junto a los soles y la semilla
+                    //     — el corazón luminoso NACE de verdad,
+                    //     brillando con intensidad. ===
+                    VFXCore.Quad(centro,
+                        new Color(214, 196, 255) * (0.30f * lateE * creceE),
+                        new Vector2(rE * 3.2f, rE * 3.2f));
+                    VFXCore.Quad(centro,
+                        new Color(246, 238, 255) * (0.55f * lateE * creceE),
+                        new Vector2(rE * 1.8f, rE * 1.8f));
+                    VFXCore.Quad(centro,
+                        new Color(255, 252, 255) * (0.85f * lateE * (0.25f + 0.75f * prog)),
+                        new Vector2(rE, rE));
                 }
 
                 // LA SEMILLA DEL HAZ: la estrella de 4 puntas que CRECE en

@@ -812,6 +812,9 @@ namespace AethonMod.Content.Items.Bolsas
             // necesaria» — era la corona que rotaba las 4 sentencias ×1.3;
             // las 4 viven por sí mismas, sin dictador.)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
+            // v6.77 — LA BOLSA DEL CRECIMIENTO (la ronda de las 14):
+            // las 14 armas que crecen, una por cada idea.
+            l.Add((ModContent.ItemType<BolsaDelCrecimiento>(), 1));
             return l;
         }
     }
@@ -853,6 +856,63 @@ namespace AethonMod.Content.Items.Bolsas
                 // es LA definitiva (y el haz de la Ira de un Ser Exterior).
                 (ModContent.ItemType<RayoPruebaC>(), 1)
             };
+        }
+    }
+
+    // ======================================================================
+    //  v6.77 — LA BOLSA DEL CRECIMIENTO (bolsa 26 del kit). LA LETRA (la
+    //  ronda de las 14 ideas): «porque elegir una cuando se pueden hacer
+    //  todas jajajajajaja, crea una bolsa nueva y dasela al jugador, esta
+    //  sera una bolsa con un arma nueva por cada una de las ideas, 14
+    //  armas en total». EL TEMA que las une: CRECER — por germinación,
+    //  por fusión, por carga, por distancia, por rebote, por mordida,
+    //  por caída, por órbita, por eco, por contacto. Las 14 completas
+    //  (la letra de cada idea en CrecimientoArsenal.cs), todas con las
+    //  librerías de la casa y todas evolutivas con el GRIMORIO.
+    // ======================================================================
+    public class BolsaDelCrecimiento : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa del Crecimiento";
+
+        protected override string NombreCorto => "Bolsa del Crecimiento";
+
+        protected override Color ColorFiesta => new Color(178, 255, 205);
+
+        protected override string Nota => "Las 14 armas que CRECEN — una por cada idea, todas jajajajajaja";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // 1 · LA SEMILLA RÚNICA — la runa que germina (la favorita de
+            //     la letra: «mi favorita»).
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoSemillaRunica>(), 1));
+            // 2 · LA PALABRA HUECA — la palabra que crece por fusión.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoPalabraHueca>(), 1));
+            // 3 · LA VELA QUE ENGREÑE — la llama que se carga.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoVelaEngrine>(), 1));
+            // 4 · EL COMETA DE PALABRAS — crece con la distancia.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoCometaPalabras>(), 1));
+            // 5 · EL SELLO DIGITAL — el clicker de los sellos.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoSelloDigital>(), 1));
+            // 6 · EL LÁTIGO DE PERLIN — el brazo corto de rayo.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoLatigoPerlin>(), 1));
+            // 7 · EL DEVORADOR MENOR — la boquita que crece mordiendo.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoDevoradorMenor>(), 1));
+            // 8 · LA ESTRELLA DOMÉSTICA — la caída que alimenta.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoEstrellaDomestica>(), 1));
+            // 9 · LA PÁGINA CORTANTE — la daga que crece rebotando.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoPaginaCortante>(), 1));
+            // 10 · EL PRISMA FRAGMENTADO — la fusión que golpea.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoPrismaFragmentado>(), 1));
+            // 11 · LA RUNA ORBITAL — los glifos que esperan.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoRunaOrbital>(), 1));
+            // 12 · LA ESPORA DEL ESCRIBA — las trampas vivas.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoEsporaDelEscriba>(), 1));
+            // 13 · EL ECO DEL TRAZO — el látigo que regresa.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoEcoDelTrazo>(), 1));
+            // 14 · LA TINTA VIVA — el snowball con tope.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CrecimientoTintaViva>(), 1));
+            return l;
         }
     }
 }
