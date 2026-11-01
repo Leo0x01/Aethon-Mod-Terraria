@@ -40,15 +40,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //              del haz NO lleva sonidos de Terraria — ni el zap de
     //              los rayos rituales ni el compás: la ceremonia YA
     //              tiene su propia voz, la carga del RC2).
-    //    12 ── 112  (v6.68 — LOS RAYOS DE PERLIN MURIERON: los brazos de
-    //              perlin ojo→centro que cruzaban TODO el disco del
-    //              círculo — los rayitos de la parte inferior derecha
-    //              que la casa NUNCA tocó — «esos quitalos de ahi». La
-    //              oración es AHORA la bola del corazón: RayitosDelCorazon
-    //              en la bruma del nacimiento, TODO el ritual.)
-    //    · ── 450  (v6.68 — con los brazos muertos, el disco del círculo
-    //              queda LIMPIO: solo la bruma, la corona, la bola del
-    //              corazón en el nacimiento y los soles que implosionan.)
+    //    12 ── 112  LOS RAYOS DE PERLIN (v6.71 — RESUCITADOS: la letra,
+    //              «los minion no lanzan sus rayos perling hacia el
+    //              centro para crear el haz, eso no lo debes eliminar,
+    //              los minions son los responsables de la creacion del
+    //              haz» — la v6.68 los mató por error creyendo que eran
+    //              los rayitos de la parte inferior derecha, pero estos
+    //              brazos ojo→centro viven DENTRO del disco del círculo
+    //              y son LA CREACIÓN DEL HAZ): cada ojo del escuadrón,
+    //              uno a uno (uno cada 10 ticks — el orden del
+    //              escuadrón), dispara SU RAYO RITUAL (TruenoPerlin modo
+    //              ritual: la boca SIGUE al ojo que gira, la punta
+    //              clavada al centro — sostenido TODO el ritual, MUDO
+    //              en la ira).
+    //    · ── 450  LA BOLA DEL CORAZÓN (v6.66 — RayitosDelCorazon en la
+    //              bruma del nacimiento, TODO el ritual) y los brazos de
+    //              perlin del escuadrón alimentando el centro.
     //  150 ── 449  LA CARGA: el sonido amado de la carga del RC2 suena
     //              entero (5,15 s), la implosión de soles rúnicos NACE
     //              LEJOS y cae al centro y TODO se CIÑE en los últimos
@@ -115,15 +122,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // rumbo de nacimiento es el CURSOR del dueño — siempre existe,
         // no hace falta recordar a nadie.
 
-        // (v6.68 — EL ESCUADRÓN que disparaba los rayos de plegaria MURIÓ
-        // con la letra nueva: «en la parte inferior derecha del circulo
-        // de minion siguen apareciendo unos rayitos, esos quitalos de
-        // ahi» — los brazos de perlin ojo→centro eran los ÚNICOS arcos
-        // que quedaban en el disco del círculo (lo único que la casa
-        // NUNCA tocó desde v6.59) y cruzaban TODO el anillo, incluida
-        // la parte inferior derecha. La oración ahora es la bola del
-        // corazón — RayitosDelCorazon — que vive en la bruma del
-        // nacimiento.)
+        // EL ESCUADRÓN: los whoAmI de los ojos vivos al nacer el ritual
+        // (disparan sus rayos uno a uno, en orden de escuadrón).
+        // v6.71 — RESUCITADOS: los minions son los responsables de la
+        // CREACIÓN DEL HAZ — sus rayos de perlin al centro lo gestan.
+        private readonly List<int> _ojos = new List<int>(12);
+        private int _rayosLanzados = 0;
 
         // EL NÚCLEO BLANCO-VIOLETA de los soles del ritual (el mismo del haz).
         private static readonly Color CorazonRunico = new Color(240, 228, 255);
@@ -231,12 +235,40 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // letra: «el haz debe apuntar a donde vaya el cursor y
             // siempre seguir el cursor»); no hay nada que recordar.
 
-            // (v6.68 — LA REUNIÓN DEL ESCUADRÓN y LOS RAYOS DE PERLIN
-            //     uno a uno MURIERON con la letra nueva: los brazos de
-            //     perlin ojo→centro eran los rayitos que seguían
-            //     apareciendo en el disco del círculo — la ceremonia
-            //     queda con SU bola de chispazos en el corazón de la
-            //     bruma y SUS ojos girando en silencio.)
+            // === EL ESCUADRÓN se reúne al nacer el ritual (los que estén
+            //     — «independientemente de donde esten los minions»).
+            if (edad < 2f)
+            {
+                _ojos.Clear();
+                _rayosLanzados = 0;
+                int tipoOjo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active && p.type == tipoOjo &&
+                        p.owner == Projectile.owner)
+                        _ojos.Add(i);
+                }
+            }
+
+            // === LOS RAYOS DE PERLIN, UNO A UNO (la letra: «una vez que
+            //     esten girando en circulos estos deben lanzar su ataque
+            //     de rayos de perlin justo al centro del circulo») —
+            //     v6.71 RESUCITADOS: los minions son los RESPONSABLES DE
+            //     LA CREACIÓN DEL HAZ, sus brazos ojo→centro lo gestan.
+            //     Cada ojo dispara SU rayo ritual — la boca SIGUE al ojo
+            //     que gira, la punta vive clavada al centro — sostenidos
+            //     TODO el ritual (el ancla es ESTA ceremonia).
+            if (Projectile.owner == Main.myPlayer && edad >= 12f && edad < 130f)
+            {
+                int tocados = (int)((edad - 12f) / 10f) + 1;
+                while (_rayosLanzados < tocados && _rayosLanzados < _ojos.Count)
+                {
+                    DispararRayoRitual(_ojos[_rayosLanzados]);
+                    _rayosLanzados++;
+                }
+            }
 
             float prog = MathHelper.Clamp(edad / (float)T_TOTAL, 0f, 1f);
 
@@ -313,9 +345,31 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // v6.60.2 — BlancoVivo MURIÓ: nadie lee el blanco de la
         // ceremonia ya (el rumbo es del cursor — la letra nueva).
 
-        // (v6.68 — DispararRayoRitual MURIÓ con la letra nueva: los rayos
-        // de plegaria ojo→centro eran los rayitos de la parte inferior
-        // derecha del círculo — la oración es ahora la bola del corazón.)
+        /// <summary>EL RAYO RITUAL DE UN OJO (el modo ritual del
+        /// TruenoPerlin — el patrón de LosCelebrantesRezan: la boca sigue
+        /// al ojo vivo, la punta vive clavada al centro de ESTA
+        /// ceremonia, sin golpe: es la oración, no el ataque). v6.71 —
+        /// RESUCITADO: los rayos de perlin de los minions al centro son
+        /// LA CREACIÓN DEL HAZ («los minions son los responsables de la
+        /// creacion del haz por lo tanto deben lanzar sus rayos
+        /// perlins»).</summary>
+        private void DispararRayoRitual(int idxOjo)
+        {
+            Projectile ojo = Main.projectile[idxOjo];
+            if (ojo == null || !ojo.active) return;
+            try
+            {
+                Projectile.NewProjectile(ojo.GetSource_FromAI(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Cosmic.TruenoPerlinProjectile>(),
+                    0, 0f, Projectile.owner,
+                    2f,                      // EL MODO: RITUAL (sostenido, sin golpe)
+                    ojo.whoAmI * 1f,         // la boca: ESTE ojo
+                    Projectile.whoAmI * 1f); // el ancla: ESTA ceremonia
+            }
+            catch { }
+        }
 
         /// <summary>EL DISPARO — EL HAZ DE LA IRA: la ceremonia muere y
         /// nace EL RAYO DE PRUEBA C (EL SUEÑO — el ganador, intacto) YA EN
