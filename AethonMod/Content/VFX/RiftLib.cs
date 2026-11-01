@@ -210,10 +210,6 @@ namespace AethonMod.Content.VFX
             return 1f;
         }
 
-        /// <summary>¿El desgarro DAÑA en este progress? (false desde el 90% — el daño cesa ~8 ticks antes del final visual).</summary>
-        public static bool Daña(float progress)
-            => progress >= 0f && progress < 0.90f;
-
         /// <summary>
         /// COLISIÓN DE LÍNEA del desgarro (la escuela A de daño): cápsula de radio
         /// 0.5·<paramref name="width"/> a lo largo de origin→origin+dir·length.
@@ -1041,61 +1037,6 @@ namespace AethonMod.Content.VFX
         // ==================================================================
         //  EL INTERIOR — el campo de estrellas del vacío
         // ==================================================================
-
-        /// <summary>
-        /// EL CAMPO DE ESTRELLAS del interior (16-28): posiciones deterministas
-        /// por hash dentro de la banda, tamaño 1-3 px, scroll a lo largo del eje
-        /// a velocidad por PROFUNDIDAD (paralaje X≠Y: las profundas van a ~0.4×),
-        /// vaivén lateral por profundidad y parpadeo por hash — el vacío "tira".
-        /// </summary>
-        public static void Estrellas(SpriteBatch batch, Vector2 origin, Vector2 dir,
-            float length, float width, Color[] paleta, float intensity, int seed,
-            float time, float scroll, int estrellas)
-        {
-            if (batch == null || paleta == null || paleta.Length == 0 || length < 8f) return;
-            estrellas = Math.Clamp(estrellas, 4, 28);
-            dir = Vector2.Normalize(dir);
-            Vector2 perp = new(-dir.Y, dir.X);
-            float tick = time * 60f;
-
-            Color baseC = Color.Lerp(Pal(paleta, paleta.Length - 1), Color.White, 0.5f);
-
-            for (int j = 0; j < estrellas; j++)
-            {
-                float h1 = H01(seed, j, 3);
-                float h2 = H01(seed, j, 7);
-                float h3 = H01(seed, j, 11);
-                float h4 = H01(seed, j, 17);
-
-                // PROFUNDIDAD: 0.35 (fondo de la caverna) .. 1.0 (superficie).
-                float depth = 0.35f + 0.65f * h1;
-
-                // EL SCROLL por profundidad: el interior FLUYE, las profundas rezan.
-                float x = h2 * length - tick * scroll * depth;
-                x = ((x % length) + length) % length;
-                float f = x / length;
-                float lens = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.6f);
-                float halfVoid = 0.31f * width * lens;
-                if (halfVoid < 0.8f) continue;
-
-                // La lateral: dentro de la banda + el vaivén de paralaje
-                // (las cercanas se mueven MÁS — la lección X≠Y de la referencia).
-                float y = (h3 - 0.5f) * 2f * halfVoid * 0.85f;
-                y += VFXCore.Sway(time * 0.8f + h4 * 6.28f, 1f, j) * halfVoid * 0.22f * (1f - depth);
-
-                // EL PARPADEO por hash (algunas duermen, otras arden).
-                float tw = 0.45f + 0.55f * MathF.Sin(tick * (0.18f + 0.22f * h4) + h4 * 6.28f + j * 2.1f);
-                if (tw <= 0.08f) continue;
-
-                float s = 1f + 2f * h4;
-                // 4-6 estrellas GRANDES de profundidad (la caverna infinita).
-                bool grande = h2 > 0.82f && j % 5 == 0;
-                if (grande) s += 1.6f;
-
-                Quad(batch, OrbTex, origin + dir * x + perp * y, new Vector2(s, s), 0f,
-                    Tint(baseC, MathHelper.Clamp(tw * intensity * (grande ? 0.8f : 1f), 0f, 1f)));
-            }
-        }
 
         /// <summary>Las estrellas FIJAS de la grieta (por fracción de arco del camino).</summary>
         private static void EstrellasCamino(SpriteBatch batch, Vector2[] camino,

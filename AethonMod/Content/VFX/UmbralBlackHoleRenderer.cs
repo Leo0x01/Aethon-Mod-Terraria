@@ -451,6 +451,13 @@ namespace AethonMod.Content.VFX
         private static void DrawWing(Vector2 center, float rr, float time,
             int seed, int flick)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el ala barrida son ~45 quads
+            // (18 segmentos × 2 cápsulas + ~7 núcleos interiores donde el
+            // Doppler ARDE) — la masa del frente es cosmética, salta si
+            // el frame va apretado.
+            if (!VFXCore.Presupuesto(45)) return;
+
             const int Segments = 18;
             // La banda barre de 34° (abajo-derecha) por el FONDO hasta 189°
             // (extremo izquierdo, donde el Doppler ARDE) — convención y-ABAJO:
@@ -505,6 +512,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawLensingArcTop(Vector2 center, float r, float time)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // arco superior son ~66 quads (22 segmentos × 3 cápsulas:
+            // banda + segundo anillo de fotones + el filo) — la topología
+            // "∞" es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(66)) return;
+
             const int Segments = 22;
             // El arco cubre de ~200° a ~340° (SOBRE la cúspide — convención
             // y-ABAJO: 270°=arriba).
@@ -584,6 +597,13 @@ namespace AethonMod.Content.VFX
         private static void DrawAccretionDisk(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: los
+            // agujeros no consultaban NADA): el disco es el método MÁS
+            // CARO del renderer (~230 quads: 26 estrías × 3 segs × 2
+            // cápsulas + picos + bandas media/externa) — si el frame va
+            // apretado, él es el PRIMERO en saltarse.
+            if (!VFXCore.Presupuesto(230)) return;
+
             // La mitad delantera (t ∈ 0..π) es la LÍNEA CALIENTE que cruza
             // por debajo-delante; la trasera apenas asoma (el lado lejano
             // está DOBLADO en los arcos de lente).
@@ -862,6 +882,14 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawRuneCircle(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // sigilo erosionado son ~100 quads (SigiloErosionado 12
+            // runas: aro roto 30 × 0.7 ≈ 21 cápsulas + 12 × 0.82 vivos ×
+            // [glow + ~5.2 trazos + perla doble ≈ 8.2] ≈ 81) — la
+            // escritura del abismo es cosmética, salta si el frame va
+            // apretado.
+            if (!VFXCore.Presupuesto(100)) return;
+
             OrbitaLib.SigiloErosionado(center, r, time, seed,
                 RuneRadius, RuneCount, RuneOrbit,
                 Math.Max(r / 52f, 0.25f) * 1.75f,

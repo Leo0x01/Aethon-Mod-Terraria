@@ -86,28 +86,6 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// EL METRÓNOMO SUELTO: dispara cuando el reloj cae en el tick 0 de
-        /// cada periodo (cada 30, cada 120...). La comparación es por TICK
-        /// ENTERO — (int)reloj % (int)periodo == 0 — y no por módulo
-        /// flotante, y el porqué es sutil: un reloj fraccionario con
-        /// decimales fijos (29.5, 30.5, 31.5...) NUNCA daría módulo cero y
-        /// los disparos se PERDERÍAN; con el tick entero, el 30.5 cae en el
-        /// tick 30 y dispara. (Contrapartida documentada: si el reloj avanza
-        /// a menos de un tick por frame, el mismo tick entero se visita dos
-        /// veces — para esos relojes, la herramienta correcta es el compás
-        /// con ventanas.)
-        /// </summary>
-        public static bool Cada(float reloj, float periodo)
-        {
-            int p = (int)periodo;
-            if (p < 1) return false;
-            int r = (int)reloj;
-            int m = r % p;
-            if (m < 0) m += p;          // relojes negativos también ciclan
-            return m == 0;
-        }
-
-        /// <summary>
         /// LAS VENTANAS DE DISEÑO EN SEGUNDOS: la coreografía se PIENSA en
         /// segundos de jugador ("el golpe tarda 0,25 s") y se PROGRAMA en
         /// ticks — esta conversión evita el 60 mágico desparramado por el
@@ -562,14 +540,5 @@ namespace AethonMod.Content.VFX
         public bool En(int indiceMovimiento)
             => NombreActivo != null && NombreActivo.Length > 0 && Movimiento.Indice == indiceMovimiento;
 
-        /// <summary>
-        /// PULSO determinista 0..1: el seno de TickEnMovimiento por la
-        /// frecuencia. El PORQUÉ del tick (y no del tiempo de render): dos
-        /// instancias del mismo compás laten IGUAL y en todas las máquinas,
-        /// siempre — un latido de coreografía tiene que ser reproducible,
-        /// no decorativo.
-        /// </summary>
-        public float Pulso(float frecuencia)
-            => 0.5f + 0.5f * MathF.Sin(TickEnMovimiento * frecuencia);
     }
 }

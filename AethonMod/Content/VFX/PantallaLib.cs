@@ -408,6 +408,14 @@ namespace AethonMod.Content.VFX
         /// escala 1 = el impacto estándar; 0.5 = un toque; 2 = el golpe
         /// de un jefe (la sacudida escala LINEAL, el flash/viñeta no
         /// saturan: son gestos, no candados).
+        /// v6.80 — LA LEY DE LAS DOS RECETAS (la cura del bug nº2 del
+        /// Grupo B de la auditoría v6.78): ESTE preset es LA RECETA
+        /// CINEMATOGRÁFICA de la casa — el golpe de pantalla del
+        /// ACONTECIMIENTO (una caída de dragón, un rayo primordial). La
+        /// RECETA DEL DISPARO (el juice del golpe de un arma: sacudida +
+        /// flash local + luz + hitstop) vive en ImpactoLib.Golpe/GolpeDeCine.
+        /// Ya NO compiten: ambas salen por el MISMO motor de sacudida
+        /// (Sacudir/SacudidaTrauma de esta librería, el dueño del pipeline).
         /// </summary>
         /// <param name="centroMundo">Centro del impacto (coords de mundo).</param>
         /// <param name="escala">La fuerza del golpe (0.25..3 recomendado).</param>

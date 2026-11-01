@@ -167,13 +167,14 @@ namespace AethonMod.Content.VFX
     /// AuraPerfil — UN AURA ENTERA descrita como datos. Todo configurables
     /// por código puro con métodos fluidos (la API de la biblioteca):
     ///
-    ///   var aura = new AuraPerfil()
-    ///       .ConRadio(70f).ConPatron(PatronAura.Poligono).ConLados(6)
+    ///   var aura = new AuraPerfil
+    ///       { Radio = 70f, Patron = PatronAura.Poligono, Lados = 6 }
     ///       .ConTrasera(centro, medio, borde)
     ///       .ConFrontal(centro, medio, borde)
-    ///       .ConHumo(fluir: 0.4f, deriva: 0.14f, ascenso: 12f)
     ///       .ConDistorsion(1f).ConBlur(1f).ConGlow(1.3f)
     ///       .ConParticulas(new ParticulasAura().ConForma(FormaParticula.Chispa)…);
+    ///   (v6.80 — la purga de muertos retiró ConRadio/ConPatron/ConLados/
+    ///   ConHumo: cero llamadores; la casa configura por inicializador.)
     ///
     /// CONTRATO DE LAS ZONAS DE COLOR: cada capa (trasera/frontal) pinta
     /// tres zonas — CENTRO, INTERMEDIA y BORDE — y el radio de cada gajo
@@ -318,21 +319,12 @@ namespace AethonMod.Content.VFX
 
         // --- LA API FLUIDA (puro código) ---
 
-        /// <summary>Radio del aura en px.</summary>
-        public AuraPerfil ConRadio(float v) { Radio = v; return this; }
-        /// <summary>El patrón de la energía (Perlin / Poligono / Anillos).</summary>
-        public AuraPerfil ConPatron(PatronAura v) { Patron = v; return this; }
-        /// <summary>Lados del N-gono del patrón Poligono.</summary>
-        public AuraPerfil ConLados(int v) { Lados = Math.Max(3, v); return this; }
         /// <summary>Los TRES colores de la capa trasera: centro, medio, borde.</summary>
         public AuraPerfil ConTrasera(Color centro, Color medio, Color borde)
         { TCentro = centro; TMedio = medio; TBorde = borde; return this; }
         /// <summary>Los TRES colores del velo frontal: centro, medio, borde.</summary>
         public AuraPerfil ConFrontal(Color centro, Color medio, Color borde)
         { FCentro = centro; FMedio = medio; FBorde = borde; VeloFrontal = true; return this; }
-        /// <summary>El comportamiento de HUMO: churn, deriva radial y ascenso.</summary>
-        public AuraPerfil ConHumo(float fluir, float deriva, float ascenso)
-        { Fluir = fluir; Deriva = deriva; Ascenso = ascenso; return this; }
         /// <summary>Amplitud de la distorsión (wobble).</summary>
         public AuraPerfil ConDistorsion(float v) { Distorsion = v; return this; }
         /// <summary>Fuerza del desenfoque barato (0 = off).</summary>
@@ -1680,7 +1672,7 @@ namespace AethonMod.Content.VFX
         /// DibujarJugadorAditivo: devuelve true si el lote del llamador
         /// fue cerrado — reabrir con ReabrirLoteVanilla).
         /// </summary>
-        public static bool DibujarDivino(Player pl, AuraPerfil p)
+        private static bool DibujarDivino(Player pl, AuraPerfil p)
         {
             if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (pl.dead) return false;
@@ -1707,7 +1699,7 @@ namespace AethonMod.Content.VFX
         /// Ascendida 2: la apoteosis absoluta). El mismo contrato del
         /// bool de DibujarJugadorAditivo.
         /// </summary>
-        public static bool DibujarDivino2(Player pl, AuraPerfil p)
+        private static bool DibujarDivino2(Player pl, AuraPerfil p)
         {
             if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (pl.dead) return false;
@@ -2543,7 +2535,7 @@ namespace AethonMod.Content.VFX
         /// EL CAMINO ADITIVO DEL PATRÓN DIVINO 3 (EL TRONO) — el mismo
         /// contrato del bool de DibujarJugadorAditivo.
         /// </summary>
-        public static bool DibujarDivino3(Player pl, AuraPerfil p)
+        private static bool DibujarDivino3(Player pl, AuraPerfil p)
         {
             if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (pl.dead) return false;
@@ -3241,7 +3233,7 @@ namespace AethonMod.Content.VFX
         /// EL CAMINO ADITIVO DEL PATRÓN DIVINO 4 (EL SERAFÍN) — el mismo
         /// contrato del bool de DibujarJugadorAditivo.
         /// </summary>
-        public static bool DibujarDivino4(Player pl, AuraPerfil p)
+        private static bool DibujarDivino4(Player pl, AuraPerfil p)
         {
             if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (pl.dead) return false;

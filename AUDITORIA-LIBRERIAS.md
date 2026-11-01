@@ -1,5 +1,24 @@
 # AUDITORÍA TOTAL DE LIBRERÍAS VFX — AethonMod v6.78
 
+> **⚡ ANEXO v6.80 — ESTADO DE EJECUCIÓN DEL PLAN (verificado con oráculo 0/0):**
+>
+> | # del TOP-10 | Estado | Detalle |
+> |---|---|---|
+> | 1. Fusionar Supremo↔SupremoAurora | ✅ **HECHO** | EL CORE UNIFICADO: `SupremoBlackHoleRenderer` parametrizado por `PerfilSupremo` (struct de 39 slots de datos + gradiente de 3 paradas + bool de estilo) — los 4 puntos de lógica dual (banda radial, jets, ondas por fase, gradiente espiral) viven tras `GradienteEnTodo`; el Aurora quedó en un SHIM de 48 l (antes 954). **Fidelidad verificada: 42/42 valores RGB de ambos perfiles, exactos** (sim 1:1 programático). Los 12 callsites externos intactos. |
+> | 2. El flash invisible de PulsoLib | ✅ **CURADO** | LA CURA SIN CIRUGÍA DE ARMAS: `PulsoSistema` DIBUJA por fin el velo de tinte (`PostDrawInterface`, quad plano 1×1 — la lección de la viñeta v6.50.28: nada de degradados radiales; alfa = FuerzaPantalla·0,6; puerta PostProceso; baile de lote patrón OndaSystem v6.50.11). Los 6 empujes de las 5 armas SIGUEN INTACTOS — ahora ALGUIEN los dibuja. El F8 ya no muestra un número fantasma. |
+> | 3. Converger las dos recetas | ✅ **HECHO (núcleo)** | LA LEY DE LAS DOS RECETAS: `ImpactoLib.Golpe` = LA RECETA DEL DISPARO · `Pantalla.PresetImpacto` = LA RECETA CINEMATOGRÁFICA — documentadas en ambos headers. La convergencia técnica: `Golpe` no-suave salió de `OndaLib.Kick` y pasa por `Pantalla.Sacudir` (el dueño declarado) con CALIBRACIÓN EXACTA: el mapeo inverso de la escala de la casa (∛(100·pico) bajo trauma 1, saturado+cap 14 encima) devuelve el pico del kick viejo AL PX EXACTO (7 px @ i=1, 10.15 @ 1.45, 14 @ 2.5). Los 82 llamadores de Kick NO se tocan (alias delgado). |
+> | 4. Extraer AgujeroBase | ⏳ SIGUIENTE (tanda 2) | La fusión nº1 (la más rentable) está; el canon de las 12 familias ×3+ es la cirugía grande pendiente. |
+> | 5. Purga de muertos | ✅ **HECHO** | **−637 l verificadas una a una con rg ANTES de cortar** — la re-verificación cazó **2 falsos muertos** que la auditoría v6.78 dio por muertos y HUBIERAN ROTO LA COMPILACIÓN: `GradienteVeredicto` (vivo: CrecimientoProjectiles2:282) y `StormLib.Chaikin` (vivo: TruenoPerlinProjectile:677). Purgados: el juicio diferido ENTERO + Retroceso/Derivar + Material de PulsoLib, RiftLib.Daña (¡un método de DAÑO sin llamador!) y RiftLib.Estrellas, RayoStrip.FajaTexturada (la wrapper; EnLote VIVE), OndaLib.Ground, OrbitaLib.SelloVacio, CompasLib.Cada/Pulso, DefinitivasLib.GradienteAlba/AnchoCono/Flicker (+_paradasAlba huérfano), FormaLib.×4, EspectroLib.Profundidad, LumenLib.Cycle, PyraLib.SeedCell/Simular/CapCeldas, EstelaLib.PuntoEnCamino, los 4 Con* de AuraLib. Rebajados a private: DibujarDivino×4, StormLib.BuildTree/PathLength. **Trauma/GolpearCamara NO purgados — falsos muertos también** (SierpesNuevas:242/:1184 los sostienen). |
+> | 6. Unificar gestos de pantalla | ✅ **NÚCLEO HECHO** | El dueño del shake es UNO (SacudidaTrauma); Kick = alias delgado documentado; el velo de PulsoLib CONECTADO (bug nº1); la ley escrita. La migración total de los 82 Kick queda como tandas. |
+> | 7. Techar el sistema de calidad | ✅ **HECHO** | **50 techos de `VFXCore.Presupuesto()`** (3 en el Supremo unificado + 47 repartidos): los 8 agujeros restantes (Bruma ×2, Cosmic ×2, Olvido ×2, Umbral ×2), StormLib (Bolt/ChainBolt/MultiBolt/PerlinBolt/ArcRing) y PyraLib (Flame/Estallido) — cada uno con el CONTEO de quads justificado en el comentario. La defensa en profundidad: renderer (salta el método) + librería (backstop). Pendiente para otra tanda: OrbitaLib (el peso real de Cosmic) y StormArc. |
+> | 8. Adopción AudioLib/texturas | ❌ NO EMPEZADA | La tanda 1 fue la convergencia de recetas; la migración masiva sigue pendiente. |
+> | 9. Telemetría y doc | ✅ **HECHO** | F8 gana `Hitstop` (TiemposLib.CongeladoRestante — el doc-rot curado, con las claves hjson ×3 y los arrays del panel 8→9), VFXPalettes ya no alaba a VoidQueen (la muerta), y cada cura lleva su doc v6.80 al estilo de la casa. |
+> | 10. Enrutar MediaResLib | ❌ NO EMPEZADA | — |
+>
+> **Balance v6.80:** 34 archivos, **−742 líneas netas** (+1.032/−1.774) — el mod ADELGAZÓ mientras ganaba dos curas de bug, la fusión nº1 y 50 techos de FPS. Oráculo 0/0 tras cada frente.
+>
+> ---
+
 > **Las tres preguntas del usuario, respondidas:** ¿cuáles se pueden FUSIONAR? · ¿qué librería FALTA? · ¿cuál se puede MEJORAR?
 >
 > **Árbol auditado:** v6.78 · **Alcance:** `AethonMod/Content/VFX/` — **71 librerías (70 + CalorLib, nacida en esta entrega), 41.600 líneas** (26,8 % del mod: 154.500 l en 390 .cs).

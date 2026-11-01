@@ -353,6 +353,12 @@ namespace AethonMod.Content.VFX
         private static void DrawEnergyRing(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el anillo completo son ~100
+            // quads (44 segmentos × 2 cápsulas + picos) — cosmético puro,
+            // salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(100)) return;
+
             // La mitad delantera (t ∈ 0..π) cruza POR DELANTE de la esfera.
             float t0 = front ? 0f : MathHelper.Pi;
             float span = MathHelper.Pi;
@@ -413,6 +419,11 @@ namespace AethonMod.Content.VFX
         private static void DrawEchoBandRing(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el eco
+            // interior son ~52 quads (26 segmentos × 2 cápsulas) — la firma
+            // del doble anillo es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(52)) return;
+
             // ============================================================
             //  EL ANILLO ECO INTERIOR — LA FIRMA DEL DOBLE ANILLO: la
             //  MISMA fórmula de bandas del shader sin(θ·20 + t·5), pero
@@ -496,6 +507,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawLightningStorm(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): la
+            // tormenta son ~210 quads (4-6 rayos × 0.82 vivos por IsLit
+            // ≈ 4-5 × Bolt(segments 7 → gens 3: 9 pts → 8 tramos × 6
+            // + 4 gorros ≈ 52 c/u)) — el corazón del Ascendido salta si
+            // el frame va apretado.
+            if (!VFXCore.Presupuesto(210)) return;
+
             // ============================================================
             //  LA TORMENTA DE RAYOS PRO — el corazón del Ascendido:
             //  4-6 StormLib.Bolt de DOBLE TIRA (cuerpo rojo-naranja +
@@ -540,6 +558,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawDischargeCrowns(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): las
+            // coronas son ~180 quads (2 × 0.86 vivas × ArcRing(count 12:
+            // 13 pts → 12 tramos × 6 + 4 gorros ≈ 82) ≈ 141 + las
+            // chispas satélite (0.4 × 1.72 × ArcRing(count 7) ≈ 52) ≈ 36)
+            // — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(180)) return;
+
             // ============================================================
             //  LAS CORONAS DE DESCARGA: dos ARCOS ELÉCTRICOS de
             //  StormLib abrazando el horizonte — uno a 1.0× y otro
@@ -582,6 +607,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawPolarJets(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // jets son ~110 quads (2 polos × [4 cápsulas ahusadas + el
+            // Bolt interior (0.9 vivo ≈ 47) + 3 quads de base/punta] ≈
+            // 55 c/u) — el escape polar es cosmético, salta si el frame
+            // va apretado.
+            if (!VFXCore.Presupuesto(110)) return;
+
             // ============================================================
             //  LOS JETS POLARES ASCENDIDOS: chorros naranjas arriba y
             //  abajo del vórtice (4 cápsulas alargadas Ahusadas cuya
@@ -684,6 +716,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawGoldenRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // círculo dorado son ~60 quads (CirculoRunico tabla C: aro +
+            // 8 runas × [glow + ~4.4 trazos + perla doble ≈ 7.4]) — el
+            // conjuro es cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(60)) return;
+
             OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount, RuneOrbit,
                 RuneGold, RuneTip, Math.Max(r / 52f, 0.25f) * 1.35f,
                 alphabet: _runes, offset: 0, ringAlpha: 0.22f,
@@ -709,6 +747,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawAmberRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // círculo ámbar son ~40 quads (5 glifos × [glow + ~4.4
+            // trazos + perla doble ≈ 7.4] + aro) — el contrarroto de
+            // escarcha es cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(40)) return;
+
             // ============================================================
             //  EL SEGUNDO CÍRCULO RÚNICO: 5 glifos ÁMBAR a radio MAYOR
             //  (3.15×R) CONTRARROTANDO respecto a las runas doradas —

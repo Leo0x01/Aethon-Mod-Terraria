@@ -49,7 +49,8 @@ namespace AethonMod.Content.Projectiles.Jefes
     ///      presa (StormLib.ChainBolt + ImpactFlash) — ya no una bala
     ///      quieta.
     ///   5  ESTRELLA FUGAZ (Arquera, furia): estrella que cae con MARCA
-    ///      de suelo telegrafiada antes del impacto (OndaLib.Ground).
+    ///      de suelo telegrafiada antes del impacto (OndaLib.GroundVisual;
+    ///      v6.80 — antes decía OndaLib.Ground, purgado por muerto).
     ///   6  TAJO DEL PORTADOR (Portador): el corte DIFERIDO de la casa —
     ///      marca que respira (Telegrafo) y FLORECE en arco TajoLib.
     ///   7  CUCHILLA EN ÓRBITA (Portador): cuchilla girando en anillo

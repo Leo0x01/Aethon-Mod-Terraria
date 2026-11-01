@@ -299,6 +299,13 @@ namespace AethonMod.Content.VFX
         private static void DrawSmokeRing(Vector2 center, float rr, float time, int seed,
             bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el anillo de humo por mitad son
+            // ~80 quads (16 fumarelitos × [Puff de la librería a quality
+            // 0.45: núcleo + 2-4 sub-blobs ≈ 4 quads] + la cápsula de
+            // definición) — cosmético puro, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(80)) return;
+
             float t0 = front ? 0f : MathHelper.Pi;
             float span = MathHelper.Pi;
             float bright = front ? 1.15f : 0.85f;
@@ -348,6 +355,14 @@ namespace AethonMod.Content.VFX
 
         private static void DrawFallingTendrils(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): las
+            // volutas REFORZADAS son ~260 quads (5 × Tendril: la ruta
+            // espiral de ~207 px al ancho 0.55·R → 15 puffs por voluta
+            // ≈ 3.5 quads c/u, y el curl del Ascendido solo la SERPENTea)
+            // — la materia devorada es cosmética, salta si el frame va
+            // apretado.
+            if (!VFXCore.Presupuesto(260)) return;
+
             for (int k = 0; k < TendrilCount; k++)
             {
                 // Cada voluta gira a su velocidad (la rotación de la caída).
@@ -391,6 +406,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawFrostCrowns(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): LA
+            // FIRMA VISUAL de la Ascendida son ~170 quads (3 coronas ×
+            // 0.88 vivas por IsLit × ArcRing(count 9): 10 pts → 9 tramos
+            // de tira × 6 quads + 4 gorros = 64 c/u) — la escarcha
+            // eléctrica es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(170)) return;
+
             int cflick = StormLib.FlickTick(time, FrostCrownHz);
             float spin = time * 0.55f;
 
@@ -422,6 +444,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawGelidBolts(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // rayos gelidos son ~80 quads (2 rayos × 0.78 vivos por IsLit
+            // × Bolt(segments 7 → gens 3: 9 pts → 8 tramos × 6 + 4 gorros
+            // ≈ 52) + el quad de la base) — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(80)) return;
+
             int bflick = StormLib.FlickTick(time, GelidBoltHz);
 
             for (int i = 0; i < GelidBoltCount; i++)
@@ -494,6 +522,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawPolarChimneys(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): las
+            // chimeneas REFORZADAS son ~120 quads (14 Puffs — 2 polos × 7
+            // pasos — a quality 0.4: núcleo + 2-3 sub-blobs + el smear de
+            // 1-6 copias de la velocity, más las 8 motas de escarcha) —
+            // salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(120)) return;
+
             // Eje menor de la elipse (los "polos" del vórtice).
             Vector2 pole = new Vector2(
                 -(float)Math.Sin(RingTilt + MathHelper.PiOver2),
@@ -667,6 +702,13 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawRuneCircle(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // doble círculo rúnico son ~120 quads (dos CirculoRunico:
+            // 8 runas teal × [glow + ~5.5 trazos + perla doble ≈ 8.5]
+            // ≈ 69 + 6 blancas de hielo ≈ 52) — el conjuro es cosmético,
+            // salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(120)) return;
+
             float glyphScale = Math.Max(r / 52f, 0.25f) * 1.35f;
 
             // ============================================================

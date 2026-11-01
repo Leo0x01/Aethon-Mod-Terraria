@@ -358,7 +358,7 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>Longitud total de una polilínea.</summary>
-        public static float PathLength(Vector2[] pts)
+        private static float PathLength(Vector2[] pts)
         {
             if (pts == null || pts.Length < 2) return 0f;
             float total = 0f;
@@ -394,7 +394,7 @@ namespace AethonMod.Content.VFX
         /// Devuelve strands[0] = el tronco (1,1) + las ramas con sus
         /// WidthScale/Alpha ya escalados por nivel.
         /// </summary>
-        public static List<StormStrand> BuildTree(Vector2[] trunk, int seed, int flick,
+        private static List<StormStrand> BuildTree(Vector2[] trunk, int seed, int flick,
             int profundidad, float lenTronco)
         {
             var strands = new List<StormStrand> { new StormStrand(trunk, 1f, 1f) };
@@ -564,6 +564,13 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color halo, Color core,
             float alpha = 1f, int segments = 8, float amp = 12f)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // StormLib no consultaba nada): la cadena con árbol son
+            // ~200 quads (tronco gens 3 del default 8 segments: 9 pts →
+            // 48 + las ramas BuildTree — 24-96 c/u, típico 3-5 — + 4
+            // gorros) — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(200)) return;
+
             float len = Vector2.Distance(start, end);
             if (len < 4f || alpha <= 0.01f || width <= 0.05f) return;
 
@@ -634,6 +641,15 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color halo, Color core,
             float alpha = 1f, int segments = 12, float amp = 24f)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // StormLib no consultaba nada): un Bolt al default (12
+            // segments → gens 4) son ~100 quads (tronco de 17 pts: 16
+            // tramos de tira × 6 quads [4 pares de columnas de funda +
+            // 2 de vena, 12 triángulos] + 4 gorros); los callers
+            // compactos (segments 5-7 → gens 3) cuestan la mitad —
+            // salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(100)) return;
+
             float len = Vector2.Distance(start, end);
             if (len < 4f) return;
 
@@ -675,6 +691,13 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color haloA, Color haloB, Color core,
             float alpha = 1f, float amp = 26f, int segments = 12)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // StormLib no consultaba nada): EL ÁRBOL completo son ~400
+            // quads (tronco de 17 pts ≈ 100 + hasta 10 ramas fractales
+            // de 24-96 — típico 4-6 — + 4 gorros) — la descarga de
+            // verdad salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(400)) return;
+
             // === EL TRONCO FRACTAL (midpoint displacement multi-escala):
             // amp ABSOLUTO (min(amp, 30%·len)) — el contrato v6.50.15. ===
             float lenMb = Vector2.Distance(start, end);
@@ -756,6 +779,14 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color halo, Color core,
             float alpha = 1f, float ampFrac = 0f)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // StormLib no consultaba nada): EL RAYO PERLIN es el MÉTODO
+            // MÁS CARO de la librería, ~1100 quads (el canal Chaikin de
+            // 98 pts: 97 tramos × 6 ≈ 580 + 3 ramas fractales ≈ 270 +
+            // ~8 ramitas de Ramificar ≈ 280 + 4 gorros) — el arco
+            // eléctrico salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(1100)) return;
+
             float len = Vector2.Distance(start, end);
             if (len < 4f || alpha <= 0.01f || width <= 0.05f) return;
 
@@ -924,6 +955,12 @@ namespace AethonMod.Content.VFX
             float a1, float a2, int seed, int flick, float width,
             Color halo, Color core, float alpha = 1f, int count = 10)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // StormLib no consultaba nada): la corona al default son
+            // ~64 quads (count+1 pts → count tramos de tira × 6 quads +
+            // 4 gorros; count 10 → 64) — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(64)) return;
+
             Vector2[] pts = new Vector2[count + 1];
             for (int i = 0; i <= count; i++)
             {

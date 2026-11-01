@@ -74,9 +74,8 @@ namespace AethonMod.Content.VFX
     ///     fotones puro).
     ///   · OndasDistorsion(...) — anillos de choque expandiéndose desde el
     ///     vórtice.
-    ///   · SelloVacio(...) — EL SIGNO MÁGICO INVOCABLE de la casa oscura:
-    ///     el círculo del vacío completo (anillo de energía + ecos +
-    ///     fotones + aro del horizonte), el par oscuro del SelloSolar.
+    ///   · SelloVacio(...) — purgado v6.80 (el signo invocable de la casa
+    ///     oscura nunca fue conjurado: cero llamadores en todo el mod).
     ///
     /// CONTRATO DE DIBUJO (DOS secciones, cada una con SU patrón validado):
     ///   · SECCIÓN A (el patrón del agujero negro): las primitivas del
@@ -1036,81 +1035,5 @@ namespace AethonMod.Content.VFX
                 alphaMul: alphaMul, ringAlpha: 0.20f);
         }
 
-        // ==================================================================
-        //  EL COMPUESTO — EL SELLO DEL VACÍO (el signo invocable, NUEVO)
-        // ==================================================================
-
-        /// <summary>
-        /// EL SELLO DEL VACÍO — EL SIGNO MÁGICO INVOCABLE de la casa
-        /// oscura (el par de SelloSolar): el círculo completo del vórtice —
-        /// anillo energético con SUS veinte bandas viajando (ambas
-        /// mitades), los ecos en resonancia, los fotones corriendo el
-        /// aro, el ANILLO DE FOTONES del horizonte y las ondas de
-        /// distorsión pulsando. Sin núcleo negro: SOLO el signo — el
-        /// consumidor lo pone debajo de lo que quiera (o encima de un
-        /// cuerpo, un portal, un altar, un jefe).
-        ///
-        /// CONTRATO (Sección A): abre y CIERRA su propio batch — el
-        /// SpriteBatch del llamador debe estar CERRADO al llamar (y queda
-        /// CERRADO al salir), igual que el render completo del vórtice.
-        /// </summary>
-        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition).</param>
-        /// <param name="radius">Radio del vórtice (px — el anillo llega a ~1.9×).</param>
-        /// <param name="time">Tiempo animado (GlobalTimeWrappedHourly).</param>
-        /// <param name="seed">Semilla determinista.</param>
-        /// <param name="vivo">Color vivo del anillo (la casa: rojo-naranja).</param>
-        /// <param name="profundo">Color profundo (valle de banda).</param>
-        /// <param name="caliente">Color del pico incandescente.</param>
-        /// <param name="alpha">Multiplicador global de intensidad.</param>
-        public static void SelloVacio(Vector2 center, float radius, float time, int seed,
-            Color? vivo = null, Color? profundo = null, Color? caliente = null,
-            float alpha = 1f)
-        {
-            if (radius < 2f || alpha <= 0.02f) return;
-            Color cVivo = (vivo ?? RingVivo) * alpha;
-            Color cDeep = profundo ?? RingProfundo;
-            Color cHot = caliente ?? HotWhite;
-
-            try
-            {
-                int flick = (int)(time * FlickHz);
-                float distortion = (float)Math.Sin(time) * DistorsionFuerza;
-                float rr = radius * Distorsion(time);
-
-                AbrirAdditive();
-
-                // --- 1. LOS ECOS en resonancia (la resonancia del shader) ---
-                EcosAnillo(center, rr, time, distortion, cVivo, cDeep);
-
-                // --- 2. EL ANILLO ENERGÉTICO, mitad TRASERA ---
-                AnilloEnergia(center, rr, time, seed, flick, front: false,
-                    hot: cHot, mid: cVivo, deep: cDeep);
-
-                // --- 3. EL ANILLO DE FOTONES del horizonte (el aro fino) ---
-                AnilloFino(center, 1.02f * radius, time * 0.15f,
-                    Tint(cVivo, 0.40f + 0.12f * (float)Math.Sin(time * 1.7f)));
-
-                // --- 4. EL ANILLO ENERGÉTICO, mitad DELANTERA ---
-                AnilloEnergia(center, rr, time, seed, flick, front: true,
-                    hot: cHot, mid: cVivo, deep: cDeep);
-
-                // --- 5. LOS FOTONES corriendo el vórtice ---
-                Fotones(center, rr, time, FotonesCount, cVivo, cHot);
-
-                // --- 6. LAS ONDAS DE DISTORSIÓN pulsando ---
-                OndasDistorsion(center, radius, time, seed, 2, 2.4f, cVivo);
-
-                CerrarBatch();
-                // v6.50.11 — el lote sale ABIERTO y vanilla (el contrato
-                // de curación; era "CERRADO al salir" en v6.49).
-            }
-            catch
-            {
-                // Cierre defensivo SOLO en el path de error — por la
-                // PUERTA BLINDADA (v6.49): respeta al lote ajeno si lo
-                // había (le devuelve su estado en vez de cerrarlo a ciegas).
-                try { CerrarBatch(); } catch { }
-            }
-        }
     }
 }

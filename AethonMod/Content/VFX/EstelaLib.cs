@@ -415,23 +415,6 @@ namespace AethonMod.Content.VFX
             // PREMULTIPLICADA (RGB·f, A·f) — la fórmula vive en VFXCore.
             return VFXCore.Tint(c, f);
         }
-
-        /// <summary>Punto a <paramref name="dist"/> px del inicio de la polilínea.</summary>
-        private static Vector2 PuntoEnCamino(Vector2[] pts, float dist)
-        {
-            float acum = 0f;
-            for (int i = 1; i < pts.Length; i++)
-            {
-                float seg = Vector2.Distance(pts[i - 1], pts[i]);
-                if (acum + seg >= dist && seg > 0f)
-                {
-                    float f = (dist - acum) / seg;
-                    return Vector2.Lerp(pts[i - 1], pts[i], f);
-                }
-                acum += seg;
-            }
-            return pts[pts.Length - 1];
-        }
     }
 
     /// <summary>

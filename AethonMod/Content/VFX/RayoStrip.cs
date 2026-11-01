@@ -197,29 +197,6 @@ namespace AethonMod.Content.VFX
         private static VertexPositionColorTexture[] _vertsT = new VertexPositionColorTexture[8192];
         private static int _nVertsT;
 
-        /// <summary>
-        /// LA FAJA TEXTURIZADA (el baile completo): abre lote, emite la
-        /// tira, cierra lote. <paramref name="pts"/> en COORDENADAS DE
-        /// PANTALLA (mundo − Main.screenPosition).
-        /// </summary>
-        /// <param name="pts">La espina del haz (pantalla).</param>
-        /// <param name="semiancho">Semiancho por nodo (px — la mitad del ancho total).</param>
-        /// <param name="color">El tinte PRE-MULTIPLICADO (StormLib.Tint(color, alfa)).</param>
-        /// <param name="tex">La textura del cuerpo (gaussiana en V, ruido en U, wrap).</param>
-        /// <param name="periodo">Px de haz por TILE de textura (el periodo del ruido).</param>
-        /// <param name="flujo">Tiles por SEGUNDO que avanza la carne (raíz→punta).</param>
-        /// <param name="tiempo">El reloj determinista (GlobalTimeWrappedHourly).</param>
-        /// <param name="vMin">Banda V inferior (0 para el cuerpo; 0.36 para el core).</param>
-        /// <param name="vMax">Banda V superior (1 para el cuerpo; 0.64 para el core).</param>
-        public static void FajaTexturada(Vector2[] pts, float[] semiancho, Color color,
-            Texture2D tex, float periodo, float flujo, float tiempo,
-            float vMin = 0f, float vMax = 1f)
-        {
-            AbrirLote();
-            try { FajaTexturadaEnLote(pts, semiancho, color, tex, periodo, flujo, tiempo, vMin, vMax); }
-            finally { CerrarLote(); }
-        }
-
         /// <summary>La faja DENTRO de un lote ya abierto (el patrón de
         /// FilamentoEnLote — BeamLib dibuja sus TRES capas en UN solo baile).</summary>
         public static void FajaTexturadaEnLote(Vector2[] pts, float[] semiancho, Color color,

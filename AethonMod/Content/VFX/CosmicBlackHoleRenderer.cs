@@ -495,6 +495,13 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawGoldenRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el círculo rúnico delegado son
+            // ~60 quads (CirculoRunico tabla C: aro + 8 runas × [glow +
+            // ~4.4 trazos + perla doble ≈ 7.4]) — el conjuro dorado es
+            // cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(60)) return;
+
             OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount, RuneOrbit,
                 RuneGold, RuneTip, Math.Max(r / 52f, 0.25f) * 1.35f,
                 alphabet: _runes, offset: 0, ringAlpha: 0.22f,

@@ -69,21 +69,13 @@ namespace AethonMod.Content.VFX
             new Color(120, 220, 255),   // cian
         };
 
-        // v6.56.3 — LAS PALETAS DE LA ESCALERA: la letra del usuario: «el
+        // (v6.56.3 — LAS PALETAS DE LA ESCALERA: la letra del usuario: «el
         // rayo del juicio, rayo del veredicto y rayo del alba son exactamente
-        // iguales» — compartían renderizador Y paleta (el GradienteJuicio
-        // hardcodeado). Cada PELDAÑO recupera SU alma: el Alba es la primera
-        // luz del amanecer (oro pálido → durazno → blanco), el Veredicto es
-        // la tarde que se vuelve noche (ámbar → magenta → violeta) y el
-        // Juicio conserva el arcoíris completo de la casa.
-        private static readonly Color[] _paradasAlba =
-        {
-            new Color(255, 236, 179),   // oro pálido
-            new Color(255, 213, 150),   // durazno suave
-            new Color(255, 248, 235),   // blanco cálido
-            new Color(255, 222, 173),   // luz de miel
-            new Color(255, 240, 200),   // crema del alba
-        };
+        // iguales» — compartían renderizador Y paleta. Cada PELDAÑO recupera
+        // SU alma. El Veredicto conserva su gradiente propio y el Juicio el
+        // arcoíris de la casa; LA PALETA DEL ALBA (_paradasAlba, 5 paradas
+        // de oro pálido→durazno→blanco→miel→crema) murió con su único
+        // lector GradienteAlba en la purga v6.80.)
 
         private static readonly Color[] _paradasVeredicto =
         {
@@ -107,17 +99,6 @@ namespace AethonMod.Content.VFX
             int i = (int)x;
             int j = (i + 1) % _paradasJuicio.Length;
             return Color.Lerp(_paradasJuicio[i], _paradasJuicio[j], x - i);
-        }
-
-        /// <summary>v6.56.3 — EL GRADIENTE DEL ALBA: la primera luz (oro
-        /// pálido → durazno → blanco → miel → crema). EL ALMA DEL PELDAÑO 1.</summary>
-        public static Color GradienteAlba(float t)
-        {
-            t = t - MathF.Floor(t);
-            float x = t * _paradasAlba.Length;
-            int i = (int)x;
-            int j = (i + 1) % _paradasAlba.Length;
-            return Color.Lerp(_paradasAlba[i], _paradasAlba[j], x - i);
         }
 
         /// <summary>v6.56.3 — EL GRADIENTE DEL VEREDICTO: la tarde que se
@@ -201,19 +182,6 @@ namespace AethonMod.Content.VFX
             t = MathHelper.Clamp(t, 0f, 1f);
             float u = 1f - t;
             return 1f - u * u * u * u;
-        }
-
-        /// <summary>
-        /// EL ANCHO CRECIENTE DEL CONO — la fórmula EXACTA del rayo de
-        /// fusión: progress^0.8 · cbrt(lerp(1.01, 0.7, progress)) · K ·
-        /// (1.1 + cos(Time)·(0.08 − progress·0.06)). Nace estrecho en el
-        /// origen, engorda hacia el fondo y RESPIRA (la senoide de ±8%).
-        /// </summary>
-        public static float AnchoCono(float progress, float time, float k)
-        {
-            float inicio = MathF.Pow(progress, 0.8f);
-            float tope = MathF.Cbrt(MathHelper.Clamp(MathHelper.Lerp(1.01f, 0.7f, progress), 0f, 1.01f));
-            return inicio * tope * k * (1.1f + MathF.Cos(time) * (0.08f - progress * 0.06f));
         }
 
         // ==================================================================
@@ -325,15 +293,6 @@ namespace AethonMod.Content.VFX
         /// concentrado como cuarta textura multiplicada.
         /// </summary>
         public static Texture2D TexRampa => Tex("AethonMod/Content/Effects/Procedural/RampaGlow");
-
-        /// <summary>
-        /// EL FLICKER INCONMENSURABLE (técnica nº11 de la investigación):
-        /// dos senos de frecuencias 8.7 Hz y 23.3 Hz que JAMÁS se repiten
-        /// en fase — el haz vivo nunca late igual dos veces. Se multiplica
-        /// sobre la respiración ±8 % de la fórmula del ancho.
-        /// </summary>
-        public static float Flicker(float t)
-            => 1f + 0.05f * MathF.Sin(t * 8.7f * MathHelper.TwoPi) + 0.035f * MathF.Sin(t * 23.3f * MathHelper.Pi + 1.7f);
 
         // ==================================================================
         //  v6.56.4 — HAZFUSIONESPINA, RETIRADA. La vía CPU de seis pasadas

@@ -334,6 +334,12 @@ namespace AethonMod.Content.VFX
         private static void DrawPlasmaRing(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el anillo de plasma por mitad
+            // son ~100 quads (44 segmentos × 2 cápsulas + picos) —
+            // cosmético puro, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(100)) return;
+
             // La mitad delantera (t ∈ 0..π) cruza POR DEBAJO-delante de la
             // esfera; la trasera (t ∈ π..2π) queda POR DETRÁS.
             float t0 = front ? 0f : MathHelper.Pi;
@@ -391,6 +397,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawSpiralArms(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // brazos son ~56 quads (2 brazos × 14 pasos × 2 cápsulas) —
+            // el vórtice que se desenrosca es cosmético, salta si el
+            // frame va apretado.
+            if (!VFXCore.Presupuesto(56)) return;
+
             const int ArmSteps = 14;
             float armPhase = time * 0.18f;
 
@@ -618,6 +630,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawGoldenRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // círculo rúnico son ~70 quads (CirculoRunico tabla R: aro +
+            // 10 runas × [glow + ~3.7 trazos + perla doble ≈ 6.7]) — la
+            // escritura mágica es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(70)) return;
+
             OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount, RuneOrbit,
                 RuneGold, RuneTip, Math.Max(r / 52f, 0.25f) * 1.35f,
                 alphabet: _runes, offset: 0, ringAlpha: 0.25f,

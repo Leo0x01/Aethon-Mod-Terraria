@@ -252,6 +252,13 @@ namespace AethonMod.Content.VFX
         public static void Flame(SpriteBatch batch, Vector2 center, float radius,
             Color[] ramp, int seed, float time, float intensity = 1f, float gravDir = 1f)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // PyraLib no consultaba nada): la hoguera son ~76 quads (4
+            // lenguas × Tongue: 8 tramos × [velo + cuerpo] + 3 núcleos
+            // blancos del 40% inferior ≈ 19 c/u) — el abanico de la
+            // hoguera salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(76)) return;
+
             if (batch == null || radius < 2f) return;
 
             int lenguas = 4;
@@ -308,6 +315,12 @@ namespace AethonMod.Content.VFX
         public static void Estallido(SpriteBatch batch, Vector2 center, float radius,
             float progress, Color[] ramp, int seed, float time, float intensity = 1f)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3:
+            // PyraLib no consultaba nada): la flor de fuego son ~115
+            // quads (6 rayos × Tongue ≈ 19 c/u + el flash del corazón) —
+            // el estallido radial salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(115)) return;
+
             if (batch == null || radius < 4f || ramp == null) return;
             progress = MathHelper.Clamp(progress, 0f, 1f);
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
@@ -364,44 +377,6 @@ namespace AethonMod.Content.VFX
         private static readonly Dictionary<int, sbyte[]> _campos = new();
         private static readonly Dictionary<int, int[]> _dims = new();
         private static readonly Dictionary<int, uint> _ultimoToque = new();
-
-        /// <summary>Celdas activas máximas dibujadas por campo (el cap de la casa).</summary>
-        private const int CapCeldas = 600;
-
-        /// <summary>Enciende la celda (x,y) del campo por semilla (el FOCO).</summary>
-        public static void SeedCell(int seed, int x, int y, int temperature)
-        {
-            if (!_campos.TryGetValue(seed, out sbyte[] campo) ||
-                !_dims.TryGetValue(seed, out int[] dims)) return;
-            if (x < 0 || y < 0 || x >= dims[0] || y >= dims[1]) return;
-            campo[y * dims[0] + x] = (sbyte)Math.Clamp(temperature, 0, 36);
-        }
-
-        /// <summary>EL PASO DE PROPAGACIÓN (fuego de difusión determinista por hash).</summary>
-        private static void Simular(sbyte[] campo, int w, int h, int seed)
-        {
-            // De ABAJO hacia ARRIBA: cada celda hereda del vecino inferior
-            // −1 nivel de frío, con vagancia lateral ±1 por hash (¡determinista!).
-            for (int y = 0; y < h - 1; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    int temp = campo[(y + 1) * w + x];
-                    if (temp <= 0) continue;
-
-                    // La vagancia: hacia qué columna sube el calor.
-                    int off = (int)(H01(seed, x, y) * 3f) - 1;   // {-1, 0, +1}
-                    int nx = x + off;
-                    if (nx < 0) nx = 0;
-                    if (nx >= w) nx = w - 1;
-
-                    int nueva = temp - 1;
-
-                    if (nueva > campo[y * w + nx])
-                        campo[y * w + nx] = (sbyte)nueva;
-                }
-            }
-        }
 
         /// <summary>Vacía TODOS los campos (descarga limpia).</summary>
         public static void ClearFields()

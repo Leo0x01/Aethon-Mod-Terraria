@@ -3255,6 +3255,7 @@ Diag: {
         Eco: Voces vivas (EcoLib): {0}
         Aura: Emisores de aura (AuraLib): {0}
         Pulso: Fuerza de pantalla (PulsoLib): {0}
+        Hitstop: Hitstop {0} ticks
         Furia: Furia del grimorio: {0}
         FuriaInactivo: silencio
         FuriaActiva: oleada {0}/{1} en marcha

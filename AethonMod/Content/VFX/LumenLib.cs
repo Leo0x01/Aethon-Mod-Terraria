@@ -174,25 +174,6 @@ namespace AethonMod.Content.VFX
         public static float Drift(float time, float idSeed, float huePerSec = 0.33f)
             => idSeed * 0.23f + time * huePerSec;
 
-        /// <summary>
-        /// La PALETA CÍCLICA con wrap (último↔primero): t en vueltas 0..1,
-        /// interpolación suave entre los colores vecinos de la tabla.
-        /// </summary>
-        public static Color Cycle(float t, Color[] palette)
-        {
-            if (palette == null || palette.Length == 0) return Color.White;
-            if (palette.Length == 1) return palette[0];
-            t = t - (float)Math.Floor(t);
-            float f = t * palette.Length;
-            int i = (int)Math.Floor(f);
-            float k = f - i;
-            // suavizado en los extremos del segmento (sin dientes de sierra)
-            k = k * k * (3f - 2f * k);
-            Color a = palette[i % palette.Length];
-            Color b = palette[(i + 1) % palette.Length];
-            return Color.Lerp(a, b, k);
-        }
-
         // ==================================================================
         //  1. EL BLOOM APILADO INVERTIDO — el corazón de la librería
         // ==================================================================

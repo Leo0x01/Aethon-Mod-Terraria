@@ -334,66 +334,6 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        /// <summary>
-        /// ONDA DE SUELO: medio-anillo pegado al piso (los impactos físicos
-        /// de las armas cuerpo a cuerpo — el frente SOLO visible encima del
-        /// suelo) + el PAQUETE DE POLVO que levanta (determinista: la
-        /// librería NO spawnea — devuelve el paquete para el ParticleManager
-        /// del llamador).
-        /// v6.49 — EL WRAPPER: la parte VISUAL vive en GroundVisual (para
-        /// las marcas de telegraph que NO quieren el paquete); este
-        /// método es visual + polvo (el original, contrato intacto).
-        /// </summary>
-        /// <param name="gravDir">1 normal · −1 mundo invertido.</param>
-        public static void Ground(SpriteBatch batch, Vector2 center, float progress,
-            float maxRadius, Color color, float intensity, int seed,
-            out ParticleData[] dustKick, float gravDir = 1f)
-        {
-            dustKick = null;
-            GroundVisual(batch, center, progress, maxRadius, color, intensity, gravDir);
-
-            if (batch == null || Main.netMode == NetmodeID.Server || maxRadius < 4f) return;
-            if (progress >= 0.45f) return; // el polvo solo nace al nacer la onda
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-
-            float r = maxRadius * Expansion(progress);
-
-            // === EL POLVO: el paquete determinista (chispas que caen con
-            //     drag + motas que flotan — listo para ParticleManager). ===
-            {
-                int count = 6;
-                dustKick = new ParticleData[count];
-                for (int k = 0; k < count; k++)
-                {
-                    float h1 = H01(seed, 700 + k, 23);
-                    float h2 = H01(seed, 710 + k, 29);
-                    float ang = MathHelper.Pi + h1 * MathHelper.Pi;   // abanico superior
-                    if (gravDir < 0) ang = -ang;
-                    float dist = r * (0.7f + 0.5f * h2);
-
-                    var p = new ParticleData
-                    {
-                        Position = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist,
-                        Velocity = new Vector2(
-                            MathF.Cos(ang) * (1.2f + 2.4f * h2),
-                            MathF.Sin(ang) * (1.0f + 2.0f * h1) * gravDir),
-                        Scale = Vector2.One * (0.5f + 0.9f * h1),
-                        PackedColor = ParticleManager.PackColor(color),
-                        PackedStartColor = ParticleManager.PackColor(color),
-                        PackedEndColor = ParticleManager.PackColor(Color.Transparent),
-                        TimeLeft = 26,
-                        Duration = 26,
-                        TextureId = ParticleTex.SoftGlow,
-                        BlendMode = 1,   // aditivo
-                        LayerPriority = LayerPriorities.BeforeProjectiles,
-                    };
-                    p.EnableComponent(ComponentFlag.FadeOut);
-                    p.EnableComponent(ComponentFlag.Gravity);
-                    dustKick[k] = p;
-                }
-            }
-        }
-
         // ==================================================================
         //  EL PAQUETE DE IMPACTO — cámara y pantalla
         // (aplicados por OndaSystem en UN punto del frame — centralizados)

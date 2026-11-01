@@ -292,6 +292,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawNebulas(Vector2 center, float rr, float time, int seed, int flick)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): la
+            // nebulosa fBm son ~34 quads (8 velos × DOBLE CAPA + 18
+            // motas de polvo) — la lejanía es cosmética, salta si el
+            // frame va apretado.
+            if (!VFXCore.Presupuesto(34)) return;
+
             // ============================================================
             //  LA NEBULOSA fBm DEL ASCENDIDO: OCHO VELOS púrpura/azul
             //  (antes 5), cada uno pintado DOBLE — halo grande tenue +
@@ -344,6 +350,12 @@ namespace AethonMod.Content.VFX
         private static void DrawPlasmaRing(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el anillo de plasma por mitad
+            // son ~100 quads (44 segmentos × 2 cápsulas + picos) —
+            // cosmético puro, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(100)) return;
+
             // La mitad delantera (t ∈ 0..π) cruza POR DELANTE de la
             // esfera; la trasera (t ∈ π..2π) queda POR DETRÁS.
             float t0 = front ? 0f : MathHelper.Pi;
@@ -398,6 +410,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawSpiralArms(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // brazos REFORZADOS son ~108 quads (3 brazos × 18 pasos × 2
+            // cápsulas) — el vórtice que desenrosca MÁS MATERIA es
+            // cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(108)) return;
+
             // ============================================================
             //  REFORZADOS: 3 brazos (antes 2) × 18 pasos (antes 14) y
             //  fluyendo a 0.26 rad/s (antes 0.18) — el vórtice del
@@ -438,6 +456,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawSpiralBolts(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // rayos espirales son ~140 quads (2 brazos × 0.80 vivos por
+            // IsLit × Strand(Refine de 8 anclas → 15 pts: 14 tramos × 6
+            // + 4 gorros ≈ 88 c/u)) — LA FIRMA del Ascendido salta si el
+            // frame va apretado.
+            if (!VFXCore.Presupuesto(140)) return;
+
             // ============================================================
             //  LOS RAYOS ESPIRALES — LA FIRMA DEL OLVIDO ASCENDIDO: dos
             //  StormLib.Bolt AZUL ELÉCTRICO que SIGUEN los brazos
@@ -488,6 +513,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawVoidArcs(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // arcos del vacío son ~235 quads (3 arcos × 0.85 vivos ×
+            // ArcRing(count 11): 12 pts → 11 tramos × 6 + 4 gorros ≈ 76
+            // ≈ 194 + las chispas satélite (0.35 × 2.55 × ArcRing(count 6)
+            // ≈ 46) ≈ 41) — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(235)) return;
+
             // ============================================================
             //  LOS ARCOS DEL VACÍO: tres StormLib.Arc morado-azules
             //  abrazando el horizonte — 0.95× (JUSTO dentro del filo),
@@ -528,6 +560,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawPhotonRunners(Vector2 center, float rr, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // corredores son ~80 quads (6 de los 3 clásicos + 2
+            // fotones-rayo × 0.72 vivos × Bolt(segments 5 → gens 3: 9
+            // pts → 8 tramos × 6 + 4 gorros ≈ 52 c/u)) — los fotones
+            // electrificados saltan si el frame va apretado.
+            if (!VFXCore.Presupuesto(80)) return;
+
             // (los 3 corredores clásicos: halo violeta + núcleo blanco-frío)
             for (int i = 0; i < 3; i++)
             {
@@ -567,6 +606,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawElectricBolts(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): los
+            // rayos del anillo son ~75 quads (2 rayos × 0.70 vivos por
+            // IsLit × Bolt(segments 7 → gens 3: 9 pts → 8 tramos × 6 +
+            // 4 gorros ≈ 52 c/u)) — salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(75)) return;
+
             // ============================================================
             //  DOS RAYOS EMERGIENDO DEL ANILLO hacia afuera — ahora con
             //  StormLib.Bolt: doble tira cuerpo + núcleo, RAMAS
@@ -685,6 +730,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawGoldenRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // círculo rúnico son ~70 quads (CirculoRunico tabla R: aro +
+            // 10 runas × [glow + ~3.7 trazos + perla doble ≈ 6.7]) — la
+            // escritura mágica es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(70)) return;
+
             OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount, RuneOrbit,
                 RuneGold, RuneTip, Math.Max(r / 52f, 0.25f) * 1.35f,
                 alphabet: _runes, offset: 0, ringAlpha: 0.25f,
@@ -713,6 +764,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawVioletRunes(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // círculo violeta son ~40 quads (6 glifos × [glow + ~3.5
+            // trazos + perla doble ≈ 6.5] + aro) — el contrarroto arcano
+            // es cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(40)) return;
+
             // Glifos al 85% de las doradas (0.85 × 1.35 de la casa).
             OrbitaLib.CirculoRunico(center, r, time, VioletRadius, VioletCount, VioletOrbit,
                 RuneViolet, RuneVioletTip, Math.Max(r / 52f, 0.25f) * 1.35f * 0.85f,

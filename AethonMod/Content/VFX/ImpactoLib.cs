@@ -16,12 +16,27 @@ namespace AethonMod.Content.VFX
     //  y 244 AddLight a mano en 118 archivos, cada una con su constelación
     //  de números — el juice del golpe reinventado en cada arma. Aquí viven
     //  LAS RECETAS DE INTENSIDAD de la casa:
-    //    · Golpe(pos, i)        — EL IMPACTO estándar (kick + flash + luz)
+    //    · Golpe(pos, i)        — EL IMPACTO estándar (sacudida + flash + luz)
     //  · GolpeDeCine(pos, i)  — EL IMPACTO + hitstop de TiemposLib (el
     //      mundo contiene la respiración — solo un jugador)
     //  Y MAÑANA: la onda de choque, el sonido con prioridad, las chispas —
     //  todo detrás de esta fachada (respeta la Ley Primera §0: no se
     //  inventa nada, se COMPONE lo que ya vive en OndaLib/PantallaLib).
+    //
+    //  v6.80 — LA LEY DE LAS DOS RECETAS (la cura del bug nº2 del Grupo B
+    //  de la auditoría v6.78: la doble receta de impacto): ya NO compiten
+    //  — cada una tiene su oficio y su letra:
+    //    · ImpactoLib.Golpe/GolpeDeCine — LA RECETA DEL DISPARO (el juice
+    //      del golpe de un arma: sacudida + flash local + baño de luz +
+    //      hitstop). El consumidor la llama en la IGNICIÓN o el IMPACTO.
+    //    · Pantalla.PresetImpacto — LA RECETA CINEMATOGRÁFICA (el golpe
+    //      de pantalla del acontecimiento: sacudida + cruz + viñeta +
+    //      onda expansiva). El consumidor la llama en el momento ÉPICO.
+    //  AMBAS salen por el MISMO motor de sacudida (PantallaLib, el dueño
+    //  del pipeline — ver abajo) y los mismos gestos canónicos. Y la
+    //  migración por tandas de los 82 Kick/224 AddLight a mano sigue
+    //  PENDIENTE (tanda 1 de N: esta entrega converge las RECETAS; los
+    //  llamadores históricos no se tocan — el alias delgado los respeta).
     //
     //  Consumidor de nacimiento: LA IGNICIÓN de las copias del RC2 (la
     /// letra: el momento del disparo del rayo concentrado).
@@ -65,18 +80,37 @@ namespace AethonMod.Content.VFX
             float i = MathHelper.Clamp(intensidad, 0.1f, 2.5f);
             Color c = color ?? new Color(255, 248, 235);
 
-            // LA SACUDIDA — el kick de OndaLib (el alias delgado de la
-            // auditoría Grupo B: PantallaLib es el dueño del pipeline)…
+            // LA SACUDIDA — v6.80: LA CONVERGENCIA DEL GRUPO B (bug nº2 de
+            // la auditoría v6.78): PantallaLib es EL DUEÑO del pipeline de
+            // sacudida y las recetas de la casa salen TODAS por su puerta
+            // (SacudidaTrauma, un ICameraModifier REAL del motor — el kick
+            // de OndaLib mutaba Main.screenPosition por su cuenta y PISABA
+            // a los CameraModifiers sin saberlo). CALIBRACIÓN EXACTA del
+            // feel viejo: el pico del kick era 7·i px; la escala de la casa
+            // es pico = (min(N,10)/10)²·min(N,14) — el mapeo inverso
+            // (raíz cúbica por debajo del trauma 1, saturado y capped a 14
+            // por encima) devuelve el pico del kick VIEJO al px exacto:
+            // 7 px con i=1, 10.15 con i=1.45, 14 (el cap histórico) con
+            // i=2.5. La VENTANA también es la del kick ((8+6·i)/60 s); lo
+            // que cambia es la CURVA: dobles senos inconmensurables
+            // orgánicos en vez del seno seco de 13 Hz — la misma familia
+            // visual que la vía dulce, UNA sola sacudida de casa.
             if (suave)
             {
-                // …o LA VÍA DULCE (v6.57): ~2.6 px por intensidad, medio
-                // segundo de decaído, DOBLES SENOS inconmensurables —
-                // determinista y suave, nada de sacudidas secas.
+                // LA VÍA DULCE (v6.57, intacta): ~2.6 px por intensidad,
+                // medio segundo de decaído, DOBLES SENOS — determinista y
+                // suave, nada de sacudidas secas.
                 Pantalla.Sacudir(2.6f * i, 0.55f, "ImpactoLib-suave");
             }
             else
             {
-                OndaLib.Kick(7f * i, (int)(8 + 6 * i));
+                // LA VÍA SECA (v6.80, convergida): el pico y la ventana del
+                // kick viejo, por el motor del dueño.
+                float picoKickViejo = 7f * i;                       // px de pico a conservar
+                float n = picoKickViejo >= 10f
+                    ? Math.Min(picoKickViejo, 14f)                  // trauma saturado: pico = N (tope 14, el cap histórico)
+                    : (float)Math.Cbrt(100f * picoKickViejo);       // pico = (N/10)²·N  →  N = ∛(100·pico)
+                Pantalla.Sacudir(n, (8f + 6f * i) / 60f, "ImpactoLib");
             }
 
             // EL FLASH LOCAL + LA LUZ — solo si el golpe pide verse

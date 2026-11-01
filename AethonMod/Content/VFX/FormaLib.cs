@@ -101,61 +101,9 @@ namespace AethonMod.Content.VFX
         public static bool PuntoEnBanda(Vector2 punto, Vector2 a, Vector2 b, float ancho)
             => DistanciaASegmento(punto, a, b) <= ancho * 0.5f;
 
-        /// <summary>
-        /// Diferencia de ángulos a−b NORMALIZADA a [−π, π] (el camino corto:
-        /// ángulos que dan la vuelta se pliegan). El helper público de los
-        /// sectores — cualquier comparación de ángulos de la casa puede
-        /// usarlo.
-        /// </summary>
-        public static float DeltaAngle(float a, float b)
-        {
-            float d = (a - b) % MathHelper.TwoPi;
-            if (d > MathF.PI)
-                d -= MathHelper.TwoPi;
-            else if (d < -MathF.PI)
-                d += MathHelper.TwoPi;
-            return d;
-        }
-
-        /// <summary>
-        /// El recorte de Liang-Barsky contra UN plano: (p, q) describe el
-        /// semiespacio del AABB y ajusta el intervalo vivo [t0, t1] del
-        /// segmento. p == 0 (paralelo al plano): fuera si q &lt; 0. Si no, la
-        /// entrada/salida es r = q/p: p &lt; 0 entra (sube t0), p &gt; 0 sale
-        /// (baja t1). False = el segmento quedó fuera.
-        /// </summary>
-        private static bool PlanoLiangBarsky(float p, float q, ref float t0, ref float t1)
-        {
-            if (p == 0f)
-                return q >= 0f;
-
-            float r = q / p;
-            if (p < 0f)
-            {
-                if (r > t1) return false;
-                if (r > t0) t0 = r;
-            }
-            else
-            {
-                if (r < t0) return false;
-                if (r < t1) t1 = r;
-            }
-            return true;
-        }
-
         // ==================================================================
         //  2. CONSULTAS CONTRA ENTIDADES — NPC / JUGADOR / PROYECTIL
         // ==================================================================
-
-        /// <summary>
-        /// El RADIO MEDIO de un NPC: (ancho + alto) / 4 — la media de sus
-        /// dos semiejes. La aproximación documentada de la casa para las
-        /// consultas de banda/anillo/sector: más honesta que "solo el
-        /// ancho" para hitboxes alargadas, más barata que girar el AABB
-        /// (eso lo hace <see cref="NPCEnSegmento"/>). 0 si el NPC es nulo.
-        /// </summary>
-        public static float RadioMedio(NPC npc)
-            => npc == null ? 0f : (npc.width + npc.height) * 0.25f;
 
         /// <summary>
         /// ¿Toca el NPC el SEGMENTO a→b con grosor
@@ -196,20 +144,6 @@ namespace AethonMod.Content.VFX
             // NARROW-PHASE: el chequeo de línea del motor (ref float scratch).
             float rayado = 0f;
             return Collision.CheckAABBvLineCollision(npc.position, npc.Size, a, b, grosor, ref rayado);
-        }
-
-        /// <summary>
-        /// ¿Está el JUGADOR en la banda de <paramref name="ancho"/> px
-        /// alrededor del segmento? La gemela de <see cref="NPCEnBanda"/>
-        /// para los jefes futuros: la media de los semiejes del jugador +
-        /// la distancia del centro al segmento ≤ ancho/2.
-        /// </summary>
-        public static bool JugadorEnBanda(Player jugador, Vector2 a, Vector2 b, float ancho)
-        {
-            if (jugador == null || !jugador.active)
-                return false;
-            float radioMedio = (jugador.width + jugador.height) * 0.25f;
-            return DistanciaASegmento(jugador.Center, a, b) <= ancho * 0.5f + radioMedio;
         }
 
         /// <summary>

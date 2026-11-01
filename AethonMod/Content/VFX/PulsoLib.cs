@@ -12,201 +12,36 @@ namespace AethonMod.Content.VFX
     /// nervioso" del mod.
     ///
     /// Nace de la super investigación (INFORME_TOP_MODS_LIBRERIAS §C.2): lo
-    /// que hace que un golpe SE SIENTA — el juicio diferido, el retroceso,
-    /// la cámara, el sonido por material y el estado de pantalla — estaba
-    /// disperso en improvisaciones de cada renderer. Los mods top lo llevan
-    /// PEGADO a miles de archivos; NADIE lo publica como API. Esta es la
-    /// primera: CINCO piezas unificadas, deterministas en MP y con la
-    /// accesibilidad centralizada.
+    /// que hace que un golpe SE SIENTA — la cámara, el trauma y el estado
+    /// de pantalla — estaba disperso en improvisaciones de cada renderer.
+    /// Los mods top lo llevan PEGADO a miles de archivos; NADIE lo publica
+    /// como API. (v6.80 — la purga de muertos dejó las CINCO piezas
+    /// originales en TRES: solo respira lo que alguien llama.)
     ///
-    ///   · EL JUICIO DIFERIDO (la joya — el iaijutsu destilado): se MARCA en
-    ///     silencio (un eco sutil + un pitch que sube por marca), y TODO se
-    ///     liquida de golpe en un "clang" único escalado por el número de
-    ///     víctimas. EL FALLO NO SUENA NI BRILLA.
-    ///   · EL RETROCESO: un struct readonly con Derivar(peso, ticksCarga) —
-    ///     dos números configuran el feel de cientos de armas; el wobble
-    ///     lleva la semilla whoAmI (determinismo MP gratis).
+    ///   · EL JUICIO DIFERIDO — purgado v6.80 (inerte desde v6.56: su único
+    ///     escritor murió en la purga de la auditoría §3, la lista de
+    ///     veredictos nunca volvió a llenarse y Marcar/Liquidar acabaron
+    ///     sin un solo llamador en todo el mod).
+    ///   · EL RETROCESO — purgado v6.80 (el struct Derivar quedó huérfano:
+    ///     dos números que ya nadie pasaba — cero llamadores en el mod).
     ///   · LA CÁMARA: un solo punto de acceso al PunchCameraModifier real,
     ///     con try/catch a prueba de balas.
     ///   · v6.34 — EL TRAUMA: el shake ACUMULATIVO con decaimiento — el castigo
     ///     sostenido SANGRA la cámara a razón de trauma² (los golpes pequeños
     ///     casi no se sienten, los grandes sacuden) y se disipa solo.
-    ///   · EL SONIDO POR MATERIAL: máx 2/frame (presupuesto) y pitch por
-    ///     combo — el contador de racha regala el pitch ascendente.
+    ///   · EL SONIDO POR MATERIAL — purgado v6.80 (el enum Material nació
+    ///     sin boca: el reproductor por material nunca llegó a escribirse y
+    ///     nadie leía el enum — cero llamadores).
     ///   · LA PANTALLA: un estado push/decay con apilamiento limitado —
     ///     todos los flashes del mod pasan por aquí y decaen iguales.
+    ///     (v6.80 — y por fin SE VEN: PulsoSistema dibuja EL VELO DE TINTE
+    ///     en PostDrawInterface; desde v6.31 hasta v6.79 el estado vivía
+    ///     ciego — el bug nº1 del Grupo B de la auditoría, curado.)
     ///
-    /// Contrato: NADA de Main.rand (todo determinista por semilla/whoAmI);
-    /// el daño de Liquidar() solo corre en server/singleplayer.
+    /// Contrato: NADA de Main.rand (todo determinista por semilla/whoAmI).
     /// </summary>
     public static class PulsoLib
     {
-        // ==================================================================
-        //  1 — EL JUICIO DIFERADO (marcar en silencio, liquidar de golpe)
-        // ==================================================================
-
-        /// <summary>UNA marca del veredicto: el objetivo anotado y su precio.</summary>
-        private struct Marca
-        {
-            public int IndiceNPC;
-            public int Daño;
-            public float Knockback;
-        }
-
-        /// <summary>UN veredicto abierto: las marcas acumuladas de un dueño.
-        /// (v6.56 — AbrirVeredicto, el único escritor de Dueño/TickLiquidación,
-        /// murió en la purga de la auditoría §3; los campos quedan con su
-        /// valor centinela para que Marcar/Liquidar — aún vivos de palabra —
-        /// sigan compilando sin aviso.)</summary>
-        private sealed class Veredicto
-        {
-            public int Dueño = -1;
-            public int TickLiquidación = -1;
-            public readonly List<Marca> Marcas = new List<Marca>(16);
-        }
-
-        // (los veredictos abiertos, por dueño — a lo sumo un puñado)
-        private static readonly List<Veredicto> _veredictos = new List<Veredicto>(8);
-
-        /// <summary>
-        /// MARCA un objetivo (SILENCIOSO): el daño se apunta pero NO se aplica;
-        /// el visual es un eco sutil y el pitch de un "tic" sube con cada marca
-        /// (0.55 + n·0.04 — el contador audible del iaijutsu). Sin víctimas
-        /// visibles: la marca ES discreta a propósito.
-        /// </summary>
-        public static void Marcar(Projectile dueño, NPC objetivo, int daño, float knockback = 2f)
-        {
-            if (objetivo == null || !VFXCore.EsObjetivo(objetivo)) return;
-            Veredicto v = VeredictoDe(dueño);
-            if (v == null) return;
-
-            // ¿ya marcado? refresca el precio, no lo duplica.
-            for (int i = 0; i < v.Marcas.Count; i++)
-                if (v.Marcas[i].IndiceNPC == objetivo.whoAmI)
-                {
-                    v.Marcas[i] = new Marca { IndiceNPC = objetivo.whoAmI, Daño = Math.Max(v.Marcas[i].Daño, daño), Knockback = knockback };
-                    return;
-                }
-
-            v.Marcas.Add(new Marca { IndiceNPC = objetivo.whoAmI, Daño = daño, Knockback = knockback });
-
-            // EL TIC ASCENDENTE (solo cliente — la voz del contador).
-            if (Main.netMode != NetmodeID.Server)
-            {
-                try
-                {
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item167.WithPitchOffset(0.55f + v.Marcas.Count * 0.04f).WithVolumeScale(0.30f),
-                        objetivo.Center);
-                }
-                catch { }
-            }
-        }
-
-        /// <summary>
-        /// LIQUIDA el veredicto de este dueño: TODAS las marcas se cobran a la
-        /// vez — un "clang" único, un destello por víctima y un shake escalado
-        /// por el número de ellas. Devuelve el número de víctimas. SI NO HAY
-        /// VÍCTIMAS: NO SUENA, NO BRILLA (el fallo es silencio — la regla).
-        /// </summary>
-        public static int Liquidar(Projectile dueño)
-        {
-            Veredicto v = VeredictoDe(dueño);
-            if (v == null) return 0;
-
-            int víctimas = 0;
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
-                foreach (Marca m in v.Marcas)
-                {
-                    NPC npc = m.IndiceNPC >= 0 && m.IndiceNPC < Main.maxNPCs ? Main.npc[m.IndiceNPC] : null;
-                    if (npc == null || !VFXCore.EsObjetivo(npc)) continue;
-                    npc.SimpleStrikeNPC(Math.Max(1, m.Daño), npc.direction, false, m.Knockback, DamageClass.Magic);
-                    víctimas++;
-                }
-            }
-            else víctimas = v.Marcas.Count;   // el cliente cuenta para el feel
-
-            if (víctimas > 0)
-            {
-                // EL CLANG ÚNICO + el shake ESCALADO por víctimas.
-                try
-                {
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item90.WithPitchOffset(-0.35f).WithVolumeScale(0.65f),
-                        dueño != null && dueño.active ? dueño.Center : Main.LocalPlayer.Center);
-                }
-                catch { }
-                GolpearCamara(-Vector2.UnitY, Math.Min(3f + víctimas * 1.6f, 12f), 12);
-                EmpujarPantalla(new Color(255, 240, 220), 0.10f + 0.03f * víctimas, 10);
-            }
-            // (el fallo: silencio absoluto — ni sonido ni brillo)
-
-            _veredictos.Remove(v);
-            return víctimas;
-        }
-
-        private static Veredicto VeredictoDe(Projectile dueño)
-        {
-            if (dueño == null || !dueño.active) return null;
-            for (int i = 0; i < _veredictos.Count; i++)
-                if (_veredictos[i].Dueño == dueño.whoAmI)
-                    return _veredictos[i];
-            return null;
-        }
-
-        private static void CerrarVeredictosVencidos()
-        {
-            int t = (int)Main.GameUpdateCount;
-            for (int i = _veredictos.Count - 1; i >= 0; i--)
-                if (_veredictos[i].TickLiquidación < t)
-                    _veredictos.RemoveAt(i);   // vencido: se disipa CALLADO
-        }
-
-        // ==================================================================
-        //  2 — EL RETROCESO (struct readonly + Derivar: 2 números → el feel)
-        // ==================================================================
-
-        /// <summary>
-        /// EL PERFIL DE RETROCESO (readonly struct — el patrón que configura
-        /// cientos de armas con dos números): cuánto se desplaza el arma, con
-        /// qué patada, a qué frecuencia tiembla el wobble y si sacude la
-        /// pantalla por ser pesada.
-        /// </summary>
-        public readonly struct Retroceso
-        {
-            public readonly float Desplazamiento;   // px que el arma retrocede
-            public readonly float Patada;           // fuerza del golpe de vuelta
-            public readonly float HzWobble;         // Hz del temblor residual
-            public readonly bool Pesado;            // ¿sacude la pantalla?
-
-            public Retroceso(float desplazamiento, float patada, float hzWobble, bool pesado)
-            {
-                Desplazamiento = desplazamiento;
-                Patada = patada;
-                HzWobble = hzWobble;
-                Pesado = pesado;
-            }
-
-            /// <summary>
-            /// DERIVA el perfil de dos números (la magia): el peso del arma
-            /// (0 = daga ligera · 1 = cañón) y los ticks de carga (0 = tiro
-            /// instantáneo). Un arma pesada y cargada desplaza MÁS, late más
-            /// lento y sacude la pantalla; una ligera apenas se mueve y
-            /// tiemble rápido.
-            /// </summary>
-            public static Retroceso Derivar(float peso, int ticksCarga = 0)
-            {
-                peso = MathHelper.Clamp(peso, 0f, 1f);
-                float carga = MathHelper.Clamp(ticksCarga / 60f, 0f, 1f);
-                return new Retroceso(
-                    desplazamiento: 2f + 12f * peso + 8f * peso * carga,
-                    patada: 0.4f + 1.6f * peso,
-                    hzWobble: 9f - 5.5f * peso,                       // ligera = rápida
-                    pesado: peso > 0.62f);
-            }
-        }
-
         // ==================================================================
         //  3 — LA CÁMARA (un solo punto de acceso, a prueba de balas)
         // ==================================================================
@@ -290,23 +125,6 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  4 — EL SONIDO POR MATERIAL (presupuesto 2/frame + pitch por combo)
-        // ==================================================================
-
-        /// <summary>El material de lo golpeado — cada uno con SU voz.</summary>
-        public enum Material
-        {
-            /// <summary>Carne: húmedo, sordo.</summary>
-            Carne,
-            /// <summary>Acero: metálico, agudo.</summary>
-            Acero,
-            /// <summary>Piedra: seco, grave.</summary>
-            Piedra,
-            /// <summary>Vacío: el silencio que duele.</summary>
-            Vacio,
-        }
-
-        // ==================================================================
         //  5 — LA PANTALLA (estado push/decay con apilamiento limitado)
         // ==================================================================
 
@@ -326,6 +144,9 @@ namespace AethonMod.Content.VFX
         /// empujes y decae exponencialmente — todos los flashes del mod
         /// pasan por aquí y mueren IGUAL (la consistencia que los
         /// improvisaciones no tenían).
+        /// v6.80 — EL VELO VIVE: PulsoSistema.PostDrawInterface dibuja este
+        /// estado como un baño de tinte plano de pantalla completa (alfa =
+        /// FuerzaPantalla·0,6). El que empuja ya no escribe en el vacío.
         /// </summary>
         public static void EmpujarPantalla(Color tinte, float fuerza, int ticks)
         {
@@ -364,7 +185,6 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static void Reset()
         {
-            try { _veredictos.Clear(); } catch { }
             _trauma = 0f;
             _frameTrauma = 0;
             _fuerzaPantalla = 0f;

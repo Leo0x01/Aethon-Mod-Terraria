@@ -9,10 +9,14 @@ namespace AethonMod.Content.VFX
     /// TODOS los efectos del mod compartan un mismo lenguaje de color en
     /// vez de esparcir números mágicos por cada arma.
     ///
-    /// La paleta estrella es <see cref="VoidQueen"/>: la del agujero negro
-    /// de la referencia del usuario — núcleo negro absoluto, disco de
-    /// acreción fucsia neón con borde interior granate, destellos rosa
-    /// pálido, rayos lila y halo púrpura profundo.
+    /// v6.80 — HIGIENE DE DOC (la auditoría v6.78): la línea de abajo
+    /// seguía ALABANDO en presente a VoidQueen, «la paleta estrella»…
+    /// pero VoidQueen fue PURGADA en la v6.56 (la purga grande) y hoy NO
+    /// existe clase alguna en la biblioteca — era la paleta del agujero
+    /// negro de la referencia del usuario (núcleo negro absoluto, disco
+    /// de acreción fucsia neón con borde interior granate, destellos
+    /// rosa pálido, rayos lila y halo púrpura profundo), enterrada con
+    /// su consumidor. Las paletas VIVAS son CrimsonCourt y RuneStars.
     /// </summary>
     public static class VFXPalettes
     {

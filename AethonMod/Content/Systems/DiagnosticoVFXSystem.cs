@@ -24,6 +24,8 @@ namespace AethonMod.Content.Systems
     /// · EcoLib: la voz activa y la cola pendiente.
     /// · AuraLib: emisores vivos (NPCs + jugador).
     /// · PulsoLib: trauma y fuerza de pantalla (el sistema CONECTADO hoy).
+    /// · TiemposLib: el hitstop vivo — ticks de congelación restantes
+    ///   (v6.80: la línea que la doc de la librería prometía y faltaba).
     /// · GrimorioFuriaSistema: la oleada y la fase del festín.
     ///
     /// REGLA DE LA CASA: cero alocaciones por frame — los textos se
@@ -55,8 +57,11 @@ namespace AethonMod.Content.Systems
 
         // EL CACHE (4 Hz — cero GC entre refrescos).
         // v6.50.2 — _tickRefresco jubilado: el flanco del % 15u manda.
-        private static readonly string[] _lineas = new string[8];
-        private static readonly Vector2[] _medidas = new Vector2[8];
+        // v6.80 — 9 líneas: HITSTOP se suma (la auditoría v6.78: el F8 no
+        // mostraba TiemposLib.CongeladoRestante pese a que su doc lo
+        // prometía — doc-rot).
+        private static readonly string[] _lineas = new string[9];
+        private static readonly Vector2[] _medidas = new Vector2[9];
         private static int _nLineas;
 
         public override void UpdateUI(GameTime gameTime)
@@ -103,6 +108,11 @@ namespace AethonMod.Content.Systems
                 Linea("Mods.AethonMod.Diag.Eco", EcoLib.ColasPendientes);
                 Linea("Mods.AethonMod.Diag.Aura", AuraLib.EmisoresVivos);
                 Linea("Mods.AethonMod.Diag.Pulso", PulsoLib.FuerzaPantalla);
+                // v6.80 — LA LÍNEA DEL HITSTOP (higiene de doc de la
+                // auditoría v6.78): TiemposLib documenta «la casa lo
+                // muestra en el F8» y el panel jamás lo pintaba. Es un
+                // int (ticks restantes; 0 = mundo respirando normal).
+                Linea("Mods.AethonMod.Diag.Hitstop", TiemposLib.CongeladoRestante);
                 // v6.50.2 — la furia en clientes MP llega por los estáticos
                 // que EcoRed.MsgHambre llena (GrimorioFuriaSistema.
                 // Diagnostico decide server vs cliente por netMode).
@@ -150,10 +160,10 @@ namespace AethonMod.Content.Systems
                 {
                     if (_lineas[i] == null) continue;
                     // v6.50.2 — FIX (tinte de la línea de ayuda caía en la de
-                    // FURIA): el orden real de Linea() es 0 Fps, 1 Factor,
-                    // 2 Quads, 3 Eco, 4 Aura, 5 Pulso, 6 Furia, 7 AYUDA —
-                    // ayuda es la 7 (la última), no la 6.
-                    Color tinte = i == 7
+                    // FURIA); v6.80 — el orden real de Linea() hoy: 0 Fps,
+                    // 1 Factor, 2 Quads, 3 Eco, 4 Aura, 5 Pulso, 6 Hitstop,
+                    // 7 Furia, 8 AYUDA — ayuda es la 8 (la última), no la 7.
+                    Color tinte = i == 8
                         ? new Color(150, 148, 142) // la línea de ayuda, discreta
                         : new Color(196, 232, 255);
                     sb.DrawString(font, _lineas[i], new Vector2(x, y + i * 20f),

@@ -444,6 +444,13 @@ namespace AethonMod.Content.VFX
         private static void DrawWing(Vector2 center, float rr, float time,
             int seed, int flick)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: este
+            // agujero no consultaba NADA): el ala barrida son ~45 quads
+            // (18 segmentos × 2 cápsulas + ~8 núcleos BLANCO-INCANDESCENTES
+            // donde el Doppler ARDE) — la masa del frente es cosmética,
+            // salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(45)) return;
+
             const int Segments = 18;
             float a0 = 0.60f, a1 = MathHelper.Pi + 0.05f;
 
@@ -490,6 +497,12 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawLensingArcTop(Vector2 center, float r, float time)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // arco superior son ~66 quads (22 segmentos × 3 cápsulas:
+            // banda + segundo anillo de fotones + el filo) — la topología
+            // "∞" es cosmética, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(66)) return;
+
             const int Segments = 22;
             float a0 = MathHelper.Pi + 0.35f, a1 = MathHelper.TwoPi - 0.35f;
 
@@ -553,6 +566,13 @@ namespace AethonMod.Content.VFX
         private static void DrawAccretionDisk(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3: los
+            // agujeros no consultaban NADA): el disco es el método MÁS
+            // CARO del renderer (~230 quads: 26 estrías × 3 segs × 2
+            // cápsulas + picos + bandas media/externa) — si el frame va
+            // apretado, él es el PRIMERO en saltarse.
+            if (!VFXCore.Presupuesto(230)) return;
+
             float t0 = front ? 0f : MathHelper.Pi;
             float span = MathHelper.Pi;
             float bright = front ? 1.25f : 0.42f;
@@ -706,6 +726,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawLightningRain(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): la
+            // lluvia de rayos son ~170 quads (4 rayos × 0.80 vivos por
+            // IsLit × Bolt(segments 7 → gens 3: 9 pts → 8 tramos × 6 +
+            // 4 gorros ≈ 52 c/u) + el quad de la base) — la lluvia
+            // naranja salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(170)) return;
+
             int lflick = StormLib.FlickTick(time, BoltRainHz);
 
             for (int i = 0; i < BoltRainCount; i++)
@@ -750,6 +777,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawGoldenArc(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // arco dorado son ~95 quads (0.90 vivo × [ArcRing(count 9):
+            // 10 pts → 9 tramos × 6 + 4 gorros ≈ 64 + el segundo filo
+            // 0.7 × ArcRing(count 8) ≈ 58]) — la firma dorada salta si
+            // el frame va apretado.
+            if (!VFXCore.Presupuesto(95)) return;
+
             int gflick = StormLib.FlickTick(time, GoldArcHz);
             if (!StormLib.IsLit(seed + 777, gflick, 0.90f)) return;
 
@@ -795,6 +829,13 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void DrawRuneCircle(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): el
+            // doble círculo rúnico son ~180 quads (2 × SigiloErosionado:
+            // el exterior de 12 runas ≈ 102 + el íntimo de 8 ≈ 75 [aro
+            // roto 21 + 8 × 0.82 × (glow + ~5.2 trazos + perla)]) — el
+            // conjuro doble salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(180)) return;
+
             float glyphScale = Math.Max(r / 52f, 0.25f) * 1.75f;
 
             // EL ANILLO EXTERIOR — el círculo de runas original, intacto.
@@ -821,6 +862,12 @@ namespace AethonMod.Content.VFX
 
         private static void DrawEmbers(Vector2 center, float r, float time, int seed)
         {
+            // v6.80 — EL TECHO DE CALIDAD (la auditoría v6.78 §4.3): las
+            // brasas son ~40 quads (20 brasas × [estela cápsula + quad])
+            // — las chispas de la referencia saltan si el frame va
+            // apretado.
+            if (!VFXCore.Presupuesto(40)) return;
+
             for (int i = 0; i < EmberCount; i++)
             {
                 float h = Hash01(seed, 980 + i, 23);

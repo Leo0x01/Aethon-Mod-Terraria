@@ -109,9 +109,6 @@ namespace AethonMod.Content.VFX
             return m.Ang[idx];
         }
 
-        /// <summary>Cuántos ticks de historia hay (diagnóstico / composición).</summary>
-        public static int Profundidad(in Memoria m) => m.N;
-
         // ==================================================================
         //  EL ESPEJO — los clones orbitales que respiran
         // ==================================================================
