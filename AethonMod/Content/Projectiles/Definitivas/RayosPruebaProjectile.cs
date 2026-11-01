@@ -1007,16 +1007,34 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // — su electricidad son LOS RAYITOS DEL CORAZÓN: la bola de
             // chispazos clavada al CENTRO EXACTO del círculo (la boca de
             // ESTE haz ES el ancla del anillo que los ojos orbitan).
-            // EL ARMA de siempre conserva SUS micro-arcos de
-            // boca (la firma del RC2 — la cura de la v6.59: el 60 % del
-            // ciclo, dos a cinco, al 60-100 %, cruzando el medio).
-            // v6.72 — PERO SOLO EN PAZ: si el arma-C se dispara
-            // DURANTE LA IRA (EL SOSPECHOSO B, confeso: «esos rayos
-            // electricos en el proyectil original estan mal ubicados,
-            // deben ubicarse correctamente»), sus micro-arcos NO viven
-            // en la boca del jugador (la parte inferior derecha, FUERA
-            // del círculo de los minions) — se mudan AL CORAZÓN DEL
-            // CÍRCULO (el bloque de abajo).
+            // ============================================================
+            //  v6.73 — LA COMPARACIÓN CON LA PRIMERA CREACIÓN (la letra:
+            //  «el rayo concentrado 2 tiene los rayitos puesto de forma
+            //  correcta, compara con el rayo de prueba C, el sueño»).
+            //  La v6.72 movió la electricidad del arma AL CORAZÓN solo
+            //  DURANTE LA IRA — y el arma en PAZ quedó clavada a su boca
+            //  de siempre («en el arma de prueba C no ha cambiado»).
+            //  La comparación con el RC2 revela LA DIFERENCIA REAL, la
+            //  que explica todo el expediente:
+            //    · EL RC2 viste su boca SOLO DURANTE LA CARGA
+            //      (Time < ChargeTime, cadencia 14/3) con CHISPAS
+            //      RADIALES sutiles: nacen a 10-16 px del centro y
+            //      saltan HACIA AFUERA (hasta 36-76 px), 1-4 arcos,
+            //      grosor 2,2, alfa 0,35-0,80 — un susurro.
+            //    · EL ARMA-C los vestía TODA LA VIDA del haz
+            //      (laserCharge > 0,05: la carga Y los 800 ticks del
+            //      disparo) con CUERDAS GRUESAS cruzando la boca de
+            //      lado a lado (2-5, grosor 3,2, alfa 0,60-1,00, el
+            //      60 % del ciclo): los rayitos vivían EN EL DISPARO —
+            //      por eso «siempre aparecen cuando se usa el haz».
+            //  LA CURA: el arma-C viste su boca EXACTAMENTE como el RC2
+            //  — byte a byte el bloque de la primera creación (misma
+            //  cadencia, misma geometría radial, mismo susurro), SOLO
+            //  mientras carga. El DISPARO queda LIMPIO: la boca del
+            //  conjuro en marcha es su corona y su conducto, nada más.
+            //  Y durante la Ira, la ley de la v6.72 sin tocar: la
+            //  electricidad del arma se muda AL CORAZÓN DEL CÍRCULO.
+            // ============================================================
             if (EsIra)
             {
                 // EL ANCLA VIVA (el círculo ES de quien el escuadrón
@@ -1032,64 +1050,53 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         Projectile, laserCharge, Projectile.localAI[0]);
                 }
             }
-            else if (laserCharge > 0.05f && Time % 5f < 3f)
+            else
             {
-                // ============================================================
-                //  v6.72 — LA BOCA DEL ARMA-C, BIEN UBICADA (la letra: «esos
-                //  rayos electricos en el proyectil original estan mal
-                //  ubicados, deben ubicarse correctamente» — el culpable
-                //  de la cacería entera). El arma-C disparada DURANTE LA
-                //  IRA cargaba SU bola de chispazos en LA BOCA DEL
-                //  JUGADOR (a +13·dir, −20 del MountedCenter) — la parte
-                //  inferior derecha, FUERA del círculo de los minions: EL
-                //  punto exacto de los rayitos de siempre (la posición
-                //  fija que aparecía SIEMPRE que se usaba el haz). LA
-                //  CURA: mientras la Ira vive (la ceremonia gesta o su
-                //  haz dispara), la electricidad del arma-C NO vive en su
-                //  propia boca — se muda AL CORAZÓN DEL CÍRCULO (el
-                //  ancla viva) y se funde en LA MISMA BOLA DEL CORAZÓN
-                //  que la Ira ya viste (RayitosDelCorazon: el mismo
-                //  punto, la misma bola, la misma ley — «los pequeños
-                //  rayos electricos deben concentrarce en el centro del
-                //  circulo formado por los minions»). Sin Ira viva: la
-                //  boca del arma como SIEMPRE (SU firma del RC2, intacta
-                //  — y sus anillos rúnicos también: no son los rayitos y
-                //  no se tocan).
-                // ============================================================
+                // ——— v6.72 — DURANTE LA IRA: la electricidad del arma-C
+                //      NO vive en la boca del jugador (la parte inferior
+                //      derecha, FUERA del círculo de los minions) — se
+                //      muda AL CORAZÓN DEL CÍRCULO (el ancla viva) y se
+                //      funde en LA MISMA BOLA DEL CORAZÓN de la Ira
+                //      (RayitosDelCorazon: el mismo punto, la misma
+                //      bola, la misma ley). ———
                 Projectile anclaViva = IraSerExteriorCeremoniaProjectile
                     .RitualDe((int)Owner);
                 if (anclaViva != null && anclaViva.active && anclaViva != Projectile)
                 {
-                    IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
-                        anclaViva, laserCharge, Projectile.localAI[0]);
+                    if (laserCharge > 0.05f && Time % 5f < 3f)
+                    {
+                        IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
+                            anclaViva, laserCharge, Projectile.localAI[0]);
+                    }
                 }
-                else
+                // ——— v6.73 — EN PAZ: LA FIRMA EXACTA DEL RC2 (la letra:
+                //      «el rayo concentrado 2 tiene los rayitos puesto de
+                //      forma correcta»): SOLO DURANTE LA CARGA, chispas
+                //      radiales que nacen pegadas a la boca (10-16 px) y
+                //      saltan HACIA AFUERA (36-76 px), 1-4 arcos, grosor
+                //      2,2, alfa 0,35-0,80 — el bloque del RC2 byte a
+                //      byte. Las cuerdas gruesas de la v6.60.2 (2-5 arcos
+                //      cruzando la boca de lado a lado TODA la vida del
+                //      haz) MUEREN con esta letra: el disparo queda
+                //      LIMPIO — «siempre aparece cuando se usa el haz»
+                //      se acaba aquí. ———
+                else if (Time < ChargeTime && Time % 14f < 3f)
                 {
                     float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
                     int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-                    int cuenta = 2 + (int)(progreso * 3.99f);
+                    int cuenta = 1 + (int)(progreso * 3.99f);
                     for (int i = 0; i < cuenta; i++)
                     {
                         int seed = (int)(Time * 0.017f) * 131 + i * 297;
                         float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                        // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
-                        // pequeños rayos electricos no estan centrados en el
-                        // medio de los circulos runicos»): antes nacían al
-                        // borde del centro (r0 10-16) y corrían HACIA FUERA
-                        // (r1 36-76) — un anillo de radios con el medio
-                        // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
-                        // lado del círculo y muere en el OPUESTO (con ±0,4 rad
-                        // de vaivén orgánico) — el MEDIO de los círculos
-                        // rúnicos HIERVE de electricidad.
-                        float rArco = 16f + 6f * progreso;
-                        float angOpuesto = ang + MathHelper.Pi
-                            + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
-                        Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
-                        Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
-                        StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
+                        float r0 = 10f + 6f * progreso;
+                        float r1 = r0 + 26f + 34f * progreso;
+                        Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
+                        Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
+                        StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f,
                             ColorConjuro(Projectile.localAI[0] + i * 8f),
                             DefinitivasLib.BlancoCalido,
-                            0.60f + 0.40f * progreso, 5, 12f);
+                            0.35f + 0.45f * progreso, 5, 12f);
                     }
                 }
             }

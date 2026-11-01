@@ -1,3 +1,26 @@
+# v6.73 — LA FIRMA EXACTA DEL RC2 EN EL ARMA-C (la comparación con la primera creación — los rayitos del arma en paz vestían la boca TODA la vida del haz)
+
+**La letra del usuario**: «bueno, en el arma de prueba C no ha cambiado» + «para saber cual es el problema debes revisar el arma que fue la primera creacion, el rayo concentrado 2, esta tiene los rayitos puesto de forma correcta y compara con el arma que hemos elegido el rayo de prueba c, el sueño» — LA COMPARACIÓN DIRECTA que faltaba: la primera creación contra la elegida, bloque por bloque.
+
+## (1) POR QUÉ «NO HA CAMBIADO» — la v6.72 solo curó el caso DURANTE LA IRA
+La v6.72 movió la electricidad del arma-C al corazón del círculo **solo mientras la Ira vivía** — pero el arma-C disparada **EN PAZ** (sin ceremonia, sin haz de la Ira: `RitualDe` devuelve null) seguía con SU bloque de siempre, intacto desde la v6.60.2. El playtest del usuario lo delató: «en el arma de prueba C no ha cambiado» — literal: en paz, nada cambió.
+
+## (2) LA DIFERENCIA REAL — la comparación con el Rayo Concentrado 2, línea por línea
+El bloque de micro-arcos del RC2 (la primera creación, `RayoConcentradoDosProjectile.PreDraw`) contra el del arma-C (`RayosPruebaProjectile.DibujarAtaque`, modo arma en paz):
+- **EL RC2 viste su boca SOLO DURANTE LA CARGA** (`Time < ChargeTime`, cadencia `Time % 14 < 3`: ~21 % de los frames, 5 s) — y con **CHISPAS RADIALES sutiles**: nacen a 10–16 px del centro (`r0 = 10+6·p`) y saltan HACIA AFUERA (`r1 = r0+26+34·p`, hasta 76 px), **1–4 arcos**, grosor **2,2**, alfa **0,35–0,80** — un susurro alrededor de la boca.
+- **EL ARMA-C los vestía TODA LA VIDA del haz** (`laserCharge > 0,05`: la carga Y los 800 ticks del disparo Y el apagado, cadencia `Time % 5 < 3`: el 60 % de los frames) — y con **CUERDAS GRUESAS CRUZANDO la boca** de lado a lado (`rArco = 16+6·p` en ambos extremos, `ang+π±0,4`), **2–5 arcos**, grosor **3,2**, alfa **0,60–1,00** — una bola de relámpagos perpetua sobre la boca, TODO el disparo.
+Por eso los rayitos aparecían «siempre que se usaba el haz» y «siempre en la misma posición»: la boca del arma (el hombro del jugador, `MountedCenter + (13·dir, −20)`) es un punto fijo — y a su lado, fuera del círculo de los minions, la bola gruesa ardió sin parar por los 13 s enteros del conducto. El RC2 nunca hizo eso: su boca se apaga cuando el rayo nace.
+
+## (3) LA CURA — el bloque del RC2, byte a byte, en el arma-C en paz
+`RayosPruebaProjectile.DibujarAtaque`: sin Ira viva, el modo arma viste su boca **EXACTAMENTE como la primera creación** — misma cadencia (`Time < ChargeTime && Time % 14 < 3`), misma geometría radial (`r0 = 10+6·p` → `r1 = r0+26+34·p`), mismo susurro (1–4 arcos, grosor 2,2, alfa 0,35–0,80, `ColorConjuro` + `BlancoCalido`, meandro 12). **El DISPARO queda LIMPIO**: cuando el conducto arde, la boca es su corona y sus aros — nada de electricidad. Las cuerdas gruesas de la v6.60.2 (cruzando la boca de lado a lado TODA la vida) MUEREN con esta letra. Y la ley de la v6.72 queda INTACTA: durante la Ira, la electricidad del arma-C se muda al corazón del círculo (`RayitosDelCorazon(anclaViva, …)`) — la boca del jugador jamás hierve en plena ceremonia.
+
+## (4) LO QUE NO SE TOCÓ
+EL HAZ entero byte-idéntico (pila de capas · brumas del disparo · corona · aros · cursor · aguja · cola · sonidos — modo Ira y modo arma). La ceremonia intacta (nacimiento único · rayos perlin · carga RC2 · bola del corazón · implosión de soles · semilla). El RC2 original NI UNA COMA. La boca del arma en el jugador, el vaivén, el vuelo, el maná, la exclusión de un haz a la vez — TODO como estaba. Solo el bloque de micro-arcos en paz (≈20 líneas de dibujado): cero cambios de conducta, de flujo, de daño o de sonido.
+
+**VERIFICACIÓN**: oráculo 0 errores/0 warnings (dotnet 8.0.412) · `-build` REAL 0/0 con RUTA ABSOLUTA a ModSources (el `-build AethonMod` por nombre empaqueta un stub v1.0 de 3 entradas — hallazgo del pipeline: siempre ruta absoluta) · `.tmod` v6.73 auditado (460 entradas, blobs 460/460, EOF exacto, sonidos vorbis dentro, PDB con `rArco` AUSENTE — la geometría vieja muerta — y `anclaViva` viva, constantes radiales del RC2 10/26/34/2,2/0,35/0,45/14 presentes en la DLL · cadena de custodia repo == ModSources) · headless: `Sandboxing: Aethon, the Eternal Grimoire v6.73` → `Server started` CERO excepciones · el `.tmod` instalado en `~/.local/share/Terraria/tModLoader/Mods/` para el playtest.
+
+---
+
 # v6.72 — LA BOCA DEL ARMA-C, BIEN UBICADA (el Sospechoso B confeso — los rayitos eran los micro-arcos de la boca del propio haz del arma-C)
 
 **La letra del usuario**: «estuve revisando y el culpable es.......... SOSPECHOSO B — La boca de TU propio haz (si disparas el arma-C durante la Ira) — el propio rayo de prueba C o sea el proyectil original, tenemos que arreglar eso, ya que esos rayos electricos en el proyectil original estan mal ubicados, deben ubicarse correctamente, asi que bueno tenemos al culpablre sospechoso B» — EL USUARIO MISMO HIZO LA PRUEBA EN JUEGO y cerró la cacería de nueve rondas.
