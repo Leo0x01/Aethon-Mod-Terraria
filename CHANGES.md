@@ -1,3 +1,24 @@
+# v6.74 — LOS RAYITOS DEL ARMA-C, MUERTOS (la prueba en mano del usuario: los rayitos «fueron modificados» — el código culpable confirmado — y la sentencia: borrarlos)
+
+**La letra del usuario**: «bueno los rayitos fueron modificados, eso quiere decir que ya sabes cual es el codigo, entonces borra esos rayitos en el arma de prueba C» — LA CONFIRMACIÓN DEFINITIVA y la sentencia final. El usuario playtesteó la v6.73 y **VIO los rayitos cambiar** (ya no eran las cuerdas gruesas de toda la vida: ahora eran las chispas radiales sutiles del RC2, solo durante la carga) — prueba en mano de que el bloque identificado ES el código culpable. Y la orden nueva no es reubicar ni disfrazar: **es EL BORRADO**.
+
+## (1) LA PRUEBA — «los rayitos fueron modificados»
+La v6.73 vistió la boca del arma-C con la firma exacta del RC2 (`Time < ChargeTime && Time % 14 < 3`: solo durante la carga, 1–4 chispas radiales, r0 10–16 → r1 36–76 hacia afuera, grosor 2,2, alfa 0,35–0,80). El usuario disparó el arma-C y vio el cambio: la firma del RC2 aparece — el culpable queda **CONFIRMADO CON LA PRUEBA DEL USUARIO**, la cacería de diez rondas cerrada para siempre. Con el código identificado y validado, la palabra nueva es una sola: **borra esos rayitos**.
+
+## (2) LA SENTENCIA — el arma-C EN PAZ no emite NI UN rayito
+`RayosPruebaProjectile.DibujarAtaque`: el bloque entero de micro-arcos de la boca del modo arma **MUERE** — ni la firma del RC2 de la v6.73 (solo en carga), ni las cuerdas gruesas de la v6.60.2 (toda la vida del haz): **NADA**. El arma-C en paz queda con SU corona rúnica, sus aros y su conducto — la boca del conjuro ya no hierve jamás. `StormLib.Bolt` desaparece del archivo entero (cero llamadas): el arma-C no dibuja ni un arco eléctrico propio, ni en la carga, ni en el disparo, ni en el apagado.
+
+## (3) LA LEY DE LA IRA — INTACTA (v6.72, sin tocar)
+- **Disparada DURANTE la ceremonia** (`anclaViva` viva): la electricidad del arma sigue mudándose **al corazón del círculo** y se funde en la bola del corazón de la Ira (`RayitosDelCorazon(anclaViva, …)`) — la ley de la v6.72 byte a byte.
+- **El haz de la Ira** (`EsIra`, el ancla heredada en el lanzamiento): sigue vistiendo la bola del corazón mientras carga y lanza — la letra de la v6.66 («los pequeños rayos electricos deben concentrarce en el centro del circulo formado por los minions… mientras el haz se carga y se lanza»).
+
+## (4) LO QUE NO SE TOCÓ
+EL HAZ entero byte-idéntico (pila de capas · brumas del disparo · corona · aros · cursor · aguja · cola · sonidos — modo Ira y modo arma). La ceremonia intacta (nacimiento único · rayos perlin · carga RC2 · bola del corazón · implosión de soles · semilla). **El RC2 original NI UNA COMA** (sus rayitos bien puestos viven donde siempre — la primera creación es sagrada). El grimorio, los anillos del ojo, el balance, LA CAZA, EL OJO DEL CIELO — TODO como estaba. Solo el bloque de micro-arcos en paz (≈33 líneas de dibujado): cero cambios de conducta, de flujo, de daño o de sonido.
+
+**VERIFICACIÓN**: oráculo 0 errores/0 warnings (dotnet 8.0.412) · `-build` REAL 0/0 con RUTA ABSOLUTA a ModSources · `.tmod` v6.74 auditado (`tools/audit_v674_tmod.py`: 460 entradas, blobs 460/460, EOF exacto, sonidos vorbis dentro, RunaCompas ausente, OjoDelCieloItem.rawimg dentro, las 10 firmas vivas y las 4 muertas ausentes, PDB con `anclaViva` viva — la ley de la Ira viajó — y `flick` viva — el RC2 original intacto —, hjson ×3 espejos, `StormLib`/`14f`/`angOpuesto` AUSENTES del arma-C en repo Y ModSources, cadena de custodia byte-idéntica) · headless: `Sandboxing: Aethon, the Eternal Grimoire v6.74` → `Server started` CERO excepciones · el `.tmod` instalado en `~/.local/share/Terraria/tModLoader/Mods/` para el playtest.
+
+---
+
 # v6.73 — LA FIRMA EXACTA DEL RC2 EN EL ARMA-C (la comparación con la primera creación — los rayitos del arma en paz vestían la boca TODA la vida del haz)
 
 **La letra del usuario**: «bueno, en el arma de prueba C no ha cambiado» + «para saber cual es el problema debes revisar el arma que fue la primera creacion, el rayo concentrado 2, esta tiene los rayitos puesto de forma correcta y compara con el arma que hemos elegido el rayo de prueba c, el sueño» — LA COMPARACIÓN DIRECTA que faltaba: la primera creación contra la elegida, bloque por bloque.

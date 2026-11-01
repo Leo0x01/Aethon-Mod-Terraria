@@ -998,8 +998,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     -Main.GlobalTimeWrappedHourly * 0.5f + 2.1f, ring.Size() * 0.5f, tamAnillo2, SpriteEffects.None, 0f);
             }
 
-            // ============ v6.66 — LOS RAYITOS: DEL CORAZÓN (IRA) O DE LA
-            // BOCA (ARMA) ============
+            // ============ v6.66 — LOS RAYITOS: SOLO DEL CORAZÓN (IRA) ===
             // LA IRA (la letra: «los pequeños rayos electricos deben
             // concentrarce en el centro del circulo formado por los
             // minions… mientras el haz se carga y se lanza» — REESCRITOS
@@ -1008,32 +1007,23 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // chispazos clavada al CENTRO EXACTO del círculo (la boca de
             // ESTE haz ES el ancla del anillo que los ojos orbitan).
             // ============================================================
-            //  v6.73 — LA COMPARACIÓN CON LA PRIMERA CREACIÓN (la letra:
-            //  «el rayo concentrado 2 tiene los rayitos puesto de forma
-            //  correcta, compara con el rayo de prueba C, el sueño»).
-            //  La v6.72 movió la electricidad del arma AL CORAZÓN solo
-            //  DURANTE LA IRA — y el arma en PAZ quedó clavada a su boca
-            //  de siempre («en el arma de prueba C no ha cambiado»).
-            //  La comparación con el RC2 revela LA DIFERENCIA REAL, la
-            //  que explica todo el expediente:
-            //    · EL RC2 viste su boca SOLO DURANTE LA CARGA
-            //      (Time < ChargeTime, cadencia 14/3) con CHISPAS
-            //      RADIALES sutiles: nacen a 10-16 px del centro y
-            //      saltan HACIA AFUERA (hasta 36-76 px), 1-4 arcos,
-            //      grosor 2,2, alfa 0,35-0,80 — un susurro.
-            //    · EL ARMA-C los vestía TODA LA VIDA del haz
-            //      (laserCharge > 0,05: la carga Y los 800 ticks del
-            //      disparo) con CUERDAS GRUESAS cruzando la boca de
-            //      lado a lado (2-5, grosor 3,2, alfa 0,60-1,00, el
-            //      60 % del ciclo): los rayitos vivían EN EL DISPARO —
-            //      por eso «siempre aparecen cuando se usa el haz».
-            //  LA CURA: el arma-C viste su boca EXACTAMENTE como el RC2
-            //  — byte a byte el bloque de la primera creación (misma
-            //  cadencia, misma geometría radial, mismo susurro), SOLO
-            //  mientras carga. El DISPARO queda LIMPIO: la boca del
-            //  conjuro en marcha es su corona y su conducto, nada más.
-            //  Y durante la Ira, la ley de la v6.72 sin tocar: la
-            //  electricidad del arma se muda AL CORAZÓN DEL CÍRCULO.
+            //  v6.74 — LOS RAYITOS DEL ARMA-C, BORRADOS (la letra: «bueno
+            //  los rayitos fueron modificados, eso quiere decir que ya
+            //  sabes cual es el codigo, entonces borra esos rayitos en el
+            //  arma de prueba C»). La v6.73 vistió la boca del arma-C con
+            //  la firma exacta del RC2 (solo durante la carga, chispas
+            //  radiales sutiles) — y el usuario LA VIO CAMBIAR en el
+            //  playtest: el código culpable quedaba CONFIRMADO con la
+            //  prueba en mano. La sentencia nueva no es reubicar ni
+            //  disfrazar: es EL BORRADO. EL ARMA-C EN PAZ NO EMITE NI UN
+            //  RAYITO — ni en la carga, ni en el disparo, ni nunca: su
+            //  boca queda con SU corona rúnica, sus aros y su conducto,
+            //  NADA MÁS. Las chispas del RC2 de la v6.73 MUEREN AQUÍ (y
+            //  con ellas la última vida de las cuerdas de la v6.60.2).
+            //  LA LEY DE LA IRA, INTACTA (v6.72): disparada DURANTE la
+            //  ceremonia, la electricidad del arma sigue mudándose AL
+            //  CORAZÓN DEL CÍRCULO — y el haz de la Ira (EsIra) sigue
+            //  vistiendo la bola del corazón mientras carga y lanza.
             // ============================================================
             if (EsIra)
             {
@@ -1069,44 +1059,21 @@ namespace AethonMod.Content.Projectiles.Definitivas
                             anclaViva, laserCharge, Projectile.localAI[0]);
                     }
                 }
-                // ——— v6.73 — EN PAZ: LA FIRMA EXACTA DEL RC2 (la letra:
-                //      «el rayo concentrado 2 tiene los rayitos puesto de
-                //      forma correcta»): SOLO DURANTE LA CARGA, chispas
-                //      radiales que nacen pegadas a la boca (10-16 px) y
-                //      saltan HACIA AFUERA (36-76 px), 1-4 arcos, grosor
-                //      2,2, alfa 0,35-0,80 — el bloque del RC2 byte a
-                //      byte. Las cuerdas gruesas de la v6.60.2 (2-5 arcos
-                //      cruzando la boca de lado a lado TODA la vida del
-                //      haz) MUEREN con esta letra: el disparo queda
-                //      LIMPIO — «siempre aparece cuando se usa el haz»
-                //      se acaba aquí. ———
-                else if (Time < ChargeTime && Time % 14f < 3f)
-                {
-                    float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
-                    int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-                    int cuenta = 1 + (int)(progreso * 3.99f);
-                    for (int i = 0; i < cuenta; i++)
-                    {
-                        int seed = (int)(Time * 0.017f) * 131 + i * 297;
-                        float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                        float r0 = 10f + 6f * progreso;
-                        float r1 = r0 + 26f + 34f * progreso;
-                        Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r0;
-                        Vector2 end = posPantalla + new Vector2(MathF.Cos(ang + 0.5f), MathF.Sin(ang + 0.5f)) * r1;
-                        StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 2.2f,
-                            ColorConjuro(Projectile.localAI[0] + i * 8f),
-                            DefinitivasLib.BlancoCalido,
-                            0.35f + 0.45f * progreso, 5, 12f);
-                    }
-                }
+                // ——— v6.74 — EN PAZ: NADA. Los rayitos de la boca del
+                //      arma-C están MUERTOS por orden del usuario («borra
+                //      esos rayitos en el arma de prueba C»): ni la firma
+                //      del RC2 de la v6.73 ni las cuerdas de la v6.60.2 —
+                //      la boca del arma en paz es solo corona, aros y
+                //      conducto. ———
             }
 
             // v6.60.2 — LA ESTRELLA DE LA BOCA MUERE (la letra: «las
             // estrellitas o brillo solo deben aparecer en la fase de
             // carga»): vivía SOLO durante el disparo (Time > ChargeTime)
             // — exactamente lo que la letra nueva prohíbe. La boca del
-            // disparo queda con SU corona rúnica, sus aros y sus arcos
-            // (que ahora cruzan EL CENTRO) — sin brillo prestado.
+            // disparo queda con SU corona rúnica y sus aros — sin brillo
+            // prestado y SIN ARCOS (los rayitos de la boca murieron con
+            // la v6.74, por orden del usuario).
 
             // ================================================================
             //  ============ LA PILA DE CAPAS DEL CONDUCTO ============
