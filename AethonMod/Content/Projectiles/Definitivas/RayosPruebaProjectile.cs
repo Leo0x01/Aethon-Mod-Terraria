@@ -1010,6 +1010,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // EL ARMA de siempre conserva SUS micro-arcos de
             // boca (la firma del RC2 — la cura de la v6.59: el 60 % del
             // ciclo, dos a cinco, al 60-100 %, cruzando el medio).
+            // v6.72 — PERO SOLO EN PAZ: si el arma-C se dispara
+            // DURANTE LA IRA (EL SOSPECHOSO B, confeso: «esos rayos
+            // electricos en el proyectil original estan mal ubicados,
+            // deben ubicarse correctamente»), sus micro-arcos NO viven
+            // en la boca del jugador (la parte inferior derecha, FUERA
+            // del círculo de los minions) — se mudan AL CORAZÓN DEL
+            // CÍRCULO (el bloque de abajo).
             if (EsIra)
             {
                 // EL ANCLA VIVA (el círculo ES de quien el escuadrón
@@ -1027,31 +1034,63 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
             else if (laserCharge > 0.05f && Time % 5f < 3f)
             {
-                float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
-                int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
-                int cuenta = 2 + (int)(progreso * 3.99f);
-                for (int i = 0; i < cuenta; i++)
+                // ============================================================
+                //  v6.72 — LA BOCA DEL ARMA-C, BIEN UBICADA (la letra: «esos
+                //  rayos electricos en el proyectil original estan mal
+                //  ubicados, deben ubicarse correctamente» — el culpable
+                //  de la cacería entera). El arma-C disparada DURANTE LA
+                //  IRA cargaba SU bola de chispazos en LA BOCA DEL
+                //  JUGADOR (a +13·dir, −20 del MountedCenter) — la parte
+                //  inferior derecha, FUERA del círculo de los minions: EL
+                //  punto exacto de los rayitos de siempre (la posición
+                //  fija que aparecía SIEMPRE que se usaba el haz). LA
+                //  CURA: mientras la Ira vive (la ceremonia gesta o su
+                //  haz dispara), la electricidad del arma-C NO vive en su
+                //  propia boca — se muda AL CORAZÓN DEL CÍRCULO (el
+                //  ancla viva) y se funde en LA MISMA BOLA DEL CORAZÓN
+                //  que la Ira ya viste (RayitosDelCorazon: el mismo
+                //  punto, la misma bola, la misma ley — «los pequeños
+                //  rayos electricos deben concentrarce en el centro del
+                //  circulo formado por los minions»). Sin Ira viva: la
+                //  boca del arma como SIEMPRE (SU firma del RC2, intacta
+                //  — y sus anillos rúnicos también: no son los rayitos y
+                //  no se tocan).
+                // ============================================================
+                Projectile anclaViva = IraSerExteriorCeremoniaProjectile
+                    .RitualDe((int)Owner);
+                if (anclaViva != null && anclaViva.active && anclaViva != Projectile)
                 {
-                    int seed = (int)(Time * 0.017f) * 131 + i * 297;
-                    float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
-                    // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
-                    // pequeños rayos electricos no estan centrados en el
-                    // medio de los circulos runicos»): antes nacían al
-                    // borde del centro (r0 10-16) y corrían HACIA FUERA
-                    // (r1 36-76) — un anillo de radios con el medio
-                    // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
-                    // lado del círculo y muere en el OPUESTO (con ±0,4 rad
-                    // de vaivén orgánico) — el MEDIO de los círculos
-                    // rúnicos HIERVE de electricidad.
-                    float rArco = 16f + 6f * progreso;
-                    float angOpuesto = ang + MathHelper.Pi
-                        + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
-                    Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
-                    Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
-                    StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
-                        ColorConjuro(Projectile.localAI[0] + i * 8f),
-                        DefinitivasLib.BlancoCalido,
-                        0.60f + 0.40f * progreso, 5, 12f);
+                    IraSerExteriorCeremoniaProjectile.RayitosDelCorazon(
+                        anclaViva, laserCharge, Projectile.localAI[0]);
+                }
+                else
+                {
+                    float progreso = Utils.GetLerpValue(0f, ChargeTime, Time, true);
+                    int flick = (int)(Main.GlobalTimeWrappedHourly * 60f) & 0x3FF;
+                    int cuenta = 2 + (int)(progreso * 3.99f);
+                    for (int i = 0; i < cuenta; i++)
+                    {
+                        int seed = (int)(Time * 0.017f) * 131 + i * 297;
+                        float ang = VFXCore.Hash01(seed, i * 7 + 1, 3) * MathHelper.TwoPi;
+                        // v6.60.2 — CENTRADOS EN EL MEDIO (la letra: «los
+                        // pequeños rayos electricos no estan centrados en el
+                        // medio de los circulos runicos»): antes nacían al
+                        // borde del centro (r0 10-16) y corrían HACIA FUERA
+                        // (r1 36-76) — un anillo de radios con el medio
+                        // VACÍO. AHORA cada arco CRUZA EL CENTRO: nace en un
+                        // lado del círculo y muere en el OPUESTO (con ±0,4 rad
+                        // de vaivén orgánico) — el MEDIO de los círculos
+                        // rúnicos HIERVE de electricidad.
+                        float rArco = 16f + 6f * progreso;
+                        float angOpuesto = ang + MathHelper.Pi
+                            + (VFXCore.Hash01(seed, i * 13 + 5, 9) - 0.5f) * 0.8f;
+                        Vector2 start = posPantalla + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rArco;
+                        Vector2 end = posPantalla + new Vector2(MathF.Cos(angOpuesto), MathF.Sin(angOpuesto)) * rArco;
+                        StormLib.Bolt(Main.spriteBatch, start, end, seed, flick, 3.2f,
+                            ColorConjuro(Projectile.localAI[0] + i * 8f),
+                            DefinitivasLib.BlancoCalido,
+                            0.60f + 0.40f * progreso, 5, 12f);
+                    }
                 }
             }
 
