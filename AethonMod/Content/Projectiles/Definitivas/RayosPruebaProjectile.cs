@@ -462,6 +462,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // TiemposLib: el momento del disparo se lee por el
                     // MOVIMIENTO, no por la luz.
                     ImpactoLib.GolpeDeCine(Projectile.Center, 1.25f, 6, suave: true, destello: false);
+
+                    // v6.78 — EL ESTALLIDO DE CALOR (la letra: «aberración
+                    // cromática en el estallido»): el golpe de aire
+                    // caliente — el anillo que se expande + el split R/B
+                    // de la lente (CalorLib viaja en SU filtro de cadena,
+                    // activo desde la carga: el fade ±1 s del filtro
+                    // maduró hace rato y el estallido llega a PLENITUD).
+                    // SOLO el arma-C — la ira del grimorio NO hierve el
+                    // aire (la letra: el calor es del rayo de prueba C).
+                    if (!EsIra)
+                        CalorLib.Estallido(Projectile.Center, 15f, 430f);
                 }
             }
 
@@ -553,6 +564,36 @@ namespace AethonMod.Content.Projectiles.Definitivas
             realSize = MathHelper.Lerp(realSize, targetSize, 0.1f);
             Projectile.velocity = Projectile.rotation.ToRotationVector2();
 
+            // ============================================================
+            //  v6.78 — EL AIRE QUE HIERVE (la letra: «ondas de calor alrededor
+            //  del haz, como una distorsión de calor»): el conducto registra
+            //  SU cápsula de calor CADA tick — CalorLib la pinta al campo a ¼
+            //  y el filtro de cadena distorsiona el aire alrededor del haz
+            //  (las ondas de convección suben por las diagonales opuestas del
+            //  ruido de plasma). EL ANCHO SIGUE LA GEOMETRÍA DEL HAZ (la
+            //  MISMA ley StripWidth de la pila — cero leyes nuevas): la boca
+            //  gorda hierve fuerte, la aguja susurra. Y SOLO el arma-C — la
+            //  letra fue explícita: «no lo hagas en el haz del grimorio, hazlo
+            //  en el rayo de prueba c» (la ira del Ser Exterior NO hierve).
+            // ============================================================
+            if (!EsIra && !Main.dedServ && Time >= ChargeTime - 20 && Time < ChargeTime + LaserDuration + 45)
+            {
+                float kCalor = Utils.GetLerpValue(ChargeTime - 30, ChargeTime + 70, Time, true)
+                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true);
+                if (kCalor > 0.01f)
+                {
+                    Vector2 dirCalor = Projectile.rotation.ToRotationVector2();
+                    float largoCalor = LargoCono * (0.5f + kCalor * 0.5f);
+                    // LA BOCA DEL HERVIDERO: el ancho del conducto por SU
+                    // ley propia (p^0.8 en 0.15 — donde el haz es pleno) + el
+                    // margen del aire que respira alrededor.
+                    float anchoBoca = MathF.Max(26f, StripWidth(0.15f) * 2.2f);
+                    float anchoAguja = MathF.Max(12f, StripWidth(0.97f) * 3.0f);
+                    CalorLib.Haz(Projectile.Center, Projectile.Center + dirCalor * largoCalor,
+                        anchoBoca, anchoAguja, 0.9f * kCalor);
+                }
+            }
+
             Projectile.localAI[0] += 1f;
 
             if (!Main.dedServ && Time > ChargeTime - 10 && Time < ChargeTime + LaserDuration)
@@ -572,6 +613,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 DefinitivasLib.Sonar(SoundID.Item34.WithPitchOffset(-0.4f), Projectile.Center);
                 OndaLib.Kick(6f, 10);
+
+                // v6.78 — EL ÚLTIMO SUSPIRO DE CALOR: el conducto muere y el
+                // aire exhala una vez (el eco del estallido — un tercio de
+                // la fuerza). Solo el arma-C.
+                if (!EsIra && !Main.dedServ)
+                    CalorLib.Estallido(Projectile.Center, 5.5f, 280f);
             }
 
             Time++;

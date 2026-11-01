@@ -22,7 +22,7 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
 2. [El mapa en 60 segundos — ¿qué quiero hacer? → ¿qué uso?](#2-el-mapa-en-60-segundos)
 3. [El núcleo — VFXCore, RayoStrip y las reglas transversales](#3-el-núcleo)
 4. [Catálogo de librerías temáticas](#4-catálogo-de-librerías-temáticas)
-5. [Los 4 shaders (.fx + .fxc)](#5-los-4-shaders)
+5. [Los 5 shaders (.fx + .fxc)](#5-los-5-shaders)
 6. [Las texturas de efectos](#6-las-texturas-de-efectos)
 7. [El sonido — las 3 capas](#7-el-sonido)
 8. [Sistemas de seguridad y diagnóstico de render](#8-sistemas-de-seguridad-y-diagnóstico)
@@ -301,8 +301,8 @@ python3 tools/fx20_validate.py AethonMod/Content/Effects/Shaders/MiShader.fxc
 | Sombra que TAPA, ojos que miran, fauces, tentáculos de sombra | **SombrasLib** (`SombrasLib.cs`) — Masa/Ojo/Devorador/BrumaColumna/Garra | Quads negros sueltos sin rim |
 | Rayo estilo vanilla 1.4.5 (clima, Arc Surge) | **RayoLib** (`RayoLib.cs`) + `RayoSistema.Lanzar` | Sprites de rayo, zigzag con Main.rand |
 | Arcos eléctricos, chispas, coronas de descarga | **StormLib** (`StormLib.cs`) — Bolt/ChainBolt/Arc | Líneas blancas secas |
-| Haz/láser masivo de energía (7 capas, telegraph) | **BeamLib** (`BeamLib.cs`) — Rayo/Telegrafo | Un Quad estirado sin capas |
-| Rayo de vértices LISO (tiras de triángulos) | **RayoStrip** (`RayoStrip.cs`) — Filamento/FajaTexturada | Rectángulos encadenados (los "bultos") |
+| Haz/láser masivo de energía (la pila de capas del RC2) | El patrón de **RayosPruebaProjectile** (pila de capas + strip §5.4) — BeamLib MURIÓ v6.56.9 | Un Quad estirado sin capas |
+| Rayo de vértices LISO (tiras de triángulos) | **RayoStrip** (`RayoStrip.cs`) — Filamento | Rectángulos encadenados (los "bultos") |
 | Onda de choque / impacto / explosión | **OndaLib** (`OndaLib.cs`) — Shock/Pulse/Kick/Flash | Anillos de grosor constante |
 | Estela que sigue al proyectil | **EstelaLib** (`EstelaLib.cs`) — Track+Ribbon | Copiar posiciones sin sanitizar |
 | Fuego, llamas, brasas, temperatura | **PyraLib** (`PyraLib.cs`) — Tongue/Flame/EmberField | Naranjas planos con alfa |
@@ -319,6 +319,7 @@ python3 tools/fx20_validate.py AethonMod/Content/Effects/Shaders/MiShader.fxc
 | Alas 100% procedurales | **AlasAuroraLib** + `AlasEstilo` (catálogo 15+ anatomías) | Rectángulos recolorizados |
 | Cinta con fase anclada al arco (serpentea sin resbalar) | **TelaLib** (`TelaLib.cs`) — Cinta | — |
 | Distorsión gravitacional del FONDO | **GravLens** + `BlackHoleLensSystem` (shader §5.1) | Warp con render targets frágiles |
+| **Ondas de calor / refracción de pantalla / aberración cromática** | **CalorLib** (`CalorLib.cs`) — Haz/Punto/Estallido (filtro de cadena §5.5) | Render targets propios por efecto, EndCapture duplicados |
 | Texto dramático en pantalla (la voz del libro) | **EcoLib** (`EcoLib.cs`) — Hablar | Cajas de diálogo propias |
 | Sacudida de cámara / flash / viñeta / onda de UI | **PantallaLib** (`PantallaLib.cs`) o **OndaLib.Kick/Flash** | Escribir ModifyScreenPosition a mano |
 | Sonido de combate (nace/golpea/carga/muere) | **AudioLib.Sonar** (§7) — 6 familias × 5 momentos | PlaySound sueltos sin anti-spam |
@@ -586,7 +587,13 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 
 ---
 
-## 5. LOS 4 SHADERS
+### 4.26 CalorLib.cs (v6.78) — EL AIRE QUE HIERVE · LA DISTORSIÓN DE CALOR DE PANTALLA
+
+**La primera librería ESPACIO-PANTALLA de dibujado del mod** (la auditoría v6.56.8 la profetizó como PostFXLib — nació con la letra del usuario: «ondas de calor alrededor del haz y aberración cromática en el estallido»). La API: `Haz(desde, hasta, anchoBoca, anchoPunta, intensidad)` — la cápsula cónica de un conducto · `Punto(pos, radio, intensidad)` — un foco suelto · `Estallido(pos, fuerzaPx, radioPx)` — el golpe: anillo expansivo + LA ABERRACIÓN CROMÁTICA (split R/B radial, 3 taps, centro por `UseTargetPosition`). La tubería: las fuentes se pintan ADITIVAS en un **campo RT a ¼ de resolución** (el patrón del `WaterShaderData` de vanilla) y un **FILTRO PROPIO EN `Filters.Scene`** ("AethonCalor", `EffectPriority.VeryHigh`) aplica el `CalorDistorsionShader` (§5.5) en la CADENA de `FilterManager.EndCapture` — la activación del filtro FUERZA la captura (vanilla no captura sin filtros: `CanCapture = HasActiveFilter`), compone con los demás filtros (el Graveyard tiñe el mundo ya distorsionado — la lección v6.51.3 intacta) y vive DEBAJO de la UI. **EL HOOK ÚNICO:** el pase del frame (`PrepararPaseDeCalor` — pinta el campo, afina los parámetros, gestiona Activate/Deactivate y la muerte suave del campo) lo dispara `BlackHoleLensSystem.ComponerLenteBajoFiltros` — UN solo hook de EndCapture por proceso (la advertencia de Starlight River). **Contratos:** las fuentes se registran en la IA (cero netcode — visual local), se consumen en el pase (dedup por `GameUpdateCount`); los estallidos son POR EDAD (nacido = GameUpdateCount — cero reloj); la puerta de calidad es `CalidadFX.WarpPantalla` + `FactorCalidad` (las octavas del ruido y la CA respiran con los FPS); la GPU-universal por bandera `_shaderFallo` (sin .fxc no hay filtro — el haz conserva su pila). **LA LEY DEL FILTRO DE CADENA: no se abre un segundo hook de EndCapture ni un RT por efecto — la distorsión de pantalla vive en CalorLib o no se hace.** **Consumidor de nacimiento:** el Rayo de Prueba C (SOLO el arma — la ira del grimorio NO hierve, letra del usuario; el gate es `!EsIra` en el registro).
+
+---
+
+## 5. LOS 5 SHADERS
 
 > Ubicación: `AethonMod/Content/Effects/Shaders/` — cada uno `.fx` (fuente) + `.fxc` (binario que carga el juego). Ver §1 para la LEY.
 
@@ -768,6 +775,14 @@ Cero sprites: abanico de plumas que se PLEGA/ABRE, la onda de aleteo SE PROPAGA 
 - **Historia:** v6.55.0 (nació SIN .fxc — §1) → **v6.55.1 compilado con la cadena propia** (validado: 0 errores, 11 params, técnica VS+PS, 4 samplers × 6 estados, GLSL transpilado verificado) → **v6.56.4 portado a las armas** (HazConcentradoLib + la reversión educada de RayoStrip, §6.A).
 
 ---
+
+### 5.5 CalorDistorsionShader — EL AIRE QUE HIERVE (v6.78, EL FILTRO DE CADENA)
+
+- **Qué hace:** la refracción de calor de PANTALLA — re-muestrea la pantalla en UVs desplazadas por **ruido de plasma en 3 octavas de convección** (dos en DIAGONALES OPUESTAS: el patrón HIERVE EN SU SITIO sin fluir — la lección MoonstoneDistortion de Starlight River; la tercera es el shimmer fino) + el sesgo ascendente (el aire caliente SUBE). El desplazamiento lo modula el **campo de calor** (texCampo, el RT a ¼ donde CalorLib pintó las fuentes aditivas) y lo cierra la **ABERRACIÓN CROMÁTICA DEL ESTALLIDO**: 3 taps radiales R-afuera/G-centro/B-adentro×0.9 alrededor de `uTargetPosition` (la matemática zoom-correcta de vanilla: `(uTargetPosition − uScreenPosition)/uScreenResolution`).
+- **Perfil:** ps_3_0 SOLO (el layout del filtro de cadena: sin vertex shader — SpriteBatch conserva el suyo). 3 samplers: `texPantalla` s0 (REGISTER-ONLY — lo alimenta el Draw de la cadena) · `texCampo` s1 (CLAMP) · `texRuido` s2 (WRAP, RuidoPlasmaCalor.png 512² seamless). Params: los de vanilla que USA (`uOpacity` el fade del filtro, `uIntensity`, `uTime`, `uTargetPosition`, `uScreenPosition`, `uScreenResolution` — Apply los setea con `?.`) + los de la casa (`uAnchoPx` 5.5 px de amplitud · `uCAFuerza` los px del split · `uCARadio` 0.36 alturas · `uConveccion` 0.5 · `uCalidad` 1-3 octavas por `FactorCalidad`) + los defensivos.
+- **Loader:** `CalorLib.Cargar` (vía `CalorSistema.Load`) — `new Filter(new ScreenShaderData(fx, "PaseCalor"), EffectPriority.VeryHigh)` → `Filters.Scene["AethonCalor"]`. **LA CLAVE:** la ACTIVACIÓN del filtro fuerza la captura de pantalla (`CanCapture = HasActiveFilter`) — vanilla no captura sin filtros activos.
+- **Uso:** `CalorLib.Haz/Punto/Estallido` desde la IA (§4.26). Consumidor de nacimiento: el Rayo de Prueba C (solo el arma — `!EsIra`).
+- **La cadena de compilación v6.78:** `vkd3d-shader -b d3dbc -p ps_3_0` + `fx20_build.py --solo-ps` (el builder extendido: float2/3/4, arrays, samplers register-only, AddressU/V — y LA CURA DEL CORRIMIENTO: cada bloque avanza `ceil4(length)` desde el inicio del dato, lo que MojoShader exige) + `fx20_validate.py` contra el MojoShader REAL. Regresión: HazConcentrado y BlackHoleDistortion reconstruidos y validados.
 
 ## 6. LAS TEXTURAS DE EFECTOS
 

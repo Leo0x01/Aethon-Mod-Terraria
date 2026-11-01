@@ -203,6 +203,17 @@ namespace AethonMod.Content.Effects
             _frameEndCapture = Main.GameUpdateCount;   // este frame SÍ capturó
             _compuestoEnEndCapture = false;
 
+            // v6.78 — EL PASE DE CALOR (CalorLib): la distorsión de calor de
+            // pantalla prepara SU campo (el RT a ¼) y los parámetros de SU
+            // filtro de cadena AQUÍ — en EL MISMO hook (la advertencia de
+            // Starlight River: dos hooks de EndCapture peleándose el
+            // finalTexture se rompen; el calor vive DENTRO del hook de la
+            // casa). El filtro mismo lo aplica la cadena de vanilla cuando
+            // orig corra — este pase solo pinta el campo y afina los
+            // parámetros. Cero fuentes: no hace nada (y su filtro se
+            // desactiva solo).
+            CalorLib.PrepararPaseDeCalor();
+
             bool intercambiado = false;
             try
             {
