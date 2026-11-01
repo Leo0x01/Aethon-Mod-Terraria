@@ -1,6 +1,6 @@
 # v6.81 — LA CURA DEL CATCH-22 — EL CHECKLIST
 
-> **PUBLICADA** — release v6.81 + CDN verificado byte a byte (md5 `2781778e9e41a571f2505e02aa02d722`, 6.627.815 B).
+> **PUBLICADA** — release v6.81 + CDN verificado byte a byte (md5 `331eb08cb2de86ad05b4a9ceadcfed49`, 6.627.810 B).
 
 **Qué pasó** (la letra): «aunque ya no hay errores grafico de pantalla negra, nunca vi que esto funcionara en el arma de prueba C» + «borra la Bolsa del Crecimiento y sus armas, son todas basura y nada creativa».
 
