@@ -212,7 +212,18 @@ namespace AethonMod.Content.Effects
             // orig corra — este pase solo pinta el campo y afina los
             // parámetros. Cero fuentes: no hace nada (y su filtro se
             // desactiva solo).
-            CalorLib.PrepararPaseDeCalor();
+            // v6.79 — LA CURA DE LA PANTALLA NEGRA: el pase recibe
+            // screenTarget2 (el buffer de trabajo de la cadena de vanilla).
+            // El restore «correcto» de antes (SetRenderTargets(previos))
+            // re-bindeaba Main.screenTarget — el binding de entrada al hook,
+            // CON EL MUNDO CAPTURADO DENTRO — y en FNA re-bindear un target
+            // lo INVALIDA: el mundo se borraba justo antes de la composición
+            // y la cadena componía SOBRE NEGRO (la pantalla negra del rayo
+            // de prueba C; en frames sin captura, el restore invalidaba el
+            // BACKBUFFER — la pantalla negra «sin previo aviso»). Ahora el
+            // binding del pase sale hacia ese buffer de trabajo y la fuente
+            // JAMÁS se re-bindea.
+            CalorLib.PrepararPaseDeCalor(screenTarget2);
 
             bool intercambiado = false;
             try

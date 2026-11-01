@@ -183,7 +183,12 @@ namespace AethonMod.Content.VFX
         // River: dos hooks que se pelean el finalTexture se rompen; aquí
         // la lente y el calor viven en EL MISMO sitio).
         // ================================================================
-        internal static void PrepararPaseDeCalor()
+        // v6.79 — LA CURA DE LA PANTALLA NEGRA: el pase recibe el buffer de
+        // trabajo de vanilla (screenTarget2 — el EndCapture del hook se lo
+        // pasa). Tras pintar el campo, el binding NO vuelve a la fuente:
+        // queda en ese buffer, que la cadena de vanilla limpia y rellena
+        // ella misma (SetRenderTarget(t2)+Clear en su primera línea útil).
+        internal static void PrepararPaseDeCalor(RenderTarget2D pantallaAlternativa)
         {
             if (_shaderFallo || _filtro == null) return;
             try
@@ -224,7 +229,9 @@ namespace AethonMod.Content.VFX
                         // último frame — el calor hay que ENTREGARLO al
                         // fade: el campo se VACÍA en la transición y lo que
                         // muere es el aire, no el frame.
-                        VaciarCampo();
+                        // (v6.79: VaciarCampo aprendió la cura del binding —
+                        // jamás re-bindea la fuente.)
+                        VaciarCampo(pantallaAlternativa);
                     }
                     return;
                 }
@@ -294,103 +301,149 @@ namespace AethonMod.Content.VFX
                 Texture2D ring = VFXCore.Ring;
                 if (glow == null || ring == null) { Desactivar(); return; }
 
+                // ============================================================
+                //  v6.79 — LA CURA DE LA PANTALLA NEGRA (la letra del
+                //  playtest: «toda la pantalla se vuelve negra al lanzar el
+                //  rayo de prueba C, y a veces sin previo aviso»).
+                //
+                //  LA CAUSA (cazada contra el FilterManager.EndCapture REAL
+                //  descompilado + la lección v5.89 del mismo síntoma): el
+                //  restore «correcto» SetRenderTargets(previos) re-bindeaba
+                //  el binding de entrada — que al entrar al hook es
+                //  Main.screenTarget CON EL MUNDO CAPTURADO DENTRO. En FNA,
+                //  re-bindear un target lo INVALIDA (Clear oculto): el
+                //  mundo se borraba justo antes de que la cadena de filtros
+                //  lo compusiera — y la cadena componía SOBRE NEGRO. En
+                //  frames sin captura, previos = [] (el backbuffer con el
+                //  mundo directo): el restore invalidaba el BACKBUFFER —
+                //  la pantalla negra «sin previo aviso».
+                //
+                //  LA CURA (dos leyes):
+                //   1. SIN CAPTURA (previos vacío) NO se toca NADA: no hay
+                //      composición que vestir y restaurar el backbuffer lo
+                //      borraría. El filtro ya quedó activo: vanilla captura
+                //      el frame SIGUIENTE (CanCapture) y el calor lo viste.
+                //   2. Tras pintar, el binding NO vuelve a la fuente: queda
+                //      en pantallaAlternativa (screenTarget2, el buffer de
+                //      trabajo que vanilla limpia y rellena él mismo). La
+                //      fuente (el mundo) jamás se re-bindea.
+                // ============================================================
                 RenderTargetBinding[] previos = gd.GetRenderTargets();
-                gd.SetRenderTarget(_campo);
-                gd.Clear(Color.Transparent);
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None,
-                    RasterizerState.CullNone);
+                if (previos.Length == 0)
+                    return;   // mundo directo al backbuffer: hoy no hay aire que hervir
+
+                bool pintado = false;
                 try
                 {
-                    Vector2 origen = Main.screenPosition;
-                    float k = EscalaCampo;
-                    Vector2 medioGlow = glow.Size() * 0.5f;
-
-                    // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
-                    //      (denso donde el haz es gordo, ralo en la aguja:
-                    //      el hervidero vive en la boca) ———
-                    for (int h = 0; h < _nHaz; h++)
+                    gd.SetRenderTarget(_campo);
+                    gd.Clear(Color.Transparent);
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                        SamplerState.LinearClamp, DepthStencilState.None,
+                        RasterizerState.CullNone);
+                    try
                     {
-                        Vector2 a = _hazDesde[h], b = _hazHasta[h];
-                        Vector2 delta = b - a;
-                        float largo = delta.Length();
-                        if (largo < 8f) continue;
-                        Vector2 dir = delta / largo;
-                        float inten = _hazIntensidad[h];
+                        Vector2 origen = Main.screenPosition;
+                        float k = EscalaCampo;
+                        Vector2 medioGlow = glow.Size() * 0.5f;
 
-                        float avance = 0f;
-                        int pasos = 0;
-                        while (avance <= largo && pasos < 64)
+                        // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
+                        //      (denso donde el haz es gordo, ralo en la aguja:
+                        //      el hervidero vive en la boca) ———
+                        for (int h = 0; h < _nHaz; h++)
                         {
-                            float t = largo > 0f ? avance / largo : 0f;
-                            float ancho = MathHelper.Lerp(_hazAnchoBoca[h],
-                                _hazAnchoPunta[h], MathF.Pow(t, 0.8f));
-                            float radio = ancho * 0.5f;
-                            // EL PESO: pleno en la boca, menguando hacia la
-                            // aguja (el aire caliente sigue al VOLUMEN del haz).
-                            float peso = inten * (1f - 0.62f * t);
-                            if (peso > 0.02f)
+                            Vector2 a = _hazDesde[h], b = _hazHasta[h];
+                            Vector2 delta = b - a;
+                            float largo = delta.Length();
+                            if (largo < 8f) continue;
+                            Vector2 dir = delta / largo;
+                            float inten = _hazIntensidad[h];
+
+                            float avance = 0f;
+                            int pasos = 0;
+                            while (avance <= largo && pasos < 64)
                             {
-                                Vector2 pos = (a + dir * avance - origen) * k;
-                                float esc = radio * k / medioGlow.X;
-                                Main.spriteBatch.Draw(glow, pos, null,
-                                    new Color(new Vector3(peso * 0.30f, 0f, 0f)),
-                                    0f, medioGlow, esc, SpriteEffects.None, 0f);
+                                float t = largo > 0f ? avance / largo : 0f;
+                                float ancho = MathHelper.Lerp(_hazAnchoBoca[h],
+                                    _hazAnchoPunta[h], MathF.Pow(t, 0.8f));
+                                float radio = ancho * 0.5f;
+                                // EL PESO: pleno en la boca, menguando hacia la
+                                // aguja (el aire caliente sigue al VOLUMEN del haz).
+                                float peso = inten * (1f - 0.62f * t);
+                                if (peso > 0.02f)
+                                {
+                                    Vector2 pos = (a + dir * avance - origen) * k;
+                                    float esc = radio * k / medioGlow.X;
+                                    Main.spriteBatch.Draw(glow, pos, null,
+                                        new Color(new Vector3(peso * 0.30f, 0f, 0f)),
+                                        0f, medioGlow, esc, SpriteEffects.None, 0f);
+                                }
+                                avance += MathF.Max(52f, radio * 1.1f);
+                                pasos++;
                             }
-                            avance += MathF.Max(52f, radio * 1.1f);
-                            pasos++;
                         }
-                    }
 
-                    // ——— LOS FOCOS: el gradiente radial ———
-                    for (int p = 0; p < _nPunto; p++)
-                    {
-                        Vector2 pos = (_puntoPos[p] - origen) * k;
-                        float esc = _puntoRadio[p] * k / medioGlow.X;
-                        Main.spriteBatch.Draw(glow, pos, null,
-                            new Color(new Vector3(_puntoIntensidad[p] * 0.32f, 0f, 0f)),
-                            0f, medioGlow, esc, SpriteEffects.None, 0f);
-                    }
-
-                    // ——— LOS ESTALLIDOS: EL ANILLO QUE SE EXPANDE (la onda
-                    //      del aire caliente — ease-out: rápida al abrir,
-                    //      lenta al morir) + el corazón temprano ———
-                    Vector2 medioRing = ring.Size() * 0.5f;
-                    for (int e = 0; e < MaxEstallido; e++)
-                    {
-                        if (_estNacido[e] == 0) continue;
-                        float edad = (frame - _estNacido[e]) / 60f;
-                        float tVida = edad / VidaEstallido;
-                        if (tVida >= 1f) continue;
-                        float env = Utils.GetLerpValue(0f, 0.1f, edad, true)
-                            * MathF.Exp(-edad * 5.5f);
-                        // EL FRENTE DE ONDA: ease-out cuadrático.
-                        float frente = 1f - MathF.Pow(1f - tVida, 2f);
-                        Vector2 pos = (_estPos[e] - origen) * k;
-                        float radio = _estRadio[e] * frente;
-                        if (radio > 3f)
+                        // ——— LOS FOCOS: el gradiente radial ———
+                        for (int p = 0; p < _nPunto; p++)
                         {
-                            float esc = radio * k / medioRing.X;
-                            Main.spriteBatch.Draw(ring, pos, null,
-                                new Color(new Vector3(env * 0.55f, 0f, 0f)),
-                                0f, medioRing, esc, SpriteEffects.None, 0f);
-                        }
-                        // EL CORAZÓN: el charco caliente del golpe (muere
-                        // rápido — el anillo es lo que viaja).
-                        if (tVida < 0.4f)
-                        {
-                            float corazon = (1f - tVida / 0.4f) * env;
-                            float escC = _estRadio[e] * 0.35f * k / medioGlow.X;
+                            Vector2 pos = (_puntoPos[p] - origen) * k;
+                            float esc = _puntoRadio[p] * k / medioGlow.X;
                             Main.spriteBatch.Draw(glow, pos, null,
-                                new Color(new Vector3(corazon * 0.5f, 0f, 0f)),
-                                0f, medioGlow, escC, SpriteEffects.None, 0f);
+                                new Color(new Vector3(_puntoIntensidad[p] * 0.32f, 0f, 0f)),
+                                0f, medioGlow, esc, SpriteEffects.None, 0f);
+                        }
+
+                        // ——— LOS ESTALLIDOS: EL ANILLO QUE SE EXPANDE (la onda
+                        //      del aire caliente — ease-out: rápida al abrir,
+                        //      lenta al morir) + el corazón temprano ———
+                        Vector2 medioRing = ring.Size() * 0.5f;
+                        for (int e = 0; e < MaxEstallido; e++)
+                        {
+                            if (_estNacido[e] == 0) continue;
+                            float edad = (frame - _estNacido[e]) / 60f;
+                            float tVida = edad / VidaEstallido;
+                            if (tVida >= 1f) continue;
+                            float env = Utils.GetLerpValue(0f, 0.1f, edad, true)
+                                * MathF.Exp(-edad * 5.5f);
+                            // EL FRENTE DE ONDA: ease-out cuadrático.
+                            float frente = 1f - MathF.Pow(1f - tVida, 2f);
+                            Vector2 pos = (_estPos[e] - origen) * k;
+                            float radio = _estRadio[e] * frente;
+                            if (radio > 3f)
+                            {
+                                float esc = radio * k / medioRing.X;
+                                Main.spriteBatch.Draw(ring, pos, null,
+                                    new Color(new Vector3(env * 0.55f, 0f, 0f)),
+                                    0f, medioRing, esc, SpriteEffects.None, 0f);
+                            }
+                            // EL CORAZÓN: el charco caliente del golpe (muere
+                            // rápido — el anillo es lo que viaja).
+                            if (tVida < 0.4f)
+                            {
+                                float corazon = (1f - tVida / 0.4f) * env;
+                                float escC = _estRadio[e] * 0.35f * k / medioGlow.X;
+                                Main.spriteBatch.Draw(glow, pos, null,
+                                    new Color(new Vector3(corazon * 0.5f, 0f, 0f)),
+                                    0f, medioGlow, escC, SpriteEffects.None, 0f);
+                            }
                         }
                     }
+                    finally
+                    {
+                        Main.spriteBatch.End();
+                    }
+                    pintado = true;
                 }
                 finally
                 {
-                    Main.spriteBatch.End();
-                    gd.SetRenderTargets(previos);
+                    // LA CURA v6.79 (2/2): JAMÁS re-bindear la fuente. El
+                    // binding queda en el buffer de trabajo de vanilla; si
+                    // algo faltara (filtro muerto a mitad, buffer nulo), la
+                    // última defensa restaura el binding viejo.
+                    if (pintado && _filtroActivo && pantallaAlternativa != null
+                        && !pantallaAlternativa.IsDisposed)
+                        gd.SetRenderTarget(pantallaAlternativa);
+                    else
+                        gd.SetRenderTargets(previos);
                 }
 
                 // === 2. LOS PARÁMETROS DEL FILTRO (antes de que la cadena
@@ -451,7 +504,12 @@ namespace AethonMod.Content.VFX
         /// calla — el filtro que se desvanece ya no tiene nada que
         /// distorsionar (sin esto, el calor del último frame quedaría
         /// CONGELADO un segundo entero).</summary>
-        private static void VaciarCampo()
+        // v6.79 — VaciarCampo aprendió la cura del binding: sin captura
+        // (previos vacío) no se toca NADA (restaurar el backbuffer lo
+        // borraría — la pantalla negra «sin previo aviso» del fade), y con
+        // captura el binding sale hacia el buffer de trabajo de vanilla,
+        // jamás de vuelta a la fuente (el mundo capturado).
+        private static void VaciarCampo(RenderTarget2D pantallaAlternativa)
         {
             try
             {
@@ -465,9 +523,14 @@ namespace AethonMod.Content.VFX
                 if (gd != null && _campo != null && !_campo.IsDisposed)
                 {
                     RenderTargetBinding[] previos = gd.GetRenderTargets();
+                    if (previos.Length == 0)
+                        return;   // sin captura: el backbuffer queda intacto
                     gd.SetRenderTarget(_campo);
                     gd.Clear(Color.Transparent);
-                    gd.SetRenderTargets(previos);
+                    if (pantallaAlternativa != null && !pantallaAlternativa.IsDisposed)
+                        gd.SetRenderTarget(pantallaAlternativa);
+                    else
+                        gd.SetRenderTargets(previos);
                 }
             }
             catch { }
