@@ -177,6 +177,96 @@ namespace AethonMod.Content.VFX
         /// <summary>¿Vive el filtro? (para la telemetría del F8).</summary>
         public static bool Activo => _filtroActivo && !_shaderFallo;
 
+        /// <summary>v6.81 — ¿El filtro está vivo SOLO como FORZADOR de
+        /// captura (la lente manda, el campo va vacío)? (F8.)</summary>
+        internal static bool PorLente => _porLente;
+
+        /// <summary>v6.81 — ¿El campo a ¼ lleva calor del frame? (la muerte
+        /// suave solo vacía lo que está sucio — F8 y el pase lo leen).</summary>
+        private static bool _campoSucio;
+
+        /// <summary>v6.81 — El filtro sostenido por la LENTE (captura
+        /// forzada sin calor — el early-out del shader copia limpio).</summary>
+        private static bool _porLente;
+
+        /// <summary>Las fuentes vivas del frame (para la telemetría del F8).</summary>
+        public static int Fuentes => _nHaz + _nPunto;
+
+        // ====================== LA DECISIÓN (v6.81) =======================
+        // EL CATCH-22 DESMONTADO — la autopsia contra el FilterManager y el
+        // Main.DoDraw REALES de tML 2026.08 (descompilados):
+        //
+        //   Main.DoDraw:  flag2 = … && Filters.Scene.CanCapture();   ← ANTES
+        //                 de dibujar el mundo — CanCapture() exige un
+        //                 filtro YA ACTIVO en _activeFilters;
+        //                 if (flag2) BeginCapture(screenTarget); … mundo …
+        //                 if (flag2) EndCapture(…)  ← el ÚNICO camino del
+        //                 juego normal por donde corre NUESTRO hook.
+        //
+        // v6.78-6.80 activaba el filtro DENTRO del hook… que solo corre si
+        // EndCapture fue llamado… que solo se llama si ya había captura…
+        // que solo la hay si un filtro ya estaba activo: EL AIRE QUE HIERVE
+        // JAMÁS PODÍA ENCENDERSE SOLO (solo vivía por accidente cuando un
+        // filtro de vanilla coincidía — cementerio, tormenta — o durante
+        // las capturas ajenas del minimapa/foto). «Nunca vi que esto
+        // funcionara»: exactamente esto, con CERO errores en el log.
+        //
+        // LA CURA: la DECISIÓN de activar se muda al lado del UPDATE —
+        // CalorSistema.PostUpdate (tras la IA de los proyectiles — las
+        // fuentes ya están registradas — y ANTES del draw: el flag2 de ESTE
+        // MISMO frame ya lo ve). El filtro se convierte además en EL
+        // FORZADOR DE CAPTURA DEL MOD: cuando la LENTE tiene fuentes pero
+        // no hay calor, el filtro se activa igual con el CAMPO VACÍO — el
+        // shader hace early-out y copia la pantalla pixel-perfect (la lente
+        // por fin compone bajo filtros SIEMPRE que hay un agujero, no solo
+        // en el cementerio).
+        // ================================================================
+        internal static void EvaluarActivacion()
+        {
+            if (Main.dedServ || _shaderFallo || _filtro == null) return;
+            try
+            {
+                // LA PUERTA DE CALIDAD (WarpPantalla — «lentes, calor») y el
+                // guard del menú: el PostUpdate manda, el pase obedece.
+                if (Main.gameMenu || !VFXCore.CalidadPermitida(VFXCore.CalidadFX.WarpPantalla))
+                {
+                    _porLente = false;
+                    Desactivar();
+                    return;
+                }
+
+                bool calor = FuentesVivas(Main.GameUpdateCount);
+                _porLente = !calor &&
+                    global::AethonMod.Content.Effects.BlackHoleLensSystem.NecesitaCaptura();
+                if (calor || _porLente)
+                    Activar();
+                else
+                    Desactivar();
+            }
+            catch
+            {
+                Desactivar();
+                _shaderFallo = true;
+            }
+        }
+
+        /// <summary>¿Hay ALGO que hierve? — haces/puntos frescos (un frame
+        /// de vida: el proyectil los re-registra CADA tick) o estallidos
+        /// vivos por edad. La leen la decisión (PostUpdate) y el pase
+        /// (EndCapture) — LA MISMA ley en los dos lados del frame.</summary>
+        private static bool FuentesVivas(ulong frame)
+        {
+            if ((_nHaz > 0 || _nPunto > 0) && frame - _frameReg <= 1)
+                return true;
+            for (int i = 0; i < MaxEstallido; i++)
+            {
+                if (_estNacido[i] == 0) continue;
+                float edad = (frame - _estNacido[i]) / 60f;
+                if (edad < VidaEstallido) return true;
+            }
+            return false;
+        }
+
         // ====================== EL PASE DEL FRAME =========================
         // Lo llama BlackHoleLensSystem.ComponerLenteBajoFiltros — UN solo
         // hook de EndCapture por proceso (la advertencia de Starlight
@@ -188,55 +278,60 @@ namespace AethonMod.Content.VFX
         // pasa). Tras pintar el campo, el binding NO vuelve a la fuente:
         // queda en ese buffer, que la cadena de vanilla limpia y rellena
         // ella misma (SetRenderTarget(t2)+Clear en su primera línea útil).
-        internal static void PrepararPaseDeCalor(RenderTarget2D pantallaAlternativa)
+        //
+        // v6.81 — EL PASE SOLO PINTA, YA NO DECIDE: la activación vive en
+        // EvaluarActivacion (PostUpdate — la cura del catch-22, ver arriba)
+        // y sin fuentes el pase NO desactiva (la lente puede estar
+        // sosteniendo el filtro con el campo vacío). Nueva firma con LA
+        // PUERTA DE LAS CAPTURAS AJENAS: solo la captura del MUNDO
+        // (pantallaFuente == Main.screenTarget) es nuestra — el minimapa y
+        // la cámara de captura llaman EndCapture con SUS propios buffers y
+        // ahí no se pinta NI se vacía nada (y el dedup del frame queda
+        // intacto para la captura buena).
+        internal static void PrepararPaseDeCalor(RenderTarget2D pantallaFuente,
+            RenderTarget2D pantallaAlternativa)
         {
             if (_shaderFallo || _filtro == null) return;
             try
             {
+                // v6.81 — CAPTURAS AJENAS FUERA: el EndCapture del minimapa/
+                // foto pasa SUS render targets (CaptureCamera.DrawTick →
+                // EndCapture(_frameBuffer, _filterFrameBuffer1, …)). Si la
+                // fuente no es Main.screenTarget, no es el mundo: ni calor
+                // (evita hervir el minimapa con UVs de pantalla) ni lente.
+                if (pantallaFuente == null || pantallaFuente != Main.screenTarget)
+                    return;
+
                 ulong frame = Main.GameUpdateCount;
                 if (frame == _framePreparado) return;   // dedup del frame
                 _framePreparado = frame;
 
-                // LA PUERTA DE CALIDAD (la familia WarpPantalla — «lentes,
-                // calor»: el enum la esperaba desde v6.31) y el guard del
-                // menú (la lección de PantallaLib).
+                // LA PUERTA DE CALIDAD (defensa — el PostUpdate ya decidió;
+                // aquí solo se apaga el campo si la calidad cayó a media).
                 if (Main.gameMenu || !VFXCore.CalidadPermitida(VFXCore.CalidadFX.WarpPantalla))
                 {
-                    Desactivar();
+                    VaciarSiSucio(pantallaAlternativa);
                     return;
                 }
 
-                // ¿HAY FUENTES? Los haces/puntos deben ser FRESCOS (un frame
-                // de vida: el proyectil los re-registra CADA tick — el que
-                // calló, murió). Los estallidos viven por EDAD.
-                bool fuentesFrescas = (_nHaz > 0 || _nPunto > 0) && frame - _frameReg <= 1;
-                bool hayEstallidos = false;
-                for (int i = 0; i < MaxEstallido; i++)
-                {
-                    if (_estNacido[i] == 0) continue;
-                    float edad = (frame - _estNacido[i]) / 60f;
-                    if (edad < VidaEstallido) { hayEstallidos = true; break; }
-                }
+                // ¿HAY FUENTES? (la MISMA ley de la decisión — ver arriba).
+                bool fuentesFrescas = FuentesVivas(frame);
 
-                if (!fuentesFrescas && !hayEstallidos)
+                if (!fuentesFrescas)
                 {
+                    // v6.81 — SIN DESACTIVAR: el filtro puede seguir vivo
+                    // POR LA LENTE (captura forzada con el campo vacío — el
+                    // early-out del shader copia la pantalla limpia). Solo
+                    // corre LA MUERTE SUAVE del aire: mientras el filtro se
+                    // desvanece (±1 s), la cadena seguiría leyendo el CAMPO
+                    // CONGELADO del último frame — el campo se VACÍA en la
+                    // transición y lo que muere es el aire, no el frame.
+                    // (v6.79: VaciarCampo aprendió la cura del binding —
+                    // jamás re-bindea la fuente.)
                     if (_filtroActivo)
-                    {
-                        Desactivar();
-                        // LA MUERTE SUAVE: mientras el filtro se desvanece
-                        // (±1 s — IsVisible sigue true hasta Opacity = 0),
-                        // la cadena seguiría leyendo el CAMPO CONGELADO del
-                        // último frame — el calor hay que ENTREGARLO al
-                        // fade: el campo se VACÍA en la transición y lo que
-                        // muere es el aire, no el frame.
-                        // (v6.79: VaciarCampo aprendió la cura del binding —
-                        // jamás re-bindea la fuente.)
-                        VaciarCampo(pantallaAlternativa);
-                    }
+                        VaciarSiSucio(pantallaAlternativa);
                     return;
                 }
-
-                Activar();
 
                 // === LA FUERZA ADAPTATIVA (VFXCore.FactorCalidad): las
                 //     octavas del hervidero y la CA respiran con los FPS —
@@ -346,6 +441,18 @@ namespace AethonMod.Content.VFX
                         float k = EscalaCampo;
                         Vector2 medioGlow = glow.Size() * 0.5f;
 
+                        // v6.81 — LA CORRECCIÓN DE ZOOM: el campo se pinta
+                        // SIN la matrix del spriteBatch (coords de pantalla
+                        // directas), pero el mundo se ve a través de
+                        // GameViewMatrix.Zoom — con zoom ≠ 1 cada px de mundo
+                        // ocupa zoom px de pantalla. El lote del mundo resta
+                        // screenPosition y deja que la matrix escale; aquí
+                        // el zoom se aplica A MANO (con zoom 1 el
+                        // comportamiento es el de siempre, byte a byte).
+                        Vector2 zoom = Main.GameViewMatrix.Zoom;
+                        if (zoom.X <= 0f || zoom.Y <= 0f || !float.IsFinite(zoom.X) || !float.IsFinite(zoom.Y))
+                            zoom = Vector2.One;
+
                         // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
                         //      (denso donde el haz es gordo, ralo en la aguja:
                         //      el hervidero vive en la boca) ———
@@ -371,8 +478,8 @@ namespace AethonMod.Content.VFX
                                 float peso = inten * (1f - 0.62f * t);
                                 if (peso > 0.02f)
                                 {
-                                    Vector2 pos = (a + dir * avance - origen) * k;
-                                    float esc = radio * k / medioGlow.X;
+                                    Vector2 pos = (a + dir * avance - origen) * zoom * k;
+                                    float esc = radio * zoom.X * k / medioGlow.X;
                                     Main.spriteBatch.Draw(glow, pos, null,
                                         new Color(new Vector3(peso * 0.30f, 0f, 0f)),
                                         0f, medioGlow, esc, SpriteEffects.None, 0f);
@@ -385,8 +492,8 @@ namespace AethonMod.Content.VFX
                         // ——— LOS FOCOS: el gradiente radial ———
                         for (int p = 0; p < _nPunto; p++)
                         {
-                            Vector2 pos = (_puntoPos[p] - origen) * k;
-                            float esc = _puntoRadio[p] * k / medioGlow.X;
+                            Vector2 pos = (_puntoPos[p] - origen) * zoom * k;
+                            float esc = _puntoRadio[p] * zoom.X * k / medioGlow.X;
                             Main.spriteBatch.Draw(glow, pos, null,
                                 new Color(new Vector3(_puntoIntensidad[p] * 0.32f, 0f, 0f)),
                                 0f, medioGlow, esc, SpriteEffects.None, 0f);
@@ -406,11 +513,11 @@ namespace AethonMod.Content.VFX
                                 * MathF.Exp(-edad * 5.5f);
                             // EL FRENTE DE ONDA: ease-out cuadrático.
                             float frente = 1f - MathF.Pow(1f - tVida, 2f);
-                            Vector2 pos = (_estPos[e] - origen) * k;
+                            Vector2 pos = (_estPos[e] - origen) * zoom * k;
                             float radio = _estRadio[e] * frente;
                             if (radio > 3f)
                             {
-                                float esc = radio * k / medioRing.X;
+                                float esc = radio * zoom.X * k / medioRing.X;
                                 Main.spriteBatch.Draw(ring, pos, null,
                                     new Color(new Vector3(env * 0.55f, 0f, 0f)),
                                     0f, medioRing, esc, SpriteEffects.None, 0f);
@@ -420,7 +527,7 @@ namespace AethonMod.Content.VFX
                             if (tVida < 0.4f)
                             {
                                 float corazon = (1f - tVida / 0.4f) * env;
-                                float escC = _estRadio[e] * 0.35f * k / medioGlow.X;
+                                float escC = _estRadio[e] * 0.35f * zoom.X * k / medioGlow.X;
                                 Main.spriteBatch.Draw(glow, pos, null,
                                     new Color(new Vector3(corazon * 0.5f, 0f, 0f)),
                                     0f, medioGlow, escC, SpriteEffects.None, 0f);
@@ -432,6 +539,7 @@ namespace AethonMod.Content.VFX
                         Main.spriteBatch.End();
                     }
                     pintado = true;
+                    _campoSucio = true;   // v6.81 — la muerte suave lo sabrá
                 }
                 finally
                 {
@@ -476,6 +584,16 @@ namespace AethonMod.Content.VFX
             try
             {
                 Filters.Scene.Activate(NombreFiltro, Vector2.Zero);
+                // v6.81 — SIN EL FADE-IN DE VANILLA (OPACITY_RATE = 1/s): el
+                // ESTALLIDO de la ignición vive 1.05 s — con el fade de 1 s
+                // del filtro la aberración cromática NUNCA habría llegado a
+                // verse (0.016 → 1.0 mientras el golpe ya murió). El haz
+                // trae SU PROPIA rampa (kCalor: la carga del conducto) — el
+                // pop no existe; y si el filtro re-enciende a mitad de un
+                // fade (calor nuevo tras la muerte), la opacidad se respeta
+                // (solo se fuerza cuando estaba a cero).
+                if (_filtro.Opacity <= 0f)
+                    _filtro.Opacity = 1f;
                 _filtroActivo = true;
             }
             catch
@@ -500,17 +618,20 @@ namespace AethonMod.Content.VFX
             catch { }
         }
 
-        /// <summary>LA MUERTE SUAVE DEL CAMPO: el RT se limpia y la CA
-        /// calla — el filtro que se desvanece ya no tiene nada que
-        /// distorsionar (sin esto, el calor del último frame quedaría
-        /// CONGELADO un segundo entero).</summary>
+        /// <summary>LA MUERTE SUAVE DEL CAMPO (v6.81: con bandera — solo se
+        /// vacía lo que está sucio, y si el vaciado no pudo completarse el
+        /// sello queda para reintentar): el RT se limpia y la CA calla — el
+        /// filtro que se desvanece ya no tiene nada que distorsionar (sin
+        /// esto, el calor del último frame quedaría CONGELADO un segundo
+        /// entero).</summary>
         // v6.79 — VaciarCampo aprendió la cura del binding: sin captura
         // (previos vacío) no se toca NADA (restaurar el backbuffer lo
         // borraría — la pantalla negra «sin previo aviso» del fade), y con
         // captura el binding sale hacia el buffer de trabajo de vanilla,
         // jamás de vuelta a la fuente (el mundo capturado).
-        private static void VaciarCampo(RenderTarget2D pantallaAlternativa)
+        private static bool VaciarCampo(RenderTarget2D pantallaAlternativa)
         {
+            bool limpio = false;
             try
             {
                 if (_filtro != null)
@@ -524,16 +645,41 @@ namespace AethonMod.Content.VFX
                 {
                     RenderTargetBinding[] previos = gd.GetRenderTargets();
                     if (previos.Length == 0)
-                        return;   // sin captura: el backbuffer queda intacto
+                        return false;  // sin captura: el backbuffer queda intacto (y el sello sigue sucio)
                     gd.SetRenderTarget(_campo);
                     gd.Clear(Color.Transparent);
                     if (pantallaAlternativa != null && !pantallaAlternativa.IsDisposed)
                         gd.SetRenderTarget(pantallaAlternativa);
                     else
                         gd.SetRenderTargets(previos);
+                    limpio = true;
                 }
             }
             catch { }
+            return limpio;
+        }
+
+        /// <summary>v6.81 — EL GUARDIA DEL SELLO: vacía el campo solo si
+        /// lleva calor, y solo baja el sello cuando el vaciado COMPLETÓ
+        /// (un device-lost a mitad no puede dejar el campo sucio engañando
+        /// a la muerte suave).</summary>
+        private static void VaciarSiSucio(RenderTarget2D pantallaAlternativa)
+        {
+            if (!_campoSucio) return;
+            if (VaciarCampo(pantallaAlternativa))
+                _campoSucio = false;
+        }
+
+        /// <summary>v6.81 — LA TELEMETRÍA DEL F8 (la línea que habría
+        /// cazado el catch-22 en un segundo: «filtro OFF · fuentes 2» era
+        /// la firma del encierro). Compacta y técnica, como la de Furia.</summary>
+        public static string Diagnostico()
+        {
+            if (_shaderFallo) return "shader FALLÓ";
+            if (!_filtroActivo) return "off";
+            return _porLente
+                ? "ON · por lente (campo vacío)"
+                : $"ON · {Fuentes} fuentes";
         }
 
         /// <summary>El sello del frame de registración (la frescura de las
@@ -635,6 +781,16 @@ namespace AethonMod.Content.VFX
     //  en Unload. El pase del frame lo disparan los demás (el hook de la
     //  lente llama a CalorLib.PrepararPaseDeCalor): este sistema no tiene
     //  punto de dibujado propio.
+    //
+    //  v6.81 — LA DECISIÓN VIVE AQUÍ: PostUpdateEverything corre al final
+    //  de Main.Update (el MISMO latido de CalidadFpsSystem — v6.49), con la
+    //  IA de los proyectiles ya corrida (las fuentes del calor están
+    //  registradas frescas) y ANTES del draw (el flag2 de captura de
+    //  Main.DoDraw — Filters.Scene.CanCapture() — se evalúa DESPUÉS: el
+    //  filtro activado en ESTE tick ya fuerza la captura de ESTE frame).
+    //  La cura del catch-22: antes la activación vivía dentro del hook de
+    //  EndCapture, que solo corre cuando ya había captura — el aire que
+    //  hierve JAMÁS podía encenderse solo (ver CalorLib.EvaluarActivacion).
     // =====================================================================
     public class CalorSistema : ModSystem
     {
@@ -647,6 +803,16 @@ namespace AethonMod.Content.VFX
         public override void Unload()
         {
             CalorLib.Descargar();
+        }
+
+        /// <summary>v6.81 — EL LATIDO DE LA DECISIÓN: activa o desactiva el
+        /// filtro de cadena según haya calor… o lente que necesite captura
+        /// (el forzador). Update-side, cada tick, al final de TODO el update
+        /// (el latido de CalidadFpsSystem), en SP y en clientes MP
+        /// (Main.dedServ corta dentro).</summary>
+        public override void PostUpdateEverything()
+        {
+            CalorLib.EvaluarActivacion();
         }
     }
 }

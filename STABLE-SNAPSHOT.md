@@ -1,3 +1,21 @@
+# v6.81 — LA CURA DEL CATCH-22 — EL CHECKLIST
+
+> **PUBLICADA** — release v6.81 + CDN verificado byte a byte (md5 `2781778e9e41a571f2505e02aa02d722`, 6.627.815 B).
+
+**Qué pasó** (la letra): «aunque ya no hay errores grafico de pantalla negra, nunca vi que esto funcionara en el arma de prueba C» + «borra la Bolsa del Crecimiento y sus armas, son todas basura y nada creativa».
+
+**La causa del calor invisible** (cazada contra el tML 2026.08 REAL descompilado — FilterManager + Main.DoDraw): `Main.DoDraw` decide la captura del mundo ANTES de dibujarlo (`CanCapture()` exige un filtro YA activo) y `EndCapture` — el único camino del hook del mod — SOLO se llama si ya había captura. El filtro del calor se activaba DENTRO del hook: **jamás podía encenderse solo**. La lente gravitacional sufría el MISMO encierro. La cura: la decisión vive en `PostUpdateEverything` (cero latencia), el filtro ahora también FUERZA la captura para la lente (con el campo vacío el shader copia pixel-perfect), puerta nueva contra las capturas ajenas del minimapa/foto, corrección de zoom del campo a ¼, y la línea CALOR en el F8.
+
+1. **EL AIRE QUE HIERVE (el rayo C)**: [ ] al dispararlo, el aire alrededor del conducto HIERVE — denso en la boca, susurro en la aguja, subiendo (la convección); [ ] la distorsión respeta el mundo NÍTIDO bajo el haz; [ ] **POR PRIMERA VEZ** — esto nunca se había visto en el juego real (solo en la teoría de v6.78).
+2. **LA ABERRACIÓN DEL ESTALLIDO**: [ ] en la IGNICIÓN (el arranque del láser) un anillo cromático rojo-afuera/azul-adentro alrededor del golpe; [ ] el ÚLTIMO SUSPIRO al morir el haz (un tercio de fuerza).
+3. **LA LENTE FORZADA (los agujeros)**: [ ] cualquier agujero negro rúnico (Cosmic, Umbral, Bruma, Olvido, Supremo…) DISTORSIONA EL FONDO a su alrededor — incluso fuera del cementerio/tormenta (antes solo pasaba en biomas con filtro de vanilla); [ ] el Devorador (GravLens) también.
+4. **EL F8**: [ ] línea nueva `Calor: Aire hirviente (CalorLib)` — «ON · 1 fuentes» con el rayo C, «ON · por lente» junto a un agujero, «off» en calma; [ ] la línea de AYUDA sigue siendo la última (gris).
+5. **SALUD DEL RENDER**: [ ] el minimapa y el mapa grande (M) SIN distorsiones raras, sin parpadeos, sin frames fantasma; [ ] la pantalla JAMÁS se pone negra (la cura v6.79 intacta); [ ] FPS estables con el rayo + agujeros a la vez.
+6. **LA PURGA**: [ ] al entrar al mundo NO llega la Bolsa del Crecimiento; [ ] en la Bolsa Maestra ya NO está; [ ] nada del Crecimiento en el juego; [ ] quien tuviera los ítems los ve como «missing item» (esperado — la purga es la purga).
+7. **LO DEMÁS INTACTO**: [ ] el Equinoccio, los Ojos, LA IRA, los rayos de las sentencias, las 24 bolsas restantes, los sonidos — todo como en v6.80.
+
+---
+
 # v6.58 — EL ATAQUE SOBRE TODO EL MUNDO + LA IGNICIÓN A CIEGAS — EL CHECKLIST
 
 > **PUBLICADA** — release [429662862](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.58.0) + CDN verificado byte a byte (md5 `05bd91d1002b4881714d75acf3cf2ff0`, 6.365.818 B; asset id 694089669).

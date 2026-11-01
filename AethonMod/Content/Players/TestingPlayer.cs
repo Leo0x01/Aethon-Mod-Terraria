@@ -61,10 +61,6 @@ namespace AethonMod.Content.Players
             // reforma: «El Veredicto de Aethon», las cinco sentencias
             // con sus siete capas + el rayo concentrado)
             bolsas += Entregar(ModContent.ItemType<BolsaDefinitivas>());
-            // v6.77 — LA BOLSA DEL CRECIMIENTO aparte (la letra: «crea una
-            // bolsa nueva y dasela al jugador, esta sera una bolsa con un
-            // arma nueva por cada una de las ideas, 14 armas en total»).
-            bolsas += Entregar(ModContent.ItemType<BolsaDelCrecimiento>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

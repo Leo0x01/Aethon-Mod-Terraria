@@ -197,6 +197,21 @@ namespace AethonMod.Content.VFX
         //  EL PUNTO DE INTEGRACIÓN — la fusión en el render del sistema
         // ==================================================================
 
+        /// <summary>v6.81 — ¿Hay ALGUNA lente viva en la mesa? El escaneo
+        /// de 8 slots que decide si el filtro de cadena de CalorLib debe
+        /// forzar la captura (la cura del catch-22: sin captura no hay
+        /// EndCapture y sin EndCapture la lente no compone — ver
+        /// BlackHoleLensSystem.NecesitaCaptura).</summary>
+        public static bool HayVivas()
+        {
+            if (Main.gameMenu) return false;
+            for (int i = 0; i < _lentes.Length; i++)
+            {
+                if (_lentes[i].Vida01 > 0f) return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// VIERTE las lentes vivas en las arrays del pase A de
         /// BlackHoleLensSystem (el shader itera 5 fuentes fijas): escribe

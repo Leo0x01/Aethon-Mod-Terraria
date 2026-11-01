@@ -26,6 +26,9 @@ namespace AethonMod.Content.Systems
     /// · PulsoLib: trauma y fuerza de pantalla (el sistema CONECTADO hoy).
     /// · TiemposLib: el hitstop vivo — ticks de congelación restantes
     ///   (v6.80: la línea que la doc de la librería prometía y faltaba).
+    /// · CalorLib: el filtro de cadena del aire que hierve — estado,
+    ///   fuentes y el modo «por lente» (v6.81: la línea que habría cazado
+    ///   el catch-22 en un segundo — «off · fuentes 2» era la firma).
     /// · GrimorioFuriaSistema: la oleada y la fase del festín.
     ///
     /// REGLA DE LA CASA: cero alocaciones por frame — los textos se
@@ -60,8 +63,12 @@ namespace AethonMod.Content.Systems
         // v6.80 — 9 líneas: HITSTOP se suma (la auditoría v6.78: el F8 no
         // mostraba TiemposLib.CongeladoRestante pese a que su doc lo
         // prometía — doc-rot).
-        private static readonly string[] _lineas = new string[9];
-        private static readonly Vector2[] _medidas = new Vector2[9];
+        // v6.81 — 10 líneas: CALOR se suma (la telemetría de la cura del
+        // catch-22: «off · fuentes 2» habría delatado el encierro al
+        // instante — el filtro jamás podía activarse desde dentro del
+        // hook de EndCapture).
+        private static readonly string[] _lineas = new string[10];
+        private static readonly Vector2[] _medidas = new Vector2[10];
         private static int _nLineas;
 
         public override void UpdateUI(GameTime gameTime)
@@ -113,6 +120,12 @@ namespace AethonMod.Content.Systems
                 // muestra en el F8» y el panel jamás lo pintaba. Es un
                 // int (ticks restantes; 0 = mundo respirando normal).
                 Linea("Mods.AethonMod.Diag.Hitstop", TiemposLib.CongeladoRestante);
+                // v6.81 — LA LÍNEA DEL CALOR: el filtro de cadena vive o
+                // muere en el PostUpdate (la cura del catch-22) y esta
+                // línea lo delata todo: «off» con fuentes registradas = el
+                // encierro volvió; «por lente» = el forzador de captura
+                // sosteniendo a la lente con el campo vacío.
+                Linea("Mods.AethonMod.Diag.Calor", CalorLib.Diagnostico());
                 // v6.50.2 — la furia en clientes MP llega por los estáticos
                 // que EcoRed.MsgHambre llena (GrimorioFuriaSistema.
                 // Diagnostico decide server vs cliente por netMode).
@@ -160,10 +173,10 @@ namespace AethonMod.Content.Systems
                 {
                     if (_lineas[i] == null) continue;
                     // v6.50.2 — FIX (tinte de la línea de ayuda caía en la de
-                    // FURIA); v6.80 — el orden real de Linea() hoy: 0 Fps,
+                    // FURIA); v6.81 — el orden real de Linea() hoy: 0 Fps,
                     // 1 Factor, 2 Quads, 3 Eco, 4 Aura, 5 Pulso, 6 Hitstop,
-                    // 7 Furia, 8 AYUDA — ayuda es la 8 (la última), no la 7.
-                    Color tinte = i == 8
+                    // 7 Calor, 8 Furia, 9 AYUDA — ayuda es la 9 (la última).
+                    Color tinte = i == 9
                         ? new Color(150, 148, 142) // la línea de ayuda, discreta
                         : new Color(196, 232, 255);
                     sb.DrawString(font, _lineas[i], new Vector2(x, y + i * 20f),

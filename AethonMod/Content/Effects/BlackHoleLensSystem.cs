@@ -178,6 +178,95 @@ namespace AethonMod.Content.Effects
         //  nova de un sol ni un agujero vivo pueden volver a apagar el bioma.
         // ================================================================
 
+        /// <summary>v6.81 — ¿NECESITA LA LENTE QUE SE FUERCE LA CAPTURA?
+        /// EL ESCANEO LIVIANO del catch-22: el filtro de cadena de CalorLib
+        /// se enciende en el PostUpdate cuando esto devuelve true, y con la
+        /// captura forzada la lente compone bajo filtros SIEMPRE que hay
+        /// un agujero en pantalla — no solo cuando un filtro de vanilla
+        /// (cementerio, tormenta) coincide por casualidad. Mismo criterio
+        /// que RecolectarFuentes para el PASE A (agujeros ×11 + ondas
+        //  cromáticas/de lente + GravLens externas) + el sol en fase de
+        /// gigante roja (el evento del B): los MINIONS PERMANENTES
+        /// (medusas/cometas/púlsares) quedan fuera a propósito — la
+        /// captura forzada no puede volverse un impuesto eterno por
+        /// sostener un esbirro (su distorsión sutil seguirá apareciendo
+        /// cuando haya calor u otra fuente). Cero alocaciones: compara
+        /// types contra un cache lazy.</summary>
+        public static bool NecesitaCaptura()
+        {
+            if (Main.gameMenu || Main.netMode == Terraria.ID.NetmodeID.Server)
+                return false;
+
+            if (_tiposCaptura == null)
+            {
+                _tiposCaptura = new int[]
+                {
+                    ModContent.ProjectileType<OlvidoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<CosmicBlackHoleProjectile>(),
+                    ModContent.ProjectileType<UmbralBlackHoleProjectile>(),
+                    ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
+                    ModContent.ProjectileType<SupremoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<SupremoAuroraBlackHoleProjectile>(),
+                    ModContent.ProjectileType<EclipsePrimordialProjectile>(),
+                    ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>(),
+                    ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                    ModContent.ProjectileType<SunProjectile>(),
+                };
+            }
+
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active) continue;
+                int t = p.type;
+                for (int j = 0; j < _tiposCaptura.Length; j++)
+                {
+                    if (t != _tiposCaptura[j]) continue;
+                    // Las ondas solo cuentan en sus estilos de lente (la
+                    // MISMA ley de RecolectarFuentes — las demas son
+                    // decorativas y no curvan nada).
+                    if (j == IdxOnda)
+                    {
+                        float st = p.ai[1];
+                        if (st != CosmicShockwaveProjectile.StyleChromatic &&
+                            st != CosmicShockwaveProjectile.StyleChromaticInverse &&
+                            st != CosmicShockwaveProjectile.StyleLens &&
+                            st != CosmicShockwaveProjectile.StyleEinstein &&
+                            st != CosmicShockwaveProjectile.StyleNova)
+                            break;
+                    }
+                    // El sol solo en su fase de gigante roja.
+                    if (j == IdxSol)
+                    {
+                        if (SunProjectile.GetRedGiantProgress(p) <= 0.05f)
+                            break;
+                    }
+                    return true;
+                }
+            }
+
+            // LAS LENTES EXTERNAS (GravLens — el Devorador, los portales…):
+            // si alguna masa viva curva el espacio, la captura se fuerza.
+            return GravLens.HayVivas();
+        }
+
+        /// <summary>v6.81 — El cache de types que fuerzan captura (lazy: los
+        /// ModContent.ProjectileType se resuelven la primera vez — ver
+        /// NecesitaCaptura). EL ORDEN ES LEY: las dos constantes de abajo
+        /// son las posiciones de la ONDA y el SOL dentro del array.</summary>
+        private static int[] _tiposCaptura;
+
+        /// <summary>v6.81 — Posición de CosmicShockwave en _tiposCaptura
+        /// (las ondas cuentan solo en sus estilos de lente).</summary>
+        private const int IdxOnda = 11;
+
+        /// <summary>v6.81 — Posición de SunProjectile en _tiposCaptura
+        /// (el sol cuenta solo en fase de gigante roja).</summary>
+        private const int IdxSol = 12;
+
         /// <summary>¿La composición bajo filtros ya corrió este frame? (el
         /// punto 36 lo lee para NO repetir el volcado de pantalla).</summary>
         private static bool _compuestoEnEndCapture;
@@ -200,6 +289,19 @@ namespace AethonMod.Content.Effects
             RenderTarget2D finalTexture, RenderTarget2D screenTarget1,
             RenderTarget2D screenTarget2, Color clearColor)
         {
+            // v6.81 — LA PUERTA DE LAS CAPTURAS AJENAS: el EndCapture del
+            // minimapa y la cámara de foto (CaptureCamera.DrawTick) llegan
+            // con SUS PROPIOS render targets — ahí ni la lente distorsiona
+            // (herviría el mapa con UVs de pantalla) ni el calor pinta, y
+            // _frameEndCapture NO se marca (Main.screenTarget NO se
+            // redibujó en una captura ajena: marcarlo habría convencido al
+            // punto 36 de que estaba fresco — el fantasma del frame viejo).
+            if (screenTarget1 == null || screenTarget1 != Main.screenTarget)
+            {
+                orig(self, finalTexture, screenTarget1, screenTarget2, clearColor);
+                return;
+            }
+
             _frameEndCapture = Main.GameUpdateCount;   // este frame SÍ capturó
             _compuestoEnEndCapture = false;
 
@@ -223,7 +325,9 @@ namespace AethonMod.Content.Effects
             // BACKBUFFER — la pantalla negra «sin previo aviso»). Ahora el
             // binding del pase sale hacia ese buffer de trabajo y la fuente
             // JAMÁS se re-bindea.
-            CalorLib.PrepararPaseDeCalor(screenTarget2);
+            // v6.81 — Nueva firma: (fuente, alternativa) — el pase filtra
+            // las capturas ajenas él mismo (ver arriba).
+            CalorLib.PrepararPaseDeCalor(screenTarget1, screenTarget2);
 
             bool intercambiado = false;
             try

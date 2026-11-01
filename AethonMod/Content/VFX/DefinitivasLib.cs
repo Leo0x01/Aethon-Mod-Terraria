@@ -72,19 +72,12 @@ namespace AethonMod.Content.VFX
         // (v6.56.3 — LAS PALETAS DE LA ESCALERA: la letra del usuario: «el
         // rayo del juicio, rayo del veredicto y rayo del alba son exactamente
         // iguales» — compartían renderizador Y paleta. Cada PELDAÑO recupera
-        // SU alma. El Veredicto conserva su gradiente propio y el Juicio el
-        // arcoíris de la casa; LA PALETA DEL ALBA (_paradasAlba, 5 paradas
-        // de oro pálido→durazno→blanco→miel→crema) murió con su único
-        // lector GradienteAlba en la purga v6.80.)
-
-        private static readonly Color[] _paradasVeredicto =
-        {
-            new Color(255, 190, 92),    // ámbar de tarde
-            new Color(255, 140, 96),    // brasa
-            new Color(255, 244, 224),   // blanco cálido
-            new Color(214, 96, 214),    // magenta
-            new Color(150, 96, 240),    // violeta de noche
-        };
+        // SU alma; el Juicio conserva el arcoíris de la casa. LA PALETA DEL
+        // ALBA (_paradasAlba) murió con su lector GradienteAlba en la purga
+        // v6.80; LA DEL VEREDICTO (_paradasVeredicto + GradienteVeredicto)
+        // sobrevivió a la v6.80 gracias a la Bolsa del Crecimiento y murió
+        // con ELLA en la purga v6.81 — la letra: «son todas basura y nada
+        // creativa». La tarde-vuelta-noche descansa.)
 
         /// <summary>
         /// EL GRADIENTE DEL JUICIO: cicla suave oro → ámbar → blanco →
@@ -99,18 +92,6 @@ namespace AethonMod.Content.VFX
             int i = (int)x;
             int j = (i + 1) % _paradasJuicio.Length;
             return Color.Lerp(_paradasJuicio[i], _paradasJuicio[j], x - i);
-        }
-
-        /// <summary>v6.56.3 — EL GRADIENTE DEL VEREDICTO: la tarde que se
-        /// vuelve noche (ámbar → brasa → blanco → magenta → violeta). EL
-        /// ALMA DEL PELDAÑO 2.</summary>
-        public static Color GradienteVeredicto(float t)
-        {
-            t = t - MathF.Floor(t);
-            float x = t * _paradasVeredicto.Length;
-            int i = (int)x;
-            int j = (i + 1) % _paradasVeredicto.Length;
-            return Color.Lerp(_paradasVeredicto[i], _paradasVeredicto[j], x - i);
         }
 
         /// <summary>El contrato de alfa de la casa (rgb premultiplicado).</summary>
@@ -176,13 +157,10 @@ namespace AethonMod.Content.VFX
             try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
         }
 
-        /// <summary>DeGolpe de la casa (aceleración brusca de la animación).</summary>
-        public static float DeGolpe(float t)
-        {
-            t = MathHelper.Clamp(t, 0f, 1f);
-            float u = 1f - t;
-            return 1f - u * u * u * u;
-        }
+        // (v6.81 — DeGolpe purgado con la Bolsa del Crecimiento: sus 7
+        // llamadores vivos eran los proyectiles del Crecimiento y la purga
+        // lo dejó huérfano. SombrasLib.DeGolpe — la versión con ~30
+        // usuarios — sigue VIVA, intacta.)
 
         // ==================================================================
         //  LAS TEXTURAS PROCEDURALES (accesos null-safe, el patrón VFXCore)
