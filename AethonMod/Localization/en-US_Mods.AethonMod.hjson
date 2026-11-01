@@ -2879,7 +2879,12 @@ Despertar: {
         JefeEmperatrizDeLuz: la Emperatriz de la Luz
         JefeCultistaLunatico: el Cultista Lunático
         JefeSenorDeLaLuna: el Señor de la Luna
-        PuertaDeCaza: ✦ La mesa está completa… pero el grimorio exige su presa: {1} (nivel {0}). ¡CÁZALA!
+        PuertaDeCaza: ✦ The table is full… but the grimoire demands its prey: {1} (level {0}). HUNT IT!
+        // v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
+        // piden que maten a los jefes»): la línea de la puerta de caza en
+        // la LISTA DE REQUISITOS del tooltip — con SU estado.
+        ReqJefeCaido: The step's prey: {0} — SLAIN
+        ReqJefeViva: The step's prey: {0} — ALIVE! The grimoire demands the hunt
         // v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
         // ítem El Ojo del Cielo — la textura del cielo de la letra).
         CieloTitulo: EL CIELO DEL DESPERTAR

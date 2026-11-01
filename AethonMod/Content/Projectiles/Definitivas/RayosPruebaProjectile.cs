@@ -907,6 +907,43 @@ namespace AethonMod.Content.Projectiles.Definitivas
                                 alpha: 0.34f * (1f - tCol) * (1f - tCol));
                         }
                     }
+
+                    // ——— v6.76 — LA FUENTE DEL LANZAMIENTO (la letra:
+                    //      «al lanzar el haz mas bruma sale en el centro
+                    //      y esta cae hasta el centro del circulo donde
+                    //      nace el haz»): al DISPARARSE, el centro
+                    //      EXHALA — nueve bocanadas NACEN en la boca del
+                    //      haz, SUBEN desacelerando (hasta ~95 px, hacia
+                    //      arriba ±43°) y CAEN de vuelta ACELERANDO al
+                    //      punto exacto donde el haz nace (el arco
+                    //      sin(t·π): la gravedad mística de la fuente)
+                    //      — la bruma se ENTREGA al nacimiento (el alfa
+                    //      se aviva con la llegada, t³ — la firma de la
+                    //      casa). Con el reloj de cada pantalla. ———
+                    float tFt = Utils.GetLerpValue(ChargeTime, ChargeTime + 70f, Time, true);
+                    if (tFt > 0f && tFt < 1f)
+                    {
+                        for (int i = 0; i < 9; i++)
+                        {
+                            int h = 1700 + i * 53;
+                            float arranca = VFXCore.Hash01(h, 5, 3) * 0.55f;
+                            float t = MathHelper.Clamp((tFt - arranca) / (1f - arranca), 0f, 1f);
+                            if (t <= 0f) continue;
+                            float ang = -MathHelper.PiOver2 +
+                                (VFXCore.Hash01(h, 7, 11) - 0.5f) * 1.5f;
+                            float alto = 70f + 25f * VFXCore.Hash01(h, 13, 17);
+                            float arco = MathF.Sin(t * MathHelper.Pi);
+                            Vector2 pos = boca + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                                * (alto * arco);
+                            float radio = (9f + 6f * VFXCore.Hash01(h, 19, 23))
+                                * (0.6f + 0.4f * arco);
+                            BrumaFX.Cloud(pos, radio,
+                                i % 2 == 0 ? new Color(222, 214, 250) : new Color(140, 92, 220),
+                                h, Main.GlobalTimeWrappedHourly,
+                                puffs: 2,
+                                alpha: (0.22f + 0.28f * arco + 0.25f * t * t * t) * aliento);
+                        }
+                    }
                 }
                 catch { }
                 finally
@@ -945,6 +982,37 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // las estrellitas o brillo»): la implosión de la carga
                 // (arriba) es la ÚLTIMA vez que se ven soles — el
                 // lanzamiento es LIMPIO.
+
+                // === v6.76 — LA ESFERA DEL NACIMIENTO (la letra:
+                //     «tambien quiero que en el punto del centro donde
+                //     nace el haz pongas un brillo, una pequeña esfera
+                //     de luz brillando con intensidad»): TODO el
+                //     lanzamiento, la BOCA del haz de la Ira viste SU
+                //     corazón luminoso — núcleo blanco incandescente +
+                //     manto cálido + halo blanco-violeta, latiendo ~1 Hz
+                //     — la fuente de luz de donde mana la ira del Ser
+                //     Exterior (nace en 12 ticks, se apaga SUAVE en los
+                //     últimos 60 — nada de cortes). ===
+                if (EsIra && Time >= ChargeTime && Time < ChargeTime + LaserDuration)
+                {
+                    float lateE = 0.74f + 0.26f * MathF.Sin(Main.GlobalTimeWrappedHourly * 6.2f);
+                    float alientoE = Utils.GetLerpValue(ChargeTime, ChargeTime + 12f, Time, true)
+                        * Utils.GetLerpValue(ChargeTime + LaserDuration,
+                            ChargeTime + LaserDuration - 60f, Time, true);
+                    const float rE = 13f;
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
+                        new Color(216, 198, 255) * (0.30f * lateE * alientoE), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE * 3.1f / 64f, rE * 3.1f / 64f), SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
+                        new Color(246, 238, 255) * (0.55f * lateE * alientoE), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE * 1.8f / 64f, rE * 1.8f / 64f), SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, Projectile.Center, null,
+                        new Color(255, 252, 255) * (0.85f * lateE * alientoE), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE / 64f, rE / 64f), SpriteEffects.None, 0f);
+                }
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.FlushAdditive();

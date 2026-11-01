@@ -88,6 +88,14 @@ namespace AethonMod.Content.Globals
                     "DespertarReq6" => almaReq != null &&
                         (almaReq.OfrendaArma || almaReq.OfrendaMineral >=
                         Systems.DespertarGrimorio.CantidadMineralDe(siguiente)),
+                    // v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun
+                    //     momento me piden que maten a los jefes»): la
+                    //     línea de la PUERTA DE CAZA late ✓ cuando SU
+                    //     jefe ya cayó (el crédito retroactivo:
+                    //     JefeYaCaido — la bandera del mundo O el
+                    //     registro del cazador del portador).
+                    "DespertarReqJefe" => Systems.DespertarGrimorio
+                        .JefeYaCaido(portador, siguiente),
                     _ => null,
                 };
                 if (cumplido == true)

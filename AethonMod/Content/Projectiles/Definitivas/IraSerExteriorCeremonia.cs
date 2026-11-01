@@ -577,16 +577,31 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float radioCuna = MathHelper.Lerp(28f, Math.Min(95f, techo), prog)
                     * (1f - 0.55f * contraccion);
                 Vector2 nubeScr = posPantalla;   // EL PUNTO DE NACIMIENTO (donde el haz nacerá)
+                // v6.76 — AÚN MÁS BRUMA (la letra: «el centro se llena de
+                //     bruma, aun mas bruma de la que hay actualmente»):
+                //     la nube blanca pasa de 12-30 a 16-50 puffs, la
+                //     morada de 12 a 18 — y UNA TERCERA CAPA interior
+                //     (el VIENTRE: ×0,36, más blanca) en el punto
+                //     exacto del nacimiento. La MISMA ley del círculo
+                //     (el techo del radio lo pone el escuadrón — nada
+                //     asoma), la masa MUCHO más gruesa: el centro de la
+                //     ceremonia HIERVE de bruma.
                 VFXCore.CerrarLoteSiAbierto();
                 BrumaFX.BeginMass();
                 BrumaFX.Cloud(nubeScr, radioCuna, new Color(205, 195, 238),
                     semilla, time,
-                    Math.Max(12, (int)(21 * prog) + 9),
-                    alpha: 0.24f + 0.38f * prog + 0.14f * contraccion);
+                    Math.Max(16, (int)(34 * prog) + 16),
+                    alpha: 0.28f + 0.40f * prog + 0.14f * contraccion);
                 BrumaFX.Cloud(nubeScr + new Vector2(0f, -radioCuna * 0.2f),
                     radioCuna * 0.62f, new Color(86, 44, 150),
-                    semilla + 29, time * 0.85f, 12,
-                    alpha: 0.20f + 0.28f * prog + 0.10f * contraccion);
+                    semilla + 29, time * 0.85f, 18,
+                    alpha: 0.24f + 0.32f * prog + 0.10f * contraccion);
+                // v6.76 — EL VIENTRE DE LA BRUMA: la capa interior MÁS
+                //     BLANCA en el punto exacto donde el haz nacerá —
+                //     el centro se LLENA de verdad.
+                BrumaFX.Cloud(nubeScr, radioCuna * 0.36f, new Color(226, 218, 250),
+                    semilla + 57, time * 1.25f, 8,
+                    alpha: 0.22f + 0.30f * prog + 0.12f * contraccion);
             }
             catch { }
             finally
@@ -648,6 +663,36 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         progCarga, time,
                         radioLejos: 320f, radioVar: 200f, corazon: 0.5f,
                         colorCorazon: CorazonRunico);
+                }
+
+                // === v6.76 — LA ESFERA DEL NACIMIENTO (la letra:
+                //     «tambien quiero que en el punto del centro donde
+                //     nace el haz pongas un brillo, una pequeña esfera
+                //     de luz brillando con intensidad»): EL CORAZÓN
+                //     LUMINOSO del ritual — núcleo blanco incandescente
+                //     + manto cálido + halo blanco-violeta, LATIENDO
+                //     (~1 Hz) — creciendo con la carga (6→15 px) en el
+                //     punto EXACTO donde el haz nacerá: la fuente de
+                //     luz que la ceremonia gesta. ===
+                {
+                    float lateE = 0.72f + 0.28f * MathF.Sin(time * 6.4f);
+                    float rE = MathHelper.Lerp(6f, 15f, prog * prog);
+                    float creceE = 0.30f + 0.70f * prog;
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                        new Color(214, 196, 255) * (0.30f * lateE * creceE), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE * 3.2f / 64f, rE * 3.2f / 64f),
+                        SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                        new Color(246, 238, 255) * (0.55f * lateE * creceE), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE * 1.8f / 64f, rE * 1.8f / 64f),
+                        SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                        new Color(255, 252, 255) * (0.85f * lateE * (0.25f + 0.75f * prog)), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(rE / 64f, rE / 64f),
+                        SpriteEffects.None, 0f);
                 }
 
                 // LA SEMILLA DEL HAZ: la estrella de 4 puntas que CRECE en

@@ -345,18 +345,25 @@ namespace AethonMod.Content.Weapons
 
         public override void SetDefaults()
         {
-            // v6.75 — EL ARMA INICIAL (la letra: «debes ajustar el daño
-            //     inicial del grimorio a 1 tanto el daño magico como el
-            //     daño de invocacion, ya que al inicio es como un arma
-            //     inicial, dejemos que con la subida de nivel ese daño
-            //     vaya mejorando solo con los calculos actuales y los
-            //     buffos ganados»): la base de AMBOS caminos nace en 1 —
-            //     el mágico (por ModifyWeaponDamage) y el de invocación
-            //     (por DanoOjosDelEterno, que lee ESTE número). TODO el
-            //     crecimiento es del NIVEL del libro, el despertar, la
-            //     reforja viva y los festines (los cálculos de siempre,
-            //     SIN tocar) — el Eterno nace humilde y se vuelve Dios.
-            Item.damage = 1;
+            // v6.76 — LA MEDIA DE LAS PRIMERAS ARMAS (la letra: «otra
+            //     cosa, empezar con 1 de daño es muy poco, mejor
+            //     empezar con 10 de daño, o mejor, investiga el daño
+            //     de las primeras armas inciales y ponle la media de
+            //     daño de las primeras armas de cada clase, ya sabes
+            //     las primeras armas son aquellas con el daño mas bajo
+            //     de cada clase»): LA INVESTIGACIÓN (wiki.gg, PC 1.4.4
+            //     — las de daño MÁS BAJO de cada clase): espada corta
+            //     de cobre 5 (melee) · arco de madera 4 (ranged) ·
+            //     vara de chispas 14 (magic) · flor de Abigail 6
+            //     (summon) — media (5+4+14+6)/4 = 7,25 ≈ 7. La base de
+            //     AMBOS caminos (el mágico por ModifyWeaponDamage y el
+            //     de invocación por DanoOjosDelEterno, que lee ESTE
+            //     número) nace en 7: TODO el crecimiento sigue siendo
+            //     del NIVEL del libro, el despertar, la reforja viva y
+            //     los festines (los cálculos de siempre, SIN tocar) —
+            //     el Eterno nace como UN ARMA INICIAL de Terraria y se
+            //     vuelve Dios.
+            Item.damage = 7;
             Item.DamageType = DamageClass.Magic;
             Item.width = 30;               // el cuerpo del Nervioso (textura 36×49)
             Item.height = 42;
@@ -1601,6 +1608,44 @@ namespace AethonMod.Content.Weapons
                             trozosAlt.Add($"[c/{colAlt}:{Math.Min(comidosMineral, cantAlt)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq6",
                                 string.Join(" ", trozosAlt)));
+                        }
+
+                        // === v6.76 — LA PRESA DEL PELDAÑO (la letra:
+                        //     «estuve revisando los requisitos para
+                        //     despertar y subir nivel de despertar, pero
+                        //     en ningun momento me piden que maten a los
+                        //     jefes, recuerda que la lista del despertar
+                        //     para los jefes principales es un cheklist
+                        //     que guarda cual jefe has matado y asi
+                        //     cuando llegas al nivel de un jefe que ya
+                        //     mataste, el requisito esta completado»):
+                        //     el checklist de la caza VIVE en la ventana
+                        //     del Cielo — pero la LISTA DE REQUISITOS
+                        //     también lo dice: cuando el peldaño
+                        //     siguiente es UNA PUERTA DE CAZA, su línea
+                        //     propia — EL JEFE con SU estado (CAÍDA ✓
+                        //     verde latiente / ¡VIVA! roja). El crédito
+                        //     es RETROACTIVO (JefeYaCaido: la bandera
+                        //     del mundo O el registro del cazador que
+                        //     viaja con el personaje): si YA lo mataste
+                        //     — aunque haya sido hace meses o en otro
+                        //     mundo con este personaje — el requisito
+                        //     NACE COMPLETADO. ===
+                        if (Systems.DespertarGrimorio.EsNivelDeCaza(siguiente))
+                        {
+                            var jefePeldaño = Systems.DespertarGrimorio.JefeDeNivel(siguiente);
+                            if (jefePeldaño != null)
+                            {
+                                bool presaCaida = Systems.DespertarGrimorio
+                                    .JefeYaCaido(Main.LocalPlayer, siguiente);
+                                string nombreJefe = Language.GetTextValue(jefePeldaño.Value.Clave);
+                                string lineaJefe = presaCaida
+                                    ? Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeCaido", nombreJefe)
+                                    : Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeViva", nombreJefe);
+                                string colJefe = presaCaida ? colOK : "FFA3A3";
+                                tooltips.Add(new TooltipLine(Mod, "DespertarReqJefe",
+                                    $"[c/{colJefe}:  • {lineaJefe}{(presaCaida ? "  ✓" : "")}]"));
+                            }
                         }
 
                         // === v6.51.11 — LA NOTA FINAL (la comida se sirve

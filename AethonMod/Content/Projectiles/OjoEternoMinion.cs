@@ -457,32 +457,31 @@ namespace AethonMod.Content.Projectiles
                 //     sobrepasarlo nunca). ===
                 Vector2 alSlot = slot - Projectile.Center;
                 float dist = alSlot.Length();
-                // === v6.66 — LA ANIMACIÓN DIRECTA (la letra: «ahora
-                //     parecen quedarse en el centro y despues de unos
-                //     segundos es cuando se ponen en circulo, no debe ser
-                //     asi, lo que deben hacer es hacer la animacion
-                //     directamente»): mientras el ritual vive, el ojo va
-                //     a SU PUESTO con ASIGNACIÓN DIRECTA de velocidad —
-                //     CERO herencia. La convergencia v6.65 blendeaba la
-                //     velocidad VIEJA (la de la puntería, que apuntaba a
-                //     la PRESA) con la nueva a razón de 0,35/tick: esa
-                //     inercia heredada llevaba al escuadrón CRUZANDO EL
-                //     CENTRO y amontonado unos segundos antes de abrirse
-                //     al anillo — «se quedan en el centro y después se
-                //     ponen en círculo». AHORA la velocidad ES el vector
-                //     al puesto (la MISMA asignación de la llegada
-                //     exacta, que siempre funcionó): la velocidad vieja
-                //     MUERE en el primer tick, el ojo se GIRA hacia su
-                //     puesto al nacer el ritual y lo alcanza en 2-3
-                //     ticks — el círculo SE CIERRA AL NACER y la
-                //     animación (el giro) corre DIRECTO desde el primer
-                //     momento. k crece con la distancia: 0,55 clavado a
-                //     la órbita giratoria · 0,85 en el arranque lejano
-                //     (un barrido legible, no un teletransporte). ===
+                // === v6.76 — EL VIAJE SUAVE AL CÍRCULO (la letra: «el
+                //     movimiento de los minions del jugador a volverse
+                //     un circulo para comenzar a cargar el haz es un
+                //     movimiento muy brusco, ya que los minions se
+                //     teletransportan a la posicion en vez de viajar a
+                //     la posicion con mivimientos suaves y luego
+                //     reorganizarse en un circulo»): la ASIGNACIÓN
+                //     DIRECTA de la v6.66 (k 0,55-0,85 por tick — hasta
+                //     el 85 % de la distancia restante CADA tick) era
+                //     un TELETRANSPORTE de 2-3 ticks. AHORA el ojo
+                //     VIAJA: velocidad proporcional a lo que falta
+                //     (k 0,10 por tick, tope 9 px/t) con ARRANQUE
+                //     AMPLERADO (lerp 0,20: la velocidad vieja GIRA
+                //     suave hacia la nueva, no muere de golpe) — el
+                //     puesto se alcanza en ~1 s con easing natural,
+                //     rápido en el medio y FRENANDO al llegar; y el
+                //     slot GIRATORIO (la vuelta lenta de siempre) se
+                //     persigue con la MISMA ley suave TODO el ritual:
+                //     el círculo se cierra VIAJANDO, nunca saltando. ===
                 if (ritualIra != null && dist > 0.01f)
                 {
-                    float kDirecto = MathHelper.Clamp(dist * 0.02f, 0.55f, 0.85f);
-                    Projectile.velocity = alSlot * kDirecto;
+                    Vector2 deseada = Vector2.Normalize(alSlot) *
+                        Math.Min(dist * 0.10f, 9f);
+                    Projectile.velocity = Vector2.Lerp(
+                        Projectile.velocity, deseada, 0.20f);
                 }
                 // === v6.51.3 — LA LLEGADA EXACTA DE LA DANZA (la letra:
                 //     «mas exacta»): cerca del puesto, el ojo lo PERSIGUE
@@ -788,18 +787,29 @@ namespace AethonMod.Content.Projectiles
             int iR = Math.Min(idx, nR - 1);
             float time = Main.GlobalTimeWrappedHourly;
 
-            // LA VUELTA DEL RITUAL: ω 0,30 → 1,05 conforme el círculo
-            // cierra (los primeros 150 ticks — la ceremonia).
-            // v6.60.2 — Y SIGUE EN EL DISPARO: muerta la ceremonia, el
-            // ANCLA es EL HAZ (RitualDe cae a él) — el círculo YA cerró:
-            // la vuelta se queda A TOPE (ω 1,05) TODO el lanzamiento.
-            // (ai[2] del haz es el dueño, NO la edad: por eso la rama —
-            // la ceremonia acelera, el haz YA llegó.)
-            float omega = 1.05f;
-            if (ancla.ModProjectile is global::AethonMod.Content.Projectiles
-                    .Definitivas.IraSerExteriorCeremoniaProjectile)
-                omega = MathHelper.Lerp(0.30f, 1.05f, MathHelper.Clamp(
-                    ancla.ai[2] / 150f, 0f, 1f));
+            // === v6.76 — LA VUELTA LENTA, SIEMPRE (la letra: «cuando
+            //     los minions ya estan en posicion y estan en circulo,
+            //     al comenzar la carga estos giran muy rapidamente y
+            //     luego detienen el giro rapido y hacen un giro lento
+            //     continuando con la carga del haz, pues esta mal los
+            //     minions deben girar lentamente siempre no ir rapido,
+            //     lentamente deben girar el circulo que forman mientras
+            //     lanzan rayos de perlin al centro para formar el
+            //     haz»): la RAMPA de ω de la v6.59 (0,30 → 1,05 rad/s
+            //     en los 150 ticks de la ceremonia) escondía un pecado
+            //     — el ángulo vive en `time · ω`, y CAMBIAR ω con
+            //     `time` ya grande produce SALTOS de ángulo enormes
+            //     (time · Δω por tick: con media hora de partida, hasta
+            //     9 rad/tick — el círculo GIRANDO COMO UNA HÉLICE
+            //     durante el cierre, hasta asentarse en el giro lento
+            //     de la carga: el «giran muy rápidamente y luego se
+            //     detienen» de la letra). LA CURA: ω CONSTANTE
+            //     0,50 rad/s (~12,6 s por vuelta — la revolución lenta
+            //     y solemne) desde el PRIMER tick del ritual y TODO el
+            //     lanzamiento del haz: cero rampa, cero salto, cero
+            //     hélice — el círculo gira LENTO SIEMPRE mientras sus
+            //     rayos de perlin gestan el haz. ===
+            const float omega = 0.50f;
 
             float angR = MathHelper.TwoPi / nR * iR + time * omega;
             float radioR = Math.Max(40f, 6.2f * nR)
