@@ -2043,6 +2043,70 @@ Items: {
 			'''
 	}
 
+	ColmilloDoradoStaff: {
+		DisplayName: El Colmillo Dorado
+		Tooltip:
+			'''
+			R7 — los RAYOS DE ENERGÍA DEL CIELO: 3 rayos dorados sobre los
+			enemigos más cercanos al cursor (presagio → doble bolt → ventana de
+		daño → resplandor). Clic derecho: EL JUICIO DEL COLMILLO (6 rayos en
+		anillo). Arma de pruebas: 0 maná.
+			'''
+	}
+
+	RelicarioDelAvispon: {
+		DisplayName: El Relicario del Avispón
+		Tooltip:
+			'''
+			R1 — pulsa la tecla del Relicario Solar (L): 8 s de AURA SOLAR
+			amarilla (+12 % daño/velocidad/crít) a cambio de +10 % de daño
+		recibido y drenaje. 45 s de recarga. Pasivas: +35 % velocidad y vuelo.
+			'''
+	}
+
+	GrilletesDeAndromeda: {
+		DisplayName: Los Grilletes de Andrómeda
+		Tooltip:
+			'''
+			R9 — convierte el maná gastado en un CAMPO DE FUERZA: cada 100 de
+			maná → +20 de escudo (máx 100). Con escudo: daño recibido ×0,85.
+		Al romperse una carga: restaura 50 de maná.
+			'''
+	}
+
+	SolEnMiniaturaStaff: {
+		DisplayName: El Sol en Miniatura
+		Tooltip:
+			'''
+			R3 — el sol de XiHe (MEAC): un minion con núcleo térmico y 2 anillos
+			dorados contra-rotantes; cada 45 ticks telegrafía y descarga su
+		láser dorado. PERSISTENTE: sobrevive a la muerte y a salir de la
+		partida (se despide con clic derecho en su buff).
+			'''
+	}
+
+	MiradaSolyn: {
+		DisplayName: La Mirada de Solyn
+		Tooltip:
+			'''
+			R8 — el rayo de energía: mantén el clic 0,75 s (la carga estelar) y
+			suelta la RÁFAGA de 5.600 px que barre tras el ratón — núcleo rosa,
+		espina dorada, filamentos dendríticos y latido de 14 Hz. 0 maná.
+			'''
+	}
+
+	BolsaInvestigaciones: {
+		DisplayName: La Bolsa de las Investigaciones
+		Tooltip:
+			'''
+			Lo que nació de ESTUDIAR a los grandes: primero los dos
+			CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
+			y de ahí en adelante, TODO lo que nazca de las investigaciones
+			del mod (Bombus Apis, VFX+, MEAC, Heroic Weapons, Umbra, Path
+			of Terraria, los rayos del cielo, Solyn, los Grilletes…).
+			'''
+	}
+
 	BolsaMaestra: {
 		DisplayName: El Cofre del Arsenal
 		Tooltip:
@@ -2471,6 +2535,14 @@ Buffs: {
 		DisplayName: Fragmento de Supernova
 		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
 	}
+	RelicarioCdBuff: {
+		DisplayName: Recarga del relicario
+		Description: El sol se está recargando
+	}
+	SolEnMiniaturaBuff: {
+		DisplayName: El Sol en Miniatura
+		Description: Un sol en miniatura orbita a tu alrededor
+	}
 }
 
 NPCs: {
@@ -2718,6 +2790,7 @@ PaginaEnBlanco: {
 }
 
 Hambre: {
+	Estatua: «Esto es solo una ilusión… me da MÁS hambre.»
 	Barra: Hambre {0}
 	Calmado: El ojo te observa, sereno. Parpadea cuando quiere.
 	Inquieto: Parpadea cada vez más rápido… algo le falta.
@@ -3571,3 +3644,6 @@ Duende: {
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
+
+Keybinds:
+	RelicarioSolar: Relicario Solar (L)

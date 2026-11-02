@@ -146,6 +146,13 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>(), 1));
+            // v6.85 — EL RÉQUIEM DEL PÚLSAR (v6.82: las cinco técnicas
+            // cósmicas premium — faro rotante + estela Catmull-Rom +
+            // overbright ×1.4 + pulsos + colapso con aberración R/G/B)
+            // nació con receta de 5 maderas pero SIN bolsa (la lección de
+            // siempre: «te olvidaste darle… al jugador»). Su familia es la
+            // de los púlsares: aquí vive.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.RequiemDelPulsarStaff>(), 1));
             return l;
         }
     }
@@ -175,6 +182,14 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.BrumaAscendidoBlackHoleStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.CosmicAscendidoBlackHoleStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.OlvidoAscendidoBlackHoleStaff>(), 1));
+            // v6.85 — LA LECCIÓN v6.82 OTRA VEZ (la letra: «te olvidaste de
+            // darle el nuevo agujero negro rúnico al jugador y de meterlo
+            // en la bolsa de agujeros negros»): EL AGUJERO ABSOLUTO — el
+            // bastón de las CUATRO CORONAS (v6.82 lo creó con su receta de
+            // 5 maderas pero NUNCA entró en la bolsa: el jugador tenía que
+            // fabricarlo). La bolsa es la vía del kit — la receta es el
+            // respaldo. Once formas rúnicas: la cima del catálogo.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.AgujeroAbsolutoStaff>(), 1));
             return l;
         }
     }
@@ -812,6 +827,11 @@ namespace AethonMod.Content.Items.Bolsas
             // necesaria» — era la corona que rotaba las 4 sentencias ×1.3;
             // las 4 viven por sí mismas, sin dictador.)
             l.Add((ModContent.ItemType<BolsaDefinitivas>(), 1));
+            // v6.85 — LA BOLSA DE LAS INVESTIGACIONES (bolsa 26 del cofre):
+            // lo que nace de ESTUDIAR a los grandes — la letra de la sesión:
+            // «todos los items creados con estas investigaciones ponlos en
+            // una nueva bolsa y dáselas al jugador».
+            l.Add((ModContent.ItemType<BolsaInvestigaciones>(), 1));
             return l;
         }
     }
@@ -853,6 +873,55 @@ namespace AethonMod.Content.Items.Bolsas
                 // es LA definitiva (y el haz de la Ira de un Ser Exterior).
                 (ModContent.ItemType<RayoPruebaC>(), 1)
             };
+        }
+    }
+
+    // ======================================================================
+    //  v6.85 — LA BOLSA DE LAS INVESTIGACIONES (bolsa 26)
+    //
+    //  La letra de la sesión: «todos los items creados con estas
+    //  investigaciones ponlos en una nueva bolsa y daselas al jugador,
+    //  ademas como todos son armas de prubas en caso de ser un arma lo
+    //  que creas, esta debe tener 0 costo de mana ya que es de prueba».
+    //
+    //  LA SEMÁNTICA ES LA DE LA CASA (permanente + garantía + clic
+    //  derecho), y su CONTENIDO son los frutos de las INVESTIGACIONES:
+    //  primero los dos clickers de la v6.82 (que nacieron sin bolsa — la
+    //  lección v6.14.2 recién curada), y de ahí en adelante TODO lo que
+    //  nazca de estudiar otros mods (Bombus Apis, VFX+, MEAC, Boss
+    //  Checklist, Heroic Weapons, Umbra/Path of Terraria, Aureum Fang,
+    //  Solyn, los Grilletes de Andrómeda…).
+    // ======================================================================
+    public class BolsaInvestigaciones : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Investigaciones";
+
+        protected override string NombreCorto => "Bolsa de las Investigaciones";
+
+        protected override Color ColorFiesta => new Color(120, 235, 190);
+
+        protected override string Nota => "Lo que nació de estudiar a los grandes";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // v6.82 — LOS DOS CLICKERS (nacieron con receta de 5 maderas
+            // pero SIN bolsa: la lección v6.14.2 — el jugador NUNCA vuelve
+            // a quedarse sin sus armas):
+            l.Add((ModContent.ItemType<Weapons.Clicker.CompasRunico>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Clicker.FuriaSolarClicker>(), 1));
+            // v6.85 — LOS CINCO FRUTOS DE LA SESIÓN (R1-R9):
+            // R1 — EL RELICARIO DEL AVISPÓN (Bombus Apis: el aura solar).
+            l.Add((ModContent.ItemType<Items.Investigaciones.RelicarioDelAvispon>(), 1));
+            // R3 — EL SOL EN MINIATURA (MEAC: el sol de XiHe).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.SolEnMiniaturaStaff>(), 1));
+            // R7 — EL COLMILLO DORADO (los rayos del cielo de Aureum Fang).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.ColmilloDoradoStaff>(), 1));
+            // R8 — LA MIRADA DE SOLYN (el rayo de energía).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaSolyn>(), 1));
+            // R9 — LOS GRILLETES DE ANDRÓMEDA (el campo de fuerza).
+            l.Add((ModContent.ItemType<Items.Investigaciones.GrilletesDeAndromeda>(), 1));
+            return l;
         }
     }
 }

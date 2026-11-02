@@ -170,14 +170,29 @@ namespace AethonMod.Content.VFX
         private const float EscalaCampo = 0.25f;
 
         // LOS VALORES DEL LOOK (la investigación, tuned para el conducto):
-        // v6.82 — ANCHOpx 5,5 → 9,0: con el bug de unidades curado (ver el
-        // shader) el presupuesto de px se gasta de verdad — 9 px de flexión
-        // plena ≈ 2,5-4 px de hervor en la boca del conducto (donde el campo
-        // ≈ 0,3-0,45) y hasta 5 px en el anillo del estallido. Un espejismo
-        // que SE VE sin derretir la pantalla.
-        private const float AnchoPx = 9.0f;   // la amplitud: px de flexión con calor pleno
+        // v6.85 — LA AMPLIFICACIÓN DE LA VISIBILIDAD: con el bug de unidades
+        // curado (v6.82), el presupuesto de px era el CORRECTO pero el CAMPO
+        // apenas llegaba: cuentas de glow de 6,4 px de campo cada 52 px de
+        // avance (solape NULO — el 93 % del conducto veía H≈0,03 → 0,3 px de
+        // horno) y UNA sola octava a 30 FPS. La letra del playtest v6.84:
+        // «no veo el efecto sobre el arma de rayo de prueba c, NINGUN efecto»
+        // con el F8 diciendo «ON · 1 fuentes» — el pase componía, el campo
+        // pintaba… y el aire NO HERVÍA porque casi no había campo ni ruido.
+        // LA CURA (cuatro frentes a la vez):
+        //   · uAnchoPx 9 → 16 (px de flexión plena);
+        //   · el PINTOR del haz: cada glow cubre ahora ±1,3·radio (el AIRE
+        //     QUE RESPIRA ALREDEDOR del conducto, no solo el eje) y el avance
+        //     es radio·1,15 (solape ×4-5 → H SATURA a 1,0 en el núcleo);
+        //   · la CALIDAD con suelo en 2 (a 30 FPS también hierven las DOS
+        //     octavas — la contraria es la que hace HERVER EN SU SITIO);
+        //   · el ruido más vivo y más fino (ver el .fx: las 3 octavas suben
+        //     de frecuencia y de velocidad — a 30 FPS el horno se NOTA).
+        // RESULTADO medido: boca ±16 px · medioconducto ±13 · aguja ±8 — el
+        // espejismo SE VE sin derretir la pantalla (la referencia: el heat
+        // haze 2D de los juegos va de 6 a 20 px a 1080p).
+        private const float AnchoPx = 16.0f;   // la amplitud: px de flexión con calor pleno
         private const float RadioCA = 0.36f;  // el estallido: ⅓ de pantalla alrededor del golpe
-        private const float Conveccion = 0.5f; // el sesgo ascendente del aire caliente
+        private const float Conveccion = 0.58f; // el sesgo ascendente del aire caliente
 
         /// <summary>¿Vive el filtro? (para la telemetría del F8).</summary>
         public static bool Activo => _filtroActivo && !_shaderFallo;
@@ -187,6 +202,14 @@ namespace AethonMod.Content.VFX
         /// captura se decide en ModifyTransformMatrix, antes del draw).</summary>
         internal static bool HayCalorVivo => !_shaderFallo && !_retroFallo &&
             _filtro != null && FuentesVivas(Main.GameUpdateCount);
+
+        /// <summary>v6.85 — El frame del ÚLTIMO PINTADO REAL del campo —
+        /// la cura del F8 mentiroso: hasta v6.84 la línea decía «ON · N
+        /// fuentes» con solo que el HOOK hubiera corrido (el sello vivía en
+        /// la PRIMERA línea del pase, antes de TODAS las puertas) — podía
+        /// decir ON mientras PintarCampo devolvía false y el aire no se veía
+        /// NUNCA. Hoy la línea solo promete lo que el campo pintó.</summary>
+        private static ulong _framePintado;
 
         /// <summary>v6.83 — El frame del ÚLTIMO pase retro (telemetría F8).
         /// </summary>
@@ -415,8 +438,14 @@ namespace AethonMod.Content.VFX
             // === LA FUERZA ADAPTATIVA (VFXCore.FactorCalidad): las
             //     octavas del hervidero y la CA respiran con los FPS —
             //     la calidad que se adapta sola (v6.34).
+            // v6.85 — SUELO EN 2: la calidad 1 (una sola octava) mataba el
+            //     hervor a 30 FPS (el F8 del playtest: «Factor de calidad:
+            //     0,5») — SIN la octava contraria el aire no HIERVE EN SU
+            //     SITIO (la base se va de viaje: el ojo lo lee como scroll,
+            //     no como calor). Dos octavas SIEMPRE; la tercera (el shimmer
+            //     fino) sigue siendo el premio de los 54+ FPS.
             float fc = VFXCore.FactorCalidad;
-            calidad = fc >= 0.9f ? 3f : fc >= 0.72f ? 2f : 1f;
+            calidad = fc >= 0.9f ? 3f : 2f;
 
             // === EL ESTALLIDO VIVO MÁS FUERTE: el centro de la CA ===
             float mejorEnv = 0f;
@@ -549,6 +578,13 @@ namespace AethonMod.Content.VFX
                         // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
                         //      (denso donde el haz es gordo, ralo en la aguja:
                         //      el hervidero vive en la boca) ———
+                        //      v6.85 — LA LEY DEL SOLAPE ×4: el glow de cada
+                        //      paso cubre ahora ±2,6·radio (EL AIRE ALREDEDOR
+                        //      del conducto — el calor no vive solo en el eje)
+                        //      y el avance baja a radio·1,15: cada punto del
+                        //      eje cae bajo 4-5 glows superpuestos → H SATURA
+                        //      (antes: cuentas aisladas de 6,4 px de campo
+                        //      cada 52 px — el 93 % del conducto veía H≈0).
                         for (int h = 0; h < _nHaz; h++)
                         {
                             Vector2 a = _hazDesde[h], b = _hazHasta[h];
@@ -572,12 +608,14 @@ namespace AethonMod.Content.VFX
                                 if (peso > 0.02f)
                                 {
                                     Vector2 pos = (a + dir * avance - ancla) * zoom * k;
-                                    float esc = radio * zoom.X * k / medioGlow.X;
+                                    // v6.85 — ±2,6·radio: el glow que respira
+                                    // alrededor del conducto (antes radio seco).
+                                    float esc = radio * 2.6f * zoom.X * k / medioGlow.X;
                                     Main.spriteBatch.Draw(glow, pos, null,
                                         new Color(new Vector3(peso * 0.42f, 0f, 0f)),
                                         0f, medioGlow, esc, SpriteEffects.None, 0f);
                                 }
-                                avance += MathF.Max(52f, radio * 1.1f);
+                                avance += MathF.Max(24f, radio * 1.15f);
                                 pasos++;
                             }
                         }
@@ -633,6 +671,7 @@ namespace AethonMod.Content.VFX
                     }
                     pintado = true;
                     _campoSucio = true;   // v6.81 — la muerte suave lo sabrá
+                    _framePintado = frame; // v6.85 — el sello de la VERDAD (F8)
                 }
                 finally
                 {
@@ -882,9 +921,16 @@ namespace AethonMod.Content.VFX
                 return $"ON · {Fuentes} fuentes · RETRO";
             if (!_filtroActivo) return "off";
             if (_framePreparado == f)
-                return _porLente
-                    ? "ON · por lente (campo vacío)"
-                    : $"ON · {Fuentes} fuentes";
+            {
+                if (_porLente)
+                    return "ON · por lente (campo vacío)";
+                // v6.85 — LA LÍNEA QUE NO MIENTE: «campo ✓» solo si el campo
+                // se pintó DE VERDAD este frame; «CAMPO SIN PINTAR» es la
+                // firma del pase que corrió pero no pudo vestir al filtro.
+                return _framePintado == f
+                    ? $"ON · {Fuentes} fuentes · campo ✓"
+                    : $"ON · {Fuentes} fuentes · CAMPO SIN PINTAR";
+            }
             return _porLente
                 ? "ON · por lente · SIN CAPTURA (¿iluminación Retro?)"
                 : $"ON · {Fuentes} fuentes · SIN CAPTURA (¿iluminación Retro?)";
@@ -963,6 +1009,7 @@ namespace AethonMod.Content.VFX
             _texRuido = null;
             _retroFallo = false;
             _frameRetro = 0;
+            _framePintado = 0;
 
             // LA LECCIÓN v5.87: RenderTarget2D.Dispose() en el hilo de
             // carga lanza ThreadStateException — la destrucción se encola

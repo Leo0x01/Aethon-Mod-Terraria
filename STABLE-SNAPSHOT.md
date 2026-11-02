@@ -1,3 +1,41 @@
+# v6.85 — LA SESIÓN DE LAS NUEVE INVESTIGACIONES — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.85 (md5 `7e19111c733de9293f7b53516390568f`, 9.047.446 B) — 480 entradas (14 assets nuevos), blobs 480/480, EOF exacto, el .fxc del calor RECOMPILADO (5.290 B), la música del festín dentro (2,1 MB), headless 0 excepciones.
+
+## LA LETRA Y LA ENTREGA
+1. **EL CALOR DEL RAYO C, POR FÍN**: el F8 decía «ON · 1 fuentes» y no se veía NADA — el campo apenas existía (cuentas de glow sin solape cada 52 px + UNA octava a 30 FPS). Ahora: amplitud 16 px, el pintor solapa ×4-5 hasta SATURAR el campo, DOS octavas siempre, ruido más fino y vivo (blobs ~120 px). El F8 ahora solo promete lo que pintó («campo ✓» / «CAMPO SIN PINTAR»).
+2. **LAS BOLSAS**: el Agujero Absoluto → Bolsa de Agujeros Negros · el Réquiem → Bolsa de los Clásicos Cósmicos · los clickers + LOS 5 ITEMS NUEVOS → **LA BOLSA DE LAS INVESTIGACIONES** (nueva, bolsa 26, en el Cofre y en la entrega directa).
+3. **LOS CINCO ITEMS DE LAS INVESTIGACIONES** (todos 0 maná):
+   - **EL RELICARIO DEL AVISPÓN** (R1 — Bombus Apis): accesorio, tecla **L**, 8 s de aura solar amarilla (+12 % daño/vel/crít; +10 % daño recibido y drenaje), 45 s de recarga.
+   - **EL SOL EN MINIATURA** (R3 — MEAC/XiHe): minion persistente (sobrevive a la muerte y a salir de la partida; despida con clic derecho en su buff); láser dorado telegrafiado cada 45 ticks.
+   - **EL COLMILLO DORADO** (R7 — los rayos del cielo): 3 rayos sobre los enemigos más cercanos al cursor · **clic derecho: EL JUICIO DEL COLMILLO** (6 rayos en anillo, 20 s).
+   - **LA MIRADA DE SOLYN** (R8 — el rayo de energía): mantén el clic 0,75 s y suelta la ráfaga de 5.600 px que barre tras el ratón (núcleo rosa, espina dorada, filamentos dendríticos).
+   - **LOS GRILLETES DE ANDRÓMEDA** (R9 — el campo de fuerza): el maná que gastas se vuelve escudo (cada 100 → +20, máx 100); al romperse una carga: +50 de maná y shatter con afterimages.
+4. **EL GRIMORIO Y SU BRUMA**: ya lanzaba la clase nueva (misma que el bastón) desde v6.82 — el playtest lo confirmará (el usuario lo vio «viejo» porque la v6.83 crasheaba).
+5. **LA MÚSICA DEL FESTÍN** (2:44 instrumental, 70 BPM): suena SOLO durante las oleadas, con crossfade.
+6. **LA LEY DE LAS ESTATUAS**: presa de estatua devorada → +1 % de hambre (no −1 %) + la voz: «Esto es solo una ilusión… me da MÁS hambre».
+7. **LA ESENCIA CORRUPTA**: sprite regenerado (núcleo con glow, 3 tonos, borde dentado, motas).
+8. **EL ETERNO FLOTA**: guardado en el inventario (no en la mano) → se ve flotando a la espalda del jugador (visual puro — la caza sigue siendo solo de la fase de hambre).
+
+## LOS ARCHIVOS (los nuevos)
+`Content/VFX/CalorLib.cs` (amplificación + F8 honesto) · `CalorDistorsionShader.fx/.fxc` (octavas) · `Content/Projectiles/Definitivas/RayosPruebaProjectile.cs` (cápsula ×1,6) · `Content/Items/Bolsas/BolsasCategorias.cs` (+3 bolsas) · `Content/Players/TestingPlayer.cs` (+BolsaInvestigaciones) · `Content/Items/Investigaciones/RelicarioDelAvispon.cs` + `Content/Dusts/SolarGlowDust.cs` + `Content/Buffs/RelicarioCdBuff.cs` · `Content/Weapons/Investigaciones/ColmilloDoradoStaff.cs` + `Content/Projectiles/Investigaciones/AureumSkyStrike.cs` · `Content/Weapons/Investigaciones/SolEnMiniaturaStaff.cs` + `Content/Projectiles/Investigaciones/SolEnMiniaturaProj.cs` + `Content/Buffs/SolEnMiniaturaBuff.cs` · `Content/Weapons/Investigaciones/MiradaSolyn.cs` (arma+carga+rayo) · `Content/Items/Investigaciones/GrilletesDeAndromeda.cs` + `Content/Projectiles/Investigaciones/CampoAndromedaProj.cs` · `Content/Effects/FlareEstrella4Puntas.png` · `Content/Effects/AnilloHexagonal.png` · `Content/Effects/Procedural/RuidoDendritico.png` · `Content/Weapons/GrimorioFlotante.cs` · `Content/Weapons/GrimorioHambrientoNervioso.cs` (la ley de las estatuas) · `Content/Items/Altar/ItemCorrupto.png` (regenerado) · `Content/Systems/OleadaHambreMusica.cs` + `Music/OleadaHambre.ogg` · `AethonMod.cs` (el keybind) · hjson ×3 (las claves nuevas + Keybinds) · `build.txt` — 6.85.
+
+## EL PLAYTEST (la lista de la casa)
+(a) [ ] **EL RAYO C HIERVE** (el objetivo de 4 sesiones): dispara el arma C — el aire alrededor del conducto SE VE ONDULAR (±16 px en la boca). F8: la línea Calor dice «ON · 1 fuentes · campo ✓». A 30 FPS también (2 octavas).
+(b) [ ] **LAS BOLSAS**: entra al mundo → el kit entrega EL COFRE DEL ARSENAL (con la Bolsa de las Investigaciones dentro), la Bolsa de las Alas, la de las Definitivas y LA DE LAS INVESTIGACIONES. Ábrelas: el Absoluto está en la de Agujeros Negros, el Réquiem en la de Clásicos Cósmicos, los clickers y los 5 items en la de Investigaciones.
+(c) [ ] **EL RELICARIO DEL AVISPÓN**: equípalo, pulsa L → el aura amarilla con flares girando 8 s (+12 % en todo) y el debuff de 45 s.
+(d) [ ] **EL SOL EN MINIATURA**: invócalo (0 maná) — orbita con sus 2 anillos dorados; telegrafía y dispara su láser. MUERE a propósito y SAL DEL MUNDO: al volver, el sol SIGUE AHÍ (persistencia). Clic derecho en su buff: se despide.
+(e) [ ] **EL COLMILLO DORADO**: clic → 3 rayos dorados caen sobre los 3 enemigos más cercanos al cursor (presagio → bolt → resplandor). Clic derecho → EL JUICIO (6 rayos en anillo, cooldown 20 s).
+(f) [ ] **LA MIRADA DE SOLYN**: mantén el clic (la carga estelar gira) y al soltar la carga: la RÁFAGA rosa/dorada de 5.600 px barre tras el ratón con su latido.
+(g) [ ] **LOS GRILLETES**: equípalos, gasta maná → el campo hexagonal cian crece con las cargas (anillos rúnicos violetas contra-rotando). Recibe un golpe con escudo: shatter + 50 de maná.
+(h) [ ] **LA BRUMA DEL GRIMORIO**: deja que el grimorio lance su agujero de bruma aleatorio — LLEVA SU ANILLO RÚNICO (desde v6.82; esta sesión lo verificó en el fuente).
+(i) [ ] **LA MÚSICA**: en el festín de hambre suena la banda sonora (2:44, con el latido); al acabar el festín, crossfade de vuelta.
+(j) [ ] **LA LEY DE LAS ESTATUAS**: con el grimorio hambriento, que devore presas de ESTATUA → el hambre SUBE 1 % (rojo) y el libro dice: «Esto es solo una ilusión… me da MÁS hambre».
+(k) [ ] **LA ESENCIA CORRUPTA**: el sprite nuevo (núcleo brillante, borde dentado, motas) en las oleadas.
+(l) [ ] **EL ETERNO FLOTA**: con el grimorio guardado (no en la mano), se ve flotando a la espalda del jugador (vaivén + halo). En la mano: como siempre.
+
+---
+
 # v6.84 — LA CURA DEL MOD QUE NO CARGABA (EL SPRITE DEL AGUJERO ABSOLUTO) — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.84 (md5 `8413bb28506ab82211017f244f556ec5`, 6.644.320 B) — 467 entradas (466 + el PNG nuevo), blobs compartidos byte a byte, EOF exacto, headless 0 excepciones, el .fxc SIN CAMBIOS (la cura es un asset puro).

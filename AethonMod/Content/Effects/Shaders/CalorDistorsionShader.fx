@@ -151,16 +151,25 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     //     v6.82 — VECTOR UNITARIO ±1: la amplitud en px la pone uAnchoPx
     //     AL FINAL (antes el ruido venía escalado en UV y el producto
     //     quedaba en UV² — 0,04 px de hervor: INVISIBLE).
-    float2 N = (tex2D(texRuido, nuv * 1.00 + float2( t * 0.045,  t * 0.110)).r - 0.5) * 2.0;
+    //     v6.85 — FRECUENCIA ×2,1 y VELOCIDAD ×1,5: la base a 512² cubría
+    //     TODO la pantalla con UNA sola celda de plasma (blobs de ~256 px)
+    //     y el scroll de 0,045 UV/s era un vaivén lento a 30 FPS — el ojo
+    //     no lo leía como CALOR. Ahora: blobs ~120 px (la escala de
+    //     referencia del heat haze 2D) moviéndose ~1,7× más rápido.
+    float2 N = (tex2D(texRuido, nuv * 2.10 + float2( t * 0.070,  t * 0.165)).r - 0.5) * 2.0;
 
     // (2) LA CONTRARIA — diagonal opuesta (calidad ≥ 2): lo que sube por la
     //     derecha baja por la izquierda — el patrón HIERVE EN SU SITIO.
+    //     v6.85 — ×3,8 y ×1,5 de velocidad (antes 1,87: la contraria era
+    //     casi un eco de la base — se cancelaban solo en el PROMEDIO,
+    //     dejando blobs gordos; ahora son DOS escalas de verdad).
     if (uCalidad >= 1.5)
-        N += (tex2D(texRuido, nuv * 1.87 + float2(-t * 0.060,  t * 0.150)).r - 0.5) * 2.0 * 0.62;
+        N += (tex2D(texRuido, nuv * 3.80 + float2(-t * 0.095,  t * 0.225)).r - 0.5) * 2.0 * 0.62;
 
     // (3) EL SHIMMER FINO — la octava rápida de los detalles (calidad ≥ 3).
+    //     v6.85 — ×6,8 (celdas ~55 px) a 0,42 UV/s: el chisporroteo.
     if (uCalidad >= 2.5)
-        N += (tex2D(texRuido, nuv * 3.41 + float2( t * 0.030,  t * 0.280)).r - 0.5) * 2.0 * 0.38;
+        N += (tex2D(texRuido, nuv * 6.80 + float2( t * 0.050,  t * 0.420)).r - 0.5) * 2.0 * 0.38;
 
     // ANISOTROPÍA: el aire caliente ondula en COLUMNAS — la vertical flexa
     // un poco más que la horizontal (0,78 : 1 — el sesgo de la convección).
@@ -168,8 +177,9 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
 
     // LA CONVECCIÓN: el sesgo NETO ascendente — el aire caliente SUBE (muestrear
     // un pelo más abajo: la imagen se levanta, como detrás de una hoguera).
-    // (En espacio UNITARIO: −0,55·uConveccion ≈ −0,28 — la fracción del
-    // presupuesto de px que se gasta en el ascenso neto.)
+    // (En espacio UNITARIO: −0,55·uConveccion; con 0,58 ≈ −0,32 — la fracción del
+    // presupuesto de px que se gasta en el ascenso neto: ~5 px plenos —
+    // el sesgo que el ojo lee «esto es CALOR de verdad».)
     N.y -= uConveccion * 0.55;
 
     // EL OFFSET — v6.82 LA CURA DEL BUG DE UNIDADES: la amplitud EN PX
@@ -177,7 +187,8 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     // modula por el campo H. Antes: N(UV) × H × (px→UV) = UV² ≈ 0,04 px
     // — el aire hervía INVISIBLE (la letra: «sigo sin ver nada en el arma
     // de prueba C»; cero errores, cero efecto — el síntoma perfecto).
-    // Ahora: la boca del conducto hierve 2,5-4 px y el estallido hasta 5.
+    // Ahora (v6.85, con el pintor del solape ×4): la boca del conducto
+    // hierve a ±16 px, el medioconducto a ±13 y la aguja a ±8.
     float2 bias = N * H * (uAnchoPx / uScreenResolution) * uIntensity * saturate(uOpacity);
     float2 uvD = clamp(coords + bias, 0.002, 0.998);
 

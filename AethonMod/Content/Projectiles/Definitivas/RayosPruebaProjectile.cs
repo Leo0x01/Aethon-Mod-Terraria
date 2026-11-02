@@ -587,10 +587,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // LA BOCA DEL HERVIDERO: el ancho del conducto por SU
                     // ley propia (p^0.8 en 0.15 — donde el haz es pleno) + el
                     // margen del aire que respira alrededor.
-                    float anchoBoca = MathF.Max(26f, StripWidth(0.15f) * 2.2f);
-                    float anchoAguja = MathF.Max(12f, StripWidth(0.97f) * 3.0f);
+                    // v6.85 — EL AIRE QUE RESPIRA ×1,6 MÁS ANCHO: la letra del
+                    // playtest v6.84 («no veo NINGUN efecto») tenía la cifra
+                    // exacta: el hervidero se pintaba DELGADO COMO EL HAZ (2,2×
+                    // StripWidth) y con cuentas de glow sin solape — el aire
+                    // apenas existía. Ahora la cápsula de calor es ~1,6× más
+                    // ancha que el conducto visual (el calor vive ALREDEDOR:
+                    // la zona donde el ojo ESPERA ver el espejismo) y el
+                    // pintor hace el resto (solape ×4-5 → H satura).
+                    float anchoBoca = MathF.Max(42f, StripWidth(0.15f) * 3.6f);
+                    float anchoAguja = MathF.Max(26f, StripWidth(0.97f) * 5.0f);
+                    // v6.85 — INTENSIDAD 0,9 → 1,25 (tope 1,5): el peso pleno
+                    // de la boca empuja H hasta la saturación con el solape.
                     CalorLib.Haz(Projectile.Center, Projectile.Center + dirCalor * largoCalor,
-                        anchoBoca, anchoAguja, 0.9f * kCalor);
+                        anchoBoca, anchoAguja, 1.25f * kCalor);
                 }
             }
 
@@ -617,8 +627,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // v6.78 — EL ÚLTIMO SUSPIRO DE CALOR: el conducto muere y el
                 // aire exhala una vez (el eco del estallido — un tercio de
                 // la fuerza). Solo el arma-C.
+                // v6.85 — FUERZA 10 → 16 y radio 300 → 320: la aberración
+                // del suspiro ahora SE VE (10 px de split R/B era el límite
+                // de lo perceptible; 16 px es un destello de lente claro).
                 if (!EsIra && !Main.dedServ)
-                    CalorLib.Estallido(Projectile.Center, 10f, 300f);
+                    CalorLib.Estallido(Projectile.Center, 16f, 320f);
             }
 
             Time++;

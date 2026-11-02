@@ -2043,6 +2043,70 @@ Items: {
 			'''
 	}
 
+	ColmilloDoradoStaff: {
+		DisplayName: The Golden Fang
+		Tooltip:
+			'''
+			R7 — ENERGY RAYS FROM THE SKY: 3 golden strikes on the enemies
+			nearest the cursor (telegraph → double bolt → damage window →
+		afterglow). Right click: THE FANG'S JUDGMENT (6 rays in a ring).
+		Test weapon: 0 mana.
+			'''
+	}
+
+	RelicarioDelAvispon: {
+		DisplayName: The Hornet's Reliquary
+		Tooltip:
+			'''
+			R1 — press the Solar Reliquary key (L): 8 s of YELLOW SOLAR AURA
+			(+12 % damage/speed/crit) at the cost of +10 % damage taken and
+		drain. 45 s cooldown. Passives: +35 % speed and flight.
+			'''
+	}
+
+	GrilletesDeAndromeda: {
+		DisplayName: Andromeda's Shackles
+		Tooltip:
+			'''
+			R9 — turns spent mana into a FORCE FIELD: every 100 mana → +20
+			shield (max 100). With shield: damage taken ×0.85. When a charge
+		breaks: restores 50 mana.
+			'''
+	}
+
+	SolEnMiniaturaStaff: {
+		DisplayName: The Miniature Sun
+		Tooltip:
+			'''
+			R3 — XiHe's sun (MEAC): a minion with a thermal core and 2 golden
+			counter-rotating rings; every 45 ticks it telegraphs and fires its
+		golden laser. PERSISTENT: survives death and logout (dismiss with
+		right click on its buff).
+			'''
+	}
+
+	MiradaSolyn: {
+		DisplayName: Solyn's Gaze
+		Tooltip:
+			'''
+			R8 — the energy beam: hold click for 0.75 s (the stellar charge) and
+			release the 5,600 px BURST that sweeps after the mouse — pink core,
+		golden spine, dendritic filaments and a 14 Hz heartbeat. 0 mana.
+			'''
+	}
+
+	BolsaInvestigaciones: {
+		DisplayName: La Bolsa de las Investigaciones
+		Tooltip:
+			'''
+			What was born from STUDYING the greats: first the two
+			CLICKERS from v6.82 (The Runic Compass and the Solar Fury),
+			and from then on, EVERYTHING born from the mod's
+			research (Bombus Apis, VFX+, MEAC, Heroic Weapons, Umbra,
+			Path of Terraria, the sky rays, Solyn, the Shackles…).
+			'''
+	}
+
 	BolsaMaestra: {
 		DisplayName: El Cofre del Arsenal
 		Tooltip:
@@ -2471,6 +2535,14 @@ Buffs: {
 		DisplayName: Fragmento de Supernova
 		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
 	}
+	RelicarioCdBuff: {
+		DisplayName: Reliquary recharge
+		Description: The sun is recharging
+	}
+	SolEnMiniaturaBuff: {
+		DisplayName: The Miniature Sun
+		Description: A miniature sun orbits around you
+	}
 }
 
 NPCs: {
@@ -2718,6 +2790,7 @@ PaginaEnBlanco: {
 }
 
 Hambre: {
+	Estatua: "This is just an illusion… it makes me MORE hungry."
 	Barra: Hambre {0}
 	Calmado: El ojo te observa, sereno. Parpadea cuando quiere.
 	Inquieto: Parpadea cada vez más rápido… algo le falta.
@@ -3571,3 +3644,6 @@ Duende: {
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
+
+Keybinds:
+	RelicarioSolar: Relicario Solar (L)

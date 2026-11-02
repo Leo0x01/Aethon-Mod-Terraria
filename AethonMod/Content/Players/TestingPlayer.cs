@@ -61,6 +61,12 @@ namespace AethonMod.Content.Players
             // reforma: «El Veredicto de Aethon», las cinco sentencias
             // con sus siete capas + el rayo concentrado)
             bolsas += Entregar(ModContent.ItemType<BolsaDefinitivas>());
+            // v6.85 — LA BOLSA DE LAS INVESTIGACIONES aparte (la letra de la
+            // sesión: «todos los items creados con estas investigaciones
+            // ponlos en una nueva bolsa y daselas al jugador» — también en
+            // la entrega DIRECTA del kit, no solo dentro del cofre:
+            // la lección v6.14.2 aplicada a la bolsa nueva).
+            bolsas += Entregar(ModContent.ItemType<BolsaInvestigaciones>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

@@ -775,7 +775,40 @@ namespace AethonMod.Content.Weapons
             // hambre sube SIEMPRE)
             EstadoGrimorio festin = EstadoDeLibro(tipoLibro);
             float quita = ReduccionHambre(paraXP, tipoLibro);
-            festin.Hambre = Math.Max(0f, festin.Hambre - quita);
+
+            // ============================================================
+            //  v6.85 — LA LEY DE LAS ESTATUAS (la letra de la sesión):
+            //  «necesitamos idear una mecanica que aumente el hambre del
+            //  grimorio, y esto sera usando los monstruos de las
+            //  estatuas, cada vez que el grimorio mate a un monstruo
+            //  generado por una estatua en vez de quitarle el hambre
+            //  este le dara un 1% de hambre y el grimorio dira algo
+            //  como, esto es solo una ilusion, me da mas hambre».
+            //  LA MARCA DE VANILLA: npc.spawnedFromStatue — el sello de
+            //  las presas de granja. La ilusión NO alimenta: ENGRE.
+            // ============================================================
+            if (presa.SpawnedFromStatue)
+            {
+                festin.Hambre = Math.Min(1f, festin.Hambre + 0.01f);   // +1% de hambre
+                if (dueño != null && dueño.active && Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    try
+                    {
+                        // LA VOZ DEL LIBRO (solo al portador — el patrón EcoRed).
+                        EcoRed.HablarAlPortador(dueño, "Mods.AethonMod.Hambre.Estatua",
+                            new Color(235, 70, 55));
+                        // LA CIFRA EN ROJO (el bocado que ENGRE).
+                        CombatText.NewText(presa.Hitbox, new Color(235, 70, 55),
+                            string.Format(Language.GetTextValue(
+                                "Mods.AethonMod.Hambre.Nervioso.Absorbe"), "+1"));
+                    }
+                    catch { }
+                }
+            }
+            else
+            {
+                festin.Hambre = Math.Max(0f, festin.Hambre - quita);
+            }
 
             // v6.50.94 — EL FESTÍN EGOÍSTA (la letra: «el festin compartido
             // no tiene sentido, el libro casa por estar hambriento, en este
