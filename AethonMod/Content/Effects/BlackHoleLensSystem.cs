@@ -214,6 +214,9 @@ namespace AethonMod.Content.Effects
                     ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>(),
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
                     ModContent.ProjectileType<SunProjectile>(),
+                    // v6.82 — EL ABSOLUTO (al FINAL: IdxOnda=11 e IdxSol=12
+                    // son POSICIONES FIJAS — no mover de aquí).
+                    ModContent.ProjectileType<AgujeroAbsolutoBlackHoleProjectile>(),
                 };
             }
 
@@ -688,6 +691,7 @@ namespace AethonMod.Content.Effects
             int brumaAscType = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
             int cosmicAscType = ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>();
             int olvidoAscType = ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>();
+            int absolutoType = ModContent.ProjectileType<AgujeroAbsolutoBlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
@@ -714,7 +718,8 @@ namespace AethonMod.Content.Effects
                     p.type == eclipseType ||
                     p.type == umbralAscType ||
                     p.type == brumaAscType || p.type == cosmicAscType ||
-                    p.type == olvidoAscType)
+                    p.type == olvidoAscType ||
+                    p.type == absolutoType)   // v6.82 — EL ABSOLUTO
                 {
                     if (count >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
@@ -743,6 +748,8 @@ namespace AethonMod.Content.Effects
                         radiusMult = BrumaAscendidoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == cosmicAscType)
                         radiusMult = CosmicAscendidoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == absolutoType)
+                        radiusMult = AgujeroAbsolutoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == olvidoAscType)
                         radiusMult = OlvidoAscendidoBlackHoleProjectile.LensRadiusMult;
                     float radius = p.width * p.scale / screenSize.X * radiusMult;
@@ -1043,6 +1050,7 @@ namespace AethonMod.Content.Effects
             int brumaAscType = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
             int cosmicAscType = ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>();
             int olvidoAscType = ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>();
+            int absolutoCoreType = ModContent.ProjectileType<AgujeroAbsolutoBlackHoleProjectile>();
             for (int i = 0; i < _blackHoleCount; i++)
             {
                 Projectile bh = Main.projectile[_blackHoleIndices[i]];
@@ -1070,6 +1078,8 @@ namespace AethonMod.Content.Effects
                         CosmicAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == olvidoAscType)
                         OlvidoAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == absolutoCoreType)   // v6.82 — EL ABSOLUTO
+                        AgujeroAbsolutoBlackHoleProjectile.DrawCoreVisuals(bh);
                 }
             }
 

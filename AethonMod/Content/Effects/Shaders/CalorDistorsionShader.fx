@@ -148,25 +148,36 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     float t = uTime;
 
     // (1) LA BASE ANCHA — la ola portadora (siempre viva, calidad ≥ 1).
-    float2 N = (tex2D(texRuido, nuv * 1.00 + float2( t * 0.045,  t * 0.110)).r - 0.5)
-               * 2.0 * float2(0.020, 0.026);
+    //     v6.82 — VECTOR UNITARIO ±1: la amplitud en px la pone uAnchoPx
+    //     AL FINAL (antes el ruido venía escalado en UV y el producto
+    //     quedaba en UV² — 0,04 px de hervor: INVISIBLE).
+    float2 N = (tex2D(texRuido, nuv * 1.00 + float2( t * 0.045,  t * 0.110)).r - 0.5) * 2.0;
 
     // (2) LA CONTRARIA — diagonal opuesta (calidad ≥ 2): lo que sube por la
     //     derecha baja por la izquierda — el patrón HIERVE EN SU SITIO.
     if (uCalidad >= 1.5)
-        N += (tex2D(texRuido, nuv * 1.87 + float2(-t * 0.060,  t * 0.150)).r - 0.5)
-             * 2.0 * float2(0.013, 0.018);
+        N += (tex2D(texRuido, nuv * 1.87 + float2(-t * 0.060,  t * 0.150)).r - 0.5) * 2.0 * 0.62;
 
     // (3) EL SHIMMER FINO — la octava rápida de los detalles (calidad ≥ 3).
     if (uCalidad >= 2.5)
-        N += (tex2D(texRuido, nuv * 3.41 + float2( t * 0.030,  t * 0.280)).r - 0.5)
-             * 2.0 * float2(0.008, 0.011);
+        N += (tex2D(texRuido, nuv * 3.41 + float2( t * 0.030,  t * 0.280)).r - 0.5) * 2.0 * 0.38;
+
+    // ANISOTROPÍA: el aire caliente ondula en COLUMNAS — la vertical flexa
+    // un poco más que la horizontal (0,78 : 1 — el sesgo de la convección).
+    N *= float2(0.78, 1.0);
 
     // LA CONVECCIÓN: el sesgo NETO ascendente — el aire caliente SUBE (muestrear
     // un pelo más abajo: la imagen se levanta, como detrás de una hoguera).
-    N.y -= uConveccion * 0.55 * H;
+    // (En espacio UNITARIO: −0,55·uConveccion ≈ −0,28 — la fracción del
+    // presupuesto de px que se gasta en el ascenso neto.)
+    N.y -= uConveccion * 0.55;
 
-    // EL OFFSET: la amplitud (px→UV) por el campo, la fuerza y el fade.
+    // EL OFFSET — v6.82 LA CURA DEL BUG DE UNIDADES: la amplitud EN PX
+    // (uAnchoPx) se convierte a UV UNA SOLA VEZ y el ruido unitario la
+    // modula por el campo H. Antes: N(UV) × H × (px→UV) = UV² ≈ 0,04 px
+    // — el aire hervía INVISIBLE (la letra: «sigo sin ver nada en el arma
+    // de prueba C»; cero errores, cero efecto — el síntoma perfecto).
+    // Ahora: la boca del conducto hierve 2,5-4 px y el estallido hasta 5.
     float2 bias = N * H * (uAnchoPx / uScreenResolution) * uIntensity * saturate(uOpacity);
     float2 uvD = clamp(coords + bias, 0.002, 0.998);
 

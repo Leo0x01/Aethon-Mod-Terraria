@@ -157,6 +157,13 @@ namespace AethonMod.Content.VFX
         private const int IntimateRuneCount = 6;      // íntimas, CW rápido
         private const float IntimateRuneRadius = 2.02f;  // ×R — MÁS ADENTRO
         private const float IntimateRuneOrbit = 0.16f;   // rad/s — el círculo vivo
+        // --- v6.82 — LA CUARTA CORONA (el ABSOLUTO): MÁS AFUERA QUE TODAS,
+        //     lenta y majestuosa — 10 runas a 3,95·R en contrarroto suave.
+        //     Solo la viste el perfil que la pide (ConCuartoAnillo): la
+        //     corona que solo el agujero MÁS ALLÁ de los Supremos sostiene. ---
+        private const int CuartoRuneCount = 10;     // la corona absoluta
+        private const float CuartoRuneRadius = 3.95f;   // ×R — la más lejana
+        private const float CuartoRuneOrbit = -0.055f;  // rad/s — CCW lento y regio
 
         // --- LOS RAYOS (LA ESTRELLA — StormLib) ---
         private const float BoltHz = 10f;        // ~10 Hz de parpadeo vivo
@@ -237,6 +244,48 @@ namespace AethonMod.Content.VFX
             tendrilPar: new Color(202, 142, 55), tendrilImpar: new Color(185, 105, 255),
             onda0: new Color(240, 245, 255), onda1: new Color(240, 245, 255),
             onda2: new Color(240, 245, 255));
+
+        /// <summary>
+        /// v6.82 — EL ABSOLUTO — el agujero MÁS ALLÁ DE LOS SUPREMOS (la
+        /// letra: «crea un arma nueva de agujero negro runico con lo que
+        /// creas que sea bueno, este debe ser mas fuerte que los supremos
+        /// asi que tiene que tener 4 anillos runicos de agujero negro»).
+        /// EL GRADIENTE DEL MÁS ALLÁ de 3 paradas — violeta del vacío
+        /// (140,90,255) → cian estelar (80,220,255) @0.45 → oro blanco
+        /// (255,240,200) — reina en TODO lo que se desenrolla (estilo
+        /// Aurora: brazos, banda radial, jets y ondas por fase); rim cian;
+        /// runas blanco-cian (interior) / violeta (exterior) / oro pálido
+        /// (íntimo) / BLANCO-CIAN la CUARTA CORONA (3,95·R — la firma del
+        /// Absoluto: 10 runas que ningún Supremo sostiene); blanco
+        /// platino (248,250,255). Los slots Onda0-2 no se usan (el estilo
+        /// gradiente colorea las ondas por fase).
+        /// </summary>
+        public static readonly PerfilSupremo Absoluto = new PerfilSupremo(
+            grad0: new Color(140, 90, 255), grad1: new Color(80, 220, 255),
+            grad2: new Color(255, 240, 200), gradSplit: 0.45f, gradienteEnTodo: true,
+            whiteIncan: new Color(248, 250, 255), hot: new Color(80, 220, 255),
+            mid: Color.Lerp(new Color(140, 90, 255), new Color(80, 220, 255), 0.50f),
+            mid2: Color.Lerp(new Color(140, 90, 255), new Color(80, 220, 255), 0.45f),
+            lerpDest: new Color(70, 40, 150), deep: new Color(70, 40, 150),
+            tintFrio: new Color(80, 220, 255),
+            acento: new Color(80, 220, 255), auraFinal: new Color(255, 240, 200),
+            nubeInt: new Color(140, 90, 255), nubeExt: new Color(255, 240, 200),
+            nebPar: new Color(96, 60, 200), nebImpar: new Color(70, 190, 235),
+            warmWhite: new Color(248, 252, 255), auraOscura: new Color(4, 6, 14, 182),
+            polvo1: new Color(210, 225, 255), polvo2: new Color(80, 220, 255),
+            polvo3: new Color(140, 90, 255),
+            runeInBody: new Color(150, 235, 255), runeInTip: new Color(248, 252, 255),
+            runeOutBody: new Color(150, 100, 255), runeOutTip: new Color(220, 200, 255),
+            runeIntBody: new Color(255, 240, 200), runeIntTip: new Color(255, 252, 235),
+            runnerA: new Color(140, 90, 255), runnerB: new Color(255, 240, 200),
+            runnerC: new Color(80, 220, 255),
+            boltHot: new Color(80, 220, 255), boltFrio: new Color(255, 240, 200),
+            jetDownHot: new Color(248, 250, 255),
+            tendrilPar: new Color(120, 200, 240), tendrilImpar: new Color(140, 90, 255),
+            onda0: new Color(248, 252, 255), onda1: new Color(248, 252, 255),
+            onda2: new Color(248, 252, 255),
+            conCuartoAnillo: true,
+            runeAbsBody: new Color(140, 235, 255), runeAbsTip: new Color(255, 255, 255));
 
         /// <summary>
         /// EL PERFIL ACTIVO (v6.80): lo fija Draw() al entrar — los 20
@@ -950,6 +999,19 @@ namespace AethonMod.Content.VFX
             OrbitaLib.CirculoRunico(center, r, time, IntimateRuneRadius, IntimateRuneCount,
                 IntimateRuneOrbit, _p.RuneIntBody, _p.RuneIntTip, glyphScale * 0.92f,
                 offset: 6, ringAlpha: 0.20f);
+
+            // ============================================================
+            //  v6.82 — LA CUARTA CORONA — 10 runas a 3,95·R, lento CCW:
+            //  la corona del ABSOLUTO, MÁS AFUERA que cualquier Supremo
+            //  (la letra: «tiene que tener 4 anillos runicos»). Solo la
+            //  viste el perfil que la pide — un aro doblemente lejano y
+            //  majestuoso, el sello del agujero que ya no pertenece a
+            //  esta categoría de cosas.
+            // ============================================================
+            if (_p.ConCuartoAnillo)
+                OrbitaLib.CirculoRunico(center, r, time, CuartoRuneRadius, CuartoRuneCount,
+                    CuartoRuneOrbit, _p.RuneAbsBody, _p.RuneAbsTip, glyphScale * 0.80f,
+                    offset: 2, ringAlpha: 0.16f);
         }
 
         // ------------------------------------------------------------------
@@ -1236,6 +1298,14 @@ namespace AethonMod.Content.VFX
         public readonly Color Onda1;
         /// <summary>Onda de distorsión 2 (solo estilo clásico).</summary>
         public readonly Color Onda2;
+        /// <summary>v6.82 — ¿El conjuro viste la CUARTA CORONA RÚNICA (el
+        /// círculo del ABSOLUTO: 10 runas a 3,95·R, lento CCW — la corona
+        /// que solo el agujero MÁS ALLÁ de los Supremos puede sostener)?</summary>
+        public readonly bool ConCuartoAnillo;
+        /// <summary>v6.82 — Runa ABSOLUTA (la 4ª corona): cuerpo.</summary>
+        public readonly Color RuneAbsBody;
+        /// <summary>v6.82 — Runa ABSOLUTA (la 4ª corona): punta.</summary>
+        public readonly Color RuneAbsTip;
 
         /// <summary>El perfil COMPLETO (todos los slots, sin defaults: un
         /// perfil nuevo se piensa ENTERO — así ningún color se hereda por
@@ -1251,7 +1321,9 @@ namespace AethonMod.Content.VFX
             Color runnerA, Color runnerB, Color runnerC,
             Color boltHot, Color boltFrio, Color jetDownHot,
             Color tendrilPar, Color tendrilImpar,
-            Color onda0, Color onda1, Color onda2)
+            Color onda0, Color onda1, Color onda2,
+            bool conCuartoAnillo = false,
+            Color runeAbsBody = default, Color runeAbsTip = default)
         {
             Grad0 = grad0; Grad1 = grad1; Grad2 = grad2; GradSplit = gradSplit;
             GradienteEnTodo = gradienteEnTodo;
@@ -1267,6 +1339,8 @@ namespace AethonMod.Content.VFX
             BoltHot = boltHot; BoltFrio = boltFrio; JetDownHot = jetDownHot;
             TendrilPar = tendrilPar; TendrilImpar = tendrilImpar;
             Onda0 = onda0; Onda1 = onda1; Onda2 = onda2;
+            ConCuartoAnillo = conCuartoAnillo;
+            RuneAbsBody = runeAbsBody; RuneAbsTip = runeAbsTip;
         }
     }
 }

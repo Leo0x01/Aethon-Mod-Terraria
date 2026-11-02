@@ -472,7 +472,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // SOLO el arma-C — la ira del grimorio NO hierve el
                     // aire (la letra: el calor es del rayo de prueba C).
                     if (!EsIra)
-                        CalorLib.Estallido(Projectile.Center, 15f, 430f);
+                        CalorLib.Estallido(Projectile.Center, 26f, 460f);
                 }
             }
 
@@ -618,7 +618,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // aire exhala una vez (el eco del estallido — un tercio de
                 // la fuerza). Solo el arma-C.
                 if (!EsIra && !Main.dedServ)
-                    CalorLib.Estallido(Projectile.Center, 5.5f, 280f);
+                    CalorLib.Estallido(Projectile.Center, 10f, 300f);
             }
 
             Time++;

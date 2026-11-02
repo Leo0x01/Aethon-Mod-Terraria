@@ -1,3 +1,32 @@
+# v6.82 — LA CURA DEL CALOR INVISIBLE + LAS CUATRO ARMAS NUEVAS — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.82 (md5 `c18a52b33d6336b5ae70a273ac54a065`, 6.638.549 B) — 466 entradas, blobs 466/466, EOF exacto, headless 0 excepciones.
+
+## LA LETRA Y LA ENTREGA
+1. **EL CALOR INVISIBLE CURADO** (el bug de unidades ÷300 en CalorDistorsionShader: el ruido venía en UV y se multiplicaba por px→UV — 0,04 px de hervor invisible; ahora ruido unitario × amplitud 9 px + pesos del campo arriba + frame ciego de UseGlobalOpacity curado + estallidos del Rayo C al alza). El .fxc recompilado con la cadena completa y validado contra el MojoShader REAL.
+2. **EL ANILLO RÚNICO DE LA BRUMA**: 8 runas teal a 2,62·R (el estándar de los agujeros base que le faltaba).
+3. **EL BASTÓN DEL AGUJERO ABSOLUTO**: 4 coronas rúnicas (la 4ª: 10 runas blanco-cian a 3,95·R), gradiente violeta→cian→oro, daño 480, atracción 680px, esfera ×1,14, Einstein 640px — más fuerte que los Supremos.
+4. **LA CLASE CLICKER DE LA CASA** (standalone): EL COMPÁS RÚNICO (constelación cada 8 clics — 5 rayos de StormLib convergentes) + LA FURIA SOLAR (nova cada 12 clics — PyraLib.Estallido + flash + temblor). Radio de contrato dibujado con fade y brillo al cursor, ping de chispas por clic, MenuTick.
+5. **EL REQUIEM DEL PÚLSAR** (arma cósmica): faro rotante 4 rev/s con haces dobles, estela Ribbon Comet, overbright ×1.4, pulsos de radio cada 12 ticks, colapso con CalorLib.Estallido (aberración R/G/B).
+
+## LOS ARCHIVOS
+- `AethonMod/Content/Effects/Shaders/CalorDistorsionShader.fx/.fxc` — la cura del bug de unidades (vkd3d→fx20_build→fx20_validate).
+- `AethonMod/Content/VFX/CalorLib.cs` — AnchoPx 9,0 · pesos del campo · UseGlobalOpacity inmediato.
+- `AethonMod/Content/Projectiles/Definitivas/RayosPruebaProjectile.cs` — estallidos 26/460 + 10/300.
+- `AethonMod/Content/VFX/BrumaBlackHoleRenderer.cs` — DrawRuneCircle (el anillo que faltaba).
+- `AethonMod/Content/VFX/SupremoBlackHoleRenderer.cs` — PerfilSupremo extendido (ConCuartoAnillo + RuneAbs) y el perfil Absoluto.
+- `AethonMod/Content/VFX/AgujeroAbsolutoBlackHoleRenderer.cs` (NUEVO) — el shim del Absoluto.
+- `AethonMod/Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.cs` (NUEVO) + `Weapons/Cosmic/AgujeroAbsolutoStaff.cs` (NUEVO) + su PNG.
+- `AethonMod/Content/Weapons/Clicker/` (NUEVO: ClickerCasa.cs + CompasRunico.cs + FuriaSolarClicker.cs) + `Projectiles/Clicker/ClickerGolpeProjectile.cs` (NUEVO) + 2 PNG.
+- `AethonMod/Content/Projectiles/Cosmic/RequiemPulsarProjectile.cs` (NUEVO) + `Weapons/Cosmic/RequiemDelPulsarStaff.cs` (NUEVO) + su PNG.
+- `AethonMod/Content/Effects/BlackHoleLensSystem.cs` — el Absoluto en los 3 puntos de la lente.
+- hjson ×3 (4 ítems + 3 DisplayNames), `tools/gen_iconos_v682.py` (los 4 iconos).
+
+## EL PLAYTEST (la lista de la casa)
+(a) Rayo C hirviendo de verdad · (b) Bruma con su anillo · (c) el Absoluto con 4 coronas · (d) los clickers con su círculo + ping + especiales de combo · (e) el púlsar con sus faros y su colapso.
+
+---
+
 # v6.81 — LA CURA DEL CATCH-22 — EL CHECKLIST
 
 > **PUBLICADA** — release v6.81 + CDN verificado byte a byte (md5 `331eb08cb2de86ad05b4a9ceadcfed49`, 6.627.810 B).

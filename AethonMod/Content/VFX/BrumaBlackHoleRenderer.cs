@@ -76,6 +76,21 @@ namespace AethonMod.Content.VFX
         private const float WaveCycle = 2.7f;
         private const int WaveCount = 2;
 
+        // --- v6.82 — EL ANILLO RÚNICO (la letra: «al agujero negro runico del
+        //     baston del agujero de la bruma, le falta un anillo runico de
+        //     agujero negro, los agujeros negros runicos del mismo nivel
+        //     tienen 1 anillo runico»): el estándar de los BASES — Cosmic y
+        //     Olvido llevan SU círculo a ~2,55-2,62·R con 8-10 runas a
+        //     0,10 rad/s; el Bruma base carecía del suyo (solo la Ascendida
+        //     tiene el DOBLE). MISMAS CONSTANTES DEL NIVEL (8 runas, 2,62·R,
+        //     0,10 rad/s — las de RuneRadius del Cosmic) con la PALETA
+        //     GELIDA de la estirpe: cuerpo teal (el horizonte congelado),
+        //     punta hielo-blanca — el alfabeto H de la casa (RunasVacio,
+        //     glifos idénticos a los del Supremo: la firma rúnica canónica).
+        private const int RuneCount = 8;
+        private const float RuneRadius = 2.62f;   // ×R — el círculo rúnico
+        private const float RuneOrbit = 0.10f;    // rad/s — el giro del conjuro
+
         // ==================================================================
         //  PALETA — la estirpe GELIDA: teal / cian / violeta / azul profundo
         // ==================================================================
@@ -87,6 +102,10 @@ namespace AethonMod.Content.VFX
         private static readonly Color PhotonWhite = new(225, 250, 255); // cian-blanco caliente
         private static readonly Color RimTeal = new(60, 200, 220);      // horizonte congelado
         private static readonly Color FrostMote = new(185, 235, 250);   // escarcha
+        // v6.82 — las runas del círculo NUEVO: el mismo par teal/hielo de la
+        // Ascendida (RuneTeal/RuneTealTip de su paleta — la firma de la estirpe).
+        private static readonly Color RuneTeal = new(60, 200, 220);     // cuerpo de runa teal
+        private static readonly Color RuneTealTip = new(225, 250, 255); // punta hielo-blanca
 
         // ==================================================================
         //  PINCELES (los genéricos + los de la LIBRERÍA DE BRUMA)
@@ -220,6 +239,10 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 1.10f * r, time * 0.2f,
                     Tint(SmokeCyan, 0.20f + 0.08f * (float)Math.Sin(time * 2.1f)));
                 DrawPhotonRunners(center, rr, time, seed);
+
+                // --- 6b. v6.82 — EL ANILLO RÚNICO (el círculo que le faltaba:
+                //     el estándar de los agujeros base — ver constantes arriba).
+                DrawRuneCircle(center, r, time);
 
                 // --- 7. CHIMENEAS POLARES + agujas frías ---
                 DrawPolarChimneys(center, rr, time, seed);
@@ -374,6 +397,29 @@ namespace AethonMod.Content.VFX
                 Quad(Glow, pos, new Vector2(0.40f * rr, 0.40f * rr), 0f,
                     Tint(PhotonWhite, 0.85f * twinkle));
             }
+        }
+
+        // ------------------------------------------------------------------
+        //  6b. EL ANILLO RÚNICO — el conjuro del bastón (v6.82)
+        // ------------------------------------------------------------------
+
+        private static void DrawRuneCircle(Vector2 center, float r, float time)
+        {
+            // v6.82 — EL TECHO DE CALIDAD (la ley de la casa desde v6.80:
+            // cada cosmético consulta el presupuesto): el círculo rúnico
+            // delegado son ~70 quads (CirculoRunico alfabeto H: aro + 8
+            // runas × [glow + ~5,5 trazos + perla doble ≈ 8,5]) — el conjuro
+            // es cosmético, salta si el frame va apretado.
+            if (!VFXCore.Presupuesto(70)) return;
+
+            // LA PRIMITIVA DE LA LIBRERÍA — mismas leyes del nivel base:
+            // el aro fino de pauta, las runas DE PIE sobre la tangente, la
+            // flotación viva y la perla — todo vive en OrbitaLib (el mismo
+            // trazo de la casa desde v6.37; el alfabeto default = RunasVacio).
+            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.35f;
+            OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount,
+                RuneOrbit, RuneTeal, RuneTealTip, glyphScale,
+                offset: 0, ringAlpha: 0.22f);
         }
 
         // ------------------------------------------------------------------

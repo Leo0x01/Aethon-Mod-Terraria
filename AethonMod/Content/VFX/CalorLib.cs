@@ -170,8 +170,13 @@ namespace AethonMod.Content.VFX
         private const float EscalaCampo = 0.25f;
 
         // LOS VALORES DEL LOOK (la investigación, tuned para el conducto):
-        private const float AnchoPx = 5.5f;    // la amplitud: px de flexión con calor pleno
-        private const float RadioCA = 0.36f;   // el estallido: ⅓ de pantalla alrededor del golpe
+        // v6.82 — ANCHOpx 5,5 → 9,0: con el bug de unidades curado (ver el
+        // shader) el presupuesto de px se gasta de verdad — 9 px de flexión
+        // plena ≈ 2,5-4 px de hervor en la boca del conducto (donde el campo
+        // ≈ 0,3-0,45) y hasta 5 px en el anillo del estallido. Un espejismo
+        // que SE VE sin derretir la pantalla.
+        private const float AnchoPx = 9.0f;   // la amplitud: px de flexión con calor pleno
+        private const float RadioCA = 0.36f;  // el estallido: ⅓ de pantalla alrededor del golpe
         private const float Conveccion = 0.5f; // el sesgo ascendente del aire caliente
 
         /// <summary>¿Vive el filtro? (para la telemetría del F8).</summary>
@@ -481,7 +486,7 @@ namespace AethonMod.Content.VFX
                                     Vector2 pos = (a + dir * avance - origen) * zoom * k;
                                     float esc = radio * zoom.X * k / medioGlow.X;
                                     Main.spriteBatch.Draw(glow, pos, null,
-                                        new Color(new Vector3(peso * 0.30f, 0f, 0f)),
+                                        new Color(new Vector3(peso * 0.42f, 0f, 0f)),
                                         0f, medioGlow, esc, SpriteEffects.None, 0f);
                                 }
                                 avance += MathF.Max(52f, radio * 1.1f);
@@ -495,7 +500,7 @@ namespace AethonMod.Content.VFX
                             Vector2 pos = (_puntoPos[p] - origen) * zoom * k;
                             float esc = _puntoRadio[p] * zoom.X * k / medioGlow.X;
                             Main.spriteBatch.Draw(glow, pos, null,
-                                new Color(new Vector3(_puntoIntensidad[p] * 0.32f, 0f, 0f)),
+                                new Color(new Vector3(_puntoIntensidad[p] * 0.45f, 0f, 0f)),
                                 0f, medioGlow, esc, SpriteEffects.None, 0f);
                         }
 
@@ -519,7 +524,7 @@ namespace AethonMod.Content.VFX
                             {
                                 float esc = radio * zoom.X * k / medioRing.X;
                                 Main.spriteBatch.Draw(ring, pos, null,
-                                    new Color(new Vector3(env * 0.55f, 0f, 0f)),
+                                    new Color(new Vector3(env * 0.65f, 0f, 0f)),
                                     0f, medioRing, esc, SpriteEffects.None, 0f);
                             }
                             // EL CORAZÓN: el charco caliente del golpe (muere
@@ -529,7 +534,7 @@ namespace AethonMod.Content.VFX
                                 float corazon = (1f - tVida / 0.4f) * env;
                                 float escC = _estRadio[e] * 0.35f * zoom.X * k / medioGlow.X;
                                 Main.spriteBatch.Draw(glow, pos, null,
-                                    new Color(new Vector3(corazon * 0.5f, 0f, 0f)),
+                                    new Color(new Vector3(corazon * 0.62f, 0f, 0f)),
                                     0f, medioGlow, escC, SpriteEffects.None, 0f);
                             }
                         }
@@ -594,6 +599,14 @@ namespace AethonMod.Content.VFX
                 // (solo se fuerza cuando estaba a cero).
                 if (_filtro.Opacity <= 0f)
                     _filtro.Opacity = 1f;
+                // v6.82 — LA CURA DEL FRAME CIEGO: FilterManager.OnActivate
+                // PONE Opacity=0 y Filter.Activate empuja ese 0 al SHADER
+                // (UseGlobalOpacity(0)) — y IsVisible() lee COMBINEDOPACITY
+                // DEL SHADER, no del filtro: el frame N de la ignición el
+                // filtro estaba ACTIVO pero INVISIBLE (la cadena lo saltaba;
+                // recién el FilterManager.Update del frame N+1 empujaba el 1).
+                // Se empuja el 1 AL SHADER aquí mismo — cero frames ciegos.
+                _filtro.GetShader().UseGlobalOpacity(1f);
                 _filtroActivo = true;
             }
             catch

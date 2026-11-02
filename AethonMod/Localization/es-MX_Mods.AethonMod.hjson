@@ -566,6 +566,30 @@ Items: {
                 DisplayName: Bastón del Agujero Supremo Aurora
                 Tooltip: ""
         }
+        AgujeroAbsolutoStaff: {
+                // v6.82: el más allá de los Supremos (4 anillos rúnicos)
+                DisplayName: Bastón del Agujero Absoluto
+                Tooltip: ""
+        }
+
+        RequiemDelPulsarStaff: {
+                // v6.82: el arma cósmica (el faro rotante)
+                DisplayName: Requiem del Púlsar
+                Tooltip: ""
+        }
+
+        CompasRunico: {
+                // v6.82: clicker nº1 (la constelación cada 8 clics)
+                DisplayName: El Compás Rúnico
+                Tooltip: ""
+        }
+
+        FuriaSolarClicker: {
+                // v6.82: clicker nº2 (la nova cada 12 clics)
+                DisplayName: La Furia Solar
+                Tooltip: ""
+        }
+
 
         UmbralAscendidoBlackHoleStaff: {
                 DisplayName: Bastón del Umbral Ascendido
@@ -2240,6 +2264,9 @@ Projectiles: {
         FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
         ArcaneBolt.DisplayName: Bolt Arcano
         OjoEternoMinion.DisplayName: El Ojo del Eterno
+        AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
+        RequiemPulsarProjectile.DisplayName: Estrella del Requiem
+        ClickerGolpeProjectile.DisplayName: El Golpe del Clic
         AnillosSingularesHalo.DisplayName: Anillos del Horizonte
         NebulaJellyfishMinion.DisplayName: Medusa Nebular
         NebulaLightning.DisplayName: Rayo Nebular
