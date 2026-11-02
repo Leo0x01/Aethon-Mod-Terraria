@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.88 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+> **Versión actual:** 6.88 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
 
 ## Qué es (en 30 segundos)
 
@@ -48,7 +48,7 @@ Alrededor del jefe:
 2. **Leer el worklog** (`/home/z/my-project/worklog.md` en el entorno de desarrollo): historial de sesiones con decisiones y trampas documentadas.
 3. **Leer STABLE-SNAPSHOT.md** de este repo: pendientes de verificación en juego + doc-rot.
 4. **Regla de oro de los efectos**: **ANTES de crear cualquier efecto (visual, sonoro, shader, textura) se lee `EFECTOS-Y-LIBRERIAS.md`** — el catálogo completo de lo que la casa ya tiene y las reglas para lo nuevo. Nada de reinventar lo existente (los óvalos-en-lugar-de-bruma no se repiten).
-5. **Entorno de build**: `/tmp/tml` (tModLoader 2026.08 re-descargable), `/tmp/sdk` (dotnet SDK 8.0.412), `/home/z/.verify/verify.csproj` (oráculo de compilación). Detalle completo en COMPILACION.md §"Pipeline de verificación de la casa". **Shaders: el pipeline fx_2_0 de la casa** (vkd3d + `tools/fx20_build.py` + `tools/fx20_validate.py`) — todo `.fx` NUEVO o modificado se entrega con su `.fxc` recompilado (tModLoader 2026.08 SOLO carga `.fxc`).
+5. **Entorno de build**: `/tmp/tml` (tModLoader 2026.07.3.0 re-descargable), `/tmp/sdk` (dotnet SDK 8.0.404), `/home/z/.verify/verify.csproj` (oráculo de compilación). Detalle completo en COMPILACION.md §"Pipeline de verificación de la casa". **Shaders: el pipeline fx_2_0 de la casa** (vkd3d + `tools/fx20_build.py` + `tools/fx20_validate.py`) — todo `.fx` NUEVO o modificado se entrega con su `.fxc` recompilado (tModLoader 2026.07 SOLO carga `.fxc`).
 6. **Reglas de la casa** (no negociables): cero sprites de rayo (todo `RayoLib`/`RayoStrip`); destellos SIEMPRE con degradado monotónico (nunca círculos planos); nubes/niebla/humo SIEMPRE con `BrumaFX` (nunca óvalos); color premultiplicado en lotes aditivos; `Hash01` determinista (cero `Main.rand` en render); convención del lote del llamador (`ReabrirLoteVanilla`); hjson es-MX + en-US SIMÉTRICOS siempre; toda arma nueva se registra en DOS sitios (su archivo + el kit de bolsas/TestingPlayer).
 7. **Al terminar**: build 0/0, auditoría del `.tmod`, **documentar cualquier efecto nuevo en `EFECTOS-Y-LIBRERIAS.md`**, commit con mensaje detallado, tag, push, GitHub release con el `.tmod` adjunto, entrada en worklog, y STABLE-SNAPSHOT actualizado.
 

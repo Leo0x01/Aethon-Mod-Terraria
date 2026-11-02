@@ -3,7 +3,7 @@
 > **Espejo compacto del worklog** (que vive en el sandbox y los wipes se lo han comido
 > dos veces — lecciones de las Tasks 68-84). La especificación gorda de cada tarea está
 > en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2 — actualizado en la
-> Task 108 (era v6.56.4), la 109 (era v6.56.5), la **Task 110 (era v6.56.6: LA PURGA de
+> Task 108 (era v6.56.4), la 109 (era v6.56.5), la **Task 112-114 (v6.85-v6.87: las nueve investigaciones + sus cinco items · LA CURA DEL CALOR VISIBLE · las bolsas que no llegaban · la escalera 100 con el libro corrupto, el altar, el árbol y el escuadrón eterno · el mod que no cargaba)**, la **Task 115 (v6.88: LA GRAN SESIÓN DE LOS DIECISÉIS BUGS — la bruma por ligas, el despertar 1-100 repartido con monedas 100 cobre→100 platino y minerales variados, la Ira en la puerta compuesta 100, los hitos del escuadrón cada 20 niveles en porcentaje, el altar corruptor con el velo morado-negro, la muralla que ya no explota + la zona sagrada del festín, el calor vuelve al arma C, el fluff del perlin lejano, los minions con la guardia del dueño, fuera del QuickBuff, las DOS bandas sonoras y el árbol mudado al Libro Azul · v6.88.1: los DOS tapones de envío — el PNG del perno y el hjson huérfano, cazados por el pipeline ANTES de publicar)**, la **Task 110 (era v6.56.6: LA PURGA de
 > las armas nuevas —solo el RC2 queda— + la cura REAL de la simetría de las alas —el
 > barrido rígido murió: Δ 0.0000 px— + el RC2 desnudo —sin disco negro ni lente, coronas
 > al 53%, la pila de capas y LOS SOLES RÚNICOS del accesorio— + LAS 9 VARIANTES con una

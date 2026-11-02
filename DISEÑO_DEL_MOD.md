@@ -416,6 +416,47 @@ client-host); `SyncResonance` en ShardSyncSystem es un stub heredado.
 
 ## 13. Mapa maestro de carpetas
 
+## 14. LA ERA DEL DESPERTAR 100 (v6.85-v6.88) — la arquitectura de la cima
+
+- **EL RITUAL POR LIGAS** (`RayoConvergenteProjectile`): el ataque combinado lanza un agujero
+  ALEATORIO por familia — la bruma NORMAL (`BrumaBlackHoleProjectile`, 1 anillo rúnico, la clase
+  del bastón) corre con Olvido/Cósmico/Umbral normales; la bruma ASCENDIDA (doble círculo rúnico)
+  SOLO cuando el portador tiene AgujerosAscendidos, con los OTROS Ascendidos. Dos tipos
+  diferentes en ligas diferentes — nunca mezcladas.
+- **LA PUERTA COMPUESTA 100** (`LosJefesDelDespertar` + `CazaJefesPlayer`): la puerta 100 cobra
+  la caza ANTES DE SUBIR (Aethon ×1 ∧ Moon Lord ×10 ∧ Emperatriz ×5) y `IraDisponible` nace con
+  el despertar 100 — la cura del «el haz no se lanza» (la v6.86 cobraba DESPUÉS de subir: si no
+  los tenía, NUNCA nacía). Las repeticiones (63-99) reparten la caza por la segunda mitad.
+- **LAS OFRENDAS REPARTIDAS**: monedas exponenciales 100 cobre → 100 platino (`MonedasPara`,
+  g=10^(6/99)) · LA OFRENDA MINERAL VARIADA (`GruposMineralDe` + `CantidadPorGrupo`: mezcla de
+  2-3 minerales de la era, 18+nivel/5 por cabeza, pagos GRUPO A GRUPO) · LOS HITOS DEL ESCUADRÓN
+  VIVOS (`MultEscuadron`: cada 20 niveles, en porcentaje — lo leen el daño de cada ojo y los
+  conjuros combinados; el ×1,25 horneado murió).
+- **EL ALTAR DE LA CORRUPCIÓN** (`AltarOfrendasUI` + `CorruptoGlobalItem`): YA sin vínculo con
+  el grimorio — corrompe armas (nombre «(Corrupto)» en negro + velo morado-negro en el
+  inventario + aura en el suelo). La economía de puntos/canje del 30 % murió de raíz.
+- **EL ÁRBOL CAMBIA DE DUEÑO** (`SkillTreePlayer` + `LibroAzul`): los puntos nacen del NIVEL
+  DEL LIBRO AZUL (1 + bajas/8; puntos 3 + nivel/5) y los efectos solo viven mientras se LLEVA
+  el arma. El Códice de Habilidades fue borrado (clase y PNG).
+- **LA GUARDIA DEL DUEÑO** (`EscuadronPersistPlayer.LlevaSuGrimorio`): el escuadrón persistente
+  solo se fotografía y solo resucita en el personaje que lleva su Grimorio del Eterno — jamás
+  en cualquier otro personaje del mismo jugador.
+- **LA ZONA DEL FESTÍN ES SAGRADA** (`FaucesGlobalNPC.ParteDeJefeDevorado` +
+  `HayJefeDevoradoCerca` + `FaucesGlobalProjectile`): durante la devoración, la familia del
+  jefe ni golpea ni recibe, el PreAI devuelve false, y los proyectiles hostiles YA disparados
+  se apagan en vuelo. El WoF cena clavado en su columna (sin teletransporte) con los HUNGRY
+  en el nudo, y `HitEffect` mantiene la vida en 1 (sin gore, sin rejilla de cadáver).
+- **FUERA DEL QUICKBUFF** (AethonMenor + GrimorioMenor): sin `Item.buffType` — el imán de la
+  tecla B murió; el buff nace con el clic del ítem y la mascota lo sostiene (patrón canónico
+  `BuffHandle_SpawnPetIfNeededAndSetTime`).
+- **LAS DOS BANDAS** (`OleadaHambreMusica`): «El Festín Desatado» (152) y «La Oleada Final»
+  (164) — cada oleada tira una moneda (Main.rand.NextBool, viaja bien en MP).
+- **LA LECCIÓN v6.88.1 (los dos tapones)**: `-build` empaqueta sin validar y el headless NO
+  carga texturas — SOLO el headless carga hjson. `audit_assets` cazó el PNG del perno del Libro
+  Azul (tML exige textura de TODO ModProjectile al cargar) y el headless cazó el hjson huérfano
+  (el bloque viejo del altar flotando tras la llave de cierre). Ambos murieron ANTES del release
+  por la cadena obligatoria de la casa — el usuario jamás los vio.
+
 ```
 AethonMod/                      ← EL MOD (build.txt aquí: versión 6.50.30)
 ├── AethonMod.cs                ← Punto de entrada, guardián de identidad, router de paquetes

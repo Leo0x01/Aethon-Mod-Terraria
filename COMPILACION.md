@@ -1,7 +1,7 @@
 # 🛠️ Cómo instalar, compilar y ACTUALIZAR "Aethon, la Luz Primordial"
 
 Este documento explica cómo recibir las versiones del mod de forma fiable y
-cómo compilarlo en un `.tmod` jugable en tModLoader 2026.08.3.0 (.NET 8).
+cómo compilarlo en un `.tmod` jugable en tModLoader 2026.07.3.0 (.NET 8).
 
 > **Versión actual: 6.88** (tag y release publicados). El mod vive en la
 > subcarpeta `AethonMod/` del repo — 297 `.cs`, ~106.500 líneas, sin dependencias.

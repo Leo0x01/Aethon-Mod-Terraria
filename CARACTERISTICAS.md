@@ -156,6 +156,44 @@ llama) · BrumaFX (humo flipbook) · AuraPortadorHalo · AethonSierpeArte (el ar
 RuneSunRenderer + BlackHoleLensSystem (lente a pantalla completa) + ~20 renderers dedicados.
 Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
 
+---
+
+## LA ERA v6.85-v6.88 (el inventario ACTUAL — verificado contra el código)
+
+> **La fuente de la verdad**: `Content/` v6.88 (470 clases) + los checklist de
+> `STABLE-SNAPSHOT.md`. Esta sección resume lo que la era añadió al inventario.
+
+- **EL DESPERTAR 100** (`DespertarGrimorio`): escalera de armas alineada con la progresión
+  de la wiki (cada arma y lingote OBTENIBLE en la era de su jefe) · LA CAZA con puertas de
+  jefe (Duque Fishron en 37 · Aethon custodia la 100 con LA CIMA COMPUESTA: Aethon ×1 +
+  Moon Lord ×10 + Emperatriz ×5 · repeticiones 63-99) · monedas 100 cobre → 100 platino
+  (exponencial g=10^(6/99)) · LA OFRENDA MINERAL VARIADA (mezcla de 2-3 minerales de la
+  era, 18+nivel/5 por cabeza) · LOS HITOS DEL ESCUADRÓN cada 20 niveles en porcentaje
+  (20:+10 % · 40:+15 % · 60:+20 % · 80:+25 % · 100:+30 % — `MultEscuadron`).
+- **EL LIBRO CORRUPTO** (la puerta del 20): 1% libros de mazmorra · 1% cofres · 50% Muralla
+  de Carne · 1 por jugador para siempre · el grimorio lo devora del suelo (despertar < 20).
+- **EL ALTAR DE LA CORRUPCIÓN** (v6.88: YA sin vínculo con el grimorio): corrompe ARMAS —
+  el nombre viste «(Corrupto)» EN NEGRO + el velo morado-negro pulsante en el inventario
+  (`PostDrawInInventory`) + el aura doble glow en el suelo. La economía de puntos murió.
+- **EL LIBRO AZUL + EL ÁRBOL DE HABILIDADES** (v6.88: el árbol YA NO es del grimorio):
+  arma de tinta azul con su perno `LibroAzulDescarga` (daño 12 + nivel·2) · los puntos del
+  árbol nacen del NIVEL DEL LIBRO AZUL (nivel = 1 + bajas/8, tope 100; puntos = 3 +
+  nivel/5) · los 10 nodos + KEYSTONE solo viven mientras se LLEVA el arma · el Códice de
+  Habilidades fue BORRADO (su bolsa entrega el Libro Azul).
+- **EL ESCUADRÓN ETERNO** (persistente + mejora masiva): los ojos sobreviven a la muerte y
+  a salir de la partida — y v6.88 los guardó con LA GUARDIA DEL DUEÑO: la fotografía solo
+  se guarda y solo resucita si ESTE personaje lleva su Grimorio del Eterno.
+- **LOS CINCO ITEMS DE LAS INVESTIGACIONES** (v6.85): Relicario del Avispón (aura solar,
+  tecla L) · Sol en Miniatura (minion dorado MEAC) · Colmillo Dorado (rayos del cielo) ·
+  Mirada de Solyn (rayo canalizado) · Grilletes de Andrómeda (escudo por maná) — todos 0 maná.
+- **LAS DOS BANDAS SONORAS DEL FESTÍN** (v6.88): «El Festín Desatado» (152 BPM) y «La
+  Oleada Final» (164 BPM) — cada oleada tira una moneda y suena UNA de las dos al azar.
+- **EL RITUAL POR LIGAS** (v6.88): la bruma NORMAL (la del bastón, 1 anillo) corre con los
+  agujeros normales; la bruma ASCENDIDA (doble círculo rúnico) SOLO con los otros
+  Ascendidos (despertar 60+). Dos tipos diferentes en ligas diferentes.
+- **LA MASCOTA Y LA TECLA B** (v6.88): AethonMenor + GrimorioMenor ya SIN `Item.buffType` —
+  el imán del QuickBuff murió: el buff nace solo con el CLIC del ítem.
+
 ## Testing
 
 - **TestingPlayer**: al entrar al mundo (1 jugador) entrega las **18 bolsas** + 99 Training Dummies.
