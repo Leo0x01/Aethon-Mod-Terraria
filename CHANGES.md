@@ -1,3 +1,23 @@
+# v6.84 — LA CURA DEL MOD QUE NO CARGABA: EL SPRITE DEL AGUJERO ABSOLUTO
+
+**La letra del usuario**: «hay errores» + client.log — el mod entero caía al cargar: `MissingResourceException: Recurso esperado no encontrado: Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile` y tModLoader desactivaba AethonMod automáticamente («Los mods se han desactivado automáticamente»).
+
+## (1) LA AUTOPSIA
+La v6.82 entregó el Bastón del Agujero Absoluto con sus 4 coronas rúnicas — el generador de iconos (`tools/gen_iconos_v682.py`) creó los PNG de los 4 ITEMS nuevos (staff del Absoluto, Compás, Furia Solar, Requiem) pero se pasó por alto que el PROYECTIL nuevo también exige su sprite: `AgujeroAbsolutoBlackHoleProjectile` no trae `override string Texture` (el agujero vive 100% en su renderer procedural), así que tModLoader busca el PNG por convención (`Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.png`)… que no existía. El `-build` empaqueta igual (no valida assets de contenido), la compilación da 0 errores, y el fallo solo explota EN JUEGO al `ModProjectile.AutoStaticDefaults` → `AssetLoadException` → `Mod.TransferAllAssets` → `MissingResourceException` → **mod desactivado**.
+
+## (2) LA CURA
+`Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.png` (NUEVO): 76×76 RGBA, el mismo lienzo de los black holes de la casa, con EL PERFIL ABSOLUTO — núcleo negro platino, photon ring cian estelar con el arco de oro blanco (lado izquierdo), halo violeta del vacío muriendo hacia fuera. Generado por `tools/gen_absoluto.py` (quedó en la cadena de herramientas de la casa). Verificado por VLM: disco negro definido, ring delgado y limpio, halo suave, apto.
+
+## (3) LA RED DE SEGURIDAD NUEVA — `audit_assets.py` (la auditoría que habría cazado esto ANTES del release)
+Escanea TODAS las clases del mod: toda clase que herede (transitivamente) de un ModType con textura automática (ModItem/ModProjectile/ModNPC/ModDust/ModBuff/ModTile/ModWall/ModMount), cuya cadena de herencia NO defina `override string Texture` y NO sea abstract, DEBE tener su PNG. Resultado tras la cura: **437 clases escaneadas, 0 PNG faltantes** (las 6 bases abstract de la casa — AlasPrismaBase, BolsaCategoria, EsenciaDeJefeItem, LlamadoDeJefe, RealStarStaffBase, RuneSunStaffBase — correctamente eximidas: tModLoader no registra lo abstract). El script queda en la cadena de verificación de la casa junto al oráculo y al parse_tmod.
+
+## (4) VERIFICACIÓN (el pipeline de la casa)
+Oráculo verify.csproj **0/0** (la cura es un asset puro — cero .cs tocados) · **-build REAL 0/0** · .tmod v6.84 (6.644.320 B, md5 `8413bb28506ab82211017f244f556ec5`): **467 entradas** (466 + EXACTAMENTE el PNG nuevo), la única entrada nueva `Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.rawimg`, los 466 blobs compartidos IDÉNTICOS (PNG a PNG, .fxc a .fxc — byte a byte), EOF exacto (tabla 26114 + blobs = 6.644.320) · **headless: Selected 6.84 → Sandboxing → Adding → Configuring → Finalizing → Server started, 0 EXCEPCIONES** (el cliente del sandbox no puede arrancar: sin GPU — la evidencia de la cura es el asset dentro del .tmod en el formato exacto de los 10 black holes que ya cargan en el cliente del usuario) · custodia ModSources rsync -rc --delete, diff 0.
+
+**Playtest (lo que hay que ver)**: (a) **EL MOD CARGA** — tModLoader → Mods → *Aethon, la Luz Primordial* v6.84 activa sin el cartel rojo de error; (b) el Bastón del Agujero Absoluto dispara su agujero de 4 coronas como en v6.82 (renderer intacto — el sprite nuevo solo satisface al loader, nunca se dibuja); (c) TODO lo demás de v6.82/v6.83 como siempre (el aire que hierve, la lente, los clickers, el Requiem).
+
+---
+
 # v6.83 — LA CAPTURA FORZADA: EL AIRE QUE HIERVE (Y LA LENTE) HASTA EN RETRO + EL ANCLA DEL ZOOM DEL CAMPO + EL F8 QUE NO MIENTE
 
 **La letra del usuario**: «sigo sin ver nada en el arma de prueba c» (3ª vez) + «cualquier cosa que hagas debes comprobarla y rehacerla hasta que este bien».

@@ -1,3 +1,22 @@
+# v6.84 — LA CURA DEL MOD QUE NO CARGABA (EL SPRITE DEL AGUJERO ABSOLUTO) — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.84 (md5 `8413bb28506ab82211017f244f556ec5`, 6.644.320 B) — 467 entradas (466 + el PNG nuevo), blobs compartidos byte a byte, EOF exacto, headless 0 excepciones, el .fxc SIN CAMBIOS (la cura es un asset puro).
+
+## LA LETRA Y LA ENTREGA
+1. **EL MOD VOLVERÁ A CARGAR**: la v6.83 salió sin el sprite del proyectil del Agujero Absoluto (`Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.png`) — tModLoader compilaba sin queja y luego caía en la carga (`MissingResourceException`) desactivando el mod entero. El sprite está: 76×76 con el perfil Absoluto (núcleo negro platino · photon ring cian con arco de oro blanco · halo violeta del vacío).
+2. **LA RED DE SEGURIDAD NUEVA**: `audit_assets.py` — toda clase con textura automática (ModItem/ModProjectile/ModNPC/…) sin `override Texture` y sin ser abstract DEBE tener su PNG. Hoy: 437 clases, **0 faltantes**. La lección queda cazada para siempre: los iconos de los proyectiles nuevos también cuentan.
+
+## LOS ARCHIVOS
+- `AethonMod/Content/Projectiles/Cosmic/AgujeroAbsolutoBlackHoleProjectile.png` (NUEVO — el asset que faltaba).
+- `AethonMod/build.txt` — 6.84. (Cero .cs tocados; el .fx/.fxc no cambian.)
+
+## EL PLAYTEST (la lista de la casa)
+(a) [ ] **EL MOD CARGA**: tModLoader → Mods → v6.84 activa, SIN el cartel rojo de «Se ha producido un error al cargar AethonMod».
+(b) [ ] El Bastón del Agujero Absoluto: dispara su agujero de 4 coronas (daño 480, atracción 680px, Einstein 640px) — igual que como estaba pensado en v6.82.
+(c) [ ] TODO lo demás como siempre: el aire que hierve del Rayo C (v6.82/6.83), la lente de los agujeros, el Compás Rúnico y la Furia Solar (clickers), el Requiem del Púlsar.
+
+---
+
 # v6.83 — LA CAPTURA FORZADA (EL CALOR Y LA LENTE HASTA EN RETRO) — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.83 (md5 `0c0b0feba423afaf2eca8e68cd602a05`, 6.640.392 B) — 466 entradas, EOF exacto, headless 0 excepciones, el .fxc SIN CAMBIOS (la cura es matemática C#).
