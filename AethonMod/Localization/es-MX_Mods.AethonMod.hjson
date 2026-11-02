@@ -3698,16 +3698,6 @@ Altar: {
 	Corromper: CORROMPER
 	CorruptaHecha: ✦ {0} nace corrupta: su nombre viste el negro y el brillo morado-negro la cubre.
 }
-	SinLibro: (sin el grimorio encima)
-	SlotVacio: relleno
-	EtiquetaRelleno: EL RELLENO — lo que NO se necesita y NO está corrupto
-	FiltroRelleno: Ni monedas, ni esencias, ni requisitos, ni favoritos. Vale ≥ 5 de plata
-	PuntosVivos: Vale {0} puntos
-	CreditoVivo: Ya pagas: {0} esencias del peldaño
-	Ofrendar: OFRENDAR AL GRIMORIO
-	Rechazado: ✦ El grimorio rechaza eso: no es relleno válido (requisito, corrupto, sagrado o sin valor).
-	OfrendaAceptada: ✦ El grimorio devora la ofrenda: +{0} puntos (total {1}).
-}
 
 Arbol: {
 	Titulo: EL ÁRBOL DE HABILIDADES

@@ -16,6 +16,16 @@ namespace AethonMod.Content.Projectiles.Investigaciones
     // ======================================================================
     public class LibroAzulDescarga : ModProjectile
     {
+        // v6.88.1 — LA TEXTURA POR CONVENCIÓN (la lección v6.84/v6.86
+        // OTRA VEZ, cazada por audit_assets.py ANTES del release): tML
+        // exige la textura de TODO ModProjectile al CARGAR (aunque
+        // PreDraw devuelva false y jamás la dibuje) — sin ella:
+        // MissingResourceException → el mod ENTERO se desactiva y TODO
+        // queda invisible. El patrón de la casa (SolEnMiniaturaProj,
+        // AureumSkyStrike): la textura del perno ES el flare de 4
+        // puntas — el dibujo real lo hace PreDraw (la cápsula viva).
+        public override string Texture => "AethonMod/Content/Effects/FlareEstrella4Puntas";
+
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
