@@ -714,11 +714,18 @@ namespace AethonMod.Content.Weapons
 
                 if (currentMinions >= maxMinions)
                 {
-                    // === LA 12.ª INVOCACIÓN FORTALECE: se elige el ojo con
-                    //     MENOS mejoras de la banda (el reparto parejo hace
-                    // que TODO el escuadrón despierte sus anillos) ===
-                    Projectile objetivo = null;
-                    int mejorMenor = int.MaxValue;
+                    // === v6.86 — LA MEJORA MASIVA (la letra: «al aplicar
+                    //     la mejora a un minion esta se aplica a todos
+                    //     los minions invocados a la vez, de esa forma no
+                    //     tengo que estar dando 44 click para aplicar
+                    //     todas las mejoras e invocar a todos los
+                    //     minions»): la 12.ª invocación NO fortalece a UN
+                    //     ojo — FORTALECE AL ESCUADRÓN ENTERO de una vez
+                    //     (todos los que puedan llevar un anillo más:
+                    //     por debajo de sus 4 y de lo que el despertar
+                    //     presta). Un clic por PELDAÑO de mejora: 4
+                    //     clics en toda la vida del escuadrón. ===
+                    int fortalecidos = 0;
                     for (int i = 0; i < Main.maxProjectiles; i++)
                     {
                         Projectile p = Main.projectile[i];
@@ -729,14 +736,14 @@ namespace AethonMod.Content.Weapons
                             continue;                       // ya lleva sus 4 mejoras
                         // v6.51.0 — LAS MEJORAS SON DEL DESPERTAR (la
                         // letra: «con la nueva mecánica las mejoras están
-                        // sujetas a esa mecánica de corrupción» — nivel 5
-                        // → la 1 · 15 → la 2 · 30 → la 3 · 40 → la 4).
+                        // sujetas a esa mecánica de corrupción»).
                         if (m >= mejorasDesbloqueadas)
                             continue;                       // el despertar aún no las presta
-                        if (m < mejorMenor) { mejorMenor = m; objetivo = p; }
+                        global::AethonMod.Content.Projectiles.OjoEternoMinion.Fortalecer(p);
+                        fortalecidos++;
                     }
 
-                    if (objetivo == null)
+                    if (fortalecidos == 0)
                     {
                         // v6.51.0 — DOS CIERRES DISTINTOS: o todo el
                         // escuadrón llevó sus 4 mejoras (el final de
@@ -745,7 +752,7 @@ namespace AethonMod.Content.Weapons
                         {
                             if (mejorasDesbloqueadas >= global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasMax)
                                 Main.NewText(Terraria.Localization.Language.GetTextValue(
-                                    "Mods.AethonMod.Armas.OjosAlMaximo"),
+                                    "Mods.AethonMod.Armas.OjosAlMaximo", currentMinions),
                                     new Color(255, 120, 120));
                             else
                                 Main.NewText(Terraria.Localization.Language.GetTextValue(
@@ -768,10 +775,9 @@ namespace AethonMod.Content.Weapons
                         }
                     }
 
-                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Fortalecer(objetivo);
                     if (Main.myPlayer == player.whoAmI)
-                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.OjoFortalecido",
-                            global::AethonMod.Content.Projectiles.OjoEternoMinion.MejorasDe(objetivo) * 50),
+                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.EscuadronFortalecido",
+                            fortalecidos, mejorasDesbloqueadas * 50),
                             new Color(196, 138, 255));
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                     return false;
@@ -1660,6 +1666,44 @@ namespace AethonMod.Content.Weapons
                             }
                         }
 
+                        // === v6.86 — LA PUERTA DEL LIBRO CORRUPTO (la letra
+                        //     del peldaño 20: «para desbloquear el nivel de
+                        //     despertar 20, a parte de lo que ya necesita,
+                        //     debemos añadir que tambien necesita consumir 1
+                        //     libro corrupto»): su línea propia con SU
+                        //     ✓ — DEVORADO ✓ verde / pendiente roja (el
+                        //     sello del libro cuenta lo que ESTE grimorio
+                        //     devoró, sea en el despertar 3 o en el 19). ===
+                        if (siguiente == 20)
+                        {
+                            bool libroComido = almaLista != null && almaLista.LibroCorruptoConsumido;
+                            string colLibro = libroComido ? colOK : colNo;
+                            string lineaLibro = libroComido
+                                ? Language.GetTextValue("Mods.AethonMod.Despertar.ReqLibroDevorado")
+                                : Language.GetTextValue("Mods.AethonMod.Despertar.ReqLibroPendiente");
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReqLibro",
+                                $"[c/{colLibro}:  • {lineaLibro}{(libroComido ? "  ✓" : "")}]"));
+                        }
+
+                        // === v6.86 — LA CIMA Y SUS CONTADORES (la letra:
+                        //     «la Ira o sea el Haz, sera obtenible en el
+                        //     nivel 100 y venciendo a moon lord al menos 5
+                        //     veces, y venciendo al fragmento de un recuerdo
+                        //     lejano Aethon 1 vez»): la cuenta viva en el
+                        //     tooltip del peldaño 100 — Moon Lord n/5 ·
+                        //     Aethon n/1, verde cuando la cima está paga. ===
+                        if (siguiente == Systems.DespertarGrimorio.NivelMax)
+                        {
+                            var cazador = Main.LocalPlayer.GetModPlayer
+                                <global::AethonMod.Content.Players.CazaJefesPlayer>();
+                            int mlVeces = cazador?.VecesMoonLord ?? 0;
+                            int aeVeces = cazador?.VecesAethon ?? 0;
+                            bool iraPaga = mlVeces >= 5 && aeVeces >= 1;
+                            string colIra = iraPaga ? colOK : colNo;
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReqIra",
+                                $"[c/{colIra}:  • LA IRA (El Haz): Moon Lord {Math.Min(mlVeces, 5)}/5 · Aethon {Math.Min(aeVeces, 1)}/1{(iraPaga ? "  ✓" : "")}]"));
+                        }
+
                         // === v6.51.11 — LA NOTA FINAL (la comida se sirve
                         //     EN EL SUELO — el gesto nuevo): con el arma o
                         //     los lingotes basta (v6.77 — la letra: «esa O
@@ -1670,6 +1714,18 @@ namespace AethonMod.Content.Weapons
                         //     inventario — el error de la mochila murió). ===
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
                             "[c/78788C:  (con el arma o los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
+
+                        // === v6.86 — LOS PUNTOS DEL ALTAR (la letra del
+                        //     altar: «para que el grimorio pueda consumir
+                        //     cosas que no sean las que necesita y no
+                        //     esten corruptas»): lo que el altar devoró ya
+                        //     vive en el alma del libro — y paga hasta el
+                        //     30 % de las esencias del peldaño. ===
+                        int puntos = almaLista?.ProgresoOfrendas ?? 0;
+                        int credito = almaLista?.CreditoPuntosEsencias ?? 0;
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReqPuntos",
+                            $"[c/78EDBE:  • Puntos de Ofrenda del altar: {puntos} (pagan hasta el 30 % de las esencias)]" +
+                            (credito > 0 ? $"[c/78EDBE: — {credito} esencias ya pagas]" : "")));
                     }
                     else
                     {

@@ -76,6 +76,12 @@ namespace AethonMod.Content.Systems
                 int eterno = ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>();
                 int tipoEsencia = ModContent.ItemType
                     <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                int tipoLibro = ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.LibroCorrupto>();
+
+                // v6.86 — LA RULETA DE LOS COFRES (la segunda fuente del
+                // Libro Corrupto: 1% abriendo cofres en la mazmorra).
+                LaRuletaDeLosCofres();
 
                 for (int i = 0; i < Main.maxPlayers; i++)
                 {
@@ -105,7 +111,7 @@ namespace AethonMod.Content.Systems
                         int siguiente = System.Math.Min(
                             DespertarGrimorio.NivelDespertarSiguiente(mano),
                             DespertarGrimorio.NivelMax);
-                        desperto = ServirLaMesa(p, mano, alma, siguiente, tipoEsencia);
+                        desperto = ServirLaMesa(p, mano, alma, siguiente, tipoEsencia, tipoLibro);
                     }
                     if (desperto) continue;   // un despertar por pulso (con calma)
 
@@ -119,6 +125,7 @@ namespace AethonMod.Content.Systems
                         Item drop = Main.item[d];
                         if (drop == null || drop.IsAir) continue;   // SOLO items caídos vivos
                         if (drop.type == tipoEsencia) continue;      // las esencias: su propia mesa
+                        if (drop.type == tipoLibro) continue;        // v6.86: el libro corrupto, su propia mesa
                         if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                             continue;
 
@@ -136,6 +143,54 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  v6.86 — LA SEGUNDA FUENTE DEL LIBRO (la letra del peldaño 20):
+        //  «o con una probabilidad de 1% abriendo cofres» — en la MAZMORRA
+        //  (el contexto de la letra: los cofres de la mazmorra). Cada cofre
+        //  tira UNA vez por cazador por sesión — y solo si aún no levantó
+        //  su libro (el sello del UNO POR CAZADOR).
+        // ================================================================
+
+        /// <summary>LOS COFRES YA RULETADOS por cazador (índices de
+        /// Main.chest — viven solo la sesión; al recargar el mundo los
+        /// índices renacen y cada cofre vuelve a tirar: da igual, el
+        /// sello de 1-por-cazador es el guardián de verdad).</summary>
+        private static readonly Dictionary<int, HashSet<int>> _cofresRuletados = new();
+
+        /// <summary>LA RULETA DE LOS COFRES (una tirada por cofre por
+        /// cazador — solo en la mazmorra, solo si le falta su libro).</summary>
+        private static void LaRuletaDeLosCofres()
+        {
+            try
+            {
+                if (Main.gameMenu || Main.netMode == NetmodeID.MultiplayerClient) return;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player p = Main.player[i];
+                    if (p == null || !p.active || p.dead) continue;
+                    if (p.chest < 0) continue;
+                    if (!p.ZoneDungeon) continue;   // el cofre abierto está en la mazmorra
+
+                    var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
+                    if (cazador == null) continue;
+                    if (cazador.YaTuvoLibro) continue;   // el sello: ya no le toca
+
+                    if (!_cofresRuletados.TryGetValue(i, out var hechos))
+                    { hechos = new HashSet<int>(); _cofresRuletados[i] = hechos; }
+                    if (!hechos.Add(p.chest)) continue;   // este cofre ya tiró
+
+                    // EL 1% DE LA LETRA.
+                    if (!Main.rand.NextBool(100)) continue;
+
+                    int idx = Item.NewItem(p.GetSource_Loot(), p.Hitbox,
+                        ModContent.ItemType<global::AethonMod.Content.Items.Altar.LibroCorrupto>(), 1);
+                    if (idx >= 0 && Main.netMode == NetmodeID.Server)
+                        NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+                }
+            }
+            catch { }
+        }
+
+        // ================================================================
         //  v6.51.11 — LA MESA DEL SUELO: el libro come de los items
         //  CAÍDOS delante de él, SOLO lo que le falta del peldaño, y
         //  despierta cuando la mesa está completa. Devuelve true si
@@ -143,7 +198,7 @@ namespace AethonMod.Content.Systems
         // ================================================================
         private static bool ServirLaMesa(Player p, Item libro,
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma,
-            int siguiente, int tipoEsencia)
+            int siguiente, int tipoEsencia, int tipoLibro)
         {
             try
             {
@@ -154,6 +209,29 @@ namespace AethonMod.Content.Systems
                 int[] armasDelPeldano = DespertarGrimorio.ArmasDelNivel[siguiente];
                 bool mordisco = false;
 
+                // ============================================================
+                //  v6.86 — EL CANJE DEL ALTAR (UNA vez por peldaño): los
+                //  PUNTOS DE OFRENDA abren el crédito — hasta el 30 % de
+                //  las ESENCIAS del peldaño, 25 puntos por esencia. El
+                //  crédito muere con la subida; los puntos sobrantes
+                //  viajan al siguiente peldaño (nada de busfarmeo: el
+                //  canje se cobra UNA vez, al abrirlo).
+                // ============================================================
+                if (alma.CreditoPuntosEsencias == 0 &&
+                    alma.ProgresoOfrendas >= DespertarGrimorio.PuntosPorEsencia)
+                {
+                    int topePeldano = (int)System.Math.Floor(esenciasNecesarias * 0.30);
+                    int porPuntos = System.Math.Min(topePeldano,
+                        alma.ProgresoOfrendas / DespertarGrimorio.PuntosPorEsencia);
+                    if (porPuntos > 0)
+                    {
+                        alma.CreditoPuntosEsencias = porPuntos;
+                        alma.ProgresoOfrendas -= porPuntos * DespertarGrimorio.PuntosPorEsencia;
+                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.CreditoPuntos",
+                            new Color(120, 235, 190), porPuntos, esenciasNecesarias);
+                    }
+                }
+
                 for (int d = 0; d < Main.maxItems; d++)
                 {
                     Item drop = Main.item[d];
@@ -161,13 +239,39 @@ namespace AethonMod.Content.Systems
                     if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
                         continue;
 
+                    // === 0) EL LIBRO CORRUPTO (v6.86 — la puerta del 20,
+                    //     la letra del peldaño): si ESTE libro está por
+                    //     debajo del 20 y aún no devoró el suyo, se lo
+                    //     come del suelo — y la puerta queda marcada PARA
+                    //     SIEMPRE («sin importar en que nivel esté su
+                    //     despertar actual»). Ya comido o ya en el 20: el
+                    //     libro se queda en el suelo (no es asunto de
+                    //     ESTA mesa).
+                    if (drop.type == tipoLibro)
+                    {
+                        if (alma.NivelDespertar >= 20 || alma.LibroCorruptoConsumido)
+                            continue;
+
+                        AnimarElBocado(p, drop, 4f);
+                        alma.LibroCorruptoConsumido = true;
+                        drop.TurnToAir();
+                        SincronizarDrop(d);
+
+                        PolvosDelBocado(p, 6);
+                        EcoRed.HablarAlPortador(p, "Mods.AethonMod.Despertar.LibroDevorado",
+                            new Color(196, 138, 255));
+                        mordisco = true;
+                    }
                     // === 1) LAS ESENCIAS — solo LAS QUE FALTAN (si ya
                     //     comió las suyas, la pila se queda en el suelo:
                     //     la letra: «si ya comio las que necesitaba ya
-                    //     no debe de comer»). ===
-                    if (drop.type == tipoEsencia)
+                    //     no debe de comer»). v6.86 — el CRÉDITO DEL
+                    //     ALTAR paga su parte (los puntos cubren hasta
+                    //     el 30 % del peldaño). ===
+                    else if (drop.type == tipoEsencia)
                     {
-                        int falta = esenciasNecesarias - alma.OfrendaEsencias;
+                        int falta = esenciasNecesarias - alma.OfrendaEsencias
+                            - alma.CreditoPuntosEsencias;
                         if (falta <= 0) continue;
 
                         int come = System.Math.Min(falta, drop.stack);
@@ -284,7 +388,7 @@ namespace AethonMod.Content.Systems
                     //     con calma: cada 5 s, no cada pulso). ===
                     if (LaMesaEstaCompleta(alma, siguiente))
                     {
-                        if (!PuedePasarLaPuerta(p, siguiente)) return true;   // la puerta manda: ni un bocado más
+                        if (!PuedePasarLaPuerta(p, alma, siguiente)) return true;   // la puerta manda: ni un bocado más
                         SubirNivel(p, libro, null);   // SubirNivel RENACE los contadores
                         return true;
                     }
@@ -298,7 +402,7 @@ namespace AethonMod.Content.Systems
                 // peldaño, si lo hay, ya caído — o el aviso con calma).
                 if (LaMesaEstaCompleta(alma, siguiente))
                 {
-                    if (!PuedePasarLaPuerta(p, siguiente)) return true;
+                    if (!PuedePasarLaPuerta(p, alma, siguiente)) return true;
                     SubirNivel(p, libro, null);
                     return true;
                 }
@@ -342,7 +446,10 @@ namespace AethonMod.Content.Systems
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
             if (alma == null) return false;
-            if (alma.OfrendaEsencias < DespertarGrimorio.EsenciasPara(siguiente)) return false;
+            // v6.86 — el CRÉDITO DEL ALTAR cuenta como esencias comidas
+            // (los puntos del altar pagan hasta el 30 % del peldaño).
+            if (alma.OfrendaEsencias + alma.CreditoPuntosEsencias <
+                DespertarGrimorio.EsenciasPara(siguiente)) return false;
             if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
             if (alma.OfrendaArma) return true;
             return alma.OfrendaMineral >= DespertarGrimorio.CantidadMineralDe(siguiente);
@@ -366,25 +473,47 @@ namespace AethonMod.Content.Systems
         /// <summary>¿PUEDE PASAR LA PUERTA de este peldaño? Si el nivel no
         /// exige jefe: siempre true. Si lo exige y ya cayó: true. Si lo
         /// exige y VIVE: el aviso con calma (qué presa quiere el libro) y
-        /// false — el despertar espera su caza.</summary>
-        private static bool PuedePasarLaPuerta(Player p, int siguiente)
+        /// false — el despertar espera su caza.
+        /// v6.86 — LA PUERTA DEL LIBRO (el peldaño 20): además de su jefe
+        /// (la Muralla), el 20 exige devorar el LIBRO CORRUPTO (la letra:
+        /// «para desbloquear el nivel de despertar 20, a parte de lo que
+        /// ya necesita, debemos añadir que tambien necesita consumir 1
+        /// libro corrupto») — y el sello ya no se borra: comido en el 3 o
+        /// en el 19, la puerta NACE paga.</summary>
+        private static bool PuedePasarLaPuerta(Player p,
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
             DespertarGrimorio.JefeDelCamino? jefe = DespertarGrimorio.JefeDeNivel(siguiente);
-            if (jefe == null) return true;
-            if (DespertarGrimorio.JefeYaCaido(p, siguiente)) return true;
-
-            // EL AVISO CON CALMA (la presa que el libro exige — el hambre
-            // de caza no grita cada cuarto de segundo).
-            ulong ahora = Main.GameUpdateCount;
-            if (!_ultimoAvisoPuerta.TryGetValue(p.whoAmI, out ulong ultimo) ||
-                ahora - ultimo >= 300ul)
+            if (jefe != null && !DespertarGrimorio.JefeYaCaido(p, siguiente))
             {
-                _ultimoAvisoPuerta[p.whoAmI] = ahora;
-                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.PuertaDeCaza",
-                    new Color(255, 120, 120), siguiente,
-                    Terraria.Localization.Language.GetTextValue(jefe.Value.Clave));
+                // EL AVISO CON CALMA (la presa que el libro exige — el hambre
+                // de caza no grita cada cuarto de segundo).
+                ulong ahora = Main.GameUpdateCount;
+                if (!_ultimoAvisoPuerta.TryGetValue(p.whoAmI, out ulong ultimo) ||
+                    ahora - ultimo >= 300ul)
+                {
+                    _ultimoAvisoPuerta[p.whoAmI] = ahora;
+                    EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.PuertaDeCaza",
+                        new Color(255, 120, 120), siguiente,
+                        Terraria.Localization.Language.GetTextValue(jefe.Value.Clave));
+                }
+                return false;
             }
-            return false;
+
+            // LA PUERTA DEL LIBRO CORRUPTO (solo el 20 la tiene).
+            if (siguiente == 20 && alma != null && !alma.LibroCorruptoConsumido)
+            {
+                ulong ahora2 = Main.GameUpdateCount;
+                if (!_ultimoAvisoPuerta.TryGetValue(p.whoAmI, out ulong ultimo2) ||
+                    ahora2 - ultimo2 >= 300ul)
+                {
+                    _ultimoAvisoPuerta[p.whoAmI] = ahora2;
+                    EcoRed.HablarAlPortador(p, "Mods.AethonMod.Despertar.PuertaLibro",
+                        new Color(255, 120, 120));
+                }
+                return false;
+            }
+            return true;
         }
 
         /// <summary>¿Es ESTA arma una de las del peldaño?</summary>
@@ -542,6 +671,10 @@ namespace AethonMod.Content.Systems
                 alma.OfrendaMonedas = 0L;
                 alma.OfrendaMineral = 0;
                 alma.OfrendaArma = false;
+                // v6.86 — el CRÉDITO DEL ALTAR muere con el peldaño (el
+                // canje se cobra UNA vez por subida — los puntos que
+                // sobraron viajan al siguiente).
+                alma.CreditoPuntosEsencias = 0;
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
                 if (ofrenda != null && !ofrenda.IsAir)

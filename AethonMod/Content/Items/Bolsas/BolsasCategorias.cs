@@ -921,6 +921,12 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaSolyn>(), 1));
             // R9 — LOS GRILLETES DE ANDRÓMEDA (el campo de fuerza).
             l.Add((ModContent.ItemType<Items.Investigaciones.GrilletesDeAndromeda>(), 1));
+            // v6.86 — R5 — EL ALTAR DE OFRENDAS (Heroic Weapons: el altar
+            // que devora lo que NO se necesita y NO está corrupto).
+            l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));
+            // v6.86 — R6 — EL CÓDICE DE HABILIDADES (Umbra/Path of
+            // Terraria: el item que abre el árbol).
+            l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
             return l;
         }
     }

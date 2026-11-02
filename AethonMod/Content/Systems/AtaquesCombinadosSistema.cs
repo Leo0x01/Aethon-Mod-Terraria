@@ -331,8 +331,12 @@ namespace AethonMod.Content.Systems
                 //     v6.60 — LA LETRA NUEVA: ONCE ojos y TODOS en su
                 //     MEJORA MÁXIMA (el requisito), y el compás lo marca
                 //     el MODO PRUEBA (5 haces/min) hasta que la prueba
-                //     termine (1 cada 30 min). ===
-                if (DespertarGrimorio.IraDisponible(despertar))
+                //     termine (1 cada 30 min).
+                //     v6.86 — LA LETRA DE LA CIMA: el despertar 100 YA NO
+                //     BASTA — además el Señor de la Luna vencido ≥ 5 veces
+                //     y Aethon ≥ 1 (IraDisponible(p): los contadores los
+                //     lleva CazaJefesPlayer y los pagan los OnKill). ===
+                if (DespertarGrimorio.IraDisponible(p))
                 {
                     ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
                     // v6.60 — SIN DADO: la ira es EL ATAQUE AGENDADO del

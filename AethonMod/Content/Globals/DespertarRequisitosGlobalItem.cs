@@ -96,6 +96,14 @@ namespace AethonMod.Content.Globals
                     //     registro del cazador del portador).
                     "DespertarReqJefe" => Systems.DespertarGrimorio
                         .JefeYaCaido(portador, siguiente),
+                    // v6.86 — LA PUERTA DEL LIBRO (el peldaño 20): late ✓
+                    //     cuando ESTE grimorio ya devoró su Libro Corrupto.
+                    "DespertarReqLibro" => almaReq != null &&
+                        almaReq.LibroCorruptoConsumido,
+                    // v6.86 — LA CIMA DE LA IRA (el peldaño 100): late ✓
+                    //     cuando Moon Lord cayó ≥ 5 veces y Aethon ≥ 1.
+                    "DespertarReqIra" => Systems.DespertarGrimorio
+                        .IraDisponible(portador),
                     _ => null,
                 };
                 if (cumplido == true)

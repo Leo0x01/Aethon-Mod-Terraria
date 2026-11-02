@@ -306,7 +306,15 @@ namespace AethonMod.Content.Projectiles
         public override void AI()
         {
             Player dueño = Main.player[Projectile.owner];
-            if (dueño == null || !dueño.active || dueño.dead)
+            // v6.86 — EL ESCUADRÓN SOBREVIVE A LA MUERTE (la letra: «los
+            // minions del grimorio sean persistentes, aunque el jugador
+            // muera o aunque salga de la partida, estos siempre permanecen
+            // invocados a no ser que el jugador los desinvoque usando su
+            // buff»): el dueño CAÍDO ya NO mata a sus ojos — lo orbitan
+            // mientras espera el renacer (la única despedida legítima
+            // sigue siendo el CLIC DERECHO del buff y la salida del
+            // juego los re-invoca: EscuadronPlayer).
+            if (dueño == null || !dueño.active)
             {
                 Projectile.Kill();
                 return;

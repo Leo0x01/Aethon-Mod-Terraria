@@ -333,7 +333,8 @@ namespace AethonMod.Content.UI
 
             // === LAS FILAS (los 50 peldaños) ===
             const float paso = 62f;
-            float altoTotal = 50f * paso;
+            // v6.86 — la escalera ahora son CIEN peldaños (antes 50).
+            float altoTotal = Systems.DespertarGrimorio.NivelMax * paso;
             float maxScroll = MathHelper.Max(0f, altoTotal - clip.Height);
             scroll = (int)MathHelper.Clamp(scroll, 0f, maxScroll);
             _scrollEscala = scroll;

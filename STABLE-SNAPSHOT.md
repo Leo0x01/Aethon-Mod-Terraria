@@ -1,3 +1,30 @@
+# v6.86 — EL DESPERTAR DE LAS CIEN PUERTAS — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.86 (md5 `b50130bfdb6210c2ec9c10280bad39ec`, 9.068.405 B) — 486 entradas (6 assets nuevos), blobs 486/486, EOF exacto, 5 .fxc byte-idénticos a v6.85, música intacta, headless 0 excepciones.
+
+## LA LETRA Y LA ENTREGA
+1. **EL DESPERTAR 100**: la escalera realineada — cada arma y lingote OBTENIBLE en la era de su jefe. Deerclops y el Duque Fishron FUERA de las puertas (las armas del Duque siguen como ofrenda 37); la Emperatriz EN su propia puerta (38) con SUS armas; Aethon custodia la 59; el Señor de la Luna corona la 50 de vanilla.
+2. **LA IRA (El Haz)** en el 100 + **Moon Lord 5 veces** y **Aethon 1 vez** (contadores por cazador; el legacy cobra 1 de las 5 si ya lo tenía muerto). El tooltip del peldaño 100 muestra la cuenta viva.
+3. **EL LIBRO CORRUPTO** (la puerta del 20): 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres · 50% la Muralla · 1 por jugador (quien levantó el suyo, no levanta otro) · el grimorio HABLA al recogerlo («déjalo caer al suelo») · lo devora del suelo con despertar < 20 → la puerta del 20 paga PARA SIEMPRE.
+4. **EL ALTAR DE OFRENDAS** (Heroic Weapons): colócalo (20 piedra + 2 estrellas + 1 diamante), clic derecho → el panel. El RELLENO (lo que NO se necesita y NO está corrupto) se vuelve PUNTOS (1/10 de plata) → pagan hasta el 30% de las esencias del peldaño. El grimorio muestra sus puntos en el tooltip.
+5. **EL ÁRBOL DE HABILIDADES** (Umbra/Path of Terraria): EL CÓDICE DE HABILIDADES (en la Bolsa de las Investigaciones) lo abre con clic derecho. Ventana con cadenas, paneo, zoom, reset doble-clic y refund conectado (BFS). Puntos: 3 + 1 cada 5 de despertar. 10 nodos (daño/vida/maná/crít/velocidad/defensa/maná−/regen/ +1 minion KEYSTONE).
+6. **EL ESCUADRÓN ETERNO**: los ojos sobreviven a la MUERTE (orbitan al caído) y a la SALIDA (se re-invocan al volver al mundo, con nivel+mejoras+daño exactos). La 12.ª invocación FORTALECE A TODOS A LA VEZ (4 clics en toda la vida, antes 44).
+
+## LOS ARCHIVOS (los nuevos)
+`Content/Systems/DespertarGrimorio.cs` (LA ESCALERA 100 + la Ira con contadores + la API del altar) · `Content/Systems/DespertarGrimorioSistema.cs` (el libro en la mesa + la puerta del 20 + el canje del altar + la ruleta de los cofres) · `Content/Players/CazaJefesPlayer.cs` (VecesMoonLord/VecesAethon/YaTuvoLibro + legacy) · `Content/Globals/CazaJefesGlobalNPC.cs` (contadores de la Ira + la Muralla suelta el libro + Deerclops/Fishron fuera) · `Content/Globals/AlmaEternoGlobalItem.cs` (LibroCorruptoConsumido + ProgresoOfrendas + CreditoPuntosEsencias — persistencia v3) · `Content/Items/Altar/LibroCorrupto.cs` (+GlobalItem del pickup + GlobalTile de los libros) + `LibroCorrupto.png` · `Content/Tiles/AltarOfrendasTile.cs` + `Content/Items/Altar/AltarOfrendasItem.cs` + `AltarOfrendasItem.png` + `AltarOfrendasTile.png` · `Content/UI/AltarOfrendasUI.cs` · `Content/UI/ArbolHabilidadesUI.cs` + `ArbolHabilidades_Cadena.png` + `ArbolHabilidades_Nodo.png` · `Content/Players/SkillTreePlayer.cs` · `Content/Items/Investigaciones/CodiceHabilidades.cs` + `CodiceHabilidades.png` · `Content/Players/EscuadronPersistPlayer.cs` · `Content/Projectiles/OjoEternoMinion.cs` (sobrevive a la muerte) · `Content/Weapons/GrimoireEternal.cs` (LA MEJORA MASIVA + tooltips del libro/la Ira/los puntos) · `Content/Globals/DespertarRequisitosGlobalItem.cs` (el ✓ del libro y la Ira) · `Content/UI/CieloDespiertoUI.cs` (escalera de 100) · `Content/Items/Bolsas/BolsasCategorias.cs` (+altar +códice) · hjson ×3 (924 claves simétricas) · `build.txt` — 6.86.
+
+## EL PLAYTEST (la lista de la casa)
+(a) [ ] **EL DESPERTAR 100**: el tooltip del grimorio muestra el peldaño siguiente con su arma/mineral OBTENIBLE en su era (nada de adamantita con el Rey Gelatina vivo). El Cielo del Despertar: la escalera de 100 con rueda.
+(b) [ ] **LAS PUERTAS**: Deerclops y el Duque NUNCA aparecen como presa; la Emperatriz en el 38 con sus armas; Aethon en el 59 (mata al dios: la puerta se paga).
+(c) [ ] **LA IRA**: al despertar 100 el tooltip muestra «Moon Lord n/5 · Aethon n/1» — mata 5 veces al Señor de la Luna y 1 a Aethon → LA IRA DISPONIBLE y el Haz responde.
+(d) [ ] **EL LIBRO CORRUPTO**: consíguelo (mazmorra o Muralla) — el grimorio HABLA al entrar al inventario; suéltalo: el grimorio lo devora (despertar < 20) y la puerta del 20 queda paga PARA SIEMPRE (el tooltip la marca ✓ aunque estés en el 3). El segundo libro: NO se puede levantar (1 por jugador).
+(e) [ ] **EL ALTAR**: craftea (20 piedra + 2 estrellas + 1 diamante), colócalo, clic derecho → el panel con el slot de relleno. Mete cosas que NO necesites (una espada vieja LIMPIA, materiales) → OFRENDAR → +puntos (verde). El tooltip del grimorio: «Puntos de Ofrenda del altar: N». Con 25+ puntos: al abrir la mesa del peldaño, el canje paga esencias (hasta 30%).
+(f) [ ] **EL ÁRBOL**: usa EL CÓDICE (clic derecho) → la ventana con cadenas. Asigna (clic), devuelve (clic derecho sin romper el árbol), panea, zookea, resetea (doble clic). Los stats se sienten (vida/daño/maná). Al re-entrar: los niveles del árbol SIGUEN (por jugador).
+(g) [ ] **EL ESCUADRÓN ETERNO**: invoca los ojos, MUERE: los ojos te orbitan muerto (no desaparecen). SAL DEL MUNDO y vuelve: el escuadrón vuelve EXACTO (niveles, anillos, daño). Clic derecho en el buff: se despiden (y NO vuelven). Con el escuadrón lleno, UN clic de invocación fortalece a TODOS («¡EL ESCUADRÓN ENTERO SE FORTALECE!») — 4 clics y están al máximo.
+(h) [ ] **LA MASCOTA SIGUE EN EL 20** y las mejoras de los ojos abren en 10/40/70/80 (el aviso lo dice).
+
+---
+
 # v6.85 — LA SESIÓN DE LAS NUEVE INVESTIGACIONES — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.85 (md5 `7e19111c733de9293f7b53516390568f`, 9.047.446 B) — 480 entradas (14 assets nuevos), blobs 480/480, EOF exacto, el .fxc del calor RECOMPILADO (5.290 B), la música del festín dentro (2,1 MB), headless 0 excepciones.

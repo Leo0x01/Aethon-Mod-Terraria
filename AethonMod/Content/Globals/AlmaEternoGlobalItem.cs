@@ -68,6 +68,40 @@ namespace AethonMod.Content.Globals
         /// arma O los lingotes basta — la regla de siempre).</summary>
         public bool OfrendaArma = false;
 
+        // ================================================================
+        //  v6.86 — EL LIBRO CORRUPTO (la letra del peldaño 20): «una vez
+        //  el libro este en el suelo el grimorio lo comera siempre que
+        //  este por debajo del nivel 20 de despertar y con esto el
+        //  requisito del despertar el nivel 20 sera marcado como valido
+        //  sin importar en que nivel este su despertar actual» — el
+        //  sello vive EN EL LIBRO (viaja con el item, como el despertar).
+        // ================================================================
+
+        /// <summary>¿ESTE grimorio ya devoró su LIBRO CORRUPTO? (la puerta
+        /// del peldaño 20 — marcada válida PARA SIEMPRE, se haya comido el
+        /// libro en el despertar 3 o en el 19).</summary>
+        public bool LibroCorruptoConsumido = false;
+
+        // ================================================================
+        //  v6.86 — EL ALTAR DE OFRENDAS (la letra: «el tipo de altar que
+        //  necesitamos para que el grimorio pueda consumir cosas que no
+        //  sean las que necesita y no esten corruptas»): lo que el altar
+        //  devora se vuelve PUNTOS en el alma del libro — y los puntos
+        //  pagan hasta el 30 % de las ESENCIAS del peldaño (una vez por
+        //  peldaño: el crédito muere con la subida, los puntos sobrantes
+        /// viajan al siguiente).
+        // ================================================================
+
+        /// <summary>Los PUNTOS DE OFRENDA acumulados por el altar (1 punto
+        /// por cada 10 de plata del valor devorado — viven en el libro y
+        /// viajan con él).</summary>
+        public int ProgresoOfrendas = 0;
+
+        /// <summary>El CRÉDITO del peldaño vivo: cuántas ESENCIAS del
+        /// peldaño actual ya están pagas con puntos (muere con la subida
+        /// — el canje se cobra UNA vez, al abrirlo).</summary>
+        public int CreditoPuntosEsencias = 0;
+
         // === EL PODER DEVORADO (las esencias corruptas) ===
         /// <summary>Cada esencia corrupta tragada: +0,1 % de daño
         /// permanente (sin tope práctico).</summary>
@@ -564,6 +598,10 @@ namespace AethonMod.Content.Globals
                 if (OfrendaMonedas > 0L) tag["almaOfrendaMonedas"] = OfrendaMonedas;
                 if (OfrendaMineral > 0) tag["almaOfrendaMineral"] = OfrendaMineral;
                 if (OfrendaArma) tag["almaOfrendaArma"] = true;
+                // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
+                if (LibroCorruptoConsumido) tag["almaLibroCorrupto"] = true;
+                if (ProgresoOfrendas > 0) tag["almaPuntos"] = ProgresoOfrendas;
+                if (CreditoPuntosEsencias > 0) tag["almaCredito"] = CreditoPuntosEsencias;
                 if (DevoracionExp > 0) tag["almaExp"] = DevoracionExp;
                 if (DevoracionFuerza > 0) tag["almaFuerza"] = DevoracionFuerza;
                 if (DevoracionPrisa > 0) tag["almaPrisa"] = DevoracionPrisa;
@@ -594,6 +632,10 @@ namespace AethonMod.Content.Globals
                 OfrendaMonedas = System.Math.Max(0L, System.Math.Min(9_999_999L, tag.GetLong("almaOfrendaMonedas")));
                 OfrendaMineral = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaMineral")));
                 OfrendaArma = tag.GetBool("almaOfrendaArma");
+                // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
+                LibroCorruptoConsumido = tag.GetBool("almaLibroCorrupto");
+                ProgresoOfrendas = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPuntos")));
+                CreditoPuntosEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaCredito")));
                 DevoracionExp = System.Math.Max(0L, System.Math.Min(999999999L, tag.GetLong("almaExp")));
                 DevoracionFuerza = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaFuerza")));
                 DevoracionPrisa = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaPrisa")));
@@ -616,6 +658,9 @@ namespace AethonMod.Content.Globals
                 OfrendaMonedas = 0L;
                 OfrendaMineral = 0;
                 OfrendaArma = false;
+                LibroCorruptoConsumido = false;
+                ProgresoOfrendas = 0;
+                CreditoPuntosEsencias = 0;
                 DevoracionExp = 0;
                 DevoracionFuerza = 0;
                 DevoracionPrisa = 0;
@@ -639,7 +684,7 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                writer.Write((byte)2);                    // versión del alma (v6.51.11: la mesa)
+                writer.Write((byte)3);                    // versión del alma (v6.86: libro + altar)
                 writer.Write(NivelDespertar);
                 writer.Write(PetDelDespertar);
                 writer.Write(DevoracionPoder);
@@ -649,6 +694,10 @@ namespace AethonMod.Content.Globals
                 writer.Write(OfrendaMonedas);
                 writer.Write(OfrendaMineral);
                 writer.Write(OfrendaArma);
+                // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
+                writer.Write(LibroCorruptoConsumido);
+                writer.Write(ProgresoOfrendas);
+                writer.Write(CreditoPuntosEsencias);
                 writer.Write(DevoracionExp);
                 writer.Write(DevoracionFuerza);
                 writer.Write(DevoracionPrisa);
@@ -682,6 +731,13 @@ namespace AethonMod.Content.Globals
                     OfrendaMonedas = System.Math.Max(0L, reader.ReadInt64());
                     OfrendaMineral = System.Math.Max(0, reader.ReadInt32());
                     OfrendaArma = reader.ReadBoolean();
+                }
+                if (ver >= 3)
+                {
+                    // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
+                    LibroCorruptoConsumido = reader.ReadBoolean();
+                    ProgresoOfrendas = System.Math.Max(0, reader.ReadInt32());
+                    CreditoPuntosEsencias = System.Math.Max(0, reader.ReadInt32());
                 }
                 DevoracionExp = System.Math.Max(0L, reader.ReadInt64());
                 DevoracionFuerza = System.Math.Max(0, reader.ReadInt32());
