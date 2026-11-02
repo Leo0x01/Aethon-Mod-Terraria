@@ -43,10 +43,45 @@ namespace AethonMod.Content.Players
         /// hornea la invocación original — DanoOjosDelEterno).</summary>
         public List<int> Danos = new List<int>();
 
+        /// <summary>v6.88 — ¿ESTE personaje LLEVA su grimorio? (la
+        /// letra: «los minions se guardan y aparecen en cualquier
+        /// personaje tenga o no tenga el grimorio, los minions solo se
+        /// deben guardar para el personaje que tenga el grimorio y los
+        /// invocó, no para cualquier personaje que yo use y entre a un
+        /// mundo»): LA GUARDIA DEL DUEÑO — el retrato SOLO se fotografía
+        /// y SOLO resucita si el grimorio VIVE en el inventario de ESTE
+        /// personaje (el que lo invocó). Sin Eterno encima: retrato
+        /// vacío = nada vuelve (el .plr lo recuerda, pero jamás revive
+        /// mientras no cargue su libro).</summary>
+        private bool LlevaSuGrimorio()
+        {
+            try
+            {
+                int tipoGrimorio = ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                for (int i = 0; i < 58; i++)
+                    if (Player.inventory[i] != null && !Player.inventory[i].IsAir
+                        && Player.inventory[i].type == tipoGrimorio)
+                        return true;
+                return Player.HeldItem != null && !Player.HeldItem.IsAir
+                    && Player.HeldItem.type == tipoGrimorio;
+            }
+            catch { return false; }
+        }
+
         public override void SaveData(TagCompound tag)
         {
             try
             {
+                // v6.88 — LA GUARDIA DEL DUEÑO: sin grimorio NO se
+                // fotografía NADA (el retrato viejo queda huérfano y no
+                // revive — el escuadrón es de quien lo invocó CON su
+                // libro puesto).
+                if (!LlevaSuGrimorio())
+                {
+                    Niveles.Clear(); MejorasList.Clear(); Danos.Clear();
+                    return;
+                }
                 // LA FOTOGRAFÍA del escuadrón VIVO (nada de contadores
                 // paralelos: se mira el mundo de verdad).
                 Niveles.Clear(); MejorasList.Clear(); Danos.Clear();
@@ -104,6 +139,10 @@ namespace AethonMod.Content.Players
                 if (Main.netMode == NetmodeID.Server) return;
                 if (Player.whoAmI != Main.myPlayer) return;
                 if (Niveles.Count == 0) return;   // retrato vacío: despedidos o jamás invocados
+                // v6.88 — LA GUARDIA DEL DUEÑO: sin el grimorio puesto
+                //     (inventario o mano) el escuadrón NO resucita —
+                //     aunque el .plr traiga un retrato viejo.
+                if (!LlevaSuGrimorio()) return;
 
                 int tipo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
@@ -129,15 +168,9 @@ namespace AethonMod.Content.Players
                         Player.Center - Vector2.UnitY * 40f, Vector2.Zero,
                         tipo, dano, 0f, Player.whoAmI, 0f, 0f,
                         nivel + mejoras * 0.01f);
-                    if (idx >= 0)
-                    {
-                        // v6.51.9 — EL ×1,25 DEL DESPERTAR MÁXIMO: si YA
-                        // está en el 100 al volver, el ojo NACE horneado.
-                        var ojo = Main.projectile[idx].ModProjectile
-                            as global::AethonMod.Content.Projectiles.OjoEternoMinion;
-                        if (ojo != null && despertar >= Systems.DespertarGrimorio.NivelMax)
-                            ojo.Bonus50Horneado = true;
-                    }
+                    // v6.88 — NADA QUE HORNEAR: el hito del escuadrón
+                    //     es VIVO (BonusHitoVivo lee el despertar del
+                    //     dueño cada tick — el ojo resucita y sube solo).
                 }
 
                 // EL BUFF DEL ESCUADRÓN re-anclado (Sostener lo mantiene).

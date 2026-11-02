@@ -583,22 +583,27 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (kCalor > 0.01f)
                 {
                     Vector2 dirCalor = Projectile.rotation.ToRotationVector2();
-                    float largoCalor = LargoCono * (0.5f + kCalor * 0.5f);
-                    // LA BOCA DEL HERVIDERO: el ancho del conducto por SU
-                    // ley propia (p^0.8 en 0.15 — donde el haz es pleno) + el
-                    // margen del aire que respira alrededor.
-                    // v6.85 — EL AIRE QUE RESPIRA ×1,6 MÁS ANCHO: la letra del
-                    // playtest v6.84 («no veo NINGUN efecto») tenía la cifra
-                    // exacta: el hervidero se pintaba DELGADO COMO EL HAZ (2,2×
-                    // StripWidth) y con cuentas de glow sin solape — el aire
-                    // apenas existía. Ahora la cápsula de calor es ~1,6× más
-                    // ancha que el conducto visual (el calor vive ALREDEDOR:
-                    // la zona donde el ojo ESPERA ver el espejismo) y el
-                    // pintor hace el resto (solape ×4-5 → H satura).
-                    float anchoBoca = MathF.Max(42f, StripWidth(0.15f) * 3.6f);
-                    float anchoAguja = MathF.Max(26f, StripWidth(0.97f) * 5.0f);
-                    // v6.85 — INTENSIDAD 0,9 → 1,25 (tope 1,5): el peso pleno
-                    // de la boca empuja H hasta la saturación con el solape.
+                    // v6.88 — EL CALOR VIVE EN EL ARMA (la letra: «las ondas
+                    //     de calor si se ven pero no estan en el rayo de
+                    //     prueba C, estas ondas de calor se ejecutan en toda
+                    //     la pantalla pero el arma se queda fuera»): la
+                    //     v6.85 multiplicó la boca del conducto por 3,6 y la
+                    //     aguja por 5 — sobre un StripWidth que YA mide
+                    //     ~850 px en la boca: la cápsula del hervidero daba
+                    //     ~3.000 px de ancho (MÁS ANCHA QUE LA PANTALLA) y
+                    //     el campo H saturaba TODA la vista — la
+                    //     distorsión se veía por todas partes MENOS donde
+                    //     el ojo la esperaba (sobre el arma). LA CURA: la
+                    //     cápsula sigue la GEOMETRÍA REAL del conducto:
+                    //     boca ×1,35 · aguja ×1,9 (el AIRE que respira
+                    //     alrededor del haz visible, ni un píxel más) y el
+                    //     largo es el del conducto DIBUJADO (LargoCono ×
+                    //     realSize — crece con la carga, igual que la pila
+                    //     de capas).
+                    float largoCalor = LargoCono * MathF.Max(0.05f, realSize)
+                        * (0.55f + 0.45f * kCalor);
+                    float anchoBoca = MathF.Max(42f, StripWidth(0.15f) * 1.35f);
+                    float anchoAguja = MathF.Max(26f, StripWidth(0.97f) * 1.9f);
                     CalorLib.Haz(Projectile.Center, Projectile.Center + dirCalor * largoCalor,
                         anchoBoca, anchoAguja, 1.25f * kCalor);
                 }

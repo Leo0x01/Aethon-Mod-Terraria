@@ -37,7 +37,13 @@ namespace AethonMod.Content.Items.Llamados
             Item.UseSound = SoundID.Item4;
             Item.rare = ItemRarityID.Quest;
             Item.value = Item.buyPrice(gold: 5);
-            Item.buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.AethonMenorBuff>();
+            // v6.88 — FUERA DEL QUICKBUFF (la letra: «la mascota
+            // de luz aethon menor se activa con la tecla B tengas
+            // o no tengas la mascota equipada»): Item.buffType era
+            // el Imán de la tecla B — vanilla la encontraba en el
+            // inventario (aunque NO estuviera equipada) y la USABA
+            // en cada pulsación. El buff lo aplica UseItem (como el
+            // Sol en Miniatura): SOLO con el CLIC del ítem.
             Item.shoot = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmetic.AethonMenorPet>();
         }
 
@@ -45,7 +51,7 @@ namespace AethonMod.Content.Items.Llamados
         {
             // El buff nace con el uso (la mascota lo sostiene después).
             if (player.whoAmI == Main.myPlayer)
-                player.AddBuff(Item.buffType, 3600, true);
+                player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.AethonMenorBuff>(), 3600, true);
             return true;
         }
 

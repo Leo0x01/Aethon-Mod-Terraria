@@ -189,28 +189,26 @@ namespace AethonMod.Content.Projectiles
         //  en todas partes.
         // ================================================================
 
-        /// <summary>¿EL DAÑO DE ESTE OJO nació ya con el ×1,25 del
-        /// DESPERTAR 50 horneado dentro? (lo marca la invocación —
-        /// GrimoireEternal.Shoot — justo tras DanoOjosDelEterno).</summary>
-        public bool Bonus50Horneado = false;
-
-        /// <summary>EL ×1,25 DEL DESPERTAR 50 QUE FALTA: 1,25 si ESTE ojo
-        /// no trae el bonus horneado y el libro dueño YA está en el 50 —
-        /// 1,0 en cualquier otro caso (lo lleva dentro o todavía no
-        /// corresponde). LAS CONSUMIDORAS DEL DAÑO DEL OJO (el rayo, el
-        /// sol, los agujeros, el supremo) lo multiplican por AQUÍ — nunca
-        /// dos veces.</summary>
-        public static float Bonus50Vivo(Projectile p)
+        /// <summary>v6.88 — EL HITO DEL ESCUADRÓN QUE VIVE (la letra:
+        /// «todo el ataque del escuadron… deberia decirlo en porcentaje
+        /// y deberia de haber un aumento cada 20 niveles»): el
+        /// multiplicador VIVO de MultEscuadron (los hitos cada 20
+        /// niveles: +10/+15/+20/+25/+30 %) del dueño de ESTE ojo. Las
+        /// consumidoras del daño del ojo (el rayo, el sol, los agujeros,
+        /// el supremo) lo multiplican por AQUÍ — una sola vez, en todas
+        /// partes. (El ×1,25 del 50 horneado de la v6.51.9 MURIÓ: se
+        /// cobraba UNA vez al nacer; el hito VIVO crece con el despertar
+        /// del dueño — el escuadrón entero sube con él, hito a hito.)</summary>
+        public static float BonusHitoVivo(Projectile p)
         {
             try
             {
                 if (p == null || !p.active) return 1f;
                 if (!(p.ModProjectile is OjoEternoMinion ojo)) return 1f;
-                if (ojo.Bonus50Horneado) return 1f;   // ya lo lleva dentro
                 Player dueño = Main.player[p.owner];
                 if (dueño == null || !dueño.active) return 1f;
-                return Content.Systems.DespertarGrimorio.NivelDe(dueño) >=
-                    Content.Systems.DespertarGrimorio.NivelMax ? 1.25f : 1f;
+                return Content.Systems.DespertarGrimorio.MultEscuadron(
+                    Content.Systems.DespertarGrimorio.NivelDe(dueño));
             }
             catch { return 1f; }
         }
@@ -622,13 +620,13 @@ namespace AethonMod.Content.Projectiles
             //     lleno, hasta ×3 con las cuatro). ===
             if (Projectile.owner == Main.myPlayer)
             {
-                // v6.51.0 — EL NIVEL 50 DEL DESPERTAR (la letra: «mejora
-                // TODO el ataque de los minions y sus proyectiles así
-                // como la cadencia de disparo»): el rayo pega ×1,25 —
-                // v6.51.9 — PERO SOLO SI NO LO LLEVA HORNEADO (la
-                // auditoría: antes se multiplicaba DOS veces en los ojos
-                // invocados ya en el 50).
-                float bonusFinal = Bonus50Vivo(Projectile);
+                // v6.88 — EL HITO DEL ESCUADRÓN (la letra: «todo el
+                // ataque del escuadron… deberia decirlo en porcentaje y
+                // deberia de haber un aumento cada 20 niveles»): el rayo
+                // pega por el MULTIPLICADOR VIVO del despertar del dueño
+                // (+10/+15/+20/+25/+30 % — BonusHitoVivo, UNA sola vez
+                // en toda la cadena: nada de hornear ni de duplicar).
+                float bonusFinal = BonusHitoVivo(Projectile);
                 int dano = Math.Max(1, (int)(Projectile.damage *
                     WeaponScaling.MinionContactDamageMult(nivel) * MultMejoras(Projectile) * bonusFinal));
                 try

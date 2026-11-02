@@ -29,16 +29,10 @@ Items: {
 			'''
 	}
 
-	CodiceHabilidades: {
-		DisplayName: El Códice de Habilidades
-		Tooltip:
-			'''
-			✦ El árbol del portador (investigación: Umbra + Path of Terraria)
-			· Clic derecho (o izquierdo): abre EL ÁRBOL DE HABILIDADES
-			· Los puntos nacen del despertar: 3 + 1 cada 5 niveles
-			· Clic para asignar · clic derecho para devolver (sin romper el árbol)
-			'''
-	}
+	LibroAzul: {
+	DisplayName: Libro Azul
+	Tooltip: 'El arma del árbol de habilidades.\nClic derecho: abre el ÁRBOL DE HABILIDADES (los puntos nacen del nivel de ESTE arma: 3 + nivel/5).\nClic izquierdo: la descarga azul (daño 12 + nivel·2).\nSube de nivel con las bajas de su portador (8 por nivel, tope 100).\nNada que ver con el grimorio: el árbol es del LIBRO.'
+}
 
 	// v6.50.117 — GENESIS PURGE: Items.GenesisShard and
 	// Items.AncientAltarItem died with the shard and the altar
@@ -1975,7 +1969,7 @@ Items: {
 			'''
 	}
 
-	ArmaCorruptaTag: Corrupto
+	ArmaCorruptaTag: (Corrupto)
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
 	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
@@ -2965,30 +2959,30 @@ Despertar: {
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario
 	HitoMejora1: ✧ ¡DESPERTAR 10: la MEJORA 1 de los ojos desbloqueada!
 	HitoSol: ✧ ¡DESPERTAR 15: DOS OJOS mejorados crean un SOL RÚNICO de 1 anillo! (2/min)
-	HitoMascota: ✧ ¡DESPERTAR 20: EL GRIMORIO TE ESCUPE AL MINIGRIMORIO como mascota!
+	HitoMascota: ✧ ¡DESPERTAR 20: la mascota minigrimorio + TODO el ataque del escuadrón +10 %!
 	HitoAgujeros: ✧ ¡DESPERTAR 30: CINCO OJOS mejorados abren un AGUJERO RÚNICO al azar! (1/min)
-	HitoMejora2: ✧ ¡DESPERTAR 40: la MEJORA 2 de los ojos desbloqueada!
+	HitoMejora2: ✧ ¡DESPERTAR 40: la MEJORA 2 de los ojos + TODO el ataque del escuadrón +15 %!
 	HitoSol2: ✧ ¡DESPERTAR 50: el sol gana su SEGUNDO anillo y nace 3 veces por minuto!
-	HitoAscendidos: ✧ ¡DESPERTAR 60: los agujeros ASCIENDEN — aún más daño!
+	HitoAscendidos: ✧ ¡DESPERTAR 60: los agujeros ASCENDIDOS + TODO el ataque del escuadrón +20 %!
 	HitoMejora3: ✧ ¡DESPERTAR 70: la MEJORA 3 de los ojos desbloqueada!
 	HitoSol3: ✧ ¡DESPERTAR 75: el sol de TRES anillos, 4 veces por minuto!
-	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos!
+	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos + TODO el ataque del escuadrón +25 %!
 	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
 	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
-	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR despierta del todo… y ahora exige su caza: el Señor de la Luna 5 veces y Aethon 1. EL HAZ responde!
+	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el ataque del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
 	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño al escuadrón entero)
 	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
-	CaminoMascota: LA MASCOTA — el grimorio escupe al minigrimorio
+	CaminoMascota: la mascota + TODO el ataque del escuadrón +10 %
 	CaminoAgujeros: los AGUJEROS NEGROS RÚNICOS (5 ojos mejorados, 1/min)
-	CaminoMejora2: la MEJORA 2 de los ojos
+	CaminoMejora2: la MEJORA 2 + el escuadrón +15 %
 	CaminoSol2: el sol de 2 ANILLOS (3/min)
-	CaminoAscendidos: los agujeros ASCENDIDOS (más daño)
+	CaminoAscendidos: los agujeros ASCENDIDOS + el escuadrón +20 %
 	CaminoMejora3: la MEJORA 3 de los ojos
 	CaminoSol3: el sol de 3 ANILLOS (4/min)
-	CaminoMejora4: la MEJORA FINAL de los ojos
+	CaminoMejora4: la MEJORA FINAL + el escuadrón +25 %
 	CaminoAgujeros2: los agujeros 2/min
 	CaminoSupremo: EL SUPREMO/AURORA (8 ojos con la mejora 4)
-	CaminoMaximo: LA IRA DE UN SER EXTERIOR — el círculo del escuadrón invoca EL HAZ (daño 1000 + mágico + 50% invocación)
+	CaminoMaximo: LA IRA DE UN SER EXTERIOR + el escuadrón +30 % — el círculo invoca EL HAZ (daño 1000 + mágico + 50% invocación)
 	Escupidizo:
 		'''
 		Ya somos tres, portador: tú, yo… y ÉL.
@@ -3016,6 +3010,7 @@ Despertar: {
 	JefeCultistaLunatico: el Cultista Lunático
 	JefeSenorDeLaLuna: el Señor de la Luna
 	JefeAethon: Aethon, el fragmento de un recuerdo lejano
+	JefeDuqueFishron: Duque Fishron, el cerdo volador del mar
 	PuertaDeCaza: ✦ La mesa está completa… pero el grimorio exige su presa: {1} (nivel {0}). ¡CÁZALA!
 	// v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
 	// piden que maten a los jefes»): la línea de la puerta de caza en
@@ -3028,7 +3023,6 @@ Despertar: {
 	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CORRUPTO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla) y déjalo caer delante de mí.
 	ReqLibroDevorado: Libro Corrupto: DEVORADO
 	ReqLibroPendiente: Libro Corrupto: consíguelo y déjalo caer delante del grimorio
-	CreditoPuntos: ✦ El altar paga {0} de las {1} esencias del peldaño (puntos de ofrenda).
 	// v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
 	// ítem El Ojo del Cielo — la textura del cielo de la letra).
 	CieloTitulo: EL CIELO DEL DESPERTAR
@@ -3697,9 +3691,17 @@ Keybinds: {
 }
 
 Altar: {
-	Titulo: EL ALTAR DE OFRENDAS
-	Subtitulo: Lo que sobra alimenta el despertar
-	PuntosLibro: Puntos del grimorio: {0}
+	Titulo: EL ALTAR DE LA CORRUPCIÓN
+	Subtitulo: v6.88 — ya sin vínculo con el grimorio: corrompe armas
+	SlotVacio: arma
+	EtiquetaArma: EL ARMA — limpia y de pelea (no herramienta)
+	FiltroArma: No vale ya corrupta, ni herramienta, ni el grimorio
+	Lista: Lista para corromper
+	YaCorrupta: Ya está corrupta
+	NoArma: Eso no es un arma corruptible
+	Corromper: CORROMPER
+	CorruptaHecha: ✦ {0} nace corrupta: su nombre viste el negro y el brillo morado-negro la cubre.
+}
 	SinLibro: (sin el grimorio encima)
 	SlotVacio: relleno
 	EtiquetaRelleno: EL RELLENO — lo que NO se necesita y NO está corrupto
@@ -3719,7 +3721,7 @@ Arbol: {
 	ResetSeguro: ¿SEGURO? (otra vez)
 	ResetHecho: ✦ El árbol vuelve a su semilla: todos los puntos devueltos.
 	NivelDe: Nivel {0}/{1}
-	Nodo0: El Despertar del Portador
+	Nodo0: El Libro Azul del Portador
 	Desc0: El ancla del árbol — siempre viva, siempre gratis. Todo crece desde aquí.
 	Nodo1: Filo del Eco
 	Desc1: +8% de daño (todo tipo) por nivel.
@@ -3738,5 +3740,5 @@ Arbol: {
 	Nodo8: Corazón de Tinta
 	Desc8: +1 vida/s de regeneración por nivel.
 	Nodo9: EL ECO DE AETHON
-	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el despertar 100.
+	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
 }

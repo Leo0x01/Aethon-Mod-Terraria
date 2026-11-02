@@ -926,7 +926,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));
             // v6.86 — R6 — EL CÓDICE DE HABILIDADES (Umbra/Path of
             // Terraria: el item que abre el árbol).
-            l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
+            // v6.88 — EL CÓDICE MURIÓ (el árbol se muda de dueño): la llave
+            //     del árbol de habilidades es EL LIBRO AZUL (el arma de
+            //     Investigaciones que abre la ventana con clic derecho).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.LibroAzul>(), 1));
             return l;
         }
     }

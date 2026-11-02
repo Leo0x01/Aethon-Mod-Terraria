@@ -408,6 +408,32 @@ namespace AethonMod.Content.Globals
                 }
             }
 
+            // === v6.88 — EL FESTÍN ES SAGRADO (la letra: «todos los
+            //     jefes mientras son devorados por el grimorio, estos
+            //     siguen atacando… en el momento en el que comienza la
+            //     animacion de devorar, los jefes deben dejar de atacar y
+            //     deternerse» + «al matar al muro de carne la accion de
+            //     devorar del grimorio no se ejecuta bien ya que el muro
+            //     explota y el grimorio no lo puede devorar»): mientras el
+            //     festín o la CENA viven (estado 1 o 3), NINGÚN golpe lo
+            //     mata a medias — ni el propio ni el AJENO. La v6.86
+            //     dejaba pasar la «muerte ajena» (un segmento del pool —
+            //     los OJOS del WoF — transfirió el daño al dueño y llamó
+            //     checkDead SIN marca: vanilla REVIENTA al jefe en plena
+            //     devoración, el WoF con su rejilla de cadáver a pantalla
+            //     completa). El jefe SOLO muere cuando el motor del
+            //     festín lo decreta (estado 2): NADIE interrumpe la
+            //     comida. ===
+            if (DevorarEstado == 1 || DevorarEstado == ESTADO_PRIMERA_CENA)
+            {
+                if (npc.life <= 0) npc.life = 1;
+                npc.active = true;
+                npc.dontTakeDamage = true;
+                npc.damage = 0;
+                npc.netUpdate = true;
+                return false;   // el festín manda
+            }
+
             // ¿Marca viva de nuestras armas? (el golpe mortal fue NUESTRO)
             bool marcado = _marcas.TryGetValue(npc.whoAmI, out int caduca)
                 && caduca > 0;
@@ -503,6 +529,24 @@ namespace AethonMod.Content.Globals
                     (gDueño.DevorarEstado == 1 || gDueño.DevorarEstado == ESTADO_PRIMERA_CENA))
                     devorado = true;
             }
+            // v6.88 — EL SEGMENTO TAMBIÉN CALLA: congelado por el dueño
+            //     devorado, ni GOLPEA (damage 0: los ojos del WoF enredados
+            //     en el portador con su daño 50) ni RECIBE
+            //     (dontTakeDamage: el daño a un segmento transfiere al
+            //     pool y podía matar al jefe en pleno festín — el agujero
+            //     de la muerte temprana que el festín sagrado ya tapa).
+            if (devorado && npc.realLife >= 0 && npc.realLife != npc.whoAmI)
+            {
+                npc.damage = 0;
+                npc.dontTakeDamage = true;
+            }
+            // v6.88 — EL PLAN B DEL CONTACTO (la letra: los jefes y sus
+            //     piezas dejan de atacar): sin CanHitPlayer en este tML,
+            //     la zona del festín se calla por la VÍA DEL DAÑO — todo
+            //     NPC a ≤700 px de un devorado vivo pega 0 mientras
+            //     dura la comida (los satélites sin realLife incluidos).
+            if (HayJefeDevoradoCerca(npc.Center, 700f))
+                npc.damage = 0;
             if (!devorado) return true;
 
             // === v6.50.110 — LA PRIMERA CENA: el motor propio (la
@@ -830,6 +874,20 @@ namespace AethonMod.Content.Globals
             if (t == 345) Sonar(SoundID.Item122.WithPitchOffset(0.34f).WithVolumeScale(0.6f), npc.Center);   // el trago
             if (t == 400) Sonar(SoundID.Item122.WithPitchOffset(0.48f).WithVolumeScale(0.8f), npc.Center);   // v6.50.114: EL LIBRO SE CIERRA
 
+            // === v6.88 — LA MURALLA NO VIAJA (la letra: «el grimorio
+            //     debe asegurarse de devorar visualmente al muro de carne,
+            //     por ejemplo atrapando su boca al morir»): el CUERPO del
+            //     WoF es quien manda el muro dibujado (DrawWOFBody sigue
+            //     su position.X) — al teletransportarlo sobre el portador,
+            //     vanilla REDIBUJABA el muro entero en la nueva X y la
+            //     escena se leía rota (el muro «explotaba» en un sitio y
+            //     reaparecía en otro). El WoF cena DONDE ESTÁ: se eleva
+            //     −90 px (la elevación del cine de siempre) pero NO viaja
+            //     — el muro queda clavado en su columna del infierno, los
+            //     OJOS y los HUNGRY se enroscan alrededor (abajo) y la
+            //     fauce los atrapa en el sitio: devoración de verdad. ===
+            bool esMuralla = npc.type == NPCID.WallofFlesh;
+
             // === v6.50.115 — LA ELEVACIÓN SOBRE EL PORTADOR (la letra:
             //     «ubicar al jefe encima del jugador y que el grimorio se
             //     ponga a un lado para devorar al jefe»): sube −90 px,
@@ -846,6 +904,10 @@ namespace AethonMod.Content.Globals
                     : Vector2.Lerp(levantado, ancla, MathHelper.SmoothStep(0f, 1f, viajar));
                 float vaivén = t < 175 ? 1f : 0.4f;
                 destino += new Vector2(MathF.Sin(t * 0.31f) * 3f, MathF.Sin(t * 0.23f) * 4f) * vaivén;
+                // v6.88 — LA MURALLA se queda en su columna (solo se
+                //     eleva): los demás jefes viajan al ancla del portador.
+                if (esMuralla)
+                    destino = _posCenaBase + new Vector2(0f, -90f * MathHelper.SmoothStep(0f, 1f, subir));
                 npc.Center = destino;
 
                 // LOS SEGMENTOS DEL WORM: se ENROSCAN alrededor del centro
@@ -855,7 +917,14 @@ namespace AethonMod.Content.Globals
                 {
                     NPC seg = Main.npc[i];
                     if (seg == null || !seg.active || i == npc.whoAmI) continue;
-                    if (seg.realLife != npc.whoAmI) continue;      // no es mío
+                    // v6.88 — LA FAMILIA DE LA MURALLA: los OJOS ya son
+                    //     míos por realLife; los HUNGRY (115/116 — sin
+                    //     realLife en vanilla) también se enroscan cuando
+                    //     la muralla cena (la boca del muro entera en el
+                    //     nudo, como la letra la pidió).
+                    bool esMio = seg.realLife == npc.whoAmI ||
+                        (esMuralla && (seg.type == 115 || seg.type == 116));
+                    if (!esMio) continue;                          // no es mío
                     float ang = idx * 0.7f + t * 0.02f;
                     Vector2 metaSeg = destino + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f)
                         * (46f + 7f * idx);
@@ -896,6 +965,82 @@ namespace AethonMod.Content.Globals
         {
             if (DevorarEstado == 1 || DevorarEstado == ESTADO_PRIMERA_CENA) return false;
             return base.CheckActive(npc);
+        }
+
+        // ================================================================
+        //  v6.88 — LA ZONA DEL FESTÍN ES SAGRADA (la letra: «todos los
+        //  jefes mientras son devorados por el grimorio, estos siguen
+        //  atacando… los jefes deben dejar de atacar y detenerse»):
+        //  tres cerrojos nuevos sobre la familia del devorado.
+        // ================================================================
+
+        /// <summary>¿ESTE NPC es parte de un jefe devorado (o lo está él
+        /// mismo)? El propio (estado 1/3), los segmentos del pool
+        /// (realLife) y CUALQUIER satélite/hostil a ≤700 px de un
+        /// devorado vivo (las manos de Skeletron/Prime, los puños del
+        /// Gólem, las tres piezas del Señor de la Luna, The Hungry… sin
+        /// enumerar IDs de vanilla: la distancia los cubre a todos).</summary>
+        public static bool ParteDeJefeDevorado(NPC npc)
+        {
+            try
+            {
+                if (npc == null || !npc.active) return false;
+                if (npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var g) &&
+                    (g.DevorarEstado == 1 || g.DevorarEstado == ESTADO_PRIMERA_CENA))
+                    return true;
+                if (npc.realLife >= 0 && npc.realLife != npc.whoAmI)
+                {
+                    NPC dueño = Main.npc[npc.realLife];
+                    if (dueño != null && dueño.active &&
+                        dueño.TryGetGlobalNPC<FaucesGlobalNPC>(out var gd) &&
+                        (gd.DevorarEstado == 1 || gd.DevorarEstado == ESTADO_PRIMERA_CENA))
+                        return true;
+                }
+                return HayJefeDevoradoCerca(npc.Center, 700f);
+            }
+            catch { return false; }
+        }
+
+        /// <summary>¿HAY un jefe devorado VIVO a «radio» de «pos»? (el
+        /// rango cubre a los satélites sin realLife y a los proyectiles
+        /// hostiles ya disparados — el nuevo FaucesGlobalProjectile los
+        /// apaga en vuelo).</summary>
+        public static bool HayJefeDevoradoCerca(Vector2 pos, float radio)
+        {
+            try
+            {
+                float r2 = radio * radio;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active) continue;
+                    if (!n.TryGetGlobalNPC<FaucesGlobalNPC>(out var g)) continue;
+                    if (g.DevorarEstado != 1 && g.DevorarEstado != ESTADO_PRIMERA_CENA)
+                        continue;
+                    if (n.Center.DistanceSQ(pos) <= r2) return true;
+                }
+                return false;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>v6.88 — SIN GORES DURANTE EL FESTÍN (la letra: «el
+        /// muro explota y el grimorio no lo puede devorar… la accion no
+        /// ocurre pero el efecto si»): la explosión del WoF nacía en
+        /// VanillaHitEffect (StrikeNPC la dispara ANTES de que CheckDead
+        /// pudiera frenar nada — 50 dust + 4-6 gores POR PARTE y el
+        /// CUERPO además escupe la REJILLA DE CADÁVER a columna completa
+        /// del infierno). La cura: mientras el festín vive, la vida se
+        /// queda en 1 — VanillaHitEffect solo escupe gore con life ≤ 0:
+        /// el jefe MUERTO A MEDIAS ya no revienta: se lo come la fauce.</summary>
+        public override void HitEffect(NPC npc, NPC.HitInfo hit)
+        {
+            try
+            {
+                if (ParteDeJefeDevorado(npc) && npc.life <= 0)
+                    npc.life = 1;   // sin gore, sin rejilla: el festín sigue
+            }
+            catch { }
         }
 
         /// <summary>

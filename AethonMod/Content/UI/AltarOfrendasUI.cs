@@ -12,36 +12,32 @@ using Terraria.ModLoader.IO;
 namespace AethonMod.Content.UI
 {
     // ======================================================================
-    //  AltarOfrendasUI — v6.86 — EL PANEL DEL ALTAR DE OFRENDAS.
+    //  AltarOfrendasUI — v6.88 — EL ALTAR DE LA CORRUPCIÓN.
     //
-    //  EL PATRÓN INVESTIGADO (R5 §3.5-3.8, Heroic Weapons/BSWLmod): el
-    //  tile abre una UI con slots y UN BOTÓN que valida, aplica y
-    //  CONSUME (TurnToAir) — la Experience Rune Forge es el calco. El
-    //  IDIOMA es el de la casa (El Cielo del Despertar): dibujado
-    //  directo en una LegacyGameInterfaceLayer antes de "Vanilla: Mouse
-    //  Text", sin TileEntity, estado estático de cliente.
+    //  LA LETRA: «la funcion del altar que implementaste no debe estar
+    //  ligada al grimorio, asi que quita ese requisito de ofrendas en el
+    //  despertar, el altar sirve para corromper las armas»: LA ECONOMÍA
+    //  DE PUNTOS (relleno → puntos → canje de esencias del 30 %) MURIÓ
+    //  con la v6.86. HOY el altar es EL CORRUPTOR: UN slot de ARMA
+    //  LIMPIA y UN botón que la CORROMPE (Corrompido = true + ResetPrefix
+    //  — el MISMO sello que dejaba la receta de corrupción de siempre:
+    //  la vía de recetas SIGUE como alternativa). El arma corrupta gana
+    //  su etiqueta «(Corrupto)» EN EL NOMBRE (negro — CorruptoGlobalItem)
+    //  y su brillo morado-negro en el inventario y el mundo.
     //
-    //  LA MESA DEL PANEL:
-    //   · EL LIBRO: no hay slot — el panel lee EL GRIMORIO ACTIVO (el
-    //     patrón de El Cielo: AlmaEternoGlobalItem.Activo) y muestra
-    //     SUS puntos.
-    //   · EL RELLENO: UN slot (clic para meter/sacar con el cursor) —
-    //     solo acepta lo que pasa el filtro AceptaRelleno (ni requisito
-    //     ni corrupto ni sagrado).
-    //   · EL BOTÓN OFRENDAR: valida de nuevo, devora la pila ENTERA,
-    //     suma sus puntos al alma del libro (RegistrarOfrenda) y lo
-    //     dice en verde. Rechazado: rojo + el tooltip del porqué.
-    //  EL CIERRE: botón X, Esc, o alejarse del altar (> 280 px) — y
-    //  SIEMPRE devuelve lo que quedó en el slot (al cursor o al suelo).
-    //  LA PERSISTENCIA (§3.9): lo que quedó en el slot al guardar el
-    //  MUNDO viaja con el mundo (SaveWorldData/LoadWorldData).
+    //  CERO VÍNCULO CON EL GRIMORIO: el panel ya NO lee el alma del
+    //  libro (ni puntos, ni crédito, ni SinLibro) — el altar corrompe
+    //  para CUALQUIERA. El patrón de UI es el de siempre (la casa: El
+    //  Cielo del Despertar — LegacyGameInterfaceLayer antes de "Vanilla:
+    //  Mouse Text", estado estático de cliente, la ley de la distancia a
+    //  280 px y la persistencia del slot con el MUNDO).
     // ======================================================================
     public class AltarOfrendasUI : ModSystem
     {
         // === EL ESTADO (cliente puro — el patrón El Cielo) ===
         private static bool _abierta;
         private static int _tileX, _tileY;
-        private static Item _relleno = new Item();
+        private static Item _arma = new Item();
         private static bool _ultimoClicIzq;
         private static bool _ultimoEsc;
 
@@ -55,47 +51,47 @@ namespace AethonMod.Content.UI
         {
             _abierta = !_abierta;
             _tileX = i; _tileY = j;
-            if (!_abierta) DevolverElRelleno();
+            if (!_abierta) DevolverElArma();
         }
 
         public override void OnWorldUnload() { CerrarDeVerdad(); }
-        public override void Unload() { CerrarDeVerdad(); _relleno = new Item(); }
+        public override void Unload() { CerrarDeVerdad(); _arma = new Item(); }
 
         /// <summary>EL CIERRE LIMPIO: nada queda en el slot (al cursor si
         /// está libre, al suelo si no).</summary>
         private static void CerrarDeVerdad()
         {
-            if (!_abierta) { _relleno = new Item(); return; }
+            if (!_abierta) { _arma = new Item(); return; }
             _abierta = false;
-            DevolverElRelleno();
+            DevolverElArma();
         }
 
-        private static void DevolverElRelleno()
+        private static void DevolverElArma()
         {
             try
             {
-                if (_relleno == null || _relleno.IsAir) { _relleno = new Item(); return; }
+                if (_arma == null || _arma.IsAir) { _arma = new Item(); return; }
                 Player yo = Main.LocalPlayer;
                 if (yo == null || !yo.active) return;
                 if (Main.mouseItem != null && Main.mouseItem.IsAir)
-                    Main.mouseItem = (Item)_relleno.Clone();
+                    Main.mouseItem = (Item)_arma.Clone();
                 else
-                    yo.QuickSpawnItem(yo.GetSource_Misc("AltarOfrendas"), _relleno, _relleno.stack);
-                _relleno = new Item();
+                    yo.QuickSpawnItem(yo.GetSource_Misc("AltarCorrupcion"), _arma, _arma.stack);
+                _arma = new Item();
             }
-            catch { _relleno = new Item(); }
+            catch { _arma = new Item(); }
         }
 
         // ================================================================
-        //  LA PERSISTENCIA DEL SLOT (§3.9 — con el MUNDO, como Heroic
-        //  Weapons: al guardar, lo que quedó en el panel viaja).
+        //  LA PERSISTENCIA DEL SLOT (con el MUNDO — la clave de siempre
+        //  «altarRelleno» se lee por compatibilidad con mundos v6.86).
         // ================================================================
         public override void SaveWorldData(TagCompound tag)
         {
             try
             {
-                if (_relleno != null && !_relleno.IsAir)
-                    tag["altarRelleno"] = ItemIO.Save(_relleno);
+                if (_arma != null && !_arma.IsAir)
+                    tag["altarArma"] = ItemIO.Save(_arma);
             }
             catch { }
         }
@@ -104,12 +100,14 @@ namespace AethonMod.Content.UI
         {
             try
             {
-                _relleno = new Item();
-                if (tag.ContainsKey("altarRelleno"))
-                    _relleno = ItemIO.Load(tag.Get<TagCompound>("altarRelleno"));
-                if (_relleno == null) _relleno = new Item();
+                _arma = new Item();
+                if (tag.ContainsKey("altarArma"))
+                    _arma = ItemIO.Load(tag.Get<TagCompound>("altarArma"));
+                else if (tag.ContainsKey("altarRelleno"))   // mundos de la v6.86
+                    _arma = ItemIO.Load(tag.Get<TagCompound>("altarRelleno"));
+                if (_arma == null) _arma = new Item();
             }
-            catch { _relleno = new Item(); }
+            catch { _arma = new Item(); }
         }
 
         // ================================================================
@@ -121,7 +119,7 @@ namespace AethonMod.Content.UI
             if (idx != -1)
             {
                 layers.Insert(idx, new LegacyGameInterfaceLayer(
-                    "AethonMod: El Altar de Ofrendas",
+                    "AethonMod: El Altar de la Corrupción",
                     DibujarElPanel, InterfaceScaleType.UI));
             }
         }
@@ -132,11 +130,33 @@ namespace AethonMod.Content.UI
         private static readonly Color TintaFondo = new(10, 16, 18);
         private static readonly Color TintaPanel = new(16, 28, 30);
         private static readonly Color TintaTeal = new(90, 220, 180);
-        private static readonly Color TintaDorado = new(255, 215, 120);
+        private static readonly Color TintaVioleta = new(186, 96, 236);
         private static readonly Color TintaTexto = new(220, 250, 245);
         private static readonly Color TintaApagado = new(110, 150, 145);
         private static readonly Color TintaRojo = new(255, 120, 120);
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
+
+        // ================================================================
+        //  v6.88 — EL FILTRO DEL CORRUPTOR: SOLO armas LIMPIAS (la copia
+        //  local del EsArma de la casa — CERO dependencia del sistema del
+        //  despertar: el altar no sabe nada del grimorio).
+        // ================================================================
+        private static bool EsArmaCorruptible(Item it)
+        {
+            try
+            {
+                if (it == null || it.IsAir) return false;
+                if (it.damage <= 0) return false;
+                if (it.accessory || it.vanity) return false;
+                if (it.pick > 0 || it.axe > 0 || it.hammer > 0 || it.ammo > 0) return false;
+                if (it.ModItem is global::AethonMod.Content.Weapons.GrimoireEternal) return false;
+                var sello = it.GetGlobalItem
+                    <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                if (sello != null && sello.Corrompido) return false;   // ya corrupta
+                return true;
+            }
+            catch { return false; }
+        }
 
         private static bool DibujarElPanel()
         {
@@ -161,53 +181,36 @@ namespace AethonMod.Content.UI
                 { CerrarDeVerdad(); return true; }
 
                 // === LA GEOMETRÍA (a la derecha del inventario) ===
-                int w = 380, h = 320;
+                int w = 380, h = 300;
                 int x = Math.Min(Main.screenWidth - w - 10,
                     470 + Math.Max(0, (Main.screenWidth - 1100) / 3));
                 int y = Main.screenHeight / 2 - h / 2;
                 if (x < 10) x = 10;
 
-                // EL FONDO + el marco de la casa.
+                // EL FONDO + el marco de la casa (el violeta de lo corrupto).
                 sb.Draw(pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaFondo * 0.94f);
-                Marco(sb, pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaTeal * 0.80f);
+                Marco(sb, pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaVioleta * 0.80f);
                 sb.Draw(pixel, new Rectangle(x, y, w, h), TintaPanel * 0.97f);
 
-                // EL TITULAR.
+                // EL TITULAR (v6.88 — el corruptor).
                 Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Titulo")),
-                    new Vector2(x + w / 2f, y + 22f), TintaTeal, 1.1f, 0.5f, 0.4f);
+                    new Vector2(x + w / 2f, y + 22f), TintaVioleta, 1.1f, 0.5f, 0.4f);
                 Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Subtitulo")),
                     new Vector2(x + w / 2f, y + 42f), TintaApagado, 0.75f, 0.5f, 0.4f);
 
-                // === EL LIBRO ACTIVO (sin slot: el patrón de El Cielo) y
-                //     sus puntos vivos. ===
-                Item libro = Globals.AlmaEternoGlobalItem.Activo(yo);
-                var alma = Globals.AlmaEternoGlobalItem.De(libro);
-                int puntos = alma?.ProgresoOfrendas ?? 0;
-                int credito = alma?.CreditoPuntosEsencias ?? 0;
-                if (alma != null)
-                {
-                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("PuntosLibro"), puntos),
-                        new Vector2(x + w - 16f, y + 22f), TintaDorado, 0.9f, 1f, 0.4f);
-                }
-                else
-                {
-                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("SinLibro")),
-                        new Vector2(x + w - 16f, y + 22f), TintaRojo, 0.8f, 1f, 0.4f);
-                }
-
-                // === EL SLOT DEL RELLENO (la mesa del panel) ===
+                // === EL SLOT DEL ARMA (la boca del corruptor) ===
                 Rectangle slot = new Rectangle(x + 24, y + 86, 52, 52);
                 bool hoverSlot = PanelContiene(slot) && !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
                 sb.Draw(pixel, slot, TintaFondo * 0.9f);
-                Marco(sb, pixel, slot, hoverSlot ? TintaTeal : TintaTeal * 0.45f);
-                if (_relleno != null && !_relleno.IsAir)
+                Marco(sb, pixel, slot, hoverSlot ? TintaVioleta : TintaVioleta * 0.45f);
+                if (_arma != null && !_arma.IsAir)
                 {
-                    Texture2D tex = TextureAssets.Item[_relleno.type].Value;
+                    Texture2D tex = TextureAssets.Item[_arma.type].Value;
                     float escala = Math.Min(44f / tex.Width, 44f / tex.Height);
                     sb.Draw(tex, slot.Center.ToVector2(), null, Color.White, 0f,
                         tex.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                    if (_relleno.stack > 1)
-                        Utils.DrawBorderString(sb, _relleno.stack.ToString(),
+                    if (_arma.stack > 1)
+                        Utils.DrawBorderString(sb, _arma.stack.ToString(),
                             new Vector2(slot.Right - 6f, slot.Bottom - 8f), TintaTexto, 0.85f, 1f, 0.85f);
                 }
                 else
@@ -215,32 +218,37 @@ namespace AethonMod.Content.UI
                     Utils.DrawBorderString(sb, Language.GetTextValue(Clave("SlotVacio")),
                         new Vector2(slot.Center.X, slot.Center.Y), TintaApagado * 0.8f, 0.7f, 0.5f, 0.5f);
                 }
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("EtiquetaRelleno")),
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("EtiquetaArma")),
                     new Vector2(x + 92f, y + 96f), TintaTexto, 0.9f);
-                string filtroTxt = Language.GetTextValue(Clave("FiltroRelleno"));
+                string filtroTxt = Language.GetTextValue(Clave("FiltroArma"));
                 Utils.DrawBorderString(sb, filtroTxt, new Vector2(x + 92f, y + 118f), TintaApagado, 0.72f);
 
-                // === LOS PUNTOS EN VIVO del relleno del slot (lo que
-                //     Ofrendar cobraría AHORA). ===
-                int puntosVivos = (_relleno != null && !_relleno.IsAir) ?
-                    Systems.DespertarGrimorio.ValorEnPuntos(_relleno) : 0;
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("PuntosVivos"), puntosVivos),
-                    new Vector2(x + 92f, y + 158f), TintaDorado, 0.9f);
-                if (credito > 0)
-                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("CreditoVivo"), credito),
-                        new Vector2(x + 92f, y + 180f), TintaTeal, 0.8f);
+                // === EL ESTADO DEL ARMA EN EL SLOT (lista / ya corrupta / no
+                //     es arma — el porqué de cada rechazo) ===
+                bool lista = EsArmaCorruptible(_arma);
+                if (_arma != null && !_arma.IsAir)
+                {
+                    var selloArma = _arma.GetGlobalItem
+                        <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                    bool yaEra = selloArma != null && selloArma.Corrompido;
+                    string estado = yaEra ? Language.GetTextValue(Clave("YaCorrupta"))
+                        : lista ? Language.GetTextValue(Clave("Lista"))
+                        : Language.GetTextValue(Clave("NoArma"));
+                    Color colEstado = yaEra ? TintaVioleta
+                        : lista ? TintaTeal : TintaRojo;
+                    Utils.DrawBorderString(sb, estado,
+                        new Vector2(x + 92f, y + 158f), colEstado, 0.85f);
+                }
 
-                // === EL BOTÓN OFRENDAR (la mesa se sirve) ===
-                Rectangle btnOfrendar = new Rectangle(x + 24, y + 214, 160, 42);
-                bool puedeOfrendar = puntosVivos > 0 && alma != null &&
-                    Systems.DespertarGrimorio.AceptaRelleno(_relleno, yo, libro);
-                bool hoverBtn = PanelContiene(btnOfrendar);
-                sb.Draw(pixel, btnOfrendar,
-                    (hoverBtn && puedeOfrendar ? TintaTeal : TintaTeal * 0.35f) * 0.30f);
-                Marco(sb, pixel, btnOfrendar, puedeOfrendar ? TintaTeal : TintaTeal * 0.35f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Ofrendar")),
-                    new Vector2(btnOfrendar.Center.X, btnOfrendar.Center.Y),
-                    puedeOfrendar ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
+                // === EL BOTÓN CORROMPER (el sello) ===
+                Rectangle btnCorromper = new Rectangle(x + 24, y + 196, 170, 42);
+                bool hoverBtn = PanelContiene(btnCorromper);
+                sb.Draw(pixel, btnCorromper,
+                    (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
+                Marco(sb, pixel, btnCorromper, lista ? TintaVioleta : TintaVioleta * 0.35f);
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Corromper")),
+                    new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
+                    lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
 
                 // === EL BOTÓN CERRAR (la esquina de siempre) ===
                 Rectangle btnCerrar = new Rectangle(x + w - 34, y + 8, 26, 26);
@@ -258,43 +266,68 @@ namespace AethonMod.Content.UI
                 bool clicNuevo = clicAhora && !_ultimoClicIzq;
                 _ultimoClicIzq = clicAhora;
 
-                // EL SLOT: meter/sacar con el cursor (solo lo que pasa el
-                // filtro — el resto rebota con su porqué).
+                // EL SLOT: meter/sacar con el cursor (solo armas limpias —
+                // el resto rebota con su porqué).
                 if (hoverSlot && clicNuevo)
                 {
                     if (!Main.mouseItem.IsAir)
                     {
-                        if (Systems.DespertarGrimorio.AceptaRelleno(Main.mouseItem, yo, libro))
+                        if (EsArmaCorruptible(Main.mouseItem))
                         {
-                            Item sale = _relleno.IsAir ? new Item() : (Item)_relleno.Clone();
-                            _relleno = (Item)Main.mouseItem.Clone();
+                            Item sale = _arma.IsAir ? new Item() : (Item)_arma.Clone();
+                            _arma = (Item)Main.mouseItem.Clone();
                             Main.mouseItem = sale;
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                         }
                         else
                         {
-                            Main.NewText(Language.GetTextValue(Clave("Rechazado")),
-                                TintaRojo);
+                            var selloMouse = Main.mouseItem.GetGlobalItem
+                                <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                            bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
+                            Main.NewText(Language.GetTextValue(
+                                yaEraMouse ? Clave("YaCorrupta") : Clave("NoArma")), TintaRojo);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                     }
-                    else if (!_relleno.IsAir)
+                    else if (!_arma.IsAir)
                     {
-                        Main.mouseItem = (Item)_relleno.Clone();
-                        _relleno = new Item();
+                        Main.mouseItem = (Item)_arma.Clone();
+                        _arma = new Item();
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                     }
                 }
 
-                // EL BOTÓN OFRENDAR: valida, devora la pila ENTERA y suma
-                // sus puntos al alma del libro.
-                if (hoverBtn && clicNuevo && puedeOfrendar)
+                // EL BOTÓN CORROMPER: el sello de la casa (el MISMO de la
+                // receta — Corrompido = true + ResetPrefix: el «Superior»
+                // jamás vuelve) + el teatro.
+                if (hoverBtn && clicNuevo && lista && !_arma.IsAir)
                 {
-                    int ganados = Systems.DespertarGrimorio.RegistrarOfrenda(_relleno, libro);
-                    _relleno = new Item();
-                    Main.NewText(Language.GetTextValue(Clave("OfrendaAceptada"),
-                        ganados, puntos + ganados), TintaTeal);
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.35f));
+                    var sello = _arma.GetGlobalItem
+                        <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                    if (sello != null)
+                    {
+                        sello.Corrompido = true;
+                        _arma.ResetPrefix();
+                        Main.NewText(Language.GetTextValue(Clave("CorruptaHecha"),
+                            _arma.Name), TintaVioleta);
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item113.WithPitchOffset(-0.45f));
+                        // EL TEATRO DEL SELLO: la bruma violeta del altar.
+                        if (!Main.dedServ)
+                        {
+                            for (int k = 0; k < 22; k++)
+                            {
+                                Dust d = Dust.NewDustPerfect(
+                                    altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                        Main.rand.NextFloat(-30f, 6f)),
+                                    DustID.Shadowflame,
+                                    Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
+                                    new Color(140, 60, 210), 1f);
+                                d.noGravity = true;
+                            }
+                        }
+                        DevolverElArma();   // el arma corrupta vuelve al cursor
+                    }
                 }
 
                 // EL BOTÓN CERRAR / ESC (el borde del teclado).

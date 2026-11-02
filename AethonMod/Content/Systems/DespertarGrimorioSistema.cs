@@ -204,33 +204,22 @@ namespace AethonMod.Content.Systems
             {
                 int esenciasNecesarias = DespertarGrimorio.EsenciasPara(siguiente);
                 long monedasNecesarias = DespertarGrimorio.MonedasPara(siguiente);
-                int mineralNecesario = DespertarGrimorio.CantidadMineralDe(siguiente);
-                int tipoMineral = DespertarGrimorio.MineralDe(siguiente);
+                // v6.88 — LA MEZCLA MINERAL (la ofrenda variada): grupos
+                //     con sus alternativos + la cantidad moderada por cabeza.
+                int[][] gruposMineral = DespertarGrimorio.GruposMineralDe(siguiente);
+                int cantGrupo = DespertarGrimorio.CantidadPorGrupo(siguiente);
                 int[] armasDelPeldano = DespertarGrimorio.ArmasDelNivel[siguiente];
                 bool mordisco = false;
 
                 // ============================================================
-                //  v6.86 — EL CANJE DEL ALTAR (UNA vez por peldaño): los
-                //  PUNTOS DE OFRENDA abren el crédito — hasta el 30 % de
-                //  las ESENCIAS del peldaño, 25 puntos por esencia. El
-                //  crédito muere con la subida; los puntos sobrantes
-                //  viajan al siguiente peldaño (nada de busfarmeo: el
-                //  canje se cobra UNA vez, al abrirlo).
+                //  v6.88 — EL CANJE DEL ALTAR MURIÓ (la letra: «la funcion
+                //  del altar que implementaste no debe estar ligada al
+                //  grimorio, asi que quita ese requisito de ofrendas en el
+                //  despertar»): el crédito del 30 % y los puntos de
+                //  ofrenda se extinguieron con la v6.86 — el altar hoy
+                //  corrompe armas (AltarOfrendasUI) y ya no paga NINGUNA
+                //  parte de esta mesa. Las esencias se comen solas.
                 // ============================================================
-                if (alma.CreditoPuntosEsencias == 0 &&
-                    alma.ProgresoOfrendas >= DespertarGrimorio.PuntosPorEsencia)
-                {
-                    int topePeldano = (int)System.Math.Floor(esenciasNecesarias * 0.30);
-                    int porPuntos = System.Math.Min(topePeldano,
-                        alma.ProgresoOfrendas / DespertarGrimorio.PuntosPorEsencia);
-                    if (porPuntos > 0)
-                    {
-                        alma.CreditoPuntosEsencias = porPuntos;
-                        alma.ProgresoOfrendas -= porPuntos * DespertarGrimorio.PuntosPorEsencia;
-                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.CreditoPuntos",
-                            new Color(120, 235, 190), porPuntos, esenciasNecesarias);
-                    }
-                }
 
                 for (int d = 0; d < Main.maxItems; d++)
                 {
@@ -270,8 +259,7 @@ namespace AethonMod.Content.Systems
                     //     el 30 % del peldaño). ===
                     else if (drop.type == tipoEsencia)
                     {
-                        int falta = esenciasNecesarias - alma.OfrendaEsencias
-                            - alma.CreditoPuntosEsencias;
+                        int falta = esenciasNecesarias - alma.OfrendaEsencias;
                         if (falta <= 0) continue;
 
                         int come = System.Math.Min(falta, drop.stack);
@@ -337,24 +325,48 @@ namespace AethonMod.Content.Systems
                     //     SOLO los que faltan (el ejemplo de la letra:
                     //     70 que necesita, 30 que sueltas, 40 que
                     //     faltan). ===
-                    else if (tipoMineral > 0 && drop.type == tipoMineral)
+                    else if (!alma.OfrendaArma &&
+                        alma.OfrendaMineralGrupo < gruposMineral.Length)
                     {
-                        if (alma.OfrendaArma) continue;
-                        int faltaMin = mineralNecesario - alma.OfrendaMineral;
-                        if (faltaMin <= 0) continue;
+                        // v6.88 — LA MEZCLA MINERAL (la letra: «debe ser
+                        //     variada, pedir menos de ese mineral, pero
+                        //     pedir varios al mismo tiempo»): el peldaño
+                        //     pide 2-3 minerales de su era — se pagan
+                        //     GRUPO A GRUPO (cada grupo lleva sus
+                        //     ALTERNATIVOS: en un mundo de estaño, el
+                        //     grupo cobre/estaño se paga con estaño). El
+                        //     que está en el slot de AHORA es
+                        //     OfrendaMineralGrupo; completarlo avanza al
+                        //     siguiente.
+                        int g = alma.OfrendaMineralGrupo;
+                        int[] grupo = gruposMineral[g];
+                        if (grupo != null && System.Array.IndexOf(grupo, drop.type) >= 0)
+                        {
+                            int faltaMin = cantGrupo - alma.OfrendaMineral;
+                            if (faltaMin > 0)
+                            {
+                                int comeMin = System.Math.Min(faltaMin, drop.stack);
+                                AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO
+                                alma.OfrendaMineral += comeMin;
+                                // GRUPO COMPLETO → el siguiente (con el
+                                // último, el índice pasa de length: la
+                                // MEZCLA ENTERA queda paga).
+                                if (alma.OfrendaMineral >= cantGrupo)
+                                {
+                                    alma.OfrendaMineralGrupo++;
+                                    alma.OfrendaMineral = 0;
+                                }
+                                drop.stack -= comeMin;
+                                if (drop.stack <= 0) drop.TurnToAir();
+                                SincronizarDrop(d);
 
-                        int comeMin = System.Math.Min(faltaMin, drop.stack);
-                        AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
-                        alma.OfrendaMineral += comeMin;
-                        drop.stack -= comeMin;
-                        if (drop.stack <= 0) drop.TurnToAir();
-                        SincronizarDrop(d);
-
-                        PolvosDelBocado(p, comeMin);
-                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMineral",
-                            new Color(196, 138, 255), comeMin, alma.OfrendaMineral,
-                            mineralNecesario);
-                        mordisco = true;
+                                PolvosDelBocado(p, comeMin);
+                                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMineral",
+                                    new Color(196, 138, 255), comeMin, cantGrupo - faltaMin + comeMin,
+                                    cantGrupo);
+                                mordisco = true;
+                            }
+                        }
                     }
                     // === 4) LAS ARMAS — ¿es LA OFRENDA del peldaño? Se
                     //     la devora ENTERA y la ofrenda queda PAGA (con
@@ -446,13 +458,14 @@ namespace AethonMod.Content.Systems
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
             if (alma == null) return false;
-            // v6.86 — el CRÉDITO DEL ALTAR cuenta como esencias comidas
-            // (los puntos del altar pagan hasta el 30 % del peldaño).
-            if (alma.OfrendaEsencias + alma.CreditoPuntosEsencias <
+            if (alma.OfrendaEsencias <
                 DespertarGrimorio.EsenciasPara(siguiente)) return false;
             if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
             if (alma.OfrendaArma) return true;
-            return alma.OfrendaMineral >= DespertarGrimorio.CantidadMineralDe(siguiente);
+            // v6.88 — LA MEZCLA ENTERA (todos los grupos de la ofrenda
+            //     variada — el índice pasa de length al pagar el último).
+            return alma.OfrendaMineralGrupo >=
+                DespertarGrimorio.GruposMineralDe(siguiente).Length;
         }
 
         // ================================================================
@@ -670,11 +683,8 @@ namespace AethonMod.Content.Systems
                 alma.OfrendaEsencias = 0;
                 alma.OfrendaMonedas = 0L;
                 alma.OfrendaMineral = 0;
+                alma.OfrendaMineralGrupo = 0;   // v6.88 — la mezcla renace
                 alma.OfrendaArma = false;
-                // v6.86 — el CRÉDITO DEL ALTAR muere con el peldaño (el
-                // canje se cobra UNA vez por subida — los puntos que
-                // sobraron viajan al siguiente).
-                alma.CreditoPuntosEsencias = 0;
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
                 if (ofrenda != null && !ofrenda.IsAir)

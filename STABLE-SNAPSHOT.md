@@ -1,3 +1,41 @@
+# v6.88 — LA GRAN SESIÓN DE LOS DIECISÉIS BUGS — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.88 (md5 `f8a7d50c8687156d6ad0ebb2574cf2ea`, 10.918.477 B) — 488 entradas, blobs 488/488 (30 stored planos), EOF EXACTO, la SEGUNDA música del festín dentro (2,06 MB), oráculo 0/0, -build REAL 0/0, headless 0 excepciones (Adding→Configuring→Finalizing→menú de mundos).
+
+## LA LETRA (los dieciséis reportes del playtest, uno a uno)
+1. **LA BRUMA EXPLICADA Y SEPARADA POR LIGAS**: la v6.87 lanzaba SIEMPRE la bruma del bastón — el usuario ordena: «el agujero negro runico con un solo anillo va junto a los agujeros negros de un solo anillo, el Ascendido va con los Ascendidos… el bruma normal solo debe lanzarse con los otros agujeros negros runicos normales de forma aleatoria; el bruma Ascendido, este solo debe lanzarse de forma aleatoria con los otros Ascendidos». HOY: el ritual lanza `BrumaBlackHole` (el del bastón, 1 anillo) con los NORMALES y `BrumaAscendido` (doble círculo rúnico) con los ASCENDIDOS (despertar 60+).
+2. **LA VENTANA DE INFO DECÍA 50/50**: los tooltips vivían en la v6.51 (Sol 7, Agujeros 10, Supremo 45, Ira 50, «Despertar 50 ×1,25»). HOY: 15/30/90/100, el tope «100 de 100», el hito del escuadrón EN PORCENTAJE y VIVO, la cima de la Ira «Moon Lord 10/10 · Emperatriz 5/5 · Aethon 1/1».
+3. **EL CALOR VIVÍA EN TODA LA PANTALLA MENOS EN EL ARMA**: la cápsula de la v6.85 (boca ×3,6 · aguja ×5 sobre un conducto de ~850 px) daba ~3.000 px — MÁS ANCHA QUE LA PANTALLA. HOY: la cápsula sigue la GEOMETRÍA REAL del conducto (×1,35/×1,9, el largo del dibujo) y el pintor respeta ×1,25·radio: el hervor vive en la franja del haz, y solo ahí.
+4. **EL ALTAR SE DESLIGA DEL DESPERTAR**: la economía de puntos/canje del 30 % MUERE (AceptaRelleno/ValorEnPuntos/RegistrarOfrenda/ProgresoOfrendas/CreditoPuntosEsencias extintos de raíz). EL ALTAR ES EL CORRUPTOR: slot de arma limpia + botón CORROMPER; el nombre viste «(Corrupto)» EN NEGRO (la línea ItemName, no una línea aparte) y el velo morado-negro cubre el item EN EL INVENTARIO (PostDrawInventario — el sprite re-dibujado con la tinta que respira).
+5. **EL RAYO PERLIN DE LOS MINIONS SE PERDÍA LEJOS**: el centro del proyectil es su ANCLA (la presa, hasta 1.500 px) y el culling de vanilla solo dibuja proyectiles con el centro en pantalla: presa fuera de la vista = rayo INVISIBLE (el daño golpeaba igual). `DrawScreenCheckFluff = 2600` (la casa ya usaba el truco en sus otros rayos — este era el único largo sin él).
+6. **EL ESCUADRÓN APARECÍA EN CUALQUIER PERSONAJE**: LA GUARDIA DEL DUEÑO — el retrato solo se fotografía (SaveData) y solo resucita (OnEnterWorld) si el grimorio VIVE en el inventario de ESTE personaje. Sin Eterno: retrato vacío, nada revive.
+7. **LA MASCOTA SE ACTIVABA CON LA TECLA B**: `Item.buffType` era el imán del QuickBuff — vanilla la encontraba en el inventario (equipada o no) y la usaba en cada pulsación. El buff lo aplica UseItem (como el Sol en Miniatura): solo con el CLIC (AethonMenor + GrimorioMenor).
+8. **LA MURALLA EXPLOTABA ANTES DE LA ANIMACIÓN**: TRES cerrojos nuevos: (a) EL FESTÍN ES SAGRADO (estado 1/3: NINGÚN golpe mata a medias — la «muerte ajena» del segmento que revienta al pool ya no pasa); (b) HitEffect sin gores mientras dura (la rejilla de cadáver a pantalla completa muere); (c) la zona del festín calla: los segmentos ni golpean ni reciben (damage 0 + dontTakeDamage), los cercanos a ≤700 px pegan 0, y el nuevo FaucesGlobalProjectile apaga los proyectiles hostiles en vuelo. La cena del WoF NO teletransporta el cuerpo (el muro dibujado queda clavado en su columna; ojos y Hungry se enroscan alrededor).
+9. **EL ORDEN DE LA ESCALA (LA WIKI)**: la caza 1-50 ya era canónica (v6.75 verificada) — lo que faltaba era REPARTIRLA: el DUQUE FISHRON entra como puerta (37, con sus armas de siempre), Aethon ABANDONA la 59 y custodia LA CIEN, y las REPETICIONES (Moon Lord ×2..×9 y Emperatriz ×2..×5) pueblan la 63-99. LA CIMA COMPUESTA (100): Aethon ×1 Y Moon Lord ×10 Y Emperatriz ×5 — y ahí nace LA IRA.
+10. **EL HAZ NO SE LANZABA**: la v6.86 volvía a pedir los contadores DESPUÉS de subir (si no los tenías, NUNCA nacía). HOY: la puerta 100 cobra la caza ANTES de subir y la Ira vive con el despertar 100 (el escuadrón de 11 al máximo sigue siendo requisito del disparo — la letra v6.60).
+11. **MONEDAS 100 COBRE → 100 PLATINO**: escala exponencial exacta g=10^(6/99) — el nivel 100 clava 100.000.000 cobre (100 P), ningún tramo plano (la v6.86 truncaba en 1 P desde el ~43).
+12. **LA OFRENDA MINERAL VARIADA**: GruposMineralDe — MEZCLA de 2-3 minerales de la era (18 + nivel/5 por cabeza), pagos GRUPO A GRUPO (OfrendaMineralGrupo en el alma, ver 4 en el cable), cada grupo con sus ALTERNATIVOS (el mundo de estaño paga con estaño). Ninguna pila solitaria es una pared.
+13. **EL HITO DEL ESCUADRÓN CADA 20 NIVELES**: MultEscuadron (20→+10 %, 40→+15 %, 60→+20 %, 80→+25 %, 100→+30 %) — VIVO (BonusHitoVivo lee el despertar del dueño cada tick; el ×1,25 horneado de la v6.51.9 MUERTO). En los hitos hjson + el tooltip del arma, EN PORCENTAJE y COMO HITO.
+14. **LA SEGUNDA BANDA SONORA**: «LA OLEADA FINAL» (164 BPM, 78 compases): doble clímax con MODULACIÓN (la tercera de picardía de Mi bemol), el coro a OCHO voces, timbales de guerra, la sala épica (reverb de tráiler por FFT) y la campana tubular. La MONEDA: al activarse una oleada (flanco de FestinVisible) elige UNA de las dos para TODA la oleada — la próxima vuelve a tirar.
+15. **EL ÁRBOL SE MUDA DE DUEÑO**: CERO vínculo con el despertar — los puntos nacen del NIVEL DEL LIBRO AZUL (3 + nivel/5) y los efectos solo viven mientras se LLEVA el arma. El Libro Azul (30×30, PIL): clic derecho abre el árbol, clic izquierdo dispara la Descarga (12 + nivel·2, maná 0), sube con las bajas de su portador (8 por nivel, tope 100 — las paga OnKill por lastInteraction). El Códice MUERE de raíz (la bolsa de Investigaciones entrega el Libro Azul en su sitio).
+16. **LA AUDITORÍA DE LA VENTANA DE INFO**: todos los números de los tooltips ahora nacen de las FUNCIONES (no de literales viejos) — la alternativa mineral lista LA MEZCLA (una línea por grupo con su estado), El Cielo pinta la mezcla en la escalera y «los 50 peldaños» murió (CIEN).
+
+## EL PLAYTEST (la lista de la casa)
+(a) [ ] **LA BRUMA POR LIGAS**: con despertar 60+, el ritual combinado lanza la bruma y sale la ASCENDIDA (doble círculo: 8 teal + 6 blancas contrarroto); con despertar <60 sale la del BASTÓN (1 anillo).
+(b) [ ] **EL CALOR EN SU SITIO**: dispara el Rayo C — el hervor SOLO alrededor del conducto; el resto de la pantalla QUIETO.
+(c) [ ] **LA MESA VARIADA**: en un peldaño mineral (59+), la ventana lista la MEZCLA (2-3 metales) — soltar lingotes de cualquiera de la lista va llenando grupo a grupo.
+(d) [ ] **EL ALTAR CORRUPTOR**: clic derecho en el altar con un arma limpia en el slot → CORROMPER → el nombre «(Corrupto)» EN NEGRO y el velo morado-negro en el inventario.
+(e) [ ] **EL HAZ AL 100**: con despertar 100 y el escuadrón 11-al-máximo, LA IRA se dispara (la puerta 100 ya cobró Aethon+ML×10+EoL×5).
+(f) [ ] **LAS DOS BANDAS**: activa varias oleadas — unas suenan «El Festín Desatado» (152) y otras «La Oleada Final» (164, el coro a 8 y la modulación), al azar.
+(g) [ ] **EL LIBRO AZUL**: la bolsa de Investigaciones lo entrega; clic derecho abre el árbol (los puntos nacen de SU nivel); matar con él sube el arma (8 bajas/nivel) y el tooltip del grimorio YA NO mienta.
+
+## PRÓXIMOS PASOS
+- El playtest de arriba (la letra del usuario manda: verificar CADA entrega en juego y rehacerla hasta que funcione).
+- El orden canónico 1-50 de la caza ya era wiki-verificado (v6.75); las REPETICIONES nuevas (63-99) piden su playtest de ritmo (¿cada 4 peldaños una puerta es el compás correcto?).
+- La curva de monedas (g=10^(6/99)) pide playtest: los tramos 60-80 deben SENTIRSE más caros sin ser un muro.
+
+---
+
 # v6.87 — LA CURA DEL MOD QUE NO CARGABA — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.87 (md5 `f2b0e5cac4a48d642789fa0808cd38fb`, 8.851.448 B) — 487 entradas (+ el highlight del altar), blobs 487/487, EOF exacto, la música del festín NUEVA (1,9 MB), headless 0 excepciones (worldgen + Server started).

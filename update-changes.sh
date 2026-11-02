@@ -2,7 +2,7 @@
 # Script para actualizar CHANGES.md automáticamente con cada commit
 # Se ejecuta manualmente o se puede integrar en un hook de git
 
-REPO_DIR="/home/z/my-project/AethonMod"
+REPO_DIR="/home/z/my-project/download/Aethon-Mod-Terraria"
 CHANGES_FILE="$REPO_DIR/CHANGES.md"
 
 # Obtener el último commit

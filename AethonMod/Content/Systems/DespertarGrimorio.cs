@@ -109,17 +109,28 @@ namespace AethonMod.Content.Systems
         /// escalera, el banco de las oleadas de hambre).</summary>
         public static int EsenciasPara(int nivel) => Math.Max(1, Math.Min(NivelMax, nivel));
 
-        /// <summary>EL DINERO que exige el nivel N (la letra: «cierta
-        /// cantidad de dinero que aumenta por nivel hasta un máximo de 1
-        /// de platino en niveles altos» — y el nivel 1 explícito: «10
-        /// monedas de cobre»): 10 cobres que CRECEN ×1,33 por nivel y se
-        /// TRUNCAN en 1 de platino (100 de oro) desde el nivel ~43.</summary>
+        /// <summary>v6.88 — EL DINERO que exige el nivel N (la letra
+        /// nueva: «el requisito de monedas maximo que se pueden pedir son
+        /// 100 monedas de platino para el nivel 100 y el minimo es 100
+        /// monedas de cobre para el nivel 1 asi que entre el nivel 1 al
+        /// 100 distribuye bien la cantidad de monedas» — la v6.86 TRUNCABA
+        /// en 1 platino desde el ~43 y el requisito se ESTANCABA): escala
+        /// exponencial SUAVE de 100 cobre → 100 platino. La base: el
+        /// crecimiento exacto g = 10^(6/99) ≈ 1,1437 — así el nivel 100
+        /// cae CLAVADO en 100.000.000 cobre (100 de platino, JAMÁS más) y
+        /// cada nivel pide visiblemente más que el anterior (ningún
+        /// tramo plano). Redondeo a múltiplos de 100 cobre (1 de plata):
+        /// las cantidades se leen limpias en la mesa. El nivel 1: 100
+        /// cobre (la letra); ~35: 5 de oro; ~70: 82 de oro; 100: 100 P.</summary>
         public static long MonedasPara(int nivel)
         {
-            if (nivel <= 1) return 10L;
+            if (nivel <= 1) return 100L;                       // 100 monedas de cobre (la letra)
             if (nivel > NivelMax) nivel = NivelMax;
-            long monedas = (long)(10.0 * Math.Pow(1.33, nivel - 1));
-            return Math.Min(1_000_000L, monedas);   // 1 de platino, jamás más
+            double g = Math.Pow(10.0, 6.0 / 99.0);            // 1,1437 — clava el 100 en 100 P
+            long monedas = (long)(100.0 * Math.Pow(g, nivel - 1));
+            monedas = (monedas / 100L) * 100L;                 // múltiplos de 1 plata
+            if (monedas < 100L) monedas = 100L;
+            return Math.Min(100_000_000L, monedas);            // 100 de platino, JAMÁS más
         }
 
         /// <summary>LA ESCALERA DE ARMAS: el peldaño de cada nivel sigue
@@ -241,45 +252,127 @@ namespace AethonMod.Content.Systems
             return peldano == null || peldano.Length == 0;
         }
 
-        /// <summary>EL MINERAL DEL PELDAÑO N (el lingote que pide — la
-        /// escalera de metales QUE CORRESPONDE al nivel: el cobre del
-        /// primer peldaño… la luminita del Señor de la Luna en la cima
-        /// 37-48… la hongonita y el espectro en el final del mundo).
-        /// v6.51.9: definido EN TODA LA ESCALERA 1-50 — la alternativa
-        /// mineral vive en cada peldaño de armas.</summary>
-        public static int MineralDe(int nivel)
+        // ================================================================
+        //  v6.88 — LA OFRENDA MINERAL VARIADA (la letra nueva: «despues
+        //  del nivel 50 la ofrenda de minerales se concentra en 1 mineral
+        //  y pide mucho, debe ser variada, pedir menos de ese mineral,
+        //  pero pedir varios al mismo tiempo» — la v6.86 pedía UN solo
+        //  mineral con 51..249 lingotes). LA NUEVA LEY: cada peldaño pide
+        //  UNA MEZCLA de 2-3 minerales DE SU ERA (se entregan en ORDEN:
+        //  el primero incompleto de la lista se acredita primero) con
+        //  cantidades MODERADAS por cabeza (18 + nivel/5) — el TOTAL del
+        //  peldaño sigue creciendo (2-3 grupos × más nivel) pero NINGUNA
+        //  pila solitaria es una pared. Cada GRUPO lleva sus ALTERNATIVOS
+        //  (cobre/estaño, hierro/plomo…): la mezcla existe en CUALQUIER
+        //  mundo, con el metal que la suerte dejó.
+        // ================================================================
+
+        /// <summary>LOS GRUPOS DE MINERALES DEL PELDAÑO N (la mezcla de
+        /// su era): cada grupo es un int[] de tipos ALTERNATIVOS (el
+        /// primero existe en este mundo o no — basta CUALQUIERA del
+        /// grupo para pagar el grupo). Se entregan EN ORDEN (grupo a
+        /// grupo — «varios al mismo tiempo»: la mesa LISTA la mezcla
+        /// completa desde el primer vistazo).</summary>
+        public static int[][] GruposMineralDe(int nivel)
         {
-            if (nivel < 1 || nivel > NivelMax) return -1;   // no es peldaño
-            if (nivel == 100) return ItemID.SpectreBar;     // LA GRAN OFRENDA FINAL (donde nace LA IRA)
-            if (nivel >= 80) return ItemID.SpectreBar;      // 80-99: la era del espectro (la cima mineral)
-            if (nivel >= 60) return ItemID.ShroomiteBar;    // 60-79: la era de la hongonita
-            if (nivel >= 45) return ItemID.LunarBar;        // 45-59: la luminita (las torres → el Señor de la Luna → Aethon)
-            if (nivel >= 35) return ItemID.ShroomiteBar;    // 35-44: la era post-Plantera
-            if (nivel >= 31) return ItemID.ChlorophyteBar;  // 31-34: la clorofita (nace tras la 1.ª mecánica)
-            if (nivel >= 30) return ItemID.HallowedBar;     // 30: la sagrada (los lingotes que sueltan las mecánicas)
-            if (nivel >= 27) return ItemID.AdamantiteBar;   // 27-29: la adamantita/titanio
-            if (nivel >= 25) return ItemID.MythrilBar;      // 25-26: el mitril/oricalco
-            if (nivel >= 21) return ItemID.CobaltBar;       // 21-24: el cobalto/paladio (MODO DIFÍCIL)
-            if (nivel >= 9) return ItemID.HellstoneBar;     // 9-20: la era del infierno (tras el Mal del Mundo: el pico de demonita)
-            if (nivel == 8) return ItemID.DemoniteBar;      // 8: la demonita/carmesí (la suelta SU jefe caído)
-            if (nivel >= 5) return ItemID.MeteoriteBar;     // 5-7: el meteorito (cae tras el Ojo)
-            if (nivel == 4) return ItemID.GoldBar;          // 4: el oro/platino
-            if (nivel == 3) return ItemID.SilverBar;        // 3: la plata/tungsteno
-            if (nivel == 2) return ItemID.IronBar;          // 2: el hierro/plomo
-            return ItemID.CopperBar;                        // 1: el cobre/estaño de la letra
+            if (nivel < 1 || nivel > NivelMax)
+                return new int[][] { new int[] { ItemID.CopperBar } };
+            if (nivel <= 4)    // 1-4: la era del cobre — cobre/estaño + hierro/plomo
+                return new int[][]
+                {
+                    new int[] { ItemID.CopperBar, ItemID.TinBar },
+                    new int[] { ItemID.IronBar, ItemID.LeadBar },
+                };
+            if (nivel <= 8)    // 5-8: post-Ojo — plata/tungsteno + oro/platino + el meteorito
+                return new int[][]
+                {
+                    new int[] { ItemID.SilverBar, ItemID.TungstenBar },
+                    new int[] { ItemID.GoldBar, ItemID.PlatinumBar },
+                    new int[] { ItemID.MeteoriteBar },
+                };
+            if (nivel <= 20)   // 9-20: la era del infierno — demonita/carmesí + piedra infernal
+                return new int[][]
+                {
+                    new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar },
+                    new int[] { ItemID.HellstoneBar },
+                };
+            if (nivel <= 24)   // 21-24: el amanecer difícil — cobalto/paladio
+                return new int[][]
+                {
+                    new int[] { ItemID.CobaltBar, ItemID.PalladiumBar },
+                };
+            if (nivel <= 26)   // 25-26: el mitril/oricalco
+                return new int[][]
+                {
+                    new int[] { ItemID.MythrilBar, ItemID.OrichalcumBar },
+                };
+            if (nivel <= 29)   // 27-29: la adamantita/titanio
+                return new int[][]
+                {
+                    new int[] { ItemID.AdamantiteBar, ItemID.TitaniumBar },
+                };
+            if (nivel <= 30)   // 30: la sagrada (los lingotes que sueltan las mecánicas)
+                return new int[][]
+                {
+                    new int[] { ItemID.HallowedBar },
+                };
+            if (nivel <= 44)   // 31-44: la era de la clorofita — clorofita + hongonita
+                return new int[][]
+                {
+                    new int[] { ItemID.ChlorophyteBar },
+                    new int[] { ItemID.ShroomiteBar },
+                };
+            if (nivel <= 59)   // 45-59: la luminita de las torres + hongonita + la víspera de espectro
+                return new int[][]
+                {
+                    new int[] { ItemID.LunarBar },
+                    new int[] { ItemID.ShroomiteBar },
+                    new int[] { ItemID.SpectreBar },
+                };
+            if (nivel <= 79)   // 60-79: la era de la hongonita — MEZCLA RICA (hongonita + espectro + clorofita)
+                return new int[][]
+                {
+                    new int[] { ItemID.ShroomiteBar },
+                    new int[] { ItemID.SpectreBar },
+                    new int[] { ItemID.ChlorophyteBar },
+                };
+            // 80-100: la era del espectro — MEZCLA FINAL (espectro + luminita + hongonita)
+            return new int[][]
+            {
+                new int[] { ItemID.SpectreBar },
+                new int[] { ItemID.LunarBar },
+                new int[] { ItemID.ShroomiteBar },
+            };
         }
 
-        /// <summary>CUÁNTOS LINGOTES exige el peldaño N (la letra de la
-        /// .51.9: «siempre deben ser mas de 50 lingotes para cada
-        /// despertar no menos, ademas el numero de lingotes siempre debe
-        /// ir aumentando por cada nivel de despertar»): 51 en el nivel 1
-        /// y +2 POR NIVEL — siempre más de 50, siempre creciente (149
-        /// la gran ofrenda final del 50).</summary>
-        public static int CantidadMineralDe(int nivel)
+        /// <summary>CUÁNTOS LINGOTES exige CADA GRUPO de la mezcla del
+        /// peldaño N (la letra nueva: «pedir menos de ese mineral, pero
+        /// pedir varios al mismo tiempo»): 18 + nivel/5 por cabeza —
+        /// MODERADO (la v6.86 pedía 51..249 de UN solo tipo; el muro
+        /// murió). El TOTAL del peldaño (grupos × cantidad) sigue
+        /// creciendo con el nivel.</summary>
+        public static int CantidadPorGrupo(int nivel)
         {
-            if (nivel < 1 || nivel > NivelMax) return 0;
-            return 51 + 2 * (nivel - 1);
+            if (nivel < 1) return 18;
+            if (nivel > NivelMax) nivel = NivelMax;
+            return 18 + nivel / 5;   // 18 en el 1 · 28 en el 50 · 38 en el 100
         }
+
+        /// <summary>LEGADO (v6.51.9→v6.88): el mineral REPRESENTATIVO del
+        /// peldaño (el PRIMER grupo de la mezcla, primer tipo) — lo siguen
+        /// leyendo los textos de la ALTERNATIVA mineral de los peldaños
+        /// de armas. La ofrenda de los peldaños minerales pasa por
+        /// GruposMineralDe (la mezcla completa).</summary>
+        public static int MineralDe(int nivel)
+        {
+            var grupos = GruposMineralDe(nivel);
+            return (grupos != null && grupos.Length > 0 && grupos[0] != null
+                && grupos[0].Length > 0) ? grupos[0][0] : -1;
+        }
+
+        /// <summary>LEGADO (v6.51.9→v6.88): la cantidad del PRIMER grupo
+        /// (para los textos de la alternativa mineral).</summary>
+        public static int CantidadMineralDe(int nivel) => CantidadPorGrupo(nivel);
 
         // ================================================================
         //  v6.51.11 — LOS CONTADORES DE LA MESA: la comida se sirve EN
@@ -375,138 +468,90 @@ namespace AethonMod.Content.Systems
         /// CazaJefesGlobalNPC).</summary>
         public static bool IraDisponible(int despertar) => despertar >= NivelMax;
 
-        /// <summary>v6.86 — LA IRA COMPLETA (la letra de la cima): el
-        /// despertar 100 Y el Señor de la Luna vencido ≥ 5 veces Y
-        /// Aethon (el fragmento de un recuerdo lejano) vencido ≥ 1 vez.
-        /// El legacy: el que ya lo tenía muerto en su mundo al cargar
-        /// esta versión cobra 1 vida de las 5 (una cacería es del que
-        /// la ve — el resto hay que ganárselo).</summary>
+        /// <summary>v6.88 — LA IRA VIVE CON EL DESPERTAR 100 (la letra
+        /// nueva de la cima: «Aethon debería estar como requisito para el
+        /// nivel 100, junto con 10 señores de la luna y 5 emperatris de la
+        /// luz, ya que en el nivel 100 es donde se consigue la habilidad
+        /// definitiva del grimorio, o sea su ataque definitivo, obtiene
+        /// Ira de un Ser Exterior»): la PUERTA 100 (JefeYaCaido) exige
+        /// Aethon ≥ 1 Y Moon Lord ≥ 10 Y Emperatriz ≥ 5 ANTES DE SUBIR —
+        /// llegar al 100 ya ES haber pagado la caza completa. La cura del
+        /// bug «al llegar al nivel máximo del despertar el haz no se
+        /// lanza»: la v6.86 volvía a pedir los contadores DESPUÉS de
+        /// subir (si no los tenía, el haz NUNCA nacía); la v6.88 los
+        /// cobra en la puerta y la Ira nace con el despertar 100. El
+        /// escuadrón de 11 TODOS al máximo sigue siendo requisito del
+        /// DISPARO (la letra v6.60, la pone
+        /// AtaquesCombinadosSistema.Tick).</summary>
         public static bool IraDisponible(Player p)
         {
             if (p == null || !p.active) return false;
-            if (NivelDe(p) < NivelMax) return false;
-            var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
-            if (cazador == null) return false;
-            return cazador.VecesMoonLord >= 5 && cazador.VecesAethon >= 1;
+            return NivelDe(p) >= NivelMax;
         }
 
-        /// <summary>Los CONTADORES DE LA IRA en texto (para tooltips y
-        /// la ventana del Cielo): «Moon Lord 3/5 · Aethon 0/1».</summary>
+        /// <summary>Los CONTADORES DE LA CIMA en texto (para tooltips y
+        /// la ventana del Cielo) — v6.88: «Moon Lord n/10 · Emperatriz
+        /// n/5 · Aethon n/1» (la letra nueva de la cima).</summary>
         public static string IraContadoresTexto(Player p)
         {
             var cazador = p?.GetModPlayer<Players.CazaJefesPlayer>();
             int ml = cazador?.VecesMoonLord ?? 0;
+            int eo = cazador?.VecesEmperatriz ?? 0;
             int ae = cazador?.VecesAethon ?? 0;
-            return $"Moon Lord {Math.Min(ml, 5)}/5 · Aethon {Math.Min(ae, 1)}/1";
+            return $"Moon Lord {Math.Min(ml, 10)}/10 · Emperatriz {Math.Min(eo, 5)}/5 · Aethon {Math.Min(ae, 1)}/1";
         }
 
         // ================================================================
-        //  v6.86 — EL ALTAR DE OFRENDAS (la letra: «investiga el altar
-        //  del mod Heroic Weapons... este es el tipo de altar que
-        //  necesitamos para que el grimorio pueda consumir cosas que no
-        //  sean las que necesita y no esten corruptas»). La ECONOMÍA
-        //  (el informe R5 §5): el altar devora RELLENO (ni requisito ni
-        //  corrupto) y lo vuelve PUNTOS en el alma del libro — 1 punto
-        //  por cada 10 de plata de valor. Los puntos canjean SOLO
-        //  esencias del peldaño, hasta el 30 % (ver el canje en
-        //  DespertarGrimorioSistema.ServirLaMesa).
+        //  v6.88 — LOS HITOS DEL ESCUADRÓN (la letra: «hay una parte en
+        //  las ventana de info que dice Despertar 50 todo el ataque del
+        //  escuadron 1.25 y mas rapido, creo que deberia decirlo en
+        //  porcentaje y deberia de haber un aumento cada 20 niveles
+        //  ademas de que debe decirlo como hito»): EL HITO DEL ESCUADRÓN
+        //  nace CADA 20 NIVELES, en PORCENTAJE, como HITO de la escalera
+        //  (ClaveHito + ElCaminoDelDespertar + el tooltip del arma):
+        ///    20 → TODO el ataque del escuadrón +10 %
+        ///    40 → +15 %   · 60 → +20 %   · 80 → +25 %   · 100 → +30 %
+        //  La v6.51.9 lo cobraba UNA sola vez (×1,25 con el despertar 50,
+        //  horneado al nacer); la v6.88 lo cobra VIVO por hitos — el
+        //  escuadrón entero se fortalece con el despertar de su dueño.
         // ================================================================
 
-        /// <summary>El precio de UNA esencia en puntos del altar (la
-        /// referencia de R5 §5.2: «una esencia equivale a 25 puntos»).</summary>
-        public const int PuntosPorEsencia = 25;
-
-        /// <summary>El umbral de valor mínimo del relleno (500 cobre =
-        /// 5 de plata: la basura blanca no alimenta a nadie — R5 §5.4).</summary>
-        public const long ValorMinimoRelleno = 500L;
-
-        /// <summary>¿ACEPTA EL ALTAR este item como RELLENO? (la tabla de
-        /// R5 §5.4 — NI requisito NI corrupto NI sagrado):
-        ///   · NO la Esencia Corrupta (es requisito), NO las MONEDAS, NO
-        ///     el mineral del peldaño, NO las armas del peldaño.
-        ///   · NO lo corrupto (requisito/ingrediente sagrado).
-        ///   · NO los items vivos del mod (grimorios, bolsas, el libro
-        ///     corrupto, quest) ni los favoritos.
-        ///   · NO lo que vale menos de 5 de plata.
-        ///   · SÍ todo lo demás (materiales, armas limpias, drops).</summary>
-        public static bool AceptaRelleno(Item it, Player portador, Item grimorio)
+        /// <summary>EL MULTIPLICADOR DE ATAQUE DEL ESCUADRÓN por los
+        /// hitos del despertar (cada 20 niveles, en porcentaje): lo leen
+        /// BonusHitoVivo (el daño del rayo de cada ojo — el reemplazo
+        /// del ×1,25 del 50) y los conjuros combinados (sol, agujeros,
+        /// supremo — AtaquesCombinadosSistema).</summary>
+        public static float MultEscuadron(int despertar)
         {
-            try
-            {
-                if (it == null || it.IsAir) return false;
-
-                // LOS SAGRADOS: la esencia, las monedas, el libro corrupto.
-                if (it.type == ItemID.CopperCoin || it.type == ItemID.SilverCoin ||
-                    it.type == ItemID.GoldCoin || it.type == ItemID.PlatinumCoin) return false;
-                if (it.type == ModContent.ItemType
-                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>()) return false;
-                if (it.type == ModContent.ItemType
-                    <global::AethonMod.Content.Items.Altar.LibroCorrupto>()) return false;
-
-                // LO CORRUPTO (requisito/ingrediente sagrado).
-                var sello = it.GetGlobalItem
-                    <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                if (sello != null && sello.Corrompido) return false;
-
-                // LOS VIVOS DEL MOD: grimorios, bolsas, quests (el patrón
-                // de la casa: nada devorable que sea una llave de juego).
-                if (it.ModItem != null) return false;
-                if (it.favorited) return false;
-
-                // LOS REQUISITOS DEL PELDAÑO VIVO (nada de alimentarse de
-                // la propia ofrenda): el mineral y las armas de AHORA.
-                if (grimorio != null && !grimorio.IsAir)
-                {
-                    int siguiente = NivelDespertarSiguiente(grimorio);
-                    if (siguiente >= 1 && siguiente <= NivelMax)
-                    {
-                        int tipoMin = MineralDe(siguiente);
-                        if (tipoMin > 0 && it.type == tipoMin) return false;
-                        var armas = ArmasDelNivel[siguiente];
-                        if (armas != null)
-                            for (int k = 0; k < armas.Length; k++)
-                                if (armas[k] == it.type) return false;
-                    }
-                }
-
-                // EL UMBRAL (la basura blanca no alimenta).
-                long valor = (long)it.value * (long)it.stack;
-                return valor >= ValorMinimoRelleno;
-            }
-            catch { return false; }
+            if (despertar >= 100) return 1.30f;
+            if (despertar >= 80) return 1.25f;
+            if (despertar >= 60) return 1.20f;
+            if (despertar >= 40) return 1.15f;
+            if (despertar >= 20) return 1.10f;
+            return 1.00f;
         }
 
-        /// <summary>CUÁNTOS PUNTOS vale la ofrenda (1 punto por cada 10
-        /// de plata del valor TOTAL de la pila — R5 §5.2).</summary>
-        public static int ValorEnPuntos(Item it)
-        {
-            if (it == null || it.IsAir) return 0;
-            long valor = (long)it.value * (long)it.stack;
-            int puntos = (int)(valor / 1000L);   // 10 de plata = 1000 cobre
-            return Math.Max(0, puntos);
-        }
+        /// <summary>El PORCENTAJE del hito en texto (para tooltips:
+        /// «+25 %»).</summary>
+        public static int PctEscuadron(int despertar)
+            => (int)Math.Round((MultEscuadron(despertar) - 1f) * 100f);
 
-        /// <summary>EL REGISTRO DE LA OFRENDA: el altar devora el relleno
-        /// (la pila entera de una vez — stack--, la UI manda) y sus puntos
-        /// viajan al ALMA DEL LIBRO (ProgresoOfrendas — persiste y viaja
-        /// por el cable con el item). Devuelve los puntos ganados.</summary>
-        public static int RegistrarOfrenda(Item relleno, Item grimorio)
-        {
-            try
-            {
-                if (relleno == null || relleno.IsAir) return 0;
-                int puntos = ValorEnPuntos(relleno);
-                if (puntos <= 0) return 0;
 
-                var alma = grimorio?.GetGlobalItem
-                    <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
-                if (alma == null) return 0;
+        // ================================================================
+        //  v6.88 — EL ALTAR SE DESLIGA DEL DESPERTAR (la letra: «la
+        //  funcion del altar que implementaste no debe estar ligada al
+        //  grimorio, asi que quita ese requisito de ofrendas en el
+        //  despertar, el altar sirve para corromper las armas»): LA
+        //  ECONOMÍA DE PUNTOS (PuntosPorEsencia, ValorMinimoRelleno,
+        //  AceptaRelleno, ValorEnPuntos, RegistrarOfrenda) MUERE de
+        //  raíz — el canje del 30 % de esencias (ServirLaMesa) muere con
+        //  ella y los campos del alma (ProgresoOfrendas /
+        //  CreditoPuntosEsencias) quedan huérfanos y se extinguen. El
+        //  altar hoy es EL CORRUPTOR DE ARMAS (AltarOfrendasUI) y nada
+        //  más. La vía de recetas de corrupción (RecetasCorrupcionSistema)
+        //  SIGUE como alternativa de siempre.
+        // ================================================================
 
-                alma.ProgresoOfrendas += puntos;
-                return puntos;
-            }
-            catch { return 0; }
-        }
 
         /// <summary>La CLAVE del anuncio del hito de este nivel (o null si
         /// el nivel no desbloquea nada — la lista pequeña de la letra).</summary>
@@ -561,39 +606,58 @@ namespace AethonMod.Content.Systems
         //     personaje a otros mundos).
         // ================================================================
 
-        /// <summary>UNA PUERTA DE LA CAZA: el nivel que la exige, la clave
-        /// hjson de su nombre y el NPC de la miniatura (la ventana del
-        /// Cielo pinta su retrato).</summary>
+        /// <summary>UNA PUERTA DE LA CAZA: el nivel que la exige, la
+        /// clave hjson de su nombre, el NPC de la miniatura (la ventana
+        /// del Cielo pinta su retrato) — v6.88: LAS VECES que la puerta
+        /// exige (1 = la de siempre; 2+ = el jefe caído DOS o más veces:
+        /// «se puede pedir matar a un jefe varias veces seguidas») y EL
+        /// CONTADOR que la paga: 0 = la lápida del mundo + el registro
+        /// del cazador (la de siempre) · 1 = Moon Lord (VecesMoonLord)
+        /// · 2 = la Emperatriz (VecesEmperatriz) · 3 = Aethon y SU cima
+        /// compuesta (la puerta 100).</summary>
         public readonly struct JefeDelCamino
         {
             public readonly int Nivel;
             public readonly string Clave;
             public readonly int Miniatura;
-            public JefeDelCamino(int nivel, string clave, int miniatura)
+            public readonly int Veces;
+            public readonly int Contador;
+            public JefeDelCamino(int nivel, string clave, int miniatura,
+                int veces = 1, int contador = 0)
             {
                 Nivel = nivel;
                 Clave = clave;
                 Miniatura = miniatura;
+                Veces = Math.Max(1, veces);
+                Contador = contador;
             }
         }
 
-        /// <summary>v6.86 — LA CAZA DE LAS CIEN PUERTAS: misma escalera
-        /// de siempre REALINEADA — la Emperatriz SUBE a SU propia puerta
-        /// (38) con SUS armas en el MISMO peldaño (la letra: «no está la
-        /// emperatriz de la luz como requisito para despertar pero sí
-        /// sus armas» — ahora es puerta Y botín, el mismo latido);
-        /// Deerclops y el Duque Fishron MUEREN como puerta (la letra:
-        /// «el jefe Deerclop no lo incluyas en la progresion del
-        /// despertar del grimorio» + «el jefe duque fishron no
-        /// necesitas incluirlo» — las armas del Duque siguen siendo
-        /// ofrenda en el 37, pero su jefe ya NO manda); y LA CIMA NUEVA:
-        /// Aethon custodia la puerta 59 — el fragmento de un recuerdo
-        /// lejano, el dios del propio mod, justo antes de la ERA DE LAS
-        /// GRANDES OFRENDAS. La cima del despertar de vanilla sigue
-        /// siendo el Señor de la Luna en el 50 (la letra v6.75).
-        /// v6.75 histórico: verificada la escalera contra la progresión
-        /// CANÓNICA de la wiki (los 11 principales — TODOS tienen su
-        /// puerta, en orden).</summary>
+        /// <summary>v6.88 — LA CAZA REPARTIDA DE LA UNO A LA CIEN (la
+        /// letra: «el orden de los jefes como requisito del Despertar
+        /// esta mal, usa la wiki para ver el orden correcto… recuerda
+        /// que ahora son 100 niveles, y ubicaste a todos en los primeros
+        /// 50 niveles» + «ya que como requisitos pides items del Duque
+        /// Fishron entonces incluye a ese jefe entre los requisitos» +
+        /// «el jefe Aethon no deberia estar como requisito para el nivel
+        /// 59, Aethon deberia estar como requisito para el nivel 100,
+        /// junto con 10 señores de la luna y 5 emperatris de la luz»):
+        /// la escalera 1-50 queda como la v6.86 (VERIFICADA contra la
+        /// progresión CANÓNICA de la wiki — cada puerta en la era de
+        /// sus armas), el DUQUE FISHRON entra como puerta en el 37 (sus
+        /// armas ya vivían ahí — ahora es puerta Y botín, el mismo
+        /// latido), Aethon ABANDONA el 59 y custodia LA CIEN — y las
+        /// REPETICIONES (Moon Lord y Emperatriz, la letra: «recuerda
+        /// que se puede pedir matar a un jefe varias veces seguidas, asi
+        /// que distribuye bien todos los requisistos de 1 a 100»)
+        /// reparten la caza por la segunda mitad de la escalera: la
+        /// cima de vanilla (Señor de la Luna, 50) sigue en su sitio con
+        /// las armas de su drop detrás (51-58, OBTENIBLES en su era — la
+        /// ley de la casa), y de la 63 a la 99 el cazador vuelve a
+        /// tirar de los dos titanes hasta la cuenta completa: la puerta
+        /// 100 — LA CIMA COMPUESTA: Aethon ×1 Y Moon Lord ×10 Y
+        /// Emperatriz ×5 — y ahí nace LA IRA (la letra: «en el nivel 100
+        /// es donde se consigue la habilidad definitiva del grimorio»).</summary>
         public static readonly JefeDelCamino[] LosJefesDelDespertar =
         {
             new JefeDelCamino(3,  "Mods.AethonMod.Despertar.JefeReyGelatina",     NPCID.KingSlime),
@@ -608,10 +672,23 @@ namespace AethonMod.Content.Systems
             new JefeDelCamino(30, "Mods.AethonMod.Despertar.JefeSkeletronPrime",  NPCID.SkeletronPrime),
             new JefeDelCamino(32, "Mods.AethonMod.Despertar.JefePlantera",        NPCID.Plantera),
             new JefeDelCamino(35, "Mods.AethonMod.Despertar.JefeGolem",           NPCID.Golem),
+            new JefeDelCamino(37, "Mods.AethonMod.Despertar.JefeDuqueFishron",    NPCID.DukeFishron),
             new JefeDelCamino(38, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss),
             new JefeDelCamino(45, "Mods.AethonMod.Despertar.JefeCultistaLunatico",NPCID.CultistBoss),
             new JefeDelCamino(50, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore),
-            new JefeDelCamino(59, "Mods.AethonMod.Despertar.JefeAethon",          MiniAethon()),
+            // v6.88 — LAS REPETICIONES (la caza repartida por la cima):
+            new JefeDelCamino(63, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 2, 1),
+            new JefeDelCamino(67, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   2, 2),
+            new JefeDelCamino(71, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 3, 1),
+            new JefeDelCamino(75, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   3, 2),
+            new JefeDelCamino(79, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 4, 1),
+            new JefeDelCamino(83, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   4, 2),
+            new JefeDelCamino(87, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 5, 1),
+            new JefeDelCamino(91, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   5, 2),
+            new JefeDelCamino(95, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 7, 1),
+            new JefeDelCamino(99, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 9, 1),
+            // LA CIMA COMPUESTA (la letra): Aethon ×1 + Moon Lord ×10 + Emperatriz ×5
+            new JefeDelCamino(100,"Mods.AethonMod.Despertar.JefeAethon",          MiniAethon(),       1, 3),
         };
 
         /// <summary>v6.86 — LA MINIATURA DE AETHON (la ventana del Cielo
@@ -635,15 +712,15 @@ namespace AethonMod.Content.Systems
             return null;
         }
 
-        /// <summary>LA BANDERA DEL MUNDO de una puerta (la lápida de
+        /// <summary>LA BANDERA DEL MUNDO de una puerta (la lápide de
         /// vanilla: la escribió Terraria al morir el jefe, en este
         /// mundo, por quien fuera — la fuente del crédito retroactivo
         /// de SIEMPRE). La Muralla no tiene bandera propia: su lápida
         /// ES el modo difícil (la única puerta al hardmode).
-        /// v6.86 — la Emperatriz baja a SU puerta (38) y Aethon (59)
-        /// NO tiene lápida de mundo (es del mod): la paga el REGISTRO
-        /// DEL CAZADOR (VecesAethon ≥ 1 — lo escribe
-        /// CazaJefesGlobalNPC al morir el dios).</summary>
+        /// v6.88 — el DUQUE FISHRON gana SU puerta (37) con su lápida
+        /// de mundo; Aethon (100) sigue SIN lápida (es del mod): la paga
+        /// el REGISTRO DEL CAZADOR — y las REPETICIONES (63-99) no leen
+        /// la lápida (una lápida es UNA sola vez): leen los CONTADORES.</summary>
         public static bool BanderaDelMundo(int nivel)
         {
             return nivel switch
@@ -660,10 +737,12 @@ namespace AethonMod.Content.Systems
                 30 => NPC.downedMechBoss3,      // Skeletron Prime
                 32 => NPC.downedPlantBoss,      // Plantera
                 35 => NPC.downedGolemBoss,
+                37 => NPC.downedFishron,        // v6.88 — EL DUQUE (la puerta nueva)
                 38 => NPC.downedEmpressOfLight, // la Emperatriz de la Luz
                 45 => NPC.downedAncientCultist, // la antesala de la cima
                 50 => NPC.downedMoonlord,       // LA CIMA de vanilla: el Señor de la Luna
-                // 59 — Aethon: sin bandera de mundo (la paga el cazador)
+                // 63-99 — las REPETICIONES: sin lápida (la pagan los contadores)
+                // 100 — Aethon: sin bandera de mundo (la paga el cazador)
                 _  => false,
             };
         }
@@ -672,20 +751,36 @@ namespace AethonMod.Content.Systems
         /// retroactivo de la letra: la bandera del mundo O el registro
         /// del cazador — mátalo cuando quieras, ANTES o DESPUÉS de
         /// llegar al nivel: cuenta igual). Sin puerta: siempre true.
-        /// v6.86 — Aethon (59) además cuenta por SUS VECES (el contador
-        /// de la Ira sirve de bandera: una victoria = puerta paga).</summary>
+        /// v6.88 — LAS REPETICIONES: las puertas de Moon Lord (63+) y
+        /// la Emperatriz (67+) leen SUS CONTADORES (una lápide es UNA
+        /// vez; el contador es para siempre); y LA CIMA COMPUESTA (100):
+        /// Aethon ≥ 1 Y Moon Lord ≥ 10 Y Emperatriz ≥ 5 — la caza
+        /// completa ANTES de subir a la cima donde nace LA IRA.</summary>
         public static bool JefeYaCaido(Player p, int nivel)
         {
             JefeDelCamino? j = JefeDeNivel(nivel);
             if (j == null) return true;
-            if (BanderaDelMundo(nivel)) return true;
+            if (BanderaDelMundo(nivel) && j.Value.Veces <= 1) return true;
             if (p != null && p.active)
             {
                 var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
                 if (cazador != null)
                 {
-                    if (nivel == 59 && cazador.VecesAethon >= 1) return true;
-                    if (cazador.Caido(nivel)) return true;
+                    switch (j.Value.Contador)
+                    {
+                        case 1:  // Moon Lord (las repetidas de la 63 a la 99)
+                            return cazador.VecesMoonLord >= j.Value.Veces;
+                        case 2:  // la Emperatriz (las repetidas de la 67 a la 91)
+                            return cazador.VecesEmperatriz >= j.Value.Veces;
+                        case 3:  // LA CIMA COMPUESTA (100): Aethon + ML×10 + EoL×5
+                            return cazador.VecesAethon >= 1
+                                && cazador.VecesMoonLord >= 10
+                                && cazador.VecesEmperatriz >= 5;
+                        default:
+                            if (nivel == 100 && cazador.VecesAethon >= 1) return true;
+                            if (cazador.Caido(nivel)) return true;
+                            return false;
+                    }
                 }
             }
             return false;

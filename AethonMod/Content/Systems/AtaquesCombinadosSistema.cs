@@ -522,13 +522,13 @@ namespace AethonMod.Content.Systems
                 // de más: ×3 con 1 · ×4,5 con 2 · ×6 con 3). El DESPERTAR
                 // ya viaja DENTRO del daño del ojo líder (se hornea al
                 // invocarlo — DanoOjosDelEterno: cuenta UNA vez), y el
-                // ×1,25 del 50 se cobra UNA vez vía Bonus50Vivo (la
+                // v6.88: el HITO del escuadrón (cada 20 niveles) se cobra UNA vez vía BonusHitoVivo (la
                 // auditoría de la .51.9: antes el despertar se multiplicaba
                 // DOS veces aquí).
                 int anillos = DespertarGrimorio.AnillosDelSol(despertar);
                 int danoSol = Math.Max(1, (int)(danoRayo * 3f *
                     (1f + 0.5f * (anillos - 1)) *
-                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.BonusHitoVivo(lider)));
 
                 // EL RAYO CONVERGENTE: 2 SEGUNDOS de ceremonia ENCIMA DEL
                 // JUGADOR — al cumplir, EL SOL nace EN SU PUNTO CENTRAL
@@ -604,8 +604,8 @@ namespace AethonMod.Content.Systems
                 // celebrantes que abren la puerta (×1,45 en ascendidos).
                 // v6.51.9 — LA AUDITORÍA: el DESPERTAR ya vive dentro del
                 // daño del ojo líder (horneado al invocarlo — DanoOjos
-                // DelEterno) y NO se vuelve a multiplicar aquí; el ×1,25
-                // del 50 se cobra UNA vez vía Bonus50Vivo.
+                // DelEterno) y NO se vuelve a multiplicar aquí; v6.88: el
+                // HITO del escuadrón (cada 20 niveles) se cobra UNA vez vía BonusHitoVivo.
                 Projectile lider = ElMasDespierto(mejorados);
                 if (lider == null) return false;
                 // v6.68 — LA VUELTA A CASA: el daño del conjuro vuelve a
@@ -619,7 +619,7 @@ namespace AethonMod.Content.Systems
                 int danoRayo = Math.Max(1, (int)(lider.damage *
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
                 int dano = Math.Max(1, (int)(danoRayo * (ascendidos ? 4.5f : 3.2f) *
-                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.BonusHitoVivo(lider)));
 
                 // EL RAYO CONVERGENTE: 3 SEGUNDOS de ceremonia — al
                 // cumplir, la puerta (el agujero rúnico al azar — los
@@ -699,9 +699,9 @@ namespace AethonMod.Content.Systems
                     WeaponScaling.MinionContactDamageMult(nivelOjo) * multMejoras));
                 // v6.51.9 — LA AUDITORÍA: igual que el sol y los agujeros —
                 // el despertar vive DENTRO del daño del líder (horneado) y
-                // el ×1,25 del 50 se cobra UNA vez vía Bonus50Vivo.
+                // el v6.88: el HITO del escuadrón (cada 20 niveles) se cobra UNA vez vía BonusHitoVivo.
                 int dano = Math.Max(1, (int)(danoRayo * 6.5f *
-                    global::AethonMod.Content.Projectiles.OjoEternoMinion.Bonus50Vivo(lider)));
+                    global::AethonMod.Content.Projectiles.OjoEternoMinion.BonusHitoVivo(lider)));
 
                 // EL RAYO CONVERGENTE DEL SUPREMO: 3 segundos — al cumplir,
                 // el SUPREMO o el AURORA (al azar) se abre EN EL PUNTO

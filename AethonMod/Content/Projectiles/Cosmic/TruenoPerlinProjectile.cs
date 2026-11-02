@@ -87,6 +87,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
+            // v6.88 — EL FLUFF DEL RAYO LEJANO (la letra: «siento que a
+            // veces el rayo perlin de los minions no se ve cuando
+            // atacan a objetivos un poco lejos»): el CENTRO de este
+            // proyectil es su ANCLA (la PRESA — hasta 1.500 px del ojo);
+            // el culling de vanilla solo dibuja el proyectil si su centro
+            // está en pantalla — presa fuera de la vista = PreDraw JAMÁS
+            // corría y el rayo NACÍA INVISIBLE (el daño golpeaba igual:
+            // el síntoma perfecto). 2.600 px de fluff: cubre TODO el
+            // rango de detección (500 + nivel/10·100, tope 1.500) con
+            // margen — la casa ya usa el truco (RayosPrueba: 5000,
+            // MiradaSolyn: 8000); este rayo era el único largo sin él.
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 2600;
         }
 
         public override void SetDefaults()

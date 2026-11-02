@@ -608,9 +608,17 @@ namespace AethonMod.Content.VFX
                                 if (peso > 0.02f)
                                 {
                                     Vector2 pos = (a + dir * avance - ancla) * zoom * k;
-                                    // v6.85 — ±2,6·radio: el glow que respira
-                                    // alrededor del conducto (antes radio seco).
-                                    float esc = radio * 2.6f * zoom.X * k / medioGlow.X;
+                                    // v6.88 — EL GLOW DEL GRUPO: ×1,25·radio (el
+                                    //     aire PEGADO al conducto — la cura del
+                                    //     «se ve en toda la pantalla pero el arma
+                                    //     se queda fuera»: la v6.85 lo pintaba a
+                                    //     ±2,6·radio y con las bocas de 3.000 px
+                                    //     de la .85 el campo inundaba la vista
+                                    //     entera; ahora la cápsula la dicta el
+                                    //     ARMA (boca ×1,35 en el registro) y el
+                                    //     pintor la respeta — el hervor vive en
+                                    //     la franja del haz, y solo ahí).
+                                    float esc = radio * 1.25f * zoom.X * k / medioGlow.X;
                                     Main.spriteBatch.Draw(glow, pos, null,
                                         new Color(new Vector3(peso * 0.42f, 0f, 0f)),
                                         0f, medioGlow, esc, SpriteEffects.None, 0f);

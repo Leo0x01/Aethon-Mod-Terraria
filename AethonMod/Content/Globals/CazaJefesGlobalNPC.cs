@@ -62,6 +62,19 @@ namespace AethonMod.Content.Globals
                         if (cazador != null) cazador.VecesMoonLord++;
                     }
                 }
+                // v6.88 — EL CONTADOR DE LA EMPERATRIZ (la letra de la
+                //     cima: «5 emperatris de la luz»): lo pagan las
+                //     pantallas vivas, como el de Moon Lord.
+                if (npc.type == NPCID.HallowBoss)
+                {
+                    for (int i = 0; i < Main.maxPlayers; i++)
+                    {
+                        Player p = Main.player[i];
+                        if (p == null || !p.active || p.dead) continue;
+                        var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
+                        if (cazador != null) cazador.VecesEmperatriz++;
+                    }
+                }
                 if (npc.type == ModContent.NPCType<NPCs.AethonBoss>() ||
                     npc.type == ModContent.NPCType<NPCs.AethonBossOscuro>() ||
                     npc.type == ModContent.NPCType<NPCs.AethonBossFusionado>())
@@ -73,7 +86,7 @@ namespace AethonMod.Content.Globals
                         var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
                         if (cazador == null) continue;
                         cazador.VecesAethon++;
-                        cazador.Pagar(59);   // LA PUERTA DEL RECUERDO LEJANO
+                        cazador.Pagar(100);  // v6.88 — LA CIMA COMPUESTA (era la 59: Aethon sube a la CIEN)
                     }
                 }
 
@@ -85,6 +98,28 @@ namespace AethonMod.Content.Globals
                 //  tenga el suyo: CanPickup filtra al resto — 1 por
                 //  cazador, para siempre).
                 // ============================================================
+                // ============================================================
+                //  v6.88 — LAS BAJAS DEL LIBRO AZUL (el arma del árbol de
+                //  habilidades sube de nivel con las bajas de quien la
+                //  lleva: 8 por nivel, tope 100 — los puntos del árbol
+                //  nacen de SU nivel (SkillTreePlayer), no del despertar.
+                // ============================================================
+                try
+                {
+                    int k = npc.lastInteraction;
+                    if (k >= 0 && k < Main.maxPlayers)
+                    {
+                        Player pj = Main.player[k];
+                        if (pj != null && pj.active)
+                        {
+                            var st = pj.GetModPlayer<Players.SkillTreePlayer>();
+                            if (st != null && st.LlevaLibroAzul())
+                                st.RegistrarBajaLibroAzul();
+                        }
+                    }
+                }
+                catch { }
+
                 if (npc.type == NPCID.WallofFlesh && Main.rand.NextBool(2))
                 {
                     int idx = Item.NewItem(npc.GetSource_Loot(), npc.Hitbox,
@@ -110,10 +145,13 @@ namespace AethonMod.Content.Globals
                 NPCID.BrainofCthulhu       => 8,   // …o su primo carmesí
                 NPCID.QueenBee             => 10,
                 NPCID.SkeletronHead        => 13,
-                // v6.86 — Deerclops y el Duque Fishron MURIERON como puerta
-                // (la letra: «el jefe Deerclop no lo incluyas en la
-                // progresion» + «el jefe duke fishron no necesitas
-                // incluirlo») — sus líneas ya no existen.
+                // v6.88 — EL DUQUE FISHRON VUELVE COMO PUERTA (la letra
+                // nueva: «ya que como requisitos pides items del Duque
+                // Fishron entonces incluye a ese jefe entre los
+                // requisitos») — la 37, con sus armas en el MISMO
+                // peldaño (puerta Y botín). Deerclops sigue FUERA (la
+                // letra v6.86 lo excluyó y nadie lo reclamó).
+                NPCID.DukeFishron          => 37,
                 NPCID.WallofFlesh          => 20,
                 NPCID.QueenSlimeBoss       => 23,
                 NPCID.Retinazer           => 25,   // los Gemelos: cada lente…

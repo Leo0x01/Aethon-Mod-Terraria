@@ -349,18 +349,31 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                         : ModContent.ProjectileType<CosmicBlackHoleProjectile>(),
                         2 => ascendidos ? ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>()
                                         : ModContent.ProjectileType<UmbralBlackHoleProjectile>(),
-                        // v6.87 — LA LETRA: «cuando el grimorio lance de
-                        // forma aleatoria su agujero negro rúnico de bruma
-                        // debe ser este nuevo que modificaste y agregaste
-                        // un anillo rúnico» — LA BRUMA DEL RITUAL es
-                        // SIEMPRE la del BASTÓN (BrumaBlackHoleProjectile,
-                        // el renderer con EL ANILLO RÚNICO v6.82), SIN
-                        // importar el despertar: antes, con AgujerosAscendidos
-                        // (nivel 85+) el ritual servía al BrumaAscendido
-                        // (doble círculo v6.23 — SIN el anillo nuevo) y el
-                        // usuario lo veía «viejo». Las otras tres familias
-                        // conservan su progresión ascendida.
-                        _ => ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
+                        // v6.88 — LA BRUMA POR LIGAS (la letra: «el
+                        // agujero negro runico con un solo anillo va junto
+                        // a los agujeros negros de un solo anillo, el
+                        // Ascendido va con los Ascendidos, ten en cuenta
+                        // que son dos tipos diferentes de agujeros negros
+                        // en niveles diferentes… el bruma normal solo debe
+                        // lanzarse con los otros agujeros negros runicos
+                        // normales de forma aleatoria; el bruma Ascendido,
+                        // este solo debe lanzarse de forma aleatoria con
+                        // los otros Ascendidos»): LA BRUMA NORMAL es la
+                        // del BASTÓN (BrumaBlackHoleProjectile, el renderer
+                        // con EL ANILLO RÚNICO v6.82 — 1 anillo, la liga
+                        // de los de UN anillo) y corre con Olvido/Cósmico/
+                        // Umbral NORMALES; LA BRUMA ASCENDIDA
+                        // (BrumaAscendidoBlackHoleProjectile — doble círculo
+                        // rúnico: 8 teal a 2,55R + 6 blancas a 3,15R
+                        // contrarroto) corre con los OTROS ASCENDIDOS.
+                        // La v6.87 la lanzaba SIEMPRE del bastón: con
+                        // despertar 60+ la bruma salía de la liga BAJA
+                        // (el hueco real de la v6.86 — con 85+ servía al
+                        // Ascendido SIN el anillo nuevo y el usuario lo
+                        // veía «viejo»).
+                        _ => ascendidos
+                            ? ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>()
+                            : ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
                     };
                 }
 

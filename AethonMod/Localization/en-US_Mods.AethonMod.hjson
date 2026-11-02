@@ -9,36 +9,30 @@ Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
 	LibroCorrupto: {
-		DisplayName: Corrupt Book
+		DisplayName: Libro Corrupto
 		Tooltip:
 			'''
-			✦ A book shaped like the dungeon's… but BLACK.
-			· Found: 1% breaking books in the dungeon · 1% opening its chests · 50% the Wall of Flesh
-			· Only 1 per player — and the grimoire wants it ON THE GROUND
-			· Devoured below awakening 20: that gate is paid FOREVER
+			✦ Un libro con la misma forma que los de la mazmorra… pero NEGRO.
+			· Se consigue: 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres · 50% la Muralla de Carne
+			· Solo 1 por jugador — y el grimorio lo quiere EN EL SUELO
+			· Devorado por debajo del despertar 20: la puerta del 20 queda paga PARA SIEMPRE
 			'''
 	}
 
 	AltarOfrendasItem: {
-		DisplayName: Offering Altar
+		DisplayName: Altar de Ofrendas
 		Tooltip:
 			'''
-			✦ The altar of things that SPARE (research: Heroic Weapons)
-			· Place it and right-click: the grimoire devours what it does NOT need and is NOT corrupted
-			· The devoured becomes OFFERING POINTS: they pay up to 30% of the rung's essences
+			✦ El altar de las cosas que SOBRAN (investigación: Heroic Weapons)
+			· Colócalo y hazle clic derecho: el grimorio devora lo que NO necesita y NO está corrupto
+			· Lo devorado se vuelve PUNTOS DE OFRENDA: pagan hasta el 30% de las esencias del peldaño
 			'''
 	}
 
-	CodiceHabilidades: {
-		DisplayName: The Skills Codex
-		Tooltip:
-			'''
-			✦ The bearer's tree (research: Umbra + Path of Terraria)
-			· Right-click (or left): opens THE SKILL TREE
-			· Points are born from the awakening: 3 + 1 every 5 levels
-			· Click to allocate · right-click to refund (without breaking the tree)
-			'''
-	}
+	LibroAzul: {
+	DisplayName: Libro Azul
+	Tooltip: 'El arma del árbol de habilidades.\nClic derecho: abre el ÁRBOL DE HABILIDADES (los puntos nacen del nivel de ESTE arma: 3 + nivel/5).\nClic izquierdo: la descarga azul (daño 12 + nivel·2).\nSube de nivel con las bajas de su portador (8 por nivel, tope 100).\nNada que ver con el grimorio: el árbol es del LIBRO.'
+}
 
 	// v6.50.117 — GENESIS PURGE: Items.GenesisShard and
 	// Items.AncientAltarItem died with the shard and the altar
@@ -605,25 +599,25 @@ Items: {
 
 	AgujeroAbsolutoStaff: {
 		// v6.82: beyond the Supremes (4 runic rings)
-		DisplayName: Absolute Hole Staff
+		DisplayName: Bastón del Agujero Absoluto
 		Tooltip: ""
 	}
 
 	RequiemDelPulsarStaff: {
 		// v6.82: the cosmic weapon (the rotating lighthouse)
-		DisplayName: Pulsar Requiem
+		DisplayName: Requiem del Púlsar
 		Tooltip: ""
 	}
 
 	CompasRunico: {
 		// v6.82: clicker #1 (the constellation every 8 clicks)
-		DisplayName: The Runic Compass
+		DisplayName: El Compás Rúnico
 		Tooltip: ""
 	}
 
 	FuriaSolarClicker: {
 		// v6.82: clicker #2 (the nova every 12 clicks)
-		DisplayName: The Solar Fury
+		DisplayName: La Furia Solar
 		Tooltip: ""
 	}
 
@@ -1975,7 +1969,7 @@ Items: {
 			'''
 	}
 
-	ArmaCorruptaTag: Corrupto
+	ArmaCorruptaTag: (Corrupto)
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
 	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
@@ -2076,54 +2070,54 @@ Items: {
 	}
 
 	ColmilloDoradoStaff: {
-		DisplayName: The Golden Fang
+		DisplayName: El Colmillo Dorado
 		Tooltip:
 			'''
-			R7 — ENERGY RAYS FROM THE SKY: 3 golden strikes on the enemies
-			nearest the cursor (telegraph → double bolt → damage window →
-			afterglow). Right click: THE FANG'S JUDGMENT (6 rays in a ring).
-			Test weapon: 0 mana.
+			R7 — los RAYOS DE ENERGÍA DEL CIELO: 3 rayos dorados sobre los
+			enemigos más cercanos al cursor (presagio → doble bolt → ventana de
+			daño → resplandor). Clic derecho: EL JUICIO DEL COLMILLO (6 rayos en
+			anillo). Arma de pruebas: 0 maná.
 			'''
 	}
 
 	RelicarioDelAvispon: {
-		DisplayName: The Hornet's Reliquary
+		DisplayName: El Relicario del Avispón
 		Tooltip:
 			'''
-			R1 — press the Solar Reliquary key (L): 8 s of YELLOW SOLAR AURA
-			(+12 % damage/speed/crit) at the cost of +10 % damage taken and
-			drain. 45 s cooldown. Passives: +35 % speed and flight.
+			R1 — pulsa la tecla del Relicario Solar (L): 8 s de AURA SOLAR
+			amarilla (+12 % daño/velocidad/crít) a cambio de +10 % de daño
+			recibido y drenaje. 45 s de recarga. Pasivas: +35 % velocidad y vuelo.
 			'''
 	}
 
 	GrilletesDeAndromeda: {
-		DisplayName: Andromeda's Shackles
+		DisplayName: Los Grilletes de Andrómeda
 		Tooltip:
 			'''
-			R9 — turns spent mana into a FORCE FIELD: every 100 mana → +20
-			shield (max 100). With shield: damage taken ×0.85. When a charge
-			breaks: restores 50 mana.
+			R9 — convierte el maná gastado en un CAMPO DE FUERZA: cada 100 de
+			maná → +20 de escudo (máx 100). Con escudo: daño recibido ×0,85.
+			Al romperse una carga: restaura 50 de maná.
 			'''
 	}
 
 	SolEnMiniaturaStaff: {
-		DisplayName: The Miniature Sun
+		DisplayName: El Sol en Miniatura
 		Tooltip:
 			'''
-			R3 — XiHe's sun (MEAC): a minion with a thermal core and 2 golden
-			counter-rotating rings; every 45 ticks it telegraphs and fires its
-			golden laser. PERSISTENT: survives death and logout (dismiss with
-			right click on its buff).
+			R3 — el sol de XiHe (MEAC): un minion con núcleo térmico y 2 anillos
+			dorados contra-rotantes; cada 45 ticks telegrafía y descarga su
+			láser dorado. PERSISTENTE: sobrevive a la muerte y a salir de la
+			partida (se despide con clic derecho en su buff).
 			'''
 	}
 
 	MiradaSolyn: {
-		DisplayName: Solyn's Gaze
+		DisplayName: La Mirada de Solyn
 		Tooltip:
 			'''
-			R8 — the energy beam: hold click for 0.75 s (the stellar charge) and
-			release the 5,600 px BURST that sweeps after the mouse — pink core,
-			golden spine, dendritic filaments and a 14 Hz heartbeat. 0 mana.
+			R8 — el rayo de energía: mantén el clic 0,75 s (la carga estelar) y
+			suelta la RÁFAGA de 5.600 px que barre tras el ratón — núcleo rosa,
+			espina dorada, filamentos dendríticos y latido de 14 Hz. 0 maná.
 			'''
 	}
 
@@ -2131,11 +2125,11 @@ Items: {
 		DisplayName: La Bolsa de las Investigaciones
 		Tooltip:
 			'''
-			What was born from STUDYING the greats: first the two
-			CLICKERS from v6.82 (The Runic Compass and the Solar Fury),
-			and from then on, EVERYTHING born from the mod's
-			research (Bombus Apis, VFX+, MEAC, Heroic Weapons, Umbra,
-			Path of Terraria, the sky rays, Solyn, the Shackles…).
+			Lo que nació de ESTUDIAR a los grandes: primero los dos
+			CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
+			y de ahí en adelante, TODO lo que nazca de las investigaciones
+			del mod (Bombus Apis, VFX+, MEAC, Heroic Weapons, Umbra, Path
+			of Terraria, los rayos del cielo, Solyn, los Grilletes…).
 			'''
 	}
 
@@ -2364,9 +2358,9 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	OjoEternoMinion.DisplayName: El Ojo del Eterno
-	AgujeroAbsolutoBlackHoleProjectile.DisplayName: The Absolute Hole
-	RequiemPulsarProjectile.DisplayName: Requiem Star
-	ClickerGolpeProjectile.DisplayName: The Click Strike
+	AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
+	RequiemPulsarProjectile.DisplayName: Estrella del Requiem
+	ClickerGolpeProjectile.DisplayName: El Golpe del Clic
 	AnillosSingularesHalo.DisplayName: Anillos del Horizonte
 	NebulaJellyfishMinion.DisplayName: Medusa Nebular
 	NebulaLightning.DisplayName: Rayo Nebular
@@ -2569,13 +2563,13 @@ Buffs: {
 	}
 
 	RelicarioCdBuff: {
-		DisplayName: Reliquary recharge
-		Description: The sun is recharging
+		DisplayName: Recarga del relicario
+		Description: El sol se está recargando
 	}
 
 	SolEnMiniaturaBuff: {
-		DisplayName: The Miniature Sun
-		Description: A miniature sun orbits around you
+		DisplayName: El Sol en Miniatura
+		Description: Un sol en miniatura orbita a tu alrededor
 	}
 }
 
@@ -2824,7 +2818,7 @@ PaginaEnBlanco: {
 }
 
 Hambre: {
-	Estatua: This is just an illusion… it makes me MORE hungry.
+	Estatua: «Esto es solo una ilusión… me da MÁS hambre.»
 	Barra: Hambre {0}
 	Calmado: El ojo te observa, sereno. Parpadea cuando quiere.
 	Inquieto: Parpadea cada vez más rápido… algo le falta.
@@ -2934,7 +2928,7 @@ Despertar: {
 	Voz3: Cada despertar me recuerda lo que era antes.
 	Voz4: (el libro se estremece de gusto) Eso. MÁS de eso.
 	OjosCerrados: ✦ El escuadrón aún duerme: se necesita NIVEL {0} para el primer ojo.
-	MejorasSelladas: ✦ Upgrades are born with THE AWAKENING (10/40/70/80). Current: {0}.
+	MejorasSelladas: ✦ Las mejoras nacen con EL DESPERTAR (10/40/70/80). Actual: {0}.
 	NuevoOjo: ✧ ¡El grimorio puede invocar un OJO NUEVO! (el número {0} del escuadrón)
 	CerrojoEsbirros: ✦ El grimorio no comparte su cielo: con sus ojos velando, ningún otro esbirro responde.
 	// v6.51.11 — THE GROUND TABLE + THE BEARER'S FEAST: the book eats
@@ -2963,32 +2957,32 @@ Despertar: {
 	ReqArmaLimpia: Requiere un arma SIN corromper
 	NaceCorrupta: Nace CORRUPTA: +5% a TODAS sus estadísticas · sin etiquetas ni reforge
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario
-	HitoMejora1: ✧ AWAKENING 10: the eyes' UPGRADE 1 unlocked!
-	HitoSol: ✧ AWAKENING 15: TWO UPGRADED EYES forge a RUNIC SUN with 1 ring! (2/min)
-	HitoMascota: ✧ AWAKENING 20: THE GRIMOIRE SPITS OUT THE MINI-GRIMOIRE as your pet!
-	HitoAgujeros: ✧ AWAKENING 30: FIVE UPGRADED EYES open a random RUNIC BLACK HOLE! (1/min)
-	HitoMejora2: ✧ AWAKENING 40: the eyes' UPGRADE 2 unlocked!
-	HitoSol2: ✧ AWAKENING 50: the sun gains its SECOND ring and rises 3 times per minute!
-	HitoAscendidos: ✧ AWAKENING 60: the black holes ASCEND — even more damage!
-	HitoMejora3: ✧ AWAKENING 70: the eyes' UPGRADE 3 unlocked!
-	HitoSol3: ✧ AWAKENING 75: the THREE-RING sun, 4 times per minute!
-	HitoMejora4: ✧ AWAKENING 80: the FINAL upgrade of the eyes!
-	HitoAgujeros2: ✧ AWAKENING 85: black holes are born TWICE per minute!
-	HitoSupremo: ✧ AWAKENING 90: EIGHT EYES with upgrade 4 open THE SUPREME or the SUPREME AURORA!
-	HitoMaximo: ✧✧ AWAKENING 100: THE WRATH OF AN OUTER BEING fully awakens… and now demands its hunt: Moon Lord 5 times and Aethon once. THE BEAM answers!
-	CaminoMejora1: the eyes' UPGRADE 1 (+50% damage to the whole squad)
-	CaminoSol: the RUNIC SUN with 1 ring (2 upgraded eyes, 2/min)
-	CaminoMascota: THE PET — the grimoire spits out the mini-grimoire
-	CaminoAgujeros: the RUNIC BLACK HOLES (5 upgraded eyes, 1/min)
-	CaminoMejora2: the eyes' UPGRADE 2
-	CaminoSol2: the sun with 2 RINGS (3/min)
-	CaminoAscendidos: the ASCENDED holes (more damage)
-	CaminoMejora3: the eyes' UPGRADE 3
-	CaminoSol3: the sun with 3 RINGS (4/min)
-	CaminoMejora4: the FINAL upgrade of the eyes
-	CaminoAgujeros2: holes 2/min
-	CaminoSupremo: THE SUPREME/AURORA (8 eyes with upgrade 4)
-	CaminoMaximo: THE WRATH OF AN OUTER BEING — the squad's circle summons THE BEAM (damage 1000 + magic + 50% summon)
+	HitoMejora1: ✧ ¡DESPERTAR 10: la MEJORA 1 de los ojos desbloqueada!
+	HitoSol: ✧ ¡DESPERTAR 15: DOS OJOS mejorados crean un SOL RÚNICO de 1 anillo! (2/min)
+	HitoMascota: ✧ ¡DESPERTAR 20: la mascota minigrimorio + TODO el ataque del escuadrón +10 %!
+	HitoAgujeros: ✧ ¡DESPERTAR 30: CINCO OJOS mejorados abren un AGUJERO RÚNICO al azar! (1/min)
+	HitoMejora2: ✧ ¡DESPERTAR 40: la MEJORA 2 de los ojos + TODO el ataque del escuadrón +15 %!
+	HitoSol2: ✧ ¡DESPERTAR 50: el sol gana su SEGUNDO anillo y nace 3 veces por minuto!
+	HitoAscendidos: ✧ ¡DESPERTAR 60: los agujeros ASCENDIDOS + TODO el ataque del escuadrón +20 %!
+	HitoMejora3: ✧ ¡DESPERTAR 70: la MEJORA 3 de los ojos desbloqueada!
+	HitoSol3: ✧ ¡DESPERTAR 75: el sol de TRES anillos, 4 veces por minuto!
+	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos + TODO el ataque del escuadrón +25 %!
+	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
+	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
+	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el ataque del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
+	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño al escuadrón entero)
+	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
+	CaminoMascota: la mascota + TODO el ataque del escuadrón +10 %
+	CaminoAgujeros: los AGUJEROS NEGROS RÚNICOS (5 ojos mejorados, 1/min)
+	CaminoMejora2: la MEJORA 2 + el escuadrón +15 %
+	CaminoSol2: el sol de 2 ANILLOS (3/min)
+	CaminoAscendidos: los agujeros ASCENDIDOS + el escuadrón +20 %
+	CaminoMejora3: la MEJORA 3 de los ojos
+	CaminoSol3: el sol de 3 ANILLOS (4/min)
+	CaminoMejora4: la MEJORA FINAL + el escuadrón +25 %
+	CaminoAgujeros2: los agujeros 2/min
+	CaminoSupremo: EL SUPREMO/AURORA (8 ojos con la mejora 4)
+	CaminoMaximo: LA IRA DE UN SER EXTERIOR + el escuadrón +30 % — el círculo invoca EL HAZ (daño 1000 + mágico + 50% invocación)
 	Escupidizo:
 		'''
 		Ya somos tres, portador: tú, yo… y ÉL.
@@ -3015,25 +3009,25 @@ Despertar: {
 	JefeEmperatrizDeLuz: la Emperatriz de la Luz
 	JefeCultistaLunatico: el Cultista Lunático
 	JefeSenorDeLaLuna: el Señor de la Luna
-	JefeAethon: Aethon, the fragment of a distant memory
-	PuertaDeCaza: ✦ The table is full… but the grimoire demands its prey: {1} (level {0}). HUNT IT!
+	JefeAethon: Aethon, el fragmento de un recuerdo lejano
+	JefeDuqueFishron: Duque Fishron, el cerdo volador del mar
+	PuertaDeCaza: ✦ La mesa está completa… pero el grimorio exige su presa: {1} (nivel {0}). ¡CÁZALA!
 	// v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
 	// piden que maten a los jefes»): la línea de la puerta de caza en
 	// la LISTA DE REQUISITOS del tooltip — con SU estado.
-	ReqJefeCaido: The step's prey: {0} — DEVOURED
-	ReqJefeViva: The step's prey: {0} — Still ALIVE. The grimoire demands the hunt
+	ReqJefeCaido: La presa del peldaño: {0} — DEVORADO
+	ReqJefeViva: La presa del peldaño: {0} — Todavía VIVO. El grimorio exige su caza
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
-	LibroEnInventario: (the book shudders) I KNOW this one. A CORRUPT BOOK… drop it on the ground, bearer. I WANT a taste.
-	LibroDevorado: (pages licking themselves) The CORRUPT BOOK is mine: the gate of awakening 20 IS BORN PAID. Forever.
-	PuertaLibro: ✦ The table is complete… but the gate of 20 demands its CORRUPT BOOK: get one (1% breaking books or opening chests in the dungeon · 50% the Wall) and drop it before me.
-	ReqLibroDevorado: Corrupt Book: DEVOURED
-	ReqLibroPendiente: Corrupt Book: get one and drop it before the grimoire
-	CreditoPuntos: ✦ The altar pays {0} of the {1} essences of the rung (offering points).
+	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CORRUPTO… déjalo caer al suelo, portador. QUIERO probarlo.
+	LibroDevorado: (páginas que se lamen) El LIBRO CORRUPTO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
+	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CORRUPTO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla) y déjalo caer delante de mí.
+	ReqLibroDevorado: Libro Corrupto: DEVORADO
+	ReqLibroPendiente: Libro Corrupto: consíguelo y déjalo caer delante del grimorio
 	// v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
 	// ítem El Ojo del Cielo — la textura del cielo de la letra).
 	CieloTitulo: EL CIELO DEL DESPERTAR
 	CieloSubtitulo: Las misiones del camino — completa los requisitos de cualquier nivel, aunque aún no estés ahí
-	CieloDespertarActual: Awakening {0}/100
+	CieloDespertarActual: Despertar {0}/100
 	CieloSinLibro: Sin el Grimorio del Eterno encima — el cielo no ve tu escalera
 	CieloPista: Rueda del ratón: desplazar la escalera · clic derecho o [X]: cerrar
 	CieloLaCaza: LA CAZA — los jefes del camino
@@ -3218,7 +3212,7 @@ Armas: {
 	ResonanciaEcos: La resonancia despierta {0} eco(s).
 	GuardianDetenido: El grimorio detiene al guardián en seco: «A ti solo te devoraré UNA vez… con eso me basta.» (+1 nivel)
 	OjoFortalecido: El escuadrón está lleno: el grimorio FORTALECE a un ojo (+{0}% de daño).
-	EscuadronFortalecido: ✧ THE WHOLE SQUAD IS FORTIFIED! ({0} eyes · upgrade {1}: +50% damage each)
+	EscuadronFortalecido: ✧ ¡EL ESCUADRÓN ENTERO SE FORTALECE! ({0} ojos · mejora {1}: +50% de daño cada uno)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 
@@ -3230,7 +3224,7 @@ Diag: {
 	Aura: Emisores de aura (AuraLib): {0}
 	Pulso: Fuerza de pantalla (PulsoLib): {0}
 	Hitstop: Hitstop {0} ticks
-	Calor: Boiling air (CalorLib): {0}
+	Calor: Aire hirviente (CalorLib): {0}
 	Furia: Furia del grimorio: {0}
 	FuriaInactivo: silencio
 	FuriaActiva: oleada {0}/{1} en marcha
@@ -3675,7 +3669,7 @@ Pueblo: {
 Tiles: {
 	AltarDeLaCaida.MapEntry: Altar de la Caída
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
-	AltarOfrendasTile.MapEntry: Offering Altar
+	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 }
 
 Duende: {
@@ -3693,50 +3687,58 @@ Rarities.LegendarioSupremo: Legendario Supremo
 
 Keybinds: {
 	$parentVal: RelicarioSolar: Relicario Solar (L)
-	RelicarioSolar.DisplayName: Relicario Solar
+	// RelicarioSolar.DisplayName: Relicario Solar
 }
 
 Altar: {
-	Titulo: THE OFFERING ALTAR
-	Subtitulo: What's left over feeds the awakening
-	PuntosLibro: Grimoire points: {0}
-	SinLibro: (no grimoire on you)
-	SlotVacio: filler
-	EtiquetaRelleno: THE FILLER — what is NOT needed and NOT corrupted
-	FiltroRelleno: No coins, no essences, no requirements, no favorites. Worth ≥ 5 silver
-	PuntosVivos: Worth {0} points
-	CreditoVivo: Already paid: {0} essences of the rung
-	Ofrendar: OFFER TO THE GRIMORIO
-	Rechazado: ✦ The grimoire refuses that: not valid filler (a requirement, corrupted, sacred or worthless).
-	OfrendaAceptada: ✦ The grimoire devours the offering: +{0} points (total {1}).
+	Titulo: EL ALTAR DE LA CORRUPCIÓN
+	Subtitulo: v6.88 — ya sin vínculo con el grimorio: corrompe armas
+	SlotVacio: arma
+	EtiquetaArma: EL ARMA — limpia y de pelea (no herramienta)
+	FiltroArma: No vale ya corrupta, ni herramienta, ni el grimorio
+	Lista: Lista para corromper
+	YaCorrupta: Ya está corrupta
+	NoArma: Eso no es un arma corruptible
+	Corromper: CORROMPER
+	CorruptaHecha: ✦ {0} nace corrupta: su nombre viste el negro y el brillo morado-negro la cubre.
+}
+	SinLibro: (sin el grimorio encima)
+	SlotVacio: relleno
+	EtiquetaRelleno: EL RELLENO — lo que NO se necesita y NO está corrupto
+	FiltroRelleno: Ni monedas, ni esencias, ni requisitos, ni favoritos. Vale ≥ 5 de plata
+	PuntosVivos: Vale {0} puntos
+	CreditoVivo: Ya pagas: {0} esencias del peldaño
+	Ofrendar: OFRENDAR AL GRIMORIO
+	Rechazado: ✦ El grimorio rechaza eso: no es relleno válido (requisito, corrupto, sagrado o sin valor).
+	OfrendaAceptada: ✦ El grimorio devora la ofrenda: +{0} puntos (total {1}).
 }
 
 Arbol: {
-	Titulo: THE SKILL TREE
-	Puntos: Free: {0} · spent {1}/{2}
-	Ayuda: Click: allocate · right-click: refund · drag the void to pan · wheel to zoom
-	Reset: RESET THE TREE
-	ResetSeguro: SURE? (again)
-	ResetHecho: ✦ The tree returns to its seed: all points refunded.
-	NivelDe: Level {0}/{1}
-	Nodo0: The Bearer's Awakening
-	Desc0: The anchor of the tree — always alive, always free. Everything grows from here.
-	Nodo1: Echo's Edge
-	Desc1: +8% damage (all types) per level.
-	Nodo2: Ink Body
-	Desc2: +20 max life per level.
-	Nodo3: Awakened Mind
-	Desc3: +40 max mana per level.
-	Nodo4: Critical Fang
-	Desc4: +4% critical chance per level.
-	Nodo5: Light Feathers
-	Desc5: +8% movement speed per level.
-	Nodo6: Ink Skin
-	Desc6: +4 defense per level.
-	Nodo7: Cheap Ink
-	Desc7: −10% mana cost per level.
-	Nodo8: Ink Heart
-	Desc8: +1 life/s regeneration per level.
-	Nodo9: THE ECHO OF AETHON
-	Desc9: KEYSTONE: +1 minion slot. The whole tree fits at awakening 100.
+	Titulo: EL ÁRBOL DE HABILIDADES
+	Puntos: Libres: {0} · gastados {1}/{2}
+	Ayuda: Clic: asignar · clic derecho: devolver · arrastra el vacío para mover · rueda para el zoom
+	Reset: REINICIAR EL ÁRBOL
+	ResetSeguro: ¿SEGURO? (otra vez)
+	ResetHecho: ✦ El árbol vuelve a su semilla: todos los puntos devueltos.
+	NivelDe: Nivel {0}/{1}
+	Nodo0: El Libro Azul del Portador
+	Desc0: El ancla del árbol — siempre viva, siempre gratis. Todo crece desde aquí.
+	Nodo1: Filo del Eco
+	Desc1: +8% de daño (todo tipo) por nivel.
+	Nodo2: Cuerpo de Tinta
+	Desc2: +20 de vida máxima por nivel.
+	Nodo3: Mente Despierta
+	Desc3: +40 de maná máximo por nivel.
+	Nodo4: Colmillo Crítico
+	Desc4: +4% de probabilidad de crítico por nivel.
+	Nodo5: Plumas Ligeras
+	Desc5: +8% de velocidad de movimiento por nivel.
+	Nodo6: Piel de Tinta
+	Desc6: +4 de defensa por nivel.
+	Nodo7: Tinta Barata
+	Desc7: −10% de coste de maná por nivel.
+	Nodo8: Corazón de Tinta
+	Desc8: +1 vida/s de regeneración por nivel.
+	Nodo9: EL ECO DE AETHON
+	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
 }

@@ -39,9 +39,9 @@ Projectiles: {
 	AlasAuroraHalo.DisplayName: La Aurora de Tinta
 	SombraPagina3Projectile.DisplayName: La Sombra de la Página III
 	SombraPagina4Projectile.DisplayName: La Sombra de la Página IV
-	AureumSkyStrike.DisplayName: Aureum Sky Strike
-	CampoAndromedaProj.DisplayName: Campo Andromeda Proj
-	SolEnMiniaturaProj.DisplayName: Sol En Miniatura Proj
-	SolynCargaProj.DisplayName: Solyn Carga Proj
-	SolynRayoProj.DisplayName: Solyn Rayo Proj
+	// AureumSkyStrike.DisplayName: Aureum Sky Strike
+	// CampoAndromedaProj.DisplayName: Campo Andromeda Proj
+	// SolEnMiniaturaProj.DisplayName: Sol En Miniatura Proj
+	// SolynCargaProj.DisplayName: Solyn Carga Proj
+	// SolynRayoProj.DisplayName: Solyn Rayo Proj
 }

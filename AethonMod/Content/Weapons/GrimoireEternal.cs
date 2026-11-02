@@ -807,14 +807,10 @@ namespace AethonMod.Content.Weapons
                 int ojoIdx = Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>(),
                     danoOjo, knockback, player.whoAmI, 0f, 0f, level);
-                // v6.51.9 — LA AUDITORÍA DEL ×1,25: si el daño nació con el
-                // bonus del DESPERTAR 50 HORNEADO (DanoOjosDelEterno lo
-                // hornea), se marca — las consumidoras (el rayo del ojo,
-                // los ataques combinados) NO vuelven a multiplicarlo.
-                if (ojoIdx >= 0 && Main.projectile[ojoIdx].ModProjectile
-                        is global::AethonMod.Content.Projectiles.OjoEternoMinion ojoNuevo)
-                    ojoNuevo.Bonus50Horneado =
-                        DespertarGrimorio.NivelDe(player) >= DespertarGrimorio.NivelMax;
+                // v6.88 — EL HORNEADO DEL ×1,25 MURIÓ: el hito del
+                // escuadrón ahora es VIVO (BonusHitoVivo lee el
+                // despertar del dueño CADA tick — nada que marcar al
+                // nacer: el ojo sube con su dueño, hito a hito).
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
             }
@@ -1346,7 +1342,7 @@ namespace AethonMod.Content.Weapons
                 else
                 {
                     tooltips.Add(new TooltipLine(Mod, "WSol",
-                        "[c/78788C:Sol Rúnico: bloqueado — Despertar 7]"));
+                        "[c/78788C:Sol Rúnico: bloqueado — Despertar 15]"));
                 }
                 if (Systems.DespertarGrimorio.AgujerosDisponibles(despertar))
                 {
@@ -1361,7 +1357,7 @@ namespace AethonMod.Content.Weapons
                 else
                 {
                     tooltips.Add(new TooltipLine(Mod, "WAgujeros",
-                        "[c/78788C:Agujeros Negros Rúnicos: bloqueado — Despertar 10]"));
+                        "[c/78788C:Agujeros Negros Rúnicos: bloqueado — Despertar 30]"));
                 }
                 if (Systems.DespertarGrimorio.SupremoDisponible(despertar))
                 {
@@ -1372,7 +1368,7 @@ namespace AethonMod.Content.Weapons
                 else
                 {
                     tooltips.Add(new TooltipLine(Mod, "WSupremo",
-                        "[c/78788C:Supremo / Supremo Aurora: bloqueado — Despertar 45]"));
+                        "[c/78788C:Supremo / Supremo Aurora: bloqueado — Despertar 90]"));
                 }
                 // v6.59 — LA IRA DE UN SER EXTERIOR (el ataque del
                 //     DESPERTAR 50 — LO que consigue el grimorio al final
@@ -1401,12 +1397,27 @@ namespace AethonMod.Content.Weapons
                 else
                 {
                     tooltips.Add(new TooltipLine(Mod, "WIra",
-                        "[c/78788C:Ira de un Ser Exterior: bloqueado — Despertar 50]"));
+                        "[c/78788C:Ira de un Ser Exterior: bloqueado — Despertar 100]"));
                 }
-                if (despertar >= Systems.DespertarGrimorio.NivelMax)
+                // v6.88 — EL HITO DEL ESCUADRÓN EN PORCENTAJE (la letra:
+                //     «dice Despertar 50 todo el ataque del escuadron
+                //     1.25 y mas rapido, creo que deberia decirlo en
+                //     porcentaje y deberia de haber un aumento cada 20
+                //     niveles ademas de que debe decirlo como hito»):
+                //     línea VIVA con el multiplicador actual (y el
+                //     próximo hito en la misma línea).
                 {
-                    tooltips.Add(new TooltipLine(Mod, "WMaximo",
-                        "[c/C49CFF:Despertar 50: TODO el ataque del escuadrón ×1,25 y más rápido]"));
+                    int pct = Systems.DespertarGrimorio.PctEscuadron(despertar);
+                    int proximoHito = 20;
+                    while (proximoHito <= despertar && proximoHito < 100) proximoHito += 20;
+                    string viva = pct > 0
+                        ? $"[c/C49CFF:DESPERTAR {despertar}: TODO el ataque del escuadrón +{pct} %]"
+                        : "[c/78788C:el escuadrón aún no cobra su hito (Despertar 20: +10 %)]";
+                    if (pct > 0 && proximoHito <= Systems.DespertarGrimorio.NivelMax)
+                        viva += $"[c/78788C:  →  hito {proximoHito}: +{Systems.DespertarGrimorio.PctEscuadron(proximoHito)} %]";
+                    else if (pct > 0)
+                        viva += "[c/C49CFF:  — la cima del escuadrón]";
+                    tooltips.Add(new TooltipLine(Mod, "WHitoEscuadron", viva));
                 }
             }
 
@@ -1602,25 +1613,45 @@ namespace AethonMod.Content.Weapons
                         //     siempre creciente). v6.51.11 — CONTADOR
                         //     PARCIAL: el ejemplo de la letra (necesita 70,
                         //     comes 30, faltan 40). ===
+                        // v6.88 — LA ALTERNATIVA MINERAL ES UNA MEZCLA
+                        //     (la letra: «debe ser variada, pedir menos de
+                        //     ese mineral, pero pedir varios al mismo
+                        //     tiempo»): UNA LÍNEA POR GRUPO de la mezcla
+                        //     del peldaño — con su estado (✓ / n·cANT) y
+                        //     los ALTERNATIVOS del grupo como iconos.
                         if (!Systems.DespertarGrimorio.EsNivelMineral(siguiente))
                         {
-                            int tipoAlt = Systems.DespertarGrimorio.MineralDe(siguiente);
-                            int cantAlt = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
-                            bool altOK = devoradaArma || comidosMineral >= cantAlt;
-                            string colAlt = altOK ? colOK : colNo;
-                            string nombreAlt = "—";
-                            try
+                            int[][] gruposAlt = Systems.DespertarGrimorio.GruposMineralDe(siguiente);
+                            int cantAlt = Systems.DespertarGrimorio.CantidadPorGrupo(siguiente);
+                            for (int gi = 0; gi < gruposAlt.Length && gi < 3; gi++)
                             {
-                                var protoAlt = Terraria.ID.ContentSamples.ItemsByType[tipoAlt];
-                                if (protoAlt != null) nombreAlt = protoAlt.Name;
+                                int[] grupo = gruposAlt[gi];
+                                if (grupo == null || grupo.Length == 0) continue;
+                                // el grupo se completa con el índice: los
+                                // pagos ya hechos (OfrendaMineralGrupo)
+                                // cubren los grupos anteriores.
+                                bool grupoPago = devoradaArma ||
+                                    almaLista != null && gi < almaLista.OfrendaMineralGrupo;
+                                bool grupoActual = almaLista != null && !devoradaArma &&
+                                    gi == almaLista.OfrendaMineralGrupo;
+                                int comidos = grupoActual ? Math.Min(almaLista.OfrendaMineral, cantAlt) : 0;
+                                bool altOK = grupoPago;
+                                string colAlt = altOK ? colOK : (grupoActual ? "E8D8FF" : colNo);
+                                var trozosAlt = new System.Collections.Generic.List<string>();
+                                trozosAlt.Add($"[c/{colAlt}:  • {'a' + gi}) la ofrenda mineral:]");
+                                for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
+                                    trozosAlt.Add($"[i:{grupo[ti]}]");
+                                string nombreAlt = "—";
+                                try
+                                {
+                                    var protoAlt = Terraria.ID.ContentSamples.ItemsByType[grupo[0]];
+                                    if (protoAlt != null) nombreAlt = protoAlt.Name;
+                                }
+                                catch { }
+                                trozosAlt.Add($"[c/{colAlt}:{(altOK ? cantAlt : comidos)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
+                                tooltips.Add(new TooltipLine(Mod, "DespertarReq6_" + gi,
+                                    string.Join(" ", trozosAlt)));
                             }
-                            catch { }
-                            var trozosAlt = new System.Collections.Generic.List<string>();
-                            trozosAlt.Add($"[c/{colAlt}:  • O la ofrenda mineral:]");
-                            trozosAlt.Add($"[i:{tipoAlt}]");
-                            trozosAlt.Add($"[c/{colAlt}:{Math.Min(comidosMineral, cantAlt)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReq6",
-                                string.Join(" ", trozosAlt)));
                         }
 
                         // === v6.76 — LA PRESA DEL PELDAÑO (la letra:
@@ -1694,14 +1725,22 @@ namespace AethonMod.Content.Weapons
                         //     Aethon n/1, verde cuando la cima está paga. ===
                         if (siguiente == Systems.DespertarGrimorio.NivelMax)
                         {
+                            // v6.88 — LA CIMA COMPUESTA (la letra: «Aethon
+                            //     debería estar como requisito para el nivel
+                            //     100, junto con 10 señores de la luna y 5
+                            //     emperatris de la luz, ya que en el nivel
+                            //     100 es donde se consigue la habilidad
+                            //     definitiva del grimorio, o sea su ataque
+                            //     definitivo, obtiene Ira de un Ser Exterior»).
                             var cazador = Main.LocalPlayer.GetModPlayer
                                 <global::AethonMod.Content.Players.CazaJefesPlayer>();
                             int mlVeces = cazador?.VecesMoonLord ?? 0;
+                            int eoVeces = cazador?.VecesEmperatriz ?? 0;
                             int aeVeces = cazador?.VecesAethon ?? 0;
-                            bool iraPaga = mlVeces >= 5 && aeVeces >= 1;
+                            bool iraPaga = mlVeces >= 10 && eoVeces >= 5 && aeVeces >= 1;
                             string colIra = iraPaga ? colOK : colNo;
                             tooltips.Add(new TooltipLine(Mod, "DespertarReqIra",
-                                $"[c/{colIra}:  • LA IRA (El Haz): Moon Lord {Math.Min(mlVeces, 5)}/5 · Aethon {Math.Min(aeVeces, 1)}/1{(iraPaga ? "  ✓" : "")}]"));
+                                $"[c/{colIra}:  • LA IRA (El Haz): Moon Lord {Math.Min(mlVeces, 10)}/10 · Emperatriz {Math.Min(eoVeces, 5)}/5 · Aethon {Math.Min(aeVeces, 1)}/1{(iraPaga ? "  ✓" : "")}]"));
                         }
 
                         // === v6.51.11 — LA NOTA FINAL (la comida se sirve
@@ -1715,22 +1754,15 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
                             "[c/78788C:  (con el arma o los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
 
-                        // === v6.86 — LOS PUNTOS DEL ALTAR (la letra del
-                        //     altar: «para que el grimorio pueda consumir
-                        //     cosas que no sean las que necesita y no
-                        //     esten corruptas»): lo que el altar devoró ya
-                        //     vive en el alma del libro — y paga hasta el
-                        //     30 % de las esencias del peldaño. ===
-                        int puntos = almaLista?.ProgresoOfrendas ?? 0;
-                        int credito = almaLista?.CreditoPuntosEsencias ?? 0;
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReqPuntos",
-                            $"[c/78EDBE:  • Puntos de Ofrenda del altar: {puntos} (pagan hasta el 30 % de las esencias)]" +
-                            (credito > 0 ? $"[c/78EDBE: — {credito} esencias ya pagas]" : "")));
+                        // v6.88 — LOS PUNTOS DEL ALTAR MURIERON (la letra:
+                        //     «quita ese requisito de ofrendas en el
+                        //     despertar»): ya no hay línea de puntos — el
+                        //     altar corrompe armas y esta mesa no lo lee.
                     }
                     else
                     {
                         tooltips.Add(new TooltipLine(Mod, "DespertarMax",
-                            "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO (máximo por ahora)]"));
+                            "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO — 100 de 100]"));
                     }
 
                     // === v6.51.9 — SOLO EL PRÓXIMO HITO (la letra: «el

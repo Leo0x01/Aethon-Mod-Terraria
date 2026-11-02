@@ -92,15 +92,21 @@ namespace AethonMod.Content.Globals
         /// viajan al siguiente).
         // ================================================================
 
-        /// <summary>Los PUNTOS DE OFRENDA acumulados por el altar (1 punto
-        /// por cada 10 de plata del valor devorado — viven en el libro y
-        /// viajan con él).</summary>
-        public int ProgresoOfrendas = 0;
+        // ================================================================
+        //  v6.88 — LA ECONOMÍA DE PUNTOS MUERE (la letra: «la funcion del
+        //  altar que implementaste no debe estar ligada al grimorio, asi
+        //  que quita ese requisito de ofrendas en el despertar»):
+        //  ProgresoOfrendas y CreditoPuntosEsencias se extinguen con la
+        //  v6.86. NACE el índice de la MEZCLA mineral (la ofrenda
+        //  variada de la v6.88: «pedir varios al mismo tiempo»).
+        // ================================================================
 
-        /// <summary>El CRÉDITO del peldaño vivo: cuántas ESENCIAS del
-        /// peldaño actual ya están pagas con puntos (muere con la subida
-        /// — el canje se cobra UNA vez, al abrirlo).</summary>
-        public int CreditoPuntosEsencias = 0;
+        /// <summary>v6.88 — EL GRUPO ACTUAL de la mezcla mineral del
+        /// peldaño vivo (0 = el primero de GruposMineralDe): el índice
+        /// del mineral que la mesa está comiendo AHORA. Completo el
+        /// grupo, avanza al siguiente; length = mezcla entera paga.</summary>
+        public int OfrendaMineralGrupo = 0;
+
 
         // === EL PODER DEVORADO (las esencias corruptas) ===
         /// <summary>Cada esencia corrupta tragada: +0,1 % de daño
@@ -597,11 +603,10 @@ namespace AethonMod.Content.Globals
                 if (OfrendaEsencias > 0) tag["almaOfrendaEsencias"] = OfrendaEsencias;
                 if (OfrendaMonedas > 0L) tag["almaOfrendaMonedas"] = OfrendaMonedas;
                 if (OfrendaMineral > 0) tag["almaOfrendaMineral"] = OfrendaMineral;
+                if (OfrendaMineralGrupo > 0) tag["almaOfrendaMineralGrupo"] = OfrendaMineralGrupo;
                 if (OfrendaArma) tag["almaOfrendaArma"] = true;
                 // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                 if (LibroCorruptoConsumido) tag["almaLibroCorrupto"] = true;
-                if (ProgresoOfrendas > 0) tag["almaPuntos"] = ProgresoOfrendas;
-                if (CreditoPuntosEsencias > 0) tag["almaCredito"] = CreditoPuntosEsencias;
                 if (DevoracionExp > 0) tag["almaExp"] = DevoracionExp;
                 if (DevoracionFuerza > 0) tag["almaFuerza"] = DevoracionFuerza;
                 if (DevoracionPrisa > 0) tag["almaPrisa"] = DevoracionPrisa;
@@ -631,11 +636,10 @@ namespace AethonMod.Content.Globals
                 OfrendaEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEsencias")));
                 OfrendaMonedas = System.Math.Max(0L, System.Math.Min(9_999_999L, tag.GetLong("almaOfrendaMonedas")));
                 OfrendaMineral = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaMineral")));
+                OfrendaMineralGrupo = System.Math.Max(0, System.Math.Min(9, tag.GetInt("almaOfrendaMineralGrupo")));
                 OfrendaArma = tag.GetBool("almaOfrendaArma");
                 // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                 LibroCorruptoConsumido = tag.GetBool("almaLibroCorrupto");
-                ProgresoOfrendas = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPuntos")));
-                CreditoPuntosEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaCredito")));
                 DevoracionExp = System.Math.Max(0L, System.Math.Min(999999999L, tag.GetLong("almaExp")));
                 DevoracionFuerza = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaFuerza")));
                 DevoracionPrisa = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaPrisa")));
@@ -659,8 +663,6 @@ namespace AethonMod.Content.Globals
                 OfrendaMineral = 0;
                 OfrendaArma = false;
                 LibroCorruptoConsumido = false;
-                ProgresoOfrendas = 0;
-                CreditoPuntosEsencias = 0;
                 DevoracionExp = 0;
                 DevoracionFuerza = 0;
                 DevoracionPrisa = 0;
@@ -684,7 +686,7 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                writer.Write((byte)3);                    // versión del alma (v6.86: libro + altar)
+                writer.Write((byte)4);                    // versión del alma (v6.88: libro + grupo mineral)
                 writer.Write(NivelDespertar);
                 writer.Write(PetDelDespertar);
                 writer.Write(DevoracionPoder);
@@ -696,8 +698,6 @@ namespace AethonMod.Content.Globals
                 writer.Write(OfrendaArma);
                 // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                 writer.Write(LibroCorruptoConsumido);
-                writer.Write(ProgresoOfrendas);
-                writer.Write(CreditoPuntosEsencias);
                 writer.Write(DevoracionExp);
                 writer.Write(DevoracionFuerza);
                 writer.Write(DevoracionPrisa);
@@ -710,6 +710,7 @@ namespace AethonMod.Content.Globals
                 writer.Write(CorazonEstelar);
                 writer.Write(AlmaVeloz);
                 writer.Write(PunoTitan);
+                writer.Write((byte)OfrendaMineralGrupo);   // v6.88: la mezcla (ver 4)
             }
             catch { writer.Write((byte)0); }
         }
@@ -736,8 +737,6 @@ namespace AethonMod.Content.Globals
                 {
                     // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                     LibroCorruptoConsumido = reader.ReadBoolean();
-                    ProgresoOfrendas = System.Math.Max(0, reader.ReadInt32());
-                    CreditoPuntosEsencias = System.Math.Max(0, reader.ReadInt32());
                 }
                 DevoracionExp = System.Math.Max(0L, reader.ReadInt64());
                 DevoracionFuerza = System.Math.Max(0, reader.ReadInt32());
@@ -751,6 +750,7 @@ namespace AethonMod.Content.Globals
                 CorazonEstelar = System.Math.Max(0, reader.ReadInt32());
                 AlmaVeloz = System.Math.Max(0, reader.ReadInt32());
                 PunoTitan = System.Math.Max(0, reader.ReadInt32());
+                if (ver >= 4) OfrendaMineralGrupo = reader.ReadByte();   // v6.88: la mezcla
             }
             catch { }
         }

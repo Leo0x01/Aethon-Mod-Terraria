@@ -68,6 +68,16 @@ namespace AethonMod.Content.Players
         /// escrita (una sola vez por cazador — jamás dos veces).</summary>
         public bool LegadoMoonLord = false;
 
+        /// <summary>v6.88 — El LEGADO de la Emperatriz: cobra la 1.ª de
+        /// las 5 (una sola vez por cazador).</summary>
+        public bool LegadoEmperatriz = false;
+
+        /// <summary>v6.88 — CUÁNTAS VECES tiró ESTE cazador a la Emperatriz
+        /// de la Luz (la letra de la cima: «5 emperatris de la luz»).
+        /// El legacy: el que ya la tenía muerta al cargar la v6.88 cobra
+        /// 1 de las 5, una sola vez.</summary>
+        public int VecesEmperatriz = 0;
+
         // ================================================================
         //  v6.86 — EL LIBRO CORRUPTO (la letra del peldaño 20): «este
         //  solo se consigue... y solo se puede conseguir 1 por jugador,
@@ -93,6 +103,7 @@ namespace AethonMod.Content.Players
                 if (PuertasPagas.Count > 0)
                     tag["cazaPuertas"] = new List<int>(PuertasPagas);
                 tag["mlVeces"] = VecesMoonLord;
+                tag["eolVeces"] = VecesEmperatriz;
                 tag["aethonVeces"] = VecesAethon;
                 tag["mlLegado"] = LegadoMoonLord;
                 tag["libroUno"] = YaTuvoLibro;
@@ -111,7 +122,9 @@ namespace AethonMod.Content.Players
                         PuertasPagas.Add(nivel);
                 VecesMoonLord = Math.Max(0, Math.Min(999, tag.GetInt("mlVeces")));
                 VecesAethon = Math.Max(0, Math.Min(999, tag.GetInt("aethonVeces")));
+                VecesEmperatriz = Math.Max(0, Math.Min(999, tag.GetInt("eolVeces")));
                 LegadoMoonLord = tag.GetBool("mlLegado");
+                LegadoEmperatriz = tag.GetBool("eolLegado");
                 YaTuvoLibro = tag.GetBool("libroUno");
             }
             catch { PuertasPagas.Clear(); }
@@ -125,11 +138,18 @@ namespace AethonMod.Content.Players
         {
             try
             {
-                if (LegadoMoonLord || VecesMoonLord > 0) { LegadoMoonLord = true; return; }
-                if (NPC.downedMoonlord)
+                if (LegadoMoonLord || VecesMoonLord > 0) { LegadoMoonLord = true; }
+                else if (NPC.downedMoonlord)
                 {
                     VecesMoonLord = 1;
                     LegadoMoonLord = true;
+                }
+                // v6.88 — EL LEGADO DE LA EMPERATRIZ (la cima compuesta
+                //     exige 5: el que ya la mató ANTES cobra 1 de las 5).
+                if (!LegadoEmperatriz && VecesEmperatriz == 0 && NPC.downedEmpressOfLight)
+                {
+                    VecesEmperatriz = 1;
+                    LegadoEmperatriz = true;
                 }
             }
             catch { }
