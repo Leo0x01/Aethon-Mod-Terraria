@@ -349,8 +349,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                         : ModContent.ProjectileType<CosmicBlackHoleProjectile>(),
                         2 => ascendidos ? ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>()
                                         : ModContent.ProjectileType<UmbralBlackHoleProjectile>(),
-                        _ => ascendidos ? ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>()
-                                        : ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
+                        // v6.87 — LA LETRA: «cuando el grimorio lance de
+                        // forma aleatoria su agujero negro rúnico de bruma
+                        // debe ser este nuevo que modificaste y agregaste
+                        // un anillo rúnico» — LA BRUMA DEL RITUAL es
+                        // SIEMPRE la del BASTÓN (BrumaBlackHoleProjectile,
+                        // el renderer con EL ANILLO RÚNICO v6.82), SIN
+                        // importar el despertar: antes, con AgujerosAscendidos
+                        // (nivel 85+) el ritual servía al BrumaAscendido
+                        // (doble círculo v6.23 — SIN el anillo nuevo) y el
+                        // usuario lo veía «viejo». Las otras tres familias
+                        // conservan su progresión ascendida.
+                        _ => ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
                     };
                 }
 

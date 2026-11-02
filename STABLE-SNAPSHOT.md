@@ -1,3 +1,26 @@
+# v6.87 — LA CURA DEL MOD QUE NO CARGABA — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.87 (md5 `f2b0e5cac4a48d642789fa0808cd38fb`, 8.851.448 B) — 487 entradas (+ el highlight del altar), blobs 487/487, EOF exacto, la música del festín NUEVA (1,9 MB), headless 0 excepciones (worldgen + Server started).
+
+## LO QUE PASÓ (la autopsia con evidencia)
+La v6.86 CAÍA AL CARGAR en el juego del usuario: `MissingResourceException: Content/Tiles/AltarOfrendasTile_Highlight` → «Se ha producido un error al cargar AethonMod v6.86 / Los mods se han desactivado automáticamente». El altar activó `HasOutlines` y tModLoader exige el PNG `_Highlight` por convención — nunca se creó. **El mod entero desactivado = TODO invisible**: ni el rayo C, ni las bolsas, ni el agujero nuevo, ni el altar, ni el árbol, ni el escuadrón. NADA estaba roto de verdad — nada pudo verse.
+
+## LA ENTREGA v6.87
+1. **LA CARGA**: el mod VUELVE A CARGAR (el highlight del altar creado — silueta amarilla 36×54) y `audit_assets.py` aprendió las CONVENCIONES (tiles con HasOutlines → _Highlight obligatorio; rutas literales verificadas contra disco): la lección v6.84+v6.86 cerrada para siempre.
+2. **LA BRUMA DEL GRIMORIO**: cuando el ritual del grimorio lanza su agujero de bruma ALEATORIO, ahora es **SIEMPRE el del BASTÓN** (`BrumaBlackHoleProjectile` — el renderer con EL ANILLO RÚNICO v6.82), sin importar el despertar (antes, con 85+, servía al Ascendido SIN el anillo). Las otras 3 familias conservan sus ascendidos.
+3. **EL FESTÍN DESATADO**: la banda sonora rehecha — **152 BPM animada y épica**: latido acelerando → kick/snare/hats + bajo ostinato + cuerdas staccato → CORNO + CORO → puente con arpegios → CLÍMAX con doble kick, arpegios 16avos y la campana inarmónica → cola que empalma con la intro. Síntesis saw-aditiva de la casa, mezcla calibrada por espectro.
+4. **TODO LO DEMÁS (v6.85+v6.86) LLEGA POR FIN**: la escalera 100, el libro corrupto, el altar, el árbol, el escuadrón eterno, las bolsas (el Absoluto EN la de agujeros, los 7 frutos EN la de investigaciones), la cura del calor del rayo C (amplitud 16 px, solape ×4-5, 2 octavas) — verificado contra el .tmod.
+
+## EL PLAYTEST (la lista de la casa)
+(a) [ ] **EL CARTEL ROJO MURIÓ**: el mod carga limpio (sin «error al cargar») — la v6.86 no cargaba NADA.
+(b) [ ] **LAS BOLSAS LLEGAN**: al entrar al mundo — El Cofre del Arsenal (con las 26 dentro: la de Agujeros Negros con EL ABSOLUTO, la de Investigaciones con los 7 frutos) + Alas + Definitivas + Investigaciones + la Llave del Despertar + 99 dummies. Clic derecho en cada bolsa: solo lo que falte.
+(c) [ ] **EL RAYO C HIERVE**: dispara el Rayo de Prueba C — el aire alrededor del haz HIERVE (±16 px en la boca, la cura v6.85 que el usuario jamás pudo ver). F8 para el sello «campo ✓».
+(d) [ ] **LA BRUMA DEL GRIMORIO CON ANILLO**: dispara el ritual combinado hasta que toque la BRUMA — el agujero nace con SU ANILLO RÚNICO (8 runas teal girando) aunque el despertar sea 85+.
+(e) [ ] **LA MÚSICA NUEVA**: activa las oleadas de hambre (la Carnada) — la música ahora es un ASALTO épico a 152 BPM (percusión completa, corno, coro, clímax con doble kick) con la campana del grimorio y el latido del hambre de firma.
+(f) [ ] **EL RESTO DE LA v6.86 POR FIN VISIBLE**: la escalera 100 en El Cielo, el libro corrupto (mazmorra/Muralla), el altar de ofrendas (colócalo: YA TIENE su resaltado del smart cursor — el sprite que faltaba), el códice del árbol, el escuadrón eterno.
+
+---
+
 # v6.86 — EL DESPERTAR DE LAS CIEN PUERTAS — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.86 (md5 `b50130bfdb6210c2ec9c10280bad39ec`, 9.068.405 B) — 486 entradas (6 assets nuevos), blobs 486/486, EOF exacto, 5 .fxc byte-idénticos a v6.85, música intacta, headless 0 excepciones.

@@ -117,3 +117,77 @@ if missing:
     sys.exit(1)
 else:
     print("\n== 0 PNG FALTANTES — TODO ASSET PRESENTE ==")
+
+# ======================================================================
+# v6.87 — LA LECCIÓN v6.86: ASSETS POR CONVENCIÓN + RUTAS LITERALES.
+# El -build empaqueta sin validar assets de contenido; el headless NO
+# carga texturas (server) → el ÚNICO sitio que caza un MissingResource
+# es EL JUEGO DEL USUARIO (v6.84: PNG de proyectil; v6.86: _Highlight
+# del altar — el mod entero desactivado). ESTAS reglas cierran la caja:
+#   A) ModTile con TileID.Sets.HasOutlines[Type]=true → exige
+#      {Texture}_Highlight.png (salvo override HighlightTexture).
+#   B) Toda ruta literal de asset (Request<T>/GetTexture/SoundStyle/
+#      MusicLoader/Effect) debe existir en disco.
+# ======================================================================
+print("\n== v6.87: AUDITORÍA DE CONVENCIONES ==")
+faltantes_conv = []
+
+# --- A) _Highlight de tiles con outlines ---
+highlight_re = re.compile(r'TileID\.Sets\.HasOutlines\s*\[\s*Type\s*\]\s*=\s*true')
+htex_re = re.compile(r'override\s+string\s+HighlightTexture')
+for name, (ns, bases, body, p) in sorted(allcls.items()):
+    if not highlight_re.search(body): continue
+    if htex_re.search(body): continue
+    rel = ns[len('AethonMod.'):] if ns and ns.startswith('AethonMod.') else (ns or '')
+    base_png = os.path.join(ROOT, rel.replace('.', os.sep), name + '.png')
+    hl = os.path.join(ROOT, rel.replace('.', os.sep), name + '_Highlight.png')
+    if not os.path.exists(hl):
+        faltantes_conv.append(f"{ns}/{name}_Highlight.png  (tile con HasOutlines)")
+
+# --- B) rutas literales de assets en código ---
+ruta_re = re.compile(r'"(AethonMod/[\w/\-]+)"')
+exts = ('.png', '.ogg', '.wav', '.mp3', '.fx', '.fxc', '.xnb')
+rutas_vistas = {}
+def sin_comentarios(cs):
+    cs = re.sub(r'/\*.*?\*/', '', cs, flags=re.S)
+    return re.sub(r'//[^\n]*', '', cs)
+for dirpath, dirs, files in os.walk(ROOT):
+    dirs[:] = [d for d in dirs if d not in ('obj', 'bin', 'research', 'tools', 'tests', '_masters')]
+    for f in files:
+        if not f.endswith('.cs'): continue
+        src = sin_comentarios(open(os.path.join(dirpath, f), encoding='utf-8-sig', errors='replace').read())
+        for m in ruta_re.finditer(src):
+            r = m.group(1)
+            # sufijos dinámicos (p.ej. GrimorioHambriento_ + algo): probar el prefijo
+            rutas_vistas.setdefault(r, os.path.join(dirpath, f))
+
+for ruta, csfile in sorted(rutas_vistas.items()):
+    fs = os.path.join(ROOT, ruta[len('AethonMod/'):])
+    if os.path.exists(fs): continue
+    # ¿es prefijo dinámico? (la ruta base + '_' + variable) → verificar que
+    # exista ALGÚN archivo que empiece por el prefijo
+    prefijo = os.path.basename(fs)
+    carpeta = os.path.dirname(fs)
+    dyn = False
+    if os.path.isdir(carpeta):
+        for f in os.listdir(carpeta):
+            if prefijo.endswith('_'):
+                if f.startswith(prefijo): dyn = True; break
+            elif f.startswith(prefijo + '_'): dyn = True; break
+    if dyn: continue
+    # ¿tiene extensión de asset conocida?
+    if any(fs.endswith(e) for e in exts):
+        faltantes_conv.append(f"{ruta}  (rutas literales en {os.path.relpath(csfile, ROOT)})")
+    else:
+        # sin extensión → el juego añade .png/.ogg según el loader: probar
+        if not (os.path.exists(fs + '.png') or os.path.exists(fs + '.ogg')
+                or os.path.exists(fs + '.wav') or os.path.exists(fs + '.fxc')
+                or os.path.exists(fs + '.fx')):
+            faltantes_conv.append(f"{ruta}  (ruta sin asset en {os.path.relpath(csfile, ROOT)})")
+
+if faltantes_conv:
+    print(f"== FALTANTES DE CONVENCIÓN: {len(faltantes_conv)} ==")
+    for f in faltantes_conv: print("  " + f)
+    sys.exit(1)
+else:
+    print("== 0 FALTANTES DE CONVENCIÓN (highlights + rutas literales) ==")
