@@ -500,6 +500,23 @@ namespace AethonMod.Content.Effects
 
             _lensTarget = null;
             _lensTargetB = null;
+
+            // v6.83 — el RT de la captura forzada muere igual.
+            RenderTarget2D targetC = _capturaRetro;
+            if (targetC != null)
+            {
+                try
+                {
+                    Main.QueueMainThreadAction(() =>
+                    {
+                        try { targetC.Dispose(); }
+                        catch { }
+                    });
+                }
+                catch { }
+            }
+            _capturaRetro = null;
+            _capturandoRetro = false;
             _distortionShader = null;
             _shaderFailed = false;
             LensActive = false;
@@ -563,6 +580,90 @@ namespace AethonMod.Content.Effects
         // ================================================================
         //  RENDER DE LA LENTE
         // ================================================================
+        /// <summary>v6.83 — EL RT DE LA CAPTURA FORZADA: el mundo entero
+        /// se dibuja aquí cuando vanilla no captura (Retro/Trippy/
+        /// «Lighting Update Every Frame») y hay lente o calor que componer.
+        /// </summary>
+        private RenderTarget2D _capturaRetro;
+
+        /// <summary>v6.83 — El bind de la captura forzada vive (se toma en
+        /// ModifyTransformMatrix y se consume en RenderLens — par exacto
+        /// por frame).</summary>
+        private bool _capturandoRetro;
+
+        // ================================================================
+        //  v6.83 — LA CAPTURA FORZADA (el corazón del modo sin captura)
+        // ================================================================
+        // LA VERDAD DEL flag2 (Main.DoDraw descompilado):
+        //     flag2 = !(drawToScreen || netMode==2 || flag) && !mapFullscreen
+        //             && Lighting.NotRetro && Filters.Scene.CanCapture()
+        // DOS AJUSTES DE VÍDEO del juego matan la captura SIN aviso (Retro/
+        // Trippy, «Lighting Update Every Frame»): el mundo va directo al
+        // backbuffer y la cadena de filtros JAMÁS corre — ni calor, ni
+        // lente, ni el tinte del cementerio, con CERO errores en el log
+        // («no veo nada» eterno). LA CURA: ESTE hook corre tras el
+        // Clear(Color.Black) y ANTES del primer trazo del mundo (la
+        // ventana limpia del frame — nada bindea RTs entre medias) — si
+        // vanilla no va a capturar y hay lente o calor, BINDEAMOS
+        // NUESTRO RT y TODO el mundo cae ahí; en el punto 36 lo
+        // componemos (TerminarFrameRetro) y lo volcamos al backbuffer.
+        //
+        // LA AUTO-VERIFICACIÓN: si la predicción fallara y vanilla
+        // capturó a pesar de todo, RenderLens lo delata
+        // (_frameEndCapture del frame) y el RT se IGNORA (mandan los
+        // caminos de siempre — la red de seguridad). Y si cualquier
+        // camino de salida no pasa por el punto 36 (menú/mapa — excluidos
+        // por los gates), el flag se resetea en la siguiente llamada:
+        // cero estados colgantes.
+        // ================================================================
+        public override void ModifyTransformMatrix(ref Terraria.Graphics.SpriteViewMatrix Transform)
+        {
+            _capturandoRetro = false;
+            try
+            {
+                if (Main.dedServ || Main.gameMenu || Main.netMode == 2) return;
+                if (Main.mapFullscreen || Main.loadMap) return;
+                if (Terraria.Graphics.Capture.CaptureManager.Instance.Active) return;  // el modo foto manda
+
+                // ¿Vanilla va a capturar? (la MISMA fórmula del flag2 — los
+                // inputs ya están estables: la cadena se decidió en
+                // PostUpdateEverything, antes del draw).
+                bool vanillaCaptura = !Main.drawToScreen && Lighting.NotRetro
+                    && Terraria.Graphics.Effects.Filters.Scene.CanCapture();
+                if (vanillaCaptura) return;   // el camino normal manda
+
+                // ¿Hay algo que componer? (calor o lente — si no, el
+                // backbuffer directo es el comportamiento de siempre).
+                if (!CalorLib.HayCalorVivo && !NecesitaCaptura()) return;
+
+                GraphicsDevice gd = Main.graphics?.GraphicsDevice;
+                if (gd == null) return;
+                int bw = gd.PresentationParameters.BackBufferWidth;
+                int bh = gd.PresentationParameters.BackBufferHeight;
+                if (bw <= 0 || bh <= 0) return;
+                if (_capturaRetro == null || _capturaRetro.IsDisposed ||
+                    _capturaRetro.Width != bw || _capturaRetro.Height != bh)
+                {
+                    if (_capturaRetro != null && !_capturaRetro.IsDisposed)
+                        _capturaRetro.Dispose();   // (hilo principal — el patrón del resize de _lensTarget)
+                    _capturaRetro = new RenderTarget2D(gd, bw, bh, false,
+                        SurfaceFormat.Color, DepthFormat.None, 0,
+                        RenderTargetUsage.DiscardContents);
+                }
+
+                // EL BIND: TODO el mundo de este frame cae en NUESTRO RT
+                // (vanilla haría su Clear negro justo después — el nuestro
+                // es idéntico: fondo negro antes del cielo).
+                gd.SetRenderTarget(_capturaRetro);
+                gd.Clear(Color.Black);
+                _capturandoRetro = true;
+            }
+            catch
+            {
+                _capturandoRetro = false;   // jamás romper el draw de vanilla
+            }
+        }
+
         private void RenderLens()
         {
             // v5.95 — ¿Estuvo activa en el frame anterior? Modo identidad: si
@@ -596,10 +697,25 @@ namespace AethonMod.Content.Effects
 
             bool captureCorrio = _frameEndCapture == Main.GameUpdateCount;
 
+            // ============================================================
+            //  v6.83 — EL FRAME RETRO (la captura forzada): el mundo vive
+            //  en NUESTRO RT (bind de ModifyTransformMatrix) porque este
+            //  frame NO capturó (Retro/Trippy/UpdateEveryFrame) — se
+            //  compone AQUÍ o no se compone JAMÁS. La auto-verificación:
+            //  si vanilla capturó a pesar de la predicción, captureCorrio
+            //  lo delata y el RT se ignora (los caminos de siempre mandan).
+            // ============================================================
+            bool retroVivo = _capturandoRetro && !captureCorrio
+                && _capturaRetro != null && !_capturaRetro.IsDisposed;
+            _capturandoRetro = false;
+
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
-            if (screenSize.X <= 0f || screenSize.Y <= 0f)
+            GraphicsDevice gd = Main.graphics?.GraphicsDevice;
+            if (gd == null || screenSize.X <= 0f || screenSize.Y <= 0f)
             {
                 LensActive = false;
+                if (retroVivo && gd != null)
+                    TerminarFrameRetro(gd, fuentes: false, screenSize);   // (defensa: el mundo SIEMPRE se ve)
                 return;
             }
 
@@ -615,23 +731,20 @@ namespace AethonMod.Content.Effects
                 // Sin fuentes (y sin proyectiles que pintar encima) → no hay
                 // lente: todo se dibuja por el camino normal, fallback total.
                 LensActive = false;
+                // v6.83 — EL FRAME RETRO SIN LENTE: el calor solo (o el
+                // mundo crudo como última defensa) — el frame retro
+                // SIEMPRE termina con el mundo en pantalla.
+                if (retroVivo)
+                    TerminarFrameRetro(gd, fuentes: false, screenSize);
                 return;
             }
 
-            GraphicsDevice gd = Main.graphics.GraphicsDevice;
-            if (gd == null)
-            {
-                LensActive = false;
-                return;
-            }
-
-            // === v6.51.3 — EL VOLCADO SOLO CON FUENTE FRESCA ===
+            // === v6.51.3 — EL VOLCADO SOLO CON FUENTE FRESCA (el camino de
+            //     siempre — SOLO con captura vanilla; el frame retro va
+            //     por TerminarFrameRetro) ===
             // Si este frame capturó (screenTarget fresco) y el hook de
             // EndCapture no pudo componer (su red de seguridad), el camino
             // VIEJO completo sigue vivo: pases de distorsión + volcado.
-            // Si el frame NO capturó, NO se toca NINGÚN render target: el
-            // mundo ya está completo en el backbuffer y solo quedan por
-            // dibujar los proyectiles que se saltaron el pase del mundo.
             if (fuentes && captureCorrio && CanRender())
             {
                 try
@@ -662,6 +775,14 @@ namespace AethonMod.Content.Effects
                 }
             }
 
+            // === v6.83 — EL FRAME RETRO CON LENTE: la lente distorsiona el
+            //     mundo capturado, el calor lo hierve ENCIMA (la MISMA capa
+            //     del camino de filtros) y el volcado final pinta TODO al
+            //     backbuffer — los núcleos van encima en
+            //     DibujarEncimaDeLaLente, como siempre) ===
+            if (retroVivo)
+                TerminarFrameRetro(gd, fuentes && CanRender(), screenSize);
+
             // === LO QUE VIVE ENCIMA DE LA LENTE (los soles, las medusas, los
             //     efectos del agujero, su núcleo y los anillos de las ondas) ===
             DibujarEncimaDeLaLente();
@@ -670,6 +791,79 @@ namespace AethonMod.Content.Effects
             // (fuentes): en modo identidad los proyectiles vuelven al pase del
             // mundo el frame siguiente — transición SIN parpadeos.
             LensActive = fuentes;
+        }
+
+        // ================================================================
+        //  v6.83 — LA SALIDA DEL FRAME RETRO (la composición completa)
+        // ================================================================
+        // El mundo vive en _capturaRetro y la pantalla espera: este método
+        // SIEMPRE deja el mundo compuesto en el BACKBUFFER antes de
+        // volver (lente + calor si toca; el mundo crudo como última
+        // defensa) — TODA salida del frame retro pasa por aquí. El orden
+        // es la MISMA composición del camino de filtros: la lente
+        // distorsiona el mundo, el calor hierve ENCIMA del mundo lensado
+        // (un SOLO draw — el shader del calor pinta el resultado directo
+        // a pantalla), y los núcleos/soles van encima en
+        // DibujarEncimaDeLaLente (que el caller corre después).
+        // ================================================================
+        private void TerminarFrameRetro(GraphicsDevice gd, bool fuentes, Vector2 screenSize)
+        {
+            if (gd == null || _capturaRetro == null || _capturaRetro.IsDisposed) return;
+            try
+            {
+                Texture2D resultado = _capturaRetro;
+
+                // (A) LA LENTE sobre el mundo capturado (si hay fuentes).
+                if (fuentes)
+                {
+                    try
+                    {
+                        RenderTarget2D lensado = RenderPasesDeDistorsion(_capturaRetro, screenSize);
+                        if (lensado != null)
+                            resultado = lensado;
+                    }
+                    catch
+                    {
+                        resultado = _capturaRetro;   // la lente jamás rompe el frame
+                    }
+                }
+
+                // (B) AL BACKBUFFER primero (el pase del calor pinta ahí, y
+                //     re-bindear un RT lo limpiaría en FNA — la lección
+                //     v6.79 aplicada al lensado: jamás re-bindear la fuente).
+                gd.SetRenderTarget(null);
+
+                // (C) EL CALOR — el pase manual: «resultado» (el mundo o el
+                //     mundo lensado) pasa por el shader del calor DIRECTO
+                //     a pantalla — UN draw. Si no puede (o no hay fuentes
+                //     de calor), el blit simple: el mundo SIEMPRE se ve.
+                if (!CalorLib.PaseRetro(gd, resultado))
+                    BlitFullscreen(gd, resultado);
+            }
+            catch
+            {
+                // LA ÚLTIMA DEFENSA: el frame retro jamás puede dejar la
+                // pantalla sin mundo — el blit crudo al backbuffer.
+                try
+                {
+                    gd.SetRenderTarget(null);
+                    BlitFullscreen(gd, _capturaRetro);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>v6.83 — EL BLIT COMPLETO: una textura al 100 % del
+        /// viewport (al backbuffer — la pantalla queda vestida).</summary>
+        private static void BlitFullscreen(GraphicsDevice gd, Texture2D tex)
+        {
+            if (tex == null || tex.IsDisposed) return;
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Matrix.Identity);
+            Main.spriteBatch.Draw(tex,
+                new Rectangle(0, 0, gd.Viewport.Width, gd.Viewport.Height), Color.White);
+            Main.spriteBatch.End();
         }
 
         /// <summary>v6.51.3 — LA RECOLECCIÓN DE FUENTES (el paso 1 de

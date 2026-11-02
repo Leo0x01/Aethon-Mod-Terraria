@@ -182,6 +182,20 @@ namespace AethonMod.Content.VFX
         /// <summary>¿Vive el filtro? (para la telemetría del F8).</summary>
         public static bool Activo => _filtroActivo && !_shaderFallo;
 
+        /// <summary>v6.83 — ¿Hay calor vivo ESTE frame? (lo lee la
+        /// CAPTURA FORZADA del lens system — el bind del RT del modo sin
+        /// captura se decide en ModifyTransformMatrix, antes del draw).</summary>
+        internal static bool HayCalorVivo => !_shaderFallo && !_retroFallo &&
+            _filtro != null && FuentesVivas(Main.GameUpdateCount);
+
+        /// <summary>v6.83 — El frame del ÚLTIMO pase retro (telemetría F8).
+        /// </summary>
+        private static ulong _frameRetro;
+
+        /// <summary>v6.83 — El pase retro murió para siempre (la defensa
+        /// de la casa: cero excepciones por frame).</summary>
+        private static bool _retroFallo;
+
         /// <summary>v6.81 — ¿El filtro está vivo SOLO como FORZADOR de
         /// captura (la lente manda, el campo va vacío)? (F8.)</summary>
         internal static bool PorLente => _porLente;
@@ -338,15 +352,74 @@ namespace AethonMod.Content.VFX
                     return;
                 }
 
-                // === LA FUERZA ADAPTATIVA (VFXCore.FactorCalidad): las
-                //     octavas del hervidero y la CA respiran con los FPS —
-                //     la calidad que se adapta sola (v6.34).
-                float fc = VFXCore.FactorCalidad;
-                float calidad = fc >= 0.9f ? 3f : fc >= 0.72f ? 2f : 1f;
+                // === 1. EL CAMPO DE CALOR (¼) + los sobres del estallido —
+                //     v6.83: la pintura vive en PintarCampo, COMPARTIDA con
+                //     el pase retro (PaseRetro): UN solo corazón, DOS
+                //     caminos de composición. False = este frame no capturó
+                //     (previos vacíos) o los recursos fallaron (PintarCampo
+                //     ya desactivó): nada que vestir.
+                if (!PintarCampo(frame, pantallaAlternativa,
+                        out Vector2 centroCA, out float caFuerza, out float calidad))
+                    return;
 
-                // === EL ESTALLIDO VIVO MÁS FUERTE: el centro de la CA ===
-                Vector2 centroCA = Vector2.Zero;
-                float mejorEnv = 0f;
+                // === 2. LOS PARÁMETROS DEL FILTRO (antes de que la cadena
+                //     corra: orig los aplica ENCIMA de este pase) ===
+                ScreenShaderData sh = _filtro.GetShader();
+                sh.UseTargetPosition(centroCA);
+                // (los nombres existen: el .fxc los declara — verificado
+                // contra el MojoShader real por fx20_validate)
+                sh.Shader.Parameters["uTexturaCampo"].SetValue(_campo);
+                if (_texRuido != null)
+                    sh.Shader.Parameters["uTexturaRuido"].SetValue(_texRuido.Value);
+                sh.Shader.Parameters["uAnchoPx"].SetValue(AnchoPx);
+                sh.Shader.Parameters["uCAFuerza"].SetValue(caFuerza);
+                sh.Shader.Parameters["uCARadio"].SetValue(RadioCA);
+                sh.Shader.Parameters["uConveccion"].SetValue(Conveccion);
+                sh.Shader.Parameters["uCalidad"].SetValue(calidad);
+            }
+            catch
+            {
+                // EL CALOR JAMÁS ROMPE EL FRAME: cualquier cosa que salga
+                // mal apaga el filtro y el juego sigue intacto.
+                Desactivar();
+                _shaderFallo = true;
+            }
+        }
+
+        // ================================================================
+        //  v6.83 — LA PINTURA DEL CAMPO (el corazón compartido)
+        // ================================================================
+        // Lo que v6.78-6.82 pintaba inline en PrepararPaseDeCalor: los
+        // sobres del estallido (el centro de la aberración + su fuerza)
+        // y el campo a ¼ de resolución con TODAS las fuentes. HOY lo
+        // comparten los DOS caminos de composición:
+        //   · EL PASE DE FILTROS (PrepararPaseDeCalor): el filtro de
+        //     cadena «AethonCalor» lo aplica la cadena de vanilla sobre
+        //     el mundo capturado (con captura — iluminación Color/Blanca).
+        //   · EL PASE RETRO (PaseRetro): el pase manual sobre la COPIA
+        //     del backbuffer (sin captura — Retro/Trippy o «Lighting
+        //     Update Every Frame»: ver PaseRetro).
+        // «salida»: el RT al que sale el binding tras pintar — el camino
+        // de filtros pasa el buffer de trabajo de vanilla (la cura
+        // v6.79: la fuente JAMÁS se re-bindea); el retro pasa null (el
+        // binding vuelve a los previos — el backbuffer).
+        // ================================================================
+        private static bool PintarCampo(ulong frame, RenderTarget2D salida,
+            out Vector2 centroCA, out float caFuerza, out float calidad)
+        {
+            // (los outs por defecto — si algo sale mal, cero aberración)
+            centroCA = Vector2.Zero;
+            caFuerza = 0f;
+            calidad = 1f;
+
+            // === LA FUERZA ADAPTATIVA (VFXCore.FactorCalidad): las
+            //     octavas del hervidero y la CA respiran con los FPS —
+            //     la calidad que se adapta sola (v6.34).
+            float fc = VFXCore.FactorCalidad;
+            calidad = fc >= 0.9f ? 3f : fc >= 0.72f ? 2f : 1f;
+
+            // === EL ESTALLIDO VIVO MÁS FUERTE: el centro de la CA ===
+            float mejorEnv = 0f;
                 for (int i = 0; i < MaxEstallido; i++)
                 {
                     if (_estNacido[i] == 0) continue;
@@ -362,7 +435,7 @@ namespace AethonMod.Content.VFX
                         centroCA = _estPos[i];
                     }
                 }
-                float caFuerza = 0f;
+                caFuerza = 0f;
                 for (int i = 0; i < MaxEstallido; i++)
                 {
                     if (_estNacido[i] == 0) continue;
@@ -371,12 +444,12 @@ namespace AethonMod.Content.VFX
                         * MathF.Exp(-edad * 5.5f) * MathF.Min(1f, fc + 0.25f);
                     caFuerza += _estFuerza[i] * env;
                 }
-                if (mejorEnv <= 0f && fuentesFrescas && _nHaz > 0)
+                if (mejorEnv <= 0f && _nHaz > 0)   // (sin estallido: la boca manda — los DOS callers ya verificaron FuentesVivas)
                     centroCA = _hazDesde[0];   // sin estallido: la boca manda
 
                 // === 1. EL CAMPO DE CALOR (¼ de resolución, aditivo) ===
                 GraphicsDevice gd = Main.graphics.GraphicsDevice;
-                if (gd == null) { Desactivar(); return; }
+                if (gd == null) { Desactivar(); return false; }
 
                 int cw = Math.Max(2, (int)(Main.screenWidth * EscalaCampo));
                 int ch = Math.Max(2, (int)(Main.screenHeight * EscalaCampo));
@@ -399,7 +472,7 @@ namespace AethonMod.Content.VFX
 
                 Texture2D glow = VFXCore.SoftGlow;
                 Texture2D ring = VFXCore.Ring;
-                if (glow == null || ring == null) { Desactivar(); return; }
+                if (glow == null || ring == null) { Desactivar(); return false; }
 
                 // ============================================================
                 //  v6.79 — LA CURA DE LA PANTALLA NEGRA (la letra del
@@ -430,7 +503,9 @@ namespace AethonMod.Content.VFX
                 // ============================================================
                 RenderTargetBinding[] previos = gd.GetRenderTargets();
                 if (previos.Length == 0)
-                    return;   // mundo directo al backbuffer: hoy no hay aire que hervir
+                    return false;   // mundo directo al backbuffer: el CAMINO DE
+                                    // FILTROS no puede — (v6.83: el PASE RETRO
+                                    // toma desde aquí — ver PaseRetro)
 
                 bool pintado = false;
                 try
@@ -458,6 +533,19 @@ namespace AethonMod.Content.VFX
                         if (zoom.X <= 0f || zoom.Y <= 0f || !float.IsFinite(zoom.X) || !float.IsFinite(zoom.Y))
                             zoom = Vector2.One;
 
+                        // v6.83 — EL ANCLA DEL ZOOM (la matemática de
+                        // ScreenShaderData.Apply descompilada): la cámara
+                        // escala ALREDEDOR DEL CENTRO de la pantalla —
+                        // px = (mundo − screenPosition − mediaPantalla·(1−1/zoom))·zoom.
+                        // v6.81 multiplicaba por zoom SIN el término del
+                        // centro (ancla de ESQUINA): con zoom ≠ 1 (el zoom
+                        // forzado de 4K/ultrawide, el slider de zoom) el
+                        // campo quedaba desplazado hasta MEDIA PANTALLA
+                        // del haz — el aire hervía donde NO estaba el
+                        // conducto. Con zoom 1: byte a byte, el de siempre.
+                        Vector2 ancla = origen + new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f
+                            * (Vector2.One - Vector2.One / zoom);
+
                         // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
                         //      (denso donde el haz es gordo, ralo en la aguja:
                         //      el hervidero vive en la boca) ———
@@ -483,7 +571,7 @@ namespace AethonMod.Content.VFX
                                 float peso = inten * (1f - 0.62f * t);
                                 if (peso > 0.02f)
                                 {
-                                    Vector2 pos = (a + dir * avance - origen) * zoom * k;
+                                    Vector2 pos = (a + dir * avance - ancla) * zoom * k;
                                     float esc = radio * zoom.X * k / medioGlow.X;
                                     Main.spriteBatch.Draw(glow, pos, null,
                                         new Color(new Vector3(peso * 0.42f, 0f, 0f)),
@@ -497,7 +585,7 @@ namespace AethonMod.Content.VFX
                         // ——— LOS FOCOS: el gradiente radial ———
                         for (int p = 0; p < _nPunto; p++)
                         {
-                            Vector2 pos = (_puntoPos[p] - origen) * zoom * k;
+                            Vector2 pos = (_puntoPos[p] - ancla) * zoom * k;
                             float esc = _puntoRadio[p] * zoom.X * k / medioGlow.X;
                             Main.spriteBatch.Draw(glow, pos, null,
                                 new Color(new Vector3(_puntoIntensidad[p] * 0.45f, 0f, 0f)),
@@ -518,7 +606,7 @@ namespace AethonMod.Content.VFX
                                 * MathF.Exp(-edad * 5.5f);
                             // EL FRENTE DE ONDA: ease-out cuadrático.
                             float frente = 1f - MathF.Pow(1f - tVida, 2f);
-                            Vector2 pos = (_estPos[e] - origen) * zoom * k;
+                            Vector2 pos = (_estPos[e] - ancla) * zoom * k;
                             float radio = _estRadio[e] * frente;
                             if (radio > 3f)
                             {
@@ -552,34 +640,126 @@ namespace AethonMod.Content.VFX
                     // binding queda en el buffer de trabajo de vanilla; si
                     // algo faltara (filtro muerto a mitad, buffer nulo), la
                     // última defensa restaura el binding viejo.
-                    if (pintado && _filtroActivo && pantallaAlternativa != null
-                        && !pantallaAlternativa.IsDisposed)
-                        gd.SetRenderTarget(pantallaAlternativa);
+                    if (pintado && _filtroActivo && salida != null
+                        && !salida.IsDisposed)
+                        gd.SetRenderTarget(salida);
                     else
                         gd.SetRenderTargets(previos);
                 }
 
-                // === 2. LOS PARÁMETROS DEL FILTRO (antes de que la cadena
-                //     corra: orig los aplica ENCIMA de este pase) ===
-                ScreenShaderData sh = _filtro.GetShader();
-                sh.UseTargetPosition(centroCA);
-                // (los nombres existen: el .fxc los declara — verificado
-                // contra el MojoShader real por fx20_validate)
-                sh.Shader.Parameters["uTexturaCampo"].SetValue(_campo);
+                // (la pintura terminó: el binding quedó en «salida» — o en
+                // los previos — y el campo a ¼ lleva el calor de ESTE frame)
+                return true;
+            // OJO: sin catch — las excepciones suben al caller (el pase de
+            // filtros apaga el filtro con _shaderFallo; el retro muere con
+            // _retroFallo: cada camino con SU defensa, como siempre).
+        }
+
+        // ================================================================
+        //  v6.83 — EL PASE RETRO (el aire que hierve SIN captura)
+        // ================================================================
+        // LA VERDAD DEL flag2 (Main.DoDraw descompilado):
+        //     flag2 = !(drawToScreen || netMode==2 || flag) && !mapFullscreen
+        //             && Lighting.NotRetro && Filters.Scene.CanCapture()
+        // DOS AJUSTES DE VÍDEO del juego matan la captura SIN aviso y
+        // SIN un error en el log (el síntoma perfecto de «no veo nada»):
+        //   · Iluminación RETRO/TRIPPY (Lighting.NotRetro = false)
+        //   · «Lighting Update Every Frame» (drawToScreen = true)
+        // En ese modo el mundo se dibuja DIRECTO AL BACKBUFFER y la
+        // cadena de filtros JAMÁS corre: ni calor, ni lente, ni siquiera
+        // el tinte del cementerio de vanilla.
+        //
+        // LA CURA — LA CAPTURA FORZADA (la que vanilla no nos da): el LENS
+        // SYSTEM BINDEA SU PROPIO RT en ModifyTransformMatrix (tras el
+        // Clear, ANTES del primer trazo del mundo — la ventana limpia del
+        // frame) y TODO el mundo cae ahí; en el punto 36 (mundo completo,
+        // UI sin empezar, spriteBatch cerrado) ESTE pase corre el shader
+        // del calor MANUALMENTE sobre ese mundo (el patrón probado del
+        // HazConcentrado: parámetros + Passes[0].Apply + draw) y lo pinta
+        // DIRECTO al backbuffer — UN draw, cero copias intermedias.
+        // (GetBackBufferData NO existe en GPU en el FNA de tML — solo el
+        // readback a CPU, inviable por frame — la captura forzada es LA
+        // única vía.)
+        // LA LEY DEL DRAW DEL 100 %: el volcado cubre TODO el viewport —
+        // aunque algo raro pasara con los bindings a mitad de camino, la
+        // pantalla termina siendo mundo+calor (JAMÁS negro).
+        // ================================================================
+        internal static bool PaseRetro(GraphicsDevice gd, Texture2D mundo)
+        {
+            if (_shaderFallo || _retroFallo || _filtro == null || gd == null) return false;
+            if (mundo == null || mundo.IsDisposed) return false;
+            try
+            {
+                if (Main.dedServ || Main.gameMenu || Main.mapFullscreen) return false;
+                if (!VFXCore.CalidadPermitida(VFXCore.CalidadFX.WarpPantalla)) return false;
+                ulong frame = Main.GameUpdateCount;
+                if (frame == _framePreparado) return false;   // el camino de filtros YA compuso este frame
+                if (!FuentesVivas(frame)) return false;        // sin fuentes: nada que hervir
+
+                // LA PANTALLA ACTUAL debe ser el BACKBUFFER (el draw final
+                // de este pase pinta AHÍ — el caller la dejó lista).
+                RenderTargetBinding[] previos = gd.GetRenderTargets();
+                if (previos.Length != 0) return false;
+
+                // EL CAMPO (¼) — pintado fresco para ESTE frame (salida
+                // null: el binding vuelve a los previos — el backbuffer).
+                if (!PintarCampo(frame, null, out Vector2 centroCA,
+                        out float caFuerza, out float calidad))
+                    return false;
+
+                // LOS PARÁMETROS — LA MATEMÁTICA EXACTA de
+                // ScreenShaderData.Apply (descompilada): sin Apply no hay
+                // vanilla que los ponga (el mismo zoom-correcto del camino
+                // de filtros — verificado contra el fuente real arriba).
+                Vector2 zoom = Main.GameViewMatrix.Zoom;
+                if (zoom.X <= 0f || zoom.Y <= 0f || !float.IsFinite(zoom.X) || !float.IsFinite(zoom.Y))
+                    zoom = Vector2.One;
+                Vector2 borde = new Vector2(Main.offScreenRange, Main.offScreenRange);
+                Vector2 tam = new Vector2(Main.screenWidth, Main.screenHeight);
+                Effect fx = _filtro.GetShader().Shader;
+                EffectParameterCollection pars = fx.Parameters;
+                pars["uOpacity"].SetValue(1f);
+                pars["uIntensity"].SetValue(1f);
+                pars["uTime"].SetValue(Main.GlobalTimeWrappedHourly);
+                pars["uScreenResolution"].SetValue(tam / zoom);
+                pars["uScreenPosition"].SetValue(
+                    Main.screenPosition + tam * 0.5f * (Vector2.One - Vector2.One / zoom) - borde);
+                pars["uTargetPosition"].SetValue(centroCA - borde);
+                pars["uTexturaCampo"].SetValue(_campo);
                 if (_texRuido != null)
-                    sh.Shader.Parameters["uTexturaRuido"].SetValue(_texRuido.Value);
-                sh.Shader.Parameters["uAnchoPx"].SetValue(AnchoPx);
-                sh.Shader.Parameters["uCAFuerza"].SetValue(caFuerza);
-                sh.Shader.Parameters["uCARadio"].SetValue(RadioCA);
-                sh.Shader.Parameters["uConveccion"].SetValue(Conveccion);
-                sh.Shader.Parameters["uCalidad"].SetValue(calidad);
+                    pars["uTexturaRuido"].SetValue(_texRuido.Value);
+                pars["uAnchoPx"].SetValue(AnchoPx);
+                pars["uCAFuerza"].SetValue(caFuerza);
+                pars["uCARadio"].SetValue(RadioCA);
+                pars["uConveccion"].SetValue(Conveccion);
+                pars["uCalidad"].SetValue(calidad);
+
+                // EL PASE FINAL: «mundo» (el crudo o el lensado) pasa por el
+                // shader del calor DIRECTO al backbuffer — la textura
+                // dibujada cae en s0 (texPantalla) y el volcado cubre el
+                // 100 % del viewport (la ley del draw — jamás negro).
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Matrix.Identity);
+                try
+                {
+                    fx.CurrentTechnique.Passes[0].Apply();
+                    Main.spriteBatch.Draw(mundo,
+                        new Rectangle(0, 0, gd.Viewport.Width, gd.Viewport.Height), Color.White);
+                }
+                finally
+                {
+                    Main.spriteBatch.End();
+                }
+                _frameRetro = frame;
+                return true;
             }
             catch
             {
-                // EL CALOR JAMÁS ROMPE EL FRAME: cualquier cosa que salga
-                // mal apaga el filtro y el juego sigue intacto.
-                Desactivar();
-                _shaderFallo = true;
+                // LA LEY DE LA CASA: el calor jamás rompe el frame — el
+                // pase retro se apaga para siempre y el juego sigue.
+                _retroFallo = true;
+                return false;
             }
         }
 
@@ -689,10 +869,25 @@ namespace AethonMod.Content.VFX
         public static string Diagnostico()
         {
             if (_shaderFallo) return "shader FALLÓ";
+            if (_retroFallo) return _filtroActivo ? "ON · ¡RETRO FALLÓ!" : "off";
+            ulong f = Main.GameUpdateCount;
+            // v6.83 — LA COMPOSICIÓN REAL, NO LA INTENCIÓN: hasta v6.82 la
+            // línea podía decir «ON · 1 fuentes» mientras la pantalla JAMÁS
+            // se capturaba (Retro/Trippy o «Lighting Update Every Frame»)
+            // — el diagnóstico mentía mientras el aire no se veía. Hoy:
+            // «RETRO» = el pase del backbuffer ESTÁ hirviendo el aire;
+            // «SIN CAPTURA» = el filtro vive pero NADA compone (el modo
+            // de vídeo mata la cadena — se ve EN UN VISTAZO).
+            if (_frameRetro == f)
+                return $"ON · {Fuentes} fuentes · RETRO";
             if (!_filtroActivo) return "off";
+            if (_framePreparado == f)
+                return _porLente
+                    ? "ON · por lente (campo vacío)"
+                    : $"ON · {Fuentes} fuentes";
             return _porLente
-                ? "ON · por lente (campo vacío)"
-                : $"ON · {Fuentes} fuentes";
+                ? "ON · por lente · SIN CAPTURA (¿iluminación Retro?)"
+                : $"ON · {Fuentes} fuentes · SIN CAPTURA (¿iluminación Retro?)";
         }
 
         /// <summary>El sello del frame de registración (la frescura de las
@@ -766,6 +961,8 @@ namespace AethonMod.Content.VFX
             _filtro = null;
             _filtroActivo = false;
             _texRuido = null;
+            _retroFallo = false;
+            _frameRetro = 0;
 
             // LA LECCIÓN v5.87: RenderTarget2D.Dispose() en el hilo de
             // carga lanza ThreadStateException — la destrucción se encola

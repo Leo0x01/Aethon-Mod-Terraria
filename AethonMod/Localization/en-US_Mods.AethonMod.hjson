@@ -570,6 +570,7 @@ Items: {
 		DisplayName: Bastón del Agujero Supremo Aurora
 		Tooltip: ""
 	}
+
 	AgujeroAbsolutoStaff: {
 		// v6.82: beyond the Supremes (4 runic rings)
 		DisplayName: Absolute Hole Staff
@@ -593,7 +594,6 @@ Items: {
 		DisplayName: The Solar Fury
 		Tooltip: ""
 	}
-
 
 	UmbralAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Umbral Ascendido
@@ -2268,9 +2268,9 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	OjoEternoMinion.DisplayName: El Ojo del Eterno
-        AgujeroAbsolutoBlackHoleProjectile.DisplayName: The Absolute Hole
-        RequiemPulsarProjectile.DisplayName: Requiem Star
-        ClickerGolpeProjectile.DisplayName: The Click Strike
+	AgujeroAbsolutoBlackHoleProjectile.DisplayName: The Absolute Hole
+	RequiemPulsarProjectile.DisplayName: Requiem Star
+	ClickerGolpeProjectile.DisplayName: The Click Strike
 	AnillosSingularesHalo.DisplayName: Anillos del Horizonte
 	NebulaJellyfishMinion.DisplayName: Medusa Nebular
 	NebulaLightning.DisplayName: Rayo Nebular

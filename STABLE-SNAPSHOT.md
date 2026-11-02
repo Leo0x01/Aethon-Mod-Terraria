@@ -1,3 +1,25 @@
+# v6.83 — LA CAPTURA FORZADA (EL CALOR Y LA LENTE HASTA EN RETRO) — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.83 (md5 `0c0b0feba423afaf2eca8e68cd602a05`, 6.640.392 B) — 466 entradas, EOF exacto, headless 0 excepciones, el .fxc SIN CAMBIOS (la cura es matemática C#).
+
+## LA LETRA Y LA ENTREGA
+1. **LA CAPTURA FORZADA**: dos ajustes de vídeo del juego (iluminación **Retro/Trippy** y **«Lighting Update Every Frame»**) mataban la captura de pantalla SIN aviso — ni calor, ni lente, ni el tinte del cementerio de vanilla, con CERO errores en el log. Ahora, en ese modo, el mod redirige el mundo a SU PROPIO render target (des antes del primer trazo) y compone en el punto 36: **el aire hierve y los agujeros distorsionan HASTA EN RETRO**.
+2. **EL ANCLA DEL ZOOM DEL CAMPO**: con zoom ≠ 1 (4K/ultrawide con zoom forzado, o el slider) el campo de calor a ¼ quedaba desplazado hasta MEDIA PANTALLA del haz (v6.81 escalaba con ancla de esquina; la cámara real escala ALREDEDOR DEL CENTRO). Ahora el hervor va CENTRADO en el conducto a cualquier zoom.
+3. **EL F8 QUE NO MIENTE**: la línea Calor ahora reporta la composición REAL — «ON · N fuentes» (la cadena de filtros), «ON · N fuentes · RETRO» (el pase del backbuffer), «SIN CAPTURA (¿iluminación Retro?)» (nada compone) o «¡RETRO FALLÓ!».
+
+## LOS ARCHIVOS
+- `AethonMod/Content/Effects/BlackHoleLensSystem.cs` — ModifyTransformMatrix (el bind del RT del modo sin captura, en la ventana limpia del frame), TerminarFrameRetro + BlitFullscreen (la composición completa del frame retro) y el consumo auto-verificado del flag.
+- `AethonMod/Content/VFX/CalorLib.cs` — PintarCampo (el corazón compartido: sobres del estallido + campo a ¼), el ANCLA del zoom (los 3 tipos de fuente), PaseRetro (el pase manual con la matemática EXACTA de ScreenShaderData.Apply), HayCalorVivo y el Diagnostico honesto.
+- `AethonMod/build.txt` — 6.83. (El .fx/.fxc NO cambian.)
+
+## EL PLAYTEST (la lista de la casa)
+(a) **Iluminación COLOR/BLANCA**: [ ] el Rayo C hierve como en v6.82 · [ ] F8 «Calor: ON · 1 fuentes» · [ ] CON ZOOM ≠ 1 el hervor sale CENTRADO en el conducto (antes: desplazado hasta media pantalla).
+(b) **EL EXPERIMENTO QUE LO PRUEBA TODO**: [ ] cambia la iluminación a RETRO → dispara el Rayo C → **EL AIRE HIERVE IGUAL** (F8: «RETRO») · [ ] con un agujero negro en pantalla, el fondo SIGUE DISTORSIONÁNDOSE en retro · [ ] pantalla NUNCA negra ni congelada al entrar/salir de retro · [ ] el minimapa y el mapa (M) limpios · [ ] el modo foto sin corrupción.
+(c) **«Lighting Update Every Frame» ON**: [ ] mismo resultado que retro (calor + lente vivos).
+(d) **LO DEMÁS INTACTO**: [ ] la lente y el calor con iluminación normal, los agujeros, el grimorio, las 4 armas de v6.82 — todo como siempre.
+
+---
+
 # v6.82 — LA CURA DEL CALOR INVISIBLE + LAS CUATRO ARMAS NUEVAS — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.82 (md5 `c18a52b33d6336b5ae70a273ac54a065`, 6.638.549 B) — 466 entradas, blobs 466/466, EOF exacto, headless 0 excepciones.
