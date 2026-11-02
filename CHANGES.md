@@ -1,4 +1,66 @@
-# v6.87 — LA CURA DEL MOD QUE NO CARGABA · LA BRUMA DEL GRIMORIO · EL FESTÍN DESATADO
+# AethonMod — Historial de Cambios
+
+## Commit dbcd4d9 — v6.88 — LA GRAN SESIÓN DE LOS DIECISÉIS BUGS: la bruma por ligas, el calor vuelve al arma, la muralla ya no explota, el árbol se muda al Libro Azul y las DOS bandas sonoras
+- Commit: dbcd4d9
+- Fecha: 2026-11-02 20:37:20
+- Mensaje: v6.88 — LA GRAN SESIÓN DE LOS DIECISÉIS BUGS: la bruma por ligas, el calor vuelve al arma, la muralla ya no explota, el árbol se muda al Libro Azul y las DOS bandas sonoras
+- Archivos modificados:
+  - AethonMod/Content/Globals/AlmaEternoGlobalItem.cs
+  - AethonMod/Content/Globals/CazaJefesGlobalNPC.cs
+  - AethonMod/Content/Globals/CorruptoGlobalItem.cs
+  - AethonMod/Content/Globals/FaucesGlobalNPC.cs
+  - AethonMod/Content/Globals/FaucesGlobalProjectile.cs
+  - AethonMod/Content/Items/Bolsas/BolsasCategorias.cs
+  - AethonMod/Content/Items/Investigaciones/CodiceHabilidades.cs
+  - AethonMod/Content/Items/Investigaciones/CodiceHabilidades.png
+  - AethonMod/Content/Items/Llamados/AethonMenorItem.cs
+  - AethonMod/Content/Items/Llamados/GrimorioMenorItem.cs
+  - AethonMod/Content/Players/CazaJefesPlayer.cs
+  - AethonMod/Content/Players/EscuadronPersistPlayer.cs
+  - AethonMod/Content/Players/SkillTreePlayer.cs
+  - AethonMod/Content/Projectiles/Cosmic/RayoConvergenteProjectile.cs
+  - AethonMod/Content/Projectiles/Cosmic/TruenoPerlinProjectile.cs
+  - AethonMod/Content/Projectiles/Definitivas/RayosPruebaProjectile.cs
+  - AethonMod/Content/Projectiles/Investigaciones/LibroAzulDescarga.cs
+  - AethonMod/Content/Projectiles/OjoEternoMinion.cs
+  - AethonMod/Content/Systems/AtaquesCombinadosSistema.cs
+  - AethonMod/Content/Systems/DespertarGrimorio.cs
+  - AethonMod/Content/Systems/DespertarGrimorioSistema.cs
+  - AethonMod/Content/Systems/OleadaHambreMusica.cs
+  - AethonMod/Content/UI/AltarOfrendasUI.cs
+  - AethonMod/Content/UI/CieloDespiertoUI.cs
+  - AethonMod/Content/VFX/CalorLib.cs
+  - AethonMod/Content/Weapons/GrimoireEternal.cs
+  - AethonMod/Content/Weapons/Investigaciones/LibroAzul.cs
+  - AethonMod/Content/Weapons/Investigaciones/LibroAzul.png
+  - AethonMod/Localization/Escriba/en-US_Mods.AethonMod.hjson
+  - AethonMod/Localization/Escriba/es-MX_Mods.AethonMod.hjson
+  - AethonMod/Localization/en-US_Mods.AethonMod.hjson
+  - AethonMod/Localization/es-ES_Mods.AethonMod.hjson
+  - AethonMod/Localization/es-MX_Mods.AethonMod.hjson
+  - AethonMod/Music/OleadaHambreEpica.ogg
+  - AethonMod/build.txt
+  - COMPILACION.md
+  - README.md
+  - STABLE-SNAPSHOT.md
+  - tools/gen_libro_azul_v688.py
+  - tools/gen_musica_festin2_v688.py
+  - tools/patch_caza_v688.py
+  - tools/patch_cazaglobal_v688.py
+  - tools/patch_cazajefes_v688.py
+  - tools/patch_cielo_v688.py
+  - tools/patch_corrupto_v688.py
+  - tools/patch_despertar_v688.py
+  - tools/patch_fauces_v688.py
+  - tools/patch_hito2_v688.py
+  - tools/patch_hito_v688.py
+  - tools/patch_hjson_v688.py
+  - tools/patch_libroazul_v688.py
+  - tools/patch_mesa2_v688.py
+  - tools/patch_mesa_v688.py
+  - tools/patch_perlin_mascotas_v688.py
+  - tools/patch_tooltips_v688.py
+  - update-changes.sh
 
 **La letra del usuario**: «bueno, no veo el efecto sobre el arma de rayo de prueba c, ningun efecto» + «te olvidaste dale el nuevo agujero negro runico al jugador y de meterlo en la bolsa de agujeros negros» + «sobre las demas bolsa tampoco las veo, intenta asegurarte de entrar todo al jugador» + «el agujero negro runico de la bruma que modificaste en el baston, tambien deberia cambiar el proyectil del grimorio» + «la banda sonora que creaste para las oleadas de hambre debe ser mas animada y epica» + «asegurate de que todos los items hayan sido dados al jugador y esten en su bolsa, no olvides darle el agujero negro nuevo».
 
