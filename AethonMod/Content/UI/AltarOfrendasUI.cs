@@ -300,33 +300,59 @@ namespace AethonMod.Content.UI
                 // EL BOTÓN CORROMPER: el sello de la casa (el MISMO de la
                 // receta — Corrompido = true + ResetPrefix: el «Superior»
                 // jamás vuelve) + el teatro.
+                // v6.89 — EL PRECIO (la letra: «para corromper algo
+                //     necesita esencia corrupta en dependencia de la
+                //     calidad del arma, el tipo de arma, el daño del arma
+                //     y sus estadisticas o efecto, no es lo mismo
+                //     corromper una espada de cobre que una espada de
+                //     adamantita, la de cobre pide menos esencia
+                //     corrupta»): el altar cobra la fórmula de la casa
+                //     (CorruptoGlobalItem.CosteCorrupcion) en Esencias
+                //     del Eterno — y viste la rareza corrupta.
                 if (hoverBtn && clicNuevo && lista && !_arma.IsAir)
                 {
                     var sello = _arma.GetGlobalItem
                         <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                     if (sello != null)
                     {
-                        sello.Corrompido = true;
-                        _arma.ResetPrefix();
-                        Main.NewText(Language.GetTextValue(Clave("CorruptaHecha"),
-                            _arma.Name), TintaVioleta);
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item113.WithPitchOffset(-0.45f));
-                        // EL TEATRO DEL SELLO: la bruma violeta del altar.
-                        if (!Main.dedServ)
+                        int coste = global::AethonMod.Content.Globals.CorruptoGlobalItem
+                            .CosteCorrupcion(_arma);
+                        int llevaba = global::AethonMod.Content.Globals.CorruptoGlobalItem
+                            .EsenciasEnLaBolsa(Main.LocalPlayer);
+                        if (llevaba < coste)
                         {
-                            for (int k = 0; k < 22; k++)
-                            {
-                                Dust d = Dust.NewDustPerfect(
-                                    altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
-                                        Main.rand.NextFloat(-30f, 6f)),
-                                    DustID.Shadowflame,
-                                    Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
-                                    new Color(140, 60, 210), 1f);
-                                d.noGravity = true;
-                            }
+                            Main.NewText(Language.GetTextValue(Clave("FaltanEsencias"),
+                                coste, llevaba), TintaRojo);
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
-                        DevolverElArma();   // el arma corrupta vuelve al cursor
+                        else
+                        {
+                            global::AethonMod.Content.Globals.CorruptoGlobalItem
+                                .PagarCorrupcion(Main.LocalPlayer, coste);
+                            sello.Corrompido = true;
+                            _arma.ResetPrefix();
+                            global::AethonMod.Content.Globals.CorruptoGlobalItem
+                                .VestirLaRareza(_arma);
+                            Main.NewText(Language.GetTextValue(Clave("CorruptaHecha"),
+                                _arma.Name), TintaVioleta);
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item113.WithPitchOffset(-0.45f));
+                            // EL TEATRO DEL SELLO: la bruma violeta del altar.
+                            if (!Main.dedServ)
+                            {
+                                for (int k = 0; k < 22; k++)
+                                {
+                                    Dust d = Dust.NewDustPerfect(
+                                        altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                            Main.rand.NextFloat(-30f, 6f)),
+                                        DustID.Shadowflame,
+                                        Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
+                                        new Color(140, 60, 210), 1f);
+                                    d.noGravity = true;
+                                }
+                            }
+                            DevolverElArma();   // el arma corrupta vuelve al cursor
+                        }
                     }
                 }
 

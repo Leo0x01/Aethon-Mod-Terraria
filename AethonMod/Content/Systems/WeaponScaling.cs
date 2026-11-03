@@ -227,7 +227,7 @@ namespace AethonMod.Content.Systems
             d *= 1f + Players.ShardPlayer.BonusDanoEsencias(p) *
                 Content.Globals.AlmaEternoGlobalItem.FactorDelLibro(p);
 
-            // 6) EL NIVEL 50 DEL DESPERTAR: TODO el ataque de los ojos.
+            // 6) LA CIMA DEL DESPERTAR (100): TODO el ataque de los ojos (×1,25).
             if (despertar >= Content.Systems.DespertarGrimorio.NivelMax)
                 d *= 1.25f;
             return System.Math.Max(1, (int)d);

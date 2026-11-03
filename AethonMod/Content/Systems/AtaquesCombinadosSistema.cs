@@ -181,7 +181,7 @@ namespace AethonMod.Content.Systems
                 if (p.whoAmI != Main.myPlayer || Main.dedServ) return;
 
                 int despertar = DespertarGrimorio.NivelDe(p);
-                if (despertar < 7) return;   // el primer poder nace en el 7
+                if (despertar < 7) return;   // (histórico v6.51: el primer poder nacía en el 7; hoy: el 15)
 
                 // === EL ESCUADRÓN: cuántos ojos, cuántos con mejora, ===
                 // === cuántos en su mejora FINAL                    ===
@@ -860,7 +860,7 @@ namespace AethonMod.Content.Systems
         ///     escuadrón: el rayo del ojo MÁS DESPIERTO (el patrón de la
         ///     casa — lider.damage YA trae SU cadena horneada: la suya
         ///     propia de invocación +1,5 %/nivel, el despertar, lo
-        ///     devorado, la reforja, las esencias y el ×1,25 del 50)
+        ///     devorado, la reforja, las esencias y el ×1,25 de la cima (v6.88: la cima es la 100))
         ///     escalado por MinionContactDamageMult y SUS mejoras — el
         ///     daño completo del ataque de invocación, al 50 %.</summary>
         private static int DanoDeLaIra(Player p, int nivel, Projectile lider, int despertar)

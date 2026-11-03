@@ -76,18 +76,19 @@ namespace AethonMod.Content.Globals
                     "DespertarReq3" => almaReq != null &&
                         almaReq.OfrendaMonedas >=
                         Systems.DespertarGrimorio.MonedasPara(siguiente),
-                    // v6.51.11 — EL REQUISITO 3 ES DUAL: el ARMA DEL
-                    //     PELDAÑO devorada… o los LINGOTES comidos (la
-                    //     ofrenda mineral — contadores del libro).
-                    "DespertarReq4" => RequisitoDeLaOfrenda(almaReq, siguiente),
-                    // v6.51.9 — LA ALTERNATIVA MINERAL de los peldaños de
-                    //     armas (la línea «O la ofrenda mineral»): el ARMA
-                    //     devorada O los lingotes comidos (la MISMA regla
-                    //     dual de la línea del tooltip — el ✓ late igual
-                    //     que se pinta la letra).
-                    "DespertarReq6" => almaReq != null &&
-                        (almaReq.OfrendaArma || almaReq.OfrendaMineral >=
-                        Systems.DespertarGrimorio.CantidadMineralDe(siguiente)),
+                    // v6.51.11 — EL REQUISITO DEL ARMA: v6.89 — el
+                    //     arma de magia/invocador SIN corrupción (la
+                    //     mesa devora UNA de las alternativas).
+                    "DespertarReq4" => almaReq != null && almaReq.OfrendaArma,
+                    // v6.89 — EL MATERIAL DEL PELDAÑO (la letra: «también
+                    //     sería obligatorio dar al menos uno de los
+                    //     materiales o das 20 lingotes de oro o das 20
+                    //     rubíes"): el grupo bloqueado completó SU cuota.
+                    "DespentarReqMat" => almaReq != null &&
+                        almaReq.OfrendaMineralGrupo >= 0 &&
+                        almaReq.OfrendaMineral >=
+                        Systems.DespertarGrimorio.CantidadMateriales(siguiente,
+                            almaReq.OfrendaMineralGrupo),
                     // v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun
                     //     momento me piden que maten a los jefes»): la
                     //     línea de la PUERTA DE CAZA late ✓ cuando SU
@@ -144,18 +145,5 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
-        /// <summary>v6.51.11 — ¿LA OFRENDA ya está PAGA? (dual: el ARMA
-        /// DEL PELDAÑO devorada · los peldaños MINERALES, los lingotes
-        /// comidos — TODO del contador del libro, nada del inventario).</summary>
-        private static bool RequisitoDeLaOfrenda(
-            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int nivel)
-        {
-            if (alma == null || nivel < 1 || nivel > Systems.DespertarGrimorio.NivelMax)
-                return false;
-            if (Systems.DespertarGrimorio.EsNivelMineral(nivel))
-                return alma.OfrendaMineral >=
-                    Systems.DespertarGrimorio.CantidadMineralDe(nivel);
-            return alma.OfrendaArma;
-        }
     }
 }

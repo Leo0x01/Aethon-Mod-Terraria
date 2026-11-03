@@ -26,7 +26,7 @@ namespace AethonMod.Content.Players
     //     re-anclado (Sostener hace el resto).
     //  LA DESPEDIDA LEGÍTIMA sigue siendo el CLIC DERECHO del buff
     //  (EscuadronUtil.Despedir): despedidos = retrato vacío = nada
-    //  vuelve. El patrón es el de SolEnMiniaturaPlayer (v6.85), ahora
+    //  vuelve. El patrón es el del esbirrón persistente de la casa (v6.85), ahora
     //  para el escuadrón ENTERO.
     // ======================================================================
     public class EscuadronPersistPlayer : ModPlayer

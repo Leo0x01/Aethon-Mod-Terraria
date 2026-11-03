@@ -152,7 +152,6 @@ namespace AethonMod.Content.Items.Bolsas
             // nació con receta de 5 maderas pero SIN bolsa (la lección de
             // siempre: «te olvidaste darle… al jugador»). Su familia es la
             // de los púlsares: aquí vive.
-            l.Add((ModContent.ItemType<Weapons.Cosmic.RequiemDelPulsarStaff>(), 1));
             return l;
         }
     }
@@ -189,7 +188,6 @@ namespace AethonMod.Content.Items.Bolsas
             // 5 maderas pero NUNCA entró en la bolsa: el jugador tenía que
             // fabricarlo). La bolsa es la vía del kit — la receta es el
             // respaldo. Once formas rúnicas: la cima del catálogo.
-            l.Add((ModContent.ItemType<Weapons.Cosmic.AgujeroAbsolutoStaff>(), 1));
             return l;
         }
     }
@@ -913,10 +911,6 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.85 — LOS CINCO FRUTOS DE LA SESIÓN (R1-R9):
             // R1 — EL RELICARIO DEL AVISPÓN (Bombus Apis: el aura solar).
             l.Add((ModContent.ItemType<Items.Investigaciones.RelicarioDelAvispon>(), 1));
-            // R3 — EL SOL EN MINIATURA (MEAC: el sol de XiHe).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.SolEnMiniaturaStaff>(), 1));
-            // R7 — EL COLMILLO DORADO (los rayos del cielo de Aureum Fang).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.ColmilloDoradoStaff>(), 1));
             // R8 — LA MIRADA DE SOLYN (el rayo de energía).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaSolyn>(), 1));
             // R9 — LOS GRILLETES DE ANDRÓMEDA (el campo de fuerza).
@@ -924,12 +918,11 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (Heroic Weapons: el altar
             // que devora lo que NO se necesita y NO está corrupto).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));
-            // v6.86 — R6 — EL CÓDICE DE HABILIDADES (Umbra/Path of
-            // Terraria: el item que abre el árbol).
-            // v6.88 — EL CÓDICE MURIÓ (el árbol se muda de dueño): la llave
-            //     del árbol de habilidades es EL LIBRO AZUL (el arma de
-            //     Investigaciones que abre la ventana con clic derecho).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.LibroAzul>(), 1));
+            // v6.89 — R6 — EL CÓDICE DE HABILIDADES VUELVE (la letra de
+            //     la sesión: «borrar las armas nuevas» — el Libro Azul murió
+            //     con ellas y la llave del árbol VOLVIÓ a su dueño de la
+            //     v6.86: el Códice (Umbra/Path of Terraria).
+            l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
             return l;
         }
     }

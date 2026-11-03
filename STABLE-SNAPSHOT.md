@@ -1,3 +1,10 @@
+# v6.89 — LA GRAN SESIÓN DEL DESPERTAR REHECHO — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.89 FINAL (md5 `53a87abe4aa819e1d07b61b5390f6666`, 10,945,778 B) — 484 entradas, blobs 484/484, EOF EXACTO, las DOS músicas del festín dentro, verify 0/0, audit_assets 0 faltantes + 0 convenciones, -build REAL 0/0, audit_v689 TODO VERIFICADO (firmas v6.89 vivas + 11 muertas ausentes + hjson ×3 simétricos + bolsa verificada), headless **Adding → Server started, 0 excepciones**.
+>
+> La entrega: la escalera del despertar de MAGIA PURA (armas mágicas/invocador por era con los datos EXACTOS del juego decompilado — el ancla del bastón de rubí: 8 rubíes + 10 de oro, daño 21 = el peldaño 4) + materiales de sus recetas («20 de oro O 20 rubíes», la mesa se queda con la primera opción) + LA LISTA COMPLETA de las CIEN puertas (§15 del DISEÑO, generada de las tablas) + la barra /100 + el Cielo «los 100 peldaños» + LA ENTREGA DEL LIBRO al 19 + la Esencia del Eterno (el renombrado cósmico) + el nombre corrupto de UN color (RarityCorrupta: inventario == barra rápida) + EL PRECIO de la corrupción (calidad/daño/tipo/stats) + la tecla B con sus mascotas SOLO EQUIPADAS (buffType + detour de QuickBuff) + la bruma que LLENA el anillo íntimo + EL PUNTO DE LUZ del nacimiento + el calor en CUATRO SEGMENTOS (solo el conducto) + EL VELO DE PERLIN (la capa nueva encima, K=1,00) + las armas nuevas BORRADAS (el árbol vuelve al CÓDICE y a la economía por despertar) + LA MIRADA DE SOLYN y EL RELICARIO rehechos CON LOS ORIGINALES EN LA MANO (WoTG y Bombus-Apis-Bee: geometría sin picos, texturas y técnicas del original) + la auditoría de TODAS las ventanas verificada claim por claim.
+>
+
 # v6.88 — LA GRAN SESIÓN DE LOS DIECISÉIS BUGS — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.88 FINAL (md5 `5a36d7ff2b744e5c9c7181940c59afbb`, 10.917.840 B) — 488 entradas, blobs 488/488 (30 stored planos), EOF EXACTO, las DOS músicas del festín dentro (1,91 + 2,06 MB), oráculo 0/0, audit_assets 470 clases + convenciones 0 faltantes, -build REAL 0/0, headless **worldgen 4200×1200 + Server started, 0 excepciones**.

@@ -1484,7 +1484,12 @@ namespace AethonMod.Content.Weapons
                     int siguiente = Systems.DespertarGrimorio.NivelDespertarSiguiente(Item);
 
                     // LA BARRA (el nivel de despertar es la propia barra:
-                    // 50 celdas, el nivel las llena).
+                    // v6.89 — EL LÍMITE ES LA CONSTANTE (la letra: «justo
+                    //     donde está la barra de progresión de despertar
+                    //     el limite de esa barra es 50 niveles cuando
+                    //     ahora la progresion de despertar llega a 100»):
+                    //     "/{NivelMax}" — 100 de 100, JAMÁS más un /50
+                    //     duro de la era del 50).
                     int celdas = 25;
                     int llenas = (int)(celdas * despertar / (float)Systems.DespertarGrimorio.NivelMax);
                     string barDesp = "";
@@ -1492,17 +1497,23 @@ namespace AethonMod.Content.Weapons
                         barDesp += i < llenas ? "▓" : "·";
 
                     tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
-                        $"[c/C49CFF:Despertar {despertar}/50]  [c/9B6FE8:{barDesp}]"));
+                        $"[c/C49CFF:Despertar {despertar}/{Systems.DespertarGrimorio.NivelMax}]  [c/9B6FE8:{barDesp}]"));
                     tooltips.Add(new TooltipLine(Mod, "DespertarDano",
                         $"[c/9B6FE8:  +{(despertar)}% de daño a TODO el grimorio]"));
 
-                    // LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL (esencias ·
-                    // dinero · el arma del peldaño) — v6.51.11 LOS
-                    // CONTADORES DEL LIBRO (la comida se sirve EN EL
-                    // SUELO: la lista cuenta lo que el libro YA COMIÓ de
-                    // cada ofrenda — v6.51.5 la lista viva con su ✓
-                    // dorado latiendo (DespertarRequisitosGlobalItem) y
-                    // los sprites mini del arma del peldaño).
+                    // v6.89 — LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL, LA
+                    //     NUEVA (la letra: «el grimorio es magia pura, así
+                    //     que las armas principales que debe pedir son
+                    //     armas mágicas y de invocador con las
+                    //     invocaciones, no incluir látigos… aunque pida
+                    //     varias armas, el grimorio solo consumirá 1 de
+                    //     ellas» + «también sería obligatorio dar al menos
+                    //     uno de los materiales o das 20 lingotes de oro o
+                    //     das 20 rubíes»): esencias + monedas + UN ARMA de
+                    //     magia/invocador (las ALTERNATIVAS del peldaño con
+                    //     su daño — la lista dice cuál come: UNA) + UN
+                    //     material (UNA opción completa — la mesa se queda
+                    //     con el primero que el jugador alimente).
                     if (despertar < Systems.DespertarGrimorio.NivelMax)
                     {
                         int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
@@ -1514,7 +1525,8 @@ namespace AethonMod.Content.Weapons
                         var almaLista = Globals.AlmaEternoGlobalItem.De(Item);
                         int comidasEsencias = almaLista?.OfrendaEsencias ?? 0;
                         long comidasMonedas = almaLista?.OfrendaMonedas ?? 0L;
-                        int comidosMineral = almaLista?.OfrendaMineral ?? 0;
+                        int comidosMaterial = almaLista?.OfrendaMineral ?? 0;
+                        int grupoBloqueado = almaLista?.OfrendaMineralGrupo ?? -1;
                         bool devoradaArma = almaLista?.OfrendaArma ?? false;
 
                         // (v6.51.6: UN SOLO COLOR POR LÍNEA, el ✓ DENTRO
@@ -1527,7 +1539,7 @@ namespace AethonMod.Content.Weapons
                         //     para todos los requisistos de nivel del
                         //     Despertar»: colNo pasa del LILA (C4A2FF) al
                         //     ROJO — y TODO el peldaño lo lee (esencias,
-                        //     dinero, arma, mineral y LA PRESA).
+                        //     dinero, arma, material y LA PRESA).
                         string colOK = "7FE89B", colNo = "FF7B7B";
 
                         // === EL REQUISITO 1 — LAS ESENCIAS (las comidas). ===
@@ -1535,7 +1547,7 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
                             $"[c/78788C:  Para Despertar {siguiente}:]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
-                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias Corruptas: {Math.Min(comidasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
+                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias del Eterno: {Math.Min(comidasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
 
                         // === EL REQUISITO 2 — EL DINERO (lo comido — y
                         //     lo que falta, para saber cuánto soltar). ===
@@ -1546,112 +1558,79 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (o
-                        //     v6.51.8: LA OFRENDA MINERAL): SU NOMBRE +
-                        //     SU SPRITE al lado (cada alternativa de este
-                        //     peldaño, [i:id] = el icono del item
-                        //     RENDERIZADO POR EL PARSER DE tML). ===
-                        if (Systems.DespertarGrimorio.EsNivelMineral(siguiente))
+                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (v6.89:
+                        //     magia/invocador, SIN corrupción — «el
+                        //     grimorio solo consumirá 1 de ellas»): las
+                        //     ALTERNATIVAS con su sprite y su nombre
+                        //     LOCALIZADO, y EL DAÑO DEL PELDAÑO (la letra:
+                        //     «usar el daño de las armas para igual al
+                        //     daño del grimorio»). ===
                         {
-                            // === v6.51.8 — LA OFRENDA MINERAL (la cima
-                            //     45-50: los lingotes del fin del mundo,
-                            //     sin corrupción) — el contador de los
-                            //     COMIDOS (v6.51.11: parcial — el libro
-                            //     come solo los que le faltan). ===
-                            int tipoMin = Systems.DespertarGrimorio.MineralDe(siguiente);
-                            int cantMin = Systems.DespertarGrimorio.CantidadMineralDe(siguiente);
-                            bool mineralOK = comidosMineral >= cantMin;
-                            string colMin = mineralOK ? colOK : colNo;
-                            string nombreMin = "—";
-                            try
+                            string colArma = devoradaArma ? colOK : colNo;
+                            int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
+                            var trozosArma = new System.Collections.Generic.List<string>();
+                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige):]");
+                            int danoPeldano = 0;
+                            for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
                             {
-                                var protoMin = Terraria.ID.ContentSamples.ItemsByType[tipoMin];
-                                if (protoMin != null) nombreMin = protoMin.Name;
+                                if (pa > 0) trozosArma.Add($"[c/78788C:·]");
+                                trozosArma.Add($"[i:{peldano[pa]}]");
+                                string nombreArma = Lang.GetItemNameValue(peldano[pa]);
+                                if (pa == 0)
+                                {
+                                    try
+                                    {
+                                        var proto = Terraria.ID.ContentSamples.ItemsByType[peldano[pa]];
+                                        if (proto != null) danoPeldano = proto.damage;
+                                    }
+                                    catch { }
+                                }
+                                trozosArma.Add($"[c/{colArma}:{nombreArma}]");
                             }
-                            catch { }
-                            var trozosMin = new System.Collections.Generic.List<string>();
-                            trozosMin.Add($"[c/{colMin}:  • Ofrenda mineral:]");
-                            trozosMin.Add($"[i:{tipoMin}]");
-                            trozosMin.Add($"[c/{colMin}:{Math.Min(comidosMineral, cantMin)}/{cantMin} × {nombreMin}{(mineralOK ? "  ✓" : "")}]");
+                            if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓]");
+                            if (danoPeldano > 0)
+                                trozosArma.Add($"[c/78788C:· daño del peldaño: {danoPeldano}]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
-                                string.Join(" ", trozosMin)));
+                                string.Join(" ", trozosArma)));
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                                "[c/78788C:  (suelta los lingotes DELANTE del grimorio seleccionado — come solo los que faltan)]"));
-                        }
-                        else
-                        {
-                        // v6.51.11 — EL ARMA se devora ENTERA (una sola):
-                        // el ✓ es el sello del libro (la comió o no).
-                        string colArma = devoradaArma ? colOK : colNo;
-                        int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
-                        var trozosArma = new System.Collections.Generic.List<string>();
-                        trozosArma.Add($"[c/{colArma}:  • Devorar 1 CORRUPTA:]");
-                        for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
-                        {
-                            if (pa > 0) trozosArma.Add($"[c/78788C:·]");
-                            trozosArma.Add($"[i:{peldano[pa]}]");
-                            string nombreArma = "—";
-                            try
-                            {
-                                var proto = Terraria.ID.ContentSamples.ItemsByType[peldano[pa]];
-                                if (proto != null) nombreArma = proto.Name;
-                            }
-                            catch { }
-                            trozosArma.Add($"[c/{colArma}:{nombreArma}]");
-                        }
-                        if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓]");
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
-                            string.Join(" ", trozosArma)));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                            "[c/78788C:  (corrupta — suéltala DELANTE del grimorio seleccionado y la devorará)]"));
+                                "[c/78788C:  (la mesa devora UNA de ellas — suéltala DELANTE del grimorio seleccionado)]"));
                         }
 
-                        // === v6.51.9 — LA ALTERNATIVA MINERAL EN TODOS LOS
-                        //     PELDAÑOS DE ARMAS (si el arma del peldaño no
-                        //     llega, LA PILA DE LINGOTES del metal del
-                        //     nivel paga lo mismo — siempre más de 50,
-                        //     siempre creciente). v6.51.11 — CONTADOR
-                        //     PARCIAL: el ejemplo de la letra (necesita 70,
-                        //     comes 30, faltan 40). ===
-                        // v6.88 — LA ALTERNATIVA MINERAL ES UNA MEZCLA
-                        //     (la letra: «debe ser variada, pedir menos de
-                        //     ese mineral, pero pedir varios al mismo
-                        //     tiempo»): UNA LÍNEA POR GRUPO de la mezcla
-                        //     del peldaño — con su estado (✓ / n·cANT) y
-                        //     los ALTERNATIVOS del grupo como iconos.
-                        if (!Systems.DespertarGrimorio.EsNivelMineral(siguiente))
+                        // === EL REQUISITO 4 — EL MATERIAL DEL PELDAÑO
+                        //     (v6.89 — la letra: «también sería obligatorio
+                        //     dar al menos uno de los materiales o das 20
+                        //     lingotes de oro o das 20 rubíes»): los GRUPOS
+                        //     son las ALTERNATIVAS — la mesa se queda con
+                        //     el PRIMERO que el jugador alimente y cobra SU
+                        //     cuota completa. El estado: el grupo bloqueado
+                        //     y su cuenta. ===
                         {
-                            int[][] gruposAlt = Systems.DespertarGrimorio.GruposMineralDe(siguiente);
-                            int cantAlt = Systems.DespertarGrimorio.CantidadPorGrupo(siguiente);
-                            for (int gi = 0; gi < gruposAlt.Length && gi < 3; gi++)
+                            int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(siguiente);
+                            bool materialOK = grupoBloqueado >= 0 &&
+                                comidosMaterial >= Systems.DespertarGrimorio.CantidadMateriales(siguiente, grupoBloqueado);
+                            string colMat = materialOK ? colOK : colNo;
+                            var trozosMat = new System.Collections.Generic.List<string>();
+                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción):]");
+                            for (int gi = 0; gi < gruposMat.Length && gi < 4; gi++)
                             {
-                                int[] grupo = gruposAlt[gi];
+                                int[] grupo = gruposMat[gi];
                                 if (grupo == null || grupo.Length == 0) continue;
-                                // el grupo se completa con el índice: los
-                                // pagos ya hechos (OfrendaMineralGrupo)
-                                // cubren los grupos anteriores.
-                                bool grupoPago = devoradaArma ||
-                                    almaLista != null && gi < almaLista.OfrendaMineralGrupo;
-                                bool grupoActual = almaLista != null && !devoradaArma &&
-                                    gi == almaLista.OfrendaMineralGrupo;
-                                int comidos = grupoActual ? Math.Min(almaLista.OfrendaMineral, cantAlt) : 0;
-                                bool altOK = grupoPago;
-                                string colAlt = altOK ? colOK : (grupoActual ? "E8D8FF" : colNo);
-                                var trozosAlt = new System.Collections.Generic.List<string>();
-                                trozosAlt.Add($"[c/{colAlt}:  • {'a' + gi}) la ofrenda mineral:]");
+                                if (gi > 0) trozosMat.Add($"[c/78788C:ó]");
                                 for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
-                                    trozosAlt.Add($"[i:{grupo[ti]}]");
-                                string nombreAlt = "—";
-                                try
-                                {
-                                    var protoAlt = Terraria.ID.ContentSamples.ItemsByType[grupo[0]];
-                                    if (protoAlt != null) nombreAlt = protoAlt.Name;
-                                }
-                                catch { }
-                                trozosAlt.Add($"[c/{colAlt}:{(altOK ? cantAlt : comidos)}/{cantAlt} × {nombreAlt}{(altOK ? "  ✓" : "")}]");
-                                tooltips.Add(new TooltipLine(Mod, "DespertarReq6_" + gi,
-                                    string.Join(" ", trozosAlt)));
+                                    trozosMat.Add($"[i:{grupo[ti]}]");
+                                int cuota = Systems.DespertarGrimorio.CantidadMateriales(siguiente, gi);
+                                string nombreMat = Lang.GetItemNameValue(grupo[0]);
+                                // el grupo BLOQUEADO lleva su cuenta viva
+                                if (gi == grupoBloqueado && !materialOK)
+                                    trozosMat.Add($"[c/E8D8FF:{Math.Min(comidosMaterial, cuota)}/{cuota} × {nombreMat}]");
+                                else
+                                    trozosMat.Add($"[c/{colMat}:{cuota} × {nombreMat}]");
                             }
+                            if (materialOK) trozosMat.Add($"[c/{colMat}: ✓]");
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReqMat",
+                                string.Join(" ", trozosMat)));
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReqMatNota",
+                                "[c/78788C:  (obligatorio: completa UNA de las opciones — la mesa se queda con la primera que alimentes)]"));
                         }
 
                         // === v6.76 — LA PRESA DEL PELDAÑO (la letra:

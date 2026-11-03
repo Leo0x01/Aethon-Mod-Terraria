@@ -30,9 +30,16 @@ Items: {
 	}
 
 	LibroAzul: {
-	DisplayName: Libro Azul
-	Tooltip: 'El arma del árbol de habilidades.\nClic derecho: abre el ÁRBOL DE HABILIDADES (los puntos nacen del nivel de ESTE arma: 3 + nivel/5).\nClic izquierdo: la descarga azul (daño 12 + nivel·2).\nSube de nivel con las bajas de su portador (8 por nivel, tope 100).\nNada que ver con el grimorio: el árbol es del LIBRO.'
-}
+		DisplayName: Libro Azul
+		Tooltip:
+			'''
+			El arma del árbol de habilidades.
+			Clic derecho: abre el ÁRBOL DE HABILIDADES (los puntos nacen del nivel de ESTE arma: 3 + nivel/5).
+			Clic izquierdo: la descarga azul (daño 12 + nivel·2).
+			Sube de nivel con las bajas de su portador (8 por nivel, tope 100).
+			Nada que ver con el grimorio: el árbol es del LIBRO.
+			'''
+	}
 
 	// v6.50.117 — GENESIS PURGE: Items.GenesisShard and
 	// Items.AncientAltarItem died with the shard and the altar
@@ -1942,12 +1949,14 @@ Items: {
 			'''
 	}
 
-	// v6.50.128 — LA ESENCIA CORRUPTA (la comida del altar)
+	// v6.50.128 — LA ESENCIA DEL ETERNO (v6.89 — el nombre nuevo: la
+	// carta cósmica del grimorio, NO la del bioma de la corrupción —
+	// la letra: «creo que mejor seria llamarlo de otra forma»)
 	ItemCorrupto: {
-		DisplayName: Esencia corrupta
+		DisplayName: Esencia del Eterno
 		Tooltip:
 			'''
-			Un residuo del poder del grimorio: la esencia que las criaturas
+			Un residuo del poder del Eterno: la esencia que las criaturas
 			destilan desde su llegada (y los jefes, a raudales).
 			CÓMELA (clic): +0,1% de daño PERMANENTE a todo lo que hagas,
 			hasta +100% con 1000 esencias — después, cada una es 1 oro.
@@ -2351,6 +2360,11 @@ Items: {
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
+
+	CodiceHabilidades: {
+		DisplayName: Codice Habilidades
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2504,6 +2518,9 @@ Projectiles: {
 	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
 	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
 	IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
+	CampoAndromedaProj.DisplayName: Campo Andromeda Proj
+	SolynCargaProj.DisplayName: Solyn Carga Proj
+	SolynRayoProj.DisplayName: Solyn Rayo Proj
 }
 
 Buffs: {
@@ -2939,8 +2956,8 @@ Despertar: {
 	Migracion: ✦ El despertar y el festín ahora viven EN ESTE grimorio (cada libro, su propia escalera).
 	BocadoEsencias: ✦ El Eterno come {0} esencias del suelo ({1}/{2} del peldaño).
 	BocadoMonedas: ✦ El Eterno come las monedas del suelo — faltan {0}.
-	BocadoMineral: ✦ El Eterno come {0} lingotes del suelo ({1}/{2}).
-	BocadoArma: ✦ ¡El Eterno devora EL ARMA CORRUPTA del peldaño!
+	BocadoMineral: ✦ El Eterno come {0} del material del suelo ({1}/{2} de la opción).
+	BocadoArma: ✦ ¡El Eterno devora EL ARMA del peldaño!
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
 	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
 	EsenciaTopeTooltip:
@@ -3005,44 +3022,47 @@ Despertar: {
 	JefeSkeletronPrime: Skeletron Prime
 	JefePlantera: Plantera
 	JefeGolem: el Gólem
-	JefeDuqueFishron: el Duque Fishron
+	JefeDuqueFishron: Duque Fishron, el cerdo volador del mar
 	JefeEmperatrizDeLuz: la Emperatriz de la Luz
 	JefeCultistaLunatico: el Cultista Lunático
 	JefeSenorDeLaLuna: el Señor de la Luna
 	JefeAethon: Aethon, el fragmento de un recuerdo lejano
-	JefeDuqueFishron: Duque Fishron, el cerdo volador del mar
 	PuertaDeCaza: ✦ La mesa está completa… pero el grimorio exige su presa: {1} (nivel {0}). ¡CÁZALA!
+	ReqJefeCaido: La presa del peldaño: {0} — DEVORADO
 	// v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
 	// piden que maten a los jefes»): la línea de la puerta de caza en
 	// la LISTA DE REQUISITOS del tooltip — con SU estado.
-	ReqJefeCaido: La presa del peldaño: {0} — DEVORADO
 	ReqJefeViva: La presa del peldaño: {0} — Todavía VIVO. El grimorio exige su caza
-	// v6.86 — THE CORRUPT BOOK (the gate of 20).
 	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CORRUPTO… déjalo caer al suelo, portador. QUIERO probarlo.
+	// v6.86 — THE CORRUPT BOOK (the gate of 20).
 	LibroDevorado: (páginas que se lamen) El LIBRO CORRUPTO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
-	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CORRUPTO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla) y déjalo caer delante de mí.
+	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CORRUPTO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
 	ReqLibroDevorado: Libro Corrupto: DEVORADO
 	ReqLibroPendiente: Libro Corrupto: consíguelo y déjalo caer delante del grimorio
+	LibroEntregado: ✦ (las páginas se abren solas) Toma, portador: MI LIBRO CORRUPTO. La puerta del 20 lo exige — déjalo caer delante de mí cuando la mesa esté lista.
+	// v6.89 — LA ENTREGA GARANTIZADA (la letra: «tienes que darle el
+	// libro corrupto al jugador»): al llegar al 19, el Eterno te lo
+	// escupe a la bolsa — la puerta nace con su llave puesta.
+	CieloTitulo: EL CIELO DEL DESPERTAR
 	// v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
 	// ítem El Ojo del Cielo — la textura del cielo de la letra).
-	CieloTitulo: EL CIELO DEL DESPERTAR
 	CieloSubtitulo: Las misiones del camino — completa los requisitos de cualquier nivel, aunque aún no estés ahí
 	CieloDespertarActual: Despertar {0}/100
 	CieloSinLibro: Sin el Grimorio del Eterno encima — el cielo no ve tu escalera
 	CieloPista: Rueda del ratón: desplazar la escalera · clic derecho o [X]: cerrar
 	CieloLaCaza: LA CAZA — los jefes del camino
-	CieloLaEscalera: LA ESCALERA — los 50 peldaños
+	CieloLaEscalera: LA ESCALERA — los 100 peldaños
 	CieloCaido: CAÍDO ✓
 	CieloSeExigeEn: se exige en el nivel {0}
 	CieloNivel: Nivel {0}
 	CieloVivo: EL PELDAÑO VIVO
 	CieloCompleto: completo ✓
 	CieloArmaPagada: arma devorada ✓
-	CieloCorruptaLista: ¡corrupta y lista!
 	CieloEnLaBolsa: en la bolsa ✓
 	CieloFaltaArma: aún no la llevas
-	CieloLingotes: o {0} lingotes de {1}
-	CieloLingotesPagados: lingotes comidos ✓
+	CieloMaterial: material: {0} × {1}
+	// v6.89 — EL MATERIAL DEL PELDAÑO (una opción: 20 de oro O 20 rubíes).
+	CieloMaterialPagado: material comido ✓
 	CieloEsencias: esencias {0}/{1}
 	CieloMonedas: dinero: falta {0}
 	CieloMonedasPagadas: dinero pagado ✓
@@ -3687,7 +3707,7 @@ Rarities.LegendarioSupremo: Legendario Supremo
 
 Keybinds: {
 	$parentVal: RelicarioSolar: Relicario Solar (L)
-	// RelicarioSolar.DisplayName: Relicario Solar
+	RelicarioSolar.DisplayName: Relicario Solar
 }
 
 Altar: {
@@ -3701,6 +3721,9 @@ Altar: {
 	NoArma: Eso no es un arma corruptible
 	Corromper: CORROMPER
 	CorruptaHecha: ✦ {0} nace corrupta: su nombre viste el negro y el brillo morado-negro la cubre.
+	// v6.89 — EL PRECIO DEL SELLO: esencias del Eterno según calidad,
+	// tipo, daño y estadísticas del arma (la de cobre pide menos).
+	FaltanEsencias: ✦ El sello cuesta {0} Esencias del Eterno — te faltan {1}. Tráelas y vuelve.
 }
 
 Arbol: {

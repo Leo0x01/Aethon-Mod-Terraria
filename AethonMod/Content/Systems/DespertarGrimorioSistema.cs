@@ -105,6 +105,14 @@ namespace AethonMod.Content.Systems
                         <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
                     if (alma == null) continue;
 
+                    // v6.89 — LA ENTREGA DEL LIBRO CORRUPTO (la letra:
+                    //     «veo que el despertar pide el libro corrupto como
+                    //     debe ser, tienes que darle el libro corrupto al
+                    //     jugador»): al llegar a la VÍSPERA de la puerta
+                    //     del 20, el Eterno escupe su libro a la bolsa del
+                    //     portador — la puerta nace con su llave puesta.
+                    RevisarEntregaDelLibro(p, alma);
+
                     bool desperto = false;
                     if (alma.NivelDespertar < DespertarGrimorio.NivelMax)
                     {
@@ -204,10 +212,9 @@ namespace AethonMod.Content.Systems
             {
                 int esenciasNecesarias = DespertarGrimorio.EsenciasPara(siguiente);
                 long monedasNecesarias = DespertarGrimorio.MonedasPara(siguiente);
-                // v6.88 — LA MEZCLA MINERAL (la ofrenda variada): grupos
-                //     con sus alternativos + la cantidad moderada por cabeza.
-                int[][] gruposMineral = DespertarGrimorio.GruposMineralDe(siguiente);
-                int cantGrupo = DespertarGrimorio.CantidadPorGrupo(siguiente);
+                // v6.89 — LAS ARMAS DEL PELDAÑO (magia/invocador, sin
+                //     látigos) y SU MATERIAL (una opción completa —
+                //     GruposMaterialesDe/CantidadMateriales).
                 int[] armasDelPeldano = DespertarGrimorio.ArmasDelNivel[siguiente];
                 bool mordisco = false;
 
@@ -318,67 +325,63 @@ namespace AethonMod.Content.Systems
                                     monedasNecesarias - alma.OfrendaMonedas)));
                         }
                     }
-                    // === 3) LOS LINGOTES DEL PELDAÑO — la ofrenda
-                    //     mineral (la ALTERNATIVA de los peldaños de
-                    //     armas y LA ofrenda de la cima 45-50): SOLO si
-                    //     el arma del peldaño no ha sido devorada ya, y
-                    //     SOLO los que faltan (el ejemplo de la letra:
-                    //     70 que necesita, 30 que sueltas, 40 que
-                    //     faltan). ===
-                    else if (!alma.OfrendaArma &&
-                        alma.OfrendaMineralGrupo < gruposMineral.Length)
+                    // === 3) EL MATERIAL DEL PELDAÑO (v6.89 — la letra:
+                    //     «tambien seria obligatorio dar al menos uno de
+                    //     los materiales o das 20 lingotes de oro o das
+                    //     20 rubies»): UNA opción — la mesa se BLOQUEA
+                    //     con el PRIMERO que el jugador alimente y cobra
+                    //     SU cuota completa; lo que caiga de OTROS grupos
+                    //     se queda en el suelo (termínalo — la lista
+                    //     siempre dice cuál).
+                    else if (!MaterialPagado(alma, siguiente))
                     {
-                        // v6.88 — LA MEZCLA MINERAL (la letra: «debe ser
-                        //     variada, pedir menos de ese mineral, pero
-                        //     pedir varios al mismo tiempo»): el peldaño
-                        //     pide 2-3 minerales de su era — se pagan
-                        //     GRUPO A GRUPO (cada grupo lleva sus
-                        //     ALTERNATIVOS: en un mundo de estaño, el
-                        //     grupo cobre/estaño se paga con estaño). El
-                        //     que está en el slot de AHORA es
-                        //     OfrendaMineralGrupo; completarlo avanza al
-                        //     siguiente.
-                        int g = alma.OfrendaMineralGrupo;
-                        int[] grupo = gruposMineral[g];
-                        if (grupo != null && System.Array.IndexOf(grupo, drop.type) >= 0)
+                        int[][] gruposMat = DespertarGrimorio.GruposMaterialesDe(siguiente);
+                        // ¿este drop pertenece a ALGÚN grupo del peldaño?
+                        int grupoDelDrop = -1;
+                        for (int g = 0; g < gruposMat.Length; g++)
                         {
-                            int faltaMin = cantGrupo - alma.OfrendaMineral;
-                            if (faltaMin > 0)
+                            var grp = gruposMat[g];
+                            if (grp != null && System.Array.IndexOf(grp, drop.type) >= 0)
+                            { grupoDelDrop = g; break; }
+                        }
+                        if (grupoDelDrop >= 0)
+                        {
+                            // LA MESA SE QUEDA CON EL PRIMERO (la ley del bloqueo).
+                            if (alma.OfrendaMineralGrupo < 0)
                             {
-                                int comeMin = System.Math.Min(faltaMin, drop.stack);
-                                AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO
-                                alma.OfrendaMineral += comeMin;
-                                // GRUPO COMPLETO → el siguiente (con el
-                                // último, el índice pasa de length: la
-                                // MEZCLA ENTERA queda paga).
-                                if (alma.OfrendaMineral >= cantGrupo)
+                                alma.OfrendaMineralGrupo = grupoDelDrop;
+                                alma.OfrendaMineral = 0;
+                            }
+                            if (alma.OfrendaMineralGrupo == grupoDelDrop)
+                            {
+                                int cuota = DespertarGrimorio.CantidadMateriales(siguiente, grupoDelDrop);
+                                int faltaMat = cuota - alma.OfrendaMineral;
+                                if (faltaMat > 0)
                                 {
-                                    alma.OfrendaMineralGrupo++;
-                                    alma.OfrendaMineral = 0;
-                                }
-                                drop.stack -= comeMin;
-                                if (drop.stack <= 0) drop.TurnToAir();
-                                SincronizarDrop(d);
+                                    int comeMat = System.Math.Min(faltaMat, drop.stack);
+                                    AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO
+                                    alma.OfrendaMineral += comeMat;
+                                    drop.stack -= comeMat;
+                                    if (drop.stack <= 0) drop.TurnToAir();
+                                    SincronizarDrop(d);
 
-                                PolvosDelBocado(p, comeMin);
-                                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMineral",
-                                    new Color(196, 138, 255), comeMin, cantGrupo - faltaMin + comeMin,
-                                    cantGrupo);
-                                mordisco = true;
+                                    PolvosDelBocado(p, comeMat);
+                                    EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMineral",
+                                        new Color(196, 138, 255), comeMat, alma.OfrendaMineral, cuota);
+                                    mordisco = true;
+                                }
                             }
                         }
                     }
-                    // === 4) LAS ARMAS — ¿es LA OFRENDA del peldaño? Se
-                    //     la devora ENTERA y la ofrenda queda PAGA (con
-                    //     el arma O los lingotes basta: la regla de
-                    //     siempre). Si no: no es asunto de ESTA mesa
-                    //     (el BOCADO DE SIEMPRE la atiende después). ===
-                    else if (EsArma(drop) && !alma.OfrendaArma && EsDelPeldano(drop, armasDelPeldano))
+                    // === 4) EL ARMA DEL PELDAÑO (v6.89 — SIN CORRUPCIÓN:
+                    //     la letra del ejemplo entrega el bastón de rubí
+                    //     TAL CUAL — «aunque pida varias armas, el
+                    //     grimorio solo consumirá 1 de ellas»: la lista
+                    //     son ALTERNATIVAS y la mesa devora UNA, la
+                    //     primera que caiga de las del peldaño. La
+                    //     corrupción es cosa del ALTAR, no de la mesa). ===
+                    else if (!alma.OfrendaArma && EsArma(drop) && EsDelPeldano(drop, armasDelPeldano))
                     {
-                        var sello = drop.GetGlobalItem
-                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                        if (sello == null || !sello.Corrompido) continue;
-
                         AnimarElBocado(p, drop, 3f);   // v6.51.12: EL FESTÍN CHICO
                         alma.OfrendaArma = true;
                         drop.TurnToAir();
@@ -450,10 +453,11 @@ namespace AethonMod.Content.Systems
             }
         }
 
-        /// <summary>¿LAS TRES OFRENDAS del peldaño están PAGAS? (las
-        /// esencias + el dinero + el arma O los lingotes). v6.67 — SOLO
-        /// las ofrendas: la PUERTA DE LA CAZA (el jefe del peldaño) es
-        /// un candado aparte y lo revisa PuedePasarLaPuerta.</summary>
+        /// <summary>¿LAS CUATRO OFRENDAS del peldaño están PAGAS? (las
+        /// esencias + el dinero + EL ARMA de magia/invocador + UN
+        /// material completo). v6.67 — SOLO las ofrendas: la PUERTA DE
+        /// LA CAZA (el jefe del peldaño) es un candado aparte y lo
+        /// revisa PuedePasarLaPuerta.</summary>
         private static bool LaMesaEstaCompleta(
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
@@ -461,11 +465,92 @@ namespace AethonMod.Content.Systems
             if (alma.OfrendaEsencias <
                 DespertarGrimorio.EsenciasPara(siguiente)) return false;
             if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
-            if (alma.OfrendaArma) return true;
-            // v6.88 — LA MEZCLA ENTERA (todos los grupos de la ofrenda
-            //     variada — el índice pasa de length al pagar el último).
-            return alma.OfrendaMineralGrupo >=
-                DespertarGrimorio.GruposMineralDe(siguiente).Length;
+            // v6.89 — EL ARMA ES OBLIGATORIA (la letra: «el grimorio solo
+            //     consumirá 1 de ellas») y EL MATERIAL TAMBIÉN (la letra:
+            //     «también sería obligatorio dar al menos uno de los
+            //     materiales o das 20 lingotes de oro o das 20 rubies»).
+            if (!alma.OfrendaArma) return false;
+            return MaterialPagado(alma, siguiente);
+        }
+
+        /// <summary>v6.89 — ¿EL MATERIAL del peldaño ya está pago? (el
+        /// grupo bloqueado completó SU cuota — 20 de oro O 20 rubíes:
+        /// el que la mesa tenga bloqueado).</summary>
+        private static bool MaterialPagado(
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
+        {
+            if (alma == null) return false;
+            int g = alma.OfrendaMineralGrupo;
+            if (g < 0) return false;
+            return alma.OfrendaMineral >=
+                DespertarGrimorio.CantidadMateriales(siguiente, g);
+        }
+
+        // ================================================================
+        //  v6.89 — LA ENTREGA DEL LIBRO CORRUPTO (la letra: «veo que el
+        //  despertar pide el libro corrupto como debe ser, tienes que
+        //  darle el libro corrupto al jugador»): el 20 exige devorar el
+        //  libro — y el Eterno SE LO DA a su portador en la VÍSPERA (al
+        //  llegar al 19), directo a la bolsa (las fuentes de siempre —
+        //  1% mazmorra, 50% la Muralla — SIGEN vivas: esta es la llave
+        //  GARANTIZADA de la puerta). Una sola vez por cazador.
+        // ================================================================
+
+        /// <summary>¿Este portador ya lleva su Libro Corrupto encima?</summary>
+        private static bool LlevaElLibro(Player p)
+        {
+            if (p == null) return false;
+            int tipoLibro = ModContent.ItemType
+                <global::AethonMod.Content.Items.Altar.LibroCorrupto>();
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it != null && !it.IsAir && it.type == tipoLibro) return true;
+            }
+            return false;
+        }
+
+        /// <summary>LA VÍSPERA DE LA PUERTA DEL 20: si ESTE grimorio está
+        /// a un paso del 19 (o ya lo cruzó) y la puerta del libro sigue
+        /// por pagar, el Eterno escupe SU libro a la bolsa del portador.</summary>
+        private static void RevisarEntregaDelLibro(Player p,
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma)
+        {
+            try
+            {
+                if (p == null || !p.active) return;
+                if (alma == null) return;
+                if (alma.NivelDespertar != 19) return;          // la víspera exacta
+                if (alma.LibroCorruptoConsumido) return;         // su puerta ya nació paga
+                if (LlevaElLibro(p)) return;                     // ya lo lleva encima
+
+                var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
+                if (cazador == null || cazador.YaTuvoLibro) return;   // ya tuvo el suyo
+
+                // LA ENTREGA: directo a la bolsa (o al suelo si va llena).
+                int tipoLibro = ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.LibroCorrupto>();
+                bool puesto = false;
+                for (int k = 0; k < 50; k++)
+                {
+                    Item slot = p.inventory[k];
+                    if (slot != null && !slot.IsAir) continue;
+                    p.inventory[k].SetDefaults(tipoLibro);
+                    puesto = true;
+                    break;
+                }
+                if (!puesto)
+                    p.QuickSpawnItem(p.GetSource_Misc("LibroDelEterno"), tipoLibro, 1);
+
+                cazador.YaTuvoLibro = true;   // el sello: su libro ya le llegó
+                if (Main.netMode == NetmodeID.Server)
+                    EcoRed.HablarAlPortador(p, "Mods.AethonMod.Despertar.LibroEntregado",
+                        new Color(196, 138, 255));
+                else if (p == Main.LocalPlayer)
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Despertar.LibroEntregado"), new Color(196, 138, 255));
+            }
+            catch { }
         }
 
         // ================================================================
@@ -683,7 +768,7 @@ namespace AethonMod.Content.Systems
                 alma.OfrendaEsencias = 0;
                 alma.OfrendaMonedas = 0L;
                 alma.OfrendaMineral = 0;
-                alma.OfrendaMineralGrupo = 0;   // v6.88 — la mezcla renace
+                alma.OfrendaMineralGrupo = -1;   // v6.89 — la mesa nueva SIN material bloqueado
                 alma.OfrendaArma = false;
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
@@ -745,6 +830,12 @@ namespace AethonMod.Content.Systems
                     alma.PetDelDespertar = true;
                     EscupirMascota(p);
                 }
+
+                // v6.89 — LA VÍSPERA DEL LIBRO (la letra: «tienes que
+                //     darle el libro corrupto al jugador»): al SUBIR al
+                //     19, la puerta del 20 ya tiene su llave en la bolsa.
+                if (nivel == 19)
+                    RevisarEntregaDelLibro(p, alma);
 
                 // EL NUEVO NIVEL CAMINA (el daño del portador lo lee su
                 // máquina — el paquete del festín lleva el despertar).

@@ -206,6 +206,48 @@ namespace AethonMod.Content.Projectiles.Definitivas
         // ENCIMA. Misma polilínea, mismo shader vanilla: cero picos.
         private const float KAlma = 0.96f;
         private const float AlfaAlma = 0.30f;
+        //  v6.89 — EL VELO DE PERLIN (la letra: «dale al proyectil otra
+        //  capa de textura, esta vez que sea una textura de ruido perlin
+        //  semi transparente que ocupe el mismo espacio que la textura
+        //  original y este encima de la textura original, no quites
+        //  nada, solo agregar una nueva textura»): UNA CAPA MÁS en la
+        //  pila — RUIDO PERLIN DE VERDAD (BrumaNoise.WarpedFbm: Perlin
+        //  de gradiente quíntico + fBm 5 octavas + domain-warping de IQ),
+        //  horneada EN RUNTIME (el patrón de BrumaBrushes), al MISMO
+        //  ANCHO que el CUERPO (K = 1,00 — el mismo espacio que la
+        //  textura original), SEMITRANSPARENTE (alfa 0,34) y ENCIMA de
+        //  todo (la última en pintarse — nada se quita).
+        // ================================================================
+        private const float KPerlin = 1.00f;      // el MISMO espacio que la textura original (el CUERPO)
+        private const float AlfaPerlin = 0.34f;   // SEMI transparente
+
+        private static Texture2D _perlinConducto;
+
+        /// <summary>EL RUIDO PERLIN DEL CONDUCTO (256², gris, horneado
+        /// una sola vez — el Perlin de gradiente de la casa).</summary>
+        private static Texture2D TexPerlinConducto
+        {
+            get
+            {
+                if (_perlinConducto != null && !_perlinConducto.IsDisposed)
+                    return _perlinConducto;
+                const int L = 256;
+                var data = new Color[L * L];
+                for (int y = 0; y < L; y++)
+                    for (int x = 0; x < L; x++)
+                    {
+                        // Perlin de gradiente + fBm 5 octavas + warp — el
+                        // MISMO ruido de las brumas, en gris 0,30-0,70.
+                        float n = global::AethonMod.Content.Effects.Bruma.BrumaNoise
+                            .WarpedFbm(x * 0.045f, y * 0.045f, 1701, 3f, 5);
+                        byte g = (byte)(MathHelper.Clamp(0.30f + n * 0.40f, 0f, 1f) * 255f);
+                        data[y * L + x] = new Color(g, g, g, 255);
+                    }
+                _perlinConducto = new Texture2D(Main.graphics.GraphicsDevice, L, L);
+                _perlinConducto.SetData(data);
+                return _perlinConducto;
+            }
+        }
 
         // LA PALETA DEL CONJURO (la del RC2, intacta): violeta arcano →
         // morado profundo (el «negro») → rojo sangre → magenta, viajando.
@@ -566,15 +608,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
             // ============================================================
             //  v6.78 — EL AIRE QUE HIERVE (la letra: «ondas de calor alrededor
-            //  del haz, como una distorsión de calor»): el conducto registra
-            //  SU cápsula de calor CADA tick — CalorLib la pinta al campo a ¼
-            //  y el filtro de cadena distorsiona el aire alrededor del haz
-            //  (las ondas de convección suben por las diagonales opuestas del
-            //  ruido de plasma). EL ANCHO SIGUE LA GEOMETRÍA DEL HAZ (la
-            //  MISMA ley StripWidth de la pila — cero leyes nuevas): la boca
-            //  gorda hierve fuerte, la aguja susurra. Y SOLO el arma-C — la
-            //  letra fue explícita: «no lo hagas en el haz del grimorio, hazlo
-            //  en el rayo de prueba c» (la ira del Ser Exterior NO hierve).
+            //  del haz, como una distorsión de calor») — v6.89 — EL CALOR
+            //  ES SOLO EL HAZ (la letra: «la turbulencia en el arma de
+            //  prueba c debe solo afectar al haz en si, solo al proyectil
+            //  y nada mas»): la cápsula única (boca ×1,35 sobre un
+            //  StripWidth que ya mide ~850 px) ponía el hervor ALREDEDOR
+            //  DEL PERSONAJE — su blob más ancho y más saturado caía sobre
+            //  el jugador, mientras el conducto REAL (que se abre en
+            //  cónico hasta ×3,4 a mitad de camino) apenas hervía. LA
+            //  CURA: CUATRO SEGMENTOS que trazan la GEOMETRÍA REAL del
+            //  conducto — cada segmento lleva SU boca y SU punta
+            //  (StripWidth en SUS fronteras + 10 % de aire pegado) y el
+            //  largo es el del conducto DIBUJADO (0,5 + 0,5·carga, la
+            //  MISMA ley de la pila de capas): el hervor vive SOBRE el
+            //  haz, de borde a borde del conducto — y NADA más.
             // ============================================================
             if (!EsIra && !Main.dedServ && Time >= ChargeTime - 20 && Time < ChargeTime + LaserDuration + 45)
             {
@@ -583,29 +630,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (kCalor > 0.01f)
                 {
                     Vector2 dirCalor = Projectile.rotation.ToRotationVector2();
-                    // v6.88 — EL CALOR VIVE EN EL ARMA (la letra: «las ondas
-                    //     de calor si se ven pero no estan en el rayo de
-                    //     prueba C, estas ondas de calor se ejecutan en toda
-                    //     la pantalla pero el arma se queda fuera»): la
-                    //     v6.85 multiplicó la boca del conducto por 3,6 y la
-                    //     aguja por 5 — sobre un StripWidth que YA mide
-                    //     ~850 px en la boca: la cápsula del hervidero daba
-                    //     ~3.000 px de ancho (MÁS ANCHA QUE LA PANTALLA) y
-                    //     el campo H saturaba TODA la vista — la
-                    //     distorsión se veía por todas partes MENOS donde
-                    //     el ojo la esperaba (sobre el arma). LA CURA: la
-                    //     cápsula sigue la GEOMETRÍA REAL del conducto:
-                    //     boca ×1,35 · aguja ×1,9 (el AIRE que respira
-                    //     alrededor del haz visible, ni un píxel más) y el
-                    //     largo es el del conducto DIBUJADO (LargoCono ×
-                    //     realSize — crece con la carga, igual que la pila
-                    //     de capas).
-                    float largoCalor = LargoCono * MathF.Max(0.05f, realSize)
-                        * (0.55f + 0.45f * kCalor);
-                    float anchoBoca = MathF.Max(42f, StripWidth(0.15f) * 1.35f);
-                    float anchoAguja = MathF.Max(26f, StripWidth(0.97f) * 1.9f);
-                    CalorLib.Haz(Projectile.Center, Projectile.Center + dirCalor * largoCalor,
-                        anchoBoca, anchoAguja, 1.25f * kCalor);
+                    float largo = LargoCono * (0.5f + 0.5f * kCalor);
+                    float[] cortes = { 0f, 0.28f, 0.55f, 0.78f, 0.985f };
+                    for (int s = 0; s < 4; s++)
+                    {
+                        float p0 = cortes[s], p1 = cortes[s + 1];
+                        float ancho0 = MathF.Max(30f, StripWidth(p0) * 1.10f);
+                        float ancho1 = MathF.Max(18f, StripWidth(p1) * 1.10f);
+                        Vector2 a = Projectile.Center + dirCalor * (largo * p0);
+                        Vector2 b = Projectile.Center + dirCalor * (largo * p1);
+                        if ((b - a).Length() < 16f) continue;
+                        CalorLib.Haz(a, b, ancho0, ancho1, 1.25f * kCalor);
+                    }
                 }
             }
 
@@ -835,7 +871,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 // EL CÍRCULO DE LOS MINIONS (la ley: la bruma vive DENTRO).
                 IraSerExteriorCeremoniaProjectile.CirculoDelEscuadron(
                     (int)Owner, out Vector2 centroMin, out float radioMin, out int nMin);
-                float anillo = Math.Max(40f, radioMin) * 0.82f;   // el techo del anillo
+                // v6.89 — LA CUNA LLENA EL ANILLO (la letra: «esa bruma
+                //     del centro debe ocupar todo el interior del circulo
+                //     de minions, o mejor dicho, todo el interior del
+                //     primer anillo runico interior del ataque del haz»):
+                //     el techo lo pone EL ANILLO ÍNTIMO de la corona de la
+                //     boca (2,02 × rCorona en pleno lanzamiento) — y si el
+                //     escuadrón apretara MÁS, su círculo manda (nada asoma).
+                float rCoronaIra = 26f * (1f + 0.04f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f));
+                float techoIra = 0.94f * 2.02f * rCoronaIra;
+                if (nMin > 0) techoIra = Math.Min(techoIra, Math.Max(40f, radioMin) * 0.94f);
+                float anillo = techoIra;   // el techo del anillo
                 Vector2 boca = posPantalla;                        // el centro de nacimiento
                 Vector2 centroMinScr = nMin > 0 ? centroMin - Main.screenPosition : boca;
 
@@ -864,14 +910,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     //      escuadrón de 11 — VISTE la corona de 26 px y
                     //      su aro de 36 px), 7 puffs y alfa 0,30 TODO el
                     //      disparo (respirando, blanco-violeta) ———
-                    BrumaFX.Cloud(boca, anillo * 0.60f, new Color(214, 205, 244),
+                    BrumaFX.Cloud(boca, anillo * 0.92f, new Color(214, 205, 244),
                         77, Main.GlobalTimeWrappedHourly * 0.8f,
                         puffs: 7,
                         alpha: 0.30f * aliento);
                     // ——— EL CORAZÓN DE LA CUNA: la capa interior MÁS
                     //      BLANCA (×0,34) que DENSIFICA el medio de los
                     //      círculos — el centro HIERVE de bruma ———
-                    BrumaFX.Cloud(boca, anillo * 0.34f, new Color(228, 220, 250),
+                    BrumaFX.Cloud(boca, anillo * 0.55f, new Color(228, 220, 250),
                         83, Main.GlobalTimeWrappedHourly * 1.1f,
                         puffs: 4,
                         alpha: 0.24f * aliento);
@@ -1087,7 +1133,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.Quad(Projectile.Center,
                         new Color(255, 252, 255) * (0.85f * lateE * alientoE),
                         new Vector2(rE, rE));
+                    // v6.89 — EL PUNTO DE LUZ (la letra: «y justo en el
+                    //     centro donde nace el haz debe de haber un punto
+                    //     de luz»): LA CHISPA EXACTA del nacimiento — el
+                    //     punto blanco con SU micro-flare en cruz, latiendo
+                    //     al doble del compás de la esfera.
+                    float lateP = 0.78f + 0.22f * MathF.Sin(Main.GlobalTimeWrappedHourly * 8.6f);
+                    float rP = 2.2f;
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(236, 228, 255) * (0.60f * lateP * alientoE),
+                        new Vector2(rP * 8.0f, rP * 1.15f));
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(236, 228, 255) * (0.60f * lateP * alientoE),
+                        new Vector2(rP * 1.15f, rP * 8.0f));
+                    VFXCore.Quad(Projectile.Center,
+                        new Color(255, 253, 255) * (0.95f * lateP * alientoE),
+                        new Vector2(rP, rP));
                 }
+
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.FlushAdditive();
@@ -1252,6 +1315,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // «láser dentro de la explosión de energía» — arde
                     // ENCIMA del alma.
                     CapaRampa(gd, textureGlow, KNucleo, ColorNucleo, positions, rotations);
+
+                    // (7) v6.89 — EL VELO DE PERLIN: la capa NUEVA — ruido
+                    //     perlin SEMITRANSPARENTE al MISMO ancho que el
+                    //     CUERPO (la textura original), ENCIMA de todo.
+                    //     NADA se quitó: solo esta capa agregada.
+                    CapaRampa(gd, TexPerlinConducto, KPerlin, ColorPerlin, positions, rotations);
                 }
                 finally
                 {
@@ -1332,6 +1401,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // BLANCO-VIOLETA incandescente — la vena del conducto.
             Color nucleo = Color.Lerp(new Color(255, 246, 255), new Color(214, 170, 255), 0.35f);
             return nucleo * (AlfaNucleo * _laserActivo) * ColaSuave(p);
+        }
+
+        /// <summary>v6.89 — EL COLOR DEL VELO DE PERLIN: la paleta del
+        /// conjuro LAVADA a blanco-violeta (el ruido se lee como LUZ que
+        /// corre por el conducto, no como mancha) — SEMITRANSPARENTE.</summary>
+        private Color ColorPerlin(float p)
+        {
+            Color c = ColorConjuro(Projectile.localAI[0] - p * CicloConjuro);
+            Color velo = Color.Lerp(c, new Color(235, 228, 255), 0.55f);
+            return velo * (AlfaPerlin * _laserActivo) * ColaSuave(p);
         }
 
         /// <summary>EL ANCHO DE LA CAPA ACTIVA — el perfil del RC2 (p^0.8 ·

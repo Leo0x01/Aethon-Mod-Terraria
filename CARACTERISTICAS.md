@@ -158,6 +158,18 @@ Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
 
 ---
 
+## LA ERA v6.89 (EL DESPERTAR DE MAGIA PURA — verificado contra el código)
+
+> **La fuente de la verdad**: `Content/` v6.89 + el checklist de STABLE-SNAPSHOT v6.89.
+
+- **EL DESPERTAR** (la escalera rehecha): armas MÁGICAS/INVOCADOR por era (SIN látigos/melee/rango) — los datos EXACTOS 1.4.4 del propio juego decompilado; materiales de SUS recetas (el doble, redondeado, mínimo 20: «20 de oro O 20 rubíes»), UNA opción bloqueada por la mesa; consume UNA de las alternativas; SIN corrupción (el arma tal cual — la corrupción vive en el ALTAR). LA LISTA COMPLETA: §15 del DISEÑO_DEL_MOD (las CIEN filas).
+- **LA ENTREGA DEL LIBRO**: al 19, el Eterno escupe su Libro Corrupto a la bolsa (la puerta del 20 nace con su llave).
+- **LA ESENCIA DEL ETERNO**: el renombrado cósmico (antes «esencia corrupta» — la carta del bioma se devolvió).
+- **EL NOMBRE CORRUPTO**: UN color (RarityCorrupta, negro tinta) en inventario Y barra rápida; EL PRECIO de corromper: esencias según calidad+daño+tipo+stats (altar y receta, la MISMA fórmula).
+- **LA TECLA B**: las mascotas (Aethon Menor + Grimorio Menor) con buffType (sus RANURAS viven) + detour de QuickBuff — SOLO si están EQUIPADAS, jamás desde el fondo de la bolsa; la tecla como era (pociones igual).
+- **EL HAZ**: la bruma del centro LLENA el interior del anillo íntimo (2,02 × rCorona) con el PUNTO DE LUZ exacto del nacimiento; el calor de la prueba C son CUATRO SEGMENTOS sobre la geometría real (solo el proyectel) + EL VELO DE PERLIN (capa nueva semitransparente al mismo ancho del cuerpo, encima de todo).
+- **LAS ARMAS**: borradas las nuevas (quedan los clickers + La Mirada de Solyn + el Relicario + los Grilletes + el altar); el ÁRBOL vuelve al CÓDICE con la economía por despertar (3 + despertar/5). LA MIRADA DE SOLYN: la geometría del original de WoTG (arranque redondo √(1,001−x²) — sin picos, fundidos por nodo, el muzzle con el factor mágico cos01(t·85)); EL RELICARIO: el detour de DrawInfernoRings con las texturas del original (BloomFlare/GlowAlpha) y el CD naciendo al pulsar (45 s de ciclo).
+
 ## LA ERA v6.85-v6.88 (el inventario ACTUAL — verificado contra el código)
 
 > **La fuente de la verdad**: `Content/` v6.88 (470 clases) + los checklist de

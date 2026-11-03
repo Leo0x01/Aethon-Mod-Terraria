@@ -573,35 +573,44 @@ namespace AethonMod.Content.Projectiles.Definitivas
             {
                 bool hayCirculo = CirculoDelEscuadron(Projectile.owner,
                     out Vector2 centroMin, out float radioMin, out int nMin);
-                float techo = (hayCirculo ? Math.Max(40f, radioMin) : 68f) * 0.72f;
-                float radioCuna = MathHelper.Lerp(28f, Math.Min(95f, techo), prog)
+                // v6.89 — LA BRUMA LLENA EL CÍRCULO (la letra: «esa bruma
+                //     del centro debe ocupar todo el interior del circulo
+                //     de minions, o mejor dicho, todo el interior del
+                //     primer anillo runico interior del ataque del haz»):
+                //     EL TECHO ya NO es el 0,72 del radio del escuadrón —
+                //     lo pone EL ANILLO ÍNTIMO de la corona (AroIntimo =
+                //     2,02 × rCorona): la nube crece hasta LLENAR su
+                //     interior (margen del 6 % para que el aro respire
+                //     por encima de la nube) y las TRES capas se
+                //     reparten el disco (1,00 · 0,75 · 0,50) — el centro
+                //     queda LLENO de bruma de borde a borde.
+                float rCoronaTecho = MathHelper.Lerp(70f, 26f, MathF.Pow(prog, 0.8f));
+                float techo = 0.94f * 2.02f * rCoronaTecho;   // el interior del anillo íntimo
+                float radioCuna = MathHelper.Lerp(28f, techo, prog)
                     * (1f - 0.55f * contraccion);
                 Vector2 nubeScr = posPantalla;   // EL PUNTO DE NACIMIENTO (donde el haz nacerá)
-                // v6.76 — AÚN MÁS BRUMA (la letra: «el centro se llena de
-                //     bruma, aun mas bruma de la que hay actualmente»):
-                //     la nube blanca pasa de 12-30 a 16-50 puffs, la
-                //     morada de 12 a 18 — y UNA TERCERA CAPA interior
-                //     (el VIENTRE: ×0,36, más blanca) en el punto
-                //     exacto del nacimiento. La MISMA ley del círculo
-                //     (el techo del radio lo pone el escuadrón — nada
-                //     asoma), la masa MUCHO más gruesa: el centro de la
-                //     ceremonia HIERVE de bruma.
+                // v6.89 — LA MASA DEL LLENADO: los puffs escalan con el
+                //     radio (una nube de 130 px lleva el TRIPLE de masa
+                //     que una de 40) — el interior HIERVE de bruma.
+                int puffsBlanca = Math.Clamp((int)(radioCuna * 0.42f), 16, 80);
+                int puffsMorada = Math.Max(10, puffsBlanca / 2);
+                int puffsVientre = Math.Max(8, puffsBlanca / 4);
                 VFXCore.CerrarLoteSiAbierto();
                 BrumaFX.BeginMass();
                 BrumaFX.Cloud(nubeScr, radioCuna, new Color(205, 195, 238),
                     semilla, time,
-                    Math.Max(16, (int)(34 * prog) + 16),
-                    alpha: 0.28f + 0.40f * prog + 0.14f * contraccion);
+                    puffsBlanca,
+                    alpha: 0.30f + 0.42f * prog + 0.14f * contraccion);
                 BrumaFX.Cloud(nubeScr + new Vector2(0f, -radioCuna * 0.2f),
-                    radioCuna * 0.62f, new Color(86, 44, 150),
-                    semilla + 29, time * 0.85f, 18,
-                    alpha: 0.24f + 0.32f * prog + 0.10f * contraccion);
-                // v6.76 — EL VIENTRE DE LA BRUMA: la capa interior MÁS
-                //     BLANCA en el punto exacto donde el haz nacerá —
-                //     el centro se LLENA de verdad.
-                BrumaFX.Cloud(nubeScr, radioCuna * 0.36f, new Color(226, 218, 250),
-                    semilla + 57, time * 1.25f, 8,
-                    alpha: 0.22f + 0.30f * prog + 0.12f * contraccion);
+                    radioCuna * 0.75f, new Color(86, 44, 150),
+                    semilla + 29, time * 0.85f, puffsMorada,
+                    alpha: 0.26f + 0.34f * prog + 0.10f * contraccion);
+                // v6.76 — EL VIENTRE DE LA BRUMA (v6.89: ahora ×0,50 —
+                //     el DISCO entero cubierto): la capa interior MÁS
+                //     BLANCA en el punto exacto donde el haz nacerá.
+                BrumaFX.Cloud(nubeScr, radioCuna * 0.50f, new Color(226, 218, 250),
+                    semilla + 57, time * 1.25f, puffsVientre,
+                    alpha: 0.24f + 0.32f * prog + 0.12f * contraccion);
             }
             catch { }
             finally
@@ -701,6 +710,28 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     VFXCore.Quad(centro,
                         new Color(255, 252, 255) * (0.85f * lateE * (0.25f + 0.75f * prog)),
                         new Vector2(rE, rE));
+                }
+
+                // === v6.89 — EL PUNTO DE LUZ (la letra: «y justo en el
+                //     centro donde nace el haz debe de haber un punto de
+                //     luz»): LA CHISPA EXACTA del nacimiento — un punto
+                //     blanco de 2-4 px con SU micro-flare en cruz, latiendo
+                //     al doble del compás de la esfera y AVIVÁNDOSE con la
+                //     carga: la fuente puntual que la esfera viste (la
+                //     esfera es el halo; ESTO es el punto). ===
+                {
+                    float lateP = 0.78f + 0.22f * MathF.Sin(time * 8.6f);
+                    float rP = 2.2f + 1.8f * prog;
+                    float creceP = 0.30f + 0.70f * prog;
+                    VFXCore.Quad(centro,
+                        new Color(236, 228, 255) * (0.60f * lateP * creceP),
+                        new Vector2(rP * 8.0f, rP * 1.15f));
+                    VFXCore.Quad(centro,
+                        new Color(236, 228, 255) * (0.60f * lateP * creceP),
+                        new Vector2(rP * 1.15f, rP * 8.0f));
+                    VFXCore.Quad(centro,
+                        new Color(255, 253, 255) * (0.95f * lateP * (0.25f + 0.75f * prog)),
+                        new Vector2(rP, rP));
                 }
 
                 // LA SEMILLA DEL HAZ: la estrella de 4 puntas que CRECE en

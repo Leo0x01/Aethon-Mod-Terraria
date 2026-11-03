@@ -603,7 +603,10 @@ namespace AethonMod.Content.Globals
                 if (OfrendaEsencias > 0) tag["almaOfrendaEsencias"] = OfrendaEsencias;
                 if (OfrendaMonedas > 0L) tag["almaOfrendaMonedas"] = OfrendaMonedas;
                 if (OfrendaMineral > 0) tag["almaOfrendaMineral"] = OfrendaMineral;
-                if (OfrendaMineralGrupo > 0) tag["almaOfrendaMineralGrupo"] = OfrendaMineralGrupo;
+                // v6.89 — LA MESA NUEVA: el grupo bloqueado (-1 = aún
+                //     ninguno) viaja SIEMPRE con su clave v2 (los saves
+                //     viejos sin v2 se migran al cargar).
+                tag["almaOfrendaMineralGrupo2"] = OfrendaMineralGrupo;
                 if (OfrendaArma) tag["almaOfrendaArma"] = true;
                 // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                 if (LibroCorruptoConsumido) tag["almaLibroCorrupto"] = true;
@@ -636,7 +639,23 @@ namespace AethonMod.Content.Globals
                 OfrendaEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEsencias")));
                 OfrendaMonedas = System.Math.Max(0L, System.Math.Min(9_999_999L, tag.GetLong("almaOfrendaMonedas")));
                 OfrendaMineral = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaMineral")));
-                OfrendaMineralGrupo = System.Math.Max(0, System.Math.Min(9, tag.GetInt("almaOfrendaMineralGrupo")));
+                // v6.89 — LA MIGRACIÓN DE LA MESA: saves VIEJOS (sin la
+                //     clave v2) traían el índice de la MEZCLA v6.88 (0..
+                //     length: la ofrenda eran TODOS los grupos) — bajo el
+                //     modelo nuevo (UNA opción bloqueada) esas cuentas no
+                //     significan nada: el material del peldaño vivo
+                //     renace limpio (el arma y las esencias/monedas
+                //     siguen como estaban: su modelo no cambió).
+                if (tag.ContainsKey("almaOfrendaMineralGrupo2"))
+                {
+                    int g2 = tag.GetInt("almaOfrendaMineralGrupo2");
+                    OfrendaMineralGrupo = System.Math.Max(-1, System.Math.Min(9, g2));
+                }
+                else
+                {
+                    OfrendaMineralGrupo = -1;   // la mesa nueva nace sin bloqueo
+                    if (OfrendaMineral > 0) OfrendaMineral = 0;   // y sin cuentas viejas
+                }
                 OfrendaArma = tag.GetBool("almaOfrendaArma");
                 // v6.86 — EL LIBRO CORRUPTO + EL ALTAR DE OFRENDAS.
                 LibroCorruptoConsumido = tag.GetBool("almaLibroCorrupto");
@@ -710,7 +729,8 @@ namespace AethonMod.Content.Globals
                 writer.Write(CorazonEstelar);
                 writer.Write(AlmaVeloz);
                 writer.Write(PunoTitan);
-                writer.Write((byte)OfrendaMineralGrupo);   // v6.88: la mezcla (ver 4)
+                // v6.89 — la MESA NUEVA: 255 = sin grupo bloqueado (-1).
+                writer.Write((byte)(OfrendaMineralGrupo < 0 ? 255 : OfrendaMineralGrupo));
             }
             catch { writer.Write((byte)0); }
         }
@@ -750,7 +770,13 @@ namespace AethonMod.Content.Globals
                 CorazonEstelar = System.Math.Max(0, reader.ReadInt32());
                 AlmaVeloz = System.Math.Max(0, reader.ReadInt32());
                 PunoTitan = System.Math.Max(0, reader.ReadInt32());
-                if (ver >= 4) OfrendaMineralGrupo = reader.ReadByte();   // v6.88: la mezcla
+                if (ver >= 4)
+                {
+                    // v6.89 — la MESA NUEVA: 255 = sin grupo bloqueado
+                    //     (el índice de la mezcla v6.88 murió).
+                    int g = reader.ReadByte();
+                    OfrendaMineralGrupo = g >= 200 ? -1 : g;
+                }
             }
             catch { }
         }

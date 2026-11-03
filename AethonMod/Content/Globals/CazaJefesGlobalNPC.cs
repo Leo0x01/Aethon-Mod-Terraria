@@ -113,8 +113,6 @@ namespace AethonMod.Content.Globals
                         if (pj != null && pj.active)
                         {
                             var st = pj.GetModPlayer<Players.SkillTreePlayer>();
-                            if (st != null && st.LlevaLibroAzul())
-                                st.RegistrarBajaLibroAzul();
                         }
                     }
                 }

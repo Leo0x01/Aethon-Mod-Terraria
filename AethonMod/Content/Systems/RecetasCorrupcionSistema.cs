@@ -103,10 +103,14 @@ namespace AethonMod.Content.Systems
                     //     letra: «eso debe mostrarse con una etiqueta»).
                     Recipe.Create(t, 1)
                         .AddIngredient(t, 1)
+                        .AddIngredient(ModContent.ItemType
+                            <global::AethonMod.Content.Items.Altar.ItemCorrupto>(),
+                            global::AethonMod.Content.Globals.CorruptoGlobalItem
+                                .CosteCorrupcion(proto))
                         .AddCondition(LlevaElGrimorio)
                         .AddCondition(QuedaUnaLimpia(t))
                         .AddCondition(NaceCorrupta)
-                        .AddOnCraftCallback(MarcarCorrupta)
+                        .AddOnCraftCallback(MarcarCorrupta)   // v6.89: cuesta CosteCorrupcion esencias (la de cobre pide menos que la de adamantita)
                         .Register();
                     armas++;
                 }
@@ -161,6 +165,8 @@ namespace AethonMod.Content.Systems
                 if (sello == null) return;
                 sello.Corrompido = true;
                 item.ResetPrefix();   // «ya no puede tener etiquetas» — pelada de fábrica
+                // v6.89 — Y VISTE SU RAREZA (el nombre negro en TODAS partes).
+                global::AethonMod.Content.Globals.CorruptoGlobalItem.VestirLaRareza(item);
             }
             catch { }
         }

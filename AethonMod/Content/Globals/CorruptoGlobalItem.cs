@@ -49,6 +49,11 @@ namespace AethonMod.Content.Globals
         public override void LoadData(Item item, TagCompound tag)
         {
             Corrompido = tag.GetBool("corrompido");
+            // v6.89 — LA RAREZA VUELVE A VESTIRSE (rare no viaja en el save:
+            //     SetDefaults lo devuelve a su rareza ORIGINAL al cargar —
+            //     aquí se re-aplica la corrupta para que el nombre tenga SU
+            //     color en TODAS partes (tooltip Y barra rápida).
+            if (Corrompido) VestirLaRareza(item);
         }
 
         public override void NetSend(Item item, BinaryWriter writer)
@@ -60,11 +65,109 @@ namespace AethonMod.Content.Globals
         {
             try { Corrompido = reader.ReadBoolean(); }
             catch { Corrompido = false; }
+            if (Corrompido) VestirLaRareza(item);
+        }
+
+        /// <summary>v6.89 — EL ARMA CORRUPTA VISTE SU RAREZA: el color de
+        /// su nombre es el MISMO en el inventario y en la barra de acceso
+        /// rápido (la letra: «el color del nombre es diferente en el
+        /// inventario que en la barra de acceso rapido» — ya no: UNA sola
+        /// fuente, la ModRarity corrupta, negro tinta (30,30,40)).</summary>
+        public static void VestirLaRareza(Item item)
+        {
+            try
+            {
+                if (item == null || item.IsAir) return;
+                int corrupta = ModContent.RarityType
+                    <global::AethonMod.Content.Rarities.RarityCorrupta>();
+                if (item.rare != corrupta) item.rare = corrupta;
+            }
+            catch { }
         }
 
         // === EL YUNQUE CERRADO («ya no puede tener etiquetas») ===
 
         public override bool CanReforge(Item item) => !Corrompido;
+
+        // ================================================================
+        //  v6.89 — EL PRECIO DE LA CORRUPCIÓN (la letra: «para corromper
+        //  algo necesita esencia corrupta en dependencia de la calidad
+        //  del arma, el tipo de arma, el daño del arma y sus
+        //  estadisticas o efecto, no es lo mismo corromper una espada de
+        //  cobre que una espada de adamantita, la de cobre pide menos
+        //  esencia corrupta»): EL ALTAR y LA RECETA cobran LO MISMO —
+        //  Esencias del Eterno según:
+        //   · LA CALIDAD (la rareza: 5 lo más barato · 340 en la púrpura);
+        //   · EL DAÑO (+1 esencia por cada 10 de daño);
+        //   · EL TIPO (el grimorio es magia: melee ×1,0 · rango ×1,1 ·
+        //     magia ×1,2 · invocación ×1,3);
+        //   · SUS ESTADÍSTICAS (crítico alto, empuje alto o uso rápido
+        //     suman su prima).
+        // ================================================================
+
+        /// <summary>CUÁNTAS ESENCIAS DEL ETERNO cuesta corromper ESTA
+        /// arma (la fórmula única del altar y de las recetas).</summary>
+        public static int CosteCorrupcion(Item item)
+        {
+            try
+            {
+                if (item == null || item.IsAir) return 1;
+                // LA CALIDAD — la columna de la rareza (de vanilla −1..10).
+                int[] porCalidad = { 5, 8, 15, 25, 40, 60, 80, 110, 150, 200, 260, 340 };
+                int calidad = Math.Clamp(item.rare + 1, 0, 11);
+                int coste = porCalidad[calidad];
+                // EL DAÑO — la de adamantita pega más que la de cobre.
+                coste += Math.Max(0, item.damage) / 10;
+                // SUS ESTADÍSTICAS — la prima del filo fino.
+                if (item.crit >= 8) coste += 10;
+                if (item.knockBack >= 6f) coste += 10;
+                if (item.useTime > 0 && item.useTime <= 10) coste += 15;
+                // EL TIPO — el Eterno es magia: lo mágico cuesta más.
+                float tipo = 1.0f;
+                if (item.DamageType == DamageClass.Magic) tipo = 1.2f;
+                else if (item.DamageType == DamageClass.Summon) tipo = 1.3f;
+                else if (item.DamageType == DamageClass.Ranged) tipo = 1.1f;
+                return Math.Max(1, (int)(coste * tipo));
+            }
+            catch { return 20; }
+        }
+
+        /// <summary>¿Cuántas Esencias del Eterno lleva el jugador encima?</summary>
+        public static int EsenciasEnLaBolsa(Player p)
+        {
+            if (p == null) return 0;
+            int tipo = ModContent.ItemType
+                <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+            int total = 0;
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir || it.type != tipo) continue;
+                total += it.stack;
+            }
+            return total;
+        }
+
+        /// <summary>EL COBRO DEL ALTAR: quita las esencias del inventario
+        /// del portador (de la pila que sea). Devuelve false si no llega.</summary>
+        public static bool PagarCorrupcion(Player p, int coste)
+        {
+            if (p == null || coste <= 0) return true;
+            if (EsenciasEnLaBolsa(p) < coste) return false;
+            int tipo = ModContent.ItemType
+                <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+            int falta = coste;
+            for (int k = 0; k < 58 && falta > 0; k++)
+            {
+                Item it = p.inventory[k];
+                if (it == null || it.IsAir || it.type != tipo) continue;
+                int quita = Math.Min(falta, it.stack);
+                it.stack -= quita;
+                falta -= quita;
+                if (it.stack <= 0) it.TurnToAir();
+            }
+            return true;
+        }
 
         // ================================================================
         //  v6.51.0 — LOS STATS EN % DE LAS ARMAS CORRUPTAS (la letra:
@@ -112,14 +215,14 @@ namespace AethonMod.Content.Globals
             if (!Corrompido) return;
             try
             {
-                // v6.88 — LA ETIQUETA EN EL NOMBRE (la letra: «las armas
-                // corruptas tendran la etiqueta de (Corrupto) en su
-                // nombre, y su nombre se vuelve negro»): la v6.86 ponía la
-                // etiqueta en una LÍNEA separada debajo del nombre — ahora
-                // el nombre MISMO la lleva: «Espada corta de cobre
-                // (Corrupto)» en NEGRO (el negro de la tinta de la casa:
-                // legible sobre el tooltip, imposible de confundir con el
-                // violeta de las líneas de lore).
+                // v6.89 — LA RAREZA VISTE EL NOMBRE (la letra: «el color del
+                //     nombre es diferente en el inventario que en la barra
+                //     de acceso rapido»): ya NO se fuerza un OverrideColor
+                //     que solo vive en el tooltip — el arma corrupta lleva
+                //     SU PROPIA ModRarity (negro tinta) y vanilla pinta el
+                //     nombre con ELLA en el tooltip, en la barra rápida y
+                //     en todas partes: UN color, UNA fuente.
+                VestirLaRareza(item);
                 int idxNombre = -1;
                 for (int i = 0; i < tooltips.Count; i++)
                 {
@@ -132,7 +235,7 @@ namespace AethonMod.Content.Globals
                     tooltips[idxNombre].Text =
                         tooltips[idxNombre].Text + " " +
                         Language.GetTextValue("Mods.AethonMod.Items.ArmaCorruptaTag");
-                    tooltips[idxNombre].OverrideColor = new Color(30, 30, 40);
+                    // (sin OverrideColor: el color lo pone LA RAREZA corrupta)
                 }
 
                 tooltips.Add(new TooltipLine(Mod, "CorruptoLinea1",

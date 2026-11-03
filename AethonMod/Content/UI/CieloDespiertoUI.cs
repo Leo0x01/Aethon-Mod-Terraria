@@ -426,21 +426,23 @@ namespace AethonMod.Content.UI
                     caido ? TintaVerde : TintaRojo, 0.84f, 0f, 0.4f);
             }
 
-            // (4) EL ARMA DEL PELDAÑO + LA ALTERNATIVA MINERAL (la misión de
-            //     la ofrenda: los sprites mini + «¿la llevas en la bolsa?»).
+            // (4) EL ARMA DEL PELDAÑO + EL MATERIAL (v6.89 — la misión de
+            //     la ofrenda NUEVA: el arma de MAGIA/INVOCADOR (sin
+            //     corrupción — «el grimorio solo consumirá 1 de ellas»)
+            //     y UNA opción de material («o das 20 lingotes de oro o
+            //     das 20 rubíes»: la mesa se queda con la primera que
+            //     alimentes — los sprites mini y «¿la llevas en la bolsa?»).
             int[] armas = Systems.DespertarGrimorio.ArmasDelNivel[n];
-            // v6.88 — LA MEZCLA MINERAL (la ofrenda variada: grupos con
-            //     alternativos, cantidad moderada por cabeza).
-            int[][] gruposMin = Systems.DespertarGrimorio.GruposMineralDe(n);
-            int cantMineral = Systems.DespertarGrimorio.CantidadPorGrupo(n);
-            int grupoActual = alma != null ? alma.OfrendaMineralGrupo : 0;
+            int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(n);
+            int grupoBloqueado = alma != null ? alma.OfrendaMineralGrupo : -1;
             int comidosActual = alma != null ? alma.OfrendaMineral : 0;
-            bool mezclaPagada = alma != null && grupoActual >= gruposMin.Length;
+            bool materialPagado = vivo && alma != null && grupoBloqueado >= 0 &&
+                comidosActual >= Systems.DespertarGrimorio.CantidadMateriales(n, grupoBloqueado);
             float ax = panel.Right - 210f;
 
             if (armas != null && armas.Length > 0)
             {
-                bool armaEnBolsa = LlevaAlgunaAlternativa(yo, armas, out bool corrupta);
+                bool armaEnBolsa = LlevaAlgunaAlternativa(yo, armas, out _);
                 bool armaPagada = alma != null && alma.OfrendaArma && vivo;
 
                 // LA FILA DE SPRITES (las alternativas del peldaño, 18 px).
@@ -462,83 +464,40 @@ namespace AethonMod.Content.UI
                     catch { }
                 }
 
+                // v6.89 — SIN ESTADO «CORRUPTA» (la mesa come el arma tal
+                //     cual): en la bolsa ✓ o falta.
                 string estadoArma = armaPagada ? Language.GetTextValue(Clave("CieloArmaPagada"))
-                    : (corrupta ? Language.GetTextValue(Clave("CieloCorruptaLista"))
                     : (armaEnBolsa ? Language.GetTextValue(Clave("CieloEnLaBolsa"))
-                    : Language.GetTextValue(Clave("CieloFaltaArma"))));
+                    : Language.GetTextValue(Clave("CieloFaltaArma")));
                 Color tintaArma = armaPagada ? TintaVerde
                     : (armaEnBolsa ? TintaDorado : TintaApagado);
                 Utils.DrawBorderString(sb, estadoArma, new Vector2(ax, fy + 28f),
                     tintaArma, 0.80f, 0f, 0.4f);
 
-                // v6.88 — LA ALTERNATIVA MINERAL ES UNA MEZCLA (varios
-                //     grupos a la vez, cantidades moderadas): el estado
-                //     del grupo ACTUAL (los anteriores ya están pagos) y
-                //     cuántos quedan.
-                int gInfo = System.Math.Min(grupoActual, gruposMin.Length - 1);
-                int tipoGrupo = gruposMin[gInfo] != null && gruposMin[gInfo].Length > 0
-                    ? gruposMin[gInfo][0] : -1;
-                int enBolsaMin = tipoGrupo > 0 ? CuentaEnLaBolsa(yo, tipoGrupo) : 0;
-                bool mineralPagado = mezclaPagada;
-                string textoMin = mineralPagado
-                    ? "[✓] " + Language.GetTextValue(Clave("CieloLingotesPagados"))
-                    : "[•] " + string.Format(Language.GetTextValue(Clave("CieloLingotes")),
-                        cantMineral, tipoGrupo > 0 ? Lang.GetItemNameValue(tipoGrupo) : "?") +
-                    (gruposMin.Length > 1 && !mineralPagado
-                        ? string.Format(" (+{0} más)", gruposMin.Length - 1 - grupoActual < 0
-                            ? 0 : gruposMin.Length - 1 - grupoActual) : "") +
-                    (enBolsaMin > 0 && !mineralPagado
-                        ? string.Format(" ({0})", enBolsaMin) : "");
-                Utils.DrawBorderString(sb, textoMin, new Vector2(ax, fy + 44f),
-                    mineralPagado ? TintaVerde : (enBolsaMin >= cantMineral ? TintaDorado : TintaApagado),
-                    0.80f, 0f, 0.4f);
-            }
-            else
-            {
-                // v6.88 — EL PELDAÑO MINERAL ES UNA MEZCLA (la letra:
-                //     «debe ser variada, pedir menos de ese mineral,
-                //     pero pedir varios al mismo tiempo»): la fila pinta
-                //     TODOS los grupos (máx 3, el primero de cada uno —
-                //     en un mundo de estaño el grupo se paga con estaño)
-                //     y el estado cuenta los grupos pagos + el actual.
-                bool mineralPagado = mezclaPagada;
-                float sx = ax;
-                int pintados = 0;
-                for (int gi = 0; gi < gruposMin.Length && pintados < 3; gi++)
-                {
-                    int tipoG = gruposMin[gi] != null && gruposMin[gi].Length > 0
-                        ? gruposMin[gi][0] : -1;
-                    if (tipoG <= 0) continue;
-                    try
-                    {
-                        Texture2D tex = TextureAssets.Item[tipoG].Value;
-                        if (tex == null) continue;
-                        // los grupos ya pagos, en VERDE; el actual, DORADO.
-                        Color tinta = gi < grupoActual ? TintaVerde
-                            : (gi == grupoActual ? TintaDorado : Color.White * 0.92f);
-                        sb.Draw(tex, new Vector2(sx + 9f, fy + 14f), null,
-                            tinta, 0f, tex.Size() * 0.5f,
-                            MathHelper.Min(18f / tex.Width, 18f / tex.Height),
-                            SpriteEffects.None, 0f);
-                        sx += 20f;
-                        pintados++;
-                    }
-                    catch { }
-                }
-                int gVivo = System.Math.Min(grupoActual, gruposMin.Length - 1);
-                int tipoVivo = gruposMin[gVivo] != null && gruposMin[gVivo].Length > 0
-                    ? gruposMin[gVivo][0] : -1;
+                // v6.89 — EL MATERIAL DEL PELDAÑO (UNA opción — la letra:
+                //     «también sería obligatorio dar al menos uno de los
+                //     materiales o das 20 lingotes de oro o das 20
+                //     rubíes»): el estado del grupo BLOQUEADO y su cuenta
+                //     viva (los otros grupos son alternativas).
+                int gVivo = grupoBloqueado >= 0 && grupoBloqueado < gruposMat.Length
+                    ? grupoBloqueado : -1;
+                int tipoVivo = gVivo >= 0 && gruposMat[gVivo] != null && gruposMat[gVivo].Length > 0
+                    ? gruposMat[gVivo][0] : -1;
+                int cuotaViva = gVivo >= 0
+                    ? Systems.DespertarGrimorio.CantidadMateriales(n, gVivo) : 0;
                 int enBolsaMin = tipoVivo > 0 ? CuentaEnLaBolsa(yo, tipoVivo) : 0;
-                string textoMin = mineralPagado
-                    ? "[✓] " + Language.GetTextValue(Clave("CieloLingotesPagados"))
-                    : string.Format(Language.GetTextValue(Clave("CieloLingotes")),
-                        cantMineral, tipoVivo > 0 ? Lang.GetItemNameValue(tipoVivo) : "?") +
-                    (gruposMin.Length > 1 && !mineralPagado
-                        ? string.Format(" · mezcla {0}/{1}", grupoActual, gruposMin.Length) : "") +
-                    (enBolsaMin > 0 && !mineralPagado
-                        ? string.Format(" ({0})", enBolsaMin) : "");
-                Utils.DrawBorderString(sb, textoMin, new Vector2(ax, fy + 30f),
-                    mineralPagado ? TintaVerde : (enBolsaMin >= cantMineral ? TintaDorado : TintaApagado),
+                string textoMin = materialPagado
+                    ? "[✓] " + Language.GetTextValue(Clave("CieloMaterialPagado"))
+                    : "[•] " + string.Format(Language.GetTextValue(Clave("CieloMaterial")),
+                        cuotaViva > 0 ? cuotaViva : 20,
+                        tipoVivo > 0 ? Lang.GetItemNameValue(tipoVivo) : "?") +
+                    (gVivo < 0 ? " · elige UNA opción" : "") +
+                    (gVivo >= 0 && !materialPagado
+                        ? string.Format(" ({0}/{1})", System.Math.Min(comidosActual, cuotaViva), cuotaViva) : "") +
+                    (enBolsaMin > 0 && !materialPagado
+                        ? string.Format(" · llevas {0}", enBolsaMin) : "");
+                Utils.DrawBorderString(sb, textoMin, new Vector2(ax, fy + 44f),
+                    materialPagado ? TintaVerde : (gVivo >= 0 ? TintaDorado : TintaApagado),
                     0.80f, 0f, 0.4f);
             }
 

@@ -102,11 +102,11 @@ namespace AethonMod.Content.Systems
         //  LAS OFRENDAS DEL NIVEL N (esencias · dinero · arma del peldaño)
         // ================================================================
 
-        /// <summary>Las ESENCIAS CORRUPTAS que exige el nivel N (la letra:
+        /// <summary>Las ESENCIAS DEL ETERNO que exige el nivel N (la letra:
         /// «para subir a nivel 1 necesitará haber devorado 1 esencia
         /// corrupta… y así por cada nivel necesita devorar más esencia
-        /// corrupta»): el nivel N pide N esencias — 1.275 en toda la
-        /// escalera, el banco de las oleadas de hambre).</summary>
+        /// corrupta»): el nivel N pide N esencias — 5.050 en toda la
+        /// escalera de las CIEN puertas, el banco de las oleadas de hambre.</summary>
         public static int EsenciasPara(int nivel) => Math.Max(1, Math.Min(NivelMax, nivel));
 
         /// <summary>v6.88 — EL DINERO que exige el nivel N (la letra
@@ -133,246 +133,479 @@ namespace AethonMod.Content.Systems
             return Math.Min(100_000_000L, monedas);            // 100 de platino, JAMÁS más
         }
 
-        /// <summary>LA ESCALERA DE ARMAS: el peldaño de cada nivel sigue
-        /// SIEMPRE la progresión de armas y minerales de Terraria.
-        /// v6.86 — LA ESCALERA DE LAS CIEN PUERTAS: renació REALINEADA
-        /// con la letra nueva: cada arma y cada lingote OBTENIBLE en la
-        /// era de su jefe («no puedes decirle al jugador que consiga
-        /// adamantium si el jefe necesario para la progresion es el rey
-        /// slime»). LAS REGLAS DE LA CASA que sobreviven: armas
-        /// corruptas al devorarlas · minerales alternativos en TODOS
-        /// los peldaños · las vacías (=) son PUERTAS DE OFRENDA MINERAL
-        /// (EsNivelMineral las lee del array vacío). v6.51.8 MURIÓ la
-        /// pintura de Israpony, EL ZENIT y las armas no obtenibles del
-        /// mod — NADA vuelve.</summary>
+        /// <summary>v6.89 — LA ESCALERA DE ARMAS NUEVA (la letra: «el
+        /// grimorio es magia pura, asi que las armas principales que debe
+        /// pedir son armas magicas y de invocador con las invocaciones, no
+        /// incluir latigos, una forma de saber como progresar con las
+        /// armas seria calcular el daño del grimorio para cada nivel y
+        /// usar el daño de las armas para igual al daño del grimorio»):
+        /// CADA peldaño pide armas MÁGICAS o de INVOCADOR (miniones, SIN
+        /// látigos, SIN melee/rango) cuya clase de daño iguala la del
+        /// grimorio en ese nivel — el daño del peldaño marca el TIER y
+        /// la era la marca la wiki (cada arma OBTENIBLE en la era de su
+        /// jefe: los datos EXACTOS de 1.4.4 salen del propio juego —
+        /// daños y recetas verificados contra el ensamblado de tML,
+        /// wiki.gg de cabecera): bastones de gemas 15/16/18/19/21/23 (el
+        /// RUBÍ de la letra: 8 rubíes + 10 lingotes de oro, daño 21 — el
+        /// peldaño 4), Space Gun 17, Water Bolt 19… hasta el Prisma
+        /// Final 100 y el Cristal Arcoíris 130 de la cima, repetidas por
+        /// la era de las grandes ofrendas (60-100) como las puertas
+        /// repiten su caza (ML×2..×9). «Aunque pida varias armas, el
+        /// grimorio solo consumirá 1 de ellas»: la lista son
+        /// ALTERNATIVAS — la mesa devora UNA (mundo sí, mundo no: la de
+        /// TU mundo).</summary>
         public static readonly int[][] ArmasDelNivel =
         {
             // (índice 0 vacío — el nivel 1 vive en [1])
             new int[] { 0 },
-            new int[] { ItemID.CopperShortsword, ItemID.CopperBroadsword, ItemID.TinShortsword, ItemID.TinBroadsword },  // 1  el cobre/estaño de la letra
-            new int[] { ItemID.IronBroadsword, ItemID.LeadBroadsword },                                                // 2  el hierro/plomo
-            new int[] { ItemID.SilverBroadsword, ItemID.TungstenBroadsword },                                           // 3  PUERTA Rey Gelatina · la plata/tungsteno
-            new int[] { ItemID.GoldBroadsword, ItemID.PlatinumBroadsword },                                             // 4  el oro/platino
-            new int[] { ItemID.Musket, ItemID.TheUndertaker, ItemID.BallOHurt, ItemID.TheMeatball, ItemID.TheRottedFork },// 5  PUERTA Ojo de Cthulhu · las esferas/corazones (mundo sí, mundo no)
-            new int[] { ItemID.BladeofGrass },                                                                          // 6  la jungla
-            new int[] { ItemID.Starfury, ItemID.IceBlade, ItemID.FalconBlade },                                         // 7  las islas del cielo y las cajas
-            new int[] { ItemID.LightsBane, ItemID.BloodButcherer },                                                     // 8  PUERTA el Mal del Mundo · la demonita/carmesí (su jefe la suelta)
-            new int[] { ItemID.FieryGreatsword },                                                                      // 9  el infierno (pico de demonita en mano — tras el Mal del Mundo)
-            new int[] { ItemID.BeesKnees, ItemID.BeeGun },                                                             // 10 PUERTA Reina Abeja · la colmena (sus drops)
-            new int[] { ItemID.Boomstick },                                                                            // 11 los santuarios de jungla
-            new int[] { ItemID.BeeKeeper },                                                                            // 12 la Reina Abeja (la espada que ella suelta)
-            new int[] { ItemID.Muramasa },                                                                             // 13 PUERTA Skeletron · la mazmorra se abre
-            new int[] { ItemID.NightsEdge },                                                                           // 14 el Filo de la Noche (la suma de la era)
-            new int[] { ItemID.Handgun },                                                                              // 15 la mazmorra profunda
-            new int[] { ItemID.DarkLance },                                                                            // 16 la lanza oscura
-            new int[] { ItemID.Sunfury },                                                                              // 17 los cofres de sombra del infierno
-            new int[] { ItemID.Katana },                                                                               // 18 el mercader viajero
-            new int[] { },                                                                                             // 19 LA OFRENDA MINERAL (la gran ofrenda pre-difícil)
-            new int[] { },                                                                                             // 20 PUERTA la Muralla · LA OFRENDA MINERAL (la puerta del modo difícil)
-            new int[] { ItemID.CobaltSword, ItemID.PalladiumSword },                                                   // 21 el cobalto/paladio (MODO DIFÍCIL)
-            new int[] { ItemID.CobaltNaginata, ItemID.PalladiumSword },                                                 // 22 la naginata cobalto (la alabada de la casa)
-            new int[] { },                                                                                             // 23 PUERTA Reina Gelatina DIFÍCIL · LA OFRENDA MINERAL
-            new int[] { ItemID.CrystalSerpent, ItemID.Flymeal },                                                          // 24 la Reina Gelatina DIFÍCIL (la serpiente y la espada de gel)
-            new int[] { ItemID.MythrilSword, ItemID.OrichalcumSword },                                                 // 25 PUERTA los Gemelos · el mitril/oricalco
-            new int[] { ItemID.MythrilHalberd, ItemID.OrichalcumSword },                                                // 26 la alabarda mitril
-            new int[] { ItemID.AdamantiteSword, ItemID.TitaniumSword },                                                 // 27 la adamantita/titanio
-            new int[] { ItemID.AdamantiteGlaive, ItemID.TitaniumSword },                                                // 28 PUERTA el Devorador · la guja adamantita
-            new int[] { },                                                                                             // 29 LA OFRENDA MINERAL
-            new int[] { ItemID.Excalibur },                                                                            // 30 PUERTA Skeletron Prime · la sagrada (lingotes de las mecánicas)
-            new int[] { ItemID.ChlorophyteClaymore, ItemID.ChlorophyteSaber },                                         // 31 la clorofita (nace tras la 1.ª mecánica caída)
-            new int[] { },                                                                                             // 32 PUERTA Plantera · LA OFRENDA MINERAL
-            new int[] { ItemID.DeathSickle },                                                                          // 33 el eclipse
-            new int[] { ItemID.TerraBlade },                                                                           // 34 LA TERRA BLADE (las verdaderas + el héroe roto — tras Plantera)
-            new int[] { ItemID.TheAxe, ItemID.GrenadeLauncher, ItemID.VenusMagnum },                                   // 35 PUERTA el Gólem · Plantera (sus drops)
-            new int[] { ItemID.PossessedHatchet, ItemID.GolemFist, ItemID.StaffofEarth, ItemID.HeatRay },              // 36 el Gólem (sus drops)
-            new int[] { ItemID.Tsunami, ItemID.Flairon, ItemID.RazorbladeTyphoon, ItemID.BubbleGun },                  // 37 el Duque Fishron (SUS armas; el jefe ya NO es puerta — la letra)
-            new int[] { ItemID.RainbowWhip, ItemID.EmpressBlade },                                                     // 38 PUERTA la Emperatriz de la Luz · SUS armas (la puerta y el botín, el mismo latido)
-            new int[] { ItemID.TheHorsemansBlade, ItemID.BatScepter, ItemID.RavenStaff },                              // 39 la Luna de Calabaza
-            new int[] { ItemID.BlizzardStaff, ItemID.ElfMelter, ItemID.SnowmanCannon, ItemID.ChristmasTreeSword },     // 40 la Luna de Escarcha
-            new int[] { ItemID.InfluxWaver, ItemID.XenoStaff, ItemID.LaserMachinegun },                                // 41 la Locura Marciana
-            new int[] { ItemID.DD2BetsyBow, ItemID.DD2SquireBetsySword },                                              // 42 Betsy (el Arco Aéreo y el Dragón Volador)
-            new int[] { ItemID.ChargedBlasterCannon },                                                                 // 43 el cañón marciano RARO
-            new int[] { },                                                                                             // 44 LA OFRENDA MINERAL
-            new int[] { },                                                                                             // 45 PUERTA el Cultista · LA OFRENDA MINERAL (la víspera de las torres)
-            new int[] { ItemID.SolarEruption, ItemID.DayBreak },                                                       // 46 la Torre Solar
-            new int[] { ItemID.VortexBeater, ItemID.Phantasm },                                                         // 47 la Torre del Vórtice
-            new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                                     // 48 la Torre de la Nebulosa
-            new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                                         // 49 la Torre del Polvo Estelar
-            new int[] { },                                                                                             // 50 PUERTA el Señor de la Luna · LA OFRENDA MINERAL (LA CIMA de vanilla)
-            new int[] { ItemID.Meowmere },                                                                             // 51 el Señor de la Luna: la espada gato
-            new int[] { ItemID.StarWrath },                                                                            // 52 la ira de las estrellas
-            new int[] { ItemID.LastPrism },                                                                            // 53 EL PRISMA FINAL
-            new int[] { ItemID.SDMG },                                                                                 // 54 la SDMG
-            new int[] { ItemID.Terrarian },                                                                            // 55 el yoyó definitivo
-            new int[] { ItemID.MoonlordTurretStaff },                                                                  // 56 el Celebration Mk2
-            new int[] { ItemID.RainbowCrystalStaff },                                                                  // 57 el cristal arcoíris
-            new int[] { ItemID.LunarFlareBook },                                                                       // 58 el libro del destello lunar
-            new int[] { },                                                                                             // 59 PUERTA Aethon (el recuerdo lejano) · LA OFRENDA MINERAL
-            // 60-100 — LA ERA DE LAS GRANDES OFRENDAS (mineral puro:
-            // la escalera de la cima — ver MineralDe: luminita 60-79 es
-            // hongonita, 80-99 es espectro, 100 es LA GRAN OFRENDA FINAL)
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 60-64
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 65-69
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 70-74
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 75-79
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 80-84
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 85-89
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 90-94
-            new int[] { }, new int[] { }, new int[] { }, new int[] { }, new int[] { },   // 95-99
-            new int[] { },                                                                                             // 100 LA GRAN OFRENDA FINAL (donde nace LA IRA)
+            new int[] { ItemID.SlimeStaff },                                                        // 1  la caída rara de las slimes (8, invocación)
+            new int[] { ItemID.AmethystStaff, ItemID.TopazStaff },                                  // 2  la era del cobre/estaño (15/16)
+            new int[] { ItemID.SapphireStaff, ItemID.EmeraldStaff },                                // 3  PUERTA Rey Gelatina · la plata/tungsteno (18/19)
+            new int[] { ItemID.RubyStaff, ItemID.DiamondStaff },                                    // 4  EL NIVEL DE LA LETRA: el bastón de rubí (21) — 8 rubíes + 10 de oro
+            new int[] { ItemID.SpaceGun, ItemID.Vilethorn, ItemID.CrimsonRod },                     // 5  PUERTA Ojo de Cthulhu · el meteorito (17) y las esferas (10/12)
+            new int[] { ItemID.AmberStaff },                                                        // 6  el desierto (21): 15 fósil + 8 ámbar
+            new int[] { ItemID.FlinxStaff },                                                        // 7  las pieles del frío (8): 6 pieles + 10 de oro/platino
+            new int[] { ItemID.ImpStaff },                                                          // 8  PUERTA el Mal del Mundo · el infierno (17 de piedra infernal)
+            new int[] { ItemID.Flamelash },                                                         // 9  los cofres de sombra del infierno (32)
+            new int[] { ItemID.HornetStaff },                                                       // 10 PUERTA Reina Abeja · la cera de la colmena (12)
+            new int[] { ItemID.BeeGun },                                                            // 11 el aguijón de la Reina (9)
+            new int[] { ItemID.DemonScythe },                                                       // 12 la guadaña de los demonios (35)
+            new int[] { ItemID.WaterBolt, ItemID.BookofSkulls },                                    // 13 PUERTA Skeletron · la mazmorra (19/29)
+            new int[] { ItemID.AquaScepter },                                                       // 14 los cofres dorados de la mazmorra (27)
+            new int[] { ItemID.MagicMissile },                                                      // 15 la mazmorra profunda (35)
+            new int[] { ItemID.MagicDagger },                                                       // 16 la mazmorra profunda (35)
+            new int[] { ItemID.Flamelash },                                                         // 17 el infierno, la revancha (32)
+            new int[] { ItemID.DemonScythe },                                                       // 18 el infierno, la revancha (35)
+            new int[] { ItemID.ImpStaff },                                                          // 19 la víspera de la Muralla (17)
+            new int[] { ItemID.WaspGun },                                                           // 20 PUERTA la Muralla + LIBRO · la Abeja difícil (31)
+            new int[] { ItemID.GoldenShower, ItemID.CursedFlames },                                 // 21 el mundo sí/no: carmesí (30) o corrompido (55)
+            new int[] { ItemID.CrystalStorm },                                                      // 22 el Hallow difícil (32)
+            new int[] { ItemID.CrystalSerpent },                                                    // 23 PUERTA Reina Gelatina DIFÍCIL · su drop (40)
+            new int[] { ItemID.NimbusRod },                                                         // 24 la lluvia difícil (30)
+            new int[] { ItemID.PoisonStaff },                                                       // 25 PUERTA los Gemelos · el nido difícil (43)
+            new int[] { ItemID.SpiderStaff },                                                       // 26 el nido de arañas (26)
+            new int[] { ItemID.QueenSpiderStaff },                                                  // 27 las colmillos de la reina (26): 24 colmillos
+            new int[] { ItemID.SkyFracture },                                                       // 28 PUERTA el Devorador · el desierto difícil (38)
+            new int[] { ItemID.MedusaHead },                                                        // 29 el mármol difícil (40)
+            new int[] { ItemID.OpticStaff },                                                        // 30 PUERTA Skeletron Prime · sus lentes (24)
+            new int[] { ItemID.VenomStaff },                                                        // 31 la clorofita (44): bastón veneno + 14 lingotes
+            new int[] { ItemID.PygmyStaff },                                                        // 32 PUERTA Plantera · su drop (40)
+            new int[] { ItemID.LeafBlower },                                                        // 33 el soplador de hojas de Plantera (48)
+            new int[] { ItemID.MagnetSphere },                                                      // 34 la mazmorra de después (48)
+            new int[] { ItemID.HeatRay },                                                           // 35 PUERTA el Gólem · su rayo (90)
+            new int[] { ItemID.StaffofEarth },                                                      // 36 el báculo de tierra del Gólem (125)
+            new int[] { ItemID.BubbleGun, ItemID.TempestStaff },                                    // 37 PUERTA el Duque · SUS drops (70/50)
+            new int[] { ItemID.FairyQueenMagicItem, ItemID.SparkleGuitar, ItemID.EmpressBlade },    // 38 PUERTA la Emperatriz · SUS drops (50/85/90)
+            new int[] { ItemID.BatScepter },                                                        // 39 la Luna de Calabaza (45)
+            new int[] { ItemID.Razorpine, ItemID.BlizzardStaff, ItemID.StaffoftheFrostHydra },      // 40 la Luna de Escarcha (48/58/100)
+            new int[] { ItemID.XenoStaff, ItemID.LaserMachinegun },                                 // 41 la Locura Marciana (36/60)
+            new int[] { ItemID.ShadowbeamStaff },                                                   // 42 la mazmorra de después (80)
+            new int[] { ItemID.InfernoFork },                                                       // 43 la mazmorra de después (70)
+            new int[] { ItemID.SpectreStaff, ItemID.RavenStaff },                                   // 44 la mazmorra de después (65/55)
+            new int[] { ItemID.ChargedBlasterCannon },                                              // 45 PUERTA el Cultista · el cañón raro (100)
+            new int[] { ItemID.NebulaArcanum },                                                     // 46 la Torre de la Nebulosa (70): 18 fragmentos
+            new int[] { ItemID.StardustDragonStaff },                                               // 47 la Torre del Polvo Estelar (40)
+            new int[] { ItemID.NebulaBlaze },                                                       // 48 la Torre de la Nebulosa (130)
+            new int[] { ItemID.StardustCellStaff },                                                 // 49 la Torre del Polvo Estelar (60)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 50 PUERTA el Señor de la Luna · SUS drops (100/100)
+            new int[] { ItemID.RainbowCrystalStaff },                                               // 51 el cristal arcoíris (130)
+            new int[] { ItemID.MoonlordTurretStaff },                                               // 52 el portal lunar (100)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 53 la era del Señor, la revancha
+            new int[] { ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff },                   // 54 la era del Señor, la revancha
+            new int[] { ItemID.NebulaBlaze },                                                       // 55 la era de las torres, la revancha (130)
+            new int[] { ItemID.NebulaArcanum },                                                     // 56 la era de las torres, la revancha (70)
+            new int[] { ItemID.StardustDragonStaff },                                               // 57 la era de las torres, la revancha (40)
+            new int[] { ItemID.StardustCellStaff },                                                 // 58 la era de las torres, la revancha (60)
+            new int[] { ItemID.LastPrism },                                                         // 59 la víspera de Aethon (100)
+            // 60-100 — LA ERA DE LAS GRANDES OFRENDAS: las armas de la cima
+            // en ciclo (como las puertas repiten su caza: ML×2..×9,
+            // Emperatriz×2..×5) — el daño del peldaño se queda en la cima
+            // (100-130): lo que hay DESPUÉS del Señor de la Luna.
+            new int[] { ItemID.LastPrism },                                                         // 60
+            new int[] { ItemID.LunarFlareBook },                                                    // 61
+            new int[] { ItemID.RainbowCrystalStaff },                                               // 62
+            new int[] { ItemID.MoonlordTurretStaff },                                               // 63 PUERTA el Señor ×2
+            new int[] { ItemID.NebulaBlaze },                                                       // 64
+            new int[] { ItemID.NebulaArcanum },                                                     // 65
+            new int[] { ItemID.StardustDragonStaff },                                               // 66
+            new int[] { ItemID.SparkleGuitar },                                                     // 67 PUERTA la Emperatriz ×2 (85)
+            new int[] { ItemID.EmpressBlade },                                                      // 68 (90)
+            new int[] { ItemID.FairyQueenMagicItem },                                               // 69 (50)
+            new int[] { ItemID.BubbleGun },                                                         // 70 (70)
+            new int[] { ItemID.TempestStaff },                                                      // 71 PUERTA el Señor ×3 (50)
+            new int[] { ItemID.RazorbladeTyphoon },                                                 // 72 (85)
+            new int[] { ItemID.HeatRay },                                                           // 73 (90)
+            new int[] { ItemID.StaffofEarth },                                                      // 74 (125)
+            new int[] { ItemID.ChargedBlasterCannon },                                              // 75 PUERTA la Emperatriz ×3 (100)
+            new int[] { ItemID.BlizzardStaff },                                                     // 76 (58)
+            new int[] { ItemID.Razorpine },                                                         // 77 (48)
+            new int[] { ItemID.StaffoftheFrostHydra },                                              // 78 (100)
+            new int[] { ItemID.BatScepter },                                                        // 79 PUERTA el Señor ×4 (45)
+            new int[] { ItemID.ShadowbeamStaff },                                                   // 80 (80)
+            new int[] { ItemID.InfernoFork },                                                       // 81 (70)
+            new int[] { ItemID.MagnetSphere },                                                      // 82 (48)
+            new int[] { ItemID.SpectreStaff },                                                      // 83 PUERTA la Emperatriz ×4 (65)
+            new int[] { ItemID.RavenStaff },                                                        // 84 (55)
+            new int[] { ItemID.LeafBlower },                                                        // 85 (48)
+            new int[] { ItemID.NebulaBlaze },                                                       // 86 (130)
+            new int[] { ItemID.LastPrism },                                                         // 87 PUERTA el Señor ×5 (100)
+            new int[] { ItemID.LaserMachinegun },                                                   // 88 (60)
+            new int[] { ItemID.XenoStaff },                                                         // 89 (36)
+            new int[] { ItemID.PygmyStaff },                                                        // 90 (40)
+            new int[] { ItemID.CrystalSerpent },                                                    // 91 PUERTA la Emperatriz ×5 (40)
+            new int[] { ItemID.TempestStaff },                                                      // 92 (50)
+            new int[] { ItemID.EmpressBlade },                                                      // 93 (90)
+            new int[] { ItemID.RazorbladeTyphoon },                                                 // 94 (85)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 95 PUERTA el Señor ×7 · la pareja (100)
+            new int[] { ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff },                   // 96 la pareja de la cima (130/100)
+            new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                 // 97 la pareja de la nebulosa (130/70)
+            new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                     // 98 la pareja del polvo (40/60)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff }, // 99 PUERTA el Señor ×9 · los CUATRO de la cima
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff, ItemID.NebulaBlaze }, // 100 LA GRAN OFRENDA FINAL (donde nace LA IRA)
         };
 
         // ================================================================
-        //  v6.51.8 — LA OFRENDA MINERAL (la letra: «en caso de no haber
-        //  mas arma usar cierta cantidad de lingotes de algun mineral
-        //  correspondiente con el nivel… al ser minerales no necesitan
-        //  estar corruptos ya que no se corrompen como las armas»).
-        //  v6.51.9 — LA OFRENDA MINERAL EN TODA LA ESCALERA (la letra:
-        //  «en caso de que la gente no pueda conseguir las armas,
-        //  tambien dale una opcion de lingotes segun el nivel claro y
-        //  siempre deben ser mas de 50 lingotes para cada despertar no
-        //  menos, ademas el numero de lingotes siempre debe ir
-        //  aumentando por cada nivel de despertar»): el metal que
-        //  corresponde a CADA nivel — en los peldaños de armas (1-44) es
-        //  la ALTERNATIVA cuando el arma no llega; en la cima (45-50,
-        //  agotadas las armas de verdad) es LA OFRENDA. Se devuelven
-        //  SOLTANDO LA PILA con el Eterno en la mano (el mismo gesto del
-        //  arma — sin corrupción: los minerales no se corrompen).
+        //  v6.89 — LOS MATERIALES DEL PELDAÑO (la letra: «en cuanto a los
+        //  materiales podria pedir el lingote 20 de oro y 20 rubies,
+        //  tambien seria obligatorio dar al menos uno de los materiales
+        //  o das 20 lingotes de oro o das 20 rubies»): CADA peldaño pide
+        //  UNA opción de material — los GRUPOS son las ALTERNATIVAS (das
+        //  20 de oro O 20 de rubí) y la mesa se queda CON EL PRIMERO QUE
+        //  EL JUGADOR ALIMENTE (completa SU cuota y el peldaño queda
+        //  pago). La LEY DE LAS CANTIDADES: el DOBLE de la receta del
+        //  arma, redondeado a decenas, mínimo 20 (8 rubíes → 20 rubíes ·
+        //  10 lingotes → 20 lingotes · 14 cera → 30 · 17 piedra infernal
+        //  → 30 · 24 colmillos → 50 · 18 fragmentos → 40) — para las
+        //  armas DROPEADAS (sin receta), el material de SU ERA (la
+        //  progresión de lingotes de la wiki: cobre/estaño → hierro/
+        //  plomo → plata/tungsteno → oro/platino → meteorito → demonita/
+        //  carmesí → piedra infernal → cobalto/paladio → mitril/
+        //  oricalco → adamantita/titanio → sagrado → clorofita →
+        //  hongonita/espectro → luminita).
         // ================================================================
 
-        /// <summary>¿EL NIVEL N ES DE MINERALES? (true = la ofrenda es
-        /// SOLO la pila de lingotes — no hay arma del peldaño; los
-        /// peldaños de armas ofrecen el mineral como ALTERNATIVA).
-        /// v6.86 — DATA-DRIVEN: la decide el ARRAY VACÍO de ArmasDelNivel
-        /// (nadie vuelve a mantener dos listas a mano).</summary>
-        public static bool EsNivelMineral(int nivel)
+        /// <summary>LOS GRUPOS DE MATERIALES del peldaño N: cada grupo es
+        /// un int[] de ALTERNATIVAS (das CUALQUIERA del grupo — mundo sí,
+        /// mundo no). El peldaño queda pago cuando UN grupo (el que la
+        /// mesa tenga bloqueado) completa SU cuota.</summary>
+        public static readonly int[][][] MaterialesDelNivel =
         {
-            if (nivel < 1 || nivel > NivelMax) return false;
-            var peldano = ArmasDelNivel[nivel];
-            return peldano == null || peldano.Length == 0;
-        }
+            // (índice 0 vacío — el nivel 1 vive en [1])
+            new int[][] { new int[] { 0 } },
+            new int[][] { new int[] { ItemID.CopperBar, ItemID.TinBar } },                                     // 1  la era del cobre (20)
+            new int[][] { new int[] { ItemID.CopperBar, ItemID.TinBar },
+                            new int[] { ItemID.Amethyst, ItemID.Topaz } },                                     // 2  la receta del bastón (10+8): 20 lingotes O 20 gemas
+            new int[][] { new int[] { ItemID.SilverBar, ItemID.TungstenBar },
+                            new int[] { ItemID.Sapphire, ItemID.Emerald } },                                   // 3  la receta del bastón (10+8)
+            new int[][] { new int[] { ItemID.GoldBar, ItemID.PlatinumBar },
+                            new int[] { ItemID.Ruby, ItemID.Diamond } },                                       // 4  LA LETRA: 20 lingotes de oro O 20 rubíes
+            new int[][] { new int[] { ItemID.MeteoriteBar } },                                                // 5  la receta del Space Gun (20 → 40)
+            new int[][] { new int[] { ItemID.Amber },
+                            new int[] { ItemID.FossilOre } },                                                  // 6  la receta del bastón de ámbar (8+15)
+            new int[][] { new int[] { ItemID.FlinxFur },
+                            new int[] { ItemID.GoldBar, ItemID.PlatinumBar } },                                // 7  la receta del bastón de flinx (6+10)
+            new int[][] { new int[] { ItemID.HellstoneBar } },                                                // 8  la receta del bastón de diablos (17 → 30)
+            new int[][] { new int[] { ItemID.HellstoneBar },
+                            new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar } },                           // 9  la era del infierno
+            new int[][] { new int[] { ItemID.BeeWax } },                                                       // 10 la receta del bastón de avispas (14 → 30)
+            new int[][] { new int[] { ItemID.BeeWax } },                                                       // 11 la era de la Reina
+            new int[][] { new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar },
+                            new int[] { ItemID.HellstoneBar } },                                               // 12 la era del infierno
+            new int[][] { new int[] { ItemID.HellstoneBar },
+                            new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar } },                           // 13 la mazmorra abierta
+            new int[][] { new int[] { ItemID.HellstoneBar } },                                                 // 14
+            new int[][] { new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar } },                              // 15
+            new int[][] { new int[] { ItemID.HellstoneBar } },                                                 // 16
+            new int[][] { new int[] { ItemID.HellstoneBar } },                                                 // 17
+            new int[][] { new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar } },                              // 18
+            new int[][] { new int[] { ItemID.HellstoneBar } },                                                 // 19
+            new int[][] { new int[] { ItemID.BeeWax } },                                                       // 20 la Abeja difícil
+            new int[][] { new int[] { ItemID.Ichor },
+                            new int[] { ItemID.CursedFlame },
+                            new int[] { ItemID.SoulofNight } },                                                // 21 la receta del Grimorio (20+15 → 40/30)
+            new int[][] { new int[] { ItemID.CrystalShard },
+                            new int[] { ItemID.SoulofLight } },                                                // 22 la receta de la Tormenta (20+15 → 40/30)
+            new int[][] { new int[] { ItemID.CrystalShard },
+                            new int[] { ItemID.SoulofLight } },                                                // 23 la era del Hallow difícil
+            new int[][] { new int[] { ItemID.SoulofNight },
+                            new int[] { ItemID.SoulofLight } },                                                // 24 la lluvia difícil
+            new int[][] { new int[] { ItemID.SoulofMight } },                                                  // 25 la era de los Gemelos (20)
+            new int[][] { new int[] { ItemID.CobaltBar, ItemID.PalladiumBar } },                               // 26 el amanecer difícil (20)
+            new int[][] { new int[] { ItemID.MythrilBar, ItemID.OrichalcumBar },
+                            new int[] { ItemID.SpiderFang } },                                                 // 27 la receta de la reina araña (24 → 50)
+            new int[][] { new int[] { ItemID.LightShard },
+                            new int[] { ItemID.SoulofLight } },                                                // 28 la receta del Cielo Roto (2+16 → 20/30)
+            new int[][] { new int[] { ItemID.AdamantiteBar, ItemID.TitaniumBar } },                            // 29 la era de la adamantita (20)
+            new int[][] { new int[] { ItemID.HallowedBar },
+                            new int[] { ItemID.SoulofSight } },                                                // 30 la receta del bastón óptico (12+20 → 20/40)
+            new int[][] { new int[] { ItemID.ChlorophyteBar } },                                               // 31 la receta del bastón veneno (14 → 30)
+            new int[][] { new int[] { ItemID.ChlorophyteBar },
+                            new int[] { ItemID.HallowedBar } },                                                // 32 la era de Plantera
+            new int[][] { new int[] { ItemID.ChlorophyteBar } },                                               // 33
+            new int[][] { new int[] { ItemID.Ectoplasm } },                                                    // 34 la mazmorra de después (20)
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 35 la era del Gólem (20)
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 36
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 37 la era del Duque
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 38 la era de la Emperatriz
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.ShroomiteBar } },                                               // 39 la Luna de Calabaza
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 40 la Luna de Escarcha
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                 // 41 la Locura Marciana
+            new int[][] { new int[] { ItemID.SpectreBar } },                                                   // 42
+            new int[][] { new int[] { ItemID.ShroomiteBar } },                                                 // 43
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.ShroomiteBar } },                                               // 44
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.ShroomiteBar } },                                               // 45 la víspera de las torres
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                               // 46 la receta de la nebulosa (18 → 40)
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                             // 47
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                               // 48
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                             // 49
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula },
+                            new int[] { ItemID.FragmentStardust } },                                           // 50 la era del Señor de la Luna
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentStardust } },                                           // 51
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentStardust } },                                           // 52
+            new int[][] { new int[] { ItemID.LunarBar } },                                                     // 53
+            new int[][] { new int[] { ItemID.LunarBar } },                                                     // 54
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                               // 55
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                               // 56
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                             // 57
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                             // 58
+            new int[][] { new int[] { ItemID.LunarBar } },                                                     // 59
+            // 60-100 — LA ERA DE LAS GRANDES OFRENDAS: luminita con los
+            // fragmentos de las torres (60-66) · la Emperatriz y el Duque
+            // con la hongonita y el espectro (67-94) · la despedida con
+            // los CUATRO de la cima (95-99) · LA GRAN OFRENDA FINAL (100).
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula } },                                              // 60
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentStardust } },                                            // 61
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula } },                                              // 62
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentStardust } },                                            // 63
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                                // 64
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                                // 65
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                              // 66
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 67
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 68
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 69
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 70
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 71
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 72
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 73
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 74
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.ShroomiteBar } },                                                // 75
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 76
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 77
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 78
+            new int[][] { new int[] { ItemID.SpectreBar } },                                                    // 79
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 80
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 81
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 82
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 83
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 84
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 85
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                                // 86
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula } },                                              // 87
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 88
+            new int[][] { new int[] { ItemID.SpectreBar },
+                            new int[] { ItemID.LunarBar } },                                                    // 89
+            new int[][] { new int[] { ItemID.ChlorophyteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 90
+            new int[][] { new int[] { ItemID.ChlorophyteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 91
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 92
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 93
+            new int[][] { new int[] { ItemID.ShroomiteBar },
+                            new int[] { ItemID.SpectreBar } },                                                  // 94
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula } },                                              // 95
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentStardust } },                                            // 96
+            new int[][] { new int[] { ItemID.FragmentNebula } },                                                // 97
+            new int[][] { new int[] { ItemID.FragmentStardust } },                                              // 98
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula } },                                              // 99 PUERTA el Señor ×9 · la pareja de la cima
+            new int[][] { new int[] { ItemID.LunarBar },
+                            new int[] { ItemID.FragmentNebula },
+                            new int[] { ItemID.FragmentStardust },
+                            new int[] { ItemID.SpectreBar } },                                                  // 100 LA GRAN OFRENDA FINAL
+        };
 
-        // ================================================================
-        //  v6.88 — LA OFRENDA MINERAL VARIADA (la letra nueva: «despues
-        //  del nivel 50 la ofrenda de minerales se concentra en 1 mineral
-        //  y pide mucho, debe ser variada, pedir menos de ese mineral,
-        //  pero pedir varios al mismo tiempo» — la v6.86 pedía UN solo
-        //  mineral con 51..249 lingotes). LA NUEVA LEY: cada peldaño pide
-        //  UNA MEZCLA de 2-3 minerales DE SU ERA (se entregan en ORDEN:
-        //  el primero incompleto de la lista se acredita primero) con
-        //  cantidades MODERADAS por cabeza (18 + nivel/5) — el TOTAL del
-        //  peldaño sigue creciendo (2-3 grupos × más nivel) pero NINGUNA
-        //  pila solitaria es una pared. Cada GRUPO lleva sus ALTERNATIVOS
-        //  (cobre/estaño, hierro/plomo…): la mezcla existe en CUALQUIER
-        //  mundo, con el metal que la suerte dejó.
-        // ================================================================
+        /// <summary>LA CUOTA de cada grupo de materiales del peldaño N
+        /// (paralela a MaterialesDelNivel): el DOBLE de la receta del
+        /// arma redondeado a decenas, mínimo 20 — 8 rubíes → 20 · 10
+        /// lingotes → 20 · 14 cera → 30 · 17 piedra infernal → 30 · 24
+        /// colmillos → 50 · 18 fragmentos → 40.</summary>
+        public static readonly int[][] CantidadesMateriales =
+        {
+            // (índice 0 vacío — el nivel 1 vive en [1])
+            new int[] { 0 },
+            new int[] { 20 },                                                                   // 1  cobre/estaño
+            new int[] { 20, 20 },                                                               // 2  lingotes / gemas
+            new int[] { 20, 20 },                                                               // 3
+            new int[] { 20, 20 },                                                               // 4  20 de oro O 20 rubíes (la letra)
+            new int[] { 40 },                                                                   // 5  2×20 del Space Gun
+            new int[] { 20, 30 },                                                               // 6  2×8 ámbar / 2×15 fósil
+            new int[] { 20, 20 },                                                               // 7  2×6 pieles / 2×10 lingotes
+            new int[] { 30 },                                                                   // 8  2×17 piedra infernal
+            new int[] { 30, 20 },                                                               // 9
+            new int[] { 30 },                                                                   // 10 2×14 cera
+            new int[] { 30 },                                                                   // 11
+            new int[] { 20, 30 },                                                               // 12
+            new int[] { 30, 20 },                                                               // 13
+            new int[] { 30 },                                                                   // 14
+            new int[] { 20 },                                                                   // 15
+            new int[] { 30 },                                                                   // 16
+            new int[] { 30 },                                                                   // 17
+            new int[] { 20 },                                                                   // 18
+            new int[] { 30 },                                                                   // 19
+            new int[] { 30 },                                                                   // 20
+            new int[] { 40, 40, 30 },                                                           // 21 2×20 ichor/maldito / 2×15 alma
+            new int[] { 40, 30 },                                                               // 22 2×20 cristal / 2×15 alma
+            new int[] { 40, 30 },                                                               // 23
+            new int[] { 30, 30 },                                                               // 24
+            new int[] { 20 },                                                                   // 25
+            new int[] { 20 },                                                                   // 26
+            new int[] { 20, 50 },                                                               // 27 2×24 colmillos
+            new int[] { 20, 30 },                                                               // 28 2×2 astillas / 2×16 alma
+            new int[] { 20 },                                                                   // 29
+            new int[] { 20, 40 },                                                               // 30 2×12 sagrado / 2×20 vista
+            new int[] { 30 },                                                                   // 31 2×14 clorofita
+            new int[] { 30, 20 },                                                               // 32
+            new int[] { 30 },                                                                   // 33
+            new int[] { 20 },                                                                   // 34
+            new int[] { 20, 20 },                                                               // 35
+            new int[] { 20, 20 },                                                               // 36
+            new int[] { 20, 20 },                                                               // 37
+            new int[] { 20, 20 },                                                               // 38
+            new int[] { 20, 20 },                                                               // 39
+            new int[] { 20, 20 },                                                               // 40
+            new int[] { 20, 20 },                                                               // 41
+            new int[] { 20 },                                                                   // 42
+            new int[] { 20 },                                                                   // 43
+            new int[] { 20, 20 },                                                               // 44
+            new int[] { 20, 20 },                                                               // 45
+            new int[] { 40 },                                                                   // 46 2×18 fragmentos
+            new int[] { 40 },                                                                   // 47
+            new int[] { 40 },                                                                   // 48
+            new int[] { 40 },                                                                   // 49
+            new int[] { 20, 40, 40 },                                                           // 50
+            new int[] { 20, 40 },                                                               // 51
+            new int[] { 20, 40 },                                                               // 52
+            new int[] { 20 },                                                                   // 53
+            new int[] { 20 },                                                                   // 54
+            new int[] { 40 },                                                                   // 55
+            new int[] { 40 },                                                                   // 56
+            new int[] { 40 },                                                                   // 57
+            new int[] { 40 },                                                                   // 58
+            new int[] { 20 },                                                                   // 59
+            new int[] { 20, 40 },                                                               // 60
+            new int[] { 20, 40 },                                                               // 61
+            new int[] { 20, 40 },                                                               // 62
+            new int[] { 20, 40 },                                                               // 63
+            new int[] { 40 },                                                                   // 64
+            new int[] { 40 },                                                                   // 65
+            new int[] { 40 },                                                                   // 66
+            new int[] { 20, 20 },                                                               // 67
+            new int[] { 20, 20 },                                                               // 68
+            new int[] { 20, 20 },                                                               // 69
+            new int[] { 20, 20 },                                                               // 70
+            new int[] { 20, 20 },                                                               // 71
+            new int[] { 20, 20 },                                                               // 72
+            new int[] { 20, 20 },                                                               // 73
+            new int[] { 20, 20 },                                                               // 74
+            new int[] { 20, 20 },                                                               // 75
+            new int[] { 20, 20 },                                                               // 76
+            new int[] { 20, 20 },                                                               // 77
+            new int[] { 20, 20 },                                                               // 78
+            new int[] { 20 },                                                                   // 79
+            new int[] { 20, 20 },                                                               // 80
+            new int[] { 20, 20 },                                                               // 81
+            new int[] { 20, 20 },                                                               // 82
+            new int[] { 20, 20 },                                                               // 83
+            new int[] { 20, 20 },                                                               // 84
+            new int[] { 20, 20 },                                                               // 85
+            new int[] { 40 },                                                                   // 86
+            new int[] { 20, 40 },                                                               // 87
+            new int[] { 20, 20 },                                                               // 88
+            new int[] { 20, 20 },                                                               // 89
+            new int[] { 30, 20 },                                                               // 90
+            new int[] { 30, 20 },                                                               // 91
+            new int[] { 20, 20 },                                                               // 92
+            new int[] { 20, 20 },                                                               // 93
+            new int[] { 20, 20 },                                                               // 94
+            new int[] { 20, 40 },                                                               // 95
+            new int[] { 20, 40 },                                                               // 96
+            new int[] { 40 },                                                                   // 97
+            new int[] { 40 },                                                                   // 98
+            new int[] { 20, 40 },                                                               // 99
+            new int[] { 20, 40, 40, 20 },                                                       // 100 LA GRAN OFRENDA FINAL
+        };
 
-        /// <summary>LOS GRUPOS DE MINERALES DEL PELDAÑO N (la mezcla de
-        /// su era): cada grupo es un int[] de tipos ALTERNATIVOS (el
-        /// primero existe en este mundo o no — basta CUALQUIERA del
-        /// grupo para pagar el grupo). Se entregan EN ORDEN (grupo a
-        /// grupo — «varios al mismo tiempo»: la mesa LISTA la mezcla
-        /// completa desde el primer vistazo).</summary>
-        public static int[][] GruposMineralDe(int nivel)
+        /// <summary>v6.89 — LOS GRUPOS DE MATERIALES del peldaño N (la
+        /// versión MÉTODO de la tabla — defensiva con la escalera).</summary>
+        public static int[][] GruposMaterialesDe(int nivel)
         {
             if (nivel < 1 || nivel > NivelMax)
                 return new int[][] { new int[] { ItemID.CopperBar } };
-            if (nivel <= 4)    // 1-4: la era del cobre — cobre/estaño + hierro/plomo
-                return new int[][]
-                {
-                    new int[] { ItemID.CopperBar, ItemID.TinBar },
-                    new int[] { ItemID.IronBar, ItemID.LeadBar },
-                };
-            if (nivel <= 8)    // 5-8: post-Ojo — plata/tungsteno + oro/platino + el meteorito
-                return new int[][]
-                {
-                    new int[] { ItemID.SilverBar, ItemID.TungstenBar },
-                    new int[] { ItemID.GoldBar, ItemID.PlatinumBar },
-                    new int[] { ItemID.MeteoriteBar },
-                };
-            if (nivel <= 20)   // 9-20: la era del infierno — demonita/carmesí + piedra infernal
-                return new int[][]
-                {
-                    new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar },
-                    new int[] { ItemID.HellstoneBar },
-                };
-            if (nivel <= 24)   // 21-24: el amanecer difícil — cobalto/paladio
-                return new int[][]
-                {
-                    new int[] { ItemID.CobaltBar, ItemID.PalladiumBar },
-                };
-            if (nivel <= 26)   // 25-26: el mitril/oricalco
-                return new int[][]
-                {
-                    new int[] { ItemID.MythrilBar, ItemID.OrichalcumBar },
-                };
-            if (nivel <= 29)   // 27-29: la adamantita/titanio
-                return new int[][]
-                {
-                    new int[] { ItemID.AdamantiteBar, ItemID.TitaniumBar },
-                };
-            if (nivel <= 30)   // 30: la sagrada (los lingotes que sueltan las mecánicas)
-                return new int[][]
-                {
-                    new int[] { ItemID.HallowedBar },
-                };
-            if (nivel <= 44)   // 31-44: la era de la clorofita — clorofita + hongonita
-                return new int[][]
-                {
-                    new int[] { ItemID.ChlorophyteBar },
-                    new int[] { ItemID.ShroomiteBar },
-                };
-            if (nivel <= 59)   // 45-59: la luminita de las torres + hongonita + la víspera de espectro
-                return new int[][]
-                {
-                    new int[] { ItemID.LunarBar },
-                    new int[] { ItemID.ShroomiteBar },
-                    new int[] { ItemID.SpectreBar },
-                };
-            if (nivel <= 79)   // 60-79: la era de la hongonita — MEZCLA RICA (hongonita + espectro + clorofita)
-                return new int[][]
-                {
-                    new int[] { ItemID.ShroomiteBar },
-                    new int[] { ItemID.SpectreBar },
-                    new int[] { ItemID.ChlorophyteBar },
-                };
-            // 80-100: la era del espectro — MEZCLA FINAL (espectro + luminita + hongonita)
-            return new int[][]
-            {
-                new int[] { ItemID.SpectreBar },
-                new int[] { ItemID.LunarBar },
-                new int[] { ItemID.ShroomiteBar },
-            };
+            var grupos = MaterialesDelNivel[nivel];
+            return grupos ?? new int[][] { new int[] { ItemID.CopperBar } };
         }
 
-        /// <summary>CUÁNTOS LINGOTES exige CADA GRUPO de la mezcla del
-        /// peldaño N (la letra nueva: «pedir menos de ese mineral, pero
-        /// pedir varios al mismo tiempo»): 18 + nivel/5 por cabeza —
-        /// MODERADO (la v6.86 pedía 51..249 de UN solo tipo; el muro
-        /// murió). El TOTAL del peldaño (grupos × cantidad) sigue
-        /// creciendo con el nivel.</summary>
-        public static int CantidadPorGrupo(int nivel)
+        /// <summary>La CUOTA del grupo g del peldaño N (20 por defecto).</summary>
+        public static int CantidadMateriales(int nivel, int grupo)
         {
-            if (nivel < 1) return 18;
-            if (nivel > NivelMax) nivel = NivelMax;
-            return 18 + nivel / 5;   // 18 en el 1 · 28 en el 50 · 38 en el 100
+            if (nivel < 1 || nivel > NivelMax) return 20;
+            var cuotas = CantidadesMateriales[nivel];
+            if (cuotas == null || grupo < 0 || grupo >= cuotas.Length) return 20;
+            int c = cuotas[grupo];
+            return c > 0 ? c : 20;
         }
 
-        /// <summary>LEGADO (v6.51.9→v6.88): el mineral REPRESENTATIVO del
-        /// peldaño (el PRIMER grupo de la mezcla, primer tipo) — lo siguen
-        /// leyendo los textos de la ALTERNATIVA mineral de los peldaños
-        /// de armas. La ofrenda de los peldaños minerales pasa por
-        /// GruposMineralDe (la mezcla completa).</summary>
-        public static int MineralDe(int nivel)
+        /// <summary>v6.89 — EL GRUPO BLOQUEADO de la mesa (el material que
+        /// el jugador empezó a alimentar): -1 = todavía NINGUNO (la mesa
+        /// se queda con el PRIMERO que caiga y lo cobra completo). Los
+        /// valores VIEJOS (v6.88: 0..length, el índice de la mezcla) se
+        /// normalizan AL CARGAR (AlmaEternoGlobalItem).</summary>
+        public static int GrupoBloqueado(int nivel, int guardado)
         {
-            var grupos = GruposMineralDe(nivel);
-            return (grupos != null && grupos.Length > 0 && grupos[0] != null
-                && grupos[0].Length > 0) ? grupos[0][0] : -1;
+            var grupos = GruposMaterialesDe(nivel);
+            if (guardado >= 0 && guardado < grupos.Length) return guardado;
+            return -1;
         }
-
-        /// <summary>LEGADO (v6.51.9→v6.88): la cantidad del PRIMER grupo
-        /// (para los textos de la alternativa mineral).</summary>
-        public static int CantidadMineralDe(int nivel) => CantidadPorGrupo(nivel);
 
         // ================================================================
         //  v6.51.11 — LOS CONTADORES DE LA MESA: la comida se sirve EN
