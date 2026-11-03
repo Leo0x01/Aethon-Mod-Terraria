@@ -1,5 +1,70 @@
 # AethonMod — Historial de Cambios
 
+## v6.91 — LA SESIÓN DEL BLINDAJE Y LA VERDAD: LA LICENCIA CC BY-NC-SA 4.0 (el repo blindado por fin), EL ALTAR CON SU VENTANA DE VERDAD (GANA bajo la palabra · EL SELLO con la cuenta · CÓMO CONSEGUIR ESENCIAS — la mesa real, sin adornos), el chat SIN la cuenta, el leak «c/78788Co» curado, LA MIRADA DE SOLYN con el PORT EXACTO de los shaders del original (el borde con rgb=0: los picos son matemáticamente imposibles), EL RELICARIO con la tecla que nunca existió (tML jamás asigna la tecla por defecto — la L se auto-asigna al entrar), la TECLA B solo EQUIPADAS con SU función vanilla intacta + LA BOLSA DE LAS POCIONES (los 67 bebibles del juego), EL LIBRO CONSAGRADO con su contador INDIVIDUAL por jugador (dejan de caer solo cuando lo USAS y tu grimorio llega al 20), EL TALLER con el MOTOR PIXELFX EXACTO (port 1:1 verificado PÍXEL A PÍXEL contra el original: 319/319 frames con diff 0.00) y EL VÁSTAGO DEL ETERNO, la mascota del pipeline sprite-gen (una imagen → transparencia real → ciclos animados)
+
+## (1) LA LICENCIA — CC BY-NC-SA 4.0 (el blindaje pedido)
+LA LETRA: «agrega la LICENCIA al repo mas restrictiva posible (hoy no tiene — GPL-3.0 o CC BY-NC-SA) para blindarlo».
+- **CC BY-NC-SA 4.0** para TODO (código, assets, .tmod): la elegida sobre GPL-3.0 porque **VETA el uso comercial** + obliga **CompartirIgual** (una derivada cerrada o comercial queda prohibida). Jugar, compartir y vídeos monetizados: PERMITIDOS.
+- El texto legal completo en `LICENSE` (descargado del código oficial de Creative Commons) + **el aviso corto VIAJA DENTRO DEL .tmod** (`AethonMod/LICENSE`, verificado por la auditoría) + la sección legal del README reescrita.
+- **La nota de material de terceros AHORA DICE LA VERDAD**: Luminance (MIT — las 3 texturas de la Mirada + la geometría), WoTG/NoxusBoss (los 2 shaders portados, atribución nominal), pixelfx (MIT — el motor del Taller), sprite-gen (Apache-2.0 — el método de la mascota). Con rutas de retirada por issue.
+
+## (2) EL ALTAR DE LA VERDAD — la ventana con SU cielo y SUS tres secciones
+LA LETRA: «la ventana del altar debes arreglar y optimizarla ya que los texto se desbordan y algunos textos estan mal, ademas no se ve nada bien ademas puedes usar la textura Espacio_1.png para mejorar el aspecto de la ventana y asegurate de que en el altar diga como conseguir la esencia del eterno».
+- **EL FONDO ES EL CIELO**: `Espacio_1.png` cubre el panel (con su velo oscuro para que el texto respire) — el marco doble de la casa siempre.
+- **GANA** (la letra: «lo que gana debe estar debajo de la palabra Gana»): el encabezado arriba, las ganancias DEBAJO — «Arma → +5% a TODAS sus estadísticas y su etiqueta» / «Material → SOLO su etiqueta».
+- **EL SELLO — LA CUENTA VIVE AQUÍ** (la letra: «el altar es quien dice cuanto necesitas y lo que falta»): Cuesta N · Llevas M · **Te falta K** (o «¡Alcanza!») — verde/rojo según alcance.
+- **CÓMO CONSEGUIR ESENCIAS** — LA MESA REAL, sin adornos: «Toda criatura puede soltar 1 al morir (0,1%)» · «Los jefes sueltan de 1 a 10 (casi siempre 1)» · «¡Las OLEADAS DE HAMBRE suben la probabilidad!» · «(empiezan a caer tras LA LLEGADA del grimorio)» — tal como caen de verdad (EsenciaCorruptaDrops + OleadaNPC).
+- **CADA LÍNEA SE MIDE** (`LineaMedida`): la fuente real del juego mide y si no cabe, la línea se PARTE POR PALABRAS — es matemáticamente imposible que un texto desborde el panel.
+- **«ListaArma» CURADO**: la llamada perdía el prefijo `Mods.AethonMod.Altar.` y el juego pintaba LA CLAVE cruda — ahora todas pasan por `Clave()`.
+
+## (3) EL CHAT SIN LA CUENTA — «te faltan 0» muere
+LA LETRA: «al consagrar algo el cartel del chat dice: el sello cuesta X Esencia del Eterno -- te faltan 0. Traelas y vuelve. esa parte de te faltan (x cantidad) esta mal… ademas no es necesario llevar la cuenta en el chat, para eso dejarlo en el altar».
+- **EL BUG**: el mensaje pasaba `llevaba` (lo que LLEVAS) como parámetro de «te faltan» — por eso «te faltan 0» = tu total. La cuenta SE FUE del chat para siempre: el mensaje solo AVISA («No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas»).
+
+## (4) EL LEAK «c/78788Co» — los spans abiertos
+LA LETRA: «en la ventana de informacion en la parte de progresion donde estan, donde dicen los requisistos, dice esto c/78788Co debes arreglar eso».
+- **LA CAUSA**: los requisitos del despertar construían el texto con un span ABIERTO sin su `]` — el parser se comía el tag de la «ó» crudo y lo pintaba como texto («c/78788C:ó»). **LA CURA**: todos los spans completos y cerrados, y los tags de un carácter jamás viajan solos (la «ó» y el «·» con sus espacios, fundidos entre sus vecinos).
+
+## (5) LA MIRADA DE SOLYN — EL PORT EXACTO DEL ORIGINAL (los picos mueren por matemática)
+LA LETRA: «esto no es cierto: La Mirada de Solyn SIN picos… el arma tiene picos, recuerda que es lo que sucede con los picos es algo historico que nunca eres capaz de reparar bien, si no sabes puedes copiar el codigo exacto con texturas y todo, ten en cuenta que es investigacion».
+- **EL ORIGINAL ENCONTRADO**: `SolynTagTeamBeam` (WoTG) con sus DOS SHADERS reales (`SolynTagTeamBeamShader.fx` + `PrimitiveBloomShader.fx`) y la geometría de Luminance decompilada (`AssignPointsRectangleTrail`: 12 puntos de control → 77/48 vértices).
+- **LOS SHADERS PORTADOS A CPU POR VÉRTICE**: el rayo con su fórmula completa (el lerpeo doble con el ruido diagonal, `frac(coords·2 + (0, x·5) − 3t)`, el umbral `smoothstep(0.3, 0.45)` que come el 40% oscuro, el glow interior y el destello de lente) y el bloom con su `pow(4y(1−y), 3)·3.5`.
+- **LA GARANTÍA ANTI-PICOS**: ambos shaders multiplican por `smoothstep(0.5, 0.4, d)` — **en el borde del haz el factor es CERO EXACTO** (verificado numéricamente: máx rgb 0.0 en 101 muestras). Con blending de suma, rgb=0 aporta NADA: **los picos son matemáticamente imposibles**.
+- **LAS TEXTURAS DEL ORIGINAL COPIADAS** (con autorización de investigación): `DendriticNoiseZoomedOut.png` (512², la MISMA de Luminance), `BloomCircleSmall.png`, `ShineFlare.png` — md5 verificadas.
+
+## (6) EL RELICARIO RESPONDE — la tecla que nunca existió
+LA LETRA: «el relicario no sirve y dice tocar L pero al tocar no hace nada».
+- **LA CAUSA RAÍZ (descompilando el tML real)**: tModLoader **JAMÁS asigna la tecla por defecto a un perfil de input existente** — el keybind nacía registrado pero SIN TECLA (la lista del perfil entra VACÍA en `KeyConfiguration.SetupKeys`; la DefaultBinding solo la aplican los botones de «Restablecer» que nadie pulsa) → `JustPressed` SIEMPRE false.
+- **LA CURA**: al ENTRAR AL MUNDO, `RelicarioTeclaSistema.OnWorldLoad` auto-asigna la **L** SOLO si la lista está vacía (respeta al que la re-mapeó — la API pública: `GetAssignedKeys()` devuelve la lista VIVA del perfil, sin reflexión) + **el tooltip dice LA TECLA REAL en vivo** (la tuya si la cambiaste; cómo asignarla si está vacía).
+- **SOLO EQUIPADO** (la decisión de la casa): el escaneo de bolsa de la v6.90 retirado — el tooltip dice «Funciona SOLO EQUIPADO» con verdad. El flujo completo verificado contra el tML decompilado: L → trigger → 8 s de aura (+12% daño/crítico/velocidad, +10% daño recibido y drenaje) → 45 s de recarga.
+
+## (7) LA TECLA B — SOLO EQUIPADAS + LA BOLSA DE LAS POCIONES
+LA LETRA: «para las mascotas debe funcionar solo cuando estan equipadas, ademas la tecla B tiene su propia funcion asi que eso no se debe tocar, debes mantener su funcion normal, y dame una bolsa con todas las pociones del juego».
+- **SOLO EQUIPADAS**: la ruta «desde la bolsa» de la v6.90 MUERE — solo la ranura de mascota (miscEquips[0]) o la de luz ([1]), con el ojo del equipo manda (hideMisc). **LA FUNCIÓN VANILLA INTACTA**: el detour esconde las mascotas del escaneo de QuickBuff, deja correr vanilla (pociones, comida, caldo — TODO igual) y las activa él mismo.
+- **LA BOLSA DE LAS POCIONES (bolsa 28)**: los **67 BEBIBLES del juego** extraídos por REFLEXIÓN REAL contra el ItemID del tML 2026.07.3.0 (58 pociones + 9 frascos — la estatua y las colocables quedan fuera), **30 de cada una**, con la semántica de la casa (permanente, garantía, clic derecho). Llega al entrar al mundo y vive en El Cofre del Arsenal. Icono propio (3 rondas del método mirar→refinar, VLM: «reads as a potion bottle, clearly»).
+
+## (8) EL LIBRO CONSAGRADO — el contador individual de cada jugador
+LA LETRA: «supongo que te refieres al libro corrupto que ahora deberia ser consagrado, que solo se puede tener 1 por jugador, pero si el jugador no lo ha usado todavia le pueden aparecer mas, solo cuando el jugador lo usa y el grimorio tiene un nivel de despertar de 20 o superior es que dejan de salir y esto es algo individual por jugador, cada jugador debe tener su propio contador en multijugador».
+- **EL RENOMBRADO CÓSMICO COMPLETO**: Libro Corrupto → **Libro Consagrado** (DisplayName, tooltip, los 5 textos del grimorio, la puerta del 20 — ya no queda NI UNA mención rancia, la auditoría lo exige).
+- **LA REGLA NUEVA**: los libros dejan de caer SOLO cuando **lo USASTE Y tu grimorio llegó al despertar 20** (la computa `ElLibroYaNoLeToca` — el sello viejo «uno por cazador para siempre» retirado de las 3 fuentes: cofres, criaturas y la víspera).
+- **EL CONTADOR ES DEL JUGADOR**: `LibroUsado` persiste en el .plr de cada cazador (individual en multijugador), se marca al DEVORAR en la mesa.
+- **LA RECOGIDA**: solo **1 EN EL INVENTARIO** (si llevas uno, el nuevo rebota) — el mundo puede escupirte otro mientras no lo uses.
+
+## (9) EL TALLER DE EFECTOS — EL MOTOR PIXELFX EXACTO (no imitación)
+LA LETRA: «todos esos efectos se ven horrible, veo que no usaste lo que te dije que usaras… usando exactamente esto crea nuevas armas, recuerda es usarlo exactamente no solo intentar imitarlo que eso nunca funciona».
+- **EL PORT 1:1 DEL MOTOR** (`Content/VFX/PixelFxCore.cs`, 1.889 líneas): la traducción LITERAL de `src/core` de pixelfx — el hash murmur, mulberry32, el ruido cúbico **en double** (JS usa doubles: con float el RNG diverge), el dither Bayer 4×4, los DOS buffers (color+luz), `place(OX,OY)`, sim.js (substeps a 120 Hz), el compositor premultiplicado — cada función cita su archivo JS de origen.
+- **VERIFICADO PÍXEL A PÍXEL CONTRA EL ORIGINAL**: el arnés renderizó los 319 frames de los 3 efectos y se comparó contra el motor JS real: **hex-sigil 127/127, shadow-flames 72/72, eclipse 120/120 — diff 0.00/1020 en TODOS** (idénticos byte a byte). El VLM sobre las hojas de contacto: «the sequence itself is coherent and correct — no visual artifacts».
+- **LAS 3 ARMAS** (El Sigilo del Eterno · Las Llamas de Sombra · El Eclipse Vivo) ahora instancian SU efecto del motor (HexSigil/ShadowFlames/Eclipse) y lo corren a 60 fps sobre un Texture2D vivo — simulación LOCAL (11k-23k px), buffers liberados al morir.
+
+## (10) EL VÁSTAGO DEL ETERNO — la mascota del pipeline sprite-gen
+LA LETRA: «crea una mascota nueva usando esto: Reel 1 — aldegad/sprite-gen (Apache-2.0): una sola imagen de personaje → sprites animados listos para el motor».
+- **EL PIPELINE COMPLETO APLICADO** (el método, no la imitación): (1) UNA imagen con identidad única — el librito alado de ojos grandes, kawaii, fondo croma; (2) **transparencia real por flood-fill desde los bordes** (la identidad queda BLOQUEADA; chispas y sombra fuera por componentes conexas); (3) la **rejilla del render detectada** (bloques 8×8) → escalado nativo NEAREST 38×30; (4) **LOS CICLOS SIN ANIMAR A MANO**: idle (respiración squash&stretch + parpadeo) y vuelo (bob + inclinación); (5) **el atlas de 8 frames** (40×384) con su FindFrame por velocidad del dueño.
+- **QA visual en 3 rondas** (borrador → render → mirar → refinar): VLM 8/10 charm («Big sparkly eyes, blush cheeks… cute mascot vibe»), la animación validada («silhouette stays consistent — the bob and tilt sell the motion»).
+- **LA VIDA CANÓNICA**: buff vanityPet + `BuffHandle_SpawnPetIfNeededAndSetTime` (la ranura de mascota, el re-engendre) — responde a la tecla B SOLO EQUIPADA. **Vive en la Bolsa del Taller** (el fruto de la investigación de los reels).
+
+## (11) EL PIPELINE DE LA CASA — TODO VERIFICADO
+- Oráculo **0 errores / 0 warnings** (los 481 .cs contra las 9 referencias del tML real) · **`-build` REAL 0/0** · **.tmod 6.91 = 11.332.685 B** · **auditoría v6.91 TODO VERIFICADO** (488+ entradas, blobs íntegros EOF exacto, los 7 PNGs nuevos con sus dimensiones exactas, 27 firmas vivas + 4 muertas ausentes, hjson ×3 simétricos con los textos nuevos y las rancias ausentes, LICENSE dentro) · **headless: Sandboxing → Configuring → Finalizing → Server started, 0 excepciones**.
+
 ## v6.90 — LA GRAN SESIÓN DE LA CONSAGRACIÓN: el arma **O** los materiales (basta uno de los dos, todo consagrado por el Eterno), el altar de materiales con su ventana mejorada, las repeticiones que suman +1 (Moon Lord ×10 al final), el hito que aumenta el daño de invocación, el hitbox del haz a toda su silueta, el velo de Perlin del ancho exacto, la Mirada de Solyn SIN picos (la autopsia del bloom tileado), el Relicario que por fin responde (dos causas raíz halladas), la tecla B desde la bolsa, el libro que cae de criaturas y cofres, LAS DOS INVESTIGACIONES DE LOS REELS (pixelfx + sprite-gen) con su TALLER DE EFECTOS y su bolsa nueva, y NADIE HA COPIADO EL PROYECTO
 
 ## (1) LA LEY DE LA OFRENDA — EL ARMA **O** LOS MATERIALES (basta UNO de los dos)

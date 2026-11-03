@@ -1578,12 +1578,20 @@ namespace AethonMod.Content.Weapons
                             string colArma = pagoCualquiera ? colOK : colNo;
                             int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
                             var trozosArma = new System.Collections.Generic.List<string>();
-                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige)");
-                            trozosArma.Add("[c/78788C:ó]");
+                            // v6.91 — LA LETRA: «en la parte de progresion donde
+                            //     dicen los requisistos dice esto c/78788Co» — LA
+                            //     CAUSA: el primer span quedaba ABIERTO sin su
+                            //     «]» y el parser se comía el tag de la «ó» crudo
+                            //     (se pintaba «c/78788C:ó» como texto). Cura: cada
+                            //     span COMPLETO y cerrado, y la «ó» con espacios
+                            //     alrededor (los tags de un solo carácter jamás
+                            //     viajan solos).
+                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige]");
+                            trozosArma.Add("[c/78788C: ó ]");
                             trozosArma.Add($"[c/{colArma}:los materiales — basta UNO de los dos:]");
                             for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
                             {
-                                if (pa > 0) trozosArma.Add($"[c/78788C:·]");
+                                if (pa > 0) trozosArma.Add("[c/78788C: · ]");
                                 trozosArma.Add($"[i:{peldano[pa]}]");
                                 string nombreArma = Lang.GetItemNameValue(peldano[pa]);
                                 trozosArma.Add($"[c/{colArma}:{nombreArma}]");
@@ -1613,14 +1621,16 @@ namespace AethonMod.Content.Weapons
                             bool pagoCualquieraMat = devoradaArma || materialOK;
                             string colMat = pagoCualquieraMat ? colOK : colNo;
                             var trozosMat = new System.Collections.Generic.List<string>();
-                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción");
-                            trozosMat.Add("[c/78788C:ó]");
+                            // v6.91 — la misma cura del leak de arriba: spans
+                            //     completos y la «ó» con espacios, nunca sola.
+                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción]");
+                            trozosMat.Add("[c/78788C: ó ]");
                             trozosMat.Add($"[c/{colMat}:el arma de arriba):]");
                             for (int gi = 0; gi < gruposMat.Length && gi < 4; gi++)
                             {
                                 int[] grupo = gruposMat[gi];
                                 if (grupo == null || grupo.Length == 0) continue;
-                                if (gi > 0) trozosMat.Add($"[c/78788C:ó]");
+                                if (gi > 0) trozosMat.Add("[c/78788C: ó ]");
                                 for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
                                     trozosMat.Add($"[i:{grupo[ti]}]");
                                 int cuota = Systems.DespertarGrimorio.CantidadMateriales(siguiente, gi);

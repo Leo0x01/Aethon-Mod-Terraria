@@ -836,6 +836,10 @@ namespace AethonMod.Content.Items.Bolsas
             // al jugador, esta bolsa tendras una copia de todas las armas
             // que sean creadas con esta investigacion»).
             l.Add((ModContent.ItemType<BolsaTallerDeEfectos>(), 1));
+            // v6.91 — LA BOLSA DE LAS POCIONES (bolsa 28 del cofre — la
+            // letra: «dame una bolsa con todas las pociones del juego»):
+            // la lista COMPLETA del ItemID, 30 de cada una.
+            l.Add((ModContent.ItemType<BolsaDePociones>(), 1));
             return l;
         }
     }
@@ -967,6 +971,114 @@ namespace AethonMod.Content.Items.Bolsas
             // EL ECLIPSE VIVO (shadow/eclipse — la nova del disco negro
             // de corona blanca).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.EclipseVivo>(), 1));
+            // v6.91 — EL VÁSTAGO DEL ETERNO (la mascota del pipeline
+            // sprite-gen — la letra: «crea una mascota nueva usando
+            // esto: Reel 1 — aldegad/sprite-gen… la mascota minigrimorio
+            // y Aethon pueden ganar sus idle/walk animados desde una
+            // imagen base»): el librito alado con SUS CICLOS ANIMADOS.
+            l.Add((ModContent.ItemType<Items.Llamados.VastagoDelEternoItem>(), 1));
+            return l;
+        }
+    }
+
+    // ======================================================================
+    //  v6.91 — LA BOLSA DE LAS POCIONES (bolsa 28)
+    //
+    //  La letra de la sesión: «dame una bolsa con todas las pociones del
+    //  juego» — LA LISTA COMPLETA, extraída por REFLEXIÓN REAL contra el
+    //  ItemID del tModLoader 2026.07.3.0 (la fuente de la casa: NADA de
+    //  listas a mano): 58 pociones + 9 frascos = LOS 67 BEBIBLES del
+    //  juego. La estatua de poción (PotionStatue) y las colocables
+    //  (PlaceableHealing/ManaPotion) NO son pociones y quedan fuera.
+    //  La semántica es LA DE LA CASA: permanente, garantía (solo lo que
+    //  falte) y clic derecho para desplegar.
+    // ======================================================================
+    public class BolsaDePociones : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Pociones";
+
+        protected override string NombreCorto => "Bolsa de las Pociones";
+
+        protected override Color ColorFiesta => new Color(120, 220, 255);
+
+        protected override string Nota => "Las 67 pociones y frascos del juego — 30 de cada una";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // === LAS CURATIVAS Y DE MANÁ ===
+            l.Add((ItemID.LesserHealingPotion, 30));
+            l.Add((ItemID.HealingPotion, 30));
+            l.Add((ItemID.GreaterHealingPotion, 30));
+            l.Add((ItemID.SuperHealingPotion, 30));
+            l.Add((ItemID.LesserManaPotion, 30));
+            l.Add((ItemID.ManaPotion, 30));
+            l.Add((ItemID.GreaterManaPotion, 30));
+            l.Add((ItemID.SuperManaPotion, 30));
+            l.Add((ItemID.LesserRestorationPotion, 30));
+            l.Add((ItemID.RestorationPotion, 30));
+            // === LOS BUFFS CLÁSICOS (la pared 288-305) ===
+            l.Add((ItemID.ObsidianSkinPotion, 30));
+            l.Add((ItemID.RegenerationPotion, 30));
+            l.Add((ItemID.SwiftnessPotion, 30));
+            l.Add((ItemID.GillsPotion, 30));
+            l.Add((ItemID.IronskinPotion, 30));
+            l.Add((ItemID.ManaRegenerationPotion, 30));
+            l.Add((ItemID.MagicPowerPotion, 30));
+            l.Add((ItemID.FeatherfallPotion, 30));
+            l.Add((ItemID.SpelunkerPotion, 30));
+            l.Add((ItemID.InvisibilityPotion, 30));
+            l.Add((ItemID.ShinePotion, 30));
+            l.Add((ItemID.NightOwlPotion, 30));
+            l.Add((ItemID.BattlePotion, 30));
+            l.Add((ItemID.ThornsPotion, 30));
+            l.Add((ItemID.WaterWalkingPotion, 30));
+            l.Add((ItemID.ArcheryPotion, 30));
+            l.Add((ItemID.HunterPotion, 30));
+            l.Add((ItemID.GravitationPotion, 30));
+            // === LOS BUFFS DE 1.3+ (la pared 2322-2359) ===
+            l.Add((ItemID.MiningPotion, 30));
+            l.Add((ItemID.HeartreachPotion, 30));
+            l.Add((ItemID.CalmingPotion, 30));
+            l.Add((ItemID.BuilderPotion, 30));
+            l.Add((ItemID.TitanPotion, 30));
+            l.Add((ItemID.FlipperPotion, 30));
+            l.Add((ItemID.SummoningPotion, 30));
+            l.Add((ItemID.TrapsightPotion, 30));
+            l.Add((ItemID.AmmoReservationPotion, 30));
+            l.Add((ItemID.LifeforcePotion, 30));
+            l.Add((ItemID.EndurancePotion, 30));
+            l.Add((ItemID.RagePotion, 30));
+            l.Add((ItemID.InfernoPotion, 30));
+            l.Add((ItemID.WrathPotion, 30));
+            l.Add((ItemID.FishingPotion, 30));
+            l.Add((ItemID.SonarPotion, 30));
+            l.Add((ItemID.CratePotion, 30));
+            l.Add((ItemID.WarmthPotion, 30));
+            // === LAS DE UTILIDAD Y LAS RARAS ===
+            l.Add((ItemID.RecallPotion, 30));
+            l.Add((ItemID.TeleportationPotion, 30));
+            l.Add((ItemID.PotionOfReturn, 30));
+            l.Add((ItemID.WormholePotion, 30));
+            l.Add((ItemID.BiomeSightPotion, 30));
+            l.Add((ItemID.LovePotion, 30));
+            l.Add((ItemID.StinkPotion, 30));
+            l.Add((ItemID.GenderChangePotion, 30));
+            l.Add((ItemID.RedPotion, 30));
+            // === LA SUERTE (1.4) ===
+            l.Add((ItemID.LuckPotionLesser, 30));
+            l.Add((ItemID.LuckPotion, 30));
+            l.Add((ItemID.LuckPotionGreater, 30));
+            // === LOS FRASCOS (imperdibles en el arsenal alquímico) ===
+            l.Add((ItemID.FlaskofPoison, 30));
+            l.Add((ItemID.FlaskofFire, 30));
+            l.Add((ItemID.FlaskofParty, 30));
+            l.Add((ItemID.FlaskofGold, 30));
+            l.Add((ItemID.FlaskofNanites, 30));
+            l.Add((ItemID.FlaskofVenom, 30));
+            l.Add((ItemID.FlaskofCursedFlames, 30));
+            l.Add((ItemID.FlaskofIchor, 30));
+            l.Add((ItemID.ToxicFlask, 30));
             return l;
         }
     }

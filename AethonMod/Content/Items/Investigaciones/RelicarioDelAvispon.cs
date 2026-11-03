@@ -52,6 +52,22 @@ namespace AethonMod.Content.Items.Investigaciones
     //    NurseCannotRemove, buffNoSave.
     // ======================================================================
 
+    // ======================================================================
+    //  v6.91 — EL RELICARIO QUE RESPONDE (la letra: «el relicario no
+    //  sirve y dice tocar L pero al tocar no hace nada»): la tecla L
+    //  JAMÁS EXISTIÓ de verdad — tML REGISTRA el keybind pero NUNCA le
+    //  pone la tecla por defecto al perfil con el que juegas (la
+    //  autopsia completa, con archivo y línea del fuente del tML, en
+    //  RelicarioTeclaSistema, abajo). ESTA SESIÓN: (1) la L se
+    //  auto-asigna al ENTRAR AL MUNDO si el keybind está vacío (respeta
+    //  la tecla del que la re-mapeó), (2) el tooltip dice LA TECLA REAL
+    //  (leída en vivo del perfil — no un «(L)» pintado a mano), (3) el
+    //  canal responde SOLO EQUIPADO (la v6.90 lo hacía contestar desde
+    //  la bolsa y el usuario lo negó: «esto no es cierto») — y el aura
+    //  de 8 s con su recarga de 45 s ya era sana desde la v6.90
+    //  (verificada de nuevo, tick a tick, abajo).
+    // ======================================================================
+
     /// <summary>EL ACCESORIO (la reliquia del avispón — test item de la
     /// investigación R1; su bolsa: la Bolsa de las Investigaciones).</summary>
     public class RelicarioDelAvispon : ModItem
@@ -72,22 +88,31 @@ namespace AethonMod.Content.Items.Investigaciones
             player.GetModPlayer<RelicarioPlayer>().TieneRelicario = true;
         }
 
-        // v6.90 — LA CURA DE LA ACTIVACIÓN (la letra: «esto no funciona»
-        // — la autopsia halló DOS causas raíz): (1) la v6.85 y la v6.89
-        // exigían el chisme EQUIPADO (TieneRelicario) y el usuario lo
-        // lleva SUELTO en la bolsa — la tecla L no hacía NADA (ni
-        // sonido, ni polvos, ni buff): HOY la activación responde si el
-        // Relicario está equipado **O EN CUALQUIER SLOT DE LA BOLSA**
-        // (la pasiva +35% sigue siendo cosa del EQUIPO, como manda
-        // Terraria; el CANAL DEL SOL es de la reliquia, esté donde
-        // esté). (2) el AURA era INVISIBLE (ver el dibujado abajo).
+        // v6.91 — EL TOOLTIP QUE NO MIENTE (la letra: «dice tocar L
+        // pero al tocar no hace nada» — el «(L)» de la v6.85 era una
+        // promesa que el juego no cumplía, porque la tecla JAMÁS fue
+        // asignada: ver RelicarioTeclaSistema, abajo). HOY la línea
+        // LEE LA TECLA VIVA del perfil: si la auto-asignación puso la
+        // L, dice L; si el jugador la re-mapeó, dice LA SUYA; si está
+        // sin tecla, enseña DÓNDE ponerla. Y la segunda línea dice la
+        // verdad de la v6.91: SOLO EQUIPADO (la v6.90 decía «EQUIPADO
+        // o EN LA BOLSA» y el usuario lo negó: «esto no es cierto»).
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
+            // LA TECLA DE VERDAD: leída EN VIVO (mismo formato que la
+            // pantalla de controles de tML: teclas unidas con «/»).
+            string tecla = RelicarioPlayer.TeclasAsignadas();
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/FFD77A:Pulsa la tecla del Relicario Solar (L) para canalizar el poder del sol]"));
+                tecla.Length > 0
+                    ? $"[c/FFD77A:Pulsa {tecla} para canalizar el poder del sol]"
+                    : "[c/FFD77A:El Relicario Solar no tiene tecla: asígnala en Controles → Teclas de mod]"));
+
+            // v6.91 — SOLO EQUIPADO, DICHO CON VERDAD: el canal del sol
+            // nace del EQUIPO (como el original de Bombus) — el chisme
+            // suelto en la bolsa ya NO canaliza.
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Funciona EQUIPADO o EN LA BOLSA · 8 s de aura solar: +12 % daño, velocidad de uso y crítico · a cambio +10 % de daño recibido y drenaje de vida · 45 s de recarga]"));
+                "[c/78788C:Funciona SOLO EQUIPADO · 8 s de aura solar: +12 % daño, velocidad de uso y crítico · a cambio +10 % de daño recibido y drenaje de vida · 45 s de recarga]"));
         }
 
         public override void AddRecipes()
@@ -106,8 +131,28 @@ namespace AethonMod.Content.Items.Investigaciones
         /// <summary>El timer del aura (480 → 0; 0 = apagado).</summary>
         public int TimerAura;
 
-        /// <summary>LA TECLA (registrada en AethonMod.Load — la L del original).</summary>
+        /// <summary>LA TECLA (registrada en AethonMod.Load — la L del
+        /// original). OJO: tML NUNCA la asigna por su cuenta al perfil
+        /// (la autopsia en RelicarioTeclaSistema) — la L vive en el
+        /// perfil porque ESTE mod la pone.</summary>
         public static ModKeybind TeclaRelicario;
+
+        /// <summary>v6.91 — La tecla VIVA del keybind (para el
+        /// tooltip): GetAssignedKeys NO devuelve una copia — devuelve
+        /// la MISMA lista del perfil que tML consulta para encender el
+        /// JustPressed (ModKeybind.cs del tML: PlayerInput.
+        /// CurrentProfile.InputModes[mode].KeyStatus[FullName]).
+        /// Vacía o inalcanzable = cadena vacía.</summary>
+        public static string TeclasAsignadas()
+        {
+            try
+            {
+                if (TeclaRelicario == null) return "";
+                List<string> teclas = TeclaRelicario.GetAssignedKeys();
+                return teclas == null ? "" : string.Join("/", teclas);
+            }
+            catch { return ""; }   // perfil sin la entrada: «sin tecla»
+        }
 
         public override void ResetEffects()
         {
@@ -119,9 +164,14 @@ namespace AethonMod.Content.Items.Investigaciones
         {
             if (TeclaRelicario == null || Player.dead || !Player.active) return;
             if (!TeclaRelicario.JustPressed) return;
-            // v6.90 — EQUIPADO **O EN LA BOLSA** (la cura de la
-            //     activación: el usuario prueba desde el inventario).
-            if (!TieneRelicario && !LlevaElRelicario()) return;
+            // v6.91 — SOLO EQUIPADO (la letra negó la cura de la v6.90:
+            //     «esto no es cierto: ... responde equipado o en la
+            //     bolsa»: YA NO responde en la bolsa). El canal del sol
+            //     nace del EQUIPO, como el original de Bombus (que lee
+            //     su bool de UpdateAccessory) — LlevaElRelicario, el
+            //     escaneo de la bolsa de la v6.90, MUERE con esta
+            //     línea: el chisme suelto NO canaliza nada.
+            if (!TieneRelicario) return;
             if (Player.HasBuff<global::AethonMod.Content.Buffs.RelicarioCdBuff>()) return;
 
             // === LA CANALIZACIÓN DEL SOL (la activación — COMO EL ORIGINAL:
@@ -213,34 +263,95 @@ namespace AethonMod.Content.Items.Investigaciones
             if (TimerAura > 0) modifiers.SourceDamage *= 1.1f;
         }
 
-        /// <summary>v6.90 — ¿El portador LLEVA el Relicario encima?
-        /// (equipado en un accesorio o suelto en la bolsa — la cura de
-        /// la activación: la tecla L responde DONDE ESTÉ la reliquia).</summary>
-        private bool LlevaElRelicario()
+    }
+
+    // ======================================================================
+    //  v6.91 — LA CURA DE LA TECLA QUE NUNCA EXISTIÓ (la letra: «dice
+    //  tocar L pero al tocar no hace nada»). LA AUTOPSIA CONTRA EL
+    //  FUENTE DEL tML 2026.07.3.0 (el DLL local decompilado + el repo
+    //  tModLoader/tModLoader, rama 1.4-stable): LA TECLA POR DEFECTO
+    //  DE UN MODKEYBIND JAMÁS SE APLICA AL PERFIL CON EL QUE JUEGAS —
+    //
+    //  · Terraria/GameInput/KeyConfiguration.cs — SetupKeys(): al armar
+    //    el perfil, CADA keybind de mod entra con una lista VACÍA:
+    //    «// Add mod keybinds / foreach (... KeybindLoader.Keybinds)
+    //    KeyStatus.Add(current.FullName, new List<string>())» — ahí NO
+    //    se aplica la DefaultBinding (nuestra «L»).
+    //  · Terraria/GameInput/PlayerInputProfile.TML.cs — la DefaultBinding
+    //    SOLO la escriben CopyModKeybindSettingsFrom y
+    //    CopyIndividualModKeybindSettingsFrom — y NADIE las llama al
+    //    arrancar: son los botones «Restablecer» de la pantalla
+    //    Controles (UIManageControls → ResetModKeybinds / la línea
+    //    «(L)» que sale junto a cada keybind de mod).
+    //  · Terraria/ModLoader/ModContent.cs — al terminar de cargar los
+    //    mods: «PlayerInput.reinitialize = true»; el próximo
+    //    PlayerInput.UpdateInput consume el flag (ReInitialize) y vuelve
+    //    a leer input.json — pero ese archivo JAMÁS trae la entrada del
+    //    keybind NUEVO: KeyConfiguration.WritePreferences() solo guarda
+    //    las listas CON teclas (Count mayor que 0). El keybind queda
+    //    VACÍO para siempre.
+    //  · CONSECUENCIA: en juego, PlayerInput.KeyboardInput() solo
+    //    enciende los triggers cuya lista CONTIENE la tecla física
+    //    pulsada (KeyConfiguration.Processkey) — con la lista vacía,
+    //    «AethonMod/RelicarioSolar» NUNCA se enciende y
+    //    ModKeybind.JustPressed es SIEMPRE false. Por eso el keybind
+    //    sale en Controles → Teclas de mod SIN tecla asignada y la L
+    //    «no hace nada» (ni sonido, ni polvos, ni buff).
+    //
+    //  LA CURA DE LA CASA: al ENTRAR AL MUNDO, si el keybind sigue SIN
+    //  tecla, se le pone LA L DEL ORIGINAL (Bombus Apis Bee usa la L
+    //  para este mismo accesorio) — por la VÍA PÚBLICA que el propio
+    //  tML usa en su botón «Restablecer»: ModKeybind.GetAssignedKeys()
+    //  NO devuelve una copia, devuelve LA LISTA VIVA del perfil
+    //  (ModKeybind.cs: PlayerInput.CurrentProfile.InputModes[mode].
+    //  KeyStatus[FullName]) — un Add ahí ES la asignación (CERO
+    //  reflexión: el campo KeyStatus es público y su lista, mutable —
+    //  lo mismo que hace CopyIndividualModKeybindSettingsFrom: Clear +
+    //  Add). SOLO si está VACÍA: si el jugador ya puso SU tecla, SU
+    //  decisión manda. La asignación vive en memoria y tML la persiste
+    //  en input.json la próxima vez que guarda los ajustes (al salir:
+    //  Main.SaveSettings → PlayerInput.Save — y WritePreferences ya no
+    //  la pierde: la lista dejó de estar vacía); si ese guardado nunca
+    //  llega, el chequeo se repite en CADA entrada al mundo
+    //  (idempotente). LA AMBIGÜEDAD DOCUMENTADA: input.json no sabe
+    //  decir «tecla quitada A PROPÓSITO» (las listas vacías no se
+    //  guardan) — para el formato de tML «vacía» siempre significa
+    //  «nunca configurada»: quien LIMPIE la tecla a mano verá la L
+    //  volver en el próximo mundo. Es el único idioma que habla el
+    //  archivo.
+    // ======================================================================
+    public class RelicarioTeclaSistema : ModSystem
+    {
+        public override void OnWorldLoad()
         {
+            // SOLO DONDE HAY TECLADO: el servidor dedicado no tiene
+            // perfiles de input ni a quién curar (en multiplayer el
+            // keybind vive en CADA cliente — cada quien se auto-cura al
+            // entrar a SU mundo; el anfitrión «host & play» SÍ pasa por
+            // aquí: en su proceso Main.dedServ es false aunque el mundo
+            // corra como servidor).
+            if (Main.dedServ) return;
+
             try
             {
-                int tipo = ModContent.ItemType<RelicarioDelAvispon>();
-                for (int k = 0; k < 50; k++)
-                {
-                    Item it = Player.inventory[k];
-                    if (it != null && !it.IsAir && it.type == tipo) return true;
-                }
-                return Player.miscEquips != null && (
-                    Contiene(Player.miscEquips, tipo));
-            }
-            catch { return false; }
-        }
+                ModKeybind tecla = RelicarioPlayer.TeclaRelicario;
+                if (tecla == null) return;   // (mod a medio descargar: ni tocar)
 
-        private static bool Contiene(Item[] bolsa, int tipo)
-        {
-            if (bolsa == null) return false;
-            for (int k = 0; k < bolsa.Length; k++)
-            {
-                Item it = bolsa[k];
-                if (it != null && !it.IsAir && it.type == tipo) return true;
+                // LA LISTA VIVA del modo Keyboard — el MISMO modo que
+                // PlayerInput.KeyboardInput() consulta durante el juego
+                // (en menús lee KeyboardUI; nuestro trigger es de juego).
+                // Si el perfil aún no conoce el keybind, el indexador
+                // revienta: el try/catch de la casa (un mundo NUNCA
+                // carga mal por una tecla).
+                List<string> teclas = tecla.GetAssignedKeys();
+                if (teclas == null || teclas.Count > 0) return;   // SU tecla manda
+
+                // LA L DEL ORIGINAL — la MISMA cadena que tML compara en
+                // Processkey (Keys.L.ToString() == "L") y la misma que su
+                // botón «Restablecer» escribiría (DefaultBinding).
+                teclas.Add("L");
             }
-            return false;
+            catch { }
         }
     }
 

@@ -201,7 +201,12 @@ namespace AethonMod.Content.Systems
 
                     var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
                     if (cazador == null) continue;
-                    if (cazador.YaTuvoLibro) continue;   // el sello: ya no le toca
+                    // v6.91 — LA COMPUTA DE LOS DROPS (la letra: «solo
+                    //     cuando el jugador lo usa y el grimorio tiene un
+                    //     nivel de despertar de 20 o superior es que dejan
+                    //     de salir»): mientras no haya usado el suyo, la
+                    //     ruleta SIGUE viva para él.
+                    if (ElLibroYaNoLeToca(p, cazador)) continue;
 
                     if (!_cofresRuletados.TryGetValue(i, out var hechos))
                     { hechos = new HashSet<int>(); _cofresRuletados[i] = hechos; }
@@ -243,7 +248,11 @@ namespace AethonMod.Content.Systems
                     if (p == null || !p.active) return;
 
                     var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
-                    if (cazador == null || cazador.YaTuvoLibro) return;   // el sello
+                    if (cazador == null) return;
+                    // v6.91 — la misma computa nueva: sin usar (o con el
+                    //     grimorio bajo el 20), las criaturas SIGUEN
+                    //     tirando la carta del libro.
+                    if (ElLibroYaNoLeToca(p, cazador)) return;
 
                     // LA TIRADA: 2% en la mazmorra · 1% en el resto.
                     int caras = p.ZoneDungeon ? 50 : 100;
@@ -310,6 +319,13 @@ namespace AethonMod.Content.Systems
 
                         AnimarElBocado(p, drop, 4f);
                         alma.LibroCorruptoConsumido = true;
+                        // v6.91 — EL CONTADOR INDIVIDUAL DEL JUGADOR (la
+                        //     letra: «esto es algo individual por jugador»):
+                        //     el USO se marca en SU CazaJefesPlayer — con
+                        //     esto (y su grimorio al 20) los libros dejan
+                        //     de salir para él.
+                        var cazadorDelBocado = p.GetModPlayer<Players.CazaJefesPlayer>();
+                        if (cazadorDelBocado != null) cazadorDelBocado.LibroUsado = true;
                         drop.TurnToAir();
                         SincronizarDrop(d);
 
@@ -597,6 +613,54 @@ namespace AethonMod.Content.Systems
             return false;
         }
 
+        // ================================================================
+        //  v6.91 — LA COMPUTA DE LOS DROPS DEL LIBRO (la letra: «solo se
+        //  puede tener 1 por jugador, PERO si el jugador no lo ha usado
+        //  todavia le pueden aparecer mas, solo cuando el jugador lo usa
+        //  y el grimorio tiene un nivel de despertar de 20 o superior es
+        //  que dejan de salir» — el contador ES DEL JUGADOR:
+        //  CazaJefesPlayer.LibroUsado, individual en multijugador).
+        // ================================================================
+
+        /// <summary>¿LOS LIBROS ya dejaron de salir PARA ESTE jugador?
+        /// Dejan de caer SOLO con el USO **Y** el nivel 20 del grimorio
+        /// que porta, JUNTOS: si no usó el suyo, SIGUEN cayendo (aunque
+        /// lleve uno sin usar — la recogida limita a 1 EN EL INVENTARIO,
+        /// pero el mundo puede escupirle otro).</summary>
+        private static bool ElLibroYaNoLeToca(Player p, Players.CazaJefesPlayer cazador)
+        {
+            try
+            {
+                if (p == null || !p.active) return true;
+                if (cazador == null) return true;
+                if (!cazador.LibroUsado) return false;   // sin usar: SIGUEN saliendo
+                var alma = ElAlmaDelPortador(p);
+                return alma != null && alma.NivelDespertar >= 20;
+            }
+            catch { return true; }
+        }
+
+        /// <summary>El ALMA (el despertar) del grimorio que ESTE jugador
+        /// porta — el nivel de la computa nueva.</summary>
+        private static global::AethonMod.Content.Globals.AlmaEternoGlobalItem ElAlmaDelPortador(Player p)
+        {
+            try
+            {
+                if (p == null) return null;
+                int tipoGrimorio = ModContent.ItemType<Weapons.GrimoireEternal>();
+                for (int k = 0; k < 58; k++)
+                {
+                    Item it = p.inventory[k];
+                    if (it == null || it.IsAir || it.type != tipoGrimorio) continue;
+                    var alma = it.GetGlobalItem
+                        <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                    if (alma != null) return alma;
+                }
+            }
+            catch { }
+            return null;
+        }
+
         /// <summary>LA VÍSPERA DE LA PUERTA DEL 20: si ESTE grimorio está
         /// a un paso del 19 (o ya lo cruzó) y la puerta del libro sigue
         /// por pagar, el Eterno escupe SU libro a la bolsa del portador.</summary>
@@ -612,7 +676,10 @@ namespace AethonMod.Content.Systems
                 if (LlevaElLibro(p)) return;                     // ya lo lleva encima
 
                 var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
-                if (cazador == null || cazador.YaTuvoLibro) return;   // ya tuvo el suyo
+                // v6.91 — la computa nueva: si aún le tocan libros
+                //     (no usó el suyo o su grimorio va bajo el 20), la
+                //     víspera SIGUE garantizando la llave.
+                if (ElLibroYaNoLeToca(p, cazador)) return;
 
                 // LA ENTREGA: directo a la bolsa (o al suelo si va llena).
                 int tipoLibro = ModContent.ItemType
@@ -629,7 +696,10 @@ namespace AethonMod.Content.Systems
                 if (!puesto)
                     p.QuickSpawnItem(p.GetSource_Misc("LibroDelEterno"), tipoLibro, 1);
 
-                cazador.YaTuvoLibro = true;   // el sello: su libro ya le llegó
+                // v6.91 — EL SELLO VIEJO (YaTuvoLibro) SE RETIRA: la
+                //     llave garantizada de la víspera puede repetirse si
+                //     el jugador aún no usó su libro (la letra nueva) —
+                //     la recogida limita a 1 EN EL INVENTARIO.
                 if (Main.netMode == NetmodeID.Server)
                     EcoRed.HablarAlPortador(p, "Mods.AethonMod.Despertar.LibroEntregado",
                         new Color(196, 138, 255));

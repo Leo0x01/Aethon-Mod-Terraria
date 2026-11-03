@@ -589,6 +589,36 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.91 — EL TRIÁNGULO DE TRES COLORES (el port de la Investigación)
+        //  El shader del arma portada (La Mirada de Solyn) se evalúa POR
+        //  VÉRTICE en la CPU: cada vértice llega con SU color completo (el
+        //  rgb=0 EXACTO del borde del haz vive aquí, no en una textura).
+        //  Reutiliza el pozo, el BasicEffect y el lote de pantalla (soft-add)
+        //  de siempre — cero comportamiento nuevo para los consumidores
+        //  existentes (solo un emisor más).
+        // ==================================================================
+
+        /// <summary>Apila un triángulo con UN COLOR COMPLETO por vértice
+        /// (sin premultiplicar — el color YA es el resultado del shader).
+        /// El llamador debe estar dentro de un lote (AbrirLote) y vaciar
+        /// con <see cref="VolcarTriangulos"/> antes de CerrarLote.</summary>
+        public static void TrianguloColoresEnLote(Vector2 a, Vector2 b, Vector2 c,
+            Color ca, Color cb, Color cc)
+        {
+            // v6.56.1 — VACIAR-Y-CONTINUAR (el contrato de EmitirTri).
+            if (_nVerts + 3 > _verts.Length) Volcar();
+            if (_nVerts + 3 > _verts.Length) return;
+            _verts[_nVerts++] = new VertexPositionColor(new Vector3(a.X, a.Y, 0f), ca);
+            _verts[_nVerts++] = new VertexPositionColor(new Vector3(b.X, b.Y, 0f), cb);
+            _verts[_nVerts++] = new VertexPositionColor(new Vector3(c.X, c.Y, 0f), cc);
+        }
+
+        /// <summary>Vacía a pantalla el pozo de triángulos (el cierre del
+        /// lote del port por vértices — el BasicEffect sin textura con el
+        /// soft-add de la casa, el mismo de los filamentos).</summary>
+        public static void VolcarTriangulos() => Volcar();
+
+        // ==================================================================
         //  EL VOLCADO (DrawUserPrimitives con BasicEffect)
         // ==================================================================
 

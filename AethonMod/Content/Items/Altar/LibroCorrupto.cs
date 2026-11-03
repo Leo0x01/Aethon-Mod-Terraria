@@ -50,10 +50,15 @@ namespace AethonMod.Content.Items.Altar
         // lo genera tools/gen_libro_corrupto_v686.py.
     }
 
-    /// <summary>EL SELLO DEL UNO POR CAZADOR: apenas el libro ENTRA al
-    /// inventario, el grimorio HABLA (el comentario de la letra + el
-    /// pedido de soltarlo al suelo) — y quien ya levantó el suyo, jamás
-    /// levanta otro (OnPickup false: el libro rebota al suelo).</summary>
+    /// <summary>LA RECOGIDA DEL LIBRO (v6.91 — la letra: «solo se puede
+    /// tener 1 por jugador, pero si el jugador no lo ha usado todavia
+    /// le pueden aparecer mas»): 1 EN EL INVENTARIO — si ya llevas uno,
+    /// el nuevo REBOTA (return false). El límite de los DROPS ya no
+    /// vive aquí: los libros SIGUEN cayendo hasta que el jugador USE el
+    /// suyo y su grimorio llegue al 20 (ElLibroYaNoLeToca, en
+    /// DespertarGrimorioSistema). Apenas el libro ENTRA al inventario,
+    /// el grimorio HABLA (el comentario de la letra + el pedido de
+    /// soltarlo al suelo).</summary>
     public class LibroCorruptoGlobalItem : GlobalItem
     {
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
@@ -63,14 +68,10 @@ namespace AethonMod.Content.Items.Altar
         {
             try
             {
-                var cazador = player.GetModPlayer<Players.CazaJefesPlayer>();
-                if (cazador == null) return true;
-
-                // UNO POR CAZADOR, PARA SIEMPRE (la letra): «una vez que un
-                // jugador consigue un libro ya no puede conseguir mas».
-                if (cazador.YaTuvoLibro) return false;
-
-                cazador.YaTuvoLibro = true;
+                // v6.91 — EL LÍMITE ES DE INVENTARIO: si ya llevas tu
+                // libro, este rebota (el mundo puede escupirte otro —
+                // la letra nueva — pero encima SOLO viaja UNO).
+                if (LlevaElLibro(player)) return false;
 
                 // EL COMENTARIO DEL GRIMORIO (la letra: «a penas el libro
                 // entre al inventario el grimorio debe decir un comentario
@@ -83,6 +84,20 @@ namespace AethonMod.Content.Items.Altar
             }
             catch { }
             return true;
+        }
+
+        /// <summary>¿El jugador ya lleva UN Libro Consagrado encima? (el
+        /// límite de la letra: 1 por inventario).</summary>
+        private static bool LlevaElLibro(Player p)
+        {
+            if (p == null) return false;
+            int tipoLibro = ModContent.ItemType<LibroCorrupto>();
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = p.inventory[k];
+                if (it != null && !it.IsAir && it.type == tipoLibro) return true;
+            }
+            return false;
         }
     }
 

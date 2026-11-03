@@ -213,19 +213,35 @@ namespace AethonMod.Content.UI
                 if (!altarVivo || yo.Center.DistanceSQ(altarCentro) > 280f * 280f)
                 { CerrarDeVerdad(); return true; }
 
-                // === LA GEOMETRÍA (a la derecha del inventario · v6.90:
-                //     más alto — el precio, el resultado y la leyenda del
-                //     sello tienen SU sitio) ===
-                int w = 380, h = 348;
+                // === LA GEOMETRÍA (v6.91 — LA VENTANA DEL USUARIO:
+                //     «la ventana del altar debes arreglar y optimizarla
+                //     ya que los texto se desbordan… puedes usar la
+                //     textura Espacio_1.png para mejorar el aspecto de la
+                //     ventana»): más alta para SUS TRES SECCIONES (GANA ·
+                //     EL SELLO · CÓMO CONSEGUIR ESENCIAS), el fondo de
+                //     cielo estrellado y CADA LÍNEA MEDIDA — es
+                //     matemáticamente imposible que un texto desborde
+                //     (LineaMedida parte por palabras al ancho real). ===
+                int w = 400, h = 576;
                 int x = Math.Min(Main.screenWidth - w - 10,
                     470 + Math.Max(0, (Main.screenWidth - 1100) / 3));
                 int y = Main.screenHeight / 2 - h / 2;
                 if (x < 10) x = 10;
+                if (y < 8) y = 8;
+                if (y + h > Main.screenHeight - 8)
+                    y = Math.Max(8, Main.screenHeight - 8 - h);
 
-                // EL FONDO + el marco de la casa (el violeta de lo corrupto).
+                // EL FONDO — EL CIELO ESTRELLADO Espacio_1.png (la letra:
+                //     «puedes usar la textura Espacio_1.png para mejorar
+                //     el aspecto de la ventana»): la textura cubre el
+                //     panel y un velo oscuro encima deja respirar al
+                //     texto. El marco doble de la casa, siempre.
+                Texture2D cielo = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/Investigacion/Espacio_1").Value;
                 sb.Draw(pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaFondo * 0.94f);
+                sb.Draw(cielo, new Rectangle(x, y, w, h), Color.White * 0.92f);
+                sb.Draw(pixel, new Rectangle(x, y, w, h), TintaFondo * 0.60f);
                 Marco(sb, pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaVioleta * 0.80f);
-                sb.Draw(pixel, new Rectangle(x, y, w, h), TintaPanel * 0.97f);
 
                 // EL TITULAR (v6.88 — el corruptor).
                 Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Titulo")),
@@ -258,10 +274,17 @@ namespace AethonMod.Content.UI
                 string filtroTxt = Language.GetTextValue(Clave("FiltroArma"));
                 Utils.DrawBorderString(sb, filtroTxt, new Vector2(x + 92f, y + 118f), TintaApagado, 0.72f);
 
-                // === v6.90 — EL ESTADO + EL RESULTADO + EL PRECIO (la
-                //     ventana mejorada: TODO antes de pulsar): qué es
-                //     (arma/material), qué gana (stats/etiqueta) y
-                //     cuántas esencias cuesta (y cuántas llevas). ===
+                // === v6.91 — EL ESTADO + LAS TRES SECCIONES DE LA
+                //     VENTANA NUEVA (la letra: «lo que gana debe estar
+                //     debajo de la palabra Gana… el altar es quien dice
+                //     cuanto necesitas y lo que falta, ademas debe decir
+                //     como conseguiras esencia»): GANA (las ganancias
+                //     DEBAJO de la palabra) · EL SELLO (precio + llevas
+                //     + LO QUE FALTA — la cuenta vive AQUÍ, no en el chat)
+                //     · CÓMO CONSEGUIR ESENCIAS (la mecánica REAL:
+                //     criaturas 0,1% · jefes 1-10 · las oleadas de hambre
+                //     pagan MÁS — tal como caen de verdad, ver
+                //     EsenciaCorruptaDrops.cs y OleadaNPC). ===
                 bool lista = EsOfrendaConsagrible(_arma);
                 bool esArma = EsArmaDeVerdad(_arma);
                 int costeVivo = lista ? global::AethonMod.Content.Globals.CorruptoGlobalItem
@@ -273,40 +296,61 @@ namespace AethonMod.Content.UI
                     var selloArma = _arma.GetGlobalItem
                         <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                     bool yaEra = selloArma != null && selloArma.Corrompido;
+                    // v6.91 — LA CURA DEL «ListaArma»: la llamada perdía el
+                    //     prefijo Mods.AethonMod.Altar. y el juego pintaba la
+                    //     CLAVE cruda. Ahora TODAS pasan por Clave().
                     string estado = yaEra ? Language.GetTextValue(Clave("YaConsagrada"))
-                        : lista ? Language.GetTextValue(esArma ? "ListaArma" : "ListaMaterial")
+                        : lista ? Language.GetTextValue(Clave(esArma ? "ListaArma" : "ListaMaterial"))
                         : Language.GetTextValue(Clave("NoArma"));
                     Color colEstado = yaEra ? TintaVioleta
                         : lista ? TintaTeal : TintaRojo;
                     Utils.DrawBorderString(sb, estado,
-                        new Vector2(x + 92f, y + 158f), colEstado, 0.85f);
-
-                    // EL RESULTADO QUE GANA (v6.90 — la letra: «si lo que
-                    //     corrompes es un arma salen estadisticas… si es
-                    //     otro item, entonces solo sale la etiqueta»).
-                    if (lista)
-                    {
-                        string resultado = esArma
-                            ? Language.GetTextValue(Clave("ResultadoArma"))
-                            : Language.GetTextValue(Clave("ResultadoMaterial"));
-                        Utils.DrawBorderString(sb, resultado,
-                            new Vector2(x + 92f, y + 180f), TintaApagado * 1.15f, 0.74f);
-                    }
+                        new Vector2(x + 24f, y + 158f), colEstado, 0.85f);
                 }
 
-                // EL PRECIO A LA VISTA (v6.90 — antes solo se veía al
-                //     FALLAR: ahora el sello dice lo que cuesta y lo que
-                //     llevas, con su color: verde si alcanza, rojo si no).
+                float cy = y + 186f;
+
+                // ── LA SECCIÓN 1 — GANA (lo que gana, DEBAJO de la
+                //    palabra — la letra: «lo que gana debe estar debajo
+                //    de la palabra Gana»). ──
+                cy = TituloSeccion(sb, Language.GetTextValue(Clave("GanaTitulo")),
+                    x, cy, w, TintaTeal);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaArma")),
+                    x + 24f, cy, w - 48f, 0.78f, TintaTexto);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaMaterial")),
+                    x + 24f, cy, w - 48f, 0.78f, TintaApagado);
+                cy += 8f;
+
+                // ── LA SECCIÓN 2 — EL SELLO (el precio A LA VISTA y LA
+                //    CUENTA DEL ALTAR: cuánto cuesta, cuántas llevas y
+                //    CUÁNTO FALTA — la letra: «el altar es quien dice
+                //    cuanto necesitas y lo que falta»). ──
+                cy = TituloSeccion(sb, Language.GetTextValue(Clave("SelloTitulo")),
+                    x, cy, w, TintaVioleta);
                 if (lista && !_arma.IsAir)
                 {
-                    Color colPrecio = llevadas >= costeVivo ? TintaTeal : TintaRojo;
-                    Utils.DrawBorderString(sb,
-                        Language.GetTextValue(Clave("PrecioVivo"), costeVivo, llevadas),
-                        new Vector2(x + w / 2f, y + 226f), colPrecio, 0.85f, 0.5f, 0.4f);
+                    bool alcanza = llevadas >= costeVivo;
+                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloCuesta"), costeVivo),
+                        x + 24f, cy, w - 48f, 0.80f, TintaTexto);
+                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloLlevas"), llevadas),
+                        x + 24f, cy, w - 48f, 0.80f, TintaApagado);
+                    cy = LineaMedida(sb, Language.GetTextValue(
+                            alcanza ? Clave("SelloAlcanza") : Clave("SelloFalta"),
+                            Math.Max(costeVivo - llevadas, 0)),
+                        x + 24f, cy, w - 48f, 0.80f,
+                        alcanza ? TintaTeal : TintaRojo);
                 }
+                else
+                {
+                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloSinOfrenda")),
+                        x + 24f, cy, w - 48f, 0.78f, TintaApagado * 0.9f);
+                }
+                cy += 4f;
 
-                // === EL BOTÓN CONSAGRAR (el sello) ===
-                Rectangle btnCorromper = new Rectangle(x + 24, y + 244, 170, 42);
+                // EL BOTÓN CONSAGRAR (el sello) — ahora debajo de SU
+                // sección, con el hueco contado.
+                Rectangle btnCorromper = new Rectangle(x + 24, (int)cy, w - 48, 42);
+                cy += 42f + 10f;
                 bool hoverBtn = PanelContiene(btnCorromper);
                 sb.Draw(pixel, btnCorromper,
                     (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
@@ -314,6 +358,23 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Consagrar")),
                     new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
                     lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
+
+                // ── LA SECCIÓN 3 — CÓMO CONSEGUIR ESENCIAS (la letra:
+                //    «debe decir como conseguiras esencia, y las esencias
+                //    se consiguen matando cualquier criatura de terraria
+                //    cierta probabilidad al igual que matando jefes,
+                //    ademas la probabilidad aumenta en las oleadas de
+                //    hambre» — la MESA REAL del juego, sin adornos). ──
+                cy = TituloSeccion(sb, Language.GetTextValue(Clave("ComoTitulo")),
+                    x, cy, w, TintaApagado * 1.25f);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoCriaturas")),
+                    x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoJefes")),
+                    x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
+                    x + 24f, cy, w - 48f, 0.75f, TintaVioleta);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
+                    x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
 
                 // LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el
                 // grimorio SOLO devora lo consagrado — la ofrenda del
@@ -391,8 +452,17 @@ namespace AethonMod.Content.UI
                             .EsenciasEnLaBolsa(Main.LocalPlayer);
                         if (llevaba < coste)
                         {
-                            Main.NewText(Language.GetTextValue(Clave("FaltanEsencias"),
-                                coste, llevaba), TintaRojo);
+                            // v6.91 — LA LETRA: «no es necesario llevar la
+                            //     cuenta en el chat, para eso dejarlo en el
+                            //     altar» — el chat SOLO AVISA; la cuenta
+                            //     (cuánto cuesta, cuánto falta y cómo
+                            //     conseguirlas) vive en LA VENTANA del
+                            //     altar. (Y el bug viejo: «te faltan 0»
+                            //     pintaba LO QUE LLEVABAS, no lo que
+                            //     faltaba — la cuenta se fue del chat para
+                            //     siempre.)
+                            Main.NewText(Language.GetTextValue(Clave("FaltanEsencias")),
+                                TintaRojo);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                         else
@@ -443,6 +513,55 @@ namespace AethonMod.Content.UI
                 return true;
             }
             catch { return true; }
+        }
+
+        /// <summary>v6.91 — EL TITULAR DE SECCIÓN de la ventana del altar:
+        /// centrado, con sus filetes a los lados. Devuelve la Y siguiente.</summary>
+        private static float TituloSeccion(SpriteBatch sb, string texto, int x, float cy, int w, Color c)
+        {
+            var fuente = FontAssets.MouseText.Value;
+            float ancho = fuente.MeasureString(texto).X * 0.85f;
+            float cx = x + w / 2f;
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle((int)(cx - ancho / 2f - 26f), (int)cy + 7, 18, 2), c * 0.45f);
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle((int)(cx + ancho / 2f + 8f), (int)cy + 7, 18, 2), c * 0.45f);
+            Utils.DrawBorderString(sb, texto, new Vector2(cx, cy), c, 0.85f, 0.5f, 0.4f);
+            return cy + 24f;
+        }
+
+        /// <summary>v6.91 — LA LÍNEA MEDIDA (la letra: «los texto se
+        /// desbordan»): cada línea del altar se mide con la fuente REAL y
+        /// si no cabe en maxAncho se PARTE POR PALABRAS — es matemáticamente
+        /// imposible que un texto se salga del panel. Devuelve la Y
+        /// siguiente.</summary>
+        private static float LineaMedida(SpriteBatch sb, string texto, float x, float cy,
+            float maxAncho, float escala, Color c)
+        {
+            var fuente = FontAssets.MouseText.Value;
+            float altoLinea = fuente.MeasureString("Ag").Y * escala + 2f;
+            var palabras = texto.Split(' ');
+            var linea = new System.Text.StringBuilder();
+            foreach (string pal in palabras)
+            {
+                string prueba = linea.Length == 0 ? pal : linea.ToString() + " " + pal;
+                if (fuente.MeasureString(prueba).X * escala > maxAncho && linea.Length > 0)
+                {
+                    Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, escala);
+                    cy += altoLinea;
+                    linea.Clear().Append(pal);
+                }
+                else
+                {
+                    linea.Clear().Append(prueba);
+                }
+            }
+            if (linea.Length > 0)
+            {
+                Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, escala);
+                cy += altoLinea;
+            }
+            return cy + 3f;
         }
 
         /// <summary>¿El ratón está encima de este rect DEL PANEL? (y come

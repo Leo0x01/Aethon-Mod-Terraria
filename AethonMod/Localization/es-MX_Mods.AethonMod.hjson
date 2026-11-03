@@ -5,12 +5,13 @@ Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
 	LibroCorrupto: {
-		DisplayName: Libro Corrupto
+		DisplayName: Libro Consagrado
 		Tooltip:
 			'''
 			✦ Un libro con la misma forma que los de la mazmorra… pero NEGRO.
 			· Se consigue: 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres · 50% la Muralla de Carne
-			· Solo 1 por jugador — y el grimorio lo quiere EN EL SUELO
+			· Solo 1 en el inventario — y el grimorio lo quiere EN EL SUELO
+			· Sin usarlo te pueden caer más — dejan de salir cuando lo USAS y tu grimorio llega al despertar 20
 			· Devorado por debajo del despertar 20: la puerta del 20 queda paga PARA SIEMPRE
 			'''
 	}
@@ -268,6 +269,16 @@ Items: {
 			(clic derecho) y despiertan las dos.
 			'''
 		Abierta: Las dos mascotas despiertan — la pareja del recuerdo y el mini grimorio te siguen.
+	}
+
+	VastagoDelEternoItem: {
+		DisplayName: El Vástago del Eterno
+		Tooltip:
+			'''
+			✦ El librito alado que nació del Taller: respira, parpadea y
+			vuela a tu lado (idle y vuelo animados — el pipeline sprite-gen).
+			· Se EQUIPA en la ranura de mascota — y la tecla B lo despierta SOLO equipado
+			'''
 	}
 
 	GrimorioMenorItem: {
@@ -2158,6 +2169,16 @@ Items: {
 			'''
 	}
 
+	BolsaDePociones: {
+		DisplayName: La Bolsa de las Pociones
+		Tooltip:
+			'''
+			TODAS las pociones del juego — la lista completa del ItemID
+			(las curativas y de maná, los buffs clásicos y modernos, la
+			suerte, las raras y los nueve frascos): 30 de cada una.
+			'''
+	}
+
 	BolsaTallerDeEfectos: {
 		DisplayName: La Bolsa del Taller de Efectos
 		Tooltip:
@@ -2577,6 +2598,11 @@ Buffs: {
 	AethonMenorBuff: {
 		DisplayName: Aethon Menor
 		Description: Una chispa viva del propio grimorio alumbra tu camino con el arcoíris
+	}
+
+	VastagoDelEternoBuff: {
+		DisplayName: El Vástago del Eterno
+		Description: Un vástago del cosmos en forma de libro: respira, parpadea y te sigue volando.
 	}
 
 	GrimorioMenorBuff: {
@@ -3080,13 +3106,13 @@ Despertar: {
 	// piden que maten a los jefes»): la línea de la puerta de caza en
 	// la LISTA DE REQUISITOS del tooltip — con SU estado.
 	ReqJefeViva: La presa del peldaño: {0} — Todavía VIVO. El grimorio exige su caza
-	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CORRUPTO… déjalo caer al suelo, portador. QUIERO probarlo.
+	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CONSAGRADO… déjalo caer al suelo, portador. QUIERO probarlo.
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
-	LibroDevorado: (páginas que se lamen) El LIBRO CORRUPTO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
-	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CORRUPTO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
-	ReqLibroDevorado: Libro Corrupto: DEVORADO
-	ReqLibroPendiente: Libro Corrupto: consíguelo y déjalo caer delante del grimorio
-	LibroEntregado: ✦ (las páginas se abren solas) Toma, portador: MI LIBRO CORRUPTO. La puerta del 20 lo exige — déjalo caer delante de mí cuando la mesa esté lista.
+	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
+	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CONSAGRADO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
+	ReqLibroDevorado: Libro Consagrado: DEVORADO
+	ReqLibroPendiente: Libro Consagrado: consíguelo y déjalo caer delante del grimorio
+	LibroEntregado: ✦ (las páginas se abren solas) Toma, portador: MI LIBRO CONSAGRADO. La puerta del 20 lo exige — déjalo caer delante de mí cuando la mesa esté lista.
 	// v6.89 — LA ENTREGA GARANTIZADA (la letra: «tienes que darle el
 	// libro corrupto al jugador»): al llegar al 19, el Eterno te lo
 	// escupe a la bolsa — la puerta nace con su llave puesta.
@@ -3767,15 +3793,30 @@ Altar: {
 	ListaMaterial: Material listo — gana solo su etiqueta
 	YaCorrupta: Ya está consagrada
 	NoArma: Eso no es una ofrenda consagrible
-	// v6.89 — EL PRECIO DEL SELLO: esencias del Eterno según calidad,
-	// tipo, daño y estadísticas del arma (la de cobre pide menos).
-	FaltanEsencias: ✦ El sello cuesta {0} Esencias del Eterno — te faltan {1}. Tráelas y vuelve.
+	// v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de
+	// la palabra Gana… el altar es quien dice cuanto necesitas y lo que
+	// falta, ademas debe decir como conseguiras esencia» — las tres
+	// secciones de la ventana nueva (GANA · EL SELLO · CÓMO CONSEGUIR).
+	GanaTitulo: GANA
+	GanaArma: Arma → +5% a TODAS sus estadísticas y su etiqueta junto al nombre
+	GanaMaterial: Material → SOLO su etiqueta junto al nombre
+	SelloTitulo: EL SELLO
+	SelloCuesta: Cuesta: {0} Esencias del Eterno
+	SelloLlevas: Llevas: {0}
+	SelloFalta: Te falta: {0}
+	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
+	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
+	ComoTitulo: CÓMO CONSEGUIR ESENCIAS
+	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
+	ComoJefes: • Los jefes sueltan de 1 a 10 (casi siempre 1)
+	ComoOleadas: • ¡Las OLEADAS DE HAMBRE suben la probabilidad!
+	ComoNota: (las esencias empiezan a caer tras LA LLEGADA del grimorio)
+	// v6.91 — LA LETRA: «no es necesario llevar la cuenta en el chat,
+	// para eso dejarlo en el altar» — el chat SOLO AVISA.
+	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
-	PrecioVivo: El sello cuesta {0} — llevas {1}
-	ResultadoArma: → gana: +5% a TODAS sus estadísticas + su etiqueta
-	ResultadoMaterial: → gana: SOLO su etiqueta junto al nombre
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (las Esencias del Eterno no necesitan sello: ellas SON su esencia)
 }

@@ -75,6 +75,12 @@ namespace AethonMod.Content.Players
             // del kit, la lección v6.14.2).
             bolsas += Entregar(ModContent.ItemType
                 <global::AethonMod.Content.Items.Bolsas.BolsaTallerDeEfectos>());
+            // v6.91 — LA BOLSA DE LAS POCIONES aparte (la letra: «dame
+            // una bolsa con todas las pociones del juego»): los 67
+            // bebibles del ItemID, también en la entrega DIRECTA del kit
+            // (la lección v6.14.2 aplicada a la bolsa nueva).
+            bolsas += Entregar(ModContent.ItemType
+                <global::AethonMod.Content.Items.Bolsas.BolsaDePociones>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

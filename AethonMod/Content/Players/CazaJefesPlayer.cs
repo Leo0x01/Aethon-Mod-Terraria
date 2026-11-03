@@ -89,8 +89,22 @@ namespace AethonMod.Content.Players
 
         /// <summary>¿ESTE cazador ya consiguió (y levantó) SU Libro
         /// Corrupto? (true = el que caiga ya no es suyo: CanPickup lo
-        /// bloquea — uno por cazador, para siempre).</summary>
+        /// bloquea — uno por cazador, para siempre).
+        /// v6.91 — LA COMPUTA VIEJA SE RETIRA de los drops (la letra:
+        /// «si el jugador no lo ha usado todavia le pueden aparecer
+        /// mas, solo cuando el jugador lo usa y el grimorio tiene un
+        /// nivel de despertar de 20 o superior es que dejan de salir»)
+        /// — queda por compatibilidad de saves, pero los drops ya la
+        /// ignoran.</summary>
         public bool YaTuvoLibro = false;
+
+        /// <summary>v6.91 — ¿ESTE jugador ya USÓ (devoró con su
+        /// grimorio) un Libro Consagrado? EL CONTADOR INDIVIDUAL de la
+        /// letra: «esto es algo individual por jugador, cada jugador
+        /// debe tener su propio contador en multijugador» — se marca en
+        /// la MESA (al devorar) y viaja en el .plr. Con él + el nivel 20
+        /// del grimorio, los libros DEJAN de salir.</summary>
+        public bool LibroUsado = false;
 
         // ================================================================
         //  LA PERSISTENCIA (el .plr del cazador — la lista viaja con el
@@ -107,6 +121,7 @@ namespace AethonMod.Content.Players
                 tag["aethonVeces"] = VecesAethon;
                 tag["mlLegado"] = LegadoMoonLord;
                 tag["libroUno"] = YaTuvoLibro;
+                tag["libroUsado"] = LibroUsado;
             }
             catch { }
         }
@@ -126,6 +141,7 @@ namespace AethonMod.Content.Players
                 LegadoMoonLord = tag.GetBool("mlLegado");
                 LegadoEmperatriz = tag.GetBool("eolLegado");
                 YaTuvoLibro = tag.GetBool("libroUno");
+                LibroUsado = tag.GetBool("libroUsado");
             }
             catch { PuertasPagas.Clear(); }
         }

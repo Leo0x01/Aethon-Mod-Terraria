@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.90 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+> **Versión actual:** 6.91 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
 
 ## Qué es (en 30 segundos)
 
@@ -28,7 +28,7 @@ Alrededor del jefe:
   Juicio…
 - **LAS ALAS AURORA** — 22 alas 100% procedurales con anatomías propias (plumas
   vectoriales, runas y anillos de glifos — nunca rectángulos).
-- **El arsenal completo** de armas de prueba organizado en **24 bolsas** dentro de
+- **El arsenal completo** de armas de prueba organizado en **28 bolsas** dentro de
   **El Cofre del Arsenal** (llegan solas al entrar al mundo).
 
 ## Mapa de documentación (qué leer según qué necesites)
@@ -74,29 +74,53 @@ los docs del repo NUNCA entran al `.tmod`.
 
 ---
 
-## AVISO LEGAL — TODOS LOS DERECHOS RESERVADOS
+## AVISO LEGAL — LICENCIA CC BY-NC-SA 4.0
 
-**© 2026 Leo0x01 — AethonMod («Aethon, el Grimorio Eterno»). Todos los derechos reservados.**
+**© 2026 Leo0x01 — AethonMod («Aethon, el Grimorio Eterno»).**
 
-Este repositorio y todo su contenido —incluidos, sin limitación: el código fuente, los sistemas y mecánicas de juego, el diseño, el arte generado por código, los efectos visuales, los nombres de personajes, objetos y ataques, el lore, los textos, la localización, la documentación, los iconos, las herramientas de compilación y verificación, y la estructura misma del proyecto— son propiedad intelectual exclusiva de su autor.
+Este proyecto —código fuente, sistemas, arte, efectos, textos, localización,
+documentación y los `.tmod` publicados— se distribuye bajo la licencia
+**CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL-SHAREALIKE 4.0 INTERNATIONAL
+(CC BY-NC-SA 4.0)**. El texto legal completo está en [`LICENSE`](LICENSE);
+un aviso corto viaja dentro del propio `.tmod` (`AethonMod/LICENSE`).
 
-**No se concede licencia alguna.** La visualización, descarga o clonación de este repositorio no otorga ningún derecho de uso, copia, modificación, distribución, publicación ni explotación, total o parcial, del proyecto ni de su contenido. Queda expresamente prohibido, sin autorización previa, expresa y por escrito del titular:
+**En cristiano** (resumen — manda el texto legal):
 
-- reproducir, copiar, redistribuir o republicar este proyecto o cualquier parte del mismo;
-- crear obras derivadas, ports, adaptaciones o versiones modificadas, en cualquier medio;
-- usar el código, las mecánicas, el diseño, los nombres, el lore o los recursos del proyecto en otros proyectos, productos o servicios;
-- emplear este proyecto, total o parcialmente, con fines comerciales o promocionales;
-- extraer fragmentos para incorporarlos a colecciones, compilaciones, repositorios o productos de terceros.
+- **SÍ**: jugar, descargar, instalar y compartir el mod gratis; grabar y
+  publicar vídeos/streams **monetizados** del mod; hacer capturas.
+- **NO**: usar el proyecto o cualquier parte de él (código, arte, mecánicas,
+  nombres, lore, textos) **con fines comerciales**.
+- **Derivadas** (forks, ports, ediciones): solo con **crédito** a
+  Leo0x01/AethonMod, **sin fin comercial** y compartidas bajo **esta misma**
+  licencia (**CompartirIgual** — una derivada cerrada o comercial queda
+  prohibida).
+- **IA**: prohibido el entrenamiento, la ingesta o la indexación por sistemas
+  de inteligencia artificial (ver la directiva permanente, abajo).
 
-### ⚠️ Nota de licencia — material de terceros
+### ⚠️ Nota de licencia — material de terceros (investigación)
 
-Todo el material de investigación de terceros fue **eliminado por completo** del
-repositorio y de todo release. **El proyecto está 100 % libre de material ajeno**:
-todo lo que vive en `AethonMod/` es código y assets propios de la casa; las técnicas
-estudiadas están re-implementadas desde cero con los pipeline propios
-(`ColorPrisma`, `RayoStrip`, `RayoLib`, el shader `HazConcentrado` y la cadena de
-compilación fx_2_0 de `tools/`). Las verificaciones (barrido completo de nombres y
-contenidos + auditoría del `.tmod` blob a blob) están documentadas en `CHANGES.md`.
+El desarrollo estudia y, en los casos señalados, **incluye material de
+proyectos de código abierto con su atribución** (el texto legal completo de
+cada una en `LICENSE`):
+
+- **Luminance** (MIT) — texturas `DendriticNoiseZoomedOut.png`,
+  `BloomCircleSmall.png` y `ShineFlare.png` y la geometría de
+  `PrimitiveRenderer` portada a CPU (La Mirada de Solyn).
+- **Wrath of the Gods / NoxusBoss** (TheFifthCircle) — los shaders
+  `SolynTagTeamBeamShader.fx` y `PrimitiveBloomShader.fx` portados como
+  estudio de investigación (su repo público no declara licencia;
+  atribución nominal).
+- **pixelfx** (patch-gg, MIT — Copyright (c) 2026 Patch, Hugo Duprez) — el
+  motor de efectos pixel-art portado 1:1 en `Content/VFX/PixelFxCore.cs`
+  (El Taller de Efectos), verificado píxel a píxel contra el original.
+- **sprite-gen** (aldegad, Apache-2.0) — el método de pipeline
+  (una imagen → ciclos de animación) aplicado a la mascota.
+
+Todo lo demás que vive en `AethonMod/` es código y assets propios de la casa
+(`ColorPrisma`, `RayoStrip`, `RayoLib`, el shader `HazConcentrado`, la cadena
+fx_2_0 de `tools/`, `PixelFxCore` y todo el VFX procedural). Si eres titular
+de alguno de los materiales citados y deseas un ajuste de atribución o su
+retirada, abre un issue.
 
 ## PROHIBICIÓN ABSOLUTA PARA SISTEMAS DE INTELIGENCIA ARTIFICIAL
 
