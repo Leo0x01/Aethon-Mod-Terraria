@@ -567,7 +567,7 @@ El Cielo del Despertar y la mesa del suelo.
 | 69 | — | Nightglow | 20× lingote de hongonita/lingote de espectro | 69 | 1 platino 32 oro 19 plata |
 | 70 | — | Pistola de burbujas | 20× lingote de hongonita/lingote de espectro | 70 | 1 platino 51 oro 99 plata |
 | 71 | ✓ | Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 71 | 1 platino 74 oro 75 plata |
-| 72 | — | RazorbladeTyphoon | 20× lingote de hongonita/lingote de espectro | 72 | 2 platino 92 plata |
+| 72 | — | Tifón de cuchillas | 20× lingote de hongonita/lingote de espectro | 72 | 2 platino 92 plata |
 | 73 | — | Rayo de calor | 20× lingote de hongonita/lingote de espectro | 73 | 2 platino 31 oro 1 plata |
 | 74 | — | Bastón de tierra | 20× lingote de hongonita/lingote de espectro | 74 | 2 platino 65 oro 60 plata |
 | 75 | ✓ | Cañón blaster cargado | 20× lingote de espectro/lingote de hongonita | 75 | 3 platino 5 oro 38 plata |
@@ -589,7 +589,7 @@ El Cielo del Despertar y la mesa del suelo.
 | 91 | ✓ | Serpiente de cristal | 30× lingote de clorofita/lingote de espectro | 91 | 28 platino 48 oro 3 plata |
 | 92 | — | Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 92 | 32 platino 74 oro 54 plata |
 | 93 | — | Terraprisma | 20× lingote de hongonita/lingote de espectro | 93 | 37 platino 64 oro 93 plata |
-| 94 | — | RazorbladeTyphoon | 20× lingote de hongonita/lingote de espectro | 94 | 43 platino 28 oro 76 plata |
+| 94 | — | Tifón de cuchillas | 20× lingote de hongonita/lingote de espectro | 94 | 43 platino 28 oro 76 plata |
 | 95 | ✓ | Prisma final o Destello lunar | 20× lingote de luminita/fragmento de nebulosa | 95 | 49 platino 77 oro 2 plata |
 | 96 | — | Bastón del cristal arcoíris o Portal lunar | 20× lingote de luminita/fragmento de polvo estelar | 96 | 57 platino 22 oro 36 plata |
 | 97 | — | Fuego de nebulosa o Arcano de nebulosa | 40× fragmento de nebulosa | 97 | 65 platino 79 oro 33 plata |
