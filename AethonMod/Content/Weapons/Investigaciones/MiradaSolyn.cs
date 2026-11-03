@@ -256,6 +256,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
 
         private static Asset<Texture2D> _flareTex;
         private static Asset<Texture2D> _dendrito;
+        private static Asset<Texture2D> _rampa;
 
         // LA PALETA (el original, exacta).
         private static readonly Color NucleoRosa = new(255, 45, 123);
@@ -360,8 +361,11 @@ namespace AethonMod.Content.Weapons.Investigaciones
         private static float Inversa(float a, float b, float v)
             => MathHelper.Clamp((v - a) / (b - a), 0f, 1f);
 
-        /// <summary>Convert01To010 de Luminance: 0→1→0 (la colina 4x(1−x)).</summary>
-        private static float Colina(float x) => 4f * x * (1f - x);
+        /// <summary>Convert01To010 de Luminance: 0→1→0 (sin(πx) — la
+        /// función REAL decompilada de Luminance línea 9012: la v6.89
+        /// usaba 4x(1−x), un poco más picuda — cosmético, pero exacto
+        /// es exacto).</summary>
+        private static float Colina(float x) => MathF.Sin(MathF.PI * MathHelper.Clamp(x, 0f, 1f));
 
         /// <summary>EL SEMIANCHO por posición (0..1) — la
         /// LaserWidthFunction del original, EXACTA: la cura de los picos.</summary>
@@ -400,9 +404,14 @@ namespace AethonMod.Content.Weapons.Investigaciones
         }
 
         /// <summary>EL COLOR DEL BLOOM por nodo — la BloomColorFunction
-        /// del original: el bump 0,02→0,05 sube y 0,81→0,95 baja.</summary>
+        /// del original: el bump 0,02→0,05 sube y 0,95→0,81 BAJA
+        /// (v6.90 — LA CURA DEL PICO FINAL: la v6.89 traía el segundo
+        /// factor INVERTIDO — Inversa(0,81→0,95) ASCENDENTE: la punta
+        /// ardía a tope y se CORTABA en seco = EL PINCHO del final. La
+        /// InverseLerpBump de Luminance (línea 9062) es IL(0,95,0,81):
+        /// DESCENDENTE — la punta se APAGA).</summary>
         private Color ColorBloom(float p)
-            => BloomMagenta * (Inversa(0.02f, 0.05f, p) * Inversa(0.81f, 0.95f, p)) * 0.34f;
+            => BloomMagenta * (Inversa(0.02f, 0.05f, p) * Inversa(0.95f, 0.81f, p)) * 0.34f;
 
         /// <summary>LA ESPINA DORADA: el secondaryColor (255,196,36) del
         /// shader original — la capa fina del centro con SUS fundidos.</summary>
@@ -436,24 +445,33 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 _dendrito = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/RuidoDendritico",
                     AssetRequestMode.ImmediateLoad);
+            if (_rampa == null)
+                _rampa = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/RampaGlow",
+                    AssetRequestMode.ImmediateLoad);
 
             Player owner = Main.player[Projectile.owner];
             if (owner == null || !owner.active) return false;
 
+            // v6.90 — LA RAÍZ ES LA BOCA (la cura del posicionado: la
+            // v6.89 enraizaba la tira en owner.Center — 100 px DETRÁS de
+            // la boca donde la IA mantiene Projectile.Center — y el
+            // flare del muzzle flotaba 100 px por delante de la tira:
+            // aguja invisible dentro del jugador + fogonazo huérfano.
+            // El original: laserPositions[0] = Projectile.Center con el
+            // primer punto retraído 10 px TRAS el muestreo).
             Vector2 dir = Projectile.ai[0].ToRotationVector2();
-            Vector2 raiz = owner.Center - Main.screenPosition;
+            Vector2 raiz = Projectile.Center - Main.screenPosition;
             Vector2 punta = raiz + dir * Largo;
 
             // LA POLILÍNEA (24 nodos — el original: 12 puntos de control;
-            // el doble: más suave). El primer punto RETROCEDE 10 px tras
-            // la boca (el original: laserPositions[0] −= velocity·10).
+            // el doble: más suave).
             int n = 24;
             Vector2[] pts = new Vector2[n];
             float[] semis = new float[n];
             Color[] coloresLaser = new Color[n];
             Color[] coloresBloom = new Color[n];
             Color[] coloresEspina = new Color[n];
-            pts[0] = raiz - dir * 10f;
             for (int i = 0; i < n; i++)
             {
                 float x = i / (float)(n - 1);
@@ -463,6 +481,11 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 coloresBloom[i] = ColorBloom(x);
                 coloresEspina[i] = ColorEspina(x);
             }
+            // EL RETROCESO DEL ORIGINAL (SolynTagTeamBeam.cs:183 — viva
+            // esta vez: la v6.89 lo escribía ANTES del bucle y el bucle
+            // lo pisaba): el primer punto se retrae 10 px TRAS la boca
+            // para que el arranque redondo TAPE el muzzle.
+            pts[0] -= dir * 10f;
 
             if (_dendrito.Value == null || _dendrito.Value.IsDisposed) return false;
 
@@ -470,22 +493,49 @@ namespace AethonMod.Content.Weapons.Investigaciones
             try
             {
                 // === 1. LA BANDA DE BLOOM (×1,9 — el original:
-                //     BloomWidthFunction = LaserWidth × 1,9) ===
+                //     BloomWidthFunction = LaserWidth × 1,9) · v6.90 —
+                //     LA CURA DEL COLLAR DE BOLAS: la v6.89 la pintaba
+                //     con SoftGlow (blob radial 64×64 tileado cada
+                //     640 px = un COLLAR DE BOLAS brillantes = LOS
+                //     PICOS periódicos). El original NO usa textura: es
+                //     la cúpula procedural pow(4v(1−v),³)·3,5 — CONSTANTE
+                //     a lo largo por construcción. SU equivalente en la
+                //     casa: RampaGlow (256×256, UNIFORME en X, cúpula en
+                //     V) — brillante de punta a punta, sin periodicidad.) ===
                 RayoStrip.FajaTexturadaEnLote(pts, Escalar(semis, 1.9f),
-                    coloresBloom, default, VFXCore.SoftGlow,
-                    640f, 0.15f, Main.GlobalTimeWrappedHourly);
+                    coloresBloom, default, _rampa.Value,
+                    640f, 0f, Main.GlobalTimeWrappedHourly);
+
+                // === 1.b EL CUERPO LISO (v6.90 — el innerGlow del shader
+                //     original sin shader: una banda RampaGlow tintada
+                //     del rosa del núcleo bajo el ruido — el cuerpo
+                //     SIEMPRE presente, el ruido lo texturiza encima). ===
+                RayoStrip.FajaTexturadaEnLote(pts, semis,
+                    coloresLaser, default, _rampa.Value,
+                    640f, 0f, Main.GlobalTimeWrappedHourly);
 
                 // === 2. EL NÚCLEO (la RuidoDendritico fluyendo — los
-                //     filamentos eléctricos del original) ===
-                RayoStrip.FajaTexturadaEnLote(pts, semis,
+                //     filamentos eléctricos del original) · v6.90 — LA
+                //     ESCALA DEL ORIGINAL: el shader muestrea U =
+                //     2·progreso (1 repetición = MEDIA VUELTA del haz —
+                //     2.800 px, SE ESTIRA con él) y fluye a 3 u/s (8.400
+                //     px/s — la v6.89 tileaba cada 640 px fijos con flujo
+                //     0,55: blobs compactos que caminaban lentos). Y a
+                //     ×0,8 del semiancho: el ruido JAMÁS toca la
+                //     silueta (el umbral smoothstep(0,3,0,45) del shader
+                //     original comía el 40% oscuro — aquí lo aproxima el
+                //     margen). ===
+                RayoStrip.FajaTexturadaEnLote(pts, Escalar(semis, 0.8f),
                     coloresLaser, default, _dendrito.Value,
-                    640f, 0.55f, Main.GlobalTimeWrappedHourly);
+                    MathF.Max(Largo * 0.5f, 16f), 3f, Main.GlobalTimeWrappedHourly);
 
                 // === 3. LA ESPINA DORADA (el secondaryColor del shader
-                //     original — la capa fina del centro) ===
+                //     original — NO es una capa de ruido: es un RECOLOR
+                //     del centro; v6.90: RampaGlow tintada, la cúpula
+                //     constante del original). ===
                 RayoStrip.FajaTexturadaEnLote(pts, Escalar(semis, 0.3f),
-                    coloresEspina, default, _dendrito.Value,
-                    320f, 0.95f, Main.GlobalTimeWrappedHourly);
+                    coloresEspina, default, _rampa.Value,
+                    640f, 0f, Main.GlobalTimeWrappedHourly);
             }
             finally { RayoStrip.CerrarLote(); }
 

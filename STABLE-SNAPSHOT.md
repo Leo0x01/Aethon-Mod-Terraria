@@ -1,3 +1,48 @@
+# v6.90 — LA GRAN SESIÓN DE LA CONSAGRACIÓN — EL CHECKLIST
+
+> **PUBLICADA** — .tmod v6.90 FINAL (md5 `23e393868316f3ab9c6eb06c91bb5749`, 10.958.015 B) — 488 entradas, blobs 488/488, EOF EXACTO, las DOS músicas del festín dentro, verify 0/0 (412 .cs), audit_assets 0 faltantes + 0 convenciones (cazó la ruta SoftGlow del taller al vuelo), -build REAL 0/0 (LA LECCIÓN: `-build` exige la ruta ABSOLUTA de ModSources — relativa al CWD empaqueta un stub v1.0 de carpeta vacía), audit_v690 TODO VERIFICADO (28 firmas v6.90 vivas con las DOS alineaciones UTF-16, hjson ×3 simétricos, textos nuevos presentes + claves rancias ausentes, entrega completa), headless **Sandboxing v6.90 → Configuring → Finalizing → Server started, 0 excepciones**.
+>
+> La entrega: LA LEY DE LA OFRENDA (el arma **O** los materiales — basta UNO de los dos; todo lo que el grimorio come CONSAGRADO por el altar) + EL ALTAR DE LA CONSAGRACIÓN (acepta materiales: el arma gana stats + etiqueta, el material SOLO la etiqueta · la ventana mejorada con el precio a la vista) + LAS REPETICIONES +1 (Señor de la Luna ×2..×7 y la cima ×10 — contadores acumulativos) + EL HITO = DAÑO DE INVOVACIÓN (y el doble cobro ×1,25 MUERTO — la auditoría de las stats) + EL HITBOX DEL HAZ a toda su silueta (si lo VES, te PEGA) + EL VELO DE PERLIN del ancho exacto (perfil V de la rampa horneado) + LA MIRADA DE SOLYN sin picos (el collar de bolas del bloom, el fundido invertido, el ruido lento y la raíz desalineada — 4 causas, todas curadas contra el original) + EL RELICARIO que responde (equipado **o en la bolsa** + el aura en lote ADDITIVO propio — era INVISIBLE por el alpha 0 del original en FNA) + LA TECLA B desde la bolsa + EL LIBRO de criaturas y cofres (1%/1%, 2%/2% mazmorra) + LAS DOS INVESTIGACIONES DE LOS REELS (sprite-gen + pixelfx) con EL TALLER DE EFECTOS (3 armas del método pixelfx + LA BOLSA nueva) + EL ALTAR con sprite NUEVO (la skill de generación + las 2 rondas del método del reel) + NADIE HA COPIADO EL PROYECTO (0 forks, 0 colisiones, concepto único).
+
+## LA LETRA (los reportes del playtest, uno a uno)
+1. **EL ARMA O LOS MATERIALES**: «con el arma o los materiales basta… deja claro que solo necesitan uno de los dos» — LaMesaEstaCompleta ahora es esencias + monedas + (arma O material); la ventana de Progresión lo dice y muestra cuál pagó; el «daño del peldaño» murió («decir eso es innecesario»).
+2. **EL GRIMORIO SE ALIMENTA (la mesa es el suelo)**: «dice que la mesa se queda con la primera que alimentes, pero no es asi quien se queda con eso es el grimorio» — toda la redacción corregida (EL GRIMORIO se queda con la primera opción).
+3. **LA CONSAGRACIÓN**: «cada item que el grimorio se coma, debe estar corrompido menos las esencias mismas» — el arma y los materiales SOLO se devoran con el sello del altar; sin sello, el Eterno habla («Sin MI sello no la pruebo») con calma cada 5 s.
+4. **EL NOMBRE NUEVO**: «llamarlos corrompidos no se si sea correcto… dame ideas» — ideas presentadas (consagrado/sellado/marcado/tocado por el Eterno) e IMPLEMENTADO: **Consagrado** (la etiqueta «(Consagrado)», el botón CONSAGRAR, el altar de la Consagración — el ritual de ofrendas, no el bioma).
+5. **LOS MATERIALES EN EL ALTAR**: «si se corrompe otro item como un lingote de oro, entonces solo sale la etiqueta» — el altar acepta armas Y materiales; el material gana SOLO la etiqueta (el tooltip del no-arma ya no cuenta stats).
+6. **LA VENTANA DEL ALTAR MEJORADA**: «debes mejorar la ventana que usa para devorar» — precio a la vista ANTES de pulsar (con lo que llevas), el resultado por tipo de item, la leyenda del sello.
+7. **LAS REPETICIONES +1**: «aumenta la cantidad de veces que debes matarlo en 1 por cada vez que se repita… al final 10 moon lord… todo eso contara para la proxima subida» — ML ×2/×3/×4/×5/**×6/×7** (95 y 99 corregidas) y la cima ×10; los contadores acumulan para todas las puertas venideras.
+8. **EL HITO = DAÑO DE INVOVACIÓN**: «la estadistica que aumenta el ataque del escuadron debe aumentar el ataque de invocacion» — dice y hace «TODO el daño de invocación del escuadrón» (rayo + conjuros + LA IRA) y el ×1,25 horneado escondido MURIÓ (cobraba doble en la cima).
+9. **LAS STATS AUDITADAS**: «asegurate de que todas las estadisticas del grimorio del eterno se cumplan» — la auditoría claim por claim: el tope de ojos (11), las mejoras (+50 %/mejora, ×3 con las 4), la cadena (2 +1/20), el ritmo (+50 % al 100), la detección, el maná por invocación, el +1,5 %/nivel de invocación — todas verdaderas; el doble cobro de la cima era la mentira y murió.
+10. **EL HITBOX DEL HAZ**: «la caja de colisiones del Haz se concentra solo en el centro» — la colisión ahora es la SILUETA (StripWidth en el punto del objetivo): el haz de ~2.000 px pega a lo ancho de TODO lo que se ve.
+11. **EL VELO DE PERLIN**: «demasiado ancha… la anchura debe ser la misma que la capa principal» — el ruido horneado × el perfil gaussiano V de RampaGlow: el velo vive DENTRO de los límites exactos del cuerpo.
+12. **LA MIRADA DE SOLYN**: «sigue con los picos… es solo posicionar la textura correctamente» — la autopsia contra el original halló 4 causas (el bloom SoftGlow tileado = COLLAR DE BOLAS · el fundido del final INVERTIDO · el ruido crudo/lento · la raíz 100 px atrás con el retroceso muerto): TODAS curadas (RampaGlow uniforme, IL(0,95,0,81) descendente, U=2·progreso a 3 u/s + capa lisa, la raíz ES la boca con el retroceso vivo).
+13. **EL RELICARIO**: «esto no funciona» — DOS causas raíz: (a) exigía EQUIPADO (el usuario lo lleva en la bolsa → la L no hacía NADA), (b) el aura dibujaba alpha 0 en AlphaBlend (invisible EN FNA — el bug LATENTE del original de Bombus). Cura: activación desde equipo O bolsa + lote ADDITIVO propio con restauración exacta.
+14. **LA TECLA B**: «no se activaron pese a que los tengo en el inventario» — el detour busca las mascotas en las ranuras Y en la bolsa (0..49): responden estén donde estén (el ojo del equipo sigue mandando si están puestas).
+15. **EL LIBRO AL AVANZAR**: «1% al matar cualquier criatura, 1% al abrir cualquier cofre, 2% cofres en la mazmorra, 2% al matar criaturas» — las 4 tasas vivas (LibroDeLasCriaturasNPC + la Ruleta extendida al mundo; siguen: 1% libros rotos, 50% la Muralla, la entrega al 19).
+16. **LAS INVESTIGACIONES**: los 2 reels identificados y analizados (sprite-gen: sprites animados de una imagen · pixelfx: 244 efectos como código + el método «borrador, render, mirar, refinar») — aplicados en EL TALLER DE EFECTOS (3 armas + bolsa) y en el SPRITE DEL ALTAR (2 rondas del método); y NADIE copió el proyecto (0 forks, 0 huellas, concepto único — recomendación: LICENCIA para el repo).
+
+## EL PLAYTEST (la lista de la casa — verifica y REHACE)
+(a) [ ] **LA LEY DE LA OFRENDA**: en un peldaño nuevo, suelta el ARMA consagrada → el peldaño paga SIN materiales (la ventana los apaga: «pagado con el arma»); en otro, solo materiales → «pagado con los materiales». Suelta un arma SIN consagrar → el grimorio NO la toca y habla.
+(b) [ ] **EL ALTAR**: mete un LINGOTE en el slot → «Material listo — gana solo su etiqueta» + el precio a la vista → CONSAGRAR → el lingote lleva «(Consagrado)» junto al nombre y SOLO eso (sin líneas de stats).
+(c) [ ] **EL RELICARIO**: con el chisme SUELTO en la bolsa, pulsa L → suena, estallan los polvos, el buff de 45 s nace y EL AURA SOLAR SE VE (cinco pasadas doradas girando).
+(d) [ ] **LA TECLA B**: las dos mascotas en la bolsa (sin equipar) → B → ambas se activan.
+(e) [ ] **LA MIRADA DE SOLYN**: dispara la ráfaga — el bloom CORRE CONSTANTE de punta a punta (sin collar de bolas), la punta se APAGA suave (sin pico final), el fogonazo nace EN LA BOCA del haz.
+(f) [ ] **EL HAZ (Rayo C / la Ira)**: los enemigos a los LADOS del conducto (los que TOCA visualmente el ancho) reciben el daño — no solo los del eje.
+(g) [ ] **EL VELO DE PERLIN**: el velo de ruido vive DENTRO del cuerpo del haz (no se sale por los lados).
+(h) [ ] **EL HITO**: con despertar 20+, el escuadrón dice «TODO el daño de invocación del escuadrón +10 %» y el rayo pega +10 % de verdad (sin doble cobro en la cima).
+(i) [ ] **LAS REPETICIONES**: la §15 (DISEÑO) lista «Señor de la Luna ×6» en la 95 y «×7» en la 99; los contadores de la Ira acumulan cada muerte para todas las puertas.
+(j) [ ] **EL LIBRO**: mata criaturas / abre cofres — el Libro del Eterno cae (1 %; 2 % en la mazmorra).
+(k) [ ] **EL TALLER**: LA BOLSA DEL TALLER DE EFECTOS llega al entrar (y en el cofre maestro): El Sigilo del Eterno (trazo → glifos → destello → ascuas), Las Llamas de Sombra (columna viva de fBm), El Eclipse Vivo (la nova negra de corona) — 0 maná.
+(l) [ ] **EL ALTAR NUEVO**: el tile VISTE el sprite nuevo (pedestal violeta-negra, grimorio abierto de páginas estrelladas, la estrella) y el smart cursor su highlight amarillo.
+
+## PRÓXIMOS PASOS
+- El playtest de arriba (la letra manda: verificar CADA entrega en juego y rehacerla hasta que funcione).
+- LA LICENCIA del repo (la recomendación de la investigación: GPL-3.0 o CC BY-NC-SA + descripción y topics) — decisión del usuario.
+- EL PIPELINE DE SPRITE-GEN (la investigación del reel 1): las mascotas/jefes del mod pueden ganar idle/walk animados desde UNA imagen base — queda como línea de HOJA-DE-RUTA cuando toque renovar sprites.
+
+---
+
 # v6.89 — LA GRAN SESIÓN DEL DESPERTAR REHECHO — EL CHECKLIST
 
 > **PUBLICADA** — .tmod v6.89 FINAL (md5 `53a87abe4aa819e1d07b61b5390f6666`, 10,945,778 B) — 484 entradas, blobs 484/484, EOF EXACTO, las DOS músicas del festín dentro, verify 0/0, audit_assets 0 faltantes + 0 convenciones, -build REAL 0/0, audit_v689 TODO VERIFICADO (firmas v6.89 vivas + 11 muertas ausentes + hjson ×3 simétricos + bolsa verificada), headless **Adding → Server started, 0 excepciones**.

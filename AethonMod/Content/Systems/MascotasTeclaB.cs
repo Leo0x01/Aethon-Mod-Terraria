@@ -110,23 +110,46 @@ namespace AethonMod.Content.Systems
                 for (int k = 0; k < tocadas.Count; k++)
                     tocadas[k].buffType = tiposGuardados[k];
 
-                // (4) LAS MASCOTAS EQUIPADAS: SOLO en la ranura de
-                //     mascota (miscEquips[0]) o la de luz (miscEquips[1]),
-                //     SOLO si el buff sigue apagado, SOLO si no las tienes
-                //     escondidas con el ojo (hideMisc: tu decisión manda).
+                // (4) LAS MASCOTAS: EQUIPADAS o EN LA BOLSA (v6.90 — la
+                //     letra: «toque B y la mascota de luz de Aethon y el
+                //     minigrimorio no se activaron pese a que los tengo
+                //     en el inventario» — la tecla las busca DONDE
+                //     ESTÉN): primero la ranura de mascota (miscEquips[0])
+                //     o la de luz (miscEquips[1]) — con el ojo del
+                //     equipo manda (hideMisc: tu decisión) — y si no
+                //     vive EQUIPADA, en CUALQUIER slot de la bolsa
+                //     (0..49). SOLO si su buff está apagado.
                 for (int m = 0; m < _tipos.Length; m++)
                 {
-                    for (int slot = 0; slot < 2; slot++)
+                    // (a) LA RANURA DEL EQUIPO (la de siempre).
+                    bool activada = false;
+                    for (int slot = 0; slot < 2 && !activada; slot++)
                     {
                         Item eq = self.miscEquips[slot];
                         if (eq == null || eq.IsAir || eq.type != _tipos[m]) continue;
-                        if (self.hideMisc[slot]) continue;   // escondida: TU decisión
-                        if (self.HasBuff(_buffs[m])) continue;   // ya vive
+                        if (self.hideMisc[slot]) continue;       // escondida: TU decisión
+                        if (self.HasBuff(_buffs[m])) { activada = true; continue; }   // ya vive
                         // LA ACTIVACIÓN: el buff de 3600 (la mascota lo
                         // sostiene después — el patrón canónico de la
                         // casa: BuffHandle re-engendra, timeLeft = 2).
                         self.AddBuff(_buffs[m], 3600, true);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, self.position);
+                        activada = true;
+                    }
+                    if (activada) continue;
+
+                    // (b) EN LA BOLSA (v6.90): cualquier slot del
+                    //     inventario principal (0..49) cuenta — la
+                    //     mascota no necesita estar EQUIPADA para
+                    //     responder a la tecla B.
+                    for (int k = 0; k < 50; k++)
+                    {
+                        Item it = self.inventory[k];
+                        if (it == null || it.IsAir || it.type != _tipos[m]) continue;
+                        if (self.HasBuff(_buffs[m])) break;      // ya vive
+                        self.AddBuff(_buffs[m], 3600, true);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, self.position);
+                        break;
                     }
                 }
             }

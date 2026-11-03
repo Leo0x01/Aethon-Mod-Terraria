@@ -67,6 +67,14 @@ namespace AethonMod.Content.Players
             // la entrega DIRECTA del kit, no solo dentro del cofre:
             // la lección v6.14.2 aplicada a la bolsa nueva).
             bolsas += Entregar(ModContent.ItemType<BolsaInvestigaciones>());
+            // v6.90 — LA BOLSA DEL TALLER DE EFECTOS aparte (la letra:
+            // «crea una bolsa nueva y dale la bolsa al jugador, esta
+            // bolsa tendras una copia de todas las armas que sean
+            // creadas con esta investigacion» — la investigación de los
+            // reels: pixelfx + sprite-gen; también en la entrega DIRECTA
+            // del kit, la lección v6.14.2).
+            bolsas += Entregar(ModContent.ItemType
+                <global::AethonMod.Content.Items.Bolsas.BolsaTallerDeEfectos>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

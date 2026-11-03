@@ -12,21 +12,29 @@ using Terraria.ModLoader.IO;
 namespace AethonMod.Content.UI
 {
     // ======================================================================
-    //  AltarOfrendasUI — v6.88 — EL ALTAR DE LA CORRUPCIÓN.
+    //  AltarOfrendasUI — v6.88 — EL ALTAR DE LA CONSAGRACIÓN (v6.90 — el
+    //  renombrado: el grimorio es una entidad CÓSMICA, no el bioma de la
+    //  Corrupción — la letra: «llamarlos corrompidos no se si sea
+    //  correcto, seria mejor decir algo como corrompido por el eterno o
+    //  de otra manera»; el sello de la casa ahora es CONSAGRADO: lo que
+    //  pasa por el altar queda CONSAGRADO POR EL ETERNO).
     //
-    //  LA LETRA: «la funcion del altar que implementaste no debe estar
-    //  ligada al grimorio, asi que quita ese requisito de ofrendas en el
-    //  despertar, el altar sirve para corromper las armas»: LA ECONOMÍA
-    //  DE PUNTOS (relleno → puntos → canje de esencias del 30 %) MURIÓ
-    //  con la v6.86. HOY el altar es EL CORRUPTOR: UN slot de ARMA
-    //  LIMPIA y UN botón que la CORROMPE (Corrompido = true + ResetPrefix
-    //  — el MISMO sello que dejaba la receta de corrupción de siempre:
-    //  la vía de recetas SIGUE como alternativa). El arma corrupta gana
-    //  su etiqueta «(Corrupto)» EN EL NOMBRE (negro — CorruptoGlobalItem)
-    //  y su brillo morado-negro en el inventario y el mundo.
+    //  v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma salen
+    //  estadisticas, pero si se corrompe otro item como un lingote de
+    //  oro, entonces solo sale la etiqueta» — EL ALTAR ACEPTA ARMAS **Y
+    //  MATERIALES**: el ARMA consagrada gana sus estadísticas (el +5 %
+    //  de siempre) y su etiqueta; cualquier OTRO item (lingotes, gemas,
+    //  cera…) gana SOLO LA ETIQUETA junto al nombre — el sello que el
+    //  grimorio exige para devorar la ofrenda del despertar.
+    //
+    //  LA VENTANA MEJORADA (la letra: «debes mejorar la ventana que usa
+    //  para devorar»): EL PRECIO A LA VISTA (cuántas esencias cuesta
+    //  ANTES de pulsar · cuántas llevas), el RESULTADO (arma → stats +
+    //  etiqueta · material → solo la etiqueta) — todo legible de un
+    //  vistazo.
     //
     //  CERO VÍNCULO CON EL GRIMORIO: el panel ya NO lee el alma del
-    //  libro (ni puntos, ni crédito, ni SinLibro) — el altar corrompe
+    //  libro (ni puntos, ni crédito, ni SinLibro) — el altar consagra
     //  para CUALQUIERA. El patrón de UI es el de siempre (la casa: El
     //  Cielo del Despertar — LegacyGameInterfaceLayer antes de "Vanilla:
     //  Mouse Text", estado estático de cliente, la ley de la distancia a
@@ -137,26 +145,51 @@ namespace AethonMod.Content.UI
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
 
         // ================================================================
-        //  v6.88 — EL FILTRO DEL CORRUPTOR: SOLO armas LIMPIAS (la copia
-        //  local del EsArma de la casa — CERO dependencia del sistema del
-        //  despertar: el altar no sabe nada del grimorio).
+        //  v6.90 — EL FILTRO DEL CONSAGRADOR: ARMAS limpias **Y
+        //  MATERIALES** (la letra: «si se corrompe otro item como un
+        //  lingote de oro, entonces solo sale la etiqueta»): cualquier
+        //  item de ofrenda vale — el arma gana stats + etiqueta, el
+        //  material SOLO la etiqueta. Nada de herramientas ni
+        //  accesorios, ni el grimorio, ni las esencias (ellas SON la
+        //  esencia del Eterno), ni el libro, ni monedas, ni lo ya
+        //  consagrado.
         // ================================================================
-        private static bool EsArmaCorruptible(Item it)
+        private static bool EsOfrendaConsagrible(Item it)
         {
             try
             {
                 if (it == null || it.IsAir) return false;
-                if (it.damage <= 0) return false;
-                if (it.accessory || it.vanity) return false;
-                if (it.pick > 0 || it.axe > 0 || it.hammer > 0 || it.ammo > 0) return false;
+                // LAS ESENCIAS NO (la letra: «menos las esencias mismas
+                // ya que estas son la misma esencia del eterno»).
+                if (it.type == ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>()) return false;
+                if (it.type == ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.LibroCorrupto>()) return false;
+                // EL DINERO NO (las monedas se funden: el sello no vive en ellas).
+                if (it.type == ItemID.CopperCoin || it.type == ItemID.SilverCoin ||
+                    it.type == ItemID.GoldCoin || it.type == ItemID.PlatinumCoin) return false;
+                // EL GRIMORIO NO (él es el comensal, no el plato).
                 if (it.ModItem is global::AethonMod.Content.Weapons.GrimoireEternal) return false;
+                // LOS ACCESORIOS Y LA VANIDAD NO SON OFRENDA NI ARMA.
+                if (it.accessory || it.vanity) return false;
+                // LAS HERRAMIENTAS TAMPOCO (picos, hachas, martillos).
+                if (it.pick > 0 || it.axe > 0 || it.hammer > 0) return false;
+                // YA CONSAGRADO: NO (una vez sellado, para siempre).
                 var sello = it.GetGlobalItem
                     <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                if (sello != null && sello.Corrompido) return false;   // ya corrupta
+                if (sello != null && sello.Corrompido) return false;
+                // TODO LO DEMÁS ES OFRENDA: armas (daño > 0) y materiales
+                // (lingotes, gemas, cera, fragmentos, almas…).
                 return true;
             }
             catch { return false; }
         }
+
+        /// <summary>v6.90 — ¿ESTE item es un ARMA? (para el texto del
+        /// resultado: arma → stats + etiqueta · material → solo
+        /// etiqueta).</summary>
+        private static bool EsArmaDeVerdad(Item it)
+            => it != null && !it.IsAir && it.damage > 0 && it.ammo == 0;
 
         private static bool DibujarElPanel()
         {
@@ -180,8 +213,10 @@ namespace AethonMod.Content.UI
                 if (!altarVivo || yo.Center.DistanceSQ(altarCentro) > 280f * 280f)
                 { CerrarDeVerdad(); return true; }
 
-                // === LA GEOMETRÍA (a la derecha del inventario) ===
-                int w = 380, h = 300;
+                // === LA GEOMETRÍA (a la derecha del inventario · v6.90:
+                //     más alto — el precio, el resultado y la leyenda del
+                //     sello tienen SU sitio) ===
+                int w = 380, h = 348;
                 int x = Math.Min(Main.screenWidth - w - 10,
                     470 + Math.Max(0, (Main.screenWidth - 1100) / 3));
                 int y = Main.screenHeight / 2 - h / 2;
@@ -198,7 +233,7 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Subtitulo")),
                     new Vector2(x + w / 2f, y + 42f), TintaApagado, 0.75f, 0.5f, 0.4f);
 
-                // === EL SLOT DEL ARMA (la boca del corruptor) ===
+                // === EL SLOT DE LA OFRENDA (la boca del consagrador) ===
                 Rectangle slot = new Rectangle(x + 24, y + 86, 52, 52);
                 bool hoverSlot = PanelContiene(slot) && !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
                 sb.Draw(pixel, slot, TintaFondo * 0.9f);
@@ -223,32 +258,70 @@ namespace AethonMod.Content.UI
                 string filtroTxt = Language.GetTextValue(Clave("FiltroArma"));
                 Utils.DrawBorderString(sb, filtroTxt, new Vector2(x + 92f, y + 118f), TintaApagado, 0.72f);
 
-                // === EL ESTADO DEL ARMA EN EL SLOT (lista / ya corrupta / no
-                //     es arma — el porqué de cada rechazo) ===
-                bool lista = EsArmaCorruptible(_arma);
+                // === v6.90 — EL ESTADO + EL RESULTADO + EL PRECIO (la
+                //     ventana mejorada: TODO antes de pulsar): qué es
+                //     (arma/material), qué gana (stats/etiqueta) y
+                //     cuántas esencias cuesta (y cuántas llevas). ===
+                bool lista = EsOfrendaConsagrible(_arma);
+                bool esArma = EsArmaDeVerdad(_arma);
+                int costeVivo = lista ? global::AethonMod.Content.Globals.CorruptoGlobalItem
+                    .CosteCorrupcion(_arma) : 0;
+                int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
+                    .EsenciasEnLaBolsa(Main.LocalPlayer);
                 if (_arma != null && !_arma.IsAir)
                 {
                     var selloArma = _arma.GetGlobalItem
                         <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                     bool yaEra = selloArma != null && selloArma.Corrompido;
-                    string estado = yaEra ? Language.GetTextValue(Clave("YaCorrupta"))
-                        : lista ? Language.GetTextValue(Clave("Lista"))
+                    string estado = yaEra ? Language.GetTextValue(Clave("YaConsagrada"))
+                        : lista ? Language.GetTextValue(esArma ? "ListaArma" : "ListaMaterial")
                         : Language.GetTextValue(Clave("NoArma"));
                     Color colEstado = yaEra ? TintaVioleta
                         : lista ? TintaTeal : TintaRojo;
                     Utils.DrawBorderString(sb, estado,
                         new Vector2(x + 92f, y + 158f), colEstado, 0.85f);
+
+                    // EL RESULTADO QUE GANA (v6.90 — la letra: «si lo que
+                    //     corrompes es un arma salen estadisticas… si es
+                    //     otro item, entonces solo sale la etiqueta»).
+                    if (lista)
+                    {
+                        string resultado = esArma
+                            ? Language.GetTextValue(Clave("ResultadoArma"))
+                            : Language.GetTextValue(Clave("ResultadoMaterial"));
+                        Utils.DrawBorderString(sb, resultado,
+                            new Vector2(x + 92f, y + 180f), TintaApagado * 1.15f, 0.74f);
+                    }
                 }
 
-                // === EL BOTÓN CORROMPER (el sello) ===
-                Rectangle btnCorromper = new Rectangle(x + 24, y + 196, 170, 42);
+                // EL PRECIO A LA VISTA (v6.90 — antes solo se veía al
+                //     FALLAR: ahora el sello dice lo que cuesta y lo que
+                //     llevas, con su color: verde si alcanza, rojo si no).
+                if (lista && !_arma.IsAir)
+                {
+                    Color colPrecio = llevadas >= costeVivo ? TintaTeal : TintaRojo;
+                    Utils.DrawBorderString(sb,
+                        Language.GetTextValue(Clave("PrecioVivo"), costeVivo, llevadas),
+                        new Vector2(x + w / 2f, y + 226f), colPrecio, 0.85f, 0.5f, 0.4f);
+                }
+
+                // === EL BOTÓN CONSAGRAR (el sello) ===
+                Rectangle btnCorromper = new Rectangle(x + 24, y + 244, 170, 42);
                 bool hoverBtn = PanelContiene(btnCorromper);
                 sb.Draw(pixel, btnCorromper,
                     (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
                 Marco(sb, pixel, btnCorromper, lista ? TintaVioleta : TintaVioleta * 0.35f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Corromper")),
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Consagrar")),
                     new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
                     lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
+
+                // LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el
+                // grimorio SOLO devora lo consagrado — la ofrenda del
+                // despertar pasa por AQUÍ).
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("LeyendaSello")),
+                    new Vector2(x + w / 2f, y + h - 34f), TintaApagado, 0.72f, 0.5f, 0.4f);
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("LeyendaSello2")),
+                    new Vector2(x + w / 2f, y + h - 16f), TintaApagado * 0.85f, 0.72f, 0.5f, 0.4f);
 
                 // === EL BOTÓN CERRAR (la esquina de siempre) ===
                 Rectangle btnCerrar = new Rectangle(x + w - 34, y + 8, 26, 26);
@@ -266,13 +339,13 @@ namespace AethonMod.Content.UI
                 bool clicNuevo = clicAhora && !_ultimoClicIzq;
                 _ultimoClicIzq = clicAhora;
 
-                // EL SLOT: meter/sacar con el cursor (solo armas limpias —
-                // el resto rebota con su porqué).
+                // EL SLOT: meter/sacar con el cursor (armas Y materiales
+                // limpios — el resto rebota con su porqué).
                 if (hoverSlot && clicNuevo)
                 {
                     if (!Main.mouseItem.IsAir)
                     {
-                        if (EsArmaCorruptible(Main.mouseItem))
+                        if (EsOfrendaConsagrible(Main.mouseItem))
                         {
                             Item sale = _arma.IsAir ? new Item() : (Item)_arma.Clone();
                             _arma = (Item)Main.mouseItem.Clone();
@@ -285,7 +358,7 @@ namespace AethonMod.Content.UI
                                 <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                             bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
                             Main.NewText(Language.GetTextValue(
-                                yaEraMouse ? Clave("YaCorrupta") : Clave("NoArma")), TintaRojo);
+                                yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), TintaRojo);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                     }
@@ -297,18 +370,15 @@ namespace AethonMod.Content.UI
                     }
                 }
 
-                // EL BOTÓN CORROMPER: el sello de la casa (el MISMO de la
+                // EL BOTÓN CONSAGRAR: el sello de la casa (el MISMO de la
                 // receta — Corrompido = true + ResetPrefix: el «Superior»
                 // jamás vuelve) + el teatro.
-                // v6.89 — EL PRECIO (la letra: «para corromper algo
-                //     necesita esencia corrupta en dependencia de la
-                //     calidad del arma, el tipo de arma, el daño del arma
-                //     y sus estadisticas o efecto, no es lo mismo
-                //     corromper una espada de cobre que una espada de
-                //     adamantita, la de cobre pide menos esencia
-                //     corrupta»): el altar cobra la fórmula de la casa
-                //     (CorruptoGlobalItem.CosteCorrupcion) en Esencias
-                //     del Eterno — y viste la rareza corrupta.
+                // v6.89 — EL PRECIO (la letra: la fórmula de la casa
+                //     según calidad, tipo, daño y estadísticas — la de
+                //     cobre pide menos que la de adamantita): el altar
+                //     cobra CosteCorrupcion en Esencias del Eterno.
+                // v6.90 — ARMA O MATERIAL: el arma gana stats + etiqueta;
+                //     el material SOLO la etiqueta (el mensaje lo dice).
                 if (hoverBtn && clicNuevo && lista && !_arma.IsAir)
                 {
                     var sello = _arma.GetGlobalItem
@@ -333,7 +403,14 @@ namespace AethonMod.Content.UI
                             _arma.ResetPrefix();
                             global::AethonMod.Content.Globals.CorruptoGlobalItem
                                 .VestirLaRareza(_arma);
-                            Main.NewText(Language.GetTextValue(Clave("CorruptaHecha"),
+                            // v6.90 — EL MENSAJE SEGUN LO QUE SEA: el arma
+                            //     con SUS estadísticas; el material con SU
+                            //     etiqueta (la letra: «si es un arma salen
+                            //     estadisticas… si es otro item entonces
+                            //     solo sale la etiqueta»).
+                            Main.NewText(Language.GetTextValue(
+                                EsArmaDeVerdad(_arma) ? Clave("ConsagradaHechaArma")
+                                                      : Clave("ConsagradaHechaMaterial"),
                                 _arma.Name), TintaVioleta);
                             Terraria.Audio.SoundEngine.PlaySound(
                                 SoundID.Item113.WithPitchOffset(-0.45f));
@@ -351,7 +428,7 @@ namespace AethonMod.Content.UI
                                     d.noGravity = true;
                                 }
                             }
-                            DevolverElArma();   // el arma corrupta vuelve al cursor
+                            DevolverElArma();   // la ofrenda consagrada vuelve al cursor
                         }
                     }
                 }

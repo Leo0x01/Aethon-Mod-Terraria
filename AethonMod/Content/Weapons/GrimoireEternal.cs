@@ -1410,8 +1410,14 @@ namespace AethonMod.Content.Weapons
                     int pct = Systems.DespertarGrimorio.PctEscuadron(despertar);
                     int proximoHito = 20;
                     while (proximoHito <= despertar && proximoHito < 100) proximoHito += 20;
+                    // v6.90 — LA LETRA: «la estadistica que aumenta el
+                    //     ataque del escuadron debe aumentar el ataque de
+                    //     invocacion ya que el ataque del escuadron se
+                    //     rige por el ataque de invocacion» — el hito dice
+                    //     (y hace) DAÑO DE INVOVACIÓN: el rayo de cada ojo,
+                    //     los conjuros combinados y LA IRA lo cobran vivo.
                     string viva = pct > 0
-                        ? $"[c/C49CFF:DESPERTAR {despertar}: TODO el ataque del escuadrón +{pct} %]"
+                        ? $"[c/C49CFF:DESPERTAR {despertar}: TODO el daño de invocación del escuadrón +{pct} %]"
                         : "[c/78788C:el escuadrón aún no cobra su hito (Despertar 20: +10 %)]";
                     if (pct > 0 && proximoHito <= Systems.DespertarGrimorio.NivelMax)
                         viva += $"[c/78788C:  →  hito {proximoHito}: +{Systems.DespertarGrimorio.PctEscuadron(proximoHito)} %]";
@@ -1559,58 +1565,57 @@ namespace AethonMod.Content.Weapons
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
                         // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (v6.89:
-                        //     magia/invocador, SIN corrupción — «el
-                        //     grimorio solo consumirá 1 de ellas»): las
-                        //     ALTERNATIVAS con su sprite y su nombre
-                        //     LOCALIZADO, y EL DAÑO DEL PELDAÑO (la letra:
-                        //     «usar el daño de las armas para igual al
-                        //     daño del grimorio»). ===
+                        //     magia/invocador · v6.90: EL ARMA **O** LOS
+                        //     MATERIALES — BASTA UNO DE LOS DOS, y todo lo
+                        //     que el grimorio come debe estar CONSAGRADO):
+                        //     las ALTERNATIVAS con su sprite y su nombre
+                        //     LOCALIZADO. Cuando UNO de los dos pagó, el
+                        //     otro se apaga (ya no hace falta). ===
                         {
-                            string colArma = devoradaArma ? colOK : colNo;
+                            bool pagoElMaterialR3 = grupoBloqueado >= 0 &&
+                                comidosMaterial >= Systems.DespertarGrimorio.CantidadMateriales(siguiente, grupoBloqueado);
+                            bool pagoCualquiera = devoradaArma || pagoElMaterialR3;
+                            string colArma = pagoCualquiera ? colOK : colNo;
                             int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
                             var trozosArma = new System.Collections.Generic.List<string>();
-                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige):]");
-                            int danoPeldano = 0;
+                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige)");
+                            trozosArma.Add("[c/78788C:ó]");
+                            trozosArma.Add($"[c/{colArma}:los materiales — basta UNO de los dos:]");
                             for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
                             {
                                 if (pa > 0) trozosArma.Add($"[c/78788C:·]");
                                 trozosArma.Add($"[i:{peldano[pa]}]");
                                 string nombreArma = Lang.GetItemNameValue(peldano[pa]);
-                                if (pa == 0)
-                                {
-                                    try
-                                    {
-                                        var proto = Terraria.ID.ContentSamples.ItemsByType[peldano[pa]];
-                                        if (proto != null) danoPeldano = proto.damage;
-                                    }
-                                    catch { }
-                                }
                                 trozosArma.Add($"[c/{colArma}:{nombreArma}]");
                             }
-                            if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓]");
-                            if (danoPeldano > 0)
-                                trozosArma.Add($"[c/78788C:· daño del peldaño: {danoPeldano}]");
+                            if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓ devorada]");
+                            else if (pagoElMaterialR3) trozosArma.Add("[c/78788C: — pagado con los materiales]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
                                 string.Join(" ", trozosArma)));
                             tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                                "[c/78788C:  (la mesa devora UNA de ellas — suéltala DELANTE del grimorio seleccionado)]"));
+                                devoradaArma
+                                    ? "[c/78788C:  (el grimorio ya devoró su arma — los materiales ya no hacen falta)]"
+                                    : "[c/78788C:  (conságuela en el altar y suéltala DELANTE del grimorio seleccionado — él devora UNA)]"));
                         }
 
                         // === EL REQUISITO 4 — EL MATERIAL DEL PELDAÑO
-                        //     (v6.89 — la letra: «también sería obligatorio
-                        //     dar al menos uno de los materiales o das 20
-                        //     lingotes de oro o das 20 rubíes»): los GRUPOS
-                        //     son las ALTERNATIVAS — la mesa se queda con
-                        //     el PRIMERO que el jugador alimente y cobra SU
-                        //     cuota completa. El estado: el grupo bloqueado
-                        //     y su cuenta. ===
+                        //     (v6.90: la OTRA cara del requisito 3 — EL
+                        //     ARMA **O** EL MATERIAL, BASTA UNO DE LOS
+                        //     DOS): los GRUPOS son las ALTERNATIVAS — EL
+                        //     GRIMORIO se queda con la primera opción que
+                        //     el jugador alimente y cobra SU cuota
+                        //     completa. El estado: el grupo bloqueado y
+                        //     su cuenta. ===
                         {
                             int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(siguiente);
                             bool materialOK = grupoBloqueado >= 0 &&
                                 comidosMaterial >= Systems.DespertarGrimorio.CantidadMateriales(siguiente, grupoBloqueado);
-                            string colMat = materialOK ? colOK : colNo;
+                            bool pagoCualquieraMat = devoradaArma || materialOK;
+                            string colMat = pagoCualquieraMat ? colOK : colNo;
                             var trozosMat = new System.Collections.Generic.List<string>();
-                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción):]");
+                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción");
+                            trozosMat.Add("[c/78788C:ó]");
+                            trozosMat.Add($"[c/{colMat}:el arma de arriba):]");
                             for (int gi = 0; gi < gruposMat.Length && gi < 4; gi++)
                             {
                                 int[] grupo = gruposMat[gi];
@@ -1627,10 +1632,13 @@ namespace AethonMod.Content.Weapons
                                     trozosMat.Add($"[c/{colMat}:{cuota} × {nombreMat}]");
                             }
                             if (materialOK) trozosMat.Add($"[c/{colMat}: ✓]");
+                            else if (devoradaArma) trozosMat.Add("[c/78788C: — pagado con el arma]");
                             tooltips.Add(new TooltipLine(Mod, "DespertarReqMat",
                                 string.Join(" ", trozosMat)));
                             tooltips.Add(new TooltipLine(Mod, "DespertarReqMatNota",
-                                "[c/78788C:  (obligatorio: completa UNA de las opciones — la mesa se queda con la primera que alimentes)]"));
+                                devoradaArma
+                                    ? "[c/78788C:  (el arma ya pagó el peldaño — el grimorio no come los materiales)]"
+                                    : "[c/78788C:  (conságralos en el altar — el grimorio se queda con la primera opción que alimentes)]"));
                         }
 
                         // === v6.76 — LA PRESA DEL PELDAÑO (la letra:
@@ -1723,15 +1731,15 @@ namespace AethonMod.Content.Weapons
                         }
 
                         // === v6.51.11 — LA NOTA FINAL (la comida se sirve
-                        //     EN EL SUELO — el gesto nuevo): con el arma o
-                        //     los lingotes basta (v6.77 — la letra: «esa O
-                        //     esta mayuscula, deberia estar en minuscula
-                        //     ya que se confunde con un cero"); suelta la
-                        //     ofrenda DELANTE del grimorio SELECCIONADO y
-                        //     come SOLO lo que necesita (nada del
-                        //     inventario — el error de la mochila murió). ===
+                        //     EN EL SUELO — el gesto nuevo): v6.90 — LA
+                        //     LETRA NUEVA: «con el arma o los materiales
+                        //     basta, aun asi debes dejar claro que solo
+                        //     necesitan uno de los dos» + la LEY DE LA
+                        //     CONSAGRACIÓN (todo lo que el grimorio come
+                        //     debe llevar el sello del altar — menos las
+                        //     esencias, que SON la esencia del Eterno). ===
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
-                            "[c/78788C:  (con el arma o los lingotes basta; suelta la ofrenda DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
+                            "[c/78788C:  (con el arma o los materiales basta — SOLO UNO de los dos; consagra la ofrenda en el altar y suéltala DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
 
                         // v6.88 — LOS PUNTOS DEL ALTAR MURIERON (la letra:
                         //     «quita ese requisito de ofrendas en el

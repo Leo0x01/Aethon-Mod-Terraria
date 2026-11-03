@@ -218,7 +218,7 @@ namespace AethonMod.Content.Systems
             new int[] { ItemID.StardustCellStaff },                                                 // 58 la era de las torres, la revancha (60)
             new int[] { ItemID.LastPrism },                                                         // 59 la víspera de Aethon (100)
             // 60-100 — LA ERA DE LAS GRANDES OFRENDAS: las armas de la cima
-            // en ciclo (como las puertas repiten su caza: ML×2..×9,
+            // en ciclo (como las puertas repiten su caza: ML×2..×7,
             // Emperatriz×2..×5) — el daño del peldaño se queda en la cima
             // (100-130): lo que hay DESPUÉS del Señor de la Luna.
             new int[] { ItemID.LastPrism },                                                         // 60
@@ -742,18 +742,21 @@ namespace AethonMod.Content.Systems
         //  ademas de que debe decirlo como hito»): EL HITO DEL ESCUADRÓN
         //  nace CADA 20 NIVELES, en PORCENTAJE, como HITO de la escalera
         //  (ClaveHito + ElCaminoDelDespertar + el tooltip del arma):
-        ///    20 → TODO el ataque del escuadrón +10 %
-        ///    40 → +15 %   · 60 → +20 %   · 80 → +25 %   · 100 → +30 %
+        ///    20 → TODO el daño de invocación del escuadrón +10 %
+        ///    40 → +15 %  · 60 → +20 %   · 80 → +25 %   · 100 → +30 %
         //  La v6.51.9 lo cobraba UNA sola vez (×1,25 con el despertar 50,
         //  horneado al nacer); la v6.88 lo cobra VIVO por hitos — el
         //  escuadrón entero se fortalece con el despertar de su dueño.
         // ================================================================
 
-        /// <summary>EL MULTIPLICADOR DE ATAQUE DEL ESCUADRÓN por los
-        /// hitos del despertar (cada 20 niveles, en porcentaje): lo leen
-        /// BonusHitoVivo (el daño del rayo de cada ojo — el reemplazo
-        /// del ×1,25 del 50) y los conjuros combinados (sol, agujeros,
-        /// supremo — AtaquesCombinadosSistema).</summary>
+        /// <summary>v6.90 — EL MULTIPLICADOR DE DAÑO DE INVOCACIÓN DEL
+        /// ESCUADRÓN por los hitos del despertar (cada 20 niveles, en
+        /// porcentaje — la letra: «la estadistica que aumenta el ataque
+        /// del escuadron debe aumentar el ataque de invocacion ya que el
+        /// ataque del escuadron se rige por el ataque de invocacion»):
+        /// lo leen BonusHitoVivo (el daño del rayo de cada ojo — el
+        /// reemplazo del ×1,25 del 50) y los conjuros combinados (sol,
+        /// agujeros, supremo, LA IRA — AtaquesCombinadosSistema).</summary>
         public static float MultEscuadron(int despertar)
         {
             if (despertar >= 100) return 1.30f;
@@ -918,8 +921,17 @@ namespace AethonMod.Content.Systems
             new JefeDelCamino(83, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   4, 2),
             new JefeDelCamino(87, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 5, 1),
             new JefeDelCamino(91, "Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   5, 2),
-            new JefeDelCamino(95, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 7, 1),
-            new JefeDelCamino(99, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 9, 1),
+            // v6.90 — LA LETRA NUEVA DE LAS REPETICIONES: «si vas a
+            // repetir jefes repetidos en el despertar, asegurate de que
+            // tambien aumente la cantidad de veces que debes matarlo en
+            // 1 por cada vez que se repita… al final tienes que matar 10
+            // moon lord con el trascurso de la subida de nivel» — el
+            // Señor de la Luna se repite en 63/71/79/87/95/99 (+1 POR
+            // REPETICIÓN: ×2, ×3, ×4, ×5, ×6, ×7) y la CIMA (100) cobra
+            // el total: ×10. Los CONTADORES son acumulativos (una muerte
+            // cuenta para TODAS las puertas venideras de una vez).
+            new JefeDelCamino(95, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 6, 1),
+            new JefeDelCamino(99, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 7, 1),
             // LA CIMA COMPUESTA (la letra): Aethon ×1 + Moon Lord ×10 + Emperatriz ×5
             new JefeDelCamino(100,"Mods.AethonMod.Despertar.JefeAethon",          MiniAethon(),       1, 3),
         };

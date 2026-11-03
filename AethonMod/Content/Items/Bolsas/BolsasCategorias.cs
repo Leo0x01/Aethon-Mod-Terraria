@@ -830,6 +830,12 @@ namespace AethonMod.Content.Items.Bolsas
             // «todos los items creados con estas investigaciones ponlos en
             // una nueva bolsa y dáselas al jugador».
             l.Add((ModContent.ItemType<BolsaInvestigaciones>(), 1));
+            // v6.90 — LA BOLSA DEL TALLER DE EFECTOS (bolsa 27 del cofre):
+            // lo que nació de la investigación de los reels (pixelfx +
+            // sprite-gen — la letra: «crea una bolsa nueva y dale la bolsa
+            // al jugador, esta bolsa tendras una copia de todas las armas
+            // que sean creadas con esta investigacion»).
+            l.Add((ModContent.ItemType<BolsaTallerDeEfectos>(), 1));
             return l;
         }
     }
@@ -923,6 +929,44 @@ namespace AethonMod.Content.Items.Bolsas
             //     con ellas y la llave del árbol VOLVIÓ a su dueño de la
             //     v6.86: el Códice (Umbra/Path of Terraria).
             l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
+            return l;
+        }
+    }
+
+    // ======================================================================
+    //  v6.90 — LA BOLSA DEL TALLER DE EFECTOS (bolsa 27)
+    //
+    //  La letra de la sesión: «crea una bolsa nueva y dale la bolsa al
+    //  jugador, esta bolsa tendras una copia de todas las armas que
+    //  sean creadas con esta investigacion» — la investigación de los
+    //  REELS (patch-gg/pixelfx: 244 efectos como código + el método
+    //  «borrador, render, mirar, refinar» · aldegad/sprite-gen: sprites
+    //  animados del taller). Sus frutos: las TRES armas del taller de
+    //  efectos (el sigilo trazado con su acto, las llamas de fBm real,
+    //  el eclipse de corona viva).
+    // ======================================================================
+    public class BolsaTallerDeEfectos : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa del Taller de Efectos";
+
+        protected override string NombreCorto => "Bolsa del Taller de Efectos";
+
+        protected override Color ColorFiesta => new Color(255, 150, 220);
+
+        protected override string Nota => "Lo que nació de estudiar los efectos vivos (pixelfx + sprite-gen)";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // EL SIGILO DEL ETERNO (shadow/hex-sigil — el acto completo:
+            // trazo, glifos, destello, ascuas).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.SigiloDelEterno>(), 1));
+            // LAS LLAMAS DE SOMBRA (shadow/shadow-flames — la columna de
+            // fBm real que sube del suelo).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.LlamasDeSombra>(), 1));
+            // EL ECLIPSE VIVO (shadow/eclipse — la nova del disco negro
+            // de corona blanca).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.EclipseVivo>(), 1));
             return l;
         }
     }

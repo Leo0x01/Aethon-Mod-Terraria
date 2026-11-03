@@ -158,6 +158,18 @@ Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
 
 ---
 
+## LA ERA v6.90 (LA CONSAGRACIÓN — la ley de la ofrenda y el taller de efectos)
+
+> **La fuente de la verdad**: `Content/` v6.90 + el checklist de STABLE-SNAPSHOT v6.90.
+
+- **LA LEY DE LA OFRENDA**: el arma **O** los materiales — BASTA UNO DE LOS DOS (el grimorio se queda con la primera opción que alimentes) y TODO lo que come debe estar **CONSAGRADO por el altar** (las esencias exentas: ellas SON la esencia del Eterno).
+- **EL ALTAR DE LA CONSAGRACIÓN** (antes «de la corrupción» — el renombrado cósmico): acepta ARMAS y MATERIALES; el arma gana +5 % a TODO + su etiqueta «(Consagrado)», el material SOLO la etiqueta. La ventana: el precio a la vista antes de pulsar, el resultado por tipo, la leyenda del sello. Sprite NUEVO (el método del reel pixelfx: 2 rondas de borrador-render-mirar-refinar con VLM).
+- **LAS REPETICIONES +1**: el Señor de la Luna ×2..×7 (+1 por repetición) y la cima ×10; contadores acumulativos (cada muerte cuenta para todas las puertas venideras).
+- **EL HITO DEL ESCUADRÓN = DAÑO DE INVOVACIÓN** (+10/15/20/25/30 % cada 20 niveles — el rayo, los conjuros y LA IRA lo cobran vivo; el ×1,25 horneado escondido murió: la auditoría de las stats).
+- **EL HITBOX DEL HAZ = SU SILUETA** (StripWidth en el punto del objetivo — si lo ves, te pega) y **EL VELO DE PERLIN** del ancho exacto (perfil V de la rampa horneado en el ruido).
+- **LA MIRADA DE SOLYN SIN PICOS** (4 causas curadas contra el original: el collar de bolas del bloom tileado, el fundido final invertido, el ruido crudo/lento, la raíz desalineada) y **EL RELICARIO QUE RESPONDE** (equipado o en la bolsa + el aura por fin VISIBLE en su lote aditivo propio).
+- **LA TECLA B DESDE LA BOLSA**, **EL LIBRO DEL ETERNO** (1 % criaturas · 1 % cofres · 2 %/2 % en la mazmorra) y **EL TALLER DE EFECTOS** (la investigación de los reels: El Sigilo del Eterno · Las Llamas de Sombra · El Eclipse Vivo — 0 maná, LA BOLSA del Taller, bolsa 27).
+
 ## LA ERA v6.89 (EL DESPERTAR DE MAGIA PURA — verificado contra el código)
 
 > **La fuente de la verdad**: `Content/` v6.89 + el checklist de STABLE-SNAPSHOT v6.89.

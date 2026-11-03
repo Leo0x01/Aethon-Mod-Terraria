@@ -238,15 +238,32 @@ namespace AethonMod.Content.Globals
                     // (sin OverrideColor: el color lo pone LA RAREZA corrupta)
                 }
 
-                tooltips.Add(new TooltipLine(Mod, "CorruptoLinea1",
-                    Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta1"))
-                { OverrideColor = tenue });
-                tooltips.Add(new TooltipLine(Mod, "CorruptoLinea2",
-                    Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta2"))
-                { OverrideColor = tenue });
-                tooltips.Add(new TooltipLine(Mod, "CorruptoLinea3",
-                    Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta3"))
-                { OverrideColor = bruma });
+                // v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma
+                //     salen estadisticas, pero si se corrompe otro item
+                //     como un lingote de oro, entonces SOLO sale la
+                //     etiqueta al lado del nombre» — el ARMA consagrada
+                //     cuenta SUS estadísticas y su lore; el MATERIAL
+                //     (lingote, gema, cera…) lleva SOLO la etiqueta y la
+                //     línea del porqué (la ofrenda del despertar).
+                bool esArma = item.damage > 0;
+                if (esArma)
+                {
+                    tooltips.Add(new TooltipLine(Mod, "CorruptoLinea1",
+                        Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta1"))
+                    { OverrideColor = tenue });
+                    tooltips.Add(new TooltipLine(Mod, "CorruptoLinea2",
+                        Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta2"))
+                    { OverrideColor = tenue });
+                    tooltips.Add(new TooltipLine(Mod, "CorruptoLinea3",
+                        Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta3"))
+                    { OverrideColor = bruma });
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "CorruptoLinea3",
+                        Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta3"))
+                    { OverrideColor = bruma });
+                }
             }
             catch { }
         }

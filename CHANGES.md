@@ -1,5 +1,86 @@
 # AethonMod — Historial de Cambios
 
+## v6.90 — LA GRAN SESIÓN DE LA CONSAGRACIÓN: el arma **O** los materiales (basta uno de los dos, todo consagrado por el Eterno), el altar de materiales con su ventana mejorada, las repeticiones que suman +1 (Moon Lord ×10 al final), el hito que aumenta el daño de invocación, el hitbox del haz a toda su silueta, el velo de Perlin del ancho exacto, la Mirada de Solyn SIN picos (la autopsia del bloom tileado), el Relicario que por fin responde (dos causas raíz halladas), la tecla B desde la bolsa, el libro que cae de criaturas y cofres, LAS DOS INVESTIGACIONES DE LOS REELS (pixelfx + sprite-gen) con su TALLER DE EFECTOS y su bolsa nueva, y NADIE HA COPIADO EL PROYECTO
+
+## (1) LA LEY DE LA OFRENDA — EL ARMA **O** LOS MATERIALES (basta UNO de los dos)
+LA LETRA: «hay que dejar claro que para el despertar se puede usar el arma, y en caso de no poder usar el arma, se usan los materiales… con el arma o los materiales basta, aun asi debes dejar claro que solo necesitan uno de los dos».
+- **LA MESA COMPLETA** (`LaMesaEstaCompleta`): esencias + monedas + **(arma O material)** — la v6.89 exigía AMBOS; si el grimorio ya devoró el arma, los materiales se quedan en el suelo (y viceversa). El peldaño paga con el PRIMERO que complete.
+- **LA VENTANA DE PROGRESIÓN REHECHA**: «• Devorar 1 arma (elige) ó los materiales — basta UNO de los dos:» + «• Material (1 opción ó el arma de arriba):» — cuando UNO pagó, el otro se apaga con su porqué («pagado con los materiales» / «pagado con el arma»). EL «daño del peldaño» MUERE (la letra: «decir eso es innecesario»).
+- **LA REDACCIÓN DE LA CASA**: «la mesa se queda con la primera que alimentes» → **EL GRIMORIO** se queda con la primera opción (la mesa es el SUELO; el que SE ALIMENTA es el libro). La nota final: «con el arma o los materiales basta — SOLO UNO de los dos».
+
+## (2) LA CONSAGRACIÓN — el renombrado cósmico (la etiqueta junto al nombre)
+LA LETRA: «asegurate de que cada item que el grimorio se coma, debe estar corrompido menos las esencias mismas ya que estas son la misma esencia del eterno… llamarlos corrompidos no se si sea correcto, seria mejor decir algo como corrompido por el eterno o de otra manera».
+- **EL NOMBRE NUEVO: CONSAGRADO** (de las ideas presentadas — *consagrado / sellado por el Eterno / marcado por el Eterno / tocado por el Eterno* — el altar CONSAGRA: lo que pasa por él queda **Consagrado por el Eterno**, y es el sello que el grimorio devora). La etiqueta: **«(Consagrado)»** junto al nombre (el sello visual y el velo morado-negro SIGEN).
+- **LA LEY**: el arma del peldaño y los materiales SOLO se los traga el grimorio si llevan EL SELLO DEL ALTAR (las esencias EXENTAS — ellas SON la esencia del Eterno; el dinero también: las monedas se funden). Sin sello: la ofrenda queda en el suelo y el Eterno habla con calma (cada 5 s): «Sin MI sello no la pruebo. Conságrala en el altar.»
+- **EL ALTAR ACEPTA MATERIALES** (la letra: «si se corrompe otro item como un lingote de oro, entonces solo sale la etiqueta»): el arma consagrada gana **+5 % a TODO + su etiqueta**; el material (lingote, gema, cera…) gana **SOLO LA ETIQUETA** junto al nombre — el tooltip del no-arma ya no cuenta estadísticas (CorruptoGlobalItem: solo la línea del porqué).
+- **LA VENTANA DEL ALTAR MEJORADA** (la letra: «debes mejorar la ventana que usa para devorar»): EL PRECIO A LA VISTA **antes de pulsar** («El sello cuesta N — llevas M», verde/rojo), EL RESULTADO que gana («arma → +5 % a TODO + etiqueta» / «material → SOLO su etiqueta»), el estado por item (ListaArma/ListaMaterial/YaConsagrada) y LA LEYENDA del sello al pie («El grimorio SOLO devora la ofrenda CONSAGRADA — las esencias no necesitan sello»). El botón se llama **CONSAGRAR** y el panel es más alto.
+
+## (3) LAS REPETICIONES QUE SUMAN +1 — Moon Lord ×10 AL FINAL
+LA LETRA: «si vas a repetir jefes repetidos en el despertar, asegurate de que tambien aumente la cantidad de veces que debes matarlo en 1 por cada vez que se repita… al final tienes que matar 10 moon lord… lo mejor es que todo eso contara para la proxima subida de nivel».
+- El Señor de la Luna se repite en **63 (×2), 71 (×3), 79 (×4), 87 (×5), 95 (×6) y 99 (×7)** — +1 POR REPETICIÓN (la v6.89 saltaba ×7→×9); la CIMA (100) cobra el total: **×10**. La Emperatriz ×2..×5 (ya estaba bien).
+- LOS CONTADORES SON ACUMULATIVOS (una muerte cuenta para TODAS las puertas venideras de una vez — el registro del cazador, retroactivo).
+- LA §15 DEL DISEÑO regenerada: cada puerta ✓ ahora DICE SU JEFE y sus veces (la lista completa sin entrar al juego).
+
+## (4) EL HITO DEL ESCUADRÓN = DAÑO DE INVOVACIÓN
+LA LETRA: «la estadistica que aumenta el ataque del escuadron a 20%, esta debe aumentar el ataque de invocacion ya que el ataque del escuadron se rige por el ataque de invocacion».
+- El hito (cada 20 niveles: +10/15/20/25/30 %) ahora dice y hace **«TODO el daño de invocación del escuadrón»** — el rayo de cada ojo, los conjuros combinados (sol, agujeros, supremo) **y LA IRA** lo cobran (DanoDeLaIra suma BonusHitoVivo).
+- **LA AUDITORÍA CAZÓ UN DOBLE COBRO**: el ×1,25 horneado del despertar 100 que vivía en `DanoOjosDelEterno` (el paso 6) se cobraba DOS VECES en el rayo (una al nacer el ojo + otra el hito vivo ×1,30 = ×1,625 real contra un «+30 %» anunciado). **MUERE** — la cima la paga SOLO el hito vivo, en todas partes: lo que el tooltip dice es ahora la verdad exacta.
+
+## (5) EL HITBOX DEL HAZ — LA SILUETA COMPLETA
+LA LETRA: «algo curioso y es que el daño o sea la caja de colisiones del Haz se concentra solo en el centro del Haz». El cono de semiángulo 0,28 rad solo cubría ~500 px a mitad de conducto mientras el haz VISUAL mide ~2.000 px ahí — el daño vivía en una aguja central. AHORA cada objetivo se mide contra **EL ANCHO REAL DEL HAZ en su punto** (`StripWidth` — la MISMA función que dibuja las siete capas): si lo VES, te PEGA.
+
+## (6) EL VELO DE PERLIN — EL ANCHO EXACTO
+LA LETRA: «el problema es que es demasiado ancha… la anchura que debe tener es la misma que la capa principal del haz». La geometría SIEMPRE fue la misma (K=1,00 = StripWidth) — lo que se salía era el PERFIL DE LA TEXTURA: RampaGlow se funde a NEGRO en sus bordes V (en aditivo, negro = invisible) y el ruido crudo era gris 0,30-0,70 HASTA EL BORDE → el velo leía más ancho que el cuerpo. LA CURA: hornear el ruido **× el perfil gaussiano V de la rampa** (σ≈0,122 medido sobre RampaGlow.png) — el velo nace y muere en negro en los mismos límites exactos del cuerpo.
+
+## (7) LA MIRADA DE SOLYN — LA AUTOPSIA DEL COLLAR DE BOLAS (los picos, por fin)
+LA LETRA: «no has arreglado nada, sigue con los picos… es solo posicionar la textura correctamente, si realmente hubieras revisado el codigo oficial te darias cuanta de que lo hicistes mal». EL ANÁLISIS FORENSE contra el original (WoTG + Luminance decompilada línea a línea + los shaders HLSL):
+- **LA CAUSA nº1 — EL COLLAR DE BOLAS**: el bloom se pintaba con `SoftGlow` (blob RADIAL 64×64 tileado cada 640 px = bolas brillantes periódicas = LOS PICOS). El original NO usa textura: la cúpula procedural `pow(4v(1−v),³)·3,5` — CONSTANTE a lo largo por construcción. CURA: **RampaGlow** (uniforme en X, cúpula en V — su equivalente exacto en la casa).
+- **LA CAUSA nº2 — EL PICO FINAL**: el fundido del bloom estaba INVERTIDO (`Inversa(0,81→0,95)` ascendente: la punta ardía a tope y se cortaba en seco). La `InverseLerpBump` de Luminance es IL(0,95,0,81) DESCENDENTE — la punta se APAGA.
+- **LA CAUSA nº3 — EL RUIDO CRUDO Y LENTO**: tileaba cada 640 px fijos con flujo 0,55 (352 px/s). El shader original muestrea U=2·progreso (1 repetición = media vuelta del haz — 2.800 px, SE ESTIRA con él) y fluye a 3 u/s (8.400 px/s). Y a ×0,8 del semiancho + UNA CAPA LISA de RampaGlow tintada debajo (el innerGlow sin shader): el ruido jamás toca la silueta.
+- **LA RAÍZ DESALINEADA**: la tira nacía en owner.Center (100 px DETRÁS de la boca) y el retroceso de 10 px era CÓDIGO MUERTO (el bucle lo pisaba). AHORA la raíz ES la boca (Projectile.Center, donde la IA la mantiene) y el retroceso corre TRAS el muestreo (SolynTagTeamBeam.cs:183, viva esta vez). La espina dorada pasa a RampaGlow tintada (es un RECOLOR del centro, no ruido) y el bulto de nacimiento usa `sin(πx)` (la Convert01To010 REAL de Luminance).
+
+## (8) EL RELICARIO DEL AVISPÓN — DOS CAUSAS RAÍZ (por eso «no funcionaba» NADA)
+LA LETRA: «esto no funciona». El forense contra el original (Bombus-Apis-Bee) halló DOS bugues apilados:
+- **(a) LA ACTIVACIÓN EXIGÍA EL CHISME EQUIPADO** (`TieneRelicario`) — y el usuario lo lleva SUELTO en la bolsa: la tecla L no hacía NADA (ni sonido, ni polvos, ni buff). HOY responde **EQUIPADO O EN CUALQUIER SLOT DE LA BOLSA** (`LlevaElRelicario` — la pasiva +35 % sigue siendo cosa del equipo, como manda Terraria).
+- **(b) EL AURA ERA INVISIBLE**: el original pinta sus cinco pasadas con `Color(r,g,b,**0**)` — alpha CERO — y en FNA `Color * float` multiplica TAMBIÉN el alfa (verificado contra FNA.dll decompilada): en el lote AlphaBlend que vive en `DrawInfernoRings` eso dibuja NADA (el original solo brilla si el lote queda en Additive por casualidad — el estado que dejó el último proyectil). LA CURA DE LA CASA: cerrar el lote, abrir uno **ADDITIVO** propio (donde el RGB se SUMA — la lectura que el original intentaba), pintar las cinco pasadas con SUS números exactos y devolver el lote EXACTO que había. + El tooltip ahora dice «Funciona EQUIPADO o EN LA BOLSA».
+
+## (9) LA TECLA B — LAS MASCOTAS DESDE LA BOLSA
+LA LETRA: «toque B y la mascota de luz de Aethon y el minigrimorio no se activaron pese a que los tengo en el inventario». El detour de QuickBuff las buscaba SOLO en las ranuras de mascota/luz — HOY: primero las ranuras (con el ojo del equipo mandando) y si no viven EQUIPADAS, **en CUALQUIER slot de la bolsa (0..49)** — la mascota responde a la B esté donde esté.
+
+## (10) EL LIBRO DEL ETERNO — LAS CUATRO FUENTES DE LA LETRA
+LA LETRA: «asegurate de que se pueda conseguir el libro corrupto al avanzar en el juego, se puede obtener con un 1% de probabilidad al matar cualquier criatura, con un 1% al abrir cualquier cofre, con 2% de abrir cofres en la mazmorra y 2% al matar criaturas».
+- **MATAR CRIATURAS**: TODO lo que muere tira 1 % (2 % si su cazador está en la mazmorra) — `LibroDeLasCriaturasNPC` (OnKill, el sello del 1-por-cazador de siempre).
+- **ABRIR COFRES**: CUALQUIER cofre tira 1 % (2 % en la mazmorra) — la Ruleta de los Cofres extendida al mundo entero.
+- SIGUEN VIVAS: 1 % rompiendo libros en la mazmorra + 50 % la Muralla + LA ENTREGA GARANTIZADA al llegar al 19.
+
+## (11) LAS DOS INVESTIGACIONES DE LOS REELS
+LA LETRA: «intenta investigar esto y dime como se podria aplicar para nuestro proyecto» + los dos enlaces.
+- **REEL 1 — aldegad/sprite-gen** (Apache-2.0): UNA imagen de personaje → sprites animados listos para el motor (identidad bloqueada, fondo a transparencia real, ciclos de movimiento sin animar a mano). APLICACIÓN: el pipeline de MASCOTAS y JEFES del mod (la mascota minigrimorio, Aethon mismo) — generar las poses base y dejar que el taller anime los idle/walk; los sprites del mod salen del generador de la casa (PIL) cuando exigen control fino, de sprite-gen cuando exigen VIDA.
+- **REEL 2 — patch-gg/pixelfx** (MIT, 3.7k★): 244 efectos pixel art «cada uno un trocito de código» + su skill de Claude Code con el método de Hugo Duprez («borrador, render, mirar, refinar» — el código es arcilla, confía en tus ojos). APLICACIÓN INMEDIATA — tres leyes adoptadas: (1) cada efecto es CÓDIGO, no PNG; (2) UN GOLPE NECESITA UN CUERPO DETRÁS (wind-up, freeze-on-contact, recovery — el acto); (3) la ronda de refinado visual (el VLM de la casa ya era eso, ahora con nombre). El catálogo shadow/arcane se inspeccionó visualmente (VLM): los 3 mejores para el cosmos del Eterno = hex-sigil, shadow-flames, eclipse.
+
+## (12) EL TALLER DE EFECTOS — LA BOLSA NUEVA (bolsa 27)
+LA LETRA: «crea una bolsa nueva y dale la bolsa al jugador, esta bolsa tendras una copia de todas las armas que sean creadas con esta investigacion». TRES armas de PRUEBA (0 maná, 5 maderas — el patrón de la casa), nacidas del método pixelfx:
+- **EL SIGILO DEL ETERNO** (hex-sigil): la pluma ardiente TRAZA el sigilo (círculo + estrella de 7 {7/3} + nudo), los SIETE glifos estallan uno a uno (CirculoRunico), EL DESTELLO (un instante congelado + UN golpe radial) y SE DESMORONA en ascuas — EL ACTO completo.
+- **LAS LLAMAS DE SOMBRA** (shadow-flames): la columna de fuego sombrío que sube VIVA del suelo — 22 nodos, el ancho respira con **WarpedFbm de verdad** (fBm 4 octavas + warp), violeta abajo → magenta arriba, la vena blanca al centro, el charco de bruma en la base.
+- **EL ECLIPSE VIVO** (eclipse): la nova del disco NEGRO (dibujado en lote alfa — el negro no vive en el aditivo) de limbo blanco y CATORCE rayos que giran y respiran; el anillo en expansión golpea TODO lo que cruza.
+- **LA BOLSA DEL TALLER DE EFECTOS** (bolsa 27): las tres dentro, en el cofre maestro Y en la entrega directa del kit (la lección v6.14.2). Iconos ×4 generados y pulidos con la ronda VLM (el método del reel).
+
+## (13) EL ALTAR DE LA CONSAGRACIÓN — EL SPRITE NUEVO (la skill + el método del reel)
+LA LETRA: «dame un promt para crear el altar e investiga este repositorio de github y del que se habla en el video para crear el sprite del altar usando la skill que presentan, ten en cuenta el enfoque del mod». EL MÉTODO aplicado (el del reel 2 — borrador, render, mirar, refinar — con la skill de generación de imágenes de la casa):
+- **RONDA 1** (2 borradores): pedestal cósmico + grimorio. El VLM dictó veredicto: base 2 + CINCO correcciones (bajar el libro al pedestal, runa central −30 % + 2 laterales, simplificar la bruma, lomo dorado con su highlight, base más ancha).
+- **RONDA 2** (los borradores corregidos): **el ganador aprobado** — pedestal violeta-negra de base ancha con runa teal central + 2 pequeñas, el GRIMORIO ABIERTO de páginas negras estrelladas con lomo dorado REPOSANDO sobre la piedra, 2-3 px de bruma bajo el libro, la estrella de 4 puntas blanco-violeta sobre él. Chroma-key del fondo, 36×54, y el **_Highlight regenerado** (la silueta amarillo pálido de la casa).
+- **EL PROMPT** queda documentado en tools-v690/altar/ (gen_refine.mjs — la versión final) y en el informe de la sesión: es el patrón reproducible para LOS SIGUIENTES sprites del mod.
+
+## (14) NADIE HA COPIADO EL PROYECTO
+LA LETRA: «tambien quiero que investigues si alguien copio mi proyecto o tiene alguno similar». La búsqueda forense (GitHub repos+código vía Sourcegraph, Bing, DuckDuckGo, el Steam Workshop de tModLoader, los forks del repo):
+- **0 COPIAS**: ninguna de las huellas digitales del mod (AethonMod, DespertarGrimorioSistema, OjoEternoMinion, BrumaBlackHoleRenderer, GrimorioHambriento, EscuadronPersistPlayer, «Grimorio del Eterno», «La Mirada de Solyn») vive en NINGÚN otro repo o mod indexado. 0 forks.
+- **0 PARECIDOS EN CONCEPTO**: los «grimorios» del Workshop son mascotas, utilidades de invocación o temas de anime — nadie tiene el nicho «grimorio consciente que devora jefes + despertar de 100 niveles con puertas».
+- EL NOMBRE «Aethon» LIBRE en el ecosistema de mods de Terraria (0 colisiones en el Workshop; vecino a vigilar: «Atherius», de donde viene el personaje Solyn).
+- RECOMENDACIONES: añadir LICENCIA al repo (hoy no tiene ninguna — GPL-3.0 o CC BY-NC-SA 4.0) + descripción y topics (terraria, tmodloader, aethon).
+
+## PIPELINE (la cadena OBLIGATORIA — TODO VERDE)
+verify.csproj **0 errores / 0 warnings** (412 .cs) · audit_assets **0 PNG faltantes + 0 convenciones** (cazó la ruta mala de SoftGlow en el taller — curada al vuelo) · `-build` REAL **0/0** (con LA LECCIÓN nueva: `-build` toma la ruta RELATIVA AL CWD — hay que darle la ruta ABSOLUTA de ModSources o empaqueta un stub v1.0 de una carpeta vacía) · .tmod **audit_v690 TODO VERIFICADO** (488 entradas, blobs 488/488, EOF exacto, los 4 PNGs nuevos 30×30/36×54, 2 músicas OggS, 28 firmas v6.90 vivas con las DOS alineaciones del heap UTF-16, hjson ×3 simétricos, los textos nuevos presentes + las claves rancias ausentes, la entrega completa) · headless **Sandboxing v6.90 → Configuring → Finalizing → Server started, 0 EXCEPCIONES**.
+
 ## v6.89 — LA GRAN SESIÓN DEL DESPERTAR REHECHO: la escalera de magia pura, la bruma que llena el círculo, el calor que vuelve al haz, el nombre corrupto de un solo color, el libro entregado, la esencia cósmica renombrada, la tecla B con sus mascotas equipadas, las armas nuevas borradas (Solyn y el Relicario rehechos CON el original en la mano) y LA LISTA COMPLETA DE LAS CIEN PUERTAS
 
 ## (1) EL DESPERTAR REHECHO — LA ESCALERA DE MAGIA PURA (la wiki + el propio juego como fuente)

@@ -486,66 +486,69 @@ AethonMod/                      ← EL MOD (build.txt aquí: versión 6.50.30)
 
 ---
 
-## §15 — LA ESCALERA COMPLETA DEL DESPERTAR (v6.89)
+## §15 — LA ESCALERA COMPLETA DEL DESPERTAR (v6.90)
 
 La tabla viva de las CIEN puertas: cada nivel con SU arma de magia/
-invocador (las alternativas — la mesa devora UNA), SU material (una
-opción completa — la mesa se queda con la primera que alimentes), SUS
-esencias y SUS monedas. La leen la ventana de Progresión del tooltip,
-El Cielo del Despertar y la mesa del suelo.
+invocador (las alternativas — EL GRIMORIO devora UNA) **O** SU material
+(una opción completa — **BASTA UNO DE LOS DOS**; EL GRIMORIO se queda
+con la primera opción que alimentes), SUS esencias y SUS monedas. **TODO
+lo que el grimorio come debe estar CONSAGRADO por el altar** (el arma y
+los materiales llevan el sello — las esencias no lo necesitan: ellas
+SON la esencia del Eterno). La leen la ventana de Progresión del
+tooltip, El Cielo del Despertar y la mesa del suelo.
 
 | Nivel | Puerta de caza | Arma a devorar (elige 1) | Material (1 opción) | Esencias | Monedas |
 |---|---|---|---|---|---|
 | 1 | — | Bastón de gelatina | 20× lingote de cobre/lingote de estaño | 1 | 1 plata |
 | 2 | — | Bastón de amatista o Bastón de topacio | 20× lingote de cobre/lingote de estaño/amatista/topacio | 2 | 1 plata |
-| 3 | ✓ | Bastón de zafiro o Bastón de esmeralda | 20× lingote de plata/lingote de tungsteno/zafiro/esmeralda | 3 | 1 plata |
+| 3 | Rey Gelatina ✓ | Bastón de zafiro o Bastón de esmeralda | 20× lingote de plata/lingote de tungsteno/zafiro/esmeralda | 3 | 1 plata |
 | 4 | — | Bastón de rubí o Bastón de diamante | 20× lingote de oro/lingote de platino/rubí/diamante | 4 | 1 plata |
-| 5 | ✓ | Arma espacial o Vilethorn o Vara carmesí | 40× lingote de meteorito | 5 | 1 plata |
+| 5 | Ojo de Cthulhu ✓ | Arma espacial o Vilethorn o Vara carmesí | 40× lingote de meteorito | 5 | 1 plata |
 | 6 | — | Bastón de ámbar | 20× ámbar/fósil | 6 | 2 plata |
 | 7 | — | Bastón de flinx | 20× piel de flinx/lingote de oro/lingote de platino | 7 | 2 plata |
-| 8 | ✓ | Bastón de diablillo | 30× lingote de piedra infernal | 8 | 2 plata |
+| 8 | El Mal del Mundo ✓ | Bastón de diablillo | 30× lingote de piedra infernal | 8 | 2 plata |
 | 9 | — | Flamelash | 30× lingote de piedra infernal/lingote de demonita/lingote de carmesí | 9 | 3 plata |
-| 10 | ✓ | Bastón de avispón | 30× cera de abeja | 10 | 3 plata |
+| 10 | Reina Abeja ✓ | Bastón de avispón | 30× cera de abeja | 10 | 3 plata |
 | 11 | — | Pistola abeja | 30× cera de abeja | 11 | 4 plata |
 | 12 | — | Guadaña demoníaca | 20× lingote de demonita/lingote de carmesí/lingote de piedra infernal | 12 | 4 plata |
-| 13 | ✓ | Proyectil acuático o Libro de calaveras | 30× lingote de piedra infernal/lingote de demonita/lingote de carmesí | 13 | 5 plata |
+| 13 | Skeletron ✓ | Proyectil acuático o Libro de calaveras | 30× lingote de piedra infernal/lingote de demonita/lingote de carmesí | 13 | 5 plata |
 | 14 | — | Cetro acuático | 30× lingote de piedra infernal | 14 | 6 plata |
 | 15 | — | Misil mágico | 20× lingote de demonita/lingote de carmesí | 15 | 7 plata |
 | 16 | — | Daga mágica | 30× lingote de piedra infernal | 16 | 8 plata |
 | 17 | — | Flamelash | 30× lingote de piedra infernal | 17 | 9 plata |
 | 18 | — | Guadaña demoníaca | 20× lingote de demonita/lingote de carmesí | 18 | 10 plata |
 | 19 | — | Bastón de diablillo | 30× lingote de piedra infernal | 19 | 12 plata |
-| 20 | ✓ | Pistola avispa | 30× cera de abeja | 20 | 14 plata |
+| 20 | La Muralla + EL LIBRO ✓ | Pistola avispa | 30× cera de abeja | 20 | 14 plata |
 | 21 | — | Lluvia dorada o Llamas malditas (arma) | 40× icor/llama maldita/alma de la noche | 21 | 16 plata |
 | 22 | — | Tormenta de cristal | 40× fragmento de cristal/alma de la luz | 22 | 18 plata |
-| 23 | ✓ | Serpiente de cristal | 40× fragmento de cristal/alma de la luz | 23 | 21 plata |
+| 23 | Reina Gelatina (difícil) ✓ | Serpiente de cristal | 40× fragmento de cristal/alma de la luz | 23 | 21 plata |
 | 24 | — | Vara del nimbio | 30× alma de la noche/alma de la luz | 24 | 24 plata |
-| 25 | ✓ | Bastón de veneno | 20× alma del poder | 25 | 28 plata |
+| 25 | Los Gemelos ✓ | Bastón de veneno | 20× alma del poder | 25 | 28 plata |
 | 26 | — | Bastón de araña | 20× lingote de cobalto/lingote de paladio | 26 | 32 plata |
 | 27 | — | Bastón de la reina araña | 20× lingote de mitril/lingote de oricalco/colmillo de araña | 27 | 37 plata |
-| 28 | ✓ | Desgarro del cielo | 20× fragmento de luz/alma de la luz | 28 | 43 plata |
+| 28 | El Devorador ✓ | Desgarro del cielo | 20× fragmento de luz/alma de la luz | 28 | 43 plata |
 | 29 | — | Cabeza de medusa | 20× lingote de adamantita/lingote de titanio | 29 | 49 plata |
-| 30 | ✓ | Bastón óptico | 20× lingote sagrado/alma de visión | 30 | 57 plata |
+| 30 | Skeletron Prime ✓ | Bastón óptico | 20× lingote sagrado/alma de visión | 30 | 57 plata |
 | 31 | — | Bastón de ponzoña | 30× lingote de clorofita | 31 | 65 plata |
-| 32 | ✓ | Bastón pigmeo | 30× lingote de clorofita/lingote sagrado | 32 | 75 plata |
+| 32 | Plantera ✓ | Bastón pigmeo | 30× lingote de clorofita/lingote sagrado | 32 | 75 plata |
 | 33 | — | Soplador de hojas | 30× lingote de clorofita | 33 | 86 plata |
 | 34 | — | Esfera magnética | 20× ectoplasma | 34 | 1 oro |
-| 35 | ✓ | Rayo de calor | 20× lingote de hongonita/lingote de espectro | 35 | 1 oro 14 plata |
+| 35 | El Gólem ✓ | Rayo de calor | 20× lingote de hongonita/lingote de espectro | 35 | 1 oro 14 plata |
 | 36 | — | Bastón de tierra | 20× lingote de hongonita/lingote de espectro | 36 | 1 oro 32 plata |
-| 37 | ✓ | Pistola de burbujas o Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 37 | 1 oro 51 plata |
-| 38 | ✓ | Nightglow o Stellar Tune o Terraprisma | 20× lingote de hongonita/lingote de espectro | 38 | 1 oro 74 plata |
+| 37 | Duque Fishron ✓ | Pistola de burbujas o Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 37 | 1 oro 51 plata |
+| 38 | La Emperatriz de la Luz ✓ | Nightglow o Stellar Tune o Terraprisma | 20× lingote de hongonita/lingote de espectro | 38 | 1 oro 74 plata |
 | 39 | — | Cetro de los murciélagos | 20× lingote de espectro/lingote de hongonita | 39 | 2 oro |
 | 40 | — | Razorpine o Bastón de ventisca o Bastón de la hidra de escarcha | 20× lingote de hongonita/lingote de espectro | 40 | 2 oro 31 plata |
 | 41 | — | Bastón alienígena o Ametralladora láser | 20× lingote de hongonita/lingote de espectro | 41 | 2 oro 65 plata |
 | 42 | — | Bastón del rayo sombrío | 20× lingote de espectro | 42 | 3 oro 5 plata |
 | 43 | — | Tenedor infernal | 20× lingote de hongonita | 43 | 3 oro 51 plata |
 | 44 | — | Bastón espectro o Bastón del cuervo | 20× lingote de espectro/lingote de hongonita | 44 | 4 oro 3 plata |
-| 45 | ✓ | Cañón blaster cargado | 20× lingote de espectro/lingote de hongonita | 45 | 4 oro 64 plata |
+| 45 | El Cultista Lunático ✓ | Cañón blaster cargado | 20× lingote de espectro/lingote de hongonita | 45 | 4 oro 64 plata |
 | 46 | — | Arcano de nebulosa | 40× fragmento de nebulosa | 46 | 5 oro 33 plata |
 | 47 | — | Bastón del dragón de polvo estelar | 40× fragmento de polvo estelar | 47 | 6 oro 13 plata |
 | 48 | — | Fuego de nebulosa | 40× fragmento de nebulosa | 48 | 7 oro 5 plata |
 | 49 | — | Bastón de celdas de polvo estelar | 40× fragmento de polvo estelar | 49 | 8 oro 11 plata |
-| 50 | ✓ | Prisma final o Destello lunar | 20× lingote de luminita/fragmento de nebulosa/fragmento de polvo estelar | 50 | 9 oro 32 plata |
+| 50 | El Señor de la Luna ✓ | Prisma final o Destello lunar | 20× lingote de luminita/fragmento de nebulosa/fragmento de polvo estelar | 50 | 9 oro 32 plata |
 | 51 | — | Bastón del cristal arcoíris | 20× lingote de luminita/fragmento de polvo estelar | 51 | 10 oro 72 plata |
 | 52 | — | Portal lunar | 20× lingote de luminita/fragmento de polvo estelar | 52 | 12 oro 32 plata |
 | 53 | — | Prisma final o Destello lunar | 20× lingote de luminita | 53 | 14 oro 17 plata |
@@ -558,51 +561,61 @@ El Cielo del Despertar y la mesa del suelo.
 | 60 | — | Prisma final | 20× lingote de luminita/fragmento de nebulosa | 60 | 37 oro 64 plata |
 | 61 | — | Destello lunar | 20× lingote de luminita/fragmento de polvo estelar | 61 | 43 oro 28 plata |
 | 62 | — | Bastón del cristal arcoíris | 20× lingote de luminita/fragmento de nebulosa | 62 | 49 oro 77 plata |
-| 63 | ✓ | Portal lunar | 20× lingote de luminita/fragmento de polvo estelar | 63 | 57 oro 22 plata |
+| 63 | Señor de la Luna ×2 ✓ | Portal lunar | 20× lingote de luminita/fragmento de polvo estelar | 63 | 57 oro 22 plata |
 | 64 | — | Fuego de nebulosa | 40× fragmento de nebulosa | 64 | 65 oro 79 plata |
 | 65 | — | Arcano de nebulosa | 40× fragmento de nebulosa | 65 | 75 oro 64 plata |
 | 66 | — | Bastón del dragón de polvo estelar | 40× fragmento de polvo estelar | 66 | 86 oro 97 plata |
-| 67 | ✓ | Stellar Tune | 20× lingote de hongonita/lingote de espectro | 67 | 1 platino |
+| 67 | Emperatriz ×2 ✓ | Stellar Tune | 20× lingote de hongonita/lingote de espectro | 67 | 1 platino |
 | 68 | — | Terraprisma | 20× lingote de hongonita/lingote de espectro | 68 | 1 platino 14 oro 97 plata |
 | 69 | — | Nightglow | 20× lingote de hongonita/lingote de espectro | 69 | 1 platino 32 oro 19 plata |
 | 70 | — | Pistola de burbujas | 20× lingote de hongonita/lingote de espectro | 70 | 1 platino 51 oro 99 plata |
-| 71 | ✓ | Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 71 | 1 platino 74 oro 75 plata |
+| 71 | Señor de la Luna ×3 ✓ | Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 71 | 1 platino 74 oro 75 plata |
 | 72 | — | Tifón de cuchillas | 20× lingote de hongonita/lingote de espectro | 72 | 2 platino 92 plata |
 | 73 | — | Rayo de calor | 20× lingote de hongonita/lingote de espectro | 73 | 2 platino 31 oro 1 plata |
 | 74 | — | Bastón de tierra | 20× lingote de hongonita/lingote de espectro | 74 | 2 platino 65 oro 60 plata |
-| 75 | ✓ | Cañón blaster cargado | 20× lingote de espectro/lingote de hongonita | 75 | 3 platino 5 oro 38 plata |
+| 75 | Emperatriz ×3 ✓ | Cañón blaster cargado | 20× lingote de espectro/lingote de hongonita | 75 | 3 platino 5 oro 38 plata |
 | 76 | — | Bastón de ventisca | 20× lingote de hongonita/lingote de espectro | 76 | 3 platino 51 oro 11 plata |
 | 77 | — | Razorpine | 20× lingote de hongonita/lingote de espectro | 77 | 4 platino 3 oro 70 plata |
 | 78 | — | Bastón de la hidra de escarcha | 20× lingote de hongonita/lingote de espectro | 78 | 4 platino 64 oro 15 plata |
-| 79 | ✓ | Cetro de los murciélagos | 20× lingote de espectro | 79 | 5 platino 33 oro 66 plata |
+| 79 | Señor de la Luna ×4 ✓ | Cetro de los murciélagos | 20× lingote de espectro | 79 | 5 platino 33 oro 66 plata |
 | 80 | — | Bastón del rayo sombrío | 20× lingote de espectro/lingote de luminita | 80 | 6 platino 13 oro 59 plata |
 | 81 | — | Tenedor infernal | 20× lingote de espectro/lingote de luminita | 81 | 7 platino 5 oro 48 plata |
 | 82 | — | Esfera magnética | 20× lingote de espectro/lingote de luminita | 82 | 8 platino 11 oro 13 plata |
-| 83 | ✓ | Bastón espectro | 20× lingote de espectro/lingote de luminita | 83 | 9 platino 32 oro 60 plata |
+| 83 | Emperatriz ×4 ✓ | Bastón espectro | 20× lingote de espectro/lingote de luminita | 83 | 9 platino 32 oro 60 plata |
 | 84 | — | Bastón del cuervo | 20× lingote de espectro/lingote de luminita | 84 | 10 platino 72 oro 26 plata |
 | 85 | — | Soplador de hojas | 20× lingote de espectro/lingote de luminita | 85 | 12 platino 32 oro 84 plata |
 | 86 | — | Fuego de nebulosa | 40× fragmento de nebulosa | 86 | 14 platino 17 oro 47 plata |
-| 87 | ✓ | Prisma final | 20× lingote de luminita/fragmento de nebulosa | 87 | 16 platino 29 oro 75 plata |
+| 87 | Señor de la Luna ×5 ✓ | Prisma final | 20× lingote de luminita/fragmento de nebulosa | 87 | 16 platino 29 oro 75 plata |
 | 88 | — | Ametralladora láser | 20× lingote de hongonita/lingote de espectro | 88 | 18 platino 73 oro 81 plata |
 | 89 | — | Bastón alienígena | 20× lingote de espectro/lingote de luminita | 89 | 21 platino 54 oro 43 plata |
 | 90 | — | Bastón pigmeo | 30× lingote de clorofita/lingote de espectro | 90 | 24 platino 77 oro 7 plata |
-| 91 | ✓ | Serpiente de cristal | 30× lingote de clorofita/lingote de espectro | 91 | 28 platino 48 oro 3 plata |
+| 91 | Emperatriz ×5 ✓ | Serpiente de cristal | 30× lingote de clorofita/lingote de espectro | 91 | 28 platino 48 oro 3 plata |
 | 92 | — | Bastón de la tempestad | 20× lingote de hongonita/lingote de espectro | 92 | 32 platino 74 oro 54 plata |
 | 93 | — | Terraprisma | 20× lingote de hongonita/lingote de espectro | 93 | 37 platino 64 oro 93 plata |
 | 94 | — | Tifón de cuchillas | 20× lingote de hongonita/lingote de espectro | 94 | 43 platino 28 oro 76 plata |
-| 95 | ✓ | Prisma final o Destello lunar | 20× lingote de luminita/fragmento de nebulosa | 95 | 49 platino 77 oro 2 plata |
+| 95 | Señor de la Luna ×6 ✓ | Prisma final o Destello lunar | 20× lingote de luminita/fragmento de nebulosa | 95 | 49 platino 77 oro 2 plata |
 | 96 | — | Bastón del cristal arcoíris o Portal lunar | 20× lingote de luminita/fragmento de polvo estelar | 96 | 57 platino 22 oro 36 plata |
 | 97 | — | Fuego de nebulosa o Arcano de nebulosa | 40× fragmento de nebulosa | 97 | 65 platino 79 oro 33 plata |
 | 98 | — | Bastón del dragón de polvo estelar o Bastón de celdas de polvo estelar | 40× fragmento de polvo estelar | 98 | 75 platino 64 oro 63 plata |
-| 99 | ✓ | Prisma final o Destello lunar o Bastón del cristal arcoíris o Portal lunar | 20× lingote de luminita/fragmento de nebulosa | 99 | 86 platino 97 oro 49 plata |
-| 100 | ✓ | Prisma final o Destello lunar o Bastón del cristal arcoíris o Portal lunar o Fuego de nebulosa | 20× lingote de luminita/fragmento de nebulosa/fragmento de polvo estelar/lingote de espectro | 100 | 100 platino |
+| 99 | Señor de la Luna ×7 ✓ | Prisma final o Destello lunar o Bastón del cristal arcoíris o Portal lunar | 20× lingote de luminita/fragmento de nebulosa | 99 | 86 platino 97 oro 49 plata |
+| 100 | LA CIMA: Aethon ×1 + Moon Lord ×10 + Emperatriz ×5 ✓ | Prisma final o Destello lunar o Bastón del cristal arcoíris o Portal lunar o Fuego de nebulosa | 20× lingote de luminita/fragmento de nebulosa/fragmento de polvo estelar/lingote de espectro | 100 | 100 platino |
 
 **Cómo se lee**: «Puerta ✓» = su jefe debe haber caído (crédito retroactivo:
-bandera del mundo o registro del cazador; «×N» = caído N veces). El nivel 20
-añade EL LIBRO CORRUPTO (el Eterno lo entrega al llegar al 19). El nivel
-100 exige la cima compuesta (Aethon ×1 + Moon Lord ×10 + Emperatriz ×5)
-y desbloquea LA IRA DE UN SER EXTERIOR (El Haz). Las monedas escalan de
+bandera del mundo o registro del cazador; «×N» = caído N veces — LOS
+CONTADORES SON ACUMULATIVOS: cada muerte cuenta para TODAS las puertas
+venideras de una vez). LAS REPETICIONES suman +1 por cada vez que el jefe
+se repite: el Señor de la Luna se pide en 50 (×1), 63 (×2), 71 (×3),
+79 (×4), 87 (×5), 95 (×6) y 99 (×7) — y la CIMA cobra el total: ×10
+ («al final tienes que matar 10 moon lord»); la Emperatriz ×2..×5. El
+nivel 20 añade EL LIBRO CORRUPTO (el Eterno lo entrega al llegar al 19;
+también cae: 1% matando cualquier criatura, 1% abriendo cualquier cofre,
+2% en la mazmorra — criaturas y cofres —, 50% la Muralla). El nivel 100
+exige la cima compuesta (Aethon ×1 + Moon Lord ×10 + Emperatriz ×5) y
+desbloquea LA IRA DE UN SER EXTERIOR (El Haz). Las monedas escalan de
 100 de cobre (nivel 1) a 100 de platino (nivel 100), y las esencias piden
 N por nivel (1→1 … 100→100). El material sale de las recetas de las armas
 de la era (el DOBLE de la receta, redondeado a decenas, mínimo 20) o del
-lingote de su era según la progresión de la wiki.
+lingote de su era según la progresión de la wiki. **El arma O el material
+pagan el peldaño — SOLO UNO de los dos** (conságralo en el altar y
+suéltalo DELANTE del grimorio seleccionado: él devora solo lo que le
+falta).

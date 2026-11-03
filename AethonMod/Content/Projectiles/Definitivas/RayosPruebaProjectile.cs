@@ -217,6 +217,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
         //  ANCHO que el CUERPO (K = 1,00 — el mismo espacio que la
         //  textura original), SEMITRANSPARENTE (alfa 0,34) y ENCIMA de
         //  todo (la última en pintarse — nada se quita).
+        //  v6.90 — LA CURA DEL ANCHO (la letra: «el problema es que es
+        //  demasiado ancha… la anchura que debe tener es la misma que
+        //  la capa principal del haz, y esta que agregaste es tan ancha
+        //  que se sale de esos limites»): la geometría SIEMPRE fue la
+        //  misma (K=1,00 = StripWidth) — lo que se salía era el PERFIL
+        //  DE LA TEXTURA: RampaGlow se funde a NEGRO en sus bordes V
+        //  (en aditivo, negro = invisible) y el ruido crudo era gris
+        //  0,30-0,70 HASTA EL BORDE → el velo leía MÁS ANCHO que el
+        //  cuerpo. LA CURA: hornear el ruido MULTIPLICADO por el perfil
+        //  gaussiano V de la rampa (σ≈0,122 en V normalizado — medido
+        //  sobre RampaGlow.png) — el velo ahora NACE y MUERE en negro
+        //  en los mismos límites exactos del cuerpo.
         // ================================================================
         private const float KPerlin = 1.00f;      // el MISMO espacio que la textura original (el CUERPO)
         private const float AlfaPerlin = 0.34f;   // SEMI transparente
@@ -224,7 +236,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static Texture2D _perlinConducto;
 
         /// <summary>EL RUIDO PERLIN DEL CONDUCTO (256², gris, horneado
-        /// una sola vez — el Perlin de gradiente de la casa).</summary>
+        /// una sola vez — el Perlin de gradiente de la casa × EL PERFIL
+        /// V DE LA RAMPA: se funde a negro en los bordes, como el
+        /// cuerpo).</summary>
         private static Texture2D TexPerlinConducto
         {
             get
@@ -234,15 +248,24 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 const int L = 256;
                 var data = new Color[L * L];
                 for (int y = 0; y < L; y++)
+                {
+                    // EL PERFIL V DE LA RAMPA (la cura v6.90): gaussiana
+                    // σ≈0,122 sobre V normalizado — el mismo fundido a
+                    // negro de RampaGlow (medido: 253 en el centro,
+                    // 96 a ⅓, 22 a ¼, 0 en el borde).
+                    float v = y / (float)(L - 1);
+                    float dv = v - 0.5f;
+                    float perfil = MathF.Exp(-(dv * dv) / (2f * 0.122f * 0.122f));
                     for (int x = 0; x < L; x++)
                     {
                         // Perlin de gradiente + fBm 5 octavas + warp — el
                         // MISMO ruido de las brumas, en gris 0,30-0,70.
                         float n = global::AethonMod.Content.Effects.Bruma.BrumaNoise
                             .WarpedFbm(x * 0.045f, y * 0.045f, 1701, 3f, 5);
-                        byte g = (byte)(MathHelper.Clamp(0.30f + n * 0.40f, 0f, 1f) * 255f);
+                        byte g = (byte)(MathHelper.Clamp((0.30f + n * 0.40f) * perfil, 0f, 1f) * 255f);
                         data[y * L + x] = new Color(g, g, g, 255);
                     }
+                }
                 _perlinConducto = new Texture2D(Main.graphics.GraphicsDevice, L, L);
                 _perlinConducto.SetData(data);
                 return _perlinConducto;
@@ -736,8 +759,27 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float grow = (float)Math.Pow(
                     Utils.GetLerpValue(ChargeTime - 20, ChargeTime + 40, Time, true) *
                     Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true), 3f);
-                return DefinitivasLib.Cono(targetHitbox, Projectile.Center, LargoCono * (0.5f + grow * 0.5f),
-                    Projectile.rotation, 0.28f * Math.Max(grow, 0.02f));
+                // v6.90 — LA COLISIÓN ES LA SILUETA DEL HAZ (la letra:
+                //     «algo curioso y es que el daño o sea la caja de
+                //     colisiones del Haz se concentra solo en el centro
+                //     del Haz»): el cono de semiangulo 0,28 rad de la
+                //     v6.56 solo cubría ~500 px a mitad de conducto
+                //     mientras el haz VISUAL mide ~2.000 px ahí — el
+                //     daño vivía en una aguja central. AHORA cada
+                //     objetivo se mide contra EL ANCHO REAL DEL HAZ en
+                //     SU punto (StripWidth — la MISMA función que
+                //     dibuja las siete capas): si lo VES, te PEGA.
+                float largo = LargoCono * (0.5f + grow * 0.5f);
+                Vector2 dir = Projectile.rotation.ToRotationVector2();
+                Vector2 c = targetHitbox.Center();
+                Vector2 v = c - Projectile.Center;
+                float radioH = MathF.Max(targetHitbox.Width, targetHitbox.Height) * 0.5f;
+                float along = v.X * dir.X + v.Y * dir.Y;
+                if (along < -radioH || along > largo + radioH) return false;
+                float p = MathHelper.Clamp(along / MathF.Max(largo, 1f), 0f, 1f);
+                float semiancho = StripWidth(p) * MathF.Max(grow, 0.02f);
+                float perp = MathF.Abs(v.X * -dir.Y + v.Y * dir.X);
+                return perp <= semiancho + radioH;
             }
             return false;
         }

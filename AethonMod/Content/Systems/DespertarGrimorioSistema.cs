@@ -41,8 +41,26 @@ namespace AethonMod.Content.Systems
     //     30 y ESPERA por los otros 40. Si sueltas 100, come 40 y las
     //     otras 60 se quedan en el suelo (recogerlas es gratis).
     //   · UN DESPERTAR POR PULSO — con las TRES ofrendas completas
-    //     (esencias + dinero + arma O lingotes), el libro DESPIERTA
+    //     (esencias + dinero + arma O materiales), el libro DESPIERTA
     //     (+1) y los contadores RENACEN limpios para el peldaño nuevo.
+    //
+    //  v6.90 — LA LETRA NUEVA (dos leyes):
+    //   · EL ARMA **O** LOS MATERIALES — BASTA UNO DE LOS DOS (la
+    //     letra: «hay que dejar claro que para el despertar se puede
+    //     usar el arma, y en caso de no poder usar el arma, se usan
+    //     los materiales… con el arma o los materiales basta, aun asi
+    //     debes dejar claro que solo necesitan uno de los dos»): si el
+    //     grimorio ya devoró EL ARMA, los materiales del suelo quedan
+    //     para el jugador; si ya completó EL MATERIAL, el arma queda
+    //     en el suelo. El peldaño paga con el PRIMERO que complete.
+    //   · TODO LO QUE EL GRIMORIO COME DEBE ESTAR CONSAGRADO (la letra:
+    //     «asegurate de que cada item que el grimorio se coma, debe
+    //     estar corrompido menos las esencias mismas ya que estas son
+    //     la misma esencia del eterno» — el nombre nuevo de la casa es
+    //     CONSAGRADO, no corrupto): el arma del peldaño y los
+    //     materiales solo se los traga si pasaron por EL ALTAR. Las
+    //     esencias y las monedas quedan exentas (las esencias SON la
+    //     esencia del Eterno; el dinero es dinero).
     //   · EL BOCADO DE SIEMPRE VIVE — cualquier OTRA arma corrupta
     //     soltada ante él sigue siendo el festín de la .129 (EXP por
     //     rareza + UN stat por clase + EL ALMA ÚNICA si era especial).
@@ -164,8 +182,12 @@ namespace AethonMod.Content.Systems
         /// sello de 1-por-cazador es el guardián de verdad).</summary>
         private static readonly Dictionary<int, HashSet<int>> _cofresRuletados = new();
 
-        /// <summary>LA RULETA DE LOS COFRES (una tirada por cofre por
-        /// cazador — solo en la mazmorra, solo si le falta su libro).</summary>
+        /// <summary>v6.90 — LA RULETA DE LOS COFRES (la letra nueva:
+        /// «se puede obtener con un 1% de probabilidad… al abrir
+        /// cualquier cofre, con 2% de abrir cofres en la mazmorra»):
+        /// CUALQUIER cofre tira 1% (2% en la mazmorra) — una tirada por
+        /// cofre por cazador por sesión, solo si aún no levantó su
+        /// libro (el sello del UNO POR CAZADOR).</summary>
         private static void LaRuletaDeLosCofres()
         {
             try
@@ -175,8 +197,7 @@ namespace AethonMod.Content.Systems
                 {
                     Player p = Main.player[i];
                     if (p == null || !p.active || p.dead) continue;
-                    if (p.chest < 0) continue;
-                    if (!p.ZoneDungeon) continue;   // el cofre abierto está en la mazmorra
+                    if (p.chest < 0) continue;   // un cofre ABIERTO (cualquiera)
 
                     var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
                     if (cazador == null) continue;
@@ -186,8 +207,9 @@ namespace AethonMod.Content.Systems
                     { hechos = new HashSet<int>(); _cofresRuletados[i] = hechos; }
                     if (!hechos.Add(p.chest)) continue;   // este cofre ya tiró
 
-                    // EL 1% DE LA LETRA.
-                    if (!Main.rand.NextBool(100)) continue;
+                    // LA TIRADA: 2% en la mazmorra · 1% en el resto del mundo.
+                    int caras = p.ZoneDungeon ? 50 : 100;
+                    if (!Main.rand.NextBool(caras)) continue;
 
                     int idx = Item.NewItem(p.GetSource_Loot(), p.Hitbox,
                         ModContent.ItemType<global::AethonMod.Content.Items.Altar.LibroCorrupto>(), 1);
@@ -196,6 +218,44 @@ namespace AethonMod.Content.Systems
                 }
             }
             catch { }
+        }
+
+        // ================================================================
+        //  v6.90 — LA TERCERA FUENTE DEL LIBRO: LAS CRIATURAS (la letra:
+        //  «se puede obtener con un 1% de probabilidad al matar cualquier
+        //  criatura… con 2% al matar criaturas [en la mazmorra]»): TODO lo
+        //  que muere tira 1% (2% si su cazador está en la mazmorra) — con
+        //  el sello del UNO POR CAZADOR de siempre (si el que mató ya
+        //  tuvo su libro, no cae para él).
+        // ================================================================
+        public class LibroDeLasCriaturasNPC : GlobalNPC
+        {
+            public override void OnKill(NPC npc)
+            {
+                try
+                {
+                    if (Main.gameMenu || Main.netMode == NetmodeID.MultiplayerClient) return;
+                    if (npc == null || !npc.active) return;
+                    // El cazador: quien le dio el ÚLTIMO golpe
+                    // (npc.lastInteraction — el campo de la casa).
+                    Player p = npc.lastInteraction >= 0 && npc.lastInteraction < Main.maxPlayers
+                        ? Main.player[npc.lastInteraction] : null;
+                    if (p == null || !p.active) return;
+
+                    var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
+                    if (cazador == null || cazador.YaTuvoLibro) return;   // el sello
+
+                    // LA TIRADA: 2% en la mazmorra · 1% en el resto.
+                    int caras = p.ZoneDungeon ? 50 : 100;
+                    if (!Main.rand.NextBool(caras)) return;
+
+                    int idx = Item.NewItem(npc.GetSource_Loot(), npc.Hitbox,
+                        ModContent.ItemType<global::AethonMod.Content.Items.Altar.LibroCorrupto>(), 1);
+                    if (idx >= 0 && Main.netMode == NetmodeID.Server)
+                        NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+                }
+                catch { }
+            }
         }
 
         // ================================================================
@@ -328,12 +388,17 @@ namespace AethonMod.Content.Systems
                     // === 3) EL MATERIAL DEL PELDAÑO (v6.89 — la letra:
                     //     «tambien seria obligatorio dar al menos uno de
                     //     los materiales o das 20 lingotes de oro o das
-                    //     20 rubies»): UNA opción — la mesa se BLOQUEA
-                    //     con el PRIMERO que el jugador alimente y cobra
-                    //     SU cuota completa; lo que caiga de OTROS grupos
-                    //     se queda en el suelo (termínalo — la lista
-                    //     siempre dice cuál).
-                    else if (!MaterialPagado(alma, siguiente))
+                    //     20 rubies») · v6.90 — DOS LEYES NUEVAS:
+                    //     (a) el arma O el material BASTAN — si el arma
+                    //         YA se devoró, los materiales se quedan en
+                    //         el suelo (el peldaño ya tiene su pago);
+                    //     (b) SOLO COME LO CONSAGRADO (la letra: «cada
+                    //         item que el grimorio se coma, debe estar
+                    //         corrompido menos las esencias mismas» — el
+                    //         sello CONSAGRADO del altar: sin él, el
+                    //         material queda en el suelo y el aviso con
+                    //         calma lo explica).
+                    else if (!MaterialPagado(alma, siguiente) && !alma.OfrendaArma)
                     {
                         int[][] gruposMat = DespertarGrimorio.GruposMaterialesDe(siguiente);
                         // ¿este drop pertenece a ALGÚN grupo del peldaño?
@@ -346,7 +411,20 @@ namespace AethonMod.Content.Systems
                         }
                         if (grupoDelDrop >= 0)
                         {
-                            // LA MESA SE QUEDA CON EL PRIMERO (la ley del bloqueo).
+                            // v6.90 — LA LEY DE LA CONSAGRACIÓN: sin el
+                            //     sello del altar, el grimorio NI LO PRUEBA
+                            //     (el aviso con calma, una vez cada 5 s).
+                            var selloMat = drop.GetGlobalItem
+                                <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                            if (selloMat == null || !selloMat.Corrompido)
+                            {
+                                AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
+                            }
+                            else
+                            {
+                            // EL GRIMORIO SE QUEDA CON EL PRIMERO (la ley del
+                            // bloqueo — la mesa es el SUELO, el que SE
+                            // ALIMENTA es EL GRIMORIO).
                             if (alma.OfrendaMineralGrupo < 0)
                             {
                                 alma.OfrendaMineralGrupo = grupoDelDrop;
@@ -371,26 +449,38 @@ namespace AethonMod.Content.Systems
                                     mordisco = true;
                                 }
                             }
+                            }
                         }
                     }
-                    // === 4) EL ARMA DEL PELDAÑO (v6.89 — SIN CORRUPCIÓN:
-                    //     la letra del ejemplo entrega el bastón de rubí
-                    //     TAL CUAL — «aunque pida varias armas, el
-                    //     grimorio solo consumirá 1 de ellas»: la lista
-                    //     son ALTERNATIVAS y la mesa devora UNA, la
-                    //     primera que caiga de las del peldaño. La
-                    //     corrupción es cosa del ALTAR, no de la mesa). ===
-                    else if (!alma.OfrendaArma && EsArma(drop) && EsDelPeldano(drop, armasDelPeldano))
+                    // === 4) EL ARMA DEL PELDAÑO (v6.89: magia/invocador;
+                    //     «aunque pida varias armas, el grimorio solo
+                    //     consumirá 1 de ellas») · v6.90 — DOS LEYES
+                    //     NUEVAS: (a) si EL MATERIAL ya pagó el peldaño,
+                    //     el arma se queda en el suelo (basta UNO de los
+                    //     dos); (b) SOLO COME LO CONSAGRADO — el sello
+                    //     del altar es la marca del Eterno (sin él, ni la
+                    //     prueba: el aviso con calma).
+                    else if (!alma.OfrendaArma && !MaterialPagado(alma, siguiente)
+                        && EsArma(drop) && EsDelPeldano(drop, armasDelPeldano))
                     {
-                        AnimarElBocado(p, drop, 3f);   // v6.51.12: EL FESTÍN CHICO
-                        alma.OfrendaArma = true;
-                        drop.TurnToAir();
-                        SincronizarDrop(d);
+                        var selloArmaPeldano = drop.GetGlobalItem
+                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                        if (selloArmaPeldano == null || !selloArmaPeldano.Corrompido)
+                        {
+                            AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
+                        }
+                        else
+                        {
+                            AnimarElBocado(p, drop, 3f);   // v6.51.12: EL FESTÍN CHICO
+                            alma.OfrendaArma = true;
+                            drop.TurnToAir();
+                            SincronizarDrop(d);
 
-                        PolvosDelBocado(p, 6);
-                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoArma",
-                            new Color(255, 215, 120));
-                        mordisco = true;
+                            PolvosDelBocado(p, 6);
+                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoArma",
+                                new Color(255, 215, 120));
+                            mordisco = true;
+                        }
                     }
 
                     // === v6.67 — ¿LA MESA ESTÁ COMPLETA? EL DESPERTAR (una
@@ -454,10 +544,11 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>¿LAS CUATRO OFRENDAS del peldaño están PAGAS? (las
-        /// esencias + el dinero + EL ARMA de magia/invocador + UN
-        /// material completo). v6.67 — SOLO las ofrendas: la PUERTA DE
-        /// LA CAZA (el jefe del peldaño) es un candado aparte y lo
-        /// revisa PuedePasarLaPuerta.</summary>
+        /// esencias + el dinero + **EL ARMA O EL MATERIAL** — v6.90, la
+        /// letra: «con el arma o los materiales basta… deja claro que
+        /// solo necesitan uno de los dos»). v6.67 — SOLO las ofrendas:
+        /// la PUERTA DE LA CAZA (el jefe del peldaño) es un candado
+        /// aparte y lo revisa PuedePasarLaPuerta.</summary>
         private static bool LaMesaEstaCompleta(
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
@@ -465,12 +556,8 @@ namespace AethonMod.Content.Systems
             if (alma.OfrendaEsencias <
                 DespertarGrimorio.EsenciasPara(siguiente)) return false;
             if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
-            // v6.89 — EL ARMA ES OBLIGATORIA (la letra: «el grimorio solo
-            //     consumirá 1 de ellas») y EL MATERIAL TAMBIÉN (la letra:
-            //     «también sería obligatorio dar al menos uno de los
-            //     materiales o das 20 lingotes de oro o das 20 rubies»).
-            if (!alma.OfrendaArma) return false;
-            return MaterialPagado(alma, siguiente);
+            // v6.90 — EL ARMA **O** EL MATERIAL: BASTA UNO DE LOS DOS.
+            return alma.OfrendaArma || MaterialPagado(alma, siguiente);
         }
 
         /// <summary>v6.89 — ¿EL MATERIAL del peldaño ya está pago? (el
@@ -567,6 +654,30 @@ namespace AethonMod.Content.Systems
         /// <summary>EL ÚLTIMO AVISO de la puerta por portador (GameUpdateCount
         /// — el aviso con CALMA: cada 5 s, no cada pulso de 15 t).</summary>
         private static readonly Dictionary<int, ulong> _ultimoAvisoPuerta = new Dictionary<int, ulong>();
+
+        /// <summary>v6.90 — EL ÚLTIMO AVISO genérico por portador (su
+        /// propio diccionario: no pelea con el de las puertas).</summary>
+        private static readonly Dictionary<int, ulong> _ultimoAvisoCalma = new Dictionary<int, ulong>();
+
+        /// <summary>v6.90 — EL AVISO CON CALMA genérico (la ley de la
+        /// consagración lo usa: sin el sello del altar, el grimorio no
+        /// prueba la ofrenda — y el portador se entera SIN spam: el
+        /// mismo compás de 5 s de las puertas de caza).</summary>
+        private static void AvisoConCalma(Player p, string clave)
+        {
+            try
+            {
+                if (p == null || !p.active) return;
+                ulong ahora = Main.GameUpdateCount;
+                if (!_ultimoAvisoCalma.TryGetValue(p.whoAmI, out ulong ultimo) ||
+                    ahora - ultimo >= 300ul)
+                {
+                    _ultimoAvisoCalma[p.whoAmI] = ahora;
+                    EcoRed.HablarAlPortador(p, clave, new Color(255, 170, 120));
+                }
+            }
+            catch { }
+        }
 
         /// <summary>¿PUEDE PASAR LA PUERTA de este peldaño? Si el nivel no
         /// exige jefe: siempre true. Si lo exige y ya cayó: true. Si lo

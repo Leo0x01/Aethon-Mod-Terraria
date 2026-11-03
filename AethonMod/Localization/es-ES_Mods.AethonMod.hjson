@@ -23,9 +23,9 @@ Items: {
 		DisplayName: Altar de Ofrendas
 		Tooltip:
 			'''
-			✦ El altar de las cosas que SOBRAN (investigación: Heroic Weapons)
-			· Colócalo y hazle clic derecho: el grimorio devora lo que NO necesita y NO está corrupto
-			· Lo devorado se vuelve PUNTOS DE OFRENDA: pagan hasta el 30% de las esencias del peldaño
+			✦ El altar de la consagración (investigación: Heroic Weapons)
+			· Colócalo y hazle clic derecho: CONSAGRA la ofrenda por el Eterno (arma o material)
+			· El arma consagrada gana +5% a TODO y su etiqueta · el material solo su etiqueta — el grimorio SOLO devora lo consagrado
 			'''
 	}
 
@@ -1978,10 +1978,10 @@ Items: {
 			'''
 	}
 
-	ArmaCorruptaTag: (Corrupto)
+	ArmaCorruptaTag: (Consagrado)
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
-	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado.
-	ArmaCorrupta3: Suéltala con el grimorio EN LA MANO: el Eterno la devorará.
+	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado para siempre.
+	ArmaCorrupta3: Consagrada por el Eterno: suéltala con el grimorio EN LA MANO y él la devorará.
 
 	SombraDeLaPagina2: {
 		DisplayName: La Sombra de la Página II
@@ -2129,6 +2129,50 @@ Items: {
 			espina dorada, filamentos dendríticos y latido de 14 Hz. 0 maná.
 			'''
 	}
+	SigiloDelEterno: {
+		DisplayName: El Sigilo del Eterno
+		Tooltip:
+			'''
+			La pluma del Eterno traza su sigilo donde apuntes: el trazo
+			ardiente, los SIETE glifos que estallan uno a uno, el destello
+			blanco — y se desmorona en ascuas. Todo lo que esté DENTRO
+			del círculo recibe el golpe. (Taller de efectos: pixelfx)
+			'''
+	}
+
+	LlamasDeSombra: {
+		DisplayName: Las Llamas de Sombra
+		Tooltip:
+			'''
+			La columna de fuego sombrío sube VIVA del suelo donde
+			apuntes: violeta profundo abajo, magenta arriba, la vena
+			blanca ardiendo al centro — el borde de las llamas respira
+			con ruido fractal de verdad. (Taller de efectos: pixelfx)
+			'''
+	}
+
+	EclipseVivo: {
+		DisplayName: El Eclipse Vivo
+		Tooltip:
+			'''
+			La nova del disco negro: se abre donde apuntes con su
+			corona de CATORCE rayos que giran y respiran, el limbo
+			blanco quemando el borde — el anillo que se expande golpea
+			todo lo que cruza. (Taller de efectos: pixelfx)
+			'''
+	}
+
+	BolsaTallerDeEfectos: {
+		DisplayName: La Bolsa del Taller de Efectos
+		Tooltip:
+			'''
+			Lo que nació de la investigación de los RELES: pixelfx (244
+			efectos como código — el sigilo con su acto, las llamas de
+			ruido fractal, el eclipse de corona viva) y sprite-gen (los
+			sprites animados del taller). Armas de PRUEBA: 0 maná.
+			'''
+	}
+
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -2521,6 +2565,11 @@ Projectiles: {
 	// CampoAndromedaProj.DisplayName: Campo Andromeda Proj
 	// SolynCargaProj.DisplayName: Solyn Carga Proj
 	// SolynRayoProj.DisplayName: Solyn Rayo Proj
+	// v6.90 — EL TALLER DE EFECTOS (pixelfx + sprite-gen).
+	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
+	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
+	EclipseVivoProj.DisplayName: El Eclipse Vivo
+		// de los reels — pixelfx + sprite-gen).
 }
 
 Buffs: {
@@ -2958,6 +3007,8 @@ Despertar: {
 	BocadoMonedas: ✦ El Eterno come las monedas del suelo — faltan {0}.
 	BocadoMineral: ✦ El Eterno come {0} del material del suelo ({1}/{2} de la opción).
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA del peldaño!
+	NoConsagrado: «(El Eterno aparta la ofrenda con una página) Sin MI sello no la pruebo. Conságrala en el altar.»
+	// v6.90 — LA LEY DE LA CONSAGRACIÓN: el grimorio SOLO come lo sellado.
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
 	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.
 	EsenciaTopeTooltip:
@@ -2976,20 +3027,20 @@ Despertar: {
 	CondicionRecetas: Requiere el Grimorio del Eterno en el inventario
 	HitoMejora1: ✧ ¡DESPERTAR 10: la MEJORA 1 de los ojos desbloqueada!
 	HitoSol: ✧ ¡DESPERTAR 15: DOS OJOS mejorados crean un SOL RÚNICO de 1 anillo! (2/min)
-	HitoMascota: ✧ ¡DESPERTAR 20: la mascota minigrimorio + TODO el ataque del escuadrón +10 %!
+	HitoMascota: ✧ ¡DESPERTAR 20: la mascota minigrimorio + TODO el daño de invocación del escuadrón +10 %!
 	HitoAgujeros: ✧ ¡DESPERTAR 30: CINCO OJOS mejorados abren un AGUJERO RÚNICO al azar! (1/min)
-	HitoMejora2: ✧ ¡DESPERTAR 40: la MEJORA 2 de los ojos + TODO el ataque del escuadrón +15 %!
+	HitoMejora2: ✧ ¡DESPERTAR 40: la MEJORA 2 de los ojos + TODO el daño de invocación del escuadrón +15 %!
 	HitoSol2: ✧ ¡DESPERTAR 50: el sol gana su SEGUNDO anillo y nace 3 veces por minuto!
-	HitoAscendidos: ✧ ¡DESPERTAR 60: los agujeros ASCENDIDOS + TODO el ataque del escuadrón +20 %!
+	HitoAscendidos: ✧ ¡DESPERTAR 60: los agujeros ASCENDIDOS + TODO el daño de invocación del escuadrón +20 %!
 	HitoMejora3: ✧ ¡DESPERTAR 70: la MEJORA 3 de los ojos desbloqueada!
 	HitoSol3: ✧ ¡DESPERTAR 75: el sol de TRES anillos, 4 veces por minuto!
-	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos + TODO el ataque del escuadrón +25 %!
+	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos + TODO el daño de invocación del escuadrón +25 %!
 	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
 	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
-	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el ataque del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
+	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el daño de invocación del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
 	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño al escuadrón entero)
 	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
-	CaminoMascota: la mascota + TODO el ataque del escuadrón +10 %
+	CaminoMascota: la mascota + TODO el daño de invocación del escuadrón +10 %
 	CaminoAgujeros: los AGUJEROS NEGROS RÚNICOS (5 ojos mejorados, 1/min)
 	CaminoMejora2: la MEJORA 2 + el escuadrón +15 %
 	CaminoSol2: el sol de 2 ANILLOS (3/min)
@@ -3711,19 +3762,26 @@ Keybinds: {
 }
 
 Altar: {
-	Titulo: EL ALTAR DE LA CORRUPCIÓN
-	Subtitulo: v6.88 — ya sin vínculo con el grimorio: corrompe armas
-	SlotVacio: arma
-	EtiquetaArma: EL ARMA — limpia y de pelea (no herramienta)
-	FiltroArma: No vale ya corrupta, ni herramienta, ni el grimorio
-	Lista: Lista para corromper
-	YaCorrupta: Ya está corrupta
-	NoArma: Eso no es un arma corruptible
-	Corromper: CORROMPER
-	CorruptaHecha: ✦ {0} nace corrupta: su nombre viste el negro y el brillo morado-negro la cubre.
+	Titulo: EL ALTAR DE LA CONSAGRACIÓN
+	Subtitulo: consagra la ofrenda por el Eterno — arma o material
+	SlotVacio: ofrenda
+	EtiquetaArma: LA OFRENDA — un arma o un material (no herramienta)
+	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni esencias
+	ListaArma: Arma lista — gana estadísticas y su etiqueta
+	ListaMaterial: Material listo — gana solo su etiqueta
+	YaCorrupta: Ya está consagrada
+	NoArma: Eso no es una ofrenda consagrible
 	// v6.89 — EL PRECIO DEL SELLO: esencias del Eterno según calidad,
 	// tipo, daño y estadísticas del arma (la de cobre pide menos).
 	FaltanEsencias: ✦ El sello cuesta {0} Esencias del Eterno — te faltan {1}. Tráelas y vuelve.
+	Consagrar: CONSAGRAR
+	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
+	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
+	PrecioVivo: El sello cuesta {0} — llevas {1}
+	ResultadoArma: → gana: +5% a TODAS sus estadísticas + su etiqueta
+	ResultadoMaterial: → gana: SOLO su etiqueta junto al nombre
+	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
+	LeyendaSello2: (las Esencias del Eterno no necesitan sello: ellas SON su esencia)
 }
 
 Arbol: {

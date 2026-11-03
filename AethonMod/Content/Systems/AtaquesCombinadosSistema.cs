@@ -860,9 +860,11 @@ namespace AethonMod.Content.Systems
         ///     escuadrón: el rayo del ojo MÁS DESPIERTO (el patrón de la
         ///     casa — lider.damage YA trae SU cadena horneada: la suya
         ///     propia de invocación +1,5 %/nivel, el despertar, lo
-        ///     devorado, la reforja, las esencias y el ×1,25 de la cima (v6.88: la cima es la 100))
-        ///     escalado por MinionContactDamageMult y SUS mejoras — el
-        ///     daño completo del ataque de invocación, al 50 %.</summary>
+        ///     devorado, la reforja, las esencias) escalado por
+        ///     MinionContactDamageMult, SUS mejoras y EL HITO VIVO del
+        ///     escuadrón (v6.90: cada 20 niveles de despertar — como el
+        ///     rayo y los conjuros) — el daño completo del ataque de
+        ///     invocación, al 50 %.</summary>
         private static int DanoDeLaIra(Player p, int nivel, Projectile lider, int despertar)
         {
             // (1) LA CADENA MÁGICA DEL GRIMORIO sobre la base 1000.
@@ -879,10 +881,16 @@ namespace AethonMod.Content.Systems
             //     despierto — el ataque del escuadrón, completo).
             //     v6.68 — LA VUELTA A CASA: de vuelta con el NIVEL DEL
             //     LIBRO (MinionContactDamageMult — la cadena de siempre).
+            //     v6.90 — EL HITO VIVO TAMBIÉN (la auditoría: el «daño
+            //     TOTAL de invocación» del escuadrón incluye sus hitos
+            //     cada 20 niveles — BonusHitoVivo, como el rayo y los
+            //     conjuros: una sola vez, en todas partes).
             float multMejoras = global::AethonMod.Content.Projectiles.OjoEternoMinion
                 .MultMejoras(lider);
+            float hitoVivo = global::AethonMod.Content.Projectiles.OjoEternoMinion
+                .BonusHitoVivo(lider);
             float danoOjo = lider.damage
-                * WeaponScaling.MinionContactDamageMult(nivel) * multMejoras;
+                * WeaponScaling.MinionContactDamageMult(nivel) * multMejoras * hitoVivo;
 
             return Math.Max(1, (int)(magica + danoOjo * 0.5f));
         }

@@ -227,9 +227,15 @@ namespace AethonMod.Content.Systems
             d *= 1f + Players.ShardPlayer.BonusDanoEsencias(p) *
                 Content.Globals.AlmaEternoGlobalItem.FactorDelLibro(p);
 
-            // 6) LA CIMA DEL DESPERTAR (100): TODO el ataque de los ojos (×1,25).
-            if (despertar >= Content.Systems.DespertarGrimorio.NivelMax)
-                d *= 1.25f;
+            // 6) v6.90 — LA CIMA YA NO SE HORNEA (la auditoría de las
+            //    stats de la letra: «asegurate de que todas las
+            //    estadisticas del grimorio del eterno se cumplan»): el
+            //    ×1,25 del despertar 100 que vivía AQUÍ se cobraba DOS
+            //    VECES en el rayo (una al nacer el ojo y otra el hito
+            //    VIVO de la v6.88 — BonusHitoVivo: +30 % en la cima).
+            //    MUERE: la cima del escuadrón la paga SOLO el hito vivo,
+            //    en el rayo y en los conjuros combinados — lo que el
+            //    tooltip dice es ahora la verdad exacta.
             return System.Math.Max(1, (int)d);
         }
 

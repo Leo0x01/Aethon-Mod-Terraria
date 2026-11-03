@@ -72,12 +72,22 @@ namespace AethonMod.Content.Items.Investigaciones
             player.GetModPlayer<RelicarioPlayer>().TieneRelicario = true;
         }
 
+        // v6.90 — LA CURA DE LA ACTIVACIÓN (la letra: «esto no funciona»
+        // — la autopsia halló DOS causas raíz): (1) la v6.85 y la v6.89
+        // exigían el chisme EQUIPADO (TieneRelicario) y el usuario lo
+        // lleva SUELTO en la bolsa — la tecla L no hacía NADA (ni
+        // sonido, ni polvos, ni buff): HOY la activación responde si el
+        // Relicario está equipado **O EN CUALQUIER SLOT DE LA BOLSA**
+        // (la pasiva +35% sigue siendo cosa del EQUIPO, como manda
+        // Terraria; el CANAL DEL SOL es de la reliquia, esté donde
+        // esté). (2) el AURA era INVISIBLE (ver el dibujado abajo).
+
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D",
                 "[c/FFD77A:Pulsa la tecla del Relicario Solar (L) para canalizar el poder del sol]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:8 s de aura solar: +12 % daño, velocidad de uso y crítico · a cambio +10 % de daño recibido y drenaje de vida · 45 s de recarga]"));
+                "[c/78788C:Funciona EQUIPADO o EN LA BOLSA · 8 s de aura solar: +12 % daño, velocidad de uso y crítico · a cambio +10 % de daño recibido y drenaje de vida · 45 s de recarga]"));
         }
 
         public override void AddRecipes()
@@ -109,7 +119,10 @@ namespace AethonMod.Content.Items.Investigaciones
         {
             if (TeclaRelicario == null || Player.dead || !Player.active) return;
             if (!TeclaRelicario.JustPressed) return;
-            if (!TieneRelicario || Player.HasBuff<global::AethonMod.Content.Buffs.RelicarioCdBuff>()) return;
+            // v6.90 — EQUIPADO **O EN LA BOLSA** (la cura de la
+            //     activación: el usuario prueba desde el inventario).
+            if (!TieneRelicario && !LlevaElRelicario()) return;
+            if (Player.HasBuff<global::AethonMod.Content.Buffs.RelicarioCdBuff>()) return;
 
             // === LA CANALIZACIÓN DEL SOL (la activación — COMO EL ORIGINAL:
             //     el buff de recarga nace EN EL MISMO INSTANTE de pulsar (no
@@ -199,6 +212,36 @@ namespace AethonMod.Content.Items.Investigaciones
         {
             if (TimerAura > 0) modifiers.SourceDamage *= 1.1f;
         }
+
+        /// <summary>v6.90 — ¿El portador LLEVA el Relicario encima?
+        /// (equipado en un accesorio o suelto en la bolsa — la cura de
+        /// la activación: la tecla L responde DONDE ESTÉ la reliquia).</summary>
+        private bool LlevaElRelicario()
+        {
+            try
+            {
+                int tipo = ModContent.ItemType<RelicarioDelAvispon>();
+                for (int k = 0; k < 50; k++)
+                {
+                    Item it = Player.inventory[k];
+                    if (it != null && !it.IsAir && it.type == tipo) return true;
+                }
+                return Player.miscEquips != null && (
+                    Contiene(Player.miscEquips, tipo));
+            }
+            catch { return false; }
+        }
+
+        private static bool Contiene(Item[] bolsa, int tipo)
+        {
+            if (bolsa == null) return false;
+            for (int k = 0; k < bolsa.Length; k++)
+            {
+                Item it = bolsa[k];
+                if (it != null && !it.IsAir && it.type == tipo) return true;
+            }
+            return false;
+        }
     }
 
     // ======================================================================
@@ -259,48 +302,100 @@ namespace AethonMod.Content.Items.Investigaciones
                     Texture2D texBloom = _texBloom?.Value;
                     if (tex != null && texBloom != null)
                     {
+                        // v6.90 — ¿HAY ALGUIEN CON EL AURA VIVA? (si no,
+                        // ni tocamos el lote — cero costo).
+                        bool alguienConAura = false;
                         for (int i = 0; i < Main.maxPlayers; i++)
                         {
-                            Player player = Main.player[i];
-                            if (player == null || !player.active || player.outOfRange || player.dead)
-                                continue;
-                            var mp = player.GetModPlayer<RelicarioPlayer>();
-                            if (mp == null || mp.TimerAura <= 0) continue;
+                            Player pj = Main.player[i];
+                            if (pj == null || !pj.active || pj.dead) continue;
+                            if (pj.GetModPlayer<RelicarioPlayer>().TimerAura > 0)
+                            { alguienConAura = true; break; }
+                        }
 
-                            // LA POSICIÓN (la del original: centro + gfxOffY).
-                            Vector2 pos = new Vector2(player.Center.X, player.Center.Y + player.gfxOffY)
-                                - Main.screenPosition;
+                        if (alguienConAura)
+                        {
+                            // v6.90 — LA CURA DEL AURA INVISIBLE (la 2ª
+                            //     causa raíz de «esto no funciona»): el
+                            //     original pinta sus cinco pasadas con
+                            //     Color(r,g,b,**0**) — alpha CERO — y en
+                            //     FNA `Color * float` multiplica TAMBIÉN
+                            //     el alfa (verificado contra FNA.dll
+                            //     decompilada): en el lote AlphaBlend que
+                            //     vive en DrawInfernoRings eso dibuja
+                            //     NADA. El aura del original SOLO brilla
+                            //     si el lote queda en Additive por casual
+                            //     (el último proyectil dibujado decide el
+                            //     estado del lote — una floración).
+                            //     LA CURA DE LA CASA: cerrar el lote,
+                            //     abrir uno ADDITIVO propio (donde el
+                            //     alpha NO gatea: el RGB se SUMA — la
+                            //     lectura que el original INTENTABA),
+                            //     pintar las cinco pasadas y devolver el
+                            //     lote EXACTO que había (los parámetros
+                            //     del call site de tML: Deferred,
+                            //     AlphaBlend, DefaultSamplerState, None,
+                            //     Rasterizer, Transform).
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred,
+                                BlendState.Additive, Main.DefaultSamplerState,
+                                DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+                            try
+                            {
+                                for (int i = 0; i < Main.maxPlayers; i++)
+                                {
+                                    Player player = Main.player[i];
+                                    if (player == null || !player.active || player.outOfRange || player.dead)
+                                        continue;
+                                    var mp = player.GetModPlayer<RelicarioPlayer>();
+                                    if (mp == null || mp.TimerAura <= 0) continue;
 
-                            // LAS CINCO PASADAS (Core/BombusApisBee_DoDetours.cs
-                            // — la tabla EXACTA, byte a byte: rotación sobre EL
-                            // TIMER (decrece → gira hacia atrás), escala con el
-                            // cierre del sol Lerp(a, 0,05, 1 − t/480)).
-                            float t = mp.TimerAura;
-                            Main.spriteBatch.Draw(tex, pos, null,
-                                new Color(223, 170, 40, 0) * 0.5f,
-                                t * 0.025f, tex.Size() * 0.5f,
-                                MathHelper.Lerp(1.25f, 0.05f, 1f - mp.TimerAura / 480f),
-                                SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(tex, pos, null,
-                                new Color(245, 245, 149, 0) * 0.5f,
-                                t * -0.0265f, tex.Size() * 0.5f,
-                                MathHelper.Lerp(1.1f, 0.05f, 1f - mp.TimerAura / 480f),
-                                SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(tex, pos, null,
-                                new Color(245, 245, 149, 0) * 0.55f,
-                                t * 0.0165f, tex.Size() * 0.5f,
-                                MathHelper.Lerp(0.9f, 0.05f, 1f - mp.TimerAura / 480f),
-                                SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(texBloom, pos, null,
-                                new Color(223, 170, 40, 0) * 0.5f,
-                                t * 0.025f, tex.Size() * 0.5f,
-                                MathHelper.Lerp(1.25f, 0.05f, 1f - mp.TimerAura / 480f),
-                                SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(texBloom, pos, null,
-                                new Color(245, 245, 149, 0) * 0.5f,
-                                t * 0.0265f, tex.Size() * 0.5f,
-                                MathHelper.Lerp(1.1f, 0.05f, 1f - mp.TimerAura / 480f),
-                                SpriteEffects.None, 0f);
+                                    // LA POSICIÓN (la del original: centro + gfxOffY).
+                                    Vector2 pos = new Vector2(player.Center.X, player.Center.Y + player.gfxOffY)
+                                        - Main.screenPosition;
+
+                                    // LAS CINCO PASADAS (Core/BombusApisBee_DoDetours.cs
+                                    // — la tabla EXACTA, byte a byte: rotación sobre EL
+                                    // TIMER (decrece → gira hacia atrás), escala con el
+                                    // cierre del sol Lerp(a, 0,05, 1 − t/480)).
+                                    float t = mp.TimerAura;
+                                    Main.spriteBatch.Draw(tex, pos, null,
+                                        new Color(223, 170, 40, 0) * 0.5f,
+                                        t * 0.025f, tex.Size() * 0.5f,
+                                        MathHelper.Lerp(1.25f, 0.05f, 1f - mp.TimerAura / 480f),
+                                        SpriteEffects.None, 0f);
+                                    Main.spriteBatch.Draw(tex, pos, null,
+                                        new Color(245, 245, 149, 0) * 0.5f,
+                                        t * -0.0265f, tex.Size() * 0.5f,
+                                        MathHelper.Lerp(1.1f, 0.05f, 1f - mp.TimerAura / 480f),
+                                        SpriteEffects.None, 0f);
+                                    Main.spriteBatch.Draw(tex, pos, null,
+                                        new Color(245, 245, 149, 0) * 0.55f,
+                                        t * 0.0165f, tex.Size() * 0.5f,
+                                        MathHelper.Lerp(0.9f, 0.05f, 1f - mp.TimerAura / 480f),
+                                        SpriteEffects.None, 0f);
+                                    Main.spriteBatch.Draw(texBloom, pos, null,
+                                        new Color(223, 170, 40, 0) * 0.5f,
+                                        t * 0.025f, tex.Size() * 0.5f,
+                                        MathHelper.Lerp(1.25f, 0.05f, 1f - mp.TimerAura / 480f),
+                                        SpriteEffects.None, 0f);
+                                    Main.spriteBatch.Draw(texBloom, pos, null,
+                                        new Color(245, 245, 149, 0) * 0.5f,
+                                        t * 0.0265f, tex.Size() * 0.5f,
+                                        MathHelper.Lerp(1.1f, 0.05f, 1f - mp.TimerAura / 480f),
+                                        SpriteEffects.None, 0f);
+                                }
+                            }
+                            finally
+                            {
+                                // EL LOTE DE VUELTA — EXACTO COMO ESTABA
+                                // (el call site de DrawInfernoRings en
+                                // tML: AlphaBlend + Transform del mundo).
+                                Main.spriteBatch.End();
+                                Main.spriteBatch.Begin(SpriteSortMode.Deferred,
+                                    BlendState.AlphaBlend, Main.DefaultSamplerState,
+                                    DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+                            }
                         }
                     }
                 }
