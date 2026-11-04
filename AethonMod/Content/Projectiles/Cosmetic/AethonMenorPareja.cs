@@ -63,7 +63,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         public const float MODO_MOLESTAR = 2f;  // ya llegado: las DOS FORMAS
         public const float MODO_VOLVER = 3f;    // de vuelta al lado del dueño
         /// <summary>v6.50.126→.131 — nació como LA GUERRA DE LOS CONEJOS
-        /// BLANCOS (Re:Zero); la letra de la .130 la bautizó EL CORO DE
+        /// BLANCOS; la letra de la .130 la bautizó EL CORO DE
         /// LAS HADAS (hadas de COLORES, la misma silueta de siempre,
         /// cada una con su color); la letra de la .131 lo selló: «deja el
         /// evento de las hadas como evento PREDERMINADO y que suceda DE
@@ -102,20 +102,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private const int TICKS_MORDIDA = 90;
 
         // ==================================================================
-        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (el easteregg Re:Zero:
+        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (la letra:
         //  «sería interesante poner eso de los conejos blancos como un
         //  easteregg algo así como minievento donde sea la minimascota con
         //  sus miniminions quien luche con ellos cuando se está en afk»).
         //
-        //  LA INVESTIGACIÓN (la pidió la letra): el GRAN CONEJO (大兎,
-        //  Ōusagi) de Re:Zero — una de las TRES bestias mágicas mayores,
-        //  creada por Daphne, la Bruja de la Gula: UNA SOLA conciencia
-        //  repartida en una HORDA de conejos blancos del tamaño de un
-        //  puño, HAMBRIENTOS SIN FIN (devoraron a Subaru en el Santuario
-        //  — una de sus muertes más brutales), atraídos por el MANA
-        //  (la nevada de Roswaal los convocó) y que se MULTIPLICAN al
-        //  ser atacados (cada conejo se divide infinitamente: matarlos a
-        //  golpes solo los hace MÁS).
+        //  LA IDEA ORIGINAL DE LA CASA: UNA SOLA conciencia repartida en
+        //  una HORDA de conejos blancos del tamaño de un puño,
+        //  HAMBRIENTOS SIN FIN, atraídos por el MANÁ quieto y que se
+        //  MULTIPLICAN al ser atacados (cada conejo golpeado se divide:
+        //  matarlos a golpes solo los hace MÁS).
         //
         //  LA TRADUCCIÓN AL MOD: el dueño quieto (AFK ~1 min) acumula
         //  maná quieto — y la HORDA LO HUELE: una bandada de conejos
@@ -123,7 +119,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         //  GRIMORIO MENOR con sus TRES OJOS les SALE AL PASO (la
         //  minimascota y sus miniminions LUCHAN con ellos — la letra):
         //  los ojos EMBISTEN en oleadas, cada conejo golpeado SE DIVIDE
-        //  (el gimmick de Re:Zero… la plaga crece) y el hambre del libro
+        //  (la plaga crece) y el hambre del libro
         //  TERMINA DEVORÁNDOLOS a todos (el festín de la casa). Teatro
         //  100% determinista (la misma máquina de siempre: sin Main.rand
         //  en el cerebro, sin daño real, sin NPCs reales — el mundo ni se
@@ -134,12 +130,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// compás de las oleadas de embestida.</summary>
         private const int PLAGA_RONDA = 90;
 
-        /// <summary>El tope de la horda (Re:Zero: se multiplican — pero
+        /// <summary>El tope de la horda (se multiplican — pero
         /// el cielo solo presta doce cuerpos a una sola conciencia).</summary>
         private const int PLAGA_MAX_CONEJOS = 12;
 
-        /// <summary>El tope de rondas (~1 minuto de guerra: el hambre del
-        /// libro es más grande que la gula de Daphne).</summary>
+        /// <summary>El tope de rondas (~1 minuto de guerra: el festín
+        /// del libro siempre encuentra el final).</summary>
         private const int PLAGA_MAX_RONDAS = 40;
 
         /// <summary>v6.51.1 — La moneda del easteregg: 22% plaga por
@@ -244,7 +240,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             /// <summary>La embestida de los ojos: −1 quieta; 0..89 ida/vuelta.</summary>
             public int Embestida = -1;
 
-            // === v6.50.126 — LA PLAGA DEL CONEJO BLANCO (Re:Zero) ===
+            // === v6.50.126 — LA PLAGA DEL CONEJO BLANCO ===
 
             /// <summary>El reloj de la ronda actual (0..PLAGA_RONDA−1).</summary>
             public int PlagaRonda;
@@ -266,14 +262,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             /// ahora el usuario la ve, SIEMPRE, en el peor caso ~1 min).</summary>
             public int PlagaTiradasFallidas;
 
-            /// <summary>LA HORDA (12 cuerpos, una sola conciencia — Re:Zero).
+            /// <summary>LA HORDA (12 cuerpos, una sola conciencia).
             /// v6.50.130 — EL CORO DE LAS HADAS: la misma bandada, cada
             /// cuerpo con SU color (ColorDeHada).</summary>
             public ConejoPlaga[] Conejos = new ConejoPlaga[PLAGA_MAX_CONEJOS];
 
         }
 
-        /// <summary>UN CUERPO DE LA HORDA (v6.50.126 — Re:Zero: conejos
+        /// <summary>UN CUERPO DE LA HORDA (v6.50.126 — conejos
         /// blancos del tamaño de un puño que se multiplican al ser
         /// golpeados). TODO determinista: la posición evoluciona en Tick
         /// desde las mismas entradas en todas las máquinas. v6.50.130:
@@ -360,8 +356,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // ABORTA TODO y vuelve INMEDIATAMENTE a su lado (la letra:
                 // la mascota jamás se aleja de un dueño despierto).
                 // v6.50.126 — también de la GUERRA: el maná quieto se
-                // disipó y la horda HUYE (los conejos de Re:Zero
-                // devoran al quieto… pero el libro jamás deja que el
+                // disipó y la horda HUYE (la plaga acecha al quieto…
+                // pero el libro jamás deja que el
                 // espectáculo toque a su dueño despierto).
                 // v6.50.129 — también de LA CURIOSIDAD (la letra nueva:
                 // la curiosidad solo vive mientras el dueño está quieto).
@@ -867,7 +863,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // dibujan con el libro, en el lote vanilla — DibujarLosTresOjos;
             // aquí solo queda su RIM, en el lote aditivo.)
 
-            // v6.50.126 — LA HORDA (Re:Zero): los conejos blancos saltan
+            // v6.50.126 — LA HORDA: los conejos blancos saltan
             // BAJO el libro y sus ojos (la guerra se ve antes de que los
             // ojos embistan: son parte del piso de la pelea).
             // v6.50.130 — LA HORDA es ahora EL CORO DE LAS HADAS (la misma
@@ -954,8 +950,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             // === v6.50.126→.130 — LOS OJOS DEL CORO: dos puntos encendidos
             //     por hada, del COLOR DE CADA UNA con núcleo blanco,
-            //     mirando al maná del dueño (antes eran ROJOS — la firma
-            //     Re:Zero; la letra los bautizó de hadas: ahora brillan
+            //     mirando al maná del dueño (antes eran ROJOS; la letra
+            //     los bautizó de hadas: ahora brillan
             //     con SU propio color, la luz de dentro de cada una). ===
             if (e.Modo == MODO_PLAGA && Main.netMode != NetmodeID.Server)
             {
@@ -1244,7 +1240,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         // ==================================================================
-        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (el motor Re:Zero)
+        //  v6.50.126 — LA PLAGA DEL CONEJO BLANCO (el motor de la plaga)
         // ==================================================================
 
         /// <summary>LA PRIMERA OLA: la horda huele el maná quieto del
@@ -1296,7 +1292,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         /// <summary>LA RONDA CAE: los ojos cobran los golpes de la ronda
-        /// que terminó — cada conejo golpeado SE DIVIDE (Re:Zero: dos
+        /// que terminó — cada conejo golpeado SE DIVIDE (dos
         /// hijos más pequeños… la plaga crece) o ES DEVORADO (la tinta
         /// del libro se lo traga). Y mientras la horda sea poca, la
         /// conciencia manda REFUERZOS desde los bordes.</summary>
@@ -1320,8 +1316,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 vivos--;
                 if (seDivide)
                 {
-                    // …PERO LA GULA SE REPARE: dos hijos nacen de él (el
-                    // gimmick de Re:Zero — golpearlos solo los hace MÁS).
+                    // …PERO LA PLAGA SE REPARA: dos hijos nacen de él
+                    // (golpearlos solo los hace MÁS).
                     NacerConejo(e, k.Pos + new Vector2(-7f, -2f), k.Angulo - 0.28f, k.Gen + 1);
                     NacerConejo(e, k.Pos + new Vector2(7f, -2f), k.Angulo + 0.28f, k.Gen + 1);
                     vivos += 2;
@@ -1445,7 +1441,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         /// <summary>LA HORDA EN PANTALLA (lote alfa): bolas blancas de
-        /// orejas largas y tamaño de puño (Re:Zero) con su SOMBRA violeta
+        /// orejas largas y tamaño de puño con su SOMBRA violeta
         /// bajo el cuerpo (la lección .66: lo blanco puro sobre cielo
         /// claro necesita piso) y su contorno oscuro (legibles en CUALQUIER
         /// fondo). El salto es del reloj del mundo — todas las pantallas
