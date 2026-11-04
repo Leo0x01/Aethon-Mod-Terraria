@@ -27,6 +27,18 @@ namespace AethonMod.Content.UI
     //  cera…) gana SOLO LA ETIQUETA junto al nombre — el sello que el
     //  grimorio exige para devorar la ofrenda del despertar.
     //
+    //  v6.92 — LA CURA DEL DESBORDE REAL (la captura del playtest de la
+    //  .91): el filtro junto al slot se CORTABA en el borde derecho
+    //  (una línea sin medir) y las leyendas del sello quedaban COMIDAS
+    //  por el borde inferior al chocar con CÓMO CONSEGUIR ESENCIAS (la
+    //  altura fija 576 ya no daba abasto). DOS PASADAS: se MIDE todo
+    //  con la fuente real y el panel NACE con la altura exacta; el
+    //  estado y EL SELLO se reservan con su variante más alta (el
+    //  panel no salta). Y LA CLAVE PERDIDA: el código pedía
+    //  Altar.YaConsagrada pero el hjson decía YaCorrupta — el estado
+    //  «ya consagrada» pintaba la CLAVE cruda (renombrada en los TRES
+    //  idiomas).
+    //
     //  LA VENTANA MEJORADA (la letra: «debes mejorar la ventana que usa
     //  para devorar»): EL PRECIO A LA VISTA (cuántas esencias cuesta
     //  ANTES de pulsar · cuántas llevas), el RESULTADO (arma → stats +
@@ -213,16 +225,39 @@ namespace AethonMod.Content.UI
                 if (!altarVivo || yo.Center.DistanceSQ(altarCentro) > 280f * 280f)
                 { CerrarDeVerdad(); return true; }
 
-                // === LA GEOMETRÍA (v6.91 — LA VENTANA DEL USUARIO:
-                //     «la ventana del altar debes arreglar y optimizarla
-                //     ya que los texto se desbordan… puedes usar la
-                //     textura Espacio_1.png para mejorar el aspecto de la
-                //     ventana»): más alta para SUS TRES SECCIONES (GANA ·
-                //     EL SELLO · CÓMO CONSEGUIR ESENCIAS), el fondo de
-                //     cielo estrellado y CADA LÍNEA MEDIDA — es
-                //     matemáticamente imposible que un texto desborde
-                //     (LineaMedida parte por palabras al ancho real). ===
-                int w = 400, h = 576;
+                // === LA GEOMETRÍA (v6.92 — LA CURA DEL DESBORDE REAL:
+                //     la captura del playtest mostró DOS cortes — el
+                //     texto del filtro junto al slot PARTIDO por el
+                //     borde derecho (era UNA línea sin medir) y las
+                //     leyendas del sello COMIDAS por el borde inferior
+                //     al chocar con la última línea de CÓMO CONSEGUIR
+                //     ESENCIAS: la altura FIJA (576) ya no daba abasto
+                //     para las tres secciones envueltas. LA CURA
+                //     ESTRUCTURAL — DOS PASADAS: primero se MIDE todo
+                //     el contenido con la fuente real (sin dibujar) y
+                //     el panel NACE con la altura exacta; después se
+                //     dibuja con la MISMA función (imposible que
+                //     diverjan). Altura ESTABLE por diseño: el estado
+                //     y la sección EL SELLO se reservan con su
+                //     variante MÁS ALTA — el panel no salta al meter
+                //     la ofrenda). ===
+                int w = 400;
+                bool lista = EsOfrendaConsagrible(_arma);
+                bool esArma = EsArmaDeVerdad(_arma);
+                int costeVivo = lista ? global::AethonMod.Content.Globals.CorruptoGlobalItem
+                    .CosteCorrupcion(_arma) : 0;
+                int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
+                    .EsenciasEnLaBolsa(Main.LocalPlayer);
+
+                // PASADA 1 — LA MEDIDA: el fondo del contenido con la
+                //     fuente REAL. La altura del panel ya no se
+                //     adivina: se CALCULA.
+                float altoContenido = FluirElContenido(null, 0, 0, w,
+                    lista, esArma, costeVivo, llevadas);
+                int h = (int)Math.Ceiling(altoContenido);
+                if (h < 460) h = 460;                       // el suelo de la casa
+                if (h > Main.screenHeight - 16) h = Main.screenHeight - 16;   // la pantalla manda
+
                 int x = Math.Min(Main.screenWidth - w - 10,
                     470 + Math.Max(0, (Main.screenWidth - 1100) / 3));
                 int y = Main.screenHeight / 2 - h / 2;
@@ -243,146 +278,31 @@ namespace AethonMod.Content.UI
                 sb.Draw(pixel, new Rectangle(x, y, w, h), TintaFondo * 0.60f);
                 Marco(sb, pixel, new Rectangle(x - 3, y - 3, w + 6, h + 6), TintaVioleta * 0.80f);
 
-                // EL TITULAR (v6.88 — el corruptor).
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Titulo")),
-                    new Vector2(x + w / 2f, y + 22f), TintaVioleta, 1.1f, 0.5f, 0.4f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Subtitulo")),
-                    new Vector2(x + w / 2f, y + 42f), TintaApagado, 0.75f, 0.5f, 0.4f);
+                // EL TITULAR (v6.88 — el corruptor · v6.92 — con la
+                //     llave de la escala: si un titular nace más ancho
+                //     que el panel, su escala baja hasta que quepa).
+                string titTxt = Language.GetTextValue(Clave("Titulo"));
+                string subTxt = Language.GetTextValue(Clave("Subtitulo"));
+                Utils.DrawBorderString(sb, titTxt, new Vector2(x + w / 2f, y + 22f),
+                    TintaVioleta, EscalaQueCabe(titTxt, 1.1f, w - 60f), 0.5f, 0.4f);
+                Utils.DrawBorderString(sb, subTxt, new Vector2(x + w / 2f, y + 42f),
+                    TintaApagado, EscalaQueCabe(subTxt, 0.75f, w - 40f), 0.5f, 0.4f);
 
-                // === EL SLOT DE LA OFRENDA (la boca del consagrador) ===
-                Rectangle slot = new Rectangle(x + 24, y + 86, 52, 52);
-                bool hoverSlot = PanelContiene(slot) && !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                sb.Draw(pixel, slot, TintaFondo * 0.9f);
-                Marco(sb, pixel, slot, hoverSlot ? TintaVioleta : TintaVioleta * 0.45f);
-                if (_arma != null && !_arma.IsAir)
-                {
-                    Texture2D tex = TextureAssets.Item[_arma.type].Value;
-                    float escala = Math.Min(44f / tex.Width, 44f / tex.Height);
-                    sb.Draw(tex, slot.Center.ToVector2(), null, Color.White, 0f,
-                        tex.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                    if (_arma.stack > 1)
-                        Utils.DrawBorderString(sb, _arma.stack.ToString(),
-                            new Vector2(slot.Right - 6f, slot.Bottom - 8f), TintaTexto, 0.85f, 1f, 0.85f);
-                }
-                else
-                {
-                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("SlotVacio")),
-                        new Vector2(slot.Center.X, slot.Center.Y), TintaApagado * 0.8f, 0.7f, 0.5f, 0.5f);
-                }
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("EtiquetaArma")),
-                    new Vector2(x + 92f, y + 96f), TintaTexto, 0.9f);
-                string filtroTxt = Language.GetTextValue(Clave("FiltroArma"));
-                Utils.DrawBorderString(sb, filtroTxt, new Vector2(x + 92f, y + 118f), TintaApagado, 0.72f);
-
-                // === v6.91 — EL ESTADO + LAS TRES SECCIONES DE LA
-                //     VENTANA NUEVA (la letra: «lo que gana debe estar
-                //     debajo de la palabra Gana… el altar es quien dice
-                //     cuanto necesitas y lo que falta, ademas debe decir
-                //     como conseguiras esencia»): GANA (las ganancias
-                //     DEBAJO de la palabra) · EL SELLO (precio + llevas
-                //     + LO QUE FALTA — la cuenta vive AQUÍ, no en el chat)
-                //     · CÓMO CONSEGUIR ESENCIAS (la mecánica REAL:
-                //     criaturas 0,1% · jefes 1-10 · las oleadas de hambre
-                //     pagan MÁS — tal como caen de verdad, ver
-                //     EsenciaCorruptaDrops.cs y OleadaNPC). ===
-                bool lista = EsOfrendaConsagrible(_arma);
-                bool esArma = EsArmaDeVerdad(_arma);
-                int costeVivo = lista ? global::AethonMod.Content.Globals.CorruptoGlobalItem
-                    .CosteCorrupcion(_arma) : 0;
-                int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
-                    .EsenciasEnLaBolsa(Main.LocalPlayer);
-                if (_arma != null && !_arma.IsAir)
-                {
-                    var selloArma = _arma.GetGlobalItem
-                        <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                    bool yaEra = selloArma != null && selloArma.Corrompido;
-                    // v6.91 — LA CURA DEL «ListaArma»: la llamada perdía el
-                    //     prefijo Mods.AethonMod.Altar. y el juego pintaba la
-                    //     CLAVE cruda. Ahora TODAS pasan por Clave().
-                    string estado = yaEra ? Language.GetTextValue(Clave("YaConsagrada"))
-                        : lista ? Language.GetTextValue(Clave(esArma ? "ListaArma" : "ListaMaterial"))
-                        : Language.GetTextValue(Clave("NoArma"));
-                    Color colEstado = yaEra ? TintaVioleta
-                        : lista ? TintaTeal : TintaRojo;
-                    Utils.DrawBorderString(sb, estado,
-                        new Vector2(x + 24f, y + 158f), colEstado, 0.85f);
-                }
-
-                float cy = y + 186f;
-
-                // ── LA SECCIÓN 1 — GANA (lo que gana, DEBAJO de la
-                //    palabra — la letra: «lo que gana debe estar debajo
-                //    de la palabra Gana»). ──
-                cy = TituloSeccion(sb, Language.GetTextValue(Clave("GanaTitulo")),
-                    x, cy, w, TintaTeal);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaArma")),
-                    x + 24f, cy, w - 48f, 0.78f, TintaTexto);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaMaterial")),
-                    x + 24f, cy, w - 48f, 0.78f, TintaApagado);
-                cy += 8f;
-
-                // ── LA SECCIÓN 2 — EL SELLO (el precio A LA VISTA y LA
-                //    CUENTA DEL ALTAR: cuánto cuesta, cuántas llevas y
-                //    CUÁNTO FALTA — la letra: «el altar es quien dice
-                //    cuanto necesitas y lo que falta»). ──
-                cy = TituloSeccion(sb, Language.GetTextValue(Clave("SelloTitulo")),
-                    x, cy, w, TintaVioleta);
-                if (lista && !_arma.IsAir)
-                {
-                    bool alcanza = llevadas >= costeVivo;
-                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloCuesta"), costeVivo),
-                        x + 24f, cy, w - 48f, 0.80f, TintaTexto);
-                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloLlevas"), llevadas),
-                        x + 24f, cy, w - 48f, 0.80f, TintaApagado);
-                    cy = LineaMedida(sb, Language.GetTextValue(
-                            alcanza ? Clave("SelloAlcanza") : Clave("SelloFalta"),
-                            Math.Max(costeVivo - llevadas, 0)),
-                        x + 24f, cy, w - 48f, 0.80f,
-                        alcanza ? TintaTeal : TintaRojo);
-                }
-                else
-                {
-                    cy = LineaMedida(sb, Language.GetTextValue(Clave("SelloSinOfrenda")),
-                        x + 24f, cy, w - 48f, 0.78f, TintaApagado * 0.9f);
-                }
-                cy += 4f;
-
-                // EL BOTÓN CONSAGRAR (el sello) — ahora debajo de SU
-                // sección, con el hueco contado.
-                Rectangle btnCorromper = new Rectangle(x + 24, (int)cy, w - 48, 42);
-                cy += 42f + 10f;
-                bool hoverBtn = PanelContiene(btnCorromper);
-                sb.Draw(pixel, btnCorromper,
-                    (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
-                Marco(sb, pixel, btnCorromper, lista ? TintaVioleta : TintaVioleta * 0.35f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Consagrar")),
-                    new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
-                    lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
-
-                // ── LA SECCIÓN 3 — CÓMO CONSEGUIR ESENCIAS (la letra:
-                //    «debe decir como conseguiras esencia, y las esencias
-                //    se consiguen matando cualquier criatura de terraria
-                //    cierta probabilidad al igual que matando jefes,
-                //    ademas la probabilidad aumenta en las oleadas de
-                //    hambre» — la MESA REAL del juego, sin adornos). ──
-                cy = TituloSeccion(sb, Language.GetTextValue(Clave("ComoTitulo")),
-                    x, cy, w, TintaApagado * 1.25f);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoCriaturas")),
-                    x + 24f, cy, w - 48f, 0.75f, TintaTexto);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoJefes")),
-                    x + 24f, cy, w - 48f, 0.75f, TintaTexto);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
-                    x + 24f, cy, w - 48f, 0.75f, TintaVioleta);
-                cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
-                    x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
-
-                // LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el
-                // grimorio SOLO devora lo consagrado — la ofrenda del
-                // despertar pasa por AQUÍ).
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("LeyendaSello")),
-                    new Vector2(x + w / 2f, y + h - 34f), TintaApagado, 0.72f, 0.5f, 0.4f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("LeyendaSello2")),
-                    new Vector2(x + w / 2f, y + h - 16f), TintaApagado * 0.85f, 0.72f, 0.5f, 0.4f);
+                // === v6.92 — PASADA 2 — EL DIBUJO: TODO el contenido
+                //     del panel (el slot con su texto MEDIDO — antes el
+                //     filtro era UNA línea sola y la captura del
+                //     playtest la mostró PARTIDA por el borde derecho —
+                //     el estado, las TRES SECCIONES de la v6.91 y las
+                //     LEYENDAS que ya NO viven en posiciones fijas: la
+                //     captura las mostraba COMIDAS por el borde
+                //     inferior al chocar con la última línea de CÓMO
+                //     CONSEGUIR ESENCIAS) fluye por UNA SOLA función
+                //     que dibuja (sb) o mide (null) — la misma
+                //     geometría en las dos pasadas, imposible que
+                //     diverjan. La cuenta del sello y las ganancias
+                //     siguen DEBAJO de sus palabras (la letra de la
+                //     v6.91). ===
+                FluirElContenido(sb, x, y, w, lista, esArma, costeVivo, llevadas);
 
                 // === EL BOTÓN CERRAR (la esquina de siempre) ===
                 Rectangle btnCerrar = new Rectangle(x + w - 34, y + 8, 26, 26);
@@ -401,8 +321,12 @@ namespace AethonMod.Content.UI
                 _ultimoClicIzq = clicAhora;
 
                 // EL SLOT: meter/sacar con el cursor (armas Y materiales
-                // limpios — el resto rebota con su porqué).
-                if (hoverSlot && clicNuevo)
+                // limpios — el resto rebota con su porqué). v6.92 — el
+                // rectángulo vivo lo dejo grabado la pasada de dibujo
+                // (_geoSlot): la posición fluye con el contenido.
+                bool hoverSlotAhora = _geoSlot.Contains(Main.mouseX, Main.mouseY) &&
+                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                if (hoverSlotAhora && clicNuevo)
                 {
                     if (!Main.mouseItem.IsAir)
                     {
@@ -440,7 +364,8 @@ namespace AethonMod.Content.UI
                 //     cobra CosteCorrupcion en Esencias del Eterno.
                 // v6.90 — ARMA O MATERIAL: el arma gana stats + etiqueta;
                 //     el material SOLO la etiqueta (el mensaje lo dice).
-                if (hoverBtn && clicNuevo && lista && !_arma.IsAir)
+                bool hoverBtnAhora = _geoBtn.Contains(Main.mouseX, Main.mouseY);
+                if (hoverBtnAhora && clicNuevo && lista && !_arma.IsAir)
                 {
                     var sello = _arma.GetGlobalItem
                         <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
@@ -515,28 +440,217 @@ namespace AethonMod.Content.UI
             catch { return true; }
         }
 
+        // ================================================================
+        //  v6.92 — EL FLUJO DEL PANEL (la cura del desborde): UNA SOLA
+        //  función dibuja (sb != null) o MIDE (sb == null) todo el
+        //  contenido del altar — del slot a las leyendas. La MISMA
+        //  geometría en las dos pasadas: imposible que diverjan.
+        //  Devuelve el fondo del contenido (la Y de la última línea +
+        //  el respiro del borde inferior).
+        //
+        //  ALTURA ESTABLE POR DISEÑO: el ESTADO y la sección EL SELLO
+        //  se reservan con su variante MÁS ALTA (la de con-ofrenda) —
+        //  el panel NO salta al meter o sacar la ofrenda.
+        // ================================================================
+        /// <summary>Los rects vivos de la pasada de dibujo (el clic los lee).</summary>
+        private static Rectangle _geoSlot;
+        private static Rectangle _geoBtn;
+
+        private static float FluirElContenido(SpriteBatch sb, int x, int y, int w,
+            bool lista, bool esArma, int costeVivo, int llevadas)
+        {
+            Texture2D pixel = TextureAssets.MagicPixel.Value;
+            bool dibujar = sb != null;
+
+            // ── EL SLOT DE LA OFRENDA (la boca del consagrador) ──
+            Rectangle slot = new Rectangle(x + 24, y + 86, 52, 52);
+            if (dibujar)
+            {
+                _geoSlot = slot;
+                bool hoverSlot = PanelContiene(slot) &&
+                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                sb.Draw(pixel, slot, TintaFondo * 0.9f);
+                Marco(sb, pixel, slot, hoverSlot ? TintaVioleta : TintaVioleta * 0.45f);
+                if (_arma != null && !_arma.IsAir)
+                {
+                    Texture2D tex = TextureAssets.Item[_arma.type].Value;
+                    float escala = Math.Min(44f / tex.Width, 44f / tex.Height);
+                    sb.Draw(tex, slot.Center.ToVector2(), null, Color.White, 0f,
+                        tex.Size() * 0.5f, escala, SpriteEffects.None, 0f);
+                    if (_arma.stack > 1)
+                        Utils.DrawBorderString(sb, _arma.stack.ToString(),
+                            new Vector2(slot.Right - 6f, slot.Bottom - 8f), TintaTexto, 0.85f, 1f, 0.85f);
+                }
+                else
+                {
+                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("SlotVacio")),
+                        new Vector2(slot.Center.X, slot.Center.Y), TintaApagado * 0.8f, 0.7f, 0.5f, 0.5f);
+                }
+            }
+
+            // v6.92 — EL TEXTO DE LA OFRENDA, MEDIDO: antes la etiqueta y
+            //     el filtro eran DOS líneas fijas sin medir y la captura
+            //     del playtest mostró el filtro PARTIDO por el borde
+            //     derecho. Ahora se parten por palabras al ancho REAL
+            //     que deja el slot a la derecha.
+            float anchoTexto = w - 92 - 16;
+            float cy = LineaMedida(sb, Language.GetTextValue(Clave("EtiquetaArma")),
+                x + 92f, y + 88f, anchoTexto, 0.88f, TintaTexto);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("FiltroArma")),
+                x + 92f, cy + 1f, anchoTexto, 0.66f, TintaApagado * 0.95f);
+
+            // Las secciones nacen bajo el slot Y bajo el texto, lo que pida más.
+            cy = Math.Max(cy, y + 138f) + 10f;
+
+            // ── EL ESTADO (v6.92 — reservado SIEMPRE con su variante más
+            //    alta: el panel no salta al meter la ofrenda). La cura del
+            //    «ListaArma» (v6.91) sigue viva: TODAS las claves pasan
+            //    por Clave(). ──
+            float altoEstado = Math.Max(
+                AltoMedido(Language.GetTextValue(Clave("ListaArma")), w - 48f, 0.85f),
+                AltoMedido(Language.GetTextValue(Clave("YaConsagrada")), w - 48f, 0.85f));
+            altoEstado = Math.Max(altoEstado,
+                AltoMedido(Language.GetTextValue(Clave("ListaMaterial")), w - 48f, 0.85f));
+            altoEstado = Math.Max(altoEstado,
+                AltoMedido(Language.GetTextValue(Clave("NoArma")), w - 48f, 0.85f));
+            if (dibujar && _arma != null && !_arma.IsAir)
+            {
+                var selloArma = _arma.GetGlobalItem
+                    <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                bool yaEra = selloArma != null && selloArma.Corrompido;
+                string estado = yaEra ? Language.GetTextValue(Clave("YaConsagrada"))
+                    : lista ? Language.GetTextValue(Clave(esArma ? "ListaArma" : "ListaMaterial"))
+                    : Language.GetTextValue(Clave("NoArma"));
+                Color colEstado = yaEra ? TintaVioleta
+                    : lista ? TintaTeal : TintaRojo;
+                LineaMedida(sb, estado, x + 24f, cy, w - 48f, 0.85f, colEstado);
+            }
+            cy += altoEstado + 4f;
+
+            // ── LA SECCIÓN 1 — GANA (lo que gana, DEBAJO de la palabra —
+            //    la letra: «lo que gana debe estar debajo de la palabra
+            //    Gana»). ──
+            cy = TituloSeccion(sb, Language.GetTextValue(Clave("GanaTitulo")),
+                x, cy, w, TintaTeal);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaArma")),
+                x + 24f, cy, w - 48f, 0.78f, TintaTexto);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaMaterial")),
+                x + 24f, cy, w - 48f, 0.78f, TintaApagado);
+            cy += 8f;
+
+            // ── LA SECCIÓN 2 — EL SELLO (el precio A LA VISTA y LA CUENTA
+            //    DEL ALTAR: cuánto cuesta, cuántas llevas y CUÁNTO FALTA —
+            //    la letra: «el altar es quien dice cuanto necesitas y lo
+            //    que falta» · v6.92 — reservada con su variante MÁS ALTA
+            //    (la de con-ofrenda): el panel no salta). ──
+            cy = TituloSeccion(sb, Language.GetTextValue(Clave("SelloTitulo")),
+                x, cy, w, TintaVioleta);
+            bool alcanza = llevadas >= costeVivo;
+            float altoConOfrenda = Math.Max(Math.Max(
+                AltoMedido(Language.GetTextValue(Clave("SelloCuesta"), costeVivo), w - 48f, 0.80f),
+                AltoMedido(Language.GetTextValue(Clave("SelloLlevas"), llevadas), w - 48f, 0.80f)),
+                AltoMedido(Language.GetTextValue(
+                    alcanza ? Clave("SelloAlcanza") : Clave("SelloFalta"),
+                    Math.Max(costeVivo - llevadas, 0)), w - 48f, 0.80f));
+            float altoSinOfrenda = AltoMedido(Language.GetTextValue(Clave("SelloSinOfrenda")),
+                w - 48f, 0.78f);
+            if (dibujar)
+            {
+                if (lista && !_arma.IsAir)
+                {
+                    LineaMedida(sb, Language.GetTextValue(Clave("SelloCuesta"), costeVivo),
+                        x + 24f, cy, w - 48f, 0.80f, TintaTexto);
+                    LineaMedida(sb, Language.GetTextValue(Clave("SelloLlevas"), llevadas),
+                        x + 24f, cy, w - 48f, 0.80f, TintaApagado);
+                    LineaMedida(sb, Language.GetTextValue(
+                            alcanza ? Clave("SelloAlcanza") : Clave("SelloFalta"),
+                            Math.Max(costeVivo - llevadas, 0)),
+                        x + 24f, cy, w - 48f, 0.80f,
+                        alcanza ? TintaTeal : TintaRojo);
+                }
+                else
+                {
+                    LineaMedida(sb, Language.GetTextValue(Clave("SelloSinOfrenda")),
+                        x + 24f, cy, w - 48f, 0.78f, TintaApagado * 0.9f);
+                }
+            }
+            cy += Math.Max(altoConOfrenda, altoSinOfrenda) + 4f;
+
+            // EL BOTÓN CONSAGRAR (el sello) — debajo de SU sección, con el
+            // hueco contado (v6.92: el rect vive en _geoBtn para el clic).
+            Rectangle btnCorromper = new Rectangle(x + 24, (int)cy, w - 48, 42);
+            if (dibujar)
+            {
+                _geoBtn = btnCorromper;
+                bool hoverBtn = PanelContiene(btnCorromper);
+                sb.Draw(pixel, btnCorromper,
+                    (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
+                Marco(sb, pixel, btnCorromper, lista ? TintaVioleta : TintaVioleta * 0.35f);
+                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Consagrar")),
+                    new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
+                    lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
+            }
+            cy += 42f + 10f;
+
+            // ── LA SECCIÓN 3 — CÓMO CONSEGUIR ESENCIAS (la mesa REAL del
+            //    juego: criaturas 0,1% · jefes 1-10 · ¡las OLEADAS DE
+            //    HAMBRE suben la probabilidad! — tal como caen de
+            //    verdad, ver EsenciaCorruptaDrops.cs y OleadaNPC). ──
+            cy = TituloSeccion(sb, Language.GetTextValue(Clave("ComoTitulo")),
+                x, cy, w, TintaApagado * 1.25f);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoCriaturas")),
+                x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoJefes")),
+                x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
+                x + 24f, cy, w - 48f, 0.75f, TintaVioleta);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
+                x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
+            cy += 6f;
+
+            // ── LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el grimorio
+            //    SOLO devora lo consagrado · v6.92 — AHORA FLUYE: la
+            //    captura del playtest la mostraba PARTIDA por el borde
+            //    inferior al chocar con la última línea de CÓMO
+            //    CONSEGUIR ESENCIAS — las leyendas ya NO viven en
+            //    posiciones fijas, siguen al contenido y se parten
+            //    centradas si hiciera falta). ──
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("LeyendaSello")),
+                x + w / 2f, cy, w - 40f, 0.72f, TintaApagado, true);
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("LeyendaSello2")),
+                x + w / 2f, cy, w - 40f, 0.72f, TintaApagado * 0.85f, true);
+
+            return cy + 8f;   // el respiro del borde inferior
+        }
+
         /// <summary>v6.91 — EL TITULAR DE SECCIÓN de la ventana del altar:
-        /// centrado, con sus filetes a los lados. Devuelve la Y siguiente.</summary>
+        /// centrado, con sus filetes a los lados. v6.92 — con sb == null
+        /// SOLO mide (la pasada 1 del panel). Devuelve la Y siguiente.</summary>
         private static float TituloSeccion(SpriteBatch sb, string texto, int x, float cy, int w, Color c)
         {
-            var fuente = FontAssets.MouseText.Value;
-            float ancho = fuente.MeasureString(texto).X * 0.85f;
-            float cx = x + w / 2f;
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)(cx - ancho / 2f - 26f), (int)cy + 7, 18, 2), c * 0.45f);
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)(cx + ancho / 2f + 8f), (int)cy + 7, 18, 2), c * 0.45f);
-            Utils.DrawBorderString(sb, texto, new Vector2(cx, cy), c, 0.85f, 0.5f, 0.4f);
+            if (sb != null)
+            {
+                var fuente = FontAssets.MouseText.Value;
+                float ancho = fuente.MeasureString(texto).X * 0.85f;
+                float cx = x + w / 2f;
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)(cx - ancho / 2f - 26f), (int)cy + 7, 18, 2), c * 0.45f);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)(cx + ancho / 2f + 8f), (int)cy + 7, 18, 2), c * 0.45f);
+                Utils.DrawBorderString(sb, texto, new Vector2(cx, cy), c, 0.85f, 0.5f, 0.4f);
+            }
             return cy + 24f;
         }
 
         /// <summary>v6.91 — LA LÍNEA MEDIDA (la letra: «los texto se
         /// desbordan»): cada línea del altar se mide con la fuente REAL y
         /// si no cabe en maxAncho se PARTE POR PALABRAS — es matemáticamente
-        /// imposible que un texto se salga del panel. Devuelve la Y
-        /// siguiente.</summary>
+        /// imposible que un texto se salga del panel. v6.92 — DOS MODOS:
+        /// con sb == null SOLO mide (la pasada 1); con centrado = true
+        /// cada línea parte se centra alrededor de x (las leyendas).
+        /// Devuelve la Y siguiente.</summary>
         private static float LineaMedida(SpriteBatch sb, string texto, float x, float cy,
-            float maxAncho, float escala, Color c)
+            float maxAncho, float escala, Color c, bool centrado = false)
         {
             var fuente = FontAssets.MouseText.Value;
             float altoLinea = fuente.MeasureString("Ag").Y * escala + 2f;
@@ -547,7 +661,7 @@ namespace AethonMod.Content.UI
                 string prueba = linea.Length == 0 ? pal : linea.ToString() + " " + pal;
                 if (fuente.MeasureString(prueba).X * escala > maxAncho && linea.Length > 0)
                 {
-                    Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, escala);
+                    DibujarLaLinea(sb, linea.ToString(), x, cy, escala, c, centrado);
                     cy += altoLinea;
                     linea.Clear().Append(pal);
                 }
@@ -558,10 +672,39 @@ namespace AethonMod.Content.UI
             }
             if (linea.Length > 0)
             {
-                Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, escala);
+                DibujarLaLinea(sb, linea.ToString(), x, cy, escala, c, centrado);
                 cy += altoLinea;
             }
             return cy + 3f;
+        }
+
+        /// <summary>El pincel de LineaMedida (sb == null = pasada de
+        /// medida: no se dibuja NADA).</summary>
+        private static void DibujarLaLinea(SpriteBatch sb, string texto, float x, float cy,
+            float escala, Color c, bool centrado)
+        {
+            if (sb == null) return;
+            float dx = x;
+            if (centrado)
+                dx = x - FontAssets.MouseText.Value.MeasureString(texto).X * escala * 0.5f;
+            Utils.DrawBorderString(sb, texto, new Vector2(dx, cy), c, escala);
+        }
+
+        /// <summary>El ALTO medido de un texto partido por palabras (la
+        /// medida pura de la pasada 1 — sin dibujar).</summary>
+        private static float AltoMedido(string texto, float maxAncho, float escala)
+            => LineaMedida(null, texto, 0f, 0f, maxAncho, escala, Color.White);
+
+        /// <summary>v6.92 — LA ESCALA QUE CABE: si un titular nace más
+        /// ancho que el panel, su escala baja hasta que quepa — jamás se
+        /// corta por los lados.</summary>
+        private static float EscalaQueCabe(string texto, float escala, float maxAncho)
+        {
+            var fuente = FontAssets.MouseText.Value;
+            float e = escala;
+            while (e > 0.55f && fuente.MeasureString(texto).X * e > maxAncho)
+                e -= 0.05f;
+            return e;
         }
 
         /// <summary>¿El ratón está encima de este rect DEL PANEL? (y come
