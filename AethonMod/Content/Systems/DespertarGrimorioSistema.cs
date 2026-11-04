@@ -347,44 +347,35 @@ namespace AethonMod.Content.Systems
                             esenciasNecesarias);
                         mordisco = true;
                     }
-                    // === 2) EL DINERO — v6.93: CONSAGRADO y ENTERO, al
-                    //     BANCO (la letra: «todo se debe consagrar incluso
-                    //     las monedas de platino, oro, plata y cobre, todo
-                    //     debe ser consagrado primero, todos menos las
-                    //     esencias» + «al consumir 100 monedas de platino
-                    //     estas completarian todos los checklist que
-                    //     pidan dinero hasta llegar a consumir las 100»):
-                    //     el Eterno se traga la pila entera y la suma al
-                    //     banco del despertar — los peldaños cobran de
-                    //     ahí, hoy o MAÑANA (retroactivo). Sin sello: NI
-                    //     LA PRUEBA (la ley de la consagración de la v6.90,
-                    //     ahora también para el dinero). El ESCUPIDERO de
-                    //     cambio de la v6.51 murió con la mesa vieja: ya no
-                    //     se come «solo lo que falta». ===
+                    // === 2) EL DINERO — SIN SELLO, ENTERO, al BANCO (la
+                    //     letra de la sesión del banco: «al consumir 100
+                    //     monedas de platino estas completarian todos los
+                    //     checklist que pidan dinero hasta llegar a
+                    //     consumir las 100» + la letra nueva: «el dinero
+                    //     no se consagra, simplemente se deja caer,
+                    //     recuerda que el grimorio solo devora lo que el
+                    //     jugador deja caer»): el Eterno se traga la pila
+                    //     entera — SIN CONSAGRAR, como las esencias — y la
+                    //     suma al banco del despertar; los peldaños cobran
+                    //     de ahí, hoy o MAÑANA (retroactivo). El dinero no
+                    //     pasa por el altar: cae delante del portador y ya.
+                    //     El ESCUPIDERO de cambio de la v6.51 murió con la
+                    //     mesa vieja: ya no se come «solo lo que falta». ===
                     else if (drop.type == ItemID.CopperCoin || drop.type == ItemID.SilverCoin ||
                         drop.type == ItemID.GoldCoin || drop.type == ItemID.PlatinumCoin)
                     {
-                        var selloMon = drop.GetGlobalItem
-                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                        if (selloMon == null || !selloMon.Corrompido)
-                        {
-                            AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
-                        }
-                        else
-                        {
-                            long cobre = ValorDeMoneda(drop.type) * drop.stack;
-                            AnimarElBocado(p, drop, 1f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
-                            global::AethonMod.Content.Globals.AlmaEternoGlobalItem
-                                .BancoGuardarMonedas(libro, cobre);
-                            drop.TurnToAir();
-                            SincronizarDrop(d);
+                        long cobre = ValorDeMoneda(drop.type) * drop.stack;
+                        AnimarElBocado(p, drop, 1f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
+                        global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                            .BancoGuardarMonedas(libro, cobre);
+                        drop.TurnToAir();
+                        SincronizarDrop(d);
 
-                            PolvosDelBocado(p, 3);
-                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMonedas",
-                                new Color(196, 138, 255),
-                                ItemToText(cobre));
-                            mordisco = true;
-                        }
+                        PolvosDelBocado(p, 3);
+                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMonedas",
+                            new Color(196, 138, 255),
+                            ItemToText(cobre));
+                        mordisco = true;
                     }
                     // === 3) EL FESTÍN DE SIEMPRE, UNIFICADO (v6.93 — la
                     //     muerte de los casos «EL MATERIAL DEL PELDAÑO» y

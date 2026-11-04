@@ -2586,7 +2586,6 @@ Projectiles: {
 	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
 	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
 	EclipseVivoProj.DisplayName: El Eclipse Vivo
-	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
 }
 
 Buffs: {
@@ -3108,7 +3107,7 @@ Despertar: {
 	ReqOpcionBloqueada: (bloqueada)
 	HitoTitulo: Próximo hito del Despertar:
 	DanoGrimorio: +{0}% de daño a TODO el grimorio
-	NotaFinal: (todo lo que el grimorio come se CONSAGRA en el Altar de la Consagración — menos las esencias — y se suelta DELANTE del jugador con el grimorio SELECCIONADO: el grimorio SOLO devora lo que su portador ARROJA al suelo)
+	NotaFinal: (las armas y los materiales se CONSAGRAN en el Altar de la Consagración; las esencias y el dinero se comen SIN sello — solo déjalos caer. Todo se suelta ENFRENTE del jugador con el grimorio SELECCIONADO: el grimorio SOLO devora lo que su portador ARROJA al suelo)
 	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CONSAGRADO… déjalo caer al suelo, portador. QUIERO probarlo.
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
 	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
@@ -3239,6 +3238,13 @@ Jefe: {
 		Corona: LA CORONA ETERNA — el arcoíris te asedia: muévete con las plumas.
 		// v6.50.57 — THE SPECIAL ATTACK: THE GOD BECOMES A SUN AND THROWS IT
 		Sol: EL SOL DEL DIOS — Aethon SE CONVIERTE en sol y lo LANZA: aléjate de la gigante roja.
+		// v6.95 — LOS TRES HACES DEL DIOS (la letra: «en vez de 3 hazes
+		// de luz, que sean 6… giren a su alrededor · el Rayo concentrado
+		// 2 como ataque definitvo · la mirada del eterno como ataque medio
+		// raro») — TODO sobre HazLib, la librería de haces de la casa.
+		Renglones: LOS SEIS RENGLONES DEL DIOS — seis barras de tinta giran a su alrededor: camina ENTRE los renglones, con el giro.
+		RayoConcentrado: EL RAYO CONCENTRADO DEL DIOS — EL DEFINITIVO: el cono del conjuro barre la arena: corre EN PERPENDICULAR.
+		Mirada: LA MIRADA DEL DIOS — el ojo del libro se abre: rompe la línea de la mirada.
 		// v6.50.120 — FUSION AS A PHASE + THE FINAL BOSS'S THREE WEAPONS
 		// (the final-boss research: Moon Lord, the Lunatic Cultist, Duke
 		// Fishron — the Complete Memory devours them all).
@@ -3786,7 +3792,7 @@ Altar: {
 	Subtitulo: consagra la ofrenda por el Eterno — arma o material
 	SlotVacio: ofrenda
 	EtiquetaArma: LA OFRENDA — un arma o un material (no herramienta)
-	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni esencias
+	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni esencias, ni dinero
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
 	ListaMaterial: Material listo — gana solo su etiqueta
 	YaConsagrada: Ya está consagrada
@@ -3817,7 +3823,7 @@ Altar: {
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
-	LeyendaSello2: (las Esencias del Eterno no necesitan sello: ellas SON su esencia)
+	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
 }
 
 Arbol: {

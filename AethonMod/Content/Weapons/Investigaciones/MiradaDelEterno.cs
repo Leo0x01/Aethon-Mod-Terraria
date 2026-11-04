@@ -55,11 +55,20 @@ namespace AethonMod.Content.Weapons.Investigaciones
     //  molestos»): dos capas de PAR (boca→punta) por UN draw call —
     //    · EL VELO (×1.9 de ancho, 44 nodos, FilasVelo): el halo de
     //      cúpula pow(4y(1−y), 3)·3.5 que envuelve la espina.
-    //    · EL CUERPO (72 nodos, FilasNucleo): la espina rosa con su
+    //    · EL CUERPO (72 nodos, FilasNucleo): la espina FUCSIA con su
     //      ruido diagonal (frac(coords·2 + (0, x·5) − 3t)), su umbral
     //      suave (el 40 % oscuro no se pinta), su núcleo blanco
-    //      (1/d), su fogonazo melocotón del arranque y su recolor
-    //      dorado del centro.
+    //      (1/d), su fogonazo DE TINTA AZUL-NOCHE del arranque y su
+    //      recolor DORADO DEL BROCHE del centro.
+    //  v6.95 — LOS COLORES DE LA CASA (la letra: «ahora solo falta
+    //  darle los colores de la casa, o sea los colores que usamos
+    //  principalmente para el mod teniendo en cuenta los colores del
+    //  libro»): la paleta del GRIMORIO vive en el rayo — ESPINA
+    //  FUCSIA (240,0,192) del iris del ojo de la portada · VELO
+    //  MORADO (170,80,255) del mod · FOGONAZO DE TINTA (96,128,255)
+    //  azul-noche de las páginas al abrirse · CENTRO DORADO
+    //  (255,200,80) del broche que cierra el libro. Mismo ataque,
+    //  misma geometría, misma ley anti-picos: SOLO la tinta cambió.
     //  EL BORDE es LEY DE LA LIBRERÍA (Filo = smoothstep(0.5→0.4,
     //  |y−0.5|)): rgb=0 EXACTO en el filo — los picos de brillo son
     //  matemáticamente imposibles. Sobre el velo el filo es invisible
@@ -187,7 +196,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                     Projectile.Center + Main.rand.NextVector2Circular(200f, 200f),
                     Main.rand.NextBool() ? DustID.Electric : DustID.PortalBoltTrail,
                     Vector2.Zero, 0,
-                    Main.rand.NextBool() ? Color.Wheat : Color.HotPink, 0.9f);
+                    Main.rand.NextBool() ? new Color(255, 200, 80) : new Color(240, 0, 192), 0.9f);
                 Vector2 hacia = Projectile.Center - d.position;
                 if (hacia.LengthSquared() > 1f) d.velocity = hacia / hacia.Length() * 10f;
                 d.noGravity = true;
@@ -221,10 +230,10 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 if (flare == null || glow == null) return false;
 
                 // TRES flares GIRANDO con la carga y DOS glows fijos —
-                // el fogonazo melocotón del amanecer, escala ·2.
+                // el fogonazo FUCSIA del iris del libro, escala ·2.
                 Vector2 pos = Projectile.Center - Main.screenPosition;
                 float brillo = Projectile.scale * 0.45f;
-                Color fogonazo = new Color(255, 174, 147, 0);
+                Color fogonazo = new Color(240, 0, 192, 0);
                 Vector2 ojoFlare = flare.Size() * 0.5f;
                 Vector2 ojoGlow = glow.Size() * 0.5f;
 
@@ -258,7 +267,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
     public class MiradaRayoProj : ModProjectile
     {
         /// <summary>El alcance máximo del rayo.</summary>
-        private const float LargoMax = 5600f;
+        internal const float LargoMax = 5600f;
 
         /// <summary>El crecimiento por actualización.</summary>
         private const float Crecimiento = 175f;
@@ -295,16 +304,30 @@ namespace AethonMod.Content.Weapons.Investigaciones
             _leyTiempo = Tiempo;
         }
 
+        /// <summary>v6.95 — EL REFRESCO DEL JEFE: el ataque hostil LA
+        /// MIRADA DEL DIOS reutiliza ESTAS leyes (la letra: «también hay
+        /// que darle la mirada del eterno como ataque medio raro» — el
+        /// MISMO rayo, girado contra el portador): el jefe refresca el
+        /// presente con SU largo y SU tiempo antes de dibujar.</summary>
+        internal static void RefrescarPara(float largo, float tiempo)
+        {
+            _leyLargo = largo;
+            _leyTiempo = tiempo;
+        }
+
         // ================================================================
         //  LAS LEYES CACHEADAS — los delegados de HazLib
         // ================================================================
 
-        private static readonly HazLib.LeyAncho LeySemianchoCuerpo = SemianchoCuerpo;
-        private static readonly HazLib.LeyAncho LeySemianchoVelo = SemianchoVelo;
-        private static readonly HazLib.LeyNodo LeyTinteCuerpo = TinteCuerpo;
-        private static readonly HazLib.LeyNodo LeyTinteVelo = TinteVelo;
-        private static readonly HazLib.LeyVertice LeyVerticeCuerpo = VerticeCuerpo;
-        private static readonly HazLib.LeyVertice LeyVerticeVelo = VerticeVelo;
+        // v6.95 — INTERNAL: el ataque hostil del jefe (LA MIRADA DEL
+        // DIOS) reutiliza estas leyes cacheadas — el MISMO aspecto del
+        // arma de la casa, sin duplicar una coma.
+        internal static readonly HazLib.LeyAncho LeySemianchoCuerpo = SemianchoCuerpo;
+        internal static readonly HazLib.LeyAncho LeySemianchoVelo = SemianchoVelo;
+        internal static readonly HazLib.LeyNodo LeyTinteCuerpo = TinteCuerpo;
+        internal static readonly HazLib.LeyNodo LeyTinteVelo = TinteVelo;
+        internal static readonly HazLib.LeyVertice LeyVerticeCuerpo = VerticeCuerpo;
+        internal static readonly HazLib.LeyVertice LeyVerticeVelo = VerticeVelo;
 
         public override string Texture => "AethonMod/Content/Effects/FlareEstrella4Puntas";
 
@@ -368,10 +391,11 @@ namespace AethonMod.Content.Weapons.Investigaciones
             RefrescarLeyes();    // las leyes leen el presente
 
             // === LA LUZ (3 puntos: boca, medio y punta) y LAS CHISPAS DEL
-            //     FILO (el borde del haz escupe polvo). ===
+            //     FILO (el borde del haz escupe polvo). La LUZ FUCSIA del
+            //     iris del libro — el color de la casa. ===
             if (Main.netMode != NetmodeID.Server && !Main.dedServ)
             {
-                Vector3 luz = new Vector3(0.9f, 0.25f, 0.55f);
+                Vector3 luz = new Vector3(0.92f, 0.08f, 0.78f);
                 Vector2 fin = owner.Center + dir * Largo;
                 Lighting.AddLight(Projectile.Center, luz);
                 Lighting.AddLight(Vector2.Lerp(Projectile.Center, fin, 0.5f), luz * 0.8f);
@@ -387,7 +411,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                         borde + perp * (semi * 0.9f * lado),
                         Main.rand.NextBool() ? DustID.Electric : DustID.PortalBoltTrail,
                         perp * lado * Main.rand.NextFloat(2f, 8f), 0,
-                        Main.rand.NextBool() ? Color.HotPink : Color.Wheat,
+                        Main.rand.NextBool() ? new Color(240, 0, 192) : new Color(255, 200, 80),
                         Main.rand.NextFloat(0.8f, 1.4f));
                     d.noGravity = true;
                 }
@@ -439,32 +463,40 @@ namespace AethonMod.Content.Weapons.Investigaciones
             return Utils.Remap(_leyLargo, 0f, LargoMax, 4f, ideal) * cierre * arranque;
         }
 
+        /// <summary>v6.95 — EL SEMIANCHO PÚBLICO DE LA CASA: el ataque
+        /// hostil del jefe (LA MIRADA DEL DIOS) mide SU colisión con la
+        /// MISMA ley del arma (el ancho vivo, no un número suelto).</summary>
+        internal static float SemianchoDeCasa(float p) => Semiancho(p);
+
         private static float SemianchoCuerpo(float p) => Semiancho(p);
 
         /// <summary>El velo es la espina ×1.9 — el halo que la envuelve.</summary>
         private static float SemianchoVelo(float p) => Semiancho(p) * 1.9f;
 
-        /// <summary>EL TINTE de la espina: rosa (255,45,123) que nace
+        /// <summary>EL TINTE de la espina: FUCSIA DEL LIBRO (240,0,192 —
+        /// el iris del ojo de la portada, el color de la casa) que nace
         /// (x<0.032) y muere (x>0.81) en transparente — la punta nunca
         /// se corta en seco.</summary>
         private static Color TinteCuerpo(float p)
         {
             float rel = _leyLargo / LargoMax;
-            return new Color(255, 45, 123)
+            return new Color(240, 0, 192)
                 * (Rampa(0f, 0.45f, rel) * Rampa(0f, 0.032f, p) * Rampa(0.95f, 0.81f, p));
         }
 
-        /// <summary>EL TINTE del velo: magenta (255,10,150) al 34 % con
-        /// el bump 0.02→0.05 — la aura que respira alrededor.</summary>
+        /// <summary>EL TINTE del velo: MORADO DE LA CASA (170,80,255) al
+        /// 34 % con el bump 0.02→0.05 — la aura que respira alrededor
+        /// (el morado principal del mod envolviendo la espina fucsia).</summary>
         private static Color TinteVelo(float p)
-            => new Color(255, 10, 150)
+            => new Color(170, 80, 255)
              * (Rampa(0.02f, 0.05f, p) * Rampa(0.95f, 0.81f, p)) * 0.34f;
 
         /// <summary>EL VÉRTICE de la espina — el INTERIOR del haz (el
         /// borde lo pone HazLib): el ruido diagonal cizarrado
         /// (frac(coords·2 + (0, x·5) − 3t)), el umbral suave (el 40 %
         /// oscuro no se pinta), el núcleo blanco (1/d), el fogonazo
-        /// melocotón del arranque y el recolor dorado del centro.</summary>
+        /// DE TINTA AZUL-NOCHE del arranque y el recolor dorado del
+        /// centro (los colores del libro, la casa).</summary>
         private static Color VerticeCuerpo(float x, float y, Color tinte)
         {
             float t = Main.GlobalTimeWrappedHourly;
@@ -485,11 +517,13 @@ namespace AethonMod.Content.Weapons.Investigaciones
             float razon = d <= 0.0001f ? 1f : Saturar((0.01f + 0.97f * ruido) / d);
             float brilloInterior = razon * Smoothstep(0.25f, 0.12f, d);
 
-            // EL FOGONAZO MELOCOTÓN del arranque (solo el primer 11 %).
+            // EL FOGONAZO DE TINTA AZUL-NOCHE del arranque (solo el
+            // primer 11 %) — la tinta del libro abriéndose.
             Vector4 arranque = RecursosMirada.Fogonazo * Smoothstep(0.11f, 0.01f, x);
 
             // EL RECOLOR DORADO: del centro hacia el borde la espina vira
-            // al dorado (255,196,36) — el lerp EXTRAPOLA (sin clamp).
+            // al DORADO DEL BROCHE (el cierre dorado del libro) — el lerp
+            // EXTRAPOLA (sin clamp).
             float mezcla = Smoothstep(0.3f, 0.18f, d) + ruido * 0.1f;
             Vector4 color = Vector4.Lerp(tinte.ToVector4(), RecursosMirada.Dorado, mezcla);
 
@@ -576,7 +610,8 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 finally { HazLib.Cerrar(); }
 
                 // === EL MUZZLE: tres flares + dos glows con el LATIDO del
-                //     factor mágico (Cos01(t·85)) — el fogonazo melocotón. ===
+                //     factor mágico (Cos01(t·85)) — el fogonazo FUCSIA del
+                //     iris del libro. ===
                 VFXCore.AbrirAdditive();
                 try
                 {
@@ -590,7 +625,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                                  * Rampa(0f, 7f, Projectile.timeLeft) // el apagado
                                  * MathHelper.Lerp(1f, 1.2f, latido)
                                  * 0.45f;
-                    Color fogonazo = new Color(255, 174, 147, 0);
+                    Color fogonazo = new Color(240, 0, 192, 0);
                     Vector2 ojoFlare = flare.Size() * 0.5f;
                     Vector2 ojoGlow = glow.Size() * 0.5f;
                     for (int i = 0; i < 3; i++)
@@ -622,11 +657,14 @@ namespace AethonMod.Content.Weapons.Investigaciones
         private static int _ruidoAncho;
         private static int _ruidoAlto;
 
-        /// <summary>El color del fogonazo del arranque (melocotón).</summary>
-        public static readonly Vector4 Fogonazo = new Color(255, 174, 147).ToVector4();
+        /// <summary>El color del fogonazo del arranque: TINTA AZUL-NOCHE
+        /// luminosa (96,128,255) — la tinta de las páginas del libro
+        /// (la casa: el arranque es la página que se abre).</summary>
+        public static readonly Vector4 Fogonazo = new Color(96, 128, 255).ToVector4();
 
-        /// <summary>El dorado del recolor del centro.</summary>
-        public static readonly Vector4 Dorado = new Color(255, 196, 36).ToVector4();
+        /// <summary>El DORADO DEL BROCHE (255,200,80) — el cierre dorado
+        /// del libro, el recolor del centro de la espina.</summary>
+        public static readonly Vector4 Dorado = new Color(255, 200, 80).ToVector4();
 
         public static Texture2D Flare => _flare?.Value;
         public static Texture2D Glow => _glow?.Value;

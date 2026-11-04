@@ -163,12 +163,12 @@ namespace AethonMod.Content.UI
         //  item de ofrenda vale — el arma gana stats + etiqueta, el
         //  material SOLO la etiqueta. Nada de herramientas ni
         //  accesorios, ni el grimorio, ni el libro, ni lo ya consagrado.
-        //  v6.93 — LAS MONEDAS ENTRAN (la letra: «todo es retroactivo
-        //  y todo se debe consagrar incluso las monedas de platino,
-        //  oro, plata y cobre, todo debe ser consagrado primero, todos
-        //  menos las esencias»): las monedas YA son ofrenda — el
-        //  grimorio no las prueba sin sello (DespertarGrimorioSistema
-        //  .ServirLaMesa) y TODO lo que comen va al BANCO del despertar.
+        //  v6.95 — EL DINERO SALE DEL ALTAR (la letra nueva: «el dinero
+        //  no se consagra, simplemente se deja caer»): las monedas ya
+        //  NO son ofrenda — el Eterno las devora SIN sello, tal cual
+        //  caen delante del portador (DespertarGrimorioSistema
+        //  .ServirLaMesa); el altar consagra armas y materiales,
+        //  nada más.
         // ================================================================
         private static bool EsOfrendaConsagrible(Item it)
         {
@@ -183,6 +183,11 @@ namespace AethonMod.Content.UI
                     <global::AethonMod.Content.Items.Altar.LibroCorrupto>()) return false;
                 // EL GRIMORIO NO (él es el comensal, no el plato).
                 if (it.ModItem is global::AethonMod.Content.Weapons.GrimoireEternal) return false;
+                // EL DINERO TAMPOCO (v6.95: «el dinero no se consagra,
+                // simplemente se deja caer» — el Eterno lo devora sin
+                // sello, directamente del suelo).
+                if (it.type == ItemID.CopperCoin || it.type == ItemID.SilverCoin ||
+                    it.type == ItemID.GoldCoin || it.type == ItemID.PlatinumCoin) return false;
                 // LOS ACCESORIOS Y LA VANIDAD NO SON OFRENDA NI ARMA.
                 if (it.accessory || it.vanity) return false;
                 // LAS HERRAMIENTAS TAMPOCO (picos, hachas, martillos).
@@ -191,9 +196,9 @@ namespace AethonMod.Content.UI
                 var sello = it.GetGlobalItem
                     <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                 if (sello != null && sello.Corrompido) return false;
-                // TODO LO DEMÁS ES OFRENDA: armas (daño > 0), materiales
-                // (lingotes, gemas, cera, fragmentos, almas… ) y, desde la
-                // v6.93, LAS MONEDAS (cobre, plata, oro y platino).
+                // TODO LO DEMÁS ES OFRENDA: armas (daño > 0) y materiales
+                // (lingotes, gemas, cera, fragmentos, almas…). Las monedas
+                // se fueron con la v6.95: el dinero NO se consagra.
                 return true;
             }
             catch { return false; }

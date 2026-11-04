@@ -1739,14 +1739,27 @@ namespace AethonMod.Content.Weapons
                         }
 
                         // === LA NOTA FINAL (la letra: «aquí debes dejar
-                        //     alguna información pequeña, como decir que
-                        //     todo debe ser consagrado en el Altar de la
-                        //     Consagración y que todo debe ser soltado
-                        //     enfrente del jugador para que el grimorio
-                        //     los devora, siempre teniendo el grimorio
-                        //     seleccionado»). ===
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
-                            "[c/78788C:  (Todo lo que el grimorio devora —armas, materiales y monedas— debe ser CONSAGRADO en el Altar de la Consagración y soltado ENFRENTE del jugador, con el grimorio seleccionado; solo las esencias se comen sin sello)]"));
+                        //     alguna información pequeña…» — v6.95: LA
+                        //     ORACIÓN LARGA SE CORTA: «si la oracion es
+                        //     muy larga debes cortarla para que continue
+                        //     abajo ya que al ser tan larga la ventana de
+                        //     informacion del grimorio se estira mucho» +
+                        //     «el dinero no se consagra, simplemente se
+                        //     deja caer»). CUATRO líneas cortas que fluyen
+                        //     hacia abajo — la ventana jamás se estira a
+                        //     lo ancho. ===
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7a",
+                            "[c/78788C:  (Las armas y los materiales se CONSAGRAN en el]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7b",
+                            "[c/78788C:  Altar de la Consagración; las esencias y el dinero]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7c",
+                            "[c/78788C:  se comen SIN sello — solo déjalos caer. Todo se]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7d",
+                            "[c/78788C:  suelta ENFRENTE del jugador con el grimorio]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7e",
+                            "[c/78788C:  SELECCIONADO: el grimorio SOLO devora lo que su]"));
+                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7f",
+                            "[c/78788C:  portador ARROJA al suelo)]"));
 
                         // v6.88 — LOS PUNTOS DEL ALTAR MURIERON (la letra:
                         //     «quita ese requisito de ofrendas en el

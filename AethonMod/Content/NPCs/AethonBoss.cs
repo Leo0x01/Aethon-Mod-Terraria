@@ -211,6 +211,16 @@ namespace AethonMod.Content.NPCs
         private const int EST_LANZAS = 15;     // v6.50.54 — LAS LANZAS ETERNAS (ETHEREAL LANCE: la luz sembrada DETRÁS de tu carrera, telegrafiada y translúcida hasta volar — castiga la línea recta)
         private const int EST_CORONA = 16;     // v6.50.54 — LA CORONA ETERNA (EVERLASTING RAINBOW: el anillo de 14 plumas prismáticas espiralando alrededor de la presa)
         private const int EST_SOL = 17;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción — y LUEGO LO LANZA a la presa: persiga lenta + gravedad + la GIGANTE ROJA que estalla en luz, bruma y formas)
+        // v6.95 — LOS TRES HACES DEL DIOS (la letra: «su ataque [el Renglón
+        // Final] es bueno para darselo al jefe pero en vez de 3 hazes de
+        // luz, que sean 6 y que este posicionado de forma pareja, giren a
+        // su alrededor, tambien hay que darle al jefe el Rayo concentrado
+        // 2 como ataque definitvo, y tambien darle la mirada del eterno
+        // como ataque medio raro») — TODO sobre HazLib, la librería de
+        // haces de la casa: el filo rgb=0 EXACTO también para el dios.
+        private const int EST_RENGLONES = 18; // v6.95 — LOS SEIS RENGLONES DEL DIOS (SEIS barras de tinta cada 60°, GIRANDO alrededor del jefe — la rueda del Renglón Final)
+        private const int EST_RC2 = 19;       // v6.95 — EL RAYO CONCENTRADO DEL DIOS (EL ATAQUE DEFINITIVO: la carga del conjuro y el cono que barre — la firma que abre LA FURIA)
+        private const int EST_MIRADA = 20;    // v6.95 — LA MIRADA DEL DIOS (el ataque MEDIO RARO: el MISMO rayo de La Mirada del Eterno girado contra el portador — peso 1: el ojo se abre POCO)
         protected const int EST_MURIENDO = 99;    // la contracción final
 
         // === v6.50.117 — LA FUSIÓN DE LOS GEMELOS DEL RECUERDO (la letra:
@@ -792,6 +802,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_LANZAS: EstadoLanzas(target); break;
                 case EST_CORONA: EstadoCorona(target); break;
                 case EST_SOL: EstadoSol(target); break;
+                case EST_RENGLONES: EstadoRenglones(target); break;
+                case EST_RC2: EstadoRC2(target); break;
+                case EST_MIRADA: EstadoMirada(target); break;
 
                 default:
                     // v6.50.117 — LOS ESTADOS DEL FUSIONADO (los ≥30: El
@@ -1458,9 +1471,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
                 2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_SOL },
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
+                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA, EST_SOL },
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA, EST_SOL },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA, EST_RC2, EST_SOL },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -1518,6 +1531,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // en la FURIA: el ataque especial del dios lleno).
                 if (plato == EST_SOL) peso = 3;
                 if (plato == EST_SOL && Furia) peso = 4;
+                // v6.95 — LOS TRES HACES DEL DIOS: los RENGLONES castigan
+                // al PEGADO (la rueda lo alcanza abrazado al dios) y la
+                // MIRADA es el plato MEDIO RARO (peso 1: el ojo se abre
+                // POCO — la letra: «como ataque medio raro» — pero cuando
+                // se abre, CASTIGA: 3.000 px de fucsia del libro).
+                if (plato == EST_RENGLONES && cerca) peso = 4;
+                if (plato == EST_MIRADA) peso = 1;
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -2120,6 +2140,118 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (_tickEstado >= 100) CerrarEstado();
         }
 
+        // ==================================================================
+        //  v6.95 — LOS TRES HACES DEL DIOS (la letra: «su ataque es bueno
+        //  para darselo al jefe pero en vez de 3 hazes de luz, que sean
+        //  6 y que este posicionado de forma pareja, giren a su
+        //  alrededor… el Rayo concentrado 2 como ataque definitvo… la
+        //  mirada del eterno como ataque medio raro») — los proyectiles
+        //  viven en Jefes/JefeHacesProjectiles.cs, TODO sobre HazLib.
+        // ==================================================================
+
+        /// <summary>
+        /// LOS SEIS RENGLONES DEL DIOS: SEIS barras de tinta cada 60°
+        /// (posición pareja) GIRANDO alrededor del jefe — la rueda del
+        /// Renglón Final. El dios se ALZA y flota con la deriva viva
+        /// mientras la rueda escribe; el PEGADO lo pasa mal (la rueda lo
+        /// alcanza abrazado), el que orbita con el giro camina ENTRE los
+        /// renglones.
+        /// </summary>
+        private void EstadoRenglones(Player target)
+        {
+            // SE ALZA sobre la presa con la deriva viva (la casa).
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.02f) * 90f, -340f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefeRenglonesProj>(),
+                        Math.Max(1, (int)(NPC.damage * 0.70f)), 2f, Main.myPlayer,
+                        0f, NPC.whoAmI, Furia ? 1f : 0f);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(-0.35f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Renglones", PaletaVioleta);
+                OndaLib.Kick(6f, 12);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 230) CerrarEstado();
+        }
+
+        /// <summary>
+        /// EL RAYO CONCENTRADO DEL DIOS — EL ATAQUE DEFINITIVO (la firma
+        /// que abre LA FURIA): 90 t de carga (los DOS anillos de runas con
+        /// la paleta del conjuro creciendo alrededor del dios) y 300 t de
+        /// cono barriendo la arena — el temblor sostenido y el loop grave
+        /// de la casa. El dios SE DETIENE a canalizar (solo la deriva):
+        /// la carga se lee, el cono se esquiva corriendo EN PERPENDICULAR.
+        /// </summary>
+        private void EstadoRC2(Player target)
+        {
+            // LA CARGA LO CLAVA: el definitivo no se canaliza corriendo —
+            // la deriva viva apenas lo mece.
+            if (_tickEstado <= 90)
+                NPC.velocity = Vector2.Lerp(NPC.velocity,
+                    new Vector2(MathF.Sin(_tickEstado * 0.03f) * 0.8f, -0.2f), 0.15f);
+            else
+                NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefeRC2Proj>(),
+                        Math.Max(1, (int)(NPC.damage * 1.05f)), 3f, Main.myPlayer,
+                        0f, NPC.whoAmI, NPC.target);
+                }
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 440) CerrarEstado();
+        }
+
+        /// <summary>
+        /// LA MIRADA DEL DIOS — el ataque MEDIO RARO (peso 1 en el menú):
+        /// el MISMO rayo de La Mirada del Eterno (sus leyes de la casa,
+        /// su fucsia del iris del libro, su velo morado) girado contra el
+        /// portador. El ojo se abre POCO — y cuando se abre, CASTIGA:
+        /// 3.000 px de tinta que barre hacia la presa.
+        /// </summary>
+        private void EstadoMirada(Player target)
+        {
+            // FLOTA SERENO (la casa): el dios no persigue — el ojo lee.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.025f) * 120f, -420f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefeMiradaProj>(),
+                        Math.Max(1, (int)(NPC.damage * 0.90f)), 2f, Main.myPlayer,
+                        0f, NPC.whoAmI, NPC.target);
+                }
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Mirada", PaletaVioleta);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 230) CerrarEstado();
+        }
+
         /// <summary>
         /// v6.50.57 — EL CIERRE CON COREOGRAFÍA: si la danza tiene pasos en
         /// la cola, el SIGUIENTE entra YA — sin pasar por la órbita (la
@@ -2183,6 +2315,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             Paso(EST_DANZA);                     // la rueda de rayos de la EoL
             if (Phase >= 4) Paso(EST_LANZAS);    // la sentencia sobre tu carrera
             if (Phase >= 5) Paso(EST_CORONA);    // la furia: el prisma completo
+            if (Phase >= 5) Paso(EST_RC2);       // v6.95 — la furia: EL DEFINITIVO (el cono del conjuro)
             Paso(EST_ESTALLIDO);                 // el cierre radiante SIEMPRE
         }
 
@@ -2829,14 +2962,18 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         //  de la pelea (P1) lo trae de nacimiento.
         // ==================================================================
 
-        /// <summary>LA FIRMA de cada fase (el ataque especial que la abre).</summary>
+        /// <summary>LA FIRMA de cada fase (el ataque especial que la abre).
+        /// v6.95 — LA FURIA ABRE CON EL DEFINITIVO: el Rayo Concentrado del
+        /// Dios reemplaza a la corona como firma de la fase 5 (la letra:
+        /// «hay que darle al jefe el Rayo concentrado 2 como ataque
+        /// definitvo») — la corona sigue en el menú de la furia.</summary>
         private static int EspecialDeFase(int fase) => fase switch
         {
             1 => EST_SOL,       // EL SOL DEL DIOS — el especial de .57, POR FIN en su casa
             2 => EST_RELOJ,     // LA CATEDRAL DEL TIEMPO — el reloj permanente de TODA la fase
             3 => EST_TELAR,     // EL TELAR — la jaula de la estrella
             4 => EST_VORTICE,   // EL VÓRTICE — la galaxia que colapsa
-            _ => EST_CORONA,    // LA CORONA — el prisma de la furia
+            _ => EST_RC2,       // EL RAYO CONCENTRADO DEL DIOS — EL DEFINITIVO abre la furia
         };
 
         /// <summary>
