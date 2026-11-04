@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -8,27 +11,49 @@ using Terraria.ModLoader.IO;
 namespace AethonMod.Content.Globals
 {
     // ======================================================================
-    //  v6.93 — EL SELLO DEL ARROJO (la letra del usuario): «recuerda todo
+    //  EL SELLO DEL ARROJO (la letra del usuario, v6.93): «recuerda todo
     //  lo que el grimorio vaya a consumir debe ser consagrado en el Altar,
-    //  menos las esencias, pero para evitar que el grimorio se coma las
-    //  esencias nada más caer, el grimorio solo comerá lo que el jugador
+    //  menos las esencias […] el grimorio solo comerá lo que el jugador
     //  arroje al suelo, cualquier cosa que se caiga de un enemigo no será
-    //  consumida por el grimorio, entiendes».
+    //  consumida por el grimorio».
+    //
+    //  v6.96 — LA CURA DEL HAMBRE MUERTA (la letra: «deje caer cosas para
+    //  que el libro las devorara y no lo hace, el grimorio no se come
+    //  nada»): LA AUTOPSIA DEL tML. El tiro del jugador (tecla T, arrastre
+    //  fuera de la ventana) nace en Player.DropSelectedItem vestido con
+    //  una fuente MISC de contexto "ThrowItem" (ItemSourceID.ThrowItem)
+    //  — y PEOR: el item que queda viviendo en el suelo es la INSTANCIA
+    //  ORIGINAL del inventario (Main.item[idx] = theItemWeDrop): el clon
+    //  que recibió OnSpawn muere reemplazado UNA instrucción después.
+    //  El marcador viejo (OnSpawn mirando EntitySource_DropAsItem /
+    //  EntitySource_Parent) JAMÁS vio un solo plato: por eso el Eterno se
+    //  murió de hambre aunque la mesa estuviera llena — ni las esencias,
+    //  ni el dinero, ni lo consagrado: NADA llevaba la marca.
+    //
+    //  LA CURA (tres dedos de la misma mano):
+    //   1. OnSpawn reconoce el contexto "ThrowItem" y ANOTA la casilla
+    //      del mundo donde vive el clon (con su huella: tipo/pila/prefijo
+    //      — el clon y el original son gemelos idénticos).
+    //   2. ArrojadoTirosSistema.PostUpdatePlayers corre UN INSTANTE
+    //      después (cuando el original YA reemplazó al clon) y marca al
+    //      SUPERVIVIENTE de esa casilla — huella verificada: si la
+    //      casilla cambió de dueño en el mismo tick, no se marca a nadie.
+    //   3. En MP, el cliente que tiró avisa a la AUTORIDAD por la EcoRed
+    //      (MsgTiro): el server busca el plato gemelo cerca del tirador
+    //      (huella + posición) y lo marca en SU mundo — el mensaje 13
+    //      del tML NO viaja con controlThrow (el server JAMÁS simula el
+    //      tiro remoto por su cuenta: la marca tiene que caminar).
     //
     //  LA MARCA: un item caído al suelo solo es PLATO si nació del gesto
-    //  del portador — ARROJADO (tecla de soltar, arrastre fuera del
-    //  inventario, o el spawn asistido del jugador). Los drops de los
-    //  enemigos (EntitySource_Loot), los cofres y los escupitajos del
-    //  propio sistema (GetSource_Misc) nacen SIN la marca: el grimorio
-    //  NI LOS PRUEBA — ni las esencias recién caídas (el caso de la
-    //  letra), ni el botín, ni el cambio del Eterno.
+    //  del portador. Los drops de los enemigos (EntitySource_Loot), los
+    //  cofres, la pesca y los escupitajos del sistema (GetSource_Misc de
+    //  la casa) nacen SIN la marca: el grimorio NI LOS PRUEBA.
     //
     //  El que decide el devoro es la AUTORIDAD (ServirLaMesa corre solo
-    //  en SP/servidor): OnSpawn marca en la máquina que nace el item, y
-    //  en multijugador la marca VIAJA por el cable con el item (NetSend/
-    //  NetReceive — la serialización de SyncItem la llama tML) y por el
-    //  guardado del mundo (SaveData/LoadData). JAMÁS se muestra al
-    //  jugador: es ley de la mesa, no etiqueta de tienda.
+    //  en SP/servidor): la marca VIAJA por el cable con el item
+    //  (NetSend/NetReceive — la serialización de SyncItem la llama tML)
+    //  y por el guardado del mundo (SaveData/LoadData). JAMÁS se muestra
+    //  al jugador: es ley de la mesa, no etiqueta de tienda.
     // ======================================================================
     public class ArrojadoGlobalItem : GlobalItem
     {
@@ -42,18 +67,184 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                // EL GESTO (v6.93 — la fuente REAL de este tML): todo lo
-                // que sale de las manos del portador — la tecla de soltar
-                // y el arrastre fuera del inventario viajan vestidos con
-                // EntitySource_DropAsItem (el sello del soltar); y el
-                // nacimiento asistido con PADRE JUGADOR (EntitySource_
-                // Parent con Entity = Player) también es gesto suyo.
-                // Los enemigos (Loot), los cofres (ItemOpen), la pesca
-                // (FishedOut) y el sistema (Misc) NO la llevan.
-                DelJugador = source is EntitySource_DropAsItem
-                    || (source is EntitySource_Parent padre && padre.Entity is Player);
+                DelJugador = EsGestoDelPortador(source);
+
+                // EL REGISTRO DEL TIRO: el clon vive YA en su casilla del
+                // mundo y va a morir reemplazado por el ORIGINAL (mismos
+                // datos exactos). Se anota la casilla; el superviviente
+                // se marca en cuanto el polvo baje (PostUpdatePlayers).
+                if (source is EntitySource_Misc misc && misc.Context == "ThrowItem")
+                    AnotarElTiro(item);
             }
             catch { DelJugador = false; }
+        }
+
+        // ================================================================
+        //  v6.96 — ¿ES GESTO DEL PORTADOR? (las cuatro puertas de la
+        //  marca — la letra: «solo come lo que el jugador suelta»).
+        // ================================================================
+        private static bool EsGestoDelPortador(IEntitySource source)
+        {
+            if (source == null) return false;
+
+            // (1) EL NACIMIENTO ASISTIDO (de siempre): el padre es un
+            //     JUGADOR (el spawn asistido del portador).
+            if (source is EntitySource_Parent padre && padre.Entity is Player)
+                return true;
+
+            // (2) EL ARMA ARROJADA QUE CLAVA (EntitySource_DropAsItem: un
+            //     proyectil que se vuelve item al tocar bloque) — SOLO si
+            //     el proyectil salió de las manos de un jugador (owner
+            //     válido): los de los monstruos (owner 255) NO llevan la
+            //     marca («cualquier cosa que se caiga de un enemigo no
+            //     será consumida por el grimorio»).
+            if (source is EntitySource_DropAsItem caida &&
+                caida.Entity is Projectile proyectil &&
+                proyectil.owner >= 0 && proyectil.owner < Main.maxPlayers)
+                return true;
+
+            // (3) LA BOLSA LLENA (EntitySource_OverfullInventory: lo que
+            //     el inventario no pudo guardar cae delante del portador
+            //     — la clase lleva AL JUGADOR dentro: gesto suyo es).
+            if (source is EntitySource_OverfullInventory)
+                return true;
+
+            // (4) EL TIRO DE VERDAD — tecla T / arrastre fuera de la
+            //     ventana: el contexto del tML (ItemSourceID.ThrowItem,
+            //     el sello del DropSelectedItem).
+            if (source is EntitySource_Misc tiro && tiro.Context == "ThrowItem")
+                return true;
+
+            return false;
+        }
+
+        // ================================================================
+        //  v6.96 — EL REGISTRO DE LOS TIROS (la casilla + la huella del
+        //  clon). Vivir solo UN tick: OnSpawn anota, PostUpdatePlayers
+        //  cobra y limpia — un puente de un solo paso.
+        // ================================================================
+
+        /// <summary>LA HUELLA del clon del tiro (el original que lo
+        /// reemplaza es su gemelo exacto: mismo tipo, misma pila, mismo
+        /// prefijo — la verificación de que la casilla sigue suya).</summary>
+        private struct HuellaDelTiro { public int Tipo, Pila, Prefijo; }
+
+        /// <summary>LOS TIROS PENDIENTES: casilla del mundo → huella del
+        /// clon que la ocupó al nacer (puede haber varios en el mismo
+        /// tick: un tiro por portador).</summary>
+        private static readonly Dictionary<int, HuellaDelTiro> _tirosPendientes = new();
+
+        private static void AnotarElTiro(Item clon)
+        {
+            try
+            {
+                if (clon == null || clon.IsAir) return;
+                int idx = Array.IndexOf(Main.item, clon);
+                // OJO: Main.item tiene 401 casillas — la 400 es el
+                // ESCENARIO del cliente en MP (NewItem devuelve 400 sin
+                // buscar slot cuando netMode==1): el tiro del cliente
+                // VIVE ahí hasta que el server le da su casilla de
+                // verdad. La anota igual: es SU plato.
+                if (idx < 0 || idx >= Main.item.Length) return;
+                _tirosPendientes[idx] = new HuellaDelTiro
+                {
+                    Tipo = clon.type,
+                    Pila = clon.stack,
+                    Prefijo = clon.prefix
+                };
+            }
+            catch { }
+        }
+
+        /// <summary>¿VIVE todavía el gemelo del tiro en esta casilla? (la
+        /// verificación de la huella: la casilla solo se marca si su
+        /// inquilino actual es el gemelo exacto del clon que la ocupó al
+        /// nacer — si el slot cambió de dueño en el mismo tick, nadie
+        /// come marcado por equivocación).</summary>
+        private static bool LaHuellaVive(Item vivo, HuellaDelTiro huella)
+            => vivo != null && !vivo.IsAir
+               && vivo.type == huella.Tipo && vivo.stack == huella.Pila
+               && vivo.prefix == huella.Prefijo;
+
+        // ================================================================
+        //  v6.96 — EL SISTEMA DE LOS TIROS: marca al superviviente de
+        //  cada casilla anotada EN CUANTO los jugadores terminaron su
+        //  tick (el original ya reemplazó al clon). Corre ANTES del
+        //  pulso devorador de la mesa (SystemLoader.PostUpdatePlayers →
+        //  … → PreUpdateTime): el plato cae y el Eterno lo ve EN EL
+        //  MISMO TICK.
+        // ================================================================
+        public class ArrojadoTirosSistema : ModSystem
+        {
+            public override void PostUpdatePlayers()
+            {
+                try
+                {
+                    if (Main.gameMenu) return;
+                    if (_tirosPendientes.Count == 0) return;
+
+                    foreach (var par in _tirosPendientes)
+                    {
+                        Item vivo = Main.item[par.Key];
+                        if (!LaHuellaVive(vivo, par.Value)) continue;
+
+                        var marca = vivo.GetGlobalItem<ArrojadoGlobalItem>();
+                        if (marca == null) continue;
+                        bool yaLaTenia = marca.DelJugador;
+                        marca.DelJugador = true;
+
+                        // MP (cliente): el mensaje 21 del tiro salió ANTES
+                        // de que la marca existiera — la AUTORIDAD se
+                        // entera por la EcoRed (MsgTiro: la huella + el
+                        // lugar del plato). En SP la marca YA vive en la
+                        // única máquina que decide.
+                        if (!yaLaTenia && Main.netMode == NetmodeID.MultiplayerClient)
+                            global::AethonMod.Content.Systems.EcoRed.AvisarTiroDelPortador(
+                                Main.myPlayer, par.Value.Tipo, par.Value.Pila,
+                                par.Value.Prefijo, vivo.Center.X, vivo.Center.Y);
+                    }
+                    _tirosPendientes.Clear();
+                }
+                catch { try { _tirosPendientes.Clear(); } catch { } }
+            }
+        }
+
+        // ================================================================
+        //  v6.96 — LA MARCA POR CABLE (server): el cliente del portador
+        //  tiró el plato y avisó — la AUTORIDAD busca el gemelo cerca del
+        //  tirador y lo marca en SU mundo (el que come es el que manda).
+        //  La llama EcoRed.Recibir (MsgTiro, solo server).
+        // ================================================================
+        public static void MarcarPorRed(int quienTiro, int tipo, int pila,
+            int prefijo, float x, float y)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                Player tirador = quienTiro >= 0 && quienTiro < Main.maxPlayers
+                    ? Main.player[quienTiro] : null;
+                if (tirador == null || !tirador.active) return;
+
+                // EL GEMELO: mismo tipo, misma pila, mismo prefijo — y
+                // nació DELANTE del tirador (600 px de margen: el plato
+                // cae a los pies de quien lo suelta).
+                Vector2 lugar = new Vector2(x, y);
+                int mejor = -1;
+                float mejorDist = 600f * 600f;
+                for (int d = 0; d < Main.maxItems; d++)
+                {
+                    Item it = Main.item[d];
+                    if (it == null || it.IsAir || !it.active) continue;
+                    if (it.type != tipo || it.stack != pila || it.prefix != prefijo) continue;
+                    var marca = it.GetGlobalItem<ArrojadoGlobalItem>();
+                    if (marca == null || marca.DelJugador) continue;
+                    float dist = it.Center.DistanceSQ(lugar);
+                    if (dist < mejorDist) { mejorDist = dist; mejor = d; }
+                }
+                if (mejor >= 0)
+                    Main.item[mejor].GetGlobalItem<ArrojadoGlobalItem>().DelJugador = true;
+            }
+            catch { }
         }
 
         // ================================================================

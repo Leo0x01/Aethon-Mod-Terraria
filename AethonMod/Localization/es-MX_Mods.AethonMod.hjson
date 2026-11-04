@@ -3793,7 +3793,7 @@ Altar: {
         ListaArma: Arma lista — gana estadísticas y su etiqueta
         ListaMaterial: Material listo — gana solo su etiqueta
         YaConsagrada: Ya está consagrada
-        NoArma: Eso no es una ofrenda consagrible
+        NoArma: ✦ No es apto
         // v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de
         // la palabra Gana… el altar es quien dice cuanto necesitas y lo que
         // falta, ademas debe decir como conseguiras esencia» — las tres

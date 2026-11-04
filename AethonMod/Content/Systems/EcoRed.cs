@@ -131,6 +131,13 @@ namespace AethonMod.Content.Systems
         // MP). Sin respuesta — el cometa mismo ES la respuesta (y el
         // aviso privado viaja por AnunciarAlPortador desde la autoridad).
         public const byte MsgForzarCaida = 15;
+        // v6.96 — EL TIRO DEL PORTADOR (cliente → server): el mensaje 13
+        // del tML NO viaja con controlThrow — el server JAMÁS simula el
+        // tiro remoto por su cuenta, y el mensaje 21 del tiro sale ANTES
+        // de que la marca del arrojo exista. Sin este paquete, en MP el
+        // Eterno se moriría de hambre otra vez (la marca del plato vive
+        // en la AUTORIDAD: la huella + el lugar del tiro).
+        public const byte MsgTiro = 17;
         // (v6.50.130 — LA BRUMA COLOCADA no necesita paquete: la AUTORIDAD
         // la descubre sola con el escaneo periódico de LaCaidaSistema.
         // DescubrirBrumasColocadas — sin hook de colocación en ESTE tML,
@@ -550,6 +557,24 @@ namespace AethonMod.Content.Systems
                     return;
                 }
 
+                // v6.96 — EL TIRO DEL PORTADOR (solo server): el cliente
+                // marcó el plato que su portador arrojó — la AUTORIDAD
+                // busca el gemelo (huella + lugar) y lo marca en SU
+                // mundo. Sin doble puerta: el que come es el server.
+                if (Main.netMode == NetmodeID.Server && tipo == MsgTiro)
+                {
+                    int quienTiro = reader.ReadByte();
+                    int tipoPlato = reader.ReadInt32();
+                    int pilaPlato = reader.ReadInt32();
+                    int prefijoPlato = reader.ReadInt32();
+                    float xPlato = reader.ReadSingle();
+                    float yPlato = reader.ReadSingle();
+                    global::AethonMod.Content.Globals.ArrojadoGlobalItem
+                        .MarcarPorRed(quienTiro, tipoPlato, pilaPlato,
+                            prefijoPlato, xPlato, yPlato);
+                    return;
+                }
+
                 // EL PEDIDO DE ENTRADA: el cliente recién llegado pide sus
                 // libros — el server contesta con la foto completa.
                 // v6.50.2 — también el pedido de la CARNADA (la selección
@@ -961,6 +986,35 @@ namespace AethonMod.Content.Systems
                 if (Main.netMode != NetmodeID.MultiplayerClient) return;
                 ModPacket p = AethonMod.Instance.GetPacket();
                 p.Write(MsgForzarCaida);
+                p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.96 — EL TIRO DEL PORTADOR (cliente → server): ArrojadoTirosSistema
+        /// acaba de marcar en ESTE cliente el plato que el portador arrojó
+        /// (tecla T / arrastre) — pero el mensaje 21 del tiro salió ANTES de
+        /// que la marca existiera, y el server no simula el tiro remoto (el
+        /// mensaje 13 del tML no lleva controlThrow). Este paquete lleva LA
+        /// HUELLA del plato (tipo/pila/prefijo) y el lugar donde cayó: la
+        /// AUTORIDAD busca su gemelo cerca del tirador y lo marca en SU
+        /// mundo — el que come es el que manda.
+        /// </summary>
+        public static void AvisarTiroDelPortador(int quien, int tipo, int pila,
+            int prefijo, float x, float y)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgTiro);
+                p.Write((byte)quien);
+                p.Write(tipo);
+                p.Write(pila);
+                p.Write(prefijo);
+                p.Write(x);
+                p.Write(y);
                 p.Send();
             }
             catch { }

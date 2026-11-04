@@ -1550,18 +1550,15 @@ namespace AethonMod.Content.Weapons
                         //     (la letra: «la lista dará 4 o más opciones
                         //     de la forma en la que las muestro, siempre
                         //     mostrando su nombre y su icono
-                        //     correspondiente, además el grimorio debe
-                        //     consumir al menos 2 de esas opciones para
-                        //     desbloquear el siguiente nivel de Despertar
-                        //     … una vez cumpla con devorar cualquiera de
-                        //     las 2, las otras opciones deben bloquearse
-                        //     con las letras en color gris oscuro»): UNA
-                        //     LÍNEA POR OPCIÓN — (A) cada arma del
-                        //     peldaño con SU sprite y SU nombre, (M) cada
-                        //     grupo de materiales con SUS alternativas y
-                        //     SU cuota. El pago es RETROACTIVO (el
-                        //     banco): devorado en OTRO peldaño cuenta
-                        //     para ESTE. ===
+                        //     correspondiente […]»). v6.96 — LOS
+                        //     PARÉNTESIS (A)/(M) MURIERON (la letra: «el
+                        //     entreparentisis de armas (A) y el de
+                        //     materiales (M) no era lo que tenia que ver,
+                        //     eran ejemplo para que implementaras
+                        //     correctamente el despertar»): UNA LÍNEA POR
+                        //     OPCIÓN, SOLO el sprite y SU nombre — el pago
+                        //     es RETROACTIVO (el banco): devorado en OTRO
+                        //     peldaño cuenta para ESTE. ===
                         {
                             int[] armasOpciones = Systems.DespertarGrimorio.ArmasDelNivel[
                                 System.Math.Max(1, System.Math.Min(
@@ -1576,7 +1573,8 @@ namespace AethonMod.Content.Weapons
                             tooltips.Add(new TooltipLine(Mod, "DespertarDevorarTit",
                                 $"[c/{(dosPagas ? colOK : "FFD787")}:  Devorar Armas o Materiales ({System.Math.Min(pagas, 2)}/2):]"));
 
-                            // LAS ARMAS (A) — una línea por arma.
+                            // LAS ARMAS — una línea por arma (su sprite
+                            // y su nombre: NADA de paréntesis de ejemplo).
                             if (armasOpciones != null)
                             {
                                 for (int pa = 0; pa < armasOpciones.Length; pa++)
@@ -1588,11 +1586,11 @@ namespace AethonMod.Content.Weapons
                                     string nombreArma = Lang.GetItemNameValue(tipoArma);
                                     string cuentaA = pagaA ? "  ✓ Devorada" : "";
                                     tooltips.Add(new TooltipLine(Mod, "DespertarDevorarA" + pa,
-                                        $"[i:{tipoArma}][c/{tintaA}: (A) {nombreArma}{cuentaA}]"));
+                                        $"[i:{tipoArma}][c/{tintaA}: {nombreArma}{cuentaA}]"));
                                 }
                             }
 
-                            // LOS MATERIALES (M) — una línea por grupo (las
+                            // LOS MATERIALES — una línea por grupo (las
                             // alternativas del grupo juntas: sus sprites,
                             // su cuota — el banco del grupo suma sus
                             // variantes: devorar 10 de oro y 10 de platino
@@ -1609,7 +1607,7 @@ namespace AethonMod.Content.Weapons
                                     bool pagaG = dispG >= cuota;
                                     string tintaG = pagaG ? colOK : (dosPagas ? colBloq : colNo);
                                     var trozos = new System.Collections.Generic.List<string>();
-                                    trozos.Add($"[c/{tintaG}: (M) {cuota} × ]");
+                                    trozos.Add($"[c/{tintaG}: {cuota} × ]");
                                     for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
                                         trozos.Add($"[i:{grupo[ti]}]");
                                     string nombres = "";
@@ -1708,24 +1706,37 @@ namespace AethonMod.Content.Weapons
                         }
 
                         // === PRÓXIMO HITO DEL DESPERTAR (la letra: «X% de
-                        //     daño a Todo el Grimorio… actualmente se
-                        //     representa bien, es solo cambiarlo de
-                        //     lugar» — MUDÓ de la ventana del escuadrón a
-                        //     su sitio de la letra + «Nivel X: (H hito)»
-                        //     — SIEMPRE el siguiente hito a completar). ===
+                        //     daño a Todo el Grimorio… Nivel X: (H hito)»
+                        //     — SIEMPRE el siguiente hito a completar).
+                        //     v6.96 — EL DAÑO QUE CRECE CADA NIVEL (la
+                        //     letra: «al parecer el daño total del
+                        //     grimorio no sube con cada nivel del
+                        //     Despertar, se supone que debe aumentar un
+                        //     1% por cada nivel pero dice esto: 0% de
+                        //     daño a Todo el grimorio (Despertar 20
+                        //     +10%)»): la línea muestra EL ACUMULADO VIVO
+                        //     — +1% por CADA nivel de Despertar
+                        //     (BonusDano: lo MISMO que el pipeline de
+                        //     daño cobra en el clic y en los ojos) — y el
+                        //     paréntesis guarda el próximo hito del
+                        //     escuadrón (el +10%/+15%/… de cada 20). ===
                         {
                             tooltips.Add(new TooltipLine(Mod, "DespertarHitoTit",
                                 "[c/78788C:  Próximo hito del Despertar:]"));
-                            int pctHito = Systems.DespertarGrimorio.PctEscuadron(despertar);
+                            int pctAcumulado = (int)Math.Round(
+                                Systems.DespertarGrimorio.BonusDano(despertar) * 100f);
                             int proximoHito = 20;
-                            while (proximoHito <= despertar && proximoHito < 100) proximoHito += 20;
-                            string lineaDano = pctHito > 0
-                                ? $"[c/C49CFF:+{pctHito}% de daño a Todo el Grimorio]"
-                                : "[c/78788C:+0% de daño a Todo el Grimorio (Despertar 20: +10%)]";
-                            if (pctHito > 0 && proximoHito <= Systems.DespertarGrimorio.NivelMax)
-                                lineaDano += $"[c/78788C:  →  hito {proximoHito}: +{Systems.DespertarGrimorio.PctEscuadron(proximoHito)}%]";
-                            else if (pctHito > 0)
-                                lineaDano += "[c/C49CFF:  — la cima del escuadrón]";
+                            while (proximoHito <= despertar &&
+                                proximoHito < Systems.DespertarGrimorio.NivelMax)
+                                proximoHito += 20;
+                            string lineaDano = pctAcumulado > 0
+                                ? $"[c/C49CFF:+{pctAcumulado}% de daño a Todo el Grimorio]"
+                                : "[c/78788C:+0% de daño a Todo el Grimorio]";
+                            if (despertar >= Systems.DespertarGrimorio.NivelMax)
+                                lineaDano += "[c/C49CFF:  — la cima del Despertar]";
+                            else
+                                lineaDano += $"[c/78788C:  (Despertar {proximoHito}: +" +
+                                    $"{Systems.DespertarGrimorio.PctEscuadron(proximoHito)}%)]";
                             tooltips.Add(new TooltipLine(Mod, "DespertarHitoDano", lineaDano));
 
                             foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
