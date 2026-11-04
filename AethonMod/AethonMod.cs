@@ -72,16 +72,10 @@ namespace AethonMod
             // se retiró — el registro de slots de fondo que vivía aquí
             // murió con ella.
 
-            // v6.85 — LA TECLA DEL RELICARIO SOLAR (la investigación R1:
-            // el aura del Bombus Apis — el original usa la tecla L). La
-            // referencia del informe: KeybindLoader.RegisterKeybind.
-            // v6.91 — OJO: REGISTRAR NO ES ASIGNAR (la letra: «dice
-            // tocar L pero al tocar no hace nada»): tML guarda la "L"
-            // como DefaultBinding pero JAMÁS la escribe en el perfil
-            // con el que juegas — la auto-asignación al entrar al mundo
-            // vive en RelicarioTeclaSistema (RelicarioDelAvispon.cs).
-            Content.Items.Investigaciones.RelicarioPlayer.TeclaRelicario =
-                KeybindLoader.RegisterKeybind(this, "RelicarioSolar", "L");
+            // v6.92 — LA PURGA DE LAS INVESTIGACIONES: el Relicario y
+            // los Grilletes de Andrómeda dejaron el mod por voluntad del
+            // usuario — su keybind murió con ellos (aquí no se registra
+            // nada: el mod ya NO tiene teclas propias).
         }
 
         public override void PostSetupContent()
@@ -97,12 +91,6 @@ namespace AethonMod
 
         public override void Unload()
         {
-            // v6.85 — LA TECLA DEL RELICARIO se suelta en la descarga (el
-            // barrendero cubre Asset/Texture2D; los ModKeybind se anulan
-            // a mano — son anclas de UI).
-            try { Content.Items.Investigaciones.RelicarioPlayer.TeclaRelicario = null; }
-            catch { }
-
             // v6.50.1 — EL BARRENDERO DE MEMORIA (el warning del client.log:
             // "AethonMod mod class still using memory"). La auditoría P2-1
             // contó ~107 campos estáticos de assets (Asset<T>, Ref<Effect>,

@@ -831,10 +831,10 @@ namespace AethonMod.Content.Items.Bolsas
             // una nueva bolsa y dáselas al jugador».
             l.Add((ModContent.ItemType<BolsaInvestigaciones>(), 1));
             // v6.90 — LA BOLSA DEL TALLER DE EFECTOS (bolsa 27 del cofre):
-            // lo que nació de la investigación de los reels (pixelfx +
-            // sprite-gen — la letra: «crea una bolsa nueva y dale la bolsa
-            // al jugador, esta bolsa tendras una copia de todas las armas
-            // que sean creadas con esta investigacion»).
+            // lo que nació del Taller de Efectos de la casa (la letra:
+            // «crea una bolsa nueva y dale la bolsa al jugador, esta bolsa
+            // tendras una copia de todas las armas que sean creadas con
+            // esta investigacion»).
             l.Add((ModContent.ItemType<BolsaTallerDeEfectos>(), 1));
             // v6.91 — LA BOLSA DE LAS POCIONES (bolsa 28 del cofre — la
             // letra: «dame una bolsa con todas las pociones del juego»):
@@ -896,9 +896,8 @@ namespace AethonMod.Content.Items.Bolsas
     //  derecho), y su CONTENIDO son los frutos de las INVESTIGACIONES:
     //  primero los dos clickers de la v6.82 (que nacieron sin bolsa — la
     //  lección v6.14.2 recién curada), y de ahí en adelante TODO lo que
-    //  nazca de estudiar otros mods (Bombus Apis, VFX+, MEAC, Boss
-    //  Checklist, Heroic Weapons, Umbra/Path of Terraria, Aureum Fang,
-    //  Solyn, los Grilletes de Andrómeda…).
+    //  nazca de las investigaciones de la casa (estudiar el arte de los
+    //  efectos, las ideas de la comunidad y nuestras propias obsesiones).
     // ======================================================================
     public class BolsaInvestigaciones : BolsaCategoria
     {
@@ -918,20 +917,16 @@ namespace AethonMod.Content.Items.Bolsas
             // a quedarse sin sus armas):
             l.Add((ModContent.ItemType<Weapons.Clicker.CompasRunico>(), 1));
             l.Add((ModContent.ItemType<Weapons.Clicker.FuriaSolarClicker>(), 1));
-            // v6.85 — LOS CINCO FRUTOS DE LA SESIÓN (R1-R9):
-            // R1 — EL RELICARIO DEL AVISPÓN (Bombus Apis: el aura solar).
-            l.Add((ModContent.ItemType<Items.Investigaciones.RelicarioDelAvispon>(), 1));
-            // R8 — LA MIRADA DE SOLYN (el rayo de energía).
+            // v6.85 — LOS FRUTOS DE LAS INVESTIGACIONES:
+            // R8 — LA MIRADA (el rayo de energía).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaSolyn>(), 1));
-            // R9 — LOS GRILLETES DE ANDRÓMEDA (el campo de fuerza).
-            l.Add((ModContent.ItemType<Items.Investigaciones.GrilletesDeAndromeda>(), 1));
-            // v6.86 — R5 — EL ALTAR DE OFRENDAS (Heroic Weapons: el altar
-            // que devora lo que NO se necesita y NO está corrupto).
+            // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
+            // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));
             // v6.89 — R6 — EL CÓDICE DE HABILIDADES VUELVE (la letra de
             //     la sesión: «borrar las armas nuevas» — el Libro Azul murió
             //     con ellas y la llave del árbol VOLVIÓ a su dueño de la
-            //     v6.86: el Códice (Umbra/Path of Terraria).
+            //     v6.86: el Códice de habilidades.
             l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
             return l;
         }
@@ -943,8 +938,8 @@ namespace AethonMod.Content.Items.Bolsas
     //  La letra de la sesión: «crea una bolsa nueva y dale la bolsa al
     //  jugador, esta bolsa tendras una copia de todas las armas que
     //  sean creadas con esta investigacion» — la investigación de los
-    //  REELS (patch-gg/pixelfx: 244 efectos como código + el método
-    //  «borrador, render, mirar, refinar» · aldegad/sprite-gen: sprites
+    //  TALLER DE EFECTOS de la casa (el motor de píxeles propio + el
+    //  método «borrador, render, mirar, refinar» + los sprites
     //  animados del taller). Sus frutos: las TRES armas del taller de
     //  efectos (el sigilo trazado con su acto, las llamas de fBm real,
     //  el eclipse de corona viva).
@@ -957,25 +952,22 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(255, 150, 220);
 
-        protected override string Nota => "Lo que nació de estudiar los efectos vivos (pixelfx + sprite-gen)";
+        protected override string Nota => "Lo que nació de estudiar los efectos vivos (el motor de píxeles de la casa)";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // EL SIGILO DEL ETERNO (shadow/hex-sigil — el acto completo:
-            // trazo, glifos, destello, ascuas).
+            // EL SIGILO DEL ETERNO (el acto completo: trazo, glifos,
+            // destello, ascuas).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.SigiloDelEterno>(), 1));
-            // LAS LLAMAS DE SOMBRA (shadow/shadow-flames — la columna de
-            // fBm real que sube del suelo).
+            // LAS LLAMAS DE SOMBRA (la columna de fBm real que sube del
+            // suelo).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.LlamasDeSombra>(), 1));
-            // EL ECLIPSE VIVO (shadow/eclipse — la nova del disco negro
-            // de corona blanca).
+            // EL ECLIPSE VIVO (la nova del disco negro de corona blanca).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.EclipseVivo>(), 1));
-            // v6.91 — EL VÁSTAGO DEL ETERNO (la mascota del pipeline
-            // sprite-gen — la letra: «crea una mascota nueva usando
-            // esto: Reel 1 — aldegad/sprite-gen… la mascota minigrimorio
-            // y Aethon pueden ganar sus idle/walk animados desde una
-            // imagen base»): el librito alado con SUS CICLOS ANIMADOS.
+            // v6.91 — EL VÁSTAGO DEL ETERNO (la mascota del Taller — el
+            // librito alado con SUS CICLOS ANIMADOS: idle y vuelo desde
+            // una imagen base).
             l.Add((ModContent.ItemType<Items.Llamados.VastagoDelEternoItem>(), 1));
             return l;
         }

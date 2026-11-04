@@ -20,7 +20,7 @@ Items: {
 		DisplayName: Altar de Ofrendas
 		Tooltip:
 			'''
-			✦ El altar de la consagración (investigación: Heroic Weapons)
+			✦ El altar de la consagración del Eterno
 			· Colócalo y hazle clic derecho: CONSAGRA la ofrenda por el Eterno (arma o material)
 			· El arma consagrada gana +5% a TODO y su etiqueta · el material solo su etiqueta — el grimorio SOLO devora lo consagrado
 			'''
@@ -276,7 +276,7 @@ Items: {
 		Tooltip:
 			'''
 			✦ El librito alado que nació del Taller: respira, parpadea y
-			vuela a tu lado (idle y vuelo animados — el pipeline sprite-gen).
+			vuela a tu lado (idle y vuelo animados, nacidos en el Taller).
 			· Se EQUIPA en la ranura de mascota — y la tecla B lo despierta SOLO equipado
 			'''
 	}
@@ -2096,31 +2096,11 @@ Items: {
 			'''
 	}
 
-	RelicarioDelAvispon: {
-		DisplayName: El Relicario del Avispón
-		Tooltip:
-			'''
-			R1 — pulsa la tecla del Relicario Solar (L): 8 s de AURA SOLAR
-			amarilla (+12 % daño/velocidad/crít) a cambio de +10 % de daño
-			recibido y drenaje. 45 s de recarga. Pasivas: +35 % velocidad y vuelo.
-			'''
-	}
-
-	GrilletesDeAndromeda: {
-		DisplayName: Los Grilletes de Andrómeda
-		Tooltip:
-			'''
-			R9 — convierte el maná gastado en un CAMPO DE FUERZA: cada 100 de
-			maná → +20 de escudo (máx 100). Con escudo: daño recibido ×0,85.
-			Al romperse una carga: restaura 50 de maná.
-			'''
-	}
-
 	SolEnMiniaturaStaff: {
 		DisplayName: El Sol en Miniatura
 		Tooltip:
 			'''
-			R3 — el sol de XiHe (MEAC): un minion con núcleo térmico y 2 anillos
+			R3 — el sol en miniatura: un minion con núcleo térmico y 2 anillos
 			dorados contra-rotantes; cada 45 ticks telegrafía y descarga su
 			láser dorado. PERSISTENTE: sobrevive a la muerte y a salir de la
 			partida (se despide con clic derecho en su buff).
@@ -2136,6 +2116,7 @@ Items: {
 			espina dorada, filamentos dendríticos y latido de 14 Hz. 0 maná.
 			'''
 	}
+
 	SigiloDelEterno: {
 		DisplayName: El Sigilo del Eterno
 		Tooltip:
@@ -2143,7 +2124,7 @@ Items: {
 			La pluma del Eterno traza su sigilo donde apuntes: el trazo
 			ardiente, los SIETE glifos que estallan uno a uno, el destello
 			blanco — y se desmorona en ascuas. Todo lo que esté DENTRO
-			del círculo recibe el golpe. (Taller de efectos: pixelfx)
+			del círculo recibe el golpe. (Taller de efectos)
 			'''
 	}
 
@@ -2154,7 +2135,7 @@ Items: {
 			La columna de fuego sombrío sube VIVA del suelo donde
 			apuntes: violeta profundo abajo, magenta arriba, la vena
 			blanca ardiendo al centro — el borde de las llamas respira
-			con ruido fractal de verdad. (Taller de efectos: pixelfx)
+			con ruido fractal de verdad. (Taller de efectos)
 			'''
 	}
 
@@ -2165,7 +2146,7 @@ Items: {
 			La nova del disco negro: se abre donde apuntes con su
 			corona de CATORCE rayos que giran y respiran, el limbo
 			blanco quemando el borde — el anillo que se expande golpea
-			todo lo que cruza. (Taller de efectos: pixelfx)
+			todo lo que cruza. (Taller de efectos)
 			'''
 	}
 
@@ -2183,23 +2164,20 @@ Items: {
 		DisplayName: La Bolsa del Taller de Efectos
 		Tooltip:
 			'''
-			Lo que nació de la investigación de los RELES: pixelfx (244
-			efectos como código — el sigilo con su acto, las llamas de
-			ruido fractal, el eclipse de corona viva) y sprite-gen (los
-			sprites animados del taller). Armas de PRUEBA: 0 maná.
+			Lo que nació del Taller de Efectos de la casa: el sigilo con
+			su acto, las llamas de ruido fractal, el eclipse de corona
+			viva y los sprites animados. Armas de PRUEBA: 0 maná.
 			'''
 	}
-
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
 		Tooltip:
 			'''
-			Lo que nació de ESTUDIAR a los grandes: primero los dos
-			CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
-			y de ahí en adelante, TODO lo que nazca de las investigaciones
-			del mod (Bombus Apis, VFX+, MEAC, Heroic Weapons, Umbra, Path
-			of Terraria, los rayos del cielo, Solyn, los Grilletes…).
+			Lo que nació de las INVESTIGACIONES de la casa: primero los
+			dos CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
+			y de ahí en adelante TODO lo que nazca de estudiar el arte
+			de los efectos: armas, altares y códices del Eterno.
 			'''
 	}
 
@@ -2579,14 +2557,15 @@ Projectiles: {
 	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
 	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
 	IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
-	// CampoAndromedaProj.DisplayName: Campo Andromeda Proj
 	// SolynCargaProj.DisplayName: Solyn Carga Proj
 	// SolynRayoProj.DisplayName: Solyn Rayo Proj
-	// v6.90 — EL TALLER DE EFECTOS (pixelfx + sprite-gen).
+	// v6.90 — EL TALLER DE EFECTOS (el motor de píxeles de la casa).
 	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
 	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
 	EclipseVivoProj.DisplayName: El Eclipse Vivo
-		// de los reels — pixelfx + sprite-gen).
+	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
+	// SolynCargaProj.DisplayName: Solyn Carga Proj
+	// SolynRayoProj.DisplayName: Solyn Rayo Proj
 }
 
 Buffs: {
@@ -2648,11 +2627,6 @@ Buffs: {
 	FragmentoSupernovaBuff: {
 		DisplayName: Fragmento de Supernova
 		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
-	}
-
-	RelicarioCdBuff: {
-		DisplayName: Recarga del relicario
-		Description: El sol se está recargando
 	}
 
 	SolEnMiniaturaBuff: {
@@ -3777,11 +3751,6 @@ Duende: {
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
-
-Keybinds: {
-	$parentVal: RelicarioSolar: Relicario Solar (L)
-	// RelicarioSolar.DisplayName: Relicario Solar
-}
 
 Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
