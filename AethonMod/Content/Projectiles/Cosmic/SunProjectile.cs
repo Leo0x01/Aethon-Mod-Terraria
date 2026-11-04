@@ -67,13 +67,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   0. EFECTOS HIJOS DETRÁS (v5.95): llamarada PhoenixNova (sprites
     ///      aditivos) + carga de la Supernova — el disco los OCULTA (alpha≈1):
     ///      se leen como backlight asomando por el limbo de la estrella.
-    ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
-    ///   2. RadialShineShader sobre WavyBlotchNoise: color (252, 212, 112) * 0.24,
+    ///   1. Backglow con ResplandorChico: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
+    ///   2. RadialShineShader sobre RuidoManchas: color (252, 212, 112) * 0.24,
     ///      escala = width * scale * 2.72 / tamaño de la textura.
-    ///   3. SunShader sobre DendriticNoiseZoomedOut (canvas):
+    ///   3. SunShader sobre RuidoDendritico (canvas):
     ///      coronaIntensityFactor = 0.05, mainColor = blanco, darkerColor = (204, 92, 25),
     ///      subtractiveAccentFactor = (181, 0, 0), sphereSpinTime = GlobalTimeWrappedHourly * 0.9,
-    ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
+    ///      s1 = RuidoManchas, s2 = MapaDistorsion,
     ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
     /// CICLO DE VIDA (v5.85/v5.86/v5.94/v5.96) - el sol como cuerpo celeste completo:
@@ -912,7 +912,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Main.spriteBatch.End();
 
                 // === 1. BACKGLOW ===
-                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/ResplandorChico").Value;
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -931,7 +931,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Main.spriteBatch.End();
 
                 // === 2. RADIAL SHINE (aura con ruido animado) ===
-                Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+                Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/RuidoManchas").Value;
                 if (_shineShader != null && _shineShader.Value != null)
                 {
                     Effect shineShader = _shineShader.Value;
@@ -954,8 +954,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (_sunShader != null && _sunShader.Value != null)
                 {
                     Effect shader = _sunShader.Value;
-                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
-                    Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/MapaDistorsion").Value;
+                    Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/RuidoDendritico").Value;
 
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     // v5.94 — GIGANTE ROJA: el cuerpo de la estrella enrojece.

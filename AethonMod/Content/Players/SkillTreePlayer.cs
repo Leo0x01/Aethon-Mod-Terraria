@@ -10,13 +10,13 @@ namespace AethonMod.Content.Players
     //  SkillTreePlayer — v6.86 — EL ÁRBOL DE HABILIDADES DEL PORTADOR.
     //
     //  LA LETRA: «recuerdas cuando estabamos intentando crear un arbol
-    //  de habilidades y no lo logramos, bueno el mod Umbra y el mod
-    //  Path of Terraria tienen el arbol de habilidades en una ventana
+    //  de habilidades y no lo logramos, bueno los mods de referencia
+    //  tienen el arbol de habilidades en una ventana
     //  funcional justo como lo necesitabamos, asi que investigalo y
     //  crea un item que la use».
     //
     //  EL INFORME R6 (r6_arbol_habilidades.md, repos clonados): el
-    //  modelo a copiar es Path of Terraria — TODO POR JUGADOR
+    //  modelo a copiar es el de la referencia — TODO POR JUGADOR
     //  (PassiveTreePlayer.SaveData: tag[id] = nivel), los efectos en
     //  PostUpdateEquips (BuffPlayer cada tick), y el refund con
     //  conectividad (FullyLinkedWithout — el árbol jamás se parte).
@@ -38,7 +38,7 @@ namespace AethonMod.Content.Players
 
         // ================================================================
         //  LA PERSISTENCIA (por JUGADOR — viaja con el .plr a todos los
-        //  mundos, el modelo de PoT).
+        //  mundos, el modelo de la referencia).
         // ================================================================
         public override void SaveData(TagCompound tag)
         {
@@ -98,7 +98,7 @@ namespace AethonMod.Content.Players
         }
 
         // ================================================================
-        //  LOS EFECTOS (el modelo PoT: PostUpdateEquips — cada tick, por
+        //  LOS EFECTOS (el modelo de la referencia: PostUpdateEquips — cada tick, por
         //  jugador, en todas las pantallas).
         // ================================================================
         public override void PostUpdateEquips()

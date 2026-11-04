@@ -3779,7 +3779,7 @@ namespace AethonMod.Content.VFX
                 }
 
                 // === 4. LOS FANTASMAS — la DISTORSIÓN heat-haze SIN shaders
-                //     (la traducción 2D del shader de Wrath of the Gods:
+                //     (la técnica 2D del heat-haze de la investigación:
                 //     desplazar el muestreo en DIRECCIÓN dictada por ruido):
                 //     dos pasadas tenues desplazadas en círculo lentísimo —
                 //     el shimmer refractivo sobre el dorado ===

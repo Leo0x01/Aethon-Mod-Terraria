@@ -6,8 +6,8 @@ namespace AethonMod.Content.Buffs
 {
     /// <summary>
     /// VastagoDelEternoBuff — v6.91 — LA MASCOTA NUEVA: EL VÁSTAGO DEL
-    /// ETERNO, nacida del pipeline de la investigación sprite-gen
-    /// (aldegad, Apache-2.0 — «una sola imagen de personaje → sprites
+    /// ETERNO, nacida del pipeline de la investigación de los reels
+    /// («una sola imagen de personaje → sprites
     /// animados listos para el motor»: la imagen base se generó con
     /// identidad única y fondo croma, la transparencia real salió por
     /// flood-fill desde los bordes, y los ciclos idle/walk — respiración

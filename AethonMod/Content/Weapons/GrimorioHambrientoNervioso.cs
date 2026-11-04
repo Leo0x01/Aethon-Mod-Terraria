@@ -786,10 +786,20 @@ namespace AethonMod.Content.Weapons
             //  como, esto es solo una ilusion, me da mas hambre».
             //  LA MARCA DE VANILLA: npc.spawnedFromStatue — el sello de
             //  las presas de granja. La ilusión NO alimenta: ENGRE.
+            //  v6.93 — LA LETRA NUEVA (la cifra): «debes hacer que
+            //  cualquier criatura que aparezca de una estatua aumente
+            //  el hambre del grimorio en 0,1%» — la ilusión que ENGRE
+            //  pasa del 1% al 0,1% POR PRESA de estatua devorada por
+            //  el grimorio (la escala de la .85 engordaba al libro
+            //  demasiado rápido: la granja de estatuas es un CHINERO,
+            //  no un banquete). El diálogo del grimorio y la cifra en
+            //  CombatText siguen vivos (el «−+1% hambre» roto de la
+            //  .85 también muere: la clave Absorbe ya no trae el
+            //  signo pegado — cada caso pone el suyo).
             // ============================================================
             if (presa.SpawnedFromStatue)
             {
-                festin.Hambre = Math.Min(1f, festin.Hambre + 0.01f);   // +1% de hambre
+                festin.Hambre = Math.Min(1f, festin.Hambre + 0.001f);   // +0,1% de hambre (la letra de la v6.93)
                 if (dueño != null && dueño.active && Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     try
@@ -797,10 +807,10 @@ namespace AethonMod.Content.Weapons
                         // LA VOZ DEL LIBRO (solo al portador — el patrón EcoRed).
                         EcoRed.HablarAlPortador(dueño, "Mods.AethonMod.Hambre.Estatua",
                             new Color(235, 70, 55));
-                        // LA CIFRA EN ROJO (el bocado que ENGRE).
+                        // LA CIFRA EN ROJO (el bocado que ENGRE: +0,1%).
                         CombatText.NewText(presa.Hitbox, new Color(235, 70, 55),
                             string.Format(Language.GetTextValue(
-                                "Mods.AethonMod.Hambre.Nervioso.Absorbe"), "+1"));
+                                "Mods.AethonMod.Hambre.Nervioso.Absorbe"), "+0,1%"));
                     }
                     catch { }
                 }
@@ -821,14 +831,16 @@ namespace AethonMod.Content.Weapons
 
             // el grito silencioso del apetito satisfecho — CON LA CIFRA
             // REAL del bocado (v6.50.104: la dieta por rareza hace que
-            // cada presa pese distinto: «Absorbe: −{0}% hambre»)
+            // cada presa pese distinto: «{0}% hambre» — v6.93: el signo
+            // lo pone CADA caso (el normal RESTA «−1»; el de estatua
+            // SUMA «+0,1%»): la clave ya no trae el menos pegado.
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 try
                 {
                     CombatText.NewText(presa.Hitbox, new Color(235, 70, 55),
                         string.Format(Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso.Absorbe"),
-                            (quita * 100f).ToString("0.##")));
+                            "−" + (quita * 100f).ToString("0.##")));
                 }
                 catch { }
             }

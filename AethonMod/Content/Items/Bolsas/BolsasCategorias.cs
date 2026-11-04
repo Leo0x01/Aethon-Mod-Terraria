@@ -858,6 +858,10 @@ namespace AethonMod.Content.Items.Bolsas
     //  original»): el RC2 original INTACTO + las TRES recetas de LA
     //  PILA DE CAPAS (A la equilibrada · B el titán · C el sueño) para
     //  elegir la ganadora en juego.
+    //  v6.93 — EL RENGLÓN FINAL (la letra: «ahora usando lo nuevo
+    //  aprendido crea una nueva arma definitiva»): la PRIMERA definitiva
+    //  nacida sobre HazLib — la barra de tinta de 4.800 px que atraviesa
+    //  al escritor y gira BORRANDO LA PÁGINA ENTERA. La bolsa la lleva.
     // ======================================================================
 
     public class BolsaDefinitivas : BolsaCategoria
@@ -868,7 +872,7 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(255, 214, 120);
 
-        protected override string Nota => "El Rayo Concentrado 2 — el ataque definitivo vive aquí";
+        protected override string Nota => "Los ataques definitivos: el RC2, El Sueño y El Renglón Final";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -879,7 +883,10 @@ namespace AethonMod.Content.Items.Bolsas
                 // murieron con la elección («me quedare con rayo de prueba
                 // C el sueño, el resto los puedes borrar»); C — EL SUEÑO —
                 // es LA definitiva (y el haz de la Ira de un Ser Exterior).
-                (ModContent.ItemType<RayoPruebaC>(), 1)
+                (ModContent.ItemType<RayoPruebaC>(), 1),
+                // v6.93 — EL RENGLÓN FINAL: la primera definitiva de HazLib
+                // (la citación → el renglón que gira → el punto final).
+                (ModContent.ItemType<RenglonFinal>(), 1)
             };
         }
     }
@@ -918,8 +925,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Clicker.CompasRunico>(), 1));
             l.Add((ModContent.ItemType<Weapons.Clicker.FuriaSolarClicker>(), 1));
             // v6.85 — LOS FRUTOS DE LAS INVESTIGACIONES:
-            // R8 — LA MIRADA (el rayo de energía).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaSolyn>(), 1));
+            // R8 — LA MIRADA (el rayo de energía; v6.93: recreada 100 %
+            // de la casa sobre HazLib — La Mirada del Eterno).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.MiradaDelEterno>(), 1));
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
             // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));

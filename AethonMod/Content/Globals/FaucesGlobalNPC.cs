@@ -225,6 +225,14 @@ namespace AethonMod.Content.Globals
         /// peleó (playerInteraction) con el Eterno visible y SIN este
         /// tipo en su lista de devorados (la «solo la primera vez» de la
         /// letra — ShardPlayer.JefesDevorados).
+        /// v6.93 — LA LETRA DEL CHECKLIST: «cuando un jefe está en el
+        /// checklist actual, al derrotarlo SIEMPRE se hace la animación
+        /// de devorar; en caso de que el jefe no aparezca en el
+        /// checklist del Despertar actual, la animación de devorar solo
+        /// se hará la primera vez que se venza al jefe» — un jefe ya
+        /// devorado VUELVE a la mesa mientras sea LA PRESA del peldaño
+        /// vivo de SU portador (y como fue devorado, cuenta para cuando
+        /// llegue su turno: el crédito es retroactivo — JefeYaCaido).
         /// </summary>
         private static bool PrimeraCenaPendiente(NPC jefe, out Player portador)
         {
@@ -253,11 +261,65 @@ namespace AethonMod.Content.Globals
                 if (!TieneEternoVisible(p)) continue;           // con el libro a mano
                 var sp = p.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null) continue;
-                if (sp.JefesDevorados.Contains(jefe.type)) continue;  // ya se lo comió
+                // v6.93 — LA REGLA DEL CHECKLIST (arriba, en el summary):
+                //     ya devorado Y fuera del checklist actual: NO repite.
+                if (sp.JefesDevorados.Contains(jefe.type) &&
+                    !JefeEnElChecklistActual(p, jefe.type)) continue;
                 portador = p;
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// v6.93 — ¿Es ESTE jefe LA PRESA del peldaño vivo del despertar
+        /// de ESTE portador? (el «checklist actual» de la letra). La
+        /// puerta que está pagando su grimorio (nivel +1): si la puerta
+        /// es la CIMA COMPUESTA, sus TRES presas cuentan (cada una con
+        /// SU cuenta). Los gemelos comparten puerta (una puerta, dos
+        /// cuerpos) y las piezas en cascada se filtran antes de llegar
+        /// aquí (EsDerrotaCompleta / DueñoDelPool).
+        /// </summary>
+        private static bool JefeEnElChecklistActual(Player p, int tipoNpc)
+        {
+            try
+            {
+                if (p == null || !p.active) return false;
+
+                // EL GRIMORIO QUE PORTA (la escalera que está pagando).
+                int tipoLibro = ModContent.ItemType<Weapons.GrimoireEternal>();
+                global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma = null;
+                for (int k = 0; k < 10; k++)
+                {
+                    Item inv = p.inventory[k];
+                    if (inv == null || inv.IsAir || inv.type != tipoLibro) continue;
+                    alma = inv.GetGlobalItem
+                        <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                    if (alma != null) break;
+                }
+                if (alma == null) return false;
+
+                int siguiente = alma.NivelDespertar + 1;
+                if (siguiente > Systems.DespertarGrimorio.NivelMax) return false;
+
+                var puerta = Systems.DespertarGrimorio.JefeDeNivel(siguiente);
+                if (puerta == null) return false;
+
+                // LA CIMA COMPUESTA (la puerta 100): sus tres presas.
+                if (puerta.Value.Contador == 3)
+                    return tipoNpc == NPCID.MoonLordCore || tipoNpc == NPCID.HallowBoss
+                        || tipoNpc == ModContent.NPCType<global::AethonMod.Content.NPCs.AethonBoss>();
+
+                // LAS REPETICIONES Y LAS DE SIEMPRE: la miniatura de la
+                // puerta ES el tipo del jefe (los gemelos: una puerta,
+                // dos cuerpos — cualquiera de los dos la abre).
+                int miniatura = puerta.Value.Miniatura;
+                if (miniatura == NPCID.Retinazer && tipoNpc == NPCID.Spazmatism) return true;
+                if (miniatura == NPCID.EaterofWorldsHead &&
+                    (tipoNpc == NPCID.EaterofWorldsBody || tipoNpc == NPCID.EaterofWorldsTail)) return true;
+                return miniatura == tipoNpc;
+            }
+            catch { return false; }
         }
 
         /// <summary>

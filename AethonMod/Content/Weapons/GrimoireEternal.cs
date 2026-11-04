@@ -1399,32 +1399,12 @@ namespace AethonMod.Content.Weapons
                     tooltips.Add(new TooltipLine(Mod, "WIra",
                         "[c/78788C:Ira de un Ser Exterior: bloqueado — Despertar 100]"));
                 }
-                // v6.88 — EL HITO DEL ESCUADRÓN EN PORCENTAJE (la letra:
-                //     «dice Despertar 50 todo el ataque del escuadron
-                //     1.25 y mas rapido, creo que deberia decirlo en
-                //     porcentaje y deberia de haber un aumento cada 20
-                //     niveles ademas de que debe decirlo como hito»):
-                //     línea VIVA con el multiplicador actual (y el
-                //     próximo hito en la misma línea).
-                {
-                    int pct = Systems.DespertarGrimorio.PctEscuadron(despertar);
-                    int proximoHito = 20;
-                    while (proximoHito <= despertar && proximoHito < 100) proximoHito += 20;
-                    // v6.90 — LA LETRA: «la estadistica que aumenta el
-                    //     ataque del escuadron debe aumentar el ataque de
-                    //     invocacion ya que el ataque del escuadron se
-                    //     rige por el ataque de invocacion» — el hito dice
-                    //     (y hace) DAÑO DE INVOVACIÓN: el rayo de cada ojo,
-                    //     los conjuros combinados y LA IRA lo cobran vivo.
-                    string viva = pct > 0
-                        ? $"[c/C49CFF:DESPERTAR {despertar}: TODO el daño de invocación del escuadrón +{pct} %]"
-                        : "[c/78788C:el escuadrón aún no cobra su hito (Despertar 20: +10 %)]";
-                    if (pct > 0 && proximoHito <= Systems.DespertarGrimorio.NivelMax)
-                        viva += $"[c/78788C:  →  hito {proximoHito}: +{Systems.DespertarGrimorio.PctEscuadron(proximoHito)} %]";
-                    else if (pct > 0)
-                        viva += "[c/C49CFF:  — la cima del escuadrón]";
-                    tooltips.Add(new TooltipLine(Mod, "WHitoEscuadron", viva));
-                }
+                // v6.93 — EL HITO DEL ESCUADRÓN MUDÓ DE CASA: la línea del
+                //     porcentaje vive AHORA en su sitio de la letra (LA
+                //     PROGRESIÓN, «Próximo hito del Despertar» — la letra
+                //     nueva de la lista: «X% de daño a Todo el Grimorio…
+                //     es solo cambiarlo de lugar»). Esta ventana se queda
+                //     con lo suyo: el escuadrón, sus ataques combinados.
             }
 
             // === LA PROGRESIÓN: la barra de EXP y la pareja del HAMBRE.
@@ -1496,212 +1476,226 @@ namespace AethonMod.Content.Weapons
                     //     ahora la progresion de despertar llega a 100»):
                     //     "/{NivelMax}" — 100 de 100, JAMÁS más un /50
                     //     duro de la era del 50).
-                    int celdas = 25;
-                    int llenas = (int)(celdas * despertar / (float)Systems.DespertarGrimorio.NivelMax);
-                    string barDesp = "";
-                    for (int i = 0; i < celdas; i++)
-                        barDesp += i < llenas ? "▓" : "·";
+                    // LA BARRA y el daño MUDARON de sitio (v6.93 — la letra
+                    //     nueva de la lista): la barra vive ahora entre el
+                    //     DINERO y DEVORAR (su sitio de la letra) y el daño
+                    //     en PRÓXIMO HITO DEL DESPERTAR.
 
-                    tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
-                        $"[c/C49CFF:Despertar {despertar}/{Systems.DespertarGrimorio.NivelMax}]  [c/9B6FE8:{barDesp}]"));
-                    tooltips.Add(new TooltipLine(Mod, "DespertarDano",
-                        $"[c/9B6FE8:  +{(despertar)}% de daño a TODO el grimorio]"));
-
-                    // v6.89 — LA LISTA PEQUEÑA DEL PRÓXIMO NIVEL, LA
-                    //     NUEVA (la letra: «el grimorio es magia pura, así
-                    //     que las armas principales que debe pedir son
-                    //     armas mágicas y de invocador con las
-                    //     invocaciones, no incluir látigos… aunque pida
-                    //     varias armas, el grimorio solo consumirá 1 de
-                    //     ellas» + «también sería obligatorio dar al menos
-                    //     uno de los materiales o das 20 lingotes de oro o
-                    //     das 20 rubíes»): esencias + monedas + UN ARMA de
-                    //     magia/invocador (las ALTERNATIVAS del peldaño con
-                    //     su daño — la lista dice cuál come: UNA) + UN
-                    //     material (UNA opción completa — la mesa se queda
-                    //     con el primero que el jugador alimente).
+                    // v6.93 — LA LISTA NUEVA DE LA LETRA: la forma
+                    //     pedida, línea por línea — Esencia del Eterno ·
+                    //     el dinero · DESPERTAR X/100 (barra) · Devorar
+                    //     Armas o Materiales (UNA LÍNEA POR OPCIÓN, con
+                    //     SU sprite y SU nombre) · el Jefe que debe ser
+                    //     Devorado (J o J0/X, vivo o devorado) · Próximo
+                    //     hito del Despertar (el daño a Todo el Grimorio
+                    //     + el nivel del hito) · y la nota pequeña del
+                    //     altar. LA TINTA DE LA LETRA: verde = cumplido
+                    //     · rojo = falta · gris oscuro = bloqueado (las
+                    //     otras opciones tras devorar las 2 que exige la
+                    //     mesa) — el patrón vale para TODOS los
+                    //     requisitos del checklist del Despertar.
                     if (despertar < Systems.DespertarGrimorio.NivelMax)
                     {
                         int esencias = Systems.DespertarGrimorio.EsenciasPara(siguiente);
                         long monedas = Systems.DespertarGrimorio.MonedasPara(siguiente);
 
-                        // v6.51.11 — LA MESA DEL LIBRO (los contadores
-                        // parciales de la ofrenda: lo que YA comió de
-                        // este peldaño — persisten y viajan por el cable).
                         var almaLista = Globals.AlmaEternoGlobalItem.De(Item);
                         int comidasEsencias = almaLista?.OfrendaEsencias ?? 0;
-                        long comidasMonedas = almaLista?.OfrendaMonedas ?? 0L;
-                        int comidosMaterial = almaLista?.OfrendaMineral ?? 0;
-                        int grupoBloqueado = almaLista?.OfrendaMineralGrupo ?? -1;
-                        bool devoradaArma = almaLista?.OfrendaArma ?? false;
 
-                        // (v6.51.6: UN SOLO COLOR POR LÍNEA, el ✓ DENTRO
-                        // del mismo span, y el arma con SU NOMBRE + SU
-                        // SPRITE INLINE [i:id] — el tag de item NATIVO de
-                        // tML, a prueba de todo).
-                        // v6.77 — LA LETRA: «los colores rojo para
-                        //     cuando no esta completado y verde para
-                        //     cuando esta completado deberian ser usados
-                        //     para todos los requisistos de nivel del
-                        //     Despertar»: colNo pasa del LILA (C4A2FF) al
-                        //     ROJO — y TODO el peldaño lo lee (esencias,
-                        //     dinero, arma, material y LA PRESA).
-                        string colOK = "7FE89B", colNo = "FF7B7B";
+                        // v6.93 — LAS TRES TINTAS (la letra: «cuando la
+                        //     opcion fue cumplida las letras estaran
+                        //     verdes, cuando la opcion todavia falta la
+                        //     letra es roja» y las demás «bloquearse con
+                        //     las letras en color gris oscuro»).
+                        string colOK = "7FE89B", colNo = "FF7B7B", colBloq = "4A4A55";
 
-                        // === EL REQUISITO 1 — LAS ESENCIAS (las comidas). ===
+                        // === EL REQUISITO 1 — LAS ESENCIAS (la letra: «este
+                        //     apartado lo puedes dejar como está
+                        //     actualmente en el mod, está bien así»). ===
                         bool esenciasOK = comidasEsencias >= esencias;
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq1",
                             $"[c/78788C:  Para Despertar {siguiente}:]"));
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq2",
-                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencias del Eterno: {Math.Min(comidasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
+                            $"[c/{(esenciasOK ? colOK : colNo)}:  • Esencia del Eterno: {Math.Min(comidasEsencias, esencias)}/{esencias}{(esenciasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 2 — EL DINERO (lo comido — y
-                        //     lo que falta, para saber cuánto soltar). ===
-                        bool monedasOK = comidasMonedas >= monedas;
+                        // === EL REQUISITO 2 — EL DINERO (la letra: «este
+                        //     apartado lo puedes dejar como está
+                        //     actualmente» — el banco retroactivo:
+                        //     disponible = devorado − cobrado). ===
+                        long disponibleMon = almaLista == null ? 0L
+                            : Globals.AlmaEternoGlobalItem.BancoMonedasDisponibles(almaLista);
+                        bool monedasOK = disponibleMon >= monedas;
                         string textoMonedas = Systems.DespertarGrimorioSistema.ItemToText(monedas);
                         if (!monedasOK)
-                            textoMonedas += $" — faltan {Systems.DespertarGrimorioSistema.ItemToText(monedas - comidasMonedas)}";
+                            textoMonedas += $" — faltan {Systems.DespertarGrimorioSistema.ItemToText(monedas - disponibleMon)}";
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
-                        // === EL REQUISITO 3 — EL ARMA DEL PELDAÑO (v6.89:
-                        //     magia/invocador · v6.90: EL ARMA **O** LOS
-                        //     MATERIALES — BASTA UNO DE LOS DOS, y todo lo
-                        //     que el grimorio come debe estar CONSAGRADO):
-                        //     las ALTERNATIVAS con su sprite y su nombre
-                        //     LOCALIZADO. Cuando UNO de los dos pagó, el
-                        //     otro se apaga (ya no hace falta). ===
+                        // === LA BARRA DEL DESPERTAR (la letra: «Despertar
+                        //     X/100 (barra de progreso)» — aquí X es el
+                        //     nivel ACTUAL de Despertar; su sitio de la
+                        //     letra: entre el dinero y DEVORAR). ===
                         {
-                            bool pagoElMaterialR3 = grupoBloqueado >= 0 &&
-                                comidosMaterial >= Systems.DespertarGrimorio.CantidadMateriales(siguiente, grupoBloqueado);
-                            bool pagoCualquiera = devoradaArma || pagoElMaterialR3;
-                            string colArma = pagoCualquiera ? colOK : colNo;
-                            int[] peldano = Systems.DespertarGrimorio.ArmasDelNivel[siguiente];
-                            var trozosArma = new System.Collections.Generic.List<string>();
-                            // v6.91 — LA LETRA: «en la parte de progresion donde
-                            //     dicen los requisistos dice esto c/78788Co» — LA
-                            //     CAUSA: el primer span quedaba ABIERTO sin su
-                            //     «]» y el parser se comía el tag de la «ó» crudo
-                            //     (se pintaba «c/78788C:ó» como texto). Cura: cada
-                            //     span COMPLETO y cerrado, y la «ó» con espacios
-                            //     alrededor (los tags de un solo carácter jamás
-                            //     viajan solos).
-                            trozosArma.Add($"[c/{colArma}:  • Devorar 1 arma (elige]");
-                            trozosArma.Add("[c/78788C: ó ]");
-                            trozosArma.Add($"[c/{colArma}:los materiales — basta UNO de los dos:]");
-                            for (int pa = 0; pa < peldano.Length && pa < 6; pa++)
-                            {
-                                if (pa > 0) trozosArma.Add("[c/78788C: · ]");
-                                trozosArma.Add($"[i:{peldano[pa]}]");
-                                string nombreArma = Lang.GetItemNameValue(peldano[pa]);
-                                trozosArma.Add($"[c/{colArma}:{nombreArma}]");
-                            }
-                            if (devoradaArma) trozosArma.Add($"[c/{colArma}: ✓ devorada]");
-                            else if (pagoElMaterialR3) trozosArma.Add("[c/78788C: — pagado con los materiales]");
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReq4",
-                                string.Join(" ", trozosArma)));
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReq5",
-                                devoradaArma
-                                    ? "[c/78788C:  (el grimorio ya devoró su arma — los materiales ya no hacen falta)]"
-                                    : "[c/78788C:  (conságuela en el altar y suéltala DELANTE del grimorio seleccionado — él devora UNA)]"));
+                            int barD = 20;
+                            int llenos = (int)(barD * (despertar / 100f));
+                            string barra = "";
+                            for (int bi = 0; bi < barD; bi++)
+                                barra += bi < llenos ? "█" : "░";
+                            tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
+                                "[c/78788C:  • Despertar ]" +
+                                $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/100]"));
                         }
 
-                        // === EL REQUISITO 4 — EL MATERIAL DEL PELDAÑO
-                        //     (v6.90: la OTRA cara del requisito 3 — EL
-                        //     ARMA **O** EL MATERIAL, BASTA UNO DE LOS
-                        //     DOS): los GRUPOS son las ALTERNATIVAS — EL
-                        //     GRIMORIO se queda con la primera opción que
-                        //     el jugador alimente y cobra SU cuota
-                        //     completa. El estado: el grupo bloqueado y
-                        //     su cuenta. ===
+                        // === EL REQUISITO 3 — DEVORAR ARMAS O MATERIALES
+                        //     (la letra: «la lista dará 4 o más opciones
+                        //     de la forma en la que las muestro, siempre
+                        //     mostrando su nombre y su icono
+                        //     correspondiente, además el grimorio debe
+                        //     consumir al menos 2 de esas opciones para
+                        //     desbloquear el siguiente nivel de Despertar
+                        //     … una vez cumpla con devorar cualquiera de
+                        //     las 2, las otras opciones deben bloquearse
+                        //     con las letras en color gris oscuro»): UNA
+                        //     LÍNEA POR OPCIÓN — (A) cada arma del
+                        //     peldaño con SU sprite y SU nombre, (M) cada
+                        //     grupo de materiales con SUS alternativas y
+                        //     SU cuota. El pago es RETROACTIVO (el
+                        //     banco): devorado en OTRO peldaño cuenta
+                        //     para ESTE. ===
                         {
+                            int[] armasOpciones = Systems.DespertarGrimorio.ArmasDelNivel[
+                                System.Math.Max(1, System.Math.Min(
+                                    Systems.DespertarGrimorio.NivelMax, siguiente))];
                             int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(siguiente);
-                            bool materialOK = grupoBloqueado >= 0 &&
-                                comidosMaterial >= Systems.DespertarGrimorio.CantidadMateriales(siguiente, grupoBloqueado);
-                            bool pagoCualquieraMat = devoradaArma || materialOK;
-                            string colMat = pagoCualquieraMat ? colOK : colNo;
-                            var trozosMat = new System.Collections.Generic.List<string>();
-                            // v6.91 — la misma cura del leak de arriba: spans
-                            //     completos y la «ó» con espacios, nunca sola.
-                            trozosMat.Add($"[c/{colMat}:  • Material (1 opción]");
-                            trozosMat.Add("[c/78788C: ó ]");
-                            trozosMat.Add($"[c/{colMat}:el arma de arriba):]");
-                            for (int gi = 0; gi < gruposMat.Length && gi < 4; gi++)
+
+                            // ¿cuántas hay pagas? (la mesa cobra 2)
+                            int pagas = Systems.DespertarGrimorioSistema
+                                .ContarOpcionesPagadas(almaLista, siguiente);
+                            bool dosPagas = pagas >= 2;
+
+                            tooltips.Add(new TooltipLine(Mod, "DespertarDevorarTit",
+                                $"[c/{(dosPagas ? colOK : "FFD787")}:  Devorar Armas o Materiales ({System.Math.Min(pagas, 2)}/2):]"));
+
+                            // LAS ARMAS (A) — una línea por arma.
+                            if (armasOpciones != null)
                             {
-                                int[] grupo = gruposMat[gi];
-                                if (grupo == null || grupo.Length == 0) continue;
-                                if (gi > 0) trozosMat.Add("[c/78788C: ó ]");
-                                for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
-                                    trozosMat.Add($"[i:{grupo[ti]}]");
-                                int cuota = Systems.DespertarGrimorio.CantidadMateriales(siguiente, gi);
-                                string nombreMat = Lang.GetItemNameValue(grupo[0]);
-                                // el grupo BLOQUEADO lleva su cuenta viva
-                                if (gi == grupoBloqueado && !materialOK)
-                                    trozosMat.Add($"[c/E8D8FF:{Math.Min(comidosMaterial, cuota)}/{cuota} × {nombreMat}]");
-                                else
-                                    trozosMat.Add($"[c/{colMat}:{cuota} × {nombreMat}]");
+                                for (int pa = 0; pa < armasOpciones.Length; pa++)
+                                {
+                                    int tipoArma = armasOpciones[pa];
+                                    bool pagaA = almaLista != null && Globals.AlmaEternoGlobalItem
+                                        .BancoItemDisponible(almaLista, tipoArma) >= 1;
+                                    string tintaA = pagaA ? colOK : (dosPagas ? colBloq : colNo);
+                                    string nombreArma = Lang.GetItemNameValue(tipoArma);
+                                    string cuentaA = pagaA ? "  ✓ Devorada" : "";
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarDevorarA" + pa,
+                                        $"[i:{tipoArma}][c/{tintaA}: (A) {nombreArma}{cuentaA}]"));
+                                }
                             }
-                            if (materialOK) trozosMat.Add($"[c/{colMat}: ✓]");
-                            else if (devoradaArma) trozosMat.Add("[c/78788C: — pagado con el arma]");
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReqMat",
-                                string.Join(" ", trozosMat)));
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReqMatNota",
-                                devoradaArma
-                                    ? "[c/78788C:  (el arma ya pagó el peldaño — el grimorio no come los materiales)]"
-                                    : "[c/78788C:  (conságralos en el altar — el grimorio se queda con la primera opción que alimentes)]"));
+
+                            // LOS MATERIALES (M) — una línea por grupo (las
+                            // alternativas del grupo juntas: sus sprites,
+                            // su cuota — el banco del grupo suma sus
+                            // variantes: devorar 10 de oro y 10 de platino
+                            // es 20 para «20 de oro o de platino»).
+                            if (gruposMat != null)
+                            {
+                                for (int g = 0; g < gruposMat.Length; g++)
+                                {
+                                    int[] grupo = gruposMat[g];
+                                    if (grupo == null || grupo.Length == 0) continue;
+                                    int cuota = Systems.DespertarGrimorio.CantidadMateriales(siguiente, g);
+                                    long dispG = almaLista == null ? 0L
+                                        : Globals.AlmaEternoGlobalItem.BancoGrupoDisponible(almaLista, grupo);
+                                    bool pagaG = dispG >= cuota;
+                                    string tintaG = pagaG ? colOK : (dosPagas ? colBloq : colNo);
+                                    var trozos = new System.Collections.Generic.List<string>();
+                                    trozos.Add($"[c/{tintaG}: (M) {cuota} × ]");
+                                    for (int ti = 0; ti < grupo.Length && ti < 3; ti++)
+                                        trozos.Add($"[i:{grupo[ti]}]");
+                                    string nombres = "";
+                                    for (int ni = 0; ni < grupo.Length; ni++)
+                                        nombres += (ni > 0 ? " o " : "") + Lang.GetItemNameValue(grupo[ni]);
+                                    string colaG = pagaG ? "  ✓ Devorado"
+                                        : (dispG > 0 && !dosPagas ? $" ({System.Math.Min(dispG, cuota)}/{cuota})" : "");
+                                    trozos.Add($"[c/{tintaG}:{nombres}{colaG}]");
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarDevorarM" + g,
+                                        string.Join(" ", trozos)));
+                                }
+                            }
                         }
 
-                        // === v6.76 — LA PRESA DEL PELDAÑO (la letra:
-                        //     «estuve revisando los requisitos para
-                        //     despertar y subir nivel de despertar, pero
-                        //     en ningun momento me piden que maten a los
-                        //     jefes, recuerda que la lista del despertar
-                        //     para los jefes principales es un cheklist
-                        //     que guarda cual jefe has matado y asi
-                        //     cuando llegas al nivel de un jefe que ya
-                        //     mataste, el requisito esta completado»):
-                        //     el checklist de la caza VIVE en la ventana
-                        //     del Cielo — pero la LISTA DE REQUISITOS
-                        //     también lo dice: cuando el peldaño
-                        //     siguiente es UNA PUERTA DE CAZA, su línea
-                        //     propia — EL JEFE con SU estado (v6.77 — la
-                        //     letra: «en caso de que ya mataste al jefe
-                        //     debe decir DEVORADO… recuerda que la
-                        //     primera muerte de cada jefe el grimorio se
-                        //     los come jajajajajaja; y si todavia no lo
-                        //     has matado debe decir algo como Todavia
-                        //     VIVO»: DEVORADO ✓ verde / Todavía VIVO
-                        //     roja). El crédito es RETROACTIVO (JefeYaCaido: la bandera
-                        //     del mundo O el registro del cazador que
-                        //     viaja con el personaje): si YA lo mataste
-                        //     — aunque haya sido hace meses o en otro
-                        //     mundo con este personaje — el requisito
-                        //     NACE COMPLETADO. ===
+                        // === EL REQUISITO 4 — EL JEFE (la letra: «El
+                        //     siguiente Jefe debe ser Devorado: J o J0/X …
+                        //     recuerda que si el jefe todavía no está
+                        //     muerto debes colocar que el jefe todavía
+                        //     está vivo, en caso de que ya se haya
+                        //     devorado debes colocar que el jefe fue
+                        //     Devorado» + «en caso de que solo se deba
+                        //     matar al jefe 1 sola vez solo aparecerá el
+                        //     nombre del jefe» — esto aparece cuando
+                        //     corresponda (la puerta de caza del
+                        //     peldaño); la CIMA COMPUESTA son sus tres
+                        //     presas, cada una con SU cuenta) ===
                         if (Systems.DespertarGrimorio.EsNivelDeCaza(siguiente))
                         {
                             var jefePeldaño = Systems.DespertarGrimorio.JefeDeNivel(siguiente);
                             if (jefePeldaño != null)
                             {
-                                bool presaCaida = Systems.DespertarGrimorio
-                                    .JefeYaCaido(Main.LocalPlayer, siguiente);
+                                tooltips.Add(new TooltipLine(Mod, "DespertarReqJefeTit",
+                                    "[c/78788C:  El siguiente Jefe debe ser Devorado:]"));
+                                var cazadorJ = Main.LocalPlayer.GetModPlayer
+                                    <global::AethonMod.Content.Players.CazaJefesPlayer>();
                                 string nombreJefe = Language.GetTextValue(jefePeldaño.Value.Clave);
-                                string lineaJefe = presaCaida
-                                    ? Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeCaido", nombreJefe)
-                                    : Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeViva", nombreJefe);
-                                string colJefe = presaCaida ? colOK : colNo;   // v6.77 — el MISMO rojo de todo el peldaño
-                                tooltips.Add(new TooltipLine(Mod, "DespertarReqJefe",
-                                    $"[c/{colJefe}:  • {lineaJefe}{(presaCaida ? "  ✓" : "")}]"));
+
+                                if (jefePeldaño.Value.Contador == 3)
+                                {
+                                    // LA CIMA COMPUESTA: las tres presas con SU cuenta.
+                                    int mlVeces = cazadorJ?.VecesMoonLord ?? 0;
+                                    int eoVeces = cazadorJ?.VecesEmperatriz ?? 0;
+                                    int aeVeces = cazadorJ?.VecesAethon ?? 0;
+                                    string tintaML = mlVeces >= 10 ? colOK : colNo;
+                                    string estadoML = mlVeces >= 10 ? " — Devorado ✓" : " — todavía está vivo";
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarReqJefeML",
+                                        $"[c/{tintaML}:  • Moon Lord {System.Math.Min(mlVeces, 10)}/10{estadoML}]"));
+                                    string tintaEoL = eoVeces >= 5 ? colOK : colNo;
+                                    string estadoEoL = eoVeces >= 5 ? " — Devorado ✓" : " — todavía está vivo";
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarReqJefeEoL",
+                                        $"[c/{tintaEoL}:  • Emperatriz de Luz {System.Math.Min(eoVeces, 5)}/5{estadoEoL}]"));
+                                    string tintaAe = aeVeces >= 1 ? colOK : colNo;
+                                    string estadoAe = aeVeces >= 1 ? " — Devorado ✓" : " — todavía está vivo";
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarReqJefeAethon",
+                                        $"[c/{tintaAe}:  • Aethon{estadoAe}]"));
+                                }
+                                else if (jefePeldaño.Value.Veces > 1)
+                                {
+                                    // LAS REPETICIONES: el jefe con SU cuenta (J0/X).
+                                    int lleva = jefePeldaño.Value.Contador == 1
+                                        ? (cazadorJ?.VecesMoonLord ?? 0)
+                                        : jefePeldaño.Value.Contador == 2
+                                            ? (cazadorJ?.VecesEmperatriz ?? 0) : 0;
+                                    int exige = jefePeldaño.Value.Veces;
+                                    bool jefePaga = lleva >= exige;
+                                    string tintaJefeR = jefePaga ? colOK : colNo;
+                                    string estadoJefeR = jefePaga ? " — Devorado ✓" : " — todavía está vivo";
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarReqJefe",
+                                        $"[c/{tintaJefeR}:  • {nombreJefe} {System.Math.Min(lleva, exige)}/{exige}{estadoJefeR}]"));
+                                }
+                                else
+                                {
+                                    // LA DE SIEMPRE: SOLO el nombre (la letra).
+                                    bool presaCaida = Systems.DespertarGrimorio
+                                        .JefeYaCaido(Main.LocalPlayer, siguiente);
+                                    string lineaJefe = presaCaida
+                                        ? Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeCaido", nombreJefe)
+                                        : Language.GetTextValue("Mods.AethonMod.Despertar.ReqJefeViva", nombreJefe);
+                                    tooltips.Add(new TooltipLine(Mod, "DespertarReqJefe",
+                                        $"[c/{(presaCaida ? colOK : colNo)}:  • {lineaJefe}{(presaCaida ? "  ✓" : "")}]"));
+                                }
                             }
                         }
 
-                        // === v6.86 — LA PUERTA DEL LIBRO CORRUPTO (la letra
-                        //     del peldaño 20: «para desbloquear el nivel de
-                        //     despertar 20, a parte de lo que ya necesita,
-                        //     debemos añadir que tambien necesita consumir 1
-                        //     libro corrupto»): su línea propia con SU
-                        //     ✓ — DEVORADO ✓ verde / pendiente roja (el
-                        //     sello del libro cuenta lo que ESTE grimorio
-                        //     devoró, sea en el despertar 3 o en el 19). ===
+                        // === LA PUERTA DEL LIBRO (solo el 20 la tiene — la
+                        //     de siempre, la de la v6.86). ===
                         if (siguiente == 20)
                         {
                             bool libroComido = almaLista != null && almaLista.LibroCorruptoConsumido;
@@ -1713,43 +1707,46 @@ namespace AethonMod.Content.Weapons
                                 $"[c/{colLibro}:  • {lineaLibro}{(libroComido ? "  ✓" : "")}]"));
                         }
 
-                        // === v6.86 — LA CIMA Y SUS CONTADORES (la letra:
-                        //     «la Ira o sea el Haz, sera obtenible en el
-                        //     nivel 100 y venciendo a moon lord al menos 5
-                        //     veces, y venciendo al fragmento de un recuerdo
-                        //     lejano Aethon 1 vez»): la cuenta viva en el
-                        //     tooltip del peldaño 100 — Moon Lord n/5 ·
-                        //     Aethon n/1, verde cuando la cima está paga. ===
-                        if (siguiente == Systems.DespertarGrimorio.NivelMax)
+                        // === PRÓXIMO HITO DEL DESPERTAR (la letra: «X% de
+                        //     daño a Todo el Grimorio… actualmente se
+                        //     representa bien, es solo cambiarlo de
+                        //     lugar» — MUDÓ de la ventana del escuadrón a
+                        //     su sitio de la letra + «Nivel X: (H hito)»
+                        //     — SIEMPRE el siguiente hito a completar). ===
                         {
-                            // v6.88 — LA CIMA COMPUESTA (la letra: «Aethon
-                            //     debería estar como requisito para el nivel
-                            //     100, junto con 10 señores de la luna y 5
-                            //     emperatris de la luz, ya que en el nivel
-                            //     100 es donde se consigue la habilidad
-                            //     definitiva del grimorio, o sea su ataque
-                            //     definitivo, obtiene Ira de un Ser Exterior»).
-                            var cazador = Main.LocalPlayer.GetModPlayer
-                                <global::AethonMod.Content.Players.CazaJefesPlayer>();
-                            int mlVeces = cazador?.VecesMoonLord ?? 0;
-                            int eoVeces = cazador?.VecesEmperatriz ?? 0;
-                            int aeVeces = cazador?.VecesAethon ?? 0;
-                            bool iraPaga = mlVeces >= 10 && eoVeces >= 5 && aeVeces >= 1;
-                            string colIra = iraPaga ? colOK : colNo;
-                            tooltips.Add(new TooltipLine(Mod, "DespertarReqIra",
-                                $"[c/{colIra}:  • LA IRA (El Haz): Moon Lord {Math.Min(mlVeces, 10)}/10 · Emperatriz {Math.Min(eoVeces, 5)}/5 · Aethon {Math.Min(aeVeces, 1)}/1{(iraPaga ? "  ✓" : "")}]"));
+                            tooltips.Add(new TooltipLine(Mod, "DespertarHitoTit",
+                                "[c/78788C:  Próximo hito del Despertar:]"));
+                            int pctHito = Systems.DespertarGrimorio.PctEscuadron(despertar);
+                            int proximoHito = 20;
+                            while (proximoHito <= despertar && proximoHito < 100) proximoHito += 20;
+                            string lineaDano = pctHito > 0
+                                ? $"[c/C49CFF:+{pctHito}% de daño a Todo el Grimorio]"
+                                : "[c/78788C:+0% de daño a Todo el Grimorio (Despertar 20: +10%)]";
+                            if (pctHito > 0 && proximoHito <= Systems.DespertarGrimorio.NivelMax)
+                                lineaDano += $"[c/78788C:  →  hito {proximoHito}: +{Systems.DespertarGrimorio.PctEscuadron(proximoHito)}%]";
+                            else if (pctHito > 0)
+                                lineaDano += "[c/C49CFF:  — la cima del escuadrón]";
+                            tooltips.Add(new TooltipLine(Mod, "DespertarHitoDano", lineaDano));
+
+                            foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
+                            {
+                                if (paso.Nivel <= despertar) continue;
+                                tooltips.Add(new TooltipLine(Mod, "DespertarHitoNivel",
+                                    $"[c/9B6FE8:Nivel {paso.Nivel}:] " +
+                                    $"[c/C4A2FF:{Language.GetTextValue(paso.Clave)}]"));
+                                break;   // SOLO el próximo (la letra)
+                            }
                         }
 
-                        // === v6.51.11 — LA NOTA FINAL (la comida se sirve
-                        //     EN EL SUELO — el gesto nuevo): v6.90 — LA
-                        //     LETRA NUEVA: «con el arma o los materiales
-                        //     basta, aun asi debes dejar claro que solo
-                        //     necesitan uno de los dos» + la LEY DE LA
-                        //     CONSAGRACIÓN (todo lo que el grimorio come
-                        //     debe llevar el sello del altar — menos las
-                        //     esencias, que SON la esencia del Eterno). ===
+                        // === LA NOTA FINAL (la letra: «aquí debes dejar
+                        //     alguna información pequeña, como decir que
+                        //     todo debe ser consagrado en el Altar de la
+                        //     Consagración y que todo debe ser soltado
+                        //     enfrente del jugador para que el grimorio
+                        //     los devora, siempre teniendo el grimorio
+                        //     seleccionado»). ===
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq7",
-                            "[c/78788C:  (con el arma o los materiales basta — SOLO UNO de los dos; consagra la ofrenda en el altar y suéltala DELANTE del grimorio seleccionado — come solo lo que le falta y al completarla despierta)]"));
+                            "[c/78788C:  (Todo lo que el grimorio devora —armas, materiales y monedas— debe ser CONSAGRADO en el Altar de la Consagración y soltado ENFRENTE del jugador, con el grimorio seleccionado; solo las esencias se comen sin sello)]"));
 
                         // v6.88 — LOS PUNTOS DEL ALTAR MURIERON (la letra:
                         //     «quita ese requisito de ofrendas en el
@@ -1760,23 +1757,6 @@ namespace AethonMod.Content.Weapons
                     {
                         tooltips.Add(new TooltipLine(Mod, "DespertarMax",
                             "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO — 100 de 100]"));
-                    }
-
-                    // === v6.51.9 — SOLO EL PRÓXIMO HITO (la letra: «el
-                    //     despertar ocupa mucho espacio, solo debe salir
-                    //     el proximo hito cuando se completo el anterior»):
-                    //     la escalera COMPLETA de la .51.8 murió — vive UNA
-                    //     SOLA LÍNEA, el próximo hito del camino; cuando el
-                    //     libro lo completa, aparece el que sigue (y en el
-                    //     50 ya no queda nada). ===
-                    foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
-                    {
-                        if (paso.Nivel <= despertar) continue;
-                        tooltips.Add(new TooltipLine(Mod, "DespertarCamino",
-                            "[c/78788C:  Próximo hito del despertar:] " +
-                            $"[c/9B6FE8:Nivel {paso.Nivel}:] " +
-                            $"[c/C4A2FF:{Language.GetTextValue(paso.Clave)}]"));
-                        break;   // SOLO el próximo (la letra)
                     }
                 }
                 catch { }

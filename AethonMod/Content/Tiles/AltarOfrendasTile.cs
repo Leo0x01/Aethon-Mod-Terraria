@@ -12,13 +12,13 @@ namespace AethonMod.Content.Tiles
 {
     // ======================================================================
     //  AltarOfrendasTile — v6.86 — EL ALTAR DE OFRENDAS (la letra del
-    //  usuario: «investiga el altar del mod Heroic Weapons, investiga
+    //  usuario: «investiga el altar del mod de referencia, investiga
     //  todas sus mecanicas, este es el tipo de altar que necesitamos
     //  para que el grimorio pueda consumir cosas que no sean las que
     //  necesita y no esten corruptas»).
     //
     //  EL INFORME R5 (r5_heroic_altar.md, fuentes extraídas de los
-    //  .tmod oficiales): el Arsenal Altar de Heroic Weapons es un TILE
+    //  .tmod oficiales): el Arsenal Altar de la referencia es un TILE
     //  COLOCADO (Style2xX, 2×3) que NO usa TileEntity — clic-derecho
     //  abre una UI propia con slots y botones que validan, aplican y
     //  CONSUMEN (stack--→TurnToAir). ESTE es su calco en el idioma de

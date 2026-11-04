@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -67,6 +69,151 @@ namespace AethonMod.Content.Globals
         /// <summary>¿Ya devoró EL ARMA CORRUPTA de ESTE peldaño? (con el
         /// arma O los lingotes basta — la regla de siempre).</summary>
         public bool OfrendaArma = false;
+
+        // ================================================================
+        //  v6.93 — EL BANCO DEL DEVORO (la letra: «las checklist son
+        //  retroactivas y se pueden cumplir siempre incluso si los
+        //  requisistos no aparecen… estoy en el nivel 1 de despertar,
+        //  pero en el altar consagro 200 lingotes de oro y 100 monedas
+        //  de platino, entonces cuando llegue el cheklist del despertar
+        //  en el que pidan lingotes de oro, la cantidad se tomara de
+        //  esos 200 que ya habia consumido, ejemplo piden 50 lingotes
+        //  de oro y como consumi 200 esos 50 ya se cumplen hasta la
+        //  siguiente ocacion que pida lingotes de oro, en un futuro
+        //  llega en otro cheklist pero ahora piden 200 lingotes de oro,
+        //  como ya se habian consumido 50, entoces la cheklist se queda
+        //  con 150 lingotes de oro completo, faltanto 50 lingotes mas
+        //  para completarla… en el caso de las monedas de platino, como
+        //  estas se piden en todas las cheklist, al consumir 100 monedas
+        //  de platino estas compeltarian todos los checklist que pidan
+        //  dinero hasta llegar a consumir las 100»).
+        //
+        //  LA REGLA: TODO lo que el Eterno devora consagrado (armas,
+        //  materiales y MONEDAS) cae al BANCO por su tipo; cada peldaño
+        //  COBRA del banco lo que pide (y lo cobrado muere con la
+        //  subida). Las ESENCIAS siguen con su mesa de siempre (la
+        //  letra: «este apartado lo puedes dejar como esta actualmente
+        //  en el mod, esta bien asi») — no entran al banco.
+        // ================================================================
+
+        /// <summary>El DINERO devorado acumulado (en cobre) — paga los
+        /// peldaños que pidan dinero, hasta agotarse.</summary>
+        public long BancoMonedas = 0L;
+
+        /// <summary>El dinero ya COBRADO por los peldaños pasados.</summary>
+        public long BancoMonedasCobrado = 0L;
+
+        /// <summary>Lo devorado por TIPO de item (lingotes, gemas,
+        /// armas… ): unidades acumuladas.</summary>
+        public Dictionary<int, long> BancoItems = new Dictionary<int, long>();
+
+        /// <summary>Lo ya COBRADO por tipo (los peldaños pasados).</summary>
+        public Dictionary<int, long> BancoItemsCobrado = new Dictionary<int, long>();
+
+        // ================================================================
+        //  v6.93 — LOS OJOS DEL BANCO (los helpers que leen la mesa, la
+        //  lista del despertar y la ventana del Cielo: DISPONIBLE =
+        //  devorado − cobrado; lo cobrado nunca devuelve).
+        // ================================================================
+
+        /// <summary>El DINERO disponible del banco (lo devorado menos lo
+        /// que los peldaños pasados ya cobraron).</summary>
+        public static long BancoMonedasDisponibles(Item libro)
+            => BancoMonedasDisponibles(De(libro));
+
+        /// <summary>El DINERO disponible del banco (por el ALMA — la
+        /// firma de la mesa y de la lista: la lee ServirLaMesa).</summary>
+        public static long BancoMonedasDisponibles(AlmaEternoGlobalItem a)
+        {
+            if (a == null) return 0L;
+            long disp = a.BancoMonedas - a.BancoMonedasCobrado;
+            return Math.Max(0L, disp);
+        }
+
+        /// <summary>Lo disponible de UN tipo exacto en el banco.</summary>
+        public static long BancoItemDisponible(Item libro, int tipo)
+            => BancoItemDisponible(De(libro), tipo);
+
+        /// <summary>Lo disponible de UN tipo exacto (por el ALMA).</summary>
+        public static long BancoItemDisponible(AlmaEternoGlobalItem a, int tipo)
+        {
+            if (a == null) return 0L;
+            a.BancoItems.TryGetValue(tipo, out long devorado);
+            a.BancoItemsCobrado.TryGetValue(tipo, out long cobrado);
+            return Math.Max(0L, devorado - cobrado);
+        }
+
+        /// <summary>Lo disponible de un GRUPO de alternativas (las
+        /// opciones del peldaño son «una de estas»: el banco suma todas
+        /// sus variantes — devorar 10 de oro y 10 de platino es tener
+        /// 20 para «20 de oro o de platino»).</summary>
+        public static long BancoGrupoDisponible(Item libro, int[] grupo)
+            => BancoGrupoDisponible(De(libro), grupo);
+
+        /// <summary>Lo disponible de un GRUPO de alternativas (por el ALMA).</summary>
+        public static long BancoGrupoDisponible(AlmaEternoGlobalItem a, int[] grupo)
+        {
+            if (a == null || grupo == null || grupo.Length == 0) return 0L;
+            long total = 0L;
+            for (int i = 0; i < grupo.Length; i++)
+                total += BancoItemDisponible(a, grupo[i]);
+            return total;
+        }
+
+        /// <summary>EL DEPÓSITO: el Eterno devoró dinero consagrado — al
+        /// banco (para los peldaños que pidan dinero, hoy o MAÑANA).</summary>
+        public static void BancoGuardarMonedas(Item libro, long cobre)
+        {
+            var a = De(libro);
+            if (a == null || cobre <= 0) return;
+            a.BancoMonedas = Math.Min(9_999_999_999L, a.BancoMonedas + cobre);
+        }
+
+        /// <summary>EL DEPÓSITO de un tipo (armas: 1 unidad; materiales:
+        /// su pila) — al banco por su tipo.</summary>
+        public static void BancoGuardarItem(Item libro, int tipo, long unidades)
+        {
+            var a = De(libro);
+            if (a == null || unidades <= 0) return;
+            a.BancoItems.TryGetValue(tipo, out long ya);
+            a.BancoItems[tipo] = Math.Min(9_999_999L, ya + unidades);
+        }
+
+        /// <summary>EL COBRO de dinero (SubirNivel): lo que el peldaño
+        /// pagado pidió se descuenta del disponible para siempre.</summary>
+        public static void BancoCobrarMonedas(Item libro, long cobre)
+        {
+            var a = De(libro);
+            if (a == null || cobre <= 0) return;
+            a.BancoMonedasCobrado = Math.Min(a.BancoMonedas, a.BancoMonedasCobrado + cobre);
+        }
+
+        /// <summary>EL COBRO de un tipo (SubirNivel: las opciones de
+        /// Devorar que pagaron el peldaño).</summary>
+        public static void BancoCobrarTipo(Item libro, int tipo, long unidades)
+        {
+            var a = De(libro);
+            if (a == null || unidades <= 0) return;
+            a.BancoItemsCobrado.TryGetValue(tipo, out long ya);
+            a.BancoItemsCobrado[tipo] = Math.Min(
+                a.BancoItems.TryGetValue(tipo, out long dev) ? dev : 0L, ya + unidades);
+        }
+
+        /// <summary>EL COBRO de un GRUPO (el material del peldaño):
+        /// descuenta la cuota del disponible de sus tipos, en orden —
+        /// primero del primero, y si no alcanza, del que sigue.</summary>
+        public static void BancoCobrarGrupo(Item libro, int[] grupo, long cuota)
+        {
+            if (grupo == null || cuota <= 0) return;
+            for (int i = 0; i < grupo.Length && cuota > 0; i++)
+            {
+                long disp = BancoItemDisponible(libro, grupo[i]);
+                if (disp <= 0) continue;
+                long toma = Math.Min(disp, cuota);
+                BancoCobrarTipo(libro, grupo[i], toma);
+                cuota -= toma;
+            }
+        }
 
         // ================================================================
         //  v6.86 — EL LIBRO CORRUPTO (la letra del peldaño 20): «una vez
@@ -622,6 +769,23 @@ namespace AethonMod.Content.Globals
                 if (CorazonEstelar > 0) tag["almaEstelar"] = CorazonEstelar;
                 if (AlmaVeloz > 0) tag["almaVeloz"] = AlmaVeloz;
                 if (PunoTitan > 0) tag["almaPuno"] = PunoTitan;
+                // v6.93 — EL BANCO DEL DEVORO (retroactivo).
+                if (BancoMonedas > 0) tag["bancoMonedas"] = BancoMonedas;
+                if (BancoMonedasCobrado > 0) tag["bancoMonedasCobrado"] = BancoMonedasCobrado;
+                if (BancoItems.Count > 0)
+                {
+                    var lista = new List<TagCompound>();
+                    foreach (var kv in BancoItems)
+                        lista.Add(new TagCompound { ["t"] = kv.Key, ["n"] = kv.Value });
+                    tag["bancoItems"] = lista;
+                }
+                if (BancoItemsCobrado.Count > 0)
+                {
+                    var listaC = new List<TagCompound>();
+                    foreach (var kv in BancoItemsCobrado)
+                        listaC.Add(new TagCompound { ["t"] = kv.Key, ["n"] = kv.Value });
+                    tag["bancoItemsCobrado"] = listaC;
+                }
             }
             catch { }
         }
@@ -671,6 +835,26 @@ namespace AethonMod.Content.Globals
                 CorazonEstelar = System.Math.Max(0, System.Math.Min(99, tag.GetInt("almaEstelar")));
                 AlmaVeloz = System.Math.Max(0, System.Math.Min(99, tag.GetInt("almaVeloz")));
                 PunoTitan = System.Math.Max(0, System.Math.Min(99, tag.GetInt("almaPuno")));
+                // v6.93 — EL BANCO DEL DEVORO (los saves viejos no lo
+                //     traen: nace vacío — el retroactivo cuenta desde
+                //     HOY, lo devorado antes no queda registrado en
+                //     ningún sitio y no se inventa).
+                BancoMonedas = System.Math.Max(0L, System.Math.Min(9_999_999_999L, tag.GetLong("bancoMonedas")));
+                BancoMonedasCobrado = System.Math.Max(0L, System.Math.Min(9_999_999_999L, tag.GetLong("bancoMonedasCobrado")));
+                BancoItems.Clear();
+                foreach (TagCompound tB in tag.GetList<TagCompound>("bancoItems"))
+                {
+                    int tT = tB.GetInt("t");
+                    long tN = System.Math.Max(0L, System.Math.Min(9_999_999L, tB.GetLong("n")));
+                    if (tT > 0 && tN > 0) BancoItems[tT] = tN;
+                }
+                BancoItemsCobrado.Clear();
+                foreach (TagCompound tC in tag.GetList<TagCompound>("bancoItemsCobrado"))
+                {
+                    int cT = tC.GetInt("t");
+                    long cN = System.Math.Max(0L, System.Math.Min(9_999_999L, tC.GetLong("n")));
+                    if (cT > 0 && cN > 0) BancoItemsCobrado[cT] = cN;
+                }
             }
             catch
             {
@@ -694,6 +878,10 @@ namespace AethonMod.Content.Globals
                 CorazonEstelar = 0;
                 AlmaVeloz = 0;
                 PunoTitan = 0;
+                BancoMonedas = 0L;
+                BancoMonedasCobrado = 0L;
+                BancoItems.Clear();
+                BancoItemsCobrado.Clear();
             }
         }
 
@@ -705,7 +893,7 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                writer.Write((byte)4);                    // versión del alma (v6.88: libro + grupo mineral)
+                writer.Write((byte)5);                    // versión del alma (v6.93: el banco del devoro)
                 writer.Write(NivelDespertar);
                 writer.Write(PetDelDespertar);
                 writer.Write(DevoracionPoder);
@@ -731,6 +919,21 @@ namespace AethonMod.Content.Globals
                 writer.Write(PunoTitan);
                 // v6.89 — la MESA NUEVA: 255 = sin grupo bloqueado (-1).
                 writer.Write((byte)(OfrendaMineralGrupo < 0 ? 255 : OfrendaMineralGrupo));
+                // v6.93 — EL BANCO DEL DEVORO (viaja con el item por el cable).
+                writer.Write(BancoMonedas);
+                writer.Write(BancoMonedasCobrado);
+                writer.Write((byte)Math.Min(255, BancoItems.Count));
+                foreach (var kv in BancoItems)
+                {
+                    writer.Write(kv.Key);
+                    writer.Write(kv.Value);
+                }
+                writer.Write((byte)Math.Min(255, BancoItemsCobrado.Count));
+                foreach (var kv in BancoItemsCobrado)
+                {
+                    writer.Write(kv.Key);
+                    writer.Write(kv.Value);
+                }
             }
             catch { writer.Write((byte)0); }
         }
@@ -776,6 +979,28 @@ namespace AethonMod.Content.Globals
                     //     (el índice de la mezcla v6.88 murió).
                     int g = reader.ReadByte();
                     OfrendaMineralGrupo = g >= 200 ? -1 : g;
+                }
+                if (ver >= 5)
+                {
+                    // v6.93 — EL BANCO DEL DEVORO.
+                    BancoMonedas = System.Math.Max(0L, reader.ReadInt64());
+                    BancoMonedasCobrado = System.Math.Max(0L, reader.ReadInt64());
+                    int nI = reader.ReadByte();
+                    BancoItems.Clear();
+                    for (int k = 0; k < nI; k++)
+                    {
+                        int tT = reader.ReadInt32();
+                        long tN = System.Math.Max(0L, reader.ReadInt64());
+                        if (tT > 0 && tN > 0) BancoItems[tT] = tN;
+                    }
+                    int nC = reader.ReadByte();
+                    BancoItemsCobrado.Clear();
+                    for (int k = 0; k < nC; k++)
+                    {
+                        int cT = reader.ReadInt32();
+                        long cN = System.Math.Max(0L, reader.ReadInt64());
+                        if (cT > 0 && cN > 0) BancoItemsCobrado[cT] = cN;
+                    }
                 }
             }
             catch { }

@@ -6,11 +6,11 @@ namespace AethonMod.Content.Items.Altar
 {
     /// <summary>
     /// AltarOfrendasItem — v6.86 — EL ITEM DEL ALTAR DE OFRENDAS (la letra:
-    /// «investiga el altar del mod Heroic Weapons... este es el tipo de
+    /// «investiga el altar del mod de referencia... este es el tipo de
     /// altar que necesitamos para que el grimorio pueda consumir cosas
     /// que no sean las que necesita y no esten corruptas»).
     ///
-    /// LA CADENA DE OBTENCIÓN (el calco de la de Heroic Weapons §2.2 —
+    /// LA CADENA DE OBTENCIÓN (el calco de la de la referencia §2.2 —
     /// «crafteo barato sin estación»: 20 piedra + 2 estrellas fugaces +
     /// 1 gema): cualquiera puede levantar un altar — lo que cuesta es
     /// alimentarlo.

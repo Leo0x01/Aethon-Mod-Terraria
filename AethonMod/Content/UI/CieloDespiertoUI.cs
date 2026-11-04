@@ -426,24 +426,21 @@ namespace AethonMod.Content.UI
                     caido ? TintaVerde : TintaRojo, 0.84f, 0f, 0.4f);
             }
 
-            // (4) EL ARMA DEL PELDAÑO + EL MATERIAL (v6.89 — la misión de
-            //     la ofrenda NUEVA: el arma de MAGIA/INVOCADOR (sin
-            //     corrupción — «el grimorio solo consumirá 1 de ellas»)
-            //     y UNA opción de material («o das 20 lingotes de oro o
-            //     das 20 rubíes»: la mesa se queda con la primera que
-            //     alimentes — los sprites mini y «¿la llevas en la bolsa?»).
+            // (4) EL ARMA DEL PELDAÑO + EL MATERIAL (v6.93 — LA LECTURA DEL
+            //     BANCO: el pago es RETROACTIVO — lo devorado en OTRO
+            //     peldaño cuenta para ESTE; disponible = devorado −
+            //     cobrado. La mesa vieja de contadores por peldaño murió
+            //     (ya nadie la escribe): la Escalera lee el banco VIVO).
             int[] armas = Systems.DespertarGrimorio.ArmasDelNivel[n];
             int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(n);
-            int grupoBloqueado = alma != null ? alma.OfrendaMineralGrupo : -1;
-            int comidosActual = alma != null ? alma.OfrendaMineral : 0;
-            bool materialPagado = vivo && alma != null && grupoBloqueado >= 0 &&
-                comidosActual >= Systems.DespertarGrimorio.CantidadMateriales(n, grupoBloqueado);
+            bool armaEnBanco = vivo && alma != null && AlgunaArmaEnElBanco(alma, armas);
+            bool materialPagado = vivo && alma != null && MaterialPagadoEnElBanco(alma, n, gruposMat);
             float ax = panel.Right - 210f;
 
             if (armas != null && armas.Length > 0)
             {
                 bool armaEnBolsa = LlevaAlgunaAlternativa(yo, armas, out _);
-                bool armaPagada = alma != null && alma.OfrendaArma && vivo;
+                bool armaPagada = armaEnBanco;
 
                 // LA FILA DE SPRITES (las alternativas del peldaño, 18 px).
                 float sx = ax;
@@ -464,8 +461,8 @@ namespace AethonMod.Content.UI
                     catch { }
                 }
 
-                // v6.89 — SIN ESTADO «CORRUPTA» (la mesa come el arma tal
-                //     cual): en la bolsa ✓ o falta.
+                // v6.93 — SIN ESTADO «CORRUPTA»: pagada por el banco ✓ o
+                //     en la bolsa (para consagrar) o falta.
                 string estadoArma = armaPagada ? Language.GetTextValue(Clave("CieloArmaPagada"))
                     : (armaEnBolsa ? Language.GetTextValue(Clave("CieloEnLaBolsa"))
                     : Language.GetTextValue(Clave("CieloFaltaArma")));
@@ -474,42 +471,54 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, estadoArma, new Vector2(ax, fy + 28f),
                     tintaArma, 0.80f, 0f, 0.4f);
 
-                // v6.89 — EL MATERIAL DEL PELDAÑO (UNA opción — la letra:
-                //     «también sería obligatorio dar al menos uno de los
-                //     materiales o das 20 lingotes de oro o das 20
-                //     rubíes»): el estado del grupo BLOQUEADO y su cuenta
-                //     viva (los otros grupos son alternativas).
-                int gVivo = grupoBloqueado >= 0 && grupoBloqueado < gruposMat.Length
-                    ? grupoBloqueado : -1;
-                int tipoVivo = gVivo >= 0 && gruposMat[gVivo] != null && gruposMat[gVivo].Length > 0
-                    ? gruposMat[gVivo][0] : -1;
-                int cuotaViva = gVivo >= 0
-                    ? Systems.DespertarGrimorio.CantidadMateriales(n, gVivo) : 0;
+                // v6.93 — EL MATERIAL DEL BANCO (retroactivo): la opción
+                //     viva es la de MÁS disponible; su cuenta es
+                //     disponible/cuota (los grupos son alternativas: sus
+                //     bancos suman).
+                int gMejor = -1; long mejorDisp = 0L; int cuotaViva = 0; int tipoVivo = -1;
+                if (alma != null)
+                {
+                    for (int g = 0; g < gruposMat.Length; g++)
+                    {
+                        long disp = Globals.AlmaEternoGlobalItem
+                            .BancoGrupoDisponible(alma, gruposMat[g]);
+                        if (disp > mejorDisp)
+                        {
+                            mejorDisp = disp;
+                            gMejor = g;
+                            cuotaViva = Systems.DespertarGrimorio.CantidadMateriales(n, g);
+                            tipoVivo = gruposMat[g] != null && gruposMat[g].Length > 0
+                                ? gruposMat[g][0] : -1;
+                        }
+                    }
+                }
                 int enBolsaMin = tipoVivo > 0 ? CuentaEnLaBolsa(yo, tipoVivo) : 0;
                 string textoMin = materialPagado
                     ? "[✓] " + Language.GetTextValue(Clave("CieloMaterialPagado"))
                     : "[•] " + string.Format(Language.GetTextValue(Clave("CieloMaterial")),
                         cuotaViva > 0 ? cuotaViva : 20,
                         tipoVivo > 0 ? Lang.GetItemNameValue(tipoVivo) : "?") +
-                    (gVivo < 0 ? " · elige UNA opción" : "") +
-                    (gVivo >= 0 && !materialPagado
-                        ? string.Format(" ({0}/{1})", System.Math.Min(comidosActual, cuotaViva), cuotaViva) : "") +
                     (enBolsaMin > 0 && !materialPagado
-                        ? string.Format(" · llevas {0}", enBolsaMin) : "");
+                        ? string.Format(" · llevas {0}", enBolsaMin) : "") +
+                    (gMejor >= 0 && !materialPagado && cuotaViva > 0
+                        ? string.Format(" ({0}/{1})",
+                            System.Math.Min(mejorDisp, cuotaViva), cuotaViva) : "");
                 Utils.DrawBorderString(sb, textoMin, new Vector2(ax, fy + 44f),
-                    materialPagado ? TintaVerde : (gVivo >= 0 ? TintaDorado : TintaApagado),
+                    materialPagado ? TintaVerde : (gMejor >= 0 ? TintaDorado : TintaApagado),
                     0.80f, 0f, 0.4f);
             }
 
-            // (5) LAS ESENCIAS Y EL DINERO — SOLO del peldaño VIVO (los
-            //     contadores de la mesa en tiempo real: lo que el libro
-            //     ya comió de tu suelo).
+            // (5) LAS ESENCIAS Y EL DINERO — SOLO del peldaño VIVO (las
+            //     esencias de la mesa en tiempo real + el DINERO del
+            //     BANCO, retroactivo: disponible = devorado − cobrado).
             if (vivo && alma != null)
             {
                 int esenciasNecesarias = Systems.DespertarGrimorio.EsenciasPara(n);
                 long monedasNecesarias = Systems.DespertarGrimorio.MonedasPara(n);
                 bool esenciasOk = alma.OfrendaEsencias >= esenciasNecesarias;
-                bool monedasOk = alma.OfrendaMonedas >= monedasNecesarias;
+                long disponible = Globals.AlmaEternoGlobalItem
+                    .BancoMonedasDisponibles(alma);
+                bool monedasOk = disponible >= monedasNecesarias;
 
                 string txtEs = string.Format(Language.GetTextValue(Clave("CieloEsencias")),
                     alma.OfrendaEsencias, esenciasNecesarias);
@@ -517,7 +526,7 @@ namespace AethonMod.Content.UI
                     new Vector2(panel.Right - 210f, fy + 2f),
                     esenciasOk ? TintaVerde : TintaTexto, 0.78f, 0f, 0.4f);
 
-                long falta = System.Math.Max(0L, monedasNecesarias - alma.OfrendaMonedas);
+                long falta = System.Math.Max(0L, monedasNecesarias - disponible);
                 string txtMo = monedasOk
                     ? "[✓] " + Language.GetTextValue(Clave("CieloMonedasPagadas"))
                     : "[•] " + string.Format(Language.GetTextValue(Clave("CieloMonedas")),
@@ -526,6 +535,39 @@ namespace AethonMod.Content.UI
                     new Vector2(panel.Right - 128f, fy + 2f),
                     monedasOk ? TintaVerde : TintaTexto, 0.78f, 0f, 0.4f);
             }
+        }
+
+        // ================================================================
+        //  v6.93 — LOS OJOS DEL BANCO DE LA ESCALERA (las lecturas
+        //  retroactivas de la ventana del Cielo).
+        // ================================================================
+
+        /// <summary>¿Alguna arma de las del peldaño está pagada en el
+        /// banco? (devorada en CUALQUIER momento — retroactivo).</summary>
+        private static bool AlgunaArmaEnElBanco(
+            Globals.AlmaEternoGlobalItem alma, int[] armas)
+        {
+            if (alma == null || armas == null) return false;
+            for (int i = 0; i < armas.Length; i++)
+                if (Globals.AlmaEternoGlobalItem.BancoItemDisponible(alma, armas[i]) >= 1)
+                    return true;
+            return false;
+        }
+
+        /// <summary>¿Algún grupo de materiales del peldaño está pago en el
+        /// banco? (la suma de sus alternativas alcanza la cuota).</summary>
+        private static bool MaterialPagadoEnElBanco(
+            Globals.AlmaEternoGlobalItem alma, int n, int[][] gruposMat)
+        {
+            if (alma == null || gruposMat == null) return false;
+            for (int g = 0; g < gruposMat.Length; g++)
+            {
+                int cuota = Systems.DespertarGrimorio.CantidadMateriales(n, g);
+                if (Globals.AlmaEternoGlobalItem
+                    .BancoGrupoDisponible(alma, gruposMat[g]) >= cuota)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>EL TEXTO DEL PODER de un nivel (el hito que abre ·

@@ -16,12 +16,12 @@ namespace AethonMod.Content.UI
     //  ArbolHabilidadesUI — v6.86 — LA VENTANA DEL ÁRBOL DE HABILIDADES.
     //
     //  LA LETRA: «recuerdas cuando estabamos intentando crear un arbol
-    //  de habilidades y no lo logramos, bueno el mod Umbra y el mod
-    //  Path of Terraria tienen el arbol de habilidades en una ventana
+    //  de habilidades y no lo logramos, bueno los mods de referencia
+    //  tienen el arbol de habilidades en una ventana
     //  funcional justo como lo necesitabamos, asi que investigalo y
     //  crea un item que la use».
     //
-    //  EL INFORME R6 (repos de Umbra y PoT clonados): la ventana
+    //  EL INFORME R6 (repos de referencia clonados): la ventana
     //  funcional son SIETE lecciones (§d.5) que aquí viven todas:
     //   1. La capa antes de "Vanilla: Mouse Text" (la de la casa).
     //   2. BLOQUEAR el clic del juego sobre la ventana (mouseInterface).

@@ -144,123 +144,133 @@ namespace AethonMod.Content.Systems
         /// grimorio en ese nivel — el daño del peldaño marca el TIER y
         /// la era la marca la wiki (cada arma OBTENIBLE en la era de su
         /// jefe: los datos EXACTOS de 1.4.4 salen del propio juego —
-        /// daños y recetas verificados contra el ensamblado de tML,
-        /// wiki.gg de cabecera): bastones de gemas 15/16/18/19/21/23 (el
-        /// RUBÍ de la letra: 8 rubíes + 10 lingotes de oro, daño 21 — el
-        /// peldaño 4), Space Gun 17, Water Bolt 19… hasta el Prisma
-        /// Final 100 y el Cristal Arcoíris 130 de la cima, repetidas por
-        /// la era de las grandes ofrendas (60-100) como las puertas
-        /// repiten su caza (ML×2..×9). «Aunque pida varias armas, el
-        /// grimorio solo consumirá 1 de ellas»: la lista son
-        /// ALTERNATIVAS — la mesa devora UNA (mundo sí, mundo no: la de
-        /// TU mundo).</summary>
+        /// daños y recetas verificados contra el ensamblado de tML):
+        /// bastones de gemas 15/16/18/19/21/23 (el RUBÍ de la letra:
+        /// 8 rubíes + 10 lingotes de oro, daño 21 — el peldaño 4),
+        /// Space Gun 17, Water Bolt 19… hasta el Prisma Final 100 y el
+        /// Cristal Arcoíris 130 de la cima, repetidas por la era de las
+        /// grandes ofrendas (60-100) como las puertas repiten su caza
+        /// (ML×2..×9).
+        /// v6.93 — LA LETRA NUEVA DE LAS OPCIONES: «la lista dará 4 o
+        /// más opciones… el grimorio debe consumir al menos 2 de esas
+        /// opciones para desbloquear el siguiente nivel de Despertar»:
+        /// CADA peldaño ahora ofrece DOS o MÁS armas (la pareja de su
+        /// era: el ancla de siempre + su compañera del mismo tier, o la
+        /// ventana corrida del ciclo en la era de las grandes ofrendas)
+        /// — junto con los grupos de materiales de siempre, la mesa
+        /// ofrece 4+ opciones y la mesa cobra DOS (armas y/o
+        /// materiales, en cualquier combinación — la letra: «las 2
+        /// opciones pueden ser las 2 armas, los 2 materiales, 1 arma y
+        /// un material, en fin lo importante es que devore 2»).</summary>
         public static readonly int[][] ArmasDelNivel =
         {
             // (índice 0 vacío — el nivel 1 vive en [1])
             new int[] { 0 },
-            new int[] { ItemID.SlimeStaff },                                                        // 1  la caída rara de las slimes (8, invocación)
+            new int[] { ItemID.SlimeStaff, ItemID.WandofSparking },                                 // 1  la caída rara de las slimes (8) · la chispa del inicio (8, la magia de madera)
             new int[] { ItemID.AmethystStaff, ItemID.TopazStaff },                                  // 2  la era del cobre/estaño (15/16)
             new int[] { ItemID.SapphireStaff, ItemID.EmeraldStaff },                                // 3  PUERTA Rey Gelatina · la plata/tungsteno (18/19)
             new int[] { ItemID.RubyStaff, ItemID.DiamondStaff },                                    // 4  EL NIVEL DE LA LETRA: el bastón de rubí (21) — 8 rubíes + 10 de oro
             new int[] { ItemID.SpaceGun, ItemID.Vilethorn, ItemID.CrimsonRod },                     // 5  PUERTA Ojo de Cthulhu · el meteorito (17) y las esferas (10/12)
-            new int[] { ItemID.AmberStaff },                                                        // 6  el desierto (21): 15 fósil + 8 ámbar
-            new int[] { ItemID.FlinxStaff },                                                        // 7  las pieles del frío (8): 6 pieles + 10 de oro/platino
-            new int[] { ItemID.ImpStaff },                                                          // 8  PUERTA el Mal del Mundo · el infierno (17 de piedra infernal)
-            new int[] { ItemID.Flamelash },                                                         // 9  los cofres de sombra del infierno (32)
-            new int[] { ItemID.HornetStaff },                                                       // 10 PUERTA Reina Abeja · la cera de la colmena (12)
-            new int[] { ItemID.BeeGun },                                                            // 11 el aguijón de la Reina (9)
-            new int[] { ItemID.DemonScythe },                                                       // 12 la guadaña de los demonios (35)
+            new int[] { ItemID.AmberStaff, ItemID.DiamondStaff },                                   // 6  el desierto (21) + la era de las gemas (23)
+            new int[] { ItemID.FlinxStaff, ItemID.SlimeStaff },                                     // 7  las pieles del frío (8) + la caída de las slimes (8)
+            new int[] { ItemID.ImpStaff, ItemID.Flamelash },                                        // 8  PUERTA el Mal del Mundo · el infierno (17 de piedra infernal / 32 de sombra)
+            new int[] { ItemID.Flamelash, ItemID.DemonScythe },                                     // 9  los cofres de sombra del infierno (32) + los demonios (35)
+            new int[] { ItemID.HornetStaff, ItemID.BeeGun },                                        // 10 PUERTA Reina Abeja · la cera de la colmena (12) + el aguijón (9)
+            new int[] { ItemID.BeeGun, ItemID.WaspGun },                                            // 11 el aguijón de la Reina (9) + la Abeja difícil (31)
+            new int[] { ItemID.DemonScythe, ItemID.ImpStaff },                                      // 12 la guadaña de los demonios (35) + el infierno (17)
             new int[] { ItemID.WaterBolt, ItemID.BookofSkulls },                                    // 13 PUERTA Skeletron · la mazmorra (19/29)
-            new int[] { ItemID.AquaScepter },                                                       // 14 los cofres dorados de la mazmorra (27)
-            new int[] { ItemID.MagicMissile },                                                      // 15 la mazmorra profunda (35)
-            new int[] { ItemID.MagicDagger },                                                       // 16 la mazmorra profunda (35)
-            new int[] { ItemID.Flamelash },                                                         // 17 el infierno, la revancha (32)
-            new int[] { ItemID.DemonScythe },                                                       // 18 el infierno, la revancha (35)
-            new int[] { ItemID.ImpStaff },                                                          // 19 la víspera de la Muralla (17)
-            new int[] { ItemID.WaspGun },                                                           // 20 PUERTA la Muralla + LIBRO · la Abeja difícil (31)
+            new int[] { ItemID.AquaScepter, ItemID.WaterBolt },                                     // 14 los cofres dorados de la mazmorra (27) + sus estantes (19)
+            new int[] { ItemID.MagicMissile, ItemID.MagicDagger },                                  // 15 la mazmorra profunda (35/35)
+            new int[] { ItemID.MagicDagger, ItemID.BookofSkulls },                                  // 16 la mazmorra profunda (35/29)
+            new int[] { ItemID.Flamelash, ItemID.ImpStaff },                                        // 17 el infierno, la revancha (32/17)
+            new int[] { ItemID.DemonScythe, ItemID.Flamelash },                                     // 18 el infierno, la revancha (35/32)
+            new int[] { ItemID.ImpStaff, ItemID.DemonScythe },                                      // 19 la víspera de la Muralla (17/35)
+            new int[] { ItemID.WaspGun, ItemID.BeeGun },                                            // 20 PUERTA la Muralla + LIBRO · la Abeja difícil (31/9)
             new int[] { ItemID.GoldenShower, ItemID.CursedFlames },                                 // 21 el mundo sí/no: carmesí (30) o corrompido (55)
-            new int[] { ItemID.CrystalStorm },                                                      // 22 el Hallow difícil (32)
-            new int[] { ItemID.CrystalSerpent },                                                    // 23 PUERTA Reina Gelatina DIFÍCIL · su drop (40)
-            new int[] { ItemID.NimbusRod },                                                         // 24 la lluvia difícil (30)
-            new int[] { ItemID.PoisonStaff },                                                       // 25 PUERTA los Gemelos · el nido difícil (43)
-            new int[] { ItemID.SpiderStaff },                                                       // 26 el nido de arañas (26)
-            new int[] { ItemID.QueenSpiderStaff },                                                  // 27 las colmillos de la reina (26): 24 colmillos
-            new int[] { ItemID.SkyFracture },                                                       // 28 PUERTA el Devorador · el desierto difícil (38)
-            new int[] { ItemID.MedusaHead },                                                        // 29 el mármol difícil (40)
-            new int[] { ItemID.OpticStaff },                                                        // 30 PUERTA Skeletron Prime · sus lentes (24)
-            new int[] { ItemID.VenomStaff },                                                        // 31 la clorofita (44): bastón veneno + 14 lingotes
-            new int[] { ItemID.PygmyStaff },                                                        // 32 PUERTA Plantera · su drop (40)
-            new int[] { ItemID.LeafBlower },                                                        // 33 el soplador de hojas de Plantera (48)
-            new int[] { ItemID.MagnetSphere },                                                      // 34 la mazmorra de después (48)
-            new int[] { ItemID.HeatRay },                                                           // 35 PUERTA el Gólem · su rayo (90)
-            new int[] { ItemID.StaffofEarth },                                                      // 36 el báculo de tierra del Gólem (125)
+            new int[] { ItemID.CrystalStorm, ItemID.GoldenShower },                                 // 22 el Hallow difícil (32) + el mundo sí/no (30)
+            new int[] { ItemID.CrystalSerpent, ItemID.CrystalStorm },                               // 23 PUERTA Reina Gelatina DIFÍCIL · su drop (40) + el Hallow (32)
+            new int[] { ItemID.NimbusRod, ItemID.GoldenShower },                                    // 24 la lluvia difícil (30) + el mundo sí/no (30)
+            new int[] { ItemID.PoisonStaff, ItemID.SpiderStaff },                                   // 25 PUERTA los Gemelos · el nido difícil (43) + la araña (26)
+            new int[] { ItemID.SpiderStaff, ItemID.PoisonStaff },                                   // 26 el nido de arañas (26/43)
+            new int[] { ItemID.QueenSpiderStaff, ItemID.PoisonStaff },                              // 27 las colmillos de la reina (26) + el nido (43)
+            new int[] { ItemID.SkyFracture, ItemID.MedusaHead },                                    // 28 PUERTA el Devorador · el desierto/mármol difícil (38/40)
+            new int[] { ItemID.MedusaHead, ItemID.CrystalSerpent },                                 // 29 el mármol difícil (40) + el Hallow difícil (40)
+            new int[] { ItemID.OpticStaff, ItemID.SpiderStaff },                                    // 30 PUERTA Skeletron Prime · sus lentes (24) + la araña (26)
+            new int[] { ItemID.VenomStaff, ItemID.OpticStaff },                                     // 31 la clorofita (44) + la era mecánica (24)
+            new int[] { ItemID.PygmyStaff, ItemID.LeafBlower },                                     // 32 PUERTA Plantera · SUS drops (40/48)
+            new int[] { ItemID.LeafBlower, ItemID.PygmyStaff },                                     // 33 el soplador de hojas de Plantera (48/40)
+            new int[] { ItemID.MagnetSphere, ItemID.BatScepter },                                   // 34 la mazmorra de después (48) + la Luna de Calabaza (45)
+            new int[] { ItemID.HeatRay, ItemID.StaffofEarth },                                      // 35 PUERTA el Gólem · su rayo (90) + su báculo (125)
+            new int[] { ItemID.StaffofEarth, ItemID.HeatRay },                                      // 36 el báculo de tierra del Gólem (125/90)
             new int[] { ItemID.BubbleGun, ItemID.TempestStaff },                                    // 37 PUERTA el Duque · SUS drops (70/50)
             new int[] { ItemID.FairyQueenMagicItem, ItemID.SparkleGuitar, ItemID.EmpressBlade },    // 38 PUERTA la Emperatriz · SUS drops (50/85/90)
-            new int[] { ItemID.BatScepter },                                                        // 39 la Luna de Calabaza (45)
+            new int[] { ItemID.BatScepter, ItemID.Razorpine },                                      // 39 la Luna de Calabaza (45) + la de Escarcha (48)
             new int[] { ItemID.Razorpine, ItemID.BlizzardStaff, ItemID.StaffoftheFrostHydra },      // 40 la Luna de Escarcha (48/58/100)
             new int[] { ItemID.XenoStaff, ItemID.LaserMachinegun },                                 // 41 la Locura Marciana (36/60)
-            new int[] { ItemID.ShadowbeamStaff },                                                   // 42 la mazmorra de después (80)
-            new int[] { ItemID.InfernoFork },                                                       // 43 la mazmorra de después (70)
+            new int[] { ItemID.ShadowbeamStaff, ItemID.InfernoFork },                               // 42 la mazmorra de después (80/70)
+            new int[] { ItemID.InfernoFork, ItemID.BatScepter },                                    // 43 la mazmorra de después (70) + la Luna de Calabaza (45)
             new int[] { ItemID.SpectreStaff, ItemID.RavenStaff },                                   // 44 la mazmorra de después (65/55)
-            new int[] { ItemID.ChargedBlasterCannon },                                              // 45 PUERTA el Cultista · el cañón raro (100)
-            new int[] { ItemID.NebulaArcanum },                                                     // 46 la Torre de la Nebulosa (70): 18 fragmentos
-            new int[] { ItemID.StardustDragonStaff },                                               // 47 la Torre del Polvo Estelar (40)
-            new int[] { ItemID.NebulaBlaze },                                                       // 48 la Torre de la Nebulosa (130)
-            new int[] { ItemID.StardustCellStaff },                                                 // 49 la Torre del Polvo Estelar (60)
+            new int[] { ItemID.ChargedBlasterCannon, ItemID.XenoStaff },                            // 45 PUERTA el Cultista · el cañón raro (100) + la Locura Marciana (36)
+            new int[] { ItemID.NebulaArcanum, ItemID.StardustDragonStaff },                         // 46 la Torre de la Nebulosa (70) + la del Polvo Estelar (40)
+            new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                     // 47 la Torre del Polvo Estelar (40/60)
+            new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                 // 48 la Torre de la Nebulosa (130/70)
+            new int[] { ItemID.StardustCellStaff, ItemID.NebulaBlaze },                             // 49 la Torre del Polvo Estelar (60) + la de la Nebulosa (130)
             new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 50 PUERTA el Señor de la Luna · SUS drops (100/100)
-            new int[] { ItemID.RainbowCrystalStaff },                                               // 51 el cristal arcoíris (130)
-            new int[] { ItemID.MoonlordTurretStaff },                                               // 52 el portal lunar (100)
+            new int[] { ItemID.RainbowCrystalStaff, ItemID.LastPrism },                             // 51 el cristal arcoíris (130) + el Prisma (100)
+            new int[] { ItemID.MoonlordTurretStaff, ItemID.RainbowCrystalStaff },                   // 52 el portal lunar (100) + el cristal arcoíris (130)
             new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 53 la era del Señor, la revancha
             new int[] { ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff },                   // 54 la era del Señor, la revancha
-            new int[] { ItemID.NebulaBlaze },                                                       // 55 la era de las torres, la revancha (130)
-            new int[] { ItemID.NebulaArcanum },                                                     // 56 la era de las torres, la revancha (70)
-            new int[] { ItemID.StardustDragonStaff },                                               // 57 la era de las torres, la revancha (40)
-            new int[] { ItemID.StardustCellStaff },                                                 // 58 la era de las torres, la revancha (60)
-            new int[] { ItemID.LastPrism },                                                         // 59 la víspera de Aethon (100)
+            new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                 // 55 la era de las torres, la revancha (130/70)
+            new int[] { ItemID.NebulaArcanum, ItemID.StardustDragonStaff },                         // 56 la era de las torres, la revancha (70/40)
+            new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                     // 57 la era de las torres, la revancha (40/60)
+            new int[] { ItemID.StardustCellStaff, ItemID.NebulaBlaze },                             // 58 la era de las torres, la revancha (60/130)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 59 la víspera de Aethon (100)
             // 60-100 — LA ERA DE LAS GRANDES OFRENDAS: las armas de la cima
             // en ciclo (como las puertas repiten su caza: ML×2..×7,
             // Emperatriz×2..×5) — el daño del peldaño se queda en la cima
-            // (100-130): lo que hay DESPUÉS del Señor de la Luna.
-            new int[] { ItemID.LastPrism },                                                         // 60
-            new int[] { ItemID.LunarFlareBook },                                                    // 61
-            new int[] { ItemID.RainbowCrystalStaff },                                               // 62
-            new int[] { ItemID.MoonlordTurretStaff },                                               // 63 PUERTA el Señor ×2
-            new int[] { ItemID.NebulaBlaze },                                                       // 64
-            new int[] { ItemID.NebulaArcanum },                                                     // 65
-            new int[] { ItemID.StardustDragonStaff },                                               // 66
-            new int[] { ItemID.SparkleGuitar },                                                     // 67 PUERTA la Emperatriz ×2 (85)
-            new int[] { ItemID.EmpressBlade },                                                      // 68 (90)
-            new int[] { ItemID.FairyQueenMagicItem },                                               // 69 (50)
-            new int[] { ItemID.BubbleGun },                                                         // 70 (70)
-            new int[] { ItemID.TempestStaff },                                                      // 71 PUERTA el Señor ×3 (50)
-            new int[] { ItemID.RazorbladeTyphoon },                                                 // 72 (85)
-            new int[] { ItemID.HeatRay },                                                           // 73 (90)
-            new int[] { ItemID.StaffofEarth },                                                      // 74 (125)
-            new int[] { ItemID.ChargedBlasterCannon },                                              // 75 PUERTA la Emperatriz ×3 (100)
-            new int[] { ItemID.BlizzardStaff },                                                     // 76 (58)
-            new int[] { ItemID.Razorpine },                                                         // 77 (48)
-            new int[] { ItemID.StaffoftheFrostHydra },                                              // 78 (100)
-            new int[] { ItemID.BatScepter },                                                        // 79 PUERTA el Señor ×4 (45)
-            new int[] { ItemID.ShadowbeamStaff },                                                   // 80 (80)
-            new int[] { ItemID.InfernoFork },                                                       // 81 (70)
-            new int[] { ItemID.MagnetSphere },                                                      // 82 (48)
-            new int[] { ItemID.SpectreStaff },                                                      // 83 PUERTA la Emperatriz ×4 (65)
-            new int[] { ItemID.RavenStaff },                                                        // 84 (55)
-            new int[] { ItemID.LeafBlower },                                                        // 85 (48)
-            new int[] { ItemID.NebulaBlaze },                                                       // 86 (130)
-            new int[] { ItemID.LastPrism },                                                         // 87 PUERTA el Señor ×5 (100)
-            new int[] { ItemID.LaserMachinegun },                                                   // 88 (60)
-            new int[] { ItemID.XenoStaff },                                                         // 89 (36)
-            new int[] { ItemID.PygmyStaff },                                                        // 90 (40)
-            new int[] { ItemID.CrystalSerpent },                                                    // 91 PUERTA la Emperatriz ×5 (40)
-            new int[] { ItemID.TempestStaff },                                                      // 92 (50)
-            new int[] { ItemID.EmpressBlade },                                                      // 93 (90)
-            new int[] { ItemID.RazorbladeTyphoon },                                                 // 94 (85)
-            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 95 PUERTA el Señor ×7 · la pareja (100)
+            // (100-130): lo que hay DESPUÉS del Señor de la Luna. La
+            // v6.93 las empareja: cada peldaño ofrece la pareja corrida
+            // del ciclo (el ancla de siempre + la que sigue).
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                 // 60
+            new int[] { ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff },                        // 61
+            new int[] { ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff },                   // 62
+            new int[] { ItemID.MoonlordTurretStaff, ItemID.NebulaBlaze },                           // 63 PUERTA el Señor ×2
+            new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                 // 64
+            new int[] { ItemID.NebulaArcanum, ItemID.StardustDragonStaff },                         // 65
+            new int[] { ItemID.StardustDragonStaff, ItemID.SparkleGuitar },                         // 66
+            new int[] { ItemID.SparkleGuitar, ItemID.EmpressBlade },                                // 67 PUERTA la Emperatriz ×2 (85/90)
+            new int[] { ItemID.EmpressBlade, ItemID.FairyQueenMagicItem },                          // 68 (90/50)
+            new int[] { ItemID.FairyQueenMagicItem, ItemID.BubbleGun },                             // 69 (50/70)
+            new int[] { ItemID.BubbleGun, ItemID.TempestStaff },                                    // 70 (70/50)
+            new int[] { ItemID.TempestStaff, ItemID.RazorbladeTyphoon },                            // 71 PUERTA el Señor ×3 (50/85)
+            new int[] { ItemID.RazorbladeTyphoon, ItemID.HeatRay },                                 // 72 (85/90)
+            new int[] { ItemID.HeatRay, ItemID.StaffofEarth },                                      // 73 (90/125)
+            new int[] { ItemID.StaffofEarth, ItemID.ChargedBlasterCannon },                         // 74 (125/100)
+            new int[] { ItemID.ChargedBlasterCannon, ItemID.BlizzardStaff },                        // 75 PUERTA la Emperatriz ×3 (100/58)
+            new int[] { ItemID.BlizzardStaff, ItemID.Razorpine },                                   // 76 (58/48)
+            new int[] { ItemID.Razorpine, ItemID.StaffoftheFrostHydra },                            // 77 (48/100)
+            new int[] { ItemID.StaffoftheFrostHydra, ItemID.BatScepter },                           // 78 (100/45)
+            new int[] { ItemID.BatScepter, ItemID.ShadowbeamStaff },                               // 79 PUERTA el Señor ×4 (45/80)
+            new int[] { ItemID.ShadowbeamStaff, ItemID.InfernoFork },                               // 80 (80/70)
+            new int[] { ItemID.InfernoFork, ItemID.MagnetSphere },                                  // 81 (70/48)
+            new int[] { ItemID.MagnetSphere, ItemID.SpectreStaff },                                 // 82 (48/65)
+            new int[] { ItemID.SpectreStaff, ItemID.RavenStaff },                                   // 83 PUERTA la Emperatriz ×4 (65/55)
+            new int[] { ItemID.RavenStaff, ItemID.LeafBlower },                                     // 84 (55/48)
+            new int[] { ItemID.LeafBlower, ItemID.NebulaBlaze },                                    // 85 (48/130)
+            new int[] { ItemID.NebulaBlaze, ItemID.LastPrism },                                     // 86 (130/100)
+            new int[] { ItemID.LastPrism, ItemID.LaserMachinegun },                                 // 87 PUERTA el Señor ×5 (100/60)
+            new int[] { ItemID.LaserMachinegun, ItemID.XenoStaff },                                 // 88 (60/36)
+            new int[] { ItemID.XenoStaff, ItemID.PygmyStaff },                                      // 89 (36/40)
+            new int[] { ItemID.PygmyStaff, ItemID.CrystalSerpent },                                 // 90 (40/40)
+            new int[] { ItemID.CrystalSerpent, ItemID.TempestStaff },                               // 91 PUERTA la Emperatriz ×5 (40/50)
+            new int[] { ItemID.TempestStaff, ItemID.EmpressBlade },                                 // 92 (50/90)
+            new int[] { ItemID.EmpressBlade, ItemID.RazorbladeTyphoon },                            // 93 (90/85)
+            new int[] { ItemID.RazorbladeTyphoon, ItemID.LastPrism },                               // 94 (85/100)
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook },                                  // 95 PUERTA el Señor ×6 · la pareja (100)
             new int[] { ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff },                   // 96 la pareja de la cima (130/100)
             new int[] { ItemID.NebulaBlaze, ItemID.NebulaArcanum },                                 // 97 la pareja de la nebulosa (130/70)
             new int[] { ItemID.StardustDragonStaff, ItemID.StardustCellStaff },                     // 98 la pareja del polvo (40/60)
-            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff }, // 99 PUERTA el Señor ×9 · los CUATRO de la cima
+            new int[] { ItemID.LastPrism, ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff }, // 99 PUERTA el Señor ×7 · los CUATRO de la cima
             new int[] { ItemID.LastPrism, ItemID.LunarFlareBook, ItemID.RainbowCrystalStaff, ItemID.MoonlordTurretStaff, ItemID.NebulaBlaze }, // 100 LA GRAN OFRENDA FINAL (donde nace LA IRA)
         };
 

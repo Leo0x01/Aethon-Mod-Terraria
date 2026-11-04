@@ -21,7 +21,7 @@ namespace AethonMod.Content.VFX
     /// ARQUITECTURA (una sola clase parametrizada por `tier` 1..10):
     ///
     ///   · CUERPO SOLAR — la MISMA TÉCNICA del sol original (backglow
-    ///     BloomCircle + aura RadialShineShader + disco de plasma
+    ///     ResplandorChico + aura RadialShineShader + disco de plasma
     ///     SunShader con granulación dendrítica), re-implementada aquí
     ///     con parámetros propios: el Sol de Terraria no se toca, las
     ///     copias heredan su piel por técnica, no por dependencia.
@@ -1003,7 +1003,7 @@ namespace AethonMod.Content.VFX
             // v6.21 — LA LECCIÓN DEL CUADRO DE RUIDO: los pases de SHADER
             // exigen SpriteSortMode.Immediate. Con Deferred el batch enlaza
             // su PROPIO efecto al hacer flush y el Passes[0].Apply() se
-            // IGNORA → el DendriticNoise se pintaba CRUDO ("un cuadrado con
+            // IGNORA → el RuidoDendritico se pintaba CRUDO ("un cuadrado con
             // textura, sin animación" — el reporte del usuario). El sol
             // original usa Immediate en TODOS sus pases; ahora igual.
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
@@ -1113,7 +1113,7 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// v6.31 — EL CUERPO DEL SOL ORIGINAL (la petición literal del usuario:
         /// "copia el código del sol original para usar en todos los demás soles
-        /// o estrellas"): LA TÉCNICA EXACTA del sol — backglow BloomCircle en
+        /// o estrellas"): LA TÉCNICA EXACTA del sol — backglow ResplandorChico en
         /// pase ALFA (el resplandor profundo) + aura RadialShineShader (el ruido
         /// de energía) + EL DISCO DE PLASMA SunShader con granulación dendrítica
         /// (la PIEL del sol) — parametrizada SOLO por radio y paleta. Todas las
@@ -1129,8 +1129,8 @@ namespace AethonMod.Content.VFX
         /// <param name="mainColor">El color del plasma brillante (la "piel").</param>
         /// <param name="darkerColor">El color del plasma frío (las celdas que bajan).</param>
         /// <param name="accentColor">El acento sustractivo (las manchas profundas).</param>
-        /// <param name="backHot">El resplandor profundo interior (BloomCircle 1).</param>
-        /// <param name="backRed">El resplandor extendido exterior (BloomCircle 2).</param>
+        /// <param name="backHot">El resplandor profundo interior (ResplandorChico 1).</param>
+        /// <param name="backRed">El resplandor extendido exterior (ResplandorChico 2).</param>
         /// <param name="shineColor">El tinte del aura de energía.</param>
         /// <param name="spinMul">Velocidad de giro de la esfera (0.9 = sol; 0.35 = gigante lenta).</param>
         /// <param name="alphaMul">Multiplicador global de intensidad (fundidos).</param>
@@ -1148,7 +1148,7 @@ namespace AethonMod.Content.VFX
                 //     proporciones EXACTAS del sol (0.95 y 1.61 × R/BodyPx). ===
                 BeginAlpha();
                 Texture2D bloom = (_bloom ??= ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/BloomCircleSmall")).Value;
+                    "AethonMod/Content/Effects/Textures/ResplandorChico")).Value;
                 float bScale = R / BodyPx;
                 Color glowHot = backHot; glowHot.A = 0;
                 Main.spriteBatch.Draw(bloom, drawPos, null, glowHot * (0.7f * alphaMul), 0f,
@@ -1161,7 +1161,7 @@ namespace AethonMod.Content.VFX
                 // === 2. AURA (RadialShineShader — el ruido de energía):
                 //     la proporción del sol, 2.72 × el ANCHO (2R) del cuerpo. ===
                 Texture2D wavyBlotch = (_wavy ??= ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise")).Value;
+                    "AethonMod/Content/Effects/Textures/RuidoManchas")).Value;
                 if (_shineShader != null && _shineShader.Value != null)
                 {
                     Effect shine = _shineShader.Value;
@@ -1183,9 +1183,9 @@ namespace AethonMod.Content.VFX
                 {
                     Effect shader = _sunShader.Value;
                     Texture2D psychedelic = (_psy ??= ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap")).Value;
+                        "AethonMod/Content/Effects/Textures/MapaDistorsion")).Value;
                     Texture2D dendritic = (_dend ??= ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut")).Value;
+                        "AethonMod/Content/Effects/Textures/RuidoDendritico")).Value;
 
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     shader.Parameters["mainColor"].SetValue(mainColor.ToVector3());

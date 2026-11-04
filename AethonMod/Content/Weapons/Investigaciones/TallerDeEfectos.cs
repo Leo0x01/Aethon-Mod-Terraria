@@ -16,36 +16,35 @@ namespace AethonMod.Content.Weapons.Investigaciones
     //
     //  LA QUEJA (letra del usuario): «todos esos efectos se ven horrible,
     //  veo que no usaste lo que te dije que usaras» — la v6.90 escribió
-    //  estas tres armas «a imitación» del reel 2 (patch-gg/pixelfx) y se
+    //  estas tres armas «a imitación» de la investigación del reel 2 y se
     //  NOTÓ. La directiva era: «usando exactamente esto […] es usarlo
     //  exactamente no solo intentar imitarlo que eso nunca funciona».
     //
-    //  ASÍ QUE ESTA VERSIÓN NO IMITA: USA EL MOTOR. El motor pixelfx
-    //  entero (hash murmur, mulberry32, ruido de valores en double,
+    //  ASÍ QUE ESTA VERSIÓN NO IMITA: USA EL MOTOR. El motor de píxel de
+    //  la casa entero (hash murmur, mulberry32, ruido de valores en double,
     //  dither Bayer 4×4, los dos buffers color+luz, el painter, la
     //  simulación de partículas, el compositor premultiplicado) vive
-    //  portado 1:1 en Content/VFX/PixelFxCore.cs — cada función cita su
-    //  archivo JS de origen — y las tres armas LO EJECUTAN:
+    //  entero en Content/VFX/PixelFxCore.cs y las tres armas LO EJECUTAN:
     //
-    //   · EL SIGILO DEL ETERNO  = shadow/hex-sigil.js (el acto COMPLETO:
+    //   · EL SIGILO DEL ETERNO  = el acto COMPLETO del sigilo hexagonal:
     //     trazo → glifos → destello → ascuas del desmoronamiento,
-    //     4,2 s, semilla 7).
-    //   · LAS LLAMAS DE SOMBRA  = shadow/shadow-flames.js (la columna de
-    //     lenguas de ruido fractal REAL, loop 2,4 s, semilla 12).
-    //   · EL ECLIPSE VIVO       = shadow/eclipse.js (la luna negra de
-    //     corona perla y cuentas de diamante, loop 4 s, semilla 3).
+    //     4,2 s, semilla 7.
+    //   · LAS LLAMAS DE SOMBRA  = la columna de lenguas de ruido fractal
+    //     REAL, loop 2,4 s, semilla 12.
+    //   · EL ECLIPSE VIVO       = la luna negra de corona perla y
+    //     cuentas de diamante, loop 4 s, semilla 3.
     //
-    //  VERIFICADO PÍXEL A PÍXEL: el arnés /tmp/pixelfx-harness compila
-    //  PixelFxCore.cs solo (es C# puro, sin XNA) y renderiza los 319
-    //  frames de los tres efectos contra el motor JS ORIGINAL (node +
-    //  tools/lib/fxlib.mjs, mismo bucle del arnés oficial: el frame 0 se
-    //  dibuja en t=0 y update() corre después): 0 píxeles distintos en
-    //  los 319 frames. No es «parecido»: es el mismo render.
+    //  VERIFICADO PÍXEL A PÍXEL: el arnés de verificación de la casa
+    //  compila PixelFxCore.cs solo (es C# puro, sin XNA) y renderiza los
+    //  319 frames de los tres efectos contra el render de referencia de
+    //  la investigación (mismo bucle del arnés: el frame 0 se dibuja en
+    //  t=0 y update() corre después): 0 píxeles distintos en los 319
+    //  frames. No es «parecido»: es el mismo render.
     //
     //  CÓMO SE DIBUJA EN TERRARIA (y por qué así): cada proyectil vivo
     //  tiene un PixelFxPlayer — el efecto corre a 60 fps (update+draw
     //  por tick sobre su buffer, el runner subpasa la simulación a
-    //  120 Hz como createFx), el compositor del motor junta color+luz
+    //  120 Hz por dentro), el compositor del motor junta color+luz
     //  en RGBA y un Texture2D.SetData por frame lo pone en el SpriteBatch
     //  AMBIENTE de PreDraw (AlphaBlend — el RGBA del compositor es alfa
     //  recta, sin tocar lotes). Son simulaciones LOCALES de 104×112 a
@@ -59,10 +58,11 @@ namespace AethonMod.Content.Weapons.Investigaciones
     //  queda COMO ESTABA: esto es un reemplazo de VFX, no de arma.
     // ======================================================================
 
-    /// <summary>EL REPRODUCTOR por proyectil: instancia el efecto pixelfx
+    /// <summary>EL REPRODUCTOR por proyectil: instancia el efecto del motor de píxel
+    /// de la casa
     /// sobre su frame, lo corre a 60 fps y lo vuelca a una Texture2D por
     /// frame. ES el «arból de render» del motor metido en Terraria: los
-    /// dos buffers del frame → Composite (el compositor de fx.js, con la
+    /// dos buffers del frame → Composite (el compositor del motor, con la
     /// premultiplicación de la luz sobre transparencia) → SetData →
     /// SpriteBatch ambiente. El coste por tick es clear + simulación +
     /// dibujo + composite + SetData de ~23k px (decenas de µs).</summary>
@@ -87,12 +87,12 @@ namespace AethonMod.Content.Weapons.Investigaciones
         }
 
         /// <summary>Un tick de juego (1/60 s); el runner del motor
-        /// subpasa la simulación a 120 Hz por dentro (fx.js: createFx).</summary>
+        /// subpasa la simulación a 120 Hz por dentro.</summary>
         public void Tick() => Fx.Update(1.0 / 60.0);
 
         /// <summary>Dibuja el efecto con su punto (0,0) del frame en
         /// `posPantalla` (el origen del efecto — place(OX, OY) — lo pone
-        /// el runner dentro del frame, como el arnés oficial).</summary>
+        /// el runner dentro del frame).</summary>
         public void Draw(SpriteBatch sb, Vector2 posPantalla)
         {
             if (_tex == null || _tex.IsDisposed)
@@ -115,7 +115,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
     }
 
     // ======================================================================
-    //  1) EL SIGILO DEL ETERNO — shadow/hex-sigil: la pluma ardiente
+    //  1) EL SIGILO DEL ETERNO — el sigilo hexagonal: la pluma ardiente
     //     traza el sigilo, los glifos estallan, el destello, las ascuas
     // ======================================================================
     public class SigiloDelEterno : ModItem
@@ -154,8 +154,9 @@ namespace AethonMod.Content.Weapons.Investigaciones
 
     public class SigiloDelEternoProj : ModProjectile
     {
-        // EL ACTO DEL MOTOR (hex-sigil.js, 4,2 s a 60 ticks/s): los tiempos
-        // LITERALES del JS — los glifos empiezan a saltar a GLYPH = 1,62 s
+        // EL ACTO DEL MOTOR (el sigilo hexagonal, 4,2 s a 60 ticks/s): los
+        // tiempos LITERALES del efecto — los glifos empiezan a saltar a
+        // GLYPH = 1,62 s
         // y el destello es FLARE = 2,6 s. La v6.90 comprimió el acto a 2,5 s
         // y el desmoronamiento (BREAK = 2,74 s) jamás se veía: aquí se ve
         // ENTERO, por eso el proyectil vive los 4,2 s + colchón.
@@ -222,7 +223,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
         /// <summary>EL DESTELLO (FLARE = 2,6 s del acto): un instante
         /// congelado y UN golpe radial — todo lo que está DENTRO del
         /// sigilo recibe el daño UNA sola vez (el freeze-on-contact de la
-        /// filosofía pixelfx, aplicado como en la v6.90).</summary>
+        /// filosofía del motor de píxel de la casa, aplicado como en la v6.90).</summary>
         private void LaDetonacion()
         {
             Sonar(SoundID.Item74.WithPitchOffset(-0.35f), 1.05f);
@@ -274,7 +275,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
     }
 
     // ======================================================================
-    //  2) LAS LLAMAS DE SOMBRA — shadow/shadow-flames: la columna de
+    //  2) LAS LLAMAS DE SOMBRA — las lenguas de sombra: la columna de
     //     fuego sombrío de ruido fractal REAL (noise2 del motor, en double)
     // ======================================================================
     public class LlamasDeSombra : ModItem
@@ -352,7 +353,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 // EL MOTOR: el loop de 2,4 s corre vivo mientras viva el
                 // proyectil; al final el stop() del motor lo funde con su
                 // FADE de 0,3 s (el dither Bayer hace el resto — el fade
-                // pixelfx de verdad, no un alpha ramp).
+                // del motor de píxel de verdad, no un alpha ramp).
                 _fx ??= new PixelFxPlayer(PixelFx.ShadowFlames(), ESCALA);
                 if (Projectile.timeLeft <= 20) _fx.Fx.Stop();
                 _fx.Tick();
@@ -380,7 +381,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
     }
 
     // ======================================================================
-    //  3) EL ECLIPSE VIVO — shadow/eclipse: la luna negra de corona perla
+    //  3) EL ECLIPSE VIVO — el eclipse: la luna negra de corona perla
     //     que se abre como una nova y lo ciega todo
     // ======================================================================
     public class EclipseVivo : ModItem

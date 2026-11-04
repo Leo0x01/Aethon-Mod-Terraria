@@ -7,13 +7,13 @@ namespace AethonMod.Content.Items.Investigaciones
     /// <summary>
     /// CodiceHabilidades — v6.86 — EL CÓDICE DE HABILIDADES (la letra:
     /// «recuerdas cuando estabamos intentando crear un arbol de
-    /// habilidades y no lo logramos, bueno el mod Umbra y el mod Path
-    /// of Terraria tienen el arbol de habilidades en una ventana
+    /// habilidades y no lo logramos, bueno los mods de referencia
+    /// tienen el arbol de habilidades en una ventana
     /// funcional justo como lo necesitabamos, asi que investigalo y
     /// crea un item que la use»).
     ///
-    /// EL PATRÓN DEL ITEM (R6 §d.2 — el GrimoireItem de Path of
-    /// Terraria): AltFunctionUse permite el CLIC DERECHO y CanUseItem
+    /// EL PATRÓN DEL ITEM (R6 §d.2 — el item-libro de la
+    /// referencia): AltFunctionUse permite el CLIC DERECHO y CanUseItem
     /// lo traduce: clic derecho = ABRIR EL ÁRBOL (y NO "usar" el item
     /// — return false). El uso izquierdo también lo abre (el códice
     /// no hace otra cosa).
@@ -26,7 +26,7 @@ namespace AethonMod.Content.Items.Investigaciones
         {
             Item.width = 28;
             Item.height = 28;
-            Item.useStyle = ItemUseStyleID.HoldUp;   // «sostener en alto» (PoT)
+            Item.useStyle = ItemUseStyleID.HoldUp;   // «sostener en alto» (el patrón de la referencia)
             Item.useTime = 20;
             Item.useAnimation = 20;
             Item.noMelee = true;
@@ -40,8 +40,8 @@ namespace AethonMod.Content.Items.Investigaciones
 
         public override bool CanUseItem(Player player)
         {
-            // CLIC DERECHO = ABRIR EL ÁRBOL (el patrón GrimoireItem de
-            // PoT): no consume el "uso" — solo abre la ventana.
+            // CLIC DERECHO = ABRIR EL ÁRBOL (el patrón del item-libro de
+            // la referencia): no consume el "uso" — solo abre la ventana.
             if (player.altFunctionUse == 2)
             {
                 UI.ArbolHabilidadesUI.Alternar();

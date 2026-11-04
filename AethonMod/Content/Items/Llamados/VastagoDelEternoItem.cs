@@ -7,7 +7,7 @@ namespace AethonMod.Content.Items.Llamados
     // ======================================================================
     //  v6.91 — EL VÁSTAGO DEL ETERNO: LA MASCOTA NUEVA (la letra de la
     //  sesión: «crea una mascota nueva usando esto: Reel 1 —
-    //  aldegad/sprite-gen (Apache-2.0): una sola imagen de personaje →
+    //  una sola imagen de personaje →
     //  sprites animados listos para el motor (bloquea la identidad del
     //  personaje, fondo a transparencia real, ciclos de idle/walk sin
     //  animar a mano, exporta atlas)»).
@@ -16,7 +16,7 @@ namespace AethonMod.Content.Items.Llamados
     //   1. UNA SOLA IMAGEN con identidad única (el librito alado de
     //      ojos grandes, kawaii, fondo croma) — generada con la skill.
     //   2. TRANSPARENCIA REAL por flood-fill desde los bordes (el
-    //      método sprite-gen: la identidad queda BLOQUEADA — nada de
+    //      método de la investigación: la identidad queda BLOQUEADA — nada de
     //      borrar colores globales) + limpieza de chispas y sombra por
     //      componentes conexas.
     //   3. LA REJILLA DEL RENDER (bloques 8×8 detectados) → escalado
@@ -32,7 +32,7 @@ namespace AethonMod.Content.Items.Llamados
     // ======================================================================
     /// <summary>
     /// VastagoDelEternoItem — EL VÁSTAGO DEL ETERNO (la mascota del
-    /// pipeline sprite-gen). SE EQUIPA en la ranura de mascota del
+    /// pipeline de la investigación de los reels). SE EQUIPA en la ranura de mascota del
     /// equipo (vanityPet) — y responde a la tecla B SOLO EQUIPADA (el
     /// detour de la casa, MascotasTeclaB).
     /// </summary>

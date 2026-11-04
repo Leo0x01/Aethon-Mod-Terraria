@@ -9,7 +9,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// <summary>
     /// VastagoDelEternoPet — v6.91 — LA MASCOTA NUEVA: EL VÁSTAGO DEL
     /// ETERNO — el librito alado de ojos grandes que nació del pipeline
-    /// sprite-gen de la investigación de los reels (una sola imagen →
+    /// de la investigación de los reels (una sola imagen →
     /// transparencia real por flood-fill → LOS CICLOS ANIMADOS: idle con
     /// respiración squash&amp;stretch y parpadeo · vuelo con balanceo).
     ///
@@ -84,7 +84,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 d.noGravity = true;
             }
 
-            // === EL FRAME (el atlas sprite-gen): si el dueño CORRE, el
+            // === EL FRAME (el atlas de la investigación): si el dueño CORRE, el
             //     ciclo de VUELO (4..7); quieto, la respiración del IDLE
             //     (0..3) — el parpadeo llega solo en el frame 3. ===
             float velDuenio = MathF.Abs(duenio.velocity.X) + MathF.Abs(duenio.velocity.Y);

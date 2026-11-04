@@ -163,11 +163,11 @@ Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
 > **La fuente de la verdad**: `Content/` v6.90 + el checklist de STABLE-SNAPSHOT v6.90.
 
 - **LA LEY DE LA OFRENDA**: el arma **O** los materiales — BASTA UNO DE LOS DOS (el grimorio se queda con la primera opción que alimentes) y TODO lo que come debe estar **CONSAGRADO por el altar** (las esencias exentas: ellas SON la esencia del Eterno).
-- **EL ALTAR DE LA CONSAGRACIÓN** (antes «de la corrupción» — el renombrado cósmico): acepta ARMAS y MATERIALES; el arma gana +5 % a TODO + su etiqueta «(Consagrado)», el material SOLO la etiqueta. La ventana: el precio a la vista antes de pulsar, el resultado por tipo, la leyenda del sello. Sprite NUEVO (el método del reel pixelfx: 2 rondas de borrador-render-mirar-refinar con VLM).
+- **EL ALTAR DE LA CONSAGRACIÓN** (antes «de la corrupción» — el renombrado cósmico): acepta ARMAS y MATERIALES; el arma gana +5 % a TODO + su etiqueta «(Consagrado)», el material SOLO la etiqueta. La ventana: el precio a la vista antes de pulsar, el resultado por tipo, la leyenda del sello. Sprite NUEVO (el método del reel: 2 rondas de borrador-render-mirar-refinar con VLM).
 - **LAS REPETICIONES +1**: el Señor de la Luna ×2..×7 (+1 por repetición) y la cima ×10; contadores acumulativos (cada muerte cuenta para todas las puertas venideras).
 - **EL HITO DEL ESCUADRÓN = DAÑO DE INVOVACIÓN** (+10/15/20/25/30 % cada 20 niveles — el rayo, los conjuros y LA IRA lo cobran vivo; el ×1,25 horneado escondido murió: la auditoría de las stats).
 - **EL HITBOX DEL HAZ = SU SILUETA** (StripWidth en el punto del objetivo — si lo ves, te pega) y **EL VELO DE PERLIN** del ancho exacto (perfil V de la rampa horneado en el ruido).
-- **LA MIRADA DE SOLYN SIN PICOS** (4 causas curadas contra el original: el collar de bolas del bloom tileado, el fundido final invertido, el ruido crudo/lento, la raíz desalineada) y **EL RELICARIO QUE RESPONDE** (equipado o en la bolsa + el aura por fin VISIBLE en su lote aditivo propio).
+- **LA MIRADA DEL ETERNO SIN PICOS** (4 causas curadas contra el original: el collar de bolas del bloom tileado, el fundido final invertido, el ruido crudo/lento, la raíz desalineada) y **EL RELICARIO QUE RESPONDE** (equipado o en la bolsa + el aura por fin VISIBLE en su lote aditivo propio).
 - **LA TECLA B DESDE LA BOLSA**, **EL LIBRO DEL ETERNO** (1 % criaturas · 1 % cofres · 2 %/2 % en la mazmorra) y **EL TALLER DE EFECTOS** (la investigación de los reels: El Sigilo del Eterno · Las Llamas de Sombra · El Eclipse Vivo — 0 maná, LA BOLSA del Taller, bolsa 27).
 
 ## LA ERA v6.89 (EL DESPERTAR DE MAGIA PURA — verificado contra el código)
@@ -180,7 +180,7 @@ Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
 - **EL NOMBRE CORRUPTO**: UN color (RarityCorrupta, negro tinta) en inventario Y barra rápida; EL PRECIO de corromper: esencias según calidad+daño+tipo+stats (altar y receta, la MISMA fórmula).
 - **LA TECLA B**: las mascotas (Aethon Menor + Grimorio Menor) con buffType (sus RANURAS viven) + detour de QuickBuff — SOLO si están EQUIPADAS, jamás desde el fondo de la bolsa; la tecla como era (pociones igual).
 - **EL HAZ**: la bruma del centro LLENA el interior del anillo íntimo (2,02 × rCorona) con el PUNTO DE LUZ exacto del nacimiento; el calor de la prueba C son CUATRO SEGMENTOS sobre la geometría real (solo el proyectel) + EL VELO DE PERLIN (capa nueva semitransparente al mismo ancho del cuerpo, encima de todo).
-- **LAS ARMAS**: borradas las nuevas (quedan los clickers + La Mirada de Solyn + el Relicario + los Grilletes + el altar); el ÁRBOL vuelve al CÓDICE con la economía por despertar (3 + despertar/5). LA MIRADA DE SOLYN: la geometría del original de WoTG (arranque redondo √(1,001−x²) — sin picos, fundidos por nodo, el muzzle con el factor mágico cos01(t·85)); EL RELICARIO: el detour de DrawInfernoRings con las texturas del original (BloomFlare/GlowAlpha) y el CD naciendo al pulsar (45 s de ciclo).
+- **LAS ARMAS**: borradas las nuevas (quedan los clickers + La Mirada del Eterno + el Relicario + los Grilletes + el altar); el ÁRBOL vuelve al CÓDICE con la economía por despertar (3 + despertar/5). LA MIRADA DEL ETERNO: la geometría del original de la referencia (arranque redondo √(1,001−x²) — sin picos, fundidos por nodo, el muzzle con el factor mágico cos01(t·85)); EL RELICARIO: el detour de DrawInfernoRings con las texturas del original (destello y resplandor) y el CD naciendo al pulsar (45 s de ciclo).
 
 ## LA ERA v6.85-v6.88 (el inventario ACTUAL — verificado contra el código)
 
@@ -208,8 +208,8 @@ Detalle por librería → DISEÑO_DEL_MOD.md §10-11.
   a salir de la partida — y v6.88 los guardó con LA GUARDIA DEL DUEÑO: la fotografía solo
   se guarda y solo resucita si ESTE personaje lleva su Grimorio del Eterno.
 - **LOS CINCO ITEMS DE LAS INVESTIGACIONES** (v6.85): Relicario del Avispón (aura solar,
-  tecla L) · Sol en Miniatura (minion dorado MEAC) · Colmillo Dorado (rayos del cielo) ·
-  Mirada de Solyn (rayo canalizado) · Grilletes de Andrómeda (escudo por maná) — todos 0 maná.
+  tecla L) · Sol en Miniatura (minion dorado) · Colmillo Dorado (rayos del cielo) ·
+  Mirada del Eterno (rayo canalizado) · Grilletes de Andrómeda (escudo por maná) — todos 0 maná.
 - **LAS DOS BANDAS SONORAS DEL FESTÍN** (v6.88): «El Festín Desatado» (152 BPM) y «La
   Oleada Final» (164 BPM) — cada oleada tira una moneda y suena UNA de las dos al azar.
 - **EL RITUAL POR LIGAS** (v6.88): la bruma NORMAL (la del bastón, 1 anillo) corre con los

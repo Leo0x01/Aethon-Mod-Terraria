@@ -71,7 +71,7 @@ namespace AethonMod.Content.Players
             // «crea una bolsa nueva y dale la bolsa al jugador, esta
             // bolsa tendras una copia de todas las armas que sean
             // creadas con esta investigacion» — la investigación de los
-            // reels: pixelfx + sprite-gen; también en la entrega DIRECTA
+            // reels; también en la entrega DIRECTA
             // del kit, la lección v6.14.2).
             bolsas += Entregar(ModContent.ItemType
                 <global::AethonMod.Content.Items.Bolsas.BolsaTallerDeEfectos>());

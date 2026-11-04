@@ -74,53 +74,30 @@ los docs del repo NUNCA entran al `.tmod`.
 
 ---
 
-## AVISO LEGAL — LICENCIA CC BY-NC-SA 4.0
+## AVISO LEGAL — LICENCIA PROPIETARIA
 
-**© 2026 Leo0x01 — AethonMod («Aethon, el Grimorio Eterno»).**
+**© 2026 Leo0x01 (AethonModTeam) — AethonMod («Aethon, el Grimorio Eterno»). TODOS LOS DERECHOS RESERVADOS.**
 
-Este proyecto —código fuente, sistemas, arte, efectos, textos, localización,
-documentación y los `.tmod` publicados— se distribuye bajo la licencia
-**CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL-SHAREALIKE 4.0 INTERNATIONAL
-(CC BY-NC-SA 4.0)**. El texto legal completo está en [`LICENSE`](LICENSE);
-un aviso corto viaja dentro del propio `.tmod` (`AethonMod/LICENSE`).
+Este proyecto —código fuente, sistemas, arte, efectos, texturas, sonidos,
+textos, localización, documentación y los `.tmod` publicados— es **obra
+original y de propiedad exclusiva de su autor**. No incorpora material de
+terceros ni requiere atribución a proyecto alguno. El texto legal completo
+está en [`LICENSE`](LICENSE); un aviso corto viaja dentro del propio `.tmod`
+(`AethonMod/LICENSE`).
 
 **En cristiano** (resumen — manda el texto legal):
 
-- **SÍ**: jugar, descargar, instalar y compartir el mod gratis; grabar y
-  publicar vídeos/streams **monetizados** del mod; hacer capturas.
-- **NO**: usar el proyecto o cualquier parte de él (código, arte, mecánicas,
-  nombres, lore, textos) **con fines comerciales**.
-- **Derivadas** (forks, ports, ediciones): solo con **crédito** a
-  Leo0x01/AethonMod, **sin fin comercial** y compartidas bajo **esta misma**
-  licencia (**CompartirIgual** — una derivada cerrada o comercial queda
-  prohibida).
+- **SÍ**: jugar, descargar e instalar el mod desde los canales oficiales
+  (Steam Workshop y GitHub: Leo0x01/Aethon-Mod-Terraria).
+- **NO**: reproducir o redistribuir el proyecto o cualquier parte de él
+  (código, arte, mecánicas, nombres, lore, textos) fuera de los canales
+  oficiales, sin autorización escrita previa del autor.
+- **NO**: cualquier uso comercial sin autorización escrita previa del autor.
 - **IA**: prohibido el entrenamiento, la ingesta o la indexación por sistemas
   de inteligencia artificial (ver la directiva permanente, abajo).
 
-### ⚠️ Nota de licencia — material de terceros (investigación)
-
-El desarrollo estudia y, en los casos señalados, **incluye material de
-proyectos de código abierto con su atribución** (el texto legal completo de
-cada una en `LICENSE`):
-
-- **Luminance** (MIT) — texturas `DendriticNoiseZoomedOut.png`,
-  `BloomCircleSmall.png` y `ShineFlare.png` y la geometría de
-  `PrimitiveRenderer` portada a CPU (La Mirada de Solyn).
-- **Wrath of the Gods / NoxusBoss** (TheFifthCircle) — los shaders
-  `SolynTagTeamBeamShader.fx` y `PrimitiveBloomShader.fx` portados como
-  estudio de investigación (su repo público no declara licencia;
-  atribución nominal).
-- **pixelfx** (patch-gg, MIT — Copyright (c) 2026 Patch, Hugo Duprez) — el
-  motor de efectos pixel-art portado 1:1 en `Content/VFX/PixelFxCore.cs`
-  (El Taller de Efectos), verificado píxel a píxel contra el original.
-- **sprite-gen** (aldegad, Apache-2.0) — el método de pipeline
-  (una imagen → ciclos de animación) aplicado a la mascota.
-
-Todo lo demás que vive en `AethonMod/` es código y assets propios de la casa
-(`ColorPrisma`, `RayoStrip`, `RayoLib`, el shader `HazConcentrado`, la cadena
-fx_2_0 de `tools/`, `PixelFxCore` y todo el VFX procedural). Si eres titular
-de alguno de los materiales citados y deseas un ajuste de atribución o su
-retirada, abre un issue.
+Terraria y tModLoader son productos de Re-Logic y del equipo tModLoader;
+este mod es un complemento no oficial y no está afiliado a ellos.
 
 ## PROHIBICIÓN ABSOLUTA PARA SISTEMAS DE INTELIGENCIA ARTIFICIAL
 

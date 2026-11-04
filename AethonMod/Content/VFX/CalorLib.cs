@@ -20,18 +20,18 @@ namespace AethonMod.Content.VFX
     //
     //  LA INVESTIGACIÓN (la síntesis de tres escuelas + el código real de
     //  vanilla descompilado):
-    //   · REFRACTIÓN EN ESPACIO DE PANTALLA (Wolfire 2006, Linden Reid,
-    //     Codrops): la distorsión re-muestrea la pantalla capturada en UVs
-    //     desplazadas por ruido — EL postulado del heat haze 2D.
-    //   · EL RUIDO QUE HIERVE EN SU SITIO (Starlight River,
-    //     MoonstoneDistortion): dos octavas en DIAGONALES OPUESTAS — el
-    //     aire hierve sin «fluir» — + la convección vertical de Rastertek
+    //   · REFRACTIÓN EN ESPACIO DE PANTALLA: la distorsión re-muestrea la
+    //     pantalla capturada en UVs desplazadas por ruido — EL postulado
+    //     del heat haze 2D.
+    //   · EL RUIDO QUE HIERVE EN SU SITIO (el truco del ruido
+    //     hirviendo): dos octavas en DIAGONALES OPUESTAS — el
+    //     aire hierve sin «fluir» — + la convección vertical
     //     (el sesgo ascendente que el ojo lee como «calor»).
     //   · EL CAMPO DE CALOR A ¼ DE RESOLUCIÓN (el patrón del
     //     WaterShaderData de vanilla, DISTORTION_BUFFER_SCALE 0.25): las
     //     fuentes se pintan ADITIVAS en un RT diminuto (1/16 de los
     //     píxeles) — donde dos fuentes se solapan, el calor SE SUMA.
-    //   · LA ABERRACIÓN CROMÁTICA DEL ESTALLIDO (Unity PPv2, el 90 % de
+    //   · LA ABERRACIÓN CROMÁTICA DEL ESTALLIDO (el estándar del 90 % de
     //     los juegos): 3 taps radiales R/G/B alrededor del punto del golpe,
     //     con la matemática zoom-correcta de vanilla
     //     ((uTargetPosition − uScreenPosition)/uScreenResolution).
@@ -57,7 +57,7 @@ namespace AethonMod.Content.VFX
     //  EL CONTRATO DEL FRAME: las fuentes se registran en la IA (fase de
     //  update) y se consumen en el pase (fase de dibujado, dentro del hook
     //  EndCapture de BlackHoleLensSystem — UN solo hook por proceso, la
-    //  advertencia de Starlight River); el frame se deduplica por
+    //  advertencia de la investigación); el frame se deduplica por
     //  GameUpdateCount (el mismo patrón de VFXCore.Presupuesto). Los
     //  estallidos son POR EDAD (nacido = GameUpdateCount): cero reloj que
     //  mantener, cero sincronía que romper.

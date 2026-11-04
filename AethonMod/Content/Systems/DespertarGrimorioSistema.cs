@@ -131,38 +131,23 @@ namespace AethonMod.Content.Systems
                     //     portador — la puerta nace con su llave puesta.
                     RevisarEntregaDelLibro(p, alma);
 
-                    bool desperto = false;
-                    if (alma.NivelDespertar < DespertarGrimorio.NivelMax)
-                    {
-                        int siguiente = System.Math.Min(
-                            DespertarGrimorio.NivelDespertarSiguiente(mano),
-                            DespertarGrimorio.NivelMax);
-                        desperto = ServirLaMesa(p, mano, alma, siguiente, tipoEsencia, tipoLibro);
-                    }
+                    // v6.93 — LA MESA UNIFICADA (la letra: «cualquier arma
+                    //     se puede consagrar para que el grimorio las coma
+                    //     aunque no seran un requisito valido para
+                    //     despertar» + «cualquier material o cantidad de
+                    //     materiales se pueden consagrar para aumentar la
+                    //     exp del grimorio»): EL BOCADO DE SIEMPRE murió
+                    //     como bucle aparte y vive DENTRO de ServirLaMesa
+                    //     — TODO lo consagrado que caiga al suelo se lo
+                    //     come (arma o material), con su EXP y su stats, y
+                    //     TODO cae al BANCO por su tipo. El Eterno come
+                    //     TAMBIÉN en la cima: el nivel 100 no apaga el
+                    //     hambre (la subida, solo mientras quede escalera).
+                    int siguiente = System.Math.Min(
+                        DespertarGrimorio.NivelDespertarSiguiente(mano),
+                        DespertarGrimorio.NivelMax);
+                    bool desperto = ServirLaMesa(p, mano, alma, siguiente, tipoEsencia, tipoLibro);
                     if (desperto) continue;   // un despertar por pulso (con calma)
-
-                    // === EL BOCADO DE SIEMPRE (el festín de la .129
-                    //     VIVE): con el Eterno EN LA MANO, toda ARMA
-                    //     CORRUPTA soltada a su lado que NO era la
-                    //     ofrenda del peldaño sigue siendo EXP + stats +
-                    //     almas — un plato por pulso (con calma). ===
-                    for (int d = 0; d < Main.maxItems; d++)
-                    {
-                        Item drop = Main.item[d];
-                        if (drop == null || drop.IsAir) continue;   // SOLO items caídos vivos
-                        if (drop.type == tipoEsencia) continue;      // las esencias: su propia mesa
-                        if (drop.type == tipoLibro) continue;        // v6.86: el libro corrupto, su propia mesa
-                        if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
-                            continue;
-
-                        var sello = drop.GetGlobalItem
-                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                        if (sello == null || !sello.Corrompido) continue;
-                        if (!EsArma(drop)) continue;
-
-                        DevorarComoBocado(p, mano, drop);
-                        break;
-                    }
                 }
             }
             catch { }
@@ -280,11 +265,6 @@ namespace AethonMod.Content.Systems
             try
             {
                 int esenciasNecesarias = DespertarGrimorio.EsenciasPara(siguiente);
-                long monedasNecesarias = DespertarGrimorio.MonedasPara(siguiente);
-                // v6.89 — LAS ARMAS DEL PELDAÑO (magia/invocador, sin
-                //     látigos) y SU MATERIAL (una opción completa —
-                //     GruposMaterialesDe/CantidadMateriales).
-                int[] armasDelPeldano = DespertarGrimorio.ArmasDelNivel[siguiente];
                 bool mordisco = false;
 
                 // ============================================================
@@ -302,6 +282,15 @@ namespace AethonMod.Content.Systems
                     Item drop = Main.item[d];
                     if (drop == null || drop.IsAir) continue;
                     if (drop.Center.DistanceSQ(p.Center) > RADIO_DEVORAR * RADIO_DEVORAR)
+                        continue;
+
+                    // v6.93 — LA MARCA DEL ARROJO (la letra: «el grimorio
+                    //     solo comerá lo que el jugador arroje al suelo,
+                    //     cualquier cosa que se caiga de un enemigo no será
+                    //     consumida por el grimorio»): sin la marca, NI LA
+                    //     MIRA — ni las esencias recién caídas de una
+                    //     criatura, ni el botín, ni el cambio del Eterno.
+                    if (!global::AethonMod.Content.Globals.ArrojadoGlobalItem.EsArrojado(drop))
                         continue;
 
                     // === 0) EL LIBRO CORRUPTO (v6.86 — la puerta del 20,
@@ -358,143 +347,77 @@ namespace AethonMod.Content.Systems
                             esenciasNecesarias);
                         mordisco = true;
                     }
-                    // === 2) EL DINERO — solo LO QUE FALTA (y si la
-                    //     moneda no cabe en la deuda, se la traga y
-                    //     ESCUPE el cambio: el libro es glotón, no
-                    //     ladrón). ===
+                    // === 2) EL DINERO — v6.93: CONSAGRADO y ENTERO, al
+                    //     BANCO (la letra: «todo se debe consagrar incluso
+                    //     las monedas de platino, oro, plata y cobre, todo
+                    //     debe ser consagrado primero, todos menos las
+                    //     esencias» + «al consumir 100 monedas de platino
+                    //     estas completarian todos los checklist que
+                    //     pidan dinero hasta llegar a consumir las 100»):
+                    //     el Eterno se traga la pila entera y la suma al
+                    //     banco del despertar — los peldaños cobran de
+                    //     ahí, hoy o MAÑANA (retroactivo). Sin sello: NI
+                    //     LA PRUEBA (la ley de la consagración de la v6.90,
+                    //     ahora también para el dinero). El ESCUPIDERO de
+                    //     cambio de la v6.51 murió con la mesa vieja: ya no
+                    //     se come «solo lo que falta». ===
                     else if (drop.type == ItemID.CopperCoin || drop.type == ItemID.SilverCoin ||
                         drop.type == ItemID.GoldCoin || drop.type == ItemID.PlatinumCoin)
                     {
-                        long falta = monedasNecesarias - alma.OfrendaMonedas;
-                        if (falta <= 0) continue;
-
-                        long valor = ValorDeMoneda(drop.type);
-                        AnimarElBocado(p, drop, 1f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
-                        long enteras = System.Math.Min(drop.stack, falta / valor);
-                        if (enteras > 0)
-                        {
-                            alma.OfrendaMonedas += enteras * valor;
-                            drop.stack -= (int)enteras;
-                            falta -= enteras * valor;
-                            mordisco = true;
-                        }
-                        // LA MONEDA QUE NO CABE: la última se la traga
-                        // entera y devuelve el cambio en cobre.
-                        if (falta > 0 && drop.stack > 0)
-                        {
-                            drop.stack--;
-                            alma.OfrendaMonedas += falta;
-                            long cambio = valor - falta;
-                            if (cambio > 0) EscupirCambio(p, cambio);
-                            falta = 0;
-                            mordisco = true;
-                        }
-                        if (drop.stack <= 0) drop.TurnToAir();
-                        SincronizarDrop(d);
-
-                        if (mordisco)
-                        {
-                            PolvosDelBocado(p, 3);
-                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMonedas",
-                                new Color(196, 138, 255),
-                                ItemToText(System.Math.Max(0L,
-                                    monedasNecesarias - alma.OfrendaMonedas)));
-                        }
-                    }
-                    // === 3) EL MATERIAL DEL PELDAÑO (v6.89 — la letra:
-                    //     «tambien seria obligatorio dar al menos uno de
-                    //     los materiales o das 20 lingotes de oro o das
-                    //     20 rubies») · v6.90 — DOS LEYES NUEVAS:
-                    //     (a) el arma O el material BASTAN — si el arma
-                    //         YA se devoró, los materiales se quedan en
-                    //         el suelo (el peldaño ya tiene su pago);
-                    //     (b) SOLO COME LO CONSAGRADO (la letra: «cada
-                    //         item que el grimorio se coma, debe estar
-                    //         corrompido menos las esencias mismas» — el
-                    //         sello CONSAGRADO del altar: sin él, el
-                    //         material queda en el suelo y el aviso con
-                    //         calma lo explica).
-                    else if (!MaterialPagado(alma, siguiente) && !alma.OfrendaArma)
-                    {
-                        int[][] gruposMat = DespertarGrimorio.GruposMaterialesDe(siguiente);
-                        // ¿este drop pertenece a ALGÚN grupo del peldaño?
-                        int grupoDelDrop = -1;
-                        for (int g = 0; g < gruposMat.Length; g++)
-                        {
-                            var grp = gruposMat[g];
-                            if (grp != null && System.Array.IndexOf(grp, drop.type) >= 0)
-                            { grupoDelDrop = g; break; }
-                        }
-                        if (grupoDelDrop >= 0)
-                        {
-                            // v6.90 — LA LEY DE LA CONSAGRACIÓN: sin el
-                            //     sello del altar, el grimorio NI LO PRUEBA
-                            //     (el aviso con calma, una vez cada 5 s).
-                            var selloMat = drop.GetGlobalItem
-                                <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                            if (selloMat == null || !selloMat.Corrompido)
-                            {
-                                AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
-                            }
-                            else
-                            {
-                            // EL GRIMORIO SE QUEDA CON EL PRIMERO (la ley del
-                            // bloqueo — la mesa es el SUELO, el que SE
-                            // ALIMENTA es EL GRIMORIO).
-                            if (alma.OfrendaMineralGrupo < 0)
-                            {
-                                alma.OfrendaMineralGrupo = grupoDelDrop;
-                                alma.OfrendaMineral = 0;
-                            }
-                            if (alma.OfrendaMineralGrupo == grupoDelDrop)
-                            {
-                                int cuota = DespertarGrimorio.CantidadMateriales(siguiente, grupoDelDrop);
-                                int faltaMat = cuota - alma.OfrendaMineral;
-                                if (faltaMat > 0)
-                                {
-                                    int comeMat = System.Math.Min(faltaMat, drop.stack);
-                                    AnimarElBocado(p, drop, 2f);   // v6.51.12: EL FESTÍN CHICO
-                                    alma.OfrendaMineral += comeMat;
-                                    drop.stack -= comeMat;
-                                    if (drop.stack <= 0) drop.TurnToAir();
-                                    SincronizarDrop(d);
-
-                                    PolvosDelBocado(p, comeMat);
-                                    EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMineral",
-                                        new Color(196, 138, 255), comeMat, alma.OfrendaMineral, cuota);
-                                    mordisco = true;
-                                }
-                            }
-                            }
-                        }
-                    }
-                    // === 4) EL ARMA DEL PELDAÑO (v6.89: magia/invocador;
-                    //     «aunque pida varias armas, el grimorio solo
-                    //     consumirá 1 de ellas») · v6.90 — DOS LEYES
-                    //     NUEVAS: (a) si EL MATERIAL ya pagó el peldaño,
-                    //     el arma se queda en el suelo (basta UNO de los
-                    //     dos); (b) SOLO COME LO CONSAGRADO — el sello
-                    //     del altar es la marca del Eterno (sin él, ni la
-                    //     prueba: el aviso con calma).
-                    else if (!alma.OfrendaArma && !MaterialPagado(alma, siguiente)
-                        && EsArma(drop) && EsDelPeldano(drop, armasDelPeldano))
-                    {
-                        var selloArmaPeldano = drop.GetGlobalItem
+                        var selloMon = drop.GetGlobalItem
                             <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                        if (selloArmaPeldano == null || !selloArmaPeldano.Corrompido)
+                        if (selloMon == null || !selloMon.Corrompido)
                         {
                             AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
                         }
                         else
                         {
-                            AnimarElBocado(p, drop, 3f);   // v6.51.12: EL FESTÍN CHICO
-                            alma.OfrendaArma = true;
+                            long cobre = ValorDeMoneda(drop.type) * drop.stack;
+                            AnimarElBocado(p, drop, 1f);   // v6.51.12: EL FESTÍN CHICO (antes del trago)
+                            global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                .BancoGuardarMonedas(libro, cobre);
                             drop.TurnToAir();
                             SincronizarDrop(d);
 
-                            PolvosDelBocado(p, 6);
-                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoArma",
-                                new Color(255, 215, 120));
+                            PolvosDelBocado(p, 3);
+                            EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoMonedas",
+                                new Color(196, 138, 255),
+                                ItemToText(cobre));
+                            mordisco = true;
+                        }
+                    }
+                    // === 3) EL FESTÍN DE SIEMPRE, UNIFICADO (v6.93 — la
+                    //     muerte de los casos «EL MATERIAL DEL PELDAÑO» y
+                    //     «EL ARMA DEL PELDAÑO»): TODO lo consagrado que
+                    //     cae es PLATO — la letra: «cualquier arma se puede
+                    //     consagrar para que el grimorio las coma aunque no
+                    //     seran un requisito valido para despertar ya que
+                    //     para despertar solo son validas las armas de mago
+                    //     e invocador» + «cualquier material o cantidad de
+                    //     materiales se pueden consagrar para aumentar la
+                    //     exp del grimorio». El arma trae su EXP (mínimo
+                    //     500), su stat por clase y su alma única; el
+                    //     material su EXP (mínimo 10 por unidad); y AMBOS
+                    //     caen al BANCO por su tipo — el pago del peldaño
+                    //     es RETROACTIVO: las 2 opciones de Devorar que
+                    //     pida (armas y/o materiales), hoy o MAÑANA, salen
+                    //     de ahí. Sin sello: el aviso con calma. ===
+                    else
+                    {
+                        var selloFestin = drop.GetGlobalItem
+                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                        if (selloFestin == null || !selloFestin.Corrompido)
+                        {
+                            AvisoConCalma(p, "Mods.AethonMod.Despertar.NoConsagrado");
+                        }
+                        else if (EsArma(drop))
+                        {
+                            DevorarComoBocado(p, libro, drop);
+                            mordisco = true;
+                        }
+                        else
+                        {
+                            DevorarMaterialBocado(p, libro, drop);
                             mordisco = true;
                         }
                     }
@@ -507,7 +430,11 @@ namespace AethonMod.Content.Systems
                     //     puerta sigue cerrada, el libro NO despierta —
                     //     exige su presa y sigue esperando (con el aviso
                     //     con calma: cada 5 s, no cada pulso). ===
-                    if (LaMesaEstaCompleta(alma, siguiente))
+                    //     v6.93 — LA GUARDA NUEVA: la mesa unificada corre
+                    //     SIEMPRE (el festín no se apaga en la cima) — la
+                    //     SUBIDA solo mientras quede escalera. ===
+                    if (alma.NivelDespertar < DespertarGrimorio.NivelMax &&
+                        LaMesaEstaCompleta(alma, siguiente))
                     {
                         if (!PuedePasarLaPuerta(p, alma, siguiente)) return true;   // la puerta manda: ni un bocado más
                         SubirNivel(p, libro, null);   // SubirNivel RENACE los contadores
@@ -521,7 +448,10 @@ namespace AethonMod.Content.Systems
                 // el próximo pulso con el libro en la mano lo cobra).
                 // v6.67 — Y TAMBIÉN LA PUERTA DE LA CAZA (el jefe del
                 // peldaño, si lo hay, ya caído — o el aviso con calma).
-                if (LaMesaEstaCompleta(alma, siguiente))
+                // v6.93 — con la GUARDA de la cima (la mesa corre siempre;
+                // la subida, mientras haya escalera).
+                if (alma.NivelDespertar < DespertarGrimorio.NivelMax &&
+                    LaMesaEstaCompleta(alma, siguiente))
                 {
                     if (!PuedePasarLaPuerta(p, alma, siguiente)) return true;
                     SubirNivel(p, libro, null);
@@ -535,58 +465,62 @@ namespace AethonMod.Content.Systems
             catch { return false; }
         }
 
-        /// <summary>EL CAMBIO DEL ETERNO: el cobre que sobra del último
-        /// trago, ESCUPIDO EN MONEDAS DE VERDAD (platino → oro → plata →
-        /// cobre, pilas de ≤999 — QuickSpawnItem CLAMPA la pila al
-        /// maxStack del item: sin el desglose, un platino de cambio con
-        /// falta de 50 cobre DEVORABA 999.950 cobre del jugador).</summary>
-        private static void EscupirCambio(Player p, long cobre)
-        {
-            if (p == null || cobre <= 0) return;
-            var fuente = p.GetSource_Misc("CambioDelEterno");
-            int[] tipos = { ItemID.PlatinumCoin, ItemID.GoldCoin, ItemID.SilverCoin, ItemID.CopperCoin };
-            long[] valores = { 1000000L, 10000L, 100L, 1L };
-            for (int k = 0; k < tipos.Length && cobre > 0; k++)
-            {
-                long cuantas = cobre / valores[k];
-                while (cuantas > 0)
-                {
-                    int pila = (int)System.Math.Min(cuantas, 999);
-                    p.QuickSpawnItem(fuente, tipos[k], pila);
-                    cuantas -= pila;
-                    cobre -= (long)pila * valores[k];
-                }
-            }
-        }
-
-        /// <summary>¿LAS CUATRO OFRENDAS del peldaño están PAGAS? (las
-        /// esencias + el dinero + **EL ARMA O EL MATERIAL** — v6.90, la
-        /// letra: «con el arma o los materiales basta… deja claro que
-        /// solo necesitan uno de los dos»). v6.67 — SOLO las ofrendas:
-        /// la PUERTA DE LA CAZA (el jefe del peldaño) es un candado
-        /// aparte y lo revisa PuedePasarLaPuerta.</summary>
+        // ================================================================
+        //  v6.93 — EL ESCUPIDERO DE CAMBIO murió con la mesa vieja (las
+        //  monedas ya no se comen «solo lo que falta»: la pila entera al
+        //  BANCO). Enterrado aquí para la historia; nadie lo llama.
+        // ================================================================
+        /// <summary>¿LAS OFRENDAS del peldaño están PAGAS? (v6.93 — LA
+        /// LISTA NUEVA de la letra: «Esencia del Eterno» como siempre +
+        /// EL DINERO DEL BANCO (retroactivo) + AL MENOS 2 DE LAS OPCIONES
+        /// de Devorar — «el grimorio debe consumir al menos 2 de esas
+        /// opciones para desbloquear el siguiente nivel de Despertar, las
+        /// 2 opciones pueden ser las 2 armas, los 2 materiales, 1 arma y
+        /// un material, en fin lo importante es que devore 2»).
+        /// v6.67 — SOLO las ofrendas: la PUERTA DE LA CAZA (el jefe del
+        /// peldaño) es un candado aparte y lo revisa PuedePasarLaPuerta.</summary>
         private static bool LaMesaEstaCompleta(
             global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
         {
             if (alma == null) return false;
             if (alma.OfrendaEsencias <
                 DespertarGrimorio.EsenciasPara(siguiente)) return false;
-            if (alma.OfrendaMonedas < DespertarGrimorio.MonedasPara(siguiente)) return false;
-            // v6.90 — EL ARMA **O** EL MATERIAL: BASTA UNO DE LOS DOS.
-            return alma.OfrendaArma || MaterialPagado(alma, siguiente);
+            // v6.93 — EL DINERO DEL BANCO (la letra del retroactivo: lo
+            //     devorado en OTRO peldaño paga ESTE si pide dinero).
+            if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                .BancoMonedasDisponibles(alma) <
+                DespertarGrimorio.MonedasPara(siguiente)) return false;
+            // v6.93 — DEVORAR: AL MENOS 2 DE LAS OPCIONES.
+            return ContarOpcionesPagadas(alma, siguiente) >= 2;
         }
 
-        /// <summary>v6.89 — ¿EL MATERIAL del peldaño ya está pago? (el
-        /// grupo bloqueado completó SU cuota — 20 de oro O 20 rubíes:
-        /// el que la mesa tenga bloqueado).</summary>
-        private static bool MaterialPagado(
-            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int siguiente)
+        /// <summary>v6.93 — ¿CUÁNTAS opciones de Devorar ya están pagas?
+        /// Las ARMAS del peldaño valen 1 unidad cada una; cada GRUPO de
+        /// materiales vale su cuota (la suma de sus alternativas cuenta
+        /// junta — devorar 10 de oro y 10 de platino es 20 para «20 de
+        /// oro o de platino»). La leen la mesa, SubirNivel (para cobrar)
+        /// y la LISTA del tooltip (para pintar los colores).</summary>
+        public static int ContarOpcionesPagadas(
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma, int nivel)
         {
-            if (alma == null) return false;
-            int g = alma.OfrendaMineralGrupo;
-            if (g < 0) return false;
-            return alma.OfrendaMineral >=
-                DespertarGrimorio.CantidadMateriales(siguiente, g);
+            if (alma == null) return 0;
+            int pagadas = 0;
+            int[] armas = DespertarGrimorio.ArmasDelNivel[
+                System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
+            if (armas != null)
+            {
+                for (int i = 0; i < armas.Length; i++)
+                    if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                        .BancoItemDisponible(alma, armas[i]) >= 1) pagadas++;
+            }
+            int[][] grupos = DespertarGrimorio.GruposMaterialesDe(nivel);
+            for (int g = 0; g < grupos.Length; g++)
+            {
+                int cuota = DespertarGrimorio.CantidadMateriales(nivel, g);
+                if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                    .BancoGrupoDisponible(alma, grupos[g]) >= cuota) pagadas++;
+            }
+            return pagadas;
         }
 
         // ================================================================
@@ -795,15 +729,11 @@ namespace AethonMod.Content.Systems
             return true;
         }
 
-        /// <summary>¿Es ESTA arma una de las del peldaño?</summary>
-        private static bool EsDelPeldano(Item drop, int[] peldano)
-        {
-            if (peldano == null) return false;
-            for (int k = 0; k < peldano.Length; k++)
-                if (peldano[k] == drop.type) return true;
-            return false;
-        }
-
+        // ================================================================
+        //  v6.93 — EsDelPeldano murió con la mesa vieja (el «arma del
+        // peldaño» ya no es un caso aparte: TODO va al festín y al
+        // banco). Enterrado aquí para la historia; nadie lo llama.
+        // ================================================================
         /// <summary>El valor de una moneda, en cobre.</summary>
         private static long ValorDeMoneda(int tipo)
         {
@@ -945,12 +875,62 @@ namespace AethonMod.Content.Systems
                 int nivel = alma.NivelDespertar;
 
                 // v6.51.11 — LA MESA RENACE (los contadores del peldaño
-                // pagado mueren; los del nuevo nacen en 0).
+                // pagado mueren; los del nuevo nacen en 0). v6.93 — la
+                // mesa vieja del MATERIAL/ARMA/MONEDAS-por-peldaño murió
+                // (el banco la entierra): los contadores se limpian por
+                // compatibilidad de los saves, ya nadie los lee.
                 alma.OfrendaEsencias = 0;
                 alma.OfrendaMonedas = 0L;
                 alma.OfrendaMineral = 0;
                 alma.OfrendaMineralGrupo = -1;   // v6.89 — la mesa nueva SIN material bloqueado
                 alma.OfrendaArma = false;
+
+                // ============================================================
+                //  v6.93 — EL COBRO DEL BANCO (la letra del RETROACTIVO:
+                //  «como ya se habian consumido 50, entoces la cheklist se
+                //  queda con 150 lingotes de oro completo, faltanto 50
+                //  lingotes mas para completarla»): el peldaño pagado
+                //  descuenta del banco lo que usó — el DINERO entero y
+                //  las 2 PRIMERAS opciones de Devorar que estén pagas
+                //  (armas primero, en el orden de la lista; el material
+                //  del grupo se cobra de sus tipos, en orden). Lo cobrado
+                //  muere aquí: el disponible baja para los peldaños que
+                //  vengan.
+                // ============================================================
+                try
+                {
+                    global::AethonMod.Content.Globals.AlmaEternoGlobalItem.BancoCobrarMonedas(
+                        grimorio, DespertarGrimorio.MonedasPara(nivel));
+                    int porCobrar = 2;
+                    int[] armasCobro = DespertarGrimorio.ArmasDelNivel[
+                        System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
+                    if (armasCobro != null)
+                    {
+                        for (int i = 0; i < armasCobro.Length && porCobrar > 0; i++)
+                        {
+                            if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                .BancoItemDisponible(grimorio, armasCobro[i]) >= 1)
+                            {
+                                global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                    .BancoCobrarTipo(grimorio, armasCobro[i], 1);
+                                porCobrar--;
+                            }
+                        }
+                    }
+                    int[][] gruposCobro = DespertarGrimorio.GruposMaterialesDe(nivel);
+                    for (int g = 0; g < gruposCobro.Length && porCobrar > 0; g++)
+                    {
+                        int cuotaG = DespertarGrimorio.CantidadMateriales(nivel, g);
+                        if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                            .BancoGrupoDisponible(grimorio, gruposCobro[g]) >= cuotaG)
+                        {
+                            global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                                .BancoCobrarGrupo(grimorio, gruposCobro[g], cuotaG);
+                            porCobrar--;
+                        }
+                    }
+                }
+                catch { }
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
                 if (ofrenda != null && !ofrenda.IsAir)
@@ -1059,14 +1039,45 @@ namespace AethonMod.Content.Systems
                     <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
                 if (alma == null) return;
 
-                // EL EXP por rareza (la tabla de la .129).
-                alma.DevoracionExp += ExpPorRareza(drop.rare);
+                // v6.93 — EL EXP NUEVO (la letra: «dependiendo de la rareza,
+                //     dificultad de obtener y cantidad de materiales con
+                //     las que se tiene que hacer, asi como la calidad de los
+                //     materiales usados, puede aumentar el nivel del
+                //     grimorio y dar experiencia extra al grimorio, la
+                //     cantidad minima de nivel que puede subir un arma es
+                //     de 1 y la cantidad de exp minima que pueda dar un arma
+                //     es de 500 siendo estas las armas mas basicas del
+                //     juego»): MÍNIMO 500 (la escala de la .129 nacía en 5
+                //     — la basura alimentaba a nada) y el arma devorada
+                //     sube el NIVEL DEL LIBRO (GrantXP) con un mínimo de
+                //     UN NIVEL por arma (si la exp no alcanza el umbral,
+                //     SubirNivelDirecto lo fuerza).
+                long exp = System.Math.Max(500L, ExpPorRareza(drop.rare));
+                alma.DevoracionExp += exp;
 
-                // EL STAT por clase.
+                // EL STAT por clase (el festín de la .129 — intacto).
                 string stat = SubirStatPorClase(alma, drop);
 
-                // EL ALMA ÚNICA (si era especial).
+                // EL ALMA ÚNICA (si era especial) — intacto.
                 string almaUnica = DespertarAlma(alma, drop);
+
+                // v6.93 — LA SUBIDA DEL LIBRO (la letra: «puede aumentar el
+                //     nivel del grimorio»): la exp va AL LIBRO (ShardLevelItem)
+                //     — y si no alcanzó para subir, el mínimo de UN NIVEL.
+                var slBocado = grimorio.GetGlobalItem
+                    <global::AethonMod.Content.Globals.ShardLevelItem>();
+                if (slBocado != null)
+                {
+                    int nivelAntes = slBocado.Level;
+                    slBocado.GrantXP(grimorio, (int)System.Math.Min(int.MaxValue, exp));
+                    if (slBocado.Level <= nivelAntes)
+                        slBocado.SubirNivelDirecto(grimorio, 1);
+                }
+
+                // v6.93 — AL BANCO por su tipo (el pago RETROACTIVO del
+                //     peldaño que pida ESTA arma, hoy o mañana: 1 unidad).
+                global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                    .BancoGuardarItem(grimorio, drop.type, 1);
 
                 // LA MUERTE DEL PLATO (en todas las pantallas).
                 string nombre = drop.Name;
@@ -1093,7 +1104,7 @@ namespace AethonMod.Content.Systems
 
                 // EL AVISO DESGLOSADO (el plato contado).
                 EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.ArmaDevorada",
-                    new Color(196, 138, 255), nombre, ExpPorRareza(drop.rare),
+                    new Color(196, 138, 255), nombre, exp,
                     Language.GetTextValue($"Mods.AethonMod.Caida.{stat}"));
                 if (almaUnica != null)
                     EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.AlmaDespertada",
@@ -1115,6 +1126,87 @@ namespace AethonMod.Content.Systems
                 !it.vanity && it.pick == 0 && it.axe == 0 && it.hammer == 0 &&
                 it.ammo == 0 && it.type !=
                 ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>();
+        }
+
+        // ================================================================
+        //  v6.93 — EL FESTÍN DE LOS MATERIALES (la letra: «Ademas cualquier
+        //  material o cantidad de materiales se pueden consagrar para
+        //  aumentar la exp del grimorio, la cantidad exp minima que pueda
+        //  dar 1 material es de 10, la cantidad de exp que puede dar un
+        //  material se debe calcular dependiendo la rareza del material,
+        //  como se obtuvo y el momento del juego en el que se obtiene»).
+        //  El proxy de la casa para «cómo se obtuvo y el momento»: el
+        //  VALOR DE VENTA de la unidad (lo que vale un lingote de
+        //  luminita no vale uno de cobre) sobre la escala de rareza.
+        // ================================================================
+
+        /// <summary>EL FESTÍN DE UN MATERIAL: la pila entera al EXP del
+        /// libro y al BANCO por su tipo (la otra cara del festín de
+        /// siempre — v6.93).</summary>
+        private static void DevorarMaterialBocado(Player p, Item grimorio, Item drop)
+        {
+            try
+            {
+                var alma = grimorio?.GetGlobalItem
+                    <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                if (alma == null) return;
+
+                long expUnidad = ExpPorMaterial(drop);
+                long exp = expUnidad * drop.stack;
+                alma.DevoracionExp += exp;
+
+                // LA EXP AL LIBRO (materiales: sin nivel forzado — la letra
+                //     del mínimo de 1 nivel era para las ARMAS).
+                var slMat = grimorio.GetGlobalItem
+                    <global::AethonMod.Content.Globals.ShardLevelItem>();
+                if (slMat != null)
+                    slMat.GrantXP(grimorio, (int)System.Math.Min(int.MaxValue, exp));
+
+                // AL BANCO por su tipo (la pila entera — retroactivo).
+                global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                    .BancoGuardarItem(grimorio, drop.type, drop.stack);
+
+                // LA MUERTE DEL PLATO (en todas las pantallas).
+                string nombre = drop.Name;
+                int cuantas = drop.stack;
+                AnimarElBocado(p, drop, 2f);   // EL FESTÍN CHICO del material
+                drop.TurnToAir();
+                int idx = Array.IndexOf(Main.item, drop);
+                if (Main.netMode == NetmodeID.Server && idx >= 0)
+                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+
+                // LOS POLVOS Y LA VOZ.
+                if (!Main.dedServ)
+                {
+                    for (int k = 0; k < System.Math.Min(20, 4 + cuantas); k++)
+                    {
+                        Dust d = Dust.NewDustPerfect(p.Center, DustID.Shadowflame,
+                            new Vector2(Main.rand.NextFloat(-2.2f, 2.2f),
+                                Main.rand.NextFloat(-3f, 0.4f)), 150,
+                            new Color(110, 40, 170), 0.9f);
+                        d.noGravity = true;
+                    }
+                }
+                EcoRed.HablarVarianteAlPortador(p, "Mods.AethonMod.Caida.DevoradoSabor",
+                    4, new Color(178, 110, 236), rugido: true, escala: 0.58f);
+                EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Caida.MaterialDevorado",
+                    new Color(196, 138, 255), nombre, cuantas, exp);
+
+                // EL FESTÍN CAMINA.
+                EcoRed.SincronizarDevoracion(p);
+            }
+            catch { }
+        }
+
+        /// <summary>LA EXP DE UNA UNIDAD de material (la letra: mínimo 10;
+        ///     crece con la rareza y el valor de venta — el proxy de la
+        ///     casa para «cómo se obtuvo y el momento del juego»).</summary>
+        private static long ExpPorMaterial(Item it)
+        {
+            if (it == null || it.IsAir) return 10L;
+            long porRareza = 10L * (1L + System.Math.Max(0, it.rare));
+            long porValor = System.Math.Max(0L, it.value) / 10_000L;   // 1 exp por cada 10 de oro que vale la unidad
+            return System.Math.Max(10L, porRareza + porValor);
         }
 
         /// <summary>EL EXP DE UN ARMA por su rareza (la escala de la .129:

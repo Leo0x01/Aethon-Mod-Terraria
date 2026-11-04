@@ -3287,7 +3287,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //     el vuelo, BRASA en la gigante; escala proporcional al
                 //     disco: starR/69 = el ratio del arma base) ===
                 Texture2D bloomCircle = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+                    "AethonMod/Content/Effects/Textures/ResplandorChico").Value;
                 float escGlow = starR / 69f;
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -3311,7 +3311,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // === 3. EL AURA DE RUIDO (RadialShine — la nebulosa que
                 //     RUGE alrededor, girando con el sol) ===
                 Texture2D wavyBlotch = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+                    "AethonMod/Content/Effects/Textures/RuidoManchas").Value;
                 if (_solAuraShader != null && _solAuraShader.Value != null)
                 {
                     Effect shineShader = _solAuraShader.Value;
@@ -3336,9 +3336,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 {
                     Effect shader = _solDiscoShader.Value;
                     Texture2D psychedelicWing = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
+                        "AethonMod/Content/Effects/Textures/MapaDistorsion").Value;
                     Texture2D dendritic = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+                        "AethonMod/Content/Effects/Textures/RuidoDendritico").Value;
 
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     // LA PALETA DEL DIOS: blanco cálido + dorado profundo →

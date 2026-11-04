@@ -2074,14 +2074,29 @@ Items: {
 			'''
 	}
 
+	RenglonFinal: {
+		DisplayName: El Renglón Final
+		Tooltip:
+			'''
+			LA ÚLTIMA LÍNEA DEL GRIMORIO: mantén el clic en LA CITACIÓN
+			(0,6 s — el reglón fantasma trazado entre dos plumas estelares)
+			y el Eterno TIENDE EL RENGLÓN: una barra de tinta de 4.800 px
+			que te ATRAVIESA y da UNA VUELTA ENTERA a la página borrando
+			todo lo que toque (daño sostenido, 4 s). La tinta corre con
+			grumo dendrítico a dos octavas, el charco dorado arde en el
+			escritor, las plumas escupen chispas y la línea ondula viva.
+			Al cerrar se contrae y estalla: EL PUNTO FINAL.
+			'''
+	}
+
 	BolsaDefinitivas: {
 		DisplayName: La Bolsa de las Armas Definitivas
 		Tooltip:
 			'''
-			EL RAYO CONCENTRADO 2 — el ataque definitivo de la casa — y
-			LA COPIA GANADORA de la pila de capas: el RAYO DE PRUEBA C —
-			EL SUEÑO (A y B murieron con la elección). C es el haz de la
-			IRA DE UN SER EXTERIOR, el ataque del despertar 50 del Eterno.
+			LOS ATAQUES DEFINITIVOS DE LA CASA: EL RAYO CONCENTRADO 2 (el
+			cono de plasma de 3.500 px), EL SUEÑO (la copia ganadora — el
+			haz de la Ira de un Ser Exterior) y EL RENGLÓN FINAL (la barra
+			de tinta de 4.800 px que gira borrando la página entera).
 			'''
 	}
 
@@ -2107,8 +2122,8 @@ Items: {
 			'''
 	}
 
-	MiradaSolyn: {
-		DisplayName: La Mirada de Solyn
+	MiradaDelEterno: {
+		DisplayName: La Mirada del Eterno
 		Tooltip:
 			'''
 			R8 — el rayo de energía: mantén el clic 0,75 s (la carga estelar) y
@@ -2557,15 +2572,16 @@ Projectiles: {
 	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
 	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
 	IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
-	// SolynCargaProj.DisplayName: Solyn Carga Proj
-	// SolynRayoProj.DisplayName: Solyn Rayo Proj
+	// v6.93 — LA MIRADA DEL ETERNO (la recreación de la casa sobre HazLib):
+	// las dos fases del arma (la carga y el rayo) con sus nombres nuevos.
+	MiradaCargaProj.DisplayName: La Carga de la Mirada
+	MiradaRayoProj.DisplayName: El Rayo de la Mirada
+	RenglonCargaProj.DisplayName: La Citación del Renglón
+	RenglonLineaProj.DisplayName: El Renglón Final
 	// v6.90 — EL TALLER DE EFECTOS (el motor de píxeles de la casa).
 	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
 	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
 	EclipseVivoProj.DisplayName: El Eclipse Vivo
-	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
-	// SolynCargaProj.DisplayName: Solyn Carga Proj
-	// SolynRayoProj.DisplayName: Solyn Rayo Proj
 }
 
 Buffs: {
@@ -2902,7 +2918,7 @@ Hambre: {
 		Frase5: ¡HAMBRE! ¡HAMBRE! ¡HAMBRE!
 		SaleACazar: Si no me alimentas, salgo yo mismo a cazar.
 		Saciado: …saciado. Por ahora.
-		Absorbe: −{0}% hambre
+		Absorbe: "{0}% hambre"
 		Nivel: Nivel {0} · XP {1}/{2}
 	}
 }
@@ -2965,6 +2981,7 @@ Caida: {
 	// weapons that fall into the crater; the Eternal devours them: rarity
 	// EXP + one stat per class + the unique souls)
 	ArmaDevorada: ✦ El Eterno devora a {0}: +{1} EXP · +1 {2}
+	MaterialDevorado: ✦ El Eterno devora {0} ×{1}: +{2} EXP (material del festín)
 	AlmaDespertada: ✧ ¡El alma de {0} DESPIERTA en el libro: {1}!
 	StatFuerza: Fuerza violenta
 	StatPrisa: Prisa del vuelo
@@ -3000,9 +3017,10 @@ Despertar: {
 	// eaten becomes 1 gold coin).
 	Migracion: ✦ El despertar y el festín ahora viven EN ESTE grimorio (cada libro, su propia escalera).
 	BocadoEsencias: ✦ El Eterno come {0} esencias del suelo ({1}/{2} del peldaño).
-	BocadoMonedas: ✦ El Eterno come las monedas del suelo — faltan {0}.
+	BocadoMonedas: ✦ El Eterno devora las monedas del suelo (+{0} al banco del despertar).
 	BocadoMineral: ✦ El Eterno come {0} del material del suelo ({1}/{2} de la opción).
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA del peldaño!
+	BocadoMaterial: ✦ El Eterno devora {0} × {1} del suelo (+{2} EXP al libro).
 	NoConsagrado: «(El Eterno aparta la ofrenda con una página) Sin MI sello no la pruebo. Conságrala en el altar.»
 	// v6.90 — LA LEY DE LA CONSAGRACIÓN: el grimorio SOLO come lo sellado.
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
@@ -3075,11 +3093,17 @@ Despertar: {
 	JefeSenorDeLaLuna: el Señor de la Luna
 	JefeAethon: Aethon, el fragmento de un recuerdo lejano
 	PuertaDeCaza: ✦ La mesa está completa… pero el grimorio exige su presa: {1} (nivel {0}). ¡CÁZALA!
-	ReqJefeCaido: La presa del peldaño: {0} — DEVORADO
+	ReqJefeCaido: "{0} — Devorado"
 	// v6.76 — LA PRESA DEL PELDAÑO (la letra: «en ningun momento me
 	// piden que maten a los jefes»): la línea de la puerta de caza en
 	// la LISTA DE REQUISITOS del tooltip — con SU estado.
-	ReqJefeViva: La presa del peldaño: {0} — Todavía VIVO. El grimorio exige su caza
+	ReqJefeViva: "{0} — todavía está vivo"
+	ReqJefeTitulo: El siguiente Jefe debe ser Devorado:
+	ReqDevorarTitulo: Devorar Armas o Materiales (al menos 2):
+	ReqOpcionBloqueada: (bloqueada)
+	HitoTitulo: Próximo hito del Despertar:
+	DanoGrimorio: +{0}% de daño a TODO el grimorio
+	NotaFinal: (todo lo que el grimorio come se CONSAGRA en el Altar de la Consagración — menos las esencias — y se suelta DELANTE del jugador con el grimorio SELECCIONADO: el grimorio SOLO devora lo que su portador ARROJA al suelo)
 	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CONSAGRADO… déjalo caer al suelo, portador. QUIERO probarlo.
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
 	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
@@ -3779,6 +3803,7 @@ Altar: {
 	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
 	ComoJefes: • Los jefes sueltan de 1 a 10 (casi siempre 1)
 	ComoOleadas: • ¡Las OLEADAS DE HAMBRE suben la probabilidad!
+	ComoEstatuas: • Las ESTATUAS no alimentan: si el grimorio mata a una criatura nacida de una estatua, su hambre SUBE +0,1%
 	ComoNota: (las esencias empiezan a caer tras LA LLEGADA del grimorio)
 	// v6.91 — LA LETRA: «no es necesario llevar la cuenta en el chat,
 	// para eso dejarlo en el altar» — el chat SOLO AVISA.

@@ -589,10 +589,11 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  v6.91 — EL TRIÁNGULO DE TRES COLORES (el port de la Investigación)
-        //  El shader del arma portada (La Mirada de Solyn) se evalúa POR
-        //  VÉRTICE en la CPU: cada vértice llega con SU color completo (el
-        //  rgb=0 EXACTO del borde del haz vive aquí, no en una textura).
+        //  v6.91 — EL TRIÁNGULO DE TRES COLORES (el motor de los haces de
+        //  la investigación). El color de La Mirada del Eterno (v6.93:
+        //  recreada de la casa sobre HazLib) se evalúa POR VÉRTICE en la
+        //  CPU: cada vértice llega con SU color completo (el rgb=0
+        //  EXACTO del borde del haz vive aquí, no en una textura).
         //  Reutiliza el pozo, el BasicEffect y el lote de pantalla (soft-add)
         //  de siempre — cero comportamiento nuevo para los consumidores
         //  existentes (solo un emisor más).

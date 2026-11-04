@@ -22,8 +22,16 @@ namespace AethonMod.Content.Globals
     //  LA PUERTA: nada cae ANTES de LA LLEGADA (ElPoderSeFiltra — el
     //  poder se pegó al mundo cuando la bruma lo tocó). LA CHUSMA Y LOS
     //  JEFES DE LAS OLEADAS DE HAMBRE no pasan por aquí: su probabilidad
-    //  es MAYOR (2 % la chusma, 10 planos los jefes — lo paga
-    //  OleadaNPC.OnKill, que también peló su loot).
+    //  es MAYOR (1 % la chusma — la letra de la v6.51.6 bajó el 2 % de
+    //  la .51.0 —, 10 planos los jefes — lo paga OleadaNPC.OnKill, que
+    //  también peló su loot).
+    //  v6.93 — LA VERIFICACIÓN PEDIDA (la letra: «asegúrate de que las
+    //  esencias realmente caigan de las criaturas normales y de las
+    //  criaturas de las oleadas de hambre»): las DOS mesas viven y pagan
+    //  — la normal (este OnKill: criaturas 0,1 % → 1 · jefes 90/5/1/4)
+    //  y la de las oleadas (OleadaNPC.OnKill: chusma 1 % → 1 · jefe de
+    //  oleada 10 planas) — y la criatura de ESTATUA también cae aquí
+    //  (ninguna mesa excluye a las presas de granja).
     // ======================================================================
     public class EsenciaCorruptaDrops : GlobalNPC
     {

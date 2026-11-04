@@ -162,9 +162,13 @@ namespace AethonMod.Content.UI
         //  lingote de oro, entonces solo sale la etiqueta»): cualquier
         //  item de ofrenda vale — el arma gana stats + etiqueta, el
         //  material SOLO la etiqueta. Nada de herramientas ni
-        //  accesorios, ni el grimorio, ni las esencias (ellas SON la
-        //  esencia del Eterno), ni el libro, ni monedas, ni lo ya
-        //  consagrado.
+        //  accesorios, ni el grimorio, ni el libro, ni lo ya consagrado.
+        //  v6.93 — LAS MONEDAS ENTRAN (la letra: «todo es retroactivo
+        //  y todo se debe consagrar incluso las monedas de platino,
+        //  oro, plata y cobre, todo debe ser consagrado primero, todos
+        //  menos las esencias»): las monedas YA son ofrenda — el
+        //  grimorio no las prueba sin sello (DespertarGrimorioSistema
+        //  .ServirLaMesa) y TODO lo que comen va al BANCO del despertar.
         // ================================================================
         private static bool EsOfrendaConsagrible(Item it)
         {
@@ -177,9 +181,6 @@ namespace AethonMod.Content.UI
                     <global::AethonMod.Content.Items.Altar.ItemCorrupto>()) return false;
                 if (it.type == ModContent.ItemType
                     <global::AethonMod.Content.Items.Altar.LibroCorrupto>()) return false;
-                // EL DINERO NO (las monedas se funden: el sello no vive en ellas).
-                if (it.type == ItemID.CopperCoin || it.type == ItemID.SilverCoin ||
-                    it.type == ItemID.GoldCoin || it.type == ItemID.PlatinumCoin) return false;
                 // EL GRIMORIO NO (él es el comensal, no el plato).
                 if (it.ModItem is global::AethonMod.Content.Weapons.GrimoireEternal) return false;
                 // LOS ACCESORIOS Y LA VANIDAD NO SON OFRENDA NI ARMA.
@@ -190,8 +191,9 @@ namespace AethonMod.Content.UI
                 var sello = it.GetGlobalItem
                     <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                 if (sello != null && sello.Corrompido) return false;
-                // TODO LO DEMÁS ES OFRENDA: armas (daño > 0) y materiales
-                // (lingotes, gemas, cera, fragmentos, almas…).
+                // TODO LO DEMÁS ES OFRENDA: armas (daño > 0), materiales
+                // (lingotes, gemas, cera, fragmentos, almas… ) y, desde la
+                // v6.93, LAS MONEDAS (cobre, plata, oro y platino).
                 return true;
             }
             catch { return false; }
@@ -604,6 +606,12 @@ namespace AethonMod.Content.UI
                 x + 24f, cy, w - 48f, 0.75f, TintaTexto);
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
                 x + 24f, cy, w - 48f, 0.75f, TintaVioleta);
+            // v6.93 — LA LEY DE LAS ESTATUAS (la letra: «también en el
+            //    altar tienes que decir que si el grimorio mata criatura
+            //    que salen de una estatua su hambre aumenta»): la línea
+            //    de la mesa de las estatuas, junto a las demás verdades.
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoEstatuas")),
+                x + 24f, cy, w - 48f, 0.75f, new Color(235, 130, 120));
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
                 x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
             cy += 6f;

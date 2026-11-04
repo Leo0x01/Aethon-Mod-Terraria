@@ -7,11 +7,11 @@
 //   · REFRACTIÓN EN ESPACIO DE PANTALLA: el filtro re-muestrea la pantalla
 //     (uImage0/texPantalla — el slot s0 que la cadena de filtros de vanilla
 //     alimenta) en UVs desplazadas por un ruido de plasma que hace scroll
-//     (Wolfire 2006, Rastertek T53, Linden Reid — EL postulado del heat
+//     (EL postulado del heat
 //     haze 2D).
 //   · EL RUIDO QUE HIERVE EN SU SITIO: DOS octavas en DIAGONALES OPUESTAS
-//     (una sube ↗, la otra ↖ — el truco de MoonstoneDistortion de Starlight
-//     River): los componentes horizontales opuestos se cancelan y el patrón
+//     (una sube ↗, la otra ↖ — el truco del ruido hirviendo en
+//     su sitio): los componentes horizontales opuestos se cancelan y el patrón
 //     NO «fluye» hacia ningún lado — el aire HIERVE sin desplazarse. La
 //     tercera octava (calidad alta) agrega el shimmer fino rápido.
 //   · LA CONVECCIÓN: un sesgo NETO hacia arriba (el aire caliente sube —
@@ -24,8 +24,8 @@
 //     SE SUMA (el hervidero de la boca del haz).
 //   · LA ABERRACIÓN CROMÁTICA DEL ESTALLIDO: 3 taps radiales alrededor del
 //     punto del golpe — R hacia afuera, G al centro, B hacia adentro ×0.9
-//     (la asimetría leve de la lente real; 6-16 px en el pico; Unity PPv2
-//     y el 90 % de los juegos: el estándar). El centro llega por
+//     (la asimetría leve de la lente real; 6-16 px en el pico; el
+//     estándar del 90 % de los juegos). El centro llega por
 //     uTargetPosition — la MISMA matemática zoom-correcta de vanilla:
 //     (uTargetPosition − uScreenPosition)/uScreenResolution = UV real de
 //     pantalla (la corrección de zoom y de offScreenRange la hacen

@@ -97,7 +97,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // el síntoma perfecto). 2.600 px de fluff: cubre TODO el
             // rango de detección (500 + nivel/10·100, tope 1.500) con
             // margen — la casa ya usa el truco (RayosPrueba: 5000,
-            // MiradaSolyn: 8000); este rayo era el único largo sin él.
+            // MiradaDelEterno: 8000); este rayo era el único largo sin él.
             ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 2600;
         }
 
