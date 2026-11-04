@@ -2420,8 +2420,8 @@ Items: {
 	}
 
 	CodiceHabilidades: {
-		// DisplayName: Codice Habilidades
-		// Tooltip: ""
+		DisplayName: Codice Habilidades
+		Tooltip: ""
 	}
 }
 
