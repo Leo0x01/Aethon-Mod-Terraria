@@ -74,7 +74,8 @@ namespace AethonMod.Content.Globals
                         almaReq.OfrendaEsencias >=
                         Systems.DespertarGrimorio.EsenciasPara(siguiente),
                     "DespertarReq3" => almaReq != null &&
-                        almaReq.OfrendaMonedas >=
+                        global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                            .BancoMonedasDisponibles(almaReq) >=
                         Systems.DespertarGrimorio.MonedasPara(siguiente),
                     // v6.51.11 — EL REQUISITO DEL ARMA: v6.89 — el
                     //     arma de magia/invocador SIN corrupción (la
