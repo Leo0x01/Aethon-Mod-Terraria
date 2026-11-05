@@ -2169,16 +2169,6 @@ Items: {
 			'''
 	}
 
-	BolsaDePociones: {
-		DisplayName: La Bolsa de las Pociones
-		Tooltip:
-			'''
-			TODAS las pociones del juego — la lista completa del ItemID
-			(las curativas y de maná, los buffs clásicos y modernos, la
-			suerte, las raras y los nueve frascos): 30 de cada una.
-			'''
-	}
-
 	BolsaTallerDeEfectos: {
 		DisplayName: La Bolsa del Taller de Efectos
 		Tooltip:
@@ -2910,6 +2900,206 @@ Hambre: {
 
 	// v6.50.91 — THE NERVOUS ONE: restless, hungry, angry — "I want to
 	// eat and it's hungry". Not fear: appetite with a voice.
+	CetroDelAlba: {
+		DisplayName: The Scepter of Dawn
+		Tooltip:
+			'''
+			Dawn in your hand: its golden beam sweeps ahead with a white heart.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	CoronaDeSerafines: {
+		DisplayName: The Crown of Seraphs
+		Tooltip:
+			'''
+			Three rings of light orbit the bearer: the crown the seraphs lent.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	JuicioDelCielo: {
+		DisplayName: The Judgment of Heaven
+		Tooltip:
+			'''
+			Swords of light rain from the sky upon the mark: the sentence cannot be appealed.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	CampanaDelSantuario: {
+		DisplayName: The Bell of the Sanctuary
+		Tooltip:
+			'''
+			Its golden wave charges and bursts: the unclean are pushed out of the sanctuary.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	LamparaDelPeregrino: {
+		DisplayName: The Pilgrim's Lantern
+		Tooltip:
+			'''
+			Releases white fireflies that hunt those lurking in the shadow.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	PlumaDelEscribaSanto: {
+		DisplayName: The Holy Scribe's Quill
+		Tooltip:
+			'''
+			A stroke of light flies to the mark and returns to the bearer: the scribe's signature.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	ReliquiaDelAmanecer: {
+		DisplayName: The Relic of Daybreak
+		Tooltip:
+			'''
+			A puddle of daybreak on the mark: five seconds of light grinding those who step in.
+			THE SACRED HOUSE — forged by THE FORGE
+			'''
+	}
+
+	PupilaDelAbismo: {
+		DisplayName: The Pupil of the Abyss
+		Tooltip:
+			'''
+			The eye of the abyss opens its teal beam: the gaze that never blinks.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	GeometriaImposible: {
+		DisplayName: The Impossible Geometry
+		Tooltip:
+			'''
+			Four angles that should not exist orbit the bearer: every corner, an edge.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	MordidaDelEspacio: {
+		DisplayName: The Bite of Space
+		Tooltip:
+			'''
+			Fangs of void tear the sky above the mark: the flesh of space bites.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	LetaniaNebular: {
+		DisplayName: The Nebular Litany
+		Tooltip:
+			'''
+			A violet nebula settles on the mark: those who step in dissolve into stardust.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	SusurroDelVacio: {
+		DisplayName: The Whisper of the Void
+		Tooltip:
+			'''
+			A teal void pulls the living toward its heart and grinds them in silence.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	SemillaDeEstrellas: {
+		DisplayName: The Seed of Stars
+		Tooltip:
+			'''
+			It blooms on the mark and its crown bursts into twin violet and teal rings.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	CoroDeLosProfundos: {
+		DisplayName: The Choir of the Deep
+		Tooltip:
+			'''
+			Tentacle seeds fall and sing, hunting the living: none escapes twice.
+			THE COSMIC HORROR HOUSE — forged by THE FORGE
+			'''
+	}
+
+	HambrePrimigenia: {
+		DisplayName: The Primal Hunger
+		Tooltip:
+			'''
+			The Eternal's maw in miniature: drags the living into its black heart and devours.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	GuadanaDelVerdugo: {
+		DisplayName: The Executioner's Scythe
+		Tooltip:
+			'''
+			The executioner's violet blade flies to the mark and returns: its wake cuts twice.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	CadenasDelOlvido: {
+		DisplayName: The Chains of Oblivion
+		Tooltip:
+			'''
+			Links of oblivion fall upon the mark: they bind what they touch to the bottom of the sky.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	VeloDeCeniza: {
+		DisplayName: The Veil of Ash
+		Tooltip:
+			'''
+			A grey ash cloud covers the mark: what breathes inside slowly fades.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	EspinasNocturnas: {
+		DisplayName: The Night Thorns
+		Tooltip:
+			'''
+			Five needles of night orbit the bearer: the crown no one wears twice.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	EclipseInterior: {
+		DisplayName: The Inner Eclipse
+		Tooltip:
+			'''
+			A black sun ignites on the mark: its violet crown bursts and snuffs out the living.
+			THE DARKNESS HOUSE — forged by THE FORGE
+			'''
+	}
+
+	BolsaTresCasas: {
+		DisplayName: The Bag of the Three Houses
+		Tooltip:
+			'''
+			THE FORGE'S TWENTY weapons: the SACRED house (gold and light),
+			the COSMIC HORROR house (teal and violet) and the DARKNESS house
+			(violet and ink black) — permanent and reusable.
+			'''
+	}
+
+	Cultistas: {
+		Burla1: (The Eternal mutters from the bag) Fools… kneeling before a FALSE god. I, at least, EXIST.
+		Burla2: (The Eternal laughs between pages) They never paid me tribute. That is why they will all die.
+		Burla3: (The Eternal whispers) Look how they tremble before their idol. They should be praying to ME… and be grateful I am not yet hungry for them.
+		Vencido1: (The Eternal savors the moment) One less praying to the void. The world breathes better.
+		Vencido2: (The Eternal turns a page) He fell for his misplaced faith. I WOULD have listened… had they paid me tribute.
+		Devorado: (The Eternal swallows) Mmm… it tasted of cold fanaticism. What a delicious disgust.
+		ElJefe: (The Eternal roars with laughter) LOOK! The false prophet himself! Pray, hooded little man… you pray to NOBODY. The tribute you never gave me will be collected by MY hunger.
+	}
+
 	Nervioso: {
 		Tranquilo: El cazador espera. Vigila, paciente, con apetito.
 		Hambriento: HAMBRIENTO — con el 25% ya quiere salir a cazar.
@@ -2964,6 +3154,7 @@ Caida: {
 	Dormido7: …las estrellas me hablaron: dicen que abajo hay manos. Yo solo he visto páginas. Acércate a ver quién tiene razón. zZz.
 	Dormido8: …¿sigues ahí? Bien. Los que esperan también alimentan. Un poquito. No es lo mismo, pero el hambre sabe esperar. zZz.
 	PrimerPensamiento: Por fin.
+	ElMandatoDelAltar: Listen to me, bearer: to AWAKEN I need CONSECRATED offerings — weapons and materials sealed in the ALTAR OF CONSECRATION with essences of the eternal. Consecrate them at the altar and drop them before me… along with the essences and the coins, which are dropped as they are.
 	CometaCae: ✦ El aire se espesa: UNA BRUMA INMENSA está naciendo cerca de ti… y algo llega dentro.
 	Impacto: ✦ La bruma se disipa… y algo flota en su lugar: TU GRIMORIO TE ESPERA.
 	Devorado:
@@ -3026,6 +3217,7 @@ Despertar: {
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA del peldaño!
 	BocadoMaterial: ✦ El Eterno devora {0} × {1} del suelo (+{2} EXP al libro).
 	NoConsagrado: «(El Eterno aparta la ofrenda con una página) Sin MI sello no la pruebo. Conságrala en el altar.»
+	FueraDeLaLista: (The Eternal pushes the plate away with a page) That is NOT on this step's list. Keep it… or bring me WHAT I DEMAND.
 	// v6.90 — LA LEY DE LA CONSAGRACIÓN: el grimorio SOLO come lo sellado.
 	MigracionPoder: ✦ El viejo poder devorado ({0} esencias) pasa a su portador: +{1}% de daño a TODO.
 	TopeEsencias: ✧ ¡TOPE DEL FESTÍN: +{0}% de daño PARA SIEMPRE! Desde ahora, cada esencia comida es 1 moneda de oro.

@@ -75,12 +75,15 @@ namespace AethonMod.Content.Players
             // del kit, la lección v6.14.2).
             bolsas += Entregar(ModContent.ItemType
                 <global::AethonMod.Content.Items.Bolsas.BolsaTallerDeEfectos>());
-            // v6.91 — LA BOLSA DE LAS POCIONES aparte (la letra: «dame
-            // una bolsa con todas las pociones del juego»): los 67
-            // bebibles del ItemID, también en la entrega DIRECTA del kit
-            // (la lección v6.14.2 aplicada a la bolsa nueva).
+            // v6.97 — LA BOLSA DE LAS POCIONES MURIÓ (la letra: «puedes
+            // borrar la bolsa con todas las pociones») — fuera del kit
+            // y de la entrega directa.
+
+            // v6.97 — LA BOLSA DE LAS TRES CASAS aparte (la entrega de LA
+            // FORJA: las 20 armas nuevas — sagrada, horror cósmico y
+            // oscuridad — también en la entrega DIRECTA del kit).
             bolsas += Entregar(ModContent.ItemType
-                <global::AethonMod.Content.Items.Bolsas.BolsaDePociones>());
+                <global::AethonMod.Content.Items.Bolsas.BolsaTresCasas>());
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

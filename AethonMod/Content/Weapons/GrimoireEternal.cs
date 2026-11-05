@@ -1056,17 +1056,45 @@ namespace AethonMod.Content.Weapons
                 else
                     tooltips.Add(summonLine);
 
-                // === v6.51.11 — LA REFORJA EN LA VENTANA BÁSICA (la letra:
-                //     «ahora sobre los modificadores de forja, el aumento
-                //     que estos dan deben aparecer en la ventana de
-                //     informacion basica»): el modificador que viste el
-                //     libro con SUS estadísticas de la wiki — las mismas
-                //     líneas coloreadas de la ventana EL ARMA, compactas
-                //     aquí, para leerse de un vistazo. ===
+                // === v6.97 — LA REFORJA Y EL HAMBRE, AL FINAL DE LA
+                //     VENTANA BÁSICA (la letra: «tenemos que mover de la
+                //     ventana de Progresion lo que dice Reforja y su
+                //     contenido y ponerlo en la ventana de informacion
+                //     basica que es la primera ventana, se debe poner al
+                //     final de la ventana donde quedaria Reforja y la
+                //     reforja actual mas la siguiente y el nivel de cuando
+                //     se consigue, y justo debajo se debe poner las
+                //     bonificaciones que da el nivel actual de reforja» +
+                //     «de la ventana de progresion debemos mover el
+                //     apartado de Hambre y su barra de progreso y el
+                //     estado del grimorio debajo del hambre a la ventana
+                //     de informacion basica»). ===
                 {
+                    // LA REFORJA: actual → siguiente (y su nivel).
                     var rungB = PeldanoDe(sl.Level);
-                    tooltips.Add(new TooltipLine(Mod, "ReforjaBasica",
-                        $"[c/B26EEC:Reforja ({rungB.Nombre}):] {StatsEtiqueta(rungB)}"));
+                    int idxB = IndiceEtiqueta(sl.Level);
+                    if (idxB + 1 < LaReforja.Length)
+                    {
+                        var proxB = LaReforja[idxB + 1];
+                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
+                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungB.Nombre})]" +
+                            $"[c/78788C: → ][c/9B6FE8:({proxB.Nombre})]" +
+                            $"[c/78788C: en el nivel {proxB.Nivel}]"));
+                    }
+                    else
+                    {
+                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
+                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungB.Nombre})]" +
+                            "[c/78788C: — la cima del mod]"));
+                    }
+                    // JUSTO DEBAJO: las bonificaciones del nivel actual.
+                    tooltips.Add(new TooltipLine(Mod, "ReforjaBonos",
+                        StatsEtiqueta(rungB)));
+
+                    // EL HAMBRE: la barra primero y el estado JUSTO
+                    //     DEBAJO (la pareja de siempre, su nueva casa).
+                    if (barraHambre != null) tooltips.Add(barraHambre);
+                    if (estadoHambre != null) tooltips.Add(estadoHambre);
                 }
             }
 
@@ -1430,36 +1458,19 @@ namespace AethonMod.Content.Weapons
                 tooltips.Add(new TooltipLine(Mod, "Level",
                     $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
 
-                // === v6.51.10 — LA REFORJA VIVA CAMINA CON EL NIVEL (la
-                //     letra: «debe cambiar cada 33 niveles el modificador
-                //     y tambien sus estadisticas»): UNA línea — dónde
-                //     está el libro y cuándo sube su modificador. ===
-                {
-                    var rungP = PeldanoDe(sl.Level);
-                    int idxP = IndiceEtiqueta(sl.Level);
-                    if (idxP + 1 < LaReforja.Length)
-                    {
-                        var proxP = LaReforja[idxP + 1];
-                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
-                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungP.Nombre})]" +
-                            $"[c/78788C: → ][c/9B6FE8:({proxP.Nombre})]" +
-                            $"[c/78788C: en el nivel {proxP.Nivel}]"));
-                    }
-                    else
-                    {
-                        tooltips.Add(new TooltipLine(Mod, "ReforjaViva",
-                            $"[c/78788C:Reforja: ][c/E8D8FF:({rungP.Nombre})]" +
-                            "[c/78788C: — la cima del mod]"));
-                    }
-                }
+                // v6.97 — LA REFORJA SE MUDÓ A LA VENTANA BÁSICA (la letra:
+                //     «mover de la ventana de Progresion lo que dice Reforja
+                //     y su contenido y ponerlo en la ventana de informacion
+                //     basica, al final de la ventana») — aquí ya no vive.
 
-                // === v6.51.0 — LA BARRA DEL DESPERTAR (la letra: «estos
-                //     niveles deben estar ubicados en la ventana de
-                //     información DEBAJO de la barra de niveles y ENCIMA
-                //     de la barra de hambre») + la LISTA PEQUEÑA de lo
-                //     que necesita el próximo nivel («para subirla de
-                //     nivel se presentará una lista pequeña de lo que
-                //     necesita»). ===
+                // === v6.51.0 — LA BARRA DEL DESPERTAR (la letra:
+                //     «la barra de progresion de Despertar en la ventana de
+                //     Progresion debe ir ubicada debajo de los requisitos»
+                //     — v6.97: la barra BAJA al final de TODOS los
+                //     requisitos del peldaño, su sitio nuevo de la letra)
+                //     + la LISTA PEQUEÑA de lo que necesita el próximo
+                //     nivel («para subirla de nivel se presentará una
+                //     lista pequeña de lo que necesita»). ===
                 try
                 {
                     // v6.51.6 — LA ESCALERA ES DE ESTE LIBRO (la letra: el
@@ -1531,20 +1542,9 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
-                        // === LA BARRA DEL DESPERTAR (la letra: «Despertar
-                        //     X/100 (barra de progreso)» — aquí X es el
-                        //     nivel ACTUAL de Despertar; su sitio de la
-                        //     letra: entre el dinero y DEVORAR). ===
-                        {
-                            int barD = 20;
-                            int llenos = (int)(barD * (despertar / 100f));
-                            string barra = "";
-                            for (int bi = 0; bi < barD; bi++)
-                                barra += bi < llenos ? "█" : "░";
-                            tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
-                                "[c/78788C:  • Despertar ]" +
-                                $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/100]"));
-                        }
+                        // v6.97 — LA BARRA DEL DESPERTAR SE MUDÓ AL FINAL
+                        //     (la letra: «debajo de los requisitos») — su
+                        //     viejo sitio entre el dinero y DEVORAR murió.
 
                         // === EL REQUISITO 3 — DEVORAR ARMAS O MATERIALES
                         //     (la letra: «la lista dará 4 o más opciones
@@ -1571,10 +1571,14 @@ namespace AethonMod.Content.Weapons
                             bool dosPagas = pagas >= 2;
 
                             tooltips.Add(new TooltipLine(Mod, "DespertarDevorarTit",
-                                $"[c/{(dosPagas ? colOK : "FFD787")}:  Devorar Armas o Materiales ({System.Math.Min(pagas, 2)}/2):]"));
+                                $"[c/{(dosPagas ? colOK : "FFD787")}:  Devorar Armas o Materiales Consagrados ({System.Math.Min(pagas, 2)}/2):]"));
 
                             // LAS ARMAS — una línea por arma (su sprite
-                            // y su nombre: NADA de paréntesis de ejemplo).
+                            // y su nombre con SU etiqueta de consagrado:
+                            // la letra nueva — «todas las armas, materiales
+                            // o cualquier item que se pida de requisito
+                            // debe aparecer en los requisitos con su
+                            // etiqueta de (Consagrado)»).
                             if (armasOpciones != null)
                             {
                                 for (int pa = 0; pa < armasOpciones.Length; pa++)
@@ -1586,7 +1590,7 @@ namespace AethonMod.Content.Weapons
                                     string nombreArma = Lang.GetItemNameValue(tipoArma);
                                     string cuentaA = pagaA ? "  ✓ Devorada" : "";
                                     tooltips.Add(new TooltipLine(Mod, "DespertarDevorarA" + pa,
-                                        $"[i:{tipoArma}][c/{tintaA}: {nombreArma}{cuentaA}]"));
+                                        $"[i:{tipoArma}][c/{tintaA}: {nombreArma} (Consagrado){cuentaA}]"));
                                 }
                             }
 
@@ -1615,7 +1619,7 @@ namespace AethonMod.Content.Weapons
                                         nombres += (ni > 0 ? " o " : "") + Lang.GetItemNameValue(grupo[ni]);
                                     string colaG = pagaG ? "  ✓ Devorado"
                                         : (dispG > 0 && !dosPagas ? $" ({System.Math.Min(dispG, cuota)}/{cuota})" : "");
-                                    trozos.Add($"[c/{tintaG}:{nombres}{colaG}]");
+                                    trozos.Add($"[c/{tintaG}:{nombres} (Consagrado){colaG}]");
                                     tooltips.Add(new TooltipLine(Mod, "DespertarDevorarM" + g,
                                         string.Join(" ", trozos)));
                                 }
@@ -1705,6 +1709,25 @@ namespace AethonMod.Content.Weapons
                                 $"[c/{colLibro}:  • {lineaLibro}{(libroComido ? "  ✓" : "")}]"));
                         }
 
+                        // === v6.97 — LA BARRA DEL DESPERTAR, DEBAJO DE
+                        //     LOS REQUISITOS (la letra: «la barra de
+                        //     progresion de Despertar en la ventana de
+                        //     Progresion debe ir ubicada debajo de los
+                        //     requisitos»): TODOS los requisitos del
+                        //     peldaño ya fueron listados — esencias, dinero,
+                        //     devorar, jefe y libro — y AHORA, debajo de
+                        //     todos, la barra del camino. ===
+                        {
+                            int barD = 20;
+                            int llenos = (int)(barD * (despertar / 100f));
+                            string barra = "";
+                            for (int bi = 0; bi < barD; bi++)
+                                barra += bi < llenos ? "█" : "░";
+                            tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
+                                "[c/78788C:  • Despertar ]" +
+                                $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/100]"));
+                        }
+
                         // === PRÓXIMO HITO DEL DESPERTAR (la letra: «X% de
                         //     daño a Todo el Grimorio… Nivel X: (H hito)»
                         //     — SIEMPRE el siguiente hito a completar).
@@ -1717,26 +1740,27 @@ namespace AethonMod.Content.Weapons
                         //     +10%)»): la línea muestra EL ACUMULADO VIVO
                         //     — +1% por CADA nivel de Despertar
                         //     (BonusDano: lo MISMO que el pipeline de
-                        //     daño cobra en el clic y en los ojos) — y el
-                        //     paréntesis guarda el próximo hito del
-                        //     escuadrón (el +10%/+15%/… de cada 20). ===
+                        //     daño cobra en el clic y en los ojos).
+                        //     v6.97 — LOS PARÉNTESIS FALSOS MURIERON (la
+                        //     letra: «esa bonificacion de (despertar 40:
+                        //     +15%), debes eliminarla ya la bonificacion
+                        //     correcta es el porcentaje de daño a TODO el
+                        //     grimorio, y no solo es (despertar 40: +15%),
+                        //     cada ciertos niveles hay una de esas
+                        //     bonificaciones que nunca pedi»): NINGÚN
+                        //     «(Despertar X: +Y%)» vive aquí — SOLO el %
+                        //     acumulado real, que es la única bonificación
+                        //     que existe. ===
                         {
                             tooltips.Add(new TooltipLine(Mod, "DespertarHitoTit",
                                 "[c/78788C:  Próximo hito del Despertar:]"));
                             int pctAcumulado = (int)Math.Round(
                                 Systems.DespertarGrimorio.BonusDano(despertar) * 100f);
-                            int proximoHito = 20;
-                            while (proximoHito <= despertar &&
-                                proximoHito < Systems.DespertarGrimorio.NivelMax)
-                                proximoHito += 20;
                             string lineaDano = pctAcumulado > 0
                                 ? $"[c/C49CFF:+{pctAcumulado}% de daño a Todo el Grimorio]"
                                 : "[c/78788C:+0% de daño a Todo el Grimorio]";
                             if (despertar >= Systems.DespertarGrimorio.NivelMax)
                                 lineaDano += "[c/C49CFF:  — la cima del Despertar]";
-                            else
-                                lineaDano += $"[c/78788C:  (Despertar {proximoHito}: +" +
-                                    $"{Systems.DespertarGrimorio.PctEscuadron(proximoHito)}%)]";
                             tooltips.Add(new TooltipLine(Mod, "DespertarHitoDano", lineaDano));
 
                             foreach (var paso in Systems.DespertarGrimorio.ElCaminoDelDespertar)
@@ -1749,28 +1773,15 @@ namespace AethonMod.Content.Weapons
                             }
                         }
 
-                        // === LA NOTA FINAL (la letra: «aquí debes dejar
-                        //     alguna información pequeña…» — v6.95: LA
-                        //     ORACIÓN LARGA SE CORTA: «si la oracion es
-                        //     muy larga debes cortarla para que continue
-                        //     abajo ya que al ser tan larga la ventana de
-                        //     informacion del grimorio se estira mucho» +
-                        //     «el dinero no se consagra, simplemente se
-                        //     deja caer»). CUATRO líneas cortas que fluyen
-                        //     hacia abajo — la ventana jamás se estira a
-                        //     lo ancho. ===
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7a",
-                            "[c/78788C:  (Las armas y los materiales se CONSAGRAN en el]"));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7b",
-                            "[c/78788C:  Altar de la Consagración; las esencias y el dinero]"));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7c",
-                            "[c/78788C:  se comen SIN sello — solo déjalos caer. Todo se]"));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7d",
-                            "[c/78788C:  suelta ENFRENTE del jugador con el grimorio]"));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7e",
-                            "[c/78788C:  SELECCIONADO: el grimorio SOLO devora lo que su]"));
-                        tooltips.Add(new TooltipLine(Mod, "DespertarReq7f",
-                            "[c/78788C:  portador ARROJA al suelo)]"));
+                        // v6.97 — LA NOTA LARGA SE FUE DE LA VENTANA (la
+                        //     letra: «la oracion esa super larga en la
+                        //     ventana de progresion es demasiado larga hay
+                        //     que ponerla mas corta o simplemente sacarla de
+                        //     ahi, dejemos que sea algo que lo diga el
+                        //     grimorio»): el cómo se consagra ya NO vive
+                        //     aquí — lo dice el Eterno al ser recogido (LA
+                        //     LLEGADA le entrega el mandato del altar) y el
+                        //     altar mismo lo enseña en su panel.
 
                         // v6.88 — LOS PUNTOS DEL ALTAR MURIERON (la letra:
                         //     «quita ese requisito de ofrendas en el
@@ -1785,8 +1796,12 @@ namespace AethonMod.Content.Weapons
                 }
                 catch { }
 
-                if (barraHambre != null) tooltips.Add(barraHambre);
-                if (estadoHambre != null) tooltips.Add(estadoHambre);
+                // v6.97 — EL HAMBRE SE MUDÓ A LA VENTANA BÁSICA (la
+                //     letra: «de la ventana de progresion debemos mover el
+                //     apartado de Hambre y su barra de progreso y el estado
+                //     del grimorio debajo del hambre a la ventana de
+                //     informacion basica que es la primera ventana») — aquí
+                //     ya no vive.
 
                 int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
                 int nextMilestoneNum = nextMilestoneLevel / 5;

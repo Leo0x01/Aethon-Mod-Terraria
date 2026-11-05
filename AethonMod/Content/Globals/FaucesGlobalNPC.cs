@@ -261,10 +261,21 @@ namespace AethonMod.Content.Globals
                 if (!TieneEternoVisible(p)) continue;           // con el libro a mano
                 var sp = p.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null) continue;
-                // v6.93 — LA REGLA DEL CHECKLIST (arriba, en el summary):
-                //     ya devorado Y fuera del checklist actual: NO repite.
-                if (sp.JefesDevorados.Contains(jefe.type) &&
-                    !JefeEnElChecklistActual(p, jefe.type)) continue;
+                // v6.97 — LA REGLA NUEVA DE LA LETRA: «el grimorio solo
+                //     va a devorar con la animación de devorar al jefe
+                //     que este en la lista de requisitos en ese momento
+                //     independientemente de si ya lo a devorado antes o
+                //     no» — LA PRIMERA VEZ MURIÓ: fuera del checklist
+                //     actual, NADIE repite cena… EXCEPTO el jefe de los
+                //     cultistas (la letra de la misma sesión: «el jefe
+                //     sera como un jefe normal solo lo devora al final
+                //     la primera vez, o si este es un requisito actual
+                //     de Despertar») — el Cultista Lunático conserva SU
+                //     primera cena y repite cuando es la presa viva.
+                bool enChecklist = JefeEnElChecklistActual(p, jefe.type);
+                bool esCultista = jefe.type == NPCID.CultistBoss;
+                bool cultistaEstreno = esCultista && !sp.JefesDevorados.Contains(jefe.type);
+                if (!enChecklist && !cultistaEstreno) continue;
                 portador = p;
                 return true;
             }

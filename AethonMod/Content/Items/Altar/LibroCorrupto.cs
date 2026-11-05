@@ -5,6 +5,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace AethonMod.Content.Items.Altar
 {
@@ -50,17 +51,30 @@ namespace AethonMod.Content.Items.Altar
         // lo genera tools/gen_libro_corrupto_v686.py.
     }
 
-    /// <summary>LA RECOGIDA DEL LIBRO (v6.91 — la letra: «solo se puede
-    /// tener 1 por jugador, pero si el jugador no lo ha usado todavia
-    /// le pueden aparecer mas»): 1 EN EL INVENTARIO — si ya llevas uno,
-    /// el nuevo REBOTA (return false). El límite de los DROPS ya no
-    /// vive aquí: los libros SIGUEN cayendo hasta que el jugador USE el
-    /// suyo y su grimorio llegue al 20 (ElLibroYaNoLeToca, en
-    /// DespertarGrimorioSistema). Apenas el libro ENTRA al inventario,
-    /// el grimorio HABLA (el comentario de la letra + el pedido de
-    /// soltarlo al suelo).</summary>
+    /// <summary>LA RECOGIDA DEL LIBRO (v6.97 — la letra nueva: «el
+    /// libro consagrado solo debe caer 1 vez […] una vez que el jugador
+    /// consume el libro consagrado este deja de aparecer en el mundo
+    /// para siempre y solo aparece para el jugador que no lo ha
+    /// consumido en multijugador y el resto que lo consumio no lo
+    /// ven»): quien ya CONSUMIÓ el suyo NI LO VE (rebota), quien ya
+    /// RECIBIÓ el suyo tampoco (la única caída ya pasó) — SOLO puede
+    /// recogerlo quien no ha recibido ninguno… o SU PROPIETARIO
+    /// recogiéndolo del suelo (lo arrojó sin querer y el Eterno aún no
+    /// lo prueba). Apenas el libro ENTRA al inventario nuevo, el
+    /// sello de LA ÚNICA CAÍDA se pone y el grimorio HABLA.</summary>
     public class LibroCorruptoGlobalItem : GlobalItem
     {
+        /// <summary>El campo del dueño viaja POR INSTANCIA (la regla del
+        /// tML para los GlobalItem con campos: cada ejemplar del libro,
+        /// SU dueño).</summary>
+        public override bool InstancePerEntity => true;
+
+        /// <summary>v6.97 — ¿QUIÉN recibió ESTE ejemplar? (el nombre del
+        /// cazador que lo levantó — viaja con el item para que pueda
+        /// recoger SU libro arrojado del suelo sin que le cuente como
+        /// segunda caída).</summary>
+        public string RecibidoPor = null;
+
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
             => entity.type == ModContent.ItemType<LibroCorrupto>();
 
@@ -69,9 +83,22 @@ namespace AethonMod.Content.Items.Altar
             try
             {
                 // v6.91 — EL LÍMITE ES DE INVENTARIO: si ya llevas tu
-                // libro, este rebota (el mundo puede escupirte otro —
-                // la letra nueva — pero encima SOLO viaja UNO).
+                // libro, este rebota.
                 if (LlevaElLibro(player)) return false;
+
+                var cazador = player.GetModPlayer<Players.CazaJefesPlayer>();
+                bool esDueno = !string.IsNullOrEmpty(RecibidoPor) &&
+                    RecibidoPor == player.name;
+
+                // v6.97 — SOLO PARA QUIEN NO LO HA CONSUMIDO NI LO HA
+                //     RECIBIDO (el dueño recoge el suyo del suelo).
+                if (!esDueno && cazador != null &&
+                    (cazador.LibroUsado || cazador.LibroRecibido))
+                    return false;
+
+                // LA ÚNICA CAÍDA queda sellada con la recogida.
+                if (cazador != null) cazador.LibroRecibido = true;
+                RecibidoPor = player.name;
 
                 // EL COMENTARIO DEL GRIMORIO (la letra: «a penas el libro
                 // entre al inventario el grimorio debe decir un comentario
@@ -84,6 +111,20 @@ namespace AethonMod.Content.Items.Altar
             }
             catch { }
             return true;
+        }
+
+        // === LA PERSISTENCIA DEL DUEÑO (viaja con el item) ===
+
+        public override void SaveData(Item item, TagCompound tag)
+        {
+            try { if (!string.IsNullOrEmpty(RecibidoPor)) tag["recibidoPor"] = RecibidoPor; }
+            catch { }
+        }
+
+        public override void LoadData(Item item, TagCompound tag)
+        {
+            try { RecibidoPor = tag.GetString("recibidoPor"); }
+            catch { RecibidoPor = null; }
         }
 
         /// <summary>¿El jugador ya lleva UN Libro Consagrado encima? (el
@@ -119,6 +160,12 @@ namespace AethonMod.Content.Items.Altar
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
                 if (!EnLaMazmorra(i, j)) return;
 
+                // v6.97 — SOLO SI ALGUIEN CERCA TODAVÍA NO RECIBIÓ el suyo
+                //     (la letra: «el libro consagrado solo debe caer 1
+                //     vez» — si todos los presentes ya recibieron o
+                //     consumieron el suyo, el libro ni cae).
+                if (!AlgunCazadorHambriento(i, j)) return;
+
                 // EL 1% DE LA LETRA (cada libro roto tira una vez).
                 if (!Main.rand.NextBool(100)) return;
 
@@ -145,6 +192,25 @@ namespace AethonMod.Content.Items.Altar
                 if (!pl.ZoneDungeon) continue;
                 if (pl.Center.DistanceSQ(pos) > 700f * 700f) continue;
                 return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.97 — ¿Hay UN cazador cerca que TODAVÍA no recibió
+        /// su libro? (la única caída de la letra: si todos los presentes
+        /// ya recibieron o consumieron el suyo, el libro NO cae — solo
+        /// aparece para quien aún no lo ha consumido).</summary>
+        private static bool AlgunCazadorHambriento(int i, int j)
+        {
+            Vector2 pos = new Vector2(i * 16f + 8f, j * 16f + 8f);
+            for (int p = 0; p < Main.maxPlayers; p++)
+            {
+                Player pl = Main.player[p];
+                if (pl == null || !pl.active) continue;
+                if (pl.Center.DistanceSQ(pos) > 700f * 700f) continue;
+                var cazador = pl.GetModPlayer<Players.CazaJefesPlayer>();
+                if (cazador == null) continue;
+                if (!cazador.LibroUsado && !cazador.LibroRecibido) return true;
             }
             return false;
         }

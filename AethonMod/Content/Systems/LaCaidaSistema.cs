@@ -120,6 +120,14 @@ namespace AethonMod.Content.Systems
         /// <summary>El estado del cielo del tick anterior (para sentir el amanecer).</summary>
         private bool _eraNoche;
 
+        /// <summary>v6.97 — LOS MANDATOS PENDIENTES: la palabra que el
+        /// Eterno dice UNOS SEGUNDOS después de ser recogido (la letra:
+        /// «una vez que el grimorio sea recogido este diga que hay que
+        /// darles ofrendas consagradas en el altar con esencias del
+        /// eterno para ayudarlo a despertar») — primero dice «Por fin.» y
+        /// luego, con calma, EL MANDATO DEL ALTAR.</summary>
+        private readonly List<System.ValueTuple<int, int>> _mandatos = new();
+
         // ================================================================
         //  LA PERSISTENCIA (el libro sobrevive sesiones)
         // ================================================================
@@ -308,6 +316,24 @@ namespace AethonMod.Content.Systems
             {
                 if (Main.gameMenu) return;
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
+
+                // ============================================================
+                //  v6.97 — LOS MANDATOS PENDIENTES: el Eterno recogido dice
+                //  SU PALABRA DEL ALTAR a los ~4 s de la toma (primero
+                //  «Por fin.», luego el mandato — dos pensamientos, con
+                //  su compás).
+                // ============================================================
+                for (int m = _mandatos.Count - 1; m >= 0; m--)
+                {
+                    var (quien, reloj) = _mandatos[m];
+                    if (reloj > 0) { _mandatos[m] = (quien, reloj - 1); continue; }
+                    _mandatos.RemoveAt(m);
+                    Player portador = quien >= 0 && quien < Main.maxPlayers
+                        ? Main.player[quien] : null;
+                    if (portador == null || !portador.active) continue;
+                    EcoRed.HablarAlPortador(portador, "Mods.AethonMod.Caida.ElMandatoDelAltar",
+                        new Color(178, 110, 236), rugido: true, escala: 0.68f, prioridad: true);
+                }
 
                 // EL AMANECER LIMPIA LA NOCHE: una llegada por jugador por noche.
                 bool esNoche = !Main.dayTime;
@@ -592,6 +618,15 @@ namespace AethonMod.Content.Systems
                 // noGravity + noTileCollide + su bobbing propio)… y JAMÁS
                 // dos: si YA vive uno cerca, el cielo no insiste.
                 if (BuscarLibroCerca(destino.X, destino.Y) != null) return;
+
+                // v6.97 — EL ALTAR DEBAJO (la letra: «el grimorio ya
+                //     aparezca CON EL ALTAR DEBAJO en la llegada»): el
+                //     libro dormido flota SOBRE SU ALTAR DE CONSAGRACIÓN —
+                //     el que le enseñará al portador el camino del
+                //     Despertar (consagrar armas y materiales con
+                //     esencias del Eterno).
+                ColocarElAltarDeLaLlegada(destino);
+
                 int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaLlegada"),
                     (int)destino.X, (int)destino.Y,
                     ModContent.NPCType<NPCs.GrimorioDormido>(), 0, 0f, idxJugador);
@@ -697,6 +732,94 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  v6.97 — EL ALTAR DE LA LLEGADA (la letra: «el grimorio ya
+        //  aparezca con el altar debajo en la llegada»): el libro dormido
+        //  flota SOBRE el ALTAR DE LA CONSAGRACIÓN — la mesa nace PUESTA
+        //  (la de siempre se fabrica; esta llega con la escena). Nada de
+        //  cráteres: UNA tile de 2×3 que descansa en el suelo del punto.
+        // ================================================================
+
+        /// <summary>Coloca el ALTAR DE LA CONSAGRACIÓN debajo del punto
+        /// de la llegada (centrado bajo el libro, descansando sobre la
+        /// primera tile sólida de esa columna). Si ya vive un altar ahí,
+        /// no se apila (la llegada es una por jugador por mundo).</summary>
+        private static void ColocarElAltarDeLaLlegada(Vector2 destino)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                int tipoAltar = ModContent.TileType
+                    <global::AethonMod.Content.Tiles.AltarOfrendasTile>();
+                int tx = (int)(destino.X / 16f);
+
+                // LA FILA DEL SUELO: la primera tile SÓLIDA bajo el punto
+                // (el altar descansa sobre ella).
+                int suelo = -1;
+                int y0 = Math.Max(10, (int)(destino.Y / 16f) - 2);
+                int limite = Main.maxTilesY - 40;
+                for (int y = y0; y < limite; y++)
+                {
+                    Tile t = Main.tile[tx, y];
+                    if (t != null && t.HasTile && Main.tileSolid[t.TileType]) { suelo = y; break; }
+                }
+                if (suelo < 0) return;
+
+                // ¿YA HAY UN ALTAR AQUÍ? (no se apilan altares).
+                for (int dx = -4; dx <= 5; dx++)
+                {
+                    for (int dy = -5; dy <= 1; dy++)
+                    {
+                        Tile t = Framing.GetTileSafely(tx + dx, suelo + dy);
+                        if (t.HasTile && t.TileType == (ushort)tipoAltar) return;
+                    }
+                }
+
+                // LA COLOCACIÓN: el 2×3 centrado bajo el libro, con su
+                // base descansando en el suelo (el origen de la casa es
+                // (0,2): la celda ancla es la fila BAJA del mueble — se
+                // prueban los anclajes vecinos por si el terreno pide
+                // otra altura, y se VERIFICA que el altar haya quedado
+                // vivo antes de cantar victoria).
+                int ax = tx - 1;
+                for (int intento = 0; intento < 5; intento++)
+                {
+                    int ay = suelo - 1 - intento;
+                    if (ay < 12) break;
+                    WorldGen.PlaceTile(ax, ay, tipoAltar, true, false);
+
+                    // ¿Quedó vivo? (escaneo ANCHO: la celda de origen y
+                    // sus alrededores — el altar mide 2×3).
+                    int arriba = -1, abajo = -1;
+                    for (int dx = 0; dx <= 1; dx++)
+                    {
+                        for (int dy = -4; dy <= 2; dy++)
+                        {
+                            Tile t = Framing.GetTileSafely(ax + dx, ay + dy);
+                            if (t.HasTile && t.TileType == (ushort)tipoAltar)
+                            {
+                                if (arriba < 0 || ay + dy < arriba) arriba = ay + dy;
+                                if (ay + dy > abajo) abajo = ay + dy;
+                            }
+                        }
+                    }
+                    if (arriba >= 0)
+                    {
+                        // EL ALTAR CAMINA POR EL CABLE (MP: la sección de
+                        // tiles nueva se sincroniza a todas las pantallas).
+                        if (Main.netMode == NetmodeID.Server)
+                        {
+                            int alto = abajo - arriba + 1;
+                            NetMessage.SendData(MessageID.TileSquare, -1, -1, null,
+                                Math.Max(6, alto + 2), ax - 2, arriba - 2);
+                        }
+                        return;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // ================================================================
         //  LA TOMA — «extender la mano» (el clic del destinatario)
         // ================================================================
 
@@ -748,6 +871,18 @@ namespace AethonMod.Content.Systems
                 // morada): «Por fin.»
                 EcoRed.HablarAlPortador(p, "Mods.AethonMod.Caida.PrimerPensamiento",
                     new Color(178, 110, 236), rugido: true, escala: 0.72f, prioridad: true);
+
+                // v6.97 — EL MANDATO DEL ALTAR (la letra: «una vez que el
+                //     grimorio sea recogido este diga que hay que darles
+                //     ofrendas consagradas en el altar con esencias del
+                //     eterno para ayudarlo a despertar»): la vieja nota
+                //     larga de la ventana de Progresión murió — ahora ESTO
+                //     lo dice el propio Eterno, a los ~4 s de la toma.
+                {
+                    var sysMandato = ModContent.GetInstance<LaCaidaSistema>();
+                    if (sysMandato != null)
+                        sysMandato._mandatos.Add((p.whoAmI, 240));
+                }
 
                 // EL LIBRO SE MARCHA (su cita terminó).
                 libro.active = false;

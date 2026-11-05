@@ -118,12 +118,38 @@ namespace AethonMod.Content.Globals
                 }
                 catch { }
 
+                // ============================================================
+                //  v6.86 — LA MURALLA SUELTA EL LIBRO (la letra del
+                //  peldaño 20): «o que directamente lo suelte la muralla
+                //  de carne con una probabilidad del 50%» — el LIBRO
+                //  CORRUPTO cae al suelo del mundo (lo levanta quien no
+                //  tenga el suyo: CanPickup filtra al resto — 1 por
+                //  cazador, para siempre).
+                //  v6.97 — LA ÚNICA CAÍDA: la Muralla solo escupe el
+                //  libro si quien la VENCIÓ todavía no recibió ni
+                //  consumió el suyo (la letra: «el libro consagrado solo
+                //  debe caer 1 vez»).
+                // ============================================================
                 if (npc.type == NPCID.WallofFlesh && Main.rand.NextBool(2))
                 {
-                    int idx = Item.NewItem(npc.GetSource_Loot(), npc.Hitbox,
-                        ModContent.ItemType<Items.Altar.LibroCorrupto>(), 1);
-                    if (idx >= 0 && Main.netMode == NetmodeID.Server)
-                        NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+                    int kLibro = npc.lastInteraction;
+                    bool cazadorHambriento = false;
+                    if (kLibro >= 0 && kLibro < Main.maxPlayers)
+                    {
+                        Player pjLibro = Main.player[kLibro];
+                        var cazadorLibro = pjLibro != null && pjLibro.active
+                            ? pjLibro.GetModPlayer<Players.CazaJefesPlayer>() : null;
+                        if (cazadorLibro != null && !cazadorLibro.LibroUsado &&
+                            !cazadorLibro.LibroRecibido)
+                            cazadorHambriento = true;
+                    }
+                    if (cazadorHambriento)
+                    {
+                        int idx = Item.NewItem(npc.GetSource_Loot(), npc.Hitbox,
+                            ModContent.ItemType<Items.Altar.LibroCorrupto>(), 1);
+                        if (idx >= 0 && Main.netMode == NetmodeID.Server)
+                            NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
+                    }
                 }
             }
             catch { }

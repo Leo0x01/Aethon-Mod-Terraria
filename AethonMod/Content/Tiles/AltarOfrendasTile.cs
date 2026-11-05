@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent.ObjectInteractions;
 using Terraria.DataStructures;
@@ -31,6 +32,63 @@ namespace AethonMod.Content.Tiles
     {
         public override string Texture => "AethonMod/Content/Tiles/AltarOfrendasTile";
 
+        // ================================================================
+        //  v6.97 — LA ANIMACIÓN DEL ALTAR (la letra: «creo que se veria
+        //  bien que el altar tuviera alguna animacion y que en el altar
+        //  no se vea ningun libro despues de todo es el grimorio quien
+        //  va ahi»): la lámina del sprite trae CUATRO marcos apilados en
+        //  vertical (36×216 — cada marco el altar entero 2×3 con su
+        //  brasa de runas latiendo distinto y SU chispa subiendo) — LA
+        //  PROPIEDAD AnimationFrameHeight de esta era del tML aplica el
+        //  marco vivo SOLA (MainFrameY += AnimationFrameHeight ×
+        //  Main.tileFrame) y AnimateTile camina los marcos: el altar
+        //  VIVE, las runas respiran y una chispa de consagración sube.
+        //  Y SIN LIBRO: la cima queda LIMPIA — el único libro que llega
+        //  al altar es el GRIMORIO MISMO (LA LLEGADA lo trae flotando
+        //  encima).
+        // ================================================================
+
+        /// <summary>La altura de CADA marco de la animación (px — el
+        /// altar mide 2×3 tiles: 36×54).</summary>
+        private const int ALTO_MARCO = 54;
+
+        /// <summary>CUÁNTOS marcos tiene la lámina (el latido completo).</summary>
+        private const int MARCOS = 4;
+
+        /// <summary>v6.97 — EL MARCO VIVO: la propiedad de la era 2026
+        /// (0 = sin animación; 54 = los CUATRO marcos de la lámina — el
+        /// tML aplica el solo el offset del marco que AnimateTile
+        /// diga) — se VISTE en el SetStaticDefaults (la regla de esta
+        /// era: las propiedades del ModTile se ponen, no se sobreponen).
+        /// </summary>
+        public override void AnimateTile(ref int frame, ref int frameCounter)
+        {
+            // EL LATIDO: 7 ticks por marco — lento, ritual, de altar.
+            if (++frameCounter >= 7)
+            {
+                frameCounter = 0;
+                if (++frame >= MARCOS) frame = 0;
+            }
+        }
+
+        public override void DrawEffects(int i, int j, SpriteBatch spriteBatch,
+            ref Terraria.DataStructures.TileDrawInfo drawData)
+        {
+            // LA CHISPA DE CONSAGRACIÓN: de vez en cuando, una brasa
+            // sube de las runas (el polvo del alma de la casa — la
+            // animación misma ya la pone el AnimationFrameHeight).
+            if (Main.tileFrame[Type] == 2 && (i + j) % 3 == 0 &&
+                Main.rand.NextBool(90) && !Main.gameMenu)
+            {
+                Dust d = Dust.NewDustPerfect(
+                    new Vector2(i * 16f + Main.rand.Next(4, 28), j * 16f - Main.rand.Next(0, 8)),
+                    DustID.Enchanted_Gold, new Vector2(0f, -0.45f), 150,
+                    new Color(150, 90, 220), 0.5f);
+                d.noGravity = true;
+                d.fadeIn = 0.6f;
+            }
+        }
+
         public override void SetStaticDefaults()
         {
             // EL CUERPO DEL ALTAR (el calco de ArsenalAltarTile §3.1):
@@ -42,6 +100,10 @@ namespace AethonMod.Content.Tiles
             Main.tileSolid[Type] = false;
             Main.tileBlockLight[Type] = false;
             TileID.Sets.HasOutlines[Type] = true;
+            // v6.97 — EL ALTAR ANIMADO: cuatro marcos en la lámina (la
+            // propiedad AnimationFrameHeight de la era 2026 — el offset
+            // del marco vivo lo aplica el tML SOLO).
+            AnimationFrameHeight = ALTO_MARCO;
 
             TileObjectData.newTile.CopyFrom(TileObjectData.Style2xX);
             TileObjectData.newTile.CoordinateHeights = new[] { 16, 16, 18 };

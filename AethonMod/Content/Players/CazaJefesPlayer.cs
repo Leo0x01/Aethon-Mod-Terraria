@@ -106,6 +106,18 @@ namespace AethonMod.Content.Players
         /// del grimorio, los libros DEJAN de salir.</summary>
         public bool LibroUsado = false;
 
+        /// <summary>v6.97 — ¿ESTE jugador ya RECIBIÓ su Libro Consagrado
+        /// (le cayó el suyo UNA vez)? La letra nueva: «el libro
+        /// consagrado solo debe caer 1 vez […] una vez que el jugador
+        /// consume el libro consagrado este deja de aparecer en el mundo
+        /// para siempre y solo aparece para el jugador que no lo ha
+        /// consumido en multijugador y el resto que lo consumio no lo
+        /// ven» — UNA sola caída por cazador: cuando el libro entra a SU
+        /// bolsa (o se lo entrega la víspera del 20), este sello se pone
+        /// y las fuentes del mundo YA NO le sueltan otro. Viaja en el
+        /// .plr.</summary>
+        public bool LibroRecibido = false;
+
         // ================================================================
         //  LA PERSISTENCIA (el .plr del cazador — la lista viaja con el
         //  personaje a todos los mundos).
@@ -122,6 +134,7 @@ namespace AethonMod.Content.Players
                 tag["mlLegado"] = LegadoMoonLord;
                 tag["libroUno"] = YaTuvoLibro;
                 tag["libroUsado"] = LibroUsado;
+                tag["libroRecibido"] = LibroRecibido;
             }
             catch { }
         }
@@ -142,6 +155,7 @@ namespace AethonMod.Content.Players
                 LegadoEmperatriz = tag.GetBool("eolLegado");
                 YaTuvoLibro = tag.GetBool("libroUno");
                 LibroUsado = tag.GetBool("libroUsado");
+                LibroRecibido = tag.GetBool("libroRecibido");
             }
             catch { PuertasPagas.Clear(); }
         }

@@ -232,10 +232,16 @@ namespace AethonMod.Content.Globals
                 var bruma = new Color(122, 216, 182);
                 if (idxNombre >= 0)
                 {
-                    tooltips[idxNombre].Text =
-                        tooltips[idxNombre].Text + " " +
+                    string completo = tooltips[idxNombre].Text + " " +
                         Language.GetTextValue("Mods.AethonMod.Items.ArmaCorruptaTag");
-                    // (sin OverrideColor: el color lo pone LA RAREZA corrupta)
+                    // v6.97 — EL COLOR DE CONSAGRADO (la letra: «el color
+                    //     de consagrado en su nombre debe ser centro negro,
+                    //     medios grises y bordes blancos»): el degradado de
+                    //     la casa — BORDES blancos → MEDIOS grises → CENTRO
+                    //     negro — letra por letra (los tags [c/] del
+                    //     tooltip pintan cada carácter con SU tinta: la
+                    //     única forma de un degradado real en una línea).
+                    tooltips[idxNombre].Text = NombreConsagrado(completo);
                 }
 
                 // v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma
@@ -268,14 +274,46 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
+        /// <summary>v6.97 — EL NOMBRE CONSAGRADO: «el color de
+        /// consagrado en su nombre debe ser centro negro, medios grises
+        /// y bordes blancos» — el degradado simétrico de la casa, letra
+        /// por letra: los bordes nacen BLANCOS, los medios viran a
+        /// GRISES y el centro muere en NEGRO.</summary>
+        private static string NombreConsagrado(string texto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(texto)) return texto;
+                var borde = new Color(235, 235, 240);
+                var medio = new Color(145, 145, 155);
+                var centro = new Color(20, 20, 26);
+                var sb = new System.Text.StringBuilder(texto.Length * 22);
+                int n = texto.Length;
+                for (int i = 0; i < n; i++)
+                {
+                    // t: 0 en los bordes → 1 en el centro del nombre.
+                    float t = n <= 1 ? 1f : 1f - MathF.Abs(2f * i / (n - 1) - 1f);
+                    Color c = t < 0.5f
+                        ? Color.Lerp(borde, medio, t * 2f)
+                        : Color.Lerp(medio, centro, (t - 0.5f) * 2f);
+                    sb.Append("[c/").Append(c.R.ToString("X2"))
+                      .Append(c.G.ToString("X2")).Append(c.B.ToString("X2"))
+                      .Append(':').Append(texto[i]).Append(']');
+                }
+                return sb.ToString();
+            }
+            catch { return texto; }
+        }
+
         // === v6.88 — EL VELO DEL INVENTARIO (la letra: «se cubren con
         //     un brillo morado negro, este brillo podria ser un shader
-        //     que cubra el item»): el "shader casero" — el sprite del
-        //     item se vuelve a dibujar ENCIMA de sí mismo con el velo
-        //     morado-negro pulsante (idéntico frame/origen/escala: CUBRE
-        //     el item como una capa de tinta) + el glow que respira por
-        //     detrás. En el suelo ya vivía su aura (abajo); el inventario
-        //     la pedía a gritos. ===
+        //     que cubra el item» — v6.97: LA LETRA NUEVA lo pide NEGRO:
+        //     «todo item consagrado debe tener un aura negra con bordes
+        //     difuminados en una gradiente y el aura debe ser negra
+        //     clara»): el velo ahora es NEGRO CLARO (la tinta de la
+        //     consagración) y el glow que respira por detrás viste el
+        //     mismo gris humo. En el suelo ya vive su aura (abajo); el
+        //     inventario la pedía a gritos. ===
         public override void PostDrawInInventory(Item item, SpriteBatch spriteBatch,
             Vector2 position, Rectangle frame, Color drawColor, Color itemColor,
             Vector2 origin, float scale)
@@ -285,25 +323,33 @@ namespace AethonMod.Content.Globals
             {
                 Texture2D tex = Terraria.GameContent.TextureAssets.Item[item.type].Value;
                 if (tex == null) return;
-                // EL VELO: el sprite encima de sí mismo, teñido morado-negro
+                // EL VELO: el sprite encima de sí mismo, teñido NEGRO CLARO
                 // (pulso 2,4 Hz — la misma respiración del aura del suelo).
                 float pulso = 0.42f + 0.16f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.4f);
                 spriteBatch.Draw(tex, position, frame,
-                    new Color(70, 24, 112, (int)(255f * pulso)) * (pulso * 0.55f),
+                    new Color(24, 22, 32, (int)(255f * pulso)) * (pulso * 0.55f),
                     0f, origin, scale, SpriteEffects.None, 0f);
-                // EL GLOW: la bruma que respira por detrás del slot.
+                // EL GLOW: la bruma gris humo que respira por detrás del slot.
                 Texture2D glow = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                 if (glow != null)
                     spriteBatch.Draw(glow, position, null,
-                        new Color(96, 40, 150) * (0.16f + 0.07f * pulso), 0f,
+                        new Color(70, 68, 82) * (0.16f + 0.07f * pulso), 0f,
                         glow.Size() * 0.5f, new Vector2(34f, 34f) / glow.Size(),
                         SpriteEffects.None, 0f);
             }
             catch { }
         }
 
-        // === LA AURA DEL ARMA CAÍDA (se VE maldita en el suelo) ===
+        // === v6.97 — EL AURA NEGRA DEL CONSAGRADO CAÍDO (la letra: «todo
+        //     item consagrado debe tener un aura negra con bordes
+        //     difuminados en una gradiente y el aura debe ser negra clara
+        //     y con la forma del item en cuestion o similar»): EL PROPIO
+        //     SPRITE del item dibujado en NEGRO CLARO, capa sobre capa
+        //     detrás de él — cada capa MÁS GRANDE y MÁS TENUE: los bordes
+        //     se difuminan en la gradiente y el aura lleva LA FORMA del
+        //     item (nada de círculos genéricos). El viejo glow morado de
+        //     la v6.88 murió con la letra nueva. ===
 
         public override bool PreDrawInWorld(Item item, SpriteBatch spriteBatch,
             Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
@@ -311,26 +357,37 @@ namespace AethonMod.Content.Globals
             if (!Corrompido || Main.gameMenu || Main.netMode == NetmodeID.Server) return true;
             try
             {
-                Texture2D glow = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (glow != null)
+                Texture2D tex = Terraria.GameContent.TextureAssets.Item[item.type].Value;
+                if (tex != null)
                 {
                     Vector2 pos = item.Center - Main.screenPosition;
-                    float pulso = 0.26f + 0.10f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.4f);
-                    spriteBatch.Draw(glow, pos, null, new Color(96, 40, 150) * pulso, 0f,
-                        glow.Size() * 0.5f, new Vector2(40f, 40f) / glow.Size(),
-                        SpriteEffects.None, 0f);
-                    spriteBatch.Draw(glow, pos, null, new Color(150, 70, 220) * (pulso * 0.5f), 0f,
-                        glow.Size() * 0.5f, new Vector2(18f, 18f) / glow.Size(),
-                        SpriteEffects.None, 0f);
+                    // LA RESPIRACIÓN: el aura late despacio (2,4 Hz — la
+                    //     misma del velo del inventario: UNA sola alma).
+                    float pulso = 0.72f + 0.28f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.4f);
+                    Rectangle frame = tex.Frame();
+                    Vector2 orig = frame.Size() * 0.5f;
+                    // LAS CAPAS DE LA GRADIENTE: negra clara cerca, casi
+                    //     humo lejos — los BORDES DIFUMINADOS de la letra.
+                    float[] escalas = { 1.14f, 1.32f, 1.54f, 1.80f };
+                    float[] alfas = { 0.36f, 0.22f, 0.13f, 0.07f };
+                    for (int k = 0; k < escalas.Length; k++)
+                    {
+                        float a = alfas[k] * pulso;
+                        if (a <= 0f) continue;
+                        spriteBatch.Draw(tex, pos, frame,
+                            new Color(26, 24, 34) * a, rotation, orig,
+                            scale * escalas[k], SpriteEffects.None, 0f);
+                    }
                 }
+                // LA BRUMA OSCURA que se deshace hacia arriba (el alma del
+                //     aura — ahora humo negro, no violeta).
                 if (Main.rand.NextBool(16))
                 {
                     Dust d = Dust.NewDustPerfect(
                         item.Center + new Vector2(Main.rand.NextFloat(-8f, 8f),
                             Main.rand.NextFloat(-9f, 3f)),
                         DustID.Shadowflame, new Vector2(0f, -0.5f), 140,
-                        new Color(120, 40, 180), 0.5f);
+                        new Color(38, 32, 52), 0.5f);
                     d.noGravity = true;
                 }
             }

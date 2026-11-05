@@ -836,10 +836,8 @@ namespace AethonMod.Content.Items.Bolsas
             // tendras una copia de todas las armas que sean creadas con
             // esta investigacion»).
             l.Add((ModContent.ItemType<BolsaTallerDeEfectos>(), 1));
-            // v6.91 — LA BOLSA DE LAS POCIONES (bolsa 28 del cofre — la
-            // letra: «dame una bolsa con todas las pociones del juego»):
-            // la lista COMPLETA del ItemID, 30 de cada una.
-            l.Add((ModContent.ItemType<BolsaDePociones>(), 1));
+            // v6.97 — LA BOLSA DE LAS POCIONES MURIÓ (la letra: «puedes
+            // borrar la bolsa con todas las pociones») — fuera del kit.
             return l;
         }
     }
@@ -982,103 +980,52 @@ namespace AethonMod.Content.Items.Bolsas
     }
 
     // ======================================================================
-    //  v6.91 — LA BOLSA DE LAS POCIONES (bolsa 28)
-    //
-    //  La letra de la sesión: «dame una bolsa con todas las pociones del
-    //  juego» — LA LISTA COMPLETA, extraída por REFLEXIÓN REAL contra el
-    //  ItemID del tModLoader 2026.07.3.0 (la fuente de la casa: NADA de
-    //  listas a mano): 58 pociones + 9 frascos = LOS 67 BEBIBLES del
-    //  juego. La estatua de poción (PotionStatue) y las colocables
-    //  (PlaceableHealing/ManaPotion) NO son pociones y quedan fuera.
-    //  La semántica es LA DE LA CASA: permanente, garantía (solo lo que
+    //  v6.97 — LA BOLSA DE LAS TRES CASAS (bolsa 29): LA ENTREGA DE LA
+    //  FORJA. La letra: «usa tu nueva habilidad de la forja para crear
+    //  un nuevo grupo de armas con diferentes efectos y vfx, intenta
+    //  que sean vistosos y que sean tipo sagrado, horror cosmico y
+    //  oscuridad, crea al menos 20 armas nuevas» — LAS VEINTE, una por
+    //  una: la casa sagrada (oro y luz), la del horror cósmico (teal y
+    //  violeta) y la de la oscuridad (violeta y negro tinta). La
+    //  semántica es LA DE LA CASA: permanente, garantía (solo lo que
     //  falte) y clic derecho para desplegar.
     // ======================================================================
-    public class BolsaDePociones : BolsaCategoria
+    public class BolsaTresCasas : BolsaCategoria
     {
-        protected override string Titulo => "La Bolsa de las Pociones";
+        protected override string Titulo => "La Bolsa de las Tres Casas";
 
-        protected override string NombreCorto => "Bolsa de las Pociones";
+        protected override string NombreCorto => "Bolsa de las Tres Casas";
 
-        protected override Color ColorFiesta => new Color(120, 220, 255);
+        protected override Color ColorFiesta => new Color(196, 138, 255);
 
-        protected override string Nota => "Las 67 pociones y frascos del juego — 30 de cada una";
+        protected override string Nota => "Las 20 armas de la Sagrada, el Horror Cósmico y la Oscuridad — LA FORJA";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // === LAS CURATIVAS Y DE MANÁ ===
-            l.Add((ItemID.LesserHealingPotion, 30));
-            l.Add((ItemID.HealingPotion, 30));
-            l.Add((ItemID.GreaterHealingPotion, 30));
-            l.Add((ItemID.SuperHealingPotion, 30));
-            l.Add((ItemID.LesserManaPotion, 30));
-            l.Add((ItemID.ManaPotion, 30));
-            l.Add((ItemID.GreaterManaPotion, 30));
-            l.Add((ItemID.SuperManaPotion, 30));
-            l.Add((ItemID.LesserRestorationPotion, 30));
-            l.Add((ItemID.RestorationPotion, 30));
-            // === LOS BUFFS CLÁSICOS (la pared 288-305) ===
-            l.Add((ItemID.ObsidianSkinPotion, 30));
-            l.Add((ItemID.RegenerationPotion, 30));
-            l.Add((ItemID.SwiftnessPotion, 30));
-            l.Add((ItemID.GillsPotion, 30));
-            l.Add((ItemID.IronskinPotion, 30));
-            l.Add((ItemID.ManaRegenerationPotion, 30));
-            l.Add((ItemID.MagicPowerPotion, 30));
-            l.Add((ItemID.FeatherfallPotion, 30));
-            l.Add((ItemID.SpelunkerPotion, 30));
-            l.Add((ItemID.InvisibilityPotion, 30));
-            l.Add((ItemID.ShinePotion, 30));
-            l.Add((ItemID.NightOwlPotion, 30));
-            l.Add((ItemID.BattlePotion, 30));
-            l.Add((ItemID.ThornsPotion, 30));
-            l.Add((ItemID.WaterWalkingPotion, 30));
-            l.Add((ItemID.ArcheryPotion, 30));
-            l.Add((ItemID.HunterPotion, 30));
-            l.Add((ItemID.GravitationPotion, 30));
-            // === LOS BUFFS DE 1.3+ (la pared 2322-2359) ===
-            l.Add((ItemID.MiningPotion, 30));
-            l.Add((ItemID.HeartreachPotion, 30));
-            l.Add((ItemID.CalmingPotion, 30));
-            l.Add((ItemID.BuilderPotion, 30));
-            l.Add((ItemID.TitanPotion, 30));
-            l.Add((ItemID.FlipperPotion, 30));
-            l.Add((ItemID.SummoningPotion, 30));
-            l.Add((ItemID.TrapsightPotion, 30));
-            l.Add((ItemID.AmmoReservationPotion, 30));
-            l.Add((ItemID.LifeforcePotion, 30));
-            l.Add((ItemID.EndurancePotion, 30));
-            l.Add((ItemID.RagePotion, 30));
-            l.Add((ItemID.InfernoPotion, 30));
-            l.Add((ItemID.WrathPotion, 30));
-            l.Add((ItemID.FishingPotion, 30));
-            l.Add((ItemID.SonarPotion, 30));
-            l.Add((ItemID.CratePotion, 30));
-            l.Add((ItemID.WarmthPotion, 30));
-            // === LAS DE UTILIDAD Y LAS RARAS ===
-            l.Add((ItemID.RecallPotion, 30));
-            l.Add((ItemID.TeleportationPotion, 30));
-            l.Add((ItemID.PotionOfReturn, 30));
-            l.Add((ItemID.WormholePotion, 30));
-            l.Add((ItemID.BiomeSightPotion, 30));
-            l.Add((ItemID.LovePotion, 30));
-            l.Add((ItemID.StinkPotion, 30));
-            l.Add((ItemID.GenderChangePotion, 30));
-            l.Add((ItemID.RedPotion, 30));
-            // === LA SUERTE (1.4) ===
-            l.Add((ItemID.LuckPotionLesser, 30));
-            l.Add((ItemID.LuckPotion, 30));
-            l.Add((ItemID.LuckPotionGreater, 30));
-            // === LOS FRASCOS (imperdibles en el arsenal alquímico) ===
-            l.Add((ItemID.FlaskofPoison, 30));
-            l.Add((ItemID.FlaskofFire, 30));
-            l.Add((ItemID.FlaskofParty, 30));
-            l.Add((ItemID.FlaskofGold, 30));
-            l.Add((ItemID.FlaskofNanites, 30));
-            l.Add((ItemID.FlaskofVenom, 30));
-            l.Add((ItemID.FlaskofCursedFlames, 30));
-            l.Add((ItemID.FlaskofIchor, 30));
-            l.Add((ItemID.ToxicFlask, 30));
+            // === LA CASA SAGRADA (el oro y la luz blanca) ===
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CetroDelAlba>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CoronaDeSerafines>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.JuicioDelCielo>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CampanaDelSantuario>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.LamparaDelPeregrino>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.PlumaDelEscribaSanto>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.ReliquiaDelAmanecer>(), 1));
+            // === LA CASA DEL HORROR CÓSMICO (el teal y el violeta) ===
+            l.Add((ModContent.ItemType<Weapons.TresCasas.PupilaDelAbismo>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.GeometriaImposible>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.MordidaDelEspacio>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.LetaniaNebular>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.SusurroDelVacio>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.SemillaDeEstrellas>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CoroDeLosProfundos>(), 1));
+            // === LA CASA DE LA OSCURIDAD (el violeta y el negro tinta) ===
+            l.Add((ModContent.ItemType<Weapons.TresCasas.HambrePrimigenia>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.GuadanaDelVerdugo>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CadenasDelOlvido>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.VeloDeCeniza>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.EspinasNocturnas>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.EclipseInterior>(), 1));
             return l;
         }
     }
