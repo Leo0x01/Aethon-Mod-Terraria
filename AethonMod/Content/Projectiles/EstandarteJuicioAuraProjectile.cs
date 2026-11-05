@@ -2,80 +2,87 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using AethonMod.Content.Buffs;
 using AethonMod.Content.Players;
+using AethonMod.Content.Systems;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Weapons.Investigaciones;
 
 namespace AethonMod.Content.Projectiles
 {
-    /// <summary>
-    /// EstandarteJuicioAuraProjectile — v6.98 — EL AURA DEL JUICIO.
-    ///
-    /// LA LETRA: «un accesorio que crea un aura alrededor del jugador
-    /// que daña a los enemigos si se acercan y cuanto mas se acerquen
-    /// mas se dañan […] con la superforja y nuestras librerias
-    /// mejoradas ahora serias capaz de crearlo algo similar o incluso
-    /// superior al concepto original con mejores VFX y texturas».
-    ///
-    /// EL CONCEPTO (la idea del estandarte de la referencia del
-    /// usuario, la implementación 100% de la casa): un ANCLA invisible que vive pegada al portador
-    /// mientras lleva el estandarte. Cada 12 ticks JUZGA a los 8
-    /// enemigos más cercanos dentro del aura (24 tiles):
-    ///   · EL DAÑO crece con la PROXIMIDAD: ×1 al borde, ×2,5 pegado
-    ///     al portador (la letra exacta: cuanto más cerca, más duele).
-    ///   · EL JUICIO SE ARMA: +8% por segundo que el impío permanece
-    ///     dentro, hasta +80% (la rampa del concepto original).
-    ///   · LA BASE escala con el nivel de despertar: 40 + 12×nivel.
-    ///   · LA LLAMA DEL ALBA: cada juicio aplica el debuff dorado
-    ///     (40 HP/s) y REPELE al que toca al portador.
-    ///
-    /// EL VESTIDO (10 CAPAS — el motor de capas de la v6.98):
-    ///   1. EL BANNER EN LA ESPALDA (el estandarte ondeando detrás
-    ///      del jugador — los proyectiles dibujan antes que el
-    ///      jugador: queda DETRÁS de verdad) — tira de 4 marcos
-    ///      forjada con la superforja, en lote ALPHA.
-    ///   2. EL ANILLO DEL SUELO (la frontera del juicio).
-    ///   3. EL VELO DE RUIDO (el flipbook procedural Ruido_0..19 —
-    ///      el suelo dorado que vive).
-    ///   4. EL ARO RÚNICO girando (MagicRing — la ley del alba).
-    ///   5. EL FIRERING PULSANTE del borde (las brasas de la frontera).
-    ///   6. LAS BRASAS QUE SUBEN (motas doradas deterministas).
-    ///   7. LAS LLAMAS DEL JUICIO sobre cada enemigo dentro — SU
-    ///      BRILLO ES SU CULPA: más cerca del portador = más intensa
-    ///      (¡la mecánica hecha VISIBLE!).
-    ///   8. EL CORAZÓN bajo los pies del portador.
-    ///   9. LAS CHISPAS ORBITANDO (SparkleStar deterministas).
-    ///  10. LA CORONA DEL BANNER (el destello de la punta).
-    ///  TODO lo demás en UN lote aditivo (el patrón de la casa:
-    ///  VFXCore cierra · el lote viste · VFXCore reabre el vanilla).
-    /// </summary>
+    // ======================================================================
+    //  EstandarteJuicioAuraProjectile — v6.98 → v6.100 — EL JUICIO,
+    //  FIEL AL ORIGINAL Y SUPERIOR.
+    //
+    //  LA LETRA DEL USUARIO: «el estandarte del juicio no tiene nada
+    //  que ver con el original y se ve peor». LA INVESTIGACIÓN del
+    //  original (research/README-ESTANDARTE.md) destapó las constantes
+    //  exactas del concepto y las segundas mitades que la v6.98 no
+    //  tenía:
+    //
+    //   · RADIO 720 px (la v6.98 juzgaba a 384 — la mitad).
+    //   · LA BENDICIÓN: el impío MÁS CERCANO (clamp al rectángulo del
+    //     NPC) alimenta un multiplicador de TODO el daño del portador
+    //     — Remap(dist, 720→80, 0→0.30) (la v6.98 no premiaba nada).
+    //   · EL ARDOR CON INTENSIDAD: cada impío dentro del radio se
+    //     MARCA (timer 180) y su intensidad crece con la cercanía
+    //     (Remap ×1→×3, con el hitbox generoso +100 del original).
+    //   · EL DESGASTE POR MULTITUD: cada impío marcado de más resta
+    //     poder al juicio de TODOS (el original: Remap(objetivos,
+    //     7→1, 1→0.10) — la casa lo suaviza a 0.15 por cabeza).
+    //   · LAS CARGAS: la novedad DE LA CASA sobre el concepto — cada
+    //     impío marcado ACUMULA cargas (hasta 300); a las 300 EL
+    //     ESTALLIDO DEL JUICIO (flash + estampa sonora), y la
+    //     cadencia del ardor se ACELERA con las cargas (15→2 ticks).
+    //   · EL REPEL: a intensidad >2.5 el impío es FRENO (y rechazo al
+    //     que se pega) — «repels nearby enemies» del original.
+    //
+    //  EL VESTIDO (todo de la casa, el motor de capas + el motor de
+    //  píxeles): el CorazonCorona del motor de píxeles latiendo bajo
+    //  el portador (AlphaBlend PointClamp) + el lote aditivo con los
+    //  CINCO halos concéntricos, los CUATRO anillos del suelo (la
+    //  llanta del radio completo, el ruido, el anillo mágico y el
+    //  anillo de fuego — el suelo del juicio), las brasas que suben,
+    //  las ESTRELLAS de los marcados (más cerca = más brillantes — LA
+    //  CULPA DELATA), el triple satélite y EL MEDIDOR DE LA BENDICIÓN
+    //  (la estrella de 4 puntas sobre el portador crece con ella).
+    // ======================================================================
     public class EstandarteJuicioAuraProjectile : ModProjectile
     {
-        public override string Texture =>
-            "AethonMod/Content/Projectiles/EstandarteJuicioAuraBanner";
+        /// <summary>EL RADIO del juicio (px — 45 tiles, como el original).</summary>
+        private const float RADIO = 720f;
 
-        /// <summary>EL RADIO del juicio (px — 24 tiles).</summary>
-        private const float RADIO = 384f;
+        /// <summary>LA BENDICIÓN máxima (+30% de TODO el daño).</summary>
+        private const float BENDICION_MAX = 0.3f;
 
-        /// <summary>LA CADENCIA: ticks entre juicios por impío.</summary>
-        private const int CADENCIA = 12;
+        /// <summary>La distancia ÍNTIMA: a 80 px del impío, bendición plena.</summary>
+        const float DIST_INTIMA = 80f;
 
-        /// <summary>CUÁNTOS impíos a la vez (los más cercanos).</summary>
-        private const int MAX_BLANCOS = 8;
+        /// <summary>Cargas para EL ESTALLIDO.</summary>
+        private const int CARGAS_MAX = 300;
 
-        /// <summary>El reloj del juicio (npc.whoAmI → el tick que podrá volver a ser juzgado).</summary>
-        private static readonly Dictionary<int, int> _proximoJuicio = new();
+        /// <summary>Ticks que el impío sigue ARDIENDO ya fuera del radio.</summary>
+        private const int ARDE_FUERA = 180;
 
-        /// <summary>LA RAMPA (npc.whoAmI → ticks que lleva DENTRO del aura).</summary>
-        private static readonly Dictionary<int, int> _rampa = new();
+        // EL ESTADO por impío (whoAmI): cargas, timer de marca,
+        // próximo ardor, intensidad y el estallido consumado.
+        private static readonly Dictionary<int, int> _cargas = new();
+        private static readonly Dictionary<int, int> _timer = new();
+        private static readonly Dictionary<int, int> _proximoArdor = new();
+        private static readonly Dictionary<int, float> _intensidad = new();
+        private static readonly Dictionary<int, bool> _estallido = new();
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Type] = 4;      // la tira del banner (26×160 = 4×40)
-        }
+        // EL MOTOR DE PÍXELES (el CorazonCorona latiendo bajo los pies).
+        private PixelFxPlayer _motor;
+
+        // El caché del ruido procedural (las 20 láminas de la casa).
+        private static Texture2D[] _ruidoCache;
+
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetDefaults()
         {
@@ -87,6 +94,7 @@ namespace AethonMod.Content.Projectiles
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
             Projectile.aiStyle = -1;
+            Projectile.ArmorPenetration = 50;    // el juicio no admite armadura
         }
 
         public override void AI()
@@ -98,210 +106,387 @@ namespace AethonMod.Content.Projectiles
                 Projectile.Kill();
                 return;
             }
-            Projectile.Center = dueno.MountedCenter;
-            Projectile.timeLeft = 2;        // inmortal mientras el flag viva
 
-            // === LA LIMPIEZA (cada 60 t: las rampas de los muertos se van) ===
-            if (Main.GameUpdateCount % 60ul == 0ul)
+            // EL ANCLA sigue al portador y no muere mientras él viva.
+            Projectile.Center = dueno.MountedCenter;
+            Projectile.timeLeft = 2;
+
+            // EL MOTOR DE PÍXELES late (solo cliente).
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
             {
-                List<int> muertos = null;
-                foreach (int k in _rampa.Keys)
-                {
-                    NPC n = Main.npc[k];
-                    if (n == null || !n.active || n.life <= 0)
-                        (muertos ??= new List<int>()).Add(k);
-                }
-                if (muertos != null)
-                    foreach (int k in muertos) { _rampa.Remove(k); _proximoJuicio.Remove(k); }
+                Motor().Tick();
+                if (Projectile.timeLeft <= 12)
+                    Motor().Fx.Stop();
             }
 
-            // === LA LECTURA DEL CAMPO (todos los clientes la ven: el Vestido) ===
-            float sumaProx = 0f;
+            // ------------------------------------------------------------
+            //  LA CUENTA DE IMPÍOS (dentro del radio con su hitbox
+            //  generoso — el original perdona +100 px de cuerpo).
+            // ------------------------------------------------------------
             int dentro = 0;
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC n = Main.npc[i];
-                if (n == null || !n.active || !n.CanBeChasedBy()) continue;
-                float dist = MathF.Sqrt(n.Center.DistanceSQ(Projectile.Center));
-                if (dist > RADIO) continue;
-                float prox = 1f - dist / RADIO;
-                dentro++;
-                sumaProx += prox;
+                if (n == null || !n.active || !n.CanBeChasedBy())
+                    continue;
+                float perdon = Math.Max(n.width, n.height) * 0.5f + 100f;
+                if (MathF.Sqrt(n.Center.DistanceSQ(Projectile.Center)) <= RADIO + perdon)
+                    dentro++;
             }
 
-            // === EL JUICIO (SOLO el cliente dueño golpea: MP-seguro) ===
+            // ------------------------------------------------------------
+            //  LA BENDICIÓN — el impío MÁS CERCANO (clamp al rectángulo,
+            //  como el original: los jefes enormes cuentan su borde).
+            // ------------------------------------------------------------
+            float bendicion = 0f;
+            NPC masCerca = null;
+            float distMin = float.MaxValue;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || !n.CanBeChasedBy())
+                    continue;
+                Vector2 borde = Vector2.Clamp(Projectile.Center, n.TopLeft, n.BottomRight);
+                float d = Vector2.Distance(Projectile.Center, borde);
+                if (d < distMin)
+                {
+                    distMin = d;
+                    masCerca = n;
+                }
+            }
+            if (masCerca != null)
+                bendicion = Remap(distMin, RADIO, DIST_INTIMA, 0f, BENDICION_MAX);
+            dueno.GetModPlayer<JuicioPlayer>().BendicionJuicio = bendicion;
+
+            // ------------------------------------------------------------
+            //  EL JUICIO (solo el dueño manda — el golpe viaja por GolpeMotor).
+            // ------------------------------------------------------------
             if (Projectile.owner == Main.myPlayer && !Main.gameMenu)
             {
-                // LOS MÁS CERCANOS PRIMERO (la selección de la casa: los 8
-                // mejores por proximidad — sin ordenar nada, cero GC).
-                for (int elegido = 0; elegido < MAX_BLANCOS; elegido++)
+                // EL DESGASTE POR MULTITUD: cada impío extra degrada el
+                // ardor de TODOS (mínimo ×0.1 — el original castiga así).
+                float porCabeza = dentro <= 1 ? 1f : MathF.Max(0.1f, 1f - (dentro - 1) * 0.15f);
+                int nivelDespertar = dueno.GetModPlayer<ShardPlayer>().NivelDespertar;
+                int danoBase = (int)((40 + 12 * nivelDespertar) * porCabeza);
+
+                for (int i = 0; i < Main.maxNPCs; i++)
                 {
-                    int mejor = -1;
-                    float mejorProx = -1f;
-                    for (int i = 0; i < Main.maxNPCs; i++)
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || !n.CanBeChasedBy() || n.dontTakeDamage)
+                        continue;
+
+                    float perdon = Math.Max(n.width, n.height) * 0.5f + 100f;
+                    float dist = MathF.Sqrt(n.Center.DistanceSQ(Projectile.Center));
+
+                    // FUERA DEL RADIO: la marca se apaga (ARDE_FUERA
+                    // ticks de gracia, y las cargas se enfrían -10%/s
+                    // en el último segundo — como el burn del original).
+                    if (dist > RADIO + perdon)
                     {
-                        NPC n = Main.npc[i];
-                        if (n == null || !n.active || !n.CanBeChasedBy()) continue;
-                        if (_proximoJuicio.TryGetValue(n.whoAmI, out int hasta) &&
-                            hasta > (int)Main.GameUpdateCount) continue;   // ya juzgado este ciclo
-                        float dist = MathF.Sqrt(n.Center.DistanceSQ(Projectile.Center));
-                        if (dist > RADIO) continue;
-                        float prox = 1f - dist / RADIO;
-                        if (prox > mejorProx) { mejorProx = prox; mejor = i; }
+                        if (!_timer.TryGetValue(n.whoAmI, out int t))
+                            continue;
+                        if (--t <= 0)
+                        {
+                            Desmarcar(n.whoAmI);
+                            continue;
+                        }
+                        _timer[n.whoAmI] = t;
+                        if (t <= 60 && _cargas.TryGetValue(n.whoAmI, out int c))
+                            _cargas[n.whoAmI] = (int)(c * 0.9f);
+                        continue;
                     }
-                    if (mejor < 0) break;
-                    Juzgar(Main.npc[mejor], dueno, mejorProx);
+
+                    // LA INTENSIDAD: más cerca = más juicio (×1 → ×3).
+                    float intensidad = Remap(dist, RADIO + perdon, perdon, 1f, 3f);
+                    _intensidad[n.whoAmI] = intensidad;
+                    _timer[n.whoAmI] = ARDE_FUERA;
+
+                    // LAS CARGAS suben — y a las máximas: EL ESTALLIDO.
+                    _cargas.TryGetValue(n.whoAmI, out int cargas);
+                    cargas = Math.Min(CARGAS_MAX + 1, cargas + 1);
+                    _cargas[n.whoAmI] = cargas;
+                    if (cargas == CARGAS_MAX && !_estallido.TryGetValue(n.whoAmI, out _))
+                    {
+                        _estallido[n.whoAmI] = true;
+                        Estallido(n);
+                    }
+
+                    // EL REPEL: pegado al portador (intensidad >2.5) el
+                    // impío es frenado — y el que embiste, RECHAZADO.
+                    if (intensidad > 2.5f && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        float rechazo = (intensidad - 2.5f) / 0.5f;
+                        n.velocity *= 1f - 0.25f * rechazo;
+                        if (n.velocity.Length() > 5f && intensidad > 2.85f)
+                            n.velocity = -n.velocity * 0.7f;
+                    }
+
+                    // EL ARDOR: la cadencia se ACELERA con las cargas
+                    // (15 → 2 ticks) y con la cercanía.
+                    if (!_proximoArdor.TryGetValue(n.whoAmI, out int proximo))
+                        proximo = 0;
+                    if (proximo <= 0)
+                    {
+                        Ardor(n, dueno, danoBase, intensidad);
+                        float cadencia = Remap(cargas, 0f, CARGAS_MAX, 15f, 2f);
+                        _proximoArdor[n.whoAmI] = (int)(cadencia + (3f - intensidad) * 4f);
+                    }
+                    else
+                    {
+                        _proximoArdor[n.whoAmI] = proximo - 1;
+                    }
                 }
             }
 
-            // === LA INTENSIDAD (el motor del Vestido: cuánta culpa hay dentro) ===
-            float inten = 0.30f + Math.Min(0.70f, sumaProx * 0.22f);
-            Projectile.localAI[0] = inten;
-            Projectile.localAI[1] = dentro;
-        }
+            // LA LIMPIEZA periódica de los muertos.
+            if (Main.GameUpdateCount % 60uL == 0)
+                LimpiarMuertos();
 
-        /// <summary>EL JUICIO: el golpe que escala con la proximidad, se
-        /// arma con el tiempo, quema con el alba y repele al osado.</summary>
-        private void Juzgar(NPC n, Player dueno, float prox)
-        {
-            int nivel = dueno.GetModPlayer<ShardPlayer>().NivelDespertar;
-            _rampa.TryGetValue(n.whoAmI, out int ticksDentro);
-            _rampa[n.whoAmI] = ticksDentro + CADENCIA;
-            _proximoJuicio[n.whoAmI] = (int)Main.GameUpdateCount + CADENCIA;
-
-            float proxMult = 1f + 1.5f * prox;                       // ×1 al borde → ×2,5 pegado
-            float rampaMult = 1f + Math.Min(0.80f, ticksDentro * (0.08f / 60f)); // +8%/s → +80%
-            int dano = (int)((40 + 12 * nivel) * proxMult * rampaMult);
-
-            int dir = n.Center.X >= dueno.Center.X ? 1 : -1;
-            dueno.ApplyDamageToNPC(n, dano, 2.5f, dir, false);
-            n.AddBuff(ModContent.BuffType<JuicioDelAlba>(), 120);
-
-            // EL CHISPAZO DORADO del veredicto.
-            if (!Main.dedServ)
+            // ------------------------------------------------------------
+            //  EL ALIENTO (solo cliente): la luz dorada del estandarte
+            //  y las brasas que suben del suelo del juicio.
+            // ------------------------------------------------------------
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
             {
-                for (int k = 0; k < 3; k++)
+                Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.85f, 0.35f) * 1.5f);
+                if (Main.rand.NextBool(2) && !Main.gameMenu)
                 {
-                    Dust d = Dust.NewDustPerfect(n.Center,
-                        DustID.Enchanted_Gold,
-                        new Vector2(Main.rand.NextFloat(-2f, 2f), Main.rand.NextFloat(-2.6f, -0.4f)),
-                        160, new Color(255, 208, 96), 0.6f);
-                    d.noGravity = true;
+                    Vector2 deriva = Main.rand.NextVector2Circular(10f, 10f);
+                    Dust brasa = Dust.NewDustPerfect(Projectile.Center + deriva, 57,
+                        deriva * Main.rand.NextFloat(0.1f, 0.4f), 150,
+                        Main.rand.NextBool() ? new Color(255, 200, 60) : new Color(255, 140, 30),
+                        0.6f);
+                    brasa.noGravity = true;
+                    brasa.noLightEmittence = true;
                 }
             }
         }
 
-        // ================================================================
-        //  EL VESTIDO (las 10 capas — el motor de la v6.98)
-        // ================================================================
-        private static Texture2D[] _ruidoCache;
+        /// <summary>El Remap acotado del original (clamp 0..1).</summary>
+        private static float Remap(float v, float in1, float in2, float out1, float out2)
+        {
+            float k = (v - in1) / (in2 - in1);
+            if (k < 0f) k = 0f;
+            else if (k > 1f) k = 1f;
+            return out1 + (out2 - out1) * k;
+        }
 
+        /// <summary>EL ARDOR: el golpe del juicio con su Llama del Alba.</summary>
+        private void Ardor(NPC n, Player dueno, int danoBase, float intensidad)
+        {
+            int dano = (int)(danoBase * intensidad);
+            GolpeMotor.Golpear(Projectile, n, dano);
+            n.AddBuff(ModContent.BuffType<Buffs.JuicioDelAlba>(), 90, false);
+        }
+
+        /// <summary>EL ESTALLIDO: el flash y la estampa de las cargas
+        /// completas (solo visual — el castigo ya lo puso el ardor
+        /// acelerado).</summary>
+        private void Estallido(NPC n)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ)
+                return;
+            for (int i = 0; i < 15; i++)
+            {
+                Dust.NewDustPerfect(n.Center, 57,
+                    Main.rand.NextVector2Circular(13f, 13f) * Main.rand.NextFloat(0.4f, 1f),
+                    160, Main.rand.NextBool() ? new Color(255, 218, 96) : new Color(255, 160, 32),
+                    0.85f).noGravity = true;
+            }
+            SoundStyle golpe = SoundID.NPCHit53;
+            golpe.Pitch = 0.7f;
+            golpe.Volume = 0.7f;
+            SoundEngine.PlaySound(in golpe, n.Center);
+        }
+
+        /// <summary>Borra la marca completa de un impío.</summary>
+        private static void Desmarcar(int who)
+        {
+            _cargas.Remove(who);
+            _timer.Remove(who);
+            _proximoArdor.Remove(who);
+            _intensidad.Remove(who);
+            _estallido.Remove(who);
+        }
+
+        /// <summary>La barredura de los que ya no viven.</summary>
+        private static void LimpiarMuertos()
+        {
+            List<int> muertos = null;
+            foreach (int k in _cargas.Keys)
+            {
+                NPC n = Main.npc[k];
+                if (n == null || !n.active || n.life <= 0)
+                    (muertos ??= new List<int>()).Add(k);
+            }
+            if (muertos == null)
+                return;
+            foreach (int k in muertos)
+                Desmarcar(k);
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            // EL MOTOR Y LAS MARCAS se apagan con el ancla.
+            _motor?.Dispose();
+            _motor = null;
+            _cargas.Clear();
+            _timer.Clear();
+            _proximoArdor.Clear();
+            _intensidad.Clear();
+            _estallido.Clear();
+        }
+
+        /// <summary>EL MOTOR: el CorazonCorona del motor de píxeles —
+        /// el corazón dorado del juicio latiendo bajo el portador.</summary>
+        private PixelFxPlayer Motor()
+        {
+            if (_motor == null)
+                _motor = new PixelFxPlayer(
+                    PixelFxCasas.CorazonCorona(977,
+                        PxColor.Rgb(255, 208, 96), PxColor.Rgb(200, 120, 30)),
+                    1.6f);
+            return _motor;
+        }
+
+        /// <summary>La lámina de ruido viva (el caché de las 20).</summary>
         private static Texture2D Ruido(int semilla, float vel)
         {
             _ruidoCache ??= new Texture2D[20];
-            int n = (int)(Main.GlobalTimeWrappedHourly * vel + semilla * 0.37f) % 20;
-            if (n < 0) n += 20;
-            return _ruidoCache[n] ??= ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/Ruido_" + n).Value;
+            int i = (int)(Main.GlobalTimeWrappedHourly * vel + semilla * 0.37f) % 20;
+            if (i < 0) i += 20;
+            return _ruidoCache[i] ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/Ruido_" + i,
+                AssetRequestMode.ImmediateLoad).Value;
         }
 
         private static Texture2D Tex(string ruta) =>
-            ModContent.Request<Texture2D>("AethonMod/Content/Effects/" + ruta).Value;
+            ModContent.Request<Texture2D>("AethonMod/Content/Effects/" + ruta,
+                AssetRequestMode.ImmediateLoad).Value;
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.gameMenu) return false;
+            if (Main.gameMenu)
+                return false;
             Player dueno = Main.player[Projectile.owner];
-            if (dueno == null || !dueno.active) return false;
-            if (dueno.GetModPlayer<JuicioPlayer>().EstandarteJuicioOculto) return false;
+            if (dueno == null || !dueno.active)
+                return false;
+            if (dueno.GetModPlayer<JuicioPlayer>().EstandarteJuicioOculto)
+                return false;     // el portador pidió silencio visual
 
             try
             {
                 VFXCore.CerrarLoteSiAbierto();
                 SpriteBatch sb = Main.spriteBatch;
                 float t = Main.GlobalTimeWrappedHourly;
-                float inten = MathHelper.Clamp(Projectile.localAI[0], 0.25f, 1f);
-                float late = 0.85f + 0.15f * MathF.Sin(t * 3.1f);
-                Vector2 pos = Projectile.Center - Main.screenPosition;
-                Vector2 suelo = pos + new Vector2(0f, 26f);
+                float bendicion = dueno.GetModPlayer<JuicioPlayer>().BendicionJuicio;
+
+                // LA VIDA del juicio: el pulso base + la bendición
+                // alimentándolo (más bendición = todo más vivo).
+                float vida = 0.3f + bendicion * 1.6f;
+                float pulso = 0.85f + 0.15f * MathF.Sin(t * 3.1f);
+
+                Vector2 centro = Projectile.Center - Main.screenPosition;
+                Vector2 suelo = centro + new Vector2(0f, 26f);
                 Color oro = new(255, 208, 96);
-                Color luz = new(255, 248, 224);
+                Color marfil = new(255, 248, 224);
 
-                // ── CAPA 1 — EL BANNER EN LA ESPALDA (lote ALPHA: el
-                //    paño es tela, no luz — y los proyectiles dibujan
-                //    ANTES que el jugador: queda detrás de verdad)
-                Texture2D banner = ModContent.Request<Texture2D>(Texture).Value;
-                int frame = (int)(t * 7.5f) % 4;
-                Rectangle src = new(0, frame * 40, 26, 40);
-                Vector2 anclaBanner = pos + new Vector2(-dueno.direction * 7f,
-                    -30f + MathF.Sin(t * 2.2f) * 1.5f);
-                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                sb.Draw(banner, anclaBanner, src, Color.White * 0.96f,
-                    MathF.Sin(t * 2.2f) * 0.06f, new Vector2(13f, 36f), 1f,
-                    SpriteEffects.None, 0f);
-                sb.End();
+                // 1) EL MOTOR DE PÍXELES — el CorazonCorona (lote
+                //    ambiente PointClamp, alfa recta del compositor).
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                {
+                    PixelFxPlayer motor = Motor();
+                    sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.PointClamp, DepthStencilState.None,
+                        RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                    motor.Draw(sb, dueno.MountedCenter - Main.screenPosition
+                        - new Vector2(motor.Meta.Ox, motor.Meta.Oy) * motor.Escala);
+                    sb.End();
+                }
 
-                // ── CAPAS 2..10 (UN lote aditivo: el juicio BRILLA)
+                // 2) EL LOTE ADITIVO — el vestido del juicio.
                 sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                Texture2D circulo = Tex("GlowCircleWhite");
-                Texture2D anillo = Tex("MagicRing");
-                Texture2D fuego = Tex("Procedural/FireRing");
-                Texture2D destello = Tex("FlareEstrella4Puntas");
-                Texture2D chispa = Tex("SparkleStar");
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+                Texture2D glow = Tex("GlowCircleWhite");
+                Texture2D anilloMag = Tex("MagicRing");
+                Texture2D anilloFuego = Tex("Procedural/FireRing");
+                Texture2D estrella = Tex("FlareEstrella4Puntas");
+                Texture2D destello = Tex("SparkleStar");
                 Texture2D orbe = Tex("GlowOrb");
 
-                // CAPA 2 — EL ANILLO DEL SUELO (la frontera del juicio)
-                Suelo(sb, circulo, suelo, oro * (0.11f * inten * late), 0f, RADIO * 2.15f, RADIO * 0.85f);
-                // CAPA 3 — EL VELO DE RUIDO (el suelo dorado que vive)
-                Suelo(sb, Ruido(0, 2.4f), suelo, oro * (0.08f * inten), t * 0.15f, RADIO * 2f, RADIO * 0.8f);
-                // CAPA 4 — EL ARO RÚNICO (la ley del alba, girando)
-                Suelo(sb, anillo, suelo, luz * (0.20f * inten), t * 1.2f, RADIO * 2.05f, RADIO * 0.8f);
-                // CAPA 5 — EL FIRERING PULSANTE (las brasas de la frontera)
-                Suelo(sb, fuego, suelo, oro * (0.13f + 0.10f * inten * late), -t * 0.8f,
-                    RADIO * 2.2f * (1f + 0.04f * late), RADIO * 0.9f);
-                // CAPA 6 — LAS BRASAS QUE SUBEN (motas deterministas)
+                // LOS CINCO HALOS concéntricos del portador.
+                float late = MathF.Abs(MathF.Sin(t * 0.9f)) * 0.2f + 0.8f;
+                for (int i = 0; i < 5; i++)
+                    Capa(sb, orbe, centro,
+                        Color.Lerp(oro, Color.White, i * 0.15f)
+                            * (0.1f * (1f - i * 0.12f) * late),
+                        0f, (0.75f - i * 0.15f) * late * 1.6f);
+
+                // LOS CUATRO ANILLOS DEL SUELO — la llanta del radio
+                // completo (1512 px = 720×2 + generosidad), el ruido,
+                // el anillo mágico y el anillo de fuego respirando.
+                Suelo(sb, glow, suelo, oro * (0.07f * vida * pulso), 0f, 1512f, 576f);
+                Suelo(sb, Ruido(0, 2.4f), suelo, oro * (0.05f * vida), t * 0.15f, 1440f, 540f);
+                Suelo(sb, anilloMag, suelo, marfil * (0.14f * vida), t * 1.2f, 1476f, 540f);
+                Suelo(sb, anilloFuego, suelo, oro * (0.09f + 0.07f * vida * pulso),
+                    -t * 0.8f, 1548f * (1f + 0.04f * pulso), 612f);
+
+                // LAS BRASAS que suben del anillo (6, deterministas).
                 for (int i = 0; i < 6; i++)
                 {
-                    float az = Azar(i);
-                    float sube = (t * 46f + az * 110f) % 110f;
-                    Vector2 p = new(suelo.X + (az * 2f - 1f) * RADIO * 0.8f, suelo.Y - sube);
-                    Capa(sb, orbe, p, oro * (0.30f * (1f - sube / 110f) * inten + 0.05f), 0f, 13f / 128f);
+                    float azar = Azar(i);
+                    float sube = (t * 46f + azar * 110f) % 110f;
+                    Vector2 pos = new(suelo.X + (azar * 2f - 1f) * RADIO * 0.8f,
+                        suelo.Y - sube);
+                    Capa(sb, orbe, pos,
+                        oro * (0.22f * (1f - sube / 110f) * vida + 0.04f),
+                        0f, 13f / 128f);
                 }
-                // CAPA 7 — LAS LLAMAS DEL JUICIO: SU BRILLO ES SU CULPA
-                //    (más cerca del portador = la llama MÁS intensa)
-                int llamas = 0;
-                for (int i = 0; i < Main.maxNPCs && llamas < 5; i++)
+
+                // LAS ESTRELLAS DE LOS MARCADOS — LA CULPA DELATA: los
+                // 5 impíos más marcados visten su estrella de 4 puntas
+                // y su destello, ESCALADOS por la intensidad.
+                int vestidos = 0;
+                for (int i = 0; i < Main.maxNPCs && vestidos < 5; i++)
                 {
                     NPC n = Main.npc[i];
-                    if (n == null || !n.active || !n.CanBeChasedBy()) continue;
-                    float dist = MathF.Sqrt(n.Center.DistanceSQ(Projectile.Center));
-                    if (dist > RADIO) continue;
-                    float prox = 1f - dist / RADIO;
-                    Vector2 p = n.Center - Main.screenPosition;
-                    float esc = (30f + 44f * prox) / 256f;
-                    Capa(sb, destello, p, oro * (0.35f + 0.55f * prox), t * 2.4f + i, esc);
-                    Capa(sb, chispa, p, luz * (0.30f + 0.45f * prox), -t * 3f, esc * 0.55f);
-                    llamas++;
+                    if (n == null || !n.active || !n.CanBeChasedBy())
+                        continue;
+                    if (!_intensidad.TryGetValue(n.whoAmI, out float inten))
+                        continue;
+                    float culpable = (inten - 1f) / 2f;    // 0 lejos → 1 pegado
+                    Vector2 pos = n.Center - Main.screenPosition;
+                    float esc = (30f + 44f * culpable) / 256f;
+                    Capa(sb, estrella, pos, oro * (0.35f + 0.55f * culpable),
+                        t * 2.4f + i, esc);
+                    Capa(sb, destello, pos, marfil * (0.3f + 0.45f * culpable),
+                        -t * 3f, esc * 0.55f);
+                    vestidos++;
                 }
-                // CAPA 8 — EL CORAZÓN bajo los pies del portador
-                Capa(sb, circulo, suelo - new Vector2(0f, 6f),
-                    luz * (0.14f * inten * late), 0f, 90f / 64f);
-                // CAPA 9 — LAS CHISPAS ORBITANDO
+
+                // EL SATÉLITE TRIPLE — los tres destellos orbitando al
+                // portador (la guardia del estandarte).
+                Capa(sb, glow, suelo - new Vector2(0f, 6f),
+                    marfil * (0.14f * vida * pulso), 0f, 1.40625f);
                 for (int i = 0; i < 3; i++)
                 {
-                    float a = t * (1.5f + Azar(i + 11) * 1.2f) + Azar(i + 4) * MathHelper.TwoPi;
-                    Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a) * 0.55f) * (54f + Azar(i) * 26f);
-                    Capa(sb, chispa, p, oro * (0.25f + 0.45f * Titila(i)), a,
+                    float ang = t * (1.5f + Azar(i + 11) * 1.2f) + Azar(i + 4) * MathF.PI * 2f;
+                    Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.55f)
+                        * (54f + Azar(i) * 26f);
+                    Capa(sb, destello, pos, oro * (0.25f + 0.45f * Titila(i)), ang,
                         (12f + 9f * Titila(i)) / 32f);
                 }
-                // CAPA 10 — LA CORONA DEL BANNER (el destello de la punta)
-                Vector2 punta = anclaBanner + new Vector2(0f, -38f);
-                Capa(sb, destello, punta, luz * (0.4f + 0.35f * Titila(9, 5f)),
-                    t * 2.6f, (34f + 14f * Titila(9, 5f)) / 256f);
+
+                // EL MEDIDOR DE LA BENDICIÓN — la estrella de 4 puntas
+                // sobre la cabeza del portador CRECE y BRILLA con la
+                // bendición (0 → 0.30): el premio se VE.
+                Vector2 arriba = centro - new Vector2(0f, 44f);
+                Capa(sb, estrella, arriba,
+                    marfil * (0.25f + 0.45f * bendicion / BENDICION_MAX),
+                    t * 2.6f, (22f + 26f * bendicion / BENDICION_MAX) / 256f);
+
                 sb.End();
             }
             catch
@@ -312,32 +497,34 @@ namespace AethonMod.Content.Projectiles
             return false;
         }
 
-        /// <summary>EL AZAR DETERMINISTA (estable entre frames).</summary>
+        /// <summary>El azar determinista de la casa.</summary>
         private static float Azar(int i)
         {
-            float v = MathF.Sin(i * 12.9898f + 78.233f) * 43758.5453f;
+            float v = MathF.Sin(i * 12.9898f + 78.233f) * 43758.547f;
             return v - MathF.Floor(v);
         }
 
-        /// <summary>EL TITILAR (0..1..0).</summary>
+        /// <summary>El titilar determinista (0..1, coseno suave).</summary>
         private static float Titila(int i, float vel = 3.1f)
-            => 0.5f - 0.5f * MathF.Cos(Main.GlobalTimeWrappedHourly * vel + Azar(i) * MathHelper.TwoPi);
+            => 0.5f - 0.5f * MathF.Cos(Main.GlobalTimeWrappedHourly * vel + Azar(i) * MathF.PI * 2f);
 
+        /// <summary>Una capa aditiva (solo si aporta algo visible).</summary>
         private static void Capa(SpriteBatch sb, Texture2D tex, Vector2 pos,
             Color color, float rot, float esc)
         {
-            if (color.A == 0 || esc <= 0f) return;
-            sb.Draw(tex, pos, null, color, rot, tex.Size() * 0.5f, esc,
-                SpriteEffects.None, 0f);
+            if (color.A != 0 && esc > 0f)
+                sb.Draw(tex, pos, null, color, rot, Utils.Size(tex) * 0.5f, esc,
+                    SpriteEffects.None, 0f);
         }
 
+        /// <summary>Un anillo del suelo (estirado a su rectángulo).</summary>
         private static void Suelo(SpriteBatch sb, Texture2D tex, Vector2 pos,
             Color color, float rot, float anchoPx, float altoPx)
         {
-            if (color.A == 0 || anchoPx <= 0f) return;
-            sb.Draw(tex, pos, null, color, rot, tex.Size() * 0.5f,
-                new Vector2(anchoPx / tex.Width, altoPx / tex.Height),
-                SpriteEffects.None, 0f);
+            if (color.A != 0 && anchoPx > 0f)
+                sb.Draw(tex, pos, null, color, rot, Utils.Size(tex) * 0.5f,
+                    new Vector2(anchoPx / tex.Width, altoPx / tex.Height),
+                    SpriteEffects.None, 0f);
         }
     }
 }

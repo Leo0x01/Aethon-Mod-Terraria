@@ -48,9 +48,32 @@ namespace AethonMod.Content.Tiles
         //  encima).
         // ================================================================
 
+        // ================================================================
+        //  v6.100 — EL ALTAR ASENTADO + LAS DOS VELAS VIVAS (la letra
+        //  del usuario: «el altar esta unos pixeles por encima del
+        //  suelo, asi que al colocarlo es como si estuviera flotando,
+        //  me gustaria que mejoraras la animacion ya que en el sprite
+        //  parece que hay 2 velas y estas dos no estan animadas»).
+        //
+        //  LA CURA DOBLE: (1) el sprite fue REGENERADO con
+        //  transparencia NATIVA (la regla permanente de la casa: la
+        //  transparencia vive en la GENERACIÓN, jamás en el
+        //  post-proceso) a 34×200 — CUATRO marcos de 50 px cuyo ARTE
+        //  LLEGA HASTA LA ÚLTIMA FILA (la v6.99 dejaba 4 px vacíos
+        //  bajo el pedestal: el altar FLOTABA); (2) LAS DOS VELAS del
+        //  pedestal ahora ARDEN en la animación — sus llamas laten y
+        //  se estiran marco a marco, alternando como velas de verdad,
+        //  además del latido de runas y la chispa de consagración.
+        //
+        //  EL MAPEO DE LA LÁMINA: con CoordinatePadding = 0 y
+        //  CoordinateWidth = 17, los 34 px de ancho del marco son DOS
+        //  celdas exactas del tile sheet — el recorte vertical del
+        //  sprite nuevo queda PERFECTO sin costuras.
+        // ================================================================
+
         /// <summary>La altura de CADA marco de la animación (px — el
-        /// altar mide 2×3 tiles: 36×54).</summary>
-        private const int ALTO_MARCO = 54;
+        /// altar mide 2×3 tiles: 34×50, arte hasta el suelo).</summary>
+        private const int ALTO_MARCO = 50;
 
         /// <summary>CUÁNTOS marcos tiene la lámina (el latido completo).</summary>
         private const int MARCOS = 4;
@@ -81,7 +104,7 @@ namespace AethonMod.Content.Tiles
                 Main.rand.NextBool(90) && !Main.gameMenu)
             {
                 Dust d = Dust.NewDustPerfect(
-                    new Vector2(i * 16f + Main.rand.Next(4, 28), j * 16f - Main.rand.Next(0, 8)),
+                    new Vector2(i * 16f + Main.rand.Next(4, 30), j * 16f - Main.rand.Next(0, 8)),
                     DustID.Enchanted_Gold, new Vector2(0f, -0.45f), 150,
                     new Color(150, 90, 220), 0.5f);
                 d.noGravity = true;
@@ -107,6 +130,12 @@ namespace AethonMod.Content.Tiles
 
             TileObjectData.newTile.CopyFrom(TileObjectData.Style2xX);
             TileObjectData.newTile.CoordinateHeights = new[] { 16, 16, 18 };
+            // v6.100 — EL MAPEO SIN COSTURAS del sprite 34×200: sin
+            // padding y con celda de 17 px, cada marco de 34 px de ancho
+            // son DOS celdas exactas del tile sheet (el recorte del
+            // sprite asentado queda byte-perfecto en el mundo).
+            TileObjectData.newTile.CoordinatePadding = 0;
+            TileObjectData.newTile.CoordinateWidth = 17;
             TileObjectData.newTile.Origin = new Point16(0, 2);
             TileObjectData.addTile(Type);
 

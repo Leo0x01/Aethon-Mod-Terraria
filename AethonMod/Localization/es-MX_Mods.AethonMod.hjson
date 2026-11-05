@@ -2041,16 +2041,81 @@ Items: {
 			'''
 	}
 
-	SombraDeLaPagina4: {
+	// ================================================================
+	//  v6.100 — LOS ÚLTIMOS DOS DEL ESCRIBA: el archivo de localización
+	//  separado (Localization/Escriba/) MURIÓ con la purga de las
+	//  armas muertas que arrastraba; sus dos ítems VIVOS (el Primer
+	//  Trazo y la Aurora de Tinta) se mudaron AQUÍ con sus tooltips.
+	// ================================================================
+
+	PrimerTrazo: {
+		DisplayName: El Primer Trazo
+		Tooltip:
+			'''
+			La pluma que escribió la primera línea del mundo, cargada de luz.
+			MANTÉN el clic: cinco trazos convergen en UN RAYO DE FUSIÓN
+			(el arcoíris de aceite corre a lo largo, el núcleo arde blanco
+			y el ruido fluye de la boca a la punta — la técnica del dios).
+			A plena carga el daño se triplica.
+			'''
+		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
+	}
+
+	AuroraDeTinta: {
+		DisplayName: La Aurora de Tinta
+		Tooltip:
+			'''
+			Las alas creadas por código: diez plumas de luz prismática
+			tejidas en el aire.
+			De noche el prisma completo corre por el ala; de día la tinta
+			se aclara a blanco-oro.
+			Vuelo de polilla (rápido, sin penalidad), 240 de vuelo,
+			sin daño de caída y la aceleración aérea de la Emperatriz.
+			Si vistes alas reales, la aurora se pliega y eleva su
+			tiempo de vuelo al mínimo.
+			'''
+		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
+		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
+	}
+
+	// v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (los clickers, las auras
+	// y la definitiva — todos hechos con LAS HERRAMIENTAS de la casa:
+	// la forja, el motor de píxeles y el cableado multicapa).
+	SelloDeTinta: {
+		DisplayName: El Sello del Escriba
+		Tooltip: ""
+	}
+
+	ParpadeoDelEterno: {
+		DisplayName: El Parpadeo del Eterno
+		Tooltip: ""
+	}
+
+	CoronaDePlumas: {
+		DisplayName: La Corona de Plumas
+		Tooltip: ""
+	}
+
+	DerrameDeTinta: {
+		DisplayName: El Derrame de Tinta
+		Tooltip: ""
+	}
+
+	LaUltimaPalabra: {
+		DisplayName: La Última Palabra
+		Tooltip: ""
+	}
+
+		SombraDeLaPagina4: {
+		// v6.100: LA COPIA FORJADA del original (todas las herramientas)
 		DisplayName: La Sombra de la Página IV
 		Tooltip:
 			'''
-			        «El ojo se cansó de ser ojo: ya solo queda el mirar.»
-			        El cuarto tomo: DOS NERVIOS ÓPTICOS de tinta cuelgan de ti y en
-			        su punta vive UN IRIS ROJO COLOSAL — su pupila se DILATA al
-			        morder y los filamentos de tinta corren desde la presa hasta el
-			        vacío. Drena 3% cada 6 t. A 1 de vida: el jefe, visto A TRAVÉS
-			        del iris.
+			El ritual del original, vestido con TODAS las herramientas: el tentáculo de sombra
+			caza al jefe a cualquier distancia, muerde y drena 3% cada 6 t.
+			LA GARGANTA DEL VÓRTICE del motor de píxeles es su boca — el horizonte de sucesos
+			girando en la punta, el velo de ruido por el cuerpo y el anillo de tinta del jefe mordido.
+			A 1 HP: LA DEVORACIÓN (el festín de las sombras).
 			'''
 	}
 
@@ -2156,48 +2221,13 @@ Items: {
 			'''
 	}
 
-	SigiloDelEterno: {
-		DisplayName: El Sigilo del Eterno
-		Tooltip:
-			'''
-			La pluma del Eterno traza su sigilo donde apuntes: el trazo
-			ardiente, los SIETE glifos que estallan uno a uno, el destello
-			blanco — y se desmorona en ascuas. Todo lo que esté DENTRO
-			del círculo recibe el golpe. (Taller de efectos)
-			'''
-	}
 
-	LlamasDeSombra: {
-		DisplayName: Las Llamas de Sombra
-		Tooltip:
-			'''
-			La columna de fuego sombrío sube VIVA del suelo donde
-			apuntes: violeta profundo abajo, magenta arriba, la vena
-			blanca ardiendo al centro — el borde de las llamas respira
-			con ruido fractal de verdad. (Taller de efectos)
-			'''
-	}
 
-	EclipseVivo: {
-		DisplayName: El Eclipse Vivo
-		Tooltip:
-			'''
-			La nova del disco negro: se abre donde apuntes con su
-			corona de CATORCE rayos que giran y respiran, el limbo
-			blanco quemando el borde — el anillo que se expande golpea
-			todo lo que cruza. (Taller de efectos)
-			'''
-	}
 
-	BolsaTallerDeEfectos: {
-		DisplayName: La Bolsa del Taller de Efectos
-		Tooltip:
-			'''
-			Lo que nació del Taller de Efectos de la casa: el sigilo con
-			su acto, las llamas de ruido fractal, el eclipse de corona
-			viva y los sprites animados. Armas de PRUEBA: 0 maná.
-			'''
-	}
+
+
+
+
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -2594,9 +2624,6 @@ Projectiles: {
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
 	// v6.90 — EL TALLER DE EFECTOS (el motor de píxeles de la casa).
-	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
-	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
-	EclipseVivoProj.DisplayName: El Eclipse Vivo
 }
 
 Buffs: {
@@ -2926,50 +2953,15 @@ Hambre: {
 
 	// v6.50.91 — THE NERVOUS ONE: restless, hungry, angry — "I want to
 	// eat and it's hungry". Not fear: appetite with a voice.
-	CetroDelAlba: {
-		DisplayName: El Cetro del Alba
-		Tooltip:
-			'''
-			El alba en la mano: su haz dorado barre el frente con el corazón blanco.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	CoronaDeSerafines: {
-		DisplayName: La Corona de los Serafines
-		Tooltip:
-			'''
-			Tres aros de luz orbitan al portador: la corona que los serafines le prestaron.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	JuicioDelCielo: {
-		DisplayName: El Juicio del Cielo
-		Tooltip:
-			'''
-			Espadas de luz caen del cielo sobre la marca: la sentencia no se apela.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	CampanaDelSantuario: {
-		DisplayName: La Campana del Santuario
-		Tooltip:
-			'''
-			Su onda dorada carga y estalla: los impuros salen empujados del santuario.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	LamparaDelPeregrino: {
-		DisplayName: La Lámpara del Peregrino
-		Tooltip:
-			'''
-			Suelta luciérnagas de luz blanca que cazan a los que acechan en la sombra.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
+
+
+
+
+
 
 	PlumaDelEscribaSanto: {
 		DisplayName: La Pluma del Escriba Santo
@@ -2980,68 +2972,19 @@ Hambre: {
 			'''
 	}
 
-	ReliquiaDelAmanecer: {
-		DisplayName: La Reliquia del Amanecer
-		Tooltip:
-			'''
-			Un charco de amanecer en la marca: cinco segundos de luz que muele a los que la pisan.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	PupilaDelAbismo: {
-		DisplayName: La Púpila del Abismo
-		Tooltip:
-			'''
-			El ojo del abismo abre su haz teal: la mirada que no parpadea jamás.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
-	GeometriaImposible: {
-		DisplayName: La Geometría Imposible
-		Tooltip:
-			'''
-			Cuatro ángulos que no deberían existir orbitan al portador: cada esquina, un filo.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
-	MordidaDelEspacio: {
-		DisplayName: La Mordida del Espacio
-		Tooltip:
-			'''
-			Colmillos de vacío desgarran el cielo sobre la marca: la carne del espacio muerde.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
-	LetaniaNebular: {
-		DisplayName: La Letanía Nebular
-		Tooltip:
-			'''
-			Una nebulosa violeta se posa en la marca: los que la pisan se disuelven en polvo de estrella.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
-	SusurroDelVacio: {
-		DisplayName: El Susurro del Vacío
-		Tooltip:
-			'''
-			Un vacío teal atrae a los vivos hacia su corazón y los muele en silencio.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
-	SemillaDeEstrellas: {
-		DisplayName: La Semilla de Estrellas
-		Tooltip:
-			'''
-			Florece en la marca y su corona estalla en anillos gemelos violeta y teal.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
+
+
+
+
+
+
+
 
 	CoroDeLosProfundos: {
 		DisplayName: El Coro de los Profundos
@@ -3052,69 +2995,19 @@ Hambre: {
 			'''
 	}
 
-	HambrePrimigenia: {
-		DisplayName: El Hambre Primigenia
-		Tooltip:
-			'''
-			La fauce del Eterno en miniatura: arrastra a los vivos al corazón negro y devora.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	GuadanaDelVerdugo: {
-		DisplayName: La Guadaña del Verdugo
-		Tooltip:
-			'''
-			El filo violeta del verdugo vuela a la marca y regresa: su estela corta dos veces.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	CadenasDelOlvido: {
-		DisplayName: Las Cadenas del Olvido
-		Tooltip:
-			'''
-			Eslabones de olvido caen sobre la marca: atan lo que tocan al fondo del cielo.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	VeloDeCeniza: {
-		DisplayName: El Velo de Ceniza
-		Tooltip:
-			'''
-			Una nube de ceniza gris cubre la marca: lo que respira dentro se apaga despacio.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	EspinasNocturnas: {
-		DisplayName: Las Espinas Nocturnas
-		Tooltip:
-			'''
-			Cinco agujas de noche orbitan al portador: la corona que nadie lleva dos veces.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	EclipseInterior: {
-		DisplayName: El Eclipse Interior
-		Tooltip:
-			'''
-			Un sol negro se enciende en la marca: su corona violeta estalla y apaga a los vivos.
-			LA CASA DE LA OSCURIDAD — la entrega de LA FORJA
-			'''
-	}
 
-	BolsaTresCasas: {
-		DisplayName: La Bolsa de las Tres Casas
-		Tooltip:
-			'''
-			Las VEINTE armas de LA FORJA: la casa SAGRADA (oro y luz),
-			la del HORROR CÓSMICO (teal y violeta) y la de la OSCURIDAD
-			(violeta y negro tinta) — permanentes y reutilizables.
-			'''
-	}
+
+
+
+
+
+
+
 
 	Cultistas: {
 		Burla1: «(El Eterno murmura desde la bolsa) Tontos… arrodillados ante un dios FALSO. Yo al menos EXISTO.»

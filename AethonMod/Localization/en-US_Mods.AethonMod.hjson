@@ -2045,16 +2045,81 @@ Items: {
 			'''
 	}
 
-	SombraDeLaPagina4: {
-		DisplayName: La Sombra de la Página IV
+	// ================================================================
+	//  v6.100 — LOS ÚLTIMOS DOS DEL ESCRIBA: el archivo de localización
+	//  separado (Localization/Escriba/) MURIÓ con la purga de las
+	//  armas muertas que arrastraba; sus dos ítems VIVOS (el Primer
+	//  Trazo y la Aurora de Tinta) se mudaron AQUÍ con sus tooltips.
+	// ================================================================
+	
+	PrimerTrazo: {
+		DisplayName: El Primer Trazo
 		Tooltip:
 			'''
-			        «El ojo se cansó de ser ojo: ya solo queda el mirar.»
-			        El cuarto tomo: DOS NERVIOS ÓPTICOS de tinta cuelgan de ti y en
-			        su punta vive UN IRIS ROJO COLOSAL — su pupila se DILATA al
-			        morder y los filamentos de tinta corren desde la presa hasta el
-			        vacío. Drena 3% cada 6 t. A 1 de vida: el jefe, visto A TRAVÉS
-			        del iris.
+			La pluma que escribió la primera línea del mundo, cargada de luz.
+			MANTÉN el clic: cinco trazos convergen en UN RAYO DE FUSIÓN
+			(el arcoíris de aceite corre a lo largo, el núcleo arde blanco
+			y el ruido fluye de la boca a la punta — la técnica del dios).
+			A plena carga el daño se triplica.
+			'''
+		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
+	}
+
+	AuroraDeTinta: {
+		DisplayName: La Aurora de Tinta
+		Tooltip:
+			'''
+			Las alas creadas por código: diez plumas de luz prismática
+			tejidas en el aire.
+			De noche el prisma completo corre por el ala; de día la tinta
+			se aclara a blanco-oro.
+			Vuelo de polilla (rápido, sin penalidad), 240 de vuelo,
+			sin daño de caída y la aceleración aérea de la Emperatriz.
+			Si vistes alas reales, la aurora se pliega y eleva su
+			tiempo de vuelo al mínimo.
+			'''
+		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
+		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
+	}
+
+	// v6.100 — the new weapons of the session (clickers, auras and the
+	// definitive one — all made with THE HOUSE TOOLS: the forge, the
+	// pixel engine and the multilayer wiring).
+	SelloDeTinta: {
+		DisplayName: The Scribe's Seal
+		Tooltip: ""
+	}
+
+	ParpadeoDelEterno: {
+		DisplayName: The Eternal's Blink
+		Tooltip: ""
+	}
+
+	CoronaDePlumas: {
+		DisplayName: The Crown of Feathers
+		Tooltip: ""
+	}
+
+	DerrameDeTinta: {
+		DisplayName: The Ink Spill
+		Tooltip: ""
+	}
+
+	LaUltimaPalabra: {
+		DisplayName: The Last Word
+		Tooltip: ""
+	}
+
+	SombraDeLaPagina4: {
+		// v6.100: THE FORGED COPY of the original (all the tools)
+		DisplayName: The Shadow of the Page IV
+		Tooltip:
+			'''
+			The original's ritual, dressed with ALL the tools: the shadow tendril
+			hunts the boss at any distance, bites and drains 3% every 6 t.
+			THE VORTEX MAW of the pixel engine is its mouth — the event horizon
+			spinning at the tip, the noise veil over its body and the ink ring on the bitten boss.
+			At 1 HP: THE DEVOURING (the shadows' feast).
 			'''
 	}
 
@@ -2157,49 +2222,6 @@ Items: {
 			R8 — el rayo de energía: mantén el clic 0,75 s (la carga estelar) y
 			suelta la RÁFAGA de 5.600 px que barre tras el ratón — núcleo rosa,
 			espina dorada, filamentos dendríticos y latido de 14 Hz. 0 maná.
-			'''
-	}
-
-	SigiloDelEterno: {
-		DisplayName: El Sigilo del Eterno
-		Tooltip:
-			'''
-			La pluma del Eterno traza su sigilo donde apuntes: el trazo
-			ardiente, los SIETE glifos que estallan uno a uno, el destello
-			blanco — y se desmorona en ascuas. Todo lo que esté DENTRO
-			del círculo recibe el golpe. (Taller de efectos)
-			'''
-	}
-
-	LlamasDeSombra: {
-		DisplayName: Las Llamas de Sombra
-		Tooltip:
-			'''
-			La columna de fuego sombrío sube VIVA del suelo donde
-			apuntes: violeta profundo abajo, magenta arriba, la vena
-			blanca ardiendo al centro — el borde de las llamas respira
-			con ruido fractal de verdad. (Taller de efectos)
-			'''
-	}
-
-	EclipseVivo: {
-		DisplayName: El Eclipse Vivo
-		Tooltip:
-			'''
-			La nova del disco negro: se abre donde apuntes con su
-			corona de CATORCE rayos que giran y respiran, el limbo
-			blanco quemando el borde — el anillo que se expande golpea
-			todo lo que cruza. (Taller de efectos)
-			'''
-	}
-
-	BolsaTallerDeEfectos: {
-		DisplayName: La Bolsa del Taller de Efectos
-		Tooltip:
-			'''
-			Lo que nació del Taller de Efectos de la casa: el sigilo con
-			su acto, las llamas de ruido fractal, el eclipse de corona
-			viva y los sprites animados. Armas de PRUEBA: 0 maná.
 			'''
 	}
 
@@ -2437,6 +2459,16 @@ Items: {
 		DisplayName: Codice Habilidades
 		Tooltip: ""
 	}
+
+	CoroDeLosProfundos: {
+		DisplayName: Coro De Los Profundos
+		Tooltip: ""
+	}
+
+	PlumaDelEscribaSanto: {
+		DisplayName: Pluma Del Escriba Santo
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2597,10 +2629,19 @@ Projectiles: {
 	MiradaRayoProj.DisplayName: El Rayo de la Mirada
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
-	// v6.90 — EL TALLER DE EFECTOS (el motor de píxeles de la casa).
-	SigiloDelEternoProj.DisplayName: El Sigilo del Eterno
-	LlamasDeSombraProj.DisplayName: Las Llamas de Sombra
-	EclipseVivoProj.DisplayName: El Eclipse Vivo
+	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
+	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
+	AlasAuroraHalo.DisplayName: Alas Aurora Halo
+	VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
+	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
+	JefeMiradaProj.DisplayName: Jefe Mirada Proj
+	JefeRC2Proj.DisplayName: Jefe R C2 Proj
+	JefeRenglonesProj.DisplayName: Jefe Renglones Proj
+	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
+	PrimerTrazoHeld.DisplayName: Primer Trazo Held
+	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
+	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
+	TresCasasProjectile.DisplayName: Tres Casas Projectile
 }
 
 Buffs: {
@@ -2930,51 +2971,16 @@ Hambre: {
 
 	// v6.50.91 — THE NERVOUS ONE: restless, hungry, angry — "I want to
 	// eat and it's hungry". Not fear: appetite with a voice.
-	CetroDelAlba: {
-		DisplayName: The Scepter of Dawn
-		Tooltip:
-			'''
-			Dawn in your hand: its golden beam sweeps ahead with a white heart.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	CoronaDeSerafines: {
-		DisplayName: The Crown of Seraphs
-		Tooltip:
-			'''
-			Three rings of light orbit the bearer: the crown the seraphs lent.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	JuicioDelCielo: {
-		DisplayName: The Judgment of Heaven
-		Tooltip:
-			'''
-			Swords of light rain from the sky upon the mark: the sentence cannot be appealed.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	CampanaDelSantuario: {
-		DisplayName: The Bell of the Sanctuary
-		Tooltip:
-			'''
-			Its golden wave charges and bursts: the unclean are pushed out of the sanctuary.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	LamparaDelPeregrino: {
-		DisplayName: The Pilgrim's Lantern
-		Tooltip:
-			'''
-			Releases white fireflies that hunt those lurking in the shadow.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	PlumaDelEscribaSanto: {
 		DisplayName: The Holy Scribe's Quill
 		Tooltip:
@@ -2984,139 +2990,12 @@ Hambre: {
 			'''
 	}
 
-	ReliquiaDelAmanecer: {
-		DisplayName: The Relic of Daybreak
-		Tooltip:
-			'''
-			A puddle of daybreak on the mark: five seconds of light grinding those who step in.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	PupilaDelAbismo: {
-		DisplayName: The Pupil of the Abyss
-		Tooltip:
-			'''
-			The eye of the abyss opens its teal beam: the gaze that never blinks.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	GeometriaImposible: {
-		DisplayName: The Impossible Geometry
-		Tooltip:
-			'''
-			Four angles that should not exist orbit the bearer: every corner, an edge.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	MordidaDelEspacio: {
-		DisplayName: The Bite of Space
-		Tooltip:
-			'''
-			Fangs of void tear the sky above the mark: the flesh of space bites.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	LetaniaNebular: {
-		DisplayName: The Nebular Litany
-		Tooltip:
-			'''
-			A violet nebula settles on the mark: those who step in dissolve into stardust.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	SusurroDelVacio: {
-		DisplayName: The Whisper of the Void
-		Tooltip:
-			'''
-			A teal void pulls the living toward its heart and grinds them in silence.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	SemillaDeEstrellas: {
-		DisplayName: The Seed of Stars
-		Tooltip:
-			'''
-			It blooms on the mark and its crown bursts into twin violet and teal rings.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
 	CoroDeLosProfundos: {
 		DisplayName: The Choir of the Deep
 		Tooltip:
 			'''
 			Tentacle seeds fall and sing, hunting the living: none escapes twice.
 			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	HambrePrimigenia: {
-		DisplayName: The Primal Hunger
-		Tooltip:
-			'''
-			The Eternal's maw in miniature: drags the living into its black heart and devours.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	GuadanaDelVerdugo: {
-		DisplayName: The Executioner's Scythe
-		Tooltip:
-			'''
-			The executioner's violet blade flies to the mark and returns: its wake cuts twice.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	CadenasDelOlvido: {
-		DisplayName: The Chains of Oblivion
-		Tooltip:
-			'''
-			Links of oblivion fall upon the mark: they bind what they touch to the bottom of the sky.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	VeloDeCeniza: {
-		DisplayName: The Veil of Ash
-		Tooltip:
-			'''
-			A grey ash cloud covers the mark: what breathes inside slowly fades.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	EspinasNocturnas: {
-		DisplayName: The Night Thorns
-		Tooltip:
-			'''
-			Five needles of night orbit the bearer: the crown no one wears twice.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	EclipseInterior: {
-		DisplayName: The Inner Eclipse
-		Tooltip:
-			'''
-			A black sun ignites on the mark: its violet crown bursts and snuffs out the living.
-			THE DARKNESS HOUSE — forged by THE FORGE
-			'''
-	}
-
-	BolsaTresCasas: {
-		DisplayName: The Bag of the Three Houses
-		Tooltip:
-			'''
-			THE FORGE'S TWENTY weapons: the SACRED house (gold and light),
-			the COSMIC HORROR house (teal and violet) and the DARKNESS house
-			(violet and ink black) — permanent and reusable.
 			'''
 	}
 

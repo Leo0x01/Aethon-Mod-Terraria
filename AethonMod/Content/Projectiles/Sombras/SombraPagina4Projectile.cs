@@ -1,54 +1,82 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using AethonMod.Content.VFX;
 using AethonMod.Content.Globals;
+using AethonMod.Content.VFX;
+using AethonMod.Content.Weapons.Investigaciones;
 
 namespace AethonMod.Content.Projectiles.Sombras
 {
-    /// <summary>
-    /// SOMBRAPAGINA4PROJECTILE — v6.52.2 — LA SOMBRA DE LA PÁGINA IV:
-    /// EL IRIS COLOSAL (la letra: «crea un sombra de la pagina 3 y 4
-    /// pero para estos solo usa el iris no el ojo completo»).
-    ///
-    /// EL CUARTO TOMO — la página que prescindió del cuerpo entero: lo que
-    /// caza es UN SOLO IRIS GIGANTE (nuestro GrimorioHambriento_IrisRojo
-    /// ×4-6), colgado del portador por DOS NERVIOS ÓPTICOS (dos cuerdas
-    /// finas de sombra que se trenzan suavemente). NO hay ojo — el iris
-    /// ES la boca:
-    ///
-    ///   · LA PUPILA: un disco negro (SoftGlow tintado, en el lote
-    ///     vanilla ALFA — el único sitio donde el negro de verdad oscurece)
-    ///     que SE DILATA con el masticar y en el drenaje se abre EN
-    ///     BOCIO — el vacío que traga.
-    ///   · EL DESTRALLO: durante el drenaje, filamentos de tinta
-    ///     (StormLib.PerlinBolt) corren DESDE la presa HACIA la pupila —
-    ///     la esencia viaja por dentro del iris.
-    ///   · EL MORDISCO: el iris colosal se PRENSA sobre el jefe, la
-    ///     pupila al máximo (el jefe visto A TRAVÉS del iris) + la corona
-    ///     de garras del festín — y el drenaje de siempre (3%/6t) con la
-    ///     devoración a 1 HP (estilo 3, el motor intacto).
-    /// </summary>
+    // ======================================================================
+    //  SombraPagina4Projectile — v6.100 — LA COPIA FORJADA DEL
+    //  ORIGINAL, VESTIDA CON TODAS LAS HERRAMIENTAS.
+    //
+    //  LA LETRA DEL USUARIO: «crea la Sombra de la Página 4, una copia
+    //  de la Sombra de la Página, hecha con la forja, las técnicas VFX
+    //  y el motor de píxeles del taller de efectos». EL RITUAL ES EL
+    //  DEL ORIGINAL (La Sombra de la Página, tomo I): el tentáculo de
+    //  sombra EMERGE del portador, CAZA a la presa NO IMPORTA LA
+    //  DISTANCIA, Muerde y DRENA 3% cada 6 t — y a 1 de vida, LA
+    //  DEVORACIÓN (el festín de las sombras con su loot).
+    //
+    //  LO QUE LE VISTE LA FORJA (las herramientas de la casa):
+    //   · LA GARGANTA DEL VÓRTICE — el motor de píxeles VIVO en la
+    //     punta (GargantaVortice: el horizonte de sucesos con sus tres
+    //     brazos de acreción) GIRANDO CON EL RUMBO del tentáculo: la
+    //     boca de la sombra ES el vórtice.
+    //   · EL VELO DE RUIDO — la lámina de ruido procedural sobre todo
+    //     el cuerpo del tentáculo (el manto de sombra).
+    //   · LA MASA VIVA — SombrasLib.ColumnaViva + Masa + OjosDeMasa +
+    //     la BRUMA en dos capas (el cuerpo de la casa).
+    //   · EL ANILLO DE TINTA — la presa mordida queda MARCADA con el
+    //     doble anillo (violeta + teal) — el sello del festín.
+    //
+    //  LAS FASES: EMERGER (el brote DeGolpe, 26 t) → CAZA (el
+    //  steering: gira máx 0.26 rad/t hacia la presa SIEMPRE) →
+    //  MORDISCO (clavado a la presa: marca + dren 3%/6t → a 1 de vida
+    //  FaucesGlobalNPC.Iniciar LA DEVORACIÓN) → DISIPAR (se deshace).
+    // ======================================================================
     public class SombraPagina4Projectile : ModProjectile
     {
+        /// <summary>FASE: el brote emergiendo del portador.</summary>
         private const byte FASE_EMERGER = 0;
+
+        /// <summary>FASE: la caza de la presa.</summary>
         private const byte FASE_CAZA = 1;
+
+        /// <summary>FASE: el mordisco drenando.</summary>
         private const byte FASE_MORDISCO = 2;
+
+        /// <summary>FASE: la disipación.</summary>
         private const byte FASE_DISIPAR = 3;
 
-        private NPC Presa => Projectile.ai[0] <= 0 ? null : Main.npc[(int)Projectile.ai[0] - 1];
+        // EL MOTOR de píxeles: la garganta del vórtice (la boca).
+        private PixelFxPlayer _motor;
+
+        private static Texture2D[] _ruidoCache;
+
+        /// <summary>LA PRESA (ai[0] = whoAmI+1; 0 = libre).</summary>
+        private NPC Presa
+        {
+            get
+            {
+                if (Projectile.ai[0] <= 0f)
+                    return null;
+                return Main.npc[(int)Projectile.ai[0] - 1];
+            }
+        }
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        public override void SetStaticDefaults() { }
-
         public override void SetDefaults()
         {
-            Projectile.width = 60;
-            Projectile.height = 60;
+            Projectile.width = 56;
+            Projectile.height = 56;
             Projectile.tileCollide = false;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
@@ -56,351 +84,422 @@ namespace AethonMod.Content.Projectiles.Sombras
             Projectile.timeLeft = 900;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 25;
-            Projectile.extraUpdates = 2;
+            Projectile.extraUpdates = 2;          // la caza corre al triple
         }
 
-        // ==================================================================
-        //  LA VIDA (el motor del festín — intacto)
-        // ==================================================================
-
+        /// <summary>LA RAÍZ de la sombra: el pecho del portador.</summary>
         private Vector2 RaizDeSombra(Player dueño) => dueño.MountedCenter;
 
+        /// <summary>LA SOMBRA PROYECTADA en el suelo (para el charco):
+        /// baja hasta el primer sólido (34 tiles de caída).</summary>
         private Vector2 SombraProyectada(Player dueño)
         {
-            Vector2 c = dueño.MountedCenter + new Vector2(0, dueño.height * 0.45f);
-            int tx = (int)(c.X / 16f), ty = (int)(c.Y / 16f);
-            int pasos = 0;
-            while (pasos < 34 && !WorldGen.SolidTile(tx, ty)) { ty++; pasos++; }
-            Vector2 suelo = new Vector2(tx * 16f + 8f, ty * 16f - 4f);
-            return pasos < 34 ? suelo : c;
+            Vector2 desde = dueño.MountedCenter + new Vector2(0f, dueño.height * 0.45f);
+            int tx = (int)(desde.X / 16f);
+            int ty = (int)(desde.Y / 16f);
+            int i;
+            for (i = 0; i < 34; i++)
+            {
+                if (WorldGen.SolidTile(tx, ty, false))
+                    break;
+                ty++;
+            }
+            if (i >= 34)
+                return desde;                     // no hay suelo: sin charco
+            return new Vector2(tx * 16f + 8f, ty * 16f - 4f);
+        }
+
+        /// <summary>EL MOTOR: LA GARGANTA DEL VÓRTICE — el horizonte de
+        /// sucesos con sus tres brazos de acreción, la boca de la sombra.</summary>
+        private PixelFxPlayer Motor()
+        {
+            if (_motor == null)
+                _motor = new PixelFxPlayer(
+                    PixelFxCasas.GargantaVortice(444,
+                        PxColor.Rgb(150, 96, 235), PxColor.Rgb(28, 16, 46)),
+                    1.35f);
+            return _motor;
         }
 
         public override void AI()
         {
-            Projectile.ai[2]++;
+            Projectile.ai[2] += 1f;
             float t = Projectile.ai[2];
             NPC presa = Presa;
             Player dueño = Main.player[Projectile.owner];
             byte fase = (byte)Projectile.ai[1];
 
-            bool presaValida = presa != null && presa.active && presa.life > 0;
-            if (fase != FASE_DISIPAR && !presaValida)
+            // EL MOTOR late (solo cliente) — en el mordisco se ENGRANDECE
+            // (1.7: la boca abierta sobre la presa).
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
             {
+                Motor().Tick();
+                if (fase == FASE_DISIPAR)
+                    Motor().Fx.Stop();
+                Motor().Escala = fase == FASE_MORDISCO ? 1.7f : 1.35f;
+                Lighting.AddLight(Projectile.Center, new Vector3(0.58f, 0.36f, 0.92f) * 0.9f);
+            }
+
+            bool viva = presa != null && presa.active && presa.life > 0;
+            if (fase != FASE_DISIPAR && !viva)
+            {
+                // LA PRESA MURIÓ (o nunca hubo): la sombra se disipa.
                 Projectile.ai[1] = FASE_DISIPAR;
-                Projectile.ai[2] = 0;
+                Projectile.ai[2] = 0f;
                 fase = FASE_DISIPAR;
-                t = 0;
+                t = 0f;
             }
 
             switch (fase)
             {
+                // ========================================================
+                //  FASE 0 — EL EMERGER: el brote sale del pecho del
+                //  portador hacia la presa (la curva DeGolpe de la casa).
+                // ========================================================
                 case FASE_EMERGER:
                 {
                     Vector2 raiz = RaizDeSombra(dueño);
                     Vector2 rumbo = presa != null
-                        ? (presa.Center - raiz).SafeNormalize(-Vector2.UnitY)
+                        ? Utils.SafeNormalize(presa.Center - raiz, -Vector2.UnitY)
                         : -Vector2.UnitY;
-                    float avance = SombrasLib.DeGolpe(t / 26f);
-                    Projectile.Center = raiz + rumbo * (40f + 150f * avance);
+                    float brote = SombrasLib.DeGolpe(t / 26f);
+                    Projectile.Center = raiz + rumbo * (30f + 170f * brote);
                     Projectile.rotation = rumbo.ToRotation();
-                    if (t == 3) Sonar(SoundID.Item122.WithPitchOffset(-0.55f).WithVolumeScale(0.75f), Projectile.Center);
-                    // EL IRIS SE CENTRA: el destello de enfoque (la pupila clava la vista)
-                    if (t == 14 && Main.netMode != NetmodeID.Server)
-                        Sonar(SoundID.Item4.WithPitchOffset(-0.3f).WithVolumeScale(0.5f), Projectile.Center);
-                    if (t >= 26) { Projectile.ai[1] = FASE_CAZA; Projectile.ai[2] = 0; }
+                    if (t == 3f)
+                        Sonar(SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.75f),
+                            Projectile.Center);
+                    if (t >= 26f)
+                    {
+                        Projectile.ai[1] = FASE_CAZA;
+                        Projectile.ai[2] = 0f;
+                    }
                     break;
                 }
-                case FASE_CAZA:
-                {
-                    if (presa != null && presaValida)
-                    {
-                        Vector2 hacia = (presa.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);
-                        float dist = Vector2.Distance(presa.Center, Projectile.Center);
-                        float vel = MathHelper.Clamp(dist * 0.05f, 18f, 46f);
-                        float actual = Projectile.velocity.ToRotation();
-                        float deseado = hacia.ToRotation();
-                        float giro = MathHelper.WrapAngle(deseado - actual);
-                        Projectile.velocity = (actual + MathHelper.Clamp(giro, -0.22f, 0.22f)).ToRotationVector2() * vel;
-                        Projectile.rotation = deseado;
 
+                // ========================================================
+                //  FASE 1 — LA CAZA: gira hacia la presa SIEMPRE (máx
+                //  0.26 rad por tick — SIEMPRE llega, la regla del tomo).
+                // ========================================================
+                case FASE_CAZA:
+                    if (presa != null && viva)
+                    {
+                        Vector2 hacia = Utils.SafeNormalize(presa.Center - Projectile.Center, Vector2.UnitX);
+                        float rapidez = MathHelper.Clamp(
+                            Vector2.Distance(presa.Center, Projectile.Center) * 0.05f, 20f, 52f);
+                        float rumboActual = Projectile.velocity.ToRotation();
+                        float rumboPresa = hacia.ToRotation();
+                        float giro = MathHelper.WrapAngle(rumboPresa - rumboActual);
+                        Projectile.velocity = (rumboActual + MathHelper.Clamp(giro, -0.26f, 0.26f))
+                            .ToRotationVector2() * rapidez;
+                        Projectile.rotation = rumboPresa;
+
+                        // LA MARCA del festín cada 15 t (si es jefe).
                         if (t % 15f == 0f && FaucesGlobalNPC.EsJefe(presa))
                             FaucesGlobalNPC.Marcar(presa, 3);
 
+                        // EL CONTACTO: el mordisco.
                         if (Projectile.Hitbox.Intersects(presa.Hitbox))
                         {
                             Projectile.ai[1] = FASE_MORDISCO;
-                            Projectile.ai[2] = 0;
-                            Sonar(SoundID.NPCHit9.WithPitchOffset(-0.4f).WithVolumeScale(0.9f), Projectile.Center);
-                            Sonar(SoundID.Item122.WithPitchOffset(-0.65f).WithVolumeScale(0.6f), Projectile.Center);
+                            Projectile.ai[2] = 0f;
+                            Sonar(SoundID.NPCHit9.WithPitchOffset(-0.35f).WithVolumeScale(0.9f),
+                                Projectile.Center);
                         }
                     }
-                    if (t > 600) { Projectile.ai[1] = FASE_DISIPAR; Projectile.ai[2] = 0; }
+                    if (t > 600f)
+                    {
+                        Projectile.ai[1] = FASE_DISIPAR;
+                        Projectile.ai[2] = 0f;
+                    }
                     break;
-                }
+
+                // ========================================================
+                //  FASE 2 — EL MORDISCO: clavado a la presa, DRENA 3%
+                //  cada 6 t — y al 1 de vida, LA DEVORACIÓN.
+                // ========================================================
                 case FASE_MORDISCO:
-                {
                     if (presa != null && presa.active && presa.life > 0)
                     {
                         if (FaucesGlobalNPC.EnFauces(presa))
                         {
+                            // Otro tentáculo llegó primero: se disipa.
                             Projectile.ai[1] = FASE_DISIPAR;
-                            Projectile.ai[2] = 0;
+                            Projectile.ai[2] = 0f;
                             break;
                         }
-                        // EL IRIS SE PRENSA sobre el jefe (lo MIRA de cerca)
                         Projectile.Center = presa.Center;
                         Projectile.rotation = (presa.Center - RaizDeSombra(dueño)).ToRotation();
-
                         if (t % 5f == 0f && FaucesGlobalNPC.EsJefe(presa))
                             FaucesGlobalNPC.Marcar(presa, 3);
 
-                        // EL DRENAJE DEL CUARTO TOMO: 3% cada 6 t (la pupila bebe)
-                        if (Main.netMode != NetmodeID.MultiplayerClient && t > 18 && t % 6 == 0)
+                        // EL DREN (solo servidor/SP): 3% de la vida actual
+                        // (mínimo 25) cada 6 t — al 1 de vida, EL FESTÍN.
+                        if (Main.netMode == NetmodeID.MultiplayerClient || t <= 18f || t % 6f != 0f)
+                            break;
+                        NPC cabeza = FaucesGlobalNPC.DueñoDelPool(presa);
+                        if (cabeza == null || !cabeza.active || cabeza.life <= 1)
+                            break;
+                        float quitar = MathF.Max(cabeza.life * 0.03f, 25f);
+                        if (cabeza.life - quitar <= 1f)
                         {
-                            NPC dueñoPool = FaucesGlobalNPC.DueñoDelPool(presa);
-                            if (dueñoPool != null && dueñoPool.active && dueñoPool.life > 1)
-                            {
-                                float quitar = MathF.Max(dueñoPool.life * 0.03f, 30f);
-                                if (dueñoPool.life - quitar <= 1f)
-                                {
-                                    FaucesGlobalNPC.Iniciar(dueñoPool, 3);
-                                    Projectile.ai[1] = FASE_DISIPAR;
-                                    Projectile.ai[2] = 0;
-                                    break;
-                                }
-                                dueñoPool.life -= (int)quitar;
-                                dueñoPool.netUpdate = true;
-                                if (t % 36 == 0)
-                                    Sonar(SoundID.NPCHit9.WithPitchOffset(-0.1f).WithVolumeScale(0.5f), Projectile.Center);
-                            }
+                            FaucesGlobalNPC.Iniciar(cabeza, 3);   // LA DEVORACIÓN
+                            Projectile.ai[1] = FASE_DISIPAR;
+                            Projectile.ai[2] = 0f;
+                            break;
                         }
+                        cabeza.life -= (int)quitar;
+                        cabeza.netUpdate = true;
+                        if (t % 36f == 0f)
+                            Sonar(SoundID.NPCHit9.WithPitchOffset(-0.1f).WithVolumeScale(0.5f),
+                                Projectile.Center);
                     }
-                    else { Projectile.ai[1] = FASE_DISIPAR; Projectile.ai[2] = 0; }
+                    else
+                    {
+                        Projectile.ai[1] = FASE_DISIPAR;
+                        Projectile.ai[2] = 0f;
+                    }
                     break;
-                }
+
+                // ========================================================
+                //  FASE 3 — LA DISIPACIÓN: se deshace en bruma.
+                // ========================================================
                 case FASE_DISIPAR:
                 {
-                    if (t == 1) Sonar(SoundID.Item122.WithPitchOffset(0.2f).WithVolumeScale(0.3f), Projectile.Center);
+                    if (t == 1f)
+                        Sonar(SoundID.Item122.WithPitchOffset(0.2f).WithVolumeScale(0.3f),
+                            Projectile.Center);
                     Projectile.velocity *= 0.92f;
-                    if (t >= 52) Projectile.Kill();
+                    if (t >= 44f)
+                        Projectile.Kill();
                     break;
                 }
             }
 
-            if (Main.netMode != NetmodeID.Server && Projectile.ai[1] <= FASE_CAZA && Main.rand.NextBool(5))
+            // EL RASTRO de sombra (la caída de tinta del cuerpo).
+            if (Main.netMode != NetmodeID.Server && Projectile.ai[1] <= 1f && Main.rand.NextBool(6))
             {
-                int d = Dust.NewDust(Projectile.Center - new Vector2(28, 28), 56, 56,
-                    DustID.Shadowflame, 0f, -0.3f, 128, default, 0.55f);
-                Main.dust[d].noGravity = true;
+                int polvo = Dust.NewDust(Projectile.Center - new Vector2(24f, 24f),
+                    48, 48, 27, 0f, -0.3f, 128, default, 0.55f);
+                Main.dust[polvo].noGravity = true;
             }
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            _motor?.Dispose();
+            _motor = null;
         }
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            if (Projectile.ai[1] != FASE_CAZA) return base.Colliding(projHitbox, targetHitbox);
+            // EN LA CAZA el cuerpo es la COLUMNA ENTERA (la curva viva
+            // del tentáculo desde la raíz hasta la cabeza), no la caja.
+            if (Projectile.ai[1] != FASE_CAZA)
+                return base.Colliding(projHitbox, targetHitbox);
             Player dueño = Main.player[Projectile.owner];
-            Vector2 raiz = RaizDeSombra(dueño);
-            Vector2[] col = SombrasLib.Columna(raiz, Projectile.Center,
+            Vector2[] columna = SombrasLib.Columna(RaizDeSombra(dueño), Projectile.Center,
                 Main.GlobalTimeWrappedHourly, Projectile.whoAmI * 17 + 5, 10, 0.24f);
             float punto = 0f;
-            for (int i = 1; i < col.Length; i++)
+            for (int i = 1; i < columna.Length; i++)
+            {
                 if (Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
-                    col[i - 1], col[i], 10, ref punto))
+                        columna[i - 1], columna[i], 8f, ref punto))
                     return true;
+            }
             return false;
         }
-
-        // ==================================================================
-        //  EL DIBUJO — los nervios ópticos + EL IRIS COLOSAL
-        // ==================================================================
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
-
+            if (Main.netMode == NetmodeID.Server)
+                return false;
             VFXCore.CerrarLoteSiAbierto();
             try
             {
-                DrawLosNervios();
+                DrawTodo();
             }
-            catch { VFXCore.CerrarLoteSiAbierto(); }
+            catch
+            {
+                VFXCore.CerrarLoteSiAbierto();
+            }
             VFXCore.ReabrirLoteVanilla();
-
-            // EL IRIS COLOSAL + SU PUPILA van en el LOTE VANILLA (el
-            // contrato de los sprites, blindado: SIEMPRE lote vivo al salir).
-            try { DibujarElIrisColosal(); }
-            catch { VFXCore.ReabrirLoteVanilla(); }
             return false;
         }
 
-        /// <summary>LOS DOS NERVIOS ÓPTICOS (cuerdas finas trenzadas — la
-        /// espina doble del iris colgante).</summary>
-        private Vector2[] Nervio(float tiempo, int semilla, Vector2 raiz, float faseTrenza)
-        {
-            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 16, 0.2f, gancho: 0.42f);
-            var nervio = new Vector2[col.Length];
-            for (int i = 0; i < col.Length; i++)
-            {
-                float u = i / (float)(col.Length - 1);
-                Vector2 dir = col[Math.Min(i + 1, col.Length - 1)] - col[Math.Max(i - 1, 0)];
-                Vector2 perp = new Vector2(-dir.Y, dir.X);
-                if (perp.LengthSquared() < 0.001f) perp = Vector2.UnitX;
-                perp.Normalize();
-                float giro = faseTrenza + u * 6.5f + tiempo * 1.6f;
-                float radio = 7f * (0.3f + 0.7f * u) * (1f + 0.18f * MathF.Sin(tiempo * 2.1f + u * 5f));
-                nervio[i] = col[i] + perp * (MathF.Cos(giro) * radio);
-            }
-            return nervio;
-        }
-
-        private void DrawLosNervios()
+        /// <summary>EL VESTIDO COMPLETO (la masa viva + el velo + la
+        /// garganta del vórtice + el anillo de la presa).</summary>
+        private void DrawTodo()
         {
             float tiempo = Main.GlobalTimeWrappedHourly;
             int semilla = Projectile.whoAmI * 17 + 5;
             Player dueño = Main.player[Projectile.owner];
+            NPC presa = Presa;
             byte fase = (byte)Projectile.ai[1];
             float t = Projectile.ai[2];
-
             Vector2 raiz = RaizDeSombra(dueño);
-            float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 52f, 0f, 1f) : 1f;
-            float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
 
-            SombrasLib.Charco(SombraProyectada(dueño), 50f, 0.5f * disipa, tiempo, semilla);
+            // 1) EL CUERPO DE LA CASA — el charco bajo el portador, la
+            //    columna viva, la masa con ojos y la bruma en dos capas.
+            SombrasLib.Charco(SombraProyectada(dueño), 44f, 0.55f, tiempo, semilla);
+            Vector2[] columna = SombrasLib.ColumnaViva(raiz, Projectile.Center,
+                tiempo, semilla, 20, 0.24f, 0.5f);
+            float vive = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
+            SombrasLib.Masa(columna, 9f, 13f, 0.95f * vive, semilla, tiempo, 44f);
+            SombrasLib.BrumaColumna(columna, 46f, 0.62f * vive, tiempo, semilla, 16);
+            SombrasLib.BrumaColumna(columna, 30f, 0.46f * vive, tiempo, semilla + 97, 12);
 
-            // LOS DOS NERVIOS — finos (el iris cuelga de ellos)
-            Vector2[] nA = Nervio(tiempo, semilla, raiz, 0f);
-            Vector2[] nB = Nervio(tiempo, semilla + 31, raiz, MathHelper.Pi);
-            SombrasLib.Masa(nA, 3.5f, 7f, 0.85f * disipa * presencia, semilla, tiempo, grosorCentro: 16f);
-            SombrasLib.Masa(nB, 3.5f, 7f, 0.85f * disipa * presencia, semilla + 31, tiempo, grosorCentro: 16f);
-            SombrasLib.BrumaColumna(nA, 34f, 0.38f * disipa * presencia, tiempo, semilla, 10);
-            SombrasLib.BrumaColumna(nB, 34f, 0.38f * disipa * presencia, tiempo, semilla + 31, 10);
+            // 2) LOS OJOS de la masa — TODOS clavados en la presa.
+            Vector2 mirada = presa != null && presa.active
+                ? presa.Center
+                : dueño.MountedCenter + Projectile.velocity * 30f;
+            float apertura = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
+            SombrasLib.OjosDeMasa(columna, mirada, apertura * vive, semilla, tiempo, 7);
 
-            // EL MORDISCO: LA CORONA DE GARRAS alrededor del jefe (las
-            // pestañas del iris — el borde dentado del festín, en garra)
-            NPC presa = Presa;
+            // 3) EL VELO DE RUIDO sobre el cuerpo + la CABEZA vestida:
+            //    el orbe violeta, el NÚCLEO PULSAR teal girando al revés
+            //    y los tres satélites de tinta.
+            Vector2 cabeza = columna[^1];
+            Vector2 rumboCabeza = Utils.SafeNormalize(columna[^1] - columna[Math.Max(columna.Length - 4, 0)],
+                Projectile.rotation.ToRotationVector2());
+            try
+            {
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                Color violeta = new(150, 96, 235);
+                Color teal = new(80, 210, 170);
+                Vector2 medio = (raiz + cabeza) * 0.5f - Main.screenPosition;
+                float largo = Vector2.Distance(raiz, cabeza);
+
+                // EL VELO DE RUIDO (el manto del tentáculo).
+                Texture2D velo = Ruido(semilla, 4.4f);
+                Main.spriteBatch.Draw(velo, medio, null, violeta * (0.1f * vive),
+                    rumboCabeza.ToRotation(), Utils.Size(velo) * 0.5f,
+                    new Vector2(largo / 512f, 0.13671875f), SpriteEffects.None, 0f);
+
+                Vector2 cabezaPantalla = cabeza - Main.screenPosition;
+                float respira = 0.8f + 0.2f * MathF.Sin(tiempo * 7f);
+                Capa(Tex("GlowOrb"), cabezaPantalla, violeta * (0.5f * vive), 0f,
+                    74f * respira / 128f);
+                Capa(Tex("Procedural/PulsarCore"), cabezaPantalla, teal * (0.55f * vive),
+                    -tiempo * 2.4f, 23f / 64f);
+                for (int i = 0; i < 3; i++)
+                {
+                    float ang = tiempo * (2f + Azar(i) * 1.5f) + Azar(i + 7) * MathF.PI * 2f;
+                    Vector2 pos = cabezaPantalla
+                        + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * (34f + Azar(i) * 20f);
+                    Capa(Tex("SparkleStar"), pos,
+                        Color.White * (0.3f + 0.35f * Titila(i)) * vive, ang,
+                        (12f + 8f * Titila(i)) / 32f);
+                }
+
+                // EL ANILLO DE TINTA — la presa mordida marcada con el
+                // doble anillo (violeta + teal): el sello del festín.
+                if (fase == FASE_MORDISCO && presa != null && presa.active)
+                {
+                    Vector2 posPresa = presa.Center - Main.screenPosition;
+                    float radioPresa = MathF.Max(presa.width, presa.height) * 0.9f + 30f;
+                    VFXCore.RingQuad(posPresa, radioPresa, tiempo * 1.4f,
+                        VFXCore.TintAlfa(violeta, 0.45f * vive));
+                    VFXCore.RingQuad(posPresa, radioPresa * 0.7f, -tiempo * 1.9f,
+                        VFXCore.TintAlfa(teal, 0.3f * vive));
+                }
+                Main.spriteBatch.End();
+            }
+            catch
+            {
+                VFXCore.CerrarLoteSiAbierto();
+            }
+
+            // 4) LA GARGANTA DEL VÓRTICE — el motor de píxeles en la
+            //    cabeza, GIRANDO CON EL RUMBO del tentáculo: la boca de
+            //    la sombra ES el horizonte de sucesos.
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+            {
+                try
+                {
+                    PixelFxPlayer motor = Motor();
+                    motor.Fx.options.Angle = rumboCabeza.ToRotation();
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.PointClamp, DepthStencilState.None,
+                        RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                    motor.Draw(Main.spriteBatch, cabeza - Main.screenPosition
+                        - new Vector2(motor.Meta.Ox, motor.Meta.Oy) * motor.Escala);
+                    Main.spriteBatch.End();
+                }
+                catch
+                {
+                    VFXCore.CerrarLoteSiAbierto();
+                }
+            }
+
+            // 5) EL MORDISCO VIVO — la boca devoradora de la casa sobre
+            //    la presa + el destello rojo del dren.
             if (fase == FASE_MORDISCO && presa != null && presa.active)
             {
+                float intensidad = MathHelper.Clamp(t / 26f, 0f, 1f);
+                SombrasLib.Devorador(cabeza, presa, intensidad, vive, tiempo, semilla, columna);
                 VFXCore.Begin();
-                float pulso = 0.5f + 0.5f * MathF.Sin(tiempo * 5.5f);
-                float radioCorona = MathHelper.Clamp(presa.Size.Length() * 0.7f, 90f, 280f);
-                for (int k = 0; k < 9; k++)
-                {
-                    float ang = k * MathHelper.TwoPi / 9f + tiempo * 0.35f;
-                    Vector2 baseG = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
-                        (radioCorona * (1.16f - 0.12f * pulso));
-                    Vector2 hacia = presa.Center - baseG;
-                    SombrasLib.Garra(baseG, hacia, 30f * disipa, 0.75f * disipa,
-                        gancho: 0.5f + 0.3f * pulso);
-                }
+                VFXCore.Quad(cabeza, SombrasLib.Alfa(SombrasLib.Rojo, 0.42f * vive),
+                    new Vector2(110f, 110f), rumboCabeza.ToRotation());
                 VFXCore.FlushAdditive();
+                return;
             }
-        }
 
-        /// <summary>
-        /// EL IRIS COLOSAL: el sprite del iris rojo ×(4..6) con LA PUPILA
-        /// (disco negro en el lote vanilla ALFA — el único negro que
-        /// oscurece de verdad) que se DILATA con el masticar y en el
-        /// drenaje se abre EN BOCIO; los FILAMENTOS de tinta corren de la
-        /// presa a la pupila.
-        /// </summary>
-        private void DibujarElIrisColosal()
-        {
-            NPC presa = Presa;
-            Player dueño = Main.player[Projectile.owner];
-            byte fase = (byte)Projectile.ai[1];
-            float t = Projectile.ai[2];
-            float tiempo = Main.GlobalTimeWrappedHourly;
-            int semilla = Projectile.whoAmI * 17 + 5;
-            float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 52f, 0f, 1f) : 1f;
-            if (disipa <= 0.02f) return;
-
-            Texture2D iris = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo").Value;
-            Texture2D glow = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            if (iris == null || glow == null) return;
-
-            float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
-
-            // EL MASTICAR (el ciclo del festín — la pupila respira con él)
-            float masticar = CicloMasticar(t);
-            // LA DILATACIÓN: base + masticar; en MORDISCO la pupila SE ABRE
-            float dilata = fase == FASE_MORDISCO
-                ? MathHelper.Lerp(0.55f + 0.20f * masticar, 1.05f, MathHelper.Clamp(t / 40f, 0f, 1f))
-                : 0.5f + 0.18f * masticar;
-
-            // LA ESCALA DEL IRIS: grande y respirando (el coloso)
-            float escIris = (4.2f + 0.5f * masticar) * presencia *
-                (1f + 0.04f * MathF.Sin(tiempo * 2.6f));
-
-            Vector2 pos = Projectile.Center;
-            Vector2 pantalla = pos - Main.screenPosition;
-            Color luzIris = Color.Lerp(Lighting.GetColor(pos.ToTileCoordinates()),
-                new Color(232, 224, 244), 0.5f) * (disipa * presencia);
-
-            // 1) EL HALO del coloso (aditivo, encolado — volcado único al final)
-            VFXCore.Quad(pos, SombrasLib.Alfa(new Color(255, 120, 90), 0.16f * disipa * presencia),
-                new Vector2(190f * escIris * 0.28f, 190f * escIris * 0.28f), 0f, VFXCore.SoftGlow);
-
-            // 2) EL IRIS (vanilla — el sprite rojo gigante)
-            Main.spriteBatch.Draw(iris, pantalla, null, luzIris, 0f,
-                iris.Size() * 0.5f, escIris, SpriteEffects.None, 0f);
-
-            // 3) LA PUPILA — el disco negro EN ALFA (vanilla): el vacío.
-            //    SoftGlow tintado NEGRO en el lote alfa = el oscurecido
-            //    real (esto el aditivo NO puede hacerlo).
-            float escPupila = escIris * dilata;
-            Main.spriteBatch.Draw(glow, pantalla, null,
-                Microsoft.Xna.Framework.Color.Black * (0.92f * disipa * presencia), 0f,
-                glow.Size() * 0.5f, escPupila * 0.55f, SpriteEffects.None, 0f);
-
-            // 4) EL BRILLO de la mirada (la chispa del iris — vivo siempre)
-            Vector2 destello = pantalla + new Vector2(
-                -6f * escIris, -7f * escIris) * (1f - dilata * 0.4f);
-            Main.spriteBatch.Draw(glow, destello, null,
-                new Color(255, 240, 230, 200) * (0.75f * disipa * presencia), 0f,
-                glow.Size() * 0.5f, escIris * 0.16f, SpriteEffects.None, 0f);
-
-            // 5) LOS FILAMENTOS DEL DRENAJE: tinta que corre de la presa a
-            //    la pupila (PerlinBolt de verdad — la esencia viaja)
-            if (fase == FASE_MORDISCO && presa != null && presa.active && t > 18)
+            // 6) LA CABEZA DE BRUMA (en emerger/caza/disipar).
+            float brillo = fase switch
             {
-                int flick = StormLib.FlickTick(tiempo, 13f);
-                int hilos = 3;
-                for (int k = 0; k < hilos; k++)
-                {
-                    int seedH = Projectile.whoAmI * 41 + k;
-                    if (!StormLib.IsLit(seedH, flick, 0.65f)) continue;
-                    Vector2 desde = presa.Center + new Vector2(
-                        MathF.Cos(k * MathHelper.TwoPi / hilos + tiempo) * 18f,
-                        MathF.Sin(k * MathHelper.TwoPi / hilos + tiempo) * 18f);
-                    StormLib.PerlinBolt(Main.spriteBatch, desde - Main.screenPosition,
-                        pantalla, seedH, flick, 2.6f,
-                        new Color(255, 130, 100), new Color(255, 224, 214),
-                        0.75f * disipa, 0.20f);
-                }
-            }
+                FASE_EMERGER => 0.35f + 0.55f * SombrasLib.DeGolpe(t / 26f),
+                FASE_CAZA => 0.85f + 0.15f * MathF.Sin(tiempo * 8f),
+                _ => 0.5f * vive,
+            };
+            SombrasLib.CabezaDeBruma(cabeza, rumboCabeza, brillo * vive, vive, tiempo, semilla);
+            SombrasLib.Bruma(cabeza, 40f, 0.5f * vive, tiempo, semilla + 31,
+                new Vector2(MathF.Sin(tiempo * 0.9f) * 10f, -14f));
+        }
 
-            // EL VOLCADO ÚNICO del halo (el contrato blindado)
-            if (VFXCore.QuadCount > 0)
+        /// <summary>La lámina de ruido viva (el caché de las 20).</summary>
+        private static Texture2D Ruido(int semilla, float vel)
+        {
+            _ruidoCache ??= new Texture2D[20];
+            int i = (int)(Main.GlobalTimeWrappedHourly * vel + semilla * 0.37f) % 20;
+            if (i < 0) i += 20;
+            return _ruidoCache[i] ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/Ruido_" + i,
+                AssetRequestMode.ImmediateLoad).Value;
+        }
+
+        private static Texture2D Tex(string ruta) =>
+            ModContent.Request<Texture2D>("AethonMod/Content/Effects/" + ruta,
+                AssetRequestMode.ImmediateLoad).Value;
+
+        /// <summary>El azar determinista de la casa.</summary>
+        private static float Azar(int i)
+        {
+            float v = MathF.Sin(i * 12.9898f + 78.233f) * 43758.547f;
+            return v - MathF.Floor(v);
+        }
+
+        /// <summary>El titilar determinista (0..1, coseno suave).</summary>
+        private static float Titila(int i, float vel = 3.1f)
+            => 0.5f - 0.5f * MathF.Cos(Main.GlobalTimeWrappedHourly * vel + Azar(i) * MathF.PI * 2f);
+
+        private static void Capa(Texture2D tex, Vector2 pos, Color color, float rot, float esc)
+        {
+            if (color.A != 0 && esc > 0f)
+                Main.spriteBatch.Draw(tex, pos, null, color, rot, Utils.Size(tex) * 0.5f, esc,
+                    SpriteEffects.None, 0f);
+        }
+
+        /// <summary>El sonido blindado (la lección de las sombras: en
+        /// AI gated != Server ya suena en SP y clientes).</summary>
+        private static void Sonar(SoundStyle estilo, Vector2 pos)
+        {
+            try
             {
-                try { VFXCore.FlushAdditive(); }
-                finally { VFXCore.ReabrirLoteVanilla(); }
+                SoundEngine.PlaySound(in estilo, pos);
             }
-        }
-
-        /// <summary>El masticar del iris (el ciclo del festín — la dilatación).</summary>
-        private static float CicloMasticar(float t)
-        {
-            float m = (t - 18f) % 18f;
-            if (m < 6f) return MathHelper.Lerp(0.25f, 1f, m / 6f);
-            if (m < 10f) return MathHelper.Lerp(1f, 0.1f, SombrasLib.DeGolpe((m - 6f) / 4f));
-            return 0.2f + 0.12f * MathF.Sin(m * 1.7f);
-        }
-
-        private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
-        {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            catch { /* el sonido jamás tumba el ritual */ }
         }
     }
 }

@@ -67,23 +67,14 @@ namespace AethonMod.Content.Players
             // la entrega DIRECTA del kit, no solo dentro del cofre:
             // la lección v6.14.2 aplicada a la bolsa nueva).
             bolsas += Entregar(ModContent.ItemType<BolsaInvestigaciones>());
-            // v6.90 — LA BOLSA DEL TALLER DE EFECTOS aparte (la letra:
-            // «crea una bolsa nueva y dale la bolsa al jugador, esta
-            // bolsa tendras una copia de todas las armas que sean
-            // creadas con esta investigacion» — la investigación de los
-            // reels; también en la entrega DIRECTA
-            // del kit, la lección v6.14.2).
-            bolsas += Entregar(ModContent.ItemType
-                <global::AethonMod.Content.Items.Bolsas.BolsaTallerDeEfectos>());
-            // v6.97 — LA BOLSA DE LAS POCIONES MURIÓ (la letra: «puedes
-            // borrar la bolsa con todas las pociones») — fuera del kit
-            // y de la entrega directa.
-
-            // v6.97 — LA BOLSA DE LAS TRES CASAS aparte (la entrega de LA
-            // FORJA: las 20 armas nuevas — sagrada, horror cósmico y
-            // oscuridad — también en la entrega DIRECTA del kit).
-            bolsas += Entregar(ModContent.ItemType
-                <global::AethonMod.Content.Items.Bolsas.BolsaTresCasas>());
+            // v6.100 — LA BOLSA DEL TALLER Y LA DE LAS TRES CASAS
+            // MURIERON con sus armas (la letra: las armas creadas con
+            // la herramienta — las de la bolsa del taller y las de las
+            // tres casas — SE BORRAN). Sus dos favoritos (Coro y
+            // Pluma) y la mascota del taller viajan ahora en la
+            // ENTREGA DIRECTA del kit (ShardPlayer.EntregarSiNoTiene)
+            // — la regla permanente: nada nuevo queda sin llegar al
+            // jugador.
 
             // v6.51.0 — LA LLAVE DEL DESPERTAR sigue como entrega DIRECTA
             // (no es una bolsa — el probador de la progresión viaja suelto,

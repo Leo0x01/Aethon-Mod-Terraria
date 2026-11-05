@@ -24,7 +24,9 @@ namespace AethonMod.Content.Items.Altar
             Item.DefaultToPlaceableTile(ModContent.TileType
                 <global::AethonMod.Content.Tiles.AltarOfrendasTile>());
             Item.width = 34;
-            Item.height = 48;
+            // v6.100 — la caja del ítem mide el marco nuevo (34×50, el
+            // altar asentado con las velas vivas).
+            Item.height = 50;
             Item.rare = ItemRarityID.Quest;
             Item.value = 0;
             Item.maxStack = 99;

@@ -788,7 +788,7 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
         protected override string NombreCorto => "El Cofre del Arsenal";
         protected override Color ColorFiesta => new(255, 196, 107);
-        protected override string Nota => "Las veinticuatro bolsas del arsenal, una dentro de la otra";
+        protected override string Nota => "Las veinticinco bolsas del arsenal, una dentro de la otra";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -830,12 +830,11 @@ namespace AethonMod.Content.Items.Bolsas
             // «todos los items creados con estas investigaciones ponlos en
             // una nueva bolsa y dáselas al jugador».
             l.Add((ModContent.ItemType<BolsaInvestigaciones>(), 1));
-            // v6.90 — LA BOLSA DEL TALLER DE EFECTOS (bolsa 27 del cofre):
-            // lo que nació del Taller de Efectos de la casa (la letra:
-            // «crea una bolsa nueva y dale la bolsa al jugador, esta bolsa
-            // tendras una copia de todas las armas que sean creadas con
-            // esta investigacion»).
-            l.Add((ModContent.ItemType<BolsaTallerDeEfectos>(), 1));
+            // v6.100 — LA BOLSA DEL TALLER MURIÓ con el taller entero (la
+            // letra: las armas de la bolsa del taller y las de las tres
+            // casas SE BORRAN). Sus dos favoritos (Coro y Pluma) y la
+            // mascota del taller viven ahora en la ENTREGA DIRECTA del
+            // kit (ShardPlayer.EntregarSiNoTiene) — la regla permanente.
             // v6.97 — LA BOLSA DE LAS POCIONES MURIÓ (la letra: «puedes
             // borrar la bolsa con todas las pociones») — fuera del kit.
             return l;
@@ -934,98 +933,15 @@ namespace AethonMod.Content.Items.Bolsas
             //     con ellas y la llave del árbol VOLVIÓ a su dueño de la
             //     v6.86: el Códice de habilidades.
             l.Add((ModContent.ItemType<Items.Investigaciones.CodiceHabilidades>(), 1));
-            return l;
-        }
-    }
-
-    // ======================================================================
-    //  v6.90 — LA BOLSA DEL TALLER DE EFECTOS (bolsa 27)
-    //
-    //  La letra de la sesión: «crea una bolsa nueva y dale la bolsa al
-    //  jugador, esta bolsa tendras una copia de todas las armas que
-    //  sean creadas con esta investigacion» — la investigación de los
-    //  TALLER DE EFECTOS de la casa (el motor de píxeles propio + el
-    //  método «borrador, render, mirar, refinar» + los sprites
-    //  animados del taller). Sus frutos: las TRES armas del taller de
-    //  efectos (el sigilo trazado con su acto, las llamas de fBm real,
-    //  el eclipse de corona viva).
-    // ======================================================================
-    public class BolsaTallerDeEfectos : BolsaCategoria
-    {
-        protected override string Titulo => "La Bolsa del Taller de Efectos";
-
-        protected override string NombreCorto => "Bolsa del Taller de Efectos";
-
-        protected override Color ColorFiesta => new Color(255, 150, 220);
-
-        protected override string Nota => "Lo que nació de estudiar los efectos vivos (el motor de píxeles de la casa)";
-
-        protected override List<(int tipo, int pila)> Contenido()
-        {
-            var l = new List<(int, int)>();
-            // EL SIGILO DEL ETERNO (el acto completo: trazo, glifos,
-            // destello, ascuas).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.SigiloDelEterno>(), 1));
-            // LAS LLAMAS DE SOMBRA (la columna de fBm real que sube del
-            // suelo).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.LlamasDeSombra>(), 1));
-            // EL ECLIPSE VIVO (la nova del disco negro de corona blanca).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.EclipseVivo>(), 1));
-            // v6.91 — EL VÁSTAGO DEL ETERNO (la mascota del Taller — el
-            // librito alado con SUS CICLOS ANIMADOS: idle y vuelo desde
-            // una imagen base).
-            l.Add((ModContent.ItemType<Items.Llamados.VastagoDelEternoItem>(), 1));
-            return l;
-        }
-    }
-
-    // ======================================================================
-    //  v6.97 — LA BOLSA DE LAS TRES CASAS (bolsa 29): LA ENTREGA DE LA
-    //  FORJA. La letra: «usa tu nueva habilidad de la forja para crear
-    //  un nuevo grupo de armas con diferentes efectos y vfx, intenta
-    //  que sean vistosos y que sean tipo sagrado, horror cosmico y
-    //  oscuridad, crea al menos 20 armas nuevas» — LAS VEINTE, una por
-    //  una: la casa sagrada (oro y luz), la del horror cósmico (teal y
-    //  violeta) y la de la oscuridad (violeta y negro tinta). La
-    //  semántica es LA DE LA CASA: permanente, garantía (solo lo que
-    //  falte) y clic derecho para desplegar.
-    // ======================================================================
-    public class BolsaTresCasas : BolsaCategoria
-    {
-        protected override string Titulo => "La Bolsa de las Tres Casas";
-
-        protected override string NombreCorto => "Bolsa de las Tres Casas";
-
-        protected override Color ColorFiesta => new Color(196, 138, 255);
-
-        protected override string Nota => "Las 20 armas de la Sagrada, el Horror Cósmico y la Oscuridad — LA FORJA";
-
-        protected override List<(int tipo, int pila)> Contenido()
-        {
-            var l = new List<(int, int)>();
-            // === LA CASA SAGRADA (el oro y la luz blanca) ===
-            l.Add((ModContent.ItemType<Weapons.TresCasas.CetroDelAlba>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.CoronaDeSerafines>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.JuicioDelCielo>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.CampanaDelSantuario>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.LamparaDelPeregrino>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.PlumaDelEscribaSanto>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.ReliquiaDelAmanecer>(), 1));
-            // === LA CASA DEL HORROR CÓSMICO (el teal y el violeta) ===
-            l.Add((ModContent.ItemType<Weapons.TresCasas.PupilaDelAbismo>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.GeometriaImposible>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.MordidaDelEspacio>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.LetaniaNebular>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.SusurroDelVacio>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.SemillaDeEstrellas>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.CoroDeLosProfundos>(), 1));
-            // === LA CASA DE LA OSCURIDAD (el violeta y el negro tinta) ===
-            l.Add((ModContent.ItemType<Weapons.TresCasas.HambrePrimigenia>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.GuadanaDelVerdugo>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.CadenasDelOlvido>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.VeloDeCeniza>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.EspinasNocturnas>(), 1));
-            l.Add((ModContent.ItemType<Weapons.TresCasas.EclipseInterior>(), 1));
+            // v6.100 — LOS FRUTOS NUEVOS DE LA INVESTIGACIÓN (la sesión de
+            // los clickers, las auras y la definitiva — todos hechos con
+            // LAS HERRAMIENTAS de la casa: la forja, el motor de píxeles y
+            // el cableado multicapa):
+            l.Add((ModContent.ItemType<Weapons.Clicker.SelloDeTinta>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Clicker.ParpadeoDelEterno>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
             return l;
         }
     }

@@ -2,36 +2,40 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Weapons.Investigaciones;
 
 namespace AethonMod.Content.Projectiles.Clicker
 {
     /// <summary>
-    /// ClickerGolpeProjectile — v6.82 — EL GOLPE DEL CLIC (la casa).
+    /// ClickerGolpeProjectile — v6.82 → v6.100 — EL GOLPE DEL CLIC.
     ///
     /// EL CORAZÓN DE LA CLASE CLICKER de la casa (la investigación del
     /// Clicker Class real): el clic ES el uso del arma — y ESTE
     /// proyectil es el golpe que cae DONDE clickeas (Main.MouseWorld):
-    /// hitbox 30×30, atraviesa TODO, vive 10 ticks — el pipeline de
-    /// vanilla lo sincroniza solo en MP.
+    /// hitbox 30×30, atraviesa TODO — el pipeline de vanilla lo
+    /// sincroniza solo en MP.
     ///
-    /// LOS TRES ESTILOS (ai[0]):
-    ///   0 · EL CLIC — el golpe normal: el PING del anillo (la firma
-    ///      del Clicker Class: partículas en círculo expandiéndose del
-    ///      punto del clic) + su núcleo de luz.
+    /// LOS CINCO ESTILOS (ai[0]):
+    ///   0 · EL CLIC — el golpe normal: el PING del anillo + su núcleo.
     ///   1 · LA CONSTELACIÓN (el Compás Rúnico, cada 8 clics): 5 rayos
-    ///      de StormLib convergiendo en el punto desde las estrellas
-    ///      vecinas + el destello — el cielo entero responde al combo.
+    ///      de StormLib convergiendo + el destello.
     ///   2 · LA NOVA (la Furia Solar, cada 12 clics): la flor de fuego
-    ///      de PyraLib.Estallido + el pulso de onda + el flash — el
-    ///      estallido solar del combo, con golpe ×3 y hitbox ancha.
+    ///      de PyraLib + el pulso + el flash — golpe ×3.
+    ///   3 · v6.100 — LA TINTA (el Sello del Escriba, cada 10 sellos):
+    ///      EL NOVA ACTO del MOTOR DE PÍXELES (la puerta del taller)
+    ///      estallando en el punto + el doble anillo violeta/teal —
+    ///      golpe ×3 con 52 ticks de acto completo.
+    ///   4 · v6.100 — EL OJO (el Parpadeo del Eterno, cada 14): LA
+    ///      GARGANTA DEL VÓRTICE del motor de píxeles ATRAYENDO a los
+    ///      vivos (succión 190 px) + los anillos contra-rotando —
+    ///      golpe ×3 en área con succión.
     ///
     /// EL DAÑO: cada golpe pega el daño del arma (los especiales, el
-    /// múltiplo que el arma pasa al nacer). Todo lo demás es VISUAL: el
-    /// ping, los rayos y la nova viven en el PreDraw (el lote aditivo de
-    /// la casa — cero sprites propios, cero estado).
+    /// múltiplo que el arma pasa al nacer). Todo lo demás es VISUAL.
     /// </summary>
     public class ClickerGolpeProjectile : ModProjectile
     {
@@ -44,8 +48,24 @@ namespace AethonMod.Content.Projectiles.Clicker
         /// <summary>Estilo 2: LA NOVA (la flor de fuego + flash).</summary>
         public const byte EstiloNova = 2;
 
-        /// <summary>La vida total del golpe (la línea de tiempo de los VFX).</summary>
-        private const int Vida = 10;
+        /// <summary>v6.100 — Estilo 3: LA TINTA (el NovaActo de píxeles).</summary>
+        public const byte EstiloTinta = 3;
+
+        /// <summary>v6.100 — Estilo 4: EL OJO (la GargantaVortice con succión).</summary>
+        public const byte EstiloOjo = 4;
+
+        /// <summary>La vida total del golpe según su estilo (la línea de
+        /// tiempo de los VFX: los actos de píxeles viven su acto entero).</summary>
+        private int VidaTotal => Estilo switch
+        {
+            EstiloTinta => 52,
+            EstiloOjo => 46,
+            _ => 10,
+        };
+
+        /// <summary>v6.100 — EL MOTOR de píxeles de los estilos especiales
+        /// (la tinta: NovaActo · el ojo: GargantaVortice).</summary>
+        private PixelFxPlayer _motor;
 
         public override void SetStaticDefaults()
         {
@@ -59,12 +79,12 @@ namespace AethonMod.Content.Projectiles.Clicker
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = Vida;
+            Projectile.timeLeft = VidaTotal;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.extraUpdates = 0;
             Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = Vida;
+            Projectile.localNPCHitCooldown = VidaTotal;
         }
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
@@ -77,6 +97,12 @@ namespace AethonMod.Content.Projectiles.Clicker
 
         public override void AI()
         {
+            // v6.100 — LA VIDA del acto: los estilos de píxeles viven su
+            // acto entero (52/46 ticks) — el tope por si vanilla le dio
+            // más tiempo de vida del nacimiento.
+            if (Projectile.timeLeft > VidaTotal)
+                Projectile.timeLeft = VidaTotal;
+
             // EL NACIMIENTO: el ping de partículas en círculo (LA firma
             // del Clicker Class — 20 chispas radiales del punto clickeado)
             // y los JUICIOS de los especiales (el flash y el kick suave
@@ -112,18 +138,80 @@ namespace AethonMod.Content.Projectiles.Clicker
                     {
                         OndaLib.Flash(new Color(170, 225, 255), 0.10f, 6);
                     }
+                    // v6.100 — LA TINTA estalla (violeta) y EL OJO se abre
+                    // (púrpura profundo, con el rugido grave del vórtice).
+                    else if (Estilo == EstiloTinta)
+                    {
+                        OndaLib.Flash(new Color(190, 130, 250), 0.13f, 7);
+                        Pantalla.Sacudir(1.8f, 0.16f, "AethonClickerTinta");
+                    }
+                    else if (Estilo == EstiloOjo)
+                    {
+                        OndaLib.Flash(new Color(120, 70, 200), 0.18f, 9);
+                        Pantalla.Sacudir(2.6f, 0.22f, "AethonClickerOjo");
+                        SoundStyle rugido = SoundID.Item122.WithPitchOffset(-0.5f);
+                        SoundEngine.PlaySound(in rugido, Projectile.Center);
+                    }
+                }
+            }
+
+            // v6.100 — LOS MOTORES DE PÍXELES laten su acto (solo cliente)
+            // y se apagan suave en el fade final.
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ &&
+                (Estilo == EstiloTinta || Estilo == EstiloOjo))
+            {
+                Motor(Estilo).Tick();
+                if (Projectile.timeLeft <= 10)
+                    Motor(Estilo).Fx.Stop();
+            }
+
+            // v6.100 — LA SUCCIÓN DEL OJO: la garganta del vórtice ATRAE
+            // a los vivos hacia su boca (190 px, server-side).
+            if (Estilo == EstiloOjo && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                float atraccion = 190f;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || !n.CanBeChasedBy())
+                        continue;
+                    Vector2 rel = n.Center - Projectile.Center;
+                    float dist = rel.Length();
+                    if (dist > atraccion || dist < 8f)
+                        continue;
+                    n.velocity += -rel / dist * 0.35f;
                 }
             }
 
             // LA LUZ del punto del clic (la mancha de luz que lee el mundo).
-            if (Main.netMode != NetmodeID.Server)
+            if (Main.netMode != NetmodeID.Server && Estilo != EstiloTinta && Estilo != EstiloOjo)
             {
                 Color c = ColorDelEstilo(1f);
-                float k = 1f - Projectile.timeLeft / (float)Vida;   // 0→1
+                float k = 1f - Projectile.timeLeft / (float)VidaTotal;   // 0→1
                 float intensidad = (1f - k) * (Estilo == EstiloClic ? 0.8f : 1.6f);
                 Lighting.AddLight(Projectile.Center,
                     c.R / 255f * intensidad, c.G / 255f * intensidad, c.B / 255f * intensidad);
             }
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            _motor?.Dispose();
+            _motor = null;
+        }
+
+        /// <summary>v6.100 — EL MOTOR de píxeles del estilo: la tinta es
+        /// EL NOVA ACTO (el acto completo del taller) y el ojo es LA
+        /// GARGANTA DEL VÓRTICE (el horizonte de sucesos).</summary>
+        private PixelFxPlayer Motor(byte estilo)
+        {
+            if (_motor == null)
+                _motor = estilo == EstiloTinta
+                    ? new PixelFxPlayer(PixelFxCasas.NovaActo(Semilla,
+                        PxColor.Rgb(170, 110, 240), PxColor.Rgb(70, 40, 110)), 2.2f)
+                    : new PixelFxPlayer(PixelFxCasas.GargantaVortice(Semilla,
+                        PxColor.Rgb(150, 90, 235), PxColor.Rgb(30, 18, 50)), 2.4f);
+            return _motor;
         }
 
         /// <summary>El color del estilo (la paleta del arma que lo llamó).</summary>
@@ -133,6 +221,8 @@ namespace AethonMod.Content.Projectiles.Clicker
             {
                 EstiloConstelacion => new Color(140, 225, 255) * brillo,
                 EstiloNova => new Color(255, 190, 90) * brillo,
+                EstiloTinta => new Color(185, 120, 245) * brillo,
+                EstiloOjo => new Color(150, 90, 235) * brillo,
                 _ => new Color(200, 235, 255) * brillo,
             };
         }
@@ -141,7 +231,7 @@ namespace AethonMod.Content.Projectiles.Clicker
         {
             if (Main.gameMenu) return false;
 
-            float edad = 1f - Projectile.timeLeft / (float)Vida;    // 0→1
+            float edad = 1f - Projectile.timeLeft / (float)VidaTotal;    // 0→1
             // LAS COORDENADAS DE LA CASA: el lote aditivo abre con la
             // GameViewMatrix (zoom, sin traslación de pantalla) — las
             // posiciones viajan en coords de PANTALLA (el patrón de TODOS
@@ -161,6 +251,10 @@ namespace AethonMod.Content.Projectiles.Clicker
                         DibujarConstelacion(centro, edad, t);
                     else if (Estilo == EstiloNova)
                         DibujarNova(centro, edad, t);
+                    else if (Estilo == EstiloTinta)
+                        DibujarTinta(centro, edad, t);
+                    else if (Estilo == EstiloOjo)
+                        DibujarOjo(centro, edad, t);
                     else
                         DibujarClic(centro, edad, t);
                 }
@@ -260,6 +354,68 @@ namespace AethonMod.Content.Projectiles.Clicker
                 VFXCore.Capsule(centro, 0f, (30f - edad * 20f), 0f,
                     VFXCore.TintAlfa(new Color(255, 252, 240), 0.90f * corazon));
             }
+        }
+
+        // ------------------------------------------------------------------
+        //  v6.100 — ESTILO 3 — LA TINTA: el NovaActo del motor de píxeles
+        //  (el acto COMPLETO del taller estallando donde cayó el sello)
+        //  + el doble anillo violeta/teal del contrato roto.
+        // ------------------------------------------------------------------
+
+        private void DibujarTinta(Vector2 centro, float edad, float t)
+        {
+            Main.spriteBatch.End();
+            try
+            {
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.PointClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                PixelFxPlayer motor = Motor(EstiloTinta);
+                motor.Draw(Main.spriteBatch, centro
+                    - new Vector2(motor.Meta.Ox, motor.Meta.Oy) * motor.Escala);
+            }
+            catch { /* el motor jamás tumba el golpe */ }
+            Main.spriteBatch.End();
+            VFXCore.AbrirAdditive();
+
+            // EL DOBLE ANILLO del estallido de tinta (violeta fuera, teal
+            // contra-el-reloj dentro).
+            VFXCore.RingQuad(centro, 30f + edad * 150f, edad * 1.4f,
+                VFXCore.TintAlfa(new Color(185, 120, 245), 0.55f * (1f - edad)));
+            VFXCore.RingQuad(centro, 18f + edad * 96f, -edad * 1.9f,
+                VFXCore.TintAlfa(new Color(80, 230, 190), 0.35f * (1f - edad)));
+        }
+
+        // ------------------------------------------------------------------
+        //  v6.100 — ESTILO 4 — EL OJO: la GargantaVortice del motor de
+        //  píxeles (el horizonte de sucesos ATRAYENDO) + los anillos
+        //  contra-rotando de la revelación.
+        // ------------------------------------------------------------------
+
+        private void DibujarOjo(Vector2 centro, float edad, float t)
+        {
+            Main.spriteBatch.End();
+            try
+            {
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.PointClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                PixelFxPlayer motor = Motor(EstiloOjo);
+                motor.Draw(Main.spriteBatch, centro
+                    - new Vector2(motor.Meta.Ox, motor.Meta.Oy) * motor.Escala);
+            }
+            catch { /* el motor jamás tumba el golpe */ }
+            Main.spriteBatch.End();
+            VFXCore.AbrirAdditive();
+
+            // LA REVELACIÓN: el anillo que abre RÁPIDO y frena + el anillo
+            // interior respirando (la pupila dilatándose).
+            float abre = MathF.Min(1f, edad * 6f);
+            VFXCore.RingQuad(centro, (14f + 150f * abre) * (1f - edad * 0.3f), t * 0.8f,
+                VFXCore.TintAlfa(new Color(150, 90, 235), 0.5f * (1f - edad)));
+            VFXCore.RingQuad(centro, (10f + 96f * abre) * (1f + 0.05f * MathF.Sin(t * 9f)),
+                -t * 1.3f,
+                VFXCore.TintAlfa(new Color(220, 190, 255), 0.3f * (1f - edad)));
         }
     }
 }

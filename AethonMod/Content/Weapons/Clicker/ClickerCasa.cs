@@ -55,6 +55,12 @@ namespace AethonMod.Content.Weapons.Clicker
         Runico = 0,
         /// <summary>Perlas cardinales (la Furia Solar): 10 perlas doradas.</summary>
         Solar = 1,
+        /// <summary>v6.100 — Sellos de tinta orbitando (el Sello del Escriba):
+        /// 6 sellos violetas con su lluvia hacia adentro.</summary>
+        Tinta = 2,
+        /// <summary>v6.100 — El ojo que parpadea (el Parpadeo del Eterno):
+        /// 4 pestañas de luz + el destino marcado.</summary>
+        Ojo = 3,
     }
 
     /// <summary>
@@ -276,6 +282,50 @@ namespace AethonMod.Content.Weapons.Clicker
                     Quad(VFXCore.SoftGlow, pos, new Vector2(9f, 9f) * late, 0f,
                         VFXCore.TintAlfa(c, 0.50f * late * alfa));
                 }
+            }
+            else if (arma.Estilo == EstiloClicker.Tinta)
+            {
+                // v6.100 — EL SELLO DEL ESCRIBA: 6 sellos de tinta viajan
+                // por el aro CONTRA el reloj, latiendo; y la tinta LLOVE
+                // hacia el centro (los trazos que caen del contrato — cada
+                // sello suelta su gota hacia adentro).
+                for (int i = 0; i < 6; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 6f - t * 0.35f;
+                    Vector2 pos = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio);
+                    float late = 0.65f + 0.35f * MathF.Sin(t * 3f + i * 1.05f);
+                    Quad(VFXCore.SoftGlow, pos, new Vector2(11f, 11f) * late, ang,
+                        VFXCore.TintAlfa(arma.Color, 0.55f * late * alfa));
+                    // LA GOTA: nace del sello y cae hacia el centro.
+                    float cae = (t * 0.5f + i * 0.17f) % 1f;
+                    Vector2 posGota = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                        * radio * (1f - cae);
+                    Quad(VFXCore.SoftGlow, posGota, new Vector2(4f, 7f), ang,
+                        VFXCore.TintAlfa(new Color(120, 60, 190), 0.45f * (1f - cae) * alfa));
+                }
+            }
+            else if (arma.Estilo == EstiloClicker.Ojo)
+            {
+                // v6.100 — EL PARPADEO DEL ETERNO: 4 pestañas de luz
+                // orbitando lentamente (el ojo que no cierra del todo) +
+                // EL DESTINO: un destello hacia el cursor cuando está
+                // dentro del contrato (la mirada que te sigue).
+                for (int i = 0; i < 4; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 4f + t * 0.12f;
+                    float late = 0.3f + 0.7f * MathF.Abs(MathF.Sin(t * 1.6f + i * 0.9f));
+                    Vector2 pos = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio);
+                    Quad(VFXCore.SoftGlow, pos, new Vector2(8f, 16f) * late, ang,
+                        VFXCore.TintAlfa(Color.Lerp(arma.Color, Color.White, 0.4f),
+                            0.55f * late * alfa));
+                }
+                Vector2 destino = ClickerCasa.CursorDentro
+                    ? Main.MouseWorld - Main.screenPosition : centro;
+                Quad(VFXCore.SoftGlow, Vector2.Lerp(centro, destino, 0.35f),
+                    new Vector2(14f, 14f) * (0.8f + 0.2f * MathF.Sin(t * 5f)), t,
+                    VFXCore.TintAlfa(new Color(210, 180, 255), 0.35f * alfa));
             }
 
             // LA LUZ DEL CONTRATO: un baño tenue del color del arma sobre

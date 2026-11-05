@@ -1306,6 +1306,31 @@ namespace AethonMod.Content.Players
                 // post-lunar queda para quien lo pierda).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Accessories.EstandarteDelJuicioItem>());
+                // v6.100 — LOS FAVORITOS DE LA PURGA: el Taller y las
+                // Tres Casas murieron con sus armas, pero sus DOS
+                // favoritos (el canon de SPRITES-FAVORITOS) y la mascota
+                // del taller siguen VIVOS — y llegan SOLOS (la regla
+                // permanente: nada nuevo queda sin llegar al jugador).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.TresCasas.CoroDeLosProfundos>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.TresCasas.PlumaDelEscribaSanto>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Llamados.VastagoDelEternoItem>());
+                // v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (los clickers,
+                // las auras y la definitiva — todas hechas con LAS
+                // HERRAMIENTAS de la casa): también en la Bolsa de las
+                // Investigaciones, pero la regla es la regla — DIRECTO.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Clicker.SelloDeTinta>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Clicker.ParpadeoDelEterno>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Auras.CoronaDePlumas>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Auras.DerrameDeTinta>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Definitivas.LaUltimaPalabra>());
 
                 if (entregados > 0)
                 {

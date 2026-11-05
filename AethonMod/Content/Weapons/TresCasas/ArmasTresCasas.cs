@@ -9,28 +9,24 @@ using AethonMod.Content.Projectiles.TresCasas;
 namespace AethonMod.Content.Weapons.TresCasas
 {
     // ======================================================================
-    //  LAS VEINTE ARMAS DE LAS TRES CASAS (v6.97) — LA ENTREGA DE LA
-    //  FORJA.
+    //  LOS FAVORITOS DE LAS TRES CASAS (v6.100) — LA PURGA DE LA FORJA.
     //
-    //  LA LETRA DEL USUARIO: «usa tu nueva habilidad de la forja para
-    //  crear un nuevo grupo de armas con diferentes efectos y vfx,
-    //  intenta que sean vistosos y que sean tipo sagrado, horror
-    //  cosmico y oscuridad, crea al menos 20 armas nuevas».
+    //  LA LETRA DEL USUARIO (v6.100): las armas creadas con la
+    //  herramienta — las de la bolsa del Taller de Efectos y las de la
+    //  bolsa de las Tres Casas — SE BORRAN. Las veinte armas de la forja
+    //  v6.97 y las tres del taller v6.92 murieron; SOLO quedan los dos
+    //  favoritos del usuario (los del canon de SPRITES-FAVORITOS):
     //
-    //  LAS TRES CASAS (el flavor de la forja):
-    //   · LA CASA SAGRADA — el oro y la luz blanca: las armas del alba,
-    //     los serafines y el juicio. (7 armas)
-    //   · LA CASA DEL HORROR CÓSMICO — el teal y el violeta: las armas
-    //     del abismo, la geometría imposible y las estrellas muertas.
-    //     (7 armas)
-    //   · LA CASA DE LA OSCURIDAD — el violeta y el negro tinta: las
-    //     armas del verdugo, la ceniza y el eclipse. (6 armas)
+    //   · LA PLUMA DEL ESCRIBA SANTO — el trazo blanco-dorado que vuela
+    //     a la marca y VUELVE cortando dos veces.
+    //   · EL CORO DE LOS PROFUNDOS — las semillas de tentáculo violeta
+    //     que caen y CANTAN persiguiendo a los vivos.
     //
-    //  LA MAQUINARIA: cada arma es UNA línea de datos (daño · uso ·
-    //  estilo del motor · variante · SUS dos tintas) — TODO el VFX y el
-    //  comportamiento vive en EL FUEGO (TresCasasProjectile: el haz ·
-    //  la corona · la lluvia · la nova · el vórtice · el enjambre · la
-    //  estela · la zona). Regla de la casa: SIN COSTE DE MANÁ (v6.35).
+    //  LA MAQUINARIA (intacta): cada arma es UNA línea de datos (daño ·
+    //  uso · estilo del motor · variante · SUS dos tintas) — TODO el VFX
+    //  y el comportamiento vive en EL FUEGO (TresCasasProjectile, ahora
+    //  vestido por capas + el motor de píxeles de la v6.99). Regla de la
+    //  casa: SIN COSTE DE MANÁ (v6.35).
     // ======================================================================
     public abstract class ArmaTresCasas : ModItem
     {
@@ -104,73 +100,15 @@ namespace AethonMod.Content.Weapons.TresCasas
             tooltips.Add(new TooltipLine(Mod, "TresCasasResena",
                 $"[c/{hex}:{Resena}]"));
             tooltips.Add(new TooltipLine(Mod, "TresCasasCasa",
-                $"[c/{hex2}:(Las Tres Casas — la entrega de LA FORJA · SIN COSTE DE MANÁ)]"));
+                $"[c/{hex2}:(Los favoritos de la forja · SIN COSTE DE MANÁ)]"));
         }
     }
 
     // ====================================================================
-    //  LA CASA SAGRADA — el oro y la luz blanca (7 armas)
+    //  LA CASA SAGRADA — el favorito del canon
     // ====================================================================
 
-    /// <summary>1 — EL CETRO DEL ALBA: el haz dorado que barre el frente.</summary>
-    public class CetroDelAlba : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_HAZ;
-        protected override Color Tinta => new(255, 208, 96);
-        protected override Color Tinta2 => new(255, 248, 224);
-        protected override int Dano => 120;
-        protected override int Uso => 34;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "EL ALBA: un haz de luz dorada que barre el frente — tres capas de sol con el corazón blanco";
-    }
-
-    /// <summary>2 — LA CORONA DE LOS SERAFINES: los aros dorados orbitando.</summary>
-    public class CoronaDeSerafines : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_CORONA;
-        protected override int Variante => 0;
-        protected override Color Tinta => new(255, 216, 120);
-        protected override Color Tinta2 => new(255, 250, 230);
-        protected override int Dano => 96;
-        protected override int Uso => 30;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "LA CORONA: tres aros de luz orbitan al portador 8 s — todo el que se acerca, quemado";
-    }
-
-    /// <summary>3 — EL JUICIO DEL CIELO: la lluvia de espadas doradas.</summary>
-    public class JuicioDelCielo : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_LLUVIA;
-        protected override Color Tinta => new(255, 222, 128);
-        protected override Color Tinta2 => new(255, 240, 180);
-        protected override int Dano => 88;
-        protected override int Uso => 26;
-        protected override string Resena => "EL JUICIO: espadas de luz caen del cielo sobre la marca — clavan y estallan";
-    }
-
-    /// <summary>4 — LA CAMPANA DEL SANTUARIO: la nova de la onda santa.</summary>
-    public class CampanaDelSantuario : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_NOVA;
-        protected override Color Tinta => new(255, 214, 110);
-        protected override Color Tinta2 => new(255, 255, 240);
-        protected override int Dano => 130;
-        protected override int Uso => 38;
-        protected override string Resena => "LA CAMPANA: una onda de luz dorada carga y ESTALLA en anillo — empuja a los impuros";
-    }
-
-    /// <summary>5 — LA LÁMPARA DEL PEREGRINO: el enjambre de luciérnagas blancas.</summary>
-    public class LamparaDelPeregrino : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_ENJAMBRE;
-        protected override Color Tinta => new(255, 244, 200);
-        protected override Color Tinta2 => new(220, 190, 120);
-        protected override int Dano => 64;
-        protected override int Uso => 24;
-        protected override string Resena => "LA LÁMPARA: suelta luciérnagas de luz blanca que persiguen a los que acechan en la sombra";
-    }
-
-    /// <summary>6 — LA PLUMA DEL ESCRIBA SANTO: la estela que va y vuelve.</summary>
+    /// <summary>LA PLUMA DEL ESCRIBA SANTO: el trazo de luz que va y vuelve.</summary>
     public class PlumaDelEscribaSanto : ArmaTresCasas
     {
         protected override int Estilo => TresCasasProjectile.ESTILO_ESTELA;
@@ -182,95 +120,11 @@ namespace AethonMod.Content.Weapons.TresCasas
         protected override string Resena => "LA PLUMA: un trazo de luz blanca que vuela a la marca y VUELVE al portador, cortando dos veces";
     }
 
-    /// <summary>7 — LA RELIQUIA DEL AMANECER: la zona del charco de luz.</summary>
-    public class ReliquiaDelAmanecer : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_ZONA;
-        protected override Color Tinta => new(255, 220, 130);
-        protected override Color Tinta2 => new(255, 250, 220);
-        protected override int Dano => 130;
-        protected override int Uso => 60;
-        protected override string Resena => "LA RELIQUIA: un charco de amanecer en la marca — 5 s de luz que muele a los que la pisan";
-    }
-
     // ====================================================================
-    //  LA CASA DEL HORROR CÓSMICO — el teal y el violeta (7 armas)
+    //  LA CASA DEL HORROR CÓSMICO — el favorito del canon
     // ====================================================================
 
-    /// <summary>8 — LA PÚPILA DEL ABISMO: el haz del ojo que todo lo mira.</summary>
-    public class PupilaDelAbismo : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_HAZ;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(90, 220, 180);
-        protected override Color Tinta2 => new(150, 67, 235);
-        protected override int Dano => 140;
-        protected override int Uso => 36;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "LA PÚPILA: el ojo del abismo abre su haz teal sobre la marca — la mirada que no parpadea";
-    }
-
-    /// <summary>9 — LA GEOMETRÍA IMPOSIBLE: los triángulos que no deberían existir.</summary>
-    public class GeometriaImposible : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_CORONA;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(96, 236, 200);
-        protected override Color Tinta2 => new(170, 90, 240);
-        protected override int Dano => 104;
-        protected override int Uso => 30;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "LA GEOMETRÍA: cuatro ángulos imposibles orbitan al portador — cada esquina, un filo teal";
-    }
-
-    /// <summary>10 — LA MORDIDA DEL ESPACIO: los colmillos que caen del vacío.</summary>
-    public class MordidaDelEspacio : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_LLUVIA;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(80, 230, 190);
-        protected override Color Tinta2 => new(120, 60, 200);
-        protected override int Dano => 92;
-        protected override int Uso => 26;
-        protected override string Resena => "LA MORDIDA: colmillos de vacío desgarran el cielo sobre la marca — la carne del espacio muerde";
-    }
-
-    /// <summary>11 — LA LETANÍA NEBULAR: la zona de la nebulosa que arrastra.</summary>
-    public class LetaniaNebular : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_ZONA;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(140, 90, 235);
-        protected override Color Tinta2 => new(80, 220, 190);
-        protected override int Dano => 150;
-        protected override int Uso => 64;
-        protected override string Resena => "LA LETANÍA: una nebulosa violeta se posa en la marca — los que la pisan, disueltos en polvo de estrella";
-    }
-
-    /// <summary>12 — EL SUSURRO DEL VACÍO: el vórtice teal que arrastra.</summary>
-    public class SusurroDelVacio : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_VORTICE;
-        protected override Color Tinta => new(90, 225, 185);
-        protected override Color Tinta2 => new(40, 30, 60);
-        protected override int Dano => 170;
-        protected override int Uso => 44;
-        protected override string Resena => "EL SUSURRO: un vacío teal ATRAE a los vivos hacia su corazón y los muele en silencio";
-    }
-
-    /// <summary>13 — LA SEMILLA DE ESTRELLAS: la nova que florece.</summary>
-    public class SemillaDeEstrellas : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_NOVA;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(170, 100, 240);
-        protected override Color Tinta2 => new(90, 230, 190);
-        protected override int Dano => 125;
-        protected override int Uso => 40;
-        protected override string Resena => "LA SEMILLA: florece en la marca y su corona de estrella estalla en anillos gemelos violeta y teal";
-    }
-
-    /// <summary>14 — EL CORO DE LOS PROFUNDOS: el enjambre de semillas tentáculo.</summary>
+    /// <summary>EL CORO DE LOS PROFUNDOS: las semillas que cantan cazando.</summary>
     public class CoroDeLosProfundos : ArmaTresCasas
     {
         protected override int Estilo => TresCasasProjectile.ESTILO_ENJAMBRE;
@@ -280,83 +134,5 @@ namespace AethonMod.Content.Weapons.TresCasas
         protected override int Dano => 68;
         protected override int Uso => 26;
         protected override string Resena => "EL CORO: semillas de tentáculo violeta caen y CANTAN persiguiendo a los vivos — ninguna escapa dos veces";
-    }
-
-    // ====================================================================
-    //  LA CASA DE LA OSCURIDAD — el violeta y el negro tinta (6 armas)
-    // ====================================================================
-
-    /// <summary>15 — EL HAMBRE PRIMIGENIA: el vórtice de la fauce.</summary>
-    public class HambrePrimigenia : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_VORTICE;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(178, 110, 236);
-        protected override Color Tinta2 => new(16, 10, 26);
-        protected override int Dano => 190;
-        protected override int Uso => 48;
-        protected override string Resena => "EL HAMBRE: la fauce del Eterno en miniatura — arrastra a los vivos al corazón NEGRO y devora";
-    }
-
-    /// <summary>16 — LA GUADAÑA DEL VERDUGO: la estela del filo oscuro.</summary>
-    public class GuadanaDelVerdugo : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_ESTELA;
-        protected override int Variante => 1;
-        protected override Color Tinta => new(186, 110, 236);
-        protected override Color Tinta2 => new(30, 20, 44);
-        protected override int Dano => 160;
-        protected override int Uso => 32;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "LA GUADAÑA: el filo violeta del verdugo vuela a la marca y regresa — su estela corta dos veces";
-    }
-
-    /// <summary>17 — LAS CADENAS DEL OLVIDO: la lluvia de eslabones violeta.</summary>
-    public class CadenasDelOlvido : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_LLUVIA;
-        protected override int Variante => 2;
-        protected override Color Tinta => new(178, 110, 236);
-        protected override Color Tinta2 => new(40, 28, 66);
-        protected override int Dano => 98;
-        protected override int Uso => 30;
-        protected override string Resena => "LAS CADENAS: eslabones de olvido caen sobre la marca — atan lo que tocan al fondo del cielo";
-    }
-
-    /// <summary>18 — EL VELO DE CENIZA: la zona de la ceniza gris.</summary>
-    public class VeloDeCeniza : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_ZONA;
-        protected override int Variante => 2;
-        protected override Color Tinta => new(150, 145, 160);
-        protected override Color Tinta2 => new(50, 44, 60);
-        protected override int Dano => 160;
-        protected override int Uso => 56;
-        protected override string Resena => "EL VELO: una nube de ceniza gris cubre la marca — lo que respira dentro, se apaga despacio";
-    }
-
-    /// <summary>19 — LAS ESPINAS NOCTURNAS: la corona de espinas negras.</summary>
-    public class EspinasNocturnas : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_CORONA;
-        protected override int Variante => 2;
-        protected override Color Tinta => new(150, 90, 220);
-        protected override Color Tinta2 => new(24, 16, 38);
-        protected override int Dano => 108;
-        protected override int Uso => 30;
-        protected override bool NaceEnElPortador => true;
-        protected override string Resena => "LAS ESPINAS: cinco agujas de noche orbitan al portador — la corona que nadie lleva dos veces";
-    }
-
-    /// <summary>20 — EL ECLIPSE INTERIOR: la nova del disco negro.</summary>
-    public class EclipseInterior : ArmaTresCasas
-    {
-        protected override int Estilo => TresCasasProjectile.ESTILO_NOVA;
-        protected override int Variante => 2;
-        protected override Color Tinta => new(178, 110, 236);
-        protected override Color Tinta2 => new(10, 6, 18);
-        protected override int Dano => 190;
-        protected override int Uso => 50;
-        protected override string Resena => "EL ECLIPSE: un sol negro se enciende en la marca — su corona violeta estalla y APAGA a los vivos";
     }
 }
