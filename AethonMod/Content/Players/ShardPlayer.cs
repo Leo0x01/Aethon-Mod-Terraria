@@ -1298,6 +1298,18 @@ namespace AethonMod.Content.Players
                 // queda para quien la pierda.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina2>());
+                // v6.100.2 — LA SOMBRA DE LA PÁGINA IV RE-FORJADA DESDE
+                // EL INICIO (la letra: «asegurate de que le entregas al
+                // jugador las cosas nuevas, armas o cualquier cosa nueva
+                // que sea creada»): la v6.100 re-forjó el CUARTO TOMO
+                // completo (la garganta del vórtice como boca girando
+                // con el rumbo, velo de ruido, anillo de tinta doble e
+                // icono re-forjado) pero solo lo dejaba en la Bolsa de
+                // las Sombras — la regla es la regla: lo re-forjado ES
+                // lo nuevo, y lo nuevo llega DIRECTO (la bolsa sigue
+                // como vía de repuesto para quien lo pierda).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina4>());
                 // v6.99 — EL ESTANDARTE DEL JUICIO (la regla de la casa:
                 // «todo nuevo ítem debe ser entregado al jugador
                 // directamente»): el accesorio del aura que juzga de la
