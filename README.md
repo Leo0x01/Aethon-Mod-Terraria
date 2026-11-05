@@ -1,7 +1,15 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.97 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+> **Versión actual:** 6.97.1 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+
+## ⚒️ PARA CREAR CUALQUIER COSA NUEVA (léeme primero)
+
+**TODO se crea con LAS HERRAMIENTAS DE LA CASA** (`tools/`), nunca a mano suelta:
+
+- **[EL-PIPELINE-DE-CREACION.md](EL-PIPELINE-DE-CREACION.md)** — **LA RECETA COMPLETA**: sprite → clase C# → textos ×3 → verificaciones → release, con las lecciones de cada regla.
+- **[LA-SUPERFORJA.md](LA-SUPERFORJA.md)** — las 12 herramientas de sprites (la pluma IA · la refina quirúrgica · el puente de la rejilla · el molde · el espejo animado · el alma con 9 efectos VFX · el tambor · la rampa · el atlas · el ojo QA VLM).
+- **EL GUARDIÁN** (`tools/audit_texturas_completas.py`) — ninguna clase puede quedarse sin textura: el gate de TODA publicación (la lección v6.87 + v6.97).
 
 ## Qué es (en 30 segundos)
 
