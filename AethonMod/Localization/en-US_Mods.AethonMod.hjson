@@ -736,6 +736,30 @@ Items: {
 			'''
 	}
 
+	EstandarteDelJuicioItem: {
+		// v6.98: THE DAMAGING AURA — the abandoned concept of the first commits,
+		// resurrected and made superior (the reference banner idea, 100% house-built).
+		DisplayName: Banner of Judgment
+		Tooltip:
+			'''
+			The banner of the Sacred House waves at your back: the wicked who
+			approach BURN. The closer they get, the more it hurts.
+			'''
+		Titulo: "[c/FFD54F:═══ BANNER OF JUDGMENT ═══]"
+		Linea1:
+			'''
+			[c/FFF8E0:The aura of judgment surrounds you: the wicked who approach burn,
+			and their glow betrays their guilt — the closer to the banner, the brighter the flame]
+			'''
+		Linea2: "[c/FFC107:Damage scales with proximity (up to ×2.5) and ramps while they stay (+8%/s, up to +80%)]"
+		Linea3: "[c/FFC107:Each judgment burns with the Dawn Flame and repels those who dare touch the bearer]"
+		Linea4:
+			'''
+			[c/78788C:The judgment's base scales with your awakening level.
+			Signed by the house layer engine — the aura we could never build, resurrected]
+			'''
+	}
+
 	AnillosSolRunicoItem: {
 		DisplayName: Los Anillos del Sol Rúnico
 		Tooltip:
@@ -2416,6 +2440,7 @@ Items: {
 }
 
 Projectiles: {
+	EstandarteJuicioAuraProjectile.DisplayName: Aura of Judgment
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
@@ -2617,6 +2642,11 @@ Buffs: {
 	QuemaduraCosmica: {
 		DisplayName: Quemadura cósmica
 		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
+	}
+
+	JuicioDelAlba: {
+		DisplayName: Dawn Flame
+		Description: The judgment of dawn consumes you: golden light burns against the wicked
 	}
 
 	OcasoActivoBuff: {

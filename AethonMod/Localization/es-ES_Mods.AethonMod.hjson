@@ -736,6 +736,30 @@ Items: {
 			'''
 	}
 
+	EstandarteDelJuicioItem: {
+		// v6.98: THE DAMAGING AURA — the abandoned concept of the first commits,
+		// resurrected and made superior (the reference banner idea, 100% house-built).
+		DisplayName: Estandarte del Juicio
+		Tooltip:
+			'''
+			El estandarte de la Casa Sagrada ondea en tu espalda: los impíos que se
+			acerquen ARDEN. Cuanto más cerca, más duele.
+			'''
+		Titulo: "[c/FFD54F:═══ EL ESTANDARTE DEL JUICIO ═══]"
+		Linea1:
+			'''
+			[c/FFF8E0:El aura del juicio te rodea: los impíos que se acerquen arden,
+			y su brillo delata su culpa — cuanto más cerca del estandarte, más intensa la llama]
+			'''
+		Linea2: "[c/FFC107:El daño crece con la proximidad (hasta ×2,5) y se arma mientras permanezcan (+8%/s, hasta +80%)]"
+		Linea3: "[c/FFC107:Cada juicio quema con la Llama del Alba y repele al que osa tocar al portador]"
+		Linea4:
+			'''
+			[c/78788C:La base del juicio escala con tu nivel de despertar.
+			Firmado por el motor de capas de la casa — el aura que nunca pudimos crear, resucitada]
+			'''
+	}
+
 	AnillosSolRunicoItem: {
 		DisplayName: Los Anillos del Sol Rúnico
 		Tooltip:
@@ -2416,6 +2440,7 @@ Items: {
 }
 
 Projectiles: {
+	EstandarteJuicioAuraProjectile.DisplayName: Aura del Juicio
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
@@ -2617,6 +2642,11 @@ Buffs: {
 	QuemaduraCosmica: {
 		DisplayName: Quemadura cósmica
 		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
+	}
+
+	JuicioDelAlba: {
+		DisplayName: Llama del Alba
+		Description: El juicio del alba te consume: la luz dorada arde contra los impíos
 	}
 
 	OcasoActivoBuff: {

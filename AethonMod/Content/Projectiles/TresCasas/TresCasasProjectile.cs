@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.TresCasas
 {
@@ -473,194 +474,508 @@ namespace AethonMod.Content.Projectiles.TresCasas
         }
 
         // ================================================================
-        //  EL DIBUJO (todo por capas de las texturas glow de la casa)
+        //  EL VESTIDO POR CAPAS (v6.98) — la letra del usuario: «para
+        //  los proyectiles usa el poder de todas nuestras herramientas
+        //  y librerias combinando todo puede salir algo increible […]
+        //  cada proyectil se debe crear por capas de vfx, cada capa
+        //  agregando algo nuevo al menos entre 5 a 10 capas de vfx por
+        //  proyectil».
+        //
+        //  LAS CAPAS DE LA CASA (de atrás hacia delante — cada plato
+        //  viste entre 5 y 10):
+        //   1. EL VELO DE RUIDO — el flipbook procedural Ruido_0..19
+        //      (la textura VIVA que late y gira, tintada — el plasma).
+        //   2. LOS ANILLOS — GlowCircleWhite/MagicRing/FireRing/Ring:
+        //      los aros que giran, respiran y se pulsan.
+        //   3. LA FIRMA — la textura que da IDENTIDAD al plato:
+        //      PulsarCore (la nova) · Star (el lucero) · Crescent (la
+        //      hoja) · Vortex (el vórtice) · CometHead (los brazos) —
+        //      NADA de círculos planos.
+        //   4. LAS CHISPAS — SparkleStar/FlareEstrella4Puntas en
+        //      posiciones DETERMINISTAS (el Azar de la semilla) que
+        //      titilan solas — cero GC, cero estado nuevo.
+        //   5. EL CORAZÓN BLANCO — el núcleo caliente arriba de todo.
+        //  TODO en lotes de la casa: el aditivo BRILLA (un Begin solo
+        //  por proyectil), el corazón negro del vórtice va en ALPHA
+        //  (lo aditivo no puede oscurecer) — el patrón de la nova
+        //  (VFXCore cierra · el lote viste · VFXCore reabre el vanilla).
         // ================================================================
+
+        /// <summary>El FLIPBOOK DEL RUIDO (20 marcos que rotan solos —
+        /// cacheados por índice: la cadena solo nace una vez).</summary>
+        private static Texture2D[] _ruidoCache;
+
+        private static Texture2D Ruido(int semilla, float vel)
+        {
+            _ruidoCache ??= new Texture2D[20];
+            int n = (int)(Main.GlobalTimeWrappedHourly * vel + semilla * 0.37f) % 20;
+            if (n < 0) n += 20;
+            return _ruidoCache[n] ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/Ruido_" + n).Value;
+        }
+
+        private static Texture2D Tex(string ruta) =>
+            ModContent.Request<Texture2D>("AethonMod/Content/Effects/" + ruta).Value;
+
+        /// <summary>EL AZAR DETERMINISTA de la semilla (0..1 — la
+        /// coreografía es estable entre frames: nada parpadea al azar).</summary>
+        private float Azar(int i)
+        {
+            float v = MathF.Sin(_semilla * 12.9898f + i * 78.233f) * 43758.5453f;
+            return v - MathF.Floor(v);
+        }
+
+        /// <summary>EL TITILAR (0..1..0 — el pulso lento de cada chispa).</summary>
+        private float Titilar(int i, float vel = 3.1f)
+            => 0.5f - 0.5f * MathF.Cos(_fase * vel + Azar(i) * MathHelper.TwoPi);
+
+        /// <summary>UNA capa: la textura centrada, girada y tintada.</summary>
+        private static void Capa(SpriteBatch sb, Texture2D tex, Vector2 pos,
+            Color color, float rot, float esc)
+        {
+            if (color.A == 0 || esc <= 0f) return;
+            sb.Draw(tex, pos, null, color, rot, tex.Size() * 0.5f, esc,
+                SpriteEffects.None, 0f);
+        }
+
+        /// <summary>UNA capa de SUELO (la elipse achatada del mundo).</summary>
+        private static void CapaSuelo(SpriteBatch sb, Texture2D tex, Vector2 pos,
+            Color color, float rot, float anchoPx, float altoPx)
+        {
+            if (color.A == 0 || anchoPx <= 0f) return;
+            sb.Draw(tex, pos, null, color, rot, tex.Size() * 0.5f,
+                new Vector2(anchoPx / tex.Width, altoPx / tex.Height),
+                SpriteEffects.None, 0f);
+        }
 
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.gameMenu) return false;
-            SpriteBatch sb = Main.spriteBatch;
+            try
+            {
+                VFXCore.CerrarLoteSiAbierto();
+                int est = Estilo;
+                // EL CORAZÓN NEGRO del vórtice va en ALPHA (lo aditivo
+                // no puede oscurecer) — debajo de todo lo que brilla.
+                if (est == ESTILO_VORTICE)
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    DibujarCorazonNegro(Main.spriteBatch);
+                    Main.spriteBatch.End();
+                }
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                switch (est)
+                {
+                    case ESTILO_HAZ: VestirHaz(Main.spriteBatch); break;
+                    case ESTILO_CORONA: VestirCorona(Main.spriteBatch); break;
+                    case ESTILO_LLUVIA: VestirLluvia(Main.spriteBatch); break;
+                    case ESTILO_NOVA: VestirNova(Main.spriteBatch); break;
+                    case ESTILO_VORTICE: VestirVortice(Main.spriteBatch); break;
+                    case ESTILO_ENJAMBRE: VestirEnjambre(Main.spriteBatch); break;
+                    case ESTILO_ESTELA: VestirEstela(Main.spriteBatch); break;
+                    case ESTILO_ZONA: VestirZona(Main.spriteBatch); break;
+                    case ESTILO_HOJA: VestirHoja(Main.spriteBatch); break;
+                    case ESTILO_LUCERO: VestirLucero(Main.spriteBatch); break;
+                }
+                Main.spriteBatch.End();
+            }
+            catch
+            {
+                VFXCore.CerrarLoteSiAbierto();
+            }
+            VFXCore.ReabrirLoteVanilla();
+            return false;   // TODO lo dibuja la casa (sin el vanilla)
+        }
+
+        // === EL HAZ (8 capas): el velo de ruido · el halo · el cuerpo
+        //     pulsante · el núcleo blanco · el pulso viajero · la
+        //     estrella del origen · el corazón del origen · el destello
+        //     del final. ===
+        private void VestirHaz(SpriteBatch sb)
+        {
+            Player dueno = Main.player[Projectile.owner];
+            if (dueno == null || !dueno.active) return;
+            Color c1 = Tinta, c2 = Tinta2;
+            float amp = 0.35f + Variante * 0.10f;
+            float ang = (float)Math.Atan2(_ancla.Y - Projectile.Center.Y,
+                _ancla.X - Projectile.Center.X) + MathF.Sin(_fase * 2.2f) * amp;
+            float frac = Math.Min(1f, (90 - Projectile.timeLeft) / 12f);
+            float largo = 640f * frac;
+            if (largo < 8f) return;
+            Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang));
+            Vector2 origen = dueno.MountedCenter - Main.screenPosition;
+            Texture2D rayo = Tex("GlowRay");
+            // 1 — EL VELO DE RUIDO a lo largo del haz (el plasma vivo)
+            CapaSuelo(sb, Ruido(_semilla, 5.5f), origen + dir * (largo * 0.5f),
+                c2 * 0.10f, ang, largo, 110f);
+            // 2 — EL HALO ancho · 3 — EL CUERPO que respira · 4 — EL NÚCLEO
+            DibujarRayo(sb, rayo, origen, ang, largo, 58f, c2 * 0.35f);
+            DibujarRayo(sb, rayo, origen, ang, largo, 30f + 7f * MathF.Sin(_fase * 6f), c1 * 0.80f);
+            DibujarRayo(sb, rayo, origen, ang, largo, 12f, Color.White);
+            // 5 — EL PULSO VIAJERO (la bola que recorre el haz)
+            float t = (_fase * 0.85f) % 1f;
+            if (t < 0f) t += 1f;
+            Vector2 pulsoPos = origen + dir * (largo * t);
+            Capa(sb, Tex("GlowOrb"), pulsoPos, c1 * 0.55f, ang, (46f + 14f * MathF.Sin(_fase * 9f)) / 128f);
+            Capa(sb, Tex("GlowOrb"), pulsoPos, Color.White * 0.65f, ang, 16f / 128f);
+            // 6 — LA ESTRELLA del origen (girando) · 7 — SU CORAZÓN
+            Capa(sb, Tex("FlareEstrella4Puntas"), origen, c2,
+                _fase * 3f, (86f + 12f * MathF.Sin(_fase * 5f)) / 256f);
+            Capa(sb, Tex("Procedural/PulsarCore"), origen, c1 * 0.85f, -_fase * 2f, 40f / 128f);
+            // 8 — EL DESTELLO del final del haz
+            Vector2 fin = origen + dir * largo;
+            Capa(sb, Tex("GlowOrb"), fin, c1 * 0.40f, ang, 40f / 128f);
+            Capa(sb, Tex("SparkleStar"), fin, Color.White * (0.4f + 0.3f * Titilar(1)),
+                _fase * 2f, (30f + 12f * Titilar(1)) / 32f);
+        }
+
+        // === LA CORONA (8 capas): el anillo del suelo · el aro rúnico ·
+        //     y POR CADA ORBE: su velo de ruido · su halo · su núcleo
+        //     PulsarCore · su corazón blanco · (+ la chispa que persigue
+        //     y el titilar del guía). ===
+        private void VestirCorona(SpriteBatch sb)
+        {
+            Player dueno = Main.player[Projectile.owner];
+            if (dueno == null || !dueno.active) return;
+            Color c1 = Tinta, c2 = Tinta2;
+            int n = 3 + Variante;
+            float radio = 92f + Variante * 9f;
+            Vector2 basePos = dueno.MountedCenter - Main.screenPosition;
+            Vector2 suelo = basePos + new Vector2(0f, 22f);
+            // 1 — EL ANILLO DEL SUELO (la órbita dibujada en el piso)
+            CapaSuelo(sb, Tex("GlowCircleWhite"), suelo, c1 * 0.10f, 0f, radio * 2.1f, radio * 0.66f);
+            // 2 — EL ARO RÚNICO (girando con la órbita misma)
+            CapaSuelo(sb, Tex("MagicRing"), suelo, c2 * 0.22f, _fase * 1.9f, radio * 2.05f, radio * 0.62f);
+            // 3..6 — LAS CAPAS DE CADA ORBE
+            for (int i = 0; i < n; i++)
+            {
+                float a = _fase * 1.9f + i * MathHelper.TwoPi / n;
+                Vector2 p = basePos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radio;
+                Capa(sb, Ruido(_semilla + i, 4.2f), p, c2 * 0.10f, a, 58f / 512f);
+                Capa(sb, Tex("GlowOrb"), p, c2 * 0.45f, a, 80f / 128f);
+                Capa(sb, Tex("Procedural/PulsarCore"), p, c1 * 0.95f, -a * 2f, 46f / 128f);
+                Capa(sb, Tex("GlowOrb"), p, Color.White * 0.55f, a, 20f / 128f);
+            }
+            // 7 — LA CHISPA QUE PERSIGUE (el rastro del orbe guía)
+            float aGuia = _fase * 1.9f;
+            Vector2 pRastro = basePos + new Vector2(MathF.Cos(aGuia - 0.42f), MathF.Sin(aGuia - 0.42f)) * (radio * 0.96f);
+            Capa(sb, Tex("SparkleStar"), pRastro, c1 * (0.35f + 0.3f * Titilar(0)), aGuia, 22f / 32f);
+            // 8 — EL TITILAR DEL GUÍA (encima del primer orbe)
+            Vector2 pGuia = basePos + new Vector2(MathF.Cos(aGuia), MathF.Sin(aGuia)) * radio;
+            Capa(sb, Tex("SparkleStar"), pGuia, Color.White * (0.30f + 0.35f * Titilar(0, 4.5f)),
+                _fase * 4f, (24f + 14f * Titilar(0, 4.5f)) / 32f);
+        }
+
+        // === LA LLUVIA (6 capas): el velo del suelo · el charco · el
+        //     aro interno girando · LOS VERTICALES que caen · los
+        //     destellos del suelo · el aro rúnico. ===
+        private void VestirLluvia(SpriteBatch sb)
+        {
             Color c1 = Tinta, c2 = Tinta2;
             Vector2 pos = Projectile.Center - Main.screenPosition;
-            int est = Estilo;
-            int vivido;
-
-            switch (est)
+            Vector2 suelo = new(pos.X, _ancla.Y - Main.screenPosition.Y);
+            float late = 0.8f + 0.2f * MathF.Sin(_fase * 3f);
+            // 1 — EL VELO DEL SUELO (el ruido que respira)
+            CapaSuelo(sb, Ruido(_semilla, 3.8f), suelo, c1 * (0.10f * late), _fase * 0.22f, 360f, 120f);
+            // 2 — EL CHARCO · 3 — EL ARO INTERNO (girando)
+            CapaSuelo(sb, Tex("GlowCircleWhite"), suelo, c1 * 0.16f, 0f, 360f, 88f);
+            CapaSuelo(sb, Tex("GlowCircleWhite"), suelo, c2 * (0.12f * late), _fase, 240f, 62f);
+            // 4 — LOS VERTICALES QUE CAEN (la promesa de las hojas)
+            Texture2D rayo = Tex("GlowRay");
+            for (int i = 0; i < 3; i++)
             {
-                case ESTILO_HAZ:
+                float x = suelo.X + (Azar(i) * 2f - 1f) * 150f;
+                float caida = (Main.GlobalTimeWrappedHourly * 430f + Azar(i) * 430f) % 430f;
+                Vector2 p = new(x, suelo.Y - 430f + caida);
+                DibujarRayo(sb, rayo, p, MathHelper.PiOver2, 46f, 6f, c1 * 0.28f);
+            }
+            // 5 — LOS DESTELLOS DEL SUELO (donde van a clavarse)
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 p = new(suelo.X + (Azar(i) * 2f - 1f) * 150f, suelo.Y - 4f);
+                Capa(sb, Tex("SparkleStar"), p, c2 * (0.30f + 0.45f * Titilar(i, 4f)),
+                    _fase + Azar(i), (16f + 14f * Titilar(i, 4f)) / 32f);
+            }
+            // 6 — EL ARO RÚNICO del perímetro
+            CapaSuelo(sb, Tex("MagicRing"), suelo, c2 * 0.18f, -_fase * 0.8f, 372f, 96f);
+        }
+
+        // === LA NOVA (10 capas): la CARGA viste velo de ruido creciente
+        //     · chispas que convergen · el PulsarCore que se arma · su
+        //     corazón · el aro de carga — y el ESTALLIDO: el FireRing
+        //     expansivo · la doble onda de choque · las llamaradas del
+        //     anillo · el ruido que se deshace · el fogonazo blanco. ===
+        private void VestirNova(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            int vivido = 70 - Projectile.timeLeft;
+            if (vivido < 20)
+            {
+                float carga = vivido / 20f;
+                // 1 — EL VELO que crece con la carga
+                Capa(sb, Ruido(_semilla, 6f), pos, c1 * (0.10f + 0.10f * carga),
+                    _fase * 2f, (50f + 130f * carga) / 512f);
+                // 2 — LAS CHISPAS QUE CONVERGEN (el imán del estallido)
+                for (int i = 0; i < 3; i++)
                 {
-                    Player dueno = Main.player[Projectile.owner];
-                    if (dueno == null || !dueno.active) break;
-                    float amp = 0.35f + Variante * 0.10f;
-                    float ang = (float)Math.Atan2(_ancla.Y - Projectile.Center.Y,
-                        _ancla.X - Projectile.Center.X) + MathF.Sin(_fase * 2.2f) * amp;
-                    float largo = 640f;
-                    Texture2D rayo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowRay").Value;
-                    Texture2D estrella = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/FlareEstrella4Puntas").Value;
-                    Vector2 origen = dueno.MountedCenter - Main.screenPosition;
-                    float frac = Math.Min(1f, (90 - Projectile.timeLeft) / 12f);
-                    float largoVivo = largo * frac;
-                    // LAS TRES CAPAS: núcleo blanco, cuerpo tintado, halo tenue.
-                    DibujarRayo(sb, rayo, origen, ang, largoVivo, 54f, c2 * 0.55f);
-                    DibujarRayo(sb, rayo, origen, ang, largoVivo, 30f, c1 * 0.85f);
-                    DibujarRayo(sb, rayo, origen, ang, largoVivo, 12f, Color.White);
-                    sb.Draw(estrella, origen, null, c2, _fase * 3f,
-                        estrella.Size() * 0.5f, 0.85f, SpriteEffects.None, 0f);
-                    break;
+                    float a = _fase * 3.4f + i * MathHelper.TwoPi / 3f;
+                    float r = 76f * (1f - carga) + 14f;
+                    Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * r;
+                    Capa(sb, Tex("GlowOrb"), p, c1 * 0.6f, a, 20f / 128f);
                 }
-                case ESTILO_CORONA:
+                // 3 — EL PULSARCORE que se arma · 4 — SU CORAZÓN
+                Capa(sb, Tex("Procedural/PulsarCore"), pos, c1 * (0.5f + 0.5f * carga),
+                    _fase * 4f, (36f + 46f * carga) / 128f);
+                Capa(sb, Tex("GlowOrb"), pos, Color.White * (0.35f + 0.5f * carga),
+                    0f, (14f + 22f * carga) / 128f);
+                // 5 — EL ARO DE CARGA (el disparo en cámara lenta)
+                Capa(sb, Tex("Procedural/Ring"), pos, c2 * (0.15f + 0.25f * carga),
+                    -_fase * 2.5f, (40f + 150f * carga) / 256f);
+            }
+            else
+            {
+                float radio = (vivido - 20) * 17f;
+                float vida = 1f - (vivido - 20) / 50f;
+                if (vida <= 0f) return;
+                // 6 — EL FIRERING EXPANSIVO (el aro de fuego de verdad)
+                Capa(sb, Tex("Procedural/FireRing"), pos, c1 * (0.85f * vida),
+                    _fase * 2f, (radio * 2.2f) / 256f);
+                // 7 — LA DOBLE ONDA DE CHOQUE
+                Capa(sb, Tex("GlowCircleWhite"), pos, c1 * (0.75f * vida), 0f, (radio * 2f) / 64f);
+                Capa(sb, Tex("GlowCircleWhite"), pos, Color.White * (0.55f * vida), 0f, (radio * 1.6f) / 64f);
+                // 8 — LAS LLAMARADAS DEL ANILLO (las puntas que giran)
+                for (int i = 0; i < 4; i++)
                 {
-                    Player dueno = Main.player[Projectile.owner];
-                    if (dueno == null || !dueno.active) break;
-                    Texture2D orbe = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowOrb").Value;
-                    int n = 3 + Variante;
-                    float radio = 92f + Variante * 9f;
-                    Vector2 basePos = dueno.MountedCenter - Main.screenPosition;
-                    for (int i = 0; i < n; i++)
-                    {
-                        float a = _fase * 1.9f + i * MathHelper.TwoPi / n;
-                        Vector2 p = basePos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radio;
-                        sb.Draw(orbe, p, null, c2 * 0.45f, a,
-                            orbe.Size() * 0.5f, 1.1f, SpriteEffects.None, 0f);
-                        sb.Draw(orbe, p, null, c1 * 0.9f, a,
-                            orbe.Size() * 0.5f, 0.62f, SpriteEffects.None, 0f);
-                        sb.Draw(orbe, p, null, Color.White * 0.9f, a,
-                            orbe.Size() * 0.5f, 0.26f, SpriteEffects.None, 0f);
-                    }
-                    break;
+                    float a = _fase * 2.2f + i * MathHelper.PiOver2;
+                    Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radio;
+                    Capa(sb, Tex("FlareEstrella4Puntas"), p, c2 * (0.7f * vida),
+                        a, (46f * vida + 18f) / 256f);
                 }
-                case ESTILO_LLUVIA:
+                // 9 — EL RUIDO QUE SE DESHACE
+                Capa(sb, Ruido(_semilla, 6f), pos, c1 * (0.12f * vida),
+                    _fase, (radio * 1.4f) / 512f);
+                // 10 — EL FOGONAZO (solo los primeros ticks)
+                if (vivido - 20 < 6)
                 {
-                    Texture2D circulo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowCircle" + Sufijo(c1)).Value;
-                    Vector2 suelo = new Vector2(pos.X, _ancla.Y - Main.screenPosition.Y);
-                    sb.Draw(circulo, suelo, null, c1 * 0.16f, 0f,
-                        circulo.Size() * 0.5f, new Vector2(2.3f, 0.55f),
-                        SpriteEffects.None, 0f);
-                    break;
-                }
-                case ESTILO_NOVA:
-                {
-                    vivido = 70 - Projectile.timeLeft;
-                    Texture2D circulo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowCircle" + Sufijo(c1)).Value;
-                    Texture2D orbe = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowOrb").Value;
-                    if (vivido < 20)
-                    {
-                        float carga = vivido / 20f;
-                        sb.Draw(orbe, pos, null, c1 * (0.35f + carga * 0.5f), _fase * 4f,
-                            orbe.Size() * 0.5f, 0.4f + carga * 0.8f, SpriteEffects.None, 0f);
-                    }
-                    else
-                    {
-                        float radio = (vivido - 20) * 17f;
-                        float vida = 1f - (vivido - 20) / 50f;
-                        if (vida > 0f)
-                        {
-                            sb.Draw(circulo, pos, null, c1 * (0.75f * vida), 0f,
-                                circulo.Size() * 0.5f, new Vector2(radio / 64f, radio / 64f),
-                                SpriteEffects.None, 0f);
-                            sb.Draw(circulo, pos, null, Color.White * (0.55f * vida), 0f,
-                                circulo.Size() * 0.5f, new Vector2(radio * 0.8f / 64f, radio * 0.8f / 64f),
-                                SpriteEffects.None, 0f);
-                        }
-                    }
-                    break;
-                }
-                case ESTILO_VORTICE:
-                {
-                    Texture2D orbe = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowOrb").Value;
-                    Texture2D circulo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowCircle" + Sufijo(c2)).Value;
-                    sb.Draw(circulo, pos, null, c2 * 0.30f, _fase,
-                        circulo.Size() * 0.5f, 3.6f, SpriteEffects.None, 0f);
-                    // LOS BRAZOS DE LA ESPIRAL (tres, girando).
-                    for (int brazo = 0; brazo < 3; brazo++)
-                    {
-                        for (int paso = 1; paso <= 7; paso++)
-                        {
-                            float a = _fase * 2.4f + brazo * MathHelper.TwoPi / 3f +
-                                paso * 0.55f;
-                            float r = paso * 26f;
-                            Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * r;
-                            float esc = 0.55f - paso * 0.06f;
-                            sb.Draw(orbe, p, null, c1 * (0.65f - paso * 0.07f), a,
-                                orbe.Size() * 0.5f, esc, SpriteEffects.None, 0f);
-                        }
-                    }
-                    // EL CORAZÓN NEGRO.
-                    sb.Draw(orbe, pos, null, new Color(12, 8, 20) * 0.85f, -_fase * 3f,
-                        orbe.Size() * 0.5f, 1.15f, SpriteEffects.None, 0f);
-                    break;
-                }
-                case ESTILO_ENJAMBRE:
-                {
-                    Texture2D circulo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowCircle" + Sufijo(c1)).Value;
-                    sb.Draw(circulo, pos, null, c1 * 0.12f, _fase,
-                        circulo.Size() * 0.5f, new Vector2(1.7f, 1.7f),
-                        SpriteEffects.None, 0f);
-                    break;
-                }
-                case ESTILO_ESTELA:
-                {
-                    Texture2D rayo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowRay").Value;
-                    // LA ESTELA (las posiciones viejas, deshaciéndose).
-                    for (int i = _estela.Length - 1; i > 0; i--)
-                    {
-                        float t = 1f - i / (float)_estela.Length;
-                        Vector2 p = _estela[i] - Main.screenPosition;
-                        sb.Draw(rayo, p, null, c1 * (0.30f * t), Projectile.rotation,
-                            rayo.Size() * 0.5f, new Vector2(0.7f, 0.28f + t * 0.2f),
-                            SpriteEffects.None, 0f);
-                    }
-                    // LA HOJA (tres capas al ras).
-                    DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 40f, c2 * 0.5f);
-                    DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 20f, c1 * 0.95f);
-                    DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 8f, Color.White);
-                    break;
-                }
-                case ESTILO_ZONA:
-                {
-                    Texture2D circulo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowCircle" + Sufijo(c1)).Value;
-                    float radio = 120f + Variante * 16f;
-                    float late = 0.85f + 0.15f * MathF.Sin(_fase * 3f);
-                    // EL CHARCO (achatado: es un suelo).
-                    sb.Draw(circulo, pos, null, c1 * (0.30f * late), 0f,
-                        circulo.Size() * 0.5f, new Vector2(radio / 64f, radio * 0.45f / 64f),
-                        SpriteEffects.None, 0f);
-                    sb.Draw(circulo, pos, null, c2 * (0.22f * late), _fase,
-                        circulo.Size() * 0.5f, new Vector2(radio * 0.7f / 64f, radio * 0.34f / 64f),
-                        SpriteEffects.None, 0f);
-                    break;
-                }
-                case ESTILO_HOJA:
-                {
-                    Texture2D rayo = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowRay").Value;
-                    DibujarRayo(sb, rayo, pos, Projectile.rotation, 62f, 26f, c2 * 0.5f);
-                    DibujarRayo(sb, rayo, pos, Projectile.rotation, 62f, 12f, c1);
-                    break;
-                }
-                case ESTILO_LUCERO:
-                {
-                    Texture2D orbe = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/GlowOrb" + Sufijo(c1)).Value;
-                    sb.Draw(orbe, pos, null, c1 * 0.5f, Projectile.rotation,
-                        orbe.Size() * 0.5f, 1.1f, SpriteEffects.None, 0f);
-                    sb.Draw(orbe, pos, null, Color.White * 0.85f, Projectile.rotation,
-                        orbe.Size() * 0.5f, 0.42f, SpriteEffects.None, 0f);
-                    break;
+                    float fl = (6 - (vivido - 20)) / 6f;
+                    Capa(sb, Tex("GlowOrb"), pos, Color.White * (0.8f * fl), 0f, (150f * fl) / 128f);
                 }
             }
-            return false;   // TODO lo dibuja la casa (sin el vanilla)
+        }
+
+        // === EL VÓRTICE (8 capas + el corazón negro en alpha): el velo
+        //     ambiental · LA TEXTURA VORTEX girando · el disco exterior
+        //     · los brazos con CometHead · los titilares del borde · el
+        //     aro del corazón · el corazón negro · su núcleo blanco. ===
+        private void DibujarCorazonNegro(SpriteBatch sb)
+        {
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            Capa(sb, Tex("Procedural/BlackDisk"), pos, Color.White * 0.88f, 0f, 64f / 256f);
+        }
+
+        private void VestirVortice(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            float disco = 232f;
+            // 1 — EL VELO AMBIENTAL (el ruido que lo envuelve todo)
+            Capa(sb, Ruido(_semilla, 2.6f), pos, c2 * 0.10f, _fase * 0.6f, disco / 512f);
+            // 2 — LA TEXTURA VORTEX (la firma del plato — girando)
+            Capa(sb, Tex("Procedural/Vortex"), pos, c1 * 0.40f, -_fase * 2.4f,
+                (disco * (1f + 0.06f * MathF.Sin(_fase * 3f))) / 64f);
+            // 3 — EL DISCO EXTERIOR
+            Capa(sb, Tex("GlowCircleWhite"), pos, c2 * 0.30f, _fase, disco / 64f);
+            // 4 — LOS BRAZOS DE LA ESPIRAL (CometHead: cabeza con núcleo)
+            Texture2D cometa = Tex("Procedural/CometHead");
+            for (int brazo = 0; brazo < 3; brazo++)
+            {
+                for (int paso = 1; paso <= 7; paso++)
+                {
+                    float a = _fase * 2.4f + brazo * MathHelper.TwoPi / 3f + paso * 0.55f;
+                    float r = paso * 26f;
+                    Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * r;
+                    Capa(sb, cometa, p, c1 * (0.65f - paso * 0.07f), a,
+                        (38f - paso * 3f) / 192f);
+                }
+            }
+            // 5 — LOS TITILARES DEL BORDE
+            for (int i = 0; i < 3; i++)
+            {
+                float a = _fase * 1.7f + i * MathHelper.TwoPi / 3f;
+                Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * (disco * 0.48f);
+                Capa(sb, Tex("SparkleStar"), p, c2 * (0.3f + 0.5f * Titilar(i, 4.2f)),
+                    a, (14f + 12f * Titilar(i, 4.2f)) / 32f);
+            }
+            // 6 — EL ARO DEL CORAZÓN (la garganta) · 7 — SU NÚCLEO
+            Capa(sb, Tex("Procedural/Ring"), pos, c2 * 0.55f, _fase * 2f, 92f / 256f);
+            Capa(sb, Tex("GlowOrb"), pos, Color.White * (0.35f + 0.25f * MathF.Sin(_fase * 5f)),
+                0f, 22f / 128f);
+        }
+
+        // === EL ENJAMBRE (6 capas): el velo del suelo · el charco · el
+        //     aro rúnico · LAS MOTES que orbitan · la estrella del
+        //     centro · el pulso del borde. ===
+        private void VestirEnjambre(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            // 1 — EL VELO · 2 — EL CHARCO
+            CapaSuelo(sb, Ruido(_semilla, 3.4f), pos, c1 * 0.08f, _fase * 0.2f, 240f, 90f);
+            CapaSuelo(sb, Tex("GlowCircleWhite"), pos, c1 * 0.12f, 0f, 220f, 110f);
+            // 3 — EL ARO RÚNICO
+            CapaSuelo(sb, Tex("MagicRing"), pos, c2 * 0.20f, _fase * 1.2f, 226f, 104f);
+            // 4 — LAS MOTES QUE ORBITAN (los luceros por nacer)
+            for (int i = 0; i < 5; i++)
+            {
+                float a = _fase * (1.4f + Azar(i) * 1.6f) + Azar(i + 7) * MathHelper.TwoPi;
+                float r = 34f + Azar(i + 3) * 42f;
+                Vector2 p = pos + new Vector2(MathF.Cos(a), MathF.Sin(a) * 0.62f) * r;
+                Color cMot = (i % 2 == 0) ? c1 : c2;
+                Capa(sb, Tex("SparkleStar"), p, cMot * (0.25f + 0.55f * Titilar(i, 3.6f)),
+                    a, (13f + 10f * Titilar(i, 3.6f)) / 32f);
+            }
+            // 5 — LA ESTRELLA DEL CENTRO (el ojo del enjambre)
+            Capa(sb, Tex("Procedural/Star"), pos, c2 * 0.5f, _fase * 2f, 26f / 16f);
+            // 6 — EL PULSO DEL BORDE
+            Capa(sb, Tex("GlowCircleWhite"), pos, c1 * (0.10f + 0.06f * MathF.Sin(_fase * 3f)),
+                _fase, 190f / 64f);
+        }
+
+        // === LA ESTELA (8 capas): las bolas del rastro · el rastro en
+        //     rayos · el halo · el cuerpo · el núcleo · la estrella de
+        //     la cabeza · LA HOJA CRECIENTE (la firma) · las chispas
+        //     que suelta. ===
+        private void VestirEstela(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            Texture2D rayo = Tex("GlowRay");
+            // 1 — LAS BOLAS DEL RASTRO (los nodos que se apagan)
+            for (int i = 3; i < _estela.Length; i += 4)
+            {
+                float t = 1f - i / (float)_estela.Length;
+                Capa(sb, Tex("GlowOrb"), _estela[i] - Main.screenPosition,
+                    c1 * (0.22f * t), Projectile.rotation, (30f * t + 8f) / 128f);
+            }
+            // 2 — EL RASTRO EN RAYOS (el rastro clásico de la casa)
+            for (int i = _estela.Length - 1; i > 0; i--)
+            {
+                float t = 1f - i / (float)_estela.Length;
+                Vector2 p = _estela[i] - Main.screenPosition;
+                DibujarRayo(sb, rayo, p, Projectile.rotation, 88f,
+                    26f * t + 6f, c1 * (0.30f * t));
+            }
+            // 3 — EL HALO · 4 — EL CUERPO · 5 — EL NÚCLEO
+            DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 40f, c2 * 0.5f);
+            DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 20f, c1 * 0.95f);
+            DibujarRayo(sb, rayo, pos, Projectile.rotation, 88f, 8f, Color.White);
+            // 6 — LA ESTRELLA DE LA CABEZA
+            Capa(sb, Tex("FlareEstrella4Puntas"), pos, c1, Projectile.rotation + _fase * 2f, 34f / 256f);
+            // 7 — LA HOJA CRECIENTE (la firma del plato — gira con la hoja)
+            Capa(sb, Tex("Procedural/Crescent"), pos, c1 * 0.95f, Projectile.rotation, 30f / 64f);
+            // 8 — LAS CHISPAS QUE SUELTA
+            Vector2 atras = new(-MathF.Cos(Projectile.rotation), -MathF.Sin(Projectile.rotation));
+            for (int i = 0; i < 2; i++)
+            {
+                Vector2 p = pos + atras * (16f + Azar(i) * 10f) +
+                    new Vector2(-atras.Y, atras.X) * ((Azar(i + 5) * 2f - 1f) * 8f);
+                Capa(sb, Tex("SparkleStar"), p, c2 * (0.25f + 0.4f * Titilar(i, 4.6f)),
+                    Projectile.rotation, (10f + 8f * Titilar(i, 4.6f)) / 32f);
+            }
+        }
+
+        // === LA ZONA (8 capas): el velo del suelo · el charco · el
+        //     interior girando · el aro rúnico · el FireRing pulsante
+        //     del borde · los destellos internos · la estrella del
+        //     centro · LAS MOTES QUE SUBEN. ===
+        private void VestirZona(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            float radio = 120f + Variante * 16f;
+            float late = 0.85f + 0.15f * MathF.Sin(_fase * 3f);
+            // 1 — EL VELO DEL SUELO · 2 — EL CHARCO · 3 — EL INTERIOR
+            CapaSuelo(sb, Ruido(_semilla, 2.8f), pos, c1 * (0.12f * late), _fase * 0.18f, radio * 2f, radio * 0.95f);
+            CapaSuelo(sb, Tex("GlowCircleWhite"), pos, c1 * (0.30f * late), 0f, radio * 2f, radio * 0.9f);
+            CapaSuelo(sb, Tex("GlowCircleWhite"), pos, c2 * (0.22f * late), _fase, radio * 1.4f, radio * 0.68f);
+            // 4 — EL ARO RÚNICO del perímetro
+            CapaSuelo(sb, Tex("MagicRing"), pos, c2 * 0.28f, _fase * 1.3f, radio * 2.05f, radio * 0.95f);
+            // 5 — EL FIRERING PULSANTE (las brasas del borde)
+            CapaSuelo(sb, Tex("Procedural/FireRing"), pos, c1 * (0.16f + 0.08f * late),
+                -_fase * 0.9f, radio * 2.15f * (1f + 0.05f * late), radio * 1.05f);
+            // 6 — LOS DESTELLOS INTERNOS
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 p = pos + new Vector2((Azar(i) * 2f - 1f) * radio * 0.72f,
+                    (Azar(i + 4) * 2f - 1f) * radio * 0.34f);
+                Capa(sb, Tex("SparkleStar"), p, c1 * (0.22f + 0.4f * Titilar(i, 3.4f)),
+                    Azar(i) * 6f, (12f + 10f * Titilar(i, 3.4f)) / 32f);
+            }
+            // 7 — LA ESTRELLA DEL CENTRO
+            Capa(sb, Tex("Procedural/Star"), pos, c2 * 0.30f, _fase * 2.5f, 24f / 16f);
+            // 8 — LAS MOTES QUE SUBEN (el humo del conjuro)
+            for (int i = 0; i < 3; i++)
+            {
+                float sube = (Main.GlobalTimeWrappedHourly * 52f + Azar(i) * 80f) % 80f;
+                Vector2 p = new(pos.X + (Azar(i) * 2f - 1f) * radio * 0.75f, pos.Y - sube);
+                Capa(sb, Tex("GlowOrb"), p, c1 * (0.30f * (1f - sube / 80f) + 0.06f),
+                    0f, 12f / 128f);
+            }
+        }
+
+        // === LA HOJA (6 capas): el halo · el cuerpo · el núcleo blanco
+        //     · LA HOJA CRECIENTE que gira · su rastro · la chispa. ===
+        private void VestirHoja(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            // 1 — EL HALO · 2 — EL CUERPO · 3 — EL NÚCLEO
+            Capa(sb, Tex("GlowOrb"), pos, c2 * 0.35f, Projectile.rotation, 64f / 128f);
+            DibujarRayo(sb, Tex("GlowRay"), pos, Projectile.rotation, 62f, 26f, c2 * 0.5f);
+            DibujarRayo(sb, Tex("GlowRay"), pos, Projectile.rotation, 62f, 12f, c1);
+            DibujarRayo(sb, Tex("GlowRay"), pos, Projectile.rotation, 62f, 5f, Color.White * 0.9f);
+            // 4 — LA HOJA CRECIENTE (la firma — gira al caer)
+            Capa(sb, Tex("Procedural/Crescent"), pos, c1 * 0.95f, Projectile.rotation, 30f / 64f);
+            // 5 — SU RASTRO (la cinta que deja)
+            Vector2 atras = new(-MathF.Cos(Projectile.rotation), -MathF.Sin(Projectile.rotation));
+            CapaSuelo(sb, Tex("TrailGlow"), pos + atras * 20f, c2 * 0.40f,
+                Projectile.rotation, 56f, 18f);
+            // 6 — LA CHISPA de la punta
+            Capa(sb, Tex("SparkleStar"), pos - atras * 24f, c2 * (0.3f + 0.4f * Titilar(2, 5f)),
+                Projectile.rotation, (12f + 8f * Titilar(2, 5f)) / 32f);
+        }
+
+        // === EL LUCERO (7 capas): el velo de ruido · el halo · LA
+        //     ESTRELLA que gira (la firma) · el corazón blanco · el
+        //     destello · las chispas del rastro. ===
+        private void VestirLucero(SpriteBatch sb)
+        {
+            Color c1 = Tinta, c2 = Tinta2;
+            Vector2 pos = Projectile.Center - Main.screenPosition;
+            // 1 — EL VELO · 2 — EL HALO
+            Capa(sb, Ruido(_semilla, 6.5f), pos, c1 * 0.13f, _fase * 3f, 66f / 512f);
+            Capa(sb, Tex("GlowOrb"), pos, c1 * 0.5f, Projectile.rotation, 88f / 128f);
+            // 3 — LA ESTRELLA QUE GIRA (la firma del lucero)
+            Capa(sb, Tex("Procedural/Star"), pos, c1, _fase * 3.5f, 44f / 16f);
+            // 4 — EL CORAZÓN BLANCO
+            Capa(sb, Tex("GlowOrb"), pos, Color.White * 0.85f, 0f, 34f / 128f);
+            // 5 — EL DESTELLO (la cruz que titila)
+            Capa(sb, Tex("FlareEstrella4Puntas"), pos, c2 * (0.4f + 0.35f * Titilar(0, 5.2f)),
+                _fase * 2.2f, (40f + 16f * Titilar(0, 5.2f)) / 256f);
+            // 6..7 — LAS CHISPAS DEL RASTRO (la polvareda estelar)
+            Vector2 atras = -Vector2.Normalize(Projectile.velocity);
+            if (float.IsNaN(atras.X)) atras = Vector2.Zero;
+            for (int i = 0; i < 2; i++)
+            {
+                Vector2 p = pos + atras * (14f + i * 12f + Azar(i) * 6f);
+                Capa(sb, Tex("SparkleStar"), p, c2 * (0.28f + 0.4f * Titilar(i + 2, 5f)),
+                    Projectile.rotation, (11f + 8f * Titilar(i + 2, 5f)) / 32f);
+            }
         }
 
         /// <summary>UN rayo: la textura estirada del origen hacia el
@@ -669,21 +984,9 @@ namespace AethonMod.Content.Projectiles.TresCasas
             float angulo, float largo, float grosor, Color color)
         {
             if (largo <= 1f || color.A == 0) return;
-            Vector2 escala = new Vector2(largo / tex.Width, grosor / tex.Height);
+            Vector2 escala = new(largo / tex.Width, grosor / tex.Height);
             sb.Draw(tex, origen, null, color, angulo,
                 new Vector2(0f, tex.Height * 0.5f), escala, SpriteEffects.None, 0f);
-        }
-
-        /// <summary>El SUFIJO de la textura tintada más cercana (la casa
-        /// tiene glows por color: Gold/Cyan/Purple/Magenta/Green/White).</summary>
-        private static string Sufijo(Color c)
-        {
-            if (c.R > c.B + 40 && c.R > c.G + 20) return "Gold";
-            if (c.G > c.R + 20 && c.B > 150) return "Cyan";
-            if (c.R > 120 && c.B > c.G + 40) return "Purple";
-            if (c.R > 200 && c.B > 200 && c.G < 140) return "Magenta";
-            if (c.G > c.R + 40 && c.G > c.B + 40) return "Green";
-            return "White";
         }
     }
 }

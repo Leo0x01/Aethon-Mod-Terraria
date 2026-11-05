@@ -54,6 +54,14 @@ recreada por la casa, sin una línea ni una textura de nadie):
   EL OJO    (el QA VLM de la casa, ahora DENTRO de la cadena) — el
              montaje pasa por la visión: la nota y los defectos
              listados, sin salir de la herramienta.
+  EL CORTE  (el cutout UNIVERSAL de la v6.98) — CUALQUIER fondo se va
+             (no solo el croma verde: el azul-noche #1a2a6e y el
+             casi-negro de un render también): el color del fondo se
+             huele en el anillo del borde, la inundación con correa
+             (BFS por distancia global + degradados locales) lo arranca
+             píxel por píxel, y el borde anti-aliased se DES-FRINGEA
+             (des-mezcla del sujeto puro). Tiras de N frames también
+             (--frames 4 para el altar).
   + LOS NUEVOS EFECTOS DEL ALMA (los 25 VFX libres de la investigación:
     explosiones, hielo, rayos, escudos, portales) — fuego · hielo · rayo
     · escudo · portal se suman a brasa · humo · glitch · consagración.
@@ -83,6 +91,8 @@ USO:
   python3 tools/superforja.py rampa   --base "#D89030" [--pasos 7] [--hue 22]
   python3 tools/superforja.py atlas   --nombre x [--tira] [--maxrects]
   python3 tools/superforja.py ojo     --nombre x   (el QA VLM sobre el montaje)
+  python3 tools/superforja.py corta   --imagen sprite.png [--tolerancia 48]
+                                         [--frames 4] [--preview]  (fondo → transparente)
   python3 tools/superforja.py forjar  ...          (la cadena corta de la .95: pluma → molde → alma)
 
 SALIDAS (en /tmp/superforja_<nombre>/):
@@ -405,6 +415,242 @@ def el_molde(origen, w, h, con_contorno=True, con_halo=True):
         sprite = contorno(sprite)
     print(f'  EL MOLDE: sprite {w}x{h} (bbox del borrador: {recorte.size})')
     return sprite, highlight(sprite)
+
+
+# ====================================================================
+#  ETAPA 3½ — EL CORTE (el cutout UNIVERSAL: CUALQUIER fondo, no solo
+#  el croma verde del borrador — el fondo azul-noche o negro de un
+#  render también se va, píxel por píxel)
+#
+#  LA LETRA: «hay un problema con la creacion de sprite y es que todos
+#  tienen un fondo oscuro, y eso esta mal, todos los sprite deben tener
+#  fondo transparente».
+#
+#  LAS TRES LEYES DEL CORTE:
+#   1. EL COLOR DEL MARCO — el fondo se huele en el ANILLO del borde
+#      (la moda de las celdas cuantizadas del marco): el fondo del
+#      cuadro, sea verde croma, azul-noche #1a2a6e o casi-negro.
+#   2. LA INUNDACIÓN CON CORREA — BFS desde los píxeles del borde que
+#      se parecen al fondo; un píxel entra si se parece al fondo
+#      (distancia global ≤ tolerancia) O a su vecino ya aceptado
+#      (distancia local ≤ 11, los degradados y viñetas del render
+#      también se van) PERO SIN SOLTARSE del fondo (correa: a lo sumo
+#      2.2× la tolerancia del color original — la inundación nunca se
+#      come el dibujo).
+#   3. EL DES-FRINGE — el borde anti-aliased contra el fondo queda
+#      teñido: el anillo de píxeles que toca el fondo se DES-MEZCLA
+#      (cuánto sujeto hay en el color observado → ese es su alfa, y su
+#      color es el sujeto puro). Sin halos oscuros jamás.
+# ====================================================================
+def _color_fondo(px, w, h, grosor=2):
+    """El color DOMINANTE del anillo del borde + su cobertura (0..1)."""
+    muestras = []
+    for x in range(w):
+        for dy in range(grosor):
+            muestras.append(px[x, dy])
+            muestras.append(px[x, h - 1 - dy])
+    for y in range(h):
+        for dx in range(grosor):
+            muestras.append(px[dx, y])
+            muestras.append(px[w - 1 - dx, y])
+    cajas = {}
+    for (r, g, b, a) in muestras:
+        llave = (r >> 4, g >> 4, b >> 4)
+        cajas[llave] = cajas.get(llave, 0) + 1
+    llave_moda = max(cajas, key=cajas.get)
+    rs = gs = bs = cnt = 0
+    for (r, g, b, a) in muestras:
+        if (r >> 4, g >> 4, b >> 4) == llave_moda:
+            rs += r; gs += g; bs += b; cnt += 1
+    return (rs // max(1, cnt), gs // max(1, cnt), bs // max(1, cnt)), \
+        cajas[llave_moda] / float(len(muestras))
+
+
+def _dist(c1, c2):
+    return math.sqrt((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2 +
+                     (c1[2] - c2[2]) ** 2)
+
+
+def _cortar_fondo(im, tolerancia=48.0, correa=2.2, local=11.0, peine=True, cielo=False):
+    """UNA imagen → (RGBA sin fondo, % quitado, color del fondo)."""
+    w, h = im.size
+    px = im.load()
+    fondo, cobertura = _color_fondo(px, w, h)
+    correa_max = tolerancia * correa
+    # EL MAPA: 0 sin ver · 1 fondo · 2 sujeto
+    mapa = bytearray(w * h)
+    pila = []
+    for x in range(w):
+        for y in (0, h - 1):
+            i = y * w + x
+            if mapa[i] == 0 and _dist(px[x, y], fondo) <= tolerancia:
+                mapa[i] = 1; pila.append((x, y))
+    for y in range(h):
+        for x in (0, w - 1):
+            i = y * w + x
+            if mapa[i] == 0 and _dist(px[x, y], fondo) <= tolerancia:
+                mapa[i] = 1; pila.append((x, y))
+    # LA INUNDACIÓN (BFS con las dos puertas y la correa)
+    while pila:
+        x, y = pila.pop()
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if nx < 0 or ny < 0 or nx >= w or ny >= h:
+                continue
+            i = ny * w + nx
+            if mapa[i] != 0:
+                continue
+            c = px[nx, ny]
+            d_fondo = _dist(c, fondo)
+            if d_fondo <= tolerancia:
+                mapa[i] = 1; pila.append((nx, ny)); continue
+            # la puerta local: el degradado del vecino (con la correa)
+            if (d_fondo <= correa_max and
+                    _dist(c, px[x, y]) <= local):
+                mapa[i] = 1; pila.append((nx, ny))
+    # EL DES-FRINGE (anillo de profundidad 2 alrededor del fondo): el
+    # píxel teñido se DES-MEZCLA — cuánto sujeto lleva el color
+    # observado es su alfa; su color es el sujeto puro. Sin halos.
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    po = out.load()
+    quitados = 0
+    tope = tolerancia * 1.35
+    for y in range(h):
+        for x in range(w):
+            i = y * w + x
+            if mapa[i] == 1:
+                quitados += 1
+                continue
+            r, g, b, a = px[x, y]
+            if a > 0:
+                # la distancia al fondo más cercano (Chebyshev ≤ 2)
+                cerca = 99
+                for dy in (-2, -1, 0, 1, 2):
+                    ny = y + dy
+                    if ny < 0 or ny >= h:
+                        continue
+                    base = ny * w
+                    for dx in (-2, -1, 0, 1, 2):
+                        nx = x + dx
+                        if nx < 0 or nx >= w:
+                            continue
+                        paso = max(abs(dx), abs(dy))
+                        if mapa[base + nx] == 1 and paso < cerca:
+                            cerca = paso
+                if cerca <= 2:
+                    d = _dist((r, g, b), fondo)
+                    if d < tope:
+                        k = d / tope * (1.0 - 0.22 * (cerca - 1))
+                        k = max(0.06, k)   # cuánto SUJETO lleva dentro
+                        alfa = max(0, min(255, int(a * k)))
+                        if k > 0.08:
+                            r2 = (r - (1 - k) * fondo[0]) / k
+                            g2 = (g - (1 - k) * fondo[1]) / k
+                            b2 = (b - (1 - k) * fondo[2]) / k
+                            r2 = max(0, min(255, int(r2)))
+                            g2 = max(0, min(255, int(g2)))
+                            b2 = max(0, min(255, int(b2)))
+                        else:
+                            r2, g2, b2 = r, g, b
+                        po[x, y] = (r2, g2, b2, alfa)
+                        continue
+            po[x, y] = (r, g, b, a)
+    # EL PEINE — las islas diminutas oscuras que flotan cerca del marco
+    # (los restos de la viñeta del render): se van; las chispas y los
+    # destellos del DIBUJO (colores vivos, aunque sean chicos) quedan.
+    if peine:
+        from collections import deque as _dq
+        visto = bytearray(w * h)
+        islas = []
+        for yy in range(h):
+            for xx in range(w):
+                i0 = yy * w + xx
+                if visto[i0] or po[xx, yy][3] <= 8:
+                    continue
+                q = _dq([(xx, yy)])
+                visto[i0] = 1
+                pix = []
+                while q:
+                    cx, cy = q.popleft()
+                    pix.append((cx, cy))
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        nx, ny = cx + dx, cy + dy
+                        if 0 <= nx < w and 0 <= ny < h and not visto[ny * w + nx] \
+                                and po[nx, ny][3] > 8:
+                            visto[ny * w + nx] = 1
+                            q.append((nx, ny))
+                islas.append(pix)
+        if islas:
+            islas.sort(key=len, reverse=True)
+            cuerpo = set(islas[0])
+            for isl in islas[1:]:          # la mayor es el dibujo
+                n = len(isl)
+                if n > 12:
+                    continue
+                lum = sum(0.30 * po[x, y][0] + 0.55 * po[x, y][1] +
+                          0.15 * po[x, y][2] for x, y in isl) / n
+                df = sum(_dist(po[x, y], fondo) for x, y in isl) / n
+                # LA ISLA RODEADA DE FONDO (solo --cielo): las
+                # estrellitas de un fondo estrellado flotan en la nada
+                # (su anillo ≥ 70% transparente) — se van aunque sean
+                # brillantes. FUERA de --cielo las chispas flotantes
+                # del DIBUJO (las brasas de la lámpara) se quedan.
+                anillo = 0
+                hueco = 0
+                for x, y in isl:
+                    for dy in (-2, -1, 0, 1, 2):
+                        for dx in (-2, -1, 0, 1, 2):
+                            if dx == 0 and dy == 0:
+                                continue
+                            nx, ny = x + dx, y + dy
+                            if 0 <= nx < w and 0 <= ny < h:
+                                anillo += 1
+                                if po[nx, ny][3] <= 8:
+                                    hueco += 1
+                rodeada = anillo > 0 and hueco >= anillo * 0.70
+                if lum < 42.0 or df < tolerancia * 0.75 or (cielo and rodeada):
+                    for x, y in isl:
+                        po[x, y] = (0, 0, 0, 0)
+    return out, 100.0 * quitados / (w * h), fondo, cobertura
+
+
+def el_corte(im, tolerancia=48.0, frames=1, peine=True, cielo=False):
+    """EL CORTE UNIVERSAL: una imagen (o una TIRA de N frames verticales)
+    → todo el fondo transparente, frame por frame (cada frame puede
+    tener su propio fondo). Devuelve (RGBA, [estadísticas por frame])."""
+    if frames <= 1:
+        out, pct, fondo, cob = _cortar_fondo(im, tolerancia, peine=peine, cielo=cielo)
+        return out, [(pct, fondo, cob)]
+    w, h = im.size
+    alto_f = h // frames
+    if alto_f * frames != h:
+        raise SystemExit(f'la tira {w}x{h} no se parte en {frames} frames')
+    trozos, stats = [], []
+    for f in range(frames):
+        cuadro = im.crop((0, f * alto_f, w, (f + 1) * alto_f))
+        out, pct, fondo, cob = _cortar_fondo(cuadro, tolerancia, peine=peine, cielo=cielo)
+        trozos.append(out)
+        stats.append((pct, fondo, cob))
+    tira = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    for f, t in enumerate(trozos):
+        tira.paste(t, (0, f * alto_f))
+    return tira, stats
+
+
+def _damero(w, h, c1=(46, 46, 58), c2=(66, 66, 82), t=8):
+    """El damero de la transparencia (para VER el corte)."""
+    im = Image.new('RGB', (w, h), c1)
+    d = ImageDrawDraw(im)
+    for y in range(0, h, t):
+        for x in range(0, w, t):
+            if (x // t + y // t) % 2 == 0:
+                d.rectangle([x, y, x + t - 1, y + t - 1], fill=c2)
+    return im
+
+
+def ImageDrawDraw(im):
+    from PIL import ImageDraw
+    return ImageDraw.Draw(im)
 
 
 # ====================================================================
@@ -1058,6 +1304,60 @@ def cmd_ojo(args):
     el_ojo(montaje, os.path.join(c, 'qa_vision.txt'))
 
 
+def cmd_corta(args):
+    """EL CORTE: el cutout universal sobre una imagen real del mod (o de
+    cualquier lado) — el fondo se va, el dibujo queda, el borde se
+    des-fringea. Con --preview: el montaje antes/después sobre damero."""
+    ruta = args.imagen
+    if not os.path.exists(ruta):
+        raise SystemExit(f'no existe {ruta}')
+    im = Image.open(ruta).convert('RGBA')
+    print(f'LA SUPERFORJA — EL CORTE (el cutout universal de {os.path.basename(ruta)})')
+    out, stats = el_corte(im, tolerancia=args.tolerancia, frames=args.frames,
+                          peine=not args.sin_peine, cielo=args.cielo)
+    for f, (pct, fondo, cob) in enumerate(stats):
+        print(f'  frame {f + 1}/{len(stats)}: fondo '
+              f'#{fondo[0]:02X}{fondo[1]:02X}{fondo[2]:02X} '
+              f'(cobertura del borde {cob * 100:.0f}%) · quitado {pct:.1f}%')
+        if pct > 92:
+            print('   (AVISO: se quitó CASI TODO — revisa la tolerancia)')
+        if pct < 1.0:
+            print('   (AVISO: casi no se quitó nada — sube la tolerancia)')
+    destino = args.destino or os.path.splitext(ruta)[0] + '_corta.png'
+    out.save(destino)
+    print(f'  → {destino}')
+    if args.preview:
+        # el montaje: original | cortado, sobre damero, ×4
+        Z = 4
+        piezas = [im.crop((0, f * (im.height // args.frames),
+                            im.width, (f + 1) * (im.height // args.frames)))
+                  for f in range(args.frames)] if args.frames > 1 else [im]
+        cortadas = [out.crop((0, f * (im.height // args.frames),
+                              im.width, (f + 1) * (im.height // args.frames)))
+                    for f in range(args.frames)] if args.frames > 1 else [out]
+        filas = []
+        for orig, cort in zip(piezas, cortadas):
+            celda_w = max(orig.width, cort.width) * Z + 16
+            celda_h = max(orig.height, cort.height) * Z + 16
+            fila = Image.new('RGB', (celda_w * 2 + 24, celda_h), (18, 18, 26))
+            for k, (fr, etiqueta) in enumerate(((orig, 'ANTES'), (cort, 'DESPUES'))):
+                frz = fr.resize((fr.width * Z, fr.height * Z), Image.NEAREST)
+                base = _damero(frz.width + 12, frz.height + 12)
+                base.paste(frz, (6, 6), frz)
+                fila.paste(base, (k * (celda_w + 12) + 6, 6))
+            filas.append(fila)
+        W = max(f.width for f in filas)
+        montaje = Image.new('RGB', (W, sum(f.height for f in filas) + 8), (18, 18, 26))
+        y = 4
+        for f in filas:
+            montaje.paste(f, ((W - f.width) // 2, y))
+            y += f.height
+        prev = os.path.splitext(destino)[0] + '_preview.png'
+        montaje.save(prev)
+        print(f'  preview → {prev}')
+    return destino
+
+
 def _correr_cadena(args, con_animacion, con_qa):
     """LA CADENA DE LA SUPERFORJA: pluma → puente → molde → (espejo) →
     alma → (atlas) → montaje → (ojo)."""
@@ -1086,6 +1386,10 @@ def _correr_cadena(args, con_animacion, con_qa):
     sprite, hl = el_molde(nativo, args.ancho, args.alto,
                           con_contorno=not args.sin_contorno,
                           con_halo=not args.sin_halo)
+    # 3½ — EL CORTE (la regla de la v6.98: TODO lo que sale de la
+    # superforja tiene fondo transparente — el croma verde del molde Y
+    # cualquier fondo oscuro residual)
+    sprite, _stats = el_corte(sprite, tolerancia=40.0)
     sprite.save(os.path.join(c, 'sprite.png'))
     hl.save(os.path.join(c, 'highlight.png'))
     # 4 — EL ESPEJO (si pide animación)
@@ -1236,6 +1540,22 @@ def main():
     p = comunes(sub.add_parser('ojo', help='el QA VLM sobre el montaje'), con_prompt=False)
     p.add_argument('--montaje', help='(default: montaje_qa.png de la carpeta)')
     p.set_defaults(fn=cmd_ojo)
+
+    # el corte (el cutout universal: cualquier fondo → transparente)
+    p = sub.add_parser('corta', help='el cutout UNIVERSAL: cualquier fondo → transparente')
+    p.add_argument('--imagen', required=True, help='el PNG a cortar')
+    p.add_argument('--destino', help='(default: <imagen>_corta.png)')
+    p.add_argument('--tolerancia', type=float, default=48.0,
+                   help='la distancia de color al fondo (default 48)')
+    p.add_argument('--frames', type=int, default=1,
+                   help='la tira vertical de N frames (ej: el altar 4)')
+    p.add_argument('--preview', action='store_true',
+                   help='el montaje antes/después sobre damero')
+    p.add_argument('--sin-peine', action='store_true',
+                   help='desactivar la barra de islas diminutas oscuras')
+    p.add_argument('--cielo', action='store_true',
+                   help='fondo estrellado: las islas brillantes rodeadas de nada también se van')
+    p.set_defaults(fn=cmd_corta)
 
     # la cadena corta (la .95) y la completa
     for nombre, ayuda, fn in (

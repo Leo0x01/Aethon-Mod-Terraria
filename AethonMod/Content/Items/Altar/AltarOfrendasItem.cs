@@ -23,8 +23,8 @@ namespace AethonMod.Content.Items.Altar
         {
             Item.DefaultToPlaceableTile(ModContent.TileType
                 <global::AethonMod.Content.Tiles.AltarOfrendasTile>());
-            Item.width = 30;
-            Item.height = 44;
+            Item.width = 34;
+            Item.height = 48;
             Item.rare = ItemRarityID.Quest;
             Item.value = 0;
             Item.maxStack = 99;

@@ -32,9 +32,31 @@ LA CADENA DE LA SUPERFORJA (el comando `cadena` — TODO en uno):
 | `atlas` | **MaxRects** (soimy/maxrects-packer · PyTexturePacker) | Frames sueltos → TIRA VERTICAL tML (la convención del juego) + ATLAS COMPACTO (guillotina por mejor lado) + DETECCIÓN DE DUPLICADOS por huella + manifiesto JSON |
 | `ojo` | el QA VLM de la casa, ahora DENTRO de la cadena | El paso «mirar»: nota 0-10 y defectos concretos sobre el montaje — la entrada perfecta para `refina` |
 | `forjar` | LA FORJA v6.95 (la cadena corta, compatibilidad) | pluma → molde → alma → montaje (lo que forjó el altar y las 20 armas) |
+| `corta` | **EL CORTE** (v6.98 — la ley de la transparencia) | EL CUTOUT UNIVERSAL: CUALQUIER fondo se va (no solo el croma verde — el azul-noche `#183078` y el casi-negro de un render también): el color se huele en el ANILLO del borde · LA INUNDACIÓN CON CORREA (BFS global + degradados locales, con correa — nunca come el dibujo) · EL DES-FRINGE de 2 anillos (el borde anti-aliased des-mezclado: sin halos jamás) · EL PEINE (islas diminutas oscuras barridas) · `--cielo` (los fondos estrellados: las islas brillantes rodeadas de nada también se van) · `--frames N` (tiras de N marcos — el altar) — y LA CADENA termina SIEMPRE aquí: nada sale de la forja con fondo |
 | `cadena` | **LA SUPERFORJA** (la unión total) | TODO: pluma → puente → molde → espejo → alma → atlas → montaje → ojo |
 
 ---
+
+## LA LEY DE LA TRANSPARENCIA (v6.98) — EL CORTE
+
+```bash
+# el sprite que salió con fondo oscuro (la letra: «todos los sprite
+# deben tener fondo transparente»):
+python3 tools/superforja.py corta --imagen sprite.png --preview
+#   → fondo #183078 (cobertura del borde 98%) · quitado 78,1%
+# la tira de N frames (el altar 36×216):
+python3 tools/superforja.py corta --imagen altar.png --frames 4 --preview
+# el fondo estrellado (las estrellitas flotantes también se van):
+python3 tools/superforja.py corta --imagen libro.png --tolerancia 34 --cielo
+```
+
+LAS TRES LEYES: (1) el fondo se huele en el anillo del borde — la moda
+de sus celdas cuantizadas, sea del color que sea; (2) la inundación
+con correa — un píxel entra si se parece al fondo (≤ tolerancia) O a su
+vecino ya aceptado (≤ 11, los degradados) SIN soltarse del fondo
+(2,2× la tolerancia — jamás se come el dibujo); (3) el des-fringe — el
+anillo de 2 píxeles que toca el fondo se des-mezcla: cuánto SUJETO
+lleva el color observado es su alfa, y su color es el sujeto puro.
 
 ## EL CICLO DE LA CASA — pintar → mirar → refinar → re-forjar
 
