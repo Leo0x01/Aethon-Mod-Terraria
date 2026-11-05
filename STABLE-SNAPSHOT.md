@@ -1,17 +1,32 @@
-# v6.100 — LA SESIÓN DE LOS CLICKERS, LAS AURAS Y LA PALABRA FINAL — EL ALTAR ASENTADO + EL ESTANDARTE FIEL + LA PURGA + LAS CINCO
+# v6.100.1 — LA CURA DE LA INTERFAZ ROTA — EL ESTANDARTE YA NO REVIENTA LOS SLOTS
 
-> **PUBLICADA** — .tmod v6.100 FINAL (md5 `b16f411b5527e0b8a71e44e285a82a99`, 11.285.452 B, 493 entradas) — **EL ALTAR ASENTADO** (arte hasta la última fila — 0 px de aire — + LA DANZA DE LAS DOS VELAS en contrafase con puntas incandescentes) · **EL ESTANDARTE FIEL AL ORIGINAL** (research/README-ESTANDARTE.md + el Warbanner copiado tal cual: tira 5 marcos a 6 ticks, radio 720, LA BENDICIÓN +30% por cercanía, el ardor ×1→×3, el repel — el ítem animado 30×390 con el pennant y el fuego que envuelve + la tela en la espalda) · **LA PURGA** (las 20 Tres Casas + las 3 del taller + las 2 bolsas MUERTAS; viven solo Coro y Pluma — con entrega directa) · **LAS CINCO ARMAS NUEVAS** (los clickers Sello del Escriba y Parpadeo del Eterno con los actos de píxeles del taller · las auras Corona de Plumas y Derrame de Tinta · LA DEFINITIVA La Última Palabra con el ritual de tres actos: carga → decreto → juicio) · **LA SOMBRA DE LA PÁGINA IV FORJADA** (la garganta del vórtice como boca, el velo de ruido, el anillo de tinta) — oráculo 0/0 (423 .cs), **-build REAL 0/0**, guardián **TODO VIVE ✔**, DLL firmas 12 vivas/5 muertas verificadas, hjson ×3 simétricos (268 claves), headless **0 excepciones**.
+> **BUILD VERIFICADA — PENDIENTE PUBLICAR** — .tmod v6.100.1 (md5 `948979744140c63794eba7a3e6878230`, 11.286.231 B, 493 entradas) — **LA CURA**: `EstandarteDelJuicioItem` ya NO lee `Main.itemFrame[Type]` (el array VANILLA que tML NUNCA redimensiona para mods — el Type del estandarte con Calamity cargada queda fuera de rango → `IndexOutOfRangeException` CADA FRAME en cada slot → las «Excepción silenciosa» mataban las capas restantes de la interfaz: cosas que desaparecen, PANTALLA NEGRA). AHORA: `PreDrawInInventory` dibuja el PARÁMETRO `frame` (el marco animado que el propio hook trae, computado con `Main.itemAnimations` — el sistema que tML SÍ dimensiona) y `PreDrawInWorld` usa `Main.GetItemDrawFrame` (el helper oficial de vanilla — el mismo del Grimorio Hambriento). La presentación v6.100 NO cambia (escala 0.62, el ajuste de 2 px, la tira animada intacta) — oráculo 0/0 (423 .cs), **-build REAL 0/0**, **DLL DECOMPILADA** (PreDrawInInventory dibuja el `frame` del parámetro · PreDrawInWorld llama GetItemDrawFrame · `itemFrame` x0 · `MarcoVivo` x0), guardián **TODO VIVE ✔** (411 clases), hjson ×3 simétricos (817 claves), headless **0 excepciones**.
 
-## PARA VERIFICAR EN JUEGO (la checklist de la sesión)
+## EL BUG (la letra del usuario)
 
-1. **EL ALTAR colocado**: asienta en el suelo SIN aire (el arte llega a la última fila) y **LAS DOS VELAS BAILAN en contrafase** — cuando la izquierda sube con su punta blanca incandescente, la derecha se agacha naranja, y al marco siguiente se cruzan (7 ticks por marco, el ciclo completo ~0.5 s).
-2. **EL ESTANDARTE DEL JUICIO** (llega solo al entrar al mundo): el ítem EN EL INVENTARIO es la tira animada (el pennant ondeando, el sol pulsando, el fuego); equipado, **LA TELA COLGANDO DE LA ESPALDA** se mece y voltea al girar; el aura cubre 45 tiles — el impío pegado arde ×3 y el del borde ×1, la cadencia ACELERA con las cargas hasta el estallido, y **TU DAÑO SUBE hasta +30%** con el enemigo más cerca (la estrella sobre tu cabeza crece con la bendición); el que se pega es frenado y rechazado.
-3. **LA PURGA**: la Bolsa de las Tres Casas y la del Taller YA NO EXISTEN (la maestra entrega 25 bolsas); sus armas no se pueden craftear — pero **EL CORO, LA PLUMA y EL VÁSTAGO llegan solos** al entrar al mundo.
-4. **LOS CLICKERS**: El Sello del Escriba (cada clic estampa; a los 10 sellos LA TINTA ESTALLA con el acto de píxeles ×3) y El Parpadeo del Eterno (el radio más ancho; a los 14 EL OJO SE ABRE en ti, ATRAE a los vivos y los muele ×3) — sus aros nuevos: los sellos lloviendo hacia adentro / las pestañas y el destino.
-5. **LAS AURAS**: La Corona de Plumas (MANTÉN el uso: el aro de 7 plumas orbita mordiendo; el anotado pica +15% por marca) y El Derrame de Tinta (la gota cae del cielo, CHAPOTEA, y el charco HIERVE 10 s trabando las piernas — suelta el arma y sigue peleando, máximo 2 charcos).
-6. **LA ÚLTIMA PALABRA** (la definitiva): MANTÉN el uso — el libro del Eterno flota sobre ti con su corazón de píxeles creciendo; SUELTA — LA PALABRA cruza el mapa con sus tres fundas y el velo de ruido; donde cae — la nova doble de píxeles y fuego, la onda de choque, EL CHARCO hirviendo y LAS ALMAS volando a ti.
-7. **LA SOMBRA DE LA PÁGINA IV** (llega sola): el tentáculo sale de ti, CAZA al jefe a CUALQUIER distancia, muerde — su boca es EL VÓRTICE DE PÍXELES girando con el rumbo y el jefe mordido lleva el ANILLO DE TINTA doble; drena 3%/6t y a 1 HP: LA DEVORACIÓN.
+«hay un error muy raro, creo que con el estandarte, este error buguea por completo la interfaz de usuario haciendo que algunas cosas desaparezcan o la pantalla se vuelva negra, es muy raro»
 
-## LA RECONSTRUCCIÓN (la nota de la casa — cómo se salvó esta sesión)
+### LA AUTOPSIA DEL client.log (5/11, 16:05→16:07)
 
-> El entorno murió a mitad de la v6.100 con el trabajo SIN publicar. LO QUE QUEDÓ: el .tmod compilado en /home/sync. LA RECONSTRUCCIÓN: el .tmod se descomprimió (el formato de la casa), sus 12 sprites NUEVOS se recuperaron BYTE A BYTE (rawimg→PNG), su hjson se leyó completo (los textos y claves exactos) y su DLL+PDB se DECOMPILARON (ilspycmd 9.1) — los 11 .cs nuevos y los 14 cambiados se reescribieron en el estilo de la casa con los números EXACTOS del decompilado, y la cadena completa volvió a correr: oráculo 0/0 · -build 0/0 · guardián TODO VIVE · 493 entradas EOF exacto · headless 0 excepciones. Las tres piezas que el VLM rechazó de la sesión interrumpida (los iconos débiles) se REFORJARON en vivo con QA iterado.
+- 16:05:30 — carga **AethonMod 6.100** (tras un reload desde la 6.99).
+- 16:06:22 — entra al mundo con el estandarte equipado.
+- 16:06:32→16:06:51 — **5 «Excepción silenciosa»** (tML las deduplica): `System.IndexOutOfRangeException` en `EstandarteDelJuicioItem.PreDrawInInventory` línea 92, llamadas desde `ItemSlot.Draw` por TRES vías: el inventario, el slot de accesorio (`AccessorySlotLoader.DrawRedirect`) y **el objeto en la mano del cursor** (`DrawInterface_38_MouseCarriedObject`).
+- 16:07:08 — guarda y renuncia (la interfaz inservible).
+
+**POR QUÉ SE ROMPÍA LA INTERFAZ ENTERA**: la excepción saltaba DENTRO del bucle de dibujado de las capas de interfaz (`Main.DrawInterface` → capa 27 del inventario) — tML la traga («silenciosa»), pero las capas que venían DETRÁS no se dibujan ese frame → elementos que desaparecen; según qué slot se dibujaba cuando reventaba, el daño cambiaba (a veces la pantalla entera en negro). CADA FRAME, mientras el ítem era visible.
+
+### LA RAÍZ (verificada en el fuente de tModLoader, rama 1.4.4)
+
+- `Main.itemFrame` es un array **VANILLA** (declarado `int[401]`, dimensionado por el juego base a ~5456) que tML **NUNCA redimensiona** — `ItemLoader.ResizeArrays` solo redimensiona `Main.itemAnimations` (el sistema de `Main.RegisterItemAnimation`… que el estandarte YA usaba para su animación).
+- La v6.100 leía `Main.itemFrame[Type]` en `MarcoVivo` para el «marco vivo» — con Calamity y compañía, el Type del estandarte queda MUY por encima del tope vanilla → **fuera de rango**.
+
+## PARA VERIFICAR EN JUEGO (la checklist de la cura)
+
+1. **Actualiza a la v6.100.1** (VÍA 1 del COMPILACION.md: el `.tmod` del release → carpeta Mods) — verifica en la lista de mods que diga **6.100.1**.
+2. **Entra al mundo con el estandarte equipado** (o tómalo del inventario / en la mano del cursor): LA INTERFAZ VIVE — nada desaparece, no hay pantalla negra, el log queda LIMPIO (0 «Excepción silenciosa»).
+3. **El ítem se ve como la v6.100**: en el inventario la tira animada (el pennant ondeando, el sol pulsando, el fuego) a escala contenida; en el suelo cae con su marco vivo; la tela sigue en la espalda meciéndose.
+4. **El resto de la v6.100 intacto**: el aura del juicio (la bendición +30%, el ardor, el repel, las cargas con estallido), el altar asentado con sus dos velas, las cinco armas nuevas, la Sombra de la Página IV.
+
+## LA LECCIÓN (sellada en el código)
+
+El marco animado de un ítem NUNCA se lee de `Main.itemFrame` (solo ítems vanilla): **llega en el parámetro `frame` del hook `PreDrawInInventory`** (ItemSlot.Draw lo computa con `Main.itemAnimations`) **o por `Main.GetItemDrawFrame(type, out tex, out frame)`** — el helper oficial, el mismo que el Grimorio Hambriento ya usaba. La casa ya conocía el patrón correcto; la v6.100 lo reinventó mal.

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -33,8 +32,20 @@ namespace AethonMod.Content.Items.Accessories
     //     transparencia nativa (el mástil, el pennant afilado, el SOL
     //     DEL JUICIO pulsando y el fuego que lo envuelve).
     //   · EL INVENTARIO: el marco vivo se dibuja él mismo
-    //     (PreDrawInInventory/World con el marco que Main.itemFrame
-    //     trae — como el original, escala 0.62).
+    //     (PreDrawInInventory con el marco que tML YA trae en el
+    //     parámetro frame — y PreDrawInWorld con el helper oficial
+    //     Main.GetItemDrawFrame, el mismo del Grimorio Hambriento).
+    //
+    //     LA LECCIÓN v6.100.1 (el client.log del usuario: interfaz
+    //     rota, cosas que desaparecen, pantalla negra): la v6.100
+    //     leía Main.itemFrame[Type] — ese array es VANILLA (tML NUNCA
+    //     lo redimensiona para mods; solo Main.itemAnimations se
+    //     redimensiona). Con el Type del estandarte fuera de rango:
+    //     IndexOutOfRangeException CADA FRAME en cada slot — la
+    //     excepción silenciosa mataba las capas restantes de la
+    //     interfaz. El marco de un ítem animado NUNCA se lee de
+    //     Main.itemFrame: llega en el parámetro frame del hook o por
+    //     Main.GetItemDrawFrame.
     //   · LA ESPALDA: EstandarteBannerDrawLayer cuelga la tela tras
     //     el portador (el original usaba AutoloadEquip Balloon —
     //     la casa, su propia capa).
@@ -71,29 +82,20 @@ namespace AethonMod.Content.Items.Accessories
             modPlayer.EstandarteJuicioOculto = hideVisual;
         }
 
-        /// <summary>EL MARCO VIVO del ítem (el que Main.itemFrame
-        /// camina con la animación registrada — con tope de seguridad
-        /// si la tira cambiara de largo).</summary>
-        private static Rectangle MarcoVivo(int tipo, Texture2D tex, int altoMarco)
-        {
-            int marco = Main.itemFrame[tipo];
-            int max = Math.Max(0, tex.Height / altoMarco - 1);
-            if (marco < 0) marco = 0;
-            else if (marco > max) marco = max;
-            return new Rectangle(0, marco * altoMarco, tex.Width, altoMarco);
-        }
-
         public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position,
             Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {
-            // EL ÍTEM EN LA MANO: el marco vivo, escala contenida (la
-            // tira es alta — 0.62 para que quepa en el slot con su
-            // fuego — el mismo ajuste del original).
+            // EL ÍTEM EN LA MANO: el marco vivo LLEGA EN EL PARÁMETRO
+            // frame — ItemSlot.Draw lo computa con Main.itemAnimations
+            // (el sistema que tML SÍ redimensiona para mods; el viejo
+            // Main.itemFrame es el array vanilla y leerlo con un Type
+            // de mod revienta). Escala contenida: la tira es alta —
+            // 0.62 para que quepa en el slot con su fuego — el mismo
+            // ajuste del original.
             Texture2D tex = TextureAssets.Item[Type].Value;
-            Rectangle marco = MarcoVivo(Type, tex, 78);
             float esc = scale * 0.62f;
             spriteBatch.Draw(tex, position - new Vector2(0f, 2f * scale),
-                marco, drawColor, 0f, Utils.Size(marco) * 0.5f, esc,
+                frame, drawColor, 0f, Utils.Size(frame) * 0.5f, esc,
                 SpriteEffects.None, 0f);
             return false;
         }
@@ -101,9 +103,10 @@ namespace AethonMod.Content.Items.Accessories
         public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor,
             Color alphaColor, ref float rotation, ref float scale, int whoAmI)
         {
-            // EL ÍTEM EN EL SUELO: el marco vivo con la luz del mundo.
-            Texture2D tex = TextureAssets.Item[Type].Value;
-            Rectangle marco = MarcoVivo(Type, tex, 78);
+            // EL ÍTEM EN EL SUELO: EL HELPER OFICIAL DE VANILLA — textura
+            // + marco de la animación registrada, SEGURO para mods (el
+            // mismo del Grimorio Hambriento; nunca Main.itemFrame).
+            Main.GetItemDrawFrame(Type, out Texture2D tex, out Rectangle marco);
             spriteBatch.Draw(tex, Item.position - Main.screenPosition,
                 marco, lightColor, rotation, Utils.Size(marco) * 0.5f, scale,
                 SpriteEffects.None, 0f);
