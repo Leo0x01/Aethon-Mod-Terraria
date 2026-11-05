@@ -1298,6 +1298,14 @@ namespace AethonMod.Content.Players
                 // queda para quien la pierda.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina2>());
+                // v6.99 — EL ESTANDARTE DEL JUICIO (la regla de la casa:
+                // «todo nuevo ítem debe ser entregado al jugador
+                // directamente»): el accesorio del aura que juzga de la
+                // v6.98 nació con receta pero SIN entrega — ahora llega
+                // SOLO, al entrar al mundo, si no lo lleva ya (la receta
+                // post-lunar queda para quien lo pierda).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Accessories.EstandarteDelJuicioItem>());
 
                 if (entregados > 0)
                 {

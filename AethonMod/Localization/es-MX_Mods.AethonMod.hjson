@@ -731,9 +731,10 @@ Items: {
 			Firmada por las librerías de signos mágicos de la casa]
 			'''
 	}
+
 	EstandarteDelJuicioItem: {
-		// v6.98: EL AURA QUE DAÑA — el concepto de los primeros commits, resucitado y
-		// hecho superior (la idea del estandarte de la referencia, la implementación 100% de la casa).
+		// v6.98: THE DAMAGING AURA — the abandoned concept of the first commits,
+		// resurrected and made superior (the reference banner idea, 100% house-built).
 		DisplayName: Estandarte del Juicio
 		Tooltip:
 			'''
@@ -2435,9 +2436,7 @@ Items: {
 }
 
 Projectiles: {
-	EstandarteJuicioAuraProjectile: {
-		DisplayName: Aura del Juicio
-	}
+	EstandarteJuicioAuraProjectile.DisplayName: Aura del Juicio
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
@@ -2640,6 +2639,7 @@ Buffs: {
 		DisplayName: Quemadura cósmica
 		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
 	}
+
 	JuicioDelAlba: {
 		DisplayName: Llama del Alba
 		Description: El juicio del alba te consume: la luz dorada arde contra los impíos

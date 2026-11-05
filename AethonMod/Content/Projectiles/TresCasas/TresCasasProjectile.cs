@@ -7,6 +7,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using PixelMotor = AethonMod.Content.Weapons.Investigaciones.PixelFxPlayer;
 
 namespace AethonMod.Content.Projectiles.TresCasas
 {
@@ -74,6 +75,13 @@ namespace AethonMod.Content.Projectiles.TresCasas
         private int _proximoHijo;
         /// <summary>Los segmentos de la estela (nacen UNA vez — cero GC).</summary>
         private Vector2[] _estela = new Vector2[16];
+
+        /// <summary>EL NÚCLEO DEL MOTOR DE PÍXELES (v6.99): la
+        /// herramienta de ANIMACIÓN DE ATAQUES de la superforja — el
+        /// mismo motor del Taller de Efectos (el de las armas de la
+        /// bolsa de taller), corriendo VIVO dentro del proyectil y
+        /// TEÑIDO con los dos colores de su arma.</summary>
+        private PixelMotor _motor;
 
         public override void SetStaticDefaults() { Main.projFrames[Type] = 1; }
 
@@ -146,6 +154,16 @@ namespace AethonMod.Content.Projectiles.TresCasas
         {
             int est = Estilo;
             _fase += 0.035f;
+            // EL NÚCLEO DEL MOTOR DE PÍXELES (v6.99): el efecto del
+            // Taller de Efectos corre VIVO — solo el que DIBUJA lo
+            // instancia (el servidor ni se entera: el daño es el de
+            // siempre) — y se funde con su FADE al morir el proyectil.
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+            {
+                PixelMotor m = Motor();
+                m.Tick();
+                if (Projectile.timeLeft <= 12) m.Fx.Stop();
+            }
             switch (est)
             {
                 case ESTILO_HAZ: AiHaz(); break;
@@ -417,6 +435,67 @@ namespace AethonMod.Content.Projectiles.TresCasas
             }
         }
 
+        public override void OnKill(int timeLeft)
+        {
+            // EL MOTOR se apaga con el proyectil: ni un byte de textura
+            // ni de buffers más allá de la muerte (el patrón del Taller).
+            _motor?.Dispose();
+            _motor = null;
+        }
+
+        // ================================================================
+        //  EL NÚCLEO DEL MOTOR DE PÍXELES (v6.99) — LA HERRAMIENTA DE
+        //  ANIMACIÓN DE ATAQUES DE LA SUPERFORJA (la letra: «entre las
+        //  herramientas había una para crear animaciones de ataque — es
+        //  la que usaste para crear las armas de la bolsa de taller —
+        //  ¿por qué no lo usas para crear proyectiles y ataques
+        //  interesantes?»). LOS DIEZ proyectiles (ocho platos + dos
+        //  hijos) llevan dentro un efecto del motor del Taller de
+        //  Efectos, forjado con la SEMILLA DEL ARMA (todos los
+        //  proyectiles de la misma arma comparten coreografía: el arma
+        //  TIENE un ataque propio) y TEÑIDO con sus dos colores.
+        // ================================================================
+
+        /// <summary>Instancia (UNA vez) el efecto del motor de este
+        /// plato: la semilla es del ARMA y la rampatinta la tejen sus
+        /// dos colores.</summary>
+        private PixelMotor Motor()
+        {
+            if (_motor == null)
+            {
+                uint c1 = PxColor.Rgb(Tinta.R, Tinta.G, Tinta.B);
+                uint c2 = PxColor.Rgb(Tinta2.R, Tinta2.G, Tinta2.B);
+                int semilla = Estilo * 37 + Variante;
+                _motor = new PixelMotor(Estilo switch
+                {
+                    ESTILO_HAZ => PixelFxCasas.EmisorHaz(semilla, c1, c2),
+                    ESTILO_CORONA => PixelFxCasas.CorazonCorona(semilla, c1, c2),
+                    ESTILO_LLUVIA => PixelFxCasas.VeloLluvia(semilla, c1, c2),
+                    ESTILO_NOVA => PixelFxCasas.NovaActo(semilla, c1, c2),
+                    ESTILO_VORTICE => PixelFxCasas.GargantaVortice(semilla, c1, c2),
+                    ESTILO_ENJAMBRE => PixelFxCasas.NidoColmena(semilla, c1, c2),
+                    ESTILO_ESTELA => PixelFxCasas.HojaEstela(semilla, c1, c2),
+                    ESTILO_ZONA => PixelFxCasas.CharcoZona(semilla, c1, c2),
+                    ESTILO_HOJA => PixelFxCasas.HojaCae(semilla, c1, c2),
+                    _ => PixelFxCasas.LuceroCaza(semilla, c1, c2),
+                }, 2f);
+            }
+            return _motor;
+        }
+
+        /// <summary>El ANCLA DEL MUNDO donde vive el núcleo: el pecho
+        /// del portador para el haz y la corona; el punto del plato
+        /// para el resto.</summary>
+        private Vector2 AnclaDelMotor()
+        {
+            if (Estilo == ESTILO_HAZ || Estilo == ESTILO_CORONA)
+            {
+                Player dueno = Main.player[Projectile.owner];
+                if (dueno != null && dueno.active) return dueno.MountedCenter;
+            }
+            return Projectile.Center;
+        }
+
         // ================================================================
         //  LOS GOLPES DEL MOTOR (el cauce de la casa: GolpeMotor)
         // ================================================================
@@ -555,6 +634,24 @@ namespace AethonMod.Content.Projectiles.TresCasas
             {
                 VFXCore.CerrarLoteSiAbierto();
                 int est = Estilo;
+                // 0) EL NÚCLEO DEL MOTOR DE PÍXELES (v6.99 — la
+                //    herramienta de animación de ataques de la
+                //    superforja): el alfa recta del compositor, el
+                //    píxel NÍTIDO (PointClamp) — DEBAJO de todo lo que
+                //    brilla. Las hojas giratorias rotan el ARTE del
+                //    efecto con la rotación del proyectil.
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                {
+                    PixelMotor m = Motor();
+                    if (est == ESTILO_ESTELA || est == ESTILO_HOJA || est == ESTILO_LUCERO)
+                        m.Fx.options.Angle = Projectile.rotation;
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    m.Draw(Main.spriteBatch, AnclaDelMotor() - Main.screenPosition -
+                        new Vector2(m.Meta.Ox, m.Meta.Oy) * m.Escala);
+                    Main.spriteBatch.End();
+                }
                 // EL CORAZÓN NEGRO del vórtice va en ALPHA (lo aditivo
                 // no puede oscurecer) — debajo de todo lo que brilla.
                 if (est == ESTILO_VORTICE)
