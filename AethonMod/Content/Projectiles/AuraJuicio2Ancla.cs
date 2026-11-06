@@ -16,12 +16,12 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles
 {
     // ======================================================================
-    //  AuraJuicio2Ancla — v6.105 — EL ANCLA INVISIBLE DEL AURA DE
-    //  JUICIO 2 (la copia silenciosa: el efecto del ESTANDARTE, el
-    //  teatro SOLO en los enemigos).
+    //  AuraJuicio2Ancla — v6.105 → v6.106 — EL ANCLA INVISIBLE DEL
+    //  AURA DE JUICIO 2 (la copia silenciosa: el efecto del
+    //  ESTANDARTE, el teatro SOLO en los enemigos).
     //
-    //  LA LETRA DEL USUARIO: «su efecto debe ser el mismo que el de
-    //  estandarte del juicio, ademas sobre el jugador no necesita
+    //  LA LETRA DEL USUARIO (v6.105): «su efecto debe ser el mismo que
+    //  el de estandarte del juicio, ademas sobre el jugador no necesita
     //  haber nada, el efecto solo se ve al acercarce los enemigos con
     //  particulas mas pequeñas y con los colores de la casa, ya sabes
     //  principalmente morado y negro, ademas tambien agrega particulas
@@ -30,6 +30,37 @@ namespace AethonMod.Content.Projectiles
     //  sea una textura de perlin circular y que solo sea un cemirculo
     //  con un difuminado y transparencia en forma de cirulo en su
     //  parte plana».
+    //
+    //  LA CORRECCIÓN DE LA LETRA (v6.106): «el semicirculo esta al
+    //  revez y las particulas deben moverse en la direccion opuesta al
+    //  jugador, ademas el semicirculo debe tener la parte recta mas
+    //  difuminada algo asi como una cupula o medialuna, las particulas
+    //  deben moverse en la direccion opuesto al jugador, o sea el
+    //  jugador esta a la derecha del enemigo y las particulas del
+    //  enemigo se mueven a la izquierda, asi para todas las direcciones,
+    //  ademas cada particula se debe liberar y deben tener el mismo
+    //  recorrido que el semcirculo, la velocidad de las particulas debe
+    //  ir cada vez mas rapido a medida que se acercan al jugador».
+    //
+    //  LA CURA v6.106 — TODO EL TEATRO COMPARTE EL MISMO ARCO:
+    //   · LA MEDIALUNA — la textura REFORJADA disuelve la parte recta
+    //     HACIA ADENTRO (isopletas circulares DENTRO de la cúpula; el
+    //     rabo de la v6.105 que salía bajo el diámetro MURIÓ): solo
+    //     vive la CONCHA del arco — una medialuna de Perlin morada y
+    //     negra cuya parte PLANA (la disuelta) mira AL PORTADOR y cuyo
+    //     arco se abomba EN DIRECCIÓN OPUESTA a él (el jugador a la
+    //     derecha → la medialuna abraza la espalda del impío abriéndose
+    //     a la IZQUIERDA).
+    //   · LAS CHISPAS DEL ARCO — cada una nace LIBERADA (su centro y su
+    //     radio quedan congelados al nacer) y RECORRE el mismo
+    //     semicírculo: parte del cuerno de arranque ALEJÁNDOSE del
+    //     portador, envuelve la cúpula por la espalda y llega al cuerno
+    //     de llegada ACELERANDO — cada vez más rápida en el tramo que
+    //     VUELVE hacia el jugador, donde se disuelve.
+    //   · LA BRUMA — el MISMO recorrido del arco y la MISMA dirección
+    //     (nace lenta en el cuerno de arranque y acelera por la cúpula),
+    //     con INTENSIDAD VARIABLE (alfa, tamaño y número de puffs crecen
+    //     con la cercanía del impío).
     //
     //  EL ANCLA ES INVISIBLE — NADA se dibuja sobre el portador (ni
     //  bloom, ni luciérnagas, ni luz del campo). Lo que hace:
@@ -43,24 +74,9 @@ namespace AethonMod.Content.Projectiles
     //      (QuemaduraVacioExterior + VacioGlobalNPC).
     //
     //   2) VISTE A LOS IMPIOS (solo cuando se ACERCAN — el efecto
-    //      solo existe en el enemigo):
-    //      · LAS PARTÍCULAS PEQUEÑAS — chispas menudas del polvo del
-    //        vacío invertido (núcleo NEGRO + halo VIOLETA — morado y
-    //        negro, la casa), naciendo en el flanco que MIRA al
-    //        portador y EXPULSADAS alejándose (LA MISMA DIRECCIÓN de
-    //        las partículas originales del aura de juicio — pero
-    //        pequeñas).
-    //      · LAS PARTÍCULAS DE BRUMA — puffs de humo fBm (BrumaFX)
-    //        derivando en LA MISMA DIRECCIÓN que las partículas, con
-    //        INTENSIDAD VARIABLE (el alfa y el tamaño crecen con la
-    //        cercanía del impío: cuanto más pegado arde, más bruma).
-    //      · EL SEMICÍRCULO PERLIN — PerlinSemicirculo.png (la
-    //        textura de perlin circular que SOLO es un semicírculo,
-    //        con el difuminado y transparencia en forma de círculo en
-    //        su parte plana): la media cúpula morada y negra sobre
-    //        cada impío, INCLINADA hacia el portador, con el pase alfa
-    //        (el negro-violeta que OSCURECE — se lee de día) y el
-    //        pase aditivo (la energía violeta).
+    //      solo existe en el enemigo): LA MEDIALUNA PERLIN + LAS
+    //      CHISPAS QUE LA RECORREN + LA BRUMA QUE LA ENVUELVE — todo
+    //      sobre EL MISMO ARCO (ver LA CURA v6.106 arriba).
     // ======================================================================
     public class AuraJuicio2Ancla : ModProjectile
     {
@@ -229,35 +245,80 @@ namespace AethonMod.Content.Projectiles
                 Vector2 dir = hacia * (1f / largo);
 
                 // ----------------------------------------------------------
-                //  LAS PARTÍCULAS PEQUEÑAS — menudas (la letra: «deben ser
-                //  mas pequeñas»), morado y negro (el polvo del vacío
-                //  invertido: NÚCLEO NEGRO + halo VIOLETA), expulsadas con
-                //  velocidad ∝ intensidad. Densidad ∝ cercanía: el impío
-                //  pegado HIERVE de chispas menudas.
+                //  v6.106 — LAS CHISPAS DEL ARCO: «las particulas deben
+                //  moverse en la direccion opuesto al jugador, o sea el
+                //  jugador esta a la derecha del enemigo y las
+                //  particulas del enemigo se mueven a la izquierda, asi
+                //  para todas las direcciones, ademas cada particula se
+                //  debe liberar y deben tener el mismo recorrido que el
+                //  semcirculo, la velocidad de las particulas debe ir
+                //  cada vez mas rapido a medida que se acercan al
+                //  jugador».
+                //
+                //  CADA CHISPA NACE LIBERADA con su arco propio — EL
+                //  MISMO RECORRIDO del semicírculo Perlin: parte del
+                //  cuerno de arranque ALEJÁNDOSE del portador (jugador a
+                //  la derecha → nace por el costado y corre a la
+                //  IZQUIERDA), envuelve la cúpula por la espalda del
+                //  impío y llega al cuerno de llegada ACELERANDO (el
+                //  tramo que VUELVE hacia el jugador es el MÁS RÁPIDO —
+                //  allí se disuelve). Cuanto más pegado arde el impío,
+                //  más rápida nace y más denso hierve el arco.
                 // ----------------------------------------------------------
-                int ritmo = (int)MathHelper.Clamp(5f - k * 2.5f, 1f, 5f);  // 1 de cada 5 lejos… de cada 2 pegado
+                int ritmo = (int)MathHelper.Clamp(4f - k * 2f, 1f, 4f);  // 1 de cada 4 lejos… de cada 2 pegado
                 if ((Projectile.ai[0] + i) % ritmo == 0f && n.Center.DistanceSQ(dueno.Center) < 640f * 640f)
                 {
-                    // nacen en el flanco que MIRA al portador (los
-                    // gigantes, a un cuarto de su cuerpo hacia él)
-                    float mitad = MathF.Max(n.width, n.height) * 0.25f;
-                    Vector2 posChispa = n.Center - dir * MathF.Min(mitad, 60f);
+                    // LA GEOMETRÍA DEL SEMICÍRCULO — el mismo arco que
+                    // dibuja la medialuna: el cuerno de arranque cae al
+                    // costado del impío y el barrido (ángulo CRECIENTE)
+                    // sale ALEJÁNDOSE del portador, pasa por la espalda
+                    // (phi+PI) y vuelve al cuerno de llegada.
+                    float phi = dir.ToRotation();               // portador → impío
+                    float radioDomo = RadioDomo(n, k);          // LA MISMA cúpula de la medialuna
+                    float a0 = phi - MathHelper.PiOver2;        // el cuerno de ARRANQUE
+                    float a1 = phi + MathHelper.PiOver2;        // el cuerno de LLEGADA
 
-                    // EXPULSADAS ALEJÁNDOSE — el abanico que converge al
-                    // rumbo recto (la técnica del aura original).
-                    float ajuste = Main.rand.NextFloat(1.2f, 3.2f) * (0.6f + 0.4f * k);
-                    Vector2 velFin = dir * ajuste;
-                    Vector2 velInicio = velFin.RotatedByRandom(0.5f);
+                    int rafaga = k > 0.55f && Main.rand.NextFloat() < 0.5f ? 2 : 1;
+                    for (int s = 0; s < rafaga; s++)
+                    {
+                        // escalonadas por el arranque del arco (la
+                        // corriente parte del costado y envuelve)
+                        float ang = a0 + Main.rand.NextFloat(0f, 0.20f);
+                        float radio = radioDomo * Main.rand.NextFloat(0.68f, 0.95f);
 
-                    // EL COLOR DE LA CASA — el halo violeta: más CLARO
-                    // cuanto más cerca arde (la temperatura del vacío).
-                    Color halo = Color.Lerp(
-                        new Color(150, 84, 235), new Color(224, 176, 255), k);
-                    Dust d = Dust.NewDustPerfect(posChispa,
-                        ModContent.DustType<PolvoVacioInvertido>(), velInicio,
-                        0, halo, Main.rand.NextFloat(0.26f, 0.42f));   // PEQUEÑAS (la letra)
-                    d.noGravity = true;
-                    d.fadeIn = 0.6f;
+                        // LA VELOCIDAD — arranca suave y ACELERA SIN
+                        // FRENO (cada vez más rápido hacia el cuerno de
+                        // llegada); la furia escala con la cercanía.
+                        float vBase = (0.045f + 0.038f * k) * Main.rand.NextFloat(0.85f, 1.2f);
+                        float acel = vBase * (0.055f + 0.05f * k);
+
+                        // LIBERADA — el centro queda congelado AL NACER:
+                        // aunque el impío camine, la chispa termina SU
+                        // semicírculo sola (PolvoArcoJuicio manda).
+                        var arco = new PolvoArcoJuicio.Arco
+                        {
+                            Centro = n.Center,
+                            Ang0 = a0,
+                            Ang = ang,
+                            AngFin = a1,
+                            VelAng = vBase,
+                            Acel = acel,
+                            Radio = radio
+                        };
+
+                        // EL COLOR DE LA CASA — el halo violeta: más
+                        // CLARO cuanto más cerca arde (la temperatura).
+                        Color halo = Color.Lerp(
+                            new Color(150, 84, 235), new Color(224, 176, 255), k);
+                        Vector2 posChispa = n.Center
+                            + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
+                        Dust d = Dust.NewDustPerfect(posChispa,
+                            ModContent.DustType<PolvoArcoJuicio>(), Vector2.Zero,
+                            0, halo, Main.rand.NextFloat(0.24f, 0.38f));   // MENUDAS (la letra)
+                        d.customData = arco;
+                        d.noGravity = true;
+                        d.noLight = false;
+                    }
                 }
             }
             Projectile.ai[0] += 1f;
@@ -331,30 +392,40 @@ namespace AethonMod.Content.Projectiles
                 return;
             Vector2 dir = hacia * (1f / largo);   // portador → impío
 
-            float mitad = MathF.Max(n.width, n.height) * 0.5f;
-
             // ==============================================================
-            //  LAS PARTÍCULAS DE BRUMA — en la MISMA DIRECCIÓN que las
-            //  partículas iniciales (derivan ALEJÁNDOSE del portador,
-            //  desde el flanco que lo mira) y con INTENSIDAD VARIABLE
-            //  (el alfa y el radio crecen con la cercanía: cuanto más
-            //  pegado arde, más bruma respira el impío).
+            //  v6.106 — LA BRUMA RECORRE EL MISMO ARCO — «en la misma
+            //  direccion e intensidad variable como las particulas
+            //  iniciales»: cada puff NACE en el cuerno de arranque y
+            //  ACELERA por el semicírculo (prog^2.3: nace lenta, cada
+            //  vez más rápida — la misma aceleración de las chispas),
+            //  envolviendo la cúpula ALEJÁNDOSE del portador y volviendo
+            //  por su espalda hasta el cuerno de llegada. INTENSIDAD
+            //  VARIABLE: el alfa, el tamaño y el NÚMERO de puffs crecen
+            //  con la cercanía del impío (cuanto más pegado arde, más
+            //  bruma respira el arco).
             // ==============================================================
             Vector2 o = Main.screenPosition;
             try
             {
                 BrumaFX.BeginMass();
-                for (int p = 0; p < 3; p++)
+                float phi = dir.ToRotation();
+                float radioDomo = RadioDomo(n, k);
+                float a0 = phi - MathHelper.PiOver2;        // EL MISMO cuerno de arranque de las chispas
+                int puffs = 3 + (k > 0.6f ? 1 : 0);         // INTENSIDAD VARIABLE: más puffs pegado
+                for (int p = 0; p < puffs; p++)
                 {
                     float f0 = Frac(semilla * 0.83f + p * 0.618034f);
-                    float ritmo = 0.10f + 0.09f * Frac(f0 * 9.7f);
+                    float ritmo = 0.085f + 0.075f * Frac(f0 * 9.7f);
                     float edad = Frac(t * ritmo + f0 * 4.1f + p * 0.233f);   // vida cíclica
 
-                    // NACE en el flanco que MIRA al portador y DERIVA
-                    // alejándose (LA MISMA DIRECCIÓN de las chispas)…
-                    Vector2 pos = n.Center - dir * (mitad * 0.4f)
-                        + dir * (edad * (18f + 30f * f0))
-                        + new Vector2(0f, -6f * edad);
+                    // EL MISMO RECORRIDO DEL SEMICÍRCULO — la posición es
+                    // la del ARCO (el mismo que las chispas y la medialuna)
+                    // y el progreso ACELERA (empieza lento, termina volando).
+                    float prog = MathF.Pow(edad, 2.3f);
+                    float ang = a0 + prog * MathHelper.Pi;
+                    Vector2 pos = n.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                        * (radioDomo * (1.00f + 0.24f * f0));
+
                     float radio = (6f + 9f * f0) * (0.7f + 0.8f * edad)
                         * (0.8f + 0.5f * k);                 // …y del TAMAÑO de su cuerpo
                     float a = vive * MathF.Sin(edad * MathF.PI)
@@ -363,9 +434,12 @@ namespace AethonMod.Content.Projectiles
                         ? Color.Lerp(new Color(30, 16, 50), new Color(96, 54, 150),
                             (edad - 0.55f) / 0.45f)
                         : new Color(30, 16, 50);
+                    // LA TANGENTE del barrido — el humo corre por donde
+                    // corre el arco (la MISMA dirección de las chispas).
+                    Vector2 tangente = new Vector2(-MathF.Sin(ang), MathF.Cos(ang));
                     BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
                         MathHelper.Clamp(a, 0.04f, 0.55f), quality: 0.5f,
-                        velocity: dir * (12f + 16f * f0));
+                        velocity: tangente * (14f + 18f * f0));
                 }
             }
             catch { }
@@ -375,55 +449,78 @@ namespace AethonMod.Content.Projectiles
             }
 
             // ==============================================================
-            //  EL SEMICÍRCULO PERLIN — la textura de perlin circular que
-            //  SOLO es un semicírculo (PerlinSemicirculo.png): la media
-            //  cúpula ARDE sobre el impío, INCLINADA hacia el portador
-            //  (la cara que arde es la que lo mira), con el difuminado y
-            //  transparencia en forma de círculo en su parte plana (la
-            //  cúpula se deshace sobre el cuerpo del impío).
+            //  v6.106 — LA MEDIALUNA PERLIN — «el semicirculo esta al
+            //  revez […] el semicirculo debe tener la parte recta mas
+            //  difuminada algo asi como una cupula o medialuna». LA
+            //  CURA: la textura REFORJADA disuelve la parte recta HACIA
+            //  ADENTRO (isopletas circulares DENTRO de la cúpula — el
+            //  rabo de la v6.105 que goteaba bajo el diámetro hacia el
+            //  jugador MURIÓ): solo vive la CONCHA del arco, una
+            //  MEDIALUNA de Perlin morada y negra. Y LA INCLINACIÓN:
+            //  la parte PLANA (la disuelta) mira AL PORTADOR y el arco
+            //  se abomba EN DIRECCIÓN OPUESTA a él — el jugador a la
+            //  derecha → la medialuna abraza la espalda del impío
+            //  abriéndose a la IZQUIERDA, y las chispas y la bruma
+            //  RECORREN ese mismo arco alejándose del jugador.
             // ==============================================================
             Texture2D perlin = PerlinSemi;
             if (perlin != null && !perlin.IsDisposed)
             {
                 float late = 0.94f + 0.06f * MathF.Sin(t * 7f + semilla * 1.7f);
 
-                // EL TAMAÑO — la cúpula viste al impío ENTERO y crece con
-                // la cercanía (el fuego pegado lo ENVUELVE).
-                float ancho = (mitad * 2f + 26f) * (0.85f + 0.45f * k) * late;
+                // EL TAMAÑO — EL RADIO DEL ARCO QUE CHISPAS Y BRUMA
+                // RECORREN (TODO el teatro comparte LA MISMA cúpula:
+                // RadioDomo) y crece con la cercanía (el fuego pegado
+                // lo ENVUELVE), con la respiración de la casa.
+                float ancho = RadioDomo(n, k) * 2f * late;
                 float esc = ancho / 192f;                    // el semicírculo mide 2R=192 en la textura
 
-                // LA INCLINACIÓN — la cúpula se echa HACIA el portador:
-                // su "arriba" apunta al campo que la enciende.
-                float rot = dir.ToRotation() + MathHelper.PiOver2;
+                // LA INCLINACIÓN — la parte plana disuelta AL PORTADOR,
+                // el arco ALEJÁNDOSE de él… y EL BAMBOLEO lento (la
+                // medialuna respira sobre la espalda del impío).
+                float rot = dir.ToRotation() + MathHelper.PiOver2
+                    + 0.05f * MathF.Sin(t * 0.8f + semilla * 0.7f);
 
                 // LA BASE EN EL CUERPO — el diámetro de la textura vive a
-                // 22 px bajo su centro (y=150 del lienzo de 256): el
-                // origen del quad (el centro de la textura) sube para que
-                // LA PARTE PLANA caiga sobre el corazón del impío.
+                // 22 px bajo su centro (y=150 del lienzo de 256): la
+                // PARTE PLANA DISUELTA cae SOBRE el corazón del impío y
+                // la concha abraza su espalda.
                 Vector2 baseTex = new Vector2(0f, 22f * esc).RotatedBy(rot);
                 Vector2 pos = n.Center - baseTex;
 
                 Vector2 tamPx = new Vector2(256f * esc, 256f * esc);
+                Vector2 tamEco = new Vector2(288f * esc, 288f * esc);   // EL ECO (más grande, más tenue)
 
                 Color negroVioleta = new(26, 12, 44);
                 Color violeta = new(150, 84, 235);
 
                 // (1) EL PASO ALFA — el negro-violeta que OSCURECE: la
-                //     cúpula se lee TAMBIÉN DE DÍA (la lección de la
+                //     medialuna se lee TAMBIÉN DE DÍA (la lección de la
                 //     .103: el aditivo se lava con el sol).
                 VFXCore.Begin();
-                VFXCore.Quad(pos, negroVioleta * ((0.34f + 0.22f * k) * vive),
+                VFXCore.Quad(pos, negroVioleta * ((0.40f + 0.26f * k) * vive),
                     tamPx, rot, perlin);
                 VFXCore.FlushAlpha();
 
                 // (2) EL PASO ADITIVO — la energía violeta que SUMA: las
-                //     vetas del Perlin prenden en la oscuridad.
+                //     vetas del Perlin prenden en la oscuridad…
                 VFXCore.Begin();
-                VFXCore.Quad(pos, violeta * ((0.20f + 0.26f * k) * vive),
+                VFXCore.Quad(pos, violeta * ((0.26f + 0.32f * k) * vive),
                     tamPx, rot, perlin);
+                //     …Y SU ECO — una segunda medialuna más GRANDE y
+                //     TENUE (la aura que gotea del arco hacia afuera).
+                VFXCore.Quad(pos, violeta * ((0.12f + 0.16f * k) * vive),
+                    tamEco, rot, perlin);
                 VFXCore.FlushAdditive();
             }
         }
+
+        /// <summary>v6.106 — EL RADIO DEL SEMICÍRCULO — LA MISMA CÚPULA
+        /// para TODO el teatro: la medialuna dibujada, las chispas que la
+        /// recorren y la bruma que la envuelve. Crece con la cercanía del
+        /// impío (el fuego pegado lo ENVUELVE) y viste su cuerpo ENTERO.</summary>
+        private static float RadioDomo(NPC n, float k) =>
+            (MathF.Max(n.width, n.height) * 0.5f + 17f) * (0.85f + 0.45f * k);
 
         /// <summary>El Remap acotado del estandarte.</summary>
         private static float Remap(float v, float in1, float in2, float out1, float out2)

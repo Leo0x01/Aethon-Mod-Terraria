@@ -3525,8 +3525,19 @@ Esencia: {
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
 }
 
-// v6.104: THE WAR BANNER STRENGTH METER (Aura of Judgment).
-HUD.FuerzaEstandarte: War Banner Strength
+HUD: {
+	// v6.104: THE WAR BANNER STRENGTH METER (Aura of Judgment).
+	FuerzaEstandarte: War Banner Strength
+	// v6.106 — THE HUD GAP CLOSED: the five grimmoire HUD strings
+	// (Nivel/NivelHambre/XP/XPHM/Ganancia) only lived in es-MX since v6.49
+	// — an es-ES or en-US game showed RAW KEYS. Now ×3 (house rule).
+	Nivel: Grimoire · Lv {0}
+	NivelHambre: Grimoire · Lv {0}  (hunger…)
+	XP: "{0} / {1} XP"
+	XPHM: "{0} / {1} XP   HM ×2"
+	Ganancia: +{0}
+}
+
 Ocaso.Rotulo: EL OCASO
 
 // v6.50.61 — THE PURGE: Presencia.Llegada died with the Witness.

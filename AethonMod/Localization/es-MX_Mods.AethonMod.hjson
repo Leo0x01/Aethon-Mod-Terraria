@@ -758,8 +758,8 @@ Items: {
 	}
 
 	AuraDeJuicioItem: {
-		// v6.104: EL AURA DE JUICIO — el puerto fiel del estandarte de
-		// guerra de la investigación (mecánica + técnica VFX, arte 100% de la casa).
+		// v6.104: THE JUDGMENT AURA — the faithful port of the war banner of
+		// the Righteous (mechanics + VFX technique, house-made art).
 		DisplayName: Aura de Juicio
 		Tooltip:
 			'''
@@ -801,10 +801,7 @@ Items: {
 	DummyNegroItem: {
 		// v6.105 — EL MUÑECO DE PRUEBAS NEGRO (el ítem que lo coloca).
 		DisplayName: Muñeco de Pruebas Negro
-		Tooltip:
-			'''
-			El mismo muñeco de Terraria… pero TEÑIDO DE NEGRO
-			'''
+		Tooltip: El mismo muñeco de Terraria… pero TEÑIDO DE NEGRO
 		Tip: "[c/B96EEA:El banco de pruebas del grimorio: ESTE muñeco SÍ recibe TODOS sus ataques. Su vida se restaura sola — jamás se rompe]"
 	}
 
@@ -2118,7 +2115,7 @@ Items: {
 	//  armas muertas que arrastraba; sus dos ítems VIVOS (el Primer
 	//  Trazo y la Aurora de Tinta) se mudaron AQUÍ con sus tooltips.
 	// ================================================================
-
+	
 	PrimerTrazo: {
 		DisplayName: El Primer Trazo
 		Tooltip:
@@ -2149,9 +2146,9 @@ Items: {
 		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
 	}
 
-	// v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (los clickers, las auras
-	// y la definitiva — todos hechos con LAS HERRAMIENTAS de la casa:
-	// la forja, el motor de píxeles y el cableado multicapa).
+	// v6.100 — the new weapons of the session (clickers, auras and the
+	// definitive one — all made with THE HOUSE TOOLS: the forge, the
+	// pixel engine and the multilayer wiring).
 	SelloDeTinta: {
 		DisplayName: El Sello del Escriba
 		Tooltip: ""
@@ -2178,7 +2175,7 @@ Items: {
 	}
 
 	SombraDeLaPagina4: {
-		// v6.100: LA COPIA FORJADA del original (todas las herramientas)
+		// v6.100: THE FORGED COPY of the original (all the tools)
 		DisplayName: La Sombra de la Página IV
 		Tooltip:
 			'''
@@ -2189,6 +2186,7 @@ Items: {
 			A 1 HP: LA DEVORACIÓN (el festín de las sombras).
 			'''
 	}
+
 	SombraDeLaPagina5: {
 		// v6.101: THE FIFTH TOME — the abyssal maw tendril
 		DisplayName: La Sombra de la Página V
@@ -2305,14 +2303,6 @@ Items: {
 			'''
 	}
 
-
-
-
-
-
-
-
-
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
 		Tooltip:
@@ -2325,7 +2315,7 @@ Items: {
 	}
 
 	BolsaAuras: {
-		// v6.104: LA BOLSA DE LAS AURAS — el material de investigación.
+		// v6.104: THE AURAS BAG — the aura research material.
 		DisplayName: La Bolsa de las Auras
 		Tooltip:
 			'''
@@ -2558,6 +2548,16 @@ Items: {
 		DisplayName: Codice Habilidades
 		Tooltip: ""
 	}
+
+	CoroDeLosProfundos: {
+		// DisplayName: Coro De Los Profundos
+		// Tooltip: ""
+	}
+
+	PlumaDelEscribaSanto: {
+		// DisplayName: Pluma Del Escriba Santo
+		// Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2718,7 +2718,25 @@ Projectiles: {
 	MiradaRayoProj.DisplayName: El Rayo de la Mirada
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
-	// v6.90 — EL TALLER DE EFECTOS (el motor de píxeles de la casa).
+	// CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
+	// DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
+	// AlasAuroraHalo.DisplayName: Alas Aurora Halo
+	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
+	// LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
+	// JefeMiradaProj.DisplayName: Jefe Mirada Proj
+	// JefeRC2Proj.DisplayName: Jefe R C2 Proj
+	// JefeRenglonesProj.DisplayName: Jefe Renglones Proj
+	// PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
+	// PrimerTrazoHeld.DisplayName: Primer Trazo Held
+	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
+	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
+	// TresCasasProjectile.DisplayName: Tres Casas Projectile
+	// SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
+	// AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
+	// AuraJuicioDano.DisplayName: Aura Juicio Dano
+	// AuraJuicioLuz.DisplayName: Aura Juicio Luz
+	// JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
+	// JefePruebaCProj.DisplayName: Jefe Prueba C Proj
 }
 
 Buffs: {
@@ -2774,7 +2792,7 @@ Buffs: {
 	}
 
 	LlamasDelJuicio: {
-		// v6.104: LAS LLAMAS DEL JUICIO — la quemadura del Aura de Juicio.
+		// v6.104: THE JUDGMENT FLAMES — the burn of the Aura of Judgment.
 		DisplayName: Llamas del Juicio
 		Description: Las llamas doradas del juicio te consumen: cuanto más cerca del portador, más ardes
 	}
@@ -2862,12 +2880,10 @@ NPCs: {
 		}
 	}
 
-	DummyNegroNPC: {
-		// v6.105 — EL MUÑECO DE PRUEBAS NEGRO: el sprite del dummy
-		// vanilla teñido de negro — recibe TODOS los ataques del
-		// grimorio (los dummies normales, como en Terraria normal).
-		DisplayName: Muñeco de Pruebas Negro
-	}
+	// v6.105 — EL MUÑECO DE PRUEBAS NEGRO: el sprite del dummy
+	// vanilla teñido de negro — recibe TODOS los ataques del
+	// grimorio (los dummies normales, como en Terraria normal).
+	DummyNegroNPC.DisplayName: Muñeco de Pruebas Negro
 }
 
 Common: {
@@ -3073,16 +3089,16 @@ Hambre: {
 
 	// v6.50.91 — THE NERVOUS ONE: restless, hungry, angry — "I want to
 	// eat and it's hungry". Not fear: appetite with a voice.
-
-
-
-
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	PlumaDelEscribaSanto: {
 		DisplayName: La Pluma del Escriba Santo
 		Tooltip:
@@ -3092,20 +3108,6 @@ Hambre: {
 			'''
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	CoroDeLosProfundos: {
 		DisplayName: El Coro de los Profundos
 		Tooltip:
@@ -3114,20 +3116,6 @@ Hambre: {
 			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
 			'''
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	Cultistas: {
 		Burla1: «(El Eterno murmura desde la bolsa) Tontos… arrodillados ante un dios FALSO. Yo al menos EXISTO.»
@@ -3476,8 +3464,8 @@ Jefe: {
 		Renglones: LOS SEIS RENGLONES DEL DIOS — seis barras de tinta giran a su alrededor: camina ENTRE los renglones, con el giro.
 		RayoConcentrado: EL RAYO CONCENTRADO DEL DIOS — EL DEFINITIVO: el cono del conjuro barre la arena: corre EN PERPENDICULAR.
 		Mirada: LA MIRADA DEL DIOS — el ojo del libro se abre: rompe la línea de la mirada.
-		// v6.104 — LOS DOS ATAQUES NUEVOS DE LA COREOGRAFÍA (la letra:
-		// la mirada que cae del cielo · el rayo de prueba C de la fase 3).
+		// v6.104 — THE TWO NEW CHOREOGRAPHY ATTACKS (the letter: the
+		// gaze that falls from the sky · the phase-3 Test Beam C).
 		MiradaCielo: LA MIRADA DEL CIELO — doce haces caen sobre la arena: seis verticales y seis horizontales, luego giran en diagonal y VUELVEN A ARDER.
 		PruebaC: EL RAYO DE PRUEBA C DEL DIOS — los seis soles caen y el conducto onírico barre: corre EN PERPENDICULAR.
 		// v6.50.120 — FUSION AS A PHASE + THE FINAL BOSS'S THREE WEAPONS
@@ -3533,14 +3521,17 @@ Esencia: {
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
 }
 
-HUD: {
-	Nivel: Grimorio · Nv {0}
-	NivelHambre: Grimorio · Nv {0}  (hambre…)
-	XP: "{0} / {1} XP"
-	XPHM: "{0} / {1} XP   HM ×2"
-	Ganancia: +{0}
-}
-
+// v6.104: THE WAR BANNER STRENGTH METER (Aura of Judgment).
+HUD.FuerzaEstandarte: Fuerza del Estandarte
+// v6.106 — LA BRECHA DEL HUD CERRADA: las cinco cuerdas del HUD del
+// grimorio (Nivel/NivelHambre/XP/XPHM/Ganancia) solo vivían en el es-MX
+// desde la v6.49 — un juego en es-ES o en-US mostraba CLAVES CRUDAS.
+// Ahora ×3 (la regla de la casa), en la forma punteada de esta sección.
+HUD.Nivel: Grimorio · Nv {0}
+HUD.NivelHambre: Grimorio · Nv {0}  (hambre…)
+HUD.XP: "{0} / {1} XP"
+HUD.XPHM: "{0} / {1} XP   HM ×2"
+HUD.Ganancia: +{0}
 Ocaso.Rotulo: EL OCASO
 
 // v6.50.61 — THE PURGE: Presencia.Llegada died with the Witness.
@@ -4089,9 +4080,4 @@ Arbol: {
 	Desc8: +1 vida/s de regeneración por nivel.
 	Nodo9: EL ECO DE AETHON
 	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
-}
-
-HUD: {
-	// v6.104: EL MEDIDOR DE FUERZA DEL ESTANDARTE (Aura de Juicio).
-	FuerzaEstandarte: Fuerza del Estandarte
 }
