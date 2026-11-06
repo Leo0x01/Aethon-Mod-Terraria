@@ -11,8 +11,18 @@ using AethonMod.Content.Projectiles;
 namespace AethonMod.Content.Items.Accessories
 {
     // ======================================================================
-    //  AuraDeJuicio2Item — v6.105 — EL AURA DE JUICIO 2 (LA COPIA
-    //  SILENCIOSA: el efecto del ESTANDARTE, nada sobre el jugador).
+    //  AuraDeJuicio2Item — v6.105 → v6.109 — EL AURA DEL VACÍO (nacida
+    //  como «Aura de Juicio 2» — la copia silenciosa; la v6.109 la
+    //  RENOMBRA por la letra del usuario y la deja como LA ÚNICA: el
+    //  Aura de Juicio y el Estandarte del Juicio MURIERON).
+    //
+    //  LA LETRA DEL USUARIO (v6.109): «ya puedes borrar los otros 2
+    //  estandarte y renombrar a EL AURA DE JUICIO 2 como Aura de Vacio,
+    //  pero todavia falta algo EL AURA DE JUICIO 2 aunque esta bien no
+    //  veo bruma le falta eso» (la bruma de verdad vive en el ancla,
+    //  v6.109) + «al parecer con el enemigo que es un fantasma el aura
+    //  no funciona es curioso jajajaja» (los espíritus también arden,
+    //  v6.109).
     //
     //  LA LETRA DEL USUARIO: «las particulas de aura del juicio estan
     //  muy grandes, deben ser mas pequeñas y su efecto debe ser el
@@ -143,7 +153,7 @@ namespace AethonMod.Content.Items.Accessories
                 if (!string.IsNullOrEmpty(texto))
                     tooltips.Add(new TooltipLine(Mod, clave, texto));
             }
-            Linea("Titulo", "[c/B96EEA:═══ EL AURA DE JUICIO II ═══]");
+            Linea("Titulo", "[c/B96EEA:═══ EL AURA DEL VACÍO ═══]");
             Linea("Linea1", "");
             Linea("Linea2", "");
             Linea("Linea3", "");

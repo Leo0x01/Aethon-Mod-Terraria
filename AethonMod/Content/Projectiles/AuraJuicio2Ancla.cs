@@ -16,9 +16,35 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles
 {
     // ======================================================================
-    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 → v6.108 — EL ANCLA INVISIBLE DEL
-    //  AURA DE JUICIO 2 (la copia silenciosa: el efecto del
-    //  ESTANDARTE, el teatro SOLO en los enemigos).
+    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 → v6.108 → v6.109 — EL
+    //  ANCLA INVISIBLE DEL AURA DEL VACÍO (nacida como «Aura de Juicio 2»
+    //  — la copia silenciosa: el efecto del viejo ESTANDARTE, el teatro
+    //  SOLO en los enemigos; v6.109: los otros dos estandartes MURIERON
+    //  y esta queda como LA ÚNICA — renombrada EL AURA DEL VACÍO).
+    //
+    //  LA LETRA DEL USUARIO (v6.109): «ya puedes borrar los otros 2
+    //  estandarte y renombrar a EL AURA DE JUICIO 2 como Aura de Vacio,
+    //  pero todavia falta algo EL AURA DE JUICIO 2 aunque esta bien no
+    //  veo bruma le falta eso» + «al parecer con el enemigo que es un
+    //  fantasma el aura no funciona es curioso jajajaja».
+    //
+    //  LA CURA v6.109 — DOS COSAS:
+    //   · LA BRUMA DE VERDAD: la v6.108 exhalaba puffs con alfas tímidos
+    //     (pico ~0.2 típicos, colores casi negros y radios chicos — la
+    //     LECCIÓN v6.50.65 otra vez: bruma oscura con alfa bajo = INVISIBLE).
+    //     AHORA la receta de la casa: MÁS puffs (3→7 por cercanía), MÁS
+    //     GRANDES, con ALFA de verdad (0.14..0.80), la RAMPA DE
+    //     ENFRIAMIENTO violácea (nace oscura y se disuelve en
+    //     violeta-claro — el borde SIEMPRE se lee) Y LA SEGUNDA CAPA: EL
+    //     ALIENTO VIOLETA aditivo derramándose por la estela de fuga
+    //     (la lectura garantizada de día Y de noche).
+    //   · EL FANTASMA TAMBIÉN ARDE: el aura es QUEMADURA (debuff +
+    //     lifeRegen), no un golpe — la puerta vanilla (CanBeChasedBy +
+    //     dontTakeDamage) dejaba FUERA a los espíritus que atraviesan
+    //     paredes (los fantasmAS de la mazmorra son intangibles dentro
+    //     de los bloques). AHORA la familia de los espíritus (aiStyle 23)
+    //     ENTRA al campo como cualquier impío — hasta un fantasma sufre
+    //     el calentamiento de la reentrada.
     //
     //  LA LETRA DEL USUARIO (v6.105): «su efecto debe ser el mismo que
     //  el de estandarte del juicio, ademas sobre el jugador no necesita
@@ -116,12 +142,18 @@ namespace AethonMod.Content.Projectiles
     // ======================================================================
     public class AuraJuicio2Ancla : ModProjectile
     {
-        /// <summary>LA DISTANCIA ÍNTIMA del estandarte (a 40 px del
-        /// impío, el fuego pleno).</summary>
+        /// <summary>v6.109 — EL RADIO DEL VACÍO (px — 18-19 tiles: un
+        /// aura ÍNTIMA, la letra del estandarte original). Público: lo
+        /// lee VacioGlobalNPC para la lentitud y la cercanía (antes
+        /// vivía en el EstandarteJuicioAuraProjectile, que MURIÓ).</summary>
+        public const float RADIO = 300f;
+
+        /// <summary>LA DISTANCIA ÍNTIMA del campo (a 40 px del impío, el
+        /// fuego pleno).</summary>
         private const float DIST_INTIMA = 40f;
 
         /// <summary>Ticks que el impío sigue ARDIENDO ya fuera del
-        /// campo (el timer 180 del estandarte).</summary>
+        /// campo (el timer 180 del original).</summary>
         private const int ARDE_FUERA = 180;
 
         /// <summary>La intensidad máxima por cercanía (×3 pegado).</summary>
@@ -199,7 +231,33 @@ namespace AethonMod.Content.Projectiles
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
                     NPC n = Main.npc[i];
-                    if (n == null || !n.active || !n.CanBeChasedBy() || n.dontTakeDamage)
+                    if (n == null || !n.active)
+                        continue;
+
+                    // ------------------------------------------------------
+                    //  v6.109 — EL FANTASMA TAMBIÉN ARDE (la letra: «con
+                    //  el enemigo que es un fantasma el aura no funciona
+                    //  es curioso jajajaja» — la curiosidad resuelta):
+                    //  el daño del aura es QUEMADURA (debuff + lifeRegen),
+                    //  NO un golpe — así que la puerta vanilla ya no
+                    //  decide quién arde. LA FÓRMULA REAL de
+                    //  NPC.CanBeChasedBy (verificada contra el fuente del
+                    //  tML 2026.09.3.1): «active && chaseable &&
+                    //  lifeMax > 5 && !dontTakeDamage && !friendly» — el
+                    //  FANTASMA del cementerio (NPCID.Ghost) se vuelve
+                    //  INTANGIBLE dentro de los bloques y la puerta lo
+                    //  dejaba FUERA. AHORA LA FAMILIA DE LOS ESPÍRITUS
+                    //  (aiStyle 23 — espectros, poltergeists, segadores —
+                    //  y el Ghost por ID, por si su AI cambia) ENTRA al
+                    //  campo como cualquier impío: hasta un fantasma
+                    //  sufre el calentamiento de la reentrada. Todo lo
+                    //  demás SIGUE fuera: los inmortales, los amigos,
+                    //  los pueblos, la chusma menuda (lifeMax <= 5) y
+                    //  los segmentos de gusano (chaseable = false).
+                    // ------------------------------------------------------
+                    bool esEspiritu = n.aiStyle == 23 || n.type == NPCID.Ghost;
+                    if ((n.friendly || n.townNPC || n.immortal ||
+                         !n.CanBeChasedBy() || n.dontTakeDamage) && !esEspiritu)
                         continue;
 
                     VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();
@@ -209,7 +267,7 @@ namespace AethonMod.Content.Projectiles
                     Vector2 borde = Vector2.Clamp(Projectile.Center, n.TopLeft, n.BottomRight);
                     float dist = Vector2.Distance(Projectile.Center, borde);
                     float perdon = Math.Max(n.width, n.height) * 0.5f + 40f;
-                    if (dist > EstandarteJuicioAuraProjectile.RADIO + perdon)
+                    if (dist > RADIO + perdon)
                     {
                         if (vacio.DuenoVacio == dueno.whoAmI + 1 && vacio.IntensidadQuemadura > 0f)
                             vacio.IntensidadQuemadura *= 0.995f;
@@ -225,10 +283,10 @@ namespace AethonMod.Content.Projectiles
                     vacio.DuenoVacio = dueno.whoAmI + 1;
                     vacio.DanoVacio = danoBase;
 
-                    // LA INTENSIDAD — la técnica Remap del estandarte:
+                    // LA INTENSIDAD — la técnica Remap del original:
                     // ×1 en el borde → ×3 PEGADO, más LA RAMPA DEL TIEMPO
                     // (cada segundo ardiendo lo enciende, hasta ×1.5).
-                    float cercania = Remap(dist, EstandarteJuicioAuraProjectile.RADIO + perdon,
+                    float cercania = Remap(dist, RADIO + perdon,
                         DIST_INTIMA, 0f, 1f);
                     float rampaTiempo = 1f + 0.5f * Math.Min(1f, vacio.VisualQuemadura);
                     vacio.IntensidadQuemadura = (1f + (INTENSIDAD_CERCA - 1f) * cercania)
@@ -439,20 +497,24 @@ namespace AethonMod.Content.Projectiles
             Vector2 dir = hacia * (1f / largo);   // portador → impío
 
             // ==============================================================
-            //  v6.108 — LA BRUMA DE LA REENTRADA — «la bruma debe hacer
-            //  lo mismo que las particulas»: cada puff NACE en el PUNTO
-            //  DE ESTANCAMIENTO (el tope abombado de la medialuna) y se
-            //  derrama hacia ATRÁS en TODAS las direcciones de fuga
-            //  (el MISMO abanico ±90° de las chispas — SIEMPRE
-            //  alejándose del portador). INTENSIDAD VARIABLE: el alfa,
-            //  el tamaño y el NÚMERO de puffs crecen con la cercanía
-            //  del impío (cuanto más hondo cae, más densa la estela).
+            //  v6.109 — LA BRUMA DE VERDAD — «no veo bruma le falta eso»:
+            //  la v6.108 la exhalaba con alfas tímidos (pico ~0.2) y
+            //  colores casi negros — INVISIBLE (la LECCIÓN v6.50.65:
+            //  bruma oscura con alfa bajo no se lee NI de día NI de
+            //  noche). LA RECETA DE LA CASA (la que SÍ se ve en las
+            //  armas de sombras): MÁS puffs (3 lejos → 7 pegado), MÁS
+            //  GRANDES, ALFA de verdad (0.14..0.80), la RAMPA DE
+            //  ENFRIAMIENTO violácea (nace oscura, se disuelve en
+            //  VIOLETA CLARO — el borde SIEMPRE se lee)… y cada puff
+            //  nace del PUNTO DE ESTANCAMIENTO y se derrama hacia ATRÁS
+            //  por el MISMO abanico de fuga ±90° de las chispas, con
+            //  INTENSIDAD VARIABLE por cercanía.
             // ==============================================================
             Vector2 o = Main.screenPosition;
             try
             {
                 BrumaFX.BeginMass();
-                int puffs = 2 + (int)(k * 3f);              // LA DENSIDAD: 2 lejos → 5 pegado (más bruma cuanto más cerca)
+                int puffs = 3 + (int)(k * 4f);              // LA DENSIDAD: 3 lejos → 7 pegado (más bruma cuanto más cerca)
                 for (int p = 0; p < puffs; p++)
                 {
                     float f0 = Frac(semilla * 0.83f + p * 0.618034f);
@@ -468,23 +530,31 @@ namespace AethonMod.Content.Projectiles
 
                     // NACE EN EL PUNTO DE ESTANCAMIENTO (el tope abombado
                     // de la medialuna) y se derrama HACIA ATRÁS por su
-                    // rumbo (la MISMA estela de las chispas).
-                    float avance = edad * RadioDomo(n, k) * (1.3f + 0.6f * f0);
+                    // rumbo (la MISMA estela de las chispas) — más LARGA
+                    // cuanto más cerca arde.
+                    float avance = edad * RadioDomo(n, k) * (1.25f + 0.75f * f0);
                     Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
 
-                    float radio = (6f + 9f * f0) * (0.7f + 0.8f * edad)
-                        * (0.8f + 0.5f * k);                 // …y del TAMAÑO de su cuerpo
+                    // EL TAMAÑO DE VERDAD: la v6.108 criaba pulgas de
+                    // 6-15 px — la estela de la reentrada es un manto.
+                    float radio = (10f + 15f * f0) * (0.8f + 0.9f * edad)
+                        * (0.85f + 0.55f * k);
+                    // EL ALFA DE VERDAD (×k — la intensidad variable de la
+                    // letra): 0.14 en el borde… 0.80 pegado al portador.
                     float a = vive * MathF.Sin(edad * MathF.PI)
-                        * (0.16f + 0.34f * k);               // INTENSIDAD VARIABLE (×k)
-                    Color c = edad > 0.55f
-                        ? Color.Lerp(new Color(30, 16, 50), new Color(96, 54, 150),
-                            (edad - 0.55f) / 0.45f)
-                        : new Color(30, 16, 50);
+                        * (0.40f + 0.34f * k);
+                    // LA RAMPA DE ENFRIAMIENTO: nace oscura y se disuelve
+                    // en VIOLETA CLARO — el borde del puff SIEMPRE se lee
+                    // contra cualquier fondo (día y noche).
+                    Color c = edad > 0.45f
+                        ? Color.Lerp(new Color(26, 14, 44), new Color(122, 78, 188),
+                            (edad - 0.45f) / 0.55f)
+                        : new Color(26, 14, 44);
                     // LA DERIVA — el humo se derrama por donde vuelan
                     // las chispas (la MISMA dirección de la fuga).
                     BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
-                        MathHelper.Clamp(a, 0.04f, 0.55f), quality: 0.5f,
-                        velocity: rumbo * (10f + 16f * f0));
+                        MathHelper.Clamp(a, 0.14f, 0.80f), quality: 0.75f,
+                        velocity: rumbo * (14f + 20f * f0));
                 }
             }
             catch { }
@@ -492,6 +562,36 @@ namespace AethonMod.Content.Projectiles
             {
                 try { Main.spriteBatch.End(); } catch { }
             }
+
+            // ==============================================================
+            //  v6.109 — LA SEGUNDA CAPA: EL ALIENTO VIOLETA (la lectura
+            //  garantizada de noche y en cueva — la otra mitad de la
+            //  receta v6.50.65): tres velos aditivos VIOLETAS
+            //  derramándose por la MISMA estela de fuga, latiendo
+            //  despacio — entre la masa del humo SIEMPRE hay luz que
+            //  SUMA, así la bruma se ve contra el fondo que sea.
+            // ==============================================================
+            try
+            {
+                VFXCore.Begin();
+                Color violetaAliento = new(150, 84, 235);
+                for (int v = 0; v < 3; v++)
+                {
+                    float f0 = Frac(semilla * 0.61f + v * 0.618034f);
+                    float late = 0.7f + 0.3f * MathF.Sin(t * (1.0f + 0.6f * f0) + v * 2.4f);
+                    float abanico = (Frac(f0 * 11.3f) * 2f - 1f) * MathHelper.PiOver2;
+                    Vector2 rumbo = dir.RotatedBy(abanico);
+                    Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.9f)
+                        + rumbo * (RadioDomo(n, k) * (0.5f + 0.8f * f0));
+                    float ancho = RadioDomo(n, k) * (1.1f + 0.5f * f0);
+                    VFXCore.Quad(pos, violetaAliento *
+                        ((0.10f + 0.10f * k) * vive * late),
+                        new Vector2(ancho, ancho * 0.75f),
+                        rumbo.ToRotation(), VFXCore.SoftGlow);
+                }
+                VFXCore.FlushAdditive();
+            }
+            catch { try { VFXCore.CerrarLoteSiAbierto(); } catch { } }
 
             // ==============================================================
             //  v6.108 — LA MEDIALUNA = EL ARCO DE CHOQUE — «la parte

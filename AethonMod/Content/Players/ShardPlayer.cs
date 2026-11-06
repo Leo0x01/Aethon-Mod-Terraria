@@ -1327,14 +1327,9 @@ namespace AethonMod.Content.Players
                 // vía de repuesto para quien lo pierda.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina5>());
-                // v6.99 — EL ESTANDARTE DEL JUICIO (la regla de la casa:
-                // «todo nuevo ítem debe ser entregado al jugador
-                // directamente»): el accesorio del aura que juzga de la
-                // v6.98 nació con receta pero SIN entrega — ahora llega
-                // SOLO, al entrar al mundo, si no lo lleva ya (la receta
-                // post-lunar queda para quien lo pierda).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Accessories.EstandarteDelJuicioItem>());
+                // v6.99 — EL ESTANDARTE DEL JUICIO MURIÓ en la v6.109
+                // (la letra: «ya puedes borrar los otros 2 estandarte»)
+                // — su entrega directa también.
                 // v6.100 — LOS FAVORITOS DE LA PURGA: el Taller y las
                 // Tres Casas murieron con sus armas, pero sus DOS
                 // favoritos (el canon de SPRITES-FAVORITOS) y la mascota
@@ -1360,24 +1355,18 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Weapons.Auras.DerrameDeTinta>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Definitivas.LaUltimaPalabra>());
-                // v6.104 — EL AURA DE JUICIO (la letra: «copia exactamente
-                // el codigo de Warbanner of the Righteous y sus textura,
-                // efectos vfx tecnica todo, en un nuevo item llamado Aura
-                // de Juicio y daselo al jugador»): el puerto fiel del
-                // estandarte de guerra — también en LA BOLSA DE LAS AURAS,
-                // que nace con esta sesión («esto sera material de
-                // investigacion de auras») — la regla de la casa: DIRECTO.
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Accessories.AuraDeJuicioItem>());
+                // v6.104 — EL AURA DE JUICIO MURIÓ en la v6.109 (la
+                // letra: «ya puedes borrar los otros 2 estandarte» — el
+                // puerto del warbanner y el estandarte original cayeron
+                // JUNTOS; sobrevive LA ÚNICA: el Aura del Vacío abajo).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaAuras>());
-                // v6.105 — EL AURA DE JUICIO 2 (la letra: «estos cambios
-                // hazlo en una nueva copia del aura del juicio, que sea
-                // aura del juicio 2»): la copia silenciosa — el efecto del
-                // estandarte, NADA sobre el jugador, partículas pequeñas
-                // moradas y negras + bruma + el semicírculo Perlin sobre
-                // los enemigos — también en la Bolsa de las Auras (la regla
-                // de la casa: DIRECTO).
+                // v6.105 → v6.109 — EL AURA DEL VACÍO (nacida «Aura de
+                // Juicio 2»: la copia silenciosa — el efecto del viejo
+                // estandarte, NADA sobre el jugador, el calentamiento
+                // aerodinámico en los impíos — la v6.109 la RENOMBRA y
+                // la deja como LA ÚNICA del oficio) — también en la
+                // Bolsa de las Auras (la regla de la casa: DIRECTO).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Accessories.AuraDeJuicio2Item>());
 

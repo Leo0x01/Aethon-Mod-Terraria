@@ -367,11 +367,14 @@ namespace AethonMod.Content.Items.Bolsas
             // entrega directa). La v6.102 la entregó directo pero la
             // dejó FUERA de la bolsa — la familia completa se reúne.
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
-            // v6.103 — EL ESTANDARTE DEL JUICIO también entra a la bolsa
-            // (nacido en la v6.98 con entrega directa pero SIN bolsa:
-            // la red de seguridad de la casa — clic derecho, solo lo
-            // que falte, permanente y reabrible).
-            l.Add((ModContent.ItemType<Accessories.EstandarteDelJuicioItem>(), 1));
+            // v6.109 — LAS FORMAS ASCENDIDAS 6 Y 7 (EL ESCRIBA DE LA LUZ
+            // y LA ESTRELLA VIVA — la casa de las luces crece).
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
+            // v6.103 — EL ESTANDARTE DEL JUICIO murió en la v6.109 (la
+            // letra: «ya puedes borrar los otros 2 estandarte») — su
+            // lugar en la bolsa lo hereda EL AURA DEL VACÍO (abajo, en
+            // la Bolsa de las Auras, que es SU casa).
             l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             // v6.51.4 — EL BRILLO DE LOS SOLES RÚNICOS también viaja en la
@@ -993,25 +996,24 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.104 — EL AURA DE JUICIO (el puerto fiel del Warbanner of
-            // the Righteous: mecánica y técnica, arte 100% de la casa —
-            // la regla permanente: todo lo nuevo llega DIRECTO y en SU
-            // bolsa).
-            l.Add((ModContent.ItemType<Accessories.AuraDeJuicioItem>(), 1));
-            // v6.105 — EL AURA DE JUICIO 2 (la copia silenciosa: el efecto
-            // del estandarte, nada sobre el jugador, partículas pequeñas
-            // moradas y negras + bruma + el semicírculo Perlin — más
-            // material de investigación de auras).
+            // v6.109 — LA PURGA DE LOS ESTANDARTES (la letra: «ya puedes
+            // borrar los otros 2 estandarte y renombrar a EL AURA DE
+            // JUICIO 2 como Aura de Vacio»): EL AURA DE JUICIO (el puerto
+            // del Warbanner, v6.104) y EL ESTANDARTE DEL JUICIO (v6.98)
+            // MURIERON — queda LA ÚNICA, renombrada EL AURA DEL VACÍO
+            // (el mismo ítem de la v6.105→.108: el calentamiento
+            // aerodinámico en los impíos, la bruma de verdad y los
+            // fantasMAS TAMBIÉN ardiendo).
             l.Add((ModContent.ItemType<Accessories.AuraDeJuicio2Item>(), 1));
-            // EL ESTANDARTE DEL JUICIO (la investigación del vacío
-            // exterior — la otra ala del estudio de auras).
-            l.Add((ModContent.ItemType<Accessories.EstandarteDelJuicioItem>(), 1));
-            // LAS CINCO FORMAS ASCENDIDAS (las auras vivas del portador).
+            // LAS FORMAS ASCENDIDAS (las auras vivas del portador — la
+            // familia completa de las luces).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDosItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaTresItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
             return l;
         }
     }

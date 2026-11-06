@@ -60,6 +60,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil _perfilAscendidaTres;
         private static AuraPerfil _perfilAscendidaCuatro;
         private static AuraPerfil _perfilAscendidaCinco;
+        private static AuraPerfil _perfilAscendidaSeis;
+        private static AuraPerfil _perfilAscendidaSiete;
         private static AuraPerfil _perfilBrasa;
         private static AuraPerfil _perfilHaloArcoiris;
 
@@ -95,6 +97,20 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil PerfilAscendidaCinco =>
             _perfilAscendidaCinco ??= AuraPerfil.FormaAscendidaCinco();
 
+        /// <summary>v6.109 — El perfil de LA FORMA ASCENDIDA 6 (EL
+        /// ESCRIBA DE LA LUZ: Metatrón — el cubo de los trece nodos, el
+        /// hexagrama doble, el halo de glifos, la lluvia de versos y el
+        /// sello perfecto), creado UNA vez.</summary>
+        private static AuraPerfil PerfilAscendidaSeis =>
+            _perfilAscendidaSeis ??= AuraPerfil.FormaAscendidaSeis();
+
+        /// <summary>v6.109 — El perfil de LA FORMA ASCENDIDA 7 (LA
+        /// ESTRELLA VIVA: el sol menor — el núcleo blanco, el plasma con
+        /// su granulación, la corona solar y LAS PROMINENCIAS que se
+        /// desgarran), creado UNA vez.</summary>
+        private static AuraPerfil PerfilAscendidaSiete =>
+            _perfilAscendidaSiete ??= AuraPerfil.FormaAscendidaSiete();
+
         /// <summary>v6.50.54 — El perfil de EL HALO ARCOÍRIS (el arcoíris
         /// de la Forma 3 destilado: SOLO la banda pequeña alrededor de la
         /// cabeza), creado UNA vez.</summary>
@@ -123,8 +139,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         /// <summary>El modo del portador (0 hambre · 2 ascendida · 3 brasa ·
-        /// 4 ascendida 2 · 5 ascendida 3 · 6 ascendida 4 · 7 halo arcoíris —
-        /// el 1 era la corona rúnica, muerta en la v6.50.44).</summary>
+        /// 4 ascendida 2 · 5 ascendida 3 · 6 ascendida 4 · 7 halo arcoíris ·
+        /// 8 ascendida 5 · 9 ascendida 6 · 10 ascendida 7 — el 1 era la
+        /// corona rúnica, muerta en la v6.50.44).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -148,6 +165,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // v6.102 - la quinta luz (el modo 8).
                 case 8:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCinco;
+                // v6.109 - la sexta luz (el modo 9): EL ESCRIBA DE LA LUZ.
+                case 9:
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaSeis;
+                // v6.109 - la séptima luz (el modo 10): LA ESTRELLA VIVA.
+                case 10:
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaSiete;
                 case 7:
                     return duenio.GetModPlayer<CosmeticPlayer>().HaloArcoiris;
             }
@@ -166,6 +189,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 5: return PerfilAscendidaTres;
                 case 6: return PerfilAscendidaCuatro;
                 case 8: return PerfilAscendidaCinco;   // v6.102 - la quinta luz
+                case 9: return PerfilAscendidaSeis;     // v6.109 - la sexta luz (El Escriba)
+                case 10: return PerfilAscendidaSiete;   // v6.109 - la séptima luz (La Estrella)
                 case 7: return PerfilHaloArcoiris;
             }
             return null;

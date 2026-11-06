@@ -85,6 +85,25 @@ namespace AethonMod.Content.Players
         /// violeta)?</summary>
         public bool FormaAscendidaCinco;
 
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 6 (v6.109 — EL ESCRIBA
+        /// DE LA LUZ: la sexta luz, nacida de la letra «crear otras las
+        /// forma ascendidas, intenta ser creativo y puedes tomar como
+        /// ejemplo a auras en internet y a los mismos angeles» —
+        /// METATRÓN, la voz que escribe: el espejo del grimorio; la
+        /// GEOMETRÍA SAGRADA — el cubo de Metatrón con sus trece nodos
+        /// de oro, el hexagrama doble, el halo de glifos, la lluvia de
+        /// versos y el sello perfecto; paleta del escriba: pergamino →
+        /// oro vivo → tinta violeta)?</summary>
+        public bool FormaAscendidaSeis;
+
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 7 (v6.109 — LA ESTRELLA
+        /// VIVA: la séptima luz — EL SOL MENOR; el portador no VISTE un
+        /// aura: ES la estrella — el núcleo blanco, el cuerpo de plasma
+        /// con su granulación, la corona solar de picos y LAS
+        /// PROMINENCIAS que brotan, crecen y se desgarran; paleta de la
+        /// estrella: nuclear → oro vivo → coral)?</summary>
+        public bool FormaAscendidaSiete;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
@@ -125,7 +144,7 @@ namespace AethonMod.Content.Players
         /// SUS plumas de luz.
         /// </summary>
         public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
-            FormaAscendidaCuatro || FormaAscendidaCinco;
+            FormaAscendidaCuatro || FormaAscendidaCinco || FormaAscendidaSeis || FormaAscendidaSiete;
 
         public override void ResetEffects()
         {
@@ -137,6 +156,8 @@ namespace AethonMod.Content.Players
             FormaAscendidaTres = false;
             FormaAscendidaCuatro = false;
             FormaAscendidaCinco = false;
+            FormaAscendidaSeis = false;
+            FormaAscendidaSiete = false;
             HaloArcoiris = false;
             BrasaDelEclipse = false;
             BrilloSolar = false;
@@ -154,6 +175,8 @@ namespace AethonMod.Content.Players
             int ascendidaTresType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaTresItem>();
             int ascendidaCuatroType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>();
             int ascendidaCincoType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCincoItem>();
+            int ascendidaSeisType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaSeisItem>();
+            int ascendidaSieteType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaSieteItem>();
             int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
             int brilloSolarType = ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>();
@@ -175,6 +198,8 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaTresType) FormaAscendidaTres = true;
                 else if (item.type == ascendidaCuatroType) FormaAscendidaCuatro = true;
                 else if (item.type == ascendidaCincoType) FormaAscendidaCinco = true;
+                else if (item.type == ascendidaSeisType) FormaAscendidaSeis = true;
+                else if (item.type == ascendidaSieteType) FormaAscendidaSiete = true;
                 else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
                 else if (item.type == brilloSolarType) BrilloSolar = true;
@@ -315,6 +340,24 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 8f);
                 }
+                // v6.109 — LA FORMA ASCENDIDA 6 (el modo 9 del portador:
+                // EL ESCRIBA DE LA LUZ — la geometría sagrada de Metatrón).
+                if (FormaAscendidaSeis && !EspiarPortador(9))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaSeis"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 9f);
+                }
+                // v6.109 — LA FORMA ASCENDIDA 7 (el modo 10 del portador:
+                // LA ESTRELLA VIVA — el sol menor con sus prominencias).
+                if (FormaAscendidaSiete && !EspiarPortador(10))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaSiete"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 10f);
+                }
                 // v6.50.54 — EL HALO ARCOÍRIS (el modo 7 del portador).
                 if (HaloArcoiris && !EspiarPortador(7))
                 {
@@ -352,7 +395,8 @@ namespace AethonMod.Content.Players
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
             if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
-                FormaAscendidaCuatro || FormaAscendidaCinco)
+                FormaAscendidaCuatro || FormaAscendidaCinco || FormaAscendidaSeis ||
+                FormaAscendidaSiete)
             {
                 Vector2 centro = Player.Center;
 
@@ -399,7 +443,11 @@ namespace AethonMod.Content.Players
                 // apoteosis absoluta alumbra el doble. v6.50.49 — la
                 // Forma 3 es EL TRONO: la luz del arcoíris, BLANCA
                 // entera (el blanco que contiene TODOS los colores).
-                Vector3 luz = FormaAscendidaCinco
+                Vector3 luz = FormaAscendidaSiete
+                    ? new Vector3(1.62f, 1.30f, 0.92f)   // LA ESTRELLA: la luz cálida que alimenta mundos
+                    : FormaAscendidaSeis
+                    ? new Vector3(1.02f, 0.88f, 0.55f)   // EL ESCRIBA: la luz de oro y tinta de la página
+                    : FormaAscendidaCinco
                     ? new Vector3(0.82f, 0.95f, 0.88f)   // EL ALIENTO: la luz teal-blanca del espíritu
                     : FormaAscendidaCuatro
                     ? new Vector3(1.55f, 1.38f, 1.02f)

@@ -736,73 +736,27 @@ Items: {
 			'''
 	}
 
-	EstandarteDelJuicioItem: {
-		// v6.98: THE DAMAGING AURA — the abandoned concept of the first commits,
-		// resurrected and made superior (the reference banner idea, 100% house-built).
-		DisplayName: Banner of Judgment
-		Tooltip:
-			'''
-			The banner waves at your back: enemies entering its intimate radius
-			BURN with the Outer Void Burn — the closer they get, the hotter
-			they burn and the slower they walk.
-			'''
-		Titulo: "[c/B46CFF:═══ BANNER OF JUDGMENT ═══]"
-		Linea1:
-			'''
-			[c/EDE0FF:The outer void breathes in an intimate radius around the bearer:
-			every enemy that enters BURNS with the Outer Void Burn]
-			'''
-		Linea2: "[c/9B4DFF:The closer they get, the hotter they burn (up to ×3) and the SLOWER they walk: the void's drag slows them]"
-		Linea3: "[c/9B4DFF:While any enemy burns, the bearer collects the OUTER VOID: +10% attack, +10 defense, −15% mana cost]"
-		Linea4:
-			'''
-			[c/78788C:The burn scales with your awakening level.
-			The research debuff the grimoire will inherit at its highest levels]
-			'''
-	}
-
-	AuraDeJuicioItem: {
-		// v6.104: THE JUDGMENT AURA — the faithful port of the war banner of
-		// the Righteous (mechanics + VFX technique, house-made art).
-		DisplayName: Aura of Judgment
-		Tooltip:
-			'''
-			The war banner burns at your back: your power grows the closer the
-			enemy stands (−15% to +15% on ALL your damage)
-			'''
-		Titulo: "[c/FFC850:═══ THE JUDGMENT AURA ═══]"
-		Linea1:
-			'''
-			[c/FFE7B0:The field of judgment embraces 45 tiles around: every fiend that
-			enters is MARKED and burns with the Judgment Flames]
-			'''
-		Linea2: "[c/FFB84D:The closer they get, the hotter they burn (intensity ×1→×3), the fire strikes ever faster (2..19 ticks) and the closest are REPELLED]"
-		Linea3: "[c/FFB84D:Each strike burns with 15 × your BEST class damage (×0.10 against hordes of 7+), 50 armor penetration and can crit]"
-		Linea4: "[c/E8A33C:At 80 px from the fiend ALL your damage burns at its peak (+15%); with an empty field, the banner punishes distance (−15%)]"
-	}
-
 	AuraDeJuicio2Item: {
-		// v6.105 → v6.108: EL AURA DE JUICIO 2 — la copia silenciosa
-		// (la letra: partículas más pequeñas, el efecto del estandarte,
-		// NADA sobre el jugador, morado y negro, bruma y el semicírculo
-		// Perlin; la v6.108 lo vuelve CALENTAMIENTO AERODINÁMICO — el
-		// arco de choque mirando al portador, el plasma naciendo de su
-		// parte abombada y el morado negro de la reentrada).
-		DisplayName: Aura of Judgement II
+		// v6.105 → v6.109: AURA OF THE VOID — born as «Aura de Juicio 2»
+		// (the silent copy); v6.109 RENAMES it and leaves it as THE ONLY
+		// ONE (the Judgment Aura and the Banner of Judgment died by the
+		// user's word). v6.108 made it AERODYNAMIC HEATING; v6.109 adds
+		// the REAL MIST + ghosts burn too.
+		DisplayName: Aura of the Void
 		Tooltip:
 			'''
-			The silent aura: nothing upon the bearer — the judgement only
-			exists in the fiend that draws near
+			The silent aura: nothing over the bearer — the void only exists
+			in the fiend that comes close
 			'''
-		Titulo: "[c/B96EEA:═══ AURA OF JUDGEMENT II ═══]"
+		Titulo: "[c/B96EEA:═══ AURA OF THE VOID ═══]"
 		Linea1:
 			'''
-			[c/D9B3FF:The quiet field spans 19 tiles: every fiend that enters burns with
-			the OUTER VOID BURN — the very effect of the Banner of Judgement]
+			[c/D9B3FF:The quiet field embraces 19 tiles: every fiend that enters burns with
+			the OUTER VOID BURN — even GHOSTS: intangibility saves no spirit]
 			'''
-		Linea2: "[c/B96EEA:The closer they come, the hotter they burn (×1→×3) and the SLOWER they walk (down to ×0.55): while they burn, YOU collect the Outer Void (+10% attack, +10 defense)]"
-		Linea3: "[c/B96EEA:AERODYNAMIC HEATING: each fiend falls toward you like a meteor — the SHOCK ARC (the crescent) wraps it with its bulging side ALWAYS FACING YOU; from that very point spring sparks and haze drifting away from you in EVERY direction (the closer, the denser) while the arc cools into BLACK PURPLE]"
-		Linea4: "[c/8A5BC8:Nothing upon the player: no glow, no fireflies, no meter — only the void, waiting]"
+		Linea2: "[c/B96EEA:The closer they get, the hotter they burn (×1→×3) and the SLOWER they walk (down to ×0.55): while they burn, YOU collect the Outer Void (+10% attack, +10 defense)]"
+		Linea3: "[c/B96EEA:AERODYNAMIC HEATING: every fiend falls toward you like a meteor — the SHOCK ARC (the crescent) wraps them with its bulging side FACING YOU AT ALL TIMES; sparks and MIST pour from that point away from you in EVERY direction, and the arc cools into BLACK PURPLE]"
+		Linea4: "[c/8A5BC8:Nothing over the player: no glow, no fireflies, no meter — just the void, waiting]"
 	}
 
 	DummyNegroItem: {
@@ -1969,6 +1923,39 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaSeisItem: {
+		DisplayName: The Ascended Form 6
+		Tooltip:
+			'''
+			THE SCRIBE OF LIGHT — the sixth light: METATRON, the voice that writes.
+			THE MIRROR OF THE GRIMOIRE: you are the book, and the sky your page.
+			THE CUBE OF METATRON spinning behind your back — thirteen golden nodes
+			joined by SACRED GEOMETRY, the hexagram of two counter-rotating
+			triangles, THE HALO OF GLYPHS orbiting with living scripture, THE RAIN
+			OF VERSES — words of light falling and rising around you — and THE
+			PERFECT SEAL beneath your feet.
+			The scribe's palette: parchment white at the core, living gold in
+			the middle, violet ink at the edge.
+			And INFINITE FLIGHT (like its five sisters).
+			'''
+	}
+
+	FormaAscendidaSieteItem: {
+		DisplayName: The Ascended Form 7
+		Tooltip:
+			'''
+			THE LIVING STAR — the seventh light: THE LESSER SUN.
+			You don't wear an aura: you ARE the star. The WHITE CORE beating in
+			your chest, the SOLAR CROWN of burning spikes, the PROMINENCES — arcs
+			of fire anchored to your ring that erupt, grow and tear like the
+			flares of a true sun —, the STELLAR TWINKLE crossing the sky and the
+			RAIN OF PHOTONS escaping you.
+			The star's palette: nuclear white at the core, living gold in the
+			middle, coral at the edge — the light that feeds worlds.
+			And INFINITE FLIGHT (like its six sisters).
+			'''
+	}
+
 	HaloArcoirisItem: {
 		DisplayName: El Halo Arcoíris
 		Tooltip:
@@ -2322,13 +2309,14 @@ Items: {
 	}
 
 	BolsaAuras: {
-		// v6.104: THE AURAS BAG — the aura research material.
+		// v6.104 → v6.109: THE AURAS BAG — the aura research material
+		// (the two dead banners OUT, the seven lights IN).
 		DisplayName: The Auras Bag
 		Tooltip:
 			'''
-			THE AURA RESEARCH MATERIAL: the Aura of Judgment (the burning
-			war banner), the Banner of Judgment and the FIVE Ascended
-			Forms — everything that AURAS, in a single kit.
+			THE AURA RESEARCH MATERIAL: the AURA OF THE VOID (the one that
+			burns even ghosts) and the SEVEN Ascended Forms — everything
+			that AURAS, in one kit.
 			'''
 	}
 
@@ -2568,7 +2556,6 @@ Items: {
 }
 
 Projectiles: {
-	EstandarteJuicioAuraProjectile.DisplayName: Aura of Judgment
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
@@ -2740,8 +2727,6 @@ Projectiles: {
 	TresCasasProjectile.DisplayName: Tres Casas Projectile
 	SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
 	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
-	AuraJuicioDano.DisplayName: Aura Juicio Dano
-	AuraJuicioLuz.DisplayName: Aura Juicio Luz
 	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
 	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
 }
@@ -2796,12 +2781,6 @@ Buffs: {
 		// v6.101: THE OUTER VOID BURN — the black-flame research debuff
 		DisplayName: Outer Void Burn
 		Description: The black flames of the void consume you: the closer to the bearer, the hotter you burn and the slower you walk
-	}
-
-	LlamasDelJuicio: {
-		// v6.104: THE JUDGMENT FLAMES — the burn of the Aura of Judgment.
-		DisplayName: Judgment Flames
-		Description: The golden flames of judgment consume you: the closer to the bearer, the hotter you burn
 	}
 
 	VacioExterior: {
