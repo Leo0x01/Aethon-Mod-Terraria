@@ -8,23 +8,27 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Dusts
 {
     /// <summary>
-    /// PolvoExpulsionJuicio — v6.107 — LA CHISPA EXPULSADA DEL CORAZÓN.
+    /// PolvoExpulsionJuicio — v6.107 → v6.108 — LA CHISPA DEL PLASMA
+    /// (la reentrada del impío).
     ///
-    /// LA LETRA DEL USUARIO (la corrección del aura de juicio 2): «las
-    /// particulas deben nacer del centro de los enemigos y luego
-    /// dispersarce hacia fuera pero siempre en la direccion opuesta al
-    /// jugador».
+    /// LA LETRA DEL USUARIO (v6.108): «deben nacer del centro de la
+    /// medialuna en la parte abombada y extenderse en todas las
+    /// direcciones pero siempre alejandose de mi, a mayor cercania mas
+    /// particulas» — EL CALENTAMIENTO AERODINÁMICO: el portador es el
+    /// planeta, su aura la atmósfera, el impío cae en reentrada y ESTA
+    /// chispa es el plasma que se desprende del choque.
     ///
-    /// EL CONTRATO: cada chispa NACE EN EL CORAZÓN del impío (una cuna
-    /// con un temblor mínimo) y sale EXPULSADA hacia FUERA, SIEMPRE en
-    /// la dirección OPUESTA al portador (el jugador a la derecha → la
-    /// chispa nace del pecho y vuela a la IZQUIERDA, abriéndose en
-    /// abanico hacia afuera — así para TODAS las direcciones). La
-    /// geometría queda CONGELADA al nacer (LIBERADA: aunque el impío
-    /// camine, la chispa termina su vuelo sola) — el rumbo es RECTO y
-    /// la velocidad ACELERA suavecito cada tick (el vacío la escupe
-    /// cada vez con más rabia) hasta disolverse en la última cuarta
-    /// parte del camino.
+    /// EL CONTRATO: cada chispa NACE EN EL PUNTO DE ESTANCAMIENTO (el
+    /// tope ABOMBADO de la medialuna — el punto del arco que MIRA al
+    /// portador, donde el choque comprime y arde; una cuna con un
+    /// temblor mínimo) y se derrama hacia ATRÁS en TODAS las
+    /// direcciones de fuga (el abanico trasero COMPLETO ±90°: cualquier
+    /// rumbo que SE ALEJE del portador — el plasma rodea el cuerpo y
+    /// deja la estela de la reentrada). La geometría queda CONGELADA
+    /// al nacer (LIBERADA: aunque el impío camine, la chispa termina
+    /// su vuelo sola) — el rumbo es RECTO y la velocidad ACELERA
+    /// suavecito cada tick (el vacío la escupe cada vez con más rabia)
+    /// hasta disolverse en la última cuarta parte del camino.
     ///
     /// Tuberías de la casa: el Update devuelve FALSE — TODO el
     /// movimiento lo escribe la geometría de la expulsión (la física
@@ -39,12 +43,14 @@ namespace AethonMod.Content.Dusts
         /// la expulsión congelada al nacer (lo que le toca recorrer).</summary>
         public class Chispa
         {
-            /// <summary>El corazón del impío AL NACER la chispa —
-            /// LIBERADA: ya no lo sigue, termina su vuelo sola.</summary>
+            /// <summary>El punto de estancamiento AL NACER la chispa
+            /// (el tope abombado de la medialuna) — LIBERADA: ya no lo
+            /// sigue, termina su vuelo sola.</summary>
             public Vector2 Centro;
 
             /// <summary>EL RUMBO — la dirección de la expulsión (SIEMPRE
-            /// dentro del abanico OPUESTO al portador).</summary>
+            /// dentro del HEMISFERIO DE FUGA: el abanico ±90° que se
+            /// aleja del portador).</summary>
             public Vector2 Dir;
 
             /// <summary>Lo recorrido desde la cuna (crece cada tick).</summary>

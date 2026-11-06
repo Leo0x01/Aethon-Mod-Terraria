@@ -16,7 +16,7 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles
 {
     // ======================================================================
-    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 — EL ANCLA INVISIBLE DEL
+    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 → v6.108 — EL ANCLA INVISIBLE DEL
     //  AURA DE JUICIO 2 (la copia silenciosa: el efecto del
     //  ESTANDARTE, el teatro SOLO en los enemigos).
     //
@@ -48,6 +48,32 @@ namespace AethonMod.Content.Projectiles
     //  darle la vuelte y las particulas deben nacer del centro de los
     //  enemigos y luego dispersarce hacia fuera pero siempre en la
     //  direccion opuesta al jugador».
+    //
+    //  LA CORRECCIÓN DE LA LETRA (v6.108): «la parte abombada de la
+    //  medialuna tiene que mirarme a mi en todo momento, deben nacer
+    //  del centro de la medialuna en la parte abombada y extenderse
+    //  en todas las direcciones pero siempre alejandose de mi, a
+    //  mayor cercania mas particulas y la medialuna cambia de color
+    //  volviendose ligeramente morada negra, y la bruma debe hacer
+    //  lo mismo que las particulas. el objetivo es que parezca
+    //  calentamiento aerodinamico igual que las cosas que entran a
+    //  la atmosfera del planeta, pero en este caso yo seria el
+    //  planeta y todo lo que entre en mi atmosfera que seria al aura
+    //  del juicio, sufriria de calentamiento aerodinamico, entiendes
+    //  el concepto».
+    //
+    //  EL CONCEPTO v6.108 — EL CALENTAMIENTO AERODINÁMICO: el
+    //  portador es EL PLANETA, su aura LA ATMÓSFERA y cada impío un
+    //  objeto CAYENDO EN REENTRADA — el ARCO DE CHOQUE (la medialuna)
+    //  lo envuelve POR DELANTE con la CONCHA ABOMBADA MIRANDO AL
+    //  PLANETA (en todo momento: el impío siempre «cae hacia ti»), y
+    //  del PUNTO DE ESTANCAMIENTO (el tope abombado — donde el choque
+    //  arde más) brota el PLASMA: chispas y bruma que se derraman
+    //  hacia ATRÁS en TODAS las direcciones de fuga (siempre
+    //  alejándose del portador), MÁS DENSAS cuanto más hondo cae el
+    //  impío (a mayor cercanía, más partículas)… y el arco MISMO se
+    //  enfría en sombra: la medialuna se vuelve LIGERAMENTE MORADA
+    //  NEGRA con la cercanía.
     //
     //  LA CURA v6.107 — EL TEATRO SE PONE DE PIE Y EXPULSA DEL CORAZÓN:
     //   · LA MEDIALUNA VERTICAL (LA CÚPULA) — LA ROTACIÓN VERTICAL DE
@@ -83,9 +109,10 @@ namespace AethonMod.Content.Projectiles
     //      (QuemaduraVacioExterior + VacioGlobalNPC).
     //
     //   2) VISTE A LOS IMPIOS (solo cuando se ACERCAN — el efecto
-    //      solo existe en el enemigo): LA MEDIALUNA VERTICAL (la
-    //      cúpula) + LAS CHISPAS EXPULSADAS DEL CORAZÓN + LA BRUMA QUE
-    //      SE DERRAMA POR EL MISMO RUMBO (ver LA CURA v6.107 arriba).
+    //      solo existe en el enemigo): EL ARCO DE CHOQUE (la
+    //      medialuna con la concha abombada MIRANDO al portador) +
+    //      EL PLASMA del punto de estancamiento (chispas y bruma
+    //      derramándose hacia atrás — ver EL CONCEPTO v6.108 arriba).
     // ======================================================================
     public class AuraJuicio2Ancla : ModProjectile
     {
@@ -210,9 +237,11 @@ namespace AethonMod.Content.Projectiles
             }
 
             // ==============================================================
-            //  2) LAS CHISPAS DEL CORAZÓN (solo cliente — el teatro
-            //     de los impíos: NACEN del corazón y salen EXPULSADAS
-            //     hacia fuera, SIEMPRE en la dirección OPUESTA al
+            //  2) EL PLASMA DE LA REENTRADA (solo cliente — el teatro
+            //     de los impíos: NACE del PUNTO DE ESTANCAMIENTO — el
+            //     tope abombado de la medialuna, donde el choque arde
+            //     más — y se derrama hacia ATRÁS en TODAS las
+            //     direcciones de fuga, SIEMPRE alejándose del
             //     portador — la MISMA fuga de la bruma).
             // ==============================================================
             if (Main.netMode != NetmodeID.Server && !Main.dedServ && !Main.gameMenu)
@@ -220,9 +249,10 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL TEATRO DE LOS IMPIOS — LAS CHISPAS DEL CORAZÓN (fase de
-        //  UPDATE: el spawn de polvos naciendo del corazón del impío; la
-        //  bruma y la cúpula viven en el render).
+        //  EL TEATRO DE LOS IMPIOS — EL PLASMA DE LA REENTRADA (fase de
+        //  UPDATE: el spawn de polvos naciendo del PUNTO DE
+        //  ESTANCAMIENTO — el tope abombado de la medialuna; la bruma y
+        //  el arco de choque viven en el render).
         // ================================================================
         private void VestirALosImpios(Player dueno)
         {
@@ -254,36 +284,47 @@ namespace AethonMod.Content.Projectiles
                 Vector2 dir = hacia * (1f / largo);
 
                 // ----------------------------------------------------------
-                //  v6.107 — LAS CHISPAS DEL CORAZÓN: «las particulas
-                //  deben nacer del centro de los enemigos y luego
-                //  dispersarce hacia fuera pero siempre en la direccion
-                //  opuesta al jugador».
+                //  v6.108 — EL PLASMA DEL PUNTO DE ESTANCAMIENTO:
+                //  «deben nacer del centro de la medialuna en la parte
+                //  abombada y extenderse en todas las direcciones pero
+                //  siempre alejandose de mi, a mayor cercania mas
+                //  particulas».
                 //
-                //  CADA CHISPA NACE EN EL CORAZÓN del impío (una cuna
-                //  con un temblor mínimo) y sale EXPULSADA hacia FUERA,
-                //  SIEMPRE en la dirección OPUESTA al portador (el
-                //  jugador a la derecha → nace del pecho y vuela a la
-                //  IZQUIERDA, abriéndose en abanico — así para TODAS las
-                //  direcciones). Cuanto más pegado arde el impío, más
-                //  rápida nace y más denso hierve su corazón.
+                //  CADA CHISPA NACE EN EL TOPE ABOMBADO de la medialuna
+                //  (EL PUNTO DE ESTANCAMIENTO — el punto del arco que
+                //  MIRA al portador, donde el choque comprime y arde)
+                //  y se derrama hacia ATRÁS en TODAS las direcciones de
+                //  fuga (el abanico trasero COMPLETO ±90°: el plasma
+                //  rodea el cuerpo y deja la estela — así para TODAS
+                //  las direcciones, SIEMPRE alejándose del portador).
+                //  Cuanto más hondo cae el impío (más cercanía), MÁS
+                //  DENSA hierve la reentrada.
                 // ----------------------------------------------------------
-                int ritmo = (int)MathHelper.Clamp(4f - k * 2f, 1f, 4f);  // 1 de cada 4 lejos… de cada 2 pegado
+                // LA DENSIDAD DE LA ATMÓSFERA — a mayor cercanía, MÁS
+                // PARTÍCULAS (el impío cae más hondo: cada 6 ticks en
+                // el borde… CADA TICK pegado, en ráfagas).
+                int ritmo = (int)MathHelper.Clamp(6f - k * 5f, 1f, 6f);
                 if ((Projectile.ai[0] + i) % ritmo == 0f && n.Center.DistanceSQ(dueno.Center) < 640f * 640f)
                 {
-                    int rafaga = k > 0.55f && Main.rand.NextFloat() < 0.5f ? 2 : 1;
+                    int rafaga = 1 + (k > 0.4f ? 1 : 0)
+                        + (k > 0.75f && Main.rand.NextFloat() < 0.5f ? 1 : 0);
                     for (int s = 0; s < rafaga; s++)
                     {
-                        // EL RUMBO — SIEMPRE OPUESTO AL PORTADOR: el
-                        // abanico alrededor de la dirección portador →
-                        // impío (TODAS las chispas comparten la MISMA
-                        // fuga: la que se aleja del jugador).
-                        float abanico = Main.rand.NextFloat(-0.85f, 0.85f);
+                        // EL RUMBO — EL HEMISFERIO DE FUGA COMPLETO: el
+                        // plasma se derrama en TODAS las direcciones que
+                        // SE ALEJAN del portador (el abanico trasero
+                        // ±90° alrededor de la fuga — el flujo del
+                        // choque rodeando el cuerpo en su caída).
+                        float abanico = Main.rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
                         Vector2 rumbo = dir.RotatedBy(abanico);
 
-                        // LA CUNA — nace del CORAZÓN del impío (un
+                        // LA CUNA — EL PUNTO DE ESTANCAMIENTO: el tope
+                        // ABOMBADO de la medialuna (el punto del arco
+                        // que MIRA al portador — allí el choque comprime
+                        // y arde, y de allí nace el plasma), con un
                         // temblor mínimo para que no nazcan todas del
-                        // mismo pixel).
-                        Vector2 cuna = n.Center + new Vector2(
+                        // mismo pixel.
+                        Vector2 cuna = n.Center - dir * (RadioDomo(n, k) * 0.95f) + new Vector2(
                             Main.rand.NextFloat(-1f, 1f) * n.width * 0.08f,
                             Main.rand.NextFloat(-1f, 1f) * n.height * 0.08f);
 
@@ -296,9 +337,10 @@ namespace AethonMod.Content.Projectiles
                         // LIBERADA — la cuna y el rumbo quedan congelados
                         // AL NACER: aunque el impío camine, la chispa
                         // termina SU vuelo sola (PolvoExpulsionJuicio
-                        // manda). El camino: del corazón hacia afuera,
-                        // hasta ~2 cúpulas de distancia.
-                        float distMax = RadioDomo(n, k) * Main.rand.NextFloat(1.35f, 2.1f);
+                        // manda). El camino: del punto de estancamiento
+                        // hacia ATRÁS — la ESTELA de la reentrada, larga
+                        // y desgarrada (hasta ~2.6 cúpulas).
+                        float distMax = RadioDomo(n, k) * Main.rand.NextFloat(1.6f, 2.6f);
                         var chispa = new PolvoExpulsionJuicio.Chispa
                         {
                             Centro = cuna,
@@ -326,10 +368,11 @@ namespace AethonMod.Content.Projectiles
 
         // ================================================================
         //  EL RENDER — NADA sobre el jugador: SOLO los impíos. LA BRUMA
-        //  DEL CORAZÓN (los puffs de BrumaFX naciendo del corazón y
-        //  derramándose hacia fuera, en la misma dirección e intensidad
-        //  variable) y LA MEDIALUNA VERTICAL (la cúpula morada y negra
-        //  que se corona sobre el impío).
+        //  DE LA REENTRADA (los puffs de BrumaFX naciendo del punto de
+        //  estancamiento y derramándose hacia atrás, en la misma
+        //  dirección e intensidad variable que las chispas) y EL ARCO
+        //  DE CHOQUE (la medialuna morada y negra con la concha
+        //  abombada MIRANDO al portador).
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
@@ -379,8 +422,10 @@ namespace AethonMod.Content.Projectiles
             return false;   // el ancla NUNCA se dibuja
         }
 
-        /// <summary>EL VESTIDO DE UN IMPIO — la bruma del corazón (misma
-        /// dirección e intensidad variable) y LA MEDIALUNA VERTICAL.</summary>
+        /// <summary>EL VESTIDO DE UN IMPIO — la bruma de la reentrada
+        /// (nace del punto de estancamiento, misma dirección e
+        /// intensidad variable que las chispas) y EL ARCO DE CHOQUE (la
+        /// medialuna con la concha abombada mirando al portador).</summary>
         private static void VestirUnImpio(NPC n, VacioGlobalNPC vacio, Player dueno, float t)
         {
             float vive = vacio.VisualQuemadura;
@@ -394,21 +439,20 @@ namespace AethonMod.Content.Projectiles
             Vector2 dir = hacia * (1f / largo);   // portador → impío
 
             // ==============================================================
-            //  v6.107 — LA BRUMA DEL CORAZÓN — «en la misma direccion
-            //  e intensidad variable como las particulas iniciales»:
-            //  cada puff NACE en el corazón del impío y se derrama
-            //  HACIA FUERA, SIEMPRE en la dirección OPUESTA al
-            //  portador (la MISMA fuga de las chispas — el jugador a la
-            //  derecha → la bruma exhala hacia la IZQUIERDA). INTENSIDAD
-            //  VARIABLE: el alfa, el tamaño y el NÚMERO de puffs crecen
-            //  con la cercanía del impío (cuanto más pegado arde, más
-            //  bruma respira su corazón).
+            //  v6.108 — LA BRUMA DE LA REENTRADA — «la bruma debe hacer
+            //  lo mismo que las particulas»: cada puff NACE en el PUNTO
+            //  DE ESTANCAMIENTO (el tope abombado de la medialuna) y se
+            //  derrama hacia ATRÁS en TODAS las direcciones de fuga
+            //  (el MISMO abanico ±90° de las chispas — SIEMPRE
+            //  alejándose del portador). INTENSIDAD VARIABLE: el alfa,
+            //  el tamaño y el NÚMERO de puffs crecen con la cercanía
+            //  del impío (cuanto más hondo cae, más densa la estela).
             // ==============================================================
             Vector2 o = Main.screenPosition;
             try
             {
                 BrumaFX.BeginMass();
-                int puffs = 3 + (k > 0.6f ? 1 : 0);         // INTENSIDAD VARIABLE: más puffs pegado
+                int puffs = 2 + (int)(k * 3f);              // LA DENSIDAD: 2 lejos → 5 pegado (más bruma cuanto más cerca)
                 for (int p = 0; p < puffs; p++)
                 {
                     float f0 = Frac(semilla * 0.83f + p * 0.618034f);
@@ -416,15 +460,17 @@ namespace AethonMod.Content.Projectiles
                     float edad = Frac(t * ritmo + f0 * 4.1f + p * 0.233f);   // vida cíclica
 
                     // EL RUMBO DEL PUFF — el MISMO abanico de fuga de
-                    // las chispas: SIEMPRE la dirección OPUESTA al
-                    // portador (determinista por puff).
-                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * 0.85f;
+                    // las chispas: TODAS las direcciones que se ALEJAN
+                    // del portador (el hemisferio trasero ±90°,
+                    // determinista por puff).
+                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * MathHelper.PiOver2;
                     Vector2 rumbo = dir.RotatedBy(abanico);
 
-                    // NACE EN EL CORAZÓN y se derrama HACIA FUERA por su
-                    // rumbo (la MISMA dirección de las chispas).
-                    float avance = edad * RadioDomo(n, k) * (1.15f + 0.55f * f0);
-                    Vector2 pos = n.Center + rumbo * avance;
+                    // NACE EN EL PUNTO DE ESTANCAMIENTO (el tope abombado
+                    // de la medialuna) y se derrama HACIA ATRÁS por su
+                    // rumbo (la MISMA estela de las chispas).
+                    float avance = edad * RadioDomo(n, k) * (1.3f + 0.6f * f0);
+                    Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
 
                     float radio = (6f + 9f * f0) * (0.7f + 0.8f * edad)
                         * (0.8f + 0.5f * k);                 // …y del TAMAÑO de su cuerpo
@@ -448,16 +494,18 @@ namespace AethonMod.Content.Projectiles
             }
 
             // ==============================================================
-            //  v6.107 — LA MEDIALUNA VERTICAL (LA CÚPULA) — «intenta
-            //  darle una rotacion vertical de 90 grados, o sea darle la
-            //  vuelta»: la v6.106 ACOSTABA el arco en HORIZONTAL (la
-            //  parte plana mirando al portador, el domo abombándose en
-            //  dirección contraria) — LA CURA: LA ROTACIÓN VERTICAL DE
-            //  90° PONE LA CÚPULA DE PIE — la parte PLANA (la disuelta)
-            //  cae ABAJO, sobre el corazón del impío, y la concha se
-            //  YERGUE cubriéndolo desde arriba (LA CÚPULA DEL JUICIO
-            //  que pesa sobre su cabeza — la medialuna YA NO gira con el
-            //  portador: solo el bamboleo lento la mece).
+            //  v6.108 — LA MEDIALUNA = EL ARCO DE CHOQUE — «la parte
+            //  abombada de la medialuna tiene que mirarme a mi en todo
+            //  momento… la medialuna cambia de color volviendose
+            //  ligeramente morada negra»: EL CALENTAMIENTO
+            //  AERODINÁMICO — el portador es el PLANETA, su aura la
+            //  ATMÓSFERA y el impío el objeto que CAE EN REENTRADA: el
+            //  arco de choque lo envuelve POR DELANTE con la CONCHA
+            //  ABOMBADA APUNTANDO SIEMPRE AL PORTADOR (en todo momento
+            //  — si lo rodeas, el arco gira contigo), la parte plana
+            //  disuelta abraza su corazón por detrás… y cuanto más
+            //  HONDO cae (más cerca del portador), más MORADA NEGRA se
+            //  vuelve (el choque se enfría en la sombra del vacío).
             // ==============================================================
             Texture2D perlin = PerlinSemi;
             if (perlin != null && !perlin.IsDisposed)
@@ -471,49 +519,67 @@ namespace AethonMod.Content.Projectiles
                 float ancho = RadioDomo(n, k) * 2f * late;
                 float esc = ancho / 192f;                    // el semicírculo mide 2R=192 en la textura
 
-                // LA ROTACIÓN VERTICAL — el domo DE PIE: la parte plana
-                // disuelta cae sobre el corazón y la concha se corona
-                // ARRIBA… y EL BAMBOLEO lento (la cúpula respira sobre
-                // la cabeza del impío).
-                float rot = 0.05f * MathF.Sin(t * 0.8f + semilla * 0.7f);
+                // LA ROTACIÓN DEL CHOQUE — LA CONCHA ME MIRA: el impío
+                // «cae» hacia el portador (el planeta) y el arco de
+                // choque lo envuelve POR DELANTE — la parte ABOMBADA
+                // apunta SIEMPRE al portador (EN TODO MOMENTO: si lo
+                // rodeas, el arco gira contigo)… y EL BAMBOLEO lento
+                // (la concha respira en el viento de la reentrada).
+                float rot = dir.ToRotation() - MathHelper.PiOver2
+                    + 0.05f * MathF.Sin(t * 0.8f + semilla * 0.7f);
 
                 // LA BASE EN EL CUERPO — el diámetro de la textura vive a
-                // 22 px bajo su centro (y=150 del lienzo de 256): la
-                // PARTE PLANA DISUELTA cae SOBRE el corazón del impío y
-                // la concha lo CORONA desde arriba.
+                // 22 px bajo su centro (y=150 del lienzo de 256): el
+                // CENTRO del semicírculo cae SOBRE el corazón del impío
+                // (la parte plana disuelta lo abraza por detrás) y la
+                // CONCHA SE ABOMBA hacia el portador hasta ~RadioDomo
+                // de su pecho — el choque se planta DELANTE del cuerpo.
                 Vector2 baseTex = new Vector2(0f, 22f * esc).RotatedBy(rot);
                 Vector2 pos = n.Center - baseTex;
 
                 Vector2 tamPx = new Vector2(256f * esc, 256f * esc);
                 Vector2 tamEco = new Vector2(288f * esc, 288f * esc);   // EL ECO (más grande, más tenue)
 
+                // EL COLOR DEL CHOQUE — v6.108: «la medialuna cambia de
+                // color volviendose ligeramente morada negra»: cuanto
+                // más HONDO cae el impío en la atmósfera del portador,
+                // el arco SE ENFRÍA EN SOMBRA — el brillo violeta se
+                // apaga hacia el MORADO NEGRO del vacío (de lejos es la
+                // medialuna violeta de siempre; pegado, una concha
+                // morada-negra).
                 Color negroVioleta = new(26, 12, 44);
                 Color violeta = new(150, 84, 235);
+                Color moradaNegra = new(46, 20, 78);
+                Color colorAlfa = Color.Lerp(negroVioleta, moradaNegra, k);
+                Color colorLuz = Color.Lerp(violeta, moradaNegra, 0.85f * k);
 
-                // (1) EL PASO ALFA — el negro-violeta que OSCURECE: la
-                //     medialuna se lee TAMBIÉN DE DÍA (la lección de la
-                //     .103: el aditivo se lava con el sol).
+                // (1) EL PASO ALFA — la sombra que OSCURECE (y se ahonda
+                //     con la cercanía): la medialuna se lee TAMBIÉN DE
+                //     DÍA (la lección de la .103: el aditivo se lava con
+                //     el sol).
                 VFXCore.Begin();
-                VFXCore.Quad(pos, negroVioleta * ((0.40f + 0.26f * k) * vive),
+                VFXCore.Quad(pos, colorAlfa * ((0.42f + 0.30f * k) * vive),
                     tamPx, rot, perlin);
                 VFXCore.FlushAlpha();
 
-                // (2) EL PASO ADITIVO — la energía violeta que SUMA: las
-                //     vetas del Perlin prenden en la oscuridad…
+                // (2) EL PASO ADITIVO — la energía que SUMA se APAGA
+                //     hacia el morado negro cuando el impío cae hondo
+                //     (las vetas del Perlin se enfrían en sombra)…
                 VFXCore.Begin();
-                VFXCore.Quad(pos, violeta * ((0.26f + 0.32f * k) * vive),
+                VFXCore.Quad(pos, colorLuz * ((0.26f + 0.26f * k) * vive),
                     tamPx, rot, perlin);
                 //     …Y SU ECO — una segunda medialuna más GRANDE y
-                //     TENUE (la aura que gotea de la cúpula hacia afuera).
-                VFXCore.Quad(pos, violeta * ((0.12f + 0.16f * k) * vive),
+                //     TENUE (la aura que gotea del choque hacia afuera).
+                VFXCore.Quad(pos, colorLuz * ((0.12f + 0.14f * k) * vive),
                     tamEco, rot, perlin);
                 VFXCore.FlushAdditive();
             }
         }
 
-        /// <summary>v6.106 — EL RADIO DEL SEMICÍRCULO — LA MISMA CÚPULA
-        /// para TODO el teatro: la medialuna dibujada, las chispas que la
-        /// recorren y la bruma que la envuelve. Crece con la cercanía del
+        /// <summary>v6.106 → v6.108 — EL RADIO DEL ARCO DE CHOQUE — LA
+        /// MISMA cúpula para TODO el teatro: la medialuna dibujada, el
+        /// punto de estancamiento donde nace el plasma (chispas y
+        /// bruma) y la estela que dejan. Crece con la cercanía del
         /// impío (el fuego pegado lo ENVUELVE) y viste su cuerpo ENTERO.</summary>
         private static float RadioDomo(NPC n, float k) =>
             (MathF.Max(n.width, n.height) * 0.5f + 17f) * (0.85f + 0.45f * k);
