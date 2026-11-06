@@ -234,6 +234,71 @@ namespace AethonMod.Content.Projectiles.Jefes
             return Color.Lerp(franjas[i], franjas[(i + 1) % 7], f);
         }
 
+        // ================================================================
+        //  v6.104 — LAS LEYES DE HAZ DE LA FASE 1.5 (la muerte de las
+        //  texturas planas): el estado estático que leen los delegados
+        //  (cero-GC — el patrón de toda la casa) y LAS CUATRO LEYES: el
+        //  tinte del velo, el tinte del núcleo, el vértice del núcleo
+        //  (el grumo de ruido + el brillo 1/d) y el vértice del rayo
+        //  del estallido (el núcleo blanco y el halo CALIENTE en UNA
+        //  pasada — el degradé blanco→oro→ámbar→brasa de la imagen
+        //  vive en el VÉRTICE, no en quads apilados).
+        // ================================================================
+        private static float _hazAlfa = 1f;
+        private static Color _hazTinte = Color.White;
+        private static float _hazAncho = 8f;
+
+        private static readonly HazLib.LeyNodo LeyTinteHazVelo = TinteHazVelo;
+        private static readonly HazLib.LeyNodo LeyTinteHazNucleo = TinteHazNucleo;
+        private static readonly HazLib.LeyVertice LeyVerticeHazNucleo = VerticeHazNucleo;
+        private static readonly HazLib.LeyVertice LeyVerticeRayoEstallido = VerticeRayoEstallido;
+
+        private static Color TinteHazVelo(float p)
+            => _hazTinte * (MathHelper.Clamp(p / 0.10f, 0f, 1f)
+                * MathHelper.Clamp((1f - p) / 0.12f, 0f, 1f) * (_hazAlfa * 0.40f));
+
+        private static Color TinteHazNucleo(float p)
+            => _hazTinte * (MathHelper.Clamp(p / 0.06f, 0f, 1f)
+                * MathHelper.Clamp((1f - p) / 0.10f, 0f, 1f) * (_hazAlfa * 0.95f));
+
+        /// <summary>EL VÉRTICE del núcleo: el grumo de ruido diagonal (la
+        /// luz que HIERVE) y el brillo interior 1/d — el mismo idioma de
+        /// los haces de las armas.</summary>
+        private static Color VerticeHazNucleo(float x, float y, Color tinte)
+        {
+            float tt = Main.GlobalTimeWrappedHourly;
+            float ruido = FracHaz(x * 2f - tt * 2.6f) * FracHaz(y * 2f + x * 4f - tt * 2.6f);
+            float opacidad = ruido * 0.65f + 0.40f;
+            float d = MathF.Abs(y - 0.5f);
+            float brillo = d <= 0.0001f ? 1f : MathHelper.Clamp(0.30f / d, 0f, 1f);
+            brillo *= 1f - MathHelper.Clamp((d - 0.10f) / 0.22f, 0f, 1f);
+            Vector4 suma = tinte.ToVector4() * opacidad + new Vector4(brillo * 0.8f);
+            return new Color(
+                (byte)Math.Clamp((int)(suma.X * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Y * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Z * 255f + 0.5f), 0, 255), 255);
+        }
+
+        /// <summary>EL VÉRTICE del rayo del estallido: el CENTRO de la
+        /// banda es el núcleo BLANCO y el borde es el HALO CALIENTE (oro →
+        /// ámbar → brasa — el degradé de la imagen) — núcleo y halo en UNA
+        /// pasada, con SU ruido vivo.</summary>
+        private static Color VerticeRayoEstallido(float x, float y, Color tinte)
+        {
+            float tt = Main.GlobalTimeWrappedHourly;
+            float ruido = FracHaz(x * 2.4f - tt * 3f) * 0.5f;
+            float d = MathF.Abs(y - 0.5f) * 2f;      // 0 = centro, 1 = borde
+            Color caliente = Color.Lerp(OroGrimorio, AmbarEstelar, 0.45f);
+            Color c = Color.Lerp(BlancoCaliente, caliente, MathF.Pow(d, 0.65f));
+            Vector4 v = c.ToVector4() * (0.95f - 0.45f * d + ruido * 0.30f);
+            return new Color(
+                (byte)Math.Clamp((int)(v.X * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(v.Y * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(v.Z * 255f + 0.5f), 0, 255), 255);
+        }
+
+        private static float FracHaz(float x) => x - MathF.Floor(x);
+
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
         public override void SetStaticDefaults()
@@ -2081,56 +2146,68 @@ namespace AethonMod.Content.Projectiles.Jefes
                 Vector2 pos = Projectile.Center - Main.screenPosition;
 
                 // === FASE 1 — EL BÚFER DE QUADS (coords de MUNDO) ===
+                // v6.104 — LA PURGA DE LAS TEXTURAS PLANAS (la letra:
+                //     «muchos de sus ataques son texuras planas, solo un
+                //     rectangulo y estan mal implementadas… asegurate de
+                //     no dejar texturas planas, lisas o raras»): los
+                //     CUERPOS de los proyectiles pequeños ya NO son
+                //     glows estirados (rectángulos de luz) — son
+                //     DESTELLOS DE 4 PUNTAS texturizados (la estrella de
+                //     la casa, VFXCore.DestelloFinal) con SU núcleo y SU
+                //     giro: cada proyectil se lee como lo que ES.
                 switch (Estilo)
                 {
                     case EstiloPuaSagrario:
-                        VFXCore.Quad(Projectile.Center, TealCristal * 0.85f,
-                            new Vector2(10f, 26f), Projectile.rotation);
+                        VFXCore.Quad(Projectile.Center, TealCristal * 0.90f,
+                            new Vector2(16f, 38f), Projectile.rotation, VFXCore.DestelloFinal);
                         VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.7f,
-                            new Vector2(5f, 12f), Projectile.rotation);
+                            new Vector2(7f, 15f), Projectile.rotation, VFXCore.DestelloFinal);
                         break;
 
                     case EstiloCoroCristal:
-                        VFXCore.Quad(Projectile.Center, TealCristal * 0.9f,
-                            new Vector2(16f, 7f), Projectile.rotation);
+                        VFXCore.Quad(Projectile.Center, TealCristal * 0.95f,
+                            new Vector2(20f, 20f), Projectile.rotation + t * 0.6f,
+                            VFXCore.DestelloFinal);
                         break;
 
                     case EstiloViroteVacio:
-                        VFXCore.Quad(Projectile.Center, TealVacio * 0.9f,
-                            new Vector2(30f, 6f), Projectile.velocity.ToRotation());
-                        VFXCore.Quad(Projectile.Center, VioletaVacio * 0.5f,
-                            new Vector2(18f, 10f), Projectile.velocity.ToRotation());
+                        VFXCore.Quad(Projectile.Center, TealVacio * 0.95f,
+                            new Vector2(38f, 13f), Projectile.velocity.ToRotation(),
+                            VFXCore.DestelloFinal);
+                        VFXCore.Quad(Projectile.Center, VioletaVacio * 0.55f,
+                            new Vector2(20f, 12f), Projectile.velocity.ToRotation());
                         break;
 
                     case EstiloFlechaEstelar:
-                        VFXCore.Quad(Projectile.Center, AmbarEstelar * 0.9f,
-                            new Vector2(24f, 5f), Projectile.rotation);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.65f,
-                            new Vector2(10f, 3f), Projectile.rotation);
+                        VFXCore.Quad(Projectile.Center, AmbarEstelar * 0.95f,
+                            new Vector2(30f, 11f), Projectile.rotation, VFXCore.DestelloFinal);
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.7f,
+                            new Vector2(12f, 5f), Projectile.rotation, VFXCore.DestelloFinal);
                         break;
 
                     case EstiloMinaEstelar:
                     {
                         float pulso = 0.9f + 0.1f * MathF.Sin(t * 8f + Seed);
-                        VFXCore.Quad(Projectile.Center, AmbarEstelar * (0.75f * pulso),
-                            new Vector2(18f, 18f));
+                        VFXCore.Quad(Projectile.Center, AmbarEstelar * (0.85f * pulso),
+                            new Vector2(24f, 24f), t * 0.8f + Seed, VFXCore.DestelloFinal);
                         VFXCore.Quad(Projectile.Center, OroGrimorio * 0.6f,
-                            new Vector2(9f, 9f));
+                            new Vector2(11f, 11f));
                         break;
                     }
 
                     case EstiloEstrellaFugaz:
                         VFXCore.Quad(Projectile.Center, OroGrimorio * 0.95f,
-                            new Vector2(20f, 20f), Projectile.rotation);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.8f,
-                            new Vector2(10f, 10f), Projectile.rotation);
+                            new Vector2(26f, 26f), Projectile.rotation + t * 1.2f,
+                            VFXCore.DestelloFinal);
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.85f,
+                            new Vector2(12f, 12f), Projectile.rotation, VFXCore.DestelloFinal);
                         break;
 
                     case EstiloCuchillaOrbit:
-                        VFXCore.Quad(Projectile.Center, EmberPortador * 0.9f,
-                            new Vector2(22f, 6f), Projectile.rotation);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.6f,
-                            new Vector2(9f, 3f), Projectile.rotation);
+                        VFXCore.Quad(Projectile.Center, EmberPortador * 0.95f,
+                            new Vector2(28f, 10f), Projectile.rotation, VFXCore.DestelloFinal);
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.65f,
+                            new Vector2(11f, 4f), Projectile.rotation, VFXCore.DestelloFinal);
                         break;
 
                     case EstiloCorteRealidad:
@@ -2140,29 +2217,38 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                     case EstiloPernoEstelar:
                     {
-                        // v6.50.117 — LA PALETA DEL PERNO (ai[1] ≥ 2 = el
-                        // gemelo oscuro: la lluvia masiva del sol moribundo
-                        // se viste de negro y morado profundo).
+                        // v6.104 — EL PERNO ES UNA ESTRELLA (no un cuadro):
+                        // el destello de 4 puntas de la casa con su giro
+                        // propio y su núcleo — la v6.50.117 — LA PALETA
+                        // DEL PERNO (ai[1] ≥ 2 = el gemelo oscuro) sigue
+                        // viva.
                         Color cLuzP = Par >= 2f ? new Color(110, 30, 170) : LuzPrimordial;
                         Color cOroP = Par >= 2f ? new Color(48, 14, 76) : OroGrimorio;
-                        VFXCore.Quad(Projectile.Center, cLuzP * 0.9f,
-                            new Vector2(16f, 16f), Projectile.rotation);
-                        VFXCore.Quad(Projectile.Center, cOroP * 0.6f,
-                            new Vector2(8f, 8f), Projectile.rotation);
+                        VFXCore.Quad(Projectile.Center, cLuzP * 0.95f,
+                            new Vector2(22f, 22f),
+                            Projectile.rotation + t * 0.5f + Seed, VFXCore.DestelloFinal);
+                        VFXCore.Quad(Projectile.Center, cOroP * 0.7f,
+                            new Vector2(9f, 9f));
                         break;
                     }
 
                     case EstiloColumnaJuicio:
                     {
-                        // EL MANTO DE LA COLUMNA: el velo dorado vertical
-                        // (coords de MUNDO — la columna entera, más ALTA
-                        // que la hitbox: la luz siempre llega antes).
+                        // v6.104 — LA COLUMNA ES UN HAZ DE VERDAD (la
+                        // letra: «asegurate de no dejar texturas planas,
+                        // lisas o raras»): el MANTO estirado (dos
+                        // rectángulos de luz de 1.100 px) MUERE — el
+                        // cuerpo de la columna lo dibuja HazLib en LA
+                        // FASE 1.5 (el velo dorado + el núcleo blanco
+                        // con SU ruido y SU filo de borde: la columna
+                        // HIERVE). Aquí queda SOLO el resplandor de la
+                        // base (el charco donde se posa).
                         float caida = Projectile.ai[1] >= 1f ? 1f :
                             0.35f + 0.65f * (_edad / 45f);   // crece mientras telegrafea
-                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.55f * caida),
-                            new Vector2(56f, 1100f));
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.75f * caida),
-                            new Vector2(22f, 950f));
+                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.35f * caida),
+                            new Vector2(120f, 46f));
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.45f * caida),
+                            new Vector2(52f, 20f));
                         break;
                     }
 
@@ -2182,22 +2268,12 @@ namespace AethonMod.Content.Projectiles.Jefes
                         const float altura = 900f;
 
                         // el cuerpo del pilar (anclado arriba, la punta baja).
+                        // v6.104 — EL CUERPO YA NO SON QUADS PLANOS: lo
+                        //     dibuja HazLib en LA FASE 1.5 (TRES velos con
+                        //     SU ruido — el manto dorado ancho, el cuerpo
+                        //     blanco y el núcleo cegador); la geometría se
+                        //     recalcula allá con las MISMAS leyes.
                         float punta = Projectile.Center.Y - altura * (1f - p);
-                        float centroY = (Projectile.Center.Y - altura + punta) * 0.5f;
-                        Vector2 centro = new Vector2(Projectile.Center.X, centroY);
-                        float alto = altura * p;
-
-                        if (alto > 4f)
-                        {
-                            VFXCore.Quad(centro, OroGrimorio * (0.40f * disolver * pulso),
-                                new Vector2(110f, alto));
-                            VFXCore.Quad(centro, BlancoCaliente * (0.55f * disolver * pulso),
-                                new Vector2(46f, alto));
-                            VFXCore.Quad(centro, LuzPrimordial * (0.30f * disolver),
-                                new Vector2(160f, alto * 0.92f));
-                            VFXCore.Quad(centro, new Color(255, 253, 244) * (0.80f * disolver),
-                                new Vector2(18f, alto));
-                        }
 
                         // EL CHARCO DE LUZ en la base (donde la columna se
                         // posa — el escenario de la pelea queda BAÑADO).
@@ -2307,6 +2383,11 @@ namespace AethonMod.Content.Projectiles.Jefes
                     {
                         // v6.50.46 — el radio se COMPUTA de la edad (ai[0]
                         // es el ESTILO — jamás se escribe).
+                        // v6.104 — LOS GLIFOS YA NO SON CÁPSULAS PLANAS:
+                        //     cada glifo del decreto es un DESTELLO DE 4
+                        //     PUNTAS girando (la runa-estrella de la
+                        //     casa) — el anillo se lee ESCRITO, no
+                        //     punteado.
                         float radioD = Math.Min(80f + 2f * _edad, 960f);
                         int beatIdx = (int)(_edad / 15f);
                         for (int i = 0; i < 24; i++)
@@ -2315,8 +2396,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                             Vector2 g = Projectile.Center +
                                 new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.86f) * radioD;
                             float h = VFXCore.Hash01(Seed, i, 91 + (beatIdx % 7));
-                            VFXCore.Quad(g, ColorOroEclipse * (0.5f + 0.4f * h),
-                                new Vector2(5f + 5f * h, 2.2f), ang + MathHelper.PiOver2);
+                            VFXCore.Quad(g, ColorOroEclipse * (0.55f + 0.45f * h),
+                                new Vector2(9f + 6f * h, 9f + 6f * h),
+                                ang + t * 0.8f + i, VFXCore.DestelloFinal);
                         }
                         break;
                     }
@@ -2349,7 +2431,13 @@ namespace AethonMod.Content.Projectiles.Jefes
                         float giro = _edad * 0.0045f;
                         Vector2 cE = Projectile.Center;
 
-                        // === (a) LOS RAYOS (el corazón de la imagen) ===
+                        // === (a) LOS RAYOS (el corazón de la imagen) —
+                        //     v6.104 — YA NO SON QUADS PLANOS: cada rayo
+                        //     lo dibuja HazLib en LA FASE 1.5 (SU núcleo
+                        //     blanco, SU halo CALIENTE y SU filo de borde
+                        //     — los rayos HIERVEN como los del arma).
+                        //     Aquí solo viven las puntas-estrella.
+                        // ===
                         for (int i = 0; i < 44; i++)
                         {
                             float h0 = VFXCore.Hash01(Seed, i, 10);
@@ -2358,30 +2446,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                             float h3 = VFXCore.Hash01(Seed, i, 13);
                             float ang = giro + i * MathHelper.TwoPi / 44f +
                                 (h0 - 0.5f) * (MathHelper.TwoPi / 44f) * 1.15f;
-                            // el largo: de 250 (el rayo corto) a 980 (el que
-                            // cruza la pantalla entera) — la VARIANZA de la
-                            // imagen, no un abanico matemático (v6.50.54: ×ESCALA
-                            // — «un poco más grande» con la fase).
                             float largo = (250f + 730f * h1) * crec * EscalaEstallido;
-                            // la vida propia: cada rayo muere a SU tiempo.
                             float vidaR = 75f + 45f * h2;
                             float alfaR = fade * (_edad < vidaR ? 1f :
                                 Math.Max(0f, 1f - (_edad - vidaR) / 22f));
                             if (alfaR <= 0.02f || largo < 8f) continue;
                             Vector2 dirR = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
-                            // LA LÍNEA NÚCLEO (blanca — la doble línea de la
-                            // imagen: cada rayo tiene su corazón fino).
-                            VFXCore.Quad(cE + dirR * (46f + largo * 0.5f),
-                                BlancoCaliente * (0.85f * alfaR),
-                                new Vector2(largo, 3.2f + 2.6f * h3), ang);
-                            // EL HALO (más corto, más ancho — y CALIENTE:
-                            // el degradé blanco→oro→ámbar→brasa de la imagen).
-                            Color cHalo = Color.Lerp(OroGrimorio,
-                                Color.Lerp(AmbarEstelar, EmberPortador, h3 * 0.7f),
-                                0.35f + 0.45f * h3);
-                            VFXCore.Quad(cE + dirR * (34f + largo * 0.34f),
-                                cHalo * (0.40f * alfaR),
-                                new Vector2(largo * 0.68f, 12f + 9f * h0), ang);
+                            // LA PUNTA-ESTRELLA (la cuenta de luz del borde —
+                            // el sello de cada rayo, texturizado).
+                            VFXCore.Quad(cE + dirR * (46f + largo),
+                                BlancoCaliente * (0.75f * alfaR),
+                                new Vector2(16f + 10f * h3, 16f + 10f * h3),
+                                ang + t * 1.1f + i, VFXCore.DestelloFinal);
                         }
 
                         // === (b) EL ANILLO SEGMENTADO (14 EMISORES creciendo
@@ -2439,21 +2515,21 @@ namespace AethonMod.Content.Projectiles.Jefes
                             ? Math.Max(0f, 1f - (_edad - 520f) / 35f) : 1f;
                         float giroV = _edad * 0.0125f + tandaV * 0.35f;
                         const float largoD = 860f;
+                        // v6.104 — LOS RAYOS YA NO SON QUADS PLANOS: cada
+                        //     uno de los seis lo dibuja HazLib en LA FASE
+                        //     1.5 (SU núcleo blanco, SU halo dorado y SU
+                        //     filo — la rueda HIERVE). Aquí viven SOLO las
+                        //     puntas-estrella y el cubo.
                         for (int i = 0; i < 6; i++)
                         {
                             float angV = giroV + i * MathHelper.TwoPi / 6f;
                             Vector2 dirV = new Vector2(MathF.Cos(angV), MathF.Sin(angV));
-                            // LA LÍNEA NÚCLEO (blanca) y EL HALO (dorado).
-                            VFXCore.Quad(Projectile.Center + dirV * (60f + largoD * 0.5f),
-                                BlancoCaliente * (0.70f * alfaT * fadeV),
-                                new Vector2(largoD, 4.5f), angV);
-                            VFXCore.Quad(Projectile.Center + dirV * (40f + largoD * 0.34f),
-                                OroGrimorio * (0.30f * alfaT * fadeV),
-                                new Vector2(largoD * 0.68f, 26f), angV);
-                            // LA PUNTA (la cuenta de luz del borde).
+                            // LA PUNTA (la cuenta de luz del borde — la
+                            // estrella de 4 puntas de la casa).
                             VFXCore.Quad(Projectile.Center + dirV * (60f + largoD),
-                                BlancoCaliente * (0.55f * alfaT * fadeV),
-                                new Vector2(14f, 14f));
+                                BlancoCaliente * (0.60f * alfaT * fadeV),
+                                new Vector2(20f, 20f), angV + t * 1.4f + i,
+                                VFXCore.DestelloFinal);
                         }
                         // EL CUBO de la rueda (el núcleo que la sostiene).
                         VFXCore.Quad(Projectile.Center,
@@ -2493,13 +2569,13 @@ namespace AethonMod.Content.Projectiles.Jefes
                             }
                             else
                             {
-                                // EL VUELO: el filo blanco largo + el halo.
-                                VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.85f,
-                                    new Vector2(46f, 5.5f), Projectile.rotation);
-                                VFXCore.Quad(Projectile.Center, OroGrimorio * 0.35f,
-                                    new Vector2(64f, 16f), Projectile.rotation);
+                                // EL VUELO: v6.104 — el filo YA NO ES UN QUAD
+                                //     PLANO: lo dibuja HazLib en LA FASE 1.5
+                                //     (el filo blanco + el halo con SU ruido).
+                                //     Aquí vive SOLO el corazón-estrella.
                                 VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.9f,
-                                    new Vector2(12f, 12f));
+                                    new Vector2(22f, 22f), Projectile.rotation + t * 1.2f,
+                                    VFXCore.DestelloFinal);
                             }
                         }
                         break;
@@ -2695,6 +2771,186 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                 }
                 VFXCore.FlushAdditive(null, false);
+
+                // ============================================================
+                //  === FASE 1.5 — LOS HACES DE LA CASA (v6.104) ===
+                //  LA MUERTE DE LAS TEXTURAS PLANAS (la letra: «muchos de
+                //  sus ataques son texuras planas, solo un rectangulo y
+                //  estan mal implementadas… asegurate de no dejar
+                //  texturas planas, lisas o raras»): los CUERPOS largos
+                //  que eran glows estirados (la columna, el pilar, los
+                //  rayos de la danza, el filo de la lanza y los 44 rayos
+                //  del estallido) los dibuja ahora HazLib — la rejilla de
+                //  quads con color por vértice, el grumo de ruido, el
+                //  núcleo caliente y EL FILO DE BORDE rgb=0 (los picos
+                //  matemáticamente imposibles): TODO hierve como los
+                //  haces de las armas.
+                // ============================================================
+                if (!Main.dedServ &&
+                    (Estilo == EstiloColumnaJuicio || Estilo == EstiloPilarAparicion ||
+                     Estilo == EstiloDanzaSolar || Estilo == EstiloLanzaEterna ||
+                     Estilo == EstiloEstallidoRadiante || Estilo == EstiloMuerteFinal))
+                {
+                    try
+                    {
+                        HazLib.Abrir();
+                        try
+                        {
+                            switch (Estilo)
+                            {
+                                // === LA COLUMNA DEL JUICIO: el velo dorado +
+                                //     el núcleo blanco de 1.100 px HIRVIENDO ===
+                                case EstiloColumnaJuicio:
+                                {
+                                    float caidaC = Projectile.ai[1] >= 1f ? 1f :
+                                        0.35f + 0.65f * (_edad / 45f);
+                                    if (caidaC > 0.03f)
+                                    {
+                                        Vector2 arriba = new Vector2(Projectile.Center.X,
+                                            Projectile.Center.Y - 1050f) - Main.screenPosition;
+                                        Vector2 abajo = new Vector2(Projectile.Center.X,
+                                            Projectile.Center.Y + 60f) - Main.screenPosition;
+                                        _hazAlfa = caidaC;
+                                        _hazTinte = OroGrimorio;
+                                        HazLib.PrepararPar(arriba, abajo, 62f, 54f, 0f, 16);
+                                        HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
+                                        _hazTinte = BlancoCaliente;
+                                        HazLib.PrepararPar(arriba, abajo, 26f, 20f, 0f, 16);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                    }
+                                    break;
+                                }
+
+                                // === EL PILAR DE LA APARICIÓN: TRES velos
+                                //     (manto dorado · cuerpo blanco · núcleo) ===
+                                case EstiloPilarAparicion:
+                                {
+                                    float pP = Math.Min(1f, _edad / 40f);
+                                    float disolverP = Projectile.ai[1] >= 1f
+                                        ? Math.Max(0f, 1f - _ticksDisolver / 40f) : 1f;
+                                    const float alturaP = 900f;
+                                    if (pP > 0.02f && disolverP > 0.03f)
+                                    {
+                                        float puntaP = Projectile.Center.Y - alturaP * (1f - pP);
+                                        Vector2 arriba = new Vector2(Projectile.Center.X,
+                                            Projectile.Center.Y - alturaP) - Main.screenPosition;
+                                        Vector2 abajo = new Vector2(Projectile.Center.X,
+                                            puntaP) - Main.screenPosition;
+                                        _hazAlfa = disolverP;
+                                        _hazTinte = OroGrimorio;
+                                        HazLib.PrepararPar(arriba, abajo, 95f, 80f, 0f, 14);
+                                        HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
+                                        _hazTinte = BlancoCaliente;
+                                        HazLib.PrepararPar(arriba, abajo, 40f, 32f, 0f, 16);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                        _hazTinte = new Color(255, 253, 244);
+                                        HazLib.PrepararPar(arriba, abajo, 15f, 11f, 0f, 16);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, null, HazLib.FilasNucleo);
+                                    }
+                                    break;
+                                }
+
+                                // === LA DANZA SOLAR: los SEIS rayos de la
+                                //     rueda (núcleo blanco + halo dorado) ===
+                                case EstiloDanzaSolar:
+                                {
+                                    int tandaH = (int)(_edad / 175f);
+                                    float tEdadH = _edad % 175f;
+                                    float alfaTH = tEdadH <= 25f
+                                        ? 0.35f
+                                        : Math.Min(1f, 0.35f + (tEdadH - 25f) / 20f * 0.65f);
+                                    float fadeH = _edad > 520f
+                                        ? Math.Max(0f, 1f - (_edad - 520f) / 35f) : 1f;
+                                    float giroH = _edad * 0.0125f + tandaH * 0.35f;
+                                    const float largoDH = 860f;
+                                    _hazAlfa = alfaTH * fadeH;
+                                    if (_hazAlfa > 0.03f)
+                                    {
+                                        Vector2 cH = Projectile.Center - Main.screenPosition;
+                                        for (int i = 0; i < 6; i++)
+                                        {
+                                            float angH = giroH + i * MathHelper.TwoPi / 6f;
+                                            Vector2 dirH = angH.ToRotationVector2();
+                                            Vector2 aH = cH + dirH * 60f;
+                                            Vector2 bH = cH + dirH * (60f + largoDH);
+                                            _hazTinte = OroGrimorio;
+                                            HazLib.PrepararPar(aH, bH, 30f, 16f, 0f, 14);
+                                            HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
+                                            _hazTinte = BlancoCaliente;
+                                            HazLib.PrepararPar(aH, bH, 11f, 5f, 0f, 14);
+                                            HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                        }
+                                    }
+                                    break;
+                                }
+
+                                // === LA LANZA ETERNA EN VUELO: el filo blanco
+                                //     + el halo dorado (el telegrafo ya era
+                                //     fino a propósito — el VUELO no) ===
+                                case EstiloLanzaEterna:
+                                {
+                                    if (_edad >= 50f)
+                                    {
+                                        Vector2 aL = (Projectile.Center - Projectile.rotation.ToRotationVector2() * 60f)
+                                            - Main.screenPosition;
+                                        Vector2 bL = (Projectile.Center + Projectile.rotation.ToRotationVector2() * 60f)
+                                            - Main.screenPosition;
+                                        _hazAlfa = 0.95f;
+                                        _hazTinte = OroGrimorio;
+                                        HazLib.PrepararPar(aL, bL, 26f, 14f, 0f, 10);
+                                        HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
+                                        _hazTinte = BlancoCaliente;
+                                        HazLib.PrepararPar(aL, bL, 10f, 4f, 0f, 10);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                    }
+                                    break;
+                                }
+
+                                // === EL ESTALLIDO RADIANTE / LA MUERTE: LOS
+                                //     44 RAYOS (núcleo blanco + halo CALIENTE
+                                //     en UNA pasada — el degradé de la imagen
+                                //     vive en el VÉRTICE) ===
+                                case EstiloEstallidoRadiante:
+                                case EstiloMuerteFinal:
+                                {
+                                    float crecH = Math.Min(1f, _edad / 14f);
+                                    float fadeH2 = _edad < 55f ? 1f :
+                                        Math.Max(0f, 1f - (_edad - 55f) / 95f);
+                                    float giroH2 = _edad * 0.0045f;
+                                    Vector2 cE2 = Projectile.Center - Main.screenPosition;
+                                    for (int i = 0; i < 44; i++)
+                                    {
+                                        float h0 = VFXCore.Hash01(Seed, i, 10);
+                                        float h1 = VFXCore.Hash01(Seed, i, 11);
+                                        float h2 = VFXCore.Hash01(Seed, i, 12);
+                                        float h3 = VFXCore.Hash01(Seed, i, 13);
+                                        float angR = giroH2 + i * MathHelper.TwoPi / 44f +
+                                            (h0 - 0.5f) * (MathHelper.TwoPi / 44f) * 1.15f;
+                                        float largoR = (250f + 730f * h1) * crecH * EscalaEstallido;
+                                        float vidaR = 75f + 45f * h2;
+                                        float alfaR = fadeH2 * (_edad < vidaR ? 1f :
+                                            Math.Max(0f, 1f - (_edad - vidaR) / 22f));
+                                        if (alfaR <= 0.02f || largoR < 8f) continue;
+                                        _hazAlfa = alfaR;
+                                        _hazAncho = 3.2f + 2.6f * h3 + 9f * h0;  // núcleo + halo
+                                        Vector2 dirR = angR.ToRotationVector2();
+                                        Vector2 aR = cE2 + dirR * 46f;
+                                        Vector2 bR = cE2 + dirR * (46f + largoR);
+                                        HazLib.PrepararPar(aR, bR, _hazAncho, _hazAncho * 0.5f, 0f, 12);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeRayoEstallido, HazLib.FilasNucleo);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        finally { HazLib.Cerrar(); }
+                    }
+                    catch { }
+                    // (el Cerrar de HazLib deja SU lote aditivo abierto: se
+                    // cierra aquí para que la FASE 2 haga su Begin limpia —
+                    // el mismo estado en que la 1.5 no hubiera corrido)
+                    VFXCore.CerrarLoteSiAbierto();
+                }
 
                 // v6.50.58 — EL DISCO DEL PROYECTIL SOL (encima de todo lo
                 // demás del sol del dios: la SUPERFICIE DE PLASMA del arma —

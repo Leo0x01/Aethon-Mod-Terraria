@@ -39,21 +39,32 @@ namespace AethonMod.Content.Projectiles.Sombras
     //     la piel trae las suyas). EL RITUAL ES EL DE LA FAMILIA —
     //     IGUAL QUE LA ORIGINAL: emerge, caza, muerde, drena y
     //     devora; solo cambió el traje.
-    //   · LOS OJOS DEL ABISMO — ONCE OJOS RASGADOS (la rendija vertical
-    //     del dragón de la casa) graduados en tamaño por toda la masa,
-    //     TODOS clavados en la presa y CADA UNO PARPADEANDO A SU
-    //     PROPIO RITMO (el parpadeo seco: hay instantes en que UN ojo
-    //     se cierra del todo y los demás siguen mirando).
-    //   · LOS DIENTES DEL LOMO — la SIERRA DOBLE: colmillos de hueso
-    //     en AMBOS lados de todo el cuerpo (la masa del tomo IV solo
-    //     llevaba una hilera alternada), con la punta manchada de rojo.
-    //   · LA FAUCE — la cabeza ya no es un vórtice: es UNA BOCA DE
-    //     VERDAD, dos mandíbulas de CINCO colmillos cada una que
+    //
+    //   v6.104 — EL TENTÁCULO LISO (la letra del usuario: «mejora aun
+    //     mas las texturas de la sombra de la pagina 5, recuerda que
+    //     es un tentaculo LISO, con ojos y colmillos, si lo necesitas
+    //     siempre puedes crear los ojos y los colmillos con la forja
+    //     o el taller»):
+    //   · LA PIEL SE ALISA — LA SIERRA DORSAL MUERE: fuera los
+    //     colmillos del lomo, fuera las ventosas, fuera los ridges —
+    //     el cuerpo queda LISO DE RAÍZ A PUNTA, vestido con LA PIEL
+    //     LISA DE LA FORJA (TentaculoLiso.png 128×512) y su BRILLO
+    //     HÚMEDO: la banda especular que RESBALA por el lomo mojado
+    //     (SombrasLib.MasaLisa).
+    //   · LOS OJOS SON DE LA FORJA — OjoAbismo.png 64×64: la esclerótica
+    //     oscura con venas carmesí, el iris radial CARMESÍ→VIOLETA y LA
+    //     RENDIJA VERTICAL con su borde incandescente — once ojos
+    //     graduados que GIRAN hacia la presa y PARPADEAN cada uno a su
+    //     ritmo (SombrasLib.OjoTexturizado).
+    //   · LOS COLMILLOS SON DE LA FORJA — ColmilloAbismo.png 48×96: la
+    //     aguja curva de marfil con su encía violeta, su degradado y su
+    //     punta pálida manchada de rojo (SombrasLib.ColmilloTexturizado).
+    //   · LA FAUCE — dos mandíbulas de CINCO colmillos cada una que
     //     JADEAN abiertas mientras cazan, se ABREN ENORME al llegar a
     //     la presa… y TRITURAN mordiendo (cierran y mastican rápido).
     //     Detrás de los colmillos: LA GARGANTA — el vacío negro con el
     //     fondo rojo sangre latiendo.
-    //   · LA CORONA — tres ojos rasgados gigantes sobre la fauce (el
+    //   · LA CORONA — tres ojos de la forja GIGANTES sobre la fauce (el
     //     grande del centro y sus dos sacerdotes), la bendición del
     //     abismo antes de morder.
     //   · EL ANILLO DE SANGRE — la presa mordida queda marcada con el
@@ -330,25 +341,26 @@ namespace AethonMod.Content.Projectiles.Sombras
             // 1) EL CUERPO DE LA CASA — el charco bajo el portador, la
             //    columna viva MÁS GORDA (la masa del quinto tomo es una
             //    bestia más gruesa) y la bruma en dos capas.
-            //    v6.102 — LA PIEL FORJADA: la masa viste LA CARNE
-            //    FORJADA de la forja/taller (MasaAbismo); la bruma
-            //    sigue siendo de la casa.
+            //    v6.104 — EL TENTÁCULO LISO (la letra: «recuerda que es
+            //    un tentaculo LISO»): la masa viste LA PIEL LISA de la
+            //    forja (MasaLisa — TentaculoLiso.png + EL BRILLO HÚMEDO
+            //    que resbala por el lomo); la bruma sigue siendo de la
+            //    casa. LA SIERRA DORSAL MUERE con la letra nueva: el
+            //    lomo queda LISO de raíz a punta (los colmillos viven
+            //    SOLO en la fauce — donde muerden de verdad).
             SombrasLib.Charco(SombraProyectada(dueño), 46f, 0.55f, tiempo, semilla);
             Vector2[] columna = SombrasLib.ColumnaViva(raiz, Projectile.Center,
                 tiempo, semilla, 20, 0.24f, 0.5f);
             float vive = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
-            SombrasLib.MasaAbismo(columna, 11f, 15f, 0.96f * vive, semilla, tiempo, 52f);
+            SombrasLib.MasaLisa(columna, 11f, 15f, 0.96f * vive, semilla, tiempo, 52f);
             SombrasLib.BrumaColumna(columna, 48f, 0.60f * vive, tiempo, semilla, 16);
             SombrasLib.BrumaColumna(columna, 32f, 0.44f * vive, tiempo, semilla + 97, 12);
 
-            // 2) LOS DIENTES DEL LOMO — LA SIERRA DOBLE: colmillos en
-            //    AMBOS lados de todo el cuerpo (la piel dentada del
-            //    quinto tomo), la punta manchada de rojo.
-            DientesDelLomo(columna, vive, semilla);
-
-            // 3) LOS OJOS DEL ABISMO — once ojos rasgados graduados,
-            //    TODOS clavados en la presa, CADA UNO parpadeando a su
-            //    propio ritmo (el parpadeo seco del que mira demasiado).
+            // 3) LOS OJOS DEL ABISMO — once ojos DE LA FORJA graduados
+            //    (OjoAbismo.png: la esclerótica oscura, el iris
+            //    carmesí-violeta y la rendija vertical), TODOS girados
+            //    hacia la presa, CADA UNO parpadeando a su propio ritmo
+            //    (el parpadeo seco del que mira demasiado).
             Vector2 mirada = presa != null && presa.active
                 ? presa.Center
                 : dueño.MountedCenter + Projectile.velocity * 30f;
@@ -410,53 +422,21 @@ namespace AethonMod.Content.Projectiles.Sombras
         }
 
         // ----------------------------------------------------------------
-        //  LA PIEL NUEVA DEL QUINTO TOMO
+        //  LA PIEL NUEVA DEL QUINTO TOMO (v6.104 — EL TENTÁCULO LISO)
         // ----------------------------------------------------------------
 
-        /// <summary>LOS DIENTES DEL LOMO — LA SIERRA DOBLE: colmillos de
-        /// hueso en AMBOS lados de la columna (más densos que la hilera
-        /// alternada de la masa), cada punta manchada de rojo — la
-        /// espalda del tentáculo Muerde también.</summary>
-        private static void DientesDelLomo(Vector2[] col, float vive, int semilla)
-        {
-            if (VFXCore.Colmillo == null || col == null || col.Length < 6 || vive <= 0.03f)
-                return;
-            VFXCore.Begin();
-            int n = col.Length;
-            for (int i = 2; i < n - 3; i++)
-            {
-                float f = i / (float)(n - 1);
-                if (f < 0.18f) continue;                 // el nacimiento va limpio
-                Vector2 dir = col[Math.Min(i + 1, n - 1)] - col[Math.Max(i - 1, 0)];
-                if (dir.LengthSquared() < 0.01f) continue;
-                dir = Vector2.Normalize(dir);
-                Vector2 perp = new(-dir.Y, dir.X);
+        // (v6.104 — LOS DIENTES DEL LOMO MURIERON con la letra nueva:
+        //  «recuerda que es un tentaculo LISO» — la sierra dorsal se
+        //  BORRA entera y el lomo queda LISO de raíz a punta; los
+        //  colmillos viven SOLO en la fauce, donde muerden de
+        //  verdad. El método DientesDelLomo fue eliminado.)
 
-                // AMBOS lados, la sierra doble (el grosor de la bestia).
-                float grosor = 16f - 9f * f;             // de gorda a fina
-                float tamaño = grosor * (0.55f + 0.3f * Azar(semilla + i));
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    Vector2 baseCol = col[i] + perp * lado * grosor * 0.5f;
-                    Vector2 rumbo = perp * lado - dir * 0.35f;   // el curvado hacia atrás
-                    VFXCore.Quad(baseCol,
-                        SombrasLib.Alfa(SombrasLib.Blanco, 0.92f * vive),
-                        new Vector2(tamaño * 0.5f, tamaño),
-                        rumbo.ToRotation() + MathHelper.PiOver2, VFXCore.Colmillo);
-                    // LA MANCHA ROJA de la punta (la sangre de la última
-                    // presa, secándose al sol… o casi).
-                    VFXCore.Quad(baseCol + rumbo * tamaño * 0.8f,
-                        SombrasLib.Alfa(SombrasLib.Rojo, 0.35f * vive),
-                        new Vector2(tamaño * 0.28f, tamaño * 0.3f));
-                }
-            }
-            VFXCore.FlushAdditive();
-        }
-
-        /// <summary>LOS OJOS DEL ABISMO — once ojos RASGADOS (la rendija
-        /// vertical del dragón de la casa) graduados en tamaño por toda
-        /// la masa, TODOS clavados en la presa y CADA UNO parpadeando a
-        /// SU propio ritmo — con EL PARPADEO SECO: de vez en cuando un
+        /// <summary>LOS OJOS DEL ABISMO — once ojos DE LA FORJA
+        /// (OjoAbismo.png: la esclerótica oscura con venas carmesí, el
+        /// iris radial CARMESÍ→VIOLETA y la RENDIJA VERTICAL con su
+        /// filo incandescente) graduados en tamaño por toda la masa,
+        /// TODOS girados hacia la presa y CADA UNO parpadeando a SU
+        /// propio ritmo — con EL PARPADEO SECO: de vez en cuando un
         /// ojo se cierra del todo un instante mientras los demás siguen
         /// mirando (eso es lo que aterroriza).</summary>
         private static void OjosDelAbismo(Vector2[] col, Vector2 presa, float presencia,
@@ -499,8 +479,13 @@ namespace AethonMod.Content.Projectiles.Sombras
                     VFXCore.Quad(pos, SombrasLib.Alfa(SombrasLib.Rojo, 0.16f * abierto),
                         new Vector2(tamaño * 2.6f, tamaño * 1.8f));
 
-                // EL OJO RASGADO (la rendija vertical — todos te MIRAN).
-                SombrasLib.Ojo(pos, tamaño, presa - pos, abierto, pupila: true, rasgada: true);
+                // EL OJO DE LA FORJA (OjoAbismo.png — la rendija
+                // vertical con su filo incandescente: todos te MIRAN;
+                // sin textura — recarga caliente — cae al rasgado
+                // procedural de siempre: la sombra JAMÁS se queda
+                // ciega).
+                SombrasLib.OjoTexturizado(pos, tamaño, presa - pos, abierto,
+                    SombrasLib.OjoAbismo);
             }
             VFXCore.FlushAdditive();
         }
@@ -536,14 +521,17 @@ namespace AethonMod.Content.Projectiles.Sombras
         }
 
         /// <summary>LA FAUCE Y LA CORONA — la cabeza del quinto tomo:
-        /// dos mandíbulas de CINCO colmillos que se abren según
-        /// <paramref name="apertura"/> (0..1), la GARGANTA (vacío negro
-        /// con fondo rojo sangre latiendo) y LA CORONA de tres ojos
-        /// rasgados gigantes bendiciendo la caza.</summary>
+        /// dos mandíbulas de CINCO colmillos DE LA FORJA
+        /// (ColmilloAbismo.png — la aguja curva de marfil con su encía
+        /// violeta y su punta pálida manchada de rojo) que se abren
+        /// según <paramref name="apertura"/> (0..1), la GARGANTA
+        /// (vacío negro con fondo rojo sangre latiendo) y LA CORONA de
+        /// tres ojos DE LA FORJA gigantes bendiciendo la caza.</summary>
         private static void FauceYCorona(Vector2 cabeza, Vector2 rumbo, float apertura,
             float vive, float tiempo, int semilla, Vector2 presa, byte fase)
         {
-            if (vive <= 0.03f || VFXCore.Colmillo == null) return;
+            var colmilloForja = SombrasLib.ColmilloAbismo;
+            if (vive <= 0.03f || (colmilloForja == null && VFXCore.Colmillo == null)) return;
             float ang = rumbo.ToRotation();
             Vector2 perp = new(-rumbo.Y, rumbo.X);
             float abre = 0.10f + 0.62f * MathHelper.Clamp(apertura, 0f, 1f);   // rad por lado
@@ -571,10 +559,12 @@ namespace AethonMod.Content.Projectiles.Sombras
                         * (0.9f + 0.2f * Azar(semilla + lado * 5 + k));
                     Vector2 rumboCol = angCol.ToRotationVector2();
                     Vector2 posCol = nace + rumboCol * largo * 0.5f;
-                    // (la textura Colmillo apunta ARRIBA: rot = ángulo + π/2)
-                    VFXCore.Quad(posCol, SombrasLib.Alfa(SombrasLib.Blanco, 0.96f * vive),
-                        new Vector2(largo * 0.42f, largo),
-                        angCol + MathHelper.PiOver2, VFXCore.Colmillo);
+                    // (v6.104 — EL COLMILLO DE LA FORJA: la aguja curva
+                    // de marfil DETALLADA — ColmilloTexturizado respeta
+                    // la convención de siempre: la punta apunta a
+                    // angCol; sin textura cae al horneado de la casa)
+                    SombrasLib.ColmilloTexturizado(posCol, largo, angCol,
+                        0.96f * vive, colmilloForja);
                     // LA PUNTA ROJA de cada colmillo (el filo fresco).
                     VFXCore.Quad(nace + rumboCol * largo * 0.92f,
                         SombrasLib.Alfa(SombrasLib.Rojo, 0.4f * vive),
@@ -582,16 +572,17 @@ namespace AethonMod.Content.Projectiles.Sombras
                 }
             }
 
-            // LA CORONA — los tres ojos rasgados gigantes SOBRE la fauce
-            // (el grande del centro y sus dos sacerdotes): la bendición
-            // del abismo antes del mordisco, TODOS clavados en la presa.
+            // LA CORONA — los tres ojos DE LA FORJA gigantes SOBRE la
+            // fauce (el grande del centro y sus dos sacerdotes): la
+            // bendición del abismo antes del mordisco, TODOS girados
+            // hacia la presa (v6.104 — la textura OjoAbismo.png).
             float coronaAbre = fase == FASE_MORDISCO ? 1f : 0.7f + 0.3f * MathF.Sin(tiempo * 4f);
-            SombrasLib.Ojo(cabeza - rumbo * 30f, 30f, presa - cabeza, coronaAbre * vive,
-                pupila: true, rasgada: true);
-            SombrasLib.Ojo(cabeza - rumbo * 22f + perp * 20f, 19f, presa - cabeza,
-                coronaAbre * 0.9f * vive, pupila: true, rasgada: true);
-            SombrasLib.Ojo(cabeza - rumbo * 22f - perp * 20f, 19f, presa - cabeza,
-                coronaAbre * 0.9f * vive, pupila: true, rasgada: true);
+            SombrasLib.OjoTexturizado(cabeza - rumbo * 30f, 30f, presa - cabeza,
+                coronaAbre * vive, SombrasLib.OjoAbismo);
+            SombrasLib.OjoTexturizado(cabeza - rumbo * 22f + perp * 20f, 19f, presa - cabeza,
+                coronaAbre * 0.9f * vive, SombrasLib.OjoAbismo);
+            SombrasLib.OjoTexturizado(cabeza - rumbo * 22f - perp * 20f, 19f, presa - cabeza,
+                coronaAbre * 0.9f * vive, SombrasLib.OjoAbismo);
 
             VFXCore.FlushAdditive();
         }

@@ -50,11 +50,17 @@ namespace AethonMod.Content.Projectiles.Jefes
         /// <summary>La vida de la rueda (en ticks).</summary>
         private const float Vida = 220f;
 
-        /// <summary>El radio de la BOCA (donde nace cada renglón).</summary>
-        private const float RadioBoca = 92f;
+        /// <summary>v6.104 — EL RADIO DE LA BOCA (donde nace cada
+        /// renglón): 92 → 230 — LA LETRA: «el ataque el renglon final
+        /// para el jefe es ligeramente diferente ya que los hazes estan
+        /// MAS SEPARADOS y son 6 hazes» — el aro despejado alrededor
+        /// del dios se ABRE: los seis renglones nacen LEJOS del cuerpo
+        /// (el hueco de la rueda se lee y se puede habitar).</summary>
+        private const float RadioBoca = 230f;
 
-        /// <summary>El radio de la PUNTA (hasta donde escribe).</summary>
-        private const float RadioPunta = 780f;
+        /// <summary>El radio de la PUNTA (hasta donde escribe).
+        /// v6.104 — 780 → 880: la rueda crece con la separación.</summary>
+        private const float RadioPunta = 880f;
 
         /// <summary>EL TIEMPO (ai[0]).</summary>
         private float Tiempo { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
@@ -563,6 +569,13 @@ namespace AethonMod.Content.Projectiles.Jefes
 
     // =====================================================================
     //  JefeMiradaProj — LA MIRADA DEL DIOS (el ataque MEDIO RARO)
+    //  v6.104 — EL MODO SINCRONIZADO (ai[2] > 0): cuando el dios mezcla
+    //  EL RENGLÓN FINAL con LA MIRADA (la letra: «a veces en un 50% de
+    //  las veces se mezcla con la mirada del eterno teniendo los dos el
+    //  mismo sentido horario al usarse juntos»), el rayo NO persigue:
+    //  GIRA a la MISMA velocidad angular de la rueda (ai[2] = rad/t del
+    //  renglón), en el MISMO sentido horario — el ojo y la rueda giran
+    //  como UNA sola máquina de escribir.
     // =====================================================================
     public class JefeMiradaProj : ModProjectile
     {
@@ -577,6 +590,12 @@ namespace AethonMod.Content.Projectiles.Jefes
 
         private float Tiempo { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
         private float Dueño => Projectile.ai[1];
+
+        /// <summary>v6.104 — LA VELOCIDAD SINCRONIZADA (ai[2]): 0 = el
+        /// modo de siempre (el rayo BARRE persiguiendo a la presa);
+        /// > 0 = el rayo GIRA a esa velocidad (rad/t, sentido horario —
+        /// la misma de la rueda del Renglón Final: LA MEZCLA).</summary>
+        private float VelSync => Projectile.ai[2];
 
         /// <summary>EL LARGO vivo (localAI[0]).</summary>
         private float Largo { get => Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
@@ -648,13 +667,26 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // === EL RAYO: crece +120/t hasta 3.000 y BARRE hacia la
                 //     presa (lerp 0.06 — se esquiva, pero castiga). ===
                 Largo = MathF.Min(Largo + 120f, LargoMax);
-                Player presa = Main.player[jefe.target];
-                if (presa != null && presa.active && !presa.dead)
+
+                if (VelSync > 0f)
                 {
-                    float objetivo = Projectile.AngleTo(presa.Center);
-                    float delta = MathHelper.WrapAngle(objetivo - Projectile.rotation);
-                    Projectile.rotation += delta * 0.06f;
-                    if (Math.Abs(delta) > 0.0005f) Projectile.netUpdate = true;
+                    // v6.104 — LA MEZCLA (la letra: «teniendo los dos el
+                    // mismo sentido horario al usarse juntos»): el rayo
+                    // GIRA con la rueda — la MISMA velocidad angular, el
+                    // MISMO sentido: el ojo es el séptimo renglón.
+                    Projectile.rotation += VelSync;
+                    Projectile.netUpdate = true;
+                }
+                else
+                {
+                    Player presa = Main.player[jefe.target];
+                    if (presa != null && presa.active && !presa.dead)
+                    {
+                        float objetivo = Projectile.AngleTo(presa.Center);
+                        float delta = MathHelper.WrapAngle(objetivo - Projectile.rotation);
+                        Projectile.rotation += delta * 0.06f;
+                        if (Math.Abs(delta) > 0.0005f) Projectile.netUpdate = true;
+                    }
                 }
 
                 // LAS LEYES DEL ARMA DE LA CASA leen el presente del dios.
@@ -748,6 +780,596 @@ namespace AethonMod.Content.Projectiles.Jefes
                             for (int i = 0; i < 2; i++)
                                 Main.spriteBatch.Draw(glow, pos, null, fogonazo,
                                     0f, ojoGlow, brillo * 2f, SpriteEffects.None, 0f);
+                        }
+                        catch { VFXCore.CerrarLoteSiAbierto(); }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+    }
+
+    // =====================================================================
+    //  v6.104 — JefeMiradaCieloProj — LA MIRADA QUE CAE DEL CIELO (la
+    //  letra del usuario: «tambien usa en la fase 2 la mirada del eterno
+    //  pero como hacez que caen del cielo y que sean 6 en vertical y 6
+    //  en horizontal, luego se mueven en diagonal y vuelven a ser
+    //  lanzado»): LA REJILLA DEL OJO — DOCE haces de La Mirada del
+    //  Eterno (sus leyes de la casa, su fucsia del iris del libro) que
+    //  CAEN DEL CIELO sobre la arena: SEIS VERTICALES y SEIS
+    //  HORIZONTALES. La coreografía de la letra, en CINCO actos:
+    //    · LA CAÍDA (telegrafo, 0-70): los doce haces descienden del
+    //      cielo como TELEGRAFOS translúcidos que crecen — se LEEN
+    //      antes de arder.
+    //    · EL PRIMER FUEGO (70-130): los doces haces SE ENCIENDEN a
+    //      plena potencia (la rejilla arde entera).
+    //    · LA DIAGONAL (130-220): TODA la rejilla GIRA 45° y SE
+    //      DESLIZA en diagonal por la arena (translúcida otra vez —
+    //      el viaje no mata: AVISA).
+    //    · EL RELANZAMIENTO (220-280): «vuelven a ser lanzado» — los
+    //      doce haces vuelven a ARDER a plena potencia EN DIAGONAL.
+    //    · LA DISOLUCIÓN (280-320): la rejilla se apaga.
+    //  TODO HazLib (la librería de haces de la casa): el filo rgb=0
+    //  en cada vértice — NADA de texturas planas ni rectángulos.
+    // =====================================================================
+    public class JefeMiradaCieloProj : ModProjectile
+    {
+        // === LOS ACTOS (ticks) ===
+        private const float T_Caida = 70f;
+        private const float T_Fuego1 = 130f;
+        private const float T_Diagonal = 220f;
+        private const float T_Fuego2 = 280f;
+        private const float T_Fin = 320f;
+
+        /// <summary>EL SEPARACIÓN entre verticales (px).</summary>
+        private const float SepX = 190f;
+
+        /// <summary>EL SEPARACIÓN entre horizontales (px).</summary>
+        private const float SepY = 150f;
+
+        /// <summary>EL LARGO de cada haz vertical (px).</summary>
+        private const float LargoV = 1500f;
+
+        /// <summary>EL LARGO de cada haz horizontal (px).</summary>
+        private const float LargoH = 1700f;
+
+        private float Tiempo { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+        private float Dueño => Projectile.ai[1];
+
+        /// <summary>EL CENTRO de la rejilla (localAI[0]/[1]): donde estaba
+        /// la presa al nacer — la rejilla NO persigue: se LEÉ.</summary>
+        private float CentroX { get => Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
+        private float CentroY { get => Projectile.localAI[1]; set => Projectile.localAI[1] = value; }
+
+        public override string Texture => "AethonMod/Content/Effects/FlareEstrella4Puntas";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 5000;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 80;
+            Projectile.height = 80;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.penetrate = -1;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+            Projectile.aiStyle = -1;
+            Projectile.netImportant = true;
+        }
+
+        public override bool ShouldUpdatePosition() => false;
+
+        /// <summary>La POTENCIA del haz según el acto: 0 en la caída/diagonal
+        /// (el telegrafo translúcido), 1 en los fuegos.</summary>
+        private float Potencia()
+        {
+            if (Tiempo < T_Caida) return 0f;
+            if (Tiempo < T_Fuego1) return 1f;
+            if (Tiempo < T_Diagonal) return 0.30f;   // la diagonal AVISA viajando
+            if (Tiempo < T_Fuego2) return 1f;
+            return MathHelper.Clamp(1f - (Tiempo - T_Fuego2) / 40f, 0f, 1f);
+        }
+
+        /// <summary>EL ÁNGULO de la rejilla: 0 en la caída y el primer
+        /// fuego; 45° (π/4) en la diagonal y el relanzamiento — el giro
+        /// ES la transición (la rejilla ENROSCA en el acto tercero).</summary>
+        private float AnguloRejilla()
+        {
+            if (Tiempo < T_Fuego1) return 0f;
+            if (Tiempo < T_Diagonal)
+                return MathHelper.Lerp(0f, MathHelper.PiOver4,
+                    MathHelper.Clamp((Tiempo - T_Fuego1) / (T_Diagonal - T_Fuego1), 0f, 1f));
+            return MathHelper.PiOver4;
+        }
+
+        /// <summary>LA DERIVA de la rejilla en la diagonal: TODO el
+        /// enjambre se desliza en diagonal por la arena (la dirección del
+        /// giro — abajo-derecha en pantalla: el rumbo de la letra).</summary>
+        private Vector2 Deriva()
+        {
+            if (Tiempo < T_Fuego1 || Tiempo >= T_Fuego2) return Vector2.Zero;
+            float f = MathHelper.Clamp((Tiempo - T_Fuego1) / (T_Fuego2 - T_Fuego1), 0f, 1f);
+            // la deriva arranca suave tras el primer fuego y frena al llegar
+            float k = MathF.Sin(f * MathHelper.Pi) * 1.6f;
+            return new Vector2(1f, 0.65f) * k;
+        }
+
+        public override void AI()
+        {
+            NPC jefe = Main.npc[(int)Dueño];
+            if (jefe == null || !jefe.active || jefe.life <= 0)
+            {
+                Projectile.Kill();
+                return;
+            }
+
+            if (Tiempo == 0f)
+            {
+                // LA REJILLA NACE SOBRE LA PRESA (donde está — no persigue).
+                Player presa = Main.player[jefe.target];
+                Vector2 centro = presa != null && presa.active ? presa.Center : jefe.Center;
+                CentroX = centro.X;
+                CentroY = centro.Y;
+                Projectile.Center = centro;
+                Projectile.netUpdate = true;
+            }
+
+            Projectile.timeLeft = 10;
+            Vector2 deriva = Deriva();
+            Projectile.Center = new Vector2(CentroX, CentroY) + deriva * (Tiempo > T_Fuego1 ? Tiempo - T_Fuego1 : 0f);
+
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+            {
+                // LA LUZ FUCSIA de la rejilla (vive con la potencia).
+                float k = 0.35f + 0.65f * Potencia();
+                Vector3 luz = new Vector3(0.92f, 0.08f, 0.78f) * k;
+                Lighting.AddLight(Projectile.Center, luz);
+                Lighting.AddLight(Projectile.Center + new Vector2(SepX * 2.5f, 0f), luz * 0.7f);
+                Lighting.AddLight(Projectile.Center - new Vector2(SepX * 2.5f, 0f), luz * 0.7f);
+
+                // LAS CHISPAS de la caída: el polvo que trae cada haz del cielo.
+                if (Tiempo < T_Caida && Tiempo % 4f == 0f)
+                {
+                    float ang = Main.rand.NextBool() ? 0f : MathHelper.PiOver2;
+                    float f = Main.rand.NextFloat(0.15f, 0.85f);
+                    Vector2 eje = ang.ToRotationVector2();
+                    Vector2 pos = Projectile.Center + eje * (f - 0.5f) * (ang == 0f ? LargoH : LargoV)
+                        + new Vector2(Main.rand.Next(-2, 3), Main.rand.Next(-2, 3)) * 60f;
+                    Dust d = Dust.NewDustPerfect(pos,
+                        Main.rand.NextBool() ? DustID.Electric : DustID.PortalBoltTrail,
+                        new Vector2(0f, 4f), 0,
+                        Main.rand.NextBool() ? new Color(255, 200, 80) : new Color(240, 0, 192), 0.9f);
+                    d.noGravity = true;
+                }
+            }
+
+            Tiempo++;
+            if (Tiempo > T_Fin) Projectile.Kill();
+        }
+
+        /// <summary>LOS DOCE HACES: 6 verticales + 6 horizontales girando
+        /// con la rejilla — cada uno su segmento A→B.</summary>
+        private void Segmento(int i, out Vector2 a, out Vector2 b)
+        {
+            float giro = AnguloRejilla();
+            bool vertical = i < 6;
+            int k = vertical ? i : i - 6;
+            float offset = (k - 2.5f) * (vertical ? SepX : SepY);
+            float largo = vertical ? LargoV : LargoH;
+            // LA REJILLA ENTERA gira: el eje del haz y su offset rotan JUNTOS.
+            float ejeGirado = (vertical ? MathHelper.PiOver2 : 0f) + giro;
+            Vector2 dirF = ejeGirado.ToRotationVector2();
+            Vector2 perpF = new(-dirF.Y, dirF.X);
+            Vector2 centroF = Projectile.Center + perpF * offset;
+            a = centroF - dirF * (largo * 0.5f);
+            b = centroF + dirF * (largo * 0.5f);
+        }
+
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        {
+            float poder = Potencia();
+            if (poder < 0.65f) return false;   // solo los FUEGOS matan
+            MiradaRayoProj.RefrescarPara(1000f, Tiempo);
+            float ancho = MiradaRayoProj.SemianchoDeCasa(0.25f) * 1.5f;
+            float punto = 0f;
+            for (int i = 0; i < 12; i++)
+            {
+                Segmento(i, out Vector2 a, out Vector2 b);
+                if (Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
+                    a, b, ancho, ref punto))
+                    return true;
+            }
+            return false;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return false;
+            try
+            {
+                NPC jefe = Main.npc[(int)Dueño];
+                if (jefe == null || !jefe.active) return false;
+
+                float poder = Potencia();
+                float nace = MathHelper.Clamp(Tiempo / T_Caida, 0f, 1f);   // la caída crece
+                float alfaHaz = MathHelper.Max(poder, 0.22f + 0.20f * nace)
+                    * MathHelper.Clamp((T_Fin - Tiempo) / 40f, 0f, 1f);
+                if (alfaHaz > 0.02f)
+                {
+                    MiradaRayoProj.RefrescarPara(1000f, Tiempo);
+                    HazLib.Abrir();
+                    try
+                    {
+                        for (int i = 0; i < 12; i++)
+                        {
+                            Segmento(i, out Vector2 a, out Vector2 b);
+                            a = a - Main.screenPosition;
+                            b = b - Main.screenPosition;
+                            // el haz crece de largo con la caída (nace del centro)
+                            Vector2 m = (a + b) * 0.5f;
+                            a = m + (a - m) * (0.25f + 0.75f * nace);
+                            b = m + (b - m) * (0.25f + 0.75f * nace);
+
+                            HazLib.PrepararPar(a, b, MiradaRayoProj.LeySemianchoVelo, 0f, 30);
+                            HazLib.Dibujar(MiradaRayoProj.LeyTinteVelo, MiradaRayoProj.LeyVerticeVelo, HazLib.FilasVelo);
+
+                            HazLib.PrepararPar(a, b, MiradaRayoProj.LeySemianchoCuerpo, 0f, 44);
+                            HazLib.Dibujar(MiradaRayoProj.LeyTinteCuerpo, MiradaRayoProj.LeyVerticeCuerpo, HazLib.FilasNucleo);
+                        }
+                    }
+                    finally { HazLib.Cerrar(); }
+                }
+
+                // LAS DOCE MARCAS del telegrafo: el destello fucsia en el
+                // CENTRO de cada haz (la cuenta de la rejilla).
+                if (RecursosMirada.AsegurarCargado())
+                {
+                    Texture2D flare = RecursosMirada.Flare;
+                    if (flare != null)
+                    {
+                        VFXCore.AbrirAdditive();
+                        try
+                        {
+                            float pulso = 0.6f + 0.4f * MathF.Sin(Main.GlobalTimeWrappedHourly * 10f);
+                            for (int i = 0; i < 12; i++)
+                            {
+                                Segmento(i, out Vector2 a, out Vector2 b);
+                                Vector2 centroHaz = ((a + b) * 0.5f) - Main.screenPosition;
+                                Color c = new Color(240, 0, 192, 0) * (alfaHaz * 0.7f * pulso);
+                                Main.spriteBatch.Draw(flare, centroHaz, null, c,
+                                    Main.GlobalTimeWrappedHourly * 0.8f, flare.Size() * 0.5f,
+                                    0.35f + 0.25f * poder, SpriteEffects.None, 0f);
+                            }
+                        }
+                        catch { VFXCore.CerrarLoteSiAbierto(); }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+    }
+
+    // =====================================================================
+    //  v6.104 — JefePruebaCProj — EL RAYO DE PRUEBA C DEL DIOS (la
+    //  letra: «para la fase 3 se usara el rayo de prueba C un ataque que
+    //  se usara siempre que se lancen al menos 2 veces los ataques
+    //  anteriores en la fase 3»): la firma del ARMA DEL SUEÑO hecha
+    //  ataque del dios — LA CARGA DE LOS SEIS SOLES (los destellos de 4
+    //  puntas naciendo LEJOS — 320..520 px — y CAYENDO hacia la boca
+    //  del dios: la implosión del conjuro) y EL CONDUCTO ONÍRICO: la
+    //  pila del Prueba C adaptada a HazLib — EL DOBLE GLOW (dos velos
+    //  envolventes, ×2.6 y ×1.9 — «EL DESENFOQUE MÁXIMO»), EL NÚCLEO
+    //  SUAVE (×0.28 — la vena blanca fina) y LA AGUJA (la punta que se
+    //  afila a ×0.06) con LA ESTRANGULACIÓN final (TODO el conducto
+    //  colapsa antes de morir — «el haz se cierra como una boca»).
+    // =====================================================================
+    public class JefePruebaCProj : ModProjectile
+    {
+        /// <summary>LA CARGA de los seis soles (ticks).</summary>
+        private const float Carga = 110f;
+
+        /// <summary>EL LÁSER (ticks).</summary>
+        private const float Laser = 300f;
+
+        /// <summary>El largo del cono.</summary>
+        private const float LargoCono = 2800f;
+
+        private float Tiempo { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+        private float Dueño => Projectile.ai[1];
+
+        /// <summary>LA MIRA (localAI[0]).</summary>
+        private float Mira { get => Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
+
+        // === EL ESTADO DE LAS LEYES (cero-GC) ===
+        private static float _t;
+        private static float _tamPrueba;
+
+        private void RefrescarLeyes() => _t = Tiempo;
+
+        private static readonly HazLib.LeyNodo LeyTintePrueba = TintePrueba;
+        private static readonly HazLib.LeyVertice LeyVerticePrueba = VerticePrueba;
+
+        private SonidoEnLoop _loop;
+
+        public override string Texture => "AethonMod/Content/Effects/Procedural/Star";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 4200;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 80;
+            Projectile.height = 80;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.penetrate = -1;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+            Projectile.aiStyle = -1;
+            Projectile.netImportant = true;
+            _loop = null;
+        }
+
+        public override bool ShouldUpdatePosition() => false;
+
+        public override void AI()
+        {
+            NPC jefe = Main.npc[(int)Dueño];
+            if (jefe == null || !jefe.active || jefe.life <= 0)
+            {
+                _loop?.StopSound();
+                Projectile.Kill();
+                return;
+            }
+
+            Projectile.Center = jefe.Center;
+            Projectile.timeLeft = 10;
+
+            // === LA MIRA: persigue MÁS VIVO que el RC2 (0.035 — el sueño
+            //     es inquieto) pero se apaga al final del conducto. ===
+            Player presa = Main.player[jefe.target];
+            if (presa != null && presa.active && !presa.dead && Tiempo < Carga + Laser * 0.7f)
+            {
+                float objetivo = Projectile.AngleTo(presa.Center);
+                float delta = MathHelper.WrapAngle(objetivo - Mira);
+                Mira += delta * 0.035f;
+                if (Math.Abs(delta) > 0.0005f) Projectile.netUpdate = true;
+            }
+
+            // === EL BARRIDO: la media onda del RC2 (±1.3 rad — un pelo
+            //     más corta: el conducto onírico barre MÁS DEPRISA). ===
+            float barrido = MathF.Sin((float)((Tiempo - Carga) / Laser) * MathHelper.Pi)
+                * 1.3f * MathHelper.Clamp((Tiempo - Carga) / 26f, 0f, 1f);
+            Projectile.rotation = Mira + (Tiempo < Carga ? 0f : barrido);
+
+            // === EL TAMAÑO + LA ESTRANGULACIÓN (la firma del arma-C:
+            //     al final TODO el conducto colapsa a ×0.07 antes de
+            //     apagarse — «se cierra como una boca y muere»). ===
+            float objetivoTam = MathF.Pow(
+                Utils.GetLerpValue(Carga - 12f, Carga + 40f, Tiempo, true) *
+                Utils.GetLerpValue(Carga + Laser + 40f, Carga + Laser, Tiempo, true), 3f);
+            if (Tiempo > Carga + Laser - 26f)
+                objetivoTam *= MathHelper.Clamp((Carga + Laser + 20f - Tiempo) / 45f, 0.07f, 1f);
+            _tamPrueba = MathHelper.Lerp(_tamPrueba, objetivoTam, 0.1f);
+            RefrescarLeyes();
+
+            if (!Main.dedServ)
+            {
+                if (Tiempo == 2f)
+                {
+                    try
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            new Terraria.Audio.SoundStyle(
+                                "AethonMod/Content/Sounds/RayoConcentradoCarga",
+                                Terraria.Audio.SoundType.Sound)
+                            { MaxInstances = 1, Volume = 0.9f, Pitch = 0.05f },
+                            Projectile.Center);
+                    }
+                    catch { }
+                }
+                if (Tiempo > Carga && Tiempo < Carga + Laser)
+                {
+                    Pantalla.Sacudir(4.5f, 0.35f, "JefePruebaC-sostenido");
+                }
+                if (Tiempo == Carga + 1f)
+                {
+                    Pantalla.Sacudir(8f, 0.7f, "JefePruebaC-encendido");
+                    OndaLib.Kick(6f, 12);
+                }
+
+                float vol = 1.0f * _tamPrueba;
+                _loop ??= new SonidoEnLoop(
+                    new Terraria.Audio.SoundStyle("AethonMod/Content/Sounds/RayoConcentradoLoop")
+                        { MaxInstances = 0 },
+                    new Terraria.Audio.ProjectileAudioTracker(Projectile).IsActiveAndInGame);
+                _loop.PlaySound(() => Projectile.Center, () => vol, () => -0.1f);
+            }
+
+            // LA LUZ del conducto: la paleta del conjuro en 3 puntos.
+            if (!Main.dedServ && Tiempo > Carga - 10f)
+            {
+                Color cLuz = RayoConcentradoDosProjectile.ColorConjuro(Tiempo);
+                float k = Math.Max(_tamPrueba, 0.15f);
+                Vector2 dir = Projectile.rotation.ToRotationVector2();
+                Lighting.AddLight(Projectile.Center,
+                    cLuz.R / 255f * 1.6f * k, cLuz.G / 255f * 1.5f * k, cLuz.B / 255f * 1.4f * k);
+                Lighting.AddLight(Projectile.Center + dir * 900f,
+                    cLuz.R / 255f * 1.2f * k, cLuz.G / 255f * 1.1f * k, cLuz.B / 255f * 1.0f * k);
+                Lighting.AddLight(Projectile.Center + dir * 1700f,
+                    cLuz.R / 255f * 0.8f * k, cLuz.G / 255f * 0.7f * k, cLuz.B / 255f * 0.6f * k);
+            }
+
+            Tiempo++;
+            if (Tiempo > Carga + Laser + 40f)
+            {
+                _loop?.StopSound();
+                Projectile.Kill();
+            }
+        }
+
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        {
+            if (Tiempo > Carga + 20f && Tiempo < Carga + Laser + 10f)
+            {
+                return DefinitivasLib.Cono(targetHitbox, Projectile.Center,
+                    LargoCono * (0.55f + _tamPrueba * 0.45f),
+                    Projectile.rotation, 0.18f * Math.Max(_tamPrueba, 0.02f));
+            }
+            return false;
+        }
+
+        // === LAS LEYES DEL ASPECTO — la pila del ARMA-C (el sueño) ===
+
+        /// <summary>EL TINTE: la PALETA DEL CONJURO viajando (la del
+        /// RC2/arma-C de la casa) con EL NACIMIENTO/MUERTE suaves.</summary>
+        private static Color TintePrueba(float p)
+        {
+            Color c = RayoConcentradoDosProjectile
+                .ColorConjuro(Main.GlobalTimeWrappedHourly * 60f + p * 48f);
+            float nace = MathHelper.Clamp(p / 0.04f, 0f, 1f);
+            // LA AGUJA: la punta se afila a ×0.06 (la letra del arma-C)
+            float muere = MathHelper.Clamp((1f - p) / 0.08f, 0f, 1f);
+            return c * (nace * muere * (0.72f + 0.28f * _tamPrueba));
+        }
+
+        /// <summary>EL VÉRTICE: el grumo de ruido diagonal MÁS SUAVE que
+        /// el RC2 (el sueño está DESENFOCADO — el ruido al 60 %) y el
+        /// brillo interior fino (×0.28 de la vena del arma-C).</summary>
+        private static Color VerticePrueba(float x, float y, Color tinte)
+        {
+            float t = Main.GlobalTimeWrappedHourly;
+            float ruido = Frac(x * 2f - t * 2.4f) * Frac(y * 2f + x * 4f - t * 2.4f);
+            float opacidad = ruido * 0.45f + 0.50f;
+
+            float d = MathF.Abs(y - 0.5f);
+            float brillo = d <= 0.0001f ? 1f : MathHelper.Clamp(0.26f / d, 0f, 1f);
+            brillo *= 1f - MathHelper.Clamp((d - 0.06f) / 0.20f, 0f, 1f);
+
+            Vector4 suma = tinte.ToVector4() * opacidad + new Vector4(brillo * 0.85f);
+            return new Color(
+                (byte)Math.Clamp((int)(suma.X * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Y * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Z * 255f + 0.5f), 0, 255), 255);
+        }
+
+        private static float Frac(float x) => x - MathF.Floor(x);
+
+        // === EL RENDER: la carga de los SEIS SOLES + el conducto onírico ===
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return false;
+            try
+            {
+                NPC jefe = Main.npc[(int)Dueño];
+                if (jefe == null || !jefe.active) return false;
+                RefrescarLeyes();
+
+                Vector2 centro = Projectile.Center - Main.screenPosition;
+
+                // === LA CARGA DE LOS SEIS SOLES (la firma del arma-C:
+                //     nacen LEJOS — 320..520 px — y CAEN hacia la boca
+                //     del dios, cayendo rectos, sin dar vueltas). ===
+                if (Tiempo < Carga + 10f)
+                {
+                    Texture2D destello = DefinitivasLib.TexStar;
+                    if (destello != null)
+                    {
+                        VFXCore.AbrirAdditive();
+                        try
+                        {
+                            float r = MathHelper.Clamp(Tiempo / Carga, 0f, 1f);
+                            float caida = MathF.Pow(r, 0.8f);          // el sol cae
+                            for (int i = 0; i < 6; i++)
+                            {
+                                float ang = i * MathHelper.TwoPi / 6f + r * 0.9f;
+                                float radio = MathHelper.Lerp(
+                                    320f + 200f * ((i * 0.37f) % 1f), 40f, caida);
+                                Vector2 pos = centro + ang.ToRotationVector2() * radio;
+                                Color c = RayoConcentradoDosProjectile
+                                    .ColorConjuro(Tiempo * 1.4f + i * 5f);
+                                Main.spriteBatch.Draw(destello, pos, null,
+                                    c * (0.35f + 0.60f * r), ang + MathHelper.PiOver2,
+                                    destello.Size() * 0.5f,
+                                    (0.5f + 0.3f * r) * (1f - caida * 0.4f),
+                                    SpriteEffects.None, 0f);
+                            }
+                        }
+                        catch { VFXCore.CerrarLoteSiAbierto(); }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
+                    }
+                }
+
+                // === EL CONDUCTO ONÍRICO: LA PILA DEL ARMA-C sobre
+                //     HazLib — EL DOBLE GLOW (dos velos: ×2.6 y ×1.9 —
+                //     el desenfoque máximo) y EL NÚCLEO SUAVE (×0.28 —
+                //     la vena fina del sueño). TRES capas, UN draw
+                //     call. ===
+                if (Tiempo > Carga - 8f && _tamPrueba > 0.01f)
+                {
+                    Vector2 dir = Projectile.rotation.ToRotationVector2();
+                    Vector2 boca = centro + dir * 46f;
+                    Vector2 punta = centro + dir * (LargoCono * (0.55f + _tamPrueba * 0.45f));
+
+                    HazLib.Abrir();
+                    try
+                    {
+                        // (1) EL GLOW EXTERIOR — la bruma del sueño (×2.6).
+                        HazLib.PrepararCono(boca, punta, 60f * _tamPrueba + 5f, 210f * _tamPrueba + 10f, 0f, 48);
+                        HazLib.Dibujar(p => RayoConcentradoDosProjectile
+                            .ColorConjuro(Main.GlobalTimeWrappedHourly * 60f + p * 48f + 20f)
+                            * (MathHelper.Clamp(p / 0.05f, 0f, 1f)
+                               * MathHelper.Clamp((1f - p) / 0.12f, 0f, 1f)) * 0.16f,
+                            null, HazLib.FilasVelo);
+
+                        // (2) EL GLOW INTERIOR — la envolvente (×1.9).
+                        HazLib.PrepararCono(boca, punta, 42f * _tamPrueba + 4f, 150f * _tamPrueba + 8f, 0f, 52);
+                        HazLib.Dibujar(p => RayoConcentradoDosProjectile
+                            .ColorConjuro(Main.GlobalTimeWrappedHourly * 60f + p * 48f + 10f)
+                            * (MathHelper.Clamp(p / 0.05f, 0f, 1f)
+                               * MathHelper.Clamp((1f - p) / 0.10f, 0f, 1f)) * 0.30f,
+                            null, HazLib.FilasVelo);
+
+                        // (3) EL NÚCLEO SUAVE — la vena del arma-C (×0.28).
+                        HazLib.PrepararCono(boca, punta, 26f * _tamPrueba + 3f, 88f * _tamPrueba + 5f, 0f, 56);
+                        HazLib.Dibujar(LeyTintePrueba, LeyVerticePrueba, HazLib.FilasNucleo);
+                    }
+                    finally { HazLib.Cerrar(); }
+
+                    // (4) LOS SEIS SOLES CONDUCTO — los destellos de 4
+                    //     puntas corriendo por las MÁRGENES del conducto
+                    //     hacia la punta (la firma del arma-C).
+                    Texture2D destello2 = DefinitivasLib.TexStar;
+                    if (destello2 != null)
+                    {
+                        VFXCore.AbrirAdditive();
+                        try
+                        {
+                            float anchoBorde = 60f * _tamPrueba;
+                            for (int i = 0; i < 6; i++)
+                            {
+                                float fase = (Main.GlobalTimeWrappedHourly * 0.55f + i * 0.167f) % 1f;
+                                float p = 0.08f + 0.88f * fase;
+                                float anchoP = 26f + 62f * MathF.Pow(p, 0.8f);
+                                Vector2 posBorde = boca + dir * (punta - boca).Length() * p
+                                    + new Vector2(-dir.Y, dir.X) * anchoBorde * ((i % 2 == 0) ? 1f : -1f);
+                                Color c = RayoConcentradoDosProjectile
+                                    .ColorConjuro(Main.GlobalTimeWrappedHourly * 60f + i * 12f);
+                                float tam = (18f + 10f * (i % 3)) * _tamPrueba;
+                                Main.spriteBatch.Draw(destello2, posBorde, null,
+                                    c * (0.55f * _tamPrueba), 0f, destello2.Size() * 0.5f,
+                                    tam / destello2.Width, SpriteEffects.None, 0f);
+                            }
                         }
                         catch { VFXCore.CerrarLoteSiAbierto(); }
                         finally { VFXCore.RestaurarLoteVanilla(); }

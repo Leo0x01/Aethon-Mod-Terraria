@@ -67,6 +67,12 @@ namespace AethonMod.Content.Players
             // la entrega DIRECTA del kit, no solo dentro del cofre:
             // la lección v6.14.2 aplicada a la bolsa nueva).
             bolsas += Entregar(ModContent.ItemType<BolsaInvestigaciones>());
+            // v6.104 — LA BOLSA DE LAS AURAS (la letra: «ademas todas
+            // estas cosas nuevas ponlas en una nueva bolsa, esto sera
+            // material de investigacion de auras»): el kit de estudio
+            // de auras — el Aura de Juicio, el Estandarte y las Cinco
+            // Formas — viaja también con el kit del probador.
+            bolsas += Entregar(ModContent.ItemType<BolsaAuras>());
             // v6.100 — LA BOLSA DEL TALLER Y LA DE LAS TRES CASAS
             // MURIERON con sus armas (la letra: las armas creadas con
             // la herramienta — las de la bolsa del taller y las de las

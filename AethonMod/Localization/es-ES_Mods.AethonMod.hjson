@@ -761,6 +761,26 @@ Items: {
 			'''
 	}
 
+	AuraDeJuicioItem: {
+		// v6.104: EL AURA DE JUICIO — el puerto fiel del Warbanner of
+		// the Righteous (mecánica + técnica VFX, arte 100% de la casa).
+		DisplayName: Aura de Juicio
+		Tooltip:
+			'''
+			El estandarte de guerra arde a tu espalda: tu poder crece cuanto más
+			cerca está el enemigo (−15% a +15% en TODO tu daño)
+			'''
+		Titulo: "[c/FFC850:═══ EL AURA DE JUICIO ═══]"
+		Linea1:
+			'''
+			[c/FFE7B0:El campo del juicio abraza 45 tiles a la redonda: cada impío que entra
+			queda MARCADO y arde con las Llamas del Juicio]
+			'''
+		Linea2: "[c/FFB84D:Cuanto más se acercan, más arden (intensidad ×1→×3), el fuego golpea cada vez más rápido (2..19 ticks) y los muy pegados son REPELIDOS]"
+		Linea3: "[c/FFB84D:Cada golpe quema con 15 × tu MEJOR daño de clase (×0.10 contra hordas de 7+), 50 de penetración de armadura y puede ser crítico]"
+		Linea4: "[c/E8A33C:A 80 px del impío TODO tu daño arde al máximo (+15%); con el campo vacío, el estandarte castiga la lejanía (−15%)]"
+	}
+
 	AnillosSolRunicoItem: {
 		DisplayName: Los Anillos del Sol Rúnico
 		Tooltip:
@@ -2270,6 +2290,17 @@ Items: {
 			'''
 	}
 
+	BolsaAuras: {
+		// v6.104: LA BOLSA DE LAS AURAS — el material de investigación.
+		DisplayName: La Bolsa de las Auras
+		Tooltip:
+			'''
+			EL MATERIAL DE INVESTIGACIÓN DE AURAS: el Aura de Juicio (el
+			estandarte de guerra que arde), el Estandarte del Juicio y las
+			CINCO Formas Ascendidas — todo lo que AURA, en un solo kit.
+			'''
+	}
+
 	BolsaMaestra: {
 		DisplayName: El Cofre del Arsenal
 		Tooltip:
@@ -2729,6 +2760,12 @@ Buffs: {
 		// v6.101: THE OUTER VOID BURN — the black-flame research debuff
 		DisplayName: Quemadura del vacío exterior
 		Description: Las llamas negras del vacío te consumen: cuanto más cerca del portador, más ardes y más lento caminas
+	}
+
+	LlamasDelJuicio: {
+		// v6.104: LAS LLAMAS DEL JUICIO — la quemadura del Aura de Juicio.
+		DisplayName: Llamas del Juicio
+		Description: Las llamas doradas del juicio te consumen: cuanto más cerca del portador, más ardes
 	}
 
 	VacioExterior: {
@@ -3393,6 +3430,10 @@ Jefe: {
 		Renglones: LOS SEIS RENGLONES DEL DIOS — seis barras de tinta giran a su alrededor: camina ENTRE los renglones, con el giro.
 		RayoConcentrado: EL RAYO CONCENTRADO DEL DIOS — EL DEFINITIVO: el cono del conjuro barre la arena: corre EN PERPENDICULAR.
 		Mirada: LA MIRADA DEL DIOS — el ojo del libro se abre: rompe la línea de la mirada.
+		// v6.104 — LOS DOS ATAQUES NUEVOS DE LA COREOGRAFÍA (la letra:
+		// la mirada que cae del cielo · el rayo de prueba C de la fase 3).
+		MiradaCielo: LA MIRADA DEL CIELO — doce haces caen sobre la arena: seis verticales y seis horizontales, luego giran en diagonal y VUELVEN A ARDER.
+		PruebaC: EL RAYO DE PRUEBA C DEL DIOS — los seis soles caen y el conducto onírico barre: corre EN PERPENDICULAR.
 		// v6.50.120 — FUSION AS A PHASE + THE FINAL BOSS'S THREE WEAPONS
 		// (the final-boss research: Moon Lord, the Lunatic Cultist, Duke
 		// Fishron — the Complete Memory devours them all).
@@ -4002,4 +4043,9 @@ Arbol: {
 	Desc8: +1 vida/s de regeneración por nivel.
 	Nodo9: EL ECO DE AETHON
 	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
+}
+
+HUD: {
+	// v6.104: EL MEDIDOR DE FUERZA DEL ESTANDARTE (Aura de Juicio).
+	FuerzaEstandarte: Fuerza del Estandarte
 }

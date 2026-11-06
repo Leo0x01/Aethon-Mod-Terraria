@@ -1360,6 +1360,17 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Weapons.Auras.DerrameDeTinta>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Definitivas.LaUltimaPalabra>());
+                // v6.104 — EL AURA DE JUICIO (la letra: «copia exactamente
+                // el codigo de Warbanner of the Righteous y sus textura,
+                // efectos vfx tecnica todo, en un nuevo item llamado Aura
+                // de Juicio y daselo al jugador»): el puerto fiel del
+                // estandarte de guerra — también en LA BOLSA DE LAS AURAS,
+                // que nace con esta sesión («esto sera material de
+                // investigacion de auras») — la regla de la casa: DIRECTO.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Accessories.AuraDeJuicioItem>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Bolsas.BolsaAuras>());
 
                 if (entregados > 0)
                 {

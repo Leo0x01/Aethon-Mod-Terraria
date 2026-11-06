@@ -221,6 +221,13 @@ namespace AethonMod.Content.NPCs
         private const int EST_RENGLONES = 18; // v6.95 — LOS SEIS RENGLONES DEL DIOS (SEIS barras de tinta cada 60°, GIRANDO alrededor del jefe — la rueda del Renglón Final)
         private const int EST_RC2 = 19;       // v6.95 — EL RAYO CONCENTRADO DEL DIOS (EL ATAQUE DEFINITIVO: la carga del conjuro y el cono que barre — la firma que abre LA FURIA)
         private const int EST_MIRADA = 20;    // v6.95 — LA MIRADA DEL DIOS (el ataque MEDIO RARO: el MISMO rayo de La Mirada del Eterno girado contra el portador — peso 1: el ojo se abre POCO)
+        // v6.104 — LA COREOGRAFÍA NUEVA (la letra: «cambia toda la
+        // coreagrafia de los jefes y mejora sus ataques»): LA MIRADA
+        // asciende a ATAQUE COMÚN de la fase 1, nace LA MIRADA QUE CAE
+        // DEL CIELO (la rejilla 6V+6H de la fase 2) y EL RAYO DE PRUEBA
+        // C llega a la fase 3 con su Ley DE LOS DOS ANTERIORES.
+        private const int EST_MIRADA_CIELO = 21; // v6.104 — LA MIRADA QUE CAE DEL CIELO (la rejilla del ojo: 6 haces VERTICALES + 6 HORIZONTALES cayendo del cielo, girando en diagonal y RELANZÁNDOSE)
+        private const int EST_PRUEBAC = 22;     // v6.104 — EL RAYO DE PRUEBA C DEL DIOS (la Ley de la fase 3: SIEMPRE que los ataques anteriores se hayan lanzado 2+ veces — el conducto onírico de los seis soles)
         protected const int EST_MURIENDO = 99;    // la contracción final
 
         // === v6.50.117 — LA FUSIÓN DE LOS GEMELOS DEL RECUERDO (la letra:
@@ -389,6 +396,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         //       P4 · EL VÓRTICE PRIMORDIAL (la galaxia que colapsa)
         //       P5 · LA CORONA ETERNA (el prisma de la furia) ===
         private int _especialPendiente = -1;
+
+        // v6.104 — LA LEY DE LOS DOS ANTERIORES (la letra: «para la fase
+        //     3 se usara el rayo de prueba C un ataque que se usara
+        //     siempre que se lancen al menos 2 veces los ataques
+        //     anteriores en la fase 3»): el contador de ATAQUES
+        //     PREVIOS (Mirada · Renglón Final · Mirada del Cielo)
+        //     lanzados en la fase 3 — al llegar a 2, el RAYO DE PRUEBA C
+        //     sale SIEMPRE (y el contador se re-arma para la próxima).
+        private int _previosP3 = 0;
 
         // === LAS RUNAS (heredadas de la sierpe). EL VOLTEO DE GRAVEDAD
         //     MURIÓ en la v6.50.57 (la letra: «eso que hace el jefe de
@@ -805,6 +821,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_RENGLONES: EstadoRenglones(target); break;
                 case EST_RC2: EstadoRC2(target); break;
                 case EST_MIRADA: EstadoMirada(target); break;
+                case EST_MIRADA_CIELO: EstadoMiradaCielo(target); break;
+                case EST_PRUEBAC: EstadoPruebaC(target); break;
 
                 default:
                     // v6.50.117 — LOS ESTADOS DEL FUSIONADO (los ≥30: El
@@ -1413,6 +1431,24 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // de fase encadenados y la apertura de la pelea.)
             if (_especialPendiente >= 0 && EntrarEspecial()) return;
 
+            // v6.104 — LA LEY DE LOS DOS ANTERIORES (la letra: «para la
+            // fase 3 se usara el rayo de prueba C un ataque que se usara
+            // siempre que se lancen al menos 2 veces los ataques
+            // anteriores en la fase 3»): DOS ataques previos (Mirada ·
+            // Renglones · Mirada del Cielo) lanzados en la fase 3 y EL
+            // SUEÑO SALE SIEMPRE — antes que el compás del estallido,
+            // antes que la coreografía: la ley de la letra manda.
+            if (Phase == 3 && _previosP3 >= 2 && _estado != EST_PRUEBAC)
+            {
+                _previosP3 = 0;   // la ley se re-arma para la próxima tanda
+                _anteultimoAtaque = _ultimoAtaque;
+                _ultimoAtaque = EST_PRUEBAC;
+                _estado = EST_PRUEBAC;
+                _tickEstado = 0;
+                NPC.netUpdate = true;
+                return;
+            }
+
             // v6.50.54 — EL COMPÁS DEL ESTALLIDO (fase 3+, la letra del
             // usuario: «en la fase 3 debe hacerla cada un número de veces
             // aleatorio entre 1 a 9 ataques de otro tipo»): cuando el
@@ -1469,11 +1505,18 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // la APERTURA de la pelea y el especial de la fase 1).
             int[] menu = Phase switch
             {
-                1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
-                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA, EST_SOL },
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA, EST_SOL },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA, EST_RC2, EST_SOL },
+                // v6.104 — LA CARTA NUEVA: LA MIRADA asciende a COMÚN de
+                // la fase 1 (peso 4 abajo — la letra la pedía común) y
+                // la fase 2 hereda LA REJILLA DEL CIELO y EL RENGLÓN
+                // FINAL (poco común — peso 1). La fase 3 abre la puerta
+                // al RAYO DE PRUEBA C (su ley de los DOS ANTERIORES
+                // vive arriba) y las fases 4/5 mantienen TODO el
+                // arsenal nuevo en la mesa.
+                1 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
+                2 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL, EST_RENGLONES, EST_MIRADA_CIELO },
+                3 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL },
+                4 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL },
+                _ => new[] { EST_MIRADA, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_SOL },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -1532,12 +1575,18 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 if (plato == EST_SOL) peso = 3;
                 if (plato == EST_SOL && Furia) peso = 4;
                 // v6.95 — LOS TRES HACES DEL DIOS: los RENGLONES castigan
-                // al PEGADO (la rueda lo alcanza abrazado al dios) y la
-                // MIRADA es el plato MEDIO RARO (peso 1: el ojo se abre
-                // POCO — la letra: «como ataque medio raro» — pero cuando
-                // se abre, CASTIGA: 3.000 px de fucsia del libro).
+                // al PEGADO (la rueda lo alcanza abrazado al dios).
+                // v6.104 — LA CARTA NUEVA DE PESOS: LA MIRADA asciende a
+                // COMÚN (peso 4 en fase 1 — la letra la sacó del rincón
+                // «medio raro»; en las demás pesa 2), EL RENGLÓN FINAL
+                // es el POCO COMÚN de la fase 2 (peso 1 — sube a 2+ si
+                // el PEGADO se abraza) y LA REJILLA DEL CIELO pesa 2
+                // (el plato raro de la fase 2 que SIEMPRE sorprende).
                 if (plato == EST_RENGLONES && cerca) peso = 4;
-                if (plato == EST_MIRADA) peso = 1;
+                if (plato == EST_RENGLONES && Phase == 2) peso = 1;
+                if (plato == EST_MIRADA) peso = Phase == 1 ? 4 : 2;
+                if (plato == EST_MIRADA_CIELO) peso = 2;
+                if (plato == EST_PRUEBAC) peso = Phase >= 4 ? 2 : 1;
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -1556,6 +1605,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 elegido = menu[(Array.IndexOf(menu, elegido) + 1) % menu.Length];
             _anteultimoAtaque = _ultimoAtaque;
             _ultimoAtaque = elegido;
+
+            // v6.104 — LA LEY DE LOS DOS ANTERIORES SE ALIMENTA: cada
+            // ataque PREVIO (Mirada · Renglones · Mirada del Cielo)
+            // lanzado en fase 3 acerca EL SUEÑO (a los 2, sale SIEMPRE
+            // — el chequeo vive arriba, antes de la carta).
+            if (Phase == 3 && (elegido == EST_MIRADA || elegido == EST_RENGLONES ||
+                elegido == EST_MIRADA_CIELO))
+                _previosP3++;
 
             // v6.50.54 — EL COMPÁS: los ataques de OTRO tipo alimentan el
             // contador del estallido (y cada estallido gasta su presupuesto).
@@ -2150,12 +2207,16 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // ==================================================================
 
         /// <summary>
-        /// LOS SEIS RENGLONES DEL DIOS: SEIS barras de tinta cada 60°
-        /// (posición pareja) GIRANDO alrededor del jefe — la rueda del
-        /// Renglón Final. El dios se ALZA y flota con la deriva viva
-        /// mientras la rueda escribe; el PEGADO lo pasa mal (la rueda lo
-        /// alcanza abrazado), el que orbita con el giro camina ENTRE los
-        /// renglones.
+        /// LOS SEIS RENGLONES DEL DIOS: SEIS barras de tinta MÁS
+        /// SEPARADAS (v6.104 — la letra: «el ataque el renglon final
+        /// para el jefe es ligeramente diferente ya que los hazes estan
+        /// mas separados y son 6 hazes»: el aro despejado se ABRE —
+        /// RadioBoca 92→230) y LA MEZCLA DEL 50% (la letra: «a veces en
+        /// un 50% de las veces se mezcla con la mirada del eterno
+        /// teniendo los dos el mismo sentido horario al usarse
+        /// juntos»): la MITAD de las veces, LA MIRADA DEL DIOS gira con
+        /// la rueda — la MISMA velocidad angular, el MISMO sentido
+        /// horario: el ojo es el séptimo renglón.
         /// </summary>
         private void EstadoRenglones(Player target)
         {
@@ -2166,6 +2227,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             if (_tickEstado == 1)
             {
+                // v6.104 — LA MONEDA DEL 50%: la MITAD de las veces, LA
+                // MIRADA acompaña a la rueda — MISMO sentido horario,
+                // MISMA velocidad (VelSync = la velocidad angular de la
+                // rueda: la mezcla de la letra).
+                bool mezcla = Main.rand.NextBool();
+                float velRueda = Furia ? 0.024f : 0.015f;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromAI(),
@@ -2174,6 +2241,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                             <global::AethonMod.Content.Projectiles.Jefes.JefeRenglonesProj>(),
                         Math.Max(1, (int)(NPC.damage * 0.70f)), 2f, Main.myPlayer,
                         0f, NPC.whoAmI, Furia ? 1f : 0f);
+                    if (mezcla)
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType
+                                <global::AethonMod.Content.Projectiles.Jefes.JefeMiradaProj>(),
+                            Math.Max(1, (int)(NPC.damage * 0.75f)), 2f, Main.myPlayer,
+                            0f, NPC.whoAmI, velRueda);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.35f), NPC.Center);
@@ -2253,6 +2327,86 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         }
 
         /// <summary>
+        /// v6.104 — LA MIRADA QUE CAE DEL CIELO (la letra: «tambien usa
+        /// en la fase 2 la mirada del eterno pero como hacez que caen
+        /// del cielo y que sean 6 en vertical y 6 en horizontal, luego
+        /// se mueven en diagonal y vuelven a ser lanzado»): LA REJILLA
+        /// DEL OJO — DOCE haces de La Mirada del Eterno cayendo del
+        /// cielo sobre la arena: SEIS VERTICALES y SEIS HORIZONTALES,
+        /// que ARDEN, giran 45° y SE DESLIZAN en diagonal… y se
+        /// RELANZAN. El dios SE ALZA a mirar la rejilla que escribió
+        /// (la rejilla vive donde estaba la presa: se LEE, no persigue).
+        /// </summary>
+        private void EstadoMiradaCielo(Player target)
+        {
+            // EL DIOS SE APARTA y SE ALZA: la rejilla es la que castiga —
+            // él solo la escribe desde arriba.
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.018f) * 150f, -460f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefeMiradaCieloProj>(),
+                        Math.Max(1, (int)(NPC.damage * 0.85f)), 2f, Main.myPlayer,
+                        0f, NPC.whoAmI, NPC.target);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(-0.5f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.MiradaCielo", PaletaVioleta);
+                OndaLib.Kick(5f, 14);
+                NPC.netUpdate = true;
+            }
+
+            // LA REJILLA vive 320 t — el dios la espera entera (más el
+            // respiro de la casa).
+            if (_tickEstado >= 345) CerrarEstado();
+        }
+
+        /// <summary>
+        /// v6.104 — EL RAYO DE PRUEBA C DEL DIOS (la letra: «para la fase
+        /// 3 se usara el rayo de prueba C un ataque que se usara siempre
+        /// que se lancen al menos 2 veces los ataques anteriores en la
+        /// fase 3»): EL CONDUCTO ONÍRICO — la carga de LOS SEIS SOLES
+        /// (los destellos de 4 puntas naciendo LEJOS y CAYENDO hacia la
+        /// boca del dios) y el cono del sueño con su doble glow, su
+        /// núcleo suave y su aguja. LA LEY que lo dispara vive en
+        /// ElegirAtaque: DOS ataques previos (Mirada · Renglones ·
+        /// Mirada del Cielo) en fase 3 = el sueño sale SIEMPRE.
+        /// </summary>
+        private void EstadoPruebaC(Player target)
+        {
+            // LA CARGA LO CLAVA (el conducto no se canaliza corriendo).
+            if (_tickEstado <= 110)
+                NPC.velocity = Vector2.Lerp(NPC.velocity,
+                    new Vector2(MathF.Sin(_tickEstado * 0.026f) * 0.7f, -0.2f), 0.15f);
+            else
+                NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefePruebaCProj>(),
+                        Math.Max(1, (int)(NPC.damage * 0.95f)), 3f, Main.myPlayer,
+                        0f, NPC.whoAmI, NPC.target);
+                }
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.PruebaC", PaletaVioleta);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 460) CerrarEstado();
+        }
+
+        /// <summary>
         /// v6.50.57 — EL CIERRE CON COREOGRAFÍA: si la danza tiene pasos en
         /// la cola, el SIGUIENTE entra YA — sin pasar por la órbita (la
         /// cadena de la Emperatriz: los ataques se pasan el turno); si la
@@ -2310,7 +2464,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 if (_coreoLargo < _coreoCola.Length) _coreoCola[_coreoLargo++] = s;
             }
+            // v6.104 — LA DANZA NUEVA (la letra: «cambia toda la
+            // coreagrafia de los jefes y mejora sus ataques»): las
+            // armas de la carta nueva TEJEN la cadena — LA MIRADA
+            // abre la lectura, LA REJILLA DEL CIELO cerca la arena, el
+            // RENGLÓN FINAL barre y EL SUEÑO del Prueba C responde a
+            // los DOS ANTERIORES (la ley hecha danza).
             Paso(EST_SOL);                       // el dios SE VUELVE sol y lo lanza
+            Paso(EST_MIRADA);                    // el ojo lee primero (común ya)
+            if (Phase >= 2) Paso(EST_MIRADA_CIELO);  // la rejilla del cielo
+            if (Phase >= 3) Paso(EST_RENGLONES);     // la rueda de tinta separada
+            if (Phase >= 3) Paso(EST_PRUEBAC);       // el sueño responde a los dos
             if (Phase >= 4) Paso(EST_TELAR);     // la jaula mientras el sol vuela
             Paso(EST_DANZA);                     // la rueda de rayos de la EoL
             if (Phase >= 4) Paso(EST_LANZAS);    // la sentencia sobre tu carrera
@@ -3291,6 +3455,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             _estallidosUsadosEnFase = 0;
             _ataquesDesdeEstallido = 0;
             if (Phase >= 3) _proximoEstallidoEn = Main.rand.Next(1, 10);
+
+            // v6.104 — LA LEY DE LOS DOS ANTERIORES SE RE-ARMA: el contador
+            // de ataques previos de la fase 3 (Mirada · Renglones · Cielo)
+            // vuelve a CERO con la fase nueva — cada fase escribe su propia
+            // cuenta antes de merecer EL SUEÑO.
+            _previosP3 = 0;
 
             // v6.50.45 — EL DECRETO DEL ECLIPSE EN CADA CAMBIO DE FASE: el
             // círculo nace EN EL JEFE y LO SIGUE (v6.50.54 — centrado en el

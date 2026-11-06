@@ -284,21 +284,21 @@ namespace AethonMod.Content.Globals
                     // v6.103 — LA ETIQUETA YA VIAJA EN EL NOMBRE
                     //     (SetNameOverride en UpdateInventory: la barra
                     //     rápida la necesita EN EL NOMBRE, texto plano):
-                    //     si ya está, NO se duplica — el degradado viste
-                    //     el nombre completo tal cual; si aún no está (el
-                    //     ítem acaba de cargar de un cofre o del suelo),
-                    //     se añade aquí como siempre y el tooltip queda
-                    //     idéntico al de toda la vida.
+                    //     si ya está, NO se duplica.
+                    // v6.104 — EL DEGRADADO MURIÓ (la letra: «el color con
+                    //     los efectos A VECES no coincide el de la barra de
+                    //     acceso rapido con el que se muestra en el
+                    //     inventario»): los tags [c/] del degradado SOLO
+                    //     viven en el tooltip — la barra rápida dibuja el
+                    //     nombre con EL COLOR DE LA RAREZA y plano: DOS
+                    //     colores distintos para el mismo nombre. LA CURA:
+                    //     UNA SOLA FUENTE — el nombre va en TEXTO PLANO y el
+                    //     color lo pone LA RAREZA (RarityCorrupta, el gris
+                    //     humo de la consagración) en el tooltip, en la
+                    //     barra rápida, en el chat y en TODAS partes:
+                    //     idéntico, siempre.
                     if (!nombre.EndsWith(etiqueta))
-                        nombre = nombre + " " + etiqueta;
-                    // v6.97 — EL COLOR DE CONSAGRADO (la letra: «el color
-                    //     de consagrado en su nombre debe ser centro negro,
-                    //     medios grises y bordes blancos»): el degradado de
-                    //     la casa — BORDES blancos → MEDIOS grises → CENTRO
-                    //     negro — letra por letra (los tags [c/] del
-                    //     tooltip pintan cada carácter con SU tinta: la
-                    //     única forma de un degradado real en una línea).
-                    tooltips[idxNombre].Text = NombreConsagrado(nombre);
+                        tooltips[idxNombre].Text = nombre + " " + etiqueta;
                 }
 
                 // v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma
@@ -331,36 +331,11 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
-        /// <summary>v6.97 — EL NOMBRE CONSAGRADO: «el color de
-        /// consagrado en su nombre debe ser centro negro, medios grises
-        /// y bordes blancos» — el degradado simétrico de la casa, letra
-        /// por letra: los bordes nacen BLANCOS, los medios viran a
-        /// GRISES y el centro muere en NEGRO.</summary>
-        private static string NombreConsagrado(string texto)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(texto)) return texto;
-                var borde = new Color(235, 235, 240);
-                var medio = new Color(145, 145, 155);
-                var centro = new Color(20, 20, 26);
-                var sb = new System.Text.StringBuilder(texto.Length * 22);
-                int n = texto.Length;
-                for (int i = 0; i < n; i++)
-                {
-                    // t: 0 en los bordes → 1 en el centro del nombre.
-                    float t = n <= 1 ? 1f : 1f - MathF.Abs(2f * i / (n - 1) - 1f);
-                    Color c = t < 0.5f
-                        ? Color.Lerp(borde, medio, t * 2f)
-                        : Color.Lerp(medio, centro, (t - 0.5f) * 2f);
-                    sb.Append("[c/").Append(c.R.ToString("X2"))
-                      .Append(c.G.ToString("X2")).Append(c.B.ToString("X2"))
-                      .Append(':').Append(texto[i]).Append(']');
-                }
-                return sb.ToString();
-            }
-            catch { return texto; }
-        }
+        // (v6.97 — EL NOMBRE CONSAGRADO degradado MURIÓ en la v6.104: los
+        //  tags [c/] solo vivían en el tooltip mientras la barra rápida
+        //  dibujaba plano — DOS colores. Ahora el color es UNO solo y
+        //  vive en RarityCorrupta: el GRIS HUMO (145,145,155), el tono
+        //  medio del degradado que era — legible sobre cualquier fondo.)
 
         // === v6.88 — EL VELO DEL INVENTARIO (la letra: «se cubren con
         //     un brillo morado negro, este brillo podria ser un shader

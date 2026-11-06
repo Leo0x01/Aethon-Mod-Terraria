@@ -482,10 +482,12 @@ namespace AethonMod.Content.Projectiles.Jefes
                             break;
                         }
 
-                        // === EL LÁSER DE LA REJILLA: la barra bicolor — el
-                        //     color ACTIVO arde con su núcleo blanco y sus
-                        //     broches; el INACTIVO se dibuja TENUE (el aviso
-                        //     legible de lo que viene) ===
+                        // === EL LÁSER DE LA REJILLA (v6.104 — LA MUERTE DE
+                        //     LA TEXTURA PLANA: la barra era un SoftGlow
+                        //     estirado de 1.300 px — LITERALMENTE un
+                        //     rectángulo de luz. Ahora es UN HAZ DE VERDAD:
+                        //     HazLib con SU velo, SU núcleo blanco, SU
+                        //     ruido hirviendo y SU filo de borde rgb=0) ===
                         case EstiloRejillaLaser:
                         {
                             bool vert = Par >= 3f;
@@ -501,23 +503,42 @@ namespace AethonMod.Content.Projectiles.Jefes
                             float rot = vert ? MathHelper.PiOver2 : 0f;
                             const float len = 1300f;
                             float ancho = (activa ? 30f : 12f) + 6f * MathF.Sin(t * 6f);
-                            Vector2 origen = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
 
-                            Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null, c * alfa, rot, origen,
-                                new Vector2(len / VFXCore.SoftGlow.Width,
-                                            ancho / VFXCore.SoftGlow.Height),
-                                SpriteEffects.None, 0f);
-                            // EL NÚCLEO BLANCO de la barra activa (el filo que mata).
-                            if (activa)
-                                Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
-                                    Color.White * (alfa * 0.55f), rot, origen,
-                                    new Vector2(len / VFXCore.SoftGlow.Width,
-                                                6f / VFXCore.SoftGlow.Height),
-                                    SpriteEffects.None, 0f);
-                            // LOS BROCHES (las puntas del láser).
-                            Vector2 dirL = new Vector2(MathF.Cos(rot), MathF.Sin(rot));
+                            // (1) EL HAZ — la rejilla de quads de la casa.
+                            try
+                            {
+                                VFXCore.CerrarLoteSiAbierto();
+                                HazLib.Abrir();
+                                try
+                                {
+                                    Vector2 dirL = rot.ToRotationVector2();
+                                    Vector2 aL = pos - dirL * (len * 0.5f);
+                                    Vector2 bL = pos + dirL * (len * 0.5f);
+                                    // EL VELO (el color de la barra — ancho).
+                                    HazLib.PrepararPar(aL, bL, ancho, ancho * 0.9f, 0f, 14);
+                                    HazLib.Dibujar(p => c * (alfa * 0.45f)
+                                        * MathHelper.Clamp(p / 0.06f, 0f, 1f)
+                                        * MathHelper.Clamp((1f - p) / 0.10f, 0f, 1f),
+                                        null, HazLib.FilasVelo);
+                                    // EL NÚCLEO BLANCO (el filo que mata — fino).
+                                    if (activa)
+                                    {
+                                        HazLib.PrepararPar(aL, bL, ancho * 0.28f, ancho * 0.2f, 0f, 14);
+                                        HazLib.Dibujar(p => Color.White * (alfa * 0.75f)
+                                            * MathHelper.Clamp(p / 0.06f, 0f, 1f)
+                                            * MathHelper.Clamp((1f - p) / 0.10f, 0f, 1f),
+                                            null, HazLib.FilasNucleo);
+                                    }
+                                }
+                                finally { HazLib.Cerrar(); }
+                            }
+                            catch { }
+
+                            // (2) LOS BROCHES (las puntas del láser — el
+                            //     corazón brillante de cada extremo).
+                            Vector2 dirB = new Vector2(MathF.Cos(rot), MathF.Sin(rot));
                             for (int e = -1; e <= 1; e += 2)
-                                LumenLib.Bloom(Main.spriteBatch, pos + dirL * (len * 0.5f * e),
+                                LumenLib.Bloom(Main.spriteBatch, pos + dirB * (len * 0.5f * e),
                                     activa ? 34f : 16f, c, alfa, 2);
                             break;
                         }

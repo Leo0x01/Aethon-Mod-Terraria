@@ -1,7 +1,10 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.VFX
@@ -473,6 +476,233 @@ namespace AethonMod.Content.VFX
             VFXCore.FlushAdditive();
         }
 
+        // ==================================================================
+        //  v6.104 — EL TENTÁCULO LISO Y SUS PIEZAS DE LA FORJA (la letra
+        //  del usuario: «mejora aun mas las texturas de la sombra de la
+        //  pagina 5, recuerda que es un tentaculo LISO, con ojos y
+        //  colmillos, si lo necesitas siempre puedes crear los ojos y
+        //  los colmillos con la forja o el taller»):
+        //   · LA PIEL se ALISA (TentaculoLiso.png): fuera la sierra
+        //     dorsal, fuera las ventosas, fuera los ridges — la masa
+        //     queda LISA, HÚMEDA y BRILLANTE (la banda especular que
+        //     RESBALA por el lomo).
+        //   · LOS OJOS y LOS COLMILLOS son TEXTURAS DE LA FORJA
+        //     (OjoAbismo.png y ColmilloAbismo.png — la pluma IA + el
+        //     molde de la casa + la plumilla del premultiplicado).
+        // ==================================================================
+
+        private static Asset<Texture2D> _tentaculoLiso;
+        private static Asset<Texture2D> _ojoAbismoTex;
+        private static Asset<Texture2D> _colmilloAbismoTex;
+
+        /// <summary>
+        /// v6.104 — LA PIEL LISA DEL QUINTO TOMO (TentaculoLiso.png,
+        /// 128×512, FORJADA): la MISMA sastrería del Ribbon que la piel
+        /// del abismo (la máscara U que respira, el espejo periódico
+        /// C0 en V — la carne fluye continua con uvFlow — y el
+        /// premultiplicado (q,q,q,q) del lote alfa) pero LISA y HÚMEDA:
+        /// el gradiente de volumen con UNA banda especular a lo largo,
+        /// tonos negro-violeta profundo con reflejos violáceos y UNA
+        /// veta carmesí MUY sutil — SIN ventosas, SIN ridges, SIN
+        /// dientes (la letra: «es un tentaculo LISO»). La viste
+        /// MasaLisa. Null-safe (recargas calientes / sin dispositivo).
+        /// </summary>
+        public static Texture2D TentaculoLiso
+        {
+            get
+            {
+                try
+                {
+                    if (_tentaculoLiso == null)
+                        _tentaculoLiso = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/TentaculoLiso");
+                    return _tentaculoLiso.IsLoaded ? _tentaculoLiso.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>
+        /// v6.104 — EL OJO DE LA FORJA (OjoAbismo.png, 64×64): el ojo
+        /// rasgado de abismo DETALLADO — esclerótica oscura con venas
+        /// carmesí finas, iris radial CARMESÍ→VIOLETA con brillo
+        /// interior, PUPILA DE RENDIJA VERTICAL negra con borde
+        /// incandescente, destello húmedo especular arriba-izquierda.
+        /// Opaco dentro de su forma almendrada, borde fundido a
+        /// transparente, premultiplicado (la convención del lote
+        /// aditivo de la casa). Lo dibuja OjoTexturizado. Null-safe.
+        /// </summary>
+        public static Texture2D OjoAbismo
+        {
+            get
+            {
+                try
+                {
+                    if (_ojoAbismoTex == null)
+                        _ojoAbismoTex = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/OjoAbismo");
+                    return _ojoAbismoTex.IsLoaded ? _ojoAbismoTex.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>
+        /// v6.104 — EL COLMILLO DE LA FORJA (ColmilloAbismo.png, 48×96):
+        /// el colmillo curvo de marfil DETALLADO — base con encía
+        /// oscura/violeta, cuerpo marfil con degradado y veta sutil,
+        /// PUNTA afilada más pálida con la mancha roja sutil del filo.
+        /// Apunta ARRIBA (base ancha abajo, punta arriba, curvado a la
+        /// derecha — la MISMA convención de rotación que
+        /// VFXCore.Colmillo: rot = ángulo + π/2). Premultiplicado.
+        /// Lo dibuja ColmilloTexturizado. Null-safe.
+        /// </summary>
+        public static Texture2D ColmilloAbismo
+        {
+            get
+            {
+                try
+                {
+                    if (_colmilloAbismoTex == null)
+                        _colmilloAbismoTex = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/ColmilloAbismo");
+                    return _colmilloAbismoTex.IsLoaded ? _colmilloAbismoTex.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>Los búferes reutilizables de la masa lisa (cero GC
+        /// por frame — el patrón de las espinas vivas: crecen al
+        /// cambiar el tamaño pedido y NUNCA se re-alocan después).</summary>
+        private static float[] _anchosLisa = new float[32];
+        private static float[] _brilloLisa = new float[32];
+        private static Color[] _tintesLisa = new Color[32];
+
+        /// <summary>
+        /// v6.104 — LA MASA LISA: EL TENTÁCULO LISO DEL QUINTO TOMO.
+        ///
+        /// LA LETRA: «mejora aun mas las texturas de la sombra de la
+        /// pagina 5, recuerda que es un tentaculo LISO, con ojos y
+        /// colmillos». La misma cinta del Ribbon de siempre (el mismo
+        /// PERFIL fusiforme/muscular y la misma RESPIRACIÓN — la forma
+        /// NO cambia, solo el traje) pero vestida con LA PIEL LISA
+        /// (TentaculoLiso.png — la forja + la sastrería del formato):
+        /// SIN sierra dorsal, SIN ventosas, SIN ridges. La piel lisa
+        /// se lee por su BRILLO: la capa nueva de EL BRILLO HÚMEDO (una
+        /// banda especular aditiva, fina y blanco-violácea, que viaja
+        /// un pelo más rápido que la carne — la luz RESBALANDO sobre
+        /// la piel mojada). El VELO que respira y EL BORDE DE ENERGÍA
+        /// violeta→rojo con su pulso viajero SE CONSERVAN ENTEROS: son
+        /// la firma del tomo.
+        ///
+        /// Capas (cada una su propio lote atómico, el contrato de la
+        /// casa): 1 · LA CARNE LISA (lote alfa, tintada BLANCO — la
+        /// piel forjada pone su propio color) → 2 · EL BRILLO HÚMEDO
+        /// (lote aditivo, NUEVA en la v6.104) → 3 · EL VELO (lote
+        /// alfa, ×1.7 tenue) → 4 · EL BORDE DE ENERGÍA (lote aditivo
+        /// con tinte por segmento + el pulso que viaja).
+        /// </summary>
+        public static void MasaLisa(Vector2[] col, float grosorRaiz, float grosorPunta,
+            float alfa, int semilla, float tiempo, float grosorCentro = -1f)
+        {
+            if (col == null || col.Length < 2 || alfa <= 0.02f) return;
+
+            var piel = TentaculoLiso;
+            if (piel == null)
+            {
+                // La piel lisa aún no vive (recarga caliente): la del
+                // abismo la viste mientras vuelve (y si esa tampoco
+                // vive, la masa clásica — la sombra JAMÁS sale desnuda).
+                MasaAbismo(col, grosorRaiz, grosorPunta, alfa, semilla, tiempo, grosorCentro);
+                return;
+            }
+            int n = col.Length;
+            if (n > _anchosLisa.Length)
+            {
+                // los búferes crecen SOLO cuando la espina pide más
+                // puntos que nunca (la primera vez); luego, cero GC.
+                _anchosLisa = new float[n];
+                _brilloLisa = new float[n];
+                _tintesLisa = new Color[n];
+            }
+
+            // === EL PERFIL: el mismo fusiforme (panza) o muscular
+            //     (bulbo + S-taper) de la masa de siempre — LA FORMA
+            //     NO CAMBIA, SOLO EL TRAJE (la letra: el mismo
+            //     tentáculo, LISO) ===
+            for (int i = 0; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                float g;
+                if (grosorCentro > 0f)
+                {
+                    float lineal = MathHelper.Lerp(grosorRaiz, grosorPunta, f);
+                    g = MathHelper.Lerp(lineal, grosorCentro, MathF.Sin(MathF.PI * f));
+                }
+                else
+                {
+                    g = MathHelper.Lerp(grosorRaiz, grosorPunta, f * f * (3f - 2f * f));
+                    g *= 1f + 0.16f * MathF.Exp(-((f - 0.18f) / 0.16f) * ((f - 0.18f) / 0.16f));
+                }
+                // la respiración a lo largo (la ondulación de energía viva)
+                g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
+                _anchosLisa[i] = g;
+                _brilloLisa[i] = g * 0.4f;         // la banda especular: FINA
+            }
+
+            // === CAPA 1 · LA CARNE LISA (la cinta que TAPA — lote
+            //     alfa; tintada BLANCO: la piel forjada pone SU color) ===
+            VFXCore.Begin();
+            VFXCore.Ribbon(col, _anchosLisa, Alfa(Blanco, alfa), piel,
+                uvFlow: tiempo * 0.05f);
+            VFXCore.FlushAlpha();
+
+            // === CAPA 2 · EL BRILLO HÚMEDO (v6.104 — NUEVA, lote
+            //     aditivo): la banda especular que RESBALA por el lomo
+            //     — el «wet look» del tentáculo LISO. Una cinta FINA
+            //     (anchos ×0.4, replegada del borde) tintada
+            //     blanco-violáceo que viaja con su propio uvFlow (un
+            //     pelo más rápido que la carne: la luz CORRE sobre la
+            //     piel mojada) y con su propia onda que sube hacia la
+            //     punta. La textura trae la banda especular horneada —
+            //     esta pasada la ENCIENDE en cualquier fondo. ===
+            for (int i = 0; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                float resbala = 0.55f + 0.45f * MathF.Sin(
+                    tiempo * 3.1f - f * 12f + semille(semilla) * 6.28f);
+                Color c = Color.Lerp(Blanco, Violeta, 0.35f);
+                _tintesLisa[i] = Alfa(c, (0.09f + 0.13f * f) * alfa * resbala);
+            }
+            VFXCore.Begin();
+            VFXCore.RibbonTinted(col, _brilloLisa, _tintesLisa, piel,
+                uvFlow: tiempo * 0.11f, edgeInset: 0.22f);
+            VFXCore.FlushAdditive();
+
+            // === CAPA 3 · EL VELO (el borde que respira — ×1.7, tenue;
+            //     el mismo de la masa del abismo: la firma del tomo) ===
+            VFXCore.Begin();
+            VFXCore.Ribbon(col, _anchosLisa, Alfa(Negro, alfa * 0.35f), piel,
+                uvFlow: tiempo * 0.05f, edgeOutset: 0.35f);
+            VFXCore.FlushAlpha();
+
+            // === CAPA 4 · EL BORDE DE ENERGÍA (aditivo, por segmento):
+            //     violeta en la raíz → ROJO SANGRE en la punta + el
+            //     PULSO que VIAJA raíz→punta — INTACTO (la firma) ===
+            for (int i = 0; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                Color c = Color.Lerp(Violeta, Rojo, MathF.Pow(f, 1.3f));
+                float pulso = 0.55f + 0.45f * MathF.Sin(tiempo * 4.2f - f * 9f + semille(semilla) * 6.28f);
+                _tintesLisa[i] = Alfa(c, (0.10f + 0.16f * f) * alfa * pulso);
+            }
+            VFXCore.Begin();
+            VFXCore.RibbonTinted(col, _anchosLisa, _tintesLisa, piel,
+                uvFlow: tiempo * 0.05f, edgeInset: 0.40f);
+            VFXCore.FlushAdditive();
+        }
+
         /// <summary>El charco de sombra del que nace todo (el ancla en el suelo).</summary>
         public static void Charco(Vector2 pos, float radio, float alfa, float tiempo, int semilla)
         {
@@ -547,6 +777,118 @@ namespace AethonMod.Content.VFX
                 Vector2 m = mirada.LengthSquared() < 0.01f ? Vector2.Zero : Vector2.Normalize(mirada) * tamaño * 0.18f;
                 VFXCore.Quad(pos + m, Alfa(Rojo, 0.95f * a), new Vector2(tamaño * 0.34f, tamaño * 0.40f));
             }
+        }
+
+        /// <summary>
+        /// v6.104 — EL OJO TEXTURIZADO DE LA FORJA: el mismo contrato
+        /// del <see cref="Ojo"/> clásico pero vestido con LA TEXTURA
+        /// de la forja (OjoAbismo.png — la letra del usuario: «si lo
+        /// necesitas siempre puedes crear los ojos y los colmillos con
+        /// la forja o el taller»): la esclerótica oscura con sus venas
+        /// carmesí, el iris radial CARMESÍ→VIOLETA con su brillo
+        /// interior y LA RENDIJA VERTICAL con su borde incandescente.
+        ///
+        /// EL PATRÓN OJO DE LA CASA: este método SOLO AÑADE CUADROS al
+        /// lote ADITIVO ABIERTO del llamador (VFXCore.Begin() …
+        /// FlushAdditive()) — como el Ojo clásico: así los once ojos
+        /// del cuerpo y la corona entera comparten UN SOLO vuelco (el
+        /// presupuesto de la casa manda) y los halos previos del
+        /// llamador NUNCA se pierden (un Begin() aquí dentro limpiaría
+        /// el búfer del llamador — la lección del contrato de lotes).
+        ///
+        /// LA VIDA DEL OJO: el ojo GIRA hacia la presa (±0.35 rad — la
+        /// rendija se inclina hacia lo que mira: LOS OJOS TE SIGUEN)
+        /// y se desplaza un pelo hacia ella; EL PARPADEO aplasta la
+        /// escala Y (×0.15..1 con «abierto»); EL HALO rojo-violeta
+        /// (0.18×abierto, SoftGlow — el cuadro sin textura del lote
+        /// aditivo) hace que la esclerótica oscura PRENDA en cualquier
+        /// fondo. Null-safe: sin textura (recarga caliente) cae al
+        /// ojo rasgado procedural de siempre.
+        /// </summary>
+        /// <param name="tamaño">Ancho en px (la textura es cuadrada: 64×64).</param>
+        /// <param name="mirada">Vector hacia la presa (gira y se desplaza hacia ella).</param>
+        /// <param name="abierto">0..1 — el parpadeo (≤0.03: NO se dibuja).</param>
+        /// <param name="textura">La textura de la forja (null = la rasgada de siempre).</param>
+        public static void OjoTexturizado(Vector2 pos, float tamaño, Vector2 mirada,
+            float abierto, Texture2D textura)
+        {
+            if (abierto <= 0.03f || tamaño <= 0.5f) return;   // cerrado: NO existe
+            float a = MathHelper.Clamp(abierto, 0f, 1f);
+
+            if (textura == null || textura.IsDisposed)
+            {
+                // La forja aún no carga (recarga caliente): el ojo
+                // rasgado procedural de siempre — la sombra JAMÁS
+                // se queda ciega.
+                Ojo(pos, tamaño, mirada, a, pupila: true, rasgada: true);
+                return;
+            }
+
+            // EL HALO rojo-violeta — el ojo PRENDE en cualquier fondo
+            // (la esclerótica oscura del abismo sola no basta: sin esto
+            // el ojo se pierde sobre las sombras de la masa).
+            Color halo = Color.Lerp(Rojo, Violeta, 0.45f);
+            VFXCore.Quad(pos, Alfa(halo, 0.18f * a), new Vector2(tamaño * 2.1f, tamaño * 1.6f));
+
+            // LA MIRADA — el ojo GIRA hacia la presa (±0.35 rad: la
+            // rendija se inclina; el gesto de quien mira DEMASIADO) y
+            // se desplaza un pelo hacia ella (como el ojo clásico).
+            Vector2 dir = mirada.LengthSquared() < 0.01f ? Vector2.Zero : Vector2.Normalize(mirada);
+            float giro = MathHelper.Clamp(dir.X * 0.35f, -0.35f, 0.35f);
+            Vector2 posOjo = pos + dir * tamaño * 0.10f;
+
+            // EL PARPADEO — la escala Y aplasta el ojo (×0.15..1: el
+            // cierre seco lo aplasta sin desplazarlo; la rendija muere
+            // de golpe, como abren los ojos de la sombra).
+            float alto = tamaño * MathHelper.Clamp(a, 0.15f, 1f);
+
+            // EL OJO DE LA FORJA (lote aditivo: el iris y el filo
+            // incandescente SUMAN; la rendija negra NO alumbra y se
+            // lee como el vacío que es, sobre el halo detrás).
+            VFXCore.Quad(posOjo, Alfa(Blanco, 0.97f * a),
+                new Vector2(tamaño, alto), giro, textura);
+        }
+
+        /// <summary>
+        /// v6.104 — EL COLMILLO TEXTURIZADO DE LA FORJA: la aguja de
+        /// marfil DETALLADA (ColmilloAbismo.png — la encía violeta en
+        /// la base, el degradado del marfil, la punta pálida con su
+        /// mancha roja sutil) apuntando en <paramref name="angulo"/>.
+        /// La textura apunta ARRIBA (48×96, curvada a la derecha — la
+        /// MISMA convención de VFXCore.Colmillo): rot = angulo + π/2,
+        /// y el aspecto 1:2 se respeta (X = largo×0.5, Y = largo).
+        ///
+        /// EL PATRÓN OJO DE LA CASA (mismo contrato): SOLO AÑADE al
+        /// lote ADITIVO ABIERTO del llamador — las dos mandíbulas
+        /// enteras comparten UN solo vuelco.
+        /// Null-safe: sin textura cae al colmillo horneado
+        /// (VFXCore.Colmillo, 48×48) con SU aspecto (X = largo×0.42).
+        /// </summary>
+        /// <param name="largo">Largo en px del colmillo.</param>
+        /// <param name="angulo">Rumbo al que apunta la punta.</param>
+        /// <param name="alfa">0..1 (el tinte blanco de la casa).</param>
+        /// <param name="textura">La textura de la forja (null = el horneado).</param>
+        public static void ColmilloTexturizado(Vector2 pos, float largo, float angulo,
+            float alfa, Texture2D textura)
+        {
+            if (largo <= 0.5f || alfa <= 0.02f) return;
+
+            if (textura == null || textura.IsDisposed)
+            {
+                // El respaldo de siempre: la aguja horneada 48×48 de
+                // VFXCore (con SU aspecto 0.42 — el de toda la vida).
+                var hueso = VFXCore.Colmillo;
+                if (hueso == null) return;
+                VFXCore.Quad(pos, Alfa(Blanco, alfa), new Vector2(largo * 0.42f, largo),
+                    angulo + MathHelper.PiOver2, hueso);
+                return;
+            }
+
+            // LA AGUJA DE LA FORJA — la textura apunta ARRIBA: la
+            // rotación suma el π/2 de la convención de la casa, y el
+            // aspecto 48×96 (1:2) se respeta: X = largo×0.5, Y = largo.
+            VFXCore.Quad(pos, Alfa(Blanco, alfa), new Vector2(largo * 0.5f, largo),
+                angulo + MathHelper.PiOver2, textura);
         }
 
         /// <summary>

@@ -528,16 +528,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // MOVIMIENTO, no por la luz.
                     ImpactoLib.GolpeDeCine(Projectile.Center, 1.25f, 6, suave: true, destello: false);
 
-                    // v6.78 — EL ESTALLIDO DE CALOR (la letra: «aberración
-                    // cromática en el estallido»): el golpe de aire
-                    // caliente — el anillo que se expande + el split R/B
-                    // de la lente (CalorLib viaja en SU filtro de cadena,
-                    // activo desde la carga: el fade ±1 s del filtro
-                    // maduró hace rato y el estallido llega a PLENITUD).
-                    // SOLO el arma-C — la ira del grimorio NO hierve el
-                    // aire (la letra: el calor es del rayo de prueba C).
-                    if (!EsIra)
-                        CalorLib.Estallido(Projectile.Center, 26f, 460f);
+                    // v6.78 — EL ESTALLIDO DE CALOR — v6.104 — MUERTO con
+                    // la letra nueva («al arma de rayo de prueba C quitale
+                    // la turbulencia esa que es como calor»): el golpe de
+                    // aire caliente de la IGNICIÓN (el anillo + el split
+                    // R/B de CalorLib) se BORRA también — el arma-C se
+                    // enciende y se apaga LIMPIA (queda el golpe de cine
+                    // de ImpactoLib, que es movimiento, no calor).
                 }
             }
 
@@ -632,41 +629,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
             // ============================================================
             //  v6.78 — EL AIRE QUE HIERVE (la letra: «ondas de calor alrededor
             //  del haz, como una distorsión de calor») — v6.89 — EL CALOR
-            //  ES SOLO EL HAZ (la letra: «la turbulencia en el arma de
-            //  prueba c debe solo afectar al haz en si, solo al proyectil
-            //  y nada mas»): la cápsula única (boca ×1,35 sobre un
-            //  StripWidth que ya mide ~850 px) ponía el hervor ALREDEDOR
-            //  DEL PERSONAJE — su blob más ancho y más saturado caía sobre
-            //  el jugador, mientras el conducto REAL (que se abre en
-            //  cónico hasta ×3,4 a mitad de camino) apenas hervía. LA
-            //  CURA: CUATRO SEGMENTOS que trazan la GEOMETRÍA REAL del
-            //  conducto — cada segmento lleva SU boca y SU punta
-            //  (StripWidth en SUS fronteras + 10 % de aire pegado) y el
-            //  largo es el del conducto DIBUJADO (0,5 + 0,5·carga, la
-            //  MISMA ley de la pila de capas): el hervor vive SOBRE el
-            //  haz, de borde a borde del conducto — y NADA más.
+            //  ES SOLO EL HAZ — v6.104 — EL CALOR MUERE (la letra nueva:
+            //  «al arma de rayo de prueba C quitale la turbulencia esa
+            //  que es como calor creo que es una libreria de calor»): la
+            //  distorsión de CalorLib sobre el conducto del ARMA-C se
+            //  BORRA ENTERA — el conducto onírico queda LIMPIO (su pila
+            //  de capas no cambia: bruma, doble glow, alma, núcleo y
+            //  soles siguen intactos; solo el AIRE deja de hervir).
+            //  (CalorLib sigue VIVO para el resto de la casa — el
+            //  estandarte del juicio sigue hirviendo SU aire.)
             // ============================================================
-            if (!EsIra && !Main.dedServ && Time >= ChargeTime - 20 && Time < ChargeTime + LaserDuration + 45)
-            {
-                float kCalor = Utils.GetLerpValue(ChargeTime - 30, ChargeTime + 70, Time, true)
-                    * Utils.GetLerpValue(ChargeTime + LaserDuration + 60, ChargeTime + LaserDuration, Time, true);
-                if (kCalor > 0.01f)
-                {
-                    Vector2 dirCalor = Projectile.rotation.ToRotationVector2();
-                    float largo = LargoCono * (0.5f + 0.5f * kCalor);
-                    float[] cortes = { 0f, 0.28f, 0.55f, 0.78f, 0.985f };
-                    for (int s = 0; s < 4; s++)
-                    {
-                        float p0 = cortes[s], p1 = cortes[s + 1];
-                        float ancho0 = MathF.Max(30f, StripWidth(p0) * 1.10f);
-                        float ancho1 = MathF.Max(18f, StripWidth(p1) * 1.10f);
-                        Vector2 a = Projectile.Center + dirCalor * (largo * p0);
-                        Vector2 b = Projectile.Center + dirCalor * (largo * p1);
-                        if ((b - a).Length() < 16f) continue;
-                        CalorLib.Haz(a, b, ancho0, ancho1, 1.25f * kCalor);
-                    }
-                }
-            }
+            // v6.104 — EL BLOQUE DE CALOR MURIÓ con la letra nueva: los
+            // cuatro segmentos de CalorLib.Haz que vestían el conducto
+            // del arma-C se BORRARON ("quitale la turbulencia esa que es
+            // como calor"). El conducto queda limpio.
 
             Projectile.localAI[0] += 1f;
 
@@ -688,14 +664,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 DefinitivasLib.Sonar(SoundID.Item34.WithPitchOffset(-0.4f), Projectile.Center);
                 OndaLib.Kick(6f, 10);
 
-                // v6.78 — EL ÚLTIMO SUSPIRO DE CALOR: el conducto muere y el
-                // aire exhala una vez (el eco del estallido — un tercio de
-                // la fuerza). Solo el arma-C.
-                // v6.85 — FUERZA 10 → 16 y radio 300 → 320: la aberración
-                // del suspiro ahora SE VE (10 px de split R/B era el límite
-                // de lo perceptible; 16 px es un destello de lente claro).
-                if (!EsIra && !Main.dedServ)
-                    CalorLib.Estallido(Projectile.Center, 16f, 320f);
+                // v6.78 — EL ÚLTIMO SUSPIRO DE CALOR — v6.104 — MUERTO con
+                // la letra nueva («quitale la turbulencia esa que es como
+                // calor»): la aberración cromática del suspiro se BORRA
+                // también — el arma-C se apaga LIMPIA.
             }
 
             Time++;

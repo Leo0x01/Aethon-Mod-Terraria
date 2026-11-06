@@ -322,7 +322,19 @@ namespace AethonMod.Content.Weapons
                     }
                 case 11: return new Color(255, 205, 92);  // Mítico — el oro clásico
                 case 12: return new Color(255, 220, 110); // Legendario — oro brillante
-                case 13: return new Color(178, 120, 235); // Supremo — (lo pinta el PreDraw)
+                case 13:
+                    {
+                        // v6.104 — EL SUPREMO RESPIRA CON SU TRAJE: el color
+                        // del peldaño ES EL RELLENO del traje supremo de
+                        // NombreEternoGlobalItem (el morado-negro que late
+                        // — la MISMA fórmula) — la barra rápida y el tooltip
+                        // respiran JUNTOS, un solo corazón.
+                        float tS = Main.GlobalTimeWrappedHourly;
+                        float latido = 0.5f + 0.5f * MathF.Sin(tS * 1.35f);
+                        Color morado = new Color(122, 44, 198);
+                        Color negrura = new Color(16, 6, 34);
+                        return Color.Lerp(negrura, morado, 0.35f + 0.65f * latido);
+                    }
                 default: return new Color(198, 198, 198);
             }
         }
@@ -983,12 +995,25 @@ namespace AethonMod.Content.Weapons
             //     paréntesis SIEMPRE AL FINAL del nombre es SU ETIQUETA DE
             //     ESCALERA — Común → Raro → Épico → Mítico → Legendario →
             //     y 50 niveles después LA EXCLUSIVA DEL MOD: Legendario
-            //     Supremo (cada 11 niveles un peldaño). El TEXTO vive en el
-            //     nombre del item (SetNameOverride en UpdateInventory y al
-            //     nacer en AlmaEternoGlobalItem.OnSpawn — se ve en el
-            //     tooltip, en el chat de recogida, en todas partes); aquí
-            //     se le viste SU COLOR de escalera (el Supremo lo dibuja
-            //     entero NombreEternoGlobalItem). ===
+            //     Supremo (cada 11 niveles un peldaño). El TEXTO vive en
+            //     el nombre del item (SetNameOverride en UpdateInventory y
+            //     al nacer en AlmaEternoGlobalItem.OnSpawn — se ve en el
+            //     tooltip, en el chat de recogida, en todas partes).
+            //     v6.104 — EL COLOR ES DE LA RAREZA SOLA (la letra: «el
+            //     color con los efectos a veces no coincide el de la
+            //     barra de acceso rapido con el que se muestra en el
+            //     inventario»): el OverrideColor de aquí era UNA FOTO del
+            //     color tomada al construir el tooltip — mientras la
+            //     barra rápida dibuja con la RAREZA que respira EN VIVO
+            //     (los peldaños Místico y Supremo LATE): dos colores
+            //     desincronizados. MUERE el OverrideColor — el nombre del
+            //     tooltip se pinta con LA RAREZA (LegendarioSupremo:
+            //     EL COLOR DE SU PELDAÑO en vivo, la MISMA fuente de la
+            //     barra) y los colores vivos quedan sincronizados por
+            //     construcción. (El TRAJE SUPREMO de
+            //     NombreEternoGlobalItem sigue siendo el premio del
+            //     peldaño final — y SU relleno ahora ES el color del
+            //     peldaño.) ===
             try
             {
                 int idxEtiqueta = IndiceEtiqueta(sl?.Level ?? 1);
@@ -1002,7 +1027,6 @@ namespace AethonMod.Content.Weapons
                     // paréntesis se pone aquí, SIN duplicarlo)
                     if (!tooltips[i].Text.EndsWith(etiquetaTxt))
                         tooltips[i].Text = tooltips[i].Text + " " + etiquetaTxt;
-                    tooltips[i].OverrideColor = ColorEtiqueta(idxEtiqueta);
                     break;
                 }
             }

@@ -850,6 +850,9 @@ namespace AethonMod.Content.Items.Bolsas
             // «todos los items creados con estas investigaciones ponlos en
             // una nueva bolsa y dáselas al jugador».
             l.Add((ModContent.ItemType<BolsaInvestigaciones>(), 1));
+            // v6.104 — LA BOLSA DE LAS AURAS (bolsa 27 del cofre): el
+            // material de investigación de auras de la letra nueva.
+            l.Add((ModContent.ItemType<BolsaAuras>(), 1));
             // v6.100 — LA BOLSA DEL TALLER MURIÓ con el taller entero (la
             // letra: las armas de la bolsa del taller y las de las tres
             // casas SE BORRAN). Sus dos favoritos (Coro y Pluma) y la
@@ -962,6 +965,48 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
             l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
+            return l;
+        }
+    }
+
+    // ======================================================================
+    //  v6.104 — LA BOLSA DE LAS AURAS (bolsa 27): EL MATERIAL DE
+    //  INVESTIGACIÓN DE AURAS (la letra del usuario: «ademas todas estas
+    //  cosas nuevas ponlas en una nueva bolsa, esto sera material de
+    //  investigacion de auras»): el Aura de Juicio (el puerto fiel del
+    //  estandarte de guerra que arde — mecánica y técnica de Warbanner
+    //  of the Righteous, arte 100% de la casa), el Estandarte del Juicio
+    //  (la investigación del vacío exterior) y LAS CINCO FORMAS
+    //  ASCENDIDAS (las auras vivas del portador) — TODO lo que AURA en
+    //  un solo kit de estudio.
+    // ======================================================================
+    public class BolsaAuras : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Auras";
+
+        protected override string NombreCorto => "Bolsa de las Auras";
+
+        protected override Color ColorFiesta => new Color(255, 200, 90);
+
+        protected override string Nota => "El material de investigación de auras";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // v6.104 — EL AURA DE JUICIO (el puerto fiel del Warbanner of
+            // the Righteous: mecánica y técnica, arte 100% de la casa —
+            // la regla permanente: todo lo nuevo llega DIRECTO y en SU
+            // bolsa).
+            l.Add((ModContent.ItemType<Accessories.AuraDeJuicioItem>(), 1));
+            // EL ESTANDARTE DEL JUICIO (la investigación del vacío
+            // exterior — la otra ala del estudio de auras).
+            l.Add((ModContent.ItemType<Accessories.EstandarteDelJuicioItem>(), 1));
+            // LAS CINCO FORMAS ASCENDIDAS (las auras vivas del portador).
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDosItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaTresItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
             return l;
         }
     }
