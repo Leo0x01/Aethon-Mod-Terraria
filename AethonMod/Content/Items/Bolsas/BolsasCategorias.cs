@@ -672,6 +672,14 @@ namespace AethonMod.Content.Items.Bolsas
             // iris rojo gigante con su pupila que se dilata al morder).
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina3>(), 1));
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina4>(), 1));
+            // v6.101 — EL QUINTO TOMO (la letra: «crea la sombra de la
+            // pagina 5, pero lo que tienes que cambiar es la textura del
+            // tentaculo sus ojos y dientes»): EL TENTÁCULO DEL ABISMO
+            // MORDAZ — once ojos rasgados parpadeando cada uno a su
+            // ritmo, la sierra doble de colmillos y LA FAUCE que jadea,
+            // se abre enorme y TRITURA (llega también DIRECTO en el
+            // regalo de pruebas — la bolsa es la vía de repuesto).
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina5>(), 1));
             // v6.50.102 — LA TINTA VIVA MURIÓ (la letra del usuario:
             // «borra también tinta viva»): su Grieta de Tinta sigue viva
             // en el grimorio que la abrió — el disparo pertenece al libro.

@@ -75,8 +75,11 @@ namespace AethonMod.Content.Tiles
         /// altar mide 2×3 tiles: 34×50, arte hasta el suelo).</summary>
         private const int ALTO_MARCO = 50;
 
-        /// <summary>CUÁNTOS marcos tiene la lámina (el latido completo).</summary>
-        private const int MARCOS = 4;
+        /// <summary>CUÁNTOS marcos tiene la lámina (v6.101 — EL ALTAR
+        /// NUEVO: la tira creció de 4 a 6 marcos para el ciclo completo
+        /// del vórtice girando 60° por marco + el ciclo parejo de las
+        /// llamas + la chispa que sube).</summary>
+        private const int MARCOS = 6;
 
         /// <summary>v6.97 — EL MARCO VIVO: la propiedad de la era 2026
         /// (0 = sin animación; 54 = los CUATRO marcos de la lámina — el

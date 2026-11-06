@@ -1,3 +1,33 @@
+# v6.101 — LA COPIA FIEL — EL ESTANDARTE 1:1 CON LA QUEMADURA DEL VACÍO EXTERIOR + LA SOMBRA DE LA PÁGINA V + EL ALTAR NUEVO
+
+> **BUILD VERIFICADA — PENDIENTE PUBLICAR** — .tmod v6.101 (md5 `0525ee1a11d431d683ac3f0ab2e3b2b9`, 11.292.554 B, 496 entradas) — **LA COPIA FIEL**: el estandarte ya no es la «bendición dorada» de la v6.100 — ES EL EFECTO DEL ORIGINAL: radio pequeño (300 px), un aura que QUEMA con llamas negras y FRENA a los enemigos cuanto más se acercan, cada enemigo ardiendo CADA VEZ MÁS con su CAPA DE RESISTENCIA de meteoro entrando a la atmósfera (manto de partículas + cresta de choque + estelas de ablación, todo morado y negro) — y mientras un enemigo arde, el portador cobra el VACÍO EXTERIOR (+10% ataque, +10 defensa, −15% maná). **LA INVESTIGACIÓN DEL GRIMORIO**: el debuff QuemaduraVacioExterior + el buff VacioExterior + el motor completo (VacioGlobalNPC: DoT, freno y capa) viven del LADO DEL DEBUFF — cualquier fuente que aplique la quemadura hereda el paquete entero. **ADEMÁS**: la cura del client.log (el End() huérfano de La Última Palabra, línea 422 — la excepción silenciosa del Acto I), LA SOMBRA DE LA PÁGINA V (el tentáculo del abismo mordaz: once ojos rasgados que parpadean cada uno a su ritmo, la sierra doble de colmillos y LA FAUCE que jadea y tritura) y EL ALTAR NUEVO (6 marcos: el vórtice GIRANDO 60° por marco, las velas en contrafase, las runas pulsando, la chispa subiendo — QA VLM 8.5/10 «Ship it») — oráculo 0/0 (437 .cs), **-build REAL 0/0**, guardián **TODO VIVE ✔** (415 clases), .tmod 496 entradas EOF exacto, hjson ×3 paquete==fuente byte a byte, **headless 0 EXCEPCIONES** (Finalizing Content v6.101 → Server started).
+
+## LA LETRA (el usuario)
+
+«lo que tienes que hacer es copiarlo 1 a 1, ya que lo mas importante es el efecto, un radio de accion pequeño, un aura que quema a los enemigos y los vuelve mas lento cuanto mas se acercan al jugador, cada enemigo que entre al radio de efecto del estandarte se quema y visualmente se nota como cada vez se quema mas y como varias particulas crean algo asi como una capa de resistencia igual a la de los meteoritos entrando a la atmosfera y todo con energia morada y negra»
+
+## EL EFECTO COPIADO (qué hace el estandarte AHORA)
+
+1. **EL RADIO PEQUEÑO** — 300 px (18-19 tiles): la v6.100 abarcaba 720 — el original es un aura ÍNTIMA.
+2. **LA QUEMADURA DEL VACÍO EXTERIOR** — cada impío que entra al radio arde con el debuff de LLAMAS NEGRAS (timer 180 del original: sigue ardiendo ya fuera); el daño escala ×1→×3 por cercanía (la técnica Remap del original) × la rampa del tiempo (cada segundo ardiendo lo enciende, hasta ×1.5) × el despertar del dueño.
+3. **LA LENTITUD** — cuanto más se acercan, más lento caminan (×1 en el borde → ×0.55 pegado al cuerpo); vive en PostAI: pisa DESPUÉS de la IA y frena a caminantes Y voladores.
+4. **EL PAGO AL DUEÑO** — mientras CUALQUIER enemigo arda con su quemadura, el portador cobra VACÍO EXTERIOR: +10% a TODO el ataque, +10 defensa, −15% maná — y él también «arde» (llamas negras de violeta lamiéndolo).
+5. **LA CAPA DE RESISTENCIA** — el frente de ablación del meteoro: MANTO de 16 partículas alrededor del cuerpo (más brillante en la cara que avanza), CRESTA DE CHOQUE comprimida delante y ESTELAS que se desprenden hacia atrás — TODO morado y negro, creciendo con la rampa visual (2 s ardiendo = intensidad plena).
+
+## PARA VERIFICAR EN JUEGO (la checklist)
+
+1. **Actualiza a la v6.101** (el `.tmod` del release → carpeta Mods) — verifica en la lista de mods que diga **6.101**.
+2. **EL ESTANDARTE**: equípalo y acércale un enemigo — arde con llamas negras (el ícono del debuff en su barra), CAMINA CADA VEZ MÁS LENTO al acercarse, y su capa de partículas moradas crece segundo a segundo; TU barra de buffs muestra VACÍO EXTERIOR mientras él arda.
+3. **LA ÚLTIMA PALABRA**: úsala — el Acto I (la carga del libro) ya no lanza la excepción silenciosa del client.log.
+4. **LA SOMBRA DE LA PÁGINA V**: llega DIRECTO al entrar al mundo — once ojos que parpadean a su ritmo, la sierra de colmillos, y LA FAUCE que se abre ENORME sobre la presa y tritura al morder.
+5. **EL ALTAR**: colócalo — el vórtice GIRA, las dos velas bailan en contrafase, las runas pulsan y la chispa sube (6 marcos, ciclo de ~0.7 s).
+
+## LA LECCIÓN (sellada en el código)
+
+El efecto de un ítem de investigación vive DEL LADO DEL EFECTO (el debuff), no del arma que lo aplica: QuemaduraVacioExterior + VacioGlobalNPC forman el paquete completo (DoT, freno, capa, pago al dueño) — el estandarte solo lo APLICA. Cuando el grimorio llegue a sus niveles altos, aplicará la misma quemadura a todos los enemigos y heredará TODO sin escribir una línea nueva.
+
+---
+
 # v6.100.2 — LA ENTREGA COMPLETA — LA SOMBRA DE LA PÁGINA IV RE-FORJADA YA LLEGA DIRECTO
 
 > **BUILD VERIFICADA — PENDIENTE PUBLICAR** — .tmod v6.100.2 (md5 `1d75b914c4117a237b09ece4c9b42747`, 11.286.228 B, 493 entradas) — **LA ENTREGA**: la v6.100 re-forjó completa la Sombra de la Página IV (la garganta del vórtice como boca girando con el rumbo, velo de ruido, anillo de tinta doble, icono re-forjado — 617 líneas de proyectil) pero solo la dejaba en la Bolsa de las Sombras. La regla de la casa es la regla: **lo re-forjado ES lo nuevo, y lo nuevo llega DIRECTO** — una sola línea en `ShardPlayer.EntregarRegaloDePruebas` (justo tras la Página II), la lista queda en **17 ítems directos** y TODA la creación nueva de la casa queda cubierta. **QUIRÚRGICO**: ni una coma de la interfaz de usuario se tocó — la cura v6.100.1 de la interfaz rota viaja INTACTA dentro de esta versión — oráculo 0/0 (423 .cs), **-build REAL 0/0**, **DLL DECOMPILADA** (la entrega lista las 17 con `SombraDeLaPagina4` tras `SombraDeLaPagina2` · GetItemDrawFrame VIVE · `MarcoVivo` x0 · `itemFrame` x0), guardián **TODO VIVE ✔** (411 clases), hjson es-ES == es-MX en claves y valores (1556 planas c/u) con 0 claves del español faltando en el en-US, headless **0 excepciones** (Selected AethonMod 6.100.2 → Mod Load Completed).

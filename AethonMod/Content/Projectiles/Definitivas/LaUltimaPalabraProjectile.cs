@@ -418,8 +418,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                         // EL LIBRO REAL — el sprite del Grimorio del Eterno
                         // flotando abierto (lote ambiente, con su vaivén).
+                        // v6.101 — LA CURA DEL client.log: el End() huérfano
+                        // que vivía aquí mataba el Acto I CADA FRAME — el
+                        // bloque del motor de arriba (Begin→Draw→End) ya
+                        // había cerrado el lote y este segundo End lanzaba
+                        // «End was called, but Begin has not yet been
+                        // called» (la excepción silenciosa del log). EL
+                        // CONTRATO de la casa: CerrarLoteSiAbierto() deja
+                        // el lote CERRADO y cada bloque abre/cierra lo
+                        // SUYO — jamás un End sin su Begin.
                         Texture2D libro = ItemTex(ModContent.ItemType<GrimoireEternal>());
-                        sb.End();
                         sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);

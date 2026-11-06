@@ -738,21 +738,22 @@ Items: {
 		DisplayName: Estandarte del Juicio
 		Tooltip:
 			'''
-			El estandarte de la Casa Sagrada ondea en tu espalda: los impíos que se
-			acerquen ARDEN. Cuanto más cerca, más duele.
+			El estandarte ondea en tu espalda: los enemigos que entren en su radio íntimo
+			ARDEN con la Quemadura del Vacío Exterior — y cuanto más se acercan,
+			más arden y más lento caminan.
 			'''
-		Titulo: "[c/FFD54F:═══ EL ESTANDARTE DEL JUICIO ═══]"
+		Titulo: "[c/B46CFF:═══ EL ESTANDARTE DEL JUICIO ═══]"
 		Linea1:
 			'''
-			[c/FFF8E0:El aura del juicio te rodea: los impíos que se acerquen arden,
-			y su brillo delata su culpa — cuanto más cerca del estandarte, más intensa la llama]
+			[c/EDE0FF:El vacío exterior respira en un radio íntimo alrededor del portador:
+			cada enemigo que entra ARDE con la Quemadura del Vacío Exterior]
 			'''
-		Linea2: "[c/FFC107:El daño crece con la proximidad (hasta ×2,5) y se arma mientras permanezcan (+8%/s, hasta +80%)]"
-		Linea3: "[c/FFC107:Cada juicio quema con la Llama del Alba y repele al que osa tocar al portador]"
+		Linea2: "[c/9B4DFF:Cuanto más se acercan, más se queman (hasta ×3) y más LENTOS caminan: la resistencia del vacío los frena]"
+		Linea3: "[c/9B4DFF:Mientras un enemigo arda, el portador cobra el VACÍO EXTERIOR: +10% ataque, +10 defensa, −15% maná]"
 		Linea4:
 			'''
-			[c/78788C:La base del juicio escala con tu nivel de despertar.
-			Firmado por el motor de capas de la casa — el aura que nunca pudimos crear, resucitada]
+			[c/78788C:La quemadura escala con tu nivel de despertar.
+			La investigación del debuff que el grimorio heredará en sus niveles altos]
 			'''
 	}
 
@@ -2106,7 +2107,7 @@ Items: {
 		Tooltip: ""
 	}
 
-		SombraDeLaPagina4: {
+	SombraDeLaPagina4: {
 		// v6.100: LA COPIA FORJADA del original (todas las herramientas)
 		DisplayName: La Sombra de la Página IV
 		Tooltip:
@@ -2115,6 +2116,19 @@ Items: {
 			caza al jefe a cualquier distancia, muerde y drena 3% cada 6 t.
 			LA GARGANTA DEL VÓRTICE del motor de píxeles es su boca — el horizonte de sucesos
 			girando en la punta, el velo de ruido por el cuerpo y el anillo de tinta del jefe mordido.
+			A 1 HP: LA DEVORACIÓN (el festín de las sombras).
+			'''
+	}
+	SombraDeLaPagina5: {
+		// v6.101: THE FIFTH TOME — the abyssal maw tendril
+		DisplayName: La Sombra de la Página V
+		Tooltip:
+			'''
+			El quinto tomo: el ritual de siempre con la piel del abismo — ONCE OJOS
+			RASGADOS que parpadean cada uno a su propio ritmo, LA SIERRA DOBLE de
+			colmillos por el lomo y LA FAUCE: mandíbulas que jadean al cazar, se abren
+			ENORME sobre la presa y TRITURAN mordiendo.
+			Caza al jefe a cualquier distancia, muerde y drena 3% cada 6 t.
 			A 1 HP: LA DEVORACIÓN (el festín de las sombras).
 			'''
 	}
@@ -2670,6 +2684,18 @@ Buffs: {
 	JuicioDelAlba: {
 		DisplayName: Llama del Alba
 		Description: El juicio del alba te consume: la luz dorada arde contra los impíos
+	}
+
+	QuemaduraVacioExterior: {
+		// v6.101: THE OUTER VOID BURN — the black-flame research debuff
+		DisplayName: Quemadura del vacío exterior
+		Description: Las llamas negras del vacío te consumen: cuanto más cerca del portador, más ardes y más lento caminas
+	}
+
+	VacioExterior: {
+		// v6.101: THE OUTER VOID — the bearer's reward while an enemy burns
+		DisplayName: Vacío exterior
+		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
 	}
 
 	OcasoActivoBuff: {

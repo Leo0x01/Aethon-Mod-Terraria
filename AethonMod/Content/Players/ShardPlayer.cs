@@ -1310,6 +1310,17 @@ namespace AethonMod.Content.Players
                 // como vía de repuesto para quien lo pierda).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina4>());
+                // v6.101 — LA SOMBRA DE LA PÁGINA V DESDE EL INICIO (la
+                // letra: «crea la sombra de la pagina 5 […] intenta que
+                // se vea mas increible y aterrador» — y la regla
+                // permanente: todo lo nuevo llega DIRECTO al jugador):
+                // el QUINTO TOMO con su piel nueva (once ojos rasgados
+                // que parpadean cada uno a su ritmo, la sierra doble de
+                // colmillos y LA FAUCE que jadea y tritura) entra con el
+                // regalo de pruebas — la Bolsa de las Sombras queda como
+                // vía de repuesto para quien lo pierda.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina5>());
                 // v6.99 — EL ESTANDARTE DEL JUICIO (la regla de la casa:
                 // «todo nuevo ítem debe ser entregado al jugador
                 // directamente»): el accesorio del aura que juzga de la
