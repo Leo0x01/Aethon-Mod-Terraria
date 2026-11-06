@@ -1162,27 +1162,42 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// ¿Es este NPC un objetivo VÁLIDO para el daño manual de la casa
-        /// (escuela A)? v6.31 — LA PETICIÓN LITERAL DEL USUARIO: "que el
-        /// filtro sea el mismo que usan las armas de Terraria base y otros
-        /// mods". ES EL PREDICADO EXACTO de la puerta de daño de vanilla
-        /// (Projectile.cs, la puerta principal proyectil→NPC, medida sobre
-        /// el decompile real):
+        /// (escuela A)? El predicado de la puerta de daño de vanilla
+        /// (Projectile.cs) MÁS LA PUERTA DE PERSECUCIÓN (CanBeChasedBy —
+        /// la que usan TODOS los proyectiles del mod desde siempre):
         /// <code>
         ///   npc.active &amp;&amp; !npc.dontTakeDamage &amp;&amp; !npc.friendly
+        ///   &amp;&amp; npc.CanBeChasedBy()
         /// </code>
+        /// v6.105 — LOS DUMMIES COMO EN TERRARIA NORMAL (la letra:
+        /// «revisa si tocaste el codigo de los dummy en el pasado… en
+        /// caso de haberlos tocado intenta ponerlos justo como deben
+        /// estar en el terraria normal»): LA AUTOPSIA HISTÓRICA — la
+        /// v6.30 añadió al Target Dummy a este filtro a petición de la
+        /// letra de aquella era, y la v6.31 lo arrastró al simplificar
+        /// a !friendly. HOY: CanBeChasedBy() EXCLUYE al Target Dummy
+        /// (immortal — medido contra el NPC.cs.patch de tML) — los
+        /// dummies normales NO son objetivo del mod (los homing no los
+        /// persiguen, las auras no los marcan), SOLO reciben los
+        /// golpes físicos del motor, como en el juego base. EL DUMMY
+        /// NEGRO (DummyNegroNPC) declara CanBeChasedBy[Type]=true y
+        /// por ESTA MISMA PUERTA recibe TODOS los ataques del
+        /// grimorio.
         /// Consecuencias medibles (todas = comportamiento vanilla):
-        ///   · EL TARGET DUMMY CUENTA (muestra números; immortal, su vida
-        ///     jamás baja — exactamente como con las armas base).
-        ///   · Los NPC AMISTOSOS (pueblos, atados) NO reciben daño — igual
-        ///     que una espada base los atraviesa sin herirlos.
-        ///   · Los NPC con dontTakeDamage (escenas/inmunes de evento) se
-        ///     respetan.
-        /// (La vacuna del Guía [type 22 + killGuide] y el gate de i-frames
-        /// por jugador viven en el motor de vanilla; nuestro daño manual
-        /// lleva SU PROPIA cadencia por diseño — los cooldowns de la casa.)
+        ///   · EL TARGET DUMMY NO CUENTA como objetivo (pero el motor
+        ///     le sigue mostrando números con los golpes físicos —
+        ///     exactamente como con las armas base).
+        ///   · Los NPC AMISTOSOS (pueblos, atados) NO reciben daño.
+        ///   · Los NPC con dontTakeDamage (escenas/inmunes de evento)
+        ///     se respetan.
+        /// (La vacuna del Guía [type 22 + killGuide] y el gate de
+        /// i-frames por jugador viven en el motor de vanilla; nuestro
+        /// daño manual lleva SU PROPIA cadencia por diseño — los
+        /// cooldowns de la casa.)
         /// </summary>
         public static bool EsObjetivo(NPC npc)
-            => npc != null && npc.active && !npc.dontTakeDamage && !npc.friendly;
+            => npc != null && npc.active && !npc.dontTakeDamage && !npc.friendly
+               && npc.CanBeChasedBy();
 
         // ==================================================================
         //  v6.31 — EL MOTOR v2: capas de oclusión + janitor + calidad + presupuesto

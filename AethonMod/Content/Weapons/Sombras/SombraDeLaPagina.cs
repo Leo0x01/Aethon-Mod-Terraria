@@ -73,7 +73,12 @@ namespace AethonMod.Content.Weapons.Sombras
             return false;
         }
 
-        /// <summary>El buscador de presas compartido por las tres armas.</summary>
+        /// <summary>El buscador de presas compartido por las tres armas.
+        /// v6.105 — LOS DUMMIES COMO EN TERRARIA NORMAL (la letra: los
+        /// dummies normales ya NO son presa — CanBeChasedBy los excluye,
+        /// como en el juego base; EL DUMMY NEGRO declara
+        /// CanBeChasedBy[Type]=true y por aquí SÍ entra: las sombras del
+        /// grimorio lo cazan, lo muerden y drenan).</summary>
         internal static NPC BuscarPresa(Vector2 desde, bool soloJefes)
         {
             NPC mejor = null;
@@ -83,6 +88,7 @@ namespace AethonMod.Content.Weapons.Sombras
                 NPC n = Main.npc[i];
                 if (n == null || !n.active || n.life <= 0 || n.dontTakeDamage) continue;
                 if (n.friendly || n.townNPC) continue;
+                if (!n.CanBeChasedBy()) continue;   // v6.105: la puerta vanilla (dummy fuera, dummy negro dentro)
                 if (soloJefes && !(n.boss || NPCID.Sets.ShouldBeCountedAsBoss[n.type])) continue;
                 if (!soloJefes && (n.boss || NPCID.Sets.ShouldBeCountedAsBoss[n.type])) continue;
                 float d = Vector2.DistanceSquared(n.Center, desde);

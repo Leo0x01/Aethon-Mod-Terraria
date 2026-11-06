@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Buffs;
+using AethonMod.Content.Items.Accessories;
 using AethonMod.Content.Players;
 using AethonMod.Content.Projectiles;
 using AethonMod.Content.VFX;
@@ -144,8 +145,18 @@ namespace AethonMod.Content.Globals
         public static bool TieneQuemadura(NPC npc) =>
             npc != null && npc.active && npc.HasBuff(ModContent.BuffType<QuemaduraVacioExterior>());
 
-        /// <summary>EL VECTOR hacia el portador de estandarte más cercano
-        /// (Vector2.Zero si no hay nadie vivo portándolo).</summary>
+        /// <summary>v6.105 — ¿El jugador PORTA UN CAMPO DE JUICIO (el
+        /// estandarte del juicio O el aura de juicio 2)? La lentitud y
+        /// la cercanía son del MOTOR COMÚN: cualquier campo que marque
+        /// con la quemadura del vacío exterior frena a los impíos que
+        /// se le acercan.</summary>
+        public static bool PortaCampoDeJuicio(Player p) =>
+            p.GetModPlayer<JuicioPlayer>().EstandarteJuicio ||
+            AuraDeJuicio2Item.LlevaElAura(p);
+
+        /// <summary>EL VECTOR hacia el portador de campo más cercano
+        /// (estandarte o aura de juicio 2 — Vector2.Zero si no hay nadie
+        /// vivo portando uno).</summary>
         private static Vector2 PortadorMasCercano(Vector2 desde)
         {
             Vector2 mejor = Vector2.Zero;
@@ -155,7 +166,7 @@ namespace AethonMod.Content.Globals
                 Player p = Main.player[i];
                 if (p == null || !p.active || p.dead)
                     continue;
-                if (!p.GetModPlayer<JuicioPlayer>().EstandarteJuicio)
+                if (!PortaCampoDeJuicio(p))
                     continue;
                 float d = p.Center.DistanceSQ(desde);
                 if (d < min)
@@ -168,8 +179,9 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>LA CERCANÍA (0..1): la distancia al rectángulo del NPC
-        /// desde el portador más cercano, remapeada del RADIO del
-        /// estandarte (300 px — el borde del vacío) a 40 px (pegado).</summary>
+        /// desde el portador de campo más cercano (estandarte o aura de
+        /// juicio 2), remapeada del RADIO del estandarte (300 px — el
+        /// borde del vacío) a 40 px (pegado).</summary>
         private static float CalcularCercania(NPC npc)
         {
             for (int i = 0; i < Main.maxPlayers; i++)
@@ -177,7 +189,7 @@ namespace AethonMod.Content.Globals
                 Player p = Main.player[i];
                 if (p == null || !p.active || p.dead)
                     continue;
-                if (!p.GetModPlayer<JuicioPlayer>().EstandarteJuicio)
+                if (!PortaCampoDeJuicio(p))
                     continue;
                 Vector2 borde = Vector2.Clamp(p.Center, npc.TopLeft, npc.BottomRight);
                 float d = Vector2.Distance(p.Center, borde);
@@ -205,6 +217,22 @@ namespace AethonMod.Content.Globals
         {
             if (VisualQuemadura <= 0.02f || Main.gameMenu || Main.netMode == NetmodeID.Server)
                 return;
+            // ----------------------------------------------------------
+            //  v6.105 — EL VESTIDO DEL ESTANDARTE ES DEL ESTANDARTE: si el
+            //  impío arde por el AURA DE JUICIO 2 (y su dueño NO porta
+            //  también el estandarte), este vestido SE CALLA — el aura 2
+            //  viste a SUS impíos con SU propio teatro (las partículas
+            //  pequeñas, la bruma y el semicírculo Perlin del ancla). La
+            //  quemadura (dot, llamas del buff, lentitud, pago) corre
+            //  IGUAL: es el motor común.
+            // ----------------------------------------------------------
+            if (DuenoVacio > 0 && DuenoVacio <= Main.maxPlayers)
+            {
+                Player duenoCampo = Main.player[DuenoVacio - 1];
+                if (duenoCampo == null || !duenoCampo.active ||
+                    !duenoCampo.GetModPlayer<JuicioPlayer>().EstandarteJuicio)
+                    return;
+            }
             try
             {
                 VFXCore.CerrarLoteSiAbierto();

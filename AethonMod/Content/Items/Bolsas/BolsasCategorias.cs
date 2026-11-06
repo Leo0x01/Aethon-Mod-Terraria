@@ -998,6 +998,11 @@ namespace AethonMod.Content.Items.Bolsas
             // la regla permanente: todo lo nuevo llega DIRECTO y en SU
             // bolsa).
             l.Add((ModContent.ItemType<Accessories.AuraDeJuicioItem>(), 1));
+            // v6.105 — EL AURA DE JUICIO 2 (la copia silenciosa: el efecto
+            // del estandarte, nada sobre el jugador, partículas pequeñas
+            // moradas y negras + bruma + el semicírculo Perlin — más
+            // material de investigación de auras).
+            l.Add((ModContent.ItemType<Accessories.AuraDeJuicio2Item>(), 1));
             // EL ESTANDARTE DEL JUICIO (la investigación del vacío
             // exterior — la otra ala del estudio de auras).
             l.Add((ModContent.ItemType<Accessories.EstandarteDelJuicioItem>(), 1));

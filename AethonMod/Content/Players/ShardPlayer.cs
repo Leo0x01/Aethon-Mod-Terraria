@@ -1371,6 +1371,15 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Items.Accessories.AuraDeJuicioItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaAuras>());
+                // v6.105 — EL AURA DE JUICIO 2 (la letra: «estos cambios
+                // hazlo en una nueva copia del aura del juicio, que sea
+                // aura del juicio 2»): la copia silenciosa — el efecto del
+                // estandarte, NADA sobre el jugador, partículas pequeñas
+                // moradas y negras + bruma + el semicírculo Perlin sobre
+                // los enemigos — también en la Bolsa de las Auras (la regla
+                // de la casa: DIRECTO).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Accessories.AuraDeJuicio2Item>());
 
                 if (entregados > 0)
                 {

@@ -393,6 +393,15 @@ namespace AethonMod.Content.Globals
             if (npc == null || !npc.active) return;
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
 
+            // === v6.105 — LA HERRAMIENTA NO ES COMIDA: el MUÑECO DE
+            //     PRUEBAS NEGRO jamás entra al festín (el dummy negro
+            //     RECIBE todos los ataques del grimorio — se lo cazan,
+            //     muerden y drenan — pero la devoración es de los jefes:
+            //     el banco de pruebas renace con su vida restaurada y
+            //     NUNCA se congela en la cine del festín) ===
+            if (npc.type == ModContent.NPCType<global::AethonMod.Content.NPCs.DummyNegroNPC>())
+                return;
+
             NPC dueño = DueñoDelPool(npc);
             if (dueño == null || !dueño.active) return;
 

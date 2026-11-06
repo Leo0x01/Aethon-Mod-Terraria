@@ -97,6 +97,16 @@ namespace AethonMod.Content.Players
                 dummies = 99;
             }
 
+            // === v6.105 — LOS 30 MUÑECOS NEGROS (el banco de pruebas del
+            //     grimorio: el mismo sprite del dummy de Terraria normal
+            //     teñido de negro — y ESTOS SÍ reciben todos los ataques
+            //     del grimorio; los dummies normales vuelven a comportarse
+            //     como en el juego base) ===
+            int tipoNegro = ModContent.ItemType
+                <global::AethonMod.Content.Items.Llamados.DummyNegroItem>();
+            if (!HasItem(tipoNegro))
+                GiveItem(tipoNegro, 30);
+
             if (bolsas > 0 && Player.whoAmI == Main.myPlayer)
             {
                 // v6.50.2 — FIX (strings hardcodeados → hjson, regla de la
