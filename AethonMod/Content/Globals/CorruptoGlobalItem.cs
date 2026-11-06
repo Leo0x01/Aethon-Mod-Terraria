@@ -208,6 +208,53 @@ namespace AethonMod.Content.Globals
         //     hook OnCraft en GlobalItem: el callback vive en la receta,
         //     firma (Recipe, Item, List<Item>, Item) verificada al IL). ===
 
+        // === v6.103 — LA ETIQUETA EN LA BARRA RÁPIDA (la letra: «me di
+        //     cuenta que la etiqueta de consagrado solo aparece en el
+        //     inventario y no el barra de acceso rapido del inventario») ===
+        //
+        // LA CAUSA RAÍZ (verificada en el decompile del tML 2026.09.3.1
+        // real — Main.GUIHotbarDrawInner): la barra rápida dibuja el
+        // nombre del ítem seleccionado con AffixName() + DrawString
+        // PLANO — NO pasa por los tooltips, así que la etiqueta que
+        // ModifyTooltips añadía a la línea ItemName JAMÁS llegaba ahí
+        // (y los tags [c/] del degradado se verían como texto crudo).
+        //
+        // LA CURA: Item.SetNameOverride — el NOMBRE mismo de la
+        // instancia lleva la etiqueta «(Consagrado)» en TEXTO PLANO, y
+        // como Name es LA FUENTE ÚNICA (HoverName del tooltip ·
+        // AffixName de la barra rápida · el hover del cursor), la
+        // etiqueta aparece EN TODAS PARTES. El degradado del tooltip
+        // sigue vivo: ModifyTooltips detecta que la etiqueta ya viaja
+        // en el nombre y NO la duplica — viste el degradado sobre el
+        // nombre completo. UpdateInventory corre cada tick por cada
+        // ítem del inventario (slots 0-9 incluidos: LA BARRA) — el
+        // override se re-apaga solo tras cargar la partida (el campo
+        // _nameOverride no viaja en el save) y aquí vuelve a vestirse.
+        public override void UpdateInventory(Item item, Player player)
+        {
+            if (!Corrompido || item == null || item.IsAir || Main.gameMenu) return;
+            try
+            {
+                string etiqueta = Language.GetTextValue("Mods.AethonMod.Items.ArmaCorruptaTag");
+                // EL NOMBRE LIMPIO: jamás se reconstruye desde item.Name
+                // (devolvería el override → la etiqueta se duplicaría
+                // cada tick) — el nombre base viene de Lang + el prefijo
+                // (los consagrados no llevan — el altar los pela — pero
+                // el cálculo es el AffixName de siempre, sin override).
+                string limpio = Lang.GetItemNameValue(item.type);
+                if (item.prefix >= 0 && item.prefix < Lang.prefix.Length)
+                {
+                    string pref = Lang.prefix[item.prefix].Value;
+                    if (!string.IsNullOrEmpty(pref))
+                        limpio = pref.StartsWith("(") ? limpio + " " + pref : pref + " " + limpio;
+                }
+                string vestido = limpio + " " + etiqueta;
+                if (item.Name != vestido)
+                    item.SetNameOverride(vestido);
+            }
+            catch { }
+        }
+
         // === LA ETIQUETA Y EL LORE (donde vivía el prefijo) ===
 
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
@@ -232,8 +279,18 @@ namespace AethonMod.Content.Globals
                 var bruma = new Color(122, 216, 182);
                 if (idxNombre >= 0)
                 {
-                    string completo = tooltips[idxNombre].Text + " " +
-                        Language.GetTextValue("Mods.AethonMod.Items.ArmaCorruptaTag");
+                    string etiqueta = Language.GetTextValue("Mods.AethonMod.Items.ArmaCorruptaTag");
+                    string nombre = tooltips[idxNombre].Text;
+                    // v6.103 — LA ETIQUETA YA VIAJA EN EL NOMBRE
+                    //     (SetNameOverride en UpdateInventory: la barra
+                    //     rápida la necesita EN EL NOMBRE, texto plano):
+                    //     si ya está, NO se duplica — el degradado viste
+                    //     el nombre completo tal cual; si aún no está (el
+                    //     ítem acaba de cargar de un cofre o del suelo),
+                    //     se añade aquí como siempre y el tooltip queda
+                    //     idéntico al de toda la vida.
+                    if (!nombre.EndsWith(etiqueta))
+                        nombre = nombre + " " + etiqueta;
                     // v6.97 — EL COLOR DE CONSAGRADO (la letra: «el color
                     //     de consagrado en su nombre debe ser centro negro,
                     //     medios grises y bordes blancos»): el degradado de
@@ -241,7 +298,7 @@ namespace AethonMod.Content.Globals
                     //     negro — letra por letra (los tags [c/] del
                     //     tooltip pintan cada carácter con SU tinta: la
                     //     única forma de un degradado real en una línea).
-                    tooltips[idxNombre].Text = NombreConsagrado(completo);
+                    tooltips[idxNombre].Text = NombreConsagrado(nombre);
                 }
 
                 // v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma

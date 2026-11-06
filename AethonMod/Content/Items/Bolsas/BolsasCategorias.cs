@@ -360,6 +360,18 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.50.53 — LA FORMA ASCENDIDA 4: EL SERAFÍN (la cuarta luz —
             // el que arde: seis alas, halo triple, corona, bruma y rayos).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
+            // v6.103 — LA FORMA ASCENDIDA 5: EL VIENTO DEL ESPÍRITU (la
+            // quinta luz — la regla permanente de la casa: «recuerda
+            // siempre crear una bolsa para armas nuevas y darselas al
+            // jugador»: TODO lo nuevo viaja en SU bolsa, además de la
+            // entrega directa). La v6.102 la entregó directo pero la
+            // dejó FUERA de la bolsa — la familia completa se reúne.
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
+            // v6.103 — EL ESTANDARTE DEL JUICIO también entra a la bolsa
+            // (nacido en la v6.98 con entrega directa pero SIN bolsa:
+            // la red de seguridad de la casa — clic derecho, solo lo
+            // que falte, permanente y reabrible).
+            l.Add((ModContent.ItemType<Accessories.EstandarteDelJuicioItem>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             // v6.51.4 — EL BRILLO DE LOS SOLES RÚNICOS también viaja en la

@@ -203,8 +203,37 @@ namespace AethonMod.Content.Projectiles
                 //  invertido) + LAS FUENTES DE CALOR (CalorLib — el
                 //  aire HIERVE entre el portador y cada impío).
                 // --------------------------------------------------------
+                //  v6.103 — Y EL CAMPO VIVE AUN SIN IMPÍOS (la letra:
+                //  «el banner no tiene ninguno de los efectos vfx»):
+                //  las BRASAS DEL VACÍO suben alrededor del portador
+                //  (el campo térmico se NOTA solo, día y noche) y el
+                //  aire SOBRE el estandarte HIERVE (CalorLib.Punto en
+                //  el portador — la receta hasta el final).
+                // --------------------------------------------------------
                 if (!Main.gameMenu)
+                {
                     VestirLaReceta(dueno);
+
+                    // LAS BRASAS AMBIENTALES — el vacío respira alrededor
+                    // del portador (2 de cada 3 ticks: campo VIVO).
+                    if (Main.rand.NextBool(3))
+                    {
+                        Vector2 pos = dueno.MountedCenter + new Vector2(
+                            Main.rand.NextFloat(-50f, 50f), Main.rand.NextFloat(-10f, 36f));
+                        Dust d = Dust.NewDustPerfect(pos,
+                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f),
+                                -Main.rand.NextFloat(0.3f, 0.9f)),
+                            130, new Color(150, 84, 235), Main.rand.NextFloat(0.5f, 0.95f));
+                        d.noGravity = true;
+                        d.fadeIn = 0.9f;
+                    }
+
+                    // EL AIRE DEL PORTADOR HIERVE (el truco final de la
+                    // receta, también en casa: la refracción sobre el
+                    // estandarte — sutil, siempre vivo).
+                    CalorLib.Punto(dueno.MountedCenter, 54f, 0.20f);
+                }
             }
         }
 
@@ -369,7 +398,29 @@ namespace AethonMod.Content.Projectiles
                     sb.End();
                 }
 
-                // 2) EL LOTE ADITIVO — el vestido del vacío (morado+negro).
+                // 2) v6.103 — EL DOMO OSCURO DEL VACÍO (lote ALFA: la capa
+                //    que OSCURECE — la única forma de que el campo se vea
+                //    TAMBIÉN DE DÍA: el aditivo se lava con la luz del sol,
+                //    pero el negro-violeta que TAPA se lee en cualquier
+                //    fondo). El aire se ESPESA alrededor del portador.
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                {
+                    Texture2D campoDomo = Tex("CampoVacio");
+                    if (campoDomo != null)
+                    {
+                        sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None,
+                            RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+                        float respiraD = 1f + 0.05f * MathF.Sin(t * 3f);
+                        float anchoD = RADIO * 2.1f * respiraD;
+                        Suelo(sb, campoDomo, centro,
+                            new Color(26, 12, 44) * (0.34f * (0.85f + 0.15f * pulso)),
+                            0f, anchoD, anchoD * 0.95f);
+                        sb.End();
+                    }
+                }
+
+                // 3) EL LOTE ADITIVO — el vestido del vacío (morado+negro).
                 sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
@@ -379,34 +430,41 @@ namespace AethonMod.Content.Projectiles
                 Texture2D destello = Tex("SparkleStar");
                 Texture2D orbe = Tex("GlowOrb");
 
-                // v6.102 — CAPA 1 DE LA RECETA: EL CAMPO TÉRMICO (el
-                // «aura base del jugador, el escudo visible»: la textura
-                // circular semitransparente que sigue al portador). El
-                // PULSO de la receta (±5%, ~2 s: el campo RESPIRA) y su
-                // eco frío detrás (la frontera disipándose).
+                // v6.102 → v6.103 — CAPA 1 DE LA RECETA: EL CAMPO TÉRMICO
+                // (el «aura base del jugador, el escudo visible»: la
+                // textura circular semitransparente que sigue al
+                // portador). El PULSO de la receta (±5%, ~2 s: el campo
+                // RESPIRA) y su eco frío detrás — v6.103: los alfas de
+                // VERDAD (0.30 → 0.55: el escudo SE VE, día y noche —
+                // la letra: «el banner no tiene ninguno de los efectos
+                // vfx ni textura que tenia que tener») y el TERCER paso:
+                // el eco BLANCO-VIOLETA interior (la frontera caliente).
                 Texture2D campo = Tex("CampoVacio");
                 if (campo != null)
                 {
                     float respira = 1f + 0.05f * MathF.Sin(t * 3f);
                     float ancho = RADIO * 2.2f * respira;
-                    Suelo(sb, campo, centro, violeta * (0.30f * pulso), 0f,
+                    Suelo(sb, campo, centro, violeta * (0.55f * pulso), 0f,
                         ancho, ancho * 0.95f);
-                    Suelo(sb, campo, centro, negroVioleta * (0.22f * pulso), 0f,
-                        ancho * 1.06f, ancho * 1.0f);
+                    Suelo(sb, campo, centro, violetaAlto * (0.22f * pulso), 0f,
+                        ancho * 0.94f, ancho * 0.90f);
+                    Suelo(sb, campo, centro, negroVioleta * (0.30f * pulso), 0f,
+                        ancho * 1.08f, ancho * 1.02f);
                 }
 
                 // EL SUELO DEL VACÍO — la mancha oscura bajo el portador
                 // (el negro-violeta: donde el aire se espesa) y su ruido.
-                Suelo(sb, glow, suelo, negroVioleta * 0.30f, 0f, RADIO * 1.7f, RADIO * 0.62f);
-                Suelo(sb, Ruido(0, 2.4f), suelo, violeta * 0.06f,
+                Suelo(sb, glow, suelo, negroVioleta * 0.38f, 0f, RADIO * 1.7f, RADIO * 0.62f);
+                Suelo(sb, Ruido(0, 2.4f), suelo, violeta * 0.08f,
                     t * 0.15f, RADIO * 1.6f, RADIO * 0.58f);
 
                 // EL ANILLO DEL VACÍO — LA FRONTERA del radio pequeño
                 // (300 px) dibujada en el suelo: la llanta violeta viva
-                // girando despacio + su gemela interna al revés.
-                Suelo(sb, anilloMag, suelo, violeta * (0.30f * pulso),
+                // girando despacio + su gemela interna al revés (v6.103:
+                // alfas de verdad — la frontera SE LEE).
+                Suelo(sb, anilloMag, suelo, violeta * (0.50f * pulso),
                     t * 0.35f, RADIO * 2.05f, RADIO * 0.72f);
-                Suelo(sb, anilloMag, suelo, violetaAlto * (0.16f * pulso),
+                Suelo(sb, anilloMag, suelo, violetaAlto * (0.28f * pulso),
                     -t * 0.5f, RADIO * 1.86f, RADIO * 0.66f);
 
                 // EL PULSO QUE RESPIRA — una onda nace en el portador y
@@ -418,28 +476,30 @@ namespace AethonMod.Content.Projectiles
 
                 // LAS LLAMAS DEL PORTADOR — el dueño TAMBIÉN arde: las
                 // lenguas negras de violeta suben lamiendo su cuerpo
-                // (el mismo fuego que paga su poder — 6, deterministas).
-                for (int i = 0; i < 6; i++)
+                // (el mismo fuego que paga su poder — 8, deterministas;
+                // v6.103: más vivas que nunca).
+                for (int i = 0; i < 8; i++)
                 {
                     float azar = Azar(i);
                     float sube = (t * 52f + azar * 120f) % 120f;
-                    Vector2 pos = new(centro.X + (azar * 2f - 1f) * 26f,
+                    Vector2 pos = new(centro.X + (azar * 2f - 1f) * 28f,
                         centro.Y + 18f - sube);
                     float muere = 1f - sube / 120f;
-                    Capa(sb, orbe, pos, violeta * (0.20f * muere),
+                    Capa(sb, orbe, pos, violeta * (0.30f * muere),
                         0f, (7f + 5f * azar) / 128f);
                     Capa(sb, orbe, pos + new Vector2(0f, -3f),
-                        Color.Black * (0.16f * muere), 0f, (5f + 4f * azar) / 128f);
+                        Color.Black * (0.22f * muere), 0f, (5f + 4f * azar) / 128f);
                 }
 
-                // LOS TRES DESTELLOS — las chispas del vacío orbitando
-                // bajito al portador (la guardia morada del estandarte).
-                for (int i = 0; i < 3; i++)
+                // LOS CINCO DESTELLOS — las chispas del vacío orbitando
+                // bajito al portador (la guardia morada del estandarte —
+                // v6.103: cinco, más brillantes).
+                for (int i = 0; i < 5; i++)
                 {
                     float ang = t * (1.5f + Azar(i + 11) * 1.2f) + Azar(i + 4) * MathF.PI * 2f;
                     Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.55f)
-                        * (46f + Azar(i) * 22f);
-                    Capa(sb, destello, pos, violetaAlto * (0.25f + 0.45f * Titila(i)),
+                        * (46f + Azar(i) * 26f);
+                    Capa(sb, destello, pos, violetaAlto * (0.35f + 0.55f * Titila(i)),
                         ang, (11f + 8f * Titila(i)) / 32f);
                 }
 

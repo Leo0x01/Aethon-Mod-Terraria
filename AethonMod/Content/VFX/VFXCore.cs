@@ -293,6 +293,28 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        // v6.103 — LA ESTRELLA DE 4 PUNTAS (LOS BRILLOS de la quinta luz):
+        // el destello agudo que titila en la corte del espíritu (la queja:
+        // «La Forma Ascendida 5 se ve muy simple, no tiene ni brillos»).
+        private static Asset<Texture2D> _destello4;
+
+        /// <summary>Destello de 4 puntas (256² — el brillo vivo de las
+        /// cortes celestes). Null-safe (recargas calientes).</summary>
+        public static Texture2D Destello4Puntas
+        {
+            get
+            {
+                try
+                {
+                    if (_destello4 == null)
+                        _destello4 = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/FlareEstrella4Puntas");
+                    return _destello4.IsLoaded ? _destello4.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
         // v6.50.18 — el NovaBurst entra al club de las workhouses: el
         // degradado monótono de caída larga (la textura que el usuario
         // pidió por nombre para los destellos finales).

@@ -105,6 +105,24 @@ namespace AethonMod.Content.VFX
         /// propio camino: EmitirHaloArcoiris.
         /// </summary>
         HaloArcoiris = 8,
+
+        /// <summary>
+        /// v6.103 — EL PATRÓN DIVINO 5 (la Forma Ascendida 5: EL VIENTO
+        /// DEL ESPÍRITU — la letra: «La Forma Ascendida 5 se ve muy
+        /// simple, no tiene ni brillos ni buenos efectos vfx»). La
+        /// v6.102 la vestía con EL CAMINO GENÉRICO de Emitir (el Perlin
+        /// plano del hambre con otra paleta — POR ESO se veía simple);
+        /// las formas 2, 3 y 4 tienen SU PROPIO camino con capas ricas y
+        /// la quinta luz también lo merece: EL ALIENTO MAYOR que respira
+        /// lento, EL CUERPO DE VIENTO, LOS ARCOS ROTOS (el sello del
+        /// icono: el anillo PARTIDO en arcos que orbitan, unos a favor y
+        /// otros en contra — el cizallamiento), LAS BANDAS ESPIRALES que
+        /// enrulan hacia fuera, LOS BRILLOS de 4 puntas titilando (la
+        /// queja puntual), LAS PLUMAS DEL VIENTO, LA TURBULENCIA v6.102
+        /// intacta en SU banda, EL RIM violeta y EL ALIENTO ASCENDENTE.
+        /// Su propio camino: EmitirDivino5.
+        /// </summary>
+        Divino5 = 9,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -709,16 +727,17 @@ namespace AethonMod.Content.VFX
         {
             var p = new AuraPerfil
             {
-                Radio = 118f,              // el aliento ancho de la quinta luz
+                Radio = 126f,              // el aliento ancho de la quinta luz
                 Anillos = 0,
                 Gajos = 0,
-                Patron = PatronAura.Perlin,   // el camino generico de Emitir: EL AURA
+                Patron = PatronAura.Divino5,   // v6.103 — SU PROPIO CAMINO (la letra: «se ve
+                                               // muy simple» — el Perlin genérico MURIÓ)
                 Fluir = 0.55f,
                 Deriva = 0.12f,
                 Ascenso = 20f,             // el aliento sube despacio (es viento, no fuego)
                 Distorsion = 0.8f,
                 Blur = 1f,
-                Glow = 1.15f,
+                Glow = 0f,                 // CERO discos planos (el contrato de las divinas)
                 Semilla = 5105,
                 AlfaTrasera = 0.34f,
                 AlfaFrontal = 0.055f,
@@ -727,6 +746,7 @@ namespace AethonMod.Content.VFX
                 Borde = 0.30f,
                 Parpadeo = 0.05f,
                 // v6.102 - LA FIRMA: la turbulencia suave que SOLO viste el aura
+                // (viva en EmitirDivino5 — la capa 6 de la pila nueva)
                 Turbulencia = 1f,
                 Hebras = 14,
             };
@@ -1695,6 +1715,13 @@ namespace AethonMod.Content.VFX
             // SERAFÍN — la cuarta luz, el que arde).
             if (p.Patron == PatronAura.Divino4)
                 return DibujarDivino4(pl, p);
+
+            // v6.103 — EL PATRÓN DIVINO 5 (la Forma Ascendida 5: EL VIENTO
+            // DEL ESPÍRITU — la quinta luz: el aliento con sus arcos rotos,
+            // sus bandas espirales y SUS BRILLOS — la letra: «se ve muy
+            // simple, no tiene ni brillos ni buenos efectos vfx»).
+            if (p.Patron == PatronAura.Divino5)
+                return DibujarDivino5(pl, p);
 
             // v6.50.54 — EL PATRÓN HALO ARCOÍRIS (el arcoíris de la Forma 3
             // destilado a adorno — el mismo contrato del bool).
@@ -3680,6 +3707,334 @@ namespace AethonMod.Content.VFX
             }
 
             // === 10. LAS PARTÍCULAS del perfil (la corte del serafín) ===
+            EmitirParticulas(centro, p, false, 511);
+        }
+
+        // ==================================================================
+        //  v6.103 — EL PATRÓN DIVINO 5: EL VIENTO DEL ESPÍRITU (la quinta
+        //  luz — la letra: «La Forma Ascendida 5 se ve muy simple, no
+        //  tiene ni brillos ni buenos efectos vfx»).
+        //
+        //  LA AUTOPSIA: la v6.102 vestía la quinta luz con EL CAMINO
+        //  GENÉRICO de Emitir (Patron Perlin — el mismo cuerpo del hambre
+        //  del grimorio con la paleta cambiada); las formas 2, 3 y 4
+        //  tienen SU PROPIO camino con capas ricas (la lección de la
+        //  .49→.52: DibujarDivino3 existía pero NADIE lo llamaba y EL
+        //  TRONO JAMÁS se dibujó — el mismo pecado, al revés). LA CURA:
+        //  EL VIENTO DEL ESPÍRITU tiene SU pila de DIEZ capas:
+        //    0. EL ALIENTO MAYOR — el resplandor amplio que respira LENTO.
+        //    1. EL CUERPO DE VIENTO — el flipbook Perlin + el núcleo plata.
+        //    2. LOS ARCOS ROTOS — EL SELLO DEL ICONO: el anillo PARTIDO en
+        //       arcos que orbitan, UNOS A FAVOR Y OTROS EN CONTRA (el
+        //       cizallamiento hecho bandera), cada uno con SU chispa.
+        //    3. LAS BANDAS ESPIRALES — las cintas de vapor que ENRULAN
+        //       desde el cuerpo hacia fuera, cada una a su paso.
+        //    4. LOS BRILLOS — LA QUEJA PUNTUAL («no tiene ni brillos»):
+        //       doce destellos de 4 puntas TITILANDO por todo el aliento.
+        //    5. LAS PLUMAS DEL VIENTO — vetas tangenciales que cruzan la
+        //       frontera del aura (la deriva hecha carne).
+        //    6. LA TURBULENCIA — LA FIRMA v6.102 INTACTA: 14 hebras que
+        //       SOLO viven en la banda 0.68R..0.96R del aura.
+        //    7. EL RIM VIOLETA — la frontera del espíritu respirando.
+        //    8. EL ALIENTO ASCENDENTE — las columnas de vaho que suben.
+        //    9. LAS PARTÍCULAS del perfil (las motas del aliento).
+        // ==================================================================
+
+        /// <summary>
+        /// v6.103 — EL PORTADOR DE LA QUINTA LUZ (el mismo contrato del
+        /// bool que DibujarDivino4: cierra el lote del llamador y devuelve
+        /// true si hay que reabrir con ReabrirLoteVanilla).
+        /// </summary>
+        private static bool DibujarDivino5(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino5(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.103 — LA EMISIÓN DEL ESPÍRITU (la quinta luz). TODO
+        /// aditivo, coords de MUNDO, deterministas (cero Main.rand) — el
+        /// mismo contrato de EmitirDivino4.
+        /// </summary>
+        private static void EmitirDivino5(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(560)) return;   // el aliento ocupa su cielo
+
+            Texture2D tex0 = Ruido(0);
+            if (tex0 == null) return;                 // sin dispositivo aún: nada que dibujar
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN LENTA del espíritu (más lenta que el fuego
+            // del serafín — el viento NO corre: SOPLA).
+            float respira = 1f + 0.05f * MathF.Sin(t * 0.9f);
+
+            // EL RITMO (las plumas leen la velocidad del portador).
+            float rapidez = MathHelper.Clamp(pl.velocity.Length() / 9f, 0f, 1f);
+
+            // LA PALETA DEL ALIENTO: plata → teal pálido → violeta (de
+            // dentro afuera: la calma del centro, el color en el borde).
+            Color plata = new Color(250, 252, 255);
+            Color teal = new Color(198, 244, 232);
+            Color tealVivo = new Color(150, 240, 210);
+            Color violeta = new Color(150, 84, 235);
+            Color violetaAlto = new Color(205, 160, 255);
+
+            float R = p.Radio * respira;
+
+            // === 0. EL ALIENTO MAYOR (el resplandor amplísimo que respira
+            //     LENTO — el cielo entero se entera de que el espíritu
+            //     está: la estela fría del teal + el velo violeta) ===
+            {
+                VFXCore.Quad(centro, TintAditivo(teal, 0.13f * respira),
+                    new Vector2(p.Radio * 3.2f, p.Radio * 3.4f), 0f, VFXCore.GlowOrb);
+                VFXCore.Quad(centro, TintAditivo(violeta, 0.07f * respira),
+                    new Vector2(p.Radio * 4.4f, p.Radio * 4.7f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 1. EL CUERPO DE VIENTO (el flipbook Perlin de la casa con
+            //     la paleta del aliento + el núcleo de plata viva) ===
+            Texture2D texC = FlipCuerpo((int)(t * (8f + 14f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * R * 1.04f;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.45f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.48f),
+                    new Vector2(ladoC, ladoC), t * 0.08f, texC);
+            }
+            VFXCore.Quad(centro, TintAditivo(plata, 0.62f),
+                new Vector2(R * 0.60f, R * 0.80f), t * 0.20f, VFXCore.GlowOrb);
+            VFXCore.Quad(centro, TintAditivo(teal, 0.26f * respira),
+                new Vector2(R * 0.72f, R * 0.92f), t * 0.20f, VFXCore.SoftGlow);
+
+            // === 2. LOS ARCOS ROTOS (EL SELLO DEL ICONO v6.102: «el sello
+            //     etéreo con el anillo ROTO en arcos de viento»): cinco
+            //     arcos que orbitan la banda del aura, UNOS A FAVOR Y
+            //     OTROS EN CONTRA — el cizallamiento hecho bandera. Cada
+            //     arco respira SU largo, lleva SU filo de plata y SU
+            //     chispa en la cabeza (la punta que AVANZA). ===
+            {
+                const int Arcos = 5;
+                for (int i = 0; i < Arcos; i++)
+                {
+                    float h = VFXCore.Hash01(p.Semilla ^ 0x77A, i, 7);
+                    float h2 = VFXCore.Hash01(p.Semilla ^ 0x77A, i, 13);
+                    // LA DIRECCIÓN PROPIA: la mitad contra-corre (el cizalla).
+                    float vel = (h < 0.5f ? -1f : 1f) * (0.16f + 0.20f * h2);
+                    float a0 = t * vel + i * (MathHelper.TwoPi / Arcos)
+                             + MathF.Sin(t * 1.3f + i * 1.9f) * 0.08f;
+                    float span = (0.55f + 0.45f * h)
+                               * (0.8f + 0.2f * MathF.Sin(t * 1.1f + i * 2.2f));
+                    float rA = R * (0.84f + 0.07f * MathF.Sin(t * 0.8f + i * 1.4f));
+                    float late = 0.55f + 0.45f * MathF.Sin(t * (1.8f + 1.3f * h) + i * 2.7f);
+                    if (late <= 0.10f) continue;    // el arco descansa
+                    Color colArco = Color.Lerp(tealVivo, violetaAlto, h);
+                    const int Pasos = 4;
+                    Vector2 prev = Vector2.Zero;
+                    for (int s = 0; s <= Pasos; s++)
+                    {
+                        float a = a0 + span * (s / (float)Pasos);
+                        Vector2 v = centro + new Vector2(MathF.Cos(a), MathF.Sin(a) * 0.92f) * rA;
+                        if (s > 0)
+                        {
+                            // la falda del arco (ancha, tenue — el aliento)
+                            VFXCore.Line(prev, v, TintAditivo(colArco, 0.28f * late), 4.6f);
+                            // el filo (fino, BRILLANTE — la vena del viento)
+                            VFXCore.Line(prev, v, TintAditivo(plata, 0.55f * late), 1.6f);
+                        }
+                        prev = v;
+                    }
+                    // LA CHISPA DE LA CABEZA (la punta del arco AVANZA y brilla).
+                    VFXCore.Quad(prev, TintAditivo(plata, 0.70f * late),
+                        new Vector2(6f, 6f), 0f, VFXCore.GlowOrb);
+                }
+            }
+
+            // === 3. LAS BANDAS ESPIRALES (las cintas de vapor que ENRULAN
+            //     desde el cuerpo hacia fuera — la espiral de Arquímedes
+            //     del aliento: cada banda a SU paso, la mitad contra) ===
+            {
+                const int Bandas = 3;
+                const int Tramos = 5;
+                for (int i = 0; i < Bandas; i++)
+                {
+                    float h = VFXCore.Hash01(p.Semilla ^ 0x91B, i, 17);
+                    float vel = (h < 0.5f ? -1f : 1f) * (0.30f + 0.22f * h);
+                    float fase = t * vel + i * 2.1f;
+                    Texture2D vapor = Ruido((i * 3 + (int)(t * 3f)) % 4);
+                    if (vapor == null) continue;
+                    for (int k = 0; k < Tramos; k++)
+                    {
+                        float a = fase + k * 0.62f;
+                        float r = R * (0.32f + 0.18f * k);
+                        Vector2 dir = new(MathF.Cos(a), MathF.Sin(a) * 0.95f);
+                        Vector2 pos = centro + dir * r;
+                        float fK = 1f - k / (float)Tramos;         // se apaga al salir
+                        float largo = R * (0.30f + 0.08f * h) * (0.7f + 0.3f * fK);
+                        Color colB = Color.Lerp(teal, violeta, k / (float)(Tramos - 1));
+                        VFXCore.Quad(pos, TintAditivo(colB, 0.20f * fK),
+                            new Vector2(largo, R * 0.11f), a + MathHelper.PiOver2, vapor);
+                        VFXCore.Quad(pos, TintAditivo(plata, 0.10f * fK),
+                            new Vector2(largo * 0.75f, R * 0.035f), a + MathHelper.PiOver2, vapor);
+                    }
+                }
+            }
+
+            // === 4. LOS BRILLOS (LA QUEJA PUNTUAL: «no tiene ni brillos»):
+            //     doce destellos de 4 puntas TITILANDO por todo el
+            //     aliento — ocho cercanos que orbitan despacio (el séquito)
+            //     y cuatro LEJANOS, grandes y lentos (la corte del
+            //     espíritu, violetas) ===
+            {
+                Texture2D estrella = VFXCore.Destello4Puntas;
+                if (estrella != null)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float h = VFXCore.Hash01(p.Semilla ^ 0x3C5, i, 23);
+                        float h2 = VFXCore.Hash01(p.Semilla ^ 0x3C5, i, 29);
+                        // EL TITILAR SECO (la aguja de luz que APRIETA y suelta).
+                        float titila = MathF.Pow(0.5f + 0.5f * MathF.Sin(
+                            t * (2.2f + 2.6f * h) + h2 * 6.28f), 3.2f);
+                        if (titila <= 0.06f) continue;
+                        float ang = t * (0.14f + 0.10f * h) * (h < 0.5f ? -1f : 1f)
+                                  + h2 * MathHelper.TwoPi;
+                        float r = R * (0.45f + 0.70f * h2);
+                        Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.9f) * r;
+                        float lado = (7f + 9f * h) * (0.7f + 0.5f * titila);
+                        Color col = Color.Lerp(plata, tealVivo, h);
+                        VFXCore.Quad(pos, TintAditivo(col, 0.75f * titila),
+                            new Vector2(lado, lado), ang * 0.5f, estrella);
+                        VFXCore.Quad(pos, TintAditivo(plata, 0.55f * titila),
+                            new Vector2(lado * 0.32f, lado * 0.32f), 0f, VFXCore.GlowOrb);
+                    }
+                    // LOS CUATRO LEJANOS (grandes, lentos, violetas — la corte).
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float h = VFXCore.Hash01(p.Semilla ^ 0x3C6, i, 31);
+                        float titila = MathF.Pow(0.5f + 0.5f * MathF.Sin(
+                            t * (0.9f + 0.8f * h) + i * 2.4f), 2.6f);
+                        if (titila <= 0.05f) continue;
+                        float ang = -t * (0.08f + 0.06f * h) + i * MathHelper.PiOver2 + h * 1.2f;
+                        float r = R * (1.25f + 0.35f * h);
+                        Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * r;
+                        float lado = (12f + 10f * h) * (0.8f + 0.4f * titila);
+                        VFXCore.Quad(pos, TintAditivo(violetaAlto, 0.60f * titila),
+                            new Vector2(lado, lado), ang, estrella);
+                        VFXCore.Quad(pos, TintAditivo(plata, 0.35f * titila),
+                            new Vector2(lado * 0.28f, lado * 0.28f), 0f, VFXCore.GlowOrb);
+                    }
+                }
+            }
+
+            // === 5. LAS PLUMAS DEL VIENTO (las vetas tangenciales que
+            //     CRUZAN la frontera del aura — la deriva hecha carne: el
+            //     espíritu es la única persona que se pinta MOVIÉNDOSE) ===
+            for (int i = 0; i < 7; i++)
+            {
+                float h = VFXCore.Hash01(p.Semilla ^ 0x55E, i, 37);
+                float h2 = VFXCore.Hash01(p.Semilla ^ 0x55E, i, 41);
+                float ang = t * (0.5f + 0.35f * h) * (h < 0.5f ? 1f : -1f) + h2 * MathHelper.TwoPi;
+                float r = R * (0.95f + 0.35f * MathF.Sin(t * (0.7f + 0.5f * h) + i * 1.3f));
+                Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r;
+                // LA VETA: larga y FINA, tangente pura (más larga si CORRE).
+                float largo = R * (0.35f + 0.25f * h) * (1f + 0.35f * rapidez);
+                float alfa = 0.30f + 0.22f * MathF.Sin(t * 1.7f + i * 2.0f);
+                Color colP = Color.Lerp(plata, teal, 0.6f);
+                VFXCore.Quad(pos, TintAditivo(colP, alfa),
+                    new Vector2(largo, 2.6f), ang + MathHelper.PiOver2, VFXCore.Pixel);
+                VFXCore.Quad(pos, TintAditivo(teal, alfa * 0.45f),
+                    new Vector2(largo * 0.9f, 6.5f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                // EL PUNTERO (el remate brillante de la veta).
+                Vector2 punta = pos + new Vector2(-MathF.Sin(ang), MathF.Cos(ang)) * (largo * 0.5f);
+                VFXCore.Quad(punta, TintAditivo(plata, alfa * 0.8f),
+                    new Vector2(3.5f, 3.5f), 0f, VFXCore.GlowOrb);
+            }
+
+            // === 6. LA TURBULENCIA (LA FIRMA v6.102 — INTACTA: las 14
+            //     hebras que SOLO viven en la banda 0.68R..0.96R del aura,
+            //     la mitad a favor y la mitad en contra, cada una
+            //     respirando su radio y estirada TANGENCIALMENTE; el
+            //     cuerpo, las bandas y TODO lo demás siguen SU pulso — la
+            //     capa es del AURA y de nadie más) ===
+            if (p.Turbulencia > 0.02f)
+            {
+                int hebras = Math.Max(6, p.Hebras);
+                if (VFXCore.Presupuesto(hebras * 2))
+                {
+                    for (int i = 0; i < hebras; i++)
+                    {
+                        float h = VFXCore.Hash01(p.Semilla ^ 0x7C15, i, 5);
+                        float h2 = VFXCore.Hash01(p.Semilla ^ 0x7C15, i, 11);
+                        float vel = (h < 0.5f ? -1f : 1f) * (0.10f + 0.22f * h2);
+                        float ang = i * (MathHelper.TwoPi / hebras) + t * vel + p.Semilla * 0.31f;
+                        float ola = 0.5f + 0.5f * MathF.Sin(t * (0.45f + 0.8f * h2) + i * 2.1f);
+                        float r = R * (0.68f + 0.28f * ola);
+                        Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang));
+                        Vector2 pos = centro + dir * r;
+                        float largo = R * (0.15f + 0.13f * h) * (0.85f + 0.3f * ola);
+                        float brillo = 0.55f + 0.45f * MathF.Sin(t * 2.2f + i * 1.9f);
+                        Color colT = Color.Lerp(p.TMedio, p.TBorde, 0.75f);
+                        float fT = MathHelper.Clamp(
+                            p.AlfaTrasera * (0.35f + 0.55f * p.Turbulencia) * brillo, 0f, 1f);
+                        Texture2D vapor = Ruido((i * 5 + (int)(t * 6f)) % 4);
+                        if (vapor != null)
+                        {
+                            // el cuerpo de la veta (ancho, tenue)
+                            VFXCore.Quad(pos, TintAditivo(colT, fT * 0.5f),
+                                new Vector2(largo, R * 0.10f), ang + 0.5f * (h - 0.5f), vapor);
+                            // el filo (fino, más brillante — la venita que se LEE)
+                            VFXCore.Quad(pos, TintAditivo(colT, fT),
+                                new Vector2(largo * 0.8f, R * 0.045f), ang, vapor);
+                        }
+                    }
+                }
+            }
+
+            // === 7. EL RIM VIOLETA (la frontera del espíritu — el aro
+            //     tenue que respira con el aliento y ENMARCA la banda
+            //     del aura; el 2.174 de la casa mide el aro del Ring) ===
+            VFXCore.Quad(centro, TintAditivo(violeta, 0.20f * respira),
+                new Vector2(R * 1.02f * 2.174f, R * 1.02f * 0.92f * 2.174f), 0f, VFXCore.Ring);
+
+            // === 8. EL ALIENTO ASCENDENTE (las columnas de vaho que suben
+            //     por el cuerpo — el aliento hecho VISIBLE: nacen junto al
+            //     portador y se disuelven subiendo) ===
+            for (int i = 0; i < 5; i++)
+            {
+                float h = VFXCore.Hash01(p.Semilla ^ 0x2A9, i, 43);
+                float ciclo = Frac(t * (0.10f + 0.05f * h) + h);
+                float x = centro.X + (h - 0.5f) * p.Radio * 1.5f
+                        + MathF.Sin(t * 1.3f + i * 1.9f) * 8f;
+                float y = centro.Y + 30f * gravedad - ciclo * 150f * gravedad;
+                float fade = MathF.Sin(ciclo * MathHelper.Pi);
+                Vector2 pos = new Vector2(x, y);
+                VFXCore.Quad(pos, TintAditivo(teal, 0.14f * fade),
+                    new Vector2(14f + 8f * h, 60f + 30f * h),
+                    MathF.Sin(t * 0.8f + i) * 0.12f, VFXCore.SoftGlow);
+                VFXCore.Quad(pos, TintAditivo(plata, 0.10f * fade),
+                    new Vector2(3f, 40f + 20f * h), 0f, VFXCore.Pixel);
+            }
+
+            // === 9. LAS PARTÍCULAS del perfil (las motas del aliento) ===
             EmitirParticulas(centro, p, false, 511);
         }
 
