@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""v6.107 — DOCS: README (versión) + STABLE-SNAPSHOT (reescritura completa)."""
+import io
+
+BASE = "/home/z/my-project/download/Aethon-Mod-Terraria"
+
+# ---------------------------------------------------------------- README
+r = f"{BASE}/README.md"
+s = io.open(r, encoding="utf-8").read()
+viejo = "> **Versión actual:** 6.106 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)"
+nuevo = "> **Versión actual:** 6.107 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)"
+assert s.count(viejo) == 1
+io.open(r, "w", encoding="utf-8", newline="\n").write(s.replace(viejo, nuevo))
+print("OK: README a la 6.107")
+
+# ------------------------------------------------------- STABLE-SNAPSHOT
+SNAP = """# SNAPSHOT ESTABLE — v6.107 — LA CÚPULA VERTICAL Y LA EXPULSIÓN DEL CORAZÓN
+
+> **PUBLICADA — release 436478145 + CDN verificado byte a byte (md5 8db355de26f89b0e59121f11d69fcffc)** — .tmod v6.107 (11.576.633 B, 514 entradas, EOF exacto) — **LA MEDIALUNA VERTICAL (LA CÚPULA)** (la rotación vertical de 90° de la letra: la v6.106 acostaba el arco en horizontal — la parte plana mirando al portador, el domo abombándose lejos de él — y la medialuna giraba siguiendo al jugador; ahora la parte PLANA disuelta cae ABAJO sobre el corazón del impío y la concha se YERGUE coronándolo desde arriba: LA CÚPULA DEL JUICIO que pesa sobre su cabeza — ya no gira con el portador, solo el bamboleo lento la mece) · **LAS CHISPAS DEL CORAZÓN** (PolvoExpulsionJuicio, el polvo NUEVO — PolvoArcoJuicio MUERE: cada chispa NACE EN EL CORAZÓN del impío y sale EXPULSADA hacia fuera, SIEMPRE en la dirección OPUESTA al portador — jugador a la derecha → nacen del pecho y vuelan a la IZQUIERDA, abanico ±0.85 rad, así para TODAS las direcciones — liberada con la cuna congelada al nacer, acelerando cada tick y disolviéndose en la última cuarta parte del camino; menudas 0.24–0.38, núcleo negro + halo violeta estirado por el rumbo + perla) · **LA BRUMA DEL CORAZÓN** (cada puff NACE en el corazón del impío y se derrama hacia fuera por el MISMO abanico de fuga — la misma dirección de las chispas —, intensidad variable ∝ cercanía) · **LA ESCENA COMPLETA** (el impío arde BAJO LA CÚPULA morada y negra mientras su corazón escupe chispas y bruma en dirección contraria al portador — todo comparte la misma cúpula RadioDomo) · **TOOLTIPS ×3** (la Linea3 del aura 2 cuenta la cúpula de pie y las chispas del corazón: es-ES + en-US traducido + el espejo es-MX := es-ES regenerado) — oráculo 0/0 (453 .cs — el entorno MURIÓ con el wipe del sandbox y se RECONSTRUYÓ: SDK 8.0.412 + tML 2026.9.3.1 re-descargados y verificados), -build REAL 0/0, AUDIT v6.107 TODO VERIFICADO (firmas VIVAS: PolvoExpulsionJuicio/RadioDomo/DistMax/Chispa · MUERTAS: PolvoArcoJuicio, los cuernos phi±PI/2, AngFin/VelAng, prog^2.3, velocity:tangente · hjson ×3 paquete==fuente byte a byte + tooltip nuevo ×3 + 0 IP y 0 CJK en 453 archivos), headless 0 EXCEPCIONES.
+
+## LA LETRA (el usuario)
+
+«tanto las particulas como la medialuna en los enemgiso al usar el aura del juicio, esta mal, intenta darle una rotacion vertical de 90 grados, o sea darle la vuelte y las particulas deben nacer del centro de los enemigos y luego dispersarce hacia fuera pero siempre en la direccion opuesta al jugador espero que con estos cambios aura del juicio 2 quede mejor»
+
+## PARA VERIFICAR EN JUEGO (la checklist v6.107)
+
+1. **LA CÚPULA**: equipa el Aura de Juicio 2 y quema un enemigo — la medialuna morada y negra AHORA ESTÁ DE PIE sobre su cabeza: la concha curva lo CORONA desde arriba y la parte recta disuelta descansa abajo, sobre su corazón (da igual de qué lado te pongas: la cúpula YA NO gira contigo — es el juicio FIJO que pesa sobre el impío; solo se mece suavecito con el bamboleo).
+2. **LAS CHISPAS**: colócate a la DERECHA del enemigo — las partículas pequeñas NACEN DEL CENTRO de su cuerpo y salen EXPULSADAS hacia FUERA, SIEMPRE en tu dirección CONTRARIA (tú a la derecha → vuelan a la IZQUIERDA abriéndose en abanico; pásate al otro lado y la fuga se da la VUELTA). Vuelan rectas, cada vez más rápidas, y se disuelven lejos del cuerpo (~2 cúpulas). Si el enemigo camina, las chispas ya nacidas terminan su vuelo solas (liberadas).
+3. **LA BRUMA**: los puffs de humo nacen TAMBIÉN del corazón del enemigo y se derraman hacia afuera por el MISMO rumbo que las chispas; cuanto más pegado está el enemigo a ti, más bruma, más gorda y más oscura.
+4. **TODO JUNTO**: acerca y aleja al enemigo — cerca, la cúpula crece y el corazón hierve de chispas rápidas y bruma densa; lejos, todo se apaga suavecito. Y el tooltip del aura 2 (español o inglés) ya cuenta la escena nueva.
+"""
+io.open(f"{BASE}/STABLE-SNAPSHOT.md", "w", encoding="utf-8", newline="\n").write(SNAP)
+print("OK: STABLE-SNAPSHOT a la v6.107")
