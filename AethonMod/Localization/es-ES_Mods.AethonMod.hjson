@@ -782,9 +782,11 @@ Items: {
 	}
 
 	AuraDeJuicio2Item: {
-		// v6.105: EL AURA DE JUICIO 2 — la copia silenciosa (la letra:
-		// partículas más pequeñas, el efecto del estandarte, NADA sobre
-		// el jugador, morado y negro, bruma y el semicírculo Perlin).
+		// v6.105 → v6.107: EL AURA DE JUICIO 2 — la copia silenciosa
+		// (la letra: partículas más pequeñas, el efecto del estandarte,
+		// NADA sobre el jugador, morado y negro, bruma y el semicírculo
+		// Perlin; la v6.107 lo pone DE PIE — la cúpula vertical, las
+		// chispas naciendo del corazón y huyendo del portador).
 		DisplayName: Aura de Juicio II
 		Tooltip:
 			'''
@@ -798,7 +800,7 @@ Items: {
 			QUEMADURA DEL VACÍO EXTERIOR — el mismo efecto del Estandarte del Juicio]
 			'''
 		Linea2: "[c/B96EEA:Cuanto más se acercan, más arden (×1→×3) y más LENTOS caminan (hasta ×0.55 pegados): mientras arden, TÚ cobras el Vacío Exterior (+10% ataque, +10 defensa)]"
-		Linea3: "[c/B96EEA:Sobre cada impío: partículas pequeñas moradas y negras expulsadas del flanco que te mira, bruma a la deriva y LA MEDIA CÚPULA PERLIN que se disuelve en círculo sobre su cuerpo]"
+		Linea3: "[c/B96EEA:Sobre cada impío: LA CÚPULA PERLIN que se yergue vertical sobre su cabeza (la parte plana disuelta abajo), chispas moradas y negras que NACEN DE SU CORAZÓN y salen expulsadas SIEMPRE en tu dirección contraria, y bruma que se derrama por el mismo rumbo]"
 		Linea4: "[c/8A5BC8:Sobre el jugador no hay NADA: ni brillo, ni luciérnagas, ni medidor — solo el vacío esperando]"
 	}
 
