@@ -75,6 +75,16 @@ namespace AethonMod.Content.Players
         /// DE GLORIA, LOS RAYOS DE DIOS y LA BRUMA SANTA del templo)?</summary>
         public bool FormaAscendidaCuatro;
 
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 5 (v6.102 — EL VIENTO DEL
+        /// ESPÍRITU: la quinta luz, «a esta nueva forma debes darle aura,
+        /// ya sabes como crear aura y a esa aura añade una capa de
+        /// turbulencia suave que solo afecte al aura» — la iconografía
+        /// del ESPÍRITU (ruach/pneuma): el aura de las cinco luces con
+        /// SU FIRMA, la TURBULENCIA SUAVE de 14 hebras que SOLO vive en
+        /// la banda del aura; paleta del aliento: plata → teal pálido →
+        /// violeta)?</summary>
+        public bool FormaAscendidaCinco;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
@@ -114,7 +124,8 @@ namespace AethonMod.Content.Players
         /// «if (drawPlayer.wings <= 0) return») — el serafín vuela con
         /// SUS plumas de luz.
         /// </summary>
-        public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres || FormaAscendidaCuatro;
+        public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
+            FormaAscendidaCuatro || FormaAscendidaCinco;
 
         public override void ResetEffects()
         {
@@ -125,6 +136,7 @@ namespace AethonMod.Content.Players
             FormaAscendidaDos = false;
             FormaAscendidaTres = false;
             FormaAscendidaCuatro = false;
+            FormaAscendidaCinco = false;
             HaloArcoiris = false;
             BrasaDelEclipse = false;
             BrilloSolar = false;
@@ -141,6 +153,7 @@ namespace AethonMod.Content.Players
             int ascendidaDosType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaDosItem>();
             int ascendidaTresType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaTresItem>();
             int ascendidaCuatroType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>();
+            int ascendidaCincoType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCincoItem>();
             int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
             int brilloSolarType = ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>();
@@ -161,6 +174,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaDosType) FormaAscendidaDos = true;
                 else if (item.type == ascendidaTresType) FormaAscendidaTres = true;
                 else if (item.type == ascendidaCuatroType) FormaAscendidaCuatro = true;
+                else if (item.type == ascendidaCincoType) FormaAscendidaCinco = true;
                 else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
                 else if (item.type == brilloSolarType) BrilloSolar = true;
@@ -292,6 +306,15 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 6f);
                 }
+                // v6.102 — LA FORMA ASCENDIDA 5 (el modo 8 del portador:
+                // EL VIENTO DEL ESPÍRITU — el aura con su turbulencia).
+                if (FormaAscendidaCinco && !EspiarPortador(8))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaCinco"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 8f);
+                }
                 // v6.50.54 — EL HALO ARCOÍRIS (el modo 7 del portador).
                 if (HaloArcoiris && !EspiarPortador(7))
                 {
@@ -328,7 +351,8 @@ namespace AethonMod.Content.Players
             //     CHISPAS — y CERO discos planos: los 2 círculos murieron).
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
-            if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres || FormaAscendidaCuatro)
+            if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
+                FormaAscendidaCuatro || FormaAscendidaCinco)
             {
                 Vector2 centro = Player.Center;
 
@@ -375,7 +399,9 @@ namespace AethonMod.Content.Players
                 // apoteosis absoluta alumbra el doble. v6.50.49 — la
                 // Forma 3 es EL TRONO: la luz del arcoíris, BLANCA
                 // entera (el blanco que contiene TODOS los colores).
-                Vector3 luz = FormaAscendidaCuatro
+                Vector3 luz = FormaAscendidaCinco
+                    ? new Vector3(0.82f, 0.95f, 0.88f)   // EL ALIENTO: la luz teal-blanca del espíritu
+                    : FormaAscendidaCuatro
                     ? new Vector3(1.55f, 1.38f, 1.02f)
                     : FormaAscendidaTres
                         ? new Vector3(1.15f, 1.05f, 0.95f)

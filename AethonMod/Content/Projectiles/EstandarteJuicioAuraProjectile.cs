@@ -14,8 +14,8 @@ using AethonMod.Content.Weapons.Investigaciones;
 namespace AethonMod.Content.Projectiles
 {
     // ======================================================================
-    //  EstandarteJuicioAuraProjectile — v6.98 → v6.100 → v6.101 — EL
-    //  ESTANDARTE 1:1 AL ORIGINAL (LA COPIA FIEL DEL EFECTO).
+    //  EstandarteJuicioAuraProjectile — v6.98 → v6.100 → v6.101 → v6.102
+    //  — EL ESTANDARTE 1:1 AL ORIGINAL (LA COPIA FIEL DEL EFECTO).
     //
     //  LA LETRA DEL USUARIO: «lo que tienes que hacer es copiarlo 1 a 1,
     //  ya que lo mas importante es el efecto: un radio de accion
@@ -43,11 +43,35 @@ namespace AethonMod.Content.Projectiles
     //   · EL PAGO: mientras un impío arde, el PORTADOR cobra el buff
     //     VACÍO EXTERIOR (+10% ataque, +10 defensa, −15% maná) — lo
     //     refresca la propia quemadura cada tick que el fuego vive.
-    //   · LA CAPA DE RESISTENCIA (la firma visual del meteoro entrando
-    //     a la atmósfera: manto de partículas + cresta de choque +
-    //     estelas de ablación, morado y negro) vive en
-    //     VacioGlobalNPC.PostDraw — ES del debuff, no del arma: el
-    //     grimorio la heredará entera.
+    //
+    //  v6.102 — EL VESTIDO DE LA RECETA (la letra: «el efecto sobre el
+    //  enemigo quedo bien en el banner pero los vfx no, crea otro
+    //  banner con algo que me dio una IA […] adapta el codigo y lo que
+    //  dijo»): LA RECETA DEL CALENTAMIENTO AERODINÁMICO (los
+    //  meteoritos entrando a la atmósfera), adaptada a la energía
+    //  MORADA Y NEGRA del vacío exterior. EL EFECTO SOBRE EL ENEMIGO
+    //  SE QUEDA (la quemadura, la lentitud, el pago — TODO intacto);
+    //  los VFX se rehacen con LAS CUATRO CAPAS de la receta:
+    //   · CAPA 1 — EL CAMPO TÉRMICO (aquí, en el ancla): la textura
+    //     anular semitransparente que sigue al portador, el «escudo
+    //     visible» con el PULSO de la receta (±5% a ~2 s: el campo
+    //     RESPIRA) — CampoVacio.png tintada de violeta.
+    //   · CAPA 2 — EL FRENTE DE COMPRESIÓN (en VacioGlobalNPC): el
+    //     cono de aire comprimido ENTRE el portador y cada impío, de
+    //     VIOLETA (lejos) a BLANCO-VIOLETA (pegado, más caliente) —
+    //     FrenteVacio.png.
+    //   · CAPA 3 — LAS PARTÍCULAS (aquí, en la IA): el gas incandescente
+    //     que fluye DESDE el impío HACIA el portador (el aire comprimido
+    //     va hacia atrás) + la ABLACIÓN que se desprende de la cara que
+    //     avanza — el polvo del vacío invertido (PolvoVacioInvertido).
+    //   · CAPA 4 — EL DESTELLO (en VacioGlobalNPC): el tinte + bloom
+    //     sobre el impío, brillando más en la cara que avanza.
+    //   · EL TRUCO FINAL — LA DISTORSIÓN DE CALOR (CalorLib): el aire
+    //     HIERVE entre el portador y el impío (las fuentes de CalorLib
+    //     registradas en la IA: el conducto del haz + el foco del
+    //     impío) — la refracción de pantalla de la casa.
+    //  La capa de resistencia de la v6.101 (manto de 16 + cresta de
+    //  ruido + estelas dibujadas) MUERE: la receta la sustituye.
     //
     //  EL VESTIDO DEL ANCLA (lo que SÍ es del estandarte): el Corazon-
     //  Corona del motor de píxeles latiendo bajo el portador EN VIOLETA
@@ -171,6 +195,16 @@ namespace AethonMod.Content.Projectiles
             if (Main.netMode != NetmodeID.Server && !Main.dedServ)
             {
                 Lighting.AddLight(Projectile.Center, new Vector3(0.58f, 0.34f, 0.95f) * 1.1f);
+
+                // --------------------------------------------------------
+                //  v6.102 — CAPA 3 DE LA RECETA + EL TRUCO FINAL (solo
+                //  cliente, en la IA — jamás en el render): el GAS
+                //  INCANDESCENTE y la ABLACIÓN (el polvo del vacío
+                //  invertido) + LAS FUENTES DE CALOR (CalorLib — el
+                //  aire HIERVE entre el portador y cada impío).
+                // --------------------------------------------------------
+                if (!Main.gameMenu)
+                    VestirLaReceta(dueno);
             }
         }
 
@@ -181,6 +215,87 @@ namespace AethonMod.Content.Projectiles
             if (k < 0f) k = 0f;
             else if (k > 1f) k = 1f;
             return out1 + (out2 - out1) * k;
+        }
+
+        // ----------------------------------------------------------------
+        //  v6.102 — EL VESTIDO DE LA RECETA (la fase de UPDATE, el
+        //  contrato de CalorLib: las fuentes se registran en la IA y se
+        //  consumen en el pase de EndCapture).
+        // ----------------------------------------------------------------
+        private static void VestirLaReceta(Player dueno)
+        {
+            int fuentes = 0;
+            for (int i = 0; i < Main.maxNPCs && fuentes < 4; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active)
+                    continue;
+                if (!VacioGlobalNPC.TieneQuemadura(n))
+                    continue;
+                VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();
+                float vive = vacio.VisualQuemadura;
+                if (vive <= 0.05f)
+                    continue;
+                fuentes++;
+
+                Vector2 haciaImpio = n.Center - dueno.MountedCenter;
+                float dist = haciaImpio.Length();
+                if (dist < 24f)
+                    continue;
+                Vector2 direccion = haciaImpio * (1f / dist);   // portador → impío
+
+                // EL TRUCO FINAL — LA DISTORSIÓN DE CALOR (la receta:
+                // «usa un shader que distorsione píxeles cerca del
+                // enemigo»): el conducto del aire hirviendo ENTRE el
+                // portador y el impío (más grueso pegado: ahí hierve
+                // más) + el foco del propio impío.
+                CalorLib.Haz(dueno.MountedCenter, n.Center,
+                    34f + 24f * vacio.CercaniaLocal,
+                    n.width * 0.5f + 16f,
+                    (0.25f + 0.75f * vacio.CercaniaLocal) * vive);
+                CalorLib.Punto(n.Center, MathF.Max(n.width, n.height) * 1.1f,
+                    (0.3f + 0.7f * vacio.CercaniaLocal) * vive);
+
+                // CAPA 3 — EL GAS INCANDESCENTE (la receta: «las
+                // partículas deben fluir DESDE el enemigo HACIA el
+                // jugador (el aire comprimido va hacia atrás)»): nace
+                // en la zona de compresión (0.35..0.95 de la distancia)
+                // y RETROCEDE hacia el portador. El polvo del vacío
+                // invertido con el halo VIOLETA (más BLANCO-VIOLETA
+                // cuanto más cerca arde: el color por temperatura).
+                if (Main.rand.NextBool(2))
+                {
+                    float cerca = dist * Main.rand.NextFloat(0.35f, 0.95f);
+                    Vector2 pos = dueno.MountedCenter + direccion * cerca;
+                    Color halo = Color.Lerp(
+                        new Color(185, 110, 255), new Color(236, 220, 255),
+                        vacio.CercaniaLocal);
+                    Dust d = Dust.NewDustPerfect(pos,
+                        ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                        -direccion * Main.rand.NextFloat(0.4f, 0.9f),
+                        160, halo, Main.rand.NextFloat(0.7f, 1.1f));
+                    d.noGravity = true;
+                    d.fadeIn = 1.2f;
+                }
+
+                // LA ABLACIÓN — la receta: «partículas que se
+                // desprenden del enemigo (simulando ablación)»: lo que
+                // se cae de la cara que AVANZA (la que choca con el
+                // vacío), desprendiéndose hacia atrás.
+                if (Main.rand.NextBool(2))
+                {
+                    Vector2 frente = vacio.FrenteLocal;
+                    if (frente.LengthSquared() < 0.1f)
+                        frente = -direccion;
+                    Vector2 pos = n.Center + frente * (MathF.Max(n.width, n.height) * 0.5f);
+                    Dust d = Dust.NewDustPerfect(pos,
+                        ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                        -frente * Main.rand.NextFloat(0.6f, 1.3f) + new Vector2(0f, -0.4f),
+                        140, new Color(150, 84, 235), Main.rand.NextFloat(0.6f, 1.0f));
+                    d.noGravity = true;
+                    d.fadeIn = 1.0f;
+                }
+            }
         }
 
         public override void OnKill(int timeLeft)
@@ -263,6 +378,22 @@ namespace AethonMod.Content.Projectiles
                 Texture2D anilloMag = Tex("MagicRing");
                 Texture2D destello = Tex("SparkleStar");
                 Texture2D orbe = Tex("GlowOrb");
+
+                // v6.102 — CAPA 1 DE LA RECETA: EL CAMPO TÉRMICO (el
+                // «aura base del jugador, el escudo visible»: la textura
+                // circular semitransparente que sigue al portador). El
+                // PULSO de la receta (±5%, ~2 s: el campo RESPIRA) y su
+                // eco frío detrás (la frontera disipándose).
+                Texture2D campo = Tex("CampoVacio");
+                if (campo != null)
+                {
+                    float respira = 1f + 0.05f * MathF.Sin(t * 3f);
+                    float ancho = RADIO * 2.2f * respira;
+                    Suelo(sb, campo, centro, violeta * (0.30f * pulso), 0f,
+                        ancho, ancho * 0.95f);
+                    Suelo(sb, campo, centro, negroVioleta * (0.22f * pulso), 0f,
+                        ancho * 1.06f, ancho * 1.0f);
+                }
 
                 // EL SUELO DEL VACÍO — la mancha oscura bajo el portador
                 // (el negro-violeta: donde el aire se espesa) y su ruido.

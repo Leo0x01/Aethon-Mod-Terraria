@@ -1895,6 +1895,21 @@ Items: {
 	}
 
 	// v6.50.54 — THE RAINBOW HALO (Form 3's rainbow, distilled into an adornment).
+	FormaAscendidaCincoItem: {
+		DisplayName: La Forma Ascendida 5
+		Tooltip:
+			'''
+			EL VIENTO DEL ESPÍRITU — la quinta luz: EL QUE SOPLA (ruach/pneuma).
+			El aura de las cinco luces con SU FIRMA: LA CAPA DE TURBULENCIA
+			SUAVE — hebras de vapor que orbitan a favor y en contra (el
+			cizallamiento de las dos corrientes), SOLO sobre la banda del
+			aura (0.68R..0.96R): tu cuerpo y todo lo demás quedan intactos.
+			La paleta del aliento: plata al centro, teal pálido al medio
+			y violeta al borde — la calma del centro, el color en el borde.
+			Y VUELO INFINITO (como sus cuatro hermanas).
+			'''
+	}
+
 	HaloArcoirisItem: {
 		DisplayName: El Halo Arcoíris
 		Tooltip:

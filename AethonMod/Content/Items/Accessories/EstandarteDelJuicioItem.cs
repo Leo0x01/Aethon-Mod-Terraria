@@ -21,7 +21,7 @@ namespace AethonMod.Content.Items.Accessories
     //  investigacion».
     //
     //  LA INVESTIGACIÓN (research/README-ESTANDARTE.md — el original
-    //  copiado tal cual): el Warbanner original es un ÍTEM ANIMADO —
+    //  copiado tal cual): el estandarte original es un ÍTEM ANIMADO —
     //  una tira de 5 marcos a 6 ticks (DrawAnimationVertical(6, 5)),
     //  de 32×78 px, con el pennant dorado ardiendo. LA v6.98 nuestra
     //  era un ítem ESTÁTICO de 30×40 — por eso «no tenía nada que

@@ -13,8 +13,8 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Globals
 {
     /// <summary>
-    /// VacioGlobalNPC — v6.101 — EL SISTEMA DE LA QUEMADURA DEL VACÍO
-    /// EXTERIOR (la investigación del estandarte para el grimorio).
+    /// VacioGlobalNPC — v6.101 → v6.102 — EL SISTEMA DE LA QUEMADURA DEL
+    /// VACÍO EXTERIOR (la investigación del estandarte para el grimorio).
     ///
     /// LA LETRA DEL USUARIO: «cada enemigo que entre al radio de efecto
     /// del estandarte se quema y visualmente se nota como cada vez se
@@ -34,14 +34,26 @@ namespace AethonMod.Content.Globals
     ///    SUAVE por cercanía (×1 en el borde → ×0.55 pegado al cuerpo).
     ///    En PostAI la IA ya escribió SU velocidad: el freno pisa
     ///    DESPUÉS y afecta a TODOS los enemigos, caminantes y voladores.
-    ///  · LA CAPA DE RESISTENCIA (PostDraw): el frente de ablación de
-    ///    los meteoritos entrando a la atmósfera — un MANTO de partículas
-    ///    alrededor del cuerpo MÁS BRILLANTE en la cara que avanza, la
-    ///    CRESTA DE CHOQUE delante (dos láminas de ruido comprimidas) y
-    ///    LAS ESTELAS que se desprenden hacia atrás como chatarra
-    ///    ardiente — TODO con energía MORADA y NEGRA, y cada vez MÁS
-    ///    INTENSO cuanto más tiempo lleva ardiendo (la rampa visual
-    ///    sube en 2 segundos de quemado).
+    ///  · v6.102 — EL VESTIDO DE LA RECETA (PostDraw): la letra nueva —
+    ///    «el efecto sobre el enemigo quedo bien en el banner pero los
+    ///    vfx no, crea otro banner con algo que me dio una IA […] adapta
+    ///    el codigo y lo que dijo»: LA RECETA DEL CALENTAMIENTO
+    ///    AERODINÁMICO, adaptada a la energía morada y negra:
+    ///     · CAPA 2 — EL FRENTE DE COMPRESIÓN: la estela DENSA del aire
+    ///       comprimido ENTRE el portador y el impío (FrenteVacio.png),
+    ///       de VIOLETA (lejos) a BLANCO-VIOLETA (pegado, más caliente),
+    ///       con el alfa ∝ intensidad — y la DOBLE PASADA de la casa
+    ///       (×1.45/×2.1 de alto: el frente GORDO que pidió EL OJO).
+    ///     · CAPA 4 — EL DESTELLO: el tinte + bloom sobre el impío
+    ///       (el glow que BRILLA más en la cara que avanza) y su
+    ///       RESPALDO negro-violeta (la corona del impío cayendo en la
+    ///       atmósfera — la única pieza de la v6.101 que sobrevivió:
+    ///       leía bien).
+    ///    La capa de resistencia de la v6.101 (manto de 16 partículas,
+    ///    cresta de ruido comprimida y estelas dibujadas) MUERE aquí:
+    ///    la receta la sustituye (la capa 3 — el gas y la ablación —
+    ///    vive en el estandarte, en la IA; la distorsión de calor, en
+    ///    CalorLib).
     ///  · TODO determinista en el render (semilla = whoAmI — 0 Main.rand
     ///    en el dibujado, la ley de la casa).
     /// </summary>
@@ -59,13 +71,13 @@ namespace AethonMod.Content.Globals
         public int DanoVacio;
 
         /// <summary>EL DUEÑO de la quemadura (player.whoAmI + 1; 0 = no
-        /// tiene dueño). Mientras un enemigo arda por él, el portador
+        /// tiene dueño). Mientras un enemigo arde por él, el portador
         /// cobra el buff Vacío Exterior.</summary>
         public int DuenoVacio;
 
         /// <summary>LA RAMPA VISUAL local (0→1 en ~2 s ardiendo): cada
-        /// vez se quema MÁS — el manto, la cresta y las estelas crecen
-        /// con ella. Se enfría sola cuando el debuff se apaga.</summary>
+        /// vez se quema MÁS — el frente y el destello crecen con ella.
+        /// Se enfría sola cuando el debuff se apaga.</summary>
         public float VisualQuemadura;
 
         /// <summary>EL FRENTE de ablación (unitario): la cara que avanza
@@ -117,7 +129,7 @@ namespace AethonMod.Content.Globals
             }
             else
             {
-                // EL ENFRIAMIENTO: fuera del fuego el manto se apaga solo.
+                // EL ENFRIAMIENTO: fuera del fuego el frente se apaga solo.
                 if (VisualQuemadura > 0f)
                     VisualQuemadura = Math.Max(0f, VisualQuemadura - 0.05f);
                 if (VisualQuemadura <= 0f)
@@ -185,9 +197,9 @@ namespace AethonMod.Content.Globals
         }
 
         // ================================================================
-        //  LA CAPA DE RESISTENCIA — el frente de ablación del meteoro.
-        //  (El contrato del dibujado de la casa: cerrar el lote, vestir,
-        //  devolver el lote vanilla SIEMPRE.)
+        //  EL VESTIDO DE LA RECETA — el frente de compresión + el
+        //  destello (el contrato del dibujado de la casa: cerrar el
+        //  lote, vestir, devolver el lote vanilla SIEMPRE).
         // ================================================================
         public override void PostDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
@@ -196,7 +208,7 @@ namespace AethonMod.Content.Globals
             try
             {
                 VFXCore.CerrarLoteSiAbierto();
-                DibujarCapaDeAblacion(npc, screenPos);
+                DibujarElFrenteYElDestello(npc, screenPos);
             }
             catch
             {
@@ -205,22 +217,22 @@ namespace AethonMod.Content.Globals
             VFXCore.ReabrirLoteVanilla();
         }
 
-        /// <summary>LA CAPA DE RESISTENCIA COMPLETA: el manto de
-        /// partículas alrededor del cuerpo (más brillante en la cara que
-        /// avanza), la CRESTA DE CHOQUE comprimida delante y LAS ESTELAS
-        /// de ablación que se desprenden hacia atrás — morado y negro,
-        /// creciendo con la rampa visual.</summary>
-        private void DibujarCapaDeAblacion(NPC npc, Vector2 screenPos)
+        /// <summary>v6.102 — LA CAPA 2 Y LA CAPA 4 DE LA RECETA:
+        /// EL FRENTE DE COMPRESIÓN (la estela del aire comprimido entre
+        /// el portador y el impío — denso en el origen, disperso hacia
+        /// la presa, más caliente cuanto más cerca) y EL DESTELLO (el
+        /// tinte + bloom sobre el impío, brillando más en la cara que
+        /// avanza), con su RESPALDO negro-violeta detrás.</summary>
+        private void DibujarElFrenteYElDestello(NPC npc, Vector2 screenPos)
         {
             float t = Main.GlobalTimeWrappedHourly;
             int semilla = npc.whoAmI * 7 + 3;
             float vive = VisualQuemadura;
-            float late = 0.85f + 0.15f * MathF.Sin(t * 9f + semille(semilla) * 6.28f);
+            float late = 0.85f + 0.15f * MathF.Sin(t * 9f + Azar(semilla) * 6.28f);
 
             Vector2 centro = npc.Center - screenPos;
             float rx = npc.width * 0.5f + 8f;
             float ry = npc.height * 0.5f + 8f;
-            float angFrente = FrenteLocal.ToRotation();
 
             Color violeta = new(185, 110, 255);
             Color violetaAlto = new(224, 176, 255);
@@ -231,65 +243,74 @@ namespace AethonMod.Content.Globals
                 SamplerState.LinearClamp, DepthStencilState.None,
                 RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            Texture2D destello = Tex("SparkleStar");
-            Texture2D orbe = Tex("GlowOrb");
+            Texture2D glow = Tex("GlowCircleWhite");   // EL GLOWSOFT de la receta
+            Texture2D frente = Tex("FrenteVacio");
 
-            // 1) EL MANTO DE RESISTENCIA — 16 partículas en elipse alrededor
-            //    del cuerpo, girando despacio, BRILLANDO MÁS en la cara que
-            //    avanza (cos(ángulo−frente)^2: el frente del meteoro).
-            for (int k = 0; k < 16; k++)
+            // === CAPA 2 — EL FRENTE DE COMPRESIÓN: el «cono de aire
+            //     caliente» ENTRE el portador y el impío. LA RECETA:
+            //     Color.Lerp(frío → caliente, intensidad) con el alfa
+            //     ∝ intensidad (150·intensidad), la escala X = la
+            //     distancia y la Y crece con la cercanía (×1.8 el
+            //     pincel) — y LA DOBLE PASADA de la casa (la segunda
+            //     ×1.45 de alto al 45%: el frente GORDO que pidió EL
+            //     OJO). El origen en el BORDE IZQUIERDO (la convención
+            //     de la receta: la estela nace en el portador) y el
+            //     espejo por impío (paridad de la semilla: unos lean
+            //     arriba, otros abajo — la turbulencia no repite). ===
+            if (frente != null)
             {
-                float ang = k * MathHelper.TwoPi / 16f + t * 0.45f;
-                Vector2 pos = centro + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
-                float choque = MathF.Max(0f, MathF.Cos(ang - angFrente));
-                float brillo = (0.22f + 0.78f * choque * choque) * vive * late;
-                float esc = (3.2f + 2.6f * choque + 1.8f * Azar(semilla + k)) / 32f;
-                Capa(sb, destello, pos, Color.Lerp(violeta, violetaAlto, choque) * brillo,
-                    ang + t * 2f, esc);
+                Vector2 haciaPortador = PortadorMasCercano(npc.Center);
+                if (haciaPortador != Vector2.Zero)
+                {
+                    Vector2 posPortador = npc.Center + haciaPortador;   // el mundo
+                    float dist = haciaPortador.Length();
+                    if (dist > 30f)
+                    {
+                        Vector2 pantalla = posPortador - screenPos;
+                        float ang = (centro - pantalla).ToRotation();   // portador → impío
+                        float k = CercaniaLocal;
+                        Color colFrente = Color.Lerp(violeta, violetaAlto, k);
+                        float alfaFrente = (0.15f + 0.50f * k) * vive * late;
+                        var origen = new Vector2(0f, frente.Height * 0.5f);
+                        var espejo = (semilla & 1) == 0
+                            ? SpriteEffects.None : SpriteEffects.FlipVertically;
+
+                        // la pasada PRINCIPAL (el pincel de la receta ×1.8)
+                        sb.Draw(frente, pantalla, null, colFrente * alfaFrente,
+                            ang, origen,
+                            new Vector2(dist / frente.Width, (0.6f + 0.4f * k) * 1.8f),
+                            espejo, 0f);
+                        // la DOBLE PASADA (más ALTA y más TENUE — el grosor)
+                        sb.Draw(frente, pantalla, null, colFrente * (alfaFrente * 0.45f),
+                            ang, origen,
+                            new Vector2(dist * 0.92f / frente.Width, (0.6f + 0.4f * k) * 2.6f),
+                            espejo, 0f);
+                    }
+                }
             }
 
-            // 2) LA CRESTA DE CHOQUE — las dos láminas de ruido COMPRIMIDAS
-            //    en la cara que avanza (el plasma del meteoro entrando).
-            Vector2 posCresta = centro + FrenteLocal * (MathF.Max(rx, ry) * 0.72f + 7f);
-            Texture2D ruido = Ruido(semilla, 6.2f);
-            float ancho = MathF.Max(rx, ry) * 2.1f * (0.9f + 0.2f * vive);
-            Capa(sb, ruido, posCresta, violeta * (0.30f * vive * late),
-                angFrente, new Vector2(ancho / 512f, (MathF.Max(rx, ry) * 1.05f) / 512f));
-            Capa(sb, ruido, posCresta + FrenteLocal * 5f,
-                Color.White * (0.10f * vive),
-                angFrente, new Vector2(ancho * 0.7f / 512f, (MathF.Max(rx, ry) * 0.55f) / 512f));
-            // EL NÚCLEO DE LA CRESTA: el punto más caliente del choque.
-            Capa(sb, orbe, posCresta, violetaAlto * (0.4f * vive * late),
-                angFrente, 0.16f);
-
-            // 3) LAS ESTELAS DE ABLACIÓN — la chatarra que se desprende
-            //    hacia ATRÁS del avance: 8 colas que nacen en el hemisferio
-            //    delantero y se estiran contracorriente, finas y largas.
-            for (int k = 0; k < 8; k++)
+            // === CAPA 4 — EL DESTELLO: el tinte + bloom sobre el impío,
+            //     BRILLANDO MÁS en la cara que avanza (la que CHOCA con
+            //     el vacío: el «tinte rojizo + bloom» de la receta, en
+            //     la energía del estandarte) y su núcleo blanco-violeta. ===
             {
-                float azar = Azar(semilla + k * 13);
-                float ang = angFrente + (azar * 2f - 1f) * 1.9f;
-                Vector2 nace = centro + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
-                float largo = (16f + 36f * azar) * vive;
-                Vector2 cola = nace - FrenteLocal * largo;
-                Vector2 medio = (nace + cola) * 0.5f;
-                // LA ESTELA VIOLETA (el rastro caliente)…
-                sb.Draw(orbe, medio, null, violeta * (0.5f * vive * (1f - azar * 0.4f)),
-                    (cola - nace).ToRotation(), Utils.Size(orbe) * 0.5f,
-                    new Vector2(largo / 128f, 3.6f / 128f), SpriteEffects.None, 0f);
-                // …Y SU SOMBRA NEGRA (el humo del vacío que deja).
-                sb.Draw(orbe, medio + FrenteLocal * largo * 0.25f, null,
-                    Color.Black * (0.35f * vive),
-                    (cola - nace).ToRotation(), Utils.Size(orbe) * 0.5f,
-                    new Vector2(largo * 1.25f / 128f, 6.5f / 128f), SpriteEffects.None, 0f);
+                float k = CercaniaLocal;
+                float esc = (MathF.Max(rx, ry) * (1.5f + 0.9f * k)) / 128f;  // la receta: 1.5·intensidad
+                Capa(sb, glow, centro, violeta * ((0.22f + 0.5f * k) * vive * late),
+                    0f, esc);
+                // EL NÚCLEO — el punto más caliente del choque
+                Texture2D orbe = Tex("GlowOrb");
+                if (orbe != null)
+                    Capa(sb, orbe, centro + FrenteLocal * (MathF.Max(rx, ry) * 0.35f),
+                        violetaAlto * ((0.30f + 0.35f * k) * vive * late),
+                        FrenteLocal.ToRotation(), 0.17f + 0.12f * k);
             }
 
-            // 4) EL HALO DEL VACÍO — el resplandor morado-oscuro detrás de
-            //    todo el cuerpo (la corona del enemigo cayendo en la atmósfera).
-            Capa(sb, Tex("GlowCircleWhite"), centro, negroVioleta * (0.34f * vive),
+            // === EL RESPALDO — la única pieza de la v6.101 que SOBREVIVE
+            //     (leía bien): el negro-violeta detrás de todo el cuerpo,
+            //     la corona del impío cayendo en la atmósfera. ===
+            Capa(sb, glow, centro, negroVioleta * (0.34f * vive),
                 0f, (MathF.Max(rx, ry) * 2.6f) / 128f);
-            Capa(sb, orbe, centro, violeta * (0.12f * vive * late),
-                0f, (MathF.Max(rx, ry) * 1.9f) / 128f);
 
             sb.End();
         }
@@ -304,8 +325,6 @@ namespace AethonMod.Content.Globals
             float v = MathF.Sin(i * 12.9898f + 78.233f) * 43758.547f;
             return v - MathF.Floor(v);
         }
-
-        private static float semille(int s) => Azar(s);
 
         /// <summary>La lámina de ruido viva (el caché de las 20).</summary>
         private static Texture2D Ruido(int semilla, float vel)

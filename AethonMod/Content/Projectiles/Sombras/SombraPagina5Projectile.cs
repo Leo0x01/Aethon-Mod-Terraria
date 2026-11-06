@@ -22,7 +22,23 @@ namespace AethonMod.Content.Projectiles.Sombras
     //  DRENA 3% cada 6 t — y a 1 de vida, LA DEVORACIÓN.
     //
     //  LO QUE CAMBIA ES LA PIEL DEL TENTÁCULO (más increíble y
-    //  aterrador — TODO procedural, la casa):
+    //  aterrador):
+    //   · v6.101 — LOS OJOS DEL ABISMO (once ojos rasgados que
+    //     parpadean cada uno a su ritmo), LA SIERRA DOBLE de
+    //     colmillos y LA FAUCE que jadea y tritura — TODO vivo.
+    //   · v6.102 — LA PIEL FORJADA (la letra: «el tentaculo debe ser
+    //     rediseñado, con nuevas texturas, usa la forja o el taller
+    //     para crear las texturas del tentaculo»): el cuerpo ya no
+    //     viste la carne horneada de siempre — viste LA CARNE FORJADA
+    //     (TentaculoAbismo.png 128×512: LA PLUMA IA + EL MOLDE de la
+    //     casa + LA SASTRERÍA del Ribbon — máscara U que respira,
+    //     espejo periódico C0 en V, premultiplicado del lote alfa):
+    //     ridges musculares, DOS HILERAS DE VENTOSAS que brillan y
+    //     VENAS CARMESÍ horneadas en la propia piel (las capas de
+    //     espinas y ventosas sueltas de la masa clásica MURIERON:
+    //     la piel trae las suyas). EL RITUAL ES EL DE LA FAMILIA —
+    //     IGUAL QUE LA ORIGINAL: emerge, caza, muerde, drena y
+    //     devora; solo cambió el traje.
     //   · LOS OJOS DEL ABISMO — ONCE OJOS RASGADOS (la rendija vertical
     //     del dragón de la casa) graduados en tamaño por toda la masa,
     //     TODOS clavados en la presa y CADA UNO PARPADEANDO A SU
@@ -314,11 +330,14 @@ namespace AethonMod.Content.Projectiles.Sombras
             // 1) EL CUERPO DE LA CASA — el charco bajo el portador, la
             //    columna viva MÁS GORDA (la masa del quinto tomo es una
             //    bestia más gruesa) y la bruma en dos capas.
+            //    v6.102 — LA PIEL FORJADA: la masa viste LA CARNE
+            //    FORJADA de la forja/taller (MasaAbismo); la bruma
+            //    sigue siendo de la casa.
             SombrasLib.Charco(SombraProyectada(dueño), 46f, 0.55f, tiempo, semilla);
             Vector2[] columna = SombrasLib.ColumnaViva(raiz, Projectile.Center,
                 tiempo, semilla, 20, 0.24f, 0.5f);
             float vive = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
-            SombrasLib.Masa(columna, 11f, 15f, 0.96f * vive, semilla, tiempo, 52f);
+            SombrasLib.MasaAbismo(columna, 11f, 15f, 0.96f * vive, semilla, tiempo, 52f);
             SombrasLib.BrumaColumna(columna, 48f, 0.60f * vive, tiempo, semilla, 16);
             SombrasLib.BrumaColumna(columna, 32f, 0.44f * vive, tiempo, semilla + 97, 12);
 

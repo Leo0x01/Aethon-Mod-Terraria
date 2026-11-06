@@ -59,6 +59,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil _perfilAscendidaDos;
         private static AuraPerfil _perfilAscendidaTres;
         private static AuraPerfil _perfilAscendidaCuatro;
+        private static AuraPerfil _perfilAscendidaCinco;
         private static AuraPerfil _perfilBrasa;
         private static AuraPerfil _perfilHaloArcoiris;
 
@@ -87,6 +88,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// creado UNA vez.</summary>
         private static AuraPerfil PerfilAscendidaCuatro =>
             _perfilAscendidaCuatro ??= AuraPerfil.FormaAscendidaCuatro();
+
+        // v6.102 - la quinta luz (el modo 8): EL VIENTO DEL ESPIRITU -
+        // el aura de las cinco luces con SU FIRMA, la TURBULENCIA SUAVE
+        // que SOLO vive en la banda del aura. Creado UNA vez.
+        private static AuraPerfil PerfilAscendidaCinco =>
+            _perfilAscendidaCinco ??= AuraPerfil.FormaAscendidaCinco();
 
         /// <summary>v6.50.54 — El perfil de EL HALO ARCOÍRIS (el arcoíris
         /// de la Forma 3 destilado: SOLO la banda pequeña alrededor de la
@@ -138,6 +145,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaTres;
                 case 6:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCuatro;
+                // v6.102 - la quinta luz (el modo 8).
+                case 8:
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCinco;
                 case 7:
                     return duenio.GetModPlayer<CosmeticPlayer>().HaloArcoiris;
             }
@@ -155,6 +165,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 4: return PerfilAscendidaDos;
                 case 5: return PerfilAscendidaTres;
                 case 6: return PerfilAscendidaCuatro;
+                case 8: return PerfilAscendidaCinco;   // v6.102 - la quinta luz
                 case 7: return PerfilHaloArcoiris;
             }
             return null;
@@ -206,6 +217,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             {
                 Lighting.AddLight(Projectile.Center - new Vector2(0f, 18f),
                     new Vector3(0.26f, 0.24f, 0.20f));
+            }
+            // v6.102 - EL VIENTO DEL ESPIRITU: la luz del aliento (teal
+            // blanca, respirando LENTO - la quinta luz no corre: SOPLA).
+            else if (Modo == 8)
+            {
+                float aliento = 0.85f + 0.15f * MathF.Sin(Main.GlobalTimeWrappedHourly * 1.1f);
+                Lighting.AddLight(Projectile.Center,
+                    0.24f * aliento, 0.28f * aliento, 0.26f * aliento);
             }
         }
 

@@ -311,6 +311,31 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public int Bloom = 3;
 
+        // === v6.102 — LA CAPA DE TURBULENCIA (la Forma Ascendida 5) ===
+
+        /// <summary>
+        /// LA TURBULENCIA SUAVE (0..1): la capa que SOLO viste el aura —
+        /// EL VIENTO DEL ESPÍRITU. HEBRAS de vapor advectadas por el
+        /// flujo: unas orbitan a favor y otras en contra (EL
+        /// CIZALLAMIENTO: la mitad de la banda cruza sobre la otra
+        /// mitad), cada una respirando su radio (la cresta y el valle
+        /// de su propia ola) y estiradas TANGENCIALMENTE (la veta del
+        /// flujo, no la aguja). SUAVE a propósito: alfa bajo, deriva
+        /// lenta — energía que respira, no vendaval. SOLO entre 0.68R
+        /// y 0.96R: el cuerpo del portador, su contorno y TODO lo demás
+        /// quedan intactos — la capa es del AURA y de nadie más.
+        /// 0 = sin turbulencia (los perfiles de siempre, intactos).
+        /// </summary>
+        public float Turbulencia = 0f;
+
+        /// <summary>
+        /// LAS HEBRAS de la turbulencia (6–16 recomendado; la mitad a
+        /// favor y la mitad en contra — el cizallamiento nace de la
+        /// interferencia de las dos corrientes). Solo la lee la capa
+        /// de turbulencia (Turbulencia > 0).
+        /// </summary>
+        public int Hebras = 12;
+
         // === SEMILLA Y PARTÍCULAS ===
         /// <summary>Semilla determinista: la MISMA apariencia siempre.</summary>
         public int Semilla = 0;
@@ -658,6 +683,70 @@ namespace AethonMod.Content.VFX
                 Ascenso = 50f,
                 Tamano = 10f,
                 Vida = 2.0f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.102 - LA FORMA ASCENDIDA 5 (EL VIENTO DEL ESPIRITU - la
+        /// quinta luz). LA LETRA: crear una nueva La Forma Ascendida;
+        /// a esta nueva forma debes darle aura (ya se como crear aura)
+        /// y a esa aura anadir una capa de turbulencia suave que solo
+        /// afecte al aura.
+        ///
+        /// LA INVESTIGACION (la iconografia del ESPIRITU - la tercera
+        /// persona de la divinidad: la unica que se pinta MOVIENDOSE):
+        /// ruach/pneuma - EL VIENTO. El aura de las cinco luces con SU
+        /// FIRMA: LA TURBULENCIA SUAVE (Turbulencia 1, 14 hebras - el
+        /// cizallamiento de las dos corrientes que SOLO vive en la
+        /// banda del aura). EL CAMINO GENERICO de Emitir (Perlin:
+        /// cuerpo + llamas + rim) - el aura de verdad de la casa - y
+        /// la PALETA DEL ALIENTO: plata blanca al centro, teal palido
+        /// al medio, violeta al borde (de dentro afuera: la calma del
+        /// centro, el color en el borde).
+        /// </summary>
+        public static AuraPerfil FormaAscendidaCinco()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 118f,              // el aliento ancho de la quinta luz
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Perlin,   // el camino generico de Emitir: EL AURA
+                Fluir = 0.55f,
+                Deriva = 0.12f,
+                Ascenso = 20f,             // el aliento sube despacio (es viento, no fuego)
+                Distorsion = 0.8f,
+                Blur = 1f,
+                Glow = 1.15f,
+                Semilla = 5105,
+                AlfaTrasera = 0.34f,
+                AlfaFrontal = 0.055f,
+                VeloFrontal = false,       // TODO-trasero por diseno (la familia de las luces)
+                Rayos = 0,
+                Borde = 0.30f,
+                Parpadeo = 0.05f,
+                // v6.102 - LA FIRMA: la turbulencia suave que SOLO viste el aura
+                Turbulencia = 1f,
+                Hebras = 14,
+            };
+            // LA PALETA DEL ALIENTO: plata -> teal palido -> violeta
+            p.ConTrasera(new Color(250, 252, 255), new Color(198, 244, 232),
+                         new Color(150, 84, 235));
+            p.ConFrontal(new Color(250, 252, 255), new Color(210, 248, 240),
+                         new Color(200, 150, 255));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 26,       // el aliento lleva motas (teal y violeta)
+                Forma = FormaParticula.Orbe,
+                Color = new Color(210, 250, 235),
+                Alfa = 0.45f,
+                Solidas = false,
+                Tasa = 1.1f,
+                Velocidad = 22f,
+                Ascenso = 34f,
+                Tamano = 8f,
+                Vida = 1.6f,
             });
             return p;
         }
@@ -4052,6 +4141,62 @@ namespace AethonMod.Content.VFX
                             Vector2 v = VertexPoligono(centro, rB, rotP, p.Lados, i);
                             VFXCore.Line(prev, v, cB * (alfaCapa * 0.9f), 2.2f);
                             prev = v;
+                        }
+                    }
+                }
+
+                // === 2c. v6.102 — LA TURBULENCIA (la capa suave que
+                //      SOLO viste el aura — EL VIENTO DEL ESPÍRITU) ===
+                // HEBRAS de vapor advectadas por el flujo: unas orbitan
+                // a FAVOR y otras EN CONTRA (el cizallamiento: la mitad
+                // de la banda cruza sobre la otra mitad — la firma de la
+                // turbulencia de verdad), cada una respirando su radio
+                // (la cresta y el valle de su propia ola) y estiradas
+                // TANGENCIALMENTE (la veta del flujo, no la aguja).
+                // SOLO entre 0.68R y 0.96R: NADA más se mueve — ni el
+                // cuerpo, ni las llamas, ni el rim siguen SU pulso de
+                // siempre. La capa es del AURA y de nadie más.
+                if (p.Turbulencia > 0.02f)
+                {
+                    int hebras = Math.Max(6, p.Hebras);
+                    if (VFXCore.Presupuesto(hebras * 2))
+                    {
+                        bool aditivo = !loteAlfa;   // el mismo pase de la pila
+                        for (int i = 0; i < hebras; i++)
+                        {
+                            float h = VFXCore.Hash01(p.Semilla ^ 0x7C15, i, 5);
+                            float h2 = VFXCore.Hash01(p.Semilla ^ 0x7C15, i, 11);
+                            // LA VELOCIDAD PROPIA: la mitad a favor, la
+                            // mitad en contra — SUAVE (0.10..0.32 rad/s)
+                            float vel = (h < 0.5f ? -1f : 1f) * (0.10f + 0.22f * h2);
+                            float ang = i * (MathHelper.TwoPi / hebras)
+                                      + t * vel + p.Semilla * 0.31f;
+                            // EL RADIO RESPIRA: la hebra cabalga su ola
+                            // (cresta ↔ valle) — la banda 0.68..0.96R
+                            float ola = 0.5f + 0.5f * MathF.Sin(t * (0.45f + 0.8f * h2) + i * 2.1f);
+                            float r = R * (0.68f + 0.28f * ola);
+                            Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang));
+                            Vector2 pos = centro + dir * r;
+                            // LA VETA: estirada TANGENCIALMENTE (el vapor
+                            // del flujo) — larga en la cresta de la ola
+                            float largo = R * (0.15f + 0.13f * h) * (0.85f + 0.3f * ola);
+                            float brillo = 0.55f + 0.45f * MathF.Sin(t * 2.2f + i * 1.9f);
+                            Color colT = Color.Lerp(cM, cB, 0.75f);   // la veta vive hacia el borde
+                            float fT = MathHelper.Clamp(
+                                alfaCapa * (0.35f + 0.55f * p.Turbulencia) * brillo, 0f, 1f);
+                            Texture2D vapor = Ruido((i * 5 + (int)(t * 6f)) % 4);
+                            if (vapor != null)
+                            {
+                                // el cuerpo de la veta (ancho, tenue)
+                                VFXCore.Quad(pos,
+                                    aditivo ? TintAditivo(colT, fT * 0.5f) : colT * (fT * 0.5f),
+                                    new Vector2(largo, R * 0.10f),
+                                    ang + 0.5f * (h - 0.5f), vapor);
+                                // el filo (fino, más brillante — la venita que se LEE)
+                                VFXCore.Quad(pos,
+                                    aditivo ? TintAditivo(colT, fT) : colT * fT,
+                                    new Vector2(largo * 0.8f, R * 0.045f), ang, vapor);
+                            }
                         }
                     }
                 }

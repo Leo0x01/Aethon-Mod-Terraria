@@ -14,7 +14,7 @@ namespace AethonMod.Content.Weapons.Auras
     //  investiga las armas tipo aura en internet» — LA INVESTIGACIÓN
     //  (la sesión de las auras): hay DOS familias de aura-arma — la
     //  CANALIZADA PERSONAL (el aura vive mientras sostienes el arma:
-    //  el arco de la Pluma, las coronas orbitantes del Warbanner) y
+    //  el arco de la Pluma, las coronas orbitantes del estandarte) y
     //  la ZONA ESTÁTICA (se lanza y queda: el charco, la runa en el
     //  suelo). LA CASA HACE UNA DE CADA:
     //

@@ -387,6 +387,92 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        /// <summary>
+        /// v6.102 — LA MASA DEL ABISMO: LA PIEL FORJADA DEL QUINTO TOMO.
+        ///
+        /// LA LETRA: «el tentaculo debe ser rediseñado, con nuevas
+        /// texturas, usa la forja o el taller para crear las texturas
+        /// del tentaculo». La misma cinta del Ribbon de siempre, pero
+        /// vestida con LA CARNE FORJADA (VFXCore.TentaculoAbismo — la
+        /// pluma IA + el molde de la casa + la sastrería del formato):
+        /// los ridges musculares, las VENTOSAS que brillan y las venas
+        /// carmesí vienen YA HORNEADOS en la piel — las capas 4
+        /// (espinas de hueso) y 5 (ventosas sueltas) de la masa
+        /// clásica MUEREN aquí (la piel trae las suyas).
+        ///
+        /// Viven las tres capas de siempre: LA CARNE que TAPA (lote
+        /// alfa, tintada BLANCO — la piel forjada pone su propio
+        /// color), EL VELO que respira (×1.7, tenue) y EL BORDE DE
+        /// ENERGÍA (aditivo: violeta en la raíz → ROJO SANGRE en la
+        /// punta + el PULSO que VIAJA raíz→punta).
+        /// </summary>
+        public static void MasaAbismo(Vector2[] col, float grosorRaiz, float grosorPunta,
+            float alfa, int semilla, float tiempo, float grosorCentro = -1f)
+        {
+            if (col == null || col.Length < 2 || alfa <= 0.02f) return;
+
+            var piel = VFXCore.TentaculoAbismo;
+            if (piel == null)
+            {
+                // La piel forjada aún no vive (recarga caliente): la
+                // masa clásica la viste mientras vuelve.
+                Masa(col, grosorRaiz, grosorPunta, alfa, semilla, tiempo, grosorCentro);
+                return;
+            }
+            int n = col.Length;
+
+            // === EL PERFIL: el mismo fusiforme (panza) o muscular
+            //     (bulbo + S-taper) de la masa de siempre ===
+            var anchos = new float[n];
+            for (int i = 0; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                float g;
+                if (grosorCentro > 0f)
+                {
+                    float lineal = MathHelper.Lerp(grosorRaiz, grosorPunta, f);
+                    g = MathHelper.Lerp(lineal, grosorCentro, MathF.Sin(MathF.PI * f));
+                }
+                else
+                {
+                    g = MathHelper.Lerp(grosorRaiz, grosorPunta, f * f * (3f - 2f * f));
+                    g *= 1f + 0.16f * MathF.Exp(-((f - 0.18f) / 0.16f) * ((f - 0.18f) / 0.16f));
+                }
+                // la respiración a lo largo (la ondulación de energía viva)
+                g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
+                anchos[i] = g;
+            }
+
+            // === CAPA 1 · LA CARNE FORJADA (la cinta que TAPA — lote
+            //     alfa; tintada BLANCO: la piel pone SU color) ===
+            VFXCore.Begin();
+            VFXCore.Ribbon(col, anchos, Alfa(Blanco, alfa), piel,
+                uvFlow: tiempo * 0.05f);
+            VFXCore.FlushAlpha();
+
+            // === CAPA 2 · EL VELO (el borde que respira — ×1.7, tenue) ===
+            VFXCore.Begin();
+            VFXCore.Ribbon(col, anchos, Alfa(Negro, alfa * 0.35f), piel,
+                uvFlow: tiempo * 0.05f, edgeOutset: 0.35f);
+            VFXCore.FlushAlpha();
+
+            // === CAPA 3 · EL BORDE DE ENERGÍA (aditivo, por segmento):
+            //     violeta en la raíz → ROJO SANGRE en la punta + el
+            //     PULSO que VIAJA raíz→punta — el filo del tajo ===
+            var bordes = new Color[n];
+            for (int i = 0; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                Color c = Color.Lerp(Violeta, Rojo, MathF.Pow(f, 1.3f));
+                float pulso = 0.55f + 0.45f * MathF.Sin(tiempo * 4.2f - f * 9f + semille(semilla) * 6.28f);
+                bordes[i] = Alfa(c, (0.10f + 0.16f * f) * alfa * pulso);
+            }
+            VFXCore.Begin();
+            VFXCore.RibbonTinted(col, anchos, bordes, piel,
+                uvFlow: tiempo * 0.05f, edgeInset: 0.40f);
+            VFXCore.FlushAdditive();
+        }
+
         /// <summary>El charco de sombra del que nace todo (el ancla en el suelo).</summary>
         public static void Charco(Vector2 pos, float radio, float alfa, float tiempo, int semilla)
         {

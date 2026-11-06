@@ -1278,6 +1278,12 @@ namespace AethonMod.Content.Players
                 // v6.50.53 — LA FORMA ASCENDIDA 4 (EL SERAFÍN — la cuarta luz).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCuatroItem>());
+                // v6.102 — LA FORMA ASCENDIDA 5 (EL VIENTO DEL ESPÍRITU —
+                // la quinta luz: el aura con su capa de turbulencia suave
+                // que SOLO afecta al aura — la regla de la casa: todo lo
+                // nuevo llega DIRECTO al jugador).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCincoItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
                 // v6.50.54 — EL HALO ARCOÍRIS (el arcoíris de la Forma 3

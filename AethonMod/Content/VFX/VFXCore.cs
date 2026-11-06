@@ -535,6 +535,37 @@ namespace AethonMod.Content.VFX
 
         private static Texture2D _colmillo;
 
+        // v6.102 — LA PIEL FORJADA DEL QUINTO TOMO (la Sombra de la
+        // Página V rediseñada con LA FORJA/TALLER de la casa).
+        private static Asset<Texture2D> _tentaculoAbismo;
+
+        /// <summary>
+        /// v6.102 — LA PIEL DEL ABISMO (TentaculoAbismo.png, 128×512,
+        /// FORJADA): la carne del QUINTO TOMO rediseñada con la cadena
+        /// de la forja — LA PLUMA (el borrador IA de la piel abisal:
+        /// ridges musculares, dos hileras de ventosas que brillan,
+        /// venas carmesí) + EL MOLDE (cutout → rejilla 128×256 → la
+        /// paleta DEL TOMO) + LA SASTRERÍA del formato del Ribbon (la
+        /// máscara U que respira, el ESPEJO PERIÓDICO — la costura C0
+        /// en V: la carne fluye continua con uvFlow — y el
+        /// PREMULTIPLICADO (q,q,q,q) del lote alfa). La viste
+        /// SombrasLib.MasaAbismo. Null-safe (recargas calientes).
+        /// </summary>
+        public static Texture2D TentaculoAbismo
+        {
+            get
+            {
+                try
+                {
+                    if (_tentaculoAbismo == null)
+                        _tentaculoAbismo = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/TentaculoAbismo");
+                    return _tentaculoAbismo.IsLoaded ? _tentaculoAbismo.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
         /// <summary>
         /// v6.50.67 — EL COLMILLO DE HUESO (48×48, horneado): aguja curva
         /// blanca con base oscura — los dientes de las fauces y las puntas
