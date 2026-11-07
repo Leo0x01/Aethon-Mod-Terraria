@@ -1903,104 +1903,19 @@ Items: {
 			'''
 	}
 
-	// v6.50.54 — THE RAINBOW HALO (Form 3's rainbow, distilled into an adornment).
-	FormaAscendidaCincoItem: {
-		DisplayName: La Forma Ascendida 5
-		Tooltip:
-			'''
-			EL RÍO DE PLUMAS — la quinta luz: LA BANDADA DE LUZ (la murmuration).
-			El viento disuelto en aves: TRES RÍOS de plumas fluyen alrededor tuyo,
-			la mitad contra-corriente — cada pluma NACE, VUELA y se disuelve en su
-			río; al correr la bandada SE INCLINA contigo y al atacar se aprieta.
-			LAS PLUMAS QUE SE QUEDAN caen meciéndose como hojas — la bendición
-			lenta — y EL RIM violeta enmarca el vuelo.
-			La paleta de la bandada: plata al centro, teal pálido al medio
-			y violeta al borde — la herencia del aliento, hecha ave.
-			Y VUELO INFINITO (como sus cuatro hermanas).
-			'''
-	}
-
-	FormaAscendidaSeisItem: {
-		DisplayName: La Forma Ascendida 6
-		Tooltip:
-			'''
-			EL ESCRIBA DE LA LUZ — la sexta luz: METATRÓN, la voz que escribe.
-			EL ESPEJO DEL GRIMORIO: tú eres el libro, y el cielo tu página.
-			EL CUBO DE METATRÓN girando tras tu espalda — trece nodos de oro
-			unidos por la GEOMETRÍA SAGRADA, el hexagrama de dos triángulos
-			que giran en contra, EL HALO DE LOS GLIFOS orbitando con la
-			escritura viva, LA LLUVIA DE VERSOS — palabras de luz cayendo y
-			subiendo a tu alrededor — y EL SELLO PERFECTO bajo tus pies.
-			La paleta del escriba: blanco pergamino al centro, oro vivo al
-			medio, tinta violeta al borde.
-			Y VUELO INFINITO (como sus cinco hermanas).
-			'''
-	}
-
-	FormaAscendidaSieteItem: {
-		DisplayName: La Forma Ascendida 7
-		Tooltip:
-			'''
-			EL OJO DE LA GALAXIA — la séptima luz: LA GALAXIA ENTERA, VISTA DESDE ARRIBA.
-			La estrella disuelta en cielo profundo: TÚ eres el NÚCLEO que ciega, y
-			LOS DOS BRAZOS se enrollan a tu alrededor — cadenas de nudos que nacen
-			pegados al corazón y se disuelven en el borde, con sus carriles de
-			POLVO VIOLETA entre los brazos, la granulación del disco y LAS
-			ESTRELLAS ERRANTES tan fuera que parecen no pertenecerle: le pertenecen.
-			La paleta de la galaxia: blanco nuclear al centro, oro vivo al medio
-			y polvo violeta al borde — la luz que alimenta mundos, desde arriba.
-			Y VUELO INFINITO (como sus seis hermanas).
-			'''
-	}
-
 	FormaAscendidaOchoItem: {
 		DisplayName: La Forma Ascendida 8
 		Tooltip:
 			'''
 			LAS OFANIM — la octava luz: LAS RUEDAS DENTRO DE RUEDAS de Ezequiel.
-			La espada disuelta en visión: TRES AROS giran cada uno en su plano —
-			la ECUATORIAL lenta, la VERTICAL en contra, la INTERIOR aprisa — y
-			sobre las llantas viajan OJOS DE LUZ que parpadean a su ritmo y MIRAN
-			hacia donde vas; el fuego de fricción lame los aros y EL PIE DEL TRONO
-			muestra sus doce marcas bajo tus pies. Al atacar, los iris ARDEN.
+			TRES AROS giran cada uno en su plano — la ECUATORIAL lenta, la VERTICAL
+			PLANTADA en su sitio, la INTERIOR aprisa — y sobre las llantas viajan
+			OJOS DE LUZ que parpadean a su ritmo y MIRAN hacia donde vas; LAS RUNAS
+			de la fricción ARDEN sobre los aros y EL PIE DEL TRONO muestra sus doce
+			marcas bajo tus pies. Al atacar, los iris y las runas ARDEN.
 			La paleta de las ruedas: blanco fuego al centro, oro vivo al medio
 			y brasa violeta al borde — la forja hecha rueda.
-			Y VUELO INFINITO (como sus siete hermanas).
-			'''
-	}
-
-	FormaAscendidaNueveItem: {
-		DisplayName: La Forma Ascendida 9
-		Tooltip:
-			'''
-			EL CÁNTICO DE LAS LÁMPARAS — la novena luz: LAS SIETE DEL TRONO
-			(«siete lámparas de fuego ardiendo delante del trono»).
-			La música disuelta en fuego: SIETE LÁMPARAS orbitan en escalinata,
-			cada llama CANTA su turno al compás 4/4 — la ola de luz corre por la
-			órbita, lámpara por lámpara; las llamas se INCLINAN contra tu carrera,
-			se ENGRÍE al atacar, y del coro brotan RELÁMPAGOS entre vecinas.
-			EL METRÓNOMO bajo tus pies barre con su péndulo al compás.
-			La paleta del coro: marfil al centro, ámbar al medio y violeta canto
-			al borde — la calidez del fuego que alaba.
-			Y VUELO INFINITO (como sus ocho hermanas).
-			'''
-	}
-
-	FormaAscendidaDiezItem: {
-		DisplayName: La Forma Ascendida 10
-		Tooltip:
-			'''
-			EL TRONO — la décima luz: LA VISTA ENTERA DEL TRONO
-			(«del trono salían relámpagos... y delante del trono, un mar de vidrio
-			semejante al cristal» + «un arco iris alrededor del trono»).
-			El árbol disuelto en majestad: EL MAR DE CRISTAL bajo tus pies — sus
-			vetas fluyen, sus ondas nacen de cada paso, su borde canta — EL ARCO
-			ESMERALDA sobre tu cabeza con la ola de brillo corriendo por sus seis
-			bandas, LA MANDORLA de la gloria envolviéndote de punta a punta, LOS
-			SIETE TRUENOS partiendo el cielo y LAS LÁGRIMAS del arco cayendo al mar.
-			La paleta del trono: cian cristal al centro, esmeralda al medio
-			y violeta hondo al borde — la eternidad, que no tiene prisa.
-			Y VUELO INFINITO (como sus nueve hermanas).
+			Y VUELO INFINITO (como sus cuatro hermanas).
 			'''
 	}
 

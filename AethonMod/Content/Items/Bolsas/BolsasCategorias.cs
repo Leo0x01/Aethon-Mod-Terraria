@@ -360,23 +360,13 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.50.53 — LA FORMA ASCENDIDA 4: EL SERAFÍN (la cuarta luz —
             // el que arde: seis alas, halo triple, corona, bruma y rayos).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
-            // v6.103 — LA FORMA ASCENDIDA 5: EL VIENTO DEL ESPÍRITU (la
-            // quinta luz — la regla permanente de la casa: «recuerda
-            // siempre crear una bolsa para armas nuevas y darselas al
-            // jugador»: TODO lo nuevo viaja en SU bolsa, además de la
-            // entrega directa). La v6.102 la entregó directo pero la
-            // dejó FUERA de la bolsa — la familia completa se reúne.
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
-            // v6.109 — LAS FORMAS ASCENDIDAS 6 Y 7 (EL ESCRIBA DE LA LUZ
-            // y LA ESTRELLA VIVA — la casa de las luces crece).
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
-            // v6.110 — LAS FORMAS ASCENDIDAS 8, 9 Y 10 (LA ESPADA DEL
-            // JUICIO, LA MÚSICA DE LAS ESFERAS y EL ÁRBOL DE LA VIDA —
-            // la década de las luces COMPLETA en SU bolsa).
+            // v6.112 — LAS LUCES 5, 6, 7, 9 Y 10 MURIERON por la letra del
+            // usuario («las otras formas 5, 6, 7, 9, 10 pueden ser borradas»)
+            // — su lugar en la bolsa murió con ellas.
+            // v6.110/v6.111 — LA FORMA ASCENDIDA 8 (LAS OFANIM — las
+            // ruedas dentro de ruedas de Ezequiel: la octava luz que el
+            // usuario conservó en la v6.112).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaOchoItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaNueveItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDiezItem>(), 1));
             // v6.103 — EL ESTANDARTE DEL JUICIO murió en la v6.109 (la
             // letra: «ya puedes borrar los otros 2 estandarte») — su
             // lugar en la bolsa lo hereda EL AURA DEL VACÍO (abajo, en
@@ -1012,17 +1002,13 @@ namespace AethonMod.Content.Items.Bolsas
             // fantasMAS TAMBIÉN ardiendo).
             l.Add((ModContent.ItemType<Accessories.AuraDeJuicio2Item>(), 1));
             // LAS FORMAS ASCENDIDAS (las auras vivas del portador — la
-            // familia completa de las luces).
+            // familia de las luces; v6.112: quedan la 1, la 2, la 3, la 4
+            // y la 8 — las 5, 6, 7, 9 y 10 murieron por la letra).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDosItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaTresItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaOchoItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaNueveItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDiezItem>(), 1));
             return l;
         }
     }

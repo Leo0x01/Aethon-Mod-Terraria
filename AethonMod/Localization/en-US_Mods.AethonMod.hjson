@@ -1903,106 +1903,20 @@ Items: {
 			'''
 	}
 
-	// v6.50.54 — THE RAINBOW HALO (Form 3's rainbow, distilled into an adornment).
-	FormaAscendidaCincoItem: {
-		DisplayName: La Forma Ascendida 5
-		Tooltip:
-			'''
-			THE RIVER OF FEATHERS — the fifth light: THE FLOCK OF LIGHT (the murmuration).
-			The wind dissolved into birds: THREE RIVERS of feathers flow around
-			you, half against the current — each feather is BORN, FLIES and
-			dissolves inside its river; when you run the flock BANKS with you,
-			and when you strike it draws tight. THE FEATHERS THAT STAY fall
-			swaying like leaves — the slow blessing — and THE VIOLET RIM frames
-			the flight.
-			The flock's palette: silver at the core, pale teal at the middle and
-			violet at the rim — the breath's legacy, become bird.
-			And INFINITE FLIGHT (like its four sisters).
-			'''
-	}
-
-	FormaAscendidaSeisItem: {
-		DisplayName: The Ascended Form 6
-		Tooltip:
-			'''
-			THE SCRIBE OF LIGHT — the sixth light: METATRON, the voice that writes.
-			THE MIRROR OF THE GRIMOIRE: you are the book, and the sky your page.
-			THE CUBE OF METATRON spinning behind your back — thirteen golden nodes
-			joined by SACRED GEOMETRY, the hexagram of two counter-rotating
-			triangles, THE HALO OF GLYPHS orbiting with living scripture, THE RAIN
-			OF VERSES — words of light falling and rising around you — and THE
-			PERFECT SEAL beneath your feet.
-			The scribe's palette: parchment white at the core, living gold in
-			the middle, violet ink at the edge.
-			And INFINITE FLIGHT (like its five sisters).
-			'''
-	}
-
-	FormaAscendidaSieteItem: {
-		DisplayName: The Ascended Form 7
-		Tooltip:
-			'''
-			THE EYE OF THE GALAXY — the seventh light: THE WHOLE GALAXY,
-			SEEN FROM ABOVE. The star dissolved into deep sky: YOU are the
-			blinding core, and THE TWO ARMS coil around you — chains of knots
-			born close to the heart and dissolving at the rim, with their
-			lanes of VIOLET DUST between the arms, the disc's granulation and
-			THE WANDERING STARS so far out they seem not to belong: they belong.
-			The galaxy's palette: nuclear white at the core, living gold at
-			the middle and dust violet at the rim — the light that feeds
-			worlds, from above. And INFINITE FLIGHT (like its six sisters).
-			'''
-	}
-
 	FormaAscendidaOchoItem: {
 		DisplayName: The Ascended Form 8
 		Tooltip:
 			'''
 			THE OPHANIM — the eighth light: THE WHEELS WITHIN WHEELS of Ezekiel.
-			The sword dissolved into vision: THREE RINGS turn, each in its own
-			plane — the equatorial slow, the vertical counter-turning, the inner
-			one fast — and along the rims travel EYES OF LIGHT that blink at
-			their own rhythm and WATCH wherever you go; friction's fire licks the
-			rings and THE THRONE'S FOOT shows its twelve marks beneath your feet.
-			When you strike, the irises BURN.
+			THREE RINGS turn, each in its own plane — the equatorial slow, the
+			vertical PLANTED in place, the inner one fast — and along the rims
+			travel EYES OF LIGHT that blink at their own rhythm and WATCH wherever
+			you go; the RUNES of friction BURN upon the rings and THE THRONE'S FOOT
+			shows its twelve marks beneath your feet.
+			When you strike, the irises and the runes BURN.
 			The wheels' palette: fire white at the core, living gold at the middle
 			and ember violet at the rim — the forge become wheel.
-			And INFINITE FLIGHT (like its seven sisters).
-			'''
-	}
-
-	FormaAscendidaNueveItem: {
-		DisplayName: The Ascended Form 9
-		Tooltip:
-			'''
-			THE LAMPS' CANTICLE — the ninth light: THE SEVEN OF THE THRONE
-			("seven lamps of fire burning before the throne").
-			Music dissolved into fire: SEVEN LAMPS orbit in staircase, each flame
-			SINGS its turn in 4/4 — the wave of light runs around the orbit, lamp
-			after lamp; the flames LEAN against your run, SWELL when you strike,
-			and from the choir LIGHTNING breaks between neighbours. THE
-			METRONOME beneath your feet sweeps with its pendulum to the beat.
-			The choir's palette: ivory at the core, amber at the middle and song
-			violet at the rim — the warmth of the fire that praises.
-			And INFINITE FLIGHT (like its eight sisters).
-			'''
-	}
-
-	FormaAscendidaDiezItem: {
-		DisplayName: The Ascended Form 10
-		Tooltip:
-			'''
-			THE THRONE — the tenth light: THE WHOLE SIGHT OF THE THRONE
-			("out of the throne proceeded lightnings... and before the throne,
-			a sea of glass like unto crystal" + "a rainbow round about the throne").
-			The tree dissolved into majesty: THE CRYSTAL SEA beneath your feet —
-			its veins flow, its waves are born of every step, its rim sings — THE
-			EMERALD ARCH over your head with the wave of brightness running along
-			its six bands, THE MANDORLA of glory wrapping you tip to tip, THE
-			SEVEN THUNDERS splitting the sky and THE ARCH'S TEARS falling to the
-			sea. The throne's palette: crystal cyan at the core, emerald at the
-			middle and deep violet at the rim — eternity, in no hurry.
-			And INFINITE FLIGHT (like its nine sisters).
+			And INFINITE FLIGHT (like its four sisters).
 			'''
 	}
 

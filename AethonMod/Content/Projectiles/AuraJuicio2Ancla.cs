@@ -16,11 +16,21 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles
 {
     // ======================================================================
-    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 → v6.108 → v6.109 — EL
-    //  ANCLA INVISIBLE DEL AURA DEL VACÍO (nacida como «Aura de Juicio 2»
-    //  — la copia silenciosa: el efecto del viejo ESTANDARTE, el teatro
-    //  SOLO en los enemigos; v6.109: los otros dos estandartes MURIERON
-    //  y esta queda como LA ÚNICA — renombrada EL AURA DEL VACÍO).
+    //  AuraJuicio2Ancla — v6.105 → v6.106 → v6.107 → v6.108 → v6.109 →
+    //  v6.112 — EL ANCLA INVISIBLE DEL AURA DEL VACÍO (nacida como «Aura
+    //  de Juicio 2» — la copia silenciosa: el efecto del viejo
+    //  ESTANDARTE, el teatro SOLO en los enemigos; v6.109: los otros dos
+    //  estandartes MURIERON y esta queda como LA ÚNICA — renombrada EL
+    //  AURA DEL VACÍO).
+    //
+    //  LA LETRA DEL USUARIO (v6.112): «en el aura del vacio la bruma es
+    //  muy larga, mejor quitemosla de esa forma y dejemos solo pequeñas
+    //  particulas» — EL MANTO LARGO (la estela de 2.2-3.4 cúpulas de la
+    //  v6.111) y EL ALIENTO VIOLETA (sus tres velos) MURIERON: solo
+    //  quedan LAS PEQUEÑAS PARTÍCULAS del humo (motas de 4-8 px que
+    //  nacen del punto de estancamiento, dan unos pasos por el
+    //  hemisferio de fuga y se disuelven) — más las chispas y el arco
+    //  de choque de siempre.
     //
     //  LA LETRA DEL USUARIO (v6.109): «ya puedes borrar los otros 2
     //  estandarte y renombrar a EL AURA DE JUICIO 2 como Aura de Vacio,
@@ -425,11 +435,11 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL RENDER — NADA sobre el jugador: SOLO los impíos. LA BRUMA
-        //  DE LA REENTRADA (los puffs de BrumaFX naciendo del punto de
-        //  estancamiento y derramándose hacia atrás, en la misma
-        //  dirección e intensidad variable que las chispas) y EL ARCO
-        //  DE CHOQUE (la medialuna morada y negra con la concha
+        //  EL RENDER — NADA sobre el jugador: SOLO los impíos. LAS
+        //  PEQUEÑAS PARTÍCULAS DEL HUMO (v6.112: el manto largo murió
+        //  — motas de BrumaFX naciendo del punto de estancamiento,
+        //  unos pasos por el hemisferio de fuga y se disuelven) y EL
+        //  ARCO DE CHOQUE (la medialuna morada y negra con la concha
         //  abombada MIRANDO al portador).
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
@@ -480,9 +490,9 @@ namespace AethonMod.Content.Projectiles
             return false;   // el ancla NUNCA se dibuja
         }
 
-        /// <summary>EL VESTIDO DE UN IMPIO — la bruma de la reentrada
-        /// (nace del punto de estancamiento, misma dirección e
-        /// intensidad variable que las chispas) y EL ARCO DE CHOQUE (la
+        /// <summary>EL VESTIDO DE UN IMPIO — las pequeñas partículas del
+        /// humo (v6.112: motas naciendo del punto de estancamiento, unos
+        /// pasos de fuga y se disuelven) y EL ARCO DE CHOQUE (la
         /// medialuna con la concha abombada mirando al portador).</summary>
         private static void VestirUnImpio(NPC n, VacioGlobalNPC vacio, Player dueno, float t)
         {
@@ -497,72 +507,66 @@ namespace AethonMod.Content.Projectiles
             Vector2 dir = hacia * (1f / largo);   // portador → impío
 
             // ==============================================================
-            //  v6.109 — LA BRUMA DE VERDAD — «no veo bruma le falta eso»:
-            //  la v6.108 la exhalaba con alfas tímidos (pico ~0.2) y
-            //  colores casi negros — INVISIBLE (la LECCIÓN v6.50.65:
-            //  bruma oscura con alfa bajo no se lee NI de día NI de
-            //  noche). LA RECETA DE LA CASA (la que SÍ se ve en las
-            //  armas de sombras): MÁS puffs (3 lejos → 7 pegado), MÁS
-            //  GRANDES, ALFA de verdad (0.14..0.80), la RAMPA DE
-            //  ENFRIAMIENTO violácea (nace oscura, se disuelve en
-            //  VIOLETA CLARO — el borde SIEMPRE se lee)… y cada puff
-            //  nace del PUNTO DE ESTANCAMIENTO y se derrama hacia ATRÁS
-            //  por el MISMO abanico de fuga ±90° de las chispas, con
-            //  INTENSIDAD VARIABLE por cercanía.
+            //  v6.112 — LA BRUMA MURIÓ DISUELTA EN PARTÍCULAS (la letra:
+            //  «en el aura del vacio la bruma es muy larga, mejor
+            //  quitemosla de esa forma y dejemos solo pequeñas
+            //  particulas»). LA AUTOPSIA: la v6.111 la había hecho
+            //  HUIR (la estela viajaba 2.2-3.4 cúpulas + 110 px — un
+            //  MANTO LARGO tras el impío) y el aliento violeta
+            //  derramaba TRES VELOS enteros por la misma fuga: la
+            //  bruma era una ESTELA, no un aura. LA CURA: el manto y
+            //  los velos MURIERON — solo quedan LAS PEQUEÑAS
+            //  PARTÍCULAS del humo: motas DIMINUTAS (4-8 px) que
+            //  nacen del PUNTO DE ESTANCAMIENTO, dan UNOS PASOS por
+            //  el hemisferio de fuga (medio cuerpo del impío, nada
+            //  más) y se disuelven — la misma rampa de enfriamiento
+            //  violácea de la casa (nace oscura, muere en VIOLETA
+            //  CLARO: el borde SIEMPRE se lee) a escala de PARTÍCULA.
+            //  (las chispas de PolvoExpulsionJuicio — la otra familia
+            //  de partículas — siguen viviendo en el update).
             // ==============================================================
             Vector2 o = Main.screenPosition;
             try
             {
                 BrumaFX.BeginMass();
-                int puffs = 3 + (int)(k * 4f);              // LA DENSIDAD: 3 lejos → 7 pegado (más bruma cuanto más cerca)
-                for (int p = 0; p < puffs; p++)
+                int motas = 5 + (int)(k * 4f);              // 5 lejos → 9 pegado (más densidad cuanto más cerca)
+                for (int p = 0; p < motas; p++)
                 {
                     float f0 = Frac(semilla * 0.83f + p * 0.618034f);
-                    float ritmo = 0.085f + 0.075f * Frac(f0 * 9.7f);
+                    float ritmo = 0.16f + 0.12f * Frac(f0 * 9.7f);   // la vida de una mota: BREVE
                     float edad = Frac(t * ritmo + f0 * 4.1f + p * 0.233f);   // vida cíclica
 
-                    // EL RUMBO DEL PUFF — el MISMO abanico de fuga de
-                    // las chispas: TODAS las direcciones que se ALEJAN
-                    // del portador (el hemisferio trasero ±90°,
-                    // determinista por puff).
+                    // EL RUMBO — el MISMO abanico de fuga de las
+                    // chispas (el hemisferio trasero ±90°, determinista
+                    // por mota): las partículas también se alejan del
+                    // portador — pero SOLO UNOS PASOS.
                     float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * MathHelper.PiOver2;
                     Vector2 rumbo = dir.RotatedBy(abanico);
 
-                    // v6.111 — LA FUGA DE LA BRUMA (la letra: «la bruma
-                    // de el aura de vacio sobre los enemigos tambien
-                    // debe alejarse del jugador»): el puff ya no ronda
-                    // el punto de estancamiento — NACE ahí y VIAJA por
-                    // su rumbo hasta LEJOS del portador, en la MISMA
-                    // escala de las chispas y un paso más allá: la
-                    // estela del humo es MÁS LARGA que la del plasma
-                    // (2.2-3.4 cúpulas + el alcance en px), siempre por
-                    // el hemisferio que huye — se disuelve a distancia.
-                    float avance = edad * (RadioDomo(n, k) * 2.2f
-                        + 110f * (0.35f + 0.9f * f0));
+                    // EL VIAJE CORTO — la letra pidió FIN de la estela
+                    // larga: la mota nace en el punto de
+                    // estancamiento y muere a MEDIO CUERPO del impío
+                    // (0.25-0.55 cúpulas — partícula de aura, no
+                    // estela de reentrada).
+                    float avance = edad * RadioDomo(n, k) * (0.25f + 0.30f * f0);
                     Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
 
-                    // EL TAMAÑO DE VERDAD: la v6.108 criaba pulgas de
-                    // 6-15 px — la estela de la reentrada es un manto.
-                    float radio = (10f + 15f * f0) * (0.8f + 0.9f * edad)
-                        * (0.85f + 0.55f * k);
-                    // EL ALFA DE VERDAD (×k — la intensidad variable de la
-                    // letra): 0.14 en el borde… 0.80 pegado al portador.
+                    // EL TAMAÑO DE PARTÍCULA — la mota DIMINUTA: 4-8 px
+                    // (la v6.111 criaba mantos de 10-25 px).
+                    float radio = (3.5f + 4.5f * f0) * (0.8f + 0.5f * edad);
+                    // EL ALFA (×k — la intensidad variable de siempre,
+                    // acotada abajo para que la mota sea mota).
                     float a = vive * MathF.Sin(edad * MathF.PI)
-                        * (0.40f + 0.34f * k);
-                    // LA RAMPA DE ENFRIAMIENTO: nace oscura y se disuelve
-                    // en VIOLETA CLARO — el borde del puff SIEMPRE se lee
-                    // contra cualquier fondo (día y noche).
+                        * (0.34f + 0.30f * k);
+                    // LA RAMPA DE ENFRIAMIENTO (la de la casa): nace
+                    // oscura y se disuelve en VIOLETA CLARO.
                     Color c = edad > 0.45f
                         ? Color.Lerp(new Color(26, 14, 44), new Color(122, 78, 188),
                             (edad - 0.45f) / 0.55f)
                         : new Color(26, 14, 44);
-                    // LA DERIVA — el humo se derrama por donde vuelan
-                    // las chispas (la MISMA dirección de la fuga) — y
-                    // v6.111 le ESTIRA el núcleo por el rumbo (el smear
-                    // del escape: la voluta se alarga huyendo).
                     BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
-                        MathHelper.Clamp(a, 0.14f, 0.80f), quality: 0.75f,
-                        velocity: rumbo * (30f + 42f * f0) * (0.5f + 0.5f * edad));
+                        MathHelper.Clamp(a, 0.12f, 0.60f), quality: 0.6f,
+                        velocity: rumbo * (14f + 20f * f0) * (0.5f + 0.5f * edad));
                 }
             }
             catch { }
@@ -572,48 +576,13 @@ namespace AethonMod.Content.Projectiles
             }
 
             // ==============================================================
-            //  v6.109 — LA SEGUNDA CAPA: EL ALIENTO VIOLETA (la lectura
-            //  garantizada de noche y en cueva — la otra mitad de la
-            //  receta v6.50.65): tres velos aditivos VIOLETAS
-            //  derramándose por la MISMA estela de fuga, latiendo
-            //  despacio — entre la masa del humo SIEMPRE hay luz que
-            //  SUMA, así la bruma se ve contra el fondo que sea.
+            //  v6.112 — EL ALIENTO VIOLETA MURIÓ (la letra: «la bruma es
+            //  muy larga, mejor quitemosla… dejemos solo pequeñas
+            //  particulas»): sus TRES VELOS aditivos derramándose por
+            //  la estela eran la mitad LARGA del manto — cayeron con
+            //  él. La lectura nocturna queda en las motas (la rampa
+            //  violácea al disolverse) y en el arco de choque.
             // ==============================================================
-            try
-            {
-                VFXCore.Begin();
-                Color violetaAliento = new(150, 84, 235);
-                for (int v = 0; v < 3; v++)
-                {
-                    float f0 = Frac(semilla * 0.61f + v * 0.618034f);
-                    float late = 0.7f + 0.3f * MathF.Sin(t * (1.0f + 0.6f * f0) + v * 2.4f);
-                    float abanico = (Frac(f0 * 11.3f) * 2f - 1f) * MathHelper.PiOver2;
-                    Vector2 rumbo = dir.RotatedBy(abanico);
-
-                    // v6.111 — EL ALIENTO TAMBIÉN HUYE (la letra: «la
-                    // bruma sobre los enemigos tambien debe alejarse
-                    // del jugador»): el velo ya no flota fijo junto al
-                    // punto de estancamiento — cada aliento lleva SU
-                    // edad cíclica y SE DERRAMA por su rumbo (nace en
-                    // el choque, se disuelve LEJOS del portador), con
-                    // su envolvente de nacimiento y muerte en el viaje.
-                    float edad = Frac(t * (0.05f + 0.045f * f0) + f0 * 5.3f + v * 0.37f);
-                    float deriva = RadioDomo(n, k) * (0.45f + 0.85f * f0)
-                        + edad * (RadioDomo(n, k) * 2.1f + 96f * (0.5f + f0));
-                    Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.9f)
-                        + rumbo * deriva;
-
-                    float ancho = RadioDomo(n, k) * (1.1f + 0.5f * f0)
-                        * (0.85f + 0.55f * edad);   // se ensancha al disolverse
-                    float envolvente = MathF.Sin(edad * MathF.PI);
-                    VFXCore.Quad(pos, violetaAliento *
-                        ((0.10f + 0.10f * k) * vive * late * envolvente),
-                        new Vector2(ancho, ancho * 0.75f),
-                        rumbo.ToRotation(), VFXCore.SoftGlow);
-                }
-                VFXCore.FlushAdditive();
-            }
-            catch { try { VFXCore.CerrarLoteSiAbierto(); } catch { } }
 
             // ==============================================================
             //  v6.108 — LA MEDIALUNA = EL ARCO DE CHOQUE — «la parte

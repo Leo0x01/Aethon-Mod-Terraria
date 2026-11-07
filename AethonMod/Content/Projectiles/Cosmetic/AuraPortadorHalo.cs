@@ -59,12 +59,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil _perfilAscendidaDos;
         private static AuraPerfil _perfilAscendidaTres;
         private static AuraPerfil _perfilAscendidaCuatro;
-        private static AuraPerfil _perfilAscendidaCinco;
-        private static AuraPerfil _perfilAscendidaSeis;
-        private static AuraPerfil _perfilAscendidaSiete;
         private static AuraPerfil _perfilAscendidaOcho;
-        private static AuraPerfil _perfilAscendidaNueve;
-        private static AuraPerfil _perfilAscendidaDiez;
         private static AuraPerfil _perfilBrasa;
         private static AuraPerfil _perfilHaloArcoiris;
 
@@ -94,45 +89,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil PerfilAscendidaCuatro =>
             _perfilAscendidaCuatro ??= AuraPerfil.FormaAscendidaCuatro();
 
-        // v6.102 - la quinta luz (el modo 8): EL VIENTO DEL ESPIRITU -
-        // el aura de las cinco luces con SU FIRMA, la TURBULENCIA SUAVE
-        // que SOLO vive en la banda del aura. Creado UNA vez.
-        private static AuraPerfil PerfilAscendidaCinco =>
-            _perfilAscendidaCinco ??= AuraPerfil.FormaAscendidaCinco();
+        // v6.112 — LAS LUCES 5, 6, 7, 9 Y 10 MURIERON por la letra del
+        // usuario («las otras formas 5, 6, 7, 9, 10 pueden ser borradas»)
+        // — sus perfiles y modos (8, 9, 10, 12, 13) también.
 
-        /// <summary>v6.109 — El perfil de LA FORMA ASCENDIDA 6 (EL
-        /// ESCRIBA DE LA LUZ: Metatrón — el cubo de los trece nodos, el
-        /// hexagrama doble, el halo de glifos, la lluvia de versos y el
-        /// sello perfecto), creado UNA vez.</summary>
-        private static AuraPerfil PerfilAscendidaSeis =>
-            _perfilAscendidaSeis ??= AuraPerfil.FormaAscendidaSeis();
-
-        /// <summary>v6.109 — El perfil de LA FORMA ASCENDIDA 7 (LA
-        /// ESTRELLA VIVA: el sol menor — el núcleo blanco, el plasma con
-        /// su granulación, la corona solar y LAS PROMINENCIAS que se
-        /// desgarran), creado UNA vez.</summary>
-        private static AuraPerfil PerfilAscendidaSiete =>
-            _perfilAscendidaSiete ??= AuraPerfil.FormaAscendidaSiete();
-
-        /// <summary>v6.110 — El perfil de LA FORMA ASCENDIDA 8 (LA
-        /// ESPADA DEL JUICIO: San Miguel — la gran espada de luz que SE
-        /// ENCIENDE al atacar, las balanzas del juicio y los trazos del
-        /// veredicto), creado UNA vez.</summary>
+        /// <summary>v6.110 — El perfil de LA FORMA ASCENDIDA 8 (v6.111
+        /// LAS OFANIM: las ruedas dentro de ruedas de Ezequiel con sus
+        /// ojos de luz — la octava luz que el usuario conservó), creado
+        /// UNA vez.</summary>
         private static AuraPerfil PerfilAscendidaOcho =>
             _perfilAscendidaOcho ??= AuraPerfil.FormaAscendidaOcho();
-
-        /// <summary>v6.110 — El perfil de LA FORMA ASCENDIDA 9 (LA
-        /// MÚSICA DE LAS ESFERAS: Gabriel — las ondas del llamado
-        /// pulsando al compás, las notas orbitando y la cortina de
-        /// aurora), creado UNA vez.</summary>
-        private static AuraPerfil PerfilAscendidaNueve =>
-            _perfilAscendidaNueve ??= AuraPerfil.FormaAscendidaNueve();
-
-        /// <summary>v6.110 — El perfil de LA FORMA ASCENDIDA 10 (EL
-        /// ÁRBOL DE LA VIDA: la corona — los diez sefirot prendiendo en
-        /// secuencia con KETER sobre la cabeza), creado UNA vez.</summary>
-        private static AuraPerfil PerfilAscendidaDiez =>
-            _perfilAscendidaDiez ??= AuraPerfil.FormaAscendidaDiez();
 
         /// <summary>v6.50.54 — El perfil de EL HALO ARCOÍRIS (el arcoíris
         /// de la Forma 3 destilado: SOLO la banda pequeña alrededor de la
@@ -163,9 +129,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         /// <summary>El modo del portador (0 hambre · 2 ascendida · 3 brasa ·
         /// 4 ascendida 2 · 5 ascendida 3 · 6 ascendida 4 · 7 halo arcoíris ·
-        /// 8 ascendida 5 · 9 ascendida 6 · 10 ascendida 7 · 11 ascendida 8 ·
-        /// 12 ascendida 9 · 13 ascendida 10 — el 1 era la corona rúnica,
-        /// muerta en la v6.50.44).</summary>
+        /// 11 ascendida 8 — el 1 era la corona rúnica, muerta en la
+        /// v6.50.44; los modos 8, 9, 10, 12 y 13 murieron en la v6.112
+        /// con las luces 5, 6, 7, 9 y 10).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -186,24 +152,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaTres;
                 case 6:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCuatro;
-                // v6.102 - la quinta luz (el modo 8).
-                case 8:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCinco;
-                // v6.109 - la sexta luz (el modo 9): EL ESCRIBA DE LA LUZ.
-                case 9:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaSeis;
-                // v6.109 - la séptima luz (el modo 10): LA ESTRELLA VIVA.
-                case 10:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaSiete;
-                // v6.110 - la octava luz (el modo 11): LA ESPADA DEL JUICIO.
+                // v6.110 - la octava luz (el modo 11): LAS OFANIM.
                 case 11:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaOcho;
-                // v6.110 - la novena luz (el modo 12): LA MÚSICA DE LAS ESFERAS.
-                case 12:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaNueve;
-                // v6.110 - la décima luz (el modo 13): EL ÁRBOL DE LA VIDA.
-                case 13:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaDiez;
                 case 7:
                     return duenio.GetModPlayer<CosmeticPlayer>().HaloArcoiris;
             }
@@ -221,12 +172,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 4: return PerfilAscendidaDos;
                 case 5: return PerfilAscendidaTres;
                 case 6: return PerfilAscendidaCuatro;
-                case 8: return PerfilAscendidaCinco;   // v6.102 - la quinta luz
-                case 9: return PerfilAscendidaSeis;     // v6.109 - la sexta luz (El Escriba)
-                case 10: return PerfilAscendidaSiete;   // v6.109 - la séptima luz (La Estrella)
-                case 11: return PerfilAscendidaOcho;    // v6.110 - la octava luz (La Espada)
-                case 12: return PerfilAscendidaNueve;   // v6.110 - la novena luz (La Música)
-                case 13: return PerfilAscendidaDiez;    // v6.110 - la décima luz (El Árbol)
+                case 11: return PerfilAscendidaOcho;    // v6.110 - la octava luz (Las Ofanim)
                 case 7: return PerfilHaloArcoiris;
             }
             return null;
@@ -278,14 +224,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             {
                 Lighting.AddLight(Projectile.Center - new Vector2(0f, 18f),
                     new Vector3(0.26f, 0.24f, 0.20f));
-            }
-            // v6.102 - EL VIENTO DEL ESPIRITU: la luz del aliento (teal
-            // blanca, respirando LENTO - la quinta luz no corre: SOPLA).
-            else if (Modo == 8)
-            {
-                float aliento = 0.85f + 0.15f * MathF.Sin(Main.GlobalTimeWrappedHourly * 1.1f);
-                Lighting.AddLight(Projectile.Center,
-                    0.24f * aliento, 0.28f * aliento, 0.26f * aliento);
             }
         }
 

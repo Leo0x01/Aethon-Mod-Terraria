@@ -1278,12 +1278,9 @@ namespace AethonMod.Content.Players
                 // v6.50.53 — LA FORMA ASCENDIDA 4 (EL SERAFÍN — la cuarta luz).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCuatroItem>());
-                // v6.102 — LA FORMA ASCENDIDA 5 (EL VIENTO DEL ESPÍRITU —
-                // la quinta luz: el aura con su capa de turbulencia suave
-                // que SOLO afecta al aura — la regla de la casa: todo lo
-                // nuevo llega DIRECTO al jugador).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCincoItem>());
+                // v6.112 — LAS LUCES 5, 6, 7, 9 Y 10 MURIERON por la letra
+                // del usuario («las otras formas 5, 6, 7, 9, 10 pueden ser
+                // borradas») — su entrega directa también (la 8 VIVE abajo).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
                 // v6.50.54 — EL HALO ARCOÍRIS (el arcoíris de la Forma 3
@@ -1369,17 +1366,13 @@ namespace AethonMod.Content.Players
                 // Bolsa de las Auras (la regla de la casa: DIRECTO).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Accessories.AuraDeJuicio2Item>());
-                // v6.110 — LAS FORMAS ASCENDIDAS 8, 9 Y 10 (la letra:
-                // «y ademas crear la forma ascendida 8, 9 y 10» — LA
-                // ESPADA DEL JUICIO, LA MÚSICA DE LAS ESFERAS y EL
-                // ÁRBOL DE LA VIDA: la década de las luces COMPLETA).
-                // La regla permanente: todo lo nuevo llega DIRECTO.
+                // v6.110 — LA FORMA ASCENDIDA 8 (la letra: «y ademas crear
+                // la forma ascendida 8, 9 y 10» — la v6.111 la re-creó como
+                // LAS OFANIM y la v6.112 la CONSERVA: la única de la
+                // segunda década que vive). La regla permanente: todo lo
+                // nuevo llega DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaOchoItem>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaNueveItem>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDiezItem>());
 
                 if (entregados > 0)
                 {
