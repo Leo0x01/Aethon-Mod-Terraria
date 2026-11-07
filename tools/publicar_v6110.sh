@@ -76,11 +76,16 @@ echo "      md5 OK ($MD5_REAL · $TAMANO_REAL B)"
 
 # ---------- 3 · EL PUSH ----------
 echo "[3/7] push de main + $TAG…"
-if ! git push origin main; then
+# El PAT va INCORPORADO a la URL del push (nunca a disco: sin git config,
+# sin credential helper — la URL vive solo el tiempo del comando). Con un
+# fine-grained PAT el login puede ser el propio token (Bearer) o
+# x-access-token; ambos son aceptados por el endpoint smart HTTP.
+PUSH_URL="https://x-access-token:${PAT}@github.com/${REPO}.git"
+if ! git push "$PUSH_URL" main; then
     echo "[ERROR] el push de main falló (¿token sin permiso de contents:write?)"
     exit 1
 fi
-if ! git push origin "$TAG"; then
+if ! git push "$PUSH_URL" "$TAG"; then
     echo "[ERROR] el push del tag $TAG falló"
     exit 1
 fi
@@ -196,7 +201,7 @@ PYEOF
 then
     git add "$SNAPSHOT"
     git commit -q -m "docs: v6.110 PUBLICADA — release $RELEASE_ID + CDN verificado byte a byte (md5 $MD5_ESPERADO); la cabecera del snapshot con el release ID real (la lección de las filas pre-rellenadas: el ID solo se conoce DESPUÉS de crear el release)"
-    git push origin main
+    git push "$PUSH_URL" main
 else
     echo "      [AVISO] el snapshot ya no tiene la marca ⏳ — nada que rellenar"
 fi
