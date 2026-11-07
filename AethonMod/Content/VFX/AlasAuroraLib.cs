@@ -643,10 +643,9 @@ namespace AethonMod.Content.VFX
             return new Color((int)(byte)(int)((float)(int)(c).R * f + 0.5f), (int)(byte)(int)((float)(int)(c).G * f + 0.5f), (int)(byte)(int)((float)(int)(c).B * f + 0.5f), 255);
         }
 
-        public static bool Dibujar(Player pl, float spread, float flap, float mezclaDia)
-        {
-            return Dibujar(pl, in AlasCatalogo.De(1), spread, flap, mezclaDia);
-        }
+        // v6.113 — LA SOBRECARGA DE LA AURORA MURIÓ con la purga de las alas
+        // (la De(1) del estilo muerto): TODO dibujado pasa por el catálogo
+        // vivo — el halo llama SIEMPRE a la de CINCO argumentos.
 
         public static bool Dibujar(Player pl, in EstiloAlas estilo, float spread, float flap, float mezclaDia)
         {

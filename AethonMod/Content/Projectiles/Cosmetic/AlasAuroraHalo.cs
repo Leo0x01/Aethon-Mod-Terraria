@@ -123,6 +123,35 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 Vector3 val3 = new Vector3(((float)(int)(val2).R / 255f * (1f - mezclaDia) + 0.95f * mezclaDia) * 0.42f * Spread * num4, ((float)(int)(val2).G / 255f * (1f - mezclaDia) + 0.88f * mezclaDia) * 0.42f * Spread * num4, ((float)(int)(val2).B / 255f * (1f - mezclaDia) + 0.66f * mezclaDia) * 0.42f * Spread * num4);
                 Lighting.AddLight(((Entity)val).Center, val3);
             }
+
+            // v6.113 — LAS MIGAS DEL VACÍO (la letra: «añadiendo afectos»):
+            // LAS RUNAS DEL VACÍO (el estilo 2 — la copia mejorada del
+            // eclipse) dejan caer MOTAS DIMINUTAS de la rampa de la casa
+            // — PARES SIMÉTRICOS (la misma distancia a ambos lados del
+            // cuerpo), nacen de la altura de las alas y se disuelven
+            // cayendo: nacen oscuras (26,14,44), mueren en violeta claro
+            // (224,176,255) — la rampa del aura del vacío.
+            if (alaEstilo == 2 && Spread > 0.25f && Main.netMode != 2 && !Main.dedServ)
+            {
+                if (Main.rand.NextBool(4))
+                {
+                    float dx = 18f + Main.rand.NextFloat(26f);
+                    float dy = -6f - Main.rand.NextFloat(10f);
+                    float caida = 0.25f + Main.rand.NextFloat(0.45f);
+                    Color nace = new Color(122, 78, 188);
+                    Color muere = new Color(224, 176, 255);
+                    for (int lado = -1; lado <= 1; lado += 2)
+                    {
+                        Dust m = Dust.NewDustPerfect(
+                            val.MountedCenter + new Vector2((float)lado * dx, dy),
+                            DustID.Enchanted_Pink,
+                            new Vector2((float)lado * 0.15f, caida),
+                            120, Color.Lerp(nace, muere, Main.rand.NextFloat()), 0.65f);
+                        m.noGravity = true;
+                        m.fadeIn = 0f;
+                    }
+                }
+            }
         }
 
         private static Color ColorDe(in EstiloAlas estilo, float h)
@@ -240,14 +269,9 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             try
             {
                 byte alaEstilo = val.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
-                if (alaEstilo == 1 || alaEstilo == 0)
-                {
-                    AlasAuroraLib.Dibujar(val, Spread, Flap, MezclaDia);
-                }
-                else
-                {
-                    AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
-                }
+                // v6.113 — SIN CASO ESPECIAL: la Aurora de Tinta murió en la
+                // purga — TODO estilo pasa por el catálogo (De() clamp incluido).
+                AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
                 AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
             }
             catch

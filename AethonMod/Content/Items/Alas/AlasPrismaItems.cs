@@ -8,12 +8,13 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Items.Alas
 {
     /// <summary>
-    /// ALASDEPRISMA — v6.54.0 — LAS QUINCE ALAS DE LA INVESTIGACIÓN.
+    /// ALASDEPRISMA — v6.54.0 → v6.113 — LA BASE DE LAS ALAS DE CÓDIGO.
     ///
-    /// La letra del usuario: «las alas la aurora de tinta están bien
-    /// pero pueden ser mejor, deja esas alas, y crea otras 15 alas
-    /// usando el mismo sistema luego metelas en una bolsa de alas y
-    /// daselas al jugador».
+    /// v6.113 — LA PURGA: las QUINCE del prisma, la Aurora de Tinta, las
+    /// Agujas del Vacío y las Cuchillas del Eclipse MURIERON (la letra:
+    /// «el resto de alas las puedes borrar»). Quedan LAS CINCO de la casa
+    /// (viven en AlasNuevasV6560.cs): Solares · Vacío · Eclipse · Juicio
+    /// · Corolas del Alba.
     ///
     /// EL SISTEMA ES EL MISMO (AlasAuroraLib — el abanico de plumas
     /// VECTORIALES con la onda de aleteo en cadena, el color por
@@ -70,54 +71,4 @@ namespace AethonMod.Content.Items.Alas
             });
         }
     }
-
-    // =====================================================================
-    //  LAS QUINCE — una clase diminuta por ala (el alma está en el
-    //  catálogo; el ítem solo la señala).
-    // =====================================================================
-
-    /// <summary>2 — TINTA SERENA: el lila de la página en calma.</summary>
-    public class AlasDeTintaSerena : AlasPrismaBase { protected override byte Estilo => 2; }
-
-    /// <summary>3 — ECLIPSE: el morado profundo del cielo tapado.</summary>
-    public class AlasDeEclipse : AlasPrismaBase { protected override byte Estilo => 3; }
-
-    /// <summary>4 — PLASMA: fucsia vibrante, aleteo nervioso.</summary>
-    public class AlasDePlasma : AlasPrismaBase { protected override byte Estilo => 4; }
-
-    /// <summary>5 — NEBULOSA: el flujo de la nebulosa violeta.</summary>
-    public class AlasDeNebulosa : AlasPrismaBase { protected override byte Estilo => 5; }
-
-    /// <summary>6 — COMETARIO: la estela del cometa.</summary>
-    public class AlasDeCometario : AlasPrismaBase { protected override byte Estilo => 6; }
-
-    /// <summary>7 — MEDIANOCHE: el cielo estrellado entero.</summary>
-    public class AlasDeMedianoche : AlasPrismaBase { protected override byte Estilo => 7; }
-
-    /// <summary>8 — PRISMA: el arcoíris completo.</summary>
-    public class AlasDelPrisma : AlasPrismaBase { protected override byte Estilo => 8; }
-
-    /// <summary>9 — FUEGO FRÍO: ondas de hielo lila.</summary>
-    public class AlasDeFuegoFrio : AlasPrismaBase { protected override byte Estilo => 9; }
-
-    /// <summary>10 — TORMENTA: violeta eléctrico, aleteo de trueno.</summary>
-    public class AlasDeTormenta : AlasPrismaBase { protected override byte Estilo => 10; }
-
-    /// <summary>11 — MARIONETA: el carmesí de la Emperatriz.</summary>
-    public class AlasDeMarioneta : AlasPrismaBase { protected override byte Estilo => 11; }
-
-    /// <summary>12 — AURORA ÁRTICA: el telón verde-cian del norte.</summary>
-    public class AlasDeAuroraArtica : AlasPrismaBase { protected override byte Estilo => 12; }
-
-    /// <summary>13 — ORQUÍDEA: el abanico rosa-magenta.</summary>
-    public class AlasDeOrquidea : AlasPrismaBase { protected override byte Estilo => 13; }
-
-    /// <summary>14 — VACÍO: negro absoluto con borde violeta, planea.</summary>
-    public class AlasDelVacio : AlasPrismaBase { protected override byte Estilo => 14; }
-
-    /// <summary>15 — SOLARES RÚNICAS: el oro de los soles del grimorio.</summary>
-    public class AlasSolaresRunicas : AlasPrismaBase { protected override byte Estilo => 15; }
-
-    /// <summary>16 — SANGRE DE TINTA: magenta profundo que gotea células.</summary>
-    public class AlasDeSangreDeTinta : AlasPrismaBase { protected override byte Estilo => 16; }
 }

@@ -2087,23 +2087,6 @@ Items: {
 		Prueba: SIN COSTE DE MANÁ — arma de prueba: canaliza sin miedo.
 	}
 
-	AuroraDeTinta: {
-		DisplayName: La Aurora de Tinta
-		Tooltip:
-			'''
-			Las alas creadas por código: diez plumas de luz prismática
-			tejidas en el aire.
-			De noche el prisma completo corre por el ala; de día la tinta
-			se aclara a blanco-oro.
-			Vuelo de polilla (rápido, sin penalidad), 240 de vuelo,
-			sin daño de caída y la aceleración aérea de la Emperatriz.
-			Si vistes alas reales, la aurora se pliega y eleva su
-			tiempo de vuelo al mínimo.
-			'''
-		FormaDia: La tinta es BLANCO-ORO: la página baña el ala.
-		FormaNoche: La tinta es PRISMA: el espectro corre por el ala.
-	}
-
 	// v6.100 — the new weapons of the session (clickers, auras and the
 	// definitive one — all made with THE HOUSE TOOLS: the forge, the
 	// pixel engine and the multilayer wiring).
@@ -2162,14 +2145,13 @@ Items: {
 	// v6.54.0 — LA INVESTIGACIÓN: LAS ALAS DE CÓDIGO (Task 74-a/b/c)
 	
 	BolsaDeAlasPrisma: {
-		DisplayName: La Bolsa de las Alas
+		DisplayName: The Wings Bag
 		Tooltip:
 			'''
-			        Las veintidós alas de código de la investigación: el mismo
-			        sistema de la Aurora de Tinta, cada una con SU paleta, SU
-			        tempo y SU ruido (fBm, wisps, starfield, seda, vermiforme,
-			        ridged, células, plasma). Vuelo 240, sin daño de caída.
-			        Clic derecho para desplegarlas. Solo entrega lo que falte.
+			        The FIVE code wings of the house (v6.113 — the purge): the
+			        four runic pairs and the corollas of dawn, each with its
+			        own palette, tempo and noise. Flight 240, no fall damage.
+			        Right click to unfold them. Only delivers what is missing.
 			'''
 	}
 
@@ -2296,141 +2278,6 @@ Items: {
 			'''
 	}
 
-	AlasDeTintaSerena: {
-		DisplayName: Alas de Tinta Serena
-		Tooltip:
-			'''
-			        El lila de la página en calma. Aleteo lento, plumas largas.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeEclipse: {
-		DisplayName: Alas de Eclipse
-		Tooltip:
-			'''
-			        El morado profundo del cielo tapado. Plumas anchas, barrido fuerte.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDePlasma: {
-		DisplayName: Alas de Plasma
-		Tooltip:
-			'''
-			        Fucsia vibrante: aleteo nervioso y plumas cortas que titilan.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeNebulosa: {
-		DisplayName: Alas de Nebulosa
-		Tooltip:
-			'''
-			        La nebulosa violeta fluye por las plumas — vuela entre estrellas.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeCometario: {
-		DisplayName: Alas de Cometario
-		Tooltip:
-			'''
-			        La estela del cometa: blanco, cian y violeta corriendo.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeMedianoche: {
-		DisplayName: Alas de Medianoche
-		Tooltip:
-			'''
-			        El cielo estrellado entero en cada pluma. Luz tenue.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDelPrisma: {
-		DisplayName: Alas del Prisma
-		Tooltip:
-			'''
-			        El arcoíris completo corre por el abanico.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeFuegoFrio: {
-		DisplayName: Alas de Fuego Frío
-		Tooltip:
-			'''
-			        Ondas de hielo lila — curvas suaves que ondean despacio.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeTormenta: {
-		DisplayName: Alas de Tormenta
-		Tooltip:
-			'''
-			        Violeta eléctrico: aleteo de trueno y puntas rasgadas.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeMarioneta: {
-		DisplayName: Alas de Marioneta
-		Tooltip:
-			'''
-			        El carmesí de la Emperatriz. Filosas, plegadas, teatrales.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeAuroraArtica: {
-		DisplayName: Alas de Aurora Ártica
-		Tooltip:
-			'''
-			        El telón verde-cian del norte — plumas larguísimas.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeOrquidea: {
-		DisplayName: Alas de Orquídea
-		Tooltip:
-			'''
-			        El abanico rosa-magenta que se abre como una flor.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDelVacio: {
-		DisplayName: Alas del Vacío
-		Tooltip:
-			'''
-			        Negro absoluto con borde violeta. Planea — casi fantasmal.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasSolaresRunicas: {
-		DisplayName: Alas Solares Rúnicas
-		Tooltip:
-			'''
-			        El oro de los soles del grimorio. Luz cálida y densa.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasDeSangreDeTinta: {
-		DisplayName: Alas de Sangre de Tinta
-		Tooltip:
-			'''
-			        Magenta profundo que gotea células — la tinta que muerde.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
 	AlasPrismaBase.Estilo: Alas de código — paleta, tempo y ruido propios
 
 	AlasRunicasSolares: {
@@ -2447,9 +2294,12 @@ Items: {
 		DisplayName: Alas Rúnicas del Vacío
 		Tooltip:
 			'''
-			        Violeta-cian: las runas del VACÍO cabalgan la punta de cada pluma
-			        mientras el anillo contrarrotante bebe la luz.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			        The improved copy of the eclipse wings, NO MORE SPIKES:
+			        twin feathers with rounded tips, a perfect mirror between
+			        left and right. Painted in the COLOR OF THE VOID (the
+			        aura ramp) and with its own effects: the violet rune ring
+			        on the tips and the crumbs that fall from the wings.
+			        Flight 240 · no fall damage · folds before real wings.
 			'''
 	}
 
@@ -2469,26 +2319,6 @@ Items: {
 			'''
 			        El gradiente del Juicio CAMINA por los glifos: oro, ámbar, blanco,
 			        violeta y cian girando en la corona de la raíz.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AgujasDelVacio: {
-		DisplayName: Agujas del Vacío
-		Tooltip:
-			'''
-			        Cuatro plumas-aguja cóncavas curvadas en garra — lo más afilado
-			        que ha volado nunca. Finas, largas, violeta.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	CuchillasDelEclipse: {
-		DisplayName: Cuchillas del Eclipse
-		Tooltip:
-			'''
-			        Media luna de cuchilla: el filo convexo vive temprano y el lomo
-			        cóncavo lo sigue — alas que CORTAN el aire.
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -2693,6 +2523,7 @@ Projectiles: {
 	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
 	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
+	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
 }
 
 Buffs: {
@@ -3387,7 +3218,7 @@ Jefe: {
 		Reconocimiento: LA PRUEBA ESTÁ CERRADA: el grimorio te declara digno. LA FORMA ASCENDIDA cae a tus pies.
 		Muerte: El libro SE CIERRA y su luz regresa a las páginas. El sol recupera su curso.
 		Carga: EL DESTELLO — la luz cruza el mundo: no estés en su línea.
-		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
+		Juicio: EL JUICIO DE LUZ — muros de luz a pantalla completa: muévete.
 		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.
 		Aliento: EL RAYO PRIMORDIAL — la luz te busca.
 		// v6.50.46 — THE ECLIPSE IS DEAD ("the light goes out and only the
@@ -3418,6 +3249,7 @@ Jefe: {
 		// gaze that falls from the sky · the phase-3 Test Beam C).
 		MiradaCielo: THE SKY GAZE — twelve beams fall upon the arena: six vertical and six horizontal, then they twist diagonally and BURN AGAIN.
 		PruebaC: THE GOD'S TEST BEAM C — the six suns fall and the oneiric conduit sweeps: run PERPENDICULAR.
+		Veredicto: EL HAZ DEL VEREDICTO — el faro del dios barre la arena: lee la línea y corre.
 		// v6.50.120 — FUSION AS A PHASE + THE FINAL BOSS'S THREE WEAPONS
 		// (the final-boss research: Moon Lord, the Lunatic Cultist, Duke
 		// Fishron — the Complete Memory devours them all).

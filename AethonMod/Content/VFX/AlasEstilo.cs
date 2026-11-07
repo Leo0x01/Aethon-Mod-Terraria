@@ -83,13 +83,35 @@ namespace AethonMod.Content.VFX
         public float Luz;
     }
 
-    // v6.56.0 — clase reconstruida del BINARIO verificado tras el wipe del sandbox:
-    // la fuente original se perdió; este código viene del .tmod (md5 3b45a5fe…) y
-    // se verificó idéntico al recompilar (ver CHANGES.md v6.56.0 y worklog Task 69).
-    // Los comentarios de la fuente original no viajan dentro del .dll.
+    // v6.113 — LA PURGA DE LAS ALAS (la letra: «guardar las siguientes
+    // alas: alas runicas del eclipse, corolas del alba, alas runicas del
+    // vacio, alas runicas solares, alas runicas del juicio — el resto de
+    // alas las puedes borrar»): el catálogo quedó en LAS CINCO DE LA CASA
+    // (1 Solares · 2 Vacío · 3 Eclipse · 4 Juicio · 5 Corolas) — la Aurora
+    // de Tinta original, LAS QUINCE del prisma (2-16), las Agujas del
+    // Vacío y las Cuchillas del Eclipse MURIERON con sus ítems.
+    //
+    // LA 2 NUEVA — LAS RUNAS DEL VACÍO (la letra: «toma las alas runicas
+    // del eclipse y has una copia llamada alas runicas del vacio, a esta
+    // copia debes mejorar las alas, quitandole los picos y añadiendo
+    // afectos, ademas de que las alas deben ser iguales tanto izquierda
+    // como derecha o sea me refiero a no tener picos, su color debe ser
+    // el color del vacio»): LA COPIA DEL ECLIPSE CURADA — el mismo abanico
+    // de 5 plumas y el mismo tempo (0.95), pero SIN PICOS (afilada 0.5 +
+    // puntas 20/14: el perfil redondeado, el taper suave), PERFECTAMENTE
+    // SIMÉTRICA (filosa 0: los DOS bordes idénticos — el espejo de la
+    // v6.56.4 hace el resto), CON EL COLOR DEL VACÍO de la casa (la rampa
+    // del aura: 150,84,235 vivo · 122,78,188 hondo · 26,14,44 el fondo)
+    // y CON SUS EFECTOS: el anillo de runas del vacío en las puntas
+    // (Runas=2, las de OrbitaLib en violeta) + LAS MIGAS DEL VACÍO (las
+    // motas que caen de las alas — viven en AlasAuroraHalo.AI).
     public static class AlasCatalogo
     {
-        public const byte Aurora = 1;
+        public const byte Solares = 1;
+        public const byte Vacio = 2;
+        public const byte Eclipse = 3;
+        public const byte Juicio = 4;
+        public const byte Corolas = 5;
 
         private const string PrefijoRuido = "AethonMod/Content/Effects/Procedural/";
 
@@ -261,151 +283,31 @@ namespace AethonMod.Content.VFX
             //IL_182e: Unknown result type (might be due to invalid IL or missing references)
             //IL_1833: Unknown result type (might be due to invalid IL or missing references)
             //IL_1847: Unknown result type (might be due to invalid IL or missing references)
-            return new EstiloAlas[24]
+            // v6.113 — EL CATÁLOGO COMPACTO: [0] default · [1] Runas
+            // Solares · [2] Runas del Vacío (LA COPIA MEJORADA DEL ECLIPSE)
+            // · [3] Runas del Eclipse · [4] Runas del Juicio · [5] Corolas
+            // del Alba. Las QUINCE del prisma, la Aurora de Tinta, las
+            // Agujas y las Cuchillas cayeron con sus ítems (la purga).
+            return new EstiloAlas[6]
             {
                 default(EstiloAlas),
-                new EstiloAlas
-                {
-                    Paleta = null,
-                    ColorDia = new Color(255, 243, 214),
-                    FuerzaDia = 0.62f,
-                    Plumas = 5,
-                    LargoInterior = 88f,
-                    LargoExterior = 48f,
-                    RaizSemiancho = 3.5f,
-                    PuntaSemianchoBase = 14f,
-                    PuntaSemianchoAbierto = 8f,
-                    PlegadoMin = 0.5f,
-                    PlegadoMax = 0.92f,
-                    AbiertoMin = 0.22f,
-                    AbiertoMax = 1.54f,
-                    Inclinacion = 0.12f,
-                    Barrido = 0.14f,
-                    Curva = 0f,
-                    AnclajeSep = 5f,
-                    Vientre = 0.34f,
-                    Afilada = 1.1f,
-                    Filosa = 0.25f,
-                    HueEntre = 0.085f,
-                    HueLargo = 0.16f,
-                    HueTiempo = 0.018f,
-                    FlapVel = 1f,
-                    Desgarre = 1f,
-                    NucleoInten = 0.92f,
-                    NucleoFrac = 0.3f,
-                    CuerpoInten = 0.34f,
-                    CuerpoFrac = 0.62f,
-                    HaloInten = 0.13f,
-                    Ruido = "AethonMod/Content/Effects/Procedural/Noise",
-                    RuidoInten = 1f,
-                    RuidoEscala = 1f,
-                    RuidoFlujo = 1f,
-                    Luz = 1f
-                },
-                Ala("Tinta Serena", (Color[])(object)new Color[3]
-                {
-                    new Color(201, 166, 255),
-                    new Color(140, 60, 210),
-                    new Color(75, 30, 122)
-                }, new Color(232, 214, 255), "Ruido_7", 6, 96f, 52f, 3.5f, 14f, 8f, 0.52f, 0.98f, 0.18f, 1.05f, 0.12f, 0.14f, 0.22f, 5f, 0.42f, 0.7f, 0.35f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.85f, 0.3f, 0.3f, 0.62f, 0.14f, 1f, 1f, 1f, 1f, 0),
-                Ala("Eclipse", (Color[])(object)new Color[3]
-                {
-                    new Color(157, 92, 232),
-                    new Color(75, 18, 119),
-                    new Color(20, 6, 31)
-                }, new Color(140, 100, 190), "Ruido_4", 4, 86f, 46f, 3.5f, 18f, 8f, 0.46f, 0.9f, 0.3f, 1.7f, 0.12f, 0.22f, 0.3f, 5f, 0.38f, 0.9f, 0.3f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.8f, 0.3f, 0.38f, 0.62f, 0.16f, 1f, 1f, 1f, 1f, 0),
-                Ala("Plasma", (Color[])(object)new Color[3]
-                {
-                    new Color(255, 61, 219),
-                    new Color(199, 36, 184),
-                    new Color(122, 47, 209)
-                }, new Color(255, 214, 246), "Ruido_5", 7, 70f, 40f, 3.5f, 10f, 8f, 0.54f, 0.96f, 0.2f, 1.48f, 0.12f, 0.14f, -0.18f, 5f, 0.18f, 1.9f, 0.85f, 0.085f, 0.16f, 0.018f, 1.35f, 1.3f, 1f, 0.3f, 0.42f, 0.62f, 0.18f, 1.2f, 1f, 1.6f, 1f, 0),
-                Ala("Nebulosa", (Color[])(object)new Color[3]
-                {
-                    new Color(184, 127, 232),
-                    new Color(209, 92, 255),
-                    new Color(110, 123, 232)
-                }, new Color(240, 220, 255), "Investigacion/Espacio_1", 6, 100f, 56f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.12f, 5f, 0.3f, 1f, 0.15f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.82f, 0.3f, 0.4f, 0.62f, 0.2f, 1.25f, 1.4f, 0.7f, 1.15f, 0),
-                Ala("Cometario", (Color[])(object)new Color[3]
-                {
-                    new Color(255, 243, 214),
-                    new Color(125, 232, 255),
-                    new Color(92, 59, 209)
-                }, new Color(255, 250, 240), "Ruido_12", 5, 96f, 44f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, -0.1f, 5f, 0.25f, 1.5f, 0.7f, 0.085f, 0.22f, 0.018f, 1f, 1f, 1f, 0.3f, 0.3f, 0.62f, 0.12f, 1f, 1f, 1f, 1f, 0),
-                Ala("Medianoche", (Color[])(object)new Color[3]
-                {
-                    new Color(245, 240, 255),
-                    new Color(48, 26, 96),
-                    new Color(14, 8, 30)
-                }, new Color(120, 110, 160), "Ruido_2", 4, 92f, 50f, 3.5f, 20f, 12f, 0.48f, 0.94f, 0.28f, 1.62f, 0.12f, 0.14f, 0.38f, 5f, 0.5f, 0.65f, 0.2f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.7f, 0.3f, 0.22f, 0.62f, 0.1f, 0.9f, 1f, 1f, 0.8f, 0),
-                Ala("Prisma", (Color[])(object)new Color[5]
-                {
-                    new Color(174, 23, 189),
-                    new Color(237, 128, 60),
-                    new Color(247, 255, 101),
-                    new Color(176, 234, 85),
-                    new Color(102, 219, 249)
-                }, new Color(255, 243, 214), "Ruido_11", 7, 72f, 42f, 3.5f, 11f, 8f, 0.52f, 0.95f, 0.22f, 1.44f, 0.12f, 0.14f, 0f, 5f, 0.2f, 1.8f, 0.6f, 0.12f, 0.16f, 0.026f, 1f, 1f, 0.95f, 0.3f, 0.38f, 0.62f, 0.16f, 1.1f, 1f, 1f, 1.2f, 0),
-                Ala("Fuego Frío", (Color[])(object)new Color[3]
-                {
-                    new Color(234, 246, 255),
-                    new Color(185, 166, 255),
-                    new Color(125, 209, 232)
-                }, new Color(250, 252, 255), "Ruido_8", 6, 90f, 54f, 3.5f, 16f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.16f, 5f, 0.4f, 0.9f, 0.3f, 0.085f, 0.24f, 0.018f, 0.85f, 1f, 0.88f, 0.3f, 0.3f, 0.62f, 0.15f, 1f, 1f, 1f, 1f, 0),
-                Ala("Tormenta", (Color[])(object)new Color[3]
-                {
-                    new Color(240, 230, 255),
-                    new Color(178, 76, 232),
-                    new Color(61, 26, 92)
-                }, new Color(226, 216, 246), "Ruido_9", 5, 82f, 46f, 3.5f, 11f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.22f, -0.22f, 5f, 0.24f, 1.7f, 0.8f, 0.085f, 0.16f, 0.018f, 1.5f, 1.5f, 1f, 0.3f, 0.36f, 0.62f, 0.14f, 1.15f, 1f, 1f, 1f, 0),
-                Ala("Marioneta", (Color[])(object)new Color[3]
-                {
-                    new Color(227, 92, 133),
-                    new Color(138, 26, 61),
-                    new Color(26, 10, 20)
-                }, new Color(210, 140, 160), "Ruido_15", 4, 84f, 38f, 3.5f, 9f, 8f, 0.56f, 1.02f, 0.24f, 1.3f, 0.2f, 0.14f, 0.5f, 5f, 0.35f, 1.3f, 0.4f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.85f, 0.3f, 0.34f, 0.62f, 0.12f, 1f, 1f, 1f, 0.9f, 0),
-                Ala("Aurora Ártica", (Color[])(object)new Color[3]
-                {
-                    new Color(125, 232, 154),
-                    new Color(125, 232, 224),
-                    new Color(185, 166, 255)
-                }, new Color(235, 255, 250), "Ruido_0", 7, 112f, 64f, 3.5f, 14f, 8f, 0.44f, 0.84f, 0.2f, 1.35f, 0.12f, 0.14f, 0.06f, 5f, 0.32f, 1f, 0.1f, 0.085f, 0.28f, 0.018f, 0.75f, 1f, 0.8f, 0.3f, 0.32f, 0.62f, 0.18f, 1f, 1f, 1f, 1.1f, 0),
-                Ala("Orquídea", (Color[])(object)new Color[3]
-                {
-                    new Color(255, 138, 209),
-                    new Color(232, 79, 199),
-                    new Color(166, 61, 232)
-                }, new Color(255, 224, 242), "Ruido_18", 5, 88f, 54f, 3.5f, 22f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.2f, 5f, 0.5f, 0.6f, 0.05f, 0.1f, 0.16f, 0.018f, 1f, 1f, 0.92f, 0.3f, 0.36f, 0.62f, 0.16f, 1.1f, 1f, 1f, 1f, 0),
-                Ala("Vacío", (Color[])(object)new Color[3]
-                {
-                    new Color(107, 47, 160),
-                    new Color(40, 14, 66),
-                    new Color(8, 3, 13)
-                }, new Color(70, 50, 100), "Ruido_10", 3, 120f, 70f, 3.5f, 17f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.28f, 6f, 0.36f, 1.2f, 0.5f, 0.085f, 0.16f, 0.018f, 0.65f, 0.7f, 0.55f, 0.3f, 0.2f, 0.62f, 0.08f, 0.85f, 1f, 1f, 0.6f, 0),
-                Ala("Solares Rúnicas", (Color[])(object)new Color[3]
-                {
-                    new Color(255, 246, 220),
-                    new Color(232, 166, 61),
-                    new Color(255, 232, 154)
-                }, new Color(255, 252, 240), "Ruido_1", 6, 90f, 48f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.02f, 5f, 0.28f, 1f, 0.45f, 0.085f, 0.16f, 0.014f, 1f, 0.7f, 1f, 0.3f, 0.34f, 0.62f, 0.15f, 1f, 1f, 1f, 1.25f, 0),
-                Ala("Sangre de Tinta", (Color[])(object)new Color[3]
-                {
-                    new Color(209, 47, 166),
-                    new Color(122, 26, 77),
-                    new Color(20, 6, 20)
-                }, new Color(224, 130, 190), "Ruido_17", 5, 86f, 46f, 3.5f, 10f, 5f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.26f, 2.2f, 0.9f, 0.085f, 0.16f, 0.018f, 1f, 1.2f, 0.9f, 0.3f, 0.38f, 0.62f, 0.14f, 1.2f, 1f, 1f, 1f, 0),
                 Ala("Runas Solares", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Oro,
                     new Color(255, 214, 130),
                     DefinitivasLib.BlancoCalido
                 }, DefinitivasLib.BlancoCalido, "Ruido_13", 5, 92f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.3f, 1f, 0.35f, 0.05f, 0.1f, 0.018f, 0.85f, 1f, 0.95f, 0.3f, 0.34f, 0.62f, 0.16f, 1f, 1f, 1f, 1.2f, 1, 1f),
+                // v6.113 — LA 2: LA COPIA DEL ECLIPSE SIN PICOS, SIMÉTRICA
+                // y DEL COLOR DEL VACÍO (la rampa del aura de la casa).
+                // Mismo abanico/tempo que la 3; filosa 0 (bordes gemelos),
+                // afilada 0.5 + puntas 20/14 (redondez), Runas=2 (el anillo
+                // violeta del vacío en las puntas).
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
-                    new Color(150, 92, 255),
-                    new Color(96, 52, 190),
-                    new Color(96, 200, 255)
-                }, new Color(150, 170, 230), "Ruido_6", 5, 88f, 44f, 3.5f, 10f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, -0.15f, 5f, 0.22f, 1.6f, 0.75f, 0.085f, 0.16f, 0.018f, 0.7f, 0.8f, 0.85f, 0.3f, 0.32f, 0.62f, 0.14f, 1f, 1f, 1f, 0.9f, 2, 1.05f),
+                    new Color(150, 84, 235),
+                    new Color(122, 78, 188),
+                    new Color(26, 14, 44)
+                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,
@@ -420,18 +322,6 @@ namespace AethonMod.Content.VFX
                     DefinitivasLib.Violeta,
                     DefinitivasLib.Cian
                 }, DefinitivasLib.BlancoCalido, "Ruido_16", 5, 94f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.26f, 5f, 0.32f, 1.2f, 0.55f, 0.16f, 0.2f, 0.024f, 1.1f, 1f, 0.95f, 0.3f, 0.36f, 0.62f, 0.16f, 1f, 1f, 1f, 1.25f, 4, 1.1f),
-                Ala("Agujas del Vacío", (Color[])(object)new Color[3]
-                {
-                    new Color(130, 74, 220),
-                    new Color(84, 40, 150),
-                    new Color(110, 216, 255)
-                }, new Color(140, 120, 200), "Ruido_19", 4, 96f, 40f, 3.5f, 9f, 5f, 0.5f, 0.92f, 0.22f, 1.54f, 0.2f, 0.14f, 0.42f, 5f, 0.24f, 2.4f, 0.55f, 0.085f, 0.16f, 0.018f, 1.15f, 1.2f, 1f, 0.3f, 0.3f, 0.62f, 0.13f, 1f, 1f, 1f, 1f, 0),
-                Ala("Cuchillas del Eclipse", (Color[])(object)new Color[3]
-                {
-                    new Color(255, 196, 110),
-                    DefinitivasLib.Ambar,
-                    new Color(70, 26, 8)
-                }, new Color(230, 180, 120), "Ruido_3", 5, 90f, 48f, 3.5f, 22f, 13f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.1f, 5f, 0.18f, 1.35f, 1f, 0.085f, 0.16f, 0.018f, 1f, 1f, 0.92f, 0.3f, 0.38f, 0.62f, 0.15f, 1.1f, 1f, 1f, 1f, 0),
                 Ala("Corolas del Alba", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.BlancoCalido,

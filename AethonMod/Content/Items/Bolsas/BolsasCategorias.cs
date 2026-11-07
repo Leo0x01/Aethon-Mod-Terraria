@@ -376,12 +376,10 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.51.4 — EL BRILLO DE LOS SOLES RÚNICOS también viaja en la
             // bolsa (la letra: «este item añadelo a la bolsa de comsetico»).
             l.Add((ModContent.ItemType<Cosmetics.BrilloSolarItem>(), 1));
-            // v6.53 — LA AURORA DE TINTA (la purga del Escriba: las alas
-            // creadas por código mudan aquí — el accesorio de vuelo y
-            // adorno de la casa; v6.53 las vuelve VISIBLES: nacieron en
-            // coordenadas de mundo y el pipeline las dibujaba 17
-            // pantallas lejos).
-            l.Add((ModContent.ItemType<Items.AuroraDeTinta>(), 1));
+            // v6.53 → v6.113 — LA AURORA DE TINTA MURIÓ en la purga de las
+            // alas (la letra: «el resto de alas las puedes borrar»): el
+            // accesorio de vuelo de la casa son ahora LAS CINCO RÚNICAS de
+            // la Bolsa de las Alas.
             return l;
         }
     }
@@ -751,33 +749,22 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(201, 166, 255);
 
-        protected override string Nota => "Veintidós alas de código — el mismo sistema de la Aurora de Tinta";
+        // v6.113 — LA PURGA DE LAS ALAS (la letra: «guardar las siguientes
+        // alas: alas runicas del eclipse, corolas del alba, alas runicas del
+        // vacio, alas runicas solares, alas runicas del juicio — el resto de
+        // alas las puedes borrar»): LAS QUINCE del prisma, la Aurora de Tinta,
+        // las Agujas del Vacío y las Cuchillas del Eclipse MURIERON — la bolsa
+        // queda con LAS CINCO DE LA CASA.
+        protected override string Nota => "Cinco alas de código — las rúnicas de la casa y las corolas del alba";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             return new List<(int, int)>
             {
-                (ModContent.ItemType<AlasDeTintaSerena>(), 1),
-                (ModContent.ItemType<AlasDeEclipse>(), 1),
-                (ModContent.ItemType<AlasDePlasma>(), 1),
-                (ModContent.ItemType<AlasDeNebulosa>(), 1),
-                (ModContent.ItemType<AlasDeCometario>(), 1),
-                (ModContent.ItemType<AlasDeMedianoche>(), 1),
-                (ModContent.ItemType<AlasDelPrisma>(), 1),
-                (ModContent.ItemType<AlasDeFuegoFrio>(), 1),
-                (ModContent.ItemType<AlasDeTormenta>(), 1),
-                (ModContent.ItemType<AlasDeMarioneta>(), 1),
-                (ModContent.ItemType<AlasDeAuroraArtica>(), 1),
-                (ModContent.ItemType<AlasDeOrquidea>(), 1),
-                (ModContent.ItemType<AlasDelVacio>(), 1),
-                (ModContent.ItemType<AlasSolaresRunicas>(), 1),
-                (ModContent.ItemType<AlasDeSangreDeTinta>(), 1),
                 (ModContent.ItemType<AlasRunicasSolares>(), 1),
                 (ModContent.ItemType<AlasRunicasDelVacio>(), 1),
                 (ModContent.ItemType<AlasRunicasDelEclipse>(), 1),
                 (ModContent.ItemType<AlasRunicasDelJuicio>(), 1),
-                (ModContent.ItemType<AgujasDelVacio>(), 1),
-                (ModContent.ItemType<CuchillasDelEclipse>(), 1),
                 (ModContent.ItemType<CorolasDelAlba>(), 1)
             };
         }

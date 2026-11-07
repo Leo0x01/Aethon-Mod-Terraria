@@ -557,14 +557,16 @@ namespace AethonMod.Content.Projectiles.Jefes
             Projectile.tileCollide = Estilo == EstiloPuaSagrario ||
                                      Estilo == EstiloEstrellaFugaz;
 
-            // v6.50.36 — LA COLUMNA DEL JUICIO: la forma LARGA (la
-            // autocuración de la casa: OnSpawn no corre en los clientes
-            // remotos — la forma se reconstruye desde lo que SÍ viaja).
-            if (Estilo == EstiloColumnaJuicio && Projectile.height < 100)
+            // v6.113 — LA PARED DE LUZ (la letra: «los 3 pilares no deben
+            // bajar deben ocupar toda la pantalla»): el pilar YA NO baja —
+            // nace PARADO y mide de ARRIBA A ABAJO (1.800 px: más alto que
+            // cualquier pantalla). La autocuración de la casa reconstruye
+            // la forma desde lo que SÍ viaja.
+            if (Estilo == EstiloColumnaJuicio && Projectile.height < 1000)
             {
                 Vector2 c = Projectile.Center;
-                Projectile.width = 56;
-                Projectile.height = 210;
+                Projectile.width = 76;
+                Projectile.height = 1800;
                 Projectile.Center = c;
             }
 
@@ -861,34 +863,71 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // =============================================================
                 case EstiloColumnaJuicio:
                 {
-                    // 45 t de CAÍDA LENTA (la línea de luz descendiendo —
-                    // EL TELEGRAPH del juicio) y luego LA ACELERACIÓN:
-                    // 52 px/t atravesando el mundo hasta el fondo.
-                    if (_edad < 45)
+                    // v6.113 — EL MURO DEL JUICIO (la letra: «los 3 pilares
+                    // no deben bajar deben ocupar toda la pantalla»): el
+                    // pilar YA NO DESCIENDE — NASCE PARADO y ocupa TODA la
+                    // pantalla de arriba a abajo. TRES tiempos por ai[1]:
+                    //   0 · 26 t — EL TELEGRAFO: la línea fina que vibra
+                    //              (SIN daño: hostile apagado).
+                    //   1 · 16 t — LA ERUPCIÓN: la pared SE ENCIENDE con
+                    //              SU hitbox de 1.800 px (76 de ancho):
+                    //              castiga al que no se movió de la línea.
+                    //   2 · 30 t — LA DISOLUCIÓN: la luz se apaga hacia
+                    //              arriba (hostile apagado otra vez).
+                    float edad = _edad;
+                    if (edad < 26f)
                     {
-                        Projectile.velocity = new Vector2(0f, 7f);
                         Projectile.ai[1] = 0f;
+                        Projectile.velocity = Vector2.Zero;
+                        Projectile.hostile = false;
+                        if (edad == 1f && !Main.dedServ)
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(0.35f), Projectile.Center);
+                        // LAS CHISPAS DEL TELÉGRAFO: motas doradas cayendo por
+                        // la línea (la casa: Hash01, jamás Main.rand).
+                        if (!Main.dedServ && ((int)edad % 6) == 0)
+                        {
+                            for (int ch = 0; ch < 3; ch++)
+                            {
+                                float yy = Projectile.Center.Y - 700f + ch * 700f;
+                                Dust d = Dust.NewDustPerfect(
+                                    new Vector2(Projectile.Center.X, yy), DustID.GoldFlame,
+                                    new Vector2(Main.rand.NextFloat(-0.6f, 0.6f), Main.rand.NextFloat(0.3f, 1.1f)),
+                                    130, new Color(255, 224, 150), 0.7f);
+                                d.noGravity = true;
+                            }
+                        }
                     }
-                    else
+                    else if (edad < 42f)
                     {
                         if (Projectile.ai[1] < 1f)
                         {
                             Projectile.ai[1] = 1f;
-                            Projectile.velocity = new Vector2(0f, 52f);
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122,
-                                Projectile.Center);
+                            // LA PARED ENCIENDE: el golpe del juicio.
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Projectile.Center);
+                            OndaLib.Kick(9f, 18);
                         }
-                        // LA ESTELA de la caída (el rastro de la columna).
-                        if (!Main.dedServ && ((int)_edad % 4) == 0)
+                        Projectile.hostile = true;   // 16 t de veredicto
+                        // LAS CHISPAS DE LA ERUPCIÓN a lo largo del muro.
+                        if (!Main.dedServ && ((int)edad % 3) == 0)
                         {
-                            int idx = Dust.NewDust(Projectile.Center, 40, 40,
+                            float yy = Projectile.Center.Y - 800f +
+                                ((edad * 97f) % 1600f);
+                            Dust d = Dust.NewDustPerfect(
+                                new Vector2(Projectile.Center.X + Main.rand.NextFloat(-30f, 30f), yy),
                                 DustID.GoldFlame,
-                                Main.rand.NextFloat(-2f, 2f), -Main.rand.NextFloat(1f, 4f));
-                            Main.dust[idx].noGravity = true;
+                                new Vector2(Main.rand.NextFloat(-1.6f, 1.6f), -Main.rand.NextFloat(0.5f, 2.2f)),
+                                165, new Color(255, 236, 170), 0.9f);
+                            d.noGravity = true;
                         }
                     }
-                    if (Projectile.Center.Y > (Main.maxTilesY - 30) * 16f ||
-                        _edad > 200)
+                    else
+                    {
+                        if (Projectile.ai[1] < 2f)
+                            Projectile.ai[1] = 2f;
+                        Projectile.hostile = false;  // la disolución no golpea
+                    }
+                    if (edad > 72f)
                         Projectile.Kill();
                     break;
                 }
@@ -2234,21 +2273,23 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                     case EstiloColumnaJuicio:
                     {
-                        // v6.104 — LA COLUMNA ES UN HAZ DE VERDAD (la
-                        // letra: «asegurate de no dejar texturas planas,
-                        // lisas o raras»): el MANTO estirado (dos
-                        // rectángulos de luz de 1.100 px) MUERE — el
-                        // cuerpo de la columna lo dibuja HazLib en LA
-                        // FASE 1.5 (el velo dorado + el núcleo blanco
-                        // con SU ruido y SU filo de borde: la columna
-                        // HIERVE). Aquí queda SOLO el resplandor de la
-                        // base (el charco donde se posa).
-                        float caida = Projectile.ai[1] >= 1f ? 1f :
-                            0.35f + 0.65f * (_edad / 45f);   // crece mientras telegrafea
-                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.35f * caida),
-                            new Vector2(120f, 46f));
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.45f * caida),
-                            new Vector2(52f, 20f));
+                        // v6.113 — EL MURO (la letra: «los 3 pilares no
+                        // deben bajar deben ocupar toda la pantalla»): el
+                        // cuerpo lo dibuja HazLib en LA FASE 1.5 a lo largo
+                        // de TODA la pantalla; aquí queda el CHARCO de la
+                        // base con SU pulso por tiempo (telegrafo tenue ·
+                        // erupción encendida · disolución apagándose).
+                        float t2 = _edad;
+                        float caida = Projectile.ai[1] >= 1f
+                            ? (Projectile.ai[1] >= 2f
+                                ? MathF.Max(0f, 1f - (t2 - 42f) / 30f)
+                                : 1f)
+                            : 0.30f + 0.70f * (t2 / 26f);
+                        float pulso = 0.85f + 0.15f * MathF.Sin(t * 5f + Seed);
+                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.40f * caida * pulso),
+                            new Vector2(150f, 52f));
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.50f * caida),
+                            new Vector2(64f, 24f));
                         break;
                     }
 
@@ -2299,7 +2340,14 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                     case EstiloNubeNebulosa:
                     {
-                        // LAS FLORES DE HUMO: 6 puffs orbitando con Hash01.
+                        // v6.113 — LA NUBE CON VOLUMEN (la letra: «algunos
+                        // ataques del jefe se ven planos o con texturas
+                        // raras»): la flor de humo plano (UN SoftGlow
+                        // violeta) murió — cada uno de los 6 puffs ahora
+                        // es TRES CAPAS anidadas (el manto exterior, el
+                        // cuerpo medio y el corazón claro) con SU fase de
+                        // pulso independiente: la nube respira por dentro
+                        // y ya no se lee como un disco plano.
                         for (int i = 0; i < 6; i++)
                         {
                             float h = VFXCore.Hash01(Seed, i, (int)(_edad / 40f));
@@ -2307,9 +2355,19 @@ namespace AethonMod.Content.Projectiles.Jefes
                             float r = 30f + 26f * VFXCore.Hash01(Seed, i + 40, 0);
                             Vector2 off = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r;
                             float fade = 1f - _edad / 360f;
+                            float fase = t * 2f + i * 1.7f;
+                            float late = 0.8f + 0.2f * MathF.Sin(fase);
+                            // TRES CAPAS: manto (violeta) · cuerpo (lila) ·
+                            // corazón (casi blanco) — el volumen de verdad.
                             VFXCore.Quad(Projectile.Center + off,
                                 NebulosaNube * fade,
-                                new Vector2(34f, 30f) * (0.8f + 0.2f * MathF.Sin(t * 2f + i)));
+                                new Vector2(40f, 36f) * late);
+                            VFXCore.Quad(Projectile.Center + off,
+                                new Color(122, 78, 188) * (fade * 0.8f),
+                                new Vector2(26f, 22f) * (1.05f - 0.15f * MathF.Sin(fase)));
+                            VFXCore.Quad(Projectile.Center + off,
+                                new Color(224, 176, 255) * (fade * 0.6f),
+                                new Vector2(12f, 10f) * (0.9f + 0.25f * MathF.Sin(fase + 1.3f)));
                         }
                         break;
                     }
@@ -2798,25 +2856,59 @@ namespace AethonMod.Content.Projectiles.Jefes
                         {
                             switch (Estilo)
                             {
-                                // === LA COLUMNA DEL JUICIO: el velo dorado +
-                                //     el núcleo blanco de 1.100 px HIRVIENDO ===
+                                // === EL MURO DEL JUICIO (v6.113): de TECHO a
+                                //     SUELO de la pantalla — el velo dorado +
+                                //     el núcleo blanco + el corazón, HIRVIENDO ===
                                 case EstiloColumnaJuicio:
                                 {
-                                    float caidaC = Projectile.ai[1] >= 1f ? 1f :
-                                        0.35f + 0.65f * (_edad / 45f);
-                                    if (caidaC > 0.03f)
+                                    // LAS FASES: 0 telégrafo (línea fina) ·
+                                    // 1 erupción (la pared encendida) ·
+                                    // 2 disolución (se apaga hacia arriba).
+                                    float fase = Projectile.ai[1];
+                                    float tC = _edad;
+                                    if (fase < 1f)
                                     {
+                                        // EL TELÉGRAFO: la línea fina que vibra
+                                        // (crece con la edad — la advertencia).
+                                        float aviso = 0.35f + 0.65f * (tC / 26f);
+                                        float vibra = 0.75f + 0.25f * MathF.Sin(t * 21f + Seed);
                                         Vector2 arriba = new Vector2(Projectile.Center.X,
-                                            Projectile.Center.Y - 1050f) - Main.screenPosition;
+                                            Main.screenPosition.Y - 80f) - Main.screenPosition;
                                         Vector2 abajo = new Vector2(Projectile.Center.X,
-                                            Projectile.Center.Y + 60f) - Main.screenPosition;
-                                        _hazAlfa = caidaC;
+                                            Main.screenPosition.Y + Main.screenHeight + 80f) - Main.screenPosition;
+                                        _hazAlfa = aviso * vibra;
                                         _hazTinte = OroGrimorio;
-                                        HazLib.PrepararPar(arriba, abajo, 62f, 54f, 0f, 16);
+                                        HazLib.PrepararPar(arriba, abajo, 9f, 7f, 0f, 18);
                                         HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
                                         _hazTinte = BlancoCaliente;
-                                        HazLib.PrepararPar(arriba, abajo, 26f, 20f, 0f, 16);
-                                        HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                        HazLib.PrepararPar(arriba, abajo, 4f, 3f, 0f, 18);
+                                        HazLib.Dibujar(LeyTinteHazNucleo, null, HazLib.FilasNucleo);
+                                    }
+                                    else
+                                    {
+                                        // LA PARED: la erupción encendida y su
+                                        // disolución (el fade del final).
+                                        float alfaC = fase < 2f
+                                            ? 1f
+                                            : MathF.Max(0f, 1f - (tC - 42f) / 30f);
+                                        float encoge = fase < 2f ? 1f : alfaC;
+                                        if (alfaC > 0.03f)
+                                        {
+                                            Vector2 arriba = new Vector2(Projectile.Center.X,
+                                                Main.screenPosition.Y - 80f) - Main.screenPosition;
+                                            Vector2 abajo = new Vector2(Projectile.Center.X,
+                                                Main.screenPosition.Y + Main.screenHeight + 80f) - Main.screenPosition;
+                                            _hazAlfa = alfaC;
+                                            _hazTinte = OroGrimorio;
+                                            HazLib.PrepararPar(arriba, abajo, 98f * encoge, 80f * encoge, 0f, 18);
+                                            HazLib.Dibujar(LeyTinteHazVelo, null, HazLib.FilasVelo);
+                                            _hazTinte = BlancoCaliente;
+                                            HazLib.PrepararPar(arriba, abajo, 44f * encoge, 32f * encoge, 0f, 18);
+                                            HazLib.Dibujar(LeyTinteHazNucleo, LeyVerticeHazNucleo, HazLib.FilasNucleo);
+                                            _hazTinte = new Color(255, 253, 244);
+                                            HazLib.PrepararPar(arriba, abajo, 18f * encoge, 12f * encoge, 0f, 18);
+                                            HazLib.Dibujar(LeyTinteHazNucleo, null, HazLib.FilasNucleo);
+                                        }
                                     }
                                     break;
                                 }

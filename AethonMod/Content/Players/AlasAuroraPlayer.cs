@@ -71,9 +71,11 @@ namespace AethonMod.Content.Players
             // EL HALO (el portador de las alas visuales): vive con el
             // accesorio O la vanidad; lo invoca SOLO el dueño local
             // (tML lo sincroniza — el patrón de la casa de los halos).
+            // v6.113 — el source string «AuroraDeTinta» murió con la
+            // purga (la ala original ya no existe): ahora es AlasAurora.
             if (VisualViva && Player.whoAmI == Main.myPlayer && !EspiarHalo())
             {
-                Projectile.NewProjectile(Player.GetSource_Misc("AuroraDeTinta"),
+                Projectile.NewProjectile(Player.GetSource_Misc("AlasAurora"),
                     Player.Center, Microsoft.Xna.Framework.Vector2.Zero,
                     ModContent.ProjectileType<AlasAuroraHalo>(),
                     0, 0f, Player.whoAmI);

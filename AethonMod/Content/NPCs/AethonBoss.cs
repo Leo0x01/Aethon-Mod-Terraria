@@ -228,6 +228,7 @@ namespace AethonMod.Content.NPCs
         // C llega a la fase 3 con su Ley DE LOS DOS ANTERIORES.
         private const int EST_MIRADA_CIELO = 21; // v6.104 — LA MIRADA QUE CAE DEL CIELO (la rejilla del ojo: 6 haces VERTICALES + 6 HORIZONTALES cayendo del cielo, girando en diagonal y RELANZÁNDOSE)
         private const int EST_PRUEBAC = 22;     // v6.104 — EL RAYO DE PRUEBA C DEL DIOS (la Ley de la fase 3: SIEMPRE que los ataques anteriores se hayan lanzado 2+ veces — el conducto onírico de los seis soles)
+        private const int EST_VEREDICTO = 23;   // v6.113 — EL HAZ DEL VEREDICTO (EL FARO DEL DIOS: la carga del radar que ESCRIBE el barrido completo y luego el haz de 2.400 px girando a través de la arena — el compás de los haces lo saca cada 2-4 ataques)
         protected const int EST_MURIENDO = 99;    // la contracción final
 
         // === v6.50.117 — LA FUSIÓN DE LOS GEMELOS DEL RECUERDO (la letra:
@@ -382,6 +383,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         protected int _coreoLargo = 0;
         private int _ataquesDesdeCoreo = 0;
         private int _proximoCoreoEn = 999;
+
+        // === v6.113 — EL COMPÁS DE LOS HACES (la letra: «mejora los
+        //     hazes del jefe, y añade nuevos hazes y mas seguido»):
+        //     cada 2-4 ataques de OTRO tipo, UN HAZ SALE — la carta de
+        //     haces de la fase (Mirada · Renglones · Rejilla · Sueño ·
+        //     Veredicto) barajada con la memoria doble de la casa ===
+        private int _ataquesDesdeHaz = 0;
+        private int _proximoHazEn = 3;
         protected int _anteultimoAtaque = 0;
 
         // === v6.50.60 — EL ATAQUE ESPECIAL DE CADA FASE (la letra:
@@ -1466,6 +1475,41 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 return;
             }
 
+            // v6.113 — EL COMPÁS DE LOS HACES (la letra: «mejora los
+            // hazes del jefe, y añade nuevos hazes y mas seguido»):
+            // cuando el contador de ataques de OTRO tipo llega al número
+            // tirado (2-4), UN HAZ SALE — la carta de haces de la fase
+            // (con EL VEREDICTO nuevo en TODAS) barajada con la memoria
+            // doble de la casa. La ley de los dos anteriores (P3) se
+            // alimenta igual: un haz lanzado ES un previo.
+            if (_ataquesDesdeHaz >= _proximoHazEn)
+            {
+                int[] cartaHaz = Phase switch
+                {
+                    1 => new[] { EST_MIRADA, EST_VEREDICTO },
+                    2 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_VEREDICTO },
+                    3 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO },
+                    4 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO },
+                    _ => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO, EST_RC2 },
+                };
+                int haz = cartaHaz[Main.rand.Next(cartaHaz.Length)];
+                int intentosH = 0;
+                while ((haz == _ultimoAtaque || haz == _anteultimoAtaque) &&
+                    intentosH++ < cartaHaz.Length)
+                    haz = cartaHaz[(Array.IndexOf(cartaHaz, haz) + 1) % cartaHaz.Length];
+                if (Phase == 3 && (haz == EST_MIRADA || haz == EST_RENGLONES ||
+                    haz == EST_MIRADA_CIELO))
+                    _previosP3++;
+                _ataquesDesdeHaz = 0;
+                _proximoHazEn = Main.rand.Next(2, 5);
+                _anteultimoAtaque = _ultimoAtaque;
+                _ultimoAtaque = haz;
+                _estado = haz;
+                _tickEstado = 0;
+                NPC.netUpdate = true;
+                return;
+            }
+
             // v6.50.57 — EL COMPÁS DE LA COREOGRAFÍA (P3+): cada 6-9
             // ataques la luz NO elige — DANZA (la mejora de IA pedida: la
             // cadena de la Emperatriz de vanilla y los god-bosses del
@@ -1513,10 +1557,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // vive arriba) y las fases 4/5 mantienen TODO el
                 // arsenal nuevo en la mesa.
                 1 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
-                2 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL, EST_RENGLONES, EST_MIRADA_CIELO },
-                3 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL },
-                4 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL },
-                _ => new[] { EST_MIRADA, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_SOL },
+                2 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL, EST_RENGLONES, EST_MIRADA_CIELO, EST_VEREDICTO },
+                3 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL, EST_VEREDICTO },
+                4 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL, EST_VEREDICTO },
+                _ => new[] { EST_MIRADA, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_SOL, EST_VEREDICTO },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -1587,6 +1631,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 if (plato == EST_MIRADA) peso = Phase == 1 ? 4 : 2;
                 if (plato == EST_MIRADA_CIELO) peso = 2;
                 if (plato == EST_PRUEBAC) peso = Phase >= 4 ? 2 : 1;
+                // v6.113 — EL VEREDICTO: el faro castiga al QUIETO (la
+                // línea del radar lo encuentra parado) y pesa 2 normal.
+                if (plato == EST_VEREDICTO) peso = 2;
+                if (plato == EST_VEREDICTO && _ticksPresaQuieta > 30) peso = 4;
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -1623,6 +1671,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
             else _ataquesDesdeEstallido++;
 
+            // v6.113 — EL COMPÁS DE LOS HACES: un HAZ lanzado re-arma su
+            // contador; un ataque de otro tipo lo alimenta.
+            if (elegido == EST_MIRADA || elegido == EST_RENGLONES ||
+                elegido == EST_MIRADA_CIELO || elegido == EST_PRUEBAC ||
+                elegido == EST_VEREDICTO || elegido == EST_RC2)
+                _ataquesDesdeHaz = 0;
+            else _ataquesDesdeHaz++;
+
             _estado = elegido;
             _tickEstado = 0;
             NPC.netUpdate = true;
@@ -1635,19 +1691,20 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         }
 
         // ==================================================================
-        //  EL JUICIO DE LUZ — LAS COLUMNAS DEL CIELO
+        //  EL JUICIO DE LUZ — LOS MUROS DE LUZ (v6.113)
         // ==================================================================
 
         /// <summary>
-        /// LA PRIMERA LEY: la luz cae. 30 t de alzarse (el anuncio) y
-        /// LA PRIMERA OLEADA de N COLUMNAS nace ARRIBA de las posiciones
-        /// PREDICHAS — el proyectil se telegrafea solo: cae LENTO (la
-        /// línea de luz descendiendo) y a los 45 t ACELERA a toda
-        /// velocidad. Y v6.50.44 — LA SEGUNDA OLEADA (la ley que se
-        /// aprende): 25 t después, MÁS APRETADA y sobre tu POSICIÓN
-        /// ACTUAL — castiga al que esquivó la primera y se quedó a
-        /// mirar. Donde estabas parado, ya no existe; donde ESTÁS,
-        /// tampoco.
+        /// v6.113 — LA NUEVA LEY (la letra: «los 3 pilares no deben bajar
+        /// deben ocupar toda la pantalla»): la luz YA NO CAE — NASCE
+        /// PARADA. DOS oleadas de N MUROS (3 en P1 → 6 en P5) nacen a la
+        /// altura de la presa, telegrafían 26 t (la línea fina que
+        /// vibra), ENCIENDEN 16 t con el hitbox de 1.800 px de alto (más
+        /// alto que cualquier pantalla) y se disuelven. La primera
+        /// oleada cae sobre tu RITMO (PredPresa); la segunda, MÁS
+        /// APRETADA y sobre tu POSICIÓN ACTUAL — castiga al que esquivó
+        /// la primera y se quedó a mirar. Donde estabas parado, ya no
+        /// existe; donde ESTÁS, tampoco.
         /// </summary>
         private void EstadoJuicio(Player target)
         {
@@ -1660,7 +1717,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             bool primera = _tickEstado == 30;
-            bool segunda = _tickEstado == 55;
+            bool segunda = _tickEstado == 58;
             if (primera || segunda)
             {
                 int n = Math.Min(6, 2 + Phase);       // 3 en P1 → 6 en P5
@@ -1675,8 +1732,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                               Main.rand.NextFloat(-30f, 30f);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
+                        // v6.113 — EL MURO YA NO BAJA: nace PARADO a la
+                        // ALTURA de la presa (el hitbox de 1.800 px cubre
+                        // toda la pantalla) y sin velocidad — el pilar
+                        // telegrafía 26 t, ENCIENDE 16 y se disuelve.
+                        float y = MathHelper.Clamp(target.Center.Y, 320f,
+                            (Main.maxTilesY - 30) * 16f);
                         Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            new Vector2(x, target.Center.Y - 1200f), new Vector2(0f, 7f),
+                            new Vector2(x, y), Vector2.Zero,
                             ModContent.ProjectileType<AtaqueJefeProjectile>(),
                             (int)(NPC.damage * 0.95f), 3f, Main.myPlayer,
                             AtaqueJefeProjectile.EstiloColumnaJuicio, 0f,
@@ -1691,7 +1754,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
             }
 
-            if (_tickEstado >= 130) { CerrarEstado(); }
+            if (_tickEstado >= 150) { CerrarEstado(); }
         }
 
         // ==================================================================
@@ -2407,6 +2470,43 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         }
 
         /// <summary>
+        /// v6.113 — EL HAZ DEL VEREDICTO (la letra: «mejora los hazes del
+        /// jefe, y añade nuevos hazes y mas seguido»): EL FARO DEL DIOS —
+        /// la carga del radar que ESCRIBE el barrido completo (la línea
+        /// fina recorriendo el camino en 40 t) y luego EL HAZ de 2.400 px
+        /// encendido girando a través de la arena (155°, lento y
+        /// constante — se esquiva leyéndolo, no corriendo). El compás de
+        /// los haces (cada 2-4 ataques) y la carta de la fase lo sacan.
+        /// </summary>
+        private void EstadoVeredicto(Player target)
+        {
+            // EL DIOS SE ALZA SERENO (el faro no persigue: ilumina).
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Sin(_tickEstado * 0.022f) * 110f, -440f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.10f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.JefeVeredictoProj>(),
+                        Math.Max(1, (int)(NPC.damage * 0.95f)), 3f, Main.myPlayer,
+                        0f, NPC.whoAmI, NPC.target);
+                }
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Veredicto", PaletaOro);
+                OndaLib.Kick(6f, 14);
+                NPC.netUpdate = true;
+            }
+
+            // LA VIDA DEL FARO: 40 de carga + 135 de barrido + 35 de
+            // disolución (210 t) + el respiro de la casa.
+            if (_tickEstado >= 235) CerrarEstado();
+        }
+
+        /// <summary>
         /// v6.50.57 — EL CIERRE CON COREOGRAFÍA: si la danza tiene pasos en
         /// la cola, el SIGUIENTE entra YA — sin pasar por la órbita (la
         /// cadena de la Emperatriz: los ataques se pasan el turno); si la
@@ -2431,6 +2531,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     _estallidosUsadosEnFase++;
                     _ataquesDesdeEstallido = 0;
                     _proximoEstallidoEn = Main.rand.Next(1, 10);
+                }
+                // v6.113 — el HAZ encadenado re-arma su compás.
+                if (siguiente == EST_MIRADA || siguiente == EST_RENGLONES ||
+                    siguiente == EST_MIRADA_CIELO || siguiente == EST_PRUEBAC ||
+                    siguiente == EST_VEREDICTO || siguiente == EST_RC2)
+                {
+                    _ataquesDesdeHaz = 0;
+                    _proximoHazEn = Main.rand.Next(2, 5);
                 }
                 if (siguiente == EST_DESTELLO)
                 {
@@ -2475,6 +2583,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (Phase >= 2) Paso(EST_MIRADA_CIELO);  // la rejilla del cielo
             if (Phase >= 3) Paso(EST_RENGLONES);     // la rueda de tinta separada
             if (Phase >= 3) Paso(EST_PRUEBAC);       // el sueño responde a los dos
+            // v6.113 — LOS DOS PLATOS NUEVOS DE LA DANZA: LOS MUROS del
+            // juicio a pantalla completa y EL FARO del veredicto barriendo
+            // la arena (la letra: «mejora los ataques del jefe, los
+            // visuales y toda la coreografia»).
+            if (Phase >= 4) Paso(EST_JUICIO);        // los muros: la fila que no se cruza
+            if (Phase >= 4) Paso(EST_VEREDICTO);     // el faro: el barrido que la cierra
             if (Phase >= 4) Paso(EST_TELAR);     // la jaula mientras el sol vuela
             Paso(EST_DANZA);                     // la rueda de rayos de la EoL
             if (Phase >= 4) Paso(EST_LANZAS);    // la sentencia sobre tu carrera
@@ -3461,6 +3575,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // vuelve a CERO con la fase nueva — cada fase escribe su propia
             // cuenta antes de merecer EL SUEÑO.
             _previosP3 = 0;
+
+            // v6.113 — EL COMPÁS DE LOS HACES SE RE-ARMA: la fase nueva
+            // tira su primer número (2-4) — los haces vuelven a ser una
+            // CERTEZA que acecha, no una casualidad del menú.
+            _ataquesDesdeHaz = 0;
+            _proximoHazEn = Main.rand.Next(2, 5);
 
             // v6.50.45 — EL DECRETO DEL ECLIPSE EN CADA CAMBIO DE FASE: el
             // círculo nace EN EL JEFE y LO SIGUE (v6.50.54 — centrado en el

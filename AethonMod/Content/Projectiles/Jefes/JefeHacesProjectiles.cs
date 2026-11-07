@@ -1380,4 +1380,322 @@ namespace AethonMod.Content.Projectiles.Jefes
             return false;
         }
     }
+
+    // =====================================================================
+    //  v6.113 — JefeVeredictoProj — EL HAZ DEL VEREDICTO (EL FARO DEL
+    //  DIOS). La letra: «mejora los hazes del jefe, y añade nuevos hazes
+    //  y mas seguido». Lo saca EL COMPÁS DE LOS HACES (AethonBoss.
+    //  ElegirAtaque: cada 2-4 ataques de otro tipo) y la carta de la
+    //  fase (peso 2; 4 contra el QUIETO).
+    //
+    //  LOS TRES ACTOS (ai[0] = Tiempo):
+    //    0-40   · LA CARGA — DOS anillos de runas doradas giran en
+    //             sentidos opuestos (el círculo del conjuro, el idioma
+    //             del RC2) y EL RADAR: la línea telegráfica FINA recorre
+    //             EL BARRIDO COMPLETO en 40 t — el faro ESCRIBE su plan:
+    //             el camino entero queda dicho antes del primer rayo.
+    //    40-175 · EL BARRIDO — el haz de 2.400 px SE ENCIENDE y recorre
+    //             el MISMO camino a velocidad CONSTANTE (2.7 rad en 135
+    //             t: 155° — se esquiva leyéndolo, no corriendo).
+    //    175-210· LA DISOLUCIÓN — el haz se estrangula y se apaga.
+    //
+    //  TODO HazLib de la casa (velo dorado + núcleo blanco + corazón)
+    //  con la CERO-GC de siempre; el daño por Colliding de línea (la
+    //  casa del CheckAABBvLineCollision, como la Mirada). Paleta ORO:
+    //  la firma del juicio (distinta de la fucsia del libro y del
+    //  conjuro del RC2).
+    // =====================================================================
+    public class JefeVeredictoProj : ModProjectile
+    {
+        private const float Carga = 40f;
+        private const float Barrido = 135f;
+        private const float LargoTotal = 2400f;
+
+        private static readonly Color OroVeredicto = new(245, 196, 81);
+        private static readonly Color BlancoVeredicto = new(255, 252, 245);
+
+        private float Tiempo { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+        private float Dueño => Projectile.ai[1];
+
+        /// <summary>LA MIRA (localAI[0]): el CENTRO del barrido — la
+        /// dirección a la presa en el PRIMER tick del conjuro (el plan
+        /// queda ESCRITO desde el principio: el radar no miente).</summary>
+        private float Mira { get => Projectile.localAI[0]; set => Projectile.localAI[0] = value; }
+
+        // === EL ESTADO DE LAS LEYES (cero-GC) ===
+        private static float _vAlfa = 1f;
+        private static Color _vTinte = Color.White;
+
+        private static readonly HazLib.LeyNodo LeyTinteVeloV = TinteVeloVeredicto;
+        private static readonly HazLib.LeyNodo LeyTinteNucleoV = TinteNucleoVeredicto;
+        private static readonly HazLib.LeyVertice LeyVerticeV = VerticeVeredicto;
+
+        private static Color TinteVeloVeredicto(float p)
+            => _vTinte * (MathHelper.Clamp(p / 0.10f, 0f, 1f)
+                * MathHelper.Clamp((1f - p) / 0.12f, 0f, 1f) * (_vAlfa * 0.40f));
+
+        private static Color TinteNucleoVeredicto(float p)
+            => _vTinte * (MathHelper.Clamp(p / 0.06f, 0f, 1f)
+                * MathHelper.Clamp((1f - p) / 0.10f, 0f, 1f) * (_vAlfa * 0.95f));
+
+        /// <summary>EL VÉRTICE: el grumo de ruido diagonal (la luz que
+        /// HIERVE) y el brillo interior 1/d — el idioma de los haces de
+        /// la casa.</summary>
+        private static Color VerticeVeredicto(float x, float y, Color tinte)
+        {
+            float tt = Main.GlobalTimeWrappedHourly;
+            float ruido = FracV(x * 2f - tt * 2.6f) * FracV(y * 2f + x * 4f - tt * 2.6f);
+            float opacidad = ruido * 0.65f + 0.40f;
+            float d = MathF.Abs(y - 0.5f);
+            float brillo = d <= 0.0001f ? 1f : MathHelper.Clamp(0.30f / d, 0f, 1f);
+            brillo *= 1f - MathHelper.Clamp((d - 0.10f) / 0.22f, 0f, 1f);
+            Vector4 suma = tinte.ToVector4() * opacidad + new Vector4(brillo * 0.8f);
+            return new Color(
+                (byte)Math.Clamp((int)(suma.X * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Y * 255f + 0.5f), 0, 255),
+                (byte)Math.Clamp((int)(suma.Z * 255f + 0.5f), 0, 255), 255);
+        }
+
+        private static float FracV(float x) => x - MathF.Floor(x);
+
+        public override string Texture => "AethonMod/Content/Effects/Procedural/Star";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 4400;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 80;
+            Projectile.height = 80;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.penetrate = -1;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+            Projectile.aiStyle = -1;
+            Projectile.netImportant = true;
+        }
+
+        public override bool ShouldUpdatePosition() => false;
+
+        public override void AI()
+        {
+            NPC jefe = Main.npc[(int)Dueño];
+            if (jefe == null || !jefe.active || jefe.life <= 0)
+            {
+                Projectile.Kill();
+                return;
+            }
+
+            Projectile.Center = jefe.Center;
+            Projectile.timeLeft = 10;
+
+            Player presa = Main.player[jefe.target];
+
+            if (Tiempo <= 1f)
+            {
+                // LA MIRA al nacer: el CENTRO del barrido (la presa al
+                // momento del conjuro — el plan ESCRITO desde el inicio).
+                if (presa != null && presa.active && !presa.dead)
+                    Mira = Projectile.AngleTo(presa.Center);
+                else
+                    Mira = MathHelper.PiOver2;
+                Projectile.rotation = Mira - 1.35f;
+                if (!Main.dedServ)
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item118.WithPitchOffset(-0.3f), Projectile.Center);
+            }
+
+            if (Tiempo < Carga)
+            {
+                // === EL RADAR: la línea telegráfica recorre EL BARRIDO
+                //     COMPLETO (de −1.35 a +1.35 rad) — el camino dicho
+                //     ENTERO antes del primer rayo. ===
+                Projectile.hostile = false;
+                Projectile.rotation = Mira + ((Tiempo / Carga) - 0.5f) * 2.7f;
+
+                // EL POLVO CONVERGENTE de la carga — dorado, el color del
+                // juicio (el círculo del conjuro del RC2).
+                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                {
+                    Dust d = Dust.NewDustPerfect(
+                        Projectile.Center + Main.rand.NextVector2Circular(120f, 120f),
+                        DustID.GoldFlame, Vector2.Zero, 0, OroVeredicto, 0.9f);
+                    Vector2 hacia = Projectile.Center - d.position;
+                    if (hacia.LengthSquared() > 1f) d.velocity = hacia / hacia.Length() * 8f;
+                    d.noGravity = true;
+                }
+            }
+            else if (Tiempo < Carga + Barrido)
+            {
+                // === EL BARRIDO: el mismo camino, lento y encendido. ===
+                if (Tiempo < Carga + 1.5f)
+                {
+                    if (!Main.dedServ)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Projectile.Center);
+                        OndaLib.Kick(10f, 20);
+                    }
+                    Projectile.netUpdate = true;
+                }
+                Projectile.hostile = true;
+                Projectile.rotation = Mira + (((Tiempo - Carga) / Barrido) - 0.5f) * 2.7f;
+
+                // LAS CHISPAS y LA LUZ a lo largo del haz (tres puntos,
+                // el idioma de la Mirada) + las chispas del barrido.
+                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                {
+                    Vector3 luz = new Vector3(0.95f, 0.75f, 0.30f);
+                    Vector2 dir = Projectile.rotation.ToRotationVector2();
+                    Lighting.AddLight(Projectile.Center, luz);
+                    Lighting.AddLight(Projectile.Center + dir * (LargoTotal * 0.5f), luz * 0.8f);
+                    Lighting.AddLight(Projectile.Center + dir * LargoTotal, luz * 0.6f);
+                    if (((int)Tiempo % 4) == 0)
+                    {
+                        for (int ch = 0; ch < 2; ch++)
+                        {
+                            float lejos = 120f + Main.rand.NextFloat(2100f);
+                            Dust d = Dust.NewDustPerfect(
+                                Projectile.Center + dir * lejos + Main.rand.NextVector2Circular(26f, 26f),
+                                DustID.GoldFlame,
+                                Main.rand.NextVector2Circular(0.8f, 0.8f), 165, OroVeredicto, 0.85f);
+                            d.noGravity = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // === LA DISOLUCIÓN: el haz se estrangula y se apaga. ===
+                Projectile.hostile = false;
+            }
+
+            Tiempo++;
+            if (Tiempo > Carga + Barrido + 35f) Projectile.Kill();
+        }
+
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        {
+            // EL DAÑO: SOLO durante el barrido (la carga avisa; la
+            // disolución perdona) — la línea del ancho del núcleo.
+            if (Tiempo < Carga || Tiempo >= Carga + Barrido) return false;
+            Vector2 dir = Projectile.rotation.ToRotationVector2();
+            Vector2 a = Projectile.Center + dir * 70f;
+            Vector2 b = Projectile.Center + dir * (LargoTotal * 0.93f);
+            float punto = 0f;
+            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
+                a, b, 46f, ref punto);
+        }
+
+        // === EL RENDER: el círculo del conjuro + el haz, TODO HazLib ===
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.dedServ) return false;
+            try
+            {
+                NPC jefe = Main.npc[(int)Dueño];
+                if (jefe == null || !jefe.active) return false;
+
+                Vector2 centro = Projectile.Center - Main.screenPosition;
+                float tt = Main.GlobalTimeWrappedHourly;
+
+                // === LA CARGA: DOS ANILLOS DE RUNAS doradas girando en
+                //     sentidos opuestos — el círculo del conjuro (el
+                //     idioma del RC2, la paleta del juicio). ===
+                if (Tiempo < Carga + 8f)
+                {
+                    float r = MathHelper.Clamp(Tiempo / Carga, 0f, 1f);
+                    Texture2D estrella = DefinitivasLib.TexStar;
+                    if (estrella != null)
+                    {
+                        VFXCore.AbrirAdditive();
+                        try
+                        {
+                            Vector2 ojo = estrella.Size() * 0.5f;
+                            float apertura = MathHelper.Clamp(r / 0.8f, 0f, 1f);
+                            for (int anillo = 0; anillo < 2; anillo++)
+                            {
+                                int n = anillo == 0 ? 12 : 8;
+                                float radio = (anillo == 0 ? 120f : 76f) * apertura;
+                                float giro = (anillo == 0 ? 1f : -1.4f) * r * MathHelper.TwoPi;
+                                float escala = (anillo == 0 ? 0.5f : 0.36f) * apertura;
+                                for (int i = 0; i < n; i++)
+                                {
+                                    float ang = giro + i * MathHelper.TwoPi / n;
+                                    Color runa = Color.Lerp(OroVeredicto, BlancoVeredicto,
+                                        0.35f + 0.35f * MathF.Sin(tt * 3f + i * 4f + anillo * 24f));
+                                    Main.spriteBatch.Draw(estrella,
+                                        centro + ang.ToRotationVector2() * radio, null,
+                                        runa * 0.85f, ang + MathHelper.PiOver2, ojo,
+                                        escala, SpriteEffects.None, 0f);
+                                }
+                            }
+                        }
+                        catch { VFXCore.CerrarLoteSiAbierto(); }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
+                    }
+                }
+
+                // === EL HAZ: la línea telegráfica (fina) o la pared
+                //     encendida (tres capas), TODO HazLib, UN draw call. ===
+                bool telegrafo = Tiempo < Carga;
+                float fade = Tiempo >= Carga + Barrido
+                    ? MathF.Max(0f, 1f - (Tiempo - Carga - Barrido) / 35f)
+                    : 1f;
+                if (fade > 0.03f)
+                {
+                    Vector2 dir = Projectile.rotation.ToRotationVector2();
+                    Vector2 boca = centro - dir * 10f;
+                    Vector2 punta = centro + dir * (telegrafo ? 2000f : LargoTotal);
+
+                    HazLib.Abrir();
+                    try
+                    {
+                        if (telegrafo)
+                        {
+                            // EL RADAR: la línea fina que VIBRA (la casa:
+                            // el parpadeo del aviso).
+                            float vibra = 0.55f + 0.45f * MathF.Sin(tt * 22f);
+                            _vAlfa = 0.10f + 0.30f * vibra * (Tiempo / Carga);
+                            _vTinte = OroVeredicto;
+                            HazLib.PrepararPar(boca, punta, 10f, 7f, 0f, 40);
+                            HazLib.Dibujar(LeyTinteVeloV, null, HazLib.FilasVelo);
+                            _vTinte = BlancoVeredicto;
+                            HazLib.PrepararPar(boca, punta, 4f, 3f, 0f, 40);
+                            HazLib.Dibujar(LeyTinteNucleoV, null, HazLib.FilasNucleo);
+                        }
+                        else
+                        {
+                            // EL BARRIDO encendido: velo + núcleo + corazón.
+                            float crece = MathHelper.Clamp((Tiempo - Carga) / 12f, 0f, 1f);
+                            _vAlfa = fade * (0.85f + 0.15f * MathF.Sin(tt * 9f));
+                            _vTinte = OroVeredicto;
+                            HazLib.PrepararPar(boca, punta, (96f - 40f * (1f - crece)) , 78f, 0f, 44);
+                            HazLib.Dibujar(LeyTinteVeloV, null, HazLib.FilasVelo);
+                            _vTinte = BlancoVeredicto;
+                            HazLib.PrepararPar(boca, punta, (42f - 18f * (1f - crece)), 30f, 0f, 56);
+                            HazLib.Dibujar(LeyTinteNucleoV, LeyVerticeV, HazLib.FilasNucleo);
+                            CorazonFaro(centro, dir);
+                        }
+                    }
+                    finally { HazLib.Cerrar(); }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>EL CORAZÓN del faro: el hilo cegador del centro (la
+        /// tercera capa, la más fina — el filo blanco del veredicto).</summary>
+        private void CorazonFaro(Vector2 centro, Vector2 dir)
+        {
+            _vTinte = new Color(255, 253, 244);
+            Vector2 boca = centro - dir * 10f;
+            Vector2 punta = centro + dir * LargoTotal;
+            HazLib.PrepararPar(boca, punta, 18f, 12f, 0f, 56);
+            HazLib.Dibujar(LeyTinteNucleoV, null, HazLib.FilasNucleo);
+        }
+    }
 }
