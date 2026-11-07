@@ -17,6 +17,7 @@
 | **`regen_oracle.py`** | El oráculo: compila los 418+ .cs contra las DLLs reales del tML — 0 errores / 0 warnings | Tras cambiar CUALQUIER .cs |
 | **`audit_vXXX_tmod.py`** | La auditoría de cada versión: blobs íntegros, EOF, firmas vivas/muertas, hjson ×3, guardián CJK/IP, LICENSE | Antes de cada release |
 | **`parse_tmod.py`** | El lector del .tmod (lo usan las auditorías) | Interno |
+| **`publicar_v6110.sh`** | **EL PUBLICADOR** — el paso 5 entero en un comando: valida el PAT, verifica el .tmod (md5+tamaño contra la AUDIT), push de main+tag, crea el release con notas nacidas del STABLE-SNAPSHOT, sube el asset, verifica el CDN byte a byte y rellena la cabecera con el release ID real (la lección de las filas pre-rellenadas: el ID solo se conoce DESPUÉS). Nació en la v6.110, cuando el corte de contexto se llevó el PAT y el release quedó colgado — que nunca más el paso 5 dependa de la memoria del agente | Cuando el gate (a-e) ya pasó y solo falta publicar | 
 
 **LA REGLA**: si algo nuevo se puede crear con una herramienta de la casa, SE CREA CON LA HERRAMIENTA. Los sprites con LA SUPERFORJA, los textos con el SYNC, las verificaciones con EL GUARDIÁN + EL ORÁCULO + LA AUDITORÍA. Nunca a mano lo que la casa ya automatizó.
 
