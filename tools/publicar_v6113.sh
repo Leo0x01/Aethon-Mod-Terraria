@@ -177,7 +177,7 @@ echo "      asset: $ASSET_URL"
 # ---------- 6 · EL CDN BYTE A BYTE ----------
 echo "[6/7] CDN verificado byte a byte…"
 curl -sL "$ASSET_URL" -o /tmp/cdn_check_v6113.tmod
-MD5_CDN=$(md5sum /tmp/cdn_check_v6112.tmod | cut -d' ' -f1)
+MD5_CDN=$(md5sum /tmp/cdn_check_v6113.tmod | cut -d' ' -f1)
 if [ "$MD5_CDN" != "$MD5_ESPERADO" ]; then
     echo "[ERROR] el CDN sirve otro binario (md5 $MD5_CDN ≠ $MD5_ESPERADO)"
     exit 1
