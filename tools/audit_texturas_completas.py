@@ -114,7 +114,12 @@ for clase, (ruta, texto, ini) in posiciones.items():
     prestamo = PRESTADA.search(cuerpo)
     if prestamo:
         png, entrada = ruta_png(prestamo.group(1))
-        modo = 'prestada'
+        # v6.111 — LA EXENCIÓN VANILLA: una textura prestada de VANILLA
+        # (Terraria/) VIVE EN EL JUEGO — no se exige en el disco del mod
+        # ni dentro del .tmod (el guardián cazaba al DummyNegro con un
+        # falso positivo desde la v6.105: el NPC_113 del muñeco de
+        # pruebas jamás pudo estar en NINGÚN .tmod — es de Terraria).
+        modo = 'vanilla' if prestamo.group(1).startswith('Terraria/') else 'prestada'
     else:
         # LA PROPIA: la convención de tML — la carpeta del .cs (la casa
         # mantiene namespace == carpeta) + el nombre de la clase
@@ -129,6 +134,8 @@ faltan_disco, total = [], 0
 for clase, info in encontradas.items():
     if info['abstracta']:
         continue
+    if info['modo'] == 'vanilla':
+        continue          # la vanilla vive en el JUEGO (la exención)
     total += 1
     if not os.path.exists(info['png']):
         faltan_disco.append((info['tipo'], clase, info['modo'], info['cs'], info['png']))
@@ -167,6 +174,8 @@ prestadas_usadas = set()
 for clase, info in encontradas.items():
     if info['abstracta'] or not vive_en_dll(clase):
         continue          # la abstracta o la muerta no cuentan
+    if info['modo'] == 'vanilla':
+        continue          # la vanilla vive en el JUEGO (la exención)
     entrada = info['entrada']
     if not any(p == entrada + '.rawimg' for p in todos):
         faltan_tmod.append((info['tipo'], clase, info['modo'], entrada))

@@ -1849,10 +1849,10 @@ Items: {
 			El aura del grimorio mismo respirando a tu alrededor.
 			La dejó caer Aethon al cerrar su prueba: el portador
 			digno viste la luz del libro.
-			La columna del cielo abierta sobre tu cabeza, el gran halo
-			doble con su corona de estrellas, las escrituras bajo tus
-			pies y las plumas doradas cayendo a tu paso — la apoteosis
-			entera. Sin alas: la luz pura (v6.110, la letra del portador).
+			El gran halo doble con su corona de estrellas, las
+			escrituras bajo tus pies y las plumas doradas cayendo a tu
+			paso — la apoteosis entera. Sin alas y sin haz de luz: la
+			luz pura que no abre el cielo (v6.111, la letra del portador).
 			'''
 	}
 
@@ -1908,17 +1908,14 @@ Items: {
 		DisplayName: La Forma Ascendida 5
 		Tooltip:
 			'''
-			EL VIENTO DEL ESPÍRITU — la quinta luz: EL QUE SOPLA (ruach/pneuma).
-			El aliento de las cinco luces con SUS DIEZ CAPAS: EL CUERPO DE
-			VIENTO, LOS ARCOS ROTOS que orbitan a favor y en contra (el
-			cizallamiento), LAS BANDAS ESPIRALES que enrulan hacia fuera,
-			LOS BRILLOS de 4 puntas titilando por todo el aliento, LAS PLUMAS
-			DEL VIENTO cruzando la frontera, EL RIM violeta, EL ALIENTO
-			ASCENDENTE — y SU FIRMA: LA CAPA DE TURBULENCIA SUAVE, hebras de
-			vapor SOLO sobre la banda del aura (0.68R..0.96R): tu cuerpo y
-			todo lo demás quedan intactos.
-			La paleta del aliento: plata al centro, teal pálido al medio
-			y violeta al borde — la calma del centro, el color en el borde.
+			EL RÍO DE PLUMAS — la quinta luz: LA BANDADA DE LUZ (la murmuration).
+			El viento disuelto en aves: TRES RÍOS de plumas fluyen alrededor tuyo,
+			la mitad contra-corriente — cada pluma NACE, VUELA y se disuelve en su
+			río; al correr la bandada SE INCLINA contigo y al atacar se aprieta.
+			LAS PLUMAS QUE SE QUEDAN caen meciéndose como hojas — la bendición
+			lenta — y EL RIM violeta enmarca el vuelo.
+			La paleta de la bandada: plata al centro, teal pálido al medio
+			y violeta al borde — la herencia del aliento, hecha ave.
 			Y VUELO INFINITO (como sus cuatro hermanas).
 			'''
 	}
@@ -1944,29 +1941,30 @@ Items: {
 		DisplayName: La Forma Ascendida 7
 		Tooltip:
 			'''
-			LA ESTRELLA VIVA — la séptima luz: EL SOL MENOR.
-			No vistes un aura: ERES la estrella. EL NÚCLEO BLANCO latiendo en
-			tu pecho, LA CORONA SOLAR de picos ardientes, LAS PROMINENCIAS —
-			arcos de fuego anclados a tu anillo que brotan, crecen y se
-			desgarran como las llamaradas de un sol de verdad —, EL PARPADEO
-			ESTELAR cruzando el cielo y LA LLUVIA DE FOTONES escapando de ti.
-			La paleta de la estrella: blanco nuclear al centro, oro vivo al
-			medio, coral al borde — la luz que alimenta mundos.
+			EL OJO DE LA GALAXIA — la séptima luz: LA GALAXIA ENTERA, VISTA DESDE ARRIBA.
+			La estrella disuelta en cielo profundo: TÚ eres el NÚCLEO que ciega, y
+			LOS DOS BRAZOS se enrollan a tu alrededor — cadenas de nudos que nacen
+			pegados al corazón y se disuelven en el borde, con sus carriles de
+			POLVO VIOLETA entre los brazos, la granulación del disco y LAS
+			ESTRELLAS ERRANTES tan fuera que parecen no pertenecerle: le pertenecen.
+			La paleta de la galaxia: blanco nuclear al centro, oro vivo al medio
+			y polvo violeta al borde — la luz que alimenta mundos, desde arriba.
 			Y VUELO INFINITO (como sus seis hermanas).
 			'''
 	}
+
 	FormaAscendidaOchoItem: {
 		DisplayName: La Forma Ascendida 8
 		Tooltip:
 			'''
-			LA ESPADA DEL JUICIO — la octava luz: SAN MIGUEL, el arcángel guerrero.
-			LA GRAN ESPADA DE LUZ alzada tras tu espalda — del suelo al cielo — que
-			SE ENCIENDE al atacar: el filo lee la batalla. LAS DOS BALANZAS del juicio
-			orbitándote (la báscula que pesa a los que se acercan), LOS PENACHOS de
-			plumas blancas cayendo como hojas de acero, EL ESCUDO DE LA FE girando bajo
-			tus pies y LOS TRAZOS DEL VEREDICTO cortando el cielo.
-			La paleta del arcángel: platino acero al centro, oro del veredicto al
-			medio, violeta real al borde — el acero, la sentencia y el sello.
+			LAS OFANIM — la octava luz: LAS RUEDAS DENTRO DE RUEDAS de Ezequiel.
+			La espada disuelta en visión: TRES AROS giran cada uno en su plano —
+			la ECUATORIAL lenta, la VERTICAL en contra, la INTERIOR aprisa — y
+			sobre las llantas viajan OJOS DE LUZ que parpadean a su ritmo y MIRAN
+			hacia donde vas; el fuego de fricción lame los aros y EL PIE DEL TRONO
+			muestra sus doce marcas bajo tus pies. Al atacar, los iris ARDEN.
+			La paleta de las ruedas: blanco fuego al centro, oro vivo al medio
+			y brasa violeta al borde — la forja hecha rueda.
 			Y VUELO INFINITO (como sus siete hermanas).
 			'''
 	}
@@ -1975,13 +1973,15 @@ Items: {
 		DisplayName: La Forma Ascendida 9
 		Tooltip:
 			'''
-			LA MÚSICA DE LAS ESFERAS — la novena luz: GABRIEL, la voz que ordena.
-			EL SONIDO HECHO VISIBLE: LAS ONDAS DEL LLAMADO — anillos concéntricos
-			naciendo al compás (el cielo entero latiendo a ritmo de 4/4) —, LAS
-			NOTAS orbitando con sus glifos de melodía, LA CORTINA DE AURORA ondeando
-			sobre ti y EL DIAPASÓN bajo tus pies: el metrómono del cielo.
-			La paleta de la voz: marfil al centro, rosa alba al medio, violeta
-			melodía al borde — la calidez del coro.
+			EL CÁNTICO DE LAS LÁMPARAS — la novena luz: LAS SIETE DEL TRONO
+			(«siete lámparas de fuego ardiendo delante del trono»).
+			La música disuelta en fuego: SIETE LÁMPARAS orbitan en escalinata,
+			cada llama CANTA su turno al compás 4/4 — la ola de luz corre por la
+			órbita, lámpara por lámpara; las llamas se INCLINAN contra tu carrera,
+			se ENGRÍE al atacar, y del coro brotan RELÁMPAGOS entre vecinas.
+			EL METRÓNOMO bajo tus pies barre con su péndulo al compás.
+			La paleta del coro: marfil al centro, ámbar al medio y violeta canto
+			al borde — la calidez del fuego que alaba.
 			Y VUELO INFINITO (como sus ocho hermanas).
 			'''
 	}
@@ -1990,14 +1990,16 @@ Items: {
 		DisplayName: La Forma Ascendida 10
 		Tooltip:
 			'''
-			EL ÁRBOL DE LA VIDA — la décima luz: LA CORONA que cierra la década.
-			DIEZ FORMAS, DIEZ SEFIROT: el mapa del cielo entero en un solo aura. Los
-			DIEZ sefirot de oro prendiendo EN SECUENCIA por sus senderos de luz (la
-			emanación descendiendo de la corona al reino), KETER — la corona de tres
-			picos — sobre tu cabeza, LAS ESTRELLAS de la década titilando y EL SELLO
-			CIRCULAR bajo tus pies.
-			La paleta de la corona: blanco corona al centro, oro corona al medio,
-			violeta hondo al borde — la eternidad, que no tiene prisa.
+			EL TRONO — la décima luz: LA VISTA ENTERA DEL TRONO
+			(«del trono salían relámpagos... y delante del trono, un mar de vidrio
+			semejante al cristal» + «un arco iris alrededor del trono»).
+			El árbol disuelto en majestad: EL MAR DE CRISTAL bajo tus pies — sus
+			vetas fluyen, sus ondas nacen de cada paso, su borde canta — EL ARCO
+			ESMERALDA sobre tu cabeza con la ola de brillo corriendo por sus seis
+			bandas, LA MANDORLA de la gloria envolviéndote de punta a punta, LOS
+			SIETE TRUENOS partiendo el cielo y LAS LÁGRIMAS del arco cayendo al mar.
+			La paleta del trono: cian cristal al centro, esmeralda al medio
+			y violeta hondo al borde — la eternidad, que no tiene prisa.
 			Y VUELO INFINITO (como sus nueve hermanas).
 			'''
 	}

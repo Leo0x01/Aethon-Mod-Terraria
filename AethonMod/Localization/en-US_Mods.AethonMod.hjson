@@ -1849,10 +1849,10 @@ Items: {
 			El aura del grimorio mismo respirando a tu alrededor.
 			La dejó caer Aethon al cerrar su prueba: el portador
 			digno viste la luz del libro.
-			La columna del cielo abierta sobre tu cabeza, el gran halo
-			doble con su corona de estrellas, las escrituras bajo tus
-			pies y las plumas doradas cayendo a tu paso — la apoteosis
-			entera. Sin alas: la luz pura (v6.110, la letra del portador).
+			The great double halo with its crown of stars, the
+			writings under your feet and the golden feathers falling
+			in your wake — the whole apotheosis. Wingless and
+			beamless: the pure light that opens no heaven (v6.111).
 			'''
 	}
 
@@ -1908,18 +1908,16 @@ Items: {
 		DisplayName: La Forma Ascendida 5
 		Tooltip:
 			'''
-			EL VIENTO DEL ESPÍRITU — la quinta luz: EL QUE SOPLA (ruach/pneuma).
-			El aliento de las cinco luces con SUS DIEZ CAPAS: EL CUERPO DE
-			VIENTO, LOS ARCOS ROTOS que orbitan a favor y en contra (el
-			cizallamiento), LAS BANDAS ESPIRALES que enrulan hacia fuera,
-			LOS BRILLOS de 4 puntas titilando por todo el aliento, LAS PLUMAS
-			DEL VIENTO cruzando la frontera, EL RIM violeta, EL ALIENTO
-			ASCENDENTE — y SU FIRMA: LA CAPA DE TURBULENCIA SUAVE, hebras de
-			vapor SOLO sobre la banda del aura (0.68R..0.96R): tu cuerpo y
-			todo lo demás quedan intactos.
-			La paleta del aliento: plata al centro, teal pálido al medio
-			y violeta al borde — la calma del centro, el color en el borde.
-			Y VUELO INFINITO (como sus cuatro hermanas).
+			THE RIVER OF FEATHERS — the fifth light: THE FLOCK OF LIGHT (the murmuration).
+			The wind dissolved into birds: THREE RIVERS of feathers flow around
+			you, half against the current — each feather is BORN, FLIES and
+			dissolves inside its river; when you run the flock BANKS with you,
+			and when you strike it draws tight. THE FEATHERS THAT STAY fall
+			swaying like leaves — the slow blessing — and THE VIOLET RIM frames
+			the flight.
+			The flock's palette: silver at the core, pale teal at the middle and
+			violet at the rim — the breath's legacy, become bird.
+			And INFINITE FLIGHT (like its four sisters).
 			'''
 	}
 
@@ -1944,30 +1942,31 @@ Items: {
 		DisplayName: The Ascended Form 7
 		Tooltip:
 			'''
-			THE LIVING STAR — the seventh light: THE LESSER SUN.
-			You don't wear an aura: you ARE the star. The WHITE CORE beating in
-			your chest, the SOLAR CROWN of burning spikes, the PROMINENCES — arcs
-			of fire anchored to your ring that erupt, grow and tear like the
-			flares of a true sun —, the STELLAR TWINKLE crossing the sky and the
-			RAIN OF PHOTONS escaping you.
-			The star's palette: nuclear white at the core, living gold in the
-			middle, coral at the edge — the light that feeds worlds.
-			And INFINITE FLIGHT (like its six sisters).
+			THE EYE OF THE GALAXY — the seventh light: THE WHOLE GALAXY,
+			SEEN FROM ABOVE. The star dissolved into deep sky: YOU are the
+			blinding core, and THE TWO ARMS coil around you — chains of knots
+			born close to the heart and dissolving at the rim, with their
+			lanes of VIOLET DUST between the arms, the disc's granulation and
+			THE WANDERING STARS so far out they seem not to belong: they belong.
+			The galaxy's palette: nuclear white at the core, living gold at
+			the middle and dust violet at the rim — the light that feeds
+			worlds, from above. And INFINITE FLIGHT (like its six sisters).
 			'''
 	}
+
 	FormaAscendidaOchoItem: {
 		DisplayName: The Ascended Form 8
 		Tooltip:
 			'''
-			THE SWORD OF JUDGMENT — the eighth light: SAINT MICHAEL, the warrior
-			archangel. THE GREAT SWORD OF LIGHT raised behind your back — from
-			ground to sky — that IGNITES when you attack: the blade reads the
-			battle. THE TWO SCALES of judgment orbiting you (the balance that
-			weighs those who approach), the WHITE PLUMES falling like steel
-			leaves, the SHIELD OF FAITH spinning under your feet and the
-			STROKES OF THE VERDICT cutting the sky.
-			The archangel's palette: steel platinum at the core, verdict gold in
-			the middle, royal violet at the edge — the steel, the sentence, the seal.
+			THE OPHANIM — the eighth light: THE WHEELS WITHIN WHEELS of Ezekiel.
+			The sword dissolved into vision: THREE RINGS turn, each in its own
+			plane — the equatorial slow, the vertical counter-turning, the inner
+			one fast — and along the rims travel EYES OF LIGHT that blink at
+			their own rhythm and WATCH wherever you go; friction's fire licks the
+			rings and THE THRONE'S FOOT shows its twelve marks beneath your feet.
+			When you strike, the irises BURN.
+			The wheels' palette: fire white at the core, living gold at the middle
+			and ember violet at the rim — the forge become wheel.
 			And INFINITE FLIGHT (like its seven sisters).
 			'''
 	}
@@ -1976,13 +1975,15 @@ Items: {
 		DisplayName: The Ascended Form 9
 		Tooltip:
 			'''
-			THE MUSIC OF THE SPHERES — the ninth light: GABRIEL, the voice that
-			commands. SOUND MADE VISIBLE: THE WAVES OF THE CALL — concentric rings
-			born to the beat (the whole sky pulsing in 4/4) —, the NOTES orbiting
-			with their melody glyphs, the AURORA CURTAIN waving above you and the
-			TUNING FORK under your feet: heaven's metronome.
-			The voice's palette: ivory at the core, blush rose in the middle,
-			melody violet at the edge — the warmth of the choir.
+			THE LAMPS' CANTICLE — the ninth light: THE SEVEN OF THE THRONE
+			("seven lamps of fire burning before the throne").
+			Music dissolved into fire: SEVEN LAMPS orbit in staircase, each flame
+			SINGS its turn in 4/4 — the wave of light runs around the orbit, lamp
+			after lamp; the flames LEAN against your run, SWELL when you strike,
+			and from the choir LIGHTNING breaks between neighbours. THE
+			METRONOME beneath your feet sweeps with its pendulum to the beat.
+			The choir's palette: ivory at the core, amber at the middle and song
+			violet at the rim — the warmth of the fire that praises.
 			And INFINITE FLIGHT (like its eight sisters).
 			'''
 	}
@@ -1991,14 +1992,16 @@ Items: {
 		DisplayName: The Ascended Form 10
 		Tooltip:
 			'''
-			THE TREE OF LIFE — the tenth light: THE CROWN that closes the decade.
-			TEN FORMS, TEN SEFIROT: the whole map of heaven in a single aura. The
-			TEN golden sefirot lighting up IN SEQUENCE along their paths of light
-			(the emanation descending from crown to kingdom), KETER — the
-			three-pointed crown — above your head, the STARS of the decade
-			twinkling and the CIRCULAR SEAL under your feet.
-			The crown's palette: crown white at the core, crown gold in the
-			middle, deep violet at the edge — eternity, which is in no hurry.
+			THE THRONE — the tenth light: THE WHOLE SIGHT OF THE THRONE
+			("out of the throne proceeded lightnings... and before the throne,
+			a sea of glass like unto crystal" + "a rainbow round about the throne").
+			The tree dissolved into majesty: THE CRYSTAL SEA beneath your feet —
+			its veins flow, its waves are born of every step, its rim sings — THE
+			EMERALD ARCH over your head with the wave of brightness running along
+			its six bands, THE MANDORLA of glory wrapping you tip to tip, THE
+			SEVEN THUNDERS splitting the sky and THE ARCH'S TEARS falling to the
+			sea. The throne's palette: crystal cyan at the core, emerald at the
+			middle and deep violet at the rim — eternity, in no hurry.
 			And INFINITE FLIGHT (like its nine sisters).
 			'''
 	}

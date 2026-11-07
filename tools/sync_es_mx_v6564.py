@@ -31,11 +31,9 @@ BASE = os.path.join(os.path.dirname(__file__), "..", "AethonMod", "Localization"
 
 ESPEJOS = [
     ("es-ES_Mods.AethonMod.hjson", "es-MX_Mods.AethonMod.hjson"),
-    ("Escriba/es-ES_Mods.AethonMod.hjson", "Escriba/es-MX_Mods.AethonMod.hjson"),
 ]
 FALLBACKS = [
     ("es-ES_Mods.AethonMod.hjson", "en-US_Mods.AethonMod.hjson"),
-    ("Escriba/es-ES_Mods.AethonMod.hjson", "Escriba/en-US_Mods.AethonMod.hjson"),
 ]
 
 CABECERA_ESPEJO = """// v6.56.6 — EL ESPEJO LATINOAMÉRICA: copia AUTOMÁTICA del es-ES (la fuente

@@ -528,11 +528,17 @@ namespace AethonMod.Content.Projectiles
                     float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * MathHelper.PiOver2;
                     Vector2 rumbo = dir.RotatedBy(abanico);
 
-                    // NACE EN EL PUNTO DE ESTANCAMIENTO (el tope abombado
-                    // de la medialuna) y se derrama HACIA ATRÁS por su
-                    // rumbo (la MISMA estela de las chispas) — más LARGA
-                    // cuanto más cerca arde.
-                    float avance = edad * RadioDomo(n, k) * (1.25f + 0.75f * f0);
+                    // v6.111 — LA FUGA DE LA BRUMA (la letra: «la bruma
+                    // de el aura de vacio sobre los enemigos tambien
+                    // debe alejarse del jugador»): el puff ya no ronda
+                    // el punto de estancamiento — NACE ahí y VIAJA por
+                    // su rumbo hasta LEJOS del portador, en la MISMA
+                    // escala de las chispas y un paso más allá: la
+                    // estela del humo es MÁS LARGA que la del plasma
+                    // (2.2-3.4 cúpulas + el alcance en px), siempre por
+                    // el hemisferio que huye — se disuelve a distancia.
+                    float avance = edad * (RadioDomo(n, k) * 2.2f
+                        + 110f * (0.35f + 0.9f * f0));
                     Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
 
                     // EL TAMAÑO DE VERDAD: la v6.108 criaba pulgas de
@@ -551,10 +557,12 @@ namespace AethonMod.Content.Projectiles
                             (edad - 0.45f) / 0.55f)
                         : new Color(26, 14, 44);
                     // LA DERIVA — el humo se derrama por donde vuelan
-                    // las chispas (la MISMA dirección de la fuga).
+                    // las chispas (la MISMA dirección de la fuga) — y
+                    // v6.111 le ESTIRA el núcleo por el rumbo (el smear
+                    // del escape: la voluta se alarga huyendo).
                     BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
                         MathHelper.Clamp(a, 0.14f, 0.80f), quality: 0.75f,
-                        velocity: rumbo * (14f + 20f * f0));
+                        velocity: rumbo * (30f + 42f * f0) * (0.5f + 0.5f * edad));
                 }
             }
             catch { }
@@ -581,11 +589,25 @@ namespace AethonMod.Content.Projectiles
                     float late = 0.7f + 0.3f * MathF.Sin(t * (1.0f + 0.6f * f0) + v * 2.4f);
                     float abanico = (Frac(f0 * 11.3f) * 2f - 1f) * MathHelper.PiOver2;
                     Vector2 rumbo = dir.RotatedBy(abanico);
+
+                    // v6.111 — EL ALIENTO TAMBIÉN HUYE (la letra: «la
+                    // bruma sobre los enemigos tambien debe alejarse
+                    // del jugador»): el velo ya no flota fijo junto al
+                    // punto de estancamiento — cada aliento lleva SU
+                    // edad cíclica y SE DERRAMA por su rumbo (nace en
+                    // el choque, se disuelve LEJOS del portador), con
+                    // su envolvente de nacimiento y muerte en el viaje.
+                    float edad = Frac(t * (0.05f + 0.045f * f0) + f0 * 5.3f + v * 0.37f);
+                    float deriva = RadioDomo(n, k) * (0.45f + 0.85f * f0)
+                        + edad * (RadioDomo(n, k) * 2.1f + 96f * (0.5f + f0));
                     Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.9f)
-                        + rumbo * (RadioDomo(n, k) * (0.5f + 0.8f * f0));
-                    float ancho = RadioDomo(n, k) * (1.1f + 0.5f * f0);
+                        + rumbo * deriva;
+
+                    float ancho = RadioDomo(n, k) * (1.1f + 0.5f * f0)
+                        * (0.85f + 0.55f * edad);   // se ensancha al disolverse
+                    float envolvente = MathF.Sin(edad * MathF.PI);
                     VFXCore.Quad(pos, violetaAliento *
-                        ((0.10f + 0.10f * k) * vive * late),
+                        ((0.10f + 0.10f * k) * vive * late * envolvente),
                         new Vector2(ancho, ancho * 0.75f),
                         rumbo.ToRotation(), VFXCore.SoftGlow);
                 }
