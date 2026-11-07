@@ -751,13 +751,12 @@ Items: {
 		Titulo: "[c/B96EEA:═══ EL AURA DEL VACÍO ═══]"
 		Linea1:
 			'''
-			[c/D9B3FF:El campo callado abraza 19 tiles: cada impío que entra arde con la
-			QUEMADURA DEL VACÍO EXTERIOR — hasta los FANTASMAS: la intangibilidad no salva
-			ni a los espíritus]
+			[c/D9B3FF:Campo de 19 tiles: los impíos que entran arden con la QUEMADURA
+			DEL VACÍO — hasta los FANTASMAS]
 			'''
-		Linea2: "[c/B96EEA:Cuanto más se acercan, más arden (×1→×3) y más LENTOS caminan (hasta ×0.55 pegados): mientras arden, TÚ cobras el Vacío Exterior (+10% ataque, +10 defensa)]"
-		Linea3: "[c/B96EEA:CALENTAMIENTO AERODINÁMICO: cada impío cae hacia ti como un meteoro — EL ARCO DE CHOQUE (la medialuna) lo envuelve con la parte abombada MIRÁNDOTE EN TODO MOMENTO; de ese punto brotan chispas y BRUMA que se alejan de ti en TODAS direcciones, y el arco se enfría en MORADO NEGRO]"
-		Linea4: "[c/8A5BC8:Sobre el jugador no hay NADA: ni brillo, ni luciérnagas, ni medidor — solo el vacío esperando]"
+		Linea2: "[c/B96EEA:Cuanto más cerca, más arden (×1→×3) y más lento caminan (×0.55). Mientras arden: TÚ ganas +10% ataque y +10 defensa]"
+		Linea3: "[c/B96EEA:CALENTAMIENTO AERODINÁMICO: el impío cae como meteoro — la medialuna de choque te mira, y de ella brotan chispas y bruma que se alejan de ti]"
+		Linea4: "[c/8A5BC8:Sobre ti no hay NADA: solo el vacío esperando]"
 	}
 
 	DummyNegroItem: {
@@ -1851,9 +1850,9 @@ Items: {
 			La dejó caer Aethon al cerrar su prueba: el portador
 			digno viste la luz del libro.
 			La columna del cielo abierta sobre tu cabeza, el gran halo
-			doble con su corona de estrellas, las alas del serafín
-			detrás de tu espalda, las escrituras bajo tus pies y las
-			plumas doradas cayendo a tu paso — la apoteosis entera.
+			doble con su corona de estrellas, las escrituras bajo tus
+			pies y las plumas doradas cayendo a tu paso — la apoteosis
+			entera. Sin alas: la luz pura (v6.110, la letra del portador).
 			'''
 	}
 
@@ -1954,6 +1953,52 @@ Items: {
 			La paleta de la estrella: blanco nuclear al centro, oro vivo al
 			medio, coral al borde — la luz que alimenta mundos.
 			Y VUELO INFINITO (como sus seis hermanas).
+			'''
+	}
+	FormaAscendidaOchoItem: {
+		DisplayName: La Forma Ascendida 8
+		Tooltip:
+			'''
+			LA ESPADA DEL JUICIO — la octava luz: SAN MIGUEL, el arcángel guerrero.
+			LA GRAN ESPADA DE LUZ alzada tras tu espalda — del suelo al cielo — que
+			SE ENCIENDE al atacar: el filo lee la batalla. LAS DOS BALANZAS del juicio
+			orbitándote (la báscula que pesa a los que se acercan), LOS PENACHOS de
+			plumas blancas cayendo como hojas de acero, EL ESCUDO DE LA FE girando bajo
+			tus pies y LOS TRAZOS DEL VEREDICTO cortando el cielo.
+			La paleta del arcángel: platino acero al centro, oro del veredicto al
+			medio, violeta real al borde — el acero, la sentencia y el sello.
+			Y VUELO INFINITO (como sus siete hermanas).
+			'''
+	}
+
+	FormaAscendidaNueveItem: {
+		DisplayName: La Forma Ascendida 9
+		Tooltip:
+			'''
+			LA MÚSICA DE LAS ESFERAS — la novena luz: GABRIEL, la voz que ordena.
+			EL SONIDO HECHO VISIBLE: LAS ONDAS DEL LLAMADO — anillos concéntricos
+			naciendo al compás (el cielo entero latiendo a ritmo de 4/4) —, LAS
+			NOTAS orbitando con sus glifos de melodía, LA CORTINA DE AURORA ondeando
+			sobre ti y EL DIAPASÓN bajo tus pies: el metrómono del cielo.
+			La paleta de la voz: marfil al centro, rosa alba al medio, violeta
+			melodía al borde — la calidez del coro.
+			Y VUELO INFINITO (como sus ocho hermanas).
+			'''
+	}
+
+	FormaAscendidaDiezItem: {
+		DisplayName: La Forma Ascendida 10
+		Tooltip:
+			'''
+			EL ÁRBOL DE LA VIDA — la décima luz: LA CORONA que cierra la década.
+			DIEZ FORMAS, DIEZ SEFIROT: el mapa del cielo entero en un solo aura. Los
+			DIEZ sefirot de oro prendiendo EN SECUENCIA por sus senderos de luz (la
+			emanación descendiendo de la corona al reino), KETER — la corona de tres
+			picos — sobre tu cabeza, LAS ESTRELLAS de la década titilando y EL SELLO
+			CIRCULAR bajo tus pies.
+			La paleta de la corona: blanco corona al centro, oro corona al medio,
+			violeta hondo al borde — la eternidad, que no tiene prisa.
+			Y VUELO INFINITO (como sus nueve hermanas).
 			'''
 	}
 

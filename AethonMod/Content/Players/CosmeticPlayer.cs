@@ -104,6 +104,35 @@ namespace AethonMod.Content.Players
         /// estrella: nuclear → oro vivo → coral)?</summary>
         public bool FormaAscendidaSiete;
 
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 8 (v6.110 — LA ESPADA DEL
+        /// JUICIO: la octava luz, de la letra «y ademas crear la forma
+        /// ascendida 8, 9 y 10» — SAN MIGUEL, el arcángel guerrero: LA
+        /// GRAN ESPADA DE LUZ alzada tras la espalda que SE ENCIENDE al
+        /// atacar, LAS DOS BALANZAS del juicio orbitando, LOS PENACHOS
+        /// de plumas blancas cayendo como hojas de acero, EL ESCUDO DE
+        /// LA FE bajo los pies y LOS TRAZOS DEL VEREDICTO; paleta del
+        /// arcángel: platino acero → oro veredicto → violeta real)?</summary>
+        public bool FormaAscendidaOcho;
+
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 9 (v6.110 — LA MÚSICA DE
+        /// LAS ESFERAS: la novena luz — GABRIEL, la voz que ordena; EL
+        /// SONIDO HECHO VISIBLE: LAS ONDAS DEL LLAMADO — anillos
+        /// concéntricos pulsando AL COMPÁS —, LAS NOTAS orbitando con
+        /// sus glifos de melodía, LA CORTINA DE AURORA ondeando arriba y
+        /// EL DIAPASÓN bajo los pies; paleta de la voz: marfil → rosa
+        /// alba → violeta melodía)?</summary>
+        public bool FormaAscendidaNueve;
+
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 10 (v6.110 — EL ÁRBOL DE
+        /// LA VIDA: la décima luz, LA CORONA que cierra la década —
+        /// DIEZ FORMAS = DIEZ SEFIROT: el mapa del cielo entero en un
+        /// aura; los DIEZ sefirot de oro prendiendo EN SECUENCIA por
+        /// sus senderos de luz, KETER (la corona de tres picos) sobre
+        /// la cabeza, LAS ESTRELLAS de la década y EL SELLO CIRCULAR
+        /// bajo los pies; paleta de la corona: blanco corona → oro
+        /// corona → violeta hondo)?</summary>
+        public bool FormaAscendidaDiez;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
@@ -144,7 +173,8 @@ namespace AethonMod.Content.Players
         /// SUS plumas de luz.
         /// </summary>
         public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
-            FormaAscendidaCuatro || FormaAscendidaCinco || FormaAscendidaSeis || FormaAscendidaSiete;
+            FormaAscendidaCuatro || FormaAscendidaCinco || FormaAscendidaSeis || FormaAscendidaSiete ||
+            FormaAscendidaOcho || FormaAscendidaNueve || FormaAscendidaDiez;
 
         public override void ResetEffects()
         {
@@ -158,6 +188,9 @@ namespace AethonMod.Content.Players
             FormaAscendidaCinco = false;
             FormaAscendidaSeis = false;
             FormaAscendidaSiete = false;
+            FormaAscendidaOcho = false;
+            FormaAscendidaNueve = false;
+            FormaAscendidaDiez = false;
             HaloArcoiris = false;
             BrasaDelEclipse = false;
             BrilloSolar = false;
@@ -177,6 +210,9 @@ namespace AethonMod.Content.Players
             int ascendidaCincoType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCincoItem>();
             int ascendidaSeisType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaSeisItem>();
             int ascendidaSieteType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaSieteItem>();
+            int ascendidaOchoType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaOchoItem>();
+            int ascendidaNueveType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaNueveItem>();
+            int ascendidaDiezType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaDiezItem>();
             int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
             int brilloSolarType = ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>();
@@ -200,6 +236,9 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaCincoType) FormaAscendidaCinco = true;
                 else if (item.type == ascendidaSeisType) FormaAscendidaSeis = true;
                 else if (item.type == ascendidaSieteType) FormaAscendidaSiete = true;
+                else if (item.type == ascendidaOchoType) FormaAscendidaOcho = true;
+                else if (item.type == ascendidaNueveType) FormaAscendidaNueve = true;
+                else if (item.type == ascendidaDiezType) FormaAscendidaDiez = true;
                 else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
                 else if (item.type == brilloSolarType) BrilloSolar = true;
@@ -358,6 +397,33 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 10f);
                 }
+                // v6.110 — LA FORMA ASCENDIDA 8 (el modo 11 del portador:
+                // LA ESPADA DEL JUICIO — la octava luz, el arcángel).
+                if (FormaAscendidaOcho && !EspiarPortador(11))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaOcho"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 11f);
+                }
+                // v6.110 — LA FORMA ASCENDIDA 9 (el modo 12 del portador:
+                // LA MÚSICA DE LAS ESFERAS — la novena luz, la voz).
+                if (FormaAscendidaNueve && !EspiarPortador(12))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaNueve"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 12f);
+                }
+                // v6.110 — LA FORMA ASCENDIDA 10 (el modo 13 del portador:
+                // EL ÁRBOL DE LA VIDA — la décima luz, la corona).
+                if (FormaAscendidaDiez && !EspiarPortador(13))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaDiez"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 13f);
+                }
                 // v6.50.54 — EL HALO ARCOÍRIS (el modo 7 del portador).
                 if (HaloArcoiris && !EspiarPortador(7))
                 {
@@ -389,14 +455,17 @@ namespace AethonMod.Content.Players
             //     2 círculos de color plano semitransparentes»: el aura
             //     vive por el PORTADOR (arriba) con el patrón Divino NUEVO
             //     de AuraLib (EL HALO DORADO de perlas sobre la cabeza,
-            //     las ALAS DE LUZ que se despliegan al correr, el CÍRCULO
-            //     RÚNICO bajo los pies, LOS RAYOS DIVINOS, los ECOS y las
-            //     CHISPAS — y CERO discos planos: los 2 círculos murieron).
+            //     el CÍRCULO RÚNICO bajo los pies, LOS RAYOS DIVINOS, los
+            //     ECOS y las CHISPAS — y CERO discos planos: los 2 círculos
+            //     murieron). v6.110 — LAS ALAS DE LUZ MURIERON por la
+            //     letra del usuario: «a la forma ascendida 1 quitale las
+            //     alas» — la primera luz es el aura PURA.
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
             if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
                 FormaAscendidaCuatro || FormaAscendidaCinco || FormaAscendidaSeis ||
-                FormaAscendidaSiete)
+                FormaAscendidaSiete || FormaAscendidaOcho || FormaAscendidaNueve ||
+                FormaAscendidaDiez)
             {
                 Vector2 centro = Player.Center;
 
@@ -443,7 +512,13 @@ namespace AethonMod.Content.Players
                 // apoteosis absoluta alumbra el doble. v6.50.49 — la
                 // Forma 3 es EL TRONO: la luz del arcoíris, BLANCA
                 // entera (el blanco que contiene TODOS los colores).
-                Vector3 luz = FormaAscendidaSiete
+                Vector3 luz = FormaAscendidaDiez
+                    ? new Vector3(1.30f, 1.16f, 0.78f)   // EL ÁRBOL: la luz de oro del mapa eterno
+                    : FormaAscendidaNueve
+                    ? new Vector3(1.05f, 0.86f, 0.92f)   // LA MÚSICA: la luz rosa y cálida del coro
+                    : FormaAscendidaOcho
+                    ? new Vector3(0.96f, 0.92f, 1.02f)   // LA ESPADA: la luz de acero del veredicto
+                    : FormaAscendidaSiete
                     ? new Vector3(1.62f, 1.30f, 0.92f)   // LA ESTRELLA: la luz cálida que alimenta mundos
                     : FormaAscendidaSeis
                     ? new Vector3(1.02f, 0.88f, 0.55f)   // EL ESCRIBA: la luz de oro y tinta de la página

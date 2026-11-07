@@ -371,6 +371,12 @@ namespace AethonMod.Content.Items.Bolsas
             // y LA ESTRELLA VIVA — la casa de las luces crece).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
+            // v6.110 — LAS FORMAS ASCENDIDAS 8, 9 Y 10 (LA ESPADA DEL
+            // JUICIO, LA MÚSICA DE LAS ESFERAS y EL ÁRBOL DE LA VIDA —
+            // la década de las luces COMPLETA en SU bolsa).
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaOchoItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaNueveItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDiezItem>(), 1));
             // v6.103 — EL ESTANDARTE DEL JUICIO murió en la v6.109 (la
             // letra: «ya puedes borrar los otros 2 estandarte») — su
             // lugar en la bolsa lo hereda EL AURA DEL VACÍO (abajo, en
@@ -1014,6 +1020,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCincoItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSeisItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaSieteItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaOchoItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaNueveItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDiezItem>(), 1));
             return l;
         }
     }

@@ -1369,6 +1369,17 @@ namespace AethonMod.Content.Players
                 // Bolsa de las Auras (la regla de la casa: DIRECTO).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Accessories.AuraDeJuicio2Item>());
+                // v6.110 — LAS FORMAS ASCENDIDAS 8, 9 Y 10 (la letra:
+                // «y ademas crear la forma ascendida 8, 9 y 10» — LA
+                // ESPADA DEL JUICIO, LA MÚSICA DE LAS ESFERAS y EL
+                // ÁRBOL DE LA VIDA: la década de las luces COMPLETA).
+                // La regla permanente: todo lo nuevo llega DIRECTO.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaOchoItem>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaNueveItem>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDiezItem>());
 
                 if (entregados > 0)
                 {

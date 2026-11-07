@@ -48,13 +48,14 @@ namespace AethonMod.Content.VFX
         /// raíz: «se sigue viendo simple, no es nada divina, además tiene
         /// 2 círculos de color plano semitransparentes»): la investigación
         /// de cómo los juegos visten a un DIOS — halo dorado sobre la
-        /// cabeza (el #1 del lenguaje visual divino), ALAS DE LUZ que se
-        /// despliegan al correr, CÍRCULO RÚNICO girando bajo los pies,
-        /// RAYOS DIVINOS cayendo del cielo, ECOS de luz tras el portador
-        /// y CHISPAS estelares parpadeando — TODO aditivo, TODO suave
-        /// (CERO discos planos: los 2 círculos del glow viejo MURIERON
-        /// con este patrón — no pasa por EL HALO DE GLOW plano de
-        /// Emitir, tiene SU propio camino: EmitirDivino).
+        /// cabeza (el #1 del lenguaje visual divino), CÍRCULO RÚNICO
+        /// girando bajo los pies, RAYOS DIVINOS cayendo del cielo, ECOS
+        /// de luz tras el portador y CHISPAS estelares parpadeando —
+        /// TODO aditivo, TODO suave (CERO discos planos: los 2 círculos
+        /// del glow viejo MURIERON con este patrón — no pasa por EL HALO
+        /// DE GLOW plano de Emitir, tiene SU propio camino: EmitirDivino).
+        /// v6.110 — LAS ALAS DE LUZ MURIERON por la letra del usuario
+        /// («a la forma ascendida 1 quitale las alas»).
         /// </summary>
         Divino = 4,
 
@@ -157,6 +158,52 @@ namespace AethonMod.Content.VFX
         /// camino: EmitirDivino7.
         /// </summary>
         Divino7 = 11,
+
+        /// <summary>
+        /// v6.110 — EL PATRÓN DIVINO 8 (la Forma Ascendida 8: LA ESPADA
+        /// DEL JUICIO — la octava luz, nacida de la letra: «y ademas
+        /// crear la forma ascendida 8, 9 y 10»). LA INVESTIGACIÓN: SAN
+        /// MIGUEL — el arcángel guerrero, el que vence al dragón: LA
+        /// GRAN ESPADA DE LUZ alzada tras la espalda (que SE ENCIENDE
+        /// al atacar — el filo lee la batalla), LAS DOS BALANZAS del
+        /// juicio orbitando (la báscula que pesa almas), LOS PENACHOS
+        /// DE PLUMAS BLANCAS cayendo como hojas de acero, EL ESCUDO DE
+        /// LA FE girando bajo los pies y LOS TRAZOS DEL VEREDICTO
+        /// cruzando el cielo. Paleta del arcángel: platino acero · oro
+        /// del veredicto · violeta real. Su propio camino:
+        /// EmitirDivino8.
+        /// </summary>
+        Divino8 = 12,
+
+        /// <summary>
+        /// v6.110 — EL PATRÓN DIVINO 9 (la Forma Ascendida 9: LA MÚSICA
+        /// DE LAS ESFERAS — la novena luz de la misma letra). LA
+        /// INVESTIGACIÓN: GABRIEL — la VOZ que anuncia, la trompeta que
+        /// despierta a los muertos — y la ARMONÍA DE LAS ESFERAS de
+        /// Pitágoras: cada órbita cantando SU nota. EL SONIDO HECHO
+        /// VISIBLE: LAS ONDAS DEL LLAMADO — anillos concéntricos
+        /// pulsando AL COMPÁS (el latido audible del cielo), LAS NOTAS
+        /// ORBITANDO con sus glifos de melodía, LA CORTINA DE AURORA
+        /// ondeando arriba y EL DIAPASÓN bajo los pies. Paleta de la
+        /// voz: marfil · rosa alba · violeta melodía. Su propio
+        /// camino: EmitirDivino9.
+        /// </summary>
+        Divino9 = 13,
+
+        /// <summary>
+        /// v6.110 — EL PATRÓN DIVINO 10 (la Forma Ascendida 10: EL
+        /// ÁRBOL DE LA VIDA — la décima luz, LA CORONA que cierra la
+        /// década). LA INVESTIGACIÓN: el ÁRBOL DE LA VIDA cabalístico —
+        /// DIEZ SEFIROT (diez emanaciones, DIEZ FORMAS: la década se
+        /// cierra con SU propio mapa) unidos por veintidós senderos.
+        /// EL ÁRBOL ENTERO respirando alrededor del portador — las
+        /// esferas de oro prendiendo EN SECUENCIA por sus senderos de
+        /// luz —, KETER (la corona de tres picos) sobre la cabeza, LAS
+        /// ESTRELLAS DE LA DÉCADA titilando y EL SELLO CIRCULAR bajo
+        /// los pies. Paleta de la corona: blanco corona · oro corona ·
+        /// violeta hondo. Su propio camino: EmitirDivino10.
+        /// </summary>
+        Divino10 = 14,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -529,12 +576,15 @@ namespace AethonMod.Content.VFX
         /// v6.50.45 — EL PATRÓN DIVINO (la reescritura TOTAL: «se sigue
         /// viendo simple, no es nada divina, además tiene 2 círculos de
         /// color plano semitransparentes»): Patron = Divino — el halo
-        /// dorado sobre la cabeza, las alas de luz que se despliegan al
-        /// correr, el círculo rúnico bajo los pies, los rayos divinos,
-        /// los ecos y las chispas estelares (todo en EmitirDivino) — y
-        /// Glow = 0 y Rayos = 0: LOS DOS CÍRCULOS PLANOS (el halo de
-        /// glow de quads sin textura) y las agujas genéricas MUEREN —
-        /// este perfil NUNCA pasa por ese camino.
+        /// dorado sobre la cabeza, el círculo rúnico bajo los pies, los
+        /// rayos divinos, los ecos y las chispas estelares (todo en
+        /// EmitirDivino) — y Glow = 0 y Rayos = 0: LOS DOS CÍRCULOS
+        /// PLANOS (el halo de glow de quads sin textura) y las agujas
+        /// genéricas MUEREN — este perfil NUNCA pasa por ese camino.
+        /// v6.110 — LAS ALAS MURIERON por la letra del usuario: «a la
+        /// forma ascendida 1 quitale las alas» — la primera luz es el
+        /// AURA pura (columna, halo, escrituras, plumas cayendo): sin
+        /// anatomía de serafín.
         /// </summary>
         public static AuraPerfil FormaAscendida()
         {
@@ -913,6 +963,165 @@ namespace AethonMod.Content.VFX
                 Ascenso = 26f,
                 Tamano = 9f,
                 Vida = 1.5f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.110 — LA FORMA ASCENDIDA 8 (LA ESPADA DEL JUICIO — la
+        /// octava luz: SAN MIGUEL, el arcángel guerrero). LA LETRA:
+        /// «y ademas crear la forma ascendida 8, 9 y 10». LA FIRMA: LA
+        /// GRAN ESPADA DE LUZ alzada tras la espalda — que SE ENCIENDE
+        /// al atacar — con LAS DOS BALANZAS del juicio orbitando y LOS
+        /// PENACHOS DE PLUMAS BLANCAS cayendo como hojas de acero.
+        /// PALETA DEL ARCÁNGEL: platino acero al centro, oro del
+        /// veredicto al medio, VIOLETA REAL al borde (el acero, la
+        /// sentencia y el sello).
+        /// </summary>
+        public static AuraPerfil FormaAscendidaOcho()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 134f,              // el arcángel ocupa el cielo del serafín
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Divino8,   // SU propio camino (EmitirDivino8)
+                Fluir = 0.55f,
+                Deriva = 0.11f,
+                Ascenso = 24f,             // las plumas de acero caen... y SUBEN las brasas
+                Distorsion = 0.8f,
+                Blur = 1f,
+                Glow = 0f,                 // CERO discos planos (el contrato de las divinas)
+                Semilla = 8110,
+                AlfaTrasera = 0.40f,       // el acero BRILLA frío
+                AlfaFrontal = 0.055f,
+                VeloFrontal = false,       // TODO-trasero por diseño (la familia de las luces)
+                Rayos = 0,
+                Borde = 0.30f,
+                Parpadeo = 0.04f,
+            };
+            // LA PALETA DEL ARCÁNGEL: platino acero -> oro veredicto -> violeta real
+            p.ConTrasera(new Color(226, 236, 250), new Color(255, 198, 78),
+                         new Color(168, 96, 255));
+            p.ConFrontal(new Color(240, 246, 255), new Color(255, 214, 120),
+                         new Color(196, 140, 255));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 22,       // las brasas del acero forjándose
+                Forma = FormaParticula.Chispa,   // CHISPAS: las virutas del yunque celestial
+                Color = new Color(232, 240, 255),
+                Alfa = 0.55f,
+                Solidas = false,
+                Tasa = 1.3f,
+                Velocidad = 26f,
+                Ascenso = 30f,
+                Tamano = 8f,
+                Vida = 1.5f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.110 — LA FORMA ASCENDIDA 9 (LA MÚSICA DE LAS ESFERAS — la
+        /// novena luz: GABRIEL, la voz que ordena). LA FIRMA: LAS ONDAS
+        /// DEL LLAMADO — los anillos concéntricos pulsando AL COMPÁS
+        /// (el cielo entero latiendo a ritmo de 4/4) con LAS NOTAS
+        /// ORBITANDO sus glifos y LA CORTINA DE AURORA ondeando arriba.
+        /// PALETA DE LA VOZ: marfil al centro, ROSA ALBA al medio,
+        /// violeta melodía al borde (la calidez del coro).
+        /// </summary>
+        public static AuraPerfil FormaAscendidaNueve()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 130f,              // el coro llena el cielo con su eco
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Divino9,   // SU propio camino (EmitirDivino9)
+                Fluir = 0.5f,
+                Deriva = 0.10f,
+                Ascenso = 16f,             // las notas flotan lentas (el adagio)
+                Distorsion = 0.7f,
+                Blur = 1f,
+                Glow = 0f,                 // CERO discos planos (el contrato de las divinas)
+                Semilla = 9110,
+                AlfaTrasera = 0.36f,
+                AlfaFrontal = 0.055f,
+                VeloFrontal = false,       // TODO-trasero por diseño (la familia de las luces)
+                Rayos = 0,
+                Borde = 0.30f,
+                Parpadeo = 0.04f,
+            };
+            // LA PALETA DE LA VOZ: marfil -> rosa alba -> violeta melodía
+            p.ConTrasera(new Color(255, 252, 240), new Color(255, 178, 204),
+                         new Color(176, 120, 244));
+            p.ConFrontal(new Color(255, 253, 246), new Color(255, 208, 222),
+                         new Color(206, 166, 250));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 24,       // las notas sueltas del coro
+                Forma = FormaParticula.Orbe,
+                Color = new Color(255, 224, 236),
+                Alfa = 0.5f,
+                Solidas = false,
+                Tasa = 1.1f,
+                Velocidad = 18f,
+                Ascenso = 32f,
+                Tamano = 8f,
+                Vida = 1.8f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.110 — LA FORMA ASCENDIDA 10 (EL ÁRBOL DE LA VIDA — la
+        /// décima luz: LA CORONA que cierra la década. DIEZ FORMAS =
+        /// DIEZ SEFIROT: el mapa entero del cielo en un solo aura).
+        /// LA FIRMA: EL ÁRBOL — las diez esferas de oro unidas por sus
+        /// senderos de luz prendiendo EN SECUENCIA — con KETER (la
+        /// corona de tres picos) sobre la cabeza. PALETA DE LA CORONA:
+        /// blanco corona al centro, ORO CORONA al medio, violeta hondo
+        /// al borde (la eternidad, que no tiene prisa).
+        /// </summary>
+        public static AuraPerfil FormaAscendidaDiez()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 140f,              // la corona: el cielo MÁS ancho de la década
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Divino10,   // SU propio camino (EmitirDivino10)
+                Fluir = 0.5f,
+                Deriva = 0.09f,
+                Ascenso = 14f,             // la eternidad sube lento
+                Distorsion = 0.7f,
+                Blur = 1f,
+                Glow = 0f,                 // CERO discos planos (el contrato de las divinas)
+                Semilla = 10110,
+                AlfaTrasera = 0.42f,       // la corona ARDE como la estrella (el cierre mayor)
+                AlfaFrontal = 0.06f,
+                VeloFrontal = false,       // TODO-trasero por diseño (la familia de las luces)
+                Rayos = 0,
+                Borde = 0.32f,
+                Parpadeo = 0.04f,
+            };
+            // LA PALETA DE LA CORONA: blanco corona -> oro corona -> violeta hondo
+            p.ConTrasera(new Color(255, 255, 252), new Color(255, 228, 128),
+                         new Color(128, 74, 226));
+            p.ConFrontal(new Color(255, 255, 250), new Color(255, 238, 168),
+                         new Color(168, 122, 244));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 26,       // las motas de las esferas
+                Forma = FormaParticula.Orbe,
+                Color = new Color(255, 238, 180),
+                Alfa = 0.55f,
+                Solidas = false,
+                Tasa = 1.2f,
+                Velocidad = 20f,
+                Ascenso = 28f,
+                Tamano = 8f,
+                Vida = 1.7f,
             });
             return p;
         }
@@ -1836,8 +2045,9 @@ namespace AethonMod.Content.VFX
                 return DibujarBrumaYPila(pl.Center, p.Radio, p, frontal: false, 511);
 
             // v6.50.45 — EL PATRÓN DIVINO camina por SU camino (la Forma
-            // Ascendida reescrita: el halo, las alas, el círculo rúnico y
-            // los rayos — el mismo contrato del bool).
+            // Ascendida reescrita: el halo, el círculo rúnico y los
+            // rayos — el mismo contrato del bool). v6.110: las alas de
+            // la primera luz MURIERON por la letra del usuario.
             if (p.Patron == PatronAura.Divino)
                 return DibujarDivino(pl, p);
 
@@ -1880,6 +2090,24 @@ namespace AethonMod.Content.VFX
             // corona solar y LAS PROMINENCIAS que se desgarran).
             if (p.Patron == PatronAura.Divino7)
                 return DibujarDivino7(pl, p);
+
+            // v6.110 — EL PATRÓN DIVINO 8 (la Forma Ascendida 8: LA
+            // ESPADA DEL JUICIO — la octava luz: la gran espada de
+            // luz, las balanzas y los trazos del veredicto).
+            if (p.Patron == PatronAura.Divino8)
+                return DibujarDivino8(pl, p);
+
+            // v6.110 — EL PATRÓN DIVINO 9 (la Forma Ascendida 9: LA
+            // MÚSICA DE LAS ESFERAS — la novena luz: las ondas del
+            // llamado al compás y la cortina de aurora).
+            if (p.Patron == PatronAura.Divino9)
+                return DibujarDivino9(pl, p);
+
+            // v6.110 — EL PATRÓN DIVINO 10 (la Forma Ascendida 10: EL
+            // ÁRBOL DE LA VIDA — la décima luz: los diez sefirot
+            // prendiendo por sus senderos y KETER sobre la cabeza).
+            if (p.Patron == PatronAura.Divino10)
+                return DibujarDivino10(pl, p);
 
             // v6.50.54 — EL PATRÓN HALO ARCOÍRIS (el arcoíris de la Forma 3
             // destilado a adorno — el mismo contrato del bool).
@@ -2211,54 +2439,11 @@ namespace AethonMod.Content.VFX
                 }
             }
 
-            // === 7. LAS ALAS DEL SERAFÍN (v6.50.47 — DOCE plumas por
-            //     lado en DOS bancos: las OCHO PRIMARIAS largas barriendo
-            //     el arco del ala + CUATRO SECUNDARIAS cortas rellenando
-            //     la espalda; ALETEO majestuoso lento que se ACELERA al
-            //     correr, despliegue completo con la velocidad) ===
-            {
-                float despliegue = 0.72f + 0.5f * rapidez;
-                // EL ALETEO: la batida lenta del serafín (más ancha al correr).
-                float aleteo = MathF.Sin(t * (1.5f + 2.2f * rapidez)) * (0.06f + 0.10f * rapidez);
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
-                    // EL BANCO PRIMARIO (8 plumas — el abanico clásico,
-                    // ahora MÁS LARGO: hasta Radio×1.55).
-                    for (int pluma = 0; pluma < 8; pluma++)
-                    {
-                        float f = pluma / 7f;
-                        float ang = -MathHelper.PiOver2 + lado *
-                            (0.26f + f * 1.24f) * despliegue + lado * aleteo * (0.6f + 0.4f * f);
-                        float flutter = 1f + 0.10f * MathF.Sin(t * 2.2f + pluma * 0.9f + lado);
-                        float r = (p.Radio * 0.52f + f * p.Radio * 1.03f) * flutter;
-                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
-                        Vector2 medio = (baseP + punta) * 0.5f;
-                        float largo = Vector2.Distance(baseP, punta) + 8f;
-                        Color cPluma = Color.Lerp(p.TCentro, p.TBorde, f);
-                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.36f - 0.16f * f) * despliegue),
-                            new Vector2(largo, 11f - 5f * f), ang, VFXCore.SoftGlow);
-                        // EL FILO de la pluma (la línea fina más caliente).
-                        VFXCore.Quad(medio + new Vector2(0f, 2f),
-                            TintAditivo(blancoSagrado, 0.20f * despliegue),
-                            new Vector2(largo * 0.9f, 3.2f), ang, VFXCore.SoftGlow);
-                    }
-                    // EL BANCO SECUNDARIO (4 plumas cortas pegadas a la
-                    // espalda — la densidad del ala de serafín).
-                    for (int pluma = 0; pluma < 4; pluma++)
-                    {
-                        float f = pluma / 4f;
-                        float ang = -MathHelper.PiOver2 + lado *
-                            (0.14f + f * 0.62f) * despliegue + lado * aleteo * 1.2f;
-                        float r = p.Radio * (0.42f + f * 0.38f);
-                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
-                        Vector2 medio = (baseP + punta) * 0.5f;
-                        float largo = Vector2.Distance(baseP, punta) + 6f;
-                        VFXCore.Quad(medio, TintAditivo(p.TMedio, 0.24f * despliegue),
-                            new Vector2(largo, 8f - 3f * f), ang, VFXCore.SoftGlow);
-                    }
-                }
-            }
+            // === [7. LAS ALAS DEL SERAFÍN — MUERTAS en la v6.110 por la
+            //     letra del usuario: «a la forma ascendida 1 quitale las
+            //     alas» — el banco primario y el secundario murieron; el
+            //     pedestal queda para las formas que SÍ las llevan (2, 3,
+            //     4 y la 5 con sus alas de viento)] ===
 
             // === 8. LOS ECOS (el rastro etéreo al moverse — 3 luces
             //     desvaneciéndose tras el portador) ===
@@ -4865,6 +5050,786 @@ namespace AethonMod.Content.VFX
 
             // === 7. LAS PARTÍCULAS del perfil (la lluvia de fotones) ===
             EmitirParticulas(centro, p, false, 711);
+        }
+
+        // ==================================================================
+        //  v6.110 — EL PATRÓN DIVINO 8: LA ESPADA DEL JUICIO
+        //  (la Forma Ascendida 8 — la octava luz, nacida de la letra:
+        //  «y ademas crear la forma ascendida 8, 9 y 10»).
+        //
+        //  LA INVESTIGACIÓN: SAN MIGUEL — «¿Quién como Dios?», el
+        //  arcángel guerrero que VENCE al dragón (Ap 12:7-8). Su
+        //  iconografía eterna: LA ESPADA (la que decide) y LA BALANZA
+        //  (la que pesa). El portador es el ARCÁNGEL: la gran espada
+        //  de luz alzada tras su espalda, las balanzas orbitando su
+        //  juicio, las plumas blancas cayendo como hojas de acero.
+        // ==================================================================
+
+        /// <summary>
+        /// v6.110 — EL DIBUJO DEL ARCÁNGEL (la octava luz). El mismo
+        /// contrato del bool que DibujarDivino7 (cierra el lote del
+        /// llamador y devuelve true; en el error, ReabrirLoteVanilla).
+        /// </summary>
+        private static bool DibujarDivino8(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino8(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.110 — LA EMISIÓN DEL ARCÁNGEL (la octava luz): el manto de
+        /// acero, el cuerpo, LA GRAN ESPADA DE LUZ (que SE ENCIENDE al
+        /// atacar — el filo lee la batalla), LAS DOS BALANZAS del
+        /// juicio, LOS PENACHOS de plumas blancas, EL ESCUDO DE LA FE
+        /// bajo los pies y LOS TRAZOS DEL VEREDICTO. El mismo contrato
+        /// de EmitirDivino7.
+        /// </summary>
+        private static void EmitirDivino8(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(700)) return;   // el arcángel ocupa su cielo de guerra
+
+            Texture2D tex0 = Ruido(0);
+            if (tex0 == null) return;                 // sin dispositivo aún: nada que dibujar
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN DEL GUERRERO (el acero templado late lento).
+            float respira = 1f + 0.04f * MathF.Sin(t * 0.9f);
+
+            // LA PALETA DEL ARCÁNGEL: platino acero · oro veredicto · violeta real.
+            Color platino = new Color(226, 236, 250);
+            Color aceroAlma = new Color(248, 250, 255);
+            Color oroVer = new Color(255, 198, 78);
+            Color violetaR = new Color(168, 96, 255);
+
+            float R = p.Radio * respira;
+
+            // ¿EL FILO ESTÁ EN BATALLA? — la espada SE ENCIENDE al
+            // atacar (itemAnimation > 0): el aura del guerrero lee la
+            // batalla y RESPONDE.
+            bool enBatalla = pl.itemAnimation > 0;
+            float encendida = enBatalla ? 1f : 0f;
+            // el encendido RESPIRA hacia su valor (nada de cortes duros).
+            float llama = 0.35f + 0.65f * encendida +
+                0.10f * MathF.Sin(t * 6f) * encendida;
+
+            // === 0. EL MANTO DEL ARCÁNGEL (el velo amplio de acero y
+            //     sello — la presencia antes del arma) ===
+            {
+                VFXCore.Quad(centro, TintAditivo(platino, 0.11f * respira),
+                    new Vector2(p.Radio * 3.0f, p.Radio * 3.2f), 0f, VFXCore.GlowOrb);
+                VFXCore.Quad(centro, TintAditivo(violetaR, 0.05f * respira),
+                    new Vector2(p.Radio * 4.0f, p.Radio * 4.2f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 1. EL CUERPO DE ACERO (el flipbook Perlin de la casa
+            //     con la paleta templada del arcángel) ===
+            Texture2D texC = FlipCuerpo((int)(t * (8f + 13f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * R * 1.0f;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.42f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.42f),
+                    new Vector2(ladoC, ladoC), -t * 0.05f, texC);
+            }
+
+            // === 2. LA GRAN ESPADA DE LUZ — LA FIRMA: la espada
+            //     alzada TRAS la espalda, vertical, del suelo al cielo;
+            //     la hoja de platino con SU alma blanca y SU filo de
+            //     veredicto; SE INCLINA con la carrera y SE ENCIENDE
+            //     en la batalla (el filo lee la guerra) ===
+            {
+                // LA INCLINACIÓN: la espada se ladea contra el viento de la carrera.
+                float inclina = MathHelper.Clamp(pl.velocity.X * -0.012f, -0.16f, 0.16f);
+                // LA GEOMETRÍA: el pomo junto a los talones, la punta R·1.62 sobre él.
+                Vector2 pomo = centro + new Vector2(0f, (pl.height * 0.5f + 2f) * gravedad);
+                Vector2 punta = centro + new Vector2(
+                    MathF.Sin(inclina) * R * 1.62f * gravedad,
+                    -(pl.height * 0.5f + R * 1.58f) * gravedad);
+                Vector2 eje = Vector2.Normalize(punta - pomo);
+                float largoT = Vector2.Distance(pomo, punta);
+
+                // LA HOJA (el cuerpo ancho de platino — GORDO: 13 px).
+                Vector2 medioH = (pomo + punta) * 0.5f + eje * (largoT * 0.08f);
+                VFXCore.Quad(medioH, TintAditivo(platino, 0.30f + 0.14f * llama),
+                    new Vector2(largoT * 0.92f, 13f), inclina, VFXCore.SoftGlow);
+                // EL ALMA (la vena blanca central — el filo de verdad).
+                VFXCore.Quad(medioH, TintAditivo(aceroAlma, 0.34f + 0.20f * llama),
+                    new Vector2(largoT * 0.9f, 4.5f), inclina, VFXCore.SoftGlow);
+                // LA VENA DEL VEREDICTO (el oro que corre por el alma).
+                VFXCore.Quad(medioH, TintAditivo(oroVer, 0.22f * llama),
+                    new Vector2(largoT * 0.82f, 2.2f), inclina, VFXCore.Pixel);
+                // LA PUNTA (el destello que señala el cielo).
+                VFXCore.Quad(punta, TintAditivo(aceroAlma, 0.55f + 0.25f * llama),
+                    new Vector2(16f, 16f), 0f, VFXCore.GlowOrb);
+                // LA GUARDA (el cruceto de oro — el sello del arma).
+                Vector2 guarda = pomo + eje * (largoT * 0.13f);
+                VFXCore.Quad(guarda, TintAditivo(oroVer, 0.45f),
+                    new Vector2(34f, 5f), inclina + MathHelper.PiOver2, VFXCore.SoftGlow);
+                VFXCore.Quad(guarda, TintAditivo(aceroAlma, 0.40f),
+                    new Vector2(30f, 2f), inclina + MathHelper.PiOver2, VFXCore.Pixel);
+                // EL POMO (la joya violeta que arma el arma).
+                VFXCore.Quad(pomo + eje * 4f, TintAditivo(violetaR, 0.55f),
+                    new Vector2(9f, 9f), 0f, VFXCore.GlowOrb);
+                // EL RAYO DEL VEREDICTO (en batalla: un destello CORTO
+                // que baja del cielo por la hoja — la sentencia cayendo).
+                if (enBatalla)
+                {
+                    VFXCore.Quad(punta - new Vector2(0f, 130f * gravedad),
+                        TintAditivo(oroVer, 0.16f),
+                        new Vector2(10f, 260f), inclina, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 3. LAS DOS BALANZAS DEL JUICIO (dos básculas
+            //     orbitando al portador: el fiel, el travesaño y SUS
+            //     dos platillos — la balanza que pesa a los que se
+            //     acercan; cada una con SU contrapeso vivo) ===
+            {
+                for (int b = 0; b < 2; b++)
+                {
+                    float angB = t * (0.28f + 0.06f * b) + b * MathHelper.Pi;
+                    Vector2 posB = centro + new Vector2(MathF.Cos(angB), MathF.Sin(angB) * 0.82f)
+                        * (R * 0.88f);
+                    // EL FIEL (el mástil vertical de la balanza).
+                    float balancea = MathF.Sin(t * 1.3f + b * 2.1f) * 0.22f;
+                    Vector2 arriba = posB + new Vector2(0f, -7f);
+                    Vector2 abajo = posB + new Vector2(0f, 7f);
+                    VFXCore.Line(arriba, abajo, TintAditivo(oroVer, 0.40f), 1.4f);
+                    // EL TRAVESAÑO (la barra que BALANCEA — el fiel leyendo el peso).
+                    Vector2 izq = posB + new Vector2(-10f, -5f + balancea * 8f);
+                    Vector2 der = posB + new Vector2(10f, -5f - balancea * 8f);
+                    VFXCore.Line(izq, der, TintAditivo(aceroAlma, 0.42f), 1.6f);
+                    // LOS PLATILLOS (dos semicírculos colgando).
+                    for (int ladoP = -1; ladoP <= 1; ladoP += 2)
+                    {
+                        Vector2 cuelga = posB + new Vector2(ladoP * 10f, -4f - balancea * ladoP * 8f);
+                        Vector2 plato = cuelga + new Vector2(0f, 6f);
+                        VFXCore.Quad(plato, TintAditivo(oroVer, 0.34f),
+                            new Vector2(11f, 4.5f), 0f, VFXCore.SoftGlow);
+                        VFXCore.Line(cuelga, plato, TintAditivo(platino, 0.26f), 0.8f);
+                    }
+                    // EL CORAZÓN DE LA BALANZA (la chispa del veredicto).
+                    VFXCore.Quad(posB, TintAditivo(violetaR, 0.5f),
+                        new Vector2(6f, 6f), 0f, VFXCore.GlowOrb);
+                }
+            }
+
+            // === 4. LOS PENACHOS DEL ARCÁNGEL (TRES plumas blancas
+            //     cayendo en cámara lenta — hojas de acero meciéndose
+            //     al descender; deterministas por hash, re-sembradas
+            //     cada ciclo de ~2.6 s) ===
+            for (int i = 0; i < 3; i++)
+            {
+                float h1 = VFXCore.Hash01(p.Semilla ^ 0x8A11, i, 31);
+                float h2 = VFXCore.Hash01(p.Semilla ^ 0x8A11, i, 37);
+                float ciclo = (t * 0.38f + h1) % 1f;
+                float ladoP = (i % 2 == 0) ? 1f : -1f;
+                float x = centro.X + ladoP * (R * (0.5f + 0.7f * h1)) +
+                    MathF.Sin(t * 0.9f + i * 2.2f) * (9f + 5f * h2);
+                float y = centro.Y - 160f * gravedad + ciclo * 320f * gravedad;
+                Vector2 posPl = new Vector2(x, y);
+                float fadeP = MathF.Sin(ciclo * MathHelper.Pi);
+                float giroP = MathHelper.PiOver2 + MathF.Sin(t * 0.8f + i * 1.5f) * 0.4f;
+                // LA PLUMA (la hoja de acero — filo de platino).
+                VFXCore.Quad(posPl, TintAditivo(platino, 0.34f * fadeP),
+                    new Vector2(16f, 4.2f), giroP, VFXCore.SoftGlow);
+                VFXCore.Quad(posPl, TintAditivo(aceroAlma, 0.22f * fadeP),
+                    new Vector2(10f, 2f), giroP, VFXCore.SoftGlow);
+            }
+
+            // === 5. EL ESCUDO DE LA FE (el aro rúnico bajo los pies —
+            //     la ley del cielo ESCRITA alrededor del guerrero: 14
+            //     segmentos girando + 7 ticks contragirando) ===
+            Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 5f);
+            {
+                float rx = R * 0.88f;
+                float ry = R * 0.28f;
+                for (int i = 0; i < 14; i++)
+                {
+                    float ang = t * 0.4f + i * MathHelper.TwoPi / 14f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
+                    float tw = 0.5f + 0.5f * MathF.Sin(t * 2.2f + i * 1.4f);
+                    bool runa = (i % 3) == 0;
+                    VFXCore.Quad(seg, TintAditivo(runa ? oroVer : platino, 0.28f + 0.28f * tw),
+                        runa ? new Vector2(12f, 3.4f) : new Vector2(7f, 2.4f),
+                        ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+                for (int i = 0; i < 7; i++)
+                {
+                    float ang = -t * 0.6f + i * MathHelper.TwoPi / 7f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx * 0.6f,
+                        MathF.Sin(ang) * ry * 0.6f);
+                    VFXCore.Quad(seg, TintAditivo(violetaR, 0.26f),
+                        new Vector2(6f, 2.2f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 6. LOS TRAZOS DEL VEREDICTO (el cielo CORTÁNDOSE: cada
+            //     ~1.3 s un TAJO de luz cruza el aire alrededor del
+            //     portador — el arco de la espada que ya sentenció;
+            //     nace, BARRANCA y se desvanece) ===
+            {
+                const int Tajes = 2;
+                for (int k = 0; k < Tajes; k++)
+                {
+                    float ciclo = Frac(t * 0.75f + k * 0.5f);   // la vida del tajo
+                    float fade = (1f - ciclo) * MathF.Sin(MathF.Min(1f, ciclo * 4f) * MathHelper.PiOver2);
+                    if (fade <= 0.04f) continue;
+                    float hA = VFXCore.Hash01(p.Semilla ^ 0x7E2D, k, (int)(t * 0.75f + k * 0.5f));
+                    float baseAng = hA * MathHelper.TwoPi + t * 0.15f;
+                    float rT = R * (0.75f + 0.3f * hA);
+                    // EL TAJO: un arco de 70° de radio ancho.
+                    float a0 = baseAng;
+                    float a1 = baseAng + MathHelper.ToRadians(70f);
+                    const int Pasos = 7;
+                    Vector2 prev = centro + new Vector2(MathF.Cos(a0), MathF.Sin(a0) * 0.9f) * rT;
+                    for (int s = 1; s <= Pasos; s++)
+                    {
+                        float a = a0 + (a1 - a0) * s / Pasos;
+                        Vector2 v = centro + new Vector2(MathF.Cos(a), MathF.Sin(a) * 0.9f) * rT;
+                        VFXCore.Line(prev, v, TintAditivo(aceroAlma, 0.42f * fade), 2.6f);
+                        VFXCore.Line(prev, v, TintAditivo(oroVer, 0.24f * fade), 1.0f);
+                        prev = v;
+                    }
+                }
+            }
+
+            // === 7. EL RIM DEL SELLO (la frontera del veredicto — el
+            //     aro violeta que ENMARCA al arcángel) ===
+            VFXCore.Quad(centro, TintAditivo(violetaR, 0.20f * respira),
+                new Vector2(R * 1.02f * 2.174f, R * 1.02f * 0.94f * 2.174f), 0f, VFXCore.Ring);
+
+            // === 8. LAS PARTÍCULAS del perfil (las virutas del yunque
+            //     celestial) ===
+            EmitirParticulas(centro, p, false, 811);
+        }
+
+        // ==================================================================
+        //  v6.110 — EL PATRÓN DIVINO 9: LA MÚSICA DE LAS ESFERAS
+        //  (la Forma Ascendida 9 — la novena luz, de la misma letra).
+        //
+        //  LA INVESTIGACIÓN: GABRIEL — la VOZ que anuncia, la trompeta
+        //  que despierta a los muertos — y LA ARMONÍA DE LAS ESFERAS de
+        //  Pitágoras: cada órbita cantando SU nota y el cielo entero
+        //  siendo UN INSTRUMENTO. EL SONIDO HECHO VISIBLE: las ondas
+        //  del llamado pulsando AL COMPÁS.
+        // ==================================================================
+
+        /// <summary>
+        /// v6.110 — EL DIBUJO DE LA VOZ (la novena luz). El mismo
+        /// contrato del bool que DibujarDivino8.
+        /// </summary>
+        private static bool DibujarDivino9(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino9(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.110 — LA EMISIÓN DE LA VOZ (la novena luz): el velo del
+        /// coro, el cuerpo de música, LAS ONDAS DEL LLAMADO pulsando al
+        /// compás, LAS NOTAS orbitando, LA CORTINA DE AURORA ondeando
+        /// arriba y EL DIAPASÓN bajo los pies. El mismo contrato de
+        /// EmitirDivino8.
+        /// </summary>
+        private static void EmitirDivino9(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(680)) return;   // el coro ocupa su cielo de eco
+
+            Texture2D tex0 = Ruido(0);
+            if (tex0 == null) return;
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN DEL CORO (el adagio — lento, muy lento).
+            float respira = 1f + 0.035f * MathF.Sin(t * 0.6f);
+
+            // LA PALETA DE LA VOZ: marfil · rosa alba · violeta melodía.
+            Color marfil = new Color(255, 252, 240);
+            Color rosa = new Color(255, 178, 204);
+            Color rosaClaro = new Color(255, 214, 228);
+            Color violetaM = new Color(176, 120, 244);
+
+            float R = p.Radio * respira;
+
+            // EL COMPÁS (el latido del cielo: 4/4 a ~66 bpm — un pulso
+            // cada 0.9 s; TODO en esta luz respira a este ritmo).
+            float pulso = Frac(t / 0.9f);
+            float golpe = MathF.Sin(pulso * MathHelper.Pi);   // el GOLPE del compás
+
+            // === 0. EL VELO DEL CORO (el eco amplio de la voz) ===
+            {
+                VFXCore.Quad(centro, TintAditivo(rosa, 0.10f * respira),
+                    new Vector2(p.Radio * 3.0f, p.Radio * 3.2f), 0f, VFXCore.GlowOrb);
+                VFXCore.Quad(centro, TintAditivo(violetaM, 0.05f * respira),
+                    new Vector2(p.Radio * 4.0f, p.Radio * 4.2f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 1. EL CUERPO DE MÚSICA (el flipbook Perlin con la
+            //     paleta del coro) ===
+            Texture2D texC = FlipCuerpo((int)(t * (7f + 12f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * R * 1.0f;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.40f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.40f),
+                    new Vector2(ladoC, ladoC), -t * 0.05f, texC);
+            }
+
+            // === 2. LAS ONDAS DEL LLAMADO — LA FIRMA: tres anillos
+            //     concéntricos naciendo AL COMPÁS (cada golpe del
+            //     4/4 engendra una onda) y EXPANDIÉNDOSE hacia fuera
+            //     desvaneciéndose — el SONIDO hecho visible: el cielo
+            //     entero latiendo con la trompeta ===
+            {
+                const int Ondas = 3;
+                for (int k = 0; k < Ondas; k++)
+                {
+                    // cada onda nace UN compás detrás de la anterior.
+                    float ciclo = Frac(t / 0.9f - k * 0.25f);
+                    float fade = (1f - ciclo) * (0.35f + 0.65f * golpe * (1f - k * 0.2f));
+                    if (fade <= 0.03f) continue;
+                    float rO = R * (0.28f + 1.05f * ciclo);
+                    // EL ANILLO (el frente de la onda — gordo, con su alma).
+                    VFXCore.Quad(centro, TintAditivo(marfil, 0.30f * fade),
+                        new Vector2(rO * 2.174f, rO * 2.174f), 0f, VFXCore.Ring);
+                    Color colO = k == 0 ? rosa : (k == 1 ? violetaM : rosaClaro);
+                    VFXCore.Quad(centro, TintAditivo(colO, 0.20f * fade),
+                        new Vector2(rO * 0.97f * 2.174f, rO * 0.97f * 2.174f), 0f, VFXCore.Ring);
+                }
+                // EL GOLPE (el flash del pulso en el corazón — la caja
+                // del compás marcando el tiempo).
+                VFXCore.Quad(centro, TintAditivo(marfil, 0.30f * MathF.Pow(golpe, 3f)),
+                    new Vector2(R * 0.55f, R * 0.55f), 0f, VFXCore.GlowOrb);
+            }
+
+            // === 3. LAS NOTAS ORBITANDO (OCHO glifos de melodía en la
+            //     banda del coro: cada nota SU vara y SU cabeza,
+            //     subiendo y bajando por su pentagrama — el canto
+            //     escrito alrededor del portador) ===
+            {
+                const int Notas = 8;
+                for (int i = 0; i < Notas; i++)
+                {
+                    float h = VFXCore.Hash01(p.Semilla ^ 0x9CE5, i, 13);
+                    float ang = t * (0.16f + 0.08f * h) + i * MathHelper.TwoPi / Notas;
+                    float rN = R * (0.62f + 0.10f * MathF.Sin(t * 0.8f + i * 1.3f));
+                    Vector2 posN = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.9f) * rN;
+                    float canta = 0.4f + 0.6f * MathF.Sin(t * 2.4f + i * 1.7f);
+                    // LA VARA (la plica de la nota — la rayita vertical).
+                    VFXCore.Quad(posN + new Vector2(2f, -4f),
+                        TintAditivo(marfil, 0.40f * canta),
+                        new Vector2(1.6f, 9f), 0f, VFXCore.Pixel);
+                    // LA CABEZA (el óvalo de la nota — el cuerpo del sonido).
+                    VFXCore.Quad(posN, TintAditivo(i % 2 == 0 ? rosa : violetaM, 0.50f * canta),
+                        new Vector2(6.5f, 5f), -0.4f, VFXCore.SoftGlow);
+                    // EL DESTELLO (la nota que BRILLA cuando canta).
+                    if (canta > 0.85f)
+                        VFXCore.Quad(posN, TintAditivo(marfil, 0.35f),
+                            new Vector2(10f, 10f), 0f, VFXCore.GlowOrb);
+                }
+            }
+
+            // === 4. LA CORTINA DE AURORA (el velo de colores ondeando
+            //     sobre el portador: SIETE bandas verticales de luz
+            //     que se mecen como las cortinas polares — la luz del
+            //     coro derramándose del cielo) ===
+            {
+                const int Bandas = 7;
+                for (int i = 0; i < Bandas; i++)
+                {
+                    float h = VFXCore.Hash01(p.Semilla ^ 0x4A2, i, 7);
+                    float fase = i * 1.1f;
+                    float x = centro.X + (i - (Bandas - 1) * 0.5f) * (R * 0.34f)
+                             + MathF.Sin(t * 0.7f + fase) * 9f;
+                    float alto = R * (1.1f + 0.5f * h);
+                    float yTop = centro.Y - (pl.height * 0.5f + R * 0.55f + alto) * gravedad;
+                    float largo = alto * (0.7f + 0.3f * MathF.Sin(t * 0.5f + fase));
+                    Color colB = Color.Lerp(rosa, violetaM, h);
+                    // LA BANDA (el listón de aurora — nace arriba y se
+                    // disuelve cayendo, meciéndose).
+                    VFXCore.Quad(new Vector2(x, yTop + largo * 0.5f * gravedad),
+                        TintAditivo(colB, 0.10f + 0.05f * MathF.Sin(t * 1.1f + fase)),
+                        new Vector2(7f + 4f * h, largo), MathF.Sin(t * 0.6f + fase) * 0.10f,
+                        VFXCore.SoftGlow);
+                    // EL BORDE INFERIOR (la cortina cayendo — el filo
+                    // más brillante donde la luz muere).
+                    VFXCore.Quad(new Vector2(x, yTop + largo * gravedad),
+                        TintAditivo(rosaClaro, 0.16f + 0.08f * MathF.Sin(t * 1.3f + fase)),
+                        new Vector2(5f, 14f), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 5. EL DIAPASÓN bajo los pies (el sello del compás: el
+            //     aro elíptico + el PÉNDULO que oscila marcando el
+            //     tiempo — el metrónomo del cielo) ===
+            Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 5f);
+            {
+                float rx = R * 0.85f;
+                float ry = R * 0.27f;
+                // EL ARO DEL DIAPASÓN.
+                for (int i = 0; i < 12; i++)
+                {
+                    float ang = t * 0.3f + i * MathHelper.TwoPi / 12f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
+                    float tw = 0.5f + 0.5f * MathF.Sin(t * 2.0f + i * 1.2f);
+                    VFXCore.Quad(seg, TintAditivo(i % 2 == 0 ? rosa : violetaM, 0.26f + 0.26f * tw),
+                        new Vector2(8f, 2.6f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+                // EL PÉNDULO (la aguja que oscila con el compás — el
+                // tictac hecho luz).
+                float swing = MathF.Sin(t / 0.9f * MathHelper.Pi) * 0.5f;
+                Vector2 baseP = suelo + new Vector2(0f, -6f * gravedad);
+                Vector2 puntaP = baseP + new Vector2(MathF.Sin(swing) * rx * 0.55f,
+                    MathF.Cos(swing) * ry * 0.9f * gravedad + 8f * gravedad);
+                VFXCore.Line(baseP, puntaP, TintAditivo(marfil, 0.40f), 1.6f);
+                VFXCore.Quad(puntaP, TintAditivo(rosa, 0.55f),
+                    new Vector2(7f, 7f), 0f, VFXCore.GlowOrb);
+            }
+
+            // === 6. LOS ARMÓNICOS (seis destellos de 4 puntas pulsando
+            //     en POSICIONES armónicas — los sobretonos del llamado,
+            //     cada uno con SU intervalo) ===
+            for (int i = 0; i < 6; i++)
+            {
+                float h = VFXCore.Hash01(p.Semilla ^ 0x3A11, i, 23);
+                float intervalo = Frac(t * (0.5f + 0.5f * h) + h);
+                float brillo = MathF.Pow(MathF.Sin(intervalo * MathHelper.Pi), 3f);
+                if (brillo < 0.08f) continue;
+                float ang = h * MathHelper.TwoPi + t * 0.2f;
+                Vector2 posA = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.75f)
+                    * (R * (0.55f + 0.4f * h));
+                VFXCore.Quad(posA, TintAditivo(marfil, 0.50f * brillo),
+                    new Vector2(14f, 2f), h * MathHelper.Pi, VFXCore.SoftGlow);
+                VFXCore.Quad(posA, TintAditivo(marfil, 0.50f * brillo),
+                    new Vector2(2f, 14f), h * MathHelper.Pi, VFXCore.SoftGlow);
+                VFXCore.Quad(posA, TintAditivo(i % 2 == 0 ? rosa : violetaM, 0.55f * brillo),
+                    new Vector2(5f, 5f), 0f, VFXCore.GlowOrb);
+            }
+
+            // === 7. EL RIM DE LA MELODÍA (la frontera del coro) ===
+            VFXCore.Quad(centro, TintAditivo(violetaM, 0.18f * respira),
+                new Vector2(R * 1.02f * 2.174f, R * 1.02f * 0.94f * 2.174f), 0f, VFXCore.Ring);
+
+            // === 8. LAS PARTÍCULAS del perfil (las notas sueltas del coro) ===
+            EmitirParticulas(centro, p, false, 911);
+        }
+
+        // ==================================================================
+        //  v6.110 — EL PATRÓN DIVINO 10: EL ÁRBOL DE LA VIDA
+        //  (la Forma Ascendida 10 — la décima luz, LA CORONA que
+        //  cierra la década: DIEZ FORMAS = DIEZ SEFIROT).
+        //
+        //  LA INVESTIGACIÓN: el ÁRBOL DE LA VIDA cabalístico — diez
+        //  emanaciones (Keter la corona, Jojmá la sabiduría, Biná el
+        //  entendimiento, Daat la puerta oculta, Jesed la piedad,
+        //  Gevurá el rigor, Tiféret la belleza, Nétzaj la victoria,
+        //  Hod la gloria, Yesod el fundamento, Maljut el reino) unidas
+        //  por sus veintidós senderos — el mapa del cielo en un
+        //  diagrama. El portador de la décima luz VISTE EL MAPA ENTERO.
+        // ==================================================================
+
+        /// <summary>
+        /// v6.110 — EL DIBUJO DE LA CORONA (la décima luz). El mismo
+        /// contrato del bool que DibujarDivino9.
+        /// </summary>
+        private static bool DibujarDivino10(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino10(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.110 — LA EMISIÓN DE LA CORONA (la décima luz): el velo de
+        /// la corona, el cuerpo, EL ÁRBOL — los diez sefirot prendiendo
+        /// en secuencia por sus senderos de luz —, KETER sobre la
+        /// cabeza, LOS SENDEROS que prenden, LAS ESTRELLAS de la década
+        /// y EL SELLO CIRCULAR bajo los pies. El mismo contrato de
+        /// EmitirDivino9.
+        /// </summary>
+        private static void EmitirDivino10(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(720)) return;   // el árbol entero ocupa SU cielo
+
+            Texture2D tex0 = Ruido(0);
+            if (tex0 == null) return;
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN DE LA ETERNIDAD (lenta como ninguna).
+            float respira = 1f + 0.03f * MathF.Sin(t * 0.5f);
+
+            // LA PALETA DE LA CORONA: blanco corona · oro corona · violeta hondo.
+            Color blancoC = new Color(255, 255, 252);
+            Color oroC = new Color(255, 228, 128);
+            Color oroVivoC = new Color(255, 206, 90);
+            Color violetaH = new Color(128, 74, 226);
+            Color violetaClaro = new Color(196, 158, 250);
+
+            float R = p.Radio * respira;
+
+            // === 0. EL VELO DE LA CORONA (el resplandor amplio del
+            //     mapa — la eternidad iluminando) ===
+            {
+                VFXCore.Quad(centro, TintAditivo(oroC, 0.12f * respira),
+                    new Vector2(p.Radio * 3.0f, p.Radio * 3.2f), 0f, VFXCore.GlowOrb);
+                VFXCore.Quad(centro, TintAditivo(violetaH, 0.06f * respira),
+                    new Vector2(p.Radio * 4.2f, p.Radio * 4.4f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 1. EL CUERPO DE LA CORONA (el flipbook Perlin con la
+            //     paleta del árbol) ===
+            Texture2D texC = FlipCuerpo((int)(t * (7f + 11f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * R * 1.0f;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.42f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.42f),
+                    new Vector2(ladoC, ladoC), -t * 0.05f, texC);
+            }
+
+            // === 2. EL ÁRBOL DE LA VIDA — LA FIRMA: los DIEZ SEFIROT
+            //     en las TRES COLUMNAS del mapa (la piedad a la
+            //     derecha, el rigor a la izquierda, el equilibrio al
+            //     centro — la escala del cielo), unidos por sus
+            //     senderos; LA SECUENCIA: la luz CORRE de esfera a
+            //     esfera en el orden de la emanación (keter → maljut,
+            //     el descenso de la corona al reino) — cada esfera
+            //     ARDE cuando la luz la atraviesa ===
+            {
+                // EL MAPA (posiciones relativas, escaladas a R).
+                Vector2[] sefirot =
+                {
+                    new Vector2( 0.00f, -1.08f),   // 0 KETER (la corona)
+                    new Vector2( 0.66f, -0.72f),   // 1 JOJMÁ (la sabiduría)
+                    new Vector2(-0.66f, -0.72f),   // 2 BINÁ (el entendimiento)
+                    new Vector2( 0.66f, -0.14f),   // 3 JESED (la piedad)
+                    new Vector2(-0.66f, -0.14f),   // 4 GEVURÁ (el rigor)
+                    new Vector2( 0.00f, -0.10f),   // 5 TIFÉRET (la belleza — el corazón)
+                    new Vector2( 0.66f,  0.44f),   // 6 NÉTZAJ (la victoria)
+                    new Vector2(-0.66f,  0.44f),   // 7 HOD (la gloria)
+                    new Vector2( 0.00f,  0.58f),   // 8 YESOD (el fundamento)
+                    new Vector2( 0.00f,  1.04f),   // 9 MALJUT (el reino)
+                };
+                for (int i = 0; i < sefirot.Length; i++)
+                    sefirot[i] = centro + sefirot[i] * new Vector2(R, R) *
+                        new Vector2(1f, 0.95f * gravedad);
+
+                // LOS SENDEROS (las venas maestras del árbol — la
+                // red que une las esferas).
+                int[,] senderos =
+                {
+                    { 0, 1 }, { 0, 2 }, { 0, 5 },
+                    { 1, 2 }, { 1, 3 }, { 1, 5 },
+                    { 2, 4 }, { 2, 5 },
+                    { 3, 4 }, { 3, 5 }, { 3, 6 },
+                    { 4, 5 }, { 4, 7 },
+                    { 5, 6 }, { 5, 7 }, { 5, 8 },
+                    { 6, 7 }, { 6, 8 }, { 7, 8 },
+                    { 8, 9 },
+                };
+
+                // LA SECUENCIA DE LA EMANACIÓN (el orden en que la luz
+                // desciende: keter → jojmá → biná → jesed → gevurá →
+                // tiféret → nétzaj → hod → yesod → maljut → y OTRA VEZ
+                // — el ciclo eterno; ~0.45 s por esfera).
+                float secuencia = (t / 0.45f) % 10f;
+                int actual = (int)secuencia;
+                float avance = Frac(secuencia);
+
+                // LOS SENDEROS primero (debajo de las esferas).
+                for (int s = 0; s < senderos.GetLength(0); s++)
+                {
+                    int a = senderos[s, 0], b = senderos[s, 1];
+                    // EL SENDEROS PRENDIDO: si la secuencia VIAJA por él
+                    // ahora, arde BLANCO (la luz corriendo por la vena).
+                    bool activo = (a == actual && avance < 0.9f) ||
+                                  (b == actual && avance > 0.1f) ||
+                                  (a == (actual + 9) % 10);
+                    Color colS = activo ? blancoC : violetaClaro;
+                    float alfaS = activo ? 0.5f : 0.16f;
+                    VFXCore.Line(sefirot[a], sefirot[b], TintAditivo(colS, alfaS), 1.1f);
+                }
+
+                // LAS ESFERAS (cada sefirá SU disco de oro; la ACTUAL
+                // arde blanca y CRECE — la emanación pasando).
+                for (int i = 0; i < sefirot.Length; i++)
+                {
+                    // la distancia de la secuencia (para el eco que
+                    // queda detrás de la luz que pasa).
+                    float dist = Math.Min(MathF.Abs(secuencia - i),
+                                          10f - MathF.Abs(secuencia - i));
+                    float eco = MathHelper.Clamp(1f - dist * 0.5f, 0f, 1f);
+                    float esActual = MathHelper.Clamp(1f - dist, 0f, 1f);
+                    float tam = 7f + 9f * esActual + 3f * eco;
+                    float late = 0.7f + 0.3f * MathF.Sin(t * 1.3f + i * 1.9f);
+                    // EL CUERPO DE LA ESFERA (el oro de la corona).
+                    VFXCore.Quad(sefirot[i], TintAditivo(oroC, (0.35f + 0.45f * esActual) * late),
+                        new Vector2(tam, tam), 0f, VFXCore.GlowOrb);
+                    // EL CORAZÓN (el blanco de la emanación).
+                    VFXCore.Quad(sefirot[i], TintAditivo(blancoC, (0.30f + 0.55f * esActual) * late),
+                        new Vector2(tam * 0.45f, tam * 0.45f), 0f, VFXCore.GlowOrb);
+                    // EL ARO (la esfera tiene SU frontera violeta).
+                    VFXCore.Quad(sefirot[i], TintAditivo(violetaH, 0.22f + 0.2f * esActual),
+                        new Vector2(tam * 1.7f, tam * 1.7f), 0f, VFXCore.Ring);
+                }
+
+                // LA LUZ QUE CORRE (el mensajero de la emanación: un
+                // destello BLANCO viajando del sefirá actual al
+                // siguiente — la chispa del descenso).
+                {
+                    int desde = actual;
+                    int hacia = (actual + 1) % 10;
+                    Vector2 posLuz = Vector2.Lerp(sefirot[desde], sefirot[hacia], avance);
+                    VFXCore.Quad(posLuz, TintAditivo(blancoC, 0.75f),
+                        new Vector2(11f, 11f), 0f, VFXCore.GlowOrb);
+                    // la ESTELA corta tras la chispa.
+                    Vector2 estela = Vector2.Lerp(sefirot[desde], sefirot[hacia],
+                        MathF.Max(0f, avance - 0.18f));
+                    VFXCore.Line(estela, posLuz, TintAditivo(blancoC, 0.35f), 1.6f);
+                }
+            }
+
+            // === 3. KETER — LA CORONA sobre la cabeza (la corona de
+            //     TRES picos de la realeza divina, flotando con su
+            //     vaivén — la primera emanación hecha JOYA) ===
+            {
+                float bob = MathF.Sin(t * 1.4f) * 3f;
+                Vector2 keter = new Vector2(centro.X,
+                    centro.Y - (pl.height * 0.5f + 30f) * gravedad + bob * gravedad);
+                // EL ARO (la base de la corona — el oro Vivo).
+                VFXCore.Quad(keter, TintAditivo(oroVivoC, 0.50f),
+                    new Vector2(34f, 6.5f), 0f, VFXCore.SoftGlow);
+                // LOS TRES PICOS (las puntas de la corona — la trinidad
+                // de la realeza: centro alto, lados reverentes).
+                for (int c = 0; c < 3; c++)
+                {
+                    float fC = (c - 1f) * 0.55f;
+                    float alto = c == 1 ? 13f : 9f;
+                    Vector2 pico = keter + new Vector2(fC * 17f, -(alto * 0.5f + 2f) * gravedad);
+                    VFXCore.Quad(pico, TintAditivo(oroC, 0.45f),
+                        new Vector2(4.5f, alto), fC * 0.25f, VFXCore.SoftGlow);
+                    // LA PUNTA (el destello de cada pico).
+                    VFXCore.Quad(pico + new Vector2(0f, -alto * 0.5f * gravedad),
+                        TintAditivo(blancoC, 0.55f),
+                        new Vector2(7f, 7f), 0f, VFXCore.GlowOrb);
+                }
+                // EL HALO DE KETER (el resplandor de la corona — el
+                // aura DENTRO del aura, la primera luz).
+                VFXCore.Quad(keter, TintAditivo(blancoC, 0.12f + 0.05f * MathF.Sin(t * 1.8f)),
+                    new Vector2(90f, 44f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 4. LAS ESTRELLAS DE LA DÉCADA (diez estrellas de 4
+            //     puntas titilando en el anillo — una por FORMA: la
+            //     década completa cantada en luz) ===
+            for (int i = 0; i < 10; i++)
+            {
+                float h = VFXCore.Hash01(p.Semilla ^ 0x0AA1, i, 41);
+                float ang = i * MathHelper.TwoPi / 10f + t * 0.12f;
+                Vector2 posE = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.9f)
+                    * (R * 1.18f);
+                float tw = MathHelper.Clamp(MathF.Pow(h, 2f) *
+                    MathF.Max(0f, MathF.Sin(t * (1.2f + h) + i * 2.3f)), 0f, 1f);
+                if (tw < 0.10f) continue;
+                VFXCore.Quad(posE, TintAditivo(blancoC, 0.50f * tw),
+                    new Vector2(13f, 1.8f), ang, VFXCore.SoftGlow);
+                VFXCore.Quad(posE, TintAditivo(blancoC, 0.50f * tw),
+                    new Vector2(1.8f, 13f), ang, VFXCore.SoftGlow);
+                VFXCore.Quad(posE, TintAditivo(oroC, 0.55f * tw),
+                    new Vector2(4.5f, 4.5f), 0f, VFXCore.GlowOrb);
+            }
+
+            // === 5. EL SELLO CIRCULAR bajo los pies (el anillo del
+            //     reino — Maljut: el doble aro con sus DIEZ marcas, una
+            //     por emanación, girando en contra) ===
+            Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 5f);
+            {
+                float rx = R * 0.9f;
+                float ry = R * 0.29f;
+                // EL ARO EXTERIOR (14 segmentos).
+                for (int i = 0; i < 14; i++)
+                {
+                    float ang = t * 0.32f + i * MathHelper.TwoPi / 14f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
+                    float tw = 0.5f + 0.5f * MathF.Sin(t * 2.0f + i * 1.3f);
+                    VFXCore.Quad(seg, TintAditivo(i % 2 == 0 ? oroC : violetaClaro, 0.26f + 0.26f * tw),
+                        new Vector2(8f, 2.5f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+                // LAS DIEZ MARCAS (las emanaciones bajo los pies —
+                // contragirando, cada una con su latido propio).
+                for (int i = 0; i < 10; i++)
+                {
+                    float ang = -t * 0.45f + i * MathHelper.TwoPi / 10f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx * 0.62f,
+                        MathF.Sin(ang) * ry * 0.62f);
+                    VFXCore.Quad(seg, TintAditivo(blancoC, 0.30f + 0.20f * MathF.Sin(t * 2.6f + i)),
+                        new Vector2(5.5f, 2.2f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 6. EL RIM DE LA CORONA (la frontera del mapa — el
+            //     aro hondo que enmarca el árbol entero) ===
+            VFXCore.Quad(centro, TintAditivo(violetaH, 0.20f * respira),
+                new Vector2(R * 1.04f * 2.174f, R * 1.04f * 0.95f * 2.174f), 0f, VFXCore.Ring);
+
+            // === 7. LAS PARTÍCULAS del perfil (las motas de las esferas) ===
+            EmitirParticulas(centro, p, false, 1011);
         }
 
         // ==================================================================
