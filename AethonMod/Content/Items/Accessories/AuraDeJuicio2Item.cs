@@ -106,16 +106,26 @@ namespace AethonMod.Content.Items.Accessories
 
         /// <summary>¿El jugador lleva EL AURA DE JUICIO 2 puesta? (los
         /// slots 3..10 de la armadura — la copia del inventario NO
-        /// cuenta: hay que PORTARLA).</summary>
+        /// cuenta: hay que PORTARLA).
+        /// v6.115 — LA FORMA ETERNA TAMBIÉN ES EL AURA (el fix del
+        /// «no activa el aura del vacío»): el ancla (AuraJuicio2Ancla)
+        /// muere si este método no la ve, y VacioGlobalNPC (la lentitud
+        /// y la quemadura) tampoco — en la v6.114 solo se reconocía el
+        /// ítem ORIGINAL, así que con la Forma Eterna puesta el ancla
+        /// nacía y moría al instante y el campo JAMÁS encendía. Ahora
+        /// el UNO que viste los OCHO mantiene el vínculo con la misma
+        /// fuerza que el original.</summary>
         public static bool LlevaElAura(Player player)
         {
             if (player == null || !player.active)
                 return false;
             int tipo = ModContent.ItemType<AuraDeJuicio2Item>();
+            int formaEterna = ModContent.ItemType<Cosmetics.FormaEternaItem>();
             for (int i = 3; i <= 10 && i < player.armor.Length; i++)
             {
                 Item a = player.armor[i];
-                if (a != null && !a.IsAir && a.type == tipo)
+                if (a != null && !a.IsAir &&
+                    (a.type == tipo || a.type == formaEterna))
                     return true;
             }
             return false;

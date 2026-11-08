@@ -52,6 +52,25 @@ namespace AethonMod.Content.Items.Cosmetics
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
             // ==========================================================
+            //  v6.115 — LA BANDERA EN VIVO (EL FIX DEL VUELO — la misma
+            //  lección de la v6.50.49 documentada en FormaAscendidaItem:
+            //  las banderas de los cosméticos hay que encenderlas AQUÍ,
+            //  DENTRO de Player.UpdateEquips, para que PostUpdateEquips
+            //  — el hook que inyecta la física de alas — las vea
+            //  ENCENDIDAS en este MISMO tick. En la v6.114 la única
+            //  detección de la Forma Eterna vivía en el escaneo de
+            //  PostUpdate: TARDE por un hook — el vuelo NUNCA corrió
+            //  («este item no tiene vuelo» — la letra del usuario).
+            //  Ahora encendemos LAS CINCO banderas de los vivos:
+            // ==========================================================
+            var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
+            visuales.FormaAscendida = true;       // LA PRIMERA LUZ + EL VUELO INFINITO
+            visuales.FormaAscendidaOcho = true;   // LAS OFANIM (la octava luz + su vuelo)
+            visuales.AnilloDorsal = true;         // la triple corona de conjuro
+            visuales.BrasaDelEclipse = true;      // el aura de humo negro y oro
+            visuales.BrilloSolar = true;          // los destellos de 4 puntas
+
+            // ==========================================================
             //  EL STATS DEL PANTEÓN — lo que los sellos daban, juntos:
             //   · EL SELLO DEL GÉNESIS (el sabio): +40 maná, +8% daño
             //     mágico, +4% crítico mágico.
@@ -74,7 +93,9 @@ namespace AethonMod.Content.Items.Cosmetics
             //  que viste a los impíos — el ancla nace igual que en el
             //  ítem original (AuraJuicio2Ancla, el efecto del viejo
             //  estandarte: nada sobre el portador, el teatro vive en
-            //  los enemigos).
+            //  los enemigos). (v6.115 — LlevaElAura ya la RECONOCE:
+            //  antes el ancla MORÍA al instante porque su vínculo solo
+            //  sabía ver el ítem original — el aura jamás encendía.)
             // ==========================================================
             int tipoAncla = ModContent.ProjectileType<AuraJuicio2Ancla>();
             if (player.ownedProjectileCounts[tipoAncla] < 1 &&
@@ -86,20 +107,44 @@ namespace AethonMod.Content.Items.Cosmetics
             }
         }
 
+        public override void UpdateVanity(Player player)
+        {
+            // v6.115 — EL VUELO TAMBIÉN EN VANIDAD (la regla de la casa:
+            // «un cosmético es un cosmético viva donde lo pongas» — los
+            // OCHO originales encienden sus banderas desde el hueco de
+            // vanidad y la Forma Eterna hereda el mismo derecho: las
+            // DOS LUCES y sus visuales viven también aquí; el aura y los
+            // stats, como en el original, solo en el hueco funcional).
+            var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
+            visuales.FormaAscendida = true;
+            visuales.FormaAscendidaOcho = true;
+            visuales.AnilloDorsal = true;
+            visuales.BrasaDelEclipse = true;
+            visuales.BrilloSolar = true;
+        }
+
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "FE1",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Titulo")));
-            tooltips.Add(new TooltipLine(Mod, "FE2",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Linea1")));
-            tooltips.Add(new TooltipLine(Mod, "FE3",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Linea2")));
-            tooltips.Add(new TooltipLine(Mod, "FE4",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Linea3")));
-            tooltips.Add(new TooltipLine(Mod, "FE5",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Linea4")));
-            tooltips.Add(new TooltipLine(Mod, "FE6",
-                Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem.Linea5")));
+            // v6.115 — EL PERGAMINO COMPLETO (el fix de la ventana de
+            // información: en la v6.114 estas claves NO existían en el
+            // hjson y la ventana mostraba las claves CRUDAS — «Mods.
+            // AethonMod.Items.FormaEternaItem.Titulo» línea por línea.
+            // Ahora las claves viven ×3 idiomas y, si alguna faltara,
+            // el respaldo la calla en vez de enseñar la llave).
+            void Linea(string clave, string respaldo)
+            {
+                string texto = Language.GetTextValue("Mods.AethonMod.Items.FormaEternaItem." + clave);
+                if (string.IsNullOrEmpty(texto) || texto.StartsWith("Mods."))
+                    texto = respaldo;
+                if (!string.IsNullOrEmpty(texto))
+                    tooltips.Add(new TooltipLine(Mod, clave, texto));
+            }
+            Linea("Titulo", "[c/B96EEA:═══ LA FORMA ETERNA ═══]");
+            Linea("Linea1", "");
+            Linea("Linea2", "");
+            Linea("Linea3", "");
+            Linea("Linea4", "");
+            Linea("Linea5", "");
         }
     }
 }

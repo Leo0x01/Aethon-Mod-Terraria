@@ -78,6 +78,26 @@ namespace AethonMod.Content.Systems
         private static WorldFileData _mundoPrincipal;
         private static Vector2 _posRetorno;
 
+        // === v6.115 — EL FARO DE BRUMA (la inundación de la DEVORACIÓN):
+        // mientras sube (0→1) el mundo real se LLENA de bruma — la
+        // transición vive escondida detrás (la letra: «en el momento en
+        // que es devorado el mundo se llena de bruma solo en la
+        // animacion»). Lo pinta EL VELO — también en el mundo real. ===
+        public static float BrumaFaro;
+
+        // === v6.115 — LA REVELACIÓN (la llegada): el interior nace
+        // LLENO de bruma y esta SE DISIPA revelando cómo es el mundo
+        // nuevo (la letra). Revelado cuenta los ticks que le quedan a
+        // la niebla de la llegada. ===
+        public const int ReveladoMax = 260;
+        public static int Revelado;
+
+        // === v6.115 — EL SOL DEL ECLIPSE PRESTADO (la misma técnica de
+        // la oleada de hambre: el Sun3 de vanilla es EL SOL ECLIPSE —
+        // clavado en el cenit del interior mientras este viva) ===
+        private static Asset<Texture2D> _solOriginal;
+        private static bool _solPuesto;
+
         // === EL VELO (la bruma que cubre el interior) ===
         private static Texture2D _softGlow;
         private static bool _veloProbeFallos;
@@ -101,6 +121,9 @@ namespace AethonMod.Content.Systems
             Transicion = false;
             _mundoPrincipal = null;
             _softGlow = null;
+            BrumaFaro = 0f;
+            Revelado = 0;
+            DevolverSolEclipse();
         }
 
         private static void BloquearGuardado(Terraria.IO.On_WorldFile.orig_SaveWorld_bool_bool orig, bool useCloud, bool resetTime)
@@ -182,8 +205,17 @@ namespace AethonMod.Content.Systems
 
                 Main.maxTilesX = Ancho;
                 Main.maxTilesY = Alto;
+                // v6.115 — LA CURA DEL ENTIERRO: la plaza (Isla 30×7)
+                // tiene su superficie en PlazaY−7 — el spawn viejo
+                // (PlazaY−4) nacía TRES filas DENTRO de la roca (el
+                // SpawnPlayer de vanilla lo rescataba arriba) y el
+                // altar viejo (PlazaY−1) quedaba SEIS filas enterrado:
+                // PlaceObject fallaba en silencio y el interior se
+                // quedaba SIN PUERTA. Ahora el PRISMA vive DE PIE
+                // (PlazaY−8: su fila de abajo es el primer aire) y el
+                // spawn nace en el aire limpio SOBRE él.
                 Main.spawnTileX = PlazaX;
-                Main.spawnTileY = PlazaY - 4;
+                Main.spawnTileY = PlazaY - 14;
                 WorldGen.setWorldSize();
                 WorldGen.clearWorld();
                 Main.worldSurface = Superficie;
@@ -222,6 +254,12 @@ namespace AethonMod.Content.Systems
                     Main.resetClouds = true;
                     Main.gameMenu = false;
                     Transicion = false;
+                    // v6.115 — LA LLEGADA: el interior nace LLENO de
+                    // bruma (la revelación la disipa) y el SOL DEL
+                    // ECLIPSE se viste (el préstamo del Sun3 — el cenit
+                    // morado de la oleada, para siempre).
+                    Revelado = ReveladoMax;
+                    PedirSolEclipse();
                     if (Main.myPlayer >= 0 && !Main.dedServ)
                     {
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Submundo.Bienvenida"),
@@ -295,6 +333,11 @@ namespace AethonMod.Content.Systems
                     Main.resetClouds = true;
                     Main.gameMenu = false;
                     Transicion = false;
+                    // v6.115 — la salida devuelve el sol de siempre y
+                    // apaga los faros de bruma (nada viaja afuera).
+                    DevolverSolEclipse();
+                    BrumaFaro = 0f;
+                    Revelado = 0;
                     // la vuelta cae AL LADO DEL ALTAR por donde entró —
                     // el libro te devuelve donde te abrió.
                     try
@@ -367,6 +410,9 @@ namespace AethonMod.Content.Systems
         {
             Activo = false;
             Transicion = false;
+            BrumaFaro = 0f;
+            Revelado = 0;
+            DevolverSolEclipse();
             try
             {
                 if (_mundoPrincipal != null)
@@ -395,14 +441,25 @@ namespace AethonMod.Content.Systems
         {
             // LA PLAZA DEL ALTAR — la isla mayor, la puerta de vuelta.
             Isla(PlazaX, PlazaY, 30, 7);
-            // EL ALTAR DE LA VUELTA (el mismo de la consagración — dentro
-            // es la puerta de SALIDA).
+
+            // v6.115 — EL PRISMA DEL ETERNO en el corazón de la plaza
+            // (la letra: «en el momento en que el jugador aparece en el
+            // mundo debe aparecer un altar que sera un primsma de
+            // colores, este tiene la capacidad de enviar de regreso al
+            // jugador y ademas de invocar a aethon»): DE PIE sobre la
+            // superficie — LA CURA DEL ENTIERRO (la superficie de la
+            // plaza vive en PlazaY−7; el altar de la v6.114 nacía en
+            // PlazaY−1, SEIS filas DENTRO de la roca: PlaceObject
+            // fallaba en silencio y el interior quedaba SIN PUERTA).
+            // El prisma ocupa PlazaY−10..PlazaY−8: su fila de abajo es
+            // EL PRIMER AIRE y sus pies tocan el dorado de la página.
             try
             {
-                WorldGen.PlaceObject(PlazaX - 7, PlazaY - 1,
-                    ModContent.TileType<Tiles.AltarOfrendasTile>(), false, 0);
+                WorldGen.PlaceObject(PlazaX, PlazaY - 8,
+                    ModContent.TileType<Tiles.AltarPrismaTile>(), false, 0);
             }
             catch { }
+
             // EL CORAZÓN: una amatista colosal bajo la plaza (el latido).
             Isla(PlazaX, PlazaY + 26, 10, 5);
 
@@ -421,6 +478,24 @@ namespace AethonMod.Content.Systems
             Isla(150, 330, 12, 4);
             Isla(650, 330, 12, 4);
             Isla(400, 360, 20, 6);
+
+            // v6.115 — LAS ISLAS DEL CUERPO CÓSMICO (la letra: «ten
+            // encuenta que es el mundo interno del grimorio asi que
+            // crealo pensando en que el grimorio es una entidad cosmica
+            // exterior todo poderosa»): EL ANILLO DE LA CORONA — seis
+            // islas mayores en círculo amplio alrededor de la plaza
+            // (los pilares del paladar) y EL RÍO DE PÁGINAS — la
+            // constelación menuda que desciende hacia el corazón.
+            Isla(PlazaX - 160, PlazaY - 70, 20, 6);
+            Isla(PlazaX + 160, PlazaY - 70, 20, 6);
+            Isla(PlazaX - 210, PlazaY + 60, 16, 5);
+            Isla(PlazaX + 210, PlazaY + 60, 16, 5);
+            Isla(PlazaX - 90, PlazaY + 120, 13, 4);
+            Isla(PlazaX + 90, PlazaY + 120, 13, 4);
+            Isla(PlazaX - 40, PlazaY - 120, 10, 3);
+            Isla(PlazaX + 40, PlazaY - 120, 10, 3);
+            Isla(PlazaX - 130, PlazaY - 20, 9, 3);
+            Isla(PlazaX + 130, PlazaY - 20, 9, 3);
 
             // EL MAR DE NIEBLA: nada de líquidos — la bruma es el velo.
         }
@@ -458,20 +533,87 @@ namespace AethonMod.Content.Systems
         public override void PreUpdateWorld()
         {
             if (!Activo) return;
-            // LA MEDIANOCHE ETERNA: el interior no conoce el sol — las
-            // estrellas y el velo son el único cielo.
-            Main.dayTime = false;
-            Main.time = 16200;
+
+            // ==============================================================
+            //  v6.115 — EL ECLIPSE PERMANENTE (la letra: «este mundo
+            //  estara en eclipse permanente ya sabes el eclipse de las
+            //  oleadas de hambre, morado y lleno de bruma»): el sol
+            //  CLAVADO EN SU CENIT (mediodía exacto, time 27000 — el
+            //  cielo no conoce ni amanecer ni ocaso) y VESTIDO DE
+            //  ECLIPSE (el préstamo del Sun3 de vanilla — la misma
+            //  técnica de la oleada de hambre). La corona morada de la
+            //  entidad es el único mediodía que el interior ha visto;
+            //  el OJO COLOSAL del velo lo corona desde arriba.
+            // ==============================================================
+            Main.dayTime = true;
+            Main.time = 27000;
             if (Main.raining)
             {
                 Main.raining = false;
                 Main.maxRaining = 0f;
             }
+
+            // LA NIEBLA DEL ECLIPSE (el filtro del cementerio — SOLO
+            // visual, como en la oleada: la masa de bruma, el cielo
+            // oscurecido y el relámpago esporádico de la casa).
+            if (Main.GraveyardVisualIntensity < 0.90f)
+                Main.GraveyardVisualIntensity = 0.90f;
+        }
+
+        /// <summary>
+        /// v6.115 — EL TINTE DEL ECLIPSE PERMANENTE: el mismo empuje
+        /// morado de la oleada de hambre (su ambiente de día), llevado
+        /// al fondo del vacío — el cielo Y la luz de los tiles viven
+        /// todos hacia el violeta del eclipse (el hook oficial que
+        /// tinta ColorOfTheSkies y la luz en el mismo pase).
+        /// </summary>
+        public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
+        {
+            if (Main.netMode == NetmodeID.Server || !Activo) return;
+            backgroundColor = Color.Lerp(backgroundColor, new Color(92, 38, 120), 0.92f);
+            tileColor = Color.Lerp(tileColor, new Color(172, 112, 196), 0.52f);
+        }
+
+        /// <summary>EL SOL DEL ECLIPSE SE VISTE (el préstamo del Sun3 —
+        /// idempotente y sin pisar el préstamo de la oleada).</summary>
+        private static void PedirSolEclipse()
+        {
+            if (_solPuesto) return;
+            try
+            {
+                if (TextureAssets.Sun != TextureAssets.Sun3)
+                {
+                    _solOriginal = TextureAssets.Sun;
+                    TextureAssets.Sun = TextureAssets.Sun3;
+                    _solPuesto = true;
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>El sol de siempre vuelve a su ranura (idempotente).</summary>
+        private static void DevolverSolEclipse()
+        {
+            if (!_solPuesto) return;
+            try
+            {
+                if (_solOriginal != null) TextureAssets.Sun = _solOriginal;
+            }
+            catch { }
+            _solPuesto = false;
+            _solOriginal = null;
         }
 
         public override void PostUpdateWorld()
         {
             if (!Activo || Main.gameMenu || Main.dedServ) return;
+
+            // v6.115 — LA REVELACIÓN CAMINA: la niebla de la llegada se
+            // disipa un tick tras otro (los primeros ~4 s del interior
+            // son el nacimiento del mundo — la letra: «al aparecer en
+            // el nuevo mundo el mundo esta lleno de bruma y esta se
+            // disipa revelando como es este mundo nuevo»).
+            if (Revelado > 0) Revelado--;
 
             Player p = Main.LocalPlayer;
             if (p == null || !p.active) return;
@@ -513,10 +655,13 @@ namespace AethonMod.Content.Systems
                 }
 
                 // LA RED DE CAÍDA: quien resbala de las islas cae al vacío…
-                // y el vacío LO DEVUELVE a la plaza (nadie muere en el libro).
+                // y el vacío LO DEVUELVE a la plaza (nadie muere en el
+                // libro). v6.115 — al LADO del prisma (PlazaY−10: el
+                // aire limpio sobre la superficie, cuatro columnas a la
+                // derecha del corazón de la plaza).
                 if (p.position.Y > (Alto - 12) * 16f)
                 {
-                    p.Center = new Vector2(PlazaX * 16f, (PlazaY - 3) * 16f);
+                    p.Center = new Vector2((PlazaX + 4) * 16f + 8f, (PlazaY - 10) * 16f);
                     p.velocity = Vector2.Zero;
                     if (p.whoAmI == Main.myPlayer)
                     {
@@ -550,6 +695,11 @@ namespace AethonMod.Content.Systems
             }
             Activo = false;
             Transicion = false;
+            // v6.115 — nada del interior viaja afuera: el sol de
+            // siempre vuelve a su ranura y los faros se apagan.
+            DevolverSolEclipse();
+            BrumaFaro = 0f;
+            Revelado = 0;
         }
 
         // ==================================================================
@@ -558,7 +708,11 @@ namespace AethonMod.Content.Systems
         // ==================================================================
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            if (!Activo || Main.dedServ || Main.gameMenu) return;
+            // v6.115 — el velo también vive en el mundo real mientras
+            // EL FARO de la devoración inunda la pantalla (la letra:
+            // «en el momento en que es devorado el mundo se llena de
+            // bruma solo en la animacion»).
+            if ((!Activo && BrumaFaro <= 0.01f) || Main.dedServ || Main.gameMenu) return;
             layers.Insert(0, new LegacyGameInterfaceLayer(
                 "AethonMod: VeloInterior", DibujarVelo, InterfaceScaleType.None));
         }
@@ -594,6 +748,49 @@ namespace AethonMod.Content.Systems
                     SamplerState.LinearClamp, DepthStencilState.None, Main.Rasterizer, null, Matrix.Identity);
                 try
                 {
+                    // ============================================================
+                    //  v6.115 — LA REVELACIÓN DE LA LLEGADA: el interior nace
+                    //  LLENO de bruma y esta SE DISIPA revelando el mundo
+                    //  (la letra). Dibujada ANTES del velo propio: la
+                    //  niebla del nacimiento es MÁS densa y CORRE más
+                    //  rápido, y EL IRIS DORADO de la entidad respira
+                    //  abriéndose a mitad de la revelación.
+                    // ============================================================
+                    float aRev = Activo ? (float)Revelado / ReveladoMax : 0f;
+                    if (aRev > 0.003f)
+                    {
+                        float k = aRev * aRev;   // ease-out: lenta al final
+                        sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
+                            new Color(16, 8, 28) * (0.92f * k));
+                        for (int banda = 0; banda < 5; banda++)
+                        {
+                            float vel = 30f + banda * 16f;
+                            float y = h * (0.10f + banda * 0.19f) + MathF.Sin(t * 0.31f + banda * 1.7f) * h * 0.06f;
+                            float x = ((t * vel + banda * 540f) % (w + 1400f)) - 700f;
+                            float esc = 1.9f + banda * 0.55f;
+                            sb.Draw(_softGlow,
+                                new Rectangle((int)(x - 320f * esc), (int)(y - 70f * esc),
+                                    (int)(640f * esc), (int)(140f * esc)),
+                                null, new Color(110, 72, 176) * ((0.16f + 0.05f * banda) * k), 0f,
+                                Vector2.Zero, SpriteEffects.None, 0f);
+                        }
+                        // EL IRIS DEL NACIMIENTO (el aliento dorado de la
+                        // entidad a mitad de la revelación).
+                        float abre = 1f - aRev;
+                        float aIris = 0.85f * abre * (1f - abre) * 4f;
+                        sb.Draw(_softGlow, new Rectangle(
+                            (int)(w * 0.5f - w * (0.10f + 0.34f * abre)),
+                            (int)(h * 0.17f - h * (0.08f + 0.16f * abre)),
+                            (int)(w * (0.20f + 0.68f * abre)), (int)(h * (0.16f + 0.32f * abre))),
+                            null, new Color(255, 214, 130) * (0.22f * aIris), 0f,
+                            Vector2.Zero, SpriteEffects.None, 0f);
+                    }
+
+                    // ============================================================
+                    //  EL VELO PROPIO DEL INTERIOR (solo dentro del libro)
+                    // ============================================================
+                    if (Activo)
+                    {
                     // === EL FONDO DEL VACÍO (el degradé del velo) ===
                     sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
                         new Color(22, 12, 38) * 0.60f);
@@ -628,12 +825,37 @@ namespace AethonMod.Content.Systems
                             new Color(210, 190, 250) * (0.10f + 0.14f * pal));
                     }
 
-                    // === EL OJO COLOSAL (el que lee desde arriba) ===
+                    // === EL OJO COLOSAL (el que lee desde arriba — corona
+                    //     del sol del eclipse, clavado en el cenit) ===
                     DibujarElOjo(sb, w, h, t, centro);
+                    } // fin del velo propio
 
-                    // === LA VIÑETA (el borde del libro: el velo cierra) ===
-                    sb.Draw(_softGlow, new Rectangle((int)(-w * 0.25f), (int)(-h * 0.3f), (int)(w * 1.5f), (int)(h * 1.6f)),
-                        null, Color.Black * 0.0f, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+                    // ============================================================
+                    //  v6.115 — EL FARO DE LA DEVORACIÓN: la bruma que
+                    //  INUNDA la pantalla mientras el libro traga al
+                    //  portador (vive TAMBIÉN en el mundo real — la
+                    //  transición va escondida detrás). ES lo último que
+                    //  se dibuja: cuando el faro está lleno, no hay mundo.
+                    // ============================================================
+                    if (BrumaFaro > 0.01f)
+                    {
+                        float a = BrumaFaro;
+                        sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
+                            new Color(18, 9, 32) * (0.97f * a));
+                        for (int banda = 0; banda < 6; banda++)
+                        {
+                            // la bruma ACELERA con el trago (0.6→1.4×).
+                            float vel = (46f + banda * 20f) * (0.6f + 0.8f * a);
+                            float y = h * (0.06f + banda * 0.16f) + MathF.Sin(t * 0.4f + banda * 1.3f) * h * 0.05f;
+                            float x = ((t * vel + banda * 500f) % (w + 1500f)) - 750f;
+                            float esc = 2.1f + banda * 0.6f;
+                            sb.Draw(_softGlow,
+                                new Rectangle((int)(x - 320f * esc), (int)(y - 80f * esc),
+                                    (int)(640f * esc), (int)(160f * esc)),
+                                null, new Color(96, 62, 158) * ((0.14f + 0.05f * banda) * a), 0f,
+                                Vector2.Zero, SpriteEffects.None, 0f);
+                        }
+                    }
                 }
                 finally
                 {

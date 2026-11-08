@@ -153,28 +153,21 @@ namespace AethonMod.Content.Tiles
         /// <summary>EL GESTO DEL ALTAR (el calco de §3.1): clic-derecho
         /// abre el panel de ofrendas Y el inventario (para que las manos
         /// puedan trabajar).
-        /// v6.114 — EL MUNDO INTERIOR (la letra: «de momento se puede
-        /// entrar usando el altar»): con EL GRIMORIO DEL ETERNO EN LA
-        /// MANO el altar es LA PUERTA — se entra al interior del libro.
-        /// Y DESDE DENTRO, el mismo altar es la vuelta a casa.</summary>
+        /// v6.115 — LA PUERTA NUEVA (la letra: «para que el altar nos
+        /// lleve a otro mundo crea un nuevo item que se fabrica con
+        /// esencia del eterno en el altar»): la puerta al interior YA NO
+        /// es el grimorio en la mano — es EL ÍTEM «Mundo Interior del
+        /// Eterno» (1000 esencias, fabricado AQUÍ en el altar). El
+        /// altar de dentro (la salida) es ahora EL PRISMA.</summary>
         public override bool RightClick(int i, int j)
         {
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active) return false;
 
-            // DENTRO DEL LIBRO: el altar es la SALIDA (la puerta gira).
+            // DENTRO DEL LIBRO: cualquier altar de la casa sigue siendo
+            // salida (la red de seguridad — el prisma es la puerta buena).
             if (Systems.SubmundoGrimorio.Activo)
             {
                 Systems.SubmundoGrimorio.Salir(Main.LocalPlayer);
-                return true;
-            }
-
-            // FUERA, CON EL GRIMORIO EN LA MANO: el altar se ABRE como
-            // puerta al interior del eterno.
-            Item enMano = Main.LocalPlayer.HeldItem;
-            if (enMano != null && !enMano.IsAir &&
-                enMano.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-            {
-                Systems.SubmundoGrimorio.Entrar(Main.LocalPlayer);
                 return true;
             }
 

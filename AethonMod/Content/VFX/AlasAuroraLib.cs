@@ -638,17 +638,6 @@ namespace AethonMod.Content.VFX
             return nVerts;
         }
 
-        private static Vector2 Lerp(Vector2 a, Vector2 b, float t)
-        {
-            //IL_0000: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0001: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0002: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0003: Unknown result type (might be due to invalid IL or missing references)
-            //IL_0009: Unknown result type (might be due to invalid IL or missing references)
-            //IL_000e: Unknown result type (might be due to invalid IL or missing references)
-            return a + (b - a) * t;
-        }
-
         // ====================================================================
         //  v6.114 — LA MEMBRANA DEL VACÍO (la letra: «las alas runicas del
         //  vacio siguen teniendo picos de sierra, debes arreglar eso»).
@@ -698,14 +687,19 @@ namespace AethonMod.Content.VFX
                     float hueMedio = (hues[b + i] + hues[b + i + 1]) * 0.5f;
 
                     // --- EL VELO: el relleno entre los ejes vecinos ---
+                    // v6.115 — LA VELA (la autopsia de la sierra que
+                    // QUEDÓ): el velo de la v6.114 brillaba al ~40 % del
+                    // cuerpo — el interior del ala se leía como HUECOS
+                    // entre plumas brillantes, no como UNA superficie.
+                    // Ahora arranca a ~0.90×CuerpoInten en la raíz y
+                    // sostiene ~0.52× en el borde: el ala es UNA vela y
+                    // las plumas son las VENAS que la recorren.
                     for (int j = 0; j < 8; j++)
                     {
                         float q0 = (float)j / 8f;
                         float q1 = (float)(j + 1) / 8f;
-                        // el tul: el cuerpo del ala hacia la raíz, un velo
-                        // cada vez más tenue hacia afuera.
-                        float i0 = (0.30f + 0.34f * (1f - q0)) * estilo.CuerpoInten * fuerza * fundido;
-                        float i1 = (0.30f + 0.34f * (1f - q1)) * estilo.CuerpoInten * fuerza * fundido;
+                        float i0 = (0.52f + 0.38f * (1f - q0)) * estilo.CuerpoInten * fuerza * fundido;
+                        float i1 = (0.52f + 0.38f * (1f - q1)) * estilo.CuerpoInten * fuerza * fundido;
                         Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, 0.05f, in estilo), i0);
                         Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, 0.05f, in estilo), i1);
                         Vector2 a0 = pA.Eje[j];
@@ -719,60 +713,172 @@ namespace AethonMod.Content.VFX
                         _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(b1, 0f), c1, new Vector2(q1, 1f));
                         _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(a1, 0f), c1, new Vector2(q1, 0f));
                     }
+                }
+            }
+            // v6.115 — EL BORDE MAESTRO (la cura de verdad): UNA curva
+            // continua por las CINCO puntas — sin los arcos por hueco.
+            return EmitirBordeMaestro(nVerts, plumas, hues, fundidos, mezclaDia, 0f, flujo: false, 0f, in estilo, n);
+        }
 
-                    // --- EL ARCO: la curva exterior de punta a punta ---
-                    Vector2 tA = pA.Eje[8];
-                    Vector2 tB = pB.Eje[8];
-                    Vector2 medio = (tA + tB) * 0.5f;
-                    Vector2 afuera = medio - _geoAnclaCentral;
-                    float largo = afuera.Length();
-                    if (largo > 0.001f)
+        /// <summary>v6.115 — La Catmull-Rom uniforme del borde maestro
+        /// (C1: la tangente es CONTINUA de punta a punta — sin
+        /// esquinas, sin dientes).</summary>
+        private static Vector2 Catmull(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+        {
+            float t2 = t * t;
+            float t3 = t2 * t;
+            return 0.5f * (2f * p1 +
+                           (p2 - p0) * t +
+                           (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 +
+                           (3f * p1 - p0 - 3f * p2 + p3) * t3);
+        }
+
+        /// <summary>
+        /// v6.115 — EL BORDE MAESTRO: LA CURVA ÚNICA QUE MATA LA SIERRA.
+        ///
+        /// LA AUTOPSIA (por qué la v6.114 no curó): (1) cada pluma
+        /// termina en una AGUJA — el perfil, aun «redondo», cae a 0 px
+        /// en la última muestra: CINCO puntas = CINCO dientes; (2) el
+        /// velo brillaba al 40 % del cuerpo (huecos oscuros entre las
+        /// plumas); (3) el «arco» por hueco era un HILO: grosor 0 en
+        /// cada punta, pandeo 0.17·|hueco| y brillo ×HaloInten (0.15
+        /// — casi invisible). El ojo leía: aguja brillante · valle
+        /// oscuro · aguja brillante = SIERRA.
+        ///
+        /// LA CURA GEOMÉTRICA: una Catmull-Rom C1-CONTINUA que pasa por
+        /// las CINCO puntas del abanico — LA MISMA curva para todo el
+        /// borde, sin costuras. Sobre ella:
+        ///   · LA BANDA (~12 px hacia adentro): el cuerpo del borde al
+        ///     nivel del ala — la aguja final de cada pluma TERMINA
+        ///     DENTRO de la banda (su taper vive bajo el brillo).
+        ///   · EL LABIO (2.5 px hacia afuera): el rim luminoso que se
+        ///     apaga al exterior — la silueta ES una curva brillante
+        ///     continua de punta a punta.
+        /// El contorno del ala deja de ser «cinco dientes» y pasa a ser
+        /// UNA curva convexa viva — las plumas se leen como venas que
+        /// corren DENTRO de la vela hasta su borde.
+        /// </summary>
+        private static int EmitirBordeMaestro(int nVerts, Pluma[] plumas, float[] hues, float[] fundidos, float mezclaDia, float time, bool flujo, float fold, in EstiloAlas estilo, int n)
+        {
+            if (estilo.Membrana <= 0f || n < 4)
+            {
+                return nVerts;
+            }
+            int porLado = n / 2;
+            if (porLado < 2)
+            {
+                return nVerts;
+            }
+            float fuerza = estilo.Membrana;
+            float brBorde = MathHelper.Clamp(estilo.CuerpoInten * 1.55f, 0.30f, 0.72f);
+            float grosor = 9f + 3f * fuerza;
+            float labio = 2.5f * fuerza;
+            float flujoT = (0.2f - fold * 0.08f) * estilo.RuidoFlujo;
+            float escalaU = 1.7f * estilo.RuidoEscala;
+            float respiracion = 0.92f + 0.08f * MathF.Sin(time * 2.4f);
+            for (int lado = 0; lado < 2; lado++)
+            {
+                int b = lado * porLado;
+                int m = porLado;
+                int muestras = (m - 1) * 6;
+                for (int s = 0; s < muestras; s++)
+                {
+                    if (nVerts + 12 > _verts.Length)
                     {
-                        afuera /= largo;
+                        break;
+                    }
+                    int seg = s / 6;
+                    float k0 = (float)(s % 6) / 6f;
+                    float k1 = (float)(s % 6 + 1) / 6f;
+                    Vector2 q0p = (seg > 0) ? plumas[b + seg - 1].Eje[8] : plumas[b].Eje[8];
+                    Vector2 q1p = plumas[b + seg].Eje[8];
+                    Vector2 q2p = plumas[b + seg + 1].Eje[8];
+                    Vector2 q3p = (seg + 2 < m) ? plumas[b + seg + 2].Eje[8] : plumas[b + m - 1].Eje[8];
+                    Vector2 p0 = Catmull(q0p, q1p, q2p, q3p, k0);
+                    Vector2 p1 = Catmull(q0p, q1p, q2p, q3p, k1);
+
+                    // El tono viaja por el borde: el hue de la pluma que
+                    // sostiene cada tramo, fundido con la siguiente.
+                    float fSeg0 = (seg + k0) / (float)(m - 1);
+                    float fSeg1 = (seg + k1) / (float)(m - 1);
+                    int iA0 = Math.Min(m - 1, (int)(fSeg0 * (m - 1) + 0.5f));
+                    int iA1 = Math.Min(m - 1, (int)(fSeg1 * (m - 1) + 0.5f));
+                    float hue0 = hues[b + iA0];
+                    float hue1 = hues[b + iA1];
+                    float fund = (fundidos[b + iA0] + fundidos[b + iA1]) * 0.5f;
+
+                    // La dirección radial (del jugador hacia afuera) da
+                    // el GROSOR de la banda: hacia adentro el cuerpo,
+                    // hacia afuera el labio.
+                    Vector2 rad0 = p0 - _geoAnclaCentral;
+                    float len0 = rad0.Length();
+                    if (len0 < 0.001f)
+                    {
+                        rad0 = new Vector2(0f, -1f);
                     }
                     else
                     {
-                        afuera = new Vector2(0f, -1f);
+                        rad0 /= len0;
                     }
-                    Vector2 ctrl = medio + afuera * ((tB - tA).Length() * 0.17f * fuerza);
-                    for (int k = 0; k < 4; k++)
+                    Vector2 rad1 = p1 - _geoAnclaCentral;
+                    float len1 = rad1.Length();
+                    if (len1 < 0.001f)
                     {
-                        float s0 = (float)k / 4f;
-                        float s1 = (float)(k + 1) / 4f;
-                        Vector2 cu0 = Lerp(tA, tB, s0);
-                        Vector2 cu1 = Lerp(tA, tB, s1);
-                        Vector2 ar0 = Bez(tA, ctrl, tB, s0);
-                        Vector2 ar1 = Bez(tA, ctrl, tB, s1);
-                        // el rim: brilla al medio del arco, se funde en
-                        // las puntas — el borde del ala ES el arco.
-                        float br0 = (0.22f + 0.85f * MathF.Sin(MathF.PI * s0)) * estilo.HaloInten * 1.6f * fuerza * fundido;
-                        float br1 = (0.22f + 0.85f * MathF.Sin(MathF.PI * s1)) * estilo.HaloInten * 1.6f * fuerza * fundido;
-                        Color e0 = Pre(TonoPluma(hueMedio, mezclaDia, 0.30f, in estilo), br0);
-                        Color e1 = Pre(TonoPluma(hueMedio, mezclaDia, 0.30f, in estilo), br1);
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu0, 0f), e0, new Vector2(s0, 0f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu1, 0f), e1, new Vector2(s1, 0f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar1, 0f), e1, new Vector2(s1, 1f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu0, 0f), e0, new Vector2(s0, 0f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar1, 0f), e1, new Vector2(s1, 1f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar0, 0f), e0, new Vector2(s0, 1f));
+                        rad1 = new Vector2(0f, -1f);
                     }
+                    else
+                    {
+                        rad1 /= len1;
+                    }
+                    Vector2 in0 = p0 - rad0 * grosor;
+                    Vector2 in1 = p1 - rad1 * grosor;
+                    Vector2 out0 = p0 + rad0 * labio;
+                    Vector2 out1 = p1 + rad1 * labio;
+
+                    float sGlob0 = (float)s / muestras;
+                    float sGlob1 = (float)(s + 1) / muestras;
+
+                    // --- LA BANDA: el cuerpo del borde (in → borde) ---
+                    Color bi0 = Pre(TonoPluma(hue0, mezclaDia, 0.18f, in estilo), brBorde * 0.55f * fuerza * fund);
+                    Color bi1 = Pre(TonoPluma(hue1, mezclaDia, 0.18f, in estilo), brBorde * 0.55f * fuerza * fund);
+                    Color bo0 = Pre(TonoPluma(hue0, mezclaDia, 0.28f, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
+                    Color bo1 = Pre(TonoPluma(hue1, mezclaDia, 0.28f, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
+                    Vector2 uvIn0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 0.72f) : new Vector2(sGlob0, 0f);
+                    Vector2 uvIn1 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob1 * 2.2f, 0.72f) : new Vector2(sGlob1, 0f);
+                    Vector2 uvBd0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 0.98f) : new Vector2(sGlob0, 0.5f);
+                    Vector2 uvBd1 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob1 * 2.2f, 0.98f) : new Vector2(sGlob1, 0.5f);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in0, 0f), bi0, uvIn0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in1, 0f), bi1, uvIn1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), bo1, uvBd1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in0, 0f), bi0, uvIn0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), bo1, uvBd1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), bo0, uvBd0);
+
+                    // --- EL LABIO: el rim luminoso que se apaga afuera ---
+                    Color lo0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
+                    Color lo1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
+                    Color lx0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f, in estilo), 0f);
+                    Color lx1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f, in estilo), 0f);
+                    Vector2 uvLx0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 1.05f) : new Vector2(sGlob0, 0.75f);
+                    Vector2 uvLx1 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob1 * 2.2f, 1.05f) : new Vector2(sGlob1, 0.75f);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), lo0, uvBd0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), lo1, uvBd1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out1, 0f), lx1, uvLx1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), lo0, uvBd0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out1, 0f), lx1, uvLx1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out0, 0f), lx0, uvLx0);
                 }
             }
             return nVerts;
-        }
-
-        /// <summary>v6.114 — La Bezier cuadrática del arco exterior.</summary>
-        private static Vector2 Bez(Vector2 a, Vector2 c, Vector2 b, float t)
-        {
-            float u = 1f - t;
-            return a * (u * u) + c * (2f * u * t) + b * (t * t);
         }
 
         /// <summary>
         /// v6.114 — LA MEMBRANA CON RUIDO: el mismo velo y el mismo arco,
         /// pero con las coordenadas de FLUJO de la textura (la niebla del
         /// vacío CORRE por dentro del ala — la misma fórmula de flujo de
-        /// EmitirCapaRuido, pasada 0).
+        /// EmitirCapaRuido, pasada 0). v6.115 — LA VELA + EL BORDE
+        /// MAESTRO: el velo al nivel del cuerpo y LA CURVA ÚNICA por las
+        /// cinco puntas con la bruma deslizándose POR EL BORDE.
         /// </summary>
         private static int EmitirMembranaRuido(int nVerts, Pluma[] plumas, float[] hues, float mezclaDia, float time, float fold, in EstiloAlas estilo, int n)
         {
@@ -799,15 +905,16 @@ namespace AethonMod.Content.VFX
                     float hueMedio = (hues[b + i] + hues[b + i + 1]) * 0.5f;
                     float uSemilla = hueMedio * 7.3f;
 
-                    // --- el velo con la niebla corriendo por dentro ---
+                    // --- el velo con la niebla corriendo por dentro
+                    //     (v6.115: al nivel de la VELA — ×1.7 más vivo) ---
                     for (int j = 0; j < 8; j++)
                     {
                         float q0 = (float)j / 8f;
                         float q1 = (float)(j + 1) / 8f;
                         float ua0 = (0f - time) * flujo + uSemilla + escalaU * q0;
                         float ua1 = (0f - time) * flujo + uSemilla + escalaU * q1;
-                        Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, 0.05f, in estilo), inten * 0.55f);
-                        Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, 0.05f, in estilo), inten * 0.55f);
+                        Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, 0.05f, in estilo), inten * 0.95f);
+                        Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, 0.05f, in estilo), inten * 0.95f);
                         Vector2 a0 = pA.Eje[j];
                         Vector2 a1 = pA.Eje[j + 1];
                         Vector2 b0 = pB.Eje[j];
@@ -819,46 +926,12 @@ namespace AethonMod.Content.VFX
                         _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(b1, 0f), c1, new Vector2(ua1, uSemilla * 0.031f + 0.6f * estilo.RuidoEscala));
                         _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(a1, 0f), c1, new Vector2(ua1, uSemilla * 0.031f));
                     }
-
-                    // --- el arco con la niebla deslizándose por el borde ---
-                    Vector2 tA = pA.Eje[8];
-                    Vector2 tB = pB.Eje[8];
-                    Vector2 medio = (tA + tB) * 0.5f;
-                    Vector2 afuera = medio - _geoAnclaCentral;
-                    float largo = afuera.Length();
-                    if (largo > 0.001f)
-                    {
-                        afuera /= largo;
-                    }
-                    else
-                    {
-                        afuera = new Vector2(0f, -1f);
-                    }
-                    Vector2 ctrl = medio + afuera * ((tB - tA).Length() * 0.17f * fuerza);
-                    for (int k = 0; k < 4; k++)
-                    {
-                        float s0 = (float)k / 4f;
-                        float s1 = (float)(k + 1) / 4f;
-                        Vector2 cu0 = Lerp(tA, tB, s0);
-                        Vector2 cu1 = Lerp(tA, tB, s1);
-                        Vector2 ar0 = Bez(tA, ctrl, tB, s0);
-                        Vector2 ar1 = Bez(tA, ctrl, tB, s1);
-                        float ua = (0f - time) * flujo + uSemilla + escalaU * s0;
-                        float ub = (0f - time) * flujo + uSemilla + escalaU * s1;
-                        float br0 = (0.20f + 0.70f * MathF.Sin(MathF.PI * s0)) * inten;
-                        float br1 = (0.20f + 0.70f * MathF.Sin(MathF.PI * s1)) * inten;
-                        Color e0 = Pre(TonoPluma(hueMedio, mezclaDia, 0.25f, in estilo), br0);
-                        Color e1 = Pre(TonoPluma(hueMedio, mezclaDia, 0.25f, in estilo), br1);
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu0, 0f), e0, new Vector2(ua, uSemilla * 0.031f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu1, 0f), e1, new Vector2(ub, uSemilla * 0.031f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar1, 0f), e1, new Vector2(ub, uSemilla * 0.031f + 0.25f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(cu0, 0f), e0, new Vector2(ua, uSemilla * 0.031f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar1, 0f), e1, new Vector2(ub, uSemilla * 0.031f + 0.25f));
-                        _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(ar0, 0f), e0, new Vector2(ua, uSemilla * 0.031f + 0.25f));
-                    }
                 }
             }
-            return nVerts;
+            // v6.115 — EL BORDE MAESTRO con la niebla corriendo por el
+            // borde (un SOLO flujo continuo a lo largo de TODA la curva —
+            // la continuidad del ruido refuerza la continuidad del borde).
+            return EmitirBordeMaestro(nVerts, plumas, hues, _fundidos, mezclaDia, time, flujo: true, fold, in estilo, n);
         }
 
         private static Color Pre(Color c, float f)

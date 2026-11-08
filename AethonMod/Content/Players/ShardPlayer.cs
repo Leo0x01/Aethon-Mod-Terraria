@@ -1380,6 +1380,15 @@ namespace AethonMod.Content.Players
                 // Eterna dentro. La regla de la casa: DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaFormaEterna>());
+                // v6.115 — EL MUNDO INTERIOR DEL ETERNO (la letra: «para
+                // que el altar nos lleve a otro mundo crea un nuevo item
+                // que se fabrica con esencia del eterno en el altar»):
+                // la puerta del trago — el arte de las mil esencias
+                // vive en el altar, pero el kit de pruebas la trae
+                // DIRECTO (la regla de la casa) para que el interior
+                // se pueda probar de una vez.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Llamados.MundoInteriorEternoItem>());
 
                 if (entregados > 0)
                 {
