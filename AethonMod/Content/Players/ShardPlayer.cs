@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -778,6 +779,25 @@ namespace AethonMod.Content.Players
         }
 
         public override void OnHurt(Player.HurtInfo info) { }
+
+        /// <summary>
+        /// v6.117 — LA PRESA TRAGADA NO SE DIBUJA: en el instante del
+        /// TRAGO (DevoracionEterna.Tragado) el portador ya está DENTRO
+        /// del libro — hideEntirePlayer (el interruptor del
+        /// PlayerDrawSet que vuelve Transparente TODA la paleta del
+        /// jugador) lo hace desaparecer dentro del estallido de
+        /// páginas. La v6.115 lo dejaba flotando ENCIMA del libro
+        /// cerrado: el trago no se leía. Se libera al llegar al interior
+        /// (y en la red de seguridad del Kill del proyectil).
+        /// </summary>
+        public override void ModifyDrawInfo(ref PlayerDrawSet drawInfo)
+        {
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado &&
+                Player.whoAmI == Main.myPlayer)
+            {
+                drawInfo.hideEntirePlayer = true;
+            }
+        }
 
         /// <summary>
         /// v6.47: EL CORAZÓN DE LA VOZ DEL HAMBRE. Corre cada tick: cuenta

@@ -25,7 +25,7 @@ using static Terraria.ModLoader.ModContent;
 namespace AethonMod.Content.Systems
 {
     // ======================================================================
-    //  SubmundoGrimorio — v6.114 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO.
+    //  SubmundoGrimorio — v6.117 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO.
     //
     //  LA LETRA DEL USUARIO: «tambien quiero que investigues como crear
     //  mundos separados… necesito crear un mundo nuevo que sera el mundo
@@ -61,9 +61,21 @@ namespace AethonMod.Content.Systems
     // ======================================================================
     public class SubmundoGrimorio : ModSystem
     {
-        // === EL TAMAÑO DE LA CASA: 800×400 — compacto, TODO ≤8400×2400 ===
+        // === EL TAMAÑO DE LA CASA: 800×450 — compacto, TODO ≤8400×2400.
+        // v6.117 — LA LEY DE LAS SECCIONES (leída en el IL del tML
+        // 2026.9.3.1 real, la cura del crash del client.log): el
+        // minimapa dibuja el mundo en SECCIONES DE 200×150 TILES
+        // (WorldSections + Main.DrawToMap_Section) y los mundos de
+        // vanilla (4200×1200 / 6400×1800 / 8400×2400) son TODOS
+        // múltiplos exactos de esas medidas. El interior de la v6.115
+        // medía 800×400: la fila de secciones y=2 cubre los tiles
+        // 300–449 y el índice Map[x, 400..449] REVIENTA con
+        // IndexOutOfRangeException (Main engine crash al entrar). LA
+        // CURA: 450 = 3×150 EXACTO (y 800 = 4×200 exacto) — el
+        // interior nace con secciones PERFECTAS como los mundos de
+        // vanilla. ===
         private const int Ancho = 800;
-        private const int Alto = 400;
+        private const int Alto = 450;
         private const int Superficie = 60;      // las islas viven BAJO el cielo abierto
         private const int Roca = 160;
         private const int PlazaX = 400;
@@ -112,11 +124,21 @@ namespace AethonMod.Content.Systems
             // NINGÚN WorldFile.SaveWorld corre (ni autosave, ni salir al
             // menú, ni nada) — el archivo del mundo real queda INTACTO.
             Terraria.IO.On_WorldFile.SaveWorld_bool_bool += BloquearGuardado;
+            // v6.117 — EL FARO DE LA DEVORACIÓN VIVE EN OnPostDraw: es el
+            // ÚNICO punto del frame que pinta TAMBIÉN en el menú (el IL
+            // de Main.Draw_Inner: DoDraw completa TODO — mundo, interfaz
+            // o MENÚ — y recién entonces dispara OnPostDraw). La
+            // inundación de la v6.115 vivía en la capa de interfaz, que
+            // NO corre en gameMenu: entre el trago y el interior quedaba
+            // un VACÍO de pantalla de carga visible. Ahora la bruma tapa
+            // el mundo, la interfaz Y la carga — un solo trago continuo.
+            Main.OnPostDraw += PintarFaroDevoracion;
         }
 
         public override void Unload()
         {
             Terraria.IO.On_WorldFile.SaveWorld_bool_bool -= BloquearGuardado;
+            Main.OnPostDraw -= PintarFaroDevoracion;
             Activo = false;
             Transicion = false;
             _mundoPrincipal = null;
@@ -229,6 +251,12 @@ namespace AethonMod.Content.Systems
                 // el mapa del interior: LIMPIO (el velo lo cubre — el
                 // interior no se cartografía como el mundo real).
                 try { Main.Map = new WorldMap((ushort)Ancho, (ushort)Alto); } catch { }
+                // v6.117 — EL MINIMAPA NACE LIMPIO: la cola de secciones
+                // y las regiones de actualización del MUNDO REAL mueren
+                // AQUÍ (el IL: DrawToMap no clampea mapMaxX/mapMaxY —
+                // con los valores del mundo viejo el primer frame
+                // revienta). La cura de la casa, en ambas direcciones.
+                ReiniciarMiniMapa();
 
                 // el FileData falso del interior (el hook ya impide que se
                 // escriba; esto es para que el juego tenga ALGO coherente).
@@ -260,6 +288,16 @@ namespace AethonMod.Content.Systems
                     // morado de la oleada, para siempre).
                     Revelado = ReveladoMax;
                     PedirSolEclipse();
+                    // v6.117 — LA ENTREGA DEL FARO: el portador llega
+                    // SIN el giro del trago y la inundación empieza a
+                    // retirarse (la revelación de niebla toma el relevo
+                    // — el decaimiento vive en PostUpdateWorld).
+                    try
+                    {
+                        Main.LocalPlayer.fullRotation = 0f;
+                        global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado = false;
+                    }
+                    catch { }
                     if (Main.myPlayer >= 0 && !Main.dedServ)
                     {
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Submundo.Bienvenida"),
@@ -323,6 +361,12 @@ namespace AethonMod.Content.Systems
                     {
                         Main.Map.Load();
                     }
+                    // v6.117 — el minimapa también nace limpio AL VOLVER
+                    // (las regiones del interior mueren aquí — la cura
+                    // simétrica; clearMap además BARRE los render targets
+                    // para que ni un píxel del interior fantasmee en el
+                    // mapa del mundo real).
+                    ReiniciarMiniMapa();
                     Main.sectionManager.SetAllSectionsLoaded();
                 }
 
@@ -338,6 +382,14 @@ namespace AethonMod.Content.Systems
                     DevolverSolEclipse();
                     BrumaFaro = 0f;
                     Revelado = 0;
+                    // v6.117 — el trago tampoco viaja: el portador vuelve
+                    // visible y derecho en el mundo real.
+                    try
+                    {
+                        Main.LocalPlayer.fullRotation = 0f;
+                        global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado = false;
+                    }
+                    catch { }
                     // la vuelta cae AL LADO DEL ALTAR por donde entró —
                     // el libro te devuelve donde te abrió.
                     try
@@ -358,6 +410,35 @@ namespace AethonMod.Content.Systems
                 try { LogModo("Salir", e); } catch { }
                 VolverADiscoPorFallo();
             }
+        }
+
+        /// <summary>
+        /// v6.117 — LA CURA DEL MINIMAPA (leída en el IL del tML
+        /// 2026.9.3.1): <see cref="Main.DrawToMap_Section"/> camina las
+        /// secciones del <see cref="WorldSections"/> y lee
+        /// <c>Map[x, y]</c> con el indexador CRUDO (más allá del mundo
+        /// = IndexOutOfRangeException = Main engine crash), y
+        /// <see cref="Main.DrawToMap"/> NO clampea mapMaxX/mapMaxY.
+        /// Al cambiar de mundo EN JUEGO (sin pasar por el menú), la
+        /// cola de secciones, la cuenta de tiles por actualizar y las
+        /// regiones quedan con los valores del MUNDO ANTERIOR — el
+        /// primer frame revienta. Esta cura todo lo estático del
+        /// minimapa en cada cambio de mundo, en ambas direcciones.
+        /// </summary>
+        private static void ReiniciarMiniMapa()
+        {
+            try
+            {
+                Terraria.Map.MapHelper.ResetMapData();   // numUpdateTile = 0
+                Main.updateMap = false;                    // la región de actualización muere
+                Main.mapMinX = 0;
+                Main.mapMaxX = 0;                          // los bucles de DrawToMap no corren
+                Main.mapMinY = 0;
+                Main.mapMaxY = 0;
+                Main.refreshMap = true;                    // todas las secciones se repintan
+                Main.clearMap = true;                      // los render targets se barren
+            }
+            catch { }
         }
 
         /// <summary>
@@ -615,6 +696,12 @@ namespace AethonMod.Content.Systems
             // disipa revelando como es este mundo nuevo»).
             if (Revelado > 0) Revelado--;
 
+            // v6.117 — LA RETIRADA DEL FARO: la inundación de la
+            // devoración se disuelve adentro (~0,7 s) mientras LA
+            // REVELACIÓN toma el relevo — el mundo emerge de las dos
+            // nieblas a la vez, sin un corte visible.
+            if (BrumaFaro > 0f) BrumaFaro = Math.Max(0f, BrumaFaro - 0.025f);
+
             Player p = Main.LocalPlayer;
             if (p == null || !p.active) return;
 
@@ -708,21 +795,174 @@ namespace AethonMod.Content.Systems
         // ==================================================================
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            // v6.115 — el velo también vive en el mundo real mientras
-            // EL FARO de la devoración inunda la pantalla (la letra:
-            // «en el momento en que es devorado el mundo se llena de
-            // bruma solo en la animacion»).
-            if ((!Activo && BrumaFaro <= 0.01f) || Main.dedServ || Main.gameMenu) return;
+            // v6.117 — EL REPARTO DE LAS DOS NIEBLAS: esta capa pinta SOLO
+            // el velo del interior (mundo real: nada). EL FARO de la
+            // devoración (la inundación que también vive en el mundo
+            // real) se mudó a Main.OnPostDraw — el único punto que pinta
+            // TAMBIÉN en el menú (la capa de interfaz NO corre en
+            // gameMenu y la pantalla de carga quedaba EXPUESTA a mitad
+            // del trago).
+            if (!Activo || Main.dedServ || Main.gameMenu) return;
             layers.Insert(0, new LegacyGameInterfaceLayer(
                 "AethonMod: VeloInterior", DibujarVelo, InterfaceScaleType.None));
         }
 
         private static bool DibujarVelo()
         {
+            // v6.117 — LA CURA DEL LOTE (la excepción silenciosa del
+            // client.log: «Begin has been called before calling End» en
+            // esta función). EL CONTRATO, leído en el IL de
+            // GameInterfaceLayer.Draw de ESTE tML: la capa ABRE ELLA
+            // MISMA el lote — Begin(Deferred, AlphaBlend, LinearClamp,
+            // DepthStencil.Default, CullCCW, Matrix.Identity) para
+            // InterfaceScaleType.None — y lo CIERRA al volver del
+            // delegado. La v6.115 llamaba Begin DENTRO de ese lote
+            // vivo: InvalidOperationException CADA FRAME (tML la
+            // tragaba como «Excepción silenciosa»), el velo NUNCA se
+            // dibujó y la sonda mató la función para toda la sesión —
+            // ni la revelación, ni el ojo, NI LA INUNDACIÓN existieron.
+            // LA CURA: dibujar SIN TOCAR Begin/End ni una vez — el lote
+            // de la capa ya tiene EXACTO lo que el velo necesita (píxeles
+            // de pantalla crudos: Main.screenWidth/Height).
+            if (Main.gameMenu || Main.dedServ) return true;
+            if (_veloProbeFallos) return true;
+            if (_softGlow == null || _softGlow.IsDisposed)
+            {
+                try
+                {
+                    _softGlow = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Procedural/SoftGlow",
+                        (AssetRequestMode)1).Value;
+                }
+                catch
+                {
+                    _veloProbeFallos = true;
+                    return true;
+                }
+            }
+
             try
             {
-                if (Main.gameMenu || Main.dedServ) return true;
-                if (_veloProbeFallos) return true;
+                SpriteBatch sb = Main.spriteBatch;
+                float w = Main.screenWidth;
+                float h = Main.screenHeight;
+                float t = Main.GlobalTimeWrappedHourly;
+                Vector2 centro = new Vector2(w * 0.5f, h * 0.5f);
+
+                // ============================================================
+                //  v6.115 — LA REVELACIÓN DE LA LLEGADA: el interior nace
+                //  LLENO de bruma y esta SE DISIPA revelando el mundo
+                //  (la letra). Dibujada ANTES del velo propio: la
+                //  niebla del nacimiento es MÁS densa y CORRE más
+                //  rápido, y EL IRIS DORADO de la entidad respira
+                //  abriéndose a mitad de la revelación.
+                // ============================================================
+                float aRev = Activo ? (float)Revelado / ReveladoMax : 0f;
+                if (aRev > 0.003f)
+                {
+                    float k = aRev * aRev;   // ease-out: lenta al final
+                    sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
+                        new Color(16, 8, 28) * (0.92f * k));
+                    for (int banda = 0; banda < 5; banda++)
+                    {
+                        float vel = 30f + banda * 16f;
+                        float y = h * (0.10f + banda * 0.19f) + MathF.Sin(t * 0.31f + banda * 1.7f) * h * 0.06f;
+                        float x = ((t * vel + banda * 540f) % (w + 1400f)) - 700f;
+                        float esc = 1.9f + banda * 0.55f;
+                        sb.Draw(_softGlow,
+                            new Rectangle((int)(x - 320f * esc), (int)(y - 70f * esc),
+                                (int)(640f * esc), (int)(140f * esc)),
+                            null, new Color(110, 72, 176) * ((0.16f + 0.05f * banda) * k), 0f,
+                            Vector2.Zero, SpriteEffects.None, 0f);
+                    }
+                    // EL IRIS DEL NACIMIENTO (el aliento dorado de la
+                    // entidad a mitad de la revelación).
+                    float abre = 1f - aRev;
+                    float aIris = 0.85f * abre * (1f - abre) * 4f;
+                    sb.Draw(_softGlow, new Rectangle(
+                        (int)(w * 0.5f - w * (0.10f + 0.34f * abre)),
+                        (int)(h * 0.17f - h * (0.08f + 0.16f * abre)),
+                        (int)(w * (0.20f + 0.68f * abre)), (int)(h * (0.16f + 0.32f * abre))),
+                        null, new Color(255, 214, 130) * (0.22f * aIris), 0f,
+                        Vector2.Zero, SpriteEffects.None, 0f);
+                }
+
+                // ============================================================
+                //  EL VELO PROPIO DEL INTERIOR (solo dentro del libro)
+                // ============================================================
+                // === EL FONDO DEL VACÍO (el degradé del velo) ===
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
+                    new Color(22, 12, 38) * 0.60f);
+                // el horizonte más denso (el velo engorda hacia abajo).
+                sb.Draw(_softGlow, new Rectangle(-((int)w / 2), (int)(h * 0.55f), (int)w * 2, (int)(h * 0.9f)),
+                    null, new Color(30, 16, 52) * 0.42f, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+
+                // === LAS BANDAS DE NEBLINA (la bruma que CORRE) ===
+                for (int banda = 0; banda < 4; banda++)
+                {
+                    float vel = 14f + banda * 9f;
+                    float y = h * (0.18f + banda * 0.22f) + MathF.Sin(t * 0.23f + banda * 2.1f) * h * 0.05f;
+                    float x = ((t * vel + banda * 700f) % (w + 1200f)) - 600f;
+                    float esc = 1.6f + banda * 0.5f;
+                    sb.Draw(_softGlow,
+                        new Rectangle((int)(x - 320f * esc), (int)(y - 60f * esc),
+                            (int)(640f * esc), (int)(120f * esc)),
+                        null, new Color(96, 62, 158) * (0.10f + 0.045f * banda), 0f,
+                        Vector2.Zero, SpriteEffects.None, 0f);
+                }
+
+                // === LAS ESTRELLAS DEL VACÍO (la niebla no las tapa: son
+                //     SUAS — brillan dentro del velo) ===
+                for (int s = 0; s < 26; s++)
+                {
+                    uint hx = VFXCore.Hash01(s * 7 + 3, 0, 911) > 0.5f ? 1u : 0u;
+                    float sx = VFXCore.Hash01(s * 13 + 1, 0, 913) * w;
+                    float sy = VFXCore.Hash01(s * 17 + 5, 0, 917) * h * 0.72f;
+                    float pal = 0.55f + 0.45f * MathF.Sin(t * (0.5f + VFXCore.Hash01(s, 0, 919) * 1.3f) + s);
+                    sb.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle((int)sx, (int)sy, 2 + (int)hx, 2),
+                        new Color(210, 190, 250) * (0.10f + 0.14f * pal));
+                }
+
+                // === EL OJO COLOSAL (el que lee desde arriba — corona
+                //     del sol del eclipse, clavado en el cenit) ===
+                DibujarElOjo(sb, w, h, t, centro);
+            }
+            catch
+            {
+                // v6.117 — la armadura ya NO mata el velo por un frame
+                // raro (la sonda solo muere si LA TEXTURA falta): el
+                // lote de la capa queda intacto pase lo que pase (nunca
+                // lo abrimos) y su End() lo cierra limpio.
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// v6.117 — EL FARO DE LA DEVORACIÓN (Main.OnPostDraw): la
+        /// bruma que INUNDA la pantalla mientras el libro traga al
+        /// portador — y que ahora vive SOBRE TODO EL FRAME TERMINADO:
+        /// el mundo, la interfaz Y LA PANTALLA DE CARGA (la letra:
+        /// «en el momento en que es devorado el mundo se llena de
+        /// bruma solo en la animacion»). El IL de Main.Draw_Inner:
+        /// DoDraw completa el frame entero y recién entonces dispara
+        /// OnPostDraw — el único punto que pinta también en gameMenu.
+        /// </summary>
+        private static void PintarFaroDevoracion(GameTime gameTime)
+        {
+            try
+            {
+                if (Main.dedServ) return;
+                if (BrumaFaro <= 0.01f) return;
+                // LA RED DE LA CASA: si el menú NO es nuestra transición
+                // (el jugador abortó a mitad del trago), la inundación
+                // muere ahí mismo — nadie queda atrapado en la bruma.
+                if (Main.gameMenu && !Transicion)
+                {
+                    BrumaFaro = 0f;
+                    return;
+                }
+                if (_veloProbeFallos) return;
                 if (_softGlow == null || _softGlow.IsDisposed)
                 {
                     try
@@ -731,142 +971,52 @@ namespace AethonMod.Content.Systems
                             "AethonMod/Content/Effects/Procedural/SoftGlow",
                             (AssetRequestMode)1).Value;
                     }
-                    catch
-                    {
-                        _veloProbeFallos = true;
-                        return true;
-                    }
+                    catch { return; }
                 }
 
-                SpriteBatch sb = Main.spriteBatch;
-                float w = Main.screenWidth;
-                float h = Main.screenHeight;
-                float t = (float)Main.time + (float)Main.GameUpdateCount * 0.016f;
-                Vector2 centro = new Vector2(w * 0.5f, h * 0.5f);
-
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, Main.Rasterizer, null, Matrix.Identity);
+                // EL BAILE DEL LOTE: OnPostDraw recibe el frame con el
+                // lote en CUALQUIER estado (el camino del menú termina
+                // cerrado; el del juego puede quedar abierto) — se cierra
+                // lo que haya (sonda de la casa), se pinta la inundación
+                // en un lote propio y se devuelve CERRADO (el estado
+                // natural entre frames: DoDraw arranca con su propio
+                // Begin).
+                VFXCore.CerrarLoteSiAbierto();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, Main.Rasterizer, null,
+                    Matrix.Identity);
                 try
                 {
-                    // ============================================================
-                    //  v6.115 — LA REVELACIÓN DE LA LLEGADA: el interior nace
-                    //  LLENO de bruma y esta SE DISIPA revelando el mundo
-                    //  (la letra). Dibujada ANTES del velo propio: la
-                    //  niebla del nacimiento es MÁS densa y CORRE más
-                    //  rápido, y EL IRIS DORADO de la entidad respira
-                    //  abriéndose a mitad de la revelación.
-                    // ============================================================
-                    float aRev = Activo ? (float)Revelado / ReveladoMax : 0f;
-                    if (aRev > 0.003f)
+                    float a = BrumaFaro;
+                    float w = Main.screenWidth;
+                    float h = Main.screenHeight;
+                    float t = Main.GlobalTimeWrappedHourly;
+
+                    // LA INUNDACIÓN: cuando el faro está lleno no hay
+                    // mundo — solo el violeta del trago.
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle(0, 0, (int)w, (int)h),
+                        new Color(18, 9, 32) * (0.97f * a));
+                    for (int banda = 0; banda < 6; banda++)
                     {
-                        float k = aRev * aRev;   // ease-out: lenta al final
-                        sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
-                            new Color(16, 8, 28) * (0.92f * k));
-                        for (int banda = 0; banda < 5; banda++)
-                        {
-                            float vel = 30f + banda * 16f;
-                            float y = h * (0.10f + banda * 0.19f) + MathF.Sin(t * 0.31f + banda * 1.7f) * h * 0.06f;
-                            float x = ((t * vel + banda * 540f) % (w + 1400f)) - 700f;
-                            float esc = 1.9f + banda * 0.55f;
-                            sb.Draw(_softGlow,
-                                new Rectangle((int)(x - 320f * esc), (int)(y - 70f * esc),
-                                    (int)(640f * esc), (int)(140f * esc)),
-                                null, new Color(110, 72, 176) * ((0.16f + 0.05f * banda) * k), 0f,
-                                Vector2.Zero, SpriteEffects.None, 0f);
-                        }
-                        // EL IRIS DEL NACIMIENTO (el aliento dorado de la
-                        // entidad a mitad de la revelación).
-                        float abre = 1f - aRev;
-                        float aIris = 0.85f * abre * (1f - abre) * 4f;
-                        sb.Draw(_softGlow, new Rectangle(
-                            (int)(w * 0.5f - w * (0.10f + 0.34f * abre)),
-                            (int)(h * 0.17f - h * (0.08f + 0.16f * abre)),
-                            (int)(w * (0.20f + 0.68f * abre)), (int)(h * (0.16f + 0.32f * abre))),
-                            null, new Color(255, 214, 130) * (0.22f * aIris), 0f,
+                        // la bruma ACELERA con el trago (0.6→1.4×).
+                        float vel = (46f + banda * 20f) * (0.6f + 0.8f * a);
+                        float y = h * (0.06f + banda * 0.16f) + MathF.Sin(t * 0.4f + banda * 1.3f) * h * 0.05f;
+                        float x = ((t * vel + banda * 500f) % (w + 1500f)) - 750f;
+                        float esc = 2.1f + banda * 0.6f;
+                        Main.spriteBatch.Draw(_softGlow,
+                            new Rectangle((int)(x - 320f * esc), (int)(y - 80f * esc),
+                                (int)(640f * esc), (int)(160f * esc)),
+                            null, new Color(96, 62, 158) * ((0.14f + 0.05f * banda) * a), 0f,
                             Vector2.Zero, SpriteEffects.None, 0f);
-                    }
-
-                    // ============================================================
-                    //  EL VELO PROPIO DEL INTERIOR (solo dentro del libro)
-                    // ============================================================
-                    if (Activo)
-                    {
-                    // === EL FONDO DEL VACÍO (el degradé del velo) ===
-                    sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
-                        new Color(22, 12, 38) * 0.60f);
-                    // el horizonte más denso (el velo engorda hacia abajo).
-                    sb.Draw(_softGlow, new Rectangle(-((int)w / 2), (int)(h * 0.55f), (int)w * 2, (int)(h * 0.9f)),
-                        null, new Color(30, 16, 52) * 0.42f, 0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-                    // === LAS BANDAS DE NEBLINA (la bruma que CORRE) ===
-                    for (int banda = 0; banda < 4; banda++)
-                    {
-                        float vel = 14f + banda * 9f;
-                        float y = h * (0.18f + banda * 0.22f) + MathF.Sin(t * 0.23f + banda * 2.1f) * h * 0.05f;
-                        float x = ((t * vel + banda * 700f) % (w + 1200f)) - 600f;
-                        float esc = 1.6f + banda * 0.5f;
-                        sb.Draw(_softGlow,
-                            new Rectangle((int)(x - 320f * esc), (int)(y - 60f * esc),
-                                (int)(640f * esc), (int)(120f * esc)),
-                            null, new Color(96, 62, 158) * (0.10f + 0.045f * banda), 0f,
-                            Vector2.Zero, SpriteEffects.None, 0f);
-                    }
-
-                    // === LAS ESTRELLAS DEL VACÍO (la niebla no las tapa: son
-                    //     SUAS — brillan dentro del velo) ===
-                    for (int s = 0; s < 26; s++)
-                    {
-                        uint hx = VFXCore.Hash01(s * 7 + 3, 0, 911) > 0.5f ? 1u : 0u;
-                        float sx = VFXCore.Hash01(s * 13 + 1, 0, 913) * w;
-                        float sy = VFXCore.Hash01(s * 17 + 5, 0, 917) * h * 0.72f;
-                        float pal = 0.55f + 0.45f * MathF.Sin(t * (0.5f + VFXCore.Hash01(s, 0, 919) * 1.3f) + s);
-                        sb.Draw(TextureAssets.MagicPixel.Value,
-                            new Rectangle((int)sx, (int)sy, 2 + (int)hx, 2),
-                            new Color(210, 190, 250) * (0.10f + 0.14f * pal));
-                    }
-
-                    // === EL OJO COLOSAL (el que lee desde arriba — corona
-                    //     del sol del eclipse, clavado en el cenit) ===
-                    DibujarElOjo(sb, w, h, t, centro);
-                    } // fin del velo propio
-
-                    // ============================================================
-                    //  v6.115 — EL FARO DE LA DEVORACIÓN: la bruma que
-                    //  INUNDA la pantalla mientras el libro traga al
-                    //  portador (vive TAMBIÉN en el mundo real — la
-                    //  transición va escondida detrás). ES lo último que
-                    //  se dibuja: cuando el faro está lleno, no hay mundo.
-                    // ============================================================
-                    if (BrumaFaro > 0.01f)
-                    {
-                        float a = BrumaFaro;
-                        sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
-                            new Color(18, 9, 32) * (0.97f * a));
-                        for (int banda = 0; banda < 6; banda++)
-                        {
-                            // la bruma ACELERA con el trago (0.6→1.4×).
-                            float vel = (46f + banda * 20f) * (0.6f + 0.8f * a);
-                            float y = h * (0.06f + banda * 0.16f) + MathF.Sin(t * 0.4f + banda * 1.3f) * h * 0.05f;
-                            float x = ((t * vel + banda * 500f) % (w + 1500f)) - 750f;
-                            float esc = 2.1f + banda * 0.6f;
-                            sb.Draw(_softGlow,
-                                new Rectangle((int)(x - 320f * esc), (int)(y - 80f * esc),
-                                    (int)(640f * esc), (int)(160f * esc)),
-                                null, new Color(96, 62, 158) * ((0.14f + 0.05f * banda) * a), 0f,
-                                Vector2.Zero, SpriteEffects.None, 0f);
-                        }
                     }
                 }
                 finally
                 {
-                    sb.End();
+                    Main.spriteBatch.End();
                 }
             }
-            catch
-            {
-                _veloProbeFallos = true; // el velo jamás rompe el render
-            }
-            return true;
+            catch { }
         }
 
         /// <summary>

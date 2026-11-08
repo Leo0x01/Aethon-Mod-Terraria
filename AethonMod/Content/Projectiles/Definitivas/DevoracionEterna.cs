@@ -14,7 +14,7 @@ using static Terraria.ModLoader.ModContent;
 namespace AethonMod.Content.Projectiles.Definitivas
 {
     // ======================================================================
-    //  DevoracionEterna — v6.115 — EL GRIMORIO DEVORA AL PORTADOR.
+    //  DevoracionEterna — v6.117 — EL GRIMORIO DEVORA AL PORTADOR.
     //
     //  LA LETRA DEL USUARIO: «al usar Mundo Interior del Eterno se hace
     //  una animacion donde el grimorio del eterno devora al jugador de
@@ -22,22 +22,43 @@ namespace AethonMod.Content.Projectiles.Definitivas
     //  el momento en que es devorado el mundo se llena de bruma solo en
     //  la animacion y el jugador es transportado el nuevo mundo».
     //
-    //  LA COREOGRAFÍA DEL TRAGO (tres actos, ~2,5 s):
+    //  v6.117 — LA CURA DE LA ANIMACIÓN (la letra: «arregla la
+    //  animacion del grimorio devorando al jugador»). LA AUTOPSIA del
+    //  client.log: el velo de la v6.115 moría al PRIMER FRAME
+    //  (Begin-sobre-lote-abierto → la sonda mataba la función para
+    //  TODA la sesión) — la inundación NUNCA existió y el trago se veía
+    //  roto. Y el libro TAPABA SU PROPIA BOCA: el sprite entero (36×49
+    //  opaco) se dibujaba ENCIMA del disco del vacío — las «fauces»
+    //  quedaban escondidas detrás de la portada. LA CURA TRIPLE:
+    //   · EL LIBRO SE PARTE EN DOS MITADES (la tapa y la contratapa
+    //     giran sobre el lomo como mandíbulas) — el vacío queda
+    //     EXPUESTO entre ellas y el trago por fin SE LEE;
+    //   · EL PORTADOR GIRA (Player.fullRotation de vanilla) mientras
+    //     sube en espiral hacia la boca — la presa cae vencida, no
+    //     teletransportada;
+    //   · AL ENTRAR, LA PRESA DESAPARECE (Tragado → hideEntirePlayer
+    //     por ModifyDrawInfo): el estallido de páginas y el portazo de
+    //     las tapas lo tragan entero — nada flota sobre el libro
+    //     cerrado.
+    //
+    //  LA COREOGRAFÍA DEL TRAGO (cuatro actos, ~2,5 s):
     //   · EL DESCENSO (0-35): el grimorio MATERIALIZA sobre el portador
     //     (el aura violeta, el corazón dorado y el anillo de seis runas
     //     — la misma vestimenta de LA LLAMADA) mientras el polvo de oro
     //     del suelo se alza.
-    //   · LA DEVORACIÓN (35-115): EL LIBRO SE ABRE — la FAUCES crece en
-    //     su centro (el disco del vacío con el aro dorado) y el portador
-    //     SUBE hacia ella: la espiral de páginas y esencias lo envuelve,
-    //     el temblor crece y el libro se inclina a recibirlo. SIN DAÑO:
-    //     el trago lleva al interior, no a la nada.
-    //   · EL TRAGO (115-130): el portador entra — el ESTALLIDO de 36
-    //     páginas, el rugido, el libro SE CIERRA de un golpe… y EL MUNDO
-    //     SE LLENA DE BRUMA (SubmundoGrimorio.BrumaFaro: la inundación
-    //     violeta que lo tapa TODO mientras la puerta gira).
-    //  Detrás de la bruma nace el interior — y su REVELACIÓN de niebla
-    //  (la que se disipa mostrando el mundo nuevo) toma el relevo.
+    //   · LA DEVORACIÓN (35-115): EL LIBRO SE ABRE EN FAUCES — las dos
+    //     tapas giran sobre el lomo y EL DISCO DEL VACÍO crece entre
+    //     ellas con su aro dorado. El portador SUBE EN ESPIRAL GIRANDO
+    //     (fullRotation acelera con la cercanía), la espiral de páginas
+    //     y esencias lo envuelve, el temblor crece y el libro se
+    //     inclina a recibirlo. SIN DAÑO: el trago lleva al interior.
+    //   · EL TRAGO (115-132): el portador ENTRA — desaparece dentro de
+    //     la boca (oculto por completo), el ESTALLIDO de 36 páginas, el
+    //     rugido, las tapas SE CIERRAN DE UN GOLPE… y EL MUNDO SE LLENA
+    //     DE BRUMA (SubmundoGrimorio.BrumaFaro — la inundación violeta
+    //     que ahora vive en OnPostDraw y tapa TAMBIÉN la carga).
+    //   · LA PUERTA (132): detrás de la bruma llena nace el interior —
+    //     y su REVELACIÓN de niebla toma el relevo del faro.
     // ======================================================================
     public class DevoracionEterna : ModProjectile
     {
@@ -48,6 +69,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const int TTrago = 115;      // el portador entra
         private const int TEntrar = 132;     // la puerta gira (detrás de la bruma)
         private const int TMuere = 165;      // la disolución
+
+        /// <summary>
+        /// v6.117 — ¿El portador ya está DENTRO de la boca? (la casa lo
+        /// consulta en ShardPlayer.ModifyDrawInfo para ocultarlo del
+        /// dibujado: la presa tragada no flota sobre el libro cerrado).
+        /// </summary>
+        public static bool Tragado;
 
         private static Texture2D _libro;
         private static bool _texturasProbadas;
@@ -104,15 +132,26 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 if (Projectile.ai[0] >= TAbre && Projectile.ai[0] < TTrago)
                 {
-                    // LA SUBIDA: cada vez más decidida hacia las fauces.
+                    // LA SUBIDA ESPIRAL: cada vez más decidida hacia las
+                    // fauces, con un vaivén lateral que se apaga al
+                    // llegar (la presa cae en espiral, no en línea recta).
                     float f = MathHelper.Clamp((Projectile.ai[0] - TAbre) / (float)(TTrago - TAbre), 0f, 1f);
                     float k = 0.045f + 0.075f * f * f;
+                    Vector2 vaivén = new Vector2(
+                        MathF.Sin(Projectile.ai[0] * 0.22f) * 34f * (1f - f * 0.7f), 0f);
                     try
                     {
-                        p.Center = Vector2.Lerp(p.Center, libro + new Vector2(0f, 8f), k);
+                        p.Center = Vector2.Lerp(p.Center, libro + vaivén + new Vector2(0f, 8f), k);
                         p.velocity = Vector2.Zero;
                         p.gravDir = 1f;
                         p.maxFallSpeed = 0f;
+
+                        // v6.117 — EL GIRO DE LA PRESA (Player.fullRotation
+                        // de vanilla): la rotación nace suave y ACELERA con
+                        // la cercanía a la boca — el portador cae vencido
+                        // en las fauces, no teletransportado.
+                        p.fullRotationOrigin = p.Center - p.position; // el eje: el centro del cuerpo
+                        p.fullRotation += (0.055f + 0.13f * f * f) * (f > 0.55f ? 1.6f : 1f);
                     }
                     catch { }
                 }
@@ -160,10 +199,25 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // === EL TRAGO: el estallido de páginas + el rugido ===
+            // === EL TRAGO: el estallido de páginas + el rugido + LA
+            //     PRESA DESAPARECE DENTRO DE LA BOCA ===
             if (Projectile.ai[0] >= TTrago && !_estallo && !Main.dedServ)
             {
                 _estallo = true;
+                // v6.117 — LA PRESA YA ESTÁ DENTRO: se oculta por
+                // completo (ShardPlayer.ModifyDrawInfo →
+                // hideEntirePlayer) y el giro muere con ella.
+                if (dueñoVivo && p.whoAmI == Main.myPlayer)
+                {
+                    try
+                    {
+                        p.Center = libro;          // el último bocado: al centro de la boca
+                        p.velocity = Vector2.Zero;
+                        p.fullRotation = 0f;
+                    }
+                    catch { }
+                    Tragado = true;
+                }
                 if (Main.netMode != 2)
                 {
                     for (int i = 0; i < 36; i++)
@@ -201,6 +255,27 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 Projectile.Kill();
         }
 
+        /// <summary>
+        /// v6.117 — LA RED DE SEGURIDAD DEL TRAGO: si el proyectil muere
+        /// SIN entregar la puerta (otro mod lo mató, el mundo se cayó,
+        /// lo que sea), la inundación y la presa-oculta se liberan —
+        /// nadie queda invisible ni atrapado en la bruma.
+        /// </summary>
+        public override void OnKill(int timeLeft)
+        {
+            if (!_entregado)
+            {
+                Tragado = false;
+                SubmundoGrimorio.BrumaFaro = 0f;
+                try
+                {
+                    if (Main.myPlayer >= 0 && Main.player[Main.myPlayer] != null)
+                        Main.player[Main.myPlayer].fullRotation = 0f;
+                }
+                catch { }
+            }
+        }
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ || Main.netMode == 2) return false;
@@ -222,6 +297,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     : 0f; // el libro SE CIERRA tras el trago
                 float vivo = 1f - cerro * 0.35f;
 
+                // v6.117 — LA APERTURA DE LAS FAUCES: la separación de
+                // las tapas (0 = libro cerrado, 1 = boca abierta al
+                // máximo). Se abre con la devoración y SE CIERRA DE UN
+                // GOLPE al tragar (el mismo cerro del portazo).
+                float abre = mawF * (1f - cerro * cerro);
+
                 // EL AURA VIOLETA (el vacío que lo abraza — pulsa).
                 float pulso = 0.75f + 0.25f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.6f);
                 sb.Draw(glow, libroPantalla, null,
@@ -236,11 +317,16 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     new Vector2(3.2f + 2.8f * mawF, 3.2f + 2.8f * mawF),
                     SpriteEffects.None, 0f);
 
-                // === LAS FAUCES (la boca del vacío que se abre en el
-                //     centro del libro — el disco con su aro dorado) ===
-                if (mawF > 0.01f)
+                // ============================================================
+                //  v6.117 — LAS FAUCES DE VERDAD: EL VACÍO PRIMERO (el
+                //  disco y su aro dorado se dibujan DETRÁS de las tapas
+                //  — en la v6.115 el libro entero los TAPABA y la boca
+                //  no existía a la vista), y LUEGO las dos mitades del
+                //  libro girando sobre el lomo como mandíbulas.
+                // ============================================================
+                if (abre > 0.01f)
                 {
-                    float fauces = mawF * (1f - cerro * 0.9f);
+                    float fauces = abre;
                     float radio = 8f + 46f * fauces;
                     // el velo interior del vacío (el fondo de la boca).
                     sb.Draw(glow, libroPantalla + new Vector2(0f, 4f), null,
@@ -262,17 +348,37 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         SpriteEffects.None, 0f);
                 }
 
-                // === EL LIBRO (36×49 ×3.2 — el mismo de LA LLAMADA):
-                //     meciéndose, ABRIÉNDOSE (estira su X e inclina su
-                //     frente hacia la presa) y CERRÁNDOSE de un golpe
-                //     tras el trago. ===
+                // === EL LIBRO EN DOS MITADES (36×49 ×3.2 — el mismo de
+                //     LA LLAMADA): la TAPA (filas 0-23) y la
+                //     CONTRATAPA (filas 24-48) giran sobre EL LOMO (el
+                //     centro del libro) como mandíbulas — cerradas son
+                //     el libro de siempre, abiertas dejan ver el vacío.
+                // ===
                 float esc = 3.2f * (0.55f + 0.45f * nace) * (1f + 0.16f * mawF * (1f - cerro));
                 float rot = MathF.Sin(Main.GlobalTimeWrappedHourly * 0.9f) * 0.09f
                     + 0.38f * mawF * (1f - cerro); // la frente se rinde a la presa
-                Vector2 orig = new Vector2(_libro.Width * 0.5f, _libro.Height * 0.5f);
-                sb.Draw(_libro, libroPantalla, null,
+                // el ángulo de la mandíbula: abre hasta ~53° con un
+                // temblor vivo; el portazo lo devuelve a 0.
+                float angMand = abre * 0.92f + MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f) * 0.025f * abre;
+
+                int altoTap = _libro.Height / 2;                       // 24 filas
+                Rectangle srcArriba = new Rectangle(0, 0, _libro.Width, altoTap);
+                Rectangle srcAbajo = new Rectangle(0, altoTap, _libro.Width, _libro.Height - altoTap);
+                // EL LOMO: ambas mitades pivotean sobre el MISMO punto
+                // de pantalla — el centro del libro (donde estaban
+                // cosidas antes de partirse).
+                Vector2 lomo = new Vector2(_libro.Width * 0.5f, altoTap);
+                Vector2 origenArriba = lomo;                                   // su borde inferior
+                Vector2 origenAbajo = new Vector2(_libro.Width * 0.5f, 0f);    // su borde superior
+
+                // LA TAPA: gira hacia arriba (la mandíbula superior).
+                sb.Draw(_libro, libroPantalla, srcArriba,
                     Color.White * nace * vivo,
-                    rot, orig, esc, SpriteEffects.None, 0f);
+                    rot - angMand, origenArriba, esc, SpriteEffects.None, 0f);
+                // LA CONTRATAPA: gira hacia abajo (la mandíbula inferior).
+                sb.Draw(_libro, libroPantalla, srcAbajo,
+                    Color.White * nace * vivo,
+                    rot + angMand, origenAbajo, esc, SpriteEffects.None, 0f);
 
                 // === EL ANILLO DE LAS SEIS RUNAS DORADAS (SigiloLib —
                 //     la vestimenta de LA LLAMADA) ===
