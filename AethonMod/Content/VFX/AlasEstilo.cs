@@ -319,12 +319,19 @@ namespace AethonMod.Content.VFX
                 // Mismo abanico/tempo que la 3; filosa 0 (bordes gemelos),
                 // afilada 0.5 + puntas 20/14 (redondez), Runas=2 (el anillo
                 // violeta del vacío en las puntas).
+                // v6.118 — EL BALANCE DE LA VELA (la cura de la sierra, el
+                // acto III): el núcleo de la pluma baja 0.88→0.78 y el
+                // cuerpo sube 0.36→0.42 — la VELA continua y su borde
+                // maestro DOMINAN la silueta; las agujas dejan de ser los
+                // picos más brillantes del ala (con el blend soft-add la
+                // composición ahora es asintótica: la curva vive SOBRE las
+                // puntas, no debajo de ellas).
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f),
+                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,

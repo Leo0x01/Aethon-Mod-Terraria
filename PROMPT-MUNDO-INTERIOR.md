@@ -15,7 +15,7 @@
 Estás dentro del CUERPO de un dios exterior. No es una cueva ni un cielo:
 es la garganta, la página y el sueño de una entidad que devora mundos y
 los guarda. Todo lo que añadas debe sentirse **órgano, no decorado**.
-Trabajas con: `SubmundoGrimorio` (el motor, 800×400, SP), `AltarPrismaTile`
+Trabajas con: `SubmundoGrimorio` (el motor, 800×450, SP), `AltarPrismaTile`
 (la puerta prismal), `DevoracionEterna` (el trago), el VELO DE BRUMA (la
 interfaz más baja) y el OJO COLOSAL (la entidad mirando). Los materiales
 de la casa: AmethystGemspark (el cristal que arde violeta), GoldBrick
@@ -73,25 +73,53 @@ nubes, cortes sin crossfade, salirse de la paleta del vacío.
 - **El interior NUNCA se escribe a disco** (el cerrojo del hook — ni un
   byte del mundo real se toca) y **se REGENERA igual en cada visita**.
 - **Nadie muere en el libro**: la red de caída devuelve SIEMPRE a la
-  plaza. Cualquier peligro nuevo debe tener su red.
-- **Sin fieras**: el interior es la soledad del dios — si algún día
-  entran criaturas, son PÁGINAS (constructos del libro, no bestias).
-- **El prisma no se rompe** (MinPick 9999) y siempre hay vuelta.
-- **La revelación y el faro** son los únicos overlays de pantalla: no
-  añadas más capas full-screen sin matar una vieja.
-- Cada textura nueva nace en EL TALLER (`tools/superforja.py` o PIL ×4
-  SS de la casa), con su QA del ojo, ANTES de tocar el .cs.
+  plaza (v6.118: el terreno es continuo — la red queda para el fondo).
+- **El festín es del libro**: las oleadas del interior NUNCA cruzan la
+  frontera (`DetenerFestin` en entrar y salir) y nunca suben el nivel
+  natural del portador (`natural:false` — probar no es progresar).
+- **El prisma no se rompe** (MinPick 9999) — y LA PÁGINA tampoco (la
+  veta es hueso del Eterno). Siempre hay vuelta.
+- **La revelación y el faro** son los únicos overlays de pantalla: el
+  velo viste la oscuridad por capas con BrumaFX (cero rects planos).
+- **Cero círculos planos**: toda niebla es BrumaFX, todo destello
+  monotónico (NovaBurst), las motas son ParticleManager — la letra
+  v6.118 («te dije que usaras nuestras librerias») es LEY.
+- Cada textura nueva nace en LA FORJA (`tools/superforja.py` o el PIL
+  ×4 SS de la casa — v6.118: `tools/piel_eterno_v6118.py`), con su QA
+  del ojo, ANTES de tocar el .cs.
 
 ---
 
-## ESTADO (v6.115 — lo que YA vive)
+## ESTADO (v6.118 — lo que YA vive)
 
-- ✅ El motor: entrar (ítem → devoración → faro de bruma) / salir (prisma).
-- ✅ Eclipse permanente: sol Sun3 prestado clavado en el cenit + tinte
-  morado (ModifySunLightColor) + niebla de cementerio 0.90 + el VELO.
-- ✅ La revelación de la llegada (~4 s de bruma disipándose + iris dorado).
-- ✅ El prisma de colores (tile animado 6 marcos, luz propia, ventana con
-  botones: VOLVER / INVOCAR A AETHON — la ceremonia del altar + grimorio).
-- ✅ La plaza curada (prisma DE PIE — v6.114 lo enterraba: sin puerta).
-- ✅ El anillo de la corona: 10 islas nuevas del cuerpo cósmico.
-- ⬜ Los escalones 1-7 de arriba (en orden).
+- ✅ **EL REWORK COMPLETO** (la letra + el cuestionario): la SUPERFICIE
+  continua de borde a borde (colinas BrumaNoise + corteza dorada + la
+  contratapa abajo), la plaza con su prisma, LAS VETAS de LA PÁGINA DEL
+  ETERNO, EL CORAZÓN geoda con su boquilla y LAS VENTANAS de vida.
+- ✅ EL CIELO DEL CUERPO: `CieloInteriorEterno` (el CustomSky) — las TRES
+  CAPAS de tentáculos con la PIEL DEL ETERNO de la Forja, los ojos que
+  MIRAN, el polvo estelar, las brumas de paralaje y EL LATIDO del
+  corazón hinchándolo todo (~5 s). EL OJO COLOSAL MURIÓ (el
+  cuestionario: FUERA — los ojos del cielo lo reemplazan).
+- ✅ LA OSCURIDAD POR CAPAS + LAS BRUMAS DE VERDAD: el velo viste el
+  techo/horizonte/costados con BrumaFX (engordando con el latido), las
+  COLUMNAS de las ventanas, las VOLUTAS y la bruma REACTIVA que se abre
+  a tu paso. CERO círculos planos (la letra).
+- ✅ LAS MOTES DE ORO (ParticleManager + EmitLight) y EL FARO de la
+  devoración con masas fBm que aceleran (el hook OnPostDraw intacto).
+- ✅ **EL CICLO ETERNO DE LAS OLEADAS DEL HAMBRE**: cada ~2,5 min de
+  calma, `GrimorioFuriaSistema.Provocar` sirve un festín (enemigos de
+  la casa, nivel del portador, `natural:false`) — LA REGLA «SIN FIERAS»
+  MURIÓ con la letra nueva («debe ser el de las oleadas de hambre»):
+  el interior ES el mundo del asedio eterno; fuera del festín, la
+  soledad sigue mandando (el spawn gate solo abre para el festín).
+- ✅ LA DEVORACIÓN ES EL CALCO DEL FESTÍN (el libro con párpado e iris,
+  la sombra de la página, el cerco) y LA PUERTA VIVE EN LA BOCA (la
+  colisión del jugador con el rectángulo de la boca — jamás un timer).
+- ✅ Eclipse permanente (sol Sun3 del cenit + tinte + cementerio 0.90) y
+  EL CEDIMIENTO: durante el festín, EL ECLIPSE DE LA OLEADA manda.
+- ✅ El motor (entrar/salir), el cerrojo de guardado, LA LEY DE LAS
+  SECCIONES del minimapa (800×450), la red de caída y la música.
+- ⬜ Los escalones que QUEDAN de la lista vieja (cartografía viva ·
+  vétebras · lluvia de esencias con susurros · juicio del eclipse ·
+  sala del fusionado · multijugador) — leídos a la luz del rework.

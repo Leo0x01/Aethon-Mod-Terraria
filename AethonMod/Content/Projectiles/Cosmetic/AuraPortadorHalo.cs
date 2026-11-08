@@ -143,7 +143,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.whoAmI == Main.myPlayer &&
                            duenio.GetModPlayer<ShardPlayer>().MomentosHambre > 0;
                 case 2:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendida;
+                    // v6.118 — el aura vive con la bandera REAL o la VISUAL
+                    // de la Forma Eterna (la visual viste sin volar).
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendida ||
+                           duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaVisual;
                 case 3:
                     return duenio.GetModPlayer<CosmeticPlayer>().BrasaDelEclipse;
                 case 4:
@@ -154,7 +157,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCuatro;
                 // v6.110 - la octava luz (el modo 11): LAS OFANIM.
                 case 11:
-                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaOcho;
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaOcho ||
+                           duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaOchoVisual;
                 case 7:
                     return duenio.GetModPlayer<CosmeticPlayer>().HaloArcoiris;
             }

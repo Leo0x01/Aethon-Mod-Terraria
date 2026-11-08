@@ -2275,7 +2275,7 @@ Items: {
 		DisplayName: La Forma Eterna
 		Tooltip: ✦ EL COSMÉTICO DEFINITIVO — todo el panteón de la casa en un solo cuerpo
 		Titulo: "[c/B96EEA:═══ LA FORMA ETERNA ═══]"
-		Linea1: "[c/D9B3FF:LAS DOS LUCES + EL VUELO INFINITO — la Forma Ascendida y LAS OFANIM: el aura de la Luz Primordial y las ruedas de Ezequiel vistiéndote, y el cielo es tuyo sin cansancio]"
+		Linea1: "[c/D9B3FF:LAS DOS LUCES — la Forma Ascendida y LAS OFANIM: el aura de la Luz Primordial y las ruedas de Ezequiel vistiéndote; el cielo es cosa de las alas]"
 		Linea2: "[c/D9B3FF:LA BRASA DEL ECLIPSE, EL ANILLO RÚNICO DORSAL y EL BRILLO DE LOS SOLES RÚNICOS — el humo negro y oro, la triple corona de conjuro y los destellos de cuatro puntas]"
 		Linea3: "[c/9FA8DA:+40 de maná, +8% daño mágico, +4% crítico mágico, +2 regeneración, +8% daño melé, +3% crítico melé y +3 defensa — el Sello del Génesis y los Anillos del Sol Rúnico]"
 		Linea4: "[c/B96EEA:EL AURA DEL VACÍO — el campo invisible de 19 tiles que viste a los impíos con la quemadura del vacío exterior, y mientras arden: +10% ataque y +10 defensa]"
@@ -3832,6 +3832,7 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: El Prisma del Eterno
+	PaginaDelEternoTile.MapEntry: La Página del Eterno
 }
 
 Duende: {

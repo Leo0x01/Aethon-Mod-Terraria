@@ -49,6 +49,14 @@ namespace AethonMod.Content.Items.Alas
             mp.Equipada = true;
             mp.OcultarVisual = hideVisual;
             mp.AlaEstilo = Estilo;
+            // v6.118 — EL CINTURÓN DEL ARNÉS (la letra: «a todas las alas
+            // del mod tienes que darle inmunidad a las caidas»): la
+            // inmunidad vive en AlasAuroraPlayer.PostUpdateEquips (el punto
+            // central que cubre las CINCO por la base común) — y AQUÍ se
+            // refuerza en el propio tick del accesorio (el patrón exacto
+            // de vanilla con sus huecos): la caída no castiga a quien
+            // lleva alas de la casa, viva donde viva el tick.
+            player.noFallDmg = true;
         }
 
         public override void UpdateVanity(Player player)

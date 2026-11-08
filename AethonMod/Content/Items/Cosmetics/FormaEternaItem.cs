@@ -52,20 +52,19 @@ namespace AethonMod.Content.Items.Cosmetics
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
             // ==========================================================
-            //  v6.115 — LA BANDERA EN VIVO (EL FIX DEL VUELO — la misma
-            //  lección de la v6.50.49 documentada en FormaAscendidaItem:
-            //  las banderas de los cosméticos hay que encenderlas AQUÍ,
-            //  DENTRO de Player.UpdateEquips, para que PostUpdateEquips
-            //  — el hook que inyecta la física de alas — las vea
-            //  ENCENDIDAS en este MISMO tick. En la v6.114 la única
-            //  detección de la Forma Eterna vivía en el escaneo de
-            //  PostUpdate: TARDE por un hook — el vuelo NUNCA corrió
-            //  («este item no tiene vuelo» — la letra del usuario).
-            //  Ahora encendemos LAS CINCO banderas de los vivos:
+            //  v6.118 — LA BANDERA EN VIVO, PERO SOLO-VISUAL (la letra:
+            //  «la forma eterna no debe volar, eso es algo que tienen
+            //  que hacer las alas»): el mismo patrón del fix v6.115 (las
+            //  banderas se encienden DENTRO de Player.UpdateEquips para
+            //  que los hooks las vean EN ESTE tick) — pero ahora la
+            //  Forma Eterna enciende las banderas VISUALES de las dos
+            //  luces (FormaAscendidaVisual/FormaAscendidaOchoVisual):
+            //  el panteón VISTE, el VUELO NO (VueloDivino solo lee las
+            //  banderas reales — el cielo es cosa de las alas).
             // ==========================================================
             var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
-            visuales.FormaAscendida = true;       // LA PRIMERA LUZ + EL VUELO INFINITO
-            visuales.FormaAscendidaOcho = true;   // LAS OFANIM (la octava luz + su vuelo)
+            visuales.FormaAscendidaVisual = true;   // LA PRIMERA LUZ (el aura, sin vuelo)
+            visuales.FormaAscendidaOchoVisual = true; // LAS OFANIM (la octava luz, sin vuelo)
             visuales.AnilloDorsal = true;         // la triple corona de conjuro
             visuales.BrasaDelEclipse = true;      // el aura de humo negro y oro
             visuales.BrilloSolar = true;          // los destellos de 4 puntas
@@ -109,15 +108,14 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void UpdateVanity(Player player)
         {
-            // v6.115 — EL VUELO TAMBIÉN EN VANIDAD (la regla de la casa:
-            // «un cosmético es un cosmético viva donde lo pongas» — los
-            // OCHO originales encienden sus banderas desde el hueco de
-            // vanidad y la Forma Eterna hereda el mismo derecho: las
-            // DOS LUCES y sus visuales viven también aquí; el aura y los
-            // stats, como en el original, solo en el hueco funcional).
+            // v6.118 — EL PANTEÓN TAMBIÉN EN VANIDAD, SOLO-VISUAL (la regla
+            // de la casa: «un cosmético es un cosmético viva donde lo
+            // pongas» — y la letra nueva: NINGUNA de las dos luces de la
+            // Forma Eterna inyecta vuelo, ni del hueco funcional ni del de
+            // vanidad: el cielo es cosa de las alas).
             var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
-            visuales.FormaAscendida = true;
-            visuales.FormaAscendidaOcho = true;
+            visuales.FormaAscendidaVisual = true;
+            visuales.FormaAscendidaOchoVisual = true;
             visuales.AnilloDorsal = true;
             visuales.BrasaDelEclipse = true;
             visuales.BrilloSolar = true;

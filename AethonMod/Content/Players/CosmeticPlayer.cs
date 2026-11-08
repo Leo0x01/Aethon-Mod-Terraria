@@ -89,6 +89,21 @@ namespace AethonMod.Content.Players
         /// blanco fuego → oro vivo → brasa violeta)?</summary>
         public bool FormaAscendidaOcho;
 
+        // v6.118 — LA SEPARACIÓN VISUAL/VUELO (la letra: «la forma eterna
+        // no debe volar, eso es algo que tienen que hacer las alas»): la
+        // Forma Eterna enciende estas DOS banderas de SOLO-VISUAL — el aura
+        // de la Primera Luz y LAS OFANIM visten al portador SIN inyectar
+        // vuelo (VueloDivino solo lee las banderas REALES, que encienden
+        // los ítems de las formas por sí mismos). Con una forma REAL
+        // puesta, la bandera real manda (vuelo legítimo); la Forma Eterna
+        // sola viste el panteón y camina.
+        /// <summary>¿Viste el AURA de la Primera Luz SIN vuelo (la Forma
+        /// Eterna)?</summary>
+        public bool FormaAscendidaVisual;
+
+        /// <summary>¿Viste el AURA de LAS OFANIM SIN vuelo (la Forma Eterna)?</summary>
+        public bool FormaAscendidaOchoVisual;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
@@ -141,6 +156,8 @@ namespace AethonMod.Content.Players
             FormaAscendidaTres = false;
             FormaAscendidaCuatro = false;
             FormaAscendidaOcho = false;
+            FormaAscendidaVisual = false;
+            FormaAscendidaOchoVisual = false;
             HaloArcoiris = false;
             BrasaDelEclipse = false;
             BrilloSolar = false;
@@ -192,9 +209,12 @@ namespace AethonMod.Content.Players
                 // UpdateAccessory.
                 else if (item.type == formaEternaType)
                 {
+                    // v6.118 — SOLO-VISUAL (la letra: «la forma eterna no
+                    // debe volar»): el escaneo viste el panteón con las
+                    // banderas VISUALES — el vuelo vive en las alas.
                     AnilloDorsal = true;
-                    FormaAscendida = true;
-                    FormaAscendidaOcho = true;
+                    FormaAscendidaVisual = true;
+                    FormaAscendidaOchoVisual = true;
                     BrasaDelEclipse = true;
                     BrilloSolar = true;
                 }
@@ -298,7 +318,7 @@ namespace AethonMod.Content.Players
             //     sincroniza.
             if (Player.whoAmI == Main.myPlayer)
             {
-                if (FormaAscendida && !EspiarPortador(2))
+                if ((FormaAscendida || FormaAscendidaVisual) && !EspiarPortador(2))
                 {
                     Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendida"),
                         Player.Center, Vector2.Zero,
@@ -328,7 +348,7 @@ namespace AethonMod.Content.Players
                 }
                 // v6.110 — LA FORMA ASCENDIDA 8 (el modo 11 del portador:
                 // LAS OFANIM — la octava luz, las ruedas de Ezequiel).
-                if (FormaAscendidaOcho && !EspiarPortador(11))
+                if ((FormaAscendidaOcho || FormaAscendidaOchoVisual) && !EspiarPortador(11))
                 {
                     Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaOcho"),
                         Player.Center, Vector2.Zero,
@@ -373,8 +393,8 @@ namespace AethonMod.Content.Players
             //     alas» — la primera luz es el aura PURA.
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
-            if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres ||
-                FormaAscendidaCuatro || FormaAscendidaOcho)
+            if (FormaAscendida || FormaAscendidaVisual || FormaAscendidaDos || FormaAscendidaTres ||
+                FormaAscendidaCuatro || FormaAscendidaOcho || FormaAscendidaOchoVisual)
             {
                 Vector2 centro = Player.Center;
 
@@ -421,7 +441,7 @@ namespace AethonMod.Content.Players
                 // apoteosis absoluta alumbra el doble. v6.50.49 — la
                 // Forma 3 es EL TRONO: la luz del arcoíris, BLANCA
                 // entera (el blanco que contiene TODOS los colores).
-                Vector3 luz = FormaAscendidaOcho
+                Vector3 luz = (FormaAscendidaOcho || FormaAscendidaOchoVisual)
                     ? new Vector3(0.96f, 0.92f, 1.02f)   // LAS OFANIM: la luz de acero del trono
                     : FormaAscendidaCuatro
                     ? new Vector3(1.55f, 1.38f, 1.02f)

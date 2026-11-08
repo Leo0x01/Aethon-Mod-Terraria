@@ -1214,17 +1214,40 @@ namespace AethonMod.Content.VFX
         /// <param name="trago">0..1 — el avance del tragado (0 = cubierto, 1 = inhalado).</param>
         public static void Devorador(Vector2 punta, NPC jefe, float intensidad, float alfa, float tiempo, int semilla, Vector2[] col = null, float trago = 0f)
         {
-            if (alfa <= 0.02f || intensidad <= 0.02f || jefe == null || !jefe.active) return;
+            if (jefe == null || !jefe.active) return;
+            DevoradorNucleo(punta, jefe.Center,
+                MathHelper.Clamp(jefe.width * 0.62f, 76f, 330f),
+                MathHelper.Clamp(jefe.height * 0.62f, 76f, 350f),
+                intensidad, alfa, tiempo, semilla, col, trago);
+        }
+
+        /// <summary>
+        /// v6.118 — LA PRESA ES EL JUGADOR: la misma cobertura total del
+        /// Devorador, medida al CUERPO del portador (la devoración del
+        /// MUNDO INTERIOR calca el festín de los jefes — la letra: «usa la
+        /// misma animación que el grimorio usa para devorar a los jefes»).
+        /// La elipse del jugador es menuda: semianchos del hitbox + un
+        /// manto generoso (la nube ENVUELVE a la presa, no la aprieta).
+        /// </summary>
+        public static void Devorador(Vector2 punta, Player presa, float intensidad, float alfa, float tiempo, int semilla, Vector2[] col = null, float trago = 0f)
+        {
+            if (presa == null || !presa.active) return;
+            DevoradorNucleo(punta, presa.Center,
+                MathHelper.Clamp(presa.width * 0.62f + 26f, 40f, 120f),
+                MathHelper.Clamp(presa.height * 0.62f + 30f, 44f, 130f),
+                intensidad, alfa, tiempo, semilla, col, trago);
+        }
+
+        /// <summary>v6.118 — EL NÚCLEO COMPARTIDO (el cuerpo histórico del
+        /// Devorador de jefes, intacto): las dos sobrecargas solo miden la
+        /// elipse de SU presa.</summary>
+        private static void DevoradorNucleo(Vector2 punta, Vector2 centro, float rx, float ry,
+            float intensidad, float alfa, float tiempo, int semilla, Vector2[] col, float trago)
+        {
+            if (alfa <= 0.02f || intensidad <= 0.02f) return;
             if (Main.netMode == NetmodeID.Server) return;
             intensidad = MathHelper.Clamp(intensidad, 0f, 1f);
             trago = MathHelper.Clamp(trago, 0f, 1f);
-
-            Vector2 centro = jefe.Center;
-            // === LA ELIPSE REAL DEL JEFE (la cura del Rey Slime a medias):
-            // semianchos del hitbox + 24% de margen — CUBRE LA CORONA y
-            // los pies, sea alto, ancho o cuadrado ===
-            float rx = MathHelper.Clamp(jefe.width * 0.62f, 76f, 330f);
-            float ry = MathHelper.Clamp(jefe.height * 0.62f, 76f, 350f);
 
             // (C) EL TRAGADO: la masa se CIÑE con cada bocanada (4,6 Hz) y
             // TODO el conjunto ENCOGE hacia la punta conforme trago→1

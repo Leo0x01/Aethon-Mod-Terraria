@@ -507,6 +507,19 @@ namespace AethonMod.Content.Systems
         /// </summary>
 
 
+        /// <summary>
+        /// v6.118 — LA PUERTA DEL INTERIOR: el festín muere AQUÍ y AHORA
+        /// (lo llaman SubmundoGrimorio al ENTRAR y al SALIR — las oleadas
+        /// NUNCA cruzan la frontera del cuerpo del dios: las de afuera no
+        /// persiguen adentro, las de adentro no escapan afuera).
+        /// </summary>
+        public static void DetenerFestin()
+        {
+            if (_fase == Fase.Inactivo) return;
+            try { Terminar(); }
+            catch { _fase = Fase.Inactivo; }
+        }
+
         public static void Provocar(Player jugador, int oleadas, bool natural = false)
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return; // el servidor manda

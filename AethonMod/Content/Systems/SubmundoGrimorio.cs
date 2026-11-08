@@ -20,66 +20,82 @@ using Terraria.Utilities;
 using Terraria.UI;
 using Terraria.WorldBuilding;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 using static Terraria.ModLoader.ModContent;
 
 namespace AethonMod.Content.Systems
 {
     // ======================================================================
-    //  SubmundoGrimorio — v6.117 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO.
+    //  SubmundoGrimorio — v6.118 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO:
+    //  LA SUPERFICIE DEL CUERPO DEL DIOS, EN ECLIPSE PERMANENTE Y BAJO EL
+    //  CICLO ETERNO DE LAS OLEADAS DEL HAMBRE.
     //
-    //  LA LETRA DEL USUARIO: «tambien quiero que investigues como crear
-    //  mundos separados… necesito crear un mundo nuevo que sera el mundo
-    //  interior del grimorio del eterno, estara lleno de bruma y de
-    //  momento se puede entrar usando el altar».
+    //  LA LETRA DEL REWORK (v6.118): «el nuevo mundo no es lo que pedí,
+    //  primero tiene que estar en la superficie, luego debe estar en
+    //  eclipse permanente y debe ser el de las oleadas de hambre, luego
+    //  no debe tener circulos planos… el fondo del mundo debe ser un
+    //  mundo de tentaculos por capas y oscuridad por capas, ademas de
+    //  brumas y particulas» + el cuestionario: terreno CONTINUO de
+    //  superficie, ciclo automático de oleadas, enemigos de casa, la
+    //  MEZCLA de materiales (amatista/oro + vetas del tile forjado), el
+    //  ojo colosal FUERA (los ojos del cielo lo reemplazan — TODOS te
+    //  miran) y TODAS las brumas (paralaje · columnas · volutas ·
+    //  reactiva).
     //
-    //  LA INVESTIGACIÓN: se leyó la mecánica de SubworldLibrary (jjohnsnaill
-    //  — sin licencia: SOLO la mecánica se aprendió, TODO este código es
-    //  de la casa). El ciclo que la hace posible en SP:
-    //    ENTRAR — menú 10 → guardar jugador y mundo principal →
-    //      SystemLoader.OnWorldUnload → fijar dimensiones nuevas →
-    //      WorldGen.setWorldSize + clearWorld → generar a mano →
-    //      QueueMainThreadAction(Spawn + gameMenu=false).
-    //    DENTRO — un hook en WorldFile.SaveWorld_bool_bool BLOQUEA el
-    //      guardado (el interior NUNCA pisa el archivo del mundo real);
-    //      el reloj se clava en la medianoche eterna.
-    //    SALIR — menú 10 → guardar jugador (el mundo NO se guarda) →
-    //      OnWorldUnload → recargar el mundo principal DESDE DISKCO →
-    //      Spawn + devolver al jugador al altar donde entró.
+    //  LO QUE VIVE AHORA (v6.118):
+    //   · LA SUPERFICIE: terreno CONTINUO de borde a borde (colinas de
+    //     AmethystGemspark con corteza GoldBrick — el filo de la
+    //     página), la PLAZA plana al centro con el prisma, LAS VETAS de
+    //     LA PÁGINA DEL ETERNO (el tile forjado — el oro del veredicto
+    //     corriéndole por la carne) y EL CORAZÓN de amatista bajo la
+    //     plaza (su LATIDO pulsa TODO el mundo: el cielo, la oscuridad
+    //     y las brumas).
+    //   · EL ECLIPSE PERMANENTE: sol Sun3 clavado en el cenit + tinte
+    //     morado + niebla de cementerio — y durante el festín, EL TINTE
+    //     DE LA OLEADA manda (el eclipse morado de las oleadas de
+    //     hambre, cedido suave).
+    //   · EL CICLO ETERNO: cada ~2,5 min de calma el libro SIRVE una
+    //     oleada (GrimorioFuriaSistema.Provocar — los enemigos DE LA
+    //     CASA escalados por el nivel del portador), en bucle eterno.
+    //   · EL FONDO: CieloInteriorEterno (el CustomSky de la casa) — las
+    //     TRES CAPAS de tentáculos con la Piel del Eterno de la Forja,
+    //     los ojos que te siguen, el polvo estelar y las brumas del
+    //     astro. EL VELO de abajo viste la OSCURIDAD POR CAPAS con
+    //     BrumaFX real (CERO círculos planos — la letra) y las motas
+    //     son partículas de casa (CERO Dust de vanilla).
     //
-    //  EL MUNDO: 800×400 de vacío — un cielo sin sol (la medianoche
-    //  eterna), islas flotantes de amatista encendida (AmethystGemspark
-    //  — el cristal que BRILLA violeta) con el borde dorado de las
-    //  páginas, la PLAZA DEL ALTAR al centro (con el altar de la
-    //  consagración para VOLVER), y encima de todo EL VELO DE BRUMA:
-    //  la interfaz más baja del juego pintada con la niebla violeta de
-    //  la casa, las bandas de neblina corriendo, las motas a la deriva
-    //  y EL OJO COLOSAL del grimorio mirando desde arriba — parpadea y
-    //  SIGUE AL JUGADOR.
+    //  LO QUE SE CONSERVA (si funciona, no se toca): el motor ENTRAR/
+    //  SALIR completo (el ciclo SubworldLibrary probado y blindado), el
+    //  cerrojo de guardado, LA LEY DE LAS SECCIONES del minimapa
+    //  (800×450), el préstamo idempotente del sol, la red de caída, el
+    //  faro de la devoración en OnPostDraw y su contrato de lote, y la
+    //  música.
     //
     //  DE MOMENTO (la letra): SP solamente — en multijugador el altar
     //  explica que el interior solo se abre en mundo de un jugador.
     // ======================================================================
     public class SubmundoGrimorio : ModSystem
     {
-        // === EL TAMAÑO DE LA CASA: 800×450 — compacto, TODO ≤8400×2400.
-        // v6.117 — LA LEY DE LAS SECCIONES (leída en el IL del tML
-        // 2026.9.3.1 real, la cura del crash del client.log): el
-        // minimapa dibuja el mundo en SECCIONES DE 200×150 TILES
-        // (WorldSections + Main.DrawToMap_Section) y los mundos de
-        // vanilla (4200×1200 / 6400×1800 / 8400×2400) son TODOS
-        // múltiplos exactos de esas medidas. El interior de la v6.115
-        // medía 800×400: la fila de secciones y=2 cubre los tiles
-        // 300–449 y el índice Map[x, 400..449] REVIENTA con
-        // IndexOutOfRangeException (Main engine crash al entrar). LA
-        // CURA: 450 = 3×150 EXACTO (y 800 = 4×200 exacto) — el
-        // interior nace con secciones PERFECTAS como los mundos de
-        // vanilla. ===
+        // === EL TAMAÑO DE LA CASA: 800×450 — LA LEY DE LAS SECCIONES
+        // (v6.117, leída en el IL del tML 2026.9.3.1 real: el minimapa
+        // camina el mundo en SECCIONES DE 200×150 TILES y TODOS los
+        // mundos de vanilla son múltiplos exactos — 800 = 4×200 EXACTO
+        // y 450 = 3×150 EXACTO: el interior nace con secciones
+        // PERFECTAS; NI UN TILE menos ni uno más). ===
         private const int Ancho = 800;
         private const int Alto = 450;
-        private const int Superficie = 60;      // las islas viven BAJO el cielo abierto
-        private const int Roca = 160;
+        // v6.118 — LAS LÍNEAS DEL TERRENO CONTINUO: las colinas de la
+        // superficie viven entre y≈95 y y≈145 (la PLAZA plana con su
+        // primer tile sólido en PlazaY−7 = 113); worldSurface = 150
+        // queda BAJO el terreno (el portador de pie vive EN LA ZONA DEL
+        // CIELO — el CustomSky del cuerpo se ve de verdad; el interior
+        // viejo enterraba la plaza 58 tiles bajo la superficie: el cielo
+        // NUNCA existió a la vista) y rockLayer = 270 abre la zona de
+        // la carne profunda (las paredes de la profundidad mandan).
+        private const int Superficie = 150;
+        private const int Roca = 270;
         private const int PlazaX = 400;
-        private const int PlazaY = 208;
+        private const int PlazaY = 120;   // la plaza: su roca alta es PlazaY−7
 
         /// <summary>¿Estamos DENTRO del mundo interior?</summary>
         public static bool Activo;
@@ -109,6 +125,44 @@ namespace AethonMod.Content.Systems
         // clavado en el cenit del interior mientras este viva) ===
         private static Asset<Texture2D> _solOriginal;
         private static bool _solPuesto;
+
+        // ================================================================
+        //  v6.118 — LA VIDA NUEVA DEL CUERPO DEL DIOS
+        // ================================================================
+
+        /// <summary>EL LATIDO DEL CORAZÓN de amatista (0..1 — sube como
+        /// una ola cada ~5 s): el cielo de tentáculos, la OSCURIDAD por
+        /// capas y las brumas del interior se hinchan a cada golpe — el
+        /// cuerpo del dios RESPIRA (lo leen CieloInteriorEterno, el velo
+        /// y las columnas de bruma).</summary>
+        public static float PulsoCorazon;
+
+        /// <summary>LAS VENTANAS DE VIDA del terreno (posiciones de MUNDO
+        /// donde la carne respira: LAS COLUMNAS de bruma ascienden y las
+        /// MOTES DE ORO nacen — las genera GenerarInterior, siempre las
+        /// mismas: el interior se regenera idéntico).</summary>
+        private static Vector2[] _vents;
+
+        /// <summary>El reloj de calma del CICLO ETERNO de oleadas (cuenta
+        /// hacia CalmaTicks entre festines).</summary>
+        private static int _ticksCalma;
+
+        /// <summary>¿Cuántos festines ha servido el libro dentro? (la
+        /// memoria del ciclo — el apetito del dios crece mientras el
+        /// portador se queda).</summary>
+        private static int _ciclosFestin;
+
+        /// <summary>El ciclo de calma entre oleadas (~2,5 min — el
+        /// cuestionario: «2-3 min de calma y luego una oleada, en bucle
+        /// eterno»).</summary>
+        private const int CalmaTicks = 60 * 60 * 5 / 2;   // 9000 t ≈ 2,5 min
+
+        /// <summary>EL CEDIMIENTO DEL TINTE (0..1): cuando el festín vive
+        /// dentro, EL ECLIPSE DE LA OLEADA manda (AmbienteOleadaSistema
+        // — «ya sabes el eclipse de las oleadas de hambre»); el tinte
+        /// propio del interior se apaga SUAVE (lerp ~2 s, nada de
+        /// cortes).</summary>
+        private static float _tinteCedido;
 
         // === EL VELO (la bruma que cubre el interior) ===
         private static Texture2D _softGlow;
@@ -145,6 +199,12 @@ namespace AethonMod.Content.Systems
             _softGlow = null;
             BrumaFaro = 0f;
             Revelado = 0;
+            // v6.118 — la vida nueva también muere con la descarga
+            PulsoCorazon = 0f;
+            _vents = null;
+            _ticksCalma = 0;
+            _ciclosFestin = 0;
+            _tinteCedido = 0f;
             DevolverSolEclipse();
         }
 
@@ -194,6 +254,14 @@ namespace AethonMod.Content.Systems
                     Main.NewText(razon, new Color(190, 160, 220));
                 return;
             }
+            // v6.118 — EL FESTÍN NO CRUZA LA PUERTA: si una oleada corría en
+            // el mundo real, muere AQUÍ (el interior sirve SU PROPIO ciclo
+            // eterno — las oleadas de afuera no persiguen al portador
+            // adentro del cuerpo del dios).
+            try { GrimorioFuriaSistema.DetenerFestin(); } catch { }
+            _ticksCalma = 0;
+            _ciclosFestin = 0;
+            _tinteCedido = 0f;
             Transicion = true;
             _mundoPrincipal = Main.ActiveWorldFileData;
             // la vuelta cae ENCIMA del altar, dos tiles arriba — no dentro.
@@ -319,6 +387,14 @@ namespace AethonMod.Content.Systems
         public static void Salir(Player player)
         {
             if (!Activo || Transicion) return;
+            // v6.118 — EL FESTÍN MUERE CON EL CUERPO: las oleadas del
+            // interior NO persiguen al portador al mundo real (la furia
+            // del libro se queda en su casa — afuera manda SU reloj).
+            try { GrimorioFuriaSistema.DetenerFestin(); } catch { }
+            _ticksCalma = 0;
+            _ciclosFestin = 0;
+            _tinteCedido = 0f;
+            PulsoCorazon = 0f;
             Transicion = true;
             Main.statusText = Language.GetTextValue("Mods.AethonMod.Submundo.Cerrando");
             Main.menuMode = 10;
@@ -517,23 +593,23 @@ namespace AethonMod.Content.Systems
         // ==================================================================
         //  LA GENERACIÓN — EL INTERIOR SIEMPRE IGUAL (la semilla fija de
         //  la casa: el grimorio ES su interior, no cambia de humor).
+        //  v6.118 — LA SUPERFICIE DEL CUERPO: terreno CONTINUO de borde a
+        //  borde (la letra: «primero tiene que estar en la superficie») —
+        //  colinas de AMATISTA ENCENDIDA con la corteza dorada de la
+        //  página, LAS VETAS de la PÁGINA DEL ETERNO corriendo por la
+        //  carne, LAS VENTANAS donde la carne respira y EL CORAZÓN de
+        //  amatista bajo la plaza. Las islas flotantes MURIERON.
         // ==================================================================
         private static void GenerarInterior()
         {
-            // LA PLAZA DEL ALTAR — la isla mayor, la puerta de vuelta.
-            Isla(PlazaX, PlazaY, 30, 7);
-
+            // === LA PLAZA DEL ALTAR: plana, al centro (la puerta de vuelta) ===
             // v6.115 — EL PRISMA DEL ETERNO en el corazón de la plaza
             // (la letra: «en el momento en que el jugador aparece en el
-            // mundo debe aparecer un altar que sera un primsma de
-            // colores, este tiene la capacidad de enviar de regreso al
-            // jugador y ademas de invocar a aethon»): DE PIE sobre la
-            // superficie — LA CURA DEL ENTIERRO (la superficie de la
-            // plaza vive en PlazaY−7; el altar de la v6.114 nacía en
-            // PlazaY−1, SEIS filas DENTRO de la roca: PlaceObject
-            // fallaba en silencio y el interior quedaba SIN PUERTA).
-            // El prisma ocupa PlazaY−10..PlazaY−8: su fila de abajo es
-            // EL PRIMER AIRE y sus pies tocan el dorado de la página.
+            // mundo debe aparecer un altar que sera un prisma de
+            // colores…»): DE PIE sobre la superficie — LA CURA DEL
+            // ENTIERRO (v6.117): el prisma ocupa PlazaY−10..PlazaY−8 y
+            // su fila de abajo es EL PRIMER AIRE (la roca alta de la
+            // plaza es PlazaY−7).
             try
             {
                 WorldGen.PlaceObject(PlazaX, PlazaY - 8,
@@ -541,71 +617,177 @@ namespace AethonMod.Content.Systems
             }
             catch { }
 
-            // EL CORAZÓN: una amatista colosal bajo la plaza (el latido).
-            Isla(PlazaX, PlazaY + 26, 10, 5);
-
-            // LAS ISLAS DE LAS PÁGINAS — el archipiélago flotante.
-            Isla(250, 150, 18, 5);
-            Isla(560, 160, 16, 5);
-            Isla(170, 260, 14, 4);
-            Isla(630, 250, 15, 4);
-            Isla(330, 120, 12, 4);
-            Isla(480, 110, 11, 4);
-            Isla(210, 190, 10, 3);
-            Isla(600, 200, 10, 3);
-            Isla(400, 90, 13, 4);
-            Isla(300, 300, 16, 5);
-            Isla(500, 310, 14, 4);
-            Isla(150, 330, 12, 4);
-            Isla(650, 330, 12, 4);
-            Isla(400, 360, 20, 6);
-
-            // v6.115 — LAS ISLAS DEL CUERPO CÓSMICO (la letra: «ten
-            // encuenta que es el mundo interno del grimorio asi que
-            // crealo pensando en que el grimorio es una entidad cosmica
-            // exterior todo poderosa»): EL ANILLO DE LA CORONA — seis
-            // islas mayores en círculo amplio alrededor de la plaza
-            // (los pilares del paladar) y EL RÍO DE PÁGINAS — la
-            // constelación menuda que desciende hacia el corazón.
-            Isla(PlazaX - 160, PlazaY - 70, 20, 6);
-            Isla(PlazaX + 160, PlazaY - 70, 20, 6);
-            Isla(PlazaX - 210, PlazaY + 60, 16, 5);
-            Isla(PlazaX + 210, PlazaY + 60, 16, 5);
-            Isla(PlazaX - 90, PlazaY + 120, 13, 4);
-            Isla(PlazaX + 90, PlazaY + 120, 13, 4);
-            Isla(PlazaX - 40, PlazaY - 120, 10, 3);
-            Isla(PlazaX + 40, PlazaY - 120, 10, 3);
-            Isla(PlazaX - 130, PlazaY - 20, 9, 3);
-            Isla(PlazaX + 130, PlazaY - 20, 9, 3);
-
-            // EL MAR DE NIEBLA: nada de líquidos — la bruma es el velo.
-        }
-
-        /// <summary>
-        /// UNA ISLA DE LA CASA: la superficie DORADA (el borde de la
-        /// página), el cuerpo de AMATISTA ENCENDIDA (AmethystGemspark —
-        /// el cristal que ilumina violeta) y el perfil de lente.
-        /// </summary>
-        private static void Isla(int cx, int cy, int rx, int ry)
-        {
-            for (int dx = -rx; dx <= rx; dx++)
+            // === EL TERRENO CONTINUO (el mapa de alturas de la casa con
+            //     BrumaNoise — la MISMA matemática de la niebla de la
+            //     casa dibuja las colinas del dios) ===
+            int[] altura = new int[Ancho];
+            for (int x = 5; x < Ancho - 5; x++)
             {
-                float f = 1f - (float)(dx * dx) / (float)(rx * rx);
-                if (f <= 0f) continue;
-                int alto = Math.Max(1, (int)MathF.Round(ry * MathF.Sqrt(f)));
-                for (int dy = -alto; dy <= alto; dy++)
+                // LAS COLINAS: fBm de la casa (lento y ampuloso — el
+                // cuerpo de un dios no tiene colinas nerviosas)
+                float n = BrumaNoise.WarpedFbm(x * 0.013f, 3.7f, 5150, 2.6f);
+                float alto = 113f + (n - 0.5f) * 76f;   // ±38 tiles alrededor de 113
+                // LA PLAZA PLANa: fusión suave en ±26 del centro
+                float d = Math.Abs(x - PlazaX);
+                if (d < 40f)
                 {
-                    int x = cx + dx, y = cy + dy;
-                    if (x < 5 || x >= Ancho - 5 || y < 5 || y >= Alto - 5) continue;
+                    float k = MathHelper.Clamp((40f - d) / 14f, 0f, 1f);   // el borde del valle
+                    k = k * k * (3f - 2f * k);
+                    alto = MathHelper.Lerp(alto, PlazaY - 7, k);
+                }
+                altura[x] = Math.Max(88, Math.Min(150, (int)alto));
+            }
+
+            // === EL CUERPO: la corteza DORADA (el filo de la página), la
+            //     CARNE DE AMATISTA (el cristal que arde violeta) y el
+            //     FORRO DEL LOMO abajo (las últimas filas: la contratapa
+            //     del libro — el mundo ENTERO descansa sobre ella) ===
+            for (int x = 5; x < Ancho - 5; x++)
+            {
+                int top = altura[x];
+                for (int y = top; y < Alto - 5; y++)
+                {
                     Tile t = Main.tile[x, y];
                     t.HasTile = true;
-                    // la PRIMERA fila de la columna: el ORO de la página.
-                    t.TileType = dy == -alto ? TileID.GoldBrick : TileID.AmethystGemspark;
+                    if (y == top)
+                        t.TileType = TileID.GoldBrick;                     // EL FILO DORADO
+                    else if (y >= Alto - 10)
+                        t.TileType = TileID.GoldBrick;                     // LA CONTRATAPA
+                    else
+                        t.TileType = TileID.AmethystGemspark;              // LA CARNE VIOLETA
                     t.TileFrameX = 0;
                     t.TileFrameY = 0;
                 }
             }
+
+            // === LAS VETAS DE LA PÁGINA DEL ETERNO (el tile forjado —
+            //     «vetas del tile forjado como decoración»): tres ríos
+            //     del ORO DEL VEREDICTO serpenteando por la carne ===
+            int tipoPagina = ModContent.TileType<Tiles.PaginaDelEternoTile>();
+            for (int v = 0; v < 3; v++)
+            {
+                float yBase = 150f + 58f * v + 20f * BrumaNoise.Fbm(v * 13.7f, 0.5f, 5230, 2);
+                for (int x = 8; x < Ancho - 8; x++)
+                {
+                    float ondula = (BrumaNoise.WarpedFbm(x * 0.031f, 9.1f + v * 4.4f, 5290 + v * 17, 2.2f) - 0.5f) * 34f;
+                    int yV = (int)(yBase + ondula);
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        int y = yV + dy;
+                        if (y <= altura[x] + 3 || y >= Alto - 12) continue;  // vive DENTRO de la carne
+                        Tile t = Main.tile[x, y];
+                        if (t == null || !t.HasTile) continue;
+                        t.TileType = (ushort)tipoPagina;
+                        t.TileFrameX = (short)(VFXCore.Hash01(x, y, 6118 + v) > 0.62f ? 18 : 0);  // 2 variantes vivas
+                        t.TileFrameY = 0;
+                    }
+                }
+            }
+
+            // === EL CORAZÓN DE AMATISTA: la cámara geoda bajo la plaza
+            //     (el latido nace aquí — una elipse hueca forrada de oro
+            //     con la veta del Eterno convergiendo en su techo) ===
+            int cx = PlazaX, cy = PlazaY + 44;
+            for (int dx = -12; dx <= 12; dx++)
+            {
+                float f = 1f - (float)(dx * dx) / 144f;
+                if (f <= 0f) continue;
+                int alto = (int)MathF.Round(8f * MathF.Sqrt(f));
+                for (int dy = -alto; dy <= alto; dy++)
+                {
+                    int x = cx + dx, y = cy + dy;
+                    if (x < 5 || x >= Ancho - 5 || y < 5 || y >= Alto - 12) continue;
+                    Tile t = Main.tile[x, y];
+                    if (dy == -alto || dy == alto || Math.Abs(dx) == 12)
+                    {
+                        t.HasTile = true;
+                        t.TileType = Math.Abs(dx) == 11 || Math.Abs(dx) == 12
+                            ? (ushort)tipoPagina : (ushort)TileID.GoldBrick;   // el forro: la página y el oro
+                        t.TileFrameX = (short)(VFXCore.Hash01(x, y, 6120) > 0.5f ? 18 : 0);
+                        t.TileFrameY = 0;
+                    }
+                    else
+                    {
+                        t.HasTile = false;                                 // LA CÁMARA HUECA
+                    }
+                }
+            }
+            // el piso de la cámara sigue siendo carne (nadie cae al vacío)
+            for (int dx = -11; dx <= 11; dx++)
+            {
+                int y = cy + 9;
+                if (y < Alto - 10 && cx + dx > 5 && cx + dx < Ancho - 5)
+                {
+                    Tile t = Main.tile[cx + dx, y];
+                    t.HasTile = true;
+                    t.TileType = TileID.AmethystGemspark;
+                    t.TileFrameX = 0;
+                    t.TileFrameY = 0;
+                }
+            }
+            // LA BOQUILLA: un tiro vertical estrecho de la plaza a la
+            // cámara (la veta sube y baja por él — la entrada al corazón)
+            for (int y = PlazaY - 6; y < cy - 8; y++)
+            {
+                Tile t = Main.tile[cx + 4, y];
+                t.HasTile = false;
+                Tile t2 = Main.tile[cx + 5, y];
+                t2.HasTile = false;
+            }
+
+            // === LAS VENTANAS DE VIDA (donde la carne respira): cinco
+            //     respiraderos deterministas repartidos por el mundo —
+            //     de ellos suben LAS COLUMNAS DE BRUMA y nacen LAS MOTES
+            //     DE ORO (las posiciones viven en _vents para el pase
+            //     del mundo; siempre las mismas: el dios respira igual) ===
+            _vents = new Vector2[5];
+            int vi = 0;
+            for (int k = 0; k < 5; k++)
+            {
+                int x = 90 + k * 155 + (int)(VFXCore.Hash01(k * 31 + 7, 1, 6130) * 60f) - 30;
+                if (x < 8 || x >= Ancho - 8) x = 90 + k * 155;
+                if (Math.Abs(x - PlazaX) < 40) x = PlazaX + (x < PlazaX ? -70 : 70);  // lejos de la plaza
+                if (x < 8 || x >= Ancho - 8) continue;
+                int y = altura[x] - 1;
+                _vents[vi++] = new Vector2(x * 16f + 8f, y * 16f + 8f);
+                // la ventana: una pequeña cavidad en la superficie
+                for (int dx2 = -2; dx2 <= 2; dx2++)
+                {
+                    for (int dy2 = -2; dy2 <= 1; dy2++)
+                    {
+                        int xx = x + dx2, yy = y + dy2;
+                        if (xx > 5 && xx < Ancho - 5 && yy > 5 && yy < Alto - 10 && Math.Abs(dx2) + Math.Abs(dy2) < 4)
+                        {
+                            // v6.118 — EL PATRÓN DE ESCRITURA DE LA CASA (el
+                            // indexador de Tilemap devuelve el Tile POR
+                            // VALOR en este tML: se escribe vía LOCAL — el
+                            // struct envuelve el almacenamiento real)
+                            Tile tv = Main.tile[xx, yy];
+                            tv.HasTile = false;
+                        }
+                    }
+                }
+                // el marco dorado de la ventana
+                for (int dx2 = -3; dx2 <= 3; dx2++)
+                {
+                    int xx = x + dx2, yy = y + 2;
+                    if (xx > 5 && xx < Ancho - 5 && yy < Alto - 10 && !Main.tile[xx, yy - 3].HasTile)
+                    {
+                        Tile t = Main.tile[xx, yy];
+                        t.HasTile = true;
+                        t.TileType = TileID.GoldBrick;
+                        t.TileFrameX = 0;
+                        t.TileFrameY = 0;
+                    }
+                }
+            }
+            if (vi < _vents.Length) System.Array.Resize(ref _vents, vi);
+
+            // EL MAR DE NIEBLA: nada de líquidos — la bruma es el velo.
         }
+
+        // (LA ISLA FLOTANTE MURIÓ con el rework v6.118 — el terreno
+        // continuo de arriba es el cuerpo entero del dios.)
 
         // ==================================================================
         //  LA VIDA DEL INTERIOR — la medianoche eterna, la bruma viva, la
@@ -642,17 +824,20 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
-        /// v6.115 — EL TINTE DEL ECLIPSE PERMANENTE: el mismo empuje
-        /// morado de la oleada de hambre (su ambiente de día), llevado
-        /// al fondo del vacío — el cielo Y la luz de los tiles viven
-        /// todos hacia el violeta del eclipse (el hook oficial que
-        /// tinta ColorOfTheSkies y la luz en el mismo pase).
+        /// v6.115 — EL TINTE DEL ECLIPSE PERMANENTE · v6.118 — EL
+        /// CEDIMIENTO: cuando el festín vive dentro, EL ECLIPSE DE LA
+        /// OLEADA manda (AmbienteOleadaSistema — «ya sabes el eclipse de
+        /// las oleadas de hambre»); el tinte propio del interior se
+        /// apaga SUAVE (lerp ~2 s) para que los DOS eclipses se crucen
+        /// sin un solo corte de color.
         /// </summary>
         public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
         {
             if (Main.netMode == NetmodeID.Server || !Activo) return;
-            backgroundColor = Color.Lerp(backgroundColor, new Color(92, 38, 120), 0.92f);
-            tileColor = Color.Lerp(tileColor, new Color(172, 112, 196), 0.52f);
+            float fuerza = 1f - _tinteCedido;
+            if (fuerza <= 0.02f) return;
+            backgroundColor = Color.Lerp(backgroundColor, new Color(92, 38, 120), 0.92f * fuerza);
+            tileColor = Color.Lerp(tileColor, new Color(172, 112, 196), 0.52f * fuerza);
         }
 
         /// <summary>EL SOL DEL ECLIPSE SE VISTE (el préstamo del Sun3 —
@@ -702,48 +887,128 @@ namespace AethonMod.Content.Systems
             // nieblas a la vez, sin un corte visible.
             if (BrumaFaro > 0f) BrumaFaro = Math.Max(0f, BrumaFaro - 0.025f);
 
+            // ==============================================================
+            //  v6.118 — EL LATIDO DEL CORAZÓN de amatista (~5 s): una ola
+            //  que sube y muere — TODO el cuerpo del dios respira con
+            //  ella (el cielo de tentáculos se hincha, la OSCURIDAD por
+            //  capas engorda, las columnas de bruma se yerguen y las
+            //  motas de oro se avivan). El golpe se SIENTE: un temblor
+            //  suave de la casa en el pico del latido.
+            // ==============================================================
+            {
+                float fase = (Main.GlobalTimeWrappedHourly % 5f) / 5f;
+                float onda = MathF.Sin(fase * MathHelper.TwoPi);
+                PulsoCorazon = MathF.Pow(MathF.Max(0f, onda), 3f);
+                if (PulsoCorazon > 0.85f && fase > 0.1f && fase < 0.4f && Main.netMode != 2)
+                    OndaLib.Kick(2);   // el golpe del corazón — suave, como manda la casa
+            }
+
+            // ==============================================================
+            //  v6.118 — EL CICLO ETERNO DE LAS OLEADAS DEL HAMBRE: cada
+            //  ~2,5 min de calma, el libro SIRVE una oleada (la letra:
+            //  «debe ser el de las oleadas de hambre» + el cuestionario:
+            //  ciclo automático, enemigos DE LA CASA). El festín corre
+            //  por GrimorioFuriaSistema (el motor de siempre — su HUD,
+            //  su pool, su escala por nivel); el nivel del festín es EL
+            //  NIVEL DEL PORTADOR (FuriaNivel: el dios come a la altura
+            //  de quien lo carga — y el interior NUNCA sube ese nivel:
+            //  probar no es progresar, la lección v6.50.74). Si Aethon
+            //  vive dentro (el prisma lo invoca), el ciclo ESPERA.
+            // ==============================================================
+            bool festinVivo;
+            try { festinVivo = GrimorioFuriaSistema.Activo; } catch { festinVivo = false; }
+            if (!festinVivo)
+            {
+                bool mundoLibre;
+                try { mundoLibre = GrimorioFuriaSistema.MundoLibre(); } catch { mundoLibre = false; }
+                if (mundoLibre)
+                {
+                    _ticksCalma++;
+                    if (_ticksCalma >= CalmaTicks)
+                    {
+                        Player hambriento = Main.LocalPlayer;
+                        if (hambriento != null && hambriento.active && !hambriento.dead)
+                        {
+                            int nivel = 2;
+                            try
+                            {
+                                var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
+                                if (sp != null) nivel = Math.Max(2, Math.Min(10, sp.FuriaNivel));
+                            }
+                            catch { }
+                            GrimorioFuriaSistema.Provocar(hambriento, nivel, natural: false);
+                            _ciclosFestin++;
+                            _ticksCalma = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _ticksCalma = 0;
+            }
+
+            // EL CEDIMIENTO DEL TINTE: el eclipse de la oleada manda
+            // mientras el festín viva (cruce suave ~2 s — sin cortes).
+            {
+                bool festinVisible;
+                try { festinVisible = AmbienteOleadaSistema.FestinVisible; }
+                catch { festinVisible = false; }
+                float objetivo = festinVisible ? 1f : 0f;
+                _tinteCedido += (objetivo - _tinteCedido) * 0.012f;
+                if (_tinteCedido < 0.005f) _tinteCedido = 0f;
+                if (_tinteCedido > 0.995f) _tinteCedido = 1f;
+            }
+
             Player p = Main.LocalPlayer;
             if (p == null || !p.active) return;
 
             // LA LUZ DEL VACÍO: el portador nunca está a ciegas — el
-            // interior lo abraza con un aura violeta tenue.
+            // interior lo abraza con un aura violeta tenue (más el
+            // AURA DEL LATIDO cuando el corazón golpea).
             try
             {
-                Lighting.AddLight(p.Center, new Vector3(0.34f, 0.20f, 0.52f));
+                float latido = 0.9f + 0.5f * PulsoCorazon;
+                Lighting.AddLight(p.Center, new Vector3(0.34f * latido, 0.20f * latido, 0.52f * latido));
 
-                // LA BRUMA VIVA: motas de niebla derivando por la pantalla
-                // — pares grandes y tenues (el mar de niebla) + alguna
-                // chispa pequeña más viva (el polvo de las páginas).
-                if (Main.rand.NextBool(3))
+                // ==========================================================
+                //  v6.118 — LAS MOTES DE ORO (la letra: «particulas» + el
+                //  cuestionario: motas doradas de esencia subiendo con luz
+                //  propia): LAS ESENCIAS DEVORADAS circulan por el cuerpo
+                //  del dios — nacen en LAS VENTANAS de vida y alrededor
+                //  del portador, suben en espiral LENTA y se disuelven en
+                //  violeta. Partículas DE LA CASA (ParticleManager — los
+                //  Dust de vanilla MURIERON con el rework: «no debe tener
+                //  circulos planos»).
+                // ==========================================================
+                if (Main.netMode != NetmodeID.Server)
                 {
-                    Vector2 pos = p.Center + new Vector2(
-                        Main.rand.NextFloat(-0.62f, 0.62f) * Main.screenWidth,
-                        Main.rand.NextFloat(-0.55f, 0.55f) * Main.screenHeight);
-                    float deriva = Main.rand.NextFloat(0.25f, 0.7f) *
-                        (Main.rand.NextBool() ? 1f : -1f);
-                    Dust d = Dust.NewDustPerfect(pos, DustID.Smoke,
-                        new Vector2(deriva, Main.rand.NextFloat(-0.05f, 0.08f)),
-                        90, new Color(120, 84, 178), Main.rand.NextFloat(2.2f, 3.6f));
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                    d.alpha = 160;
-                }
-                if (Main.rand.NextBool(9))
-                {
-                    Vector2 pos = p.Center + new Vector2(
-                        Main.rand.NextFloat(-0.6f, 0.6f) * Main.screenWidth,
-                        Main.rand.NextFloat(-0.5f, 0.5f) * Main.screenHeight);
-                    Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Pink,
-                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
-                                    Main.rand.NextFloat(0.05f, 0.35f)),
-                        130, new Color(190, 150, 240), Main.rand.NextFloat(0.6f, 1.1f));
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
+                    // de las ventanas cercanas (≤1 mota cada 20 t por
+                    // ventana — el GATE del tick evita las ráfagas: la
+                    // semilla cuantizada dispararía 20 veces por ventana)
+                    if (_vents != null && (Main.GameUpdateCount % 20u) == 0u)
+                    {
+                        foreach (Vector2 vent in _vents)
+                        {
+                            if (Vector2.DistanceSquared(vent, p.Center) > 1500f * 1500f) continue;
+                            if (VFXCore.Hash01((int)(vent.X * 0.13f), (int)(Main.GameUpdateCount / 20), 6140) < 0.55f)
+                                continue;
+                            SpawnMotaDorada(vent + new Vector2(
+                                (VFXCore.Hash01((int)vent.X, (int)Main.GameUpdateCount, 6141) - 0.5f) * 26f, 0f));
+                        }
+                    }
+                    // el aliento del portador (1 cada ~20 t — la esencia
+                    // que el libro ya probó se le escapa dorada)
+                    if ((Main.GameUpdateCount % 20u) == 7u &&
+                        VFXCore.Hash01(p.whoAmI * 3, (int)(Main.GameUpdateCount / 20), 6143) < 0.55f)
+                        SpawnMotaDorada(p.Center + new Vector2(
+                            (VFXCore.Hash01(p.whoAmI, (int)Main.GameUpdateCount, 6144) - 0.5f) * 44f,
+                            10f + VFXCore.Hash01(p.whoAmI + 1, (int)Main.GameUpdateCount, 6145) * 26f));
                 }
 
-                // LA RED DE CAÍDA: quien resbala de las islas cae al vacío…
-                // y el vacío LO DEVUELVE a la plaza (nadie muere en el
-                // libro). v6.115 — al LADO del prisma (PlazaY−10: el
+                // LA RED DE CAÍDA: quien resbala al fondo del cuerpo cae al
+                // vacío… y el vacío LO DEVUELVE a la plaza (nadie muere en
+                // el libro). v6.115 — al LADO del prisma (PlazaY−10: el
                 // aire limpio sobre la superficie, cuatro columnas a la
                 // derecha del corazón de la plaza).
                 if (p.position.Y > (Alto - 12) * 16f)
@@ -757,6 +1022,43 @@ namespace AethonMod.Content.Systems
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, p.Center);
                     }
                 }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.118 — LA MOTA DE ORO DE LA ESENCIA: una partícula de la casa
+        /// (ParticleManager) que nace dorada, sube en espiral LENTA,
+        /// ILUMINA lo que toca (EmitLight) y se enfría hacia el violeta
+        /// del vacío antes de disolverse — la esencia devorada que
+        /// circula por el cuerpo del dios.
+        /// </summary>
+        private static void SpawnMotaDorada(Vector2 pos)
+        {
+            try
+            {
+                int dur = 150 + (int)(VFXCore.Hash01((int)pos.X, (int)pos.Y, 6150) * 110f);
+                var m = new global::AethonMod.Content.Particles.ParticleData
+                {
+                    Position = pos,
+                    Velocity = new Vector2(
+                        (VFXCore.Hash01((int)Main.GameUpdateCount, (int)pos.X, 6151) - 0.5f) * 0.5f,
+                        -0.30f - VFXCore.Hash01((int)pos.Y, (int)Main.GameUpdateCount, 6152) * 0.35f),
+                    Scale = Vector2.One * (0.42f + VFXCore.Hash01((int)pos.X, (int)Main.GameUpdateCount, 6153) * 0.45f),
+                    PackedColor = global::AethonMod.Content.Particles.ParticleManager.PackColor(new Color(255, 224, 150)),
+                    PackedStartColor = global::AethonMod.Content.Particles.ParticleManager.PackColor(new Color(255, 224, 150)),
+                    PackedEndColor = global::AethonMod.Content.Particles.ParticleManager.PackColor(new Color(170, 120, 235)),
+                    TimeLeft = dur,
+                    Duration = dur,
+                    TextureId = global::AethonMod.Content.Particles.ParticleTex.SoftGlow,
+                    BlendMode = 1,      // aditivo: la esencia ARDE
+                    LayerPriority = global::AethonMod.Content.Particles.LayerPriorities.AboveTiles,
+                };
+                m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.FadeIn);
+                m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.FadeOut);
+                m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.ColorShift);
+                m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.EmitLight);
+                global::AethonMod.Content.Particles.ParticleManager.Spawn(m);
             }
             catch { }
         }
@@ -784,9 +1086,15 @@ namespace AethonMod.Content.Systems
             Transicion = false;
             // v6.115 — nada del interior viaja afuera: el sol de
             // siempre vuelve a su ranura y los faros se apagan.
+            // v6.118 — la vida nueva también se apaga (el latido muere
+            // con el cuerpo y el reloj del ciclo vuelve a cero).
             DevolverSolEclipse();
             BrumaFaro = 0f;
             Revelado = 0;
+            PulsoCorazon = 0f;
+            _vents = null;
+            _ticksCalma = 0;
+            _tinteCedido = 0f;
         }
 
         // ==================================================================
@@ -816,117 +1124,129 @@ namespace AethonMod.Content.Systems
             // MISMA el lote — Begin(Deferred, AlphaBlend, LinearClamp,
             // DepthStencil.Default, CullCCW, Matrix.Identity) para
             // InterfaceScaleType.None — y lo CIERRA al volver del
-            // delegado. La v6.115 llamaba Begin DENTRO de ese lote
-            // vivo: InvalidOperationException CADA FRAME (tML la
-            // tragaba como «Excepción silenciosa»), el velo NUNCA se
-            // dibujó y la sonda mató la función para toda la sesión —
-            // ni la revelación, ni el ojo, NI LA INUNDACIÓN existieron.
-            // LA CURA: dibujar SIN TOCAR Begin/End ni una vez — el lote
-            // de la capa ya tiene EXACTO lo que el velo necesita (píxeles
-            // de pantalla crudos: Main.screenWidth/Height).
+            // delegado. LA CURA: dibujar SIN TOCAR Begin/End ni una vez
+            // — el lote de la capa ya tiene EXACTO lo que el velo
+            // necesita (píxeles de pantalla crudos: la interfaz no
+            // corre en gameMenu y la pantalla de carga quedaba EXPUESTA
+            // a mitad del trago).
+            //
+            // v6.118 — EL VELO ES BRUMA DE VERDAD (la letra: «parece que
+            // todo lo que llamas bruma son solo circulos planos, eso
+            // esta mal, te dije que usaras nuestras librerias»): los
+            // RECTS de SoftGlow, las BANDAS planas y EL OJO colosal
+            // MURIERON. El velo viste LA OSCURIDAD POR CAPAS con los
+            // pinceles fBm de BrumaFX (la librería de la casa — el
+            // pincel dibuja EN el lote abierto del llamador: el contrato
+            // de la capa queda INTACTO) y la revelación disipa con
+            // AnimatedPuffs de verdad + EL IRIS con el NovaBurst
+            // sancionado (el degradado monotónico — jamás un círculo
+            // plano).
             if (Main.gameMenu || Main.dedServ) return true;
             if (_veloProbeFallos) return true;
-            if (_softGlow == null || _softGlow.IsDisposed)
-            {
-                try
-                {
-                    _softGlow = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SoftGlow",
-                        (AssetRequestMode)1).Value;
-                }
-                catch
-                {
-                    _veloProbeFallos = true;
-                    return true;
-                }
-            }
 
             try
             {
-                SpriteBatch sb = Main.spriteBatch;
                 float w = Main.screenWidth;
                 float h = Main.screenHeight;
                 float t = Main.GlobalTimeWrappedHourly;
-                Vector2 centro = new Vector2(w * 0.5f, h * 0.5f);
+                // EL LATIDO DEL CORAZÓN engorda la oscuridad (el cuerpo
+                // del dios respira: cada golpe, el velo se hincha).
+                float latido = PulsoCorazon;
 
                 // ============================================================
-                //  v6.115 — LA REVELACIÓN DE LA LLEGADA: el interior nace
-                //  LLENO de bruma y esta SE DISIPA revelando el mundo
-                //  (la letra). Dibujada ANTES del velo propio: la
-                //  niebla del nacimiento es MÁS densa y CORRE más
-                //  rápido, y EL IRIS DORADO de la entidad respira
-                //  abriéndose a mitad de la revelación.
+                //  v6.115→v6.118 — LA REVELACIÓN DE LA LLEGADA: el interior
+                //  nace LLENO de bruma y esta SE DISIPA revelando el mundo
+                //  (la letra). Ahora es NIEBLA DE VERDAD: la base (bajo los
+                //  puffs, garantizada) + SIETE MASAS fBm que ENFRÍAN
+                //  (endColor violeta) y se disipan al ritmo de la llegada
+                //  + EL IRIS DORADO respirando con el NovaBurst.
                 // ============================================================
                 float aRev = Activo ? (float)Revelado / ReveladoMax : 0f;
                 if (aRev > 0.003f)
                 {
                     float k = aRev * aRev;   // ease-out: lenta al final
-                    sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
-                        new Color(16, 8, 28) * (0.92f * k));
-                    for (int banda = 0; banda < 5; banda++)
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle(0, 0, (int)w, (int)h),
+                        new Color(16, 8, 28) * (0.66f * k));
+
+                    // LAS MASAS DEL NACIMIENTO (7 — se disipan con la llegada)
+                    for (int i = 0; i < 7; i++)
                     {
-                        float vel = 30f + banda * 16f;
-                        float y = h * (0.10f + banda * 0.19f) + MathF.Sin(t * 0.31f + banda * 1.7f) * h * 0.06f;
-                        float x = ((t * vel + banda * 540f) % (w + 1400f)) - 700f;
-                        float esc = 1.9f + banda * 0.55f;
-                        sb.Draw(_softGlow,
-                            new Rectangle((int)(x - 320f * esc), (int)(y - 70f * esc),
-                                (int)(640f * esc), (int)(140f * esc)),
-                            null, new Color(110, 72, 176) * ((0.16f + 0.05f * banda) * k), 0f,
-                            Vector2.Zero, SpriteEffects.None, 0f);
+                        float px = w * (0.08f + 0.14f * i) +
+                            MathF.Sin(t * 0.4f + i * 1.7f) * w * 0.05f;
+                        float py = h * (0.14f + 0.13f * (i % 5)) +
+                            MathF.Cos(t * 0.3f + i * 2.1f) * h * 0.06f;
+                        float radio = (0.30f + 0.10f * (i % 3)) * h + 120f * k;
+                        BrumaFX.AnimatedPuff(new Vector2(px, py), radio,
+                            new Color(110, 72, 176), 6211 + i * 13,
+                            life01: 1f - aRev, time: t,
+                            alpha: (0.52f - 0.10f * (i % 3)) * k,
+                            endColor: new Color(30, 16, 52));
                     }
+
                     // EL IRIS DEL NACIMIENTO (el aliento dorado de la
-                    // entidad a mitad de la revelación).
+                    // entidad a mitad de la revelación — el NOVABURST:
+                    // el degradado monotónico de la casa, NUNCA un glow
+                    // plano apilado).
                     float abre = 1f - aRev;
                     float aIris = 0.85f * abre * (1f - abre) * 4f;
-                    sb.Draw(_softGlow, new Rectangle(
-                        (int)(w * 0.5f - w * (0.10f + 0.34f * abre)),
-                        (int)(h * 0.17f - h * (0.08f + 0.16f * abre)),
-                        (int)(w * (0.20f + 0.68f * abre)), (int)(h * (0.16f + 0.32f * abre))),
-                        null, new Color(255, 214, 130) * (0.22f * aIris), 0f,
-                        Vector2.Zero, SpriteEffects.None, 0f);
+                    if (aIris > 0.01f && VFXCore.NovaBurst != null)
+                    {
+                        float tamX = w * (0.20f + 0.68f * abre);
+                        float tamY = h * (0.16f + 0.32f * abre);
+                        Main.spriteBatch.Draw(VFXCore.NovaBurst,
+                            new Rectangle((int)(w * 0.5f - tamX * 0.5f),
+                                          (int)(h * 0.17f - tamY * 0.5f),
+                                          (int)tamX, (int)tamY),
+                            null, new Color(255, 214, 130) * (0.34f * aIris), 0f,
+                            Vector2.Zero, SpriteEffects.None, 0f);
+                    }
                 }
 
                 // ============================================================
-                //  EL VELO PROPIO DEL INTERIOR (solo dentro del libro)
+                //  EL VELO PROPIO — LA OSCURIDAD POR CAPAS (la letra del
+                //  cuestionario: «oscuridad por capas» + «ambas»: el
+                //  gradiente base + el latido encima). TRES CAPAS de
+                //  masa fBm que CUELGA del techo del mundo, ENGORDE en
+                //  el horizonte de abajo y CIÑE los costados — la zona
+                //  jugable queda legible entre ellas.
                 // ============================================================
-                // === EL FONDO DEL VACÍO (el degradé del velo) ===
-                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)w, (int)h),
-                    new Color(22, 12, 38) * 0.60f);
-                // el horizonte más denso (el velo engorda hacia abajo).
-                sb.Draw(_softGlow, new Rectangle(-((int)w / 2), (int)(h * 0.55f), (int)w * 2, (int)(h * 0.9f)),
-                    null, new Color(30, 16, 52) * 0.42f, 0f, Vector2.Zero, SpriteEffects.None, 0f);
 
-                // === LAS BANDAS DE NEBLINA (la bruma que CORRE) ===
-                for (int banda = 0; banda < 4; banda++)
-                {
-                    float vel = 14f + banda * 9f;
-                    float y = h * (0.18f + banda * 0.22f) + MathF.Sin(t * 0.23f + banda * 2.1f) * h * 0.05f;
-                    float x = ((t * vel + banda * 700f) % (w + 1200f)) - 600f;
-                    float esc = 1.6f + banda * 0.5f;
-                    sb.Draw(_softGlow,
-                        new Rectangle((int)(x - 320f * esc), (int)(y - 60f * esc),
-                            (int)(640f * esc), (int)(120f * esc)),
-                        null, new Color(96, 62, 158) * (0.10f + 0.045f * banda), 0f,
-                        Vector2.Zero, SpriteEffects.None, 0f);
-                }
+                // (base tenue — el piso que garantiza el tono del vacío
+                // BAJO las masas de verdad; los puffs viven ENCIMA)
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(0, 0, (int)w, (int)h),
+                    new Color(22, 12, 38) * 0.30f);
 
-                // === LAS ESTRELLAS DEL VACÍO (la niebla no las tapa: son
-                //     SUAS — brillan dentro del velo) ===
-                for (int s = 0; s < 26; s++)
-                {
-                    uint hx = VFXCore.Hash01(s * 7 + 3, 0, 911) > 0.5f ? 1u : 0u;
-                    float sx = VFXCore.Hash01(s * 13 + 1, 0, 913) * w;
-                    float sy = VFXCore.Hash01(s * 17 + 5, 0, 917) * h * 0.72f;
-                    float pal = 0.55f + 0.45f * MathF.Sin(t * (0.5f + VFXCore.Hash01(s, 0, 919) * 1.3f) + s);
-                    sb.Draw(TextureAssets.MagicPixel.Value,
-                        new Rectangle((int)sx, (int)sy, 2 + (int)hx, 2),
-                        new Color(210, 190, 250) * (0.10f + 0.14f * pal));
-                }
+                // CAPA 1 — EL TECHO: la masa que cuelga del cielo del
+                // cuerpo (dos puffs enormes respirando con el latido)
+                BrumaFX.Puff(new Vector2(w * 0.30f + MathF.Sin(t * 0.12f) * w * 0.04f, -h * 0.14f),
+                    h * 0.60f, new Color(16, 9, 28), 6311, t,
+                    alpha: 0.36f + 0.12f * latido, quality: 0.8f);
+                BrumaFX.Puff(new Vector2(w * 0.74f + MathF.Cos(t * 0.10f) * w * 0.04f, -h * 0.18f),
+                    h * 0.54f, new Color(20, 11, 34), 6323, t + 21f,
+                    alpha: 0.32f + 0.10f * latido, quality: 0.8f);
 
-                // === EL OJO COLOSAL (el que lee desde arriba — corona
-                //     del sol del eclipse, clavado en el cenit) ===
-                DibujarElOjo(sb, w, h, t, centro);
+                // CAPA 2 — EL HORIZONTE: el velo ENGORDA hacia abajo (el
+                // piso de niebla del cuerpo del dios — dos racimos)
+                BrumaFX.Cloud(new Vector2(w * 0.32f, h * 1.10f), h * 0.44f,
+                    new Color(26, 14, 44), 6331, t, 5,
+                    alpha: 0.30f + 0.08f * latido);
+                BrumaFX.Cloud(new Vector2(w * 0.78f, h * 1.14f), h * 0.40f,
+                    new Color(30, 16, 52), 6343, t + 13f, 4,
+                    alpha: 0.26f + 0.08f * latido);
+
+                // CAPA 3 — LOS COSTADOS: la oscuridad CIÑE los bordes
+                // laterales (el mundo vive DENTRO del cuerpo)
+                BrumaFX.Puff(new Vector2(-w * 0.07f, h * 0.42f), w * 0.26f,
+                    new Color(18, 10, 30), 6351, t + 7f, alpha: 0.24f, quality: 0.6f);
+                BrumaFX.Puff(new Vector2(w * 1.07f, h * 0.52f), w * 0.28f,
+                    new Color(18, 10, 30), 6363, t + 17f, alpha: 0.24f, quality: 0.6f);
+
+                // EL ALIENTO VIOLETA entre las capas (la lectura de
+                // noche — la firma de SombrasLib destilada al velo)
+                BrumaFX.Cloud(new Vector2(w * 0.5f, h * 0.55f), h * 0.30f,
+                    new Color(64, 42, 96), 6371, t * 0.8f, 3, alpha: 0.10f + 0.05f * latido);
             }
             catch
             {
@@ -992,23 +1312,32 @@ namespace AethonMod.Content.Systems
                     float h = Main.screenHeight;
                     float t = Main.GlobalTimeWrappedHourly;
 
-                    // LA INUNDACIÓN: cuando el faro está lleno no hay
-                    // mundo — solo el violeta del trago.
+                    // ========================================================
+                    //  v6.118 — LA INUNDACIÓN ES BRUMA DE VERDAD (la letra:
+                    //  «todo lo que llamas bruma son solo circulos planos,
+                    //  eso esta mal»): la BASE (garantizada bajo la niebla
+                    //  — cuando el faro está lleno no hay mundo, solo el
+                    //  violeta del trago) + SEIS MASAS fBm que ACELERAN
+                    //  con el trago (0.6→1.4×) y ENSANCHAN su deriva —
+                    //  BrumaFX en el lote propio del faro (píxeles de
+                    //  pantalla crudos: también en la pantalla de carga).
+                    // ========================================================
                     Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle(0, 0, (int)w, (int)h),
-                        new Color(18, 9, 32) * (0.97f * a));
-                    for (int banda = 0; banda < 6; banda++)
+                        new Color(18, 9, 32) * (0.90f * a));
+
+                    float vel = 0.6f + 0.8f * a;             // la ACELERACIÓN del trago
+                    for (int masa = 0; masa < 6; masa++)
                     {
-                        // la bruma ACELERA con el trago (0.6→1.4×).
-                        float vel = (46f + banda * 20f) * (0.6f + 0.8f * a);
-                        float y = h * (0.06f + banda * 0.16f) + MathF.Sin(t * 0.4f + banda * 1.3f) * h * 0.05f;
-                        float x = ((t * vel + banda * 500f) % (w + 1500f)) - 750f;
-                        float esc = 2.1f + banda * 0.6f;
-                        Main.spriteBatch.Draw(_softGlow,
-                            new Rectangle((int)(x - 320f * esc), (int)(y - 80f * esc),
-                                (int)(640f * esc), (int)(160f * esc)),
-                            null, new Color(96, 62, 158) * ((0.14f + 0.05f * banda) * a), 0f,
-                            Vector2.Zero, SpriteEffects.None, 0f);
+                        float y = h * (0.06f + masa * 0.17f) +
+                            MathF.Sin(t * 0.4f + masa * 1.3f) * h * 0.06f;
+                        float x = ((t * (46f + masa * 20f) * vel + masa * 520f) % (w + 1400f)) - 700f;
+                        float radio = h * (0.16f + 0.05f * (masa % 3)) + 60f * a;
+                        BrumaFX.Puff(new Vector2(x, y), radio,
+                            masa % 2 == 0 ? new Color(96, 62, 158) : new Color(30, 16, 52),
+                            6411 + masa * 17, t + masa * 3.1f,
+                            alpha: (0.40f + 0.07f * masa) * a, quality: 0.7f,
+                            velocity: new Vector2((14f + masa * 6f) * vel, 0f));
                     }
                 }
                 finally
@@ -1019,60 +1348,113 @@ namespace AethonMod.Content.Systems
             catch { }
         }
 
-        /// <summary>
-        /// EL OJO COLOSAL DEL GRIMORIO: la almendra pálida arriba en el
-        /// centro del cielo, la pupila vertical que SIGUE al jugador y el
-        /// PARPADEO lento — el libro te está leyendo.
-        /// </summary>
-        private static void DibujarElOjo(SpriteBatch sb, float w, float h, float t, Vector2 centroPantalla)
+        // ==================================================================
+        //  v6.118 — LAS BRUMAS DEL MUNDO (el pase del mundo — coords de
+        //  MUNDO convertidas a pantalla, en el lote de masa de BrumaFX):
+        //  LAS COLUMNAS que ascienden de LAS VENTANAS de vida, LAS
+        //  VOLUTAS que serpentean sobre el terreno y LA BRUMA REACTIVA
+        //  que SE ABRE a tu paso y se cierra detrás (el cuestionario:
+        //  «todas» las brumas — columnas · volutas · reactiva).
+        // ==================================================================
+        public override void PostDrawTiles()
         {
-            float cx = w * 0.5f;
-            float cy = h * 0.17f;
-
-            // EL PARPADEO: cada ~8 s el ojo se cierra un instante.
-            float ciclo = t % 8.5f;
-            float apertura = 1f;
-            if (ciclo > 7.9f)
+            if (!Activo || Main.gameMenu || Main.dedServ || Main.netMode == 2) return;
+            if (_veloProbeFallos) return;
+            try
             {
-                float f = (ciclo - 7.9f) / 0.6f;              // 0→1→0
-                float pliegue = MathF.Sin(MathF.PI * f);       // campana
-                apertura = 1f - 0.97f * pliegue;
+                Player p = Main.LocalPlayer;
+                if (p == null || !p.active || p.dead) return;
+                float t = Main.GlobalTimeWrappedHourly;
+                float latido = PulsoCorazon;
+                Vector2 o = Main.screenPosition;
+
+                VFXCore.CerrarLoteSiAbierto();
+                try
+                {
+                    BrumaFX.BeginMass();
+                    try
+                    {
+                        // === LAS COLUMNAS DE LAS VENTANAS (la carne
+                        //     respira: bruma que ASCIENDE de cada ventanal
+                        //     cercano — se yerguen con el latido) ===
+                        if (_vents != null)
+                        {
+                            foreach (Vector2 vent in _vents)
+                            {
+                                if (Vector2.DistanceSquared(vent, p.Center) > 1300f * 1300f) continue;
+                                BrumaFX.Column(vent - o,
+                                    150f + 60f * latido,              // la altura respira con el corazón
+                                    74f + 22f * latido,
+                                    new Color(44, 26, 78),
+                                    (int)(vent.X * 0.13f), t,
+                                    alpha: 0.24f + 0.10f * latido, speed: 0.30f);
+                            }
+                        }
+
+                        // === LAS VOLUTAS SOBRE EL TERRENO (la niebla
+                        //     serpentea rozando la superficie del dios) ===
+                        for (int k = 0; k < 2; k++)
+                        {
+                            float bx = p.Center.X + (k == 0 ? -420f : 430f) +
+                                MathF.Sin(t * 0.11f + k * 2.7f) * 130f;
+                            float by = p.Center.Y - 130f + MathF.Cos(t * 0.09f + k) * 60f;
+                            Vector2[] camino = new Vector2[5];
+                            for (int s = 0; s < 5; s++)
+                            {
+                                camino[s] = new Vector2(
+                                    bx - o.X + s * 105f + MathF.Sin(t * 0.3f + s * 1.7f + k * 3f) * 34f,
+                                    by - o.Y + MathF.Sin(s * 1.1f + t * 0.2f + k) * 30f);
+                            }
+                            BrumaFX.Tendril(camino, 52f, new Color(58, 36, 92),
+                                6511 + k * 7, t, alpha: 0.18f + 0.06f * latido);
+                        }
+
+                        // === LA BRUMA REACTIVA (SE ABRE a tu paso): un
+                        //     anillo de puffs orbitando LENTO alrededor del
+                        //     portador — cada masa SE APAGA cuando el
+                        //     portador se acerca (la niebla lo RESPETA) y
+                        //     vuelve a cerrarse detrás (nunca lo toca) ===
+                        for (int i = 0; i < 6; i++)
+                        {
+                            float ang = t * 0.14f + i * MathHelper.TwoPi / 6f;
+                            float r = 210f + 70f * MathF.Sin(t * 0.2f + i * 2.3f);
+                            Vector2 pos = p.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * r;
+                            float dist = Vector2.Distance(pos, p.Center);
+                            float abre = MathHelper.Clamp((dist - 120f) / 130f, 0f, 1f);
+                            if (abre <= 0.05f) continue;             // la niebla SE ABRE alrededor
+                            BrumaFX.Puff(pos - o, 96f + 30f * (i % 2),
+                                new Color(40, 24, 70), 6611 + i * 13, t + i * 2.2f,
+                                alpha: 0.20f * abre, quality: 0.6f);
+                        }
+                    }
+                    finally
+                    {
+                        try { Main.spriteBatch.End(); } catch { }
+                    }
+                }
+                finally { VFXCore.ReabrirLoteVanilla(); }
             }
-            if (apertura < 0.03f) return;
-
-            // LA ALMENDRA: el resplandor tenue + el blanco del ojo.
-            sb.Draw(_softGlow, new Rectangle((int)(cx - 460f), (int)(cy - 150f), 920, 300),
-                null, new Color(84, 52, 140) * (0.30f * apertura), 0f, Vector2.Zero, SpriteEffects.None, 0f);
-            sb.Draw(_softGlow, new Rectangle((int)(cx - 300f), (int)(cy - 62f * apertura), 600, (int)(124f * apertura)),
-                null, new Color(196, 172, 235) * (0.30f * apertura), 0f, Vector2.Zero, SpriteEffects.None, 0f);
-            sb.Draw(_softGlow, new Rectangle((int)(cx - 250f), (int)(cy - 44f * apertura), 500, (int)(88f * apertura)),
-                null, new Color(224, 206, 252) * (0.34f * apertura), 0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-            // LA PUPILA: vertical, oscura — MIRA AL JUGADOR (su posición
-            // en pantalla inclina la mirada).
-            float mirada = MathF.Sin(t * 0.13f) * 26f +
-                MathHelper.Clamp((centroPantalla.X - cx) * 0.05f, -80f, 80f);
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)(cx + mirada - 13f), (int)(cy - 54f * apertura), 26, (int)(108f * apertura)),
-                new Color(16, 8, 28) * (0.88f * apertura));
-            // el brillo de la córnea alrededor de la pupila.
-            sb.Draw(_softGlow, new Rectangle((int)(cx + mirada - 60f), (int)(cy - 40f * apertura), 120, (int)(80f * apertura)),
-                null, new Color(150, 84, 235) * (0.20f * apertura), 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            catch { }
         }
     }
 
     // ======================================================================
-    //  InteriorSpawnGate — EL SILENCIO DE LAS FIERAS (v6.114): dentro del
-    //  libro NO despierta bestia alguna — el interior es el libro y sus
-    //  páginas: la soledad es parte del horror. (El hook de la casa:
-    //  EditSpawnRate/EditSpawnRange viven en GlobalNPC — verificado por
-    //  reflexión contra el tML 2026.09.3.1 real.)
+    //  InteriorSpawnGate — EL SILENCIO DE LAS FIERAS (v6.114 → v6.118 —
+    //  LA EXCEPCIÓN DEL FESTÍN): fuera del festín, dentro del libro NO
+    //  despierta bestia alguna — el interior es el libro y sus páginas:
+    //  la soledad es parte del horror. PERO el mundo ES ahora EL MUNDO
+    //  DE LAS OLEADAS DEL HAMBRE (la letra: «debe ser el de las oleadas
+    //  de hambre»): cuando el festín corre (GrimorioFuriaSistema), la
+    //  puerta se ABRE y el motor de spawn de la oleada manda (OleadaNPC
+    //  — el pool de la casa con su escala por nivel). (El hook de la
+    //  casa: EditSpawnRate/EditSpawnRange viven en GlobalNPC —
+    //  verificado por reflexión contra el tML 2026.09.3.1 real.)
     // ======================================================================
     public class InteriorSpawnGate : GlobalNPC
     {
         public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns)
         {
-            if (SubmundoGrimorio.Activo)
+            if (SubmundoGrimorio.Activo && !GrimorioFuriaSistema.Activo)
             {
                 spawnRate = 0;
                 maxSpawns = 0;

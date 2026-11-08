@@ -72,12 +72,27 @@ namespace AethonMod.Content.VFX
 
         private static bool _texturaProboFallar;
 
+        // v6.118 — EL SOFT-ADD CANÓNICO DE LA CASA (la cura de LA SIERRA
+        // QUE QUEDÓ). La reconstrucción v6.56.0 del binario dejó el
+        // destino en ZERO — out = src·(1−dst) + 0: cada capa REEMPLAZABA
+        // el fondo atenuado y los solapes del borde (velo + pluma + banda
+        // + labio + ruido apilados) componían con ESCALONES
+        // multiplicativos. Peor aún: donde la aguja de la pluma ya era
+        // brillante (núcleo 0.88), la BANDA del borde maestro sumaba
+        // ~0.53·(1−0.88) ≈ 0.06 — la curva continua DESAPARECÍA justo
+        // sobre las puntas y brillaba en los valles: aguja · valle ·
+        // aguja, LA SIERRA INVERTIDA que las dos curas geométricas
+        // (v6.114 membrana + v6.115 borde maestro) no podían matar
+        // porque NO era geometría — era el blend. El soft-add documentado
+        // de RayoStrip.cs (v6.50.26, códice §3.2): dst += rgb·(1−dst) —
+        // acumulación ASINTÓTICA que nunca clipea, funde cada borde EN
+        // CURVA y la banda del borde maestro VIVE sobre las puntas.
         private static readonly BlendState _pantalla = new BlendState
         {
-            ColorSourceBlend = (Blend)7,
-            ColorDestinationBlend = (Blend)0,
-            AlphaSourceBlend = (Blend)0,
-            AlphaDestinationBlend = (Blend)0
+            ColorSourceBlend = Blend.InverseDestinationColor,
+            ColorDestinationBlend = Blend.One,
+            AlphaSourceBlend = Blend.One,
+            AlphaDestinationBlend = Blend.One,
         };
 
         private static VertexPositionColorTexture[] _verts = (VertexPositionColorTexture[])(object)new VertexPositionColorTexture[4096];
@@ -581,6 +596,16 @@ namespace AethonMod.Content.VFX
                 num5 = 0.3f;
             }
             num5 *= estilo.RuidoInten;
+            // v6.118 — EL ENSOGLADO DEL RUIDO (la membrana>0): las pasadas
+            // de ruido ya NO definen el filo del ala — el BORDE MAESTRO es
+            // el dueño de la silueta. Antes los quads de ruido corrían al
+            // ANCHO COMPLETO de la pluma (SemiMas/SemiMenos crudos) y los
+            // blobs de la textura con alfa en el borde sembraban peines
+            // FUERA de la curva (la LEY v6.56.7 del códice: texturas crudas
+            // en el borde = picos). Ahora se ensolegan hacia adentro: la
+            // niebla del vacío CORRE por dentro del ala y la curva exterior
+            // queda limpia.
+            float inset = estilo.Membrana > 0f ? (pasada == 0 ? 0.86f : 0.72f) : 1f;
             Vector2 val6 = default(Vector2);
             VertexPositionColorTexture val9 = default(VertexPositionColorTexture);
             VertexPositionColorTexture val10 = default(VertexPositionColorTexture);
@@ -623,10 +648,10 @@ namespace AethonMod.Content.VFX
                     float num13 = num7 + num * num11;
                     Color val7 = Color.Lerp(val, val2, num10);
                     Color val8 = Color.Lerp(val, val2, num11);
-                    val9 = new VertexPositionColorTexture(new Vector3(reference.Eje[j] + val6 * reference.SemiMas[j], 0f), val7, new Vector2(num12, num8));
-                    val10 = new VertexPositionColorTexture(new Vector3(reference.Eje[j] - val6 * reference.SemiMenos[j], 0f), val7, new Vector2(num12, num9));
-                    val11 = new VertexPositionColorTexture(new Vector3(reference.Eje[j + 1] + val6 * reference.SemiMas[j + 1], 0f), val8, new Vector2(num13, num8));
-                    val12 = new VertexPositionColorTexture(new Vector3(reference.Eje[j + 1] - val6 * reference.SemiMenos[j + 1], 0f), val8, new Vector2(num13, num9));
+                    val9 = new VertexPositionColorTexture(new Vector3(reference.Eje[j] + val6 * (reference.SemiMas[j] * inset), 0f), val7, new Vector2(num12, num8));
+                    val10 = new VertexPositionColorTexture(new Vector3(reference.Eje[j] - val6 * (reference.SemiMenos[j] * inset), 0f), val7, new Vector2(num12, num9));
+                    val11 = new VertexPositionColorTexture(new Vector3(reference.Eje[j + 1] + val6 * (reference.SemiMas[j + 1] * inset), 0f), val8, new Vector2(num13, num8));
+                    val12 = new VertexPositionColorTexture(new Vector3(reference.Eje[j + 1] - val6 * (reference.SemiMenos[j + 1] * inset), 0f), val8, new Vector2(num13, num9));
                     _verts[nVerts++] = val9;
                     _verts[nVerts++] = val10;
                     _verts[nVerts++] = val11;
@@ -1255,15 +1280,25 @@ namespace AethonMod.Content.VFX
                     // crudo i hacía que las plumas gemelas centellearan y
                     // giraran distinto — asimetría visible del par).
                     float dirGiro = (float)((Entity)pl).direction;
+                    // v6.118 — LAS RUNAS DE LA PUNTA, UN NODO ADENTRO (la
+                    // membrana>0): el glifo deja de marcar el diente de la
+                    // punta — vive SOBRE la pluma, BAJO la curva del borde
+                    // maestro (nada anguloso y brillante montado en la
+                    // silueta: la punta pertenece a la curva continua).
+                    int nodoRuna = estilo.Membrana > 0f ? 7 : 8;
                     for (int i = 0; i < _geoN; i++)
                     {
-                        Vector2 val3 = _pozosEje[i][8];
+                        Vector2 val3 = _pozosEje[i][nodoRuna];
                         int gemela = i % num4;
                         float num5 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + gemela, 3, 5) * ((float)Math.PI * 2f);
                         float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * 2.3f + num5 + flap * 0.35f);
                         num6 *= 0.8f + 0.2f * VFXCore.Hash01(((Entity)pl).whoAmI * 13 + gemela, (int)(globalTimeWrappedHourly * 12f), 17);
                         float num7 = (float)gemela / (float)(num4 - 1);
-                        float escala = 1.45f + 0.35f * num7;
+                        // v6.118 — la escala también se aquieta en la membrana:
+                        // el glifo acompaña a la pluma sin DOMINAR el filo.
+                        float escala = estilo.Membrana > 0f
+                            ? 1.26f + 0.28f * num7
+                            : 1.45f + 0.35f * num7;
                         Color cuerpo = val;
                         Color punta = val2;
                         if (estilo.Runas == 4)

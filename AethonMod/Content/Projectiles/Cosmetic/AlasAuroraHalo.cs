@@ -128,15 +128,20 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // LAS RUNAS DEL VACÍO (el estilo 2 — la copia mejorada del
             // eclipse) dejan caer MOTAS DIMINUTAS de la rampa de la casa
             // — PARES SIMÉTRICOS (la misma distancia a ambos lados del
-            // cuerpo), nacen de la altura de las alas y se disuelven
-            // cayendo: nacen oscuras (26,14,44), mueren en violeta claro
+            // cuerpo), nacen oscuras (26,14,44), mueren en violeta claro
             // (224,176,255) — la rampa del aura del vacío.
+            // v6.118 — EL ENSOGLADO DE LAS MIGAS (la cura de la sierra,
+            // el acto IV): nacían a la ALTURA DE LAS ALAS (−6..−16 sobre
+            // el centro) — polvos redondos DENTRO del ala, punteando el
+            // filo (la LEY v6.56.0 del códice: Dust junto al filo = LA
+            // SIERRA). Ahora nacen BAJO el ala (cuelgan del aura, caen a
+            // los pies) y el filo queda limpio para la curva del borde.
             if (alaEstilo == 2 && Spread > 0.25f && Main.netMode != 2 && !Main.dedServ)
             {
-                if (Main.rand.NextBool(4))
+                if (Main.rand.NextBool(6))
                 {
                     float dx = 18f + Main.rand.NextFloat(26f);
-                    float dy = -6f - Main.rand.NextFloat(10f);
+                    float dy = 6f + Main.rand.NextFloat(12f);
                     float caida = 0.25f + Main.rand.NextFloat(0.45f);
                     Color nace = new Color(122, 78, 188);
                     Color muere = new Color(224, 176, 255);
