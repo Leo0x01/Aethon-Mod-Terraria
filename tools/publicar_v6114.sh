@@ -99,8 +99,9 @@ import json, re, sys
 lines = open(sys.argv[1], encoding='utf-8').read().splitlines()
 
 # el resumen: la línea que empieza con «> **» — sin la marca de estado
-resumen = next(l for l in lines if l.startswith('> **'))
-resumen = re.sub(r'^> \*\*[^*]*\*\* [^\u2014]*\u2014 ', '', resumen)  # el bloque bold + la nota del PAT hasta el primer guion largo
+# v6.114: la línea de estado puede ser «> ⏳ **PENDIENTE…** — » o «> **PUBLICADA…** — »
+resumen = next(l for l in lines if l.startswith('> **') or l.startswith('> ⏳ **'))
+resumen = re.sub(r'^> [^\u2014]*\u2014 ', '', resumen, count=1)  # TODO el bloque de estado hasta el primer guion largo
 # « · » separa los bloques del resumen → una viñeta por bloque
 vinyetas = '\n'.join('- ' + p.strip() for p in resumen.split(' · ') if p.strip())
 
