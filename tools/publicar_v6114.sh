@@ -191,7 +191,7 @@ if python3 - "$SNAPSHOT" "$RELEASE_ID" "$MD5_ESPERADO" <<'PYEOF'
 import sys
 snap, rid, md5 = sys.argv[1], sys.argv[2], sys.argv[3]
 txt = open(snap, encoding='utf-8').read()
-viejo = '> **⏳ PENDIENTE DE PUBLICAR**'
+viejo = '> ⏳ **PENDIENTE DE PUBLICAR**'
 nuevo = f'> **PUBLICADA — release {rid} + CDN verificado byte a byte (md5 {md5})**'
 if viejo not in txt:
     sys.exit(1)  # ya estaba publicada: se salta el paso 7
