@@ -21,6 +21,14 @@ ESTE GUARDIÁN cierra la clase de bug PARA SIEMPRE:
   (3) .tmod → DLL: (inversa) todo rawimg de contenido debe existir
       como clase o como textura prestada (las de Effects/ no cuentan:
       las pide el código a mano).
+  (4) v6.116 — LAS CONVENCIONES tML (la lección v6.87 REGRESA al
+      gate): todo ModTile con `TileID.Sets.HasOutlines[Type] = true`
+      (y sin `override string HighlightTexture`) EXIGE su
+      `{textura}_Highlight` EN DISCO y DENTRO DEL .tmod — el CLIENTE
+      lo pide en ModTile.SetupContent() línea 145 y el headless NO lo
+      caza (el servidor no carga texturas). La v6.115 murió en la
+      máquina del usuario por exactamente esto: el check vivía solo
+      en el viejo audit_assets.py que nadie corría desde v6.97.
 
 USO:  python3 tools/audit_texturas_completas.py [.tmod]
       (sin argumento: usa el .tmod instalado del tML local)
@@ -52,6 +60,10 @@ CLASES = re.compile(
 MODS = {'ModItem', 'ModProjectile', 'ModNPC', 'ModDust', 'ModTile',
         'ModWall', 'ModBuff', 'ModPetal'}
 PRESTADA = re.compile(r'override\s+string\s+Texture\s*=>\s*"([^"]+)"')
+# v6.116 — LA CONVENCIÓN DEL RESALTADO (la lección v6.87): el tile que
+# enciende HasOutlines EXIGE su _Highlight (salvo override propio).
+HASOUTLINES = re.compile(r'HasOutlines\s*\[\s*Type\s*\]\s*=\s*true')
+HL_PROPIA = re.compile(r'override\s+string\s+HighlightTexture')
 
 
 def ruta_png(ruta_asset):
@@ -128,7 +140,9 @@ for clase, (ruta, texto, ini) in posiciones.items():
         entrada = carpeta + '/' + clase
         modo = 'propia'
     encontradas[clase] = {'tipo': tipo, 'cs': rel, 'abstracta': abstracta,
-                          'png': png, 'entrada': entrada, 'modo': modo}
+                          'png': png, 'entrada': entrada, 'modo': modo,
+                          'hasoutlines': bool(HASOUTLINES.search(cuerpo)),
+                          'hl_propia': bool(HL_PROPIA.search(cuerpo))}
 
 faltan_disco, total = [], 0
 for clase, info in encontradas.items():
@@ -208,7 +222,38 @@ if sueltos:
 else:
     print('    OK: ningún rawimg de contenido huérfano')
 
-if faltan_disco or faltan_tmod or sueltos:
+# === (4) v6.116 — LAS CONVENCIONES tML (el HasOutlines ⇒ _Highlight) ===
+# LA LETRA: el usuario cargó la v6.115 y el mod SE DESACTIVÓ SOLO:
+# «Asset could not be found: Content\Tiles\AltarPrismaTile_Highlight» —
+# el prisma encendió HasOutlines (calco del altar) sin su máscara. El
+# check existía desde la v6.87 (audit_assets.py) pero quedó HUÉRFANO
+# cuando este guardián se volvió el gate: HOY VIVE AQUÍ, PARA SIEMPRE.
+faltan_hl_disco, faltan_hl_tmod, tiles_hl = [], [], 0
+for clase, info in encontradas.items():
+    if (info['tipo'] != 'ModTile' or info['abstracta'] or info['hl_propia']
+            or not info['hasoutlines']):
+        continue
+    if info['modo'] == 'vanilla':
+        continue          # la textura prestada de vanilla vive en el juego
+    tiles_hl += 1
+    hl_png = info['png'][:-len('.png')] + '_Highlight.png'
+    hl_entrada = info['entrada'] + '_Highlight'
+    if not os.path.exists(hl_png):
+        faltan_hl_disco.append((clase, hl_png))
+    if parse and os.path.exists(TMOD) and not any(
+            p == hl_entrada + '.rawimg' for p in todos):
+        faltan_hl_tmod.append((clase, hl_entrada))
+print(f'(4) CONVENCIONES (HasOutlines ⇒ _Highlight): {tiles_hl} tiles con outlines')
+if faltan_hl_disco:
+    for clase, hl in faltan_hl_disco:
+        print(f'    ¡FALTA EL HIGHLIGHT EN DISCO! {clase} — {os.path.relpath(hl, RAIZ)}')
+if faltan_hl_tmod:
+    for clase, hl in faltan_hl_tmod:
+        print(f'    ¡FALTA EL HIGHLIGHT EN EL .tmod! {clase} — {hl}.rawimg')
+if not faltan_hl_disco and not faltan_hl_tmod:
+    print('    OK: todo tile con HasOutlines trae su máscara (disco y .tmod)')
+
+if faltan_disco or faltan_tmod or sueltos or faltan_hl_disco or faltan_hl_tmod:
     print('\nGUARDIÁN DE TEXTURAS: ¡FALTA! — el build NO se publica hasta curar esto')
     sys.exit(1)
 print('\nGUARDIÁN DE TEXTURAS: TODO VIVE ✔')

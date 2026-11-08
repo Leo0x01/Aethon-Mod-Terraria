@@ -111,6 +111,27 @@ namespace AethonMod.Content.Globals
         public Dictionary<int, long> BancoItemsCobrado = new Dictionary<int, long>();
 
         // ================================================================
+        //  v6.116 — EL CLON DEL BANCO (la cura del aviso del cargador:
+        //  «has reference fields (BancoItems, BancoItemsCobrado) that
+        //  may not be safe to share between clones» — el tML lo gritaba
+        //  desde la v6.51 en CADA carga). El banco es el ALMA del libro:
+        //  al clonarse el ítem (duplicación, stacks, la red) cada copia
+        //  carga con SU PROPIA mesa — los diccionarios se COPIAN, jamás
+        //  se comparten por referencia entre clones.
+        // ================================================================
+
+        /// <summary>La copia del alma: el clon nace con fotocopias del
+        /// banco (lo devorado y lo cobrado hasta el momento) — editar el
+        /// banco de UNA copia jamás toca el de la otra.</summary>
+        public override GlobalItem Clone(Item from, Item to)
+        {
+            AlmaEternoGlobalItem copia = (AlmaEternoGlobalItem)base.Clone(from, to);
+            copia.BancoItems = new Dictionary<int, long>(BancoItems);
+            copia.BancoItemsCobrado = new Dictionary<int, long>(BancoItemsCobrado);
+            return copia;
+        }
+
+        // ================================================================
         //  v6.93 — LOS OJOS DEL BANCO (los helpers que leen la mesa, la
         //  lista del despertar y la ventana del Cielo: DISPONIBLE =
         //  devorado − cobrado; lo cobrado nunca devuelve).
