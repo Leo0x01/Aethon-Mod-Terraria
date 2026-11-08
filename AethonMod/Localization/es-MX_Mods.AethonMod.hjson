@@ -2260,6 +2260,38 @@ Items: {
 			— todo lo que AURA, en un solo kit.
 			'''
 	}
+	// v6.114 — EL COSMÉTICO DEFINITIVO (la letra: «es momento de crear
+	// el item cosmetico definitivo… un unico accesorio»).
+	FormaEternaItem: {
+		DisplayName: La Forma Eterna
+		Tooltip:
+			'''
+			        ✦ EL COSMÉTICO DEFINITIVO — TODO EL PANTEÓN EN UN SOLO CUERPO.
+			        VISTE LOS OCHO: la Forma Ascendida y LAS OFANIM (las dos
+			        luces vivas + el VUELO INFINITO), la Brasa del Eclipse, el
+			        Anillo Rúnico Dorsal y el Brillo de los Soles Rúnicos.
+			        El Sello del Génesis y los Anillos del Sol Rúnico (+40 maná,
+			        +8% mágico, +8% melee, +3 defensa) y EL AURA DEL VACÍO: el
+			        campo invisible que viste a los impíos.
+			        «Todo lo que el libro ha dado, en un solo cuerpo — la forma
+			        que no se apaga.»
+			'''
+	}
+
+	BolsaFormaEterna: {
+		// v6.114 — LA BOLSA NUEVA (la letra: «los accesorios mencionados
+		// se deben guardar en una nueva bolsa junto con el accesorio
+		// definitivo»).
+		DisplayName: La Bolsa de la Forma Eterna
+		Tooltip:
+			'''
+			        LOS OCHO DEL PANTEÓN + LA FORMA ETERNA: la brasa del eclipse,
+			        el anillo rúnico dorsal, el sello del génesis, los anillos del
+			        sol rúnico, el brillo de los soles rúnicos, la forma ascendida,
+			        las ofanim y el aura del vacío… y el UNO que los viste todos.
+			'''
+	}
+
 
 	BolsaMaestra: {
 		DisplayName: El Cofre del Arsenal
@@ -2289,11 +2321,12 @@ Items: {
 		DisplayName: Alas Rúnicas del Vacío
 		Tooltip:
 			'''
-			        La copia mejorada del eclipse, YA SIN PICOS: plumas gemelas
-			        de punta redondeada, el espejo perfecto entre izquierda y
-			        derecha. Del COLOR DEL VACÍO (la rampa del aura) y con SUS
-			        efectos: el anillo de runas violeta en las puntas y las
-			        migas que caen de las alas.
+			        La copia mejorada del eclipse, SIN SIERRA: la MEMBRANA une
+			        las plumas y el ARCO exterior borda el ala de punta a punta —
+			        UNA curva continua, sin un solo pico. Simétrica izquierda y
+			        derecha, del COLOR DEL VACÍO (la rampa del aura) y con SUS
+			        efectos: el anillo de runas violeta en las puntas, la niebla
+			        que corre por dentro y las migas que caen de las alas.
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -3201,6 +3234,9 @@ Jefe: {
 	// Portador.Furia died with their bosses.
 	
 	Aethon: {
+		// v6.114 — LA CEREMONIA DE LA LLAMADA: el altar se alza y el
+		// grimorio del eterno flota JUSTO ENCIMA (la letra).
+		LlamadaCeremonia: LA LLAMADA CONTESTA — el altar se alza y el grimorio se abre: EL LIBRO HA ESCUCHADO SU NOMBRE.
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar
 		Nombre2: La Canción del Tiempo
@@ -3788,6 +3824,22 @@ Duende: {
 	Burla1: «(El Eterno hojea, aburrido) ¿ESTE era el gran artesano? Un enano con un martillo de juguete… ni mi página índice lo teme.»
 	Burla2: «(El Eterno ríe entre páginas) ¿Reforjarme? ¡JA! Duende: tu yunque es la cuna… yo soy la bestia que se comió al herrero.»
 	Burla3: «(El Eterno susurra) Tiembla, chatarra barbuda: tu miedo es lo más sabio que harás hoy. Al menos el enanito sabe reconocer a sus mayores.»
+}
+
+
+// v6.114 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO (la letra: «necesito
+// crear un mundo nuevo que sera el mundo interior del grimorio del
+// eterno, estara lleno de bruma y de momento se puede entrar usando el
+// altar»).
+Submundo: {
+	Nombre: El Interior del Eterno
+	SoloSP: El interior del libro solo se abre en mundos de UN JUGADOR — por ahora.
+	YaDentro: El libro ya está abierto — el interior te rodea.
+	Cargando: El libro se abre…
+	Cerrando: El libro se cierra…
+	Bienvenida: EL INTERIOR DEL ETERNO — la bruma lo es todo. El altar de la plaza es la vuelta a casa.
+	Despedida: El libro se cierra — el mundo real te devuelve.
+	RedCaida: EL VACÍO TE DEVUELVE A LA PLAZA — nadie cae dentro del libro.
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo

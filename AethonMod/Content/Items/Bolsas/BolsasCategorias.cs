@@ -999,4 +999,42 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    // ======================================================================
+    //  v6.114 — LA BOLSA DE LA FORMA ETERNA (la letra: «los accesorios
+    //  mencionados se deben guardar en una nueva bolsa junto con el
+    //  accesorio definitivo»): LOS OCHO DEL PANTEÓN + LA FORMA ETERNA
+    //  — el kit del cosmético definitivo. La brasa del eclipse, el
+    //  anillo rúnico dorsal, el sello del génesis, los anillos del sol
+    //  rúnico, el brillo de los soles rúnicos, la forma ascendida, la
+    //  forma ascendida 8 (las ofanim) y el aura del vacío… y el UNO
+    //  que los viste todos.
+    // ======================================================================
+    public class BolsaFormaEterna : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de la Forma Eterna";
+
+        protected override string NombreCorto => "Bolsa de la Forma Eterna";
+
+        protected override Color ColorFiesta => new Color(190, 140, 255);
+
+        protected override string Nota => "Los ocho del panteón y el UNO que los viste todos";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // LOS OCHO DE LA LETRA:
+            l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));      // la brasa del eclipse
+            l.Add((ModContent.ItemType<Cosmetics.AnilloRunicoDorsalItem>(), 1));   // el anillo rúnico dorsal
+            l.Add((ModContent.ItemType<Accessories.SelloGenesisItem>(), 1));       // el sello del génesis
+            l.Add((ModContent.ItemType<Accessories.AnillosSolRunicoItem>(), 1));   // los anillos del sol rúnico
+            l.Add((ModContent.ItemType<Cosmetics.BrilloSolarItem>(), 1));          // el brillo de los soles rúnicos
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));       // la forma ascendida
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaOchoItem>(), 1));   // la forma ascendida 8 (las ofanim)
+            l.Add((ModContent.ItemType<Accessories.AuraDeJuicio2Item>(), 1));      // el aura del vacío
+            // Y EL DEFINITIVO:
+            l.Add((ModContent.ItemType<Cosmetics.FormaEternaItem>(), 1));          // LA FORMA ETERNA
+            return l;
+        }
+    }
 }

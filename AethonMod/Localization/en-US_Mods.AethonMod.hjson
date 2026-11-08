@@ -2265,6 +2265,38 @@ Items: {
 			that AURAS, in one kit.
 			'''
 	}
+	// v6.114 — THE DEFINITIVE COSMETIC (the letter: "time to create the
+	// definitive cosmetic item… a single accessory").
+	FormaEternaItem: {
+		DisplayName: The Eternal Form
+		Tooltip:
+			'''
+			        ✦ THE DEFINITIVE COSMETIC — THE WHOLE PANTHEON IN ONE BODY.
+			        IT WEARS THE EIGHT: the Ascended Form and THE OPHANIM (the
+			        two living lights + INFINITE FLIGHT), the Eclipse Ember, the
+			        Dorsal Runic Ring and the Runic Suns' Shine.
+			        The Seal of Genesis and the Runic Sun Rings (+40 mana, +8%
+			        magic, +8% melee, +3 defense) and THE VOID AURA: the
+			        invisible field that dresses the unholy.
+			        "All the book ever gave, in one body — the form that
+			        never fades."
+			'''
+	}
+
+	BolsaFormaEterna: {
+		// v6.114 — THE NEW BAG (the letter: "the mentioned accessories
+		// must be kept in a new bag together with the definitive
+		// accessory").
+		DisplayName: The Bag of the Eternal Form
+		Tooltip:
+			'''
+			        THE EIGHT OF THE PANTHEON + THE ETERNAL FORM: the eclipse
+			        ember, the dorsal runic ring, the seal of genesis, the runic
+			        sun rings, the runic suns' shine, the ascended form, the
+			        ophanim and the void aura… and the ONE wearing them all.
+			'''
+	}
+
 
 	BolsaMaestra: {
 		DisplayName: El Cofre del Arsenal
@@ -2291,14 +2323,15 @@ Items: {
 	}
 
 	AlasRunicasDelVacio: {
-		DisplayName: Alas Rúnicas del Vacío
+		DisplayName: Void Runic Wings
 		Tooltip:
 			'''
-			        The improved copy of the eclipse wings, NO MORE SPIKES:
-			        twin feathers with rounded tips, a perfect mirror between
-			        left and right. Painted in the COLOR OF THE VOID (the
-			        aura ramp) and with its own effects: the violet rune ring
-			        on the tips and the crumbs that fall from the wings.
+			        The eclipse's improved copy, SAW-FREE: the MEMBRANE joins
+			        the feathers and the outer ARC hems the wing from tip to
+			        tip — ONE continuous curve, not a single spike. Left/right
+			        symmetric, in the COLOR OF THE VOID (the aura's ramp) and
+			        with ITS effects: the violet rune ring at the tips, the
+			        mist running through it and the crumbs falling from it.
 			        Flight 240 · no fall damage · folds before real wings.
 			'''
 	}
@@ -3206,6 +3239,9 @@ Jefe: {
 	// Portador.Furia died with their bosses.
 	
 	Aethon: {
+		// v6.114 — THE CALL'S CEREMONY: the altar rises and the eternal
+		// grimoire floats RIGHT ABOVE it (the letter).
+		LlamadaCeremonia: THE CALL ANSWERS — the altar rises and the grimoire opens: THE BOOK HAS HEARD ITS NAME.
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar
 		Nombre2: La Canción del Tiempo
@@ -3793,6 +3829,21 @@ Duende: {
 	Burla1: «(El Eterno hojea, aburrido) ¿ESTE era el gran artesano? Un enano con un martillo de juguete… ni mi página índice lo teme.»
 	Burla2: «(El Eterno ríe entre páginas) ¿Reforjarme? ¡JA! Duende: tu yunque es la cuna… yo soy la bestia que se comió al herrero.»
 	Burla3: «(El Eterno susurra) Tiembla, chatarra barbuda: tu miedo es lo más sabio que harás hoy. Al menos el enanito sabe reconocer a sus mayores.»
+}
+
+
+// v6.114 — THE ETERNAL GRIMOIRE'S INNER WORLD (the letter: "I need to
+// create a new world that will be the eternal grimoire's inner world,
+// full of mist, and for now you enter it using the altar").
+Submundo: {
+	Nombre: The Eternal's Interior
+	SoloSP: The book's interior only opens in SINGLE PLAYER worlds — for now.
+	YaDentro: The book is already open — the interior surrounds you.
+	Cargando: The book opens…
+	Cerrando: The book closes…
+	Bienvenida: THE ETERNAL'S INTERIOR — the mist is everything. The plaza's altar is the way home.
+	Despedida: The book closes — the real world takes you back.
+	RedCaida: THE VOID RETURNS YOU TO THE PLAZA — no one falls inside the book.
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo

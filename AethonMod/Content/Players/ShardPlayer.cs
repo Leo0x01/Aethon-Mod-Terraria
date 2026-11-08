@@ -1373,6 +1373,13 @@ namespace AethonMod.Content.Players
                 // nuevo llega DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaOchoItem>());
+                // v6.114 — LA BOLSA DE LA FORMA ETERNA (la letra: «los
+                // accesorios mencionados se deben guardar en una nueva
+                // bolsa junto con el accesorio definitivo»): el kit del
+                // cosmético definitivo — LOS OCHO DEL PANTEÓN + la Forma
+                // Eterna dentro. La regla de la casa: DIRECTO.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Bolsas.BolsaFormaEterna>());
 
                 if (entregados > 0)
                 {

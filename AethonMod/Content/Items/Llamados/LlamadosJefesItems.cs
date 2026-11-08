@@ -166,35 +166,33 @@ namespace AethonMod.Content.Items.Llamados
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
 
-            // v6.50.117 — EL NOMBRE PARTIDO EN DOS (la letra): pronunciar
-            // el nombre trae AMBOS fragmentos del recuerdo — el de LUZ
-            // y su GEMELO DE OSCURIDAD, con la fórmula de la Emperatriz
-            // (SpawnBoss: el «ha despertado», el target fijado y el
-            // timeLeft ×20 de vanilla). El reloj del mundo lo toma el de
-            // luz; el gemelo nace YA en la órbita de pelea.
-            //
-            // v6.50.119 — DOS CURAS EN LA ENTRADA:
-            //  · LOS GEMELOS NACEN MÁS ABIERTOS (la letra: «al menos un
-            //    150% mas grande»): con la hitbox a 550 px, los ±300 de
-            //    la .117 los hacía nacer ENCIMADOS (600 de luz entre
-            //    centros < 550+550). El doble (±600, −600, jitter ×2)
-            //    los separa limpio a cada lado del portador.
-            //  · EL RESET DE LOS ESTÁTICOS DEL PAR (la cura del estado
-            //    huérfano): un decreto de fusión que quedó vivo de una
-            //    pelea anterior (despawn a media cine) insta-fusionaba
-            //    a la SIGUIENTE pareja en cuanto uno tocara los 1000;
-            //    y un batón de un whoAmI muerto esperaba para siempre.
+            // v6.114 — LA CEREMONIA DE LA LLAMADA (la letra: «en la
+            // llamada debe aparecer el altar y justo encima debe estar
+            // el grimorio del eterno»): pronunciar el nombre ya no trae
+            // los fragmentos de la nada — EL ALTAR se materializa
+            // delante del portador con EL GRIMORIO DEL ETERNO flotando
+            // justo encima, y de ESA ceremonia nacen los dos fragmentos
+            // (la fórmula de la Emperatriz vive en la ceremonia).
             AethonBoss.FusionDecretada = false;
             AethonBoss.TurnoAtaque = -1;
 
-            Vector2 posLuz = player.Center + new Vector2(-600f, -600f) +
-                Main.rand.NextVector2Circular(100f, 100f);
-            NPC.SpawnBoss((int)posLuz.X, (int)posLuz.Y, NpcConvocado, player.whoAmI);
+            // EL ANCLA: el suelo bajo los pies del portador (si vuela,
+            // la ceremonia flota a la altura del portador).
+            int tileX = (int)(player.Center.X / 16f);
+            int tileY = (int)(player.Center.Y / 16f);
+            int suelo = -1;
+            for (int y = tileY; y < tileY + 70 && y < Main.maxTilesY - 10; y++)
+            {
+                if (WorldGen.SolidTile(tileX, y)) { suelo = y; break; }
+            }
+            Vector2 ancla = suelo >= 0
+                ? new Vector2(tileX * 16f + 8f, suelo * 16f)
+                : player.Center + new Vector2(0f, 60f);
 
-            Vector2 posOscuro = player.Center + new Vector2(600f, -600f) +
-                Main.rand.NextVector2Circular(100f, 100f);
-            NPC.SpawnBoss((int)posOscuro.X, (int)posOscuro.Y,
-                ModContent.NPCType<AethonBossOscuro>(), player.whoAmI);
+            Projectile.NewProjectile(player.GetSource_ItemUse(Item),
+                ancla, Vector2.Zero,
+                ModContent.ProjectileType<Projectiles.Definitivas.CeremoniaLlamado>(),
+                0, 0f, player.whoAmI);
             return true;
         }
 

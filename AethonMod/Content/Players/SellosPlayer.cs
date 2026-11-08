@@ -59,6 +59,9 @@ namespace AethonMod.Content.Players
             //     13..19 de vanidad (siempre visibles). ===
             int sello = ModContent.ItemType<Items.Accessories.SelloGenesisItem>();
             int sol = ModContent.ItemType<Items.Accessories.AnillosSolRunicoItem>();
+            // v6.114 — LA FORMA ETERNA (el cosmético definitivo): enciende
+            // las DOS escrituras de los sellos de una vez.
+            int formaEterna = ModContent.ItemType<Items.Cosmetics.FormaEternaItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -70,6 +73,12 @@ namespace AethonMod.Content.Players
 
                 if (item.type == sello) SelloGenesis = true;
                 else if (item.type == sol) AnillosSol = true;
+                // v6.114 — LA FORMA ETERNA: las dos escrituras juntas.
+                else if (item.type == formaEterna)
+                {
+                    SelloGenesis = true;
+                    AnillosSol = true;
+                }
             }
 
             // v6.50.2 — FIX (host sin sus visuales en Host&Play): el viejo

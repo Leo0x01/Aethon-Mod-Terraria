@@ -161,6 +161,9 @@ namespace AethonMod.Content.Players
             int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
             int brilloSolarType = ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>();
+            // v6.114 — LA FORMA ETERNA (el cosmético definitivo): vista
+            // en cualquier hueco, enciende TODO el panteón de una vez.
+            int formaEternaType = ModContent.ItemType<Items.Cosmetics.FormaEternaItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -182,6 +185,19 @@ namespace AethonMod.Content.Players
                 else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
                 else if (item.type == brilloSolarType) BrilloSolar = true;
+                // v6.114 — LA FORMA ETERNA: el UNO que viste los CINCO de
+                // este escaneo (el anillo dorsal, las dos luces vivas, la
+                // brasa y el brillo) — los otros tres (los sellos y el
+                // aura) viven en SellosPlayer y en su propio
+                // UpdateAccessory.
+                else if (item.type == formaEternaType)
+                {
+                    AnilloDorsal = true;
+                    FormaAscendida = true;
+                    FormaAscendidaOcho = true;
+                    BrasaDelEclipse = true;
+                    BrilloSolar = true;
+                }
             }
 
             // v6.50.2 — FIX (host sin sus visuales en Host&Play): mismo error

@@ -152,10 +152,32 @@ namespace AethonMod.Content.Tiles
 
         /// <summary>EL GESTO DEL ALTAR (el calco de §3.1): clic-derecho
         /// abre el panel de ofrendas Y el inventario (para que las manos
-        /// puedan trabajar).</summary>
+        /// puedan trabajar).
+        /// v6.114 — EL MUNDO INTERIOR (la letra: «de momento se puede
+        /// entrar usando el altar»): con EL GRIMORIO DEL ETERNO EN LA
+        /// MANO el altar es LA PUERTA — se entra al interior del libro.
+        /// Y DESDE DENTRO, el mismo altar es la vuelta a casa.</summary>
         public override bool RightClick(int i, int j)
         {
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active) return false;
+
+            // DENTRO DEL LIBRO: el altar es la SALIDA (la puerta gira).
+            if (Systems.SubmundoGrimorio.Activo)
+            {
+                Systems.SubmundoGrimorio.Salir(Main.LocalPlayer);
+                return true;
+            }
+
+            // FUERA, CON EL GRIMORIO EN LA MANO: el altar se ABRE como
+            // puerta al interior del eterno.
+            Item enMano = Main.LocalPlayer.HeldItem;
+            if (enMano != null && !enMano.IsAir &&
+                enMano.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            {
+                Systems.SubmundoGrimorio.Entrar(Main.LocalPlayer);
+                return true;
+            }
+
             UI.AltarOfrendasUI.Alternar(i, j);
             Main.playerInventory = true;
             return true;
