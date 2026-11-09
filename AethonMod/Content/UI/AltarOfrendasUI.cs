@@ -220,6 +220,11 @@ namespace AethonMod.Content.UI
                 Player yo = Main.LocalPlayer;
                 if (yo == null || !yo.active) { CerrarDeVerdad(); return true; }
 
+                // v6.119 — LA PUERTA SE APAGA CADA FRAME: si el botón al
+                // interior no se dibuja (puerta cerrada o panel de otro
+                // altar), su rect muere aquí — jamás un clic fantasma.
+                _geoPuerta = Rectangle.Empty;
+
                 SpriteBatch sb = Main.spriteBatch;
                 Texture2D pixel = TextureAssets.MagicPixel.Value;
 
@@ -401,6 +406,24 @@ namespace AethonMod.Content.UI
                         {
                             global::AethonMod.Content.Globals.CorruptoGlobalItem
                                 .PagarCorrupcion(Main.LocalPlayer, coste);
+                            // v6.119 — LA CUENTA DE LA PUERTA (la letra:
+                            // «al consagrar 1000 esencias el altar se
+                            // pueda ir al mundo interior»): cada esencia
+                            // que el Eterno COBRA por un sello queda
+                            // anotada en el altar — y el día que la
+                            // cuenta cruza LAS MIL, EL ALTAR SE VUELVE
+                            // PUERTA (el botón del interior nace en la
+                            // ventana y el mundo entero se entera).
+                            bool yaAbierta = global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += coste;
+                            if (!yaAbierta && global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                            {
+                                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
+                                    new Color(220, 170, 255));
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item113.WithPitchOffset(-0.7f));
+                            }
                             sello.Corrompido = true;
                             _arma.ResetPrefix();
                             global::AethonMod.Content.Globals.CorruptoGlobalItem
@@ -435,6 +458,43 @@ namespace AethonMod.Content.UI
                     }
                 }
 
+                // ============================================================
+                //  v6.119 — EL BOTÓN DE LA PUERTA AL MUNDO INTERIOR (la
+                //  letra: «al consagrar 1000 esencias el altar se pueda
+                //  ir al mundo interior»): EL ALTAR TRAGA igual que el
+                //  ítem — LA MISMA DEVORACIÓN (DevoracionEterna: el
+                //  libro baja, se abre, traga al portador SIN daño, la
+                //  bruma inunda y el interior lo recibe con su
+                //  revelación). El ítem «Mundo Interior del Eterno»
+                //  SIGUE siendo la puerta de la bolsa: el altar es la
+                //  puerta de la casa (y no se gasta NINGUNA de las dos).
+                // ============================================================
+                bool hoverPuertaAhora = _geoPuerta.Contains(Main.mouseX, Main.mouseY) &&
+                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                if (hoverPuertaAhora) Main.LocalPlayer.mouseInterface = true;
+                if (hoverPuertaAhora && clicNuevo)
+                {
+                    Player portador = Main.LocalPlayer;
+                    string razonPuerta;
+                    if (!global::AethonMod.Content.Systems.SubmundoGrimorio
+                        .PuedeEntrar(portador, out razonPuerta))
+                    {
+                        if (razonPuerta != null)
+                            Main.NewText(razonPuerta, new Color(190, 160, 220));
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                    else
+                    {
+                        CerrarDeVerdad();   // el altar suelta la ventana: el libro toma el relevo
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
+                        Projectile.NewProjectile(portador.GetSource_Misc("AltarMundoInterior"),
+                            portador.Center, Vector2.Zero,
+                            ModContent.ProjectileType
+                                <global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna>(),
+                            0, 0f, portador.whoAmI);
+                    }
+                }
+
                 // EL BOTÓN CERRAR / ESC (el borde del teclado).
                 bool escAhora = Microsoft.Xna.Framework.Input.Keyboard
                     .GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape);
@@ -462,6 +522,10 @@ namespace AethonMod.Content.UI
         /// <summary>Los rects vivos de la pasada de dibujo (el clic los lee).</summary>
         private static Rectangle _geoSlot;
         private static Rectangle _geoBtn;
+        /// <summary>v6.119 — EL RECT de la PUERTA al mundo interior (solo
+        /// vive cuando la puerta está abierta: Rectangle.Empty la apaga —
+        /// un clic en un rect vacío jamás entra).</summary>
+        private static Rectangle _geoPuerta;
 
         private static float FluirElContenido(SpriteBatch sb, int x, int y, int w,
             bool lista, bool esArma, int costeVivo, int llevadas)
@@ -598,6 +662,46 @@ namespace AethonMod.Content.UI
                     lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
             }
             cy += 42f + 10f;
+
+            // ── v6.119 — LA SECCIÓN DE LA PUERTA — EL MUNDO INTERIOR (la
+            //    letra: «al consagrar 1000 esencias el altar se pueda ir
+            //    al mundo interior»): la cuenta VIVA de lo consagrado en
+            //    el altar (X/1000, persistida con el mundo) y, al llegar
+            //    a las mil, EL BOTÓN QUE TRAGA — la misma DEVORACIÓN del
+            //    ítem, nacida del altar. La geometría fluye: el botón
+            //    solo existe cuando la puerta está abierta (y la pasada
+            //    de medida reserva EXACTAMENTE lo mismo que dibuja). ──
+            cy = TituloSeccion(sb, Language.GetTextValue(Clave("MundoTitulo")),
+                x, cy, w, new Color(210, 150, 255));
+            bool puertaAbierta = global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+            if (puertaAbierta)
+            {
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("MundoAbierta")),
+                    x + 24f, cy, w - 48f, 0.78f, TintaVioleta);
+                Rectangle btnPuerta = new Rectangle(x + 24, (int)cy, w - 48, 42);
+                if (dibujar)
+                {
+                    _geoPuerta = btnPuerta;
+                    bool hoverPuerta = PanelContiene(btnPuerta);
+                    sb.Draw(pixel, btnPuerta,
+                        (hoverPuerta ? new Color(210, 150, 255) : TintaVioleta * 0.6f) * 0.35f);
+                    Marco(sb, pixel, btnPuerta,
+                        hoverPuerta ? new Color(230, 190, 255) : TintaVioleta * 0.7f);
+                    Utils.DrawBorderString(sb, Language.GetTextValue(Clave("MundoPuerta")),
+                        new Vector2(btnPuerta.Center.X, btnPuerta.Center.Y),
+                        TintaTexto, 1.0f, 0.5f, 0.5f);
+                }
+                cy += 42f + 10f;
+            }
+            else
+            {
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("MundoProgreso"),
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
+                    x + 24f, cy, w - 48f, 0.78f, TintaApagado);
+                cy = LineaMedida(sb, Language.GetTextValue(Clave("MundoPista")),
+                    x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
+            }
 
             // ── LA SECCIÓN 3 — CÓMO CONSEGUIR ESENCIAS (la mesa REAL del
             //    juego: criaturas 0,1% · jefes 1-10 · ¡las OLEADAS DE

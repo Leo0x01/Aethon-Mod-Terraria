@@ -164,6 +164,37 @@ namespace AethonMod.Content.Systems
         /// cortes).</summary>
         private static float _tinteCedido;
 
+        // ================================================================
+        //  v6.119 — LA PUERTA DEL ALTAR (la letra: «al consagrar 1000
+        //  esencias el altar se pueda ir al mundo interior»): el
+        //  ALTAR DE LA CONSAGRACIÓN acumula TODAS las esencias que el
+        //  Eterno le ha cobrado por sellar ofrendas — y cuando la
+        //  cuenta llega a LAS MIL (el mismo número sagrado del ítem y
+        //  del tope del festín del portador), EL ALTAR MISMO SE VUELVE
+        //  PUERTA: su ventana abre EL BOTÓN que desata LA DEVORACIÓN
+        //  (la misma película del ítem — el libro baja, se abre y
+        //  traga al portador). La cuenta vive con el MUNDO (se
+        //  consagra en un altar, se abre en todos: la voluntad del
+        //  libro es del mundo, no del mueble) y el ítem
+        //  «MundoInteriorEternoItem» SIGUE siendo la puerta portátil
+        //  de siempre (las DOS puertas, la de la bolsa y la del
+        //  altar).
+        // ================================================================
+
+        /// <summary>EL NÚMERO SAGRADO de la puerta del altar: las MIL
+        /// esencias consagradas que abren el interior.</summary>
+        public const int EsenciasPuerta = 1000;
+
+        /// <summary>Las esencias que EL ETERNO ha cobrado YA en el altar
+        /// de este mundo (consagración tras consagración — la cuenta
+        /// acumulada, persistida con el mundo).</summary>
+        public static int EsenciasConsagradas;
+
+        /// <summary>¿La puerta del altar está YA abierta? (las mil
+        /// esencias pagadas: el botón del interior vive en la ventana
+        /// del altar).</summary>
+        public static bool PuertaAbierta => EsenciasConsagradas >= EsenciasPuerta;
+
         // === EL VELO (la bruma que cubre el interior) ===
         private static Texture2D _softGlow;
         private static bool _veloProbeFallos;
@@ -205,6 +236,9 @@ namespace AethonMod.Content.Systems
             _ticksCalma = 0;
             _ciclosFestin = 0;
             _tinteCedido = 0f;
+            // v6.119 — la cuenta del altar muere con la descarga (vive
+            // con el MUNDO: al recargar, LoadWorldData la devuelve).
+            EsenciasConsagradas = 0;
             DevolverSolEclipse();
         }
 
@@ -1095,6 +1129,36 @@ namespace AethonMod.Content.Systems
             _vents = null;
             _ticksCalma = 0;
             _tinteCedido = 0f;
+            // v6.119 — OJO: EsenciasConsagradas NO se toca aquí — la
+            // cuenta del altar es del MUNDO REAL y este hook también
+            // corre al ENTRAR al interior (SystemLoader.OnWorldUnload
+            // de CallbackEntrar): la puerta abierta sigue abierta al
+            // volver a casa (la voluntad del libro es del mundo).
+        }
+
+        // ================================================================
+        //  v6.119 — LA PERSISTENCIA DE LA PUERTA: la cuenta de las
+        //  esencias consagradas en el altar vive con el ARCHIVO del
+        //  mundo real (SaveWorldData corre en cada guardado del mundo
+        //  — y el cerrojo del interior (BloquearGuardado) garantiza
+        //  que NUNCA se guarda desde adentro: la cuenta del mundo
+        //  real jamás se contamina con el archivo falso del interior).
+        // ================================================================
+        public override void SaveWorldData(Terraria.ModLoader.IO.TagCompound tag)
+        {
+            try { tag["esenciasConsagradasAltar"] = EsenciasConsagradas; }
+            catch { }
+        }
+
+        public override void LoadWorldData(Terraria.ModLoader.IO.TagCompound tag)
+        {
+            EsenciasConsagradas = 0;
+            try
+            {
+                var n = tag.Get<int>("esenciasConsagradasAltar");
+                if (n > 0) EsenciasConsagradas = n;
+            }
+            catch { }
         }
 
         // ==================================================================
@@ -1355,6 +1419,30 @@ namespace AethonMod.Content.Systems
         //  VOLUTAS que serpentean sobre el terreno y LA BRUMA REACTIVA
         //  que SE ABRE a tu paso y se cierra detrás (el cuestionario:
         //  «todas» las brumas — columnas · volutas · reactiva).
+        //
+        //  v6.119 — EL CONTRATO DEL LOTE DE PostDrawTiles (LA CURA DEL
+        //  CRASH DEL client.log: «Begin has been called before calling
+        //  End» en DrawSuperSpecialProjectiles → Main engine crash
+        //  justo al entrar al interior). Leído en el IL del tML
+        //  2026.09.3.1 real, el pase de Main.DoDraw es EXACTO:
+        //      spriteBatch.End();                        ← vanilla CIERRA
+        //      SystemLoader.PostDrawTiles();            ← ESTE hook
+        //      TimeLogger.DetailedDrawTime(35);
+        //      SortDrawCacheWorms();
+        //      DrawSuperSpecialProjectiles(DrawCacheFirstFractals)
+        //          → spriteBatch.Begin(...)              ← vanilla ABRE
+        //  El hook corre con el lote CERRADO y vanilla espera CERRADO
+        //  a la salida (DrawSuperSpecialProjectiles abre el suyo). El
+        //  finally de la v6.118 llamaba a ReabrirLoteVanilla() — que
+        //  RE-ABRE el lote cuando no hay uno vivo — y el frame salía
+        //  con un Begin HUÉRFANO: el Begin de vanilla reventaba
+        //  (InvalidOperationException) y el motor moría EN EL PRIMER
+        //  frame del interior (el guard «!Activo» lo explicaba todo:
+        //  en el mundo real este hook jamás corría). LA CURA: salir
+        //  SIEMPRE CERRADO — CerrarLoteSiAbierto en el finally (el
+        //  patrón del RayoLib.PostDrawTiles de la casa: quien sigue
+        //  abre su propio lote). El re-abrir queda para los PreDraw
+        //  (el lote ABIERTO del pase de entidades) — jamás aquí.
         // ==================================================================
         public override void PostDrawTiles()
         {
@@ -1432,7 +1520,11 @@ namespace AethonMod.Content.Systems
                         try { Main.spriteBatch.End(); } catch { }
                     }
                 }
-                finally { VFXCore.ReabrirLoteVanilla(); }
+                // v6.119 — LA SALIDA CERRADA (la cura del crash): el
+                // lote vuelve CERRADO — DrawSuperSpecialProjectiles lo
+                // abre él mismo justo después de este hook. Si algo
+                // ajeno dejara un Begin vivo, la sonda lo caza aquí.
+                finally { VFXCore.CerrarLoteSiAbierto(); }
             }
             catch { }
         }

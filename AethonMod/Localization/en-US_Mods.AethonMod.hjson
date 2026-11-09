@@ -2308,6 +2308,7 @@ Items: {
 		Linea1: "[c/D9B3FF:ON USE: the Eternal grimoire descends, opens and DEVOURS YOU — no damage: the swallow is the door]"
 		Linea2: "[c/D9B3FF:the world fills with mist… and as it clears THE INTERIOR is born: the hunger waves' permanent eclipse, purple and full of mist]"
 		Linea3: "[c/78788C:THE PRISM OF COLORS at the plaza returns you to the real world — or SUMMON AETHON from its button window]"
+		Linea4: "[c/78788C:THE DOOR NEVER WEARS OUT: the item is NOT consumed — usable FOREVER, again and again, every time the book calls]"
 	}
 
 	BolsaMaestra: {
@@ -2952,6 +2953,7 @@ Hambre: {
 		Vencido1: (The Eternal savors the moment) One less praying to the void. The world breathes better.
 		Vencido2: (The Eternal turns a page) He fell for his misplaced faith. I WOULD have listened… had they paid me tribute.
 		Devorado: (The Eternal swallows) Mmm… it tasted of cold fanaticism. What a delicious disgust.
+		PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you.
 		ElJefe: (The Eternal roars with laughter) LOOK! The false prophet himself! Pray, hooded little man… you pray to NOBODY. The tribute you never gave me will be collected by MY hunger.
 	}
 
@@ -3911,6 +3913,15 @@ Altar: {
 	Consagrar: CONSAGRAR
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
+	// v6.119 — THE ALTAR'S DOOR (the letter: consecrating 1000
+	// essences lets the altar take you to the inner world): the
+	// living tally of what was consecrated and, at ONE THOUSAND,
+	// the button that swallows.
+	MundoTitulo: THE ETERNAL'S INNER WORLD
+	MundoProgreso: Essences consecrated at the altar: {0}/{1}
+	MundoPista: (when the tally reaches ONE THOUSAND, the altar itself will open the door into the book's interior)
+	MundoAbierta: The thousand essences are paid: the altar can NOW devour the bearer and take them inside.
+	MundoPuerta: ENTER THE INNER WORLD
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
 }

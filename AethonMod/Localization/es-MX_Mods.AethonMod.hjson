@@ -2303,6 +2303,7 @@ Items: {
 		Linea1: "[c/D9B3FF:AL USARLO: el grimorio del Eterno desciende, se abre y TE DEVORA — sin daño: el trago es la puerta]"
 		Linea2: "[c/D9B3FF:el mundo se llena de bruma… y al disiparse nace EL INTERIOR: el eclipse permanente de las oleadas, morado y lleno de bruma]"
 		Linea3: "[c/78788C:EL PRISMA DE COLORES de la plaza te devuelve al mundo real — o INVOCÁ A AETHON desde su ventana de botones]"
+		Linea4: "[c/78788C:LA PUERTA NO SE GASTA: el ítem NO se consume — se puede usar SIEMPRE, una y otra vez, cada vez que el libro llama]"
 	}
 
 	BolsaMaestra: {
@@ -2947,6 +2948,7 @@ Hambre: {
 		Vencido1: «(El Eterno saborea el momento) Uno menos que reza al vacío. El mundo respira mejor.»
 		Vencido2: «(El Eterno pasa una página) Cayó por su fe mal puesta. Yo LO habría escuchado… si me hubieran dado tributo.»
 		Devorado: «(El Eterno traga) Mmm… sabía a fanatismo frío. Qué asco tan delicioso.»
+	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
 		ElJefe: «(El Eterno ruge de risa) ¡MIRA! ¡El falso profeta en persona! Reza, enano encapuchado… rezas a NADIE. El tributo que nunca me dieron lo cobrará MI hambre.»
 	}
 
@@ -3906,6 +3908,14 @@ Altar: {
 	Consagrar: CONSAGRAR
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
+	// v6.119 — LA PUERTA DEL ALTAR (la letra: «al consagrar 1000
+	// esencias el altar se pueda ir al mundo interior»): la cuenta
+	// viva de lo consagrado y, a las MIL, el botón que traga.
+	MundoTitulo: EL MUNDO INTERIOR DEL ETERNO
+	MundoProgreso: Esencias consagradas en el altar: {0}/{1}
+	MundoPista: (cuando la cuenta llegue a las MIL, el altar mismo abrirá la puerta al interior del libro)
+	MundoAbierta: Las mil esencias están pagadas: el altar YA PUEDE devorar al portador y llevarlo al interior.
+	MundoPuerta: IR AL MUNDO INTERIOR
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
 }

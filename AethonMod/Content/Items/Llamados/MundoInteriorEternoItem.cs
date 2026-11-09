@@ -9,7 +9,8 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Items.Llamados
 {
     // ======================================================================
-    //  MundoInteriorEternoItem — v6.115 — LA PUERTA AL MUNDO INTERIOR.
+    //  MundoInteriorEternoItem — v6.115 → v6.119 — LA PUERTA AL MUNDO
+    //  INTERIOR (Y LA PUERTA PORTÁTIL DE LA BOLSA).
     //
     //  LA LETRA DEL USUARIO: «para que el altar nos lleve a otro mundo
     //  que es el mundo crea un nuevo item que se fabrica con esencia
@@ -23,6 +24,20 @@ namespace AethonMod.Content.Items.Llamados
     //  mundo esta lleno de bruma y esta se disipa revelando como es
     //  este mundo nuevo».
     //
+    //  v6.119 — LA LETRA NUEVA: «intenta que el item que lleva al mundo
+    //  interior no sea consumible y se pueda seguir usando siempre» +
+    //  «al consagrar 1000 esencias el altar se pueda ir al mundo
+    //  interior». LA PUERTA NO SE GASTA (de jamás): consumible = false
+    //  desde su nacimiento y AQUÍ BLINDADA — cada uso deja el ítem
+    //  DONDE ESTABA (ni stack--, ni TurnToAir, ni consume en NINGÚN
+    //  camino: el UseItem SOLO nace el proyectil y devuelve true), y
+    //  el guard nuevo de CanUseItem espera a que la DEVORACIÓN viva
+    //  termine para aceptar el siguiente uso: la puerta se puede usar
+    //  SIEMPRE — al volver del interior, de nuevo y de nuevo. (Y la
+    //  segunda puerta nació en el ALTAR: consagradas las MIL esencias
+    //  en el altar, SU ventana traga igual que el ítem — ver
+    //  AltarOfrendasUI y SubmundoGrimorio.EsenciasConsagradas.)
+    //
     //  EL ARTE DE LA PUERTA: 1000× ESENCIA DEL ETERNO en el ALTAR DE LA
     //  CONSAGRACIÓN (el mismo número sagrado de la carta cósmica: las
     //  mil esencias que la espalda del jugador ya conoce). Al USARLO no
@@ -31,7 +46,7 @@ namespace AethonMod.Content.Items.Llamados
     //  traga al portador SIN DAÑO, el mundo se llena de bruma y el
     //  interior lo recibe con su revelación de niebla).
     //
-    //  (La puerta vieja — el grimorio en la mano sobre el altar — muere
+    //  (La puerta vieja — el grimorio en la mano sobre el altar — murió
     //  por esta letra: el camino AHORA es el ítem, el arte y el trago.)
     // ======================================================================
     public class MundoInteriorEternoItem : ModItem
@@ -41,7 +56,7 @@ namespace AethonMod.Content.Items.Llamados
             Item.width = 30;
             Item.height = 30;
             Item.maxStack = 1;
-            Item.consumable = false;          // una puerta no se gasta
+            Item.consumable = false;          // una puerta no se gasta (v6.119: JAMÁS)
             Item.rare = ItemRarityID.Purple;  // el morado del vacío de la casa
             Item.value = Item.buyPrice(platinum: 1);
             Item.useStyle = ItemUseStyleID.HoldUp;
@@ -56,6 +71,21 @@ namespace AethonMod.Content.Items.Llamados
             // quien ya está en su barriga.
             if (SubmundoGrimorio.Activo || SubmundoGrimorio.Transicion)
                 return false;
+            // v6.119 — UN FESTÍN A LA VEZ: si UNA devoración ya vive para
+            // este portador, el ítem espera — el libro que ya está
+            // tragando no abre una segunda boca. El ítem NO se pierde ni
+            // se gasta (el uso simplemente no dispara hasta que el
+            // trago termina) y tras el viaje queda DONDE ESTABA: la
+            // puerta se puede usar SIEMPRE, una y otra vez.
+            int tipoFestin = ModContent.ProjectileType
+                <Projectiles.Definitivas.DevoracionEterna>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr != null && pr.active && pr.type == tipoFestin &&
+                    pr.owner == player.whoAmI)
+                    return false;
+            }
             return true;
         }
 
@@ -97,6 +127,9 @@ namespace AethonMod.Content.Items.Llamados
             Linea("Linea1", "");
             Linea("Linea2", "");
             Linea("Linea3", "");
+            // v6.119 — LA LETRA: «que se pueda seguir usando siempre» —
+            // la línea del contrato: la puerta NO se gasta.
+            Linea("Linea4", "");
         }
 
         public override void AddRecipes()
