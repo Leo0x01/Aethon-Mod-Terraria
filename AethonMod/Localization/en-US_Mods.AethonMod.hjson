@@ -2339,12 +2339,12 @@ Items: {
 		DisplayName: Void Runic Wings
 		Tooltip:
 			'''
-			        The eclipse's improved copy, SAW-FREE: the MEMBRANE joins
-			        the feathers and the outer ARC hems the wing from tip to
-			        tip — ONE continuous curve, not a single spike. Left/right
-			        symmetric, in the COLOR OF THE VOID (the aura's ramp) and
-			        with ITS effects: the violet rune ring at the tips, the
-			        mist running through it and the crumbs falling from it.
+			        THE EXACT COPY OF THE ECLIPSE, in the COLOR OF THE VOID:
+			        the same five-feather fan — spike-free, left/right
+			        symmetric — dressed in the aura's ramp (the living
+			        violet, the deep flesh and the nothing's floor). THE
+			        VIOLET RUNE RING burns at the feather tips and THE VOID
+			        CRUMBS fall from the wings as you fly.
 			        Flight 240 · no fall damage · folds before real wings.
 			'''
 	}
@@ -3245,6 +3245,11 @@ Configs: {
 			Label: Maná gratis en pruebas
 			Tooltip: ""
 		}
+
+		MostrarFormaEterna: {
+			Label: Show the Eternal Form
+			Tooltip: Turn it on to wear the Eternal Form's visual pantheon (the two lights, the dorsal ring, the ember, the glint and its light). Turn it off to hide all the theater: the stats and the void aura remain yours. The accessory's eye toggle (hide accessory) also hides it.
+		}
 	}
 }
 
@@ -3835,6 +3840,7 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: The Prism of the Eternal
+	PilarPrismaTile.MapEntry: The Prism Pillar
 	PaginaDelEternoTile.MapEntry: The Page of the Eternal
 }
 
@@ -3874,6 +3880,7 @@ PrismaInterior: {
 	YaVive: AETHON ALREADY WALKS THE INTERIOR
 	Leyenda: The calling: the altar materializes and THE GRIMOIRE floats just above — the shards are born of the ceremony
 	NombreCorto: The Prism of the Eternal
+	NombrePilar: The Prism Pillar — the plain's way out
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo

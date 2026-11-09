@@ -2338,12 +2338,12 @@ Items: {
 		DisplayName: Alas Rúnicas del Vacío
 		Tooltip:
 			'''
-			        La copia mejorada del eclipse, SIN SIERRA: la MEMBRANA une
-			        las plumas y el ARCO exterior borda el ala de punta a punta —
-			        UNA curva continua, sin un solo pico. Simétrica izquierda y
-			        derecha, del COLOR DEL VACÍO (la rampa del aura) y con SUS
-			        efectos: el anillo de runas violeta en las puntas, la niebla
-			        que corre por dentro y las migas que caen de las alas.
+			        LA COPIA EXACTA DEL ECLIPSE, del COLOR DEL VACÍO: el mismo
+			        abanico de cinco plumas — sin picos, simétrica izquierda y
+			        derecha — vestida con la rampa del aura (el violeta vivo,
+			        la carne hond y el fondo de la nada). EL ANILLO DE RUNAS
+			        VIOLETAS arde en las puntas de las plumas y LAS MIGAS DEL
+			        VACÍO caen de las alas mientras vuelas.
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -3244,6 +3244,11 @@ Configs: {
 			Label: Maná gratis en pruebas
 			Tooltip: ""
 		}
+
+		MostrarFormaEterna: {
+			Label: Mostrar la Forma Eterna
+			Tooltip: Enciéndelo para vestir el panteón visual de la Forma Eterna (las dos luces, el anillo dorsal, la brasa, el brillo y su luz). Apágalo para ocultar todo el teatro: los stats y el aura del vacío siguen siendo tuyos. El ojo del accesorio (ocultar accesorio) también la esconde.
+		}
 	}
 }
 
@@ -3834,6 +3839,7 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: El Prisma del Eterno
+	PilarPrismaTile.MapEntry: El Pilar Prisma
 	PaginaDelEternoTile.MapEntry: La Página del Eterno
 }
 
@@ -3873,6 +3879,7 @@ PrismaInterior: {
 	YaVive: AETHON YA CAMINA POR EL INTERIOR
 	Leyenda: La llamada: el altar se materializa y EL GRIMORIO flota justo encima — de la ceremonia nacen los fragmentos
 	NombreCorto: El Prisma del Eterno
+	NombrePilar: El Pilar Prisma — la salida del llano
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo

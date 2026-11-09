@@ -47,7 +47,19 @@ namespace AethonMod.Content.Items.Altar
         {
             Item.width = 22;
             Item.height = 22;
-            Item.maxStack = 999;
+            // v6.120 — LA PILA DE LAS MIL (la letra: «las esencias del
+            // eterno solo llegan hasta pilas de 999, por lo tanto nunca
+            // se cumplen las 1000, para eso hacer que puedan acumularse
+            // hasta 9999»): la pila crece a 9999 — las MIL de la puerta
+            // del altar (EsenciasPuerta) y las MIL del ítem
+            // (MundoInteriorEternoItem pide 1000 EN UNA SOLA PILA: con
+            // el tope 999 la receta no podía pagarse nunca) caben enteras
+            // en UNA pila de la bolsa. (El tope del festín del portador
+            // sigue siendo SU cuenta — ShardPlayer.EsenciasTope: 1000
+            // comidas, sin cambio alguno; y la mesa de drops intacta:
+            // EsenciaCorruptaDrops y OleadaNPC NO se tocan — «si
+            // funciona, no se toca».)
+            Item.maxStack = 9999;
             Item.rare = ItemRarityID.LightPurple;
             Item.value = 0;                 // no vale nada: vale lo que el Eterno pague
             // v6.51.11 — SE COME (la letra): un consumible de verdad.

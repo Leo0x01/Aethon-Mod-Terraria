@@ -26,11 +26,29 @@ using static Terraria.ModLoader.ModContent;
 namespace AethonMod.Content.Systems
 {
     // ======================================================================
-    //  SubmundoGrimorio — v6.118 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO:
-    //  LA SUPERFICIE DEL CUERPO DEL DIOS, EN ECLIPSE PERMANENTE Y BAJO EL
+    //  SubmundoGrimorio — v6.120 — EL MUNDO INTERIOR DEL GRIMORIO ETERNO:
+    //  EL LLANO DE OBSIDIANA Y SU PILAR, EN ECLIPSE PERMANENTE Y BAJO EL
     //  CICLO ETERNO DE LAS OLEADAS DEL HAMBRE.
     //
-    //  LA LETRA DEL REWORK (v6.118): «el nuevo mundo no es lo que pedí,
+    //  LA LETRA DEL REDISEÑO (v6.120): «el mundo interior debe ser plano,
+    //  solo un mundo plano de obsidiana, el fondo deben ser capas de
+    //  tentaculos en loop y al menos 3 capas» + «necesitas crear un pilar
+    //  tipo prisma altar que permita salir… el pilar debe aparecer ya
+    //  colocado en el mundo interior» + «crea 3 banda sonoras que sonaran
+    //  aleatoriamente». CÓMO SERÍA EL INTERIOR DE UNA ENTIDAD CÓSMICA:
+    //  LA PÁGINA NEGRA INFINITA — el cuerpo del dios destilado a UN
+    //  LLANO de obsidiana que no acaba nunca (la obsidiana es la carne
+    //  CONGELADA de lo devorado: todo lo que el libro tragó, apagado y
+    //  comprimido en UNA verdad plana), EL CIELO de tentáculos EN LOOP
+    //  (CieloInteriorEterno — el cuerpo VIVO que sigue moviéndose
+    //  alrededor en TRES capas que se repiten sin costura: el dios te
+    //  envuelve entero mientras caminas su página), EL PILAR PRISMA
+    //  (la única torre del llano — el hueso de la puerta, ya colocado
+    //  junto al nacimiento) y LAS TRES BANDAS de la casa (el sueño, la
+    //  garganta y el corazón — tres caras del mismo dios, al azar).
+    //
+    //  (El rework v6.118 del terreno continuo, la geoda y las vetas
+    //  MURIÓ con esta letra — el llano es el cuerpo entero del dios.)
     //  primero tiene que estar en la superficie, luego debe estar en
     //  eclipse permanente y debe ser el de las oleadas de hambre, luego
     //  no debe tener circulos planos… el fondo del mundo debe ser un
@@ -84,18 +102,19 @@ namespace AethonMod.Content.Systems
         // PERFECTAS; NI UN TILE menos ni uno más). ===
         private const int Ancho = 800;
         private const int Alto = 450;
-        // v6.118 — LAS LÍNEAS DEL TERRENO CONTINUO: las colinas de la
-        // superficie viven entre y≈95 y y≈145 (la PLAZA plana con su
-        // primer tile sólido en PlazaY−7 = 113); worldSurface = 150
-        // queda BAJO el terreno (el portador de pie vive EN LA ZONA DEL
-        // CIELO — el CustomSky del cuerpo se ve de verdad; el interior
-        // viejo enterraba la plaza 58 tiles bajo la superficie: el cielo
-        // NUNCA existió a la vista) y rockLayer = 270 abre la zona de
-        // la carne profunda (las paredes de la profundidad mandan).
+        // v6.120 — EL LLANO DE OBSIDIANA (la letra: «el mundo interior
+        // debe ser plano, solo un mundo plano de obsidiana»): la
+        // superficie del cuerpo es UNA LÍNEA RECTA de obsidiana a
+        // y = LlanoY — ni colinas ni plaza ni geoda: SOLO el llano y su
+        // pilar. worldSurface = 150 queda BAJO el llano (el portador de
+        // pie vive EN LA ZONA DEL CIELO — el CustomSky del cuerpo se ve
+        // de verdad) y rockLayer = 270 abre la zona honda (las paredes de
+        // la profundidad mandan — el cielo no se cuela bajo la roca).
         private const int Superficie = 150;
         private const int Roca = 270;
-        private const int PlazaX = 400;
-        private const int PlazaY = 120;   // la plaza: su roca alta es PlazaY−7
+        private const int LlanoY = 140;     // la PRIMERA FILA SÓLIDA del llano
+        private const int PlazaX = 400;    // donde vive EL PILAR PRISMA
+        private const int SpawnX = 405;    // el nacimiento: AL LADO del pilar
 
         /// <summary>¿Estamos DENTRO del mundo interior?</summary>
         public static bool Activo;
@@ -322,6 +341,9 @@ namespace AethonMod.Content.Systems
 
                 // === EL INTERIOR NACE ===
                 Activo = true;
+                // v6.120 — LA MONEDA DE LA MÚSICA nace vírgen en cada
+                // visita (EscenaInteriorGrimorio: la banda suelta al azar).
+                try { EscenaInteriorGrimorio.AlEntrar(); } catch { }
                 Main.rand = new UnifiedRandom((int)DateTime.Now.Ticks);
                 WorldGen.gen = true;
                 WorldGen.loadFailed = false;
@@ -329,17 +351,12 @@ namespace AethonMod.Content.Systems
 
                 Main.maxTilesX = Ancho;
                 Main.maxTilesY = Alto;
-                // v6.115 — LA CURA DEL ENTIERRO: la plaza (Isla 30×7)
-                // tiene su superficie en PlazaY−7 — el spawn viejo
-                // (PlazaY−4) nacía TRES filas DENTRO de la roca (el
-                // SpawnPlayer de vanilla lo rescataba arriba) y el
-                // altar viejo (PlazaY−1) quedaba SEIS filas enterrado:
-                // PlaceObject fallaba en silencio y el interior se
-                // quedaba SIN PUERTA. Ahora el PRISMA vive DE PIE
-                // (PlazaY−8: su fila de abajo es el primer aire) y el
-                // spawn nace en el aire limpio SOBRE él.
-                Main.spawnTileX = PlazaX;
-                Main.spawnTileY = PlazaY - 14;
+                // v6.120 — EL NACIMIENTO EN EL LLANO: al LADO del pilar
+                // (SpawnX, en el aire limpio SOBRE la línea del llano —
+                // cae dos tiles y PISA la obsidiana; el pilar está a la
+                // vista, la salida NUNCA se pierde).
+                Main.spawnTileX = SpawnX;
+                Main.spawnTileY = LlanoY - 4;
                 WorldGen.setWorldSize();
                 WorldGen.clearWorld();
                 Main.worldSurface = Superficie;
@@ -625,203 +642,89 @@ namespace AethonMod.Content.Systems
         }
 
         // ==================================================================
-        //  LA GENERACIÓN — EL INTERIOR SIEMPRE IGUAL (la semilla fija de
-        //  la casa: el grimorio ES su interior, no cambia de humor).
-        //  v6.118 — LA SUPERFICIE DEL CUERPO: terreno CONTINUO de borde a
-        //  borde (la letra: «primero tiene que estar en la superficie») —
-        //  colinas de AMATISTA ENCENDIDA con la corteza dorada de la
-        //  página, LAS VETAS de la PÁGINA DEL ETERNO corriendo por la
-        //  carne, LAS VENTANAS donde la carne respira y EL CORAZÓN de
-        //  amatista bajo la plaza. Las islas flotantes MURIERON.
+        //  LA GENERACIÓN — v6.120 — EL LLANO DE OBSIDIANA (la letra: «el
+        //  mundo interior debe ser plano, solo un mundo plano de
+        //  obsidiana… el pilar debe aparecer ya colocado en el mundo
+        //  interior»). EL CUERPO DEL DIOS, DESTILADO: una página negra
+        //  infinita — LA LÍNEA RECTA de obsidiana de borde a borde (el
+        //  cuerpo entero ES el llano) y EL PILAR PRISMA ya parado en
+        //  él, al lado del nacimiento. Nada más: la vastedad ES el
+        //  diseño — el cielo de tentáculos en loop (CieloInteriorEterno)
+        //  es el mundo entero, y el llano es la única verdad sólida.
+        //
+        //  LA LECCIÓN QUE CURÓ EL «NO PUEDO SALIR»: el prisma viejo se
+        //  «colocaba» ANTES del terreno — TileObject.CanPlace valida
+        //  AnchorBottom sobre el mundo VACÍO y fallaba EN SILENCIO:
+        //  el interior nacía SIN PUERTA. EL PILAR SE COLOCA ÚLTIMO
+        //  (DESPUÉS del llano): el obsidiana YA es sólido bajo sus
+        //  pies — CanPlace dice SÍ y la puerta NACE en cada visita.
         // ==================================================================
         private static void GenerarInterior()
         {
-            // === LA PLAZA DEL ALTAR: plana, al centro (la puerta de vuelta) ===
-            // v6.115 — EL PRISMA DEL ETERNO en el corazón de la plaza
-            // (la letra: «en el momento en que el jugador aparece en el
-            // mundo debe aparecer un altar que sera un prisma de
-            // colores…»): DE PIE sobre la superficie — LA CURA DEL
-            // ENTIERRO (v6.117): el prisma ocupa PlazaY−10..PlazaY−8 y
-            // su fila de abajo es EL PRIMER AIRE (la roca alta de la
-            // plaza es PlazaY−7).
+            // ==============================================================
+            //  (1) EL LLANO — LA LÍNEA RECTA: obsidiana pura de borde a
+            //  borde, desde LlanoY hasta el fondo del mundo (la letra:
+            //  «solo un mundo plano de obsidiana» — ni colinas, ni
+                       //  plaza, ni geoda, ni vetas: el llano ES el cuerpo).
+            // ==============================================================
+            for (int x = 5; x < Ancho - 5; x++)
+            {
+                for (int y = LlanoY; y < Alto - 5; y++)
+                {
+                    Tile t = Main.tile[x, y];
+                    t.HasTile = true;
+                    t.TileType = TileID.Obsidian;
+                    t.TileFrameX = 0;
+                    t.TileFrameY = 0;
+                }
+            }
+
+            // ==============================================================
+            //  (2) EL PILAR PRISMA — YA COLOCADO, al lado del nacimiento
+            //  (la letra: «el pilar debe aparecer ya colocado en el
+            //  mundo interior»). DESPUÉS del llano — la cura del «no
+            //  puedo salir»: el ancla de abajo pisa obsidiana SÓLIDA
+            //  y TileObject.CanPlace pasa (el prisma viejo corría
+            //  sobre el mundo VACÍO y fallaba en silencio). Con Origin
+            //  (1,4), PlaceObject(PlazaX, LlanoY−1) lo para con su
+            //  fila de abajo en EL PRIMER AIRE sobre el llano (las
+            //  filas LlanoY−5..LlanoY−1: un pilar de CINCO tiles de
+            //  alto, la salida que se lee desde lejos).
+            // ==============================================================
             try
             {
-                WorldGen.PlaceObject(PlazaX, PlazaY - 8,
-                    ModContent.TileType<Tiles.AltarPrismaTile>(), false, 0);
+                WorldGen.PlaceObject(PlazaX, LlanoY - 1,
+                    ModContent.TileType<Tiles.PilarPrismaTile>(), false, 0);
             }
             catch { }
 
-            // === EL TERRENO CONTINUO (el mapa de alturas de la casa con
-            //     BrumaNoise — la MISMA matemática de la niebla de la
-            //     casa dibuja las colinas del dios) ===
-            int[] altura = new int[Ancho];
-            for (int x = 5; x < Ancho - 5; x++)
-            {
-                // LAS COLINAS: fBm de la casa (lento y ampuloso — el
-                // cuerpo de un dios no tiene colinas nerviosas)
-                float n = BrumaNoise.WarpedFbm(x * 0.013f, 3.7f, 5150, 2.6f);
-                float alto = 113f + (n - 0.5f) * 76f;   // ±38 tiles alrededor de 113
-                // LA PLAZA PLANa: fusión suave en ±26 del centro
-                float d = Math.Abs(x - PlazaX);
-                if (d < 40f)
-                {
-                    float k = MathHelper.Clamp((40f - d) / 14f, 0f, 1f);   // el borde del valle
-                    k = k * k * (3f - 2f * k);
-                    alto = MathHelper.Lerp(alto, PlazaY - 7, k);
-                }
-                altura[x] = Math.Max(88, Math.Min(150, (int)alto));
-            }
-
-            // === EL CUERPO: la corteza DORADA (el filo de la página), la
-            //     CARNE DE AMATISTA (el cristal que arde violeta) y el
-            //     FORRO DEL LOMO abajo (las últimas filas: la contratapa
-            //     del libro — el mundo ENTERO descansa sobre ella) ===
-            for (int x = 5; x < Ancho - 5; x++)
-            {
-                int top = altura[x];
-                for (int y = top; y < Alto - 5; y++)
-                {
-                    Tile t = Main.tile[x, y];
-                    t.HasTile = true;
-                    if (y == top)
-                        t.TileType = TileID.GoldBrick;                     // EL FILO DORADO
-                    else if (y >= Alto - 10)
-                        t.TileType = TileID.GoldBrick;                     // LA CONTRATAPA
-                    else
-                        t.TileType = TileID.AmethystGemspark;              // LA CARNE VIOLETA
-                    t.TileFrameX = 0;
-                    t.TileFrameY = 0;
-                }
-            }
-
-            // === LAS VETAS DE LA PÁGINA DEL ETERNO (el tile forjado —
-            //     «vetas del tile forjado como decoración»): tres ríos
-            //     del ORO DEL VEREDICTO serpenteando por la carne ===
-            int tipoPagina = ModContent.TileType<Tiles.PaginaDelEternoTile>();
-            for (int v = 0; v < 3; v++)
-            {
-                float yBase = 150f + 58f * v + 20f * BrumaNoise.Fbm(v * 13.7f, 0.5f, 5230, 2);
-                for (int x = 8; x < Ancho - 8; x++)
-                {
-                    float ondula = (BrumaNoise.WarpedFbm(x * 0.031f, 9.1f + v * 4.4f, 5290 + v * 17, 2.2f) - 0.5f) * 34f;
-                    int yV = (int)(yBase + ondula);
-                    for (int dy = -1; dy <= 1; dy++)
-                    {
-                        int y = yV + dy;
-                        if (y <= altura[x] + 3 || y >= Alto - 12) continue;  // vive DENTRO de la carne
-                        Tile t = Main.tile[x, y];
-                        if (t == null || !t.HasTile) continue;
-                        t.TileType = (ushort)tipoPagina;
-                        t.TileFrameX = (short)(VFXCore.Hash01(x, y, 6118 + v) > 0.62f ? 18 : 0);  // 2 variantes vivas
-                        t.TileFrameY = 0;
-                    }
-                }
-            }
-
-            // === EL CORAZÓN DE AMATISTA: la cámara geoda bajo la plaza
-            //     (el latido nace aquí — una elipse hueca forrada de oro
-            //     con la veta del Eterno convergiendo en su techo) ===
-            int cx = PlazaX, cy = PlazaY + 44;
-            for (int dx = -12; dx <= 12; dx++)
-            {
-                float f = 1f - (float)(dx * dx) / 144f;
-                if (f <= 0f) continue;
-                int alto = (int)MathF.Round(8f * MathF.Sqrt(f));
-                for (int dy = -alto; dy <= alto; dy++)
-                {
-                    int x = cx + dx, y = cy + dy;
-                    if (x < 5 || x >= Ancho - 5 || y < 5 || y >= Alto - 12) continue;
-                    Tile t = Main.tile[x, y];
-                    if (dy == -alto || dy == alto || Math.Abs(dx) == 12)
-                    {
-                        t.HasTile = true;
-                        t.TileType = Math.Abs(dx) == 11 || Math.Abs(dx) == 12
-                            ? (ushort)tipoPagina : (ushort)TileID.GoldBrick;   // el forro: la página y el oro
-                        t.TileFrameX = (short)(VFXCore.Hash01(x, y, 6120) > 0.5f ? 18 : 0);
-                        t.TileFrameY = 0;
-                    }
-                    else
-                    {
-                        t.HasTile = false;                                 // LA CÁMARA HUECA
-                    }
-                }
-            }
-            // el piso de la cámara sigue siendo carne (nadie cae al vacío)
-            for (int dx = -11; dx <= 11; dx++)
-            {
-                int y = cy + 9;
-                if (y < Alto - 10 && cx + dx > 5 && cx + dx < Ancho - 5)
-                {
-                    Tile t = Main.tile[cx + dx, y];
-                    t.HasTile = true;
-                    t.TileType = TileID.AmethystGemspark;
-                    t.TileFrameX = 0;
-                    t.TileFrameY = 0;
-                }
-            }
-            // LA BOQUILLA: un tiro vertical estrecho de la plaza a la
-            // cámara (la veta sube y baja por él — la entrada al corazón)
-            for (int y = PlazaY - 6; y < cy - 8; y++)
-            {
-                Tile t = Main.tile[cx + 4, y];
-                t.HasTile = false;
-                Tile t2 = Main.tile[cx + 5, y];
-                t2.HasTile = false;
-            }
-
-            // === LAS VENTANAS DE VIDA (donde la carne respira): cinco
-            //     respiraderos deterministas repartidos por el mundo —
-            //     de ellos suben LAS COLUMNAS DE BRUMA y nacen LAS MOTES
-            //     DE ORO (las posiciones viven en _vents para el pase
-            //     del mundo; siempre las mismas: el dios respira igual) ===
+            // ==============================================================
+            //  (3) LOS RESPIRADEROS — las cinco bocas del llano (la
+            //  bruma que ASCIENende y las motas de oro que nacen —
+            //  SIEMPRE las mismas: el dios respira igual). v6.120: el
+            //  llano NO se excava (la letra: SOLO obsidiana) — los
+            //  respiraderos son POSICIONES sobre la línea (las
+            //  columnas suben DESDE la superficie; las motas nacen a
+            //  ras del cuerpo).
+            // ==============================================================
             _vents = new Vector2[5];
             int vi = 0;
             for (int k = 0; k < 5; k++)
             {
                 int x = 90 + k * 155 + (int)(VFXCore.Hash01(k * 31 + 7, 1, 6130) * 60f) - 30;
                 if (x < 8 || x >= Ancho - 8) x = 90 + k * 155;
-                if (Math.Abs(x - PlazaX) < 40) x = PlazaX + (x < PlazaX ? -70 : 70);  // lejos de la plaza
+                if (Math.Abs(x - PlazaX) < 40) x = PlazaX + (x < PlazaX ? -70 : 70);  // lejos del pilar
                 if (x < 8 || x >= Ancho - 8) continue;
-                int y = altura[x] - 1;
-                _vents[vi++] = new Vector2(x * 16f + 8f, y * 16f + 8f);
-                // la ventana: una pequeña cavidad en la superficie
-                for (int dx2 = -2; dx2 <= 2; dx2++)
-                {
-                    for (int dy2 = -2; dy2 <= 1; dy2++)
-                    {
-                        int xx = x + dx2, yy = y + dy2;
-                        if (xx > 5 && xx < Ancho - 5 && yy > 5 && yy < Alto - 10 && Math.Abs(dx2) + Math.Abs(dy2) < 4)
-                        {
-                            // v6.118 — EL PATRÓN DE ESCRITURA DE LA CASA (el
-                            // indexador de Tilemap devuelve el Tile POR
-                            // VALOR en este tML: se escribe vía LOCAL — el
-                            // struct envuelve el almacenamiento real)
-                            Tile tv = Main.tile[xx, yy];
-                            tv.HasTile = false;
-                        }
-                    }
-                }
-                // el marco dorado de la ventana
-                for (int dx2 = -3; dx2 <= 3; dx2++)
-                {
-                    int xx = x + dx2, yy = y + 2;
-                    if (xx > 5 && xx < Ancho - 5 && yy < Alto - 10 && !Main.tile[xx, yy - 3].HasTile)
-                    {
-                        Tile t = Main.tile[xx, yy];
-                        t.HasTile = true;
-                        t.TileType = TileID.GoldBrick;
-                        t.TileFrameX = 0;
-                        t.TileFrameY = 0;
-                    }
-                }
+                _vents[vi++] = new Vector2(x * 16f + 8f, LlanoY * 16f - 4f);
             }
             if (vi < _vents.Length) System.Array.Resize(ref _vents, vi);
 
             // EL MAR DE NIEBLA: nada de líquidos — la bruma es el velo.
         }
 
-        // (LA ISLA FLOTANTE MURIÓ con el rework v6.118 — el terreno
-        // continuo de arriba es el cuerpo entero del dios.)
+        // (LA ISLA FLOTANTE murió con la v6.118 · EL TERRENO CONTINUO, la
+        // geoda y las vetas murieron con la v6.120 — el LLANO de
+        // obsidiana de arriba es el cuerpo entero del dios.)
 
         // ==================================================================
         //  LA VIDA DEL INTERIOR — la medianoche eterna, la bruma viva, la
@@ -1041,13 +944,12 @@ namespace AethonMod.Content.Systems
                 }
 
                 // LA RED DE CAÍDA: quien resbala al fondo del cuerpo cae al
-                // vacío… y el vacío LO DEVUELVE a la plaza (nadie muere en
-                // el libro). v6.115 — al LADO del prisma (PlazaY−10: el
-                // aire limpio sobre la superficie, cuatro columnas a la
-                // derecha del corazón de la plaza).
+                // vacío… y el vacío LO DEVUELVE al llano (nadie muere en
+                // el libro). v6.120 — al LADO DEL PILAR (el aire limpio
+                // sobre el llano, en el nacimiento: la salida a la vista).
                 if (p.position.Y > (Alto - 12) * 16f)
                 {
-                    p.Center = new Vector2((PlazaX + 4) * 16f + 8f, (PlazaY - 10) * 16f);
+                    p.Center = new Vector2(SpawnX * 16f + 8f, (LlanoY - 8) * 16f);
                     p.velocity = Vector2.Zero;
                     if (p.whoAmI == Main.myPlayer)
                     {
@@ -1569,12 +1471,50 @@ namespace AethonMod.Content.Systems
     }
 
     // ======================================================================
-    //  EscenaInteriorGrimorio — LA MÚSICA DEL INTERIOR: dentro del libro
-    //  suena EL HAMBRE (la oleada del grimorio — su tema de casa).
+    //  EscenaInteriorGrimorio — v6.120 — LAS TRES BANDAS EXCLUSIVAS DEL
+    //  INTERIOR (la letra: «crea una banda sonora exclusiva para el
+    //  mundo interior, crea 3 banda sonoras que sonaran aleatoriamente»).
+    //
+    //  EL REPERTORIO (las tres caras del mismo dios — 100 % síntesis de
+    //  la casa, tools/gen_musica_interior_v6120.py):
+    //   · «EL SUEÑO DEL VACÍO» (Music/MundoSuenoVacio.ogg, 58 BPM): el
+    //     dron sub, los pads violetas, el coro lejano, la campana suelta
+    //     y EL LATIDO lento — el dios dormido entre mundos devorados.
+    //   · «LA GARGANTA DE PÁGINAS» (Music/MundoGarganta.ogg, 92 BPM):
+    //     los susurros con formantes, el arpa pizzicato y los glissandi
+    //     que caen — el tragadero hablando mientras algo baja.
+    //   · «EL CORAZÓN COLOSAL» (Music/MundoCorazon.ogg, 120 BPM): los
+    //     taikos EN el latido, el corno, el coro solemne y los
+    //     timbales — el órgano que todo lo mueve.
+    //
+    //  LA MONEDA (el patrón de OleadaHambreMusica): al ENTRAR al
+    //  interior se tira UNA de las tres — y cada ~2,5 min de estancia la
+    //  moneda VUELVE A TIRARSE (sin repetir la inmediata: las tres
+    //  rotan de verdad en una sesión larga; el crossfade lo maneja el
+    //  motor de vanilla al cambiar el slot). Prioridad Event: durante
+    //  el festín, la oleada (BossHigh) manda como siempre.
     // ======================================================================
     public class EscenaInteriorGrimorio : ModSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.Event;
+
+        /// <summary>La pista que suena AHORA (slot de MusicLoader; 0 si
+        /// aún no se ha tirado la moneda).</summary>
+        private static int _slotActual;
+
+        /// <summary>La ÚLTIMA que sonó (para no repetir la inmediata).</summary>
+        private static int _slotPrevio;
+
+        /// <summary>EL RELOJ ABSOLUTO del re-tiro (el tick de juego en el
+        /// que la moneda vuelve a tirarse — 0 = tira YA). El reloj vive en
+        /// el getter (ModSceneEffect de esta era NO trae hook Update: la
+        /// moneda se consulta en cada frame del interior y el re-tiro es
+        /// una comparación de tick absoluto).</summary>
+        private static long _proximoTiro;
+
+        /// <summary>El intervalo del re-tiro (~2,5 min — comparable a la
+        /// duración de las piezas: la estancia larga oye DOS o TRES).</summary>
+        private const long TicksMoneda = 60 * 60 * 5 / 2;
 
         public override int Music
         {
@@ -1582,13 +1522,41 @@ namespace AethonMod.Content.Systems
             {
                 try
                 {
-                    return MusicLoader.GetMusicSlot(Mod, "Music/OleadaHambre");
+                    int a = MusicLoader.GetMusicSlot(Mod, "Music/MundoSuenoVacio");
+                    int b = MusicLoader.GetMusicSlot(Mod, "Music/MundoGarganta");
+                    int c = MusicLoader.GetMusicSlot(Mod, "Music/MundoCorazon");
+                    // LA MONEDA: solo las que CARGARON de verdad
+                    int[] vivas = System.Array.FindAll(new[] { a, b, c }, s => s > 0);
+                    if (vivas.Length == 0) return MusicLoader.GetMusicSlot(Mod, "Music/OleadaHambre");
+                    // EL RELOJ DEL RE-TIRO: la primera lectura (o la que cruza
+                    // el intervalo) TIRA LA MONEDA — UNA al azar que NO sea
+                    // la inmediata anterior (con 2 vivas: la otra; con 3:
+                    // cualquiera de las otras dos)
+                    long ahora = (long)Main.GameUpdateCount;
+                    bool hayQueTirar = _slotActual <= 0 || ahora >= _proximoTiro;
+                    if (hayQueTirar)
+                    {
+                        if (_slotActual > 0) _slotPrevio = _slotActual;
+                        int[] sinRepetir = System.Array.FindAll(vivas, s => s != _slotPrevio);
+                        int[] pozo = sinRepetir.Length > 0 ? sinRepetir : vivas;
+                        _slotActual = pozo[Main.rand.Next(pozo.Length)];
+                        _proximoTiro = ahora + TicksMoneda;
+                    }
+                    return _slotActual;
                 }
-                catch { return -1; }
+                catch { return MusicLoader.GetMusicSlot(Mod, "Music/OleadaHambre"); }
             }
         }
 
         public override bool IsSceneEffectActive(Player player)
             => SubmundoGrimorio.Activo;
+
+        // La llegada del portador: la moneda NACE vírgen en cada visita.
+        public static void AlEntrar()
+        {
+            _slotPrevio = _slotActual > 0 ? _slotActual : 0;
+            _slotActual = 0;
+            _proximoTiro = 0;      // la primera lectura del interior tira YA
+        }
     }
 }

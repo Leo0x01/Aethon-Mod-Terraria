@@ -314,24 +314,64 @@ namespace AethonMod.Content.VFX
                     new Color(255, 214, 130),
                     DefinitivasLib.BlancoCalido
                 }, DefinitivasLib.BlancoCalido, "Ruido_13", 5, 92f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.3f, 1f, 0.35f, 0.05f, 0.1f, 0.018f, 0.85f, 1f, 0.95f, 0.3f, 0.34f, 0.62f, 0.16f, 1f, 1f, 1f, 1.2f, 1, 1f),
-                // v6.113 — LA 2: LA COPIA DEL ECLIPSE SIN PICOS, SIMÉTRICA
-                // y DEL COLOR DEL VACÍO (la rampa del aura de la casa).
-                // Mismo abanico/tempo que la 3; filosa 0 (bordes gemelos),
-                // afilada 0.5 + puntas 20/14 (redondez), Runas=2 (el anillo
-                // violeta del vacío en las puntas).
-                // v6.118 — EL BALANCE DE LA VELA (la cura de la sierra, el
-                // acto III): el núcleo de la pluma baja 0.88→0.78 y el
-                // cuerpo sube 0.36→0.42 — la VELA continua y su borde
-                // maestro DOMINAN la silueta; las agujas dejan de ser los
-                // picos más brillantes del ala (con el blend soft-add la
-                // composición ahora es asintótica: la curva vive SOBRE las
-                // puntas, no debajo de ellas).
+                // v6.120 — LA COPIA EXACTA DEL ECLIPSE (la letra: «vuelve
+                // a copiar el codigo de las alas runicas del eclipse para
+                // reparar las alas runicas del vacio»): TODO el repertorio
+                // estructural del Eclipse, BYTE A BYTE — el abanico de 5
+                // plumas, el tempo 0.95, las puntas 19/12, afilada 0.55,
+                // filosa 0.05, núcleo 0.88, cuerpo 0.36, halo 0.15, el
+                // ruido Ruido_14 y el perfil clásico (membrana 0 · redonda
+                // 0 — EL CAMINO DEL ECLIPSE: la membrana y el borde
+                // maestro de las v6.114-v6.118 MURIERON aquí). Lo único
+                // propio del vacío: LA PALETA (la rampa del aura:
+                // 150,84,235 · 122,78,188 · 26,14,44), su ColorDia y SU
+                // ANILLO (Runas=2 — las runas violetas de OrbitaLib).
+                //
+                // LA AUDITORÍA DE LOS PICOS (la letra: «luego has una
+                // auditoria del codigo copiado, revisa porque tiene
+                // picos… investiga los hazes que tambien tenian picos y
+                // ahora no»): los picos del vacío NO vivían en la
+                // geometría del abanico — vivían en las TRES CURAS
+                // geométricas apiladas encima (la membrana que rellenaba
+                // los valles, el arco del borde maestro y su niebla con
+                // inset 0.86/0.72, el balance de la vela que apagaba el
+                // núcleo de la pluma bajo la banda): cada una sumaba SU
+                // banda al filo en el lote soft-add, y donde la aguja de
+                // la pluma ya brillaba, la banda del arco ENCENDÍA el
+                // valle — pico→valle→pico, LA SIERRA que dos re-balances
+                // no podían matar porque su causa era el CAMINO EXTRA,
+                // no los números. LA MISMA TÉCNICA QUE CURÓ LOS HAZES
+                // (HazLib v6.91 — EL FILO DE BORDE: el rgb llega a CERO
+                // EXACTO en el borde de la banda, la transición smoothstep
+                // sucede ANTES del borde y el lote soft-add
+                // dst += rgb·(1−dst) no puede encender un píxel con un
+                // aporte de cero — «los picos son matemáticamente
+                // imposibles»): el ala la respeta VOLVIENDO al camino
+                // único del Eclipse, donde el perfil pow de la pluma muere
+                // asintótico (0.3 px en la última muestra) y NINGUNA
+                // banda extra monta su silueta. Membrana = 0 apaga
+                // EmitirMembrana/EmitirMembranaRuido de raíz (su guard es
+                // Membrana <= 0) y Redonda = 0 devuelve la aguja clásica
+                // de siempre — el ala entera corre por el MISMO código
+                // que el Eclipse que YA NO TIENE PICOS.
+                //
+                // LA ESTÉTICA DE RUNAS VUELVE (la letra: «perdio toda la
+                // estetica de runas que tenia la version original»): con
+                // Membrana = 0 el nodo del glifo regresa a LA PUNTA
+                // (nodo 8 — DibujarRunas: `estilo.Membrana > 0f ? 7 : 8`)
+                // y su escala a la completa (1.45 + 0.35·n — la v6.118 la
+                // empequeñecía a 1.26 «para no dominar el filo»: las
+                // runas VOLVIERON A LAS PUNTAS de las plumas, donde
+                // vivían en la versión original) + Runas=2 mantiene el
+                // anillo violeta del vacío (RunasVacio de OrbitaLib) y
+                // LAS MIGAS DEL VACÍO siguen cayendo (AlasAuroraHalo.AI —
+                // alaEstilo == 2, intactas).
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f),
+                }, new Color(90, 60, 140), "Ruido_14", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,

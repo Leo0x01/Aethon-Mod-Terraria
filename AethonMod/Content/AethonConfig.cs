@@ -68,5 +68,37 @@ namespace AethonMod.Content
         /// </summary>
         [DefaultValue(true)]
         public bool ManaGratisEnPruebas = true;
+
+        // ------------------------------------------------------------------
+        //  v6.120 — LA FORMA ETERNA A LA VISTA (la letra: «la forma eterna
+        //  debe poder activarse y ocultarse con las opciones del juego»)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// ¿El panteón visual de LA FORMA ETERNA se viste? (el interruptor
+        /// de las opciones del juego — el menú de configuración del mod).
+        /// OFF apaga SOLO el teatro (las dos luces, el anillo dorsal, la
+        /// brasa, el brillo, las chispas y la luz): los STATS del panteón
+        /// y el AURA DEL VACÍO (el campo que quema impíos) siguen siendo
+        /// de juego y NO se tocan. Además, con el accesorio en el hueco
+        /// funcional, el OJO de vanilla (ocultar accesorio) también lo
+        /// esconde — las DOS opciones del juego mandan: la del menú y la
+        /// del hueco.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool MostrarFormaEterna = true;
+
+        /// <summary>¿La Forma Eterna se viste AHORA? (la opción del menú
+        /// leída por el ítem y el escaneo — el punto único de la
+        /// verdad).</summary>
+        public static bool FormaEternaVisible()
+        {
+            try
+            {
+                var cfg = ModContent.GetInstance<AethonConfig>();
+                return cfg == null || cfg.MostrarFormaEterna;
+            }
+            catch { return true; }
+        }
     }
 }

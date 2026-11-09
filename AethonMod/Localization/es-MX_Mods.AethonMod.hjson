@@ -2334,12 +2334,12 @@ Items: {
 		DisplayName: Alas Rúnicas del Vacío
 		Tooltip:
 			'''
-			        La copia mejorada del eclipse, SIN SIERRA: la MEMBRANA une
-			        las plumas y el ARCO exterior borda el ala de punta a punta —
-			        UNA curva continua, sin un solo pico. Simétrica izquierda y
-			        derecha, del COLOR DEL VACÍO (la rampa del aura) y con SUS
-			        efectos: el anillo de runas violeta en las puntas, la niebla
-			        que corre por dentro y las migas que caen de las alas.
+			        LA COPIA EXACTA DEL ECLIPSE, del COLOR DEL VACÍO: el mismo
+			        abanico de cinco plumas — sin picos, simétrica izquierda y
+			        derecha — vestida con la rampa del aura (el violeta vivo,
+			        la carne hond y el fondo de la nada). EL ANILLO DE RUNAS
+			        VIOLETAS arde en las puntas de las plumas y LAS MIGAS DEL
+			        VACÍO caen de las alas mientras vuelas.
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -2948,7 +2948,7 @@ Hambre: {
 		Vencido1: «(El Eterno saborea el momento) Uno menos que reza al vacío. El mundo respira mejor.»
 		Vencido2: «(El Eterno pasa una página) Cayó por su fe mal puesta. Yo LO habría escuchado… si me hubieran dado tributo.»
 		Devorado: «(El Eterno traga) Mmm… sabía a fanatismo frío. Qué asco tan delicioso.»
-	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
+		PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
 		ElJefe: «(El Eterno ruge de risa) ¡MIRA! ¡El falso profeta en persona! Reza, enano encapuchado… rezas a NADIE. El tributo que nunca me dieron lo cobrará MI hambre.»
 	}
 
@@ -3239,6 +3239,13 @@ Configs: {
 		ManaGratisEnPruebas: {
 			Label: Maná gratis en pruebas
 			Tooltip: ""
+		}
+
+		// v6.120 — LA FORMA ETERNA A LA VISTA (la letra: «la forma eterna
+		// debe poder activarse y ocultarse con las opciones del juego»)
+		MostrarFormaEterna: {
+			Label: Mostrar la Forma Eterna
+			Tooltip: Enciéndelo para vestir el panteón visual de la Forma Eterna (las dos luces, el anillo dorsal, la brasa, el brillo y su luz). Apágalo para ocultar todo el teatro: los stats y el aura del vacío siguen siendo tuyos. El ojo del accesorio (ocultar accesorio) también la esconde.
 		}
 	}
 }
@@ -3831,6 +3838,8 @@ Tiles: {
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: El Prisma del Eterno
 	PaginaDelEternoTile.MapEntry: La Página del Eterno
+	// v6.120 — EL PILAR PRISMA: la salida del llano de obsidiana
+	PilarPrismaTile.MapEntry: El Pilar Prisma
 }
 
 Duende: {
@@ -3869,6 +3878,9 @@ PrismaInterior: {
 	YaVive: AETHON YA CAMINA POR EL INTERIOR
 	Leyenda: La llamada: el altar se materializa y EL GRIMORIO flota justo encima — de la ceremonia nacen los fragmentos
 	NombreCorto: El Prisma del Eterno
+	// v6.120 — EL PILAR PRISMA (la salida del llano): su nombre en el mapa
+	// y el texto del cursor (la misma ventana del prisma, la salida buena).
+	NombrePilar: El Pilar Prisma — la salida del llano
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
@@ -3908,9 +3920,10 @@ Altar: {
 	Consagrar: CONSAGRAR
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
-	// v6.119 — LA PUERTA DEL ALTAR (la letra: «al consagrar 1000
-	// esencias el altar se pueda ir al mundo interior»): la cuenta
-	// viva de lo consagrado y, a las MIL, el botón que traga.
+	// v6.119 — THE ALTAR'S DOOR (the letter: consecrating 1000
+	// essences lets the altar take you to the inner world): the
+	// living tally of what was consecrated and, at ONE THOUSAND,
+	// the button that swallows.
 	MundoTitulo: EL MUNDO INTERIOR DEL ETERNO
 	MundoProgreso: Esencias consagradas en el altar: {0}/{1}
 	MundoPista: (cuando la cuenta llegue a las MIL, el altar mismo abrirá la puerta al interior del libro)

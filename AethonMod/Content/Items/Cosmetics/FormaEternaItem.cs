@@ -52,22 +52,28 @@ namespace AethonMod.Content.Items.Cosmetics
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
             // ==========================================================
-            //  v6.118 — LA BANDERA EN VIVO, PERO SOLO-VISUAL (la letra:
-            //  «la forma eterna no debe volar, eso es algo que tienen
-            //  que hacer las alas»): el mismo patrón del fix v6.115 (las
-            //  banderas se encienden DENTRO de Player.UpdateEquips para
-            //  que los hooks las vean EN ESTE tick) — pero ahora la
-            //  Forma Eterna enciende las banderas VISUALES de las dos
-            //  luces (FormaAscendidaVisual/FormaAscendidaOchoVisual):
-            //  el panteón VISTE, el VUELO NO (VueloDivino solo lee las
-            //  banderas reales — el cielo es cosa de las alas).
+            //  v6.120 — LAS OPCIONES DEL JUEGO MANDAN (la letra: «la forma
+            //  eterna debe poder activarse y ocultarse con las opciones
+            //  del juego»): el panteón visual SOLO se viste si la opción
+            //  del menú está ENCENDIDA (MostrarFormaEterna) Y el OJO de
+            //  vanilla del hueco NO lo esconde (hideVisual — el mismo
+            //  respeto de las alas de la casa: AlasPrismaBase pasa el
+            //  ojo a OcultarVisual). Los STATS y EL AURA DEL VACÍO son
+            //  de juego: siguen vivos aunque el teatro se apague.
             // ==========================================================
+            bool visible = !hideVisual &&
+                global::AethonMod.Content.AethonConfig.FormaEternaVisible();
             var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
-            visuales.FormaAscendidaVisual = true;   // LA PRIMERA LUZ (el aura, sin vuelo)
-            visuales.FormaAscendidaOchoVisual = true; // LAS OFANIM (la octava luz, sin vuelo)
-            visuales.AnilloDorsal = true;         // la triple corona de conjuro
-            visuales.BrasaDelEclipse = true;      // el aura de humo negro y oro
-            visuales.BrilloSolar = true;          // los destellos de 4 puntas
+            if (visible)
+            {
+                // (el comentario histórico vive en el escaneo de
+                // CosmeticPlayer — v6.118, SOLO-VISUAL, sin vuelo)
+                visuales.FormaAscendidaVisual = true;   // LA PRIMERA LUZ (el aura, sin vuelo)
+                visuales.FormaAscendidaOchoVisual = true; // LAS OFANIM (la octava luz, sin vuelo)
+                visuales.AnilloDorsal = true;         // la triple corona de conjuro
+                visuales.BrasaDelEclipse = true;      // el aura de humo negro y oro
+                visuales.BrilloSolar = true;          // los destellos de 4 puntas
+            }
 
             // ==========================================================
             //  EL STATS DEL PANTEÓN — lo que los sellos daban, juntos:
@@ -113,6 +119,11 @@ namespace AethonMod.Content.Items.Cosmetics
             // pongas» — y la letra nueva: NINGUNA de las dos luces de la
             // Forma Eterna inyecta vuelo, ni del hueco funcional ni del de
             // vanidad: el cielo es cosa de las alas).
+            // v6.120 — y LA OPCIÓN DEL MENÚ manda aquí también (la letra:
+            // «la forma eterna debe poder activarse y ocultarse con las
+            // opciones del juego»): la vanidad es puro teatro y el teatro
+            // se apaga con el interruptor.
+            if (!global::AethonMod.Content.AethonConfig.FormaEternaVisible()) return;
             var visuales = player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>();
             visuales.FormaAscendidaVisual = true;
             visuales.FormaAscendidaOchoVisual = true;

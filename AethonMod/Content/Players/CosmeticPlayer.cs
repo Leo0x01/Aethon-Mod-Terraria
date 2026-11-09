@@ -207,7 +207,20 @@ namespace AethonMod.Content.Players
                 // brasa y el brillo) — los otros tres (los sellos y el
                 // aura) viven en SellosPlayer y en su propio
                 // UpdateAccessory.
-                else if (item.type == formaEternaType)
+                // v6.120 — LAS OPCIONES DEL JUEGO MANDAN (la letra: «la
+                // forma eterna debe poder activarse y ocultarse con las
+                // opciones del juego»): el escaneo respeta EL INTERRUPTOR
+                // DEL MENÚ (MostrarFormaEterna) y, en el hueco FUNCIONAL,
+                // también EL OJO de vanilla (hideVisibleAccessory — la
+                // misma señal que UpdateAccessory recibe como hideVisual;
+                // el array es de 10, índices 3..9 = los accesorios). En
+                // la VANIDAD (13..19) solo manda el interruptor — la
+                // vanidad de esta era del tML no tiene ojo (leído en el
+                // decompile: UpdateVisibleAccessories no pasa bandera
+                // para los huecos sociales).
+                else if (item.type == formaEternaType &&
+                    global::AethonMod.Content.AethonConfig.FormaEternaVisible() &&
+                    (i >= 10 || !Player.hideVisibleAccessory[i]))
                 {
                     // v6.118 — SOLO-VISUAL (la letra: «la forma eterna no
                     // debe volar»): el escaneo viste el panteón con las

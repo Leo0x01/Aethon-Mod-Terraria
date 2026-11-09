@@ -1,3 +1,21 @@
+> **ACTUALIZACIÓN v6.120 — LA PÁGINA NEGRA INFINITA**: la letra del usuario
+> REDEFINIÓ el interior («el mundo interior debe ser plano, solo un mundo
+> plano de obsidiana, el fondo deben ser capas de tentaculos en loop y al
+> menos 3 capas… el pilar debe aparecer ya colocado»). EL LLANO es ahora
+> la ley: UNA línea recta de obsidiana de borde a borde, EL PILAR PRISMA
+> (la salida, ya colocado junto al nacimiento), el eclipse permanente,
+> el latido y LAS TRES BANDAS al azar. El fondo de tentáculos vive en
+> TRES CAPAS PERIÓDICAS (900/760/640 px) que se repiten SIN COSTURA — un
+> LOOP de verdad. LAS ISLAS, EL TERRENO CONTINUO, LA GEODA, LAS VETAS y
+> LOS ESCALONES de abajo MURIERON con esta letra (se conservan abajo como
+> el registro de lo que fueron). La regla de oro SIGUE VIVA: el grimorio
+> es una entidad cósmica exterior todopoderosa, y su interior es su
+> CUERPO VIVO — cada mejora debe respirar esa idea con los colores de la
+> casa (el vacío: 26,14,44 · 122,78,188 · 150,84,235 · el oro del
+> veredicto 255,214,130) y su eclipse permanente.
+
+---
+
 # PROMPT-MUNDO-INTERIOR — El prompt que me doy a mí mismo para mejorar el mundo
 
 > **La letra**: «crea un promt que te digas a ti mismo para mejorar ese mundo».

@@ -1,49 +1,42 @@
-# SNAPSHOT ESTABLE — v6.119 — LA CURA DEL CRASH DEL INTERIOR + LAS DOS PUERTAS (el ítem que no se gasta y el altar de las mil esencias)
+# SNAPSHOT ESTABLE — v6.120 — EL LLANO DE OBSIDIANA + EL PILAR DE LA SALIDA + LAS TRES BANDAS
 
-> **PUBLICADA — release 439205390 + CDN verificado byte a byte (md5 d88a863f662d45aa5e9295cc800feffd)** — .tmod v6.119 listo y verificado (11.568.886 B, 494 entradas, EOF exacto).
+> ⏳ **PENDIENTE DE PUBLICACIÓN** — .tmod v6.120 listo y verificado (15.943.130 B, 499 entradas, EOF exacto, md5 5bb475d8279bd092e6b3f18deec03514).
 
 ## LA LETRA (el usuario)
 
-«hay errores, tambien intenta que el item que lleva al mundo interior no sea consumible y se pueda seguir usando siempre, ademas recuerda hacer al consagrar 1000 esencias el altar se pueda ir al mundo interior» — con el client.log de la sesión del 9/11: Main engine crash (`Begin has been called before calling End`) en `DrawSuperSpecialProjectiles` justo al entrar al mundo interior («El libro se abre…» → Width 800 × Height 450 → crash).
+«una vez dentro del mundo interior no puedo salir, necesitas crear un pilar tipo prisma altar que permita salir, este se creara usando las herramientas del mod, la forja y el taller, ademas el pilar debe aparecer ya colocado en el mundo interior, y el mundo interior debe ser plano, solo un mundo plano de obsidiana, el fondo deben ser capas de tentaculos en loop y al menos 3 capas, usa la forja y el taller para crearlo» + «crea una banda sonora exclusiva para el mundo interior, crea 3 banda sonoras que sonaran aleatoriamente, manten el contexto del mundo interior del grimorio del eterno, como crees que seria el mundo interior de una entidad cosmica» + «la forma eterna debe poder activarse y ocultarse con las opciones del juego» + «las esencias del eterno solo llegan hasta pilas de 999… hacer que puedan acumularse hasta 9999» + «vuelve a copiar el codigo de las alas runicas del eclipse para reparar las alas runicas del vacio, luego has una auditoria del codigo copiado, revisa porque tiene picos, para investigar mejor el porque, puedes investigar los hazes que tambien tenian picos y ahora no, puedes usar la misma tecnica para las alas runicas del vacio» + «asegurarte de que cuando se cumpla esto, solo se active siempre que se consagran 1000 esencias» + «ademas no toques nada que este funcionando correctamente, recuerda, si funciona no lo toques».
 
-## LA AUTOPSIA DEL CRASH (leída en el IL del tML 2026.09.3.1 real)
+## LA AUTOPSIA DEL «NO PUEDO SALIR»
 
-El pase de `Main.DoDraw` alrededor de nuestro hook es EXACTO:
+El prisma viejo NUNCA nacía: `GenerarInterior` colocaba `WorldGen.PlaceObject` ANTES de generar el terreno — sobre el mundo recién limpiado, sin NI UN tile sólido debajo — y `TileObject.CanPlace` (leído en el decompile del tML 2026.09.3.1) valida el `AnchorBottom` que Style2xX hereda: sin sólido debajo, `CanPlace` devuelve false y PlaceObject FALLA EN SILENCIO. El interior nacía SIN PUERTA: quien entraba, no salía. LA CURA ES DE ORDEN: el llano nace primero y EL PILAR se coloca DESPUÉS — el obsidiana ya es sólido bajo su base, el ancla pasa y la puerta NACE en cada visita, al lado del punto de aparición.
 
-```
-spriteBatch.End();                          ← vanilla CIERRA el lote de tiles
-SystemLoader.PostDrawTiles();              ← EL HOOK DEL MOD corre AQUÍ
-TimeLogger.DetailedDrawTime(35);
-SortDrawCacheWorms();
-DrawSuperSpecialProjectiles(DrawCacheFirstFractals)
-    → spriteBatch.Begin(...)                ← vanilla ABRE (el que CRASHEÓ)
-```
+## LA OBRA (v6.120)
 
-`SubmundoGrimorio.PostDrawTiles` (las brumas del interior, v6.118) terminaba con `finally { VFXCore.ReabrirLoteVanilla(); }` — y `ReabrirLoteVanilla` RE-ABRE un lote cuando no hay uno vivo. El frame salía del hook con un Begin HUÉRFANO → el Begin de `DrawSuperSpecialProjectiles` lanzaba `InvalidOperationException` → Main engine crash. Solo crasheaba DENTRO del interior porque el hook tiene el guard `!Activo` (en el mundo real jamás corría). **LA CURA**: `finally { VFXCore.CerrarLoteSiAbierto(); }` — salir SIEMPRE CERRADO (quien sigue — `DrawSuperSpecialProjectiles` — abre su propio lote). Es el patrón que `RayoLib.PostDrawTiles` y `ParticleManager.PostDrawTiles` ya usaban; `ReabrirLoteVanilla` queda SOLO para los PreDraw (el lote ABIERTO del pase de entidades). VERIFICADO en el IL de la DLL compilada: ReabrirLoteVanilla AUSENTE del PostDrawTiles, CerrarLoteSiAbierto VIVO en el finally.
-
-## LAS DOS PUERTAS
-
-1. **LA PUERTA PORTÁTIL (el ítem) NO SE GASTA**: `MundoInteriorEternoItem` nació `consumable = false` y ahora queda blindado: NINGÚN camino consume el ítem; el guard nuevo de `CanUseItem` (UN festín a la vez — si una DevoracionEterna ya vive para este portador, el uso espera a que el trago termine) evita la doble devoración; tras cada viaje el ítem está DONDE ESTABA: se puede usar SIEMPRE. El tooltip ganó la línea del contrato (Linea4 ×3 idiomas: «LA PUERTA NO SE GASTA…»).
-2. **LA PUERTA DEL ALTAR (las mil esencias consagradas)**: `SubmundoGrimorio.EsenciasConsagradas` (persistida con el mundo: SaveWorldData/LoadWorldData — `esenciasConsagradasAltar` en el TagCompound; el cerrojo del interior garantiza que jamás se contamina desde adentro; NO se resetea al entrar/salir del interior) acumula TODAS las esencias que el Eterno cobró por sellar ofrendas. A las MIL (`EsenciasPuerta = 1000`): el ANUNCIO al mundo + LA SECCIÓN NUEVA de la ventana del altar — «EL MUNDO INTERIOR DEL ETERNO» con la cuenta viva (X/1000 + la pista) mientras falta y, al abrirse, EL BOTÓN «IR AL MUNDO INTERIOR» (mismo gesto que el ítem: cierra la ventana, nace DevoracionEterna, el libro devora al portador SIN daño y el interior lo recibe con la revelación de niebla). El rect del botón se apaga cada frame (`_geoPuerta = Rectangle.Empty`) — jamás un clic fantasma; la geometría fluye por la MISMA función de medida y dibujo de la casa (el panel no salta).
-
-## EL WARN DEL EMPAQUETADO (investigado a fondo — es del tML, no del mod)
-
-«[FNA]: Image loading failed: unknown image type» durante «Empaquetando»: el empaquetador del tML compara `icon_small.png` con su plantilla leyendo el archivo HASTA EL FINAL y luego intenta la conversión rawimg desde el EOF → StbImage responde «unknown image type» → WARN… y después resetea la posición y empaqueta el archivo CORRECTO (verificado: el icon_small.png del .tmod es byte-idéntico, 2279 B). Probado contra el FNA3D_Image_Load REAL del tML 2026.09.3.1: los 474 PNG del mod cargan BIEN (secuencial y 40 rondas en paralelo: cero fallos). INOFENSIVO.
+- **EL PILAR PRISMA** — forjado por LA FORJA y EL TALLER (`tools/pilar_prisma_v6120.py`, PIL determinista, EL OJO QA VLM en 3 pasadas: FIX → FIX → **SHIP 7/9/8/8**): la columna santuario de 3×5 tiles (pedimento de amatista con sus dos velas, fuste esbelto facetado con sus tres anillos rúnicos, capitel con el prisma triangular bebiendo el haz dorado y el abanico en colores de la casa). Clic-derecho → LA VENTANA del prisma («tipo prisma altar»): VOLVER AL MUNDO REAL / INVOCAR A AETHON. MinPick 9999: nadie talla su salida. YA COLOCADO en cada visita.
+- **EL LLANO DE OBSIDIANA** — `GenerarInterior` reescrito: UNA LÍNEA RECTA de obsidiana de borde a borde, SOLO obsidiana (colinas, plaza, geoda y vetas MURIERON). El interior de una entidad cósmica como LA PÁGINA NEGRA INFINITA: la carne congelada de lo devorado, la vastedad como diseño, el latido (PulsoCorazon) respirando el cielo entero.
+- **EL FONDO EN LOOP** — las TRES capas de tentáculos son BANDAS PERIÓDICAS (900/760/640 px, 4+3+2 tentáculos por periodo) envueltas por el MÓDULO del paralaje: camines donde camines, el cuerpo del dios se repite SIN COSTURA — un LOOP de verdad. El brillo de los titanes corre en el mismo loop; el polvo estelar, las brumas y el abrazo del sol siguen vivos.
+- **LAS TRES BANDAS EXCLUSIVAS** — 100% síntesis de la casa: «EL SUEÑO DEL VACÍO» (58 BPM, el dios dormido), «LA GARGANTA DE PÁGINAS» (92 BPM, el tragadero susurrante) y «EL CORAZÓN COLOSAL» (120 BPM, el órgano que todo lo mueve). LA MONEDA: una al azar al entrar y re-tiro cada ~2,5 min SIN repetir la inmediata — la estancia larga oye dos o tres; en el festín manda la oleada (BossHigh) como siempre.
+- **LAS ALAS DEL VACÍO = LA COPIA EXACTA DEL ECLIPSE** — el repertorio estructural BYTE A BYTE (ruido, plumas, puntas, tempo, filos, núcleo), solo cambia la paleta del vacío y su anillo rúnico violeta. LA AUDITORÍA DE LOS PICOS: la sierra vivía en el CAMINO EXTRA (membrana + borde maestro + niebla inset + el balance de la vela), no en la geometría — la misma lección del FILO DE HazLib que curó los haces (borde a CERO EXACTO + smoothstep antes del borde + soft-add): se respeta VOLVIENDO al camino único del eclipse. LAS RUNAS vuelven a las puntas (nodo 8, escala completa 1.45+0.35·n) y las migas del vacío siguen cayendo. Tooltip ×3 reescrito.
+- **LA FORMA ETERNA A LA VISTA** — el interruptor «Mostrar la Forma Eterna» del menú de configuración del mod (default ON) + el OJO de vanilla del hueco funcional la esconden y la muestran; SOLO muere el teatro (los stats y el aura del vacío son de juego). El escaneo de CosmeticPlayer respeta ambos.
+- **LAS ESENCIAS A 9999** — las mil de la puerta caben en UNA pila. El drop (criaturas 0,1% · jefes 90/5/1), el tope del festín del portador y la lógica del altar VERIFICADOS SIN CAMBIO: la cuenta solo sube al consagrar, la puerta solo se abre a las MIL consagradas, el botón solo existe con la puerta abierta, la cuenta vive con el mundo.
+- **LA CURA QUE SOLO EL HEADLESS VIO** — una línea huérfana en el en-US la toleró el -build y la cazó el servidor headless («malformed localization file» — el mod NO cargaba): extirpada, los TRES hjson parseados con el parser real y todo el gate re-corrido. El headless es OBLIGATORIO.
 
 ## VERIFICACIÓN (la cadena de la casa)
 
-- oráculo verify.csproj: **0 errores / 0 warnings** (contra el tModLoader.dll + FNA + ReLogic + TerrariaHooks + log4net + CsvHelper + MP3Sharp + NVorbis del tML 2026.09.3.1 real).
-- **-build REAL 0/0**: 494 entradas, 11.568.886 B, EOF exacto, sum(comp)+tabla == fsize, 494/494 blobs inflan.
-- **Las firmas de la cura y la puerta VIVEN** en la DLL: EsenciasConsagradas · PuertaAbierta · EsenciasPuerta · esenciasConsagradasAltar · PuertaAbiertaAnuncio · AltarMundoInterior · MundoTitulo/MundoPuerta/MundoProgreso (UTF-16 #US) · PostDrawTiles.
-- **PostDrawTiles curado VERIFICADO EN EL IL** de la DLL empaquetada (ReabrirLoteVanilla AUSENTE, CerrarLoteSiAbierto en el finally).
-- **hjson ×3**: es-MX regenerado por `tools/sync_es_mx_v6564.py` (espejo puro), en-US traducido — empaquetado == fuente IDÉNTICO, claves nuevas COMPLETAS en los 3.
-- **Servidor headless 0 EXCEPCIONES** (Sandboxing → Constructing → Adding Content → Configuring → Finalizing → Adding Recipes → Choose World; generación de mundo corriendo con el mod activo sin errores).
+- oráculo verify.csproj: **0 errores / 0 warnings** (448 .cs contra el tML 2026.09.3.1 real).
+- **-build REAL 0/0**: 499 entradas, 15.943.130 B, EOF exacto, 499/499 blobs inflan.
+- **GUARDIÁN TODO VIVE ✔** (el pilar con su máscara en disco y en el .tmod).
+- **AUDIT v6.120 TODO VERIFICADO ✔** — 100 checks: firmas VIVAS (PilarPrismaTile · LlanoY · EscenaInteriorGrimorio · MostrarFormaEterna · hideVisibleAccessory…), literales UTF-16 de las bandas, la tira 54×516 y su máscara 54×86, las 3 ogg, el repertorio del vacío == eclipse, el llano SOLO obsidiana, el pilar DESPUÉS del terreno, el drop intacto, la puerta solo a las mil, las esencias a 9999, keysets ×3 idénticos.
+- **EL OJO del pilar: SHIP 7/9/8/8** (tres pasadas de refina, el ciclo de la casa).
+- **headless 0 EXCEPCIONES** («Sandboxing: Aethon, the Eternal Grimoire v6.120» → Adding Recipes → Choose World).
 
 ## PARA VERIFICAR EN EL JUEGO
 
-- [ ] **EL CRASH MURIÓ**: usa MUNDO INTERIOR DEL ETERNO (o el botón del altar) — «El libro se abre…» → ENTRAS AL INTERIOR SIN CRASH y las brumas del mundo (columnas, volutas, la reactiva) viven sobre el terreno.
-- [ ] **EL ÍTEM NO SE GASTA**: úsalo, viaja, vuelve por el prisma y úsalo OTRA VEZ (y otra): el ítem siempre está en la bolsa; spamearlo durante la devoración ya no apila libros.
-- [ ] **LA CUENTA DEL ALTAR**: consagra armas/materiales — la sección «EL MUNDO INTERIOR DEL ETERNO» de la ventana del altar muestra la cuenta viva subiendo (X/1000).
-- [ ] **LA PUERTA DEL ALTAR**: al llegar a las 1000 consagradas, el ANUNCIO al chat + EL BOTÓN «IR AL MUNDO INTERIOR» aparece en la ventana del altar — y traga igual que el ítem.
-- [ ] **LA PERSISTENCIA**: la cuenta del altar SOBREVIVE guardar/cargar el mundo (y entrar/salir del interior no la toca).
-- [ ] **TODO LO DEMÁS DE LA v6.118 INTACTO** (si funciona, no se toca): la superficie del cuerpo, el ciclo eterno de oleadas, el cielo de tentáculos, la revelación, las alas y la salida limpia.
+- [ ] **LA SALIDA EXISTE**: entra al mundo interior (el ítem o el botón del altar) — EL PILAR PRISMA ya está colocado al lado de donde apareces, con su luz de faro. Clic derecho → VOLVER AL MUNDO REAL (y INVOCAR A AETHON sigue vivo).
+- [ ] **EL LLANO**: el interior es UNA planicie de obsidiana de borde a borde — sin colinas, sin plaza, sin geoda: solo el llano, su pilar, el eclipse y el latido.
+- [ ] **EL LOOP DEL FONDO**: camina hacia un lado LARGO rato — las capas de tentáculos se repiten idénticas sin costura, los ojos siguen mirándote, los titanes verlet laten.
+- [ ] **LAS TRES BANDAS**: entra varias veces (o quédate ~5 min) — suena EL SUEÑO DEL VACÍO, LA GARGANTA DE PÁGINAS o EL CORAZÓN COLOSAL, al azar, sin repetir la inmediata; en el festín manda la oleada.
+- [ ] **LAS ALAS DEL VACÍO**: vístelas — el abanico del eclipse vestido de violeta, SIN PICOS, con las runas violetas EN LAS PUNTAS y las migas cayendo.
+- [ ] **LA FORMA ETERNA**: «Opciones del juego → Configuración del mod → Mostrar la Forma Eterna» — apágala y el panteón visual se apaga (stats y aura intactos); enciéndela y vuelve. El ojo del hueco funcional también la esconde.
+- [ ] **LAS ESENCIAS**: una pila llega a 9999 — consagra en el altar y la cuenta viva (X/1000) sube; a las MIL consagradas el botón IR AL MUNDO INTERIOR aparece (el drop sigue igual: 0,1% criaturas, jefes 1-10).
+- [ ] **TODO LO DEMÁS INTACTO** (si funciona, no se toca): la devoración, el ítem que no se gasta, el ciclo de oleadas, las brumas, el altar de la consagración y sus secciones.

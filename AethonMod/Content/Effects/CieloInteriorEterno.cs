@@ -44,6 +44,17 @@ namespace AethonMod.Content.Effects
     //  por escala Y) y TODO el cielo respira con EL LATIDO DEL CORAZÓN
     //  de amatista (SubmundoGrimorio.PulsoCorazon — el balanceo y los
     //  brillos se hinchan a cada golpe, ~5 s).
+    //
+    //  v6.120 — LAS CAPAS EN LOOP (la letra: «el fondo deben ser capas
+    //  de tentaculos en loop y al menos 3 capas»): las TRES capas de
+    //  tentáculos son ahora BANDAS PERIÓDICAS — cada capa tiene su
+    //  PERIODO propio en píxeos (lejos 900 · medio 760 · cerca 640) y
+    //  SUS tentáculos por periodo (4 · 3 · 2), dibujados en
+    //  REPETICIONES que envuelven la pantalla por MÓDULO del paralaje:
+    //  camines donde camines por el llano de obsidiana, el cuerpo del
+    //  dios SE REPITE idéntico sin costura — el fondo es un LOOP de
+    //  verdad (el mundo interior de una entidad cósmica NO TIENE BORDE:
+    //  su interior te envuelve entero, siempre).
     // ======================================================================
     public class CieloInteriorEterno : CustomSky
     {
@@ -166,8 +177,13 @@ namespace AethonMod.Content.Effects
             try
             {
                 // ============================================================
-                //  (1) LA CAPA LEJANA — siete siluetas casi negras ondulando
-                //      al borde de la nada (Columna determinista — barata)
+                //  (1) LA CAPA LEJANA — v6.120 — LA BANDA EN LOOP: CUATRO
+                //      siluetas casi negras por PERIODO (900 px), repetidas
+                //      sin costura a lo ancho del cielo (la letra: «el fondo
+                //      deben ser capas de tentaculos en loop»). El paralaje
+                //      corre con la cámara y el patrón VUELVE A EMPEZAR
+                //      idéntico: camines donde camines, el cuerpo del dios
+                //      NUNCA se acaba — ES UN LOOP de verdad.
                 // ============================================================
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
@@ -175,17 +191,24 @@ namespace AethonMod.Content.Effects
                 try
                 {
                     Color tinteLejos = new Color(16, 9, 30);
-                    for (int k = 0; k < SemillaLejos.Length; k++)
+                    float perLejos = 900f;                     // el PERIODO del loop
+                    float offLejos = Mod(camX * 0.012f, perLejos);
+                    int repsLejos = (int)(w / perLejos) + 2;
+                    for (int rep = 0; rep <= repsLejos; rep++)
                     {
-                        int sem = SemillaLejos[k];
-                        float fx = 0.06f + 0.145f * k + 0.03f * VFXCore.Hash01(sem, 1, 911);
-                        Vector2 raiz = new Vector2(w * fx - camX * 0.012f, -260f - 120f * VFXCore.Hash01(sem, 2, 913));
-                        Vector2 cabeza = raiz + new Vector2(
-                            (VFXCore.Hash01(sem, 3, 917) - 0.5f) * 320f + MathF.Sin(t * 0.11f + k) * 46f,
-                            h * (0.30f + 0.26f * VFXCore.Hash01(sem, 4, 919)));
-                        Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.4f, sem, 16, 0.16f);
-                        DibujarTira(sb, espina, 14f, 30f, tinteLejos,
-                            (0.42f + 0.16f * latido) * a, flujo: t * 0.010f + k * 0.13f);
+                        float x0 = rep * perLejos - offLejos - perLejos;
+                        for (int k = 0; k < SemillaLejos.Length && k < 4; k++)
+                        {
+                            int sem = SemillaLejos[k];
+                            float fx = 0.10f + 0.23f * k + 0.05f * VFXCore.Hash01(sem, 1, 911);
+                            Vector2 raiz = new Vector2(x0 + perLejos * fx, -260f - 120f * VFXCore.Hash01(sem, 2, 913));
+                            Vector2 cabeza = raiz + new Vector2(
+                                (VFXCore.Hash01(sem, 3, 917) - 0.5f) * 320f + MathF.Sin(t * 0.11f + k) * 46f,
+                                h * (0.30f + 0.26f * VFXCore.Hash01(sem, 4, 919)));
+                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.4f, sem, 16, 0.16f);
+                            DibujarTira(sb, espina, 14f, 30f, tinteLejos,
+                                (0.42f + 0.16f * latido) * a, flujo: t * 0.010f + k * 0.13f);
+                        }
                     }
 
                     // EL POLVO ESTELAR DENSO de las capas lejanas (las SUAS
@@ -215,8 +238,10 @@ namespace AethonMod.Content.Effects
                     new Color(52, 32, 84), 5507, t, wind: 19f, layer: 1, alpha: 0.11f * a);
 
                 // ============================================================
-                //  (3) LA CAPA MEDIA — cuatro brazos con Piel del Eterno y
-                //      OJOS QUE TE SIGUEN (Columna determinista)
+                //  (3) LA CAPA MEDIA — v6.120 — LA BANDA EN LOOP: TRES brazos
+                //      con Piel del Eterno por PERIODO (760 px), repetidos sin
+                //      costura — y sus OJOS QUE TE SIGUEN: el loop pone MÁS
+                //      ojos mirándote (todos los del cuerpo, a la vez)
                 // ============================================================
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
@@ -225,26 +250,33 @@ namespace AethonMod.Content.Effects
                 {
                     Vector2 miradaJugador = Main.LocalPlayer != null
                         ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
-                    for (int k = 0; k < SemillaMedio.Length; k++)
+                    float perMedio = 760f;                      // el PERIODO del loop
+                    float offMedio = Mod(camX * 0.035f, perMedio);
+                    int repsMedio = (int)(w / perMedio) + 2;
+                    for (int rep = 0; rep <= repsMedio; rep++)
                     {
-                        int sem = SemillaMedio[k];
-                        float fx = 0.16f + 0.225f * k + 0.04f * VFXCore.Hash01(sem, 1, 931);
-                        Vector2 raiz = new Vector2(w * fx - camX * 0.035f, -300f - 90f * VFXCore.Hash01(sem, 2, 933));
-                        Vector2 cabeza = raiz + new Vector2(
-                            (VFXCore.Hash01(sem, 3, 937) - 0.5f) * 260f + MathF.Sin(t * 0.16f + k * 1.7f) * 60f * hincha,
-                            h * (0.34f + 0.30f * VFXCore.Hash01(sem, 4, 939)));
-                        Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.5f, sem, 18, 0.19f);
-                        DibujarTira(sb, espina, 22f, 52f, new Color(150, 96, 210),
-                            (0.50f + 0.16f * latido) * a, flujo: t * 0.020f + k * 0.21f);
-
-                        // LOS OJOS DEL BRAZO (2 por brazo — reparto áureo):
-                        // TODOS MIRAN al portador
-                        for (int e = 0; e < 2; e++)
+                        float x0 = rep * perMedio - offMedio - perMedio;
+                        for (int k = 0; k < SemillaMedio.Length && k < 3; k++)
                         {
-                            float ue = 0.30f + 0.40f * e;
-                            int idx = (int)(ue * (espina.Length - 1));
-                            DibujarOjo(sb, espina[idx], 16f + 7f * VFXCore.Hash01(sem, 5 + e, 941),
-                                miradaJugador, sem * 3 + e, (0.5f + 0.3f * latido) * a);
+                            int sem = SemillaMedio[k];
+                            float fx = 0.14f + 0.32f * k + 0.05f * VFXCore.Hash01(sem, 1, 931);
+                            Vector2 raiz = new Vector2(x0 + perMedio * fx, -300f - 90f * VFXCore.Hash01(sem, 2, 933));
+                            Vector2 cabeza = raiz + new Vector2(
+                                (VFXCore.Hash01(sem, 3, 937) - 0.5f) * 260f + MathF.Sin(t * 0.16f + k * 1.7f) * 60f * hincha,
+                                h * (0.34f + 0.30f * VFXCore.Hash01(sem, 4, 939)));
+                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.5f, sem, 18, 0.19f);
+                            DibujarTira(sb, espina, 22f, 52f, new Color(150, 96, 210),
+                                (0.50f + 0.16f * latido) * a, flujo: t * 0.020f + k * 0.21f);
+
+                            // LOS OJOS DEL BRAZO (2 por brazo — reparto áureo):
+                            // TODOS MIRAN al portador
+                            for (int e = 0; e < 2; e++)
+                            {
+                                float ue = 0.30f + 0.40f * e;
+                                int idx = (int)(ue * (espina.Length - 1));
+                                DibujarOjo(sb, espina[idx], 16f + 7f * VFXCore.Hash01(sem, 5 + e, 941),
+                                    miradaJugador, sem * 3 + e, (0.5f + 0.3f * latido) * a);
+                            }
                         }
                     }
                 }
@@ -278,11 +310,13 @@ namespace AethonMod.Content.Effects
                 catch { }
 
                 // ============================================================
-                //  (5) LA CAPA CERCANA — los TITANES: 3 verlet enormes
-                //      (ColumnaViva — inercia y latigazo de verdad) con la
-                //      Piel del Eterno a TAMAÑO DIOS, su BRILLO HÚMEDO
-                //      aditivo (las vetas doradas ARDEN), ojos por todo el
-                //      cuerpo y bruma en la cabeza
+                //  (5) LA CAPA CERCANA — v6.120 — LA BANDA EN LOOP: DOS
+                //      TITANES verlet por PERIODO (640 px), repetidos sin
+                //      costura (ColumnaViva — inercia y latigazo de verdad)
+                //      con la Piel del Eterno a TAMAÑO DIOS, su BRILLO
+                //      HÚMEDO aditivo (las vetas doradas ARDEN), ojos por
+                //      todo el cuerpo y bruma en la cabeza. El loop los
+                //      clona a lo ancho del cielo: EL DIOS ENTERO, en bucle.
                 // ============================================================
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
@@ -291,56 +325,71 @@ namespace AethonMod.Content.Effects
                 {
                     Vector2 miradaJugador = Main.LocalPlayer != null
                         ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
-                    for (int k = 0; k < SemillaCerca.Length; k++)
+                    float perCerca = 640f;                     // el PERIODO del loop
+                    float offCerca = Mod(camX * 0.06f, perCerca);
+                    int repsCerca = (int)(w / perCerca) + 2;
+                    for (int rep = 0; rep <= repsCerca; rep++)
                     {
-                        int sem = SemillaCerca[k];
-                        float fx = 0.20f + 0.30f * k + 0.05f * VFXCore.Hash01(sem, 1, 951);
-                        Vector2 raiz = new Vector2(w * fx - camX * 0.06f, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
-                        // LA CABEZA VIVA (Lissajous lenta — el verlet hace el resto)
-                        Vector2 cabeza = raiz + new Vector2(
-                            MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
-                            h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
-                            MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
-                        Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
-
-                        // EL CUERPO (fusiforme: raíz 34 → vientre 104 → cabeza 66)
-                        DibujarTira(sb, espina, 34f, 104f, new Color(168, 112, 224),
-                            (0.78f + 0.14f * latido) * a, flujo: t * 0.030f + k * 0.29f,
-                            grosorCentroAlt: 66f);
-
-                        // LOS OJOS DEL TITÁN (4 por cuerpo — TODOS te miran,
-                        // apertura escalonada, el latido los hincha)
-                        for (int e = 0; e < 4; e++)
+                        float x0 = rep * perCerca - offCerca - perCerca;
+                        for (int k = 0; k < SemillaCerca.Length && k < 2; k++)
                         {
-                            float ue = 0.22f + 0.20f * e;
-                            int idx = (int)(ue * (espina.Length - 1));
-                            DibujarOjo(sb, espina[idx], 24f + 9f * VFXCore.Hash01(sem, 6 + e, 959),
-                                miradaJugador, sem * 7 + e, (0.62f + 0.30f * latido) * a);
+                            int sem = SemillaCerca[k];
+                            float fx = 0.22f + 0.48f * k + 0.06f * VFXCore.Hash01(sem, 1, 951);
+                            Vector2 raiz = new Vector2(x0 + perCerca * fx, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
+                            // LA CABEZA VIVA (Lissajous lenta — el verlet hace el resto)
+                            Vector2 cabeza = raiz + new Vector2(
+                                MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
+                                h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
+                                MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
+                            Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
+
+                            // EL CUERPO (fusiforme: raíz 34 → vientre 104 → cabeza 66)
+                            DibujarTira(sb, espina, 34f, 104f, new Color(168, 112, 224),
+                                (0.78f + 0.14f * latido) * a, flujo: t * 0.030f + k * 0.29f,
+                                grosorCentroAlt: 66f);
+
+                            // LOS OJOS DEL TITÁN (4 por cuerpo — TODOS te miran,
+                            // apertura escalonada, el latido los hincha)
+                            for (int e = 0; e < 4; e++)
+                            {
+                                float ue = 0.22f + 0.20f * e;
+                                int idx = (int)(ue * (espina.Length - 1));
+                                DibujarOjo(sb, espina[idx], 24f + 9f * VFXCore.Hash01(sem, 6 + e, 959),
+                                    miradaJugador, sem * 7 + e, (0.62f + 0.30f * latido) * a);
+                            }
                         }
                     }
                 }
                 finally { VFXCore.CerrarLoteSiAbierto(); }
 
                 // EL BRILLO HÚMEDO de los titanes (lote aditivo: las VETAS
-                // DORADAS de la piel ARDEN — la misma tira ×1.35 de ancho)
+                // DORADAS de la piel ARDEN — la misma tira ×1.35 de ancho,
+                // EN EL MISMO LOOP de la capa)
                 sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     Main.Rasterizer, null, m);
                 try
                 {
-                    for (int k = 0; k < SemillaCerca.Length; k++)
+                    // el MISMO módulo del loop de la capa (mismo frame, mismo
+                    // camX: las vetas caen EXACTAS sobre sus cuerpos)
+                    float offBrillo = Mod(camX * 0.06f, 640f);
+                    for (int rep = 0; rep <= (int)(w / 640f) + 2; rep++)
                     {
-                        int sem = SemillaCerca[k];
-                        float fx = 0.20f + 0.30f * k + 0.05f * VFXCore.Hash01(sem, 1, 951);
-                        Vector2 raiz = new Vector2(w * fx - camX * 0.06f, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
-                        Vector2 cabeza = raiz + new Vector2(
-                            MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
-                            h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
-                            MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
-                        Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
-                        DibujarTira(sb, espina, 46f, 140f, new Color(150, 84, 235),
-                            (0.10f + 0.10f * latido) * a, flujo: t * 0.030f + k * 0.29f,
-                            grosorCentroAlt: 88f);
+                        float x0 = rep * 640f - offBrillo - 640f;
+                        for (int k = 0; k < SemillaCerca.Length && k < 2; k++)
+                        {
+                            int sem = SemillaCerca[k];
+                            float fx = 0.22f + 0.48f * k + 0.06f * VFXCore.Hash01(sem, 1, 951);
+                            Vector2 raiz = new Vector2(x0 + 640f * fx, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
+                            Vector2 cabeza = raiz + new Vector2(
+                                MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
+                                h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
+                                MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
+                            Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
+                            DibujarTira(sb, espina, 46f, 140f, new Color(150, 84, 235),
+                                (0.10f + 0.10f * latido) * a, flujo: t * 0.030f + k * 0.29f,
+                                grosorCentroAlt: 88f);
+                        }
                     }
                     // LAS VOLUTAS entre titanes (BrumaFX.Tendril — la niebla
                     // serpentea entre los cuerpos del dios)
@@ -438,6 +487,16 @@ namespace AethonMod.Content.Effects
         {
             float f = x - MathF.Floor(x);
             return f < 0f ? 0f : (f > 0.999f ? 0.999f : f);
+        }
+
+        /// <summary>v6.120 — EL MÓDULO DEL LOOP: el resto positivo de
+        /// x/m (el corazón del «tentaculos en loop» — el patrón del
+        /// cuerpo VUELVE A EMPEZAR idéntico tras cada periodo, camines
+        /// donde camines: sin costura, sin fin).</summary>
+        private static float Mod(float x, float m)
+        {
+            float f = x % m;
+            return f < 0f ? f + m : f;
         }
 
         // ==================================================================
