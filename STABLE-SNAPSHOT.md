@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.119 — LA CURA DEL CRASH DEL INTERIOR + LAS DOS PUERTAS (el ítem que no se gasta y el altar de las mil esencias)
 
-> .tmod v6.119 verificada: 494 entradas · 11.568.886 B · EOF exacto · 494/494 blobs inflan · oráculo 0/0 · -build REAL 0/0 · headless 0 excepciones.
+> **PUBLICADA — release 439205390 + CDN verificado byte a byte (md5 d88a863f662d45aa5e9295cc800feffd)** — .tmod v6.119 listo y verificado (11.568.886 B, 494 entradas, EOF exacto).
 
 ## LA LETRA (el usuario)
 
