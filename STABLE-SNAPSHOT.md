@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.120 — EL LLANO DE OBSIDIANA + EL PILAR DE LA SALIDA + LAS TRES BANDAS
 
-> ⏳ **PENDIENTE DE PUBLICACIÓN** — .tmod v6.120 listo y verificado (15.943.130 B, 499 entradas, EOF exacto, md5 5bb475d8279bd092e6b3f18deec03514).
+> **PUBLICADA — release 439346783 + CDN verificado byte a byte (md5 5bb475d8279bd092e6b3f18deec03514)** — .tmod v6.120 listo y verificado (15.943.130 B, 499 entradas, EOF exacto, md5 5bb475d8279bd092e6b3f18deec03514).
 
 ## LA LETRA (el usuario)
 
