@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.122 — EL AURA DEL VACÍO + LAS TRES ARMAS + EL CURA-TODO DEL INTERIOR
 
-> ⏳ **PENDIENTE DE PUBLICACIÓN**
+> **PUBLICADA — release 440575030 + CDN verificado byte a byte (md5 9da2d6744a9e60da3f1ba743c7daf3f3)**
 
 ## LA LETRA (el usuario)
 
