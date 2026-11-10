@@ -43,6 +43,29 @@ namespace AethonMod.Content.Projectiles.Jefes
     // =====================================================================
 
     // =====================================================================
+    //  v6.122 — LA LEY DE LA RAMPA DE VIDA (la letra del usuario: «sus
+    //  hazes siempre terminan y empiezan en un corte brusco, sin
+    //  efectos"): NINGÚN haz del dios nace ni muere de golpe — el
+    //  NACIMIENTO y la MUERTE son 20 ticks de respiración (smoothstep:
+    //  la luz se enciende y se apaga como la luz de verdad),
+    //  multiplicados en TODO el dibujo vía HazLib.IntensidadGlobal. El
+    //  Kill sigue mandando: para entonces la rampa ya llegó a CERO.
+    // =====================================================================
+    internal static class HacesVida
+    {
+        /// <summary>La rampa 0→1→0 de la vida del haz: nace en [borde]
+        /// ticks, muere en los últimos [borde] antes de [fin].</summary>
+        internal static float Rampa(float t, float fin, float borde = 20f)
+        {
+            float nace = MathHelper.Clamp((t - 1f) / borde, 0f, 1f);
+            float muere = MathHelper.Clamp((fin - t) / borde, 0f, 1f);
+            nace = nace * nace * (3f - 2f * nace);
+            muere = muere * muere * (3f - 2f * muere);
+            return nace * muere;
+        }
+    }
+
+    // =====================================================================
     //  JefeRenglonesProj — LOS SEIS RENGLONES DEL DIOS
     // =====================================================================
     public class JefeRenglonesProj : ModProjectile
@@ -249,6 +272,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 HazLib.Abrir();
                 try
                 {
+                    // v6.122 — LA RAMPA DE VIDA: la rueda ENCIENDE al nacer
+                    // y EXPIRA al morir — jamás un corte brusco.
+                    HazLib.IntensidadGlobal = HacesVida.Rampa(Tiempo, Vida);
                     for (int i = 0; i < 6; i++)
                     {
                         Vector2 dir = (_angulo + i * (MathHelper.Pi / 3f)).ToRotationVector2();
@@ -553,6 +579,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                     HazLib.Abrir();
                     try
                     {
+                        // v6.122 — LA RAMPA DE VIDA DEL CONO (el conjuro
+                        // de carga no se toca — solo el cono respira).
+                        HazLib.IntensidadGlobal =
+                            HacesVida.Rampa(Tiempo - Carga + 10f, Laser + 30f);
                         HazLib.PrepararCono(boca, punta, 46f * _tamaño + 4f, 150f * _tamaño + 8f, 0f, 56);
                         HazLib.Dibujar(LeyTinteVelo, LeyVerticeVelo, HazLib.FilasVelo);
 
@@ -741,6 +771,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                     HazLib.Abrir();
                     try
                     {
+                        // v6.122 — LA RAMPA DE VIDA: el ojo se abre SUAVE
+                        // y el rayo se disipa SUAVE — jamás un corte brusco.
+                        HazLib.IntensidadGlobal =
+                            HacesVida.Rampa(Tiempo - Carga, Rayo);
                         // CAPA 1 — EL VELO: la cúpula morada de la casa.
                         HazLib.PrepararPar(boca, punta, MiradaRayoProj.LeySemianchoVelo, 0f, 44);
                         HazLib.Dibujar(MiradaRayoProj.LeyTinteVelo, MiradaRayoProj.LeyVerticeVelo, HazLib.FilasVelo);
@@ -1006,6 +1040,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                     HazLib.Abrir();
                     try
                     {
+                        // v6.122 — LA RAMPA DE VIDA: la rejilla del cielo
+                        // ENCIENDE y se disipa suave — el alfaHaz viejo
+                        // solo vestía el polvo, los haces morían en seco.
+                        HazLib.IntensidadGlobal = HacesVida.Rampa(Tiempo, T_Fin, 24f);
                         for (int i = 0; i < 12; i++)
                         {
                             Segmento(i, out Vector2 a, out Vector2 b);
@@ -1324,6 +1362,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                     HazLib.Abrir();
                     try
                     {
+                        // v6.122 — LA RAMPA DE VIDA DEL CONO (los soles de
+                        // la carga no se tocan — solo el cono respira).
+                        HazLib.IntensidadGlobal =
+                            HacesVida.Rampa(Tiempo - Carga + 10f, Laser + 30f);
                         // (1) EL GLOW EXTERIOR — la bruma del sueño (×2.6).
                         HazLib.PrepararCono(boca, punta, 60f * _tamPrueba + 5f, 210f * _tamPrueba + 10f, 0f, 48);
                         HazLib.Dibujar(p => RayoConcentradoDosProjectile

@@ -107,6 +107,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         //  NADA MÁS; el número queda retirado como los de camiseta)
         public const int EstiloSolJefe = 24;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción cabalgándolo — y luego LO LANZA a la presa: la persigue LENTO, GRAVITA, CRECE hasta la GIGANTE ROJA (×6) y estalla en LUZ, BRUMA y FORMAS que hacen daño)
         public const int EstiloMuerteFinal = 25;  // v6.50.80 — LA MUERTE DEL DIOS (la letra: «debe hacer una gran explosion de luz y desaparecer, asi es como debe ser su muerte»): el Estallido Radiante en SU versión final — la MISMA luz que el dios usaba como ataque, pero a ESCALA 1.85 (la más grande de toda la pelea) y PURA LUZ: jamás daña (la victoria no se cobra con un golpe de gracia barato a quemarropa)
+        public const int EstiloAparicionLuz = 26; // v6.122 — LA EXPLOSIÓN DE LUZ DE LA APARICIÓN (la letra: «el siempre debe aparecer con una explocion de luz»): el Estallido Radiante en su versión de NACIMIENTO — ESCALA 1.45 (más grande que cualquier ataque de combate, más contenida que la muerte) y PURA LUZ: jamás daña (la bienvenida no se cobra con un golpe barato). Se dispara en EstadoNaciendo al completarse la materialización — SIEMPRE, en cada aparición.
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -123,9 +124,14 @@ namespace AethonMod.Content.Projectiles.Jefes
         // v6.50.80 — LA ESCALA DE LA MUERTE: la última luz es LA MÁS GRANDE
         //     de la pelea — 1.85 plano (el estallido de combate llega a 1.27
         //     en fase 3: la muerte es un 45 % más grande que su máximo ataque).
+        //     v6.122 — LA ESCALA DEL NACIMIENTO: 1.45 — la bienvenida del dios
+        //     ARDE más que cualquier ataque de combate, sin robarle el trono
+        //     a su última luz.
         private float EscalaEstallido => Estilo == EstiloMuerteFinal
             ? 1.85f
-            : 1.15f + 0.06f * Math.Max(0, FaseEstallido - 1);
+            : Estilo == EstiloAparicionLuz
+                ? 1.45f
+                : 1.15f + 0.06f * Math.Max(0, FaseEstallido - 1);
 
         // === EL ESTADO (por estilo) ===
         private float _edad;
@@ -422,6 +428,17 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // desde el nacimiento (la autocuración de la IA lo
                     // mantiene así en TODAS las máquinas: el msg 27 no lleva
                     // este OnSpawn).
+                    Projectile.timeLeft = 152;
+                    Projectile.hostile = false;
+                    Projectile.damage = 0;
+                    break;
+
+                case EstiloAparicionLuz:
+                    // v6.122 — LA EXPLOSIÓN DE LUZ DE LA APARICIÓN: la MUERTE
+                    // en su versión de nacimiento — mismo espectáculo, PURA
+                    // LUZ (hostil y daño a CERO: la ventana de la onda del
+                    // estilo de combate NO corre para este estilo — el cauce
+                    // la filtra por Estilo == EstiloEstallidoRadiante).
                     Projectile.timeLeft = 152;
                     Projectile.hostile = false;
                     Projectile.damage = 0;
@@ -1436,12 +1453,16 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // =============================================================
                 case EstiloEstallidoRadiante:
                 case EstiloMuerteFinal:
+                case EstiloAparicionLuz:
                 {
                     // v6.50.80 — LA MUERTE comparte el cauce del ataque (el
                     // estallido del dios muriendo ES su propio ataque, en su
                     // versión más grande) — solo el NACIMIENTO cambia de
                     // talla: más chispas, más fuerte, el estruendo final.
+                    // v6.122 — y LA APARICIÓN comparte el mismo cauce: la
+                    // bienvenida del dios ES su propia luz.
                     bool esLaMuerte = Estilo == EstiloMuerteFinal;
+                    bool esAparicion = Estilo == EstiloAparicionLuz;
 
                     // CLAVADO donde nació (estalló donde estaba el jefe) —
                     // la autocuración del inicio ya puso hostil/daño de la
@@ -1468,15 +1489,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                     if (_edad <= 1f)
                     {
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Projectile.Center);
-                        OndaLib.Kick(esLaMuerte ? 20f : 13f, esLaMuerte ? 40 : 26);
-                        int rachas = esLaMuerte ? 80 : 42;
+                        OndaLib.Kick(esLaMuerte ? 20f : esAparicion ? 16f : 13f,
+                                     esLaMuerte ? 40 : esAparicion ? 32 : 26);
+                        int rachas = esLaMuerte ? 80 : esAparicion ? 56 : 42;
                         for (int i = 0; i < rachas; i++)
                         {
                             float ang = i * MathHelper.TwoPi / rachas +
                                 Main.rand.NextFloat(-0.06f, 0.06f);
                             float v = esLaMuerte
                                 ? Main.rand.NextFloat(9f, 24f)
-                                : Main.rand.NextFloat(6f, 17f);
+                                : esAparicion
+                                    ? Main.rand.NextFloat(8f, 21f)
+                                    : Main.rand.NextFloat(6f, 17f);
                             Dust d = Dust.NewDustPerfect(Projectile.Center,
                                 DustID.GoldFlame,
                                 new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * v);

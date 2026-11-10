@@ -2185,6 +2185,44 @@ Items: {
 			'''
 	}
 
+	JuicioDosSoles: {
+		DisplayName: Judgment of the Two Suns
+		Tooltip:
+			'''
+			THE DEFINITIVE ATTACK OF LIGHT AND DARKNESS: hold the click and
+			TWO SPHERES are born at your sides — the white-gold LIGHT one
+			and the black-violet DARKNESS one — flying to the point you
+			look at. They collide, IMPLODE (all nearby dust falls to the
+			center) and burst into THE FLASH: the explosion of light that
+			floods the world, with its shockwave ring and golden rain.
+			The blast hits everything alive within 460 px.
+			'''
+	}
+
+	TajoOscuro: {
+		DisplayName: The Dark Slash
+		Tooltip:
+			'''
+			THE DARKNESS FILTER: each use stabs UP TO THREE SLASHES near
+			your enemies (the closest to the cursor) — long blades of
+			BLACK core, purple middles and WHITE edges born behind the
+			prey along your direction, PIERCING THROUGH it from one end
+			to the other, cutting everything the blade touches.
+			'''
+	}
+
+	AgujasVacio: {
+		DisplayName: The Void Needles
+		Tooltip:
+			'''
+			THE VOID SEWING KIT: UP TO THREE THIN NEEDLES per use, always
+			NEAR your enemies — they fly at the prey with the WHITE TIP,
+			PIERCE it and STAY STUCK in its body: the wound bleeds the
+			void (a drip of damage) until the needle dissolves into
+			violet motes.
+			'''
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -2627,9 +2665,16 @@ Buffs: {
 	}
 
 	VacioExterior: {
-		// v6.101: THE OUTER VOID — the bearer's reward while an enemy burns
-		DisplayName: Outer Void
+		// v6.122: renamed VOID BURN (la letra: «Vacio Exterior, que ahora
+		// se llamara Quemadura del Vacio») — the bearer's reward stays the same
+		DisplayName: Void Burn
 		Description: The void's fire knows its owner: +10% attack, +10 defense, −15% mana cost while any enemy burns
+	}
+
+	AuraVacioBuff: {
+		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
+		DisplayName: Void Aura
+		Description: The void the Eternal Form wears collects {0} damage per second: 0.1% of the sum of the Grimoire of the Eternal's final summon and final magic damage
 	}
 
 	OcasoActivoBuff: {
@@ -3899,6 +3944,10 @@ Altar: {
 	ListaEsencias: Esencias listas — el Eterno las devora enteras por la puerta
 	YaConsagrada: Ya está consagrada
 	NoArma: ✦ No es apto
+	// v6.122 — THE OFFERING OF THE THOUSAND (the altar only takes what
+	// the door still needs; the rest stays on the cursor — never lost)
+	PuertaBebe: The altar drinks {0} essences — the door reads {1}/{2}
+	PuertaYaAbierta: The door is already open — the thousand essences already live in the altar
 	// v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de
 	// la palabra Gana… el altar es quien dice cuanto necesitas y lo que
 	// falta, ademas debe decir como conseguiras esencia» — las tres
@@ -3970,3 +4019,4 @@ Arbol: {
 	Nodo9: EL ECO DE AETHON
 	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
 }
+	AuraVacioBuff: {1

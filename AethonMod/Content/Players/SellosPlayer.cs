@@ -71,10 +71,35 @@ namespace AethonMod.Content.Players
                 Item item = Player.armor[i];
                 if (item == null || item.IsAir) continue;
 
+                // ==========================================================
+                //  v6.122 — EL OJITO DE OCULTAR SE RESPETA DE VERDAD (la
+                //  letra: «la forma eterna no se oculta completamente
+                //  cuando se toca ocultar en el inventario de
+                //  equipamiento, solo se oculta una parte»). LA AUTOPSIA:
+                //  el comentario de esta clase PROMETÍA «respeta el OJITO
+                //  de ocultar accesorio» desde v6.35 — pero el bucle JAMÁS
+                //  lo consultó: los halos de las DOS escrituras (los
+                //  proyectiles SelloGenesisHalo / AnillosSolaresHalo, con
+                //  sus chispas y su luz) seguían vivos con el ojito
+                //  cerrado — ESA era la parte que no se ocultaba (la forma
+                //  misma ya muere por CosmeticPlayer y UpdateAccessory,
+                //  que SÍ respetan el ojo y el interruptor del menú).
+                //  LA CURA: en el hueco FUNCIONAL (3..9), el ojito apaga
+                //  la ESCRITURA (puro teatro); las ESTADÍSTICAS viven en
+                //  UpdateAccessory y jamás mueren. Y LA FORMA ETERNA
+                //  también respeta EL INTERRUPTOR DEL MENÚ
+                //  (AethonConfig.MostrarFormaEterna) — su teatro entero
+                //  se apaga igual que el de CosmeticPlayer.
+                // ==========================================================
+                if (i <= 9 && Player.hideVisibleAccessory[i]) continue;
+                bool esFormaEterna = item.type == formaEterna;
+                if (esFormaEterna &&
+                    !global::AethonMod.Content.AethonConfig.FormaEternaVisible()) continue;
+
                 if (item.type == sello) SelloGenesis = true;
                 else if (item.type == sol) AnillosSol = true;
                 // v6.114 — LA FORMA ETERNA: las dos escrituras juntas.
-                else if (item.type == formaEterna)
+                else if (esFormaEterna)
                 {
                     SelloGenesis = true;
                     AnillosSol = true;

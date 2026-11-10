@@ -150,13 +150,26 @@ namespace AethonMod.Content.Effects
             _pintadoEsteFrame = true;
 
             // La red de seguridad de siempre: el cielo jamás rompe el render.
-            try { PintarElCuerpo(spriteBatch); }
+            // v6.122 — PERO UN SOLO FALLO YA NO MATA EL CIELO PARA SIEMPRE:
+            // el catch viejo ponía _activo=false a la PRIMERA excepción y
+            // el mundo interior quedaba negro el resto de la partida (el
+            // fondo negro reportado). Ahora aguanta 60 fallos consecutivos
+            // (un segundo entero de frames malos) antes de rendirse; cualquier
+            // frame bueno rearma el contador.
+            try { PintarElCuerpo(spriteBatch); _fallosSeguidos = 0; }
             catch
             {
-                _alpha = 0f;
-                _activo = false;
+                _fallosSeguidos++;
+                if (_fallosSeguidos > 60)
+                {
+                    _alpha = 0f;
+                    _activo = false;
+                }
             }
         }
+
+        /// <summary>Contador de fallos consecutivos del pintado (v6.122).</summary>
+        private int _fallosSeguidos;
 
         // ==================================================================
         //  EL CUERPO — tres capas de tentáculos + polvo estelar + brumas
@@ -292,12 +305,32 @@ namespace AethonMod.Content.Effects
                 //  (2) LAS BRUMAS DE PARALAJE (BrumaFX.MistBand ×3 — la
                 //      receta textual de la librería: capas 0/1/2 con
                 //      vientos distintos = PROFUNDIDAD) — entre lo lejano y
-                //      lo medio, la niebla del cuerpo del dios
+                //      lo medio, la niebla del cuerpo del dios.
+                //
+                //      v6.122 — LA CURA DEL FONDO NEGRO: el contrato de
+                //      BrumaFX es «dibuja en el lote ABIERTO del llamador»
+                //      y estas brumas corrían con el lote CERRADO (entre
+                //      el finally de la capa lejana y el Begin de la capa
+                //      media) → la primera QuadFrame lanzaba «Draw was
+                //      called, but Begin has not yet been called» (el
+                //      crash silencioso del client.log al ENTRAR al
+                //      interior), el catch de Draw apagaba el cielo para
+                //      siempre (_activo = false) y el mundo interior
+                //      quedaba NEGRO de por vida. SU PROPIO LOTE con la
+                //      matriz del paisaje — la lección v6.119 de RayoLib:
+                //      el que dibuja, abre su lote.
                 // ============================================================
-                BrumaFX.MistBand(new Rectangle(-260, -160, (int)w + 520, (int)h + 320),
-                    new Color(64, 42, 96), 5501, t, wind: 11f, layer: 0, alpha: 0.13f * a);
-                BrumaFX.MistBand(new Rectangle(-260, -160, (int)w + 520, (int)h + 320),
-                    new Color(52, 32, 84), 5507, t, wind: 19f, layer: 1, alpha: 0.11f * a);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, m);
+                try
+                {
+                    BrumaFX.MistBand(new Rectangle(-260, -160, (int)w + 520, (int)h + 320),
+                        new Color(64, 42, 96), 5501, t, wind: 11f, layer: 0, alpha: 0.13f * a);
+                    BrumaFX.MistBand(new Rectangle(-260, -160, (int)w + 520, (int)h + 320),
+                        new Color(52, 32, 84), 5507, t, wind: 19f, layer: 1, alpha: 0.11f * a);
+                }
+                finally { VFXCore.CerrarLoteSiAbierto(); }
 
                 // ============================================================
                 //  (3) LA CAPA MEDIA — v6.120 — LA BANDA EN LOOP: TRES brazos
@@ -352,7 +385,13 @@ namespace AethonMod.Content.Effects
                 //      vanilla (Sun3 prestado, clavado en el cenit) BRILLA
                 //      entre las capas — aquí su ARO DE BRUMA (el abrazo);
                 //      las capas cercanas pasarán por encima.
+                //      v6.122 — SU PROPIO LOTE (mismo contrato de BrumaFX:
+                //      el catch local tragaba el disparo del lote cerrado,
+                //      pero el halo JAMÁS se dibujaba — ni crash ni sol).
                 // ============================================================
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, m);
                 try
                 {
                     Vector2 sol = new Vector2(w * 0.5f, h * 0.16f);  // el cenit (time 27000)
@@ -373,6 +412,7 @@ namespace AethonMod.Content.Effects
                     }
                 }
                 catch { }
+                finally { VFXCore.CerrarLoteSiAbierto(); }
 
                 // ============================================================
                 //  (5) LA CAPA CERCANA — v6.120 — LA BANDA EN LOOP: DOS

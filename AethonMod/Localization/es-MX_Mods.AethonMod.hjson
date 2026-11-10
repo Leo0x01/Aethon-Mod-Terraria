@@ -2180,6 +2180,44 @@ Items: {
 			'''
 	}
 
+	JuicioDosSoles: {
+		DisplayName: El Juicio de los Dos Soles
+		Tooltip:
+			'''
+			EL ATAQUE DEFINITIVO DE LUZ Y OSCURIDAD: mantén el clic y las
+			DOS ESFERAS nacen a tus lados — la de LUZ blanco-dorada y la
+			de OSCURIDAD negro-violeta — y vuelan al punto que miras.
+			Colisionan, IMPLOSIONAN (todo el polvo cercano cae al centro)
+			y estallan en EL DESTELLO: la explosión de luz que inunda el
+			mundo, con su anillo de choque y su lluvia dorada. La onda
+			golpea a todo lo que viva en 460 px.
+			'''
+	}
+
+	TajoOscuro: {
+		DisplayName: El Tajo de Oscuridad
+		Tooltip:
+			'''
+			EL FILTRO DE LA OSCURIDAD: cada uso clava HASTA TRES TAJOS
+			cerca de tus enemigos (los más cercanos al cursor) — filos
+			largos de CENTRO NEGRO, medios morados y BORDES BLANCOS que
+			nacen detrás de la presa según tu dirección y LA ATRAVIESAN
+			de un extremo a otro, perforando todo lo que el filo toca.
+			'''
+	}
+
+	AgujasVacio: {
+		DisplayName: Las Agujas del Vacío
+		Tooltip:
+			'''
+			EL COSTURERO DEL VACÍO: HASTA TRES AGUJAS DELGADAS por uso,
+			siempre CERCA de tus enemigos — vuelan a la presa con la
+			PUNTA BLANCA, la ATRAVIESAN y SE QUEDAN CLAVADAS en su
+			cuerpo: la herida sangra el vacío (un goteo de daño) hasta
+			que la aguja se disuelve en motas violetas.
+			'''
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -2622,9 +2660,16 @@ Buffs: {
 	}
 
 	VacioExterior: {
-		// v6.101: THE OUTER VOID — the bearer's reward while an enemy burns
-		DisplayName: Vacío exterior
+		// v6.122: renamed VOID BURN (la letra: «Vacio Exterior, que ahora
+		// se llamara Quemadura del Vacio») — el pago al dueño sigue igual
+		DisplayName: Quemadura del vacío
 		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
+	}
+
+	AuraVacioBuff: {
+		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
+		DisplayName: Aura del vacío
+		Description: El vacío que viste la Forma Eterna cobra {0} de daño por segundo: el 0,1% de la suma del daño de invocación y el daño mágico finales del Grimorio del Eterno
 	}
 
 	OcasoActivoBuff: {
@@ -3241,8 +3286,6 @@ Configs: {
 			Tooltip: ""
 		}
 
-		// v6.120 — LA FORMA ETERNA A LA VISTA (la letra: «la forma eterna
-		// debe poder activarse y ocultarse con las opciones del juego»)
 		MostrarFormaEterna: {
 			Label: Mostrar la Forma Eterna
 			Tooltip: Enciéndelo para vestir el panteón visual de la Forma Eterna (las dos luces, el anillo dorsal, la brasa, el brillo y su luz). Apágalo para ocultar todo el teatro: los stats y el aura del vacío siguen siendo tuyos. El ojo del accesorio (ocultar accesorio) también la esconde.
@@ -3837,9 +3880,8 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: El Prisma del Eterno
-	PaginaDelEternoTile.MapEntry: La Página del Eterno
-	// v6.120 — EL PILAR PRISMA: la salida del llano de obsidiana
 	PilarPrismaTile.MapEntry: El Pilar Prisma
+	PaginaDelEternoTile.MapEntry: La Página del Eterno
 }
 
 Duende: {
@@ -3878,8 +3920,6 @@ PrismaInterior: {
 	YaVive: AETHON YA CAMINA POR EL INTERIOR
 	Leyenda: La llamada: el altar se materializa y EL GRIMORIO flota justo encima — de la ceremonia nacen los fragmentos
 	NombreCorto: El Prisma del Eterno
-	// v6.120 — EL PILAR PRISMA (la salida del llano): su nombre en el mapa
-	// y el texto del cursor (la misma ventana del prisma, la salida buena).
 	NombrePilar: El Pilar Prisma — la salida del llano
 }
 
@@ -3899,6 +3939,10 @@ Altar: {
 	ListaEsencias: Esencias listas — el Eterno las devora enteras por la puerta
 	YaConsagrada: Ya está consagrada
 	NoArma: ✦ No es apto
+	// v6.122 — EL DEPÓSITO DE LAS MIL (la letra: el altar toma solo lo
+	// que falta para las mil y el resto queda en el cursor — jamás se pierde)
+	PuertaBebe: El altar bebe {0} esencias — la puerta lleva {1}/{2}
+	PuertaYaAbierta: La puerta ya está abierta — las mil esencias ya viven en el altar
 	// v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de
 	// la palabra Gana… el altar es quien dice cuanto necesitas y lo que
 	// falta, ademas debe decir como conseguiras esencia» — las tres

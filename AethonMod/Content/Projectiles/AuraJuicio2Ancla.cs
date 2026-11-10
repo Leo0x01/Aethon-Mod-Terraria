@@ -232,11 +232,21 @@ namespace AethonMod.Content.Projectiles
             //  1) LA MARCA DEL CAMPO — EL EFECTO DEL ESTANDARTE (solo el
             //     dueño manda: la quemadura viaja dentro del propio
             //     debuff — la copia del bloque del estandarte).
+            //     v6.122 — EL DAÑO DE LA FORMA ETERNA (la letra: «el
+            //     daño que causa la forma eterna debe ser el mismo que
+            //     el 0.1% de la suma del daño de invocacion final y el
+            //     daño magico final del grimorio del eterno, o sea es
+            //     el daño que tiene el grimorio despues de hacer el
+            //     calculo de todos los buff»): la vieja escala del
+            //     despertar (20 + 6×nivel) MUERE — el aura cobra el
+            //     0,1 % de la suma de los DOS daños finales del
+            //     Grimorio, calculados con TODO el pipeline de buffs
+            //     (DanoFormaEterna, aquí al lado — la única fuente).
             // ==============================================================
             if (Projectile.owner == Main.myPlayer && !Main.gameMenu)
             {
-                int nivelDespertar = dueno.GetModPlayer<ShardPlayer>().NivelDespertar;
-                int danoBase = 20 + 6 * nivelDespertar;   // HP/s a intensidad ×1
+                int danoBase = DanoFormaEterna(dueno);
+                bool marcoAlMenosUno = false;
 
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
@@ -292,6 +302,7 @@ namespace AethonMod.Content.Projectiles
                     // LA CUENTA DEL DUEÑO (quién cobra el buff del vacío).
                     vacio.DuenoVacio = dueno.whoAmI + 1;
                     vacio.DanoVacio = danoBase;
+                    marcoAlMenosUno = true;
 
                     // LA INTENSIDAD — la técnica Remap del original:
                     // ×1 en el borde → ×3 PEGADO, más LA RAMPA DEL TIEMPO
@@ -301,6 +312,24 @@ namespace AethonMod.Content.Projectiles
                     float rampaTiempo = 1f + 0.5f * Math.Min(1f, vacio.VisualQuemadura);
                     vacio.IntensidadQuemadura = (1f + (INTENSIDAD_CERCA - 1f) * cercania)
                         * rampaTiempo;
+                }
+
+                // ==========================================================
+                //  v6.122 — EL AURA DEL VACÍO HECHA BUFF (la letra: «este
+                //  daño causado por la forma Eterna se debe ver reflejado
+                //  como un buff y como el daño viene del aura del vacio,
+                //  el buff se llamara Aura del Vacio»): mientras el campo
+                //  marque a UN solo impío, el portador luce EL ESPEJO —
+                //  la ventana del buff cuenta el daño EXACTO que el vacío
+                //  está cobrando (el 0,1 % de la suma de los dos daños
+                //  finales del Grimorio). Se refresca cada tick que el
+                //  aura trabaja (30 ticks de cortesía — el mismo patrón
+                //  del pago del Vacío Exterior).
+                // ==========================================================
+                if (marcoAlMenosUno)
+                {
+                    Content.Buffs.AuraVacioBuff.UltimoDano = danoBase;
+                    dueno.AddBuff(ModContent.BuffType<Content.Buffs.AuraVacioBuff>(), 30, true);
                 }
             }
 
@@ -314,6 +343,68 @@ namespace AethonMod.Content.Projectiles
             // ==============================================================
             if (Main.netMode != NetmodeID.Server && !Main.dedServ && !Main.gameMenu)
                 VestirALosImpios(dueno);
+        }
+
+        // ================================================================
+        //  v6.122 — EL DAÑO DE LA FORMA ETERNA (la única fuente de
+        //  verdad). LA LETRA: «el daño que causa la forma eterna debe
+        //  ser el mismo que el 0.1% de la suma del daño de invocacion
+        //  final y el daño magico final del grimorio del eterno, o sea
+        //  es el daño que tiene el grimorio despues de hacer el
+        //  calculo de todos los buff».
+        //
+        //  LOS DOS DAÑOS FINALES (con TODO el pipeline de buffs):
+        //   · EL MÁGICO — Player.GetWeaponDamage(el Grimorio): la
+        //     cadena EXACTA que pega el clic izquierdo (el Item.damage
+        //     × la escalera del mod — ModifyWeaponDamage: nivel
+        //     +2,2 %/nivel, maná faltante, lo devorado, el despertar,
+        //     la reforja, el festín × FactorDelLibro — MÁS TODO el
+        //     equipo y los buffs del portador por la clase mágica de
+        //     vanilla). Es EL número que la ventana del grimorio
+        //     presume.
+        //   · EL DE INVOACIÓN — WeaponScaling.DanoOjosDelEterno (la
+        //     cadena propia: nivel +1,5 %/nivel, despertar, lo
+        //     devorado, la reforja, el festín) × TODO el multiplicador
+        //     de invocación del portador (GetDamage<SummonDamageClass>
+        //     — el mismo que el pipeline de vanilla le suma a los ojos
+        //     al nacer): el número que un ojo del Eterno pegaría de
+        //     verdad.
+        //  El aura cobra el 0,1 % de la SUMA (mínimo 1 — el vacío
+        //  JAMÁS trabaja gratis).
+        // ================================================================
+        public static int DanoFormaEterna(Player p)
+        {
+            try
+            {
+                if (p == null || !p.active) return 1;
+
+                // EL GRIMORIO DEL ETERNO — donde viva (inventario o mano)
+                int tipoLibro = ModContent.ItemType<Content.Weapons.GrimoireEternal>();
+                Item libro = null;
+                for (int i = 0; i < p.inventory.Length; i++)
+                {
+                    Item it = p.inventory[i];
+                    if (it != null && !it.IsAir && it.type == tipoLibro) { libro = it; break; }
+                }
+                if (libro == null) return 1;   // sin grimorio no hay suma que cobrar
+
+                // (1) EL MÁGICO FINAL — la cadena completa de vanilla+mod
+                int magicoFinal = p.GetWeaponDamage(libro);
+
+                // (2) EL DE INVOCACIÓN FINAL — la cadena propia + el
+                //     multiplicador de invocación del portador
+                var sl = libro.GetGlobalItem<Content.Globals.ShardLevelItem>();
+                int ojos = Content.Systems.WeaponScaling.DanoOjosDelEterno(libro.damage, sl?.Level ?? 1, p);
+                float invocFinal = p.GetDamage(Terraria.ModLoader.DamageClass.Summon).ApplyTo(ojos);
+
+                // (3) EL 0,1 % DE LA SUMA — la letra, exacta
+                float dano = 0.001f * (invocFinal + magicoFinal);
+                return Math.Max(1, (int)dano);
+            }
+            catch
+            {
+                return 1;   // el vacío jamás rompe el juego
+            }
         }
 
         // ================================================================

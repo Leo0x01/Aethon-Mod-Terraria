@@ -1238,23 +1238,14 @@ namespace AethonMod.Content.Systems
                             endColor: new Color(30, 16, 52));
                     }
 
-                    // EL IRIS DEL NACIMIENTO (el aliento dorado de la
-                    // entidad a mitad de la revelación — el NOVABURST:
-                    // el degradado monotónico de la casa, NUNCA un glow
-                    // plano apilado).
-                    float abre = 1f - aRev;
-                    float aIris = 0.85f * abre * (1f - abre) * 4f;
-                    if (aIris > 0.01f && VFXCore.NovaBurst != null)
-                    {
-                        float tamX = w * (0.20f + 0.68f * abre);
-                        float tamY = h * (0.16f + 0.32f * abre);
-                        Main.spriteBatch.Draw(VFXCore.NovaBurst,
-                            new Rectangle((int)(w * 0.5f - tamX * 0.5f),
-                                          (int)(h * 0.17f - tamY * 0.5f),
-                                          (int)tamX, (int)tamY),
-                            null, new Color(255, 214, 130) * (0.34f * aIris), 0f,
-                            Vector2.Zero, SpriteEffects.None, 0f);
-                    }
+                    // v6.122 — EL IRIS DEL NACIMIENTO MURIÓ: el óvalo
+                    // dorado que crecía y desaparecía al entrar al
+                    // interior era EL VESTIGIO del viejo ojo colosal
+                    // (la letra: «pienso que sea un vestigio de un
+                    // supuesto ojo que querías crear y no está bien
+                    // borrado» — exactamente). Extirpado: la llegada
+                    // queda solo con las masas violetas de la
+                    // revelación, SIN ojo fantasma.
                 }
 
                 // ============================================================

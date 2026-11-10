@@ -776,10 +776,26 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // hacen LA LLEGADA: nacen YA en la órbita de pelea —
                     // el reloj del mundo y la coreografía son del hermano
                     // de luz (nadie pelea por el mediodía).
+                    // v6.122 — PERO NACEN CON SU EXPLOSIÓN DE LUZ (la
+                    // letra: «el siempre debe aparecer con una explocion
+                    // de luz»): sin cine de reloj, pero JAMÁS en silencio
+                    // — el Estallido de NACIMIENTO (escala 1.45, pura luz
+                    // que jamás daña) los anuncia igual que al hermano de
+                    // luz. Hasta lo OSCURO nace de un estallido: la luz
+                    // que se apaga.
                     NPC.alpha = 0;
                     _tickEstado = 0;
                     _estado = EST_FLOTAR;
                     _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            0, 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloAparicionLuz,
+                            0f, NPC.whoAmI * 31 + 7);
+                    }
                 }
                 _nacio = true;
                 NPC.netUpdate = true;
@@ -1198,6 +1214,28 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         d.noGravity = true;
                     }
 
+                    // t=24 — LA MATERIALIZACIÓN COMPLETÓ: v6.122 — LA
+                    // EXPLOSIÓN DE LUZ DE LA APARICIÓN (la letra: «la forma
+                    // en la que aparece el jefe aethon esta mal, el siempre
+                    // debe aparecer con una explocion de luz»): el Estallido
+                    // Radiante en su versión de NACIMIENTO — escala 1.45,
+                    // PURA LUZ que JAMÁS daña (la bienvenida no se cobra con
+                    // un golpe barato): el núcleo blanco-oro, el anillo
+                    // segmentado, los 44+ rayos en 360°, la cruz anamórfica,
+                    // las chispas que vuelan y el destello que inunda la
+                    // pantalla. SIEMPRE — toda aparición pasa por aquí (el
+                    // ítem, el prisma, el renacer: el ESTADO NACIENDO es la
+                    // única puerta de entrada del dios).
+                    if (_tickEstado == 24 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            0, 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloAparicionLuz,
+                            0f, NPC.whoAmI * 31 + 7);
+                    }
+
                     // t=26 — EL ESTAMPIDO: el fade completó y la luz RUGE
                     // (el destello del sol lo pinta ColaSierpeSky con SU
                     // curva comprimida 20/40/80).
@@ -1489,8 +1527,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     1 => new[] { EST_MIRADA, EST_VEREDICTO },
                     2 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_VEREDICTO },
                     3 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO },
-                    4 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO },
-                    _ => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_VEREDICTO, EST_RC2 },
+                    // v6.122 — EL RAYO CONCENTRADO ENTRA A LA FASE 4 (la
+                    // letra: «no lanza el rayo concentrado» — vivía SOLO
+                    // en la furia (P5) y el usuario peleaba la pelea entera
+                    // sin verlo NUNCA): la fase del arsenal completo lo
+                    // hereda en la carta de haces y en el menú; sigue siendo
+                    // LA FIRMA que abre la furia.
+                    4 => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_VEREDICTO },
+                    _ => new[] { EST_MIRADA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_VEREDICTO },
                 };
                 int haz = cartaHaz[Main.rand.Next(cartaHaz.Length)];
                 int intentosH = 0;
@@ -1559,7 +1603,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 1 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
                 2 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL, EST_RENGLONES, EST_MIRADA_CIELO, EST_VEREDICTO },
                 3 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL, EST_VEREDICTO },
-                4 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_SOL, EST_VEREDICTO },
+                4 => new[] { EST_MIRADA, EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_SOL, EST_VEREDICTO },
                 _ => new[] { EST_MIRADA, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_RENGLONES, EST_MIRADA_CIELO, EST_PRUEBAC, EST_RC2, EST_SOL, EST_VEREDICTO },
             };
 

@@ -354,7 +354,82 @@ namespace AethonMod.Content.UI
                     !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
                 if (hoverSlotAhora && clicNuevo)
                 {
-                    if (!Main.mouseItem.IsAir)
+                    // ==========================================================
+                    //  v6.122 — EL DEPÓSITO DE LAS MIL (la letra: «en el
+                    //  altar debes poner como limite solo 1000 esencias
+                    //  ya que al poner mas de 1000 el resto se pierden,
+                    //  asi que el altar tiene un tope de 1000 si pones
+                    //  mas de 1000 el altar tomara 1000 y el resto
+                    //  quedaran seleccionadas para que sean devueltas al
+                    //  inventario»). EL ALTAR COME ESENCIAS DIRECTO:
+                    //  clic en la boca con una pila de Esencias del
+                    //  Eterno y LA PUERTA se alimenta (EsenciasPuerta =
+                    //  1000 — el tope de la casa): toma SOLO lo que
+                    //  falta para las mil y EL RESTO QUEDA EN EL CURSOR
+                    //  («seleccionadas»): NI UNA se pierde — se devuelven
+                    //  al inventario con el mismo clic de siempre.
+                    // ==========================================================
+                    if (!Main.mouseItem.IsAir && Main.mouseItem.type == ModContent.ItemType
+                        <global::AethonMod.Content.Items.Altar.ItemCorrupto>())
+                    {
+                        int topePuerta = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta;
+                        int yaConsagradas = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas;
+                        int falta = topePuerta - yaConsagradas;
+                        if (falta <= 0)
+                        {
+                            // LA PUERTA YA ESTÁ ABIERTA: el altar no bebe
+                            // más — las mil ya viven en sus huesos.
+                            Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")),
+                                TintaTeal);
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                        }
+                        else
+                        {
+                            int toma = Math.Min(falta, Main.mouseItem.stack);
+                            bool yaAbierta = global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += toma;
+                            Main.NewText(Language.GetTextValue(Clave("PuertaBebe"),
+                                toma,
+                                global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                                topePuerta), TintaVioleta);
+                            // el anuncio de la puerta abriéndose (el mismo
+                            // del camino del coste — la puerta es UNA).
+                            if (!yaAbierta && global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                            {
+                                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
+                                    new Color(220, 170, 255));
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item113.WithPitchOffset(-0.7f));
+                            }
+                            else
+                            {
+                                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113
+                                    .WithPitchOffset(-0.25f));
+                            }
+                            // EL SOBREVIVIENTE VIVE EN EL CURSOR: lo que
+                            // sobra NO se pierde — queda SELECCIONADO para
+                            // volver al inventario (la letra, exacta).
+                            Main.mouseItem.stack -= toma;
+                            if (Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
+                            // EL TEATRO DEL TRAGO: la bruma violeta bebe.
+                            if (!Main.dedServ)
+                            {
+                                for (int k = 0; k < Math.Min(30, 8 + toma / 40); k++)
+                                {
+                                    Dust d = Dust.NewDustPerfect(
+                                        new Vector2(_tileX * 16f + 16f, _tileY * 16f + 4f) +
+                                            new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                                Main.rand.NextFloat(-30f, 4f)),
+                                        DustID.Shadowflame,
+                                        Main.rand.NextVector2Circular(2.2f, 2.2f), 140,
+                                        new Color(140, 60, 210), 1f);
+                                    d.noGravity = true;
+                                }
+                            }
+                        }
+                    }
+                    else if (!Main.mouseItem.IsAir)
                     {
                         if (EsOfrendaConsagrible(Main.mouseItem))
                         {
@@ -405,41 +480,74 @@ namespace AethonMod.Content.UI
                     // ============================================================
                     if (esEsencias)
                     {
+                        // v6.122 — EL DEVORO CON TOPE DE MIL (la letra:
+                        // «el altar tiene un tope de 1000 si pones mas de
+                        // 1000 el altar tomara 1000 y el resto quedaran
+                        // seleccionadas para que sean devueltas al
+                        // inventario»): el devoro v6.121 tragaba la pila
+                        // ENTERA y el exceso sobre las mil se PERDÍA para
+                        // siempre (contado a la puerta que ya estaba
+                        // llena). AHORA: toma SOLO lo que falta para las
+                        // mil y EL SOBRANTE VUELVE al inventario del
+                        // portador — NI UNA se pierde, en ningún camino.
+                        int topePuerta = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta;
+                        int yaConsagradas = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas;
+                        int falta = topePuerta - yaConsagradas;
                         int cuantas = _arma.stack;
-                        bool yaAbiertaEsencias =
-                            global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += cuantas;
-                        // EL TEATRO DEL DEVORO: la bruma violeta se las traga.
-                        if (!Main.dedServ)
+                        if (falta <= 0)
                         {
-                            for (int k = 0; k < 22; k++)
+                            // LA PUERTA YA ESTÁ ABIERTA: el altar no bebe
+                            // más — TODO vuelve al inventario.
+                            Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")),
+                                TintaTeal);
+                            if (cuantas > 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                                Main.LocalPlayer.QuickSpawnItem(
+                                    Main.LocalPlayer.GetSource_FromThis(),
+                                    _arma.type, cuantas);
+                        }
+                        else
+                        {
+                            int toma = Math.Min(falta, cuantas);
+                            bool yaAbiertaEsencias =
+                                global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += toma;
+                            // EL SOBRANTE VUELVE (la letra: «devueltas al
+                            // inventario») — jamás se pierde.
+                            if (cuantas - toma > 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                                Main.LocalPlayer.QuickSpawnItem(
+                                    Main.LocalPlayer.GetSource_FromThis(),
+                                    _arma.type, cuantas - toma);
+                            // EL TEATRO DEL DEVORO: la bruma violeta se las traga.
+                            if (!Main.dedServ)
                             {
-                                Dust d = Dust.NewDustPerfect(
-                                    altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
-                                        Main.rand.NextFloat(-30f, 6f)),
-                                    DustID.Shadowflame,
-                                    Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
-                                    new Color(140, 60, 210), 1f);
-                                d.noGravity = true;
+                                for (int k = 0; k < 22; k++)
+                                {
+                                    Dust d = Dust.NewDustPerfect(
+                                        altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                            Main.rand.NextFloat(-30f, 6f)),
+                                        DustID.Shadowflame,
+                                        Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
+                                        new Color(140, 60, 210), 1f);
+                                    d.noGravity = true;
+                                }
+                            }
+                            Main.NewText(Language.GetTextValue(Clave("DevoradasHecha"),
+                                toma,
+                                global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                                topePuerta), TintaVioleta);
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item113.WithPitchOffset(-0.45f));
+                            if (!yaAbiertaEsencias &&
+                                global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                            {
+                                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
+                                    new Color(220, 170, 255));
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item113.WithPitchOffset(-0.7f));
                             }
                         }
-                        Main.NewText(Language.GetTextValue(Clave("DevoradasHecha"),
-                            cuantas,
-                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
-                            TintaVioleta);
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item113.WithPitchOffset(-0.45f));
-                        if (!yaAbiertaEsencias &&
-                            global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
-                        {
-                            Main.NewText(Terraria.Localization.Language.GetTextValue(
-                                "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                new Color(220, 170, 255));
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                SoundID.Item113.WithPitchOffset(-0.7f));
-                        }
-                        _arma = new Item();   // DEVORADAS: el hueco queda vacío
+                        _arma = new Item();   // el hueco queda vacío (lo suyo ya vive en la puerta)
                     }
                     else
                     {

@@ -264,21 +264,55 @@ def forjar_marco(frame, solo_cuerpo=False):
         img.alpha_composite(gl2)
     # EL HAZ QUE ENTRA — LA CURA DEL OJO (4ª): ANCHO (SS*8), HONDO
     # (baja hasta el ápice) y con DOS MOTAS DORADAS QUE DESCIENDEN
-    # marco a marco (la corriente del Eterno — animación visible)
+    # marco a marco (la corriente del Eterno — animación visible).
+    # v6.122 — LA CURA DEL RECORTE SUPERIOR (la letra: «el sprite del
+    # pilar en el mundo interior se ve cortado en la parte de arriba»):
+    # el haz nacía PEGADO a y=0 (un polígono de 16 px de ancho contra
+    # el borde del marco) y el borde superior del marco lo cortaba EN
+    # SECO — el mismo pecado del pilar v6.120 que ya curamos ahí. LA
+    # CURA (la doctrina de la casa): el haz NACE DE UNA FUENTE DE LUZ
+    # INTERIOR (y≈4,5 px, un resplandor radial monotónico) y su tramo
+    # alto se disuelve con UNA RAMPA DE ALFA — la luz EMERGE del cielo
+    # del interior, NADA pega al borde y el corte superior es
+    # geométricamente imposible.
     if not solo_cuerpo:
         haz_alfa = 235 + int(20 * math.sin(fase * math.pi * 2))
         y_tope = py - ph * 0.92
-        dr.polygon([(cx - SS * 8.0, 0), (cx + SS * 8.0, 0),
+        y_src = 4.5 * SS                            # LA FUENTE: dentro del marco
+        # el resplandor de la fuente (radial — degradado monotónico de la casa)
+        for r in range(int(3.0 * SS), 0, -2):
+            f = 1 - r / (3.0 * SS)
+            dr.ellipse([cx - r, y_src - r * 0.8, cx + r, y_src + r * 0.8],
+                       fill=(255, 232, 160, int(haz_alfa * (0.18 + 0.62 * f))))
+        # el cono del haz: desde LA FUENTE ensanchándose hacia el prisma
+        dr.polygon([(cx - SS * 1.6, y_src), (cx + SS * 1.6, y_src),
                     (cx + SS * 3.2, y_tope), (cx - SS * 3.2, y_tope)],
-                   fill=(255, 226, 150, haz_alfa))
+                   fill=(255, 226, 150, int(haz_alfa * 0.72)))
         # EL NÚCLEO BLANCO del haz (el filo que lo hace LEERSE)
-        dr.polygon([(cx - SS * 3.4, 0), (cx + SS * 3.4, 0),
+        dr.polygon([(cx - SS * 0.7, y_src), (cx + SS * 0.7, y_src),
                     (cx + SS * 1.2, y_tope + SS), (cx - SS * 1.2, y_tope + SS)],
-                   fill=(255, 246, 210, min(255, haz_alfa + 20)))
-        # LAS MOTAS DEL HAZ (dos chispas que BAJAN por la luz)
+                   fill=(255, 246, 210, int(min(255, haz_alfa * 0.72 + 20))))
+        # LA RAMPA de arranque: el cono se disuelve hacia la fuente
+        prof = max(1.0, y_tope - y_src)
+        for k in range(int(prof // (SS * 2)) + 1):
+            ya = y_src + k * SS * 2
+            yb = min(ya + SS * 2, y_tope)
+            if yb <= ya:
+                break
+            g = (ya - y_src) / prof
+            alfa_banda = int(haz_alfa * 0.55 * g * g)
+            if alfa_banda > 6:
+                xa0 = SS * 1.6 + (SS * 3.2 - SS * 1.6) * g
+                xa1 = SS * 0.7 + (SS * 1.2 - SS * 0.7) * g
+                dr.rectangle([cx - xa0, ya, cx + xa0, yb],
+                             fill=(255, 226, 150, alfa_banda))
+                dr.rectangle([cx - xa1, ya, cx + xa1, yb],
+                             fill=(255, 246, 210, min(255, alfa_banda + 20)))
+        # LAS MOTAS DEL HAZ (dos chispas que BAJAN por la luz — jamás
+        # por encima de la fuente)
         for mta in range(2):
             k = (fase + mta * 0.5) % 1.0
-            my2 = (1 - k) * y_tope
+            my2 = y_src + (1 - k) * max(1.0, y_tope - y_src)
             mx2 = cx + math.sin(k * 9.0 + mta * 3.1) * SS * 1.6
             dr.ellipse([mx2 - SS * 0.9, my2 - SS * 0.9, mx2 + SS * 0.9, my2 + SS * 0.9],
                        fill=(255, 240, 190, 235))
@@ -409,8 +443,17 @@ def verificar(tira, hi):
     fila_media = sum(1 for x in range(F_W) if m0.getpixel((x, F_H // 2))[3] > 200)
     if fila_media < 6:
         print(f"  [FALLO] el fuste no es opaco en su corazón ({fila_media} px)"); ok = False
+    # v6.122 — EL ÁPICE Y EL HAZ DENTRO: nada (alfa > 90) puede tocar las
+    # filas 0-1 de NINGÚN marco — el corte superior de la letra («se ve
+    # cortado en la parte de arriba») es geométricamente imposible.
+    for fr in range(MARCOS):
+        marco = tira.crop((0, fr * F_H, F_W, (fr + 1) * F_H))
+        for y in (0, 1):
+            fila = sum(1 for x in range(F_W) if marco.getpixel((x, y))[3] > 90)
+            if fila > 0:
+                print(f"  [FALLO] marco {fr}: {fila} px pegados a la fila {y} — el corte de arriba volvió"); ok = False
     if ok:
-        print(f"  VERIFICACIÓN TÉCNICA ✔ ({F_W}×{F_H}×{MARCOS} · transparencia nativa · asentado · corazón opaco)")
+        print(f"  VERIFICACIÓN TÉCNICA ✔ ({F_W}×{F_H}×{MARCOS} · transparencia nativa · asentado · corazón opaco · ápice y haz dentro)")
     return ok
 
 

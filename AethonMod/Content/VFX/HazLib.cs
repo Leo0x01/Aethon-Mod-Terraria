@@ -180,7 +180,21 @@ namespace AethonMod.Content.VFX
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             RayoStrip.AbrirLote();
+            // v6.122 — LA INTENSIDAD DE VIDA se rearma en cada apertura:
+            // el llamador que quiera nacer/morir suave la fija DESPUÉS
+            // de Abrir y ANTES de Dibujar (quien no la toca, dibuja pleno).
+            IntensidadGlobal = 1f;
         }
+
+        /// <summary>
+        /// v6.122 — LA INTENSIDAD DE VIDA del haz: el multiplicador global
+        /// que el llamador fija entre <see cref="Abrir"/> y
+        /// <see cref="Dibujar"/> para que NINGÚN haz nazca ni muera en un
+        /// corte brusco (la letra: «sus hazes siempre terminan y empiezan
+        /// en un corte brusco, sin efectos»). Viaja con el filo: la luz
+        /// se APAGA y también se ADELGAZA — un desvanecimiento de verdad.
+        /// </summary>
+        public static float IntensidadGlobal = 1f;
 
         /// <summary>CIERRA el lote: vacía el pozo a pantalla en UN draw
         /// call (el soft-add de la casa) y devuelve el SpriteBatch a
@@ -359,8 +373,10 @@ namespace AethonMod.Content.VFX
                     // ENCIMA el filo de la casa (el BORDE) — en ese
                     // orden, que el borde apague lo que sea que haga el
                     // interior. Filo(y) solo depende de la fila: una vez
-                    // por esquina de fila.
-                    float f0 = Filo(y0), f1 = Filo(y1);
+                    // por esquina de fila. v6.122 — y LA INTENSIDAD DE
+                    // VIDA viaja con el filo (nacer/morir suave: la luz
+                    // se apaga Y se adelgaza — jamás un corte brusco).
+                    float f0 = Filo(y0) * IntensidadGlobal, f1 = Filo(y1) * IntensidadGlobal;
                     Color ca0 = PorFactor(vertice(x0, y0, k0), f0);
                     Color ca1 = PorFactor(vertice(x0, y1, k0), f1);
                     Color cb0 = PorFactor(vertice(x1, y0, k1), f0);

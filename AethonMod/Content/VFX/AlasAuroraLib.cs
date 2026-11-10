@@ -1285,7 +1285,21 @@ namespace AethonMod.Content.VFX
                     // punta — vive SOBRE la pluma, BAJO la curva del borde
                     // maestro (nada anguloso y brillante montado en la
                     // silueta: la punta pertenece a la curva continua).
-                    int nodoRuna = estilo.Membrana > 0f ? 7 : 8;
+                    // v6.122 — LA CURA ES PARA TODAS LAS ALAS RÚNICAS (la
+                    // letra: «las alas runicas del vacio siguen teniendo
+                    // picos, investiga como se eliminan esos picos ya lo
+                    // habiamos eliminado antes»). LA AUTOPSIA: la cura
+                    // v6.118 vivía TRAS la condición «membrana>0» — y la
+                    // v6.120 convirtió las alas del vacío en la copia
+                    // EXACTA del eclipse (membrana 0): las runas VOLVIERON
+                    // al nodo 8 (la punta misma) con la escala completa
+                    // 1.45+0.35·n — el glifo montado SOBRE la silueta de la
+                    // punta ES el pico que el usuario ve (las alas del
+                    // eclipse, SIN runas, nunca lo mostraron). LA CURA
+                    // RESTAURADA: UN NODO ADENTRO (el 7) y la escala
+                    // serena (1.26+0.28·n) — SIEMPRE, para todo estilo con
+                    // runas; la punta vuelve a pertenecer SOLO a la curva.
+                    int nodoRuna = 7;
                     for (int i = 0; i < _geoN; i++)
                     {
                         Vector2 val3 = _pozosEje[i][nodoRuna];
@@ -1296,9 +1310,10 @@ namespace AethonMod.Content.VFX
                         float num7 = (float)gemela / (float)(num4 - 1);
                         // v6.118 — la escala también se aquieta en la membrana:
                         // el glifo acompaña a la pluma sin DOMINAR el filo.
-                        float escala = estilo.Membrana > 0f
-                            ? 1.26f + 0.28f * num7
-                            : 1.45f + 0.35f * num7;
+                        // v6.122 — y con la cura universal de arriba, la
+                        // escala SERENA es la única escala (el glifo vive
+                        // SOBRE la pluma, jamás montado en el filo).
+                        float escala = 1.26f + 0.28f * num7;
                         Color cuerpo = val;
                         Color punta = val2;
                         if (estilo.Runas == 4)

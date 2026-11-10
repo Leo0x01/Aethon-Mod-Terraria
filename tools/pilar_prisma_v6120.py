@@ -50,7 +50,7 @@ import subprocess
 import sys
 
 try:
-    from PIL import Image, ImageDraw, ImageFilter
+    from PIL import Image, ImageChops, ImageDraw, ImageFilter
 except ImportError:
     sys.exit("Falta Pillow: pip install Pillow")
 
@@ -174,29 +174,61 @@ def forjar_marco(frame):
                     fill=(255, 240, 200, 255), width=SS - 1)
 
     # ================================================================
-    #  EL CAPITEL — EL PRISMA CRISTALINO FLOTANDO (el triángulo facetado
-    #  con su glint viajero) bajo EL HAZ que entra y EL ABANICO que sale
+    #  EL CAPITEL — EL PRISMA CRISTALINO (el triángulo facetado con su
+    #  glint viajero) bajo EL HAZ que entra y EL ABANICO que sale.
+    #
+    #  v6.122 — LA CURA DEL RECORTE SUPERIOR (la letra: «el sprite del
+    #  pilar en el mundo interior se ve cortado en la parte de arriba»):
+    #  el prisma vivía en py=0.155H con ph=0.185H → el ÁPICE caía en
+    #  0.155−0.185 = **−0.030H** (≈ −2.6 px FINALES, y el bob lo llevaba
+    #  a −4.5): la punta SE DIBUJABA FUERA DEL MARCO y quedaba truncada
+    #  por el borde — el corte recto de arriba. LA CURA: el prisma baja
+    #  a 0.205H y se afina a 0.165H → ápice = +0.040H (≈ +3.4 px),
+    #  SIEMPRE dentro del marco aun con el bob completo; el haz que
+    #  entra ahora NACE SUAVE (rampa de alfa en su tramo alto — la luz
+    #  EMERGE del más allá, no un corte de tijera).
     # ================================================================
     bob = math.sin(fase * math.pi * 2) * 1.9 * SS
-    px, py = cx, H * 0.155 + bob
+    px, py = cx, H * 0.205 + bob
     # LA CURA DEL OJO (3ª): el prisma es UN TRIÁNGULO DE VERDAD —
     # ESTRECHO y ALTO (el ápice fino arriba, la base corta abajo:
     # nada de rombo)
-    pw, ph = W * 0.155, H * 0.185
+    pw, ph = W * 0.150, H * 0.165
     # el resplandor del corazón (TENUE — el brillo NO puede comerse el
     # triángulo: el prisma lee PRISMA, no orbe) + EL PARPADEO del
-    # cristal (la cura del ojo 3ª: el corazón late VISIBLEMENTE)
+    # cristal (la cura del ojo 3ª: el corazón late VISIBLEMENTE).
+    # v6.122 (ronda 2): aún MÁS tenue y contenido — el triángulo manda
     late = 0.5 + 0.5 * math.sin(fase * math.pi * 2)
-    for r in range(int(pw * (1.05 + 0.35 * late)), 0, -2):
-        f = 1 - r / (pw * (1.05 + 0.35 * late))
-        col = (150 + int(70 * f), 84 + int(90 * f), 235, int(24 + int(34 * f) + int(20 * late)))
+    for r in range(int(pw * (0.90 + 0.28 * late)), 0, -2):
+        f = 1 - r / (pw * (0.90 + 0.28 * late))
+        col = (150 + int(70 * f), 84 + int(90 * f), 235, int(16 + int(26 * f) + int(14 * late)))
         dr.ellipse([px - r, py - r * 1.1, px + r, py + r * 1.1], fill=col)
     # EL HAZ QUE ENTRA (la luz dorada del Eterno, desde arriba — GRUESO
-    # y PULSANTE: su alfa camina 165↔255, se lee desde el llano)
+    # y PULSANTE: su alfa camina 165↔255, se lee desde el llano).
+    # v6.122 (ronda 2 — LA FUENTE): el haz ya NO pega contra el borde
+    # del marco — NACE DE UN PUNTO DE LUZ (un resplandor radial suave
+    # a y≈3px) y se ensancha hacia el prisma: no hay NI UN píxel en
+    # y=0, el corte recto de arriba es imposible. La rampa de alfa
+    # adicional disuelve su arranque.
     haz_alfa = 210 + int(45 * math.sin(fase * math.pi * 2))
-    dr.polygon([(px - SS * 4.0, 0), (px + SS * 4.0, 0),
-                (px + SS * 1.7, py - ph * 0.85), (px - SS * 1.7, py - ph * 0.85)],
-               fill=(255, 226, 150, haz_alfa))
+    haz = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    dh = ImageDraw.Draw(haz)
+    y_src = 4.5 * SS                               # LA FUENTE: dentro del marco
+    # el resplandor de la fuente (radial — degradado monotónico de la casa)
+    for r in range(int(3.0 * SS), 0, -2):
+        f = 1 - r / (3.0 * SS)
+        col = (255, 232, 160, int(haz_alfa * (0.18 + 0.62 * f)))
+        dh.ellipse([px - r, y_src - r * 0.8, px + r, y_src + r * 0.8], fill=col)
+    # el cono del haz: desde la FUENTE ensanchándose hacia el prisma
+    dh.polygon([(px - SS * 1.5, y_src), (px + SS * 1.5, y_src),
+                (px + SS * 2.1, py - ph * 0.72), (px - SS * 2.1, py - ph * 0.72)],
+               fill=(255, 226, 150, int(haz_alfa * 0.72)))
+    # LA RAMPA suave sobre el cono (el arranque se disuelve en la fuente)
+    prof = max(1.0, py - ph * 0.72 - y_src)
+    rampa = Image.linear_gradient("L").resize((W, H)).point(
+        lambda v: int(255 * (0.55 + 0.45 * min(1.0, v / (prof / H * 255)))))
+    haz.putalpha(ImageChops.multiply(haz.split()[3], rampa))
+    img.alpha_composite(haz)
     # el triángulo facetado (el prisma de verdad — ESTRECHO y ALTO:
     # ápice filudo, base corta — sus TRES facetas y aristas vivas)
     A = (px, py - ph)
@@ -299,8 +331,26 @@ def verificar(tira, hi):
     fila_media = sum(1 for x in range(F_W) if m0.getpixel((x, F_H // 2))[3] > 200)
     if fila_media < 6:
         print(f"  [FALLO] el fuste no es opaco en su corazón ({fila_media} px)"); ok = False
+    # v6.122 — EL ÁPICE VIVO Y LA FUENTE DENTRO: nada sólido (alfa > 90)
+    # puede tocar las filas 0-1 del marco — ni el prisma NI el haz: el
+    # corte recto de arriba es geométricamente imposible.
+    cx_f = F_W // 2
+    for fr in range(MARCOS):
+        marco = tira.crop((0, fr * F_H, F_W, (fr + 1) * F_H))
+        for y in (0, 1):
+            fila = sum(1 for x in range(F_W) if marco.getpixel((x, y))[3] > 90)
+            if fila > 0:
+                print(f"  [FALLO] marco {fr}: {fila} px pegados a la fila {y} — el corte de arriba volvió"); ok = False
+        fila_top = None
+        for y in range(F_H):
+            if marco.getpixel((cx_f, y))[3] > 200:
+                fila_top = y
+                break
+        if fila_top is None or fila_top < 2:
+            print(f"  [FALLO] marco {fr}: el ápice del prisma pega al borde "
+                  f"(y={fila_top}) — el corte de arriba volvió"); ok = False
     if ok:
-        print(f"  VERIFICACIÓN TÉCNICA ✔ ({F_W}×{F_H}×{MARCOS} · transparencia nativa · asentado · corazón opaco)")
+        print(f"  VERIFICACIÓN TÉCNICA ✔ ({F_W}×{F_H}×{MARCOS} · transparencia nativa · asentado · corazón opaco · ápice vivo ≥2px)")
     return ok
 
 
