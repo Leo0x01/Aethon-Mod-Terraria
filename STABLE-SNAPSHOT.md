@@ -1,6 +1,32 @@
-# SNAPSHOT ESTABLE — v6.122 — EL AURA DEL VACÍO + LAS TRES ARMAS + EL CURA-TODO DEL INTERIOR
+# SNAPSHOT ESTABLE — v6.123 — EL CUADRO NEGRO MUERTO + LA BOLSA DE LA SUPERFORJA + LA QUEMADURA QUE QUEMA
 
-> **PUBLICADA — release 440575030 + CDN verificado byte a byte (md5 9da2d6744a9e60da3f1ba743c7daf3f3)**
+> **PUBLICADA — release 440743346 + CDN verificado byte a byte (md5 588c24eaec673a2d3790470aee1a8eaf)**
+
+## LA LETRA (el usuario — sesión 5; el usuario JUGÓ la v6.122)
+
+«el fondo del mundo interior sigue siendo un cuadrado negro que desaparece al volar alto, pero al bajar otra vez, el cuadro negro aparece, investiga porque pasa eso, ese cuadro negro no debe estar ahi, sera una textura que falta o algo asi» · «se supone que creaste nuevas armas, donde estan, recuerda que debes darselas al jugador en una bolsa» · «al invocar a aethon este no se invoca como te dije que debe invocarse, debe invocarse con una explosion de luz asi que elimina la animacion de invocacion actual» · «quemadura del vacio debe hacerle daño a los enemigos, es una quemadura, debe hacer 1% de daño de la vida maxima del enemigo por cada medio segundo, y ademas cuando aura de vacio deja de afectar al enemigo, la quemadura del vacio sobre el enemigo continua por 5 segundos mas haciendo daño» · «el calculo de aura del vacio parece no estar hecho correctamente, revisa eso» · «las alas runicas del vacio siguen con picos o mejor dicho dientes de cierra, eso debes quitarlo» · «las imagenes de los buff de aura del vacio y quemadura del vacio no deben ser transparente» · «el mensaje al aplicar las diferentes mejoras a los minions del grimorio es el mismo, deberia ser un mensaje diferente por mejora que revele la mejora que se aplica» · «asegurate que los errores del log esten solucionados».
+
+## LA OBRA (v6.123)
+
+- **EL CUADRO NEGRO MURIÓ POR GEOMETRÍA** — era el FONDO DE CUEVA DE VANILLA (Main.DrawBackground del tML 2026.09.3.1 decompilado: piezas de 16×16 desde worldSurface·16 hacia abajo, coloreadas con Lighting.GetColor — en el vacío oscuro salían NEGRAS). LA CURA: `Superficie = LlanoY` y `Roca = LlanoY+2` (las piezas nacen donde empieza la obsidiana, ocultas tras los tiles para siempre) + la guardia de altitud del cielo murió (el cuerpo del dios pinta a TODAS las alturas).
+- **LA BOLSA DE LA SUPERFORJA** — las 3 armas de la v6.122 vivían solo tras recetas de 5 maderas: `BolsaSuperforja` (el emblema de los Dos Soles) + asiento en el Cofre del Arsenal (bolsa 28) + ENTREGA DIRECTA en el regalo de pruebas.
+- **LA INVOCACIÓN ES UNA EXPLOSIÓN DE LUZ** — la ceremonia de 130 ticks (altar + grimorio flotante) BORRADA COMPLETA; el ítem y el prisma invocan a los DOS fragmentos al instante; el jefe nace VISIBLE con su Estallido Radiante + rugido y el mediodía se posa con él (EstadoNaciendo → red de seguridad de un tick).
+- **LA QUEMADURA QUEMA DE VERDAD** — la v6.122 caía en el CAMINO LENTO de vanilla (0,5 daño/seg) por no tocar `lifeRegenExpectedLossPerSecond` (el decompile de NPC.UpdateNPC lo demuestra). AHORA: N = 1% de vida máx, `lifeRegen -= 4·N` → UN GOLPE cada 30 ticks (medio segundo, LA LETRA) + `ARDE_FUERA = 300` (5 segundos tras el aura).
+- **EL CÁLCULO DEL AURA CORREGIDO** — 0,1% de (DanoOjosDelEterno EXACTO + GetWeaponDamage del Grimorio): el multiplicador de invocación salió del sumando (los ojos reales no lo llevan — ley v6.51).
+- **EL RENOMBRE HECHO BIEN** — la v6.122 lo puso al revés: el debuff de enemigos es «Quemadura del vacío» y el pago del dueño vuelve a «Vacío exterior» («Outer Void»), ×3 idiomas.
+- **LOS ICONOS 100% OPACOS** — 32×32, fondo sólido, marco de amatista con esquinas doradas (los v6.122 eran ~40% opacos). + LOS PROMPTS DE IA DE ARTE entregados al dueño.
+- **LAS ALAS SIN DIENTES** — el inset del ruido es INCONDICIONAL (0,86/0,72 SIEMPRE: la niebla corre por dentro, el filo es de la curva).
+- **UN MENSAJE POR MEJORA** — Anillo Dorado (1) · Anillo Violeta (2) · Sol Dorado (3) · Sol Azul-Estelar (4), ×3 idiomas.
+- **LOS ERRORES DEL LOG MUERTOS CON PRUEBA** — (1) NVorbis «end out of array bounds» reproducida en laboratorio con la NVorbis real (decodificar→SeekTo(0) = OGGAudioTrack.Reuse): MundoCorazon/OleadaHambre/OleadaHambreEpica reventaban → reencuadrados ffmpeg q6, las 5 pistas pasan; (2) warn FNA: los 480 PNG pasan el FNA3D.ReadImageStream REAL — el warn es de OTRO mod; (3) «142ms blocking» = bestiario, documentado.
+- **LAS DOS BANDAS III** — El Sueño del Vacío III (Am DÓRICO 57 BPM: Am9→Fmaj7#11→Cmaj9→Bm7♭5) y La Garganta de Páginas III (D FRIGIO 96 BPM: Dm(add9)→E♭maj7#11→Gm7→A7sus4): melodías con frases y dinámicas, Karplus-Strong, campana FM en tonalidad, formantes, reverb Schroeder, QC LIMPIA ✔ ×2 + test NVorbis.
+
+## VERIFICACIÓN (la casa, completa)
+
+oráculo 0/0 (451 .cs) · -build REAL 0/0 (504 entradas, 19.119.836 B) · GUARDIÁN TODO VIVE ✔ · AUDIT v6.123 TODO VERIFICADO ✔ (iconos opacos medidos DENTRO del .tmod) · headless v6.123 → Choose World SIN EXCEPCIONES · NVorbis 5/5 · FNA 480/480 · BAÚL DEL PAT verificado.
+
+---
+
+# HISTORIA — SNAPSHOT v6.122 (la sesión 4 — publicada, release 440575030)
 
 ## LA LETRA (el usuario)
 
