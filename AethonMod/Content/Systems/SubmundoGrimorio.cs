@@ -106,12 +106,24 @@ namespace AethonMod.Content.Systems
         // debe ser plano, solo un mundo plano de obsidiana»): la
         // superficie del cuerpo es UNA LÍNEA RECTA de obsidiana a
         // y = LlanoY — ni colinas ni plaza ni geoda: SOLO el llano y su
-        // pilar. worldSurface = 150 queda BAJO el llano (el portador de
-        // pie vive EN LA ZONA DEL CIELO — el CustomSky del cuerpo se ve
-        // de verdad) y rockLayer = 270 abre la zona honda (las paredes de
-        // la profundidad mandan — el cielo no se cuela bajo la roca).
-        private const int Superficie = 150;
-        private const int Roca = 270;
+        // pilar.
+        // v6.123 — LA CURA DEL CUADRO NEGRO (la letra: «el fondo del
+        // mundo interior sigue siendo un cuadrado negro que desaparece
+        // al volar alto, pero al bajar otra vez, el cuadro negro
+        // aparece»): el fondo de cueva de vanilla (Main.DrawBackground,
+        // verificado contra el decompile del tML 2026.09.3.1) pinta sus
+        // piezas de 16×16 DESDE LA LÍNEA worldSurface·16 HACIA ABAJO,
+        // coloreadas con Lighting.GetColor — y en el vacío oscuro del
+        // interior ESAS PIEZAS SALÍAN NEGRAS: un cuadrado negro de borde
+        // perfectamente recto (bgTopY) que crecía al bajar y moría al
+        // subir (la cámara dejaba la línea fuera de pantalla). LA CURA
+        // GEOMÉTRICA: worldSurface CLAVADO EN LA PRIMERA FILA SÓLIDA
+        // DEL LLANO (LlanoY) y rockLayer un pelo más abajo — las piezas
+        // de cueva nacen EXACTAMENTE donde empieza la obsidiana y quedan
+        // OCULTAS TRAS LOS TILES para siempre: ni un píxel de ellas
+        // vuelve a verse, suba o baje el portador.
+        private const int Superficie = LlanoY;          // la línea del llano MISMA
+        private const int Roca = LlanoY + 2;            // la zona honda nace bajo la piel
         private const int LlanoY = 140;     // la PRIMERA FILA SÓLIDA del llano
         private const int PlazaX = 400;    // donde vive EL PILAR PRISMA
         private const int SpawnX = 405;    // el nacimiento: AL LADO del pilar

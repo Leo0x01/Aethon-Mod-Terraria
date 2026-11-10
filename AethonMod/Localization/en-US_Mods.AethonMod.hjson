@@ -2223,6 +2223,21 @@ Items: {
 			'''
 	}
 
+	BolsaSuperforja: {
+		// v6.123 — THE SUPERFORGE BAG (the letter: "you created new
+		// weapons, where are they — you must give them to the player
+		// in a bag")
+		DisplayName: The Superforge Bag
+		Tooltip:
+			'''
+			THE THREE DEFINITIVE SUPERFORGE WEAPONS: The Judgment of the Two
+			Suns (the light-and-dark implosion that bursts into the flash),
+			The Darkness Slash (the black-purple-white blades that cross
+			the arena piercing everything) and The Void Needles (the thin
+			needles that stick and drip damage).
+			'''
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -2662,15 +2677,19 @@ Buffs: {
 	}
 
 	QuemaduraVacioExterior: {
-		// v6.101: THE OUTER VOID BURN — the black-flame research debuff
-		DisplayName: Outer Void Burn
-		Description: The black flames of the void consume you: the closer to the bearer, the hotter you burn and the slower you walk
+		// v6.123 — THE RENAME, DONE RIGHT (la letra: «quemedura del vacio
+		// debe hacerle daño a los enemigos, es una quemadura» — la v6.122
+		// puso ESTE nombre en el buff del dueño por error): EL DEBUFF DE
+		// LOS ENEMIGOS es LA QUEMADURA DEL VACÍO.
+		DisplayName: Void Burn
+		Description: The black flames of the void consume you: 1% of your max life every half second — and when the aura lets you go, you keep BURNING for 5 more seconds
 	}
 
 	VacioExterior: {
-		// v6.122: renamed VOID BURN (la letra: «Vacio Exterior, que ahora
-		// se llamara Quemadura del Vacio») — the bearer's reward stays the same
-		DisplayName: Void Burn
+		// v6.123 — THE BEARER'S REWARD KEEPS ITS NAME: «Quemadura del
+		// vacío» le pertenece AL DEBUFF DE LOS ENEMIGOS (la quemadura es la
+		// que hace daño); el pago del dueño sigue siendo EL VACÍO EXTERIOR.
+		DisplayName: Outer Void
 		Description: The void's fire knows its owner: +10% attack, +10 defense, −15% mana cost while any enemy burns
 	}
 
@@ -3310,7 +3329,6 @@ Jefe: {
 	Aethon: {
 		// v6.114 — THE CALL'S CEREMONY: the altar rises and the eternal
 		// grimoire floats RIGHT ABOVE it (the letter).
-		LlamadaCeremonia: THE CALL ANSWERS — the altar rises and the grimoire opens: THE BOOK HAS HEARD ITS NAME.
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar
 		Nombre2: La Canción del Tiempo
@@ -3429,7 +3447,11 @@ Armas: {
 	ResonanciaEcos: La resonancia despierta {0} eco(s).
 	GuardianDetenido: El grimorio detiene al guardián en seco: «A ti solo te devoraré UNA vez… con eso me basta.» (+1 nivel)
 	OjoFortalecido: El escuadrón está lleno: el grimorio FORTALECE a un ojo (+{0}% de daño).
-	EscuadronFortalecido: ✧ ¡EL ESCUADRÓN ENTERO SE FORTALECE! ({0} ojos · mejora {1}: +50% de daño cada uno)
+	EscuadronFortalecido: THE WHOLE SQUAD GROWS STRONGER! ({0} eyes · +50% damage each)
+	EscuadronMejora1: THE SQUAD GROWS STRONGER! ({0} eyes gain THE GOLDEN RING of the black hole: +50% damage each)
+	EscuadronMejora2: THE SQUAD GROWS STRONGER! ({0} eyes gain THE VIOLET RING of the abyss: +50% damage each)
+	EscuadronMejora3: THE SQUAD GROWS STRONGER! ({0} eyes gain THE GOLDEN SUN of the upgrades: +50% damage each)
+	EscuadronMejora4: THE SQUAD GROWS STRONGER! ({0} eyes gain THE BLUE-STAR SUN, the last ring: +50% damage each)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 

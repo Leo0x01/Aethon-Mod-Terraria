@@ -1409,6 +1409,15 @@ namespace AethonMod.Content.Players
                 // se pueda probar de una vez.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.MundoInteriorEternoItem>());
+                // v6.123 — LA BOLSA DE LA SUPERFORJA (la letra: «se supone
+                // que creaste nuevas armas, donde estan, recuerda que debes
+                // darselas al jugador en una bolsa»): las TRES ARMAS
+                // DEFINITIVAS de la superforja (El Juicio de los Dos Soles,
+                // El Tajo de Oscuridad y Las Agujas del Vacío) llegan
+                // DIRECTO en su bolsa — también viven en el Cofre del
+                // Arsenal y tras sus recetas de 5 maderas.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Bolsas.BolsaSuperforja>());
 
                 if (entregados > 0)
                 {

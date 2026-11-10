@@ -137,16 +137,15 @@ namespace AethonMod.Content.Effects
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
         {
             if (Descargado || _alpha <= 0.01f || _pintadoEsteFrame) return;
-            // EL CIELO DEL CUERPO VIVE EN LA SUPERFICIE: bajo la roca, el
-            // interior ES la carne (las paredes de la profundidad mandan) —
-            // el tentáculo no se cuela en la cueva del dios.
-            try
-            {
-                Player p = Main.LocalPlayer;
-                if (p != null && p.active && !p.dead &&
-                    p.Center.Y / 16f > Main.rockLayer + 30f) return;
-            }
-            catch { }
+            // v6.123 — LA GUARDIA DE ALTITUD MURIÓ (la cura del cuadrado
+            // negro): la vieja guardia («bajo la roca no se pinta el
+            // cielo») dejaba el fondo de cueva de vanilla dueño de la
+            // pantalla en cuanto el portador bajaba — y ese fondo, en el
+            // vacío oscuro del interior, salía NEGRO (el cuadrado
+            // reportado). EL CUERPO DEL DIOS ES EL FONDO del interior a
+            // TODAS las alturas: la carne llena la pantalla de borde a
+            // borde SIEMPRE; donde haya tiles, los tiles la tapan, y
+            // donde haya aire, los tentáculos mandan.
             _pintadoEsteFrame = true;
 
             // La red de seguridad de siempre: el cielo jamás rompe el render.

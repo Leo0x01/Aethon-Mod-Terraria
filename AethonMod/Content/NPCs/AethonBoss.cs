@@ -749,52 +749,44 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             _idxMem = (_idxMem + 1) & 7;
             if (_idxMem == 0) _memLlena = true;
 
-            // === LA ENTRADA — EL PRIMER TICK (v6.50.50: LA ENTRADA EXACTA DE
-            //     LA EMPERATRIZ, ACTO POR ACTO. El invocador ya la dejó DONDE
-            //     nace la Emperatriz (200 px ENCIMA del jugador, el jitter
-            //     circular de 50 del case 661) y su SpawnBoss ya dijo SU
-            //     anuncio («ha despertado», el de vanilla — como la Emperatriz,
-            //     NI UN texto más). Aquí solo el nacimiento: invisible (alpha
-            //     255) e intocable — v6.50.52: la presentación ENTERA (la lluvia
-            //     + LA CARRERA) corre con el jefe INVISIBLE; el fade
-            //     vive ahora en EL APARECER (24 t al final, cuando el
-            //     sol ya llegó al centro — «LUEGO aparece el jefe») ===
+            // === LA ENTRADA — v6.123 — NACER ES EXPLOSIONAR DE LUZ (la
+            //     letra: «al invocar a aethon este no se invoca como te
+            //     dije que debe invocarse, debe invocarse con una
+            //     explosion de luz asi que elimina la animacion de
+            //     invocacion actual»): LA CARRERA DEL RELOJ, LA LLUVIA,
+            //     EL TEMBLOR, EL PILAR Y EL FADE DE LA EMPERATRIZ
+            //     MURIERON — los TRES (la luz, el gemelo oscuro y el
+            //     fusionado) nacen YA: VISIBLES, en la órbita de pelea,
+            //     y su nacimiento ES EL ESTALLIDO RADIANTE (escala 1.45,
+            //     pura luz que jamás daña). El mediodía también llega con
+            //     la luz (el reloj se posa YA en 27000: el sol está en el
+            //     centro porque LA LUZ ACABA DE ENTRAR AL MUNDO — sin
+            //     carrera que esperar). ===
             if (!_nacio)
             {
                 NPC.velocity = Vector2.Zero;
-                if (HaceLlegada)
+                NPC.alpha = 0;
+                NPC.dontTakeDamage = false;
+                _tickEstado = 0;
+                _estado = EST_FLOTAR;
+                _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    NPC.alpha = 255;          // invisible hasta que la presentación lo traiga
-                    NPC.dontTakeDamage = true;
-                    _subLlegada = SUB_PRESENTA;
-                    _tickEstado = 0;
-                    _estado = EST_NACIENDO;
-                }
-                else
-                {
-                    // v6.50.117 — EL GEMELO OSCURO (y el fusionado) NUNCA
-                    // hacen LA LLEGADA: nacen YA en la órbita de pelea —
-                    // el reloj del mundo y la coreografía son del hermano
-                    // de luz (nadie pelea por el mediodía).
-                    // v6.122 — PERO NACEN CON SU EXPLOSIÓN DE LUZ (la
-                    // letra: «el siempre debe aparecer con una explocion
-                    // de luz»): sin cine de reloj, pero JAMÁS en silencio
-                    // — el Estallido de NACIMIENTO (escala 1.45, pura luz
-                    // que jamás daña) los anuncia igual que al hermano de
-                    // luz. Hasta lo OSCURO nace de un estallido: la luz
-                    // que se apaga.
-                    NPC.alpha = 0;
-                    _tickEstado = 0;
-                    _estado = EST_FLOTAR;
-                    _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    // EL MEDIODÍA LLEGA CON LA LUZ (solo la autoridad).
+                    Main.dayTime = true;
+                    Main.time = 27000.0;
+                    // EL ESTALLIDO DE NACIMIENTO — la explosión de luz
+                    // que ES la invocación.
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        0, 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloAparicionLuz,
+                        0f, NPC.whoAmI * 31 + 7);
+                    // EL RUGIDO de la luz que entra.
+                    if (!Main.dedServ)
                     {
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            NPC.Center, Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            0, 0f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloAparicionLuz,
-                            0f, NPC.whoAmI * 31 + 7);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
                     }
                 }
                 _nacio = true;
@@ -991,324 +983,36 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // ==================================================================
 
         /// <summary>
-        /// v6.50.52 — LA LLEGADA EN DOS ACTOS (la letra nueva: «la
-        /// presentación debe durar hasta que el sol llegue al centro,
-        /// LUEGO APARECE EL JEFE» — y «demora mucho el suelo temblando y
-        /// todo eso»: los cinco actos de la .51 murieron).
-        ///
-        ///   ACTO 1 — LA PRESENTACIÓN (= LA CARRERA): la coreografía de
-        ///   la Emperatriz (SU caída (0,5) que se frena ×0.95, SU
-        ///   Item161) con la lluvia SOLO COLOR LUZ (blanco y oro)
-        ///   cayendo en TODO EL CIELO, EL TEMBLOR creciendo (los kicks
-        ///   del espejo) y LA CARRERA del reloj bidireccional — TODO
-        ///   JUNTO desde el primer tick. La presentación dura EXACTO lo
-        ///   que tarda el sol en llegar al centro (mínimo 150 t para que
-        ///   respire) y la luz permanece INVISIBLE (alpha 255): el jefe
-        ///   APARECE al final, no antes. EL PARACAÍDAS a los 570 t: si
-        ///   cualquier cosa mete el sol (la carrera de la .51 podía
-        ///   colgarse — «el jefe no aparece»), la IA lo POSA a mano y
-        ///   aparece IGUAL — el jefe sale SIEMPRE.
-        ///
-        ///   ACTO 2 — EL APARECER (80 t): el sol YA está en el centro:
-        ///   EL PILAR de luz cae del cielo (EstiloPilarAparicion — el
-        ///   manto dorado y el charco en la base, cosmético, daño 0),
-        ///   EL DESTELLO nace del sol (lo pinta ColaSierpeSky con SU
-        ///   curva comprimida) y la luz SE MATERIALIZA dentro del pilar
-        ///   (fade 255→0 en 24 t) bajando a su órbita de pelea con su
-        ///   lluvia de chispas doradas — y a PELEAR. El anuncio sigue
-        ///   siendo SOLO el de SpawnBoss («ha despertado», el de
-        ///   vanilla — NI UN texto más).
+        /// v6.123 — EL NACIMIENTO INSTANTÁNEO (la letra: «debe invocarse
+        /// con una explosion de luz asi que elimina la animacion de
+        /// invocacion actual»): LA CARRERA DEL RELOJ, LA LLUVIA, EL
+        /// TEMBLOR, EL PILAR Y EL FADE MURIERON con sus dos actos — el
+        /// nacimiento YA ES el estallido (lo dispara el primer tick en
+        /// el bloque !_nacio). Este estado queda SOLO como red de
+        /// seguridad: si cualquier camino viejo volviera a entrar, sale
+        /// a la órbita EN EL MISMO TICK — jamás un jefe invisible ni un
+        /// reloj atascado.
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
-            // LA CUENTA (la ai[1] de la Emperatriz): _tickEstado llega +1
-            // por el ++ del motor — el t de vanilla, sin descuentos.
-            int t = _tickEstado;
-
-            switch (_subLlegada)
-            {
-                // ==============================================================
-                //  ACTO 1 — LA PRESENTACIÓN (= LA CARRERA): la lluvia de
-                //  luz en TODO EL CIELO + el temblor + el reloj corriendo
-                //  al mediodía (AVANZA o RETROCEDE — lo lleva
-                //  AethonLlegadaSistema en TODAS las máquinas). El jefe
-                //  INVISIBLE hasta el final.
-                // ==============================================================
-                case SUB_PRESENTA:
-                {
-                    // t=0/1 — LA CAÍDA INICIAL (SU velocity (0,5)).
-                    if (t <= 1)
-                        NPC.velocity = new Vector2(0f, 5f);
-
-                    // t=10 — EL SONIDO DE SU NACIMIENTO (en SU tick, palabra por palabra).
-                    // v6.50.59 — EL RUIDO DE TEMBLOR DE SIEMPRE (la letra:
-                    // «en la presentacion del jefe sale el sonido de la
-                    // emperatriz de la luz y esto esta mal, el ruido que
-                    // debe salir era el ruido de temblor que habia
-                    // anteriormente»): el Item161 de la Emperatriz MURIÓ —
-                    // vuelve el TEMBLOR de la casa (el Item122 grave de la
-                    // llegada de la .48, el que sacudía el mundo). Y
-                    // REFUERZOS: el temblor CRECE — el mismo rugido otra
-                    // vez a mitad de la carrera (más grave aún).
-                    if (t == 11 && !Main.dedServ)
-                    {
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item122.WithPitchOffset(-0.25f), NPC.Center);
-                        OndaLib.Kick(9f, 22);
-                    }
-                    if (t == 130 && !Main.dedServ)
-                    {
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item122.WithPitchOffset(-0.4f), NPC.Center);
-                        OndaLib.Kick(11f, 24);
-                    }
-
-                    // v6.50.59 — EL CIELO ENTERO SE ENCIENDE (la letra: «el
-                    // cielo entero no se ilumina, solo salen particulas,
-                    // debe tambien iluminarce con aurora blanca y dorada»):
-                    // además de la lluvia de polvos, la LUZ DE MUNDO inunda
-                    // los alrededores de la presa mientras el dios desciende
-                    // — el SUELO también se baña de blanco-dorado (la aurora
-                    // del cielo la pinta ColaSierpeSky en TODAS las
-                    // pantallas).
-                    if (!Main.dedServ)
-                    {
-                        float encendido = MathHelper.Clamp(t / 180f, 0f, 1f);
-                        Lighting.AddLight(target.Center,
-                            new Vector3(1.6f, 1.42f, 1.0f) * (0.35f + 0.65f * encendido));
-                    }
-
-                    // LA CAÍDA QUE SE FRENA (cada tick: ×0.95 — como la Emperatriz).
-                    NPC.velocity *= 0.95f;
-
-                    // LA LLUVIA DE LUZ (TODO EL CIELO, SOLO COLOR LUZ: el
-                    // rectángulo de la cámara entero — relativo al
-                    // JUGADOR, no al jefe: la lluvia cae por TODOS lados)
-                    // — VIVE HASTA EL FINAL de la presentación (la .51 la
-                    // cortaba a los 155 t y la carrera seguía sola).
-                    if (t > 11 && !Main.dedServ)
-                    {
-                        float anchoCielo = Math.Max(920f, Main.screenWidth * 0.62f);
-                        float techoCielo = Math.Max(520f, Main.screenHeight * 0.62f);
-                        for (int k = 0; k < 4; k++)
-                        {
-                            float opacidad = MathHelper.Clamp(t / 180f, 0f, 1f);
-                            float num52 = MathHelper.Lerp(1.3f, 0.7f, opacidad) *
-                                Utils.GetLerpValue(0f, 120f, t, true);
-                            // SOLO COLOR LUZ: blanco y oro de la casa,
-                            // alternados — NI UN matiz del espectro.
-                            Color colLuz = (k & 1) == 0
-                                ? new Color(255, 255, 250, 255)
-                                : new Color(255, 244, 204, 255);
-                            int idx = Dust.NewDust(NPC.position, NPC.width, NPC.height,
-                                DustID.RainbowMk2, 0f, 0f, 0, colLuz);
-                            Main.dust[idx].position = target.Center +
-                                new Vector2(Main.rand.NextFloat(-anchoCielo, anchoCielo),
-                                    -Main.rand.NextFloat(60f, techoCielo));
-                            Main.dust[idx].velocity *= Main.rand.NextFloat() * 0.8f;
-                            Main.dust[idx].noGravity = true;
-                            Main.dust[idx].fadeIn = 0.6f + Main.rand.NextFloat() * 0.7f * num52;
-                            Main.dust[idx].velocity += Vector2.UnitY * 3f;
-                            Main.dust[idx].scale = 0.45f;
-                            if (idx != 6000)
-                            {
-                                Dust clon = Dust.CloneDust(idx);
-                                clon.scale /= 2f;
-                                clon.fadeIn *= 0.85f;
-                                clon.color = new Color(255, 255, 255, 255);
-                            }
-                        }
-                    }
-
-                    // LA LUZ PERMANECE INVISIBLE — «la presentación debe
-                    // durar hasta que el sol llegue al centro, LUEGO
-                    // aparece el jefe» (el fade vive en EL APARECER).
-                    NPC.alpha = 255;
-
-                    // EL CAMBIO DE ACTO (manda el server / singleplayer;
-                    // en MP cada cliente remata su propia carrera con el
-                    // espejo — nadie salta): el sol EN EL CENTRO (con el
-                    // mínimo de 75 t de presentación — v6.50.121: la
-                    // mitad)… o EL PARACAÍDAS (285 t — v6.50.121: la
-                    // mitad: cualquier cosa que meta el sol, la IA lo
-                    // posa a mano — EL JEFE APARECE SIEMPRE).
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        bool solCentro = Main.dayTime &&
-                            Main.time >= 26999.0 && Main.time <= 27001.0;
-                        if ((t >= 75 && solCentro) || t >= 285)
-                        {
-                            if (!solCentro)
-                            {
-                                // EL ATERRIZAJE DE EMERGENCIA — solo si el
-                                // reloj se atascó: el sol se posa y NADIE
-                                // espera más (en juego normal jamás dispara:
-                                // la carrera más larga son ~220 t).
-                                Main.dayTime = true;
-                                Main.time = 27000.0;
-                            }
-                            SubFaseLlegada(SUB_APARICION);
-                        }
-                    }
-                    break;
-                }
-
-                // ==============================================================
-                //  ACTO 2 — EL APARECER (40 t — v6.50.121: la mitad,
-                //  apertura más ágil): el sol YA está en el centro →
-                //  EL PILAR cae, EL DESTELLO nace del sol y la luz se
-                //  materializa dentro del pilar bajando a su órbita —
-                //  y a PELEAR.
-                // ==============================================================
-                case SUB_APARICION:
-                {
-                    NPC.velocity = Vector2.Zero;
-                    if (_tickEstado == 1 && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        // EL PILAR: la columna de luz que cae del cielo
-                        // (cosmética — daño 0; la dibuja
-                        // AtaqueJefeProjectile.EstiloPilarAparicion con el
-                        // manto dorado y el charco de luz en la base).
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            PosicionAparicion(target), Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            0, 0f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPilarAparicion, 0f,
-                            NPC.whoAmI);
-                    }
-
-                    // LA MATERIALIZACIÓN RÁPIDA (fade 255→0 en 24 t): la
-                    // luz YA está aquí — aparece DENTRO del pilar.
-                    NPC.alpha = (int)Math.Round(255f *
-                        Math.Max(0f, 1f - _tickEstado / 24f));
-
-                    // LA BAJADA: directo A LA ÓRBITA DE PELEA — la luz se
-                    // materializa DENTRO del pilar y se posa donde va a
-                    // flotar (la cúspide de la .51 a −760 quedaba FUERA de
-                    // la vista: ahora NADA de la aparición sale de la
-                    // pantalla). Posición SERVER-SEGURA (la v6.50.42:
-                    // relativa al jugador, SIN matemática de pantalla).
-                    if (_tickEstado <= 36)
-                    {
-                        Vector2 punto = target.Center + new Vector2(0f, -420f);
-                        NPC.Center = Vector2.Lerp(NPC.Center, punto, 0.14f);
-                        NPC.netUpdate = true;
-                    }
-                    else
-                    {
-                        Vector2 punto = target.Center + new Vector2(0f, -420f);
-                        NPC.velocity = Vector2.Lerp(NPC.velocity,
-                            (punto - NPC.Center) * 0.04f, 0.12f);
-                    }
-
-                    // LA LLUVIA DE LUZ: chispas doradas que caen con la luz.
-                    if (!Main.dedServ && Main.rand.NextBool(3))
-                    {
-                        Dust d = Dust.NewDustPerfect(
-                            NPC.Center + new Vector2(Main.rand.NextFloat(-100f, 100f),
-                                Main.rand.NextFloat(-50f, 50f)),
-                            DustID.GoldFlame,
-                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
-                                Main.rand.NextFloat(1f, 3f)),
-                            180, PaletaOro, 1.4f);
-                        d.noGravity = true;
-                    }
-
-                    // t=24 — LA MATERIALIZACIÓN COMPLETÓ: v6.122 — LA
-                    // EXPLOSIÓN DE LUZ DE LA APARICIÓN (la letra: «la forma
-                    // en la que aparece el jefe aethon esta mal, el siempre
-                    // debe aparecer con una explocion de luz»): el Estallido
-                    // Radiante en su versión de NACIMIENTO — escala 1.45,
-                    // PURA LUZ que JAMÁS daña (la bienvenida no se cobra con
-                    // un golpe barato): el núcleo blanco-oro, el anillo
-                    // segmentado, los 44+ rayos en 360°, la cruz anamórfica,
-                    // las chispas que vuelan y el destello que inunda la
-                    // pantalla. SIEMPRE — toda aparición pasa por aquí (el
-                    // ítem, el prisma, el renacer: el ESTADO NACIENDO es la
-                    // única puerta de entrada del dios).
-                    if (_tickEstado == 24 && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            NPC.Center, Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            0, 0f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloAparicionLuz,
-                            0f, NPC.whoAmI * 31 + 7);
-                    }
-
-                    // t=26 — EL ESTAMPIDO: el fade completó y la luz RUGE
-                    // (el destello del sol lo pinta ColaSierpeSky con SU
-                    // curva comprimida 20/40/80).
-                    if (_tickEstado == 26 && !Main.dedServ)
-                    {
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                    }
-
-                    // v6.50.121 — LA MITAD (80→40): el fade (24 t), el
-                    //     rugido (26) y la bajada (36) ya cabían todos
-                    //     dentro — el cine muerto sobraba.
-                    if (_tickEstado >= 40)
-                    {
-                        _estado = EST_FLOTAR;
-                        _tickEstado = 0;
-                        _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
-                        NPC.alpha = 0;
-                        NPC.dontTakeDamage = false;
-                        // v6.50.60 — LA APERTURA ES EL SOL (la letra: «el
-                        // ataque del sol que debe lanzar y perseguirme no
-                        // lo hace realmente» — porque vivía encerrado en
-                        // fase 3+ y la pelea moría antes de verlo): el
-                        // PRIMER acto del dios al materializarse ES
-                        // convertirse en sol y LANZARLO — el ataque
-                        // especial sale EN CADA combate, desde el segundo
-                        // uno de la pelea.
-                        _especialPendiente = EST_SOL;
-                        NPC.netUpdate = true;
-                    }
-                    break;
-                }
-            }
+            _subLlegada = 0;
+            _estado = EST_FLOTAR;
+            _tickEstado = 0;
+            _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+            NPC.alpha = 0;
+            NPC.dontTakeDamage = false;
+            _especialPendiente = EST_SOL;   // la apertura de siempre (v6.50.60)
+            NPC.netUpdate = true;
         }
 
-        /// <summary>
-        /// v6.50.44 → v6.50.51 — LA BASE DEL PILAR DE LA APARICIÓN: el punto
-        /// del cielo sobre el que cae la columna de luz. La lección de la
-        /// v6.50.42 queda grabada: NADA de matemática de pantalla — la
-        /// posición es relativa al JUGADOR (la cámara lo sigue) y SIEMPRE
-        /// clamped dentro del mundo (jamás otra muerte por fuera-de-límites).
-        /// </summary>
-        private Vector2 PosicionAparicion(Player target)
-        {
-            // La órbita de pelea (target − 420): el pilar termina donde la
-            // luz va a quedar flotando — el descenso TERMINA en su puesto.
-            Vector2 pos = target.Center + new Vector2(0f, -420f);
-
-            // NUNCA ENTERRADO: la base del pilar vive en el CIELO de la
-            // arena (montaña o suelo alto no la hunden en el terreno).
-            float cielo = target.Center.Y - 300f;
-            if (pos.Y > cielo) pos.Y = cielo;
-
-            // NUNCA FUERA DEL MUNDO: los clamps de la v6.50.42 — el jefe
-            // que nace (o materializa) fuera de límites MUERE.
-            float margen = 320f;
-            pos.X = MathHelper.Clamp(pos.X, margen, Main.maxTilesX * 16f - margen);
-            pos.Y = MathHelper.Clamp(pos.Y, margen, Main.maxTilesY * 16f - margen);
-            return pos;
-        }
 
         // (v6.50.52 — SeguirCielo MURIÓ con los actos largos de la .51:
         // la presentación deja al jefe cerca de la presa con la caída
         // frenada de la Emperatriz y EL APARECER lo baja del pilar a la
         // órbita en 80 t — ya no hay 150+900 ticks de cielo que seguir.)
 
-        /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
-        private void SubFaseLlegada(int sub)
-        {
-            _subLlegada = sub;
-            _tickEstado = 0;
-            NPC.netUpdate = true;
-        }
+        // v6.123 — SubFaseLlegada MURIÓ con la llegada de dos actos: el
+        // nacimiento instantáneo no tiene sub-fases que cambiar.
 
         /// <summary>
         /// LA ÓRBITA SERENA: la luz pasea en elipse sobre la presa —

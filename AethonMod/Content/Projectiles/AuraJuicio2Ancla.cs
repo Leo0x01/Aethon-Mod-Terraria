@@ -162,9 +162,12 @@ namespace AethonMod.Content.Projectiles
         /// fuego pleno).</summary>
         private const float DIST_INTIMA = 40f;
 
-        /// <summary>Ticks que el impío sigue ARDIENDO ya fuera del
-        /// campo (el timer 180 del original).</summary>
-        private const int ARDE_FUERA = 180;
+        /// <summary>v6.123 — CUÁNTO ARDE FUERA DEL AURA (la letra:
+        /// «cuando aura del vacio deja de afectar al enemigo, la
+        /// quemadura del vacio sobre el enemigo continua por 5 segundos
+        /// mas haciendo daño»): 300 ticks = 5 segundos EXACTOS de fuego
+        /// que sigue COBRANDO tras dejar el campo (antes eran 180).</summary>
+        private const int ARDE_FUERA = 300;
 
         /// <summary>La intensidad máxima por cercanía (×3 pegado).</summary>
         private const float INTENSIDAD_CERCA = 3f;
@@ -346,14 +349,23 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  v6.122 — EL DAÑO DE LA FORMA ETERNA (la única fuente de
-        //  verdad). LA LETRA: «el daño que causa la forma eterna debe
+        //  v6.122 → v6.123 — EL DAÑO DE LA FORMA ETERNA (la única fuente
+        //  de verdad). LA LETRA: «el daño que causa la forma eterna debe
         //  ser el mismo que el 0.1% de la suma del daño de invocacion
-        //  final y el daño magico final del grimorio del eterno, o sea
-        //  es el daño que tiene el grimorio despues de hacer el
-        //  calculo de todos los buff».
+        //  final y el daño magico final del grimorio del eterno» + «el
+        //  calculo de aura del vacio parece no estar hecho
+        //  correctamente, revisa eso».
         //
-        //  LOS DOS DAÑOS FINALES (con TODO el pipeline de buffs):
+        //  v6.123 — LA AUTOPSIA: el sumando de invocación multiplicaba
+        //  los ojos por TODO el multiplicador de invocación del portador
+        //  (GetDamage<Summon>.ApplyTo) — pero los ojos del Eterno NUNCA
+        //  reciben ese pipeline: GrimoireEternal los invoca con
+        //  DanoOjosDelEterno a secas (la ley v6.51: «EL DAÑO ES DEL
+        //  GRIMORIO SOLAMENTE, sin importar la armadura o accesorios»)
+        //  — el número del buff INFLABA con el equipo de invocación y
+        //  JAMÁS coincidía con el daño que un ojo pega de verdad.
+        //
+        //  LOS DOS DAÑOS FINALES (los que el juego USA de verdad):
         //   · EL MÁGICO — Player.GetWeaponDamage(el Grimorio): la
         //     cadena EXACTA que pega el clic izquierdo (el Item.damage
         //     × la escalera del mod — ModifyWeaponDamage: nivel
@@ -391,11 +403,15 @@ namespace AethonMod.Content.Projectiles
                 // (1) EL MÁGICO FINAL — la cadena completa de vanilla+mod
                 int magicoFinal = p.GetWeaponDamage(libro);
 
-                // (2) EL DE INVOCACIÓN FINAL — la cadena propia + el
-                //     multiplicador de invocación del portador
+                // (2) EL DE INVOCACIÓN FINAL — v6.123: EL DAÑO EXACTO DE
+                //     UN OJO REAL (DanoOjosDelEterno, SIN el multiplicador
+                //     de equipo del portador: GrimoireEternal invoca los
+                //     ojos con ESTE número a secas — la ley v6.51 «EL DAÑO
+                //     ES DEL GRIMORIO SOLAMENTE» — el viejo ApplyTo del
+                //     multiplicador de invocación INFLABA el número del
+                //     buff con equipo que los ojos jamás usan)
                 var sl = libro.GetGlobalItem<Content.Globals.ShardLevelItem>();
-                int ojos = Content.Systems.WeaponScaling.DanoOjosDelEterno(libro.damage, sl?.Level ?? 1, p);
-                float invocFinal = p.GetDamage(Terraria.ModLoader.DamageClass.Summon).ApplyTo(ojos);
+                int invocFinal = Content.Systems.WeaponScaling.DanoOjosDelEterno(libro.damage, sl?.Level ?? 1, p);
 
                 // (3) EL 0,1 % DE LA SUMA — la letra, exacta
                 float dano = 0.001f * (invocFinal + magicoFinal);

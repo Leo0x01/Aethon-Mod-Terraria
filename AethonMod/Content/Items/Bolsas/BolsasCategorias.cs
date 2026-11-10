@@ -839,6 +839,11 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.104 — LA BOLSA DE LAS AURAS (bolsa 27 del cofre): el
             // material de investigación de auras de la letra nueva.
             l.Add((ModContent.ItemType<BolsaAuras>(), 1));
+            // v6.123 — LA BOLSA DE LA SUPERFORJA (bolsa 28 del cofre): las
+            // TRES ARMAS DEFINITIVAS de la superforja (la letra: «debes
+            // darselas al jugador en una bolsa») — también DIRECTO en el
+            // regalo de pruebas.
+            l.Add((ModContent.ItemType<BolsaSuperforja>(), 1));
             // v6.100 — LA BOLSA DEL TALLER MURIÓ con el taller entero (la
             // letra: las armas de la bolsa del taller y las de las tres
             // casas SE BORRAN). Sus dos favoritos (Coro y Pluma) y la
@@ -1034,6 +1039,41 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Accessories.AuraDeJuicio2Item>(), 1));      // el aura del vacío
             // Y EL DEFINITIVO:
             l.Add((ModContent.ItemType<Cosmetics.FormaEternaItem>(), 1));          // LA FORMA ETERNA
+            return l;
+        }
+    }
+
+    // ======================================================================
+    //  v6.123 — LA BOLSA DE LA SUPERFORJA (la letra: «se supone que
+    //  creaste nuevas armas, donde estan, recuerda que debes darselas
+    //  al jugador en una bolsa»): LAS TRES ARMAS DE LA SUPERFORJA de la
+    //  v6.122 vivían SOLO detrás de sus recetas de 5 maderas — el
+    //  jugador no tenía NINGUNA vía de encontrarlas. Su bolsa propia
+    //  (la regla permanente de la casa: todo lo nuevo llega DIRECTO +
+    //  su bolsa de repuesto) y su asiento en el Cofre del Arsenal.
+    // ======================================================================
+    public class BolsaSuperforja : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de la Superforja";
+
+        protected override string NombreCorto => "Bolsa de la Superforja";
+
+        protected override Color ColorFiesta => new Color(255, 232, 150);
+
+        protected override string Nota => "Las tres armas definitivas de la superforja: luz, tajos y agujas";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // EL JUICIO DE LOS DOS SOLES — dos esferas de luz y oscuridad
+            // colisionan: implosión → EL DESTELLO (la explosión de luz).
+            l.Add((ModContent.ItemType<Weapons.Definitivas.JuicioDosSoles>(), 1));
+            // EL TAJO DE OSCURIDAD — hasta tres tajos negro-morado-blanco
+            // que cruzan la arena y ATRAVIESAN a los enemigos.
+            l.Add((ModContent.ItemType<Weapons.Definitivas.TajoOscuro>(), 1));
+            // LAS AGUJAS DEL VACÍO — agujas delgadas que nacen cerca de
+            // la presa, la atraviesan y SE CLAVAN goteando daño.
+            l.Add((ModContent.ItemType<Weapons.Definitivas.AgujasVacio>(), 1));
             return l;
         }
     }

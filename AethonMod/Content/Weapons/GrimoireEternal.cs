@@ -738,6 +738,9 @@ namespace AethonMod.Content.Weapons
                     //     presta). Un clic por PELDAÑO de mejora: 4
                     //     clics en toda la vida del escuadrón. ===
                     int fortalecidos = 0;
+                    // v6.123 — EL PELDAÑO que el escuadrón acaba de ganar
+                    // (1-4) — el mensaje de la mejora lo revela.
+                    int mejoraAlcanzada = 0;
                     for (int i = 0; i < Main.maxProjectiles; i++)
                     {
                         Projectile p = Main.projectile[i];
@@ -752,6 +755,7 @@ namespace AethonMod.Content.Weapons
                         if (m >= mejorasDesbloqueadas)
                             continue;                       // el despertar aún no las presta
                         global::AethonMod.Content.Projectiles.OjoEternoMinion.Fortalecer(p);
+                        if (m + 1 > mejoraAlcanzada) mejoraAlcanzada = m + 1;
                         fortalecidos++;
                     }
 
@@ -788,9 +792,21 @@ namespace AethonMod.Content.Weapons
                     }
 
                     if (Main.myPlayer == player.whoAmI)
-                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.EscuadronFortalecido",
-                            fortalecidos, mejorasDesbloqueadas * 50),
+                    {
+                        // v6.123 — UN MENSAJE DISTINTO POR MEJORA (la
+                        // letra: «el mensaje al aplicar las diferentes
+                        // mejoras a los minions del grimorio es el mismo,
+                        // deberia ser un mensaje diferente por mejora que
+                        // revele la mejora que se aplica»): el escuadrón
+                        // fortalece TODO a la vez y el mensaje cuenta EL
+                        // PELDAÑO que acaba de ganar — el anillo dorado
+                        // (1), el anillo violeta (2), el sol dorado (3)
+                        // o el sol azul-estelar (4).
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Armas.EscuadronMejora" + mejoraAlcanzada,
+                            fortalecidos),
                             new Color(196, 138, 255));
+                    }
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                     return false;
                 }

@@ -215,14 +215,17 @@ namespace AethonMod.Content.UI
         }
 
         /// <summary>
-        /// LA LLAMADA NACE DEL PRISMA: la ceremonia se ancla en el suelo
-        /// delante del prisma (mirando al jugador) — el ALTAR se
-        /// materializa y EL GRIMORIO DEL ETERNO flota justo encima (la
-        /// coreografía completa de la v6.114 vive en CeremoniaLlamado).
+        /// LA LLAMADA NACE DEL PRISMA (v6.123 — LA CEREMONIA MURIÓ, la
+        /// letra: «debe invocarse con una explosion de luz asi que
+        /// elimina la animacion de invocacion actual»): invocar desde el
+        /// prisma YA no materializa el altar con el grimorio flotando —
+        /// los DOS fragmentos nacen AL INSTANTE delante del prisma con
+        /// SUS estallidos de luz de nacimiento (cada jefe dispara el
+        /// suyo al nacer).
         /// </summary>
         private static void InvocarLaLlamada(Player yo)
         {
-            // EL ANCLA: el suelo delante del prisma, del lado del jugador.
+            // EL ANCLA: delante del prisma, del lado del jugador.
             int dirX = yo.Center.X < _tileX * 16f ? -1 : 1;
             int tileX = _tileX + dirX * 9;
             int tileY = _tileY - 2;
@@ -235,10 +238,15 @@ namespace AethonMod.Content.UI
                 ? new Vector2(tileX * 16f + 8f, suelo * 16f)
                 : new Vector2(tileX * 16f + 8f, (_tileY + 2) * 16f);
 
-            Projectile.NewProjectile(yo.GetSource_Misc("PrismaInterior"),
-                ancla, Vector2.Zero,
-                ModContent.ProjectileType<Projectiles.Definitivas.CeremoniaLlamado>(),
-                0, 0f, yo.whoAmI);
+            Vector2 posLuz = ancla + new Vector2(-600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
+            NPC.SpawnBoss((int)posLuz.X, (int)posLuz.Y,
+                ModContent.NPCType<NPCs.AethonBoss>(), yo.whoAmI);
+
+            Vector2 posOscuro = ancla + new Vector2(600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
+            NPC.SpawnBoss((int)posOscuro.X, (int)posOscuro.Y,
+                ModContent.NPCType<NPCs.AethonBossOscuro>(), yo.whoAmI);
         }
     }
 }

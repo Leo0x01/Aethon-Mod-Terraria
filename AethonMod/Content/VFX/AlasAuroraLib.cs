@@ -596,16 +596,18 @@ namespace AethonMod.Content.VFX
                 num5 = 0.3f;
             }
             num5 *= estilo.RuidoInten;
-            // v6.118 — EL ENSOGLADO DEL RUIDO (la membrana>0): las pasadas
-            // de ruido ya NO definen el filo del ala — el BORDE MAESTRO es
-            // el dueño de la silueta. Antes los quads de ruido corrían al
-            // ANCHO COMPLETO de la pluma (SemiMas/SemiMenos crudos) y los
-            // blobs de la textura con alfa en el borde sembraban peines
-            // FUERA de la curva (la LEY v6.56.7 del códice: texturas crudas
-            // en el borde = picos). Ahora se ensolegan hacia adentro: la
-            // niebla del vacío CORRE por dentro del ala y la curva exterior
-            // queda limpia.
-            float inset = estilo.Membrana > 0f ? (pasada == 0 ? 0.86f : 0.72f) : 1f;
+            // v6.118 → v6.123 — EL ENSOGLADO DEL RUIDO — INCONDICIONAL
+            // (la letra: «las alas runicas del vacio siguen con picos o
+            // mejor dicho dientes de cierra, eso debes quitarlo»). LA
+            // AUTOPSIA: la cura de la v6.118 vivía tras «membrana>0» — y
+            // la v6.120 convirtió las alas del vacío en copia del
+            // eclipse (membrana 0): el ruido VOLVIÓ a correr al ANCHO
+            // COMPLETO de la pluma (inset 1) y los blobs de la textura
+            // con alfa en el borde volvieron a sembrar dientes FUERA de
+            // la curva — el pico que el usuario ve. Ahora la niebla corre
+            // por DENTRO del ala SIEMPRE (membrana o no): el filo SOLO
+            // pertenece a la curva de la pluma.
+            float inset = pasada == 0 ? 0.86f : 0.72f;
             Vector2 val6 = default(Vector2);
             VertexPositionColorTexture val9 = default(VertexPositionColorTexture);
             VertexPositionColorTexture val10 = default(VertexPositionColorTexture);

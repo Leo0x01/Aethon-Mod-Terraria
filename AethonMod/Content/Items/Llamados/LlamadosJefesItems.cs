@@ -166,33 +166,29 @@ namespace AethonMod.Content.Items.Llamados
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
 
-            // v6.114 — LA CEREMONIA DE LA LLAMADA (la letra: «en la
-            // llamada debe aparecer el altar y justo encima debe estar
-            // el grimorio del eterno»): pronunciar el nombre ya no trae
-            // los fragmentos de la nada — EL ALTAR se materializa
-            // delante del portador con EL GRIMORIO DEL ETERNO flotando
-            // justo encima, y de ESA ceremonia nacen los dos fragmentos
-            // (la fórmula de la Emperatriz vive en la ceremonia).
+            // v6.123 — LA CEREMONIA MURIÓ, LA LUZ NACE (la letra: «al
+            // invocar a aethon este no se invoca como te dije que debe
+            // invocarse, debe invocarse con una explosion de luz asi que
+            // elimina la animacion de invocacion actual»): el altar, el
+            // grimorio flotante y sus 130 ticks de conjuro SE RETIRAN —
+            // pronunciar el nombre ES la explosión: los DOS fragmentos
+            // nacen YA (la fórmula de siempre: luz a −600,−600 y
+            // oscuridad a +600,−600 alrededor del portador) y cada uno
+            // ARRANCA CON SU ESTALLIDO RADIANTE de nacimiento (el jefe
+            // lo dispara en su nacimiento instantáneo — ver AethonBoss).
             AethonBoss.FusionDecretada = false;
             AethonBoss.TurnoAtaque = -1;
 
-            // EL ANCLA: el suelo bajo los pies del portador (si vuela,
-            // la ceremonia flota a la altura del portador).
-            int tileX = (int)(player.Center.X / 16f);
-            int tileY = (int)(player.Center.Y / 16f);
-            int suelo = -1;
-            for (int y = tileY; y < tileY + 70 && y < Main.maxTilesY - 10; y++)
-            {
-                if (WorldGen.SolidTile(tileX, y)) { suelo = y; break; }
-            }
-            Vector2 ancla = suelo >= 0
-                ? new Vector2(tileX * 16f + 8f, suelo * 16f)
-                : player.Center + new Vector2(0f, 60f);
+            Vector2 ancla = player.Center;
+            Vector2 posLuz = ancla + new Vector2(-600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
+            NPC.SpawnBoss((int)posLuz.X, (int)posLuz.Y,
+                ModContent.NPCType<AethonBoss>(), player.whoAmI);
 
-            Projectile.NewProjectile(player.GetSource_ItemUse(Item),
-                ancla, Vector2.Zero,
-                ModContent.ProjectileType<Projectiles.Definitivas.CeremoniaLlamado>(),
-                0, 0f, player.whoAmI);
+            Vector2 posOscuro = ancla + new Vector2(600f, -600f) +
+                Main.rand.NextVector2Circular(100f, 100f);
+            NPC.SpawnBoss((int)posOscuro.X, (int)posOscuro.Y,
+                ModContent.NPCType<AethonBossOscuro>(), player.whoAmI);
             return true;
         }
 

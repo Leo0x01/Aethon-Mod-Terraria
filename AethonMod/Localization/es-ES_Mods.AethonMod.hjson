@@ -2222,6 +2222,21 @@ Items: {
 			'''
 	}
 
+	BolsaSuperforja: {
+		// v6.123 — THE SUPERFORGE BAG (the letter: "you created new
+		// weapons, where are they — you must give them to the player
+		// in a bag")
+		DisplayName: La Bolsa de la Superforja
+		Tooltip:
+			'''
+			LAS TRES ARMAS DEFINITIVAS DE LA SUPERFORJA: El Juicio de los
+			Dos Soles (la implosión de luz y oscuridad que estalla en el
+			destello), El Tajo de Oscuridad (los filos negro-morado-blanco
+			que cruzan la arena atravesando todo) y Las Agujas del Vacío
+			(las agujas delgadas que se clavan y gotean daño).
+			'''
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -2661,15 +2676,19 @@ Buffs: {
 	}
 
 	QuemaduraVacioExterior: {
-		// v6.101: THE OUTER VOID BURN — the black-flame research debuff
-		DisplayName: Quemadura del vacío exterior
-		Description: Las llamas negras del vacío te consumen: cuanto más cerca del portador, más ardes y más lento caminas
+		// v6.123 — THE RENAME, DONE RIGHT (la letra: «quemedura del vacio
+		// debe hacerle daño a los enemigos, es una quemadura» — la v6.122
+		// puso ESTE nombre en el buff del dueño por error): EL DEBUFF DE
+		// LOS ENEMIGOS es LA QUEMADURA DEL VACÍO.
+		DisplayName: Quemadura del vacío
+		Description: Las llamas negras del vacío te consumen: 1% de tu vida máxima por cada medio segundo — y cuando el aura te suelta, ARDES 5 segundos más
 	}
 
 	VacioExterior: {
-		// v6.122: renamed VOID BURN (la letra: «Vacio Exterior, que ahora
-		// se llamara Quemadura del Vacio») — the bearer's reward stays the same
-		DisplayName: Quemadura del vacío
+		// v6.123 — THE BEARER'S REWARD KEEPS ITS NAME: «Quemadura del
+		// vacío» le pertenece AL DEBUFF DE LOS ENEMIGOS (la quemadura es la
+		// que hace daño); el pago del dueño sigue siendo EL VACÍO EXTERIOR.
+		DisplayName: Vacío exterior
 		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
 	}
 
@@ -3309,7 +3328,6 @@ Jefe: {
 	Aethon: {
 		// v6.114 — THE CALL'S CEREMONY: the altar rises and the eternal
 		// grimoire floats RIGHT ABOVE it (the letter).
-		LlamadaCeremonia: LA LLAMADA CONTESTA — el altar se alza y el grimorio se abre: EL LIBRO HA ESCUCHADO SU NOMBRE.
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar
 		Nombre2: La Canción del Tiempo
@@ -3428,7 +3446,11 @@ Armas: {
 	ResonanciaEcos: La resonancia despierta {0} eco(s).
 	GuardianDetenido: El grimorio detiene al guardián en seco: «A ti solo te devoraré UNA vez… con eso me basta.» (+1 nivel)
 	OjoFortalecido: El escuadrón está lleno: el grimorio FORTALECE a un ojo (+{0}% de daño).
-	EscuadronFortalecido: ✧ ¡EL ESCUADRÓN ENTERO SE FORTALECE! ({0} ojos · mejora {1}: +50% de daño cada uno)
+	EscuadronFortalecido: ✧ ¡EL ESCUADRÓN ENTERO SE FORTALECE! ({0} ojos · +50% de daño cada uno)
+	EscuadronMejora1: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL ANILLO DORADO del agujero negro: +50% de daño cada uno)
+	EscuadronMejora2: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL ANILLO VIOLETA del abismo: +50% de daño cada uno)
+	EscuadronMejora3: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL DORADO de las mejoras: +50% de daño cada uno)
+	EscuadronMejora4: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL AZUL-ESTELAR, el último anillo: +50% de daño cada uno)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 

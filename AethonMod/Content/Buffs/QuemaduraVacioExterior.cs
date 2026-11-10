@@ -53,10 +53,29 @@ namespace AethonMod.Content.Buffs
             VacioGlobalNPC vacio = npc.GetGlobalNPC<VacioGlobalNPC>();
             float intensidad = MathHelper.Clamp(vacio.IntensidadQuemadura, 1f, 4.5f);
 
-            // EL DOT DE LA QUEMADURA — la convención vanilla (−2 por punto
-            // de vida por segundo): el daño base lo escribió la fuente
-            // (el estandarte escala con el despertar del dueño).
-            npc.lifeRegen -= (int)(2f * MathF.Max(1, vacio.DanoVacio) * intensidad);
+            // ==============================================================
+            //  v6.123 — EL DAÑO DE LA QUEMADURA (la letra: «quemedura del
+            //  vacio debe hacerle daño a los enemigos, es una quemadura,
+            //  debe hacer 1% de daño de la vida maxima del enemigo por
+            //  cada medio segundo»). LA AUTOPSIA DE LA v6.122: el DoT
+            //  viejo escribía `lifeRegen -= 2×daño` PERO JAMÁS tocaba
+            //  `lifeRegenExpectedLossPerSecond` — y el decompile REAL del
+            //  tML 2026.09.3.1 (NPC.UpdateNPC) dice que con ese campo en
+            //  −1 el drain cae al CAMINO LENTO de vanilla: 1 de vida
+            //  cada 120 ticks (¡0,5 daño por segundo aunque el lifeRegen
+            //  fuera enorme!) — la quemadura de la v6.122 apenas
+            //  cosquilleaba. LA CONVENCIÓN VERIFICADA: el golpe de
+            //  `lifeRegenExpectedLossPerSecond` (N) sale CADA
+            //  120·N/|lifeRegen| TICKS → con lifeRegen = −4·N el golpe
+            //  cae cada 30 ticks (MEDIO SEGUNDO) y el número de combate
+            //  enseña N. EL NUEVO PAQUETE: N = 1% de la vida MÁXIMA del
+            //  impío (mínimo 1) y lifeRegen = −4·N — UNO POR CIENTO por
+            //  medio segundo, EXACTO como la letra lo pide.
+            // ==============================================================
+            int porMedioSegundo = Math.Max(1, (int)Math.Ceiling(npc.lifeMax * 0.01f));
+            npc.lifeRegen -= porMedioSegundo * 4;
+            if (npc.lifeRegenExpectedLossPerSecond < porMedioSegundo)
+                npc.lifeRegenExpectedLossPerSecond = porMedioSegundo;
 
             // EL PAGO AL DUEÑO: mientras ESTE enemigo arda, el portador
             // de la quemadura cobra el Vacío Exterior (su propio «fuego»
