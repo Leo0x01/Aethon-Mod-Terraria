@@ -2610,6 +2610,9 @@ Projectiles: {
 	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
 	CeremoniaLlamado.DisplayName: Ceremonia Llamado
 	DevoracionEterna.DisplayName: Devoracion Eterna
+	AgujaVacioProj.DisplayName: Aguja Vacio Proj
+	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
+	TajoOscuroProj.DisplayName: Tajo Oscuro Proj
 }
 
 Buffs: {
@@ -4019,4 +4022,3 @@ Arbol: {
 	Nodo9: EL ECO DE AETHON
 	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
 }
-	AuraVacioBuff: {1

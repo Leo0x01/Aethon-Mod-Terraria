@@ -2609,6 +2609,9 @@ Projectiles: {
 	// JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
 	// CeremoniaLlamado.DisplayName: Ceremonia Llamado
 	// DevoracionEterna.DisplayName: Devoracion Eterna
+	// AgujaVacioProj.DisplayName: Aguja Vacio Proj
+	// JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
+	// TajoOscuroProj.DisplayName: Tajo Oscuro Proj
 }
 
 Buffs: {
@@ -2665,7 +2668,7 @@ Buffs: {
 
 	VacioExterior: {
 		// v6.122: renamed VOID BURN (la letra: «Vacio Exterior, que ahora
-		// se llamara Quemadura del Vacio») — el pago al dueño sigue igual
+		// se llamara Quemadura del Vacio») — the bearer's reward stays the same
 		DisplayName: Quemadura del vacío
 		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
 	}
@@ -3943,8 +3946,8 @@ Altar: {
 	ListaEsencias: Esencias listas — el Eterno las devora enteras por la puerta
 	YaConsagrada: Ya está consagrada
 	NoArma: ✦ No es apto
-	// v6.122 — EL DEPÓSITO DE LAS MIL (la letra: el altar toma solo lo
-	// que falta para las mil y el resto queda en el cursor — jamás se pierde)
+	// v6.122 — THE OFFERING OF THE THOUSAND (the altar only takes what
+	// the door still needs; the rest stays on the cursor — never lost)
 	PuertaBebe: El altar bebe {0} esencias — la puerta lleva {1}/{2}
 	PuertaYaAbierta: La puerta ya está abierta — las mil esencias ya viven en el altar
 	// v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de

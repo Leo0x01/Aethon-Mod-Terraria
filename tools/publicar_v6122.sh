@@ -28,8 +28,8 @@ cd "$(dirname "$0")/.."
 REPO="Leo0x01/Aethon-Mod-Terraria"
 TAG="v6.122"
 MOD_TMOD="$HOME/.local/share/Terraria/tModLoader/Mods/AethonMod.tmod"
-MD5_ESPERADO="4c1ae96e2491014ef6f474b4056ca495"
-TAMANO_ESPERADO=28343970
+MD5_ESPERADO="9da2d6744a9e60da3f1ba743c7daf3f3"
+TAMANO_ESPERADO=28346148
 SNAPSHOT="STABLE-SNAPSHOT.md"
 API="https://api.github.com"
 

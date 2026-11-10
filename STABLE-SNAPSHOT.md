@@ -27,7 +27,7 @@
 ## PARA VERIFICAR (la cadena de la casa)
 
 - oráculo verify.csproj: **0 errores / 0 warnings** (452 .cs contra el tML 2026.09.3.1 real).
-- **-build REAL 0/0**: 503 entradas, 28.343.970 B, EOF exacto.
+- **-build REAL 0/0**: 503 entradas, 28.346.148 B, EOF exacto.
 - **GUARDIÁN TODO VIVE ✔** (incluida la pasada del .tmod: los 4 PNG nuevos y ninguna máscara huérfana).
 - **AUDIT v6.122 TODO VERIFICADO ✔** — las firmas de la obra VIVAS en la DLL (DanoFormaEterna · AuraVacioBuff · EstiloAparicionLuz · HacesVida · IntensidadGlobal · las tres armas), los literales UTF-16, las texturas medidas, las bandas vorbis y RENACIDAS ≠ versión 1 (el archivo de la casa), hjson empaquetado == fuente, keysets ×3 idénticos, y LA FUENTE de cada cura (las brumas en su lote, el iris muerto, el ápice dentro, las runas al nodo 7, el depósito con el sobreviviente en el cursor).
 - **servidor headless**: Constructing Mods → Adding Recipes sin UNA excepción, sin «Disabling Mod».
