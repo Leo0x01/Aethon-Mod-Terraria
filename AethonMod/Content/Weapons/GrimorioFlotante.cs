@@ -42,6 +42,15 @@ namespace AethonMod.Content.Weapons
             if (p == null || !p.active || p.dead || p.stealth > 0.94f)
                 return false;
 
+            // v6.121 — EL LIBRO NO CABE DENTRO DE SÍ MISMO (la letra: el
+            // grimorio NO debe aparecer en el mundo interior): el
+            // portador siempre lleva al Eterno en la bolsa — y dentro
+            // del CUERPO del dios, el libro que flota detrás del jugador
+            // es un absurdo: estás DENTRO de él. AHÍ el libro no flota:
+            // te envuelve. La capa muere mientras el interior viva.
+            if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo)
+                return false;
+
             // SOLO GUARDADO: si lo lleva en la mano, la mano manda (y el
             // uso del arma es del jugador).
             if (p.HeldItem != null && !p.HeldItem.IsAir &&

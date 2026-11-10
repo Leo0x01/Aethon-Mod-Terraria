@@ -175,10 +175,14 @@ namespace AethonMod.Content.UI
             try
             {
                 if (it == null || it.IsAir) return false;
-                // LAS ESENCIAS NO (la letra: «menos las esencias mismas
-                // ya que estas son la misma esencia del eterno»).
+                // v6.121 — LAS ESENCIAS SÍ (la letra nueva: «intento
+                // colocar 1000 esencias del eterno en el altar y dice
+                // no apto»): la letra vieja las vedaba del hueco; ahora
+                // SON LA OFRENDA DE LA PUERTA — entran como cualquier
+                // ofrenda y al consagrarlas EL ETERNO LAS DEVORA ENTERAS
+                // (la cuenta X/1000 sube con TODAS — ver el botón).
                 if (it.type == ModContent.ItemType
-                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>()) return false;
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>()) return true;
                 if (it.type == ModContent.ItemType
                     <global::AethonMod.Content.Items.Altar.LibroCorrupto>()) return false;
                 // EL GRIMORIO NO (él es el comensal, no el plato).
@@ -256,8 +260,18 @@ namespace AethonMod.Content.UI
                 int w = 400;
                 bool lista = EsOfrendaConsagrible(_arma);
                 bool esArma = EsArmaDeVerdad(_arma);
-                int costeVivo = lista ? global::AethonMod.Content.Globals.CorruptoGlobalItem
-                    .CosteCorrupcion(_arma) : 0;
+                // v6.121 — LA OFRENDA QUE ES EL DINERO MISMO (la letra:
+                // «intento colocar 1000 esencias del eterno en el altar
+                // y dice no apto»): las ESENCIAS DEL ETERNO entran al
+                // hueco como cualquier ofrenda — pero no se sellan: EL
+                // ETERNO LAS DEVORA ENTERAS y la cuenta de la puerta
+                // (X/1000) sube con TODAS. Su sello no cuesta nada:
+                // ELLAS SON EL PAGO.
+                bool esEsencias = lista && _arma != null && !_arma.IsAir && _arma.type ==
+                    ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                int costeVivo = lista && !esEsencias
+                    ? global::AethonMod.Content.Globals.CorruptoGlobalItem
+                        .CosteCorrupcion(_arma) : 0;
                 int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
                     .EsenciasEnLaBolsa(Main.LocalPlayer);
 
@@ -379,6 +393,56 @@ namespace AethonMod.Content.UI
                 bool hoverBtnAhora = _geoBtn.Contains(Main.mouseX, Main.mouseY);
                 if (hoverBtnAhora && clicNuevo && lista && !_arma.IsAir)
                 {
+                    // ============================================================
+                    // v6.121 — EL DEVORO DE LAS ESENCIAS (la letra: «intento
+                    // colocar 1000 esencias del eterno en el altar y dice
+                    // no apto»): LAS ESENCIAS DEL ETERNO ya entran al hueco
+                    // — y al CONSAGRARLAS el Eterno no las sella: LAS
+                    // DEVORA ENTERAS. TODAS suben a la cuenta de la
+                    // puerta del mundo interior (EsenciasConsagradas):
+                    // las mil en el hueco y LA PUERTA NACE. No vuelven al
+                    // cursor: lo devorado es del Eterno.
+                    // ============================================================
+                    if (esEsencias)
+                    {
+                        int cuantas = _arma.stack;
+                        bool yaAbiertaEsencias =
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += cuantas;
+                        // EL TEATRO DEL DEVORO: la bruma violeta se las traga.
+                        if (!Main.dedServ)
+                        {
+                            for (int k = 0; k < 22; k++)
+                            {
+                                Dust d = Dust.NewDustPerfect(
+                                    altarCentro + new Vector2(Main.rand.NextFloat(-14f, 14f),
+                                        Main.rand.NextFloat(-30f, 6f)),
+                                    DustID.Shadowflame,
+                                    Main.rand.NextVector2Circular(2.5f, 2.5f), 140,
+                                    new Color(140, 60, 210), 1f);
+                                d.noGravity = true;
+                            }
+                        }
+                        Main.NewText(Language.GetTextValue(Clave("DevoradasHecha"),
+                            cuantas,
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
+                            TintaVioleta);
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item113.WithPitchOffset(-0.45f));
+                        if (!yaAbiertaEsencias &&
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                        {
+                            Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
+                                new Color(220, 170, 255));
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item113.WithPitchOffset(-0.7f));
+                        }
+                        _arma = new Item();   // DEVORADAS: el hueco queda vacío
+                    }
+                    else
+                    {
                     var sello = _arma.GetGlobalItem
                         <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                     if (sello != null)
@@ -456,6 +520,7 @@ namespace AethonMod.Content.UI
                             DevolverElArma();   // la ofrenda consagrada vuelve al cursor
                         }
                     }
+                    }   // v6.121 — fin del else del devoro (las esencias ya tuvieron su rama)
                 }
 
                 // ============================================================
@@ -532,6 +597,10 @@ namespace AethonMod.Content.UI
         {
             Texture2D pixel = TextureAssets.MagicPixel.Value;
             bool dibujar = sb != null;
+            // v6.121 — ¿LA OFRENDA SON LAS ESENCIAS? (el devoro de la
+            // puerta: el hueco las acepta y el Eterno las traga enteras).
+            bool esEsencias = lista && _arma != null && !_arma.IsAir && _arma.type ==
+                ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>();
 
             // ── EL SLOT DE LA OFRENDA (la boca del consagrador) ──
             Rectangle slot = new Rectangle(x + 24, y + 86, 52, 52);
@@ -584,16 +653,20 @@ namespace AethonMod.Content.UI
                 AltoMedido(Language.GetTextValue(Clave("ListaMaterial")), w - 48f, 0.85f));
             altoEstado = Math.Max(altoEstado,
                 AltoMedido(Language.GetTextValue(Clave("NoArma")), w - 48f, 0.85f));
+            altoEstado = Math.Max(altoEstado,
+                AltoMedido(Language.GetTextValue(Clave("ListaEsencias")), w - 48f, 0.85f));
             if (dibujar && _arma != null && !_arma.IsAir)
             {
                 var selloArma = _arma.GetGlobalItem
                     <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                 bool yaEra = selloArma != null && selloArma.Corrompido;
                 string estado = yaEra ? Language.GetTextValue(Clave("YaConsagrada"))
-                    : lista ? Language.GetTextValue(Clave(esArma ? "ListaArma" : "ListaMaterial"))
+                    : lista ? Language.GetTextValue(Clave(
+                          esEsencias ? "ListaEsencias"
+                          : esArma ? "ListaArma" : "ListaMaterial"))
                     : Language.GetTextValue(Clave("NoArma"));
                 Color colEstado = yaEra ? TintaVioleta
-                    : lista ? TintaTeal : TintaRojo;
+                    : lista ? (esEsencias ? TintaVioleta : TintaTeal) : TintaRojo;
                 LineaMedida(sb, estado, x + 24f, cy, w - 48f, 0.85f, colEstado);
             }
             cy += altoEstado + 4f;
@@ -607,6 +680,12 @@ namespace AethonMod.Content.UI
                 x + 24f, cy, w - 48f, 0.78f, TintaTexto);
             cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaMaterial")),
                 x + 24f, cy, w - 48f, 0.78f, TintaApagado);
+            // v6.121 — LA TERCERA GANANCIA: LAS ESENCIAS (la ofrenda que
+            //     es el pago — el Eterno las devora por la puerta).
+            cy = LineaMedida(sb, Language.GetTextValue(Clave("GanaEsencias"),
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
+                x + 24f, cy, w - 48f, 0.78f,
+                esEsencias ? TintaVioleta : TintaApagado);
             cy += 8f;
 
             // ── LA SECCIÓN 2 — EL SELLO (el precio A LA VISTA y LA CUENTA
@@ -623,12 +702,32 @@ namespace AethonMod.Content.UI
                 AltoMedido(Language.GetTextValue(
                     alcanza ? Clave("SelloAlcanza") : Clave("SelloFalta"),
                     Math.Max(costeVivo - llevadas, 0)), w - 48f, 0.80f));
+            // v6.121 — EL DEVORO también se mide (la variante más ancha:
+            // 9999 esencias — la pila del hueco puede ser enorme).
+            altoConOfrenda = Math.Max(altoConOfrenda,
+                AltoMedido(Language.GetTextValue(Clave("DevoraLinea"),
+                    9999,
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
+                    w - 48f, 0.80f));
             float altoSinOfrenda = AltoMedido(Language.GetTextValue(Clave("SelloSinOfrenda")),
                 w - 48f, 0.78f);
             if (dibujar)
             {
                 if (lista && !_arma.IsAir)
                 {
+                    if (esEsencias)
+                    {
+                        // v6.121 — EL DEVORO A LA VISTA: lo que el hueco
+                        //     trae y a dónde va — la cuenta de la puerta.
+                        LineaMedida(sb, Language.GetTextValue(Clave("DevoraLinea"),
+                            _arma.stack,
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta),
+                            x + 24f, cy, w - 48f, 0.80f, TintaVioleta);
+                    }
+                    else
+                    {
                     LineaMedida(sb, Language.GetTextValue(Clave("SelloCuesta"), costeVivo),
                         x + 24f, cy, w - 48f, 0.80f, TintaTexto);
                     LineaMedida(sb, Language.GetTextValue(Clave("SelloLlevas"), llevadas),
@@ -638,6 +737,7 @@ namespace AethonMod.Content.UI
                             Math.Max(costeVivo - llevadas, 0)),
                         x + 24f, cy, w - 48f, 0.80f,
                         alcanza ? TintaTeal : TintaRojo);
+                    }
                 }
                 else
                 {
@@ -657,7 +757,8 @@ namespace AethonMod.Content.UI
                 sb.Draw(pixel, btnCorromper,
                     (hoverBtn && lista ? TintaVioleta : TintaVioleta * 0.35f) * 0.30f);
                 Marco(sb, pixel, btnCorromper, lista ? TintaVioleta : TintaVioleta * 0.35f);
-                Utils.DrawBorderString(sb, Language.GetTextValue(Clave("Consagrar")),
+                Utils.DrawBorderString(sb, Language.GetTextValue(
+                        Clave(esEsencias ? "Devorar" : "Consagrar")),
                     new Vector2(btnCorromper.Center.X, btnCorromper.Center.Y),
                     lista ? TintaTexto : TintaApagado, 1.0f, 0.5f, 0.5f);
             }

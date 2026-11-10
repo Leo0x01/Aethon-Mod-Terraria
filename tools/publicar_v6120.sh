@@ -139,7 +139,7 @@ partes += [
     '-build REAL 0/0 · GUARDIÁN TODO VIVE (con la pasada (4) NUEVA de convenciones + prueba negativa) · '
     'AUDIT v6.120 TODO VERIFICADO ✔ (100 checks: 499 entradas, EOF exacto, EMPAQUETADO==FUENTE ×3, las firmas de la obra VIVAS en la DLL) · '
     'servidor headless 0 excepciones (el mod cargando de verdad: «Sandboxing: Aethon v6.120»).',
-    '.tmod: 15.943.130 B · 499 entradas · md5 5bb475d8279bd092e6b3f18deec03514
+    '.tmod: 15.943.130 B · 499 entradas · md5 5bb475d8279bd092e6b3f18deec03514',
     'Instalación: descarga `AethonMod.tmod` → carpeta `Mods` del tModLoader → actívalo.',
 ]
 body = '\n'.join(partes)

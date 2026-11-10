@@ -2,6 +2,63 @@
 
 > **La letra**: «une las 3 herramientas en una, ademas busca mas herramientas similares y de utilidad que creas que nos puedan ser utiles y crea una super herramienta con todas ellas»
 
+---
+
+## v6.121 — LA FUSIÓN: LA FORJA + EL TALLER = LA SUPERFORJA (una sola)
+
+> **La letra**: «une La Forja y El Taller — que se mencionen por separado es molesto» +
+> «dime para que sirve cada una».
+
+**PARA QUÉ SERVÍA CADA UNA** (la respuesta):
+
+| | Qué era | Qué hacía |
+|---|---|---|
+| **LA FORJA** (v6.95, `taller_pixelart.py`) | La cadena CORTA de los 3 reels | LA PLUMA (pxl: el borrador IA con la paleta del libro) → EL MOLDE (sprite-gen: cutout, rejilla, paleta, contorno Terraria, highlight) → EL ALMA (pixelfx: el efecto de píxel). Forjó el Altar de la Caída y las 20 armas dignas. |
+| **EL TALLER** (v6.98, `superforja.py`) | La Forja AGRANDADA — LA SUPERFORJA | El mismo corazón (la cadena corta VIVE dentro: el comando `forjar`) rodeado de las SIETE herramientas nuevas de la investigación: EL PUENTE, EL ESPEJO, EL TAMBOR, LA RAMPA, EL ATLAS, LA REFINA, EL OJO, EL CORTE. |
+
+**LA FUSIÓN**: desde la v6.121 hay **UNA SOLA HERRAMIENTA — LA SUPERFORJA**
+(`tools/superforja.py`). `tools/taller_pixelart.py` YA NO es una herramienta
+separada: es el **ALIAS DE COMPATIBILIDAD** — las recetas viejas que llaman «la
+forja» o «el taller» siguen funcionando y aterrizan en la Superforja (con su
+carpeta `forja_<n>` respetada). Un nombre, una casa, cero pérdida.
+
+---
+
+## v6.121 — EL ALMA ES PIXELFX DE VERDAD (copiado y adaptado)
+
+> **La letra**: «revisa que la forja o el taller tenga el codigo de este repo
+> (github.com/patch-gg/pixelfx), asegurate de que no pierda calidad de ninguna
+> manera, copia y adapta, y tambien mejora para nuestro juego».
+
+**LO COPIADO Y ADAPTADO — la arquitectura de los 244 efectos** (su corazón):
+1. **EL DOBLE BÚFER**: un búfer de COLOR y un búfer de LUZ — la luz se compone
+   **EN ADITIVO** (premultiplied alpha: rgb·a se SUMA, el alfa se MAXEA): el
+   brillo respira ALREDEDOR del sprite SIN lavarlo jamás.
+2. **EL LIENZO EXTENDIDO**: los efectos viven en el espacio LOCAL alrededor
+   del origen (pad de 26 px) — coronas, halos y anillos respiran fuera del
+   bounding box.
+3. **draw(p, t, o)**: cada efecto, UN TROCITO DE CÓDIGO determinista que
+   pinta el frame t — la firma de su API.
+4. **CERO BLUR**: pixel PURO — la luz es CRISP (la lección del pilar).
+
+**LO MEJORADO PARA NUESTRO JUEGO**: los 8 efectos nuevos salen de SUS
+categorías, vestidos con la paleta del vacío (violeta 150,84,235 · oro
+255,214,130):
+
+```
+LOS 17 EFECTOS DEL ALMA (python3 tools/superforja.py alma --efecto <nombre>):
+  los 9 de siempre: brasa · humo · glitch · consagracion · fuego · hielo ·
+                    rayo · escudo · portal           (INTACTOS, píxel a píxel)
+  los 8 de pixelfx: eclipse (shadow: LA FIRMA DEL MOD) · sigilo (hex sigil) ·
+                    agujero (black hole) · orbe (arcane orb) ·
+                    disolucion (dissolve burn) · aura (halo) ·
+                    destello (hit flash) · runas (magic circle)
+  QA VLM: SHIP — «eclipse, orbe y destello leen muy bien, paleta
+          violeta+oro consistente y píxeles limpios»
+```
+
+---
+
 **El comando**: `python3 tools/superforja.py <comando> — TODO local, sin nube (la regla de sprite-gen).**
 
 ---

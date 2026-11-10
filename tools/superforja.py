@@ -119,7 +119,7 @@ import random
 import subprocess
 import sys
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
@@ -134,7 +134,54 @@ PALETA_PROMPT = ("deep midnight-blue ink #182878 body, near-black #0A0A2A shadow
                  "fuchsia #F000C0 magic accents, teal #5ADCB4 flames, violet #9643EB runes")
 
 EFECTOS = ['brasa', 'humo', 'glitch', 'consagracion',
-           'fuego', 'hielo', 'rayo', 'escudo', 'portal']
+           'fuego', 'hielo', 'rayo', 'escudo', 'portal',
+           'eclipse', 'sigilo', 'agujero', 'orbe',
+           'disolucion', 'aura', 'destello', 'runas']
+
+# ====================================================================
+#  v6.121 — EL CÓDIGO DE PIXELFX, COPIADO Y ADAPTADO (la letra: «revisa
+#  que la forja o el taller tenga el codigo de este repo, asegurate de
+#  que no pierda calidad de ninguna manera, copia y adapta, y tambien
+#  mejora para nuestro juego» — github.com/patch-gg/pixelfx)
+#
+#  LO COPIADO Y ADAPTADO — LA ARQUITECTURA DE PIXELFX (su corazón, la
+#  razón por la que sus 244 efectos se ven vivos):
+#   1. EL DOBLE BÚFER: un búfer de COLOR y un búfer de LUZ — la luz se
+#      compone EN ADITIVO (premultiplied alpha: rgb·a se SUMA, el alfa
+#      se MAXEA): el brillo respira ALREDEDOR del sprite SIN lavarlo
+#      jamás (la calidad NO se pierde: los 9 efectos de siempre quedan
+#      INTACTOS píxel a píxel — el teatro es una capa NUEVA).
+#   2. EL LIENZO EXTENDIDO: los efectos de pixelfx viven en el espacio
+#      LOCAL ALREDEDOR del origen (no recortados al bounding box): el
+#      pad de 26 px deja respirar coronas, halos y anillos.
+#   3. draw(p, t, o): cada efecto, UN TROCITO DE CÓDIGO determinista
+#      (semilla de la casa) que pinta el frame t — la firma de su API.
+#   4. CERO BLUR: pixelfx es pixel PURO — la luz es CRISP, sin
+#      difuminados que traicionen el pixel art (la lección del pilar).
+#
+#  LO MEJORADO PARA NUESTRO JUEGO: los 8 efectos nuevos salen de SUS
+#  categorías (shadow · arcane · holy · status · spawn&death ·
+#  impacts · transitions) vestidos con LA PALETA DEL VACÍO — el
+#  eclipse del grimorio, el sigilo del conjuro, el agujero de los
+#  staves, la disolución de la devoración:
+#   · eclipse    (shadow — su «eclipse»: LA FIRMA DEL MOD)
+#   · sigilo     (shadow — su «hex sigil»: el círculo rúnico girando)
+#   · agujero    (shadow — su «black hole»: el pozo y su anillo)
+#   · orbe       (arcane — su «arcane orb»: el orbe y sus satélites)
+#   · disolucion (spawn&death — su «dissolve burn»: la devoración)
+#   · aura       (holy — su «halo»: el halo dorado y su columna)
+#   · destello   (impacts — su «hit flash»: el fogonazo y la onda)
+#   · runas      (arcane — su «magic circle cast»: las runas orbitando)
+# ====================================================================
+_EFECTOS_PIXELFX = {'eclipse', 'sigilo', 'agujero', 'orbe',
+                    'disolucion', 'aura', 'destello', 'runas'}
+_PAD = 26                       # el lienzo extendido de pixelfx
+
+VACIO_H = (26, 14, 44)          # el vacío hondo (la casa)
+VIOLETA_V = (150, 84, 235)      # el violeta del vacío
+LILA_V = (196, 112, 255)        # el lila vivo
+ORO_V = (255, 214, 130)         # el oro del veredicto
+ORO_H = (212, 168, 84)          # el oro hondo
 
 
 def carpeta_de(nombre, dest=None):
@@ -879,9 +926,295 @@ def el_alma(sprite, efecto='brasa', frames=3):
                     pf[x, y] = (int(r * (1 - k) + 255 * rr * k),
                                 int(g * (1 - k) + 255 * gg * k),
                                 int(b * (1 - k) + 255 * bb * k), 255)
-        out.append(fr)
+        # v6.121 — EL TEATRO DE PIXELFX: los efectos nuevos viven
+        # ALREDEDOR del sprite (el lienzo extendido + el doble búfer).
+        # Los 9 de siempre vuelven INTACTOS (ni un píxel tocado).
+        if efecto in _EFECTOS_PIXELFX:
+            out.append(_teatro_pixelfx(efecto, sprite, f, frames))
+        else:
+            out.append(fr)
     print(f'  EL ALMA: {frames} frames del efecto «{efecto}»')
     return out
+
+
+# ====================================================================
+#  v6.121 — EL MOTOR DE PIXELFX ADAPTADO (doble búfer + lienzo
+#  extendido): cada efecto, UN TROCITO DE CÓDIGO (draw(p, t, o))
+# ====================================================================
+def _luz_aditiva(base, luz):
+    """LA COMPOSICIÓN DE PIXELFX — el búfer de LUZ se SUMA en
+    premultiplied alpha: result.rgb = base.rgb·base.a + luz.rgb·luz.a;
+    result.a = max. El brillo NUNCA lava: se ACUMULA (aditivo de
+    verdad, no un alpha_composite encima)."""
+    import numpy as np
+    b = np.asarray(base.convert('RGBA'), dtype=np.float32) / 255.0
+    l = np.asarray(luz.convert('RGBA'), dtype=np.float32) / 255.0
+    out = b.copy()
+    ba = b[..., 3:4]
+    out[..., :3] = np.clip(b[..., :3] * ba + l[..., :3] * l[..., 3:4], 0.0, 1.0)
+    out[..., 3:4] = np.clip(ba + l[..., 3:4], 0.0, 1.0)
+    return Image.fromarray((out * 255.0).round().astype('uint8'))
+
+
+def _teatro_pixelfx(efecto, sprite, frame, frames):
+    """EL FRAME VIVO del efecto de teatro: el lienzo extendido
+    (sprite al centro + _PAD por lado), el búfer de COLOR (píxeles
+    sólidos del efecto) y el búfer de LUZ (el resplandor aditivo).
+    Determinista: TODO sale de la fase (la semilla ya la puso
+    el_alma)."""
+    fase = frame / max(1, frames)
+    w, h = sprite.size
+    W, H = w + _PAD * 2, h + _PAD * 2
+    lienzo = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    lienzo.paste(sprite, (_PAD, _PAD))
+    color = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    luz = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    dc = ImageDraw.Draw(color)
+    dl = ImageDraw.Draw(luz)
+    cx, cy = W / 2.0, H / 2.0
+    R = max(w, h) / 2.0
+
+    # === EL ECLIPSE (shadow: «eclipse») — LA FIRMA DEL MOD =========
+    if efecto == 'eclipse':
+        # el disco negro en el cenit del sprite
+        dr = R * 0.52
+        dx, dy = cx, _PAD + h * 0.06
+        pulso = 0.5 + 0.5 * math.sin(fase * math.pi * 2)
+        dc.ellipse([dx - dr, dy - dr, dx + dr, dy + dr], fill=(12, 6, 22, 255))
+        dc.ellipse([dx - dr, dy - dr, dx + dr, dy + dr],
+                   outline=LILA_V + (215,), width=2)
+        # LA CORONA: 12 radios alternos (el abanico del dios)
+        for k in range(12):
+            a = fase * math.pi / 3 + k * math.pi / 6
+            largo = dr * (1.18 + (0.42 if k % 2 == 0 else 0.18) + 0.10 * pulso)
+            x1 = dx + math.cos(a) * dr * 1.06
+            y1 = dy + math.sin(a) * dr * 1.06
+            x2 = dx + math.cos(a) * largo
+            y2 = dy + math.sin(a) * largo
+            dc.line([(x1, y1), (x2, y2)],
+                    fill=VIOLETA_V + (235,), width=2)
+        # el aro de la corona (el abrazo)
+        dc.ellipse([dx - dr * 1.10, dy - dr * 1.10, dx + dr * 1.10, dy + dr * 1.10],
+                   outline=LILA_V + (200,), width=2)
+        # LA LUZ: el resplandor violeta del cenit
+        dl.ellipse([dx - dr * 1.7, dy - dr * 1.7, dx + dr * 1.7, dy + dr * 1.7],
+                   fill=VIOLETA_V + (int(46 + 30 * pulso),))
+        dl.ellipse([dx - dr * 1.15, dy - dr * 1.15, dx + dr * 1.15, dy + dr * 1.15],
+                   fill=LILA_V + (int(30 + 24 * pulso),))
+
+    # === EL SIGILO (shadow: «hex sigil») ============================
+    elif efecto == 'sigilo':
+        rx, ry = w * 0.72, h * 0.46
+        gira = fase * math.pi * 2
+        dc.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+                   outline=ORO_H + (225,), width=2)
+        dc.ellipse([cx - rx * 0.72, cy - ry * 0.72, cx + rx * 0.72, cy + ry * 0.72],
+                   outline=VIOLETA_V + (160,), width=1)
+        # LAS 8 MUESCAS RÚNICAS caminando (el conjuro orbitando)
+        for k in range(8):
+            a = gira + k * math.pi / 4
+            mx = cx + math.cos(a) * rx
+            my = cy + math.sin(a) * ry
+            dc.line([(mx - 2, my - 4), (mx + 2, my + 4)],
+                    fill=ORO_V + (255,), width=2)
+        # el ojo del sigilo (el punto que todo lo ve)
+        dc.ellipse([cx - 4, cy - 4, cx + 4, cy + 4], fill=ORO_V + (255,))
+        # LA LUZ: el círculo arde detrás del sprite
+        dl.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+                   fill=VIOLETA_V + (36,))
+        dl.ellipse([cx - 10, cy - 10, cx + 10, cy + 10],
+                   fill=ORO_V + (60,))
+
+    # === EL AGUJERO (shadow: «black hole») =========================
+    elif efecto == 'agujero':
+        r_in = R * 0.30
+        r_out = R * 0.52
+        gira = fase * math.pi * 2
+        # EL POZO (el negro que devora la luz)
+        dc.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in],
+                   fill=(8, 4, 16, 255))
+        # EL ANILLO DE ACRECIÓN (violeta → oro: la espiral de tres
+        # brazos que gira — el pozo come y el anillo brilla)
+        for paso in range(3):
+            fr = paso / 3
+            rr = r_in + (r_out - r_in) * (0.35 + 0.65 * fr)
+            col = tuple(int(VIOLETA_V[i] * (1 - fr) + ORO_V[i] * fr) for i in range(3))
+            for k in range(3):
+                a0 = gira + k * math.pi * 2 / 3 + fr * 0.9
+                a1 = a0 + 0.55
+                pasos = 7
+                pts = []
+                for s in range(pasos + 1):
+                    aa = a0 + (a1 - a0) * s / pasos
+                    pts.append((cx + math.cos(aa) * rr, cy + math.sin(aa) * rr))
+                dc.line(pts, fill=col + (235,), width=3)
+        # LA FRONTERA (el horizonte de eventos)
+        dc.ellipse([cx - r_in * 1.12, cy - r_in * 1.12, cx + r_in * 1.12, cy + r_in * 1.12],
+                   outline=(6, 3, 12, 255), width=2)
+        # LOS DESPOJOS orbitando hacia adentro
+        for k in range(5):
+            a = -gira * 1.6 + k * math.pi * 2 / 5
+            rr = r_out * (1.15 - 0.22 * ((fase + k / 5) % 1.0))
+            dx2 = cx + math.cos(a) * rr
+            dy2 = cy + math.sin(a) * rr * 0.82
+            dc.ellipse([dx2 - 2, dy2 - 2, dx2 + 2, dy2 + 2], fill=ORO_V + (255,))
+        # LA LUZ: el pozo arde alrededor
+        dl.ellipse([cx - r_out * 1.02, cy - r_out * 0.88, cx + r_out * 1.02, cy + r_out * 0.88],
+                   fill=VIOLETA_V + (66,))
+        dl.ellipse([cx - r_in * 1.25, cy - r_in * 1.25, cx + r_in * 1.25, cy + r_in * 1.25],
+                   fill=ORO_V + (58,))
+
+    # === EL ORBE (arcane: «arcane orb») ============================
+    elif efecto == 'orbe':
+        bob = math.sin(fase * math.pi * 2) * 5.0
+        ox, oy = cx, cy - h * 0.16 + bob
+        r = max(10.0, h * 0.13)
+        # el núcleo (el cristal vivo)
+        dc.ellipse([ox - r, oy - r, ox + r, oy + r], fill=VIOLETA_V + (255,))
+        dc.ellipse([ox - r * 0.55, oy - r * 0.55, ox + r * 0.55, oy + r * 0.55],
+                   fill=LILA_V + (255,))
+        dc.ellipse([ox - r * 0.22, oy - r * 0.28, ox + r * 0.10, oy - r * 0.04],
+                   fill=(240, 226, 255, 255))
+        # LOS TRES SATÉLITES (la órbita de la casa)
+        for k in range(3):
+            a = fase * math.pi * 2 + k * math.pi * 2 / 3
+            sx = ox + math.cos(a) * r * 2.1
+            sy = oy + math.sin(a) * r * 0.8
+            dc.ellipse([sx - 3, sy - 3, sx + 3, sy + 3], fill=ORO_V + (255,))
+            dl.ellipse([sx - 5, sy - 5, sx + 5, sy + 5], fill=ORO_V + (70,))
+            # la estela del satélite (los tres pasos previos)
+            for t in (1, 2):
+                aa = a - t * 0.16
+                ex = ox + math.cos(aa) * r * 2.1
+                ey = oy + math.sin(aa) * r * 0.8
+                dc.ellipse([ex - 2, ey - 2, ex + 2, ey + 2],
+                           fill=VIOLETA_V + (150 - t * 50,))
+        # LA LUZ: el aura del orbe — LA CURA DEL OJO: CONTENIDA y
+        # FUERTE (nítida, no un charco difuso)
+        dl.ellipse([ox - r * 1.9, oy - r * 1.9, ox + r * 1.9, oy + r * 1.9],
+                   fill=VIOLETA_V + (72,))
+        dl.ellipse([ox - r * 1.25, oy - r * 1.25, ox + r * 1.25, oy + r * 1.25],
+                   fill=LILA_V + (64,))
+
+    # === LA DISOLUCIÓN (spawn&death: «dissolve burn») ==============
+    elif efecto == 'disolucion':
+        # EL CUERPO SE DESHACE de abajo hacia arriba (la devoración):
+        # bajo la línea, los píxeles se vuelven brasas y se van
+        # LA CURA DEL OJO: la línea NACE bajo el sprite (frame 0
+        # INTACTO) y SUBE con los frames — antes el frame 0 ya venía
+        # medio devorado
+        linea = int(h * (1.02 - 1.15 * fase))
+        sp = sprite.copy()
+        ps = sp.load()
+        for y in range(max(0, linea), h):
+            for x in range(w):
+                if ps[x, y][3] == 0:
+                    continue
+                k = (y - linea) / max(1, h - linea)
+                if random.random() < 0.22 + 0.48 * k:
+                    ps[x, y] = (int(255 * (1 - k * 0.5)), int(170 * (1 - k)), int(60 * (1 - k)), 255)
+                elif random.random() < 0.30 * k:
+                    ps[x, y] = (0, 0, 0, 0)
+        lienzo.paste(sp, (_PAD, _PAD))
+        # LAS BRASAS: la FRONTERA ARDE siempre (la línea de la
+        # devoración visible en CADA frame) + las que escapan arriba
+        for k in range(10):
+            sem = k * 13 + 5
+            bx = _PAD + (sem * 37 % w)
+            by = _PAD + max(0, min(h - 1, linea + (sem * 7 % 5) - 2))
+            dc.ellipse([bx - 2, by - 2, bx + 2, by + 2], fill=(255, 190, 90, 255))
+        for k in range(12):
+            sem = k * 17 + 3
+            bx = _PAD + (sem * 31 % w)
+            by = _PAD + max(0, linea) + (sem * 53 % max(1, h - max(0, linea)))
+            sube = (fase * 26 + (sem % 7) * 3) % (h * 0.5)
+            dc.ellipse([bx - 2, by - sube, bx + 2, by - sube + 2],
+                       fill=ORO_V + (235,),)
+        dl.ellipse([cx - w * 0.5, _PAD + max(0, linea) - 6,
+                    cx + w * 0.5, _PAD + max(0, linea) + 10],
+                   fill=(250, 140, 60, 58))
+        # LA LUZ: el resplandor de las brasas bajo la línea
+        dl.ellipse([cx - w * 0.55, _PAD + max(0, linea) + h * 0.10,
+                    cx + w * 0.55, _PAD + max(0, linea) + h * 0.55],
+                   fill=(250, 140, 60, 44))
+
+    # === EL AURA (holy: «halo») ====================================
+    elif efecto == 'aura':
+        respira = 0.5 + 0.5 * math.sin(fase * math.pi * 2)
+        rx, ry = w * 0.42, h * 0.10
+        hy2 = _PAD + h * 0.06
+        # EL HALO DORADO sobre el sprite
+        dc.ellipse([cx - rx, hy2 - ry, cx + rx, hy2 + ry],
+                   outline=ORO_V + (255,), width=3)
+        dc.ellipse([cx - rx * 0.72, hy2 - ry * 0.72, cx + rx * 0.72, hy2 + ry * 0.72],
+                   outline=ORO_H + (180,), width=1)
+        # LA COLUMNA DE LUZ detrás del sprite (el pilar del veredicto)
+        ancho_col = w * (0.50 + 0.08 * respira)
+        dl.polygon([(cx - ancho_col * 0.5, _PAD), (cx + ancho_col * 0.5, _PAD),
+                    (cx + w * 0.28, _PAD + h), (cx - w * 0.28, _PAD + h)],
+                   fill=ORO_V + (44,))
+        # el halo arde
+        dl.ellipse([cx - rx * 1.2, hy2 - ry * 1.6, cx + rx * 1.2, hy2 + ry * 1.6],
+                   fill=ORO_V + (int(56 + 44 * respira),))
+
+    # === EL DESTELLO (impacts: «hit flash») ========================
+    elif efecto == 'destello':
+        # frame 0: EL FOGONAZO — LA CURA DEL OJO: va al BÚFER DE LUZ
+        # (aditivo blanco-violeta: el fondo oscuro VIVE, nada de gris plano)
+        if frame == 0:
+            dl.rectangle([_PAD, _PAD, _PAD + w, _PAD + h],
+                         fill=(236, 214, 255, 132))
+        # LA ONDA DE CHOQUE: el anillo que EXPANDE y se apaga —
+        # LA CURA DEL OJO: en el frame 0 el anillo NACE GRUESO al
+        # centro (el destello SE LEE desde el primer marco)
+        crece = fase
+        r = R * (0.22 + 1.05 * crece)
+        alfa = int(245 * (1.0 - crece) ** 1.2)
+        dc.ellipse([cx - r, cy - r * 0.92, cx + r, cy + r * 0.92],
+                   outline=VIOLETA_V + (alfa,), width=4 if fase < 0.5 else 3)
+        r2 = r * 0.62
+        dc.ellipse([cx - r2, cy - r2 * 0.92, cx + r2, cy + r2 * 0.92],
+                   outline=ORO_V + (max(0, alfa - 40),), width=2)
+        # LAS CHISPAS DEL IMPACTO (6, fijas, encendidas al inicio)
+        for k in range(6):
+            a = k * math.pi / 3 + 0.35
+            d2 = R * (0.42 + 0.62 * crece)
+            sx = cx + math.cos(a) * d2
+            sy = cy + math.sin(a) * d2 * 0.9
+            dc.ellipse([sx - 2, sy - 2, sx + 2, sy + 2],
+                       fill=ORO_V + (max(0, alfa),))
+        # LA LUZ: el impacto arde
+        dl.ellipse([cx - r, cy - r, cx + r, cy + r],
+                   fill=LILA_V + (max(0, alfa // 3),))
+
+    # === LAS RUNAS (arcane: «magic circle cast») ===================
+    elif efecto == 'runas':
+        gira = fase * math.pi * 2
+        rx, ry = w * 0.66, h * 0.50
+        # EL CÍRCULO DEL CONJURO (el elipsoide guía)
+        dc.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+                   outline=ORO_H + (215,), width=2)
+        # LAS SEIS RUNAS ORBITANDO (los glifos de la casa: T,L,I)
+        glifos = [[(0, -5), (0, 5)], [(-3, -5), (0, -2), (0, 5)], [(-4, 2), (4, 2)],
+                  [(0, -5), (0, 0), (4, 0)], [(-3, 0), (3, 0), (3, 5)], [(0, -5), (-4, 5), (4, 5)]]
+        for k in range(6):
+            a = gira + k * math.pi / 3
+            mx = cx + math.cos(a) * rx
+            my = cy + math.sin(a) * ry
+            parpadeo = 195 + int(60 * (0.5 + 0.5 * math.sin(fase * math.pi * 4 + k)))
+            for gl in glifos[k]:
+                dc.line([(mx + gl[0] * 1.0, my + gl[1] * 1.0),
+                         (mx + gl[0] * 1.0, my + gl[1] * 1.0 + 3)],
+                        fill=ORO_V + (parpadeo,), width=3)
+            # la luz de la runa — LA CURA DEL OJO: viva, no tenue
+            dl.ellipse([mx - 6, my - 6, mx + 6, my + 6], fill=ORO_V + (76,))
+        # LA LUZ del círculo entero
+        dl.ellipse([cx - rx * 0.8, cy - ry * 0.8, cx + rx * 0.8, cy + ry * 0.8],
+                   fill=VIOLETA_V + (26,))
+
+    # === LA COMPOSICIÓN DE PIXELFX: color ENCIMA, LUZ ADITIVA =====
+    lienzo.alpha_composite(color)
+    return _luz_aditiva(lienzo, luz)
 
 
 # ====================================================================

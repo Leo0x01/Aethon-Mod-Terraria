@@ -3886,12 +3886,16 @@ Rarities.LegendarioSupremo: Legendario Supremo
 
 Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
-	Subtitulo: consagra la ofrenda por el Eterno — arma o material
+	Subtitulo: consagra la ofrenda por el Eterno — arma, material o esencias
 	SlotVacio: ofrenda
-	EtiquetaArma: LA OFRENDA — un arma o un material (no herramienta)
-	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni esencias, ni dinero
+	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
+	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni dinero — LAS ESENCIAS SÍ: el Eterno las devora
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
 	ListaMaterial: Material listo — gana solo su etiqueta
+	// v6.121 — LA OFRENDA QUE ES EL PAGO (la letra: «intento colocar
+	// 1000 esencias del eterno en el altar y dice no apto»): las
+	// esencias ENTRAN al hueco — el Eterno las DEVORA enteras.
+	ListaEsencias: Esencias listas — el Eterno las devora enteras por la puerta
 	YaConsagrada: Ya está consagrada
 	NoArma: ✦ No es apto
 	// v6.91 — LA VENTANA DEL USUARIO: «lo que gana debe estar debajo de
@@ -3901,12 +3905,14 @@ Altar: {
 	GanaTitulo: GANA
 	GanaArma: Arma → +5% a TODAS sus estadísticas y su etiqueta junto al nombre
 	GanaMaterial: Material → SOLO su etiqueta junto al nombre
+	GanaEsencias: Esencias del Eterno → DEVORADAS: +1 a la puerta por cada una (las {0} la abren)
 	SelloTitulo: EL SELLO
 	SelloCuesta: Cuesta: {0} Esencias del Eterno
 	SelloLlevas: Llevas: {0}
 	SelloFalta: Te falta: {0}
 	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
 	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
+	DevoraLinea: Devora: {0} esencias — TODAS suben a la puerta ({1}/{2})
 	ComoTitulo: CÓMO CONSEGUIR ESENCIAS
 	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
 	ComoJefes: • Los jefes sueltan de 1 a 10 (casi siempre 1)
@@ -3918,6 +3924,8 @@ Altar: {
 	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
+	Devorar: DEVORAR
+	DevoradasHecha: ✦ El Eterno devoró {0} esencias — la puerta cuenta {1}/{2}.
 	ConsagradaHechaMaterial: ✦ {0} queda CONSAGRADO por el Eterno: solo su etiqueta junto al nombre — el sello que el grimorio devora.
 	// v6.119 — THE ALTAR'S DOOR (the letter: consecrating 1000
 	// essences lets the altar take you to the inner world): the

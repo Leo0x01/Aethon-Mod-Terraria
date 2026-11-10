@@ -486,7 +486,21 @@ namespace AethonMod.Content.Systems
                 {
                     if (Main.mapEnabled)
                     {
-                        Main.Map.Load();
+                        // v6.121 — EL MAPA RENACE EN LAS DIMENSIONES DEL
+                        // MUNDO REAL antes de recargar. LA AUTOPSIA del
+                        // client.log: el objeto Main.Map seguía siendo el
+                        // del interior (WorldMap 800×450) y el .map del
+                        // mundo real trae entradas hasta 4200×1200 →
+                        // WorldMap.SetTile fuera de rango → la caída al
+                        // disco POR UN MAPA. Renace del tamaño correcto
+                        // y LUEGO carga; y si aun así el archivo viene
+                        // roto: mapa limpio y a jugar (nada de crash).
+                        try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                        try { Main.Map.Load(); }
+                        catch
+                        {
+                            try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                        }
                     }
                     // v6.117 — el minimapa también nace limpio AL VOLVER
                     // (las regiones del interior mueren aquí — la cura
@@ -566,6 +580,65 @@ namespace AethonMod.Content.Systems
                 Main.clearMap = true;                      // los render targets se barren
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.121 — EL BLINDAJE DEL MINIMAPA (la cura del crash del
+        /// client.log: Main engine crash en DrawToMap_Section →
+        /// IndexOutOfRangeException al volver a cargar «Chaparral
+        /// Mustio de Platino» después de visitar el interior). LA
+        /// AUTOPSIA: el jugador entró al interior (Main.Map =
+        /// WorldMap(800, 450)), ese objeto SOBREVIVIÓ al menú (los
+        /// rebuilds del mod no tocan los statics de vanilla) y al
+        /// recargar el mundo real (4200×1200) el Map.Load() llenó el
+        /// mapa CHICO con entradas GRANDES → SetTile fuera de rango
+        /// (la «Excepción silenciosa» del log) → DrawToMap_Section leyó
+        /// Map[x, y] más allá del array → crash fatal. LA CURA: cada
+        /// frame (en PreUpdateWorld, ANTES del Draw) se SONDEA la
+        /// esquina del mapa con el MISMO indexador que crashea — si el
+        /// mapa no cubre el mundo actual, RENACE limpio en las
+        /// dimensiones correctas. Un mapa corrupto ya no puede tumbar
+        /// el juego: se pierde la exploración del minimapa, JAMÁS la
+        /// partida.
+        /// </summary>
+        private static bool _mapaBlindado;
+
+        private static void BlindarMapa()
+        {
+            // nada que blindar en el menú, en el servidor o sin minimapa
+            if (Main.gameMenu || Main.netMode == 2 || !Main.mapEnabled) return;
+            try
+            {
+                // (1) LA SONDA DE LA ESQUINA: el indexador crudo, el
+                //     mismo que crashea en DrawToMap_Section — si el
+                //     mapa cubre el mundo, aquí no pasa nada (una
+                //     lectura); si es más chico, dispara y lo cazamos.
+                _ = Main.Map[Main.maxTilesX - 1, Main.maxTilesY - 1];
+                // (2) las regiones de actualización jamás mayores que
+                //     el mundo (el caminante espiral de DrawToMap no
+                //     puede salirse del array)
+                if (Main.mapMaxX > Main.maxTilesX || Main.mapMaxY > Main.maxTilesY)
+                    ReiniciarMiniMapa();
+            }
+            catch
+            {
+                // EL MAPA ESTÁ ROTO: renace limpio en las dimensiones
+                // del mundo actual (la exploración se rehace caminando;
+                // un crash fatal jamás)
+                try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                ReiniciarMiniMapa();
+                if (!_mapaBlindado)
+                {
+                    _mapaBlindado = true;
+                    try
+                    {
+                        ModContent.GetInstance<SubmundoGrimorio>().Mod.Logger.Info(
+                            "[SubmundoGrimorio/BlindarMapa] el mapa sobreviviente era más chico " +
+                            "que el mundo — renació limpio (la cura del crash del client.log v6.121)");
+                    }
+                    catch { }
+                }
+            }
         }
 
         /// <summary>
@@ -732,6 +805,13 @@ namespace AethonMod.Content.Systems
         // ==================================================================
         public override void PreUpdateWorld()
         {
+            // v6.121 — EL BLINDAJE DEL MINIMAPA corre SIEMPRE (también
+            // en el mundo real: el crash del client.log ocurrió AL
+            // VOLVER del interior — el objeto mapa chico sobrevivió al
+            // menú y el mundo grande lo pisó). Corre ANTES del Draw del
+            // frame: si el mapa está roto, este frame lo cura.
+            BlindarMapa();
+
             if (!Activo) return;
 
             // ==============================================================
@@ -1131,9 +1211,17 @@ namespace AethonMod.Content.Systems
                 if (aRev > 0.003f)
                 {
                     float k = aRev * aRev;   // ease-out: lenta al final
+                    // v6.121 — LA REVELACIÓN NACE CASI OPACA (la letra: al
+                    // entrar, una bruma a pantalla completa TAPA CUALQUIER
+                    // error de carga): la base vieja (0,66 en el pico)
+                    // dejaba VER el mundo medio-formado A TRAVÉS de la
+                    // niebla — el fondo negro sin cielo, el terreno
+                    // pop-in, el grimorio viejo. Ahora el nacimiento es
+                    // 0,97 de opacidad (nada se ve) y se abre POCO a
+                    // poco con la disipación.
                     Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle(0, 0, (int)w, (int)h),
-                        new Color(16, 8, 28) * (0.66f * k));
+                        new Color(16, 8, 28) * ((0.35f + 0.62f * k) * 1f));
 
                     // LAS MASAS DEL NACIMIENTO (7 — se disipan con la llegada)
                     for (int i = 0; i < 7; i++)
@@ -1290,7 +1378,7 @@ namespace AethonMod.Content.Systems
                     // ========================================================
                     Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle(0, 0, (int)w, (int)h),
-                        new Color(18, 9, 32) * (0.90f * a));
+                        new Color(18, 9, 32) * (0.97f * a));
 
                     float vel = 0.6f + 0.8f * a;             // la ACELERACIÓN del trago
                     for (int masa = 0; masa < 6; masa++)

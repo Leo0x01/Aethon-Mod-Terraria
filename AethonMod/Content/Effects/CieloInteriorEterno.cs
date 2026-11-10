@@ -100,6 +100,18 @@ namespace AethonMod.Content.Effects
         internal bool ActivoInterno => _activo;
         internal float AlfaInterno => _alpha;
 
+        /// <summary>v6.121 — NACE PLENO: el cuerpo del dios NO hace
+        /// fade-in dentro del interior (la letra: el fondo debe estar
+        /// LLENO desde el primer frame — el velo de la revelación ya
+        /// cubre la llegada; el fade de 2,4 s de la v6.120 dejaba los
+        /// primeros segundos en PANTALLA NEGRA, y eso era justo lo que
+        /// el jugador veía al entrar). El fundido queda para la SALIDA
+        /// (Deactivate), donde sí es de buen tono.</summary>
+        internal void NacerPleno()
+        {
+            if (_activo && _alpha < 1f) _alpha = 1f;
+        }
+
         public override void Update(GameTime gameTime)
         {
             if (Descargado) { _alpha = 0f; return; }
@@ -111,13 +123,20 @@ namespace AethonMod.Content.Effects
         }
 
         // ==================================================================
-        //  EL DIBUJO — EN LA BANDA DE MONTAÑAS (detrás del mundo, delante
-        //  del cielo desnudo)
+        //  EL DIBUJO — v6.121 — EN TODAS LAS BANDAS DEL CIELO (la letra:
+        //  «el fondo es una pantalla negra y se corta a unos píxeles del
+        //  borde — debería ser un fondo lejano lleno de tentáculos»):
+        //  la vieja banda de montañas (1.5 < minDepth < 8.2) dejaba el
+        //  cielo de vanilla — NEGRO bajo el eclipse — asomando por todo lo
+        //  que no fuera esa banda. El cuerpo del dios se pinta EN TODAS
+        //  las bandas (la guard _pintadoEsteFrame lo hace UNA vez por
+        //  frame, en la primera banda que pregunte: queda detrás del
+        //  disco del eclipse y de las brumas — el fondo LEJANO de verdad,
+        //  sin cortes ni costuras, de borde a borde).
         // ==================================================================
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
         {
             if (Descargado || _alpha <= 0.01f || _pintadoEsteFrame) return;
-            if (!(minDepth < 8.2f && minDepth > 1.5f)) return;
             // EL CIELO DEL CUERPO VIVE EN LA SUPERFICIE: bajo la roca, el
             // interior ES la carne (las paredes de la profundidad mandan) —
             // el tentáculo no se cuela en la cueva del dios.
@@ -177,46 +196,89 @@ namespace AethonMod.Content.Effects
             try
             {
                 // ============================================================
-                //  (1) LA CAPA LEJANA — v6.120 — LA BANDA EN LOOP: CUATRO
-                //      siluetas casi negras por PERIODO (900 px), repetidas
-                //      sin costura a lo ancho del cielo (la letra: «el fondo
-                //      deben ser capas de tentaculos en loop»). El paralaje
-                //      corre con la cámara y el patrón VUELVE A EMPEZAR
-                //      idéntico: camines donde camines, el cuerpo del dios
-                //      NUNCA se acaba — ES UN LOOP de verdad.
+                //  v6.121 — (0) LA PÁGINA DEL CUERPO: LA BASE QUE LLENA LA
+                //      PANTALLA ENTERA (la letra: «el fondo es una pantalla
+                //      negra… debería ser un fondo lejano lleno de
+                //      tentáculos»). Antes el cuerpo vivía SOLO en la banda
+                //      de montañas y el resto era el cielo de vanilla, NEGRO
+                //      bajo el eclipse — el interior parecía una pantalla
+                //      negra CORTADA. Ahora la CARNE DEL VACÍO (el gradiente
+                //      profundo de la paleta de la casa) cubre TODA la
+                //      pantalla DE BORDE A BORDE con un sobregiro de 120 px
+                //      por lado que mata el corte en el borde aunque la
+                //      matriz desplace unos píxeles — y encima nace el
+                //      cuerpo entero de tentáculos.
                 // ============================================================
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     Main.Rasterizer, null, m);
                 try
                 {
-                    Color tinteLejos = new Color(16, 9, 30);
+                    int franjas = 10;
+                    float y0 = -120f, y1 = h + 120f;
+                    for (int f = 0; f < franjas; f++)
+                    {
+                        float u0 = (float)f / franjas;
+                        float u1 = (float)(f + 1) / franjas;
+                        // la carne del vacío: 34,20,58 arriba → 12,6,22 abajo
+                        Color franja = Color.Lerp(new Color(34, 20, 58), new Color(12, 6, 22), 0.5f + 0.5f * (u0 + u1) * 0.5f);
+                        franja *= (0.88f + 0.10f * latido) * a;
+                        float ya = y0 + (y1 - y0) * u0;
+                        float yb = y0 + (y1 - y0) * u1 + 2f;
+                        sb.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value,
+                            new Rectangle(-120, (int)ya, (int)w + 240, (int)(yb - ya) + 2),
+                            franja);
+                    }
+                }
+                finally { VFXCore.CerrarLoteSiAbierto(); }
+
+                // ============================================================
+                //  (1) LA CAPA LEJANA — v6.121 — EL FONDO LLENO DE
+                //      TENTÁCULOS: SEIS siluetas por PERIODO (900 px) —
+                //      el doble que la v6.120 — con raíces MUY por encima
+                //      de la pantalla (hasta -910) y cabezas que llegan
+                //      HONDO (hasta el 82 % de la altura): la bóveda del
+                //      dios CUBIERTA de cuerpo, sin huecos negros. El
+                //      overscan de DOS periodos por lado mata el corte en
+                //      el borde para siempre. El tinte SUBE (16,9,30 →
+                //      46,28,84): lo lejano ahora SE LEE contra la carne —
+                //      la vieja silueta casi-negra era INVISIBLE y el fondo
+                //      parecía vacío.
+                // ============================================================
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, m);
+                try
+                {
+                    Color tinteLejos = new Color(46, 28, 84);
                     float perLejos = 900f;                     // el PERIODO del loop
                     float offLejos = Mod(camX * 0.012f, perLejos);
-                    int repsLejos = (int)(w / perLejos) + 2;
-                    for (int rep = 0; rep <= repsLejos; rep++)
+                    int repsLejos = (int)(w / perLejos) + 4;   // dos periodos de sobregiro por lado
+                    for (int rep = -2; rep <= repsLejos - 2; rep++)
                     {
-                        float x0 = rep * perLejos - offLejos - perLejos;
-                        for (int k = 0; k < SemillaLejos.Length && k < 4; k++)
+                        float x0 = rep * perLejos - offLejos;
+                        for (int k = 0; k < SemillaLejos.Length && k < 6; k++)
                         {
                             int sem = SemillaLejos[k];
-                            float fx = 0.10f + 0.23f * k + 0.05f * VFXCore.Hash01(sem, 1, 911);
-                            Vector2 raiz = new Vector2(x0 + perLejos * fx, -260f - 120f * VFXCore.Hash01(sem, 2, 913));
+                            float fx = 0.06f + 0.155f * k + 0.05f * VFXCore.Hash01(sem, 1, 911);
+                            Vector2 raiz = new Vector2(x0 + perLejos * fx, -720f - 190f * VFXCore.Hash01(sem, 2, 913));
                             Vector2 cabeza = raiz + new Vector2(
                                 (VFXCore.Hash01(sem, 3, 917) - 0.5f) * 320f + MathF.Sin(t * 0.11f + k) * 46f,
-                                h * (0.30f + 0.26f * VFXCore.Hash01(sem, 4, 919)));
+                                h * (0.42f + 0.40f * VFXCore.Hash01(sem, 4, 919)) + 720f);
                             Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.4f, sem, 16, 0.16f);
-                            DibujarTira(sb, espina, 14f, 30f, tinteLejos,
-                                (0.42f + 0.16f * latido) * a, flujo: t * 0.010f + k * 0.13f);
+                            DibujarTira(sb, espina, 14f, 34f, tinteLejos,
+                                (0.46f + 0.18f * latido) * a, flujo: t * 0.010f + k * 0.13f);
                         }
                     }
 
                     // EL POLVO ESTELAR DENSO de las capas lejanas (las SUAS
-                    // del vacío — SparkleStar con parpadeo determinista)
-                    for (int s = 0; s < 34; s++)
+                    // del vacío — SparkleStar con parpadeo determinista).
+                    // v6.121 — toda la altura de la pantalla (antes solo
+                    // llegaba al 62 %: el tercio de abajo quedaba pelado).
+                    for (int s = 0; s < 44; s++)
                     {
                         float sx = VFXCore.Hash01(s * 13 + 1, 0, 961) * w;
-                        float sy = VFXCore.Hash01(s * 17 + 5, 0, 963) * h * 0.62f;
+                        float sy = VFXCore.Hash01(s * 17 + 5, 0, 963) * h * 0.95f;
                         float pal = 0.5f + 0.5f * MathF.Sin(t * (0.4f + VFXCore.Hash01(s, 0, 967) * 1.1f) + s * 2.4f);
                         float tam = 7f + 9f * VFXCore.Hash01(s * 7 + 3, 0, 969);
                         sb.Draw(_chispa, new Vector2(sx, sy), null,
@@ -252,18 +314,21 @@ namespace AethonMod.Content.Effects
                         ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
                     float perMedio = 760f;                      // el PERIODO del loop
                     float offMedio = Mod(camX * 0.035f, perMedio);
-                    int repsMedio = (int)(w / perMedio) + 2;
-                    for (int rep = 0; rep <= repsMedio; rep++)
+                    // v6.121 — CUATRO brazos por periodo (antes 3) y el
+                    // overscan de dos periodos: el cuerpo medio también
+                    // llena los bordes.
+                    int repsMedio = (int)(w / perMedio) + 4;
+                    for (int rep = -2; rep <= repsMedio - 2; rep++)
                     {
-                        float x0 = rep * perMedio - offMedio - perMedio;
-                        for (int k = 0; k < SemillaMedio.Length && k < 3; k++)
+                        float x0 = rep * perMedio - offMedio;
+                        for (int k = 0; k < SemillaMedio.Length && k < 4; k++)
                         {
                             int sem = SemillaMedio[k];
-                            float fx = 0.14f + 0.32f * k + 0.05f * VFXCore.Hash01(sem, 1, 931);
-                            Vector2 raiz = new Vector2(x0 + perMedio * fx, -300f - 90f * VFXCore.Hash01(sem, 2, 933));
+                            float fx = 0.10f + 0.24f * k + 0.05f * VFXCore.Hash01(sem, 1, 931);
+                            Vector2 raiz = new Vector2(x0 + perMedio * fx, -520f - 120f * VFXCore.Hash01(sem, 2, 933));
                             Vector2 cabeza = raiz + new Vector2(
                                 (VFXCore.Hash01(sem, 3, 937) - 0.5f) * 260f + MathF.Sin(t * 0.16f + k * 1.7f) * 60f * hincha,
-                                h * (0.34f + 0.30f * VFXCore.Hash01(sem, 4, 939)));
+                                h * (0.46f + 0.42f * VFXCore.Hash01(sem, 4, 939)) + 520f);
                             Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.5f, sem, 18, 0.19f);
                             DibujarTira(sb, espina, 22f, 52f, new Color(150, 96, 210),
                                 (0.50f + 0.16f * latido) * a, flujo: t * 0.020f + k * 0.21f);
@@ -327,15 +392,17 @@ namespace AethonMod.Content.Effects
                         ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
                     float perCerca = 640f;                     // el PERIODO del loop
                     float offCerca = Mod(camX * 0.06f, perCerca);
-                    int repsCerca = (int)(w / perCerca) + 2;
-                    for (int rep = 0; rep <= repsCerca; rep++)
+                    // v6.121 — el overscan de dos periodos también en los
+                    // titanes: ningun borde se queda sin dios.
+                    int repsCerca = (int)(w / perCerca) + 4;
+                    for (int rep = -2; rep <= repsCerca - 2; rep++)
                     {
-                        float x0 = rep * perCerca - offCerca - perCerca;
+                        float x0 = rep * perCerca - offCerca;
                         for (int k = 0; k < SemillaCerca.Length && k < 2; k++)
                         {
                             int sem = SemillaCerca[k];
                             float fx = 0.22f + 0.48f * k + 0.06f * VFXCore.Hash01(sem, 1, 951);
-                            Vector2 raiz = new Vector2(x0 + perCerca * fx, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
+                            Vector2 raiz = new Vector2(x0 + perCerca * fx, -520f - 120f * VFXCore.Hash01(sem, 2, 953));
                             // LA CABEZA VIVA (Lissajous lenta — el verlet hace el resto)
                             Vector2 cabeza = raiz + new Vector2(
                                 MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
@@ -371,16 +438,17 @@ namespace AethonMod.Content.Effects
                 try
                 {
                     // el MISMO módulo del loop de la capa (mismo frame, mismo
-                    // camX: las vetas caen EXACTAS sobre sus cuerpos)
+                    // camX: las vetas caen EXACTAS sobre sus cuerpos) — con
+                    // el MISMO overscan de la v6.121
                     float offBrillo = Mod(camX * 0.06f, 640f);
-                    for (int rep = 0; rep <= (int)(w / 640f) + 2; rep++)
+                    for (int rep = -2; rep <= (int)(w / 640f) + 2; rep++)
                     {
-                        float x0 = rep * 640f - offBrillo - 640f;
+                        float x0 = rep * 640f - offBrillo;
                         for (int k = 0; k < SemillaCerca.Length && k < 2; k++)
                         {
                             int sem = SemillaCerca[k];
                             float fx = 0.22f + 0.48f * k + 0.06f * VFXCore.Hash01(sem, 1, 951);
-                            Vector2 raiz = new Vector2(x0 + 640f * fx, -340f - 70f * VFXCore.Hash01(sem, 2, 953));
+                            Vector2 raiz = new Vector2(x0 + 640f * fx, -520f - 120f * VFXCore.Hash01(sem, 2, 953));
                             Vector2 cabeza = raiz + new Vector2(
                                 MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
                                 h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
@@ -612,7 +680,13 @@ namespace AethonMod.Content.Effects
             {
                 bool dentro = SubmundoGrimorio.Activo;
                 if (dentro && (_cielo == null || !_cielo.ActivoInterno))
+                {
                     SkyManager.Instance.Activate("AethonMod:CieloInteriorEterno");
+                    // v6.121 — NACE PLENO: dentro del cuerpo del dios el
+                    // fondo existe DESDE EL PRIMER FRAME (el fade de 2,4 s
+                    // era la pantalla negra de la que se quejó la letra).
+                    _cielo?.NacerPleno();
+                }
                 else if (!dentro && _cielo != null && _cielo.ActivoInterno &&
                          _cielo.AlfaInterno <= 0.02f)
                     SkyManager.Instance.Deactivate("AethonMod:CieloInteriorEterno");
