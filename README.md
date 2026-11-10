@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.118 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+> **Versión actual:** 6.123 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
 
 ## ⚒️ PARA CREAR CUALQUIER COSA NUEVA (léeme primero)
 
@@ -38,6 +38,17 @@ Alrededor del jefe:
   vectoriales, runas y anillos de glifos — nunca rectángulos).
 - **El arsenal completo** de armas de prueba organizado en **28 bolsas** dentro de
   **El Cofre del Arsenal** (llegan solas al entrar al mundo).
+- **EL MUNDO INTERIOR DEL ETERNO** — el altar devora las mil esencias y te traga al
+  interior del dios: el llano de obsidiana con el pilar prisma bajo un cielo de
+  tentáculos que respira (tres bandas sonoras propias rotando), el latido de amatista
+  y el festín que escala mientras te quedas.
+- **LAS TRES ARMAS DE LA SUPERFORJA** — El Juicio de los Dos Soles (la implosión de
+  luz y oscuridad que estalla en el destello), El Tajo de Oscuridad (los filos
+  negro-morado-blanco que atraviesan la arena) y Las Agujas del Vacío (las agujas que
+  se clavan y gotean daño) — **en La Bolsa de la Superforja**, al entrar al mundo.
+- **EL AURA DEL VACÍO** — la Forma Eterna quema a los impíos con la **Quemadura del
+  vacío** (1 % de vida máxima por medio segundo, y arde 5 segundos más al soltarlos)
+  mientras el buff del aura te cuenta el daño EXACTO que el vacío cobra.
 
 ## Mapa de documentación (qué leer según qué necesites)
 
