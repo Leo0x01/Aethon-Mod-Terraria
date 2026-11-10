@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.121 — EL DEVORO DE LA PUERTA + EL CUERPO ENTERO DEL CIELO + LA VÉRTICE DEL DIOS
 
-> **ESTADO: BUILT + AUDITADA + HEADLESS 0/0** — oráculo verify.csproj **0 errores / 0 warnings** (448 .cs contra el tML 2026.09.3.1 real) · **-build REAL 0/0** (AethonMod.tmod 28.572.959 B · md5 703ac2d9076b783bbc8e2937475ed4af) · **AUDIT v6.121 TODO VERIFICADO ✔** · **headless 0 EXCEPCIONES** («Sandboxing: Aethon, the Eternal Grimoire v6.121» → Adding Recipes → Choose World).
+> **PUBLICADA — release 439984865 + CDN verificado byte a byte (md5 703ac2d9076b783bbc8e2937475ed4af)** — .tmod v6.121 listo y verificado (28.572.959 B, EOF exacto). Cadena: oráculo 0/0 · -build 0/0 · AUDIT TODO VERIFICADO · headless 0 excepciones. — oráculo verify.csproj **0 errores / 0 warnings** (448 .cs contra el tML 2026.09.3.1 real) · **-build REAL 0/0** (AethonMod.tmod 28.572.959 B · md5 703ac2d9076b783bbc8e2937475ed4af) · **AUDIT v6.121 TODO VERIFICADO ✔** · **headless 0 EXCEPCIONES** («Sandboxing: Aethon, the Eternal Grimoire v6.121» → Adding Recipes → Choose World).
 
 ## LA LETRA (el usuario)
 
