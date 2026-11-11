@@ -73,6 +73,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const int TDesiste = 300;    // la red: sin trago, se disuelve
         private const int TTrasTragoPuerta = 16;  // tras ENTRAR: la puerta gira
         private const int TTrasTragoMuerte = 74;   // tras ENTRAR: el poso muere
+        // v6.124 — LA CACERÍA INVERSA (la letra: «acabo de ver que para que
+        // el jugador entre al mundo interior debe tocar el grimorio mientras
+        // es deborado, bueno muchas veces el jugador no es atraido
+        // correctamente al grimorio, en este caso para que no hayan errores,
+        // si por 2 segundos el jugador no es atraido, el grimorio volara
+        // hacia el jugador y con esto se soluciona el problema de que a
+        // veces no entra al mundo interior»): DOS SEGUNDOS de paciencia —
+        // pasados 120 ticks de arrastre SIN trago, el libro DEJA SU ANCLA
+        // Y VUELA hacia su presa: la boca llega hasta el jugador y el
+        // trago NUNCA falla.
+        private const int TVueloLibro = 120; // 2 s de arrastre sin trago → el libro VUELA
 
         /// <summary>
         /// ¿El portador ya está DENTRO de la boca? (la casa lo consulta en
@@ -202,6 +213,54 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         p.fullRotation += (0.055f + 0.13f * f * f) * (f > 0.55f ? 1.6f : 1f);
                     }
                     catch { }
+
+                    // ==========================================================
+                    //  v6.124 — LA CACERÍA INVERSA (la letra: «si por 2
+                    //  segundos el jugador no es atraido, el grimorio
+                    //  volara hacia el jugador»): pasados 120 ticks de
+                    //  arrastre SIN trago, el libro ABANDONA su ancla y
+                    //  VUELA hasta su presa — la boca cae ENCIMA del
+                    //  jugador y el rectángulo del trago NUNCA falla (la
+                    //  cura de la entrada intermitente al mundo interior).
+                    // ==========================================================
+                    if (Projectile.ai[0] >= TSombra + TVueloLibro)
+                    {
+                        Vector2 posLibro = PosLibro;
+                        Vector2 hacia = p.Center - posLibro;
+                        float dist = hacia.Length();
+                        Vector2 dirLibro = dist > 0.01f ? hacia / dist : Vector2.UnitY;
+
+                        // EL OBJETIVO DEL CENTRO: la BOCA del libro PUESTA
+                        // EN el jugador (la boca vive a 14 px del libro,
+                        // hacia la presa — y PosLibro es Center+(0,−140)).
+                        Vector2 centroObjetivo = p.Center - dirLibro * 14f + new Vector2(0f, 140f);
+
+                        // EL VUELO: arranca suave y se decide (0.05 → 0.22
+                        // en ~45 t — el libro cae sobre su presa).
+                        float v = MathHelper.Clamp(
+                            (Projectile.ai[0] - (TSombra + TVueloLibro)) / 45f, 0f, 1f);
+                        float kv = 0.05f + 0.17f * v * v;
+                        Projectile.Center = Vector2.Lerp(Projectile.Center, centroObjetivo, kv);
+
+                        // EL DESPEGUE: el aleteo del libro que rompe su
+                        // ancla (UNA sola vez) + la estela de páginas.
+                        if (Projectile.ai[0] == TSombra + TVueloLibro && !Main.dedServ)
+                        {
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                Terraria.ID.SoundID.Item113.WithPitchOffset(-0.4f), posLibro);
+                            OndaLib.Kick(3f, 10);
+                        }
+                        if (!Main.dedServ && Main.netMode != 2 && Main.rand.NextBool(2))
+                        {
+                            Dust d = Dust.NewDustPerfect(posLibro + Main.rand.NextVector2Circular(30f, 22f),
+                                Terraria.ID.DustID.Enchanted_Gold,
+                                -dirLibro * Main.rand.NextFloat(1.5f, 4f) +
+                                new Vector2(0f, Main.rand.NextFloat(-0.6f, 0.6f)),
+                                180, new Color(255, 226, 150), Main.rand.NextFloat(0.7f, 1.2f));
+                            d.noGravity = true;
+                            d.fadeIn = 0f;
+                        }
+                    }
 
                     // === LA PUERTA VIVE EN LA BOCA: SOLO la colisión del
                     //     jugador con el rectángulo de la boca dispara el

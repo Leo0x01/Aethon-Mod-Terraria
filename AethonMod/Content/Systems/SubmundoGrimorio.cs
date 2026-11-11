@@ -310,6 +310,37 @@ namespace AethonMod.Content.Systems
         //  en la mano) y salir por el altar del interior.
         // ==================================================================
 
+        // ================================================================
+        //  v6.125 — LA VOZ EXCLUSIVA DEL MUNDO INTERIOR (la letra: «el
+        //  grimorio tendra un nuevo set de dialogos solo dentro del mundo
+        //  interior, esto hara que los dialogos anteriores no se activen
+        //  y solo se activen los nuevos dialogos exclusivos del mundo
+        //  interior»). ESTA ES LA ÚNICA BOCA DEL LIBRO DENTRO: todos los
+        //  puntos donde el grimorio levanta la voz (el susurro del
+        //  hambre, la voz del despertar, la voz del jefe muerto, los
+        //  celos) consultan ESTA puerta — DENTRO solo habla EL SET DEL
+        //  INTERIOR (Eco.Interior1..8, el reparto sin repetición de la
+        //  casa, en la voz morada del Eterno); FUERA todo sigue
+        //  EXACTAMENTE igual que siempre.
+        // ================================================================
+
+        /// <summary>¿La voz del libro DENTRO del mundo interior? (el set
+        /// exclusivo de diálogos solo se activa aquí dentro).</summary>
+        public static bool VozInteriorActiva => Activo && !Transicion;
+
+        /// <summary>
+        /// HABLA EL SET DEL INTERIOR: una línea del repertorio exclusivo
+        /// del mundo interior (la voz morada del Eterno soñando su propia
+        /// panza) — la única voz del grimorio mientras el portador vive
+        /// dentro.
+        /// </summary>
+        public static void HablarInterior(Player portador)
+        {
+            if (portador == null || !portador.active) return;
+            EcoRed.HablarVarianteAlPortador(portador, "Mods.AethonMod.Eco.Interior", 8,
+                new Color(178, 110, 236), rugido: false, escala: 0.62f);
+        }
+
         /// <summary>
         /// ¿El jugador puede entrar? (SP solamente, de momento — la letra:
         /// «de momento se puede entrar usando el altar».)

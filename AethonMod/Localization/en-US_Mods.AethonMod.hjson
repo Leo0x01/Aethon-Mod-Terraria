@@ -2186,56 +2186,96 @@ Items: {
 	}
 
 	JuicioDosSoles: {
-		DisplayName: Judgment of the Two Suns
+		DisplayName: The Judgment of the Two Suns
 		Tooltip:
 			'''
-			THE DEFINITIVE ATTACK OF LIGHT AND DARKNESS: hold the click and
-			TWO SPHERES are born at your sides — the white-gold LIGHT one
-			and the black-violet DARKNESS one — flying to the point you
-			look at. They collide, IMPLODE (all nearby dust falls to the
-			center) and burst into THE FLASH: the explosion of light that
-			floods the world, with its shockwave ring and golden rain.
-			The blast hits everything alive within 460 px.
+			THE DEFINITIVE ATTACK OF LIGHT AND DARKNESS: hold the click and the
+			TWO RUNE SUNS are born — the WHITE SUN with its golden palette and
+			the BLACK SUN with its violet rings — and they fly to the point you
+			look at. They fuse into THE FUSED SUN, bigger and more devastating,
+			swelling as it charges the sentence… and it BURSTS into THE NOVA:
+			the double ring of golden mist, the rain of echo runes and the
+			shockwave that strikes everything alive within 460 px.
 			'''
 	}
 
-	TajoOscuro: {
-		DisplayName: The Dark Slash
+	TajoDelVacio: {
+		// v6.124 — THE VOID SLASH: the beam-teardrop of the letter
+		// ("usa un pequeño haz usando nuestros hazes, el inicio y final
+		// del tajo tipo haz sera muy fino en el centro se vuelve mas
+		// grueso... negro en el centro, morado en los bordes").
+		DisplayName: The Void Slash
 		Tooltip:
 			'''
-			THE DARKNESS FILTER: each use stabs UP TO THREE SLASHES near
-			your enemies (the closest to the cursor) — long blades of
-			BLACK core, purple middles and WHITE edges born behind the
-			prey along your direction, PIERCING THROUGH it from one end
-			to the other, cutting everything the blade touches.
-			'''
-	}
-
-	AgujasVacio: {
-		DisplayName: The Void Needles
-		Tooltip:
-			'''
-			THE VOID SEWING KIT: UP TO THREE THIN NEEDLES per use, always
-			NEAR your enemies — they fly at the prey with the WHITE TIP,
-			PIERCE it and STAY STUCK in its body: the wound bleeds the
-			void (a drip of damage) until the needle dissolves into
-			violet motes.
+			THE BEAM-SLASH: each use stabs UP TO THREE SLASHES near your enemies
+			(the closest to your cursor) — small beams THIN at both ends and THICK
+			in the middle, with the BLACK core and the burning PURPLE edges: the
+			void teardrop that stabs like a needle and pierces everything it touches.
 			'''
 	}
 
 	BolsaSuperforja: {
-		// v6.123 — THE SUPERFORGE BAG (the letter: "you created new
-		// weapons, where are they — you must give them to the player
-		// in a bag")
 		DisplayName: The Superforge Bag
 		Tooltip:
 			'''
-			THE THREE DEFINITIVE SUPERFORGE WEAPONS: The Judgment of the Two
-			Suns (the light-and-dark implosion that bursts into the flash),
-			The Darkness Slash (the black-purple-white blades that cross
-			the arena piercing everything) and The Void Needles (the thin
-			needles that stick and drip damage).
+			THE SUPERFORGE'S DEFINITIVE WEAPONS: The Judgment of the Two Suns (the
+			two rune suns that fuse into the bigger, devastating sun and burst into
+			the mist-and-rune nova) and The Void Slash (the beam-slashes, thin at
+			the ends and thick in the middle — black core, burning purple edge —
+			that stab near your enemies and pierce through them).
 			'''
+	}
+
+	DazzlingStabberStaff: {
+		DisplayName: Dazzling Stabber Staff
+		Tooltip:
+			'''
+			RESEARCH · CALAMITY MOD: the staff of the THREE HOLY DAGGERS. Summons
+			3 daggers per use (takes 3 minion slots): the CRYSTAL dagger strikes
+			fast then rests (50% damage, 20 armor penetration), the ROCK dagger
+			lunges and recoils (300% damage!) and the FLAME dagger sweeps in a
+			wide arc and ignites the HOLY FLAMES. En garde!
+			'''
+	}
+
+	ArbitradorII: {
+		DisplayName: The Arbitrator II
+		Tooltip:
+			'''
+			RESEARCH · CALAMITY ENTROPY: the JAVELIN that PIERCES WALLS. 250
+			damage · slow use · 16% crit. On hit it BURSTS, damaging everything
+			alive in the area. With STEALTH charged (2.5 s still) it STICKS into
+			the prey… and 1 second later releases the X BURST, four arms of
+			greater range that sweep everything they cross.
+			'''
+		Titulo: ═══ THE ARBITRATOR II — CALAMITY ENTROPY ═══
+		Linea1: The javelin of arbitration: pierces WALLS and bursts on hit.
+		Linea2: STEALTHED (2.5 s still): it STICKS into the prey…
+		Linea3: …and 1 second later, the greater-range X BURST.
+		Linea4: 250 damage · use 32 · knockback 1 · 16% crit.
+		Receta: The original recipe: 4× Solar Veil + 6× Slag Ingot + 1× Plague Cell Vat (mythril anvil). Here: wood (research).
+	}
+
+	ElPrincipioYElFin: {
+		DisplayName: The Beginning and The End
+		Tooltip:
+			'''
+			RESEARCH · CALAMITY ENTROPY: the DAGGERS OF THE EXCHANGE. 2500
+			damage · 100 armor penetration · they pierce walls. LEFT: the GOLD
+			dagger brands THE BRAND OF THE BEGINNING. RIGHT: the BLUE dagger
+			pins THE GAZE OF THE END. Both stack up to 8 LAYERS… and striking
+			with the OTHER color RELEASES the mark: every layer spawns its SOUL
+			(the echo souls hunt your enemies with piercing waves; the
+			netherlight souls heal and serve you). STEALTHED: two homing daggers
+			that burst into souls.
+			'''
+		Titulo: ═══ THE BEGINNING AND THE END — CALAMITY ENTROPY ═══
+		Linea1: LEFT: the GOLD dagger — THE BRAND OF THE BEGINNING (8 layers).
+		Linea2: RIGHT: the BLUE dagger — THE GAZE OF THE END (8 layers).
+		Linea3: Striking with the OTHER color RELEASES the mark into SOULS: the
+		Linea4: ECHO ones hunt your enemies with PIERCING waves; the
+		Linea5: NETHERLIGHT ones heal you and SERVE you (+damage, +speed, +crit).
+		Receta: The original recipe: 12× Phantom Dragon Tooth at the Abyssal Altar. Here: wood (research).
 	}
 
 	RenglonFinal: {
@@ -2628,6 +2668,13 @@ Projectiles: {
 	AgujaVacioProj.DisplayName: Aguja Vacio Proj
 	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
 	TajoOscuroProj.DisplayName: Tajo Oscuro Proj
+	AlmaEco.DisplayName: Alma Eco
+	AlmaLuzInferior.DisplayName: Alma Luz Inferior
+	ArbitradorIIProyectil.DisplayName: Arbitrador I I Proyectil
+	DagaEterna.DisplayName: Daga Eterna
+	DazzlingStabber.DisplayName: Dazzling Stabber
+	OndaSonoraEterna.DisplayName: Onda Sonora Eterna
+	TajoDelVacioProj.DisplayName: Tajo Del Vacio Proj
 }
 
 Buffs: {
@@ -2694,10 +2741,15 @@ Buffs: {
 	}
 
 	AuraVacioBuff: {
-		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
+		// v6.125 — SOLO LA LETRA DEL USUARIO (la letra de la sesión 7: «en el
+		// buff de aura del vacio solo debe estar mi texto no decir si hace
+		// daño o no, y eso de decir que el vacio esta cobrando una presa
+		// esta bien, solo quita la explicacion de daño y manten el resto»):
+		// el rango «1 → {0} por tick» MURIÓ — queda SOLO el texto del
+		// usuario + el sello del trabajo (la presa que arde dentro).
 		DisplayName: Void Aura
-		Description: The void power of an Outer Being surrounds you, harming all who come near: from 1 damage per tick at the outer edge up to {0} per tick next to you — and it strikes faster the closer the enemy is
-		Trabajando: THE VOID IS COLLECTING — prey burns within the aura
+		Description: The void power of an Outer being surrounds you, harming all who come near.
+		Trabajando: EL VACÍO ESTÁ COBRANDO — una presa arde dentro del aura
 	}
 
 	OcasoActivoBuff: {
@@ -2723,6 +2775,37 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
+	}
+
+	// v6.124 — THE RESEARCH BUFFS (local copies of Calamity's effects).
+	DazzlingStabberBuff: {
+		DisplayName: Dazzling Stabber
+		Description: En garde! The holy daggers watch over you
+	}
+
+	LlamasSagradas: {
+		DisplayName: Holy Flames
+		Description: Dissolving from holy light
+	}
+
+	MarcaDelPrincipio: {
+		DisplayName: Brand of the Beginning
+		Description: The netherlight brand burns in you — its layers await the exchange
+	}
+
+	MiradaDelFin: {
+		DisplayName: Gaze of the End
+		Description: The void abyss watches you — its layers await the exchange
+	}
+
+	SupresionVital: {
+		DisplayName: Life Suppression
+		Description: You have seen your death
+	}
+
+	Servidumbre: {
+		DisplayName: Servitude
+		Description: The serving soul: +damage, +use speed and +crit
 	}
 }
 
@@ -2935,6 +3018,18 @@ Eco: {
 		Superficie1: El grimorio tiene hambre… y la superficie es el bufé.
 		Superficie2: Hierba, zombis y ojos nocturnos. Menú de todos los días.
 		Superficie3: El sol calienta la carne de arriba. Ven que la pruebo.
+	}
+
+	// v6.124 — THE INNER WORLD'S EXCLUSIVE DIALOGUE SET.
+	Interior: {
+		Interior1: You are inside… do you notice? Even the silence here tastes of ink.
+		Interior2: Everything I ever ate lives in these walls. Walk them with respect.
+		Interior3: The sky's tentacles are my breathing. Don't worry: they don't bite their owner.
+		Interior4: If you hear pages turning… it is not the wind. It's me, dreaming what I devoured.
+		Interior5: This plain was once a whole library. Now it is ONE page. I learned to fold.
+		Interior6: The mists here remember every boss. The one brushing you… that one cost me the most.
+		Interior7: Want to leave? The pillar is my only door. I also have a spine, of another kind.
+		Interior8: Stay as long as you wish… but don't fall asleep: dreams, in here, are contagious to me.
 	}
 }
 

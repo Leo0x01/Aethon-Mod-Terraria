@@ -1047,8 +1047,18 @@ namespace AethonMod.Content.Systems
                 }
 
                 // LA VOZ DEL LIBRO (los pensamientos del portador).
-                EcoRed.HablarVarianteAlPortador(p, "Mods.AethonMod.Despertar.Voz",
-                    4, new Color(178, 110, 236), rugido: true, escala: 0.62f);
+                // v6.124 — DENTRO DEL MUNDO INTERIOR solo habla EL SET
+                // EXCLUSIVO DEL INTERIOR (la letra: «el grimorio tendra un
+                // nuevo set de dialogos solo dentro del mundo interior,
+                // esto hara que los dialogos anteriores no se activen y
+                // solo se activen los nuevos dialogos exclusivos del
+                // mundo interior»): la voz del despertar NO se activa
+                // dentro — habla el interior.
+                if (SubmundoGrimorio.VozInteriorActiva)
+                    SubmundoGrimorio.HablarInterior(p);
+                else
+                    EcoRed.HablarVarianteAlPortador(p, "Mods.AethonMod.Despertar.Voz",
+                        4, new Color(178, 110, 236), rugido: true, escala: 0.62f);
 
                 // EL HITO (si el nivel desbloquea un poder).
                 string hito = DespertarGrimorio.ClaveHito(nivel);

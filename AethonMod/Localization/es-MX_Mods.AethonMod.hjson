@@ -2181,56 +2181,111 @@ Items: {
 	}
 
 	JuicioDosSoles: {
+		// v6.124 — REBUILT ON THE RUNE SUNS of the house (the letter: "no
+		// usan los soles runicos que tenemos como base para sus soles").
 		DisplayName: El Juicio de los Dos Soles
 		Tooltip:
 			'''
-			EL ATAQUE DEFINITIVO DE LUZ Y OSCURIDAD: mantén el clic y las
-			DOS ESFERAS nacen a tus lados — la de LUZ blanco-dorada y la
-			de OSCURIDAD negro-violeta — y vuelan al punto que miras.
-			Colisionan, IMPLOSIONAN (todo el polvo cercano cae al centro)
-			y estallan en EL DESTELLO: la explosión de luz que inunda el
-			mundo, con su anillo de choque y su lluvia dorada. La onda
-			golpea a todo lo que viva en 460 px.
+			EL ATAQUE DEFINITIVO DE LUZ Y OSCURIDAD: mantén el clic y los DOS SOLES
+			RÚNICOS nacen — el SOL BLANCO con su paleta de oro y el SOL NEGRO con
+			sus anillos violeta — y vuelan al punto que miras. Se funden en EL SOL
+			FUSIONADO, más grande y devastador, que se hincha cargando la
+			sentencia… y ESTALLA en LA NOVA: el doble círculo de bruma dorada, la
+			lluvia de runas de eco y el anillo de choque que golpea a todo lo que
+			viva en 460 px.
 			'''
 	}
 
-	TajoOscuro: {
-		DisplayName: El Tajo de Oscuridad
+	TajoDelVacio: {
+		// v6.124 — THE VOID SLASH: the beam-teardrop of the letter
+		// ("usa un pequeño haz usando nuestros hazes, el inicio y final
+		// del tajo tipo haz sera muy fino en el centro se vuelve mas
+		// grueso... negro en el centro, morado en los bordes").
+		DisplayName: El Tajo del Vacío
 		Tooltip:
 			'''
-			EL FILTRO DE LA OSCURIDAD: cada uso clava HASTA TRES TAJOS
-			cerca de tus enemigos (los más cercanos al cursor) — filos
-			largos de CENTRO NEGRO, medios morados y BORDES BLANCOS que
-			nacen detrás de la presa según tu dirección y LA ATRAVIESAN
-			de un extremo a otro, perforando todo lo que el filo toca.
-			'''
-	}
-
-	AgujasVacio: {
-		DisplayName: Las Agujas del Vacío
-		Tooltip:
-			'''
-			EL COSTURERO DEL VACÍO: HASTA TRES AGUJAS DELGADAS por uso,
-			siempre CERCA de tus enemigos — vuelan a la presa con la
-			PUNTA BLANCA, la ATRAVIESAN y SE QUEDAN CLAVADAS en su
-			cuerpo: la herida sangra el vacío (un goteo de daño) hasta
-			que la aguja se disuelve en motas violetas.
+			EL TAJO-HAZ: cada uso clava HASTA TRES TAJOS cerca de tus enemigos
+			(los más cercanos al cursor) — pequeños haces FINOS en el inicio y el
+			final y GRUESOS en el centro, con el CORAZÓN NEGRO y los BORDES
+			MORADOS que arden: la lágrima de vacío que se clava como aguja y
+			atraviesa a todo el que toca.
 			'''
 	}
 
 	BolsaSuperforja: {
-		// v6.123 — THE SUPERFORGE BAG (the letter: "you created new
-		// weapons, where are they — you must give them to the player
-		// in a bag")
+		// v6.124 — THE SUPERFORGE BAG: the two weapons of the letter
+		// (the Tajo de Oscuridad and the Agujas del Vacío died; the
+		// Tajo del Vacío — the beam-slash — was born).
 		DisplayName: La Bolsa de la Superforja
 		Tooltip:
 			'''
-			LAS TRES ARMAS DEFINITIVAS DE LA SUPERFORJA: El Juicio de los
-			Dos Soles (la implosión de luz y oscuridad que estalla en el
-			destello), El Tajo de Oscuridad (los filos negro-morado-blanco
-			que cruzan la arena atravesando todo) y Las Agujas del Vacío
-			(las agujas delgadas que se clavan y gotean daño).
+			LAS ARMAS DEFINITIVAS DE LA SUPERFORJA: El Juicio de los Dos Soles
+			(los dos soles rúnicos que se funden en el sol más grande y devastador
+			y estallan en la nova de bruma y runas) y El Tajo del Vacío (los
+			tajos-haz finos en los extremos y gruesos al centro — negro el
+			corazón, morado el filo — que se clavan cerca de tus enemigos y los
+			atraviesan).
 			'''
+	}
+
+	DazzlingStabberStaff: {
+		// v6.124 — THE RESEARCH COPY of Calamity Mod's Dazzling Stabber
+		// Staff (code + sprite 100% from the public repo — drop of
+		// Providence, the Profaned Goddess).
+		DisplayName: Dazzling Stabber Staff
+		Tooltip:
+			'''
+			INVESTIGACIÓN · CALAMITY MOD: el bastón de las TRES DAGAS SAGRADAS.
+			Invoca 3 dagas por uso (ocupa 3 ranuras de esbirro): la daga de
+			CRISTAL ataca rápido y descansa (50% del daño, 20 de penetración),
+			la daga de ROCA embiste y retrocede (¡300% del daño!) y la daga de
+			FUEGO barre en arco amplio y prende las LLAMAS SAGRADAS.
+			¡En garde!
+			'''
+	}
+
+	ArbitradorII: {
+		// v6.124 — THE RESEARCH COPY of Calamity Entropy's Arbitrator II
+		// (the official wiki sheet — javelin that pierces walls).
+		DisplayName: El Arbitrador II
+		Tooltip:
+			'''
+			INVESTIGACIÓN · CALAMITY ENTROPY: la JABALINA que ATRAVIESA MUROS.
+			250 daño · uso lento · 16% crítico. Al golpear, ESTALLA y daña a todo
+			lo que viva en el área. Con el SIGILO cargado (2,5 s quieto) se CLAVA
+			en la presa… y a los 1 segundo libera la EXPLOSIÓN EN X, cuatro
+			brazos de mayor alcance que barren a todo lo que cruzan.
+			'''
+		Titulo: ═══ EL ARBITRADOR II — CALAMITY ENTROPY ═══
+		Linea1: La javalina del arbitraje: atraviesa MUROS y estalla al golpear.
+		Linea2: SIGILOSO (2,5 s quieto): se CLAVA en la presa…
+		Linea3: …y a los 1 segundo, la EXPLOSIÓN EN X de mayor alcance.
+		Linea4: 250 daño · uso 32 · empuje 1 · 16% crítico.
+		Receta: La receta del original: 4× Velo de Sombra Solar + 6× Lingote de Escoria + 1× Bote de Células de Peste (yunque de mitril). Aquí: madera (investigación).
+	}
+
+	ElPrincipioYElFin: {
+		// v6.124 — THE RESEARCH COPY of Calamity Entropy's The Beginning
+		// and The End (the official wiki sheet — the gold and blue knives).
+		DisplayName: El Principio y el Fin
+		Tooltip:
+			'''
+			INVESTIGACIÓN · CALAMITY ENTROPY: las DAGAS DEL CANJE. 2500 daño ·
+			100 penetración · atraviesan muros. IZQUIERDA: la daga de ORO marca
+			LA MARCA DEL PRINCIPIO. DERECHA: la daga AZUL clava LA MIRADA DEL
+			FIN. Ambas acumulan hasta 8 CAPAS… y golpear con el OTRO color
+			LIBERA la marca: cada capa suelta su ALMA (las de eco persiguen a
+			tus enemigos con ondas que atraviesan; las de luz inferior te curan
+			y te sirven). SIGILOSO: dos dagas rastreadoras que revientan en
+			almas.
+			'''
+		Titulo: ═══ EL PRINCIPIO Y EL FIN — CALAMITY ENTROPY ═══
+		Linea1: IZQUIERDA: la daga de ORO — LA MARCA DEL PRINCIPIO (8 capas).
+		Linea2: DERECHA: la daga AZUL — LA MIRADA DEL FIN (8 capas).
+		Linea3: Golpear con el OTRO color LIBERA la marca en ALMAS: las de ECO
+		Linea4: persiguen a tus enemigos con ondas que ATRAVIESAN; las de LUZ
+		Linea5: INFERIOR te curan y te SIRVEN (+daño, +velocidad, +crítico).
+		Receta: La receta del original: 12× Colmillo de Dragón Fantasma en el Altar del Abismo. Aquí: madera (investigación).
 	}
 
 	RenglonFinal: {
@@ -2686,9 +2741,14 @@ Buffs: {
 	}
 
 	AuraVacioBuff: {
-		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
+		// v6.125 — SOLO LA LETRA DEL USUARIO (la letra de la sesión 7: «en el
+		// buff de aura del vacio solo debe estar mi texto no decir si hace
+		// daño o no, y eso de decir que el vacio esta cobrando una presa
+		// esta bien, solo quita la explicacion de daño y manten el resto»):
+		// el rango «1 → {0} por tick» MURIÓ — queda SOLO el texto del
+		// usuario + el sello del trabajo (la presa que arde dentro).
 		DisplayName: Aura del vacío
-		Description: El poder de vacío de un ser Exterior te rodea dañando a todo el que se acerque: de 1 de daño por tick en el borde exterior hasta {0} por tick pegado a ti — y golpea más rápido cuanto más cerca está el enemigo
+		Description: El poder de vacío de un ser Exterior te rodea, dañando a todo el que se acerque.
 			Trabajando: EL VACÍO ESTÁ COBRANDO — una presa arde dentro del aura
 	}
 
@@ -2715,6 +2775,38 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
+	}
+
+	// v6.124 — LOS BUFFS DE LAS INVESTIGACIONES (la copia local de los
+	// efectos de Calamity y Calamity Entropy).
+	DazzlingStabberBuff: {
+		DisplayName: Dazzling Stabber
+		Description: ¡En garde! Las dagas sagradas velan por ti
+	}
+	LlamasSagradas: {
+		// (Holy Flames de Calamity — la daga de FUEGO la prende, 3 s)
+		DisplayName: Llamas sagradas
+		Description: La luz sagrada te disuelve
+	}
+	MarcaDelPrincipio: {
+		// (冥煌烙印 — la daga de ORO; hasta 8 capas)
+		DisplayName: La Marca del Principio
+		Description: La marca de la luz inferior arde en ti — las capas esperan su canje
+	}
+	MiradaDelFin: {
+		// (虚渊凝视 — la daga AZUL; hasta 8 capas)
+		DisplayName: La Mirada del Fin
+		Description: El abismo vacío te mira — las capas esperan su canje
+	}
+	SupresionVital: {
+		// (生命压制 — ambas dagas, 10 s)
+		DisplayName: Supresión vital
+		Description: Has visto tu muerte
+	}
+	Servidumbre: {
+		// (使役 — el alma de luz inferior al portador, 3 s)
+		DisplayName: Servidumbre
+		Description: El alma sirviente: +daño, +velocidad de uso y +crítico
 	}
 }
 
@@ -2927,6 +3019,25 @@ Eco: {
 		Superficie1: El grimorio tiene hambre… y la superficie es el bufé.
 		Superficie2: Hierba, zombis y ojos nocturnos. Menú de todos los días.
 		Superficie3: El sol calienta la carne de arriba. Ven que la pruebo.
+	}
+
+	// v6.124 — EL SET EXCLUSIVO DEL MUNDO INTERIOR (la letra: «el
+	// grimorio tendra un nuevo set de dialogos solo dentro del mundo
+	// interior, esto hara que los dialogos anteriores no se activen y
+	// solo se activen los nuevos dialogos exclusivos del mundo
+	// interior»): DENTRO, el libro NO susurra el hambre, NO opina de
+	// las armas, NO celebra a los jefes — SOLO habla ESTE repertorio
+	// (la voz del Eterno soñando su propia panza, cada ~25 s y en cada
+	// momento que antes hablaba otra voz).
+	Interior: {
+		Interior1: Estás dentro… ¿lo notas? Aquí hasta el silencio tiene sabor a tinta.
+		Interior2: Todo lo que comí vive en estas paredes. Camínalas con respeto.
+		Interior3: Los tentáculos del cielo son mi respiración. No te apures: no muerden a su dueño.
+		Interior4: Si escuchas páginas girar… no es el viento. Soy yo, soñando lo que devoré.
+		Interior5: Este llano fue una biblioteca entera. Ahora es UNA página. Aprendí a plegar.
+		Interior6: Las brumas de aquí recuerdan a cada jefe. La que te roza… esa es del que más me costó.
+		Interior7: ¿Quieres salir? El pilar es mi única puerta. Yo también tengo una columna, de otro tipo.
+		Interior8: Quédate el tiempo que quieras… pero no te duermas: los sueños, aquí dentro, se me contagian.
 	}
 }
 

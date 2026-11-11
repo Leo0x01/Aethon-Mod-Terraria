@@ -1282,26 +1282,21 @@ namespace AethonMod.Content.VFX
                     // crudo i hacía que las plumas gemelas centellearan y
                     // giraran distinto — asimetría visible del par).
                     float dirGiro = (float)((Entity)pl).direction;
-                    // v6.118 — LAS RUNAS DE LA PUNTA, UN NODO ADENTRO (la
-                    // membrana>0): el glifo deja de marcar el diente de la
-                    // punta — vive SOBRE la pluma, BAJO la curva del borde
-                    // maestro (nada anguloso y brillante montado en la
-                    // silueta: la punta pertenece a la curva continua).
-                    // v6.122 — LA CURA ES PARA TODAS LAS ALAS RÚNICAS (la
-                    // letra: «las alas runicas del vacio siguen teniendo
-                    // picos, investiga como se eliminan esos picos ya lo
-                    // habiamos eliminado antes»). LA AUTOPSIA: la cura
-                    // v6.118 vivía TRAS la condición «membrana>0» — y la
-                    // v6.120 convirtió las alas del vacío en la copia
-                    // EXACTA del eclipse (membrana 0): las runas VOLVIERON
-                    // al nodo 8 (la punta misma) con la escala completa
-                    // 1.45+0.35·n — el glifo montado SOBRE la silueta de la
-                    // punta ES el pico que el usuario ve (las alas del
-                    // eclipse, SIN runas, nunca lo mostraron). LA CURA
-                    // RESTAURADA: UN NODO ADENTRO (el 7) y la escala
-                    // serena (1.26+0.28·n) — SIEMPRE, para todo estilo con
-                    // runas; la punta vuelve a pertenecer SOLO a la curva.
-                    int nodoRuna = 7;
+                    // v6.118 — LAS RUNAS DE LA PUNTA: el nodo del glifo.
+                    // v6.122 lo escondió un nodo adentro (el 7) con la
+                    // escala serena — y el usuario lo vio FLOTANDO EN EL
+                    // CENTRO de cada ala («se ven raras con algo en el
+                    // centro de cada ala», v6.124 — y ya lo había echado
+                    // de menos en la v6.120: «perdio toda la estetica de
+                    // runas que tenia la version original»). LA AUTOPSIA
+                    // de los dientes de sierra cerró el caso: la única
+                    // causa PROBADA fue el RUIDO A ANCHO COMPLETO (la
+                    // cura del inset incondicional de la v6.123 — viva),
+                    // no el glifo. v6.124 — LAS RUNAS VUELVEN A LAS
+                    // PUNTAS (nodo 8, la escala completa de la versión
+                    // original 1.45+0.35·n): el glifo CORONA la punta de
+                    // la pluma, donde nació.
+                    int nodoRuna = 8;
                     for (int i = 0; i < _geoN; i++)
                     {
                         Vector2 val3 = _pozosEje[i][nodoRuna];
@@ -1310,12 +1305,13 @@ namespace AethonMod.Content.VFX
                         float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * 2.3f + num5 + flap * 0.35f);
                         num6 *= 0.8f + 0.2f * VFXCore.Hash01(((Entity)pl).whoAmI * 13 + gemela, (int)(globalTimeWrappedHourly * 12f), 17);
                         float num7 = (float)gemela / (float)(num4 - 1);
-                        // v6.118 — la escala también se aquieta en la membrana:
-                        // el glifo acompaña a la pluma sin DOMINAR el filo.
-                        // v6.122 — y con la cura universal de arriba, la
-                        // escala SERENA es la única escala (el glifo vive
-                        // SOBRE la pluma, jamás montado en el filo).
-                        float escala = 1.26f + 0.28f * num7;
+                        // v6.124 — LA ESCALA COMPLETA DE LA VERSIÓN
+                        // ORIGINAL (1.45+0.35·n): la serena de la v6.122
+                        // (1.26+0.28·n) empequeñecía al glifo — el usuario
+                        // la vio como runas APAGADAS y un «algo» raro en
+                        // el centro del ala. La runa CORONA la punta con
+                        // todo su tamaño.
+                        float escala = 1.45f + 0.35f * num7;
                         Color cuerpo = val;
                         Color punta = val2;
                         if (estilo.Runas == 4)

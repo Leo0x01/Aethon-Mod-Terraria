@@ -2,39 +2,52 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Weapons.Definitivas
 {
     // ======================================================================
-    //  v6.122 — EL JUICIO DE LOS DOS SOLES (la letra del usuario: «usa la
-    //  superforja para crear un arma con ataque definitivo de luz y
-    //  oscuridad, quiero dos esferas de luz y oscuridad colisionen y
-    //  creen una implosion que luego explota en un destello de luz»).
+    //  v6.124 — EL JUICIO DE LOS DOS SOLES, RECONSTRUIDO CON LOS SOLES
+    //  RÚNICOS DE LA CASA (la letra del usuario: «el juicio de los dos
+    //  soles es raro, no usan los soles runicos que tenemos como base
+    //  para sus soles y todavia hay una textura plana y rectangular en
+    //  la explocion lo cual es raro»).
     //
-    //  EL ATAQUE DEFINITIVO DE LUZ Y OSCURIDAD — el guion en TRES actos:
-    //    1. LA CONVOCATORIA (30 t): DOS ESFERAS nacen a los lados del
-    //       portador — la ESFERA DE LUZ (blanco-dorado, chispas de oro)
-    //       y la ESFERA DE OSCURIDAD (núcleo negro con el borde ardiendo
-    //       violeta — la lección v6.101: el negro solo existe si su
-    //       borde arde) — y vuelan al PUNTO DE ENCUENTRO (el cursor, con
-    //       correa de 640 px).
-    //    2. LA IMPLOSIÓN (26 t): las dos esferas ESPIRALAN una dentro de
-    //       la otra, encogiéndose — el remolino de la casa gira y TIRA
-    //       del polvo hacia adentro (la luz se ATRAGANTA), un latido
-    //       negro al final: el punto donde la luz y la oscuridad se
-    //       comen mutuamente.
-    //    3. EL DESTELLO (44 t): LA EXPLOSIÓN DE LUZ — la NovaBurst de la
-    //       casa naciendo de CERO a TAMAÑO DIOS, el anillo de choque de
-    //       OndaLib expandiéndose, los rayos del DestelloFinal, la lluvia
-    //       de chispas doradas, la luz que inunda el mundo y la sacudida
-    //       de cámara. La onda golpea UNA VEZ (ventana de 10 t, radio
-    //       460): la sentencia de los dos soles.
+    //  LA AUTOPSIA DE LA v6.122: las «esferas» eran UNA ESTRELLA DE 4
+    //  PUNTAS de 16 px (Star.png) estirada — no soles; y el destello
+    //  final pintaba NovaBurst y DestelloFinal, DOS texturas casi
+    //  CUADRADAS llenas (la fila central de la NovaBurst va de borde a
+    //  borde a 255) — «la textura plana y rectangular» de la letra.
+    //
+    //  LA RECONSTRUCCIÓN — TODO ES EL CÓDIGO DE SOLES DEL PROYECTO:
+    //    · LOS DOS SOLES SON SOLES RÚNICOS DE VERDAD: el CUERPO SOLAR
+    //      es RuneSunRenderer.DrawSunBody (EL MISMO disco de plasma
+    //      SunShader con granulación dendrítica, limbo y manchas que
+    //      viste a TODOS los soles del mod) y los ANILLOS son
+    //      RuneSunRenderer.EmitRingSystem (EL MISMO emisor de SigiloLib
+    //      — los aros elípticos con glifos rúnicos cabalgando la órbita
+    //      de la familia de soles rúnicos). El SOL BLANCO lleva la
+    //      paleta blanco-oro; el SOL NEGRO, la negro-violeta (la lección
+    //      v6.101: el negro solo existe si su borde arde — su backglow
+    //      violeta y SUS ANILLOS RÚNICOS lo recortan del mundo).
+    //    · LA FUSIÓN: los dos soles espiralan uno dentro del otro y
+    //      nace EL SOL FUSIONADO — un sol MÁS GRANDE Y DEVASTADOR (×2,1
+    //      el cuerpo, el DOBLE de anillos rúnicos) que se hincha y
+    //      enrojece mientras carga la sentencia.
+    //    · LA EXPLOSIÓN ES LA NOVA DE LOS SOLES DE LA CASA (el patrón
+    //      de RuneSunProjectile.OnKill): TODO redondo y orgánico — el
+    //      DOBLE círculo de BRUMA dorada (BrumaNacimientoFX, modo 3), la
+    //      CHISPA central (ParticlePresets.Explosion), la LLUVIA de
+    //      runas de eco doradas, el ANILLO DE CHOQUE (OndaLib.Shock —
+    //      la onda circular de la casa) y el sol muriendo EN la luz (su
+    //      cuerpo fundiéndose con alphaMul). CERO texturas planas: ni
+    //      Star, ni NovaBurst, ni DestelloFinal — el examen de la letra
+    //      queda cerrado.
     // ======================================================================
     public class JuicioDosSoles : ModItem
     {
@@ -88,104 +101,22 @@ namespace AethonMod.Content.Weapons.Definitivas
     }
 
     // ======================================================================
-    //  JuicioDosSolesProj — v6.124 — LA CEREMONIA CON SOLES DE VERDAD (la
-    //  letra: «ya que son soles hubieras usado nuestro codigo de soles
-    //  para crear esos 2 soles, creando uno blanco y otro negro y asi
-    //  fucionarlos en una explosion creando uno aun mas grande y
-    //  debastador y luego explotando» + «todo proyectil debe ser creado
-    //  con la superforja, en este caso con la nueva que sera creada
-    //  SForja»).
-    //
-    //  LOS SOLES SON SPRITES DE LA SFORJA (la autopsia de los «soles
-    //  transparentes»: la v6.122 dibujaba la textura procedural Star
-    //  con colores multiplicados — al fallar la carga el dibujo moría
-    //  en silencio y SOLO quedaba el destello; y aún cargando, la
-    //  estrella NO ES un sol). AHORA: EL SOL DE LUZ y EL SOL DE
-    //  OSCURIDAD nacen del CÓDIGO DE SOLES DE LA CASA
-    //  (gen_sol_aethon_v65036.py — el generador del sol del jefe,
-    //  parametrizado en tools/sforja.py con HD cuadrado ×8): el
-    //  blanco-dorado de Aethon y el negro con el borde ardiendo
-    //  violeta (la lección v6.101) — y LA FUSIÓN: el sol del juicio
-    //  con el corazón negro y la doble corona.
-    //
-    //  EL GUION EN CUATRO ACTOS (la letra, con la fusión que faltaba):
-    //    1. LA CONVOCATORIA (30 t): LOS DOS SOLES nacen a los lados y
-    //       vuelan al PUNTO DE ENCUENTRO — el sol de LUZ con su corona
-    //       dorada girando, el sol de OSCURIDAD con su borde ardiendo.
-    //    2. LA IMPLOSIÓN (26 t): los dos soles ESPIRALAN uno dentro
-    //       del otro — el remolino TIRA del polvo, el latido negro al
-    //       final: donde la luz y la oscuridad se comen mutuamente.
-    //    3. LA FUSIÓN (30 t): NACE EL SOL DEL JUICIO — uno AÚN MÁS
-    //       GRANDE Y DEVASTADOR que crece temblando hasta el tamaño
-    //       dios, la luz inunda el mundo: la fusión de la letra, que
-    //       la v6.122 se saltaba por completo.
-    //    4. EL DESTELLO (40 t): EL SOL EXPLOTA — la NovaBurst de la
-    //       casa, el anillo de choque, la lluvia dorada y la onda que
-    //       golpea (ventana de 10 t, radio 460): la sentencia.
+    //  JuicioDosSolesProj — LA CEREMONIA ENTERA (los dos soles rúnicos,
+    //  la fusión y la nova — un solo proyectil, cuatro actos).
     // ======================================================================
     public class JuicioDosSolesProj : ModProjectile
     {
-        // LA TEXTURA DE IDENTIDAD: EL SOL DEL JUICIO (la fusión — el
-        // corazón de la ceremonia; los dos soles y el destello viven
-        // abajo, cada uno con SU sprite de la SForja).
-        public override string Texture => "AethonMod/Content/Effects/Procedural/SolFusion";
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        // === LOS SOLES DE LA SFORJA (el código de soles de la casa) ===
-        private static Asset<Texture2D> _solLuz;
-        private static Asset<Texture2D> _solOscuro;
-        private static Asset<Texture2D> _solFusion;
-
-        private static Texture2D SolLuz
-        {
-            get
-            {
-                try
-                {
-                    _solLuz ??= ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SolLuz");
-                    return _solLuz.IsLoaded ? _solLuz.Value : null;
-                }
-                catch { return null; }
-            }
-        }
-
-        private static Texture2D SolOscuro
-        {
-            get
-            {
-                try
-                {
-                    _solOscuro ??= ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SolOscuro");
-                    return _solOscuro.IsLoaded ? _solOscuro.Value : null;
-                }
-                catch { return null; }
-            }
-        }
-
-        private static Texture2D SolFusion
-        {
-            get
-            {
-                try
-                {
-                    _solFusion ??= ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SolFusion");
-                    return _solFusion.IsLoaded ? _solFusion.Value : null;
-                }
-                catch { return null; }
-            }
-        }
-
-        private const int T_CONVOCATORIA = 30;
-        private const int T_IMPLOSION = 26;
-        private const int T_FUSION = 30;
-        private const int T_DESTELLO = 40;
+        private const int T_CONVOCATORIA = 36;   // los dos soles vuelan al punto
+        private const int T_FUSION = 30;         // espiralan y EL SOL FUSIONADO nace
+        private const int T_CARGA = 22;          // el sol fusionado se hincha (la sentencia)
+        private const int T_NOVA = 42;           // LA NOVA (la explosión del sol)
 
         /// <summary>El reloj del acto actual.</summary>
         private float _t;
 
-        /// <summary>0 convocatoria · 1 implosión · 2 fusión · 3 destello.</summary>
+        /// <summary>0 convocatoria · 1 fusión · 2 carga · 3 nova.</summary>
         private int _acto;
 
         private Vector2 Punto => new(Projectile.ai[0], Projectile.ai[1]);
@@ -197,7 +128,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             Projectile.friendly = true;
             Projectile.tileCollide = false;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = T_CONVOCATORIA + T_IMPLOSION + T_FUSION + T_DESTELLO + 10;
+            Projectile.timeLeft = T_CONVOCATORIA + T_FUSION + T_CARGA + T_NOVA + 10;
             Projectile.aiStyle = -1;
             Projectile.ignoreWater = true;
         }
@@ -210,15 +141,17 @@ namespace AethonMod.Content.Weapons.Definitivas
 
             // EL RELOJ DE LOS ACTOS
             if (_acto == 0 && _t > T_CONVOCATORIA) { _acto = 1; _t = 0; }
-            else if (_acto == 1 && _t > T_IMPLOSION) { _acto = 2; _t = 0; NacerElSolFusion(); }
-            else if (_acto == 2 && _t > T_FUSION) { _acto = 3; _t = 0; NacerElDestello(); }
-            else if (_acto == 3 && _t > T_DESTELLO) { Projectile.Kill(); return; }
+            else if (_acto == 1 && _t > T_FUSION) { _acto = 2; _t = 0; }
+            else if (_acto == 2 && _t > T_CARGA) { _acto = 3; _t = 0; NacerLaNova(); }
+            else if (_acto == 3 && _t > T_NOVA) { Projectile.Kill(); return; }
 
             Projectile.Center = Punto;
 
-            // === ACTO 1 — LA CONVOCATORIA: los soles vuelan al punto ===
             if (_acto == 0)
             {
+                // === ACTO 1 — LA CONVOCATORIA: los DOS SOLES RÚNICOS
+                //     vuelan al punto — la luz siembra ORO, la oscuridad
+                //     siembra vacío invertido (la firma de siempre) ===
                 if (!Main.dedServ && Main.rand.NextBool(2))
                 {
                     bool esLuz = Main.rand.NextBool();
@@ -231,9 +164,11 @@ namespace AethonMod.Content.Weapons.Definitivas
                     d.noGravity = true;
                 }
             }
-            // === ACTO 2 — LA IMPLOSIÓN: todo cae al centro ===
             else if (_acto == 1)
             {
+                // === ACTO 2 — LA FUSIÓN: los soles espiralan y TODO el
+                //     polvo cercano CAE al centro (la succión de antes,
+                //     intacta — el tirón de la casa) ===
                 if (!Main.dedServ && Main.rand.NextBool(3))
                 {
                     float ang = Main.rand.NextFloat(MathHelper.TwoPi);
@@ -245,70 +180,50 @@ namespace AethonMod.Content.Weapons.Definitivas
                         new Color(200, 150, 255), 1.1f);
                     d.noGravity = true;
                 }
-                if (_t == T_IMPLOSION && !Main.dedServ)
+                if (_t == T_FUSION && !Main.dedServ)
                 {
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item122.WithPitchOffset(0.35f), Punto);
                     OndaLib.Kick(6f, 14);
                 }
             }
-            // === ACTO 3 — LA FUSIÓN: el sol del juicio CRECE temblando ===
             else if (_acto == 2)
             {
+                // === ACTO 3 — LA CARGA: el SOL FUSIONADO se hincha — la
+                //     gigante de los soles de la casa (enrojece, tiembla
+                //     y su luz inunda) ===
+                float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
                 if (!Main.dedServ)
                 {
-                    float crece = Math.Min(1f, _t / T_FUSION);
-                    Lighting.AddLight(Punto, new Vector3(2.8f, 2.4f, 1.8f) * (0.4f + 0.6f * crece));
-                    // EL TEMBLOR DE LA FUSIÓN (el dios apretando el puño)
-                    if (Main.rand.NextBool(4))
-                        OndaLib.Kick(2 + (int)(6f * crece), 6);
-                    // LAS CHISPAS DE LA FORJA (los dos soles deshaciéndose)
-                    if (Main.rand.NextBool(2))
+                    Lighting.AddLight(Punto, new Vector3(2.2f, 1.8f, 1.2f) * (0.6f + rg));
+                    if (Main.rand.NextBool(3))
+                        OndaLib.Kick(1 + (int)(4f * rg));
+                }
+            }
+            else
+            {
+                // === ACTO 4 — LA NOVA: la luz inunda el mundo (2 s de
+                //     día dentro del juicio) + la lluvia dorada ===
+                if (!Main.dedServ)
+                {
+                    float vida = Math.Max(0f, 1f - _t / T_NOVA);
+                    Lighting.AddLight(Punto, new Vector3(2.6f, 2.3f, 1.6f) * vida);
+                    if (_t < 14 && Main.rand.NextBool(2))
                     {
-                        bool esLuz = Main.rand.NextBool();
-                        Dust d = Dust.NewDustPerfect(Punto + Main.rand.NextVector2Circular(60f, 60f) * (1f - crece * 0.6f),
-                            esLuz ? DustID.GoldFlame : DustID.Shadowflame,
-                            -Vector2.Normalize(Punto - Projectile.Center - Main.rand.NextVector2Circular(80f, 80f)) * 3f,
-                            0, esLuz ? new Color(255, 236, 170) : new Color(170, 98, 245), 1.2f);
+                        Dust d = Dust.NewDustPerfect(Punto, DustID.GoldFlame,
+                            Main.rand.NextVector2Circular(11f, 11f), 0,
+                            new Color(255, 244, 204), Main.rand.NextFloat(1.1f, 2f));
                         d.noGravity = true;
                     }
                 }
             }
-            // === ACTO 4 — EL DESTELLO: el sol explota en luz ===
-            else
-            {
-                if (!Main.dedServ)
-                {
-                    float vida = Math.Max(0f, 1f - _t / T_DESTELLO);
-                    Lighting.AddLight(Punto, new Vector3(2.6f, 2.3f, 1.6f) * vida);
-                }
-                if (!Main.dedServ && _t < 14 && Main.rand.NextBool(2))
-                {
-                    Dust d = Dust.NewDustPerfect(Punto, DustID.GoldFlame,
-                        Main.rand.NextVector2Circular(11f, 11f), 0,
-                        new Color(255, 244, 204), Main.rand.NextFloat(1.1f, 2f));
-                    d.noGravity = true;
-                }
-            }
         }
 
-        /// <summary>EL NACIMIENTO DEL SOL DEL JUICIO (la fusión de la
-        /// letra: «fucionarlos en una explosion creando uno aun mas
-        /// grande y debastador»): el trueno de la forja y el tirón.</summary>
-        private void NacerElSolFusion()
-        {
-            if (!Main.dedServ)
-            {
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.25f), Punto);
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item15, Punto);
-                OndaLib.Kick(8f, 18);
-            }
-        }
-
-        /// <summary>EL NACIMIENTO DEL DESTELLO: la onda golpea (una ventana
-        /// de 10 t con la hitbox de 920 px — la sentencia) y el teatro
-        /// estalla (el trueno, la sacudida, el anillo).</summary>
-        private void NacerElDestello()
+        /// <summary>EL NACIMIENTO DE LA NOVA: la onda golpea (una ventana
+        /// de 10 t con la hitbox de 920 px — la sentencia) y TODO el
+        /// teatro de la nova de los soles de la casa estalla (el patrón
+        /// de RuneSunProjectile.OnKill: bruma, chispa, runas de eco).</summary>
+        private void NacerLaNova()
         {
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
@@ -321,7 +236,38 @@ namespace AethonMod.Content.Weapons.Definitivas
             {
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Punto);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Punto);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Punto);
                 OndaLib.Kick(14f, 26);
+
+                // LA NOVA DE BRUMA — el DOBLE círculo de la casa (el
+                // patrón del sol rúnico: el círculo COMPLETO al radio de
+                // la nova + el corazón MÁS DENSO que se disipa antes).
+                Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(),
+                    Punto, Vector2.Zero,
+                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.BrumaNacimientoFX>(),
+                    0, 0f, Projectile.owner, 3f, 460f / 340f);
+                Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(),
+                    Punto, Vector2.Zero,
+                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Cosmic.BrumaNacimientoFX>(),
+                    0, 0f, Projectile.owner, 3f, (460f * 0.55f) / 340f);
+
+                // LA CHISPA de la nova (el fogonazo central de la casa).
+                ParticlePresets.Explosion(Punto, 300f, 40,
+                    new Color(255, 245, 200), new Color(255, 170, 60), 44);
+
+                // LAS RUNAS DE ECO: la nova escupe glifos de luz (la
+                // lluvia rúnica del sol de siempre).
+                for (int i = 0; i < 26; i++)
+                {
+                    float angle = (MathHelper.TwoPi / 26f) * i +
+                                  Main.rand.NextFloat(-0.08f, 0.08f);
+                    Vector2 outward = new((float)Math.Cos(angle), (float)Math.Sin(angle));
+                    Dust d = Dust.NewDustPerfect(Punto, DustID.Enchanted_Gold,
+                        outward * Main.rand.NextFloat(5f, 12f),
+                        255, new Color(255, 235, 170), 1.5f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
             }
         }
 
@@ -331,193 +277,159 @@ namespace AethonMod.Content.Weapons.Definitivas
             modifiers.SourceDamage *= 1f;
         }
 
+        // ================================================================
+        //  EL DIBUJO — TODO CON EL CÓDIGO DE SOLES DE LA CASA
+        // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
             try
             {
-                Vector2 cen = Punto - Main.screenPosition;
                 float gt = Main.GlobalTimeWrappedHourly;
-                Texture2D luz = SolLuz;
-                Texture2D oscuridad = SolOscuro;
-                Texture2D fusion = SolFusion;
-                Texture2D nova = VFXCore.NovaBurst;
-                Texture2D destello = VFXCore.DestelloFinal;
-
-                // ============================================================
-                //  LOS SOLES (núcleos en lote ALFA — el negro del sol de
-                //  oscuridad TIENE que ser negro de verdad, el aditivo lo
-                //  lavaría; los HALOS en aditivo aparte, como la casa manda)
-                // ============================================================
-                void DibujarSol(Texture2D sol, Vector2 pos, float escala, float rot, float alfa)
-                {
-                    if (sol == null) return;
-                    Main.spriteBatch.Draw(sol, pos, null, Color.White * alfa, rot,
-                        sol.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                }
-                void DibujarHalo(Texture2D sol, Vector2 pos, float escala, Color tinte, float alfa)
-                {
-                    if (sol == null) return;
-                    Main.spriteBatch.Draw(sol, pos, null, tinte * alfa, 0f,
-                        sol.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                }
+                VFXCore.CerrarLoteSiAbierto();
 
                 if (_acto == 0)
                 {
-                    // ACTO 1 — LAS DOS SOLES volando al encuentro
+                    // === LOS DOS SOLES RÚNICOS volando al punto ===
                     float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
                     p = p * p * (3f - 2f * p);
                     for (int lado = 0; lado < 2; lado++)
-                    {
-                        bool esLuz = lado == 0;
-                        Texture2D sol = esLuz ? luz : oscuridad;
-                        if (sol == null) continue;
-                        Vector2 origen = Punto + (esLuz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
-                        Vector2 pos = Vector2.Lerp(origen, Punto, p) - Main.screenPosition +
-                            new Vector2(0f, MathF.Sin(gt * 6f + lado * 3.1f) * 26f * (1f - p));
-                        float escala = 0.9f + 0.25f * MathF.Sin(gt * 5f + lado);
-                        float rot = gt * (esLuz ? 0.55f : -0.55f);
-                        // EL NÚCLEO (alfa puro — el negro es negro)
-                        DibujarSol(sol, pos, escala, rot, 1f);
-                        // EL HALO (aditivo — la corona ardiendo alrededor)
-                        VFXCore.AbrirAdditive();
-                        try
-                        {
-                            DibujarHalo(sol, pos, escala * 2.2f,
-                                esLuz ? new Color(255, 214, 130) : new Color(150, 84, 235), 0.34f);
-                            DibujarHalo(sol, pos, escala * 1.4f,
-                                esLuz ? new Color(255, 240, 190) : new Color(96, 50, 170), 0.5f);
-                        }
-                        finally { VFXCore.RestaurarLoteVanilla(); }
-                    }
+                        DibujarSolSencillo(lado == 0, p, gt);
                 }
                 else if (_acto == 1)
                 {
-                    // ACTO 2 — LA IMPLOSIÓN: los soles espiralan al centro
-                    float p = MathHelper.Clamp(_t / T_IMPLOSION, 0f, 1f);
-                    float radio = MathHelper.Lerp(210f, 8f, p);
+                    // === LA FUSIÓN: los dos soles espiralan uno dentro
+                    //     del otro, encogiéndose — y al final EL SOL
+                    //     FUSIONADO NACE y CRECE (el sol más grande y
+                    //     devastador de la letra) ===
+                    float p = MathHelper.Clamp(_t / T_FUSION, 0f, 1f);
+                    float radio = MathHelper.Lerp(210f, 26f, p);
                     for (int lado = 0; lado < 2; lado++)
                     {
-                        bool esLuz = lado == 0;
-                        Texture2D sol = esLuz ? luz : oscuridad;
-                        if (sol == null) continue;
+                        bool luz = lado == 0;
                         float ang = gt * 5.5f + lado * MathHelper.Pi + p * 9f;
-                        Vector2 pos = cen + ang.ToRotationVector2() * radio;
-                        float escala = MathHelper.Lerp(1.0f, 0.34f, p);
-                        DibujarSol(sol, pos, escala, ang * 2f, 1f);
-                        VFXCore.AbrirAdditive();
-                        try
-                        {
-                            DibujarHalo(sol, pos, escala * 1.9f,
-                                esLuz ? new Color(255, 214, 130) : new Color(150, 84, 235), 0.5f);
-                        }
-                        finally { VFXCore.RestaurarLoteVanilla(); }
+                        Vector2 pos = Punto + ang.ToRotationVector2() * radio;
+                        float r = MathHelper.Lerp(RuneSunRenderer.BodyPx * 0.92f,
+                            RuneSunRenderer.BodyPx * 0.34f, p);
+                        DibujarSol(luz, pos, r, gt, 8, rg: 0f, alpha: 1f,
+                            seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                     }
-                    // EL REMOLINO del tirón (el vacío tragándose la luz)
-                    Texture2D remolino = DefinitivasLib.TexRemolino;
-                    if (remolino != null)
+                    // EL SOL FUSIONADO: nace en el centro a media fusión y
+                    // crece hasta su tamaño de sentencia (×2,1 el cuerpo).
+                    if (p > 0.45f)
                     {
-                        VFXCore.AbrirAdditive();
-                        try
-                        {
-                            Main.spriteBatch.Draw(remolino, cen, null,
-                                new Color(120, 70, 200) * (0.5f * (1f - p * 0.5f)),
-                                gt * 3.2f, remolino.Size() * 0.5f,
-                                2.6f - 1.6f * p, SpriteEffects.None, 0f);
-                        }
-                        finally { VFXCore.RestaurarLoteVanilla(); }
-                    }
-                    // EL LATIDO NEGRO final (el punto de la nada)
-                    float negro = MathHelper.Clamp((p - 0.75f) / 0.25f, 0f, 1f);
-                    if (negro > 0f && nova != null)
-                    {
-                        VFXCore.AbrirAdditive();
-                        try
-                        {
-                            Main.spriteBatch.Draw(nova, cen, null,
-                                new Color(10, 5, 18) * negro, 0f, nova.Size() * 0.5f,
-                                0.4f + 0.5f * negro, SpriteEffects.None, 0f);
-                        }
-                        finally { VFXCore.RestaurarLoteVanilla(); }
+                        float n = MathHelper.Clamp((p - 0.45f) / 0.55f, 0f, 1f);
+                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.5f, 1.05f, n);
+                        DibujarSolFusionado(Punto, r, gt, 12, rg: 0f, alpha: n);
                     }
                 }
                 else if (_acto == 2)
                 {
-                    // ACTO 3 — LA FUSIÓN: EL SOL DEL JUICIO nace y crece
-                    // hasta el tamaño dios, TEMBLANDO de poder
-                    float p = MathHelper.Clamp(_t / T_FUSION, 0f, 1f);
-                    if (fusion != null)
-                    {
-                        float crece = 0.35f + 4.4f * (p * p * (3f - 2f * p));
-                        // EL TEMBLOR DE LA FUSIÓN (la masa peleando por nacer)
-                        Vector2 tiro = p < 0.95f
-                            ? new Vector2(MathF.Sin(gt * 46f), MathF.Cos(gt * 38f)) * 7f * (1f - p * 0.5f)
-                            : Vector2.Zero;
-                        DibujarSol(fusion, cen + tiro, crece, gt * 0.5f, Math.Min(1f, 0.4f + p));
-                        VFXCore.AbrirAdditive();
-                        try
-                        {
-                            DibujarHalo(fusion, cen + tiro, crece * 1.55f,
-                                new Color(255, 214, 130), 0.42f * (0.5f + 0.5f * p));
-                            DibujarHalo(fusion, cen + tiro, crece * 2.6f,
-                                new Color(150, 84, 235), 0.30f * p);
-                        }
-                        finally { VFXCore.RestaurarLoteVanilla(); }
-                        // LOS DOS SOLES disolviéndose DENTRO de la fusión
-                        float disuelven = Math.Max(0f, 1f - p * 2.6f);
-                        if (disuelven > 0.02f)
-                        {
-                            for (int lado = 0; lado < 2; lado++)
-                            {
-                                bool esLuz = lado == 0;
-                                Texture2D sol = esLuz ? luz : oscuridad;
-                                if (sol == null) continue;
-                                float ang = lado * MathHelper.Pi + p * 7f;
-                                Vector2 pos = cen + ang.ToRotationVector2() * MathHelper.Lerp(80f, 0f, p);
-                                DibujarSol(sol, pos, 0.8f * disuelven + 0.2f, ang, disuelven);
-                            }
-                        }
-                    }
+                    // === LA CARGA: el sol fusionado se HINCHA y enrojece
+                    //     (la gigante final de los soles de la casa) ===
+                    float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
+                    float r = RuneSunRenderer.BodyPx *
+                        (1.05f + 0.55f * rg * rg + 0.12f * MathF.Sin(gt * 18f) * rg);
+                    DibujarSolFusionado(Punto, r, gt, 14, rg, alpha: 1f);
                 }
                 else
                 {
-                    // ACTO 4 — EL DESTELLO: el sol del juicio EXPLOTA en luz
-                    float p = MathHelper.Clamp(_t / T_DESTELLO, 0f, 1f);
-                    float crece = Math.Min(1f, _t / 7f);          // abre RÁPIDO
+                    // === LA NOVA: el sol muere EN la luz — su cuerpo se
+                    //     funde (alphaMul) mientras el ANILLO DE CHOQUE
+                    //     redondo de la casa se expande. NADA de texturas
+                    //     planas: solo el sol, la onda y la bruma ===
+                    float p = MathHelper.Clamp(_t / T_NOVA, 0f, 1f);
                     float apaga = 1f - p;
+                    float r = RuneSunRenderer.BodyPx *
+                        (1.6f + 0.5f * Math.Min(1f, _t / 6f)) * (0.85f + 0.15f * apaga);
+                    DibujarSolFusionado(Punto, r, gt, 16, rg: 1f,
+                        alpha: MathF.Min(1f, apaga * 1.8f));
+
                     VFXCore.AbrirAdditive();
                     try
                     {
-                        // LOS RAYOS del destello
-                        if (destello != null)
-                            Main.spriteBatch.Draw(destello, cen, null,
-                                new Color(255, 244, 210) * (0.85f * apaga),
-                                gt * 0.9f, destello.Size() * 0.5f,
-                                (1.4f + 5.6f * crece) * (0.8f + 0.2f * MathF.Sin(gt * 14f)),
-                                SpriteEffects.None, 0f);
-                        // LA NOVA (el corazón de la explosión)
-                        if (nova != null)
-                            Main.spriteBatch.Draw(nova, cen, null,
-                                new Color(255, 250, 235) * (0.95f * apaga * apaga * (3f - 2f * apaga)),
-                                0f, nova.Size() * 0.5f,
-                                (0.6f + 6.4f * crece) * (0.9f + 0.1f * MathF.Sin(gt * 12f)),
-                                SpriteEffects.None, 0f);
-                        // EL SOL FUSIONADO deshaciéndose en la explosión
-                        if (fusion != null && _t < 18)
-                            Main.spriteBatch.Draw(fusion, cen, null,
-                                new Color(255, 244, 210) * (0.5f * (1f - _t / 18f)),
-                                gt * 1.4f, fusion.Size() * 0.5f,
-                                4.6f * (1f + 0.3f * MathF.Sin(gt * 20f)) * (1f - _t / 40f),
-                                SpriteEffects.None, 0f);
-                        // EL ANILLO DE CHOQUE (la onda de OndaLib)
-                        OndaLib.Shock(Main.spriteBatch, cen, MathHelper.Clamp(_t / 26f, 0f, 1f),
-                            1.5f + 4.5f * crece, new Color(255, 232, 170), 0.8f, 7, 14f);
+                        OndaLib.Shock(Main.spriteBatch, Punto - Main.screenPosition,
+                            MathHelper.Clamp(_t / 26f, 0f, 1f),
+                            1.5f + 4.5f * Math.Min(1f, _t / 7f),
+                            new Color(255, 232, 170), 0.8f * apaga, 7, 14f);
                     }
                     finally { VFXCore.RestaurarLoteVanilla(); }
                 }
+
+                VFXCore.ReabrirLoteVanilla();
             }
-            catch { }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
             return false;
+        }
+
+        /// <summary>EL SOL SENCILLO (el blanco o el negro) en su vuelo a
+        /// la cita: cuerpo solar + anillos rúnicos + la corona de polvo
+        /// de la casa.</summary>
+        private void DibujarSolSencillo(bool luz, float progreso, float gt)
+        {
+            Vector2 origen = Punto + (luz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
+            Vector2 pos = Vector2.Lerp(origen, Punto, progreso) +
+                new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * 26f * (1f - progreso));
+            DibujarSol(luz, pos, RuneSunRenderer.BodyPx * 0.92f, gt, 8,
+                rg: 0f, alpha: 1f, seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
+        }
+
+        // ================================================================
+        //  LOS CUERPOS SOLARES — LA MISMA TÉCNICA DE LA FAMILIA DE SOLES
+        //  (DrawSunBody: el disco de plasma SunShader con su granulación
+        //  dendrítica + EmitRingSystem: los aros rúnicos de SigiloLib)
+        // ================================================================
+
+        /// <summary>Dibuja un sol (blanco o negro) con SU paleta y SUS
+        /// anillos rúnicos — la base de soles rúnicos de la casa.</summary>
+        private static void DibujarSol(bool luz, Vector2 centroMundo, float r, float gt,
+            int anillos, float rg, float alpha, int seed, float rot)
+        {
+            Vector2 drawPos = centroMundo - Main.screenPosition;
+            if (luz)
+            {
+                // EL SOL BLANCO — blanco-oro (la esfera de luz).
+                RuneSunRenderer.DrawSunBody(drawPos, r, rot, gt,
+                    new Color(255, 255, 252), new Color(238, 228, 205),
+                    new Color(255, 214, 120),
+                    new Color(255, 240, 196), new Color(255, 205, 120),
+                    new Color(255, 248, 228), 0.9f, alpha);
+            }
+            else
+            {
+                // EL SOL NEGRO — negro-violeta (la esfera de oscuridad:
+                // el negro solo existe si su borde arde — su backglow
+                // violeta lo recorta del mundo).
+                RuneSunRenderer.DrawSunBody(drawPos, r, rot, gt,
+                    new Color(20, 11, 32), new Color(7, 4, 12),
+                    new Color(96, 54, 170),
+                    new Color(130, 76, 215), new Color(76, 44, 150),
+                    new Color(150, 84, 235), 0.9f, alpha);
+            }
+            VFXCore.Begin();
+            try { RuneSunRenderer.EmitRingSystem(centroMundo, r, gt, seed, anillos, rg, 0f, alpha); }
+            finally { VFXCore.FlushAdditive(null, false); }
+        }
+
+        /// <summary>EL SOL FUSIONADO — el sol MÁS GRANDE Y DEVASTADOR:
+        /// el corazón blanco-oro de la luz con las vetas violetas de la
+        /// oscuridad (la paleta de la fusión) y el DOBLE de anillos.</summary>
+        private static void DibujarSolFusionado(Vector2 centroMundo, float r, float gt,
+            int anillos, float rg, float alpha)
+        {
+            Vector2 drawPos = centroMundo - Main.screenPosition;
+            // la gigante enrojece la paleta (la ley de los soles de la casa)
+            Color main = Color.Lerp(new Color(255, 251, 244), new Color(255, 196, 130), rg * 0.8f);
+            Color darker = Color.Lerp(new Color(216, 186, 255), new Color(170, 90, 200), rg * 0.8f);
+            RuneSunRenderer.DrawSunBody(drawPos, r, gt * 0.5f, gt,
+                main, darker, new Color(120, 70, 200),
+                Color.Lerp(new Color(255, 238, 205), new Color(255, 170, 90), rg),
+                Color.Lerp(new Color(180, 120, 255), new Color(140, 70, 220), rg),
+                Color.Lerp(new Color(255, 250, 240), new Color(255, 210, 150), rg),
+                0.6f, alpha);
+            VFXCore.Begin();
+            try { RuneSunRenderer.EmitRingSystem(centroMundo, r, gt, 11, anillos, rg, 0f, alpha); }
+            finally { VFXCore.FlushAdditive(null, false); }
         }
     }
 }

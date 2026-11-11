@@ -78,17 +78,19 @@ namespace AethonMod.Content.Buffs
 
         public override void ModifyBuffText(ref string buffName, ref string tip, ref int rare)
         {
-            // LA VENTANA CUENTA EL RANGO EXACTO (la letra: «el poder de
-            // vacio de un ser Exterior te rodea dañando a todo el que
-            // se acerque»): 1 en el borde exterior → el máximo PEGADO
-            // al portador — el número vive en la única fuente de verdad
-            // + el sello del trabajo (si una presa arde dentro).
+            // v6.125 — SOLO LA LETRA DEL USUARIO (la letra de la sesión 7:
+            // «en el buff de aura del vacio solo debe estar mi texto no
+            // decir si hace daño o no, y eso de decir que el vacio esta
+            // cobrando una presa esta bien, solo quita la explicacion de
+            // daño y manten el resto»): LA VENTANA YA NO EXPLICA EL DAÑO —
+            // el rango «1 → {0} por tick» MURIÓ del texto (el cálculo
+            // sigue vivo en AuraJuicio2Ancla, la única fuente de verdad);
+            // queda SOLO el texto del usuario + EL SELLO DEL TRABAJO (que
+            // el vacío está cobrando una presa — «eso está bien», la letra).
             try
             {
                 string texto = Terraria.Localization.Language.GetTextValue(
                     "Mods.AethonMod.Buffs.AuraVacioBuff.Description");
-                int maximo = DanoMaximoVivo > 0 ? DanoMaximoVivo : 10;
-                texto = string.Format(texto, maximo);
                 if (Trabajando)
                 {
                     string trabajando = Terraria.Localization.Language.GetTextValue(

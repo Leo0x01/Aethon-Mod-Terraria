@@ -100,6 +100,24 @@ namespace AethonMod.Content.Systems
                 //     SU especie y SU color verdaderos.
                 if (npc == null ||
                     !(npc.boss || Globals.OleadaNPC.JefeVerdadero(npc))) return;
+                // v6.124 — LA VOZ DEL JEFE NO CRUZA LA PUERTA (la letra:
+                // «el grimorio tendra un nuevo set de dialogos solo dentro
+                // del mundo interior, esto hara que los dialogos
+                // anteriores no se activen y solo se activen los nuevos
+                // dialogos exclusivos del mundo interior»): DENTRO, la
+                // voz del festín NO se activa — habla SOLO el set
+                // exclusivo del interior (Eco.Interior1..8).
+                if (SubmundoGrimorio.VozInteriorActiva)
+                {
+                    for (int i = 0; i < Main.player.Length; i++)
+                    {
+                        Player dentro = Main.player[i];
+                        if (dentro == null || !dentro.active) continue;
+                        if (!TieneLibroVisible(dentro)) continue;
+                        SubmundoGrimorio.HablarInterior(dentro);
+                    }
+                    return;
+                }
                 // v6.50.3 — LA DERROTA COMPLETA (un helper, dos consumidores):
                 // la VOZ (aquí) y LA CRÓNICA del Testigo (GlobalNPCXP) aplican
                 // LAS MISMAS reglas — una derrota, una voz y UNA página. Antes

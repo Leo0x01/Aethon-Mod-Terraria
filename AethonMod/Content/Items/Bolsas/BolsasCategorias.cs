@@ -956,6 +956,21 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
             l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
+            // v6.124 — LAS TRES ARMAS DE INVESTIGACIÓN de la letra de la
+            // sesión («copia el arma Dazzling Stabber Staff de Calamity
+            // Mod… investiga y copia al 100% todo sobre el arma
+            // Arbitrator II en CALAMITY ENTROPY… copia el arma the
+            // beginning and the end de CALAMITY ENTROPY… luego daselas
+            // al jugador»): EL DAZZLING STABBER STAFF (el calco 100% del
+            // original de Calamity: código + sprites reales), EL
+            // ARBITRADOR II (la ficha del wiki oficial de Calamity
+            // Entropy: la jabalina que atraviesa muros y estalla, y su
+            // sigilosa que SE CLAVA y detona la X) y EL PRINCIPIO Y EL
+            // FIN (la ficha del wiki: las dagas de oro y azul, sus
+            // marcas de 8 capas y el canje de almas).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.DazzlingStabberStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.ArbitradorII>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.ElPrincipioYElFin>(), 1));
             return l;
         }
     }
@@ -1060,20 +1075,25 @@ namespace AethonMod.Content.Items.Bolsas
 
         protected override Color ColorFiesta => new Color(255, 232, 150);
 
-        protected override string Nota => "Las tres armas definitivas de la superforja: luz, tajos y agujas";
+        protected override string Nota => "Las armas definitivas de la superforja: los dos soles y el tajo-haz del vacío";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // EL JUICIO DE LOS DOS SOLES — dos esferas de luz y oscuridad
-            // colisionan: implosión → EL DESTELLO (la explosión de luz).
+            // EL JUICIO DE LOS DOS SOLES — los DOS SOLES RÚNICOS (el
+            // blanco y el negro) colisionan: fusión → EL SOL FUSIONADO
+            // más grande y devastador → LA NOVA (la explosión del sol).
             l.Add((ModContent.ItemType<Weapons.Definitivas.JuicioDosSoles>(), 1));
-            // EL TAJO DE OSCURIDAD — hasta tres tajos negro-morado-blanco
-            // que cruzan la arena y ATRAVIESAN a los enemigos.
-            l.Add((ModContent.ItemType<Weapons.Definitivas.TajoOscuro>(), 1));
-            // LAS AGUJAS DEL VACÍO — agujas delgadas que nacen cerca de
-            // la presa, la atraviesan y SE CLAVAN goteando daño.
-            l.Add((ModContent.ItemType<Weapons.Definitivas.AgujasVacio>(), 1));
+            // EL TAJO DEL VACÍO — v6.124 (la letra: «las otras dos armas
+            // las puedes borrar el tajo de oscuridad y las agujas del
+            // vacio, entonces crea un nuevo tajo y para eso debes usar un
+            // pequeño haz usando nuestros hazes, el inicio y final del
+            // tajo tipo haz sera muy fino en el centro se vuelve mas
+            // grueso, y como dije antes los colores son negro en el
+            // centro, morado en los bordes»): hasta tres tajos-haz cerca
+            // de los enemigos — FINOS en los extremos, GRUESOS al centro,
+            // NEGRO al centro y MORADO en los bordes (todo HazLib).
+            l.Add((ModContent.ItemType<Weapons.Definitivas.TajoDelVacio>(), 1));
             return l;
         }
     }

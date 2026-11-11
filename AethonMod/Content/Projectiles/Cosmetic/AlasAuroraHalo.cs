@@ -276,23 +276,27 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 byte alaEstilo = val.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
                 // v6.113 — SIN CASO ESPECIAL: la Aurora de Tinta murió en la
                 // purga — TODO estilo pasa por el catálogo (De() clamp incluido).
-                // v6.124 — UN CASO ESPECIAL NACE (la letra: «intenta rehacer
-                // el codigo de las alas runicas del vacio»): las ALAS RÚNICAS
-                // DEL VACÍO dejaron el camino del abanico de agujas PARA
-                // SIEMPRE — AlasVacioLib dibuja UNA MEMBRANA CONTINUA por
-                // ala con LA LEY DEL FILO (el borde aporta ~0: la sierra es
-                // matemáticamente imposible) y sus runas VIVEN DENTRO del
-                // cuerpo de la membrana (nada montado en la silueta).
-                if (alaEstilo == AlasCatalogo.Vacio)
-                {
-                    AlasVacioLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
-                    AlasVacioLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
-                }
-                else
-                {
-                    AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
-                    AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
-                }
+                // v6.124 → v6.125 — EL CASO ESPECIAL MURIÓ (la letra de la
+                // sesión 7: «las alas runicas del vacio ya no tienen picos,
+                // pero perdieron la forma original y ademas se ven raras con
+                // algo en el centro de cada ala, intenta retomar la forma
+                // anterior y original, pero manten lo que hiciste para que
+                // no tengan picos y sean lisas como ahora»): LA MEMBRANA
+                // CONTINUA de AlasVacioLib era lisísima PERO NO ERA LA FORMA
+                // — el usuario perdió EL ABANICO DE CINCO PLUMAS CON SU VELA
+                // (la forma original de la v6.118) y vio «algo en el centro
+                // de cada ala» (las runas VIVIENDO DENTRO del cuerpo de la
+                // membrana). LAS ALAS DEL VACÍO VUELVEN AL CAMINO DEL ABANICO
+                // (AlasAuroraLib) con TODOS los parámetros de la v6.118 (la
+                // membrana-vela entre plumas, el borde maestro, las puntas
+                // redondas, la simetría perfecta — ver AlasEstilo.Vacio) +
+                // LA LISURA v6.123 VIVA (el ensoglado del ruido INCONDICIONAL
+                // en AlasAuroraLib) + LAS RUNAS DE REGRESO A LAS PUNTAS (el
+                // nodo 8 con la escala completa de la versión original — ver
+                // DibujarRunas). (AlasVacioLib queda como archivo: la casa no
+                // borra las librerías — pero YA NADIE la llama.)
+                AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
+                AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
             }
             catch
             {
