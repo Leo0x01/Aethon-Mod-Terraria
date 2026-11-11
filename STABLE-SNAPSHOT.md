@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.125 — LA FORMA ORIGINAL Y LA LISURA + LOS SOLES RÚNICOS + EL TAJO-HAZ + LAS INVESTIGACIONES DE CALAMITY + LA VOZ DEL INTERIOR
 
-> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+> **PUBLICADA — release 441408839 + CDN verificado byte a byte (md5 27685c7c4ed10871b256670f0088de0d)**
 
 ## LA LETRA (el usuario — sesión 7; el usuario JUGÓ la v6.124)
 
