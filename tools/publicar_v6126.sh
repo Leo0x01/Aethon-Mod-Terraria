@@ -46,7 +46,7 @@ echo "[2/7] .tmod íntegro: $TAM_REAL B · md5 $MD5_REAL"
 echo "[3/7] push de main + $TAG…"
 git push origin main
 git tag -f "$TAG" >/dev/null 2>&1 || true
-git push -f origin "$TAG"
+git push -f origin "refs/tags/$TAG:refs/tags/$TAG"
 
 # ---------- 4 · EL RELEASE ----------
 echo "[4/7] creando el release $TAG…"
