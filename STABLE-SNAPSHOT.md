@@ -1,3 +1,26 @@
+# SNAPSHOT ESTABLE — v6.126 — LA RECONCILIACIÓN + LAS CINCO DAGAS DEL ETERNO EN SU SITIO
+
+> ⏳ **PENDIENTE DE PUBLICAR** — esta cabecera se rellena con el release ID real al publicar
+
+## LA LETRA (el usuario — la sesión 6, retomada; el usuario JUGÓ la v6.123)
+
+«las alas runicas del vacio volvieron, pero no mantuvieron la forma lisa, ahora tienen picos, esos picos los debes eliminar, o en caso de no poder, debes hacerlo tan finos y juntos que no se noten» · «en las copias de armas, solo Dazzling Stabber Staff fue copiada al 100%, las demas tambien deben copiarse al 100%, me importa la tecnica usada, si no puedes, entonces investigalas (investiga las tecnicas), si no entonces borralas» · «toma lo que aprendiste de Dazzling Stabber Staff, crees un promt para crear dagas inspiradas en el grimorio del eterno, dame un promto para crear un spritesheet con al menos 5 dagas diferentes inspiradas en el grimorio del eterno ya sabes como se ve el grimorio, quiero que esas dagas sean las siguiente invocacion despues de los 11 ojos, vienen las 5 dagas que tambien tendran un ojo en el centro» · «por alguna razon, las alas que tengo equipada, se separan del jugador en la animacion y estan a parte, el grimorio debe devorar al jugador en su conjunto y en la animacion debe verse como el jugador con todo lo que tiene es devorado» · «aunque ahora con el detalle de que el grimorio vuelva siempre se va al mundo interior» · «los textos no estan correctos, revisa los textos nuevos, estan en crudo».
+
+## LA RECONCILIACIÓN (este árbol nace de la v6.125 PUBLICADA)
+
+Otro sandbox publicó la v6.124 oficial (LA SFORJA + LOS SOLES DE VERDAD) y la v6.125 (la respuesta a jugarla). Este trabajo retomó la letra de la sesión 6 y LA AUTOPSIA DE LAS PIEZAS: 2 MUERTAS ya curadas mejor por la historia oficial (las alas volvieron a LA FORMA ORIGINAL del abanico v6.118 con la lisura viva; el Juicio vive con los SOLES RÚNICOS del proyecto) — nada de este árbol las toca. 4 VIVAS que la v6.125 no tiene:
+
+- **LAS CINCO DAGAS DEL ETERNO (la invocación del GRIMORIO, tras los 11 ojos)** — la v6.125 trajo el DazzlingStabberStaff como arma-investigación de la bolsa; ESTAS son la escalera del grimorio: CRISTAL (ráfaga de tajos, 50 % + 20 perforación) · LLAMA (barrido en arco) · ROCA (embestida con recul, 300 %) + VACÍO (se clava y gotea — la técnica de las agujas que el dueño ama) y VEREDICTO (marca y sentencia, 150 %). TODAS prenden la quemadura del vacío 3 s, TODAS con EL OJO EN EL CENTRO (almendra + iris vivo que MIRA a la presa) y el anillo íntimo de radio 32. La tira `DagaEterna_Hoja.png` 34×170 (5 marcos por ai[0]) + el icono `DagaEternaBuff.png` 32×32 100 % opaco con LA LEY DEL CONTRASTE (masa 54,33,86 sobre fondo 19,10,35 — 2,9× medidos; QA VLM SHIP) + LA ESCALERA en el clic derecho (la primera que falte, con mensaje por daga ×3) + el retrato persistente + el tooltip completo (Ojos X/11 · Dagas X/5).
+- **LA MARCHA AL MUNDO INTERIOR** — tras el trago, el libro NO posa: ABRE SU PROPIO OJO (iris negro de borde dorado — LA PUERTA SOY YO), ESPIRALA dentro de sí (órbita 40→0 acelerando, escala muerta en cero) con la lluvia de páginas doradas y el iris SE CIERRA detrás — CONSERVANDO LA CACERÍA INVERSA v6.125 (TVueloLibro=120) INTACTA.
+- **EL PLEGADO DE LAS ALAS EN LA DEVORACIÓN** — el halo de las alas era un proyectil APARTE que flotaba a un lado del festín: ahora se PLEGAR hacia la boca junto con el cuerpo (con sus últimas migas) y el grimorio flotante MUERE durante el festín. El jugador entra ENTERO, con todo lo que lleva puesto — SIN tocar la forma original v6.125 de las alas.
+- **LOS TEXTOS CRUDOS ×3** — los 29 DisplayName autogenerados («Aguja Vacio Proj», «Corona De Plumas Projectile», «Alma Eco», «Tajo Del Vacio Proj»…) MURIERON en los TRES idiomas + los bloques del Coro de los Profundos y la Pluma del Escriba Santo MUDADOS a Items (vivían en la cola dentro de Hambre: el juego jamás los veía; el tooltip real se conserva). Parser hjson REAL: **1679 claves IGUALES ×3, NI UN crudo vivo**.
+
+## VERIFICACIÓN (la casa, completa)
+
+oráculo 0/0 (466 .cs contra el tML 2026.09.3.1 real) · -build REAL 0/0 (523 entradas, 19.356.727 B) · GUARDIÁN TODO VIVE ✔ · AUDIT v6.126 TODO VERIFICADO ✔ (las investigaciones v6.125 dentro + la cacería inversa VIVA + la danza de los soles v6.125 VIVA + las dagas + la marcha + el pliegue + hjson ×3) · headless: Sandboxing v6.126 → Adding Recipes → Server started SIN UNA EXCEPCIÓN.
+
+---
+
 # SNAPSHOT ESTABLE — v6.125 — LA FORMA ORIGINAL Y LA LISURA + LOS SOLES RÚNICOS + EL TAJO-HAZ + LAS INVESTIGACIONES DE CALAMITY + LA VOZ DEL INTERIOR
 
 > **PUBLICADA — release 441408839 + CDN verificado byte a byte (md5 27685c7c4ed10871b256670f0088de0d)**
