@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -94,34 +95,57 @@ namespace AethonMod.Content.Systems
     // ======================================================================
     public class SubmundoGrimorio : ModSystem
     {
-        // === EL TAMAÑO DE LA CASA: 800×450 — LA LEY DE LAS SECCIONES
+        // === EL TAMAÑO DE LA CASA: 800×600 — LA LEY DE LAS SECCIONES
         // (v6.117, leída en el IL del tML 2026.9.3.1 real: el minimapa
         // camina el mundo en SECCIONES DE 200×150 TILES y TODOS los
         // mundos de vanilla son múltiplos exactos — 800 = 4×200 EXACTO
-        // y 450 = 3×150 EXACTO: el interior nace con secciones
+        // y 600 = 4×150 EXACTO: el interior nace con secciones
         // PERFECTAS; NI UN TILE menos ni uno más). ===
+        //
+        // v6.124 — EL ALTO NUEVA: 450 → 600. LA AUTOPSIA DEL CUADRO
+        // NEGRO (la letra: «el fondo negro permanece en el mundo
+        // interior» + «desaparece al volar alto y reaparece al bajar»):
+        // NO era el fondo de cueva (la cura v6.123 escondió las piezas
+        // tras la obsidiana — verificado), era EL HELL BLACK BOX DE
+        // VANILLA: Main.DrawBackground (decompile REAL del tML
+        // 2026.09.3.1, líneas del método) dibuja
+        // `spriteBatch.Draw(BlackTile, Rectangle(0, 0, screenWidth+100,
+        // screenHeight+200))` — UN RECTÁNGULO NEGRO DE PANTALLA COMPLETA
+        // — cuando `num2*16 <= screenPosition.Y + screenHeight`, donde
+        // num2 = worldSurface + ((maxTilesY−330−worldSurface)/6)*6 − 5
+        // es LA LÍNEA DEL CIELO DEL INFIERNO. Con Alto=450 la línea caía
+        // en el tile ~117 — ¡ARRIBA DEL LLANO (140)!: parado en el
+        // suelo la cámara SIEMPRE la cruzaba → la caja negra tapaba el
+        // cielo entero; volando ~30 tiles la cámara dejaba de cruzarla
+        // → el cuadro moría al subir y RENACÍA al bajar, EXACTO el
+        // síntoma. LA CURA GEOMÉTRICA DEFINITIVA: con Alto=600 la línea
+        // del infierno cae en el tile 261 (4176 px — a 121 tiles BAJO el
+        // llano): la caja JAMÁS se dibuja en el alcance de la cámara
+        // (el fondo del pozo es obsidiana sólida y nadie la talla), y el
+        // UnderworldLayer de vanilla (maxTilesY−200 = 400) queda igual
+        // fuera de alcance. La LEY DE SECCIONES sigue VIVA: 600 = 4×150
+        // EXACTO. El llano, el pilar y el nacimiento NO SE MUEVEN (la
+        // obsidiana sólida de 140 a 595: el cuerpo del dios es MÁS
+        // HONDO, nada más).
         private const int Ancho = 800;
-        private const int Alto = 450;
+        private const int Alto = 600;
         // v6.120 — EL LLANO DE OBSIDIANA (la letra: «el mundo interior
         // debe ser plano, solo un mundo plano de obsidiana»): la
         // superficie del cuerpo es UNA LÍNEA RECTA de obsidiana a
         // y = LlanoY — ni colinas ni plaza ni geoda: SOLO el llano y su
         // pilar.
-        // v6.123 — LA CURA DEL CUADRO NEGRO (la letra: «el fondo del
-        // mundo interior sigue siendo un cuadrado negro que desaparece
-        // al volar alto, pero al bajar otra vez, el cuadro negro
-        // aparece»): el fondo de cueva de vanilla (Main.DrawBackground,
-        // verificado contra el decompile del tML 2026.09.3.1) pinta sus
-        // piezas de 16×16 DESDE LA LÍNEA worldSurface·16 HACIA ABAJO,
-        // coloreadas con Lighting.GetColor — y en el vacío oscuro del
-        // interior ESAS PIEZAS SALÍAN NEGRAS: un cuadrado negro de borde
-        // perfectamente recto (bgTopY) que crecía al bajar y moría al
-        // subir (la cámara dejaba la línea fuera de pantalla). LA CURA
-        // GEOMÉTRICA: worldSurface CLAVADO EN LA PRIMERA FILA SÓLIDA
-        // DEL LLANO (LlanoY) y rockLayer un pelo más abajo — las piezas
-        // de cueva nacen EXACTAMENTE donde empieza la obsidiana y quedan
-        // OCULTAS TRAS LOS TILES para siempre: ni un píxel de ellas
-        // vuelve a verse, suba o baje el portador.
+        // v6.123 → v6.124 — LA CURA DEL CUADRO NEGRO, LA HISTORIA
+        // COMPLETA: la v6.123 escondió las piezas de cueva tras la
+        // obsidiana (worldSurface = LlanoY — correcto y NECESARIO,
+        // verificado con el decompile REAL del tML 2026.09.3.1)… pero
+        // el cuadro SIGUIÓ porque el culpable era OTRO pintor: EL HELL
+        // BLACK BOX (la autopsia completa vive en el comentario del
+        // Alto, arriba). La cura v6.124 = EL MUNDO MÁS HONDO (600):
+        // la línea del infierno BAJA al tile 261 y la caja JAMÁS entra
+        // al alcance de la cámara. worldSurface sigue CLAVADO EN LA
+        // PRIMERA FILA SÓLIDA DEL LLANO (las piezas de cueva nacen
+        // donde empieza la obsidiana y quedan OCULTAS TRAS LOS TILES)
+        // y rockLayer un pelo más abajo — los DOS pintores muertos.
         private const int Superficie = LlanoY;          // la línea del llano MISMA
         private const int Roca = LlanoY + 2;            // la zona honda nace bajo la piel
         private const int LlanoY = 140;     // la PRIMERA FILA SÓLIDA del llano
@@ -341,6 +365,18 @@ namespace AethonMod.Content.Systems
         {
             try
             {
+                // v6.124 — LA LECCIÓN DE SUBWORLDMODUCTION (la letra:
+                // «investiga como funciona la creacion de mundos en otros
+                // mods y en la libreria de la cual nos inspiramos»): la
+                // SubworldLibrary llama Main.ToggleGameplayUpdates(false)
+                // ANTES de tocar el mundo (LoadWorld) — sin ella, el hilo
+                // principal SIGUE actualizando el juego (NPCs, proyectiles,
+                // iluminación) sobre el mundo VIEJO mientras el hilo de
+                // fondo lo borra y lo regenera: LA CARRERA que hacía que
+                // a veces la puerta no abriera (excepciones aleatorias →
+                // VolverADiscoPorFallo → el intento muere en silencio).
+                // Ahora el mundo se congela ANTES del primer byte.
+                Main.ToggleGameplayUpdates(false);
                 WorldFile.CacheSaveTime();
                 Player.SavePlayer(Main.ActivePlayerFileData);
                 Player.ClearPlayerTempInfo();
@@ -388,6 +424,18 @@ namespace AethonMod.Content.Systems
                 // con los valores del mundo viejo el primer frame
                 // revienta). La cura de la casa, en ambas direcciones.
                 ReiniciarMiniMapa();
+                // v6.124 — LA ESPERA DEL CERROJO DEL MAPA (SubworldLibrary,
+                // LoadWorld): si una carga del minimapa del mundo viejo
+                // sigue CORRIENDO en el hilo de fondo, se espera — jamás
+                // se le escribe encima a un mapa cargándose a medias
+                // (la otra mitad de la entrada intermitente).
+                try
+                {
+                    int paciencia = 0;
+                    while (Main.mapEnabled && Main.loadMapLock && paciencia++ < 6000)
+                        Thread.Sleep(0);
+                }
+                catch { }
 
                 // el FileData falso del interior (el hook ya impide que se
                 // escriba; esto es para que el juego tenga ALGO coherente).
@@ -408,6 +456,13 @@ namespace AethonMod.Content.Systems
 
                 Main.QueueMainThreadAction(delegate
                 {
+                    // v6.124 — el mundo vuelve a RESPONDER en el mismo
+                    // tick en que el portador despierta dentro (la
+                    // lámpara de SubworldLibrary se apaga AQUÍ — vanilla
+                    // la enciende en Player.EnterWorld, pero el interior
+                    // entra por Spawn: se enciende a mano, EXACTO donde
+                    // la carrera terminó).
+                    Main.ToggleGameplayUpdates(true);
                     Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
                     WorldFile.SetOngoingToTemps();
                     Main.resetClouds = true;
@@ -469,6 +524,10 @@ namespace AethonMod.Content.Systems
         {
             try
             {
+                // v6.124 — LA MISMA LÁMPARA AL VOLVER: el gameplay se
+                // congela antes de tocar el disco (la lección de
+                // SubworldLibrary, aplicada a la salida).
+                Main.ToggleGameplayUpdates(false);
                 WorldFile.CacheSaveTime();
                 Player.SavePlayer(Main.ActivePlayerFileData);
                 Player.ClearPlayerTempInfo();
@@ -521,10 +580,23 @@ namespace AethonMod.Content.Systems
                     // mapa del mundo real).
                     ReiniciarMiniMapa();
                     Main.sectionManager.SetAllSectionsLoaded();
+                    // v6.124 — LA ESPERA DEL CERROJO (SubworldLibrary):
+                    // el mapa del mundo real termina de cargar ANTES de
+                    // ceder el turno — nada se escribe sobre un mapa a
+                    // medias.
+                    try
+                    {
+                        int paciencia = 0;
+                        while (Main.mapEnabled && Main.loadMapLock && paciencia++ < 6000)
+                            Thread.Sleep(0);
+                    }
+                    catch { }
                 }
 
                 Main.QueueMainThreadAction(delegate
                 {
+                    // v6.124 — el gameplay revive con el portador.
+                    Main.ToggleGameplayUpdates(true);
                     Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
                     WorldFile.SetOngoingToTemps();
                     Main.resetClouds = true;
@@ -706,6 +778,27 @@ namespace AethonMod.Content.Systems
             BrumaFaro = 0f;
             Revelado = 0;
             DevolverSolEclipse();
+            // v6.124 — LA PUERTA NUNCA MUERE EN SILENCIO (la letra: «a
+            // veces no entra al mundo interior y tengo que intentarlo
+            // varias veces»): el fallo ahora SE VE — el portador sabe
+            // que el intento murió y que la puerta puede volver a
+            // abrirse (Transicion ya está libre y el juego responde:
+            // ToggleGameplayUpdates(true) ANTES de soltar el mundo).
+            try { Main.ToggleGameplayUpdates(true); } catch { }
+            try
+            {
+                Main.QueueMainThreadAction(delegate
+                {
+                    try
+                    {
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Submundo.FalloPuerta"),
+                            new Color(255, 120, 120));
+                    }
+                    catch { }
+                });
+            }
+            catch { }
             try
             {
                 if (_mundoPrincipal != null)

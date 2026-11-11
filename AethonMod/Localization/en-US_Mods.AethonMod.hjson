@@ -2682,7 +2682,7 @@ Buffs: {
 		// puso ESTE nombre en el buff del dueño por error): EL DEBUFF DE
 		// LOS ENEMIGOS es LA QUEMADURA DEL VACÍO.
 		DisplayName: Void Burn
-		Description: The black flames of the void consume you: 1% of your max life every half second — and when the aura lets you go, you keep BURNING for 5 more seconds
+		Description: The black flames of the void consume you: inside the aura, 1 to {0} damage per tick depending on your closeness to the bearer — and when the aura lets you go, you keep BURNING for 5 more seconds with 1% of your max life every half second
 	}
 
 	VacioExterior: {
@@ -2696,7 +2696,8 @@ Buffs: {
 	AuraVacioBuff: {
 		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
 		DisplayName: Void Aura
-		Description: The void the Eternal Form wears collects {0} damage per second: 0.1% of the sum of the Grimoire of the Eternal's final summon and final magic damage
+		Description: The void power of an Outer Being surrounds you, harming all who come near: from 1 damage per tick at the outer edge up to {0} per tick next to you — and it strikes faster the closer the enemy is
+		Trabajando: THE VOID IS COLLECTING — prey burns within the aura
 	}
 
 	OcasoActivoBuff: {
@@ -3936,6 +3937,7 @@ Submundo: {
 	Cerrando: The book closes…
 	Bienvenida: THE ETERNAL'S INTERIOR — the mist is everything. The plaza's altar is the way home.
 	Despedida: The book closes — the real world takes you back.
+	FalloPuerta: THE BOOK COULD NOT OPEN — the attempt was lost in the mist. Try again: the door still lives.
 	RedCaida: THE VOID RETURNS YOU TO THE PLAZA — no one falls inside the book.
 	Devorado: THE GRIMOIRE DEVOURS YOU — the mist floods everything…
 }

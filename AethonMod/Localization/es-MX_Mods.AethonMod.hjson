@@ -2674,7 +2674,7 @@ Buffs: {
 		// puso ESTE nombre en el buff del dueño por error): EL DEBUFF DE
 		// LOS ENEMIGOS es LA QUEMADURA DEL VACÍO.
 		DisplayName: Quemadura del vacío
-		Description: Las llamas negras del vacío te consumen: 1% de tu vida máxima por cada medio segundo — y cuando el aura te suelta, ARDES 5 segundos más
+		Description: Las llamas negras del vacío te consumen: dentro del aura, de 1 a {0} de daño por tick según tu cercanía al portador — y cuando el aura te suelta, ARDES 5 segundos más con el 1% de tu vida máxima por cada medio segundo
 	}
 
 	VacioExterior: {
@@ -2688,7 +2688,8 @@ Buffs: {
 	AuraVacioBuff: {
 		// v6.122: THE VOID AURA — the Forma Eterna's damage, made visible
 		DisplayName: Aura del vacío
-		Description: El vacío que viste la Forma Eterna cobra {0} de daño por segundo: el 0,1% de la suma del daño de invocación y el daño mágico finales del Grimorio del Eterno
+		Description: El poder de vacío de un ser Exterior te rodea dañando a todo el que se acerque: de 1 de daño por tick en el borde exterior hasta {0} por tick pegado a ti — y golpea más rápido cuanto más cerca está el enemigo
+			Trabajando: EL VACÍO ESTÁ COBRANDO — una presa arde dentro del aura
 	}
 
 	OcasoActivoBuff: {
@@ -3928,6 +3929,7 @@ Submundo: {
 	Cerrando: El libro se cierra…
 	Bienvenida: EL INTERIOR DEL ETERNO — la bruma lo es todo. El altar de la plaza es la vuelta a casa.
 	Despedida: El libro se cierra — el mundo real te devuelve.
+	FalloPuerta: EL LIBRO NO PUDO ABRIRSE — el intento se perdió en la bruma. Vuelve a intentarlo: la puerta sigue viva.
 	RedCaida: EL VACÍO TE DEVUELVE A LA PLAZA — nadie cae dentro del libro.
 	Devorado: EL GRIMORIO TE DEVORA — la bruma lo inunda todo…
 }

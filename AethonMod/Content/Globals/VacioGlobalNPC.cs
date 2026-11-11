@@ -74,6 +74,13 @@ namespace AethonMod.Content.Globals
         /// el calentamiento aerodinámico.</summary>
         public float CercaniaLocal;
 
+        /// <summary>v6.124 — ¿está DENTRO del radio del aura AHORA MISMO?
+        /// Lo escribe el ancla cada tick (true = el aura lo está
+        /// tocando: el DAÑO POR CERCANÍA de la letra; false = salió:
+        /// la quemadura SIGUE por sus últimos ticks con el 1% de la
+        /// vida máxima por medio segundo — la persistencia de 5 s).</summary>
+        public bool DentroDelCampo;
+
         // ================================================================
         //  LA LENTITUD + LA RAMPA VISUAL — cada tick de vida del NPC.
         // ================================================================

@@ -35,7 +35,29 @@ Alrededor del jefe:
   Testamento de Aethon, el Índice del Juicio, la Pluma del Veredicto y el Ojo del
   Juicio…
 - **LAS ALAS AURORA** — 22 alas 100% procedurales con anatomías propias (plumas
-  vectoriales, runas y anillos de glifos — nunca rectángulos).
+  vectoriales, runas y anillos de glifos — nunca rectángulos). Las **alas rúnicas
+  del vacío** son una MEMBRANA CONTINUA con LA LEY DEL FILO (el borde aporta ~0:
+  los dientes de sierra son matemáticamente imposibles) y sus runas viven dentro
+  del cuerpo del ala.
+- **LA SFORJA** (`tools/sforja.py`) — la forja definitiva + el taller: TODO el
+  repertorio de la Superforja heredado + **HD cuadrado** (×8), el comando
+  **proyectil** (con manifiesto de hitbox), el **sol de la casa parametrizado**
+  (luz · oscuridad · fusión), **fondos tileables** y 27 efectos del alma. LAS
+  TRES ARMAS DEL JUICIO nacieron aquí: **El Juicio de los Dos Soles** (dos
+  soles de verdad — uno blanco-dorado, uno negro con el borde ardiendo — que se
+  funden en UN SOL MÁS GRANDE Y DEVASTADOR y luego explotan en luz), **El Tajo
+  de Oscuridad** (centro negro · medios morados · bordes blancos, agujas que se
+  clavan cerca del enemigo) y **Las Agujas del Vacío** (delgadas, atraviesan y
+  se quedan clavadas).
+- **EL AURA DEL VACÍO** — el efecto ACTIVO de La Forma Eterna: siempre presente
+  mientras la lleves, cobrando a todo el que se acerque (1 de daño por tick en
+  el borde → 10 pegado a ti, golpeando más rápido cuanto más cerca + el 10 % de
+  tu maná por encima de 200 sumado al máximo) — y la Quemadura del Vacío arde
+  5 segundos más cuando los sueltas, con el 1 % de su vida por medio segundo.
+- **EL MUNDO INTERIOR DEL ETERNO** — 800×600 de obsidiana sólida bajo el llano
+  (el hell-black-box de vanilla JAMÁS entra al alcance de la cámara), la entrada
+  con la lámpara de SubworldLibrary (ToggleGameplayUpdates + el cerrojo del
+  mapa: la puerta ya no falla en silencio) y el cielo del cuerpo del dios.
 - **El arsenal completo** de armas de prueba organizado en **28 bolsas** dentro de
   **El Cofre del Arsenal** (llegan solas al entrar al mundo).
 - **EL MUNDO INTERIOR DEL ETERNO** — el altar devora las mil esencias y te traga al

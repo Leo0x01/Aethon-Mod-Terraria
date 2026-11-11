@@ -110,7 +110,9 @@ namespace AethonMod.Content.Weapons.Definitivas
     // ======================================================================
     public class AgujaVacioProj : ModProjectile
     {
-        public override string Texture => "AethonMod/Content/Effects/Procedural/Star";
+        // EL SPRITE DE LA AGUJA — la receta `aguja` de la SForja
+        // (44×12: punta blanca · cuerpo violeta · ojo dorado)
+        public override string Texture => "AethonMod/Content/Effects/Procedural/AgujaVacioProj";
 
         private const int T_CLAVADA = 46;
 
@@ -125,6 +127,11 @@ namespace AethonMod.Content.Weapons.Definitivas
 
         /// <summary>El goteo del clavado (cada 15 t, ~3 tandas).</summary>
         private float _goteo;
+
+        /// <summary>v6.124 — LA DIRECCIÓN DEL VUELO en el momento del
+        /// clavado (la aguja queda apuntando HACIA DENTRO del cuerpo
+        /// — la vieja usaba el offset y la aguja miraba PARA AFUERA).</summary>
+        private float _rotVuelo;
 
         public override void SetDefaults()
         {
@@ -210,6 +217,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             _clavada = true;
             _presa = target.whoAmI;
             _offset = Projectile.Center - target.Center;
+            _rotVuelo = Projectile.velocity.ToRotation();   // v6.124 — apuntando hacia dentro
             _goteo = 0;
             // EL CHASQUIDO del clavado.
             if (!Main.dedServ)
@@ -231,37 +239,35 @@ namespace AethonMod.Content.Weapons.Definitivas
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
             try
             {
-                // LA AGUJA DELGADA: 30 px de largo, 2 de grueso — PUNTA
-                // BLANCA al frente, CUERPO VIOLETA y EL OJO DORADO atrás.
-                Vector2 punta = Projectile.Center - Main.screenPosition;
-                float rot = _clavada && _presa >= 0
-                    ? _offset.ToRotation()
-                    : Projectile.velocity.ToRotation();
-                Vector2 eje = rot.ToRotationVector2();
-                Vector2 rabo = punta - eje * 30f;
-                Texture2D pixel = Terraria.GameContent.TextureAssets.MagicPixel.Value;
+                // v6.124 — LA AGUJA ES SU SPRITE DE LA SFORJA (la letra:
+                // «todo proyectil debe ser creado con la superforja»):
+                // punta blanca · cuerpo violeta · ojo dorado — dibujada
+                // en el lote ALFA (el cuerpo es CUERPO, no luz) con el
+                // aura aditiva de la casa detrás.
+                Vector2 pos = Projectile.Center - Main.screenPosition;
+                float rot = _clavada && _presa >= 0 ? _rotVuelo : Projectile.velocity.ToRotation();
 
-                // EL CUERPO violeta (2 px de grueso)
-                Vector2 grueso = new Vector2(30f, 2f);
-                Main.spriteBatch.Draw(pixel, punta - eje * 15f, null,
-                    new Color(96, 52, 168), rot, new Vector2(15f, 1f),
-                    grueso / 16f, SpriteEffects.None, 0f);
-                // LA PUNTA BLANCA (los 8 px del frente, afilada)
-                Vector2 puntaBlanca = punta - eje * 4f;
-                Main.spriteBatch.Draw(pixel, puntaBlanca, null,
-                    new Color(255, 252, 245), rot, new Vector2(4f, 0.75f),
-                    new Vector2(8f, 1.5f) / 16f, SpriteEffects.None, 0f);
-                // EL OJO DORADO (el ojo de coser de la aguja, 3 px atrás)
-                Main.spriteBatch.Draw(pixel, rabo + eje * 3f, null,
-                    new Color(255, 214, 130), rot, new Vector2(1.5f, 1.5f),
-                    new Vector2(3f, 3f) / 16f, SpriteEffects.None, 0f);
+                Main.instance.LoadProjectile(Projectile.type);
+                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
+                if (tex != null)
+                {
+                    Vector2 origen = new Vector2(tex.Width * 0.5f, tex.Height * 0.5f);
+                    // LA AGUJA (el sprite — la escala entera, legible)
+                    Main.spriteBatch.Draw(tex, pos, null, Color.White, rot,
+                        origen, 1f, SpriteEffects.None, 0f);
+                }
+
                 // LA AURA tenue del vuelo (aditiva — la aguja destella)
                 VFXCore.AbrirAdditive();
                 try
                 {
-                    Main.spriteBatch.Draw(pixel, punta - eje * 12f, null,
-                        new Color(120, 70, 200) * 0.16f, rot, new Vector2(12f, 3f),
-                        new Vector2(34f, 7f) / 16f, SpriteEffects.None, 0f);
+                    if (tex != null)
+                    {
+                        Vector2 origen = new Vector2(tex.Width * 0.5f, tex.Height * 0.5f);
+                        Main.spriteBatch.Draw(tex, pos, null,
+                            new Color(150, 84, 235) * 0.30f, rot, origen,
+                            new Vector2(1.7f, 2.3f), SpriteEffects.None, 0f);
+                    }
                 }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }

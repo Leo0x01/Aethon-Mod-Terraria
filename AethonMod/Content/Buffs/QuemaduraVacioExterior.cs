@@ -54,28 +54,54 @@ namespace AethonMod.Content.Buffs
             float intensidad = MathHelper.Clamp(vacio.IntensidadQuemadura, 1f, 4.5f);
 
             // ==============================================================
-            //  v6.123 — EL DAÑO DE LA QUEMADURA (la letra: «quemedura del
-            //  vacio debe hacerle daño a los enemigos, es una quemadura,
-            //  debe hacer 1% de daño de la vida maxima del enemigo por
-            //  cada medio segundo»). LA AUTOPSIA DE LA v6.122: el DoT
-            //  viejo escribía `lifeRegen -= 2×daño` PERO JAMÁS tocaba
-            //  `lifeRegenExpectedLossPerSecond` — y el decompile REAL del
-            //  tML 2026.09.3.1 (NPC.UpdateNPC) dice que con ese campo en
-            //  −1 el drain cae al CAMINO LENTO de vanilla: 1 de vida
-            //  cada 120 ticks (¡0,5 daño por segundo aunque el lifeRegen
-            //  fuera enorme!) — la quemadura de la v6.122 apenas
-            //  cosquilleaba. LA CONVENCIÓN VERIFICADA: el golpe de
-            //  `lifeRegenExpectedLossPerSecond` (N) sale CADA
-            //  120·N/|lifeRegen| TICKS → con lifeRegen = −4·N el golpe
-            //  cae cada 30 ticks (MEDIO SEGUNDO) y el número de combate
-            //  enseña N. EL NUEVO PAQUETE: N = 1% de la vida MÁXIMA del
-            //  impío (mínimo 1) y lifeRegen = −4·N — UNO POR CIENTO por
-            //  medio segundo, EXACTO como la letra lo pide.
+            //  v6.124 — LOS DOS FUEGOS (la letra nueva + la v6.123,
+            //  ambas vivas):
+            //
+            //  (A) DENTRO DEL AURA — EL DAÑO POR CERCANÍA (la letra:
+            //  «dejemos que el daño del aura del vacio sea 1 de daño en
+            //  los bordes exteriores del efecto del aura, y a mas cerca
+            //  del jugador este el enemigo mas daño hace y mas tick de
+            //  daño hace por segundo, el daño va de 1 a 10 por cada tick
+            //  de daño» + el bono del 10 % del maná sobre 200): el
+            //  ancla (AuraJuicio2Ancla) marca DentroDelCampo = true y la
+            //  cercanía vive en CercaniaLocal (0 borde → 1 pegado). EL
+            //  GOLPE: D = 1 + (máx−1)·c cada I = 30−20·c ticks (2/s en
+            //  el borde → 6/s pegado) — cobrado con la convención
+            //  vanilla VERIFICADA (NPC.UpdateNPC, decompile REAL del
+            //  tML 2026.09.3.1): el golpe de D sale cada
+            //  120·D/|lifeRegen| ticks → lifeRegen = −120·D/I y
+            //  lifeRegenExpectedLossPerSecond = D (el número que el
+            //  combate enseña).
+            //
+            //  (B) FUERA DEL AURA — LA QUEMADURA QUE ARDE SOLA (la letra
+            //  v6.123: «debe hacer 1% de daño de la vida maxima del
+            //  enemigo por cada medio segundo» + «cuando aura del vacio
+            //  deja de afectar al enemigo, la quemadura del vacio sobre
+            //  el enemigo continua por 5 segundos mas haciendo daño»):
+            //  N = 1% de la vida MÁXIMA por MEDIO SEGUNDO — lifeRegen =
+            //  −4·N (un golpe de N cada 30 ticks) — la persistencia de
+            //  ARDE_FUERA = 300 ticks (5 segundos exactos de fuego tras
+            //  dejar el campo).
             // ==============================================================
-            int porMedioSegundo = Math.Max(1, (int)Math.Ceiling(npc.lifeMax * 0.01f));
-            npc.lifeRegen -= porMedioSegundo * 4;
-            if (npc.lifeRegenExpectedLossPerSecond < porMedioSegundo)
-                npc.lifeRegenExpectedLossPerSecond = porMedioSegundo;
+            if (vacio.DentroDelCampo && vacio.DuenoVacio > 0 &&
+                vacio.DuenoVacio <= Main.maxPlayers)
+            {
+                Player dueno = Main.player[vacio.DuenoVacio - 1];
+                float c = MathHelper.Clamp(vacio.CercaniaLocal, 0f, 1f);
+                int danoTick = global::AethonMod.Content.Projectiles.AuraJuicio2Ancla.DanoAuraPorCercania(dueno, c);
+                int intervalo = (int)MathHelper.Clamp(
+                    global::AethonMod.Content.Projectiles.AuraJuicio2Ancla.IntervaloAura(c), 5, 30);
+                npc.lifeRegen -= 120 * danoTick / intervalo;
+                if (npc.lifeRegenExpectedLossPerSecond < danoTick)
+                    npc.lifeRegenExpectedLossPerSecond = danoTick;
+            }
+            else
+            {
+                int porMedioSegundo = Math.Max(1, (int)Math.Ceiling(npc.lifeMax * 0.01f));
+                npc.lifeRegen -= porMedioSegundo * 4;
+                if (npc.lifeRegenExpectedLossPerSecond < porMedioSegundo)
+                    npc.lifeRegenExpectedLossPerSecond = porMedioSegundo;
+            }
 
             // EL PAGO AL DUEÑO: mientras ESTE enemigo arda, el portador
             // de la quemadura cobra el Vacío Exterior (su propio «fuego»

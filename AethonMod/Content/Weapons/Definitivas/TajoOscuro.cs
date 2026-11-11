@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -113,12 +114,23 @@ namespace AethonMod.Content.Weapons.Definitivas
     }
 
     // ======================================================================
-    //  TajoOscuroProj — LA AGUJA DEL TAJO: el filo largo que se clava y
-    //  atraviesa (centro negro · medios morados · bordes blancos).
+    //  TajoOscuroProj — v6.124 — LA AGUJA DEL TAJO CON SPRITE DE LA
+    //  SFORJA (la letra: «todo proyectil debe ser creado con la
+    //  superforja, en este caso con la nueva que sera creada SForja»).
+    //
+    //  LA AUTOPSIA de la v6.122: el tajo se dibujaba con bandas HazLib
+    //  — proyectil SIN sprite propio. AHORA el filo ES UN SPRITE nacido
+    //  de la receta `tajo` de tools/sforja.py: LA HOJA LLENA POR CAPAS
+    //  con la letra de color EXACTA — CENTRO NEGRO · medios morados ·
+    //  BORDES BLANCOS — y PUNTAS DE AGUJA en los extremos (el que se
+    //  clava). El sprite se ESTIRA a lo largo del vuelo (300 px de
+    //  cuerpo visible) con LA RAMPA DE VIDA v6.122 (nace y muere
+    //  suave) y su estela sigue siendo la de la casa.
     // ======================================================================
     public class TajoOscuroProj : ModProjectile
     {
-        public override string Texture => "AethonMod/Content/Effects/Procedural/Star";
+        // EL SPRITE DEL TAJO — la receta `tajo` de la SForja (120×36)
+        public override string Texture => "AethonMod/Content/Effects/Procedural/TajoOscuroProj";
 
         private const float Vida = 46f;
         private float _t;
@@ -161,81 +173,44 @@ namespace AethonMod.Content.Weapons.Definitivas
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
             try
             {
-                // EL TAJO: del rabo (300 px atrás) a la punta — TODO sobre
-                // HazLib, con LA RAMPA DE VIDA v6.122.
+                // EL TAJO: el sprite de la SForja ESTIRADO a lo largo del
+                // vuelo (el cuerpo entero de 300 px + la Rampa de Vida
+                // v6.122 — nace y muere suave, jamás un corte brusco).
                 Vector2 punta = Projectile.Center - Main.screenPosition;
-                Vector2 dir = Vector2.Normalize(Projectile.velocity);
-                Vector2 rabo = punta - dir * 300f;
+                float rot = Projectile.velocity.ToRotation();
+                float rampa = HacesVida.Rampa(_t, Vida);
 
-                HazLib.Abrir();
+                Main.instance.LoadProjectile(Projectile.type);
+                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
+                if (tex != null)
+                {
+                    float escalaX = 300f / tex.Width;      // el cuerpo de 300 px
+                    float escalaY = 1.0f;
+                    Vector2 origen = new Vector2(tex.Width * 0.5f, tex.Height * 0.5f);
+                    // EL NÚCLEO del tajo (lote alfa — el CENTRO NEGRO es
+                    // negro de verdad, el aditivo lo lavaría)
+                    Main.spriteBatch.Draw(tex, punta, null,
+                        Color.White * rampa, rot, origen,
+                        new Vector2(escalaX, escalaY), SpriteEffects.None, 0f);
+                }
+
+                // EL VELO MORADO del vuelo (aditivo — la estela que arde)
+                VFXCore.AbrirAdditive();
                 try
                 {
-                    HazLib.IntensidadGlobal = HacesVida.Rampa(_t, Vida);
-
-                    // EL VELO — los MEDIOS MORADOS (la envolvente ancha)
-                    HazLib.PrepararPar(rabo, punta, SemianoTajoVelo, 0f, 34);
-                    HazLib.Dibujar(TinteTajoVelo, VerticeTajoVelo, HazLib.FilasVelo);
-
-                    // EL CUERPO — CENTRO NEGRO con BORDES BLANCOS
-                    HazLib.PrepararPar(rabo, punta, SemianoTajo, 0f, 40);
-                    HazLib.Dibujar(TinteTajo, VerticeTajo, HazLib.FilasNucleo);
+                    if (tex != null)
+                    {
+                        Vector2 origen = new Vector2(tex.Width * 0.5f, tex.Height * 0.5f);
+                        Main.spriteBatch.Draw(tex, punta, null,
+                            new Color(150, 84, 235) * (0.30f * rampa), rot, origen,
+                            new Vector2(300f / tex.Width * 1.35f, 1.55f),
+                            SpriteEffects.None, 0f);
+                    }
                 }
-                finally { HazLib.Cerrar(); }
+                finally { VFXCore.RestaurarLoteVanilla(); }
             }
             catch { }
             return false;
-        }
-
-        // === LAS LEYES DEL TAJO (la letra de color, EXACTA) ===
-
-        /// <summary>El semiancho del cuerpo: fino en la punta (la aguja
-        /// que se clava), lleno en el rabo — 14→26 px.</summary>
-        private static float SemianoTajo(float x)
-            => 15f + 11f * x;
-
-        /// <summary>El semiancho del velo morado (×1.9 del cuerpo).</summary>
-        private static float SemianoTajoVelo(float x)
-            => (15f + 11f * x) * 1.9f;
-
-        /// <summary>EL TINTE del cuerpo a lo largo: el charco blanco de
-        /// la punta (donde se clava) vira al negro del centro.</summary>
-        private static Color TinteTajo(float x)
-            => Color.Lerp(new Color(20, 12, 32), new Color(8, 5, 14), x);
-
-        /// <summary>EL TINTE del velo: los MEDIOS MORADOS.</summary>
-        private static Color TinteTajoVelo(float x)
-            => Color.Lerp(new Color(120, 70, 200), new Color(74, 40, 140), x);
-
-        /// <summary>EL VÉRTICE del cuerpo: CENTRO NEGRO · medios
-        /// morados · BORDES BLANCOS (la letra, palabra por palabra).</summary>
-        private static Color VerticeTajo(float x, float y, Color tinte)
-        {
-            float d = MathF.Abs(y - 0.5f) * 2f;          // 0 centro → 1 borde
-            Color c;
-            if (d < 0.5f)
-                c = new Color(8, 5, 14, 255);            // EL CENTRO NEGRO
-            else if (d < 0.78f)
-                c = new Color(58, 30, 104, 255);         // el medio morado hondo
-            else if (d < 0.92f)
-                c = new Color(150, 84, 235, 255);        // el medio morado vivo
-            else
-                c = new Color(255, 252, 245, 255);       // EL BORDE BLANCO
-            // EL PUNTAZO: la punta del tajo ARDE blanca (donde se clava)
-            float clava = 1f - MathHelper.Clamp(x / 0.12f, 0f, 1f);
-            if (clava > 0f && d < 0.9f)
-                c = Color.Lerp(c, new Color(255, 252, 245, 255), clava * 0.85f);
-            return c;
-        }
-
-        /// <summary>EL VÉRTICE del velo: la cúpula pow suave, morada.</summary>
-        private static Color VerticeTajoVelo(float x, float y, Color tinte)
-        {
-            float bulto = y * (4f - y * 4f);
-            float k = bulto * bulto * bulto * 2.2f;
-            Vector4 v = tinte.ToVector4() * k;
-            return new Color((byte)Math.Clamp((int)(v.X * 255f + 0.5f), 0, 255),
-                (byte)Math.Clamp((int)(v.Y * 255f + 0.5f), 0, 255),
-                (byte)Math.Clamp((int)(v.Z * 255f + 0.5f), 0, 255), 255);
         }
     }
 }

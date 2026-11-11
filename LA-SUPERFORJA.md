@@ -1,6 +1,45 @@
-# LA SUPERFORJA — Las 3 herramientas de los reels + las 7 nuevas de la investigación, todas en una
+# LA SFORJA — La forja definitiva + el taller (todo el repertorio de la Superforja, mejorado)
 
-> **La letra**: «une las 3 herramientas en una, ademas busca mas herramientas similares y de utilidad que creas que nos puedan ser utiles y crea una super herramienta con todas ellas»
+> **La letra (v6.124)**: «hacer la fusion de La Forja y El Taller comprar cual es mejor
+> si esa fusion o la que ya existe de la superforja, comparar y mejorar para crear la
+> SForja, la cual sera la forja definitiva mas el taller, usada para la generacion de
+> pixelart de todo tipo, incluyendo fondos, sprite, proyectiles entre otros, asi que
+> mejora su resolucion y capacidad» + «integralo al 100% La Forja/El Taller… intenta
+> mejorar tambien la resulicion a HDcuedrado» + «todo proyectil debe ser creado con la
+> superforja, en este caso con la nueva que sera creada SForja»
+
+---
+
+## v6.124 — LA COMPARACIÓN, HECHA — Y LA SFORJA, NACIDA
+
+**LA COMPARACIÓN (la letra la pedía)**: LA FORJA (la cadena corta de los 3 reels) ya
+vivía DENTRO de LA SUPERFORJA desde la v6.121 (el comando `forjar` = la cadena corta;
+`taller_pixelart.py` = el alias) — la fusión GANÓ: no había dos casas, había UNA con
+dos nombres. **LA SFORJA** (`tools/sforja.py`) = LA SUPERFORJA MEJORADA, no un
+reemplazo: el motor VIVE (todo el repertorio heredado: pluma · refina · puente ·
+molde · espejo · alma · tambor · rampa · atlas · ojo · forjar · corta · cadena —
+cualquier comando no-SForja cae ÍNTEGRO a la Superforja), y la capacidad crece:
+
+| Lo nuevo de la SForja | Qué es |
+|---|---|
+| **HD CUADRADO** | Supersampling **×8** → la caja EXACTA (64×64 · 128×128, o el tamaño que sea) con reducción Lanczos — píxel CRISP, sin blur (la regla de la casa) |
+| **`sol`** | **EL CÓDIGO DE SOLES DE LA CASA** (gen_sol_aethon_v65036.py, el generador del sol del jefe) PARAMETRIZADO: `luz` (el blanco-dorado de Aethon) · `oscuridad` (el negro que solo existe porque su borde ARDE violeta) · `fusion` (el sol del juicio: corazón negro dominante + doble corona). Así nacieron SolLuz.png · SolOscuro.png · SolFusion.png del JUICIO DE LOS DOS SOLES |
+| **`proyectil`** | EL COMANDO DE PROYECTILES (la letra: «todo proyectil debe ser creado con la superforja»): la receta (`tajo` · `aguja` · `sol`) + **EL MANIFIESTO DE HITBOX** (lo que el .cs necesita: sprite, bbox opaco, hitbox sugerida) + la tira animada opcional del espejo |
+| **`fondo`** | EL FONDO ENLAZABLE: tileable horizontal exacto (la última octava = la primera) — las capas del vacío para fondos del mundo |
+| **10 EFECTOS NUEVOS** | chispa · vortice · prisma · pulso · lagrima · corrosion · nebulosa · filo · temblor · eclipse_total — las familias de pixelfx (hacia el 100 % de su arquitectura de 244), con el MISMO doble búfer aditivo; los 17 de siempre INTACTOS píxel a píxel (27 en total) |
+
+```bash
+# EL SOL DE LA CASA en HD cuadrado (el de las armas del juicio):
+python3 tools/sforja.py sol --nombre juicio --paleta fusion --tam 96
+# EL PROYECTIL nacido en la forja (con manifiesto de hitbox):
+python3 tools/sforja.py proyectil --nombre x --receta tajo --ancho 120 --alto 36
+# EL FONDO del mundo interior (tileable):
+python3 tools/sforja.py fondo --nombre cielo_vacio --ancho 256 --alto 128
+# EL ALMA con el registro ampliado (27 efectos):
+python3 tools/sforja.py alma --nombre x --efecto vortice --tira
+# TODO el repertorio de la Superforja, intacto:
+python3 tools/sforja.py molde --nombre x --borrador ./borrador.png
+```
 
 ---
 

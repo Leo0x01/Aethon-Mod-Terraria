@@ -276,8 +276,23 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 byte alaEstilo = val.GetModPlayer<AlasAuroraPlayer>().AlaEstilo;
                 // v6.113 — SIN CASO ESPECIAL: la Aurora de Tinta murió en la
                 // purga — TODO estilo pasa por el catálogo (De() clamp incluido).
-                AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
-                AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
+                // v6.124 — UN CASO ESPECIAL NACE (la letra: «intenta rehacer
+                // el codigo de las alas runicas del vacio»): las ALAS RÚNICAS
+                // DEL VACÍO dejaron el camino del abanico de agujas PARA
+                // SIEMPRE — AlasVacioLib dibuja UNA MEMBRANA CONTINUA por
+                // ala con LA LEY DEL FILO (el borde aporta ~0: la sierra es
+                // matemáticamente imposible) y sus runas VIVEN DENTRO del
+                // cuerpo de la membrana (nada montado en la silueta).
+                if (alaEstilo == AlasCatalogo.Vacio)
+                {
+                    AlasVacioLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
+                    AlasVacioLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
+                }
+                else
+                {
+                    AlasAuroraLib.Dibujar(val, in AlasCatalogo.De(alaEstilo), Spread, Flap, MezclaDia);
+                    AlasAuroraLib.DibujarRunas(val, in AlasCatalogo.De(alaEstilo), Spread, Flap);
+                }
             }
             catch
             {

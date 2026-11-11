@@ -235,20 +235,33 @@ namespace AethonMod.Content.Projectiles
             //  1) LA MARCA DEL CAMPO — EL EFECTO DEL ESTANDARTE (solo el
             //     dueño manda: la quemadura viaja dentro del propio
             //     debuff — la copia del bloque del estandarte).
-            //     v6.122 — EL DAÑO DE LA FORMA ETERNA (la letra: «el
-            //     daño que causa la forma eterna debe ser el mismo que
-            //     el 0.1% de la suma del daño de invocacion final y el
-            //     daño magico final del grimorio del eterno, o sea es
-            //     el daño que tiene el grimorio despues de hacer el
-            //     calculo de todos los buff»): la vieja escala del
-            //     despertar (20 + 6×nivel) MUERE — el aura cobra el
-            //     0,1 % de la suma de los DOS daños finales del
-            //     Grimorio, calculados con TODO el pipeline de buffs
-            //     (DanoFormaEterna, aquí al lado — la única fuente).
+            //     v6.122 → v6.124 — EL DAÑO DEL AURA (la letra nueva:
+            //     «el daño va de 1 a 10 por cada tick de daño» + el
+            //     bono del 10 % del maná sobre 200): la vieja escala del
+            //     despertar (20 + 6×nivel) murió en la v6.122, el 0,1 %
+            //     de los daños del Grimorio muere AHORA — el rango del
+            //     aura vive del MANÁ del portador (DanoAuraMax y sus
+            //     hermanas, aquí al lado — la única fuente).
             // ==============================================================
             if (Projectile.owner == Main.myPlayer && !Main.gameMenu)
             {
-                int danoBase = DanoFormaEterna(dueno);
+                // ======================================================
+                //  v6.124 — EL BUFF SIEMPRE PRESENTE (la letra: «el buff
+                //  del Aura del Vacio siempre debe estar aplicado
+                //  mientras se use La Forma Eterna ya que es un efecto
+                //  activo de La Forma Eterna»): el Aura del Vacío es un
+                //  EFECTO ACTIVO del portador — viva o no viva una presa
+                //  en el campo, el espejo luce SU PODER: la ventana
+                //  cuenta el rango EXACTO que el vacío está cobrando
+                //  (1 en el borde exterior → {DanoMaximo} pegado al
+                //  portador). Se refresca cada tick que el ancla vive
+                //  (30 ticks de cortesía — el mismo patrón del pago del
+                //  Vacío Exterior).
+                // ======================================================
+                int danoMaximo = DanoAuraMax(dueno);
+                Content.Buffs.AuraVacioBuff.DanoMaximoVivo = danoMaximo;
+                dueno.AddBuff(ModContent.BuffType<Content.Buffs.AuraVacioBuff>(), 30, true);
+
                 bool marcoAlMenosUno = false;
 
                 for (int i = 0; i < Main.maxNPCs; i++)
@@ -286,12 +299,17 @@ namespace AethonMod.Content.Projectiles
                     VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();
 
                     // FUERA DEL RADIO: si arde por NOSOTROS, el fuego se
-                    // enfría poco a poco (el debuff muere solo a los 180).
+                    // enfría poco a poco (el debuff muere solo a los 5 s
+                    // — la persistencia de la letra).
                     Vector2 borde = Vector2.Clamp(Projectile.Center, n.TopLeft, n.BottomRight);
                     float dist = Vector2.Distance(Projectile.Center, borde);
                     float perdon = Math.Max(n.width, n.height) * 0.5f + 40f;
                     if (dist > RADIO + perdon)
                     {
+                        // v6.124 — ya NO está dentro: la quemadura que
+                        // queda es EL FUEGO QUE ARDE SOLO (1% de la vida
+                        // máxima por medio segundo, QuemaduraVacioExterior).
+                        vacio.DentroDelCampo = false;
                         if (vacio.DuenoVacio == dueno.whoAmI + 1 && vacio.IntensidadQuemadura > 0f)
                             vacio.IntensidadQuemadura *= 0.995f;
                         continue;
@@ -299,12 +317,15 @@ namespace AethonMod.Content.Projectiles
 
                     // DENTRO — LA MARCA: la Quemadura del Vacío Exterior
                     // (se refresca mientras permanezca; fuera, sus últimos
-                    // 180 ticks de fuego — el timer del estandarte).
+                    // 300 ticks de fuego — los 5 segundos de la letra).
                     n.AddBuff(ModContent.BuffType<QuemaduraVacioExterior>(), ARDE_FUERA, false);
 
                     // LA CUENTA DEL DUEÑO (quién cobra el buff del vacío).
                     vacio.DuenoVacio = dueno.whoAmI + 1;
-                    vacio.DanoVacio = danoBase;
+                    vacio.DanoVacio = danoMaximo;
+                    // v6.124 — DENTRO DEL CAMPO: el daño por CERCANÍA de
+                    // la letra (lo lee QuemaduraVacioExterior.Update).
+                    vacio.DentroDelCampo = true;
                     marcoAlMenosUno = true;
 
                     // LA INTENSIDAD — la técnica Remap del original:
@@ -318,21 +339,19 @@ namespace AethonMod.Content.Projectiles
                 }
 
                 // ==========================================================
-                //  v6.122 — EL AURA DEL VACÍO HECHA BUFF (la letra: «este
-                //  daño causado por la forma Eterna se debe ver reflejado
-                //  como un buff y como el daño viene del aura del vacio,
-                //  el buff se llamara Aura del Vacio»): mientras el campo
-                //  marque a UN solo impío, el portador luce EL ESPEJO —
-                //  la ventana del buff cuenta el daño EXACTO que el vacío
-                //  está cobrando (el 0,1 % de la suma de los dos daños
-                //  finales del Grimorio). Se refresca cada tick que el
-                //  aura trabaja (30 ticks de cortesía — el mismo patrón
-                //  del pago del Vacío Exterior).
+                //  v6.122 → v6.124 — EL AURA DEL VACÍO HECHA BUFF: mientras
+                //  el campo marque a UN solo impío, la ventana cuenta
+                //  también SI está cobrando (el marcado — un texto corto
+                //  de trabajo). El buff en sí YA vive ARRIBA (siempre
+                //  presente con la Forma Eterna — la letra nueva).
                 // ==========================================================
                 if (marcoAlMenosUno)
                 {
-                    Content.Buffs.AuraVacioBuff.UltimoDano = danoBase;
-                    dueno.AddBuff(ModContent.BuffType<Content.Buffs.AuraVacioBuff>(), 30, true);
+                    Content.Buffs.AuraVacioBuff.Trabajando = true;
+                }
+                else
+                {
+                    Content.Buffs.AuraVacioBuff.Trabajando = false;
                 }
             }
 
@@ -349,78 +368,78 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  v6.122 → v6.123 — EL DAÑO DE LA FORMA ETERNA (la única fuente
-        //  de verdad). LA LETRA: «el daño que causa la forma eterna debe
-        //  ser el mismo que el 0.1% de la suma del daño de invocacion
-        //  final y el daño magico final del grimorio del eterno» + «el
-        //  calculo de aura del vacio parece no estar hecho
-        //  correctamente, revisa eso».
+        //  v6.124 — EL DAÑO DEL AURA DEL VACÍO, LA LETRA NUEVA Y SIMPLE
+        //  (la única fuente de verdad). LA LETRA: «para hacerlo simple
+        //  con el calculo de daño, dejemos que el daño del aura del vacio
+        //  sea 1 de daño en los bordes exteriores del efecto del aura,
+        //  y a mas cerca del jugador este el enemigo mas daño hace y
+        //  mas tick de daño hace por segundo, el daño va de 1 a 10 por
+        //  cada tick de daño, ademas tendra un calculo de daño igual
+        //  al 10% de mana superior a 200 puntos, o sea, cuando el jugador
+        //  tenga mas de 200 puntos de mana, cada punto de mana extra por
+        //  encima de 200 se cuenta para el calculo de daño, los primeros
+        //  200 puntos de mana no cuentan nunca para el calculo de daño»
+        //  + «el daño siempre se suma al daño maximo que puede hacer el
+        //  aura del vacio y este siempre es el daño que se hace cuando
+        //  el enemigo esta cerca del jugador».
         //
-        //  v6.123 — LA AUTOPSIA: el sumando de invocación multiplicaba
-        //  los ojos por TODO el multiplicador de invocación del portador
-        //  (GetDamage<Summon>.ApplyTo) — pero los ojos del Eterno NUNCA
-        //  reciben ese pipeline: GrimoireEternal los invoca con
-        //  DanoOjosDelEterno a secas (la ley v6.51: «EL DAÑO ES DEL
-        //  GRIMORIO SOLAMENTE, sin importar la armadura o accesorios»)
-        //  — el número del buff INFLABA con el equipo de invocación y
-        //  JAMÁS coincidía con el daño que un ojo pega de verdad.
-        //
-        //  LOS DOS DAÑOS FINALES (los que el juego USA de verdad):
-        //   · EL MÁGICO — Player.GetWeaponDamage(el Grimorio): la
-        //     cadena EXACTA que pega el clic izquierdo (el Item.damage
-        //     × la escalera del mod — ModifyWeaponDamage: nivel
-        //     +2,2 %/nivel, maná faltante, lo devorado, el despertar,
-        //     la reforja, el festín × FactorDelLibro — MÁS TODO el
-        //     equipo y los buffs del portador por la clase mágica de
-        //     vanilla). Es EL número que la ventana del grimorio
-        //     presume.
-        //   · EL DE INVOACIÓN — WeaponScaling.DanoOjosDelEterno (la
-        //     cadena propia: nivel +1,5 %/nivel, despertar, lo
-        //     devorado, la reforja, el festín) × TODO el multiplicador
-        //     de invocación del portador (GetDamage<SummonDamageClass>
-        //     — el mismo que el pipeline de vanilla le suma a los ojos
-        //     al nacer): el número que un ojo del Eterno pegaría de
-        //     verdad.
-        //  El aura cobra el 0,1 % de la SUMA (mínimo 1 — el vacío
-        //  JAMÁS trabaja gratis).
+        //  LA ARITMÉTICA (el ejemplo de la letra, verificado): con 300
+        //  de maná → 100 por encima del límite → el 10% = 10 → el rango
+        //  queda 1 a 20 por tick (el bono SIEMPRE al MÁXIMO — el daño
+        //  pegado al portador). El DAÑO por tick a cercanía c:
+        //      D(c) = 1 + (máx − 1)·c          (c = 0 en el borde → 1)
+        //  y EL RITMO de ticks también escala con la cercanía:
+        //      I(c) = 30 − 20·c  ticks entre golpe (2/s en el borde →
+        //                          6/s pegado al cuerpo)
+        //  TODO se cobra por la convención vanilla del DoT:
+        //  lifeRegen = −120·D/I (un golpe de D cada I ticks EXACTOS) y
+        //  lifeRegenExpectedLossPerSecond = D (el número que el combate
+        //  enseña). El viejo 0,1 % de los daños del Grimorio MURIÓ: el
+        //  bono vive del MANÁ (y el reclamo de la letra — «aumente el
+        //  daño del grimorio y no se vio reflejado» — ya no aplica:
+        //  el rango se mueve con el MANÁ del portador, no con el libro).
         // ================================================================
-        public static int DanoFormaEterna(Player p)
+
+        /// <summary>v6.124 — EL MANÁ QUE CUENTA: el 10 % de los puntos
+        /// de maná POR ENCIMA de 200 (los primeros 200 NUNCA cuentan —
+        /// la letra, palabra por palabra).</summary>
+        public static int BonusMana(Player p)
         {
             try
             {
-                if (p == null || !p.active) return 1;
-
-                // EL GRIMORIO DEL ETERNO — donde viva (inventario o mano)
-                int tipoLibro = ModContent.ItemType<Content.Weapons.GrimoireEternal>();
-                Item libro = null;
-                for (int i = 0; i < p.inventory.Length; i++)
-                {
-                    Item it = p.inventory[i];
-                    if (it != null && !it.IsAir && it.type == tipoLibro) { libro = it; break; }
-                }
-                if (libro == null) return 1;   // sin grimorio no hay suma que cobrar
-
-                // (1) EL MÁGICO FINAL — la cadena completa de vanilla+mod
-                int magicoFinal = p.GetWeaponDamage(libro);
-
-                // (2) EL DE INVOCACIÓN FINAL — v6.123: EL DAÑO EXACTO DE
-                //     UN OJO REAL (DanoOjosDelEterno, SIN el multiplicador
-                //     de equipo del portador: GrimoireEternal invoca los
-                //     ojos con ESTE número a secas — la ley v6.51 «EL DAÑO
-                //     ES DEL GRIMORIO SOLAMENTE» — el viejo ApplyTo del
-                //     multiplicador de invocación INFLABA el número del
-                //     buff con equipo que los ojos jamás usan)
-                var sl = libro.GetGlobalItem<Content.Globals.ShardLevelItem>();
-                int invocFinal = Content.Systems.WeaponScaling.DanoOjosDelEterno(libro.damage, sl?.Level ?? 1, p);
-
-                // (3) EL 0,1 % DE LA SUMA — la letra, exacta
-                float dano = 0.001f * (invocFinal + magicoFinal);
-                return Math.Max(1, (int)dano);
+                if (p == null || !p.active) return 0;
+                int extra = p.statManaMax2 - 200;
+                if (extra <= 0) return 0;
+                return (int)(extra * 0.10f);
             }
-            catch
-            {
-                return 1;   // el vacío jamás rompe el juego
-            }
+            catch { return 0; }
+        }
+
+        /// <summary>v6.124 — EL MÁXIMO DEL AURA: 10 + el bono de maná.
+        /// Es el daño por tick que sufre el enemigo PEGADO al portador
+        /// (el bono SIEMPRE se suma al máximo — la letra).</summary>
+        public static int DanoAuraMax(Player p)
+        {
+            try { return 10 + BonusMana(p); }
+            catch { return 10; }
+        }
+
+        /// <summary>v6.124 — EL DAÑO POR TICK a una cercanía dada
+        /// (0 = borde exterior → 1 = pegado al cuerpo).</summary>
+        public static int DanoAuraPorCercania(Player p, float cercania)
+        {
+            float c = MathHelper.Clamp(cercania, 0f, 1f);
+            float dano = 1f + (DanoAuraMax(p) - 1f) * c;
+            return Math.Max(1, (int)Math.Round(dano));
+        }
+
+        /// <summary>v6.124 — EL INTERVALO de ticks entre golpes a una
+        /// cercanía dada: 30 en el borde (2 golpes/s) → 10 pegado
+        /// (6 golpes/s) — «mas tick de daño hace por segundo», la letra.</summary>
+        public static int IntervaloAura(float cercania)
+        {
+            float c = MathHelper.Clamp(cercania, 0f, 1f);
+            return (int)MathHelper.Lerp(30f, 10f, c);
         }
 
         // ================================================================

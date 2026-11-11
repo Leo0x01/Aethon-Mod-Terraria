@@ -7,34 +7,45 @@ using AethonMod.Content.Dusts;
 namespace AethonMod.Content.Buffs
 {
     /// <summary>
-    /// AuraVacioBuff — v6.122 — EL AURA DEL VACÍO (el daño de la Forma
-    /// Eterna, hecho buff visible).
+    /// AuraVacioBuff — v6.122 → v6.124 — EL AURA DEL VACÍO (el efecto
+    /// ACTIVO de la Forma Eterna, hecho buff visible).
     ///
-    /// LA LETRA DEL USUARIO: «el daño que causa la forma eterna debe ser
-    /// el mismo que el 0.1% de la suma del daño de invocacion final y el
-    /// daño magico final del grimorio del eterno, o sea es el daño que
-    /// tiene el grimorio despues de hacer el calculo de todos los buff,
-    /// este daño causado por la forma Eterna se debe ver reflejado como
-    /// un buff y como el daño viene del aura del vacio, el buff se
-    /// llamara Aura del Vacio».
+    /// LA LETRA DEL USUARIO (v6.124): «el buff del Aura del Vacio
+    /// siempre debe estar aplicado mientras se use La Forma Eterna ya
+    /// que es un efecto activo de La Forma Eterna y deberia decir algo
+    /// como, el poder de vacio de un ser Exterior te rodea dañando a
+    /// todo el que se acerque» + «para hacerlo simple con el calculo
+    /// de daño, dejemos que el daño del aura del vacio sea 1 de daño en
+    /// los bordes exteriores del efecto del aura, y a mas cerca del
+    /// jugador este el enemigo mas daño hace y mas tick de daño hace
+    /// por segundo, el daño va de 1 a 10 por cada tick de daño» + el
+    /// bono del 10 % del maná sobre 200 (SIEMPRE sumado al máximo).
     ///
-    /// EL ESPEJO DEL AURA: mientras el campo de la Forma Eterna marque a
-    /// un impío, el portador luce ESTE buff — su ventana cuenta EXACTO
-    /// el daño que el vacío está cobrando (el 0,1 % de la suma de los
-    /// DOS daños finales del Grimorio del Eterno, ya con TODOS los buffs
-    /// aplicados). Es un buff de INFORMACIÓN: cero stats, puro espejo —
-    /// el cálculo vive en AuraJuicio2Ancla.DanoFormaEterna (la única
-    /// fuente de verdad) y el valor llega aquí en
-    /// <see cref="UltimoDano"/> cada tick que el aura trabaja.
+    /// EL ESPEJO DEL AURA: mientras el ancla viva (la Forma Eterna
+    /// puesta), ESTE buff vive — su ventana cuenta EL RANGO EXACTO que
+    /// el vacío cobra: 1 en el borde exterior → {DanoMaximoVivo} pegado
+    /// al portador (10 + el bono de maná). Es un buff de INFORMACIÓN:
+    /// cero stats, puro espejo — el cálculo vive en AuraJuicio2Ancla
+    /// (BonusMana / DanoAuraMax — la única fuente de verdad) y el valor
+    /// llega aquí en <see cref="DanoMaximoVivo"/> cada tick que el
+    /// ancla vive.
     /// </summary>
     public class AuraVacioBuff : ModBuff
     {
         /// <summary>
-        /// El daño por segundo que el aura está cobrando AHORA (lo escribe
-        /// AuraJuicio2Ancla cada tick que marca a un impío — la única
-        /// fuente de verdad del cálculo).
+        /// v6.124 — EL MÁXIMO que el aura está cobrando AHORA (lo escribe
+        /// AuraJuicio2Ancla cada tick que vive — la única fuente de
+        /// verdad del cálculo). Es el daño por tick del enemigo PEGADO
+        /// al portador; el borde exterior siempre cobra 1.
         /// </summary>
-        public static int UltimoDano;
+        public static int DanoMaximoVivo;
+
+        /// <summary>
+        /// v6.124 — ¿el campo tiene a UNA presa viva dentro? (solo el
+        /// texto corto del trabajo — el buff SIEMPRE vive con la Forma
+        /// Eterna, presa o no).
+        /// </summary>
+        public static bool Trabajando;
 
         public override void SetStaticDefaults()
         {
@@ -67,13 +78,27 @@ namespace AethonMod.Content.Buffs
 
         public override void ModifyBuffText(ref string buffName, ref string tip, ref int rare)
         {
-            // LA VENTANA CUENTA EL DAÑO EXACTO (la letra: «este daño
-            // causado por la forma Eterna se debe ver reflejado como un
-            // buff»): el número vive en la única fuente de verdad.
-            tip = string.Format(
-                Terraria.Localization.Language.GetTextValue(
-                    "Mods.AethonMod.Buffs.AuraVacioBuff.Description"),
-                UltimoDano);
+            // LA VENTANA CUENTA EL RANGO EXACTO (la letra: «el poder de
+            // vacio de un ser Exterior te rodea dañando a todo el que
+            // se acerque»): 1 en el borde exterior → el máximo PEGADO
+            // al portador — el número vive en la única fuente de verdad
+            // + el sello del trabajo (si una presa arde dentro).
+            try
+            {
+                string texto = Terraria.Localization.Language.GetTextValue(
+                    "Mods.AethonMod.Buffs.AuraVacioBuff.Description");
+                int maximo = DanoMaximoVivo > 0 ? DanoMaximoVivo : 10;
+                texto = string.Format(texto, maximo);
+                if (Trabajando)
+                {
+                    string trabajando = Terraria.Localization.Language.GetTextValue(
+                        "Mods.AethonMod.Buffs.AuraVacioBuff.Trabajando");
+                    if (!string.IsNullOrEmpty(trabajando) && !trabajando.StartsWith("Mods."))
+                        texto = texto + "\n" + trabajando;
+                }
+                tip = texto;
+            }
+            catch { }
         }
     }
 }
