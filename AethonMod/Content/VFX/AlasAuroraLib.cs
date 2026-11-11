@@ -238,7 +238,9 @@ namespace AethonMod.Content.VFX
             //IL_021b: Unknown result type (might be due to invalid IL or missing references)
             //IL_0289: Unknown result type (might be due to invalid IL or missing references)
             //IL_028b: Unknown result type (might be due to invalid IL or missing references)
-            int num = ((estilo.Plumas < 2) ? 2 : ((estilo.Plumas > 7) ? 7 : estilo.Plumas));
+            // v6.124 — el tope gemelo de ConstruirPluma (la franja fina:
+            // 9 hebras viven aquí también — ver el clamp de Dibujar).
+            int num = ((estilo.Plumas < 2) ? 2 : ((estilo.Plumas > 13) ? 13 : estilo.Plumas));
             float num2 = (float)i / (float)(num - 1);
             float num3 = MathHelper.Lerp(estilo.PlegadoMin, estilo.PlegadoMax, num2);
             float num4 = MathHelper.Lerp(estilo.AbiertoMin, estilo.AbiertoMax, num2);
@@ -747,6 +749,126 @@ namespace AethonMod.Content.VFX
             return EmitirBordeMaestro(nVerts, plumas, hues, fundidos, mezclaDia, 0f, flujo: false, 0f, in estilo, n);
         }
 
+        // ====================================================================
+        //  v6.124 — LA CURVA SERENA (la letra del usuario: «esos picos los
+        //  debes eliminar, o en caso de no poder, debes hacerlo tan finos
+        //  y juntos que no se noten»).
+        //
+        //  LA LECCIÓN DE LAS SIETE CURAS: la membrana (v6.114) y el borde
+        //  maestro (v6.115) ya rellenaban valles — pero cada uno traía SU
+        //  pila (el velo al 40 %, la vela re-balanceada, la niebla con
+        //  inset) y el apilado en el lote soft-add ENCENDÍA los valles
+        //  donde la aguja ya brillaba: SIERRA INVERTIDA. La v6.120 mató
+        //  el camino extra… y dejó el abanico pelado: CINCO plumas
+        //  separadas = la sierra ORIGINAL.
+        //
+        //  LA SERENA ES SOLO EL ARCÉN: UNA banda fina que abraza la curva
+        //  de las puntas — nada de velo interior, nada de re-balance, sin
+        //  tocar UN píxel del cuerpo de las plumas. La geometría es la
+        //  del borde maestro (Catmull C1 por las puntas de cada lado)…
+        //  pero el PERFIL transversal es la LEY DEL FILO de HazLib
+        //  v6.91: el aporte NACE EN CERO EXACTO en el borde interior,
+        //  sube en smoothstep hasta la curva y MUERE EN CERO EXACTO en el
+        //  labio exterior — la banda es una JOROBA suave centrada en la
+        //  curva: donde hay valle lo RELLENA hasta la curva; donde hay
+        //  punta la abraza (punta + labio, el mismo plano). El contorno
+        //  exterior queda siendo LA CURVA + un labio constante — UNA
+        //  curva lisa de punta a punta, imposible que la serena siembre
+        //  un pico nuevo: un aporte de CERO no puede encender un píxel.
+        // ====================================================================
+        private static int EmitirCurvaSerena(int nVerts, Pluma[] plumas, float[] hues, float[] fundidos, float mezclaDia, float time, in EstiloAlas estilo, int n)
+        {
+            if (estilo.Serena <= 0f || n < 4)
+            {
+                return nVerts;
+            }
+            int porLado = n / 2;
+            if (porLado < 2)
+            {
+                return nVerts;
+            }
+            float fuerza = estilo.Serena;
+            // EL ARCÉN: hacia adentro cubre el ancho de la punta (la
+            // joroba nace DENTRO de las plumas, jamás en el aire); hacia
+            // afuera, un labio mínimo (el plano exterior de la curva).
+            float grosor = 12f + 4f * fuerza;
+            float labio = 3f;
+            float respiracion = 0.92f + 0.08f * MathF.Sin(time * 2.1f);
+            for (int lado = 0; lado < 2; lado++)
+            {
+                int b = lado * porLado;
+                int m = porLado;
+                int muestras = (m - 1) * 6;
+                for (int s = 0; s < muestras; s++)
+                {
+                    if (nVerts + 12 > _verts.Length)
+                    {
+                        break;
+                    }
+                    int seg = s / 6;
+                    float k0 = (float)(s % 6) / 6f;
+                    float k1 = (float)(s % 6 + 1) / 6f;
+                    Vector2 q0p = (seg > 0) ? plumas[b + seg - 1].Eje[8] : plumas[b].Eje[8];
+                    Vector2 q1p = plumas[b + seg].Eje[8];
+                    Vector2 q2p = plumas[b + seg + 1].Eje[8];
+                    Vector2 q3p = (seg + 2 < m) ? plumas[b + seg + 2].Eje[8] : plumas[b + m - 1].Eje[8];
+                    Vector2 p0 = Catmull(q0p, q1p, q2p, q3p, k0);
+                    Vector2 p1 = Catmull(q0p, q1p, q2p, q3p, k1);
+
+                    // El tono viaja con la pluma del tramo (el idioma del
+                    // borde maestro) y el fundido respira con el resto.
+                    float fSeg0 = (seg + k0) / (float)(m - 1);
+                    float fSeg1 = (seg + k1) / (float)(m - 1);
+                    int iA0 = Math.Min(m - 1, (int)(fSeg0 * (m - 1) + 0.5f));
+                    int iA1 = Math.Min(m - 1, (int)(fSeg1 * (m - 1) + 0.5f));
+                    float hue0 = hues[b + iA0];
+                    float hue1 = hues[b + iA1];
+                    float fund = (fundidos[b + iA0] + fundidos[b + iA1]) * 0.5f;
+
+                    // La dirección radial (del ancla hacia afuera) da la
+                    // JOROBA: adentro el nacimiento en cero, en la curva
+                    // el pecho, afuera la muerte en cero.
+                    Vector2 rad0 = p0 - _geoAnclaCentral;
+                    float len0 = rad0.Length();
+                    if (len0 < 0.001f) rad0 = new Vector2(0f, -1f); else rad0 /= len0;
+                    Vector2 rad1 = p1 - _geoAnclaCentral;
+                    float len1 = rad1.Length();
+                    if (len1 < 0.001f) rad1 = new Vector2(0f, -1f); else rad1 /= len1;
+                    Vector2 in0 = p0 - rad0 * grosor;
+                    Vector2 in1 = p1 - rad1 * grosor;
+                    Vector2 out0 = p0 + rad0 * labio;
+                    Vector2 out1 = p1 + rad1 * labio;
+
+                    // EL PERFIL DE LA JOROBA (la ley del filo): nacimiento
+                    // CERO dentro, pecho en la curva, muerte CERO en el
+                    // labio — la intensidad del pecho acompaña al cuerpo
+                    // de la pluma sin dominarlo.
+                    float pecho = estilo.CuerpoInten * 0.72f * fuerza * fund * respiracion;
+                    Color ci0 = Pre(TonoPluma(hue0, mezclaDia, 0.05f, in estilo), 0f);
+                    Color ci1 = Pre(TonoPluma(hue1, mezclaDia, 0.05f, in estilo), 0f);
+                    Color cc0 = Pre(TonoPluma(hue0, mezclaDia, 0.22f, in estilo), pecho);
+                    Color cc1 = Pre(TonoPluma(hue1, mezclaDia, 0.22f, in estilo), pecho);
+                    Color co0 = Pre(TonoPluma(hue0, mezclaDia, 0.05f, in estilo), 0f);
+                    Color co1 = Pre(TonoPluma(hue1, mezclaDia, 0.05f, in estilo), 0f);
+                    Vector2 uv0 = new Vector2((float)s / muestras, 0f);
+                    Vector2 uv1 = new Vector2((float)(s + 1) / muestras, 0f);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in0, 0f), ci0, uv0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in1, 0f), ci1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), cc1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(in0, 0f), ci0, uv0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), cc1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), cc0, uv0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), cc0, uv0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p1, 0f), cc1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out1, 0f), co1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), cc0, uv0);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out1, 0f), co1, uv1);
+                    _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(out0, 0f), co0, uv0);
+                }
+            }
+            return nVerts;
+        }
+
         /// <summary>v6.115 — La Catmull-Rom uniforme del borde maestro
         /// (C1: la tangente es CONTINUA de punta a punta — sin
         /// esquinas, sin dientes).</summary>
@@ -1035,7 +1157,12 @@ namespace AethonMod.Content.VFX
                     float[] hues = _hues;
                     float[] fundidos = _fundidos;
                     float num = flap * estilo.HueTiempo;
-                    int num2 = ((estilo.Plumas < 2) ? 2 : ((estilo.Plumas > 7) ? 7 : estilo.Plumas));
+                    // v6.124 — EL TOPE DE PLUMAS SUBE A 13 (la letra: «tan
+                    // finos y juntos que no se noten» — las Runas del Vacío
+                    // visten 9 hebras): los pozos de la casa aguantan 14
+                    // (new Pluma[14]) y el abanico cierra EXACTO con impares
+                    // (la simetría de las runas de la v6.56.5 lo exige).
+                    int num2 = ((estilo.Plumas < 2) ? 2 : ((estilo.Plumas > 13) ? 13 : estilo.Plumas));
                     int num3 = 0;
                     for (int i = -1; i <= 1; i += 2)
                     {
@@ -1133,6 +1260,11 @@ namespace AethonMod.Content.VFX
                     // de las capas sólidas — con la mezcla aditiva el orden
                     // es irrelevante y las plumas siguen leyéndose encima.
                     num7 = EmitirMembrana(num7, plumas, hues, fundidos, mezclaDia, in estilo, num2 * 2);
+                    // v6.124 — LA CURVA SERENA: el arcén que cose las
+                    // puntas y rellena los valles (la forma lisa) — en el
+                    // MISMO lote de las capas sólidas, ANTES del ruido:
+                    // las plumas se leen encima, el contorno es UNA curva.
+                    num7 = EmitirCurvaSerena(num7, plumas, hues, fundidos, mezclaDia, globalTimeWrappedHourly, in estilo, num2 * 2);
                     if (num7 >= 3)
                     {
                         Volcar(graphicsDevice, _fxPlano, num7, textura: false);
@@ -1302,8 +1434,19 @@ namespace AethonMod.Content.VFX
                     // serena (1.26+0.28·n) — SIEMPRE, para todo estilo con
                     // runas; la punta vuelve a pertenecer SOLO a la curva.
                     int nodoRuna = 7;
+                    // v6.124 — LA FRANJA FINA: con muchas plumas delgadas
+                    // (la Runas del Vacío viste 9 hebras) el glifo vive
+                    // DENTRO de la hebra — una runa cada DOS plumas (el
+                    // número de siempre: 5 glifos por lado) y la escala
+                    // serena ×0.72 (la hebra es fina: el glifo jamás
+                    // monta el filo — la doctrina v6.122, vestida a la
+                    // medida de la franja).
+                    bool franjaFina = estilo.Plumas > 7;
                     for (int i = 0; i < _geoN; i++)
                     {
+                        int gemelaIdx = i % num4;
+                        if (franjaFina && (gemelaIdx & 1) == 1)
+                            continue;               // la hebra impar va limpia
                         Vector2 val3 = _pozosEje[i][nodoRuna];
                         int gemela = i % num4;
                         float num5 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + gemela, 3, 5) * ((float)Math.PI * 2f);
@@ -1316,6 +1459,7 @@ namespace AethonMod.Content.VFX
                         // escala SERENA es la única escala (el glifo vive
                         // SOBRE la pluma, jamás montado en el filo).
                         float escala = 1.26f + 0.28f * num7;
+                        if (franjaFina) escala *= 0.72f;   // v6.124 — la hebra fina: el glifo vive dentro
                         Color cuerpo = val;
                         Color punta = val2;
                         if (estilo.Runas == 4)

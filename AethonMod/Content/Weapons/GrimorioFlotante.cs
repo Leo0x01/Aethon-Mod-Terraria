@@ -42,6 +42,16 @@ namespace AethonMod.Content.Weapons
             if (p == null || !p.active || p.dead || p.stealth > 0.94f)
                 return false;
 
+            // v6.124 — EL FESTÍN SE LO COME (la letra: «el grimorio debe
+            // devorar al jugador en su conjunto y en la animacion debe
+            // verse como el jugador con TODO LO QUE TIENE es devorado»):
+            // mientras el Eterno devora a ESTE portador, el libro que
+            // flota a su espalda NO existe — el libro de la ceremonia ES
+            // el libro (dos libros sería un impostor flotando junto al
+            // festín: TODO lo del jugador entra a la boca con él).
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Devorando(p.whoAmI))
+                return false;
+
             // v6.121 — EL LIBRO NO CABE DENTRO DE SÍ MISMO (la letra: el
             // grimorio NO debe aparecer en el mundo interior): el
             // portador siempre lleva al Eterno en la bolsa — y dentro

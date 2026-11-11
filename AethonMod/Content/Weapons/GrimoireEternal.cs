@@ -726,6 +726,73 @@ namespace AethonMod.Content.Weapons
 
                 if (currentMinions >= maxMinions)
                 {
+                    // ============================================================
+                    //  v6.124 — LA ESCALERA DE LAS DAGAS (la letra: «quiero
+                    //  que esas dagas sean las siguiente invocacion despues
+                    //  de los 11 ojos, vienen las 5 dagas que tambien
+                    //  tendran un ojo en el centro»): con el escuadrón de
+                    //  OJOS LLENO, el clic derecho ya no fortalece —
+                    //  INVOCA a la siguiente DAGA DEL ETERNO que falte
+                    //  (la secuencia del Dazzling Stabber: Cristal →
+                    //  Llama → Roca → Vacío → Veredicto; cada una con SU
+                    //  técnica y el OJO en el centro de la hoja). Con las
+                    //  CINCO vivas, la invocación vuelve a FORTALECER a
+                    //  los ojos (las mejoras de siempre — intactas).
+                    // ============================================================
+                    int tipoDaga = ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.DagaEternaMinion>();
+                    int dagasVivas = 0;
+                    for (int i = 0; i < Main.maxProjectiles; i++)
+                    {
+                        Projectile p = Main.projectile[i];
+                        if (p != null && p.active && p.owner == player.whoAmI && p.type == tipoDaga)
+                            dagasVivas++;
+                    }
+                    if (dagasVivas < global::AethonMod.Content.Projectiles.DagaEternaMinion.TechoDagas)
+                    {
+                        // LA PRIMERA QUE FALTE (la secuencia del stabber: el
+                        // set se mantiene COMPLETO — la que murió vuelve)
+                        int tipoNuevo = 0;
+                        for (int k = 0; k < global::AethonMod.Content.Projectiles.DagaEternaMinion.TiposMax; k++)
+                        {
+                            if (!global::AethonMod.Content.Projectiles.DagaEternaMinion.ViveTipo(player, k))
+                            {
+                                tipoNuevo = k;
+                                break;
+                            }
+                        }
+
+                        // el coste del conjuro (una invocación más)
+                        if (!ManaMinionGratis())
+                        {
+                            int dagaCost = WeaponScaling.MinionManaCost(level);
+                            if (player.statMana < dagaCost && !player.manaFlower) return false;
+                            if (player.statMana >= dagaCost)
+                            {
+                                player.statMana -= dagaCost;
+                                if (player.statMana < 0) player.statMana = 0;
+                            }
+                        }
+
+                        // LA DAGA NACE con el daño DEL GRIMORIO SOLAMENTE
+                        // (la ley v6.51 — la MISMA cadena de los ojos).
+                        int danoDaga = WeaponScaling.DanoOjosDelEterno(Item.damage, level, player);
+                        player.AddBuff(ModContent.BuffType
+                            <global::AethonMod.Content.Buffs.DagaEternaBuff>(), 18000);
+                        Projectile.NewProjectile(source, player.Center - Vector2.UnitY * 30f,
+                            Vector2.Zero, tipoDaga, danoDaga, knockback, player.whoAmI,
+                            tipoNuevo, 0f, level);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
+
+                        // v6.123 — UN MENSAJE POR DAGA que revele SU técnica
+                        // (la lección de las mejoras, aplicada a las dagas).
+                        if (Main.myPlayer == player.whoAmI)
+                            Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Armas.DagaInvocada" + (tipoNuevo + 1)),
+                                new Color(196, 138, 255));
+                        return false;
+                    }
+
                     // === v6.86 — LA MEJORA MASIVA (la letra: «al aplicar
                     //     la mejora a un minion esta se aplica a todos
                     //     los minions invocados a la vez, de esa forma no
@@ -1367,10 +1434,18 @@ namespace AethonMod.Content.Weapons
                 int mejorasDesbloqueadas = Systems.DespertarGrimorio.MejorasDesbloqueadas(despertar);
                 float multMejoras = 1f + 0.5f * mejorasDesbloqueadas;
 
+                // v6.124 — LA LÍNEA DE LAS DAGAS (la letra: «quiero que
+                // esas dagas sean las siguiente invocacion despues de los
+                // 11 ojos, vienen las 5 dagas que tambien tendran un ojo
+                // en el centro»): el escuadrón se lee COMPLETO — los ojos
+                // y SUS DAGAS (el anillo íntimo de la guardia).
+                int dagasVivasTip = global::AethonMod.Content.Projectiles.DagaEternaMinion.DagasVivas(portadorTip);
+
                 tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ EL ESCUADRÓN ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
                     $"[c/E8D8FF:Ojos: {ojosVivos}/{techoOjos}]  " +
-                    $"[c/78788C:(+1 ojo cada 10 niveles del grimorio)]"));
+                    $"[c/D8B8FF:Dagas: {dagasVivasTip}/5]  " +
+                    $"[c/78788C:(+1 ojo cada 10 niveles · las 5 dagas tras los {techoOjos} ojos)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionMejoras",
                     $"[c/E8D8FF:Mejoras desbloqueadas: {mejorasDesbloqueadas}/4]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionMejoras2",

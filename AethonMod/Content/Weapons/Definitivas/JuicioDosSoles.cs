@@ -16,24 +16,44 @@ namespace AethonMod.Content.Weapons.Definitivas
     //  oscuridad, quiero dos esferas de luz y oscuridad colisionen y
     //  creen una implosion que luego explota en un destello de luz»).
     //
-    //  EL ATAQUE DEFINITIVO DE LUZ Y OSCURIDAD — el guion en TRES actos:
-    //    1. LA CONVOCATORIA (30 t): DOS ESFERAS nacen a los lados del
-    //       portador — la ESFERA DE LUZ (blanco-dorado, chispas de oro)
-    //       y la ESFERA DE OSCURIDAD (núcleo negro con el borde ardiendo
-    //       violeta — la lección v6.101: el negro solo existe si su
-    //       borde arde) — y vuelan al PUNTO DE ENCUENTRO (el cursor, con
-    //       correa de 640 px).
-    //    2. LA IMPLOSIÓN (26 t): las dos esferas ESPIRALAN una dentro de
-    //       la otra, encogiéndose — el remolino de la casa gira y TIRA
-    //       del polvo hacia adentro (la luz se ATRAGANTA), un latido
-    //       negro al final: el punto donde la luz y la oscuridad se
-    //       comen mutuamente.
-    //    3. EL DESTELLO (44 t): LA EXPLOSIÓN DE LUZ — la NovaBurst de la
-    //       casa naciendo de CERO a TAMAÑO DIOS, el anillo de choque de
-    //       OndaLib expandiéndose, los rayos del DestelloFinal, la lluvia
-    //       de chispas doradas, la luz que inunda el mundo y la sacudida
-    //       de cámara. La onda golpea UNA VEZ (ventana de 10 t, radio
-    //       460): la sentencia de los dos soles.
+    //  v6.124 — LA PELÍCULA NUEVA (la letra: «la animacion de Juicio de
+    //  los Dos Soles no me gusta para nada, ademas que no tengan anillos
+    //  runicos los soles, a lo mucho que solo tengan 1 y cuando se unan
+    //  que tengan 3, ademas debes mejorar la animacion en todos los
+    //  sentidos»). LA AUTOPSIA: los soles eran TRES texturas de estrella
+    //  apiladas girando (el núcleo, el halo ×2,1 y el borde girando con
+    //  el reloj — LEÍDO como anillos rúnicos) y la coreografía era DOS
+    //  lerp rectos y un remolino plano. LA OBRA NUEVA — cuatro actos,
+    //  el lenguaje de las estrellas binarias de verdad:
+    //    1. LA CONVOCATORIA (34 t): los DOS SOLES nacen a los lados del
+    //       portador con su destello de nacimiento y CRECEN volando al
+    //       punto de encuentro por ARCOS CURVOS (el de luz por arriba,
+    //       el de oscuridad por abajo — el yin y el yang) sembrando su
+    //       rastro (oro y brasa), mientras el punto respira UN ANILLO
+    //       fino de telégrafo.
+    //    2. LA DANZA (46 t): LA ÓRBITA BINARIA — los dos soles giran
+    //       el uno alrededor del otro, el radio CAE (84 → 12 px) y la
+    //       vuelta ACELERA (el inspiral de verdad: ω 0,09 → 0,30 rad/t)
+    //       tejiendo la espiral con sus estelas; el polvo cercano cae al
+    //       centro (la gravedad del par) y el temblor crece con la
+    //       vuelta. Al contacto: EL COMPÁS — un golpe de oscuridad.
+    //    3. LA FUSIÓN (24 t): los dos son UNO — EL ECLIPSE de la casa
+    //       (el disco NEGRO de borde ardiendo — el negro solo existe si
+    //       su borde arde) con SUS TRES ANILLOS (la letra: «cuando se
+    //       unan que tengan 3» — oro, blanco y violeta, cada uno girando
+    //       a su aire). El cuerpo SE CONTRAE (la tensión) tragándose el
+    //       polvo que acelera hacia adentro.
+    //    4. EL DESTELLO (44 t): LA EXPLOSIÓN DE LUZ — la corona ERUPCIONA
+    //       (el anillo de fuego expandiéndose), la NovaBurst nace de
+    //       cero a tamaño dios, los rayos del DestelloFinal, la lluvia
+    //       dorada, la luz que inunda el mundo y la sacudida. La onda
+    //       golpea UNA VEZ (la ventana de 10 t y el radio de 460 — las
+    //       estadísticas de la v6.122, INTACTAS).
+    //
+    //  LOS ANILLOS DE LOS SOLES (la letra, EXACTA): UNO solo por sol en
+    //  los actos 1-2 (la corona fina que respira) y TRES en la fusión —
+    //  las texturas de estrella girando MURIERON (eran «los anillos
+    //  rúnicos»).
     // ======================================================================
     public class JuicioDosSoles : ModItem
     {
@@ -87,22 +107,28 @@ namespace AethonMod.Content.Weapons.Definitivas
     }
 
     // ======================================================================
-    //  JuicioDosSolesProj — LA CEREMONIA ENTERA (las dos esferas, la
-    //  implosión y el destello — un solo proyectil, tres actos).
+    //  JuicioDosSolesProj — LA CEREMONIA ENTERA (los dos soles, la danza,
+    //  la fusión y el destello — un solo proyectil, cuatro actos).
     // ======================================================================
     public class JuicioDosSolesProj : ModProjectile
     {
-        public override string Texture => "AethonMod/Content/Effects/Procedural/Star";
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        private const int T_CONVOCATORIA = 30;
-        private const int T_IMPLOSION = 26;
+        // === LOS TIEMPOS DE LA PELÍCULA NUEVA (v6.124) ===
+        private const int T_CONVOCATORIA = 34;
+        private const int T_DANZA = 46;
+        private const int T_FUSION = 24;
         private const int T_DESTELLO = 44;
 
         /// <summary>El reloj del acto actual.</summary>
         private float _t;
 
-        /// <summary>0 convocatoria · 1 implosión · 2 destello.</summary>
+        /// <summary>0 convocatoria · 1 danza · 2 fusión · 3 destello.</summary>
         private int _acto;
+
+        /// <summary>Las estelas de la danza (la espiral tejida — 8 muestras por sol).</summary>
+        private readonly Vector2[] _estelaLuz = new Vector2[8];
+        private readonly Vector2[] _estelaSombra = new Vector2[8];
 
         private Vector2 Punto => new(Projectile.ai[0], Projectile.ai[1]);
 
@@ -113,12 +139,44 @@ namespace AethonMod.Content.Weapons.Definitivas
             Projectile.friendly = true;
             Projectile.tileCollide = false;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = T_CONVOCATORIA + T_IMPLOSION + T_DESTELLO + 10;
+            Projectile.timeLeft = T_CONVOCATORIA + T_DANZA + T_FUSION + T_DESTELLO + 10;
             Projectile.aiStyle = -1;
             Projectile.ignoreWater = true;
         }
 
         public override bool ShouldUpdatePosition() => false;
+
+        // ================================================================
+        //  LAS POSICIONES DE LA DANZA — la coreografía de los dos soles
+        // ================================================================
+
+        /// <summary>EL ARCO DE LA CONVOCATORIA (Bezier cuadrática): el sol
+        /// de luz llega POR ARRIBA y el de oscuridad POR ABAJO — los arcos
+        /// curvos que reemplazan los lerps rectos de la v6.122.</summary>
+        private static Vector2 ArcoConvocatoria(Vector2 punto, bool luz, float p)
+        {
+            float e = p * p * (3f - 2f * p);
+            Vector2 origen = punto + (luz ? new Vector2(-330f, -50f) : new Vector2(330f, 50f));
+            Vector2 control = punto + (luz ? new Vector2(-90f, -190f) : new Vector2(90f, 190f));
+            Vector2 a = Vector2.Lerp(origen, control, e);
+            Vector2 b = Vector2.Lerp(control, punto, e);
+            return Vector2.Lerp(a, b, e);
+        }
+
+        /// <summary>LA ÓRBITA BINARIA DE LA DANZA: el radio CAE (el
+        /// inspiral) y la vuelta ACELERA — cada sol en su lado opuesto del
+        /// par (θ y θ+π: DOS soles girando el uno alrededor del otro).</summary>
+        private static void PosicionesDanza(Vector2 punto, float t, out Vector2 luz, out Vector2 sombra, out float radio)
+        {
+            float p = MathHelper.Clamp(t / T_DANZA, 0f, 1f);
+            // EL INSPIRAL: el radio muere suave al final (la caída acelera)
+            radio = MathHelper.Lerp(84f, 12f, p * p * (3f - 2f * p) * 0.75f + p * 0.25f * p);
+            // LA VUELTA QUE ACELERA: ω crece de 0,09 a 0,30 rad/t
+            float omega = MathHelper.Lerp(0.09f, 0.30f, p * p);
+            float ang = 1.1f + omega * t * (1f + p * 0.55f);
+            luz = punto + ang.ToRotationVector2() * radio;
+            sombra = punto - ang.ToRotationVector2() * radio;
+        }
 
         public override void AI()
         {
@@ -126,64 +184,107 @@ namespace AethonMod.Content.Weapons.Definitivas
 
             // EL RELOJ DE LOS ACTOS
             if (_acto == 0 && _t > T_CONVOCATORIA) { _acto = 1; _t = 0; }
-            else if (_acto == 1 && _t > T_IMPLOSION) { _acto = 2; _t = 0; NacerElDestello(); }
-            else if (_acto == 2 && _t > T_DESTELLO) { Projectile.Kill(); return; }
+            else if (_acto == 1 && _t > T_DANZA) { _acto = 2; _t = 0; }
+            else if (_acto == 2 && _t > T_FUSION) { _acto = 3; _t = 0; NacerElDestello(); }
+            else if (_acto == 3 && _t > T_DESTELLO) { Projectile.Kill(); return; }
 
             Projectile.Center = Punto;
 
-            // === ACTO 1 — LA CONVOCATORIA: las esferas vuelan al punto ===
+            // === ACTO 1 — LA CONVOCATORIA: los soles crecen volando ===
             if (_acto == 0)
             {
-                float progreso = _t / T_CONVOCATORIA;
-                // EL POLVO DE LOS DOS SOLES (la luz siembra oro, la
-                // oscuridad siembra vacío invertido)
+                float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
+                Vector2 pl = ArcoConvocatoria(Punto, true, p);
+                Vector2 ps = ArcoConvocatoria(Punto, false, p);
+                // EL DESTELLO DE NACIMIENTO (una vez, a medio camino)
+                if (!Main.dedServ && (int)_t == 8)
+                {
+                    OndaLib.Flash(new Color(255, 240, 210), 0.10f, 8);
+                }
+                // LOS RASTROS: el oro de la luz, la brasa de la oscuridad
                 if (!Main.dedServ && Main.rand.NextBool(2))
                 {
                     bool esLuz = Main.rand.NextBool();
-                    Vector2 semilla = Punto + (esLuz ? new Vector2(-260f, 0f) : new Vector2(260f, 0f)) +
-                        Main.rand.NextVector2Circular(60f, 60f);
-                    Dust d = Dust.NewDustPerfect(semilla,
+                    Vector2 pos = esLuz ? pl : ps;
+                    Dust d = Dust.NewDustPerfect(pos,
                         esLuz ? DustID.GoldFlame : DustID.Shadowflame,
-                        -Vector2.Normalize(Punto - semilla) * Main.rand.NextFloat(2f, 5f),
+                        -Vector2.Normalize(Punto - pos) * Main.rand.NextFloat(0.6f, 2.2f) +
+                            Main.rand.NextVector2Circular(0.8f, 0.8f),
                         0, esLuz ? new Color(255, 226, 150) : new Color(150, 84, 235), 0.9f);
                     d.noGravity = true;
                 }
-                if (progreso >= 1f) { }      // el acto cambia solo
             }
-            // === ACTO 2 — LA IMPLOSIÓN: todo cae al centro ===
+            // === ACTO 2 — LA DANZA: la órbita binaria y la gravedad del par ===
             else if (_acto == 1)
             {
-                // LA SUCCIÓN: el polvo cercano es TIRADO al punto.
-                if (!Main.dedServ && Main.rand.NextBool(3))
+                PosicionesDanza(Punto, _t, out Vector2 pl, out Vector2 ps, out float radio);
+                // LAS ESTELAS (la espiral tejida: cada sol guarda su rastro)
+                if ((int)_t % 3 == 0)
                 {
+                    for (int i = 7; i > 0; i--) { _estelaLuz[i] = _estelaLuz[i - 1]; _estelaSombra[i] = _estelaSombra[i - 1]; }
+                    _estelaLuz[0] = pl; _estelaSombra[0] = ps;
+                }
+                // LA GRAVEDAD DEL PAR: el polvo cercano CAE al centro (y
+                // acelera con la vuelta — la succión de la v6.122, hecha danza)
+                if (!Main.dedServ && Main.rand.NextBool(2))
+                {
+                    float p = MathHelper.Clamp(_t / T_DANZA, 0f, 1f);
                     float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    float lejos = Main.rand.NextFloat(180f, 420f);
+                    float lejos = Main.rand.NextFloat(150f, 420f);
                     Vector2 pos = Punto + ang.ToRotationVector2() * lejos;
                     Dust d = Dust.NewDustPerfect(pos,
                         Main.rand.NextBool(3) ? DustID.GoldFlame : DustID.Shadowflame,
-                        -ang.ToRotationVector2() * (lejos / 14f), 0,
-                        new Color(200, 150, 255), 1.1f);
+                        -ang.ToRotationVector2() * (lejos / (16f - 7f * p)), 0,
+                        new Color(210, 160, 255), 1.0f);
                     d.noGravity = true;
                 }
-                // EL OÍDO DEL JUICIO: el remolino gana peso (el tirón).
-                if (_t == T_IMPLOSION && !Main.dedServ)
+                // EL TEMBLOR QUE CRECE con la vuelta (el rugido del inspiral)
+                float prog = MathHelper.Clamp(_t / T_DANZA, 0f, 1f);
+                if (!Main.dedServ && Main.rand.NextFloat() < 0.02f + 0.10f * prog * prog)
+                    OndaLib.Kick(1.5f + 3.5f * prog, 10);
+                // EL COMPÁS DEL CONTACTO (el golpe de oscuridad antes del silencio)
+                if ((int)_t == T_DANZA && !Main.dedServ)
                 {
+                    OndaLib.Flash(new Color(6, 3, 14), 0.45f, 10);
                     Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item122.WithPitchOffset(0.35f), Punto);
-                    OndaLib.Kick(6f, 14);
+                        SoundID.Item122.WithPitchOffset(-0.35f), Punto);
                 }
             }
-            // === ACTO 3 — EL DESTELLO: la luz inunda ===
+            // === ACTO 3 — LA FUSIÓN: la contracción y la lluvia al centro ===
+            else if (_acto == 2)
+            {
+                float p = MathHelper.Clamp(_t / T_FUSION, 0f, 1f);
+                // LA GRAVEDAD FINAL: TODO lo cercano acelera hacia adentro
+                if (!Main.dedServ && Main.rand.NextBool(2))
+                {
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    float lejos = Main.rand.NextFloat(110f, 380f);
+                    Vector2 pos = Punto + ang.ToRotationVector2() * lejos;
+                    Dust d = Dust.NewDustPerfect(pos,
+                        Main.rand.NextBool(3) ? DustID.GoldFlame : DustID.Shadowflame,
+                        -ang.ToRotationVector2() * (lejos / (9f - 5f * p)), 0,
+                        new Color(220, 170, 255), 1.1f);
+                    d.noGravity = true;
+                }
+                if (!Main.dedServ && Main.rand.NextFloat() < 0.05f + 0.15f * p)
+                    OndaLib.Kick(2f + 4f * p, 8);
+                // LA TENSIÓN FINAL: el silencio carga (el golpe queda para el destello)
+                if ((int)_t == T_FUSION && !Main.dedServ)
+                {
+                    OndaLib.Flash(new Color(8, 4, 16), 0.35f, 8);
+                }
+            }
+            // === ACTO 4 — EL DESTELLO: la luz inunda ===
             else
             {
                 // LA LUZ DEL MUNDO (2 s de día dentro del juicio)
                 if (!Main.dedServ)
                 {
                     float vida = Math.Max(0f, 1f - _t / T_DESTELLO);
-                    Lighting.AddLight(Punto, new Vector3(2.6f, 2.3f, 1.6f) * vida);
+                    Lighting.AddLight(Punto, new Vector3(3.1f, 2.7f, 1.9f) * vida);
                 }
                 // LA LLUVIA DORADA del estallido
-                if (!Main.dedServ && _t < 14 && Main.rand.NextBool(2))
+                if (!Main.dedServ && _t < 16 && Main.rand.NextBool(2))
                 {
                     Dust d = Dust.NewDustPerfect(Punto, DustID.GoldFlame,
                         Main.rand.NextVector2Circular(11f, 11f), 0,
@@ -210,6 +311,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Punto);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Punto);
                 OndaLib.Kick(14f, 26);
+                OndaLib.Flash(new Color(255, 250, 235), 0.55f, 12);
             }
         }
 
@@ -226,79 +328,139 @@ namespace AethonMod.Content.Weapons.Definitivas
             {
                 Vector2 cen = Punto - Main.screenPosition;
                 float gt = Main.GlobalTimeWrappedHourly;
-                Texture2D estrella = DefinitivasLib.TexStar;
+                Texture2D glow = VFXCore.SoftGlow;
                 Texture2D nova = VFXCore.NovaBurst;
                 Texture2D destello = VFXCore.DestelloFinal;
 
-                VFXCore.AbrirAdditive();
-                try
+                // ============================================================
+                //  ACTO 1 — LA CONVOCATORIA: dos soles creciendo por sus arcos
+                // ============================================================
+                if (_acto == 0)
                 {
-                    if (_acto == 0)
+                    float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
+                    float crece = 0.35f + 0.65f * (p * p * (3f - 2f * p));
+                    Vector2 pl = ArcoConvocatoria(Punto, true, p) - Main.screenPosition;
+                    Vector2 ps = ArcoConvocatoria(Punto, false, p) - Main.screenPosition;
+
+                    // EL TELEGRAFO: UN anillo fino respirando en el punto
+                    float resp = 1f + 0.08f * MathF.Sin(gt * 4.2f);
+                    OrbitaLib.AbrirAdditive();
+                    try
                     {
-                        // LAS DOS ESFERAS volando al punto (a los lados)
-                        float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
-                        p = p * p * (3f - 2f * p);
-                        for (int lado = 0; lado < 2; lado++)
-                        {
-                            bool luz = lado == 0;
-                            Vector2 origen = Punto + (luz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
-                            Vector2 pos = Vector2.Lerp(origen, Punto, p) +
-                                new Vector2(0f, MathF.Sin(gt * 6f + lado * 3.1f) * 26f * (1f - p));
-                            float escala = 1.1f + 0.3f * MathF.Sin(gt * 9f + lado);
-                            // EL BORDE de la esfera (violeta para la oscuridad)
-                            if (!luz)
-                                Main.spriteBatch.Draw(estrella, pos, null,
-                                    new Color(150, 84, 235) * 0.55f, gt * 2.2f,
-                                    estrella.Size() * 0.5f, escala * 1.5f, SpriteEffects.None, 0f);
-                            // EL NÚCLEO
-                            Main.spriteBatch.Draw(estrella, pos, null,
-                                luz ? new Color(255, 246, 220) : new Color(12, 7, 20),
-                                gt * (luz ? 1.6f : -1.6f), estrella.Size() * 0.5f,
-                                escala, SpriteEffects.None, 0f);
-                            // EL HALO
-                            Main.spriteBatch.Draw(estrella, pos, null,
-                                luz ? new Color(255, 214, 130) * 0.45f : new Color(96, 54, 170) * 0.5f,
-                                0f, estrella.Size() * 0.5f, escala * 2.1f, SpriteEffects.None, 0f);
-                        }
+                        OrbitaLib.AnilloFino(cen, 44f * resp, 0f,
+                            OrbitaLib.Tint(new Color(230, 205, 255), 0.16f + 0.10f * p));
+                        DibujarSolDeLuz(pl, crece, 1f);
+                        DibujarSolDeSombra(ps, crece, 1f);
                     }
-                    else if (_acto == 1)
+                    finally { OrbitaLib.CerrarBatch(); }
+                    DibujarDiscoNegro(ps, 13f * crece);
+                }
+                // ============================================================
+                //  ACTO 2 — LA DANZA: la órbita binaria con sus estelas
+                // ============================================================
+                else if (_acto == 1)
+                {
+                    PosicionesDanza(Punto, _t, out Vector2 pl, out Vector2 ps, out float radio);
+                    Vector2 plS = pl - Main.screenPosition, psS = ps - Main.screenPosition;
+                    float p = MathHelper.Clamp(_t / T_DANZA, 0f, 1f);
+
+                    // LAS ESTELAS: la espiral tejida (los fantasmas de la danza)
+                    OrbitaLib.AbrirAdditive();
+                    try
                     {
-                        // LA IMPLOSIÓN: las esferas espiralan al centro
-                        float p = MathHelper.Clamp(_t / T_IMPLOSION, 0f, 1f);
-                        float radio = MathHelper.Lerp(210f, 8f, p);
-                        for (int lado = 0; lado < 2; lado++)
+                        for (int i = 6; i >= 1; i--)
                         {
-                            bool luz = lado == 0;
-                            float ang = gt * 5.5f + lado * MathHelper.Pi + p * 9f;
-                            Vector2 pos = cen + ang.ToRotationVector2() * radio;
-                            float escala = MathHelper.Lerp(1.3f, 0.4f, p);
-                            Main.spriteBatch.Draw(estrella, pos, null,
-                                luz ? new Color(255, 246, 220) : new Color(12, 7, 20),
-                                ang, estrella.Size() * 0.5f, escala, SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(estrella, pos, null,
-                                luz ? new Color(255, 214, 130) * 0.5f : new Color(150, 84, 235) * 0.6f,
-                                0f, estrella.Size() * 0.5f, escala * 1.9f, SpriteEffects.None, 0f);
+                            float f = (7 - i) / 7f;
+                            if (_estelaLuz[i] != Vector2.Zero)
+                            {
+                                Vector2 e = _estelaLuz[i] - Main.screenPosition;
+                                if (glow != null)
+                                    Main.spriteBatch.Draw(glow, e, null,
+                                        new Color(255, 226, 150) * (0.16f * f),
+                                        0f, glow.Size() * 0.5f, (0.24f + 0.06f * i) * (1f - 0.5f * p),
+                                        SpriteEffects.None, 0f);
+                            }
+                            if (_estelaSombra[i] != Vector2.Zero)
+                            {
+                                Vector2 e = _estelaSombra[i] - Main.screenPosition;
+                                if (glow != null)
+                                    Main.spriteBatch.Draw(glow, e, null,
+                                        new Color(150, 84, 235) * (0.20f * f),
+                                        0f, glow.Size() * 0.5f, (0.26f + 0.07f * i) * (1f - 0.5f * p),
+                                        SpriteEffects.None, 0f);
+                            }
                         }
-                        // EL REMOLINO del tirón (el vacío tragándose la luz)
-                        Texture2D remolino = DefinitivasLib.TexRemolino;
-                        if (remolino != null)
-                            Main.spriteBatch.Draw(remolino, cen, null,
-                                new Color(120, 70, 200) * (0.5f * (1f - p * 0.5f)),
-                                gt * 3.2f, remolino.Size() * 0.5f,
-                                2.6f - 1.6f * p, SpriteEffects.None, 0f);
-                        // EL LATIDO NEGRO final (el punto de la nada)
-                        float negro = MathHelper.Clamp((p - 0.75f) / 0.25f, 0f, 1f);
-                        if (negro > 0f && nova != null)
-                            Main.spriteBatch.Draw(nova, cen, null,
-                                new Color(10, 5, 18) * negro, 0f, nova.Size() * 0.5f,
-                                0.4f + 0.5f * negro, SpriteEffects.None, 0f);
+                        DibujarSolDeLuz(plS, 1f, 1f);
+                        DibujarSolDeSombra(psS, 1f, 1f);
+                        // LA ÓRBITA que se lee (el círculo de la danza, tenue)
+                        OrbitaLib.AnilloFino(cen, radio, gt * 0.8f,
+                            OrbitaLib.Tint(new Color(190, 150, 255), 0.10f));
                     }
-                    else
+                    finally { OrbitaLib.CerrarBatch(); }
+                    DibujarDiscoNegro(psS, 13f * (1f - 0.35f * p));
+                }
+                // ============================================================
+                //  ACTO 3 — LA FUSIÓN: el eclipse con SUS TRES ANILLOS
+                // ============================================================
+                else if (_acto == 2)
+                {
+                    float p = MathHelper.Clamp(_t / T_FUSION, 0f, 1f);
+                    float contrae = MathHelper.Lerp(1f, 0.34f, p * p);
+                    float tension = p * p;
+
+                    OrbitaLib.AbrirAdditive();
+                    try
                     {
-                        // EL DESTELLO: la explosión de luz
-                        float p = MathHelper.Clamp(_t / T_DESTELLO, 0f, 1f);
-                        float crece = Math.Min(1f, _t / 7f);          // abre RÁPIDO
-                        float apaga = 1f - p;
+                        // EL BORDE ARDIENDO del eclipse (la ley del negro:
+                        // el disco negro vive en el pase alfa de abajo —
+                        // su borde arde AQUÍ)
+                        if (glow != null)
+                        {
+                            Main.spriteBatch.Draw(glow, cen, null,
+                                new Color(255, 214, 130) * (0.55f + 0.35f * tension),
+                                0f, glow.Size() * 0.5f, (0.85f + 0.5f * tension) * contrae,
+                                SpriteEffects.None, 0f);
+                        }
+                        // === LOS TRES ANILLOS DE LA FUSIÓN (la letra: «cuando
+                        //     se unan que tengan 3») — cada uno SU color, SU
+                        //     velocidad y SU dirección; se aprietan con la
+                        //     contracción y arden con la tensión ===
+                        float brillo = 0.55f + 0.45f * tension;
+                        OrbitaLib.AnilloFino(cen, 30f * contrae, gt * 1.4f,
+                            OrbitaLib.Tint(new Color(255, 214, 130), brillo));        // el ORO
+                        OrbitaLib.AnilloFino(cen, 39f * contrae, -gt * 1.0f,
+                            OrbitaLib.Tint(new Color(255, 246, 225), brillo * 0.85f)); // el BLANCO
+                        OrbitaLib.AnilloFino(cen, 49f * contrae, gt * 0.7f,
+                            OrbitaLib.Tint(new Color(150, 84, 235), brillo * 0.75f));  // el VIOLETA
+                        // EL ÚLTIMO SUSPIRO del sol de luz (la corona que se
+                        // apaga devorada — el residuo del acto anterior)
+                        if (glow != null && tension < 0.5f)
+                            Main.spriteBatch.Draw(glow, cen, null,
+                                new Color(255, 240, 205) * (0.35f * (1f - tension * 2f)),
+                                0f, glow.Size() * 0.5f, 0.55f * contrae,
+                                SpriteEffects.None, 0f);
+                    }
+                    finally { OrbitaLib.CerrarBatch(); }
+                    // EL DISCO NEGRO (el eclipse de la casa)
+                    DibujarDiscoNegro(cen, 21f * contrae);
+                }
+                // ============================================================
+                //  ACTO 4 — EL DESTELLO: la erupción de la corona
+                // ============================================================
+                else
+                {
+                    float p = MathHelper.Clamp(_t / T_DESTELLO, 0f, 1f);
+                    float crece = Math.Min(1f, _t / 7f);          // abre RÁPIDO
+                    float apaga = 1f - p;
+                    OrbitaLib.AbrirAdditive();
+                    try
+                    {
+                        // LA CORONA ERUPCIONA (el anillo de fuego que se
+                        // expande — la erupción solar de la fusión)
+                        float anilloR = 40f + 520f * crece;
+                        float anilloBrillo = MathF.Max(0f, 0.85f - crece * 0.55f) * (0.7f + 0.3f * MathF.Sin(gt * 18f));
+                        OrbitaLib.AnilloFino(cen, anilloR, gt * 0.5f,
+                            OrbitaLib.Tint(new Color(255, 232, 170), anilloBrillo));
                         // LOS RAYOS del destello
                         if (destello != null)
                             Main.spriteBatch.Draw(destello, cen, null,
@@ -317,11 +479,75 @@ namespace AethonMod.Content.Weapons.Definitivas
                         OndaLib.Shock(Main.spriteBatch, cen, MathHelper.Clamp(_t / 26f, 0f, 1f),
                             1.5f + 4.5f * crece, new Color(255, 232, 170), 0.8f, 7, 14f);
                     }
+                    finally { OrbitaLib.CerrarBatch(); }
                 }
-                finally { VFXCore.RestaurarLoteVanilla(); }
             }
             catch { }
             return false;
+        }
+
+        /// <summary>EL SOL DE LUZ (la letra de la v6.124: SIN anillos
+        /// rúnicos — A LO MUCHO UNO): el disco blanco-dorado caliente con
+        /// su corona tibia y UN ANILLO FINO que respira — nada de
+        /// texturas de estrella girando.</summary>
+        private static void DibujarSolDeLuz(Vector2 pos, float escala, float alfa)
+        {
+            Texture2D glow = VFXCore.SoftGlow;
+            if (glow == null) return;
+            float respira = 1f + 0.06f * MathF.Sin(Main.GlobalTimeWrappedHourly * 5.1f);
+            // LA CORONA tibia (el halo que la envuelve)
+            Main.spriteBatch.Draw(glow, pos, null,
+                new Color(255, 214, 130) * (0.40f * alfa), 0f, glow.Size() * 0.5f,
+                1.05f * escala * respira, SpriteEffects.None, 0f);
+            // EL DISCO (el corazón blanco-dorado)
+            Main.spriteBatch.Draw(glow, pos, null,
+                new Color(255, 246, 220) * (0.95f * alfa), 0f, glow.Size() * 0.5f,
+                0.50f * escala, SpriteEffects.None, 0f);
+            // EL ÚNICO ANILLO (la corona fina — uno solo, la letra)
+            OrbitaLib.AnilloFino(pos, 16f * escala * respira, 0f,
+                OrbitaLib.Tint(new Color(255, 232, 170), 0.42f * alfa));
+        }
+
+        /// <summary>EL SOL DE OSCURIDAD (la ley v6.101: el negro solo
+        /// existe si su borde arde): el disco negro vive en el pase alfa
+        /// (DibujarDiscoNegro) y AQUÍ arden su borde violeta y SU UNICO
+        /// ANILLO fino.</summary>
+        private static void DibujarSolDeSombra(Vector2 pos, float escala, float alfa)
+        {
+            Texture2D glow = VFXCore.SoftGlow;
+            if (glow == null) return;
+            float respira = 1f + 0.06f * MathF.Sin(Main.GlobalTimeWrappedHourly * 4.6f + 1.9f);
+            // EL BORDE ARDIENDO (el aro violeta que hace existir al negro)
+            Main.spriteBatch.Draw(glow, pos, null,
+                new Color(150, 84, 235) * (0.50f * alfa), 0f, glow.Size() * 0.5f,
+                0.62f * escala * respira, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(glow, pos, null,
+                new Color(96, 54, 170) * (0.55f * alfa), 0f, glow.Size() * 0.5f,
+                0.45f * escala, SpriteEffects.None, 0f);
+            // EL ÚNICO ANILLO (uno solo, la letra — violeta hondo)
+            OrbitaLib.AnilloFino(pos, 17f * escala * respira, 0f,
+                OrbitaLib.Tint(new Color(122, 78, 188), 0.42f * alfa));
+        }
+
+        /// <summary>EL DISCO NEGRO (el pase de lo oscuro): el negro de
+        /// verdad NO puede ser aditivo — vive en el pase ALFA encima de
+        /// todo lo brillante (la ley de la casa para TODO lo negro).</summary>
+        private static void DibujarDiscoNegro(Vector2 pos, float radio)
+        {
+            try
+            {
+                VFXCore.AbrirAlpha();
+                try
+                {
+                    Texture2D glow = VFXCore.SoftGlow;
+                    if (glow != null)
+                        Main.spriteBatch.Draw(glow, pos, null,
+                            new Color(8, 4, 16, 255), 0f, glow.Size() * 0.5f,
+                            radio * 2f / glow.Width, SpriteEffects.None, 0f);
+                }
+                finally { OrbitaLib.CerrarBatch(); }
+            }
+            catch { }
         }
 
         private static float apagasuave(float apaga)

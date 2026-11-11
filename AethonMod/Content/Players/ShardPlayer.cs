@@ -643,9 +643,15 @@ namespace AethonMod.Content.Players
             // QUITAR EL BUFF, como manda la letra).
             // ============================================================
             {
-                // EL ESCUADRÓN ENTERO (los 6 minions de la casa).
+                // EL ESCUADRÓN ENTERO (los 6 minions de la casa + LAS DAGAS
+                // v6.124 — la promesa cubre también a LAS CINCO DAGAS DEL
+                // ETERNO: mientras viva CUALQUIERA de las suyas, lo vivo es
+                // legal — el libro puede irse AL COFRE que sus dagas siguen
+                // en el aire, como sus ojos).
                 int tipoOjo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                int tipoDaga = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.DagaEternaMinion>();
                 int tipoSupernova = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.Cosmic.FragmentoSupernovaMinion>();
                 int tipoPulsar = ModContent.ProjectileType
@@ -664,7 +670,7 @@ namespace AethonMod.Content.Players
                     if (p == null || !p.active || !p.minion) continue;
                     if (p.owner != Player.whoAmI) continue;
                     slotsEnUso += p.minionSlots;      // lo que vanilla va a contar
-                    if (p.type == tipoOjo || p.type == tipoSupernova || p.type == tipoPulsar ||
+                    if (p.type == tipoOjo || p.type == tipoDaga || p.type == tipoSupernova || p.type == tipoPulsar ||
                         p.type == tipoMedusa || p.type == tipoCometa || p.type == tipoSierpe)
                         hayEscuadron = true;
                 }

@@ -2148,7 +2148,7 @@ Items: {
 		DisplayName: The Wings Bag
 		Tooltip:
 			'''
-			        The FIVE code wings of the house (v6.113 — the purge): the
+			        The FIVE code wings of the house: the
 			        four runic pairs and the corollas of dawn, each with its
 			        own palette, tempo and noise. Flight 240, no fall damage.
 			        Right click to unfold them. Only delivers what is missing.
@@ -2301,7 +2301,7 @@ Items: {
 		Tooltip:
 			'''
 			Lo que nació de las INVESTIGACIONES de la casa: primero los
-			dos CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
+			dos CLICKERS de los orígenes (El Compás Rúnico y la Furia Solar),
 			y de ahí en adelante TODO lo que nazca de estudiar el arte
 			de los efectos: armas, altares y códices del Eterno.
 			'''
@@ -2392,12 +2392,12 @@ Items: {
 		DisplayName: Void Runic Wings
 		Tooltip:
 			'''
-			        THE EXACT COPY OF THE ECLIPSE, in the COLOR OF THE VOID:
-			        the same five-feather fan — spike-free, left/right
-			        symmetric — dressed in the aura's ramp (the living
-			        violet, the deep flesh and the nothing's floor). THE
-			        VIOLET RUNE RING burns at the feather tips and THE VOID
-			        CRUMBS fall from the wings as you fly.
+			        THE SMOOTH FORM OF THE VOID: nine thin, close-packed strands
+			        on the same fan — so fine the outline is ONE continuous
+			        curve, without a single spike — dressed in the aura ramp
+			        (bright violet, deep flesh, and the black of the void).
+			        THE VIOLET RUNE RING burns between the strands and THE
+			        CRUMBS OF THE VOID fall from the wings as you fly.
 			        Flight 240 · no fall damage · folds before real wings.
 			'''
 	}
@@ -2453,6 +2453,7 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	OjoEternoMinion.DisplayName: El Ojo del Eterno
+	DagaEternaMinion.DisplayName: The Eternal Dagger
 	AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
 	RequiemPulsarProjectile.DisplayName: Estrella del Requiem
 	ClickerGolpeProjectile.DisplayName: El Golpe del Clic
@@ -2605,35 +2606,44 @@ Projectiles: {
 	MiradaRayoProj.DisplayName: El Rayo de la Mirada
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
-	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
-	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	AlasAuroraHalo.DisplayName: Alas Aurora Halo
-	VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
-	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
-	JefeMiradaProj.DisplayName: Jefe Mirada Proj
-	JefeRC2Proj.DisplayName: Jefe R C2 Proj
-	JefeRenglonesProj.DisplayName: Jefe Renglones Proj
-	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
-	PrimerTrazoHeld.DisplayName: Primer Trazo Held
-	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
-	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
-	TresCasasProjectile.DisplayName: Tres Casas Projectile
-	SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
-	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
-	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
-	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
-	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
-	CeremoniaLlamado.DisplayName: Ceremonia Llamado
-	DevoracionEterna.DisplayName: Devoracion Eterna
-	AgujaVacioProj.DisplayName: Aguja Vacio Proj
-	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
-	TajoOscuroProj.DisplayName: Tajo Oscuro Proj
+	CoronaDePlumasProjectile.DisplayName: Crown of Feathers
+	DerrameDeTintaProjectile.DisplayName: Ink Spill
+	AlasAuroraHalo.DisplayName: Wings Halo
+	VastagoDelEternoPet.DisplayName: Scion of the Eternal
+	LaUltimaPalabraProjectile.DisplayName: The Last Word
+	JefeMiradaProj.DisplayName: The Gaze
+	JefeRC2Proj.DisplayName: Concentrated Ray 2
+	JefeRenglonesProj.DisplayName: The Lines
+	PrimerTrazoFajo.DisplayName: First Stroke Wad
+	PrimerTrazoHeld.DisplayName: The First Stroke
+	SombraPagina3Projectile.DisplayName: Shadow of the Page 3
+	SombraPagina4Projectile.DisplayName: Shadow of the Page 4
+	TresCasasProjectile.DisplayName: The Three Houses
+	SombraPagina5Projectile.DisplayName: Shadow of the Page 5
+	AuraJuicio2Ancla.DisplayName: Void Aura Anchor
+	JefeMiradaCieloProj.DisplayName: Gaze of the Sky
+	JefePruebaCProj.DisplayName: Test Ray C
+	JefeVeredictoProj.DisplayName: The Verdict
+	CeremoniaLlamado.DisplayName: Ceremony Call
+	DevoracionEterna.DisplayName: The Eternal Devouring
+	AgujaVacioProj.DisplayName: Needle of the Void
+	JuicioDosSolesProj.DisplayName: Judgment of the Two Suns
+	TajoOscuroProj.DisplayName: The Slash of Darkness
 }
 
 Buffs: {
 	OjoEternoBuff: {
 		DisplayName: Ojos del Eterno
 		Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
+	}
+
+	// v6.124 — THE FIVE DAGGERS OF THE ETERNAL (the letter: "they
+	// come after the 11 eyes, five daggers that also carry an eye in
+	// the center" — the Dazzling Stabber technique, the ladder after
+	// the 11 eyes)
+	DagaEternaBuff: {
+		DisplayName: Daggers of the Eternal
+		Description: The five eternal daggers of the Grimoire, each with an eye in the center of its blade, fight for you
 	}
 
 	AethonMenorBuff: {
@@ -3452,6 +3462,12 @@ Armas: {
 	EscuadronMejora2: THE SQUAD GROWS STRONGER! ({0} eyes gain THE VIOLET RING of the abyss: +50% damage each)
 	EscuadronMejora3: THE SQUAD GROWS STRONGER! ({0} eyes gain THE GOLDEN SUN of the upgrades: +50% damage each)
 	EscuadronMejora4: THE SQUAD GROWS STRONGER! ({0} eyes gain THE BLUE-STAR SUN, the last ring: +50% damage each)
+	DagaInvocada1: ✧ THE CRYSTAL DAGGER joins the squad! — rapid slash flurries (50% damage, +20 armor penetration)
+	DagaInvocada2: ✧ THE FLAME DAGGER joins the squad! — wide arcing sweeps through the enemy field
+	DagaInvocada3: ✧ THE ROCK DAGGER joins the squad! — lunges with recoil (300% damage)
+	DagaInvocada4: ✧ THE DAGGER OF THE VOID joins the squad! — impales its prey and drips the void
+	DagaInvocada5: ✧ THE DAGGER OF THE VERDICT joins the squad! — marks its prey and passes sentence (150%)
+	DagasLlenas: ✧ The five daggers of the Eternal live: further summons empower the eyes again (+50% damage per empowerment)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 
@@ -3467,7 +3483,7 @@ Diag: {
 	Furia: Furia del grimorio: {0}
 	FuriaInactivo: silencio
 	FuriaActiva: oleada {0}/{1} en marcha
-	Ayuda: "[F8] cierra el diagnóstico · v6.49"
+	Ayuda: "[F8] cierra el diagnóstico"
 }
 
 Biomes: {

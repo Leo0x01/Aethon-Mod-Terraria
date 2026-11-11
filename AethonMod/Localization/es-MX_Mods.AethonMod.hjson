@@ -2143,7 +2143,7 @@ Items: {
 		DisplayName: La Bolsa de las Alas
 		Tooltip:
 			'''
-			        Las CINCO alas de código de la casa (v6.113 — la purga): las
+			        Las CINCO alas de código de la casa: las
 			        cuatro rúnicas y las corolas del alba, cada una con SU paleta,
 			        SU tempo y SU ruido. Vuelo 240, sin daño de caída.
 			        Clic derecho para desplegarlas. Solo entrega lo que falte.
@@ -2296,7 +2296,7 @@ Items: {
 		Tooltip:
 			'''
 			Lo que nació de las INVESTIGACIONES de la casa: primero los
-			dos CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
+			dos CLICKERS de los orígenes (El Compás Rúnico y la Furia Solar),
 			y de ahí en adelante TODO lo que nazca de estudiar el arte
 			de los efectos: armas, altares y códices del Eterno.
 			'''
@@ -2387,12 +2387,12 @@ Items: {
 		DisplayName: Alas Rúnicas del Vacío
 		Tooltip:
 			'''
-			        LA COPIA EXACTA DEL ECLIPSE, del COLOR DEL VACÍO: el mismo
-			        abanico de cinco plumas — sin picos, simétrica izquierda y
-			        derecha — vestida con la rampa del aura (el violeta vivo,
-			        la carne hond y el fondo de la nada). EL ANILLO DE RUNAS
-			        VIOLETAS arde en las puntas de las plumas y LAS MIGAS DEL
-			        VACÍO caen de las alas mientras vuelas.
+			        LA FORMA LISA DEL VACÍO: nueve hebras finas y juntas en el
+			        mismo abanico — tan finas que el contorno es UNA CURVA
+			        continua, sin un solo pico — vestidas con la rampa del aura
+			        (el violeta vivo, la carne honda y el fondo de la nada).
+			        EL ANILLO DE RUNAS VIOLETAS arde entre las hebras y LAS
+			        MIGAS DEL VACÍO caen de las alas mientras vuelas.
 			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 			'''
 	}
@@ -2441,6 +2441,22 @@ Items: {
 		// DisplayName: Pluma Del Escriba Santo
 		// Tooltip: ""
 	}
+
+	CoroDeLosProfundos: {
+		DisplayName: El Coro de los Profundos
+		Tooltip:
+			'''
+			El coro de los abismos — la voz de la casa hecha arma.
+			'''
+	}
+
+	PlumaDelEscribaSanto: {
+		DisplayName: La Pluma del Escriba Santo
+		Tooltip:
+			'''
+			La pluma del escriba — la palabra hecha arma de la casa.
+			'''
+	}
 }
 
 Projectiles: {
@@ -2448,6 +2464,7 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	OjoEternoMinion.DisplayName: El Ojo del Eterno
+	DagaEternaMinion.DisplayName: Daga del Eterno
 	AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
 	RequiemPulsarProjectile.DisplayName: Estrella del Requiem
 	ClickerGolpeProjectile.DisplayName: El Golpe del Clic
@@ -2600,32 +2617,43 @@ Projectiles: {
 	MiradaRayoProj.DisplayName: El Rayo de la Mirada
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
-	// CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
-	// DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	// AlasAuroraHalo.DisplayName: Alas Aurora Halo
-	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
-	// LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
-	// JefeMiradaProj.DisplayName: Jefe Mirada Proj
-	// JefeRC2Proj.DisplayName: Jefe R C2 Proj
-	// JefeRenglonesProj.DisplayName: Jefe Renglones Proj
-	// PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
-	// PrimerTrazoHeld.DisplayName: Primer Trazo Held
-	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
-	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
-	// TresCasasProjectile.DisplayName: Tres Casas Projectile
-	// SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
-	// AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
-	// JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
-	// JefePruebaCProj.DisplayName: Jefe Prueba C Proj
-	// JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
-	// CeremoniaLlamado.DisplayName: Ceremonia Llamado
-	// DevoracionEterna.DisplayName: Devoracion Eterna
+	CoronaDePlumasProjectile.DisplayName: Corona de Plumas
+	DerrameDeTintaProjectile.DisplayName: Derrame de Tinta
+	AlasAuroraHalo.DisplayName: Halo de las Alas
+	VastagoDelEternoPet.DisplayName: Vástago del Eterno
+	LaUltimaPalabraProjectile.DisplayName: La Última Palabra
+	JefeMiradaProj.DisplayName: La Mirada
+	JefeRC2Proj.DisplayName: Rayo Concentrado 2
+	JefeRenglonesProj.DisplayName: Los Renglones
+	PrimerTrazoFajo.DisplayName: Fajo del Primer Trazo
+	PrimerTrazoHeld.DisplayName: El Primer Trazo
+	SombraPagina3Projectile.DisplayName: Sombra de la Página 3
+	SombraPagina4Projectile.DisplayName: Sombra de la Página 4
+	TresCasasProjectile.DisplayName: El Proyectil de las Tres Casas
+	SombraPagina5Projectile.DisplayName: Sombra de la Página 5
+	AuraJuicio2Ancla.DisplayName: Ancla del Aura del Vacío
+	JefeMiradaCieloProj.DisplayName: Mirada del Cielo
+	JefePruebaCProj.DisplayName: Rayo de Prueba C
+	JefeVeredictoProj.DisplayName: El Veredicto
+	CeremoniaLlamado.DisplayName: Llamado de Ceremonia
+	DevoracionEterna.DisplayName: La Devoración Eterna
+	AgujaVacioProj.DisplayName: Aguja del Vacío
+	JuicioDosSolesProj.DisplayName: El Juicio de los Dos Soles
+	TajoOscuroProj.DisplayName: El Tajo de Oscuridad
 }
 
 Buffs: {
 	OjoEternoBuff: {
 		DisplayName: Ojos del Eterno
 		Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
+	}
+
+	// v6.124 — LAS CINCO DAGAS DEL ETERNO (la letra: «vienen
+	// las 5 dagas que tambien tendran un ojo en el centro» — la
+	// técnica del Dazzling Stabber, la escalera tras los 11 ojos)
+	DagaEternaBuff: {
+		DisplayName: Dagas del Eterno
+		Description: Las cinco dagas eternas del grimorio, cada una con un ojo en el centro de su hoja, luchan por ti
 	}
 
 	AethonMenorBuff: {
@@ -3444,6 +3472,12 @@ Armas: {
 	EscuadronMejora2: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL ANILLO VIOLETA del abismo: +50% de daño cada uno)
 	EscuadronMejora3: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL DORADO de las mejoras: +50% de daño cada uno)
 	EscuadronMejora4: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL AZUL-ESTELAR, el último anillo: +50% de daño cada uno)
+	DagaInvocada1: ✧ ¡LA DAGA DE CRISTAL se une al escuadrón! — ráfagas de tajos rápidos (50% del daño, +20 de perforación)
+	DagaInvocada2: ✧ ¡LA DAGA DE LLAMA se une al escuadrón! — barridos en arco amplio por la zona enemiga
+	DagaInvocada3: ✧ ¡LA DAGA DE ROCA se une al escuadrón! — embestidas con reculo (300% del daño)
+	DagaInvocada4: ✧ ¡LA DAGA DEL VACÍO se une al escuadrón! — se clava en su presa y gotea el vacío
+	DagaInvocada5: ✧ ¡LA DAGA DEL VEREDICTO se une al escuadrón! — marca a su presa y la sentencia (150%)
+	DagasLlenas: ✧ Las cinco dagas del Eterno viven: las invocaciones vuelven a fortalecer a los ojos (+50% de daño por mejora)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 
@@ -3459,7 +3493,7 @@ Diag: {
 	Furia: Furia del grimorio: {0}
 	FuriaInactivo: silencio
 	FuriaActiva: oleada {0}/{1} en marcha
-	Ayuda: "[F8] cierra el diagnóstico · v6.49"
+	Ayuda: "[F8] cierra el diagnóstico"
 }
 
 Biomes: {

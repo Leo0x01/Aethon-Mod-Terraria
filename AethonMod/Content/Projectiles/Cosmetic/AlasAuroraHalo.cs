@@ -114,6 +114,39 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Spread = MathHelper.Lerp(Spread, num2, 0.085f);
             Flap += (0.055f + (flag ? 0.15f : 0f) + Spread * 0.03f) * num;
             MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
+
+            // v6.124 — LAS ALAS SE PLIEGAN DENTRO DEL TRAGO (la letra:
+            // «por alguna razon, las alas que tengo equipada, se separan
+            // del jugador en la animacion y estan a parte, el grimorio
+            // debe devorar al jugador en su conjunto y en la animacion
+            // debe verse como el jugador con todo lo que tiene es
+            // devorado»): el halo de las alas es un PROYECTIL APARTE —
+            // cuando el cuerpo ya está DENTRO de la boca (Tragado), las
+            // alas dejaban de tener dueño visible y quedaban FLOTANDO a
+            // un lado del libro: SEPARADAS. AHORA se PLEGAN y se APAGAN
+            // a toda prisa (el lerp rápido al 0): las alas entran a la
+            // boca CON el cuerpo — el jugador es devorado ENTERO, con
+            // todo lo que lleva puesto.
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado &&
+                val.whoAmI == Main.myPlayer)
+            {
+                if (Spread > 0.03f && Main.netMode != 2 && !Main.dedServ)
+                {
+                    // LAS MIGAS DEL TRAGO: los últimos trazos de las alas
+                    // cayendo hacia la boca junto con el cuerpo
+                    if (Main.rand.NextBool(2))
+                    {
+                        Dust m = Dust.NewDustPerfect(
+                            val.MountedCenter + new Vector2(Main.rand.NextFloat(-30f, 30f), Main.rand.NextFloat(-18f, 6f)),
+                            DustID.Enchanted_Pink,
+                            new Vector2(0f, -Main.rand.NextFloat(0.8f, 2.2f)),
+                            140, new Color(190, 150, 240), 0.8f);
+                        m.noGravity = true;
+                    }
+                }
+                Spread = MathHelper.Lerp(Spread, 0f, 0.38f);   // se pliega al vacío
+                if (Spread < 0.03f) Spread = 0f;
+            }
             if (Spread > 0.05f && Main.netMode != 2)
             {
                 float h = Flap * 0.02f % 1f;

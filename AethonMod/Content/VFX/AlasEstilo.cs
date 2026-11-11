@@ -65,6 +65,21 @@ namespace AethonMod.Content.VFX
         // Redonda (0 = aguja clásica · 1 = redondez completa).
         public float Redonda;
 
+        // v6.124 — LA CURVA SERENA (la letra del usuario: «las alas
+        // runicas del vacio volvieron, pero no mantuvieron la forma lisa,
+        // ahora tienen picos, esos picos los debes eliminar, o en caso de
+        // no poder, debes hacerlo tan finos y juntos que no se noten»):
+        // EL ARCO SUAVE que cose las puntas de las plumas — una banda
+        // fina, del color de la pluma, que pasa POR las puntas y RELLENA
+        // los valles entre ellas con una rampa que muere en CERO EXACTO
+        // en sus dos bordes (la ley del filo de HazLib v6.91: un aporte
+        // de cero no puede encender un píxel — la serena NO puede
+        // fabricar picos nuevos). Es LA FORMA LISA: el contorno del ala
+        // deja de ser plumas separadas (pico→valle→pico) y pasa a ser UNA
+        // curva continua con las plumas viviendo DENTRO. 0 = sin serena
+        // (los demás estilos, intactos — «si funciona, no se toca»).
+        public float Serena;
+
         public byte Runas;
 
         public float RunasInten;
@@ -366,12 +381,47 @@ namespace AethonMod.Content.VFX
                 // anillo violeta del vacío (RunasVacio de OrbitaLib) y
                 // LAS MIGAS DEL VACÍO siguen cayendo (AlasAuroraHalo.AI —
                 // alaEstilo == 2, intactas).
+                // v6.124 — LA FORMA LISA DEFINITIVA (la letra: «las alas
+                // runicas del vacio volvieron, pero no mantuvieron la
+                // forma lisa, ahora tienen picos, esos picos los debes
+                // eliminar, o en caso de no poder, debes hacerlo tan
+                // finos y juntos que no se noten»). LA AUTOPSIA FINAL:
+                // con membrana 0 el contorno del ala ERAN las CINCO
+                // PLUMAS SEPARADAS — cada punta un pico, cada hueco
+                // entre plumas un valle: LA SIERRA era la GEOMETRÍA
+                // misma del abanico, y siete curas parciales (v6.113
+                // perfil redondo · v6.114 membrana · v6.115 borde
+                // maestro · v6.118 ensoglado · v6.120 copia del eclipse
+                // · v6.122 runas al nodo 7 · v6.123 inset del ruido) no
+                // podían matarla porque NINGUNA tocaba el abanico. LA
+                // CURA TRIPLE, la letra cumplida ENTERA:
+                //   · LA FRANJA FINA Y JUNTA («tan finos y juntos que
+                //     no se noten»): 9 PLUMAS DELGADAS (punta 8/5 —
+                //     era 19/12) en el mismo abanico: el hueco entre
+                //     puntas vecinas cae a UN TERCIO y cada pluma es una
+                //     hebra fina, no una pala.
+                //   · EL PERFIL SERENO: afilada 0.5 + redonda 0.3 (el
+                //     hombro redondo del plectro en la punta) + filosa
+                //     0 (simetría perfecta, los DOS bordes idénticos).
+                //   · LA CURVA SERENA (Serena 0.55): el arco suave que
+                //     cose las puntas y rellena los valles — rampa a
+                //     CERO EXACTO en sus bordes (EmitirCurvaSerena):
+                //     el contorno ES UNA CURVA, las hebras viven dentro.
+                // El abanico respira igual (tempo 0.95, largos 90/52) y
+                // las runas siguen al nodo 7 con la escala serena — solo
+                // que ahora una cada DOS plumas (5 glifos por lado, el
+                // número de siempre) y a escala 0.72 (las hebras son
+                // delgadas: el glifo vive DENTRO, jamás montado en el
+                // filo). El resto es del vacío de siempre: LA PALETA
+                // (150,84,235 · 122,78,188 · 26,14,44), su ColorDia, SU
+                // ANILLO (Runas=2, las runas violetas de OrbitaLib) y
+                // LAS MIGAS DEL VACÍO (AlasAuroraHalo.AI, intactas).
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_14", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1f),
+                }, new Color(90, 60, 140), "Ruido_14", 9, 90f, 52f, 3.5f, 8f, 5f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1f, 0f, 0.3f, 0.55f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,
@@ -395,7 +445,7 @@ namespace AethonMod.Content.VFX
             };
         }
 
-        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f)
+        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, float serena = 0f)
         {
             //IL_0012: Unknown result type (might be due to invalid IL or missing references)
             //IL_0013: Unknown result type (might be due to invalid IL or missing references)
@@ -403,6 +453,7 @@ namespace AethonMod.Content.VFX
             {
                 Membrana = membrana,
                 Redonda = redonda,
+                Serena = serena,
                 Paleta = paleta,
                 ColorDia = dia,
                 FuerzaDia = 0.62f,
