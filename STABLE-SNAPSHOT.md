@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.124 — LA SFORJA + LOS SOLES DE VERDAD + EL AURA POR CERCANÍA + EL CUADRO NEGRO MUERTO POR ALTURA
 
-> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+> **PUBLICADA — release 441285135 + CDN verificado byte a byte (md5 b01e4005cae8b9211711ac8d74634228)**
 
 ## LA LETRA (el usuario — sesión 6)
 
