@@ -2480,13 +2480,21 @@ Items: {
 	}
 
 	CoroDeLosProfundos: {
-		// DisplayName: Coro De Los Profundos
-		// Tooltip: ""
+		DisplayName: El Coro de los Profundos
+		Tooltip:
+			'''
+						Semillas de tentáculo caen y cantan persiguiendo a los vivos: ninguna escapa dos veces.
+			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
+			'''
 	}
 
 	PlumaDelEscribaSanto: {
-		// DisplayName: Pluma Del Escriba Santo
-		// Tooltip: ""
+		DisplayName: La Pluma del Escriba Santo
+		Tooltip:
+			'''
+						Un trazo de luz que vuela a la marca y vuelve al portador: la firma del santo.
+			LA CASA SAGRADA — la entrega de LA FORJA
+			'''
 	}
 }
 
@@ -2495,6 +2503,7 @@ Projectiles: {
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	OjoEternoMinion.DisplayName: El Ojo del Eterno
+	DagaEternaMinion.DisplayName: Daga del Eterno
 	AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
 	RequiemPulsarProjectile.DisplayName: Estrella del Requiem
 	ClickerGolpeProjectile.DisplayName: El Golpe del Clic
@@ -2647,42 +2656,50 @@ Projectiles: {
 	MiradaRayoProj.DisplayName: El Rayo de la Mirada
 	RenglonCargaProj.DisplayName: La Citación del Renglón
 	RenglonLineaProj.DisplayName: El Renglón Final
-	// CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
-	// DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	// AlasAuroraHalo.DisplayName: Alas Aurora Halo
-	// VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
-	// LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
-	// JefeMiradaProj.DisplayName: Jefe Mirada Proj
-	// JefeRC2Proj.DisplayName: Jefe R C2 Proj
-	// JefeRenglonesProj.DisplayName: Jefe Renglones Proj
-	// PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
-	// PrimerTrazoHeld.DisplayName: Primer Trazo Held
-	// SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
-	// SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
-	// TresCasasProjectile.DisplayName: Tres Casas Projectile
-	// SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
-	// AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
-	// JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
-	// JefePruebaCProj.DisplayName: Jefe Prueba C Proj
-	// JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
-	// CeremoniaLlamado.DisplayName: Ceremonia Llamado
-	// DevoracionEterna.DisplayName: Devoracion Eterna
-	// AgujaVacioProj.DisplayName: Aguja Vacio Proj
-	// JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
-	// TajoOscuroProj.DisplayName: Tajo Oscuro Proj
-	// AlmaEco.DisplayName: Alma Eco
-	// AlmaLuzInferior.DisplayName: Alma Luz Inferior
-	// ArbitradorIIProyectil.DisplayName: Arbitrador I I Proyectil
-	// DagaEterna.DisplayName: Daga Eterna
-	// DazzlingStabber.DisplayName: Dazzling Stabber
-	// OndaSonoraEterna.DisplayName: Onda Sonora Eterna
-	// TajoDelVacioProj.DisplayName: Tajo Del Vacio Proj
+	CoronaDePlumasProjectile.DisplayName: Corona de Plumas
+	DerrameDeTintaProjectile.DisplayName: Derrame de Tinta
+	AlasAuroraHalo.DisplayName: Halo de las Alas
+	VastagoDelEternoPet.DisplayName: Vástago del Eterno
+	LaUltimaPalabraProjectile.DisplayName: La Última Palabra
+	JefeMiradaProj.DisplayName: La Mirada
+	JefeRC2Proj.DisplayName: Rayo Concentrado 2
+	JefeRenglonesProj.DisplayName: Los Renglones
+	PrimerTrazoFajo.DisplayName: Fajo del Primer Trazo
+	PrimerTrazoHeld.DisplayName: El Primer Trazo
+	SombraPagina3Projectile.DisplayName: Sombra de la Página 3
+	SombraPagina4Projectile.DisplayName: Sombra de la Página 4
+	TresCasasProjectile.DisplayName: El Proyectil de las Tres Casas
+	SombraPagina5Projectile.DisplayName: Sombra de la Página 5
+	AuraJuicio2Ancla.DisplayName: Ancla del Aura del Vacío
+	JefeMiradaCieloProj.DisplayName: Mirada del Cielo
+	JefePruebaCProj.DisplayName: Rayo de Prueba C
+	JefeVeredictoProj.DisplayName: El Veredicto
+	CeremoniaLlamado.DisplayName: Llamado de Ceremonia
+	DevoracionEterna.DisplayName: La Devoración Eterna
+	AgujaVacioProj.DisplayName: Aguja del Vacío
+	JuicioDosSolesProj.DisplayName: El Juicio de los Dos Soles
+	TajoOscuroProj.DisplayName: El Tajo de Oscuridad
+	AlmaEco.DisplayName: Alma de Eco
+	AlmaLuzInferior.DisplayName: Alma de la Luz Inferior
+	ArbitradorIIProyectil.DisplayName: La Jabalina del Arbitrador
+	DagaEterna.DisplayName: La Daga Deslumbrante
+	DazzlingStabber.DisplayName: El Puñal Deslumbrante
+	OndaSonoraEterna.DisplayName: La Onda Sonora Eterna
+	TajoDelVacioProj.DisplayName: El Tajo del Vacío
 }
 
 Buffs: {
 	OjoEternoBuff: {
 		DisplayName: Ojos del Eterno
 		Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
+	}
+
+	// v6.126 — LAS CINCO DAGAS DEL ETERNO (la letra: «vienen
+	// las 5 dagas que tambien tendran un ojo en el centro» — la
+	// técnica del Dazzling Stabber, la escalera tras los 11 ojos)
+	DagaEternaBuff: {
+		DisplayName: Dagas del Eterno
+		Description: Las cinco dagas eternas del grimorio, cada una con un ojo en el centro de su hoja, luchan por ti
 	}
 
 	AethonMenorBuff: {
@@ -3093,23 +3110,7 @@ Hambre: {
 	
 	
 	
-	PlumaDelEscribaSanto: {
-		DisplayName: La Pluma del Escriba Santo
-		Tooltip:
-			'''
-			Un trazo de luz que vuela a la marca y vuelve al portador: la firma del santo.
-			LA CASA SAGRADA — la entrega de LA FORJA
-			'''
-	}
 
-	CoroDeLosProfundos: {
-		DisplayName: El Coro de los Profundos
-		Tooltip:
-			'''
-			Semillas de tentáculo caen y cantan persiguiendo a los vivos: ninguna escapa dos veces.
-			LA CASA DEL HORROR CÓSMICO — la entrega de LA FORJA
-			'''
-	}
 
 	Cultistas: {
 		Burla1: «(El Eterno murmura desde la bolsa) Tontos… arrodillados ante un dios FALSO. Yo al menos EXISTO.»
@@ -3550,6 +3551,12 @@ Armas: {
 	EscuadronMejora2: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL ANILLO VIOLETA del abismo: +50% de daño cada uno)
 	EscuadronMejora3: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL DORADO de las mejoras: +50% de daño cada uno)
 	EscuadronMejora4: ✧ ¡EL ESCUADRÓN SE FORTALECE! ({0} ojos ganan EL SOL AZUL-ESTELAR, el último anillo: +50% de daño cada uno)
+	DagaInvocada1: ✧ ¡LA DAGA DE CRISTAL se une al escuadrón! — ráfagas de tajos rápidos (50% del daño, +20 de perforación)
+	DagaInvocada2: ✧ ¡LA DAGA DE LLAMA se une al escuadrón! — barridos en arco amplio por la zona enemiga
+	DagaInvocada3: ✧ ¡LA DAGA DE ROCA se une al escuadrón! — embestidas con reculo (300% del daño)
+	DagaInvocada4: ✧ ¡LA DAGA DEL VACÍO se une al escuadrón! — se clava en su presa y gotea el vacío
+	DagaInvocada5: ✧ ¡LA DAGA DEL VEREDICTO se une al escuadrón! — marca a su presa y la sentencia (150%)
+	DagasLlenas: ✧ Las cinco dagas del Eterno viven: las invocaciones vuelven a fortalecer a los ojos (+50% de daño por mejora)
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 

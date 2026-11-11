@@ -643,9 +643,15 @@ namespace AethonMod.Content.Players
             // QUITAR EL BUFF, como manda la letra).
             // ============================================================
             {
-                // EL ESCUADRÓN ENTERO (los 6 minions de la casa).
+                // EL ESCUADRÓN ENTERO (los 6 minions de la casa + LAS DAGAS
+                // v6.124 — la promesa cubre también a LAS CINCO DAGAS DEL
+                // ETERNO: mientras viva CUALQUIERA de las suyas, lo vivo es
+                // legal — el libro puede irse AL COFRE que sus dagas siguen
+                // en el aire, como sus ojos).
                 int tipoOjo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                int tipoDaga = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.DagaEternaMinion>();
                 int tipoSupernova = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.Cosmic.FragmentoSupernovaMinion>();
                 int tipoPulsar = ModContent.ProjectileType
@@ -664,7 +670,7 @@ namespace AethonMod.Content.Players
                     if (p == null || !p.active || !p.minion) continue;
                     if (p.owner != Player.whoAmI) continue;
                     slotsEnUso += p.minionSlots;      // lo que vanilla va a contar
-                    if (p.type == tipoOjo || p.type == tipoSupernova || p.type == tipoPulsar ||
+                    if (p.type == tipoOjo || p.type == tipoDaga || p.type == tipoSupernova || p.type == tipoPulsar ||
                         p.type == tipoMedusa || p.type == tipoCometa || p.type == tipoSierpe)
                         hayEscuadron = true;
                 }
@@ -943,25 +949,6 @@ namespace AethonMod.Content.Players
 
                 if (autoridad)
                 {
-                    // ============================================================
-                    //  v6.124 — EL SUSURRO AMBIENTAL DEL MUNDO INTERIOR (la
-                    //  letra: «el grimorio tendra un nuevo set de dialogos
-                    //  solo dentro del mundo interior, esto hara que los
-                    //  dialogos anteriores no se activen y solo se activen
-                    //  los nuevos dialogos exclusivos del mundo interior»):
-                    //  DENTRO, el libro murmura SOLO su set del interior —
-                    //  una línea del repertorio exclusivo cada ~25 s
-                    //  (Eco.Interior1..8, el reparto sin repetición de la
-                    //  casa, en la voz morada del Eterno). FUERA, este
-                    //  reloj no existe.
-                    // ============================================================
-                    if (!Player.dead && nivel > 0 &&
-                        Systems.SubmundoGrimorio.VozInteriorActiva &&
-                        ((Main.GameUpdateCount + (ulong)Player.whoAmI * 97ul) % 1500u) == 0u)
-                    {
-                        Systems.SubmundoGrimorio.HablarInterior(Player);
-                    }
-
                     // v6.50.10 — FIX: UN MUERTO NO ALIMENTA EL LIBRO.
                     // La hambre crecía con el portador caído (5 min de
                     // respawn bastaban para los 10 momentos) y la furia
@@ -993,20 +980,7 @@ namespace AethonMod.Content.Players
                             // "sal del infierno"…): el libro sabe DÓNDE está
                             // hambriento. El resto del escalado sigue siendo el
                             // de la casa (1→4).
-                            // v6.124 — LA VOZ EXCLUSIVA DEL INTERIOR (la
-                            // letra: «el grimorio tendra un nuevo set de
-                            // dialogos solo dentro del mundo interior,
-                            // esto hara que los dialogos anteriores no se
-                            // activen y solo se activen los nuevos
-                            // dialogos exclusivos del mundo interior»):
-                            // DENTRO, el susurro del hambre NO se activa
-                            // — habla SOLO el set exclusivo del interior
-                            // (Eco.Interior1..8). FUERA, todo igual.
-                            if (Systems.SubmundoGrimorio.VozInteriorActiva)
-                            {
-                                Systems.SubmundoGrimorio.HablarInterior(Player);
-                            }
-                            else if (MomentosHambre == 1)
+                            if (MomentosHambre == 1)
                             {
                                 string claveSabor = EcoSistema.ClaveSusurroDelBioma(Player);
                                 if (!string.IsNullOrEmpty(claveSabor))
@@ -1108,13 +1082,6 @@ namespace AethonMod.Content.Players
         /// </summary>
         private void ElLibroCeloso(int nivelLibro)
         {
-            // v6.124 — LOS CELOS NO CRUZAN LA PUERTA (la letra: «esto hara
-            // que los dialogos anteriores no se activen y solo se activen
-            // los nuevos dialogos exclusivos del mundo interior»): DENTRO
-            // del mundo interior el libro NO opina de las armas ajenas —
-            // solo habla su set del interior.
-            if (Systems.SubmundoGrimorio.VozInteriorActiva) return;
-
             if (_ticksCelos > 0) _ticksCelos--;
 
             Item sostenido = Player.HeldItem;
@@ -1455,25 +1422,8 @@ namespace AethonMod.Content.Players
                 // El Tajo de Oscuridad y Las Agujas del Vacío) llegan
                 // DIRECTO en su bolsa — también viven en el Cofre del
                 // Arsenal y tras sus recetas de 5 maderas.
-                // v6.125 — LAS DOS DE LA LETRA (El Juicio reconstruido con
-                // los soles rúnicos + El Tajo del Vacío: Tajo de Oscuridad
-                // y Agujas del Vacío murieron por la letra de la sesión 7).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaSuperforja>());
-                // v6.125 — LA BOLSA DE LAS INVESTIGACIONES (la letra: «copia
-                // el arma Dazzling Stabber Staff de Calamity Mod y crea una
-                // version con su codigo, sprite y textura al 100% como
-                // investigacion, luego daselas al jugador» + «copia el arma
-                // the beginning and the end de CALAMITY ENTROPY y crea una
-                // version... luego daselas al jugador» + «investiga y copia
-                // al 100% todo sobre el arma Arbitrator II»): LAS TRES ARMAS
-                // DE INVESTIGACIÓN (el Dazzling Stabber Staff de Calamity,
-                // el Arbitrador II y El Principio y el Fin de Calamity
-                // Entropy) llegan DIRECTO en su bolsa — también viven en el
-                // Cofre del Arsenal (bolsa 26) y tras sus recetas de 5
-                // maderas.
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Bolsas.BolsaInvestigaciones>());
 
                 if (entregados > 0)
                 {

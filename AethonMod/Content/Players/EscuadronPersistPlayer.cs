@@ -43,6 +43,15 @@ namespace AethonMod.Content.Players
         /// hornea la invocación original — DanoOjosDelEterno).</summary>
         public List<int> Danos = new List<int>();
 
+        /// <summary>v6.124 — EL RETRATO DE LAS DAGAS: el TIPO de cada
+        /// daga viva (0=Cristal · 1=Llama · 2=Roca · 3=Vacío ·
+        /// 4=Veredicto — cada técnica revive con SU daga).</summary>
+        public List<int> DagasTipos = new List<int>();
+
+        /// <summary>v6.124 — EL RETRATO DE LAS DAGAS: el daño de
+        /// nacimiento de cada una.</summary>
+        public List<int> DagasDanos = new List<int>();
+
         /// <summary>v6.88 — ¿ESTE personaje LLEVA su grimorio? (la
         /// letra: «los minions se guardan y aparecen en cualquier
         /// personaje tenga o no tenga el grimorio, los minions solo se
@@ -80,18 +89,37 @@ namespace AethonMod.Content.Players
                 if (!LlevaSuGrimorio())
                 {
                     Niveles.Clear(); MejorasList.Clear(); Danos.Clear();
+                    DagasTipos.Clear(); DagasDanos.Clear();
                     return;
                 }
                 // LA FOTOGRAFÍA del escuadrón VIVO (nada de contadores
                 // paralelos: se mira el mundo de verdad).
+                // v6.124 — LAS DAGAS TAMBIÉN POSAN (el retrato de los ojos,
+                // heredado: dagasTipos + dagasDanos — cada técnica revive
+                // con su daga al recargar el mundo).
                 Niveles.Clear(); MejorasList.Clear(); Danos.Clear();
+                DagasTipos.Clear(); DagasDanos.Clear();
                 int tipo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                int tipoDaga = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.DagaEternaMinion>();
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile p = Main.projectile[i];
-                    if (p == null || !p.active || p.type != tipo) continue;
+                    if (p == null || !p.active) continue;
                     if (p.owner != Player.whoAmI) continue;
+                    if (p.type == tipoDaga)
+                    {
+                        int tipoD = System.Math.Max(0, System.Math.Min(
+                            global::AethonMod.Content.Projectiles.DagaEternaMinion.TiposMax - 1,
+                            (int)p.ai[0]));
+                        int danoD = p.damage;
+                        if (danoD < 1) danoD = 1;
+                        DagasTipos.Add(tipoD);
+                        DagasDanos.Add(danoD);
+                        continue;
+                    }
+                    if (p.type != tipo) continue;
 
                     float a2 = p.ai[2];
                     int nivel = (int)System.MathF.Floor(a2);
@@ -111,6 +139,11 @@ namespace AethonMod.Content.Players
                     tag["ojosMejoras"] = MejorasList;
                     tag["ojosDanos"] = Danos;
                 }
+                if (DagasTipos.Count > 0)
+                {
+                    tag["dagasTipos"] = DagasTipos;
+                    tag["dagasDanos"] = DagasDanos;
+                }
             }
             catch { }
         }
@@ -122,6 +155,17 @@ namespace AethonMod.Content.Players
                 Niveles = new List<int>(tag.GetList<int>("ojosNiveles"));
                 MejorasList = new List<int>(tag.GetList<int>("ojosMejoras"));
                 Danos = new List<int>(tag.GetList<int>("ojosDanos"));
+                // v6.124 — el retrato de las dagas (tipo + daño de nacimiento)
+                DagasTipos = new List<int>(tag.GetList<int>("dagasTipos"));
+                DagasDanos = new List<int>(tag.GetList<int>("dagasDanos"));
+                if (DagasTipos.Count != DagasDanos.Count)
+                { DagasTipos = new List<int>(); DagasDanos = new List<int>(); }
+                int techoDagas = global::AethonMod.Content.Projectiles.DagaEternaMinion.TechoDagas;
+                if (DagasTipos.Count > techoDagas)
+                {
+                    DagasTipos.RemoveRange(techoDagas, DagasTipos.Count - techoDagas);
+                    DagasDanos.RemoveRange(techoDagas, DagasDanos.Count - techoDagas);
+                }
                 // LA HIGIENE DEL RETRATO: las tres listas del mismo largo.
                 int n = Niveles.Count;
                 if (MejorasList.Count != n) MejorasList = new List<int>();
@@ -176,6 +220,39 @@ namespace AethonMod.Content.Players
                 // EL BUFF DEL ESCUADRÓN re-anclado (Sostener lo mantiene).
                 Player.AddBuff(ModContent.BuffType
                     <global::AethonMod.Content.Buffs.OjoEternoBuff>(), 18000);
+
+                // v6.124 — LA RESURRECCIÓN DE LAS DAGAS: la fotografía,
+                // daga por daga (ai[0] = SU tipo — la técnica revive con
+                // ella; ai[2] = el nivel del libro; el daño del retrato).
+                if (DagasTipos.Count > 0)
+                {
+                    int tipoDaga = ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.DagaEternaMinion>();
+                    int yaVivas = 0;
+                    for (int i = 0; i < Main.maxProjectiles; i++)
+                    {
+                        Projectile p = Main.projectile[i];
+                        if (p != null && p.active && p.type == tipoDaga &&
+                            p.owner == Player.whoAmI)
+                            yaVivas++;
+                    }
+                    int nivelLibro = Niveles.Count > 0 ? System.Math.Max(1, Niveles[0]) : 1;
+                    for (int k = 0; k < DagasTipos.Count &&
+                        yaVivas < global::AethonMod.Content.Projectiles.DagaEternaMinion.TechoDagas;
+                        k++, yaVivas++)
+                    {
+                        int tipoD = System.Math.Max(0, System.Math.Min(
+                            global::AethonMod.Content.Projectiles.DagaEternaMinion.TiposMax - 1,
+                            DagasTipos[k]));
+                        int danoD = System.Math.Max(1, DagasDanos[k]);
+                        Projectile.NewProjectile(fuente,
+                            Player.Center - Vector2.UnitY * 30f, Vector2.Zero,
+                            tipoDaga, danoD, 0f, Player.whoAmI,
+                            tipoD, 0f, nivelLibro);
+                    }
+                    Player.AddBuff(ModContent.BuffType
+                        <global::AethonMod.Content.Buffs.DagaEternaBuff>(), 18000);
+                }
             }
             catch { }
         }

@@ -65,14 +65,20 @@ namespace AethonMod.Content.Projectiles.Definitivas
     {
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        // === LOS TIEMPOS DE LA CASA (el festín del portador, ~4 s) ===
+        // === LOS TIEMPOS DE LA CASA (el festín del portador, ~4 s + LA
+        //     MARCHA — v6.124: el grimorio SE VA AL MUNDO INTERIOR tras
+        //     el trago: el iris se abre, el libro ESPIRALA dentro de SÍ
+        //     MISMO y el iris se cierra — la puerta gira detrás del teatro) ===
         private const int TNace = 26;        // el libro despierta y CRECE
         private const int TSello = 30;       // el cerco cierra sobre la presa
         private const int TSombra = 40;      // la sombra de la página brota
         private const int TFestin = 60;      // la boca mastica desde la llegada
         private const int TDesiste = 300;    // la red: sin trago, se disuelve
-        private const int TTrasTragoPuerta = 16;  // tras ENTRAR: la puerta gira
-        private const int TTrasTragoMuerte = 74;   // tras ENTRAR: el poso muere
+        private const int TTrasTragoCierre = 10;   // tras ENTRAR: el libro se cierra
+        private const int TTrasTragoIris = 26;     // el iris se abre (el ojo del libro)
+        private const int TTrasTragoEspiral = 30;  // el libro espirala dentro de sí
+        private const int TTrasTragoPuerta = 74;   // tras TODO el teatro: la puerta gira
+        private const int TTrasTragoMuerte = 86;   // tras ENTRAR: el poso muere
         // v6.124 — LA CACERÍA INVERSA (la letra: «acabo de ver que para que
         // el jugador entre al mundo interior debe tocar el grimorio mientras
         // es deborado, bueno muchas veces el jugador no es atraido
@@ -91,6 +97,26 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// tragada no flota sobre el libro cerrado).
         /// </summary>
         public static bool Tragado;
+
+        /// <summary>v6.124 — ¿SE ESTÁ DEVORANDO al jugador X AHORA MIsMO?
+        /// (la ceremonia ENTERA, del nacimiento a la muerte del festín). Lo
+        /// consultan EL GRIMORIO FLOTANTE y LOS HALOS del portador (la
+        /// letra: «el grimorio debe devorar al jugador en su conjunto…
+        /// debe verse como el jugador CON TODO LO QUE TIENE es devorado» —
+        /// el libro que flota a su espalda se lo come el festín, y las
+        /// alas se pliegan DENTRO del trago junto con el cuerpo).</summary>
+        public static bool Devorando(int whoAmI)
+        {
+            if (whoAmI < 0) return false;
+            int tipo = ModContent.ProjectileType<DevoracionEterna>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.type == tipo && p.owner == whoAmI)
+                    return true;
+            }
+            return false;
+        }
 
         // === LAS TEXTURAS DEL FESTÍN (la familia del ojo — las mismas del
         //     cine de jefes, NADA de libros partidos) ===
@@ -343,10 +369,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // === LA BRUMA INUNDA (solo en la animación — la letra): el
-            //     faro sube CON LA CERCANÍA de la boca y, tras el trago,
-            //     termina de llenarse PARA la puerta (la pantalla de carga
-            //     vive ESCONDIDA detrás — el contrato de PintarFaroDevoracion) ===
+            // === LA MARCHA AL MUNDO INTERIOR (v6.124 — la letra: «con el
+            //     detalle de que el grimorio vuelva siempre se va al mundo
+            //     interior»): tras el trago el grimorio NO se queda
+            //     posando — ABRE SU PROPIO OJO (el iris negro de borde
+            //     dorado — la puerta SOY YO), ESPIRALA dentro de sí mismo
+            //     (el inspiral de la casa) y el iris se CIERRA detrás:
+            //     el libro vuelve a su mundo interior CON el portador
+            //     dentro. La puerta gira detrás del teatro completo ===
             if (_estallo)
             {
                 float f = MathHelper.Clamp((Projectile.ai[0] - _tTrago) / (float)TTrasTragoPuerta, 0f, 1f);
@@ -532,6 +562,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             //  ACTO 2 — EL LIBRO DE VERDAD (el DibujarElLibro del festín):
             //  crece, se inclina hacia su presa, MIRA FIJO con su iris
             //  recortado, mastica — y al trago SE CIERRA DE UN GOLPE
+            //  (y con LA MARCHA v6.124: espirala dentro de SU PROPIO IRIS
+            //  — el libro se va al mundo interior por su propio ojo)
             // ================================================================
             DibujarElLibro(centroPresa, tiempo, t, muerde, inhala, poso, presencia, vivoF);
 
@@ -652,6 +684,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 SombrasLib.Bruma(PosLibro, 110f * (0.6f + 0.4f * fade), 0.6f * fade, tiempo, semilla,
                     new Vector2(MathF.Sin(tiempo * 0.7f) * 22f, -12f));
             }
+
+            // ================================================================
+            //  ACTO 3 — LA MARCHA AL MUNDO INTERIOR (v6.124): el iris se
+            //  ABRE sobre el libro cerrado (el ojo negro de borde dorado —
+            //  LA PUERTA SOY YO), el libro ESPIRALA dentro de sí mismo
+            //  (en DibujarElLibro — el inspiral de la casa) y el iris SE
+            //  CIERRA detrás con su destello. El libro NO posa: vuelve a
+            //  su mundo interior CON el portador dentro (la letra: «el
+            //  grimorio vuelva siempre se va al mundo interior»).
+            // ================================================================
+            DibujarLaMarcha(tiempo, t, presencia);
         }
 
         // ==================================================================
@@ -669,13 +712,19 @@ namespace AethonMod.Content.Projectiles.Definitivas
             esc *= 1f - 0.25f * poso;                         // y exhala al poso
             float alfaLibro = MathHelper.Clamp(t / 14f, 0f, 1f) * presencia;
 
+            // v6.124 — LA MARCHA: tras el trago el libro ESPIRALA dentro
+            // de su propio iris (PosLibro) y su escala muere en cero —
+            // el libro se va al mundo interior POR SU PROPIO OJO.
+            (Vector2 posLibroMar, float escMar, float rotMar) = MarchaDelLibro(t, esc);
+            if (escMar < 0.02f) return;                       // ya se entró: no se dibuja
+
             Rectangle frame = new Rectangle(0, 0, _texLibro.Width, _texLibro.Height);
             Vector2 origen = frame.Size() * 0.5f;
-            Vector2 pos = PosLibro - Main.screenPosition;
-            Color luz = Lighting.GetColor(PosLibro.ToTileCoordinates());
+            Vector2 pos = posLibroMar - Main.screenPosition;
+            Color luz = Lighting.GetColor(posLibroMar.ToTileCoordinates());
             // EL LIBRO SE INCLINA hacia su presa (está ARRIBA y la MIRA):
-            // el vaivén de siempre + el sesgo de la rendición
-            float rot = 0.09f * MathF.Sin(tiempo * 1.25f) - 0.18f * inhala;
+            // el vaivén de siempre + el sesgo de la rendición + LA MARCHA
+            float rot = 0.09f * MathF.Sin(tiempo * 1.25f) - 0.18f * inhala + rotMar;
 
             // EL PÁRPADO: ABIERTO comiendo (Medio) — y al trago SE CIERRA
             // de golpe (Cerrado): el chasquido del festín
@@ -687,13 +736,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 null, Main.GameViewMatrix.TransformationMatrix);
             try
             {
-                Main.spriteBatch.Draw(_texLibro, pos, frame, luz * alfaLibro, rot, origen, esc,
+                Main.spriteBatch.Draw(_texLibro, pos, frame, luz * alfaLibro, rot, origen, escMar,
                     SpriteEffects.None, 0f);
 
                 if (comiendo)
                 {
                     // la boca: el párpado MEDIO — la página abierta hacia su comida
-                    Main.spriteBatch.Draw(_texMedio, pos, frame, luz * alfaLibro, rot, origen, esc,
+                    Main.spriteBatch.Draw(_texMedio, pos, frame, luz * alfaLibro, rot, origen, escMar,
                         SpriteEffects.None, 0f);
 
                     // LA MIRADA: el iris CLAVADO en el portador, con el
@@ -703,7 +752,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     Vector2 mirada = d.LengthSquared() > 4f
                         ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
                         : Vector2.Zero;
-                    Vector2 alOjo = (Weapons.GrimorioHambrientoNervioso.OjoTexel + mirada - origen) * esc;
+                    Vector2 alOjo = (Weapons.GrimorioHambrientoNervioso.OjoTexel + mirada - origen) * escMar;
                     Vector2 posOjo = pos + alOjo.RotatedBy(rot);
 
                     float apertura = 0.45f + 0.50f * muerde;   // 0,45 mordida → 0,95 bocado
@@ -712,13 +761,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     var origenIris = new Vector2(_texIris.Width * 0.5f,
                         _texIris.Height * 0.5f - corte);
                     Main.spriteBatch.Draw(_texIris, posOjo, recorte, luz * alfaLibro, rot,
-                        origenIris, esc * Weapons.GrimorioHambrientoNervioso.IrisEscala,
+                        origenIris, escMar * Weapons.GrimorioHambrientoNervioso.IrisEscala,
                         SpriteEffects.None, 0f);
                 }
                 else if (cerrado)
                 {
                     // CERRADO: el libro sellado con el festín DENTRO
-                    Main.spriteBatch.Draw(_texCerrado, pos, frame, luz * alfaLibro, rot, origen, esc,
+                    Main.spriteBatch.Draw(_texCerrado, pos, frame, luz * alfaLibro, rot, origen, escMar,
                         SpriteEffects.None, 0f);
                 }
                 else
@@ -728,10 +777,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     Vector2 mirada = d.LengthSquared() > 4f
                         ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
                         : Vector2.Zero;
-                    Vector2 alOjo = (Weapons.GrimorioHambrientoNervioso.OjoTexel + mirada - origen) * esc;
+                    Vector2 alOjo = (Weapons.GrimorioHambrientoNervioso.OjoTexel + mirada - origen) * escMar;
                     Vector2 posOjo = pos + alOjo.RotatedBy(rot);
                     Main.spriteBatch.Draw(_texIris, posOjo, null, luz * alfaLibro, rot,
-                        _texIris.Size() * 0.5f, esc * Weapons.GrimorioHambrientoNervioso.IrisEscala,
+                        _texIris.Size() * 0.5f, escMar * Weapons.GrimorioHambrientoNervioso.IrisEscala,
                         SpriteEffects.None, 0f);
                 }
             }
@@ -744,8 +793,8 @@ namespace AethonMod.Content.Projectiles.Definitivas
             try
             {
                 float pulso = 0.14f + 0.06f * MathF.Sin(tiempo * 2.6f) + 0.22f * ciñeLibro(t) + 0.30f * inhala;
-                VFXCore.Quad(PosLibro, SombrasLib.Alfa(SombrasLib.Violeta, pulso * presencia),
-                    new Vector2(150f * esc, 150f * esc));
+                VFXCore.Quad(posLibroMar, SombrasLib.Alfa(SombrasLib.Violeta, pulso * presencia * (escMar / Math.Max(esc, 0.01f))),
+                    new Vector2(150f * escMar, 150f * escMar));
 
                 // LA HERIDA: la boca abierta brilla ROJA mientras come
                 if (comiendo)
@@ -774,6 +823,108 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private static float ciñeLibro(float t)
         {
             return MathHelper.Clamp((t - TSello) / 22f, 0f, 1f);
+        }
+
+        // ==================================================================
+        //  v6.124 — LA MARCHA AL MUNDO INTERIOR: EL IRIS Y LA ESPIRAL.
+        //
+        //  Tras el trago (la letra: «aunque ahora con el detalle de que el
+        //  grimorio vuelva siempre se va al mundo interior») el libro
+        //  cerrado NO se queda posando: ABRE SU PROPIO OJO — un iris
+        //  NEGRO de borde DORADO ardiendo que crece sobre él (LA PUERTA
+        //  SOY YO: el libro vuelve a su interior POR SU PROPIO OJO) — y
+        //  el libro cerrado ESPIRALA dentro de sí mismo (el inspiral de
+        //  la casa: la órbita se aprieta y ACELERA) dejando una lluvia de
+        //  páginas doradas. El iris SE CIERRA detrás con su destello y
+        //  su onda: el mundo interior se lo tragó CON el portador dentro.
+        // ==================================================================
+        private void DibujarLaMarcha(float tiempo, float t, float presencia)
+        {
+            if (!_estallo) return;
+            float dt = t - _tTrago;
+
+            // EL CALENDARIO DE LA MARCHA
+            float abre = MathHelper.Clamp((dt - TTrasTragoCierre) / (float)TTrasTragoIris, 0f, 1f);
+            float espiral = MathHelper.Clamp((dt - TTrasTragoCierre - TTrasTragoIris) / (float)TTrasTragoEspiral, 0f, 1f);
+            float cierra = MathHelper.Clamp((dt - TTrasTragoCierre - TTrasTragoIris - TTrasTragoEspiral) / 12f, 0f, 1f);
+            if (abre <= 0f) return;
+
+            Vector2 pos = PosLibro - Main.screenPosition;
+            float radioIris = MathHelper.Lerp(6f, 58f, SombrasLib.DeGolpe(abre)) * (1f - 0.92f * SombrasLib.DeGolpe(cierra));
+
+            // === EL IRIS: el ojo negro de borde dorado (LA PUERTA) — el
+            //     disco NEGRO vive en el pase alfa, el borde ARDE en el
+            //     aditivo (la ley de la casa para todo lo negro) ===
+            if (radioIris > 1.5f)
+            {
+                VFXCore.AbrirAlpha();
+                try
+                {
+                    if (VFXCore.SoftGlow != null)
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
+                            new Color(6, 3, 12, 255), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                            radioIris * 2f / VFXCore.SoftGlow.Width, SpriteEffects.None, 0f);
+                }
+                finally { OrbitaLib.CerrarBatch(); }
+            }
+
+            OrbitaLib.AbrirAdditive();
+            try
+            {
+                // EL BORDE ARDIENDO (el aro dorado que hace existir la puerta)
+                float arde = 0.55f + 0.25f * MathF.Sin(tiempo * 6f) + 0.2f * espiral;
+                OrbitaLib.AnilloFino(pos, radioIris, tiempo * 0.6f,
+                    OrbitaLib.Tint(new Color(255, 214, 130), 0.85f * arde * presencia));
+                OrbitaLib.AnilloFino(pos, radioIris * 1.35f, -tiempo * 0.4f,
+                    OrbitaLib.Tint(new Color(150, 84, 235), 0.40f * arde * presencia));
+                // EL VÓRTICE de la puerta (las motas cayendo al iris)
+                for (int k = 0; k < 7; k++)
+                {
+                    float prog = SombrasLib.Frac(tiempo * 0.5f + k * 0.143f);
+                    float ang = (k * 2.399f + tiempo * 1.5f + prog * 5.2f);
+                    float rr = radioIris * (1.9f - 1.2f * prog);
+                    Vector2 mota = pos + ang.ToRotationVector2() * rr;
+                    if (VFXCore.SoftGlow != null)
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, mota, null,
+                            new Color(220, 190, 255) * (0.30f * prog * (1f - cierra) * presencia),
+                            0f, VFXCore.SoftGlow.Size() * 0.5f, 0.10f + 0.06f * prog,
+                            SpriteEffects.None, 0f);
+                }
+                // EL CIERRE detrás del libro (el destello de la puerta)
+                if (cierra > 0f && cierra < 1f)
+                {
+                    float snap = 1f - cierra;
+                    if (VFXCore.SoftGlow != null)
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, pos, null,
+                            new Color(255, 240, 200) * (0.7f * snap * presencia), 0f,
+                            VFXCore.SoftGlow.Size() * 0.5f,
+                            (radioIris * 2.4f / VFXCore.SoftGlow.Width) * (1f + 0.6f * cierra),
+                            SpriteEffects.None, 0f);
+                    OrbitaLib.AnilloFino(pos, radioIris + 90f * cierra, 0f,
+                        OrbitaLib.Tint(new Color(255, 232, 170), 0.55f * snap * presencia));
+                }
+            }
+            finally { OrbitaLib.CerrarBatch(); }
+        }
+
+        /// <summary>v6.124 — LA POSICIÓN DEL LIBRO EN LA MARCHA: tras el
+        /// trago el libro cerrado ESPIRALA hacia el centro de SU PROPIO
+        /// iris (PosLibro) — la órbita se aprieta y ACELERA (el inspiral
+        /// de la casa, el mismo lenguaje de la danza de los Dos Soles) y
+        /// la escala MUERE en cero: el libro se entra por su ojo.</summary>
+        private (Vector2 pos, float esc, float rot) MarchaDelLibro(float t, float escBase)
+        {
+            float dt = t - _tTrago;
+            float espiral = MathHelper.Clamp((dt - TTrasTragoCierre - TTrasTragoIris) / (float)TTrasTragoEspiral, 0f, 1f);
+            if (espiral <= 0f) return (PosLibro, escBase, 0f);
+            float e = espiral * espiral * (3f - 2f * espiral);
+            // LA ÓRBITA QUE SE APRIETA: 40 px → 0, y la vuelta ACELERA
+            float radio = 40f * (1f - e);
+            float ang = (dt - TTrasTragoCierre - TTrasTragoIris) * (0.22f + 0.30f * e);
+            Vector2 pos = PosLibro + ang.ToRotationVector2() * radio;
+            // LA ESCALA MUERE (el libro se entra por su ojo)
+            float esc = escBase * (1f - 0.97f * e);
+            return (pos, esc, 0.9f * e + ang);
         }
 
         /// <summary>El masticar del festín: abre… ¡CIERRA de golpe! …mastica… abre.</summary>
