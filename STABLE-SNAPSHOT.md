@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.126 — LA RECONCILIACIÓN + LAS CINCO DAGAS DEL ETERNO EN SU SITIO
 
-> ⏳ **PENDIENTE DE PUBLICAR** — esta cabecera se rellena con el release ID real al publicar
+> **PUBLICADA — release 442155777 + CDN verificado byte a byte (md5 c7731425f4a6cca10cf9422191c3b36e)**
 
 ## LA LETRA (el usuario — la sesión 6, retomada; el usuario JUGÓ la v6.123)
 
