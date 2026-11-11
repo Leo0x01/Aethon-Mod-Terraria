@@ -96,7 +96,7 @@ if [ -n "$ASSET_URL" ]; then
     curl -s -X DELETE "$ASSET_URL" "${AUTH[@]}" >/dev/null
     echo "      el asset viejo murió"
 fi
-UP=$(curl -s -X POST "$API/repos/$REPO/releases/$RELEASE_ID/assets?name=AethonMod.tmod" \
+UP=$(curl -s -X POST "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=AethonMod.tmod" \
     "${AUTH[@]}" -H "Content-Type: application/octet-stream" \
     --data-binary "@$MOD_TMOD")
 ASSET_DL=$(echo "$UP" | python3 -c "import json,sys; print(json.load(sys.stdin).get('browser_download_url',''))")
