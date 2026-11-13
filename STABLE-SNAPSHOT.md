@@ -1,3 +1,33 @@
+# SNAPSHOT ESTABLE — v6.128 — LAS DAGAS NACIDAS EN LA SFORJA (la receta `daga`)
+
+> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+
+## LA LETRA (el usuario — la sesión 9)
+
+«Usa la SForja para crear el diseño de las dagas» — la ley de la casa v6.124 lo exigía desde el nacimiento de la SForja: «todo proyectil debe ser creado con la superforja, en este caso con la nueva que sera creada SForja»… y las cinco dagas del Eterno habían nacido de un script aparte (`scripts/dagas_v6124.py`). La deuda queda saldada: EL DISEÑO DE LAS DAGAS VIVE AHORA EN LA SFORJA.
+
+## LA RECETA `daga` (la forja de las cinco — `tools/sforja.py`)
+
+El comando `proyectil` estrena su cuarta receta: **`--receta daga`** (`tajo·aguja·sol·daga`), con `--tipo` (el alma suelta de cada una) y **`--tira`** (EL SPRITESHEET 34×170: las cinco apiladas en el ORDEN EXACTO de ai[0] — cristal·llama·roca·vacío·veredicto — el recorte que el DagaEternaMinion hace en PreDraw con `Rectangle(0, tipo·34, 34, 34)`). EL MANIFIESTO canta el mapa de marcos, la almendra en (17,15), la dirección (ARRIBA en rotación 0, lo que el .cs espera con `dir.ToRotation() + π/2`) y la hitbox (20×20, la del minion) — y `--qa` monta el escenario (los cinco marcos ×5 + la tira) y llama a EL OJO DE LAS DAGAS (el QA VLM específico de la receta).
+
+## LA ANATOMÍA DE CADA DAGA (la receta, píxel a píxel)
+
+Cada marco de 34×34 nace NATIVO y determinista: **LA PUNTA** (el perfil pow: aguja fundida en cuerpo pleno) · **LA HOJA** (la rampa vertical de SU alma + el shading de la casa: flanco izquierdo que lee ×1,14, derecho que descansa ×0,84, el nervio central ×0,55 y EL FILO que arde al borde) · **EL OJO-ALMENDRA EN (17,15)** (la cuenca (10,6,18) + el ANILLO del párpado por daga — el contraste manda: oscuro en la hoja pálida del cristal, claro en la hoja ardiendo de la llama, ORO en la del vacío — donde el IRIS VIVO del runtime aterriza y MIRA a la presa) · **LA GUARDA** (la barra con su luz + las puntas de rombo de los gavilanes) · **LA EMPUÑADURA VENDADA** (vueltas alternas con su brillo) · **EL POMO JOYA** · y el bautizo de siempre: EL CONTORNO TERRARIA de la casa (1 px (8,6,20)) + EL GLOW que irradia suave. LAS FIRMAS POR DAGA: **CRISTAL** (lila pálido con FACETAS brillo/sombra en diagonal, la «Dazzling» estilete) · **LLAMA** (hoja negra con EL EJE SERPENTEANTE de verdad — la punta a un lado, el vientre al otro — y el FILO QUE ARDE: blanco-cálido en las crestas de la onda, violeta caliente en los valles; la lección v6.101 del sol negro: el negro solo existe si arde) · **ROCA** (obsidiana MACIZA —la más ancha— con VENAS DE ORO que bajan serpenteando DENTRO del perfil) · **VACÍO** (hoja negra de borde violeta con la GUARDA DORADA grande — la firma del oro — y el iris ORO de la mirada) · **VEREDICTO** (el oro del veredicto, filo blanco-cálido, la GEMA violeta en la guarda y la punta de hoja ancha).
+
+## LA LECCIÓN DE LA AUTOPSIA (el Lanczos es el traje de los VFX, no de los minions)
+
+La primera hornada nació con el supersampling ×8 + Lanczos de la SForja (el camino HD de soles, tajos y agujas) — y EL OJO la cazó: «hojas huecas, dagas 2 y 4 como marcos vacíos». LA AUTOPSIA DE PÍXELES encontró la causa raíz: **el Lanczos DESDIBUJA los detalles de 1 px** — el filo de la llama quedaba lavado en 1 px suavizado (el cuerpo oscuro se reducía a 2 px: «lila sólida»), las vetas de oro se MEZCLABAN con la obsidiana ((210,185,133) = oro barro del promedio del kernel) y la «onda» solo respiraba el ANCHO (ambos bordes juntos) sin serpentear. LA LEY NUEVA DE LA CASA: **la daga es PIXEL ART** — se dibuja NATIVA 34×34, píxel DURO (como todas las armas de la casa); el Lanczos queda para los VFX lisos. Con la receta nativa: el filo es un borde DURO, las venas son ORO PURO y el serpenteo se MIDE (±2,6 px: la punta a un lado, el vientre al otro).
+
+## EL CICLO DE LA REFINA (pintar → mirar → refinar → re-forjar — 8 rondas)
+
+5/10 (hojas huecas) → 7/10 (paletas bien, filo lavado) → 6/10 (autopsia del Lanczos) → **la reescritura nativa** → 7,5/10 (ondulación invisible: el serpenteo medido ±0,75 px → amplificado) → 7/10 (las venas se salían de la hoja: el bug del zigzag) → 7/10 (llama y vacío gemelas: el fuego fino y el ORO grande las separan) → **SHIP 8/10** → pulido final (la gema medio tapada por la venda: acortada a la guarda) → 8/10 «las cinco dagas y la tira se ven completas, legibles y claramente distintas… paletas correctas… contorno Terraria con buen contraste». EL OJO está en su suelo de ruido (SHIP/FIX-menor alternando a 8/10): SHIP.
+
+## VERIFICACIÓN (la casa, completa — el entorno re-puesto tras el reciclaje)
+
+entorno re-descargado (tModLoader.zip v2026.09.3.1 + dotnet-sdk 8.0.404, el oráculo regenerado con 79 referencias — la lección v6.118 del sandbox reciclado) · oráculo 0/0 (465 .cs contra el tML 2026.09.3.1 real) · -build REAL 0/0 (524 entradas, 19.359.979 B, md5 c6e2aab56167487a14c16374a9ea7a7d) · AUDIT v6.128 TODO VERIFICADO ✔ (EOF exacto · 524/524 blobs · hjson ×3 empaquetado==fuente · la TIRA dentro del .tmod 34×170 PÍXEL A PÍXEL == la forjada · las cinco dagas distintas por firma alfa · la CUENCA del ojo en (17,0,15,0) en las cinco — el trono del iris vivo · el cetro 40×46 y el icono del buff 32×32 intactos) · headless: Sandboxing v6.128 → Adding Recipes → Choose World SIN UNA EXCEPCIÓN · **el .cs NO se toca** (la tira respeta el formato al byte: Main.projFrames=5, frameH=34, ai[0] elige el marco, la almendra donde el iris aterriza).
+
+---
+
 # SNAPSHOT ESTABLE — v6.127 — LA CAUSA RAÍZ DE LA SIERRA + EL CETRO DE LAS DAGAS + LA LEY DE LOS ANILLOS + LOS COSMÉTICOS PEGADOS + LOS DIÁLOGOS EN SU SITIO
 
 > **PUBLICADA — release 443941877 + CDN verificado byte a byte (md5 9da1d7ad0f3d37bd5fe4dcb21a6920c7)**

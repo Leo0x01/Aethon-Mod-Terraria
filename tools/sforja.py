@@ -54,6 +54,9 @@ USO:
   python3 tools/sforja.py sol --nombre fusion --paleta fusion
   python3 tools/sforja.py fondo --nombre cielo_vacio --ancho 256 --alto 128
   python3 tools/sforja.py alma --nombre x --efecto vortice --tira
+  python3 tools/sforja.py proyectil --nombre dagas_eter --receta daga --tipo vacio
+  python3 tools/sforja.py proyectil --nombre dagas_eter --receta daga --tira --qa \
+      --destino_tml AethonMod/Content/Projectiles/DagaEterna_Hoja.png
   (y TODO el repertorio de superforja: pluma·molde·espejo·corta·cadena…)
 """
 import os
@@ -315,6 +318,271 @@ def el_aguja(w=44, h=12, ss=SS_HD):
 
 
 # ====================================================================
+#  LAS DAGAS DEL ETERNO — LA RECETA DE LAS CINCO (la letra: «vienen
+#  las 5 dagas que también tendrán un ojo en el centro»): CRISTAL ·
+#  LLAMA · ROCA · VACÍO · VEREDICTO, cada una con SU alma (la rampa),
+#  SU filo (el borde que arde) y SU guarda — y TODAS con EL OJO EN EL
+#  CENTRO: la ALMENDRA en (17,15) del marco de 34×34, exactamente
+#  donde el IRIS VIVO del DagaEternaMinion aterriza en runtime (el
+#  iris que MIRA a la presa, dibujado aparte). La hoja APUNTA ARRIBA
+#  en rotación 0 (lo que el minion espera: dir.ToRotation() + π/2) y
+#  LA TIRA apila las cinco en el ORDEN EXACTO de ai[0] (el PreDraw
+#  recorta Rectangle(0, tipo·34, 34, 34) del spritesheet 34×170).
+#  La paleta de cada daga ES la de su alma en el .cs (LuzDe/IrisDe):
+#  el iris del párpado y la luz de la estela nacen del mismo color.
+# ====================================================================
+ORDEN_DAGAS = ['cristal', 'llama', 'roca', 'vacio', 'veredicto']   # ai[0] 0..4
+
+DAGAS = {
+    # 0 · LA DAGA DE CRISTAL — lila pálido facetado (la «Dazzling»
+    #     del stabber: la ráfaga de tajos que abre la escalera)
+    'cristal': dict(
+        punta=1.0, cuerpo=3.7, onda=0.0, semilla=0.0, gx=5,
+        rampa=[((198, 162, 250), 0.0), ((170, 132, 232), 0.55), ((112, 76, 180), 1.0)],
+        filo=(242, 232, 255), guarda=(172, 142, 222), guarda_hi=(228, 206, 255),
+        iris=(224, 200, 255), anillo=(96, 62, 158), pomo=(188, 152, 242),
+        facetas=True,
+    ),
+    # 1 · LA DAGA DE LLAMA — hoja negra ONDULADA con el filo ardiendo
+    #     violeta (el barrido en arco amplio). LA LECCIÓN v6.101 DEL SOL
+    #     NEGRO: «el negro solo existe si arde» — el cuerpo sube de
+    #     tono y el filo ARDE GRUESO respirando hacia adentro.
+    'llama': dict(
+        punta=1.4, cuerpo=4.8, onda=1.55, semilla=-1.0, gx=5, fw=2.0,
+        rampa=[((18, 10, 32), 0.0), ((40, 22, 64), 1.0)],
+        filo=(228, 140, 255), guarda=(86, 52, 128), guarda_hi=(140, 84, 200),
+        iris=(178, 120, 255), anillo=(216, 170, 255), pomo=(178, 120, 255),
+        respira=0.55, respiw=0.7,
+    ),
+    # 2 · LA DAGA DE ROCA — obsidiana MACIZA (ancha) con vetas de oro
+    #     (la embestida con reculo, 300 %)
+    'roca': dict(
+        punta=2.6, cuerpo=6.6, onda=0.0, semilla=0.0, gx=7, ojox=5,
+        rampa=[((58, 34, 90), 0.0), ((30, 17, 50), 1.0)],
+        filo=(120, 76, 168), guarda=(64, 38, 96), guarda_hi=(120, 76, 168),
+        iris=(150, 84, 235), pomo=(255, 214, 130), vetas=True,
+    ),
+    # 3 · LA DAGA DEL VACÍO — hoja negra de borde violeta con la
+    #     guarda DORADA (se clava y gotea; el iris ORO de la mirada).
+    #     La lección del sol negro también: el borde arde HACIA
+    #     adentro o la hoja negra no existe contra lo oscuro.
+    'vacio': dict(
+        punta=1.5, cuerpo=4.5, onda=0.0, semilla=0.0, gx=7, gyh=3, fw=1.4,
+        rampa=[((22, 12, 38), 0.0), ((48, 26, 80), 1.0)],
+        filo=(140, 92, 215), guarda=(255, 214, 130), guarda_hi=(255, 244, 214),
+        iris=(255, 214, 130), pomo=(255, 214, 130), respira=0.55,
+    ),
+    # 4 · LA DAGA DEL VEREDICTO — el ORO del veredicto con el filo
+    #     blanco-cálido y la GEMA violeta (marca y sentencia, 150 %)
+    'veredicto': dict(
+        punta=2.0, cuerpo=4.6, onda=0.0, semilla=0.0, gx=6,
+        rampa=[((255, 214, 130), 0.0), ((226, 172, 90), 0.6), ((158, 108, 50), 1.0)],
+        filo=(255, 244, 214), guarda=(212, 168, 84), guarda_hi=(255, 214, 130),
+        iris=(255, 244, 214), pomo=(255, 244, 214), gema=(150, 84, 235),
+    ),
+}
+
+# el puño por daga (la venda de la empuñadura)
+_WRAP_DAGA = {'cristal': (150, 110, 210), 'llama': (96, 58, 148),
+              'roca': (74, 44, 116), 'vacio': (122, 78, 188),
+              'veredicto': (140, 96, 46)}
+
+
+def _mult(c, k):
+    """El color multiplicado (el shading de la casa, con tope 255)."""
+    return tuple(min(255, int(c[j] * k)) for j in range(3))
+
+
+def la_daga(tipo='vacio', tam=34):
+    """LA DAGA DEL ETERNO — UN marco de 34×34 nacido en la forja: la
+    punta de aguja, la hoja escaneada PÍXEL A PÍXEL (la rampa vertical
+    + el shading de la casa: flanco izquierdo que lee, flanco derecho
+    que descansa, el nervio central y el filo que ARDE en el color del
+    alma), EL OJO-ALMENDRA en (17,15), la guarda con sus puntas de
+    rombo, la empuñadura vendada y el pomo joya.
+
+    LA DAGA ES PIXEL ART (la lección v6.128 de la autopsia): el Lanczos
+    de hdcuadrado es el traje de los VFX LISOS (soles, tajos, agujas)
+    pero DESDIBUJA los detalles de 1 px del minion (el filo de la llama
+    quedaba lavado, las vetas de oro se mezclaban con la obsidiana, la
+    «onda» respiraba el ancho sin serpentear) — la daga se dibuja
+    NATIVA 34×34, píxel DURO (la ley de las armas de la casa), con el
+    EJE SERPENTEANTE de la llama y el contorno Terraria de la casa."""
+    cfg = DAGAS[tipo]
+    rampa = cfg['rampa']
+
+    def color_en(t):
+        for i in range(len(rampa) - 1):
+            (c0, t0), (c1, t1) = rampa[i], rampa[i + 1]
+            if t <= t1 or i == len(rampa) - 2:
+                k = 0.0 if t1 == t0 else min(1.0, max(0.0, (t - t0) / (t1 - t0)))
+                return tuple(int(c0[j] + (c1[j] - c0[j]) * k) for j in range(3))
+        return rampa[-1][0]
+
+    im = Image.new('RGBA', (tam, tam), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    cx = tam // 2                 # 17 para 34 (la columna del alma)
+    tip_y, guard_y = 2, 22        # la anatomía del marco
+
+    def semi(t):
+        """EL PERFIL: el semiancho de la hoja (punta de aguja fundida
+        en el cuerpo pleno; la llama además RESPIRA el ancho)."""
+        b = cfg['punta'] + (cfg['cuerpo'] - cfg['punta']) * min(1.0, t * 2.1) ** 0.85
+        if cfg['onda']:
+            b += cfg['onda'] * 0.30 * math.sin(t * 4.6 + cfg['semilla'])
+        return b
+
+    def serpent(t):
+        """LA ONDA DE LA LLAMA (la lección de la autopsia): el EJE
+        serpentea — la hoja que ondula DE VERDAD mueve su centro (±2,6
+        px medidos: el serpenteo de ±0,75 px era INVISIBLE; el S
+        completo se lee: la punta a un lado, el vientre al otro)."""
+        if not cfg['onda']:
+            return 0.0
+        A = cfg['onda'] * 1.7
+        return A * math.sin(t * 6.0 + cfg['semilla']) * (1.0 - t * 0.45)
+
+    def dentro(x, y):
+        """¿El píxel vive dentro de la hoja? (el eje serpenteante manda)"""
+        if y < tip_y or y >= guard_y or x < 0 or x >= tam:
+            return False
+        t = (y - tip_y) / float(guard_y - tip_y)
+        return abs(x + 0.5 - (cx + serpent(t))) <= semi(t)
+
+    # ---- LA HOJA (píxel a píxel: rampa vertical + shading horizontal)
+    fw = cfg.get('fw', 0.85)                     # el ancho del filo que arde
+    rw = fw + cfg.get('respiw', 1.5)             # la respiración hacia adentro
+    brasa = _mult(cfg['filo'], cfg['respira']) if cfg.get('respira') else None
+    for y in range(tip_y, guard_y):
+        t = (y - tip_y) / float(guard_y - tip_y)
+        sm = semi(t)
+        if sm < 0.3:
+            continue
+        cxe = cx + serpent(t)                    # el eje de ESTA fila
+        base = color_en(t)
+        izq = _mult(base, 1.14)                  # el flanco izquierdo LEE (la casa)
+        der = _mult(base, 0.84)                  # el derecho descansa
+        nervio = _mult(base, 0.55)               # el pliegue central
+        if cfg['onda']:
+            # EL FILO QUE ARDE DE VERDAD (la llama): el borde arde MÁS
+            # donde la onda CRESTA — blanco-cálido PLENO en los pliegues,
+            # violeta caliente en los valles (el fuego lame las curvas)
+            calor = abs(math.sin(t * 6.0 + cfg['semilla']))
+            filo_f = tuple(int(cfg['filo'][j] + (252 - cfg['filo'][j]) * calor)
+                           for j in range(3))
+        else:
+            filo_f = cfg['filo']
+        for x in range(tam):
+            dx = x + 0.5 - cxe
+            adx = abs(dx)
+            if adx > sm:
+                continue
+            if adx > sm - fw:                    # EL FILO (lo que MÁS arde)
+                c = filo_f
+            elif brasa is not None and adx > sm - rw:
+                c = brasa                        # la brasa respira hacia adentro
+            elif sm > 1.7 and adx <= 0.75:       # el nervio central
+                c = nervio
+            else:
+                c = izq if dx < 0 else der
+            d.point((x, y), fill=c + (255,))
+
+    # ---- LOS FACETOS DEL CRISTAL (las cuñas que refractan — pares
+    #      BRILLO/SOMBRA en diagonal: la faceta lee por el contraste)
+    if cfg.get('facetas'):
+        for t0 in (0.16, 0.42, 0.68, 0.86):
+            y0 = int(tip_y + (guard_y - tip_y) * t0)
+            x0 = int(round(cx + serpent(t0) - semi(t0) * 0.55))
+            for k in range(5):
+                x, y = x0 + k, y0 - k
+                if dentro(x, y):
+                    d.point((x, y), fill=(248, 242, 255, 255))   # la faceta brillante
+                x2, y2 = x0 + k + 1, y0 - k + 1
+                if dentro(x2, y2) and (k % 2 == 0):
+                    d.point((x2, y2), fill=(88, 58, 142, 255))    # su sombra gemela
+
+    # ---- LAS VETAS DE ORO DE LA ROCA (VENAS que bajan serpenteando
+    #      DENTRO de la hoja — la v6.128-d: el zigzag viejo se SALÍA de
+    #      la hoja y quedaban puntos sueltos; la vena SIGUE el perfil)
+    if cfg.get('vetas'):
+        for (t0, fase) in ((0.10, 0.0), (0.50, math.pi)):
+            y = int(round(tip_y + (guard_y - tip_y) * t0))
+            for k in range(8):                       # la vena: 8 px bajando
+                if y >= guard_y:
+                    break
+                tt = (y - tip_y) / float(guard_y - tip_y)
+                amp = min(semi(tt) - 2.0, 2.8)
+                vx = int(round(cx + serpent(tt) + math.sin(k * 0.95 + fase) * amp))
+                for px in (vx, vx + 1):              # la vena de 2 px de oro
+                    if dentro(px, y):
+                        d.point((px, y), fill=(255, 214, 130, 255))
+                if dentro(vx, y) and k % 3 == 0:     # el destello de la vena
+                    d.point((vx, y), fill=(255, 244, 214, 255))
+                y += 1
+
+    # ---- EL OJO EN EL CENTRO (la letra): la ALMENDRA en (17,15) —
+    #      la cuenca oscura que recibe al iris vivo del runtime. El
+    #      ANILLO del párpado por daga (el contraste manda: oscuro en
+    #      la hoja pálida, claro en la hoja ardiendo, ancho en la roca)
+    ox, oy = cx, 15
+    oxr = cfg.get('ojox', 4)
+    d.ellipse([ox - oxr, oy - 2, ox + oxr, oy + 2],
+              outline=cfg.get('anillo', cfg['iris']) + (255,))
+    d.ellipse([ox - oxr + 1, oy - 1, ox + oxr - 1, oy + 1], fill=(10, 6, 18, 255))
+    d.point((ox - 2, oy), fill=(16, 10, 28, 255))   # los párpados caen a los lados
+    d.point((ox + 2, oy), fill=(16, 10, 28, 255))
+
+    # ---- LA GUARDA (el gavilán: la barra + las puntas de rombo)
+    gy, gx = 22, cfg['gx']
+    gyh = cfg.get('gyh', 2)                          # el alto de la barra
+    d.rectangle([cx - gx, gy, cx + gx, gy + gyh - 1], fill=cfg['guarda'] + (255,))
+    d.rectangle([cx - gx, gy, cx + gx, gy], fill=cfg['guarda_hi'] + (255,))
+    for lado in (-1, 1):                             # las puntas de rombo
+        px0 = cx + lado * gx
+        d.polygon([(px0 + lado * 2, gy + gyh - 1), (px0, gy - 1),
+                   (px0 - lado, gy + gyh - 1), (px0, gy + gyh)],
+                  fill=cfg['guarda'] + (255,))
+        d.point((px0 + lado, gy), fill=cfg['guarda_hi'] + (255,))
+    if cfg.get('gema'):                              # la gema del veredicto
+        d.polygon([(cx, gy - 2), (cx + 3, gy), (cx, gy + 2), (cx - 3, gy)],
+                  fill=cfg['gema'] + (255,))
+        d.polygon([(cx, gy - 1), (cx + 1, gy), (cx, gy + 1), (cx - 1, gy)],
+                  fill=_mult(cfg['gema'], 1.5) + (255,))
+        d.point((cx, gy - 1), fill=(255, 244, 214, 255))
+    if cfg.get('vetas'):                             # las pepitas de la roca
+        for vx in (-4, -1, 3):
+            d.point((cx + vx, gy + 1), fill=(255, 214, 130, 255))
+
+    # ---- LA EMPUÑADURA (la venda: vueltas alternas con su brillo)
+    wrap = _WRAP_DAGA[tipo]
+    for y in range(gy + gyh, gy + gyh + 6):
+        c = wrap if y % 2 == 0 else _mult(wrap, 0.66)
+        d.rectangle([cx - 1, y, cx + 1, y], fill=c + (255,))
+        d.point((cx - 1, y), fill=_mult(wrap, 1.45) + (255,))
+
+    # ---- EL POMO (la joya que cierra el puño — montada sobre el
+    #      final de la venda, SIEMPRE dentro del marco de 34)
+    d.ellipse([cx - 2, gy + gyh + 4, cx + 2, gy + gyh + 7], fill=cfg['pomo'] + (255,))
+    d.point((cx - 1, gy + gyh + 5), fill=_mult(cfg['pomo'], 1.5) + (255,))
+
+    # EL CONTORNO TERRARIA de la casa (el hilo negro que lee el ojo)
+    img = SF.contorno(im)
+    # EL GLOW — la luz irradia suave alrededor del filo (el bautizo)
+    return _glow(img, 0.05, 90)
+
+
+def la_tira_dagas(tam=34):
+    """LA TIRA DE LAS CINCO — el spritesheet del mod (34×170): un
+    marco de 34×34 por daga, apiladas en el ORDEN EXACTO de ai[0]
+    (cristal·llama·roca·vacío·veredicto) — el recorte que el
+    DagaEternaMinion hace en PreDraw con Rectangle(0, tipo·34, 34, 34)."""
+    tira = Image.new('RGBA', (tam, tam * len(ORDEN_DAGAS)), (0, 0, 0, 0))
+    for k, tp in enumerate(ORDEN_DAGAS):
+        tira.paste(la_daga(tp, tam), (0, k * tam))
+    return tira
+
+
+# ====================================================================
 #  EL REGISTRO DE EFECTOS AMPLIADO — diez efectos nuevos de las
 #  familias de pixelfx (hacia el 100 % de su arquitectura de 244),
 #  con el MISMO doble búfer aditivo (dc = color · dl = luz).
@@ -496,6 +764,70 @@ def cmd_sol(args):
     return ruta
 
 
+def el_montaje_dagas(carpeta, tira, tam=34, x=5):
+    """EL MONTAJE DE LAS CINCO — los cinco marcos ×5 + la tira ×3
+    sobre el fondo oscuro de la casa (el escenario del QA VLM, el
+    mismo look del montaje de siempre)."""
+    piezas = []
+    for k, tp in enumerate(ORDEN_DAGAS):
+        marco = tira.crop((0, k * tam, tam, (k + 1) * tam))
+        piezas.append(marco.resize((tam * x, tam * x), Image.NEAREST))
+    piezas.append(tira.resize((tam * x, tam * x * len(ORDEN_DAGAS)), Image.NEAREST))
+    alto = max(p.height for p in piezas) + 30
+    ancho = sum(p.width for p in piezas) + 20 * (len(piezas) + 1)
+    lienzo = Image.new('RGBA', (ancho, alto), (64, 64, 74, 255))   # el gris medio (el QA lo pidió)
+    dx = 20
+    for p in piezas:
+        lienzo.paste(p, (dx, 22), p)
+        dx += p.width + 20
+    destino = os.path.join(carpeta, 'montaje_daga.png')
+    lienzo.save(destino)
+    print(f'  EL MONTAJE: {destino}')
+    return destino
+
+
+def el_ojo_daga(montaje, destino_txt):
+    """EL OJO DE LAS DAGAS — el QA VLM específico de la receta (las
+    cinco almas, el ojo-almendra en el centro, el contorno Terraria):
+    la nota y los defectos concretos, listos para la refina."""
+    import subprocess
+    prompt = (
+        "QA de sprites de dagas para un mod de Terraria (fondo gris oscuro). "
+        "De izquierda a derecha: (1) DAGA DE CRISTAL: hoja lila pálido facetada; "
+        "(2) DAGA DE LLAMA: hoja negra ONDULADA con el filo ardiendo violeta; "
+        "(3) DAGA DE ROCA: hoja ANCHA de obsidiana con vetas de oro; "
+        "(4) DAGA DEL VACÍO: hoja negra de borde violeta con guarda DORADA; "
+        "(5) DAGA DEL VEREDICTO: hoja dorada con filo blanco-cálido y gema "
+        "violeta en la guarda; y a la derecha LA TIRA con las cinco apiladas. "
+        "TODAS apuntan ARRIBA y llevan UN OJO (almendra oscura con párpado de "
+        "color) en el centro de la hoja. Responde en español, máximo 6 líneas: "
+        "(1) ¿las cinco dagas se ven completas, legibles y DISTINTAS entre sí? "
+        "(2) ¿cada hoja lleva su ojo-almendra en el centro? "
+        "(3) ¿las paletas se leen como se describe? "
+        "(4) ¿el contorno oscuro estilo Terraria marca bien la silueta? "
+        "(5) NOTA 0-10 y defectos concretos (máximo 4). "
+        "(6) VEREDICTO final: SHIP o FIX (y qué corregir).")
+    r = subprocess.run(['z-ai', 'vision', '-p', prompt, '-i', montaje],
+                       capture_output=True, text=True, timeout=180)
+    veredicto = ''
+    ini = (r.stdout or '').find('{')
+    if ini >= 0:
+        try:
+            dd = json.loads(r.stdout[ini:])
+            veredicto = dd['choices'][0]['message']['content'].strip()
+        except Exception:
+            veredicto = ''
+    if not veredicto:
+        veredicto = ((r.stdout or '') + '\n' + (r.stderr or '')).strip()[-1500:] \
+            or 'EL OJO no respondió'
+    with open(destino_txt, 'w', encoding='utf-8') as f:
+        f.write(veredicto + '\n')
+    print('  EL OJO DE LAS DAGAS (QA VLM):')
+    for linea in veredicto.splitlines()[:8]:
+        print('   ', linea)
+    return veredicto
+
+
 def cmd_proyectil(args):
     """`proyectil` — EL SPRITE DE PROYECTIL nacido en la forja (la
     letra: «todo proyectil debe ser creado con la superforja»): la
@@ -509,10 +841,17 @@ def cmd_proyectil(args):
         img = el_aguja(args.ancho, args.alto)
     elif receta == 'sol':
         img = el_sol(args.paleta or 'luz', args.tam or HD_CUADRO)
+    elif receta == 'daga':
+        # LA RECETA DE LAS CINCO DAGAS DEL ETERNO — la tira apila las
+        # cinco en el ORDEN de ai[0] (lo que el DagaEternaMinion recorta)
+        if args.tira:
+            img = la_tira_dagas(args.tam or 34)
+        else:
+            img = la_daga(args.tipo, args.tam or 34)
     else:
-        raise SystemExit(f"receta desconocida: {receta} (tajo·aguja·sol)")
+        raise SystemExit(f"receta desconocida: {receta} (tajo·aguja·sol·daga)")
 
-    ruta = os.path.join(dest, f"proyectil_{receta}.png")
+    ruta = os.path.join(dest, f"proyectil_{receta}{'_' + args.tipo if receta == 'daga' and not args.tira else ''}.png")
     img.save(ruta)
     # EL MANIFIESTO DE HITBOX (el documento del proyectil: lo que el
     # .cs necesita saber del sprite que la forja le hizo).
@@ -522,6 +861,21 @@ def cmd_proyectil(args):
            "bbox_opaco": list(bbox_img) if bbox_img else None,
            "hitbox_sugerida": [max(8, img.size[0] // 4), max(8, img.size[1] // 2)],
            "hd_cuadrado": True, "supersampling": SS_HD}
+    if receta == 'daga':
+        man.update({
+            "tira": bool(args.tira),
+            "marco": args.tam or 34,
+            "marcos": len(ORDEN_DAGAS) if args.tira else 1,
+            "mapa_marcos": {tp: k for k, tp in enumerate(ORDEN_DAGAS)}
+                           if args.tira else {args.tipo: 0},
+            "orden_ai0": ORDEN_DAGAS,
+            "apunta": "ARRIBA en rotation 0 (el .cs usa dir.ToRotation() + PI/2)",
+            "ojo_almendra": [17, 15],
+            "hitbox_sugerida": [20, 20],
+            "nota": ("la receta de las cinco dagas del Eterno — el "
+                     "DagaEternaMinion recorta SU marco por ai[0] con "
+                     "Rectangle(0, tipo*34, 34, 34) del spritesheet 34x170"),
+        })
     with open(os.path.join(dest, "manifiesto.json"), 'w', encoding='utf-8') as f:
         json.dump(man, f, indent=2, ensure_ascii=False)
     print(f"[sforja/proyectil] {ruta} ({img.size[0]}×{img.size[1]}) — hitbox sugerida {man['hitbox_sugerida']}")
@@ -534,6 +888,10 @@ def cmd_proyectil(args):
         os.makedirs(os.path.dirname(args.destino_tml), exist_ok=True)
         img.save(args.destino_tml)
         print(f"[sforja/proyectil] → COPIADO AL MOD: {args.destino_tml}")
+    if args.qa and receta == 'daga' and args.tira:
+        # EL OJO DE LAS DAGAS — el QA VLM de la casa sobre el montaje
+        montaje = el_montaje_dagas(dest, img, args.tam or 34)
+        el_ojo_daga(montaje, os.path.join(dest, 'qa_ojo.txt'))
     return ruta
 
 
@@ -605,10 +963,17 @@ def main():
     # EL PROYECTIL
     p = sub.add_parser('proyectil', help='el sprite de proyectil + hitbox + tira (todo en la forja)')
     p.add_argument('--nombre', required=True)
-    p.add_argument('--receta', default='tajo', choices=['tajo', 'aguja', 'sol'])
+    p.add_argument('--receta', default='tajo', choices=['tajo', 'aguja', 'sol', 'daga'])
+    p.add_argument('--tipo', default='vacio', choices=list(DAGAS.keys()),
+                   help='el alma de la daga (receta daga)')
+    p.add_argument('--tira', action='store_true',
+                   help='(receta daga) LA TIRA de las cinco en el orden de ai[0] (34×170)')
+    p.add_argument('--qa', action='store_true',
+                   help='(receta daga + tira) EL OJO: el montaje + el QA VLM de la casa')
     p.add_argument('--ancho', type=int, default=120)
     p.add_argument('--alto', type=int, default=36)
-    p.add_argument('--tam', type=int, default=HD_CUADRO, help='el lado del sol (receta sol)')
+    p.add_argument('--tam', type=int, default=None,
+                   help='el lado del sol (receta sol) o el marco de la daga (34, receta daga)')
     p.add_argument('--paleta', help='la paleta del sol (receta sol)')
     p.add_argument('--animacion', help='la tira animada (vida·respirar·flotar·latir·vaivén)')
     p.add_argument('--frames', type=int, default=6)

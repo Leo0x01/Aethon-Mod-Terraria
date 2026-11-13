@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.127 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
+> **Versión actual:** 6.128 · **Target:** tModLoader 2026.9.3.1 (Terraria 1.4.4.9, .NET 8) · **Idiomas:** español siempre (es-ES fuente + espejos es-MX/en-US)
 
 ## ⚒️ PARA CREAR CUALQUIER COSA NUEVA (léeme primero)
 

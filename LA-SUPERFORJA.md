@@ -10,6 +10,45 @@
 
 ---
 
+## v6.128 — LA RECETA `daga`: LAS CINCO DAGAS DEL ETERNO NACEN EN LA SFORJA
+
+> **La letra (v6.128)**: «Usa la SForja para crear el diseño de las dagas» —
+> la ley v6.124 por fin cumplida con las dagas: «todo proyectil debe ser
+> creado con la superforja, en este caso con la nueva que sera creada SForja».
+
+**LA RECETA `daga`** (la cuarta del comando `proyectil`: `tajo·aguja·sol·daga`):
+las CINCO DAGAS DEL ETERNO (cristal·llama·roca·vacío·veredicto, cada una con
+SU rampa, SU filo, SU guarda y SU anillo del párpado) + **`--tira`**: el
+SPRITESHEET 34×170 en el ORDEN EXACTO de ai[0] (lo que el DagaEternaMinion
+recorta en PreDraw) + EL MANIFIESTO con el mapa de marcos, la almendra en
+(17,15) y la hitbox 20×20 + `--qa`: EL OJO DE LAS DAGAS (el QA VLM específico).
+
+**LA LECCIÓN DE LA AUTOPSIA — el Lanczos es el traje de los VFX, no de los
+minions**: la primera hornada usó el supersampling ×8 + Lanczos (el camino HD
+de soles/tajos/agujas) y EL OJO la cazó («hojas huecas») — el Lanczos
+DESDIBUJA los detalles de 1 px (el filo lavado, el oro mezclado con la
+obsidiana, la onda muda). LA LEY NUEVA: **la daga es PIXEL ART** — NATIVA
+34×34, píxel DURO, como todas las armas de la casa. El ciclo de la refina:
+8 rondas (5 → 7 → 6 → nativa → 7,5 → 7 → 7 → **SHIP 8/10**).
+
+```bash
+# UNA daga (el alma suelta):
+python3 tools/sforja.py proyectil --nombre daga --receta daga --tipo vacio
+# LA TIRA DE LAS CINCO (el spritesheet 34×170, orden ai[0]) + QA VLM + copia al mod:
+python3 tools/sforja.py proyectil --nombre dagas --receta daga --tira --qa \
+    --destino_tml AethonMod/Content/Projectiles/DagaEterna_Hoja.png
+```
+
+| Las cinco firmas | El alma de cada una |
+|---|---|
+| **CRISTAL** (ai[0]=0) | lila pálido FACETADO (pares brillo/sombra en diagonal) — la «Dazzling» estilete |
+| **LLAMA** (1) | hoja negra con el EJE SERPENTEANTE (±2,6 px) y el FILO QUE ARDE (blanco-cálido en las crestas de la onda — el negro solo existe si arde) |
+| **ROCA** (2) | obsidiana MACIZA (la más ancha) con VENAS DE ORO serpenteando DENTRO del perfil |
+| **VACÍO** (3) | hoja negra de borde violeta con la GUARDA DORADA grande y el anillo del párpado ORO |
+| **VEREDICTO** (4) | el ORO del veredicto con filo blanco-cálido, la GEMA violeta en la guarda, la punta de hoja ancha |
+
+---
+
 ## v6.124 — LA COMPARACIÓN, HECHA — Y LA SFORJA, NACIDA
 
 **LA COMPARACIÓN (la letra la pedía)**: LA FORJA (la cadena corta de los 3 reels) ya
