@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.128 — LAS DAGAS NACIDAS EN LA SFORJA (la receta `daga`)
 
-> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+> **PUBLICADA — release 444550560 + CDN verificado byte a byte (md5 c6e2aab56167487a14c16374a9ea7a7d)**
 
 ## LA LETRA (el usuario — la sesión 9)
 
