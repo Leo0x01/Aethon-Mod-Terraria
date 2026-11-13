@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.129 — EL ALA LISA SIN PLUMAS + EL CETRO QUE INVOCABA + LA DEVORACIÓN DE LA PRIMERA VEZ
 
-> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+> **PUBLICADA — release 444667317 + CDN verificado byte a byte (md5 bdca26034758b43bb8bbf2906eeea95d)**
 
 ## LA LETRA (el usuario — la sesión 10)
 
