@@ -73,7 +73,7 @@ if [ -n "$ASSET_URL" ]; then
     echo "      el asset viejo existe — se borra y re-sube"
     curl -s -X DELETE "$ASSET_URL" "${AUTH[@]}" || true
 fi
-UP=$(curl -s -X POST "${API}/repos/$REPO/releases/$RELEASE_ID/assets?name=AethonMod.tmod" \
+UP=$(curl -s -X POST "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=AethonMod.tmod" \
     -H "Authorization: Bearer $PAT" -H "Content-Type: application/octet-stream" \
     --data-binary "@$MOD_TMOD")
 BROWSER=$(echo "$UP" | jq -r '.browser_download_url // empty')
