@@ -2447,12 +2447,12 @@ Items: {
 		DisplayName: Void Runic Wings
 		Tooltip:
 			'''
-			        THE EXACT COPY OF THE ECLIPSE, in the COLOR OF THE VOID:
-			        the same five-feather fan — spike-free, left/right
-			        symmetric — dressed in the aura's ramp (the living
-			        violet, the deep flesh and the nothing's floor). THE
-			        VIOLET RUNE RING burns at the feather tips and THE VOID
-			        CRUMBS fall from the wings as you fly.
+			        THE SMOOTH WING OF THE VOID, FEATHERLESS: one continuous
+			        sail of violet crystal — left/right symmetric — born from
+			        your back and dying in a single luminous curved edge (the
+			        aura's ramp: the living violet, the deep flesh and the
+			        nothing's floor). THE VIOLET RUNE RING burns along the
+			        edge and THE VOID CRUMBS fall from the wings as you fly.
 			        Flight 240 · no fall damage · folds before real wings.
 			'''
 	}

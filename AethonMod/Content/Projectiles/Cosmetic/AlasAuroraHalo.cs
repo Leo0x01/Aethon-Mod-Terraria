@@ -115,44 +115,24 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Flap += (0.055f + (flag ? 0.15f : 0f) + Spread * 0.03f) * num;
             MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
 
-            // v6.126 → v6.127 — LAS ALAS SE PLIEGAN DENTRO DEL TRAGO Y
-            // DENTRO DEL ARRASTRE (la letra: «por alguna razon, las alas
-            // que tengo equipada, se separan del jugador en la animacion y
-            // estan a parte, el grimorio debe devorar al jugador en su
-            // conjunto y en la animacion debe verse como el jugador con
-            // todo lo que tiene es devorado» + la nueva: «las alas giran
-            // en una posición diferente a la del jugador y se separan de
-            // él»): el halo de las alas es un PROYECTIL APARTE — cuando el
-            // cuerpo ya está DENTRO de la boca (Tragado) o la boca lo está
-            // ARRASTRANDO (Arrastrando — el cuerpo GIRA hacia la boca y
-            // las alas a plena apertura barren LEJOS del cuerpo,
-            // «girando en una posición diferente»), las alas quedaban
-            // FLOTANDO a un lado del libro: SEPARADAS. AHORA se PLEGAN y
-            // se APAGAN a toda prisa (el lerp rápido al 0): se recogen
-            // contra el cuerpo y entran a la boca CON él — el jugador es
-            // devorado ENTERO, con todo lo que lleva puesto.
-            bool presaDelFestin =
-                global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado ||
-                global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Arrastrando == val.whoAmI;
-            if (presaDelFestin && val.whoAmI == Main.myPlayer)
-            {
-                if (Spread > 0.03f && Main.netMode != 2 && !Main.dedServ)
-                {
-                    // LAS MIGAS DEL TRAGO: los últimos trazos de las alas
-                    // cayendo hacia la boca junto con el cuerpo
-                    if (Main.rand.NextBool(2))
-                    {
-                        Dust m = Dust.NewDustPerfect(
-                            val.MountedCenter + new Vector2(Main.rand.NextFloat(-30f, 30f), Main.rand.NextFloat(-18f, 6f)),
-                            DustID.Enchanted_Pink,
-                            new Vector2(0f, -Main.rand.NextFloat(0.8f, 2.2f)),
-                            140, new Color(190, 150, 240), 0.8f);
-                        m.noGravity = true;
-                    }
-                }
-                Spread = MathHelper.Lerp(Spread, 0f, 0.38f);   // se pliega al vacío
-                if (Spread < 0.03f) Spread = 0f;
-            }
+            // v6.126 → v6.129 — EL PLEGADO DE LA DEVORACIÓN MURIÓ (la letra:
+            // «quita eso ya que no hace diferencias y todo lo que el jugador
+            // usa está separado del jugador cuando es devorado… la primera
+            // vez que se puso la mecanica de que el grimorio del eterno
+            // devore al jugador esta animacion estaba correcta, asi que
+            // investiga como funcionaba la primera vez»). LA AUTOPSIA: el
+            // plegado (Spread→0 a toda prisa apenas empezaba el arrastre)
+            // ERA LO QUE «SEPARABA» las alas del cuerpo — el cuerpo seguía
+            // viajando hacia la boca girando con fullRotation y las alas se
+            // contraían y DESAPARECÍAN a su lado. LA PRIMERA VEZ (v6.117)
+            // no existía NINGÚN plegado: las alas viajaban ABIERTAS con el
+            // cuerpo, girando CON él (AlasAuroraLib.Dibujar aplica
+            // pl.fullRotation y dibuja desde pl.MountedCenter — pegadas al
+            // cuerpo vivo por CONSTRUCCIÓN), y al TRAGO todo desaparecía
+            // JUNTO (hideEntirePlayer + el PreDraw apagado por Tragado —
+            // el «en su conjunto» de la letra v6.126). Eso es lo que vive:
+            // las alas viajan ABIERTAS con el cuerpo hasta el trago.
+
             if (Spread > 0.05f && Main.netMode != 2)
             {
                 float h = Flap * 0.02f % 1f;

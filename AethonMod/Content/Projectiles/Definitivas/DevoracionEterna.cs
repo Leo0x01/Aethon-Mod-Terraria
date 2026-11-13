@@ -98,26 +98,31 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// </summary>
         public static bool Tragado;
 
-        /// <summary>v6.127 — ¿A QUIÉN está ARRASTRANDO la boca AHORA MISMO?
-        /// (−1 = nadie). La ventana del ARRASTRE — del primer tirón al
-        /// trago — la consulta EL SISTEMA DE COSMÉTICOS
-        /// (DevoracionCosmeticosSistema) para PEGAR los halos del portador
-        /// a su cuerpo VIVO: la cura del lag de un tick (la letra: «las
-        /// alas giran en una posición diferente a la del jugador y se
-        /// separan de él… el mismo bug afecta a otros ítems cosméticos —
-        /// todos se separan del jugador durante la animación» — los halos
-        /// seguían al jugador en SU IA, que corría ANTES del tirón: el
-        /// jugador saltaba hasta 24 px por tick y los cosméticos quedaban
-        /// un tick ATRÁS, despegados del cuerpo).</summary>
-        public static int Arrastrando = -1;
-
-        /// <summary>v6.124 — ¿SE ESTÁ DEVORANDO al jugador X AHORA MIsMO?
-        /// (la ceremonia ENTERA, del nacimiento a la muerte del festín). Lo
-        /// consultan EL GRIMORIO FLOTANTE y LOS HALOS del portador (la
-        /// letra: «el grimorio debe devorar al jugador en su conjunto…
-        /// debe verse como el jugador CON TODO LO QUE TIENE es devorado» —
-        /// el libro que flota a su espalda se lo come el festín, y las
-        /// alas se pliegan DENTRO del trago junto con el cuerpo).</summary>
+        // v6.129 — LA VENTANA «Arrastrando» Y DevoracionCosmeticosSistema
+        // MURIERON (la letra: «quita eso ya que no hace diferencias y todo
+        // lo que el jugador usa está separado del jugador cuando es
+        // devorado… la primera vez que se puso la mecanica de que el
+        // grimorio del eterno devore al jugador esta animacion estaba
+        // correcta, asi que investiga como funcionaba la primera vez»).
+        // LA AUTOPSIA (leída contra la v6.117 — la primera versión que el
+        // usuario aprobó): los halos cosméticos NUNCA se dibujan desde su
+        // propia posición de proyectil — todos dibujan desde el CUERPO
+        // VIVO del dueño en su PreDraw (AlasAuroraHalo llama a
+        // AlasAuroraLib.Dibujar(val, …) que lee pl.MountedCenter y
+        // pl.fullRotation EN EL MISMO dibujado): PEGAR pr.Center era
+        // pegar NADA — por eso «no hace diferencias». Y lo que SEPARABA
+        // las alas del cuerpo era EL PLEGADO v6.126-127: apenas empezaba
+        // el arrastre, las alas se contraían (Spread→0 a toda prisa) y
+        // DESAPARECÍAN mientras el cuerpo seguía viajando = «todo lo que
+        // el jugador usa está separado del jugador».
+        // LA PRIMERA VEZ (v6.117): el festín arrastraba al jugador con el
+        // lerp suave + fullRotation de siempre y los cosméticos viajaban
+        // TAL CUAL — las alas ABIERTAS girando CON el cuerpo (la librería
+        // aplica la rotación del cuerpo) — y al trago TODO desaparecía
+        // JUNTO (hideEntirePlayer + los halos apagados por el Tragado:
+        // el mismo «en su conjunto» de la letra v6.126). ESO es lo que
+        // vive: nada de pegamentos, nada de plegados — el arrastre de
+        // siempre y TODO desapareciendo junto en el trago.
         public static bool Devorando(int whoAmI)
         {
             if (whoAmI < 0) return false;
@@ -214,7 +219,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             else if (t >= TDesiste)
             {
                 _disuelve = 0.01f;
-                Arrastrando = -1;      // (v6.127) el arrastre murió con el desiste
             }
 
             // === EL PORTADOR ES PRESA (controles fuera + EL ARRASTRE) ===
@@ -231,11 +235,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 if (Projectile.ai[0] >= TSombra && !_estallo)
                 {
-                    // v6.127 — LA VENTANA DEL ARRASTRE (la cura del lag de
-                    // los cosméticos: el sistema los pega a este jugador
-                    // VIVO mientras la boca lo arrastra)
-                    Arrastrando = p.whoAmI;
-                    // EL ARRASTRE: cada vez más decidido hacia LA BOCA (no
+                    // EL ARRASTRE (v6.129 — como LA PRIMERA VEZ, la v6.117:
+                    // sin ventanas ni pegamentos — los cosméticos viajan
+                    // TAL CUAL con el cuerpo, dibujándose desde el dueño
+                    // VIVO con su rotación, y al trago TODO desaparece
+                    // junto): cada vez más decidido hacia LA BOCA (no
                     // hacia el libro: la presa entra por la boca), con el
                     // vaivén lateral que se apaga al llegar (la espiral de
                     // siempre — la presa cae vencida, no teletransportada).
@@ -318,7 +322,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     {
                         _estallo = true;
                         _tTrago = Projectile.ai[0];
-                        Arrastrando = -1;      // (v6.127) el arrastre acaba de terminar: EL TRAGO
                         try
                         {
                             p.Center = boca;        // el último bocado: al centro de la boca
@@ -434,7 +437,6 @@ namespace AethonMod.Content.Projectiles.Definitivas
             if (!_entregado)
             {
                 Tragado = false;
-                Arrastrando = -1;      // (v6.127) la ventana del arrastre muere con el festín
                 SubmundoGrimorio.BrumaFaro = 0f;
                 try
                 {
@@ -986,52 +988,22 @@ namespace AethonMod.Content.Projectiles.Definitivas
     }
 
     // ======================================================================
-    //  v6.127 — DevoracionCosmeticosSistema — EL PEGAMENTO DE LOS
-    //  COSMÉTICOS (la cura del lag de un tick).
-    //
-    //  LA LETRA: «las alas giran en una posición diferente a la del
-    //  jugador y se separan de él… el mismo bug afecta a otros ítems
-    //  cosméticos — todos se separan del jugador durante la animación».
-    //
-    //  LA AUTOPSIA: los halos cosméticos (el aura, el anillo dorsal, el
-    //  brillo solar, los sellos…) siguen al jugador en SU IA
-    //  (Projectile.Center = dueño.Center) — pero el ARRASTRE de la
-    //  devoración mueve al jugador DENTRO de la IA del festín, que corre
-    //  DESPUÉS de la de muchos halos: el jugador salta hasta ~24 px por
-    //  tick hacia la boca (y gira hasta 0,3 rad/tick) y los cosméticos
-    //  quedan UN TICK ATRÁS — despegados del cuerpo, cada uno por su
-    //  lado, durante TODA la animación.
-    //
-    //  LA CURA: después de que TODAS las IA de proyectiles corran
-    //  (PostUpdateProjectiles — después del último tirón del festín),
-    //  cada halo cosmético del portador arrastrado (los proyectiles
-    //  adosados de la casa: friendly=false, ni minion ni el festín
-    //  mismo) se PEGA a la posición VIVA del jugador — el dibujado ya
-    //  no puede verlos despegados. El jugador entra devorado EN SU
-    //  CONJUNTO: el cuerpo, las alas y TODO lo que lleva puesto viajan
-    //  pegados hasta la boca.
+    //  v6.129 — DevoracionCosmeticosSistema MURIÓ (la letra: «quita eso
+    //  ya que no hace diferencias y todo lo que el jugador usa está
+    //  separado del jugador cuando es devorado»). LA AUTOPSIA de su
+    //  inutilidad: los halos cosméticos NUNCA se dibujan desde su propia
+    //  posición de proyectil — el aura, el anillo dorsal, el brillo solar,
+    //  los sellos y LAS ALAS dibujan desde el CUERPO VIVO del dueño en su
+    //  PreDraw (con pl.fullRotation aplicada, en el MISMO dibujado): pegar
+    //  pr.Center tras todas las IA era pegar NADA. Y lo que de verdad
+    //  SEPARABA las alas del cuerpo era EL PLEGADO v6.126-127 (el bloque
+    //  del AlasAuroraHalo — también muerto en esta versión): las alas se
+    //  contraían y desaparecían apenas empezaba el arrastre, mientras el
+    //  cuerpo seguía viajando. LA PRIMERA VEZ (v6.117) NO EXISTÍA NINGUNO
+    //  de los dos y la animación estaba CORRECTA: el arrastre de siempre
+    //  (lerp suave + fullRotation), los cosméticos viajando TAL CUAL con
+    //  el cuerpo — y al trago TODO desapareciendo JUNTO (hideEntirePlayer
+    //  + los halos apagados por Tragado: «en su conjunto»). ESO es lo que
+    //  vive: sin pegamento, sin plegado, sin ventanas.
     // ======================================================================
-    public class DevoracionCosmeticosSistema : ModSystem
-    {
-        public override void PostUpdateProjectiles()
-        {
-            int who = DevoracionEterna.Arrastrando;
-            if (who < 0 || who >= Main.maxPlayers) return;
-            Player p = Main.player[who];
-            if (p == null || !p.active) return;
-
-            int tipoFestin = ModContent.ProjectileType<DevoracionEterna>();
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile pr = Main.projectile[i];
-                if (pr == null || !pr.active || pr.owner != who) continue;
-                if (pr.type == tipoFestin) continue;          // el festín mismo
-                if (pr.friendly || pr.minion) continue;        // los minions orbitan ANCHOS
-                // EL HALO ADOSADO (la firma de la casa: «cosmético: no
-                // toca nada» — friendly=false): PEGADO al cuerpo vivo
-                pr.Center = p.Center;
-                pr.velocity = Vector2.Zero;
-            }
-        }
-    }
 }

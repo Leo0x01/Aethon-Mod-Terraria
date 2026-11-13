@@ -98,6 +98,19 @@ namespace AethonMod.Content.VFX
         public float RuidoFlujo;
 
         public float Luz;
+
+        // v6.129 — EL ALA LISA (la letra: «las alas siguen con picos, diente
+        // de sierra, supongo que esos dientes de sierra son supuestas
+        // plumas, esas plumas las puedes eliminar»): LAS PLUMAS MUEREN COMO
+        // TIRAS. Las cinco tiras radiales (las capas sólidas del núcleo,
+        // el cuerpo y el halo, con su niebla) NO se emiten: el ala ES LA
+        // VELA — una superficie continua que nace de la espalda y muere en
+        // el BORDE MAESTRO (la curva C1 de punta a punta), con las runas
+        // coronando las puntas y la niebla corriendo por dentro. Las
+        // plumas viven SOLO como ARMADURA invisible (sus ejes alimentan la
+        // vela y el borde). false = el camino de siempre (abanico con
+        // plumas — Solares, Eclipse, Juicio, Corolas intactas).
+        public bool Lisas;
     }
 
     // v6.113 — LA PURGA DE LAS ALAS (la letra: «guardar las siguientes
@@ -344,7 +357,7 @@ namespace AethonMod.Content.VFX
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f),
+                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f, lisas: true),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,
@@ -368,7 +381,7 @@ namespace AethonMod.Content.VFX
             };
         }
 
-        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f)
+        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, bool lisas = false)
         {
             //IL_0012: Unknown result type (might be due to invalid IL or missing references)
             //IL_0013: Unknown result type (might be due to invalid IL or missing references)
@@ -412,7 +425,8 @@ namespace AethonMod.Content.VFX
                 RuidoFlujo = ruidoFlujo,
                 Luz = luz,
                 Runas = runas,
-                RunasInten = runasInten
+                RunasInten = runasInten,
+                Lisas = lisas
             };
         }
 

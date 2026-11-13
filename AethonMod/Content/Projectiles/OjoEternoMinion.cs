@@ -1261,7 +1261,17 @@ namespace AethonMod.Content.Projectiles
             Projectile.tileCollide = false;
             Projectile.friendly = true;
             Projectile.minion = true;
-            Projectile.minionSlots = 1f;
+            // v6.129 — LOS PUESTOS LIBERADOS (la letra: «haz que esta arma
+            // no sea de invocador asi no se ven afectado los minions»): el
+            // ojo cobraba 1 puesto de minion — con el escuadrón completo
+            // (11 ojos + 5 dagas = 16) la maquinaria vanilla de maxMinions
+            // MATABA a los minions que no cabían (los del jugador y los
+            // propios: el cetro «no invocaba nada»). minionSlots 0: el
+            // escuadrón tiene SU PROPIO contador (la casa nunca usó los
+            // puestos como recurso — el grimorio cuenta por niveles):
+            // no desplaza a NADIE y nadie lo mata. (minion sigue true: el
+            // targeting derecho y el minionPos del círculo VIVEN.)
+            Projectile.minionSlots = 0f;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 18000;
             Projectile.DamageType = DamageClass.Summon;

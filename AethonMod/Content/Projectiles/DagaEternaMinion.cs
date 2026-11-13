@@ -147,7 +147,17 @@ namespace AethonMod.Content.Projectiles
             Projectile.height = 20;
             Projectile.friendly = true;
             Projectile.minion = true;
-            Projectile.minionSlots = 1f;
+            // v6.129 — LOS PUESTOS LIBERADOS (la letra: «haz que esta arma
+            // no sea de invocador asi no se ven afectado los minions»): la
+            // daga cobraba 1 puesto de minion — la maquinaria vanilla
+            // (maxMinions) MATABA a los minions que no cabían: los del
+            // jugador y los propios del escuadrón (¡16 puestos contra 1-11
+            // del portador: moría TODO al nacer!). minionSlots 0: el
+            // escuadrón tiene SU PROPIO contador (el cetro: 11 ojos + 5
+            // dagas — nada de puestos de vanilla): no desplaza a NADIE y
+            // nadie lo mata. (minion sigue true: el targeting derecho del
+            // jugador y el minionPos del anillo VIVEN.)
+            Projectile.minionSlots = 0f;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 2;
             Projectile.tileCollide = false;

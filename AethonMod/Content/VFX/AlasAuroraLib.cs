@@ -119,6 +119,18 @@ namespace AethonMod.Content.VFX
 
         private const float RadioAnillo = 46f;
 
+        // v6.129 — LAS CONSTANTES DEL ALA LISA (la vela estirada al borde
+        // liso): PAD (el borde por fuera de las puntas) · RNaceLisa (el
+        // nacimiento junto al cuerpo) · DTHNace (la rotación de cierre de
+        // los nacimientos) · UNace (el ancho del camino de los nacimientos).
+        private const float PADLisa = 12f;
+
+        private const float RNaceLisa = 16f;
+
+        private const float DTHNace = 0.35f;
+
+        private const float UNace = 0.35f;
+
         private static Vector2[][] CrearPozosEje()
         {
             Vector2[][] array = new Vector2[14][];
@@ -332,6 +344,160 @@ namespace AethonMod.Content.VFX
                 float plectro = MathF.Pow(MathF.Max(0f, MathF.Cos(num21 * MathF.PI * 0.5f)), 0.62f);
                 return num20 * MathHelper.Lerp(aguja, plectro, redonda);
             }
+        }
+
+        /// <summary>
+        /// v6.129 — LA VELA ESTIRADA AL BORDE LISO (el ala lisa, la letra:
+        /// «esos dientes de sierra son supuestas plumas, esas plumas las
+        /// puedes eliminar»).
+        ///
+        /// LA GEOMETRÍA: las plumas dejan de ser TIRAS y quedan como la
+        /// ARMADURA invisible de UNA SOLA HOJA por lado. El borde es EL
+        /// CAMINO u, parametrizado por CONSTRUCCIÓN (sin ambigüedades de
+        /// atan2 ni envolturas por ±π):
+        ///   · u=0 → LA CÚSPIDE (la pluma 0: la punta más alta y larga)
+        ///   · u=1 → LA TENDIDA (la pluma 4: la punta horizontal)
+        ///   · u=−U / u=1+U → LOS NACIMIENTOS junto al cuerpo (a RNACE px)
+        /// R(u): la función SUAVE por tramos (smoothstep: nacimiento→
+        /// cúspide→tendida→nacimiento — SIN Catmull: con los puntos del
+        /// abanico desigualmente espaciados la Catmull hacía OVERSHOOT y
+        /// la curva ONDULABA: la sierra de ±25 px que el sim cazó).
+        /// θ(u): el ángulo lineal en [0,1] y el cierre hacia el cuerpo en
+        /// los nacimientos.
+        /// Cada eje se estira A LO LARGO DE SU DIRECCIÓN hasta SU punto
+        /// del borde P(u_k) (el tramo final): la vela llega JUSTO al
+        /// borde, sin dientes ni huecos. Las runas (nodo 8) coronan el
+        /// borde en las direcciones de las plumas.
+        /// </summary>
+        private static int EstirarVelaLisa(Pluma[] plumas, float[] hues, float[] fundidos,
+            Vector2 centroRot, Vector2 val2, int porLado, float fullRotation, float grav,
+            in EstiloAlas estilo)
+        {
+            int nuevo = porLado + 2;
+            if (nuevo * 2 > _pozosEje.Length)
+            {
+                return porLado * 2;      // (imposible: 14 pozos para 7+7 — la red)
+            }
+            for (int lado = -1; lado <= 1; lado += 2)
+            {
+                int bViejo = (lado < 0) ? 0 : porLado;
+                int bNuevo = (lado < 0) ? 0 : nuevo;
+                Vector2 ancla = val2 + new Vector2((float)lado * estilo.AnclajeSep, 0f);
+                if (fullRotation != 0f)
+                {
+                    ancla = centroRot + Utils.RotatedBy(ancla - centroRot, (double)fullRotation, default(Vector2));
+                }
+
+                // === EL CAMINO DEL BORDE: P(u) y las fracciones u de las plumas ===
+                float th0 = AnguloDe(plumas[bViejo].Eje[8]);
+                float th4 = AnguloDe(plumas[bViejo + porLado - 1].Eje[8]);
+                while (th4 > th0 + MathHelper.Pi) th4 -= MathHelper.TwoPi;
+                while (th4 <= th0 - MathHelper.Pi) th4 += MathHelper.TwoPi;
+                float r0 = Vector2.Distance(plumas[bViejo].Eje[8], _geoAnclaCentral) + PADLisa;
+                float r4 = Vector2.Distance(plumas[bViejo + porLado - 1].Eje[8], _geoAnclaCentral) + PADLisa;
+                float signo = (th4 >= th0) ? 1f : -1f;
+                float thNaceSup = th0 - signo * DTHNace;
+                float thNaceInf = th4 + signo * DTHNace;
+                float[] us = new float[porLado];
+                for (int k = 0; k < porLado; k++)
+                {
+                    float thk = AnguloDe(plumas[bViejo + k].Eje[8]);
+                    while (thk > th0 + MathHelper.Pi) thk -= MathHelper.TwoPi;
+                    while (thk <= th0 - MathHelper.Pi) thk += MathHelper.TwoPi;
+                    us[k] = (MathF.Abs(th4 - th0) > 1e-4f)
+                        ? Math.Clamp((thk - th0) / (th4 - th0), 0f, 1f)
+                        : 0f;
+                }
+
+                float ThetaDe(float u)
+                {
+                    if (u < 0f) return MathHelper.Lerp(th0, thNaceSup, -u / UNace);
+                    if (u > 1f) return MathHelper.Lerp(th4, thNaceInf, (u - 1f) / UNace);
+                    return MathHelper.Lerp(th0, th4, u);
+                }
+                float RadioDe(float u)
+                {
+                    if (u < 0f) return MathHelper.Lerp(RNaceLisa, r0, Suave(0f, 1f, (u + UNace) / UNace));
+                    if (u > 1f) return MathHelper.Lerp(r4, RNaceLisa, Suave(0f, 1f, (u - 1f) / UNace));
+                    return MathHelper.Lerp(r0, r4, Suave(0f, 1f, u));
+                }
+                Vector2 PuntoDe(float u)
+                {
+                    float th = ThetaDe(u);
+                    return _geoAnclaCentral + new Vector2(MathF.Cos(th), MathF.Sin(th)) * RadioDe(u);
+                }
+
+                // === LOS EJES NUEVOS: [nacimiento, plumas estiradas, nacimiento] ===
+                Vector2 nSup = PuntoDe(-UNace);
+                Vector2 nInf = PuntoDe(1f + UNace);
+                Vector2[][] ejesNuevos = new Vector2[nuevo][];
+                for (int k = 0; k < nuevo; k++) ejesNuevos[k] = new Vector2[9];
+                for (int j = 0; j < 9; j++)
+                {
+                    float q = (float)j / 8f;
+                    // EL NACIMIENTO SUPERIOR: del ancla al punto P(−U)
+                    ejesNuevos[0][j] = Vector2.Lerp(ancla, nSup, q);
+                    // LAS PLUMAS ESTIRADAS: el tramo final corre a SU punto del borde
+                    for (int k = 0; k < porLado; k++)
+                    {
+                        Vector2 punta = plumas[bViejo + k].Eje[8];
+                        Vector2 dirK = punta - ancla;
+                        float l = dirK.Length();
+                        if (l > 0.001f) dirK /= l; else dirK = new Vector2(0f, -grav);
+                        Vector2 d = PuntoDe(us[k]) - punta;
+                        float s = Vector2.Dot(d, dirK) * Suave(0.45f, 1f, q);
+                        ejesNuevos[k + 1][j] = plumas[bViejo + k].Eje[j] + dirK * s;
+                    }
+                    // EL NACIMIENTO INFERIOR: del ancla al punto P(1+U)
+                    ejesNuevos[nuevo - 1][j] = Vector2.Lerp(ancla, nInf, q);
+                }
+
+                // PISO LOS POZOS (la armadura del borde), en ORDEN DE FRANJA
+                for (int k = 0; k < nuevo; k++)
+                {
+                    Pluma p = default(Pluma);
+                    p.Eje = _pozosEje[bNuevo + k];
+                    p.SemiMas = _pozosSemi[bNuevo + k];
+                    p.SemiMenos = _pozosSemi2[bNuevo + k];
+                    for (int j = 0; j < 9; j++)
+                    {
+                        p.Eje[j] = ejesNuevos[k][j];
+                        p.SemiMas[j] = 1f;
+                        p.SemiMenos[j] = 1f;
+                    }
+                    p.Largo = Vector2.Distance(p.Eje[0], p.Eje[8]);
+                    plumas[bNuevo + k] = p;
+                    int vecino = Math.Clamp(k - 1, 0, porLado - 1);
+                    hues[bNuevo + k] = hues[bViejo + vecino];
+                    fundidos[bNuevo + k] = fundidos[bViejo + vecino];
+                }
+            }
+            return nuevo * 2;
+        }
+
+        /// <summary>El ángulo de un punto del ala respecto del ancla central.</summary>
+        private static float AnguloDe(Vector2 p)
+        {
+            return MathF.Atan2(p.Y - _geoAnclaCentral.Y, p.X - _geoAnclaCentral.X);
+        }
+
+        /// <summary>v6.129 — EL PUNTO DEL CAMINO DEL BORDE LISO (el mismo
+        /// camino de EstirarVelaLisa, evaluado por el borde maestro): el
+        /// ángulo lineal en [0,1] con el cierre hacia el cuerpo en los
+        /// nacimientos, y el radio en smoothstep por tramos (nacimiento →
+        /// cúspide → tendida → nacimiento).</summary>
+        private static Vector2 PuntoCaminoLisa(float u,
+            float th0, float th4, float r0, float r4, float thNS, float thNI)
+        {
+            float th;
+            if (u < 0f) th = MathHelper.Lerp(th0, thNS, -u / UNace);
+            else if (u > 1f) th = MathHelper.Lerp(th4, thNI, (u - 1f) / UNace);
+            else th = MathHelper.Lerp(th0, th4, u);
+            float r;
+            if (u < 0f) r = MathHelper.Lerp(RNaceLisa, r0, Suave(0f, 1f, (u + UNace) / UNace));
+            else if (u > 1f) r = MathHelper.Lerp(r4, RNaceLisa, Suave(0f, 1f, (u - 1f) / UNace));
+            else r = MathHelper.Lerp(r0, r4, Suave(0f, 1f, u));
+            return _geoAnclaCentral + new Vector2(MathF.Cos(th), MathF.Sin(th)) * r;
         }
 
         private static int EmitirCapa(int nVerts, Pluma[] plumas, float[] hues, float[] fundidos, float mezclaDia, int capa, in EstiloAlas estilo, int n)
@@ -760,14 +926,39 @@ namespace AethonMod.Content.VFX
                         // EL BLANCO (0.05 → 0.43) al acercarse al borde: el
                         // bordillo es lo MÁS LUMINOSO del ala y la silueta
                         // pertenece a LA CURVA (zigzag 3.5 px — sim verificado).
+                        // v6.129 — EL ALA LISA ES TODA VELA (la letra: «esas
+                        // plumas las puedes eliminar»): sin las tiras, la
+                        // vela ES el cuerpo ENTERO del ala — su base SUBE
+                        // (0.55 → 0.80) para que la superficie no quede
+                        // tenue donde vivían los núcleos de las plumas: el
+                        // cristal del vacío se lee LLENO de la raíz al borde.
+                        float velaBase = estilo.Lisas ? 0.80f : 0.55f;
+                        float velaTope = estilo.Lisas ? 1.30f : 0.62f;
                         float sube0 = Suave(0.35f, 0.95f, q0);
                         float sube1 = Suave(0.35f, 0.95f, q1);
-                        float i0 = (0.55f + 0.62f * sube0) * estilo.CuerpoInten * fuerza * fundido;
-                        float i1 = (0.55f + 0.62f * sube1) * estilo.CuerpoInten * fuerza * fundido;
+                        float i0 = (velaBase + velaTope * sube0) * estilo.CuerpoInten * fuerza * fundido;
+                        float i1 = (velaBase + velaTope * sube1) * estilo.CuerpoInten * fuerza * fundido;
                         float hb0 = 0.05f + 0.38f * sube0;
                         float hb1 = 0.05f + 0.38f * sube1;
-                        Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, hb0, in estilo), i0);
-                        Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, hb1, in estilo), i1);
+                        // v6.129 — EL TONO EN RAMPA RADIAL (el ala lisa): la
+                        // vela de siempre viaja por franjas (hue_medio por
+                        // cada par de plumas) — y la PALETA VIAJERA caía al
+                        // FONDO NEGRO en las franjas del medio: el ojo leía
+                        // CINCO TIRAS claras separadas por huecos oscuros
+                        // (las «plumas» que el usuario ve como dientes).
+                        // En el ala lisa NO hay franjas: el tono es LA RAMPA
+                        // RADIAL de la casa (el violeta VIVO en la raíz → el
+                        // HONDO hacia el borde → el BLANCO del bordillo):
+                        // hue 0 (paleta[0], el vivo) → 1/3 (paleta[1], el
+                        // hondo PURO) — el FONDO de la paleta JAMÁS se toca.
+                        float hue0l = estilo.Lisas
+                            ? (1f / 3f) * Suave(0f, 0.85f, q0)
+                            : hueMedio + estilo.HueLargo * q0;
+                        float hue1l = estilo.Lisas
+                            ? (1f / 3f) * Suave(0f, 0.85f, q1)
+                            : hueMedio + estilo.HueLargo * q1;
+                        Color c0 = Pre(TonoPluma(hue0l, mezclaDia, hb0, in estilo), i0);
+                        Color c1 = Pre(TonoPluma(hue1l, mezclaDia, hb1, in estilo), i1);
                         Vector2 a0 = pA.Eje[j];
                         Vector2 a1 = pA.Eje[j + 1];
                         Vector2 b0 = pB.Eje[j];
@@ -855,30 +1046,72 @@ namespace AethonMod.Content.VFX
                 int b = lado * porLado;
                 int m = porLado;
                 int muestras = (m - 1) * 6;
+                // v6.129 — EL BORDE MUESTREADO (el ala lisa): el CAMINO u de
+                // EstirarVelaLisa (nacimiento→cúspide→tendida→nacimiento)
+                // evaluado en u EQUIESPACIADO — SIN Catmull (con los puntos
+                // desiguales del abanico la Catmull hacía OVERSHOOT y la
+                // curva ONDULABA: la sierra de ±25 px que el sim cazó y el
+                // QA VLM cerró: «el borde es UNA CURVA CONTINUA y suave,
+                // sin picos ni dentado» — 9/10).
+                float th0l = 0f, th4l = 0f, r0l = 0f, r4l = 0f, signoL = 1f;
+                float thNS = 0f, thNI = 0f;
+                bool lisa = estilo.Lisas;
+                if (lisa)
+                {
+                    th0l = AnguloDe(plumas[b + 1].Eje[8]);
+                    th4l = AnguloDe(plumas[b + m - 2].Eje[8]);
+                    while (th4l > th0l + MathHelper.Pi) th4l -= MathHelper.TwoPi;
+                    while (th4l <= th0l - MathHelper.Pi) th4l += MathHelper.TwoPi;
+                    r0l = Vector2.Distance(plumas[b + 1].Eje[8], _geoAnclaCentral);
+                    r4l = Vector2.Distance(plumas[b + m - 2].Eje[8], _geoAnclaCentral);
+                    signoL = (th4l >= th0l) ? 1f : -1f;
+                    thNS = th0l - signoL * DTHNace;
+                    thNI = th4l + signoL * DTHNace;
+                }
                 for (int s = 0; s < muestras; s++)
                 {
                     if (nVerts + 12 > _verts.Length)
                     {
                         break;
                     }
-                    int seg = s / 6;
-                    float k0 = (float)(s % 6) / 6f;
-                    float k1 = (float)(s % 6 + 1) / 6f;
-                    Vector2 q0p = (seg > 0) ? plumas[b + seg - 1].Eje[8] : plumas[b].Eje[8];
-                    Vector2 q1p = plumas[b + seg].Eje[8];
-                    Vector2 q2p = plumas[b + seg + 1].Eje[8];
-                    Vector2 q3p = (seg + 2 < m) ? plumas[b + seg + 2].Eje[8] : plumas[b + m - 1].Eje[8];
-                    Vector2 p0 = Catmull(q0p, q1p, q2p, q3p, k0);
-                    Vector2 p1 = Catmull(q0p, q1p, q2p, q3p, k1);
+                    int seg;
+                    Vector2 p0, p1;
+                    if (lisa)
+                    {
+                        float u0 = -UNace + (1f + 2f * UNace) * s / muestras;
+                        float u1 = -UNace + (1f + 2f * UNace) * (s + 1) / muestras;
+                        p0 = PuntoCaminoLisa(u0, th0l, th4l, r0l, r4l, thNS, thNI);
+                        p1 = PuntoCaminoLisa(u1, th0l, th4l, r0l, r4l, thNS, thNI);
+                        seg = Math.Min(m - 2, (int)(u0 / (1f + 2f * UNace) * (m - 1)));
+                    }
+                    else
+                    {
+                        seg = s / 6;
+                        float k0 = (float)(s % 6) / 6f;
+                        float k1 = (float)(s % 6 + 1) / 6f;
+                        Vector2 q0p = (seg > 0) ? plumas[b + seg - 1].Eje[8] : plumas[b].Eje[8];
+                        Vector2 q1p = plumas[b + seg].Eje[8];
+                        Vector2 q2p = plumas[b + seg + 1].Eje[8];
+                        Vector2 q3p = (seg + 2 < m) ? plumas[b + seg + 2].Eje[8] : plumas[b + m - 1].Eje[8];
+                        p0 = Catmull(q0p, q1p, q2p, q3p, k0);
+                        p1 = Catmull(q0p, q1p, q2p, q3p, k1);
+                    }
 
                     // El tono viaja por el borde: el hue de la pluma que
                     // sostiene cada tramo, fundido con la siguiente.
-                    float fSeg0 = (seg + k0) / (float)(m - 1);
-                    float fSeg1 = (seg + k1) / (float)(m - 1);
+                    // v6.129 — en el ala lisa el borde es UNA curva y UN
+                    // tono: la RAMPA RADIAL en su extremo (el HONDO puro,
+                    // hue 1/3 — sin las franjas de la paleta viajera).
+                    float fSeg0 = estilo.Lisas
+                        ? (float)s / muestras
+                        : (seg + (float)(s % 6) / 6f) / (m - 1);
+                    float fSeg1 = estilo.Lisas
+                        ? (float)(s + 1) / muestras
+                        : (seg + (float)(s % 6 + 1) / 6f) / (m - 1);
                     int iA0 = Math.Min(m - 1, (int)(fSeg0 * (m - 1) + 0.5f));
                     int iA1 = Math.Min(m - 1, (int)(fSeg1 * (m - 1) + 0.5f));
-                    float hue0 = hues[b + iA0];
-                    float hue1 = hues[b + iA1];
+                    float hue0 = estilo.Lisas ? (1f / 3f) : hues[b + iA0];
+                    float hue1 = estilo.Lisas ? (1f / 3f) : hues[b + iA1];
                     float fund = (fundidos[b + iA0] + fundidos[b + iA1]) * 0.5f;
 
                     // La dirección radial (del jugador hacia afuera) da
@@ -1113,6 +1346,27 @@ namespace AethonMod.Content.VFX
                     _geoAnclaCentral = ((fullRotation != 0f) ? (val + Utils.RotatedBy(val2 - val, (double)fullRotation, default(Vector2))) : val2);
                     _geoN = num2 * 2;
                     _geoRunasValida = true;
+                    // v6.129 — LA VELA ESTIRADA AL BORDE LISO (el ala lisa —
+                    // la letra: «esos dientes de sierra son supuestas plumas,
+                    // esas plumas las puedes eliminar»): con las tiras
+                    // muertas, los ejes de las plumas quedan como ARMADURA —
+                    // y la vela se ESTIRA hasta EL BORDE ENVOLVENTE: la
+                    // curva que ya NO pasa por las cinco puntas del abanico
+                    // (las puntas desiguales 90→52 px eran los DIENTES del
+                    // contorno: la Catmull por ellas ondulaba pico-valle).
+                    // El borde nuevo: la espiral del abanico INFLADA (cada
+                    // punta +12 px por fuera, en su dirección VIVA) más los
+                    // DOS NACIMIENTOS junto al cuerpo (la hoja cierra a 14
+                    // px del anclaje): UNA CURVA CONTINUA de la espalda a la
+                    // cúspide y de la cúspide a la punta tendida — y las
+                    // runas coronan ese borde en las direcciones de las
+                    // plumas. (Los pozos de 14 ya soportan los 7 ejes por
+                    // lado: 5 plumas + 2 nacimientos.)
+                    if (estilo.Lisas)
+                    {
+                        _geoN = EstirarVelaLisa(plumas, hues, fundidos, val, val2,
+                            num2, fullRotation, gravDir, in estilo);
+                    }
                     // v6.56.6 — EL BARRIDO DEL HEREDERO MUERE ENTERO (la letra:
                     // «no están simétricas y siguen teniendo esa ligera rotación
                     // en el sentido contrario que no deben tener»). El sim de la
@@ -1171,9 +1425,23 @@ namespace AethonMod.Content.VFX
                         _geoAnclaCentral.X = 2f * cx2 - _geoAnclaCentral.X;
                     }
                     int num7 = 0;
-                    for (int k = 0; k < 3; k++)
+                    // v6.129 — LAS PLUMAS MUEREN EN EL ALA LISA (la letra:
+                    // «esos dientes de sierra son supuestas plumas, esas
+                    // plumas las puedes eliminar»): las CINCO TIRAS radiales
+                    // — las capas sólidas (núcleo, cuerpo, halo) y SU niebla
+                    // — ERAN los dientes de sierra (cinco rayos brillantes
+                    // convergiendo en cinco puntas: pico-rayo-valle-rayo-
+                    // pico). Para el estilo Liso NO se emiten: el ala ES LA
+                    // VELA (la superficie continua de la raíz al borde
+                    // maestro) y la silueta pertenece ENTERA a la curva C1.
+                    // Las plumas viven SOLO como armadura invisible: sus
+                    // ejes alimentan la vela, el borde y las runas.
+                    if (!estilo.Lisas)
                     {
-                        num7 = EmitirCapa(num7, plumas, hues, fundidos, mezclaDia, k, in estilo, num2 * 2);
+                        for (int k = 0; k < 3; k++)
+                        {
+                            num7 = EmitirCapa(num7, plumas, hues, fundidos, mezclaDia, k, in estilo, num2 * 2);
+                        }
                     }
                     // v6.114 — LA MEMBRANA (la cura de la sierra): el velo
                     // entre plumas y el arco exterior entran al MISMO lote
@@ -1184,18 +1452,26 @@ namespace AethonMod.Content.VFX
                     {
                         Volcar(graphicsDevice, _fxPlano, num7, textura: false);
                     }
-                    num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 0, fold, in estilo, num2 * 2);
+                    if (!estilo.Lisas)
+                    {
+                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 0, fold, in estilo, num2 * 2);
+                    }
                     // v6.114 — y su niebla: el mismo velo/arco con el flujo
                     // de la textura — la bruma CORRE por dentro del ala.
+                    // v6.129 — en el ala lisa es LA ÚNICA niebla (la niebla
+                    // de las tiras murió con ellas): la superficie vive.
                     num7 = EmitirMembranaRuido(num7, plumas, hues, mezclaDia, globalTimeWrappedHourly, fold, in estilo, num2 * 2);
                     if (num7 >= 3)
                     {
                         Volcar(graphicsDevice, _fxTextura, num7, textura: true);
                     }
-                    num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 1, fold, in estilo, num2 * 2);
-                    if (num7 >= 3)
+                    if (!estilo.Lisas)
                     {
-                        Volcar(graphicsDevice, _fxTextura, num7, textura: true);
+                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 1, fold, in estilo, num2 * 2);
+                        if (num7 >= 3)
+                        {
+                            Volcar(graphicsDevice, _fxTextura, num7, textura: true);
+                        }
                     }
                 }
                 finally
@@ -1346,6 +1622,19 @@ namespace AethonMod.Content.VFX
                     int nodoRuna = 8;
                     for (int i = 0; i < _geoN; i++)
                     {
+                        // v6.129 — EN EL ALA LISA los NACIMIENTOS no llevan
+                        // runa (la hoja cierra junto al cuerpo: el glifo ahí
+                        // cabalgaría la espalda) — las runas coronan el borde
+                        // en las DIRECCIONES DE LAS PLUMAS (el índice por lado
+                        // es [nacimiento, plumas…, nacimiento]: el 0 y el
+                        // último son los cierres).
+                        if (estilo.Lisas)
+                        {
+                            int porLadoRuna = _geoN / 2;
+                            int kEnLado = i % porLadoRuna;
+                            if (kEnLado == 0 || kEnLado == porLadoRuna - 1)
+                                continue;
+                        }
                         Vector2 val3 = _pozosEje[i][nodoRuna];
                         // v6.127 — LA RUNA CORONA EL BORDILLO DESDE DENTRO
                         // (la cura de la sierra, acto IV): la runa nacía

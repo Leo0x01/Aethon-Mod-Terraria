@@ -59,7 +59,30 @@ namespace AethonMod.Content.Weapons.Investigaciones
             Item.useStyle = ItemUseStyleID.Swing;
             Item.noMelee = true;
             Item.UseSound = SoundID.Item113;
-            Item.DamageType = DamageClass.Summon;
+            // v6.129 — LA CAUSA RAÍZ DE «NO INVOCABA NADA» (la letra: «el
+            // arma cetro de las dagas del eterno no invoca nada, mejora eso
+            // y revisa porque no invoca nada»): el cetro NACIÓ sin
+            // Item.shoot — y el hook Shoot de tModLoader SOLO corre cuando
+            // Item.shoot > 0 (el gatillo del uso: Player.ItemCheck solo
+            // llama a Shoot si el ítem tiene un proyectil que disparar).
+            // El grimorio de la casa lleva Item.shoot = 931 (Nightglow
+            // vanilla) POR ESO: es SOLO el gatillo — aquí el gatillo es el
+            // PROPIO escuadrón (el primer ojo), y Shoot devuelve false:
+            // NADA de vanilla vuela, todo nace del Shoot nuestro.
+            Item.shoot = ModContent.ProjectileType<
+                global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+            Item.shootSpeed = 10f;
+            // v6.129 — NO ES ARMA DE INVOCADOR (la letra: «haz que esta
+            // arma no sea de invocador asi no se ven afectado los
+            // minions»): el cetro era DamageClass.Summon y su escuadrón
+            // cobraba minionSlots — la maquinaria vanilla de puestos
+            // MATABA a los minions que no caben (los del jugador Y los
+            // propios). El cetro pasa a LA CLASE DEL GRIMORIO (Magic — el
+            // daño del escuadrón sigue la ley v6.51 con DanoOjosDelEterno,
+            // independiente de la clase) y el escuadrón YA NO COBRA
+            // puestos (minionSlots 0 en el ojo y la daga): ni desplaza a
+            // los minions del jugador, ni muere por exceso de puestos.
+            Item.DamageType = DamageClass.Magic;
             Item.autoReuse = true;
             Item.value = Item.buyPrice(gold: 20);
             Item.rare = ItemRarityID.Purple;
