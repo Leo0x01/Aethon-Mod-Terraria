@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.127 — LA CAUSA RAÍZ DE LA SIERRA + EL CETRO DE LAS DAGAS + LA LEY DE LOS ANILLOS + LOS COSMÉTICOS PEGADOS + LOS DIÁLOGOS EN SU SITIO
 
-> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+> **PUBLICADA — release 443941877 + CDN verificado byte a byte (md5 9da1d7ad0f3d37bd5fe4dcb21a6920c7)**
 
 ## LA LETRA (el usuario — la sesión 8; el usuario JUGÓ la v6.126)
 
