@@ -90,6 +90,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         public override bool PreDraw(ref Color lightColor)
         {
+            // v6.127 — LA PRESA TRAGADA: el portador está DENTRO del libro
+            // (hideEntirePlayer lo oculta TODO) — el cosmético se apaga CON
+            // él (la letra: «el grimorio debe devorar al jugador en su
+            // conjunto… con todo lo que tiene es devorado» — nada flota
+            // solo junto al festín). Renace cuando la puerta gira.
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado &&
+                Projectile.owner == Main.myPlayer)
+                return false;
             if (Main.dedServ) return false;
 
             Player duenio = Main.player[Projectile.owner];
@@ -211,6 +219,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         public override bool PreDraw(ref Color lightColor)
         {
+            // v6.127 — LA PRESA TRAGADA: el portador está DENTRO del libro
+            // (hideEntirePlayer lo oculta TODO) — el cosmético se apaga CON
+            // él (la letra: «el grimorio debe devorar al jugador en su
+            // conjunto… con todo lo que tiene es devorado» — nada flota
+            // solo junto al festín). Renace cuando la puerta gira.
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado &&
+                Projectile.owner == Main.myPlayer)
+                return false;
             if (Main.dedServ) return false;
 
             Player duenio = Main.player[Projectile.owner];

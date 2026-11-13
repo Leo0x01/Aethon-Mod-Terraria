@@ -2278,6 +2278,21 @@ Items: {
 		Receta: The original recipe: 12× Phantom Dragon Tooth at the Abyssal Altar. Here: wood (research).
 	}
 
+	CetroDagasEterno: {
+		DisplayName: Scepter of the Eternal Daggers
+		Tooltip:
+			'''
+			THE SCEPTER OF THE FULL SQUADRON: one swing brings EVERYTHING
+			at once. Its own counter summons THE 11 ETERNAL EYES AND the
+			FIVE DAGGERS simultaneously — the eyes close their circle
+			and the daggers ride their intimate ring (your bodyguard).
+			The squadron's damage follows the grimoire (the Eternal law).
+			'''
+		Linea1: ✧ THE 11 EYES close their circle around the book's spirit.
+		Linea2: ✧ THE 5 DAGGERS (Crystal · Flame · Rock · Void · Verdict) ride
+		Linea3: their intimate ring, radius 32 — the guard inside the crown.
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -2474,16 +2489,6 @@ Items: {
 
 	CodiceHabilidades: {
 		DisplayName: Codice Habilidades
-		Tooltip: ""
-	}
-
-	CoroDeLosProfundos: {
-		DisplayName: Coro De Los Profundos
-		Tooltip: ""
-	}
-
-	PlumaDelEscribaSanto: {
-		DisplayName: Pluma Del Escriba Santo
 		Tooltip: ""
 	}
 
@@ -3045,16 +3050,14 @@ Eco: {
 	}
 
 	// v6.124 — THE INNER WORLD'S EXCLUSIVE DIALOGUE SET.
-	Interior: {
-		Interior1: You are inside… do you notice? Even the silence here tastes of ink.
-		Interior2: Everything I ever ate lives in these walls. Walk them with respect.
-		Interior3: The sky's tentacles are my breathing. Don't worry: they don't bite their owner.
-		Interior4: If you hear pages turning… it is not the wind. It's me, dreaming what I devoured.
-		Interior5: This plain was once a whole library. Now it is ONE page. I learned to fold.
-		Interior6: The mists here remember every boss. The one brushing you… that one cost me the most.
-		Interior7: Want to leave? The pillar is my only door. I also have a spine, of another kind.
-		Interior8: Stay as long as you wish… but don't fall asleep: dreams, in here, are contagious to me.
-	}
+	Interior1: You are inside… do you notice? Even the silence here tastes of ink.
+	Interior2: Everything I ever ate lives in these walls. Walk them with respect.
+	Interior3: The sky's tentacles are my breathing. Don't worry: they don't bite their owner.
+	Interior4: If you hear pages turning… it is not the wind. It's me, dreaming what I devoured.
+	Interior5: This plain was once a whole library. Now it is ONE page. I learned to fold.
+	Interior6: The mists here remember every boss. The one brushing you… that one cost me the most.
+	Interior7: Want to leave? The pillar is my only door. I also have a spine, of another kind.
+	Interior8: Stay as long as you wish… but don't fall asleep: dreams, in here, are contagious to me.
 }
 
 Furia: {
@@ -3115,19 +3118,9 @@ Hambre: {
 	
 	
 	
-
-
-	Cultistas: {
-		Burla1: (The Eternal mutters from the bag) Fools… kneeling before a FALSE god. I, at least, EXIST.
-		Burla2: (The Eternal laughs between pages) They never paid me tribute. That is why they will all die.
-		Burla3: (The Eternal whispers) Look how they tremble before their idol. They should be praying to ME… and be grateful I am not yet hungry for them.
-		Vencido1: (The Eternal savors the moment) One less praying to the void. The world breathes better.
-		Vencido2: (The Eternal turns a page) He fell for his misplaced faith. I WOULD have listened… had they paid me tribute.
-		Devorado: (The Eternal swallows) Mmm… it tasted of cold fanaticism. What a delicious disgust.
-		PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you.
-		ElJefe: (The Eternal roars with laughter) LOOK! The false prophet himself! Pray, hooded little man… you pray to NOBODY. The tribute you never gave me will be collected by MY hunger.
-	}
-
+	
+	
+	
 	Nervioso: {
 		Tranquilo: El cazador espera. Vigila, paciente, con apetito.
 		Hambriento: HAMBRIENTO — con el 25% ya quiere salir a cazar.
@@ -3143,6 +3136,17 @@ Hambre: {
 		Absorbe: "{0}% hambre"
 		Nivel: Nivel {0} · XP {1}/{2}
 	}
+}
+
+Cultistas: {
+	Burla1: (The Eternal mutters from the bag) Fools… kneeling before a FALSE god. I, at least, EXIST.
+	Burla2: (The Eternal laughs between pages) They never paid me tribute. That is why they will all die.
+	Burla3: (The Eternal whispers) Look how they tremble before their idol. They should be praying to ME… and be grateful I am not yet hungry for them.
+	Vencido1: (The Eternal savors the moment) One less praying to the void. The world breathes better.
+	Vencido2: (The Eternal turns a page) He fell for his misplaced faith. I WOULD have listened… had they paid me tribute.
+	Devorado: (The Eternal swallows) Mmm… it tasted of cold fanaticism. What a delicious disgust.
+	PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you.
+	ElJefe: (The Eternal roars with laughter) LOOK! The false prophet himself! Pray, hooded little man… you pray to NOBODY. The tribute you never gave me will be collected by MY hunger.
 }
 
 Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
@@ -3562,6 +3566,8 @@ Armas: {
 	DagaInvocada4: ✧ THE DAGGER OF THE VOID joins the squad! — impales its prey and drips the void
 	DagaInvocada5: ✧ THE DAGGER OF THE VERDICT joins the squad! — marks its prey and passes sentence (150%)
 	DagasLlenas: ✧ The five daggers of the Eternal live: further summons empower the eyes again (+50% damage per empowerment)
+	CetroEscuadron: ✧ THE SCEPTER RAISES THE FULL SQUADRON! ({0} eyes · {1} daggers — all at once)
+	CetroCompleto: ✧ The squadron is already complete: 11 eyes and 5 daggers live — the scepter refreshes their icons.
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 

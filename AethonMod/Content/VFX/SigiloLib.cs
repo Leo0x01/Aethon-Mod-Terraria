@@ -260,9 +260,10 @@ namespace AethonMod.Content.VFX
         /// <param name="punta">Color de la punta pálida.</param>
         /// <param name="brillo">Multiplicador global (0..1+).</param>
         /// <param name="perla">Dibujar la perla encima del glifo.</param>
+        /// <param name="glowK">v6.127 — Multiplicador del resplandor de fondo (1 = entero; las runas que viven SOBRE un bordillo luminoso — las alas del vacío — lo recogen para no sangrar fuera de la silueta).</param>
         public static void Runa(Vector2 pos, float rot, Vector2[][] alfabeto, int indice,
             float escala, float time, float fase, Color cuerpo, Color punta,
-            float brillo, bool perla = true)
+            float brillo, bool perla = true, float glowK = 1f)
         {
             if (brillo <= 0.02f || escala <= 0.05f) return;
             Vector2[] strokes = alfabeto[indice % alfabeto.Length];
@@ -272,7 +273,7 @@ namespace AethonMod.Content.VFX
 
             // Resplandor suave DETRÁS (el grabado ardiendo).
             VFXCore.Quad(pos, Tint(cuerpo, 0.20f * pulse * brillo),
-                new Vector2(34f * escala, 34f * escala), 0f, Glow);
+                new Vector2(34f * escala * glowK, 34f * escala * glowK), 0f, Glow);
 
             // Los TRAZOS del glifo (rotados al marco pedido).
             for (int s = 0; s < strokes.Length; s += 2)

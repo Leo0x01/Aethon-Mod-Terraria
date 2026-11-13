@@ -2288,6 +2288,21 @@ Items: {
 		Receta: La receta del original: 12× Colmillo de Dragón Fantasma en el Altar del Abismo. Aquí: madera (investigación).
 	}
 
+	CetroDagasEterno: {
+		DisplayName: Cetro de las Dagas del Eterno
+		Tooltip:
+			'''
+			EL CETRO DEL ESCUADRÓN COMPLETO: una sola vara y TODO a la vez.
+			Su propio contador invoca LOS 11 OJOS DEL ETERNO Y A LA VEZ LAS
+			CINCO DAGAS simultáneamente — los ojos cierran su círculo y las
+			dagas montan su anillo íntimo (la guardia del portador).
+			El daño del escuadrón sigue al grimorio (la ley del Eterno).
+			'''
+		Linea1: ✧ LOS 11 OJOS cierran su círculo alrededor del espíritu del libro.
+		Linea2: ✧ LAS 5 DAGAS (Cristal · Llama · Roca · Vacío · Veredicto) montan
+		Linea3: su anillo íntimo de radio 32 — la guardia dentro de la corona.
+	}
+
 	RenglonFinal: {
 		DisplayName: El Renglón Final
 		Tooltip:
@@ -3056,16 +3071,14 @@ Eco: {
 	// las armas, NO celebra a los jefes — SOLO habla ESTE repertorio
 	// (la voz del Eterno soñando su propia panza, cada ~25 s y en cada
 	// momento que antes hablaba otra voz).
-	Interior: {
-		Interior1: Estás dentro… ¿lo notas? Aquí hasta el silencio tiene sabor a tinta.
-		Interior2: Todo lo que comí vive en estas paredes. Camínalas con respeto.
-		Interior3: Los tentáculos del cielo son mi respiración. No te apures: no muerden a su dueño.
-		Interior4: Si escuchas páginas girar… no es el viento. Soy yo, soñando lo que devoré.
-		Interior5: Este llano fue una biblioteca entera. Ahora es UNA página. Aprendí a plegar.
-		Interior6: Las brumas de aquí recuerdan a cada jefe. La que te roza… esa es del que más me costó.
-		Interior7: ¿Quieres salir? El pilar es mi única puerta. Yo también tengo una columna, de otro tipo.
-		Interior8: Quédate el tiempo que quieras… pero no te duermas: los sueños, aquí dentro, se me contagian.
-	}
+	Interior1: Estás dentro… ¿lo notas? Aquí hasta el silencio tiene sabor a tinta.
+	Interior2: Todo lo que comí vive en estas paredes. Camínalas con respeto.
+	Interior3: Los tentáculos del cielo son mi respiración. No te apures: no muerden a su dueño.
+	Interior4: Si escuchas páginas girar… no es el viento. Soy yo, soñando lo que devoré.
+	Interior5: Este llano fue una biblioteca entera. Ahora es UNA página. Aprendí a plegar.
+	Interior6: Las brumas de aquí recuerdan a cada jefe. La que te roza… esa es del que más me costó.
+	Interior7: ¿Quieres salir? El pilar es mi única puerta. Yo también tengo una columna, de otro tipo.
+	Interior8: Quédate el tiempo que quieras… pero no te duermas: los sueños, aquí dentro, se me contagian.
 }
 
 Furia: {
@@ -3128,16 +3141,6 @@ Hambre: {
 	
 
 
-	Cultistas: {
-		Burla1: «(El Eterno murmura desde la bolsa) Tontos… arrodillados ante un dios FALSO. Yo al menos EXISTO.»
-		Burla2: «(El Eterno ríe entre páginas) Nunca me rindieron tributo. Por eso van a morir todos.»
-		Burla3: «(El Eterno susurra) Mira cómo tiemblan ante su ídolo. Deberían rezarme a MÍ… y agradecer que aún no tengo hambre de ellos.»
-		Vencido1: «(El Eterno saborea el momento) Uno menos que reza al vacío. El mundo respira mejor.»
-		Vencido2: «(El Eterno pasa una página) Cayó por su fe mal puesta. Yo LO habría escuchado… si me hubieran dado tributo.»
-		Devorado: «(El Eterno traga) Mmm… sabía a fanatismo frío. Qué asco tan delicioso.»
-		PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
-		ElJefe: «(El Eterno ruge de risa) ¡MIRA! ¡El falso profeta en persona! Reza, enano encapuchado… rezas a NADIE. El tributo que nunca me dieron lo cobrará MI hambre.»
-	}
 
 	Nervioso: {
 		Tranquilo: El cazador espera. Vigila, paciente, con apetito.
@@ -3154,6 +3157,18 @@ Hambre: {
 		Absorbe: "{0}% hambre"
 		Nivel: Nivel {0} · XP {1}/{2}
 	}
+}
+
+
+Cultistas: {
+	Burla1: «(El Eterno murmura desde la bolsa) Tontos… arrodillados ante un dios FALSO. Yo al menos EXISTO.»
+	Burla2: «(El Eterno ríe entre páginas) Nunca me rindieron tributo. Por eso van a morir todos.»
+	Burla3: «(El Eterno susurra) Mira cómo tiemblan ante su ídolo. Deberían rezarme a MÍ… y agradecer que aún no tengo hambre de ellos.»
+	Vencido1: «(El Eterno saborea el momento) Uno menos que reza al vacío. El mundo respira mejor.»
+	Vencido2: «(El Eterno pasa una página) Cayó por su fe mal puesta. Yo LO habría escuchado… si me hubieran dado tributo.»
+	Devorado: «(El Eterno traga) Mmm… sabía a fanatismo frío. Qué asco tan delicioso.»
+	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
+	ElJefe: «(El Eterno ruge de risa) ¡MIRA! ¡El falso profeta en persona! Reza, enano encapuchado… rezas a NADIE. El tributo que nunca me dieron lo cobrará MI hambre.»
 }
 
 Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
@@ -3573,6 +3588,8 @@ Armas: {
 	DagaInvocada4: ✧ ¡LA DAGA DEL VACÍO se une al escuadrón! — se clava en su presa y gotea el vacío
 	DagaInvocada5: ✧ ¡LA DAGA DEL VEREDICTO se une al escuadrón! — marca a su presa y la sentencia (150%)
 	DagasLlenas: ✧ Las cinco dagas del Eterno viven: las invocaciones vuelven a fortalecer a los ojos (+50% de daño por mejora)
+	CetroEscuadron: ✧ ¡EL CETRO ALZA AL ESCUADRÓN ENTERO! ({0} ojos · {1} dagas — todo a la vez)
+	CetroCompleto: ✧ El escuadrón ya está completo: los 11 ojos y las 5 dagas viven — la vara refresca sus iconos.
 	OjosAlMaximo: Los once ojos ya llevan sus cuatro mejoras: no queda nada que fortalecer.
 }
 

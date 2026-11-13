@@ -971,6 +971,15 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Investigaciones.DazzlingStabberStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Investigaciones.ArbitradorII>(), 1));
             l.Add((ModContent.ItemType<Weapons.Investigaciones.ElPrincipioYElFin>(), 1));
+            // v6.127 — EL CETRO DE LAS DAGAS DEL ETERNO (la letra: «las
+            // dagas no van en el grimorio por ahora, es contenido de
+            // prueba… crea un arma nueva que invoque las 5 dagas en la
+            // posición correcta, que tenga su propio contador de minions,
+            // y ese contador invoque los 11 ojos Y a la vez las 5 dagas
+            // simultáneamente»): el arma de prueba del escuadrón COMPLETO
+            // — una sola vara y la formación entera (los ojos + SUS
+            // dagas). Mana 0: la regla de las armas de investigación.
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.CetroDagasEterno>(), 1));
             return l;
         }
     }

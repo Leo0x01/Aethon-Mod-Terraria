@@ -12,42 +12,31 @@ using AethonMod.Content.Particles;
 namespace AethonMod.Content.Weapons.Definitivas
 {
     // ======================================================================
-    //  v6.124 — EL JUICIO DE LOS DOS SOLES, RECONSTRUIDO CON LOS SOLES
-    //  RÚNICOS DE LA CASA (la letra del usuario: «el juicio de los dos
-    //  soles es raro, no usan los soles runicos que tenemos como base
-    //  para sus soles y todavia hay una textura plana y rectangular en
-    //  la explocion lo cual es raro»).
+    //  v6.127 — LA CEREMONIA MEJORADA + LA LEY DE LOS ANILLOS (la letra del
+    //  usuario: «la animación actual es insatisfactoria, mejórala» + «máximo
+    //  1 anillo rúnico por sol; al fusionarse deben verse 3 anillos»).
     //
-    //  LA AUTOPSIA DE LA v6.122: las «esferas» eran UNA ESTRELLA DE 4
-    //  PUNTAS de 16 px (Star.png) estirada — no soles; y el destello
-    //  final pintaba NovaBurst y DestelloFinal, DOS texturas casi
-    //  CUADRADAS llenas (la fila central de la NovaBurst va de borde a
-    //  borde a 255) — «la textura plana y rectangular» de la letra.
+    //  LA LEY DE LOS ANILLOS: cada sol sencillo lleva UN SOLO anillo rúnico
+    //  (la corona mínima — antes cargaban OCHO cada uno, un mercado de
+    //  aros); EL SOL FUSIONADO es el único que merece TRES (la corona
+    //  completa de la sentencia — nace con 3, vive con 3, muere con 3).
     //
-    //  LA RECONSTRUCCIÓN — TODO ES EL CÓDIGO DE SOLES DEL PROYECTO:
-    //    · LOS DOS SOLES SON SOLES RÚNICOS DE VERDAD: el CUERPO SOLAR
-    //      es RuneSunRenderer.DrawSunBody (EL MISMO disco de plasma
-    //      SunShader con granulación dendrítica, limbo y manchas que
-    //      viste a TODOS los soles del mod) y los ANILLOS son
-    //      RuneSunRenderer.EmitRingSystem (EL MISMO emisor de SigiloLib
-    //      — los aros elípticos con glifos rúnicos cabalgando la órbita
-    //      de la familia de soles rúnicos). El SOL BLANCO lleva la
-    //      paleta blanco-oro; el SOL NEGRO, la negro-violeta (la lección
-    //      v6.101: el negro solo existe si su borde arde — su backglow
-    //      violeta y SUS ANILLOS RÚNICOS lo recortan del mundo).
-    //    · LA FUSIÓN: los dos soles espiralan uno dentro del otro y
-    //      nace EL SOL FUSIONADO — un sol MÁS GRANDE Y DEVASTADOR (×2,1
-    //      el cuerpo, el DOBLE de anillos rúnicos) que se hincha y
-    //      enrojece mientras carga la sentencia.
-    //    · LA EXPLOSIÓN ES LA NOVA DE LOS SOLES DE LA CASA (el patrón
-    //      de RuneSunProjectile.OnKill): TODO redondo y orgánico — el
-    //      DOBLE círculo de BRUMA dorada (BrumaNacimientoFX, modo 3), la
-    //      CHISPA central (ParticlePresets.Explosion), la LLUVIA de
-    //      runas de eco doradas, el ANILLO DE CHOQUE (OndaLib.Shock —
-    //      la onda circular de la casa) y el sol muriendo EN la luz (su
-    //      cuerpo fundiéndose con alphaMul). CERO texturas planas: ni
-    //      Star, ni NovaBurst, ni DestelloFinal — el examen de la letra
-    //      queda cerrado.
+    //  LA ANIMACIÓN — LA MUERTE DE UNA BINARIA (el guion nuevo, el drama
+    //  de verdad — la v6.126 espiralaba a velocidad CONSTANTE y el sol
+    //  fusionado nacía a media fusión, sin contacto, sin destello):
+    //    ACTO 1 · LA CONVOCATORIA — los dos soles CRECEN mientras vuelan
+    //      (nacen chicos, llegan gordos) y dejan ESTELAS de su fuego.
+    //    ACTO 2 · LA ESPIRAL DE MUERTE — los soles orbitan su centro común
+    //      y la órbita SE CAE: el giro ACELERA (la ley de Kepler — mientras
+    //      el radio se hunde, la velocidad sube) hasta el CONTACTO: el
+    //      DESTELLO DE FUSIÓN (la luz blanca) y el sol fusionado NACE DEL
+    //      CHOQUE — nada nace antes del contacto.
+    //    ACTO 3 · LA CARGA — el gigante se hincha, enrojece, TIEMBLA, sus
+    //      TRES anillos GIRAN CADA VEZ MÁS RÁPIDO y el polvo cercano CAE
+    //      al interior (la succión de la sentencia).
+    //    ACTO 4 · LA NOVA — EL COLAPSO: el sol SE CONTRAE de golpe (el
+    //      núcleo plegándose, la luz APAGÁNDOSE)… y al fondo del colapso
+    //      LA NOVA: la onda, la bruma, las runas — la sentencia.
     // ======================================================================
     public class JuicioDosSoles : ModItem
     {
@@ -109,9 +98,18 @@ namespace AethonMod.Content.Weapons.Definitivas
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         private const int T_CONVOCATORIA = 36;   // los dos soles vuelan al punto
-        private const int T_FUSION = 30;         // espiralan y EL SOL FUSIONADO nace
-        private const int T_CARGA = 22;          // el sol fusionado se hincha (la sentencia)
-        private const int T_NOVA = 42;           // LA NOVA (la explosión del sol)
+        private const int T_FUSION = 34;         // la espiral de muerte y el contacto
+        private const int T_CARGA = 24;          // el sol fusionado se hincha (la sentencia)
+        private const int T_NOVA = 46;           // el colapso y LA NOVA
+
+        /// <summary>v6.127 — EL CONTACTO: la fracción de la espiral donde
+        /// los dos soles SE TOCAN (el resto del acto es el nacimiento del
+        /// gigante — nada nace antes del choque).</summary>
+        private const float P_CONTACTO = 0.78f;
+
+        /// <summary>v6.127 — EL COLAPSO: los primeros ticks de la nova en
+        /// que el sol se PLEGA antes de estallar.</summary>
+        private const int T_COLAPSO = 7;
 
         /// <summary>El reloj del acto actual.</summary>
         private float _t;
@@ -142,78 +140,133 @@ namespace AethonMod.Content.Weapons.Definitivas
             // EL RELOJ DE LOS ACTOS
             if (_acto == 0 && _t > T_CONVOCATORIA) { _acto = 1; _t = 0; }
             else if (_acto == 1 && _t > T_FUSION) { _acto = 2; _t = 0; }
-            else if (_acto == 2 && _t > T_CARGA) { _acto = 3; _t = 0; NacerLaNova(); }
+            else if (_acto == 2 && _t > T_CARGA) { _acto = 3; _t = 0; }
             else if (_acto == 3 && _t > T_NOVA) { Projectile.Kill(); return; }
+
+            // v6.127 — LA NOVA ESTALLA AL FONDO DEL COLAPSO (no al empezar
+            // el acto: el sol se pliega primero — la sentencia cae cuando
+            // el núcleo ya tocó fondo)
+            if (_acto == 3 && _t == T_COLAPSO) NacerLaNova();
 
             Projectile.Center = Punto;
 
             if (_acto == 0)
             {
                 // === ACTO 1 — LA CONVOCATORIA: los DOS SOLES RÚNICOS
-                //     vuelan al punto — la luz siembra ORO, la oscuridad
-                //     siembra vacío invertido (la firma de siempre) ===
-                if (!Main.dedServ && Main.rand.NextBool(2))
+                //     CRECEN mientras vuelan a la cita y dejan SU ESTELA
+                //     (la luz siembra ORO, la oscuridad VACÍO INVERTIDO) ===
+                float p = MathHelper.Clamp(_t / (float)T_CONVOCATORIA, 0f, 1f);
+                float suave = p * p * (3f - 2f * p);
+                if (!Main.dedServ)
                 {
-                    bool esLuz = Main.rand.NextBool();
-                    Vector2 semilla = Punto + (esLuz ? new Vector2(-260f, 0f) : new Vector2(260f, 0f)) +
-                        Main.rand.NextVector2Circular(60f, 60f);
-                    Dust d = Dust.NewDustPerfect(semilla,
-                        esLuz ? DustID.GoldFlame : DustID.Shadowflame,
-                        -Vector2.Normalize(Punto - semilla) * Main.rand.NextFloat(2f, 5f),
-                        0, esLuz ? new Color(255, 226, 150) : new Color(150, 84, 235), 0.9f);
-                    d.noGravity = true;
+                    for (int lado = 0; lado < 2; lado++)
+                    {
+                        bool esLuz = lado == 0;
+                        Vector2 pos = PosicionSolSencillo(esLuz, suave, Main.GlobalTimeWrappedHourly);
+                        Vector2 prev = PosicionSolSencillo(esLuz, Math.Max(0f, suave - 0.06f), Main.GlobalTimeWrappedHourly);
+                        Vector2 hacia = pos - prev;
+                        if (Main.rand.NextBool(2) && hacia.LengthSquared() > 0.01f)
+                        {
+                            Dust d = Dust.NewDustPerfect(pos + Main.rand.NextVector2Circular(14f, 14f),
+                                esLuz ? DustID.GoldFlame : DustID.Shadowflame,
+                                -Vector2.Normalize(hacia) * Main.rand.NextFloat(1.2f, 3f),
+                                0, esLuz ? new Color(255, 226, 150) : new Color(150, 84, 235), 0.9f);
+                            d.noGravity = true;
+                        }
+                    }
                 }
             }
             else if (_acto == 1)
             {
-                // === ACTO 2 — LA FUSIÓN: los soles espiralan y TODO el
-                //     polvo cercano CAE al centro (la succión de antes,
-                //     intacta — el tirón de la casa) ===
-                if (!Main.dedServ && Main.rand.NextBool(3))
+                // === ACTO 2 — LA ESPIRAL DE MUERTE: la órbita SE CAE, el
+                //     giro ACELERA (Kepler) y TODO el polvo cercano cae al
+                //     centro; al CONTACTO: el destello y el terremoto ===
+                float p = MathHelper.Clamp(_t / (float)T_FUSION, 0f, 1f);
+                if (!Main.dedServ)
                 {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    float lejos = Main.rand.NextFloat(180f, 420f);
-                    Vector2 pos = Punto + ang.ToRotationVector2() * lejos;
-                    Dust d = Dust.NewDustPerfect(pos,
-                        Main.rand.NextBool(3) ? DustID.GoldFlame : DustID.Shadowflame,
-                        -ang.ToRotationVector2() * (lejos / 14f), 0,
-                        new Color(200, 150, 255), 1.1f);
-                    d.noGravity = true;
-                }
-                if (_t == T_FUSION && !Main.dedServ)
-                {
-                    Terraria.Audio.SoundEngine.PlaySound(
-                        SoundID.Item122.WithPitchOffset(0.35f), Punto);
-                    OndaLib.Kick(6f, 14);
+                    if (Main.rand.NextBool(3))
+                    {
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float lejos = Main.rand.NextFloat(180f, 420f);
+                        Vector2 pos = Punto + ang.ToRotationVector2() * lejos;
+                        Dust d = Dust.NewDustPerfect(pos,
+                            Main.rand.NextBool(3) ? DustID.GoldFlame : DustID.Shadowflame,
+                            -ang.ToRotationVector2() * (lejos / 14f), 0,
+                            new Color(200, 150, 255), 1.1f);
+                        d.noGravity = true;
+                    }
+                    // el RETUMBE crece con la caída de la órbita
+                    if (p > 0.3f && _t % 4 == 0)
+                        OndaLib.Kick(1 + (int)(5f * p), 10);
+                    // EL CONTACTO: el destello de fusión (oro + violeta
+                    // cruzados — los dos fuegos abrazándose)
+                    if (p >= P_CONTACTO && _t <= P_CONTACTO * T_FUSION + 5)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            bool oro = Main.rand.NextBool();
+                            float a = Main.rand.NextFloat(MathHelper.TwoPi);
+                            Dust d = Dust.NewDustPerfect(Punto,
+                                oro ? DustID.GoldFlame : DustID.Shadowflame,
+                                a.ToRotationVector2() * Main.rand.NextFloat(4f, 11f), 0,
+                                oro ? new Color(255, 240, 190) : new Color(180, 120, 255), 1.4f);
+                            d.noGravity = true;
+                        }
+                    }
+                    if (p >= P_CONTACTO && _t <= P_CONTACTO * T_FUSION + 1)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(0.35f), Punto);
+                        OndaLib.Kick(8f, 18);
+                    }
                 }
             }
             else if (_acto == 2)
             {
-                // === ACTO 3 — LA CARGA: el SOL FUSIONADO se hincha — la
-                //     gigante de los soles de la casa (enrojece, tiembla
-                //     y su luz inunda) ===
+                // === ACTO 3 — LA CARGA: el SOL FUSIONADO se hincha, TIEMBLA,
+                //     su luz INUNDA y el polvo CAE al interior (la succión
+                //     de la sentencia) ===
                 float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
                 if (!Main.dedServ)
                 {
                     Lighting.AddLight(Punto, new Vector3(2.2f, 1.8f, 1.2f) * (0.6f + rg));
+                    if (Main.rand.NextBool(2))
+                    {
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        float lejos = Main.rand.NextFloat(140f, 380f);
+                        Dust d = Dust.NewDustPerfect(Punto + ang.ToRotationVector2() * lejos,
+                            Main.rand.NextBool(2) ? DustID.GoldFlame : DustID.Enchanted_Pink,
+                            -ang.ToRotationVector2() * (lejos / 26f), 0,
+                            Color.Lerp(new Color(255, 226, 150), new Color(255, 150, 90), rg), 1.2f);
+                        d.noGravity = true;
+                    }
                     if (Main.rand.NextBool(3))
-                        OndaLib.Kick(1 + (int)(4f * rg));
+                        OndaLib.Kick(1 + (int)(5f * rg), 12);
                 }
             }
             else
             {
-                // === ACTO 4 — LA NOVA: la luz inunda el mundo (2 s de
-                //     día dentro del juicio) + la lluvia dorada ===
+                // === ACTO 4 — LA NOVA: primero EL COLAPSO (el núcleo se
+                //     pliega, la luz SE APAGA)… y al fondo, la explosión:
+                //     la luz INUNDA y la lluvia dorada cae ===
                 if (!Main.dedServ)
                 {
-                    float vida = Math.Max(0f, 1f - _t / T_NOVA);
-                    Lighting.AddLight(Punto, new Vector3(2.6f, 2.3f, 1.6f) * vida);
-                    if (_t < 14 && Main.rand.NextBool(2))
+                    if (_t < T_COLAPSO)
                     {
-                        Dust d = Dust.NewDustPerfect(Punto, DustID.GoldFlame,
-                            Main.rand.NextVector2Circular(11f, 11f), 0,
-                            new Color(255, 244, 204), Main.rand.NextFloat(1.1f, 2f));
-                        d.noGravity = true;
+                        float plega = _t / (float)T_COLAPSO;
+                        Lighting.AddLight(Punto, new Vector3(2.2f, 1.8f, 1.2f) * (0.9f - 0.72f * plega));
+                    }
+                    else
+                    {
+                        float vida = Math.Max(0f, 1f - (_t - T_COLAPSO) / (T_NOVA - T_COLAPSO));
+                        Lighting.AddLight(Punto, new Vector3(2.6f, 2.3f, 1.6f) * vida);
+                        if (_t < T_COLAPSO + 14 && Main.rand.NextBool(2))
+                        {
+                            Dust d = Dust.NewDustPerfect(Punto, DustID.GoldFlame,
+                                Main.rand.NextVector2Circular(11f, 11f), 0,
+                                new Color(255, 244, 204), Main.rand.NextFloat(1.1f, 2f));
+                            d.noGravity = true;
+                        }
                     }
                 }
             }
@@ -290,70 +343,118 @@ namespace AethonMod.Content.Weapons.Definitivas
 
                 if (_acto == 0)
                 {
-                    // === LOS DOS SOLES RÚNICOS volando al punto ===
+                    // === LOS DOS SOLES RÚNICOS volando a la cita: CRECEN
+                    //     mientras vuelan (nacen chicos, llegan gordos) —
+                    //     UN SOLO ANILLO cada uno (la ley de la letra) ===
                     float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
-                    p = p * p * (3f - 2f * p);
-                    for (int lado = 0; lado < 2; lado++)
-                        DibujarSolSencillo(lado == 0, p, gt);
-                }
-                else if (_acto == 1)
-                {
-                    // === LA FUSIÓN: los dos soles espiralan uno dentro
-                    //     del otro, encogiéndose — y al final EL SOL
-                    //     FUSIONADO NACE y CRECE (el sol más grande y
-                    //     devastador de la letra) ===
-                    float p = MathHelper.Clamp(_t / T_FUSION, 0f, 1f);
-                    float radio = MathHelper.Lerp(210f, 26f, p);
+                    float suave = p * p * (3f - 2f * p);
+                    float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.5f, 0.92f, suave);
                     for (int lado = 0; lado < 2; lado++)
                     {
                         bool luz = lado == 0;
-                        float ang = gt * 5.5f + lado * MathHelper.Pi + p * 9f;
-                        Vector2 pos = Punto + ang.ToRotationVector2() * radio;
-                        float r = MathHelper.Lerp(RuneSunRenderer.BodyPx * 0.92f,
-                            RuneSunRenderer.BodyPx * 0.34f, p);
-                        DibujarSol(luz, pos, r, gt, 8, rg: 0f, alpha: 1f,
+                        Vector2 pos = PosicionSolSencillo(luz, suave, gt);
+                        DibujarSol(luz, pos, r, gt, 1, rg: 0f, alpha: 1f,
                             seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                     }
-                    // EL SOL FUSIONADO: nace en el centro a media fusión y
-                    // crece hasta su tamaño de sentencia (×2,1 el cuerpo).
-                    if (p > 0.45f)
+                }
+                else if (_acto == 1)
+                {
+                    // === LA ESPIRAL DE MUERTE: la órbita SE CAE (empieza
+                    //     ancha y serena, el PLUNGE final la plega de
+                    //     golpe) y el giro ACELERA (la ley de Kepler — el
+                    //     ángulo come el cuadrado del progreso) hasta el
+                    //     CONTACTO: el DESTELLO y el gigante NACE DEL
+                    //     CHOQUE. UN ANILLO por sol, hasta tocarse ===
+                    float p = MathHelper.Clamp(_t / (float)T_FUSION, 0f, 1f);
+                    float pc = MathHelper.Clamp(p / P_CONTACTO, 0f, 1f);   // el tramo espiral
+                    if (p < P_CONTACTO)
                     {
-                        float n = MathHelper.Clamp((p - 0.45f) / 0.55f, 0f, 1f);
-                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.5f, 1.05f, n);
-                        DibujarSolFusionado(Punto, r, gt, 12, rg: 0f, alpha: n);
+                        // LA ÓRBITA QUE SE CAE: lenta arriba, el plunge al final
+                        float caida = pc * pc * (3f - 2f * pc);
+                        caida = MathF.Pow(caida, 1.45f);
+                        float radio = MathHelper.Lerp(190f, 24f, caida);
+                        // EL GIRO QUE ACELERA (Kepler: ω ∝ 1/r — el cuadrado
+                        // del progreso come vueltas)
+                        float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+                        for (int lado = 0; lado < 2; lado++)
+                        {
+                            bool luz = lado == 0;
+                            Vector2 pos = Punto + (ang + (luz ? 0f : MathHelper.Pi)).ToRotationVector2() * radio;
+                            float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.92f, 0.55f, caida);
+                            DibujarSol(luz, pos, r, gt, 1, rg: 0f, alpha: 1f,
+                                seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
+                        }
+                    }
+                    else
+                    {
+                        // EL DESTELLO DE CONTACTO (la luz blanca de fusión
+                        // — se apaga en lo que queda del acto) + EL
+                        // GIGANTE NACIDO DEL CHOQUE (nace grande, se
+                        // asienta al tamaño de la sentencia) — TRES ANILLOS
+                        float n = MathHelper.Clamp((p - P_CONTACTO) / (1f - P_CONTACTO), 0f, 1f);
+                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.7f, 1.05f, n * n * (3f - 2f * n));
+                        DibujarSolFusionado(Punto, r, gt, 3, rg: 0f, alpha: 1f);
+                        if (n < 0.85f)
+                        {
+                            VFXCore.Begin();
+                            try
+                            {
+                                float f = 1f - n / 0.85f;
+                                Vector2 dPos = Punto - Main.screenPosition;
+                                float fr = 460f * (0.35f + 0.75f * (1f - f));
+                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 250, 235), 0.85f * f * f),
+                                    new Vector2(fr, fr), 0f);
+                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 230, 170), 0.5f * f * f * f),
+                                    new Vector2(fr * 1.6f, fr * 1.6f), 0f);
+                            }
+                            finally { VFXCore.FlushAdditive(null, false); }
+                        }
                     }
                 }
                 else if (_acto == 2)
                 {
-                    // === LA CARGA: el sol fusionado se HINCHA y enrojece
-                    //     (la gigante final de los soles de la casa) ===
+                    // === LA CARGA: el gigante se HINCHA, enrojece, TIEMBLA
+                    //     y sus TRES ANILLOS giran cada vez MÁS RÁPIDO (el
+                    //     tiempo del sistema se acelera con la carga) ===
                     float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
                     float r = RuneSunRenderer.BodyPx *
                         (1.05f + 0.55f * rg * rg + 0.12f * MathF.Sin(gt * 18f) * rg);
-                    DibujarSolFusionado(Punto, r, gt, 14, rg, alpha: 1f);
+                    DibujarSolFusionado(Punto, r, gt * (1f + 1.8f * rg), 3, rg, alpha: 1f);
                 }
                 else
                 {
-                    // === LA NOVA: el sol muere EN la luz — su cuerpo se
-                    //     funde (alphaMul) mientras el ANILLO DE CHOQUE
-                    //     redondo de la casa se expande. NADA de texturas
-                    //     planas: solo el sol, la onda y la bruma ===
-                    float p = MathHelper.Clamp(_t / T_NOVA, 0f, 1f);
-                    float apaga = 1f - p;
-                    float r = RuneSunRenderer.BodyPx *
-                        (1.6f + 0.5f * Math.Min(1f, _t / 6f)) * (0.85f + 0.15f * apaga);
-                    DibujarSolFusionado(Punto, r, gt, 16, rg: 1f,
-                        alpha: MathF.Min(1f, apaga * 1.8f));
-
-                    VFXCore.AbrirAdditive();
-                    try
+                    // === LA NOVA — EL COLAPSO Y LA LUZ: primero el sol SE
+                    //     PLEGA (se contrae y APAGA — el núcleo tocando
+                    //     fondo)… y al fondo del colapso ESTALLA: se
+                    //     hincha hasta el doble, se funde en la luz y el
+                    //     ANILLO DE CHOQUE redondo de la casa barre el
+                    //     mundo. TRES ANILLOS hasta el final ===
+                    if (_t < T_COLAPSO)
                     {
-                        OndaLib.Shock(Main.spriteBatch, Punto - Main.screenPosition,
-                            MathHelper.Clamp(_t / 26f, 0f, 1f),
-                            1.5f + 4.5f * Math.Min(1f, _t / 7f),
-                            new Color(255, 232, 170), 0.8f * apaga, 7, 14f);
+                        float plega = _t / (float)T_COLAPSO;
+                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(1.6f, 0.7f, plega * plega);
+                        DibujarSolFusionado(Punto, r, gt * 2.8f, 3, rg: 1f,
+                            alpha: 1f - 0.45f * plega);
                     }
-                    finally { VFXCore.RestaurarLoteVanilla(); }
+                    else
+                    {
+                        float p = MathHelper.Clamp((_t - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO), 0f, 1f);
+                        float apaga = 1f - p;
+                        float r = RuneSunRenderer.BodyPx *
+                            (0.7f + 1.45f * Math.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
+                        DibujarSolFusionado(Punto, r, gt * 3.2f, 3, rg: 1f,
+                            alpha: MathF.Min(1f, apaga * 1.8f));
+
+                        VFXCore.AbrirAdditive();
+                        try
+                        {
+                            OndaLib.Shock(Main.spriteBatch, Punto - Main.screenPosition,
+                                MathHelper.Clamp((_t - T_COLAPSO) / 26f, 0f, 1f),
+                                1.5f + 4.5f * Math.Min(1f, (_t - T_COLAPSO) / 7f),
+                                new Color(255, 232, 170), 0.8f * apaga, 7, 14f);
+                        }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
+                    }
                 }
 
                 VFXCore.ReabrirLoteVanilla();
@@ -362,16 +463,19 @@ namespace AethonMod.Content.Weapons.Definitivas
             return false;
         }
 
-        /// <summary>EL SOL SENCILLO (el blanco o el negro) en su vuelo a
-        /// la cita: cuerpo solar + anillos rúnicos + la corona de polvo
-        /// de la casa.</summary>
-        private void DibujarSolSencillo(bool luz, float progreso, float gt)
+        /// <summary>v6.127 — el ángulo base de la espiral (el arranque
+        /// sereno del par — determinista, del reloj global).</summary>
+        private static float lado0(float gt) => gt * 0.2f;
+
+        /// <summary>v6.127 — LA POSICIÓN DEL SOL SENCILLO durante la
+        /// convocatoria (el MISMO camino para la IA de las estelas y el
+        /// PreDraw — una sola verdad): desde su lado (±300 px) con el
+        /// cabeceo sereno de siempre, al punto de la cita.</summary>
+        private Vector2 PosicionSolSencillo(bool luz, float suave, float gt)
         {
             Vector2 origen = Punto + (luz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
-            Vector2 pos = Vector2.Lerp(origen, Punto, progreso) +
-                new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * 26f * (1f - progreso));
-            DibujarSol(luz, pos, RuneSunRenderer.BodyPx * 0.92f, gt, 8,
-                rg: 0f, alpha: 1f, seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
+            return Vector2.Lerp(origen, Punto, suave) +
+                new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * 26f * (1f - suave));
         }
 
         // ================================================================
@@ -413,7 +517,8 @@ namespace AethonMod.Content.Weapons.Definitivas
 
         /// <summary>EL SOL FUSIONADO — el sol MÁS GRANDE Y DEVASTADOR:
         /// el corazón blanco-oro de la luz con las vetas violetas de la
-        /// oscuridad (la paleta de la fusión) y el DOBLE de anillos.</summary>
+        /// oscuridad (la paleta de la fusión) y SUS TRES ANILLOS (la ley
+        /// de la letra: solo el gigante merece la corona completa).</summary>
         private static void DibujarSolFusionado(Vector2 centroMundo, float r, float gt,
             int anillos, float rg, float alpha)
         {

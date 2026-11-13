@@ -472,6 +472,20 @@ namespace AethonMod.Content.VFX
                     float num9 = reference.SemiMenos[j + 1] * num;
                     float num10 = MathHelper.Lerp(0.22f, fundidos[i], num4 * num4);
                     float num11 = MathHelper.Lerp(0.22f, fundidos[i], num5 * num5);
+                    // v6.127 — LA MUERTE DE LA AGUJA (la cura de la sierra,
+                    // acto I): el perfil v6.56 SUBÍA hacia la punta (0.22 →
+                    // fundido): el punto MÁS BRILLANTE de cada pluma era
+                    // exactamente su PUNTA — la aguja que clavaba cada
+                    // diente de la sierra en el borde. Con vela (Membrana > 0)
+                    // las plumas son las VENAS de la vela: su brillo MUERE
+                    // DENTRO (smoothstep 1→0 en el último tramo) y el filo
+                    // SOLO pertenece a la curva del borde maestro — en q=1
+                    // el aporte es CERO EXACTO.
+                    if (estilo.Membrana > 0f)
+                    {
+                        num10 *= 1f - Suave(0.60f, 1f, num4);
+                        num11 *= 1f - Suave(0.60f, 1f, num5);
+                    }
                     Color val5 = Pre(TonoPluma(hues[i] + estilo.HueLargo * num4, mezclaDia, num3 * (1f - 0.3f * num4), in estilo), num2 * num10);
                     Color val6 = Pre(TonoPluma(hues[i] + estilo.HueLargo * num5, mezclaDia, num3 * (1f - 0.3f * num5), in estilo), num2 * num11);
                     val7 = new VertexPositionColorTexture(new Vector3(reference.Eje[j] + val4 * num6, 0f), val5, new Vector2(num4, 0f));
@@ -487,6 +501,14 @@ namespace AethonMod.Content.VFX
                 }
             }
             return nVerts;
+        }
+
+        /// <summary>v6.127 — El smoothstep de la casa para las curas de la
+        /// sierra (nace 0, muere 1, derivada 0 en ambos cabos).</summary>
+        private static float Suave(float e0, float e1, float x)
+        {
+            float t = MathHelper.Clamp((x - e0) / Math.Max(e1 - e0, 0.0001f), 0f, 1f);
+            return t * t * (3f - 2f * t);
         }
 
         private static int EmitirCapaRuido(int nVerts, Pluma[] plumas, float[] hues, float mezclaDia, float time, int pasada, float fold, in EstiloAlas estilo, int n)
@@ -725,10 +747,27 @@ namespace AethonMod.Content.VFX
                     {
                         float q0 = (float)j / 8f;
                         float q1 = (float)(j + 1) / 8f;
-                        float i0 = (0.52f + 0.38f * (1f - q0)) * estilo.CuerpoInten * fuerza * fundido;
-                        float i1 = (0.52f + 0.38f * (1f - q1)) * estilo.CuerpoInten * fuerza * fundido;
-                        Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, 0.05f, in estilo), i0);
-                        Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, 0.05f, in estilo), i1);
+                        // v6.127 — LA VELA CLAREA HACIA EL BORDILLO (la cura
+                        // de la sierra, acto II — LA CAUSA RAÍZ): el velo
+                        // heredaba la paleta VIAJERA al 5 % de blanco y CAÍA
+                        // de 0.90 a 0.52 hacia el borde — entre las plumas
+                        // 2-4 (hue 0.71-0.88) el tono viaja por el FONDO
+                        // NEGRO de la paleta (26,14,44): el bordillo quedaba
+                        // CASI INVISIBLE y el ojo solo veía las CINCO plumas
+                        // brillantes = CINCO DIENTES (zigzag del contorno
+                        // percibido: 31.9 px medidos en el sim 1:1). La vela
+                        // ahora SUBE (0.55 → 1.17 ×CuerpoInten) y VIAJA HACIA
+                        // EL BLANCO (0.05 → 0.43) al acercarse al borde: el
+                        // bordillo es lo MÁS LUMINOSO del ala y la silueta
+                        // pertenece a LA CURVA (zigzag 3.5 px — sim verificado).
+                        float sube0 = Suave(0.35f, 0.95f, q0);
+                        float sube1 = Suave(0.35f, 0.95f, q1);
+                        float i0 = (0.55f + 0.62f * sube0) * estilo.CuerpoInten * fuerza * fundido;
+                        float i1 = (0.55f + 0.62f * sube1) * estilo.CuerpoInten * fuerza * fundido;
+                        float hb0 = 0.05f + 0.38f * sube0;
+                        float hb1 = 0.05f + 0.38f * sube1;
+                        Color c0 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q0, mezclaDia, hb0, in estilo), i0);
+                        Color c1 = Pre(TonoPluma(hueMedio + estilo.HueLargo * q1, mezclaDia, hb1, in estilo), i1);
                         Vector2 a0 = pA.Eje[j];
                         Vector2 a1 = pA.Eje[j + 1];
                         Vector2 b0 = pB.Eje[j];
@@ -797,9 +836,17 @@ namespace AethonMod.Content.VFX
                 return nVerts;
             }
             float fuerza = estilo.Membrana;
-            float brBorde = MathHelper.Clamp(estilo.CuerpoInten * 1.55f, 0.30f, 0.72f);
-            float grosor = 9f + 3f * fuerza;
+            // v6.127 — EL BORDILLO LUMINOSO (la cura de la sierra, acto
+            // III): la banda heredaba el CUERPO (tope 0.72) — el borde era
+            // lo MÁS TENUE del ala y la silueta la dibujaban las puntas de
+            // las plumas. Ahora la banda sube ×1.5 (tope 1.05), engorda a
+            // 16 px y CLAREA (hacia blanco +0.12/+0.20): la orilla de la
+            // vela es lo MÁS LUMINOSO del ala — la silueta ES la curva
+            // Catmull-Rom, de punta a punta.
+            float brBorde = MathHelper.Clamp(estilo.CuerpoInten * 1.55f * 1.5f, 0.30f, 1.05f);
+            float grosor = 12f + 4f * fuerza;
             float labio = 2.5f * fuerza;
+            float rimBlanco = 0.20f;
             float flujoT = (0.2f - fold * 0.08f) * estilo.RuidoFlujo;
             float escalaU = 1.7f * estilo.RuidoEscala;
             float respiracion = 0.92f + 0.08f * MathF.Sin(time * 2.4f);
@@ -866,10 +913,10 @@ namespace AethonMod.Content.VFX
                     float sGlob1 = (float)(s + 1) / muestras;
 
                     // --- LA BANDA: el cuerpo del borde (in → borde) ---
-                    Color bi0 = Pre(TonoPluma(hue0, mezclaDia, 0.18f, in estilo), brBorde * 0.55f * fuerza * fund);
-                    Color bi1 = Pre(TonoPluma(hue1, mezclaDia, 0.18f, in estilo), brBorde * 0.55f * fuerza * fund);
-                    Color bo0 = Pre(TonoPluma(hue0, mezclaDia, 0.28f, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
-                    Color bo1 = Pre(TonoPluma(hue1, mezclaDia, 0.28f, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
+                    Color bi0 = Pre(TonoPluma(hue0, mezclaDia, 0.18f + rimBlanco * 0.6f, in estilo), brBorde * 0.55f * fuerza * fund);
+                    Color bi1 = Pre(TonoPluma(hue1, mezclaDia, 0.18f + rimBlanco * 0.6f, in estilo), brBorde * 0.55f * fuerza * fund);
+                    Color bo0 = Pre(TonoPluma(hue0, mezclaDia, 0.28f + rimBlanco, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
+                    Color bo1 = Pre(TonoPluma(hue1, mezclaDia, 0.28f + rimBlanco, in estilo), brBorde * 0.95f * fuerza * fund * respiracion);
                     Vector2 uvIn0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 0.72f) : new Vector2(sGlob0, 0f);
                     Vector2 uvIn1 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob1 * 2.2f, 0.72f) : new Vector2(sGlob1, 0f);
                     Vector2 uvBd0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 0.98f) : new Vector2(sGlob0, 0.5f);
@@ -882,10 +929,10 @@ namespace AethonMod.Content.VFX
                     _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), bo0, uvBd0);
 
                     // --- EL LABIO: el rim luminoso que se apaga afuera ---
-                    Color lo0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
-                    Color lo1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
-                    Color lx0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f, in estilo), 0f);
-                    Color lx1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f, in estilo), 0f);
+                    Color lo0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f + rimBlanco, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
+                    Color lo1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f + rimBlanco, in estilo), brBorde * 1.05f * fuerza * fund * respiracion);
+                    Color lx0 = Pre(TonoPluma(hue0, mezclaDia, 0.42f + rimBlanco, in estilo), 0f);
+                    Color lx1 = Pre(TonoPluma(hue1, mezclaDia, 0.42f + rimBlanco, in estilo), 0f);
                     Vector2 uvLx0 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob0 * 2.2f, 1.05f) : new Vector2(sGlob0, 0.75f);
                     Vector2 uvLx1 = flujo ? new Vector2(-time * flujoT + escalaU * sGlob1 * 2.2f, 1.05f) : new Vector2(sGlob1, 0.75f);
                     _verts[nVerts++] = new VertexPositionColorTexture(new Vector3(p0, 0f), lo0, uvBd0);
@@ -1300,6 +1347,28 @@ namespace AethonMod.Content.VFX
                     for (int i = 0; i < _geoN; i++)
                     {
                         Vector2 val3 = _pozosEje[i][nodoRuna];
+                        // v6.127 — LA RUNA CORONA EL BORDILLO DESDE DENTRO
+                        // (la cura de la sierra, acto IV): la runa nacía
+                        // CENTRADA en el nodo 8 — el punto que está SOBRE la
+                        // curva del borde — y su glifo (~12-13 px de medio
+                        // alto) SOBRESALÍA fuera de la curva: cinco bultos
+                        // brillantes cabalgando el borde liso = cinco
+                        // dientes más. Con vela (Membrana > 0) la runa se
+                        // ATRASA 9 px por el radio (vive en la banda
+                        // luminosa, coronando la punta desde dentro) y su
+                        // resplandor se recoge ×0.75 — la escala del glifo
+                        // NO se toca (la letra de la v6.124: escala completa).
+                        float glowK = 1f;
+                        if (estilo.Membrana > 0f)
+                        {
+                            Vector2 radial = val3 - _geoAnclaCentral;
+                            float rl = radial.Length();
+                            if (rl > 0.001f)
+                            {
+                                val3 -= radial / rl * 9f;
+                            }
+                            glowK = 0.75f;
+                        }
                         int gemela = i % num4;
                         float num5 = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + gemela, 3, 5) * ((float)Math.PI * 2f);
                         float num6 = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * 2.3f + num5 + flap * 0.35f);
@@ -1319,7 +1388,7 @@ namespace AethonMod.Content.VFX
                             cuerpo = DefinitivasLib.GradienteJuicio(globalTimeWrappedHourly * 0.07f + (float)gemela / (float)num4);
                         }
                         float espejoLado = ((i < num4) || ((num4 & 1) == 1)) ? 1f : (-1f);
-                    SigiloLib.Runa(val3 + screenPosition, (globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) * espejoLado + num5) * dirGiro, array, (gemela * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6);
+                    SigiloLib.Runa(val3 + screenPosition, (globalTimeWrappedHourly * 0.35f * ((i % 2 == 0) ? 1f : (-1f)) * espejoLado + num5) * dirGiro, array, (gemela * 3 + ((Entity)pl).whoAmI) % array.Length, escala, globalTimeWrappedHourly, num5, cuerpo, punta, num3 * num6, glowK: glowK);
                     }
                     for (int j = 0; j < 8; j++)
                     {

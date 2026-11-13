@@ -115,20 +115,26 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Flap += (0.055f + (flag ? 0.15f : 0f) + Spread * 0.03f) * num;
             MezclaDia = MathHelper.Lerp(MezclaDia, Main.dayTime ? 1f : 0f, 0.025f);
 
-            // v6.126 — LAS ALAS SE PLIEGAN DENTRO DEL TRAGO (la letra de la
-            // sesión 6: «por alguna razon, las alas que tengo equipada, se
-            // separan del jugador en la animacion y estan a parte, el
-            // grimorio debe devorar al jugador en su conjunto y en la
-            // animacion debe verse como el jugador con todo lo que tiene es
-            // devorado»): el halo de las alas es un PROYECTIL APARTE —
-            // cuando el cuerpo ya está DENTRO de la boca (Tragado), las
-            // alas dejaban de tener dueño visible y quedaban FLOTANDO a
-            // un lado del libro: SEPARADAS. AHORA se PLEGAN y se APAGAN
-            // a toda prisa (el lerp rápido al 0): las alas entran a la
-            // boca CON el cuerpo — el jugador es devorado ENTERO, con
-            // todo lo que lleva puesto.
-            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado &&
-                val.whoAmI == Main.myPlayer)
+            // v6.126 → v6.127 — LAS ALAS SE PLIEGAN DENTRO DEL TRAGO Y
+            // DENTRO DEL ARRASTRE (la letra: «por alguna razon, las alas
+            // que tengo equipada, se separan del jugador en la animacion y
+            // estan a parte, el grimorio debe devorar al jugador en su
+            // conjunto y en la animacion debe verse como el jugador con
+            // todo lo que tiene es devorado» + la nueva: «las alas giran
+            // en una posición diferente a la del jugador y se separan de
+            // él»): el halo de las alas es un PROYECTIL APARTE — cuando el
+            // cuerpo ya está DENTRO de la boca (Tragado) o la boca lo está
+            // ARRASTRANDO (Arrastrando — el cuerpo GIRA hacia la boca y
+            // las alas a plena apertura barren LEJOS del cuerpo,
+            // «girando en una posición diferente»), las alas quedaban
+            // FLOTANDO a un lado del libro: SEPARADAS. AHORA se PLEGAN y
+            // se APAGAN a toda prisa (el lerp rápido al 0): se recogen
+            // contra el cuerpo y entran a la boca CON él — el jugador es
+            // devorado ENTERO, con todo lo que lleva puesto.
+            bool presaDelFestin =
+                global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado ||
+                global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Arrastrando == val.whoAmI;
+            if (presaDelFestin && val.whoAmI == Main.myPlayer)
             {
                 if (Spread > 0.03f && Main.netMode != 2 && !Main.dedServ)
                 {
