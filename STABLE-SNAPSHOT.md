@@ -1,5 +1,7 @@
 # SNAPSHOT ESTABLE — v6.129 — EL ALA LISA SIN PLUMAS + EL CETRO QUE INVOCABA + LA DEVORACIÓN DE LA PRIMERA VEZ
 
+> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+
 ## LA LETRA (el usuario — la sesión 10)
 
 «las alas siguen con picos, diente de sierra, supongo que esos dientes de sierra son supuestas plumas, esas plumas las puedes eliminar, aunque ahora las alas se ven mejor, pero esos dientes de sierra siguen arruinandolas» + «el arma cetro de las dagas del eterno no invoca nada, mejora eso y revisa porque no invoca nada, haz que esta arma no sea de invocador asi no se ven afectado los minions» + «quita eso ya que no hace diferencias y todo lo que el jugador usa está separado del jugador cuando es devorado, te dire algo, la primera vez que se puso la mecanica de que el grimorio del eterno devore al jugador esta animacion estaba correcta, asi que investiga como funcionaba la primera vez que se puso esto de que el jugador sea devorado»
