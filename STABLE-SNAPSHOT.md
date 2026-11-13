@@ -1,5 +1,7 @@
 # SNAPSHOT ESTABLE — v6.127 — LA CAUSA RAÍZ DE LA SIERRA + EL CETRO DE LAS DAGAS + LA LEY DE LOS ANILLOS + LOS COSMÉTICOS PEGADOS + LOS DIÁLOGOS EN SU SITIO
 
+> ⏳ **PENDIENTE DE PUBLICAR — el release ID se rellena tras el empuje (la marca ⏳ muere cuando el CDN queda verificado)**
+
 ## LA LETRA (el usuario — la sesión 8; el usuario JUGÓ la v6.126)
 
 «las alas runicas del vacio siguen con picos, mejor dicho dientes de sierra, deberias investigar bien como quitar eso, investiga a fondo la causa raíz de por qué aparecen esos picos y eliminarlos (o hacerlos imperceptiblemente pequeños)» · «las dagas no van en el grimorio por ahora, es contenido de prueba — crea un arma nueva que invoque las 5 dagas en la posición correcta, que tenga su propio contador de minions, y ese contador invoque los 11 ojos Y a la vez las 5 dagas simultáneamente» · «el juicio de doble sol: la animación actual es insatisfactoria, mejórala — regla de anillos rúnicos: máximo 1 anillo por sol; al fusionarse deben verse 3 anillos» · «al devorar al jugador hacia el mundo interior, las alas giran en una posición diferente a la del jugador y se separan de él — el mismo bug afecta a otros ítems cosméticos, todos se separan del jugador durante la animación» · «los textos crudos contienen los diálogos del grimorio al entrar al mundo interior — prohibido eliminarlos, solo arreglarlos colocando el texto definitivo que saldrá en el juego».
