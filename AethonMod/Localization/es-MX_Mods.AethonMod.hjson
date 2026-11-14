@@ -2228,21 +2228,6 @@ Items: {
 			'''
 	}
 
-	DazzlingStabberStaff: {
-		// v6.124 — THE RESEARCH COPY of Calamity Mod's Dazzling Stabber
-		// Staff (code + sprite 100% from the public repo — drop of
-		// Providence, the Profaned Goddess).
-		DisplayName: Dazzling Stabber Staff
-		Tooltip:
-			'''
-			INVESTIGACIÓN · CALAMITY MOD: el bastón de las TRES DAGAS SAGRADAS.
-			Invoca 3 dagas por uso (ocupa 3 ranuras de esbirro): la daga de
-			CRISTAL ataca rápido y descansa (50% del daño, 20 de penetración),
-			la daga de ROCA embiste y retrocede (¡300% del daño!) y la daga de
-			FUEGO barre en arco amplio y prende las LLAMAS SAGRADAS.
-			¡En garde!
-			'''
-	}
 
 	ArbitradorII: {
 		// v6.124 — THE RESEARCH COPY of Calamity Entropy's Arbitrator II
@@ -2707,7 +2692,6 @@ Projectiles: {
 	AlmaLuzInferior.DisplayName: Alma de la Luz Inferior
 	ArbitradorIIProyectil.DisplayName: La Jabalina del Arbitrador
 	DagaEterna.DisplayName: La Daga Deslumbrante
-	DazzlingStabber.DisplayName: El Puñal Deslumbrante
 	OndaSonoraEterna.DisplayName: La Onda Sonora Eterna
 	TajoDelVacioProj.DisplayName: El Tajo del Vacío
 }
@@ -2720,7 +2704,7 @@ Buffs: {
 
 	// v6.126 — LAS CINCO DAGAS DEL ETERNO (la letra: «vienen
 	// las 5 dagas que tambien tendran un ojo en el centro» — la
-	// técnica del Dazzling Stabber, la escalera tras los 11 ojos)
+	// técnica de las cuchillas, la escalera tras los 11 ojos)
 	DagaEternaBuff: {
 		DisplayName: Dagas del Eterno
 		Description: Las cinco dagas eternas del grimorio, cada una con un ojo en el centro de su hoja, luchan por ti
@@ -2822,15 +2806,6 @@ Buffs: {
 
 	// v6.124 — LOS BUFFS DE LAS INVESTIGACIONES (la copia local de los
 	// efectos de Calamity y Calamity Entropy).
-	DazzlingStabberBuff: {
-		DisplayName: Dazzling Stabber
-		Description: ¡En garde! Las dagas sagradas velan por ti
-	}
-	LlamasSagradas: {
-		// (Holy Flames de Calamity — la daga de FUEGO la prende, 3 s)
-		DisplayName: Llamas sagradas
-		Description: La luz sagrada te disuelve
-	}
 	MarcaDelPrincipio: {
 		// (冥煌烙印 — la daga de ORO; hasta 8 capas)
 		DisplayName: La Marca del Principio

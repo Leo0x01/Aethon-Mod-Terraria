@@ -16,8 +16,9 @@ namespace AethonMod.Content.Projectiles
     /// ojo en el centro jejejejej»).
     ///
     /// LA TÉCNICA ES 100 % COPIADA DEL DAZZLING STABBER STAFF (la letra:
-    /// «toma lo que aprendiste de Dazzling Stabber Staff» — el invocador
-    /// de dagas de Providence del Calamity, investigado en la wiki real):
+    /// «toma lo que aprendiste del invocador de dagas del Eterno» — el
+    /// comportamiento de cuchillas orbitantes nacido de una
+    /// investigación de la wiki, hoy máquina 100 % de la casa):
     /// un escuadrón de DAGAS PERSISTENTES, cada una con SU técnica
     /// propia, que VUELAN alrededor del portador y se LANZAN contra las
     /// presas — y TODAS prenden la QUEMADURA DEL VACÍO (nuestra Holy
@@ -80,57 +81,53 @@ namespace AethonMod.Content.Projectiles
         /// las 5 dagas»).</summary>
         public const int TechoDagas = 5;
 
-        // v6.132 — LA MÁQUINA DEL STABBER (la letra: «su tipo de ataque
-        // debe ser igual que el de Dazzling Stabber Staff de Calamity
-        // Mod»): LAS FASES MUEREN (F_HOVER/F_VIENTO/F_GOLPE/F_CLAVADA/
-        // F_VUELTA con el reloj en Projectile.frame — un reloj que
-        // NADIE avanzaba en F_GOLPE: las técnicas recibían t=0 ETERNO y
-        // las cuchillas se quedaban CONGELADAS a 70 px de la presa, con
-        // _posVuelta=(0,0) en el primer ataque — el ataque y la
-        // animación que el usuario vio MUERTOS). LA MÁQUINA NUEVA es el
-        // CALCO del original: VELOCIDAD (nada de lerp de posición — el
-        // cuchillo ACELERA 1,03× y FRENA 0,93× cerca del objetivo, el
-        // giro 0,15 del blade-3), EL DESCANSO (attackCooldown tras los
-        // golpes: 80-95 el cristal a las 6 cuchilladas · 45-60 la roca
-        // tras su embestida · 5 la llama), AttackDelay del empuje de la
-        // carga y la vuelta al descanso orbital (moveSmoothing 50→2).
-        // ai[1] pasa a ser LO QUE ERA EN CALAMITY: el RestOffsetAngle
-        // (el ángulo del puesto de descanso de ESTE cuchillo en el
-        // abanico — asignado al nacer, JAMÁS una fase).
+        // v6.133 — LA MÁQUINA DEL STABBER ES DE LA CASA (la letra:
+        // «con el comportamiento ya creado de las cuchillas, puedes
+        // borrar Dazzling Stabber Staff de Calamity Mod del codigo y
+        // cualquier referencia»): EL ARMA DE INVESTIGACIÓN murió con sus
+        // sprites y su buff — la MÁQUINA VIVE porque ya es nuestra: la
+        // casa la forjó en la v6.132 para curar el ataque muerto (LAS
+        // FASES con el reloj en Projectile.frame que NADIE avanzaba en
+        // F_GOLPE — las cuchillas congeladas a 70 px de la presa) y hoy
+        // no debe NADA a nadie: VELOCIDAD (nada de lerp de posición —
+        // el cuchillo ACELERA 1,03× y FRENA 0,93× cerca del objetivo,
+        // el giro 0,15), EL DESCANSO (attackCooldown tras los golpes:
+        // 80-95 el cristal a las 6 cuchilladas · 45-60 la roca tras su
+        // embestida · 5 la llama), AttackDelay del empuje de la carga
+        // y la vuelta al descanso orbital (moveSmoothing 50→2).
+        // ai[1] ES el RestOffsetAngle: el ángulo del puesto de
+        // descanso de ESTE cuchillo en el abanico — asignado al nacer,
+        // JAMÁS una fase.
         private float RestOffsetAngle => Projectile.ai[1];
 
-        /// <summary>EL DESCANSO del stabber (Calamity: attackCooldown):
+        /// <summary>EL DESCANSO del stabber (attackCooldown):
         /// los ticks sin atacar tras la última cuchillada — el cristal
         /// descansa 80-95 tras 6 golpes, la roca 45-60 tras la
         /// embestida, la llama 5 entre barridos.</summary>
         private int attackCooldown;
 
         /// <summary>Las cuchilladas de ESTA ronda (el cristal cuenta 6
-        /// antes de descansar — la cadencia EXACTA del original).</summary>
+        /// antes de descansar — la cadencia exacta de la casa).</summary>
         private int attacksDone;
 
-        /// <summary>LA SUAVIZACIÓN DE LA VUELTA (Calamity: moveSmoothing
-        /// 50→2): el acercamiento al puesto de descanso cada vez más
+        /// <summary>LA SUAVIZACIÓN DE LA VUELTA (moveSmoothing 50→2): el acercamiento al puesto de descanso cada vez más
         /// directo — arruja suave, aterriza directo.</summary>
         private float moveSmoothing = 50f;
 
-        /// <summary>El multiplicador de daño por tipo (Calamity:
-        /// damageMult — 0,5 cristal con 20 de perforación · 3 roca · 1
+        /// <summary>El multiplicador de daño por tipo (damageMult — 0,5 cristal con 20 de perforación · 3 roca · 1
         /// llama·vacío·veredicto).</summary>
         private float damageMult = 1f;
 
-        /// <summary>EL OBJETIVO FIJADO (Calamity: storedPos): la
+        /// <summary>EL OBJETIVO FIJADO (storedPos): la
         /// posición donde vuela el cuchillo — se fija al abrir la
         /// ronda y el cuchillo la PERSIGUE (el original congela el
         /// objetivo al arrancar: no re-aima cada tick).</summary>
         private Vector2 storedPos;
 
-        /// <summary>¿Acaba de golpear? (los efectos del on-hit —
-        /// Calamity: justHit).</summary>
+        /// <summary>¿Acaba de golpear? (los efectos del on-hit — justHit).</summary>
         private bool justHit;
 
-        /// <summary>EL RETARDO DEL EMPUJE (Calamity: AttackDelay en
-        /// ai[0] — aquí en localAI[0]: ai[0] ES EL TIPO del alma): el
+        /// <summary>EL RETARDO DEL EMPUJE (AttackDelay en localAI[0]: ai[0] ES EL TIPO del alma): el
         /// cuchillo que acaba de cortar espera ANTES de volver a
         /// cargar — el empuje que lee el ojo.</summary>
         private float AttackDelay
@@ -222,8 +219,8 @@ namespace AethonMod.Content.Projectiles
         // rayo): la daga golpea CON SU CUERPO — el bucle del stabber.
         public override bool MinionContactDamage() => true;
 
-        /// <summary>v6.132 — EL DESCANSO APAGA EL FILO (Calamity:
-        /// CanDamage => attackCooldown == 0): la cuchilla que descansa
+        /// <summary>v6.132 — EL DESCANSO APAGA EL FILO (CanDamage =>
+        /// attackCooldown == 0): la cuchilla que descansa
         /// NO corta de paso — solo la cuchilla en ronda.</summary>
         public override bool? CanDamage() => attackCooldown == 0 ? null : false;
 
@@ -272,8 +269,8 @@ namespace AethonMod.Content.Projectiles
             int tipoBuff = ModContent.BuffType<global::AethonMod.Content.Buffs.DagaEternaBuff>();
             global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, dueño, tipoBuff);
 
-            // === EL ALMA DE CADA CUCHILLO (Calamity: el switch de
-            //     KnifeType al abrir la IA): el color del filo, el
+            // === EL ALMA DE CADA CUCHILLO (el switch de KnifeType
+            //     al abrir la IA — la ley de la casa): el color del filo, el
             //     extraUpdates (el cristal 1, la roca 2 — MÁS ticks de
             //     física por frame: la rapidéz del original) y el daño
             //     por tipo. El VACÍO y el VEREDICTO (los dos de la casa)
@@ -316,14 +313,13 @@ namespace AethonMod.Content.Projectiles
             global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
                 .PegarAlFestin(Projectile, Projectile.owner);
 
-            // EL FOCO (Calamity: MinionHoming(1100f) — el buscador de la
-            // casa de siempre): la presa más cercana al dueño.
+            // EL FOCO (el buscador de siempre de la casa): la presa más cercana al dueño.
             NPC potentialTarget = ObjetivoDaga(dueño);
 
-            // EL OBJETIVO SE FIJA AL ABRIR LA RONDA (Calamity: storedPos
+            // EL OBJETIVO SE FIJA AL ABRIR LA RONDA (storedPos
             // solo cuando cooldown==0 y AttackDelay<=0 — el cuchillo no
             // re-apunta cada tick: persigue el punto donde ESTABA).
-            // (AttackDelay vive en localAI[0]: en Calamity era ai[0],
+            // (AttackDelay vive en localAI[0] — NO en ai[0],
             // PERO aquí ai[0] ES EL TIPO del alma desde la v6.124 — el
             // reloj del empuje es CINE LOCAL: el daño lo cobra el
             // contacto del filo, no el reloj.)
@@ -334,8 +330,7 @@ namespace AethonMod.Content.Projectiles
             // LA PRESA DE LA MIRADA (el iris la sigue viva).
             _presa = potentialTarget != null && potentialTarget.active ? potentialTarget.whoAmI : -1;
 
-            // LOS EFECTOS DEL GOLPE (Calamity: justHit — el flash y la
-            // firma de sonido de cada alma).
+            // LOS EFECTOS DEL GOLPE (justHit — el flash y la firma de sonido de cada alma).
             if (justHit)
             {
                 if (Main.netMode != NetmodeID.Server && !Main.dedServ)
@@ -383,7 +378,7 @@ namespace AethonMod.Content.Projectiles
                 justHit = false;
             }
 
-            // LA MÁQUINA (Calamity: el if grande — objetivo presente:
+            // LA MÁQUINA (el if grande — objetivo presente:
             // SLICE o descanso; sin objetivo: la vuelta al descanso).
             if (potentialTarget != null)
             {
@@ -400,20 +395,19 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL SLICE — EL ATAQUE DEL STABBER (Calamity: SliceTarget,
-        //  byte a byte en la física: la aceleración 1,03/0,93, el giro
-        //  0,15 y la carga del blade-3 — aquí adaptado a las CINCO
-        //  almas de la casa: cristal=blade-1 (orbita y repite) ·
-        //  roca=blade-2 (embiste recto y recula) · llama=vacío=
-        //  veredicto=blade-3 (persigue curvando y CARGA a 36 px/t)
+        //  EL SLICE — EL ATAQUE DEL STABBER (la máquina de la casa:
+        //  la aceleración 1,03/0,93, el giro 0,15 y la carga del
+        //  empuje — adaptada a las CINCO almas: el cristal orbita y
+        //  repite · la roca embiste recta y recula · la llama, el
+        //  vacío y el veredicto persiguen curvando y CARGAN a 36 px/t)
         // ================================================================
         private void SliceTarget()
         {
             moveSmoothing = 50f;
 
-            // EL RETARDO DEL EMPUJE (Calamity: AttackDelay — cuenta
-            // hacia abajo hasta −60; mientras >0 el cuchillo SOLO gira
-            // la órbita del cristal).
+            // EL RETARDO DEL EMPUJE (AttackDelay — cuenta hacia
+            // abajo hasta −60; mientras >0 el cuchillo SOLO gira la
+            // órbita del cristal).
             if (AttackDelay > -60f)
             {
                 AttackDelay -= 1f;
@@ -430,7 +424,7 @@ namespace AethonMod.Content.Projectiles
                 }
             }
 
-            // EL DESPEGUE (Calamity: sin movimiento → -12 en Y: el
+            // EL DESPEGUE (sin movimiento → −12 en Y: el
             // cuchillo JAMÁS se queda clavado esperando).
             if (Projectile.velocity.Length() < 3f)
                 Projectile.velocity = Vector2.UnitY * -12f;
@@ -461,7 +455,7 @@ namespace AethonMod.Content.Projectiles
             if (Tipo == TIPO_CRISTAL && !Projectile.WithinRange(storedPos, 400f))
                 Projectile.velocity = DireccionSegura(storedPos) * 20f;
 
-            // LA CARGA DEL BLADE-3 (Calamity): a la vista del objetivo y
+            // LA CARGA DEL EMPUJE (blade-3): a la vista del objetivo y
             // lejos (>75) — ZUMBIDO: 36 px/t rectos + AttackDelay 15
             // (el empuje que lee el ojo: el cuchillo TRUENA).
             if (!Projectile.WithinRange(storedPos, 75f) &&
@@ -478,8 +472,8 @@ namespace AethonMod.Content.Projectiles
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
         }
 
-        /// <summary>(Calamity: DireccionSegura — Projectile.SafeDirectionTo
-        /// con respaldo: JAMÁS NaN.)</summary>
+        /// <summary>DireccionSegura — la dirección hacia el punto con
+        /// respaldo: JAMÁS NaN.</summary>
         private Vector2 DireccionSegura(Vector2 destino, Vector2 respaldo = default)
         {
             Vector2 v = destino - Projectile.Center;
@@ -487,10 +481,10 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL DESCANSO — (Calamity: manageAttackCooldown): el cristal
-        //  vuelve a su puesto mientras cuenta; la roca desliza frenando
-        //  (0,96); al terminar, la ronda renace (attacksDone=0 y el
-        //  pulso del anillo del cristal).
+        //  EL DESCANSO — manageAttackCooldown: el cristal vuelve a su
+        //  puesto mientras cuenta; la roca desliza frenando (0,96); al
+        //  terminar, la ronda renace (attacksDone=0 y el pulso del
+        //  anillo del cristal).
         // ================================================================
         private void ManageAttackCooldown()
         {
@@ -505,8 +499,8 @@ namespace AethonMod.Content.Projectiles
                 attacksDone = 0;
                 if (Tipo == TIPO_CRISTAL && !Main.dedServ && Main.netMode != NetmodeID.Server)
                 {
-                    // (Calamity: el BloomRing de la pausa — la casa: el
-                    // pulso de anillo violeta del cristal que descansa.)
+                    // el BloomRing de la pausa — el pulso de anillo
+                    // violeta del cristal que descansa.
                     for (int k = 0; k < 6; k++)
                     {
                         Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
@@ -520,8 +514,8 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  LA VUELTA AL DESCANSO — (Calamity: ReturnToRestingPosition):
-        //  el abanico orbital SOBRE LA CORONA CENTRADA (el arco de la
+        //  LA VUELTA AL DESCANSO — ReturnToRestingPosition: el abanico
+        //  orbital SOBRE LA CORONA CENTRADA (el arco de la
         //  tiara v6.131, quieta sobre la cabeza del enjambre) con el
         //  seno del original (la respiración del vuelo) y el giro del
         //  sprite hacia el descanso (0,25 — la rotación que aterriza).
@@ -547,13 +541,13 @@ namespace AethonMod.Content.Projectiles
             // la corona de ojos, la respiración ±3,5 % de la danza).
             Vector2 destino = SlotDelAnillo(dueño);
 
-            // EL SENO DEL ORIGINAL (Calamity): el vaivén vertical vivo
+            // EL SENO DEL VUELO: el vaivén vertical vivo
             // del abanico — la corona RESPIRA.
             float sine = Math.Abs((float)Math.Sin(
                 (Main.GlobalTimeWrappedHourly + RestOffsetAngle * 1.8f) * 8f / MathHelper.Pi));
             destino += new Vector2(0f, -6f * (MathHelper.Lerp(sine, 0.8f, 0.8f) - 0.8f));
 
-            // EL ACECAMIENTO (Calamity: velocidad = distancia /
+            // EL ACECAMIENTO (velocidad = distancia /
             // moveSmoothing — 50 al arrancar: suave; 2 al final:
             // directo. La corona ATRAPA al cuchillo que vuelve).
             Projectile.velocity = (destino - Projectile.Center) / moveSmoothing;
@@ -586,7 +580,7 @@ namespace AethonMod.Content.Projectiles
         //  stabber: 50 %/20 pen el cristal · 100 % la llama · 300 % la
         //  roca) + LA QUEMADURA DEL VACÍO al 100 % por 3 s en TODAS
         // ================================================================
-        // v6.132 — EL GOLPE DEL STABBER (Calamity: damageMult — el
+        // v6.132 — EL GOLPE DEL STABBER (damageMult — el
         // multiplicador vive en la IA y AQUÍ se aplica; la perforación
         // del cristal viaja en Projectile.ArmorPenetration como el
         // original).
@@ -599,8 +593,8 @@ namespace AethonMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // v6.132 — EL COMPÁS DEL STABBER (Calamity: el OnHit por
-            // tipo): el CRISTAL empuja (AttackDelay 15, cuenta la
+            // v6.132 — EL COMPÁS DEL STABBER (el OnHit por tipo):
+            // el CRISTAL empuja (AttackDelay 15, cuenta la
             // racha y descansa 80-95 a las SEIS) · la ROCA RECUA del
             // golpe (rebote 15 px/t desviado + descanso 45-60) · la
             // LLAMA/VACÍO el latido corto (5) · el VEREDICTO la posa
@@ -893,7 +887,7 @@ namespace AethonMod.Content.Projectiles
         //     sincroniza el owner como todo minion de vanilla) ===
         private int _presa = -1;
 
-        /// <summary>v6.132 — LA RED DEL COMPÁS (Calamity: SendExtraAI —
+        /// <summary>v6.132 — LA RED DEL COMPÁS (SendExtraAI —
         /// el descanso y la racha viajan con el minion: los otros
         /// clientes ven la MISMA cadencia, no cuchillas fantasma
         /// cortando en vacío).</summary>

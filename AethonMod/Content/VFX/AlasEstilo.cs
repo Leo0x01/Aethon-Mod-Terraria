@@ -341,50 +341,34 @@ namespace AethonMod.Content.VFX
                     new Color(255, 214, 130),
                     DefinitivasLib.BlancoCalido
                 }, DefinitivasLib.BlancoCalido, "Ruido_13", 5, 92f, 50f, 3.5f, 14f, 8f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.34f, 5f, 0.3f, 1f, 0.35f, 0.05f, 0.1f, 0.018f, 0.85f, 1f, 0.95f, 0.3f, 0.34f, 0.62f, 0.16f, 1f, 1f, 1f, 1.2f, 1, 1f),
-                // v6.124 — LA FORMA ORIGINAL VUELVE (la letra: «las alas
-                // runicas del vacio ya no tienen picos, pero perdieron la
-                // forma original y ademas se ven raras con algo en el
-                // centro de cada ala, intenta retomar la forma anterior y
-                // original, pero manten lo que hiciste para que no tengan
-                // picos y sean lisas como ahora»). LA AUTOPSIA: la copia
-                // del eclipse de la v6.120 mató la silueta propia del
-                // vacío — la MEMBRANA (la vela continua que une las
-                // plumas), la PUNTA REDONDA y la SIMETRÍA PERFECTA
-                // (filosa 0) murieron con ella, y el glifo rúnico que
-                // v6.122 escondió un nodo adentro quedó flotando en el
-                // CENTRO de cada ala («algo en el centro de cada ala»).
-                // LA CURA: TODOS los parámetros de la v6.118 — la última
-                // versión con LA FORMA PROPIA (abanico simétrico de 5
-                // plumas, puntas 20/14 redondas, la VELA continua con su
-                // borde maestro, el ruido Ruido_6, el núcleo 0.78 y el
-                // cuerpo 0.42 del balance) — y LA LISURA NO SE TOCA: el
-                // ENSOGLADO DEL RUIDO de la v6.123 (inset 0.86/0.72
-                // INCONDICIONAL en AlasAuroraLib) sigue vivo: la niebla
-                // corre POR DENTRO del ala y el filo SOLO pertenece a la
-                // curva — la única causa probada de los dientes de sierra
-                // (el ruido a ancho completo) sigue muerta. Las runas
-                // vuelven a LAS PUNTAS (nodo 8, escala completa — ver
-                // DibujarRunas): la estética de runas de la versión
-                // original, sin el «algo» del centro.
-                // v6.132 — LA MARIPUSA DEL VACÍO (la letra: «estan muy
-                // grandes, hagamosla un 10% mas pequeñas y ademas ciento
-                // que le falta algo abajo, como otro pequeño par de alitas
-                // ya sabes como una mariposa y su forma necesitan ser mas
-                // digamos que mas epicas»): TODO el par al 90 %
-                // (EscalaGlobal 0,9) + EL PAR DE ALITAS (alitas 0,55: el
-                // abanico inferior nacido bajo la espalda, al 55 % y más
-                // abatido — el ala baja de la mariposa) + LA FORMA ÉPICA:
-                // las plumas interiores SUBEN (largos 96/58 → la cúspide
-                // ALTA de la vela), la curva del eje se hace HONDA (0,18 →
-                // 0,30: el arco del halcón en pleno planeo) y el ancho de
-                // punta se ABRE (20/14 → 22/15: la vela envergada al
-                // viento).
+                // v6.133 — LA COPIA EXACTA DEL ECLIPSE (la letra:
+                // «las alas se ven horrible por algun motivo no me
+                // gusta su forma, intenta copiar el codigo exacto de
+                // las alas runicas del eclipse y luego aplica la
+                // correccion para convertirlas en unas nuevas alas
+                // runicas de vacio»). LA AUTOPSIA: la «forma épica»
+                // v6.132 (largos 96/58, curva 0,30, puntas 22/15) le
+                // rompió la silueta al vacío — el usuario la vio
+                // horrible. LA CURA ES LA LETRA MISMA: la entrada
+                // completa de RUNAS DEL ECLIPSE, parámetro por
+                // parámetro (largos 90/52 · raíz 3,5 · puntas 19/12 ·
+                // plegado 0,5/0,92 · abierto 0,22/1,54 · inclinación
+                // 0,12 · barrido 0,14 · curva 0,18 · vientre 0,55 ·
+                // filosa 0,05 · el balance núcleo 0,88/cuerpo 0,36 —
+                // LA FORMA QUE SÍ GUSTA), y SOLO las correcciones para
+                // hacerla DEL VACÍO: la paleta violeta de la casa
+                // (150,84,235 · 122,78,188 · 26,14,44 con el día
+                // 90,60,140), SU ruido Ruido_6, SUS runas del vacío
+                // (el alfabeto RunasVacio del Supremo, estilo 2), la
+                // EscalaGlobal 0,9 y las alitas 0,55 de la v6.132 (el
+                // −10 % y la mariposa que SÍ gustaron). El Eclipse
+                // mismo queda INTACTO en su slot.
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 96f, 58f, 3.5f, 22f, 15f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.30f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f, lisas: true, escalaGlobal: 0.9f, alitas: 0.55f),
+                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, escalaGlobal: 0.9f, alitas: 0.55f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,

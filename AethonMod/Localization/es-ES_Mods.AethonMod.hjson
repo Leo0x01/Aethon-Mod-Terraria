@@ -2227,19 +2227,6 @@ Items: {
 			'''
 	}
 
-	DazzlingStabberStaff: {
-		DisplayName: Dazzling Stabber Staff
-		Tooltip:
-			'''
-			INVESTIGACIÓN · CALAMITY MOD: el bastón de las TRES DAGAS SAGRADAS.
-			Invoca 3 dagas por uso (ocupa 3 ranuras de esbirro): la daga de
-			CRISTAL ataca rápido y descansa (50% del daño, 20 de penetración),
-			la daga de ROCA embiste y retrocede (¡300% del daño!) y la daga de
-			FUEGO barre en arco amplio y prende las LLAMAS SAGRADAS.
-			¡En garde!
-			'''
-	}
-
 	ArbitradorII: {
 		DisplayName: El Arbitrador II
 		Tooltip:
@@ -2699,7 +2686,6 @@ Projectiles: {
 	AlmaLuzInferior.DisplayName: Alma de la Luz Inferior
 	ArbitradorIIProyectil.DisplayName: La Jabalina del Arbitrador
 	DagaEterna.DisplayName: La Daga Deslumbrante
-	DazzlingStabber.DisplayName: El Puñal Deslumbrante
 	OndaSonoraEterna.DisplayName: La Onda Sonora Eterna
 	TajoDelVacioProj.DisplayName: El Tajo del Vacío
 }
@@ -2807,17 +2793,6 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
-	}
-
-	// v6.124 — THE RESEARCH BUFFS (local copies of Calamity's effects).
-	DazzlingStabberBuff: {
-		DisplayName: Dazzling Stabber
-		Description: ¡En garde! Las dagas sagradas velan por ti
-	}
-
-	LlamasSagradas: {
-		DisplayName: Llamas sagradas
-		Description: La luz sagrada te disuelve
 	}
 
 	MarcaDelPrincipio: {

@@ -2226,18 +2226,6 @@ Items: {
 			'''
 	}
 
-	DazzlingStabberStaff: {
-		DisplayName: Dazzling Stabber Staff
-		Tooltip:
-			'''
-			RESEARCH · CALAMITY MOD: the staff of the THREE HOLY DAGGERS. Summons
-			3 daggers per use (takes 3 minion slots): the CRYSTAL dagger strikes
-			fast then rests (50% damage, 20 armor penetration), the ROCK dagger
-			lunges and recoils (300% damage!) and the FLAME dagger sweeps in a
-			wide arc and ignites the HOLY FLAMES. En garde!
-			'''
-	}
-
 	ArbitradorII: {
 		DisplayName: The Arbitrator II
 		Tooltip:
@@ -2695,8 +2683,7 @@ Projectiles: {
 	AlmaEco.DisplayName: Echo Soul
 	AlmaLuzInferior.DisplayName: Netherlight Soul
 	ArbitradorIIProyectil.DisplayName: The Arbiter's Javelin
-	DagaEterna.DisplayName: The Dazzling Dagger
-	DazzlingStabber.DisplayName: The Dazzling Stiletto
+	DagaEterna.DisplayName: The Eternal Blade
 	OndaSonoraEterna.DisplayName: The Eternal Soundwave
 	TajoDelVacioProj.DisplayName: The Slash of the Void
 }
@@ -2804,17 +2791,6 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
-	}
-
-	// v6.124 — THE RESEARCH BUFFS (local copies of Calamity's effects).
-	DazzlingStabberBuff: {
-		DisplayName: Dazzling Stabber
-		Description: En garde! The holy daggers watch over you
-	}
-
-	LlamasSagradas: {
-		DisplayName: Holy Flames
-		Description: Dissolving from holy light
 	}
 
 	MarcaDelPrincipio: {

@@ -956,19 +956,16 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
             l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
-            // v6.124 — LAS TRES ARMAS DE INVESTIGACIÓN de la letra de la
-            // sesión («copia el arma Dazzling Stabber Staff de Calamity
-            // Mod… investiga y copia al 100% todo sobre el arma
-            // Arbitrator II en CALAMITY ENTROPY… copia el arma the
-            // beginning and the end de CALAMITY ENTROPY… luego daselas
-            // al jugador»): EL DAZZLING STABBER STAFF (el calco 100% del
-            // original de Calamity: código + sprites reales), EL
-            // ARBITRADOR II (la ficha del wiki oficial de Calamity
-            // Entropy: la jabalina que atraviesa muros y estalla, y su
-            // sigilosa que SE CLAVA y detona la X) y EL PRINCIPIO Y EL
-            // FIN (la ficha del wiki: las dagas de oro y azul, sus
-            // marcas de 8 capas y el canje de almas).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.DazzlingStabberStaff>(), 1));
+            // v6.124/v6.133 — LAS ARMAS DE INVESTIGACIÓN de la letra de
+            // la sesión (el Arbitrador II y el Principio y el Fin,
+            // fichas del wiki de Calamity Entropy: la jabalina que
+            // atraviesa muros y estalla con su sigilosa que SE CLAVA y
+            // detona la X, y las dagas de oro y azul con sus marcas de
+            // 8 capas y el canje de almas). EL DAZZLING STABBER STAFF
+            // cayó con su arma en la v6.133 (la letra: «puedes borrar
+            // Dazzling Stabber Staff de Calamity Mod del codigo y
+            // cualquier referencia» — su máquina ya vive entera en las
+            // CUCHILLAS DEL ETERNO).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.ArbitradorII>(), 1));
             l.Add((ModContent.ItemType<Weapons.Investigaciones.ElPrincipioYElFin>(), 1));
             // v6.127 — EL CETRO DE LAS DAGAS DEL ETERNO (la letra: «las
