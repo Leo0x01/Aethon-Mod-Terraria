@@ -83,3 +83,4 @@ yarn-error.log*
 
 # v6.50.54 — EL ORÁCULO DE COMPILACIÓN local (nunca se commitea: herramienta del entorno)
 verify.csproj
+tools/__pycache__/
