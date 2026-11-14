@@ -1,4 +1,4 @@
-# EL LIBRO MAESTRO DE LA CASA — AethonMod v6.135
+# EL LIBRO MAESTRO DE LA CASA — AethonMod v6.136
 
 > **EL DOCUMENTO ÚNICO DE VERDAD.** Todo lo que una IA (o un humano) necesita para
 > retomar, entender y continuar este proyecto está aquí. Si este documento
@@ -101,7 +101,7 @@ Detalles de cada paso:
 | R12 | **JAMÁS renombrar la carpeta `AethonMod/`** | El guardián de identidad (AethonMod.cs) huérfana los .plr/.twld |
 | R13 | **La carpeta `Content/Weapons/Investigaciones/` es SOLO contenido de prueba de la casa** (v6.136: las recreaciones ajenas murieron — ver §10) | Orden del usuario v6.54.0 + v6.136 |
 | R14 | **Sandbox reciclado = restaurar entorno** con `scripts/restaura_entorno_v6121.sh` | Ver §4 |
-| R15 | **La versión del mod vive SOLO en `build.txt`** | `version = 6.135` |
+| R15 | **La versión del mod vive SOLO en `build.txt`** | `version = 6.136` |
 | R16 | **Persistir TODO script** (>10 líneas) en `mod/tools/` o `/home/z/my-project/scripts/` | Artefacto recuperable |
 | R17 | **Cero secretos en el repo**: el token de GitHub vive SOLO en `remote.origin.url` (nunca en un .md del repo) | Seguridad |
 | R18 | **Música/texturas/sonidos = generados por código de la casa** (numpy/PIL) | Cero derechos de terceros |
@@ -123,7 +123,7 @@ Aethon-Mod-Terraria/              ← RAÍZ DEL REPO (docs y tools, FUERA del .t
 ├── MAESTRO.md                    ← ESTE DOCUMENTO (la norma superior)
 ├── README.md                     ← Presentación + mapa de docs + aviso legal
 ├── CHANGES.md                    ← Historial: 38 versiones, la letra de cada una
-├── STABLE-SNAPSHOT.md            ← Estado de la última publicada (v6.135)
+├── STABLE-SNAPSHOT.md            ← Estado de la última publicada (v6.136)
 ├── CARACTERISTICAS.md            ← Inventario de contenido (qué existe)
 ├── DISEÑO_DEL_MOD.md             ← Arquitectura de sistemas (cómo funciona)
 ├── EFECTOS-Y-LIBRERIAS.md        ← EL CÓDICE VISUAL (78 librerías — consulta obligatoria)
@@ -134,7 +134,7 @@ Aethon-Mod-Terraria/              ← RAÍZ DEL REPO (docs y tools, FUERA del .t
 ├── ACTUALIZAR-FUENTE.bat / .sh   ← repo → ModSources (usuario final)
 ├── tools/                        ← 436 herramientas (ver §8)
 └── AethonMod/                    ← EL MOD (lo que se compila)
-    ├── build.txt                 # ← LA VERSIÓN (6.135) + side=Both + buildIgnore
+    ├── build.txt                 # ← LA VERSIÓN (6.136) + side=Both + buildIgnore
     ├── AethonMod.cs              # Punto de entrada + GUARDIÁN DE IDENTIDAD
     ├── AethonMod.csproj          # (viaja en buildIgnore)
     ├── LICENSE                   # aviso corto dentro del .tmod
@@ -259,7 +259,7 @@ bash /tmp/tml/start-tModLoader.sh -build /home/z/my-project/mod/AethonMod
 
 ```bash
 cd /tmp/tml && timeout 150 bash start-tModLoaderServer.sh -config serverconfig.txt
-# gate: 0 "Exception" en el log + la línea "Sandboxing: Aethon, the Eternal Grimoire v6.135"
+# gate: 0 "Exception" en el log + la línea "Sandboxing: Aethon, the Eternal Grimoire v6.136"
 ```
 
 ---

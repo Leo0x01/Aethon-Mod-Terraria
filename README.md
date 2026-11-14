@@ -64,7 +64,7 @@ GRIMORIO ETERNO**, el jefe final de 5 fases.
 | Archivo | Contenido | Para quién |
 |---|---|---|
 | **MAESTRO.md** | **EL LIBRO MAESTRO**: reglas de la casa, protocolo, arquitectura, entorno, gates, técnicas, librerías, recursos, herramientas, cronología | RETOMAR TRABAJO — leer PRIMERO |
-| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.135): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
+| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.136): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
 | **EFECTOS-Y-LIBRERIAS.md** | **EL CÓDICE VISUAL Y SONORO**: las 78 librerías VFX, los shaders, las texturas de efectos y las reglas | Crear o tocar CUALQUIER efecto |
 | **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de los sistemas con mapa de archivos | Entender CÓMO funciona algo |
 | **CARACTERISTICAS.md** | Inventario total de contenido | Saber QUÉ existe |
@@ -95,7 +95,7 @@ GRIMORIO ETERNO**, el jefe final de 5 fases.
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── MAESTRO.md                 ← EL LIBRO MAESTRO (leer primero)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.135)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.136)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # 462 .cs: VFX (78 librerías), Weapons, Items, Systems…
 │   │   └── Effects/           # Texturas procedurales (66) + Bruma + 4 shaders (.fx+.fxc)

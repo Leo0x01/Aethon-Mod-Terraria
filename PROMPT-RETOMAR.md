@@ -34,7 +34,7 @@ puedas averiguar tú mismo del repo.
      arquitectura, entorno, gates, técnicas, las 78 librerías VFX, recursos,
      herramientas y cronología. **Si algo contradice a otro doc, manda MAESTRO.**
    - `STABLE-SNAPSHOT.md` — el estado exacto de la última versión publicada
-     (ahora v6.135) y los pendientes.
+     (ahora v6.136) y los pendientes.
    - Las 3 primeras entradas de `CHANGES.md` — las últimas letras del usuario
      (cada versión nace de SU petición textual).
    - Antes de tocar CUALQUIER efecto: `EFECTOS-Y-LIBRERIAS.md`.
@@ -68,7 +68,7 @@ puedas averiguar tú mismo del repo.
 - **Entregables**: SIEMPRE a `/home/z/my-project/download/` (el .tmod, sims,
   informes). El usuario solo ve esa carpeta.
 
-## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.135)
+## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.136)
 
 - **Versión**: 6.136 (`AethonMod/build.txt`) — publicada como
   [release 445612303](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136),
