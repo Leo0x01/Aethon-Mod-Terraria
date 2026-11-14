@@ -130,11 +130,15 @@ namespace AethonMod.Content.Weapons.Investigaciones
             {
                 if (global::AethonMod.Content.Projectiles.DagaEternaMinion.ViveTipo(player, k))
                     continue;
-                // LA POSICIÓN CORRECTA: nace sobre el portador — su anillo
-                // íntimo (radio 32, la guardia) se ordena solo.
+                // LA POSICIÓN CORRECTA: nace sobre el portador — su
+                // corona (la tiara sobre los ojos) se ordena sola.
+                // v6.132 — ai[1] ES EL RestOffsetAngle DEL STABBER
+                // (Calamity): el ángulo del puesto de descanso en el
+                // abanico — las cinco repartidas (k/5 · 2π − π/2: la
+                // corona ENTERA cubierta, nadie apilado).
                 Projectile.NewProjectile(source, player.Center - Vector2.UnitY * 30f,
                     Vector2.Zero, tipoDaga, danoEscuadron, knockback, player.whoAmI,
-                    k, 0f, level);
+                    k, k / (float)global::AethonMod.Content.Projectiles.DagaEternaMinion.TiposMax * MathHelper.TwoPi - MathHelper.PiOver2, level);
                 tiposNacidos.Add(k);
             }
             int dagasNuevas = tiposNacidos.Count;

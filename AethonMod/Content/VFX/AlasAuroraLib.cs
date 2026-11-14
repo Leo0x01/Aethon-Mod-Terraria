@@ -99,6 +99,13 @@ namespace AethonMod.Content.VFX
 
         private static readonly Pluma[] _plumas = new Pluma[14];
 
+        // v6.132 — LOS POZOS DEL PAR DE ALITAS (10 propios: 5 plumas × 2
+        // lados del abanico inferior — separados de los 14 del par
+        // principal para que NADIA pise la geometría viva del otro).
+        private static readonly Vector2[][] _pozosEjeAlitas = CrearPozosEje();
+        private static readonly float[][] _pozosSemiAlitas = CrearPozosSemi();
+        private static readonly float[][] _pozosSemi2Alitas = CrearPozosSemi();
+
         private static readonly float[] _hues = new float[14];
 
         private static readonly float[] _fundidos = new float[14];
@@ -261,7 +268,12 @@ namespace AethonMod.Content.VFX
             num7 += rotCuerpo * grav;
             Vector2 val = new Vector2(MathF.Cos(num7), MathF.Sin(num7) * grav);
             Vector2 val2 = new Vector2(0f - val.Y, val.X);
-            float num8 = MathHelper.Lerp(estilo.LargoInterior, estilo.LargoExterior, num2) * (0.5f + 0.5f * spread);
+            // v6.132 — LA ESCALA GLOBAL (la letra: «hagamosla un 10% mas
+            // pequeñas»): TODO lo dimensional del ala multiplica por la
+            // escala del estilo (<=0 se trata como 1 — los estilos viejos
+            // sin escala quedan INTACTOS).
+            float escalaG = estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f;
+            float num8 = MathHelper.Lerp(estilo.LargoInterior, estilo.LargoExterior, num2) * (0.5f + 0.5f * spread) * escalaG;
             num8 *= 1f + MathF.Sin(flap * 0.7f + (float)i * 0.6f) * 0.045f;
             float num9 = MathHelper.Clamp(estilo.Vientre, 0.15f, 0.7f);
             float afilada = MathHelper.Clamp(estilo.Afilada, 0.35f, 2.5f);
@@ -273,8 +285,8 @@ namespace AethonMod.Content.VFX
             // REDONDO del plectro: cos(t·π/2)^0.62 — llega a 0 por una
             // curva circular, no por un plomo.
             float redonda = MathHelper.Clamp(estilo.Redonda, 0f, 1f);
-            float num11 = estilo.PuntaSemianchoBase + estilo.PuntaSemianchoAbierto * spread;
-            float raizSemiancho = estilo.RaizSemiancho;
+            float num11 = (estilo.PuntaSemianchoBase + estilo.PuntaSemianchoAbierto * spread) * escalaG;
+            float raizSemiancho = estilo.RaizSemiancho * escalaG;
             float vientre = num9;
             float vientre2 = num9 * (1f - 0.45f * num10);
             float ancho = num11 * (1f + 0.18f * num10);
@@ -1343,7 +1355,7 @@ namespace AethonMod.Content.VFX
                     int num3 = 0;
                     for (int i = -1; i <= 1; i += 2)
                     {
-                        Vector2 val3 = val2 + new Vector2((float)i * estilo.AnclajeSep, 0f);
+                        Vector2 val3 = val2 + new Vector2((float)i * estilo.AnclajeSep * (estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f), 0f);
                         if (fullRotation != 0f)
                         {
                             val3 = val + Utils.RotatedBy(val3 - val, (double)fullRotation, default(Vector2));
@@ -1515,6 +1527,99 @@ namespace AethonMod.Content.VFX
                         {
                             Volcar(graphicsDevice, _fxTextura, num7, textura: true);
                         }
+                    }
+
+                    // ============================================================
+                    //  v6.132 — EL PAR DE ALITAS (la letra: «le falta algo
+                    //  abajo, como otro pequeño par de alitas ya sabes como
+                    //  una mariposa»): LA SEGUNDA VELA — el abanico inferior
+                    //  nacido BAJO la espalda (16 px más abajo), al 55 % del
+                    //  tamaño y MÁS ABATIDO (plegado +0,20: el ala baja
+                    //  caída, la pose de la mariposa en reposo). Se dibuja
+                    //  ANTES de nada del borde principal en el MISMO lote
+                    //  aditivo: el par inferior queda DETRÁS del principal
+                    //  (nace más abajo y adentro — la mariposa SUPERPONE sus
+                    //  alas al aletear). Sin alitas (0) el bloque entero NO
+                    //  corre — los otros estilos quedan intactos.
+                    // ============================================================
+                    if (estilo.Alitas > 0f && _geoN > 0)
+                    {
+                        float escA = MathHelper.Clamp(estilo.Alitas, 0.25f, 0.8f);
+                        int nA = num2;                       // las mismas plumas por lado
+                        int idxA = 0;
+                        for (int ladoA = -1; ladoA <= 1; ladoA += 2)
+                        {
+                            // EL ANCLA INFERIOR: 16·escalaG px bajo la espalda
+                            // (la cintura del cuerpo — el ala baja de la
+                            // mariposa nace del ABDOMEN, no del pecho).
+                            Vector2 anclaA = val2 + new Vector2((float)ladoA * estilo.AnclajeSep * escA * 0.7f,
+                                16f * (estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f) * gravDir);
+                            if (fullRotation != 0f)
+                            {
+                                anclaA = val + Utils.RotatedBy(anclaA - val, (double)fullRotation, default(Vector2));
+                            }
+                            for (int jA = 0; jA < nA; jA++)
+                            {
+                                // EL ABANICO INFERIOR: ConstruirPluma con la
+                                // escala viva del par — el plegado EXTRA
+                                // (+0,20 en el lerp: el ala caída) vive en un
+                                // estilo local copiado.
+                                EstiloAlas estA = estilo;
+                                estA.EscalaGlobal = (estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f) * escA;
+                                estA.LargoInterior = estilo.LargoInterior;
+                                estA.LargoExterior = estilo.LargoExterior;
+                                // el abatido: el ángulo del abanico se CIERRA
+                                // (el ala baja cae hacia el cuerpo)
+                                estA.Inclinacion = estilo.Inclinacion + 0.22f;
+                                // el par inferior escribe en EL ARRAY de plumas del
+                                // par (14 — el abanico chico usa SOLO los primeros 10
+                                // slots OTRA VEZ: su vela pasa nAlitas=10, no pisa nada)
+                                plumas[idxA] = ConstruirPluma(anclaA, jA, spread * 0.85f, flap, gravDir, ladoA,
+                                    globalTimeWrappedHourly, in estA, _pozosEjeAlitas[idxA], _pozosSemiAlitas[idxA],
+                                    _pozosSemi2Alitas[idxA], fundidos[idxA], fullRotation);
+                                hues[idxA] = hues[idxA % Math.Max(1, _geoN)];
+                                idxA++;
+                            }
+                        }
+                        // LA VELA DEL PAR INFERIOR — con los pozos SOBRE
+                        // _geoN (los 14 del par principal ya volcaron: se
+                        // pisan SEGUROS, la geometría muerta no se relee).
+                        int nAlitas = idxA;
+                        try
+                        {
+                            // el espejo del par (mirando a la izquierda)
+                            if (((Entity)pl).direction < 0)
+                            {
+                                float cxA = val.X;
+                                for (int mA = 0; mA < nAlitas; mA++)
+                                {
+                                    Vector2[] ejeA = _pozosEjeAlitas[mA];
+                                    for (int kA = 0; kA < ejeA.Length; kA++)
+                                        ejeA[kA].X = 2f * cxA - ejeA[kA].X;
+                                    float[] smA = _pozosSemiAlitas[mA];
+                                    float[] snA = _pozosSemi2Alitas[mA];
+                                    for (int kA2 = 0; kA2 < smA.Length; kA2++)
+                                    {
+                                        float tmpA = smA[kA2];
+                                        smA[kA2] = snA[kA2];
+                                        snA[kA2] = tmpA;
+                                    }
+                                }
+                            }
+                            EstiloAlas estV = estilo;
+                            estV.Lisas = false;          // el par inferior SIEMPRE es vela con membrana
+                            int nv = EmitirMembrana(0, plumas, hues, fundidos, mezclaDia, in estV, nAlitas);
+                            if (nv >= 3)
+                            {
+                                Volcar(graphicsDevice, _fxPlano, nv, textura: false);
+                            }
+                            nv = EmitirMembranaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, fold, in estV, nAlitas);
+                            if (nv >= 3)
+                            {
+                                Volcar(graphicsDevice, _fxTextura, nv, textura: true);
+                            }
+                        }
+                        catch { }
                     }
                 }
                 finally

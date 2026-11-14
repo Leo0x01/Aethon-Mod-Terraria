@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -79,23 +80,64 @@ namespace AethonMod.Content.Projectiles
         /// las 5 dagas»).</summary>
         public const int TechoDagas = 5;
 
-        // === LAS FASES (ai[1]) ===
-        private const float F_HOVER = 0f;     // el anillo: espera y mira
-        private const float F_VIENTO = 1f;    // la anticipación: se echa atrás
-        private const float F_GOLPE = 2f;     // la técnica de SU tipo
-        private const float F_CLAVADA = 3f;   // (solo Vacío) clavada goteando
-        private const float F_VUELTA = 4f;    // el regreso al anillo
+        // v6.132 — LA MÁQUINA DEL STABBER (la letra: «su tipo de ataque
+        // debe ser igual que el de Dazzling Stabber Staff de Calamity
+        // Mod»): LAS FASES MUEREN (F_HOVER/F_VIENTO/F_GOLPE/F_CLAVADA/
+        // F_VUELTA con el reloj en Projectile.frame — un reloj que
+        // NADIE avanzaba en F_GOLPE: las técnicas recibían t=0 ETERNO y
+        // las cuchillas se quedaban CONGELADAS a 70 px de la presa, con
+        // _posVuelta=(0,0) en el primer ataque — el ataque y la
+        // animación que el usuario vio MUERTOS). LA MÁQUINA NUEVA es el
+        // CALCO del original: VELOCIDAD (nada de lerp de posición — el
+        // cuchillo ACELERA 1,03× y FRENA 0,93× cerca del objetivo, el
+        // giro 0,15 del blade-3), EL DESCANSO (attackCooldown tras los
+        // golpes: 80-95 el cristal a las 6 cuchilladas · 45-60 la roca
+        // tras su embestida · 5 la llama), AttackDelay del empuje de la
+        // carga y la vuelta al descanso orbital (moveSmoothing 50→2).
+        // ai[1] pasa a ser LO QUE ERA EN CALAMITY: el RestOffsetAngle
+        // (el ángulo del puesto de descanso de ESTE cuchillo en el
+        // abanico — asignado al nacer, JAMÁS una fase).
+        private float RestOffsetAngle => Projectile.ai[1];
 
-        // === EL COMPÁS (la cadencia en el anillo, por tipo — el ritmo
-        //     propio del stabber: cada daga ataca a SU velocidad) ===
-        private static int CadenciaDe(int tipo) => tipo switch
+        /// <summary>EL DESCANSO del stabber (Calamity: attackCooldown):
+        /// los ticks sin atacar tras la última cuchillada — el cristal
+        /// descansa 80-95 tras 6 golpes, la roca 45-60 tras la
+        /// embestida, la llama 5 entre barridos.</summary>
+        private int attackCooldown;
+
+        /// <summary>Las cuchilladas de ESTA ronda (el cristal cuenta 6
+        /// antes de descansar — la cadencia EXACTA del original).</summary>
+        private int attacksDone;
+
+        /// <summary>LA SUAVIZACIÓN DE LA VUELTA (Calamity: moveSmoothing
+        /// 50→2): el acercamiento al puesto de descanso cada vez más
+        /// directo — arruja suave, aterriza directo.</summary>
+        private float moveSmoothing = 50f;
+
+        /// <summary>El multiplicador de daño por tipo (Calamity:
+        /// damageMult — 0,5 cristal con 20 de perforación · 3 roca · 1
+        /// llama·vacío·veredicto).</summary>
+        private float damageMult = 1f;
+
+        /// <summary>EL OBJETIVO FIJADO (Calamity: storedPos): la
+        /// posición donde vuela el cuchillo — se fija al abrir la
+        /// ronda y el cuchillo la PERSIGUE (el original congela el
+        /// objetivo al arrancar: no re-aima cada tick).</summary>
+        private Vector2 storedPos;
+
+        /// <summary>¿Acaba de golpear? (los efectos del on-hit —
+        /// Calamity: justHit).</summary>
+        private bool justHit;
+
+        /// <summary>EL RETARDO DEL EMPUJE (Calamity: AttackDelay en
+        /// ai[0] — aquí en localAI[0]: ai[0] ES EL TIPO del alma): el
+        /// cuchillo que acaba de cortar espera ANTES de volver a
+        /// cargar — el empuje que lee el ojo.</summary>
+        private float AttackDelay
         {
-            TIPO_CRISTAL => 130,
-            TIPO_LLAMA => 170,
-            TIPO_ROCA => 220,
-            TIPO_VACIO => 240,
-            _ => 160,
-        };
+            get => Projectile.localAI[0];
+            set => Projectile.localAI[0] = value;
+        }
 
         // === LA PUERTA DE LAS DAGAS (la letra: «la siguiente invocación
         //     después de los 11 ojos») — la llama el Grimorio ===
@@ -180,6 +222,11 @@ namespace AethonMod.Content.Projectiles
         // rayo): la daga golpea CON SU CUERPO — el bucle del stabber.
         public override bool MinionContactDamage() => true;
 
+        /// <summary>v6.132 — EL DESCANSO APAGA EL FILO (Calamity:
+        /// CanDamage => attackCooldown == 0): la cuchilla que descansa
+        /// NO corta de paso — solo la cuchilla en ronda.</summary>
+        public override bool? CanDamage() => attackCooldown == 0 ? null : false;
+
         // ================================================================
         //  EL NIVEL (el patrón de los ojos: ai[2] desde el spawn)
         // ================================================================
@@ -225,390 +272,313 @@ namespace AethonMod.Content.Projectiles
             int tipoBuff = ModContent.BuffType<global::AethonMod.Content.Buffs.DagaEternaBuff>();
             global::AethonMod.Content.Systems.EscuadronUtil.Sostener(Projectile, dueño, tipoBuff);
 
-            // EL FOCO: la presa más cercana al dueño (el caza de los ojos).
-            NPC presa = ObjetivoDaga(dueño);
-
-            // v6.131 — EL PEGUE DEL FESTÍN (la letra: «debes tomar al
-            //     jugador completo para la animacion de devorar»): la
-            //     corona de cuchillas HEREDA el movimiento del cuerpo
-            //     COMPLETO mientras el Eterno arrastra al dueño — la
-            //     tiara entera sube RÍGIDA con su portador a la boca.
-            global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
-                .PegarAlFestin(Projectile, Projectile.owner);
-
-            float fase = Projectile.ai[1];
-            // Projectile.frame ES el reloj de fase (el truco de los ojos:
-            // campo sincronizado, cero netcode).
-            int t = Projectile.frame;
-
-            if (fase == F_HOVER)
+            // === EL ALMA DE CADA CUCHILLO (Calamity: el switch de
+            //     KnifeType al abrir la IA): el color del filo, el
+            //     extraUpdates (el cristal 1, la roca 2 — MÁS ticks de
+            //     física por frame: la rapidéz del original) y el daño
+            //     por tipo. El VACÍO y el VEREDICTO (los dos de la casa)
+            //     cabalgan la máquina del stabber con SU firma: el vacío
+            //     extraUpdates 1 con la QUEMADURA 100 % (la casa arde
+            //     violeta), el veredicto ×1,5 de la sentencia.
+            switch (Tipo)
             {
-                // === LA CORONA: la tiara encima de los ojos ===
-                Vector2 slot = SlotDelAnillo(dueño);
-                float suaviza = Math.Min(1f, t / 22f);   // el nacimiento: se acomoda suave
-                Projectile.Center = Vector2.Lerp(Projectile.Center, slot, 0.18f + 0.10f * suaviza);
-                Projectile.velocity = Vector2.Zero;
-
-                // v6.131 — EL FILO HACIA AFUERA (la corona de puntas):
-                // quieta en SU punto del arco, la cuchilla APUNTA al
-                // cielo por fuera — el filo del arco (la tangente +
-                // 90°: la punta de la tiara). El lerp de la rotación
-                // evita el saltito del nacimiento.
-                Vector2 radial = slot - dueño.MountedCenter;
-                if (radial.LengthSquared() < 0.001f) radial = -Vector2.UnitY;
-                float rotCorona = MathF.Atan2(radial.Y, radial.X) + MathHelper.PiOver2;
-                Projectile.rotation = MathHelper.Lerp(
-                    Projectile.rotation, rotCorona, MathHelper.Clamp(0.06f + 0.10f * suaviza, 0f, 1f));
-
-                // el reloj del compás: cuenta ABAJO hasta el ataque
-                if (t <= 0)
-                {
-                    // EL DESFASE DE NACIMIENTO (la ley de los ojos): el
-                    // primer ataque cae entre el 35 % y el 100 % del
-                    // intervalo propio — las cinco JAMÁS se lanzan en bloque.
-                    int cadencia = Math.Max(30, (int)(CadenciaDe(Tipo) / (VelocidadNivel * RitmoPropio)));
-                    Projectile.frame = (int)(cadencia *
-                        (0.35f + 0.65f * VFXCore.Hash01(Projectile.whoAmI, 811, 233)));
-                }
-                else if (t <= 1)
-                {
-                    if (presa != null)
-                    {
-                        Projectile.ai[1] = F_VIENTO;
-                        Projectile.frame = 0;
-                        Projectile.netUpdate = true;
-                        // LA MIRADA COLECTIVA: el iris se clava en la presa
-                        if (Main.netMode != NetmodeID.Server && Main.rand.NextBool(2))
-                        {
-                            Dust d = Dust.NewDustPerfect(Projectile.Center,
-                                DustID.Enchanted_Pink, -Vector2.Normalize(presa.Center - Projectile.Center) * 1.6f,
-                                130, new Color(200, 160, 255), 0.7f);
-                            d.noGravity = true;
-                        }
-                    }
-                    else
-                    {
-                        // sin presa: el compás respira corto (vuelve a mirar)
-                        Projectile.frame = 50;
-                    }
-                }
-                else
-                {
-                    Projectile.frame = t - 1;
-                }
-            }
-            else if (fase == F_VIENTO)
-            {
-                // === LA ANTICIPACIÓN (el telegráfo del stabber): la daga
-                //     se ECHA ATRÁS apuntando a la presa — el resorte ===
-                int viento = Tipo == TIPO_ROCA ? 16 : 12;
-                float p = Math.Min(1f, t / (float)viento);
-                if (presa != null && presa.active)
-                {
-                    _presa = presa.whoAmI;
-                    Vector2 dir = Vector2.Normalize(presa.Center - Projectile.Center);
-                    if (dir.LengthSquared() < 0.0001f) dir = -Vector2.UnitY;
-                    Projectile.Center -= dir * (2.6f * (1f - p * 0.4f));
-                    Projectile.rotation = dir.ToRotation() + MathHelper.PiOver2;
-                    // LA MARCA DEL VEREDICTO: el anillo dorado sobre la presa
-                    if (Tipo == TIPO_VEREDICTO && !Main.dedServ && Main.rand.NextBool(3))
-                    {
-                        Dust d = Dust.NewDustPerfect(presa.Center + Main.rand.NextVector2Circular(22f, 22f),
-                            DustID.GoldFlame, Vector2.Zero, 160, new Color(255, 214, 130), 0.8f);
-                        d.noGravity = true;
-                    }
-                }
-                if (t >= viento)
-                {
-                    Projectile.ai[1] = F_GOLPE;
-                    Projectile.frame = 0;
-                    Projectile.netUpdate = true;
-                }
-                else Projectile.frame = t + 1;
-            }
-            else if (fase == F_GOLPE)
-            {
-                CorrerTecnica(presa, t);
-            }
-            else if (fase == F_CLAVADA)
-            {
-                // === (VACÍO) LA DAGA VIVE DENTRO DE LA PRESA: cabalga el
-                //     cuerpo donde entró y GOTEA el vacío — cada 15 t un
-                //     golpe de ×0,35 (el contacto lo cobra el hitbox
-                //     acoplado) — hasta disolverse en motas violetas ===
-                NPC clavada = _presa >= 0 && _presa < Main.maxNPCs ? Main.npc[_presa] : null;
-                if (clavada == null || !clavada.active || clavada.life <= 0)
-                {
-                    // la presa murió: la daga sigue su vuelo (busca la
-                    // siguiente tela — la ley de Las Agujas del Vacío)
-                    Projectile.ai[1] = F_VUELTA;
-                    Projectile.frame = 0;
-                    Projectile.netUpdate = true;
-                }
-                else
-                {
-                    Projectile.Center = clavada.Center + _offsetClavada;
-                    Projectile.rotation = _angClavada;
-                    if (t >= 45)
-                    {
-                        // la disolución en motas violetas
-                        if (!Main.dedServ && Main.netMode != NetmodeID.Server)
-                            for (int k = 0; k < 10; k++)
-                            {
-                                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
-                                    Main.rand.NextVector2Circular(2.4f, 2.4f), 140,
-                                    new Color(190, 150, 240), 0.9f);
-                                d.noGravity = true;
-                            }
-                        Projectile.ai[1] = F_VUELTA;
-                        Projectile.frame = 0;
-                        Projectile.netUpdate = true;
-                    }
-                    else Projectile.frame = t + 1;
-                }
-            }
-            else // F_VUELTA
-            {
-                // === EL REGRESO (el compás del stabber: golpe → pausa →
-                //     anillo — el CRISTAL vuelve MÁS DESPACIO: su pausa
-                //     breve de la letra) ===
-                int vuelta = Tipo == TIPO_CRISTAL ? 46 : 24;
-                Vector2 slot = SlotDelAnillo(dueño);
-                float p = Math.Min(1f, t / (float)vuelta);
-                float ease = p * p * (3f - 2f * p);
-                Projectile.Center = Vector2.Lerp(_posVuelta, slot, ease);
-                if (presa != null && presa.active)
-                    Projectile.rotation = MathHelper.Lerp(Projectile.rotation,
-                        AnguloHacia(presa.Center), 0.12f);
-                if (t >= vuelta)
-                {
-                    Projectile.ai[1] = F_HOVER;
-                    int cadencia = Math.Max(30, (int)(CadenciaDe(Tipo) / (VelocidadNivel * RitmoPropio)));
-                    Projectile.frame = cadencia;
-                    Projectile.netUpdate = true;
-                }
-                else Projectile.frame = t + 1;
+                case TIPO_CRISTAL:
+                    damageMult = 0.5f;
+                    Projectile.ArmorPenetration = 20;   // «innate 20 armor penetration»
+                    Projectile.extraUpdates = 1;
+                    break;
+                case TIPO_LLAMA:
+                    damageMult = 1f;
+                    break;
+                case TIPO_ROCA:
+                    damageMult = 3f;                    // «300% base damage»
+                    Projectile.extraUpdates = 2;
+                    break;
+                case TIPO_VACIO:
+                    damageMult = 1f;
+                    Projectile.extraUpdates = 1;
+                    break;
+                default:
+                    damageMult = 1.5f;                  // la sentencia de la casa
+                    break;
             }
 
-            // LA QUEMADURA PRENDE EN CADA GOLPE (ModifyHitNPC) — aquí
-            // solo vive la LUZ de la daga (la casa: el minion alumbra).
+            // LA LUZ DE LA CASA (el minion alumbra).
             if (!Main.dedServ)
             {
                 Color luz = LuzDe(Tipo);
                 Lighting.AddLight(Projectile.Center, luz.ToVector3() * 0.55f);
             }
 
-            // === v6.130 — EL PARPADEO INDEPENDIENTE (la letra: «recuerda
-            //     usar y animar los ojos usando los ojos minions»): cada
-            //     cuchilla lleva SU reloj — el MISMO sistema de los Ojos
-            //     del Eterno (localAI[0] = la cuenta atrás al próximo
-            //     parpadeo 6–18 s por hash, localAI[1] = la fase del
-            //     párpado 10→1, cero RNG de red: visual-local como en el
-            //     ojo). Durante el GOLPE y el VIENTO el párpado se CORTA
-            //     y el ojo queda ABIERTO clavado en la presa (la mirada
-            //     del cazador — la ley del OjoEternoMinion). ===
-            if (fase == F_VIENTO || fase == F_GOLPE || fase == F_CLAVADA)
+            // EL PEGUE DEL FESTÍN (v6.131, intacto: la corona entera
+            // hereda el movimiento del cuerpo COMPLETO mientras el
+            // Eterno arrastra al dueño).
+            global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                .PegarAlFestin(Projectile, Projectile.owner);
+
+            // EL FOCO (Calamity: MinionHoming(1100f) — el buscador de la
+            // casa de siempre): la presa más cercana al dueño.
+            NPC potentialTarget = ObjetivoDaga(dueño);
+
+            // EL OBJETIVO SE FIJA AL ABRIR LA RONDA (Calamity: storedPos
+            // solo cuando cooldown==0 y AttackDelay<=0 — el cuchillo no
+            // re-apunta cada tick: persigue el punto donde ESTABA).
+            // (AttackDelay vive en localAI[0]: en Calamity era ai[0],
+            // PERO aquí ai[0] ES EL TIPO del alma desde la v6.124 — el
+            // reloj del empuje es CINE LOCAL: el daño lo cobra el
+            // contacto del filo, no el reloj.)
+            if (potentialTarget != null && attackCooldown == 0 && AttackDelay <= 0f)
             {
-                if (Projectile.localAI[1] > 0f) Projectile.localAI[1] = 0f;
+                storedPos = potentialTarget.Center;
             }
-            else if (Projectile.localAI[1] > 0f)
-                Projectile.localAI[1]--;                      // la fase 10→1
+            // LA PRESA DE LA MIRADA (el iris la sigue viva).
+            _presa = potentialTarget != null && potentialTarget.active ? potentialTarget.whoAmI : -1;
+
+            // LOS EFECTOS DEL GOLPE (Calamity: justHit — el flash y la
+            // firma de sonido de cada alma).
+            if (justHit)
+            {
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                {
+                    if (Tipo == TIPO_CRISTAL && attacksDone >= 6)
+                    {
+                        for (int k = 0; k < 9; k++)
+                        {
+                            Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
+                                Vector2.One.RotatedByRandom(0.5) * Main.rand.NextFloat(10f, 20f));
+                            dust.noGravity = true;
+                            dust.scale = Main.rand.NextFloat(1.25f, 1.75f);
+                            dust.color = LuzDe(Tipo);
+                        }
+                    }
+                    if (Tipo == TIPO_ROCA)
+                    {
+                        for (int k = 0; k < 5; k++)
+                        {
+                            Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Stone,
+                                Vector2.One.RotatedByRandom(100) * Main.rand.NextFloat(1f, 5f));
+                            dust.noGravity = true;
+                            dust.scale = Main.rand.NextFloat(0.75f, 1.2f);
+                        }
+                    }
+                    if (Tipo == TIPO_VEREDICTO)
+                    {
+                        for (int k = 0; k < 12; k++)
+                        {
+                            Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
+                                Main.rand.NextVector2Circular(3.2f, 3.2f), 160, new Color(255, 214, 130), 1.0f);
+                            dust.noGravity = true;
+                        }
+                    }
+                    if (Tipo == TIPO_VACIO)
+                    {
+                        for (int k = 0; k < 6; k++)
+                        {
+                            Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
+                                Main.rand.NextVector2Circular(2.4f, 2.4f), 150, new Color(150, 84, 235), 0.9f);
+                            dust.noGravity = true;
+                        }
+                    }
+                }
+                justHit = false;
+            }
+
+            // LA MÁQUINA (Calamity: el if grande — objetivo presente:
+            // SLICE o descanso; sin objetivo: la vuelta al descanso).
+            if (potentialTarget != null)
+            {
+                if (attackCooldown == 0)
+                    SliceTarget();
+                else
+                    ManageAttackCooldown();
+            }
             else
             {
-                Projectile.localAI[0]--;
-                if (Projectile.localAI[0] <= 0f)
-                {   // el próximo parpadeo: 6–18 s, propio de ESTA cuchilla
-                    Projectile.localAI[1] = 10f;
-                    Projectile.localAI[0] = 360f + 720f *
-                        VFXCore.Hash01(Projectile.whoAmI, 911, 77);
-                }
+                ManageAttackCooldown();
+                ReturnToRestingPosition(dueño);
             }
         }
 
         // ================================================================
-        //  LAS TÉCNICAS — el repertorio del stabber, una por daga
+        //  EL SLICE — EL ATAQUE DEL STABBER (Calamity: SliceTarget,
+        //  byte a byte en la física: la aceleración 1,03/0,93, el giro
+        //  0,15 y la carga del blade-3 — aquí adaptado a las CINCO
+        //  almas de la casa: cristal=blade-1 (orbita y repite) ·
+        //  roca=blade-2 (embiste recto y recula) · llama=vacío=
+        //  veredicto=blade-3 (persigue curvando y CARGA a 36 px/t)
         // ================================================================
-        private void CorrerTecnica(NPC presa, int t)
+        private void SliceTarget()
         {
-            switch (Tipo)
-            {
-                case TIPO_CRISTAL: TecnicaCristal(presa, t); break;
-                case TIPO_LLAMA: TecnicaLlama(presa, t); break;
-                case TIPO_ROCA: TecnicaRoca(presa, t); break;
-                case TIPO_VACIO: TecnicaVacio(presa, t); break;
-                default: TecnicaVeredicto(presa, t); break;
-            }
-        }
+            moveSmoothing = 50f;
 
-        /// <summary>CRISTAL — «rapidly slash enemies before briefly
-        /// pausing, dealing 50% base damage with 20 innate armor
-        /// penetration»: TRES tajos rápidos A TRAVÉS de la presa (12 t
-        /// cada uno), cada uno naciendo del lado opuesto — la ráfaga
-        /// EXACTA del original.</summary>
-        private void TecnicaCristal(NPC presa, int t)
-        {
-            if (presa == null || !presa.active) { IrAVuelta(); return; }
-            int tajo = t / 12;                     // 0..2: la ráfaga de tres
-            float p = (t % 12) / 12f;
-            if (tajo > 2) { IrAVuelta(); return; }
-            // cada tajo nace 70 px DETRÁS de la presa (alternando el
-            // lado — la ráfaga la cruza en zigzag) y la ATRAVIESA
-            Vector2 dir = tajo % 2 == 0
-                ? new Vector2(1f, -0.35f)
-                : new Vector2(-1f, -0.35f);
-            dir.Normalize();
-            Vector2 desde = presa.Center - dir * 70f;
-            Vector2 hasta = presa.Center + dir * 70f;
-            float ease = p * p * (3f - 2f * p);
-            Projectile.Center = Vector2.Lerp(desde, hasta, ease);
-            Projectile.rotation = dir.ToRotation() + MathHelper.PiOver2;
-            // el rastro del tajo (las esquirlas de cristal)
-            if (!Main.dedServ && Main.netMode != NetmodeID.Server && p < 0.7f && Main.rand.NextBool(2))
+            // EL RETARDO DEL EMPUJE (Calamity: AttackDelay — cuenta
+            // hacia abajo hasta −60; mientras >0 el cuchillo SOLO gira
+            // la órbita del cristal).
+            if (AttackDelay > -60f)
             {
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
-                    Main.rand.NextVector2Circular(1.2f, 1.2f), 130, new Color(220, 190, 255), 0.7f);
-                d.noGravity = true;
-            }
-        }
-
-        /// <summary>LLAMA — «swipe at enemies in a wide arcing motion»:
-        /// un BARRIDO en arco amplio alrededor de la presa (de −70° a
-        /// +70° por encima, peinando la zona, ×1,0 a TODO lo que el
-        /// arco toque).</summary>
-        private void TecnicaLlama(NPC presa, int t)
-        {
-            if (presa == null || !presa.active) { IrAVuelta(); return; }
-            const int T_BARRIDO = 30;
-            if (t > T_BARRIDO) { IrAVuelta(); return; }
-            float p = t / (float)T_BARRIDO;
-            float a0 = -MathHelper.PiOver2 - 1.25f;
-            float a1 = -MathHelper.PiOver2 + 1.25f;
-            float ang = MathHelper.Lerp(a0, a1, p);
-            float radio = 84f;
-            Projectile.Center = presa.Center + ang.ToRotationVector2() * radio;
-            Projectile.rotation = ang + MathHelper.Pi;   // la tangente del arco + el sprite que apunta arriba
-            // las lenguas del barrido (la llama negra de la casa)
-            if (!Main.dedServ && Main.netMode != NetmodeID.Server && Main.rand.NextBool(2))
-            {
-                Dust d = Dust.NewDustPerfect(Projectile.Center,
-                    Main.rand.NextBool(2) ? DustID.Shadowflame : DustID.Enchanted_Pink,
-                    -ang.ToRotationVector2() * Main.rand.NextFloat(0.8f, 2.2f), 140,
-                    Main.rand.NextBool(2) ? new Color(150, 84, 235) : new Color(96, 54, 170), 0.9f);
-                d.noGravity = true;
-            }
-        }
-
-        /// <summary>ROCA — «lunge at enemies and recoil after hits,
-        /// dealing 300% base damage»: la EMBESTIDA desde el anillo
-        /// (nacimos lejos: el lunge de verdad) que ATRAVIESA a la presa
-        /// y el RECUDE — el rebote hacia atrás del golpe.</summary>
-        private void TecnicaRoca(NPC presa, int t)
-        {
-            if (presa == null || !presa.active) { IrAVuelta(); return; }
-            const int T_LUNGE = 16;
-            const int T_RECUDE = 12;
-            if (t < T_LUNGE)
-            {
-                // LA EMBESTIDA: de donde nací (guardado en _posVuelta)
-                // hasta MÁS ALLÁ de la presa (la atraviesa entera)
-                float p = t / (float)T_LUNGE;
-                float ease = p * p * p;                 // acelera como una piedra
-                Vector2 hasta = _posVuelta + (presa.Center - _posVuelta) * 1.65f;
-                Projectile.Center = Vector2.Lerp(_posVuelta, hasta, ease);
-                Projectile.rotation = AnguloHacia(presa.Center);
-                if (!Main.dedServ && Main.netMode != NetmodeID.Server && Main.rand.NextBool(2))
+                AttackDelay -= 1f;
+                if (AttackDelay > 0f)
                 {
-                    Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Shadowflame,
-                        Main.rand.NextVector2Circular(1.6f, 1.6f), 130, new Color(96, 54, 170), 0.9f);
-                    d.noGravity = true;
+                    if (Tipo == TIPO_CRISTAL)
+                    {
+                        if (!Projectile.WithinRange(storedPos, 150f))
+                            Projectile.velocity = Projectile.velocity.RotatedBy(0.1);
+                        else
+                            Projectile.velocity *= 1.004f;
+                    }
+                    return;
                 }
             }
-            else if (t < T_LUNGE + T_RECUDE)
-            {
-                // EL RECUDE: el rebote hacia atrás del golpe (el
-                // retroceso EXACTO del original)
-                float p = (t - T_LUNGE) / (float)T_RECUDE;
-                Vector2 dir = Vector2.Normalize(presa.Center - _posVuelta);
-                if (dir.LengthSquared() < 0.0001f) dir = -Vector2.UnitY;
-                Projectile.Center += -dir * 4.2f * (1f - p);
-            }
-            else IrAVuelta();
-        }
 
-        /// <summary>VACÍO — la cuarta de la casa: el LANZAMIENTO que SE
-        /// CLAVA (la daga vive DENTRO de la presa 45 t goteando ×0,35
-        /// cada 15 t — F_CLAVADA cobra el goteo por contacto).</summary>
-        private void TecnicaVacio(NPC presa, int t)
-        {
-            if (presa == null || !presa.active) { IrAVuelta(); return; }
-            const int T_VUELO = 14;
-            if (t > T_VUELO)
+            // EL DESPEGUE (Calamity: sin movimiento → -12 en Y: el
+            // cuchillo JAMÁS se queda clavado esperando).
+            if (Projectile.velocity.Length() < 3f)
+                Projectile.velocity = Vector2.UnitY * -12f;
+
+            // CERCA: FRENA en seco (0,93 — el mordisco del corte).
+            if (Projectile.velocity.Length() > 5f && Projectile.WithinRange(storedPos, 50f))
+                Projectile.velocity *= 0.93f;
+            // LEJOS: ACELERA (1,03 — el zumbido del vuelo).
+            else if (Projectile.velocity.Length() < (Tipo == TIPO_ROCA ? 15f : 40f))
+                Projectile.velocity *= 1.03f;
+
+            float angularTurnSpeed = 0.15f;                       // el giro del original
+            float angleToTargetCoords = Projectile.AngleTo(storedPos);
+
+            // BLADE-3 (la llama, el vacío y el veredicto): PERSIGUE
+            // curvando hacia el punto (la curva del barrido amplio).
+            if (Tipo == TIPO_LLAMA || Tipo == TIPO_VACIO || Tipo == TIPO_VEREDICTO)
             {
-                // LA ENTRADA: el punto del clavado (offset dentro del
-                // cuerpo — la herida vive donde entró)
-                _offsetClavada = Projectile.Center - presa.Center;
-                _angClavada = Projectile.rotation;
-                Projectile.ai[1] = F_CLAVADA;
-                Projectile.frame = 0;
+                if (!Projectile.WithinRange(storedPos, 50f))
+                    Projectile.velocity = Projectile.velocity.ToRotation()
+                        .AngleTowards(angleToTargetCoords, angularTurnSpeed)
+                        .ToRotationVector2() * Projectile.velocity.Length();
+            }
+            // BLADE-2 (la roca): la EMBESTIDA RECTA a 15 px/t.
+            if (Tipo == TIPO_ROCA)
+                Projectile.velocity = DireccionSegura(storedPos) * 15f;
+            // BLADE-1 (el cristal): si se alejó MUCHO, vuelve directo.
+            if (Tipo == TIPO_CRISTAL && !Projectile.WithinRange(storedPos, 400f))
+                Projectile.velocity = DireccionSegura(storedPos) * 20f;
+
+            // LA CARGA DEL BLADE-3 (Calamity): a la vista del objetivo y
+            // lejos (>75) — ZUMBIDO: 36 px/t rectos + AttackDelay 15
+            // (el empuje que lee el ojo: el cuchillo TRUENA).
+            if (!Projectile.WithinRange(storedPos, 75f) &&
+                Vector2.Dot(DireccionSegura(storedPos), Projectile.velocity.SafeNormalize(Vector2.Zero)) > 0.99f &&
+                (Tipo == TIPO_LLAMA || Tipo == TIPO_VACIO || Tipo == TIPO_VEREDICTO))
+            {
+                Projectile.velocity = DireccionSegura(storedPos) * 36f;
+                AttackDelay = 15f;
                 Projectile.netUpdate = true;
-                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
-                {
-                    for (int k = 0; k < 8; k++)
-                    {
-                        Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
-                            Main.rand.NextVector2Circular(2.2f, 2.2f), 150, new Color(150, 84, 235), 0.9f);
-                        d.noGravity = true;
-                    }
-                }
-                return;
             }
-            float p = t / (float)T_VUELO;
-            float ease = p * p;                        // acelera: la sed
-            Vector2 hasta = presa.Center;
-            Projectile.Center = Vector2.Lerp(_posVuelta, hasta, ease);
-            Projectile.rotation = AnguloHacia(presa.Center);
+
+            // LA ROTACIÓN: el filo APUNTA al vuelo (la punta hacia
+            // donde va — la ley del sprite que apunta arriba).
+            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
         }
 
-        /// <summary>VEREDICTO — la quinta de la casa: el golpe PUNTUAL
-        /// ×1,5 sobre la presa marcada, con su estallido de oro (la
-        /// sentencia pequeña — el lenguaje del Juicio).</summary>
-        private void TecnicaVeredicto(NPC presa, int t)
+        /// <summary>(Calamity: DireccionSegura — Projectile.SafeDirectionTo
+        /// con respaldo: JAMÁS NaN.)</summary>
+        private Vector2 DireccionSegura(Vector2 destino, Vector2 respaldo = default)
         {
-            if (presa == null || !presa.active) { IrAVuelta(); return; }
-            const int T_GOLPE = 12;
-            const int T_POSA = 14;
-            if (t < T_GOLPE)
+            Vector2 v = destino - Projectile.Center;
+            return v.LengthSquared() > 0.0001f ? Vector2.Normalize(v) : respaldo;
+        }
+
+        // ================================================================
+        //  EL DESCANSO — (Calamity: manageAttackCooldown): el cristal
+        //  vuelve a su puesto mientras cuenta; la roca desliza frenando
+        //  (0,96); al terminar, la ronda renace (attacksDone=0 y el
+        //  pulso del anillo del cristal).
+        // ================================================================
+        private void ManageAttackCooldown()
+        {
+            if (attackCooldown <= 0) return;
+            attackCooldown--;
+            if (Tipo == TIPO_CRISTAL)
+                ReturnToRestingPosition(Main.player[Projectile.owner]);
+            else if (Tipo == TIPO_ROCA)
+                Projectile.velocity *= 0.96f;
+            if (attackCooldown == 0)
             {
-                // LA SENTENCIA: una línea recta rápida, de punta
-                float p = t / (float)T_GOLPE;
-                float ease = 1f - (1f - p) * (1f - p) * (1f - p);
-                Vector2 hasta = presa.Center;
-                Projectile.Center = Vector2.Lerp(_posVuelta, hasta, Math.Min(1f, ease * 1.15f));
-                Projectile.rotation = AnguloHacia(presa.Center);
-            }
-            else if (t < T_GOLPE + T_POSA)
-            {
-                // LA POSA: la daga respira un instante donde cayó la
-                // sentencia (con su lluvia de oro)
-                if (t == T_GOLPE && !Main.dedServ && Main.netMode != NetmodeID.Server)
+                attacksDone = 0;
+                if (Tipo == TIPO_CRISTAL && !Main.dedServ && Main.netMode != NetmodeID.Server)
                 {
-                    for (int k = 0; k < 12; k++)
+                    // (Calamity: el BloomRing de la pausa — la casa: el
+                    // pulso de anillo violeta del cristal que descansa.)
+                    for (int k = 0; k < 6; k++)
                     {
-                        Dust d = Dust.NewDustPerfect(presa.Center, DustID.GoldFlame,
-                            Main.rand.NextVector2Circular(3.2f, 3.2f), 160, new Color(255, 214, 130), 1.0f);
-                        d.noGravity = true;
+                        Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
+                            Vector2.One.RotatedByRandom(100) * Main.rand.NextFloat(4f, 8f));
+                        dust.noGravity = true;
+                        dust.scale = Main.rand.NextFloat(0.65f, 1.15f);
+                        dust.color = LuzDe(Tipo);
                     }
                 }
             }
-            else IrAVuelta();
         }
 
-        private void IrAVuelta()
+        // ================================================================
+        //  LA VUELTA AL DESCANSO — (Calamity: ReturnToRestingPosition):
+        //  el abanico orbital SOBRE LA CORONA CENTRADA (el arco de la
+        //  tiara v6.131, quieta sobre la cabeza del enjambre) con el
+        //  seno del original (la respiración del vuelo) y el giro del
+        //  sprite hacia el descanso (0,25 — la rotación que aterriza).
+        // ================================================================
+        private void ReturnToRestingPosition(Player dueño)
         {
-            _posVuelta = Projectile.Center;
-            Projectile.ai[1] = F_VUELTA;
-            Projectile.frame = 0;
-            Projectile.netUpdate = true;
+            if (dueño == null || !dueño.active) return;
+            if (moveSmoothing > 2f)
+                moveSmoothing--;
+            // v6.132 — LOS PICOS AL JUGADOR (la letra: «el pico de las
+            // cuchillas deben apuntar al jugador»): al descansar, el
+            // filo mira HACIA el centro (el jugador) — la corona de
+            // puntas de verdad: el sprite apunta arriba → rotación =
+            // dirección al centro + 90°.
+            Vector2 centroCorona = CentroDeLaCorona(dueño);
+            Vector2 radial = Projectile.Center - centroCorona;
+            float rotDescanso = radial.LengthSquared() > 0.01f
+                ? MathF.Atan2(radial.Y, radial.X) + MathHelper.PiOver2
+                : -MathHelper.PiOver2;
+            Projectile.rotation = Projectile.rotation.AngleTowards(rotDescanso, 0.25f);
+
+            // EL PUESTO: la TIARA (SlotDelAnillo — el arco quieto sobre
+            // la corona de ojos, la respiración ±3,5 % de la danza).
+            Vector2 destino = SlotDelAnillo(dueño);
+
+            // EL SENO DEL ORIGINAL (Calamity): el vaivén vertical vivo
+            // del abanico — la corona RESPIRA.
+            float sine = Math.Abs((float)Math.Sin(
+                (Main.GlobalTimeWrappedHourly + RestOffsetAngle * 1.8f) * 8f / MathHelper.Pi));
+            destino += new Vector2(0f, -6f * (MathHelper.Lerp(sine, 0.8f, 0.8f) - 0.8f));
+
+            // EL ACECAMIENTO (Calamity: velocidad = distancia /
+            // moveSmoothing — 50 al arrancar: suave; 2 al final:
+            // directo. La corona ATRAPA al cuchillo que vuelve).
+            Projectile.velocity = (destino - Projectile.Center) / moveSmoothing;
+        }
+
+        /// <summary>EL CENTRO DE LA CORONA (el jugador — o el LIBRO
+        /// mientras el espíritu caza: la ley v6.51.7 de los ojos).</summary>
+        private Vector2 CentroDeLaCorona(Player dueño)
+        {
+            Vector2 centro = dueño.MountedCenter;
+            try
+            {
+                Vector2? libro = PosicionDelLibro(dueño);
+                if (libro is Vector2 lb) centro = lb;
+            }
+            catch { }
+            return centro;
+        }
+
+        /// <summary>EL RESTO DEL TIEMPO (sin presa): el cuchillo vive en
+        /// SU puesto de la tiara — la corona SIEMPRE centrada (la letra:
+        // «deben estar como una corona centrada»).</summary>
+        private void VivirEnLaCorona(Player dueño)
+        {
+            ReturnToRestingPosition(dueño);
         }
 
         // ================================================================
@@ -616,33 +586,50 @@ namespace AethonMod.Content.Projectiles
         //  stabber: 50 %/20 pen el cristal · 100 % la llama · 300 % la
         //  roca) + LA QUEMADURA DEL VACÍO al 100 % por 3 s en TODAS
         // ================================================================
+        // v6.132 — EL GOLPE DEL STABBER (Calamity: damageMult — el
+        // multiplicador vive en la IA y AQUÍ se aplica; la perforación
+        // del cristal viaja en Projectile.ArmorPenetration como el
+        // original).
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {
-            switch (Tipo)
-            {
-                case TIPO_CRISTAL:
-                    modifiers.SourceDamage *= 0.5f;      // «50% base damage»
-                    modifiers.ArmorPenetration += 20f;   // «innate 20 armor penetration»
-                    break;
-                case TIPO_ROCA:
-                    modifiers.SourceDamage *= 3f;        // «300% base damage»
-                    modifiers.Knockback += 2f;           // el peso de la piedra
-                    break;
-                case TIPO_VEREDICTO:
-                    modifiers.SourceDamage *= 1.5f;      // la sentencia
-                    break;
-                case TIPO_VACIO:
-                    if (Projectile.ai[1] == F_CLAVADA)
-                        modifiers.SourceDamage *= 0.35f; // el goteo del clavado
-                    break;
-                // LLAMA: ×1,0 — el barrido completo
-            }
+            modifiers.SourceDamage *= damageMult;
+            if (Tipo == TIPO_ROCA)
+                modifiers.Knockback += 2f;               // el peso de la piedra
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // LA QUEMADURA DEL VACÍO (nuestra Holy Flames: el stabber
-            // prende Holy Flames al 100 % por 3 s — la casa arde violeta)
+            // v6.132 — EL COMPÁS DEL STABBER (Calamity: el OnHit por
+            // tipo): el CRISTAL empuja (AttackDelay 15, cuenta la
+            // racha y descansa 80-95 a las SEIS) · la ROCA RECUA del
+            // golpe (rebote 15 px/t desviado + descanso 45-60) · la
+            // LLAMA/VACÍO el latido corto (5) · el VEREDICTO la posa
+            // breve (10 — la sentencia respira). Y LA QUEMADURA DEL
+            // VACÍO prende en TODO golpe (nuestra Holy Flames: el
+            // stabber arde violeta al 100 % por 3 s).
+            justHit = true;
+            switch (Tipo)
+            {
+                case TIPO_CRISTAL:
+                    AttackDelay = 15f;
+                    attacksDone++;
+                    if (attacksDone >= 6)
+                        attackCooldown = Main.rand.Next(80, 96);
+                    break;
+                case TIPO_ROCA:
+                    Projectile.velocity = (-Projectile.velocity.SafeNormalize(Vector2.UnitX) * 15f).RotatedByRandom(0.7);
+                    attackCooldown = Main.rand.Next(45, 61);
+                    break;
+                case TIPO_LLAMA:
+                case TIPO_VACIO:
+                    if (attackCooldown == 0)
+                        attackCooldown = 5;
+                    break;
+                default:
+                    if (attackCooldown == 0)
+                        attackCooldown = 10;
+                    break;
+            }
             try
             {
                 int quemadura = ModContent.BuffType
@@ -650,25 +637,30 @@ namespace AethonMod.Content.Projectiles
                 target.AddBuff(quemadura, 180);
             }
             catch { }
+            Projectile.netUpdate = true;
         }
 
         // ================================================================
-        //  LA FORMACIÓN — v6.131 LA CORONA ENCIMA DE LOS OJOS (la letra:
-        //  «deben estar ubicadas como una corona encima de los ojos»):
-        //  las cuchillas ya NO son el anillo íntimo del cuerpo — son LA
-        //  TIARA del escuadrón: un arco REALZADO y ESTÁTICO por ENCIMA
-        //  de la corona de ojos (la ley del SlotDeFormacion de los
-        //  ojos: radio 40+6,2·n abanico trasero — la tiara vive a
-        //  RADIOTIARA px y apunta sus filos hacia AFUERA, como los
-        //  rayos de una corona de puntas).
+        //  LA FORMACIÓN — v6.132 LA CORONA CENTRADA (la letra: «ademas
+        //  deben estar como una corona centrada» + «el pico de las
+        //  cuchillas deben apuntar al jugador»): la tiara en ARCO de la
+        //  v6.131 (solo ARRIBA) pasa a ser LA CORONA CIRCULAR COMPLETA
+        //  — el CÍRCULO ENTERO alrededor de la cabeza del enjambre,
+        //  las CINCO repartidas a 72° (la corona de puntas de verdad:
+        //  la de arriba corona, las de los lados ciñen las sienes, las
+        //  de abajo escoltan la nuca), con la RESPIRACIÓN ÚNICA de la
+        //  danza (el latido ±3,5 % de los ojos — el enjambre respira
+        //  JUNTO) y los PICOS APUNTANDO AL JUGADOR (ReturnToRestingPosition
+        //  gira cada filo hacia el centro: puntas adentro, la corona
+        //  ciñe).
         // ================================================================
 
-        // EL RADIO DE LA TIARA — LA LEY DEL DESPEJE (medido por el sim
+        // EL RADIO DE LA CORONA — LA LEY DEL DESPEJE (medida por el sim
         // sim_corona_v6131.py): la corona de ojos vive a max(40, 6,2·n)
         // y su borde exterior a +11 (el sprite del ojo); la cuchilla
         // ×1,4 tiene 23,8 px de semialto ANCLADOS AL CENTRO → el radio
-        // de la tiara es el borde de los ojos + 41 (semialto + 6 de
-        // aire): a 11 ojos, ~109 px — la tiara CORONA la cabeza del
+        // de la corona es el borde de los ojos + 41 (semialto + 6 de
+        // aire): a 11 ojos, ~109 px — la corona CIÑE la cabeza del
         // enjambre SIN pisar a un solo ojo, a CUALQUIER número de estos.
         private static float RadioTiara(int nOjos) =>
             MathF.Max(40f, 6.2f * nOjos) + 41f;
@@ -683,31 +675,21 @@ namespace AethonMod.Content.Projectiles
         {
             // EL CENTRO: el jugador — o el LIBRO mientras el espíritu
             // caza (la ley v6.51.7 de los ojos: los ojos son la corona
-            // del libro, las cuchillas SU TIARA).
-            Vector2 centro = dueño.MountedCenter;
-            try
-            {
-                Vector2? libro = PosicionDelLibro(dueño);
-                if (libro is Vector2 lb) centro = lb;
-            }
-            catch { }
+            // del libro, las cuchillas SU CORONA de puntas).
+            Vector2 centro = CentroDeLaCorona(dueño);
 
-            // LA CORONA: UN ARCO por encima de la cabeza de la corona de
-            // ojos — de −116° a −64° (52° de arco para las cinco puntas,
-            // ~13° entre filos: la tiara ABIERTA de la casa — las
-            // cuchillas de los extremos caen a los LADOS de la cabeza,
-            // la del centro la corona PLENA). QUIETA (no gira: una
-            // corona se lleva puesta), con la RESPIRACIÓN ÚNICA de la
-            // danza (el mismo latido ±3,5 % de los ojos — el enjambre
-            // respira JUNTO) y el cabeceo mínimo.
+            // LA CORONA CIRCULAR COMPLETA (v6.132): las CINCO repartidas
+            // a 72° exactos por RestOffsetAngle (el ángulo del abanico
+            // de descanso que el cetro siembra al nacer: k/5·2π − π/2 —
+            // el CÍRCULO ENTERO, nadie apilado, la corona CENTRADA de
+            // la letra), QUIETA (una corona se lleva puesta: no gira),
+            // con la RESPIRACIÓN ÚNICA de la danza (el latido ±3,5 % de
+            // los ojos — el enjambre respira JUNTO) y el cabeceo mínimo.
             float time = Main.GlobalTimeWrappedHourly;
             int idx = Math.Max(0, (int)Projectile.minionPos);
-            int n = Math.Max(1, DagasVivas(dueño));
             int tipoOjo = ModContent.ProjectileType<OjoEternoMinion>();
             int nOjos = Math.Max(0, dueño.ownedProjectileCounts[tipoOjo]);
-            float f = n <= 1 ? 0.5f : (float)idx / (n - 1);
-            const float aBorde = 1.02f;               // ≈58°: los extremos caen a los lados
-            float ang = -MathHelper.PiOver2 + MathHelper.Lerp(-aBorde, aBorde, f);
+            float ang = RestOffsetAngle;
             float radio = RadioTiara(nOjos) * (1f + 0.035f * MathF.Sin(time * 0.5f));
             Vector2 slot = centro + ang.ToRotationVector2() * radio;
             slot.Y += MathF.Sin(time * 0.9f + idx * 1.9f) * 1.5f;   // el cabeceo de siempre
@@ -795,9 +777,10 @@ namespace AethonMod.Content.Projectiles
                 float esc = Projectile.scale;
 
                 // LA ESTELA DEL GOLPE (el rastro de la casa): tres
-                // fantasmas ATRÁS durante la técnica — la cuchilla que
-                // vuela deja su firma en el aire.
-                if (Projectile.ai[1] == F_GOLPE)
+                // fantasmas ATRÁS mientras VUELA al ataque — v6.132: la
+                // máquina del stabber no tiene fases; la estela vive
+                // cuando el cuchillo NO descansa (la ronda abierta).
+                if (attackCooldown == 0 && Projectile.velocity.LengthSquared() > 25f)
                 {
                     for (int j = 1; j <= 3; j++)
                     {
@@ -909,8 +892,21 @@ namespace AethonMod.Content.Projectiles
         // === EL ESTADO PRIVADO (visual/movimiento — la posición la
         //     sincroniza el owner como todo minion de vanilla) ===
         private int _presa = -1;
-        private Vector2 _offsetClavada = Vector2.Zero;
-        private float _angClavada = -MathHelper.PiOver2;
-        private Vector2 _posVuelta = Vector2.Zero;
+
+        /// <summary>v6.132 — LA RED DEL COMPÁS (Calamity: SendExtraAI —
+        /// el descanso y la racha viajan con el minion: los otros
+        /// clientes ven la MISMA cadencia, no cuchillas fantasma
+        /// cortando en vacío).</summary>
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(attackCooldown);
+            writer.Write(attacksDone);
+        }
+
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            attackCooldown = reader.ReadInt32();
+            attacksDone = reader.ReadInt32();
+        }
     }
 }

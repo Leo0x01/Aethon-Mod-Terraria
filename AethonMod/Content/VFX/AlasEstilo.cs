@@ -111,6 +111,20 @@ namespace AethonMod.Content.VFX
         // vela y el borde). false = el camino de siempre (abanico con
         // plumas — Solares, Eclipse, Juicio, Corolas intactas).
         public bool Lisas;
+
+        // v6.132 — LA ESCALA GLOBAL (la letra: «estan muy grandes, hagamosla
+        // un 10% mas pequeñas»): multiplica TODO lo dimensional del ala —
+        // los largos, los semianchos y la separación de anclas. 1 = como
+        // siempre; 0,9 = el par entero al 90 %.
+        public float EscalaGlobal;
+
+        // v6.132 — EL PAR DE ALITAS (la letra: «le falta algo abajo, como
+        // otro pequeño par de alitas ya sabes como una mariposa»): el par
+        // SECUNDARIO — un segundo abanico NACIDO BAJO el principal (más
+        // abajo y ATRÁS, al ~55 % del tamaño, más abatido: el ala baja de
+        // la mariposa). 0 = no hay par inferior (los otros estilos quedan
+        // intactos); > 0 = la fracción de escala del par inferior.
+        public float Alitas;
     }
 
     // v6.113 — LA PURGA DE LAS ALAS (la letra: «guardar las siguientes
@@ -352,12 +366,25 @@ namespace AethonMod.Content.VFX
                 // vuelven a LAS PUNTAS (nodo 8, escala completa — ver
                 // DibujarRunas): la estética de runas de la versión
                 // original, sin el «algo» del centro.
+                // v6.132 — LA MARIPUSA DEL VACÍO (la letra: «estan muy
+                // grandes, hagamosla un 10% mas pequeñas y ademas ciento
+                // que le falta algo abajo, como otro pequeño par de alitas
+                // ya sabes como una mariposa y su forma necesitan ser mas
+                // digamos que mas epicas»): TODO el par al 90 %
+                // (EscalaGlobal 0,9) + EL PAR DE ALITAS (alitas 0,55: el
+                // abanico inferior nacido bajo la espalda, al 55 % y más
+                // abatido — el ala baja de la mariposa) + LA FORMA ÉPICA:
+                // las plumas interiores SUBEN (largos 96/58 → la cúspide
+                // ALTA de la vela), la curva del eje se hace HONDA (0,18 →
+                // 0,30: el arco del halcón en pleno planeo) y el ancho de
+                // punta se ABRE (20/14 → 22/15: la vela envergada al
+                // viento).
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 20f, 14f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f, lisas: true),
+                }, new Color(90, 60, 140), "Ruido_6", 5, 96f, 58f, 3.5f, 22f, 15f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.30f, 5f, 0.45f, 0.5f, 0f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.78f, 0.3f, 0.42f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f, lisas: true, escalaGlobal: 0.9f, alitas: 0.55f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,
@@ -381,7 +408,7 @@ namespace AethonMod.Content.VFX
             };
         }
 
-        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, bool lisas = false)
+        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, bool lisas = false, float escalaGlobal = 1f, float alitas = 0f)
         {
             //IL_0012: Unknown result type (might be due to invalid IL or missing references)
             //IL_0013: Unknown result type (might be due to invalid IL or missing references)
@@ -426,7 +453,9 @@ namespace AethonMod.Content.VFX
                 Luz = luz,
                 Runas = runas,
                 RunasInten = runasInten,
-                Lisas = lisas
+                Lisas = lisas,
+                EscalaGlobal = escalaGlobal,
+                Alitas = alitas
             };
         }
 

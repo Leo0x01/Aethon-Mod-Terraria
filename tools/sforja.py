@@ -605,7 +605,7 @@ CUCHILLAS = {
     #     — el taladro se APRIETA (9×7 → ~7×5) y sube al CENTRO de
     #     masa de la hoja (y=16) para dejar masa lila alrededor.
     'cristal': dict(
-        curva=-0.150, vientre=3.4, lomo=8.2, punta_y=2, base_y=31,
+        curva=-0.235, vientre=3.8, lomo=8.6, punta_y=1, base_y=31,
         rampa=[((206, 172, 252), 0.0), ((172, 134, 234), 0.55), ((112, 76, 180), 1.0)],
         filo=(244, 234, 255), ojo=(70, 42, 120), facetas=True,
     ),
@@ -618,10 +618,10 @@ CUCHILLAS = {
     #     de verdad). El anillo del ojo OSCURO (el QA: «debería
     #     leerse oscuro» — el violeta pálido moría contra el negro).
     'llama': dict(
-        curva=0.030, vientre=4.4, lomo=5.6, punta_y=1, base_y=31,
-        serp=3.8, onda=0.55, semilla=-1.0, respira=0.55, respiw=1.0,
+        curva=0.055, vientre=4.8, lomo=5.2, punta_y=0, base_y=31,
+        serp=4.2, onda=0.62, semilla=-1.0, respira=0.62, respiw=1.15,
         rampa=[((18, 10, 32), 0.0), ((30, 17, 50), 1.0)],
-        filo=(228, 140, 255), ojo=(160, 105, 225),
+        filo=(228, 140, 255), ojo=(160, 105, 225), rim=(150, 78, 215),
     ),
     # 2 · LA CUCHILLA DE ROCA — el cincel MACIZO de obsidiana: el
     #     doble de ancha, las venas de oro VIVAS dentro del perfil.
@@ -630,7 +630,7 @@ CUCHILLAS = {
     #     VIOLETA sube de tono (el QA no lo veía contra la obsidiana:
     #     el borde vivo claro lo separa de la piedra).
     'roca': dict(
-        curva=0.0, vientre=2.6, lomo=13.0, punta_y=3, base_y=31,
+        curva=-0.085, vientre=2.9, lomo=14.0, punta_y=1, base_y=31, aserrada=2,
         rampa=[((58, 34, 90), 0.0), ((30, 17, 50), 1.0)],
         filo=(120, 76, 168), ojo=(150, 100, 210), vetas=True,
     ),
@@ -642,7 +642,7 @@ CUCHILLAS = {
     #     PARALELA y solo el talón ensancha) y el marco dorado se
     #     CONTIENE (r 1,75: nada invade el borde inferior).
     'vacio': dict(
-        curva=0.0, vientre=3.4, lomo=8.0, punta_y=2, base_y=31, crec_tope=0.88,
+        curva=0.0, vientre=3.8, lomo=8.4, punta_y=1, base_y=31, crec_tope=0.90,
         rampa=[((22, 12, 38), 0.0), ((48, 26, 80), 1.0)],
         filo=(170, 120, 240), ojo=(255, 214, 130), respira=0.55,
         anillo_doble=True, anillo_r=1.75,
@@ -652,7 +652,7 @@ CUCHILLAS = {
     #     el QA pedía SIMETRÍA LITERAL — lomo y vientre IGUALES (la
     #     balanza perfecta) y el ojo al CENTRO-BAJO (y=17).
     'veredicto': dict(
-        curva=0.0, vientre=6.4, lomo=6.4, punta_y=2, base_y=31,
+        curva=0.0, vientre=6.8, lomo=6.8, punta_y=1, base_y=31,
         rampa=[((255, 218, 140), 0.0), ((226, 172, 90), 0.6), ((158, 108, 50), 1.0)],
         filo=(255, 246, 220), ojo=(150, 84, 235), gema=True, gema_central=True,
     ),
@@ -718,7 +718,7 @@ def la_cuchilla(tipo='vacio', tam=34):
         v6.130-e: el SERPENTEANTE de la llama VIVE EN EL EJE (el QA
         medía el centro FIJO en 16,5 — serp estaba definido pero
         lados() jamás lo sumaba: la hoja no serpenteba NADA)."""
-        crec = min(1.0, t * 1.9) ** 0.9             # el ensanche de la hoja
+        crec = min(1.0, t * 1.35) ** 0.9            # el ensanche de la hoja (v6.132: temprano)
         if cfg.get('crec_tope'):                    # v6.130-e: la puerta recta
             crec = min(crec, cfg['crec_tope'])
         lomo = cfg['lomo'] * crec
@@ -773,6 +773,63 @@ def la_cuchilla(tipo='vacio', tam=34):
             else:
                 c = izq if dx < 0 else der
             d.point((x, y), fill=c + (255,))
+
+    # ---- EL ASERRADO DE LA ROCA (v6.132, el QA: «bordes aserrados»):
+    #      dientes de sierra FINOS en el FILO — el cincel que MASTICA.
+    #      Dos píxeles arriba, uno abajo: la sierra de la obsidiana.
+    if cfg.get('aserrada'):
+        for y in range(py + 2, by - 3, cfg['aserrada']):
+            t_s = (y - py) / float(by - py)
+            lo_s, fi_s, _ = lados(t_s)
+            # el diente SOBRESALE 1 px del filo (hacia la derecha)
+            for k in (-1, 0):
+                if dentro(int(fi_s) + 1 + k, y) or fi_s + 1 + k < tam:
+                    if int(fi_s) + 1 + k >= 0 and int(fi_s) + 1 + k < tam:
+                        d.point((int(fi_s) + 1 + k, y),
+                                fill=_mult(cfg['filo'], 1.18) + (255,))
+            # y el valle QUEMA 1 px hacia adentro (la sierra de verdad)
+            if dentro(int(fi_s) - 1, y + 1):
+                d.point((int(fi_s) - 1, y + 1), fill=_mult(color_en(t_s), 0.62) + (255,))
+
+    # ---- EL RIM-LIGHT DE LA LLAMA (v6.132, el QA: «1px de contorno
+    #      cálido la haría pop»): el hilo de brasa CLARO por el LOMO —
+    #      la hoja negra LEE contra cualquier fondo.
+    if cfg.get('rim'):
+        for y in range(py + 1, by):
+            t_r = (y - py) / float(by - py)
+            lo_r, _, _ = lados(t_r)
+            xr = int(round(lo_r))
+            if 0 <= xr < tam and dentro(xr, y):
+                d.point((xr, y), fill=_mult(cfg['rim'], 1.22) + (255,))
+
+    # ---- EL TIP-HIGHLIGHT (v6.132, el QA: «afila las puntas con 1-2
+    #      px de tip highlight»): la punta de TODAS las cuchillas gana
+    #      su destello BLANCO — el pico que BRILLA, la agresividad
+    #      que se lee.
+    if py >= 0 and py < tam:
+        t_p = 0.0
+        lo_p, fi_p, _ = lados(t_p)
+        cx_p = int(round((lo_p + fi_p) * 0.5))
+        # LA PRIMERA FILA CON MASA y su columna MÁS GRUESA (la punta
+        # REAL de esta alma — la llama nace DESPLAZADA por el
+        # serpenteo: el destello cae DONDE la hoja nace). Las 3 filas
+        # siguientes: la columna se PERSIGUE (el px con masa más
+        # cercano a la anterior — la punta que baja por el filo).
+        yy0 = py
+        cx_p = cx
+        while yy0 < by:
+            xs_p = [x for x in range(tam) if dentro(x, yy0)]
+            if xs_p:
+                # la columna del CENTRO de la primera masa viva
+                cx_p = min(xs_p, key=lambda x: abs(x - cx))
+                break
+            yy0 += 1
+        for k in range(3):
+            yy = yy0 + k
+            xs_q = [x for x in range(tam) if dentro(x, yy)]
+            if xs_q:
+                cx_p = min(xs_q, key=lambda x: abs(x - cx_p))
+                d.point((cx_p, yy), fill=(252, 248, 255, 255))
 
     # ---- LA ESQUINA DE LA BASE (el talón de la cuchilla: el corte
     #      diagonal que cierra la hoja abajo — el bisel del cincel)

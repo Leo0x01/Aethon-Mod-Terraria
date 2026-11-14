@@ -79,17 +79,13 @@ namespace AethonMod.Content.Projectiles.Definitivas
         private const int TTrasTragoEspiral = 30;  // el libro espirala dentro de sí
         private const int TTrasTragoPuerta = 74;   // tras TODO el teatro: la puerta gira
         private const int TTrasTragoMuerte = 86;   // tras ENTRAR: el poso muere
-        // v6.124 — LA CACERÍA INVERSA (la letra: «acabo de ver que para que
-        // el jugador entre al mundo interior debe tocar el grimorio mientras
-        // es deborado, bueno muchas veces el jugador no es atraido
-        // correctamente al grimorio, en este caso para que no hayan errores,
-        // si por 2 segundos el jugador no es atraido, el grimorio volara
-        // hacia el jugador y con esto se soluciona el problema de que a
-        // veces no entra al mundo interior»): DOS SEGUNDOS de paciencia —
-        // pasados 120 ticks de arrastre SIN trago, el libro DEJA SU ANCLA
-        // Y VUELA hacia su presa: la boca llega hasta el jugador y el
-        // trago NUNCA falla.
-        private const int TVueloLibro = 120; // 2 s de arrastre sin trago → el libro VUELA
+        // v6.132 — EL AVALANZAMIENTO (la letra: «se avalanza al jugador,
+        // tocandolo»): tras la emboscada de la sombra (26 ticks de
+        // lectura — el charco que APRESA), el libro ROMPE su ancla y CAE
+        // sobre su presa QUIETA. La cacería inversa v6.124 (el plan B de
+        // los 2 s) muere: el avalanzamiento ES el acto central desde el
+        // diseño.
+        private const int TVueloLibro = 26;  // tras la emboscada → el libro SE AVALANZA
 
         /// <summary>
         /// ¿El portador ya está DENTRO de la boca? (la casa lo consulta en
@@ -269,10 +265,31 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 _disuelve = 0.01f;
             }
 
-            // === EL PORTADOR ES PRESA (controles fuera + EL ARRASTRE) ===
+            // ==================================================================
+            //  v6.132 — LA COREOGRAFÍA NUEVA, DESDE CERO (la letra: «la
+            //  animacion debes rehacerla desde 0, y ya que para que vaya
+            //  al mundo interior necesita tocar el grimorio, haz
+            //  simplemente que sea el grimorio quien toque al jugador, al
+            //  jugador no lo muevas de donde estar, el grimorio lo
+            //  atrapa con la sombra de la pagina, y se avalanza al
+            //  jugador, tocandolo de esa forma»):
+            //    · EL JUGADOR NO SE MUEVE — ni lerp, ni espiral, ni
+            //      fullRotation: SOLO los controles congelados (la presa
+            //      QUIETA — y sus cosméticos con él: cero separación
+            //      posible, la queja v6.131 muere de raíz).
+            //    · LA SOMBRA DE LA PÁGINA LO APRESA (TSombra→): el
+            //      charco bajo sus pies SUBE por su cuerpo — la sombra
+            //      VIVA lo envuelve hasta el pecho (el atrapado se lee).
+            //    · EL GRIMORIO SE AVALANZA: tras la emboscada de la
+            //      sombra (TVueloLibro), el libro ROMPE su ancla y CAE
+            //      sobre su presa — la boca llega hasta el jugador y LO
+            //      TOCA (el rectángulo de la boca contra su hitbox — el
+            //      contacto ES el trago).
+            // ==================================================================
             if (dueñoVivo && p.whoAmI == Main.myPlayer && _disuelve <= 0f)
             {
-                // best effort: el lerp de POSICIÓN es el que manda
+                // LA PRESA QUIETA: solo los controles mueren (el cuerpo y
+                // TODO lo que lleva quedan DONDE ESTÁN — la letra).
                 p.controlLeft = false;
                 p.controlRight = false;
                 p.controlUp = false;
@@ -280,125 +297,94 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 p.controlJump = false;
                 p.controlUseItem = false;
                 p.controlUseTile = false;
-
-                if (Projectile.ai[0] >= TSombra && !_estallo)
+                if (Projectile.ai[0] >= TSombra)
                 {
-                    // EL ARRASTRE (v6.129 — como LA PRIMERA VEZ, la v6.117:
-                    // sin ventanas ni pegamentos — los cosméticos viajan
-                    // TAL CUAL con el cuerpo, dibujándose desde el dueño
-                    // VIVO con su rotación, y al trago TODO desaparece
-                    // junto): cada vez más decidido hacia LA BOCA (no
-                    // hacia el libro: la presa entra por la boca), con el
-                    // vaivén lateral que se apaga al llegar (la espiral de
-                    // siempre — la presa cae vencida, no teletransportada).
-                    // v6.131 — EL DELTA DEL FESTÍN: el movimiento de ESTE
-                    // tick queda registrado para que TODO el séquito
-                    // (ojos, cuchillas, joyas) HERede el viaje — el
-                    // jugador COMPLETO sube a la boca (la letra).
-                    Vector2 posAntes = p.Center;
-                    float f = MathHelper.Clamp((Projectile.ai[0] - TSombra) / 110f, 0f, 1f);
-                    float k = 0.045f + 0.075f * f * f;
-                    Vector2 boca = BocaDelLibro(p.Center);
-                    Vector2 vaivén = new Vector2(
-                        MathF.Sin(Projectile.ai[0] * 0.22f) * 34f * (1f - f * 0.7f), 0f);
+                    p.velocity.X *= 0.60f;         // derrapa apenas: la sombra lo frena
+                    if (Projectile.ai[0] > TSombra + 14) p.velocity = Vector2.Zero;
+                    p.gravDir = 1f;
+                    p.maxFallSpeed = 0f;
+                }
+            }
+
+            // === EL GRIMORIO SE AVALANZA (v6.132 — el acto central): tras
+            //     la emboscada de la sombra, el libro ABANDONA su ancla y
+            //     CAE sobre su presa — cada vez más decidido, con el
+            //     aleteo del despegue y su estela de páginas ===
+            if (dueñoVivo && Projectile.ai[0] >= TSombra + TVueloLibro && !_estallo && _disuelve <= 0f)
+            {
+                Vector2 posLibro = PosLibro;
+                Vector2 hacia = p.Center - posLibro;
+                float dist = hacia.Length();
+                Vector2 dirLibro = dist > 0.01f ? hacia / dist : Vector2.UnitY;
+
+                // EL OBJETIVO DEL CENTRO: la BOCA del libro PUESTA EN el
+                // jugador (la boca a 14 px del libro hacia la presa).
+                Vector2 centroObjetivo = p.Center - dirLibro * 14f + new Vector2(0f, 140f);
+
+                // EL VUELO: arranca suave y se decide (0.05 → 0.24 en ~40 t
+                // — el libro se AVALANZA: cae sobre su presa de golpe).
+                float v = MathHelper.Clamp(
+                    (Projectile.ai[0] - (TSombra + TVueloLibro)) / 40f, 0f, 1f);
+                float kv = 0.05f + 0.19f * v * v;
+                Projectile.Center = Vector2.Lerp(Projectile.Center, centroObjetivo, kv);
+
+                // EL DESPEGUE: el aleteo del libro que rompe su ancla (UNA
+                // sola vez) + la onda del conjuro.
+                if (Projectile.ai[0] == TSombra + TVueloLibro && !Main.dedServ)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        Terraria.ID.SoundID.Item113.WithPitchOffset(-0.4f), posLibro);
+                    OndaLib.Kick(3f, 10);
+                }
+                // LA ESTELA DEL AVALANZAMIENTO: páginas doradas del libro a
+                // la presa (la caída del ave de rapiña).
+                if (!Main.dedServ && Main.netMode != 2 && Main.rand.NextBool(2))
+                {
+                    Dust d = Dust.NewDustPerfect(posLibro + Main.rand.NextVector2Circular(30f, 22f),
+                        Terraria.ID.DustID.Enchanted_Gold,
+                        -dirLibro * Main.rand.NextFloat(1.5f, 4f) +
+                        new Vector2(0f, Main.rand.NextFloat(-0.6f, 0.6f)),
+                        180, new Color(255, 226, 150), Main.rand.NextFloat(0.7f, 1.2f));
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+            }
+
+            // === LA PUERTA ES EL TOQUE (v6.132 — la letra: «que sea el
+            //     grimorio quien toque al jugador»): la boca del libro
+            //     AVALANZADO contra el hitbox de la presa quieta — el
+            //     CONTACTO ES el trago ===
+            if (dueñoVivo && !_estallo && _disuelve <= 0f && Projectile.ai[0] >= TSombra + 6)
+            {
+                float esc = EscalaDelLibro(Projectile.ai[0], 0f);
+                Vector2 boca = BocaDelLibro(p.Center);
+                Rectangle rectBoca = RectBoca(boca, esc);
+                if (rectBoca.Intersects(p.Hitbox))
+                {
+                    _estallo = true;
+                    _tTrago = Projectile.ai[0];
+                    // LA PRESA YA NO SE MUEVE: queda DONDE ESTÁ (la boca del
+                    // libro la cubre — el libro la tragó AL TOCARLA).
                     try
                     {
-                        p.Center = Vector2.Lerp(p.Center, boca + vaivén, k);
                         p.velocity = Vector2.Zero;
-                        p.gravDir = 1f;
-                        p.maxFallSpeed = 0f;
-
-                        // EL GIRO DE LA PRESA (Player.fullRotation de
-                        // vanilla): nace suave y ACELERA con la cercanía.
-                        p.fullRotationOrigin = p.Center - p.position; // el eje: el centro del cuerpo
-                        p.fullRotation += (0.055f + 0.13f * f * f) * (f > 0.55f ? 1.6f : 1f);
                     }
                     catch { }
-                    DeltaDelFestin = p.Center - posAntes;
-
-                    // ==========================================================
-                    //  v6.124 — LA CACERÍA INVERSA (la letra: «si por 2
-                    //  segundos el jugador no es atraido, el grimorio
-                    //  volara hacia el jugador»): pasados 120 ticks de
-                    //  arrastre SIN trago, el libro ABANDONA su ancla y
-                    //  VUELA hasta su presa — la boca cae ENCIMA del
-                    //  jugador y el rectángulo del trago NUNCA falla (la
-                    //  cura de la entrada intermitente al mundo interior).
-                    // ==========================================================
-                    if (Projectile.ai[0] >= TSombra + TVueloLibro)
+                    Tragado = true;            // la presa desaparece DENTRO
+                    if (Main.netMode != 2)
                     {
-                        Vector2 posLibro = PosLibro;
-                        Vector2 hacia = p.Center - posLibro;
-                        float dist = hacia.Length();
-                        Vector2 dirLibro = dist > 0.01f ? hacia / dist : Vector2.UnitY;
-
-                        // EL OBJETIVO DEL CENTRO: la BOCA del libro PUESTA
-                        // EN el jugador (la boca vive a 14 px del libro,
-                        // hacia la presa — y PosLibro es Center+(0,−140)).
-                        Vector2 centroObjetivo = p.Center - dirLibro * 14f + new Vector2(0f, 140f);
-
-                        // EL VUELO: arranca suave y se decide (0.05 → 0.22
-                        // en ~45 t — el libro cae sobre su presa).
-                        float v = MathHelper.Clamp(
-                            (Projectile.ai[0] - (TSombra + TVueloLibro)) / 45f, 0f, 1f);
-                        float kv = 0.05f + 0.17f * v * v;
-                        Projectile.Center = Vector2.Lerp(Projectile.Center, centroObjetivo, kv);
-
-                        // EL DESPEGUE: el aleteo del libro que rompe su
-                        // ancla (UNA sola vez) + la estela de páginas.
-                        if (Projectile.ai[0] == TSombra + TVueloLibro && !Main.dedServ)
+                        for (int i = 0; i < 36; i++)
                         {
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                Terraria.ID.SoundID.Item113.WithPitchOffset(-0.4f), posLibro);
-                            OndaLib.Kick(3f, 10);
-                        }
-                        if (!Main.dedServ && Main.netMode != 2 && Main.rand.NextBool(2))
-                        {
-                            Dust d = Dust.NewDustPerfect(posLibro + Main.rand.NextVector2Circular(30f, 22f),
-                                Terraria.ID.DustID.Enchanted_Gold,
-                                -dirLibro * Main.rand.NextFloat(1.5f, 4f) +
-                                new Vector2(0f, Main.rand.NextFloat(-0.6f, 0.6f)),
-                                180, new Color(255, 226, 150), Main.rand.NextFloat(0.7f, 1.2f));
+                            float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                            Dust d = Dust.NewDustPerfect(boca,
+                                i % 3 == 0 ? DustID.Enchanted_Pink : DustID.GoldFlame,
+                                new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * Main.rand.NextFloat(2.0f, 6.5f),
+                                180, i % 3 == 0 ? new Color(190, 150, 240) : new Color(255, 230, 160), 1.1f);
                             d.noGravity = true;
                             d.fadeIn = 0f;
                         }
-                    }
-
-                    // === LA PUERTA VIVE EN LA BOCA: SOLO la colisión del
-                    //     jugador con el rectángulo de la boca dispara el
-                    //     trago (la letra: «solo enviar al jugador al nuevo
-                    //     mundo cuando el jugador entre a la boca del
-                    //     grimorio») — el patrón Hitbox.Intersects de las
-                    //     sombras de página de la casa ===
-                    float esc = EscalaDelLibro(Projectile.ai[0], 0f);
-                    Rectangle rectBoca = RectBoca(boca, esc);
-                    if (rectBoca.Intersects(p.Hitbox) && !_estallo)
-                    {
-                        _estallo = true;
-                        _tTrago = Projectile.ai[0];
-                        try
-                        {
-                            p.Center = boca;        // el último bocado: al centro de la boca
-                            p.velocity = Vector2.Zero;
-                            p.fullRotation = 0f;
-                        }
-                        catch { }
-                        Tragado = true;            // la presa desaparece DENTRO
-                        if (Main.netMode != 2)
-                        {
-                            for (int i = 0; i < 36; i++)
-                            {
-                                float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                                Dust d = Dust.NewDustPerfect(boca,
-                                    i % 3 == 0 ? DustID.Enchanted_Pink : DustID.GoldFlame,
-                                    new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * Main.rand.NextFloat(2.0f, 6.5f),
-                                    180, i % 3 == 0 ? new Color(190, 150, 240) : new Color(255, 230, 160), 1.1f);
-                                d.noGravity = true;
-                                d.fadeIn = 0f;
-                            }
-                            OndaLib.Kick(9);
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, boca);
-                        }
+                        OndaLib.Kick(9);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, boca);
                     }
                 }
             }
@@ -418,8 +404,9 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 }
             }
 
-            // === LA ESPIRAL DE LA DEVORACIÓN: páginas y esencias SUBEN de
-            //     la presa a la boca (la corriente del festín) ===
+            // === LA ESPIRAL DE LA DEVORACIÓN: la corriente de páginas
+            //     rodea a la presa quieta y corre a la boca del libro
+            //     que cae (v6.132: la presa no viaja — la corriente SÍ) ===
             if (Projectile.ai[0] >= TSombra && !_estallo && !Main.dedServ && Main.netMode != 2 &&
                 dueñoVivo && _disuelve <= 0f)
             {
@@ -661,6 +648,33 @@ namespace AethonMod.Content.Projectiles.Definitivas
 
                 // EL CHARCO bajo el libro
                 SombrasLib.Charco(PosLibro + new Vector2(0f, 30f), 46f * sale, 0.7f * vivoF, tiempo, semilla);
+
+                // v6.132 — EL APRESAMIENTO (la letra: «el grimorio lo
+                // atrapa con la sombra de la pagina»): el charco propio
+                // nace BAJO LOS PIES del jugador QUIETO y CRECE hasta
+                // cubrirlo hasta el pecho — la sombra de la página que
+                // APRESA a la presa en su sitio (se lee en los primeros
+                // ticks del avalanzamiento: la presa ya NO puede huir).
+                if (vivo)
+                {
+                    float apresa = MathHelper.Clamp((t - TSombra) / 26f, 0f, 1f);
+                    if (apresa > 0f)
+                    {
+                        Vector2 pies = p.Center + new Vector2(0f, p.height * 0.5f - 4f);
+                        SombrasLib.Charco(pies, (30f + 22f * apresa) * sale, (0.55f + 0.35f * apresa) * vivoF,
+                            tiempo, semilla + 911);
+                        // LOS BRAZOS DE SOMBRA que suben por el cuerpo (dos
+                        // columnas finas a los costados de la presa)
+                        Vector2[] brazoIzq = SombrasLib.ColumnaViva(
+                            pies + new Vector2(-12f, -2f), pies + new Vector2(-14f, -30f * apresa),
+                            tiempo, semilla + 17, 8, 0.30f, gancho: 0.2f);
+                        SombrasLib.Masa(brazoIzq, 7f, 11f, 0.75f * apresa * vivoF, semilla, tiempo, grosorCentro: 16f);
+                        Vector2[] brazoDer = SombrasLib.ColumnaViva(
+                            pies + new Vector2(12f, -2f), pies + new Vector2(14f, -30f * apresa),
+                            tiempo, semilla + 29, 8, 0.30f, gancho: 0.2f);
+                        SombrasLib.Masa(brazoDer, 7f, 11f, 0.75f * apresa * vivoF, semilla, tiempo, grosorCentro: 16f);
+                    }
+                }
 
                 // EL CUERPO GIGANTE: libro → presa (y al trago, VUELVE cargando)
                 float alcance = sale * 0.35f + festin * 0.65f;
