@@ -74,7 +74,7 @@ EOF
 BODY=$(python3 -c "
 import json, sys
 notas = sys.stdin.read()
-print(json.dumps({'tag_name': '$TAG', 'name': 'v6.133 — LAS ALAS REPARADAS · LA CORONA DE CUCHILLAS · EL JUGADOR COMPLETO DEVORADO', 'body': notas, 'draft': False, 'prerelease': False}))
+print(json.dumps({'tag_name': '$TAG', 'name': 'v6.133 — LA COPIA EXACTA DEL ECLIPSE · LA PURGA DEL STABBER', 'body': notas, 'draft': False, 'prerelease': False}))
 " <<< "$NOTAS")
 
 REL_ID=$(curl -s "$API/repos/$REPO/releases/tags/$TAG" "${AUTH[@]}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
