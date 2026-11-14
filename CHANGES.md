@@ -1,5 +1,26 @@
 # AethonMod — Historial de Cambios
 
+## v6.135 — EL ARCÁNGEL DE 6 ALAS Y LAS SEIS MITOLÓGICAS — la letra del usuario, sesión 16: «necesitamos mejorar la estetica de las alas, ahora que tienes como hacerlas correctamente con las alas runicas de vacio, quiero que modifiques esas alas teniendo en cuenta las alas de arcangeles superiores que tiene 3 pares de alas o sea 6 alas y hacer otras versiones de las alas runicas del vacio basandote en otras mitologias o creaciones y tipos de alas» + «continua y crea mas tipos de alas»
+
+**EL TERCER PAR — LA CORONA DEL ARCÁNGEL**: las Runas del Vacío ganan el par superior (el campo `Coronas`, escala 0,72): el abanico nace SOBRE la espalda (16·escala px más arriba), ALZADO (inclinación −0,18: abre hacia arriba — la pose del arcángel que no pliega las alas) y con el spread más abierto. El orden de dibujo es ahora CORONA → ALITAS → PRINCIPAL (de atrás hacia adelante). **El Vacío es EL ARCÁNGEL: 6 alas en tres niveles.**
+
+**LAS SEIS MITOLÓGICAS** — todas nacen del Vacío v6.134 (la geometría exacta del Eclipse + el ala lisa), cada una con SU alma (paleta · runas · ruido · plumas por lado · curva · pares):
+
+- **Serafín del Vacío** (hebrea) — TRES PARES de fuego violeta que no quema; la llama se encorva (curva 0,34) y el alfabeto del vacío arde en el borde.
+- **Valquiria Rúnica** (nórdica) — SIETE plumas de lanza rectas (curva 0, filosa 0,3), la plata del cielo de batalla con el futhark solar de la casa.
+- **Quetzal Emplumado** (azteca) — la serpiente de jade que ONDEA en tres niveles (curva 0,42, la mayor del catálogo; siete plumas turquesa).
+- **Fénix del Renacer** (griega) — TRES LLAMAS ANIDADAS: núcleo blanco → fuego vivo → brasa hondo; el tono ARDE a lo largo del ala (hueLargo 0,22) y aletea más vivo (flap 1,15).
+- **Tengu del Crepúsculo** (japonesa) — siete plumas primarias de tinta azul-negra (filosa 0,55, las puntas separadas del cuervo) con los glifos ámbar del abismo.
+- **Dragón del Vacío** (membrana) — la única SIN abanico de plumas: la vela de DOS DEDOS (Plumas=2, punta 24, vientre 0,62) en seis velas de escamas rojo-vino.
+
+**LOS ITEMS Y LA BOLSA**: seis clases nuevas (`AlasMitologicasV6135.cs`, estilos 6..11) con sus seis sprites 30×30 de la casa; LA BOLSA DE LAS ALAS pasa de cinco a ONCE alas; hjson ×3 (es-ES · es-MX · en-US) con paridad de claves 1691/1691/1691.
+
+**EL SIM 1:1** (sim_alas_v6135.py, parámetros leídos del .cs REAL): los TRES NIVELES con anclas distintas (corona −14,4 px arriba · espalda · alitas +14,4 px abajo) · LA CORONA ALZADA (ángulo medio −28,5° vs −19,4° del principal: 9,2° más alta) · EL ESPEJO con la fórmula del motor (Δ 0,000 px en los tres pares) · los seis paneles con SU alma (pares, plumas, curva y paleta distintos). QA VLM: el zoom del panel del arcángel confirmó los tres pares con orígenes distintos (superior ascendente · central amplio · inferior caído) y los seis colores claramente diferenciados.
+
+**VERIFICACIÓN**: oráculo verify.csproj **0 errores / 0 warnings** · **-build REAL 0/0** (526 entradas, 19.367.611 B) · **GUARDIÁN TODO VIVE ✔** · **AUDIT v6.135 TODO VERIFICADO ✔** (40 checks: EOF exacto · 526 blobs · hjson == fuente ×3 · la geometría v6.133 intacta · la receta lisa v6.134 sin cambio · el arcángel · los seis mitos con su paleta y pares · las clases y los sprites · la no-regresión de la purga · paridad 1691/1691/1691) · **headless**: Sandboxing v6.135 SIN UNA EXCEPCIÓN.
+
+---
+
 ## v6.134 — LAS PLUMAS MUEREN — la letra del usuario, sesión 15: «ahora quitale las plumas a las alas»
 
 **EL ALA DEL VACÍO SIN PLUMAS**: la copia exacta del Eclipse (v6.133) trajo de vuelta las CINCO TIRAS radiales del abanico (las capas sólidas núcleo/cuerpo/halo y su niebla — las «plumas» a la vista) y, peor, al caer la membrana a 0 LAS ALITAS quedaron mudas (la vela del par inferior no se emitía). LA CURA es la receta probada del ala lisa de la casa (v6.129-131): **membrana 1f + redonda 1f + lisas true** — las tiras MUEREN (no se emiten), las cinco plumas quedan como la ARMADURA INVISIBLE de UNA hoja continua por lado con la RAMPA RADIAL (el violeta vivo en la raíz → el hondo puro → el bordillo blanco de la curva C1), el borde es EL CAMINO u sin Catmull (nacimiento→cúspide→tendida→nacimiento) y LAS ALITAS REVIVEN (su vela vive tras Membrana > 0). LA GEOMETRÍA DE LA COPIA EXACTA NO SE TOCA: los 31 parámetros del Eclipse siguen idénticos — solo cambiaron los tres flags de las plumas. El Eclipse conserva sus plumas INTACTAS en su slot.

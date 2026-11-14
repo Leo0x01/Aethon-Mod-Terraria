@@ -2477,6 +2477,78 @@ Items: {
 			'''
 	}
 
+	AlasSerafinDelVacio: {
+		DisplayName: Alas del Serafín del Vacío
+		Tooltip:
+			'''
+			EL SERAFÍN: TRES PARES de alas de fuego violeta que no quema —
+			        el par mayor sobre los hombros, el de vuelo en la espalda y el
+			        inferior caído. La llama se encorva como el fuego de un trono y
+			        el alfabeto del vacío arde en el borde de cada vela.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
+	AlasValquiriaRunica: {
+		DisplayName: Alas de la Valquiria Rúnica
+		Tooltip:
+			'''
+			LA VALQUIRIA: SIETE PLUMAS DE LANZA por lado — rectas y filosas,
+			        la plata del cielo de batalla sobre el acero y la noche. El
+			        futhark solar de la casa graba cada pluma: las alas que eligen
+			        a los caídos.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
+	AlasQuetzalEmplumado: {
+		DisplayName: Alas del Quetzal Emplumado
+		Tooltip:
+			'''
+			LA SERPIENTE EMPLUMADA: siete plumas de jade por lado que ONDEAN
+			        en tres niveles — el par alto, el de vuelo y el inferior. La
+			        rampa turquesa de la selva viva y los glifos del vacío en el
+			        borde de cada nivel.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
+	AlasFenixDelRenacer: {
+		DisplayName: Alas del Fénix del Renacer
+		Tooltip:
+			'''
+			EL FÉNIX: TRES LLAMAS ANIDADAS — núcleo blanco, fuego vivo y
+			        brasa hondo, el par alto alzado sobre los hombros. El tono ARDE
+			        a lo largo del ala y el alfabeto solar corona cada punta: las
+			        alas que renacen de su propia ceniza.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
+	AlasTenguDelCrepusculo: {
+		DisplayName: Alas del Tengu del Crepúsculo
+		Tooltip:
+			'''
+			EL CUERVO DE LAS MONTAÑAS: siete plumas primarias de tinta
+			        azul-negra, rectas y separadas como el ala del ave que las
+			        escribe. Los glifos ámbar del abismo arden entre pluma y pluma
+			        — el crepúsculo del demonio lector.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
+	AlasDragonDelVacio: {
+		DisplayName: Alas del Dragón del Vacío
+		Tooltip:
+			'''
+			EL DRAGÓN: la membrana de DOS DEDOS por lado — la vela gorda del
+			        murciélago ancestral en seis velas de escamas rojo-vino. Los
+			        glifos ámbar del abismo recorren el borde de cada vela y las
+			        venas laten como corazón de cueva.
+			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
+			'''
+	}
+
 	CodiceHabilidades: {
 		DisplayName: Codice Habilidades
 		Tooltip: ""

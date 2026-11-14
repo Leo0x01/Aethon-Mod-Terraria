@@ -2475,6 +2475,78 @@ Items: {
 			'''
 	}
 
+	AlasSerafinDelVacio: {
+		DisplayName: Void Seraph Wings
+		Tooltip:
+			'''
+			THE SERAPH: THREE PAIRS of violet-fire wings that do not burn —
+			        the greater pair over the shoulders, the flight pair on the
+			        back, and the lower folded pair. The flame curls like throne
+			        fire, and the void alphabet burns along every sail's edge.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasValquiriaRunica: {
+		DisplayName: Runic Valkyrie Wings
+		Tooltip:
+			'''
+			THE VALKYRIE: SEVEN SPEAR-FEATHERS per side — straight and keen,
+			        the silver of the battle sky over steel and night. The house's
+			        solar futhark is engraved on every feather: the wings that
+			        choose the fallen.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasQuetzalEmplumado: {
+		DisplayName: Feathered Quetzal Wings
+		Tooltip:
+			'''
+			THE FEATHERED SERPENT: seven jade feathers per side that ripple
+			        across three tiers — the high pair, the flight pair, and the
+			        lower one. The living jungle's turquoise ramp with void glyphs
+			        on every tier's edge.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasFenixDelRenacer: {
+		DisplayName: Rebirth Phoenix Wings
+		Tooltip:
+			'''
+			THE PHOENIX: THREE NESTED FLAMES — white core, living fire and
+			        deep ember, the high pair raised over the shoulders. The hue
+			        BURNS along the wing and the solar alphabet crowns every tip:
+			        the wings reborn from their own ash.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasTenguDelCrepusculo: {
+		DisplayName: Dusk Tengu Wings
+		Tooltip:
+			'''
+			THE MOUNTAIN CROW: seven primary feathers of blue-black ink,
+			        straight and parted like the wing of the bird that writes
+			        them. Abyssal amber glyphs burn between feather and feather —
+			        the reading demon's dusk.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
+	AlasDragonDelVacio: {
+		DisplayName: Void Dragon Wings
+		Tooltip:
+			'''
+			THE DRAGON: the TWO-FINGER membrane per side — the ancestral
+			        bat's fat sail across six wine-red scale veils. Abyssal amber
+			        glyphs run along every sail's edge, and the veins beat like a
+			        cave heart.
+			        Flight 240 · no fall damage · folds before real wings.
+			'''
+	}
+
 	CodiceHabilidades: {
 		DisplayName: Codice Habilidades
 		Tooltip: ""

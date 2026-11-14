@@ -755,7 +755,7 @@ namespace AethonMod.Content.Items.Bolsas
         // alas las puedes borrar»): LAS QUINCE del prisma, la Aurora de Tinta,
         // las Agujas del Vacío y las Cuchillas del Eclipse MURIERON — la bolsa
         // queda con LAS CINCO DE LA CASA.
-        protected override string Nota => "Cinco alas de código — las rúnicas de la casa y las corolas del alba";
+        protected override string Nota => "Once alas de código — las rúnicas de la casa, las corolas y las seis mitológicas";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -765,7 +765,16 @@ namespace AethonMod.Content.Items.Bolsas
                 (ModContent.ItemType<AlasRunicasDelVacio>(), 1),
                 (ModContent.ItemType<AlasRunicasDelEclipse>(), 1),
                 (ModContent.ItemType<AlasRunicasDelJuicio>(), 1),
-                (ModContent.ItemType<CorolasDelAlba>(), 1)
+                (ModContent.ItemType<CorolasDelAlba>(), 1),
+                // v6.135 — LAS SEIS MITOLÓGICAS (la letra: «hacer otras
+                // versiones de las alas runicas del vacio basandote en
+                // otras mitologias o creaciones y tipos de alas»).
+                (ModContent.ItemType<AlasSerafinDelVacio>(), 1),
+                (ModContent.ItemType<AlasValquiriaRunica>(), 1),
+                (ModContent.ItemType<AlasQuetzalEmplumado>(), 1),
+                (ModContent.ItemType<AlasFenixDelRenacer>(), 1),
+                (ModContent.ItemType<AlasTenguDelCrepusculo>(), 1),
+                (ModContent.ItemType<AlasDragonDelVacio>(), 1)
             };
         }
     }
