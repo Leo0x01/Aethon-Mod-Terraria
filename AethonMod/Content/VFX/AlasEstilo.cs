@@ -363,12 +363,28 @@ namespace AethonMod.Content.VFX
                 // EscalaGlobal 0,9 y las alitas 0,55 de la v6.132 (el
                 // −10 % y la mariposa que SÍ gustaron). El Eclipse
                 // mismo queda INTACTO en su slot.
+                // v6.134 — LAS PLUMAS MUEREN (la letra: «ahora quitale
+                // las plumas a las alas»): la copia del Eclipse trajo
+                // de vuelta las CINCO TIRAS radiales del abanico (las
+                // capas sólidas y su niebla — las «plumas» a la vista)
+                // y, peor, al caer la membrana a 0 las ALITAS quedaron
+                // mudas (la vela del par inferior no se emitía). LA
+                // CURA es la receta probada del ala lisa de la casa
+                // (v6.129-131): membrana 1f + redonda 1f + lisas true
+                // — las tiras MUEREN (no se emiten), las cinco plumas
+                // quedan como la ARMADURA INVISIBLE de UNA hoja
+                // continua por lado (la RAMPA RADIAL: el violeta vivo
+                // en la raíz → el hondo puro → el bordillo blanco de
+                // la curva C1), el borde es EL CAMINO u sin Catmull y
+                // las alitas REVIVEN (su vela vive tras Membrana > 0).
+                // La geometría del Eclipse (la copia exacta v6.133)
+                // NO SE TOCA: solo los tres flags de las plumas.
                 Ala("Runas del Vacío", (Color[])(object)new Color[3]
                 {
                     new Color(150, 84, 235),
                     new Color(122, 78, 188),
                     new Color(26, 14, 44)
-                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, escalaGlobal: 0.9f, alitas: 0.55f),
+                }, new Color(90, 60, 140), "Ruido_6", 5, 90f, 52f, 3.5f, 19f, 12f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0.18f, 5f, 0.45f, 0.55f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 2, 1.05f, 1f, 1f, lisas: true, escalaGlobal: 0.9f, alitas: 0.55f),
                 Ala("Runas del Eclipse", (Color[])(object)new Color[3]
                 {
                     DefinitivasLib.Ambar,
