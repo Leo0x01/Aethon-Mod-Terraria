@@ -1,8 +1,8 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
-> **v6.135 — EL ARCÁNGEL DE 6 ALAS Y LAS SEIS MITOLÓGICAS** —
-> [release 445558359](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.135)
-> (md5 `6d378f1c5d9a6fdfe5281785bb54e917`, 526 entradas, CDN verificado byte a byte)
+> **v6.136 — LA PURGA DE LAS DOS ARMAS + EL MUÑECO DE LA CASA** —
+> [release 445612303](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136)
+> (md5 `c083e217dd39955ae63d119acb72e4bf`, 521 entradas, CDN verificado byte a byte)
 >
 > **⚠️ PRIMER LECTOR — IA O HUMANO: empieza por [`MAESTRO.md`](MAESTRO.md).**
 > Es el documento único de verdad: las reglas de la casa, el protocolo de
@@ -28,7 +28,7 @@ Un mod masivo de Terraria (tModLoader **2026.09.3.1**) cuyo sello es que
 **todo el arte es 100% código de la casa** y **cero dependencias**
 (`modReferences` vacío): 462 archivos C#, 78 librerías VFX propias, 503
 texturas generadas por código, música y sonidos sintetizados, 4 shaders
-propios. **Cero material de terceros.**
+propios. **Cero material de terceros — cero texturas del juego base (verificado v6.136).**
 
 **EL LORE**: el **Grimorio del Eterno** que cargas NO es un arma: **ES
 AETHON**, una entidad primigenia atada en forma de libro. Come cada kill,

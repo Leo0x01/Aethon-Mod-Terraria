@@ -1,6 +1,15 @@
-# ANÁLISIS DE REFERENCIAS EXTERNAS — AethonMod v6.135
+# ANÁLISIS DE REFERENCIAS EXTERNAS — AethonMod — ✅ RESUELTO (v6.136)
 
-**Fecha**: 2026-11-14 · **Pedido**: «Luego analizar el proyecto en busca de referencias externas, el proyecto no debe tener referencia de ningún tipo y todo lo que tenga el código debe ser nuestro propio»
+> **ESTADO: RESUELTO el 2026-11-14.** La decisión del dueño (opción A
+> para las dos armas): «Arbitrador II, El Principio y el Fin, puedes
+> borrar esas armas, ya no son útiles, el resto de contenido de la
+> carpeta se queda tal cual» + «Genera las texturas con SForja, y luego
+> verifica que todo esté sin mencionar ni referencias externas».
+> La v6.136 ejecutó la purga + los sprites propios del muñeco + la
+> verificación integral (0 menciones, 0 texturas vanilla). El texto de
+> abajo se conserva como el informe histórico de la auditoría original.
+
+**Fecha**: 2026-11-14 · **Resolución**: v6.136 (publicada) · **Pedido**: «Luego analizar el proyecto en busca de referencias externas, el proyecto no debe tener referencia de ningún tipo y todo lo que tenga el código debe ser nuestro propio»
 
 **Metodología**: escaneo completo de los 462 .cs + 3 hjson + build.txt con
 grep de: URLs http(s) · nombres de otros mods (Calamity, Entropy, Fargo,

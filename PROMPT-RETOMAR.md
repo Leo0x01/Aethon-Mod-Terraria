@@ -70,18 +70,19 @@ puedas averiguar tú mismo del repo.
 
 ## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.135)
 
-- **Versión**: 6.135 (`AethonMod/build.txt`) — publicada como
-  [release 445558359](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.135),
-  md5 `6d378f1c5d9a6fdfe5281785bb54e917`, 526 entradas en el .tmod.
-- **Última versión (v6.135)**: EL ARCÁNGEL DE 6 ALAS (el tercer par `Coronas`
-  en el motor de alas + el Vacío a 3 pares) + LAS SEIS MITOLÓGICAS (Serafín ·
-  Valquiria · Quetzal · Fénix · Tengu · Dragón — estilos 6..11 del catálogo,
-  que ahora tiene 12) + la Bolsa de las Alas a 11 alas.
-- **PENDIENTE ÚNICO IMPORTANTE**: la decisión sobre
-  `Content/Weapons/Investigaciones/` (las recreaciones de armas de Calamity
-  Entropy pedidas en sesiones antiguas) — leer
-  `ANALISIS-REFERENCIAS-EXTERNAS.md` y preguntar al usuario. Es la única
-  deuda de material externo del proyecto.
+- **Versión**: 6.136 (`AethonMod/build.txt`) — publicada como
+  [release 445612303](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136),
+  md5 `c083e217dd39955ae63d119acb72e4bf`, 521 entradas en el .tmod.
+- **Última versión (v6.136)**: LA PURGA DE LAS DOS ARMAS DE INVESTIGACIÓN
+  (Arbitrador II + El Principio y el Fin, con todo su árbol: 13 archivos +
+  4 carpetas) + EL LAVADO de las menciones en los que se quedan + EL MUÑECO
+  DE PRUEBAS con sprite propio de la SForja (sin texturas del juego base) +
+  LA VERIFICACIÓN INTEGRAL: **0 referencias externas** en todo el código y
+  la localización (la deuda de `ANALISIS-REFERENCIAS-EXTERNAS.md` quedó
+  RESUELTA — la carpeta Investigaciones ahora es 100 % contenido de la
+  casa: Mirada del Eterno, Cetro de las Dagas, Códice, motor de píxeles).
+- **Sin deudas externas**: el proyecto no debe NADA a nadie — todo el
+  arte, la música y el código son de la casa.
 - Entorno: oráculo/genera_oraculo_v6121.sh · restauración:
   scripts/restaura_entorno_v6121.sh · build:
   `/tmp/tml/start-tModLoader.sh -build /home/z/my-project/mod/AethonMod`.

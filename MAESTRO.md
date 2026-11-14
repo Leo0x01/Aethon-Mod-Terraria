@@ -2,8 +2,8 @@
 
 > **EL DOCUMENTO ÚNICO DE VERDAD.** Todo lo que una IA (o un humano) necesita para
 > retomar, entender y continuar este proyecto está aquí. Si este documento
-> contradice a otro, **manda este documento**. Última actualización: **v6.135**
-> (2026-11-14, release GitHub 445558359). Los .md especializados siguen siendo
+> contradice a otro, **manda este documento**. Última actualización: **v6.136**
+> (2026-11-14, release GitHub 445612303). Los .md especializados siguen siendo
 > válidos como referencia de detalle; este es el índice vivo y la norma superior.
 
 ---
@@ -17,11 +17,11 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.135** (vive en `AethonMod/build.txt`, línea `version = 6.135`) |
-| **Última release** | [v6.135](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.135) — md5 `6d378f1c5d9a6fdfe5281785bb54e917`, 19.367.611 B, 526 entradas |
+| **Versión actual** | **6.136** (vive en `AethonMod/build.txt`, línea `version = 6.136`) |
+| **Última release** | [v6.136](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136) — md5 `c083e217dd39955ae63d119acb72e4bf`, 19.354.517 B, 521 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
-| **Tamaño** | 462 archivos .cs · 503 png · 78 librerías VFX · 436 herramientas · 38 versiones publicadas en CHANGES.md |
+| **Tamaño** | 452 archivos .cs · 498 png · 78 librerías VFX · 437 herramientas · 39 versiones publicadas en CHANGES.md |
 
 **La premisa**: el jugador es el portador del Grimorio Eterno, un libro vivo
 devorador de jefes. El mod crece POR SESIONES con el usuario (cada versión nace
@@ -99,7 +99,7 @@ Detalles de cada paso:
 | R10 | **Todo .fx NUEVO o modificado viaja con su .fxc recompilado** (pipeline fx_2_0) | tML 2026.09 solo carga .fxc |
 | R11 | **Los nombres de clases nuevas en el hjson VAN CON SU SPRITE** (.png con el MISMO nombre de la clase, junto al .cs) | Convención tML autoload |
 | R12 | **JAMÁS renombrar la carpeta `AethonMod/`** | El guardián de identidad (AethonMod.cs) huérfana los .plr/.twld |
-| R13 | **La carpeta `Content/Weapons/Investigaciones/` es SOLO investigación** — jamás debe salir en un lanzamiento (ver §10) | Orden del usuario v6.54.0 |
+| R13 | **La carpeta `Content/Weapons/Investigaciones/` es SOLO contenido de prueba de la casa** (v6.136: las recreaciones ajenas murieron — ver §10) | Orden del usuario v6.54.0 + v6.136 |
 | R14 | **Sandbox reciclado = restaurar entorno** con `scripts/restaura_entorno_v6121.sh` | Ver §4 |
 | R15 | **La versión del mod vive SOLO en `build.txt`** | `version = 6.135` |
 | R16 | **Persistir TODO script** (>10 líneas) en `mod/tools/` o `/home/z/my-project/scripts/` | Artefacto recuperable |
@@ -524,16 +524,22 @@ Dazzling Stabber Staff de Calamity y TODA su referencia (v6.133) · la bolsa
 de investigación y sus armas (v6.113) · el puerto del dios (v6.54.0: la
 copia verbatim de material ajeno BORRADA — «cero material ajeno en el repo»).
 
-## 10 · LA CUENTA PENDIENTE: LAS INVESTIGACIONES (ver ANALISIS-REFERENCIAS-EXTERNAS.md)
+## 10 · LAS INVESTIGACIONES — LA DEUDA CERRADA (v6.136)
 
-Por orden del usuario en sesiones antiguas, existen **copias de armas de
-Calamity Entropy** en `Content/Weapons/Investigaciones/` (ArbitradorII, El
-Principio y el Fin) — recreaciones de mecánica documentada como "práctica",
-separadas del contenido jugable, que NUNCA deben salir en un lanzamiento
-(R13). El usuario pidió el 2026-11-14 un análisis de referencias externas:
-el informe completo con las decisiones pendientes está en
-`ANALISIS-REFERENCIAS-EXTERNAS.md`. **Antes de cualquier release pública:
-resolver esa carpeta** (las opciones están en el informe).
+La deuda quedó **RESUELTA el 2026-11-14** por orden del usuario: las dos
+armas que recreaban material de un mod ajeno (el Arbitrador II y El
+Principio y el Fin, pedidas como práctica en sesiones antiguas) **fueron
+borradas con todo su árbol** (13 archivos + 4 carpetas: proyectiles,
+dagas, almas, onda, 4 marcas, sigilo, GlobalNPC). Se quedan — 100 %
+originales de la casa: la Mirada del Eterno (re-hecha limpia en la
+v6.93), el Cetro de las Dagas del Eterno y sus cinco cuchillas (la
+máquina forjada de cero en la v6.132), el Códice de habilidades y el
+motor de píxeles (PixelFxPlayer). El muñeco de pruebas negro también es
+de la casa desde la v6.136 (sprite por SForja, sin texturas del juego
+base). **Verificación integral**: 0 menciones externas en TODO el
+código y la localización; 0 texturas vanilla; las purgas viejas
+siguen muertas (audit con no-regresión en cada versión). El informe
+histórico queda en `ANALISIS-REFERENCIAS-EXTERNAS.md` (resuelto).
 
 ## 11 · CÓMO RETOMAR EL PROYECTO (el protocolo de arranque)
 
