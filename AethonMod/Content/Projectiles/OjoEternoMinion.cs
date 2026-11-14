@@ -363,6 +363,19 @@ namespace AethonMod.Content.Projectiles
             //     normales ESPERAN: están rezando, no cazando).
             Projectile ritualIra = global::AethonMod.Content.Projectiles.Definitivas
                 .IraSerExteriorCeremoniaProjectile.RitualDe(Projectile.owner);
+
+            // v6.131 — EL PEGUE DEL FESTÍN (la letra: «el jugador se mueve
+            //     hacia arriba, pero todos sus items cosmeticos quedan en
+            //     la misma posicion… debes tomar al jugador completo para
+            //     la animacion de devorar»): mientras el Eterno ARRASTRA
+            //     al dueño, el ojo HEREDA el movimiento del cuerpo COMPLETO
+            //     (la ley v6.77 del pegue al ancla, ahora para el festín):
+            //     la corona entera sube RÍGIDA con su portador a la boca —
+            //     la ley suave de abajo solo corrige el giro y el resto.
+            //     El festín es del jugador ENTERO: cuerpo, alas y ojos
+            //     suben JUNTOS.
+            global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                .PegarAlFestin(Projectile, Projectile.owner);
             // v6.65 — EL RITUAL RECLAMA A SUS OJOS (la letra: «a veces al
             //     comenzar la animacion los mininion no cierran el circulo
             //     correctamente, ya luego de unos segundos ya se ponen en

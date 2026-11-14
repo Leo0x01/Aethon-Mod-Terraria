@@ -378,6 +378,30 @@ namespace AethonMod.Content.VFX
             {
                 return porLado * 2;      // (imposible: 14 pozos para 7+7 — la red)
             }
+            // v6.131 — EL SNAPSHOT DE LA ARMADURA (la letra: «solo se ven
+            // las alas de la izquierda y ademas parece que en algun punto
+            // la textura de las alas se vuelve cuadrada o rectangular»).
+            // LA AUTOPSIA: los pozos son COMPARTIDOS — las plumas vivas
+            // del lado IZQUIERDO (índices 0..4) pisaban los mismos pozos
+            // que el ESTIRADO iba a re-escribir ANTES de que el lado
+            // DERECHO (índices 5..9) leyera SUS plumas viejas: las dos
+            // primeras plumas del ala derecha nacían de los NACIMIENTOS
+            // izquierdos ya escritos (stubs de 16 px casi sin masa) — y
+            // con la punta de referencia pisoteada, el camino del borde
+            // derecho se armaba con el ángulo de la punta IZQUIERDA: la
+            // vela cruzaba LA ESPALDA (el bloque rectangular de la
+            // captura) y el ala derecha MORÍA (solo se veía la
+            // izquierda). LA CURA: TODO se calcula primero sobre UNA
+            // COPIA de la armadura viva (los ejes viejos de AMBOS lados
+            // intactos) y SOLO al final se piso el pozo — el lado
+            // derecho lee SUS plumas de verdad, no los restos del
+            // izquierdo.
+            int totalViejo = porLado * 2;
+            Vector2[][] ejesViejos = new Vector2[totalViejo][];
+            for (int s = 0; s < totalViejo; s++)
+            {
+                ejesViejos[s] = (Vector2[])plumas[s].Eje.Clone();
+            }
             for (int lado = -1; lado <= 1; lado += 2)
             {
                 int bViejo = (lado < 0) ? 0 : porLado;
@@ -389,19 +413,19 @@ namespace AethonMod.Content.VFX
                 }
 
                 // === EL CAMINO DEL BORDE: P(u) y las fracciones u de las plumas ===
-                float th0 = AnguloDe(plumas[bViejo].Eje[8]);
-                float th4 = AnguloDe(plumas[bViejo + porLado - 1].Eje[8]);
+                float th0 = AnguloDe(ejesViejos[bViejo][8]);
+                float th4 = AnguloDe(ejesViejos[bViejo + porLado - 1][8]);
                 while (th4 > th0 + MathHelper.Pi) th4 -= MathHelper.TwoPi;
                 while (th4 <= th0 - MathHelper.Pi) th4 += MathHelper.TwoPi;
-                float r0 = Vector2.Distance(plumas[bViejo].Eje[8], _geoAnclaCentral) + PADLisa;
-                float r4 = Vector2.Distance(plumas[bViejo + porLado - 1].Eje[8], _geoAnclaCentral) + PADLisa;
+                float r0 = Vector2.Distance(ejesViejos[bViejo][8], _geoAnclaCentral) + PADLisa;
+                float r4 = Vector2.Distance(ejesViejos[bViejo + porLado - 1][8], _geoAnclaCentral) + PADLisa;
                 float signo = (th4 >= th0) ? 1f : -1f;
                 float thNaceSup = th0 - signo * DTHNace;
                 float thNaceInf = th4 + signo * DTHNace;
                 float[] us = new float[porLado];
                 for (int k = 0; k < porLado; k++)
                 {
-                    float thk = AnguloDe(plumas[bViejo + k].Eje[8]);
+                    float thk = AnguloDe(ejesViejos[bViejo + k][8]);
                     while (thk > th0 + MathHelper.Pi) thk -= MathHelper.TwoPi;
                     while (thk <= th0 - MathHelper.Pi) thk += MathHelper.TwoPi;
                     us[k] = (MathF.Abs(th4 - th0) > 1e-4f)
@@ -440,13 +464,13 @@ namespace AethonMod.Content.VFX
                     // LAS PLUMAS ESTIRADAS: el tramo final corre a SU punto del borde
                     for (int k = 0; k < porLado; k++)
                     {
-                        Vector2 punta = plumas[bViejo + k].Eje[8];
+                        Vector2 punta = ejesViejos[bViejo + k][8];
                         Vector2 dirK = punta - ancla;
                         float l = dirK.Length();
                         if (l > 0.001f) dirK /= l; else dirK = new Vector2(0f, -grav);
                         Vector2 d = PuntoDe(us[k]) - punta;
                         float s = Vector2.Dot(d, dirK) * Suave(0.45f, 1f, q);
-                        ejesNuevos[k + 1][j] = plumas[bViejo + k].Eje[j] + dirK * s;
+                        ejesNuevos[k + 1][j] = ejesViejos[bViejo + k][j] + dirK * s;
                     }
                     // EL NACIMIENTO INFERIOR: del ancla al punto P(1+U)
                     ejesNuevos[nuevo - 1][j] = Vector2.Lerp(ancla, nInf, q);
@@ -1367,6 +1391,17 @@ namespace AethonMod.Content.VFX
                         _geoN = EstirarVelaLisa(plumas, hues, fundidos, val, val2,
                             num2, fullRotation, gravDir, in estilo);
                     }
+                    // v6.131 — EL N DE LOS EMISORES (la segunda mitad del
+                    // bug de «solo se ve el ala izquierda»): la vela lisa
+                    // estirada vive en _geoN ejes (7 por lado — 5 plumas +
+                    // 2 nacimientos), pero los emisores recibían el n del
+                    // ABANICO VIEJO (10): el "lado 1" emparejaba ejes del
+                    // ala IZQUIERDA con stubs del ala DERECHA a través de
+                    // la espalda — el bloque rectangular de la captura.
+                    // AHORA el conteo viaja CON la geometría: en el ala
+                    // lisa los emisores y el borde leen los 7 ejes por
+                    // lado de la vela estirada.
+                    int nEmisores = estilo.Lisas ? _geoN : num2 * 2;
                     // v6.56.6 — EL BARRIDO DEL HEREDERO MUERE ENTERO (la letra:
                     // «no están simétricas y siguen teniendo esa ligera rotación
                     // en el sentido contrario que no deben tener»). El sim de la
@@ -1397,7 +1432,15 @@ namespace AethonMod.Content.VFX
                     if (((Entity)pl).direction < 0)
                     {
                         float cx2 = val.X;
-                        for (int m = 0; m < num3; m++)
+                        // v6.131 — EL ESPEJO RECORRE LA GEOMETRÍA VIVA: en
+                        // el ala lisa son _geoN ejes (14 — con los DOS
+                        // nacimientos por lado), no los 10 del abanico
+                        // viejo: mirando a la izquierda, los 4 ejes que
+                        // faltaban quedaban SIN espejar — la vela del ala
+                        // derecha nacía en el lado del cuerpo equivocado
+                        // (mitad del bug «solo se ve la izquierda»).
+                        int nEspejo = estilo.Lisas ? _geoN : num3;
+                        for (int m = 0; m < nEspejo; m++)
                         {
                             Vector2[] eje = _pozosEje[m];
                             for (int k2 = 0; k2 < eje.Length; k2++)
@@ -1440,34 +1483,34 @@ namespace AethonMod.Content.VFX
                     {
                         for (int k = 0; k < 3; k++)
                         {
-                            num7 = EmitirCapa(num7, plumas, hues, fundidos, mezclaDia, k, in estilo, num2 * 2);
+                            num7 = EmitirCapa(num7, plumas, hues, fundidos, mezclaDia, k, in estilo, nEmisores);
                         }
                     }
                     // v6.114 — LA MEMBRANA (la cura de la sierra): el velo
                     // entre plumas y el arco exterior entran al MISMO lote
                     // de las capas sólidas — con la mezcla aditiva el orden
                     // es irrelevante y las plumas siguen leyéndose encima.
-                    num7 = EmitirMembrana(num7, plumas, hues, fundidos, mezclaDia, in estilo, num2 * 2);
+                    num7 = EmitirMembrana(num7, plumas, hues, fundidos, mezclaDia, in estilo, nEmisores);
                     if (num7 >= 3)
                     {
                         Volcar(graphicsDevice, _fxPlano, num7, textura: false);
                     }
                     if (!estilo.Lisas)
                     {
-                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 0, fold, in estilo, num2 * 2);
+                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 0, fold, in estilo, nEmisores);
                     }
                     // v6.114 — y su niebla: el mismo velo/arco con el flujo
                     // de la textura — la bruma CORRE por dentro del ala.
                     // v6.129 — en el ala lisa es LA ÚNICA niebla (la niebla
                     // de las tiras murió con ellas): la superficie vive.
-                    num7 = EmitirMembranaRuido(num7, plumas, hues, mezclaDia, globalTimeWrappedHourly, fold, in estilo, num2 * 2);
+                    num7 = EmitirMembranaRuido(num7, plumas, hues, mezclaDia, globalTimeWrappedHourly, fold, in estilo, nEmisores);
                     if (num7 >= 3)
                     {
                         Volcar(graphicsDevice, _fxTextura, num7, textura: true);
                     }
                     if (!estilo.Lisas)
                     {
-                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 1, fold, in estilo, num2 * 2);
+                        num7 = EmitirCapaRuido(0, plumas, hues, mezclaDia, globalTimeWrappedHourly, 1, fold, in estilo, nEmisores);
                         if (num7 >= 3)
                         {
                             Volcar(graphicsDevice, _fxTextura, num7, textura: true);

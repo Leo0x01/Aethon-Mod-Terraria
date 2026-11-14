@@ -143,8 +143,14 @@ namespace AethonMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.width = 20;
-            Projectile.height = 20;
+            Projectile.width = 26;
+            Projectile.height = 26;
+            // v6.131 — LA CORONA GRANDE (la letra: «las cuchillas son
+            // muy pequeñas, que sean un poco mas grande»): la hoja se
+            // dibuja ×1,4 (47×47 — el filo SE LEE) y el CUERPO del
+            // proyectil crece con ella (hitbox 26 — el golpe cubre la
+            // hoja grande).
+            Projectile.scale = 1.40f;
             Projectile.friendly = true;
             Projectile.minion = true;
             // v6.129 — LOS PUESTOS LIBERADOS (la letra: «haz que esta arma
@@ -222,6 +228,14 @@ namespace AethonMod.Content.Projectiles
             // EL FOCO: la presa más cercana al dueño (el caza de los ojos).
             NPC presa = ObjetivoDaga(dueño);
 
+            // v6.131 — EL PEGUE DEL FESTÍN (la letra: «debes tomar al
+            //     jugador completo para la animacion de devorar»): la
+            //     corona de cuchillas HEREDA el movimiento del cuerpo
+            //     COMPLETO mientras el Eterno arrastra al dueño — la
+            //     tiara entera sube RÍGIDA con su portador a la boca.
+            global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                .PegarAlFestin(Projectile, Projectile.owner);
+
             float fase = Projectile.ai[1];
             // Projectile.frame ES el reloj de fase (el truco de los ojos:
             // campo sincronizado, cero netcode).
@@ -229,11 +243,22 @@ namespace AethonMod.Content.Projectiles
 
             if (fase == F_HOVER)
             {
-                // === EL ANILLO ÍNTIMO: la guardia del portador ===
+                // === LA CORONA: la tiara encima de los ojos ===
                 Vector2 slot = SlotDelAnillo(dueño);
                 float suaviza = Math.Min(1f, t / 22f);   // el nacimiento: se acomoda suave
                 Projectile.Center = Vector2.Lerp(Projectile.Center, slot, 0.18f + 0.10f * suaviza);
                 Projectile.velocity = Vector2.Zero;
+
+                // v6.131 — EL FILO HACIA AFUERA (la corona de puntas):
+                // quieta en SU punto del arco, la cuchilla APUNTA al
+                // cielo por fuera — el filo del arco (la tangente +
+                // 90°: la punta de la tiara). El lerp de la rotación
+                // evita el saltito del nacimiento.
+                Vector2 radial = slot - dueño.MountedCenter;
+                if (radial.LengthSquared() < 0.001f) radial = -Vector2.UnitY;
+                float rotCorona = MathF.Atan2(radial.Y, radial.X) + MathHelper.PiOver2;
+                Projectile.rotation = MathHelper.Lerp(
+                    Projectile.rotation, rotCorona, MathHelper.Clamp(0.06f + 0.10f * suaviza, 0f, 1f));
 
                 // el reloj del compás: cuenta ABAJO hasta el ataque
                 if (t <= 0)
@@ -628,13 +653,37 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  LA FORMACIÓN — EL ANILLO ÍNTIMO (la guardia del portador)
+        //  LA FORMACIÓN — v6.131 LA CORONA ENCIMA DE LOS OJOS (la letra:
+        //  «deben estar ubicadas como una corona encima de los ojos»):
+        //  las cuchillas ya NO son el anillo íntimo del cuerpo — son LA
+        //  TIARA del escuadrón: un arco REALZADO y ESTÁTICO por ENCIMA
+        //  de la corona de ojos (la ley del SlotDeFormacion de los
+        //  ojos: radio 40+6,2·n abanico trasero — la tiara vive a
+        //  RADIOTIARA px y apunta sus filos hacia AFUERA, como los
+        //  rayos de una corona de puntas).
         // ================================================================
+
+        // EL RADIO DE LA TIARA — LA LEY DEL DESPEJE (medido por el sim
+        // sim_corona_v6131.py): la corona de ojos vive a max(40, 6,2·n)
+        // y su borde exterior a +11 (el sprite del ojo); la cuchilla
+        // ×1,4 tiene 23,8 px de semialto ANCLADOS AL CENTRO → el radio
+        // de la tiara es el borde de los ojos + 41 (semialto + 6 de
+        // aire): a 11 ojos, ~109 px — la tiara CORONA la cabeza del
+        // enjambre SIN pisar a un solo ojo, a CUALQUIER número de estos.
+        private static float RadioTiara(int nOjos) =>
+            MathF.Max(40f, 6.2f * nOjos) + 41f;
+
+        // LA ESCALA DE LA CORONA (la letra: «las cuchillas son muy
+        // pequeñas, que sean un poco mas grande»): la hoja de 34×34
+        // viaja ×1,4 — el filo se LEE (47×47 en pantalla), el ojo del
+        // taladro acompaña (OJO_ESC×1,4).
+        private const float ESCALA_TIARA = 1.40f;
+
         private Vector2 SlotDelAnillo(Player dueño)
         {
             // EL CENTRO: el jugador — o el LIBRO mientras el espíritu
-            // caza (la ley v6.51.7 de los ojos, en su círculo pequeño:
-            // los ojos son la corona del libro, las dagas su guardia).
+            // caza (la ley v6.51.7 de los ojos: los ojos son la corona
+            // del libro, las cuchillas SU TIARA).
             Vector2 centro = dueño.MountedCenter;
             try
             {
@@ -643,15 +692,26 @@ namespace AethonMod.Content.Projectiles
             }
             catch { }
 
-            // EL ANILLO: radio 32 (íntimo — los ojos viven a 62+), giro
-            // lento 0,45 rad/s, el puesto por minionPos (la cuenta
-            // ordenada de vanilla), reloj GlobalTime (determinista).
+            // LA CORONA: UN ARCO por encima de la cabeza de la corona de
+            // ojos — de −116° a −64° (52° de arco para las cinco puntas,
+            // ~13° entre filos: la tiara ABIERTA de la casa — las
+            // cuchillas de los extremos caen a los LADOS de la cabeza,
+            // la del centro la corona PLENA). QUIETA (no gira: una
+            // corona se lleva puesta), con la RESPIRACIÓN ÚNICA de la
+            // danza (el mismo latido ±3,5 % de los ojos — el enjambre
+            // respira JUNTO) y el cabeceo mínimo.
             float time = Main.GlobalTimeWrappedHourly;
             int idx = Math.Max(0, (int)Projectile.minionPos);
             int n = Math.Max(1, DagasVivas(dueño));
-            float ang = time * 0.45f + MathHelper.TwoPi * idx / n;
-            return centro + ang.ToRotationVector2() * 32f +
-                new Vector2(0f, MathF.Sin(time * 2.2f + idx * 1.9f) * 2.5f);
+            int tipoOjo = ModContent.ProjectileType<OjoEternoMinion>();
+            int nOjos = Math.Max(0, dueño.ownedProjectileCounts[tipoOjo]);
+            float f = n <= 1 ? 0.5f : (float)idx / (n - 1);
+            const float aBorde = 1.02f;               // ≈58°: los extremos caen a los lados
+            float ang = -MathHelper.PiOver2 + MathHelper.Lerp(-aBorde, aBorde, f);
+            float radio = RadioTiara(nOjos) * (1f + 0.035f * MathF.Sin(time * 0.5f));
+            Vector2 slot = centro + ang.ToRotationVector2() * radio;
+            slot.Y += MathF.Sin(time * 0.9f + idx * 1.9f) * 1.5f;   // el cabeceo de siempre
+            return slot;
         }
 
         private float AnguloHacia(Vector2 destino)
@@ -729,6 +789,10 @@ namespace AethonMod.Content.Projectiles
                 Vector2 pos = Projectile.Center - Main.screenPosition;
                 Vector2 orig = new Vector2(tex.Width * 0.5f, frameH * 0.5f);
                 float rot = Projectile.rotation;
+                // v6.131 — LA CORONA GRANDE: la hoja ×1,4 (ESCALA_TIARA
+                // vive en Projectile.scale — el golpe y el dibujado
+                // crecen JUNTOS con la hoja).
+                float esc = Projectile.scale;
 
                 // LA ESTELA DEL GOLPE (el rastro de la casa): tres
                 // fantasmas ATRÁS durante la técnica — la cuchilla que
@@ -739,13 +803,13 @@ namespace AethonMod.Content.Projectiles
                     {
                         float a = (0.30f / j);
                         Main.spriteBatch.Draw(tex, pos - new Vector2(0f, j * 7f).RotatedBy(rot - MathHelper.PiOver2),
-                            rect, LuzDe(Tipo) * a, rot, orig, 1f - j * 0.12f, SpriteEffects.None, 0f);
+                            rect, LuzDe(Tipo) * a, rot, orig, esc - j * 0.17f, SpriteEffects.None, 0f);
                     }
                 }
 
                 // LA CUCHILLA (el marco de SU tipo del spritesheet — la
                 // hoja SIN mango con el agujero taladrado al centro)
-                Main.spriteBatch.Draw(tex, pos, rect, Color.White, rot, orig, 1f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(tex, pos, rect, Color.White, rot, orig, esc, SpriteEffects.None, 0f);
 
                 // ============== EL OJO DEL GRIMORIO (v6.130) ==============
                 // LA LETRA: «en esa zona va el ojo del grimorio, ya
@@ -771,7 +835,7 @@ namespace AethonMod.Content.Projectiles
                 // EL CENTRO DEL TALADRO (v6.130: EL TRONO POR TIPO — la
                 // SForja taladró cada hoja donde tenía masa; el offset
                 // medido píxel a píxel del sprite, girando CON la hoja)
-                Vector2 trono = TronoDelOjo[Tipo];
+                Vector2 trono = TronoDelOjo[Tipo] * esc;
                 Vector2 centroOjo = pos + trono.RotatedBy(rot);
 
                 // EL OJO MINION (la esclerótica + el párpado que
@@ -784,7 +848,7 @@ namespace AethonMod.Content.Projectiles
                     ? Lighting.GetColor(Projectile.Center.ToTileCoordinates())
                     : Lighting.GetColor(Projectile.Center.ToTileCoordinates()) * 0.55f;
                 Main.spriteBatch.Draw(ojoTex, centroOjo, null, colorOjo, rot,
-                    ojoTex.Size() * 0.5f, OJO_ESC, SpriteEffects.None, 0f);
+                    ojoTex.Size() * 0.5f, OJO_ESC * esc, SpriteEffects.None, 0f);
 
                 // EL IRIS VIVO (solo con el ojo ABIERTO — la ley del
                 // OjoEternoMinion: el párpado tapa la mirada): viaja
@@ -803,7 +867,7 @@ namespace AethonMod.Content.Projectiles
                     // iris se desplaza hacia la presa EN EL MUNDO, no en
                     // el marco girado — la geometría del trasplante)
                     Vector2 miraHoja = mira.RotatedBy(-rot);
-                    Vector2 irisPos = centroOjo + new Vector2(miraHoja.X * MIRA_X, miraHoja.Y * MIRA_Y).RotatedBy(rot);
+                    Vector2 irisPos = centroOjo + new Vector2(miraHoja.X * MIRA_X * esc, miraHoja.Y * MIRA_Y * esc).RotatedBy(rot);
                     Texture2D iris = ModContent.Request<Texture2D>(
                         "AethonMod/Content/Weapons/GrimorioHambriento_Iris",
                         ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
@@ -812,7 +876,7 @@ namespace AethonMod.Content.Projectiles
                     // OSCURO no se leía; el del grimorio ES dorado vivo)
                     Color colorIris = IrisDe(Tipo);
                     Main.spriteBatch.Draw(iris, irisPos, null, colorIris, rot,
-                        iris.Size() * 0.5f, IRIS_ESC, SpriteEffects.None, 0f);
+                        iris.Size() * 0.5f, IRIS_ESC * esc, SpriteEffects.None, 0f);
                 }
                 return false;
             }

@@ -89,7 +89,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             if (duenio == null || !duenio.active || duenio.dead) return false;
 
             float t = Main.GlobalTimeWrappedHourly;
-            Vector2 centro = Projectile.Center;
+            // v6.131 — EL PEGUE DEL FESTÍN (la letra: «debes tomar al
+            // jugador completo para la animacion de devorar»): el brillo
+            // dibuja desde SU posición (pegada al dueño un tick TARDE) —
+            // mientras el Eterno arrastra al portador, el delta del
+            // CUERPO COMPLETO se hereda AQUÍ, en el dibujado: la estrella
+            // solar sube JUNTO con su portador, sin retraso visible.
+            Vector2 centro = Projectile.Center +
+                (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                    .ArrastrandoA(Projectile.owner)
+                    ? global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.DeltaDelFestin
+                    : Vector2.Zero);
             int semilla = Projectile.identity % 97 + 3;
 
             // LA RECETA DE DrawTwinkles (RuneSunRenderer, tier 3+ —

@@ -136,6 +136,53 @@ namespace AethonMod.Content.Projectiles.Definitivas
             return false;
         }
 
+        // ================================================================
+        //  v6.131 — EL PEGUE DEL FESTÍN (la letra: «el jugador se mueve
+        //  hacia arriba, pero todos sus items cosmeticos quedan en la
+        //  misma posicion, es como que dentro del codigo estas tomando
+        //  solo al jugador, pero no a lo que lleva equipado, debes tomar
+        //  al jugador completo para la animacion de devorar»).
+        //
+        //  LA AUTOPSIA: el arrastre mueve al jugador con un lerp que
+        //  ACELERA (k 0,045→0,12 — hasta ~12 px/t cerca de la boca), pero
+        //  el SÉQUITO lo sigue con leyes suaves que se VEN arrastradas:
+        //  · LOS OJOS Y LAS CUCHILLAS: la ley del planeo (tope 9-13 px/t
+        //    + lerp 0,18-0,35) persigue el PUESTO móvil — con el ancla a
+        //    12 px/t el círculo entero se queda ATRÁS (la misma queja de
+        //    la v6.77 de los ojos con el haz, ahora en el festín).
+        //  · EL BRILLO SOLAR: dibuja desde SU Projectile.Center (pegado
+        //    al dueño en SU tick de AI — un tick de retraso constante).
+        //  · EL ANILLO DORSAL: usa la espalda del dueño SIN la rotación
+        //    del festín — el cuerpo GIRA (fullRotation) y el anillo no.
+        //  LA CURA es la ley v6.77 de los ojos (EL PEGUE AL ANCLA),
+        //  generalizada: TODO lo que sigue al portador HEREDA el
+        //  movimiento del CUERPO COMPLETO durante el festín — los ojos y
+        //  cuchillas saltan el tope (pegue rígido), el brillo y el
+        //  anillo leen el delta de ESTE frame. El festín es del jugador
+        //  ENTERO: cuerpo, alas, séquito y joyas suben JUNTOS a la boca.
+        // ================================================================
+
+        /// <summary>El movimiento del portador en ESTE tick del festín
+        /// (el delta que TODO su séquito hereda — el pegue v6.77 de los
+        /// ojos, generalizado al festín entero).</summary>
+        public static Vector2 DeltaDelFestin = Vector2.Zero;
+
+        /// <summary>¿El festín está ARRASTRANDO a ESTE jugador? (el
+        /// séquito lo consulta para pegarse al cuerpo completo).</summary>
+        public static bool ArrastrandoA(int whoAmI) => Devorando(whoAmI) && !Tragado;
+
+        /// <summary>EL PEGUE: aplica el delta del festín a un proyectil
+        /// del séquito (posición += delta — el cuerpo completo viaja
+        /// RÍGIDO). Devuelve true si aplicó.</summary>
+        public static bool PegarAlFestin(Projectile pr, int owner)
+        {
+            if (pr == null || !pr.active || !ArrastrandoA(owner)) return false;
+            Vector2 d = DeltaDelFestin;
+            if (d == Vector2.Zero) return true;   // arrastre aún quieto: nada que heredar
+            pr.position += d;
+            return true;
+        }
+
         // === LAS TEXTURAS DEL FESTÍN (la familia del ojo — las mismas del
         //     cine de jefes, NADA de libros partidos) ===
         private static Texture2D _texLibro;     // el cuerpo: el ítem Grimorio del Eterno
@@ -199,6 +246,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             float t = Projectile.ai[0];
             Projectile.ai[0] = t + 1f;
             Projectile.velocity = Vector2.Zero;
+            DeltaDelFestin = Vector2.Zero;   // v6.131 — el delta nace limpio cada tick
 
             Player p = Main.player[Projectile.owner];
             bool dueñoVivo = p != null && p.active && !p.dead;
@@ -243,6 +291,11 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     // hacia el libro: la presa entra por la boca), con el
                     // vaivén lateral que se apaga al llegar (la espiral de
                     // siempre — la presa cae vencida, no teletransportada).
+                    // v6.131 — EL DELTA DEL FESTÍN: el movimiento de ESTE
+                    // tick queda registrado para que TODO el séquito
+                    // (ojos, cuchillas, joyas) HERede el viaje — el
+                    // jugador COMPLETO sube a la boca (la letra).
+                    Vector2 posAntes = p.Center;
                     float f = MathHelper.Clamp((Projectile.ai[0] - TSombra) / 110f, 0f, 1f);
                     float k = 0.045f + 0.075f * f * f;
                     Vector2 boca = BocaDelLibro(p.Center);
@@ -261,6 +314,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         p.fullRotation += (0.055f + 0.13f * f * f) * (f > 0.55f ? 1.6f : 1f);
                     }
                     catch { }
+                    DeltaDelFestin = p.Center - posAntes;
 
                     // ==========================================================
                     //  v6.124 — LA CACERÍA INVERSA (la letra: «si por 2
@@ -434,6 +488,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
         /// </summary>
         public override void OnKill(int timeLeft)
         {
+            DeltaDelFestin = Vector2.Zero;   // v6.131 — el pegue muere con el festín
             if (!_entregado)
             {
                 Tragado = false;

@@ -106,8 +106,20 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             // El ancla: el centro de la espalda (consciente de la
             // gravedad invertida — la corona viaja con el pecho).
+            // v6.131 — Y CONSCIENTE DEL FESTÍN (la letra: «debes tomar
+            // al jugador completo»): durante el arrastre el cuerpo GIRA
+            // (fullRotation de vanilla) — la espalda del anillo gira
+            // CON él: el anillo viaja pegado al pecho que GIRA, no al
+            // cuerpo congelado de la postura.
             Vector2 espalda = duenio.Center -
                 new Vector2(0f, duenio.height * 0.04f * duenio.gravDir);
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                    .ArrastrandoA(Projectile.owner))
+            {
+                Vector2 eje = duenio.fullRotationOrigin;
+                Vector2 rel = espalda - (duenio.position + eje);
+                espalda = duenio.position + eje + rel.RotatedBy(duenio.fullRotation);
+            }
 
             try
             {
