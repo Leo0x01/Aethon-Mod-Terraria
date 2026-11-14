@@ -125,16 +125,16 @@ namespace AethonMod.Content.Weapons.Investigaciones
             }
 
             // LAS DAGAS que faltan (la PRIMERA que falte de cada tipo — la
-            // secuencia del stabber: el set se mantiene COMPLETO)
+            // secuencia de las cuchillas: el set se mantiene COMPLETO)
             for (int k = 0; k < global::AethonMod.Content.Projectiles.DagaEternaMinion.TiposMax; k++)
             {
                 if (global::AethonMod.Content.Projectiles.DagaEternaMinion.ViveTipo(player, k))
                     continue;
                 // LA POSICIÓN CORRECTA: nace sobre el portador — su
                 // corona (la tiara sobre los ojos) se ordena sola.
-                // v6.132 — ai[1] ES EL RestOffsetAngle DEL STABBER
-                // (Calamity): el ángulo del puesto de descanso en el
-                // abanico — las cinco repartidas (k/5 · 2π − π/2: la
+                // v6.132 — ai[1] ES EL RestOffsetAngle: el ángulo del
+                // puesto de descanso en el abanico — las cinco
+                // repartidas (k/5 · 2π − π/2: la
                 // corona ENTERA cubierta, nadie apilado).
                 Projectile.NewProjectile(source, player.Center - Vector2.UnitY * 30f,
                     Vector2.Zero, tipoDaga, danoEscuadron, knockback, player.whoAmI,

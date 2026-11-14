@@ -758,7 +758,7 @@ Items: {
 	DummyNegroItem: {
 		// v6.105 — EL MUÑECO DE PRUEBAS NEGRO (el ítem que lo coloca).
 		DisplayName: Muñeco de Pruebas Negro
-		Tooltip: El mismo muñeco de Terraria… pero TEÑIDO DE NEGRO
+		Tooltip: El muñeco de entrenamiento de la casa — NEGRO-VIOLETA de la forja
 		Tip: "[c/B96EEA:El banco de pruebas del grimorio: ESTE muñeco SÍ recibe TODOS sus ataques. Su vida se restaura sola — jamás se rompe]"
 	}
 
@@ -2229,49 +2229,7 @@ Items: {
 	}
 
 
-	ArbitradorII: {
-		// v6.124 — THE RESEARCH COPY of Calamity Entropy's Arbitrator II
-		// (the official wiki sheet — javelin that pierces walls).
-		DisplayName: El Arbitrador II
-		Tooltip:
-			'''
-			INVESTIGACIÓN · CALAMITY ENTROPY: la JABALINA que ATRAVIESA MUROS.
-			250 daño · uso lento · 16% crítico. Al golpear, ESTALLA y daña a todo
-			lo que viva en el área. Con el SIGILO cargado (2,5 s quieto) se CLAVA
-			en la presa… y a los 1 segundo libera la EXPLOSIÓN EN X, cuatro
-			brazos de mayor alcance que barren a todo lo que cruzan.
-			'''
-		Titulo: ═══ EL ARBITRADOR II — CALAMITY ENTROPY ═══
-		Linea1: La javalina del arbitraje: atraviesa MUROS y estalla al golpear.
-		Linea2: SIGILOSO (2,5 s quieto): se CLAVA en la presa…
-		Linea3: …y a los 1 segundo, la EXPLOSIÓN EN X de mayor alcance.
-		Linea4: 250 daño · uso 32 · empuje 1 · 16% crítico.
-		Receta: La receta del original: 4× Velo de Sombra Solar + 6× Lingote de Escoria + 1× Bote de Células de Peste (yunque de mitril). Aquí: madera (investigación).
-	}
 
-	ElPrincipioYElFin: {
-		// v6.124 — THE RESEARCH COPY of Calamity Entropy's The Beginning
-		// and The End (the official wiki sheet — the gold and blue knives).
-		DisplayName: El Principio y el Fin
-		Tooltip:
-			'''
-			INVESTIGACIÓN · CALAMITY ENTROPY: las DAGAS DEL CANJE. 2500 daño ·
-			100 penetración · atraviesan muros. IZQUIERDA: la daga de ORO marca
-			LA MARCA DEL PRINCIPIO. DERECHA: la daga AZUL clava LA MIRADA DEL
-			FIN. Ambas acumulan hasta 8 CAPAS… y golpear con el OTRO color
-			LIBERA la marca: cada capa suelta su ALMA (las de eco persiguen a
-			tus enemigos con ondas que atraviesan; las de luz inferior te curan
-			y te sirven). SIGILOSO: dos dagas rastreadoras que revientan en
-			almas.
-			'''
-		Titulo: ═══ EL PRINCIPIO Y EL FIN — CALAMITY ENTROPY ═══
-		Linea1: IZQUIERDA: la daga de ORO — LA MARCA DEL PRINCIPIO (8 capas).
-		Linea2: DERECHA: la daga AZUL — LA MIRADA DEL FIN (8 capas).
-		Linea3: Golpear con el OTRO color LIBERA la marca en ALMAS: las de ECO
-		Linea4: persiguen a tus enemigos con ondas que ATRAVIESAN; las de LUZ
-		Linea5: INFERIOR te curan y te SIRVEN (+daño, +velocidad, +crítico).
-		Receta: La receta del original: 12× Colmillo de Dragón Fantasma en el Altar del Abismo. Aquí: madera (investigación).
-	}
 
 	CetroDagasEterno: {
 		DisplayName: Cetro de las Dagas del Eterno
@@ -2760,11 +2718,6 @@ Projectiles: {
 	AgujaVacioProj.DisplayName: Aguja del Vacío
 	JuicioDosSolesProj.DisplayName: El Juicio de los Dos Soles
 	TajoOscuroProj.DisplayName: El Tajo de Oscuridad
-	AlmaEco.DisplayName: Alma de Eco
-	AlmaLuzInferior.DisplayName: Alma de la Luz Inferior
-	ArbitradorIIProyectil.DisplayName: La Jabalina del Arbitrador
-	DagaEterna.DisplayName: La Daga Deslumbrante
-	OndaSonoraEterna.DisplayName: La Onda Sonora Eterna
 	TajoDelVacioProj.DisplayName: El Tajo del Vacío
 }
 
@@ -2876,28 +2829,6 @@ Buffs: {
 		Description: Un sol en miniatura orbita a tu alrededor
 	}
 
-	// v6.124 — LOS BUFFS DE LAS INVESTIGACIONES (la copia local de los
-	// efectos de Calamity y Calamity Entropy).
-	MarcaDelPrincipio: {
-		// (冥煌烙印 — la daga de ORO; hasta 8 capas)
-		DisplayName: La Marca del Principio
-		Description: La marca de la luz inferior arde en ti — las capas esperan su canje
-	}
-	MiradaDelFin: {
-		// (虚渊凝视 — la daga AZUL; hasta 8 capas)
-		DisplayName: La Mirada del Fin
-		Description: El abismo vacío te mira — las capas esperan su canje
-	}
-	SupresionVital: {
-		// (生命压制 — ambas dagas, 10 s)
-		DisplayName: Supresión vital
-		Description: Has visto tu muerte
-	}
-	Servidumbre: {
-		// (使役 — el alma de luz inferior al portador, 3 s)
-		DisplayName: Servidumbre
-		Description: El alma sirviente: +daño, +velocidad de uso y +crítico
-	}
 }
 
 NPCs: {

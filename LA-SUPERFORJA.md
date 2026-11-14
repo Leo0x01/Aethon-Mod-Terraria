@@ -46,7 +46,7 @@ python3 tools/sforja.py proyectil --nombre dagas --receta daga --tira --qa \
 
 | Las cinco firmas | El alma de cada una |
 |---|---|
-| **CRISTAL** (ai[0]=0) | lila pálido FACETADO (pares brillo/sombra en diagonal) — la «Dazzling» estilete |
+| **CRISTAL** (ai[0]=0) | lila pálido FACETADO (pares brillo/sombra en diagonal) — la estilete deslumbrante |
 | **LLAMA** (1) | hoja negra con el EJE SERPENTEANTE (±2,6 px) y el FILO QUE ARDE (blanco-cálido en las crestas de la onda — el negro solo existe si arde) |
 | **ROCA** (2) | obsidiana MACIZA (la más ancha) con VENAS DE ORO serpenteando DENTRO del perfil |
 | **VACÍO** (3) | hoja negra de borde violeta con la GUARDA DORADA grande y el anillo del párpado ORO |

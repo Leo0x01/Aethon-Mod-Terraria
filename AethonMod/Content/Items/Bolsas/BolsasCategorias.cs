@@ -965,18 +965,14 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
             l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
-            // v6.124/v6.133 — LAS ARMAS DE INVESTIGACIÓN de la letra de
-            // la sesión (el Arbitrador II y el Principio y el Fin,
-            // fichas del wiki de Calamity Entropy: la jabalina que
-            // atraviesa muros y estalla con su sigilosa que SE CLAVA y
-            // detona la X, y las dagas de oro y azul con sus marcas de
-            // 8 capas y el canje de almas). EL DAZZLING STABBER STAFF
-            // cayó con su arma en la v6.133 (la letra: «puedes borrar
-            // Dazzling Stabber Staff de Calamity Mod del codigo y
-            // cualquier referencia» — su máquina ya vive entera en las
-            // CUCHILLAS DEL ETERNO).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.ArbitradorII>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.ElPrincipioYElFin>(), 1));
+            // v6.136 — LA PURGA DE LAS DOS ARMAS DE INVESTIGACIÓN (la
+            // letra: «puedes borrar esas armas, ya no son útiles, el
+            // borrar esas armas, ya no son útiles, el resto de
+            // contenido de la carpeta se queda tal cual»): murieron
+            // con su jabalina, sus dagas del canje, sus marcas y su
+            // sigilo — el resto de la carpeta VIVE tal cual (la Mirada
+            // del Eterno, el Cetro de las Dagas y sus cinco cuchillas,
+            // el Códice y el motor de píxeles).
             // v6.127 — EL CETRO DE LAS DAGAS DEL ETERNO (la letra: «las
             // dagas no van en el grimorio por ahora, es contenido de
             // prueba… crea un arma nueva que invoque las 5 dagas en la

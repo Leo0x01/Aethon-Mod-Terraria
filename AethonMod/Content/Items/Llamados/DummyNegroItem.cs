@@ -18,16 +18,16 @@ namespace AethonMod.Content.Items.Llamados
     //  dummy negros si puedan recibir todos los ataques del
     //  grimorio».
     //
-    //  EL ÍTEM: clic y el muñeco nace en el tile del cursor (la misma
-    //  mecánica del ítem vanilla 3202). El icono ES el sprite del
-    //  dummy de Terraria normal TEÑIDO DE NEGRO (dibujado a mano en
-    //  PreDrawInInventory — cero forja: el arte es de vanilla, el
-    //  tinte de la casa).
+    //  EL ÍTEM: clic y el muñeco nace en el tile del cursor. El icono
+    //  ES el sprite del muñeco de la casa (v6.136 — la letra:
+    //  «Genera las texturas con SForja»: nació en la forja; el ítem lo
+    //  toma prestado del NPC con el override de la casa).
     // ======================================================================
     public class DummyNegroItem : ModItem
     {
-        /// <summary>EL SPRITE DE TERRARIA NORMAL (el mismo del NPC).</summary>
-        public override string Texture => "Terraria/Images/NPC_113";
+        /// <summary>EL SPRITE DE LA CASA — prestado del NPC por el
+        /// override de la casa (el muñeco negro de la forja).</summary>
+        public override string Texture => "AethonMod/Content/NPCs/DummyNegroNPC";
 
         public override void SetStaticDefaults()
         {
@@ -88,18 +88,15 @@ namespace AethonMod.Content.Items.Llamados
         public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position,
             Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {
-            // EL ICONO — el sprite del dummy de TERRARIA NORMAL teñido de
-            // negro-violeta (la casa), el frame de pie, escalado al slot.
+            // EL ICONO — el sprite de la casa (el muñeco negro de la
+            // forja), escalado al slot.
             Texture2D tex = TextureAssets.Item[Type].Value;
             if (tex == null || tex.IsDisposed)
                 return true;
-            int framesVanilla = System.Math.Max(1, Main.npcFrameCount[NPCID.TargetDummy]);
-            int altoFrame = tex.Height / framesVanilla;
-            var marco = new Rectangle(0, 0, tex.Width, altoFrame);
+            var marco = new Rectangle(0, 0, tex.Width, tex.Height);
 
-            float esc = scale * 28f / System.MathF.Max(marco.Width, altoFrame);
-            Color tinte = new Color(64, 54, 92);
-            spriteBatch.Draw(tex, position, marco, tinte, 0f,
+            float esc = scale * 28f / System.MathF.Max(marco.Width, marco.Height);
+            spriteBatch.Draw(tex, position, marco, drawColor, 0f,
                 marco.Size() * 0.5f, esc, SpriteEffects.None, 0f);
             return false;
         }
@@ -110,13 +107,11 @@ namespace AethonMod.Content.Items.Llamados
             Texture2D tex = TextureAssets.Item[Type].Value;
             if (tex == null || tex.IsDisposed)
                 return true;
-            int framesVanilla = System.Math.Max(1, Main.npcFrameCount[NPCID.TargetDummy]);
-            int altoFrame = tex.Height / framesVanilla;
-            var marco = new Rectangle(0, 0, tex.Width, altoFrame);
+            var marco = new Rectangle(0, 0, tex.Width, tex.Height);
 
-            // EL ÍTEM EN EL SUELO — el muñeco negro tirado (teñido).
+            // EL ÍTEM EN EL SUELO — el muñeco negro tirado.
             spriteBatch.Draw(tex, Item.position - Main.screenPosition, marco,
-                new Color(52, 44, 74), rotation, marco.Size() * 0.5f, scale,
+                lightColor, rotation, marco.Size() * 0.5f, scale,
                 SpriteEffects.None, 0f);
             return false;
         }

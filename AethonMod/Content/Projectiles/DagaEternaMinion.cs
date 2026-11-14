@@ -15,31 +15,25 @@ namespace AethonMod.Content.Projectiles
     /// despues de los 11 ojos, vienen las 5 dagas que tambien tendran un
     /// ojo en el centro jejejejej»).
     ///
-    /// LA TÉCNICA ES 100 % COPIADA DEL DAZZLING STABBER STAFF (la letra:
-    /// «toma lo que aprendiste del invocador de dagas del Eterno» — el
-    /// comportamiento de cuchillas orbitantes nacido de una
-    /// investigación de la wiki, hoy máquina 100 % de la casa):
+    /// LA MÁQUINA DE LAS CUCHILLAS — 100 % DE LA CASA (v6.132 la forjó
+    /// de cero: LAS FASES con el reloj en Projectile.frame que nadie
+    /// avanzaba — el ataque muerto que curamos a mano; v6.136 lavó los
+    /// últimos nombres viejos de su etapa de investigación):
     /// un escuadrón de DAGAS PERSISTENTES, cada una con SU técnica
     /// propia, que VUELAN alrededor del portador y se LANZAN contra las
-    /// presas — y TODAS prenden la QUEMADURA DEL VACÍO (nuestra Holy
-    /// Flames: el stabber prende Holy Flames al 100 % por 3 s — aquí es
-    /// la quemadura del vacío al 100 % por 3 s, 180 t):
-    ///   · DAGA DE CRISTAL (ai[0]=0) — «Crystal daggers rapidly slash
-    ///     enemies before briefly pausing, dealing 50% base damage but
-    ///     having an innate 20 armor penetration»: RÁFAGA de tres tajos
-    ///     rápidos A TRAVÉS de la presa (×0,5 del daño, +20 de
-    ///     perforación) y una PAUSA breve antes de volver — el compás
-    ///     EXACTO del original.
-    ///   · DAGA DE LLAMA (1) — «Flame daggers swipe at enemies in a wide
-    ///     arcing motion»: un BARRIDO EN ARCO AMPLIO que cruza la zona
-    ///     de la presa peinándolo todo (×1,0).
-    ///   · DAGA DE ROCA (2) — «Rock daggers lunge at enemies and recoil
-    ///     after hits, dealing 300% base damage»: la EMBESTIDA de
-    ///     lejos, el golpe ×3,0 y el RECUDE hacia atrás antes de volver.
+    /// presas — y TODAS prenden la QUEMADURA DEL VACÍO al 100 % por
+    /// 3 s (180 t):
+    ///   · DAGA DE CRISTAL (ai[0]=0) — RÁFAGA de tres tajos rápidos
+    ///     A TRAVÉS de la presa (×0,5 del daño, +20 de perforación) y
+    ///     una PAUSA breve antes de volver.
+    ///   · DAGA DE LLAMA (1) — un BARRIDO EN ARCO AMPLIO que cruza la
+    ///     zona de la presa peinándolo todo (×1,0).
+    ///   · DAGA DE ROCA (2) — la EMBESTIDA de lejos, el golpe ×3,0 y el
+    ///     RECUDE hacia atrás antes de volver.
     ///   · DAGA DEL VACÍO (3) — la cuarta de la casa: se LANZA, SE CLAVA
     ///     en la presa y GOTEA el vacío (×0,35 cada 15 t mientras vive
     ///     clavada, 45 t — la técnica de Las Agujas del Vacío que el
-    ///     dueño ama, viviendo en el bucle del stabber).
+    ///     dueño ama, cabalgando la máquina de las cuchillas).
     ///   · DAGA DEL VEREDICTO (4) — la quinta de la casa: MARCA a la
     ///     presa (el anillo dorado del veredicto) y la SENTENCIA con un
     ///     golpe puntual ×1,5 y su estallido de oro.
@@ -63,13 +57,13 @@ namespace AethonMod.Content.Projectiles
     /// LA ESCALERA (la letra): las dagas son LA SIGUIENTE INVOCACIÓN
     /// después de los 11 ojos — con el escuadrón de ojos LLENO, el clic
     /// derecho del Grimorio invoca a la siguiente daga que falte (la
-    /// secuencia del stabber: cristal → llama → roca → vacío →
+    /// secuencia de las cuchillas: cristal → llama → roca → vacío →
     /// veredicto); con las CINCO vivas, la invocación vuelve a
     /// FORTALECER a los ojos (las mejoras de siempre).
     /// </summary>
     public class DagaEternaMinion : ModProjectile
     {
-        // === LOS TIPOS (ai[0]) — la secuencia del stabber ===
+        // === LOS TIPOS (ai[0]) — la secuencia de las cuchillas ===
         public const int TIPO_CRISTAL = 0;
         public const int TIPO_LLAMA = 1;
         public const int TIPO_ROCA = 2;
@@ -81,12 +75,11 @@ namespace AethonMod.Content.Projectiles
         /// las 5 dagas»).</summary>
         public const int TechoDagas = 5;
 
-        // v6.133 — LA MÁQUINA DEL STABBER ES DE LA CASA (la letra:
-        // «con el comportamiento ya creado de las cuchillas, puedes
-        // borrar Dazzling Stabber Staff de Calamity Mod del codigo y
-        // cualquier referencia»): EL ARMA DE INVESTIGACIÓN murió con sus
-        // sprites y su buff — la MÁQUINA VIVE porque ya es nuestra: la
-        // casa la forjó en la v6.132 para curar el ataque muerto (LAS
+        // v6.133/v6.136 — LA MÁQUINA DE LAS CUCHILLAS ES 100% DE LA
+        // CASA (la v6.132 la forjó de cero; la v6.136 cerró la
+        // historia: las armas ajenas murieron y esta máquina VIVE
+        // porque no debe nada a nadie): la casa la forjó para curar
+        // el ataque muerto (LAS
         // FASES con el reloj en Projectile.frame que NADIE avanzaba en
         // F_GOLPE — las cuchillas congeladas a 70 px de la presa) y hoy
         // no debe NADA a nadie: VELOCIDAD (nada de lerp de posición —
@@ -100,7 +93,7 @@ namespace AethonMod.Content.Projectiles
         // JAMÁS una fase.
         private float RestOffsetAngle => Projectile.ai[1];
 
-        /// <summary>EL DESCANSO del stabber (attackCooldown):
+        /// <summary>EL DESCANSO de la máquina (attackCooldown):
         /// los ticks sin atacar tras la última cuchillada — el cristal
         /// descansa 80-95 tras 6 golpes, la roca 45-60 tras la
         /// embestida, la llama 5 entre barridos.</summary>
@@ -151,7 +144,7 @@ namespace AethonMod.Content.Projectiles
         }
 
         /// <summary>¿Vive ya una daga de ESTE tipo? (la secuencia del
-        /// stabber: se invoca la PRIMERA que falte).</summary>
+        /// cuchillas: se invoca la PRIMERA que falte).</summary>
         public static bool ViveTipo(Player p, int tipoDaga)
         {
             int tipo = ModContent.ProjectileType<DagaEternaMinion>();
@@ -216,7 +209,7 @@ namespace AethonMod.Content.Projectiles
         }
 
         // EL FILO ES EL ATAQUE (a diferencia del ojo, que dispara su
-        // rayo): la daga golpea CON SU CUERPO — el bucle del stabber.
+        // rayo): la daga golpea CON SU CUERPO — el bucle de la máquina.
         public override bool MinionContactDamage() => true;
 
         /// <summary>v6.132 — EL DESCANSO APAGA EL FILO (CanDamage =>
@@ -239,7 +232,7 @@ namespace AethonMod.Content.Projectiles
 
         /// <summary>LA VELOCIDAD DE NIVEL (la ley de los ojos: 1,0× en
         /// nivel 1 subiendo LINEAL hasta 1,5× en el 100 — el compás del
-        /// stabber se acelera con el libro).</summary>
+        /// la máquina se acelera con el libro).</summary>
         private float VelocidadNivel => 1f + 0.5f * Math.Min(Level - 1, 99) / 99f;
 
         /// <summary>EL RITMO PROPIO (la ley de los ojos: cada daga lleva
@@ -252,7 +245,7 @@ namespace AethonMod.Content.Projectiles
         private int Tipo => Math.Max(0, Math.Min(TiposMax - 1, (int)Projectile.ai[0]));
 
         // ================================================================
-        //  LA IA — EL BUCLE DEL STABBER: anillo → anticipación → técnica
+        //  LA IA — EL BUCLE DE LA MÁQUINA: anillo → anticipación → técnica
         //  → (clavada) → vuelta → anillo
         // ================================================================
         public override void AI()
@@ -274,7 +267,7 @@ namespace AethonMod.Content.Projectiles
             //     extraUpdates (el cristal 1, la roca 2 — MÁS ticks de
             //     física por frame: la rapidéz del original) y el daño
             //     por tipo. El VACÍO y el VEREDICTO (los dos de la casa)
-            //     cabalgan la máquina del stabber con SU firma: el vacío
+            //     cabalgan la máquina de las cuchillas con SU firma: el vacío
             //     extraUpdates 1 con la QUEMADURA 100 % (la casa arde
             //     violeta), el veredicto ×1,5 de la sentencia.
             switch (Tipo)
@@ -395,7 +388,7 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL SLICE — EL ATAQUE DEL STABBER (la máquina de la casa:
+        //  EL SLICE — EL ATAQUE DE LA MÁQUINA (la máquina de la casa:
         //  la aceleración 1,03/0,93, el giro 0,15 y la carga del
         //  empuje — adaptada a las CINCO almas: el cristal orbita y
         //  repite · la roca embiste recta y recula · la llama, el
@@ -577,10 +570,10 @@ namespace AethonMod.Content.Projectiles
 
         // ================================================================
         //  LOS GOLPES — la letra del daño por tipo (la técnica del
-        //  stabber: 50 %/20 pen el cristal · 100 % la llama · 300 % la
+        //  cuchillas: 50 %/20 pen el cristal · 100 % la llama · 300 % la
         //  roca) + LA QUEMADURA DEL VACÍO al 100 % por 3 s en TODAS
         // ================================================================
-        // v6.132 — EL GOLPE DEL STABBER (damageMult — el
+        // v6.132 — EL GOLPE DE LA MÁQUINA (damageMult — el
         // multiplicador vive en la IA y AQUÍ se aplica; la perforación
         // del cristal viaja en Projectile.ArmorPenetration como el
         // original).
@@ -593,14 +586,14 @@ namespace AethonMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // v6.132 — EL COMPÁS DEL STABBER (el OnHit por tipo):
+            // v6.132 — EL COMPÁS DE LAS CUCHILLAS (el OnHit por tipo):
             // el CRISTAL empuja (AttackDelay 15, cuenta la
             // racha y descansa 80-95 a las SEIS) · la ROCA RECUA del
             // golpe (rebote 15 px/t desviado + descanso 45-60) · la
             // LLAMA/VACÍO el latido corto (5) · el VEREDICTO la posa
             // breve (10 — la sentencia respira). Y LA QUEMADURA DEL
-            // VACÍO prende en TODO golpe (nuestra Holy Flames: el
-            // stabber arde violeta al 100 % por 3 s).
+            // VACÍO prende en TODO golpe (la quemadura de la casa: la
+            // máquina arde violeta al 100 % por 3 s).
             justHit = true;
             switch (Tipo)
             {
@@ -704,7 +697,7 @@ namespace AethonMod.Content.Projectiles
             OjoEternoMinion.PosicionDelLibro(dueño);
 
         /// <summary>EL CAZA (el foco de los ojos): la presa más cercana
-        /// al DUEÑO dentro del alcance del stabber.</summary>
+        /// al DUEÑO dentro del alcance de la máquina.</summary>
         private NPC ObjetivoDaga(Player dueño)
         {
             NPC mejor = null;
@@ -772,7 +765,7 @@ namespace AethonMod.Content.Projectiles
 
                 // LA ESTELA DEL GOLPE (el rastro de la casa): tres
                 // fantasmas ATRÁS mientras VUELA al ataque — v6.132: la
-                // máquina del stabber no tiene fases; la estela vive
+                // máquina de las cuchillas no tiene fases; la estela vive
                 // cuando el cuchillo NO descansa (la ronda abierta).
                 if (attackCooldown == 0 && Projectile.velocity.LengthSquared() > 25f)
                 {

@@ -28,10 +28,10 @@ namespace AethonMod.Content.NPCs
     //  NO es objetivo, como en el juego base).
     //
     //  Y NACE EL DUMMY NEGRO — EL BANCO DE PRUEBAS DEL GRIMORIO:
-    //   · EL MISMO SPRITE que el dummy de Terraria normal
-    //     (Terraria/Images/NPC_113) pero TEÑIDO DE NEGRO (el
-    //     negro-violeta de la casa, con su resplandor morado para
-    //     leerlo de noche) — dibujado a mano en PreDraw con el tinte.
+    //   · EL SPRITE DE LA CASA (v6.136 — la letra: «Genera las
+    //     texturas con SForja»): el muñeco de paja NEGRO-VIOLETA nació
+    //     en LA FORJA — cero texturas del juego base (la regla de la
+    //     casa: todo el arte es 100% nuestro).
     //   · RECIBE TODOS LOS ATAQUES DEL GRIMORIO:
     //     NPCID.Sets.CanBeChasedBy[Type] = true — LA MISMA PUERTA que
     //     excluye a los dummies normales lo INCLUYE a él: las sombras
@@ -50,13 +50,12 @@ namespace AethonMod.Content.NPCs
     // ======================================================================
     public class DummyNegroNPC : ModNPC
     {
-        /// <summary>EL SPRITE DE TERRARIA NORMAL — la textura vanilla
-        /// del Target Dummy (NPC_113), teñida de negro en el dibujo.</summary>
-        public override string Texture => "Terraria/Images/NPC_113";
+        /// <summary>EL SPRITE DE LA CASA — el muñeco negro de la
+        /// forja (DummyNegroNPC.png junto a esta clase).</summary>
 
         public override void SetStaticDefaults()
         {
-            Main.npcFrameCount[Type] = 1;   // quieto: el frame 0 del vanilla
+            Main.npcFrameCount[Type] = 1;   // quieto: UN solo marco (el de la forja)
             // EL BESTIARIO NO (no es un monstruo — es una herramienta de
             // pruebas: como el dummy vanilla, no aparece en las cifras).
             NPCID.Sets.DontDoHardmodeScaling[Type] = true;
@@ -206,11 +205,9 @@ namespace AethonMod.Content.NPCs
                 if (tex == null || tex.IsDisposed)
                     return false;
 
-                // EL FRAME 0 DEL SPRITE VANILLA — la tira puede tener
-                // varios marcos (el wobble del dummy base): el de pie.
-                int framesVanilla = Math.Max(1, Main.npcFrameCount[NPCID.TargetDummy]);
-                int altoFrame = tex.Height / framesVanilla;
-                var marco = new Rectangle(0, 0, tex.Width, altoFrame);
+                // EL SPRITE DE LA CASA — un solo marco: el muñeco
+                // negro de la forja (ya nació negro-violeta).
+                var marco = new Rectangle(0, 0, tex.Width, tex.Height);
 
                 // EL BAMBOLEO — la inclinación que nace al golpe y muere
                 // sola (oscilación amortiguada desde la base).
@@ -238,12 +235,10 @@ namespace AethonMod.Content.NPCs
                             marco.Height * 2.2f / glow.Height), SpriteEffects.None, 0f);
                 }
 
-                // (2) EL MUÑECO TEÑIDO DE NEGRO — el sprite vanilla
-                //     multiplicado por el negro-violeta de la casa: la
-                //     silueta del dummy de siempre, en negro (con el
-                //     matiz morado que lo delata como del grimorio).
-                Color tinte = new Color(52, 44, 74);
-                spriteBatch.Draw(tex, pos, marco, tinte, balanceo, origen,
+                // (2) EL MUÑECO — el sprite de la casa tal cual (ya
+                //     nació negro-violeta en la forja), bañado por la
+                //     luz del mundo (drawColor).
+                spriteBatch.Draw(tex, pos, marco, drawColor, balanceo, origen,
                     1f, SpriteEffects.None, 0f);
 
                 // (3) LA VENA VIOLETA — un segundo pase ADITIVO muy
@@ -269,7 +264,7 @@ namespace AethonMod.Content.NPCs
             catch
             {
                 // el dibujo JAMÁS tumba el frame — si algo falla, el
-                // sprite crudo del vanilla sale por el return true.
+                // sprite crudo sale por el return true.
                 return true;
             }
             VFXCore.ReabrirLoteVanilla();

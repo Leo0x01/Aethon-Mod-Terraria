@@ -762,7 +762,7 @@ Items: {
 	DummyNegroItem: {
 		// v6.105 — EL MUÑECO DE PRUEBAS NEGRO (el ítem que lo coloca).
 		DisplayName: Black Test Dummy
-		Tooltip: The same dummy as always… DYED BLACK
+		Tooltip: The house’s own training dummy — forged in black-violet
 		Tip: "[c/B96EEA:The grimoire’s testing ground: THIS dummy takes ALL of its attacks. Its life restores itself — it never breaks]"
 	}
 
@@ -2226,46 +2226,6 @@ Items: {
 			'''
 	}
 
-	ArbitradorII: {
-		DisplayName: The Arbitrator II
-		Tooltip:
-			'''
-			RESEARCH · CALAMITY ENTROPY: the JAVELIN that PIERCES WALLS. 250
-			damage · slow use · 16% crit. On hit it BURSTS, damaging everything
-			alive in the area. With STEALTH charged (2.5 s still) it STICKS into
-			the prey… and 1 second later releases the X BURST, four arms of
-			greater range that sweep everything they cross.
-			'''
-		Titulo: ═══ THE ARBITRATOR II — CALAMITY ENTROPY ═══
-		Linea1: The javelin of arbitration: pierces WALLS and bursts on hit.
-		Linea2: STEALTHED (2.5 s still): it STICKS into the prey…
-		Linea3: …and 1 second later, the greater-range X BURST.
-		Linea4: 250 damage · use 32 · knockback 1 · 16% crit.
-		Receta: The original recipe: 4× Solar Veil + 6× Slag Ingot + 1× Plague Cell Vat (mythril anvil). Here: wood (research).
-	}
-
-	ElPrincipioYElFin: {
-		DisplayName: The Beginning and The End
-		Tooltip:
-			'''
-			RESEARCH · CALAMITY ENTROPY: the DAGGERS OF THE EXCHANGE. 2500
-			damage · 100 armor penetration · they pierce walls. LEFT: the GOLD
-			dagger brands THE BRAND OF THE BEGINNING. RIGHT: the BLUE dagger
-			pins THE GAZE OF THE END. Both stack up to 8 LAYERS… and striking
-			with the OTHER color RELEASES the mark: every layer spawns its SOUL
-			(the echo souls hunt your enemies with piercing waves; the
-			netherlight souls heal and serve you). STEALTHED: two homing daggers
-			that burst into souls.
-			'''
-		Titulo: ═══ THE BEGINNING AND THE END — CALAMITY ENTROPY ═══
-		Linea1: LEFT: the GOLD dagger — THE BRAND OF THE BEGINNING (8 layers).
-		Linea2: RIGHT: the BLUE dagger — THE GAZE OF THE END (8 layers).
-		Linea3: Striking with the OTHER color RELEASES the mark into SOULS: the
-		Linea4: ECHO ones hunt your enemies with PIERCING waves; the
-		Linea5: NETHERLIGHT ones heal you and SERVE you (+damage, +speed, +crit).
-		Receta: The original recipe: 12× Phantom Dragon Tooth at the Abyssal Altar. Here: wood (research).
-	}
-
 	CetroDagasEterno: {
 		DisplayName: Scepter of the Eternal Daggers
 		Tooltip:
@@ -2752,11 +2712,6 @@ Projectiles: {
 	AgujaVacioProj.DisplayName: Needle of the Void
 	JuicioDosSolesProj.DisplayName: Judgment of the Two Suns
 	TajoOscuroProj.DisplayName: The Slash of Darkness
-	AlmaEco.DisplayName: Echo Soul
-	AlmaLuzInferior.DisplayName: Netherlight Soul
-	ArbitradorIIProyectil.DisplayName: The Arbiter's Javelin
-	DagaEterna.DisplayName: The Eternal Blade
-	OndaSonoraEterna.DisplayName: The Eternal Soundwave
 	TajoDelVacioProj.DisplayName: The Slash of the Void
 }
 
@@ -2863,26 +2818,6 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
-	}
-
-	MarcaDelPrincipio: {
-		DisplayName: Brand of the Beginning
-		Description: The netherlight brand burns in you — its layers await the exchange
-	}
-
-	MiradaDelFin: {
-		DisplayName: Gaze of the End
-		Description: The void abyss watches you — its layers await the exchange
-	}
-
-	SupresionVital: {
-		DisplayName: Life Suppression
-		Description: You have seen your death
-	}
-
-	Servidumbre: {
-		DisplayName: Servitude
-		Description: The serving soul: +damage, +use speed and +crit
 	}
 }
 
