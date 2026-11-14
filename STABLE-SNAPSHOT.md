@@ -1,25 +1,23 @@
-# SNAPSHOT ESTABLE — v6.129 — EL ALA LISA SIN PLUMAS + EL CETRO QUE INVOCABA + LA DEVORACIÓN DE LA PRIMERA VEZ
+# SNAPSHOT ESTABLE — v6.130 — LAS CUCHILLAS DEL ETERNO: LA SFORJA + EL OJO DEL GRIMORIO ANIMADO
 
-> **PUBLICADA — release 444667317 + CDN verificado byte a byte (md5 bdca26034758b43bb8bbf2906eeea95d)**
+> **PUBLICADA — release 445120423 + CDN verificado byte a byte (md5 707ca2f38e8838608a8443a3e7f12213)**
 
-## LA LETRA (el usuario — la sesión 10)
+## LA LETRA (el usuario — la sesión 11)
 
-«las alas siguen con picos, diente de sierra, supongo que esos dientes de sierra son supuestas plumas, esas plumas las puedes eliminar, aunque ahora las alas se ven mejor, pero esos dientes de sierra siguen arruinandolas» + «el arma cetro de las dagas del eterno no invoca nada, mejora eso y revisa porque no invoca nada, haz que esta arma no sea de invocador asi no se ven afectado los minions» + «quita eso ya que no hace diferencias y todo lo que el jugador usa está separado del jugador cuando es devorado, te dire algo, la primera vez que se puso la mecanica de que el grimorio del eterno devore al jugador esta animacion estaba correcta, asi que investiga como funcionaba la primera vez que se puso esto de que el jugador sea devorado»
+«Haber, regeneraste el sprite pero no usaste la SForja, usa la SForja y que sean cuchillas estilosas y recuerda usar y animar los ojos usando los ojos minions» + «Veo que en el sprite de las dagas hay un agujero que se supone que es el ojo, bueno en esa zona va el ojo del grimorio, ya tienes el sprite son los mismos ojos que se usan para los minions, pero más pequeños y adaptados a las dagas, bueno más que dagas es mejor que sean cuchillas y quitar el mango de las dagas en el sprite, así que sería mejor regenerar el sprite con eso en mente»
 
-## EL ALA LISA — LAS PLUMAS MUEREN (la letra manda)
+## LA RECETA `cuchilla` DE LA SFORJA — LA DAGA MUERE
 
-LAS PLUMAS ERAN LOS DIENTES — la autopsia contra el sim 1:1 nuevo (`tools/sim_alas_v6129.py`, con la rasterización baricéntrica CORREGIDA: la de la v6.127 solo pintaba una línea por triángulo) encontró a los TRES culpables: **LAS TIRAS RADIALES** (las capas sólidas del núcleo·cuerpo·halo: cinco rayos convergiendo en cinco puntas) · **LA PALETA VIAJERA** (el tono por franjas cae al FONDO NEGRO entre plumas: «huecos negros») · **EL BORDE POR LAS CINCO PUNTAS** (la Catmull-Rom por radios desiguales 90→52 px hace OVERSHOOT y ONDULA: ±25 px medidos). LA CURA (nuevo parámetro del catálogo `Lisas`, SOLO en Runas del Vacío): las tiras MUEREN (las plumas quedan como ARMADURA invisible) · el tono es LA RAMPA RADIAL (vivo → hondo puro → el blanco del bordillo: el fondo JAMÁS) · LA VELA SE ESTIRA al BORDE LISO (el camino u: nacimiento → cúspide → tendida → nacimiento, en smoothstep por tramos — cada eje corre hasta SU punto del borde) · EL BORDE MUESTREADO del camino (SIN Catmull: liso por construcción) · LAS RUNAS coronan el borde en las direcciones de las plumas. QA VLM: «0 tiras radiales; superficie continua; el borde es UNA CURVA CONTINUA y suave; la forma de abanico se conserva» — **9/10 · 8/10**. Solares, Eclipse, Juicio y Corolas INTACTAS (abanico de siempre).
+LA DAGA v6.128 ERA 40 % MANGO (guarda + empuñadura vendada + pomo joya — medido por el QA VLM) — TODO eso SE BORRA. Nace LA CUCHILLA: TODO hoja (del filo al lomo, la base ES hoja), UN SOLO FILO con su lomo, y EL TALADRO DEL OJO taladrado DE VERDAD (ventana TRANSPARENTE interior con su anillo por alma). LAS FIRMAS: CRISTAL la daga-luna curvada (curva −0,15) · LLAMA la lengua de fuego SERPENTEANTE (la autopsia: `serp` estaba definido pero `lados()` JAMÁS lo sumaba — la hoja no serpenteba NADA; ahora ondula ±2,5 px) · ROCA el cincel macizo (lomo 13) con las venas de oro LEJOS del taladro (la ley del taladro: zona muerta 3,8 radios) · VACÍO la puerta RECTA (crec_tope 0,88) con el MARCO DORADO del ojo · VEREDICTO la balanza SIMÉTRICA (lomo=vientre=6,4, curva 0) con la gema centrada al pie. EL TALADRO VIVE SOBRE EL EJE de la hoja (el centro fijo x=17 se salía por el vientre curvo: el ojo nacía en C abierta). 10 RONDAS QA VLM → SHIP 9/9/9/8 + comparación A/B.
 
-## EL CETRO QUE NO INVOCABA — DOS CAUSAS RAÍZ
+## EL OJO DEL GRIMORIO ANIMADO — EL TRASPLANTE DEL SISTEMA DEL ESCUADRÓN
 
-**(A) EL GATILLO FALTABA**: el cetro nació sin `Item.shoot` y el hook `Shoot` de tModLoader SOLO corre cuando `Item.shoot > 0` — el grimorio de la casa lleva `Item.shoot = 931` por eso. Ahora el cetro lleva SU PROPIO escuadrón como gatillo (nada de vanilla vuela: Shoot devuelve false). **(B) LOS PUESTOS ASESINABAN AL ESCUADRÓN**: `minionSlots = 1` × 16 unidades contra `maxMinions` 1-11: la maquinaria vanilla mataba a los minions que no cabían (los del jugador Y los propios — «no invoca nada» y «se ven afectados los minions», literales). LA CURA: el cetro es `DamageClass.Magic` (la clase del grimorio — el daño sigue la ley v6.51 con DanoOjosDelEterno) y **`minionSlots = 0`** en el ojo y la daga: el escuadrón tiene SU PROPIO contador (ni desplaza a nadie, ni muere por exceso — el techo vivo del ShardPlayer y el minionPos del círculo VIVEN).
+LA ALMENDRA recortada del ojo del minion (CuchillaOjo_Abierto/Medio/Cerrado 27×15 — la esclerótica blanca PURA: el ojo entero 56×54 a 9 px era todo párpado marrón) · EL PARPADEO INDEPENDIENTE (el reloj de la casa: 6–18 s por hash, la fase 10→1, cortado durante viento/golpe/clavada) · EL IRIS VIVO GrimorioHambriento_Iris (3,7 px) que MIRA a la presa (rotación inversa: se desplaza hacia la presa EN EL MUNDO) · EL TRONO POR TIPO (TronoDelOjo: offsets medidos con flood-fill del taladro real de cada marco). SIM 1:1 + GIF del parpadeo y la mirada; 5 rondas QA VLM → SHIP 9/8/7/9.
 
-## LA DEVORACIÓN DE LA PRIMERA VEZ (la v6.117, leída contra el git)
+## PARA VERIFICAR
 
-**DevoracionCosmeticosSistema y la ventana «Arrastrando» MURIERON.** LA AUTOPSIA de su inutilidad: los halos cosméticos NUNCA se dibujan desde su posición de proyectil — todos dibujan desde el CUERPO VIVO del dueño en su PreDraw (con `pl.fullRotation` aplicada, desde la v6.117): pegar `pr.Center` tras todas las IA era pegar NADA. Y lo que SEPARABA las alas del cuerpo era EL PLEGADO v6.126-127 (las alas se contraían y desaparecían apenas empezaba el arrastre, mientras el cuerpo seguía viajando). LO QUE VIVE (exactamente la primera vez): el arrastre de siempre (lerp suave + fullRotation · la boca y la cacería inversa intactas), los cosméticos viajando TAL CUAL con el cuerpo (las alas ABIERTAS girando CON él) y al TRAGO todo desaparece JUNTO (hideEntirePlayer + los halos apagados por Tragado). Nada de pegamentos, nada de plegados, nada de ventanas.
-
-## VERIFICACIÓN (la casa, completa)
-
-oráculo verify.csproj **0/0** (465 .cs contra el tML 2026.09.3.1 real) · **-build REAL 0/0** (524 entradas, 19.361.323 B, md5 bdca26034758b43bb8bbf2906eeea95d) · **GUARDIÁN TODO VIVE ✔** · **AUDIT v6.129 TODO VERIFICADO ✔** (EOF exacto · 524/524 blobs · hjson ×3 empaquetado==fuente · las firmas VIVAS en la DLL: EstirarVelaLisa·PuntoCaminoLisa·PADLisa·RNaceLisa·Lisas·Tragado·Devorando · los MUERTOS JAMÁS en la DLL: DevoracionCosmeticosSistema·Arrastrando · el tooltip del ala lisa ×2 · paridad de claves 1686/1686/1686) · **SIM 1:1 + QA VLM 9/10 · 8/10** · **headless**: Sandboxing v6.129 → Adding Recipes → Choose World SIN UNA EXCEPCIÓN.
-
----
+- oráculo verify.csproj **0/0** (465 .cs contra tML 2026.09.3.1 real)
+- **-build REAL 0/0** (527 entradas, 19.364.946 B, md5 707ca2f38e8838608a8443a3e7f12213)
+- **AUDIT v6.130 TODO VERIFICADO ✔** (EOF · blobs 527/527 · hjson ×3 == fuente · SIN MANGO medido · TALADRO 5/5 · los 3 recortes DENTRO · firmas VIVAS en la DLL · iris y ojos del escuadrón INTACTOS · paridad 1686/1686/1686)
+- **headless**: Sandboxing v6.130 → Adding Recipes → Server started, 0 excepciones
+- QA VLM del sprite: SHIP 9/9/9/8 (10 rondas) · QA del ojo: SHIP 9/8/7/9 (5 rondas)
