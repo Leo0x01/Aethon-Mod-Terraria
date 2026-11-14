@@ -583,6 +583,342 @@ def la_tira_dagas(tam=34):
 
 
 # ====================================================================
+#  LAS CUCHILLAS DEL ETERNO — LA RECETA v6.130 (la letra de la sesión
+#  11: «regeneraste el sprite pero no usaste la SForja, usa la SForja
+#  y que sean cuchillas estilosas y recuerda usar y animar los ojos
+#  usando los ojos minions» + «más que dagas es mejor que sean
+#  cuchillas y quitar el mango de las dagas en el sprite»): LA DAGA
+#  MUERE — la guarda, la empuñadura vendada y el pomo joya (el 40 %
+#  del alto del marco v6.128, medido por el QA) SE BORRAN; nace LA
+#  CUCHILLA: TODO hoja, del filo al lomo, con EL AGUJERO DEL OJO al
+#  centro — la cuenca que en runtime recibe al OJO DEL GRIMORIO: las
+#  MISMAS texturas de los Ojos del Eterno (OjoEterno_Abierto·Medio·
+#  Cerrado, 56×54, escaladas ~0,30 → la almendra ~8×5 px DENTRO del
+#  agujero 9×7) + el iris GrimorioHambriento_Iris que MIRA a la presa
+#  y el PARPADEO independiente (el reloj 6–18 s por hash de la casa).
+#  La cuenca del sprite es el TRONO vacío: el ojo vivo aterriza encima.
+# ====================================================================
+CUCHILLAS = {
+    # 0 · LA CUCHILLA DE CRISTAL — la daga-luna del stabber: hoja
+    #     CURVA de un solo filo (el lomo alto, el vientre profundo).
+    #     v6.130-b: el agujero del QA era ENORME y devoraba la hoja
+    #     — el taladro se APRIETA (9×7 → ~7×5) y sube al CENTRO de
+    #     masa de la hoja (y=16) para dejar masa lila alrededor.
+    'cristal': dict(
+        curva=-0.150, vientre=3.4, lomo=8.2, punta_y=2, base_y=31,
+        rampa=[((206, 172, 252), 0.0), ((172, 134, 234), 0.55), ((112, 76, 180), 1.0)],
+        filo=(244, 234, 255), ojo=(70, 42, 120), facetas=True,
+    ),
+    # 1 · LA CUCHILLA DE LLAMA — la hoja negra que SERPENTEA (el eje
+    #     de la v6.128 vive) con el filo ARDIENDO violeta. v6.130-d:
+    #     el QA la leía VIOLETA (la banda de brasa comía la hoja) —
+    #     el núcleo VUELVE AL NEGRO PURO (la rampa NUNCA sube del
+    #     (30,17,50)), la brasa se APRIETA y el serpenteo se AGRAVA
+    #     (±3,2 px en una hoja ESTRECHA: la lengua de fuego SERPENTEA
+    #     de verdad). El anillo del ojo OSCURO (el QA: «debería
+    #     leerse oscuro» — el violeta pálido moría contra el negro).
+    'llama': dict(
+        curva=0.030, vientre=4.4, lomo=5.6, punta_y=1, base_y=31,
+        serp=3.8, onda=0.55, semilla=-1.0, respira=0.55, respiw=1.0,
+        rampa=[((18, 10, 32), 0.0), ((30, 17, 50), 1.0)],
+        filo=(228, 140, 255), ojo=(160, 105, 225),
+    ),
+    # 2 · LA CUCHILLA DE ROCA — el cincel MACIZO de obsidiana: el
+    #     doble de ancha, las venas de oro VIVAS dentro del perfil.
+    #     v6.130-e: el QA pedía MÁS ANCHA — el cincel GANA (lomo 13,
+    #     vientre 2,6: la picoleta que parte) y el anillo del ojo
+    #     VIOLETA sube de tono (el QA no lo veía contra la obsidiana:
+    #     el borde vivo claro lo separa de la piedra).
+    'roca': dict(
+        curva=0.0, vientre=2.6, lomo=13.0, punta_y=3, base_y=31,
+        rampa=[((58, 34, 90), 0.0), ((30, 17, 50), 1.0)],
+        filo=(120, 76, 168), ojo=(150, 100, 210), vetas=True,
+    ),
+    # 3 · LA CUCHILLA DEL VACÍO — la hoja negra de borde violeta con
+    #     EL MARCO DORADO DEL OJO (la firma del oro de la casa).
+    #     v6.130-e: la punta del QA se leía CURVADA (la base ensancha
+    #     en diagonal — el sesgo del eje) — la puerta RECTA de VERDAD:
+    #     el ensanche MUERE a los 3/4 (crec tope 0,88: la hoja sube
+    #     PARALELA y solo el talón ensancha) y el marco dorado se
+    #     CONTIENE (r 1,75: nada invade el borde inferior).
+    'vacio': dict(
+        curva=0.0, vientre=3.4, lomo=8.0, punta_y=2, base_y=31, crec_tope=0.88,
+        rampa=[((22, 12, 38), 0.0), ((48, 26, 80), 1.0)],
+        filo=(170, 120, 240), ojo=(255, 214, 130), respira=0.55,
+        anillo_doble=True, anillo_r=1.75,
+    ),
+    # 4 · LA CUCHILLA DEL VEREDICTO — el ORO de la sentencia, el
+    #     filo blanco-cálido, la hoja ancha que sentencia. v6.130-g:
+    #     el QA pedía SIMETRÍA LITERAL — lomo y vientre IGUALES (la
+    #     balanza perfecta) y el ojo al CENTRO-BAJO (y=17).
+    'veredicto': dict(
+        curva=0.0, vientre=6.4, lomo=6.4, punta_y=2, base_y=31,
+        rampa=[((255, 218, 140), 0.0), ((226, 172, 90), 0.6), ((158, 108, 50), 1.0)],
+        filo=(255, 246, 220), ojo=(150, 84, 235), gema=True, gema_central=True,
+    ),
+}
+
+# el hueco del ojo (EL AGUJERO DEL GRIMORIO): el TRONO del iris —
+# (17,15) por defecto, y por alma su radio (el QA v6.130-b: el
+# taladro NI gigante NI pegado a la punta — masa alrededor)
+OJO_CX, OJO_CY = 17, 15
+OJO_RX, OJO_RY = 3.5, 2.6      # el agujero ~7×5 px (apretado: masa viva)
+OJO_CY_POR_ALMA = {'cristal': 18, 'llama': 17, 'roca': 16, 'vacio': 16, 'veredicto': 19}
+
+
+def la_cuchilla(tipo='vacio', tam=34):
+    """LA CUCHILLA DEL ETERNO — UN marco de 34×34 SIN MANGO: la hoja
+    NACE en la base del marco y MUERE en la punta — nada de guardas,
+    vendas ni pomos (la letra: «quitar el mango de las dagas en el
+    sprite»). El PERFIL es el de una cuchilla de verdad: un solo
+    filo (el lado del vientre, la curva honda que CORTA) y un lomo
+    (el lado recto que no corta), la punta ABIERTA al lado contrario
+    de la curva — cada alma con SU firma:
+
+    CRISTAL — la daga-luna: la curva MÁS honda, casi un croissant.
+    LLAMA — el eje SERPENTEANTE (±2,2 px) y el filo que ARDE.
+    ROCA — el cincel: obsidiana maciza con VENAS DE ORO dentro.
+    VACÍO — la hoja negra de borde violeta, el anillo ORO del ojo.
+    VEREDICTO — el oro de la sentencia con la gema violeta al pie.
+
+    EL AGUJERO DEL OJO al centro (9×7): la cuenca OSCURA con su
+    anillo — el trono del ojo del grimorio que el runtime dibuja
+    (los OJOS MINIONS escalados a ~8×5, la almendra blanca de las
+    texturas OjoEterno_*)."""
+    cfg = CUCHILLAS[tipo]
+    rampa = cfg['rampa']
+
+    def color_en(t):
+        for i in range(len(rampa) - 1):
+            (c0, t0), (c1, t1) = rampa[i], rampa[i + 1]
+            if t <= t1 or i == len(rampa) - 2:
+                k = 0.0 if t1 == t0 else min(1.0, max(0.0, (t - t0) / (t1 - t0)))
+                return tuple(int(c0[j] + (c1[j] - c0[j]) * k) for j in range(3))
+        return rampa[-1][0]
+
+    im = Image.new('RGBA', (tam, tam), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    cx = tam // 2                                   # 17: la columna del alma
+    py, by = cfg['punta_y'], cfg['base_y']          # la vida vertical de la hoja
+
+    def serpent(t):
+        """EL EJE SERPENTEANTE (la firma de la llama, v6.128 viva).
+        v6.130-f: el QA lo leía «curva sutil» — la frecuencia SUBE
+        (6,0 → 7,2: dos ondulaciones completas de punta a base) y
+        la amplitud se mantiene arriba (el decaimiento baja a 0,25)."""
+        if not cfg.get('serp'):
+            return 0.0
+        return cfg['serp'] * math.sin(t * 7.2 + cfg['semilla']) * (1.0 - t * 0.25)
+
+    def lados(t):
+        """LOS DOS LADOS DE LA CUCHILLA: (lomo, filo) — el lomo es el
+        borde que NO corta (la curva suave y ALTA del respaldo), el
+        filo es el borde que CORTA (el vientre profundo). t=0 en la
+        PUNTA (ambos se juntan), t=1 en la BASE (todo el ancho).
+        v6.130-e: el SERPENTEANTE de la llama VIVE EN EL EJE (el QA
+        medía el centro FIJO en 16,5 — serp estaba definido pero
+        lados() jamás lo sumaba: la hoja no serpenteba NADA)."""
+        crec = min(1.0, t * 1.9) ** 0.9             # el ensanche de la hoja
+        if cfg.get('crec_tope'):                    # v6.130-e: la puerta recta
+            crec = min(crec, cfg['crec_tope'])
+        lomo = cfg['lomo'] * crec
+        vientre = cfg['vientre'] * crec
+        curva = cfg['curva']
+        # la CURVA DEL EJE: el arco de la cuchilla (− hacia un lado,
+        # + hacia el otro — la hoja se DOBLA con el corte)
+        eje = curva * (t ** 1.6) * 30.0 + serpent(t)
+        return cx + eje - lomo, cx + eje + vientre, cx + eje
+
+    def dentro(x, y):
+        if y < py or y > by or x < 0 or x >= tam:
+            return False
+        t = (y - py) / float(by - py)
+        lo, fi, _e = lados(t)
+        return lo <= x + 0.5 <= fi
+
+    # ---- LA HOJA (píxel a píxel: rampa + shading + EL FILO)
+    fw = 1.1                                        # el ancho del filo que arde
+    rw = fw + cfg.get('respiw', 1.4)                # la respiración hacia adentro
+    brasa = _mult(cfg['filo'], cfg.get('respira', 0)) if cfg.get('respira') else None
+    for y in range(py, by + 1):
+        t = (y - py) / float(by - py)
+        lo, fi, eje = lados(t)
+        ancho = fi - lo
+        if ancho < 0.6:
+            continue
+        base = color_en(t)
+        izq = _mult(base, 1.14)                     # el flanco del LOMO lee (la casa)
+        der = _mult(base, 0.82)                     # el flanco del filo descansa
+        nervio = _mult(base, 0.55)                  # el pliegue central
+        if cfg.get('onda'):
+            # EL FILO QUE ARDE DE VERDAD (la llama): blanco-cálido
+            # PLENO en las crestas de la onda, violeta en los valles
+            calor = abs(math.sin(t * 6.0 + cfg['semilla']))
+            filo_f = tuple(int(cfg['filo'][j] + (252 - cfg['filo'][j]) * calor)
+                           for j in range(3))
+        else:
+            filo_f = cfg['filo']
+        for x in range(tam):
+            dx = x + 0.5 - eje
+            if not (lo <= x + 0.5 <= fi):
+                continue
+            du = x + 0.5 - lo                       # la distancia al LOMO
+            dd = fi - (x + 0.5)                     # la distancia al FILO
+            if dd <= fw:                            # EL FILO (lo que MÁS arde)
+                c = filo_f
+            elif brasa is not None and dd <= rw:
+                c = brasa                           # la brasa respira hacia adentro
+            elif ancho > 4.5 and abs(dx) <= 0.75:
+                c = nervio                           # el nervio central
+            else:
+                c = izq if dx < 0 else der
+            d.point((x, y), fill=c + (255,))
+
+    # ---- LA ESQUINA DE LA BASE (el talón de la cuchilla: el corte
+    #      diagonal que cierra la hoja abajo — el bisel del cincel)
+    t = 1.0
+    lo, fi, eje = lados(t)
+    for k in range(6):
+        y = by - k
+        tt = (y - py) / float(by - py)
+        lo2, fi2, _ = lados(tt)
+        # el talón muerde 1 px por lado por fila subiendo
+        for x in range(int(math.floor(lo2)) + (5 - k) // 2,
+                       int(math.ceil(fi2)) - (5 - k) // 2):
+            if dentro(x, y):
+                d.point((x, y), fill=_mult(color_en(tt), 0.72) + (255,))
+
+    # ---- LOS FACETOS DEL CRISTAL (las cuñas que refractan)
+    if cfg.get('facetas'):
+        for t0 in (0.22, 0.50, 0.76):
+            y0 = int(py + (by - py) * t0)
+            tt = (y0 - py) / float(by - py)
+            lo, fi, _ = lados(tt)
+            x0 = int(round(lo + (fi - lo) * 0.30))
+            for k in range(4):
+                x, y = x0 + k, y0 - k
+                if dentro(x, y):
+                    d.point((x, y), fill=(248, 242, 255, 255))
+                x2 = x0 + k + 1, y0 - k + 1
+                if dentro(x2[0], x2[1]) and k % 2 == 0:
+                    d.point(x2, fill=(88, 58, 142, 255))
+
+    # ---- LAS VENAS DE ORO DE LA ROCA (dentro del perfil, LEJOS del
+    #      taladro — el QA v6.130-b: el zigzag NO invade el ojo)
+    if cfg.get('vetas'):
+        # el centro del taladro: SOBRE EL EJE de la hoja (v6.130-c)
+        oy_v = OJO_CY_POR_ALMA.get(tipo, OJO_CY)
+        t_v = (oy_v - py) / float(by - py)
+        lo_v, fi_v, _ = lados(t_v)
+        ancho_v = fi_v - lo_v
+        ox_v = int(round((lo_v + fi_v) * 0.5))
+        rx_v = min(OJO_RX, ancho_v * 0.5 - 2.6)
+        for (t0, fase) in ((0.08, 0.0), (0.62, math.pi)):
+            y = int(round(py + (by - py) * t0))
+            for k in range(9):
+                if y > by:
+                    break
+                tt = (y - py) / float(by - py)
+                lo, fi, _ = lados(tt)
+                amp = min((fi - lo) * 0.28, 2.6)
+                vx = int(round((lo + fi) * 0.5 + math.sin(k * 0.95 + fase) * amp))
+                for px_ in (vx, vx + 1):
+                    # LA LEY DEL TALADRO (v6.130-f: la vena JAMÁS roza
+                    # el anillo — la zona MUERTA se agranda a 3,8 radios
+                    # y la primera vena nace a y=20, BAJO el trono)
+                    dpx = (px_ + 0.5 - ox_v) / (rx_v + 3.8)
+                    dpy = (y + 0.5 - oy_v) / (OJO_RY + 3.8)
+                    if math.hypot(dpx, dpy) <= 1.0:
+                        continue
+                    if dentro(px_, y):
+                        d.point((px_, y), fill=(255, 214, 130, 255))
+                if dentro(vx, y) and k % 3 == 0:
+                    dpx = (vx + 0.5 - ox_v) / (rx_v + 3.8)
+                    dpy = (y + 0.5 - oy_v) / (OJO_RY + 3.8)
+                    if math.hypot(dpx, dpy) > 1.0:
+                        d.point((vx, y), fill=(255, 244, 214, 255))
+                y += 1
+
+    # ---- LA GEMA DEL VEREDICTO (la amatista al pie del EJE —
+    #      v6.130-d: CENTRADA, el sello del juez sobre la balanza)
+    if cfg.get('gema'):
+        t_g = 0.88
+        lo_g, fi_g, eje_g = lados(t_g)
+        gx0 = int(round((lo_g + fi_g) * 0.5)) if cfg.get('gema_central') \
+            else int(cx - cfg['lomo'] * 0.45)
+        gy0 = by - 2
+        d.polygon([(gx0, gy0 - 2), (gx0 + 2, gy0), (gx0, gy0 + 2), (gx0 - 2, gy0)],
+                  fill=cfg['ojo'] + (255,))
+        d.point((gx0, gy0 - 1), fill=(226, 180, 255, 255))
+
+    # ---- EL AGUJERO DEL OJO (la letra: «en esa zona va el ojo del
+    #      grimorio»): LA CUENCA OSCURA ~7×5 al centro de la hoja con
+    #      su ANILLO por alma — el TRONO donde el runtime siembra el
+    #      OJO MINION ESCALADO (OjoEterno_* ~8×5 + su iris que MIRA).
+    #      El agujero es UNA VENTANA: el píxel del fondo es TRANSPARENTE
+    #      (la hoja de verdad tiene el agujero taladrado) y el ANILLO
+    #      marca el borde del taladro.
+    #      v6.130-c (la lección del QA): el taladro vive SOBRE EL EJE
+    #      DE LA HOJA a su altura (la curva MUEVE el eje — un centro
+    #      fijo en x=17 se SALÍA por el vientre y el ojo nacía en C
+    #      ABIERTA) y su radio se APRIETA al ancho que la hoja da
+    #      (siempre masa alrededor: el anillo JAMÁS cruza el filo).
+    oy = OJO_CY_POR_ALMA.get(tipo, OJO_CY)
+    t_o = (oy - py) / float(by - py)
+    lo_o, fi_o, eje_o = lados(t_o)
+    ancho_o = fi_o - lo_o
+    ox = int(round((lo_o + fi_o) * 0.5))            # el CENTRO REAL de la hoja
+    rx = min(OJO_RX, ancho_o * 0.5 - 2.6)           # el radio que CABE (masa viva)
+    ry = OJO_RY
+    anillo_doble = cfg.get('anillo_doble', False)
+    anillo_r = cfg.get('anillo_r', 1.55)
+    for yy in range(oy - 5, oy + 6):
+        for xx in range(ox - 6, ox + 7):
+            dx = (xx + 0.5 - ox) / (rx + 0.6)
+            dy = (yy + 0.5 - oy) / (ry + 0.6)
+            r = math.hypot(dx, dy)
+            if r <= 1.0 and dentro(xx, yy):
+                im.putpixel((xx, yy), (0, 0, 0, 0))          # EL TALADRO (transparente)
+            elif anillo_doble and r <= anillo_r + 0.35 and dentro(xx, yy):
+                # EL MARCO DOBLE DEL VACÍO: el oro GRUESO del QA —
+                # el anillo de la puerta (la firma de la casa)
+                c_anillo = _mult(cfg['ojo'], 1.25 if r > anillo_r - 0.45 else 0.85)
+                d.point((xx, yy), fill=c_anillo + (255,))
+            elif r <= anillo_r and dentro(xx, yy):
+                d.point((xx, yy), fill=_mult(cfg['ojo'], 0.9) + (255,))  # el anillo
+            elif r <= anillo_r + 0.3 and dentro(xx, yy):
+                d.point((xx, yy), fill=_mult(cfg['ojo'], 1.35) + (255,))  # su borde vivo
+
+    # LA SOMBRA INTERIOR del taladro (el arco que da profundidad al
+    # agujero — los 2 px bajo el taladro, fuera del anillo)
+    for xx in range(ox - 4, ox + 5):
+        yy = oy + 4
+        if dentro(xx, yy):
+            dx = (xx + 0.5 - ox) / (OJO_RX + 0.6)
+            dy = (yy + 0.5 - oy) / (OJO_RY + 0.6)
+            if math.hypot(dx, dy) <= 1.9:
+                d.point((xx, yy), fill=_mult(cfg['ojo'], 0.55) + (255,))
+
+    # EL CONTORNO TERRARIA de la casa (el hilo negro que lee el ojo)
+    img = SF.contorno(im)
+    # EL GLOW — la luz irradia suave alrededor del filo (el bautizo)
+    return _glow(img, 0.05, 90)
+
+
+def la_tira_cuchillas(tam=34):
+    """LA TIRA DE LAS CINCO CUCHILLAS — el spritesheet del mod
+    (34×170): un marco de 34×34 por alma, en el ORDEN EXACTO de ai[0]
+    (cristal·llama·roca·vacío·veredicto) — MISMO formato byte a byte
+    que la tira de dagas (el PreDraw del DagaEternaMinion recorta
+    Rectangle(0, tipo·34, 34, 34) sin tocar UNA línea del .cs de
+    formato)."""
+    tira = Image.new('RGBA', (tam, tam * len(ORDEN_DAGAS)), (0, 0, 0, 0))
+    for k, tp in enumerate(ORDEN_DAGAS):
+        tira.paste(la_cuchilla(tp, tam), (0, k * tam))
+    return tira
+
+
+# ====================================================================
 #  EL REGISTRO DE EFECTOS AMPLIADO — diez efectos nuevos de las
 #  familias de pixelfx (hacia el 100 % de su arquitectura de 244),
 #  con el MISMO doble búfer aditivo (dc = color · dl = luz).
@@ -842,16 +1178,24 @@ def cmd_proyectil(args):
     elif receta == 'sol':
         img = el_sol(args.paleta or 'luz', args.tam or HD_CUADRO)
     elif receta == 'daga':
-        # LA RECETA DE LAS CINCO DAGAS DEL ETERNO — la tira apila las
-        # cinco en el ORDEN de ai[0] (lo que el DagaEternaMinion recorta)
+        # LA RECETA DE LAS CINCO DAGAS DEL ETERNO — la tira apila
+        # las cinco en el ORDEN de ai[0] (lo que el DagaEternaMinion recorta)
         if args.tira:
             img = la_tira_dagas(args.tam or 34)
         else:
             img = la_daga(args.tipo, args.tam or 34)
+    elif receta == 'cuchilla':
+        # v6.130 — LA RECETA DE LAS CINCO CUCHILLAS (la letra de la
+        # sesión 11): SIN mango, TODO hoja, EL AGUJERO DEL OJO al
+        # centro — la tira respeta el formato byte a byte
+        if args.tira:
+            img = la_tira_cuchillas(args.tam or 34)
+        else:
+            img = la_cuchilla(args.tipo, args.tam or 34)
     else:
-        raise SystemExit(f"receta desconocida: {receta} (tajo·aguja·sol·daga)")
+        raise SystemExit(f"receta desconocida: {receta} (tajo·aguja·sol·daga·cuchilla)")
 
-    ruta = os.path.join(dest, f"proyectil_{receta}{'_' + args.tipo if receta == 'daga' and not args.tira else ''}.png")
+    ruta = os.path.join(dest, f"proyectil_{receta}{'_' + args.tipo if receta in ('daga', 'cuchilla') and not args.tira else ''}.png")
     img.save(ruta)
     # EL MANIFIESTO DE HITBOX (el documento del proyectil: lo que el
     # .cs necesita saber del sprite que la forja le hizo).
@@ -861,7 +1205,7 @@ def cmd_proyectil(args):
            "bbox_opaco": list(bbox_img) if bbox_img else None,
            "hitbox_sugerida": [max(8, img.size[0] // 4), max(8, img.size[1] // 2)],
            "hd_cuadrado": True, "supersampling": SS_HD}
-    if receta == 'daga':
+    if receta in ('daga', 'cuchilla'):
         man.update({
             "tira": bool(args.tira),
             "marco": args.tam or 34,
@@ -888,8 +1232,8 @@ def cmd_proyectil(args):
         os.makedirs(os.path.dirname(args.destino_tml), exist_ok=True)
         img.save(args.destino_tml)
         print(f"[sforja/proyectil] → COPIADO AL MOD: {args.destino_tml}")
-    if args.qa and receta == 'daga' and args.tira:
-        # EL OJO DE LAS DAGAS — el QA VLM de la casa sobre el montaje
+    if args.qa and receta in ('daga', 'cuchilla') and args.tira:
+        # EL OJO DE LAS DAGAS/CUCHILLAS — el QA VLM de la casa sobre el montaje
         montaje = el_montaje_dagas(dest, img, args.tam or 34)
         el_ojo_daga(montaje, os.path.join(dest, 'qa_ojo.txt'))
     return ruta
@@ -963,13 +1307,13 @@ def main():
     # EL PROYECTIL
     p = sub.add_parser('proyectil', help='el sprite de proyectil + hitbox + tira (todo en la forja)')
     p.add_argument('--nombre', required=True)
-    p.add_argument('--receta', default='tajo', choices=['tajo', 'aguja', 'sol', 'daga'])
+    p.add_argument('--receta', default='tajo', choices=['tajo', 'aguja', 'sol', 'daga', 'cuchilla'])
     p.add_argument('--tipo', default='vacio', choices=list(DAGAS.keys()),
-                   help='el alma de la daga (receta daga)')
+                   help='el alma de la daga/cuchilla (receta daga·cuchilla)')
     p.add_argument('--tira', action='store_true',
-                   help='(receta daga) LA TIRA de las cinco en el orden de ai[0] (34×170)')
+                   help='(receta daga·cuchilla) LA TIRA de las cinco en el orden de ai[0] (34×170)')
     p.add_argument('--qa', action='store_true',
-                   help='(receta daga + tira) EL OJO: el montaje + el QA VLM de la casa')
+                   help='(receta daga·cuchilla + tira) EL OJO: el montaje + el QA VLM de la casa')
     p.add_argument('--ancho', type=int, default=120)
     p.add_argument('--alto', type=int, default=36)
     p.add_argument('--tam', type=int, default=None,

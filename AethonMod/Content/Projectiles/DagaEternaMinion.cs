@@ -372,6 +372,32 @@ namespace AethonMod.Content.Projectiles
                 Color luz = LuzDe(Tipo);
                 Lighting.AddLight(Projectile.Center, luz.ToVector3() * 0.55f);
             }
+
+            // === v6.130 — EL PARPADEO INDEPENDIENTE (la letra: «recuerda
+            //     usar y animar los ojos usando los ojos minions»): cada
+            //     cuchilla lleva SU reloj — el MISMO sistema de los Ojos
+            //     del Eterno (localAI[0] = la cuenta atrás al próximo
+            //     parpadeo 6–18 s por hash, localAI[1] = la fase del
+            //     párpado 10→1, cero RNG de red: visual-local como en el
+            //     ojo). Durante el GOLPE y el VIENTO el párpado se CORTA
+            //     y el ojo queda ABIERTO clavado en la presa (la mirada
+            //     del cazador — la ley del OjoEternoMinion). ===
+            if (fase == F_VIENTO || fase == F_GOLPE || fase == F_CLAVADA)
+            {
+                if (Projectile.localAI[1] > 0f) Projectile.localAI[1] = 0f;
+            }
+            else if (Projectile.localAI[1] > 0f)
+                Projectile.localAI[1]--;                      // la fase 10→1
+            else
+            {
+                Projectile.localAI[0]--;
+                if (Projectile.localAI[0] <= 0f)
+                {   // el próximo parpadeo: 6–18 s, propio de ESTA cuchilla
+                    Projectile.localAI[1] = 10f;
+                    Projectile.localAI[0] = 360f + 720f *
+                        VFXCore.Hash01(Projectile.whoAmI, 911, 77);
+                }
+            }
         }
 
         // ================================================================
@@ -658,8 +684,39 @@ namespace AethonMod.Content.Projectiles
         }
 
         // ================================================================
-        //  EL DIBUJO — LA HOJA + EL IRIS VIVO (el ojo en el centro)
+        //  EL DIBUJO — LA CUCHILLA + EL OJO MINION ANIMADO (v6.130: la
+        //  letra: «recuerda usar y animar los ojos usando los ojos
+        //  minions» — el MISMO sistema del OjoEternoMinion: las tres
+        //  texturas por capas Abierto/Medio/Cerrado para el PARPADEO
+        //  independiente + el iris GrimorioHambriento_Iris dibujado en
+        //  runtime que MIRA a la presa, TODO escalado a la cuenca de la
+        //  cuchilla: el agujero ~7×5 del sprite recibe el ojo minion
+        //  ~8×5 — la MISMA cara del escuadrón, en versión pocket)
         // ================================================================
+
+        // EL OJO EN LA CUCHILLA (las constantes del trasplante: la
+        // ALMENDRA del ojo minion recortada 27×15 — la esclerótica
+        // blanca PURA que a 9 px SÍ se lee como el ojo del escuadrón;
+        // el ojo entero 56×54 era TODO párpado marrón a esta escala)
+        private const float OJO_ESC = 0.35f;    // 27×15 → ~9,5×5,3 px: el taladro lleno
+        private const float IRIS_ESC = 0.115f;  // el iris 32×32 → ~3,7 px (sobre el blanco)
+        private const float MIRA_X = 1.6f;       // el viaje del iris: media cuenca
+        private const float MIRA_Y = 0.8f;
+
+        /// <summary>EL TRONO DEL TALADRO por tipo (v6.130: la SForja
+        /// taladró la hoja DONDE tenía masa — la curva y el eje MUEVEN
+        /// el centro): el offset del ojo desde el centro del marco,
+        /// medido píxel a píxel del sprite (flood-fill del taladro
+        /// real de cada marco de la tira).</summary>
+        private static readonly Vector2[] TronoDelOjo =
+        {
+            new(-4.5f, 0.5f),    // cristal (la curva luna lo baja a la izquierda)
+            new(0.5f, -0.5f),    // llama (el serpenteo lo deja casi al centro)
+            new(-5.5f, -1.5f),   // roca (el cincel ancho, arriba-izquierda)
+            new(-2.5f, -1.5f),   // vacío (la puerta lo pone a la izquierda)
+            new(-0.5f, 1.5f),    // veredicto (la balanza lo baja al pie)
+        };
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
@@ -672,11 +729,10 @@ namespace AethonMod.Content.Projectiles
                 Vector2 pos = Projectile.Center - Main.screenPosition;
                 Vector2 orig = new Vector2(tex.Width * 0.5f, frameH * 0.5f);
                 float rot = Projectile.rotation;
-                float time = Main.GlobalTimeWrappedHourly;
 
                 // LA ESTELA DEL GOLPE (el rastro de la casa): tres
-                // fantasmas ATRÁS durante la técnica — la daga que vuela
-                // deja su firma en el aire.
+                // fantasmas ATRÁS durante la técnica — la cuchilla que
+                // vuela deja su firma en el aire.
                 if (Projectile.ai[1] == F_GOLPE)
                 {
                     for (int j = 1; j <= 3; j++)
@@ -687,31 +743,76 @@ namespace AethonMod.Content.Projectiles
                     }
                 }
 
-                // LA HOJA (el marco de SU tipo del spritesheet)
+                // LA CUCHILLA (el marco de SU tipo del spritesheet — la
+                // hoja SIN mango con el agujero taladrado al centro)
                 Main.spriteBatch.Draw(tex, pos, rect, Color.White, rot, orig, 1f, SpriteEffects.None, 0f);
 
-                // EL IRIS VIVO (la letra: «también tendrán un ojo en el
-                // centro»): la almendra de la hoja RECIBE su iris en
-                // runtime — y MIRA: viaja hacia la presa (el iris que
-                // manda, la firma de los Ojos del Eterno).
-                NPC presa = _presa >= 0 && _presa < Main.maxNPCs ? Main.npc[_presa] : null;
-                Vector2 mira = Vector2.Zero;
-                if (presa != null && presa.active)
+                // ============== EL OJO DEL GRIMORIO (v6.130) ==============
+                // LA LETRA: «en esa zona va el ojo del grimorio, ya
+                // tienes el sprite son los mismos ojos que se usan para
+                // los minions, pero más pequeños y adaptados a las
+                // dagas» — EL TRASPLANTE del OjoEternoMinion: LA
+                // ALMENDRA recortada del ojo del escuadrón (la
+                // esclerótica blanca 27×15 — a esta escala el ojo
+                // entero 56×54 era todo párpado marrón y NO se leía),
+                // el párpado parpadea por capas (Medio/Cerrado/Medio —
+                // localAI[1] 10→1, el reloj de la IA) y el IRIS VIVO
+                // GrimorioHambriento_Iris MIRA a la presa (la firma
+                // del escuadrón, en versión pocket).
+                float fase = Projectile.localAI[1];
+                bool abierto = fase <= 0f;
+                bool medio = fase > 8f || fase < 3f;      // 10-9 y 2-1: el medio párpado (el QA: el iris ASOMA en 8-3)
+                Texture2D ojoTex = ModContent.Request<Texture2D>(
+                    abierto ? "AethonMod/Content/Projectiles/CuchillaOjo_Abierto"
+                            : (medio ? "AethonMod/Content/Projectiles/CuchillaOjo_Medio"
+                                     : "AethonMod/Content/Projectiles/CuchillaOjo_Cerrado"),
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+
+                // EL CENTRO DEL TALADRO (v6.130: EL TRONO POR TIPO — la
+                // SForja taladró cada hoja donde tenía masa; el offset
+                // medido píxel a píxel del sprite, girando CON la hoja)
+                Vector2 trono = TronoDelOjo[Tipo];
+                Vector2 centroOjo = pos + trono.RotatedBy(rot);
+
+                // EL OJO MINION (la esclerótica + el párpado que
+                // respira): EL COLOR ES EL DEL OJO REAL DE LA CASA —
+                // Lighting.GetColor (blanco en luz plena; la esclerótica
+                // ES blanca, el QA del sim lo exigió: el tinte del alma
+                // la volvía oscura y el ojo NO se leía como el de los
+                // minions). Con el ojo CERRADO el brillo baja (duerme).
+                Color colorOjo = abierto || medio
+                    ? Lighting.GetColor(Projectile.Center.ToTileCoordinates())
+                    : Lighting.GetColor(Projectile.Center.ToTileCoordinates()) * 0.55f;
+                Main.spriteBatch.Draw(ojoTex, centroOjo, null, colorOjo, rot,
+                    ojoTex.Size() * 0.5f, OJO_ESC, SpriteEffects.None, 0f);
+
+                // EL IRIS VIVO (solo con el ojo ABIERTO — la ley del
+                // OjoEternoMinion: el párpado tapa la mirada): viaja
+                // hacia la presa (el iris que manda, la firma de los
+                // Ojos del Eterno — MIRA a lo que va a cortar).
+                if (abierto)
                 {
-                    Vector2 d = Vector2.Normalize(presa.Center - Projectile.Center);
-                    if (d.LengthSquared() > 0.0001f) mira = d * 2.2f;
-                }
-                Vector2 irisPos = pos + mira.RotatedBy(rot - MathHelper.PiOver2) + new Vector2(0f, -1f).RotatedBy(rot);
-                Color irisColor = IrisDe(Tipo);
-                if (VFXCore.SoftGlow != null)
-                {
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, irisPos, null,
-                        irisColor * 0.95f, 0f, VFXCore.SoftGlow.Size() * 0.5f,
-                        0.16f, SpriteEffects.None, 0f);
-                    // la pupila: el punto oscuro que da la mirada
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, irisPos, null,
-                        new Color(12, 7, 20) * 0.9f, 0f, VFXCore.SoftGlow.Size() * 0.5f,
-                        0.07f, SpriteEffects.None, 0f);
+                    NPC presa = _presa >= 0 && _presa < Main.maxNPCs ? Main.npc[_presa] : null;
+                    Vector2 mira = Vector2.Zero;
+                    if (presa != null && presa.active)
+                    {
+                        Vector2 d = Vector2.Normalize(presa.Center - Projectile.Center);
+                        if (d.LengthSquared() > 0.0001f) mira = d * 1.0f;
+                    }
+                    // la mirada en el MARCO DE LA HOJA (rot inversa: el
+                    // iris se desplaza hacia la presa EN EL MUNDO, no en
+                    // el marco girado — la geometría del trasplante)
+                    Vector2 miraHoja = mira.RotatedBy(-rot);
+                    Vector2 irisPos = centroOjo + new Vector2(miraHoja.X * MIRA_X, miraHoja.Y * MIRA_Y).RotatedBy(rot);
+                    Texture2D iris = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Weapons/GrimorioHambriento_Iris",
+                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                    // EL IRIS LLEVA EL ALMA (el oro de la casa sobre el
+                    // blanco de la esclerótica — el QA del sim: el iris
+                    // OSCURO no se leía; el del grimorio ES dorado vivo)
+                    Color colorIris = IrisDe(Tipo);
+                    Main.spriteBatch.Draw(iris, irisPos, null, colorIris, rot,
+                        iris.Size() * 0.5f, IRIS_ESC, SpriteEffects.None, 0f);
                 }
                 return false;
             }
