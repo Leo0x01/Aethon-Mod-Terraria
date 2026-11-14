@@ -1,5 +1,10 @@
 # 📜 DISEÑO y ARQUITECTURA del Mod — "Aethon, el Grimorio Eterno"
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **Documento de ARQUITECTURA REAL** (v6.50.61). Describe cómo funciona HOY
 > cada sistema del mod, con mapa de archivos y valores exactos — escrito para que un humano o
 > una IA puedan retomar el trabajo sin re-leer los ~290 `.cs`.

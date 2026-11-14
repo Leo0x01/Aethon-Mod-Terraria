@@ -1,5 +1,10 @@
 # HOJA DE RUTA — EL TERCER ACTO (backlog Tasks 86-103)
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **Espejo compacto del worklog** (que vive en el sandbox y los wipes se lo han comido
 > dos veces — lecciones de las Tasks 68-84). La especificación gorda de cada tarea está
 > en el worklog; aquí vive el MAPA. Creado en la Task 85, era v6.56.2 — actualizado en la

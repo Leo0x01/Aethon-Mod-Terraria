@@ -1,5 +1,10 @@
 # ANÁLISIS DE DISEÑO — CAMINO A LA 1.0
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **Task 68 · v6.50.116** — Análisis sin código. Todo lo aquí listado sale del código real de la v6.50.116.
 > Este documento es la base de diseño acordada para las próximas versiones (0.9x → 1.0).
 

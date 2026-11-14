@@ -1,5 +1,10 @@
 # AethonMod — Características e Inventario del Contenido
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **Inventario verificado contra el código de v6.50.30** (commit `1d26716`, 2026-09-28).
 > Fuente de la verdad: el propio `Content/` (297 `.cs`, ~106.500 líneas). Cómo funciona cada
 > cosa → `DISEÑO_DEL_MOD.md`. Estado/pendientes → `STABLE-SNAPSHOT.md`.

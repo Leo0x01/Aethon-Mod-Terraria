@@ -18,6 +18,11 @@
 
 # PROMPT-MUNDO-INTERIOR — El prompt que me doy a mí mismo para mejorar el mundo
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **La letra**: «crea un promt que te digas a ti mismo para mejorar ese mundo».
 > Este documento ES ese prompt. Cada vez que se retome el MUNDO INTERIOR DEL
 > ETERNO (`SubmundoGrimorio.cs`), se lee esto primero y se elige el siguiente

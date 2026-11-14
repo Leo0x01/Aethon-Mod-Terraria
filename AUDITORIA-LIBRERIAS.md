@@ -1,5 +1,10 @@
 # AUDITORÍA TOTAL DE LIBRERÍAS VFX — AethonMod v6.78
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **⚡ ANEXO v6.80 — ESTADO DE EJECUCIÓN DEL PLAN (verificado con oráculo 0/0):**
 >
 > | # del TOP-10 | Estado | Detalle |

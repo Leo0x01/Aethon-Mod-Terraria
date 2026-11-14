@@ -1,9 +1,9 @@
 # 🛠️ Cómo instalar, compilar y ACTUALIZAR "Aethon, la Luz Primordial"
 
 Este documento explica cómo recibir las versiones del mod de forma fiable y
-cómo compilarlo en un `.tmod` jugable en tModLoader 2026.07.3.0 (.NET 8).
+cómo compilarlo en un `.tmod` jugable en tModLoader 2026.09.3.1 (.NET 8).
 
-> **Versión actual: 6.88** (tag y release publicados). El mod vive en la
+> **versión actual: 6.135** (tag y release publicados). El mod vive en la
 > subcarpeta `AethonMod/` del repo — 297 `.cs`, ~106.500 líneas, sin dependencias.
 
 ---
@@ -93,7 +93,7 @@ de `ModSources` (no la carpeta del repo entera), y Build & Reload.
 
 1. **.NET SDK 8.0** — <https://dotnet.microsoft.com/download/dotnet/8.0>
    (lo usa tModLoader internamente al compilar mods).
-2. **tModLoader** 2026.07.3.0 (rama 1.4-stable, Steam o manual).
+2. **tModLoader** 2026.09.3.1 (rama 1.4-stable, Steam o manual).
 3. **Git** (solo para la VÍA 2).
 
 ---
@@ -145,7 +145,7 @@ y el worklog del entorno de desarrollo):
    Gate: **0 errores / 0 warnings**.
 2. **`-build` REAL** — `tModLoader -build <subcarpeta AethonMod>` headless
    (compila y empaqueta sin abrir ventana; el entorno de desarrollo usa
-   `/tmp/tml` con el tML 2026.07.3.0 y `/tmp/sdk` con el dotnet SDK 8.0.404
+   `/tmp/tml` con el tML 2026.09.3.1 y `/tmp/sdk` con el dotnet SDK 8.0.404
    — si el sandbox se resetea, re-descargar ambos y regenerar verify.csproj).
 3. **Auditoría del `.tmod`** — parsear la tabla de entradas byte a byte
    (7-bit lengths desde el offset 317): contar entradas, tamaño, y que la

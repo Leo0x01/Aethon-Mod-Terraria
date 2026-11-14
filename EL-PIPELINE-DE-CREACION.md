@@ -1,5 +1,10 @@
 # EL PIPELINE DE CREACIÓN — Cómo se crea CUALQUIER cosa para AethonMod
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **LA LEY DE LA CASA** (la letra del usuario): *«recuerda poner las herramientas en la carpeta tools dentro del proyecto en github y ademas documentarlo para que puedas leerlo siempre que se necesite crear algo nuevo, ademas recuerda que todo esto se debe combinar con las librerias para la creacion de cualquier cosa o item para nuestro proyecto»*
 >
 > **Este documento se lee ANTES de crear cualquier cosa nueva** — un arma, un ítem, un NPC, un proyectil, una textura, un diálogo, una bolsa. Nada se crea a mano suelta: TODO pasa por LAS HERRAMIENTAS DE LA CASA (la carpeta `tools/`) y por SUS VERIFICACIONES (el guardián, el oráculo, la auditoría).

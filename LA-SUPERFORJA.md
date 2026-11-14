@@ -1,5 +1,10 @@
 # LA SFORJA — La forja definitiva + el taller (todo el repertorio de la Superforja, mejorado)
 
+> 📜 **DOC HISTÓRICA** — Este documento describe una era anterior del
+> proyecto. Para el estado vigente y las reglas actuales manda
+> **[MAESTRO.md](MAESTRO.md)**; esta copia se conserva como referencia.
+
+
 > **La letra (v6.124)**: «hacer la fusion de La Forja y El Taller comprar cual es mejor
 > si esa fusion o la que ya existe de la superforja, comparar y mejorar para crear la
 > SForja, la cual sera la forja definitiva mas el taller, usada para la generacion de

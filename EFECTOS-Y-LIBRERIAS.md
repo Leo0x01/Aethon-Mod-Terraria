@@ -1,5 +1,9 @@
 # EFECTOS-Y-LIBRERIAS.md — EL CÓDICE VISUAL Y SONORO DE LA CASA (v1.7)
 
+> ✅ **VIGENTE como referencia de detalle** (el índice vivo y las reglas
+> actuales están en **[MAESTRO.md](MAESTRO.md)** — actualizada a v6.135).
+
+
 > **ESTE ES EL ARCHIVO DE CONSULTA OBLIGATORIA PARA CUALQUIER EFECTO.**
 > Antes de crear UN SOLO efecto — visual, de sonido, de pantalla, de partícula,
 > de shader, de textura, de luz — **ESTE ARCHIVO SE LEE PRIMERO, COMPLETO EN LA
