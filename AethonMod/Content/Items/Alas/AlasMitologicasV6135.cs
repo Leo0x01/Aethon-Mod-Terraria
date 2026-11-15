@@ -76,9 +76,28 @@ namespace AethonMod.Content.Items.Alas
     }
 
     /// <summary>13 — LA VALQUIRIA LISA: las plumas dejan de ser tiras —
-    /// la vela continua del borde maestro (la receta lisa de la casa).</summary>
+    /// la vela continua del borde maestro (la receta lisa de la casa).
+    /// v6.139 — SOLO RUNAS (la letra: «las alas como tal quitalas y
+    /// deja las runas que tiene como alas»): el cuerpo murió — quedan
+    /// las runas del borde como alas.</summary>
     public class AlasValquiriaLisa : AlasPrismaBase
     {
         protected override byte Estilo => 13;
+    }
+
+    // ====================================================================
+    //  v6.139 — LAS ALAS RÚNICAS (la letra: «mejora esas runas añadiendo
+    //  unas alas de solo runas basandote en como se ve las alas valquiria
+    //  lisa, estas se llamaran alas runicas, usa el mismo sistema de
+    //  runas que usaste para valquiria lisa y mejoralo»): el ala hecha
+    //  de ESCRITURA — el enjambre de glifos dibuja el borde maestro, la
+    //  vela y las puntas (sin cuerpo, como la Lisa — pero DENSO).
+    // ====================================================================
+
+    /// <summary>14 — LAS ALAS RÚNICAS: el enjambre — tres corrientes de
+    /// glifos (borde · vela · puntas) con la runa MAYOR de cada ala.</summary>
+    public class AlasRunicas : AlasPrismaBase
+    {
+        protected override byte Estilo => 14;
     }
 }

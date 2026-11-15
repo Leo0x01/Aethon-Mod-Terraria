@@ -261,21 +261,26 @@ namespace AethonMod.Content.Globals
                 if (!TieneEternoVisible(p)) continue;           // con el libro a mano
                 var sp = p.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null) continue;
-                // v6.97 — LA REGLA NUEVA DE LA LETRA: «el grimorio solo
-                //     va a devorar con la animación de devorar al jefe
-                //     que este en la lista de requisitos en ese momento
-                //     independientemente de si ya lo a devorado antes o
-                //     no» — LA PRIMERA VEZ MURIÓ: fuera del checklist
-                //     actual, NADIE repite cena… EXCEPTO el jefe de los
-                //     cultistas (la letra de la misma sesión: «el jefe
-                //     sera como un jefe normal solo lo devora al final
-                //     la primera vez, o si este es un requisito actual
-                //     de Despertar») — el Cultista Lunático conserva SU
-                //     primera cena y repite cuando es la presa viva.
+                // v6.139 — LA CURA DEL FESTÍN ROTO (la letra: «es raro,
+                //     el grimorio parece que no esta devorando la primera
+                //     muerte de los jefes»): la regla v6.97 («solo jefes
+                //     del checklist actual») se había vuelto OBLIGATORIA
+                //     para TODAS las cenas — pero la escalera del
+                //     Despertar solo tiene puertas de jefe en los niveles
+                //     3, 5, 8, 10, 13, 20…: con el Despertar en 0, 1, 2,
+                //     4, 6… la puerta siguiente NO era un jefe,
+                //     JefeDeNivel devolvía null y NINGUNA primera cena
+                //     arrancaba JAMÁS (el libro perdía su derecho de
+                //     siempre). LA LETRA DE LAS DOS REGLAS, JUNTAS:
+                //     (1) LA PRIMERA MUERTE ES DEL LIBRO — un jefe que
+                //     ESTE portador NUNCA ha devorado cena SIEMPRE (el
+                //     derecho original, venga como venga el despertar);
+                //     (2) LAS REPETICIONES SON DEL CHECKLIST (v6.97) — un
+                //     jefe ya devorado SOLO repite cena si es la presa
+                //     viva del peldaño actual de ESTE despertar.
+                bool yaDevorado = sp.JefesDevorados.Contains(jefe.type);
                 bool enChecklist = JefeEnElChecklistActual(p, jefe.type);
-                bool esCultista = jefe.type == NPCID.CultistBoss;
-                bool cultistaEstreno = esCultista && !sp.JefesDevorados.Contains(jefe.type);
-                if (!enChecklist && !cultistaEstreno) continue;
+                if (yaDevorado && !enChecklist) continue;
                 portador = p;
                 return true;
             }

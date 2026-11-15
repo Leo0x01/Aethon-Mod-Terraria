@@ -775,6 +775,7 @@ namespace AethonMod.Content.Items.Bolsas
                 // lisa): viajan con las mitológicas.
                 (ModContent.ItemType<AlasValquiriaSinPlumas>(), 1),
                 (ModContent.ItemType<AlasValquiriaLisa>(), 1),
+                (ModContent.ItemType<AlasRunicas>(), 1),
                 (ModContent.ItemType<AlasQuetzalEmplumado>(), 1),
                 (ModContent.ItemType<AlasFenixDelRenacer>(), 1),
                 (ModContent.ItemType<AlasTenguDelCrepusculo>(), 1),

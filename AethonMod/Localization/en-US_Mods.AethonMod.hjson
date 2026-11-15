@@ -2332,11 +2332,11 @@ Items: {
 		DisplayName: The Eternal Form
 		Tooltip: ✦ THE DEFINITIVE COSMETIC — the whole pantheon in one body
 		Titulo: "[c/B96EEA:═══ THE ETERNAL FORM ═══]"
-		Linea1: "[c/D9B3FF:THE TWO LIGHTS — the Ascended Form and THE OPHANIM: the Primordial Light's aura and Ezekiel's wheels dressing you; the sky belongs to the wings]"
-		Linea2: "[c/D9B3FF:THE ECLIPSE EMBER, THE DORSAL RUNIC RING and THE RUNIC SUNS' SHINE — the black-and-gold smoke, the triple casting crown and the four-point sparkles]"
-		Linea3: "[c/9FA8DA:+40 mana, +8% magic damage, +4% magic crit, +2 regeneration, +8% melee damage, +3% melee crit and +3 defense — the Seal of Genesis and the Runic Sun Rings]"
-		Linea4: "[c/B96EEA:THE VOID AURA — the invisible 19-tile field that dresses the unholy with the outer void's burn, and while they burn: +10% attack and +10 defense]"
-		Linea5: '''[c/78788C:"All the book ever gave, in one body — the form that never fades."]'''
+		Linea1: "[c/D9B3FF:THE TWO LIGHTS — the Primordial Light's aura and the wheels of Ezekiel]"
+		Linea2: "[c/D9B3FF:THE ECLIPSE EMBER, THE RUNIC BACK-RING and THE RUNIC SUNS]"
+		Linea3: "[c/9FA8DA:+40 mana, +8% magic dmg, +4% magic crit, +2 regen, +8% melee, +3% melee crit, +3 defense]"
+		Linea4: "[c/B96EEA:THE VOID AURA — 19 tiles: burns the wicked; while they burn: +10% attack and +10 defense]"
+		Linea5: '''[c/78788C:"The form that never fades."]'''
 	}
 
 	BolsaFormaEterna: {
@@ -2455,11 +2455,16 @@ Items: {
 	}
 
 	AlasValquiriaLisa: {
-		// v6.137 — LA COPIA LISA (la letra: «en la otra intenta darle una
-		// forma lisa a las plumas y no toques nada mas»): las plumas dejan
-		// de ser tiras — la superficie continua del borde maestro.
+		// v6.139 — RUNES ONLY: the body died — the edge runes ARE the wings.
 		DisplayName: Sleek Valkyrie
-		Tooltip: Las plumas de la Valquiria fundidas en UNA vela lisa y continua
+		Tooltip: Runes only — the calligraphy of the leading edge as wings
+	}
+
+	AlasRunicas: {
+		// v6.139 — THE WING MADE OF WRITING: the swarm — leading edge,
+		// sail and tips drawn in glyphs, the GREATER rune on each tip.
+		DisplayName: Runic Wings
+		Tooltip: THE WING MADE OF WRITING — edge, sail and tips in futhark glyphs, the GREATER rune on each wingtip. Flight 240 · no fall damage · yields to real wings.
 	}
 
 	AlasValquiriaRunica: {
@@ -4063,16 +4068,16 @@ PrismaInterior: {
 	BotonVolver: RETURN TO THE REAL WORLD
 	BotonInvocar: SUMMON AETHON
 	YaVive: AETHON ALREADY WALKS THE INTERIOR
-	Leyenda: The calling: the altar materializes and THE GRIMOIRE floats just above — the shards are born of the ceremony
+	Leyenda: The altar materializes and THE GRIMOIRE floats above — the shards are born of the ceremony
 	NombreCorto: The Prism of the Eternal
 	NombrePilar: The Prism Pillar — the plain's way out
 	OleadaTitulo: THE HUNGER WAVE
 	OleadaNivel: Level {0} of {1}
-	OleadaPista: unlock levels by completing the wave OUTSIDE (your best: {0})
+	OleadaPista: level up by completing it OUTSIDE (your best: {0})
 	OleadaLanzar: UNLEASH THE WAVE · LEVEL {0}
 	OleadaCorre: THE WAVE ALREADY RUNS THROUGH THE BODY…
-	JefesTitulo: THE DEVOURED BOSSES — THE INNER ARENA
-	JefesVacio: no devoured bosses yet — kill them with the grimoire first
+	JefesTitulo: THE INNER ARENA — THE DEVOURED
+	JefesVacio: no devoured bosses yet
 	JefePoder: Lv {0} · {1}%
 	PoderCrece: ✦ {0} fell in the arena ({1} times): its next version is born at {2}%
 }
@@ -4084,7 +4089,7 @@ Altar: {
 	Subtitulo: consagra la ofrenda por el Eterno — arma, material o esencias
 	SlotVacio: ofrenda
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
-	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni dinero — LAS ESENCIAS SÍ: el Eterno las devora
+	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
 	ListaMaterial: Material listo — gana solo su etiqueta
 	// v6.121 — LA OFRENDA QUE ES EL PAGO (la letra: «intento colocar
@@ -4102,9 +4107,9 @@ Altar: {
 	// falta, ademas debe decir como conseguiras esencia» — las tres
 	// secciones de la ventana nueva (GANA · EL SELLO · CÓMO CONSEGUIR).
 	GanaTitulo: GANA
-	GanaArma: Arma → +5% a TODAS sus estadísticas y su etiqueta junto al nombre
+	GanaArma: Weapon → +5% to ALL stats and its tag
 	GanaMaterial: Material → SOLO su etiqueta junto al nombre
-	GanaEsencias: Esencias del Eterno → DEVORADAS: +1 a la puerta por cada una (las {0} la abren)
+	GanaEsencias: Essences → +1 to the gate each (the {0} open it)
 	SelloTitulo: EL SELLO
 	SelloCuesta: Cuesta: {0} Esencias del Eterno
 	SelloLlevas: Llevas: {0}
@@ -4116,17 +4121,20 @@ Altar: {
 	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
 	ComoJefes: • Los jefes sueltan de 1 a 10 (casi siempre 1)
 	ComoOleadas: • ¡Las OLEADAS DE HAMBRE suben la probabilidad!
-	ComoEstatuas: • Las ESTATUAS no alimentan: si el grimorio mata a una criatura nacida de una estatua, su hambre SUBE +0,1%
-	ComoNota: (las esencias empiezan a caer tras LA LLEGADA del grimorio)
+	ComoEstatuas: • STATUES do not feed: hunger RISES +0.1%
+	ComoNota: (essences drop after the grimoire's ARRIVAL)
 	// v6.91 — LA LETRA: «no es necesario llevar la cuenta en el chat,
 	// para eso dejarlo en el altar» — el chat SOLO AVISA.
 	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
 	// v6.137 — THE ONE-ALTAR LAW.
-	YaHayUno: ✦ A CONSECRATION ALTAR already lives in this world — the Eternal listens to only one. Pick it up to move it.
-	Desactivado: ✦ This altar is DEACTIVATED — the working one is elsewhere (find it on the map: it says ACTIVE).
+	YaHayUno: ✦ Only ONE altar may live — pick up the other to move it.
+	Desactivado: ✦ This altar is DEACTIVATED — the map says which one is ACTIVE.
 	Promovido: The altar was picked up… and another rises: THIS is the active altar now.
-	DesactivadoCorto: DEACTIVATED altar (another one works)
+	DesactivadoCorto: DEACTIVATED altar
+	ActivoSufijo: (ACTIVE)
+	DevoradoSufijo: (devoured by the grimoire)
+	DevoradoAnuncio: ✦ The grimoire devoured an inactive altar — only the ACTIVE altar remains.
 	NoInterior: ✦ The altar does not live inside the book — the interior only has its PRISM PILLAR.
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	Devorar: DEVORAR

@@ -1414,6 +1414,19 @@ namespace AethonMod.Content.VFX
                     // lisa los emisores y el borde leen los 7 ejes por
                     // lado de la vela estirada.
                     int nEmisores = estilo.Lisas ? _geoN : num2 * 2;
+                    // v6.139 — SOLO RUNAS (la letra: «las alas como tal
+                    // quitalas y deja las runas que tiene como alas»):
+                    // la geometría VIVE (los ejes alimentan las runas —
+                    // EstirarVelaLisa ya corrió y _geoN/_pozosEje están
+                    // listos), pero TODO el cuerpo muere: ni capas, ni
+                    // membrana, ni niebles, ni alitas, ni coronas. El
+                    // enjambre de glifos dibuja el ala entera (DibujarRunas,
+                    // el paso siguiente del halo).
+                    if (estilo.SoloRunas)
+                    {
+                        _geoRunasValida = true;   // la geometría SÍ vale — las runas la leen
+                        return true;              // …pero el cuerpo NO se emite
+                    }
                     // v6.56.6 — EL BARRIDO DEL HEREDERO MUERE ENTERO (la letra:
                     // «no están simétricas y siguen teniendo esa ligera rotación
                     // en el sentido contrario que no deben tener»). El sim de la
@@ -1818,6 +1831,97 @@ namespace AethonMod.Content.VFX
                 float globalTimeWrappedHourly = Main.GlobalTimeWrappedHourly;
                 float num3 = MathHelper.Clamp(spread, 0f, 1f) * num2;
                 int num4 = Math.Max(_geoN / 2, 1);
+                // ============================================================
+                //  v6.139 — EL ENJAMBRE DE LAS ALAS RÚNICAS (estilo 14):
+                //  el ala hecha de ESCRITURA. Tres corrientes de glifos
+                //  dibujan la geometría viva: (1) EL BORDE MAESTRO — la
+                //  curva de la vela lisa, runas medias siguiendo la
+                //  curva con su ángulo TANGENTE (la caligrafía abraza
+                //  el borde); (2) LA VELA — un abanico de runas MENORES
+                //  corriendo de la espalda hacia el borde (las líneas
+                //  del Conjuro de la casa, la dirección de las plumas);
+                //  (3) LAS PUNTAS — la runa MAYOR (1.9×) coronando cada
+                //  punta, con el doble de brillo. Mismo alfabeto, mismo
+                //  giro por semilla, mismo centelleo — solo que el ala
+                //  YA NO TIENE CUERPO: la escritura ES el ala.
+                // ============================================================
+                if (estilo.Enjambre)
+                {
+                    VFXCore.Begin();
+                    try
+                    {
+                        Vector2 screenPos = Main.screenPosition;
+                        float dirGiroE = (float)((Entity)pl).direction;
+                        float escalaG = (estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f);
+                        for (int ladoE = -1; ladoE <= 1; ladoE += 2)
+                        {
+                            int baseE = ladoE < 0 ? 0 : num4;
+                            // (3) LAS PUNTAS — la runa MAYOR de cada ala
+                            // (la pluma EXTERIOR del abanico: el eje del
+                            // medio-lado es la punta viva de la vela).
+                            int idxPunta = baseE + Math.Max(num4 - 2, 0);
+                            Vector2 posPunta = _pozosEje[idxPunta][8];
+                            SigiloLib.Runa(posPunta + screenPos,
+                                globalTimeWrappedHourly * 0.4f * dirGiroE,
+                                array, ((Entity)pl).whoAmI * 5 + (ladoE < 0 ? 0 : 1),
+                                1.9f, globalTimeWrappedHourly,
+                                0f, val2, val2, num3 * 1.15f, glowK: 0.35f);
+                            // (1) EL BORDE MAESTRO — runas medias siguiendo
+                            // la curva del borde (los nodos 8 de los ejes
+                            // del lado, con su ángulo TANGENTE: la caligrafía
+                            // abraza el borde).
+                            for (int e = 1; e < num4 - 1; e++)
+                            {
+                                int ie = baseE + e;
+                                Vector2 p0 = _pozosEje[ie][8];
+                                Vector2 prev = _pozosEje[baseE + e - 1][8];
+                                Vector2 next = _pozosEje[Math.Min(ie + 1, baseE + num4 - 1)][8];
+                                Vector2 tang = next - prev;
+                                float ang = tang.LengthSquared() > 0.0001f
+                                    ? (float)Math.Atan2(tang.Y, tang.X) : 0f;
+                                float f = (float)e / (float)Math.Max(num4 - 2, 1);
+                                float esc = 0.85f + 0.35f * f;
+                                // el brillo RESPIRA a lo largo del borde (la
+                                // onda del Conjuro: un pulso que VIAJA)
+                                float onda = 0.72f + 0.28f *
+                                    (float)Math.Sin(globalTimeWrappedHourly * 1.6f - f * 4.2f);
+                                SigiloLib.Runa(p0 + screenPos, ang + MathHelper.PiOver2,
+                                    array, ((Entity)pl).whoAmI * 13 + ie,
+                                    esc, globalTimeWrappedHourly,
+                                    f * 0.8f, val, val2, num3 * onda * 0.9f, glowK: 0.3f);
+                            }
+                            // (2) LA VELA — runas menores corriendo de la
+                            // espalda al borde, por cada eje (los nodos 2..7
+                            // del pozo: la línea del conjuro que apunta a la
+                            // punta).
+                            for (int e2 = 1; e2 < num4 - 1; e2++)
+                            {
+                                int ie2 = baseE + e2;
+                                for (int nodo = 2; nodo <= 7; nodo += 2)
+                                {
+                                    Vector2 pv = _pozosEje[ie2][nodo];
+                                    float g = (float)nodo / 8f;
+                                    float esc2 = 0.42f + 0.30f * g;
+                                    float brillo = num3 * (0.34f + 0.22f * g) *
+                                        (0.75f + 0.25f * (float)Math.Sin(
+                                            globalTimeWrappedHourly * 2.1f + g * 3f + e2));
+                                    SigiloLib.Runa(pv + screenPos,
+                                        globalTimeWrappedHourly * 0.35f *
+                                        ((e2 % 2 == 0) ? 1f : -1f) * dirGiroE,
+                                        array, ((Entity)pl).whoAmI * 29 + ie2 * 8 + nodo,
+                                        esc2, globalTimeWrappedHourly,
+                                        g * 2f, val, val2, brillo, perla: false);
+                                }
+                            }
+                        }
+                        VFXCore.FlushAdditive();
+                    }
+                    finally
+                    {
+                        VFXCore.ReabrirLoteVanilla();
+                    }
+                    return true;
+                }
                 VFXCore.Begin();
                 try
                 {

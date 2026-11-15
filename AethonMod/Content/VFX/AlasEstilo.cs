@@ -112,6 +112,22 @@ namespace AethonMod.Content.VFX
         // plumas — Solares, Eclipse, Juicio, Corolas intactas).
         public bool Lisas;
 
+        /// <summary>v6.139 — SOLO RUNAS (la letra: «las alas valquiria
+        /// lisa solo muestra las runas, pero esas runas solas se ven
+        /// bien… ahora las alas valquiria lisa deja las runas… las alas
+        /// como tal quitalas y deja las runas que tiene como alas»):
+        /// true = el CUERPO del ala NO se dibuja — la geometría vive
+        /// igual (los ejes alimentan las runas), pero la vela, las
+        /// tiras y la niebla mueren. EL ALA ES EL ENJAMBRE DE GLIFOS.
+        public bool SoloRunas;
+
+        /// <summary>v6.139 — EL ENJAMBRE (estilo 14 — las Alas
+        /// Rúnicas): true = las runas no coronan el borde: DIBUJAN el
+        /// ala — un ejército de glifos siguiendo el BORDE MAESTRO, la
+        /// VELA y las PUNTAS de la geometría viva (más la runa MAYOR
+        /// de cada punta). El ala hecha enteramente de escritura.</summary>
+        public bool Enjambre;
+
         /// <summary>v6.135 — LA CORONA (el TERCER PAR del arcángel):
         /// la escala del par superior (0 = sin corona). Como Alitas,
         /// pero el abanico nace SOBRE la espalda, alzado y abierto —
@@ -174,6 +190,10 @@ namespace AethonMod.Content.VFX
         // nada mas»): el alma PLATA de la nórdica, dos cuerpos nuevos.
         public const byte ValquiriaSinPlumas = 12;
         public const byte ValquiriaLisa = 13;
+        /// <summary>v6.139 — LAS ALAS RÚNICAS (la letra: «mejora esas
+        /// runas añadiendo unas alas de solo runas… estas se llamaran
+        /// alas runicas»): el enjambre — el ala hecha de escritura.</summary>
+        public const byte AlasRunicas = 14;
 
         private const string PrefijoRuido = "AethonMod/Content/Effects/Procedural/";
 
@@ -352,7 +372,7 @@ namespace AethonMod.Content.VFX
             // Agujas y las Cuchillas cayeron con sus ítems (la purga).
             // v6.135 — LAS SEIS MITOLÓGICAS: [6] Serafín · [7] Valquiria ·
             // [8] Quetzal · [9] Fénix · [10] Tengu · [11] Dragón.
-            return new EstiloAlas[14]
+            return new EstiloAlas[15]
             {
                 default(EstiloAlas),
                 Ala("Runas Solares", (Color[])(object)new Color[3]
@@ -541,11 +561,32 @@ namespace AethonMod.Content.VFX
                     new Color(218, 232, 255),
                     new Color(130, 150, 190),
                     new Color(22, 28, 48)
-                }, new Color(150, 170, 210), "Ruido_13", 7, 92f, 54f, 3.5f, 17f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0f, 5f, 0.45f, 0.5f, 0.3f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 1, 1f, lisas: true)
+                }, new Color(150, 170, 210), "Ruido_13", 7, 92f, 54f, 3.5f, 17f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0f, 5f, 0.45f, 0.5f, 0.3f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 1, 1f, lisas: true, soloRunas: true),
+                // ==============================================================
+                //  v6.139 — 14 — LAS ALAS RÚNICAS (la letra: «mejora
+                //  esas runas añadiendo unas alas de solo runas
+                //  basandote en como se ve las alas valquiria lisa,
+                //  estas se llamaran alas runicas, usa el mismo sistema
+                //  de runas que usaste para valquiria lisa y mejoralo»):
+                //  la MISMA alma plata de la valquiria (la paleta del
+                //  cielo de batalla, el futhark dorado, el Ruido_13) —
+                //  pero el ala YA NO ES VELA: es ESCRITURA. El enjambre
+                //  de glifos dibuja el BORDE MAESTRO (la curva de la
+                //  vela lisa), la VELA interior y las PUNTAS — con la
+                //  runa MAYOR coronando cada punta. (El cuerpo muere
+                //  igual que en la Lisa: SoloRunas — pero aquí el
+                //  enjambre es DENSO: el ala entera vive en glifos.)
+                // ==============================================================
+                Ala("Alas Rúnicas", (Color[])(object)new Color[3]
+                {
+                    new Color(218, 232, 255),
+                    new Color(130, 150, 190),
+                    new Color(22, 28, 48)
+                }, new Color(150, 170, 210), "Ruido_13", 7, 92f, 54f, 3.5f, 17f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0f, 5f, 0.45f, 0.5f, 0.3f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 1, 1.35f, lisas: true, soloRunas: true, enjambre: true)
             };
         }
 
-        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, bool lisas = false, float escalaGlobal = 1f, float alitas = 0f, float coronas = 0f)
+        private static EstiloAlas Ala(string _, Color[] paleta, Color dia, string ruido, int plumas = 5, float largoInt = 88f, float largoExt = 48f, float raiz = 3.5f, float punta = 14f, float puntaAbierta = 8f, float plegadoMin = 0.5f, float plegadoMax = 0.92f, float abiertoMin = 0.22f, float abiertoMax = 1.54f, float inclinacion = 0.12f, float barrido = 0.14f, float curva = 0f, float anclajeSep = 5f, float vientre = 0.35f, float afilada = 1f, float filosa = 0.3f, float hueEntre = 0.085f, float hueLargo = 0.16f, float hueTiempo = 0.018f, float flap = 1f, float desgarre = 1f, float nucleo = 0.92f, float nucleoFrac = 0.3f, float cuerpo = 0.34f, float cuerpoFrac = 0.62f, float halo = 0.13f, float ruidoInten = 1f, float ruidoEscala = 1f, float ruidoFlujo = 1f, float luz = 1f, byte runas = 0, float runasInten = 0f, float membrana = 0f, float redonda = 0f, bool lisas = false, float escalaGlobal = 1f, float alitas = 0f, float coronas = 0f, bool soloRunas = false, bool enjambre = false)
         {
             //IL_0012: Unknown result type (might be due to invalid IL or missing references)
             //IL_0013: Unknown result type (might be due to invalid IL or missing references)
@@ -592,7 +633,9 @@ namespace AethonMod.Content.VFX
                 RunasInten = runasInten,
                 Lisas = lisas,
                 EscalaGlobal = escalaGlobal,
-                Alitas = alitas
+                Alitas = alitas,
+                SoloRunas = soloRunas,
+                Enjambre = enjambre
             };
         }
 

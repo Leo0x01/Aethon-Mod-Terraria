@@ -147,8 +147,26 @@ namespace AethonMod.Content.Tiles
             // del tML (verificado en el decompile) escribe «(ACTIVO)»
             // SOBRE el altar que funciona — el mapa siempre dice cuál
             // es el que sirve.
+            // v6.139 — EL MAPA DICE CUÁL SIRVE (la letra: «el altar
+            // principal no se muestra en el mapa»): la sobrecarga con
+            // nameFunc (verificada en el decompile — esta era del tML
+            // no tiene ModifyMapEntryName) escribe «(ACTIVO)» sobre el
+            // que funciona y «(devorado por el grimorio)» sobre los
+            // muertos — el mapa siempre dice la verdad.
             LocalizedText nombre = CreateMapEntryName();
-            AddMapEntry(new Color(90, 220, 180), nombre);
+            AddMapEntry(new Color(90, 220, 180), nombre, (n, i, j) =>
+            {
+                try
+                {
+                    if (global::AethonMod.Content.Systems.AltarUnicoSistema.HayActivo &&
+                        !global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))
+                        return n + " " + Terraria.Localization.Language.GetTextValue(
+                            "Mods.AethonMod.Altar.DevoradoSufijo");
+                    return n + " " + Terraria.Localization.Language.GetTextValue(
+                        "Mods.AethonMod.Altar.ActivoSufijo");
+                }
+                catch { return n; }
+            });
 
             // EL POLVO AL PICARLO: el brillo de las estrellas fugaces.
             DustType = DustID.Enchanted_Gold;
@@ -253,6 +271,59 @@ namespace AethonMod.Content.Tiles
         /// <summary>AL PICARLO suelta su item (el altar viaja). v6.137 —
         /// si era EL ACTIVO, el sistema PROMUEVE al primero que quede
         /// vivo (la puerta del Eterno nunca se queda sin altar).</summary>
+        /// <summary>v6.139 — EL GRIMORIO DEVORA LOS ALTARES INACTIVOS
+        /// (la letra: «los altares inactivos sean devorados por el
+        /// grimorio»): un altar de ofrendas que NO es el activo del
+        /// mundo es una CORTEZA MUERTA — el libro la reclama. En el
+        /// latido de RandomUpdate, la bruma del festín lo traga (sin
+        /// botín: lo devorado no se recoge, se digiere) y queda solo
+        /// la voluta violeta en el suelo.</summary>
+        public override void RandomUpdate(int i, int j)
+        {
+            try
+            {
+                // DENTRO DEL LIBRO no se devora: allí cualquier altar
+                // es la red de seguridad de salida.
+                if (Systems.SubmundoGrimorio.Activo) return;
+                // EL ACTIVO (o un mundo sin altar registrado) vive.
+                if (!global::AethonMod.Content.Systems.AltarUnicoSistema.HayActivo) return;
+                if (global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j)) return;
+
+                // LA BOCA SE ABRE: bruma del festín + el altar desaparece
+                // (WorldGen.KillTile sin item — lo devorado no se pica).
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                Vector2 centro = new Vector2(i * 16f + 16f, j * 16f + 24f);
+                for (int k = 0; k < 14; k++)
+                {
+                    Dust d = Dust.NewDustPerfect(centro + new Vector2(
+                        Main.rand.NextFloat(-26f, 26f), Main.rand.NextFloat(-30f, 8f)),
+                        DustID.Shadowflame, new Vector2(0f, -0.8f), 128,
+                        new Color(96, 58, 148), 0.9f);
+                    d.noGravity = true;
+                }
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.25f), centro);
+                    Main.NewText(Terraria.Localization.Language.GetTextValue(
+                        "Mods.AethonMod.Altar.DevoradoAnuncio"),
+                        new Color(190, 160, 220));
+                }
+                // matar TODAS las tiles del mueble 2×3 (el pico de
+                // vanilla mataría una; la boca se lleva el cuerpo entero)
+                int ox = i, oy = j;
+                Tile izq = Framing.GetTileSafely(i - 1, j);
+                Tile arriba = Framing.GetTileSafely(i, j - 1);
+                if (izq != null && izq.HasTile && izq.TileType == Type) ox = i - 1;
+                if (arriba != null && arriba.HasTile && arriba.TileType == Type) oy = j - 1;
+                for (int dx = 0; dx < 2; dx++)
+                    for (int dy = 0; dy < 3; dy++)
+                        WorldGen.KillTile(ox + dx, oy + dy, false, false, true);
+                if (Main.netMode == NetmodeID.Server)
+                    NetMessage.SendTileSquare(-1, ox, oy, 3, 4);
+            }
+            catch { }
+        }
+
         public override bool CanDrop(int i, int j)
         {
             if (global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))

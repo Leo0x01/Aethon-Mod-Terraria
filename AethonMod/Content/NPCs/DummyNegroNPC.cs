@@ -237,15 +237,34 @@ namespace AethonMod.Content.NPCs
                 //     propios lotes — el contrato de la casa.)
                 try
                 {
+                    // v6.139 — EL LOTE DE MASA EXPLÍCITO (la autopsia del
+                    // client.log: «Draw was called, but Begin has not yet
+                    // been called» en PuffBody desde ESTE PreDraw): el
+                    // contrato de BrumaFX.Puff es que el LLAMADOR abre el
+                    // lote (BeginMass — el patrón de toda la casa,
+                    // SombrasLib:956); este PreDraw cerraba el lote del
+                    // pase de NPCs y llamaba Puff con el lote MUERTO →
+                    // excepción silenciosa cada frame (deduplicada a una
+                    // línea en el log, pero el muñeco quedaba SIN su
+                    // bruma). AHORA: se cierra el lote del pase, se abre
+                    // EL LOTE DE MASA (AlphaBlend — el humo que oculta),
+                    // se pinta el puff y se devuelve el lote de vanilla.
                     VFXCore.CerrarLoteSiAbierto();
+                    BrumaFX.BeginMass();
                     BrumaFX.Puff(
                         NPC.Center - new Vector2(0f, marco.Height * 0.42f),
                         34f + (float)System.Math.Sin(Main.GlobalTimeWrappedHourly * 0.9f) * 4f,
                         new Color(96, 58, 148), NPC.whoAmI * 97 + 13,
                         Main.GlobalTimeWrappedHourly, 0.42f, 0.85f);
-                    VFXCore.ReabrirLoteVanilla();
+                    // (RestaurarLoteVanilla — NO Reabrir: el lote de masa
+                    // sigue ABIERTO tras el Puff y Reabrir lo respeta sin
+                    // cerrarlo; Restaurar CIERRA el lote de masa y reabre
+                    // el del pase de NPCs — la salida correcta de todo
+                    // PreDraw que abrió su propio lote, el contrato
+                    // v6.56.1 de la casa.)
+                    VFXCore.RestaurarLoteVanilla();
                 }
-                catch { try { VFXCore.ReabrirLoteVanilla(); } catch { } }
+                catch { try { VFXCore.RestaurarLoteVanilla(); } catch { } }
 
                 // (2) EL MUÑECO — el sprite de la casa tal cual (ya
                 //     nació negro-violeta en la forja), bañado por la

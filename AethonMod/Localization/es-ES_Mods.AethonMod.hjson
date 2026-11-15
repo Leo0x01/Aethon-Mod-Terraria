@@ -2333,11 +2333,11 @@ Items: {
 		DisplayName: La Forma Eterna
 		Tooltip: ✦ EL COSMÉTICO DEFINITIVO — todo el panteón de la casa en un solo cuerpo
 		Titulo: "[c/B96EEA:═══ LA FORMA ETERNA ═══]"
-		Linea1: "[c/D9B3FF:LAS DOS LUCES — la Forma Ascendida y LAS OFANIM: el aura de la Luz Primordial y las ruedas de Ezequiel vistiéndote; el cielo es cosa de las alas]"
-		Linea2: "[c/D9B3FF:LA BRASA DEL ECLIPSE, EL ANILLO RÚNICO DORSAL y EL BRILLO DE LOS SOLES RÚNICOS — el humo negro y oro, la triple corona de conjuro y los destellos de cuatro puntas]"
-		Linea3: "[c/9FA8DA:+40 de maná, +8% daño mágico, +4% crítico mágico, +2 regeneración, +8% daño melé, +3% crítico melé y +3 defensa — el Sello del Génesis y los Anillos del Sol Rúnico]"
-		Linea4: "[c/B96EEA:EL AURA DEL VACÍO — el campo invisible de 19 tiles que viste a los impíos con la quemadura del vacío exterior, y mientras arden: +10% ataque y +10 defensa]"
-		Linea5: "[c/78788C:«Todo lo que el libro ha dado, en un solo cuerpo — la forma que no se apaga.»]"
+		Linea1: "[c/D9B3FF:LAS DOS LUCES — el aura de la Luz Primordial y las ruedas de Ezequiel]"
+		Linea2: "[c/D9B3FF:LA BRASA DEL ECLIPSE, EL ANILLO RÚNICO DORSAL y LOS SOLES RÚNICOS]"
+		Linea3: "[c/9FA8DA:+40 maná, +8% daño mágico, +4% crít. mágico, +2 regen, +8% melé, +3% crít. melé, +3 defensa]"
+		Linea4: "[c/B96EEA:EL AURA DEL VACÍO — 19 tiles: quema a los impíos; mientras arden: +10% ataque y +10 defensa]"
+		Linea5: "[c/78788C:«La forma que no se apaga.»]"
 	}
 
 	BolsaFormaEterna: {
@@ -2457,11 +2457,16 @@ Items: {
 	}
 
 	AlasValquiriaLisa: {
-		// v6.137 — LA COPIA LISA (la letra: «en la otra intenta darle una
-		// forma lisa a las plumas y no toques nada mas»): las plumas dejan
-		// de ser tiras — la superficie continua del borde maestro.
+		// v6.139 — RUNES ONLY: the body died — the edge runes ARE the wings.
 		DisplayName: Valquiria Lisa
-		Tooltip: Las plumas de la Valquiria fundidas en UNA vela lisa y continua
+		Tooltip: Solo runas — la caligrafía del borde maestro como alas
+	}
+
+	AlasRunicas: {
+		// v6.139 — THE WING MADE OF WRITING: the swarm — leading edge,
+		// sail and tips drawn in glyphs, the GREATER rune on each tip.
+		DisplayName: Alas Rúnicas
+		Tooltip: EL ALA HECHA DE ESCRITURA — el borde, la vela y las puntas en glifos del futhark, con la runa MAYOR en cada punta. Vuelo 240 · sin daño de caída · se pliega ante alas reales.
 	}
 
 	AlasValquiriaRunica: {
@@ -3065,7 +3070,7 @@ Furia: {
 	IndicadorTitulo: Furia del grimorio
 	IndicadorTituloNivel: Furia del grimorio · NIVEL {0}
 	Oleada: Oleada {0} de {1} — el grimorio escupe a su comida. XP ×{2} en esta oleada.
-	OleadaNivel: Oleada {0} de {1} (furia de NIVEL {2}) — el grimorio escupe a su comida. XP ×{3} en esta oleada.
+	OleadaNivel: Oleada {0} de {1} · furia {2} · XP ×{3}
 	NivelArranque: EL FESTÍN ES DE NIVEL {0}: {1} oleadas de hambre. Vence… y la furia crecerá.
 	NivelVencido: "{0} VENCIÓ la furia de nivel {1} — la próxima será de NIVEL {2}. El libro toma nota… y sonríe."
 	OleadaFinal: OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.
@@ -4065,16 +4070,16 @@ PrismaInterior: {
 	BotonVolver: VOLVER AL MUNDO REAL
 	BotonInvocar: INVOCAR A AETHON
 	YaVive: AETHON YA CAMINA POR EL INTERIOR
-	Leyenda: La llamada: el altar se materializa y EL GRIMORIO flota justo encima — de la ceremonia nacen los fragmentos
+	Leyenda: El altar se materializa y EL GRIMORIO flota encima — de la ceremonia nacen los fragmentos
 	NombreCorto: El Prisma del Eterno
 	NombrePilar: El Pilar Prisma — la salida del llano
 	OleadaTitulo: LA OLEADA DE HAMBRE
 	OleadaNivel: Nivel {0} de {1}
-	OleadaPista: desbloquea niveles completando la oleada FUERA del interior (tu máximo: {0})
+	OleadaPista: sube de nivel completándola FUERA del interior (tu máximo: {0})
 	OleadaLanzar: LANZAR LA OLEADA · NIVEL {0}
 	OleadaCorre: LA OLEADA YA CORRE POR EL CUERPO…
-	JefesTitulo: LOS JEFES DEVORADOS — LA ARENA DEL INTERIOR
-	JefesVacio: aún no has devorado jefes — mátalos con el grimorio primero
+	JefesTitulo: LA ARENA DEL INTERIOR — LOS DEVORADOS
+	JefesVacio: aún no hay jefes devorados
 	JefePoder: Nv {0} · {1}%
 	PoderCrece: ✦ {0} cayó en la arena ({1} veces): su próxima versión nace al {2}%
 }
@@ -4086,7 +4091,7 @@ Altar: {
 	Subtitulo: consagra la ofrenda — arma · material · esencias
 	SlotVacio: ofrenda
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
-	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni dinero — LAS ESENCIAS SÍ: el Eterno las devora
+	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
 	ListaMaterial: Material listo — gana solo su etiqueta
 	// v6.121 — LA OFRENDA QUE ES EL PAGO (la letra: «intento colocar
@@ -4104,9 +4109,9 @@ Altar: {
 	// falta, ademas debe decir como conseguiras esencia» — las tres
 	// secciones de la ventana nueva (GANA · EL SELLO · CÓMO CONSEGUIR).
 	GanaTitulo: GANA
-	GanaArma: Arma → +5% a TODAS sus estadísticas y su etiqueta junto al nombre
+	GanaArma: Arma → +5% a TODAS sus stats y su etiqueta
 	GanaMaterial: Material → SOLO su etiqueta junto al nombre
-	GanaEsencias: Esencias del Eterno → DEVORADAS: +1 a la puerta por cada una (las {0} la abren)
+	GanaEsencias: Esencias → +1 a la puerta por cada una (las {0} la abren)
 	SelloTitulo: EL SELLO
 	SelloCuesta: Cuesta: {0} Esencias del Eterno
 	SelloLlevas: Llevas: {0}
@@ -4118,17 +4123,20 @@ Altar: {
 	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
 	ComoJefes: • Los jefes sueltan de 1 a 10 (casi siempre 1)
 	ComoOleadas: • ¡Las OLEADAS DE HAMBRE suben la probabilidad!
-	ComoEstatuas: • Las ESTATUAS no alimentan: si el grimorio mata a una criatura nacida de una estatua, su hambre SUBE +0,1%
-	ComoNota: (las esencias empiezan a caer tras LA LLEGADA del grimorio)
+	ComoEstatuas: • Las ESTATUAS no alimentan: su hambre SUBE +0,1%
+	ComoNota: (las esencias caen tras LA LLEGADA del grimorio)
 	// v6.91 — LA LETRA: «no es necesario llevar la cuenta en el chat,
 	// para eso dejarlo en el altar» — el chat SOLO AVISA.
 	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
 	// v6.137 — THE ONE-ALTAR LAW.
-	YaHayUno: ✦ Ya vive UN ALTAR DE CONSAGRACIÓN en este mundo — el Eterno solo escucha a uno. Recógelo si quieres moverlo.
-	Desactivado: ✦ Este altar está DESACTIVADO — el que funciona es otro (búscalo en el mapa: dice ACTIVO).
+	YaHayUno: ✦ Solo puede vivir UN altar — el Eterno escucha a uno. Recoge el otro para moverlo.
+	Desactivado: ✦ Este altar está DESACTIVADO — el mapa dice cuál es el ACTIVO.
 	Promovido: El altar recogido… y otro asciende: ESTE es el altar activo ahora.
-	DesactivadoCorto: Altar DESACTIVADO (otro es el activo)
+	DesactivadoCorto: Altar DESACTIVADO
+	ActivoSufijo: (ACTIVO)
+	DevoradoSufijo: (devorado por el grimorio)
+	DevoradoAnuncio: ✦ El grimorio devoró un altar inactivo — solo el altar ACTIVO permanece.
 	NoInterior: ✦ El altar no vive dentro del libro — el interior solo tiene su PILAR PRISMA.
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	Devorar: DEVORAR
@@ -4140,11 +4148,11 @@ Altar: {
 	// the button that swallows.
 	MundoTitulo: EL MUNDO INTERIOR DEL ETERNO
 	MundoProgreso: Esencias consagradas en el altar: {0}/{1}
-	MundoPista: (cuando la cuenta llegue a las MIL, el altar mismo abrirá la puerta al interior del libro)
-	MundoAbierta: Las mil esencias están pagadas: el altar YA PUEDE devorar al portador y llevarlo al interior.
+	MundoPista: (con las MIL esencias pagadas, el altar abre la puerta al interior)
+	MundoAbierta: Las mil pagadas: el altar YA puede devorarte y llevarte al interior.
 	MundoPuerta: IR AL MUNDO INTERIOR
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
-	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
+	LeyendaSello2: (esencias y dinero no necesitan sello)
 }
 
 Arbol: {
