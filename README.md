@@ -1,8 +1,8 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
-> **v6.136 — LA PURGA DE LAS DOS ARMAS + EL MUÑECO DE LA CASA** —
-> [release 445612303](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136)
-> (md5 `c083e217dd39955ae63d119acb72e4bf`, 521 entradas, CDN verificado byte a byte)
+> **v6.137 — EL PILAR DEL CUERPO DEL DIOS: LA ARENA INTERIOR** —
+> [release 445870013](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.137)
+> (md5 `96d9c3029ea013bac2639545257dbfad`, 523 entradas, CDN verificado byte a byte)
 >
 > **⚠️ PRIMER LECTOR — IA O HUMANO: empieza por [`MAESTRO.md`](MAESTRO.md).**
 > Es el documento único de verdad: las reglas de la casa, el protocolo de
@@ -64,7 +64,7 @@ GRIMORIO ETERNO**, el jefe final de 5 fases.
 | Archivo | Contenido | Para quién |
 |---|---|---|
 | **MAESTRO.md** | **EL LIBRO MAESTRO**: reglas de la casa, protocolo, arquitectura, entorno, gates, técnicas, librerías, recursos, herramientas, cronología | RETOMAR TRABAJO — leer PRIMERO |
-| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.136): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
+| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.137): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
 | **EFECTOS-Y-LIBRERIAS.md** | **EL CÓDICE VISUAL Y SONORO**: las 78 librerías VFX, los shaders, las texturas de efectos y las reglas | Crear o tocar CUALQUIER efecto |
 | **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de los sistemas con mapa de archivos | Entender CÓMO funciona algo |
 | **CARACTERISTICAS.md** | Inventario total de contenido | Saber QUÉ existe |
@@ -95,7 +95,7 @@ GRIMORIO ETERNO**, el jefe final de 5 fases.
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── MAESTRO.md                 ← EL LIBRO MAESTRO (leer primero)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.136)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.137)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # 462 .cs: VFX (78 librerías), Weapons, Items, Systems…
 │   │   └── Effects/           # Texturas procedurales (66) + Bruma + 4 shaders (.fx+.fxc)

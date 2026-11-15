@@ -34,7 +34,7 @@ puedas averiguar tú mismo del repo.
      arquitectura, entorno, gates, técnicas, las 78 librerías VFX, recursos,
      herramientas y cronología. **Si algo contradice a otro doc, manda MAESTRO.**
    - `STABLE-SNAPSHOT.md` — el estado exacto de la última versión publicada
-     (ahora v6.136) y los pendientes.
+     (ahora v6.137) y los pendientes.
    - Las 3 primeras entradas de `CHANGES.md` — las últimas letras del usuario
      (cada versión nace de SU petición textual).
    - Antes de tocar CUALQUIER efecto: `EFECTOS-Y-LIBRERIAS.md`.
@@ -68,21 +68,24 @@ puedas averiguar tú mismo del repo.
 - **Entregables**: SIEMPRE a `/home/z/my-project/download/` (el .tmod, sims,
   informes). El usuario solo ve esa carpeta.
 
-## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.136)
+## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.137)
 
-- **Versión**: 6.136 (`AethonMod/build.txt`) — publicada como
-  [release 445612303](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.136),
-  md5 `c083e217dd39955ae63d119acb72e4bf`, 521 entradas en el .tmod.
-- **Última versión (v6.136)**: LA PURGA DE LAS DOS ARMAS DE INVESTIGACIÓN
-  (Arbitrador II + El Principio y el Fin, con todo su árbol: 13 archivos +
-  4 carpetas) + EL LAVADO de las menciones en los que se quedan + EL MUÑECO
-  DE PRUEBAS con sprite propio de la SForja (sin texturas del juego base) +
-  LA VERIFICACIÓN INTEGRAL: **0 referencias externas** en todo el código y
-  la localización (la deuda de `ANALISIS-REFERENCIAS-EXTERNAS.md` quedó
-  RESUELTA — la carpeta Investigaciones ahora es 100 % contenido de la
-  casa: Mirada del Eterno, Cetro de las Dagas, Códice, motor de píxeles).
-- **Sin deudas externas**: el proyecto no debe NADA a nadie — todo el
-  arte, la música y el código son de la casa.
+- **Versión**: 6.137 (`AethonMod/build.txt`) — publicada como
+  [release 445870013](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.137),
+  md5 `96d9c3029ea013bac2639545257dbfad`, 523 entradas en el .tmod.
+- **Última versión (v6.137) — EL PILAR DEL CUERPO DEL DIOS**: las DOS
+  VALQUIRIAS (estilos 12 sin plumas · 13 lisa) · LOS COLMILLOS de la forja
+  en las cinco dagas del Cetro · EL MUÑECO (receta 5+5 · el círculo plano
+  murió → BrumaFX · 999 en el regalo) · LA LEY DEL ALTAR ÚNICO (un activo
+  por mundo: rebote · promoción · apagado · el libro nace ENCIMA — cima−40)
+  · EL INTERIOR LIMPIO (ni altares ni grimorios: solo el pilar) · EL PILAR
+  NUEVO (ventana medida sin desbordes · LA OLEADA a elección 1..FuriaNivel
+  — desbloquear es completar FUERA · LA ARENA de jefes devorados: aura de
+  oleada + 25%/kill interior persistente + IA 1-5 normal/6+ experto
+  (préstamo del modo maestro)/8+ agresiva (coreografía temática)/10 combos;
+  jefes del mod solo poder+experto).
+- **Sin deudas externas**: todo el arte, la música y el código son de la
+  casa (verificado v6.136, vigente).
 - Entorno: oráculo/genera_oraculo_v6121.sh · restauración:
   scripts/restaura_entorno_v6121.sh · build:
   `/tmp/tml/start-tModLoader.sh -build /home/z/my-project/mod/AethonMod`.
