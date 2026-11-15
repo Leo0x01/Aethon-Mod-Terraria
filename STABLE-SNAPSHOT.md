@@ -1,33 +1,26 @@
-# SNAPSHOT ESTABLE — v6.138 — LA CURA DEL MAPA ASESINADO
+# SNAPSHOT ESTABLE — v6.139 — LA SESIÓN DE LAS NUEVE CURAS
 
-> **PUBLICADA — [release 445918299](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.138) + CDN verificado byte a byte (md5 `c21002edea9cfe45e4235282a37e86a4`, 19.357.744 B, 523 entradas)**
+> **PUBLICADA — [release 445948793](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.139) + CDN verificado (md5 `ec353a3e45a8442a2c416eab46220fd3`, 19.358.919 B, 524 entradas)**
 
-## LA LETRA (sesión 19)
+## LA LETRA (sesión 20)
 
-«revisa, un error cerro el juego, debe ser lo ultimo añadido al log» + el client.log: **Main engine crash** en `DrawToMap_Section → IndexOutOfRangeException` al recargar el mundo real (13413) después de visitar el mundo interior con la v6.136/137.
+«mejora los textos del altar… los textos del prisma del eterno se desbordan… el grimorio parece que no esta devorando la primera muerte de los jefes… el altar principal no se muestra en el mapa, los altares inactivos sean devorados… las alas valquiria lisa solo muestra las runas… alas runicas… analiza que todos los sistemas que calculan daños lo haga correctamente… mejora el texto de info de La Forma Eterna… dame una idea sobre que se podria hacer con todo el texto del altar» + el client.log (un error en la última entrada).
 
-## EL CRIMEN COMPLETO (contra el decompile REAL)
+## LAS SIETE ENTREGAS
 
-1. **02:02:16** (dentro del interior): el AUTOSAVE del jugador (10 min: `DoUpdate_AutoSave → saveToonWhilePlaying → Player.SavePlayer → InternalSaveMap → Main.Map.Save()`) corrió DENTRO del interior — **NO pasa por `WorldFile.SaveWorld`**, así que el cerrojo v6.114 no lo veía.
-2. `MapHelper.InternalSaveMap` escribe `<carpetaJugador>/<Main.worldID>.map` — y `clearWorld` NO cambia `worldID` → **el mapa 800×600 del interior SOBREESCRIBIÓ el .map del mundo real** (mismo nombre de archivo).
-3. **04:03:25**: al cargar el mundo real, `WorldMap.Load()` deserializa → `SetTile` fuera de rango (excepción SILENCIOSA del hilo) → el mapa queda roto → el primer frame `DrawToMap_Section` → **FATAL**. (Detalle letal: `Main.Map` solo nace en el CONSTRUCTOR de Main — el mapa chico sobrevive al menú y a TODO.)
+1. **EL ERROR DEL LOG CURADO** — DummyNegroNPC pintaba `BrumaFX.Puff` con el lote CERRADO (`Draw without Begin`): el PreDraw cerraba el lote del pase de NPCs y llamaba Puff a ciegas. Cura: `BeginMass` explícito + `RestaurarLoteVanilla` de salida (el contrato v6.56.1).
+2. **EL FESTÍN CURADO** — la regla v6.97 («solo jefes del checklist») era OBLIGATORIA para todas las cenas, pero la escalera solo tiene puertas de jefe en niveles 3,5,8,10,13,20… → con despertar intermedio NINGUNA primera cena arrancaba. Cura: 1ª muerte cena SIEMPRE; repeticiones por checklist.
+3. **EL ALTAR EN EL MAPA + DEVORADO** — nameFunc por coordenada («(ACTIVO)»/«(devorado por el grimorio)» — la API real del decompile) + los altares inactivos DEVORADOS en RandomUpdate (cuerpo 2×3, sin botín).
+4. **TEXTOS RECORTADOS** — altar, prisma y Forma Eterna en 3 idiomas: la misma info, la mitad de texto.
+5. **LAS ALAS DE ESCRITURA** — Valquiria Lisa = `SoloRunas` (el cuerpo muere; las runas SON las alas) + **Alas Rúnicas nuevas** (estilo 14): el enjambre — borde maestro tangente con pulso viajero, vela de runas menores, runa MAYOR (1.9×) por punta. En la bolsa, 3 idiomas.
+6. **AUDITORÍA DE DAÑO** — convención vanilla verificada en el decompile (`lifeRegenCount`; golpe de num con −120·num): aura 1→10+bono por cercanía con 2→6 ticks/s EXACTO · quemadura 1% vida máx/medio s EXACTO · +10 def/+10% daño/−15% maná ✔ · Forma Eterna 7 stats ✔ · grimorio multiplicativo con topes ✔ · esencias +0,1%/u ≤+100% ligadas al libro ✔. TODO SANO.
+7. **EL PERGAMINO DEL ALTAR** — mockup fullHD (`pergamino_altar_mockup_fullhd.png` en download/): TODA la info del altar en un pergamino del grimorio. PROPUESTA PENDIENTE DE LA LETRA: si le gusta al usuario, la próxima sesión lo implementa como ventana real del juego (ítem consumible «El Pergamino del Altar» o botón «?» en el panel).
 
-## LA CURA TRIPLE (v6.138)
+## PARA VERIFICAR EN JUEGO
 
-1. **EL CERROJO DEL MAPA**: hook `Terraria.Map.On_MapHelper.SaveMap` — mientras el interior vive, NINGÚN guardado de mapa corre (el mismo patrón del cerrojo de SaveWorld).
-2. **EL MAPA QUE RENACE**: `OnWorldLoad` (dentro de `LoadWorld_Version2`, ANTES de deserializar) compara `Main.Map.MaxWidth/MaxHeight` contra el mundo — si no calzan, el mapa RENACE con las dims correctas antes del primer frame.
-3. **LA SONDA MEJORADA**: `BlindarMapa` compara dimensiones directamente (la sonda por excepción queda de red).
-
-## LA RECUPERACIÓN DEL MUNDO DEL USUARIO
-
-Con la v6.138, el mundo 13413 **vuelve a cargar solo** — el mapa dañado renace limpio. Solo se pierde la exploración del minimapa (se rehace caminando). La partida está intacta. (Alternativa manual: borrar el `.map` de la carpeta del jugador.)
-
-## PARA VERIFICAR
-
-- Oráculo **0/0** · build REAL **0/0** (523 entradas, md5 `c21002ed…`) · **GUARDIÁN: TODO VIVE ✔** · **AUDIT de la cura ✔** · **headless 0 excepciones (v6.138)**
-
-## PENDIENTE PARA LA PRÓXIMA SESIÓN
-
-1. **Verificar en juego**: entrar al interior, esperar >10 min DENTRO (el autosave no debe escribir el .map — el log no debe mostrar "Guardando datos de mapa" dentro), salir por el pilar Y TAMBIÉN por guardar-y-salir, recargar el mundo → sin crash.
-2. El mundo 13413 del usuario debe cargar limpio con la v6.138 (el mapa renace).
-3. Doc-rot conocida: CARACTERISTICAS.md y DISEÑO_DEL_MOD.md desactualizados en conteos — MAESTRO.md lleva los datos vigentes.
+- El muñeco del banco de pruebas con su bruma violeta viva (y el log SIN la excepción silenciosa).
+- Matar un jefe NUEVO (nunca devorado) con cualquier despertar → LA CENA ARRANCA (se detiene a 100 HP).
+- El minimapa: el altar dice «(ACTIVO)»; colocar un segundo altar → el grimorio lo devora con el anuncio.
+- Los paneles del altar y el prisma: textos cortos, nada desborda.
+- Valquiria Lisa: solo runas · Alas Rúnicas (bolsa de alas): el enjambre completo.
+- Doc-rot conocida: CARACTERISTICAS.md/DISEÑO_DEL_MOD.md desactualizados — MAESTRO.md manda.

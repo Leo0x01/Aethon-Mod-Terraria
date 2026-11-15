@@ -1,9 +1,9 @@
-# EL LIBRO MAESTRO DE LA CASA — AethonMod v6.138
+# EL LIBRO MAESTRO DE LA CASA — AethonMod v6.139
 
 > **EL DOCUMENTO ÚNICO DE VERDAD.** Todo lo que una IA (o un humano) necesita para
 > retomar, entender y continuar este proyecto está aquí. Si este documento
-> contradice a otro, **manda este documento**. Última actualización: **v6.138**
-> (2026-11-15, release GitHub 445918299). Los .md especializados siguen siendo
+> contradice a otro, **manda este documento**. Última actualización: **v6.139**
+> (2026-11-15, release GitHub 445948793). Los .md especializados siguen siendo
 > válidos como referencia de detalle; este es el índice vivo y la norma superior.
 
 ---
@@ -17,11 +17,11 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.138** (vive en `AethonMod/build.txt`, línea `version = 6.138`) |
-| **Última release** | [v6.138](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.138) — md5 `c21002edea9cfe45e4235282a37e86a4`, 19.357.744 B, 523 entradas |
+| **Versión actual** | **6.139** (vive en `AethonMod/build.txt`, línea `version = 6.139`) |
+| **Última release** | [v6.139](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.139) — md5 `ec353a3e45a8442a2c416eab46220fd3`, 19.358.919 B, 524 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
-| **Tamaño** | 456 archivos .cs · 500 png · 78 librerías VFX · 446 herramientas · 41 versiones publicadas en CHANGES.md |
+| **Tamaño** | 456 archivos .cs · 500 png · 78 librerías VFX · 446 herramientas · 42 versiones publicadas en CHANGES.md |
 
 **La premisa**: el jugador es el portador del Grimorio Eterno, un libro vivo
 devorador de jefes. El mod crece POR SESIONES con el usuario (cada versión nace

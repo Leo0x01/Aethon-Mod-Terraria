@@ -1,8 +1,8 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
-> **v6.138 — LA CURA DEL MAPA ASESINADO** —
-> [release 445918299](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.138)
-> (md5 `c21002edea9cfe45e4235282a37e86a4`, 523 entradas, CDN verificado byte a byte)
+> **v6.139 — LA SESIÓN DE LAS NUEVE CURAS** —
+> [release 445948793](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.139)
+> (md5 `ec353a3e45a8442a2c416eab46220fd3`, 524 entradas, CDN verificado byte a byte)
 >
 > **⚠️ PRIMER LECTOR — IA O HUMANO: empieza por [`MAESTRO.md`](MAESTRO.md).**
 > Es el documento único de verdad: las reglas de la casa, el protocolo de
@@ -64,7 +64,7 @@ GRIMORIO ETERNO**, el jefe final de 5 fases.
 | Archivo | Contenido | Para quién |
 |---|---|---|
 | **MAESTRO.md** | **EL LIBRO MAESTRO**: reglas de la casa, protocolo, arquitectura, entorno, gates, técnicas, librerías, recursos, herramientas, cronología | RETOMAR TRABAJO — leer PRIMERO |
-| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.138): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
+| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual (v6.139): qué se entregó y cómo se verificó | Retomar trabajo — segundo |
 | **EFECTOS-Y-LIBRERIAS.md** | **EL CÓDICE VISUAL Y SONORO**: las 78 librerías VFX, los shaders, las texturas de efectos y las reglas | Crear o tocar CUALQUIER efecto |
 | **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de los sistemas con mapa de archivos | Entender CÓMO funciona algo |
 | **CARACTERISTICAS.md** | Inventario total de contenido | Saber QUÉ existe |
