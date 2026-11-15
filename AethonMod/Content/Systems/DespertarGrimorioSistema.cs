@@ -978,8 +978,15 @@ namespace AethonMod.Content.Systems
                     global::AethonMod.Content.Globals.AlmaEternoGlobalItem.BancoCobrarMonedas(
                         grimorio, DespertarGrimorio.MonedasPara(nivel));
                     int porCobrar = 2;
-                    int[] armasCobro = DespertarGrimorio.ArmasDelNivel[
-                        System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
+                    // v6.140 — LA ESCALERA LARGA NO PIDE ARMAS: las
+                    // tablas de armas/materiales viven solo en las 100
+                    // puertas de la caza (índices 1..100); los peldaños
+                    // 101..1000 pagan ESENCIAS + MONEDAS (la Forma
+                    // Eterna se construye con lo devorado, no con
+                    // hierros ajenos).
+                    int[] armasCobro = nivel <= 100
+                        ? DespertarGrimorio.ArmasDelNivel[System.Math.Max(1, nivel)]
+                        : null;
                     if (armasCobro != null)
                     {
                         for (int i = 0; i < armasCobro.Length && porCobrar > 0; i++)
@@ -993,7 +1000,8 @@ namespace AethonMod.Content.Systems
                             }
                         }
                     }
-                    int[][] gruposCobro = DespertarGrimorio.GruposMaterialesDe(nivel);
+                    int[][] gruposCobro = nivel <= 100
+                        ? DespertarGrimorio.GruposMaterialesDe(nivel) : null;
                     for (int g = 0; g < gruposCobro.Length && porCobrar > 0; g++)
                     {
                         int cuotaG = DespertarGrimorio.CantidadMateriales(nivel, g);
@@ -1070,6 +1078,41 @@ namespace AethonMod.Content.Systems
                         EcoRed.AnunciarAlPortador(p, hito, new Color(255, 215, 120));
                 }
 
+                // ============================================================
+                //  v6.140 — LA CONSTRUCCIÓN DE LA FORMA ETERNA (la letra:
+                //  «desde el nivel 100 se ira construyendo la forma eterna
+                //  pedazo a pedazo, y cuando llega a nivel 1000, la forma
+                //  eterna completa se manifiesta dando el aura del vacio
+                //  al jugador»): cada 100 niveles una PIEZA del panteón
+                //  entra DIRECTO al inventario del portador (la regla de
+                //  la casa: lo nuevo llega). Al 1000: LA MANIFESTACIÓN —
+                //  la explosión de luz que borra la pantalla.
+                // ============================================================
+                if (nivel > 100 && nivel < 1000 && nivel % 100 == 0)
+                {
+                    int pieza = PiezaDeLaForma(nivel);
+                    if (pieza > 0 && p != null && p.active)
+                    {
+                        p.QuickSpawnItem(p.GetSource_GiftOrReward(), pieza, 1);
+                        EcoRed.SincronizarDevoracion(p);
+                    }
+                }
+                if (nivel >= 1000 && p != null && p.active)
+                {
+                    // EL UNO QUE VISTE TODO — la pieza final: LA FORMA
+                    // ETERNA entra… y con ella EL AURA DEL VACÍO (el
+                    // efecto activo de la Forma Eterna la enciende sola).
+                    p.QuickSpawnItem(p.GetSource_GiftOrReward(),
+                        ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
+                    // LA MANIFESTACIÓN — la explosión de luz (una sola
+                    // vez POR LIBRO: la marca vive en el alma).
+                    if (!alma.ManifestacionVivida)
+                    {
+                        alma.ManifestacionVivida = true;
+                        ManifestacionDeLaForma(p);
+                    }
+                }
+
                 // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez POR
                 // LIBRO — cada Eterno escupe al suyo).
                 if (nivel == 20 && !alma.PetDelDespertar)
@@ -1090,6 +1133,115 @@ namespace AethonMod.Content.Systems
             }
             catch { }
         }
+
+        /// <summary>v6.140 — LA PIEZA DE LA FORMA ETERNA de cada peldaño
+        /// de construcción (200→900). El panteón se entrega en el ORDEN
+        /// DE LA BOLSA (los ocho + el que los viste): la Brasa, el
+        /// Anillo, el Sello, los Anillos del Sol, el Brillo, la
+        /// Ascendida, las Ofanim… y el Aura del Vacío al 900 (la
+        /// víspera de la manifestación: el portador ya VIVE el octavo
+        /// poder antes del estallido).</summary>
+        private static int PiezaDeLaForma(int nivel) => nivel switch
+        {
+            200 => ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>(),
+            300 => ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>(),
+            400 => ModContent.ItemType<Items.Accessories.SelloGenesisItem>(),
+            500 => ModContent.ItemType<Items.Accessories.AnillosSolRunicoItem>(),
+            600 => ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>(),
+            700 => ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(),
+            800 => ModContent.ItemType<Items.Cosmetics.FormaAscendidaOchoItem>(),
+            900 => ModContent.ItemType<Items.Accessories.AuraDeJuicio2Item>(),
+            _ => -1,
+        };
+
+        /// <summary>v6.140 — LA MANIFESTACIÓN DE LA FORMA ETERNA (la
+        /// letra: «la manifestacion sera una explocion de luz sobre el
+        /// jugador que eliminara a cualquier enemigo en la pantalla de
+        /// un solo golpe, jefes incluidos y con su loot ya que es una
+        /// muerte valida»): el estallido de luz del cuerpo completo.
+        /// TODO lo que viva en la PANTALLA muere con StrikeNPC (la
+        /// muerte VÁLIDA: loot, lápidas, bestiario, contadores de la
+        /// casa) — jefes incluidos (el festín nunca interrumpe: se
+        /// respeta DevorarEstado). Es el NACIMIENTO del dios.</summary>
+        private static void ManifestacionDeLaForma(Player p)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+
+                // EL TEATRO DEL ESTALLIDO (la máquina con pantalla)
+                if (!Main.dedServ)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item122.WithPitchOffset(-0.2f), p.Center);
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item89.WithPitchOffset(0.3f), p.Center);
+                }
+
+                // EL BARRIDO DE LA PANTALLA: todo lo VIVO en el
+                // rectángulo de la cámara muere con UN GOLPE VÁLIDO.
+                int x0 = (int)(Main.screenPosition.X / 16f) - 4;
+                int y0 = (int)(Main.screenPosition.Y / 16f) - 4;
+                int x1 = (int)((Main.screenPosition.X + Main.screenWidth) / 16f) + 4;
+                int y1 = (int)((Main.screenPosition.Y + Main.screenHeight) / 16f) + 4;
+                Rectangle zona = new Rectangle(
+                    x0, y0, x1 - x0, y1 - y0);
+
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active) continue;
+                    if (!n.Center.Between(zona.TopLeft() * 16f, zonasBottomRight(zona))) continue;
+                    // LO SAGRADO NO SE TOCA: el festín en curso sigue su
+                    // cine (DevorarEstado), los pueblos y los tuyos viven.
+                    if (n.townNPC || n.friendly) continue;
+                    if (n.TryGetGlobalNPC<Globals.FaucesGlobalNPC>(out var fauces) &&
+                        fauces.DevorarEstado != 0) continue;
+
+                    // LA MUERTE VÁLIDA (la API de esta era del tML,
+                    // verificada en el decompile): CalculateHitInfo →
+                    // StrikeNPC(HitInfo) dispara el golpe mortal
+                    // completo — loot, lápidas, bestiario, los
+                    // contadores de la casa (Fauces, CazaJefes…).
+                    var golpe = n.CalculateHitInfo(int.MaxValue, 0);
+                    golpe.InstantKill = true;
+                    n.StrikeNPC(golpe);
+                    if (Main.netMode == NetmodeID.Server)
+                        Terraria.NetMessage.SendStrikeNPC(n, in golpe);
+                    n.netUpdate = true;
+                }
+
+                // EL VELO DE LUZ (la onda del nacimiento — el destello
+                // de la revelación de la casa, sobre TODO el mundo por
+                // una vez)
+                if (!Main.dedServ)
+                {
+                    for (int k = 0; k < 90; k++)
+                    {
+                        float ang = k / 90f * MathF.PI * 2f;
+                        Dust d = Dust.NewDustPerfect(p.Center,
+                            DustID.Enchanted_Gold,
+                            new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                                Main.rand.NextFloat(6f, 16f),
+                            200, new Color(255, 236, 190), Main.rand.NextFloat(0.8f, 1.4f));
+                        d.noGravity = true;
+                    }
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Despertar.ManifestacionTexto"),
+                        new Color(255, 236, 190));
+                }
+                if (Main.netMode == NetmodeID.Server)
+                    EcoRed.AnunciarAlPortador(p,
+                        "Mods.AethonMod.Despertar.ManifestacionTexto",
+                        new Color(255, 236, 190));
+            }
+            catch { }
+        }
+
+        /// <summary>La esquina inferior-derecha de la zona en píxeles (el
+        /// between de la manifestación pide esquinas del MISMO espacio).</summary>
+        private static Vector2 zonasBottomRight(Rectangle zona)
+            => new Vector2((zona.X + zona.Width) * 16f, (zona.Y + zona.Height) * 16f);
 
         /// <summary>Un precio de cobre vuelto TEXTO de monedas (el formato
         /// de la casa: 1 de platino · 3 de oro · 50 de plata · 10 de cobre).</summary>

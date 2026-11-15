@@ -103,7 +103,11 @@ namespace AethonMod.Content.Globals
             if (!n.TryGetGlobalNPC<JefeInteriorGlobalNPC>(out var g)) return;
             g.EsInterior = true;
             g.TipoOriginal = n.type;
-            g.NivelIA = Math.Max(1, Math.Min(10, nivelIA));
+            // v6.140 — EL NIVEL SIN TOPE (la letra: «que ademas no
+            // tengan limites de nivel»): el poder de la arena crece por
+            // SIEMPRE — cada muerte dentro del interior hace a la
+            // siguiente versión más poderosa, sin techo.
+            g.NivelIA = Math.Max(1, nivelIA);
             g.AplicarStats(n);
             n.netUpdate = true;
         }
@@ -128,8 +132,21 @@ namespace AethonMod.Content.Globals
                 _defBase = n.defense;
             }
             float mult = Multiplicador(NivelIA - 1);
-            n.lifeMax = Math.Max(1, (int)(_vidaBase * mult));
-            n.life = n.lifeMax;
+            int vidaMaxNueva = Math.Max(1, (int)(_vidaBase * mult));
+            // v6.140 — LA VIDA YA NO SE RESTAURA (la letra: «en el
+            // mundo interior con los jefes… estos se regeneran
+            // constantemente eso no debe pasar»): el refresco periódico
+            // de stats clavaba life = lifeMax CADA 30 TICKS — el jefe
+            // era inmortal. AHORA: el lifeMax puede CRECER (un nivel
+            // nuevo), pero la vida ACTUAL solo se AJUSTA
+            // proporcionalmente si el máximo subió a mitad de pelea
+            // (nunca se cura: el daño hecho queda hecho).
+            if (vidaMaxNueva > n.lifeMax)
+            {
+                float fraccion = n.lifeMax > 0 ? (float)n.life / n.lifeMax : 1f;
+                n.life = Math.Max(1, (int)(vidaMaxNueva * fraccion));
+            }
+            n.lifeMax = vidaMaxNueva;
             if (_danoBase > 0) n.damage = (int)(_danoBase * mult);
             n.defense = _defBase + (int)(Math.Max(0, NivelIA - 1) * 2.5f);
             // LA TALLA EN LOS DEFAULTS DE LA IA (la lección v6.50.73:
@@ -221,13 +238,36 @@ namespace AethonMod.Content.Globals
                     if (_vidaBase > 0) AplicarStats(npc);
                 }
 
+                // === v6.140 — LA REGENERACIÓN DE LA ARENA (la letra:
+                //     «la regeneracion me gusto, hagamos que a partir
+                //     del nivel 10, estos puedan regenerarse a 1% de su
+                //     vida maxima cada segundo y que con cada nivel esa
+                //     regeneracion aumente en 0.1% de su vida maxima»):
+                //     1% por segundo en el nivel 10, +0,1% por nivel
+                //     adicional — SIN TOPE. Es regen LICITA (vía
+                //     lifeRegen, la convención vanilla: 60 ticks =
+                //     1 s — nunca toca life directo, jamás interrumpe
+                //     el daño del jugador: solo suma lo que la vida
+                //     recupera sola). ===
+                if (NivelIA >= 10 && npc.life < npc.lifeMax && npc.life > 0)
+                {
+                    float porSegundo = 0.01f + 0.001f * (NivelIA - 10);
+                    int regenTicks = Math.Max(1, (int)(npc.lifeMax * porSegundo / 60f));
+                    if (npc.lifeRegen < regenTicks)
+                        npc.lifeRegen = regenTicks;
+                }
+
                 // === NIVEL 8+ (jefes vanilla): LOS ATAQUES TEMÁTICOS ===
                 // la coreografía del festín (cada jefe convoca a LOS
                 // SUYOS): prestada de OleadaNPC — nivel 10: SIN PAUSA.
                 if (NivelIA >= 8 && EsVanilla(npc.type))
                 {
                     _tickAtaque++;
-                    int cadencia = NivelIA >= 10 ? 36 : 60;
+                    // v6.140 — SIN TOPE: la cadencia APRIETA con cada
+                    // nivel sobre 10 (36 t base, −1 t cada 5 niveles,
+                    // piso 18 t — el combo eterno de la arena infinita).
+                    int cadencia = NivelIA >= 10
+                        ? Math.Max(18, 36 - (NivelIA - 10) / 5) : 60;
                     if (_tickAtaque >= cadencia)
                     {
                         _tickAtaque = 0;

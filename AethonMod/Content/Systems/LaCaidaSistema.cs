@@ -317,6 +317,17 @@ namespace AethonMod.Content.Systems
                 if (Main.gameMenu) return;
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
 
+                // v6.140 — LA LLEGADA JAMÁS NACE DENTRO DEL LIBRO (la
+                // letra: «al llegar al mundo interior el grimorio sigue
+                // haciendo la llegada, en el mundo interior no puede
+                // haber el evento de la llegada, puesto que es el mundo
+                // interior del mismo grimorio no puede aparecer el
+                // grimorio en el mapa»): los TRES caminos al cielo
+                // (primera noche · failsave del primer vecino · Tinta
+                // del Cometa) mueren mientras el interior viva — el
+                // libro NO puede caer dentro de sí mismo.
+                if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo) return;
+
                 // ============================================================
                 //  v6.97 — LOS MANDATOS PENDIENTES: el Eterno recogido dice
                 //  SU PALABRA DEL ALTAR a los ~4 s de la toma (primero
@@ -496,6 +507,9 @@ namespace AethonMod.Content.Systems
             try
             {
                 if (Main.netMode == NetmodeID.MultiplayerClient) return -1;
+                // v6.140 — dentro del interior ni la TINTA (el libro no
+                // cae dentro de sí mismo).
+                if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo) return -1;
                 if (p == null || !p.active || p.dead || string.IsNullOrEmpty(p.name)) return -1;
 
                 if (YaEsperaLibro(p.name)) return 1;
@@ -617,7 +631,24 @@ namespace AethonMod.Content.Systems
                 // libro nace donde el reconciliador lo BUSCA; flota solo:
                 // noGravity + noTileCollide + su bobbing propio)… y JAMÁS
                 // dos: si YA vive uno cerca, el cielo no insiste.
+                // v6.140 — LA CURA DEL FANTASMA DEL ALTAR (la letra:
+                // «solapando el altar hay otro grimorio, aunque este es
+                // invisible y solo se hace visible cuando el grimorio
+                // que tiene el jugador lo devora»): un libro YA VIVO en
+                // el MUNDO (cualquier rincón, no solo el radar del
+                // bobbing) es EL libro de ESTA era — el cielo NUNCA
+                // engendra un segundo Dormido mientras uno espere a su
+                // destinatario. El fantasma solapado era UN SEGUNDO
+                // Dormido nacido de una segunda bruma (la Tinta o el
+                // failsave del vecino pisando la primera noche).
                 if (BuscarLibroCerca(destino.X, destino.Y) != null) return;
+                for (int iL = 0; iL < Main.maxNPCs; iL++)
+                {
+                    NPC nL = Main.npc[iL];
+                    if (nL != null && nL.active &&
+                        nL.type == ModContent.NPCType<NPCs.GrimorioDormido>())
+                        return;   // ya hay UN libro esperando en el mundo
+                }
 
                 // v6.97 — EL ALTAR DEBAJO (la letra: «el grimorio ya
                 //     aparezca CON EL ALTAR DEBAJO en la llegada»): el

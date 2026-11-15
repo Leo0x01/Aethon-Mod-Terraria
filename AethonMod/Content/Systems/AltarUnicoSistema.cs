@@ -56,6 +56,35 @@ namespace AethonMod.Content.Systems
         {
             ActivoX = i;
             ActivoY = j;
+            // v6.140 — EL MAPA APRENDE EL ALTAR YA (la letra: «el altar
+            // activo no aparece en el mapa»): la cadena del minimapa
+            // (verificada en el decompile — WorldGen.UpdateMapTile →
+            // Map.UpdateType) SOLO pinta un tile cuya celda YA TIENE
+            // luz en el mapa (Main.Map[i,j].Light > 0) — y la luz del
+            // mapa solo la escribe el motor de luz en la franja de la
+            // CÁMARA (LegacyLighting escribe mapMinX/MaxX). Un altar
+            // registrado por LA LLEGADA (o tras el renacer del mapa de
+            // la v6.138) que el jugador nunca ha MIRADO de cerca nace
+            // INVISIBLE en el minimapa — para siempre. LA CURA: al
+            // registrar, las 6 celdas del mueble reciben su luz mínima
+            // (UpdateLighting con 40: visible sin quemar el fondo) y
+            // su TIPO (UpdateType) — el mapa entero aprende al altar
+            // en el mismo instante en que se convierte en EL ACTIVO.
+            try
+            {
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                {
+                    for (int dx = 0; dx < 2; dx++)
+                        for (int dy = 0; dy < 3; dy++)
+                        {
+                            int x = i + dx, y = j + dy;
+                            if (x < 0 || y < 0 || x >= Main.maxTilesX || y >= Main.maxTilesY) continue;
+                            Main.Map.UpdateLighting(x, y, Math.Max(Main.Map[x, y].Light, (byte)40));
+                            Main.Map.UpdateType(x, y);
+                        }
+                }
+            }
+            catch { }
         }
 
         /// <summary>EL ALTAR ACTIVO MURIÓ (lo picaron): si queda otro

@@ -465,8 +465,18 @@ namespace AethonMod.Content.Players
 
         /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
         public const int SegundosPorMomento = 75;
-        /// <summary>Momentos que tarden la furia (~5 minutos sin comer).</summary>
-        public const int MomentosParaFuria = 4;
+        /// <summary>v6.140 — LA FURIA AL 90% (la letra: «el grimorio
+        /// lanza el texto de tener hambre al 4%… las oleadas de hambre
+        /// solo deben aparecer a partir de 90% de hambre y al llegar al
+        /// 100% aparecer si o si con el llamado del grimorio»): la furia
+        /// YA NO estalla al 40% (los viejos 4 momentos de 10) — el
+        /// UMBRAL DE OLEADA es el 90% (momento 9) y el 100% (momento
+        /// 10, el tope) es SIEMPRE. Los momentos 1-8 son EL SUSURRO
+        /// (la voz del libro, informativa: «tengo hambre…» — sin
+        /// oleada, sin aura). EL AURA TAMBIÉN ESPERA: no hay «aura
+        /// rara» sin peligro real (la aura vive con MomentosHambre ≥ 9:
+        /// cuando el aura prende, la oleada YA está prometida).</summary>
+        public const int MomentosParaFuria = 9;
         /// <summary>El libro hambriento habla "a nivel alto" (25 = el segundo peldaño del festín).</summary>
         public const int NivelMinimoHambre = 25;
         /// <summary>Tope de momentos de hambre (= tope de oleadas).</summary>
@@ -1065,7 +1075,14 @@ namespace AethonMod.Content.Players
                 // — v6.48 por el PORTADOR (AuraPortadorHalo, el camino
                 // aditivo del halo-proyectil: el neón de verdad detrás del
                 // cuerpo). Las partículas corren en la AI del portador.
-                if (local && MomentosHambre > 0 && !Player.dead)
+                // v6.140 — EL AURA SOLO CON PELIGRO REAL: la ceniza
+                // del libro viste al portador SOLO cuando la furia está
+                // al umbral (90%+) — antes prendía con el 10% de hambre
+                // y parecía «un aura rara» sin explicación (la letra:
+                // «a veces al jugador le aparece un aura rara similar a
+                // la de las oleadas»). AHORA: aura encendida = la
+                // oleada YA puede estallar en cualquier chequeo.
+                if (local && MomentosHambre >= MomentosParaFuria && !Player.dead)
                 {
                     if (!EspiarPortador(0))
                     {

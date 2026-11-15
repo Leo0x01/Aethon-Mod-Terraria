@@ -60,9 +60,22 @@ namespace AethonMod.Content.UI
         private static Item _arma = new Item();
         private static bool _ultimoClicIzq;
         private static bool _ultimoEsc;
+        private static bool _ultimoP;
 
         /// <summary>¿El panel está abierto?</summary>
         public static bool Abierta => _abierta;
+
+        /// <summary>v6.140 — EL PERGAMINO DEL ALTAR (la letra: «dame
+        /// una idea sobre que se podria hacer con todo el texto del
+        /// altar… creando un libro de informacion»): el panel queda
+        /// MÍNIMO — toda la info vive en EL PERGAMINO (PergaminoUI, la
+        /// hoja con el ojo que mira al cursor). Se abre con la tecla P
+        /// mientras el panel vive (el atajo de la casa).</summary>
+        public static void AlternarPergamino()
+        {
+            if (PergaminoUI.Abierto) PergaminoUI.Cerrar();
+            else PergaminoUI.Abrir();
+        }
 
         /// <summary>EL ALTAR SE ABRE (o se cierra): lo llama el RightClick
         /// del tile — con la posición del altar (para la ley de la
@@ -672,8 +685,22 @@ namespace AethonMod.Content.UI
                 bool escAhora = Microsoft.Xna.Framework.Input.Keyboard
                     .GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape);
                 if ((hoverCerrar && clicNuevo) || (escAhora && !_ultimoEsc))
-                    CerrarDeVerdad();
+                {
+                    if (PergaminoUI.Abierto) PergaminoUI.Cerrar();
+                    else CerrarDeVerdad();
+                }
                 _ultimoEsc = escAhora;
+
+                // v6.140 — LA TECLA P: EL PERGAMINO (toda la info del
+                // altar vive en la hoja del libro — el ojo te mira).
+                bool pAhora = Microsoft.Xna.Framework.Input.Keyboard
+                    .GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.P);
+                if (pAhora && !_ultimoP && !PergaminoUI.Abierto)
+                {
+                    PergaminoUI.Abrir();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+                }
+                _ultimoP = pAhora;
 
                 return true;
             }

@@ -3299,6 +3299,16 @@ Despertar: {
 	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
 	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
 	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el daño de invocación del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
+	HitoPieza1: ✦ NIVEL 200 — LA FORMA ETERNA SE CONSTRUYE: LA BRASA DEL ECLIPSE entra al panteón.
+	HitoPieza2: ✦ NIVEL 300 — pieza 2/8: EL ANILLO RÚNICO DORSAL.
+	HitoPieza3: ✦ NIVEL 400 — pieza 3/8: EL SELLO DEL GÉNESIS.
+	HitoPieza4: ✦ NIVEL 500 — pieza 4/8: LOS ANILLOS DEL SOL RÚNICO.
+	HitoPieza5: ✦ NIVEL 600 — pieza 5/8: EL BRILLO DE LOS SOLES RÚNICOS.
+	HitoPieza6: ✦ NIVEL 700 — pieza 6/8: LA FORMA ASCENDIDA.
+	HitoPieza7: ✦ NIVEL 800 — pieza 7/8: LAS OFANIM — las ruedas de Ezequiel.
+	HitoPieza8: ✦ NIVEL 900 — pieza 8/8: EL AURA DEL VACÍO — la víspera de la manifestación.
+	HitoManifestacion: ✦✦ NIVEL 1000 — LA FORMA ETERNA SE MANIFIESTA ✦✦
+	ManifestacionTexto: ✦✦ LA FORMA ETERNA SE MANIFIESTA — la luz del dios devora la pantalla ✦✦
 	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño al escuadrón entero)
 	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
 	CaminoMascota: la mascota + TODO el daño de invocación del escuadrón +10 %
@@ -4078,6 +4088,57 @@ Submundo: {
 
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back
 // and also summon Aethon using a window with buttons to choose").
+	Pergamino: {
+		Titulo: EL PERGAMINO DEL GRIMORIO
+		Subtitulo: el libro de la ofrenda — todo lo que el Eterno sabe
+		SecAltar: EL ALTAR DE LA CONSAGRACIÓN
+		Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
+		Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.
+		Altar3: • EL SELLO cobra esencias de tu inventario; esencias y dinero no lo necesitan.
+		Altar4: • Solo UN altar vive por mundo — el mapa dice cuál es el ACTIVO; los demás son DEVORADOS por el grimorio (sin botín).
+		Altar5: • Las esencias caen de toda criatura (0,1%), los jefes sueltan 1-10, y las OLEADAS DE HAMBRE suben la probabilidad. Las estatuas no alimentan.
+		SecInterior: EL MUNDO INTERIOR
+		Interior1: • Forja «Mundo Interior del Eterno» en el altar: 1000 esencias. ENTRA con el ítem en la mano: el libro te devora y te lleva.
+		Interior2: • Dentro vive EL ECLIPSE PERMANENTE morado y lleno de bruma. Nada de llegada ni de oleadas: es el cuerpo del propio dios.
+		Interior3: • EL PILAR PRISMA es la salida… y LA ARENA: invoca a los jefes que ya devoraste, cada uno MÁS PODEROSO por cada muerte en la arena.
+		Interior4: • Desde el nivel 10, los jefes de la arena REGENERAN 1% de su vida máxima por segundo (+0,1% por nivel extra) — y no hay tope de nivel.
+		SecOleadas: LAS OLEADAS DE HAMBRE
+		Oleadas1: • El hambre del grimorio sube con el tiempo sin matar (75 s por momento, 10 momentos).
+		Oleadas2: • El susurro del libro llega pronto… pero LA OLEADA solo estalla al 90% de hambre — y al 100% SIEMPRE, con el llamado del grimorio.
+		Oleadas3: • Vencer la oleada sube su nivel (la siguiente trae MÁS oleadas); morir la congela.
+		Oleadas4: • El aura de ceniza sobre el portador solo aparece con hambre al 90%: si la ves, la oleada ya está prometida.
+		SecGrimorio: EL GRIMORIO Y SUS MECÁNICAS
+		Grimorio1: • LA DEVORACIÓN: la primera muerte de cada jefe es del LIBRO — se detiene a 100 de vida y el festín lo digiere (con su cine y su loot).
+		Grimorio2: • LAS SOMBRAS DE LA PÁGINA: los tomos I-V, el arsenal mágico del despertar. Cada puerta del despertar los forja más fuertes.
+		Grimorio3: • EL FESTÍN DE ARMAS: toda arma consagrada se vuelve poder — hasta +45% de daño (fuerza y EXP devoradas).
+		Grimorio4: • LAS ESENCIAS CONSUMIDAS: +0,1% de daño por esencia (tope +100%) — solo con el libro cerca (100% en mano, 25% guardado).
+		Grimorio5: • EL ESCUADRÓN: los OJOS DEL ETERNO (11) y las DAGAS DEL ETERNO (5) — la guardia del portador.
+		SecDespertar: LA ESCALERA DEL DESPERTAR (1-1000)
+		Despertar1: • Cada nivel cuesta: N esencias + monedas (de 100 cobre a 100 de platino) + armas y materiales de la caza.
+		Despertar2: • LAS PUERTAS DE LA CAZA: Rey Gelatina (3) · Ojo de Cthulhu (5) · El Mal del Mundo (8) · Reina Abeja (10) · Skeletron (13) · Muralla de Carne (20) · Reina Gelatina (23) · Los Gemelos (25) · El Devorador (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duque Fishron (37) · Emperatriz de Luz (38) · Cultista Lunático (45) · Señor de la Luna (50) · Aethon (100).
+		Despertar3: • Tras la cima (100) llegan LAS REPETICIONES (63-99: Luna y Emperatriz) y LA ESCALERA LARGA (101-1000): +1% de daño por nivel, para siempre.
+		Despertar4: • LA IRA DEL SER EXTERIOR se gana en el nivel 100 (con su caza pagada): el Haz definitivo del grimorio.
+		SecAtaques: LOS ATAQUES DEL GRIMORIO Y SUS MINIONS
+		Ataques1: • LOS OJOS DEL ETERNO (11): el escuadrón que todo lo mira — cada ojo un proyectil viviente con su mirada.
+		Ataques2: • LAS DAGAS DEL ETERNO (5): cristal · llama · roca · vacío · veredicto — la guardia íntima con el ojo en el centro.
+		Ataques3: • LAS SOMBRAS DE LA PÁGINA: los cinco tomos del arsenal mágico (la página, el abanico, la garganta, la sierra, la fauce).
+		Ataques4: • EL FESTÍN: la devoración que detiene jefes y los digiere enteros.
+		Ataques5: • LA IRA DEL SER EXTERIOR: el haz definitivo del nivel 100.
+		Ataques6: • LA PRIMERA CENA: la primera muerte de cada jefe, siempre del libro.
+		SecForma: LA FORMA ETERNA (100-1000)
+		Forma1: • Desde el nivel 100, LA FORMA ETERNA se construye PIEZA A PIEZA cada 100 niveles: la Brasa (200) · el Anillo Rúnico (300) · el Sello del Génesis (400) · los Anillos del Sol (500) · el Brillo (600) · la Ascendida (700) · las Ofanim (800) · el Aura del Vacío (900).
+		Forma2: • AL 1000, LA MANIFESTACIÓN: el estallido de luz que elimina de un solo golpe a TODO lo que viva en la pantalla — jefes incluidos, con su loot (es una muerte válida).
+		Forma3: • La Forma Eterna completa viste el panteón entero: las dos luces, el anillo, la brasa, el brillo… y el AURA DEL VACÍO.
+		Forma4: • Stats del panteón: +40 maná · +8% daño mágico · +4% crít. mágico · +2 regen · +8% melé · +3% crít. melé · +3 defensa.
+		SecAuras: LAS AURAS · LOS BUFFS Y DEBUFFS
+		Auras1: • EL AURA DEL VACÍO: el campo de 19 tiles que quema a los impíos — de 1 de daño en el borde a 10+ pegado al cuerpo (más rápido cuanto más cerca). Tras salir del campo, la QUEMADURA DEL VACÍO EXTERIOR sigue ardiendo 5 s (1% de vida máxima por medio segundo).
+		Auras2: • EL VACÍO EXTERIOR (buff del portador): mientras tu presa arde — +10% de ataque · +10 defensa · −15% coste de maná.
+		Auras3: • EL AURA DE HAMBRE: la ceniza del libro sobre el portador — solo con hambre al 90% (la oleada está al caer).
+		Auras4: • LA QUEMADURA DEL VACÍO (debuff del enemigo): el fuego negro de violeta — 1% de vida máxima cada medio segundo, 5 s tras dejar el aura.
+		Auras5: • EL AURA DE LAS OLEADAS: los enemigos del festín visten la bruma violeta del grimorio.
+		Auras6: • El ojo de este pergamino te está mirando. Siempre.
+	}
+
 PrismaInterior: {
 	Titulo: EL PRISMA DEL ETERNO
 	Subtitulo: el altar de colores del interior — elige tu camino

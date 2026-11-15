@@ -58,7 +58,19 @@ namespace AethonMod.Content.Systems
         /// renació alineada — cada arma y cada lingote OBTENIBLE en la
         /// era de su jefe (nada de adamantita con el Rey Gelatina vivo).
         /// Historic: 50 (v6.51.0-v6.85).</summary>
-        public const int NivelMax = 100;
+        /// <summary>v6.140 — LA ESCALERA LARGA (la letra: «La Forma
+        /// Eterna… solo se alcanzara a completar cuando el jugador llega
+        /// a nivel 1000 del grimorio del eterno»): el despertar sube
+        /// hasta MIL — la CIMÁ (100) ya no es el final: la FORMA ETERNA
+        /// se construye PIEZA A PIEZA cada 100 niveles (100, 200…
+        /// 900) y al 1000 SE MANIFIESTA COMPLETA. LA IRA SIGUE EN EL
+        /// 100 (la letra de la v6.88 no cambió: la habilidad definitiva
+        /// del grimorio es del peldaño 100 — IraDisponibleNivel).</summary>
+        public const int NivelMax = 1000;
+
+        /// <summary>El peldaño de LA IRA — la cima de la v6.88 (el Haz
+        /// del Ser Exterior): NivelMax ya no es su puerta, ESTE es.</summary>
+        public const int NivelIra = 100;
 
         /// <summary>v6.51.6 — EL DESPERTAR ES DEL LIBRO (la letra: «el
         /// despertar se comparte entre todos los grimorios, eso debe ser
@@ -125,6 +137,12 @@ namespace AethonMod.Content.Systems
         public static long MonedasPara(int nivel)
         {
             if (nivel <= 1) return 100L;                       // 100 monedas de cobre (la letra)
+            // v6.140 — desde el 100 (la cima de las monedas): tope
+            // PERMANENTE de 100 de platino por peldaño (la letra v6.88:
+            // «el requisito de monedas maximo que se pueden pedir son
+            // 100 monedas de platino» — los peldaños largos 101-999
+            // pagan el máximo, cada uno).
+            if (nivel >= 100) return 100_000_000L;
             if (nivel > NivelMax) nivel = NivelMax;
             double g = Math.Pow(10.0, 6.0 / 99.0);            // 1,1437 — clava el 100 en 100 P
             long monedas = (long)(100.0 * Math.Pow(g, nivel - 1));
@@ -709,7 +727,7 @@ namespace AethonMod.Content.Systems
         /// CONTADORES DE CAZA tienen la última palabra (los lleva
         /// CazaJefesPlayer y los pagan los OnKill de
         /// CazaJefesGlobalNPC).</summary>
-        public static bool IraDisponible(int despertar) => despertar >= NivelMax;
+        public static bool IraDisponible(int despertar) => despertar >= NivelIra;
 
         /// <summary>v6.88 — LA IRA VIVE CON EL DESPERTAR 100 (la letra
         /// nueva de la cima: «Aethon debería estar como requisito para el
@@ -729,7 +747,7 @@ namespace AethonMod.Content.Systems
         public static bool IraDisponible(Player p)
         {
             if (p == null || !p.active) return false;
-            return NivelDe(p) >= NivelMax;
+            return NivelDe(p) >= NivelIra;
         }
 
         /// <summary>Los CONTADORES DE LA CIMA en texto (para tooltips y
@@ -818,6 +836,23 @@ namespace AethonMod.Content.Systems
                 case 85: return "Mods.AethonMod.Despertar.HitoAgujeros2";
                 case 90: return "Mods.AethonMod.Despertar.HitoSupremo";
                 case 100: return "Mods.AethonMod.Despertar.HitoMaximo";
+                // v6.140 — LAS PIEZAS DE LA FORMA ETERNA (la letra:
+                // «desde el nivel 100 se ira construyendo la forma
+                // eterna pedazo a pedazo»): cada 100 niveles una PIEZA
+                // del panteón se CONSTRUYE — 200 la Brasa, 300 el
+                // Anillo, 400 el Sello, 500 los Anillos del Sol, 600 el
+                // Brillo, 700 la Ascendida, 800 las Ofanim, 900 el Aura
+                // del Vacío… y 1000 LA MANIFESTACIÓN COMPLETA (la
+                // explosión de luz — SubirNivel la dispara).
+                case 200: return "Mods.AethonMod.Despertar.HitoPieza1";
+                case 300: return "Mods.AethonMod.Despertar.HitoPieza2";
+                case 400: return "Mods.AethonMod.Despertar.HitoPieza3";
+                case 500: return "Mods.AethonMod.Despertar.HitoPieza4";
+                case 600: return "Mods.AethonMod.Despertar.HitoPieza5";
+                case 700: return "Mods.AethonMod.Despertar.HitoPieza6";
+                case 800: return "Mods.AethonMod.Despertar.HitoPieza7";
+                case 900: return "Mods.AethonMod.Despertar.HitoPieza8";
+                case 1000: return "Mods.AethonMod.Despertar.HitoManifestacion";
                 default: return null;
             }
         }

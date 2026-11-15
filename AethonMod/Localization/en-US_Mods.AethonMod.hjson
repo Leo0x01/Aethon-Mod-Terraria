@@ -3283,6 +3283,16 @@ Despertar: {
 	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
 	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
 	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el daño de invocación del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
+	HitoPieza1: ✦ LEVEL 200 — THE ETERNAL FORM IS BUILT: THE ECLIPSE EMBER joins the pantheon.
+	HitoPieza2: ✦ LEVEL 300 — piece 2/8: THE RUNIC BACK-RING.
+	HitoPieza3: ✦ LEVEL 400 — piece 3/8: THE GENESIS SEAL.
+	HitoPieza4: ✦ LEVEL 500 — piece 4/8: THE RUNIC SUN RINGS.
+	HitoPieza5: ✦ LEVEL 600 — piece 5/8: THE RUNIC SUNS' SHINE.
+	HitoPieza6: ✦ LEVEL 700 — piece 6/8: THE ASCENDED FORM.
+	HitoPieza7: ✦ LEVEL 800 — piece 7/8: THE OPHANIM — the wheels of Ezekiel.
+	HitoPieza8: ✦ LEVEL 900 — piece 8/8: THE VOID AURA — the eve of the manifestation.
+	HitoManifestacion: ✦✦ LEVEL 1000 — THE ETERNAL FORM MANIFESTS ✦✦
+	ManifestacionTexto: ✦✦ THE ETERNAL FORM MANIFESTS — the god's light devours the screen ✦✦
 	CaminoMejora1: la MEJORA 1 de los ojos (+50% de daño al escuadrón entero)
 	CaminoSol: el SOL RÚNICO de 1 anillo (2 ojos mejorados, 2/min)
 	CaminoMascota: la mascota + TODO el daño de invocación del escuadrón +10 %
@@ -4062,6 +4072,57 @@ Submundo: {
 
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back
 // and also summon Aethon using a window with buttons to choose").
+Pergamino: {
+	Titulo: THE GRIMOIRE'S SCROLL
+	Subtitulo: the book of the offering — all the Eternal knows
+	SecAltar: THE CONSECRATION ALTAR
+	Altar1: • The offering: a weapon gains +5% to ALL its stats and its tag; a material only its tag; essences raise the gate by 1.
+	Altar2: • Not accepted: already consecrated, tools, accessories or money. ESSENCES ARE: the Eternal devours them whole.
+	Altar3: • THE SEAL charges essences from your inventory; essences and money never need it.
+	Altar4: • Only ONE altar lives per world — the map says which is the ACTIVE one; the rest are DEVOURED by the grimoire (no loot).
+	Altar5: • Essences drop from every creature (0.1%), bosses drop 1-10, and HUNGER WAVES raise the odds. Statues do not feed it.
+	SecInterior: THE INNER WORLD
+	Interior1: • Craft «Inner World of the Eternal» at the altar: 1000 essences. ENTER with the item in hand: the book devours you and takes you.
+	Interior2: • Inside lives THE PERMANENT ECLIPSE, purple and full of mist. No arrival, no waves: it is the god's own body.
+	Interior3: • THE PRISM PILLAR is the way out… and THE ARENA: summon the bosses you devoured, each MIGHTIER for every death in the arena.
+	Interior4: • From level 10, arena bosses REGENERATE 1% of max life per second (+0.1% per extra level) — and there is no level cap.
+	SecOleadas: THE HUNGER WAVES
+	Oleadas1: • The grimoire's hunger grows with time without kills (75 s per moment, 10 moments).
+	Oleadas2: • The book's whisper comes early… but THE WAVE only erupts at 90% hunger — and at 100% ALWAYS, with the grimoire's call.
+	Oleadas3: • Beating the wave raises its level (the next brings MORE waves); dying freezes it.
+	Oleadas4: • The ash aura on the bearer only appears at 90% hunger: if you see it, the wave is already promised.
+	SecGrimorio: THE GRIMOIRE AND ITS MECHANICS
+	Grimorio1: • THE DEVOURING: the first death of every boss belongs to the BOOK — it stops at 100 life and the feast digests it (cinema and loot included).
+	Grimorio2: • THE SHADOWS OF THE PAGE: tomes I-V, the awakening's magic arsenal. Each door of the awakening forges them stronger.
+	Grimorio3: • THE WEAPON FEAST: every consecrated weapon becomes power — up to +45% damage (devoured strength and EXP).
+	Grimorio4: • CONSUMED ESSENCES: +0.1% damage per essence (cap +100%) — only with the book nearby (100% in hand, 25% stored).
+	Grimorio5: • THE SQUADRON: the EYES OF THE ETERNAL (11) and the DAGGERS OF THE ETERNAL (5) — the bearer's guard.
+	SecDespertar: THE AWAKENING LADDER (1-1000)
+	Despertar1: • Each level costs: N essences + coins (from 100 copper to 100 platinum) + hunting weapons and materials.
+	Despertar2: • THE HUNTING DOORS: King Slime (3) · Eye of Cthulhu (5) · The World's Evil (8) · Queen Bee (10) · Skeletron (13) · Wall of Flesh (20) · Queen Slime (23) · The Twins (25) · The Destroyer (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duke Fishron (37) · Empress of Light (38) · Lunatic Cultist (45) · Moon Lord (50) · Aethon (100).
+	Despertar3: • After the summit (100) come THE REPEATS (63-99: Moon and Empress) and THE LONG LADDER (101-1000): +1% damage per level, forever.
+	Despertar4: • THE WRATH OF THE OUTER BEING is earned at level 100 (with its hunt paid): the grimoire's ultimate Beam.
+	SecAtaques: THE GRIMOIRE'S ATTACKS AND MINIONS
+	Ataques1: • THE EYES OF THE ETERNAL (11): the squadron that watches everything — each eye a living projectile with its own gaze.
+	Ataques2: • THE DAGGERS OF THE ETERNAL (5): crystal · flame · rock · void · verdict — the intimate guard with the eye at its heart.
+	Ataques3: • THE SHADOWS OF THE PAGE: the five tomes of the magic arsenal (the page, the fan, the throat, the saw, the maw).
+	Ataques4: • THE FEAST: the devouring that stops bosses and digests them whole.
+	Ataques5: • THE WRATH OF THE OUTER BEING: the ultimate beam of level 100.
+	Ataques6: • THE FIRST SUPPER: the first death of every boss, always the book's.
+	SecForma: THE ETERNAL FORM (100-1000)
+	Forma1: • From level 100, THE ETERNAL FORM is built PIECE BY PIECE every 100 levels: the Ember (200) · the Runic Ring (300) · the Genesis Seal (400) · the Sun Rings (500) · the Shine (600) · the Ascended (700) · the Ophanim (800) · the Void Aura (900).
+	Forma2: • AT 1000, THE MANIFESTATION: the burst of light that kills in one blow EVERYTHING alive on the screen — bosses included, with their loot (it is a valid death).
+	Forma3: • The complete Eternal Form dresses the whole pantheon: the two lights, the ring, the ember, the shine… and the VOID AURA.
+	Forma4: • Pantheon stats: +40 mana · +8% magic dmg · +4% magic crit · +2 regen · +8% melee · +3% melee crit · +3 defense.
+	SecAuras: THE AURAS · BUFFS AND DEBUFFS
+	Auras1: • THE VOID AURA: the 19-tile field that burns the wicked — from 1 damage at the edge to 10+ hugging the body (faster the closer). After leaving the field, the OUTER VOID BURN keeps burning for 5 s (1% of max life per half second).
+	Auras2: • THE OUTER VOID (bearer's buff): while your prey burns — +10% attack · +10 defense · −15% mana cost.
+	Auras3: • THE HUNGER AURA: the book's ash upon its bearer — only at 90% hunger (the wave is about to fall).
+	Auras4: • THE VOID BURN (enemy debuff): the violet black fire — 1% of max life every half second, 5 s after leaving the aura.
+	Auras5: • THE WAVE AURA: the feast's enemies wear the grimoire's violet mist.
+	Auras6: • This scroll's eye is watching you. Always.
+}
+
 PrismaInterior: {
 	Titulo: THE PRISM OF THE ETERNAL
 	Subtitulo: the interior's altar of colors — choose your path

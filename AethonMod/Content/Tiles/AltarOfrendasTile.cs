@@ -309,7 +309,12 @@ namespace AethonMod.Content.Tiles
                         new Color(190, 160, 220));
                 }
                 // matar TODAS las tiles del mueble 2×3 (el pico de
-                // vanilla mataría una; la boca se lleva el cuerpo entero)
+                // vanilla mataría una; la boca se lleva el cuerpo entero).
+                // v6.140 — EL ÍTEM TAMBIÉN ES DEVORADO (la letra: «el
+                // item debe ser devorado no solo quitados del suelo
+                // para que el jugador los recoja»): KillTile con
+                // noItem=true — el altar devorado NO suelta NADA (lo
+                // devorado se digiere, no se recoge).
                 int ox = i, oy = j;
                 Tile izq = Framing.GetTileSafely(i - 1, j);
                 Tile arriba = Framing.GetTileSafely(i, j - 1);

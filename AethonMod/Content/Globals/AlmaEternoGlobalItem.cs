@@ -44,6 +44,10 @@ namespace AethonMod.Content.Globals
         /// «siempre empieza desde nivel 0»).</summary>
         public int NivelDespertar = 0;
 
+        /// <summary>v6.140 — ¿ESTE libro ya vivió LA MANIFESTACIÓN de la
+        /// Forma Eterna (el estallido del nivel 1000)? Una por libro.</summary>
+        public bool ManifestacionVivida;
+
         /// <summary>¿ESTE libro ya escupió a su mascota (nivel 20)? La
         /// ceremonia no se repite por libro.</summary>
         public bool PetDelDespertar = false;
@@ -763,6 +767,7 @@ namespace AethonMod.Content.Globals
             try
             {
                 if (NivelDespertar > 0) tag["almaDespertar"] = NivelDespertar;
+                tag["almaManifestacion"] = ManifestacionVivida;
                 if (PetDelDespertar) tag["almaPet"] = true;
                 if (DevoracionPoder > 0) tag["almaPoder"] = DevoracionPoder;
                 // v6.51.11 — LA MESA DEL DESPERTAR (los contadores
@@ -818,6 +823,7 @@ namespace AethonMod.Content.Globals
                 NivelDespertar = System.Math.Max(0, System.Math.Min(
                     Content.Systems.DespertarGrimorio.NivelMax,
                     tag.GetInt("almaDespertar")));
+                ManifestacionVivida = tag.GetBool("almaManifestacion");
                 PetDelDespertar = tag.GetBool("almaPet");
                 DevoracionPoder = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPoder")));
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales).

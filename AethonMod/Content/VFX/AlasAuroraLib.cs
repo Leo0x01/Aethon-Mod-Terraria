@@ -1845,74 +1845,113 @@ namespace AethonMod.Content.VFX
                 //  giro por semilla, mismo centelleo — solo que el ala
                 //  YA NO TIENE CUERPO: la escritura ES el ala.
                 // ============================================================
+                // ============================================================
+                //  v6.140 — LAS ALAS RÚNICAS v2 (la letra: «hagamos que
+                //  las alas de valquiria lisa tenga una copia exacta y
+                //  esta ser Alas Runicas, y a estas has que las runas
+                //  cambien lentamente de color de dorado a morado,
+                //  ademas que las runas no se muevan en circulo como lo
+                //  hacen, su movimiento queda fijado en una direccion y
+                //  estas esten extendiendose hacia afuera»): EL ENJAMBRE
+                //  DENSO v6.139 MURIÓ — era otro diseño. ESTA ES LA
+                //  COPIA EXACTA DE LA LISA: la misma runa del borde
+                //  (nodo 8, la escala completa 1.45+0.35·n, el mismo
+                //  brillo que respira, el mismo retraso de la membrana,
+                //  los nacimientos sin runa) — SOLO cambian DOS cosas:
+                //  el COLOR (dorado→morado, ciclo LENTO de ~37 s) y el
+                //  ÁNGULO (TANGENTE FIJO al eje de la pluma: la runa
+                //  apunta HACIA AFUERA y se EXTIENDE con el ala — NADA
+                //  de girar en círculo).
+                // ============================================================
                 if (estilo.Enjambre)
                 {
                     VFXCore.Begin();
                     try
                     {
-                        Vector2 screenPos = Main.screenPosition;
-                        float dirGiroE = (float)((Entity)pl).direction;
-                        float escalaG = (estilo.EscalaGlobal > 0f ? estilo.EscalaGlobal : 1f);
-                        for (int ladoE = -1; ladoE <= 1; ladoE += 2)
+                        Vector2 screenPosE = Main.screenPosition;
+                        float dirGiro = (float)((Entity)pl).direction;
+                        int porLado = Math.Max(_geoN / 2, 1);
+                        // EL CICLO DEL COLOR — LENTO (0.085 rad/s: ~37 s
+                        // el ciclo dorado→morado→dorado). La fase corre
+                        // POR POSICIÓN en el borde: el degradado RECORRE
+                        // el ala (dorado en la espalda, morado en la
+                        // punta) mientras todo respira lento.
+                        float ciclo = globalTimeWrappedHourly * 0.085f;
+                        Color doradoC = val;                     // el ORO del alfabeto (el case de arriba)
+                        Color moradoC = new Color(186, 104, 255);
+                        Color moradoP = new Color(232, 200, 255);
+
+                        int nodoRunaE = 8;
+                        for (int i = 0; i < _geoN; i++)
                         {
-                            int baseE = ladoE < 0 ? 0 : num4;
-                            // (3) LAS PUNTAS — la runa MAYOR de cada ala
-                            // (la pluma EXTERIOR del abanico: el eje del
-                            // medio-lado es la punta viva de la vela).
-                            int idxPunta = baseE + Math.Max(num4 - 2, 0);
-                            Vector2 posPunta = _pozosEje[idxPunta][8];
-                            SigiloLib.Runa(posPunta + screenPos,
-                                globalTimeWrappedHourly * 0.4f * dirGiroE,
-                                array, ((Entity)pl).whoAmI * 5 + (ladoE < 0 ? 0 : 1),
-                                1.9f, globalTimeWrappedHourly,
-                                0f, val2, val2, num3 * 1.15f, glowK: 0.35f);
-                            // (1) EL BORDE MAESTRO — runas medias siguiendo
-                            // la curva del borde (los nodos 8 de los ejes
-                            // del lado, con su ángulo TANGENTE: la caligrafía
-                            // abraza el borde).
-                            for (int e = 1; e < num4 - 1; e++)
+                            // la Lisa: los NACIMIENTOS no llevan runa
+                            int kEnLado = i % porLado;
+                            if (kEnLado == 0 || kEnLado == porLado - 1)
+                                continue;
+
+                            Vector2 pos = _pozosEje[i][nodoRunaE];
+                            // la Lisa: el retraso de la membrana (la runa
+                            // corona el borde DESDE DENTRO)
+                            float glowE = 1f;
+                            if (estilo.Membrana > 0f)
                             {
-                                int ie = baseE + e;
-                                Vector2 p0 = _pozosEje[ie][8];
-                                Vector2 prev = _pozosEje[baseE + e - 1][8];
-                                Vector2 next = _pozosEje[Math.Min(ie + 1, baseE + num4 - 1)][8];
-                                Vector2 tang = next - prev;
-                                float ang = tang.LengthSquared() > 0.0001f
-                                    ? (float)Math.Atan2(tang.Y, tang.X) : 0f;
-                                float f = (float)e / (float)Math.Max(num4 - 2, 1);
-                                float esc = 0.85f + 0.35f * f;
-                                // el brillo RESPIRA a lo largo del borde (la
-                                // onda del Conjuro: un pulso que VIAJA)
-                                float onda = 0.72f + 0.28f *
-                                    (float)Math.Sin(globalTimeWrappedHourly * 1.6f - f * 4.2f);
-                                SigiloLib.Runa(p0 + screenPos, ang + MathHelper.PiOver2,
-                                    array, ((Entity)pl).whoAmI * 13 + ie,
-                                    esc, globalTimeWrappedHourly,
-                                    f * 0.8f, val, val2, num3 * onda * 0.9f, glowK: 0.3f);
+                                Vector2 radial = pos - _geoAnclaCentral;
+                                float rl = radial.Length();
+                                if (rl > 0.001f) pos -= radial / rl * 9f;
+                                glowE = 0.75f;
                             }
-                            // (2) LA VELA — runas menores corriendo de la
-                            // espalda al borde, por cada eje (los nodos 2..7
-                            // del pozo: la línea del conjuro que apunta a la
-                            // punta).
-                            for (int e2 = 1; e2 < num4 - 1; e2++)
-                            {
-                                int ie2 = baseE + e2;
-                                for (int nodo = 2; nodo <= 7; nodo += 2)
-                                {
-                                    Vector2 pv = _pozosEje[ie2][nodo];
-                                    float g = (float)nodo / 8f;
-                                    float esc2 = 0.42f + 0.30f * g;
-                                    float brillo = num3 * (0.34f + 0.22f * g) *
-                                        (0.75f + 0.25f * (float)Math.Sin(
-                                            globalTimeWrappedHourly * 2.1f + g * 3f + e2));
-                                    SigiloLib.Runa(pv + screenPos,
-                                        globalTimeWrappedHourly * 0.35f *
-                                        ((e2 % 2 == 0) ? 1f : -1f) * dirGiroE,
-                                        array, ((Entity)pl).whoAmI * 29 + ie2 * 8 + nodo,
-                                        esc2, globalTimeWrappedHourly,
-                                        g * 2f, val, val2, brillo, perla: false);
-                                }
-                            }
+
+                            int gemela = i % porLado;
+                            // LA DIRECCIÓN FIJA — el eje VIVO de la pluma
+                            // (del nacimiento al borde): la runa se ALINEA
+                            // a él, apuntando HACIA AFUERA.
+                            Vector2 eje = _pozosEje[i][nodoRunaE] - _pozosEje[i][2];
+                            float angFijo = eje.LengthSquared() > 0.0001f
+                                ? MathF.Atan2(eje.Y, eje.X) : 0f;
+
+                            float faseE = VFXCore.Hash01(((Entity)pl).whoAmI * 7 + gemela, 3, 5) * MathF.PI * 2f;
+                            float num6E = 0.55f + 0.45f * MathF.Sin(globalTimeWrappedHourly * 2.3f + faseE + flap * 0.35f);
+                            num6E *= 0.8f + 0.2f * VFXCore.Hash01(((Entity)pl).whoAmI * 13 + gemela, (int)(globalTimeWrappedHourly * 12f), 17);
+                            float num7E = (float)gemela / (float)(porLado - 1);
+                            float escalaE = 1.45f + 0.35f * num7E;
+
+                            // EL COLOR VIAJA POR EL BORDE (fase por
+                            // posición + el ciclo lento global)
+                            float faseColor = 0.5f + 0.5f * MathF.Sin(ciclo + num7E * 0.9f);
+                            Color cuerpoE = Color.Lerp(doradoC, moradoC, faseColor);
+                            Color puntaE = Color.Lerp(val2, moradoP, faseColor);
+
+                            // EL ÁNGULO FIJO (la letra: «su movimiento
+                            // queda fijado en una direccion y estas esten
+                            // extendiendose hacia afuera»): la runa vive
+                            // ALINEADA a su eje — +π/2 para que el glifo
+                            // CRUCE el borde como la corona de la Lisa.
+                            // El ÚNICO movimiento: un TROTE suave de ±4°
+                            // al ritmo del aleteo (vive, no gira).
+                            float trote = 0.07f * MathF.Sin(globalTimeWrappedHourly * 1.6f + faseE + flap * 0.5f);
+                            SigiloLib.Runa(pos + screenPosE,
+                                angFijo + MathHelper.PiOver2 + trote,
+                                array, (gemela * 3 + ((Entity)pl).whoAmI) % array.Length,
+                                escalaE, globalTimeWrappedHourly, faseE,
+                                cuerpoE, puntaE, num3 * num6E, glowK: glowE);
+                        }
+
+                        // EL ANILLO CENTRAL — la firma de la Lisa (8 runas
+                        // orbitando la espalda): HEREDA el ciclo
+                        // dorado→morado y MANTIENE su órbita (es el
+                        // corazón de la copia exacta).
+                        for (int j = 0; j < 8; j++)
+                        {
+                            float num8 = ((float)j / 8f * ((float)Math.PI * 2f) + globalTimeWrappedHourly * num) * dirGiro + MathHelper.Pi * (1f - dirGiro) * 0.5f;
+                            Vector2 val4 = _geoAnclaCentral + new Vector2(MathF.Cos(num8), MathF.Sin(num8) * 0.86f) * 46f;
+                            float fase = VFXCore.Hash01(((Entity)pl).whoAmI * 11 + j, 5, 7) * ((float)Math.PI * 2f);
+                            float brillo = num3 * (0.42f + 0.3f * MathF.Sin(globalTimeWrappedHourly * 2f + (float)j * 1.3f)) * (0.55f + 0.45f * spread);
+                            float faseAnillo = 0.5f + 0.5f * MathF.Sin(ciclo + (float)j / 8f * 0.9f);
+                            Color cuerpoA = Color.Lerp(doradoC, moradoC, faseAnillo);
+                            Color puntaA = Color.Lerp(val2, moradoP, faseAnillo);
+                            SigiloLib.Runa(val4 + screenPosE, num8 + (float)Math.PI / 2f,
+                                array, j % array.Length, 1.05f, globalTimeWrappedHourly,
+                                fase, cuerpoA, puntaA, brillo, perla: false);
                         }
                         VFXCore.FlushAdditive();
                     }
@@ -1922,6 +1961,7 @@ namespace AethonMod.Content.VFX
                     }
                     return true;
                 }
+
                 VFXCore.Begin();
                 try
                 {
