@@ -771,6 +771,10 @@ namespace AethonMod.Content.Items.Bolsas
                 // otras mitologias o creaciones y tipos de alas»).
                 (ModContent.ItemType<AlasSerafinDelVacio>(), 1),
                 (ModContent.ItemType<AlasValquiriaRunica>(), 1),
+                // v6.137 — LAS DOS COPIAS DE LA VALQUIRIA (sin plumas ·
+                // lisa): viajan con las mitológicas.
+                (ModContent.ItemType<AlasValquiriaSinPlumas>(), 1),
+                (ModContent.ItemType<AlasValquiriaLisa>(), 1),
                 (ModContent.ItemType<AlasQuetzalEmplumado>(), 1),
                 (ModContent.ItemType<AlasFenixDelRenacer>(), 1),
                 (ModContent.ItemType<AlasTenguDelCrepusculo>(), 1),

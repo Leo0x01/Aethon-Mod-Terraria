@@ -2447,6 +2447,21 @@ Items: {
 			'''
 	}
 
+	AlasValquiriaSinPlumas: {
+		// v6.137 — LA COPIA SIN PLUMAS (la letra: «en una quita las plumas
+		// y no toques nada mas»): la plata nórdica sin el abanico.
+		DisplayName: Featherless Valkyrie
+		Tooltip: La Valquiria sin su abanico de plumas — la vela estructural de la casa
+	}
+
+	AlasValquiriaLisa: {
+		// v6.137 — LA COPIA LISA (la letra: «en la otra intenta darle una
+		// forma lisa a las plumas y no toques nada mas»): las plumas dejan
+		// de ser tiras — la superficie continua del borde maestro.
+		DisplayName: Sleek Valkyrie
+		Tooltip: Las plumas de la Valquiria fundidas en UNA vela lisa y continua
+	}
+
 	AlasValquiriaRunica: {
 		DisplayName: Runic Valkyrie Wings
 		Tooltip:
@@ -4051,6 +4066,15 @@ PrismaInterior: {
 	Leyenda: The calling: the altar materializes and THE GRIMOIRE floats just above — the shards are born of the ceremony
 	NombreCorto: The Prism of the Eternal
 	NombrePilar: The Prism Pillar — the plain's way out
+	OleadaTitulo: THE HUNGER WAVE
+	OleadaNivel: Level {0} of {1}
+	OleadaPista: unlock levels by completing the wave OUTSIDE (your best: {0})
+	OleadaLanzar: UNLEASH THE WAVE · LEVEL {0}
+	OleadaCorre: THE WAVE ALREADY RUNS THROUGH THE BODY…
+	JefesTitulo: THE DEVOURED BOSSES — THE INNER ARENA
+	JefesVacio: no devoured bosses yet — kill them with the grimoire first
+	JefePoder: Lv {0} · {1}%
+	PoderCrece: ✦ {0} fell in the arena ({1} times): its next version is born at {2}%
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
@@ -4098,6 +4122,12 @@ Altar: {
 	// para eso dejarlo en el altar» — el chat SOLO AVISA.
 	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
+	// v6.137 — THE ONE-ALTAR LAW.
+	YaHayUno: ✦ A CONSECRATION ALTAR already lives in this world — the Eternal listens to only one. Pick it up to move it.
+	Desactivado: ✦ This altar is DEACTIVATED — the working one is elsewhere (find it on the map: it says ACTIVE).
+	Promovido: The altar was picked up… and another rises: THIS is the active altar now.
+	DesactivadoCorto: DEACTIVATED altar (another one works)
+	NoInterior: ✦ The altar does not live inside the book — the interior only has its PRISM PILLAR.
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	Devorar: DEVORAR
 	DevoradasHecha: ✦ El Eterno devoró {0} esencias — la puerta cuenta {1}/{2}.

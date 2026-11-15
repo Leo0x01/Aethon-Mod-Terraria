@@ -60,4 +60,25 @@ namespace AethonMod.Content.Items.Alas
     {
         protected override byte Estilo => 11;
     }
+
+    // ====================================================================
+    //  v6.137 — LAS DOS COPIAS DE LA VALQUIRIA RÚNICA (la letra: «hacer
+    //  dos copias, en una quita las plumas y no toques nada mas, en la
+    //  otra intenta darle una forma lisa a las plumas y no toques nada
+    //  mas»): el alma plata intacta — SOLO el cuerpo cambia.
+    // ====================================================================
+
+    /// <summary>12 — LA VALQUIRIA SIN PLUMAS: sin el abanico de siete
+    /// plumas de lanza — la vela estructural de la casa, nada más.</summary>
+    public class AlasValquiriaSinPlumas : AlasPrismaBase
+    {
+        protected override byte Estilo => 12;
+    }
+
+    /// <summary>13 — LA VALQUIRIA LISA: las plumas dejan de ser tiras —
+    /// la vela continua del borde maestro (la receta lisa de la casa).</summary>
+    public class AlasValquiriaLisa : AlasPrismaBase
+    {
+        protected override byte Estilo => 13;
+    }
 }

@@ -478,6 +478,12 @@ namespace AethonMod.Content.Systems
             {
                 NPC n = Main.npc[i];
                 if (n != null && n.active && n.boss) return false;
+                // v6.137 — LOS JEFES DE LA ARENA también cierran la mesa
+                // (los devorados invocables incluyen minijefes sin .boss:
+                // el sello de la arena es la palabra).
+                if (n != null && n.active && n.TryGetGlobalNPC
+                        <global::AethonMod.Content.Globals.JefeInteriorGlobalNPC>(out var ji)
+                    && ji.EsInterior) return false;
             }
             return true;
         }

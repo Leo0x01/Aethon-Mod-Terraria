@@ -1610,6 +1610,29 @@ namespace AethonMod.Content.Globals
         /// SIRVE LA RACION del guardián: LOS SUYOS. Solo la autoridad
         /// (server / SP) - la casa MP de siempre.
         /// </summary>
+        /// <summary>v6.137 — LA COREOGRAFÍA PRESTADA (la arena del
+        /// mundo interior la pide: los jefes interiores de nivel 8+
+        /// disparan LOS ATAQUES TEMÁTICOS del festín — cada jefe convoca
+        /// a LOS SUYOS). El wrapper público del switch privado: mismo
+        /// cuerpo, ninguna copia.</summary>
+        public static void CoreografiaPrestada(NPC jefe, Player presa, int nivel)
+        {
+            try
+            {
+                if (jefe == null || !jefe.active || presa == null || !presa.active) return;
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                // una instancia EFÍMERA solo para correr el switch de
+                // instancia (los Coro* leen campos de instancia: Oleada,
+                // EsEspecial — se visten del nivel prestado)
+                var efimera = new OleadaNPC();
+                efimera.Oleada = Math.Max(1, Math.Min(10, nivel - 2));
+                efimera.Nivel = Math.Max(1, Math.Min(10, nivel));
+                efimera.EsEspecial = nivel >= 10;
+                efimera.Coreografia(jefe, presa);
+            }
+            catch { }
+        }
+
         private void Coreografia(NPC npc, Player presa)
         {
             try

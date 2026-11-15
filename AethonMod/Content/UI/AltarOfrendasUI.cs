@@ -919,17 +919,17 @@ namespace AethonMod.Content.UI
             cy = TituloSeccion(sb, Language.GetTextValue(Clave("ComoTitulo")),
                 x, cy, w, TintaApagado * 1.25f);
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoCriaturas")),
-                x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+                x + 24f, cy, w - 48f, 0.70f, TintaTexto);
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoJefes")),
-                x + 24f, cy, w - 48f, 0.75f, TintaTexto);
+                x + 24f, cy, w - 48f, 0.70f, TintaTexto);
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
-                x + 24f, cy, w - 48f, 0.75f, TintaVioleta);
+                x + 24f, cy, w - 48f, 0.70f, TintaVioleta);
             // v6.93 — LA LEY DE LAS ESTATUAS (la letra: «también en el
             //    altar tienes que decir que si el grimorio mata criatura
             //    que salen de una estatua su hambre aumenta»): la línea
             //    de la mesa de las estatuas, junto a las demás verdades.
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoEstatuas")),
-                x + 24f, cy, w - 48f, 0.75f, new Color(235, 130, 120));
+                x + 24f, cy, w - 48f, 0.70f, new Color(235, 130, 120));
             cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
                 x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
             cy += 6f;
@@ -952,8 +952,12 @@ namespace AethonMod.Content.UI
         /// <summary>v6.91 — EL TITULAR DE SECCIÓN de la ventana del altar:
         /// centrado, con sus filetes a los lados. v6.92 — con sb == null
         /// SOLO mide (la pasada 1 del panel). Devuelve la Y siguiente.</summary>
+        // v6.137 — EL AIRE: los títulos de sección respiran — un
+        // margen de 8 px ANTES de cada título (antes las secciones
+        // venían pegadas una a la otra y el panel se leía apretado).
         private static float TituloSeccion(SpriteBatch sb, string texto, int x, float cy, int w, Color c)
         {
+            cy += 8f;   // el respiro de la casa
             if (sb != null)
             {
                 var fuente = FontAssets.MouseText.Value;

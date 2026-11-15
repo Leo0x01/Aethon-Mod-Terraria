@@ -49,6 +49,22 @@ namespace AethonMod.Content.Items.Llamados
             Item.autoReuse = false;
         }
 
+        // ==============================================================
+        //  v6.137 — LA RECETA DEL BANCO (la letra: «hacer receta de
+        //  muñeco de prueba negro, que sean solo 5 de madera y 5
+        //  esencia del eterno»): la madera del espantapájaros y la
+        //  esencia del Eterno — en la mano de cualquiera (la casa no
+        //  exige estación para las herramientas).
+        // ==============================================================
+        public override void AddRecipes()
+        {
+            CreateRecipe(5)
+                .AddIngredient(ItemID.Wood, 5)
+                .AddIngredient(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 5)
+                .Register();
+        }
+
         public override bool CanUseItem(Player player)
         {
             // Solo donde haya SITIO (que no haya ya un NPC en el tile del

@@ -168,6 +168,12 @@ namespace AethonMod.Content.VFX
         public const byte Fenix = 9;
         public const byte Tengu = 10;
         public const byte Dragon = 11;
+        // v6.137 — LAS DOS COPIAS DE LA VALQUIRIA (la letra: «hacer dos
+        // copias, en una quita las plumas y no toques nada mas, en la
+        // otra intenta darle una forma lisa a las plumas y no toques
+        // nada mas»): el alma PLATA de la nórdica, dos cuerpos nuevos.
+        public const byte ValquiriaSinPlumas = 12;
+        public const byte ValquiriaLisa = 13;
 
         private const string PrefijoRuido = "AethonMod/Content/Effects/Procedural/";
 
@@ -346,7 +352,7 @@ namespace AethonMod.Content.VFX
             // Agujas y las Cuchillas cayeron con sus ítems (la purga).
             // v6.135 — LAS SEIS MITOLÓGICAS: [6] Serafín · [7] Valquiria ·
             // [8] Quetzal · [9] Fénix · [10] Tengu · [11] Dragón.
-            return new EstiloAlas[12]
+            return new EstiloAlas[14]
             {
                 default(EstiloAlas),
                 Ala("Runas Solares", (Color[])(object)new Color[3]
@@ -508,7 +514,34 @@ namespace AethonMod.Content.VFX
                     new Color(200, 64, 72),
                     new Color(108, 28, 40),
                     new Color(20, 6, 10)
-                }, new Color(150, 60, 70), "Ruido_6", 2, 96f, 60f, 4.5f, 24f, 16f, 0.5f, 0.92f, 0.22f, 1.6f, 0.12f, 0.14f, 0.18f, 5f, 0.62f, 0.5f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.9f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 3, 1.05f, 1f, 1f, lisas: true, escalaGlobal: 0.95f, alitas: 0.5f, coronas: 0.62f)
+                }, new Color(150, 60, 70), "Ruido_6", 2, 96f, 60f, 4.5f, 24f, 16f, 0.5f, 0.92f, 0.22f, 1.6f, 0.12f, 0.14f, 0.18f, 5f, 0.62f, 0.5f, 0.05f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.9f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 3, 1.05f, 1f, 1f, lisas: true, escalaGlobal: 0.95f, alitas: 0.5f, coronas: 0.62f),
+                // ==============================================================
+                //  v6.137 — LAS DOS COPIAS DE LA VALQUIRIA RÚNICA (la
+                //  letra: «hacer dos copias, en una quita las plumas y
+                //  no toques nada mas, en la otra intenta darle una
+                //  forma lisa a las plumas y no toques nada mas»). EL
+                //  ALMA PLATA INTACTA (misma paleta, mismo Ruido_13,
+                //  mismo tempo): SOLO el cuerpo cambia.
+                // ==============================================================
+                //  12 — SIN PLUMAS: el abanico de SIETE plumas de lanza
+                //  se va; quedan las DOS plumas estructurales (el mínimo
+                //  que la librería teje como vela — nada más se toca).
+                Ala("Valquiria Sin Plumas", (Color[])(object)new Color[3]
+                {
+                    new Color(218, 232, 255),
+                    new Color(130, 150, 190),
+                    new Color(22, 28, 48)
+                }, new Color(150, 170, 210), "Ruido_13", 2, 92f, 54f, 3.5f, 17f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0f, 5f, 0.45f, 0.5f, 0.3f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 1, 1f),
+                //  13 — LISA: la MISMA receta lisa de la casa (v6.129:
+                //  las plumas dejan de ser TIRAS — la vela continua del
+                //  borde maestro; las siete plumas viven como armadura
+                //  invisible que alimenta la superficie).
+                Ala("Valquiria Lisa", (Color[])(object)new Color[3]
+                {
+                    new Color(218, 232, 255),
+                    new Color(130, 150, 190),
+                    new Color(22, 28, 48)
+                }, new Color(150, 170, 210), "Ruido_13", 7, 92f, 54f, 3.5f, 17f, 11f, 0.5f, 0.92f, 0.22f, 1.54f, 0.12f, 0.14f, 0f, 5f, 0.45f, 0.5f, 0.3f, 0.085f, 0.16f, 0.018f, 0.95f, 1f, 0.88f, 0.3f, 0.36f, 0.62f, 0.15f, 1f, 1f, 1f, 1.05f, 1, 1f, lisas: true)
             };
         }
 

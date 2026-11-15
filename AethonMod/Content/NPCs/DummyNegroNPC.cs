@@ -6,6 +6,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.NPCs
 {
@@ -223,17 +224,28 @@ namespace AethonMod.Content.NPCs
                 Vector2 pos = NPC.Bottom - screenPos;
                 Vector2 origen = new Vector2(marco.Width * 0.5f, marco.Height);
 
-                // (1) EL RESPLANDOR MORADO — la lectura nocturna del
-                //     negro de la casa (un halo suave bajo el lote alfa
-                //     del propio NPC).
-                Texture2D glow = VFXCore.SoftGlow;
-                if (glow != null && !glow.IsDisposed)
+                // (1) LA BRUMA DEL GRIMORIO (v6.137 — la letra: «tiene
+                //     algo asi como un circulo plano, acaso ese circulo
+                //     es bruma, de ser asi usar la libreria
+                //     correspondiente, recuerda la regla de la casa,
+                //     nada de geometria plana»): el SoftGlow estirado
+                //     MURIÓ — era geometría plana. La bruma de verdad es
+                //     BrumaFX.Puff (LA biblioteca de la casa) latiendo
+                //     alrededor del cuerpo: el banco de pruebas respira
+                //     envuelto en la niebla violeta del vacío.
+                //     (En el lote del NPC: BrumaFX cierra y reabre sus
+                //     propios lotes — el contrato de la casa.)
+                try
                 {
-                    spriteBatch.Draw(glow, pos - new Vector2(0f, marco.Height * 0.5f),
-                        null, new Color(66, 32, 108) * 0.42f, 0f,
-                        glow.Size() * 0.5f, new Vector2(marco.Width * 2.6f / glow.Width,
-                            marco.Height * 2.2f / glow.Height), SpriteEffects.None, 0f);
+                    VFXCore.CerrarLoteSiAbierto();
+                    BrumaFX.Puff(
+                        NPC.Center - new Vector2(0f, marco.Height * 0.42f),
+                        34f + (float)System.Math.Sin(Main.GlobalTimeWrappedHourly * 0.9f) * 4f,
+                        new Color(96, 58, 148), NPC.whoAmI * 97 + 13,
+                        Main.GlobalTimeWrappedHourly, 0.42f, 0.85f);
+                    VFXCore.ReabrirLoteVanilla();
                 }
+                catch { try { VFXCore.ReabrirLoteVanilla(); } catch { } }
 
                 // (2) EL MUÑECO — el sprite de la casa tal cual (ya
                 //     nació negro-violeta en la forja), bañado por la

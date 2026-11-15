@@ -625,10 +625,34 @@ namespace AethonMod.Content.Systems
                 //     el que le enseñará al portador el camino del
                 //     Despertar (consagrar armas y materiales con
                 //     esencias del Eterno).
-                ColocarElAltarDeLaLlegada(destino);
+                // v6.137 — EL LIBRO ENCIMA DEL ALTAR (la letra: «cuando
+                // el grimorio llega al mundo la primera vez, este
+                // aparece encima del altar, o sea arriba a unos pixeles
+                // por encima, no solapando el altar que es lo que hace
+                // actualmente»): el libro nace con SU BASE ~40 px por
+                // encima de la CIMA del altar recién colocado — flotando
+                // sobre su trono, jamás clavado dentro de las velas.
+                int cimaAltar = ColocarElAltarDeLaLlegada(destino);
+                // v6.137 — y el altar de la llegada ES EL ACTIVO del
+                // mundo (la ley del altar único: el primero que trae el
+                // cometa).
+                float yLibro;
+                if (cimaAltar >= 0)
+                {
+                    yLibro = cimaAltar * 16f - 40f - 21f;  // cima − 40px − media altura del libro
+                    // EL REGISTRO: la cima es la fila 0 del mueble; el
+                    // origen (0,2) del altar está en cimaAltar (la tile
+                    // superior-izquierda del 2×3 es su origen mismo).
+                    global::AethonMod.Content.Systems.AltarUnicoSistema.Registrar(
+                        (int)(destino.X / 16f) - 1, cimaAltar);
+                }
+                else
+                {
+                    yLibro = destino.Y - 60f;
+                }
 
                 int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaLlegada"),
-                    (int)destino.X, (int)destino.Y,
+                    (int)destino.X, (int)yLibro,
                     ModContent.NPCType<NPCs.GrimorioDormido>(), 0, 0f, idxJugador);
                 NPC libro = (npcIdx >= 0 && npcIdx < Main.maxNPCs) ? Main.npc[npcIdx] : null;
                 if (libro != null && libro.active)
@@ -743,11 +767,14 @@ namespace AethonMod.Content.Systems
         /// de la llegada (centrado bajo el libro, descansando sobre la
         /// primera tile sólida de esa columna). Si ya vive un altar ahí,
         /// no se apila (la llegada es una por jugador por mundo).</summary>
-        private static void ColocarElAltarDeLaLlegada(Vector2 destino)
+        /// <summary>v6.137 — devuelve la fila (tile) MÁS ALTA del altar
+        /// colocado (-1 si no se colocó): la llegada la usa para nacer
+        /// el libro POR ENCIMA de la cima — jamás solapado.</summary>
+        private static int ColocarElAltarDeLaLlegada(Vector2 destino)
         {
             try
             {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                if (Main.netMode == NetmodeID.MultiplayerClient) return -1;
                 int tipoAltar = ModContent.TileType
                     <global::AethonMod.Content.Tiles.AltarOfrendasTile>();
                 int tx = (int)(destino.X / 16f);
@@ -762,7 +789,7 @@ namespace AethonMod.Content.Systems
                     Tile t = Main.tile[tx, y];
                     if (t != null && t.HasTile && Main.tileSolid[t.TileType]) { suelo = y; break; }
                 }
-                if (suelo < 0) return;
+                if (suelo < 0) return -1;
 
                 // ¿YA HAY UN ALTAR AQUÍ? (no se apilan altares).
                 for (int dx = -4; dx <= 5; dx++)
@@ -770,7 +797,7 @@ namespace AethonMod.Content.Systems
                     for (int dy = -5; dy <= 1; dy++)
                     {
                         Tile t = Framing.GetTileSafely(tx + dx, suelo + dy);
-                        if (t.HasTile && t.TileType == (ushort)tipoAltar) return;
+                        if (t.HasTile && t.TileType == (ushort)tipoAltar) return -1;
                     }
                 }
 
@@ -812,11 +839,15 @@ namespace AethonMod.Content.Systems
                             NetMessage.SendData(MessageID.TileSquare, -1, -1, null,
                                 Math.Max(6, alto + 2), ax - 2, arriba - 2);
                         }
-                        return;
+                        // v6.137 — LA CIMA DEL ALTAR: la fila más alta
+                        // del mueble colocado — la llegada nace el libro
+                        // POR ENCIMA, jamás solapado.
+                        return arriba;
                     }
                 }
+                return -1;   // ningún anclaje prendió — sin altar
             }
-            catch { }
+            catch { return -1; }
         }
 
         // ================================================================

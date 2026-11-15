@@ -2453,6 +2453,19 @@ EL SERAFÍN: TRES PARES de alas de fuego violeta que no quema —
 			'''
 	}
 
+	AlasValquiriaSinPlumas: {
+		// v6.137 — LA COPIA SIN PLUMAS (la letra: «en una quita las plumas
+		// y no toques nada mas»): la plata nórdica sin el abanico.
+		DisplayName: Valquiria Sin Plumas
+		Tooltip: La Valquiria sin su abanico de plumas — la vela estructural de la casa
+	}
+	AlasValquiriaLisa: {
+		// v6.137 — LA COPIA LISA (la letra: «en la otra intenta darle una
+		// forma lisa a las plumas y no toques nada mas»): las plumas dejan
+		// de ser tiras — la superficie continua del borde maestro.
+		DisplayName: Valquiria Lisa
+		Tooltip: Las plumas de la Valquiria fundidas en UNA vela lisa y continua
+	}
 	AlasValquiriaRunica: {
 		DisplayName: Alas de la Valquiria Rúnica
 		Tooltip:
@@ -4069,13 +4082,22 @@ PrismaInterior: {
 	Leyenda: La llamada: el altar se materializa y EL GRIMORIO flota justo encima — de la ceremonia nacen los fragmentos
 	NombreCorto: El Prisma del Eterno
 	NombrePilar: El Pilar Prisma — la salida del llano
+	OleadaTitulo: LA OLEADA DE HAMBRE
+	OleadaNivel: Nivel {0} de {1}
+	OleadaPista: desbloquea niveles completando la oleada FUERA del interior (tu máximo: {0})
+	OleadaLanzar: LANZAR LA OLEADA · NIVEL {0}
+	OleadaCorre: LA OLEADA YA CORRE POR EL CUERPO…
+	JefesTitulo: LOS JEFES DEVORADOS — LA ARENA DEL INTERIOR
+	JefesVacio: aún no has devorado jefes — mátalos con el grimorio primero
+	JefePoder: Nv {0} · {1}%
+	PoderCrece: ✦ {0} cayó en la arena ({1} veces): su próxima versión nace al {2}%
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
 
 Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
-	Subtitulo: consagra la ofrenda por el Eterno — arma, material o esencias
+	Subtitulo: consagra la ofrenda — arma · material · esencias
 	SlotVacio: ofrenda
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No vale ya consagrada, ni herramienta, ni accesorio, ni el grimorio, ni dinero — LAS ESENCIAS SÍ: el Eterno las devora
@@ -4116,6 +4138,12 @@ Altar: {
 	// para eso dejarlo en el altar» — el chat SOLO AVISA.
 	FaltanEsencias: ✦ No llevas suficientes Esencias del Eterno — el altar dice cuánto falta y cómo conseguirlas.
 	Consagrar: CONSAGRAR
+	// v6.137 — LA LEY DEL ALTAR ÚNICO.
+	YaHayUno: ✦ Ya vive UN ALTAR DE CONSAGRACIÓN en este mundo — el Eterno solo escucha a uno. Recógelo si quieres moverlo.
+	Desactivado: ✦ Este altar está DESACTIVADO — el que funciona es otro (búscalo en el mapa: dice ACTIVO).
+	Promovido: El altar recogido… y otro asciende: ESTE es el altar activo ahora.
+	DesactivadoCorto: Altar DESACTIVADO (otro es el activo)
+	NoInterior: ✦ El altar no vive dentro del libro — el interior solo tiene su PILAR PRISMA.
 	ConsagradaHechaArma: ✦ {0} nace CONSAGRADA por el Eterno: +5% a TODAS sus estadísticas y su etiqueta junto al nombre.
 	Devorar: DEVORAR
 	DevoradasHecha: ✦ El Eterno devoró {0} esencias — la puerta cuenta {1}/{2}.

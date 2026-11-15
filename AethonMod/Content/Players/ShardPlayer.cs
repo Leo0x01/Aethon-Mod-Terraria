@@ -69,6 +69,14 @@ namespace AethonMod.Content.Players
         /// </summary>
         public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
 
+        /// <summary>v6.137 — LA CUENTA DE LA ARENA: cuántas veces mató
+        /// el portador a CADA jefe DENTRO del mundo interior (pares
+        /// tipo→kills — el poder del jefe interior crece +25% por cada
+        /// una; los kills de afuera no cuentan: la arena es la que
+        /// entrena).</summary>
+        public System.Collections.Generic.List<int> MuertesInteriorTipos = new System.Collections.Generic.List<int>();
+        public System.Collections.Generic.List<int> MuertesInteriorCuenta = new System.Collections.Generic.List<int>();
+
         /// <summary>
         /// v6.50.115 — ¿Ya ocurrió EL FESTÍN DEL GUARDIÁN? El easter egg de
         /// la Mazmorra (la letra: «el guardia intenta atacar al jugador
@@ -1142,6 +1150,33 @@ namespace AethonMod.Content.Players
         /// sincroniza por EcoRed únicamente entonces: antes el Devorador
         /// disparaba ~80 MsgCronica idénticos por una sola derrota).
         /// </summary>
+        /// <summary>v6.137 — ¿CUÁNTOS KILLS INTERIORES lleva el
+        /// portador contra ESTE jefe? (el nivel de la arena).</summary>
+        public int KillsInteriorDe(int npcType)
+        {
+            int idx = MuertesInteriorTipos.IndexOf(npcType);
+            return idx >= 0 ? MuertesInteriorCuenta[idx] : 0;
+        }
+
+        /// <summary>v6.137 — UN KILL MÁS en la arena (devuelve la cuenta
+        /// nueva; -1 si algo falla).</summary>
+        public int MarcarKillInterior(int npcType)
+        {
+            try
+            {
+                int idx = MuertesInteriorTipos.IndexOf(npcType);
+                if (idx < 0)
+                {
+                    MuertesInteriorTipos.Add(npcType);
+                    MuertesInteriorCuenta.Add(1);
+                    return 1;
+                }
+                MuertesInteriorCuenta[idx]++;
+                return MuertesInteriorCuenta[idx];
+            }
+            catch { return -1; }
+        }
+
         public bool CronicaMarcar(int npcType)
         {
             if (npcType <= 0) return false;
@@ -1297,6 +1332,34 @@ namespace AethonMod.Content.Players
             try
             {
                 int entregados = 0;
+                // ==============================================================
+                //  v6.137 — LOS 999 MUÑECOS DE PRUEBAS (la letra: «dale
+                //  al jugador 999 muñecos de prueba negros»): el banco
+                //  de pruebas del grimorio A GRANEL — un stack de 999
+                //  (se rellena SOLO si el jugador no lleva ya uno
+                //  completo: la entrega es una vez por guardado).
+                // ==============================================================
+                try
+                {
+                    int tipoDummy = ModContent.ItemType
+                        <global::AethonMod.Content.Items.Llamados.DummyNegroItem>();
+                    bool yaLlena = false;
+                    for (int k = 0; k < 50; k++)
+                    {
+                        Item inv = Player.inventory[k];
+                        if (inv != null && !inv.IsAir && inv.type == tipoDummy &&
+                            inv.stack >= 999) { yaLlena = true; break; }
+                    }
+                    if (!yaLlena)
+                    {
+                        // QuickSpawnItem: el patrón de la casa (devuelve el
+                        // índice y SINCRONIZA solo — el gift del server)
+                        int idx99 = Player.QuickSpawnItem(
+                            Player.GetSource_GiftOrReward(), tipoDummy, 999);
+                        if (idx99 >= 0) entregados++;
+                    }
+                }
+                catch { }
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDosItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
@@ -1500,6 +1563,10 @@ namespace AethonMod.Content.Players
                 tag["furiaV2"] = true;
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 tag["jefesDevorados"] = JefesDevorados;
+                // v6.137 — LA CUENTA DE LA ARENA (los kills interiores
+                // por jefe — el poder +25% por muerte persiste).
+                tag["muertesInteriorTipos"] = MuertesInteriorTipos;
+                tag["muertesInteriorCuenta"] = MuertesInteriorCuenta;
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
                 tag["guardianDevorado"] = GuardianMazmorraDevorado;
@@ -1563,6 +1630,8 @@ namespace AethonMod.Content.Players
                     FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 JefesDevorados = new System.Collections.Generic.List<int>(tag.GetList<int>("jefesDevorados"));
+                MuertesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorTipos"));
+                MuertesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorCuenta"));
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)
                 GuardianMazmorraDevorado = tag.GetBool("guardianDevorado");

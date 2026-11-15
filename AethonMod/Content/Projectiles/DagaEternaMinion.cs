@@ -737,13 +737,17 @@ namespace AethonMod.Content.Projectiles
         /// el centro): el offset del ojo desde el centro del marco,
         /// medido píxel a píxel del sprite (flood-fill del taladro
         /// real de cada marco de la tira).</summary>
+        // v6.137 — EL TRONO DEL OJO EN LA ENCÍA: el colmillo apunta con
+        // la punta y su BASE (la encía violeta) es donde el OJO del
+        // grimorio vive — el mismo espíritu del trasplante v6.130, en
+        // la nueva piel.
         private static readonly Vector2[] TronoDelOjo =
         {
-            new(-4.5f, 0.5f),    // cristal (la curva luna lo baja a la izquierda)
-            new(0.5f, -0.5f),    // llama (el serpenteo lo deja casi al centro)
-            new(-5.5f, -1.5f),   // roca (el cincel ancho, arriba-izquierda)
-            new(-2.5f, -1.5f),   // vacío (la puerta lo pone a la izquierda)
-            new(-0.5f, 1.5f),    // veredicto (la balanza lo baja al pie)
+            new(-4.5f, -12.5f),  // cristal (en la encía, un pelo a la izquierda)
+            new(0.5f, -13.5f),   // llama (casi al centro de la encía)
+            new(-5.5f, -14.5f),  // roca (arriba-izquierda de la encía)
+            new(-2.5f, -14.5f),  // vacío (la puerta lo pone a la izquierda)
+            new(-0.5f, -11.5f),  // veredicto (la balanza lo baja al pie)
         };
 
         public override bool PreDraw(ref Color lightColor)
@@ -751,17 +755,30 @@ namespace AethonMod.Content.Projectiles
             if (Main.dedServ || Main.netMode == NetmodeID.Server) return false;
             try
             {
+                // ==============================================================
+                //  v6.137 — EL COLMILLO (la letra: «sobre las cuchillas, y
+                //  si son colmillos, el proyecto ya tiene textura de
+                //  colmillo en algun lugar»): la hoja MURIÓ — cada
+                //  cuchilla viste EL COLMILLO DE LA FORJA
+                //  (ColmilloAbismo.png 48×96: la aguja de marfil con la
+                //  encía violeta en la base), apuntando con la PUNTA al
+                //  rumbo del golpe. El tinte de la estela pinta EL ALMA
+                //  de cada tipo sobre el marfil; la máquina queda
+                //  INTACTA (solo cambia la piel).
+                // ==============================================================
                 Texture2D tex = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/DagaEterna_Hoja", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                int frameH = tex.Height / TiposMax;
-                Rectangle rect = new Rectangle(0, Tipo * frameH, tex.Width, frameH);
+                    "AethonMod/Content/Effects/ColmilloAbismo", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                Rectangle rect = new Rectangle(0, 0, tex.Width, tex.Height);
                 Vector2 pos = Projectile.Center - Main.screenPosition;
-                Vector2 orig = new Vector2(tex.Width * 0.5f, frameH * 0.5f);
-                float rot = Projectile.rotation;
+                // EL COLMILLO APUNTA CON LA PUNTA: la textura mira ARRIBA
+                // (la convención de SombrasLib.ColmilloTexturizado) — el
+                // origen en la BASE (la encía) y la rotación del golpe.
+                Vector2 orig = new Vector2(tex.Width * 0.5f, tex.Height * 0.88f);
+                float rot = Projectile.rotation + MathHelper.PiOver2;
                 // v6.131 — LA CORONA GRANDE: la hoja ×1,4 (ESCALA_TIARA
                 // vive en Projectile.scale — el golpe y el dibujado
                 // crecen JUNTOS con la hoja).
-                float esc = Projectile.scale;
+                float esc = Projectile.scale * 0.62f;   // el colmillo es LARGO (96 px): ×0,62 para la talla de la cuchilla
 
                 // LA ESTELA DEL GOLPE (el rastro de la casa): tres
                 // fantasmas ATRÁS mientras VUELA al ataque — v6.132: la
@@ -777,9 +794,12 @@ namespace AethonMod.Content.Projectiles
                     }
                 }
 
-                // LA CUCHILLA (el marco de SU tipo del spritesheet — la
-                // hoja SIN mango con el agujero taladrado al centro)
-                Main.spriteBatch.Draw(tex, pos, rect, Color.White, rot, orig, esc, SpriteEffects.None, 0f);
+                // EL COLMILLO (el marfil de la forja con el ALMA de su
+                // tipo — el tinte SUAVE: el marfil se lee, el alma asoma)
+                Color tintaColmillo = Color.White;
+                try { tintaColmillo = Color.Lerp(Color.White, LuzDe(Tipo), 0.38f); }
+                catch { }
+                Main.spriteBatch.Draw(tex, pos, rect, tintaColmillo, rot, orig, esc, SpriteEffects.None, 0f);
 
                 // ============== EL OJO DEL GRIMORIO (v6.130) ==============
                 // LA LETRA: «en esa zona va el ojo del grimorio, ya

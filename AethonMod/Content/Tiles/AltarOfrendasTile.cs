@@ -142,7 +142,11 @@ namespace AethonMod.Content.Tiles
             TileObjectData.newTile.Origin = new Point16(0, 2);
             TileObjectData.addTile(Type);
 
-            // EL MAPA: el teal de las investigaciones.
+            // EL MAPA: el teal de las investigaciones. v6.137 — EL
+            // NOMBRE DEL ACTIVO: el hook ModifyMapEntryName de esta era
+            // del tML (verificado en el decompile) escribe «(ACTIVO)»
+            // SOBRE el altar que funciona — el mapa siempre dice cuál
+            // es el que sirve.
             LocalizedText nombre = CreateMapEntryName();
             AddMapEntry(new Color(90, 220, 180), nombre);
 
@@ -159,9 +163,52 @@ namespace AethonMod.Content.Tiles
         /// es el grimorio en la mano — es EL ÍTEM «Mundo Interior del
         /// Eterno» (1000 esencias, fabricado AQUÍ en el altar). El
         /// altar de dentro (la salida) es ahora EL PRISMA.</summary>
+        public override void PlaceInWorld(int i, int j, Item item)
+        {
+            // v6.137 — EL REGISTRO DEL ALTAR ÚNICO: recién colocado, es
+            // EL ACTIVO del mundo (el ítem ya validó que no había otro).
+            // El ORIGEN del mueble desde la tile del cursor: PlaceInWorld
+            // recibe la tile DEL ANCLA (Origin (0,2)) — el origen queda
+            // en (i, j-2)… pero la casa VERIFICA mirando el marco real.
+            try
+            {
+                int ox = i, oy = j;
+                Tile izq = Framing.GetTileSafely(i - 1, j);
+                if (izq != null && izq.HasTile && izq.TileType == (ushort)Type) ox = i - 1;
+                Tile arriba = Framing.GetTileSafely(ox, j - 1);
+                if (arriba != null && arriba.HasTile && arriba.TileType == (ushort)Type) oy = j - 1;
+                Systems.AltarUnicoSistema.Registrar(ox, oy);
+            }
+            catch { }
+        }
+
+        /// <summary>v6.137 — EL ALTAR APAGADO: si NO es el activo, su
+        /// luz muere (la lectura visual del mundo) — solo el que sirve
+        /// alumbra el camino de la consagración.</summary>
+        public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
+        {
+            if (!Systems.AltarUnicoSistema.EsElActivo(i, j)) { r = 0f; g = 0f; b = 0f; }
+        }
+
         public override bool RightClick(int i, int j)
         {
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active) return false;
+
+            // v6.137 — EL AVISO DEL ALTAR DESACTIVADO (la letra:
+            // «cualquier altar extra queda desactivado con un texto que
+            // lo diga»): un altar que NO es el activo no abre su
+            // ventana — solo explica por qué está apagado. (La
+            // colocación ya rebota los duplicados: esto alcanza a los
+            // altares que quedaron atrás cuando el activo se recogió y
+            // otro fue promovido.)
+            if (global::AethonMod.Content.Systems.AltarUnicoSistema.HayActivo &&
+                !global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))
+            {
+                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                    "Mods.AethonMod.Altar.Desactivado"), new Microsoft.Xna.Framework.Color(190, 160, 220));
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose, new Vector2(i * 16f, j * 16f));
+                return true;
+            }
 
             // DENTRO DEL LIBRO: cualquier altar de la casa sigue siendo
             // salida (la red de seguridad — el prisma es la puerta buena).
@@ -178,15 +225,43 @@ namespace AethonMod.Content.Tiles
 
         public override void MouseOver(int i, int j)
         {
-            Main.LocalPlayer.cursorItemIconEnabled = true;
-            Main.LocalPlayer.cursorItemIconID = ModContent.ItemType
-                <Items.Altar.AltarOfrendasItem>();
+            // v6.137 — EL CURSOR DICE CUÁL SIRVE (la letra: «siempre
+            // marcar el altar que funciona en el mapa»): el ACTIVO
+            // muestra su ítem como siempre; un altar DESACTIVADO
+            // escribe su estado con el texto del cursor (la técnica del
+            // Pilar Prisma — el mapa de esta era del tML solo admite
+            // UNA entrada por tipo, pero el cursor siempre dice la
+            // verdad).
+            if (global::AethonMod.Content.Systems.AltarUnicoSistema.HayActivo &&
+                !global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))
+            {
+                Main.LocalPlayer.cursorItemIconEnabled = true;
+                Main.LocalPlayer.cursorItemIconText = Terraria.Localization.Language.GetTextValue(
+                    "Mods.AethonMod.Altar.DesactivadoCorto");
+            }
+            else
+            {
+                Main.LocalPlayer.cursorItemIconEnabled = true;
+                Main.LocalPlayer.cursorItemIconID = ModContent.ItemType
+                    <Items.Altar.AltarOfrendasItem>();
+            }
         }
 
         public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
             => true;
 
-        /// <summary>AL PICARLO suelta su item (el altar viaja).</summary>
-        public override bool CanDrop(int i, int j) => true;
+        /// <summary>AL PICARLO suelta su item (el altar viaja). v6.137 —
+        /// si era EL ACTIVO, el sistema PROMUEVE al primero que quede
+        /// vivo (la puerta del Eterno nunca se queda sin altar).</summary>
+        public override bool CanDrop(int i, int j)
+        {
+            if (global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))
+            {
+                global::AethonMod.Content.Systems.AltarUnicoSistema.ActivoX = -1;
+                global::AethonMod.Content.Systems.AltarUnicoSistema.ActivoY = -1;
+                global::AethonMod.Content.Systems.AltarUnicoSistema.PromoverSiHaceFalta();
+            }
+            return true;
+        }
     }
 }
