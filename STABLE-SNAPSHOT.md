@@ -1,32 +1,28 @@
-# SNAPSHOT ESTABLE — v6.141 — LA SESIÓN DEL LIBRO ABIERTO Y LAS SEIS VERDADES
+# SNAPSHOT ESTABLE — v6.142 — LA FORMA EN SU DESPERTAR Y EL RELOJ DE VERDAD
 
-> **PUBLICADA — [release 446319797](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.141) + CDN verificado (md5 `55cb6ef94085c995fb2f12efcec0686c`, 19.383.189 B, 524 entradas)**
+> **PUBLICADA — [release 446344047](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.142) + CDN verificado (md5 `2e8af7377e0c911eaa6850a5e07d4b24`, 19.368.967 B, 524 entradas)**
 
-## LA LETRA (sesión 22)
+## LA LETRA (sesión 23)
 
-Todo gira a su ojo — EL OJO QUE MIRA como arma nueva (ojo cerca del enemigo → mirada → marca → quemadura del vacío en PvP) · la Forma Eterna de verdad (nivel NORMAL del libro desde 100, 12 partes, 10P+1000 esencias +10%/nivel, puestas en el jugador con el libro) · el libro de la Sforza con el ojo de los minions (el pergamino murió) · el ojo rojo como único indicador de hambre (el aura rara eliminada) · el fantasma del altar · el altar en el minimapa · los jefes del interior (lejos, sin clima, Skeletron normal) · las alas entregadas.
+La Forma Eterna debía estar en EL DESPERTAR (101-112, una parte por peldaño, 10P+1000 esencias +10%/nivel, +4% ataque a todo el grimorio, pieza visual puesta SOLO usando el libro; al 112 la MANIFESTACIÓN + el ítem nace + los visuales DESAPARECEN convertidos) · la escalera a 120 con el poder extra 113-120 (+10% ataque/nivel, coste +20%/nivel) · el indicador de hambre es LA MÁQUINA DEL GRIMORIO HAMBRIENTO NERVIOSO a velocidad NORMAL (el Nervioso es la demo acelerada) · la descripción del cosmético: lo que es + qué significa usarlo.
 
-## LAS OCHO ENTREGAS
+## LAS SIETE ENTREGAS
 
-1. **EL OJO QUE MIRA (Weapons/Ojos/ElOjoQueMira.cs)**: LaMiradaProyectil (el ojo de LOS MINIONS se materializa a 140px de la presa bajo el cursor, carga 16 t, dispara) → LaMiradaRayo (rayo atravesante de 340 px, AABBvLineCollision) → LaMarcaSilenciosa (ModBuff: 2 s de glifo → enciende QuemaduraVacioExterior 5 s con intensidad 1,5 y dueño). PvP: OnHitPlayer + MarcarPlayer (la quemadura v6.141 Update(Player): 1% vida máx/medio s). Mejora: +1,5% daño y −0,5% maná POR NIVEL DEL LIBRO. ENTREGA directa + receta (15 esencias + estantería).
-2. **LA FORMA ETERNA v2 (Players/FormaEternaPlayer.cs)**: el despertar REVERTIDO a 100 (NivelMax=100; piezas 200-1000 y NivelIra muertos). La construcción: NivelLibro (ShardLevelItem) ≥ 100 → 12 partes (la Escritura/AnilloDorsal · 3 Anillos · Primera Luz · Brasa · 3 Soles/BrilloSolar · Ofanim · Manto · Aura del Vacío). Coste: MonedasParte=10M·1,1^n + EsenciasParte=1000·1,1^n. Cada parte: +4% DamageClass.Generic y SU visual en PostUpdateEquips SOLO sosteniendo el libro. La 12: QuickSpawnItem(FormaEternaItem) + ManifestacionDeLaForma (públicada desde DespertarGrimorioSistema). El pago: SHIFT+clic derecho del libro (CanUseItem). Persistencia: fePartes/feManifestacion.
-3. **EL LIBRO DEL ETERNO (UI/LibroDelEternoUI.cs)**: EL ICONO del grimorio junto al botón de logros (geometría vanilla del decompile: 20+560·escala+num; el nuestro a su izquierda, SOLO con el inventario abierto). EL LIBRO ABIERTO: tapa de cuero + chapas + lomo cosido con puntadas + DOS PÁGINAS (izq: altar/interior/oleadas/grimorio · der: despertar/ataques/forma/auras) + EL OJO DE LOS MINIONS (OjoEterno_Abierto) siguiendo al cursor con parpadeo. PergaminoUI = redirector (la tecla P vive).
-4. **UNA SOLA HAMBRE**: GrimoireEternal.TasaHambre=0 (la del arma murió); ShardPlayer espeja et.Hambre=MomentosHambre/10 (y a 0 al comer). EL AURA DEL PORTADOR MUERTA (el bloque del halo v6.140 eliminado — el modo 0 no se engendra jamás). La furia sigue: 9/10=90% posible, 10/10=100% SIEMPRE.
-5. **EL FANTASMA MUERTO**: RevivirLibro re-ancla (AltarUnicoSistema.ActivoX/Y: cima−40−21) y la pendiente APRENDE la posición nueva.
-6. **LOS JEFES DEL INTERIOR**: JefeInteriorGlobalNPC.PreAI fuerza ai[1]=1 en SkeletronHead interior (el AI_011 de vanilla con IsItDay lo metía en el spin-guardián por el mediodía eterno — verificado en el decompile). InvocarJefeInterior: ancla a 100 tiles (dirX·100). Regen licita verificada (1%+0,1%/nv desde 10, sin tope).
-7. **EL FARO DEL MINIMAPA**: AltarUnicoSistema.PostUpdateTime repinta las 6 celdas cada 60 ticks (RepintarEnMapa).
-8. **LAS ALAS RÚNICAS ENTREGADAS** (EntregarSiNoTiene en el regalo de pruebas).
+1. **EL DESPERTAR A LOS 120 (DespertarGrimorio.cs)**: NivelMax=120 · NivelCaza=100 (la cima de la caza no se mueve: Aethon y la Ira siguen en el 100) · NivelFormaInicio=101 · NivelManifestacion=112. BonusDano POR TRAMOS: +1%/nivel (1-100) · +4%/nivel (101-112) · +10%/nivel (113-120) — +228% acumulado a 120, a TODO el ataque del grimorio (mágico e invocación: Equinoccio y ojos pasan por él). MonedasPara/EsenciasPara: 10P+1000 la primera parte, ×1,10 hasta la 12, ×1,20 desde el 113 (verificado por código: 101=10,00P+1000 · 112=28,53P+2853 · 120=122,68P+12268).
+2. **LAS MESAS SEGURAS**: ArmasDe()/GruposMaterialesDe()/CantidadMateriales protegen >100 (las tablas viven hasta 100 — los 4 accesos directos migraron) · LaMesaEstaCompleta: arriba del 100 SOLO esencias+monedas · SubirNivel no cobra Devorar arriba del 100 · los hitos del camino CaminoForma1-11 + CaminoManifestacion + CaminoPoderExtra (la escalera UI pinta las partes).
+3. **LA CONSTRUCCIÓN (DespertarGrimorioSistema.SubirNivel → FormaEternaPlayer.ConstruirParte)**: cada peldaño 101-112 construye UNA PARTE (aviso + sonido) · al 112 LA CONVERSIÓN (ConvertirLaForma): el ítem cosmético nace + ManifestacionDeLaForma (una vez) + Convertida=true (los visuales YA NO visten al portador — la letra: «desaparece ya que es convertida en el item cosmetico»).
+4. **EL VESTIDO (FormaEternaPlayer.PostUpdateEquips)**: las partes visuales SOLO sosteniendo el libro · la 12ª enciende EL AURA DEL VACÍO (el ancla) hasta la conversión · EL ATAQUE vive en BonusDano (no en el player — un solo sitio de verdad).
+5. **EL RELOJ DE VERDAD**: GrimoireEternal.TasaHambre=1/216000 (LA HORA — la máquina del Nervioso a velocidad normal: ojo rojo 20-80%, inquietud 50%+, caza propia 25%+, festín por rareza) · ShardPlayer.SegundosPorMomento=360 (90% a los 54 min, 100% a la hora — LA OLEADA calzada al reloj del arma) · los espejos v6.141 muertos (subida y cena).
+6. **LA DESCRIPCIÓN DEL COSMÉTICO (FormaEternaItem + hjson ×3)**: Titulo + Linea1-11 — LO QUE ES (doce partes, cada una creció puesta en el portador como un miembro más; la duodécima estalló y la forma se convirtió en el ítem) + QUÉ SIGNIFICA USARLO (vestir al dios entero; el poder quedó horneado en el grimorio). El lector extendido a Linea11.
+7. **EL LIBRO ACTUALIZADO (hjson ×3)**: despertar 1-120 · la forma en su sección (101-112, la mesa, la conversión) · el hambre con su máquina de verdad · Auras3 sin el aura muerta. FIX: una comilla recta interna en en-US Linea11 rompía el parser hjson — el headless lo cazó (el oráculo C# no valida hjson); comillas tipográficas.
 
 ## PARA VERIFICAR EN JUEGO
 
-- El OJO QUE MIRA (regalo de pruebas al entrar): clic sobre un enemigo — el ojo aparece a su lado, la mirada lo atraviesa, la marca y las llamas violetas.
-- PvP: golpear a otro jugador con la mirada — la marca lo enciende y ARDE.
-- Libro nivel 100+: SHIFT+clic derecho del libro — el aviso de la parte construida (10P+1000 esencias la primera).
-- El icono del grimorio junto al botón de logros (abre el inventario): un clic — EL LIBRO, con el ojo siguiendo el cursor.
-- Dejar pasar el hambre: el ojo del libro se pone ROJO e inquieto — sin aura sobre el jugador NUNCA.
-- Cargar el mundo con una llegada pendiente: el libro re-nace ENCIMA del altar.
-- Interior: invocar a Skeletron — la cabeza NORMAL (sin spin); todos los jefes nacen LEJOS.
-- El minimapa: el altar activo SIEMPRE visible (faro de 1 s).
+- Despertar 100 pagado + 10P + 1000 esencias en el banco: la mesa del altar sube al 101 — LA ESCRITURA se construye y viste al portador CON el libro en la mano.
+- Peldaño a peldaño hasta el 112: la 12ª parte — el estallido de LA MANIFESTACIÓN, el ítem LA FORMA ETERNA en el inventario… y los visuales del portador DESAPARECEN (la forma se convirtió).
+- 113-120: cada peldaño +10% de ataque a TODO (el Equinoccio Y los ojos pegan más).
+- Una hora sin comer: el ojo del libro enrojece y se inquieta progresivamente — al 90% (54 min) la oleada PUEDE estallar; a la hora, SEGURA.
+- El tooltip del cosmético: LO QUE ES + QUÉ SIGNIFICA USARLO.
 
 ## DOC-ROT CONOCIDA
 CARACTERISTICAS.md / DISEÑO_DEL_MOD.md desactualizados — MAESTRO.md manda.
