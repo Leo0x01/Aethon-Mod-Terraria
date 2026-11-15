@@ -87,7 +87,15 @@ namespace AethonMod.Content.Weapons
         private static readonly EstadoGrimorio _estadoEterno = new EstadoGrimorio
         {
             Nervioso = true,
-            TasaHambre = 1f / 216000f,  // UNA HORA de 0 a 100% (la .102: 15 min — muy rápido)
+            // v6.141 — LA HAMBRE ÚNICA (la letra: «el indicador de que
+            // el grimorio del eterno tiene hambre es cuando se vuelve
+            // inquieto y su ojo se vuelve rojo y ese es su unica forma
+            // que debe tener para saber si tiene hambre»): el Eterno YA
+            // NO tiene hambre propia — TasaHambre 0 y su Hambre vive
+            // ESPEJADA del RELOJ del portador (ShardPlayer.
+            // MomentosHambre: 10 momentos = 100%). El ojo rojo y el
+            // nerviosismo SON el único indicador.
+            TasaHambre = 0f,
         };
         protected override EstadoGrimorio Estado => _estadoEterno;
         internal static EstadoGrimorio EstadoEterno => _estadoEterno;
@@ -633,6 +641,32 @@ namespace AethonMod.Content.Weapons
             // v6.45: en modo pruebas NO se exige maná (bandera).
             if (player.altFunctionUse == 2)
             {
+                // v6.141 — LA CONSTRUCCIÓN DE LA FORMA ETERNA (la
+                // letra: la Forma Eterna vive en el NIVEL NORMAL del
+                // libro, desde el 100): clic derecho CON SHIFT = pagar
+                // la parte siguiente (10P + 1000 esencias, +10%/nivel).
+                // El disparo de los ojos SIGUE siendo el clic derecho
+                // normal (sin SHIFT, nada cambia — el grimorio no se
+                // toca).
+                try
+                {
+                    if (Microsoft.Xna.Framework.Input.Keyboard.GetState()
+                            .IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
+                        Microsoft.Xna.Framework.Input.Keyboard.GetState()
+                            .IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
+                    {
+                        var fe = player.GetModPlayer
+                            <global::AethonMod.Content.Players.FormaEternaPlayer>();
+                        if (fe != null && fe.PuertaAbierta &&
+                            fe.PartesConstruidas < global::AethonMod.Content.Players
+                                .FormaEternaPlayer.PartesTotales)
+                        {
+                            fe.PagarParteSiguiente();
+                            return false;   // este clic fue de la construcción
+                        }
+                    }
+                }
+                catch { }
                 if (ManaMinionGratis()) return true;
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 // v6.51.10 — LA REFORJA VIVA: la columna COSTO DE MANÁ del

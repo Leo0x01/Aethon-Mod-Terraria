@@ -2549,6 +2549,11 @@ Items: {
 			THE SACRED HOUSE — forged by THE FORGE
 			'''
 	}
+
+	ElOjoQueMira: {
+		DisplayName: El Ojo Que Mira
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -2733,6 +2738,8 @@ Projectiles: {
 	JuicioDosSolesProj.DisplayName: Judgment of the Two Suns
 	TajoOscuroProj.DisplayName: The Slash of Darkness
 	TajoDelVacioProj.DisplayName: The Slash of the Void
+	LaMiradaProyectil.DisplayName: La Mirada Proyectil
+	LaMiradaRayo.DisplayName: La Mirada Rayo
 }
 
 Buffs: {
@@ -2838,6 +2845,11 @@ Buffs: {
 	SolEnMiniaturaBuff: {
 		DisplayName: El Sol en Miniatura
 		Description: Un sol en miniatura orbita a tu alrededor
+	}
+
+	LaMarcaSilenciosa: {
+		DisplayName: La Marca Silenciosa
+		Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
 	}
 }
 
@@ -4070,6 +4082,24 @@ Submundo: {
 	Devorado: THE GRIMOIRE DEVOURS YOU — the mist floods everything…
 }
 
+FormaEterna: {
+	Parte1: THE WRITING — the runic chest tattoo
+	Parte2: THE FIRST RING — the inner runic ring
+	Parte3: THE SECOND RING — the black hole ring
+	Parte4: THE THIRD RING — the outer golden ring
+	Parte5: THE FIRST LIGHT — the Ascended Form's aura
+	Parte6: THE EMBER — the Eclipse's black and gold smoke
+	Parte7: THE FIRST SUN — the first runic sun
+	Parte8: THE SECOND SUN — the solar pair
+	Parte9: THE THIRD SUN — the full choir of suns
+	Parte10: THE OPHANIM — the wheels of Ezekiel
+	Parte11: THE MANTLE — the veil that joins the pantheon
+	Parte12: THE VOID AURA — the masterpiece
+	Construida: ✦ THE ETERNAL FORM IS BUILT — part {0}/{1}: {2}
+	Completa: ✦✦ THE COMPLETE ETERNAL FORM — the god manifests ✦✦
+	TooltipPuerta: The Eternal Form awaits: SHIFT + right-click to build the next part ({0} platinum + {1} essences)
+}
+
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
@@ -4090,7 +4120,7 @@ Pergamino: {
 	Oleadas1: • The grimoire's hunger grows with time without kills (75 s per moment, 10 moments).
 	Oleadas2: • The book's whisper comes early… but THE WAVE only erupts at 90% hunger — and at 100% ALWAYS, with the grimoire's call.
 	Oleadas3: • Beating the wave raises its level (the next brings MORE waves); dying freezes it.
-	Oleadas4: • The ash aura on the bearer only appears at 90% hunger: if you see it, the wave is already promised.
+	Oleadas4: • THE ONLY hunger indicator: the grimoire grows RESTLESS and ITS EYE TURNS RED. When the eye burns red, the wave is near.
 	SecGrimorio: THE GRIMOIRE AND ITS MECHANICS
 	Grimorio1: • THE DEVOURING: the first death of every boss belongs to the BOOK — it stops at 100 life and the feast digests it (cinema and loot included).
 	Grimorio2: • THE SHADOWS OF THE PAGE: tomes I-V, the awakening's magic arsenal. Each door of the awakening forges them stronger.
@@ -4100,8 +4130,8 @@ Pergamino: {
 	SecDespertar: THE AWAKENING LADDER (1-1000)
 	Despertar1: • Each level costs: N essences + coins (from 100 copper to 100 platinum) + hunting weapons and materials.
 	Despertar2: • THE HUNTING DOORS: King Slime (3) · Eye of Cthulhu (5) · The World's Evil (8) · Queen Bee (10) · Skeletron (13) · Wall of Flesh (20) · Queen Slime (23) · The Twins (25) · The Destroyer (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duke Fishron (37) · Empress of Light (38) · Lunatic Cultist (45) · Moon Lord (50) · Aethon (100).
-	Despertar3: • After the summit (100) come THE REPEATS (63-99: Moon and Empress) and THE LONG LADDER (101-1000): +1% damage per level, forever.
-	Despertar4: • THE WRATH OF THE OUTER BEING is earned at level 100 (with its hunt paid): the grimoire's ultimate Beam.
+	Despertar3: • Past the summit, the book keeps leveling with XP — and from 100 on, each level builds THE ETERNAL FORM (see its section).
+	Despertar4: • THE WRATH OF THE OUTER BEING is earned at level 100 (with its hunt paid): the ultimate Beam. And THE EYE THAT WATCHES: the new eye weapon — it appears near the enemy, its gaze marks, the mark ignites the void burn (in multiplayer, the enemy player burns too).
 	SecAtaques: THE GRIMOIRE'S ATTACKS AND MINIONS
 	Ataques1: • THE EYES OF THE ETERNAL (11): the squadron that watches everything — each eye a living projectile with its own gaze.
 	Ataques2: • THE DAGGERS OF THE ETERNAL (5): crystal · flame · rock · void · verdict — the intimate guard with the eye at its heart.
@@ -4109,7 +4139,7 @@ Pergamino: {
 	Ataques4: • THE FEAST: the devouring that stops bosses and digests them whole.
 	Ataques5: • THE WRATH OF THE OUTER BEING: the ultimate beam of level 100.
 	Ataques6: • THE FIRST SUPPER: the first death of every boss, always the book's.
-	SecForma: THE ETERNAL FORM (100-1000)
+	SecForma: THE ETERNAL FORM (from the BOOK's level 100)
 	Forma1: • From level 100, THE ETERNAL FORM is built PIECE BY PIECE every 100 levels: the Ember (200) · the Runic Ring (300) · the Genesis Seal (400) · the Sun Rings (500) · the Shine (600) · the Ascended (700) · the Ophanim (800) · the Void Aura (900).
 	Forma2: • AT 1000, THE MANIFESTATION: the burst of light that kills in one blow EVERYTHING alive on the screen — bosses included, with their loot (it is a valid death).
 	Forma3: • The complete Eternal Form dresses the whole pantheon: the two lights, the ring, the ember, the shine… and the VOID AURA.
@@ -4243,3 +4273,25 @@ Arbol: {
 	Nodo9: EL ECO DE AETHON
 	Desc9: KEYSTONE: +1 espacio de minion. El árbol entero cabe en el Libro Azul 100.
 }
+
+ElOjoQueMira: {
+	DisplayName: THE EYE THAT WATCHES
+	Tooltip:
+		'''
+		"Everything turns on its eye: the grimoire’s window."
+		THE EYE APPEARS near the enemy under your cursor, charges its
+		gaze and FIRES: the beam pierces everything it crosses.
+		EVERYTHING struck receives THE SILENT MARK — and the mark ignites
+		THE VOID BURN (1% of max life per half second, 5 s).
+		IN MULTIPLAYER: the marked enemy player BURNS too.
+		Grows with the Eternal Grimoire’s level: +1.5% damage and
+		−0.5% mana per level.
+		'''
+}
+
+LaMarcaSilenciosa: {
+	DisplayName: The Silent Mark
+	Description: The eye marked you: the void burn finds you.
+}
+
+LibroEterno.NombreIcono: THE ETERNAL BOOK

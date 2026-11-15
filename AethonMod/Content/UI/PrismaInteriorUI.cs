@@ -448,9 +448,14 @@ namespace AethonMod.Content.UI
                 int kills = sp != null ? sp.KillsInteriorDe(tipoJefe) : 0;
                 int nivelIA = Math.Min(10, 1 + kills);
 
-                // EL ANCLA: delante del pilar, del lado del jugador.
+                // v6.141 — EL ANCLA LEJOS (la letra: «en el mundo
+                // interior los jefes deben aparecer alejados del
+                // jugador»): 100 tiles de distancia (1600 px) del lado
+                // del jugador — el jefe NACE lejos y CAMINA/VAJA hacia
+                // la pelea (como toda invocación de vanilla: la emoción
+                // de verlo venir).
                 int dirX = yo.Center.X < _tileX * 16f ? -1 : 1;
-                int tileX = _tileX + dirX * 9;
+                int tileX = _tileX + dirX * 100;
                 int tileY = _tileY - 2;
                 int suelo = -1;
                 for (int y = tileY; y < tileY + 60 && y < Main.maxTilesY - 10; y++)

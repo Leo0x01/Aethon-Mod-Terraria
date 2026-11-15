@@ -187,6 +187,17 @@ namespace AethonMod.Content.Globals
 
         public override bool PreAI(NPC npc)
         {
+            // === v6.141 — SKELETRON JAMÁS GUARDIÁN (la letra: «el
+            //     esqueletron aparece siendo la version de la mazmorra
+            //     con alta defensa, eso esta mal»): el interior vive en
+            //     MEDIODÍA ETERNO (time 27000) y el AI_011 de vanilla
+            //     (verificado en el decompile: `type == 68 ||
+            //     Main.IsItDay()` → ai[1] = 2f) mete a la cabeza en el
+            //     MODO SPIN DEL DÍA — la versión furiosa de defensa
+            //     brutal. LA CURA: mientras viva en la arena, su ai[1]
+            //     JAMÁS pasa de 1 (el modo noche de toda la vida). ===
+            if (EsInterior && npc.type == NPCID.SkeletronHead && npc.ai[1] == 2f)
+                npc.ai[1] = 1f;
             if (!EsInterior) return true;
             try
             {

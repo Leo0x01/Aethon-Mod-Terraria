@@ -978,15 +978,8 @@ namespace AethonMod.Content.Systems
                     global::AethonMod.Content.Globals.AlmaEternoGlobalItem.BancoCobrarMonedas(
                         grimorio, DespertarGrimorio.MonedasPara(nivel));
                     int porCobrar = 2;
-                    // v6.140 — LA ESCALERA LARGA NO PIDE ARMAS: las
-                    // tablas de armas/materiales viven solo en las 100
-                    // puertas de la caza (índices 1..100); los peldaños
-                    // 101..1000 pagan ESENCIAS + MONEDAS (la Forma
-                    // Eterna se construye con lo devorado, no con
-                    // hierros ajenos).
-                    int[] armasCobro = nivel <= 100
-                        ? DespertarGrimorio.ArmasDelNivel[System.Math.Max(1, nivel)]
-                        : null;
+                    int[] armasCobro = DespertarGrimorio.ArmasDelNivel[
+                        System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
                     if (armasCobro != null)
                     {
                         for (int i = 0; i < armasCobro.Length && porCobrar > 0; i++)
@@ -1000,8 +993,7 @@ namespace AethonMod.Content.Systems
                             }
                         }
                     }
-                    int[][] gruposCobro = nivel <= 100
-                        ? DespertarGrimorio.GruposMaterialesDe(nivel) : null;
+                    int[][] gruposCobro = DespertarGrimorio.GruposMaterialesDe(nivel);
                     for (int g = 0; g < gruposCobro.Length && porCobrar > 0; g++)
                     {
                         int cuotaG = DespertarGrimorio.CantidadMateriales(nivel, g);
@@ -1078,40 +1070,14 @@ namespace AethonMod.Content.Systems
                         EcoRed.AnunciarAlPortador(p, hito, new Color(255, 215, 120));
                 }
 
-                // ============================================================
-                //  v6.140 — LA CONSTRUCCIÓN DE LA FORMA ETERNA (la letra:
-                //  «desde el nivel 100 se ira construyendo la forma eterna
-                //  pedazo a pedazo, y cuando llega a nivel 1000, la forma
-                //  eterna completa se manifiesta dando el aura del vacio
-                //  al jugador»): cada 100 niveles una PIEZA del panteón
-                //  entra DIRECTO al inventario del portador (la regla de
-                //  la casa: lo nuevo llega). Al 1000: LA MANIFESTACIÓN —
-                //  la explosión de luz que borra la pantalla.
-                // ============================================================
-                if (nivel > 100 && nivel < 1000 && nivel % 100 == 0)
-                {
-                    int pieza = PiezaDeLaForma(nivel);
-                    if (pieza > 0 && p != null && p.active)
-                    {
-                        p.QuickSpawnItem(p.GetSource_GiftOrReward(), pieza, 1);
-                        EcoRed.SincronizarDevoracion(p);
-                    }
-                }
-                if (nivel >= 1000 && p != null && p.active)
-                {
-                    // EL UNO QUE VISTE TODO — la pieza final: LA FORMA
-                    // ETERNA entra… y con ella EL AURA DEL VACÍO (el
-                    // efecto activo de la Forma Eterna la enciende sola).
-                    p.QuickSpawnItem(p.GetSource_GiftOrReward(),
-                        ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
-                    // LA MANIFESTACIÓN — la explosión de luz (una sola
-                    // vez POR LIBRO: la marca vive en el alma).
-                    if (!alma.ManifestacionVivida)
-                    {
-                        alma.ManifestacionVivida = true;
-                        ManifestacionDeLaForma(p);
-                    }
-                }
+                // v6.141 — LA FORMA ETERNA YA NO ES DEL DESPERTAR (la
+                // letra: «La Forma Eterna fue incluida en el nivel de
+                // despertar, yo pensaba ponerlo en el nivel normal del
+                // grimorio… asi que el despertar no tendra esos 1000
+                // niveles»): las piezas v6.140 mueren AQUÍ — la
+                // construcción vive en el NIVEL NORMAL DEL LIBRO
+                // (FormaEternaPlayer: desde el libro nivel 100, cada
+                // nivel una parte, 12 en total).
 
                 // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez POR
                 // LIBRO — cada Eterno escupe al suyo).
@@ -1134,27 +1100,7 @@ namespace AethonMod.Content.Systems
             catch { }
         }
 
-        /// <summary>v6.140 — LA PIEZA DE LA FORMA ETERNA de cada peldaño
-        /// de construcción (200→900). El panteón se entrega en el ORDEN
-        /// DE LA BOLSA (los ocho + el que los viste): la Brasa, el
-        /// Anillo, el Sello, los Anillos del Sol, el Brillo, la
-        /// Ascendida, las Ofanim… y el Aura del Vacío al 900 (la
-        /// víspera de la manifestación: el portador ya VIVE el octavo
-        /// poder antes del estallido).</summary>
-        private static int PiezaDeLaForma(int nivel) => nivel switch
-        {
-            200 => ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>(),
-            300 => ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>(),
-            400 => ModContent.ItemType<Items.Accessories.SelloGenesisItem>(),
-            500 => ModContent.ItemType<Items.Accessories.AnillosSolRunicoItem>(),
-            600 => ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>(),
-            700 => ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(),
-            800 => ModContent.ItemType<Items.Cosmetics.FormaAscendidaOchoItem>(),
-            900 => ModContent.ItemType<Items.Accessories.AuraDeJuicio2Item>(),
-            _ => -1,
-        };
-
-        /// <summary>v6.140 — LA MANIFESTACIÓN DE LA FORMA ETERNA (la
+        /// <summary>v6.141 — LA MANIFESTACIÓN DE LA FORMA ETERNA (la
         /// letra: «la manifestacion sera una explocion de luz sobre el
         /// jugador que eliminara a cualquier enemigo en la pantalla de
         /// un solo golpe, jefes incluidos y con su loot ya que es una
@@ -1163,7 +1109,7 @@ namespace AethonMod.Content.Systems
         /// muerte VÁLIDA: loot, lápidas, bestiario, contadores de la
         /// casa) — jefes incluidos (el festín nunca interrumpe: se
         /// respeta DevorarEstado). Es el NACIMIENTO del dios.</summary>
-        private static void ManifestacionDeLaForma(Player p)
+        public static void ManifestacionDeLaForma(Player p)
         {
             try
             {

@@ -243,14 +243,50 @@ namespace AethonMod.Content.Systems
                 // ¿Ya vive el libro de ESTA pendiente? (otro engendro del
                 // mismo tick, o un cliente que llegó antes — no duplicar).
                 if (BuscarLibroCerca(pendiente.X, pendiente.Y) != null) return;
+                // v6.141 — LA CURA DEL FANTASMA (la letra: «el grimorio
+                // fansasma todavia existe»): el re-engendro usaba la
+                // posición VIEJA de la pendiente — si el mundo cambió (o
+                // el cráter quedó en otra parte), el libro nacía FLOTANDO
+                // EN EL AIRE, solapando el altar como un fantasma. Ahora:
+                // si existe EL ALTAR ACTIVO del mundo, el libro nace
+                // ENCIMA DEL ALTAR (la ley de la llegada v6.137: cima −
+                // 40 px − media altura); si no hay altar, DUERME EN EL
+                // SUELO bajo el punto viejo (nunca en el aire).
+                float xLibro = pendiente.X, yLibro = pendiente.Y;
+                try
+                {
+                    int ax = global::AethonMod.Content.Systems.AltarUnicoSistema.ActivoX;
+                    int ay = global::AethonMod.Content.Systems.AltarUnicoSistema.ActivoY;
+                    if (ax >= 0 && ay >= 0)
+                    {
+                        xLibro = (ax + 1) * 16f;       // el centro del 2×3
+                        yLibro = ay * 16f - 40f - 21f;  // cima − 40px − ½ libro
+                    }
+                    else
+                    {
+                        int tx = (int)(pendiente.X / 16f);
+                        int ty = (int)(pendiente.Y / 16f);
+                        for (int dy = 0; dy < 30 && ty + dy < Main.maxTilesY - 10; dy++)
+                        {
+                            Tile t = Main.tile[tx, ty + dy];
+                            if (t != null && t.HasTile && Main.tileSolid[t.TileType])
+                            { yLibro = (ty + dy) * 16f - 40f - 21f; break; }
+                        }
+                    }
+                }
+                catch { }
 
                 int idx = IndiceDeJugador(pendiente.Jugador);
                 int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaCaida"),
-                    (int)pendiente.X, (int)pendiente.Y,
+                    (int)xLibro, (int)yLibro,
                     ModContent.NPCType<NPCs.GrimorioDormido>(), 0, 0f, idx);
                 NPC libro = (npcIdx >= 0 && npcIdx < Main.maxNPCs) ? Main.npc[npcIdx] : null;
                 if (libro != null && libro.active)
                 {
+                    // v6.141 — la pendiente APRENDE la posición real del
+                    // libro re-nacido (el fantasma no vuelve ni tras
+                    // otra recarga).
+                    pendiente.X = xLibro; pendiente.Y = yLibro;
                     // v6.51.0 — SIN GivenName (el hover dice «El Grimorio
                     // Dormido»): el nombre vive en la PENDIENTE y el
                     // índice en ai[1] (viaja por el SyncNPC).

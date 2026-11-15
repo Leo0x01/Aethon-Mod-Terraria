@@ -984,6 +984,20 @@ namespace AethonMod.Content.Players
                         {
                             MomentosHambre = momentos;
 
+                            // v6.141 — EL ESPEJO DEL OJO: la hambre del
+                            // ARMA vive espiada del medidor REAL (10
+                            // momentos = 100%) — el ojo del Eterno se
+                            // pone rojo e inquieto con el MISMO reloj
+                            // que estalla la oleada (una sola hambre,
+                            // una sola verdad).
+                            try
+                            {
+                                var et = global::AethonMod.Content.Weapons.GrimoireEternal.EstadoEterno;
+                                if (et != null)
+                                    et.Hambre = Math.Min(1f, MomentosHambre / 10f);
+                            }
+                            catch { }
+
                             // v6.49 — el estado nuevo viaja al portador
                             // (su barra, su aura, sus celos — en SU cliente).
                             EcoRed.SincronizarHambre(Player);
@@ -1075,23 +1089,19 @@ namespace AethonMod.Content.Players
                 // — v6.48 por el PORTADOR (AuraPortadorHalo, el camino
                 // aditivo del halo-proyectil: el neón de verdad detrás del
                 // cuerpo). Las partículas corren en la AI del portador.
-                // v6.140 — EL AURA SOLO CON PELIGRO REAL: la ceniza
-                // del libro viste al portador SOLO cuando la furia está
-                // al umbral (90%+) — antes prendía con el 10% de hambre
-                // y parecía «un aura rara» sin explicación (la letra:
-                // «a veces al jugador le aparece un aura rara similar a
-                // la de las oleadas»). AHORA: aura encendida = la
-                // oleada YA puede estallar en cualquier chequeo.
-                if (local && MomentosHambre >= MomentosParaFuria && !Player.dead)
-                {
-                    if (!EspiarPortador(0))
-                    {
-                        Projectile.NewProjectile(Player.GetSource_Misc("AuraHambre"),
-                            Player.Center, Vector2.Zero,
-                            ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
-                            0, 0f, Player.whoAmI, 0f);
-                    }
-                }
+                // v6.141 — EL AURA DEL PORTADOR MURIÓ (la letra: «el
+                // aura rara por algun motivo sigue apareciendo y ademas
+                // no es necesaria, por lo tanto la puedes quitar del
+                // jugador, recuerda que el indicador de que el grimorio
+                // del eterno tiene hambre es cuando se vuelve inquieto
+                // y su ojo se vuelve rojo y ese es su unica forma que
+                // debe tener para saber si tiene hambre»): NADA de halo
+                // de hambre sobre el jugador — el ojo rojo e inquieto
+                // del libro ES el único indicador. (El modo 0 del halo
+                // queda muerto: ya nadie lo engendra; SigueViva()
+                // devuelve false por su propia guarda de MomentosHambre
+                // — el que quede vivo de partidas viejas se despide
+                // solo en el primer tick.)
             }
             catch { }
         }
@@ -1275,6 +1285,16 @@ namespace AethonMod.Content.Players
             TicksSinMatar = 0;
             bool cambio = MomentosHambre != 0;
             MomentosHambre = 0;
+            // v6.141 — el espejo del ojo también se apaga.
+            if (cambio)
+            {
+                try
+                {
+                    var et = global::AethonMod.Content.Weapons.GrimoireEternal.EstadoEterno;
+                    if (et != null) et.Hambre = 0f;
+                }
+                catch { }
+            }
             if (cambio)
                 EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
         }
@@ -1486,6 +1506,20 @@ namespace AethonMod.Content.Players
                 // Eterna dentro. La regla de la casa: DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaFormaEterna>());
+                // v6.141 — LAS ALAS RÚNICAS DIRECTO (la letra: «no veo
+                // las alas, lo mas probables es que no se lo diste al
+                // jugador»): la copia exacta de la Valquiria Lisa con el
+                // ciclo dorado→morado llega al inventario desde ya — la
+                // regla de la casa: lo nuevo llega.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Alas.AlasRunicas>());
+                // v6.141 — EL OJO QUE MIRA (la letra: «para todo esto
+                // crea un arma nueva, no olvides darsela al jugador al
+                // terminarla»): LA NUEVA ARMA DEL OJO — el ojo aparece
+                // cerca del enemigo, su mirada marca, la marca enciende
+                // la quemadura del vacío (PvP incluido). DIRECTO.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Ojos.ElOjoQueMira>());
                 // v6.115 — EL MUNDO INTERIOR DEL ETERNO (la letra: «para
                 // que el altar nos lleve a otro mundo crea un nuevo item
                 // que se fabrica con esencia del eterno en el altar»):

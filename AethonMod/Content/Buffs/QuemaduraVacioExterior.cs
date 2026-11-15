@@ -48,6 +48,38 @@ namespace AethonMod.Content.Buffs
             BuffID.Sets.LongerExpertDebuff[Type] = true;    // los expertos arden más largo
         }
 
+        /// <summary>v6.141 — LA QUEMADURA EN JUGADORES (la letra: «de
+        /// esa forma en caso de multijugador el jugador enemigo recibe
+        /// el daño del debuff»): EL MISMO FUEGO sobre players en PvP —
+        /// 1% de la vida MÁXIMA por medio segundo (la convención del
+        /// player: lifeRegen negativo = la barra baja sola; vanilla
+        /// cobra 0.5/s por unidad en la convención lenta, así que el
+        /// golpe de N/0.5 s se escribe lifeRegen = −2·N·2). Las llamas
+        /// negras también lo visten.</summary>
+        public override void Update(Player player, ref int buffIndex)
+        {
+            try
+            {
+                int porMedioSegundo = Math.Max(1, (int)Math.Ceiling(player.statLifeMax2 * 0.01f));
+                player.lifeRegen -= porMedioSegundo * 4;
+
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ && !Main.gameMenu &&
+                    Main.rand.NextBool(4))
+                {
+                    Color halo = Main.rand.NextBool(3)
+                        ? new Color(224, 176, 255)
+                        : new Color(150, 84, 235);
+                    Dust d = Dust.NewDustPerfect(
+                        player.Center + new Vector2(
+                            Main.rand.NextFloat(-player.width * 0.5f, player.width * 0.5f),
+                            Main.rand.NextFloat(-player.height * 0.5f, 0f)),
+                        DustID.Torch, new Vector2(0f, -1.6f), 160, halo, 0.9f);
+                    d.noGravity = true;
+                }
+            }
+            catch { }
+        }
+
         public override void Update(NPC npc, ref int buffIndex)
         {
             VacioGlobalNPC vacio = npc.GetGlobalNPC<VacioGlobalNPC>();

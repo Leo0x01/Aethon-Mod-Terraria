@@ -52,6 +52,40 @@ namespace AethonMod.Content.Systems
 
         /// <summary>REGISTRA un altar recién colocado como EL ACTIVO (la
         /// colocación ya validó que no hubiera otro).</summary>
+        /// <summary>v6.141 — EL FARO DEL ALTAR: repinta las 6 celdas del
+        /// mueble en el mapa (la red de seguridad — cada 60 ticks, la
+        /// luz del mapa es efímera si algo la apaga).</summary>
+        public static void RepintarEnMapa()
+        {
+            try
+            {
+                if (ActivoX < 0 || ActivoY < 0) return;
+                if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
+                for (int dx = 0; dx < 2; dx++)
+                    for (int dy = 0; dy < 3; dy++)
+                    {
+                        int x = ActivoX + dx, y = ActivoY + dy;
+                        if (x < 0 || y < 0 || x >= Main.maxTilesX || y >= Main.maxTilesY) continue;
+                        Main.Map.UpdateLighting(x, y, Math.Max(Main.Map[x, y].Light, (byte)40));
+                        Main.Map.UpdateType(x, y);
+                    }
+            }
+            catch { }
+        }
+
+        public override void PostUpdateTime()
+        {
+            // v6.141 — EL LATIDO DEL FARO: una vez por segundo, el altar
+            // reaprende el mapa (la cura de «no veo nada en el mapa»).
+            if (++_tickFaro >= 60)
+            {
+                _tickFaro = 0;
+                RepintarEnMapa();
+            }
+        }
+
+        private int _tickFaro;
+
         public static void Registrar(int i, int j)
         {
             ActivoX = i;
