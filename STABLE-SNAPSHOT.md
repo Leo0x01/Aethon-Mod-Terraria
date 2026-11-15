@@ -1,32 +1,32 @@
-# SNAPSHOT ESTABLE — v6.140 — LA SESIÓN DEL PERGAMINO Y LAS SEIS CURAS
+# SNAPSHOT ESTABLE — v6.141 — LA SESIÓN DEL LIBRO ABIERTO Y LAS SEIS VERDADES
 
-> **PUBLICADA — [release 446259255](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.140) + CDN verificado (md5 `05f048733833b880247f494fbe7aacc9`, 19.376.095 B, 524 entradas)**
+> **PUBLICADA — [release 446319797](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.141) + CDN verificado (md5 `55cb6ef94085c995fb2f12efcec0686c`, 19.383.189 B, 524 entradas)**
 
-## LA LETRA (sesión 21)
+## LA LETRA (sesión 22)
 
-El pergamino aprobado con EL OJO que mira al cursor + toda la info · el hambre al 4% y las oleadas · la llegada en el mundo interior · la regeneración de los jefes del interior (matar la inmortal, dejar la regen por nivel) · el altar en el minimapa + el ítem devorado · el grimorio fantasma del altar · el aura rara del jugador · las Alas Rúnicas como copia exacta de la Lisa (dorado→morado, sin giro) · la Forma Eterna 100→1000 con la manifestación · las ideas del ataque básico.
+Todo gira a su ojo — EL OJO QUE MIRA como arma nueva (ojo cerca del enemigo → mirada → marca → quemadura del vacío en PvP) · la Forma Eterna de verdad (nivel NORMAL del libro desde 100, 12 partes, 10P+1000 esencias +10%/nivel, puestas en el jugador con el libro) · el libro de la Sforza con el ojo de los minions (el pergamino murió) · el ojo rojo como único indicador de hambre (el aura rara eliminada) · el fantasma del altar · el altar en el minimapa · los jefes del interior (lejos, sin clima, Skeletron normal) · las alas entregadas.
 
-## LAS NUEVE ENTREGAS
+## LAS OCHO ENTREGAS
 
-1. **HAMBRE AL 90%** — la furia estallaba al 40% (MomentosParaFuria 4/10); ahora 9/10, y el 100% es SIEMPRE. El susurro sigue desde el 1 (informativo).
-2. **EL AURA RARA EXPLICADA** — era el AuraPortadorHalo de hambre prendiendo al 10%: ahora solo al 90% (aura = oleada prometida).
-3. **LA LLEGADA JAMÁS EN EL INTERIOR** — guarda SubmundoGrimorio.Activo en los TRES caminos + la Tinta del Cometa.
-4. **LA REGEN DE LA ARENA** — la vida ya NO se restaura (life=lifeMax cada 30t era inmortal); REGEN LICITA: nv10+ = 1%/s + 0,1%/nivel, SIN tope; cadencia de combos aprieta sin tope (piso 18t).
-5. **ALTAR EN EL MINIMAPA + FANTASMA** — el altar pinta sus 6 celdas al registrarse (Map.UpdateLighting 40 + UpdateType — la cadena del decompile); el ítem de los altares extra devorado SIN drop (KillTile noItem); NUNCA dos GrimoriosDormidos en el mundo.
-6. **ALAS RÚNICAS v2** — COPIA EXACTA de la Lisa (misma runa nodo 8, escala 1.45+0,35n, brillo, retraso de membrana) + dorado→morado lento (~37 s, fase por posición) + ángulo TANGENTE FIJO (extendiéndose afuera, trote suave al aleteo).
-7. **FORMA ETERNA 100→1000** — NivelMax 1000, Ira en 100 (NivelIra), monedas 100P/peldaño desde el 100, 101-999 sin armas/materiales; piezas 200-900 (Brasa·Anillo·Sello·AnillosSol·Brillo·Ascendida·Ofanim·AuraVacío); AL 1000 LA MANIFESTACIÓN: FormaEternaItem + el estallido (CalculateHitInfo MaxValue+InstantKill → StrikeNPC — muerte válida con loot, respeta festín y pueblos), ManifestacionVivida persiste por libro.
-8. **EL PERGAMINO IN-GAME (PergaminoUI)** — la hoja procedural (arena-oro, vetas, varillas) con 8 secciones de TODO el mod en 3 idiomas (48 claves), EL OJO sigue al cursor (pupila desplazada al ratón + párpado que parpadea solo), rueda (PlayerInput.ScrollWheelDelta) + flechas + ESC, tecla P junto al altar.
-9. **ENTREGABLES** — mockup v2 fullHD (LXGW WenKai manuscrita + el ojo con pestañas mirando al texto) + el doc de 9 ideas del ataque básico (5 vistosas · 4 no vistosas · la recomendación: Página Rasgada + Marca Silenciosa).
+1. **EL OJO QUE MIRA (Weapons/Ojos/ElOjoQueMira.cs)**: LaMiradaProyectil (el ojo de LOS MINIONS se materializa a 140px de la presa bajo el cursor, carga 16 t, dispara) → LaMiradaRayo (rayo atravesante de 340 px, AABBvLineCollision) → LaMarcaSilenciosa (ModBuff: 2 s de glifo → enciende QuemaduraVacioExterior 5 s con intensidad 1,5 y dueño). PvP: OnHitPlayer + MarcarPlayer (la quemadura v6.141 Update(Player): 1% vida máx/medio s). Mejora: +1,5% daño y −0,5% maná POR NIVEL DEL LIBRO. ENTREGA directa + receta (15 esencias + estantería).
+2. **LA FORMA ETERNA v2 (Players/FormaEternaPlayer.cs)**: el despertar REVERTIDO a 100 (NivelMax=100; piezas 200-1000 y NivelIra muertos). La construcción: NivelLibro (ShardLevelItem) ≥ 100 → 12 partes (la Escritura/AnilloDorsal · 3 Anillos · Primera Luz · Brasa · 3 Soles/BrilloSolar · Ofanim · Manto · Aura del Vacío). Coste: MonedasParte=10M·1,1^n + EsenciasParte=1000·1,1^n. Cada parte: +4% DamageClass.Generic y SU visual en PostUpdateEquips SOLO sosteniendo el libro. La 12: QuickSpawnItem(FormaEternaItem) + ManifestacionDeLaForma (públicada desde DespertarGrimorioSistema). El pago: SHIFT+clic derecho del libro (CanUseItem). Persistencia: fePartes/feManifestacion.
+3. **EL LIBRO DEL ETERNO (UI/LibroDelEternoUI.cs)**: EL ICONO del grimorio junto al botón de logros (geometría vanilla del decompile: 20+560·escala+num; el nuestro a su izquierda, SOLO con el inventario abierto). EL LIBRO ABIERTO: tapa de cuero + chapas + lomo cosido con puntadas + DOS PÁGINAS (izq: altar/interior/oleadas/grimorio · der: despertar/ataques/forma/auras) + EL OJO DE LOS MINIONS (OjoEterno_Abierto) siguiendo al cursor con parpadeo. PergaminoUI = redirector (la tecla P vive).
+4. **UNA SOLA HAMBRE**: GrimoireEternal.TasaHambre=0 (la del arma murió); ShardPlayer espeja et.Hambre=MomentosHambre/10 (y a 0 al comer). EL AURA DEL PORTADOR MUERTA (el bloque del halo v6.140 eliminado — el modo 0 no se engendra jamás). La furia sigue: 9/10=90% posible, 10/10=100% SIEMPRE.
+5. **EL FANTASMA MUERTO**: RevivirLibro re-ancla (AltarUnicoSistema.ActivoX/Y: cima−40−21) y la pendiente APRENDE la posición nueva.
+6. **LOS JEFES DEL INTERIOR**: JefeInteriorGlobalNPC.PreAI fuerza ai[1]=1 en SkeletronHead interior (el AI_011 de vanilla con IsItDay lo metía en el spin-guardián por el mediodía eterno — verificado en el decompile). InvocarJefeInterior: ancla a 100 tiles (dirX·100). Regen licita verificada (1%+0,1%/nv desde 10, sin tope).
+7. **EL FARO DEL MINIMAPA**: AltarUnicoSistema.PostUpdateTime repinta las 6 celdas cada 60 ticks (RepintarEnMapa).
+8. **LAS ALAS RÚNICAS ENTREGADAS** (EntregarSiNoTiene en el regalo de pruebas).
 
 ## PARA VERIFICAR EN JUEGO
 
-- Dejar pasar el hambre: susurros al 10%+, el AURA solo al 90%, la oleada al 90/100%.
-- Entrar al mundo interior: SIN llegada jamás (ni con la Tinta).
-- Arena: el jefe ya no se cura solo; al nivel 10+ regenera 1%/s visible (baja el DPS y sube).
-- Colocar el altar: aparece en el minimapa AL INSTANTE; un altar extra lo devora SIN soltar ítem.
-- Alas Rúnicas: idénticas a la Lisa pero dorado→morado lento y sin giro circular.
-- Subir al 200+: cada 100 llega una pieza; el tooltip del despertar cuenta hasta 1000.
-- Junto al altar, tecla P: EL PERGAMINO con el ojo siguiendo el cursor.
+- El OJO QUE MIRA (regalo de pruebas al entrar): clic sobre un enemigo — el ojo aparece a su lado, la mirada lo atraviesa, la marca y las llamas violetas.
+- PvP: golpear a otro jugador con la mirada — la marca lo enciende y ARDE.
+- Libro nivel 100+: SHIFT+clic derecho del libro — el aviso de la parte construida (10P+1000 esencias la primera).
+- El icono del grimorio junto al botón de logros (abre el inventario): un clic — EL LIBRO, con el ojo siguiendo el cursor.
+- Dejar pasar el hambre: el ojo del libro se pone ROJO e inquieto — sin aura sobre el jugador NUNCA.
+- Cargar el mundo con una llegada pendiente: el libro re-nace ENCIMA del altar.
+- Interior: invocar a Skeletron — la cabeza NORMAL (sin spin); todos los jefes nacen LEJOS.
+- El minimapa: el altar activo SIEMPRE visible (faro de 1 s).
 
 ## DOC-ROT CONOCIDA
 CARACTERISTICAS.md / DISEÑO_DEL_MOD.md desactualizados — MAESTRO.md manda.
