@@ -2330,23 +2330,27 @@ Items: {
 	// v6.114 — THE DEFINITIVE COSMETIC (the letter: "time to create the
 	// definitive cosmetic item… a single accessory").
 	FormaEternaItem: {
-		// v6.142 — LA DESCRIPCIÓN DE VERDAD (la letra: «mejora la
-		// descripcion del item cosmetico de La Forma Eterna, donde
-		// diga lo que es y que significa usarlo»).
+		// v6.143 — EL ACCESORIO DE VERDAD (la letra: «Asegúrate que La
+		// Forma Eterna que sale en el despertar 112 sea el accesorio,
+		// ya que debe tener el efecto de aura de vacío… recuerda el
+		// efecto de aura del vacío, con su respectiva quemadura y los
+		// buff y debuff»).
 		DisplayName: LA FORMA ETERNA
-		Tooltip: ✦ EL CUERPO COMPLETO DEL ETERNO, HECHO FORMA — la gloria convertida en objeto
+		Tooltip: ✦ EL ACCESORIO DEL VACÍO — doce partes construidas en el despertar, hechas un solo cuerpo
 		Titulo: "[c/B96EEA:═══ LA FORMA ETERNA ═══]"
-		Linea1: "[c/D9B3FF:LO QUE ES: doce partes construidas en el despertar (101-112) — la Escritura,"
-		Linea2: "[c/D9B3FF:los Tres Anillos, la Primera Luz, la Brasa, los Tres Soles, las Ofanim,"
-		Linea3: "[c/D9B3FF:el Manto y el Aura del Vacío — cada una creció PUESTA en el portador"
-		Linea4: "[c/D9B3FF:mientras usaba el libro, como un miembro más de su cuerpo; al llegar la"
-		Linea5: "[c/D9B3FF:duodécima, LA MANIFESTACIÓN estalló y la forma se CONVIRTIÓ en este ítem.]"
-		Linea6: "[c/9FA8DA:QUÉ SIGNIFICA USARLO: vestir al dios entero — aura, anillos, soles y ruedas"
-		Linea7: "[c/9FA8DA:girando a tu alrededor (todo el panteón a la vez). El poder de la forma ya no"
-		Linea8: "[c/9FA8DA:está aquí: quedó horneado en el grimorio (+4% por parte y +10% por peldaño"
-		Linea9: "[c/9FA8DA:del poder extra — TODO su ataque, mágico e invocación). EL AURA DEL VACÍO:"
-		Linea10: "[c/78788C:19 tiles queman a los impíos. «La forma que no se apaga — el recuerdo de"
-		Linea11: "[c/78788C:la vez que un mortal se vistió de Eterno… y sobrevivió para contarlo.»]"
+		Linea1: "[c/D9B3FF:LO QUE ES: el cuerpo completo del Eterno, hecho accesorio. Doce partes]"
+		Linea2: "[c/D9B3FF:construidas en el despertar (101-112) — cada una creció PUESTA en el portador"
+		Linea3: "[c/D9B3FF:mientras usaba el libro; al llegar la 12ª, LA MANIFESTACIÓN estalló y la forma"
+		Linea4: "[c/D9B3FF:se CONVIRTIÓ en ESTE accesorio: la gloria, ahora portable.]"
+		Linea5: "[c/9FA8DA:QUÉ SIGNIFICA USARLO: llevarla puesta enciende EL AURA DEL VACÍO — el campo"
+		Linea6: "[c/9FA8DA:de 19 tiles que arde a tu alrededor. Los impíos que entran sufren LA QUEMADURA"
+		Linea7: "[c/9FA8DA:DEL VACÍO (cuanto más cerca, más arden ×1→×3 y más lento caminan ×0,55 — hasta"
+		Linea8: "[c/9FA8DA:los fantasmas); al salir siguen ardiendo: 1% de vida máx. por medio segundo"
+		Linea9: "[c/9FA8DA:durante 5 s. MIENTRAS ARDEN, TÚ cobras VACÍO EXTERIOR: +10% ataque, +10 defensa,"
+		Linea10: "[c/9FA8DA:−15% coste de maná. Y SIEMPRE: el buff AURA DEL VACÍO + los stats del panteón"
+		Linea11: "[c/9FA8DA:(+40 maná · +8% daño mágico · +4% crít. mágico · +2 regen · +8% melée · +3% crít. · +3 def).]"
+		Linea12: "[c/78788C:«La forma que no se apaga — el recuerdo de la vez que un mortal se vistió de Eterno"
+		Linea13: "[c/78788C:… y sobrevivió para contarlo.»]"
 	}
 
 	// v6.126 — LAS CINCO DAGAS DEL ETERNO (la letra: «vienen
@@ -2937,7 +2941,7 @@ Despertar: {
 	CaminoForma9: EL TERCER SOL — el coro completo (+4 %)
 	CaminoForma10: LAS OFANIM — las ruedas de Ezequiel (+4 %)
 	CaminoForma11: EL MANTO — el velo del panteón (+4 %)
-	CaminoManifestacion: ✧✧ LA 12ª PARTE: EL AURA DEL VACÍO — LA MANIFESTACIÓN estalla y la forma se CONVIERTE en el ítem cosmético
+	CaminoManifestacion: ✧✧ LA 12ª PARTE: EL AURA DEL VACÍO — LA MANIFESTACIÓN estalla y la forma se CONVIERTE en EL ACCESORIO (el aura del vacío, con su quemadura y sus buffs)
 	CaminoPoderExtra: EL PODER EXTRA — +10 % de ataque a todo el grimorio por nivel (113-120)
 	Escupidizo:
 		'''
@@ -3717,8 +3721,8 @@ FormaEterna: {
 	Parte11: EL MANTO — el velo que une el panteón
 	Parte12: EL AURA DEL VACÍO — la obra maestra
 	Construida: ✦ LA FORMA ETERNA SE CONSTRUYE — parte {0}/{1}: {2}
-	Completa: ✦✦ LA FORMA ETERNA COMPLETA — el dios se manifiesta ✦✦
-	TooltipPuerta: La Forma Eterna espera: clic derecho con SHIFT para construir la parte siguiente ({0} de platino + {1} esencias)
+	Completa: ✦✦ LA FORMA ETERNA COMPLETA — LA MANIFESTACIÓN estalla y la forma se CONVIERTE en EL ACCESORIO DEL AURA DEL VACÍO ✦✦
+	TooltipPuerta: La Forma Eterna se construye en EL DESPERTAR (101-112): una parte por peldaño, pagada en LA MESA DEL ALTAR — 10 de platino + 1000 esencias, +10% por nivel
 }
 
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back

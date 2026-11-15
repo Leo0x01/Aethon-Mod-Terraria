@@ -9,7 +9,12 @@ using AethonMod.Content.Projectiles;
 namespace AethonMod.Content.Items.Cosmetics
 {
     // ======================================================================
-    //  FormaEternaItem — v6.114 — LA FORMA ETERNA: EL COSMÉTICO DEFINITIVO.
+    //  FormaEternaItem — v6.114/v6.143 — LA FORMA ETERNA: EL ACCESORIO
+    //  DEL AURA DEL VACÍO (la letra v6.143: «Asegúrate que La Forma
+    //  Eterna que sale en el despertar 112 sea el accesorio, ya que
+    //  debe tener el efecto de aura de vacío… recuerda el efecto de
+    //  aura del vacío, con su respectiva quemadura y los buff y
+    //  debuff»).
     //
     //  LA LETRA DEL USUARIO: «es momento de crear el item cosmetico
     //  definitivo para este se tiene que usar los siguiente accesorios…
@@ -160,6 +165,8 @@ namespace AethonMod.Content.Items.Cosmetics
             Linea("Linea9", "");
             Linea("Linea10", "");
             Linea("Linea11", "");
+            Linea("Linea12", "");   // v6.143 — EL ACCESORIO DE VERDAD: el aura del vacío con su quemadura y sus buffs/debuffs
+            Linea("Linea13", "");
         }
     }
 }

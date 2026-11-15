@@ -2325,23 +2325,26 @@ Items: {
 	// v6.114 — THE DEFINITIVE COSMETIC (the letter: "time to create the
 	// definitive cosmetic item… a single accessory").
 	FormaEternaItem: {
-		// v6.142 — LA DESCRIPCIÓN DE VERDAD (la letra: «mejora la
-		// descripcion del item cosmetico de La Forma Eterna, donde
-		// diga lo que es y que significa usarlo»).
+		// v6.143 — THE TRUE ACCESSORY (the letter: make sure the
+		// Eternal Form born at awakening 112 is the ACCESSORY — it
+		// carries the VOID AURA effect with its burn, buffs and
+		// debuffs).
 		DisplayName: THE ETERNAL FORM
-		Tooltip: ✦ THE ETERNO'S COMPLETE BODY, MADE FORM — glory converted into an object
+		Tooltip: ✦ THE VOID'S ACCESSORY — twelve parts built on the awakening, made one body
 		Titulo: "[c/B96EEA:═══ THE ETERNAL FORM ═══]"
-		Linea1: "[c/D9B3FF:WHAT IT IS: twelve parts built on the awakening (101-112) — the Writing,]"
-		Linea2: "[c/D9B3FF:the Three Rings, the First Light, the Ember, the Three Suns, the Ophanim,]"
-		Linea3: "[c/D9B3FF:the Mantle and the Void Aura — each grew WORN by the bearer while using the"
-		Linea4: "[c/D9B3FF:book; at the twelfth, THE MANIFESTATION erupted and the form was CONVERTED"
-		Linea5: "[c/D9B3FF:into this item — the glory made object.]"
-		Linea6: "[c/9FA8DA:WHAT IT MEANS TO WEAR IT: to dress as the whole god — aura, rings, suns"
-		Linea7: "[c/9FA8DA:and wheels spinning around you. The power stayed baked into the grimoire"
-		Linea8: "[c/9FA8DA:(+4% per part and +10% per extra-power step — ALL its attack, magic and"
-		Linea9: "[c/9FA8DA:summon). THE VOID AURA — 19 tiles: burns the impious while they burn."
-		Linea10: "[c/78788C:“The form that never fades — the memory of the time a mortal dressed"
-		Linea11: "[c/78788C:as the Eterno… and survived to tell it.”]"
+		Linea1: "[c/D9B3FF:WHAT IT IS: the Eterno's complete body, made an accessory. Twelve parts"
+		Linea2: "[c/D9B3FF:built on the awakening (101-112) — each grew WORN by the bearer while using"
+		Linea3: "[c/D9B3FF:the book; when the 12th arrived, THE MANIFESTATION erupted and the form was"
+		Linea4: "[c/D9B3FF:CONVERTED into THIS accessory: glory, now portable.]"
+		Linea5: "[c/9FA8DA:WHAT IT MEANS TO WEAR IT: wearing it ignites THE VOID AURA — the 19-tile"
+		Linea6: "[c/9FA8DA:field burning around you. The wicked who enter suffer THE VOID BURN (the"
+		Linea7: "[c/9FA8DA:closer, the hotter ×1→×3 and the slower ×0.55 — even ghosts); on leaving they"
+		Linea8: "[c/9FA8DA:keep burning: 1% max life per half second for 5 s. WHILE THEY BURN, YOU collect"
+		Linea9: "[c/9FA8DA:OUTER VOID: +10% attack, +10 defense, −15% mana cost. And ALWAYS: the VOID"
+		Linea10: "[c/9FA8DA:AURA buff + the pantheon stats (+40 mana · +8% magic dmg · +4% magic crit ·"
+		Linea11: "[c/9FA8DA:+2 regen · +8% melee · +3% crit · +3 def).]"
+		Linea12: "[c/78788C:“The form that never fades — the memory of the time a mortal dressed as"
+		Linea13: "[c/78788C:the Eterno… and survived to tell it.”]"
 	}
 
 	DagaEternaBuff: {
@@ -3030,7 +3033,7 @@ Despertar: {
 	CaminoForma9: THE THIRD SUN — the full choir (+4%)
 	CaminoForma10: THE OPHANIM — the wheels of Ezekiel (+4%)
 	CaminoForma11: THE MANTLE — the pantheon veil (+4%)
-	CaminoManifestacion: ✧✧ THE 12TH PART: THE VOID AURA — THE MANIFESTATION erupts and the form is CONVERTED into the cosmetic item
+	CaminoManifestacion: ✧✧ THE 12TH PART: THE VOID AURA — THE MANIFESTATION erupts and the form is CONVERTED into THE ACCESSORY (the void aura, with its burn and its buffs)
 	CaminoPoderExtra: THE EXTRA POWER — +10% attack to the whole grimoire per level (113-120)
 	Escupidizo:
 		'''
@@ -3810,8 +3813,8 @@ FormaEterna: {
 	Parte11: THE MANTLE — the veil that joins the pantheon
 	Parte12: THE VOID AURA — the masterpiece
 	Construida: ✦ THE ETERNAL FORM IS BUILT — part {0}/{1}: {2}
-	Completa: ✦✦ THE COMPLETE ETERNAL FORM — the god manifests ✦✦
-	TooltipPuerta: The Eternal Form awaits: SHIFT + right-click to build the next part ({0} platinum + {1} essences)
+	Completa: ✦✦ THE COMPLETE ETERNAL FORM — THE MANIFESTATION erupts and the form is CONVERTED into THE VOID AURA ACCESSORY ✦✦
+	TooltipPuerta: The Eternal Form is built on THE AWAKENING (101-112): one part per step, paid at THE ALTAR TABLE — 10 platinum + 1000 essences, +10% per level
 }
 
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back

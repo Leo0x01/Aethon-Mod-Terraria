@@ -129,7 +129,14 @@ namespace AethonMod.Content.Players
                 if (Player == null || !Player.active) return;
                 Convertida = true;
 
-                // EL ÍTEM COSMÉTICO NACE
+                // v6.143 — EL ACCESORIO NACE (la letra: «sea el
+                // accesorio, ya que debe tener el efecto de aura de
+                // vacío»): La Forma Eterna ES un accesorio — puesto,
+                // enciende EL AURA DEL VACÍO (el ancla de 19 tiles),
+                // su QUEMADURA en los impíos (×1→×3 por cercanía, slow
+                // ×0,55, el fuego de salida) y SUS BUFFS al portador
+                // (Vacío Exterior mientras arden + el buff del aura +
+                // los stats del panteón).
                 Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
                     ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
 
