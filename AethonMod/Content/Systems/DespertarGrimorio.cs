@@ -58,16 +58,29 @@ namespace AethonMod.Content.Systems
         /// renació alineada — cada arma y cada lingote OBTENIBLE en la
         /// era de su jefe (nada de adamantita con el Rey Gelatina vivo).
         /// Historic: 50 (v6.51.0-v6.85).</summary>
-        /// <summary>v6.141 — EL DESPERTAR VUELVE A SUS CIEN (la letra:
-        /// «La Forma Eterna fue incluida en el nivel de despertar, yo
-        /// pensaba ponerlo en el nivel normal del grimorio, creo que te
-        /// equivocaste aqui… asi que el despertar no tendra esos 1000
-        /// niveles»): la escalera de las mil puertas v6.140 MUERE — el
-        /// despertar es la escalera de SIEMPRE (1..100, la Ira en la
-        /// cima). LA FORMA ETERNA vive ahora en el NIVEL NORMAL DEL
-        /// LIBRO (ShardLevelItem.Level — el de la XP): desde el nivel
-        /// 100, cada nivel extra construye UNA PARTE (FormaEternaPlayer).</summary>
-        public const int NivelMax = 100;
+        /// <summary>v6.142 — EL DESPERTAR A LOS CIENTO VEINTE (la letra:
+        /// «entonces ahora el despertar tiene hasta 112 niveles, por lo
+        /// tanto pero para no dejarlo en 112, demosle hasta nivel 120»):
+        /// la cima de LA CAZA sigue en 100 (Aethon, la Ira) — y de 101 a
+        /// 112 se construye LA FORMA ETERNA (una parte por nivel), y de
+        /// 113 a 120 el PODER EXTRA (+10% de ataque por nivel, el coste
+        /// sube 20% por nivel). NADA de puertas ni mesas de Devorar
+        /// arriba del 100: SOLO esencias + monedas.</summary>
+        public const int NivelMax = 120;
+
+        /// <summary>La cima de LA CAZA (Aethon, la Ira — la puerta 100):
+        /// arriba de aquí el despertar ya no caza — solo CONSTRUYE.</summary>
+        public const int NivelCaza = 100;
+
+        /// <summary>El PRIMER peldaño de LA FORMA ETERNA (la letra:
+        /// «cuando el despertar llegue a nivel 100, entonces comienza a
+        /// desbloquear la forma del eterno»): 101-112, una parte por
+        /// nivel.</summary>
+        public const int NivelFormaInicio = 101;
+
+        /// <summary>El peldaño de LA MANIFESTACIÓN (la 12ª parte — el
+        /// ítem cosmético nace y la forma del portador se CONVIERTE).</summary>
+        public const int NivelManifestacion = 112;
 
         /// <summary>v6.51.6 — EL DESPERTAR ES DEL LIBRO (la letra: «el
         /// despertar se comparte entre todos los grimorios, eso debe ser
@@ -103,20 +116,35 @@ namespace AethonMod.Content.Systems
             return nivel >= NivelMax ? NivelMax : nivel + 1;
         }
 
-        /// <summary>El daño extra por nivel: +1 % por nivel de despertar a
-        /// TODOS los tipos de daño del grimorio (mágico y de invocación).</summary>
-        public static float BonusDano(int nivel) => MathF.Max(0, Math.Min(NivelMax, nivel)) * 0.01f;
+        /// <summary>El daño extra por nivel — A TODO el ataque del
+        /// grimorio (mágico Y de invocación: la letra v6.142, «todos los
+        /// aumentos del despertar siempre afectan a todo el ataque del
+        /// grimorio del eterno»):
+        ///   · 1-100: +1 % por nivel (la escalera de siempre);
+        ///   · 101-112: +4 % por nivel (LA FORMA ETERNA se construye y
+        ///     aprieta — la letra: «dando cada nivel un 4% de ataque»);
+        ///   · 113-120: +10 % por nivel (EL PODER EXTRA).
+        /// Acumulado a nivel 120: +100% +48% +80% = +228% en total.</summary>
+        public static float BonusDano(int nivel)
+        {
+            int n = Math.Clamp(nivel, 0, NivelMax);
+            float acumulado = 0f;
+            if (n > NivelCaza) { acumulado += NivelCaza * 0.01f; }
+            else return n * 0.01f;
+
+            int forma = Math.Min(n, NivelManifestacion) - NivelCaza;      // 101-112
+            if (forma > 0) acumulado += forma * 0.04f;
+
+            int extra = Math.Max(0, n - NivelManifestacion);              // 113-120
+            if (extra > 0) acumulado += extra * 0.10f;
+            return acumulado;
+        }
 
         // ================================================================
         //  LAS OFRENDAS DEL NIVEL N (esencias · dinero · arma del peldaño)
         // ================================================================
 
-        /// <summary>Las ESENCIAS DEL ETERNO que exige el nivel N (la letra:
-        /// «para subir a nivel 1 necesitará haber devorado 1 esencia
-        /// corrupta… y así por cada nivel necesita devorar más esencia
-        /// corrupta»): el nivel N pide N esencias — 5.050 en toda la
-        /// escalera de las CIEN puertas, el banco de las oleadas de hambre.</summary>
-        public static int EsenciasPara(int nivel) => Math.Max(1, Math.Min(NivelMax, nivel));
+
 
         /// <summary>v6.88 — EL DINERO que exige el nivel N (la letra
         /// nueva: «el requisito de monedas maximo que se pueden pedir son
@@ -135,11 +163,51 @@ namespace AethonMod.Content.Systems
         {
             if (nivel <= 1) return 100L;                       // 100 monedas de cobre (la letra)
             if (nivel > NivelMax) nivel = NivelMax;
+
+            // v6.142 — LOS PELDAÑOS DE LA FORMA (101-120): el coste de
+            // la letra («10 de platino por cada nivel extra mas 1000 de
+            // esencia del eterno, eso por cada nivel y va aumentando la
+            // cantidad hasta un 10% por cada nivel»… y del 113 en
+            // adelante, «el costo sea de 20% por nivel»).
+            if (nivel > NivelCaza)
+            {
+                // 10P la primera parte (101), ×1,10 hasta la 12 (112),
+                // ×1,20 desde el poder extra (113-120)
+                double costoForma = 10_000_000d;
+                for (int n = NivelCaza + 2; n <= nivel; n++)
+                    costoForma *= n > NivelManifestacion ? 1.20 : 1.10;
+                return (long)Math.Min(1_000_000_000d, costoForma);
+            }
+
             double g = Math.Pow(10.0, 6.0 / 99.0);            // 1,1437 — clava el 100 en 100 P
             long monedas = (long)(100.0 * Math.Pow(g, nivel - 1));
             monedas = (monedas / 100L) * 100L;                 // múltiplos de 1 plata
             if (monedas < 100L) monedas = 100L;
             return Math.Min(100_000_000L, monedas);            // 100 de platino, JAMÁS más
+        }
+
+        /// <summary>v6.142 — LAS ESENCIAS DE LA FORMA (101-120): 1000
+        /// por parte, +10% por nivel (y +20% del 113 en adelante — el
+        /// mismo ritmo de las monedas).</summary>
+        public static int EsenciasPara(int nivel)
+        {
+            if (nivel > NivelCaza)
+            {
+                double esencias = 1000d;
+                for (int n = NivelCaza + 2; n <= nivel; n++)
+                    esencias *= n > NivelManifestacion ? 1.20 : 1.10;
+                return (int)Math.Min(250_000d, esencias);
+            }
+            return Math.Max(1, Math.Min(NivelMax, nivel));
+        }
+
+        /// <summary>v6.142 — EL ACCESO SEGURO a la mesa de armas (la
+        /// tabla vive hasta 100: arriba NO hay Devorar — vacío).</summary>
+        public static int[] ArmasDe(int nivel)
+        {
+            if (nivel < 1 || nivel > NivelCaza || nivel >= ArmasDelNivel.Length)
+                return System.Array.Empty<int>();
+            return ArmasDelNivel[nivel] ?? System.Array.Empty<int>();
         }
 
         /// <summary>v6.89 — LA ESCALERA DE ARMAS NUEVA (la letra: «el
@@ -598,16 +666,19 @@ namespace AethonMod.Content.Systems
         /// versión MÉTODO de la tabla — defensiva con la escalera).</summary>
         public static int[][] GruposMaterialesDe(int nivel)
         {
-            if (nivel < 1 || nivel > NivelMax)
-                return new int[][] { new int[] { ItemID.CopperBar } };
+            // v6.142 — arriba del 100 NO HAY Devorar (la Forma se paga
+            // con esencias + monedas): la mesa vieja no aplica.
+            if (nivel < 1 || nivel > NivelCaza || nivel >= MaterialesDelNivel.Length)
+                return System.Array.Empty<int[]>();
             var grupos = MaterialesDelNivel[nivel];
-            return grupos ?? new int[][] { new int[] { ItemID.CopperBar } };
+            return grupos ?? System.Array.Empty<int[]>();
         }
 
         /// <summary>La CUOTA del grupo g del peldaño N (20 por defecto).</summary>
         public static int CantidadMateriales(int nivel, int grupo)
         {
-            if (nivel < 1 || nivel > NivelMax) return 20;
+            if (nivel < 1 || nivel > NivelCaza || nivel >= CantidadesMateriales.Length)
+                return 20;
             var cuotas = CantidadesMateriales[nivel];
             if (cuotas == null || grupo < 0 || grupo >= cuotas.Length) return 20;
             int c = cuotas[grupo];
@@ -1113,6 +1184,22 @@ namespace AethonMod.Content.Systems
             new PasoDelCamino(85, "Mods.AethonMod.Despertar.CaminoAgujeros2"),
             new PasoDelCamino(90, "Mods.AethonMod.Despertar.CaminoSupremo"),
             new PasoDelCamino(100,"Mods.AethonMod.Despertar.CaminoMaximo"),
+            // v6.142 — LA FORMA ETERNA DEL DESPERTAR (101-112: una parte
+            // por peldaño; el 112 LA MANIFESTACIÓN) + EL PODER EXTRA
+            // (113-120: +10% de ataque por nivel).
+            new PasoDelCamino(101,"Mods.AethonMod.Despertar.CaminoForma1"),
+            new PasoDelCamino(102,"Mods.AethonMod.Despertar.CaminoForma2"),
+            new PasoDelCamino(103,"Mods.AethonMod.Despertar.CaminoForma3"),
+            new PasoDelCamino(104,"Mods.AethonMod.Despertar.CaminoForma4"),
+            new PasoDelCamino(105,"Mods.AethonMod.Despertar.CaminoForma5"),
+            new PasoDelCamino(106,"Mods.AethonMod.Despertar.CaminoForma6"),
+            new PasoDelCamino(107,"Mods.AethonMod.Despertar.CaminoForma7"),
+            new PasoDelCamino(108,"Mods.AethonMod.Despertar.CaminoForma8"),
+            new PasoDelCamino(109,"Mods.AethonMod.Despertar.CaminoForma9"),
+            new PasoDelCamino(110,"Mods.AethonMod.Despertar.CaminoForma10"),
+            new PasoDelCamino(111,"Mods.AethonMod.Despertar.CaminoForma11"),
+            new PasoDelCamino(112,"Mods.AethonMod.Despertar.CaminoManifestacion"),
+            new PasoDelCamino(113,"Mods.AethonMod.Despertar.CaminoPoderExtra"),
         };
     }
 }

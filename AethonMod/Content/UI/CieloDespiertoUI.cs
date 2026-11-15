@@ -431,7 +431,7 @@ namespace AethonMod.Content.UI
             //     peldaño cuenta para ESTE; disponible = devorado −
             //     cobrado. La mesa vieja de contadores por peldaño murió
             //     (ya nadie la escribe): la Escalera lee el banco VIVO).
-            int[] armas = Systems.DespertarGrimorio.ArmasDelNivel[n];
+            int[] armas = Systems.DespertarGrimorio.ArmasDe(n);
             int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(n);
             bool armaEnBanco = vivo && alma != null && AlgunaArmaEnElBanco(alma, armas);
             bool materialPagado = vivo && alma != null && MaterialPagadoEnElBanco(alma, n, gruposMat);

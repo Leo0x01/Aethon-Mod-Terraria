@@ -87,15 +87,18 @@ namespace AethonMod.Content.Weapons
         private static readonly EstadoGrimorio _estadoEterno = new EstadoGrimorio
         {
             Nervioso = true,
-            // v6.141 — LA HAMBRE ÚNICA (la letra: «el indicador de que
-            // el grimorio del eterno tiene hambre es cuando se vuelve
-            // inquieto y su ojo se vuelve rojo y ese es su unica forma
-            // que debe tener para saber si tiene hambre»): el Eterno YA
-            // NO tiene hambre propia — TasaHambre 0 y su Hambre vive
-            // ESPEJADA del RELOJ del portador (ShardPlayer.
-            // MomentosHambre: 10 momentos = 100%). El ojo rojo y el
-            // nerviosismo SON el único indicador.
-            TasaHambre = 0f,
+            // v6.142 — LA MÁQUINA DEL NERVIOSO A VELOCIDAD NORMAL (la
+            // letra: «el indicador real es el que se usa en el Grimorio
+            // Hambriento Nervioso… la diferencia es que en el grimorio
+            // hambriento nervioso la mecanica esta acelerada por
+            // motivos de prueba»): el Eterno ES el Nervioso jugable —
+            // SU reloj de UNA HORA (1/216000; el minuto del Nervioso
+            // de prueba es la demo acelerada), SU ojo rojo (la rampa
+            // 20%→80%), SU inquietud (50%+), SU caza propia (25%+) y
+            // SU festín (HambrePorPresa: 0,1%→5% por rareza, el jefe
+            // 10% entero). EL OJO ROJO E INQUIETO ES EL ÚNICO
+            // INDICADOR DE HAMBRE.
+            TasaHambre = 1f / 216000f,
         };
         protected override EstadoGrimorio Estado => _estadoEterno;
         internal static EstadoGrimorio EstadoEterno => _estadoEterno;
@@ -641,32 +644,9 @@ namespace AethonMod.Content.Weapons
             // v6.45: en modo pruebas NO se exige maná (bandera).
             if (player.altFunctionUse == 2)
             {
-                // v6.141 — LA CONSTRUCCIÓN DE LA FORMA ETERNA (la
-                // letra: la Forma Eterna vive en el NIVEL NORMAL del
-                // libro, desde el 100): clic derecho CON SHIFT = pagar
-                // la parte siguiente (10P + 1000 esencias, +10%/nivel).
-                // El disparo de los ojos SIGUE siendo el clic derecho
-                // normal (sin SHIFT, nada cambia — el grimorio no se
-                // toca).
-                try
-                {
-                    if (Microsoft.Xna.Framework.Input.Keyboard.GetState()
-                            .IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
-                        Microsoft.Xna.Framework.Input.Keyboard.GetState()
-                            .IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
-                    {
-                        var fe = player.GetModPlayer
-                            <global::AethonMod.Content.Players.FormaEternaPlayer>();
-                        if (fe != null && fe.PuertaAbierta &&
-                            fe.PartesConstruidas < global::AethonMod.Content.Players
-                                .FormaEternaPlayer.PartesTotales)
-                        {
-                            fe.PagarParteSiguiente();
-                            return false;   // este clic fue de la construcción
-                        }
-                    }
-                }
-                catch { }
+                // v6.142 — EL PAGO SHIFT MURIÓ: LA FORMA ETERNA se paga
+                // en LA MESA DEL ALTAR (el camino de siempre — esencias
+                // devoradas + monedas del banco), como todo el despertar.
                 if (ManaMinionGratis()) return true;
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 // v6.51.10 — LA REFORJA VIVA: la columna COSTO DE MANÁ del
@@ -1653,9 +1633,7 @@ namespace AethonMod.Content.Weapons
                         //     es RETROACTIVO (el banco): devorado en OTRO
                         //     peldaño cuenta para ESTE. ===
                         {
-                            int[] armasOpciones = Systems.DespertarGrimorio.ArmasDelNivel[
-                                System.Math.Max(1, System.Math.Min(
-                                    Systems.DespertarGrimorio.NivelMax, siguiente))];
+                            int[] armasOpciones = Systems.DespertarGrimorio.ArmasDe(siguiente);
                             int[][] gruposMat = Systems.DespertarGrimorio.GruposMaterialesDe(siguiente);
 
                             // ¿cuántas hay pagas? (la mesa cobra 2)

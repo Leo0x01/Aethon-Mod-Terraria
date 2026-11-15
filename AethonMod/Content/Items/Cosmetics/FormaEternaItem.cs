@@ -154,6 +154,12 @@ namespace AethonMod.Content.Items.Cosmetics
             Linea("Linea3", "");
             Linea("Linea4", "");
             Linea("Linea5", "");
+            Linea("Linea6", "");   // v6.142 — la descripción de verdad (lo que es + qué significa usarlo)
+            Linea("Linea7", "");
+            Linea("Linea8", "");
+            Linea("Linea9", "");
+            Linea("Linea10", "");
+            Linea("Linea11", "");
         }
     }
 }

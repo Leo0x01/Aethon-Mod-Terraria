@@ -419,7 +419,7 @@ namespace AethonMod.Content.Systems
                                 DespertarGrimorio.NivelMax, siguiente));
 
                             // ¿ES UN ARMA DEL PELDAÑO? (la opción de su tipo).
-                            int[] armasMesa = DespertarGrimorio.ArmasDelNivel[nivelMesa];
+                            int[] armasMesa = DespertarGrimorio.ArmasDe(nivelMesa);
                             bool esArmaPedida = false;
                             if (armasMesa != null)
                             {
@@ -551,6 +551,11 @@ namespace AethonMod.Content.Systems
             if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
                 .BancoMonedasDisponibles(alma) <
                 DespertarGrimorio.MonedasPara(siguiente)) return false;
+            // v6.142 — ARRIBA DEL 100 NO HAY DEVORAR (la letra: la Forma
+            // se paga «con 10 de platino por cada nivel extra mas 1000 de
+            // esencia del eterno» — NADA de armas ni materiales): solo
+            // las esencias + las monedas de arriba.
+            if (siguiente > DespertarGrimorio.NivelCaza) return true;
             // v6.93 — DEVORAR: AL MENOS 2 DE LAS OPCIONES.
             return ContarOpcionesPagadas(alma, siguiente) >= 2;
         }
@@ -566,8 +571,7 @@ namespace AethonMod.Content.Systems
         {
             if (alma == null) return 0;
             int pagadas = 0;
-            int[] armas = DespertarGrimorio.ArmasDelNivel[
-                System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
+            int[] armas = DespertarGrimorio.ArmasDe(nivel);
             if (armas != null)
             {
                 for (int i = 0; i < armas.Length; i++)
@@ -977,9 +981,10 @@ namespace AethonMod.Content.Systems
                 {
                     global::AethonMod.Content.Globals.AlmaEternoGlobalItem.BancoCobrarMonedas(
                         grimorio, DespertarGrimorio.MonedasPara(nivel));
-                    int porCobrar = 2;
-                    int[] armasCobro = DespertarGrimorio.ArmasDelNivel[
-                        System.Math.Max(1, System.Math.Min(DespertarGrimorio.NivelMax, nivel))];
+                    // v6.142 — arriba del 100 NO se cobra Devorar (no se
+                    // pidió): solo el dinero y las esencias.
+                    int porCobrar = nivel > DespertarGrimorio.NivelCaza ? 0 : 2;
+                    int[] armasCobro = DespertarGrimorio.ArmasDe(nivel);
                     if (armasCobro != null)
                     {
                         for (int i = 0; i < armasCobro.Length && porCobrar > 0; i++)
@@ -1070,14 +1075,31 @@ namespace AethonMod.Content.Systems
                         EcoRed.AnunciarAlPortador(p, hito, new Color(255, 215, 120));
                 }
 
-                // v6.141 — LA FORMA ETERNA YA NO ES DEL DESPERTAR (la
-                // letra: «La Forma Eterna fue incluida en el nivel de
-                // despertar, yo pensaba ponerlo en el nivel normal del
-                // grimorio… asi que el despertar no tendra esos 1000
-                // niveles»): las piezas v6.140 mueren AQUÍ — la
-                // construcción vive en el NIVEL NORMAL DEL LIBRO
-                // (FormaEternaPlayer: desde el libro nivel 100, cada
-                // nivel una parte, 12 en total).
+                // ============================================================
+                //  v6.142 — LA CONSTRUCCIÓN DE LA FORMA ETERNA (la letra:
+                //  «cuando el despertar llegue a nivel 100, entonces
+                //  comienza a desbloquear la forma del eterno… seria
+                //  hasta nivel 112… una parte por cada nivel»): cada
+                //  peldaño 101-112 construye UNA PARTE (puesta en el
+                //  portador mientras usa el libro). Al 112 (la 12ª):
+                //  el ítem cosmético NACE, LA MANIFESTACIÓN estalla y
+                //  LOS VISUALES DESAPARECEN (la forma se CONVIERTE en
+                //  el ítem — la letra: «en el momento de la
+                //  manifestacion la forma eterna que es parte del
+                //  grimorio desaparece ya que es convertida en el item
+                //  cosmetico»).
+                // ============================================================
+                if (nivel >= DespertarGrimorio.NivelFormaInicio &&
+                    nivel <= DespertarGrimorio.NivelManifestacion && p != null && p.active)
+                {
+                    try
+                    {
+                        var fe = p.GetModPlayer
+                            <global::AethonMod.Content.Players.FormaEternaPlayer>();
+                        fe?.ConstruirParte(nivel - DespertarGrimorio.NivelCaza);
+                    }
+                    catch { }
+                }
 
                 // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez POR
                 // LIBRO — cada Eterno escupe al suyo).

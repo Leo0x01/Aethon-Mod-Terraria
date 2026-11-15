@@ -464,7 +464,17 @@ namespace AethonMod.Content.Players
         public int FuriaNivel = 1;
 
         /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
-        public const int SegundosPorMomento = 75;
+        // v6.142 — LA HORA DEL HAMBRE (la letra: «el indicador real es
+        // el que se usa en el Grimorio Hambriento Nervioso… la
+        // diferencia es que en el grimorio hambriento nervioso la
+        // mecanica esta acelerada por motivos de prueba»): el Eterno
+        // corre SU reloj normal — UNA HORA de 0 a 100% (la tasa del
+        // arma: 1/216000). El reloj de los momentos CALZA con él:
+        // 360 s por momento → el 90% (momento 9) a los 54 min y el
+        // 100% a la hora exacta. Cuando LA OLEADA estalla, el ojo del
+        // libro ya llegó ROJO del todo (la rampa del Nervioso: 20%→
+        // 80% de hambre) — UNA sola verdad, la del arma.
+        public const int SegundosPorMomento = 360;
         /// <summary>v6.140 — LA FURIA AL 90% (la letra: «el grimorio
         /// lanza el texto de tener hambre al 4%… las oleadas de hambre
         /// solo deben aparecer a partir de 90% de hambre y al llegar al
@@ -984,19 +994,15 @@ namespace AethonMod.Content.Players
                         {
                             MomentosHambre = momentos;
 
-                            // v6.141 — EL ESPEJO DEL OJO: la hambre del
-                            // ARMA vive espiada del medidor REAL (10
-                            // momentos = 100%) — el ojo del Eterno se
-                            // pone rojo e inquieto con el MISMO reloj
-                            // que estalla la oleada (una sola hambre,
-                            // una sola verdad).
-                            try
-                            {
-                                var et = global::AethonMod.Content.Weapons.GrimoireEternal.EstadoEterno;
-                                if (et != null)
-                                    et.Hambre = Math.Min(1f, MomentosHambre / 10f);
-                            }
-                            catch { }
+                            // v6.142 — EL ESPEJO MURIÓ (la letra: el
+                            // indicador real es EL DEL ARMA — la
+                            // máquina del Grimorio Hambriento Nervioso
+                            // a velocidad NORMAL): el Eterno corre SU
+                            // propio reloj (TasaHambre 1/216000, la
+                            // hora) con su ojo rojo, su inquietud, SU
+                            // caza y SU festín. El medidor de momentos
+                            // solo decide LA OLEADA (90%/100% a la
+                            // hora — calzadas al mismo reloj).
 
                             // v6.49 — el estado nuevo viaja al portador
                             // (su barra, su aura, sus celos — en SU cliente).
@@ -1285,16 +1291,6 @@ namespace AethonMod.Content.Players
             TicksSinMatar = 0;
             bool cambio = MomentosHambre != 0;
             MomentosHambre = 0;
-            // v6.141 — el espejo del ojo también se apaga.
-            if (cambio)
-            {
-                try
-                {
-                    var et = global::AethonMod.Content.Weapons.GrimoireEternal.EstadoEterno;
-                    if (et != null) et.Hambre = 0f;
-                }
-                catch { }
-            }
             if (cambio)
                 EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
         }

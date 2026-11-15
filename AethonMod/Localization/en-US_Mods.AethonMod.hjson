@@ -2325,427 +2325,23 @@ Items: {
 	// v6.114 — THE DEFINITIVE COSMETIC (the letter: "time to create the
 	// definitive cosmetic item… a single accessory").
 	FormaEternaItem: {
-		// v6.115 — THE COMPLETE SCROLL (the info-window fix: in v6.114
-		// the Titulo/Linea1..5 keys DID NOT EXIST and the window showed
-		// the raw keys). Every color tag lives on ONE physical line
-		// (Terraria's tag parser reads per line — a [c/] is never split).
-		DisplayName: The Eternal Form
-		Tooltip: ✦ THE DEFINITIVE COSMETIC — the whole pantheon in one body
+		// v6.142 — LA DESCRIPCIÓN DE VERDAD (la letra: «mejora la
+		// descripcion del item cosmetico de La Forma Eterna, donde
+		// diga lo que es y que significa usarlo»).
+		DisplayName: THE ETERNAL FORM
+		Tooltip: ✦ THE ETERNO'S COMPLETE BODY, MADE FORM — glory converted into an object
 		Titulo: "[c/B96EEA:═══ THE ETERNAL FORM ═══]"
-		Linea1: "[c/D9B3FF:THE TWO LIGHTS — the Primordial Light's aura and the wheels of Ezekiel]"
-		Linea2: "[c/D9B3FF:THE ECLIPSE EMBER, THE RUNIC BACK-RING and THE RUNIC SUNS]"
-		Linea3: "[c/9FA8DA:+40 mana, +8% magic dmg, +4% magic crit, +2 regen, +8% melee, +3% melee crit, +3 defense]"
-		Linea4: "[c/B96EEA:THE VOID AURA — 19 tiles: burns the wicked; while they burn: +10% attack and +10 defense]"
-		Linea5: '''[c/78788C:"The form that never fades."]'''
-	}
-
-	BolsaFormaEterna: {
-		// v6.114 — THE NEW BAG (the letter: "the mentioned accessories
-		// must be kept in a new bag together with the definitive
-		// accessory").
-		DisplayName: The Bag of the Eternal Form
-		Tooltip:
-			'''
-			        THE EIGHT OF THE PANTHEON + THE ETERNAL FORM: the eclipse
-			        ember, the dorsal runic ring, the seal of genesis, the runic
-			        sun rings, the runic suns' shine, the ascended form, the
-			        ophanim and the void aura… and the ONE wearing them all.
-			'''
-	}
-
-	// v6.115 — THE DOOR ITEM (the letter: "so the altar takes us to
-	// another world, create a new item crafted with Essence of the
-	// Eternal at the altar — 1000 essences forge the Inner World of
-	// the Eternal"). Every color tag lives on ONE physical line.
-	MundoInteriorEternoItem: {
-		DisplayName: Inner World of the Eternal
-		Tooltip: The art of a thousand essences — the grimoire devours its bearer and wakes him inside its own body
-		Titulo: "[c/B96EEA:═══ INNER WORLD OF THE ETERNAL ═══]"
-		Linea1: "[c/D9B3FF:ON USE: the Eternal grimoire descends, opens and DEVOURS YOU — no damage: the swallow is the door]"
-		Linea2: "[c/D9B3FF:the world fills with mist… and as it clears THE INTERIOR is born: the hunger waves' permanent eclipse, purple and full of mist]"
-		Linea3: "[c/78788C:THE PRISM OF COLORS at the plaza returns you to the real world — or SUMMON AETHON from its button window]"
-		Linea4: "[c/78788C:THE DOOR NEVER WEARS OUT: the item is NOT consumed — usable FOREVER, again and again, every time the book calls]"
-	}
-
-	BolsaMaestra: {
-		DisplayName: El Cofre del Arsenal
-		Tooltip:
-			'''
-			        LAS VEINTICUATRO BOLSAS del arsenal dentro de una sola: la
-			        del Probador, la de los Fundacionales, la de los Soles
-			        Rúnicos… y todas las demás.
-			        Ábrela y despliega la que necesites.
-			        Clic derecho. Solo entrega lo que te falte.
-			'''
-	}
-
-	AlasPrismaBase.Estilo: Alas de código — paleta, tempo y ruido propios
-
-	AlasRunicasSolares: {
-		DisplayName: Alas Rúnicas Solares
-		Tooltip:
-			'''
-			        Las plumas doradas de los soles rúnicos — cada punta lleva un
-			        glifo del alfabeto solar y un anillo de runas gira en la raíz.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasRunicasDelVacio: {
-		DisplayName: Void Runic Wings
-		Tooltip:
-			'''
-			        THE SMOOTH WING OF THE VOID, FEATHERLESS: one continuous
-			        sail of violet crystal — left/right symmetric — born from
-			        your back and dying in a single luminous curved edge (the
-			        aura's ramp: the living violet, the deep flesh and the
-			        nothing's floor). THE VIOLET RUNE RING burns along the
-			        edge and THE VOID CRUMBS fall from the wings as you fly.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasRunicasDelEclipse: {
-		DisplayName: Alas Rúnicas del Eclipse
-		Tooltip:
-			'''
-			        Ámbar sobre negro: los glifos del ABISMO arden en las puntas y el
-			        anillo respira con la penumbra del eclipse.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasRunicasDelJuicio: {
-		DisplayName: Alas Rúnicas del Juicio
-		Tooltip:
-			'''
-			        El gradiente del Juicio CAMINA por los glifos: oro, ámbar, blanco,
-			        violeta y cian girando en la corona de la raíz.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	CorolasDelAlba: {
-		DisplayName: Corolas del Alba
-		Tooltip:
-			'''
-			        Siete pétalos redondeados de oro y blanco cálido, aleteo lento —
-			        la corola abierta del alba.
-			        Vuelo 240 · sin daño de caída · se pliega ante alas reales.
-			'''
-	}
-
-	AlasSerafinDelVacio: {
-		DisplayName: Void Seraph Wings
-		Tooltip:
-			'''
-			THE SERAPH: THREE PAIRS of violet-fire wings that do not burn —
-			        the greater pair over the shoulders, the flight pair on the
-			        back, and the lower folded pair. The flame curls like throne
-			        fire, and the void alphabet burns along every sail's edge.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasValquiriaSinPlumas: {
-		// v6.137 — LA COPIA SIN PLUMAS (la letra: «en una quita las plumas
-		// y no toques nada mas»): la plata nórdica sin el abanico.
-		DisplayName: Featherless Valkyrie
-		Tooltip: La Valquiria sin su abanico de plumas — la vela estructural de la casa
-	}
-
-	AlasValquiriaLisa: {
-		// v6.139 — RUNES ONLY: the body died — the edge runes ARE the wings.
-		DisplayName: Sleek Valkyrie
-		Tooltip: Runes only — the calligraphy of the leading edge as wings
-	}
-
-	AlasRunicas: {
-		// v6.139 — THE WING MADE OF WRITING: the swarm — leading edge,
-		// sail and tips drawn in glyphs, the GREATER rune on each tip.
-		DisplayName: Runic Wings
-		Tooltip: THE WING MADE OF WRITING — edge, sail and tips in futhark glyphs, the GREATER rune on each wingtip. Flight 240 · no fall damage · yields to real wings.
-	}
-
-	AlasValquiriaRunica: {
-		DisplayName: Runic Valkyrie Wings
-		Tooltip:
-			'''
-			THE VALKYRIE: SEVEN SPEAR-FEATHERS per side — straight and keen,
-			        the silver of the battle sky over steel and night. The house's
-			        solar futhark is engraved on every feather: the wings that
-			        choose the fallen.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasQuetzalEmplumado: {
-		DisplayName: Feathered Quetzal Wings
-		Tooltip:
-			'''
-			THE FEATHERED SERPENT: seven jade feathers per side that ripple
-			        across three tiers — the high pair, the flight pair, and the
-			        lower one. The living jungle's turquoise ramp with void glyphs
-			        on every tier's edge.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasFenixDelRenacer: {
-		DisplayName: Rebirth Phoenix Wings
-		Tooltip:
-			'''
-			THE PHOENIX: THREE NESTED FLAMES — white core, living fire and
-			        deep ember, the high pair raised over the shoulders. The hue
-			        BURNS along the wing and the solar alphabet crowns every tip:
-			        the wings reborn from their own ash.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasTenguDelCrepusculo: {
-		DisplayName: Dusk Tengu Wings
-		Tooltip:
-			'''
-			THE MOUNTAIN CROW: seven primary feathers of blue-black ink,
-			        straight and parted like the wing of the bird that writes
-			        them. Abyssal amber glyphs burn between feather and feather —
-			        the reading demon's dusk.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	AlasDragonDelVacio: {
-		DisplayName: Void Dragon Wings
-		Tooltip:
-			'''
-			THE DRAGON: the TWO-FINGER membrane per side — the ancestral
-			        bat's fat sail across six wine-red scale veils. Abyssal amber
-			        glyphs run along every sail's edge, and the veins beat like a
-			        cave heart.
-			        Flight 240 · no fall damage · folds before real wings.
-			'''
-	}
-
-	CodiceHabilidades: {
-		DisplayName: Codice Habilidades
-		Tooltip: ""
-	}
-
-	CoroDeLosProfundos: {
-		DisplayName: Choir of the Deeps
-		Tooltip:
-			'''
-						Tentacle seeds fall and sing, hunting the living: none escapes twice.
-			THE COSMIC HORROR HOUSE — forged by THE FORGE
-			'''
-	}
-
-	PlumaDelEscribaSanto: {
-		DisplayName: Quill of the Holy Scribe
-		Tooltip:
-			'''
-						A stroke of light flies to the mark and returns to the bearer: the scribe's signature.
-			THE SACRED HOUSE — forged by THE FORGE
-			'''
-	}
-
-	ElOjoQueMira: {
-		DisplayName: El Ojo Que Mira
-		Tooltip: ""
-	}
-}
-
-Projectiles: {
-	SombraPaginaProjectile.DisplayName: La Sombra de la Página
-	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
-	ArcaneBolt.DisplayName: Bolt Arcano
-	OjoEternoMinion.DisplayName: El Ojo del Eterno
-	DagaEternaMinion.DisplayName: The Eternal Dagger
-	AgujeroAbsolutoBlackHoleProjectile.DisplayName: El Agujero Absoluto
-	RequiemPulsarProjectile.DisplayName: Estrella del Requiem
-	ClickerGolpeProjectile.DisplayName: El Golpe del Clic
-	AnillosSingularesHalo.DisplayName: Anillos del Horizonte
-	NebulaJellyfishMinion.DisplayName: Medusa Nebular
-	NebulaLightning.DisplayName: Rayo Nebular
-	StellarCometMinion.DisplayName: Cometa Estelar
-	LivingPulsarMinion.DisplayName: Púlsar Vivo
-	RencorPrimordialProjectile.DisplayName: Círculo del Rencor
-	EminenciaAtrozProjectile.DisplayName: Congregación de Espíritus
-	OcasoShardProjectile.DisplayName: Fragmento del Ocaso
-	OcasoBurstProjectile.DisplayName: Muerte de Estrella
-	FolioErranteProjectile.DisplayName: Página del Grimorio
-	PlumaPrimordialProjectile.DisplayName: Pluma Primordial
-	SelloErranteProjectile.DisplayName: Sello Errante
-	LenguaTintaProjectile.DisplayName: Lengua de Tinta
-	OjoTextoProjectile.DisplayName: Ojo del Texto
-	VersoVivoProjectile.DisplayName: Glifo Vivo
-	// v6.18: wings were removed from the mod (user request).
-	
-	SunProjectile.DisplayName: Sol
-	CosmicShockwaveProjectile.DisplayName: Onda de Choque Cósmica
-	SupernovaProjectile.DisplayName: Supernova
-	PlasmaStormProjectile.DisplayName: Tormenta de Plasma
-	PhoenixNovaProjectile.DisplayName: Nova del Fénix
-	QuantumSplitProjectile.DisplayName: División Cuántica
-	CosmicBlackHoleProjectile.DisplayName: Agujero Cósmico
-	UmbralBlackHoleProjectile.DisplayName: Agujero del Umbral
-	BrumaBlackHoleProjectile.DisplayName: Agujero de la Bruma
-	OlvidoBlackHoleProjectile.DisplayName: Agujero del Olvido
-	SupremoBlackHoleProjectile.DisplayName: Agujero Negro Supremo
-	SupremoAuroraBlackHoleProjectile.DisplayName: Agujero Negro Supremo Aurora
-	UmbralAscendidoBlackHoleProjectile.DisplayName: Umbral Ascendido
-	BrumaAscendidoBlackHoleProjectile.DisplayName: Bruma Ascendida
-	CosmicAscendidoBlackHoleProjectile.DisplayName: Cósmico Ascendido
-	OlvidoAscendidoBlackHoleProjectile.DisplayName: Olvido Ascendido
-	// v6.22: THE PRIMORDIAL ECLIPSE
-	EclipsePrimordialProjectile.DisplayName: Eclipse Primordial
-	// v6.19: the runic suns and the scepter's lightning bolt
-	RuneSunProjectile.DisplayName: Sol Rúnico
-	RunicLightning.DisplayName: Trueno Rúnico
-	SembradorPulsarProjectile.DisplayName: Púlsar del Cementerio
-	LagrimaSolarProjectile.DisplayName: Lágrima Solar
-	ColapsoMagnetarProjectile.DisplayName: Magnetar del Colapso
-	DecretoEclipseProjectile.DisplayName: Círculo del Eclipse
-	CometaErranteProjectile.DisplayName: Cometa Errante
-	NovaEncadenadaProjectile.DisplayName: Nova Encadenada
-	VozCuasarProjectile.DisplayName: Voz del Cuásar
-	TelarEstrellaProjectile.DisplayName: Estrella del Telar
-	LluviaMeteorosProjectile.DisplayName: Lluvia de Meteoros
-	MeteoroProjectile.DisplayName: Meteoro
-	AbrazoNebulosaProjectile.DisplayName: Abrazo de la Nebulosa
-	FiloHorizonteProjectile.DisplayName: Filo del Horizonte
-	RayoGammaProjectile.DisplayName: Rayo Gamma
-	NeutronStarProjectile.DisplayName: Estrella de Neutrones
-	PulsarProjectile.DisplayName: Púlsar
-	WhiteDwarfProjectile.DisplayName: Enana Blanca
-	DeadStarProjectile.DisplayName: Estrella Muerta
-	RedSupergiantProjectile.DisplayName: Supergigante Roja
-	MagnetarProjectile.DisplayName: Magnetar
-	CicloEstelarProjectile.DisplayName: Ciclo Estelar
-	RelojArenaProjectile.DisplayName: Reloj de Arena Cósmico
-	MareaGravitatoriaProjectile.DisplayName: Marea Gravitatoria
-	MareaChicaProjectile.DisplayName: Ola Menor
-	EnjambrePrismaticoProjectile.DisplayName: Enjambre Prismático
-	PenduloJuicioProjectile.DisplayName: Péndulo del Juicio
-	CoroEspectralProjectile.DisplayName: Coro Espectral
-	LanzaAlbaProjectile.DisplayName: Lanza del Alba
-	RealityTearProjectile.DisplayName: Desgarro de Realidad
-	SinfoniaPrimordialProjectile.DisplayName: Sinfonía Primordial
-	TormentaNebularProjectile.DisplayName: Tormenta Nebular
-	DesgarroCuanticoProjectile.DisplayName: Sutura Cuántica
-	PortalDimensionalProjectile.DisplayName: Portal Dimensional
-	PliegueEspacioProjectile.DisplayName: Pliegue del Espacio
-	HeridaElectricaProjectile.DisplayName: Herida Eléctrica
-	CorazonColapsoProjectile.DisplayName: Corazón del Colapso
-	GargantaVacioProjectile.DisplayName: Garganta del Vacío
-	UmbralRotoProjectile.DisplayName: Umbral Roto
-	LeviatanEspectralProjectile.DisplayName: Leviatán Espectral
-	DanzaOrbesProjectile.DisplayName: Danza de los Orbes
-	LenteAbismoProjectile.DisplayName: Lente del Abismo
-	SolVivoProjectile.DisplayName: Sol Vivo
-	SierpeEstelarProjectile.DisplayName: Sierpe Estelar
-	OuroborosAstralProjectile.DisplayName: Ouroboros Astral
-	CaravanaEspectralProjectile.DisplayName: Caravana Espectral
-	AnguilaSolarProjectile.DisplayName: Anguila Solar
-	CienpiesRunicoProjectile.DisplayName: Ciempiés Rúnico
-	FlageloEstelarProjectile.DisplayName: Flagelo Estelar
-	ViboraGenesiacaProjectile.DisplayName: Víbora Genesíaca
-	BoaEclipseProjectile.DisplayName: Boa del Eclipse
-	FarolGuardianProjectile.DisplayName: Farol Guardián
-	CintaAuroraProjectile.DisplayName: Cinta Aurora
-	ManadaAstralProjectile.DisplayName: Manada Astral
-	CriaEstelarMinion.DisplayName: Cría Estelar
-	TajoAstralProjectile.DisplayName: Tajo Astral
-	AnillosSolaresHalo.DisplayName: Anillos Solares
-	SelloGenesisHalo.DisplayName: Sello del Génesis
-	AnilloRunicoDorsalHalo.DisplayName: Anillo Rúnico Dorsal
-	AuraPortadorHalo.DisplayName: Aura del Portador
-	TentaculoCosmicoProjectile.DisplayName: Tentáculo del Vacío
-	FragmentoSupernovaMinion.DisplayName: Fragmento de Supernova
-	RafagaNovaProjectile.DisplayName: Ráfaga Nova
-	MetronomoPulsarHalo.DisplayName: Metrónomo de Púlsar
-	PulsoPulsarProjectile.DisplayName: Pulso de Púlsar
-	VelaSolarProjectile.DisplayName: Vela Solar
-	RafagaSolarProjectile.DisplayName: Ráfaga Solar
-	TajoGuadanaProjectile.DisplayName: Tajo de la Guadaña
-	FisuraDesgarroProjectile.DisplayName: Fisura de Realidad
-	GuardiaNovaProjectile.DisplayName: Guardia de Nova
-	AnilloEnfriamientoProjectile.DisplayName: Anillo de Enfriamiento
-	NovaParryProjectile.DisplayName: Nova del Parry
-	EmbestidaNovaProjectile.DisplayName: Embestida de Nova
-	PulsoEcoProjectile.DisplayName: Pulso Cuántico
-	VerboPrimordialProjectile.DisplayName: El Verbo Primordial
-	VerboDetonacionProjectile.DisplayName: Detonación del Verbo
-	AtaqueJefeProjectile.DisplayName: Diente de guardián
-	AtaqueOleadaProjectile.DisplayName: Diente de oleada
-	TruenoPerlinProjectile.DisplayName: Arco Perlin
-	ArcoSobretensionProjectile.DisplayName: Arco de Sobretensión
-	RayoPrimordialProjectile.DisplayName: Rayo Primordial
-	VenaTruenoProjectile.DisplayName: Vena de Trueno
-	AethonMenorPet.DisplayName: Aethon Menor (mascota)
-	MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
-	GrimorioMenorPet.DisplayName: Grimorio Menor (mascota)
-	CaidaDevoradaProjectile.DisplayName: Devoración del Doble
-	// v6.50.91 — the Nervous One's spirit and its hunting shadow
-	GrimorioNerviosoFlotante.DisplayName: El Grimorio Nervioso
-	SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
-	GrietaDeTintaProjectile.DisplayName: La Grieta de Tinta
-	ManchaDeTinta.DisplayName: La Mancha de Tinta
-	PrimeraCenaProjectile.DisplayName: La Primera Cena
-	CaidaCometaProjectile.DisplayName: La Caída Cometa
-	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro (mascota)
-	AtaqueFusionProjectile.DisplayName: El Ataque de Fusión
-	EscupidizoProjectile.DisplayName: El Escupidizo
-	RayoConvergenteProjectile.DisplayName: El Rayo Convergente
-	TentaculoEquinoccioProjectile.DisplayName: El Tentáculo del Equinoccio
-	LlegadaBrumaProjectile.DisplayName: La Llegada de la Bruma
-	BrilloSolarHalo.DisplayName: El Halo de Brillo Solar
-	BrumaNacimientoFX.DisplayName: La Bruma del Nacimiento
-	DignosFXProjectile.DisplayName: El Destello de los Dignos
-	BocadoDelSueloProjectile.DisplayName: El Bocado del Suelo
-	SombraPagina2Projectile.DisplayName: La Sombra de la Página II
-	RayoConcentradoDosProjectile.DisplayName: El Rayo Concentrado II
-	RayosPruebaProjectile.DisplayName: Los Rayos de Prueba del RC2
-	IraSerExteriorCeremoniaProjectile.DisplayName: La Ira de un Ser Exterior
-	// v6.93 — LA MIRADA DEL ETERNO (la recreación de la casa sobre HazLib):
-	// las dos fases del arma (la carga y el rayo) con sus nombres nuevos.
-	MiradaCargaProj.DisplayName: La Carga de la Mirada
-	MiradaRayoProj.DisplayName: El Rayo de la Mirada
-	RenglonCargaProj.DisplayName: La Citación del Renglón
-	RenglonLineaProj.DisplayName: El Renglón Final
-	CoronaDePlumasProjectile.DisplayName: Crown of Feathers
-	DerrameDeTintaProjectile.DisplayName: Ink Spill
-	AlasAuroraHalo.DisplayName: Wings Halo
-	VastagoDelEternoPet.DisplayName: Scion of the Eternal
-	LaUltimaPalabraProjectile.DisplayName: The Last Word
-	JefeMiradaProj.DisplayName: The Gaze
-	JefeRC2Proj.DisplayName: Concentrated Ray 2
-	JefeRenglonesProj.DisplayName: The Lines
-	PrimerTrazoFajo.DisplayName: First Stroke Wad
-	PrimerTrazoHeld.DisplayName: The First Stroke
-	SombraPagina3Projectile.DisplayName: Shadow of the Page 3
-	SombraPagina4Projectile.DisplayName: Shadow of the Page 4
-	TresCasasProjectile.DisplayName: The Three Houses
-	SombraPagina5Projectile.DisplayName: Shadow of the Page 5
-	AuraJuicio2Ancla.DisplayName: Void Aura Anchor
-	JefeMiradaCieloProj.DisplayName: Gaze of the Sky
-	JefePruebaCProj.DisplayName: Test Ray C
-	JefeVeredictoProj.DisplayName: The Verdict
-	CeremoniaLlamado.DisplayName: Ceremony Call
-	DevoracionEterna.DisplayName: The Eternal Devouring
-	AgujaVacioProj.DisplayName: Needle of the Void
-	JuicioDosSolesProj.DisplayName: Judgment of the Two Suns
-	TajoOscuroProj.DisplayName: The Slash of Darkness
-	TajoDelVacioProj.DisplayName: The Slash of the Void
-	LaMiradaProyectil.DisplayName: La Mirada Proyectil
-	LaMiradaRayo.DisplayName: La Mirada Rayo
-}
-
-Buffs: {
-	OjoEternoBuff: {
-		DisplayName: Ojos del Eterno
-		Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
+		Linea1: "[c/D9B3FF:WHAT IT IS: twelve parts built on the awakening (101-112) — the Writing,]"
+		Linea2: "[c/D9B3FF:the Three Rings, the First Light, the Ember, the Three Suns, the Ophanim,]"
+		Linea3: "[c/D9B3FF:the Mantle and the Void Aura — each grew WORN by the bearer while using the"
+		Linea4: "[c/D9B3FF:book; at the twelfth, THE MANIFESTATION erupted and the form was CONVERTED"
+		Linea5: "[c/D9B3FF:into this item — the glory made object.]"
+		Linea6: "[c/9FA8DA:WHAT IT MEANS TO WEAR IT: to dress as the whole god — aura, rings, suns"
+		Linea7: "[c/9FA8DA:and wheels spinning around you. The power stayed baked into the grimoire"
+		Linea8: "[c/9FA8DA:(+4% per part and +10% per extra-power step — ALL its attack, magic and"
+		Linea9: "[c/9FA8DA:summon). THE VOID AURA — 19 tiles: burns the impious while they burn."
+		Linea10: "[c/78788C:“The form that never fades — the memory of the time a mortal dressed"
+		Linea11: "[c/78788C:as the Eterno… and survived to tell it.”]"
 	}
 
 	DagaEternaBuff: {
@@ -2850,6 +2446,111 @@ Buffs: {
 	LaMarcaSilenciosa: {
 		DisplayName: La Marca Silenciosa
 		Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
+	}
+
+	AlasDragonDelVacio: {
+		DisplayName: Alas Dragon Del Vacio
+		Tooltip: ""
+	}
+
+	AlasFenixDelRenacer: {
+		DisplayName: Alas Fenix Del Renacer
+		Tooltip: ""
+	}
+
+	AlasQuetzalEmplumado: {
+		DisplayName: Alas Quetzal Emplumado
+		Tooltip: ""
+	}
+
+	AlasRunicas: {
+		DisplayName: Alas Runicas
+		Tooltip: ""
+	}
+
+	AlasRunicasDelEclipse: {
+		DisplayName: Alas Runicas Del Eclipse
+		Tooltip: ""
+	}
+
+	AlasRunicasDelJuicio: {
+		DisplayName: Alas Runicas Del Juicio
+		Tooltip: ""
+	}
+
+	AlasRunicasDelVacio: {
+		DisplayName: Alas Runicas Del Vacio
+		Tooltip: ""
+	}
+
+	AlasRunicasSolares: {
+		DisplayName: Alas Runicas Solares
+		Tooltip: ""
+	}
+
+	AlasSerafinDelVacio: {
+		DisplayName: Alas Serafin Del Vacio
+		Tooltip: ""
+	}
+
+	AlasTenguDelCrepusculo: {
+		DisplayName: Alas Tengu Del Crepusculo
+		Tooltip: ""
+	}
+
+	AlasValquiriaLisa: {
+		DisplayName: Alas Valquiria Lisa
+		Tooltip: ""
+	}
+
+	AlasValquiriaRunica: {
+		DisplayName: Alas Valquiria Runica
+		Tooltip: ""
+	}
+
+	AlasValquiriaSinPlumas: {
+		DisplayName: Alas Valquiria Sin Plumas
+		Tooltip: ""
+	}
+
+	CorolasDelAlba: {
+		DisplayName: Corolas Del Alba
+		Tooltip: ""
+	}
+
+	BolsaFormaEterna: {
+		DisplayName: Bolsa Forma Eterna
+		Tooltip: ""
+	}
+
+	BolsaMaestra: {
+		DisplayName: Bolsa Maestra
+		Tooltip: ""
+	}
+
+	CodiceHabilidades: {
+		DisplayName: Codice Habilidades
+		Tooltip: ""
+	}
+
+	MundoInteriorEternoItem: {
+		DisplayName: Mundo Interior Eterno Item
+		Tooltip: ""
+	}
+
+	ElOjoQueMira: {
+		DisplayName: El Ojo Que Mira
+		Tooltip: ""
+	}
+
+	CoroDeLosProfundos: {
+		DisplayName: Coro De Los Profundos
+		Tooltip: ""
+	}
+
+	PlumaDelEscribaSanto: {
+		DisplayName: Pluma Del Escriba Santo
+		Tooltip: ""
 	}
 }
 
@@ -3318,6 +3019,19 @@ Despertar: {
 	CaminoAgujeros2: los agujeros 2/min
 	CaminoSupremo: EL SUPREMO/AURORA (8 ojos con la mejora 4)
 	CaminoMaximo: LA IRA DE UN SER EXTERIOR + el escuadrón +30 % — el círculo invoca EL HAZ (daño 1000 + mágico + 50% invocación)
+	CaminoForma1: THE WRITING — the 1st part of THE ETERNAL FORM (+4% attack to the whole grimoire)
+	CaminoForma2: THE FIRST RING — the 2nd part (+4%)
+	CaminoForma3: THE SECOND RING — the black hole ring (+4%)
+	CaminoForma4: THE THIRD RING — the golden ring (+4%)
+	CaminoForma5: THE FIRST LIGHT — the ascended aura (+4%)
+	CaminoForma6: THE EMBER — the eclipse smoke (+4%)
+	CaminoForma7: THE FIRST SUN — the runic sun (+4%)
+	CaminoForma8: THE SECOND SUN — the solar pair (+4%)
+	CaminoForma9: THE THIRD SUN — the full choir (+4%)
+	CaminoForma10: THE OPHANIM — the wheels of Ezekiel (+4%)
+	CaminoForma11: THE MANTLE — the pantheon veil (+4%)
+	CaminoManifestacion: ✧✧ THE 12TH PART: THE VOID AURA — THE MANIFESTATION erupts and the form is CONVERTED into the cosmetic item
+	CaminoPoderExtra: THE EXTRA POWER — +10% attack to the whole grimoire per level (113-120)
 	Escupidizo:
 		'''
 		Ya somos tres, portador: tú, yo… y ÉL.
@@ -4117,20 +3831,20 @@ Pergamino: {
 	Interior3: • THE PRISM PILLAR is the way out… and THE ARENA: summon the bosses you devoured, each MIGHTIER for every death in the arena.
 	Interior4: • From level 10, arena bosses REGENERATE 1% of max life per second (+0.1% per extra level) — and there is no level cap.
 	SecOleadas: THE HUNGER WAVES
-	Oleadas1: • The grimoire's hunger grows with time without kills (75 s per moment, 10 moments).
-	Oleadas2: • The book's whisper comes early… but THE WAVE only erupts at 90% hunger — and at 100% ALWAYS, with the grimoire's call.
+	Oleadas1: • The grimoire's hunger runs THE GRIMORIO HAMBRIENTO NERVIOSO MACHINE at NORMAL speed: 0 to 100% in ONE HOUR if unfed. The book's red, restless eye is THE ONLY INDICATOR.
+	Oleadas2: • THE WAVE erupts at 90% hunger (possible) — and at 100% ALWAYS, with the grimoire's call. At normal pace: 90% at 54 min, 100% at the hour sharp.
 	Oleadas3: • Beating the wave raises its level (the next brings MORE waves); dying freezes it.
-	Oleadas4: • THE ONLY hunger indicator: the grimoire grows RESTLESS and ITS EYE TURNS RED. When the eye burns red, the wave is near.
+	Oleadas4: • The feast: each devoured kill lowers hunger (0.1%→5% by rarity; bosses, a full 10%). From 25% the book HUNTS ON ITS OWN if you idle — the spirit and its shadow devour alone.
 	SecGrimorio: THE GRIMOIRE AND ITS MECHANICS
 	Grimorio1: • THE DEVOURING: the first death of every boss belongs to the BOOK — it stops at 100 life and the feast digests it (cinema and loot included).
 	Grimorio2: • THE SHADOWS OF THE PAGE: tomes I-V, the awakening's magic arsenal. Each door of the awakening forges them stronger.
 	Grimorio3: • THE WEAPON FEAST: every consecrated weapon becomes power — up to +45% damage (devoured strength and EXP).
 	Grimorio4: • CONSUMED ESSENCES: +0.1% damage per essence (cap +100%) — only with the book nearby (100% in hand, 25% stored).
 	Grimorio5: • THE SQUADRON: the EYES OF THE ETERNAL (11) and the DAGGERS OF THE ETERNAL (5) — the bearer's guard.
-	SecDespertar: THE AWAKENING LADDER (1-1000)
+	SecDespertar: THE AWAKENING LADDER (1-120)
 	Despertar1: • Each level costs: N essences + coins (from 100 copper to 100 platinum) + hunting weapons and materials.
 	Despertar2: • THE HUNTING DOORS: King Slime (3) · Eye of Cthulhu (5) · The World's Evil (8) · Queen Bee (10) · Skeletron (13) · Wall of Flesh (20) · Queen Slime (23) · The Twins (25) · The Destroyer (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duke Fishron (37) · Empress of Light (38) · Lunatic Cultist (45) · Moon Lord (50) · Aethon (100).
-	Despertar3: • Past the summit, the book keeps leveling with XP — and from 100 on, each level builds THE ETERNAL FORM (see its section).
+	Despertar3: • From 101 to 112 THE ETERNAL FORM is built (one part per step — see its section). From 113 to 120, THE EXTRA POWER: +10% attack per level to the WHOLE grimoire, cost rising 20% per level.
 	Despertar4: • THE WRATH OF THE OUTER BEING is earned at level 100 (with its hunt paid): the ultimate Beam. And THE EYE THAT WATCHES: the new eye weapon — it appears near the enemy, its gaze marks, the mark ignites the void burn (in multiplayer, the enemy player burns too).
 	SecAtaques: THE GRIMOIRE'S ATTACKS AND MINIONS
 	Ataques1: • THE EYES OF THE ETERNAL (11): the squadron that watches everything — each eye a living projectile with its own gaze.
@@ -4139,15 +3853,15 @@ Pergamino: {
 	Ataques4: • THE FEAST: the devouring that stops bosses and digests them whole.
 	Ataques5: • THE WRATH OF THE OUTER BEING: the ultimate beam of level 100.
 	Ataques6: • THE FIRST SUPPER: the first death of every boss, always the book's.
-	SecForma: THE ETERNAL FORM (from the BOOK's level 100)
-	Forma1: • From level 100, THE ETERNAL FORM is built PIECE BY PIECE every 100 levels: the Ember (200) · the Runic Ring (300) · the Genesis Seal (400) · the Sun Rings (500) · the Shine (600) · the Ascended (700) · the Ophanim (800) · the Void Aura (900).
-	Forma2: • AT 1000, THE MANIFESTATION: the burst of light that kills in one blow EVERYTHING alive on the screen — bosses included, with their loot (it is a valid death).
-	Forma3: • The complete Eternal Form dresses the whole pantheon: the two lights, the ring, the ember, the shine… and the VOID AURA.
-	Forma4: • Pantheon stats: +40 mana · +8% magic dmg · +4% magic crit · +2 regen · +8% melee · +3% melee crit · +3 defense.
+	SecForma: THE ETERNAL FORM (the awakening 101-112)
+	Forma1: • When the awakening reaches 100, THE FORM BEGINS: from step 101 to 112, each level builds ONE PART — 12 in all: the Writing · the Three Rings · the First Light · the Ember · the Three Suns · the Ophanim · the Mantle · the Void Aura.
+	Forma2: • Each step COSTS: 10 platinum + 1000 Eternal essences, rising 10% per level (paid at THE ALTAR TABLE — devoured essences + bank coins). Each level grants +4% attack to the WHOLE grimoire (magic and summon).
+	Forma3: • The parts are PUT ON the player WHILE USING THE BOOK (not items: they are LIMBS of the bearer). Every ring, every sun, every light — one separate part.
+	Forma4: • At step 112 (the 12th part): the cosmetic item THE ETERNAL FORM is born, THE MANIFESTATION erupts (everything alive on screen dies with loot — a valid death) and THE BEARER'S VISUALS VANISH: the form was CONVERTED into the item.
 	SecAuras: THE AURAS · BUFFS AND DEBUFFS
 	Auras1: • THE VOID AURA: the 19-tile field that burns the wicked — from 1 damage at the edge to 10+ hugging the body (faster the closer). After leaving the field, the OUTER VOID BURN keeps burning for 5 s (1% of max life per half second).
 	Auras2: • THE OUTER VOID (bearer's buff): while your prey burns — +10% attack · +10 defense · −15% mana cost.
-	Auras3: • THE HUNGER AURA: the book's ash upon its bearer — only at 90% hunger (the wave is about to fall).
+	Auras3: • THE HUNGER: no aura anymore — the book's red, restless eye is the ONLY indicator (its machine runs at normal speed: 100% in one hour).
 	Auras4: • THE VOID BURN (enemy debuff): the violet black fire — 1% of max life every half second, 5 s after leaving the aura.
 	Auras5: • THE WAVE AURA: the feast's enemies wear the grimoire's violet mist.
 	Auras6: • This scroll's eye is watching you. Always.
@@ -4295,3 +4009,267 @@ LaMarcaSilenciosa: {
 }
 
 LibroEterno.NombreIcono: THE ETERNAL BOOK
+
+Buffs: {
+	AethonMenorBuff: {
+		DisplayName: Aethon Menor Buff
+		Description: Mods.AethonMod.Buffs.AethonMenorBuff.Description
+	}
+
+	AuraVacioBuff: {
+		DisplayName: Aura Vacio Buff
+		Description: Mods.AethonMod.Buffs.AuraVacioBuff.Description
+	}
+
+	CriaEstelarBuff: {
+		DisplayName: Cria Estelar Buff
+		Description: Mods.AethonMod.Buffs.CriaEstelarBuff.Description
+	}
+
+	DagaEternaBuff: {
+		DisplayName: Daga Eterna Buff
+		Description: Mods.AethonMod.Buffs.DagaEternaBuff.Description
+	}
+
+	FragmentoSupernovaBuff: {
+		DisplayName: Fragmento Supernova Buff
+		Description: Mods.AethonMod.Buffs.FragmentoSupernovaBuff.Description
+	}
+
+	GrimorioMenorBuff: {
+		DisplayName: Grimorio Menor Buff
+		Description: Mods.AethonMod.Buffs.GrimorioMenorBuff.Description
+	}
+
+	JuicioDelAlba: {
+		DisplayName: Juicio Del Alba
+		Description: Mods.AethonMod.Buffs.JuicioDelAlba.Description
+	}
+
+	LivingPulsarBuff: {
+		DisplayName: Living Pulsar Buff
+		Description: Mods.AethonMod.Buffs.LivingPulsarBuff.Description
+	}
+
+	NebulaJellyfishBuff: {
+		DisplayName: Nebula Jellyfish Buff
+		Description: Mods.AethonMod.Buffs.NebulaJellyfishBuff.Description
+	}
+
+	OcasoActivoBuff: {
+		DisplayName: Ocaso Activo Buff
+		Description: Mods.AethonMod.Buffs.OcasoActivoBuff.Description
+	}
+
+	OjoEternoBuff: {
+		DisplayName: Ojo Eterno Buff
+		Description: Mods.AethonMod.Buffs.OjoEternoBuff.Description
+	}
+
+	QuemaduraCosmica: {
+		DisplayName: Quemadura Cosmica
+		Description: Mods.AethonMod.Buffs.QuemaduraCosmica.Description
+	}
+
+	QuemaduraVacioExterior: {
+		DisplayName: Quemadura Vacio Exterior
+		Description: Mods.AethonMod.Buffs.QuemaduraVacioExterior.Description
+	}
+
+	SobrecalentadoBuff: {
+		DisplayName: Sobrecalentado Buff
+		Description: Mods.AethonMod.Buffs.SobrecalentadoBuff.Description
+	}
+
+	StellarCometBuff: {
+		DisplayName: Stellar Comet Buff
+		Description: Mods.AethonMod.Buffs.StellarCometBuff.Description
+	}
+
+	VacioExterior: {
+		DisplayName: Vacio Exterior
+		Description: Mods.AethonMod.Buffs.VacioExterior.Description
+	}
+
+	VastagoDelEternoBuff: {
+		DisplayName: Vastago Del Eterno Buff
+		Description: Mods.AethonMod.Buffs.VastagoDelEternoBuff.Description
+	}
+
+	LaMarcaSilenciosa: {
+		DisplayName: La Marca Silenciosa
+		Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
+	}
+}
+
+Projectiles: {
+	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
+	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
+	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
+	ClickerGolpeProjectile.DisplayName: Clicker Golpe Projectile
+	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
+	AethonMenorPet.DisplayName: Aethon Menor Pet
+	AlasAuroraHalo.DisplayName: Alas Aurora Halo
+	AnilloRunicoDorsalHalo.DisplayName: Anillo Runico Dorsal Halo
+	AnillosSolaresHalo.DisplayName: Anillos Solares Halo
+	AuraPortadorHalo.DisplayName: Aura Portador Halo
+	BrilloSolarHalo.DisplayName: Brillo Solar Halo
+	EscupidizoProjectile.DisplayName: Escupidizo Projectile
+	GrimorioMenorPet.DisplayName: Grimorio Menor Pet
+	MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	SelloGenesisHalo.DisplayName: Sello Genesis Halo
+	VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
+	AbrazoNebulosaProjectile.DisplayName: Abrazo Nebulosa Projectile
+	AnguilaSolarProjectile.DisplayName: Anguila Solar Projectile
+	AnilloEnfriamientoProjectile.DisplayName: Anillo Enfriamiento Projectile
+	ArcoSobretensionProjectile.DisplayName: Arco Sobretension Projectile
+	BoaEclipseProjectile.DisplayName: Boa Eclipse Projectile
+	BrumaAscendidoBlackHoleProjectile.DisplayName: Bruma Ascendido Black Hole Projectile
+	BrumaBlackHoleProjectile.DisplayName: Bruma Black Hole Projectile
+	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
+	CaravanaEspectralProjectile.DisplayName: Caravana Espectral Projectile
+	CicloEstelarProjectile.DisplayName: Ciclo Estelar Projectile
+	CienpiesRunicoProjectile.DisplayName: Cienpies Runico Projectile
+	CintaAuroraProjectile.DisplayName: Cinta Aurora Projectile
+	ColapsoMagnetarProjectile.DisplayName: Colapso Magnetar Projectile
+	CometaErranteProjectile.DisplayName: Cometa Errante Projectile
+	CorazonColapsoProjectile.DisplayName: Corazon Colapso Projectile
+	CoroEspectralProjectile.DisplayName: Coro Espectral Projectile
+	CosmicAscendidoBlackHoleProjectile.DisplayName: Cosmic Ascendido Black Hole Projectile
+	CosmicBlackHoleProjectile.DisplayName: Cosmic Black Hole Projectile
+	CosmicShockwaveProjectile.DisplayName: Cosmic Shockwave Projectile
+	CriaEstelarMinion.DisplayName: Cria Estelar Minion
+	DanzaOrbesProjectile.DisplayName: Danza Orbes Projectile
+	DeadStarProjectile.DisplayName: Dead Star Projectile
+	DecretoEclipseProjectile.DisplayName: Decreto Eclipse Projectile
+	DesgarroCuanticoProjectile.DisplayName: Desgarro Cuantico Projectile
+	DignosFXProjectile.DisplayName: Dignos F X Projectile
+	EclipsePrimordialProjectile.DisplayName: Eclipse Primordial Projectile
+	EmbestidaNovaProjectile.DisplayName: Embestida Nova Projectile
+	EminenciaAtrozProjectile.DisplayName: Eminencia Atroz Projectile
+	EnjambrePrismaticoProjectile.DisplayName: Enjambre Prismatico Projectile
+	FarolGuardianProjectile.DisplayName: Farol Guardian Projectile
+	FiloHorizonteProjectile.DisplayName: Filo Horizonte Projectile
+	FisuraDesgarroProjectile.DisplayName: Fisura Desgarro Projectile
+	FlageloEstelarProjectile.DisplayName: Flagelo Estelar Projectile
+	FolioErranteProjectile.DisplayName: Folio Errante Projectile
+	FragmentoSupernovaMinion.DisplayName: Fragmento Supernova Minion
+	GargantaVacioProjectile.DisplayName: Garganta Vacio Projectile
+	GuardiaNovaProjectile.DisplayName: Guardia Nova Projectile
+	HeridaElectricaProjectile.DisplayName: Herida Electrica Projectile
+	LagrimaSolarProjectile.DisplayName: Lagrima Solar Projectile
+	LanzaAlbaProjectile.DisplayName: Lanza Alba Projectile
+	LenguaTintaProjectile.DisplayName: Lengua Tinta Projectile
+	LenteAbismoProjectile.DisplayName: Lente Abismo Projectile
+	LeviatanEspectralProjectile.DisplayName: Leviatan Espectral Projectile
+	LivingPulsarMinion.DisplayName: Living Pulsar Minion
+	LluviaMeteorosProjectile.DisplayName: Lluvia Meteoros Projectile
+	MagnetarProjectile.DisplayName: Magnetar Projectile
+	ManadaAstralProjectile.DisplayName: Manada Astral Projectile
+	MareaChicaProjectile.DisplayName: Marea Chica Projectile
+	MareaGravitatoriaProjectile.DisplayName: Marea Gravitatoria Projectile
+	MeteoroProjectile.DisplayName: Meteoro Projectile
+	MetronomoPulsarHalo.DisplayName: Metronomo Pulsar Halo
+	NebulaJellyfishMinion.DisplayName: Nebula Jellyfish Minion
+	NebulaLightning.DisplayName: Nebula Lightning
+	NeutronStarProjectile.DisplayName: Neutron Star Projectile
+	NovaEncadenadaProjectile.DisplayName: Nova Encadenada Projectile
+	NovaParryProjectile.DisplayName: Nova Parry Projectile
+	OcasoBurstProjectile.DisplayName: Ocaso Burst Projectile
+	OcasoShardProjectile.DisplayName: Ocaso Shard Projectile
+	OjoTextoProjectile.DisplayName: Ojo Texto Projectile
+	OlvidoAscendidoBlackHoleProjectile.DisplayName: Olvido Ascendido Black Hole Projectile
+	OlvidoBlackHoleProjectile.DisplayName: Olvido Black Hole Projectile
+	OuroborosAstralProjectile.DisplayName: Ouroboros Astral Projectile
+	PenduloJuicioProjectile.DisplayName: Pendulo Juicio Projectile
+	PliegueEspacioProjectile.DisplayName: Pliegue Espacio Projectile
+	PlumaPrimordialProjectile.DisplayName: Pluma Primordial Projectile
+	PortalDimensionalProjectile.DisplayName: Portal Dimensional Projectile
+	PulsarProjectile.DisplayName: Pulsar Projectile
+	PulsoEcoProjectile.DisplayName: Pulso Eco Projectile
+	PulsoPulsarProjectile.DisplayName: Pulso Pulsar Projectile
+	RafagaNovaProjectile.DisplayName: Rafaga Nova Projectile
+	RafagaSolarProjectile.DisplayName: Rafaga Solar Projectile
+	RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
+	RayoGammaProjectile.DisplayName: Rayo Gamma Projectile
+	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
+	RealityTearProjectile.DisplayName: Reality Tear Projectile
+	RedSupergiantProjectile.DisplayName: Red Supergiant Projectile
+	RelojArenaProjectile.DisplayName: Reloj Arena Projectile
+	RencorPrimordialProjectile.DisplayName: Rencor Primordial Projectile
+	RuneSunProjectile.DisplayName: Rune Sun Projectile
+	RunicLightning.DisplayName: Runic Lightning
+	SelloErranteProjectile.DisplayName: Sello Errante Projectile
+	SembradorPulsarProjectile.DisplayName: Sembrador Pulsar Projectile
+	SierpeEstelarProjectile.DisplayName: Sierpe Estelar Projectile
+	SinfoniaPrimordialProjectile.DisplayName: Sinfonia Primordial Projectile
+	SolVivoProjectile.DisplayName: Sol Vivo Projectile
+	StellarCometMinion.DisplayName: Stellar Comet Minion
+	SunProjectile.DisplayName: Sun Projectile
+	SupremoAuroraBlackHoleProjectile.DisplayName: Supremo Aurora Black Hole Projectile
+	SupremoBlackHoleProjectile.DisplayName: Supremo Black Hole Projectile
+	TajoAstralProjectile.DisplayName: Tajo Astral Projectile
+	TajoGuadanaProjectile.DisplayName: Tajo Guadana Projectile
+	TelarEstrellaProjectile.DisplayName: Telar Estrella Projectile
+	TentaculoCosmicoProjectile.DisplayName: Tentaculo Cosmico Projectile
+	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
+	TormentaNebularProjectile.DisplayName: Tormenta Nebular Projectile
+	TruenoPerlinProjectile.DisplayName: Trueno Perlin Projectile
+	UmbralAscendidoBlackHoleProjectile.DisplayName: Umbral Ascendido Black Hole Projectile
+	UmbralBlackHoleProjectile.DisplayName: Umbral Black Hole Projectile
+	UmbralRotoProjectile.DisplayName: Umbral Roto Projectile
+	VelaSolarProjectile.DisplayName: Vela Solar Projectile
+	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
+	VerboDetonacionProjectile.DisplayName: Verbo Detonacion Projectile
+	VerboPrimordialProjectile.DisplayName: Verbo Primordial Projectile
+	VersoVivoProjectile.DisplayName: Verso Vivo Projectile
+	ViboraGenesiacaProjectile.DisplayName: Vibora Genesiaca Projectile
+	VozCuasarProjectile.DisplayName: Voz Cuasar Projectile
+	WhiteDwarfProjectile.DisplayName: White Dwarf Projectile
+	DagaEternaMinion.DisplayName: Daga Eterna Minion
+	DevoracionEterna.DisplayName: Devoracion Eterna
+	IraSerExteriorCeremoniaProjectile.DisplayName: Ira Ser Exterior Ceremonia Projectile
+	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
+	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
+	RayosPruebaProjectile.DisplayName: Rayos Prueba Projectile
+	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
+	AtaqueJefeProjectile.DisplayName: Ataque Jefe Projectile
+	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
+	JefeMiradaProj.DisplayName: Jefe Mirada Proj
+	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
+	JefeRC2Proj.DisplayName: Jefe R C2 Proj
+	JefeRenglonesProj.DisplayName: Jefe Renglones Proj
+	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
+	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
+	GrimorioNerviosoFlotante.DisplayName: Grimorio Nervioso Flotante
+	SombraPaginaCaza.DisplayName: Sombra Pagina Caza
+	OjoEternoMinion.DisplayName: Ojo Eterno Minion
+	AtaqueOleadaProjectile.DisplayName: Ataque Oleada Projectile
+	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
+	PrimerTrazoHeld.DisplayName: Primer Trazo Held
+	BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
+	CaidaDevoradaProjectile.DisplayName: Caida Devorada Projectile
+	FauceDevoradorProjectile.DisplayName: Fauce Devorador Projectile
+	GrietaDeTintaProjectile.DisplayName: Grieta De Tinta Projectile
+	ManchaDeTinta.DisplayName: Mancha De Tinta
+	PrimeraCenaProjectile.DisplayName: Primera Cena Projectile
+	SombraPagina2Projectile.DisplayName: Sombra Pagina2 Projectile
+	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
+	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
+	SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
+	SombraPaginaProjectile.DisplayName: Sombra Pagina Projectile
+	TresCasasProjectile.DisplayName: Tres Casas Projectile
+	PhoenixNovaProjectile.DisplayName: Phoenix Nova Projectile
+	PlasmaStormProjectile.DisplayName: Plasma Storm Projectile
+	QuantumSplitProjectile.DisplayName: Quantum Split Projectile
+	SupernovaProjectile.DisplayName: Supernova Projectile
+	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
+	RenglonCargaProj.DisplayName: Renglon Carga Proj
+	RenglonLineaProj.DisplayName: Renglon Linea Proj
+	TajoDelVacioProj.DisplayName: Tajo Del Vacio Proj
+	MiradaCargaProj.DisplayName: Mirada Carga Proj
+	MiradaRayoProj.DisplayName: Mirada Rayo Proj
+	LaMiradaProyectil.DisplayName: La Mirada Proyectil
+	LaMiradaRayo.DisplayName: La Mirada Rayo
+	ArcaneBolt.DisplayName: Arcane Bolt
+}
