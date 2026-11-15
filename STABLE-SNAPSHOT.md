@@ -1,28 +1,27 @@
-# SNAPSHOT ESTABLE — v6.142 — LA FORMA EN SU DESPERTAR Y EL RELOJ DE VERDAD
+# SNAPSHOT ESTABLE — v6.143 — EL ACCESORIO DE VERDAD
 
-> **PUBLICADA — [release 446344047](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.142) + CDN verificado (md5 `2e8af7377e0c911eaa6850a5e07d4b24`, 19.368.967 B, 524 entradas)**
+> **PUBLICADA — [release 446370078](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.143) + CDN verificado (md5 `e397f8c48f7c1181eb172b88850ffd3a`, 19.375.490 B, 524 entradas)**
 
-## LA LETRA (sesión 23)
+## LA LETRA (sesión 24)
 
-La Forma Eterna debía estar en EL DESPERTAR (101-112, una parte por peldaño, 10P+1000 esencias +10%/nivel, +4% ataque a todo el grimorio, pieza visual puesta SOLO usando el libro; al 112 la MANIFESTACIÓN + el ítem nace + los visuales DESAPARECEN convertidos) · la escalera a 120 con el poder extra 113-120 (+10% ataque/nivel, coste +20%/nivel) · el indicador de hambre es LA MÁQUINA DEL GRIMORIO HAMBRIENTO NERVIOSO a velocidad NORMAL (el Nervioso es la demo acelerada) · la descripción del cosmético: lo que es + qué significa usarlo.
+«Asegúrate que La Forma Eterna que sale en el despertar 112 sea el accesorio, ya que debe tener el efecto de aura de vacío, ya sabes, por lo tanto es un accesorio, recuerda el efecto de aura del vacío, con su respectiva quemadura y los buff y debuff».
 
-## LAS SIETE ENTREGAS
+## LA VERIFICACIÓN — el circuito completo, vivo y entero
 
-1. **EL DESPERTAR A LOS 120 (DespertarGrimorio.cs)**: NivelMax=120 · NivelCaza=100 (la cima de la caza no se mueve: Aethon y la Ira siguen en el 100) · NivelFormaInicio=101 · NivelManifestacion=112. BonusDano POR TRAMOS: +1%/nivel (1-100) · +4%/nivel (101-112) · +10%/nivel (113-120) — +228% acumulado a 120, a TODO el ataque del grimorio (mágico e invocación: Equinoccio y ojos pasan por él). MonedasPara/EsenciasPara: 10P+1000 la primera parte, ×1,10 hasta la 12, ×1,20 desde el 113 (verificado por código: 101=10,00P+1000 · 112=28,53P+2853 · 120=122,68P+12268).
-2. **LAS MESAS SEGURAS**: ArmasDe()/GruposMaterialesDe()/CantidadMateriales protegen >100 (las tablas viven hasta 100 — los 4 accesos directos migraron) · LaMesaEstaCompleta: arriba del 100 SOLO esencias+monedas · SubirNivel no cobra Devorar arriba del 100 · los hitos del camino CaminoForma1-11 + CaminoManifestacion + CaminoPoderExtra (la escalera UI pinta las partes).
-3. **LA CONSTRUCCIÓN (DespertarGrimorioSistema.SubirNivel → FormaEternaPlayer.ConstruirParte)**: cada peldaño 101-112 construye UNA PARTE (aviso + sonido) · al 112 LA CONVERSIÓN (ConvertirLaForma): el ítem cosmético nace + ManifestacionDeLaForma (una vez) + Convertida=true (los visuales YA NO visten al portador — la letra: «desaparece ya que es convertida en el item cosmetico»).
-4. **EL VESTIDO (FormaEternaPlayer.PostUpdateEquips)**: las partes visuales SOLO sosteniendo el libro · la 12ª enciende EL AURA DEL VACÍO (el ancla) hasta la conversión · EL ATAQUE vive en BonusDano (no en el player — un solo sitio de verdad).
-5. **EL RELOJ DE VERDAD**: GrimoireEternal.TasaHambre=1/216000 (LA HORA — la máquina del Nervioso a velocidad normal: ojo rojo 20-80%, inquietud 50%+, caza propia 25%+, festín por rareza) · ShardPlayer.SegundosPorMomento=360 (90% a los 54 min, 100% a la hora — LA OLEADA calzada al reloj del arma) · los espejos v6.141 muertos (subida y cena).
-6. **LA DESCRIPCIÓN DEL COSMÉTICO (FormaEternaItem + hjson ×3)**: Titulo + Linea1-11 — LO QUE ES (doce partes, cada una creció puesta en el portador como un miembro más; la duodécima estalló y la forma se convirtió en el ítem) + QUÉ SIGNIFICA USARLO (vestir al dios entero; el poder quedó horneado en el grimorio). El lector extendido a Linea11.
-7. **EL LIBRO ACTUALIZADO (hjson ×3)**: despertar 1-120 · la forma en su sección (101-112, la mesa, la conversión) · el hambre con su máquina de verdad · Auras3 sin el aura muerta. FIX: una comilla recta interna en en-US Linea11 rompía el parser hjson — el headless lo cazó (el oráculo C# no valida hjson); comillas tipográficas.
+- **ES EL ACCESORIO**: `FormaEternaItem` con `Item.accessory = true` — nace en el peldaño 112 (`ConvertirLaForma`) y funciona puesto Y en vanidad para el teatro visual.
+- **EL CAMPO**: `UpdateAccessory` enciende el ancla `AuraJuicio2Ancla` — **19 tiles** (RADIO=300px), reconocida por `LlevaElAura` (v6.115: el vínculo ve la Forma Eterna con la misma fuerza que el ítem original).
+- **LA QUEMADURA** (`QuemaduraVacioExterior`, debuff): los impíos que entran arden **×1→×3 por cercanía**, caminan a **×0,55** — hasta los **fantasmas**; al salir siguen ardiendo **1% de vida máx. por medio segundo durante 5 s** (y en PvP el jugador enemigo también arde — v6.141).
+- **LOS BUFFS**: mientras un enemigo arde, el portador cobra **VACÍO EXTERIOR** (+10% ataque, +10 defensa, −15% coste de maná — `VacioExterior.cs:44-46`); **siempre**, el buff **AURA DEL VACÍO** (`AuraVacioBuff`, presa o no) y los **stats del panteón** del hueco funcional (+40 maná · +8% mágico · +4% crít. · +2 regen · +8% melée · +3% crít. · +3 def).
+
+## EL TEXTO CURADO (lo que realmente faltaba)
+
+El tooltip de la v6.142 decía «el poder de la forma ya no está aquí» — **falso**: el aura ES un efecto activo del accesorio. Reescrito ×3 idiomas: LO QUE ES (doce partes construidas en el despertar 101-112; la 12ª estalló LA MANIFESTACIÓN y la forma se CONVIRTIÓ en ESTE accesorio) + QUÉ SIGNIFICA USARLO (llevarla puesta enciende EL AURA DEL VACÍO: campo, quemadura, fuego de salida, Vacío Exterior, buff del aura y stats) — lector extendido a Linea13. Cazados los textos viejos: el bloque `FormaEterna` cantaba el SHIFT muerto de la v6.141 (→ LA MESA DEL ALTAR) y `CaminoManifestacion` decía «ítem cosmético» (→ EL ACCESORIO).
 
 ## PARA VERIFICAR EN JUEGO
 
-- Despertar 100 pagado + 10P + 1000 esencias en el banco: la mesa del altar sube al 101 — LA ESCRITURA se construye y viste al portador CON el libro en la mano.
-- Peldaño a peldaño hasta el 112: la 12ª parte — el estallido de LA MANIFESTACIÓN, el ítem LA FORMA ETERNA en el inventario… y los visuales del portador DESAPARECEN (la forma se convirtió).
-- 113-120: cada peldaño +10% de ataque a TODO (el Equinoccio Y los ojos pegan más).
-- Una hora sin comer: el ojo del libro enrojece y se inquieta progresivamente — al 90% (54 min) la oleada PUEDE estallar; a la hora, SEGURA.
-- El tooltip del cosmético: LO QUE ES + QUÉ SIGNIFICA USARLO.
+- Despertar 112: la 12ª parte — el accesorio LA FORMA ETERNA nace (los visuales del portador desaparecen: la forma se convirtió).
+- Puesta en el hueco de accesorio: el buff AURA DEL VACÍO aparece (siempre); un enemigo entra al campo — arde (la quemadura ×1→×3, lento) y TÚ cobras VACÍO EXTERIOR (+10% ataque, +10 defensa, −15% maná) mientras arda.
+- El tooltip del ítem: LO QUE ES + QUÉ SIGNIFICA USARLO con el aura entera cantada.
 
 ## DOC-ROT CONOCIDA
 CARACTERISTICAS.md / DISEÑO_DEL_MOD.md desactualizados — MAESTRO.md manda.
