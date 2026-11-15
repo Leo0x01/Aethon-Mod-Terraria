@@ -34,7 +34,7 @@ puedas averiguar tú mismo del repo.
      arquitectura, entorno, gates, técnicas, las 78 librerías VFX, recursos,
      herramientas y cronología. **Si algo contradice a otro doc, manda MAESTRO.**
    - `STABLE-SNAPSHOT.md` — el estado exacto de la última versión publicada
-     (ahora v6.137) y los pendientes.
+     (ahora v6.138) y los pendientes.
    - Las 3 primeras entradas de `CHANGES.md` — las últimas letras del usuario
      (cada versión nace de SU petición textual).
    - Antes de tocar CUALQUIER efecto: `EFECTOS-Y-LIBRERIAS.md`.
@@ -68,11 +68,11 @@ puedas averiguar tú mismo del repo.
 - **Entregables**: SIEMPRE a `/home/z/my-project/download/` (el .tmod, sims,
   informes). El usuario solo ve esa carpeta.
 
-## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.137)
+## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.138)
 
-- **Versión**: 6.137 (`AethonMod/build.txt`) — publicada como
-  [release 445870013](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.137),
-  md5 `96d9c3029ea013bac2639545257dbfad`, 523 entradas en el .tmod.
+- **Versión**: 6.138 (`AethonMod/build.txt`) — publicada como
+  [release 445918299](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.138),
+  md5 `c21002edea9cfe45e4235282a37e86a4`, 523 entradas en el .tmod.
 - **Última versión (v6.137) — EL PILAR DEL CUERPO DEL DIOS**: las DOS
   VALQUIRIAS (estilos 12 sin plumas · 13 lisa) · LOS COLMILLOS de la forja
   en las cinco dagas del Cetro · EL MUÑECO (receta 5+5 · el círculo plano
