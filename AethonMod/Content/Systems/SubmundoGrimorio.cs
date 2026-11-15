@@ -264,6 +264,22 @@ namespace AethonMod.Content.Systems
             // NINGÚN WorldFile.SaveWorld corre (ni autosave, ni salir al
             // menú, ni nada) — el archivo del mundo real queda INTACTO.
             Terraria.IO.On_WorldFile.SaveWorld_bool_bool += BloquearGuardado;
+            // v6.138 — EL CERROJO DEL MAPA (LA AUTOPSIA DEL CRASH DEL
+            // client.log v6.137): el AUTOSAVE DEL JUGADOR (cada 10 min,
+            // DoUpdate_AutoSave → Player.SavePlayer → InternalSaveMap →
+            // Main.Map.Save() → MapHelper.InternalSaveMap) NO pasa por
+            // SaveWorld — el cerrojo de la v6.114 NO lo veía. Dentro del
+            // interior Main.Map es el mapa CHICO (800×600) pero
+            // Main.worldID SIGUE SIENDO EL DEL MUNDO REAL (clearWorld no
+            // lo toca — solo GenerateWorld lo re-randomiza) → el autosave
+            // ESCRIBÍA el mapa del interior SOBRE el .map del mundo real
+            // (mismo worldID, mismo nombre de archivo) → al cargar el
+            // mundo real, LoadMapVersion2 desbordaba (SetTile línea 38)
+            // → DrawToMap_Section → Main engine crash. EL CERROJO: mientras
+            // el interior vive, NINGÚN guardado de mapa corre — el .map
+            // del mundo real queda INTACTO (el interior no se cartografía:
+            // su mapa vive solo en la memoria de la visita).
+            Terraria.Map.On_MapHelper.SaveMap += BloquearGuardadoMapa;
             // v6.117 — EL FARO DE LA DEVORACIÓN VIVE EN OnPostDraw: es el
             // ÚNICO punto del frame que pinta TAMBIÉN en el menú (el IL
             // de Main.Draw_Inner: DoDraw completa TODO — mundo, interfaz
@@ -278,6 +294,7 @@ namespace AethonMod.Content.Systems
         public override void Unload()
         {
             Terraria.IO.On_WorldFile.SaveWorld_bool_bool -= BloquearGuardado;
+            Terraria.Map.On_MapHelper.SaveMap -= BloquearGuardadoMapa;
             Main.OnPostDraw -= PintarFaroDevoracion;
             Activo = false;
             Transicion = false;
@@ -303,6 +320,17 @@ namespace AethonMod.Content.Systems
             // libro siempre está igual que la última vez que soñaste.
             if (Activo) return;
             orig(useCloud, resetTime);
+        }
+
+        /// <summary>v6.138 — EL CERROJO DEL MAPA (la autopsia completa en
+        /// el comentario de la instalación): Main.Map.Save() JAMÁS corre
+        /// mientras el interior vive — ni el autosave del jugador, ni
+        /// salir al menú, ni nada. El .map del mundo real queda
+        /// INTACTO.</summary>
+        private static void BloquearGuardadoMapa(Terraria.Map.On_MapHelper.orig_SaveMap orig)
+        {
+            if (Activo) return;   // el interior no se cartografía
+            orig();
         }
 
         // ==================================================================
@@ -724,6 +752,19 @@ namespace AethonMod.Content.Systems
             if (Main.gameMenu || Main.netMode == 2 || !Main.mapEnabled) return;
             try
             {
+                // (0) v6.138 — LA COMPARACIÓN DIRECTA (la lección del
+                //     crash del menú: más limpia que la sonda — los
+                //     campos públicos MaxWidth/MaxHeight del decompile):
+                //     si el mapa no calza con el mundo, RENACE aquí
+                //     mismo.
+                if (Main.Map != null &&
+                    (Main.Map.MaxWidth != Main.maxTilesX ||
+                     Main.Map.MaxHeight != Main.maxTilesY))
+                {
+                    Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY);
+                    ReiniciarMiniMapa();
+                    return;
+                }
                 // (1) LA SONDA DE LA ESQUINA: el indexador crudo, el
                 //     mismo que crashea en DrawToMap_Section — si el
                 //     mapa cubre el mundo, aquí no pasa nada (una
@@ -1211,6 +1252,60 @@ namespace AethonMod.Content.Systems
                 m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.ColorShift);
                 m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.EmitLight);
                 global::AethonMod.Content.Particles.ParticleManager.Spawn(m);
+            }
+            catch { }
+        }
+
+        public override void OnWorldLoad()
+        {
+            // ==============================================================
+            //  v6.138 — EL MAPA QUE RENACE (la autopsia COMPLETA del crash
+            //  del client.log v6.137, contra el decompile REAL):
+            //
+            //  EL CRIMEN: Main.Map SOLO nace en el CONSTRUCTOR de Main (al
+            //  arrancar el exe). El interior lo REEMPLAZA por el suyo
+            //  (800×600, CallbackEntrar)… y ese objeto SOBREVIVE al menú,
+            //  al reload de mods y a TODO (es un static de vanilla: nadie
+            //  lo recrea). Al cargar el mundo real (4200×1200) desde el
+            //  menú: OnWorldLoad corre DENTRO de LoadWorld_Version2
+            //  (línea 711 del WorldFile decompilado) → DESPUÉS
+            //  Main.Map.Load() deserializa el .map legítimo sobre el
+            //  mapa CHICO → SetTile fuera de rango (la excepción
+            //  silenciosa del hilo) → el mapa queda chico y limpio → el
+            //  primer frame corre DrawToMap_Section con las secciones del
+            //  mundo GRANDE → IndexOutOfRangeException → Main engine
+            //  crash. (La sonda v6.121 en PreUpdateWorld llegaba TARDE:
+            //  el frame ya había reventado; y su guarda de gameMenu la
+            //  apagaba durante la carga — la carga corre con gameMenu en
+            //  true.)
+            //
+            //  LA CURA: AQUÍ (antes de que WorldMap.Load() deserialice)
+            //  se comparan LAS DIMENSIONES del mapa vivo contra las del
+            //  mundo recién leído — si no calzan, el mapa RENACE con las
+            //  dimensiones correctas (los campos públicos MaxWidth/
+            //  MaxHeight del WorldMap decompilado: comparación directa,
+            //  sin excepciones, sin guardas). El jugador pierde la
+            //  exploración del minimapa — que se rehace caminando —,
+            //  NUNCA la partida.
+            // ==============================================================
+            try
+            {
+                if (Activo) return;   // el interior nace con SU mapa limpio
+                if (Main.netMode == 2 || Main.dedServ) return;   // sin minimapa
+                if (Main.Map == null) return;
+                if (Main.Map.MaxWidth != Main.maxTilesX ||
+                    Main.Map.MaxHeight != Main.maxTilesY)
+                {
+                    Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY);
+                    ReiniciarMiniMapa();
+                    try
+                    {
+                        Mod.Logger.Info("[SubmundoGrimorio/OnWorldLoad] el mapa " +
+                            "sobreviviente no calzaba con el mundo — renació " +
+                            $"{Main.maxTilesX}×{Main.maxTilesY} (la cura del crash v6.138)");
+                    }
+                    catch { }
+                }
             }
             catch { }
         }
