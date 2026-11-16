@@ -540,47 +540,33 @@ namespace AethonMod.Content.Effects
         //  flujo) con perfil fusiforme (raíz → vientre → cabeza)
         // ==================================================================
         private static void DibujarTira(SpriteBatch sb, Vector2[] espina, float grosorRaiz,
-            float grosorCentro, Color tinte, float alfa, float flujo, float grosorCentroAlt = -1f)
+            float grosorPunta, Color tinte, float alfa = 1f, float flujo = 0f,
+            float grosorCentroAlt = -1f)
         {
-            if (espina == null || espina.Length < 3 || alfa <= 0.01f) return;
-            int n = espina.Length;
-            for (int i = 0; i < n - 1; i++)
+            // v6.144 — EL VESTIDO DE LA SOMBRA DE LA PÁGINA (la letra:
+            // «el mundo interior tiene como tentaculos de fondo, debes
+            // cambiarlos y usar los tentaculos de la sombra de la
+            // pagina»): la tira ya NO viste la PielDelEterno — ahora es
+            // LA MASA LISA de la casa (SombrasLib.MasaLisa), el mismo
+            // cuerpo de la Sombra de la Página: silueta fusiforme lisa
+            // sin textura, con el tinte de cada capa. EL FLUJO de las
+            // bandas viaja en el tiempo de la masa (la piel lisa es
+            // periódica: avanza) y EL VIENTRE en grosorCentro.
+            try
             {
-                float u = i / (float)(n - 1);
-                float u1 = (i + 1) / (float)(n - 1);
-                Vector2 a = espina[i];
-                Vector2 b = espina[i + 1];
-                Vector2 mid = (a + b) * 0.5f;
-                float len = Vector2.Distance(a, b) + 2.5f;      // el solape mata las juntas
-                if (len < 2f) continue;
-                float rot = (b - a).ToRotation() + MathHelper.PiOver2;
-
-                // EL PERFIL FUSIFORME (fina → gorda → fina, como Masa)
-                float wU = PerfilFusiforme(u);
-                float wU1 = PerfilFusiforme(u1);
-                float grosor = MathHelper.Lerp(grosorRaiz, grosorCentro, wU);
-                float grosor1 = MathHelper.Lerp(grosorRaiz, grosorCentro, wU1);
-                if (grosorCentroAlt > 0f)
-                {
-                    // el grosor del CENTRO declarado aparte (el vientre del titán)
-                    grosor = MathHelper.Lerp(grosor, grosorCentroAlt, PerfilFusiforme(u) * 0.6f);
-                    grosor1 = MathHelper.Lerp(grosor1, grosorCentroAlt, PerfilFusiforme(u1) * 0.6f);
-                }
-
-                // LAS BANDAS DE V (la carne fluye raíz→cabeza)
-                float v0 = Frac01(u * 2.6f + flujo);
-                float v1 = Frac01(u1 * 2.6f + flujo);
-                if (v1 <= v0) v1 = v0 + 0.02f;                  // nunca hacia atrás
-                int y0 = (int)(v0 * 510f);
-                int alto = Math.Max(3, (int)((v1 - v0) * 510f));
-                if (y0 + alto > 512) { y0 = 512 - alto; }
-                var src = new Rectangle(0, y0, 128, alto);
-
-                sb.Draw(_piel, mid, src, tinte * alfa, rot,
-                    new Vector2(64f, alto * 0.5f),
-                    new Vector2(grosor / 128f, len / alto),
-                    SpriteEffects.None, 0f);
+                VFXCore.AbrirAdditive();
+                // MasaLisa cobra un ALFA plano (0-1): el tinte se lo
+                // damos a través del brillo de la masa (la piel lisa de
+                // la sombra ya trae SU violeta de la casa — el tinte
+                // antiguo modula cuánto brilla: alfa·el peso del tinte)
+                float brillo = alfa * (0.30f + 0.70f *
+                    (tinte.R + tinte.G + tinte.B) / (3f * 255f));
+                SombrasLib.MasaLisa(espina, grosorRaiz, grosorPunta, brillo,
+                    espina.Length * 7 + (int)espina[0].X,
+                    Main.GlobalTimeWrappedHourly * 0.6f + flujo, grosorCentroAlt);
             }
+            catch { }
+            finally { VFXCore.CerrarLoteSiAbierto(); }
         }
 
         /// <summary>El perfil fusiforme suave (0 en los extremos, 1 al centro).</summary>

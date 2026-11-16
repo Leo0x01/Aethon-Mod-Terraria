@@ -141,7 +141,12 @@ namespace AethonMod.Content.UI
                 // EL DESPERTAR ACTUAL (dorado) — o el aviso sin libro.
                 if (alma != null)
                 {
-                    string nivelTxt = Language.GetTextValue(Clave("CieloDespertarActual"), despertar);
+                    // v6.144 — LA BARRA DINÁMICA (la letra: «deberia
+                    // llegar a 120 y actualizarse siempre en caso de que
+                    // el nivel maximo de despertar sea aumentado en un
+                    // futuro»): {1} = NivelMax — nunca más un 100 duro.
+                    string nivelTxt = Language.GetTextValue(Clave("CieloDespertarActual"),
+                        despertar, Content.Systems.DespertarGrimorio.NivelMax);
                     Utils.DrawBorderString(sb, nivelTxt, new Vector2(x + w - 70f, y + 22f),
                         TintaDorado, 0.95f, 1f, 0.4f);
                 }

@@ -551,12 +551,13 @@ namespace AethonMod.Content.Systems
             if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
                 .BancoMonedasDisponibles(alma) <
                 DespertarGrimorio.MonedasPara(siguiente)) return false;
-            // v6.142 — ARRIBA DEL 100 NO HAY DEVORAR (la letra: la Forma
-            // se paga «con 10 de platino por cada nivel extra mas 1000 de
-            // esencia del eterno» — NADA de armas ni materiales): solo
-            // las esencias + las monedas de arriba.
-            if (siguiente > DespertarGrimorio.NivelCaza) return true;
-            // v6.93 — DEVORAR: AL MENOS 2 DE LAS OPCIONES.
+            // v6.144 — EL DEVORAR VIVE ARRIBA DEL CIEN (la letra:
+            // «despues del nivel 100 dice que devore armas o materiales
+            // para despertar, pero no hay nada para devorar, asi que pon
+            // materiales o armas para devorar como requisito y ademas
+            // agrega jefes tambien»): esencias + monedas COMO SIEMPRE —
+            // y ADEMÁS las 2 opciones de Devorar de la Forma (armas de la
+            // casa + materiales del finalgame).
             return ContarOpcionesPagadas(alma, siguiente) >= 2;
         }
 
@@ -981,9 +982,9 @@ namespace AethonMod.Content.Systems
                 {
                     global::AethonMod.Content.Globals.AlmaEternoGlobalItem.BancoCobrarMonedas(
                         grimorio, DespertarGrimorio.MonedasPara(nivel));
-                    // v6.142 — arriba del 100 NO se cobra Devorar (no se
-                    // pidió): solo el dinero y las esencias.
-                    int porCobrar = nivel > DespertarGrimorio.NivelCaza ? 0 : 2;
+                    // v6.144 — el Devorar de la Forma TAMBIÉN se cobra
+                    // (las 2 primeras pagas, la regla de siempre).
+                    int porCobrar = 2;
                     int[] armasCobro = DespertarGrimorio.ArmasDe(nivel);
                     if (armasCobro != null)
                     {
@@ -1089,6 +1090,14 @@ namespace AethonMod.Content.Systems
                 //  grimorio desaparece ya que es convertida en el item
                 //  cosmetico»).
                 // ============================================================
+                // v6.144 — LA ESCALERA NUEVA DE LAS PARTES (la letra:
+                // «que el hito del nivel de despertar 120 sean las Alas
+                // Runicas y el Aura del Vacio… donde todos los requisitos
+                // se unen creando asi La Forma Eterna»): las partes 1-11
+                // se construyen en los peldaños 101-111 (una por nivel) y
+                // LA PARTES 12ª — LAS ALAS RÚNICAS + EL AURA — SOLO al
+                // llegar al 120, con LA MANIFESTACIÓN (la explosión de
+                // luz MÁS GRANDE — la del 112 queda ANULADA).
                 if (nivel >= DespertarGrimorio.NivelFormaInicio &&
                     nivel <= DespertarGrimorio.NivelManifestacion && p != null && p.active)
                 {
@@ -1096,7 +1105,17 @@ namespace AethonMod.Content.Systems
                     {
                         var fe = p.GetModPlayer
                             <global::AethonMod.Content.Players.FormaEternaPlayer>();
-                        fe?.ConstruirParte(nivel - DespertarGrimorio.NivelCaza);
+                        if (nivel < DespertarGrimorio.NivelManifestacion)
+                        {
+                            // peldaños 101-111 → partes 1-11
+                            fe?.ConstruirParte(nivel - DespertarGrimorio.NivelCaza);
+                        }
+                        else
+                        {
+                            // EL 120: la 12ª parte + LA CONVERSIÓN (el ítem
+                            // nace de la explosión — nada se construye dos veces)
+                            fe?.ConstruirParte(12);
+                        }
                     }
                     catch { }
                 }
@@ -1179,21 +1198,43 @@ namespace AethonMod.Content.Systems
                     n.netUpdate = true;
                 }
 
-                // EL VELO DE LUZ (la onda del nacimiento — el destello
-                // de la revelación de la casa, sobre TODO el mundo por
-                // una vez)
+                // EL VELO DE LUZ DEL 120 (la letra: «al llegar a nivel
+                // 120 de despertar es cuando ocurre la explosion de luz
+                // y debe ser aun mas grande que la anterior»): 220 polvos
+                // dorados (la del 112 eran 90), la ONDA DE CHOQUE doble
+                // — la coronación violeta alrededor del velo dorado — y
+                // el ESTALLIDO RADIANTE de escala dios (1.85) sobre el
+                // portador, el mismo nacimiento del jefe de la casa.
                 if (!Main.dedServ)
                 {
-                    for (int k = 0; k < 90; k++)
+                    for (int k = 0; k < 220; k++)
                     {
-                        float ang = k / 90f * MathF.PI * 2f;
+                        float ang = k / 220f * MathF.PI * 2f;
+                        bool corona = k % 3 == 0;    // la coronación violeta
                         Dust d = Dust.NewDustPerfect(p.Center,
-                            DustID.Enchanted_Gold,
+                            corona ? DustID.PurpleTorch : DustID.Enchanted_Gold,
                             new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
-                                Main.rand.NextFloat(6f, 16f),
-                            200, new Color(255, 236, 190), Main.rand.NextFloat(0.8f, 1.4f));
+                                Main.rand.NextFloat(8f, 22f),
+                            200,
+                            corona ? new Color(185, 110, 250) : new Color(255, 236, 190),
+                            Main.rand.NextFloat(1.0f, 1.8f));
                         d.noGravity = true;
                     }
+                    // LA ONDA DE CHOQUE (el triple latido de la casa —
+                    // el mismo Kick de la muerte del dios, TRIPLEDADO)
+                    global::AethonMod.Content.VFX.OndaLib.Kick(20f, 40);
+                    global::AethonMod.Content.VFX.OndaLib.Kick(12f, 26);
+                    // EL ESTALLIDO RADIANTE de escala dios sobre el portador
+                    var estallido = Projectile.NewProjectileDirect(
+                        p.GetSource_FromThis(), p.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Jefes.AtaqueJefeProjectile>(),
+                        0, 0f, p.whoAmI);
+                    estallido.ai[0] = global::AethonMod.Content.Projectiles.Jefes
+                        .AtaqueJefeProjectile.EstiloEstallidoRadiante;
+                    estallido.ai[1] = 4;              // LA FASE DIOS (escala 1.85)
+                    estallido.netUpdate = true;
+
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Despertar.ManifestacionTexto"),
                         new Color(255, 236, 190));

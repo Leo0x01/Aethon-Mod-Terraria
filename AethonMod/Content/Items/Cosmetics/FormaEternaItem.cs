@@ -99,6 +99,26 @@ namespace AethonMod.Content.Items.Cosmetics
             player.statDefense += 3;
 
             // ==========================================================
+            //  v6.144 — LAS ALAS RÚNICAS DE LA FORMA FINAL (la letra:
+            //  «donde todos los requisitos se unen creando asi La Forma
+            //  Eterna que contara tambien con las Alas Runicas, por lo
+            //  tanto da inmunidad a las caidas y vuelo infinito, ademas
+            //  del resto de buff»): la 12ª parte del hito 120 SON las
+            //  alas — el accesorio completo da la INMUNIDAD A LAS CAÍDAS
+            //  y el VUELO INFINITO (el patrón del VueloDivino de las
+            //  formas: física Mothron con wingTime SIEMPRE lleno — y si
+            //  el portador ya lleva alas, estas solo le PROHÍBEN caer).
+            // ==========================================================
+            player.noFallDmg = true;
+            if (player.wingsLogic == 0)
+            {
+                player.wingsLogic = 27;              // la física Mothron de las alas
+                player.empressBrooch = true;         // el arranque vertical
+            }
+            player.wingTimeMax = System.Math.Max(player.wingTimeMax, 240);
+            player.wingTime = player.wingTimeMax;    // el vuelo INFINITO
+
+            // ==========================================================
             //  EL AURA DEL VACÍO (la octava gracia): el campo invisible
             //  que viste a los impíos — el ancla nace igual que en el
             //  ítem original (AuraJuicio2Ancla, el efecto del viejo

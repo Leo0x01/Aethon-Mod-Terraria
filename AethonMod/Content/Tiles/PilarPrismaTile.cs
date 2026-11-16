@@ -140,6 +140,20 @@ namespace AethonMod.Content.Tiles
         {
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active) return false;
 
+            // v6.144 — AETHON (SELLADO) POR EL PILAR (la letra: «Crea un
+            // nuevo jefe que sea Aethon (Sellado) solo aparece en el
+            // mundo interior a travez del pilar»): SHIFT + clic derecho
+            // sobre el pilar LO DESPIERTA — el grimorio gigante con sus
+            // tres ojos sellados. Sin SHIFT: la ventana de siempre.
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
+                Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
+            {
+                if (NPCs.AethonSellado.Invocar(Main.LocalPlayer))
+                    Main.NewText("[c/B96EEA:AETHON (SELLADO) DESPIERTA — el grimorio se alza entero]",
+                        new Color(185, 110, 250));
+                return true;
+            }
+
             // LA VENTANA CON LOS BOTONES (el gesto del prisma — «tipo
             // prisma altar»): VOLVER AL MUNDO REAL o INVOCAR A AETHON.
             UI.PrismaInteriorUI.Alternar(i, j);

@@ -55,8 +55,8 @@ Items: {
 		DisplayName: Grimorio del Eterno
 		Tooltip:
 			'''
-			        Un libro viejo que devora lo que su portador mata.
-			        Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
+			   Un libro viejo que devora lo que su portador mata.
+			   Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
 			'''
 	}
 
@@ -251,15 +251,8 @@ Items: {
 	}
 
 	AethonMenorItem: {
-		DisplayName: El Aethon Menor
-		Tooltip:
-			'''
-			Una chispa viva del propio grimorio.
-			Invoca al AETHON MENOR — la mascota de luz: una página
-			del libro hecha criatura, flotando a tu hombro, coronada
-			de perlas y alumbrando con el arcoíris del tomo.
-			Se EQUIPA en la ranura de mascota de LUZ del equipo.
-			'''
+		DisplayName: Pequeño Recuerdo de Aethon
+		Tooltip: Un pequeño recuerdo de algo más grande.
 	}
 
 	BolsaDeLaCria: {
@@ -287,17 +280,7 @@ Items: {
 
 	GrimorioMenorItem: {
 		DisplayName: Grimorio Menor
-		Tooltip:
-			'''
-			El Grimorio del Eterno… EN MINIATURA (la OTRA mascota:
-			la miniatura del LIBRO, no del jefe de luz).
-			Flota a tu hombro con su ojo despierto; si te quedas
-			quieto, se aburre y vuela a MOLESTAR a los vecinos con
-			sus 3 mini minions y su sombrilla de página (1 de daño,
-			tope 10 golpes… y luego se aburre).
-			Se EQUIPA en la ranura de mascota del equipo (y su
-			ojo vive hasta en el icono).
-			'''
+		Tooltip: Un pequeño grimorio travieso y curioso vuela a tu hombro
 	}
 
 	TintaDelCometa: {
@@ -534,52 +517,52 @@ Items: {
 
 	TestMagicRing: {
 		DisplayName: Anillo Mágico de Prueba
-		Tooltip: ""
+		Tooltip: Anillo de pruebas de la casa
 	}
 
 	TestSparkle: {
 		DisplayName: Destello de Prueba
-		Tooltip: ""
+		Tooltip: Chispa de pruebas de la casa
 	}
 
 	ProjBeam: {
 		DisplayName: Rayo de Prueba
-		Tooltip: ""
+		Tooltip: Arma de pruebas de la casa
 	}
 
 	TestMagicRingV2: {
 		DisplayName: Anillo Mágico de Prueba V2
-		Tooltip: ""
+		Tooltip: Anillo de pruebas II de la casa
 	}
 
 	SeerOrb: {
 		DisplayName: Orbe del Vidente
-		Tooltip: ""
+		Tooltip: El orbe del vidente: mira donde tú no puedes
 	}
 
 	SunStaff: {
 		DisplayName: Sol
-		Tooltip: ""
+		Tooltip: La vara del sol de la casa
 	}
 
 	SupernovaStaff: {
 		DisplayName: Supernova
-		Tooltip: ""
+		Tooltip: La supernova en tu mano
 	}
 
 	PlasmaStormStaff: {
 		DisplayName: Tormenta de Plasma
-		Tooltip: ""
+		Tooltip: La tormenta de plasma del Eterno
 	}
 
 	PhoenixNovaStaff: {
 		DisplayName: Nova del Fénix
-		Tooltip: ""
+		Tooltip: La nova del fénix renace en llamas
 	}
 
 	QuantumSplitStaff: {
 		DisplayName: División Cuántica
-		Tooltip: ""
+		Tooltip: La vara que parte el haz en mundos paralelos
 	}
 
 	CosmicBlackHoleStaff: {
@@ -590,17 +573,17 @@ Items: {
 
 	UmbralBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Umbral
-		Tooltip: ""
+		Tooltip: El umbral entre mundos en una vara
 	}
 
 	BrumaBlackHoleStaff: {
 		DisplayName: Bastón del Agujero de la Bruma
-		Tooltip: ""
+		Tooltip: Una gota de bruma que se traga la luz
 	}
 
 	OlvidoBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Olvido
-		Tooltip: ""
+		Tooltip: Un agujero de olvido: lo que entra no recuerda salir
 	}
 
 	SupremoBlackHoleStaff: {
@@ -641,22 +624,22 @@ Items: {
 
 	UmbralAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Umbral Ascendido
-		Tooltip: ""
+		Tooltip: La vara del umbral, ascendida
 	}
 
 	BrumaAscendidoBlackHoleStaff: {
 		DisplayName: Bastón de la Bruma Ascendida
-		Tooltip: ""
+		Tooltip: La vara del agujero negro de bruma, en su forma ascendida
 	}
 
 	CosmicAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Cósmico Ascendido
-		Tooltip: ""
+		Tooltip: La vara cósmica del agujero negro, ascendida
 	}
 
 	OlvidoAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Olvido Ascendido
-		Tooltip: ""
+		Tooltip: La vara del olvido, ascendida
 	}
 
 	VoidCrownItem: {
@@ -913,12 +896,12 @@ Items: {
 
 	TormentaNebularStaff: {
 		DisplayName: Cetro de la Tormenta Nebular
-		Tooltip: ""
+		Tooltip: La tormenta nebulosa arrasa el cielo
 	}
 
 	LanzaAlbaStaff: {
 		DisplayName: Lanza del Alba Rúnica
-		Tooltip: ""
+		Tooltip: La lanza del alba amanece sobre los impíos
 	}
 
 	StormRuneStaff: {
@@ -1969,7 +1952,7 @@ Items: {
 	// the bookmark) + THE BAG that delivers them.
 	DignosEquinoccioBinario: {
 		DisplayName: El Equinoccio Binario
-		Tooltip: ""
+		Tooltip: El arma de los Dignos: luz y sombra en equilibrio
 	}
 
 	BolsaProyectilesDignos: {
@@ -2091,27 +2074,27 @@ Items: {
 	// pixel engine and the multilayer wiring).
 	SelloDeTinta: {
 		DisplayName: El Sello del Escriba
-		Tooltip: ""
+		Tooltip: El sello de tinta del grimorio
 	}
 
 	ParpadeoDelEterno: {
 		DisplayName: El Parpadeo del Eterno
-		Tooltip: ""
+		Tooltip: El parpadeo del Eterno: allí donde cierres los ojos
 	}
 
 	CoronaDePlumas: {
 		DisplayName: La Corona de Plumas
-		Tooltip: ""
+		Tooltip: La corona de plumas del Eterno ronda a los impíos
 	}
 
 	DerrameDeTinta: {
 		DisplayName: El Derrame de Tinta
-		Tooltip: ""
+		Tooltip: El derrame de tinta del grimorio cubre el suelo
 	}
 
 	LaUltimaPalabra: {
 		DisplayName: La Última Palabra
-		Tooltip: ""
+		Tooltip: La última palabra del Eterno: el silencio final
 	}
 
 	SombraDeLaPagina4: {
@@ -2333,19 +2316,19 @@ Items: {
 		DisplayName: LA FORMA ETERNA
 		Tooltip: ✦ EL ACCESORIO DEL VACÍO — doce partes construidas en el despertar, hechas un solo cuerpo
 		Titulo: "[c/B96EEA:═══ LA FORMA ETERNA ═══]"
-		Linea1: "[c/D9B3FF:LO QUE ES: el cuerpo completo del Eterno, hecho accesorio. Doce partes]"
-		Linea2: "[c/D9B3FF:construidas en el despertar (101-112) — cada una creció PUESTA en el portador"
-		Linea3: "[c/D9B3FF:mientras usaba el libro; al llegar la 12ª, LA MANIFESTACIÓN estalló y la forma"
-		Linea4: "[c/D9B3FF:se CONVIRTIÓ en ESTE accesorio: la gloria, ahora portable.]"
-		Linea5: "[c/9FA8DA:QUÉ SIGNIFICA USARLO: llevarla puesta enciende EL AURA DEL VACÍO — el campo"
-		Linea6: "[c/9FA8DA:de 19 tiles que arde a tu alrededor. Los impíos que entran sufren LA QUEMADURA"
-		Linea7: "[c/9FA8DA:DEL VACÍO (cuanto más cerca, más arden ×1→×3 y más lento caminan ×0,55 — hasta"
-		Linea8: "[c/9FA8DA:los fantasmas); al salir siguen ardiendo: 1% de vida máx. por medio segundo"
-		Linea9: "[c/9FA8DA:durante 5 s. MIENTRAS ARDEN, TÚ cobras VACÍO EXTERIOR: +10% ataque, +10 defensa,"
-		Linea10: "[c/9FA8DA:−15% coste de maná. Y SIEMPRE: el buff AURA DEL VACÍO + los stats del panteón"
-		Linea11: "[c/9FA8DA:(+40 maná · +8% daño mágico · +4% crít. mágico · +2 regen · +8% melée · +3% crít. · +3 def).]"
-		Linea12: "[c/78788C:«La forma que no se apaga — el recuerdo de la vez que un mortal se vistió de Eterno"
-		Linea13: "[c/78788C:… y sobrevivió para contarlo.»]"
+		Linea1: Doce partes construidas en el despertar, hechas un solo cuerpo.
+		Linea2: «La forma que no se apaga — el recuerdo de la vez que un mortal
+		Linea3: se vistió de Eterno… y sobrevivió para contarlo.»
+		Linea4: Pieza de Lore.
+		Linea5: Pieza de Lore.
+		Linea6: Pieza de Lore.
+		Linea7: Pieza de Lore.
+		Linea8: Pieza de Lore.
+		Linea9: Pieza de Lore.
+		Linea10: Pieza de Lore.
+		Linea11: Pieza de Lore.
+		Linea12: Pieza de Lore.
+		Linea13: Pieza de Lore.
 	}
 
 	DagaEternaBuff: {
@@ -2354,8 +2337,8 @@ Items: {
 	}
 
 	AethonMenorBuff: {
-		DisplayName: Aethon Menor
-		Description: Una chispa viva del propio grimorio alumbra tu camino con el arcoíris
+		DisplayName: Pequeño Recuerdo de Aethon
+		Description: Un pequeño recuerdo de algo más grande alumbra tu camino
 	}
 
 	VastagoDelEternoBuff: {
@@ -2365,7 +2348,7 @@ Items: {
 
 	GrimorioMenorBuff: {
 		DisplayName: Grimorio Menor
-		Description: La miniatura del grimorio flota a tu hombro — se aburre, viaja al pueblo y molesta a los vecinos
+		Description: Un pequeño grimorio travieso y curioso
 	}
 
 	NebulaJellyfishBuff: {
@@ -2448,78 +2431,8 @@ Items: {
 	}
 
 	LaMarcaSilenciosa: {
-		// DisplayName: La Marca Silenciosa
-		// Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
-	}
-
-	AlasDragonDelVacio: {
-		// DisplayName: Alas Dragon Del Vacio
-		// Tooltip: ""
-	}
-
-	AlasFenixDelRenacer: {
-		// DisplayName: Alas Fenix Del Renacer
-		// Tooltip: ""
-	}
-
-	AlasQuetzalEmplumado: {
-		// DisplayName: Alas Quetzal Emplumado
-		// Tooltip: ""
-	}
-
-	AlasRunicas: {
-		// DisplayName: Alas Runicas
-		// Tooltip: ""
-	}
-
-	AlasRunicasDelEclipse: {
-		// DisplayName: Alas Runicas Del Eclipse
-		// Tooltip: ""
-	}
-
-	AlasRunicasDelJuicio: {
-		// DisplayName: Alas Runicas Del Juicio
-		// Tooltip: ""
-	}
-
-	AlasRunicasDelVacio: {
-		// DisplayName: Alas Runicas Del Vacio
-		// Tooltip: ""
-	}
-
-	AlasRunicasSolares: {
-		// DisplayName: Alas Runicas Solares
-		// Tooltip: ""
-	}
-
-	AlasSerafinDelVacio: {
-		// DisplayName: Alas Serafin Del Vacio
-		// Tooltip: ""
-	}
-
-	AlasTenguDelCrepusculo: {
-		// DisplayName: Alas Tengu Del Crepusculo
-		// Tooltip: ""
-	}
-
-	AlasValquiriaLisa: {
-		// DisplayName: Alas Valquiria Lisa
-		// Tooltip: ""
-	}
-
-	AlasValquiriaRunica: {
-		// DisplayName: Alas Valquiria Runica
-		// Tooltip: ""
-	}
-
-	AlasValquiriaSinPlumas: {
-		// DisplayName: Alas Valquiria Sin Plumas
-		// Tooltip: ""
-	}
-
-	CorolasDelAlba: {
-		// DisplayName: Corolas Del Alba
-		// Tooltip: ""
+		DisplayName: La Marca Silenciosa
+		Description: El ojo que mira te ha marcado: la quemadura del vacío vendrá
 	}
 
 	BolsaFormaEterna: {
@@ -2533,17 +2446,17 @@ Items: {
 	}
 
 	CodiceHabilidades: {
-		// DisplayName: Codice Habilidades
+		DisplayName: Códice de Habilidades
 		// Tooltip: ""
 	}
 
 	MundoInteriorEternoItem: {
-		// DisplayName: Mundo Interior Eterno Item
+		DisplayName: Puerta del Mundo Interior
 		// Tooltip: ""
 	}
 
 	ElOjoQueMira: {
-		// DisplayName: El Ojo Que Mira
+		DisplayName: El Ojo que Mira
 		// Tooltip: ""
 	}
 
@@ -2555,6 +2468,85 @@ Items: {
 	PlumaDelEscribaSanto: {
 		// DisplayName: Pluma Del Escriba Santo
 		// Tooltip: ""
+	}
+
+	AlasPrismaBase.Estilo: Plumas vectoriales de la casa: aleteo en cadena, inmunidad a las caídas y vuelo del prisma
+
+	AlasRunicasSolares: {
+		DisplayName: Alas Rúnicas Solares
+		Tooltip: "[c/FFD787:El abanico del sol de la casa: plumas vectoriales doradas con runas que respiran luz — inmunidad a las caídas y el aleteo del prisma]"
+	}
+
+	AlasRunicasDelVacio: {
+		DisplayName: Alas Rúnicas del Vacío
+		Tooltip: "[c/9D6BE8:La copia exacta del Eclipse vestida de vacío: membrana lisa violeta, runas del abismo y las alitas de mariposa — inmunidad a las caídas]"
+	}
+
+	AlasRunicasDelEclipse: {
+		DisplayName: Alas Rúnicas del Eclipse
+		Tooltip: "[c/C49CFF:El abanico del eclipse: oro viejo sobre negro de tinta, el borde maestro que la casa aprendió del fuego — inmunidad a las caídas]"
+	}
+
+	AlasRunicasDelJuicio: {
+		DisplayName: Alas Rúnicas del Juicio
+		Tooltip: "[c/FF9BE8:Las cinco voces del juicio en un solo abanico: la paleta completa de la casa latiendo por las plumas — inmunidad a las caídas]"
+	}
+
+	CorolasDelAlba: {
+		DisplayName: Corolas del Alba
+		Tooltip: "[c/FFE9B8:El ala-pétalo: la corola que abre el alba sobre tu espalda, plegada como flor de amanecer — inmunidad a las caídas]"
+	}
+
+	AlasSerafinDelVacio: {
+		DisplayName: Alas Serafín del Vacío
+		Tooltip: "[c/D9B3FF:Las seis plumas del serafín, caídas al vacío y recogidas por la casa — inmunidad a las caídas]"
+	}
+
+	AlasValquiriaRunica: {
+		DisplayName: Alas Valquiria Rúnica
+		Tooltip: "[c/C4B5FF:El abanico de la valquiria con su escritura rúnica: plumas de guerra que recuerdan cada runa — inmunidad a las caídas]"
+	}
+
+	AlasQuetzalEmplumado: {
+		DisplayName: Alas Quetzal Emplumado
+		Tooltip: "[c/9BFFC4:El plumaje del quetzal: verde jade y esmeralda fluyendo como selva alada — inmunidad a las caídas]"
+	}
+
+	AlasFenixDelRenacer: {
+		DisplayName: Alas Fénix del Renacer
+		Tooltip: "[c/FFB89B:El ala que renace: fuego vivo de naranja a escarlata, ceniza en la raíz y llama en la punta — inmunidad a las caídas]"
+	}
+
+	AlasTenguDelCrepusculo: {
+		DisplayName: Alas Tengu del Crepúsculo
+		Tooltip: "[c/FF9B9B:El abanico del tengu: rojo crepuscular y sombra de pinar, plumas de papel sagrado — inmunidad a las caídas]"
+	}
+
+	AlasDragonDelVacio: {
+		DisplayName: Alas Dragón del Vacío
+		Tooltip: "[c/8A5BC8:La membrana del dragón del vacío: piel de abismo con venas de estrella — inmunidad a las caídas]"
+	}
+
+	AlasValquiriaSinPlumas: {
+		DisplayName: Alas Valquiria sin Plumas
+		Tooltip: "[c/B8A8D9:La valquiria desplumada: solo la ARMADURA del ala, el esqueleto de guerra con su brillo — inmunidad a las caídas]"
+	}
+
+	AlasValquiriaLisa: {
+		DisplayName: Alas Valquiria Lisa
+		Tooltip: "[c/C8BEE8:La valquiria lisa: la membrana continua sin una sola pluma, silenciosa como la nieve — inmunidad a las caídas]"
+	}
+
+	AlasRunicas: {
+		DisplayName: Alas Rúnicas
+		Tooltip: "[c/FFD787:El ciclo dorado→morado de la casa: la copia viva de la Valquiria Lisa con el pulso rúnico completo — inmunidad a las caídas]"
+	}
+
+	SombraDeLaPaginaII: {
+		// v6.144 — THE FACELESS COPY: the page shadow with the cursed doll's flight
+		DisplayName: Sombra de la Página II
+		Tooltip: La copia sin rostro de la sombra de la página: persigue, golpea, rebota y vuelve — la muñeca maldita de la casa
+		Frase: «Sin ojos. Sin dientes. Solo la página, recordando.»
 	}
 }
 
@@ -2584,8 +2576,6 @@ NPCs: {
 		Bestiary: Las dos mitades recordaron ser una. Un eclipse con colmillos: la luz y la oscuridad ya no se turnan.
 	}
 
-	CazadorAstral.DisplayName: Cazador Astral
-
 	GrimorioDormido: {
 		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
 		// keep only the main boss, Aethon; delete the other bosses and the
@@ -2609,10 +2599,30 @@ NPCs: {
 		}
 	}
 
-	// v6.105 — EL MUÑECO DE PRUEBAS NEGRO: el sprite del dummy
-	// vanilla teñido de negro — recibe TODOS los ataques del
-	// grimorio (los dummies normales, como en Terraria normal).
+	// v6.144 — el nombre que faltaba
+	CazadorAstral.DisplayName: Cazador Astral
+	// v6.144 — el nombre que faltaba
 	DummyNegroNPC.DisplayName: Muñeco de Pruebas Negro
+	// v6.144 — el nombre que faltaba
+	AltarDeLaCaida.DisplayName: Altar de la Caída
+	// v6.144 — el nombre que faltaba
+	AltarOfrendasTile.DisplayName: Altar de las Ofrendas
+	// v6.144 — el nombre que faltaba
+	AltarPrismaTile.DisplayName: Altar Prisma
+	// v6.144 — el nombre que faltaba
+	BrumaAltarTile.DisplayName: Altar de la Bruma
+	// v6.144 — el nombre que faltaba
+	PaginaDelEternoTile.DisplayName: Página del Eterno
+	// v6.144 — el nombre que faltaba
+	PilarPrismaTile.DisplayName: Pilar Interior
+
+	AethonSellado: {
+		// v6.144 — THE SEALED GOD: the grimoire itself, giant
+		DisplayName: Aethon (Sellado)
+		Bestiario: El grimorio mismo, sellado en su propio interior: el libro que fue dios mira a través de sus tres ojos dormidos. Pieza de Lore.
+	}
+
+	AethonSelladoOjo.DisplayName: Ojo Sellado
 }
 
 Common: {
@@ -3089,7 +3099,7 @@ Despertar: {
 	// v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
 	// ítem El Ojo del Cielo — la textura del cielo de la letra).
 	CieloSubtitulo: Las misiones del camino — completa los requisitos de cualquier nivel, aunque aún no estés ahí
-	CieloDespertarActual: Despertar {0}/100
+	CieloDespertarActual: Despertar {0}/{1}
 	CieloSinLibro: Sin el Grimorio del Eterno encima — el cielo no ve tu escalera
 	CieloPista: Rueda del ratón: desplazar la escalera · clic derecho o [X]: cerrar
 	CieloLaCaza: LA CAZA — los jefes del camino
@@ -3822,7 +3832,7 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: EL PERGAMINO DEL GRIMORIO
-	Subtitulo: el libro de la ofrenda — todo lo que el Eterno sabe
+	Subtitulo: la página izquierda guarda el saber del mod · la derecha, los recuerdos
 	SecAltar: EL ALTAR DE LA CONSAGRACIÓN
 	Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
 	Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.
@@ -3869,6 +3879,27 @@ Pergamino: {
 	Auras4: • LA QUEMADURA DEL VACÍO (debuff del enemigo): el fuego negro de violeta — 1% de vida máxima cada medio segundo, 5 s tras dejar el aura.
 	Auras5: • EL AURA DE LAS OLEADAS: los enemigos del festín visten la bruma violeta del grimorio.
 	Auras6: • El ojo de este pergamino te está mirando. Siempre.
+	LoreGrimorioT: EL GRIMORIO DEL ETERNO
+	LoreGrimorio1: Un libro que devora. No es un arma que se empuña: es un hambre que se lleva. Cada arma comida, cada esencia, cada jefe caído despierta un peldaño más del libro.
+	LoreGrimorio2: El Eterno sueña su propio interior, y quien entra camina por ese sueño. Pieza de Lore.
+	LoreFormaT: LA FORMA ETERNA
+	LoreForma1: Doce partes construidas en el despertar. Al llegar a la última, la Manifestación las une todas en un solo cuerpo portable: la forma de quien se vistió de Eterno y sobrevivió.
+	LoreForma2: Pieza de Lore.
+	LoreMascotaLuzT: LA MASCOTA DE LUZ
+	LoreMascotaLuz1: El Pequeño Recuerdo de Aethon: un pequeño recuerdo de algo más grande.
+	LoreMascotaLuz2: Pieza de Lore.
+	LoreGrimorioMenorT: EL GRIMORIO MENOR
+	LoreGrimorioMenor1: Es un pequeño grimorio travieso y curioso.
+	LoreGrimorioMenor2: Pieza de Lore.
+	LoreAethonT: AETHON
+	LoreAethon1: La puerta cien del despertar. La Ira. Aquel que el grimorio exige devorar para clavar la cima de la caza.
+	LoreAethon2: Pieza de Lore.
+	LoreFragmentoT: EL FRAGMENTO DE UN RECUERDO LEJANO
+	LoreFragment1: Pieza de Lore.
+	LoreFragment2: Pieza de Lore.
+	LorePiezasT: LAS PIEZAS QUE FALTAN
+	LorePiezas1: Todo lo que aún no tiene historia se guarda como Pieza de Lore. Cuando la historia llegue, la pieza será reemplazada.
+	LorePiezas2: Pieza de Lore.
 }
 
 PrismaInterior: {
@@ -4066,8 +4097,8 @@ Buffs: {
 	}
 
 	OjoEternoBuff: {
-		// DisplayName: Ojo Eterno Buff
-		// Description: Mods.AethonMod.Buffs.OjoEternoBuff.Description
+		DisplayName: El Ojo del Eterno
+		Description: El ojo del Eterno vela tu escuadrón
 	}
 
 	QuemaduraCosmica: {
@@ -4276,4 +4307,7 @@ Projectiles: {
 	// LaMiradaProyectil.DisplayName: La Mirada Proyectil
 	// LaMiradaRayo.DisplayName: La Mirada Rayo
 	// ArcaneBolt.DisplayName: Arcane Bolt
+	// SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
 }
+
+PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.

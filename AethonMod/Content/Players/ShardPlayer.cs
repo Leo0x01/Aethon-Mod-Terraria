@@ -1516,6 +1516,12 @@ namespace AethonMod.Content.Players
                 // la quemadura del vacío (PvP incluido). DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Ojos.ElOjoQueMira>());
+                // v6.144 — LA SOMBRA DE LA PÁGINA II (la letra: «crea una
+                // nueva arma de la sombra de la pagina… fusiona… con el
+                // ataque de Muñeca Maldita de Llama Sombría»): la copia
+                // sin rostro del bumerán maldito — DIRECTO (la regla).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPaginaII>());
                 // v6.115 — EL MUNDO INTERIOR DEL ETERNO (la letra: «para
                 // que el altar nos lleve a otro mundo crea un nuevo item
                 // que se fabrica con esencia del eterno en el altar»):

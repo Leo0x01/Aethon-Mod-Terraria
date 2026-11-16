@@ -1789,14 +1789,21 @@ namespace AethonMod.Content.Weapons
                         //     devorar, jefe y libro — y AHORA, debajo de
                         //     todos, la barra del camino. ===
                         {
+                            // v6.144 — LA BARRA DINÁMICA (la letra:
+                            // «deberia llegar a 120 y actualizarse
+                            // siempre en caso de que el nivel maximo de
+                            // despertar sea aumentado en un futuro»): el
+                            // tope vive en LA CONSTANTE — hoy 120, mañana
+                            // lo que sea, la barra JAMÁS vuelve a mentir.
                             int barD = 20;
-                            int llenos = (int)(barD * (despertar / 100f));
+                            float frac = despertar / (float)Systems.DespertarGrimorio.NivelMax;
+                            int llenos = (int)Math.Clamp(barD * frac, 0f, barD);
                             string barra = "";
                             for (int bi = 0; bi < barD; bi++)
                                 barra += bi < llenos ? "█" : "░";
                             tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
                                 "[c/78788C:  • Despertar ]" +
-                                $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/100]"));
+                                $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/{Systems.DespertarGrimorio.NivelMax}]"));
                         }
 
                         // === PRÓXIMO HITO DEL DESPERTAR (la letra: «X% de
@@ -1862,7 +1869,7 @@ namespace AethonMod.Content.Weapons
                     else
                     {
                         tooltips.Add(new TooltipLine(Mod, "DespertarMax",
-                            "[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO — 100 de 100]"));
+                            $"[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO — {Systems.DespertarGrimorio.NivelMax} de {Systems.DespertarGrimorio.NivelMax}]"));
                     }
                 }
                 catch { }

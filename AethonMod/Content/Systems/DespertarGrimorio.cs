@@ -78,9 +78,17 @@ namespace AethonMod.Content.Systems
         /// nivel.</summary>
         public const int NivelFormaInicio = 101;
 
-        /// <summary>El peldaño de LA MANIFESTACIÓN (la 12ª parte — el
-        /// ítem cosmético nace y la forma del portador se CONVIERTE).</summary>
-        public const int NivelManifestacion = 112;
+        /// <summary>v6.144 — EL PELDAÑO DE LA MANIFESTACIÓN (la letra:
+        /// «que el hito del nivel de despertar 120 sean las Alas Runicas
+        /// y el Aura del Vacio, luego al llegar a nivel 120 de despertar
+        /// es cuando ocurre la explosion de luz y debe ser aun mas grande
+        /// que la anterior, por cierto al ser la explosion a nivel 120 la
+        /// otra queda anulada, la correcta es a nivel 120, donde todos los
+        /// requisitos se unen creando asi La Forma Eterna»): la 12ª parte
+        /// — LAS ALAS RÚNICAS + EL AURA — nace al 120 y el ítem completo
+        /// nace de la explosión de luz MÁS GRANDE. La explosión vieja del
+        /// 112 queda ANULADA.</summary>
+        public const int NivelManifestacion = 120;
 
         /// <summary>v6.51.6 — EL DESPERTAR ES DEL LIBRO (la letra: «el
         /// despertar se comparte entre todos los grimorios, eso debe ser
@@ -201,10 +209,73 @@ namespace AethonMod.Content.Systems
             return Math.Max(1, Math.Min(NivelMax, nivel));
         }
 
-        /// <summary>v6.142 — EL ACCESO SEGURO a la mesa de armas (la
-        /// tabla vive hasta 100: arriba NO hay Devorar — vacío).</summary>
+        // ============================================================
+        //  v6.144 — EL DEVORAR ARRIBA DEL CIEN (la letra: «despues del
+        //  nivel 100 dice que devore armas o materiales para despertar,
+        //  pero no hay nada para devorar, asi que pon materiales o armas
+        //  para devorar como requisito y ademas agrega jefes tambien»):
+        //  la Forma se paga con SUS ESencias y monedas COMO SIEMPRE —
+        //  y ADEMÁS cada peldaño 101-120 exige devorar 2 de las OPCIONES
+        //  NUEVAS (materiales del finalgame + armas de la casa) y pasa
+        //  SU PUERTA de jefe (las últimas cacerías vanilla).
+        // ============================================================
+
+        /// <summary>v6.144 — LAS ARMAS DE LA FORMA (101-120): el
+        /// peldaño pide TRES opciones de la casa (basta devorar 2, la
+        /// regla de la mesa de siempre) — el arsenal que el Eterno
+        /// escupió en el camino, devuelto al libro que lo soñó.</summary>
+        public static int[] ArmasDeLaForma(int nivel)
+        {
+            if (nivel <= NivelCaza || nivel > NivelMax) return System.Array.Empty<int>();
+            try
+            {
+                // LAS TRES ESPIGAS de la casa: un ojo, una sombra, una
+                // sentencia (rotan por peldaño — la escalera siempre
+                // tiene algo DISTINTO que devorar).
+                int ojo = ModContent.ItemType<Weapons.Ojos.ElOjoQueMira>();
+                int sombra = ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>();
+                int clicker = ModContent.ItemType<Weapons.Clicker.CompasRunico>();
+                return (nivel % 3) switch
+                {
+                    1 => new[] { ojo, sombra, clicker },
+                    2 => new[] { sombra, clicker, ojo },
+                    _ => new[] { clicker, ojo, sombra },
+                };
+            }
+            catch { return System.Array.Empty<int>(); }
+        }
+
+        /// <summary>v6.144 — LOS MATERIALES DE LA FORMA (101-120): los
+        /// lingotes y polvos del finalgame — grupos con alternativas
+        /// (devorar 20 de luminita O 20 de escama de quimera cuenta
+        /// como UNA opción pagada, la convención del banco de siempre).</summary>
+        public static int[][] GruposMaterialesDeLaForma(int nivel)
+        {
+            if (nivel <= NivelCaza || nivel > NivelMax)
+                return System.Array.Empty<int[]>();
+            int paso = ((nivel - NivelCaza - 1) / 2) % 5;   // rota cada 2 peldaños
+            int[] Opcion(params int[] xs) => xs;
+            return new int[][] { paso switch
+            {
+                0 => Opcion(ItemID.LunarBar, ItemID.ChlorophyteBar),
+                1 => Opcion(ItemID.ShroomiteBar, ItemID.SpectreBar),
+                2 => Opcion(ItemID.BeetleHusk, ItemID.TurtleShell),
+                3 => Opcion(ItemID.Ectoplasm, ItemID.SpookyWood),
+                _ => Opcion(ItemID.FragmentNebula, ItemID.FragmentSolar,
+                            ItemID.FragmentStardust, ItemID.FragmentVortex),
+            } };
+        }
+
+        /// <summary>v6.144 — LA CUOTA de los materiales de la Forma
+        /// (20 por grupo — un tributo digno de los peldaños del dios).</summary>
+        public static int CantidadMaterialesDeLaForma(int nivel, int grupo)
+            => 20;
+
+        /// <summary>EL ACCESO SEGURO a la mesa de armas (la tabla clásica
+        /// vive hasta 100; arriba del 100 mandan LAS ARMAS DE LA FORMA).</summary>
         public static int[] ArmasDe(int nivel)
         {
+            if (nivel > NivelCaza) return ArmasDeLaForma(nivel);
             if (nivel < 1 || nivel > NivelCaza || nivel >= ArmasDelNivel.Length)
                 return System.Array.Empty<int>();
             return ArmasDelNivel[nivel] ?? System.Array.Empty<int>();
@@ -666,6 +737,8 @@ namespace AethonMod.Content.Systems
         /// versión MÉTODO de la tabla — defensiva con la escalera).</summary>
         public static int[][] GruposMaterialesDe(int nivel)
         {
+            // v6.144 — arriba del 100 mandan LOS MATERIALES DE LA FORMA
+            if (nivel > NivelCaza) return GruposMaterialesDeLaForma(nivel);
             // v6.142 — arriba del 100 NO HAY Devorar (la Forma se paga
             // con esencias + monedas): la mesa vieja no aplica.
             if (nivel < 1 || nivel > NivelCaza || nivel >= MaterialesDelNivel.Length)
@@ -674,9 +747,11 @@ namespace AethonMod.Content.Systems
             return grupos ?? System.Array.Empty<int[]>();
         }
 
-        /// <summary>La CUOTA del grupo g del peldaño N (20 por defecto).</summary>
+        /// <summary>La CUOTA del grupo g del peldaño N (20 por defecto;
+        /// arriba del 100 manda la cuota de la Forma — también 20).</summary>
         public static int CantidadMateriales(int nivel, int grupo)
         {
+            if (nivel > NivelCaza) return CantidadMaterialesDeLaForma(nivel, grupo);
             if (nivel < 1 || nivel > NivelCaza || nivel >= CantidadesMateriales.Length)
                 return 20;
             var cuotas = CantidadesMateriales[nivel];
@@ -1024,6 +1099,22 @@ namespace AethonMod.Content.Systems
             new JefeDelCamino(99, "Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 7, 1),
             // LA CIMA COMPUESTA (la letra): Aethon ×1 + Moon Lord ×10 + Emperatriz ×5
             new JefeDelCamino(100,"Mods.AethonMod.Despertar.JefeAethon",          MiniAethon(),       1, 3),
+            // v6.144 — LAS CACERÍAS DE LA FORMA (101-120): cada peldaño
+            // de la construcción exige SU jefe (la letra: «ademas agrega
+            // jefes tambien») — las cuatro bestias del finalgame en ronda,
+            // y la cima doble (119 el Señor de la Luna ×12, 120 Aethon ×2:
+            // el sello del dios se paga con el dios).
+            new JefeDelCamino(101,"Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 8, 1),
+            new JefeDelCamino(103,"Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   6, 2),
+            new JefeDelCamino(105,"Mods.AethonMod.Despertar.JefeDuqueFishron",    NPCID.DukeFishron, 4, 1),
+            new JefeDelCamino(107,"Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 9, 1),
+            new JefeDelCamino(109,"Mods.AethonMod.Despertar.JefeGolem",           NPCID.Golem,       3, 1),
+            new JefeDelCamino(111,"Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   7, 2),
+            new JefeDelCamino(113,"Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 10, 1),
+            new JefeDelCamino(115,"Mods.AethonMod.Despertar.JefeDuqueFishron",    NPCID.DukeFishron, 5, 1),
+            new JefeDelCamino(117,"Mods.AethonMod.Despertar.JefeEmperatrizDeLuz", NPCID.HallowBoss,   8, 2),
+            new JefeDelCamino(119,"Mods.AethonMod.Despertar.JefeSenorDeLaLuna",   NPCID.MoonLordCore, 12, 1),
+            new JefeDelCamino(120,"Mods.AethonMod.Despertar.JefeAethon",          MiniAethon(),       2, 3),
         };
 
         /// <summary>v6.86 — LA MINIATURA DE AETHON (la ventana del Cielo

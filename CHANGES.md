@@ -1,5 +1,28 @@
 # AethonMod — Historial de Cambios
 
+## v6.144 — EL DESPERTAR DE LOS CIENTO VEINTE + EL DIOS SELLADO
+
+**La letra completa (12 puntos) y su entrega:**
+
+1. **LAS ALAS NUEVAS VIVEN** — la caza de textos crudos las cubrió: 14 bloques DisplayName+Tooltip ×3 idiomas + el Estilo.
+2. **TEXTOS CRUDOS CAZADOS** — mascotas, alas, items: los «Mods.AethonMod.X.Y» crudos murieron (audit 139→2 falsos positivos).
+3. **LA FORMA ETERNA → PIEZA DE LORE** — su descripción ya no explica mecánica: es lore provisional («Pieza de Lore» donde no hay historia, la letra manda).
+4. **EL LORE DEL GRIMORIO SIN MARGEN** — el tooltip tenía 8 espacios de sangría dura (el margen fantasma) → 3 espacios ×3 idiomas.
+5. **LA BARRA DEL DESPERTAR DINÁMICA** — «{0}/100» duro → «{0}/{1}» con `NivelMax` (si el nivel máximo sube, la barra se actualiza sola) — en la ventana del grimorio Y la del cielo.
+6. **EL DEVORAR 101-120** — cada peldaño de la Forma exige: armas de la casa (El Ojo que Mira, La Sombra de la Página, el Compás Rúnico) + materiales endgame (barras lunares, fragmentos celestes…) + SU PUERTA DE JEFE (las últimas cacerías vanilla).
+7. **EL HITO 120 = LAS ALAS RÚNICAS + EL AURA DEL VACÍO** — la 12ª parte solo se construye al 120; LA MANIFESTACIÓN estalla allí (MÁS GRANDE que nunca: 220 polvos, doble onda de choque, estallido escala dios) — la explosión del 112 queda ANULADA. La Forma Eterna nace con las alas integradas: inmunidad a caídas + vuelo infinito + todos los buffs. Y el 2% del maná total suma al daño máximo del aura (la letra del cálculo, vivo).
+8. **EL OJO QUE MIRA MINION** — 22×22, la animación del escuadrón (3 texturas Abierto/Medio/Cerrado + iris que sigue a la presa) y su ataque es el RAYO DE PERLIN de la casa.
+9. **LAS MASCOTAS** — la de luz es «Pequeño Recuerdo de Aethon» («un pequeño recuerdo de algo más grande») y el grimorio menor «un pequeño grimorio travieso y curioso».
+10. **EL LIBRO DE VERDAD** — icono junto a los logros, tinta legible, el ojo de abajo-derecha muerto, scroll independiente por página (izquierda=info del mod · derecha=LORE: grimorio, Forma Eterna, mascotas, Aethon, el Fragmento — «Pieza de Lore» donde la historia aún no existe, nada inventado).
+11. **EL PILAR INTERIOR** — sprite re-forjado con la SForja: un pilar de verdad (basamento, fuste con bandas rúnicas, capitel) con EL OJO DEL MINIÓN en la punta (parpadea Abierto→Medio→Cerrado, verificado: esclerótica 114→62→34 px). Renombrado «Pilar Interior» ×3.
+12. **EL MUNDO INTERIOR** — los tentáculos de fondo visten LA MASA LISA de la sombra de la página (SombrasLib.MasaLisa — el mismo cuerpo del arma).
+13. **LA SOMBRA DE LA PÁGINA II** — la copia sin rostro: sin ojos ni dientes, con el ataque de la Muñeca Maldita (rebota ×5, cada rebote ×1,12 más rápido) vestido con la masa lisa de la casa y animación post-lanzamiento viva (la masa ondea, la punta respira, estela de bruma). Entrega directa.
+14. **AETHON (SELLADO)** — el nuevo jefe del mundo interior (SHIFT + clic en el pilar): el grimorio GIGANTE con vuelo de dos tiempos (mira a dónde va, luego va), teletransporte cubriéndose de bruma (la llegada del interior), SUS TRES OJOS SELLADOS como minions con barra de vida (25k cada uno, reviven a los 30 s) y el arsenal completo del grimorio disparado POR los ojos (púa sagraria, coro de cristal, virote del vacío, flecha estelar, tajo portador, estallido radiante). Su muerte: la explosión de luz de siempre.
+
+— oráculo 0/0 (464 .cs) · build REAL 0/0 · GUARDIÁN TODO VIVE ✔ · AUDIT 12/12 puntos de la letra ✔ · hjson ×3 parsea (la cura de las llaves: pegados \t} separados + cierres perdidos restaurados) · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.143 — EL ACCESORIO DE VERDAD
 
 1. **LA VERIFICACIÓN (la letra: «Asegúrate que La Forma Eterna que sale en el despertar 112 sea el accesorio, ya que debe tener el efecto de aura de vacío… recuerda el efecto de aura del vacío, con su respectiva quemadura y los buff y debuff»)**: verificado TODO el circuito, vivo y entero — La Forma Eterna **ES un accesorio** (`Item.accessory = true`) y al llevarla puesta enciende **EL AURA DEL VACÍO** (el ancla `AuraJuicio2Ancla`: el campo de **19 tiles**, reconocida por `LlevaElAura` desde la v6.115). **LA QUEMADURA** (`QuemaduraVacioExterior`): los impíos que entran arden **×1→×3 por cercanía**, caminan a **×0,55** — hasta los FANTASMAS; al salir del campo siguen ardiendo **1% de vida máxima por medio segundo durante 5 s**. **LOS BUFFS/DEBUFFS**: mientras un enemigo arde, el portador cobra **VACÍO EXTERIOR** (+10% ataque, +10 defensa, −15% coste de maná); **siempre**, el buff **AURA DEL VACÍO**; y los **stats del panteón** del hueco funcional (+40 maná · +8% daño mágico · +4% crít. mágico · +2 regen · +8% melée · +3% crít. melée · +3 defensa).

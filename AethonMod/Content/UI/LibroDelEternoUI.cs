@@ -125,7 +125,11 @@ namespace AethonMod.Content.UI
                 float esc = Main.inventoryScale;
                 int num = (int)(Main.screenWidth / 2f - 560f * esc / 2f - 20f); // el origen X responsive
                 if (num < 0) num = 0;
-                int x = (int)(20f + 560f * esc) + num - 88;   // a la IZQUIERDA del de logros
+                // v6.144 — JUSTO AL LADO DE LOS LOGROS (la letra:
+                // «debe estar justo al lado de donde van los logros»):
+                // el botón de logros ocupa (20 + 560·esc + num, 20) —
+                // nuestro icono vive PEGADO a su DERECHA (+48 px).
+                int x = (int)(20f + 560f * esc) + num + 48;    // a la DERECHA del de logros
                 int y = 20;
                 GeoIcono = new Rectangle(x, y, 40, 40);
                 if (GeoIcono.X < 8) GeoIcono.X = 8;
@@ -192,10 +196,16 @@ namespace AethonMod.Content.UI
         private float _scrollIzq, _scrollDer;     // cada página desplaza sola
         private float _maxIzq, _maxDer;
         private int _parpadeo, _parpadeoEn;
+        // v6.144 — LAS GEOMETRÍAS DE LAS PÁGINAS (para el scroll
+        // independiente: la rueda decide por la página bajo el cursor)
+        private Rectangle GeoPagIzq, GeoPagDer;
 
-        private static readonly Color Tinta = new(48, 32, 24);
-        private static readonly Color TintaTitulo = new(94, 44, 118);
-        private static readonly Color TintaCap = new(120, 72, 24);
+        // v6.144 — LA TINTA LEGIBLE (la letra: «los textos no se ven
+        // ya que estan muy oscuros»): el marrón-tinta SUBE un tramo —
+        // sigue siendo tinta de manuscrito pero se LEE sobre el papel.
+        private static readonly Color Tinta = new(86, 58, 40);
+        private static readonly Color TintaTitulo = new(126, 58, 148);
+        private static readonly Color TintaCap = new(150, 94, 40);
         private static readonly Color Papel = new(226, 210, 176);
         private static readonly Color PapelSombra = new(206, 188, 150);
         private static readonly Color Cuero = new(84, 54, 34);
@@ -216,10 +226,22 @@ namespace AethonMod.Content.UI
 
         public override void Update(GameTime gameTime)
         {
-            // LA RUEDA desplaza AMBAS páginas (la lectura unificada)
+            // ============================================================
+            //  v6.144 — EL SCROLL INDEPENDIENTE (la letra: «haz que la
+            //  pagina derecha y la pagina izquierda sean individuales,
+            //  o sea el scroll en uno no afecta a la otra»): la rueda
+            //  SOLO mueve LA PÁGINA bajo el cursor (fuera de ambas: nada).
+            // ============================================================
             int delta = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
-            _scrollIzq = MathHelper.Clamp(_scrollIzq - delta * 0.45f, 0f, Math.Max(0f, _maxIzq));
-            _scrollDer = MathHelper.Clamp(_scrollDer - delta * 0.45f, 0f, Math.Max(0f, _maxDer));
+            if (delta != 0)
+            {
+                Rectangle mitIzq = new Rectangle(0, 0, Main.screenWidth / 2, Main.screenHeight);
+                if (GeoPagIzq.Contains(Main.mouseX, Main.mouseY))
+                    _scrollIzq = MathHelper.Clamp(_scrollIzq - delta * 0.45f, 0f, Math.Max(0f, _maxIzq));
+                else if (GeoPagDer.Contains(Main.mouseX, Main.mouseY))
+                    _scrollDer = MathHelper.Clamp(_scrollDer - delta * 0.45f, 0f, Math.Max(0f, _maxDer));
+                Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es del libro
+            }
 
             if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
                 LibroDelEternoUI.Cerrar();
@@ -279,6 +301,7 @@ namespace AethonMod.Content.UI
                 int pagW = w / 2 - 20;
                 Rectangle pagIzq = new Rectangle(x + 10, y + 8, pagW, h - 16);
                 Rectangle pagDer = new Rectangle(cx + 14, y + 8, pagW, h - 16);
+                GeoPagIzq = pagIzq; GeoPagDer = pagDer;   // v6.144 — para el scroll por página
                 sb.Draw(_pixel, pagIzq, Papel);
                 sb.Draw(_pixel, pagDer, Papel);
                 // LA SOMBRA DEL LOMO sobre cada página (el hueco real)
@@ -351,9 +374,10 @@ namespace AethonMod.Content.UI
                     Main.DefaultSamplerState, DepthStencilState.None,
                     Main.Rasterizer, null, Main.Transform);
 
-                // ============ EL OJO DE LOS MINIONS (la letra) ============
-                // EN LA PORTADA derecha, abajo: el ojo que SIGUE AL CURSOR
-                DibujarElOjo(sb, pagDer.Right - 90, pagDer.Bottom - 90, 46f);
+                // ============ v6.144 — EL OJO DE ABAJO-DERECHA MURIÓ
+                // (la letra: «el ojo de abajo a la derecha lo puedes
+                // eliminar») — la página derecha es del LORE: el ojo
+                // ya no vive aquí. ============
 
                 // ============ LA X ============
                 var rectX = new Rectangle(x + w - 42, y + 8, 28, 28);

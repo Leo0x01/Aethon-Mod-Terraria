@@ -140,6 +140,15 @@ namespace AethonMod.Content.Players
                 Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
                     ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
 
+                // v6.144 — EL REGALO DEL HITO 120 (la letra: «que el
+                // hito del nivel de despertar 120 sean las Alas Runicas
+                // y el Aura del Vacio»): junto a la Forma nace EL PAR DE
+                // ALAS RÚNICAS DEL VACÍO — la Forma ya integra su vuelo
+                // (inmunidad a caídas + vuelo infinito), pero el regalo
+                // es suyo: puede vestirlas por separado.
+                Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
+                    ModContent.ItemType<Items.Alas.AlasRunicasDelVacio>(), 1);
+
                 // LA MANIFESTACIÓN (una sola vez): la explosión de luz
                 if (!ManifestacionVivida)
                 {

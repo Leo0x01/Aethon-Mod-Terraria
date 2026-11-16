@@ -417,10 +417,23 @@ namespace AethonMod.Content.Projectiles
 
         /// <summary>v6.124 — EL MÁXIMO DEL AURA: 10 + el bono de maná.
         /// Es el daño por tick que sufre el enemigo PEGADO al portador
-        /// (el bono SIEMPRE se suma al máximo — la letra).</summary>
+        /// (el bono SIEMPRE se suma al máximo — la letra).
+        /// v6.144 — EL MANÁ TOTAL TAMBIÉN CUENTA (la letra: «el daño en
+        /// cuanto a cantidad de mana es el 2% del mana total y este
+        /// aumento de daño va al daño que hace cuando mas cerca esta el
+        /// enemigo del jugador»): el 2% del maná TOTAL se suma AL
+        /// MÁXIMO — al daño que cobra PEGADO al portador. Con 400 de
+        /// maná: 10 + 20 (el 10% de los 200 extra) + 8 (el 2% del
+        /// total) = 38 pegado al cuerpo; el borde exterior SIEMPRE 1.</summary>
         public static int DanoAuraMax(Player p)
         {
-            try { return 10 + BonusMana(p); }
+            try
+            {
+                int bonusTotal = 0;
+                if (p != null && p.active)
+                    bonusTotal = (int)(p.statManaMax2 * 0.02f);   // EL 2% DEL MANÁ TOTAL
+                return 10 + BonusMana(p) + bonusTotal;
+            }
             catch { return 10; }
         }
 

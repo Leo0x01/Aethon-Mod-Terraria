@@ -186,8 +186,11 @@ namespace AethonMod.Content.Weapons.Ojos
 
         public override void SetDefaults()
         {
-            Projectile.width = 28;
-            Projectile.height = 28;
+            // v6.144 — EL TAMAÑO DE UN MINION (la letra: «el ojo que
+            // mira es muy grande, debe ser del tamaño de un minion»):
+            // 22×22 — el cuerpo del escuadrón a ESCALA 0.375.
+            Projectile.width = 22;
+            Projectile.height = 22;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
@@ -248,22 +251,65 @@ namespace AethonMod.Content.Weapons.Ojos
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // EL OJO DE LOS MINIONS (la letra): la misma textura, la
-            // CARGA la abre (el brillo crece con _tick/CARGA).
-            Texture2D tex = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
+            // ============================================================
+            //  v6.144 — LA ANIMACIÓN DE LOS MINIONS EXACTA (la letra:
+            //  «debe ser del tamaño de un minion y ademas debe estar
+            //  animado, su mirada debe ser el ataque, para esto lo mejor
+            //  es copiar exactamente la animacion de los minions»): EL
+            //  MISMO MECANISMO del escuadrón (OjoEternoMinion.DrawElOjo)
+            //  — las TRES texturas (Abierto/Medio/Cerrado) con el
+            //  parpadeo escalonado, el IRIS que SE DESLIZA hacia la
+            //  presa (MIRA_X/MIRA_Y del escuadrón) y se DILATA con la
+            //  carga, el pop de nacimiento +16%, y LA ESCALA MINION
+            //  (0.375 — ya NO es un ojo gigante).
+            // ============================================================
             float f = Math.Min(1f, (float)_tick / CARGA);
-            float esc = 0.9f + 0.25f * f;
             var pos = Projectile.Center - Main.screenPosition;
+
+            // LA FASE DEL PÁRPADO (el ciclo del escuadrón: abierto →
+            // medio → cerrado → medio → abierto, ~7 s con pausas)
+            double ciclo = (Main.GlobalTimeWrappedHourly * 0.55 + Projectile.whoAmI * 0.37) % 7.0;
+            string nombreTex = "AethonMod/Content/Projectiles/OjoEterne_Abierto";
+            if (ciclo > 5.6 && ciclo < 6.1) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
+            else if (ciclo >= 6.1 && ciclo < 6.5) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Cerrado";
+            else if (ciclo >= 6.5 && ciclo < 7.0) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
+            Texture2D tex = ModContent.Request<Texture2D>(nombreTex).Value;
+
+            // LA ESCALA MINION (0.375, la del escuadrón) + el pop de
+            // nacimiento (+16% el primer medio segundo) + el hinchado
+            // de la carga (respira al 6% mientras carga)
+            const float ESCALA = 0.375f;
+            float pop = _tick < 30 ? 1.16f - 0.16f * (_tick / 30f) : 1f;
+            float esc = ESCALA * pop * (1f + 0.06f * f);
+
             // el resplandor de la carga (violeta→dorado al abrirse)
             Texture2D glow = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             Color cGlow = Color.Lerp(new Color(150, 84, 235), new Color(255, 200, 90), f);
             Main.spriteBatch.Draw(glow, pos, null, cGlow * (0.35f + 0.3f * f),
-                0f, glow.Size() * 0.5f, 1.2f + 0.6f * f, SpriteEffects.None, 0f);
+                0f, glow.Size() * 0.5f, 0.5f + 0.25f * f, SpriteEffects.None, 0f);
+
+            // EL OJO: la textura del escuadrón a ESCALA MINION
             Main.spriteBatch.Draw(tex, pos, null,
                 Microsoft.Xna.Framework.Color.White * (0.85f + 0.15f * f),
                 0f, tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+
+            // EL IRIS VIVO (el mecanismo del escuadrón: el núcleo dorado
+            // SE DESLIZA hacia la presa y se DILATA con la carga —
+            // MIRA_X 7.5 · MIRA_Y 2.5, en píxeles de sprite × escala)
+            Vector2 hacia = _presa - Projectile.Center;
+            float mx = 0f, my = 0f;
+            if (hacia.LengthSquared() > 1f)
+            {
+                hacia.Normalize();
+                mx = hacia.X * 7.5f * esc;
+                my = hacia.Y * 2.5f * esc;
+            }
+            float iris = (0.41f + 0.10f * f) * esc;   // IRIS_ESCALA + la dilatación
+            Main.spriteBatch.Draw(glow,
+                pos + new Vector2(mx, my), null,
+                new Color(255, 200, 90) * (0.85f + 0.15f * f),
+                0f, glow.Size() * 0.5f, iris * 2.2f, SpriteEffects.None, 0f);
             return false;
         }
 
@@ -358,15 +404,23 @@ namespace AethonMod.Content.Weapons.Ojos
                 "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             float vida = Projectile.timeLeft / 18f;
 
-            for (int k = 0; k < 12; k++)
-            {
-                float f = k / 11f;
-                var p = pos - dir * (LARGO * 0.5f) + dir * (LARGO * f);
-                float esc = 0.5f + 0.4f * (float)Math.Sin(f * Math.PI);
-                Color c = Color.Lerp(new Color(150, 84, 235), new Color(255, 210, 120), f);
-                Main.spriteBatch.Draw(glow, p, null, c * 0.55f * vida,
-                    0f, glow.Size() * 0.5f, esc * 1.4f, SpriteEffects.None, 0f);
-            }
+            // ============================================================
+            //  v6.144 — EL RAYO DE PERLIN (la letra: «el ataque es el
+            //  mismo que tiene el ojo que mira, solo que lo que lanza
+            //  es un rayo de perlin»): EL MISMO ARCO ELÉCTRICO de la
+            //  casa (StormLib.PerlinBolt — el meandro fBm de 3 octavas
+            //  con el halo violeta y el núcleo blanco-oro), del ojo a
+            //  lo largo de TODA la mirada.
+            // ============================================================
+            var inicio = pos - dir * (LARGO * 0.5f);
+            var fin = pos + dir * (LARGO * 0.5f);
+            int seed = Projectile.whoAmI * 31 + (int)(Main.GameUpdateCount * 0.6f);
+            global::AethonMod.Content.VFX.StormLib.PerlinBolt(
+                Main.spriteBatch, inicio, fin, seed, 2,
+                7f * vida,                                       // el ancho del arco
+                new Color(150, 84, 235) * (0.55f * vida),        // el halo violeta
+                new Color(255, 240, 210) * (0.85f * vida),       // el núcleo claro
+                1f, 0.14f);                                      // amplitud del meandro
             return false;
         }
     }

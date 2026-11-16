@@ -55,8 +55,8 @@ Items: {
 		DisplayName: Grimorio del Eterno
 		Tooltip:
 			'''
-			        Un libro viejo que devora lo que su portador mata.
-			        Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
+			   Un libro viejo que devora lo que su portador mata.
+			   Mantén sus páginas llenas... o será tu alma la que llene la siguiente.
 			'''
 	}
 
@@ -534,52 +534,52 @@ Items: {
 
 	TestMagicRing: {
 		DisplayName: Anillo Mágico de Prueba
-		Tooltip: ""
+		Tooltip: The house's test ring
 	}
 
 	TestSparkle: {
 		DisplayName: Destello de Prueba
-		Tooltip: ""
+		Tooltip: The house's test sparkle
 	}
 
 	ProjBeam: {
 		DisplayName: Rayo de Prueba
-		Tooltip: ""
+		Tooltip: The house's test weapon
 	}
 
 	TestMagicRingV2: {
 		DisplayName: Anillo Mágico de Prueba V2
-		Tooltip: ""
+		Tooltip: The house's test ring II
 	}
 
 	SeerOrb: {
 		DisplayName: Orbe del Vidente
-		Tooltip: ""
+		Tooltip: The seer orb: watches where you cannot
 	}
 
 	SunStaff: {
 		DisplayName: Sol
-		Tooltip: ""
+		Tooltip: The house's sun staff
 	}
 
 	SupernovaStaff: {
 		DisplayName: Supernova
-		Tooltip: ""
+		Tooltip: The supernova in your hand
 	}
 
 	PlasmaStormStaff: {
 		DisplayName: Tormenta de Plasma
-		Tooltip: ""
+		Tooltip: The Eternal's plasma storm
 	}
 
 	PhoenixNovaStaff: {
 		DisplayName: Nova del Fénix
-		Tooltip: ""
+		Tooltip: The phoenix nova is reborn in flames
 	}
 
 	QuantumSplitStaff: {
 		DisplayName: División Cuántica
-		Tooltip: ""
+		Tooltip: The staff that splits the beam into parallel worlds
 	}
 
 	CosmicBlackHoleStaff: {
@@ -590,17 +590,17 @@ Items: {
 
 	UmbralBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Umbral
-		Tooltip: ""
+		Tooltip: The threshold between worlds in a staff
 	}
 
 	BrumaBlackHoleStaff: {
 		DisplayName: Bastón del Agujero de la Bruma
-		Tooltip: ""
+		Tooltip: A drop of mist that swallows the light
 	}
 
 	OlvidoBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Olvido
-		Tooltip: ""
+		Tooltip: A hole of oblivion: what enters doesn't remember leaving
 	}
 
 	SupremoBlackHoleStaff: {
@@ -641,22 +641,22 @@ Items: {
 
 	UmbralAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Umbral Ascendido
-		Tooltip: ""
+		Tooltip: The threshold staff, ascended
 	}
 
 	BrumaAscendidoBlackHoleStaff: {
 		DisplayName: Bastón de la Bruma Ascendida
-		Tooltip: ""
+		Tooltip: The mist black hole staff, in its ascended form
 	}
 
 	CosmicAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Cósmico Ascendido
-		Tooltip: ""
+		Tooltip: The cosmic black hole staff, ascended
 	}
 
 	OlvidoAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Olvido Ascendido
-		Tooltip: ""
+		Tooltip: The oblivion staff, ascended
 	}
 
 	VoidCrownItem: {
@@ -913,12 +913,12 @@ Items: {
 
 	TormentaNebularStaff: {
 		DisplayName: Cetro de la Tormenta Nebular
-		Tooltip: ""
+		Tooltip: The nebular storm sweeps the sky
 	}
 
 	LanzaAlbaStaff: {
 		DisplayName: Lanza del Alba Rúnica
-		Tooltip: ""
+		Tooltip: The dawn spear rises over the wicked
 	}
 
 	StormRuneStaff: {
@@ -1970,7 +1970,7 @@ Items: {
 	// the bookmark) + THE BAG that delivers them.
 	DignosEquinoccioBinario: {
 		DisplayName: El Equinoccio Binario
-		Tooltip: ""
+		Tooltip: The Worthy's weapon: light and shadow in balance
 	}
 
 	BolsaProyectilesDignos: {
@@ -2092,27 +2092,27 @@ Items: {
 	// pixel engine and the multilayer wiring).
 	SelloDeTinta: {
 		DisplayName: The Scribe's Seal
-		Tooltip: ""
+		Tooltip: The grimoire's ink seal
 	}
 
 	ParpadeoDelEterno: {
 		DisplayName: The Eternal's Blink
-		Tooltip: ""
+		Tooltip: The Eternal's blink: wherever you close your eyes
 	}
 
 	CoronaDePlumas: {
 		DisplayName: The Crown of Feathers
-		Tooltip: ""
+		Tooltip: The Eternal's feather crown circles the wicked
 	}
 
 	DerrameDeTinta: {
 		DisplayName: The Ink Spill
-		Tooltip: ""
+		Tooltip: The grimoire's ink spill covers the ground
 	}
 
 	LaUltimaPalabra: {
 		DisplayName: The Last Word
-		Tooltip: ""
+		Tooltip: The Eternal's last word: the final silence
 	}
 
 	SombraDeLaPagina4: {
@@ -2451,76 +2451,6 @@ Items: {
 		Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
 	}
 
-	AlasDragonDelVacio: {
-		DisplayName: Alas Dragon Del Vacio
-		Tooltip: ""
-	}
-
-	AlasFenixDelRenacer: {
-		DisplayName: Alas Fenix Del Renacer
-		Tooltip: ""
-	}
-
-	AlasQuetzalEmplumado: {
-		DisplayName: Alas Quetzal Emplumado
-		Tooltip: ""
-	}
-
-	AlasRunicas: {
-		DisplayName: Alas Runicas
-		Tooltip: ""
-	}
-
-	AlasRunicasDelEclipse: {
-		DisplayName: Alas Runicas Del Eclipse
-		Tooltip: ""
-	}
-
-	AlasRunicasDelJuicio: {
-		DisplayName: Alas Runicas Del Juicio
-		Tooltip: ""
-	}
-
-	AlasRunicasDelVacio: {
-		DisplayName: Alas Runicas Del Vacio
-		Tooltip: ""
-	}
-
-	AlasRunicasSolares: {
-		DisplayName: Alas Runicas Solares
-		Tooltip: ""
-	}
-
-	AlasSerafinDelVacio: {
-		DisplayName: Alas Serafin Del Vacio
-		Tooltip: ""
-	}
-
-	AlasTenguDelCrepusculo: {
-		DisplayName: Alas Tengu Del Crepusculo
-		Tooltip: ""
-	}
-
-	AlasValquiriaLisa: {
-		DisplayName: Alas Valquiria Lisa
-		Tooltip: ""
-	}
-
-	AlasValquiriaRunica: {
-		DisplayName: Alas Valquiria Runica
-		Tooltip: ""
-	}
-
-	AlasValquiriaSinPlumas: {
-		DisplayName: Alas Valquiria Sin Plumas
-		Tooltip: ""
-	}
-
-	CorolasDelAlba: {
-		DisplayName: Corolas Del Alba
-		Tooltip: ""
-	}
-
 	BolsaFormaEterna: {
 		DisplayName: Bolsa Forma Eterna
 		Tooltip: ""
@@ -2555,6 +2485,85 @@ Items: {
 		DisplayName: Pluma Del Escriba Santo
 		Tooltip: ""
 	}
+
+	AlasPrismaBase.Estilo: The house's vector feathers: chained flapping, fall immunity and the prism's flight
+
+	AlasRunicasSolares: {
+		DisplayName: Solar Runic Wings
+		Tooltip: "[c/FFD787:The house's sun fan: golden vector feathers with runes breathing light — fall immunity and the prism's beat]"
+	}
+
+	AlasRunicasDelVacio: {
+		DisplayName: Void Runic Wings
+		Tooltip: "[c/9D6BE8:The exact copy of the Eclipse dressed in void: smooth violet membrane, abyss runes and butterfly winglets — fall immunity]"
+	}
+
+	AlasRunicasDelEclipse: {
+		DisplayName: Eclipse Runic Wings
+		Tooltip: "[c/C49CFF:The eclipse fan: old gold over ink black, the master edge the house learned from fire — fall immunity]"
+	}
+
+	AlasRunicasDelJuicio: {
+		DisplayName: Judgment Runic Wings
+		Tooltip: "[c/FF9BE8:The judgment's five voices in one fan: the house's full palette pulsing through the feathers — fall immunity]"
+	}
+
+	CorolasDelAlba: {
+		DisplayName: Dawn Corollas
+		Tooltip: "[c/FFE9B8:The petal-wing: the corolla dawn opens over your back, folded like a morning flower — fall immunity]"
+	}
+
+	AlasSerafinDelVacio: {
+		DisplayName: Void Seraph Wings
+		Tooltip: "[c/D9B3FF:The seraph's six feathers, fallen into the void and gathered by the house — fall immunity]"
+	}
+
+	AlasValquiriaRunica: {
+		DisplayName: Runic Valkyrie Wings
+		Tooltip: "[c/C4B5FF:The valkyrie's fan with its runic script: war feathers that remember every rune — fall immunity]"
+	}
+
+	AlasQuetzalEmplumado: {
+		DisplayName: Feathered Quetzal Wings
+		Tooltip: "[c/9BFFC4:The quetzal's plumage: jade and emerald flowing like a winged jungle — fall immunity]"
+	}
+
+	AlasFenixDelRenacer: {
+		DisplayName: Rebirth Phoenix Wings
+		Tooltip: "[c/FFB89B:The wing that is reborn: living fire from orange to scarlet, ash at the root and flame at the tip — fall immunity]"
+	}
+
+	AlasTenguDelCrepusculo: {
+		DisplayName: Twilight Tengu Wings
+		Tooltip: "[c/FF9B9B:The tengu's fan: twilight red and pine-shadow, sacred paper feathers — fall immunity]"
+	}
+
+	AlasDragonDelVacio: {
+		DisplayName: Void Dragon Wings
+		Tooltip: "[c/8A5BC8:The void dragon's membrane: abyss skin with star veins — fall immunity]"
+	}
+
+	AlasValquiriaSinPlumas: {
+		DisplayName: Plucked Valkyrie Wings
+		Tooltip: "[c/B8A8D9:The plucked valkyrie: only the wing's ARMOR, the war skeleton with its glow — fall immunity]"
+	}
+
+	AlasValquiriaLisa: {
+		DisplayName: Smooth Valkyrie Wings
+		Tooltip: "[c/C8BEE8:The smooth valkyrie: one continuous membrane without a single feather, silent as snow — fall immunity]"
+	}
+
+	AlasRunicas: {
+		DisplayName: Runic Wings
+		Tooltip: "[c/FFD787:The house's gold→purple cycle: the living copy of the Smooth Valkyrie with the full runic pulse — fall immunity]"
+	}
+
+	SombraDeLaPaginaII: {
+		// v6.144 — THE FACELESS COPY: the page shadow with the cursed doll's flight
+		DisplayName: Page Shadow II
+		Tooltip: The faceless copy of the page shadow: hunts, strikes, bounces and returns — the cursed doll of the house
+		Frase: No eyes. No teeth. Only the page, remembering.
+	}
 }
 
 NPCs: {
@@ -2583,8 +2592,6 @@ NPCs: {
 		Bestiary: Las dos mitades recordaron ser una. Un eclipse con colmillos: la luz y la oscuridad ya no se turnan.
 	}
 
-	CazadorAstral.DisplayName: Cazador Astral
-
 	GrimorioDormido: {
 		// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
 		// keep only the main boss, Aethon; delete the other bosses and the
@@ -2608,10 +2615,30 @@ NPCs: {
 		}
 	}
 
-	// v6.105 — EL MUÑECO DE PRUEBAS NEGRO: el sprite del dummy
-	// vanilla teñido de negro — recibe TODOS los ataques del
-	// grimorio (los dummies normales, como en Terraria normal).
-	DummyNegroNPC.DisplayName: Black Test Dummy
+	// v6.144 — el nombre que faltaba
+	CazadorAstral.DisplayName: Astral Hunter
+	// v6.144 — el nombre que faltaba
+	DummyNegroNPC.DisplayName: Black Training Dummy
+	// v6.144 — el nombre que faltaba
+	AltarDeLaCaida.DisplayName: Altar of the Fall
+	// v6.144 — el nombre que faltaba
+	AltarOfrendasTile.DisplayName: Offerings Altar
+	// v6.144 — el nombre que faltaba
+	AltarPrismaTile.DisplayName: Prism Altar
+	// v6.144 — el nombre que faltaba
+	BrumaAltarTile.DisplayName: Mist Altar
+	// v6.144 — el nombre que faltaba
+	PaginaDelEternoTile.DisplayName: Page of the Eternal
+	// v6.144 — el nombre que faltaba
+	PilarPrismaTile.DisplayName: Inner Pillar
+
+	AethonSellado: {
+		// v6.144 — THE SEALED GOD: the grimoire itself, giant
+		DisplayName: Aethon (Sealed)
+		Bestiario: The grimoire itself, sealed inside its own interior: the book that was a god watches through its three sleeping eyes. Lore Piece.
+	}
+
+	AethonSelladoOjo.DisplayName: Sealed Eye
 }
 
 Common: {
@@ -3088,7 +3115,7 @@ Despertar: {
 	// v6.67 — EL CIELO DEL DESPERTAR: la ventana de misiones (la abre el
 	// ítem El Ojo del Cielo — la textura del cielo de la letra).
 	CieloSubtitulo: Las misiones del camino — completa los requisitos de cualquier nivel, aunque aún no estés ahí
-	CieloDespertarActual: Despertar {0}/100
+	CieloDespertarActual: Awakened {0}/{1}
 	CieloSinLibro: Sin el Grimorio del Eterno encima — el cielo no ve tu escalera
 	CieloPista: Rueda del ratón: desplazar la escalera · clic derecho o [X]: cerrar
 	CieloLaCaza: LA CAZA — los jefes del camino
@@ -3821,7 +3848,7 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: THE GRIMOIRE'S SCROLL
-	Subtitulo: the book of the offering — all the Eternal knows
+	Subtitulo: the left page keeps the mod's knowledge · the right one, the memories
 	SecAltar: THE CONSECRATION ALTAR
 	Altar1: • The offering: a weapon gains +5% to ALL its stats and its tag; a material only its tag; essences raise the gate by 1.
 	Altar2: • Not accepted: already consecrated, tools, accessories or money. ESSENCES ARE: the Eternal devours them whole.
@@ -3868,6 +3895,27 @@ Pergamino: {
 	Auras4: • THE VOID BURN (enemy debuff): the violet black fire — 1% of max life every half second, 5 s after leaving the aura.
 	Auras5: • THE WAVE AURA: the feast's enemies wear the grimoire's violet mist.
 	Auras6: • This scroll's eye is watching you. Always.
+	LoreGrimorioT: THE GRIMOIRE OF THE ETERNAL
+	LoreGrimorio1: A book that devours. Not a weapon you wield: a hunger you carry. Every eaten weapon, every essence, every fallen boss wakes one more step of the book.
+	LoreGrimorio2: The Eternal dreams its own interior, and whoever enters walks that dream. Lore Piece.
+	LoreFormaT: THE ETERNAL FORM
+	LoreForma1: Twelve parts built on the awakening. When the last arrives, the Manifestation joins them all into one portable body: the form of whoever dressed as the Eternal and survived.
+	LoreForma2: Lore Piece.
+	LoreMascotaLuzT: THE LIGHT PET
+	LoreMascotaLuz1: Aethon's Little Memory: a small memory of something bigger.
+	LoreMascotaLuz2: Lore Piece.
+	LoreGrimorioMenorT: THE LITTLE GRIMOIRE
+	LoreGrimorioMenor1: It is a small mischievous and curious grimoire.
+	LoreGrimorioMenor2: Lore Piece.
+	LoreAethonT: AETHON
+	LoreAethon1: The awakening's hundredth door. The Wrath. The one the grimoire demands to devour to nail the hunt's summit.
+	LoreAethon2: Lore Piece.
+	LoreFragmentoT: THE FRAGMENT OF A DISTANT MEMORY
+	LoreFragment1: Lore Piece.
+	LoreFragment2: Lore Piece.
+	LorePiezasT: THE MISSING PIECES
+	LorePiezas1: Everything that has no story yet is kept as a Lore Piece. When the story arrives, the piece will be replaced.
+	LorePiezas2: Lore Piece.
 }
 
 PrismaInterior: {
@@ -4275,4 +4323,7 @@ Projectiles: {
 	LaMiradaProyectil.DisplayName: La Mirada Proyectil
 	LaMiradaRayo.DisplayName: La Mirada Rayo
 	ArcaneBolt.DisplayName: Arcane Bolt
+	SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
 }
+
+PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.
