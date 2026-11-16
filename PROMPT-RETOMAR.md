@@ -68,11 +68,11 @@ puedas averiguar tú mismo del repo.
 - **Entregables**: SIEMPRE a `/home/z/my-project/download/` (el .tmod, sims,
   informes). El usuario solo ve esa carpeta.
 
-## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.143)
+## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.144)
 
-- **Versión**: 6.143 (`AethonMod/build.txt`) — publicada como
-  [release 446370078](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.143),
-  md5 `e397f8c48f7c1181eb172b88850ffd3a`, 524 entradas en el .tmod.
+- **Versión**: 6.144 (`AethonMod/build.txt`) — publicada como
+  [release 447207239](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.144),
+  md5 `04a0ff1a4204a8abf34beacfd6081ad4`, 526 entradas en el .tmod.
 - **Última versión (v6.137) — EL PILAR DEL CUERPO DEL DIOS**: las DOS
   VALQUIRIAS (estilos 12 sin plumas · 13 lisa) · LOS COLMILLOS de la forja
   en las cinco dagas del Cetro · EL MUÑECO (receta 5+5 · el círculo plano
