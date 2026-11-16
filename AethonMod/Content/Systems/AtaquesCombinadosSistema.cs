@@ -134,7 +134,11 @@ namespace AethonMod.Content.Systems
         /// const: con const el compilador hornea la rama muerta del
         /// modo final y escupe el CS0162 de código inalcanzable — el
         /// oráculo de la casa vive en el 0/0.)</summary>
-        private static readonly bool IRA_MODO_PRUEBA = true;
+        // v6.145 — EL MODO PRUEBA MUERE (la letra: «ya es momento de
+        // cambiar su frecuencia, ahora debe estar solo disponible cada
+        // 10 minutos»): la ira sale del ciclo de pruebas — es EL
+        // arma definitiva con su reloj de diez minutos.
+        private static readonly bool IRA_MODO_PRUEBA = false;
 
         /// <summary>EL COMPÁS DE PRUEBA: 5 haces por minuto (3600/5 =
         /// cada 720 ticks — 12 s).</summary>
@@ -142,7 +146,8 @@ namespace AethonMod.Content.Systems
 
         /// <summary>EL COMPÁS FINAL (cuando la prueba termine): 1 haz
         /// cada 30 minutos (3600 × 30 = 108.000 ticks).</summary>
-        private const ulong IRA_ENFRIAMIENTO_FINAL = 3600ul * 30ul;
+        // v6.145 — DIEZ MINUTOS (la letra de la frecuencia nueva).
+        private const ulong IRA_ENFRIAMIENTO_FINAL = 3600ul * 10ul;
 
         /// <summary>EL RITMO DE LA IRA EN TEXTO — lo lee el tooltip del
         /// grimorio (GrimoireEternal): SIEMPRE dice la verdad de los
@@ -338,6 +343,25 @@ namespace AethonMod.Content.Systems
                 //     lleva CazaJefesPlayer y los pagan los OnKill). ===
                 if (DespertarGrimorio.IraDisponible(p))
                 {
+                    // v6.145 — EL CONTADOR TIPO BUFF (la letra: «con un
+                    // contador tipo buff para el haz»): mientras el
+                    // reloj de la ira corre, el portador LLEVA el buff
+                    // de recarga (su descripción es el contador vivo);
+                    // cuando está lista, el buff se retira.
+                    try
+                    {
+                        int buffRecarga = ModContent.BuffType<Buffs.IraSerExteriorRecargaBuff>();
+                        int idx = p.FindBuffIndex(buffRecarga);
+                        if (!IraLista(p))
+                        {
+                            if (idx < 0)
+                                p.AddBuff(buffRecarga, 2);   // eterno: vive mientras corra
+                        }
+                        else if (idx >= 0)
+                            p.DelBuff(idx);
+                    }
+                    catch { }
+
                     ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
                     // v6.60 — SIN DADO: la ira es EL ATAQUE AGENDADO del
                     // libro — su reloj ES el compás (el dado era el eco
@@ -349,7 +373,15 @@ namespace AethonMod.Content.Systems
                     //     gracia de 2 s), la ceremonia de la ira NO
                     //     abre — su reloj queda LISTO y arranca en
                     //     cuanto el círculo se libera.
-                    if (ahora >= hasta && circuloLibre)
+                    // v6.145 — SOLO SHIFT+CLICK IZQUIERDO (la letra:
+                    // «este no se dispara automaticamente, solo se
+                    // dispara si el jugador toca el Shift+click
+                    // izquierdo»): el disparo automático MURIÓ — la
+                    // ceremonia espera el gesto del portador. El reloj
+                    // de los 10 minutos corre igual (IraLista(p) lo lee
+                    // el HUD y el contador tipo buff), pero NADA
+                    // estalla solo.
+                    if (false && ahora >= hasta && circuloLibre)
                     {
                         // NADA DE HACES SOLAPADOS (el RC2/C del portador —
                         // SU arma): en EL COMPÁS FINAL la ira ESPERA el
@@ -758,6 +790,65 @@ namespace AethonMod.Content.Systems
         /// disparando. La letra: «el daño base del rayo que es 1000, mas
         /// el calculo correspondiente para el aumento de daño magico, mas
         /// el 50% del total del daño de invocacion».</summary>
+        /// <summary>v6.145 — ¿ESTÁ LISTA LA IRA? El reloj de los 10
+        /// minutos (lo lee el HUD y el contador tipo buff): true si el
+        /// cooldown se cumplió.</summary>
+        public static bool IraLista(Player p)
+        {
+            if (p == null || !p.active) return false;
+            ulong ahora = Main.GameUpdateCount;
+            ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+            return ahora >= hasta;
+        }
+
+        /// <summary>v6.145 — LOS TICKS QUE FALTAN (el contador tipo
+        /// buff): lo que queda del reloj, en ticks de juego.</summary>
+        public static ulong IraRestante(Player p)
+        {
+            if (p == null || !p.active) return 0ul;
+            ulong ahora = Main.GameUpdateCount;
+            ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
+            return ahora >= hasta ? 0ul : hasta - ahora;
+        }
+
+        /// <summary>v6.145 — EL GESTO DEL PORTADOR (la letra: «solo se
+        /// dispara si el jugador toca el Shift+click izquierdo»): el
+        /// Shift+click nuevo de la ira. Cobra el reloj de los 10 min y
+        /// dispara LA CEREMONIA — nada automático, TODO gesto.</summary>
+        public static void ShiftClickDeLaIra(Player p)
+        {
+            try
+            {
+                if (p == null || !p.active || p.dead) return;
+                if (!DespertarGrimorio.IraDisponible(p)) return;
+                if (!IraLista(p)) return;
+
+                // el escuadrón al máximo (la ley de siempre)
+                int tipoOjo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
+                var mejorados = new List<Projectile>();
+                int ojosVivos = 0, ojosAlMax = 0;
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || pr.type != tipoOjo) continue;
+                    if (pr.owner != p.whoAmI) continue;
+                    mejorados.Add(pr);
+                    ojosVivos++;
+                    if (global::AethonMod.Content.Projectiles.OjoEternoMinion
+                            .MejorasDe(pr) >= global::AethonMod.Content.Projectiles
+                            .OjoEternoMinion.MejorasMax)
+                        ojosAlMax++;
+                }
+                if (ojosVivos < IRA_OJOS_MINIMOS || ojosVivos != ojosAlMax) return;
+
+                // EL RELOJ SE COBRA — 10 minutos desde EL disparo
+                _iraHasta[p.whoAmI] = Main.GameUpdateCount + IRA_ENFRIAMIENTO_FINAL;
+                DispararLaIra(p, mejorados, DespertarGrimorio.NivelDe(p));
+            }
+            catch { }
+        }
+
         private static void DispararLaIra(Player p, List<Projectile> mejorados, int despertar)
         {
             try

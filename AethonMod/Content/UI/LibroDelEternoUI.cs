@@ -319,20 +319,43 @@ namespace AethonMod.Content.UI
                 }
 
                 // ============ EL TITULAR (la portada interior) ============
+                // v6.145 — A LA IZQUIERDA (la letra: «que su nombre no
+                // este en el centro ya que no es real»): las páginas
+                // informativas del grimorio llevan el título pegado al
+                // lomo — un rótulo de archivo, no una portada.
                 var fuente = FontAssets.MouseText.Value;
                 float cy = y + 26;
                 string tit = T("Titulo");
                 float escTit = EscalaQueCabe(tit, 1.1f, w - 60f);
                 Vector2 medT = fuente.MeasureString(tit) * escTit;
-                Utils.DrawBorderString(sb, tit, new Vector2(x + w / 2f - medT.X / 2f, cy),
+                Utils.DrawBorderString(sb, tit, new Vector2(x + 22f, cy),
                     TintaTitulo, escTit);
                 cy += medT.Y + 6f;
+                // v6.145 — EL SUBTÍTULO TAMBIÉN A LA IZQUIERDA (la
+                // misma letra del titular) + LOS RÓTULOS DE PÁGINA (la
+                // letra: «la de la izquierta es la pagina informativa y
+                // la derecha es pagina de lore»): cada página lleva SU
+                // nombre grabado arriba — el archivo dice qué lees.
                 string sub = T("Subtitulo");
                 float escSub = EscalaQueCabe(sub, 0.75f, w - 60f);
                 Vector2 medS = fuente.MeasureString(sub) * escSub;
-                Utils.DrawBorderString(sb, sub, new Vector2(x + w / 2f - medS.X / 2f, cy),
+                Utils.DrawBorderString(sb, sub, new Vector2(x + 22f, cy),
                     TintaCap, escSub);
                 cy += medS.Y + 12f;
+
+                // LOS RÓTULOS — arriba de cada página (Info · Lore)
+                try
+                {
+                    string rotI = Language.GetTextValue("Mods.AethonMod.LibroEterno.RotuloIzq");
+                    string rotD = Language.GetTextValue("Mods.AethonMod.LibroEterno.RotuloDer");
+                    if (!string.IsNullOrEmpty(rotI) && !rotI.StartsWith("Mods."))
+                        Utils.DrawBorderString(sb, rotI, new Vector2(GeoPagIzq.X + 8f, GeoPagIzq.Y + 2f),
+                            new Color(150, 110, 190) * 0.9f, 0.72f);
+                    if (!string.IsNullOrEmpty(rotD) && !rotD.StartsWith("Mods."))
+                        Utils.DrawBorderString(sb, rotD, new Vector2(GeoPagDer.X + 8f, GeoPagDer.Y + 2f),
+                            new Color(150, 110, 190) * 0.9f, 0.72f);
+                }
+                catch { }
 
                 // ============ EL CUERPO: DOS COLUMNAS CON RECORTE ============
                 int cuerpoY = (int)cy;

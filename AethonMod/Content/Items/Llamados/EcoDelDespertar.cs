@@ -57,9 +57,25 @@ namespace AethonMod.Content.Items.Llamados
             // LA SUBIDA COMPLETA (la ceremonia de las tres ofrendas, sin
             // cobrarlas — es el probador). v6.51.6 — sube el despertar
             // DEL GRIMORIO ACTIVO (cada libro es su propia escalera).
+            // v6.145 — EL PASO SE ELIGE (la letra: «debes hacer que el
+            // Eco del Despertar se pueda seleccionar si subir de 1 a 1
+            // o de 10 en 10»): SIN Shift sube 1 peldaño; CON Shift
+            // apretado sube 10 de una vez (el eco golpea la escalera
+            // con el triple de fuerza).
             Item eterno = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(player);
             if (eterno == null) return false;
-            Content.Systems.DespertarGrimorioSistema.SubirNivel(player, eterno, null);
+            bool pasoLargo = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
+                             Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift);
+            int pasos = pasoLargo ? 10 : 1;
+            for (int i = 0; i < pasos; i++)
+            {
+                var alma = eterno.GetGlobalItem
+                    <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                if (alma == null ||
+                    alma.NivelDespertar >= Content.Systems.DespertarGrimorio.NivelMax)
+                    break;
+                Content.Systems.DespertarGrimorioSistema.SubirNivel(player, eterno, null);
+            }
             return true;
         }
     }

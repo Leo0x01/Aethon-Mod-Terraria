@@ -543,27 +543,41 @@ namespace AethonMod.Content.Effects
             float grosorPunta, Color tinte, float alfa = 1f, float flujo = 0f,
             float grosorCentroAlt = -1f)
         {
-            // v6.144 — EL VESTIDO DE LA SOMBRA DE LA PÁGINA (la letra:
-            // «el mundo interior tiene como tentaculos de fondo, debes
-            // cambiarlos y usar los tentaculos de la sombra de la
-            // pagina»): la tira ya NO viste la PielDelEterno — ahora es
-            // LA MASA LISA de la casa (SombrasLib.MasaLisa), el mismo
-            // cuerpo de la Sombra de la Página: silueta fusiforme lisa
-            // sin textura, con el tinte de cada capa. EL FLUJO de las
-            // bandas viaja en el tiempo de la masa (la piel lisa es
-            // periódica: avanza) y EL VIENTRE en grosorCentro.
+            // v6.145 — LA SOMBRA DE LA PÁGINA DE VERDAD (la letra:
+            // «esto no esta implementando, lo que hiciste fue quitar los
+            // que existian pero no incluiste los nuevos, estos nuevos
+            // deben ser tentaculos creados con la sombra de la pagina
+            // original pero sin dientes ni ojos, y con bruma densa en la
+            // base»): LA MASA CLÁSICA de la casa (SombrasLib.Masa — la
+            // del cuerpo de la Sombra de la Página original, con SU
+            // violeta de verdad) SIN OjosDeMasa y SIN Colmillo — solo el
+            // cuerpo. Y LA BRUMA DENSA EN LA BASE: cada tentáculo exhala
+            // su nube donde nace (la raíz del cielo — el aliento del
+            // Eterno durmiendo).
             try
             {
                 VFXCore.AbrirAdditive();
-                // MasaLisa cobra un ALFA plano (0-1): el tinte se lo
-                // damos a través del brillo de la masa (la piel lisa de
-                // la sombra ya trae SU violeta de la casa — el tinte
-                // antiguo modula cuánto brilla: alfa·el peso del tinte)
-                float brillo = alfa * (0.30f + 0.70f *
-                    (tinte.R + tinte.G + tinte.B) / (3f * 255f));
-                SombrasLib.MasaLisa(espina, grosorRaiz, grosorPunta, brillo,
+                // EL CUERPO — la masa de la sombra original: el fusiforme
+                // con el vientre (grosorCentro) y el alfa REAL (no el
+                // brillo apagado de la lisa: la masa clásica YA trae su
+                // gradación — el alfa del cielo la modula)
+                SombrasLib.Masa(espina, grosorRaiz, grosorPunta,
+                    MathHelper.Clamp(alfa * 0.85f, 0f, 1f),
                     espina.Length * 7 + (int)espina[0].X,
-                    Main.GlobalTimeWrappedHourly * 0.6f + flujo, grosorCentroAlt);
+                    Main.GlobalTimeWrappedHourly * 0.6f + flujo,
+                    grosorCentro: grosorCentroAlt > 0f ? grosorCentroAlt : -1f);
+
+                // LA BRUMA DENSA DE LA BASE — la raíz exhala su nube
+                // (2 puffs por tentáculo, densos: la base del tentáculo
+                // NACE de la bruma — el borde superior del cielo vive)
+                Vector2 raiz = espina[0];
+                int sem = espina.Length * 7 + (int)espina[0].X;
+                SombrasLib.Bruma(raiz + new Vector2(0f, 30f), 90f, 0.42f * alfa + 0.18f,
+                    Main.GlobalTimeWrappedHourly, sem + 911,
+                    new Vector2(MathF.Sin(Main.GlobalTimeWrappedHourly * 0.4f + sem) * 4f, -6f));
+                SombrasLib.Bruma(raiz + new Vector2(MathF.Sin(sem) * 24f, 60f), 130f,
+                    0.34f * alfa + 0.14f, Main.GlobalTimeWrappedHourly, sem + 313,
+                    new Vector2(0f, -9f));
             }
             catch { }
             finally { VFXCore.CerrarLoteSiAbierto(); }

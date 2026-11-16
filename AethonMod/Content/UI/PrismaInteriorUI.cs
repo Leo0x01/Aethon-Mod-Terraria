@@ -371,7 +371,23 @@ namespace AethonMod.Content.UI
                     else if (hoverInvocar)
                     {
                         _abierta = false;
-                        InvocarLaLlamada(yo);
+                        // v6.145 — EL PRISMA TAMBIÉN DESPIERTA AL
+                        // SELLADO (la letra: «el prisma del eterno debe
+                        // invocar a AETHON (SELLADO) como mismo invoca
+                        // al otro aethon»): SIN Shift, la LLAMADA de
+                        // siempre (los dos fragmentos); CON Shift, EL
+                        // DIOS SELLADO — el mismo gesto del pilar.
+                        bool sellado = Main.keyState.IsKeyDown(
+                            Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
+                            Main.keyState.IsKeyDown(
+                            Microsoft.Xna.Framework.Input.Keys.RightShift);
+                        if (sellado)
+                        {
+                            if (!NPCs.AethonSellado.Invocar(yo))
+                                _abierta = true;   // ya vive: la ventana queda
+                        }
+                        else
+                            InvocarLaLlamada(yo);
                     }
                     else if (hoverLanzar)
                     {
@@ -500,6 +516,7 @@ namespace AethonMod.Content.UI
                 ModContent.NPCType<NPCs.AethonBoss>(),
                 ModContent.NPCType<NPCs.AethonBossOscuro>(),
                 ModContent.NPCType<NPCs.AethonBossFusionado>(),
+                ModContent.NPCType<NPCs.AethonSellado>(),
             };
             for (int t = 0; t < tipos.Length; t++)
                 for (int i = 0; i < Main.maxNPCs; i++)

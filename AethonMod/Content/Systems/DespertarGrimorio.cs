@@ -227,22 +227,21 @@ namespace AethonMod.Content.Systems
         public static int[] ArmasDeLaForma(int nivel)
         {
             if (nivel <= NivelCaza || nivel > NivelMax) return System.Array.Empty<int>();
-            try
+            // v6.145 — ARMAS DEL JUEGO, NADA DE LA CASA (la letra:
+            // «las armas de la casa no seran jugables… por lo tanto
+            // debes usar armas del juego, armas finales de moon lord y
+            // los pilares… de nivel 101-120 se deben tomar 3 de 5
+            // opciones entre armas de terraria finales»): LAS CINCO
+            // FINALES — las cuatro de los pilares + la del Señor de la
+            // Luna. El peldaño pide devorar 3 de las 5.
+            return new int[]
             {
-                // LAS TRES ESPIGAS de la casa: un ojo, una sombra, una
-                // sentencia (rotan por peldaño — la escalera siempre
-                // tiene algo DISTINTO que devorar).
-                int ojo = ModContent.ItemType<Weapons.Ojos.ElOjoQueMira>();
-                int sombra = ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>();
-                int clicker = ModContent.ItemType<Weapons.Clicker.CompasRunico>();
-                return (nivel % 3) switch
-                {
-                    1 => new[] { ojo, sombra, clicker },
-                    2 => new[] { sombra, clicker, ojo },
-                    _ => new[] { clicker, ojo, sombra },
-                };
-            }
-            catch { return System.Array.Empty<int>(); }
+                ItemID.NebulaBlaze,        // el pilar nebuloso
+                ItemID.SolarEruption,       // el pilar solar
+                ItemID.VortexBeater,        // el pilar del vórtice
+                ItemID.StardustDragonStaff, // el pilar del polvo estelar
+                ItemID.LastPrism,       // el Señor de la Luna (Lunar Flare)
+            };
         }
 
         /// <summary>v6.144 — LOS MATERIALES DE LA FORMA (101-120): los
@@ -1059,6 +1058,23 @@ namespace AethonMod.Content.Systems
         /// 100 — LA CIMA COMPUESTA: Aethon ×1 Y Moon Lord ×10 Y
         /// Emperatriz ×5 — y ahí nace LA IRA (la letra: «en el nivel 100
         /// es donde se consigue la habilidad definitiva del grimorio»).</summary>
+        /// <summary>v6.145 — LA PUERTA DE JEFE OBLIGATORIA de la Forma
+        /// (101-120 — la letra: «la puerta de jefe es obligatioria para
+        /// estos niveles… debe usar jefes vanilla y el propio Aethon
+        /// Sellado solo para el nivel despertar 120»): cada peldaño
+        /// EXIGE su jefe — el Cultista y el Señor de la Luna van
+        /// rotando la escalera final, y EL 120 cierra con AETHON
+        /// (SELLADO), el dios del mundo interior. La condición la lee
+        /// la mesa del altar (CazaJefesPlayer): sin jefe caído, el
+        /// peldaño NO sube.</summary>
+        public static int JefeDeLaForma(int nivel)
+        {
+            if (nivel < NivelFormaInicio || nivel > NivelMax) return -1;
+            if (nivel >= NivelMax) return ModContent.NPCType<NPCs.AethonSellado>();
+            int paso = (nivel - NivelFormaInicio) % 2;
+            return paso == 0 ? NPCID.CultistBoss : NPCID.MoonLordCore;
+        }
+
         public static readonly JefeDelCamino[] LosJefesDelDespertar =
         {
             new JefeDelCamino(3,  "Mods.AethonMod.Despertar.JefeReyGelatina",     NPCID.KingSlime),

@@ -8,6 +8,12 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
+	SombraDeTinta: {
+		DisplayName: Sombra de Tinta
+		Tooltip: La fusión de la sombra: el tentáculo de la página que ahora REBOTA como la muñeca maldita — 5 rebotes, cada uno más rápido, y vuelve a casa
+		Frase: «La tinta recuerda cada rebote.»
+	}
+
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -2331,110 +2337,6 @@ Items: {
 		Linea13: Pieza de Lore.
 	}
 
-	DagaEternaBuff: {
-		DisplayName: Dagas del Eterno
-		Description: Las cinco dagas eternas del grimorio, cada una con un ojo en el centro de su hoja, luchan por ti
-	}
-
-	AethonMenorBuff: {
-		DisplayName: Pequeño Recuerdo de Aethon
-		Description: Un pequeño recuerdo de algo más grande alumbra tu camino
-	}
-
-	VastagoDelEternoBuff: {
-		DisplayName: El Vástago del Eterno
-		Description: Un vástago del cosmos en forma de libro: respira, parpadea y te sigue volando.
-	}
-
-	GrimorioMenorBuff: {
-		DisplayName: Grimorio Menor
-		Description: Un pequeño grimorio travieso y curioso
-	}
-
-	NebulaJellyfishBuff: {
-		DisplayName: Medusa Nebular
-		Description: Una medusa de nebulosa deriva a tu lado a pulsos de gravedad
-	}
-
-	StellarCometBuff: {
-		DisplayName: Cometa Estelar
-		Description: Un cometa vivo orbita a tu lado y cae en picado sobre tus enemigos
-	}
-
-	LivingPulsarBuff: {
-		DisplayName: Púlsar Vivo
-		Description: Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos
-	}
-
-	QuemaduraCosmica: {
-		DisplayName: Quemadura cósmica
-		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
-	}
-
-	JuicioDelAlba: {
-		DisplayName: Llama del Alba
-		Description: El juicio del alba te consume: la luz dorada arde contra los impíos
-	}
-
-	QuemaduraVacioExterior: {
-		// v6.123 — THE RENAME, DONE RIGHT (la letra: «quemedura del vacio
-		// debe hacerle daño a los enemigos, es una quemadura» — la v6.122
-		// puso ESTE nombre en el buff del dueño por error): EL DEBUFF DE
-		// LOS ENEMIGOS es LA QUEMADURA DEL VACÍO.
-		DisplayName: Quemadura del vacío
-		Description: Las llamas negras del vacío te consumen: dentro del aura, de 1 a {0} de daño por tick según tu cercanía al portador — y cuando el aura te suelta, ARDES 5 segundos más con el 1% de tu vida máxima por cada medio segundo
-	}
-
-	VacioExterior: {
-		// v6.123 — THE BEARER'S REWARD KEEPS ITS NAME: «Quemadura del
-		// vacío» le pertenece AL DEBUFF DE LOS ENEMIGOS (la quemadura es la
-		// que hace daño); el pago del dueño sigue siendo EL VACÍO EXTERIOR.
-		DisplayName: Vacío exterior
-		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
-	}
-
-	AuraVacioBuff: {
-		// v6.125 — SOLO LA LETRA DEL USUARIO (la letra de la sesión 7: «en el
-		// buff de aura del vacio solo debe estar mi texto no decir si hace
-		// daño o no, y eso de decir que el vacio esta cobrando una presa
-		// esta bien, solo quita la explicacion de daño y manten el resto»):
-		// el rango «1 → {0} por tick» MURIÓ — queda SOLO el texto del
-		// usuario + el sello del trabajo (la presa que arde dentro).
-		DisplayName: Aura del vacío
-		Description: El poder de vacío de un ser Exterior te rodea, dañando a todo el que se acerque.
-		Trabajando: EL VACÍO ESTÁ COBRANDO — una presa arde dentro del aura
-	}
-
-	OcasoActivoBuff: {
-		DisplayName: El Ocaso
-		Description: El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución
-	}
-
-	SobrecalentadoBuff: {
-		DisplayName: Sobrecalentada
-		Description: El bastón humea y calla: no dispara mientras se enfría
-	}
-
-	CriaEstelarBuff: {
-		DisplayName: Cría Estelar
-		Description: Una cría de sierpe estelar nada a tu lado y caza a tus enemigos
-	}
-
-	FragmentoSupernovaBuff: {
-		DisplayName: Fragmento de Supernova
-		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
-	}
-
-	SolEnMiniaturaBuff: {
-		DisplayName: El Sol en Miniatura
-		Description: Un sol en miniatura orbita a tu alrededor
-	}
-
-	LaMarcaSilenciosa: {
-		DisplayName: La Marca Silenciosa
-		Description: El ojo que mira te ha marcado: la quemadura del vacío vendrá
-	}
-
 	BolsaFormaEterna: {
 		// DisplayName: Bolsa Forma Eterna
 		// Tooltip: ""
@@ -2540,13 +2442,6 @@ Items: {
 	AlasRunicas: {
 		DisplayName: Alas Rúnicas
 		Tooltip: "[c/FFD787:El ciclo dorado→morado de la casa: la copia viva de la Valquiria Lisa con el pulso rúnico completo — inmunidad a las caídas]"
-	}
-
-	SombraDeLaPaginaII: {
-		// v6.144 — THE FACELESS COPY: the page shadow with the cursed doll's flight
-		DisplayName: Sombra de la Página II
-		Tooltip: La copia sin rostro de la sombra de la página: persigue, golpea, rebota y vuelve — la muñeca maldita de la casa
-		Frase: «Sin ojos. Sin dientes. Solo la página, recordando.»
 	}
 }
 
@@ -3831,8 +3726,8 @@ FormaEterna: {
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
-	Titulo: EL PERGAMINO DEL GRIMORIO
-	Subtitulo: la página izquierda guarda el saber del mod · la derecha, los recuerdos
+	Titulo: Páginas informativas del grimorio
+	Subtitulo: la izquierda: la página informativa · la derecha: la página de lore
 	SecAltar: EL ALTAR DE LA CONSAGRACIÓN
 	Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
 	Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.
@@ -3900,6 +3795,8 @@ Pergamino: {
 	LorePiezasT: LAS PIEZAS QUE FALTAN
 	LorePiezas1: Todo lo que aún no tiene historia se guarda como Pieza de Lore. Cuando la historia llegue, la pieza será reemplazada.
 	LorePiezas2: Pieza de Lore.
+	RotuloIzq: PÁGINA INFORMATIVA
+	RotuloDer: PÁGINA DE LORE
 }
 
 PrismaInterior: {
@@ -4043,97 +3940,102 @@ LaMarcaSilenciosa: {
 	Description: El ojo te marcó: la quemadura del vacío te encuentra.
 }
 
-LibroEterno.NombreIcono: EL LIBRO DEL ETERNO
+LibroEterno.NombreIcono: Información
 
 Buffs: {
+	IraSerExteriorRecargaBuff: {
+		DisplayName: Recarga: Ira de un Ser Exterior
+		Description: La Ira recarga su reloj de 10 minutos.
+	}
+
 	AethonMenorBuff: {
-		// DisplayName: Aethon Menor Buff
-		// Description: Mods.AethonMod.Buffs.AethonMenorBuff.Description
+		DisplayName: Pequeño Recuerdo de Aethon
+		Description: Un pequeño recuerdo de algo más grande alumbra tu camino
 	}
 
 	AuraVacioBuff: {
-		// DisplayName: Aura Vacio Buff
-		// Description: Mods.AethonMod.Buffs.AuraVacioBuff.Description
+		DisplayName: Aura del vacío
+		Description: El poder de vacío de un ser Exterior te rodea, dañando a todo el que se acerque.
 	}
 
 	CriaEstelarBuff: {
-		// DisplayName: Cria Estelar Buff
-		// Description: Mods.AethonMod.Buffs.CriaEstelarBuff.Description
+		DisplayName: Cría Estelar
+		Description: Una cría de sierpe estelar nada a tu lado y caza a tus enemigos
 	}
 
 	DagaEternaBuff: {
-		// DisplayName: Daga Eterna Buff
-		// Description: Mods.AethonMod.Buffs.DagaEternaBuff.Description
+		DisplayName: Daga Eterna
+		Description: La daga devorada orbita a su presa
 	}
 
 	FragmentoSupernovaBuff: {
-		// DisplayName: Fragmento Supernova Buff
-		// Description: Mods.AethonMod.Buffs.FragmentoSupernovaBuff.Description
+		DisplayName: Fragmento de Supernova
+		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
 	}
 
 	GrimorioMenorBuff: {
-		// DisplayName: Grimorio Menor Buff
-		// Description: Mods.AethonMod.Buffs.GrimorioMenorBuff.Description
+		DisplayName: Grimorio Menor
+		Description: Un pequeño grimorio travieso y curioso
 	}
 
 	JuicioDelAlba: {
-		// DisplayName: Juicio Del Alba
-		// Description: Mods.AethonMod.Buffs.JuicioDelAlba.Description
+		DisplayName: Llama del Alba
+		Description: El juicio del alba te consume: la luz dorada arde contra los impíos
 	}
 
 	LivingPulsarBuff: {
-		// DisplayName: Living Pulsar Buff
-		// Description: Mods.AethonMod.Buffs.LivingPulsarBuff.Description
+		DisplayName: Púlsar Vivo
+		Description: Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos
 	}
 
 	NebulaJellyfishBuff: {
-		// DisplayName: Nebula Jellyfish Buff
-		// Description: Mods.AethonMod.Buffs.NebulaJellyfishBuff.Description
+		DisplayName: Medusa Nebular
+		Description: Una medusa de nebulosa deriva a tu lado a pulsos de gravedad
 	}
 
 	OcasoActivoBuff: {
-		// DisplayName: Ocaso Activo Buff
-		// Description: Mods.AethonMod.Buffs.OcasoActivoBuff.Description
+		DisplayName: El Ocaso
+		Description: El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución
 	}
 
 	OjoEternoBuff: {
-		DisplayName: El Ojo del Eterno
-		Description: El ojo del Eterno vela tu escuadrón
+		DisplayName: Ojos del Eterno
+		Description: Los ojos del grimorio flotan en corona y disparan su rayo negro de bruma
 	}
 
 	QuemaduraCosmica: {
-		// DisplayName: Quemadura Cosmica
-		// Description: Mods.AethonMod.Buffs.QuemaduraCosmica.Description
+		DisplayName: Quemadura cósmica
+		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
 	}
 
 	QuemaduraVacioExterior: {
-		// DisplayName: Quemadura Vacio Exterior
-		// Description: Mods.AethonMod.Buffs.QuemaduraVacioExterior.Description
+		DisplayName: Quemadura del vacío
+		Description: Las llamas negras del vacío te consumen: dentro del aura, de 1 a {0} de daño por tick según tu cercanía al portador — y cuando el aura te suelta, ARDES 5 segundos más con el 1% de tu vida máxima por cada medio segundo
 	}
 
 	SobrecalentadoBuff: {
-		// DisplayName: Sobrecalentado Buff
-		// Description: Mods.AethonMod.Buffs.SobrecalentadoBuff.Description
+		DisplayName: Sobrecalentada
+		Description: El bastón humea y calla: no dispara mientras se enfría
 	}
 
 	StellarCometBuff: {
-		// DisplayName: Stellar Comet Buff
-		// Description: Mods.AethonMod.Buffs.StellarCometBuff.Description
+		DisplayName: Cometa Estelar
+		Description: Un cometa vivo orbita a tu lado y cae en picado sobre tus enemigos
 	}
 
 	VacioExterior: {
-		// DisplayName: Vacio Exterior
-		// Description: Mods.AethonMod.Buffs.VacioExterior.Description
+		DisplayName: Vacío exterior
+		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
 	}
 
 	VastagoDelEternoBuff: {
-		// DisplayName: Vastago Del Eterno Buff
-		// Description: Mods.AethonMod.Buffs.VastagoDelEternoBuff.Description
+		DisplayName: El Vástago del Eterno
+		Description: Un vástago del cosmos en forma de libro: respira, parpadea y te sigue volando.
 	}
 
 	LaMarcaSilenciosa: {
-		// DisplayName: La Marca Silenciosa
-		// Description: Mods.AethonMod.Buffs.LaMarcaSilenciosa.Description
+		DisplayName: La Marca Silenciosa
+		Description: El ojo te marcó: la quemadura del vacío te encuentra.
 	}
 }
 

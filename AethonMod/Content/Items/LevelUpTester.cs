@@ -60,15 +60,24 @@ namespace AethonMod.Content.Items
                 var sl = inv.GetGlobalItem<ShardLevelItem>();
                 if (sl == null) continue;
 
+                // v6.145 — EL PASO SE ELIGE (la letra: «de la misma
+                // forma con el Verdugo de niveles, si subir niveles de
+                // 10 en 10 o de 100 en 100»): SIN Shift sube 10 niveles
+                // (el paso de siempre); CON Shift apretado sube 100 —
+                // el verdugo ejecuta la fila entera.
+                int paso = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
+                           Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift)
+                    ? 100 : LevelsPerUse;
+
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    sl.Level += LevelsPerUse;
+                    sl.Level += paso;
 
                 if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
                 {
                     // v6.50.2 — FIX (strings hardcodeados → hjson, regla de
                     // la casa): los dos avisos del probador viajan por clave.
                     Main.NewText(Language.GetTextValue("Mods.AethonMod.LevelUpTester.Subida",
-                            inv.Name, LevelsPerUse, sl.Level),
+                            inv.Name, paso, sl.Level),
                         new Microsoft.Xna.Framework.Color(245, 196, 81));
 
                     // Efectos visuales de subida de nivel.

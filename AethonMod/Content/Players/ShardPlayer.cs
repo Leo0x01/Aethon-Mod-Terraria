@@ -845,8 +845,32 @@ namespace AethonMod.Content.Players
         /// y los celos del libro. Así "la voz y el hambre son del
         /// portador": las siente ÉL, en SU pantalla, contadas UNA vez.
         /// </summary>
+        // v6.145 — EL GESTO DE LA IRA (la letra: «solo se dispara si
+        // el jugador toca el Shift+click izquierdo»): el click izq +
+        // Shift (y sin UI encima) dispara LA IRA DE UN SER EXTERIOR si
+        // su reloj de 10 minutos está listo. El borde de bajada del
+        // click evita el ametrallado.
+        private bool _iraClickAnterior;
+
         public override void PostUpdate()
         {
+            // EL GESTO DE LA IRA — Shift + click izquierdo (solo el
+            // jugador local, sin UI encima)
+            try
+            {
+                if (Player == Main.LocalPlayer && !Main.gameMenu &&
+                    Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift))
+                {
+                    bool clickAhora = Main.mouseLeft && !Main.playerInventory &&
+                        !Player.mouseInterface && !Main.ingameOptionsWindow;
+                    if (clickAhora && !_iraClickAnterior)
+                        Systems.AtaquesCombinadosSistema.ShiftClickDeLaIra(Player);
+                    _iraClickAnterior = clickAhora;
+                }
+                else _iraClickAnterior = false;
+            }
+            catch { }
+
             // ============================================================
             // v6.51.6 — LA MIGRACIÓN DEL ALMA (una sola vez): el guardado
             // de la .51.0–.51.5 trae el despertar y el festín en el
@@ -1516,12 +1540,14 @@ namespace AethonMod.Content.Players
                 // la quemadura del vacío (PvP incluido). DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Ojos.ElOjoQueMira>());
-                // v6.144 — LA SOMBRA DE LA PÁGINA II (la letra: «crea una
-                // nueva arma de la sombra de la pagina… fusiona… con el
-                // ataque de Muñeca Maldita de Llama Sombría»): la copia
-                // sin rostro del bumerán maldito — DIRECTO (la regla).
+                // v6.145 — LA SOMBRA DE TINTA (la letra: «crea la
+                // siguiente arma, sombra de tinta, donde uses la sombra
+                // de la pagina original, y a eso tienes que agregar
+                // tambien el ataque de Muñeca Maldita, es una fusion»):
+                // la sombra de la página VESTIDA DE TINTA — el mismo
+                // tentáculo, ahora REBOTÓN. DIRECTO (la regla).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPaginaII>());
+                    <global::AethonMod.Content.Weapons.Sombras.SombraDeTinta>());
                 // v6.115 — EL MUNDO INTERIOR DEL ETERNO (la letra: «para
                 // que el altar nos lleve a otro mundo crea un nuevo item
                 // que se fabrica con esencia del eterno en el altar»):

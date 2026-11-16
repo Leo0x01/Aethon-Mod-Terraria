@@ -140,14 +140,12 @@ namespace AethonMod.Content.Players
                 Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
                     ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
 
-                // v6.144 — EL REGALO DEL HITO 120 (la letra: «que el
-                // hito del nivel de despertar 120 sean las Alas Runicas
-                // y el Aura del Vacio»): junto a la Forma nace EL PAR DE
-                // ALAS RÚNICAS DEL VACÍO — la Forma ya integra su vuelo
-                // (inmunidad a caídas + vuelo infinito), pero el regalo
-                // es suyo: puede vestirlas por separado.
-                Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
-                    ModContent.ItemType<Items.Alas.AlasRunicasDelVacio>(), 1);
+                // v6.145 — LAS ALAS VIVEN DENTRO (la letra: «ahora las
+                // alas runicas deben estar tambien fusionadas dentro de
+                // la forma eterna»): la Forma Eterna ES el accesorio
+                // con las alas rúnicas integradas — inmunidad a las
+                // caídas y vuelo infinito (los PostUpdateEquips del
+                // ítem). NADA de regalo aparte: la fusión ES el hito.
 
                 // LA MANIFESTACIÓN (una sola vez): la explosión de luz
                 if (!ManifestacionVivida)
@@ -171,10 +169,11 @@ namespace AethonMod.Content.Players
                 // (la forma vive en el ÍTEM — «desaparece ya que es
                 // convertida en el item cosmetico»).
                 if (Convertida || PartesConstruidas <= 0) return;
-                Item held = Player.HeldItem;
-                bool usandoLibro = held != null && !held.IsAir &&
-                    held.type == ModContent.ItemType<Weapons.GrimoireEternal>();
-                if (!usandoLibro) return;
+                // v6.145 — EL VESTIDO ES DEL PORTADOR, NO DEL LIBRO (la
+                // letra: «las parte de La Forma Eterna desbloqueada con
+                // el Despertar no se ven reflejadas en el jugador a
+                // medida que esta se desbloquea»): cada parte se VISTE
+                // apenas se construye — el cuerpo va siendo la Forma.
 
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;

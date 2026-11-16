@@ -1,5 +1,28 @@
 # AethonMod — Historial de Cambios
 
+## v6.145 — LA LETRA COMPLETA: EL DESPERTAR DE VERDAD + EL DIOS DE LOS DIECISIETE OJOS
+
+**Los 14 puntos de la sesión 26, entregados y verificados:**
+
+1. **EL DEVORAR 101-120 DE VERDAD**: las armas de la casa FUERON (no son jugables) — ahora son LAS CINCO FINALES DE VANILLA (Nebula Blaze, Solar Eruption, Vortex Beater, Stardust Dragon, Last Prism): se devoran **3 de 5**. La PUERTA DE JEFE es OBLIGATORIA en cada peldaño (Cultista y Señor de la Luna rotando) y **EL 120 LA GUARDA AETHON (SELLADO)**.
+2. **EL 120 ARREGLADO**: las Alas Rúnicas viven FUSIONADAS dentro de La Forma Eterna (inmunidad a caídas + vuelo infinito, sin regalo aparte) — y la conversión ya no depende del estado viejo del save.
+3. **EL PERGAMINO RENACE** → «**Páginas informativas del grimorio**», título ARRIBA A LA IZQUIERDA (no centrado) y las páginas rotuladas: IZQ = PÁGINA INFORMATIVA · DER = PÁGINA DE LORE.
+4. **EL ICONO** → «**Información**» (la animación del grimorio del inventario es la siguiente parada).
+5. **LOS BUFFS CRUDOS MUERON**: el bloque Buffs del hjson tenía los DisplayName COMENTADOS desde la v6.141 — restaurados de la v6.140 + los nombres nuevos (19/19 · 18/18 · 18/18 en los 3 idiomas).
+6. **EL AURA**: la bruma NUNCA va hacia el jugador (cono de fuga ±60°) y afecta a TODOS los monstruos — invisibles, intangibles, espectros: si es enemigo, ARDE.
+7. **LA IRA DE UN SER EXTERIOR**: cada **10 minutos**, con **contador tipo buff** (mm:ss vivo en la descripción) y **SOLO Shift + click izquierdo** — el disparo automático murió.
+8. **EL VESTIDO DE LA FORMA**: las partes se ven en el jugador A MEDIDA que se desbloquean (sin exigir el libro en mano).
+9. **EL ECO** sube 1 (o **10 con Shift**) · **EL VERDUGO** sube 10 (o **100 con Shift**).
+10. **EL IRIS DEL ENTRECERRADO**: el OjoEterno_Medio redibujado — párpado hasta la MITAD, iris CORTADO por el borde (arriba párpado puro, abajo el ojo+iris). Todas las animaciones heredan; la devoración de jefes usa su propia textura (intacta).
+11. **EL PRISMA DESPIERTA AL SELLADO**: Shift + INVOCAR en el prisma = Aethon (Sellado), como el pilar.
+12. **AETHON (SELLADO) RE-IMPLEMENTADO**: **17 ojos** (corona de 11 + 6 contra-rotante), el VUELO DEL CAZADOR (la física del grimorio saliendo a cazar: aceleración 0.009 + freno 0.88 + balanceo seno) y **cada ojo renace MÁS PODEROSO** (+35% vida, +20% daño, +12% tamaño por generación).
+13. **LA SOMBRA DE TINTA**: la fusión pedida — el proyectil ORIGINAL de la Sombra de la Página con el MODO MUÑECA (tras el mordisco REBOTA ×5, cada rebote ×1,12 más rápido, y vuelve a casa). La Sombra de la Página II está BORRADA.
+14. **LOS TENTÁCULOS DEL INTERIOR**: la MASA CLÁSICA de la sombra original SIN ojos ni dientes + BRUMA DENSA en la base de cada tentáculo.
+
+— oráculo 0/0 (464 .cs) · build 0/0 · GUARDIÁN TODO VIVE ✔ · AUDIT 14/14 · hjson ×3 parsea · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.144 — EL DESPERTAR DE LOS CIENTO VEINTE + EL DIOS SELLADO
 
 **La letra completa (12 puntos) y su entrega:**

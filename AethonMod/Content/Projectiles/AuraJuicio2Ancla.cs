@@ -291,9 +291,16 @@ namespace AethonMod.Content.Projectiles
                     //  los pueblos, la chusma menuda (lifeMax <= 5) y
                     //  los segmentos de gusano (chaseable = false).
                     // ------------------------------------------------------
-                    bool esEspiritu = n.aiStyle == 23 || n.type == NPCID.Ghost;
-                    if ((n.friendly || n.townNPC || n.immortal ||
-                         !n.CanBeChasedBy() || n.dontTakeDamage) && !esEspiritu)
+                    // v6.145 — TODOS LOS MONSTRUOS (la letra: «el aura
+                    // del vacio debe poder afectar a todos los monstruos
+                    // sin importar si estan invisibles o no»): la puerta
+                    // vieja (CanBeChasedBy) dejaba fuera a los
+                    // intangibles y a cuanto NPC decidiera esconderse.
+                    // AHORA la única ley: si ES UN ENEMIGO (no amigo, no
+                    // pueblo, no inmortal), ARDE — invisibles,
+                    // intangibles, espectros, TODO lo que respira
+                    // contra el portador.
+                    if (n.friendly || n.townNPC || n.immortal || n.dontTakeDamage)
                         continue;
 
                     VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();
@@ -522,7 +529,17 @@ namespace AethonMod.Content.Projectiles
                         // SE ALEJAN del portador (el abanico trasero
                         // ±90° alrededor de la fuga — el flujo del
                         // choque rodeando el cuerpo en su caída).
-                        float abanico = Main.rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
+                        // v6.145 — SOLO EL HEMISFERIO TRASERO (la letra:
+                        // «hay como una pequeña bruma que va hacia el
+                        // jugador lo cual esta mal, esta debe ir siempre
+                        // al lado opuesto del jugador»): el abanico
+                        // ±90° de la v6.108 mandaba la MITAD de las
+                        // partículas por encima del impío — hacia el
+                        // portador. AHORA el cono es ±60° alrededor de
+                        // la fuga: TODO lo que nace se ALEJA del
+                        // jugador, sin excepción.
+                        float abanico = Main.rand.NextFloat(
+                            -MathHelper.Pi / 3f, MathHelper.Pi / 3f);
                         Vector2 rumbo = dir.RotatedBy(abanico);
 
                         // LA CUNA — EL PUNTO DE ESTANCAMIENTO: el tope
@@ -679,7 +696,10 @@ namespace AethonMod.Content.Projectiles
                     // chispas (el hemisferio trasero ±90°, determinista
                     // por mota): las partículas también se alejan del
                     // portador — pero SOLO UNOS PASOS.
-                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * MathHelper.PiOver2;
+                    // v6.145 — SOLO LA FUGA (la misma letra): el cono
+                    // se cierra a ±60° — la bruma NUNCA va hacia el
+                    // jugador.
+                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * (MathHelper.Pi / 3f);
                     Vector2 rumbo = dir.RotatedBy(abanico);
 
                     // EL VIAJE CORTO — la letra pidió FIN de la estela

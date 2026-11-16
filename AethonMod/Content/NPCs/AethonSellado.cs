@@ -65,8 +65,11 @@ namespace AethonMod.Content.NPCs
         private const byte EST_TELEPORT = 2;   // cubrirse de bruma y reaparecer
         private const byte EST_MUERTE = 3;     // la última luz
 
-        // ═══ LOS MINIONS: LOS TRES OJOS SELLADOS ═══
-        private const int OJOS_MAX = 3;
+        // ═══ LOS MINIONS: LOS DIECISIETE OJOS SELLADOS ═══
+        // v6.145 — LA LETRA: «el jefe AETHON (SELLADO) esta mal
+        // implementando, debe tener 17 minions» — la corte completa
+        // del dios sellado: diecisiete ojos, la órbita mayor.
+        private const int OJOS_MAX = 17;
         private const int REVIVIR_T = 1800;     // 30 segundos (la letra)
 
         // ═══ LOS ATAQUES DEL ARSENAL (individuales — el libro dirige,
@@ -92,6 +95,9 @@ namespace AethonMod.Content.NPCs
         private int _cooldownAtaque;
         private int _cooldownTeleport;
         private readonly int[] _revivirEn = new int[OJOS_MAX];
+        // v6.145 — LAS GENERACIONES de los ojos (cuántas veces renació
+        // cada uno — el poder crece con cada resurrección)
+        private readonly int[] _generaciones = new int[OJOS_MAX];
 
         public override void SetStaticDefaults()
         {
@@ -220,23 +226,31 @@ namespace AethonMod.Content.NPCs
         // ── EL VUELO DE DOS TIEMPOS: mira a dónde va, luego va ──
         private void AIVolar(Player presa)
         {
-            // EL PRIMER TIEMPO: la orientación — el libro GIRA hacia el
-            // rumbo (los ojos miran el destino ANTES del cuerpo)
+            // v6.145 — EL VUELO DEL CAZADOR (la letra: «la animacion
+            // debe ser tomada del grimorio del eterno cuando sale a
+            // cazar» — el patrón EXACTO del GrimorioNerviosoFlotante):
+            // aceleración suave hacia el destino + freno 0.88 + el
+            // balanceo seno del paseo — el libro SERENO, mirando a
+            // dónde va (la rotación gira primero, el cuerpo sigue).
             _rumboTiempo++;
             float giro = MathHelper.WrapAngle(_rumboElegido.ToRotation() - NPC.rotation);
             NPC.rotation += MathHelper.Clamp(giro, -0.05f, 0.05f);
 
-            // EL SEGUNDO TIEMPO: el avance — tras orientarse (40 ticks),
-            // el libro VA (acelera en el rumbo que miró)
-            float avance = _rumboTiempo > 40f
-                ? MathHelper.Clamp((_rumboTiempo - 40f) / 30f, 0f, 1f)
-                : 0f;
-            float vel = 6f + 5f * Furia + 3f * avance;
-            NPC.velocity = _rumboElegido * vel * avance;
+            // EL DESTINO + EL VAIVÉN (el +10/-14 seno del flotante)
+            Vector2 destino = _destino + new Vector2(
+                MathF.Sin(Main.GlobalTimeWrappedHourly * 0.07f) * 10f,
+                MathF.Sin(Main.GlobalTimeWrappedHourly * 0.11f) * 14f);
 
-            // el vaivén del flotante (bob + tilt — la firma del grimorio)
-            NPC.Center += new Vector2(0f, MathF.Sin(Main.GlobalTimeWrappedHourly * 1.35f
-                + NPC.whoAmI) * 0.35f);
+            // LA FÍSICA DEL LIBRO: velocity += (destino-Center)*0.009;
+            // velocity *= 0.88 (la firma del espíritu) — con el TOPE
+            // SERENO de la caza (10..20 según la distancia, la Furia
+            // lo sube — el dios no pasea cuando arde)
+            NPC.velocity += (destino - NPC.Center) * 0.009f;
+            NPC.velocity *= 0.88f;
+            float tope = MathHelper.Clamp(
+                Vector2.Distance(destino, NPC.Center) * 0.01f, 10f, 20f + 12f * Furia);
+            float velCaza = NPC.velocity.Length();
+            if (velCaza > tope) NPC.velocity *= tope / velCaza;
 
             // ¿LLEGÓ? (cerca del destino elegido) → nuevo rumbo o teleport
             if (Vector2.Distance(NPC.Center, _destino) < 90f || _rumboTiempo > 210f)
@@ -365,6 +379,11 @@ namespace AethonMod.Content.NPCs
                     idxOjos[vivos++] = i;
             }
 
+            // v6.145 — APUNTA LAS GENERACIONES de los ojos vivos (para
+            // que el renacido sea MÁS PODEROSO que el que murió)
+            for (int i = 0; i < vivos; i++)
+                _generaciones[i] = (int)(Main.npc[idxOjos[i]].ai[1] / 10000f);
+
             // los muertos esperan su reloj (30 s) — el sello RE-ESCRIBE
             for (int i = vivos; i < OJOS_MAX; i++)
             {
@@ -376,7 +395,17 @@ namespace AethonMod.Content.NPCs
                     Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 140f;
                     int idx = NPC.NewNPC(NPC.GetSource_FromAI(), (int)pos.X, (int)pos.Y,
                         tipoOjo, 0, NPC.whoAmI, i, Main.rand.NextFloat(MathHelper.TwoPi), NPC.target);
-                    if (idx >= 0 && idx < Main.maxNPCs) Main.npc[idx].netUpdate = true;
+                    if (idx >= 0 && idx < Main.maxNPCs)
+                    {
+                        NPC ojo = Main.npc[idx];
+                        // v6.145 — LA GENERACIÓN SUBE: cada ojo renace
+                        // MÁS PODEROSO (+1 gen → +35% vida, +20% daño —
+                        // la escala la aplica el ojo en su primera AI)
+                        int gen = 1 + (_generaciones != null && i < _generaciones.Length
+                            ? _generaciones[i] : 0);
+                        ojo.ai[1] = gen * 10000f;
+                        ojo.netUpdate = true;
+                    }
                     _revivirEn[i] = REVIVIR_T;
                     if (Main.netMode != NetmodeID.Server)
                     {
@@ -388,13 +417,19 @@ namespace AethonMod.Content.NPCs
                 }
             }
 
-            // la ÓRBITA: los ojos escoltan al libro en el triángulo
+            // la ÓRBITA — LA CORONA DE LOS DIECISIETE: dos anillos
+            // (11 afuera + 6 adentro girando CONTRARIO — el reloj del
+            // sello), con el vaivén del libro
             float t = Main.GlobalTimeWrappedHourly;
             for (int i = 0; i < vivos; i++)
             {
                 NPC ojo = Main.npc[idxOjos[i]];
-                float ang = t * 0.9f + i * (MathHelper.TwoPi / OJOS_MAX);
-                Vector2 destino = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * 150f;
+                bool anilloExt = i < 11;
+                float ang = t * (anilloExt ? 0.75f : -1.1f) +
+                    i * (MathHelper.TwoPi / (anilloExt ? 11f : 6f));
+                float radio = anilloExt ? 190f : 100f;
+                Vector2 destino = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.72f)
+                    * radio + new Vector2(0f, MathF.Sin(t * 1.3f + i) * 6f);
                 ojo.Center = Vector2.Lerp(ojo.Center, destino, 0.14f);
                 ojo.velocity = Vector2.Zero;
             }
@@ -502,7 +537,13 @@ namespace AethonMod.Content.NPCs
 
         private int Amo => (int)NPC.ai[0];
         private float Angulo => NPC.ai[2];
-        private float T => NPC.ai[1];
+        // v6.145 — LA GENERACIÓN (la letra: «cada ojo debe ser mas
+        // poderoso cada vez que se regeneren»): cada resurrección
+        // sube la generación del ojo (+35% vida, +20% daño — el sello
+        // LO ESCRIBE MÁS FUERTE). La generación vive en ai[1] (alta) —
+        // el T del ojo se lleva a localAI.
+        private int Generacion => (int)(NPC.ai[1] / 10000f);
+        private float T => NPC.localAI[0];
 
         public override void SetStaticDefaults()
         {
@@ -525,10 +566,29 @@ namespace AethonMod.Content.NPCs
             NPC.DeathSound = SoundID.NPCDeath6;
         }
 
+        private bool _primeraAI = true;
+
         public override void AI()
         {
-            NPC.ai[1]++;
+            NPC.localAI[0]++;
             NPC.TargetClosest();
+
+            // v6.145 — LA ESCALA DE LA GENERACIÓN (la letra: «cada ojo
+            // debe ser mas poderoso cada vez que se regeneren»): al
+            // nacer (o renacer), el ojo toma SU generación y crece —
+            // +35% vida y +20% daño por generación. El sello aprende.
+            if (_primeraAI)
+            {
+                _primeraAI = false;
+                int gen = Math.Max(0, Generacion);
+                if (gen > 0)
+                {
+                    float mul = 1f + 0.35f * gen;
+                    NPC.lifeMax = (int)(25_000 * mul);
+                    NPC.life = NPC.lifeMax;
+                    NPC.damage = (int)(70 * (1f + 0.20f * gen));
+                }
+            }
 
             // EL AMO murió: el sello se disuelve
             NPC amo = Amo >= 0 && Amo < Main.maxNPCs ? Main.npc[Amo] : null;
@@ -579,8 +639,11 @@ namespace AethonMod.Content.NPCs
                 sb.Draw(glow, pos, null,
                     new Color(150, 90, 220) * 0.4f, 0f,
                     glow.Size() * 0.5f, 1.4f, SpriteEffects.None, 0f);
+                // v6.145 — EL TAMAÑO DEL PODER: cada generación lo
+                // agranda (+12% por gen — el sello lo escribe más fuerte)
+                float escGen = 0.85f * (1f + 0.12f * Math.Max(0, Generacion));
                 sb.Draw(tex, pos, null, Color.White, rot,
-                    tex.Size() * 0.5f, 0.85f, SpriteEffects.None, 0f);
+                    tex.Size() * 0.5f, escGen, SpriteEffects.None, 0f);
             }
             catch { }
             return false;
