@@ -188,6 +188,13 @@ namespace AethonMod.Content.Items.Bolsas
             // 5 maderas pero NUNCA entró en la bolsa: el jugador tenía que
             // fabricarlo). La bolsa es la vía del kit — la receta es el
             // respaldo. Once formas rúnicas: la cima del catálogo.
+            // v6.147 — EL PURO ENTRA A LA BOLSA (la letra del usuario:
+            // «el Agujero Rúnico Puro debes darselo al jugador en forma
+            // de arma no lo veo» + «metelo en la bolsa de agujeros
+            // negros runicos»): el agujero PURO de la v6.146 vivía solo
+            // dentro del Rayo Convergente (la ruleta) — ahora tiene SU
+            // BASTÓN y viaja con la familia. Doce formas rúnicas.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.AgujeroRunicoPuroStaff>(), 1));
             return l;
         }
     }

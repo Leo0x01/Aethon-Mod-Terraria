@@ -108,9 +108,14 @@ namespace AethonMod.Content.Players
                     new Color(196, 138, 255));
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
 
-                // ¿LA CONVERSIÓN? (la 12ª parte — nivel 112 del despertar)
+                // ¿LA CONVERSIÓN? (la 12ª parte — la cima de la escalera)
                 if (PartesConstruidas >= PartesTotales && !Convertida)
                     ConvertirLaForma();
+                // v6.147 — LA PROTECCIÓN DEL DOBLE ESCUPE: si el jugador
+                // ya convirtió una vez (save viejo con feConvertida) y
+                // vuelve a construir 12 partes con OTRO grimorio, el
+                // ESCUPE no se repite — el ítem ya es suyo (la escalera
+                // viva del despertar manda el vestido, no este flag).
             }
             catch { }
         }
@@ -119,9 +124,11 @@ namespace AethonMod.Content.Players
         /// la manifestacion la forma eterna que es parte del grimorio
         /// desaparece ya que es convertida en el item cosmetico»): la
         /// forma que vestía al portador SE CONVIERTE — el ítem cosmético
-        /// LA FORMA ETERNA nace, LA MANIFESTACIÓN estalla (una sola vez)
-        /// y desde este instante los visuales YA NO VISTEN al portador
-        /// (¿quieren la forma? que se pongan el ítem — es suyo).</summary>
+        /// LA FORMA ETERNA nace, LA MANIFESTACIÓN estalla (una sola vez).
+        /// v6.147 — la letra nueva la llama EL ESCUPE: el grimorio al
+        /// llegar al 120 del despertar ESCUPE La Forma Eterna (el ítem
+        /// con las alas rúnicas y el aura dentro); el vestido del dios
+        /// se recoge y desde entonces la forma vive en el ítem.</summary>
         private void ConvertirLaForma()
         {
             try
@@ -163,21 +170,19 @@ namespace AethonMod.Content.Players
         {
             try
             {
-                // LA LETRA: «una parte que sera puesta en el jugador
-                // MIENTRAS USA EL LIBRO» — el dios solo viste a quien
-                // lo SOSTIENE. Y tras LA CONVERSIÓN ya no viste a nadie
-                // (la forma vive en el ÍTEM — «desaparece ya que es
-                // convertida en el item cosmetico»).
-                if (Convertida || PartesConstruidas <= 0) return;
-                // v6.146 — EL VESTIDO PIDE EL LIBRO EN LA BARRA (la
-                // letra: «de hecho si deberia funcionar solo si el libro
-                // esta equipado en la barra de acceso rapido» + «tiene
-                // que verse a medida que evoluciona el grimorio»): el
-                // dios viste a quien LLEVA PUESTO el grimorio — el libro
-                // en la HOTBAR (los primeros 10 slots), no en la bolsa.
-                // Y LAS PARTES SE VEN A MEDIDA EVOLUCIONA: cada una se
-                // viste apenas se construye (v6.145 — ya sin exigir la
-                // MANO: la barra basta).
+                // v6.147 — LA LETRA NUEVA MANDA (el usuario: «el vestido
+                // debe verse siempre que un grimorio no llegue a nivel 120
+                // de despertar, y una vez llega a nivel 120 de despertar
+                // debe escupir La Forma Eterna»): el vestido ya NO muere
+                // con la conversión vieja — vive MIENTRAS el grimorio
+                // ACTIVO (el de la barra) NO ha llegado al 120. El estado
+                // viejo 'Convertida' queda como historial (el ítem ya
+                // nació una vez — no se re-escupe), pero el VESTIDO manda
+                // la escalera VIVA del libro, no el recuerdo.
+                //
+                // LA LETRA ORIGINAL (v6.141): «una parte que sera puesta
+                // en el jugador MIENTRAS USA EL LIBRO» + la v6.146: el
+                // libro en la HOTBAR (los primeros 10 slots), no la bolsa.
                 bool libroEnBarra = false;
                 for (int i = 0; i < 10; i++)
                 {
@@ -186,7 +191,20 @@ namespace AethonMod.Content.Players
                         inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                     { libroEnBarra = true; break; }
                 }
-                if (!libroEnBarra) return;
+                if (!libroEnBarra || PartesConstruidas <= 0) return;
+
+                // LA ESCALERA VIVA: el despertar DEL LIBRO ACTIVO decide.
+                // < 120 → el dios viste al portador (las partes que haya
+                // construido). ≥ 120 → la forma YA FUE ESCUPIDA (nació el
+                // ítem con LA MANIFESTACIÓN en ConvertirLaForma) y el
+                // portador la lleva puesta como accesorio — el vestido
+                // del dios se recoge.
+                Item libroActivo = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(Player);
+                if (libroActivo == null) return;
+                int despertar = Systems.DespertarGrimorio.NivelDe(libroActivo);
+                bool formaEscupida = despertar >= Systems.DespertarGrimorio.NivelManifestacion ||
+                                     Convertida;
+                if (formaEscupida) return;
 
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;
@@ -203,9 +221,9 @@ namespace AethonMod.Content.Players
                 // TODO el ataque del grimorio, mágico e invocación.)
 
                 // LA PARTE 12 — EL AURA DEL VACÍO: la obra maestra es EL
-                // EFECTO ACTIVO (el campo arde solo mientras la forma
-                // viste al portador — hasta LA CONVERSIÓN).
-                if (PartesConstruidas >= PartesTotales)
+                // EFECTO ACTIVO (el campo arde mientras la forma viste al
+                // portador — hasta que el libro llega al 120 y LA ESCUPE).
+                if (PartesConstruidas >= 12)
                 {
                     if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
                     {

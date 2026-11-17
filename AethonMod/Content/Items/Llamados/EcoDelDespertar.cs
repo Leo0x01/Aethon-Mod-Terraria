@@ -36,6 +36,13 @@ namespace AethonMod.Content.Items.Llamados
         // seleccionador de oleadas del hambre»): el ECO recuerda SU
         // paso (1 o 10) por portador — el click derecho lo alterna,
         // el izquierdo lo aplica.
+        // v6.147 — EL HOOK CORRECTO (la letra del usuario: «esto no
+        // funciona»): CanRightClick/RightClick son el par de INVENTARIO
+        // (click derecho sobre el SLOT — el gesto de los baúles), NO
+        // dispara con el ítem EN LA MANO. El selector real de la casa
+        // es AltFunctionUse: el click derecho con el ítem SOSTENIDO
+        // entra por CanUseItem+UseItem con player.altFunctionUse==2 —
+        // igual que el selector de oleadas del hambre.
         public static int PasoDe(Player p)
         {
             var sp = p.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
@@ -56,41 +63,34 @@ namespace AethonMod.Content.Items.Llamados
             Item.UseSound = SoundID.Item4;
         }
 
-        public override bool CanRightClick()
-        {
-            // el click derecho alterna el paso (1 ↔ 10) — solo el dueño
-            return Main.mouseRight && !Main.LocalPlayer.mouseInterface;
-        }
-
-        public override void RightClick(Player player)
-        {
-            var sp = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
-            if (sp == null) return;
-            sp.EcoPasoLargo = !sp.EcoPasoLargo;
-            // EL AVISO del selector (el lenguaje de las oleadas)
-            Main.NewText(Terraria.Localization.Language.GetTextValue(
-                "Mods.AethonMod.Items.EcoDelDespertar.Paso",
-                sp.EcoPasoLargo ? 10 : 1), new Microsoft.Xna.Framework.Color(196, 138, 255));
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-        }
-
-        public override bool CanUseItem(Player player)
-        {
-            // En el tope ya no despierta más (la llave gira en vacío).
-            // v6.51.6 — el despertar es DEL LIBRO: se lee el Eterno
-            // ACTIVO (en la mano primero; si no, el del inventario).
-            return Content.Systems.DespertarGrimorio.NivelDe(player)
-                < Content.Systems.DespertarGrimorio.NivelMax;
-        }
+        // v6.147 — LA FUNCIÓN ALTERNATIVA (click derecho EN LA MANO):
+        // AltFunctionUse marca el ítem como usable con click derecho —
+        // el uso entra por UseItem con player.altFunctionUse == 2.
+        public override bool AltFunctionUse(Player player)
+            => !player.mouseInterface;
 
         public override bool? UseItem(Player player)
         {
-            // LA SUBIDA COMPLETA (la ceremonia de las tres ofrendas, sin
-            // cobrarlas — es el probador). v6.51.6 — sube el despertar
-            // DEL GRIMORIO ACTIVO (cada libro es su propia escalera).
-            // v6.146 — EL PASO DEL SELECTOR (la letra nueva): el click
-            // derecho eligió la potencia (1 o 10 — PasoDe); el click
-            // izquierdo la APLICA. NADA de Shift.
+            // v6.147 — ¿CLICK DERECHO? (altFunctionUse 2): ALTERNA EL
+            // PASO (1 ↔ 10) y NO aplica nada — el borde del selector.
+            if (player.altFunctionUse == 2)
+            {
+                var sp = player.GetModPlayer
+                    <global::AethonMod.Content.Players.ShardPlayer>();
+                if (sp == null) return true;
+                sp.EcoPasoLargo = !sp.EcoPasoLargo;
+                Main.NewText(Terraria.Localization.Language.GetTextValue(
+                    "Mods.AethonMod.Items.EcoDelDespertar.Paso",
+                    sp.EcoPasoLargo ? 10 : 1), new Microsoft.Xna.Framework.Color(196, 138, 255));
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                return true;
+            }
+
+            // LA APLICACIÓN (click izquierdo): la ceremonia completa de
+            // las tres ofrendas, sin cobrarlas — es el probador.
+            // v6.51.6 — sube el despertar DEL GRIMORIO ACTIVO (cada
+            // libro es su propia escalera). v6.146 — EL PASO DEL
+            // SELECTOR: la potencia elegida (1 o 10 — PasoDe) se aplica.
             Item eterno = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(player);
             if (eterno == null) return false;
             int pasos = PasoDe(player);
@@ -104,6 +104,15 @@ namespace AethonMod.Content.Items.Llamados
                 Content.Systems.DespertarGrimorioSistema.SubirNivel(player, eterno, null);
             }
             return true;
+        }
+
+        public override bool CanUseItem(Player player)
+        {
+            // En el tope ya no despierta más (la llave gira en vacío).
+            // v6.51.6 — el despertar es DEL LIBRO: se lee el Eterno
+            // ACTIVO (en la mano primero; si no, el del inventario).
+            return Content.Systems.DespertarGrimorio.NivelDe(player)
+                < Content.Systems.DespertarGrimorio.NivelMax;
         }
     }
 }

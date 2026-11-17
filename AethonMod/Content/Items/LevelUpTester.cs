@@ -23,20 +23,16 @@ namespace AethonMod.Content.Items
     {
         public const int LevelsPerUse = 10;
 
-        // v6.146 — EL SELECTOR DE POTENCIA (la letra: el click derecho
-        // cambia 10 ↔ 100; el izquierdo aplica)
-        public override bool CanRightClick() => Main.mouseRight && !Main.LocalPlayer.mouseInterface;
-
-        public override void RightClick(Player player)
-        {
-            var sp = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
-            if (sp == null) return;
-            sp.VerdugoPasoCien = !sp.VerdugoPasoCien;
-            Main.NewText(Language.GetTextValue(
-                "Mods.AethonMod.LevelUpTester.Paso",
-                sp.VerdugoPasoCien ? 100 : LevelsPerUse), new Microsoft.Xna.Framework.Color(245, 196, 81));
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-        }
+        // v6.147 — LA FUNCIÓN ALTERNATIVA REAL (la letra del usuario:
+        // «esto no funciona: click derecho alterna la potencia, click
+        // izquierdo la aplica»): CanRightClick/RightClick eran el par
+        // de INVENTARIO (click sobre el SLOT — el gesto de los baúles)
+        // y NUNCA disparaba con el ítem EN LA MANO. El selector de la
+        // casa es AltFunctionUse: click derecho sostenido → UseItem
+        // con altFunctionUse == 2 — igual que el Eco del Despertar y
+        // las oleadas del hambre.
+        public override bool AltFunctionUse(Player player)
+            => !player.mouseInterface;
 
         public override void SetStaticDefaults() { }
 
@@ -59,6 +55,23 @@ namespace AethonMod.Content.Items
 
         public override bool? UseItem(Player player)
         {
+            // v6.147 — ¿CLICK DERECHO EN LA MANO? (altFunctionUse 2):
+            // ALTERNA LA POTENCIA (10 ↔ 100) y no sube nada — el borde
+            // del selector (el mismo gesto del Eco y las oleadas).
+            if (player.altFunctionUse == 2)
+            {
+                var sp = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+                if (sp == null) return true;
+                sp.VerdugoPasoCien = !sp.VerdugoPasoCien;
+                if (player.whoAmI == Main.myPlayer)
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.LevelUpTester.Paso",
+                        sp.VerdugoPasoCien ? 100 : LevelsPerUse),
+                        new Microsoft.Xna.Framework.Color(245, 196, 81));
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                return true;
+            }
+
             // v6.50 — el doble gate muerto arreglado: el server corre este
             // UseItem por el uso sincronizado del jugador remoto (y él es
             // quien debe subir SU copia — EcoRed.SincronizarLibros lleva el

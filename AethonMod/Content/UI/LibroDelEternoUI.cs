@@ -189,15 +189,30 @@ namespace AethonMod.Content.UI
                     else
                     {
                         // EL IRIS VIVO — mira al cursor y RESPIRA (la
-                        // escala late con el tiempo)
+                        // escala late con el tiempo).
+                        // v6.147 — EL IRIS PROPORCIONADO (la letra del
+                        // usuario: «el iris esta desproporcionadamente
+                        // grande, se sale por completo del ojo»): la
+                        // v6.146 lo dibujaba a LA MISMA ESCALA que el
+                        // libro (0.62 → 20×20 px, casi todo el icono de
+                        // 22×30). El grimorio REAL usa IRIS_ESC 0.2773
+                        // SOBRE la escala del libro (GrimorioHambriento:
+                        // internal const IRIS_ESC = 0.2773f) — ESA es la
+                        // proporción del ojo. Y nace en EL OJO del libro
+                        // (OJO 19.09, 22.45 sobre 36×49), no en el
+                        // centro del icono.
                         var iris = ModContent.Request<Texture2D>(
                             "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
-                        Vector2 alCursor = new Vector2(Main.mouseX, Main.mouseY) - centroIcono;
+                        Vector2 alOjo = (new Vector2(19.09f, 22.45f) -
+                            new Vector2(18f, 24.5f)) * 0.62f;   // el ojo, relativo al centro
+                        Vector2 posOjo = centroIcono + alOjo.RotatedBy(rotIcono);
+                        Vector2 alCursor = new Vector2(Main.mouseX, Main.mouseY) - posOjo;
                         Vector2 mirada = alCursor.LengthSquared() > 4f
-                            ? Vector2.Normalize(alCursor) * new Vector2(3.2f, 2.6f) * 0.62f
+                            ? Vector2.Normalize(alCursor) * new Vector2(2.4f, 1.9f) * 0.62f
                             : Vector2.Zero;
-                        float respira = 0.62f * (1f + 0.10f * (float)Math.Sin(tiempo * 2.2f));
-                        sb.Draw(iris, centroIcono + mirada, null, Color.White,
+                        float respira = 0.62f * 0.2773f *
+                            (1f + 0.10f * (float)Math.Sin(tiempo * 2.2f));
+                        sb.Draw(iris, posOjo + mirada, null, Color.White,
                             rotIcono, iris.Size() * 0.5f, respira,
                             SpriteEffects.None, 0f);
                     }
@@ -249,9 +264,9 @@ namespace AethonMod.Content.UI
         // v6.144 — LA TINTA LEGIBLE (la letra: «los textos no se ven
         // ya que estan muy oscuros»): el marrón-tinta SUBE un tramo —
         // sigue siendo tinta de manuscrito pero se LEE sobre el papel.
-        private static readonly Color Tinta = new(86, 58, 40);
-        private static readonly Color TintaTitulo = new(126, 58, 148);
-        private static readonly Color TintaCap = new(150, 94, 40);
+        private static readonly Color Tinta = new(46, 30, 22);
+        private static readonly Color TintaTitulo = new(94, 38, 118);
+        private static readonly Color TintaCap = new(110, 66, 26);
         private static readonly Color Papel = new(226, 210, 176);
         private static readonly Color PapelSombra = new(206, 188, 150);
         private static readonly Color Cuero = new(84, 54, 34);
@@ -378,43 +393,44 @@ namespace AethonMod.Content.UI
                 }
 
                 // ============ EL TITULAR (la portada interior) ============
-                // v6.145 — A LA IZQUIERDA (la letra: «que su nombre no
-                // este en el centro ya que no es real»): las páginas
-                // informativas del grimorio llevan el título pegado al
-                // lomo — un rótulo de archivo, no una portada.
+                // v6.147 — EL TITULAR YA NO PISA LAS PÁGINAS (la letra
+                // del usuario: «el texto de la izquierda se solapa con
+                // el texto del titulo de la izquierda»): la v6.145 lo
+                // ponía a (x+22, y+26) — ENCIMA de la página izquierda,
+                // pisando su rótulo y el arranque de su columna. Ahora
+                // vive en LA FRANJA DE CUERO sobre las páginas (entre
+                // la tapa y el papel, y−22): un rótulo de archivo
+                // grabado en el cuero, con la tinta clara del lomo.
                 var fuente = FontAssets.MouseText.Value;
-                float cy = y + 26;
                 string tit = T("Titulo");
-                float escTit = EscalaQueCabe(tit, 1.1f, w - 60f);
+                float escTit = EscalaQueCabe(tit, 0.95f, w - 60f);
                 Vector2 medT = fuente.MeasureString(tit) * escTit;
-                Utils.DrawBorderString(sb, tit, new Vector2(x + 22f, cy),
-                    TintaTitulo, escTit);
-                cy += medT.Y + 6f;
-                // v6.145 — EL SUBTÍTULO TAMBIÉN A LA IZQUIERDA (la
-                // misma letra del titular) + LOS RÓTULOS DE PÁGINA (la
-                // letra: «la de la izquierta es la pagina informativa y
-                // la derecha es pagina de lore»): cada página lleva SU
-                // nombre grabado arriba — el archivo dice qué lees.
+                Utils.DrawBorderString(sb, tit, new Vector2(x + 22f, y - 22f),
+                    new Color(232, 214, 170), escTit);
                 string sub = T("Subtitulo");
-                float escSub = EscalaQueCabe(sub, 0.75f, w - 60f);
-                Vector2 medS = fuente.MeasureString(sub) * escSub;
-                Utils.DrawBorderString(sb, sub, new Vector2(x + 22f, cy),
-                    TintaCap, escSub);
-                cy += medS.Y + 12f;
+                float escSub = EscalaQueCabe(sub, 0.65f, w - 60f - medT.X);
+                if (!string.IsNullOrEmpty(sub) && !sub.StartsWith("Mods."))
+                    Utils.DrawBorderString(sb, sub, new Vector2(x + 26f + medT.X, y - 20f),
+                        new Color(206, 184, 148), escSub);
 
-                // LOS RÓTULOS — arriba de cada página (Info · Lore)
+                // LOS RÓTULOS — arriba de cada página (Info · Lore),
+                // grabados en la franja superior del papel
                 try
                 {
                     string rotI = Language.GetTextValue("Mods.AethonMod.LibroEterno.RotuloIzq");
                     string rotD = Language.GetTextValue("Mods.AethonMod.LibroEterno.RotuloDer");
                     if (!string.IsNullOrEmpty(rotI) && !rotI.StartsWith("Mods."))
                         Utils.DrawBorderString(sb, rotI, new Vector2(GeoPagIzq.X + 8f, GeoPagIzq.Y + 2f),
-                            new Color(150, 110, 190) * 0.9f, 0.72f);
+                            TintaCap * 0.95f, 0.78f);
                     if (!string.IsNullOrEmpty(rotD) && !rotD.StartsWith("Mods."))
                         Utils.DrawBorderString(sb, rotD, new Vector2(GeoPagDer.X + 8f, GeoPagDer.Y + 2f),
-                            new Color(150, 110, 190) * 0.9f, 0.72f);
+                            TintaCap * 0.95f, 0.78f);
                 }
                 catch { }
+
+                // el cuerpo arranca DEBAJO del rótulo de la página —
+                // nunca debajo del titular (que ya vive en el cuero)
+                float cy = GeoPagIzq.Y + 26f;
 
                 // ============ EL CUERPO: DOS COLUMNAS CON RECORTE ============
                 int cuerpoY = (int)cy;
@@ -422,9 +438,9 @@ namespace AethonMod.Content.UI
                 Rectangle recIzq = new Rectangle(pagIzq.X + 6, cuerpoY, pagIzq.Width - 12, cuerpoH);
                 Rectangle recDer = new Rectangle(pagDer.X + 6, cuerpoY, pagDer.Width - 12, cuerpoH);
 
-                // LA MITAD DE LAS SECCIONES en cada página:
-                // IZQ: altar · interior · oleadas · grimorio
-                // DER: despertar · ataques · forma eterna · auras + EL OJO
+                // LAS SECCIONES: IZQ = LAS MECÁNICAS COMPLETAS (v6.147 —
+                // las 4 de la derecha se mudan aquí, la página es una y
+                // scrollea) · DER = EL COMPENDIO DEL ETERNO (el lore)
                 string[][][] columnas =
                 {
                     new string[][]
@@ -433,13 +449,32 @@ namespace AethonMod.Content.UI
                         new[] { "SecInterior", "Interior1", "Interior2", "Interior3", "Interior4" },
                         new[] { "SecOleadas", "Oleadas1", "Oleadas2", "Oleadas3", "Oleadas4" },
                         new[] { "SecGrimorio", "Grimorio1", "Grimorio2", "Grimorio3", "Grimorio4", "Grimorio5" },
-                    },
-                    new string[][]
-                    {
                         new[] { "SecDespertar", "Despertar1", "Despertar2", "Despertar3", "Despertar4" },
                         new[] { "SecAtaques", "Ataques1", "Ataques2", "Ataques3", "Ataques4", "Ataques5", "Ataques6" },
                         new[] { "SecForma", "Forma1", "Forma2", "Forma3", "Forma4" },
                         new[] { "SecAuras", "Auras1", "Auras2", "Auras3", "Auras4", "Auras5", "Auras6" },
+                    },
+                    new string[][]
+                    {
+                        // v6.147 — LA PÁGINA DERECHA ES EL COMPENDIO DEL
+                        // ETERNO (la letra: «el lore es el documento
+                        // Aethon_El_Compendio_del_Eterno…, ya lo puedes
+                        // integrar al juego»): las CUATRO PARTES del
+                        // documento canónico viven aquí — el prólogo con
+                        // su pregunta, el Devorador de Finales, el
+                        // Sistema del Pacto, el Ciclo del Portador y La
+                        // Respuesta. Las mecánicas (despertar·ataques·
+                        // forma·auras) se mudan a la página IZQUIERDA
+                        // con sus hermanas de siempre.
+                        new[] { "SecLore", "LoreEpigrafe0", "LoreIntro" },
+                        new[] { "LoreSecI", "LoreEpigrafe1", "LoreI_Loquedevora",
+                                "LoreI_LaCuarentenadeTer", "LoreI_ElSellado" },
+                        new[] { "LoreSecII", "LoreEpigrafe2", "LoreII_ElNivel",
+                                "LoreII_ElDespertar", "LoreII_Doshambresdistinta" },
+                        new[] { "LoreSecIII", "LoreEpigrafe3", "LoreIII_LaLlegada",
+                                "LoreIII_ElGrimoriodelEter", "LoreIII_ElAltar" },
+                        new[] { "LoreSecIV", "LoreIV_Laimposibilidaddel",
+                                "LoreIV_Laentidadinmortal", "LoreIV_Elaburrimientoyla" },
                     },
                 };
 
@@ -473,14 +508,25 @@ namespace AethonMod.Content.UI
             catch { }
         }
 
-        /// <summary>Una columna de secciones (medir y dibujar con recorte).</summary>
+        /// <summary>Una columna de secciones (medir y dibujar con recorte).
+        /// v6.147 — EL CUERPO CENTRADO Y LEGIBLE (la letra del usuario:
+        /// «los textos estan desentrados y siguen un poco ilegibles por
+        /// el color»): la sangría v6.146 (X+26 con margen derecho de 26)
+        /// empujaba el bloque contra el lomo — la izquierda nacía pegada
+        /// a la costura y la derecha terminaba corta. Ahora el bloque SE
+        /// CENTRA en su página (márgenes iguales a ambos lados) y la
+        /// escala del cuerpo sube de 0.85 a 0.92 con la TINTA OSCURA
+        /// nueva (ver Tinta v6.147).</summary>
         private float DibujarColumna(SpriteBatch sb, string[][] secciones,
             Rectangle pagina, Rectangle recorte, ref float scroll, bool esIzq)
         {
             var fuente = FontAssets.MouseText.Value;
             float cy = recorte.Y - scroll;
-            float xizq = pagina.X + 26f;
-            float maxAncho = pagina.Width - 52f;
+            // v6.147 — EL BLOQUE CENTRADO: el texto ocupa el ANCHO ÚTIL
+            // de la página y la sangría se reparte a los DOS lados
+            float margen = 18f;
+            float xizq = pagina.X + margen;
+            float maxAncho = pagina.Width - margen * 2f;
 
             foreach (var sec in secciones)
             {
@@ -509,16 +555,16 @@ namespace AethonMod.Content.UI
             float maxAncho, Color c, Rectangle recorte)
         {
             var fuente = FontAssets.MouseText.Value;
-            float alto = fuente.MeasureString("Ag").Y * 0.85f + 3f;
+            float alto = fuente.MeasureString("Ag").Y * 0.92f + 3f;
             var palabras = texto.Split(' ');
             var linea = new System.Text.StringBuilder();
             foreach (string pal in palabras)
             {
                 string prueba = linea.Length == 0 ? pal : linea + " " + pal;
-                if (fuente.MeasureString(prueba).X * 0.85f > maxAncho && linea.Length > 0)
+                if (fuente.MeasureString(prueba).X * 0.92f > maxAncho && linea.Length > 0)
                 {
                     if (VisibleEn(cy, alto, recorte))
-                        Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.85f);
+                        Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.92f);
                     cy += alto;
                     linea.Clear().Append(pal);
                 }
@@ -527,7 +573,7 @@ namespace AethonMod.Content.UI
             if (linea.Length > 0)
             {
                 if (VisibleEn(cy, alto, recorte))
-                    Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.85f);
+                    Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.92f);
                 cy += alto;
             }
             return cy + 3f;

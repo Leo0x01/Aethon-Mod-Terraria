@@ -1011,7 +1011,18 @@ namespace AethonMod.Content.Projectiles.Definitivas
             float e = espiral * espiral * (3f - 2f * espiral);
             // LA ÓRBITA QUE SE APRIETA: 40 px → 0, y la vuelta ACELERA
             float radio = 40f * (1f - e);
-            float ang = (dt - TTrasTragoCierre - TTrasTragoIris) * (0.22f + 0.30f * e);
+            // v6.147 — EL GIRO CONGELADO AL TERMINAR (la letra del
+            // usuario: «la animacion del grimorio devorando el jugador
+            // es rara ya que el grimorio gira varias veces, no deberia
+            // hacerlo»): la espiral gira UNA vuelta y pico al apretarse
+            // (ang integra 0.22→0.52 rad/tick — ~1.7 vueltas en 30
+            // ticks, el diseño), pero al LLEGAR al centro (espiral=1)
+            // la fórmula vieja SEGUÍA sumando 0.52 rad/tick hasta el
+            // Kill — el libro quedaba en PEONZA ~5 vueltas más. El
+            // reloj de la espiral se congela en su duración exacta: el
+            // libro SE ENTRA POR SU OJO y ya no gira de más.
+            float dtEsp = MathF.Min(dt - TTrasTragoCierre - TTrasTragoIris, (float)TTrasTragoEspiral);
+            float ang = dtEsp * (0.22f + 0.30f * e);
             Vector2 pos = PosLibro + ang.ToRotationVector2() * radio;
             // LA ESCALA MUERE (el libro se entra por su ojo)
             float esc = escBase * (1f - 0.97f * e);

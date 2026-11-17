@@ -760,6 +760,25 @@ namespace AethonMod.Content.Effects
                 float t = Main.GlobalTimeWrappedHourly;
                 float radio = sol.Width * 0.5f * escala;
 
+                // v6.147 — EL LOTE PROPIO (la cura del crash silencioso del
+                // client.log: «Draw was called, but Begin has not yet been
+                // called» ×2 al ENTRAR al mundo interior): vanilla llama a
+                // DrawSunAndMoon FUERA de su lote de fondo (el hook es de
+                // posicionamiento — el disco se dibuja después en lote
+                // aparte), y BrumaFX.Puff dibuja DIRECTO sobre
+                // Main.spriteBatch → el primer Puff corría con el lote
+                // CERRADO y la excepción silenciosa apagaba el cielo (60
+                // fallos = _activo=false, el fondo negro de por vida). LA
+                // LECCIÓN v6.122 DEL PROPIO ARCHIVO: el que dibuja, abre su
+                // lote — SU PROPIO Begin/End con la matriz del juego, y se
+                // devuelve EL ESTADO EXACTO que había (abierto→abierto).
+                bool loteEstabaAbierto = VFXCore.LoteAbierto;
+                if (loteEstabaAbierto) VFXCore.CerrarLoteSiAbierto();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                try
+                {
                 // EL NÚCLEO morado que CUBRE el disco + EL VELO negro algo
                 // descentrado + EL ANILLO de satélites que orbitan
                 BrumaFX.Puff(pos, radio * 1.15f, new Color(96, 62, 158), 4711, t,
@@ -775,6 +794,17 @@ namespace AethonMod.Content.Effects
                     BrumaFX.Puff(p, radio * 0.6f, (i & 1) == 0
                         ? new Color(96, 62, 158) : new Color(20, 10, 34),
                         4700 + i * 11, t + i * 1.7f, alpha: 0.34f, quality: 0.5f);
+                }
+                }
+                finally
+                {
+                    try { Main.spriteBatch.End(); } catch { }
+                    // devolver el estado que vanilla traía (abierto→abierto,
+                    // con los parámetros del pase de fondo de vanilla)
+                    if (loteEstabaAbierto)
+                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None, Main.Rasterizer,
+                            null, Main.Transform);
                 }
             }
             catch

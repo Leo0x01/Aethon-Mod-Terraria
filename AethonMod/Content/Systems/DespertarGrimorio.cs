@@ -862,8 +862,16 @@ namespace AethonMod.Content.Systems
         /// lejano Aethon 1 vez» — el despertar 100 YA NO BASTA: los
         /// CONTADORES DE CAZA tienen la última palabra (los lleva
         /// CazaJefesPlayer y los pagan los OnKill de
-        /// CazaJefesGlobalNPC).</summary>
-        public static bool IraDisponible(int despertar) => despertar >= NivelMax;
+        /// CazaJefesGlobalNPC).
+        /// v6.147 — LA CURA DE LA IRA PERDIDA (la letra del usuario:
+        /// «la ira de un ser exterior no se desbloquea a nivel 100 y
+        /// tampoco el icono de buff»): la v6.141 rompió la condición
+        /// al reorganizar el despertar — cambió NivelIra por NivelMax
+        /// (120) y la Ira + su buff pedían EL TOPE de la escalera.
+        /// La letra de siempre manda: LA IRA NACE EN EL 100 (la cima
+        /// de la caza, NivelCaza) — la puerta 100 ya cobró la caza
+        /// (v6.88), no se cobra dos veces.</summary>
+        public static bool IraDisponible(int despertar) => despertar >= NivelCaza;
 
         /// <summary>v6.88 — LA IRA VIVE CON EL DESPERTAR 100 (la letra
         /// nueva de la cima: «Aethon debería estar como requisito para el
@@ -879,11 +887,13 @@ namespace AethonMod.Content.Systems
         /// cobra en la puerta y la Ira nace con el despertar 100. El
         /// escuadrón de 11 TODOS al máximo sigue siendo requisito del
         /// DISPARO (la letra v6.60, la pone
-        /// AtaquesCombinadosSistema.Tick).</summary>
+        /// AtaquesCombinadosSistema.Tick).
+        /// v6.147 — la firma de Player sufre la MISMA cura (NivelCaza,
+        /// no NivelMax — ver la otra sobrecarga).</summary>
         public static bool IraDisponible(Player p)
         {
             if (p == null || !p.active) return false;
-            return NivelDe(p) >= NivelMax;
+            return NivelDe(p) >= NivelCaza;
         }
 
         /// <summary>Los CONTADORES DE LA CIMA en texto (para tooltips y

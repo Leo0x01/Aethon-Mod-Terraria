@@ -609,6 +609,11 @@ Items: {
 		DisplayName: Bastón del Agujero del Olvido
 		Tooltip: A hole of oblivion: what enters doesn't remember leaving
 	}
+	AgujeroRunicoPuroStaff: {
+		DisplayName: Pure Rune Black Hole Staff
+		Tooltip: The purity of the void: the ring of twelve living runes, dustless
+	}
+
 
 	SupremoBlackHoleStaff: {
 		// v6.18: the FIVE new ones
@@ -2526,7 +2531,7 @@ NPCs: {
 	// v6.144 — el nombre que faltaba
 	PaginaDelEternoTile.DisplayName: Page of the Eternal
 	// v6.144 — el nombre que faltaba
-	PilarPrismaTile.DisplayName: Inner Pillar
+	PilarPrismaTile.DisplayName: The Eternal's Pillar
 
 	AethonSellado: {
 		// v6.144 — THE SEALED GOD: the grimoire itself, giant
@@ -3692,7 +3697,7 @@ Tiles: {
 	BrumaAltarTile.MapEntry: Bruma (vestigio de la vieja caída)
 	AltarOfrendasTile.MapEntry: Altar de Ofrendas
 	AltarPrismaTile.MapEntry: The Prism of the Eternal
-	PilarPrismaTile.MapEntry: The Prism Pillar
+	PilarPrismaTile.MapEntry: The Eternal's Pillar
 	PaginaDelEternoTile.MapEntry: The Page of the Eternal
 }
 
@@ -3786,6 +3791,28 @@ Pergamino: {
 	Forma3: • The parts are PUT ON the player WHILE USING THE BOOK (not items: they are LIMBS of the bearer). Every ring, every sun, every light — one separate part.
 	Forma4: • At step 112 (the 12th part): the cosmetic item THE ETERNAL FORM is born, THE MANIFESTATION erupts (everything alive on screen dies with loot — a valid death) and THE BEARER'S VISUALS VANISH: the form was CONVERTED into the item.
 	SecAuras: THE AURAS · BUFFS AND DEBUFFS
+	SecLore: EL COMPENDIO DEL ETERNO
+	LoreIntro: — Grimorio del Eterno, susurrado durante la onceava noche de hambre Todo portador se hace, tarde o temprano, la misma pregunta.
+	LoreEpigrafe0: «Los que preguntan tienen finales. Yo esperé a lo único que no los tiene.»
+	LoreSecI: LORE I — EL DEVORADOR DE FINALES
+	LoreI_Loquedevora: Aethon no es un dios en el sentido en que los mortales usan la palabra. Los dioses quieren ser adorados; Aethon quiere ser alimentado. No acumula poder como el dragón acumula oro: lo metaboliza —el poder no es su ambición, es su alimento, y la ambición es una palabra de mortales que jamás aprendió a pronunciar bien.
+	LoreI_LaCuarentenadeTer: Terraria es una dimensión defendida. Algo, hace eras, decidió que este mundo estaría custodiado por fuerzas extrañas, y esa cuarentena ha rechazado dioses antes que a Aethon: dioses más grandes, más ruidosos, llegados como ejércitos de dientes y devueltos por la puerta como peregrinos borrachos.
+	LoreI_ElSellado: ¿Por qué un ser de su naturaleza se encogería a propósito hasta caber en la palma de una mano? La respuesta oficial del canon: para cumplir su capricho —entrar, y cultivar un apóstol que dominara la dimensión en su nombre—.
+	LoreSecII: LORE II — EL SISTEMA DEL PACTO
+	LoreEpigrafe1: «Incluso el hambre puede refinarse. Incluso el vacío tiene modales.»
+	LoreII_ElNivel: El Nivel responde a la pregunta más antigua que existe, la del carroñero: ¿cuánto ha comido? Es infinito por diseño, porque el hambre de Aethon no tiene fondo y el canon se niega a fingir uno.
+	LoreII_ElDespertar: El Despertar responde a una pregunta de otro orden y con otro dueño: ¿cuánto de Aethon cabe en ti? No es experiencia: es ritual, y los rituales tienen un número exacto de pasos —las Ciento Veinte Puertas—.
+	LoreII_Doshambresdistinta: La tabla siguiente fija la distinción con las palabras exactas que conviene copiar en la biblia interna del mod. Tabla 1 · El Nivel y el Despertar: dos hambres distintas Ninguna de las dos varas sustituye a la otra. Un portador de Nivel infinito y Despertar bajo es un granjero con una fiera: fuerza sin ventana.
+	LoreSecIII: LORE III — EL CICLO DEL PORTADOR
+	LoreEpigrafe2: «Lo que siguen son las páginas que el libro permite leer. Las demás te leerán a ti.»
+	LoreIII_LaLlegada: La Llegada es única por portador. No hay trueno: el grimorio aparece cerca —bajo un árbol, junto a la puerta, a veces sobre la mesa de casa, como correspondencia que nadie recuerda haber pedido—.
+	LoreIII_ElGrimoriodelEter: El arma principal es la forma sellada del dios: la cúspide de la magia no porque conozca todos los hechizos, sino porque todos los hechizos son migas caídas de su mesa —fragmentos de sistemas mágicos devorados en universos ya digeridos—.
+	LoreIII_ElAltar: es el medio por el que el libro se arraiga a esta realidad —sus raíces clavadas en el mundo mismo—.
+	LoreSecIV: LORE IV — LA RESPUESTA
+	LoreEpigrafe3: «Hay más páginas en mí de las que este mundo ha leído. ¿Quieres verlas? Aliméntame.»
+	LoreIV_Laimposibilidaddel: Empecemos por lo que la pregunta da por supuesto: que los dioses no esperan. Y es verdad. Esperar es la única plegaria que los mortales pueden dirigir a lo alto sin recibir respuesta; es un oficio de criaturas que tienen poco tiempo.
+	LoreIV_Laentidadinmortal: El jugador no es un mortal cualquiera: es una entidad inmortal. Muere —disuelto en lava, aplastado por un ojo gigante, picoteado por demonios, empalado por su propio descuido— y vuelve. Siempre vuelve.
+	LoreIV_Elaburrimientoyla: El aburrimiento de Aethon no es tristeza: es saturación, el estado de un paladar que ya probó todo lo que el vacío tiene en carta. Un dios aburrido no se entristece —se apaga—; y un dios apagado es indistinguible de uno dormido, que es indistinguible de uno muerto, salvo por el detalle de que sigue comiendo.
 	Auras1: • THE VOID AURA: the 19-tile field that burns the wicked — from 1 damage at the edge to 10+ hugging the body (faster the closer). After leaving the field, the OUTER VOID BURN keeps burning for 5 s (1% of max life per half second).
 	Auras2: • THE OUTER VOID (bearer's buff): while your prey burns — +10% attack · +10 defense · −15% mana cost.
 	Auras3: • THE HUNGER: no aura anymore — the book's red, restless eye is the ONLY indicator (its machine runs at normal speed: 100% in one hour).
@@ -3814,7 +3841,7 @@ Pergamino: {
 	LorePiezas1: Everything that has no story yet is kept as a Lore Piece. When the story arrives, the piece will be replaced.
 	LorePiezas2: Lore Piece.
 	RotuloIzq: INFO PAGE
-	RotuloDer: LORE PAGE
+	RotuloDer: THE ETERNAL COMPENDIUM
 }
 
 PrismaInterior: {
@@ -3825,7 +3852,7 @@ PrismaInterior: {
 	YaVive: AETHON ALREADY WALKS THE INTERIOR
 	Leyenda: The altar materializes and THE GRIMOIRE floats above — the shards are born of the ceremony
 	NombreCorto: The Prism of the Eternal
-	NombrePilar: The Prism Pillar — the plain's way out
+	NombrePilar: The Eternal's Pillar — the plain's way out
 	OleadaTitulo: THE HUNGER WAVE
 	OleadaNivel: Level {0} of {1}
 	OleadaPista: level up by completing it OUTSIDE (your best: {0})

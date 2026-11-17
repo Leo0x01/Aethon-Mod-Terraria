@@ -118,6 +118,34 @@ namespace AethonMod.Content.Items.Cosmetics
             player.wingTimeMax = System.Math.Max(player.wingTimeMax, 240);
             player.wingTime = player.wingTimeMax;    // el vuelo INFINITO
 
+            // v6.147 — LAS ALAS SE VEN (la letra del usuario: «no veo
+            //  la fusion, o sea las alas runicas no se ven al equipar
+            //  la Forma Eterna»): la v6.145 dio la FÍSICA (Mothron +
+            //  vuelo infinito) pero NADIE encendió el VISUAL — las alas
+            //  de la casa se dibujan por el HALO (AlasAuroraHalo lee
+            //  AlasAuroraPlayer.AlaEstilo), y solo los ítems
+            //  AlasPrismaBase lo marcan. La Forma Eterna LAS TRAE
+            //  FUSIONADAS: marca el estilo 14 (ALAS RÚNICAS) como si
+            //  llevara el ítem puesto — el halo nace, las runas se ven.
+            //  (Respeta hideVisual y la opción del menú: el teatro se
+            //  apaga, el vuelo NO.)
+            // ==========================================================
+            try
+            {
+                if (visible)
+                {
+                    var aurora = player.GetModPlayer
+                        <global::AethonMod.Content.Players.AlasAuroraPlayer>();
+                    if (aurora != null)
+                    {
+                        aurora.Equipada = true;
+                        aurora.OcultarVisual = hideVisual;
+                        aurora.AlaEstilo = 14;        // LAS ALAS RÚNICAS
+                    }
+                }
+            }
+            catch { }
+
             // ==========================================================
             //  EL AURA DEL VACÍO (la octava gracia): el campo invisible
             //  que viste a los impíos — el ancla nace igual que en el
@@ -155,6 +183,19 @@ namespace AethonMod.Content.Items.Cosmetics
             visuales.AnilloDorsal = true;
             visuales.BrasaDelEclipse = true;
             visuales.BrilloSolar = true;
+
+            // v6.147 — LAS ALAS TAMBIÉN EN VANIDAD (la fusión es del
+            // ítem, viva donde lo pongan): el halo visual de las ALAS
+            // RÚNICAS (estilo 14) — sin física (el cielo es cosa de las
+            // alas de verdad / el hueco funcional).
+            try
+            {
+                var aurora = player.GetModPlayer
+                    <global::AethonMod.Content.Players.AlasAuroraPlayer>();
+                if (aurora != null && aurora.AlaEstilo == 0)
+                    aurora.AlaEstilo = 14;
+            }
+            catch { }
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
