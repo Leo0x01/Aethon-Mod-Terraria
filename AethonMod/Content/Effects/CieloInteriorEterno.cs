@@ -342,13 +342,17 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    Vector2 miradaJugador = Main.LocalPlayer != null
-                        ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
                     float perMedio = 760f;                      // el PERIODO del loop
                     float offMedio = Mod(camX * 0.035f, perMedio);
                     // v6.121 — CUATRO brazos por periodo (antes 3) y el
                     // overscan de dos periodos: el cuerpo medio también
                     // llena los bordes.
+                    // v6.150 — SIN OJOS EN EL FONDO (la letra: «deben
+                    // estar tentaculos de sombra de la pagina, pero sin
+                    // ojos ni colmillos en el fondo»): los brazos medios
+                    // son PURA SOMBRA DE PÁGINA — la piel que fluye sin
+                    // rostro. Los ojos viven SOLO en los dioses cercanos
+                    // de verdad (el pilar, el Eterno), no en el telón.
                     int repsMedio = (int)(w / perMedio) + 4;
                     for (int rep = -2; rep <= repsMedio - 2; rep++)
                     {
@@ -364,16 +368,6 @@ namespace AethonMod.Content.Effects
                             Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.5f, sem, 18, 0.19f);
                             DibujarTira(sb, espina, 22f, 52f, new Color(150, 96, 210),
                                 (0.50f + 0.16f * latido) * a, flujo: t * 0.020f + k * 0.21f);
-
-                            // LOS OJOS DEL BRAZO (2 por brazo — reparto áureo):
-                            // TODOS MIRAN al portador
-                            for (int e = 0; e < 2; e++)
-                            {
-                                float ue = 0.30f + 0.40f * e;
-                                int idx = (int)(ue * (espina.Length - 1));
-                                DibujarOjo(sb, espina[idx], 16f + 7f * VFXCore.Hash01(sem, 5 + e, 941),
-                                    miradaJugador, sem * 3 + e, (0.5f + 0.3f * latido) * a);
-                            }
                         }
                     }
                 }
@@ -427,12 +421,16 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    Vector2 miradaJugador = Main.LocalPlayer != null
-                        ? Main.LocalPlayer.Center - Main.screenPosition : new Vector2(w * 0.5f, h * 0.7f);
                     float perCerca = 640f;                     // el PERIODO del loop
                     float offCerca = Mod(camX * 0.06f, perCerca);
                     // v6.121 — el overscan de dos periodos también en los
                     // titanes: ningun borde se queda sin dios.
+                    // v6.150 — SIN OJOS EN EL FONDO (la letra: «deben
+                    // estar tentaculos de sombra de la pagina, pero sin
+                    // ojos ni colmillos en el fondo»): los titanes del
+                    // telón son PURA SOMBRA — el cuerpo de piel que fluye
+                    // sin rostro. El ojo que mira vive en el PILAR (el
+                    // minion-ojo de la casa), no en el decorado.
                     int repsCerca = (int)(w / perCerca) + 4;
                     for (int rep = -2; rep <= repsCerca - 2; rep++)
                     {
@@ -453,16 +451,6 @@ namespace AethonMod.Content.Effects
                             DibujarTira(sb, espina, 34f, 104f, new Color(168, 112, 224),
                                 (0.78f + 0.14f * latido) * a, flujo: t * 0.030f + k * 0.29f,
                                 grosorCentroAlt: 66f);
-
-                            // LOS OJOS DEL TITÁN (4 por cuerpo — TODOS te miran,
-                            // apertura escalonada, el latido los hincha)
-                            for (int e = 0; e < 4; e++)
-                            {
-                                float ue = 0.22f + 0.20f * e;
-                                int idx = (int)(ue * (espina.Length - 1));
-                                DibujarOjo(sb, espina[idx], 24f + 9f * VFXCore.Hash01(sem, 6 + e, 959),
-                                    miradaJugador, sem * 7 + e, (0.62f + 0.30f * latido) * a);
-                            }
                         }
                     }
                 }
@@ -624,38 +612,10 @@ namespace AethonMod.Content.Effects
             return f < 0f ? f + m : f;
         }
 
-        // ==================================================================
-        //  EL OJO DEL CUERPO — OjoAbismo girando hacia su presa (el
-        //  parpadeo aplasta la escala Y; la apertura vive en la semilla)
-        // ==================================================================
-        private static void DibujarOjo(SpriteBatch sb, Vector2 pos, float tam, Vector2 presa, int semilla, float alfa)
-        {
-            if (alfa <= 0.02f || _ojo == null) return;
-            // EL PARPADEO: cada ~7 s el ojo se cierra un instante
-            float ciclo = Frac01(Main.GlobalTimeWrappedHourly / 7f + VFXCore.Hash01(semilla, 1, 971));
-            float apertura = 1f;
-            if (ciclo > 0.93f)
-            {
-                float f = (ciclo - 0.93f) / 0.07f;
-                apertura = 1f - 0.97f * MathF.Sin(MathHelper.Pi * f);
-            }
-            if (apertura < 0.05f) return;
-
-            // LA MIRADA: el ojo GIRA hacia el portador (±0.35 rad)
-            Vector2 dir = presa - pos;
-            float rot = dir.LengthSquared() > 4f
-                ? MathF.Atan2(dir.Y, dir.X) * 0.22f
-                : 0f;
-            float late = 0.8f + 0.2f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.1f + semilla);
-
-            sb.Draw(_ojo, pos, null, new Color(226, 200, 255) * (alfa * apertura * late),
-                rot, _ojo.Size() * 0.5f, new Vector2(tam / 64f, (tam / 64f) * apertura),
-                SpriteEffects.None, 0f);
-            // el halo rojo-violeta del ojo (la lectura de noche)
-            sb.Draw(_ojo, pos, null, new Color(150, 60, 200) * (alfa * apertura * 0.24f),
-                rot, _ojo.Size() * 0.5f, new Vector2(tam * 1.7f / 64f, (tam * 1.7f / 64f) * apertura),
-                SpriteEffects.None, 0f);
-        }
+        // v6.150 — DibujarOjo MURIÓ (la letra: «sin ojos ni colmillos en
+        // el fondo»): el telón del cuerpo del dios es PURA SOMBRA DE
+        // PÁGINA — el ojo que mira vive en el PILAR (el minion-ojo), no
+        // en el decorado.
 
         // ==================================================================
         //  LAS TEXTURAS (lazy + null-safe — la armadura de la casa)

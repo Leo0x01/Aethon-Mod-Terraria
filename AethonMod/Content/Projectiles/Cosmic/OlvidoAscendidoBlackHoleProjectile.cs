@@ -262,91 +262,31 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>Materia absorbida: estelas TrailGlow cayendo en espiral.</summary>
         private void SpawnLibraryAbsorbedMatter()
+        
         {
-            for (int i = 0; i < 2; i++)
-            {
-                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(2.4f, 4.2f) *
-                             OlvidoAscendidoBlackHoleRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-
-                Vector2 inward = new Vector2(-(float)Math.Cos(angle), -(float)Math.Sin(angle));
-                Vector2 tangent = new Vector2(-(float)Math.Sin(angle), (float)Math.Cos(angle));
-                Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
-                                   tangent * Main.rand.NextFloat(0.25f, 0.5f);
-
-                Color start = new Color(110, 150, 255, 190);
-                Color end = new Color(240, 244, 255, 235);
-
-                var p = new ParticleData
-                {
-                    Position = spawnPos,
-                    Velocity = velocity,
-                    Scale = new Vector2(1.6f, 0.5f),
-                    Rotation = angle + MathHelper.Pi,
-                    PackedColor = ParticleManager.PackColor(start),
-                    PackedStartColor = ParticleManager.PackColor(start),
-                    PackedEndColor = ParticleManager.PackColor(end),
-                    TimeLeft = 75,
-                    Duration = 75,
-                    TextureId = ParticleTex.TrailGlow,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.AboveLens,
-                };
-                p.UserData0 = Projectile.Center.X;
-                p.UserData1 = Projectile.Center.Y;
-                p.UserData3 = 0.09f;
-                p.EnableComponent(ComponentFlag.PullTo);
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.ColorShift);
-                ParticleManager.Spawn(p);
-            }
+            // v6.150 — EL POLVITO GIRATORIO MURIÓ (la letra: «todos mantienen el polvito
+            // raro que gira todo el tiempo»): estas estelas de
+            // la librería (TrailGlow con ComponentFlag.Orbit,
+            // girando SIEMPRE) eran el polvito de verdad — la
+            // v6.149 mató el polvo de vanilla y dejó vivo ESTE.
+            // El agujero es 100% shader: el tratamiento
+            // aprobado, puro renderer.
+            return;
         }
 
         /// <summary>Estelas orbitando en la banda del vórtice de código
         /// (2.3..5.8× la esfera, elipse del plasma 0.96).</summary>
         private void SpawnLibraryAccretionDisk()
+        
         {
-            if (Main.rand.NextBool(4))
-            {
-                float shadow = OlvidoAscendidoBlackHoleRenderer.SpherePx *
-                               MathHelper.Max(Projectile.scale, 0.4f);
-                float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
-                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                // Kepler: ω ∝ r^(−3/2) — el interior gira más rápido.
-                float angVel = 0.16f * (float)Math.Pow(4.6f * shadow / radius, 1.5f);
-
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * radius,
-                    (float)Math.Sin(angle) * radius * 0.96f); // elipse del plasma
-
-                var p = new ParticleData
-                {
-                    Position = spawnPos,
-                    Velocity = Vector2.Zero,
-                    Scale = new Vector2(2.2f, 0.55f),
-                    Rotation = angle + MathHelper.PiOver2,
-                    RotationSpeed = angVel,
-                    PackedColor = ParticleManager.PackColor(new Color(110, 160, 255, 200)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(170, 200, 255, 200)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(12, 18, 100, 40)),
-                    TimeLeft = 48,
-                    Duration = 48,
-                    TextureId = ParticleTex.TrailGlow,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.AboveLens,
-                };
-                p.UserData0 = Projectile.Center.X;
-                p.UserData1 = Projectile.Center.Y;
-                p.UserData2 = angVel;
-                p.UserData3 = radius;
-                p.EnableComponent(ComponentFlag.Orbit);
-                p.EnableComponent(ComponentFlag.ColorShift);
-                p.EnableComponent(ComponentFlag.FadeOut);
-                ParticleManager.Spawn(p);
-            }
+            // v6.150 — EL POLVITO GIRATORIO MURIÓ (la letra: «todos mantienen el polvito
+            // raro que gira todo el tiempo»): estas estelas de
+            // la librería (TrailGlow con ComponentFlag.Orbit,
+            // girando SIEMPRE) eran el polvito de verdad — la
+            // v6.149 mató el polvo de vanilla y dejó vivo ESTE.
+            // El agujero es 100% shader: el tratamiento
+            // aprobado, puro renderer.
+            return;
         }
 
         // ------------------------------------------------------------------

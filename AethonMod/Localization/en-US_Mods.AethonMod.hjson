@@ -3742,8 +3742,9 @@ FormaEterna: {
 	Parte11: THE MANTLE — the veil that joins the pantheon
 	Parte12: THE VOID AURA — the masterpiece
 	Construida: ✦ THE ETERNAL FORM IS BUILT — part {0}/{1}: {2}
+	Anillos: ✧ THE RUNIC SUN RINGS awaken — each awakening step lights ONE more ring around the bearer
 	Completa: ✦✦ THE COMPLETE ETERNAL FORM — THE MANIFESTATION erupts and the form is CONVERTED into THE VOID AURA ACCESSORY ✦✦
-	TooltipPuerta: The Eternal Form is built on THE AWAKENING (101-112): one part per step, paid at THE ALTAR TABLE — 10 platinum + 1000 essences, +10% per level
+	TooltipPuerta: The Eternal Form is built on THE AWAKENING (101-120): one part per step up to the 11th, and from 113 to 119 THE RUNIC SUN RINGS light up one by one — the 12th part is born at 120 with THE MANIFESTATION
 }
 
 // v6.115 — THE PRISM WINDOW (the letter: "it can send the player back
@@ -3776,7 +3777,7 @@ Pergamino: {
 	SecDespertar: THE AWAKENING LADDER (1-120)
 	Despertar1: • Each level costs: N essences + coins (from 100 copper to 100 platinum) + hunting weapons and materials.
 	Despertar2: • THE HUNTING DOORS: King Slime (3) · Eye of Cthulhu (5) · The World's Evil (8) · Queen Bee (10) · Skeletron (13) · Wall of Flesh (20) · Queen Slime (23) · The Twins (25) · The Destroyer (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duke Fishron (37) · Empress of Light (38) · Lunatic Cultist (45) · Moon Lord (50) · Aethon (100).
-	Despertar3: • From 101 to 112 THE ETERNAL FORM is built (one part per step — see its section). From 113 to 120, THE EXTRA POWER: +10% attack per level to the WHOLE grimoire, cost rising 20% per level.
+	Despertar3: • From 101 to 111 THE ETERNAL FORM is built (one part per step — see its section). From 113 to 119, THE RUNIC SUN RINGS light up one by one around the bearer. From 113 to 120, THE EXTRA POWER: +10% attack per level to the WHOLE grimoire, cost rising 20% per level.
 	Despertar4: • THE WRATH OF THE OUTER BEING is earned at level 100 (with its hunt paid): the ultimate Beam. And THE EYE THAT WATCHES: the new eye weapon — it appears near the enemy, its gaze marks, the mark ignites the void burn (in multiplayer, the enemy player burns too).
 	SecAtaques: THE GRIMOIRE'S ATTACKS AND MINIONS
 	Ataques1: • THE EYES OF THE ETERNAL (11): the squadron that watches everything — each eye a living projectile with its own gaze.
@@ -3785,11 +3786,11 @@ Pergamino: {
 	Ataques4: • THE FEAST: the devouring that stops bosses and digests them whole.
 	Ataques5: • THE WRATH OF THE OUTER BEING: the ultimate beam of level 100.
 	Ataques6: • THE FIRST SUPPER: the first death of every boss, always the book's.
-	SecForma: THE ETERNAL FORM (the awakening 101-112)
-	Forma1: • When the awakening reaches 100, THE FORM BEGINS: from step 101 to 112, each level builds ONE PART — 12 in all: the Writing · the Three Rings · the First Light · the Ember · the Three Suns · the Ophanim · the Mantle · the Void Aura.
+	SecForma: THE ETERNAL FORM (the awakening 101-120)
+	Forma1: • When the awakening reaches 100, THE FORM BEGINS: from step 101 to 111 each level builds ONE PART (11 in all: the Writing · the Three Rings · the First Light · the Ember · the Three Suns · the Ophanim · the Mantle). From 113 to 119, THE RUNIC SUN RINGS light up ONE BY ONE around the bearer. And at 120: the 12th part (THE WINGS + THE AURA) with THE MANIFESTATION.
 	Forma2: • Each step COSTS: 10 platinum + 1000 Eternal essences, rising 10% per level (paid at THE ALTAR TABLE — devoured essences + bank coins). Each level grants +4% attack to the WHOLE grimoire (magic and summon).
-	Forma3: • The parts are PUT ON the player WHILE USING THE BOOK (not items: they are LIMBS of the bearer). Every ring, every sun, every light — one separate part.
-	Forma4: • At step 112 (the 12th part): the cosmetic item THE ETERNAL FORM is born, THE MANIFESTATION erupts (everything alive on screen dies with loot — a valid death) and THE BEARER'S VISUALS VANISH: the form was CONVERTED into the item.
+	Forma3: • The parts are PUT ON the player WHILE USING THE BOOK (not items: they are LIMBS of the bearer). Every ring, every sun, every light — one separate part. And the construction belongs to THE GRIMOIRE: each book builds ITS OWN form and spits it upon reaching ITS 120.
+	Forma4: • At step 120: the accessory THE ETERNAL FORM is born, THE MANIFESTATION erupts (the GREATEST light explosion — everything alive on screen dies with loot, a valid death) and THE BEARER'S VISUALS VANISH: the form was CONVERTED into the item.
 	SecAuras: THE AURAS · BUFFS AND DEBUFFS
 	SecLore: EL COMPENDIO DEL ETERNO
 	LoreIntro: — Grimorio del Eterno, susurrado durante la onceava noche de hambre Todo portador se hace, tarde o temprano, la misma pregunta.
@@ -3852,13 +3853,13 @@ Pergamino: {
 }
 
 PrismaInterior: {
-	Titulo: THE PRISM OF THE ETERNAL
-	Subtitulo: the interior's altar of colors — choose your path
+	Titulo: THE PILLAR OF THE ETERNAL
+	Subtitulo: the interior's pillar — choose your path
 	BotonVolver: RETURN TO THE REAL WORLD
 	BotonInvocar: SUMMON AETHON
 	YaVive: AETHON ALREADY WALKS THE INTERIOR
-	Leyenda: The altar materializes and THE GRIMOIRE floats above — the shards are born of the ceremony
-	NombreCorto: The Prism of the Eternal
+	Leyenda: The pillar materializes and THE GRIMOIRE floats above — the shards are born of the ceremony
+	NombreCorto: The Pillar of the Eternal
 	NombrePilar: The Eternal's Pillar — the plain's way out
 	OleadaTitulo: THE HUNGER WAVE
 	OleadaNivel: Level {0} of {1}

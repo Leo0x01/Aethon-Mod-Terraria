@@ -172,6 +172,27 @@ namespace AethonMod.Content.Tiles
             => true;
 
         // ================================================================
+        //  v6.150 — LA REGISTRACIÓN DEL SPECIALDRAW (la autopsia: «el
+        //  pilar no fue cambiado»): SpecialDraw NO corre solo — el
+        //  decompile lo dice plano: «Use DrawEffects hook to queue for
+        //  SpecialDraw» y solo se llama para los puntos registrados con
+        //  TilesRenderer.AddSpecialPoint(i, j, TileCounterType.Custom…
+        //  CustomNonSolid)». La v6.149 escribió el SpecialDraw pero
+        //  NADIE lo registraba: el sprite seguía cortado arriba y el
+        //  ojo-minion jamás nacía. AHORA cada tile del pilar pide su
+        //  turno al renderer (60 fps, PointClamp — el camino sano de
+        //  esta era del tML).
+        // ================================================================
+        public override void DrawEffects(int i, int j, SpriteBatch spriteBatch, ref TileDrawInfo drawData)
+        {
+            // SOLO el tile ORIGEN registra (el (1,4) de la colocación) —
+            // el SpecialDraw dibuja el marco completo desde ahí.
+            if (drawData.tileFrameX == 0 && drawData.tileFrameY == 0)
+                Main.instance.TilesRenderer.AddSpecialPoint(i, j,
+                    Terraria.GameContent.Drawing.TileDrawing.TileCounterType.CustomNonSolid);
+        }
+
+        // ================================================================
         //  v6.149 — EL DIBUJO ESPECIAL DEL PILAR (la letra: «el sprite del
         //  pilar se corta arriba»): vanilla CLIPA cada fila del mueble a
         //  su CoordinateHeight (la fila superior solo pinta 16px del

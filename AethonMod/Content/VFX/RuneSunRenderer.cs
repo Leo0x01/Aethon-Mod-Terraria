@@ -1006,6 +1006,14 @@ namespace AethonMod.Content.VFX
             // IGNORA → el RuidoDendritico se pintaba CRUDO ("un cuadrado con
             // textura, sin animación" — el reporte del usuario). El sol
             // original usa Immediate en TODOS sus pases; ahora igual.
+            // v6.150 — LA SONDA DE LA CASA: el client.log de la v6.149
+            // mostró TRES InvalidOperationException silenciosas al usar el
+            // Juicio de los Dos Soles — su PreDraw llama DibujarSol justo
+            // después de RestaurarLoteVanilla (lote vanilla ABIERTO) y este
+            // Begin pisaba ese Begin vivo. La sonda cierra cualquier lote
+            // ajeno ANTES de abrir el nuestro: DrawSunBody ya no exige un
+            // estado de entrada (contrato blindado, igual que VFXCore).
+            VFXCore.CerrarLoteSiAbierto();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -1013,6 +1021,10 @@ namespace AethonMod.Content.VFX
 
         private static void BeginAlpha()
         {
+            // v6.150 — LA SONDA (mismo fix que BeginAdditive: el crash del
+            // client.log nació EXACTAMENTE aquí — Begin sobre el lote vanilla
+            // que el PreDraw del Juicio dejaba abierto).
+            VFXCore.CerrarLoteSiAbierto();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);

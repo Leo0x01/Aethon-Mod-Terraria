@@ -581,7 +581,7 @@ namespace AethonMod.Content.Weapons.Definitivas
 
                 VFXCore.ReabrirLoteVanilla();
             }
-            catch { VFXCore.CerrarLoteSiAbierto(); }
+            catch { VFXCore.RestaurarLoteVanilla(); }
             return false;
         }
 

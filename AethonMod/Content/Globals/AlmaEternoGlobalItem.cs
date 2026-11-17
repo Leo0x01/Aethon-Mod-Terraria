@@ -48,6 +48,26 @@ namespace AethonMod.Content.Globals
         /// Forma Eterna (el estallido del nivel 1000)? Una por libro.</summary>
         public bool ManifestacionVivida;
 
+        // === v6.150 — LA FORMA ETERNA ES DEL LIBRO (la letra: «esto no
+        //     debe estar ligado a un jugador para saber si se completo,
+        //     debe estar ligado a un grimorio para completarlo»): las
+        //     partes construidas y LA CONVERSIÓN viajan con ESTE grimorio
+        //     — cada libro construye SU forma y la escupe AL LLEGAR al
+        //     120 de SU despertar. Migración: los saves v6.142-149
+        //     guardaban fePartes/feConvertida en el JUGADOR — al cargar
+        //     se copian al grimorio ACTIVO una sola vez. ===
+        /// <summary>Las partes de LA FORMA ETERNA construidas por ESTE
+        /// libro (0..12 — peldaños 101-112 del despertar).</summary>
+        public int FormasPartes = 0;
+
+        /// <summary>¿ESTE libro ya escupió LA FORMA ETERNA (el ítem
+        /// cosmético nació al llegar al 120)? Una por libro.</summary>
+        public bool FormaEscupida = false;
+
+        /// <summary>¿Ya se mostró el aviso de los ANILLOS DE SOLES
+        /// RÚNICOS creciendo (113-119)? Una por libro.</summary>
+        public bool AnillosAvisoVivido = false;
+
         /// <summary>¿ESTE libro ya escupió a su mascota (nivel 20)? La
         /// ceremonia no se repite por libro.</summary>
         public bool PetDelDespertar = false;
@@ -768,6 +788,9 @@ namespace AethonMod.Content.Globals
             {
                 if (NivelDespertar > 0) tag["almaDespertar"] = NivelDespertar;
                 tag["almaManifestacion"] = ManifestacionVivida;
+                // v6.150 — LA FORMA ETERNA DEL LIBRO (partes + escupida).
+                if (FormasPartes > 0) tag["almaFormasPartes"] = FormasPartes;
+                tag["almaFormaEscupida"] = FormaEscupida;
                 if (PetDelDespertar) tag["almaPet"] = true;
                 if (DevoracionPoder > 0) tag["almaPoder"] = DevoracionPoder;
                 // v6.51.11 — LA MESA DEL DESPERTAR (los contadores
@@ -824,6 +847,12 @@ namespace AethonMod.Content.Globals
                     Content.Systems.DespertarGrimorio.NivelMax,
                     tag.GetInt("almaDespertar")));
                 ManifestacionVivida = tag.GetBool("almaManifestacion");
+                // v6.150 — LA FORMA ETERNA DEL LIBRO (saves viejos sin las
+                // claves: el grimorio nace sin partes — la migración del
+                // jugador la rellena una sola vez).
+                FormasPartes = System.Math.Max(0, System.Math.Min(12, tag.GetInt("almaFormasPartes")));
+                FormaEscupida = tag.GetBool("almaFormaEscupida");
+                AnillosAvisoVivido = tag.GetBool("almaAnillosAviso");
                 PetDelDespertar = tag.GetBool("almaPet");
                 DevoracionPoder = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPoder")));
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales).
@@ -923,6 +952,10 @@ namespace AethonMod.Content.Globals
                 writer.Write((byte)5);                    // versión del alma (v6.93: el banco del devoro)
                 writer.Write(NivelDespertar);
                 writer.Write(PetDelDespertar);
+                // v6.150 — LA FORMA ETERNA DEL LIBRO (partes + escupida
+                // viajan con el item por el cable).
+                writer.Write(FormasPartes);
+                writer.Write(FormaEscupida);
                 writer.Write(DevoracionPoder);
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales
                 // del peldaño vivo — los tooltips del portador los leen).
@@ -974,6 +1007,11 @@ namespace AethonMod.Content.Globals
                 NivelDespertar = System.Math.Max(0, System.Math.Min(
                     Content.Systems.DespertarGrimorio.NivelMax, reader.ReadInt32()));
                 PetDelDespertar = reader.ReadBoolean();
+                // v6.150 — LA FORMA ETERNA DEL LIBRO: viaja DESPUÉS del
+                // pet en TODA versión ≥1 (los peers viejos no existen —
+                // mismatches de versión de mod no se soportan).
+                FormasPartes = System.Math.Max(0, System.Math.Min(12, reader.ReadInt32()));
+                FormaEscupida = reader.ReadBoolean();
                 DevoracionPoder = System.Math.Max(0, reader.ReadInt32());
                 if (ver >= 2)
                 {

@@ -499,9 +499,21 @@ namespace AethonMod.Content.UI
                 };
 
                 sb.End();
+                // v6.150 — LA MATRIZ RECUPERADA (la autopsia: «todos los
+                // textos estan corridos hacia la izquierda y un poco
+                // hacia arriba»): este Begin intermedio NO pasaba la
+                // matriz — el marco del libro se dibujaba con la
+                // UIScaleMatrix del pase de interfaz (UI escalada), pero
+                // TODO el cuerpo de texto caía en coordenadas CRUDAS de
+                // pantalla → con la escala de UI ≠ 100 % los textos
+                // quedaban DESPLAZADOS hacia arriba-izquierda respecto a
+                // las páginas. LA CURA: reabrir con Main.UIScaleMatrix
+                // (la MISMA matriz del pase — el decompile lo prueba: el
+                // bucle de layers corre bajo _uiScaleMatrix) + recorte
+                // con RasterizerState.ScissorTest para las columnas.
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
-                    RasterizerState.CullNone);
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
 
                 _maxIzq = DibujarColumna(sb, columnas[0], pagIzq, recIzq, ref _scrollIzq, true);
                 _maxDer = DibujarColumna(sb, columnas[1], pagDer, recDer, ref _scrollDer, false);

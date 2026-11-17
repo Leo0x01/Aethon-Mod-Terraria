@@ -113,6 +113,15 @@ namespace AethonMod.Content.Players
         /// FormaEternaPlayer cada tick (0 = sin forma en construcción).</summary>
         public int PartesFormaEterna;
 
+        /// <summary>v6.150 — LOS ANILLOS DE SOLES RÚNICOS de la
+        /// construcción (la letra: «que se muestren los anillos de
+        /// soles runicos mientras lo hace»): 1..7 — cada peldaño del
+        /// despertar 113-119 enciende UN anillo más del sol rúnico
+        /// alrededor del portador (el mismo sistema de SigiloLib que
+        /// viste a los soles de verdad). Lo escribe FormaEternaPlayer
+        /// cada tick (0 = todavía no llegó a los anillos).</summary>
+        public int AnillosSolRunico;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
@@ -170,6 +179,10 @@ namespace AethonMod.Content.Players
             HaloArcoiris = false;
             BrasaDelEclipse = false;
             BrilloSolar = false;
+            // v6.150 — LA CONSTRUCCIÓN TAMBIÉN SE APAGA (los anillos de
+            // soles rúnicos solo viven mientras el grimorio viste).
+            PartesFormaEterna = 0;
+            AnillosSolRunico = 0;
         }
 
         public override void PostUpdate()
@@ -401,6 +414,17 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.BrilloSolarHalo>(),
                         0, 0f, Player.whoAmI);
                 }
+                // v6.150 — LOS ANILLOS DE SOLES RÚNICOS DE LA CONSTRUCCIÓN
+                // (la letra: «que se muestren los anillos de soles runicos
+                // mientras lo hace»): 1..7 anillos del sol rúnico alrededor
+                // del portador, uno por peldaño del despertar 113-119.
+                if (AnillosSolRunico > 0 && !EspiarAnillosSol())
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("AnillosSolRunico"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AnillosSolRunicoHalo>(),
+                        0, 0f, Player.whoAmI);
+                }
             }
 
             // === LA FORMA ASCENDIDA — v6.50.45, EL PATRÓN DIVINO ===
@@ -544,6 +568,20 @@ namespace AethonMod.Content.Players
         private bool EspiarBrilloSolar()
         {
             int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.BrilloSolarHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>v6.150 — ¿YA vive el halo de los ANILLOS DE SOLES
+        /// RÚNICOS de la construcción? (el patrón de EspiarBrilloSolar).</summary>
+        private bool EspiarAnillosSol()
+        {
+            int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.AnillosSolRunicoHalo>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile p = Main.projectile[i];

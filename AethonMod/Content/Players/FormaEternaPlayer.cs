@@ -9,53 +9,52 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// FormaEternaPlayer — v6.142 — LA FORMA ETERNA DEL DESPERTAR (la
-    /// letra completa: «La forma eterna debia estar en el nivel de
-    /// despertar, cuando el despertar llegue a nivel 100, entonces
-    /// comienza a desbloquear la forma del eterno, como dices 12
-    /// partes, seria hasta nivel 112 pagando los requisitos con 10 de
-    /// platino + 1000 esencias del Eterno, subiendo 10% por nivel,
-    /// dando cada nivel un +4% de ataque y su pieza visual puesta en
-    /// el jugador SOLO mientras usa el libro — no es un ítem, es un
-    /// miembro del portador. Luego con las 12: el ítem cosmético La
-    /// Forma Eterna nace y LA MANIFESTACIÓN estalla… en el momento de
-    /// la manifestacion la forma eterna que es parte del grimorio
-    /// desaparece ya que es convertida en el item cosmetico»).
+    /// FormaEternaPlayer — v6.150 — LA FORMA ETERNA ES DEL GRIMORIO.
     ///
-    /// EL DISEÑO:
-    ///  · LA CASA: EL DESPERTAR del Grimorio del Eterno (101-112 — el
-    ///    constructor es DespertarGrimorioSistema.SubirNivel).
-    ///  · LAS 12 PARTES (una por peldaño): cada una es UNA PARTE
-    ///    VISUAL DEL CUERPO que se PONE en el portador MIENTRAS USA EL
-    ///    LIBRO (nada de ítems: son MIEMBROS del portador).
-    ///  · EL ATAQUE: lo paga BonusDano del despertar (+4%/nivel
-    ///    101-112, +10%/nivel 113-120) — A TODO el grimorio (mágico e
-    ///    invocación), como toda la escalera.
-    ///  · LA 12ª PARTE (nivel 112): LA CONVERSIÓN — el ítem cosmético
-    ///    LA FORMA ETERNA nace, LA MANIFESTACIÓN estalla y LOS
-    ///    VISUALES DEL PORTADOR DESAPARECEN (la forma se convirtió en
-    ///    el ítem: el portador ya no la lleva puesta — se la pone
-    ///    quien la vista, como el cosmético de siempre).
+    /// LA LETRA NUEVA (v6.150): «la forma eterna no se viste si el
+    /// jugador ya la completo en un grimorio, esto no debe estar ligado
+    /// a un jugador para saber si se completo, debe estar ligado a un
+    /// grimorio para completarlo» + «la forma eterna no viste los
+    /// anillos de soles runicos mientras se construye hasta nivel 112,
+    /// por lo tanto que se construya hasta nivel 120 y que se muestren
+    /// los anillos de soles runicos mientras lo hace».
+    ///
+    /// EL DISEÑO (v6.150 — el estado CAMBIÓ DE DUEÑO):
+    ///  · LAS PARTES Y LA CONVERSIÓN VIVEN EN EL GRIMORIO
+    ///    (AlmaEternoGlobalItem.FormasPartes / FormaEscupida): cada
+    ///    libro construye SU forma y la escupe AL LLEGAR al 120 de SU
+    ///    despertar. Un jugador que ya completó un grimorio puede
+    ///    empezar OTRO y lo verá construirse desde cero.
+    ///  · LA CONSTRUCCIÓN LLEGA HASTA EL 120: las partes 1-11 nacen en
+    ///    los peldaños 101-111 (una por nivel, como siempre) y de 113 a
+    ///    119 LOS ANILLOS DE SOLES RÚNICOS se encienden UNO A UNO
+    ///    alrededor del portador (el vestido del sol creciendo — la
+    ///    corona que la letra pedía ver). El 120: la 12ª parte (LAS
+    ///    ALAS + EL AURA) + LA CONVERSIÓN (el ítem nace de la
+    ///    explosión de luz MÁS GRANDE).
+    ///  · MIGRACIÓN (una sola vez): los saves v6.142-149 guardaban
+    ///    fePartes/feConvertida en el JUGADOR — al cargar, copian al
+    ///    grimorio ACTIVO y el jugador queda limpio.
     /// </summary>
     public class FormaEternaPlayer : ModPlayer
     {
         /// <summary>¿Cuántas partes tiene LA FORMA ETERNA COMPLETA?</summary>
         public const int PartesTotales = 12;
 
-        // ============ EL ESTADO (persiste con el jugador) ============
+        // ============ EL ESTADO (v6.150 — YA NO VIVE AQUÍ) ============
+        // PartesConstruidas/Convertida/ManifestacionVivida viajan con el
+        // GRIMORIO (AlmaEternoGlobalItem). Este ModPlayer solo conserva
+        // los campos por la MIGRACIÓN (leer los saves viejos una vez).
 
-        /// <summary>Las partes ya construidas (0..12 — lo construyó EL
-        /// DESPERTAR del libro: peldaños 101-112).</summary>
-        public int PartesConstruidas;
+        /// <summary>MIGRACIÓN — las partes del save viejo (v6.142-149,
+        /// vivían en el jugador). Se copian al grimorio y se limpian.</summary>
+        public int LegadoPartes;
 
-        /// <summary>LA CONVERSIÓN ya vivió (la 12ª parte se convirtió
-        /// en el ítem cosmético — los visuales ya NO visten al
-        /// portador).</summary>
-        public bool Convertida;
+        /// <summary>MIGRACIÓN — la conversión del save viejo.</summary>
+        public bool LegadoConvertida;
 
-        /// <summary>¿Ya vivió LA MANIFESTACIÓN? (una vez por jugador —
-        /// el ítem cosmético puede perderse, la gloria no repite).</summary>
-        public bool ManifestacionVivida;
+        /// <summary>MIGRACIÓN — la manifestación del save viejo.</summary>
+        public bool LegadoManifestacion;
 
         // ============ LAS 12 PARTES (el orden de adentro hacia afuera) ============
         //   1  LA ESCRITURA — el tatuaje rúnico (la triple corona de conjuro)
@@ -69,7 +68,7 @@ namespace AethonMod.Content.Players
         //   9  EL TERCER SOL — el coro completo
         //  10  LAS OFANIM — las ruedas de Ezequiel
         //  11  EL MANTO — el velo que une el panteón
-        //  12  EL AURA DEL VACÍO — la obra maestra (el campo activo)
+        //  12  EL AURA DEL VACÍO + LAS ALAS — la obra maestra (nace al 120)
         public static string ClaveParte(int i) => i switch
         {
             0 => "Mods.AethonMod.FormaEterna.Parte1",
@@ -87,77 +86,96 @@ namespace AethonMod.Content.Players
             _ => "Mods.AethonMod.FormaEterna.Parte1",
         };
 
+        // ============ EL ACCESO AL ESTADO DEL LIBRO ============
+
+        /// <summary>v6.150 — El grimorio ACTIVO del portador (el de la
+        /// barra; null si no lleva ninguno).</summary>
+        public static Item GrimorioActivo(Player p)
+        {
+            if (p == null || !p.active) return null;
+            bool libroEnBarra = false;
+            for (int i = 0; i < 10; i++)
+            {
+                Item inv = p.inventory[i];
+                if (inv != null && !inv.IsAir &&
+                    inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                { libroEnBarra = true; break; }
+            }
+            if (!libroEnBarra) return null;
+            return global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p);
+        }
+
+        /// <summary>v6.150 — Las partes construidas por EL GRIMORIO que
+        /// el portador lleva puesto (0 si no lleva ninguno).</summary>
+        public static int PartesDe(Item grimorio)
+        {
+            var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(grimorio);
+            return alma == null ? 0 : alma.FormasPartes;
+        }
+
+        /// <summary>v6.150 — ¿EL grimorio ya escupió su Forma Eterna?</summary>
+        public static bool EscupidaDe(Item grimorio)
+        {
+            var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(grimorio);
+            return alma != null && alma.FormaEscupida;
+        }
+
         // ============ EL CONSTRUCTOR (lo llama SubirNivel 101-112) ============
 
-        /// <summary>Construye la parte N (1-12) del peldaño del despertar
-        /// (el pago ya lo cobró la MESA — esencias + monedas). Al llegar
-        /// a la 12: LA CONVERSIÓN (el ítem nace + LA MANIFESTACIÓN + los
-        /// visuales del portador DESAPARECEN).</summary>
+        /// <summary>v6.150 — Construye la parte N (1-12) EN EL GRIMORIO
+        /// ACTIVO del portador (el pago ya lo cobró la MESA). Al llegar
+        /// a la 12 (el 120 del despertar): LA CONVERSIÓN — el ítem nace
+        /// + LA MANIFESTACIÓN. El estado pertenece AL LIBRO: cada
+        /// grimorio construye el suyo.</summary>
         public void ConstruirParte(int numero)
         {
             try
             {
                 if (numero < 1 || numero > PartesTotales) return;
-                if (PartesConstruidas >= numero) return;   // ya construida
-                PartesConstruidas = numero;
+                Item libro = GrimorioActivo(Player);
+                var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(libro);
+                if (alma == null) return;                       // sin libro: nada que construir
+                if (alma.FormasPartes >= numero) return;        // este libro ya la tiene
+                alma.FormasPartes = numero;
 
                 // EL AVISO (la voz de la casa)
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.FormaEterna.Construida",
-                        PartesConstruidas, PartesTotales,
+                        alma.FormasPartes, PartesTotales,
                         Language.GetTextValue(ClaveParte(numero - 1))),
                     new Color(196, 138, 255));
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
 
                 // ¿LA CONVERSIÓN? (la 12ª parte — la cima de la escalera)
-                if (PartesConstruidas >= PartesTotales && !Convertida)
-                    ConvertirLaForma();
-                // v6.147 — LA PROTECCIÓN DEL DOBLE ESCUPE: si el jugador
-                // ya convirtió una vez (save viejo con feConvertida) y
-                // vuelve a construir 12 partes con OTRO grimorio, el
-                // ESCUPE no se repite — el ítem ya es suyo (la escalera
-                // viva del despertar manda el vestido, no este flag).
+                if (alma.FormasPartes >= PartesTotales && !alma.FormaEscupida)
+                    ConvertirLaForma(libro, alma);
             }
             catch { }
         }
 
-        /// <summary>v6.142 — LA CONVERSIÓN (la letra: «en el momento de
-        /// la manifestacion la forma eterna que es parte del grimorio
-        /// desaparece ya que es convertida en el item cosmetico»): la
-        /// forma que vestía al portador SE CONVIERTE — el ítem cosmético
-        /// LA FORMA ETERNA nace, LA MANIFESTACIÓN estalla (una sola vez).
-        /// v6.147 — la letra nueva la llama EL ESCUPE: el grimorio al
-        /// llegar al 120 del despertar ESCUPE La Forma Eterna (el ítem
-        /// con las alas rúnicas y el aura dentro); el vestido del dios
-        /// se recoge y desde entonces la forma vive en el ítem.</summary>
-        private void ConvertirLaForma()
+        /// <summary>v6.150 — LA CONVERSIÓN, EN EL LIBRO (la letra: «en el
+        /// momento de la manifestacion la forma eterna que es parte del
+        /// grimorio desaparece ya que es convertida en el item
+        /// cosmetico»): la forma que vestía al portador SE CONVIERTE —
+        /// el ítem cosmético LA FORMA ETERNA nace, LA MANIFESTACIÓN
+        /// estalla (una sola vez POR LIBRO).</summary>
+        private void ConvertirLaForma(Item libro,
+            global::AethonMod.Content.Globals.AlmaEternoGlobalItem alma)
         {
             try
             {
                 if (Player == null || !Player.active) return;
-                Convertida = true;
+                alma.FormaEscupida = true;
 
-                // v6.143 — EL ACCESORIO NACE (la letra: «sea el
-                // accesorio, ya que debe tener el efecto de aura de
-                // vacío»): La Forma Eterna ES un accesorio — puesto,
-                // enciende EL AURA DEL VACÍO (el ancla de 19 tiles),
-                // su QUEMADURA en los impíos (×1→×3 por cercanía, slow
-                // ×0,55, el fuego de salida) y SUS BUFFS al portador
-                // (Vacío Exterior mientras arden + el buff del aura +
-                // los stats del panteón).
+                // EL ACCESORIO NACE (la letra v6.143: «sea el accesorio,
+                // ya que debe tener el efecto de aura de vacío» + v6.145:
+                // las alas rúnicas viven DENTRO).
                 Player.QuickSpawnItem(Player.GetSource_GiftOrReward(),
                     ModContent.ItemType<Items.Cosmetics.FormaEternaItem>(), 1);
 
-                // v6.145 — LAS ALAS VIVEN DENTRO (la letra: «ahora las
-                // alas runicas deben estar tambien fusionadas dentro de
-                // la forma eterna»): la Forma Eterna ES el accesorio
-                // con las alas rúnicas integradas — inmunidad a las
-                // caídas y vuelo infinito (los PostUpdateEquips del
-                // ítem). NADA de regalo aparte: la fusión ES el hito.
-
-                // LA MANIFESTACIÓN (una sola vez): la explosión de luz
-                if (!ManifestacionVivida)
+                // LA MANIFESTACIÓN (una por LIBRO): la explosión de luz.
+                if (!alma.ManifestacionVivida)
                 {
-                    ManifestacionVivida = true;
+                    alma.ManifestacionVivida = true;
                     Content.Systems.DespertarGrimorioSistema.ManifestacionDeLaForma(Player);
                 }
             }
@@ -170,75 +188,79 @@ namespace AethonMod.Content.Players
         {
             try
             {
-                // v6.147 — LA LETRA NUEVA MANDA (el usuario: «el vestido
-                // debe verse siempre que un grimorio no llegue a nivel 120
-                // de despertar, y una vez llega a nivel 120 de despertar
-                // debe escupir La Forma Eterna»): el vestido ya NO muere
-                // con la conversión vieja — vive MIENTRAS el grimorio
-                // ACTIVO (el de la barra) NO ha llegado al 120. El estado
-                // viejo 'Convertida' queda como historial (el ítem ya
-                // nació una vez — no se re-escupe), pero el VESTIDO manda
-                // la escalera VIVA del libro, no el recuerdo.
-                //
-                // LA LETRA ORIGINAL (v6.141): «una parte que sera puesta
-                // en el jugador MIENTRAS USA EL LIBRO» + la v6.146: el
-                // libro en la HOTBAR (los primeros 10 slots), no la bolsa.
-                bool libroEnBarra = false;
-                for (int i = 0; i < 10; i++)
-                {
-                    Item inv = Player.inventory[i];
-                    if (inv != null && !inv.IsAir &&
-                        inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-                    { libroEnBarra = true; break; }
-                }
-                if (!libroEnBarra || PartesConstruidas <= 0) return;
+                // v6.150 — LA MIGRACIÓN PRIMERO (una sola vez): los saves
+                // v6.142-149 traían el estado en el JUGADOR — se copia al
+                // grimorio activo en cuanto exista y se limpia.
+                if (LegadoPartes > 0 || LegadoConvertida || LegadoManifestacion)
+                    MigrarAlGrimorioSiHaceFalta();
+
+                // v6.150 — LA LETRA NUEVA MANDA: «esto no debe estar
+                // ligado a un jugador para saber si se completo, debe
+                // estar ligado a un grimorio para completarlo». El
+                // vestido lo decide EL GRIMORIO ACTIVO (sus partes, su
+                // escupida) — el jugador ya NO guarda nada.
+                Item libroActivo = GrimorioActivo(Player);
+                if (libroActivo == null) return;
+                var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(libroActivo);
+                if (alma == null || alma.FormasPartes <= 0) return;
 
                 // LA ESCALERA VIVA: el despertar DEL LIBRO ACTIVO decide.
-                // < 120 → el dios viste al portador (las partes que haya
-                // construido). ≥ 120 → la forma YA FUE ESCUPIDA (nació el
-                // ítem con LA MANIFESTACIÓN en ConvertirLaForma) y el
-                // portador la lleva puesta como accesorio — el vestido
-                // del dios se recoge.
-                Item libroActivo = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(Player);
-                if (libroActivo == null) return;
+                // < 120 → el dios viste al portador (las partes construidas
+                // + los anillos de soles rúnicos de 113-119). ≥ 120 → la
+                // forma YA FUE ESCUPIDA (nació el ítem) y el portador la
+                // lleva puesta como accesorio — el vestido del dios se recoge.
                 int despertar = Systems.DespertarGrimorio.NivelDe(libroActivo);
-                bool formaEscupida = despertar >= Systems.DespertarGrimorio.NivelManifestacion ||
-                                     Convertida;
-                if (formaEscupida) return;
+                if (despertar >= Systems.DespertarGrimorio.NivelManifestacion ||
+                    alma.FormaEscupida)
+                    return;
 
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;
 
-                // v6.149 — EL VESTIDO SE CONSTRUYE PARTE POR PARTE (la
-                // letra: «no puedo ver La forma Eterna construyendose a
-                // medida que avanza el despertar del grimorio del
-                // eterno»): el contador de partes VIAJA CON EL JUGADOR —
-                // el anillo dorsal lo lee para crecer en densidad (de la
-                // escritura desnuda de la parte 1 a la triple corona
-                // completa de la parte 4), y cada umbral enciende SU
-                // capa. La construcción ahora SE VE peldaño a peldaño.
-                visuales.PartesFormaEterna = PartesConstruidas;
+                // EL VESTIDO SE CONSTRUYE PARTE POR PARTE — el contador
+                // viaja al anillo dorsal (crece con cada parte).
+                visuales.PartesFormaEterna = alma.FormasPartes;
 
                 // LAS PARTES SE PONEN (de adentro hacia afuera):
-                if (PartesConstruidas >= 1) visuales.AnilloDorsal = true;         // 1: la escritura
-                if (PartesConstruidas >= 5) visuales.FormaAscendidaVisual = true;  // 5: la primera luz
-                if (PartesConstruidas >= 6) visuales.BrasaDelEclipse = true;       // 6: la brasa
-                if (PartesConstruidas >= 7) visuales.BrilloSolar = true;           // 7-9: los soles
-                if (PartesConstruidas >= 10) visuales.FormaAscendidaOchoVisual = true; // 10: las ofanim
-                // v6.149 — LA PARTE 11, EL MANTO: el velo que une el
-                // panteón — la Primera Luz VUELVE a vestirse (ahora como
-                // velo del manto: la luz ya no es solo el estandarte de
-                // la parte 5, es la tela que cose todo lo construido).
-                if (PartesConstruidas >= 11) visuales.FormaAscendidaVisual = true;
+                if (alma.FormasPartes >= 1) visuales.AnilloDorsal = true;         // 1: la escritura
+                if (alma.FormasPartes >= 5) visuales.FormaAscendidaVisual = true;  // 5: la primera luz
+                if (alma.FormasPartes >= 6) visuales.BrasaDelEclipse = true;       // 6: la brasa
+                if (alma.FormasPartes >= 7) visuales.BrilloSolar = true;           // 7-9: los soles
+                if (alma.FormasPartes >= 10) visuales.FormaAscendidaOchoVisual = true; // 10: las ofanim
+                // LA PARTE 11, EL MANTO: el velo que une el panteón.
+                if (alma.FormasPartes >= 11) visuales.FormaAscendidaVisual = true;
 
-                // (EL ATAQUE no se paga aquí: lo paga BonusDano del
-                // despertar — +4%/nivel 101-112 y +10%/nivel 113-120, a
-                // TODO el ataque del grimorio, mágico e invocación.)
+                // ============================================================
+                //  v6.150 — LOS ANILLOS DE SOLES RÚNICOS MIENTRAS SE
+                //  CONSTRUYE (la letra: «la forma eterna no viste los
+                //  anillos de soles runicos mientras se construye hasta
+                //  nivel 112, por lo tanto que se construya hasta nivel
+                //  120 y que se muestren los anillos de soles runicos
+                //  mientras lo hace»): de 113 a 119 — DESPUÉS de las 11
+                //  partes, ANTES de la escupida — LOS ANILLOS DEL SOL
+                //  RÚNICO se encienden UNO A UNO alrededor del portador
+                //  (el mismo sistema de SigiloLib que viste a los soles:
+                //  cada peldaño un anillo más, 7 al llegar al 119). El
+                //  vestido del sol creciendo hacia el 120.
+                // ============================================================
+                if (despertar > Systems.DespertarGrimorio.NivelManifestacion - 8 &&
+                    despertar < Systems.DespertarGrimorio.NivelManifestacion)
+                {
+                    visuales.AnillosSolRunico = despertar - 112; // 113→1 … 119→7
+                    if (visuales.AnillosSolRunico > 0 &&
+                        Player.whoAmI == Main.myPlayer && !alma.AnillosAvisoVivido)
+                    {
+                        alma.AnillosAvisoVivido = true;
+                        Main.NewText(Language.GetTextValue(
+                                "Mods.AethonMod.FormaEterna.Anillos"),
+                            new Color(255, 215, 120));
+                    }
+                }
 
                 // LA PARTE 12 — EL AURA DEL VACÍO: la obra maestra es EL
                 // EFECTO ACTIVO (el campo arde mientras la forma viste al
                 // portador — hasta que el libro llega al 120 y LA ESCUPE).
-                if (PartesConstruidas >= 12)
+                if (alma.FormasPartes >= 12)
                 {
                     if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
                     {
@@ -261,24 +283,51 @@ namespace AethonMod.Content.Players
             catch { }
         }
 
-        // ============ PERSISTENCIA ============
+        // ============ LA MIGRACIÓN (una sola vez) ============
+
+        /// <summary>v6.150 — Copia el estado VIEJO del jugador (saves
+        /// v6.142-149) al grimorio ACTIVO y se limpia: la forma eterna
+        /// pasa a ser del LIBRO. La llama PostUpdateEquips (cuando el
+        /// grimorio ya existe — sin libro no hay a quién dárselo).</summary>
+        private void MigrarAlGrimorioSiHaceFalta()
+        {
+            try
+            {
+                if (LegadoPartes <= 0 && !LegadoConvertida && !LegadoManifestacion)
+                    return;                                    // save nuevo: nada que migrar
+                Item libro = GrimorioActivo(Player);
+                var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(libro);
+                if (alma == null) return;                      // sin grimorio: se reintenta el próximo tick
+
+                if (LegadoPartes > alma.FormasPartes) alma.FormasPartes = LegadoPartes;
+                if (LegadoConvertida) alma.FormaEscupida = true;
+                if (LegadoManifestacion) alma.ManifestacionVivida = true;
+                LegadoPartes = 0;
+                LegadoConvertida = false;
+                LegadoManifestacion = false;
+            }
+            catch { }
+        }
+
+        // ============ PERSISTENCIA (solo la migración pendiente) ============
         public override void SaveData(Terraria.ModLoader.IO.TagCompound tag)
         {
-            tag["fePartes"] = PartesConstruidas;
-            tag["feConvertida"] = Convertida;
-            tag["feManifestacion"] = ManifestacionVivida;
+            // v6.150 — el estado YA VIVE EN EL LIBRO. Aquí solo queda la
+            // migración PENDIENTE (jugador sin grimorio en el momento de
+            // migrar): se conserva hasta que tenga el libro puesto.
+            if (LegadoPartes > 0) tag["fePartes"] = LegadoPartes;
+            if (LegadoConvertida) tag["feConvertida"] = true;
+            if (LegadoManifestacion) tag["feManifestacion"] = true;
         }
 
         public override void LoadData(Terraria.ModLoader.IO.TagCompound tag)
         {
-            PartesConstruidas = Math.Max(0, Math.Min(PartesTotales, tag.GetInt("fePartes")));
-            Convertida = tag.GetBool("feConvertida");
-            ManifestacionVivida = tag.GetBool("feManifestacion");
-            // LA MIGRACIÓN HONESTA: las partes v6.141 se pagaron con el
-            // nivel del LIBRO — en la v6.142 la casa es el DESPERTAR. El
-            // estado sobrevive tal cual (las construidas, construidas
-            // están): quien quiera las 12 de verdad, que suba el
-            // despertar — las partes ya puestas se respetan.
+            // v6.150 — LECTURA COMPATIBLE: el save viejo traía el estado
+            // del jugador; se recibe como MIGRACIÓN pendiente (se copia al
+            // grimorio en cuanto el jugador entre a un mundo con él).
+            LegadoPartes = Math.Max(0, Math.Min(PartesTotales, tag.GetInt("fePartes")));
+            LegadoConvertida = tag.GetBool("feConvertida");
+            LegadoManifestacion = tag.GetBool("feManifestacion");
         }
     }
 }
