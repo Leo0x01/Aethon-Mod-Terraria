@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -169,5 +170,62 @@ namespace AethonMod.Content.Tiles
 
         public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
             => true;
+
+        // ================================================================
+        //  v6.149 — EL DIBUJO ESPECIAL DEL PILAR (la letra: «el sprite del
+        //  pilar se corta arriba»): vanilla CLIPA cada fila del mueble a
+        //  su CoordinateHeight (la fila superior solo pinta 16px del
+        //  marco) y el capitel del prisma quedaba decapitado. EL
+        //  SPECIALDRAW dibuja el MARCO COMPLETO (86px) de una pieza,
+        //  anclado a la esquina superior izquierda del objeto — sin
+        //  clips por fila, con el frame animado de siempre.
+        // ================================================================
+        public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
+        {
+            try
+            {
+                Tile tile = Main.tile[i, j];
+                if (tile == null || !tile.HasTile) return;
+                // SOLO el tile ORIGEN dibuja (el (1,4) de la colocación:
+                // topLeft = (i-1, j-4))
+                int ox = i - 1, oy = j - 4;
+                Tile origen = Main.tile[ox, oy];
+                if (origen == null || !origen.HasTile ||
+                    origen.TileType != Type) return;
+
+                Texture2D tex = ModContent.Request<Texture2D>(Texture).Value;
+                int frame = Main.tileFrame[Type];
+                var src = new Rectangle(0, frame * ALTO_MARCO, tex.Width, ALTO_MARCO);
+                Vector2 pos = new Vector2(ox * 16, oy * 16) - Main.screenPosition;
+                // la sombra suave del mueble (el estándar de vanilla)
+                pos += new Vector2(-2f, 0f);
+
+                spriteBatch.Draw(tex, pos, src, Lighting.GetColor(ox, oy), 0f,
+                    Vector2.Zero, 1f, SpriteEffects.None, 0f);
+
+                // v6.149 — EL OJO-MINION DEL PILAR (la letra: «debe usar a
+                // un minion como ojo… y debe siempre mirar al jugador»): el
+                // SpecialDraw mantiene VIVO al ojo sobre el prisma (lo
+                // spawnea si no existe — el minion se autolimpia si el
+                // pilar o el interior mueren).
+                if (Main.netMode != NetmodeID.Server && !Main.gameMenu)
+                {
+                    int tipoOjo = ModContent.ProjectileType
+                        <Projectiles.Cosmetic.PilarOjoMinion>();
+                    bool vivo = false;
+                    for (int pi = 0; pi < Main.maxProjectiles; pi++)
+                    {
+                        Projectile pr = Main.projectile[pi];
+                        if (pr != null && pr.active && pr.type == tipoOjo)
+                        { vivo = true; break; }
+                    }
+                    if (!vivo)
+                        Projectile.NewProjectile(null,
+                            new Vector2((i + 0.5f) * 16f, (j - 4) * 16f - 34f),
+                            Vector2.Zero, tipoOjo, 0, 0f, Main.myPlayer);
+                }
+            }
+            catch { }
+        }
     }
 }

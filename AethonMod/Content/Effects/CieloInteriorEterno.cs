@@ -543,44 +543,62 @@ namespace AethonMod.Content.Effects
             float grosorPunta, Color tinte, float alfa = 1f, float flujo = 0f,
             float grosorCentroAlt = -1f)
         {
-            // v6.145 — LA SOMBRA DE LA PÁGINA DE VERDAD (la letra:
-            // «esto no esta implementando, lo que hiciste fue quitar los
-            // que existian pero no incluiste los nuevos, estos nuevos
-            // deben ser tentaculos creados con la sombra de la pagina
-            // original pero sin dientes ni ojos, y con bruma densa en la
-            // base»): LA MASA CLÁSICA de la casa (SombrasLib.Masa — la
-            // del cuerpo de la Sombra de la Página original, con SU
-            // violeta de verdad) SIN OjosDeMasa y SIN Colmillo — solo el
-            // cuerpo. Y LA BRUMA DENSA EN LA BASE: cada tentáculo exhala
-            // su nube donde nace (la raíz del cielo — el aliento del
-            // Eterno durmiendo).
-            try
+            // v6.149 — LA CURA DEL CIELO MUERTO (la letra: «creo que el
+            // problema con el mundo interior es que los tentaculos de
+            // sombra de tinta al fondo no se muestran»): la v6.145 vistió
+            // la tira con SombrasLib.Masa, que dibuja por los lotes de
+            // VFXCore en COORDENADAS DE MUNDO con la matriz del juego —
+            // el cielo vive en COORDENADAS DE PANTALLA con la matriz del
+            // paisaje: los tentáculos nacían fuera de pantalla
+            // (INVISIBLES) y cada Masa CERRABA el lote del cielo → el
+            // polvo estelar lanzaba «Draw was called, but Begin has not
+            // yet been called» CADA FRAME → el catch apagaba el cielo a
+            // los 60 fallos → el interior quedaba NEGRO. LA CURA: el
+            // contrato ORIGINAL de la v6.123 — la tira se dibuja DIRECTO
+            // con el sb del cielo (EN PANTALLA, en el lote del llamador:
+            // NI UN Begin NI UN End aquí dentro), vistiendo la
+            // PielDelEterno con bandas de V que fluyen. El fusiforme
+            // (raíz fina → vientre → cabeza) y el vientre declarado de
+            // los titanes viven igual que siempre.
+            if (espina == null || espina.Length < 3 || alfa <= 0.01f || _piel == null) return;
+            int n = espina.Length;
+            for (int i = 0; i < n - 1; i++)
             {
-                VFXCore.AbrirAdditive();
-                // EL CUERPO — la masa de la sombra original: el fusiforme
-                // con el vientre (grosorCentro) y el alfa REAL (no el
-                // brillo apagado de la lisa: la masa clásica YA trae su
-                // gradación — el alfa del cielo la modula)
-                SombrasLib.Masa(espina, grosorRaiz, grosorPunta,
-                    MathHelper.Clamp(alfa * 0.85f, 0f, 1f),
-                    espina.Length * 7 + (int)espina[0].X,
-                    Main.GlobalTimeWrappedHourly * 0.6f + flujo,
-                    grosorCentro: grosorCentroAlt > 0f ? grosorCentroAlt : -1f);
+                float u = i / (float)(n - 1);
+                float u1 = (i + 1) / (float)(n - 1);
+                Vector2 a = espina[i];
+                Vector2 b = espina[i + 1];
+                Vector2 mid = (a + b) * 0.5f;
+                float len = Vector2.Distance(a, b) + 2.5f;      // el solape mata las juntas
+                if (len < 2f) continue;
+                float rot = (b - a).ToRotation() + MathHelper.PiOver2;
 
-                // LA BRUMA DENSA DE LA BASE — la raíz exhala su nube
-                // (2 puffs por tentáculo, densos: la base del tentáculo
-                // NACE de la bruma — el borde superior del cielo vive)
-                Vector2 raiz = espina[0];
-                int sem = espina.Length * 7 + (int)espina[0].X;
-                SombrasLib.Bruma(raiz + new Vector2(0f, 30f), 90f, 0.42f * alfa + 0.18f,
-                    Main.GlobalTimeWrappedHourly, sem + 911,
-                    new Vector2(MathF.Sin(Main.GlobalTimeWrappedHourly * 0.4f + sem) * 4f, -6f));
-                SombrasLib.Bruma(raiz + new Vector2(MathF.Sin(sem) * 24f, 60f), 130f,
-                    0.34f * alfa + 0.14f, Main.GlobalTimeWrappedHourly, sem + 313,
-                    new Vector2(0f, -9f));
+                // EL PERFIL FUSIFORME (fina → gorda → fina, como Masa)
+                float wU = PerfilFusiforme(u);
+                float wU1 = PerfilFusiforme(u1);
+                float grosor = MathHelper.Lerp(grosorRaiz, grosorPunta, wU);
+                float grosor1 = MathHelper.Lerp(grosorRaiz, grosorPunta, wU1);
+                if (grosorCentroAlt > 0f)
+                {
+                    // el grosor del CENTRO declarado aparte (el vientre del titán)
+                    grosor = MathHelper.Lerp(grosor, grosorCentroAlt, PerfilFusiforme(u) * 0.6f);
+                    grosor1 = MathHelper.Lerp(grosor1, grosorCentroAlt, PerfilFusiforme(u1) * 0.6f);
+                }
+
+                // LAS BANDAS DE V (la carne fluye raíz→cabeza)
+                float v0 = Frac01(u * 2.6f + flujo);
+                float v1 = Frac01(u1 * 2.6f + flujo);
+                if (v1 <= v0) v1 = v0 + 0.02f;                  // nunca hacia atrás
+                int y0 = (int)(v0 * 510f);
+                int alto = Math.Max(3, (int)((v1 - v0) * 510f));
+                if (y0 + alto > 512) { y0 = 512 - alto; }
+                var src = new Rectangle(0, y0, 128, alto);
+
+                sb.Draw(_piel, mid, src, tinte * alfa, rot,
+                    new Vector2(64f, alto * 0.5f),
+                    new Vector2(grosor / 128f, len / alto),
+                    SpriteEffects.None, 0f);
             }
-            catch { }
-            finally { VFXCore.CerrarLoteSiAbierto(); }
         }
 
         /// <summary>El perfil fusiforme suave (0 en los extremos, 1 al centro).</summary>

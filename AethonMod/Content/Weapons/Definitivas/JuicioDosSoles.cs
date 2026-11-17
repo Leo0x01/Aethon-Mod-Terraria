@@ -341,59 +341,134 @@ namespace AethonMod.Content.Weapons.Definitivas
                 float gt = Main.GlobalTimeWrappedHourly;
                 VFXCore.CerrarLoteSiAbierto();
 
+                // ================================================================
+                //  v6.149 — LA NUEVA COREOGRAFÍA DEL JUICIO (la letra:
+                //  «cambia y mejora la animacion del arma el juicio de los
+                //  dos soles»). CUATRO actos REHECHOS:
+                //    0 · LA INVOCACIÓN GÓTICA — los soles nacen como RUNAS
+                //      de silueta apenas insinuada y se ENCENDEN desde el
+                //      núcleo (la materia brotando del conjuro), con el
+                //      SIGILO de la cita dibujándose bajo ellos.
+                //    1 · EL VALS DE LOS ECLIPSES — la órbita de caída con
+                //      ESTELAS DE COMETA (la historia viva de la danza) y
+                //      cada cruce ES UN ECLIPSE: el sol que pasa por
+                //      delante APAGA al otro (el brillo alterna — los
+                //      cuerpos se comen la luz por turnos, el lenguaje de
+                //      la fusión).
+                //    2 · LA FUSIÓN — el gigante con sus anillos
+                //      COLAPSANDO EN ESPIRAL hacia el núcleo (los aros ya
+                //      no giran planos: CAEN hacia dentro, la materia
+                //      rindiéndose), el temblor y el sonrojo de siempre.
+                //    3 · EL SILENCIO Y LA SENTENCIA — primero TODO SE
+                //      APAGA (el colapso ahora es OSCURO: el mundo retiene
+                //      la respiración un instante)… y la SENTENCIA estalla
+                //      DOBLE: el destello blanco + la onda de choque +
+                //      LA LLUVIA DE LUZ (motas doradas cayendo del
+                //      estallido).
+                // ================================================================
                 if (_acto == 0)
                 {
-                    // === LOS DOS SOLES RÚNICOS volando a la cita: CRECEN
-                    //     mientras vuelan (nacen chicos, llegan gordos) —
-                    //     UN SOLO ANILLO cada uno (la ley de la letra) ===
+                    // === LA INVOCACIÓN GÓTICA: runa → sol ===
                     float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
                     float suave = p * p * (3f - 2f * p);
                     float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.5f, 0.92f, suave);
+
+                    // EL SIGILO DE LA CITA (el círculo de conjuro dibujándose
+                    // bajo los soles: un aro que SE TRAZA — el arco crece
+                    // con la invocación)
+                    VFXCore.AbrirAdditive();
+                    try
+                    {
+                        Vector2 cSig = Punto - Main.screenPosition;
+                        // el trazo: aro de 200px que nace de un punto y se
+                        // cierra (el compás del mago)
+                        float arco = MathHelper.TwoPi * suave;
+                        for (int k = 0; k < 24; k++)
+                        {
+                            float a0 = k * MathHelper.TwoPi / 24f;
+                            if (a0 > arco) break;
+                            Vector2 pos = cSig + a0.ToRotationVector2() * 200f;
+                            Vector2 pos2 = cSig + MathF.Min(a0 + 0.16f, arco).ToRotationVector2() * 200f;
+                            VFXCore.Line(pos, pos2, SigiloLib.Tint(new Color(255, 214, 130), 0.45f + 0.30f * suave), 3f);
+                        }
+                    }
+                    finally { VFXCore.RestaurarLoteVanilla(); }
+
                     for (int lado = 0; lado < 2; lado++)
                     {
                         bool luz = lado == 0;
                         Vector2 pos = PosicionSolSencillo(luz, suave, gt);
-                        DibujarSol(luz, pos, r, gt, 1, rg: 0f, alpha: 1f,
+                        // EL ENCENDIDO: el sol nace OSCURO (la silueta
+                        // gótica, alpha 0.35) y su núcleo SE PRENDE al
+                        // 60% — la materia brotando del conjuro
+                        float enciende = MathHelper.Clamp((p - 0.55f) / 0.45f, 0f, 1f);
+                        DibujarSol(luz, pos, r, gt, 1, rg: 0f,
+                            alpha: 0.35f + 0.65f * enciende,
                             seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                     }
                 }
                 else if (_acto == 1)
                 {
-                    // === LA ESPIRAL DE MUERTE: la órbita SE CAE (empieza
-                    //     ancha y serena, el PLUNGE final la plega de
-                    //     golpe) y el giro ACELERA (la ley de Kepler — el
-                    //     ángulo come el cuadrado del progreso) hasta el
-                    //     CONTACTO: el DESTELLO y el gigante NACE DEL
-                    //     CHOQUE. UN ANILLO por sol, hasta tocarse ===
+                    // === EL VALS DE LOS ECLIPSES (órbita + estelas + turnos de luz) ===
                     float p = MathHelper.Clamp(_t / (float)T_FUSION, 0f, 1f);
-                    float pc = MathHelper.Clamp(p / P_CONTACTO, 0f, 1f);   // el tramo espiral
+                    float pc = MathHelper.Clamp(p / P_CONTACTO, 0f, 1f);
                     if (p < P_CONTACTO)
                     {
-                        // LA ÓRBITA QUE SE CAE: lenta arriba, el plunge al final
                         float caida = pc * pc * (3f - 2f * pc);
                         caida = MathF.Pow(caida, 1.45f);
                         float radio = MathHelper.Lerp(190f, 24f, caida);
-                        // EL GIRO QUE ACELERA (Kepler: ω ∝ 1/r — el cuadrado
-                        // del progreso come vueltas)
                         float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+
                         for (int lado = 0; lado < 2; lado++)
                         {
                             bool luz = lado == 0;
-                            Vector2 pos = Punto + (ang + (luz ? 0f : MathHelper.Pi)).ToRotationVector2() * radio;
+                            float angLado = ang + (luz ? 0f : MathHelper.Pi);
+                            Vector2 pos = Punto + angLado.ToRotationVector2() * radio;
                             float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.92f, 0.55f, caida);
-                            DibujarSol(luz, pos, r, gt, 1, rg: 0f, alpha: 1f,
+
+                            // EL ECLIPSE MUTUO: el sol que pasa por DELANTE
+                            // (la mitad inferior de la órbita: sin>0) APAGA
+                            // al otro — los brillos ALTERNAN con la danza
+                            bool delante = MathF.Sin(angLado) > 0f;
+                            float alfaEclipse = delante ? 1.10f : 0.55f;
+
+                            // LA ESTELA DEL COMETA: la historia viva de la
+                            // caída — 9 posiciones PASADAS con el radio y
+                            // ángulo de hace k·0.045 rad, apagándose
+                            VFXCore.AbrirAdditive();
+                            try
+                            {
+                                for (int k = 1; k <= 9; k++)
+                                {
+                                    float angPas = angLado - k * 0.045f - 0.09f;
+                                    float radPas = radio + k * 2.2f;   // la estela nace ANCHA (la órbita era mayor)
+                                    Vector2 posPas = Punto + angPas.ToRotationVector2() * radPas - Main.screenPosition;
+                                    float fEst = (1f - k / 10f);
+                                    VFXCore.Quad(posPas, SigiloLib.Tint(
+                                        luz ? new Color(255, 240, 200) : new Color(190, 130, 255),
+                                        0.30f * fEst * fEst * alfaEclipse),
+                                        new Vector2(r * (0.55f + 0.4f * fEst)), 0f);
+                                }
+                            }
+                            finally { VFXCore.RestaurarLoteVanilla(); }
+
+                            DibujarSol(luz, pos, r, gt, 1, rg: 0f,
+                                alpha: MathHelper.Clamp(alfaEclipse, 0f, 1f),
                                 seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                         }
                     }
                     else
                     {
-                        // EL DESTELLO DE CONTACTO (la luz blanca de fusión
-                        // — se apaga en lo que queda del acto) + EL
-                        // GIGANTE NACIDO DEL CHOQUE (nace grande, se
-                        // asienta al tamaño de la sentencia) — TRES ANILLOS
+                        // EL DESTELLO DE CONTACTO + EL GIGANTE (de siempre,
+                        // ahora con EL TEMBLOR de nacimiento: un microjitter
+                        // de 2px que se apaga en 10 ticks)
                         float n = MathHelper.Clamp((p - P_CONTACTO) / (1f - P_CONTACTO), 0f, 1f);
+                        float temblor = MathF.Max(0f, 1f - n * 3f);
+                        Vector2 jitter = new Vector2(
+                            Main.rand.NextFloat(-2f, 2f) * temblor,
+                            Main.rand.NextFloat(-2f, 2f) * temblor);
                         float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.7f, 1.05f, n * n * (3f - 2f * n));
-                        DibujarSolFusionado(Punto, r, gt, 3, rg: 0f, alpha: 1f);
+                        DibujarSolFusionado(Punto + jitter, r, gt, 3, rg: 0f, alpha: 1f);
                         if (n < 0.85f)
                         {
                             VFXCore.Begin();
@@ -413,45 +488,92 @@ namespace AethonMod.Content.Weapons.Definitivas
                 }
                 else if (_acto == 2)
                 {
-                    // === LA CARGA: el gigante se HINCHA, enrojece, TIEMBLA
-                    //     y sus TRES ANILLOS giran cada vez MÁS RÁPIDO (el
-                    //     tiempo del sistema se acelera con la carga) ===
+                    // === LA FUSIÓN: los anillos CAEN EN ESPIRAL hacia el
+                    //     núcleo (la materia rindiéndose) + el temblor ===
                     float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
                     float r = RuneSunRenderer.BodyPx *
                         (1.05f + 0.55f * rg * rg + 0.12f * MathF.Sin(gt * 18f) * rg);
+                    // EL COLAPSO ESPIRAL de los anillos: el radio de los
+                    // aros EXTERIORES se plisá hacia el cuerpo conforme
+                    // carga (la casa lo dibuja con DibujarSolFusionado;
+                    // aquí vive el ALMA del colapso: un aro extra que CAE)
                     DibujarSolFusionado(Punto, r, gt * (1f + 1.8f * rg), 3, rg, alpha: 1f);
+                    VFXCore.AbrirAdditive();
+                    try
+                    {
+                        // EL ARO QUE CAE: un anillo fino que espirala hacia
+                        // el núcleo (200px → el cuerpo), rojo al final —
+                        // la gravedad de la sentencia
+                        float cae = 1f - rg;
+                        float radCae = MathHelper.Lerp(r * 0.9f, 210f, cae * cae);
+                        Vector2 cPos = Punto - Main.screenPosition;
+                        for (int k = 0; k < 20; k++)
+                        {
+                            float a0 = k * MathHelper.TwoPi / 20f + gt * 2.4f + rg * 7f;
+                            Vector2 p0 = cPos + a0.ToRotationVector2() * radCae;
+                            Vector2 p1 = cPos + (a0 + 0.33f).ToRotationVector2() * radCae;
+                            Color cCae = Color.Lerp(new Color(255, 224, 150), new Color(255, 90, 40), rg);
+                            VFXCore.Line(p0, p1, SigiloLib.Tint(cCae, 0.5f * (0.4f + 0.6f * rg)), 2.5f);
+                        }
+                    }
+                    finally { VFXCore.RestaurarLoteVanilla(); }
                 }
                 else
                 {
-                    // === LA NOVA — EL COLAPSO Y LA LUZ: primero el sol SE
-                    //     PLEGA (se contrae y APAGA — el núcleo tocando
-                    //     fondo)… y al fondo del colapso ESTALLA: se
-                    //     hincha hasta el doble, se funde en la luz y el
-                    //     ANILLO DE CHOQUE redondo de la casa barre el
-                    //     mundo. TRES ANILLOS hasta el final ===
+                    // === EL SILENCIO Y LA SENTENCIA ===
                     if (_t < T_COLAPSO)
                     {
+                        // EL SILENCIO OSCURO: el sol se plisá y SE APAGA —
+                        // el mundo retiene la respiración (el alpha cae
+                        // MÁS rápido: al 70% del colapso ya casi no hay
+                        // luz — el vacío antes de la palabra)
                         float plega = _t / (float)T_COLAPSO;
                         float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(1.6f, 0.7f, plega * plega);
                         DibujarSolFusionado(Punto, r, gt * 2.8f, 3, rg: 1f,
-                            alpha: 1f - 0.45f * plega);
+                            alpha: MathF.Max(0.08f, 1f - 1.45f * plega));
                     }
                     else
                     {
+                        // LA SENTENCIA: el estallido DOBLE — destello + onda
+                        // + LA LLUVIA DE LUZ (las motas doradas del veredicto
+                        // cayendo del centro del estallido)
                         float p = MathHelper.Clamp((_t - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO), 0f, 1f);
                         float apaga = 1f - p;
                         float r = RuneSunRenderer.BodyPx *
-                            (0.7f + 1.45f * Math.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
+                            (0.7f + 1.45f * MathF.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
                         DibujarSolFusionado(Punto, r, gt * 3.2f, 3, rg: 1f,
                             alpha: MathF.Min(1f, apaga * 1.8f));
 
                         VFXCore.AbrirAdditive();
                         try
                         {
-                            OndaLib.Shock(Main.spriteBatch, Punto - Main.screenPosition,
+                            Vector2 cPos = Punto - Main.screenPosition;
+                            OndaLib.Shock(Main.spriteBatch, cPos,
                                 MathHelper.Clamp((_t - T_COLAPSO) / 26f, 0f, 1f),
-                                1.5f + 4.5f * Math.Min(1f, (_t - T_COLAPSO) / 7f),
+                                1.5f + 4.5f * MathF.Min(1f, (_t - T_COLAPSO) / 7f),
                                 new Color(255, 232, 170), 0.8f * apaga, 7, 14f);
+
+                            // LA LLUVIA DE LUZ (14 motas deterministas que
+                            // nacen del estallido y CAEN — el oro del
+                            // veredicto esparciéndose)
+                            if (apaga > 0.05f)
+                            {
+                                for (int k = 0; k < 14; k++)
+                                {
+                                    float h = VFXCore.Hash01(k, 3, 991);
+                                    float ang = h * MathHelper.TwoPi + gt * 0.3f;
+                                    float vel = 60f + 130f * VFXCore.Hash01(k, 5, 993);
+                                    float edad = MathHelper.Clamp((_t - T_COLAPSO - h * 6f) / 20f, 0f, 1f);
+                                    if (edad <= 0f) continue;
+                                    Vector2 mota = cPos + new Vector2(
+                                        MathF.Cos(ang) * vel * edad,
+                                        MathF.Sin(ang) * vel * edad + 60f * edad * edad); // la gravedad del oro
+                                    float fMota = (1f - edad) * apaga;
+                                    VFXCore.Quad(mota, SigiloLib.Tint(
+                                        k % 3 == 0 ? new Color(255, 250, 235) : new Color(255, 216, 140),
+                                        0.65f * fMota), new Vector2(14f, 14f), 0f);
+                                }
+                            }
                         }
                         finally { VFXCore.RestaurarLoteVanilla(); }
                     }
@@ -462,6 +584,7 @@ namespace AethonMod.Content.Weapons.Definitivas
             catch { VFXCore.CerrarLoteSiAbierto(); }
             return false;
         }
+
 
         /// <summary>v6.127 — el ángulo base de la espiral (el arranque
         /// sereno del par — determinista, del reloj global).</summary>

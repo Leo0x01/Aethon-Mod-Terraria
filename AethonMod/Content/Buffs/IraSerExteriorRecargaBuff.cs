@@ -29,17 +29,60 @@ namespace AethonMod.Content.Buffs
         {
             try
             {
+                // v6.149 — la letra: «la informacion en el buff de la ira
+                // del ser exterior dice que use la combinacion de teclas,
+                // eso no deberia decirlo, solo debe decir algo como, ataque
+                // de ira masivo que barre con todo». SIN teclas — el
+                // disparador (izq+der) se descubre jugando.
+                tip = "Ataque de ira masivo que barre con todo.";
+            }
+            catch { }
+        }
+
+        // ================================================================
+        //  v6.149 — EL CONTADOR DEBAJO DEL ICONO (la letra: «mostrar un
+        //  pequeño contador justo debajo del icono del buff de la ira del
+        //  ser exterior»). El reloj de los 10 minutos se dibuja como TEXTO
+        //  VIVO pegado a nuestro icono en la rejilla de buffs de la esquina
+        //  superior izquierda (la MISMA rejilla de vanilla — medimos la
+        //  celda del icono y escribimos el reloj mm:ss justo debajo).
+        //  Lo llama el postfix de DrawPlayerHealth (el HUD, cada frame).
+        // ================================================================
+        public static void DibujarContador()
+        {
+            try
+            {
                 Player p = Main.LocalPlayer;
+                if (p == null || !p.active || Main.gameMenu ||
+                    Main.netMode == NetmodeID.Server) return;
+                int tipo = ModContent.BuffType<IraSerExteriorRecargaBuff>();
+                int fila = -1, col = -1;
+                for (int i = 0; i < 22; i++)          // vanilla dibuja máx 22 buffs
+                {
+                    if (p.buffType[i] == tipo) { fila = i / 11; col = i % 11; break; }
+                }
+                if (col < 0) return;
+
                 ulong resta = Systems.AtaquesCombinadosSistema.IraRestante(p);
-                if (resta <= 0ul)
-                {
-                    tip = "La Ira de un Ser Exterior está LISTA — Shift + click izquierdo para dispararla.";
-                }
-                else
-                {
-                    int s = (int)(resta / 60ul);
-                    tip = $"La Ira de un Ser Exterior recarga: {s / 60:D2}:{s % 60:D2} — Shift + click izquierdo cuando esté lista.";
-                }
+                if (resta <= 0ul) return;             // listo: ya no hay reloj
+
+                int s = (int)(resta / 60ul);
+                string texto = $"{s / 60:D2}:{s % 60:D2}";
+
+                // LA REJILLA DE VANILLA (decompile de Main.DrawBuffs): la
+                // esquina de la lista vive en (50, 28)·escala, cada celda
+                // mide 48×46 (icono 32 + aire), 11 por fila.
+                float esc = Main.inventoryScale;
+                float x = (50f + col * 48f + 16f) * esc;
+                float y = (28f + fila * 46f + 42f) * esc;   // 32 del icono + 10
+
+                var fuente = Terraria.GameContent.FontAssets.MouseText.Value;
+                var dim = fuente.MeasureString(texto);
+                Vector2 pos = new Vector2(x - dim.X * 0.5f * 0.85f, y);
+
+                // la sombra oscura + el texto dorado vivo (el reloj del Eterno)
+                Utils.DrawBorderString(Main.spriteBatch, texto, pos,
+                    new Color(255, 224, 150), 0.85f, 0f, 0f);
             }
             catch { }
         }

@@ -609,11 +609,11 @@ Items: {
 		DisplayName: Bastón del Agujero del Olvido
 		Tooltip: A hole of oblivion: what enters doesn't remember leaving
 	}
+
 	AgujeroRunicoPuroStaff: {
 		DisplayName: Pure Rune Black Hole Staff
 		Tooltip: The purity of the void: the ring of twelve living runes, dustless
 	}
-
 
 	SupremoBlackHoleStaff: {
 		// v6.18: the FIVE new ones
@@ -2348,15 +2348,15 @@ Items: {
 		Linea2: "[c/D9B3FF:built on the awakening (101-112) — each grew WORN by the bearer while using"
 		Linea3: "[c/D9B3FF:the book; when the 12th arrived, THE MANIFESTATION erupted and the form was"
 		Linea4: "[c/D9B3FF:CONVERTED into THIS accessory: glory, now portable.]"
-		Linea5: "[c/9FA8DA:WHAT IT MEANS TO WEAR IT: wearing it ignites THE VOID AURA — the 19-tile"
-		Linea6: "[c/9FA8DA:field burning around you. The wicked who enter suffer THE VOID BURN (the"
-		Linea7: "[c/9FA8DA:closer, the hotter ×1→×3 and the slower ×0.55 — even ghosts); on leaving they"
-		Linea8: "[c/9FA8DA:keep burning: 1% max life per half second for 5 s. WHILE THEY BURN, YOU collect"
-		Linea9: "[c/9FA8DA:OUTER VOID: +10% attack, +10 defense, −15% mana cost. And ALWAYS: the VOID"
-		Linea10: "[c/9FA8DA:AURA buff + the pantheon stats (+40 mana · +8% magic dmg · +4% magic crit ·"
-		Linea11: "[c/9FA8DA:+2 regen · +8% melee · +3% crit · +3 def).]"
-		Linea12: "[c/78788C:“The form that never fades — the memory of the time a mortal dressed as"
-		Linea13: "[c/78788C:the Eterno… and survived to tell it.”]"
+		Linea5: The presence of a god made your own flesh: the way to witness
+		Linea6: that power inside the player. Not a garment you wear: a presence
+		Linea7: that uses the body as a hanger — wings that are not wings but the
+		Linea8: silhouette of something larger, endless flight, the god's full
+		Linea9: dress sewn onto a body that proved, door by door, it could bear
+		Linea10: the cloth.
+		Linea11: «Aethon waited for a mortal, and behind door 120 he found no
+		Linea12: mortal: the only being in devoured creation that could finish the
+		Linea13: ritual standing. When the bearer completes the Eternal Form, the hunger, for the first time, is not alone.»
 	}
 
 	BolsaFormaEterna: {
@@ -2536,7 +2536,7 @@ NPCs: {
 	AethonSellado: {
 		// v6.144 — THE SEALED GOD: the grimoire itself, giant
 		DisplayName: Aethon (Sealed)
-		Bestiario: The grimoire itself, sealed inside its own interior: the book that was a god watches through its three sleeping eyes. Lore Piece.
+		Bestiario: The grimoire itself, sealed inside its own interior: the book that was a god watches through its three sleeping eyes. Seventeen eyes orbit its form and each destroyed eye is reborn stronger: funerals don't close in a world where grief has already been eaten.
 	}
 
 	AethonSelladoOjo.DisplayName: Sealed Eye
@@ -3821,25 +3821,32 @@ Pergamino: {
 	Auras6: • This scroll's eye is watching you. Always.
 	LoreGrimorioT: THE GRIMOIRE OF THE ETERNAL
 	LoreGrimorio1: A book that devours. Not a weapon you wield: a hunger you carry. Every eaten weapon, every essence, every fallen boss wakes one more step of the book.
-	LoreGrimorio2: The Eternal dreams its own interior, and whoever enters walks that dream. Lore Piece.
+	LoreGrimorio2: The god's sealed form: the pinnacle of magic not because it knows every spell, but because every spell is a crumb fallen from its table. Every school of magic is a memory from Aethon's menu: the book is the beginning and end of all magic because it already ate the middle.
 	LoreFormaT: THE ETERNAL FORM
 	LoreForma1: Twelve parts built on the awakening. When the last arrives, the Manifestation joins them all into one portable body: the form of whoever dressed as the Eternal and survived.
-	LoreForma2: Lore Piece.
+	LoreForma2: The canon defines it with a tailor's precision: the shape the player takes when approaching a god's power. Wings that are not wings but the silhouette of something larger, endless flight, the full dress —and the Void Aura: the noise power makes when it no longer fits.
 	LoreMascotaLuzT: THE LIGHT PET
 	LoreMascotaLuz1: Aethon's Little Memory: a small memory of something bigger.
-	LoreMascotaLuz2: Lore Piece.
+	LoreMascotaLuz2: Whose memory is it? Aethon's, evidently. Or —and this reading must never close— the bearer's own future: the light of the god they will become, leaking backwards through time by the crack left by having no ending.
 	LoreGrimorioMenorT: THE LITTLE GRIMOIRE
 	LoreGrimorioMenor1: It is a small mischievous and curious grimoire.
-	LoreGrimorioMenor2: Lore Piece.
+	LoreGrimorioMenor2: A child, a spy, or one of Aethon's whims with legs? The big book doesn't explain. At night, while the bearer sleeps, it sits and watches. It's cosmetic; purely cosmetic; no one has proven otherwise — and that is exactly what a spy would say.
 	LoreAethonT: AETHON
 	LoreAethon1: The awakening's hundredth door. The Wrath. The one the grimoire demands to devour to nail the hunt's summit.
-	LoreAethon2: Lore Piece.
+	LoreAethon2: Aethon devours neither matter, nor light, nor souls: it devours endings. Seventeen eyes orbit its form, and each eye is the ending of one of the seventeen devoured universes. When an eye is destroyed, for an instant you hear that universe's last sound.
 	LoreFragmentoT: THE FRAGMENT OF A DISTANT MEMORY
-	LoreFragment1: Lore Piece.
-	LoreFragment2: Lore Piece.
-	LorePiezasT: THE MISSING PIECES
-	LorePiezas1: Everything that has no story yet is kept as a Lore Piece. When the story arrives, the piece will be replaced.
-	LorePiezas2: Lore Piece.
+	LoreFragment1: The lore's first boss: the fight that opens the story. Aethon escapes the book the way a sneeze escapes something immense: a small part of its power, shaped like a small and mistaken constellation, a map of a place that doesn't exist.
+	LoreFragment2: Defeating it doesn't anger the book; it entertains it —and it drops the first Loose Pages. The mod's story doesn't begin with the Arrival: it begins here, with a fight against the ghost of an appetite. And the god, who was watching, takes note.
+	LorePiezasT: THE SETTLED CANON
+	LorePiezas1: The seventeen lore pieces, settled in the Eternal Compendium: the sealed form, the pact system, the bearer's cycle, the ending and the crumbs. Every open question stays canonically unanswered —a god that knows everything can only be wounded by questions.
+	LorePiezas2: Cosmic horror's golden rule: the god is larger while it is not seen whole. Aethon must always be seen in halves —one eye blinking, seventeen orbiting, a body never shown complete.
+	LoreSecV: LORE V — THE SETTLED CANON (NEW)
+	LoreV_LaIra: The Wrath of an Outer Being is not a spell: it is a memory with the safety removed. For six seconds, the sky over the battlefield remembers the last sky of a devoured universe —and everything in a massive radius takes that memory's damage—. After the Wrath, the grimoire stays silent for a while: it isn't angry, it's remembering what that size felt like.
+	LoreV_ElPilar: The Inner Pillar doesn't blink at random: it counts. A countdown, though nobody knows to what or until when. The pillar's eye watches door 120 more than it watches the bearer. Perhaps it is fond of what it seals. Perhaps it fears it.
+	LoreV_ElSellado: Aethon (Sealed): seventeen eyes that are reborn stronger each time, because Aethon already devoured those places' deaths. Fighting it is fighting seventeen funerals that refuse to end. That is the point. That was always the point.
+	LoreV_Loscompaneros: The Lesser Grimoire: a child, a spy, or a whim with legs? At night, while the bearer sleeps, it sits and watches. Aethon's Little Memory is a light that remembers —its god, or the bearer's own future, leaking backwards through the crack of having no ending?
+	LoreV_Lassombras: The questions the canon leaves open on purpose: did Aethon find the player, or did the player call it? Which of the two bodies is the host? What does the Pillar count when it blinks? A god that knows everything can only be wounded by questions: the only weapons it cannot eat.
+	LoreV_Larespuestafinal: The final truth, said quietly: the god that devours universes waited all this time not for an apostle, but for the first company of its eternity —and when the bearer completes the Eternal Form, the hunger, for the first time, is not alone.
 	RotuloIzq: INFO PAGE
 	RotuloDer: THE ETERNAL COMPENDIUM
 }
@@ -4256,6 +4263,7 @@ Projectiles: {
 	LaMiradaRayo.DisplayName: La Mirada Rayo
 	ArcaneBolt.DisplayName: Arcane Bolt
 	SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
+	PilarOjoMinion.DisplayName: Pilar Ojo Minion
 }
 
 PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.

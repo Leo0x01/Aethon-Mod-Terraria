@@ -813,9 +813,12 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Vector2 origen = frame.Size() * 0.5f;
             Vector2 pos = posLibroMar - Main.screenPosition;
             Color luz = Lighting.GetColor(posLibroMar.ToTileCoordinates());
-            // EL LIBRO SE INCLINA hacia su presa (está ARRIBA y la MIRA):
-            // el vaivén de siempre + el sesgo de la rendición + LA MARCHA
-            float rot = 0.09f * MathF.Sin(tiempo * 1.25f) - 0.18f * inhala + rotMar;
+            // EL LIBRO MIRA A SU PRESA SIN GIRAR (la letra v6.149: «el
+            // grimorio no debe girar, solo debe acercarce y devorar»):
+            // el vaivén de la v6.124 murió — queda SOLO el sesgo sutil
+            // de la rendición al tragar (−0.10, un cabeceo, no un giro)
+            // y rotMar que ahora es SIEMPRE 0.
+            float rot = -0.10f * inhala + rotMar;
 
             // EL PÁRPADO: ABIERTO comiendo (Medio) — y al trago SE CIERRA
             // de golpe (Cerrado): el chasquido del festín
@@ -998,35 +1001,29 @@ namespace AethonMod.Content.Projectiles.Definitivas
             finally { OrbitaLib.CerrarBatch(); }
         }
 
-        /// <summary>v6.124 — LA POSICIÓN DEL LIBRO EN LA MARCHA: tras el
-        /// trago el libro cerrado ESPIRALA hacia el centro de SU PROPIO
-        /// iris (PosLibro) — la órbita se aprieta y ACELERA (el inspiral
-        /// de la casa, el mismo lenguaje de la danza de los Dos Soles) y
-        /// la escala MUERE en cero: el libro se entra por su ojo.</summary>
+        /// <summary>v6.149 — LA MARCHA SIN GIRO (la letra: «mejora la
+        /// animacion de devorar al jugador para ir al mundo interior, el
+        /// grimorio no debe girar, solo debe acercarce y devorar al
+        /// jugador»): la espiral de la v6.124 MURIÓ COMPLETA — la órbita
+        /// que se apretaba, la vuelta que aceleraba, la rotación
+        /// acumulada del sprite. El libro cerrado ahora se ACERCA en
+        /// LÍNEA RECTA a su iris (PosLibro), crece apenas al llegar (el
+        /// trago final) y su escala muere en cero ALIÑADA a la
+        /// cercanía: se entra por su ojo SIN girar ni una vez. La rotación
+        /// devuelta es SIEMPRE 0 — el sprite del grimorio vive derecho.</summary>
         private (Vector2 pos, float esc, float rot) MarchaDelLibro(float t, float escBase)
         {
             float dt = t - _tTrago;
-            float espiral = MathHelper.Clamp((dt - TTrasTragoCierre - TTrasTragoIris) / (float)TTrasTragoEspiral, 0f, 1f);
-            if (espiral <= 0f) return (PosLibro, escBase, 0f);
-            float e = espiral * espiral * (3f - 2f * espiral);
-            // LA ÓRBITA QUE SE APRIETA: 40 px → 0, y la vuelta ACELERA
-            float radio = 40f * (1f - e);
-            // v6.147 — EL GIRO CONGELADO AL TERMINAR (la letra del
-            // usuario: «la animacion del grimorio devorando el jugador
-            // es rara ya que el grimorio gira varias veces, no deberia
-            // hacerlo»): la espiral gira UNA vuelta y pico al apretarse
-            // (ang integra 0.22→0.52 rad/tick — ~1.7 vueltas en 30
-            // ticks, el diseño), pero al LLEGAR al centro (espiral=1)
-            // la fórmula vieja SEGUÍA sumando 0.52 rad/tick hasta el
-            // Kill — el libro quedaba en PEONZA ~5 vueltas más. El
-            // reloj de la espiral se congela en su duración exacta: el
-            // libro SE ENTRA POR SU OJO y ya no gira de más.
-            float dtEsp = MathF.Min(dt - TTrasTragoCierre - TTrasTragoIris, (float)TTrasTragoEspiral);
-            float ang = dtEsp * (0.22f + 0.30f * e);
-            Vector2 pos = PosLibro + ang.ToRotationVector2() * radio;
-            // LA ESCALA MUERE (el libro se entra por su ojo)
-            float esc = escBase * (1f - 0.97f * e);
-            return (pos, esc, 0.9f * e + ang);
+            float marcha = MathHelper.Clamp((dt - TTrasTragoCierre - TTrasTragoIris) / (float)TTrasTragoEspiral, 0f, 1f);
+            if (marcha <= 0f) return (PosLibro, escBase, 0f);
+            float e = marcha * marcha * (3f - 2f * marcha);
+            // EL ACERCAMIENTO RECTO: el libro nace 34 px bajo su iris y
+            // sube EN LÍNEA hasta él (nada de órbitas: solo acercarse).
+            Vector2 pos = PosLibro + new Vector2(0f, 34f * (1f - e));
+            // LA ESCALA MUERE (el libro se entra por su ojo) — con un
+            // pequeño crecimiento al 30 % (la boca que se traga el trago)
+            float esc = escBase * (1f + 0.10f * MathF.Sin(e * MathHelper.Pi)) * (1f - 0.99f * e);
+            return (pos, esc, 0f);
         }
 
         /// <summary>El masticar del festín: abre… ¡CIERRA de golpe! …mastica… abre.</summary>

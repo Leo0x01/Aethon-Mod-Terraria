@@ -140,7 +140,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // CADA UNO respirando su pulso (la runa se enciende al
                 // pasar por el frente y se enfría por detrás — el
                 // lenguaje rúnico de la casa, NADA de polvo).
-                AnilloDeRunasVivas();
             }
 
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (copia exacta) ===
@@ -173,36 +172,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode != NetmodeID.Server)
             {
                 float projGravityRadius = gravityRadius * 0.9f;
-                foreach (Projectile pr in Main.ActiveProjectiles)
-                {
-                    if (pr == null || !pr.active || !pr.hostile || pr.friendly) continue;
-                    Vector2 toHorizon = Projectile.Center - pr.Center;
-                    float d = toHorizon.Length();
-                    if (d > projGravityRadius || d < 4f) continue;
-
-                    if (d < ShieldRadius * 0.6f)
-                    {
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                            pr.Kill();
-                        for (int i = 0; i < 5; i++)
-                        {
-                            Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.PinkCrystalShard,
-                                (pr.Center - Projectile.Center) * -0.02f +
-                                new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
-                                200, new Color(255, 170, 120), 0.7f);
-                            d2.noGravity = true;
-                            d2.fadeIn = 0f;
-                        }
-                        continue;
-                    }
-
-                    float ps = (1f - d / projGravityRadius) * gravityStrength * 0.35f;
-                    if (toHorizon.LengthSquared() > 0.01f)
-                    {
-                        toHorizon.Normalize();
-                        pr.velocity += toHorizon * ps;
-                    }
-                }
             }
 
             // === AURA DE DAÑO: TICKS QUE ACELERAN CERCA DEL CENTRO (copia exacta) ===
@@ -246,7 +215,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
             Vector3 light = new Vector3(1.00f * pulse, 0.24f * pulse, 0.82f * pulse);
             Lighting.AddLight(Projectile.Center, light);
-            float le = CosmicBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
+            float le = AgujeroPuroRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f), light * 0.75f);
         }
@@ -286,92 +255,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         /// <summary>Materia absorbida (dusts) cayendo en espiral desde el anillo.</summary>
-        private void SpawnAbsorbedDusts()
-        {
-            float deathSpeedBoost = 1f;
-            if (Projectile.timeLeft <= 90f)
-                deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
 
-            float shadow = CosmicBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
-
-            for (int i = 0; i < 2; i++)
-            {
-                float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 2f) +
-                              Main.rand.NextFloat(-0.25f, 0.25f);
-                float dist = 2.6f * shadow + 1.4f * shadow * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                float speed = (6f + 6f * (1f - dist / (4f * shadow))) * deathSpeedBoost;
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 velocity = toCenter * speed;
-
-                    float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
-                    velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
-
-                    Color color;
-                    if (dist < 1.6f * shadow)
-                    {
-                        color = new Color(255, 242, 225); // blanco cálido al borde
-                    }
-                    else
-                    {
-                        color = Main.rand.Next(3) switch
-                        {
-                            0 => new Color(255, 68, 26),    // rojo-naranja del anillo
-                            1 => new Color(255, 110, 40),   // naranja eléctrico
-                            _ => new Color(180, 30, 15),    // rojo profundo
-                        };
-                    }
-
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        velocity, 150, color, 1.2f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                    d.scale = Main.rand.NextFloat(0.8f, 1.4f);
-                }
-            }
-        }
 
         /// <summary>Chispas rosas encantadas capturadas por el campo.</summary>
-        private void SpawnCapturedEnergySparks()
-        {
-            if (Main.rand.NextBool(12))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(260f, 380f) * MathHelper.Max(Projectile.scale, 0.5f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Pink,
-                    vel, 255, new Color(255, 180, 130), 0.9f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-        }
+
 
         /// <summary>Devora el polvo del ambiente en espiral.</summary>
-        private void AttractNearbyDust()
-        {
-            float radius = 420f;
-            for (int i = 0; i < Main.maxDust; i++)
-            {
-                Dust d = Main.dust[i];
-                if (!d.active || d.noGravity) continue;
-                Vector2 toCenter = Projectile.Center - d.position;
-                float dist = toCenter.Length();
-                if (dist > radius || dist < 4f) continue;
-                float strength = (1f - dist / radius) * 0.35f;
-                toCenter.Normalize();
-                Vector2 pull = toCenter * strength + new Vector2(-toCenter.Y, toCenter.X) * strength * 0.35f;
-                d.velocity += pull;
-            }
-        }
+
 
         // ------------------------------------------------------------------
         //  PARTÍCULAS DE LA LIBRERÍA PROPIA (capa AboveLens)
@@ -384,7 +274,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 float dist = Main.rand.NextFloat(2.4f, 4.2f) *
-                             CosmicBlackHoleRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
+                             AgujeroPuroRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -428,7 +318,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.rand.NextBool(4))
             {
-                float shadow = CosmicBlackHoleRenderer.SpherePx *
+                float shadow = AgujeroPuroRenderer.SpherePx *
                                MathHelper.Max(Projectile.scale, 0.4f);
                 float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
@@ -467,7 +357,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  RENDER — 100% CÓDIGO (CosmicBlackHoleRenderer v6.16)
+        //  RENDER — 100% CÓDIGO (AgujeroPuroRenderer v6.149 — el anillo de Einstein rúnico)
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
@@ -508,7 +398,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float time = Main.GlobalTimeWrappedHourly;
             int seed = p.whoAmI * 13 + 7;
 
-            CosmicBlackHoleRenderer.Draw(drawPos, p.scale, time, seed);
+            AgujeroPuroRenderer.Draw(drawPos, p.scale, time, seed);
         }
 
         /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
@@ -533,38 +423,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  por detrás: el anillo parece GIRAR MÁS RÁPIDO que el agujero
         //  (la ilusión del horizonte) SIN una sola partícula de polvo.
         // ==============================================================
-        private void AnilloDeRunasVivas()
-        {
-            try
-            {
-                float time = Main.GlobalTimeWrappedHourly;
-                float radio = CosmicBlackHoleRenderer.SpherePx *
-                    MathHelper.Max(Projectile.scale, 0.4f) * 1.45f;
-                int seed = Projectile.whoAmI * 31;
-                for (int r = 0; r < 12; r++)
-                {
-                    float ang = time * -0.55f + r * (MathHelper.TwoPi / 12f);
-                    // la respiración: el frente (hacia el rumbo) ARDE
-                    float frente = MathHelper.Clamp(
-                        Vector2.Dot(new Vector2(MathF.Cos(ang), MathF.Sin(ang)),
-                            Projectile.velocity.SafeNormalize(Vector2.UnitX).SafeNormalize(Vector2.UnitX)), -1f, 1f);
-                    float calor = 0.5f + 0.5f * frente;
-                    Vector2 pos = Projectile.Center +
-                        new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * radio;
-                    Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Pink,
-                        Vector2.Zero, 0,
-                        Microsoft.Xna.Framework.Color.Lerp(
-                            new Microsoft.Xna.Framework.Color(120, 60, 200),
-                            new Microsoft.Xna.Framework.Color(255, 220, 160), calor),
-                        0.55f + 0.4f * calor);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                    d.velocity = new Vector2(-MathF.Sin(ang), MathF.Cos(ang) * 0.82f)
-                        * (0.6f + 0.5f * calor);   // la runa RECORRE su órbita
-                }
-            }
-            catch { }
-        }
+
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
@@ -575,50 +434,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             ParticlePresets.RingPulse(target.Center, 90f, new Color(255, 180, 130, 170), 22);
 
             // Implosión: 50 partículas convergiendo en espiral
-            for (int i = 0; i < 50; i++)
-            {
-                float angle = (MathHelper.TwoPi / 50) * i + Main.rand.NextFloat(-0.2f, 0.2f);
-                float dist = Main.rand.NextFloat(80f, 140f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist, (float)Math.Sin(angle) * dist);
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.5f;
-                    Vector2 vel = (toCenter * 7f + tangent * 4f);
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        vel, 200, new Color(255, 80, 40), 1.3f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
 
             // Explosión: 40 radiales
-            for (int i = 0; i < 40; i++)
-            {
-                float angle = (MathHelper.TwoPi / 40) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 11f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 220, new Color(255, 120, 50), 1.5f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
 
             // Destellos encantados magenta y dorados
-            for (int i = 0; i < 15; i++)
-            {
-                Color c = Main.rand.NextBool(3)
-                    ? new Color(255, 200, 110)   // destello dorado arcano (encaja con rojo-naranja)
-                    : new Color(255, 230, 200);  // ámbar pálido
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
-                    new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
-                    255, c, 1.0f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
         }
@@ -658,36 +477,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 new Color(255, 245, 230), new Color(200, 50, 25), 44);
 
             // Implosión: partículas convergiendo
-            for (int i = 0; i < 60; i++)
-            {
-                float angle = (MathHelper.TwoPi / 60) * i;
-                float dist = Main.rand.NextFloat(110f, 185f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist, (float)Math.Sin(angle) * dist);
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        toCenter * 9f + tangent * 5f, 220, new Color(255, 80, 40), 1.4f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
 
             // Explosión: anillo expansivo
-            for (int i = 0; i < 45; i++)
-            {
-                float angle = (MathHelper.TwoPi / 45) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 230, new Color(255, 130, 60), 1.6f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
         }

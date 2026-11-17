@@ -261,13 +261,23 @@ namespace AethonMod.Content.UI
         // independiente: la rueda decide por la página bajo el cursor)
         private Rectangle GeoPagIzq, GeoPagDer;
 
-        // v6.144 — LA TINTA LEGIBLE (la letra: «los textos no se ven
-        // ya que estan muy oscuros»): el marrón-tinta SUBE un tramo —
-        // sigue siendo tinta de manuscrito pero se LEE sobre el papel.
-        private static readonly Color Tinta = new(46, 30, 22);
-        private static readonly Color TintaTitulo = new(94, 38, 118);
-        private static readonly Color TintaCap = new(110, 66, 26);
-        private static readonly Color Papel = new(226, 210, 176);
+        // v6.149 — LA LEGIBILIDAD DE VERDAD (la letra: «todos los textos
+        // estan desentrados y el color de los textos los hace
+        // ilegibles»). DOS CURAS:
+        //   · LOS COLORES: el marrón-tinta apagado (46,30,22) sobre papel
+        //     era CENIZA — apenas distinguible de la sombra del papel.
+        //     La tinta nueva es la CLÁSICA de manuscrito vivo: un
+        //     sepia-oscuro con CONTRASTE REAL contra el papel (el truco
+        //     del WriteBorderString: el texto lleva SU PROPIO borde
+        //     negro y el cuerpo sube de luminosidad). Títulos: violeta
+        //     SATURADO; capítulos: ámbar quemado con más cuerpo.
+        //   · EL CENTRADO (abajo, en DibujarColumna): títulos de sección
+        //     CENTRADOS en la página (no pegados a la izquierda) y el
+        //     cuerpo JUSTIFICADO con centrado óptico por línea.
+        private static readonly Color Tinta = new(72, 44, 24);
+        private static readonly Color TintaTitulo = new(128, 52, 158);
+        private static readonly Color TintaCap = new(140, 84, 34);
+        private static readonly Color Papel = new(232, 218, 186);
         private static readonly Color PapelSombra = new(206, 188, 150);
         private static readonly Color Cuero = new(84, 54, 34);
         private static readonly Color CueroClaro = new(112, 76, 46);
@@ -475,6 +485,16 @@ namespace AethonMod.Content.UI
                                 "LoreIII_ElGrimoriodelEter", "LoreIII_ElAltar" },
                         new[] { "LoreSecIV", "LoreIV_Laimposibilidaddel",
                                 "LoreIV_Laentidadinmortal", "LoreIV_Elaburrimientoyla" },
+                        // v6.149 — LORE V: EL CANON ASSENTADO (la letra:
+                        // «con el nuevo lore que te di, integralo al mod …
+                        // e informar de ello en el libro de informacion»):
+                        // la Ira, el Pilar que cuenta, el Sellado y sus
+                        // funerales, los compañeros, las sombras y la
+                        // respuesta final — las piezas nuevas del Compendio.
+                        new[] { "LoreSecV", "LoreV_LaIra",
+                                "LoreV_ElPilar", "LoreV_ElSellado",
+                                "LoreV_Loscompaneros", "LoreV_Lassombras",
+                                "LoreV_Larespuestafinal" },
                     },
                 };
 
@@ -535,36 +555,54 @@ namespace AethonMod.Content.UI
                 var medT = fuente.MeasureString(titulo);
                 if (VisibleEn(cy, medT.Y, recorte))
                 {
-                    Utils.DrawBorderString(sb, titulo, new Vector2(xizq, cy), TintaTitulo, 0.95f);
-                    sb.Draw(_pixel, new Rectangle(
-                        (int)(xizq + medT.X * 0.95f + 10), (int)(cy + 10),
-                        (int)(pagina.Right - 26 - xizq - medT.X * 0.95f - 10), 2),
-                        TintaCap * 0.6f);
+                    // v6.149 — EL TÍTULO CENTRADO (la letra: «todos los
+                    // textos estan desentrados»): el título de sección vive
+                    // en el CENTRO de la página, con su subrayado SIMÉTRICO
+                    // a ambos lados (el rótulo de archivo clásico).
+                    float xTit = pagina.X + (pagina.Width - medT.X * 0.95f) * 0.5f;
+                    Utils.DrawBorderString(sb, titulo, new Vector2(xTit, cy), TintaTitulo, 0.95f);
+                    float yLinea = cy + medT.Y * 0.95f + 2f;
+                    sb.Draw(_pixel, new Rectangle((int)(pagina.X + margen), (int)yLinea,
+                        (int)Math.Max(4f, xTit - 20f - (pagina.X + margen)), 2), TintaCap * 0.55f);
+                    sb.Draw(_pixel, new Rectangle((int)(xTit + medT.X * 0.95f + 20f), (int)yLinea,
+                        (int)Math.Max(4f, pagina.Right - margen - (xTit + medT.X * 0.95f + 20f)), 2),
+                        TintaCap * 0.55f);
                 }
                 cy += medT.Y * 0.95f + 9f;
 
                 for (int i = 1; i < sec.Length; i++)
-                    cy = LineaLibro(sb, T(sec[i]), xizq + 14f, cy, maxAncho - 14f,
-                        Tinta, recorte);
+                    cy = LineaLibro(sb, T(sec[i]), xizq, cy, maxAncho,
+                        Tinta, recorte, pagina);
                 cy += 5f;
             }
             return Math.Max(0f, cy + scroll - recorte.Y + 20f);
         }
 
         private float LineaLibro(SpriteBatch sb, string texto, float x, float cy,
-            float maxAncho, Color c, Rectangle recorte)
+            float maxAncho, Color c, Rectangle recorte, Rectangle pagina)
         {
             var fuente = FontAssets.MouseText.Value;
             float alto = fuente.MeasureString("Ag").Y * 0.92f + 3f;
             var palabras = texto.Split(' ');
             var linea = new System.Text.StringBuilder();
+            void Volcar(float y)
+            {
+                if (!VisibleEn(y, alto, recorte)) return;
+                // v6.149 — EL CENTRADO ÓPTICO (la letra: «todos los textos
+                // estan desentrados»): cada línea del cuerpo se CENTRA en
+                // el ancho útil de la página — el bloque de texto respira
+                // simétrico, como un manuscrito de verdad (la última línea
+                // corta ya no cuelga sola a la izquierda).
+                float ancho = fuente.MeasureString(linea.ToString()).X * 0.92f;
+                float xc = pagina.X + (pagina.Width - ancho) * 0.5f;
+                Utils.DrawBorderString(sb, linea.ToString(), new Vector2(xc, y), c, 0.92f);
+            }
             foreach (string pal in palabras)
             {
                 string prueba = linea.Length == 0 ? pal : linea + " " + pal;
                 if (fuente.MeasureString(prueba).X * 0.92f > maxAncho && linea.Length > 0)
                 {
-                    if (VisibleEn(cy, alto, recorte))
-                        Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.92f);
+                    Volcar(cy);
                     cy += alto;
                     linea.Clear().Append(pal);
                 }
@@ -572,8 +610,7 @@ namespace AethonMod.Content.UI
             }
             if (linea.Length > 0)
             {
-                if (VisibleEn(cy, alto, recorte))
-                    Utils.DrawBorderString(sb, linea.ToString(), new Vector2(x, cy), c, 0.92f);
+                Volcar(cy);
                 cy += alto;
             }
             return cy + 3f;

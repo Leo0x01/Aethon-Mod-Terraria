@@ -209,12 +209,27 @@ namespace AethonMod.Content.Players
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;
 
+                // v6.149 — EL VESTIDO SE CONSTRUYE PARTE POR PARTE (la
+                // letra: «no puedo ver La forma Eterna construyendose a
+                // medida que avanza el despertar del grimorio del
+                // eterno»): el contador de partes VIAJA CON EL JUGADOR —
+                // el anillo dorsal lo lee para crecer en densidad (de la
+                // escritura desnuda de la parte 1 a la triple corona
+                // completa de la parte 4), y cada umbral enciende SU
+                // capa. La construcción ahora SE VE peldaño a peldaño.
+                visuales.PartesFormaEterna = PartesConstruidas;
+
                 // LAS PARTES SE PONEN (de adentro hacia afuera):
                 if (PartesConstruidas >= 1) visuales.AnilloDorsal = true;         // 1: la escritura
                 if (PartesConstruidas >= 5) visuales.FormaAscendidaVisual = true;  // 5: la primera luz
                 if (PartesConstruidas >= 6) visuales.BrasaDelEclipse = true;       // 6: la brasa
                 if (PartesConstruidas >= 7) visuales.BrilloSolar = true;           // 7-9: los soles
                 if (PartesConstruidas >= 10) visuales.FormaAscendidaOchoVisual = true; // 10: las ofanim
+                // v6.149 — LA PARTE 11, EL MANTO: el velo que une el
+                // panteón — la Primera Luz VUELVE a vestirse (ahora como
+                // velo del manto: la luz ya no es solo el estandarte de
+                // la parte 5, es la tela que cose todo lo construido).
+                if (PartesConstruidas >= 11) visuales.FormaAscendidaVisual = true;
 
                 // (EL ATAQUE no se paga aquí: lo paga BonusDano del
                 // despertar — +4%/nivel 101-112 y +10%/nivel 113-120, a

@@ -104,6 +104,15 @@ namespace AethonMod.Content.Players
         /// <summary>¿Viste el AURA de LAS OFANIM SIN vuelo (la Forma Eterna)?</summary>
         public bool FormaAscendidaOchoVisual;
 
+        /// <summary>v6.149 — ¿Cuántas partes de LA FORMA ETERNA están
+        /// construidas? (la letra: «no puedo ver La forma Eterna
+        /// construyendose a medida que avanza el despertar del grimorio
+        /// del eterno»): el vestido crece PARTE POR PARTE — el anillo
+        /// dorsal se hace más denso con cada parte construida y EL
+        /// MANTO (parte 11) tiene su propio velo. Lo escribe
+        /// FormaEternaPlayer cada tick (0 = sin forma en construcción).</summary>
+        public int PartesFormaEterna;
+
         /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
         /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
         /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que

@@ -269,7 +269,7 @@ namespace AethonMod.Content.Weapons.Ojos
             // LA FASE DEL PÁRPADO (el ciclo del escuadrón: abierto →
             // medio → cerrado → medio → abierto, ~7 s con pausas)
             double ciclo = (Main.GlobalTimeWrappedHourly * 0.55 + Projectile.whoAmI * 0.37) % 7.0;
-            string nombreTex = "AethonMod/Content/Projectiles/OjoEterne_Abierto";
+            string nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Abierto";
             if (ciclo > 5.6 && ciclo < 6.1) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
             else if (ciclo >= 6.1 && ciclo < 6.5) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Cerrado";
             else if (ciclo >= 6.5 && ciclo < 7.0) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";

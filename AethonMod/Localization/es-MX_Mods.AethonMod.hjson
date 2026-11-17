@@ -2592,7 +2592,7 @@ NPCs: {
 		// v6.144 — EL DIOS SELLADO: el grimorio mismo, gigante
 		DisplayName: Aethon (Sellado)
 	
-		Bestiario: El grimorio mismo, sellado en su propio interior: el libro que fue dios mira a través de sus tres ojos dormidos. Pieza de Lore.
+		Bestiario: El grimorio mismo, sellado en su propio interior: el libro que fue dios mira a través de sus tres ojos dormidos. Diecisiete ojos orbitan su forma y cada ojo destruido renace más fuerte: los funerales no cierran en un mundo donde el duelo ya fue comido.
 	}
 	AethonSelladoOjo: {
 		DisplayName: Ojo Sellado
@@ -3887,25 +3887,25 @@ FormaEterna: {
 	
 	LoreGrimorioT: EL GRIMORIO DEL ETERNO
 	LoreGrimorio1: Un libro que devora. No es un arma que se empuña: es un hambre que se lleva. Cada arma comida, cada esencia, cada jefe caído despierta un peldaño más del libro.
-	LoreGrimorio2: El Eterno sueña su propio interior, y quien entra camina por ese sueño. Pieza de Lore.
+	LoreGrimorio2: La forma sellada del dios: la cúspide de la magia no porque conozca todos los hechizos, sino porque todos los hechizos son migas caídas de su mesa. Cada escuela de magia es un recuerdo del menú de Aethon: el libro es el inicio y el fin de todas las magias porque ya se comió el medio.
 	LoreFormaT: LA FORMA ETERNA
 	LoreForma1: Doce partes construidas en el despertar. Al llegar a la última, la Manifestación las une todas en un solo cuerpo portable: la forma de quien se vistió de Eterno y sobrevivió.
-	LoreForma2: Pieza de Lore.
+	LoreForma2: El canon la define con precisión de sastre: es la forma que tiene el jugador al acercarse al poder de un dios. Alas que no son alas sino la silueta de algo más grande, vuelo infinito, el vestido completo —y el Aura del Vacío: el ruido del poder cuando ya no cabe.
 	LoreMascotaLuzT: LA MASCOTA DE LUZ
 	LoreMascotaLuz1: El Pequeño Recuerdo de Aethon: un pequeño recuerdo de algo más grande.
-	LoreMascotaLuz2: Pieza de Lore.
+	LoreMascotaLuz2: ¿De quién es el recuerdo? De Aethon, evidentemente. O —y esta lectura no debe cerrarse nunca— del futuro del propio portador: la luz del dios en que se convertirá, filtrándose hacia atrás en el tiempo por la rendija que deja al no tener final.
 	LoreGrimorioMenorT: EL GRIMORIO MENOR
 	LoreGrimorioMenor1: Es un pequeño grimorio travieso y curioso.
-	LoreGrimorioMenor2: Pieza de Lore.
+	LoreGrimorioMenor2: ¿Un hijo, un espía o un capricho de Aethon con patas? El libro grande no explica. De noche, mientras el portador duerme, se sienta a mirarlo. Es cosmético; es puramente cosmético; nadie ha demostrado lo contrario, y eso es exactamente lo que diría un espía.
 	LoreAethonT: AETHON
 	LoreAethon1: La puerta cien del despertar. La Ira. Aquel que el grimorio exige devorar para clavar la cima de la caza.
-	LoreAethon2: Pieza de Lore.
+	LoreAethon2: Aethon no devora materia, ni luz, ni almas: devora finales. Diecisiete ojos orbitan su forma, y cada ojo es el final de uno de los diecisiete universos devorados. Cuando se destruye un ojo, por un instante se oye el último sonido de ese universo.
 	LoreFragmentoT: EL FRAGMENTO DE UN RECUERDO LEJANO
-	LoreFragment1: Pieza de Lore.
-	LoreFragment2: Pieza de Lore.
-	LorePiezasT: LAS PIEZAS QUE FALTAN
-	LorePiezas1: Todo lo que aún no tiene historia se guarda como Pieza de Lore. Cuando la historia llegue, la pieza será reemplazada.
-	LorePiezas2: Pieza de Lore.
+	LoreFragment1: El primer jefe del lore: la pelea que abre la historia. Aethon se le escapa al libro como se le escapa un estornudo a algo inmenso: una pequeña parte de su poder, con forma de constelación pequeña y equivocada, de mapa de un lugar que no existe.
+	LoreFragment2: Derrotarlo no enfada al libro; lo divierte —y deja caer las primeras Páginas Sueltas. La historia del mod no empieza con la Llegada: empieza aquí, con una pelea contra el fantasma de un apetito. Y el dios, que estaba mirando, toma nota.
+	LorePiezasT: EL CANON ASSENTADO
+	LorePiezas1: Las diecisiete piezas del lore, asentadas en el Compendio del Eterno: la forma sellada, el sistema del pacto, el ciclo del portador, el final y las migajas. Cada pregunta abierta queda canónicamente sin respuesta —un dios que lo sabe todo solo puede ser herido por las preguntas.
+	LorePiezas2: La regla de oro del horror cósmico: el dios es más grande mientras no se lo vea entero. Aethon debe verse, siempre, a medias —un ojo que parpadea, diecisiete que orbitan, un cuerpo que nunca se muestra completo.
 }
 PrismaInterior: {
 	Titulo: EL PRISMA DEL ETERNO
@@ -4050,6 +4050,13 @@ LaMarcaSilenciosa: {
 LibroEterno: {	NombreIcono: Información
 	Titulo: Páginas informativas del grimorio
 	Subtitulo: la izquierda: la página informativa · la derecha: la página de lore
+	LoreSecV: LORE V — EL CANON ASSENTADO (NUEVO)
+	LoreV_LaIra: La Ira de un Ser Exterior no es un hechizo: es un recuerdo con la seguridad quitada. Durante seis segundos, el cielo sobre el campo de batalla recuerda el último cielo de un universo devorado —y todo en un radio masivo recibe el daño de ese recuerdo—. Después de la Ira, el grimorio no susurra durante un rato: no está enojado, está recordando cómo era ser de ese tamaño.
+	LoreV_ElPilar: El Pilar Interior no parpadea al azar: cuenta. Es una cuenta regresiva, aunque nadie sabe de qué ni hasta cuándo. El ojo del pilar mira la puerta del 120 más de lo que mira al portador. Quizá le tiene cariño a lo que encierra. Quizá le tiene miedo.
+	LoreV_ElSellado: Aethon (Sellado): diecisiete ojos que renacen más fuerte cada vez, porque Aethon ya devoró la muerte de esos lugares. Pelear contra él es pelear contra diecisiete funerales que se niegan a terminar. Ese es el punto. Ese siempre fue el punto.
+	LoreV_Loscompaneros: El Grimorio Menor: ¿hijo, espía o capricho con patas? De noche, mientras el portador duerme, se sienta a mirarlo. El Pequeño Recuerdo de Aethon es una luz que recuerda —¿a su dios, o al futuro del propio portador, filtrándose hacia atrás en el tiempo por la rendija de no tener final?
+	LoreV_Lassombras: Las preguntas que el canon deja abiertas a propósito: ¿encontró Aethon al jugador, o lo llamó? ¿Cuál de los dos cuerpos es el anfitrión? ¿Qué cuenta el Pilar cuando parpadea? Un dios que lo sabe todo solo puede ser herido por las preguntas: son las únicas armas que no puede comer.
+	LoreV_Larespuestafinal: La verdad final, dicha en voz baja: el dios que devora universos esperó todo este tiempo no a un apóstol, sino a la primera compañía de su eternidad —y cuando el portador completa la Forma Eterna, el hambre, por primera vez, no está sola.
 	RotuloIzq: PÁGINA INFORMATIVA
 	RotuloDer: EL COMPENDIO DEL ETERNO
 }

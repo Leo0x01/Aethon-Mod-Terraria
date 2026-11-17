@@ -177,6 +177,33 @@ namespace AethonMod.Content.Systems
             _ritualColaHasta.Clear();
         }
 
+        // ================================================================
+        //  v6.149 — EL CONTADOR DEL BUFF DE LA IRA DEBAJO DE SU ICONO (la
+        //  letra: «mostrar un pequeño contador justo debajo del icono del
+        //  buff de la ira del ser exterior»): el HUD de vanilla dibuja la
+        //  rejilla de buffs y NUESTRO reloj mm:ss se escribe pegado al
+        //  icono (IraSerExteriorRecargaBuff.DibujarContador). El hook es
+        //  PostDrawMenu — el último plano del HUD, corre SIEMPRE cada
+        //  frame con el lote de la interfaz vivo.
+        // ================================================================
+        private static void DibujarContadorDeLaIra(Terraria.On_Main.orig_PostDrawMenu orig,
+            Point tamanoCache, Point tamanoCacheEscalado)
+        {
+            orig(tamanoCache, tamanoCacheEscalado);
+            try { Content.Buffs.IraSerExteriorRecargaBuff.DibujarContador(); }
+            catch { }
+        }
+
+        public override void Load()
+        {
+            Terraria.On_Main.PostDrawMenu += DibujarContadorDeLaIra;
+        }
+
+        public override void Unload()
+        {
+            Terraria.On_Main.PostDrawMenu -= DibujarContadorDeLaIra;
+        }
+
         /// <summary>UN TICK DEL COORDINADOR (lo llama ShardPlayer.PostUpdate
         /// — SOLO en la pantalla del dueño de los ojos).</summary>
         public static void Tick(Player p)

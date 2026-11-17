@@ -73,7 +73,8 @@ namespace AethonMod.Content.VFX
         /// <param name="altura">La altura del sprite del jugador (px).</param>
         /// <param name="time">Tiempo animado (Main.GlobalTimeWrappedHourly).</param>
         /// <param name="alpha">Multiplicador global de intensidad (0..1).</param>
-        public static void Draw(Vector2 espalda, float altura, float time, float alpha = 1f)
+        public static void Draw(Vector2 espalda, float altura, float time, float alpha = 1f,
+            float runasMul = 1f)   // v6.149 — la densidad de runas de la corona (la construcción de la Forma Eterna)
         {
             if (alpha <= 0.02f || altura < 8f) return;
 
@@ -97,7 +98,7 @@ namespace AethonMod.Content.VFX
                 //     6 contrarrotando + blanco íntimo de 6 rápido, las
                 //     runas DE PIE con sus perlas. ---
                 OrbitaLib.CoronaConjuro(centro, r, time,
-                    alphaMul: alpha, glyphMul: GlifoMul);
+                    alphaMul: alpha, glyphMul: GlifoMul * runasMul);
 
                 OrbitaLib.CerrarBatch();
                 // El batch queda CERRADO (el contrato).

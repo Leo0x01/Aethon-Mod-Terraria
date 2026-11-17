@@ -123,8 +123,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             try
             {
+                // v6.149 — LA CORONA QUE SE CONSTRUYE (la letra: «no
+                // puedo ver La forma Eterna construyendose a medida que
+                // avanza el despertar del grimorio del eterno»): cuando
+                // el portador está construyendo LA FORMA ETERNA, la
+                // corona crece PARTE POR PARTE — la parte 1 es LA
+                // ESCRITURA desnuda (una marca tenue al 45 %), y con
+                // las partes 2-4 los tres anillos de la triple corona
+                // se encienden uno a uno hasta la corona completa:
+                //   parte 1  → alpha 0.45 · runas 0.5 (la escritura)
+                //   parte 2  → alpha 0.60 · runas 0.7 (el primer anillo)
+                //   parte 3  → alpha 0.80 · runas 0.85 (el segundo)
+                //   parte 4+ → alpha 1.00 · runas 1.0 (la corona plena)
+                // Sin forma en construcción (el anillo por accesorio),
+                // la corona plena de siempre.
+                int partes = duenio.GetModPlayer<CosmeticPlayer>().PartesFormaEterna;
+                float alphaCorona = 1f, runasCorona = 1f;
+                if (partes > 0)
+                {
+                    alphaCorona = MathHelper.Clamp(0.45f + 0.15f * System.Math.Min(partes - 1, 3), 0f, 1f);
+                    runasCorona = MathHelper.Clamp(0.50f + 0.17f * System.Math.Min(partes - 1, 3), 0f, 1f);
+                }
                 AnilloDorsalRenderer.Draw(espalda, duenio.height,
-                    Main.GlobalTimeWrappedHourly, 1f);
+                    Main.GlobalTimeWrappedHourly, alphaCorona, runasCorona);
             }
             catch
             {
