@@ -1,23 +1,18 @@
-# SNAPSHOT ESTABLE — v6.145 — LA LETRA COMPLETA
+# SNAPSHOT ESTABLE — v6.146 — LA SESIÓN DE LOS GESTOS
 
-> **PUBLICADA — [release 447334734](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.145) + CDN verificado (md5 `f1d9ae8eccc9fe96ebb7be6c977f9a25`, 19.395.234 B)**
+> **PUBLICADA — [release 448346708](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146) + CDN verificado (md5 `a5fa29117116c8d8c1e0dfad4991819d`, 19.400.025 B)**
 
-## LOS 14 PUNTOS DE LA SESIÓN 26
+## LOS 12 PUNTOS DE LA SESIÓN 27
 
-1. Devorar 101-120: **3 de 5** entre las armas finales VANILLA (Nebula Blaze · Solar Eruption · Vortex Beater · Stardust Dragon · Last Prism) + materiales + puerta de jefe OBLIGATORIA (Cultista/ML rotando · **Aethon Sellado al 120**).
-2. Alas Rúnicas **FUSIONADAS** en La Forma Eterna (inmunidad caídas + vuelo infinito).
-3. Pergamino → **Páginas informativas del grimorio** (título izquierda + rótulos Info/Lore).
-4. Icono → **Información**.
-5. **Buffs crudos curados** (rescate v6.140 + nombres nuevos · 19/19 · 18/18 · 18/18).
-6. Aura: bruma **siempre al lado opuesto** (±60°) + **TODOS** los monstruos.
-7. Ira: **10 min + contador tipo buff + solo Shift+click izquierdo**.
-8. Vestido de la Forma visible al desbloquear cada parte.
-9. Eco 1/10 · Verdugo 10/100 (Shift).
-10. Iris del entrecerrado **cortado a la mitad**.
-11. Prisma: Shift+INVOCAR = **Aethon (Sellado)**.
-12. Aethon (Sellado): **17 ojos** + vuelo del cazador + **renacen más poderosos**.
-13. **Sombra de Tinta** (fusión real · II borrada).
-14. Tentáculos del interior: masa clásica + bruma densa en la base.
+1. Vestido de la Forma con el libro en la **hotbar** — visible al evolucionar.
+2. Scroll: `LockVanillaMouseScroll` (el cerrojo oficial de tML) — la rueda es del libro.
+3. Sombra de Tinta sin ojos/colmillos + Muñeca Maldita (rebotes ×5).
+4. Ira: **izq+der** · buff desde el nivel 100 · icono SFORGA · texto «1 cada 10 min» del const.
+5. **Agujero Rúnico Puro**: anillo de runas vivas (en la ruleta del escuadrón).
+6. Muñeco de Pruebas Negro: eterno.
+7. Eco 1↔10 · Verdugo 10↔100 (click der alterna · izq aplica).
+8. Aura: bruma residual fuera + **Espectro arde**.
+9. Icono «Información»: parpadeo + iris que sigue al cursor.
 
 ## VERIFICACIÓN
-Oráculo 0/0 · build 0/0 · GUARDIÁN ✔ · AUDIT 14/14 · hjson ×3 ✔ · headless 0 exc.
+Oráculo 0/0 · build 0/0 · GUARDIÁN ✔ · AUDIT 12/12 · hjson ×3 ✔ · headless 0 exc.

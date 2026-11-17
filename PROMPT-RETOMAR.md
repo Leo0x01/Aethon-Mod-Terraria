@@ -70,9 +70,9 @@ puedas averiguar tú mismo del repo.
 
 ## 3 · EL ESTADO ACTUAL (se actualiza con cada versión — v6.145)
 
-- **Versión**: 6.145 (`AethonMod/build.txt`) — publicada como
-  [release 447334734](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.145),
-  md5 `f1d9ae8eccc9fe96ebb7be6c977f9a25`, 527 entradas en el .tmod.
+- **Versión**: 6.146 (`AethonMod/build.txt`) — publicada como
+  [release 448346708](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146),
+  md5 `a5fa29117116c8d8c1e0dfad4991819d`, 528 entradas en el .tmod.
 - **Última versión (v6.137) — EL PILAR DEL CUERPO DEL DIOS**: las DOS
   VALQUIRIAS (estilos 12 sin plumas · 13 lisa) · LOS COLMILLOS de la forja
   en las cinco dagas del Cetro · EL MUÑECO (receta 5+5 · el círculo plano
