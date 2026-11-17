@@ -8,6 +8,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
+using ReLogic.Graphics;
 
 namespace AethonMod.Content.UI
 {
@@ -97,8 +98,18 @@ namespace AethonMod.Content.UI
                     return true;
                 }, InterfaceScaleType.UI));
 
-            // EL LIBRO ABIERTO
-            layers.Insert(idx + 1, new LegacyGameInterfaceLayer("AethonMod: LibroDelEterno",
+            // ============================================================
+            //  v6.151 — EL LIBRO ENCIMA DE TODO (la letra: «el libro de
+            //  informacion debe abrirse encima de la interfaz de usuario
+            //  nada lo debe tapar»): la capa del LIBRO ABIERTO ya NO se
+            //  inserta junto al inventario — vive AL FINAL de la lista
+            //  (la ÚLTIMA capa dibuja encima de todo: inventario, mapas,
+            //  barras, hasta el propio cursor de texto). El icono
+            //  pequeño sigue en su sitio de siempre (es un botón del
+            //  inventario); lo que manda encima de todo es EL LIBRO
+            //  ABIERTO.
+            // ============================================================
+            layers.Add(new LegacyGameInterfaceLayer("AethonMod: LibroDelEterno",
                 () =>
                 {
                     if (_estado != null && _estado.Visible)
@@ -274,7 +285,15 @@ namespace AethonMod.Content.UI
         //   · EL CENTRADO (abajo, en DibujarColumna): títulos de sección
         //     CENTRADOS en la página (no pegados a la izquierda) y el
         //     cuerpo JUSTIFICADO con centrado óptico por línea.
-        private static readonly Color Tinta = new(72, 44, 24);
+        // v6.151 — LA TINTA DE LA LETRA («nunca arreglaste el color de
+        // los textos, ese color no se ve y es horrible, que sean letras
+        // con bordes blanco centro negro»): el CUERPO pasa por
+        // DrawBorderString con centro NEGRO PURO (el contraste máximo
+        // contra el papel — la línea que SIEMPRE se lee) y el borde que
+        // DibujaCuerpo pinta BLANCO (el halo que la separa de las
+        // sombras del papel). LOS TÍTULOS QUEDAN COMO ESTÁN (la letra:
+        // «la letra de los titulos y esas cosas dejalas como estan»).
+        private static readonly Color Tinta = new(10, 8, 12);
         private static readonly Color TintaTitulo = new(128, 52, 158);
         private static readonly Color TintaCap = new(140, 84, 34);
         private static readonly Color Papel = new(232, 218, 186);
@@ -443,8 +462,14 @@ namespace AethonMod.Content.UI
                 float cy = GeoPagIzq.Y + 26f;
 
                 // ============ EL CUERPO: DOS COLUMNAS CON RECORTE ============
-                int cuerpoY = (int)cy;
-                int cuerpoH = h - (int)cy - y - 30;
+                // v6.151 — EL MARGEN DEL DESAPARECER (la letra: «al hacer
+                // scroll los textos desaparecen muy pegados al borde
+                // superio, intenta dejar un pequeño margen arriba»): el
+                // RECORTE de las columnas nace 30 px MÁS ABAJO de la
+                // página (el aire del papel) — la línea que se va
+                // desvaneció dentro de la página, no contra su borde.
+                int cuerpoY = (int)cy + 30;
+                int cuerpoH = h - (int)cy - y - 60;
                 Rectangle recIzq = new Rectangle(pagIzq.X + 6, cuerpoY, pagIzq.Width - 12, cuerpoH);
                 Rectangle recDer = new Rectangle(pagDer.X + 6, cuerpoY, pagDer.Width - 12, cuerpoH);
 
@@ -528,12 +553,21 @@ namespace AethonMod.Content.UI
                 // eliminar») — la página derecha es del LORE: el ojo
                 // ya no vive aquí. ============
 
-                // ============ LA X ============
-                var rectX = new Rectangle(x + w - 42, y + 8, 28, 28);
+                // ============ LA X — EN SU SITIO DE VERDAD ============
+                // v6.151 — EL BOTÓN Y SU DIBUJO SON LO MISMO (la letra:
+                // «esa X esta mal ubicada, esta muy a la izquierda
+                // cuando el boton real para tocarla esta mas a la
+                // derecha»): la v6.150 movió el DIBUJO pero el rectángulo
+                // seguía midiendo 28 px dentro del marco — el dedo caía
+                // DONDE NO SE VE. AHORA: la X vive pegada a la ESQUINA
+                // SUPERIOR DERECHA del LIBRO (la esquina de la TAPA, el
+                // sitio universal del cierre) con su hitbox de 36 px
+                // dibujada EXACTA — donde tocas es donde cae.
+                var rectX = new Rectangle(x + w - 6, y - 8, 36, 36);
                 bool hoverX = rectX.Contains(Main.mouseX, Main.mouseY);
-                sb.Draw(_pixel, rectX, (hoverX ? new Color(220, 90, 90) : new Color(96, 74, 52)) * 0.4f);
+                sb.Draw(_pixel, rectX, (hoverX ? new Color(220, 90, 90) : new Color(96, 74, 52)) * 0.45f);
                 Utils.DrawBorderString(sb, "X", new Vector2(rectX.Center.X, rectX.Center.Y),
-                    hoverX ? new Color(220, 90, 90) : Tinta, 1f, 0.5f, 0.5f);
+                    hoverX ? new Color(220, 90, 90) : Tinta, 1.1f, 0.5f, 0.5f);
                 if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
                     LibroDelEternoUI.Cerrar();
             }
@@ -605,9 +639,26 @@ namespace AethonMod.Content.UI
                 // el ancho útil de la página — el bloque de texto respira
                 // simétrico, como un manuscrito de verdad (la última línea
                 // corta ya no cuelga sola a la izquierda).
+                // v6.151 — EL BORDE BLANCO + EL CENTRO NEGRO (la letra):
+                // DOS pases — el PASO 1 dibuja el texto BLANCO en los 4
+                // offsets cardinales (el contorno que SIEMPRE se lee,
+                // incluso sobre la sombra del lomo), el PASO 2 el texto
+                // NEGRO encima (el cuerpo de la tinta). El contraste
+                // máximo de la letra, sin tocar los títulos.
                 float ancho = fuente.MeasureString(linea.ToString()).X * 0.92f;
                 float xc = pagina.X + (pagina.Width - ancho) * 0.5f;
-                Utils.DrawBorderString(sb, linea.ToString(), new Vector2(xc, y), c, 0.92f);
+                var posL = new Vector2(xc, y);
+                const float o = 1.1f;   // el grosor del contorno
+                sb.DrawString(fuente, linea.ToString(), posL + new Vector2(o, 0f),
+                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                sb.DrawString(fuente, linea.ToString(), posL + new Vector2(-o, 0f),
+                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                sb.DrawString(fuente, linea.ToString(), posL + new Vector2(0f, o),
+                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                sb.DrawString(fuente, linea.ToString(), posL + new Vector2(0f, -o),
+                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                sb.DrawString(fuente, linea.ToString(), posL,
+                    c, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
             }
             foreach (string pal in palabras)
             {

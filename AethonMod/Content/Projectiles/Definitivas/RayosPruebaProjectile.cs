@@ -368,6 +368,17 @@ namespace AethonMod.Content.Projectiles.Definitivas
             Projectile.netImportant = true;
             raySound = null;
             _cargaSlot = default;
+            // v6.151 — EL RITMO DE LOS AGUJEROS RÚNICOS (la letra: «debes
+            //     aumentar los tick de daño de la ira de un ser exterior,
+            //     que sean la misma velocidad que los ticks de los agujeros
+            //     runicos, esto es solo aumentar la velocidad con la que
+            //     hace daño, no su daño»): el agujero rúnico golpea cada 6 t
+            //     en su centro (hasta 24 en el borde — el intervalo
+            //     6+prox·18 de su aura). EL HAZ DE LA IRA toma EL RITMO DEL
+            //     CENTRO: localNPCHitCooldown 10→6 — golpea un 66 % más
+            //     rápido, EL MISMO DAÑO POR GOLPE (el cálculo NO se toca).
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 6;
         }
 
         // LOS POZOS DEL RC2 (cero-GC): la MISMA polilínea de 1500 puntos

@@ -98,31 +98,36 @@ namespace AethonMod.Content.Buffs
                     }
                 }
 
-                // === 3. EL RESPLANDOR MORADO (al 100 % — la Ira LISTA) ===
+                // ============================================================
+                //  v6.151 — EL BRILLO CUADRADO QUE DICE «LISTA» (la letra:
+                //  «el brillo en el icono de buff de la ira es solo un
+                //  circulo plano demasiado grande… seria bueno un pequeño
+                //  brillo cuadrado que sobresalga al menos 1 a 5 pixeles
+                //  del icono» + «si el brillo sale bien el contador no
+                //  hace falta»): el círculo plano MURIÓ. GlowUILib.MarcoLuz
+                //  dibuja el MARCO de luz que SOBRESALE 4 px del icono,
+                //  con SU latido — y mientras carga, el marco APAGADO
+                //  opaca el borde (la Ira se está cocinando: el marco
+                //  crece con el progreso, de 1 px a los 4 de lista).
+                //  EL CONTADOR mm:ss MURIÓ con la letra: el brillo ES el
+                //  reloj (el icono gris→color de siempre + el marco que
+                //  se enciende al llegar).
+                // ============================================================
+                var rect = new Rectangle((int)pos.X, (int)pos.Y, tex.Width, tex.Height);
                 if (progreso >= 1f)
                 {
-                    Texture2D glow = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                    float t = Main.GlobalTimeWrappedHourly;
-                    float late = 0.7f + 0.3f * MathF.Sin(t * 3.2f);   // el latido
-                    sb.Draw(glow, pos + tex.Size() * 0.5f, null,
-                        new Color(190, 90, 255) * (0.45f * late),
-                        0f, glow.Size() * 0.5f,
-                        new Vector2(2.2f, 2.2f), SpriteEffects.None, 0f);
+                    // LISTA: el marco entero ARDE — 4 px de salida con el
+                    // latido de la casa y el velo interior iluminando
+                    VFX.GlowUILib.MarcoLuz(sb, rect, new Color(196, 108, 255),
+                        4f, 0.95f, 1f);
+                    VFX.GlowUILib.Iluminar(sb, rect, new Color(150, 84, 235), 0.35f);
                 }
-
-                // === 4. EL CONTADOR mm:ss DEBAJO (el texto dorado de la
-                //     casa — el reloj vivo de siempre, en su sitio) ===
-                if (resta > 0ul)
+                else if (progreso > 0.15f)
                 {
-                    int s = (int)(resta / 60ul);
-                    string texto = $"{s / 60:D2}:{s % 60:D2}";
-                    var fuente = FontAssets.ItemStack.Value;
-                    // LA POSICIÓN: debajo del icono (position es la
-                    // esquina sup-izq del icono en coordenadas de UI).
-                    Utils.DrawBorderString(sb, texto,
-                        pos + new Vector2(tex.Width * 0.5f, tex.Height + 2f),
-                        new Color(255, 224, 150), 0.85f, 0.5f, 0f);
+                    // CARGANDO: el marco NACE con el progreso (1→4 px) y
+                    // a media intensidad — la promesa del estallido
+                    VFX.GlowUILib.MarcoLuz(sb, rect, new Color(150, 84, 235),
+                        1f + 3f * progreso, 0.28f + 0.30f * progreso, 0.4f);
                 }
             }
             catch { }

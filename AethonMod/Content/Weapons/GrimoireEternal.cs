@@ -637,6 +637,13 @@ namespace AethonMod.Content.Weapons
 
         public override bool CanUseItem(Player player)
         {
+            // v6.151 — EL GESTO DE LA IRA MANDA (la letra: «todos los
+            // minions desaparecen» al activarla): mientras el portador
+            // dispara la Ira (izq+der), el libro NO se usa — ni invoca
+            // ni dispara. El escuadrón ES el círculo de la ceremonia.
+            var shardIra = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+            if (shardIra != null && shardIra.IraSilenciaElLibro) return false;
+
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 

@@ -204,14 +204,25 @@ namespace AethonMod.Content.Players
                 var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.De(libroActivo);
                 if (alma == null || alma.FormasPartes <= 0) return;
 
-                // LA ESCALERA VIVA: el despertar DEL LIBRO ACTIVO decide.
-                // < 120 → el dios viste al portador (las partes construidas
-                // + los anillos de soles rúnicos de 113-119). ≥ 120 → la
-                // forma YA FUE ESCUPIDA (nació el ítem) y el portador la
-                // lleva puesta como accesorio — el vestido del dios se recoge.
+                // ============================================================
+                //  v6.151 — EL VESTIDO NO SE APAGA POR UNA ESCUPIDA AJENA
+                //  (la letra: «La Forma Eterna solo se construye en
+                //  personaje que no la hayan desbloqueado antes, una vez
+                //  desbloqueada ya no se puede volver a construir y por eso
+                //  en mi personaje de prueba sin importar cuantos libros
+                //  lleve a despertar 101 a 120 no puedo ver como se
+                //  construye»): la condición v6.150 leía ESTADO GLOBAL —
+                //  si CUALQUIER libro del personaje ya había escupido su
+                //  forma, TODO libro nuevo nacía «ya vestido y recogido»:
+                //  jamás se veía la construcción. LA CURA: el vestido lo
+                //  decide EL DESPERTAR DE ESTE LIBRO — mientras ESTE libro
+                //  no llegue a SU 120 (ni escupa SU forma), el dios VISTE:
+                //  cada grimorio construye SU forma (la letra v6.150, por
+                //  fin de verdad).
+                // ============================================================
                 int despertar = Systems.DespertarGrimorio.NivelDe(libroActivo);
                 if (despertar >= Systems.DespertarGrimorio.NivelManifestacion ||
-                    alma.FormaEscupida)
+                    (alma.FormaEscupida && alma.FormasPartes >= PartesTotales))
                     return;
 
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();

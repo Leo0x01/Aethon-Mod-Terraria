@@ -107,6 +107,12 @@ namespace AethonMod.Content.Globals
     /// </summary>
     public class OleadaNPC : GlobalNPC
     {
+        /// <summary>v6.151 — TRUE mientras un jefe de oleada pelea con
+        /// LA NOCHE PRESTADA (el Skeletron/Ojo de la furia del grimorio).
+        /// Lo lee SubmundoGrimorio.PreUpdateWorld: el mediodía eterno del
+        /// mundo interior NO pisa el préstamo — el guardián pelea NORMAL
+        /// (cero modo mazmorra dentro del dios).</summary>
+        public static bool NochePrestadaActiva;
         public override bool InstancePerEntity => true;
 
         /// <summary>¿Este NPC fue convocado por la furia del grimorio?</summary>
@@ -919,6 +925,9 @@ namespace AethonMod.Content.Globals
                 {
                     p._prestaDia = false;
                     Main.dayTime = p._diaOriginal;
+                    // v6.151 — el anuncio MUERE con el préstamo (nadie
+                    // más tiene la noche: el mediodía del interior vuelve)
+                    if (NochePrestadaActiva) NochePrestadaActiva = false;
                 }
                 if (p._prestaSuperficie)
                 {
@@ -1157,6 +1166,12 @@ namespace AethonMod.Content.Globals
                     if (algoPrestado)
                     {
                         _prestamoAbierto = this;
+                        // v6.151 — LA NOCHE PRESTADA, ANUNCIADA (para el
+                        // clamp del mediodía del mundo interior: mientras
+                        // un Skeletron/Ojo de oleada peleaba con SU noche,
+                        // el decorado NO la pisa — el guardián pelea
+                        // NORMAL, jamás en modo mazmorra).
+                        if (_prestaDia) NochePrestadaActiva = true;
                     }
                 }
             }

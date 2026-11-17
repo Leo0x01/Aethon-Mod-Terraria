@@ -217,12 +217,37 @@ namespace AethonMod.Content.Tiles
                 Texture2D tex = ModContent.Request<Texture2D>(Texture).Value;
                 int frame = Main.tileFrame[Type];
                 var src = new Rectangle(0, frame * ALTO_MARCO, tex.Width, ALTO_MARCO);
+                // v6.151 — SIN EL CORTE SUPERIOR (la letra: «analiza bien
+                // el sprite del El Pilar del Eterno, esta cortado en la
+                // parte superior»): el marco se ancla a la ESQUINA del
+                // OBJETO COMPLETO (oy·16 es la fila superior del tile
+                // ORIGEN, que ya es (j-4): el capitel entero — sus 86 px
+                // — nace ENTERO; el clip por filas de vanilla muere aquí
+                // porque SpecialDraw dibuja de UNA pieza) + EL AIRE del
+                // ápice: 6 px de margen sobre el capitel para que la
+                // punta NUNCA roce el límite del tile vecino.
                 Vector2 pos = new Vector2(ox * 16, oy * 16) - Main.screenPosition;
-                // la sombra suave del mueble (el estándar de vanilla)
                 pos += new Vector2(-2f, 0f);
 
                 spriteBatch.Draw(tex, pos, src, Lighting.GetColor(ox, oy), 0f,
                     Vector2.Zero, 1f, SpriteEffects.None, 0f);
+
+                // LA AURA DEL CAPITEL (el resplandor violeta que ABRAZA al
+                // pilar — la lectura del faro desde lejos; lote aditivo
+                // con degradado del SoftGlow de la casa, monotónico)
+                try
+                {
+                    var glow = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                    float t = Main.GlobalTimeWrappedHourly;
+                    float late = 0.5f + 0.5f * MathF.Sin(t * 2.2f);
+                    var cPos = pos + new Vector2(tex.Width * 0.5f, ALTO_MARCO * 0.5f);
+                    spriteBatch.Draw(glow, cPos, null,
+                        new Color(150, 90, 230) * (0.16f + 0.10f * late), 0f,
+                        glow.Size() * 0.5f,
+                        new Vector2(2.6f, 3.4f), SpriteEffects.None, 0f);
+                }
+                catch { }
 
                 // v6.149 — EL OJO-MINION DEL PILAR (la letra: «debe usar a
                 // un minion como ojo… y debe siempre mirar al jugador»): el

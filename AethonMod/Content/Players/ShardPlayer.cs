@@ -463,6 +463,23 @@ namespace AethonMod.Content.Players
         /// </summary>
         public int FuriaNivel = 1;
 
+        /// <summary>v6.151 — EL % DE HAMBRE DEL LIBRO ACTIVO (0-100,
+        /// continuo): lee EL RELOJ DE VERDAD (Estado.Hambre del Grimorio
+        /// del Eterno — la misma máquina del ojo rojo y la barra del
+        /// tooltip). Sin libro visible: la cuenta de momentos de siempre
+        /// (MomentosHambre × 10 % — el respaldo que nunca miente).</summary>
+        public int PorcientoHambreDelLibro()
+        {
+            try
+            {
+                var eterno = global::AethonMod.Content.Weapons.GrimoireEternal.EstadoEterno;
+                if (eterno != null && eterno.Hambre > 0f)
+                    return (int)Math.Min(100f, MathF.Floor(eterno.Hambre * 100f));
+            }
+            catch { }
+            return Math.Min(100, MomentosHambre * 10);
+        }
+
         /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
         // v6.142 — LA HORA DEL HAMBRE (la letra: «el indicador real es
         // el que se usa en el Grimorio Hambriento Nervioso… la
@@ -485,8 +502,30 @@ namespace AethonMod.Content.Players
         /// (la voz del libro, informativa: «tengo hambre…» — sin
         /// oleada, sin aura). EL AURA TAMBIÉN ESPERA: no hay «aura
         /// rara» sin peligro real (la aura vive con MomentosHambre ≥ 9:
-        /// cuando el aura prende, la oleada YA está prometida).</summary>
+        /// cuando el aura prende, la oleada YA está prometida).
+        /// v6.151 — LA LEY NUEVA (la letra: «asegurate de que el % de
+        /// hambre sea el % de probabilidad de que se active una oleada
+        /// de hambre, pero no sera tal cual lo presenta, si el libro
+        /// tiene 89% de hambre o menos la probabilidad de que las
+        /// oleadas de hambre se activen es de solo 1%, pero al llegar a
+        /// 90% de hambre la probabilidad pasa al 5% y se incrementa 5%
+        /// por cada punto extra, en 91% es 10%, y asi hasta llegar a
+        /// 100% que directamente activa la oleada del nivel
+        /// correspondiente»): LA TABLA — 0-89 %: 1 % · 90 %: 5 % ·
+        /// 91 %: 10 % · … · 99 %: 50 % · 100 %: DIRECTA. Y el nivel es
+        /// EL DE SIEMPRE: victoria sube, derrota mantiene (FuriaNivel).</summary>
         public const int MomentosParaFuria = 9;
+
+        /// <summary>v6.151 — LA PROBABILIDAD DE OLEADA según el % de
+        /// hambre del libro (0-100): la tabla de la letra — 1 % con
+        /// 89 o menos, 5 % al 90, +5 % por punto extra, DIRECTA al 100.
+        /// (La llama el chequeo de furia cada 5 s; el dado es de 100.)</summary>
+        public static int ProbabilidadOleada(int porcentajeHambre)
+        {
+            if (porcentajeHambre >= 100) return 100;      // LA DIRECTA
+            if (porcentajeHambre < 90) return 1;          // el ruido de fondo
+            return 5 + (porcentajeHambre - 90) * 5;       // 90→5 · 91→10 · 99→50
+        }
         /// <summary>El libro hambriento habla "a nivel alto" (25 = el segundo peldaño del festín).</summary>
         public const int NivelMinimoHambre = 25;
         /// <summary>Tope de momentos de hambre (= tope de oleadas).</summary>
@@ -887,6 +926,15 @@ namespace AethonMod.Content.Players
         // ametrallado). Sin UI encima y sin inventario abierto.
         private bool _iraDerAnterior;
 
+        // v6.151 — EL SILENCIO DE USO DEL LIBRO mientras nace la Ira
+        // (el gesto izq+der es SOLO de la ceremonia: el grimorio no
+        // dispara su Shoot ese instante — los minions no se tocan).
+        private int _iraSilenciarItem;
+
+        /// <summary>v6.151 — True mientras el gesto de la Ira acalla el
+        /// uso del grimorio (lo lee GrimoireEternal.CanUseItem).</summary>
+        public bool IraSilenciaElLibro => _iraSilenciarItem > 0;
+
         public override void PostUpdate()
         {
             // EL GESTO DE LA IRA — izq mantenido + der pulsado
@@ -898,9 +946,21 @@ namespace AethonMod.Content.Players
                         !Player.mouseInterface && !Main.ingameOptionsWindow;
                     bool der = Main.mouseRight && !Main.playerInventory &&
                         !Player.mouseInterface && !Main.ingameOptionsWindow;
+                    // v6.151 — EL GESTO ES SOLO DE LA IRA (la letra: «en
+                    //     el momento en el que voy a activarla todos los
+                    //     minions desaparecen»): el clic DERECHO con el
+                    //     izq mantenido dispara la ceremonia Y SUPRIME el
+                    //     Shoot del grimorio de ESTE tick — el libro NO
+                    //     re-invoca ni re-cuenta NADA mientras la ira
+                    //     nace (el escuadrón queda INTACTO: los ojos son
+                    //     los testigos del ritual, no su precio).
                     if (izq && der && !_iraDerAnterior)
+                    {
                         Systems.AtaquesCombinadosSistema.ShiftClickDeLaIra(Player);
+                        _iraSilenciarItem = 6;   // ~0,1 s de silencio de uso
+                    }
                     _iraDerAnterior = der;
+                    if (_iraSilenciarItem > 0) _iraSilenciarItem--;
                 }
                 else _iraDerAnterior = false;
             }
@@ -1115,7 +1175,22 @@ namespace AethonMod.Content.Players
                                 // EL RELOJ que decide CUÁNDO estalla.
                                 var config = ModContent.GetInstance<Content.AethonConfigServidor>();
                                 bool evento = config == null || config.EventoHambreGrimorio;
-                                if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
+                                // v6.151 — EL DADO DE LA LETRA: la probabilidad
+                                // la pone EL % DE HAMBRE DEL LIBRO (1 % ≤ 89 ·
+                                // 5 % al 90 · +5 % por punto · 100 % DIRECTA).
+                                // Este sitio (el instante del momento nuevo) y
+                                // el reloj de abajo tiran EL MISMO dado.
+                                int pctHambre = PorcientoHambreDelLibro();
+                                if (pctHambre >= 100)
+                                {
+                                    if (evento && !GrimorioFuriaSistema.Activo &&
+                                        GrimorioFuriaSistema.MundoLibre())
+                                        GrimorioFuriaSistema.Provocar(Player,
+                                            Math.Max(1, Math.Min(10, FuriaNivel)), natural: true);
+                                }
+                                else if (evento && !GrimorioFuriaSistema.Activo &&
+                                    GrimorioFuriaSistema.MundoLibre() &&
+                                    Main.rand.Next(100) < ProbabilidadOleada(pctHambre))
                                     GrimorioFuriaSistema.Provocar(Player,
                                         Math.Max(1, Math.Min(10, FuriaNivel)), natural: true);
                             }
@@ -1142,8 +1217,16 @@ namespace AethonMod.Content.Players
                     {
                         var configR = ModContent.GetInstance<Content.AethonConfigServidor>();
                         bool eventoR = configR == null || configR.EventoHambreGrimorio;
+                        // v6.151 — EL MISMO DADO DE LA TABLA (la letra: el %
+                        // de hambre ES la probabilidad): el reloj de cada 5 s
+                        // consulta la tabla con el % CONTINUO del libro —
+                        // 100 % SIEMPRE dispara, 90 % falla 19 de 20 veces,
+                        // 1 % el ruido de fondo de la espera.
+                        int pctHambreR = PorcientoHambreDelLibro();
                         if (eventoR && !GrimorioFuriaSistema.Activo &&
-                            GrimorioFuriaSistema.MundoLibre())
+                            GrimorioFuriaSistema.MundoLibre() &&
+                            (pctHambreR >= 100 ||
+                             Main.rand.Next(100) < ProbabilidadOleada(pctHambreR)))
                             GrimorioFuriaSistema.Provocar(Player,
                                 Math.Max(1, Math.Min(10, FuriaNivel)), natural: true);
                     }

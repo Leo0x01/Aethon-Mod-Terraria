@@ -54,6 +54,7 @@ namespace AethonMod.Content.Globals
         /// binario? (una sola vez — el penetrate no viaja en los mensajes
         /// de vanilla, se calza en la IA de cada copia).</summary>
         private bool _perforaBinaria;
+        private bool _perforaEterno;   // v6.151 — el básico del Eterno: 10
 
         public override bool AppliesToEntity(Projectile projectile, bool lateInstantiation)
         {
@@ -78,6 +79,21 @@ namespace AethonMod.Content.Globals
             {
                 _perforaBinaria = true;
                 projectile.penetrate = 4;
+            }
+
+            // ================================================================
+            //  v6.151 — EL ATAQUE BÁSICO DEL ETERNO PERFORA 10 (la letra:
+            //  «quiero que limites el ataque basico del grimorio del
+            //  eterno a solo 10»): los discos del Equinoccio (las marcas
+            //  9201/9202 — los proyectiles del clic izquierdo del libro)
+            //  calzan penetrate=10 UNA vez al nacer. Antes eran -1
+            //  (infinito): el disco atravesaba TODO el mundo. Diez
+            //  cuerpos y se apaga — un ataque básico con medida.
+            // ================================================================
+            if ((marca == 9201f || marca == 9202f) && !_perforaEterno)
+            {
+                _perforaEterno = true;
+                projectile.penetrate = 10;
             }
 
             if (Main.netMode == NetmodeID.Server) return;

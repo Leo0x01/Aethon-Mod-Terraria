@@ -99,13 +99,33 @@ namespace AethonMod.Content.Weapons.Definitivas
 
         private const int T_CONVOCATORIA = 36;   // los dos soles vuelan al punto
         private const int T_FUSION = 34;         // la espiral de muerte y el contacto
-        private const int T_CARGA = 24;          // el sol fusionado se hincha (la sentencia)
+
+        // ================================================================
+        //  v6.151 — LA CAZA DEL SOL FUSIONADO (la letra: «el sol formado
+        //  por la fusion no debe explotar asi nada mas, debe mantenerse,
+        //  perseguir a los enemigos y despues de un tiempo debe crecer al
+        //  menos 70% mas su tamaño, volverse completamente rojo y luego
+        //  explotar, junto a todas estas acciones su daño aumenta y ademas
+        //  su caja de colisiones tambien para abarcar mas area de daño»):
+        //  el acto 2 YA NO es la carga de 24 t — es LA CAZA de 300 t
+        //  (5 s): el gigante PERSIGUE al enemigo más cercano (homing
+        //  suave de la casa), SE MANTIENE vivo y creciendo, y su cuerpo
+        //  ENROJECE por completo conforme la caza madura; el daño del
+        //  proyectil y SU HITBOX escalan con el mismo reloj (×1 → ×1.7+
+        //  al final). La nova estalla AL FINAL de la caza — nunca antes.
+        // ================================================================
+        private const int T_CARGA = 300;         // LA CAZA: 5 s persiguiendo y creciendo
         private const int T_NOVA = 46;           // el colapso y LA NOVA
 
         /// <summary>v6.127 — EL CONTACTO: la fracción de la espiral donde
         /// los dos soles SE TOCAN (el resto del acto es el nacimiento del
         /// gigante — nada nace antes del choque).</summary>
         private const float P_CONTACTO = 0.78f;
+
+        /// <summary>v6.151 — EL CRECIMIENTO DE LA CAZA: +70 % mínimo al
+        /// final (la letra: «crecer al menos 70% mas su tamaño») — la
+        /// curva es SIEMPRE creciente (smoothstep) y el ROJO la sigue.</summary>
+        private const float CRECE_CAZA = 0.70f;
 
         /// <summary>v6.127 — EL COLAPSO: los primeros ticks de la nova en
         /// que el sol se PLEGA antes de estallar.</summary>
@@ -114,8 +134,17 @@ namespace AethonMod.Content.Weapons.Definitivas
         /// <summary>El reloj del acto actual.</summary>
         private float _t;
 
-        /// <summary>0 convocatoria · 1 fusión · 2 carga · 3 nova.</summary>
+        /// <summary>0 convocatoria · 1 fusión · 2 caza · 3 nova.</summary>
         private int _acto;
+
+        /// <summary>v6.151 — EL BLANCO DE LA CAZA (el enemigo más cercano
+        /// al punto de la fusión; se re-sortea si muere).</summary>
+        private int _presa = -1;
+
+        /// <summary>v6.151 — La posición REAL del sol (durante la caza se
+        /// MUEVE persiguiendo; el Punto sigue siendo la cita de siempre
+        /// para los actos 0-1).</summary>
+        private Vector2 _centroCaza;
 
         private Vector2 Punto => new(Projectile.ai[0], Projectile.ai[1]);
 
@@ -139,7 +168,14 @@ namespace AethonMod.Content.Weapons.Definitivas
 
             // EL RELOJ DE LOS ACTOS
             if (_acto == 0 && _t > T_CONVOCATORIA) { _acto = 1; _t = 0; }
-            else if (_acto == 1 && _t > T_FUSION) { _acto = 2; _t = 0; }
+            else if (_acto == 1 && _t > T_FUSION)
+            {
+                _acto = 2; _t = 0;
+                // v6.151 — LA CAZA EMPIEZA: el sol fusionado nace EN el
+                // punto de la fusión y elige a SU presa (la más cercana).
+                _centroCaza = Punto;
+                _presa = PresaMasCercana(Punto);
+            }
             else if (_acto == 2 && _t > T_CARGA) { _acto = 3; _t = 0; }
             else if (_acto == 3 && _t > T_NOVA) { Projectile.Kill(); return; }
 
@@ -148,7 +184,57 @@ namespace AethonMod.Content.Weapons.Definitivas
             // el núcleo ya tocó fondo)
             if (_acto == 3 && _t == T_COLAPSO) NacerLaNova();
 
-            Projectile.Center = Punto;
+            if (_acto == 2)
+            {
+                // ============================================================
+                //  v6.151 — LA CAZA (la letra: «debe mantenerse, perseguir
+                //  a los enemigos y despues de un tiempo debe crecer…»):
+                //  el gigante NO se queda clavado — PERSIGUE. El homing
+                //  suave de la casa (aceleración hacia la presa + tope de
+                //  velocidad que CRECE con la caza: empieza solemne y
+                //  termina arrebatado). La presa muerta → la siguiente.
+                // ============================================================
+                if (_presa < 0 || _presa >= Main.maxNPCs || !Main.npc[_presa].active ||
+                    !VFXCore.EsObjetivo(Main.npc[_presa]))
+                    _presa = PresaMasCercana(_centroCaza);
+
+                float caza = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
+                if (_presa >= 0)
+                {
+                    NPC blanco = Main.npc[_presa];
+                    Vector2 hacia = blanco.Center - _centroCaza;
+                    if (hacia.LengthSquared() > 40f * 40f)
+                    {
+                        hacia.Normalize();
+                        float acel = 0.10f + 0.16f * caza;       // cada vez más hambre
+                        _centroCaza += hacia * acel * (1f + CRECE_CAZA * 0.4f * caza);
+                    }
+                    // el freno vertical del sol (pesa más que el vuelo):
+                    _centroCaza.Y += MathF.Sin(Main.GlobalTimeWrappedHourly * 1.7f) * 0.35f;
+                }
+                Projectile.Center = _centroCaza;
+
+                // EL DAÑO Y LA CAJA CRECEN CON LA CAZA (la letra: «su daño
+                // aumenta y ademas su caja de colisiones tambien»): el
+                // daño base ×(1 → ×1.85 al final) y el hitbox engorda al
+                // ritmo del cuerpo (1.7× su tamaño: 30 → 300 px de lado).
+                float escalaCuerpo = 1f + CRECE_CAZA * caza;
+                int lado = (int)(46f * escalaCuerpo * escalaCuerpo);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.position = _centroCaza - new Vector2(lado * 0.5f, lado * 0.5f);
+                    Projectile.width = lado;
+                    Projectile.height = lado;
+                    if (_t % 30f == 0f)   // el daño escala por tramos (sync sano)
+                    {
+                        Projectile.damage = (int)(Projectile.originalDamage *
+                            (1f + 0.85f * caza));
+                        Projectile.netUpdate = true;
+                    }
+                }
+            }
+            else
+                Projectile.Center = Punto;
 
             if (_acto == 0)
             {
@@ -221,29 +307,6 @@ namespace AethonMod.Content.Weapons.Definitivas
                     }
                 }
             }
-            else if (_acto == 2)
-            {
-                // === ACTO 3 — LA CARGA: el SOL FUSIONADO se hincha, TIEMBLA,
-                //     su luz INUNDA y el polvo CAE al interior (la succión
-                //     de la sentencia) ===
-                float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
-                if (!Main.dedServ)
-                {
-                    Lighting.AddLight(Punto, new Vector3(2.2f, 1.8f, 1.2f) * (0.6f + rg));
-                    if (Main.rand.NextBool(2))
-                    {
-                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                        float lejos = Main.rand.NextFloat(140f, 380f);
-                        Dust d = Dust.NewDustPerfect(Punto + ang.ToRotationVector2() * lejos,
-                            Main.rand.NextBool(2) ? DustID.GoldFlame : DustID.Enchanted_Pink,
-                            -ang.ToRotationVector2() * (lejos / 26f), 0,
-                            Color.Lerp(new Color(255, 226, 150), new Color(255, 150, 90), rg), 1.2f);
-                        d.noGravity = true;
-                    }
-                    if (Main.rand.NextBool(3))
-                        OndaLib.Kick(1 + (int)(5f * rg), 12);
-                }
-            }
             else
             {
                 // === ACTO 4 — LA NOVA: primero EL COLAPSO (el núcleo se
@@ -280,14 +343,19 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Projectile.position = Punto - new Vector2(460f, 460f);
+                // v6.151 — LA NOVA EN EL FINAL DE LA CAZA: estalla donde
+                // el gigante terminó su persecución, con el ÁREA de su
+                // tamaño final (la letra: la caja de colisión «tambien
+                // para abarcar mas area de daño») y el daño YA escalado
+                // por la caza (Projectile.damage lo fue subiendo la IA).
+                Projectile.position = _centroCaza - new Vector2(460f, 460f);
                 Projectile.width = 920;
                 Projectile.height = 920;
                 Projectile.netUpdate = true;
             }
             if (!Main.dedServ)
             {
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Punto);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, _centroCaza);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Punto);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Punto);
                 OndaLib.Kick(14f, 26);
@@ -459,27 +527,42 @@ namespace AethonMod.Content.Weapons.Definitivas
                     }
                     else
                     {
-                        // EL DESTELLO DE CONTACTO + EL GIGANTE (de siempre,
-                        // ahora con EL TEMBLOR de nacimiento: un microjitter
-                        // de 2px que se apaga en 10 ticks)
+                        // ============================================================
+                        //  v6.151 — LA FUSIÓN SIN SALTO (la letra: «se unen
+                        //  pero el proyectil da un salto para hacer otra
+                        //  animacion, debe ser una animacion suave al
+                        //  inicio y ademas debe ser completamente fluida»).
+                        //  EL DIAGNÓSTICO: en el CONTACTO el vals moría con
+                        //  sus soles a radio 24 px y escala 0.55·BodyPx — y
+                        //  el gigante nacía de GOLPE a 0.7·BodyPx con un
+                        //  jitter aleatorio encima (el «salto»). LA CURA:
+                        //  el gigante nace EXACTO del tamaño del par en el
+                        //  contacto (0.55) y crece CONTINUO hasta 1.05 —
+                        //  la MISMA curva que el acto de la caza recogerá
+                        //  después (una sola función, cero cortes de
+                        //  fase); el TEMBLOR aleatorio murió (era el
+                        //  «saltito» leído) y el destello de contacto se
+                        //  FUNDIÓ con la curva (ya no es un flash seco:
+                        //  es la misma luz que sigue creciendo).
+                        // ============================================================
                         float n = MathHelper.Clamp((p - P_CONTACTO) / (1f - P_CONTACTO), 0f, 1f);
-                        float temblor = MathF.Max(0f, 1f - n * 3f);
-                        Vector2 jitter = new Vector2(
-                            Main.rand.NextFloat(-2f, 2f) * temblor,
-                            Main.rand.NextFloat(-2f, 2f) * temblor);
-                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.7f, 1.05f, n * n * (3f - 2f * n));
-                        DibujarSolFusionado(Punto + jitter, r, gt, 3, rg: 0f, alpha: 1f);
-                        if (n < 0.85f)
+                        float r = RuneSunRenderer.BodyPx * RadioFusion(n);
+                        DibujarSolFusionado(Punto, r, gt, 3, rg: 0f, alpha: 1f);
+                        // EL ALIENTO DEL NACIMIENTO: la luz que respira al
+                        // ritmo de la curva (continua — el destello viejo
+                        // era un corte): nace con el contacto y se disuelve
+                        // en el arranque de la caza
+                        if (n < 0.6f)
                         {
                             VFXCore.Begin();
                             try
                             {
-                                float f = 1f - n / 0.85f;
+                                float f = 1f - n / 0.6f;
                                 Vector2 dPos = Punto - Main.screenPosition;
-                                float fr = 460f * (0.35f + 0.75f * (1f - f));
-                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 250, 235), 0.85f * f * f),
+                                float fr = 460f * (0.30f + 0.55f * (1f - f));
+                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 250, 235), 0.70f * f * f),
                                     new Vector2(fr, fr), 0f);
-                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 230, 170), 0.5f * f * f * f),
+                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 230, 170), 0.42f * f * f * f),
                                     new Vector2(fr * 1.6f, fr * 1.6f), 0f);
                             }
                             finally { VFXCore.FlushAdditive(null, false); }
@@ -488,31 +571,59 @@ namespace AethonMod.Content.Weapons.Definitivas
                 }
                 else if (_acto == 2)
                 {
-                    // === LA FUSIÓN: los anillos CAEN EN ESPIRAL hacia el
-                    //     núcleo (la materia rindiéndose) + el temblor ===
-                    float rg = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
+                    // ============================================================
+                    //  v6.151 — LA CAZA DIBUJADA (la letra: «el sol formado
+                    //  por la fusion… debe mantenerse, perseguir a los
+                    //  enemigos y despues de un tiempo debe crecer al menos
+                    //  70% mas su tamaño, volverse completamente rojo y
+                    //  luego explotar»): el gigante CABALGA tras su presa
+                    //  (el _centroCaza que mueve la IA), crece con la
+                    //  MISMA curva continua del nacimiento (RadioFusion
+                    //  0.55→1.05 y LUEGO la caza 1.05→1.05+0.70 — una
+                    //  sola línea de vida, cero saltos) y su paleta SE
+                    //  PIERDE EN EL ROJO conforme la caza madura (rg:
+                    //  el dorado de la fusión → el carmesí del final).
+                    // ============================================================
+                    float caza = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
+                    float rg = caza * caza * (3f - 2f * caza);   // smoothstep: el rojo madura suave
                     float r = RuneSunRenderer.BodyPx *
-                        (1.05f + 0.55f * rg * rg + 0.12f * MathF.Sin(gt * 18f) * rg);
-                    // EL COLAPSO ESPIRAL de los anillos: el radio de los
-                    // aros EXTERIORES se plisá hacia el cuerpo conforme
-                    // carga (la casa lo dibuja con DibujarSolFusionado;
-                    // aquí vive el ALMA del colapso: un aro extra que CAE)
-                    DibujarSolFusionado(Punto, r, gt * (1f + 1.8f * rg), 3, rg, alpha: 1f);
+                        (RadioFusion(1f) + CRECE_CAZA * rg +
+                         0.05f * MathF.Sin(gt * 9f) * rg);       // el pulso arterial al final
+                    DibujarSolFusionado(_centroCaza, r, gt * (1f + 1.2f * rg), 3, rg, alpha: 1f);
+
+                    // LA LUZ DE LA CAZA: el dorado se vuelve carmesí
+                    if (!Main.dedServ)
+                        Lighting.AddLight(_centroCaza,
+                            new Vector3(2.2f, 1.8f - 0.9f * rg, 1.2f - 0.8f * rg) * (0.7f + 0.5f * rg));
+
+                    // LA ESTELA DE LA CAZA: migas de luz dorada→roja que el
+                    // sol deja mientras persigue (la historia del vuelo)
+                    if (!Main.dedServ && Main.rand.NextBool(2))
+                    {
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        Dust d = Dust.NewDustPerfect(_centroCaza + ang.ToRotationVector2() *
+                            (r * (0.7f + 0.5f * Main.rand.NextFloat())),
+                            DustID.GoldFlame,
+                            -ang.ToRotationVector2() * Main.rand.NextFloat(0.8f, 2.2f), 0,
+                            Color.Lerp(new Color(255, 226, 150), new Color(255, 90, 40), rg), 1.1f);
+                        d.noGravity = true;
+                    }
+
+                    // EL ARO QUE CAE (la firma de la carga vieja, ahora
+                    // SIRVIENDO a la caza: el anillo espirala hacia el
+                    // cuerpo ENROJECIENDO — la gravedad de la sentencia)
                     VFXCore.AbrirAdditive();
                     try
                     {
-                        // EL ARO QUE CAE: un anillo fino que espirala hacia
-                        // el núcleo (200px → el cuerpo), rojo al final —
-                        // la gravedad de la sentencia
                         float cae = 1f - rg;
-                        float radCae = MathHelper.Lerp(r * 0.9f, 210f, cae * cae);
-                        Vector2 cPos = Punto - Main.screenPosition;
+                        float radCae = MathHelper.Lerp(r * 1.6f, 210f, cae * cae);
+                        Vector2 cPos = _centroCaza - Main.screenPosition;
                         for (int k = 0; k < 20; k++)
                         {
                             float a0 = k * MathHelper.TwoPi / 20f + gt * 2.4f + rg * 7f;
                             Vector2 p0 = cPos + a0.ToRotationVector2() * radCae;
                             Vector2 p1 = cPos + (a0 + 0.33f).ToRotationVector2() * radCae;
-                            Color cCae = Color.Lerp(new Color(255, 224, 150), new Color(255, 90, 40), rg);
+                            Color cCae = Color.Lerp(new Color(255, 224, 150), new Color(255, 80, 40), rg);
                             VFXCore.Line(p0, p1, SigiloLib.Tint(cCae, 0.5f * (0.4f + 0.6f * rg)), 2.5f);
                         }
                     }
@@ -520,7 +631,9 @@ namespace AethonMod.Content.Weapons.Definitivas
                 }
                 else
                 {
-                    // === EL SILENCIO Y LA SENTENCIA ===
+                    // === EL SILENCIO Y LA SENTENCIA (en el FINAL de la
+                    //     caza: el gigante ROJO y enorme se pliega — la
+                    //     sentencia cae DONDE terminó la persecución) ===
                     if (_t < T_COLAPSO)
                     {
                         // EL SILENCIO OSCURO: el sol se plisá y SE APAGA —
@@ -528,26 +641,29 @@ namespace AethonMod.Content.Weapons.Definitivas
                         // MÁS rápido: al 70% del colapso ya casi no hay
                         // luz — el vacío antes de la palabra)
                         float plega = _t / (float)T_COLAPSO;
-                        float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(1.6f, 0.7f, plega * plega);
-                        DibujarSolFusionado(Punto, r, gt * 2.8f, 3, rg: 1f,
+                        float rGigante = RuneSunRenderer.BodyPx * (RadioFusion(1f) + CRECE_CAZA);
+                        float r = MathHelper.Lerp(rGigante, rGigante * 0.42f, plega * plega);
+                        DibujarSolFusionado(_centroCaza, r, gt * 2.8f, 3, rg: 1f,
                             alpha: MathF.Max(0.08f, 1f - 1.45f * plega));
                     }
                     else
                     {
                         // LA SENTENCIA: el estallido DOBLE — destello + onda
                         // + LA LLUVIA DE LUZ (las motas doradas del veredicto
-                        // cayendo del centro del estallido)
+                        // cayendo del centro del estallido — DONDE cayó el
+                        // gigante rojo, no en el punto de la cita vieja)
                         float p = MathHelper.Clamp((_t - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO), 0f, 1f);
                         float apaga = 1f - p;
-                        float r = RuneSunRenderer.BodyPx *
-                            (0.7f + 1.45f * MathF.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
-                        DibujarSolFusionado(Punto, r, gt * 3.2f, 3, rg: 1f,
+                        float rGiganteS = RuneSunRenderer.BodyPx * (RadioFusion(1f) + CRECE_CAZA);
+                        float r = rGiganteS *
+                            (0.42f + 0.95f * MathF.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
+                        DibujarSolFusionado(_centroCaza, r, gt * 3.2f, 3, rg: 1f,
                             alpha: MathF.Min(1f, apaga * 1.8f));
 
                         VFXCore.AbrirAdditive();
                         try
                         {
-                            Vector2 cPos = Punto - Main.screenPosition;
+                            Vector2 cPos = _centroCaza - Main.screenPosition;
                             OndaLib.Shock(Main.spriteBatch, cPos,
                                 MathHelper.Clamp((_t - T_COLAPSO) / 26f, 0f, 1f),
                                 1.5f + 4.5f * MathF.Min(1f, (_t - T_COLAPSO) / 7f),
@@ -589,6 +705,35 @@ namespace AethonMod.Content.Weapons.Definitivas
         /// <summary>v6.127 — el ángulo base de la espiral (el arranque
         /// sereno del par — determinista, del reloj global).</summary>
         private static float lado0(float gt) => gt * 0.2f;
+
+        /// <summary>v6.151 — LA CURVA ÚNICA DE LA FUSIÓN (la cura del
+        /// «salto»): el radio del sol fusionado de su NACIMIENTO (n=0,
+        /// EXACTO al radio 0.55·BodyPx del par en el contacto — la
+        /// continuidad matemática) a su adultez (n=1, 1.05·BodyPx).
+        /// La caza recoge esta curva por su cola: una sola línea de
+        /// vida, sin cortes de fase JAMÁS.</summary>
+        private static float RadioFusion(float n)
+        {
+            float s = n * n * (3f - 2f * n);   // smoothstep: suave al inicio
+            return MathHelper.Lerp(0.55f, 1.05f, s);
+        }
+
+        /// <summary>v6.151 — LA PRESA de la caza: el enemigo REAL más
+        /// cercano al punto (VFXCore.EsObjetivo — la ley de la casa:
+        /// ni amistosos ni intocables), en un radio de caza amplio.</summary>
+        private static int PresaMasCercana(Vector2 desde)
+        {
+            int mejor = -1;
+            float mejorD = 1600f * 1600f;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || !VFXCore.EsObjetivo(n)) continue;
+                float d = n.Center.DistanceSQ(desde);
+                if (d < mejorD) { mejorD = d; mejor = i; }
+            }
+            return mejor;
+        }
 
         /// <summary>v6.127 — LA POSICIÓN DEL SOL SENCILLO durante la
         /// convocatoria (el MISMO camino para la IA de las estelas y el

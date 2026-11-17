@@ -2349,7 +2349,7 @@ Items: {
 		Linea3: "[c/D9B3FF:the book; when the 12th arrived, THE MANIFESTATION erupted and the form was"
 		Linea4: "[c/D9B3FF:CONVERTED into THIS accessory: glory, now portable.]"
 		Linea5: The presence of a god made your own flesh: the way to witness
-		Linea6: that power inside the player. Not a garment you wear: a presence
+		Linea6: that power inside the bearer. Not a garment you wear: a presence
 		Linea7: that uses the body as a hanger — wings that are not wings but the
 		Linea8: silhouette of something larger, endless flight, the god's full
 		Linea9: dress sewn onto a body that proved, door by door, it could bear
@@ -4265,6 +4265,7 @@ Projectiles: {
 	ArcaneBolt.DisplayName: Arcane Bolt
 	SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
 	PilarOjoMinion.DisplayName: Pilar Ojo Minion
+	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
 }
 
 PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.

@@ -2332,7 +2332,7 @@ Items: {
 		Linea2: «La forma que no se apaga — el recuerdo de la vez que un mortal
 		Linea3: se vistió de Eterno… y sobrevivió para contarlo.»
 		Linea4: La presencia de un dios hecha carne propia: la manera de presenciar
-		Linea5: ese poder en el jugador. No es un objeto que uno se pone: es una
+		Linea5: ese poder en el portador. No es un objeto que uno se pone: es una
 		Linea6: presencia que usa al cuerpo como percha —alas que no son alas sino
 		Linea7: la silueta de algo más grande, vuelo infinito, el vestido completo
 		Linea8: del dios, cosido sobre un cuerpo que, puerta por puerta, demostró
@@ -4249,6 +4249,7 @@ Projectiles: {
 	// ArcaneBolt.DisplayName: Arcane Bolt
 	// SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
 	// PilarOjoMinion.DisplayName: Pilar Ojo Minion
+	// AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
 }
 
 PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.

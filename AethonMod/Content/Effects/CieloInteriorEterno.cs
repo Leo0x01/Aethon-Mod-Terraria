@@ -278,23 +278,47 @@ namespace AethonMod.Content.Effects
                                 (VFXCore.Hash01(sem, 3, 917) - 0.5f) * 320f + MathF.Sin(t * 0.11f + k) * 46f,
                                 h * (0.42f + 0.40f * VFXCore.Hash01(sem, 4, 919)) + 720f);
                             Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.4f, sem, 16, 0.16f);
-                            DibujarTira(sb, espina, 14f, 34f, tinteLejos,
-                                (0.46f + 0.18f * latido) * a, flujo: t * 0.010f + k * 0.13f);
+                            // v6.151 — LA SOMBRA DE LA PÁGINA EN EL FONDO
+                            //     (la letra: «El fondo del mundo interior
+                            //     nunca fue cambiado, deben estar los
+                            //     tentaculos de la sombra de la pagina en
+                            //     el fondo del mundo interior, pero sin
+                            //     ojos ni colmillos»): la capa lejana YA
+                            //     usa DibujarTira (la PielDelEterno — las
+                            //     bandas de V que fluyen, EL look de la
+                            //     sombra de página del grimorio) — pero se
+                            //     leía como cielo estrellado morado por el
+                            //     TINTE CLARO (46,28,84) y las 44 chispas
+                            //     encima. AHORA: la LEJANÍA ES TINTA — el
+                            //     tinte de la PÁGINA (el negro-violeta
+                            //     profundo de SombraPaginaProjectile), la
+                            //     tira MÁS ANCHA (la página fluye, no
+                            //     ondea) y el flujo MÁS VIVO (la tinta
+                            //     corre). Cero ojos, cero colmillos (los
+                            //     de la v6.150 siguen muertos).
+                            Color tintaLejos = new Color(30, 18, 52);
+                            DibujarTira(sb, espina, 22f, 46f, tintaLejos,
+                                (0.60f + 0.20f * latido) * a, flujo: t * 0.026f + k * 0.19f);
                         }
                     }
 
-                    // EL POLVO ESTELAR DENSO de las capas lejanas (las SUAS
-                    // del vacío — SparkleStar con parpadeo determinista).
-                    // v6.121 — toda la altura de la pantalla (antes solo
-                    // llegaba al 62 %: el tercio de abajo quedaba pelado).
-                    for (int s = 0; s < 44; s++)
+                    // v6.151 — EL POLVO ESTELAR MURIÓ (la letra: el fondo
+                    //     son «tentaculos de la sombra de la pagina» — el
+                    //     interior del dios NO es un cielo estrellado: es
+                    //     SU CUERPO de tinta). En su lugar: LAS MOTAS DE
+                    //     TINTA — 20 hilos finos que CAEN lento (la página
+                    //     deshojándose al fondo del cuerpo), con el mismo
+                    //     parpadeo determinista de la casa pero SIN el
+                    //     brillo de estrella (tinta tenue, no cielo).
+                    for (int s = 0; s < 20; s++)
                     {
                         float sx = VFXCore.Hash01(s * 13 + 1, 0, 961) * w;
-                        float sy = VFXCore.Hash01(s * 17 + 5, 0, 963) * h * 0.95f;
+                        float sy = (VFXCore.Hash01(s * 17 + 5, 0, 963) * h +
+                                    t * (3f + 5f * VFXCore.Hash01(s, 0, 967))) % h;
                         float pal = 0.5f + 0.5f * MathF.Sin(t * (0.4f + VFXCore.Hash01(s, 0, 967) * 1.1f) + s * 2.4f);
-                        float tam = 7f + 9f * VFXCore.Hash01(s * 7 + 3, 0, 969);
+                        float tam = 5f + 7f * VFXCore.Hash01(s * 7 + 3, 0, 969);
                         sb.Draw(_chispa, new Vector2(sx, sy), null,
-                            new Color(214, 190, 250) * ((0.07f + 0.15f * pal + 0.10f * latido) * a),
+                            new Color(96, 64, 148) * ((0.05f + 0.10f * pal + 0.05f * latido) * a),
                             0f, _chispa.Size() * 0.5f, tam / 64f, SpriteEffects.None, 0f);
                     }
                 }

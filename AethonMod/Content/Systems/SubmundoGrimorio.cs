@@ -1002,8 +1002,25 @@ namespace AethonMod.Content.Systems
             //  entidad es el único mediodía que el interior ha visto;
             //  el OJO COLOSAL del velo lo corona desde arriba.
             // ==============================================================
-            Main.dayTime = true;
-            Main.time = 27000;
+            // v6.151 — EL MEDIODÍA RESPETA AL GUARDIÁN DE OLEADA (la
+            //     letra: «invoque el esqueletron en el mundo interior y
+            //     aparecio en modo guardian de la mazmorra con la cabeza
+            //     girando y hiendo rapidamente hacia el jugador, eso no
+            //     debe pasar»): LA AUTOPSIA — este clamp corre CADA TICK
+            //     y PISABA el préstamo de noche del sello de oleada
+            //     (OleadaNPC._prestaDia: su PreAI pone dayTime=false
+            //     para que SkeletronHead/Ojo peleen NORMALES) — la IA
+            //     vanilla del guardián volvía a ver DÍA y entraba en MODO
+            //     GUARDIÁN DE MAZMORRA (cabeza girando, embiste, daño
+            //     9999). LA CURA: si un jefe de oleada TIENE LA NOCHE
+            //     PRESTADA AHORA MISMO, el clamp lo respeta (el sello es
+            //     la ley del festín; el mediodía del decorado puede
+            //     esperar un tick).
+            if (!Content.Globals.OleadaNPC.NochePrestadaActiva)
+            {
+                Main.dayTime = true;
+                Main.time = 27000;
+            }
             if (Main.raining)
             {
                 Main.raining = false;

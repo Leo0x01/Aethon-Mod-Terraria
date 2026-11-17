@@ -1105,10 +1105,29 @@ namespace AethonMod.Content.Systems
                     {
                         var fe = p.GetModPlayer
                             <global::AethonMod.Content.Players.FormaEternaPlayer>();
+                        // ============================================================
+                        //  v6.151 — LA ESCALERA EXACTA DE LA LETRA (la
+                        //  autopsia: «explota en nivel 112 de despertar, el
+                        //  113 y 119 no hacen nada» — el peldaño 112 llamaba
+                        //  ConstruirParte(112-100)=12: construía LA 12ª EN
+                        //  EL 112, disparaba la conversión+manifestación y
+                        //  FormaEscupida apagaba TODO el vestido — por eso
+                        //  113-119 «no hacían nada»). LA CURA:
+                        //   · 101-111 → partes 1-11 (una por nivel, como
+                        //     siempre)
+                        //   · 112-119 → NADA se construye: son los peldaños
+                        //     de LOS ANILLOS DE SOLES RÚNICOS (el vestido
+                        //     los enciende uno a uno — AnillosSolRunico en
+                        //     FormaEternaPlayer, ya vivo)
+                        //   · 120 → LA 12ª PARTE + LA CONVERSIÓN (el ítem
+                        //     nace de la explosión de luz — SOLO al 120)
+                        // ============================================================
                         if (nivel < DespertarGrimorio.NivelManifestacion)
                         {
-                            // peldaños 101-111 → partes 1-11
-                            fe?.ConstruirParte(nivel - DespertarGrimorio.NivelCaza);
+                            if (nivel <= 111)
+                                fe?.ConstruirParte(nivel - DespertarGrimorio.NivelCaza);
+                            // 112-119: los ANILLOS viven en el vestido (el
+                            // aviso de cada anillo lo da el propio vestido)
                         }
                         else
                         {
@@ -1198,41 +1217,48 @@ namespace AethonMod.Content.Systems
                     n.netUpdate = true;
                 }
 
-                // EL VELO DE LUZ DEL 120 (la letra: «al llegar a nivel
-                // 120 de despertar es cuando ocurre la explosion de luz
-                // y debe ser aun mas grande que la anterior»): 220 polvos
-                // dorados (la del 112 eran 90), la ONDA DE CHOQUE doble
-                // — la coronación violeta alrededor del velo dorado — y
-                // el ESTALLIDO RADIANTE de escala dios (1.85) sobre el
-                // portador, el mismo nacimiento del jefe de la casa.
+                // ============================================================
+                //  v6.151 — LA EXPLOSIÓN DE LUZ PURA (la letra: «la
+                //  explosion es horrible… la explocion esta llena de
+                //  rayas, y lo que debe ser es una explosion de luz, sin
+                //  texturas ya que es puro codigo, analiza como es que la
+                //  mascota de luz hace su explosion, esa es la explosion
+                //  que quiero para cuando termina la construccion de la
+                //  forma eterna»). LA AUTOPSIA: el velo viejo eran 220
+                //  POLVOS + el AtaqueJefeProjectile (sus brumas y
+                //  destellos con TEXTURAS — las «rayas»). LA CURA: EL
+                //  ESTALLIDO DE LA MASCOTA DE LUZ (MiniEstallidoPet) EN
+                //  TAMAÑO DIOS — LA MISMA RECETA 100 % CÓDIGO: los 22
+                //  RAYOS deterministas (línea núcleo blanca + halo
+                //  oro→ámbar→brasa), LA CRUZ ANAMÓRFICA, el NÚCLEO que
+                //  inunda (Bloom), LA ESTRELLA de 8 rayos (DestelloFinal
+                //  — el flare de la casa), LA ONDA expansiva y LAS BOKEH
+                //  — TODO por Quads y librerías de la casa (VFXCore/
+                //  LumenLib/OndaLib), CERO brumas con texturas, cero
+                //  polvos, cero rayas. La coronación violeta vive en la
+                //  ONDA doble y las bokeh alternadas.
+                // ============================================================
                 if (!Main.dedServ)
                 {
-                    for (int k = 0; k < 220; k++)
-                    {
-                        float ang = k / 220f * MathF.PI * 2f;
-                        bool corona = k % 3 == 0;    // la coronación violeta
-                        Dust d = Dust.NewDustPerfect(p.Center,
-                            corona ? DustID.PurpleTorch : DustID.Enchanted_Gold,
-                            new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
-                                Main.rand.NextFloat(8f, 22f),
-                            200,
-                            corona ? new Color(185, 110, 250) : new Color(255, 236, 190),
-                            Main.rand.NextFloat(1.0f, 1.8f));
-                        d.noGravity = true;
-                    }
                     // LA ONDA DE CHOQUE (el triple latido de la casa —
                     // el mismo Kick de la muerte del dios, TRIPLEDADO)
                     global::AethonMod.Content.VFX.OndaLib.Kick(20f, 40);
                     global::AethonMod.Content.VFX.OndaLib.Kick(12f, 26);
-                    // EL ESTALLIDO RADIANTE de escala dios sobre el portador
+                    // EL ESTALLIDO DE LA MASCOTA DE LUZ (receta propia,
+                    // escala dios — el mismo proyectil de la mascota con
+                    // SU semilla y SU dueño: nace, dura y muere SOLO)
                     var estallido = Projectile.NewProjectileDirect(
                         p.GetSource_FromThis(), p.Center, Vector2.Zero,
                         ModContent.ProjectileType
-                            <global::AethonMod.Content.Projectiles.Jefes.AtaqueJefeProjectile>(),
+                            <global::AethonMod.Content.Projectiles.Cosmetic.MiniEstallidoPet>(),
                         0, 0f, p.whoAmI);
-                    estallido.ai[0] = global::AethonMod.Content.Projectiles.Jefes
-                        .AtaqueJefeProjectile.EstiloEstallidoRadiante;
-                    estallido.ai[1] = 4;              // LA FASE DIOS (escala 1.85)
+                    // LA ESCALA DIOS de la manifestación: el estallido de
+                    // la mascota (daño decorativo 15) nace con SU semilla
+                    // determinista y NO sigue a ninguna mascota (ai[1]=-1:
+                    // queda clavado sobre el portador, como el velo de
+                    // siempre). La pantalla entera es pura luz.
+                    estallido.ai[0] = Main.rand.Next(10000);
+                    estallido.ai[1] = -1;
                     estallido.netUpdate = true;
 
                     Main.NewText(Language.GetTextValue(

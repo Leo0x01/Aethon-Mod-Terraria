@@ -630,13 +630,19 @@ namespace AethonMod.Content.Globals
                     Vector2 raiz = cercano.MountedCenter;
 
                     // LA SOMBRA FINA: columna viva del portador al libro
+                    // v6.151 — LA SOMBRA DE PÁGINA LISA (la letra: «a la
+                    //     sombra de la pagina del grimorio del eterno,
+                    //     sacale los colmillos y los ojitos, el resto
+                    //     dejalo tal cual esta, esto es solo un cambio
+                    //     estetico»): el lazo del Eterno es TINTA PURA —
+                    //     Masa en modo liso (sin espinas de hueso, sin
+                    //     ventosas) y SIN los ojos entornados. Queda la
+                    //     masa que fluye con SU bruma — el resto igual.
                     Vector2[] col = SombrasLib.ColumnaViva(raiz, item.Center,
                         tiempo, semilla, 10, 0.22f, gancho: 0.4f);
-                    SombrasLib.Masa(col, 3f, 6f, 0.55f, semilla, tiempo, grosorCentro: 12f);
+                    SombrasLib.Masa(col, 3f, 6f, 0.55f, semilla, tiempo,
+                        grosorCentro: 12f, lisa: true);
                     SombrasLib.BrumaColumna(col, 18f, 0.30f, tiempo, semilla, 7);
-
-                    // LOS OJOS ENTORNADOS a lo largo del lazo (me vigilan volver)
-                    SombrasLib.OjosDeMasa(col, item.Center, 0.5f, semilla, tiempo, 4);
                 }
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.ReabrirLoteVanilla();

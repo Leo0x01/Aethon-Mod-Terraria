@@ -259,7 +259,7 @@ namespace AethonMod.Content.VFX
         /// <paramref name="grosorCentro"/> activa la panza del látigo
         /// (fina → gorda → fina); sin él queda el perfil muscular clásico.
         /// </summary>
-        public static void Masa(Vector2[] col, float grosorRaiz, float grosorPunta, float alfa, int semilla, float tiempo, float grosorCentro = -1f)
+        public static void Masa(Vector2[] col, float grosorRaiz, float grosorPunta, float alfa, int semilla, float tiempo, float grosorCentro = -1f, bool lisa = false)
         {
             if (col == null || col.Length < 2 || alfa <= 0.02f) return;
 
@@ -336,7 +336,13 @@ namespace AethonMod.Content.VFX
             // === CAPA 4 · LAS ESPINAS DE HUESO (colmillos curvos
             // alternando lado — la sierra afilada de la v6.50.66 ahora
             // con dientes DE VERDAD) ===
-            if (VFXCore.Colmillo != null)
+            // v6.151 — EL MODO LISO («a la sombra de la pagina del
+            //     grimorio del eterno, sacale los colmillos y los
+            //     ojitos»): lisa=true APAGA colmillos, ventosas y ojos —
+            //     queda la MASA PURA de tinta que fluye (el lazo del
+            //     libro la usa; las sombras del resto del mod quedan
+            //     IGUAL — la letra: «el resto dejalo tal cual esta»).
+            if (VFXCore.Colmillo != null && !lisa)
             {
                 VFXCore.Begin();
                 for (int i = 2; i < n - 2; i++)
@@ -368,7 +374,9 @@ namespace AethonMod.Content.VFX
             // === CAPA 5 · LAS VENTOSAS DEL LOMO (la fila blanca del
             // spritesheet de referencia — «white circular suckers along
             // its length»: la panza del tentáculo, el lado que SUJETA) ===
-            if (VFXCore.Ventosa != null)
+            // v6.151 — el modo liso también las calla (la tinta pura no
+            // tiene anatomía — solo fluye).
+            if (VFXCore.Ventosa != null && !lisa)
             {
                 VFXCore.Begin();
                 int cada = Math.Max(2, n / 8);
