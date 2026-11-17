@@ -370,11 +370,24 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.BrumaColumna(col, 30f, 0.46f * disipa, tiempo, semilla + 97, 12);
 
             // === LOS OJOS (más ojos que el arma 1: la página es TODA ojos) ===
+            // v6.146 — LA TINTA NO MIRA (la letra: «al arma quitale los
+            // colmillos y ojos»): el MODO TINTA (ai[0]==1 — la Sombra de
+            // Tinta) NO dibuja ojos ni boca — SOLO la masa lisa y la
+            // bruma, MÁS DENSA (×1.35): la tinta es ciega, va a lo suyo.
+            // (La boca procedural ya murió en v6.50.68 — solo quedaban
+            // estos ojos.)
+            bool esTinta = Projectile.ai[0] == 1f;
             Vector2 objetivo = presa != null && presa.active
                 ? presa.Center
                 : dueño.MountedCenter + Projectile.velocity * 30f;
             float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
-            SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 7);
+            if (!esTinta)
+                SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 7);
+            else
+            {
+                // LA TINTA RESPIRA MÁS: dos capas extra de bruma densa
+                SombrasLib.BrumaColumna(col, 40f, 0.50f * disipa, tiempo, semilla + 41, 10);
+            }
 
             // === v6.50.68 — LA CABEZA ES BRUMA (la boca procedural RETIRADA
             // por la letra del usuario): TODO lo que era boca ahora vive EN LA

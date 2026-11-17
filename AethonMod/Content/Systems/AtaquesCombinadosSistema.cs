@@ -152,9 +152,13 @@ namespace AethonMod.Content.Systems
         /// <summary>EL RITMO DE LA IRA EN TEXTO — lo lee el tooltip del
         /// grimorio (GrimoireEternal): SIEMPRE dice la verdad de los
         /// const de arriba, el de la prueba y el del final.</summary>
+        // v6.146 — EL RITMO DICE LA VERDAD (la letra: «en la info del
+        // grimorio del eterno dice que es cada 30 minutos cuando
+        // realmente es cada 10»): el texto sale del CONST real — 600 s
+        // = 10 min — jamás vuelve a desincronizarse.
         public static string IraRitmoTexto() => IRA_MODO_PRUEBA
             ? "prueba: 5 haces/min"
-            : "1 cada 30 min";
+            : $"1 cada {IRA_ENFRIAMIENTO_FINAL / 3600ul} min";
 
         /// <summary>El ruido de la moneda aleatoria (por tick, cuando el
         /// reloj ya está listo: 1 de cada ~75 t dispara).</summary>
@@ -343,24 +347,10 @@ namespace AethonMod.Content.Systems
                 //     lleva CazaJefesPlayer y los pagan los OnKill). ===
                 if (DespertarGrimorio.IraDisponible(p))
                 {
-                    // v6.145 — EL CONTADOR TIPO BUFF (la letra: «con un
-                    // contador tipo buff para el haz»): mientras el
-                    // reloj de la ira corre, el portador LLEVA el buff
-                    // de recarga (su descripción es el contador vivo);
-                    // cuando está lista, el buff se retira.
-                    try
-                    {
-                        int buffRecarga = ModContent.BuffType<Buffs.IraSerExteriorRecargaBuff>();
-                        int idx = p.FindBuffIndex(buffRecarga);
-                        if (!IraLista(p))
-                        {
-                            if (idx < 0)
-                                p.AddBuff(buffRecarga, 2);   // eterno: vive mientras corra
-                        }
-                        else if (idx >= 0)
-                            p.DelBuff(idx);
-                    }
-                    catch { }
+                    // v6.146 — el buff del reloj LO LLEVA EL JUGADOR
+                    // (ShardPlayer.MantenerBuffDeLaIra — nace con el
+                    // nivel 100 y no se va nunca; aquí ya no se
+                    // administra).
 
                     ulong hasta = _iraHasta.TryGetValue(p.whoAmI, out ulong v) ? v : 0ul;
                     // v6.60 — SIN DADO: la ira es EL ATAQUE AGENDADO del

@@ -291,16 +291,22 @@ namespace AethonMod.Content.Projectiles
                     //  los pueblos, la chusma menuda (lifeMax <= 5) y
                     //  los segmentos de gusano (chaseable = false).
                     // ------------------------------------------------------
-                    // v6.145 — TODOS LOS MONSTRUOS (la letra: «el aura
-                    // del vacio debe poder afectar a todos los monstruos
-                    // sin importar si estan invisibles o no»): la puerta
-                    // vieja (CanBeChasedBy) dejaba fuera a los
-                    // intangibles y a cuanto NPC decidiera esconderse.
-                    // AHORA la única ley: si ES UN ENEMIGO (no amigo, no
-                    // pueblo, no inmortal), ARDE — invisibles,
-                    // intangibles, espectros, TODO lo que respira
-                    // contra el portador.
-                    if (n.friendly || n.townNPC || n.immortal || n.dontTakeDamage)
+                    // v6.146 — EL ESPECTRO ARDE (la letra: «el
+                    // monstruo Espectro todavia es inmune al aura del
+                    // vacio»): la AUTOPSIA del decompile — el Ghost
+                    // vanilla (aiStyle 23) enciende ÉL MISMO
+                    // dontTakeDamage cada frame que vive DENTRO de los
+                    // bloques (NPC.cs:4916), y la puerta v6.145 lo
+                    // echaba por ese flag. LA LEY NUEVA: los ESPÍRITUS
+                    // (aiStyle 23 — espectros, poltergeists, segadores —
+                    // y los Ghost/Espectro por ID) ENTRAN SIEMPRE: su
+                    // intangibilidad es una POSE, el vacío los toca
+                    // igual. El resto de la ley v6.145 queda: amigo,
+                    // pueblo, inmortal → fuera.
+                    bool esEspiritu = n.aiStyle == 23 ||
+                        n.type == NPCID.Ghost || n.type == NPCID.Wraith;
+                    if ((n.friendly || n.townNPC || n.immortal ||
+                         n.dontTakeDamage) && !esEspiritu)
                         continue;
 
                     VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();
@@ -681,16 +687,16 @@ namespace AethonMod.Content.Projectiles
             //  (las chispas de PolvoExpulsionJuicio — la otra familia
             //  de partículas — siguen viviendo en el update).
             // ==============================================================
-            Vector2 o = Main.screenPosition;
-            try
-            {
-                BrumaFX.BeginMass();
-                int motas = 5 + (int)(k * 4f);              // 5 lejos → 9 pegado (más densidad cuanto más cerca)
-                for (int p = 0; p < motas; p++)
-                {
-                    float f0 = Frac(semilla * 0.83f + p * 0.618034f);
-                    float ritmo = 0.16f + 0.12f * Frac(f0 * 9.7f);   // la vida de una mota: BREVE
-                    float edad = Frac(t * ritmo + f0 * 4.1f + p * 0.233f);   // vida cíclica
+//            Vector2 o = Main.screenPosition;
+//            try
+//            {
+//                BrumaFX.BeginMass();
+//                int motas = 5 + (int)(k * 4f);              // 5 lejos → 9 pegado (más densidad cuanto más cerca)
+//                for (int p = 0; p < motas; p++)
+//                {
+//                    float f0 = Frac(semilla * 0.83f + p * 0.618034f);
+//                    float ritmo = 0.16f + 0.12f * Frac(f0 * 9.7f);   // la vida de una mota: BREVE
+//                    float edad = Frac(t * ritmo + f0 * 4.1f + p * 0.233f);   // vida cíclica
 
                     // EL RUMBO — el MISMO abanico de fuga de las
                     // chispas (el hemisferio trasero ±90°, determinista
@@ -699,40 +705,40 @@ namespace AethonMod.Content.Projectiles
                     // v6.145 — SOLO LA FUGA (la misma letra): el cono
                     // se cierra a ±60° — la bruma NUNCA va hacia el
                     // jugador.
-                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * (MathHelper.Pi / 3f);
-                    Vector2 rumbo = dir.RotatedBy(abanico);
+//                    float abanico = (Frac(f0 * 13.7f) * 2f - 1f) * (MathHelper.Pi / 3f);
+//                    Vector2 rumbo = dir.RotatedBy(abanico);
 
                     // EL VIAJE CORTO — la letra pidió FIN de la estela
                     // larga: la mota nace en el punto de
                     // estancamiento y muere a MEDIO CUERPO del impío
                     // (0.25-0.55 cúpulas — partícula de aura, no
                     // estela de reentrada).
-                    float avance = edad * RadioDomo(n, k) * (0.25f + 0.30f * f0);
-                    Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
+//                    float avance = edad * RadioDomo(n, k) * (0.25f + 0.30f * f0);
+//                    Vector2 pos = n.Center - dir * (RadioDomo(n, k) * 0.95f) + rumbo * avance;
 
                     // EL TAMAÑO DE PARTÍCULA — la mota DIMINUTA: 4-8 px
                     // (la v6.111 criaba mantos de 10-25 px).
-                    float radio = (3.5f + 4.5f * f0) * (0.8f + 0.5f * edad);
+//                    float radio = (3.5f + 4.5f * f0) * (0.8f + 0.5f * edad);
                     // EL ALFA (×k — la intensidad variable de siempre,
                     // acotada abajo para que la mota sea mota).
-                    float a = vive * MathF.Sin(edad * MathF.PI)
-                        * (0.34f + 0.30f * k);
+//                    float a = vive * MathF.Sin(edad * MathF.PI)
+//                        * (0.34f + 0.30f * k);
                     // LA RAMPA DE ENFRIAMIENTO (la de la casa): nace
                     // oscura y se disuelve en VIOLETA CLARO.
-                    Color c = edad > 0.45f
-                        ? Color.Lerp(new Color(26, 14, 44), new Color(122, 78, 188),
-                            (edad - 0.45f) / 0.55f)
-                        : new Color(26, 14, 44);
-                    BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
-                        MathHelper.Clamp(a, 0.12f, 0.60f), quality: 0.6f,
-                        velocity: rumbo * (14f + 20f * f0) * (0.5f + 0.5f * edad));
-                }
-            }
-            catch { }
-            finally
-            {
-                try { Main.spriteBatch.End(); } catch { }
-            }
+//                    Color c = edad > 0.45f
+//                        ? Color.Lerp(new Color(26, 14, 44), new Color(122, 78, 188),
+//                            (edad - 0.45f) / 0.55f)
+//                        : new Color(26, 14, 44);
+//                    BrumaFX.Puff(pos - o, radio, c, semilla * 31 + p, t + f0 * 7f,
+//                        MathHelper.Clamp(a, 0.12f, 0.60f), quality: 0.6f,
+//                        velocity: rumbo * (14f + 20f * f0) * (0.5f + 0.5f * edad));
+//                }
+//            }
+//            catch { }
+//            finally
+//            {
+//                try { Main.spriteBatch.End(); } catch { }
+//            }
 
             // ==============================================================
             //  v6.112 — EL ALIENTO VIOLETA MURIÓ (la letra: «la bruma es

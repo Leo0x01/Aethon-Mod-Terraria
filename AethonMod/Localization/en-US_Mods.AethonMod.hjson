@@ -332,6 +332,7 @@ Items: {
 			dinero y el arma corrupta del peldaño… pero el probador es del
 			probador.
 			'''
+		Paso: The Echo will strike with force {0} (right click to toggle)
 	}
 
 	OjoDelCieloItem: {
@@ -2798,6 +2799,7 @@ Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
 LevelUpTester: {
 	Subida: ✦ {0} subió +{1} niveles (ahora nivel {2}).
 	SinGrimorio: No se encontró un Grimorio del Eterno en el inventario.
+	Paso: The Executioner will cut {0} levels (right click to toggle)
 }
 
 RelojDeArena: {
@@ -4056,6 +4058,7 @@ Buffs: {
 }
 
 Projectiles: {
+	AgujeroRunicoPuroProjectile.DisplayName: Pure Runic Black Hole
 	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
 	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile

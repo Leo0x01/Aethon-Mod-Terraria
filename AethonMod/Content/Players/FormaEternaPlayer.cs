@@ -169,11 +169,24 @@ namespace AethonMod.Content.Players
                 // (la forma vive en el ÍTEM — «desaparece ya que es
                 // convertida en el item cosmetico»).
                 if (Convertida || PartesConstruidas <= 0) return;
-                // v6.145 — EL VESTIDO ES DEL PORTADOR, NO DEL LIBRO (la
-                // letra: «las parte de La Forma Eterna desbloqueada con
-                // el Despertar no se ven reflejadas en el jugador a
-                // medida que esta se desbloquea»): cada parte se VISTE
-                // apenas se construye — el cuerpo va siendo la Forma.
+                // v6.146 — EL VESTIDO PIDE EL LIBRO EN LA BARRA (la
+                // letra: «de hecho si deberia funcionar solo si el libro
+                // esta equipado en la barra de acceso rapido» + «tiene
+                // que verse a medida que evoluciona el grimorio»): el
+                // dios viste a quien LLEVA PUESTO el grimorio — el libro
+                // en la HOTBAR (los primeros 10 slots), no en la bolsa.
+                // Y LAS PARTES SE VEN A MEDIDA EVOLUCIONA: cada una se
+                // viste apenas se construye (v6.145 — ya sin exigir la
+                // MANO: la barra basta).
+                bool libroEnBarra = false;
+                for (int i = 0; i < 10; i++)
+                {
+                    Item inv = Player.inventory[i];
+                    if (inv != null && !inv.IsAir &&
+                        inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                    { libroEnBarra = true; break; }
+                }
+                if (!libroEnBarra) return;
 
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;

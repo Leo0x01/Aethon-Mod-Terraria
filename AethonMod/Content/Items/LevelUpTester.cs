@@ -23,6 +23,21 @@ namespace AethonMod.Content.Items
     {
         public const int LevelsPerUse = 10;
 
+        // v6.146 — EL SELECTOR DE POTENCIA (la letra: el click derecho
+        // cambia 10 ↔ 100; el izquierdo aplica)
+        public override bool CanRightClick() => Main.mouseRight && !Main.LocalPlayer.mouseInterface;
+
+        public override void RightClick(Player player)
+        {
+            var sp = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+            if (sp == null) return;
+            sp.VerdugoPasoCien = !sp.VerdugoPasoCien;
+            Main.NewText(Language.GetTextValue(
+                "Mods.AethonMod.LevelUpTester.Paso",
+                sp.VerdugoPasoCien ? 100 : LevelsPerUse), new Microsoft.Xna.Framework.Color(245, 196, 81));
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+
         public override void SetStaticDefaults() { }
 
         public override void SetDefaults()
@@ -60,14 +75,11 @@ namespace AethonMod.Content.Items
                 var sl = inv.GetGlobalItem<ShardLevelItem>();
                 if (sl == null) continue;
 
-                // v6.145 — EL PASO SE ELIGE (la letra: «de la misma
-                // forma con el Verdugo de niveles, si subir niveles de
-                // 10 en 10 o de 100 en 100»): SIN Shift sube 10 niveles
-                // (el paso de siempre); CON Shift apretado sube 100 —
-                // el verdugo ejecuta la fila entera.
-                int paso = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
-                           Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift)
-                    ? 100 : LevelsPerUse;
+                // v6.146 — EL PASO DEL SELECTOR (la letra nueva): el
+                // click derecho eligió la potencia (10 o 100); el click
+                // izquierdo la APLICA — como las oleadas del hambre.
+                var spVer = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+                int paso = spVer != null && spVer.VerdugoPasoCien ? 100 : LevelsPerUse;
 
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                     sl.Level += paso;

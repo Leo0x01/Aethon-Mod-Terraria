@@ -154,9 +154,55 @@ namespace AethonMod.Content.UI
 
                 // EL LIBRO (escala al slot)
                 var origen = tex.Size() * 0.5f;
-                sb.Draw(tex, new Vector2(GeoIcono.X + 20, GeoIcono.Y + 22), null,
+                Vector2 centroIcono = new Vector2(GeoIcono.X + 20, GeoIcono.Y + 22);
+                float rotIcono = hover ? -0.12f : -0.05f;
+                sb.Draw(tex, centroIcono, null,
                     hover ? Color.White : new Color(210, 200, 235),
-                    hover ? -0.12f : -0.05f, origen, 0.62f, SpriteEffects.None, 0f);
+                    rotIcono, origen, 0.62f, SpriteEffects.None, 0f);
+
+                // v6.146 — LA ANIMACIÓN DEL GRIMORIO DEL ETERNO (la
+                // letra: «el icono de Información no esta animado como
+                // el grimorio del eterno en el inventario, debes animar
+                // ese icono igual que al grimorio del eterno»): LAS
+                // MISMAS CAPAS del GrimorioHambriento en el inventario
+                // — EL OJO QUE PARPADEA: el ciclo de la casa (abierto
+                // la mayoría del tiempo, párpado MEDIO un instante,
+                // CERRADO un flash) + EL IRIS DORADO que respira y
+                // SIGUE al cursor mientras está abierto.
+                try
+                {
+                    float tiempo = Main.GlobalTimeWrappedHourly;
+                    // EL CICLO DEL PARPADEO (la firma del eterno: 6 s
+                    // abierto → 8 ticks medio → 4 cerrado → 6 medio)
+                    float fase = tiempo % 7.5f;
+                    string capa = null;
+                    if (fase > 6.9f && fase <= 7.1f) capa = "AethonMod/Content/Weapons/GrimorioHambriento_Medio";
+                    else if (fase > 7.1f && fase <= 7.3f) capa = "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado";
+                    else if (fase > 7.3f && fase <= 7.5f) capa = "AethonMod/Content/Weapons/GrimorioHambriento_Medio";
+                    if (capa != null)
+                    {
+                        var parpado = ModContent.Request<Texture2D>(capa).Value;
+                        sb.Draw(parpado, centroIcono, null,
+                            hover ? Color.White : new Color(210, 200, 235),
+                            rotIcono, parpado.Size() * 0.5f, 0.62f, SpriteEffects.None, 0f);
+                    }
+                    else
+                    {
+                        // EL IRIS VIVO — mira al cursor y RESPIRA (la
+                        // escala late con el tiempo)
+                        var iris = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+                        Vector2 alCursor = new Vector2(Main.mouseX, Main.mouseY) - centroIcono;
+                        Vector2 mirada = alCursor.LengthSquared() > 4f
+                            ? Vector2.Normalize(alCursor) * new Vector2(3.2f, 2.6f) * 0.62f
+                            : Vector2.Zero;
+                        float respira = 0.62f * (1f + 0.10f * (float)Math.Sin(tiempo * 2.2f));
+                        sb.Draw(iris, centroIcono + mirada, null, Color.White,
+                            rotIcono, iris.Size() * 0.5f, respira,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+                catch { }
 
                 // LA PULSACIÓN DEL OJO (la vida del icono: el destello
                 // violeta que respira)
@@ -227,11 +273,24 @@ namespace AethonMod.Content.UI
         public override void Update(GameTime gameTime)
         {
             // ============================================================
-            //  v6.144 — EL SCROLL INDEPENDIENTE (la letra: «haz que la
-            //  pagina derecha y la pagina izquierda sean individuales,
-            //  o sea el scroll en uno no afecta a la otra»): la rueda
-            //  SOLO mueve LA PÁGINA bajo el cursor (fuera de ambas: nada).
+            //  v6.146 — EL CERROJO OFICIAL DE LA RUEDA (la letra: «esto
+            //  tiene algo que cuando uso la rueda del mouse para hacer
+            //  scroll tambien se hace scroll en el inventario»): el
+            //  patrón del PROPIO UIScrollbar de tML — cuando el cursor
+            //  vive sobre LAS PÁGINAS del libro, LockVanillaMouseScroll
+            //  clava la lista que vanilla consulta ANTES de mover SU
+            //  inventario (Main.cs: 'MouseInModdedUI.Count == 0'): la
+            //  rueda es DEL LIBRO y NADIE MÁS. (El cerrojo viejo de
+            //  'ScrollWheelDelta = 0' no bastaba: vanilla lee su
+            //  ScrollWheelValue directo — SOLO esta lista lo frena.)
             // ============================================================
+            bool cursorEnLibro = GeoPagIzq.Contains(Main.mouseX, Main.mouseY) ||
+                                 GeoPagDer.Contains(Main.mouseX, Main.mouseY);
+            if (cursorEnLibro)
+                Terraria.GameInput.PlayerInput.LockVanillaMouseScroll("AethonMod/LibroEterno");
+
+            // v6.144 — EL SCROLL INDEPENDIENTE: la rueda SOLO mueve LA
+            // PÁGINA bajo el cursor (fuera de ambas: nada).
             int delta = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
             if (delta != 0)
             {

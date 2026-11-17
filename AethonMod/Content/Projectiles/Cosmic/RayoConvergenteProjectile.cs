@@ -341,7 +341,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     bool ascendidos = Content.Systems.DespertarGrimorio
                         .AgujerosAscendidos(Content.Systems.DespertarGrimorio.NivelDe(dueno));
-                    tipo = (Main.rand.Next(4)) switch
+                    // v6.146 — LA RULETA CRECE A CINCO: el AGUJERO RÚNICO PURO (sin
+                        // partículas, con el anillo de runas vivas — la letra)
+                        // entra al azar con los otros cuatro.
+                        tipo = (Main.rand.Next(5)) switch
                     {
                         0 => ascendidos ? ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>()
                                         : ModContent.ProjectileType<OlvidoBlackHoleProjectile>(),
@@ -371,9 +374,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         // (el hueco real de la v6.86 — con 85+ servía al
                         // Ascendido SIN el anillo nuevo y el usuario lo
                         // veía «viejo»).
-                        _ => ascendidos
+                        3 => ascendidos
                             ? ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>()
                             : ModContent.ProjectileType<BrumaBlackHoleProjectile>(),
+                        // v6.146 — EL PURO (la letra: «quiero que crees un
+                        // agujero negro runico sin esas particulas y que
+                        // las sustituyas por algo que haga que se vea
+                        // mejor»): SIN las cuatro familias de polvo — EL
+                        // ANILLO DE RUNAS VIVAS lo viste (12 glifos que
+                        // respiran en contrarrotação). Corre en las DOS
+                        // ligas (normal y ascendida): la pureza no tiene
+                        // liga.
+                        4 => ModContent.ProjectileType<AgujeroRunicoPuroProjectile>(),
+                        _ => ModContent.ProjectileType<CosmicBlackHoleProjectile>(),
                     };
                 }
 

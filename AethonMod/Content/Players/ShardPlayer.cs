@@ -845,31 +845,69 @@ namespace AethonMod.Content.Players
         /// y los celos del libro. Así "la voz y el hambre son del
         /// portador": las siente ÉL, en SU pantalla, contadas UNA vez.
         /// </summary>
-        // v6.145 — EL GESTO DE LA IRA (la letra: «solo se dispara si
-        // el jugador toca el Shift+click izquierdo»): el click izq +
-        // Shift (y sin UI encima) dispara LA IRA DE UN SER EXTERIOR si
-        // su reloj de 10 minutos está listo. El borde de bajada del
-        // click evita el ametrallado.
-        private bool _iraClickAnterior;
+        // v6.146 — LOS PASOS DE LOS SELECTORES (la letra del Eco y
+        // el Verdugo): click derecho alterna, click izquierdo aplica.
+        public bool EcoPasoLargo;       // el Eco: 1 ↔ 10
+        public bool VerdugoPasoCien;    // el Verdugo: 10 ↔ 100
+
+        // v6.146 — EL BUFF CONTADOR DESDE EL PRIMER MOMENTO (la
+        // letra: «el buff contador no aparece deberia a aparecer desde
+        // el primer momento en el que el grimorio desbloquea ese
+        // ataque en el despertar»): en cuanto el despertar llega al
+        // 100 (la cima pagada), el reloj de la Ira NACE con su buff —
+        // disponible o recargando, el portador SIEMPRE lo ve.
+        private void MantenerBuffDeLaIra()
+        {
+            try
+            {
+                if (Player != Main.LocalPlayer || Main.gameMenu) return;
+                bool desbloqueada = Systems.DespertarGrimorio.IraDisponible(Player);
+                int buffRecarga = ModContent.BuffType
+                    <global::AethonMod.Content.Buffs.IraSerExteriorRecargaBuff>();
+                int idx = Player.FindBuffIndex(buffRecarga);
+                if (desbloqueada)
+                {
+                    // el buff VIVE siempre (la descripción es el reloj
+                    // vivo: recargando o lista — el jugador la ve venir)
+                    if (idx < 0)
+                        Player.AddBuff(buffRecarga, 2);
+                }
+                else if (idx >= 0)
+                    Player.DelBuff(idx);
+            }
+            catch { }
+        }
+
+        // v6.146 — EL GESTO DE LA IRA (la letra: «el ataque no sera
+        // con Shift+click izquierdo, sera con click izquierdo+click
+        // derecho, para esto hay que mantener presionado el click
+        // izquierdo y luego presionar el derecho»): MANTÉN el click
+        // izquierdo y PULSA el derecho — el borde de subida del
+        // derecho dispara LA IRA (una vez por pulsación, sin
+        // ametrallado). Sin UI encima y sin inventario abierto.
+        private bool _iraDerAnterior;
 
         public override void PostUpdate()
         {
-            // EL GESTO DE LA IRA — Shift + click izquierdo (solo el
-            // jugador local, sin UI encima)
+            // EL GESTO DE LA IRA — izq mantenido + der pulsado
             try
             {
-                if (Player == Main.LocalPlayer && !Main.gameMenu &&
-                    Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift))
+                if (Player == Main.LocalPlayer && !Main.gameMenu)
                 {
-                    bool clickAhora = Main.mouseLeft && !Main.playerInventory &&
+                    bool izq = Main.mouseLeft && !Main.playerInventory &&
                         !Player.mouseInterface && !Main.ingameOptionsWindow;
-                    if (clickAhora && !_iraClickAnterior)
+                    bool der = Main.mouseRight && !Main.playerInventory &&
+                        !Player.mouseInterface && !Main.ingameOptionsWindow;
+                    if (izq && der && !_iraDerAnterior)
                         Systems.AtaquesCombinadosSistema.ShiftClickDeLaIra(Player);
-                    _iraClickAnterior = clickAhora;
+                    _iraDerAnterior = der;
                 }
-                else _iraClickAnterior = false;
+                else _iraDerAnterior = false;
             }
             catch { }
+
+            // EL BUFF DEL RELOJ — desde el nivel 100, siempre visible
+            MantenerBuffDeLaIra();
 
             // ============================================================
             // v6.51.6 — LA MIGRACIÓN DEL ALMA (una sola vez): el guardado

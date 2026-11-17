@@ -27,6 +27,19 @@ namespace AethonMod.Content.Items.Llamados
         public override void SetStaticDefaults()
         {
             // El DisplayName y el tooltip viven en la localización.
+            // v6.146 — el aviso del selector va por clave (la regla).
+        }
+
+        // v6.146 — EL SELECTOR DE POTENCIA (la letra: «que funciona
+        // dando clicj derecho y con eso cambia la potencia, luego con
+        // click iziquierdo se aplica, que funciona igual que el
+        // seleccionador de oleadas del hambre»): el ECO recuerda SU
+        // paso (1 o 10) por portador — el click derecho lo alterna,
+        // el izquierdo lo aplica.
+        public static int PasoDe(Player p)
+        {
+            var sp = p.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+            return sp != null && sp.EcoPasoLargo ? 10 : 1;
         }
 
         public override void SetDefaults()
@@ -43,6 +56,24 @@ namespace AethonMod.Content.Items.Llamados
             Item.UseSound = SoundID.Item4;
         }
 
+        public override bool CanRightClick()
+        {
+            // el click derecho alterna el paso (1 ↔ 10) — solo el dueño
+            return Main.mouseRight && !Main.LocalPlayer.mouseInterface;
+        }
+
+        public override void RightClick(Player player)
+        {
+            var sp = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+            if (sp == null) return;
+            sp.EcoPasoLargo = !sp.EcoPasoLargo;
+            // EL AVISO del selector (el lenguaje de las oleadas)
+            Main.NewText(Terraria.Localization.Language.GetTextValue(
+                "Mods.AethonMod.Items.EcoDelDespertar.Paso",
+                sp.EcoPasoLargo ? 10 : 1), new Microsoft.Xna.Framework.Color(196, 138, 255));
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+
         public override bool CanUseItem(Player player)
         {
             // En el tope ya no despierta más (la llave gira en vacío).
@@ -57,16 +88,12 @@ namespace AethonMod.Content.Items.Llamados
             // LA SUBIDA COMPLETA (la ceremonia de las tres ofrendas, sin
             // cobrarlas — es el probador). v6.51.6 — sube el despertar
             // DEL GRIMORIO ACTIVO (cada libro es su propia escalera).
-            // v6.145 — EL PASO SE ELIGE (la letra: «debes hacer que el
-            // Eco del Despertar se pueda seleccionar si subir de 1 a 1
-            // o de 10 en 10»): SIN Shift sube 1 peldaño; CON Shift
-            // apretado sube 10 de una vez (el eco golpea la escalera
-            // con el triple de fuerza).
+            // v6.146 — EL PASO DEL SELECTOR (la letra nueva): el click
+            // derecho eligió la potencia (1 o 10 — PasoDe); el click
+            // izquierdo la APLICA. NADA de Shift.
             Item eterno = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(player);
             if (eterno == null) return false;
-            bool pasoLargo = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) ||
-                             Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift);
-            int pasos = pasoLargo ? 10 : 1;
+            int pasos = PasoDe(player);
             for (int i = 0; i < pasos; i++)
             {
                 var alma = eterno.GetGlobalItem

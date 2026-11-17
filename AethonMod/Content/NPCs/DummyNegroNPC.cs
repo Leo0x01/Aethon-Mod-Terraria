@@ -100,6 +100,15 @@ namespace AethonMod.Content.NPCs
             NPC.aiStyle = -1;           // sin IA vanilla (yo me encargo)
             NPC.netAlways = true;       // que todos lo vean igual
             NPC.HitSound = SoundID.NPCHit1;
+            // v6.146 — ETERNO DE VERDAD (la letra: «al parecer el
+            // muñeco de prueba negro desaparece con el tiempo, eso no
+            // deberia suceder»): la causa — el motor despawnea NPCs
+            // no-townNPC cuando su vida cae (el vanilla espera que
+            // mueran). LAS DOS CERROJOS: life SIEMPRE al pleno cada
+            // tick (la AI lo clava — nunca llega a la línea de
+            // despawn) y timeLeft renovado (el contador que el motor
+            // usa para retirar 'fantasmas' — aquí jamás caduca).
+            NPC.timeLeft = NPC.active ? NPC.timeLeft : int.MaxValue;
         }
 
         public override bool CheckDead()
@@ -134,6 +143,14 @@ namespace AethonMod.Content.NPCs
 
         public override void AI()
         {
+            // v6.146 — EL CERROJO CONTRA EL DESPAWN: el motor mata a
+            // los NPC de vida baja tras un rato — el muñeco RENUEVA su
+            // boleto cada tick (timeLeft alto) y su vida jamás cae
+            // bajo la cuarta parte (el restaurador de abajo). El banco
+            // de pruebas NO se va de la partida jamás.
+            NPC.timeLeft = 3600;
+            NPC.netOffset = default;
+
             // EL BAMBOLEO decae (nace en HitEffect: 24 → 0).
             if (NPC.ai[0] > 0f)
                 NPC.ai[0]--;

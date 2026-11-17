@@ -1,5 +1,23 @@
 # AethonMod — Historial de Cambios
 
+## v6.146 — LA SESIÓN DE LOS GESTOS: el click que elige, la rueda que no se comparte y el agujero sin polvo
+
+**Los 12 puntos de la sesión 27, entregados y verificados:**
+
+1. **EL VESTIDO VIVE EN LA BARRA**: las partes de La Forma Eterna se ven en el jugador a medida evoluciona el grimorio — con el libro EQUIPADO EN LA HOTBAR (no en la mano, no en la bolsa).
+2. **LA RUEDA YA NO SE COMPARTE**: el libro usa EL CERROJO OFICIAL de tML — `PlayerInput.LockVanillaMouseScroll` (el patrón del propio UIScrollbar, verificado contra el código descompilado): con el cursor sobre las páginas, la rueda mueve SOLO el libro — el inventario NI SE ENTERA.
+3. **LA SOMBRA DE TINTA SIN ROSTRO**: el modo tinta NO dibuja ojos (la boca ya no existía) — masa lisa + bruma ×1.35 más densa. Y SÍ trae el ataque de la Muñeca Maldita (los rebotes ×5 de la v6.145).
+4. **LA IRA DE VERDAD**: **click izquierdo mantenido + click derecho pulsado** (nada de Shift) · el buff contador nace CON el nivel 100 y no se va nunca · el icono forjado con SFORGA (el ojo-reloj entrecerrado) · y el texto del grimorio ya dice la verdad: **1 cada 10 min** (calculado del const real, jamás vuelve a desincronizarse).
+5. **EL AGUJERO RÚNICO PURO**: sin las 4 familias de partículas (polvo absorbido, chispas, materia, disco de acreción) — el reemplazo: **EL ANILLO DE RUNAS VIVAS** (12 glifos en contrarrotação que se encienden al cruzar el frente). Entra en la ruleta rúnica del escuadrón con los otros cuatro.
+6. **EL MUÑECO ETERNO**: el banco de pruebas renueva su boleto cada tick (`timeLeft` fijado) — JAMÁS desaparece.
+7. **EL ECO Y EL VERDUGO CON SELECTOR**: click derecho alterna la potencia (Eco: 1↔10 · Verdugo: 10↔100), click izquierdo la aplica — igual que el seleccionador de oleadas del hambre.
+8. **EL AURA LIMPIA**: la pequeña bruma que iba hacia el jugador MURIÓ (la letra dio permiso: «si no puedes cambiar su angulo, entonces quitala») — queda el arco de choque y las chispas. Y **EL ESPECTRO ARDE**: su `dontTakeDamage` (que enciende SU propia IA al meterse en bloques — hallado en el decompile) ya no lo salva: los espíritus (aiStyle 23, Ghost, Wraith) entran SIEMPRE.
+9. **EL ICONO «Información» ANIMADO**: las capas del grimorio del eterno — el ojo PARPADEA (abierto → medio → cerrado → medio) y el IRIS DORADO sigue al cursor y respira.
+
+— oráculo 0/0 (465 .cs) · build 0/0 · GUARDIÁN TODO VIVE ✔ · AUDIT 12/12 · hjson ×3 ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.145 — LA LETRA COMPLETA: EL DESPERTAR DE VERDAD + EL DIOS DE LOS DIECISIETE OJOS
 
 **Los 14 puntos de la sesión 26, entregados y verificados:**
