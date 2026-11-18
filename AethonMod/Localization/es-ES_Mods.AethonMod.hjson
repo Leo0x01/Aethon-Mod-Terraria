@@ -22,7 +22,7 @@ Items: {
 			· Se consigue: 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres · 50% la Muralla de Carne
 			· Solo 1 en el inventario — y el grimorio lo quiere EN EL SUELO
 			· Sin usarlo te pueden caer más — dejan de salir cuando lo USAS y tu grimorio llega al despertar 20
-			· Devorado por debajo del despertar 20: la puerta del 20 queda paga PARA SIEMPRE
+			· Devorado por debajo del despertar 20: el Despertar 20 queda pago PARA SIEMPRE
 			'''
 	}
 
@@ -2524,6 +2524,7 @@ NPCs: {
 	}
 
 	AethonSelladoOjo.DisplayName: Ojo Sellado
+	// ElCronista.DisplayName: El Cronista
 }
 
 Common: {
@@ -2551,8 +2552,8 @@ Eco: {
 		QueenBee1: La colmena guarda luto. El grimorio lama la miel real de la abeja reina — dulzura con aguijón: su sabor favorito.
 		QueenBee2: La reina muere y la colmena olvida su nombre. El grimorio lo apunta por ella: «dulce, con ira, breve como el verano».
 		QueenBee3: Zumbido último de la abeja real. El grimorio guarda el aguijón de broche — cierra el capítulo y hiere al siguiente.
-		Skeletron1: Los huesos del guardián vuelven a ser polvo. El grimorio copia su maldición a mano alzada — la próxima puerta no lo detendrá.
-		Skeletron2: El guardián de la puerta muerde el polvo que era. El grimorio recoge la calavera: pesa poco, prometía mucho.
+		Skeletron1: Los huesos del guardián vuelven a ser polvo. El grimorio copia su maldición a mano alzada — el próximo Despertar no lo detendrá.
+		Skeletron2: El guardián del Despertar muerde el polvo que era. El grimorio recoge la calavera: pesa poco, prometía mucho.
 		Skeletron3: Maldición cumplida, huesos pagados. El grimorio firma el recibo con la mano del viejo — la letra tiembla, la cuenta está saldada.
 		WallofFlesh1: El muro que separaba los mundos arde hasta las cenizas. El grimorio traga su hambre antigua y DESPIERTA: desde hoy, todo lo que muera vale el doble.
 		WallofFlesh2: El muro ardía de hambre vieja y la vieja hambre ardió. El grimorio se traga EL LÍMITE y abre los ojos de par en par.
@@ -2911,7 +2912,7 @@ Despertar: {
 	HitoMejora4: ✧ ¡DESPERTAR 80: la MEJORA FINAL de los ojos + TODO el daño de invocación del escuadrón +25 %!
 	HitoAgujeros2: ✧ ¡DESPERTAR 85: los agujeros negros nacen DOS veces por minuto!
 	HitoSupremo: ✧ ¡DESPERTAR 90: OCHO OJOS con la mejora 4 abren el SUPREMO o el SUPREMO AURORA!
-	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el daño de invocación del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en la puerta — EL HAZ responde!
+	HitoMaximo: ✧✧ ¡DESPERTAR 100: LA IRA DE UN SER EXTERIOR + TODO el daño de invocación del escuadrón +30 %! La cima completa: Aethon ×1, Moon Lord ×10 y Emperatriz ×5 pagadas en el Despertar — EL HAZ responde!
 	HitoPieza1: ✦ NIVEL 200 — LA FORMA ETERNA SE CONSTRUYE: LA BRASA DEL ECLIPSE entra al panteón.
 	HitoPieza2: ✦ NIVEL 300 — pieza 2/8: EL ANILLO RÚNICO DORSAL.
 	HitoPieza3: ✦ NIVEL 400 — pieza 3/8: EL SELLO DEL GÉNESIS.
@@ -2989,8 +2990,8 @@ Despertar: {
 	NotaFinal: (las armas y los materiales se CONSAGRAN en el Altar de la Consagración; las esencias y el dinero se comen SIN sello — solo déjalos caer. Todo se suelta ENFRENTE del jugador con el grimorio SELECCIONADO: el grimorio SOLO devora lo que su portador ARROJA al suelo)
 	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CONSAGRADO… déjalo caer al suelo, portador. QUIERO probarlo.
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
-	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
-	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CONSAGRADO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
+	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: el peldaño del Despertar 20 NACE PAGA. Para siempre.
+	PuertaLibro: ✦ La mesa está completa… pero el Despertar 20 exige su LIBRO CONSAGRADO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
 	ReqLibroDevorado: Libro Consagrado: DEVORADO
 	ReqLibroPendiente: Libro Consagrado: consíguelo y déjalo caer delante del grimorio
 	LibroEntregado: ✦ (las páginas se abren solas) Toma, portador: MI LIBRO CONSAGRADO. La puerta del 20 lo exige — déjalo caer delante de mí cuando la mesa esté lista.
@@ -3757,7 +3758,7 @@ Pergamino: {
 	Grimorio2: • LAS SOMBRAS DE LA PÁGINA: los tomos I-V, el arsenal mágico del despertar. Cada puerta del despertar los forja más fuertes.
 	Grimorio3: • EL FESTÍN DE ARMAS: toda arma consagrada se vuelve poder — hasta +45% de daño (fuerza y EXP devoradas).
 	Grimorio4: • LAS ESENCIAS CONSUMIDAS: +0,1% de daño por esencia (tope +100%) — solo con el libro cerca (100% en mano, 25% guardado).
-	Grimorio5: • EL ESCUADRÓN: los OJOS DEL ETERNO (11) y las DAGAS DEL ETERNO (5) — la guardia del portador.
+	Grimorio5: • EL ESCUADRÓN: los ONCE OJOS DEL ETERNO — la guardia que ve por el portador.
 	SecDespertar: LA ESCALERA DEL DESPERTAR (1-120)
 	Despertar1: • Cada nivel cuesta: N esencias + monedas (de 100 cobre a 100 de platino) + armas y materiales de la caza.
 	Despertar2: • LAS PUERTAS DE LA CAZA: Rey Gelatina (3) · Ojo de Cthulhu (5) · El Mal del Mundo (8) · Reina Abeja (10) · Skeletron (13) · Muralla de Carne (20) · Reina Gelatina (23) · Los Gemelos (25) · El Devorador (28) · Skeletron Prime (30) · Plantera (32) · Golem (35) · Duque Fishron (37) · Emperatriz de Luz (38) · Cultista Lunático (45) · Señor de la Luna (50) · Aethon (100).
@@ -3765,7 +3766,7 @@ Pergamino: {
 	Despertar4: • LA IRA DEL SER EXTERIOR se gana en el nivel 100 (con su caza pagada): el Haz definitivo. Y EL OJO QUE MIRA: el arma del ojo — aparece cerca del enemigo, su mirada marca, la marca enciende la quemadura del vacío (en multijugador, el jugador enemigo también arde).
 	SecAtaques: LOS ATAQUES DEL GRIMORIO Y SUS MINIONS
 	Ataques1: • LOS OJOS DEL ETERNO (11): el escuadrón que todo lo mira — cada ojo un proyectil viviente con su mirada.
-	Ataques2: • LAS DAGAS DEL ETERNO (5): cristal · llama · roca · vacío · veredicto — la guardia íntima con el ojo en el centro.
+	Ataques2: • LA CONJURA COMBINADA: mantener el ataque básico carga la sinfonía del Eterno — el clic derecho invoca y mejora al escuadrón.
 	Ataques3: • LAS SOMBRAS DE LA PÁGINA: los cinco tomos del arsenal mágico (la página, el abanico, la garganta, la sierra, la fauce).
 	Ataques4: • EL FESTÍN: la devoración que detiene jefes y los digiere enteros.
 	Ataques5: • LA IRA DEL SER EXTERIOR: el haz definitivo del nivel 100.

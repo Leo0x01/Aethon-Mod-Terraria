@@ -61,6 +61,12 @@ namespace AethonMod.Content.Globals
     /// </summary>
     public class JefeInteriorGlobalNPC : GlobalNPC
     {
+        // v6.152 — LA NOCHE PRESTADA UNIVERSAL (ver el PreAI de abajo):
+        // mientras el interior vive, TODO SkeletronHead recibe la noche
+        // prestada en el PreAI del festín (el clamp del mediodía NUNCA
+        // deja que su IA vea el día — el guardián de mazmorra es
+        // IMPOSIBLE dentro, llegue como llegue la cabeza).
+        private bool _prestaNocheInterior;
         public override bool InstancePerEntity => true;
 
         /// <summary>¿Es el jefe interior de la arena? (lo marca el pilar
@@ -187,6 +193,27 @@ namespace AethonMod.Content.Globals
 
         public override bool PreAI(NPC npc)
         {
+            // === v6.152 — LA NOCHE PRESTADA UNIVERSAL (la letra: «al
+            //     invocar a esqueletro me sale la version de la
+            //     mazmorra… eso no debe pasar»): el fix v6.141 (la
+            //     ai[1] devuelta a 1) solo vestía a los jefes de LA
+            //     ARENA (EsInterior) y reñía CADA TICK con la IA
+            //     vanilla (que veía día y la volvía a 2 — el tira y
+            //     afloja que el usuario vio como cabeza girando). LA
+            //     CURA DE RAÍZ: mientras el MUNDO INTERIOR viva y
+            //     sea de día, TODO SkeletronHead recibe LA NOCHE
+            //     PRESTADA antes de su IA (dayTime=false) y se la
+            //     devolvemos en PostAI — la IA vanilla JAMÁS ve el
+            //     día: no hay modo guardián que la agarre, ni en la
+            //     arena, ni en la oleada, ni en la carnada.
+            _prestaNocheInterior = false;
+            if (npc.type == NPCID.SkeletronHead &&
+                Systems.SubmundoGrimorio.Activo && Main.dayTime)
+            {
+                Main.dayTime = false;
+                _prestaNocheInterior = true;
+            }
+
             // === v6.141 — SKELETRON JAMÁS GUARDIÁN (la letra: «el
             //     esqueletron aparece siendo la version de la mazmorra
             //     con alta defensa, eso esta mal»): el interior vive en
@@ -224,6 +251,13 @@ namespace AethonMod.Content.Globals
 
         public override void PostAI(NPC npc)
         {
+            // v6.152 — LA NOCHE DEVUELTA (el préstamo dura UN AI — el
+            // contrato de la casa: el mediodía del decorado vuelve)
+            if (_prestaNocheInterior)
+            {
+                try { Main.dayTime = true; } catch { }
+                _prestaNocheInterior = false;
+            }
             if (!EsInterior) return;
             try
             {

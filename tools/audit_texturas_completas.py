@@ -211,6 +211,8 @@ for p in todos:
         continue
     if p.endswith('_Highlight.rawimg'):
         continue          # el compañero del resaltado (exigido por tML)
+    if p.endswith('_Head.rawimg') or p.endswith('_Head_Boss.rawimg'):
+        continue          # v6.152 — el retrato del [AutoloadHead] (convención tML)
     base = p.rsplit('/', 1)[-1].rsplit('.', 1)[0]
     ruta_asset = p[:-len('.rawimg')]
     if ruta_asset not in prestadas_usadas and not vive_en_dll(base):

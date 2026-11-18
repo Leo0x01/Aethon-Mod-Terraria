@@ -109,7 +109,16 @@ namespace AethonMod.Content.UI
             //  inventario); lo que manda encima de todo es EL LIBRO
             //  ABIERTO.
             // ============================================================
-            layers.Add(new LegacyGameInterfaceLayer("AethonMod: LibroDelEterno",
+            // v6.152 — EL CURSOR MANDA (la letra: «el cursor queda por
+            // debajo del libro de informacion, el cursor debe estar por
+            // encima del libro de informacion»): el libro ya NO es la
+            // ÚLTIMA capa — vive JUSTO ANTES de 'Vanilla: Mouse Over'
+            // (la capa que dibuja el cursor de vanilla): encima de todo
+            // el juego y su interfaz… DEBAJO del cursor, como manda la
+            // letra.
+            int idxCursor = layers.FindIndex(l => l.Name.Equals("Vanilla: Mouse Over"));
+            if (idxCursor < 0) idxCursor = layers.Count;
+            layers.Insert(idxCursor, new LegacyGameInterfaceLayer("AethonMod: LibroDelEterno",
                 () =>
                 {
                     if (_estado != null && _estado.Visible)
@@ -565,9 +574,23 @@ namespace AethonMod.Content.UI
                 // dibujada EXACTA — donde tocas es donde cae.
                 var rectX = new Rectangle(x + w - 6, y - 8, 36, 36);
                 bool hoverX = rectX.Contains(Main.mouseX, Main.mouseY);
+                // v6.152 — LA X DIBUJADA ES SU HITBOX (la letra: «el
+                //     hitbox esta bien, pero la X no, la X esta corrida
+                //     hacia la izquierda»): el marco se dibuja con el
+                //     MISMO rectángulo del hitbox y la letra muere
+                //     EXACTAMENTE en su centro medido de verdad (el
+                //     centro vertical del glifo 'X' de la fuente, no
+                //     el del rectángulo — el ajuste de -2 px que la
+                //     fuente MouseText pide para centrar óptico).
                 sb.Draw(_pixel, rectX, (hoverX ? new Color(220, 90, 90) : new Color(96, 74, 52)) * 0.45f);
-                Utils.DrawBorderString(sb, "X", new Vector2(rectX.Center.X, rectX.Center.Y),
-                    hoverX ? new Color(220, 90, 90) : Tinta, 1.1f, 0.5f, 0.5f);
+                sb.Draw(_pixel, new Rectangle(rectX.X + 2, rectX.Y + 2, rectX.Width - 4, rectX.Height - 4),
+                    (hoverX ? new Color(150, 40, 40) : new Color(58, 40, 30)) * 0.55f);
+                var fuenteX = FontAssets.MouseText.Value;
+                Vector2 midX = fuenteX.MeasureString("X") * 0.5f;
+                sb.DrawString(fuenteX, "X",
+                    new Vector2(rectX.Center.X, rectX.Center.Y + 1f) - midX,
+                    hoverX ? new Color(255, 210, 210) : new Color(235, 225, 205), 0f,
+                    Vector2.Zero, 1.1f, SpriteEffects.None, 0f);
                 if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
                     LibroDelEternoUI.Cerrar();
             }
@@ -583,6 +606,25 @@ namespace AethonMod.Content.UI
         /// CENTRA en su página (márgenes iguales a ambos lados) y la
         /// escala del cuerpo sube de 0.85 a 0.92 con la TINTA OSCURA
         /// nueva (ver Tinta v6.147).</summary>
+        /// <summary>v6.152 — EL UMBRAL DE DESPERTAR de cada sección del
+        /// Compendio (la letra: «debes hacer que las piezas de lore se
+        /// vayan desbloqueando a medida que el nivel de despertar
+        /// aumenta»). La sección [0] (el título del compendio) y [1]
+        /// (el epígrafe) SIEMPRE se ven; el CUERPO se abre al umbral.
+        /// Los umbrales por índice de sección del lore (II+): el canon
+        /// SE GANA con el despertar.</summary>
+        private static readonly int[] UmbralLore = { 0, 0, 10, 25, 40, 60, 80 };
+
+        /// <summary>El Despertar del portador local (para el lore).</summary>
+        private static int DespertarLocal()
+        {
+            try
+            {
+                return Systems.DespertarGrimorio.NivelDe(Main.LocalPlayer);
+            }
+            catch { return 0; }
+        }
+
         private float DibujarColumna(SpriteBatch sb, string[][] secciones,
             Rectangle pagina, Rectangle recorte, ref float scroll, bool esIzq)
         {
@@ -594,10 +636,25 @@ namespace AethonMod.Content.UI
             float xizq = pagina.X + margen;
             float maxAncho = pagina.Width - margen * 2f;
 
+            // v6.152 — EL LORE PROGRESIVO (la letra: «debes hacer
+            //     que las piezas de lore se vayan desbloqueando a
+            //     medida que el nivel de despertar aumenta»): en la
+            //     página del COMPENDIO cada sección nace bajo su
+            //     umbral de despertar — el título y el epígrafe se ven
+            //     SIEMPRE, el cuerpo SOLO al llegar. La mecánica
+            //     (página izquierda) está SIEMPRE completa.
+            int despertarAhora = esIzq ? int.MaxValue : DespertarLocal();
             foreach (var sec in secciones)
             {
                 cy += 12f;
                 string titulo = T(sec[0]);
+                int idxSec = System.Array.IndexOf(secciones, sec);
+                bool seccionAbierta = true;
+                if (!esIzq && idxSec >= 2)
+                {
+                    int umbral = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
+                    seccionAbierta = despertarAhora >= umbral;
+                }
                 var medT = fuente.MeasureString(titulo);
                 if (VisibleEn(cy, medT.Y, recorte))
                 {
@@ -616,9 +673,25 @@ namespace AethonMod.Content.UI
                 }
                 cy += medT.Y * 0.95f + 9f;
 
-                for (int i = 1; i < sec.Length; i++)
-                    cy = LineaLibro(sb, T(sec[i]), xizq, cy, maxAncho,
-                        Tinta, recorte, pagina);
+                if (seccionAbierta)
+                {
+                    for (int i = 1; i < sec.Length; i++)
+                        cy = LineaLibro(sb, T(sec[i]), xizq, cy, maxAncho,
+                            Tinta, recorte, pagina);
+                }
+                else
+                {
+                    // LA SECCIÓN SELLADA: su epígrafe (sec[1] — la
+                    // promesa) y EL SELLO — la línea de puntos con el
+                    // candado y el nivel que la abre
+                    if (sec.Length > 1)
+                        cy = LineaLibro(sb, T(sec[1]), xizq, cy, maxAncho,
+                            Tinta, recorte, pagina);
+                    int umbralSello = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
+                    string sello = "· · · ✦ sellado · se revela al Despertar " + umbralSello + " ✦ · · ·";
+                    cy = LineaLibro(sb, sello, xizq, cy, maxAncho,
+                        new Color(120, 104, 82), recorte, pagina);
+                }
                 cy += 5f;
             }
             return Math.Max(0f, cy + scroll - recorte.Y + 20f);

@@ -112,19 +112,27 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // identidad por portador).
             int semilla = Projectile.identity % 89 + 11;
 
-            VFXCore.CerrarLoteSiAbierto();
-            VFXCore.Begin();
+            // ============================================================
+            //  v6.152 — LOS ANILLOS DE LA CONSTRUCCIÓN SON LOS DEL
+            //  ACCESORIO (la letra: «no son los mismos que los de la
+            //  forma eterna en accesorio, ten en cuenta que la forma
+            //  eterna en accesorio es la correcta y es como debe verse
+            //  la Forma Eterna en construccion»). LA CORRECCIÓN: el
+            //  accesorio viste AnilloDorsalRenderer.Draw — LA TRIPLE
+            //  CORONA DE CONJURO + el anillo de fotones (la firma de la
+            //  espalda del portador). El SistemaAnillos de soles de la
+            //  v6.150 MURIÓ aquí: la construcción viste EXACTAMENTE la
+            //  corona del accesorio, con las runas ESCRIBIÉNDOSE —
+            //  cada peldaño 113-119 enciende un TERCIO de la corona
+            //  (runasMul 0.35→1.0: la escritura crece hasta su forma
+            //  final, LA del accesorio).
+            // ============================================================
             try
             {
-                // R de los anillos del sol: proporcional al cuerpo del
-                // portador (el sol de la casa con BodyPx=34; aquí el
-                // portador ES la estrella — su altura es la regla).
-                float R = 34f * (duenio.height / 42f);
-                SigiloLib.SistemaAnillos(centro, R, t, semilla,
-                    anillos, 0f, 1f, 1f);
+                float runasMul = MathHelper.Clamp(0.35f + 0.65f * (anillos - 1) / 6f, 0.35f, 1f);
+                VFX.AnilloDorsalRenderer.Draw(centro, duenio.height, t, 1f, runasMul);
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
-            VFXCore.FlushAdditive();
             VFXCore.ReabrirLoteVanilla();
             return false;
         }

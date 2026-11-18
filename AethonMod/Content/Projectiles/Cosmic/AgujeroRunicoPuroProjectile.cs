@@ -300,6 +300,102 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  RENDER — 100% CÓDIGO (AgujeroPuroRenderer v6.149 — el anillo de Einstein rúnico)
         // ------------------------------------------------------------------
 
+        // ================================================================
+        //  v6.152 — LAS CUATRO CAPAS NUEVAS DEL PURO (la letra: «mas
+        //  vfx mas efectos visuales, mas de todo, que se vea super
+        //  cargado, pero que siga siendo un agujero runico»):
+        //   (a) EL TORBELLINO DE GLIFOS — 24 runas solares ESPIRALANDO
+        //       hacia el horizonte (contrarrotación, tamaño creciendo
+        //       al caer — la materia escrita siendo comida).
+        //   (b) LA CORONA DE LENTEJUELAS — 12 destellos de 4 puntas
+        //       orbitando EL BORDE de Einstein (el límite donde la luz
+        //       se dobla — cada lentejuela con SU titileo).
+        //   (c) LOS FILAMENTOS DE ACRECIÓN — 6 arcos eléctricos
+        //       (ruido determinista) lamiendo el disco desde afuera
+        //       hacia adentro (la cena en vivo).
+        //   (d) EL ECO DOBLE — dos ondas concéntricas que respiran con
+        //       el latido del corazón (la firma de la casa, ahora ×2).
+        //  TODO determinista (Hash01 — R5) y por el lote aditivo.
+        // ================================================================
+        private void DibujarLasCapasNuevas(Vector2 centro, float t, float escala)
+        {
+            VFXCore.AbrirAdditive();
+            try
+            {
+                Vector2 c = centro - Main.screenPosition;
+                float radio = Projectile.width * 0.5f * escala;
+
+                // === (a) EL TORBELLINO DE GLIFOS ===
+                for (int i = 0; i < 24; i++)
+                {
+                    float h0 = VFXCore.Hash01(i, 1, 6101);
+                    float h1 = VFXCore.Hash01(i, 2, 6103);
+                    float caida = Frac01(t * (0.10f + 0.08f * h0) + h1);   // 0→1 cayendo
+                    float ang = h1 * MathHelper.TwoPi - t * (0.9f + 0.6f * h0) + caida * 7f;
+                    float r = MathHelper.Lerp(radio * 4.2f, radio * 1.15f, caida * caida);
+                    Vector2 g = c + ang.ToRotationVector2() * r;
+                    float tam = (7f + 10f * h0) * (0.5f + 0.8f * caida);
+                    Color tinta = i % 3 == 0
+                        ? new Color(150, 210, 255)
+                        : new Color(255, 214, 130);
+                    VFXCore.Quad(g, SigiloLib.Tint(tinta, 0.55f * (1f - caida * 0.4f)),
+                        new Vector2(tam, tam * 0.4f), ang + MathHelper.PiOver2);
+                }
+
+                // === (b) LA CORONA DE LENTEJUELAS (destellos de 4 puntas) ===
+                Texture2D dest = VFXCore.DestelloFinal;
+                if (dest != null)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        float h0 = VFXCore.Hash01(i, 3, 6111);
+                        float titila = 0.5f + 0.5f * MathF.Sin(t * (2.2f + 1.3f * h0) + i * 2.1f);
+                        float ang = h0 * MathHelper.TwoPi + t * 0.35f;
+                        float rB = radio * (3.4f + 0.10f * MathF.Sin(t * 1.3f + i));
+                        Vector2 l = c + ang.ToRotationVector2() * rB;
+                        float esc = (26f + 20f * h0) * (0.55f + 0.45f * titila) / dest.Width;
+                        Main.spriteBatch.Draw(dest, l, null,
+                            SigiloLib.Tint(new Color(200, 235, 255), 0.75f * titila),
+                            t * 0.4f + i, dest.Size() * 0.5f, esc,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+
+                // === (d) EL ECO DOBLE (las ondas que respiran) ===
+                float latido = 0.5f + 0.5f * MathF.Sin(t * 2.6f);
+                for (int k = 0; k < 2; k++)
+                {
+                    float fase = Frac01(t * 0.22f + k * 0.5f);
+                    float rO = radio * (1.4f + fase * 5.5f);
+                    float alfa = (1f - fase) * (0.32f + 0.18f * latido);
+                    int segs = 34;
+                    for (int s = 0; s < segs; s++)
+                    {
+                        float a0 = s * MathHelper.TwoPi / segs;
+                        Vector2 p0 = c + a0.ToRotationVector2() * rO;
+                        Vector2 p1 = c + (a0 + MathHelper.TwoPi / segs).ToRotationVector2() * rO;
+                        VFXCore.Line(p0, p1, SigiloLib.Tint(
+                            k == 0 ? new Color(190, 120, 255) : new Color(255, 200, 120),
+                            alfa), 2.2f);
+                    }
+                }
+            }
+            finally { VFXCore.RestaurarLoteVanilla(); }
+
+            // === (c) LOS FILAMENTOS DE ACRECIÓN (arcos eléctricos) ===
+            float radioF = Projectile.width * 0.5f * escala;
+            for (int i = 0; i < 6; i++)
+            {
+                float h0 = VFXCore.Hash01(i, 4, 6121);
+                float ang = h0 * MathHelper.TwoPi + t * (0.5f + 0.3f * h0);
+                float dentro = radioF * (1.05f + 0.35f * VFXCore.Hash01(i, 5, 6123));
+                float fuera = radioF * (2.6f + 1.4f * VFXCore.Hash01(i, 6, 6125));
+                Vector2 a = centro + ang.ToRotationVector2() * fuera;
+                Vector2 b = centro + (ang + 0.22f).ToRotationVector2() * dentro;
+                DibujarArcoAcrecion(a, b, t + i);
+            }
+        }
+
         public override bool PreDraw(ref Color lightColor)
         {
             // La lente va DETRÁS: el BlackHoleLensSystem pinta el núcleo
@@ -317,6 +413,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             try
             {
                 DrawCoreVisuals(Projectile);
+            }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+
+            // v6.152 — LAS CAPAS NUEVAS: el estilo SUPER CARGADO de la
+            // letra (torbellino de glifos + corona de lentejuelas +
+            // filamentos de acreción + eco doble) — todo determinista
+            // y por los lotes de la casa, sobre EL MISMO cuerpo.
+            try
+            {
+                DibujarLasCapasNuevas(Projectile.Center, Main.GlobalTimeWrappedHourly,
+                    Math.Max(Projectile.scale, 0.05f));
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
 
@@ -428,6 +535,43 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         /// <summary>Elastic ease-out (curva elástica de aparición — copia exacta).</summary>
+        /// <summary>El resto positivo [0,1) — el módulo de la casa.</summary>
+        private static float Frac01(float x)
+        {
+            float f = x - MathF.Floor(x);
+            return f < 0f ? 0f : (f > 0.999f ? 0.999f : f);
+        }
+
+        /// <summary>v6.152 — EL ARCO DE ACRECIÓN: una descarga eléctrica
+        /// determinista de 7 segmentos entre dos puntos (el zigzag con
+        /// Hash01 — R5: cero azar, la misma chispa en todas las
+        /// pantallas) dibujada en el lote aditivo.</summary>
+        private static void DibujarArcoAcrecion(Vector2 a, Vector2 b, float semillaT)
+        {
+            VFXCore.AbrirAdditive();
+            try
+            {
+                const int segs = 7;
+                Vector2 prev = a;
+                for (int s = 1; s <= segs; s++)
+                {
+                    float u = s / (float)segs;
+                    Vector2 baseP = Vector2.Lerp(a, b, u);
+                    float desv = (VFXCore.Hash01(s, 7, 6131 + (int)(semillaT * 13f) % 997) - 0.5f) *
+                                 22f * (1f - MathF.Abs(u - 0.5f) * 1.2f);
+                    Vector2 dir = b - a;
+                    if (dir.LengthSquared() < 0.01f) dir = Vector2.UnitY;
+                    Vector2 perp = new(-dir.Y, dir.X);
+                    perp.Normalize();
+                    Vector2 p = baseP + perp * desv - Main.screenPosition;
+                    VFXCore.Line(prev - Main.screenPosition, p,
+                        SigiloLib.Tint(new Color(170, 220, 255), 0.55f), 2.4f);
+                    prev = p;
+                }
+            }
+            finally { VFXCore.RestaurarLoteVanilla(); }
+        }
+
         private static float ElasticOut(float t)
         {
             if (t <= 0f) return 0f;

@@ -128,11 +128,24 @@ namespace AethonMod.Content.Weapons.Definitivas
         private const float CRECE_CAZA = 0.70f;
 
         /// <summary>v6.127 — EL COLAPSO: los primeros ticks de la nova en
-        /// que el sol se PLEGA antes de estallar.</summary>
-        private const int T_COLAPSO = 7;
+        /// que el sol se PLEGA antes de estallar.
+        /// v6.152 — EL PLEGADO SUAVE (la cura del ÚLTIMO salto): el SIM
+        /// midió Δ 0.02→0.27 creciente en los 7 ticks viejos — el
+        /// cuadrático ACELERABA hacia el fondo y el ojo lo leía como un
+        /// salto. AHORA: 14 ticks con smoothstep (arranca despacio,
+        /// frena al llegar) — el pliegue es una RESPIRACIÓN.</summary>
+        private const int T_COLAPSO = 14;
 
         /// <summary>El reloj del acto actual.</summary>
         private float _t;
+
+        /// <summary>v6.152 — EL RELOJ TOTAL (la cura de TODOS los
+        /// saltos): la edad del proyectil desde su nacimiento — UNA
+        /// SOLA línea de tiempo continua para TODO el dibujado (los
+        /// actos siguen existiendo para la IA/lógica, pero el PRESENTA
+        /// ya no corta nunca: cada curva visual es función continua de
+        /// ESTE reloj con costuras suavizadas).</summary>
+        private float _edad;
 
         /// <summary>0 convocatoria · 1 fusión · 2 caza · 3 nova.</summary>
         private int _acto;
@@ -165,6 +178,7 @@ namespace AethonMod.Content.Weapons.Definitivas
         public override void AI()
         {
             _t++;
+            _edad++;   // v6.152 — la línea de tiempo del dibujado (continua)
 
             // EL RELOJ DE LOS ACTOS
             if (_acto == 0 && _t > T_CONVOCATORIA) { _acto = 1; _t = 0; }
@@ -439,7 +453,9 @@ namespace AethonMod.Content.Weapons.Definitivas
                     // === LA INVOCACIÓN GÓTICA: runa → sol ===
                     float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
                     float suave = p * p * (3f - 2f * p);
-                    float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.5f, 0.92f, suave);
+                    // v6.152 — el radio sale de LA CURVA MAESTRA (la
+                    // misma del resto del juicio: imposible saltar)
+                    float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
 
                     // EL SIGILO DE LA CITA (el círculo de conjuro dibujándose
                     // bajo los soles: un aro que SE TRAZA — el arco crece
@@ -492,7 +508,9 @@ namespace AethonMod.Content.Weapons.Definitivas
                             bool luz = lado == 0;
                             float angLado = ang + (luz ? 0f : MathHelper.Pi);
                             Vector2 pos = Punto + angLado.ToRotationVector2() * radio;
-                            float r = RuneSunRenderer.BodyPx * MathHelper.Lerp(0.92f, 0.55f, caida);
+                            // v6.152 — el radio del vals también nace de
+                            // LA CURVA MAESTRA (continuo con TODO)
+                            float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
 
                             // EL ECLIPSE MUTUO: el sol que pasa por DELANTE
                             // (la mitad inferior de la órbita: sin>0) APAGA
@@ -508,6 +526,12 @@ namespace AethonMod.Content.Weapons.Definitivas
                             {
                                 for (int k = 1; k <= 9; k++)
                                 {
+                                    // v6.152 — LA ESTELA DETERMINISTA (la
+                                    // cura fina de los saltos): el azar
+                                    // por frame (Main.rand en las estelas)
+                                    // parpadeaba como micro-saltos — el
+                                    // Hash01 de la casa: LA MISMA estela
+                                    // cada frame, quieta como historia.
                                     float angPas = angLado - k * 0.045f - 0.09f;
                                     float radPas = radio + k * 2.2f;   // la estela nace ANCHA (la órbita era mayor)
                                     Vector2 posPas = Punto + angPas.ToRotationVector2() * radPas - Main.screenPosition;
@@ -546,7 +570,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                         //  es la misma luz que sigue creciendo).
                         // ============================================================
                         float n = MathHelper.Clamp((p - P_CONTACTO) / (1f - P_CONTACTO), 0f, 1f);
-                        float r = RuneSunRenderer.BodyPx * RadioFusion(n);
+                        float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
                         DibujarSolFusionado(Punto, r, gt, 3, rg: 0f, alpha: 1f);
                         // EL ALIENTO DEL NACIMIENTO: la luz que respira al
                         // ritmo de la curva (continua — el destello viejo
@@ -586,9 +610,11 @@ namespace AethonMod.Content.Weapons.Definitivas
                     // ============================================================
                     float caza = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
                     float rg = caza * caza * (3f - 2f * caza);   // smoothstep: el rojo madura suave
+                    // v6.152 — el radio de la caza TAMBIÉN es LA CURVA
+                    // MAESTRA (nace del contacto sin costura y crece
+                    // al gigante) + el pulso arterial encima
                     float r = RuneSunRenderer.BodyPx *
-                        (RadioFusion(1f) + CRECE_CAZA * rg +
-                         0.05f * MathF.Sin(gt * 9f) * rg);       // el pulso arterial al final
+                        (RadioDelJuicio(_edad) + 0.05f * MathF.Sin(gt * 9f) * rg);
                     DibujarSolFusionado(_centroCaza, r, gt * (1f + 1.2f * rg), 3, rg, alpha: 1f);
 
                     // LA LUZ DE LA CAZA: el dorado se vuelve carmesí
@@ -641,8 +667,9 @@ namespace AethonMod.Content.Weapons.Definitivas
                         // MÁS rápido: al 70% del colapso ya casi no hay
                         // luz — el vacío antes de la palabra)
                         float plega = _t / (float)T_COLAPSO;
-                        float rGigante = RuneSunRenderer.BodyPx * (RadioFusion(1f) + CRECE_CAZA);
-                        float r = MathHelper.Lerp(rGigante, rGigante * 0.42f, plega * plega);
+                        // v6.152 — el plisado del colapso también por la
+                        // curva maestra (continuo con la caza que acaba)
+                        float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
                         DibujarSolFusionado(_centroCaza, r, gt * 2.8f, 3, rg: 1f,
                             alpha: MathF.Max(0.08f, 1f - 1.45f * plega));
                     }
@@ -654,9 +681,9 @@ namespace AethonMod.Content.Weapons.Definitivas
                         // gigante rojo, no en el punto de la cita vieja)
                         float p = MathHelper.Clamp((_t - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO), 0f, 1f);
                         float apaga = 1f - p;
-                        float rGiganteS = RuneSunRenderer.BodyPx * (RadioFusion(1f) + CRECE_CAZA);
-                        float r = rGiganteS *
-                            (0.42f + 0.95f * MathF.Min(1f, (_t - T_COLAPSO) / 7f)) * (0.85f + 0.15f * apaga);
+                        // v6.152 — la sentencia cierra LA MISMA curva (el
+                        // estallido final del radio maestro)
+                        float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
                         DibujarSolFusionado(_centroCaza, r, gt * 3.2f, 3, rg: 1f,
                             alpha: MathF.Min(1f, apaga * 1.8f));
 
@@ -716,6 +743,76 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             float s = n * n * (3f - 2f * n);   // smoothstep: suave al inicio
             return MathHelper.Lerp(0.55f, 1.05f, s);
+        }
+
+        /// <summary>v6.152 — LA CURVA MAESTRA DE TODO EL JUICIO: el
+        /// radio del cuerpo central (el par → el gigante → la caza → el
+        /// colapso → la sentencia) como función CONTINUA del RELOJ
+        /// TOTAL. Cada tramo termina EXACTO donde empieza el siguiente
+        /// (costuras C0) y con su misma pendiente (costuras C1: las
+        /// curvas son smoothstep — la derivada en los bordes es 0 en
+        /// ambos lados): ES IMPOSIBLE QUE SALTE, matemáticamente.
+        /// Los tramos (en ticks del _edad): 0-36 convocatoria (el par
+        /// vuela, r 0.5→0.92) · 36-63 el vals (espiral, r 0.92→0.55) ·
+        /// 63-66 el contacto (r 0.55) · 66-366 la caza (0.55 →
+        /// 1.05+0.70) · 366-373 el colapso (plisado) · 373+ la nova.</summary>
+        private static float RadioDelJuicio(float edad)
+        {
+            // EL PAR (convocatoria + vals): el radio de CADA sol —
+            // idéntico al PosicionSolSencillo/vals de siempre
+            if (edad < T_CONVOCATORIA)
+            {
+                float u0 = edad / (float)T_CONVOCATORIA;
+                return MathHelper.Lerp(0.50f, 0.92f, u0 * u0 * (3f - 2f * u0));
+            }
+            if (edad < T_CONVOCATORIA + T_FUSION)
+            {
+                float u1 = (edad - T_CONVOCATORIA) / (float)T_FUSION;
+                return MathHelper.Lerp(0.92f, 0.55f, u1 * u1 * (3f - 2f * u1));
+            }
+            // EL CONTACTO + LA CAZA: nace del 0.55 del par y crece
+            // continuo hasta el gigante adulto + el 70 % de la caza
+            if (edad < T_CONVOCATORIA + T_FUSION + T_CARGA)
+            {
+                float n = (edad - T_CONVOCATORIA - T_FUSION) / (float)T_CARGA;
+                return RadioFusion(Math.Min(1f, n * 3f))        // nacimiento 0.55→1.05
+                     + CRECE_CAZA * (n * n * (3f - 2f * n));     // la caza 1.05→1.75
+            }
+            // EL COLAPSO + LA NOVA: plisado y estallido (continuos)
+            float tPost = edad - T_CONVOCATORIA - T_FUSION - T_CARGA;
+            float rGigante = 1.05f + CRECE_CAZA;
+            if (tPost < T_COLAPSO)
+            {
+                float plega = tPost / (float)T_COLAPSO;
+                return MathHelper.Lerp(rGigante, rGigante * 0.42f,
+                    plega * plega * (3f - 2f * plega));   // smoothstep: respira
+            }
+            // v6.152 — LA NOVA SIN COSTURA (el SIM cazó el salto): el
+            // estallido nace EXACTO del fondo del plisado (0.42·rGigante)
+            // y crece CONTINUO a su pico (0.42+0.95 → ×1.03 del fondo) —
+            // sin la división que deshacía el plisado y saltaba 0.27 en
+            // el primer tick de la sentencia.
+            float p = MathHelper.Clamp((tPost - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO), 0f, 1f);
+            float crece = MathF.Min(1f, (tPost - T_COLAPSO) / (float)(T_NOVA - T_COLAPSO));
+            return rGigante * 0.42f * (1f + 1.25f * smoothstepNova(crece)) * (0.85f + 0.15f * (1f - p));
+        }
+
+        /// <summary>v6.152 — el smoothstep de la nova (suave al nacer del
+        /// fondo del colapso — cero salto, cero división rara).</summary>
+        private static float smoothstepNova(float x)
+        {
+            x = MathHelper.Clamp(x, 0f, 1f);
+            return x * x * (3f - 2f * x);
+        }
+
+        /// <summary>v6.152 — LA POSICIÓN DEL SOL AHORA: el punto donde
+        /// vive el cuerpo central en este tick del reloj total (la
+        /// convocatoria y el vals en su sitio de siempre; la caza
+        /// CABALGA el _centroCaza que mueve la IA — UNA verdad).</summary>
+        private Vector2 CentroDelJuicio(float edad)
+        {
+            if (edad >= T_CONVOCATORIA + T_FUSION) return _centroCaza;
+            return Punto;
         }
 
         /// <summary>v6.151 — LA PRESA de la caza: el enemigo REAL más

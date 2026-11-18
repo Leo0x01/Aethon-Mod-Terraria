@@ -400,7 +400,19 @@ namespace AethonMod.Content.Weapons
             // además con la etiqueta de legendario supremo»).
             Item.rare = ModContent.RarityType
                 <global::AethonMod.Content.Rarities.LegendarioSupremo>();
-            Item.UseSound = SoundID.Item8;
+            // v6.152 — LA SATURACIÓN DEL AUDIO MUERE (la letra: «al
+            //     lanzar el ataque basico y lo dejo sostenido, el audio
+            //     comienza a subir su volumen esta subida de volumen
+            //     afecta a todo el audio y sube hasta saturarse por
+            //     completo»): el mezclador de FNA SATURA cuando viven
+            //     demasiadas instancias a la vez — el UseSound por uso
+            //     (autoReuse cada 22 t) + los zaps de los ojos del
+            //     escuadrón sumaban decenas vivas. EL TOPE: máximo 2
+            //     instancias del mismo estilo vivas (SoundMaxInstances
+            //     — la propia SoundStyle de tML lo corta en la raíz).
+            var usoBasico = SoundID.Item8.WithVolumeScale(0.85f);
+            usoBasico.MaxInstances = 2;
+            Item.UseSound = usoBasico;
             Item.autoReuse = true;         // v5.1: mantener click = disparo continuo
             Item.shoot = 931;              // Nightglow vanilla (el número — como el Equinoccio)
             Item.shootSpeed = 12f;
@@ -904,16 +916,43 @@ namespace AethonMod.Content.Weapons
 
             // LA PAREJA PRINCIPAL + LAS EXTRA POR NIVEL: cada «bolt» del
             // sistema del Eterno es UN DÍA Y UNA NOCHE — 1 pareja base y
+            // ============================================================
+            //  v6.152 — EL LÍMITE DE 10 PROYECTILES BÁSICOS (la letra:
+            //  «lo que tenia que quedar en 10 era el limite de
+            //  proyectiles basicos del grimorio, no la penetracion»):
+            //  el disparo NACE con un TOPE: si ya viven 10 discos del
+            //  Equinoccio (los 931 con nuestras marcas 9201/9202 — los
+            //  del OTRO arma Dignos no cuentan), los NUEVOS esperan al
+            //  siguiente disparo. El abanico entero cabe en el tope:
+            //  nace lo que falde, jamás se dispara MÁS de 10 vivos.
+            //  (La penetración vuelve a su casa: los discos atraviesan
+            //  como siempre — el 10 es CUÁNTOS, no CUÁNTO.)
+            // ============================================================
+            const int TOPE_BASICOS = 10;
+            int vivos = 0;
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.owner != player.whoAmI || pr.type != 931)
+                    continue;
+                float marca = pr.ai[2];
+                if (marca == 9201f || marca == 9202f) vivos++;
+            }
+            int cupo = Math.Max(0, TOPE_BASICOS - vivos);
+            if (cupo <= 0) return false;   // el cielo ya está lleno de discos
+
             // una más cada 3 niveles, en abanico (el homing del 931 hace
             // el resto)
             int extra = WeaponScaling.ExtraProjectiles(level);
 
             LanzarPareja(source, pos, baseV, damage, knockback, player);
+            cupo--;
 
-            for (int i = 0; i < extra; i++)
+            for (int i = 0; i < extra && cupo > 0; i++)
             {
                 float angulo = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
                 LanzarPareja(source, pos, baseV.RotatedBy(angulo), damage, knockback, player);
+                cupo -= 2;   // cada pareja son DOS discos (dorado + negro)
             }
 
             return false;   // todos los spawns son nuestros

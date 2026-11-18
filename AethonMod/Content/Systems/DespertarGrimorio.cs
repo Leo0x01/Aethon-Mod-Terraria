@@ -68,7 +68,7 @@ namespace AethonMod.Content.Systems
         /// arriba del 100: SOLO esencias + monedas.</summary>
         public const int NivelMax = 120;
 
-        /// <summary>La cima de LA CAZA (Aethon, la Ira — la puerta 100):
+        /// <summary>La cima de LA CAZA (Aethon, la Ira — la Despertar 100):
         /// arriba de aquí el despertar ya no caza — solo CONSTRUYE.</summary>
         public const int NivelCaza = 100;
 
@@ -869,7 +869,7 @@ namespace AethonMod.Content.Systems
         /// al reorganizar el despertar — cambió NivelIra por NivelMax
         /// (120) y la Ira + su buff pedían EL TOPE de la escalera.
         /// La letra de siempre manda: LA IRA NACE EN EL 100 (la cima
-        /// de la caza, NivelCaza) — la puerta 100 ya cobró la caza
+        /// de la caza, NivelCaza) — la Despertar 100 ya cobró la caza
         /// (v6.88), no se cobra dos veces.</summary>
         public static bool IraDisponible(int despertar) => despertar >= NivelCaza;
 
@@ -1024,7 +1024,7 @@ namespace AethonMod.Content.Systems
         /// CONTADOR que la paga: 0 = la lápida del mundo + el registro
         /// del cazador (la de siempre) · 1 = Moon Lord (VecesMoonLord)
         /// · 2 = la Emperatriz (VecesEmperatriz) · 3 = Aethon y SU cima
-        /// compuesta (la puerta 100).</summary>
+        /// compuesta (la Despertar 100).</summary>
         public readonly struct JefeDelCamino
         {
             public readonly int Nivel;

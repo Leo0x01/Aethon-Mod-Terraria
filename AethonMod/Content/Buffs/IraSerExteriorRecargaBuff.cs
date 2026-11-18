@@ -129,6 +129,41 @@ namespace AethonMod.Content.Buffs
                     VFX.GlowUILib.MarcoLuz(sb, rect, new Color(150, 84, 235),
                         1f + 3f * progreso, 0.28f + 0.30f * progreso, 0.4f);
                 }
+
+                // ============================================================
+                //  v6.152 — EL ANILLO DEL HOLD (la letra del gesto nuevo:
+                //  «dejando precionado el click derecho durante 2
+                //  segundos»): mientras SOSTIENES el click derecho, un
+                //  ARCO blanco-violeta se CIERRRE alrededor del icono
+                //  (0→100 % en los 2 s) — el gesto tiene SU reloj visible
+                //  y sabes EXACTAMENTE cuándo va a disparar.
+                // ============================================================
+                float hold = p.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>()
+                    .IraHoldProgreso;
+                if (hold > 0f && hold < 1f)
+                {
+                    try
+                    {
+                        var glowHold = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                        int pasos = 28;
+                        for (int k = 0; k < pasos; k++)
+                        {
+                            float u = k / (float)pasos;
+                            if (u > hold) break;
+                            float ang0 = -MathHelper.PiOver2 + u * MathHelper.TwoPi;
+                            Vector2 borde = pos + new Vector2(
+                                tex.Width * 0.5f + 15f, tex.Height * 0.5f + 15f);
+                            Vector2 p0 = borde + ang0.ToRotationVector2() * 17f;
+                            Vector2 p1 = borde + (ang0 + 0.10f).ToRotationVector2() * 17f;
+                            sb.Draw(glowHold, p0, null,
+                                new Color(226, 208, 255) * 0.85f, 0f,
+                                glowHold.Size() * 0.5f, new Vector2(0.22f, 0.10f),
+                                SpriteEffects.None, 0f);
+                        }
+                    }
+                    catch { }
+                }
             }
             catch { }
             return true;   // nosotros lo dibujamos TODO (vanilla no repite)

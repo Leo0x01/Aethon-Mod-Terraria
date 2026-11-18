@@ -249,27 +249,11 @@ namespace AethonMod.Content.Tiles
                 }
                 catch { }
 
-                // v6.149 — EL OJO-MINION DEL PILAR (la letra: «debe usar a
-                // un minion como ojo… y debe siempre mirar al jugador»): el
-                // SpecialDraw mantiene VIVO al ojo sobre el prisma (lo
-                // spawnea si no existe — el minion se autolimpia si el
-                // pilar o el interior mueren).
-                if (Main.netMode != NetmodeID.Server && !Main.gameMenu)
-                {
-                    int tipoOjo = ModContent.ProjectileType
-                        <Projectiles.Cosmetic.PilarOjoMinion>();
-                    bool vivo = false;
-                    for (int pi = 0; pi < Main.maxProjectiles; pi++)
-                    {
-                        Projectile pr = Main.projectile[pi];
-                        if (pr != null && pr.active && pr.type == tipoOjo)
-                        { vivo = true; break; }
-                    }
-                    if (!vivo)
-                        Projectile.NewProjectile(null,
-                            new Vector2((i + 0.5f) * 16f, (j - 4) * 16f - 34f),
-                            Vector2.Zero, tipoOjo, 0, 0f, Main.myPlayer);
-                }
+                // v6.152 — EL OJO-MINION MURIÓ (la letra: «crearlo de
+                // nuevo con otra forma, que no tenga ningun ojo»): el
+                // obelisco del umbral NO tiene vigilante — su corona es
+                // EL ARO ABIERTO (la puerta por donde se sale del
+                // interior). El spawn del ojo murió con el prisma viejo.
             }
             catch { }
         }

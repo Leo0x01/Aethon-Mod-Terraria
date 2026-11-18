@@ -328,6 +328,14 @@ namespace AethonMod.Content.Globals
         /// </summary>
         public void Marcar(NPC npc, int oleada, bool jefe, bool especial = false, int nivel = 1)
         {
+            // v6.152 — LA IDENTIDAD DEL GUARDIÁN DE OLEADA (la letra:
+            //     «debe estar identificado como esqueletro mazmorra,
+            //     ya que es diiferente al esqueletron normal»): el
+            //     SkeletronHead del festín es SU PROPIA CRIATURA — la
+            //     versión de mazmorra con el sello del grimorio — y se
+            //     LLAMA distinto: el jugador sabe a cuál enfrenta.
+            if (jefe && npc.type == NPCID.SkeletronHead)
+                npc.GivenName = "Esqueletron Mazmorra";
             try
             {
                 // v6.50.48 — EL DESHACE DEL PRE-ESCALADO: si el hook de la

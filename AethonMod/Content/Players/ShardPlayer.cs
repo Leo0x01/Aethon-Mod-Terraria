@@ -917,52 +917,72 @@ namespace AethonMod.Content.Players
             catch { }
         }
 
-        // v6.146 — EL GESTO DE LA IRA (la letra: «el ataque no sera
-        // con Shift+click izquierdo, sera con click izquierdo+click
-        // derecho, para esto hay que mantener presionado el click
-        // izquierdo y luego presionar el derecho»): MANTÉN el click
-        // izquierdo y PULSA el derecho — el borde de subida del
-        // derecho dispara LA IRA (una vez por pulsación, sin
-        // ametrallado). Sin UI encima y sin inventario abierto.
-        private bool _iraDerAnterior;
+        // ================================================================
+        //  v6.152 — EL GESTO NUEVO DE LA IRA (la letra: «en todo caso
+        //  debemos cambiar los botones para la ira, ahora que sean
+        //  dejando precionado el click derecho durante 2 segundos, y
+        //  solo eso, creo que seria lo mejor»): MANTÉN EL CLICK DERECHO
+        //  2 SEGUNDOS — sin nada más. La autopsia del gesto viejo: el
+        //  izq+der hacía que CADA click derecho del gesto disparara la
+        //  rama de invocación del Shoot (el libro se re-usaba en plena
+        //  ceremonia) — el origen del «los minions desaparecen».
+        //  AHORA: el hold de 120 t carga la Ira; MIENTRAS carga, el
+        //  grimorio NO SE USA (CanUseItem callado — cero invocación,
+        //  cero re-conteo, el escuadrón INTACTO); al cumplir los 2 s
+        //  LA CEREMONIA nace. Soltar antes = nada (y el hold se anula
+        //  si abre el inventario o una UI).
+        // ================================================================
+        private int _iraHoldDerecho;          // ticks de DER sostenido
+        private bool _iraCargandoHold;        // el hold llegó a la ira (sigue callando un rato)
+        private const int IRA_HOLD_TICKS = 120;   // 2 segundos exactos
 
         // v6.151 — EL SILENCIO DE USO DEL LIBRO mientras nace la Ira
-        // (el gesto izq+der es SOLO de la ceremonia: el grimorio no
-        // dispara su Shoot ese instante — los minions no se tocan).
+        // (lo mantiene TODO el hold + la eclosión: el grimorio no
+        // dispara su Shoot — los minions no se tocan).
         private int _iraSilenciarItem;
 
         /// <summary>v6.151 — True mientras el gesto de la Ira acalla el
         /// uso del grimorio (lo lee GrimoireEternal.CanUseItem).</summary>
-        public bool IraSilenciaElLibro => _iraSilenciarItem > 0;
+        public bool IraSilenciaElLibro => _iraSilenciarItem > 0 || _iraHoldDerecho > 0 || _iraCargandoHold;
+
+        /// <summary>v6.152 — EL PROGRESO DEL HOLD (0..1): lo dibuja el
+        /// buff de la Ira (el anillo del icono se CIERRRE mientras
+        /// cargas el gesto — sabes cuándo falta). 0 si no hay hold.</summary>
+        public float IraHoldProgreso =>
+            _iraHoldDerecho <= 0 ? 0f : Math.Min(1f, _iraHoldDerecho / (float)IRA_HOLD_TICKS);
 
         public override void PostUpdate()
         {
-            // EL GESTO DE LA IRA — izq mantenido + der pulsado
+            // EL GESTO DE LA IRA — mantener el CLICK DERECHO 2 segundos
             try
             {
                 if (Player == Main.LocalPlayer && !Main.gameMenu)
                 {
-                    bool izq = Main.mouseLeft && !Main.playerInventory &&
-                        !Player.mouseInterface && !Main.ingameOptionsWindow;
                     bool der = Main.mouseRight && !Main.playerInventory &&
                         !Player.mouseInterface && !Main.ingameOptionsWindow;
-                    // v6.151 — EL GESTO ES SOLO DE LA IRA (la letra: «en
-                    //     el momento en el que voy a activarla todos los
-                    //     minions desaparecen»): el clic DERECHO con el
-                    //     izq mantenido dispara la ceremonia Y SUPRIME el
-                    //     Shoot del grimorio de ESTE tick — el libro NO
-                    //     re-invoca ni re-cuenta NADA mientras la ira
-                    //     nace (el escuadrón queda INTACTO: los ojos son
-                    //     los testigos del ritual, no su precio).
-                    if (izq && der && !_iraDerAnterior)
+                    if (der)
                     {
-                        Systems.AtaquesCombinadosSistema.ShiftClickDeLaIra(Player);
-                        _iraSilenciarItem = 6;   // ~0,1 s de silencio de uso
+                        // EL HOLD VIVE: cuenta ticks y al llegar a 2 s
+                        // dispara LA IRA (una sola vez por hold — la
+                        // marca _iraCargandoHold impide el ametrallado
+                        // mientras sigas sosteniendo).
+                        _iraHoldDerecho++;
+                        if (_iraHoldDerecho == IRA_HOLD_TICKS && !_iraCargandoHold)
+                        {
+                            _iraCargandoHold = true;
+                            _iraSilenciarItem = 15;   // la eclosión calla el libro un instante más
+                            Systems.AtaquesCombinadosSistema.ShiftClickDeLaIra(Player);
+                        }
                     }
-                    _iraDerAnterior = der;
+                    else
+                    {
+                        // SOLTÓ (o abrió UI): el hold se reinicia limpio
+                        _iraHoldDerecho = 0;
+                        _iraCargandoHold = false;
+                    }
                     if (_iraSilenciarItem > 0) _iraSilenciarItem--;
                 }
-                else _iraDerAnterior = false;
+                else { _iraHoldDerecho = 0; _iraCargandoHold = false; }
             }
             catch { }
 

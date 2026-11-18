@@ -357,7 +357,13 @@ namespace AethonMod.Content.Projectiles.Sombras
             // panza de 44 px) → vuelve a ser FINA en la punta que toca al
             // enemigo (13 px) — antes era un bíceps de 40 px naciendo del
             // cuerpo: un garrote, no un látigo
-            SombrasLib.Masa(col, 9f, 13f, 0.95f * disipa, semilla, tiempo, grosorCentro: 44f);
+            // v6.152 — LA SOMBRA ORIGINAL TAMBIÉN ES LISA (la letra:
+            //     «quita los ojo y colmillos, tambien vi que tiene
+            //     lineas rojas, quitalas tambien dejando un tentaculo
+            //     negro completo»): la Masa en modo liso (sin espinas
+            //     de hueso, sin ventosas) — tinta negra que fluye.
+            SombrasLib.Masa(col, 9f, 13f, 0.95f * disipa, semilla, tiempo,
+                grosorCentro: 44f, lisa: true);
 
             // === LA BRUMA NEGRA DEL CUERPO (v6.50.64): el tentáculo
             // 100% código también EXHALA — puﬀs vivos a lo largo ===
@@ -381,13 +387,13 @@ namespace AethonMod.Content.Projectiles.Sombras
                 ? presa.Center
                 : dueño.MountedCenter + Projectile.velocity * 30f;
             float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
-            if (!esTinta)
-                SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 7);
-            else
-            {
-                // LA TINTA RESPIRA MÁS: dos capas extra de bruma densa
-                SombrasLib.BrumaColumna(col, 40f, 0.50f * disipa, tiempo, semilla + 41, 10);
-            }
+            // v6.152 — LOS OJOS MURIERON EN LA SOMBRA ORIGINAL (la
+            //     letra: «quita los ojo y colmillos… dejando un
+            //     tentaculo negro completo»): ya NO hay ojos en NINGÚN
+            //     modo — la sombra es TINTA CIEGA de punta a punta.
+            //     En su lugar: la bruma densa que respiraba la tinta
+            //     (ahora es de TODOS los modos — la página exhala).
+            SombrasLib.BrumaColumna(col, 40f, 0.50f * disipa, tiempo, semilla + 41, 10);
 
             // === v6.50.68 — LA CABEZA ES BRUMA (la boca procedural RETIRADA
             // por la letra del usuario): TODO lo que era boca ahora vive EN LA
@@ -405,12 +411,12 @@ namespace AethonMod.Content.Projectiles.Sombras
                 float hambre = MathHelper.Clamp(t / 26f, 0f, 1f);
                 SombrasLib.Devorador(punta, presa, hambre, disipa, tiempo, semilla, col);
 
-                // la HERIDA: el punto donde el tentáculo ENTERRÓ la punta
-                // brilla rojo DENTRO de la bruma (la digestión)
-                VFXCore.Begin();
-                VFXCore.Quad(punta, SombrasLib.Alfa(SombrasLib.Rojo, 0.42f * disipa),
-                    new Vector2(110f, 110f), rumbo.ToRotation());
-                VFXCore.FlushAdditive();
+                // v6.152 — LA HERIDA ROJA MURIÓ (la letra: «tambien vi
+                //     que tiene lineas rojas, quitalas tambien dejando
+                //     un tentaculo negro completo»): la digestión ya no
+                //     ARDE en rojo — la punta bruma NEGRA sobre el
+                //     devorado (la cena es discreta).
+                SombrasLib.CabezaDeBruma(punta, rumbo, 0.85f * disipa, disipa, tiempo, semilla + 13);
             }
             else
             {

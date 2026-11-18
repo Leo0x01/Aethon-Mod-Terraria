@@ -293,7 +293,7 @@ namespace AethonMod.Content.Systems
                     if (!global::AethonMod.Content.Globals.ArrojadoGlobalItem.EsArrojado(drop))
                         continue;
 
-                    // === 0) EL LIBRO CORRUPTO (v6.86 — la puerta del 20,
+                    // === 0) EL LIBRO CORRUPTO (v6.86 — el Despertar 20,
                     //     la letra del peldaño): si ESTE libro está por
                     //     debajo del 20 y aún no devoró el suyo, se lo
                     //     come del suelo — y la puerta queda marcada PARA
@@ -1149,7 +1149,7 @@ namespace AethonMod.Content.Systems
 
                 // v6.89 — LA VÍSPERA DEL LIBRO (la letra: «tienes que
                 //     darle el libro corrupto al jugador»): al SUBIR al
-                //     19, la puerta del 20 ya tiene su llave en la bolsa.
+                //     19, el Despertar 20 ya tiene su llave en la bolsa.
                 if (nivel == 19)
                     RevisarEntregaDelLibro(p, alma);
 

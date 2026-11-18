@@ -176,12 +176,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (Main.netMode != NetmodeID.Server)
                     {
                         // EL ZAP OSCURO: la mitad del registro del cetro eléctrico
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item12.WithPitchOffset(-0.15f).WithVolumeScale(0.9f),
-                            Projectile.Center);
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.55f),
-                            Projectile.Center);
+                        // v6.152 — LA SATURACIÓN MUERE: tope 1 instancia
+                        //     por estilo (el escuadrón entero dispara y
+                        //     el mezclador ya no se llena — la cura del
+                        //     audio que sube hasta saturarse)
+                        var zapOscuro = SoundID.Item12.WithPitchOffset(-0.15f).WithVolumeScale(0.9f);
+                        zapOscuro.MaxInstances = 1;
+                        Terraria.Audio.SoundEngine.PlaySound(zapOscuro, Projectile.Center);
+                        var truenoOscuro = SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.55f);
+                        truenoOscuro.MaxInstances = 1;
+                        Terraria.Audio.SoundEngine.PlaySound(truenoOscuro, Projectile.Center);
 
                         // chispas de SOMBRA violeta (la descarga del ojo no es eléctrica)
                         for (int i = 0; i < 12; i++)
@@ -205,12 +209,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (Main.netMode != NetmodeID.Server)
                     {
                         // EL ZAP: chasquido eléctrico agudo + trueno corto.
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item12.WithPitchOffset(0.35f).WithVolumeScale(1.05f),
-                            Projectile.Center);
-                        Terraria.Audio.SoundEngine.PlaySound(
-                            SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.55f),
-                            Projectile.Center);
+                        // v6.152 — LA SATURACIÓN MUERE (tope 1 por estilo)
+                        var zapClaro = SoundID.Item12.WithPitchOffset(0.35f).WithVolumeScale(1.05f);
+                        zapClaro.MaxInstances = 1;
+                        Terraria.Audio.SoundEngine.PlaySound(zapClaro, Projectile.Center);
+                        var truenoClaro = SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.55f);
+                        truenoClaro.MaxInstances = 1;
+                        Terraria.Audio.SoundEngine.PlaySound(truenoClaro, Projectile.Center);
 
                         // Chispas eléctricas del punto de descarga.
                         for (int i = 0; i < 16; i++)

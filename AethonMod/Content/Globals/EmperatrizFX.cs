@@ -54,7 +54,6 @@ namespace AethonMod.Content.Globals
         /// binario? (una sola vez — el penetrate no viaja en los mensajes
         /// de vanilla, se calza en la IA de cada copia).</summary>
         private bool _perforaBinaria;
-        private bool _perforaEterno;   // v6.151 — el básico del Eterno: 10
 
         public override bool AppliesToEntity(Projectile projectile, bool lateInstantiation)
         {
@@ -82,19 +81,13 @@ namespace AethonMod.Content.Globals
             }
 
             // ================================================================
-            //  v6.151 — EL ATAQUE BÁSICO DEL ETERNO PERFORA 10 (la letra:
-            //  «quiero que limites el ataque basico del grimorio del
-            //  eterno a solo 10»): los discos del Equinoccio (las marcas
-            //  9201/9202 — los proyectiles del clic izquierdo del libro)
-            //  calzan penetrate=10 UNA vez al nacer. Antes eran -1
-            //  (infinito): el disco atravesaba TODO el mundo. Diez
-            //  cuerpos y se apaga — un ataque básico con medida.
+            //  v6.152 — LA PENETRACIÓN VUELVE A SU CASA (la letra: «lo
+            //  que tenia que quedar en 10 era el limite de proyectiles
+            //  basicos del grimorio, no la penetracion»): el penetrate
+            //  v6.151 MURIÓ (los discos vuelven a atravesar como
+            //  siempre) — el 10 vive en el TOPE DE PAREJAS del Shoot
+            //  (GrimoireEternal: máx 10 proyectiles básicos vivos).
             // ================================================================
-            if ((marca == 9201f || marca == 9202f) && !_perforaEterno)
-            {
-                _perforaEterno = true;
-                projectile.penetrate = 10;
-            }
 
             if (Main.netMode == NetmodeID.Server) return;
 
@@ -251,8 +244,12 @@ namespace AethonMod.Content.Globals
                 // ============================================================
                 Projectiles.Cosmic.DignosFXProjectile.Nacer(projectile,
                     projectile.Center, 1);
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(0.6f), projectile.Center);
+                // v6.152 — LA SATURACIÓN MUERE: el estallido por golpe
+                //     con tope (una andanada de discos contra una horda
+                //     era un muro de Item122 simultáneos)
+                var estallidoGolpe = SoundID.Item122.WithPitchOffset(0.6f);
+                estallidoGolpe.MaxInstances = 2;
+                Terraria.Audio.SoundEngine.PlaySound(estallidoGolpe, projectile.Center);
                 if (Main.myPlayer == projectile.owner)
                 {
                     int danoArea = Math.Max(1, projectile.damage / 2);
