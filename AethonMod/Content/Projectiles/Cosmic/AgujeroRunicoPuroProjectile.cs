@@ -379,6 +379,66 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             alfa), 2.2f);
                     }
                 }
+
+                // ============================================================
+                //  v6.153 — LAS TRES CAPAS NUEVAS (la letra: «tambien
+                //  dale mas efectos al agujero runico puro» — más de
+                //  todo): (e) la espiral de polvo estelar · (f) los
+                //  chorros polares · (g) el horizonte que respira —
+                //  TODO dentro del lote aditivo, determinista.
+                // ============================================================
+
+                // === (e) LA ESPIRAL DE POLVO ESTELAR (3 brazos de motas) ===
+                for (int i = 0; i < 60; i++)
+                {
+                    int brazo = i % 3;
+                    float h0 = VFXCore.Hash01(i, 7, 6131);
+                    float caida = Frac01(t * (0.16f + 0.10f * h0) + h0 + brazo * 0.333f);
+                    float ang = brazo * MathHelper.TwoPi / 3f + t * 0.42f
+                        + caida * 5.4f + h0 * 0.35f;
+                    // espiral logarítmica: el radio CAE al horizonte
+                    float rE = radio * (1.12f + 3.4f * MathF.Pow(1f - caida, 1.7f));
+                    Vector2 m = c + ang.ToRotationVector2() * rE;
+                    float tam = (3.2f + 4.6f * h0) * (0.45f + 0.75f * caida);
+                    Color tintaE = (i & 3) == 0
+                        ? new Color(200, 235, 255)
+                        : new Color(255, 226, 160);
+                    VFXCore.Quad(m, SigiloLib.Tint(tintaE, 0.62f * (1f - caida * 0.35f)),
+                        new Vector2(tam, tam * 0.55f), ang + MathHelper.PiOver2);
+                }
+
+                // === (f) LOS CHORROS POLARES (los haces de los polos) ===
+                for (int polo = 0; polo < 2; polo++)
+                {
+                    float dirY = polo == 0 ? -1f : 1f;
+                    for (int i = 0; i < 9; i++)
+                    {
+                        float h0 = VFXCore.Hash01(i, 8 + polo, 6141);
+                        float sube = Frac01(t * (0.34f + 0.20f * h0) + h0 * 0.9f);
+                        float alto = radio * (1.15f + sube * 3.3f);
+                        float lado = (h0 - 0.5f) * radio * (0.28f + sube * 0.85f);
+                        Vector2 p = c + new Vector2(lado, dirY * alto);
+                        float chispa = 0.55f + 0.45f * MathF.Sin(t * 7f + i * 1.9f + polo * 3.1f);
+                        float tamF = (5f + 7f * h0) * (0.5f + 0.6f * sube) * chispa;
+                        VFXCore.Quad(p, SigiloLib.Tint(
+                            polo == 0 ? new Color(170, 220, 255) : new Color(255, 210, 140),
+                            0.55f * (1f - sube * 0.30f) * chispa),
+                            new Vector2(tamF * 0.65f, tamF), dirY < 0f ? -MathHelper.PiOver2 : MathHelper.PiOver2);
+                    }
+                }
+
+                // === (g) EL HORIZONTE QUE RESPIRA (onda de choque del borde) ===
+                float choque = Frac01(t * 0.58f);            // cada ~1,7 s
+                float rChoque = radio * (1.18f + choque * 2.6f);
+                float alfaChoque = (1f - choque) * (1f - choque) * 0.55f;
+                int segsG = 44;
+                for (int s = 0; s < segsG; s++)
+                {
+                    float a0 = s * MathHelper.TwoPi / segsG + t * 0.18f;
+                    Vector2 p0 = c + a0.ToRotationVector2() * rChoque;
+                    Vector2 p1 = c + (a0 + MathHelper.TwoPi / segsG).ToRotationVector2() * rChoque;
+                    VFXCore.Line(p0, p1, SigiloLib.Tint(new Color(235, 245, 255), alfaChoque), 1.6f);
+                }
             }
             finally { VFXCore.RestaurarLoteVanilla(); }
 

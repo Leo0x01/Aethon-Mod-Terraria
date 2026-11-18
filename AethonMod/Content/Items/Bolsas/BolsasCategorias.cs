@@ -681,21 +681,10 @@ namespace AethonMod.Content.Items.Bolsas
             // solo nos quedamos con La Sombra de la Página») — la familia
             // vuelve a ser UNA: la fauce tentacular aprobada.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA ÚNICA: la aprobada por el usuario
-            // v6.52.2 — LOS TOMOS NUEVOS (la letra: «crea un sombra de la
-            // pagina 3 y 4 pero para estos solo usa el iris no el ojo
-            // completo»): EL CORO DE IRISES (siete iris flotando en la
-            // cuerda, todos clavados en la presa) y EL IRIS COLOSAL (el
-            // iris rojo gigante con su pupila que se dilata al morder).
-            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina3>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina4>(), 1));
-            // v6.101 — EL QUINTO TOMO (la letra: «crea la sombra de la
-            // pagina 5, pero lo que tienes que cambiar es la textura del
-            // tentaculo sus ojos y dientes»): EL TENTÁCULO DEL ABISMO
-            // MORDAZ — once ojos rasgados parpadeando cada uno a su
-            // ritmo, la sierra doble de colmillos y LA FAUCE que jadea,
-            // se abre enorme y TRITURA (llega también DIRECTO en el
-            // regalo de pruebas — la bolsa es la vía de repuesto).
-            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina5>(), 1));
+            // v6.153 — LA PURGA DE LOS TOMOS (la letra: «borra todas las
+            // sombras de la pagina extra, deja solo la sombra de la
+            // pagina original»): los tomos 2-5 y la Sombra de Tinta
+            // MURIERON — la familia es UNA (la original, lisa y negra).
             // v6.50.102 — LA TINTA VIVA MURIÓ (la letra del usuario:
             // «borra también tinta viva»): su Grieta de Tinta sigue viva
             // en el grimorio que la abrió — el disparo pertenece al libro.

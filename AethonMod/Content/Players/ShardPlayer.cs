@@ -1578,39 +1578,9 @@ namespace AethonMod.Content.Players
                 // de 4 puntas de los soles de 3 anillos+, hechos adorno).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.BrilloSolarItem>());
-                // v6.51.13 — LA SOMBRA DE LA PÁGINA II DESDE EL INICIO
-                // (la letra: «asegurate de que La Sombra de la Página II
-                // se le de al jugador desde el inicio y que no consuma
-                // mana ya que es de prueba»): el SEGUNDO TOMO entra con
-                // el regalo de pruebas — SIN MANÁ (SetDefaults:
-                // Item.mana = 0, y la línea del tooltip lo declara) y
-                // su VÍA DE SIEMPRE (la receta tomo 1 + 10 madera)
-                // queda para quien la pierda.
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina2>());
-                // v6.100.2 — LA SOMBRA DE LA PÁGINA IV RE-FORJADA DESDE
-                // EL INICIO (la letra: «asegurate de que le entregas al
-                // jugador las cosas nuevas, armas o cualquier cosa nueva
-                // que sea creada»): la v6.100 re-forjó el CUARTO TOMO
-                // completo (la garganta del vórtice como boca girando
-                // con el rumbo, velo de ruido, anillo de tinta doble e
-                // icono re-forjado) pero solo lo dejaba en la Bolsa de
-                // las Sombras — la regla es la regla: lo re-forjado ES
-                // lo nuevo, y lo nuevo llega DIRECTO (la bolsa sigue
-                // como vía de repuesto para quien lo pierda).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina4>());
-                // v6.101 — LA SOMBRA DE LA PÁGINA V DESDE EL INICIO (la
-                // letra: «crea la sombra de la pagina 5 […] intenta que
-                // se vea mas increible y aterrador» — y la regla
-                // permanente: todo lo nuevo llega DIRECTO al jugador):
-                // el QUINTO TOMO con su piel nueva (once ojos rasgados
-                // que parpadean cada uno a su ritmo, la sierra doble de
-                // colmillos y LA FAUCE que jadea y tritura) entra con el
-                // regalo de pruebas — la Bolsa de las Sombras queda como
-                // vía de repuesto para quien lo pierda.
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Sombras.SombraDeLaPagina5>());
+                // v6.153 — EL TOMO II MURIÓ con la purga de las sombras extra.
+                // v6.153 — EL TOMO IV MURIÓ con la purga de las sombras extra.
+                // v6.153 — EL TOMO V MURIÓ con la purga de las sombras extra.
                 // v6.99 — EL ESTANDARTE DEL JUICIO MURIÓ en la v6.109
                 // (la letra: «ya puedes borrar los otros 2 estandarte»)
                 // — su entrega directa también.
@@ -1681,14 +1651,8 @@ namespace AethonMod.Content.Players
                 // la quemadura del vacío (PvP incluido). DIRECTO.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Ojos.ElOjoQueMira>());
-                // v6.145 — LA SOMBRA DE TINTA (la letra: «crea la
-                // siguiente arma, sombra de tinta, donde uses la sombra
-                // de la pagina original, y a eso tienes que agregar
-                // tambien el ataque de Muñeca Maldita, es una fusion»):
-                // la sombra de la página VESTIDA DE TINTA — el mismo
-                // tentáculo, ahora REBOTÓN. DIRECTO (la regla).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Sombras.SombraDeTinta>());
+                // v6.153 — LA SOMBRA DE TINTA MURIÓ (la letra: «el arma,
+                // sombra de tinta borrala») — su entrega también.
                 // v6.115 — EL MUNDO INTERIOR DEL ETERNO (la letra: «para
                 // que el altar nos lleve a otro mundo crea un nuevo item
                 // que se fabrica con esencia del eterno en el altar»):

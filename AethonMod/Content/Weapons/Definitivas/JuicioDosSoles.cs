@@ -448,47 +448,93 @@ namespace AethonMod.Content.Weapons.Definitivas
                 //      LA LLUVIA DE LUZ (motas doradas cayendo del
                 //      estallido).
                 // ================================================================
-                if (_acto == 0)
+                // ============================================================
+                //  v6.153 — EL PAR (convocatoria Y los primeros ticks del
+                //  vals — fundido): UNA sola población. El par se dibuja
+                //  mientras AlphaDelPar viva: TODO el acto 0 y el tramo
+                //  orbital hasta el CONTACTO; tras él se FUNDE en
+                //  T_FUNDIDO ticks mientras el gigante prende (el frame
+                //  de «dos soles menos un gigante» MURIÓ — la población
+                //  total es continua).
+                // ============================================================
+                if (AlphaDelPar(_edad) > 0.01f)
                 {
-                    // === LA INVOCACIÓN GÓTICA: runa → sol ===
                     float p = MathHelper.Clamp(_t / T_CONVOCATORIA, 0f, 1f);
                     float suave = p * p * (3f - 2f * p);
-                    // v6.152 — el radio sale de LA CURVA MAESTRA (la
-                    // misma del resto del juicio: imposible saltar)
                     float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
+                    float funde = AlphaDelPar(_edad);   // 1 → 0 tras el contacto
 
-                    // EL SIGILO DE LA CITA (el círculo de conjuro dibujándose
-                    // bajo los soles: un aro que SE TRAZA — el arco crece
-                    // con la invocación)
-                    VFXCore.AbrirAdditive();
-                    try
+                    // EL SIGILO DE LA CITA — solo en la convocatoria (el
+                    // arco crece con la invocación y se disuelve al vals)
+                    if (_edad < T_CONVOCATORIA + T_FUNDIDO)
                     {
-                        Vector2 cSig = Punto - Main.screenPosition;
-                        // el trazo: aro de 200px que nace de un punto y se
-                        // cierra (el compás del mago)
-                        float arco = MathHelper.TwoPi * suave;
-                        for (int k = 0; k < 24; k++)
+                        VFXCore.AbrirAdditive();
+                        try
                         {
-                            float a0 = k * MathHelper.TwoPi / 24f;
-                            if (a0 > arco) break;
-                            Vector2 pos = cSig + a0.ToRotationVector2() * 200f;
-                            Vector2 pos2 = cSig + MathF.Min(a0 + 0.16f, arco).ToRotationVector2() * 200f;
-                            VFXCore.Line(pos, pos2, SigiloLib.Tint(new Color(255, 214, 130), 0.45f + 0.30f * suave), 3f);
+                            Vector2 cSig = Punto - Main.screenPosition;
+                            float arco = MathHelper.TwoPi * suave;
+                            for (int k = 0; k < 24; k++)
+                            {
+                                float a0 = k * MathHelper.TwoPi / 24f;
+                                if (a0 > arco) break;
+                                Vector2 pos = cSig + a0.ToRotationVector2() * 200f;
+                                Vector2 pos2 = cSig + MathF.Min(a0 + 0.16f, arco).ToRotationVector2() * 200f;
+                                VFXCore.Line(pos, pos2, SigiloLib.Tint(new Color(255, 214, 130),
+                                    (0.45f + 0.30f * suave) * funde), 3f);
+                            }
                         }
+                        finally { VFXCore.RestaurarLoteVanilla(); }
                     }
-                    finally { VFXCore.RestaurarLoteVanilla(); }
 
                     for (int lado = 0; lado < 2; lado++)
                     {
                         bool luz = lado == 0;
-                        Vector2 pos = PosicionSolSencillo(luz, suave, gt);
-                        // EL ENCENDIDO: el sol nace OSCURO (la silueta
-                        // gótica, alpha 0.35) y su núcleo SE PRENDE al
-                        // 60% — la materia brotando del conjuro
+                        // v6.153 — LA POSICIÓN CONTINUA: convocatoria y
+                        // vals son LA MISMA función (el cabeceo DECAE
+                        // solo — jamás muere abrupto al cambiar de acto)
+                        Vector2 pos = PosicionSolContinua(luz, _edad, gt);
+                        // EL ENCENDIDO gótico de la convocatoria (el sol
+                        // nace oscuro y su núcleo se prende al 60%)
                         float enciende = MathHelper.Clamp((p - 0.55f) / 0.45f, 0f, 1f);
-                        DibujarSol(luz, pos, r, gt, 1, rg: 0f,
-                            alpha: 0.35f + 0.65f * enciende,
-                            seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
+                        float alphaSol = (0.35f + 0.65f * enciende) * funde;
+                        // el vals: el eclipse mutuo alterna los brillos
+                        if (_edad >= T_CONVOCATORIA)
+                        {
+                            float u1 = MathHelper.Clamp(
+                                (_edad - T_CONVOCATORIA) / (float)T_FUSION, 0f, 1f);
+                            float pc = MathHelper.Clamp(u1 / P_CONTACTO, 0f, 1f);
+                            float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+                            float angLado = ang + (luz ? 0f : MathHelper.Pi);
+                            bool delante = MathF.Sin(angLado) > 0f;
+                            float alfaEclipse = delante ? 1.10f : 0.55f;
+                            alphaSol = MathHelper.Clamp(alfaEclipse, 0f, 1f) * funde;
+
+                            // LA ESTELA DEL COMETA (determinista, la de siempre)
+                            float radio = MathHelper.Lerp(190f, 24f,
+                                MathF.Pow(pc * pc * (3f - 2f * pc), 1.45f));
+                            VFXCore.AbrirAdditive();
+                            try
+                            {
+                                for (int k = 1; k <= 9; k++)
+                                {
+                                    float angPas = angLado - k * 0.045f - 0.09f;
+                                    float radPas = radio + k * 2.2f;
+                                    Vector2 posPas = Punto + angPas.ToRotationVector2() * radPas
+                                        - Main.screenPosition;
+                                    float fEst = (1f - k / 10f);
+                                    VFXCore.Quad(posPas, SigiloLib.Tint(
+                                        luz ? new Color(255, 240, 200) : new Color(190, 130, 255),
+                                        0.30f * fEst * fEst * alfaEclipse),
+                                        new Vector2(r * (0.55f + 0.4f * fEst)), 0f);
+                                }
+                            }
+                            finally { VFXCore.RestaurarLoteVanilla(); }
+                        }
+
+                        if (alphaSol > 0.01f)
+                            DibujarSol(luz, pos, r, gt, 1, rg: 0f,
+                                alpha: alphaSol,
+                                seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                     }
                 }
                 else if (_acto == 1)
@@ -549,73 +595,61 @@ namespace AethonMod.Content.Weapons.Definitivas
                                 seed: luz ? 3 : 7, rot: gt * (luz ? 0.4f : -0.4f));
                         }
                     }
-                    else
+                    // v6.153 — LA MITAD POST-CONTACTO DEL ACTO 1 MUERE
+                    // COMO BLOQUE: el gigante NO nace aquí — nace en el
+                    // bloque continuo de abajo (AlphaDelGigante), fundido
+                    // con la muerte del par. La old-guardia de la fusión
+                    // (v6.151) ya no gobierna el dibujado.
+                }
+                // ============================================================
+                //  v6.153 — EL GIGANTE (una sola población): nace EN el
+                //  contacto (AlphaDelGigante: prende fundido mientras el
+                //  par se muere) y vive TODO — el vals post-contacto, la
+                //  caza entera y el colapso. Su posición es
+                //  CentroDelJuicio (el punto de la cita → _centroCaza:
+                //  LA MISMA función) y su radio LA CURVA MAESTRA.
+                //  LA CAZA (la letra v6.151) solo viste su paleta: el
+                //  rojo madura con la caza (rg) y el pulso arterial late.
+                // ============================================================
+                if (AlphaDelGigante(_edad) > 0.01f && _acto <= 2)
+                {
+                    float prende = AlphaDelGigante(_edad);
+                    // el rojo de la caza (solo cuando la caza corre)
+                    float caza = _acto == 2 ? MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f) : 0f;
+                    float rg = caza * caza * (3f - 2f * caza);   // smoothstep: el rojo madura suave
+                    // LA CURVA MAESTRA + el pulso arterial de la caza
+                    float r = RuneSunRenderer.BodyPx *
+                        (RadioDelJuicio(_edad) + 0.05f * MathF.Sin(gt * 9f) * rg);
+                    DibujarSolFusionado(CentroDelJuicio(_edad), r, gt * (1f + 1.2f * rg), 3, rg,
+                        alpha: prende);
+
+                    // EL ALIENTO DEL NACIMIENTO — nace de 0 px (la
+                    // v6.152 lo escupía YA GRANDE: otro salto leído) y
+                    // respira CONTINUO mientras el gigante prende
+                    if (prende < 1f)
                     {
-                        // ============================================================
-                        //  v6.151 — LA FUSIÓN SIN SALTO (la letra: «se unen
-                        //  pero el proyectil da un salto para hacer otra
-                        //  animacion, debe ser una animacion suave al
-                        //  inicio y ademas debe ser completamente fluida»).
-                        //  EL DIAGNÓSTICO: en el CONTACTO el vals moría con
-                        //  sus soles a radio 24 px y escala 0.55·BodyPx — y
-                        //  el gigante nacía de GOLPE a 0.7·BodyPx con un
-                        //  jitter aleatorio encima (el «salto»). LA CURA:
-                        //  el gigante nace EXACTO del tamaño del par en el
-                        //  contacto (0.55) y crece CONTINUO hasta 1.05 —
-                        //  la MISMA curva que el acto de la caza recogerá
-                        //  después (una sola función, cero cortes de
-                        //  fase); el TEMBLOR aleatorio murió (era el
-                        //  «saltito» leído) y el destello de contacto se
-                        //  FUNDIÓ con la curva (ya no es un flash seco:
-                        //  es la misma luz que sigue creciendo).
-                        // ============================================================
-                        float n = MathHelper.Clamp((p - P_CONTACTO) / (1f - P_CONTACTO), 0f, 1f);
-                        float r = RuneSunRenderer.BodyPx * RadioDelJuicio(_edad);
-                        DibujarSolFusionado(Punto, r, gt, 3, rg: 0f, alpha: 1f);
-                        // EL ALIENTO DEL NACIMIENTO: la luz que respira al
-                        // ritmo de la curva (continua — el destello viejo
-                        // era un corte): nace con el contacto y se disuelve
-                        // en el arranque de la caza
-                        if (n < 0.6f)
+                        VFXCore.Begin();
+                        try
                         {
-                            VFXCore.Begin();
-                            try
-                            {
-                                float f = 1f - n / 0.6f;
-                                Vector2 dPos = Punto - Main.screenPosition;
-                                float fr = 460f * (0.30f + 0.55f * (1f - f));
-                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 250, 235), 0.70f * f * f),
-                                    new Vector2(fr, fr), 0f);
-                                VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 230, 170), 0.42f * f * f * f),
-                                    new Vector2(fr * 1.6f, fr * 1.6f), 0f);
-                            }
-                            finally { VFXCore.FlushAdditive(null, false); }
+                            Vector2 dPos = CentroDelJuicio(_edad) - Main.screenPosition;
+                            float fr = 460f * prende * (0.85f + 0.15f * MathF.Sin(gt * 6f));
+                            VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 250, 235), 0.70f * prende * (1f - prende) * 4f),
+                                new Vector2(fr, fr), 0f);
+                            VFXCore.Quad(dPos, SigiloLib.Tint(new Color(255, 230, 170), 0.42f * prende * (1f - prende) * 3f),
+                                new Vector2(fr * 1.6f, fr * 1.6f), 0f);
                         }
+                        finally { VFXCore.FlushAdditive(null, false); }
                     }
                 }
                 else if (_acto == 2)
                 {
-                    // ============================================================
-                    //  v6.151 — LA CAZA DIBUJADA (la letra: «el sol formado
-                    //  por la fusion… debe mantenerse, perseguir a los
-                    //  enemigos y despues de un tiempo debe crecer al menos
-                    //  70% mas su tamaño, volverse completamente rojo y
-                    //  luego explotar»): el gigante CABALGA tras su presa
-                    //  (el _centroCaza que mueve la IA), crece con la
-                    //  MISMA curva continua del nacimiento (RadioFusion
-                    //  0.55→1.05 y LUEGO la caza 1.05→1.05+0.70 — una
-                    //  sola línea de vida, cero saltos) y su paleta SE
-                    //  PIERDE EN EL ROJO conforme la caza madura (rg:
-                    //  el dorado de la fusión → el carmesí del final).
-                    // ============================================================
+                    // (la caza vieja dibuja SU estela propia — el resto
+                    // del bloque de abajo sigue vivo para las estelas y
+                    // el temblor de cámara)
                     float caza = MathHelper.Clamp(_t / (float)T_CARGA, 0f, 1f);
-                    float rg = caza * caza * (3f - 2f * caza);   // smoothstep: el rojo madura suave
-                    // v6.152 — el radio de la caza TAMBIÉN es LA CURVA
-                    // MAESTRA (nace del contacto sin costura y crece
-                    // al gigante) + el pulso arterial encima
+                    float rg = caza * caza * (3f - 2f * caza);
                     float r = RuneSunRenderer.BodyPx *
                         (RadioDelJuicio(_edad) + 0.05f * MathF.Sin(gt * 9f) * rg);
-                    DibujarSolFusionado(_centroCaza, r, gt * (1f + 1.2f * rg), 3, rg, alpha: 1f);
 
                     // LA LUZ DE LA CAZA: el dorado se vuelve carmesí
                     if (!Main.dedServ)
@@ -803,6 +837,97 @@ namespace AethonMod.Content.Weapons.Definitivas
         {
             x = MathHelper.Clamp(x, 0f, 1f);
             return x * x * (3f - 2f * x);
+        }
+
+        // ================================================================
+        //  v6.153 — LA ANIMACIÓN DESDE CERO (la letra: «el juicio de los
+        //  dos soles sigue tienen un salto en su animacion, lo que
+        //  tienes que hacer es crearla desde cero»). EL DIAGNÓSTICO
+        //  FINAL: la curva maestra v6.152 era continua para el RADIO,
+        //  pero el dibujado cambiaba de acto en acto con TRES costuras
+        //  que el ojo leía como saltos:
+        //   · EL CABECEO ABRUPTO: los soles de la convocatoria cabecean
+        //     (senoidal ±26 px) y al entrar al vals el cabeceo MUERE de
+        //     golpe (la órbita no lo trae).
+        //   · LA POBLACIÓN: dos soles → un gigante ES una sustitución:
+        //     el par se APAGA en el frame del contacto y el gigante
+        //     PRENDE en el siguiente — un frame de menos-populación que
+        //     el ojo lee como PARPADEO/SALTO.
+        //   · LA LUZ DEL NACIMIENTO: el destello de 460 px nacía YA
+        //     GRANDE (0.30+0.55 con f=1) en vez de crecer desde cero.
+        //  LA RECONSTRUCCIÓN: TODO el juicio es UNA coreografía con
+        //  CROSSFADE — cada etapa entra fundida sobre la anterior (la
+        //  población NUNCA salta: par y gigante coexisten unos ticks
+        //  con alphas cruzadas), el CABECEO decae CONTINUO (su amplitud
+        //  se multiplica por la curva, no se apaga) y la luz nace de
+        //  0 px. Los actos siguen mandando la LÓGICA (daño, homing,
+        //  nova); el dibujado ya no los conoce.
+        // ================================================================
+
+        /// <summary>El TAMBO de la fusión: ticks en que el par y el
+        /// gigante COEXISTEN fundidos (el crossfade de población — la
+        /// cura del frame de menos-populación).</summary>
+        private const int T_FUNDIDO = 10;
+
+        /// <summary>El cabeceo de la convocatoria (±26 px) que DECAE
+        /// continuo al entrar al vals — jamás muere abrupto.</summary>
+        private static float Cabeceo(float edad)
+        {
+            // nace pleno en la convocatoria y se disuelve CONTINUO en
+            // los primeros ticks del vals (smoothstep de salida)
+            float salida = MathHelper.Clamp(
+                (edad - (T_CONVOCATORIA - T_FUNDIDO)) / (float)T_FUNDIDO, 0f, 1f);
+            return (1f - smoothstepNova(salida)) * 26f;
+        }
+
+        /// <summary>LA POSICIÓN CONTINUA DE UN SOL DEL PAR: la cita con
+        /// el cabeceo vivo — la MISMA función para convocatoria y vals
+        /// (la órbita del vals hereda el punto de llegada SIN corte).</summary>
+        private Vector2 PosicionSolContinua(bool luz, float edad, float gt)
+        {
+            if (edad < T_CONVOCATORIA + T_FUNDIDO)
+            {
+                // convocatoria (y los primeros ticks del vals fundidos):
+                // el vuelo sereno con el cabeceo que DECAE
+                float u0 = MathHelper.Clamp(edad / (float)T_CONVOCATORIA, 0f, 1f);
+                float suave = smoothstepNova(u0);
+                Vector2 origen = Punto + (luz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
+                return Vector2.Lerp(origen, Punto, suave) +
+                    new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * Cabeceo(edad) * (1f - suave * 0.4f));
+            }
+            // el vals: la órbita de siempre (el cabeceo ya se disolvió)
+            float u1 = MathHelper.Clamp((edad - T_CONVOCATORIA) / (float)T_FUSION, 0f, 1f);
+            float pc = MathHelper.Clamp(u1 / P_CONTACTO, 0f, 1f);
+            float caida = pc * pc * (3f - 2f * pc);
+            caida = MathF.Pow(caida, 1.45f);
+            float radio = MathHelper.Lerp(190f, 24f, caida);
+            float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+            float angLado = ang + (luz ? 0f : MathHelper.Pi);
+            return Punto + angLado.ToRotationVector2() * radio;
+        }
+
+        /// <summary>EL CROSSFADE DEL PAR: 1 mientras el par es LA
+        /// población; decae a 0 en los T_FUNDIDO ticks tras el contacto
+        /// (el gigante prende mientras el par se funde — la población
+        /// NUNCA salta).</summary>
+        private static float AlphaDelPar(float edad)
+        {
+            float contacto = T_CONVOCATORIA + T_FUSION * P_CONTACTO;
+            if (edad <= contacto) return 1f;
+            float u = (edad - contacto) / (float)T_FUNDIDO;
+            return 1f - smoothstepNova(MathHelper.Clamp(u, 0f, 1f));
+        }
+
+        /// <summary>EL CROSSFADE DEL GIGANTE: 0 hasta el contacto;
+        /// prende CONTINUO en T_FUNDIDO ticks (el recíproco del par —
+        /// la población total es SIEMPRE ~2). Tras la fusión sigue en 1
+        /// hasta el colapso (donde el plisado lo gobierna).</summary>
+        private static float AlphaDelGigante(float edad)
+        {
+            float contacto = T_CONVOCATORIA + T_FUSION * P_CONTACTO;
+            if (edad <= contacto) return 0f;
+            float u = (edad - contacto) / (float)T_FUNDIDO;
+            return smoothstepNova(MathHelper.Clamp(u, 0f, 1f));
         }
 
         /// <summary>v6.152 — LA POSICIÓN DEL SOL AHORA: el punto donde

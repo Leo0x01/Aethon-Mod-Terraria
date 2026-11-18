@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Projectiles.Definitivas;
 
@@ -821,14 +822,30 @@ namespace AethonMod.Content.Systems
             try
             {
                 if (p == null || !p.active || p.dead) return;
-                if (!DespertarGrimorio.IraDisponible(p)) return;
-                if (!IraLista(p)) return;
+                if (!DespertarGrimorio.IraDisponible(p))
+                {
+                    // v6.153 — LA VOZ DEL CANDADO (la letra: «la ira no
+                    // se activa»): el gesto sostenido con el despertar
+                    // bajo NO puede ser un silencio — el libro DICE por
+                    // qué no nace la Ira.
+                    AvisarIra(p, "Mods.AethonMod.Ira.AvisoDespertar");
+                    return;
+                }
+                if (!IraLista(p))
+                {
+                    // v6.153 — EL RELOJ TAMBIÉN HABLA: la Ira recarga —
+                    // el portador lo sabe en voz, no en vacío.
+                    AvisarIra(p, "Mods.AethonMod.Ira.AvisoRecarga");
+                    return;
+                }
 
-                // el escuadrón al máximo (la ley de siempre)
+                // el escuadrón de siempre — v6.153: YA NO se exige que
+                // TODO esté al máximo (ese silencio extra mataba el
+                // gesto tras cualquier mejora pendiente)
                 int tipoOjo = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.OjoEternoMinion>();
                 var mejorados = new List<Projectile>();
-                int ojosVivos = 0, ojosAlMax = 0;
+                int ojosVivos = 0;
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile pr = Main.projectile[i];
@@ -836,37 +853,63 @@ namespace AethonMod.Content.Systems
                     if (pr.owner != p.whoAmI) continue;
                     mejorados.Add(pr);
                     ojosVivos++;
-                    if (global::AethonMod.Content.Projectiles.OjoEternoMinion
-                            .MejorasDe(pr) >= global::AethonMod.Content.Projectiles
-                            .OjoEternoMinion.MejorasMax)
-                        ojosAlMax++;
                 }
-                if (ojosVivos < IRA_OJOS_MINIMOS || ojosVivos != ojosAlMax) return;
+                if (ojosVivos < IRA_OJOS_MINIMOS)
+                {
+                    // v6.153 — LA VOZ DEL ESCUADRÓN: faltan ojos y el
+                    // libro lo dice con la cifra exacta.
+                    if (p.whoAmI == Main.myPlayer && !Main.dedServ)
+                        Main.NewText(Language.GetTextValue(
+                                "Mods.AethonMod.Ira.AvisoOjos", IRA_OJOS_MINIMOS, ojosVivos),
+                            new Color(196, 138, 255));
+                    return;
+                }
 
-                // EL RELOJ SE COBRA — 10 minutos desde EL disparo
-                _iraHasta[p.whoAmI] = Main.GameUpdateCount + IRA_ENFRIAMIENTO_FINAL;
-                DispararLaIra(p, mejorados, DespertarGrimorio.NivelDe(p));
+                // v6.153 — EL RELOJ SE COBRA SOLO SI LA CEREMONIA NACE:
+                // el portador NO paga 10 minutos por una Ira sin
+                // nacimiento (la causa silenciosa más cruel de la v6.152).
+                if (DispararLaIra(p, mejorados, DespertarGrimorio.NivelDe(p)))
+                    _iraHasta[p.whoAmI] = Main.GameUpdateCount + IRA_ENFRIAMIENTO_FINAL;
             }
             catch { }
         }
 
-        private static void DispararLaIra(Player p, List<Projectile> mejorados, int despertar)
+        /// <summary>v6.153 — LA VOZ DE LA IRA BLOQUEADA (la letra: «la
+        /// ira no se activa»): cada candado del gesto HABLA — un texto
+        /// morado en la pantalla del portador (una voz cada 2 s: el hold
+        /// no ametralla el chat). Sin esto el gesto era un pozo: contabas
+        /// los 2 s y no pasaba NADA.</summary>
+        private static void AvisarIra(Player p, string clave)
         {
             try
             {
-                // v6.60.2 — EL BLANCO ES SOLO EL GATILLO: la ira SE
-                // DISPARA cuando el escuadrón tiene a quién cazar (un
-                // enemigo de verdad cerca — jefes primero, la ley de
-                // BuscarBlancoIra), pero el haz YA NO lo persigue: se
-                // APUNTA con el cursor del dueño y lo sigue TODO el
-                // lanzamiento (la letra nueva).
-                NPC blanco = RayosPruebaProjectile.BuscarBlancoIra(p.Center, 2400f);
-                if (blanco == null) return;
+                if (p == null || p.whoAmI != Main.myPlayer || Main.dedServ) return;
+                if (_iraAvisoTick.TryGetValue(p.whoAmI, out ulong t) &&
+                    Main.GameUpdateCount - t < 120ul) return;
+                _iraAvisoTick[p.whoAmI] = Main.GameUpdateCount;
+                Main.NewText(Language.GetTextValue(clave), new Color(196, 138, 255));
+            }
+            catch { }
+        }
 
+        private static readonly System.Collections.Generic.Dictionary<int, ulong> _iraAvisoTick =
+            new System.Collections.Generic.Dictionary<int, ulong>();
+
+        /// <summary>v6.153 — LA IRA NACE SIEMPRE QUE EL GESTO SE CUMPLA:
+        /// devuelve false SOLO si no hay escuadrón. EL BLANCO PROPIO
+        /// MURIÓ como requisito — el haz se apunta con el cursor desde
+        /// la v6.60; exigir un enemigo a 2400 px mataba el gesto en
+        /// arenas vacías y el usuario leía «la ira no se activa». El
+        /// reloj de los 10 min (lo cobra el llamador) solo corre con
+        /// true: sin ceremonia no hay pago.</summary>
+        private static bool DispararLaIra(Player p, List<Projectile> mejorados, int despertar)
+        {
+            try
+            {
                 // EL DAÑO (la letra, exacta): base 1000 + cadena mágica +
                 // 50 % del daño total de invocación.
                 Projectile lider = ElMasDespierto(mejorados);
-                if (lider == null) return;
+                if (lider == null) return false;
                 int nivel = (int)MathF.Floor(lider.ai[2]);
                 int dano = DanoDeLaIra(p, nivel, lider, despertar);
 
@@ -928,8 +971,9 @@ namespace AethonMod.Content.Systems
                 //     del RC2 a los 150 ticks de la ceremonia y su bucle
                 //     de disparo). El nacimiento del ritual es MUDO:
                 //     solo el cine de los ojos y el polvo blanco-morado.
+                return true;    // v6.153 — la ceremonia nació: el reloj se cobra
             }
-            catch { }
+            catch { return false; }   // v6.153 — sin ceremonia no hay pago
         }
 
         /// <summary>EL DAÑO DE LA IRA (la letra, EXACTA): «el daño base

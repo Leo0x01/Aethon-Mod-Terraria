@@ -339,10 +339,22 @@ namespace AethonMod.Content.UI
                     cy += altoLista + 8f;
                 }
 
-                // === LA LEYENDA DEL PIE ===
+                // === LA LEYENDA DEL PIE — v6.153: LA VERDAD Y EL ANCHO
+                //     (la letra: «ese texto se desborda […] en realidad
+                //     no se cumple nada de lo que dice ahi»): la
+                //     leyenda vieja prometía una ceremonia y unos
+                //     fragmentos que NUNCA pasaron — el pilar es EL
+                //     OBELISCO DEL UMBRAL (v6.152): la ventana que
+                //     manda en el interior. El texto NUEVO dice LO QUE
+                //     HAY, y la escala SE CALCULA para caber (la cura
+                //     del altar v6.92: mide y achica — jamás desborda).
                 string leyenda = Language.GetTextValue("Mods.AethonMod.PrismaInterior.Leyenda");
+                float escLey = 0.68f;
+                var medLey = fuente.MeasureString(leyenda) * escLey;
+                if (medLey.X > w - 48f && medLey.X > 0f)
+                    escLey *= (w - 48f) / medLey.X;
                 Utils.DrawBorderString(sb, leyenda, new Vector2(x + w / 2f, y + h - 16f),
-                    TintaApagado, 0.68f, 0.5f, 0.5f);
+                    TintaApagado, escLey, 0.5f, 0.5f);
 
                 // === EL BOTÓN CERRAR (la esquina de siempre) ===
                 _geoCerrar = new Rectangle(x + w - 34, y + 8, 26, 26);

@@ -425,6 +425,19 @@ namespace AethonMod.Content.Globals
 
                 npc.netUpdate = true; // MP: mejor esfuerzo de la casa (SP-first)
 
+                // v6.153 — EL BOLETO ETERNO DEL GUARDIÁN (la letra:
+                // «todos los jefes de las oleadas […] no se vayan sin
+                // importar si es de dia o no»): los jefes sellados
+                // nacen con SU BOLETO ALTO — vanilla retira como
+                // 'fantasmas' a los que dejan caducar timeLeft (el
+                // Deerclops raro, que sobrevive AL festín, era el que
+                // se esfumaba). El PreAI lo RENUEVA cada tick (abajo).
+                if (jefe)
+                {
+                    npc.timeLeft = int.MaxValue / 2;
+                    npc.netAlways = true;
+                }
+
                 // v6.50.48 — EL CENSO DE LAS PIEZAS (la maquinaria del
                 // fix de la barra): cada pieza de multi-jefe (segmentos
                 // del Devorador, Creepers del Cerebro) que nace sellada
@@ -1129,6 +1142,12 @@ namespace AethonMod.Content.Globals
 
                     if (esGuardian && EsJefeDeOleada)
                     {
+                        // v6.153 — EL BOLETO SE RENUEVA CADA TICK (la
+                        // letra: los jefes NO se van): jamás caducan por
+                        // timeLeft — viven hasta caer o hasta que el
+                        // festín muera (el resto del motor, intacto).
+                        npc.timeLeft = int.MaxValue / 2;
+
                         bool algoDelGuardian = false;
 
                         // === LA NOCHE PERPETUA (solo los que leen el

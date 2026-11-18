@@ -144,21 +144,32 @@ namespace AethonMod.Content.Buffs
                 {
                     try
                     {
+                        // v6.153 — EL ANILLO, CENTRADO DE VERDAD (la
+                        // letra: «ese circulo esta decentrado, deberia
+                        // estar todo en el centro del buff de la ira»):
+                        // el centro ES EL CENTRO DEL ICONO (la v6.152 le
+                        // sumaba +15 px en X e Y — el radio viejo
+                        // contaminando el centro) y el radio ABRAZA el
+                        // icono (media diagonal + 2 px de aire).
                         var glowHold = ModContent.Request<Texture2D>(
                             "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                        Vector2 centro = pos + tex.Size() * 0.5f;
+                        float radio = tex.Size().Length() * 0.5f + 2f;
                         int pasos = 28;
                         for (int k = 0; k < pasos; k++)
                         {
                             float u = k / (float)pasos;
                             if (u > hold) break;
                             float ang0 = -MathHelper.PiOver2 + u * MathHelper.TwoPi;
-                            Vector2 borde = pos + new Vector2(
-                                tex.Width * 0.5f + 15f, tex.Height * 0.5f + 15f);
-                            Vector2 p0 = borde + ang0.ToRotationVector2() * 17f;
-                            Vector2 p1 = borde + (ang0 + 0.10f).ToRotationVector2() * 17f;
-                            sb.Draw(glowHold, p0, null,
-                                new Color(226, 208, 255) * 0.85f, 0f,
-                                glowHold.Size() * 0.5f, new Vector2(0.22f, 0.10f),
+                            Vector2 p0 = centro + ang0.ToRotationVector2() * radio;
+                            Vector2 p1 = centro + (ang0 + MathHelper.TwoPi / pasos)
+                                .ToRotationVector2() * radio;
+                            Vector2 medio = (p0 + p1) * 0.5f;
+                            float largo = Vector2.Distance(p0, p1) + 2.5f;
+                            sb.Draw(glowHold, medio, null,
+                                new Color(226, 208, 255) * 0.85f,
+                                ang0 + MathHelper.PiOver2, glowHold.Size() * 0.5f,
+                                new Vector2(largo / glowHold.Width * 0.30f, 0.10f),
                                 SpriteEffects.None, 0f);
                         }
                     }

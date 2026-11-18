@@ -72,6 +72,25 @@ namespace AethonMod.Content.Globals
         /// ceremonia no se repite por libro.</summary>
         public bool PetDelDespertar = false;
 
+        /// <summary>v6.153 — LAS SOMBRAS DE LA PÁGINA DEL GRIMORIO (la
+        /// letra: «por cada 20 despertares este pueda usar una sombra de
+        /// la pagina extra»): el CAP teórico es nivel/20 (SOLO lectura);
+        /// este contador son las YA GASTADAS (una sombra usada es una
+        /// sombra gastada — VUELVE cuando su presa es absorbida). Con el
+        /// nivel fijo, el disponible es (nivel/20 − gastadas).</summary>
+        public int SombrasGastadas = 0;
+
+        /// <summary>v6.153 — EL CAP DE SOMBRAS del despertar de ESTE
+        /// libro (nivel/20 — el techo que la letra manda).</summary>
+        public int SombrasCap => NivelDespertar / 20;
+
+        /// <summary>v6.153 — LAS SOMBRAS LIBRES ahora mismo (cap −
+        /// gastadas, jamás negativo).</summary>
+        public int SombrasLibres
+        {
+            get { int libres = SombrasCap - SombrasGastadas; return libres < 0 ? 0 : libres; }
+        }
+
         // === v6.51.11 — LA MESA DEL DESPERTAR (los contadores PARCIALES
         //     de la ofrenda del peldaño actual: la comida se sirve EN EL
         //     SUELO — el libro come SOLO lo que le falta; la letra:
@@ -798,6 +817,9 @@ namespace AethonMod.Content.Globals
                 if (FormasPartes > 0) tag["almaFormasPartes"] = FormasPartes;
                 tag["almaFormaEscupida"] = FormaEscupida;
                 if (PetDelDespertar) tag["almaPet"] = true;
+                // v6.153 — LAS SOMBRAS DE LA PÁGINA (las gastadas viajan
+                // con el libro).
+                if (SombrasGastadas > 0) tag["almaSombrasGastadas"] = SombrasGastadas;
                 if (DevoracionPoder > 0) tag["almaPoder"] = DevoracionPoder;
                 // v6.51.11 — LA MESA DEL DESPERTAR (los contadores
                 // parciales del peldaño vivo: la comida se sirve en el
@@ -860,6 +882,8 @@ namespace AethonMod.Content.Globals
                 FormaEscupida = tag.GetBool("almaFormaEscupida");
                 AnillosAvisoVivido = tag.GetBool("almaAnillosAviso");
                 PetDelDespertar = tag.GetBool("almaPet");
+                // v6.153 — LAS SOMBRAS DE LA PÁGINA.
+                SombrasGastadas = System.Math.Max(0, System.Math.Min(999, tag.GetInt("almaSombrasGastadas")));
                 DevoracionPoder = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPoder")));
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales).
                 OfrendaEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEsencias")));

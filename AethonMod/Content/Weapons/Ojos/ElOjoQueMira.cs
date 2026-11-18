@@ -48,7 +48,11 @@ namespace AethonMod.Content.Weapons.Ojos
     /// </summary>
     public class ElOjoQueMira : ModItem
     {
-        public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
+        // v6.153 — EL SPRITE PROPIO (la letra: «mejora el sprite del
+        // item Ojo que mira»): el ojo del grimorio FORJADO — la almendra
+        // de pergamino, el iris dorado con la pupila rasgada violeta y
+        // su aro rúnico (ya NO el sprite prestado del escuadrón).
+        public override string Texture => "AethonMod/Content/Weapons/Ojos/ElOjoQueMira";
 
         public override void SetStaticDefaults()
         {
@@ -172,8 +176,15 @@ namespace AethonMod.Content.Weapons.Ojos
     {
         public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
 
-        private const int CARGA = 16;      // ticks mirando (el iris se abre)
-        private const int VIDA = 46;       // el ojo vive poco: mira y se va
+        // v6.153 — EL MINION TOTALMENTE ANIMADO (la letra: «hacer que
+        // sea un minion totalmente animado lo que ataca ya que ahora
+        // mismo solo sale un punto amarillo»): el ojo vive MÁS (mira,
+        // dispara y SE QUEDA un instante vigilando — como un minion),
+        // parpadea TODO el tiempo (el ciclo de 3 texturas del
+        // escuadrón), su iris PERSIGUE a la presa y DILATA con la carga
+        // y la muerte es un CIERRE de párpado (no un pop seco).
+        private const int CARGA = 26;      // ticks mirando (el iris se abre)
+        private const int VIDA = 110;      // vive: mira, dispara, vigila, cierra
 
         private int _tick;
         private Vector2 _presa;           // a quién mira
@@ -213,9 +224,14 @@ namespace AethonMod.Content.Weapons.Ojos
                     (Main.player[Projectile.owner]?.Center ?? Projectile.Center);
             }
 
-            // LA FLOTACIÓN (el bobbing del ojo de la casa)
-            Projectile.velocity.Y = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.2f
+            // v6.153 — LA FLOTACIÓN DEL ESCUADRÓN (el bobbing del
+            // OjoEternoMinion: el vaivén SUAVE de quien vela — con su
+            // deriva lateral respirada, no solo el salto vertical)
+            float bob = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.2f
                 + Projectile.whoAmI) * 0.35f;
+            float lado = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 1.1f
+                + Projectile.whoAmI * 0.7f) * 0.18f;
+            Projectile.velocity = new Vector2(lado, bob);
 
             // EL DISPARO: tras la carga, LA MIRADA
             if (_tick == CARGA && !_disparado)
@@ -244,8 +260,15 @@ namespace AethonMod.Content.Weapons.Ojos
                 }
             }
 
-            // LA DESPEDIDA: tras el disparo el ojo se disipa (parpadeo)
-            if (_tick > CARGA + 14)
+            // v6.153 — LA DESPEDIDA DEL MINION: tras el disparo VIGILA
+            // (sigue mirando a su presa, parpadeando) y al final CIERRA
+            // el párpado antes de irse (el ojo se DUERME — no un pop).
+            if (_tick > VIDA - 10)
+            {
+                // los últimos 10 t: el párpado cierra (lo dibuja el
+                // PreDraw con el ciclo forzado) y la última luz calla
+            }
+            if (_tick > VIDA)
                 Projectile.Kill();
         }
 
@@ -266,21 +289,43 @@ namespace AethonMod.Content.Weapons.Ojos
             float f = Math.Min(1f, (float)_tick / CARGA);
             var pos = Projectile.Center - Main.screenPosition;
 
-            // LA FASE DEL PÁRPADO (el ciclo del escuadrón: abierto →
-            // medio → cerrado → medio → abierto, ~7 s con pausas)
-            double ciclo = (Main.GlobalTimeWrappedHourly * 0.55 + Projectile.whoAmI * 0.37) % 7.0;
+            // ============================================================
+            //  v6.153 — EL CICLO DE PÁRPADO DEL ESCUADRÓN, DE VERDAD
+            //  (la letra: «un minion totalmente animado»): el ojo
+            //  parpadea CADA ~2,6 s (el ciclo vivo del OjoEternoMinion —
+            //  abierto con pausas largas → medio un instante → cerrado
+            //  un flash → medio), y en la MUERTE el párpado CIERRA
+            //  completo (los últimos 10 t: el ojo se duerme al irse).
+            // ============================================================
+            bool muriendo = _tick > VIDA - 10;
             string nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Abierto";
-            if (ciclo > 5.6 && ciclo < 6.1) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
-            else if (ciclo >= 6.1 && ciclo < 6.5) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Cerrado";
-            else if (ciclo >= 6.5 && ciclo < 7.0) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
+            if (muriendo)
+            {
+                // el cierre final: medio → cerrado, según los t que falten
+                nombreTex = _tick > VIDA - 5
+                    ? "AethonMod/Content/Projectiles/OjoEterno_Cerrado"
+                    : "AethonMod/Content/Projectiles/OjoEterno_Medio";
+            }
+            else
+            {
+                double ciclo = (Main.GlobalTimeWrappedHourly * 1.4 + Projectile.whoAmI * 0.37) % 2.6;
+                if (ciclo > 2.05 && ciclo < 2.25) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
+                else if (ciclo >= 2.25 && ciclo < 2.42) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Cerrado";
+                else if (ciclo >= 2.42 && ciclo < 2.6) nombreTex = "AethonMod/Content/Projectiles/OjoEterno_Medio";
+            }
             Texture2D tex = ModContent.Request<Texture2D>(nombreTex).Value;
 
-            // LA ESCALA MINION (0.375, la del escuadrón) + el pop de
-            // nacimiento (+16% el primer medio segundo) + el hinchado
-            // de la carga (respira al 6% mientras carga)
-            const float ESCALA = 0.375f;
-            float pop = _tick < 30 ? 1.16f - 0.16f * (_tick / 30f) : 1f;
-            float esc = ESCALA * pop * (1f + 0.06f * f);
+            // ============================================================
+            //  LA ESCALA DE MINION DE VERDAD (0.55 — la cura del «solo
+            //  sale un punto amarillo»: la v6.144 lo dejó en 0.375 y el
+            //  glow lo comía) + el pop de nacimiento (+16%) + el
+            //  hinchado de la carga (respira al 8% mientras carga) + LA
+            //  INCLINACIÓN DEL ESCUADRÓN (el ojo SE INCLINA hacia lo
+            //  que mira — la rotación viva del OjoEternoMinion).
+            // ============================================================
+            const float ESCALA = 0.55f;
+            float pop = _tick < 26 ? 1.16f - 0.16f * (_tick / 26f) : 1f;
+            float esc = ESCALA * pop * (1f + 0.08f * f);
 
             // el resplandor de la carga (violeta→dorado al abrirse)
             Texture2D glow = ModContent.Request<Texture2D>(
@@ -289,23 +334,32 @@ namespace AethonMod.Content.Weapons.Ojos
             Main.spriteBatch.Draw(glow, pos, null, cGlow * (0.35f + 0.3f * f),
                 0f, glow.Size() * 0.5f, 0.5f + 0.25f * f, SpriteEffects.None, 0f);
 
-            // EL OJO: la textura del escuadrón a ESCALA MINION
-            Main.spriteBatch.Draw(tex, pos, null,
-                Microsoft.Xna.Framework.Color.White * (0.85f + 0.15f * f),
-                0f, tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+            // (el cuerpo ya vive ABAJO, con SU inclinación — la del iris)
 
-            // EL IRIS VIVO (el mecanismo del escuadrón: el núcleo dorado
-            // SE DESLIZA hacia la presa y se DILATA con la carga —
-            // MIRA_X 7.5 · MIRA_Y 2.5, en píxeles de sprite × escala)
+            // ============================================================
+            //  EL IRIS VIVO DEL ESCUADRÓN (el mecanismo EXACTO del
+            //  OjoEterneMinion.DrawElOjo): el núcleo dorado SE DESLIZA
+            //  por la almendra hacia la presa (MIRA_X/MIRA_Y de la
+            //  casa), se DILATA con la carga, y el CUERPO ENTERO se
+            //  INCLINA hacia su mirada (la rotación viva del escuadrón
+            //  — media vuelta del rumbo, suave).
+            // ============================================================
             Vector2 hacia = _presa - Projectile.Center;
             float mx = 0f, my = 0f;
+            float inclinacion = 0f;
             if (hacia.LengthSquared() > 1f)
             {
                 hacia.Normalize();
                 mx = hacia.X * 7.5f * esc;
                 my = hacia.Y * 2.5f * esc;
+                inclinacion = hacia.ToRotation() * 0.10f;   // la inclinación viva
             }
-            float iris = (0.41f + 0.10f * f) * esc;   // IRIS_ESCALA + la dilatación
+            float iris = (0.41f + 0.14f * f) * esc;   // IRIS_ESCALA + la dilatación de la carga
+            // el cuerpo con SU inclinación (el minion entero mira)
+            Main.spriteBatch.Draw(tex, pos, null,
+                Microsoft.Xna.Framework.Color.White * (0.85f + 0.15f * f) * (muriendo ? 0.8f : 1f),
+                inclinacion, tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+            // el iris dorado DESLIZADO
             Main.spriteBatch.Draw(glow,
                 pos + new Vector2(mx, my), null,
                 new Color(255, 200, 90) * (0.85f + 0.15f * f),

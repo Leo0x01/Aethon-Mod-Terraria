@@ -68,8 +68,48 @@ namespace AethonMod.Content.Weapons.Sombras
                 ? (presa.Center - player.MountedCenter).SafeNormalize(velocity.LengthSquared() > 0.1f ? velocity : Vector2.UnitX)
                 : velocity.LengthSquared() > 0.1f ? velocity.SafeNormalize(Vector2.UnitX) : Vector2.UnitX;
 
-            Projectile.NewProjectile(source, player.MountedCenter, rumbo * 14f, type, damage, knockback,
+            // ============================================================
+            //  v6.153 — LA CONCENTRACIÓN (la letra: «o aumentar el daño
+            //  que le hace a un solo enemigo si usa todas las sombras de
+            //  la pagina que posea en ese momento»): al disparar CON EL
+            //  GRIMORIO DEL ETERNO en el inventario, TODAS las sombras
+            //  libres del libro SE GASTAN sobre esta presa (el drenaje
+            //  de la mordida ×(1+n) — el proyectil las dibuja orbitando).
+            //  Sin Eterno o sin sombras: el disparo de siempre.
+            // ============================================================
+            int sombrasUsadas = 0;
+            try
+            {
+                Item eterno = null;
+                for (int i = 0; i < 58 && eterno == null; i++)
+                {
+                    Item it = player.inventory[i];
+                    if (it != null && !it.IsAir &&
+                        it.type == ModContent.ItemType
+                            <global::AethonMod.Content.Weapons.GrimoireEternal>())
+                        eterno = it;
+                }
+                if (eterno != null && presa != null)
+                {
+                    var alma = eterno.GetGlobalItem
+                        <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                    if (alma != null && alma.SombrasLibres > 0)
+                    {
+                        sombrasUsadas = alma.SombrasLibres;
+                        alma.SombrasGastadas += sombrasUsadas;   // TODAS se gastan
+                        if (player.whoAmI == Main.myPlayer && !Main.dedServ)
+                            Terraria.Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                    "Mods.AethonMod.Ira.SombrasConcentradas", sombrasUsadas, sombrasUsadas + 1),
+                                new Microsoft.Xna.Framework.Color(150, 90, 220));
+                    }
+                }
+            }
+            catch { }
+
+            int idxP = Projectile.NewProjectile(source, player.MountedCenter, rumbo * 14f, type, damage, knockback,
                 player.whoAmI, presa != null ? presa.whoAmI + 1 : 0, 0);
+            if (idxP >= 0 && idxP < Main.maxProjectiles && sombrasUsadas > 0)
+                Main.projectile[idxP].localAI[0] = sombrasUsadas;   // viajan con la mordida
             return false;
         }
 

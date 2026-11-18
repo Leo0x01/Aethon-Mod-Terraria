@@ -171,6 +171,35 @@ namespace AethonMod.Content.Projectiles.Nervioso
             return mejor;
         }
 
+        /// <summary>v6.153 — LA PRESA SIN SOMBRA: la criatura moviéndose
+        /// cerca que TODAVÍA no tiene SU hilillo del Eterno (cada sombra
+        /// es individual: UNA por enemigo, la letra).</summary>
+        private NPC PresaSinSombra(int tipoSombra)
+        {
+            NPC mejor = null;
+            float mejorD = RADIO_CAZA * RADIO_CAZA;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || n.life <= 0 || n.dontTakeDamage) continue;
+                if (n.townNPC || NPCID.Sets.ActsLikeTownNPC[n.type]) continue;   // los vecinos, jamás
+                if (n.velocity.LengthSquared() < 0.02f) continue;                 // «hasta que algo SE MUEVA»
+                // ¿YA tiene su sombra? (de ESTE dueño)
+                bool ocupada = false;
+                for (int k = 0; k < Main.maxProjectiles; k++)
+                {
+                    Projectile sp = Main.projectile[k];
+                    if (sp != null && sp.active && sp.type == tipoSombra &&
+                        sp.owner == Projectile.owner && (int)sp.ai[0] - 1 == i)
+                    { ocupada = true; break; }
+                }
+                if (ocupada) continue;
+                float d = Vector2.DistanceSquared(n.Center, Projectile.Center);
+                if (d < mejorD) { mejorD = d; mejor = n; }
+            }
+            return mejor;
+        }
+
         /// <summary>EL CAMBIO DE MODO a VOLVER (con la despedida que toca).</summary>
         private void IrAVolver()
         {
@@ -478,16 +507,68 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // sus vecinos NO lanza sombras nuevas («solo vigilar a
                 // los npc», la letra .118) — la sombra que ya había
                 // salido termina su comida en paz.
-                if (!enPueblo && autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
+                if (!enPueblo && autoridad && t % TICKS_BUSCA == 0f &&
                     !EstadoDelLibro.AtacoReciente())
                 {
-                    NPC presa = PresaCercana();
-                    if (presa != null)
+                    // ========================================================
+                    //  v6.153 — LAS SOMBRAS DE LA PÁGINA DEL ETERNO (la
+                    //  letra: «por cada 20 despertares este pueda usar
+                    //  una sombra de la pagina extra […] esta cazando y
+                    //  podra usar una sombra de la pagina por cada
+                    //  enemigo»): si ESTE espíritu sirve al GRIMORIO DEL
+                    //  ETERNO, su caza cambia de arte — NO es UNA sombra
+                    //  del Nervioso: es UNA POR ENEMIGO (cada presa
+                    //  moviéndose cerca recibe SU hilillo negro, hasta
+                    //  el cap de sombras del despertar — nivel/20).
+                    //  Cada una drena 1% de vida MÁXIMA por segundo (la
+                    //  letra de SombraPaginaEterno) y SE VE siempre.
+                    //  Los libros NORMALES (el Nervioso de prueba)
+                    //  siguen con SU sombra de siempre, UNA a la vez.
+                    // ========================================================
+                    bool esEterno = TipoLibro == ModContent.ItemType
+                        <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                    if (esEterno)
                     {
-                        Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
-                            Vector2.Zero, ModContent.ProjectileType<SombraPaginaCaza>(),
-                            0, 0f, Projectile.owner, presa.whoAmI + 1, 0f, 0f);
-                        Sonar(SoundID.Item122.WithPitchOffset(-0.3f).WithVolumeScale(0.6f), Projectile.Center);
+                        Player dueñoCaza = Main.player[Projectile.owner];
+                        var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
+                            .De(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(dueñoCaza));
+                        if (alma != null && alma.SombrasLibres > 0)
+                        {
+                            // LAS PRESAS SIN SOMBRA (una sombra por enemigo)
+                            int tipoEterno = ModContent.ProjectileType
+                                <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
+                            int vivas = 0;
+                            for (int i = 0; i < Main.maxProjectiles; i++)
+                            {
+                                Projectile sp = Main.projectile[i];
+                                if (sp != null && sp.active && sp.type == tipoEterno &&
+                                    sp.owner == Projectile.owner) vivas++;
+                            }
+                            if (vivas < alma.SombrasLibres)
+                            {
+                                NPC presaLibre = PresaSinSombra(tipoEterno);
+                                if (presaLibre != null)
+                                {
+                                    alma.SombrasGastadas++;   // LA SOMBRA SE GASTA al nacer
+                                    Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                                        Projectile.Center, Vector2.Zero, tipoEterno,
+                                        0, 0f, Projectile.owner, presaLibre.whoAmI + 1, 0f, 0f);
+                                    Sonar(SoundID.Item122.WithPitchOffset(-0.3f)
+                                        .WithVolumeScale(0.6f), Projectile.Center);
+                                }
+                            }
+                        }
+                    }
+                    else if (!SombraActiva())
+                    {
+                        NPC presa = PresaCercana();
+                        if (presa != null)
+                        {
+                            Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
+                                Vector2.Zero, ModContent.ProjectileType<SombraPaginaCaza>(),
+                                0, 0f, Projectile.owner, presa.whoAmI + 1, 0f, 0f);
+                            Sonar(SoundID.Item122.WithPitchOffset(-0.3f).WithVolumeScale(0.6f), Projectile.Center);
+                        }
                     }
                 }
             }

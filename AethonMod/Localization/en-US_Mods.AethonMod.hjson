@@ -8,11 +8,6 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
-	SombraDeTinta: {
-		DisplayName: Ink Shadow
-		Tooltip: The fusion of the shadow: the page tentacle now BOUNCES like the cursed doll — 5 bounces, each faster, then home
-		Frase: The ink remembers every bounce.
-	}
 
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
@@ -2052,32 +2047,7 @@ Items: {
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado para siempre.
 	ArmaCorrupta3: Consagrada por el Eterno: suéltala con el grimorio EN LA MANO y él la devorará.
 
-	SombraDeLaPagina2: {
-		DisplayName: La Sombra de la Página II
-		Tooltip:
-			'''
-			        «La página doblada en dos: la sombra que aprendió a cerrarse.»
-			        El segundo tomo: la DOBLE HÉLICE de tinta trenzada sobre su
-			        espina, LOS IRIS REALES del Ojo Eterno repartidos por las hebras,
-			        los rayitos Perlin chispeando entre ambas y la BOCA DE GARRAS que
-			        cierra de golpe. Caza a cualquier distancia, drena 3% cada 6 t y
-			        a 1 de vida: el festín de siempre.
-			        SIN COSTE DE MANÁ — arma de prueba: úsala sin miedo.
-			'''
-	}
 
-	SombraDeLaPagina3: {
-		DisplayName: La Sombra de la Página III
-		Tooltip:
-			'''
-			        «Siete iris sin rostro, y todos miran lo mismo que tú.»
-			        El tercer tomo: UNA cuerda de sombra que lleva SIETE IRISES
-			        flotando — SOLO el iris, sin párpados ni esclerótica — cada uno
-			        con su propio latido y TODOS clavados en la presa. En vuelo se
-			        abren en abanico; al morder, EL CORO CONVERGE sobre la herida
-			        y drena 3% cada 6 t. A 1 de vida: el festín de siempre.
-			'''
-	}
 
 	// ================================================================
 	//  v6.100 — LOS ÚLTIMOS DOS DEL ESCRIBA: el archivo de localización
@@ -2127,32 +2097,7 @@ Items: {
 		Tooltip: The Eternal's last word: the final silence
 	}
 
-	SombraDeLaPagina4: {
-		// v6.100: THE FORGED COPY of the original (all the tools)
-		DisplayName: The Shadow of the Page IV
-		Tooltip:
-			'''
-			The original's ritual, dressed with ALL the tools: the shadow tendril
-			hunts the boss at any distance, bites and drains 3% every 6 t.
-			THE VORTEX MAW of the pixel engine is its mouth — the event horizon
-			spinning at the tip, the noise veil over its body and the ink ring on the bitten boss.
-			At 1 HP: THE DEVOURING (the shadows' feast).
-			'''
-	}
 
-	SombraDeLaPagina5: {
-		// v6.101: THE FIFTH TOME — the abyssal maw tendril
-		DisplayName: The Shadow of the Page V
-		Tooltip:
-			'''
-			The fifth tome: the family ritual wearing the skin of the abyss — ELEVEN
-			SLIT EYES blinking each at its own pace, the DOUBLE SAW of fangs along its
-			back and THE MAW: jaws that pant while hunting, open WIDE over the prey
-			and GRIND as they bite.
-			Hunts the boss at any distance, bites and drains 3% every 6 t.
-			At 1 HP: THE DEVOURING (the shadows' feast).
-			'''
-	}
 
 	// v6.54.0 — LA INVESTIGACIÓN: LAS ALAS DE CÓDIGO (Task 74-a/b/c)
 	
@@ -2718,12 +2663,22 @@ Furia: {
 	NivelVencido: "{0} VENCIÓ la furia de nivel {1} — la próxima será de NIVEL {2}. El libro toma nota… y sonríe."
 	OleadaFinal: OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.
 	Jefe: El hambre convoca un guardián: {0} (XP ×{1})
-	JefeHuido: "{0} se hunde, insatisfecho…"
 	// v6.50.61 — THE PURGE: DerechoEsencias died with the Witness's
 	// shop (the wardens' souls drop from their corpses).
 	OleadaEspecial: EL JUICIO: los SEIS guardianes a la vez, ×15 en TODO. El festín final.
 	JefeRaro: EL DADO DEL INVIERNO: {0} se sienta a la mesa (oleada {1} — 1 de 100). El invierno caminante ya no guarda zona alguna: SOLO el azar lo invita.
 	MuertePortador: El festín muere con su portador. El libro TOMA NOTA.
+}
+
+Cronista: {
+	Llega: The Chronicler wakes from the book — the scribe who survived the first devouring walks beside you.
+}
+
+Ira: {
+	AvisoDespertar: The Wrath still sleeps — it needs the Grimoire's Awakened 100.
+	AvisoRecarga: The Outer Being's Wrath is still recharging — its clock lives on the buff.
+	AvisoOjos: The Wrath needs the full squad: {0} awakened eyes (you have {1}).
+	SombrasConcentradas: The grimoire concentrates {0} page shadows on the prey — the bite tightens ×{1}.
 }
 
 Llamado: {
@@ -3859,7 +3814,7 @@ PrismaInterior: {
 	BotonVolver: RETURN TO THE REAL WORLD
 	BotonInvocar: SUMMON AETHON
 	YaVive: AETHON ALREADY WALKS THE INTERIOR
-	Leyenda: The pillar materializes and THE GRIMOIRE floats above — the shards are born of the ceremony
+	Leyenda: The Obelisk of the Threshold rules the interior: return to the real world · summon Aethon · launch the wave · the arena of the devoured
 	NombreCorto: The Pillar of the Eternal
 	NombrePilar: The Eternal's Pillar — the plain's way out
 	OleadaTitulo: THE HUNGER WAVE

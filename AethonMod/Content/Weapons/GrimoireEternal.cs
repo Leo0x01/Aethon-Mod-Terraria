@@ -618,7 +618,14 @@ namespace AethonMod.Content.Weapons
 
             // 3) LA REFORJA VIVA (la columna Velocidad de la wiki:
             //    Maníaco/Prohibido +10 % … Celeste −10 % … Supremo +20 %).
-            factor *= 1f - PeldanoDe(sl.Level).Velocidad;
+            //    v6.153 — LA COLUMNA JAMÁS PENALIZA (la letra: «cuando
+            //    aumenta el nivel del grimorio esta cadencia disminuye
+            //    y mucho, eso no debe pasar» — el SIM v6.152 medía la
+            //    caída 4,3/s → 3,5/s entre los peldaños 198 y 264: el
+            //    Celeste RESTABA 10 % y los peldaños neutros BORRABAN
+            //    el +10 % del anterior). El clamp a >= 0: subir de
+            //    peldaño NUNCA puede quitar cadencia — solo sumarla.
+            factor *= 1f - Math.Max(0f, PeldanoDe(sl.Level).Velocidad);
 
             // 4) LA CUANTIZACIÓN + EL TOPE: el uso efectivo SIEMPRE en
             //    ticks ENTEROS (animación y disparo JUNTOS — jamás
@@ -1538,6 +1545,20 @@ namespace AethonMod.Content.Weapons
                     //     su verdad, sin editar este tooltip jamás.
                     tooltips.Add(new TooltipLine(Mod, "WIra",
                         $"[c/E8D8FF:Ira de un Ser Exterior: EL HAZ · {Systems.AtaquesCombinadosSistema.IraRitmoTexto()}]"));
+                    // v6.153 — LAS SOMBRAS DE LA PÁGINA (la letra: «por
+                    // cada 20 despertares este pueda usar una sombra de
+                    // la pagina extra»): el grimorio CUENTA sus sombras
+                    // libres — el portador sabe cuántas páginas puede
+                    // desatar.
+                    try
+                    {
+                        var almaS = Item.GetGlobalItem
+                            <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                        if (almaS != null && almaS.SombrasCap > 0)
+                            tooltips.Add(new TooltipLine(Mod, "WSombras",
+                                $"[c/96A8C8:Sombras de la página: {almaS.SombrasLibres}/{almaS.SombrasCap} — una por cada 20 despertares · el modo caza las reparte, el arma las concentra]"));
+                    }
+                    catch { }
                     tooltips.Add(new TooltipLine(Mod, "WIra2",
                         "[c/78788C:(el escuadrón de 11, TODOS al máximo, cierra el círculo · daño 1000 + mágico + 50% invocación)]"));
                 }

@@ -341,7 +341,9 @@ namespace AethonMod.Content.Systems
         // === LAS CONSTANTES DE LA CASA ===
         /// <summary>El evento completo dura 5 MINUTOS de oleadas (300 s).</summary>
         public const int TicksEvento = 18000;
-        /// <summary>El jefe de la oleada tiene 90 s para caer antes de hundirse.</summary>
+        /// <summary>El jefe de la oleada tiene 90 s para caer antes de hundirse.
+        /// v6.153 — JUBILADO (la letra: los jefes NO se van): el timeout
+        /// murió — la constante queda como documento de la era vieja.</summary>
         public const int TicksJefeMax = 5400;
         /// <summary>La llamada dramática inicial (las dos voces).</summary>
         public const int TicksLlamada = 200;
@@ -1069,27 +1071,17 @@ namespace AethonMod.Content.Systems
                 return;
             }
 
-            // EL JEFE SE CANSÓ: se hunde insatisfecho (90 s) y la furia
-            // sigue su curso — 10 jefes vivos a la vez no es un evento,
-            // es un dilema de render.
-            if (_ticksFase >= TicksJefeMax)
-            {
-                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.JefeHuido",
-                    new Color(150, 140, 148), jefe.FullName);
-                jefe.active = false; // despawn limpio (apagado directo de la autoridad)
-                // v6.50.1 — FIX (JEFE FANTASMA): este despawn corre en
-                // PostUpdateWorld (FUERA de la AI del NPC — vanilla difunde
-                // el 23 desde UpdateNetworkCode solo si el apagado pasa
-                // DENTRO de su update). Sin el 23 explícito, los clientes
-                // conservaban un jefe congelado/invulnerable hasta que el
-                // slot se reciclaba.
-                if (Main.netMode == NetmodeID.Server)
-                    Terraria.NetMessage.SendData(23, -1, -1, null, jefe.whoAmI);
-                _fase = Fase.Interludio;
-                _ticksFase = 0;
-                // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
-                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
-            }
+            // ============================================================
+            //  v6.153 — EL JEFE YA NO SE VA (la letra: «asegurate de que
+            //  todos los jefes de las oleadas ingnoren sus condiciones
+            //  de aparicion y no se vayan sin importar si es de dia o
+            //  no, esto es un cambio para los jefes, no para las
+            //  oleadas»): EL TIMEOUT DE LOS 90 s MURIÓ — el guardián
+            //  vive hasta que el portador lo TUMBE (o muera con él: la
+            //  muerte del portador ya cancela el festín entero, la ley
+            //  v6.48). Si el jefe se atasca sin alcance, la fase espera:
+            //  la muerte del guardián es la ÚNICA puerta.
+            // ============================================================
         }
 
         // ==================================================================

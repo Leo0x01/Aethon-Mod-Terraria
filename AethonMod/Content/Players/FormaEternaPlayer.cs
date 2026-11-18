@@ -92,16 +92,15 @@ namespace AethonMod.Content.Players
         /// barra; null si no lleva ninguno).</summary>
         public static Item GrimorioActivo(Player p)
         {
+            // v6.153 — EL LIBRO VIVE DONDE LO LLEVES (la cura de «nunca
+            // aparecieron los anillos»: la v6.150 exigía el Eterno EN LA
+            // BARRA DE ACCESO RÁPIDO — con el libro en el inventario
+            // normal (slots 10-49, p. ej. tras reorganizar) el vestido
+            // entero moría sin decir nada). La casa YA tiene el lector
+            // correcto: Activo(p) (mano primero, luego los 58 slots).
+            // El despertar sube IGUAL desde la bolsa; la construcción
+            // también tenía que verse desde ahí.
             if (p == null || !p.active) return null;
-            bool libroEnBarra = false;
-            for (int i = 0; i < 10; i++)
-            {
-                Item inv = p.inventory[i];
-                if (inv != null && !inv.IsAir &&
-                    inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-                { libroEnBarra = true; break; }
-            }
-            if (!libroEnBarra) return null;
             return global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(p);
         }
 
@@ -221,12 +220,42 @@ namespace AethonMod.Content.Players
                 //  fin de verdad).
                 // ============================================================
                 int despertar = Systems.DespertarGrimorio.NivelDe(libroActivo);
+
+                // ============================================================
+                //  v6.153 — LOS ANILLOS DE SOLES RÚNICOS, PRIMERO QUE
+                //  NADA (la letra: «nunca aparecioron los anillos de
+                //  soles runicos» + la pregunta respondida en el código:
+                //  SÍ SON 12 PARTES — las 11 de los peldaños 101-111 y
+                //  LA 12ª del 120 (alas + aura del vacío + LA
+                //  CONVERSIÓN al ítem); los peldaños 113-119 son EL
+                //  VESTIDO DEL SOL: un anillo de la corona por nivel).
+                //  Este bloque vive ANTES del early-return de la
+                //  escupida: un libro EN CONSTRUCCIÓN (que todavía no
+                //  llega a su 120) jamás pierde sus anillos — y un
+                //  libro VIEJO que ya escupió no los revive (su forma
+                //  YA vive en el ítem).
+                // ============================================================
+                var visuales = Player.GetModPlayer<CosmeticPlayer>();
+                if (visuales == null) return;
+                bool escupida = alma.FormaEscupida && alma.FormasPartes >= PartesTotales;
+                if (!escupida &&
+                    despertar > Systems.DespertarGrimorio.NivelManifestacion - 8 &&
+                    despertar < Systems.DespertarGrimorio.NivelManifestacion)
+                {
+                    visuales.AnillosSolRunico = despertar - 112; // 113→1 … 119→7
+                    if (visuales.AnillosSolRunico > 0 &&
+                        Player.whoAmI == Main.myPlayer && !alma.AnillosAvisoVivido)
+                    {
+                        alma.AnillosAvisoVivido = true;
+                        Main.NewText(Language.GetTextValue(
+                                "Mods.AethonMod.FormaEterna.Anillos"),
+                            new Color(255, 215, 120));
+                    }
+                }
+
                 if (despertar >= Systems.DespertarGrimorio.NivelManifestacion ||
                     (alma.FormaEscupida && alma.FormasPartes >= PartesTotales))
                     return;
-
-                var visuales = Player.GetModPlayer<CosmeticPlayer>();
-                if (visuales == null) return;
 
                 // EL VESTIDO SE CONSTRUYE PARTE POR PARTE — el contador
                 // viaja al anillo dorsal (crece con cada parte).
@@ -241,32 +270,7 @@ namespace AethonMod.Content.Players
                 // LA PARTE 11, EL MANTO: el velo que une el panteón.
                 if (alma.FormasPartes >= 11) visuales.FormaAscendidaVisual = true;
 
-                // ============================================================
-                //  v6.150 — LOS ANILLOS DE SOLES RÚNICOS MIENTRAS SE
-                //  CONSTRUYE (la letra: «la forma eterna no viste los
-                //  anillos de soles runicos mientras se construye hasta
-                //  nivel 112, por lo tanto que se construya hasta nivel
-                //  120 y que se muestren los anillos de soles runicos
-                //  mientras lo hace»): de 113 a 119 — DESPUÉS de las 11
-                //  partes, ANTES de la escupida — LOS ANILLOS DEL SOL
-                //  RÚNICO se encienden UNO A UNO alrededor del portador
-                //  (el mismo sistema de SigiloLib que viste a los soles:
-                //  cada peldaño un anillo más, 7 al llegar al 119). El
-                //  vestido del sol creciendo hacia el 120.
-                // ============================================================
-                if (despertar > Systems.DespertarGrimorio.NivelManifestacion - 8 &&
-                    despertar < Systems.DespertarGrimorio.NivelManifestacion)
-                {
-                    visuales.AnillosSolRunico = despertar - 112; // 113→1 … 119→7
-                    if (visuales.AnillosSolRunico > 0 &&
-                        Player.whoAmI == Main.myPlayer && !alma.AnillosAvisoVivido)
-                    {
-                        alma.AnillosAvisoVivido = true;
-                        Main.NewText(Language.GetTextValue(
-                                "Mods.AethonMod.FormaEterna.Anillos"),
-                            new Color(255, 215, 120));
-                    }
-                }
+                // (v6.153 — los anillos viven ARRIBA, antes del return)
 
                 // LA PARTE 12 — EL AURA DEL VACÍO: la obra maestra es EL
                 // EFECTO ACTIVO (el campo arde mientras la forma viste al

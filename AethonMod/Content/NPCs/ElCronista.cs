@@ -188,6 +188,87 @@ namespace AethonMod.Content.NPCs
             };
         }
 
+        // ================================================================
+        //  v6.153 — LA LLEGADA AL INSTANTE (la letra: «el supuesto NPC
+        //  nuevo no lo veo en ninguna parte, deberia aparecer siempre
+        //  que el jugador tenga el grimorio y deberia aparecer al
+        //  instante»): CanTownNPCSpawn solo corre en el chequeo de
+        //  población de vanilla (~8 s Y solo con casa libre) — el
+        //  Cronista podía tardar minutos o no llegar. EL PASO DIRECTO:
+        //  cada segundo, si ALGUIEN lleva el grimorio y el Cronista NO
+        //  vive, NACE AL LADO del portador — sin casa, al instante,
+        //  con su estallido de tinta. (El despawn sin grimorio sigue
+        //  vivo en PreAI: la partida manda.)
+        // ================================================================
+        private class CronistaSistema : ModSystem
+        {
+            private int _tick;
+
+            public override void PostUpdateWorld()
+            {
+                // cada segundo (60 t) — al instante para el ojo humano
+                if (++_tick < 60) return;
+                _tick = 0;
+                try
+                {
+                    if (Main.netMode == NetmodeID.MultiplayerClient) return;
+
+                    // ¿YA vive? (el de vanilla o el nuestro — no se dobla)
+                    int tipo = ModContent.NPCType<ElCronista>();
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                        if (Main.npc[i] != null && Main.npc[i].active &&
+                            Main.npc[i].type == tipo) return;
+
+                    // ¿ALGUIEN lleva el grimorio? Nace a SU lado.
+                    int eterno = ModContent.ItemType
+                        <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                    foreach (Player p in Main.ActivePlayers)
+                    {
+                        bool tiene = false;
+                        for (int i = 0; i < 58; i++)
+                            if (p.inventory[i] != null && p.inventory[i].type == eterno)
+                            { tiene = true; break; }
+                        if (!tiene) continue;
+
+                        // EL SITIO: 3 tiles al lado del portador, al suelo
+                        int tx = (int)(p.Center.X / 16f) + (p.direction >= 0 ? 3 : -3);
+                        int ty = (int)(p.Center.Y / 16f);
+                        int suelo = -1;
+                        for (int y = ty - 4; y < ty + 22 && y < Main.maxTilesY - 4; y++)
+                            if (WorldGen.SolidTile(tx, y)) { suelo = y; break; }
+                        Vector2 pos = suelo >= 0
+                            ? new Vector2(tx * 16f + 8f, suelo * 16f)
+                            : p.Bottom;
+
+                        int idx = NPC.NewNPC(p.GetSource_FromAI(),
+                            (int)pos.X, (int)pos.Y, tipo, 0, 0f, p.whoAmI);
+                        if (idx >= 0 && idx < Main.maxNPCs && Main.npc[idx].active)
+                        {
+                            Main.npc[idx].homeTileX = (int)(pos.X / 16f);   // su casa ES el lugar
+                            Main.npc[idx].homeTileY = (int)(pos.Y / 16f);
+                            Main.npc[idx].netUpdate = true;
+
+                            // EL ESTALLIDO DE TINTA (la firma de la casa)
+                            if (!Main.dedServ)
+                                for (int k = 0; k < 16; k++)
+                                {
+                                    var d = Dust.NewDustPerfect(Main.npc[idx].Center,
+                                        DustID.Shadowflame,
+                                        new Vector2(Main.rand.NextFloat(-2.5f, 2.5f),
+                                            Main.rand.NextFloat(-3.5f, -0.5f)),
+                                        120, new Color(90, 50, 150), 1.2f);
+                                    d.noGravity = true;
+                                }
+                            global::AethonMod.Content.Systems.EcoRed.AnunciarMundo("Mods.AethonMod.Cronista.Llega",
+                                new Color(196, 138, 255));
+                        }
+                        return;   // uno por mundo (el primero que lo lleve)
+                    }
+                }
+                catch { }
+            }
+        }
+
         public override void SetChatButtons(ref string button, ref string button2)
         {
             button = Language.GetTextValue("LegacyInterface.28");   // "Tienda"

@@ -75,9 +75,15 @@ namespace AethonMod.Content.Systems
         public static float UseSpeedMult(int level, int useTimeBase = 22)
         {
             // v5.78: guard contra division by zero
+            // v6.153 — EL TECHO SUBE (la letra: «la cadencia de disparo
+            // cuanto mayor sea el nivel normal del grimorio» — nunca
+            // menor): el −25 % de la v5.25 dejaba TODO el piso 81-500 en
+            // el MISMO uso (17 t) y la reforja podía RESTAR encima. El
+            // nivel ahora empuja hasta −45 % (22 t → 13 t) antes del
+            // tope duro del arma (MinTicksUso = 7).
             if (useTimeBase <= 0) return 1f;
             float reduction = level * UseSpeedPerLevel;
-            if (reduction > 0.25f) reduction = 0.25f;
+            if (reduction > 0.45f) reduction = 0.45f;
             // Calcular useTime efectivo y redondear a entero
             int effectiveUseTime = (int)(useTimeBase * (1f - reduction));
             if (effectiveUseTime < 1) effectiveUseTime = 1;

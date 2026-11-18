@@ -57,6 +57,16 @@ namespace AethonMod.Content.NPCs
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 1;   // quieto: UN solo marco (el de la forja)
+            // v6.153 — EL CANDADO DE ETERNIDAD (la letra: «el muñeco de
+            // prueba negro tiende a desaparecer del mundo, eso esta
+            // mal»): NPC.CheckActive apaga a cualquier hostil que pasa
+            // 750 t fuera del rectángulo de pantalla de TODOS los
+            // jugadores — el dummy RENOVABA timeLeft en su AI, pero
+            // CheckActive corre FUERA de ella y con el muñeco lejos de
+            // todos (un banco de pruebas en una cueva) vanilla lo
+            // retiraba como fantasma. El GlobalNPC de abajo (la clase
+            // DummyNegroEterno) devuelve false: JAMÁS despawnea — vive
+            // hasta que el jugador lo guarde (el ítem de retorno).
             // EL BESTIARIO NO (no es un monstruo — es una herramienta de
             // pruebas: como el dummy vanilla, no aparece en las cifras).
             NPCID.Sets.DontDoHardmodeScaling[Type] = true;
@@ -317,6 +327,27 @@ namespace AethonMod.Content.NPCs
             }
             VFXCore.ReabrirLoteVanilla();
             return false;
+        }
+    }
+
+    // ==================================================================
+    //  v6.153 — EL CANDADO DE ETERNIDAD DEL BANCO DE PRUEBAS (la letra:
+    //  «el muñeco de prueba negro tiende a desaparecer del mundo, eso
+    //  esta mal, porque desaparece no debe hacerlo»): NPC.CheckActive
+    //  apaga a los hostiles que dejan caducar su boleto lejos de las
+    //  pantallas — el dummy NO es excepción para vanilla (no es town
+    //  NPC, no tiene sello de festín). ESTE GlobalNPC lo es: mientras
+    //  VIVA un DummyNegro en el mundo, CheckActive devuelve false — el
+    //  muñeco queda hasta que lo guarden. (Los demás NPC ni se enteran:
+    //  el hook solo mira ESTE tipo.)
+    // ==================================================================
+    public class DummyNegroEterno : GlobalNPC
+    {
+        public override bool CheckActive(NPC npc)
+        {
+            if (npc != null && npc.type == ModContent.NPCType<DummyNegroNPC>())
+                return false;   // el banco de pruebas NO se va del mundo
+            return true;
         }
     }
 }

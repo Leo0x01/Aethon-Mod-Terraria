@@ -45,10 +45,8 @@ namespace AethonMod.Content.Projectiles.Sombras
         private const byte FASE_MORDISCO = 2;
         private const byte FASE_DISIPAR = 3;
         // v6.145 — LA FASE MUÑECA (la fusión de la Sombra de Tinta):
-        // el modo tinta (ai[0]=1) — tras el mordisco la sombra NO se
         // disipa: REBOTA como la Muñeca Maldita (5 rebotes, cada uno
         // ×1,12 más rápido) y LUEGO se disipa con el estilo de siempre.
-        private const byte FASE_MUNECA = 4;
 
         private NPC Presa => Projectile.ai[0] <= 0 ? null : Main.npc[(int)Projectile.ai[0] - 1];
 
@@ -96,6 +94,16 @@ namespace AethonMod.Content.Projectiles.Sombras
             return pasos < 34 ? suelo : c;
         }
 
+        /// <summary>v6.153 — LAS SOMBRAS CONCENTRADAS (la letra:
+        /// «o aumentar el daño que le hace a un solo enemigo si usa
+        /// todas las sombras de la pagina que posea en ese momento»):
+        /// el disparo del arma original con el Eterno en el inventario
+        /// GASTA todas las sombras libres del grimorio sobre SU presa —
+        /// viaja en localAI[0] (≥1 = concentrada) y multiplica el
+        /// drenaje ×(1+n). Las sombras SE VEN: n hilillos extra nacen
+        /// del libro hacia la presa mientras dure la mordida.</summary>
+        private int SombrasConcentradas => (int)Projectile.localAI[0];
+
         public override void AI()
         {
             Projectile.ai[2]++;
@@ -107,8 +115,7 @@ namespace AethonMod.Content.Projectiles.Sombras
             bool presaValida = presa != null && presa.active && presa.life > 0;
             if (fase != FASE_DISIPAR && !presaValida)
             {
-                Projectile.ai[1] = (Projectile.ai[0] == 1f && Projectile.ai[1] != FASE_MUNECA)
-                            ? FASE_MUNECA : FASE_DISIPAR;
+                Projectile.ai[1] = FASE_DISIPAR;
                 Projectile.ai[2] = 0;
                 fase = FASE_DISIPAR;
                 t = 0;
@@ -161,8 +168,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                             Sonar(SoundID.NPCHit9.WithPitchOffset(-0.35f).WithVolumeScale(0.9f), Projectile.Center);
                         }
                     }
-                    if (t > 600) { Projectile.ai[1] = (Projectile.ai[0] == 1f && Projectile.ai[1] != FASE_MUNECA)
-                            ? FASE_MUNECA : FASE_DISIPAR; Projectile.ai[2] = 0; }
+                    if (t > 600) { Projectile.ai[1] = FASE_DISIPAR; Projectile.ai[2] = 0; }
                     break;
                 }
                 case FASE_MORDISCO:
@@ -176,8 +182,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                         // dueño del pool de un worm)
                         if (FaucesGlobalNPC.EnFauces(presa))
                         {
-                            Projectile.ai[1] = (Projectile.ai[0] == 1f && Projectile.ai[1] != FASE_MUNECA)
-                            ? FASE_MUNECA : FASE_DISIPAR;
+                            Projectile.ai[1] = FASE_DISIPAR;
                             Projectile.ai[2] = 0;
                             break;
                         }
@@ -195,12 +200,16 @@ namespace AethonMod.Content.Projectiles.Sombras
                             NPC dueñoPool = FaucesGlobalNPC.DueñoDelPool(presa);
                             if (dueñoPool != null && dueñoPool.active && dueñoPool.life > 1)
                             {
-                                float quitar = MathF.Max(dueñoPool.life * 0.025f, 25f);
+                                // v6.153 — LA CONCENTRACIÓN: el drenaje
+                                // base × (1 + sombras concentradas) — cada
+                                // sombra de la página gastada aprieta CON
+                                // la mordiza (la letra).
+                                float quitar = MathF.Max(dueñoPool.life * 0.025f, 25f)
+                                    * (1f + SombrasConcentradas);
                                 if (dueñoPool.life - quitar <= 1f)
                                 {
                                     FaucesGlobalNPC.Iniciar(dueñoPool, 3);
-                                    Projectile.ai[1] = (Projectile.ai[0] == 1f && Projectile.ai[1] != FASE_MUNECA)
-                            ? FASE_MUNECA : FASE_DISIPAR;
+                                    Projectile.ai[1] = FASE_DISIPAR;
                                     Projectile.ai[2] = 0;
                                     break;
                                 }
@@ -211,8 +220,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                             }
                         }
                     }
-                    else { Projectile.ai[1] = (Projectile.ai[0] == 1f && Projectile.ai[1] != FASE_MUNECA)
-                            ? FASE_MUNECA : FASE_DISIPAR; Projectile.ai[2] = 0; }
+                    else { Projectile.ai[1] = FASE_DISIPAR; Projectile.ai[2] = 0; }
                     break;
                 }
                 case FASE_DISIPAR:
@@ -220,37 +228,6 @@ namespace AethonMod.Content.Projectiles.Sombras
                     if (t == 1) Sonar(SoundID.Item122.WithPitchOffset(0.2f).WithVolumeScale(0.3f), Projectile.Center);
                     Projectile.velocity *= 0.92f;
                     if (t >= 44) Projectile.Kill();
-                    break;
-                }
-                case FASE_MUNECA:
-                {
-                    // v6.145 — EL REBOTE DE LA MUÑECA MALDITA (la fusión
-                    // de la Sombra de Tinta): la sombra sale del mordisco
-                    // REBOTANDO en el mundo (tileCollide ON, 5 rebotes,
-                    // ×1,12 cada uno) — el bumerán maldito del hex doll
-                    // vestido de tinta. Tras el último: la fuga de casa
-                    // (un ángulo hacia el dueño) y el disipar suave.
-                    Projectile.tileCollide = true;
-                    if (t == 1f)
-                    {
-                        Sonar(SoundID.Item122.WithPitchOffset(0.05f).WithVolumeScale(0.5f), Projectile.Center);
-                        // el primer impulso: rumbo alejándose de la presa
-                        Vector2 huida = -Projectile.velocity.SafeNormalize(Vector2.UnitY);
-                        Projectile.velocity = huida * 11f;
-                    }
-                    // LA ANIMACIÓN SIGUE VIVA (la letra de la II): la masa
-                    // ondea — la rotación persigue la velocidad
-                    Projectile.rotation = Projectile.velocity.ToRotation();
-                    // bruma de tinta por el camino (más densa que la casa)
-                    if (Main.netMode != NetmodeID.Server && Main.rand.NextBool(4))
-                        SombrasLib.Bruma(Projectile.Center, 24f, 0.5f,
-                            Main.GlobalTimeWrappedHourly, Projectile.whoAmI * 7 + 3,
-                            -Projectile.velocity * 0.1f);
-                    if (t > 300f)   // la red de seguridad
-                    {
-                        Projectile.ai[1] = FASE_DISIPAR;
-                        Projectile.ai[2] = 0;
-                    }
                     break;
                 }
             }
@@ -278,46 +255,6 @@ namespace AethonMod.Content.Projectiles.Sombras
             return false;
         }
 
-        public override bool OnTileCollide(Vector2 oldVelocity)
-        {
-            // v6.145 — EL REBOTE (la fase muñeca de la Sombra de Tinta):
-            // invierte el eje golpeado y ACELERA ×1,12 — hasta 5 veces
-            // (ai[2] cuenta los rebotes). Tras el quinto: LA VUELTA A
-            // CASA (rumbo al dueño, sin colisión) y el disipar.
-            if (Projectile.ai[1] != FASE_MUNECA) return true;
-
-            int rebotes = (int)Projectile.ai[2];
-            if (rebotes >= 5)
-            {
-                // LA VUELTA: hacia el dueño — la sombra regresa
-                Player dueño = Main.player[Projectile.owner];
-                Vector2 casa = dueño.MountedCenter - Projectile.Center;
-                if (casa.LengthSquared() > 1f)
-                    Projectile.velocity = Vector2.Normalize(casa) * 14f;
-                Projectile.tileCollide = false;
-                if (Projectile.Hitbox.Intersects(dueño.Hitbox) ||
-                    casa.LengthSquared() < 90f * 90f)
-                {
-                    Projectile.ai[1] = FASE_DISIPAR;
-                    Projectile.ai[2] = 0;
-                }
-                return false;
-            }
-            Projectile.ai[2] = rebotes + 1;
-            if (Math.Abs(Projectile.velocity.X - oldVelocity.X) > float.Epsilon)
-                Projectile.velocity.X = -oldVelocity.X;
-            if (Math.Abs(Projectile.velocity.Y - oldVelocity.Y) > float.Epsilon)
-                Projectile.velocity.Y = -oldVelocity.Y;
-            Projectile.velocity *= 1.12f;      // la aceleración de la muñeca
-            if (Main.netMode != NetmodeID.Server)
-            {
-                SombrasLib.Bruma(Projectile.Center, 30f, 0.6f,
-                    Main.GlobalTimeWrappedHourly, Projectile.whoAmI * 13 + 1);
-                Sonar(SoundID.Item122.WithPitchOffset(0.18f).WithVolumeScale(0.35f),
-                    Projectile.Center);
-            }
-            return false;
-        }
 
         public override bool PreDraw(ref Color lightColor)
         {
@@ -382,7 +319,6 @@ namespace AethonMod.Content.Projectiles.Sombras
             // bruma, MÁS DENSA (×1.35): la tinta es ciega, va a lo suyo.
             // (La boca procedural ya murió en v6.50.68 — solo quedaban
             // estos ojos.)
-            bool esTinta = Projectile.ai[0] == 1f;
             Vector2 objetivo = presa != null && presa.active
                 ? presa.Center
                 : dueño.MountedCenter + Projectile.velocity * 30f;
@@ -402,6 +338,26 @@ namespace AethonMod.Content.Projectiles.Sombras
             Vector2 punta = col[col.Length - 1];
             Vector2 rumbo = (col[col.Length - 1] - col[Math.Max(col.Length - 4, 0)])
                 .SafeNormalize(Projectile.rotation.ToRotationVector2());
+
+            // v6.153 — LAS SOMBRAS CONCENTRADAS SE VEN (la letra: «que
+            // se vea reflejado siempre que la use»): cada sombra gastada
+            // sobre ESTA presa es UN HILO NEGRO más apretándola — nacen
+            // del libro, orbitan la presa y aprietan al ritmo del
+            // drenaje. El festín concentrado ES visible desde el cielo.
+            int sombras = (int)Projectile.localAI[0];
+            if (sombras > 0 && presa != null && presa.active && presa.life > 0)
+            {
+                for (int s = 0; s < sombras; s++)
+                {
+                    float angS = tiempo * (0.8f + 0.12f * (s % 3)) + s * MathHelper.TwoPi / Math.Max(1, sombras);
+                    float radS = 46f + 12f * MathF.Sin(tiempo * 3f + s * 1.7f);
+                    Vector2 anclaS = presa.Center + angS.ToRotationVector2() * radS;
+                    Vector2[] colS = SombrasLib.ColumnaViva(raiz, anclaS, tiempo,
+                        semilla + s * 37, 12, 0.18f, gancho: 0.6f);
+                    SombrasLib.Masa(colS, 5f, 8f, 0.55f, semilla + s * 37, tiempo,
+                        grosorCentro: 18f, lisa: true);
+                }
+            }
 
             if (fase == FASE_MORDISCO && presa != null && presa.active)
             {

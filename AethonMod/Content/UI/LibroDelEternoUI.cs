@@ -99,25 +99,26 @@ namespace AethonMod.Content.UI
                 }, InterfaceScaleType.UI));
 
             // ============================================================
-            //  v6.151 — EL LIBRO ENCIMA DE TODO (la letra: «el libro de
-            //  informacion debe abrirse encima de la interfaz de usuario
-            //  nada lo debe tapar»): la capa del LIBRO ABIERTO ya NO se
-            //  inserta junto al inventario — vive AL FINAL de la lista
-            //  (la ÚLTIMA capa dibuja encima de todo: inventario, mapas,
-            //  barras, hasta el propio cursor de texto). El icono
-            //  pequeño sigue en su sitio de siempre (es un botón del
-            //  inventario); lo que manda encima de todo es EL LIBRO
-            //  ABIERTO.
+            //  v6.153 — EL CURSOR GANA DE VERDAD (la letra: «el libro de
+            //  informacion sigue estando por encima del cursor y el
+            //  cursor siempre queda oculto»): LA AUTOPSIA — insertar la
+            //  capa del libro antes de 'Vanilla: Mouse Over' NO basta:
+            //  el cursor de Terraria NO vive en esa capa cuando el
+            //  inventario está abierto (el libro FUERZA playerInventory
+            //  = false en su Draw, pero vanilla ya decidió SU pase de
+            //  cursor con el inventario abierto de ANTES — el cursor
+            //  queda pintado y el libro encima lo TAPA). LA CURA
+            //  DOBLE:
+            //   (a) la capa del libro vive ANTES de 'Vanilla: Mouse
+            //       Text' (la 33 — TODAS las capas de cursor de vanilla
+            //       van después) — ya no puede tapar NADA de vanilla;
+            //   (b) el libro dibuja SU PROPIO CURSOR al final de su
+            //       Draw (el cursor de vanilla clonado en la posición
+            //       real del ratón) — el puntero es LO ÚLTIMO que se
+            //       ve, SIEMPRE.
             // ============================================================
-            // v6.152 — EL CURSOR MANDA (la letra: «el cursor queda por
-            // debajo del libro de informacion, el cursor debe estar por
-            // encima del libro de informacion»): el libro ya NO es la
-            // ÚLTIMA capa — vive JUSTO ANTES de 'Vanilla: Mouse Over'
-            // (la capa que dibuja el cursor de vanilla): encima de todo
-            // el juego y su interfaz… DEBAJO del cursor, como manda la
-            // letra.
-            int idxCursor = layers.FindIndex(l => l.Name.Equals("Vanilla: Mouse Over"));
-            if (idxCursor < 0) idxCursor = layers.Count;
+            int idxCursor = layers.FindIndex(l => l.Name.Equals("Vanilla: Mouse Text"));
+            if (idxCursor < 0) idxCursor = layers.Count - 1;
             layers.Insert(idxCursor, new LegacyGameInterfaceLayer("AethonMod: LibroDelEterno",
                 () =>
                 {
@@ -572,7 +573,17 @@ namespace AethonMod.Content.UI
                 // SUPERIOR DERECHA del LIBRO (la esquina de la TAPA, el
                 // sitio universal del cierre) con su hitbox de 36 px
                 // dibujada EXACTA — donde tocas es donde cae.
-                var rectX = new Rectangle(x + w - 6, y - 8, 36, 36);
+                // ============================================================
+                //  v6.153 — LA X EN SU ESQUINA DE VERDAD (la letra: «la X
+                //  no fue movida de lugar y no cuadra con su hitbox»):
+                //  el rectángulo viejo SOBRESALÍA de la tapa (6 px a la
+                //  derecha, 8 arriba — el botón FLOTABA fuera de la
+                //  esquina y el usuario lo veía despegado). AHORA vive
+                //  PEGADO POR DENTRO de la esquina superior derecha de
+                //  la TAPA (el sitio universal del cierre): DIBUJO y
+                //  HITBOX son EL MISMO rectángulo de 30×30.
+                // ============================================================
+                var rectX = new Rectangle(x + w - 38, y + 6, 30, 30);
                 bool hoverX = rectX.Contains(Main.mouseX, Main.mouseY);
                 // v6.152 — LA X DIBUJADA ES SU HITBOX (la letra: «el
                 //     hitbox esta bien, pero la X no, la X esta corrida
@@ -593,6 +604,37 @@ namespace AethonMod.Content.UI
                     Vector2.Zero, 1.1f, SpriteEffects.None, 0f);
                 if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
                     LibroDelEternoUI.Cerrar();
+
+                // ============================================================
+                //  v6.153 — EL CURSOR PROPIO (la letra: «el cursor
+                //  siempre queda oculto»): LO ÚLTIMO que dibuja el libro
+                //  es EL PROPIO CURSOR — el puntero de vanilla clonado
+                //  en la posición real del ratón. NADA del libro (ni de
+                //  la casa) puede taparlo: el usuario SIEMPRE ve dónde
+                //  apunta. (El cursor de vanilla vive en sus capas 33+;
+                //  esta capa corre antes — el clon garantiza la vista
+                //  aunque otro mod mueva capas.)
+                // ============================================================
+                try
+                {
+                    // v6.153 — EL CURSOR DE VANILLA CLONADO (verificado por
+                    // reflexión contra el tModLoader.dll REAL:
+                    // TextureAssets.Cursors es el Asset<Texture2D>[] de
+                    // siempre; Main.DrawCursor(bonus, smart) usa
+                    // Cursors[Main.cursorStyle] — aquí se clona su trazo
+                    // al pie: el tinte vivo del cursor (cursorColor, la
+                    // animación de color de vanilla) y SU escala).
+                    var cursor = Terraria.GameContent.TextureAssets.Cursors[0].Value;
+                    if (cursor != null && !cursor.IsDisposed)
+                    {
+                        Vector2 posCursor = new Vector2(Main.mouseX, Main.mouseY);
+                        sb.Draw(cursor, posCursor, null,
+                            Main.cursorColor * Main.cursorAlpha,
+                            0f, default, Main.cursorScale,
+                            SpriteEffects.None, 0f);
+                    }
+                }
+                catch { }
             }
             catch { }
         }
