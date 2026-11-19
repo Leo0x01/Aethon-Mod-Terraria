@@ -48,52 +48,24 @@ namespace AethonMod.Content.NPCs
     public class ElCronista : ModNPC
     {
         // ================================================================
-        //  v6.156 — EL CUERPO DEL SISTEMA DE JUGADORES (la letra: «usa el
-        //  mismo sistema que terraria tiene para crear jugadores y crea
-        //  al Cronista»): un Player MODELO dibujado por EL RENDERER DE
-        //  VANILLA (Main.PlayerRenderer — el LegacyPlayerRenderer que
-        //  dibuja a todos los jugadores del mundo, verificado en el
-        //  decompile: DrawPlayer(Camera, Player, position, rotation,
-        //  rotationOrigin, shadow, scale)). El Cronista es UN HOMBRE
-        //  (la letra: «el cronista es hombre») con la túnica del
-        //  escriba (la MysticRobe de vanilla — el ropaje oscuro), la
-        //  paleta de tinta de la casa y la pluma en la solapa.
+        //  v6.157 — EL CUERPO ES LA TIRA PROPIA (ver PreDraw): el
+        //  PlayerRenderer de la v6.156 MURIÓ (frágil: un fallo del
+        //  new Player() fuera de mundo dejaba al NPC INVISIBLE — el
+        //  «realmente no aparece» del usuario). El sprite es el
+        //  NPC_25_Frames clásico de los town NPC (verificado en el
+        //  framer del decompile: Main.npcFrameCount[Type]=25 con
+        //  ExtraFrames=5 y AttackFrames=4 — el layout del Guide).
         // ================================================================
-        private static Player _cuerpo;
-        private static bool _cuerpoListo;
-
-        private static void ForjarCuerpo()
-        {
-            if (_cuerpoListo) return;
-            try
-            {
-                _cuerpo = new Player();
-                _cuerpo.Male = true;                      // UN HOMBRE (la letra)
-                _cuerpo.name = "El Cronista";
-                _cuerpo.skinVariant = 0;                  // el cuerpo clásico
-                _cuerpo.hair = 7;                         // el pelo corto serio
-                _cuerpo.skinColor = new Color(216, 190, 150);   // pergamino
-                _cuerpo.eyeColor = new Color(150, 96, 210);     // la runa viva
-                _cuerpo.hairColor = new Color(46, 28, 70);      // la tinta
-                _cuerpo.armor[1] = new Item(ItemID.Robe); // LA TÚNICA DEL ESCRIBA
-                _cuerpo.armor[2] = new Item(ItemID.FamiliarShirt);
-                _cuerpo.armor[3] = new Item(ItemID.FamiliarPants);
-                _cuerpo.armor[4] = new Item(ItemID.FamiliarWig); // la capucha
-                _cuerpo.dead = false;
-                _cuerpoListo = true;
-            }
-            catch
-            {
-                _cuerpo = null;
-            }
-        }
 
         public override void SetStaticDefaults()
         {
-            // LA ANIMACIÓN PROPIA (la tira forjada: 25 marcos del
-            // town NPC — idle, caminar, atacar y EL REPOSO DEL ESCRIBA)
+            // LA ANIMACIÓN PROPIA (la tira forjada v6.157: 25 marcos
+            // del town NPC — idle, caminar, EL ESCRIBA SENTADO y el
+            // lanzamiento de la pluma). EL LAYOUT DEL GUIDE (el framer
+            // del decompile): 0 idle · 1-14 andar · 15-20 extra ·
+            // 21-24 ataque → ExtraFrames = 5, AttackFrames = 4.
             Main.npcFrameCount[Type] = 25;
-            NPCID.Sets.ExtraFramesCount[Type] = 9;
+            NPCID.Sets.ExtraFramesCount[Type] = 5;
             NPCID.Sets.AttackFrameCount[Type] = 4;
             NPCID.Sets.DangerDetectRange[Type] = 700;
             NPCID.Sets.AttackType[Type] = 0;          // lanzamiento (la pluma)
@@ -276,6 +248,21 @@ namespace AethonMod.Content.NPCs
                         if (Main.npc[i] != null && Main.npc[i].active &&
                             Main.npc[i].type == tipo) return;
 
+                    // v6.157 — EL NPC TEST TAMBIÉN NACE (la letra: «el
+                    // NPC test debe aparecer junto con el cronista»):
+                    // el CanTownNPCSpawn del NPCTest NO LO HACE NACER
+                    // JAMÁS (los town NPC sin casa no llegan — el
+                    // chequeo vanilla de Main.SpawnTownNPC exige
+                    // housing; por eso «el NPC test no existe no lo
+                    // veo»). EL SPOWNER DE LA CASA: cuando nace el
+                    // Cronista, su sombra de pruebas nace A SU LADO
+                    // (UNO por mundo, el mismo bucle anti-doble).
+                    int tipoTest = ModContent.NPCType<NPCTest>();
+                    bool testVive = false;
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                        if (Main.npc[i] != null && Main.npc[i].active &&
+                            Main.npc[i].type == tipoTest) { testVive = true; break; }
+
                     // ¿ALGUIEN lleva el grimorio? Nace a SU lado.
                     int eterno = ModContent.ItemType
                         <global::AethonMod.Content.Weapons.GrimoireEternal>();
@@ -317,6 +304,40 @@ namespace AethonMod.Content.NPCs
                             global::AethonMod.Content.Systems.EcoRed.AnunciarMundo("Mods.AethonMod.Cronista.Llega",
                                 new Color(196, 138, 255));
                         }
+
+                        // v6.157 — LA SOMBRA DE PRUEBAS nace JUNTO AL
+                        // CRONISTA (la letra: «el NPC test debe aparecer
+                        // junto con el cronista»): a 4 tiles a la derecha
+                        // (o a la izquierda si no hay suelo), con SU
+                        // bruma violeta de nacimiento.
+                        if (!testVive)
+                        {
+                            int txT = tx + (p.direction >= 0 ? 4 : -4);
+                            int sueloT = -1;
+                            for (int y = ty - 4; y < ty + 22 && y < Main.maxTilesY - 4; y++)
+                                if (WorldGen.SolidTile(txT, y)) { sueloT = y; break; }
+                            Vector2 posT = sueloT >= 0
+                                ? new Vector2(txT * 16f + 8f, sueloT * 16f)
+                                : p.Bottom;
+                            int idxT = NPC.NewNPC(p.GetSource_FromAI(),
+                                (int)posT.X, (int)posT.Y, tipoTest, 0, 0f, p.whoAmI);
+                            if (idxT >= 0 && idxT < Main.maxNPCs && Main.npc[idxT].active)
+                            {
+                                Main.npc[idxT].homeTileX = (int)(posT.X / 16f);
+                                Main.npc[idxT].homeTileY = (int)(posT.Y / 16f);
+                                Main.npc[idxT].netUpdate = true;
+                                if (!Main.dedServ)
+                                    for (int k = 0; k < 10; k++)
+                                    {
+                                        var d = Dust.NewDustPerfect(Main.npc[idxT].Center,
+                                            DustID.Shadowflame,
+                                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
+                                                Main.rand.NextFloat(-2.5f, -0.5f)),
+                                            100, new Color(110, 60, 180), 1.0f);
+                                        d.noGravity = true;
+                                    }
+                            }
+                        }
                         return;   // UNO por mundo (el primero que lo lleve)
                     }
                 }
@@ -336,54 +357,48 @@ namespace AethonMod.Content.NPCs
         }
 
         // ================================================================
-        //  v6.156 — EL DIBUJO: EL CRONISTA ES UN JUGADOR DE TERRARIA
-        //  (la letra: «usa el mismo sistema que terraria tiene para
-        //  crear jugadores»): el renderer de vanilla (Main.PlayerRenderer
-        //  — el LegacyPlayerRenderer, verificado en el decompile:
-        //  DrawPlayer(Camera, Player, position, rotation, rotationOrigin,
-        //  shadow, scale)) dibuja SU CUERPO — el Player modelo de
-        //  ForjarCuerpo: la túnica del escriba, el pelo de tinta, la
-        //  piel de pergamino y EL ANDAR de los jugadores (bodyFrame del
-        //  ciclo de caminar). LA PLUMA DORADA de la casa en la solapa.
+        //  v6.157 — EL CUERPO: LA TIRA PROPIA DE 25 MARCOS (la letra:
+        //  «el cronista no se ve como un NPC de terraria» + «investiga
+        //  si existe algun mod o recurso externo para la creacion de
+        //  NPC… crea nuestra propia version para nosotros»). LA
+        //  INVESTIGACIÓN: los mods grandes usan UNA TIRA de 25 marcos
+        //  40×56 animada por EL FRAMER DE VANILLA (el decompile del
+        //  Guide: idle=frame 0 · walk=2..14 por velocity.X ·
+        //  extra=16..20 · ataque=21..24) — LA VÍA SIN texturas ajenas
+        //  ni copyright: el sprite del escriba FORJADO POR CÓDIGO
+        //  (cronista_sprite_v6157.py — la túnica de tinta con borde
+        //  dorado, la piel de pergamino, el ojo de runa, la pluma
+        //  dorada y el grimorio al pecho). EL RENDERER DE JUGADORES
+        //  MUERE: era frágil (un new Player() fuera de mundo tira con
+        //  el catch mudo → NPC INVISIBLE — exactamente lo que el
+        //  usuario vio: «realmente no aparece»); vanilla dibuja la
+        //  tira con el framer de siempre (AnimationType = Guide).
         // ================================================================
+
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
-            try
+            // LA LEY DE LA CASA: el sprite lo dibuja VANILLA (la tira
+            // propia de 25 marcos, animada por el framer del Guide) —
+            // aquí solo EL AURA DEL ESCRIBA: la tinta del oficio respira
+            // a sus pies (2 motas suaves, el suspiro de la pluma).
+            if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 18f == 0f)
             {
-                ForjarCuerpo();
-                if (_cuerpo != null && Main.PlayerRenderer != null)
+                try
                 {
-                    float vel = NPC.velocity.Length();
-                    if (vel > 0.5f)
+                    for (int k = 0; k < 2; k++)
                     {
-                        int f = (int)(Main.GlobalTimeWrappedHourly * 8f) % 12 + 1;
-                        _cuerpo.bodyFrame = new Rectangle(0, 56 * f, 40, 56);
+                        Vector2 cuna = NPC.BottomLeft + new Vector2(
+                            Main.rand.NextFloat(NPC.width), Main.rand.NextFloat(-3f, 1f));
+                        Dust d = Dust.NewDustPerfect(cuna,
+                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                            new Vector2(Main.rand.NextFloat(-0.25f, 0.25f), -Main.rand.NextFloat(0.08f, 0.3f)),
+                            0, new Color(196, 138, 255), Main.rand.NextFloat(0.18f, 0.30f));
+                        d.noGravity = true;
                     }
-                    else
-                        _cuerpo.bodyFrame = new Rectangle(0, 0, 40, 56);
-                    _cuerpo.direction = NPC.direction;
-                    _cuerpo.gravDir = 1f;
-                    _cuerpo.fullRotation = 0f;
-                    _cuerpo.wingFrame = 0;
-
-                    Vector2 pos = NPC.position - screenPos;
-                    Main.PlayerRenderer.DrawPlayer(Main.Camera, _cuerpo, pos,
-                        0f, Vector2.Zero);
-
-                    // LA PLUMA DORADA (el sello del escriba inmortal).
-                    var plumaAsset = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/NPCs/ElCronista_Head",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                    var pluma = plumaAsset.Value;
-                    spriteBatch.Draw(pluma,
-                        pos + new Vector2(NPC.width * 0.5f - 20f, -6f),
-                        null, Color.White * 0.85f, 0f, Vector2.Zero,
-                        2f, SpriteEffects.None, 0f);
                 }
+                catch { }
             }
-            catch { }
-            return false;
+            return true;   // VANILLA DIBUJA (la tira de 25 marcos propia)
         }
 
         // ================================================================
@@ -470,7 +485,16 @@ namespace AethonMod.Content.NPCs
         /// ANTES de cualquier tienda.</summary>
         public override void ModifyActiveShop(string shopName, Item[] items)
         {
-            if (shopName != "Cronista") return;
+            // v6.157 — LA CAUSA RAÍZ DE LA TIENDA VACÍA (la autopsia del
+            // decompile REAL): el nombre que llega aquí es EL COMPLETO —
+            // NPCShopDatabase.GetShopName(npcType, "Cronista") forma
+            // «AethonMod/ElCronista/Cronista» (FullName + "/" + nombre),
+            // y OnChatButtonClicked llama SetupShop con ESE nombre. El
+            // guard viejo `shopName != "Cronista"` NUNCA casaba → el
+            // mostrador quedaba VACÍO EN TODAS LAS PARTIDAS, desde el
+            // día uno. EL GUARD NUEVO: casa con el FINAL del nombre
+            // completo (cualquier prefijo del mod lo deja pasar).
+            if (shopName == null || !shopName.EndsWith("/Cronista")) return;
             try
             {
                 Player comprador = Main.LocalPlayer;
@@ -690,9 +714,9 @@ namespace AethonMod.Content.NPCs
     // ======================================================================
     public class EsenciaMonedaSistema : ModSystem
     {
-        /// <summary>El ID de la moneda (lo reparten los items de la
-        /// tienda via shopSpecialCurrency — CustomCurrencyManager lo
-        /// registra en su Load).</summary>
+        /// <summary>El ID de la moneda (lo reparten los items de la tienda
+        /// via shopSpecialCurrency — CustomCurrencyManager lo registra
+        /// en su Load).</summary>
         public static int IdMoneda { get; private set; } = -1;
 
         public override void Load()
@@ -708,6 +732,46 @@ namespace AethonMod.Content.NPCs
         public override void Unload()
         {
             IdMoneda = -1;
+        }
+    }
+
+    // ======================================================================
+    //  CONSAGRACIONDELCRONISTA — v6.157 — TODO LO QUE EL CRONISTA VENDE
+    //  SALE CONSAGRADO (la letra: «asegurate de que todo lo que venda
+    //  este consagrado justo como lo pide el grimorio»). LA VÍA REAL
+    //  (verificada en el decompile): al comprar, ItemSlot llama
+    //  item.OnCreated(new BuyItemCreationContext(Main.mouseItem,
+    //  localPlayer.TalkNPC)) — el contexto lleva EL NPC VENDEDOR. El
+    //  hook GlobalItem.OnCreated ve pasar cada item comprado: si el
+    //  vendedor es El Cronista, el item NACE CONSAGRADO (el mismo
+    //  sello del altar: Corrompido = true — el grimorio lo come sin
+    //  pasar por el altar, porque el Cronista YA lo consagró al
+    //  venderlo: la pluma del escriba sella la mercancía).
+    // ======================================================================
+    public class ConsagracionDelCronista : GlobalItem
+    {
+        public override bool AppliesToEntity(Item item, bool lateInstance)
+            => true;   // cualquier mercancía del mostrador
+
+        public override void OnCreated(Item item, ItemCreationContext context)
+        {
+            // SOLO lo comprado en el mostrador del Cronista (la firma
+            // real del decompile: BuyItemCreationContext con VendorNPC).
+            if (context is not Terraria.DataStructures.BuyItemCreationContext compra)
+                return;
+            try
+            {
+                if (compra.VendorNPC == null) return;
+                if (compra.VendorNPC.type != ModContent.NPCType<ElCronista>()) return;
+
+                var sello = item.GetGlobalItem
+                    <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                if (sello != null && !sello.Corrompido)
+                {
+                    sello.Corrompido = true;   // EL SELLO DEL ESCRIBA
+                }
+            }
+            catch { }
         }
     }
 }

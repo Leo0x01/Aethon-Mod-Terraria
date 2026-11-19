@@ -49,7 +49,11 @@ namespace AethonMod.Content.NPCs
         }
 
         public override bool CanTownNPCSpawn(int numTownNPCs)
-            => true;   // ES UN TEST: siempre puede llegar
+            => false;   // v6.157: NACE JUNTO AL CRONISTA (el spawner de
+                        // CronistaSistema lo invoca — la letra: «el NPC
+                        // test debe aparecer junto con el cronista»);
+                        // el camino vanilla de casas NUNCA lo trae (por
+                        // eso «no lo veo» — sin casa no hay town NPC)
 
         public override string GetChat()
             => "Soy un test";

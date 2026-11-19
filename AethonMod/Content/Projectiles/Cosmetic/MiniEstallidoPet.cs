@@ -404,6 +404,47 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     float c = _edad / 45f;
                     LumenLib.Bloom(Main.spriteBatch, pos, (22f + 26f * c) * escDios,
                         OroGrimorio, 0.35f + 0.35f * c, 3);
+
+                    // ====================================================
+                    //  v6.157 — LA CARGA DE LA MANIFESTACIÓN (la letra:
+                    //  «en el momento de la explosion tiene que haber un
+                    //  momento en donde la explosion cargue con
+                    //  particulas hiendo al jugador y luego explotando
+                    //  como dije»): en modo dios, la FASE DE RECOGIDA es
+                    //  LA CARGA DE VERDAD — LLUVIA DENSA de partículas
+                    //  doradas que CAEN HACIA EL JUGADOR desde toda la
+                    //  pantalla (nacen en anillo ancho y VIAJAN AL
+                    //  CENTRO, acelerando al final — la respiración
+                    //  antes del estallido del dios).
+                    // ====================================================
+                    if (Projectile.ai[1] == -2f)
+                    {
+                        int semilla = (int)Projectile.ai[0];
+                        int cuantas = 26 + (int)(c * 18f);   // más denso al final
+                        for (int i = 0; i < cuantas; i++)
+                        {
+                            float h0 = VFXCore.Hash01(semilla, i, 70);
+                            float h1 = VFXCore.Hash01(semilla, i, 71);
+                            float h2 = VFXCore.Hash01(semilla, i, 72);
+                            float h3 = VFXCore.Hash01(semilla, i, 73 + (int)(_edad * 0.5f));
+                            // cada partícula nace en SU anillo y CAE al
+                            // centro con easing (rápida al final — la
+                            // succión del despertar)
+                            float nace = (h0 * 0.92f + 0.04f) * c;
+                            float rIni = (360f + 480f * h1) * nace;
+                            float viaje = MathF.Pow(c, 0.55f);   // acelera al final
+                            float rAhora = rIni + (26f - rIni) * viaje;
+                            float ang = h2 * MathHelper.TwoPi + t * (0.3f + 0.5f * h0);
+                            Vector2 pp = pos + new Vector2(
+                                MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * rAhora;
+                            // la estela: más pequeña y brillante al acercarse
+                            float cerca = 1f - Math.Clamp(rAhora / 800f, 0f, 1f);
+                            LumenLib.Bloom(Main.spriteBatch, pp,
+                                (5f + 9f * h3) * (0.6f + cerca * 0.8f),
+                                (h3 > 0.5f) ? OroGrimorio : AmbarEstelar,
+                                (0.30f + 0.55f * cerca) * (0.5f + 0.5f * nace), 2);
+                        }
+                    }
                 }
                 else
                 {
@@ -441,19 +482,16 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             OroGrimorio, 0.50f * (1f - tB / 70f), seed);
 
                     // ====================================================
-                    //  v6.156 — LA ONDA DE ABERRACIÓN CROMÁTICA (la letra:
-                    //  «una onda expansiva en forma de aberracion
-                    //  cromatica debe extenderse hacia fuera a gran
-                    //  velocidad barriendo con todos los enemigos»):
-                    //  en modo dios, EL FRENTE DEL BARRIDO se dibuja como
-                    //  una CORONA TRIPLE DESFAZADA — el mismo frente
-                    //  dibujado TRES veces, separado unos píxeles y en
-                    //  los TRES CANALES del prismático (rojo cian /
-                    //  oro púrpura / blanco turquesa): donde la onda
-                    //  pasa, los colores se ROMPEN como en una lente
-                    //  barata — LA ABERRACIÓN CROMÁTICA de verdad,
-                    //  hecha con las piezas de la casa (OndaLib.Pulse
-                    //  ×3 con offset radial y tintes opuestos).
+                    //  v6.157 — LA ONDA DE ABERRACIÓN CROMÁTICA DE LA
+                    // LIBRERÍA (la letra: «no tiene onda expansiva
+                    // cromatica, creo que hay librerias para eso en
+                    // nuestro proyecto» — HAY: OndaLib.Shock con
+                    // chromatic:true, la onda de choque ROTA de la casa
+                    // con SUS FRANJAS R/B de verdad — la usan el Ciclo
+                    // Estelar y la Supergigante Roja). El frente triple
+                    // casero de la v6.156 (3×Pulse desfasados) MUERE:
+                    // LA ONDA REAL, dibujada EN el radio del barrido
+                    // (42 px/t) con el grosor y el falloff de la casa.
                     // ====================================================
                     if (Projectile.ai[1] == -2f && _frenteAberracion >= 0f)
                     {
@@ -461,44 +499,19 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         float rMaxOnda = 2600f;
                         if (frente <= rMaxOnda)
                         {
-                            float alfaOnda = 0.85f * Math.Max(0f,
+                            float alfaOnda = 0.95f * Math.Max(0f,
                                 1f - frente / rMaxOnda);
                             if (alfaOnda > 0.02f)
                             {
-                                // LA LEY DE LA CURVA: OndaLib.Expansion
-                                // mapea progreso→radio (1-(1-p)^2.2) —
-                                // para dibujar el frente EN el radio real
-                                // del barrido, el progreso es el que
-                                // EXPANDE INVERSO a ese radio.
+                                // EL PROGRESO de la onda EN el radio real
+                                // del barrido: Expansion(p)=1-(1-p)^2.2 →
+                                // el inverso pone el frente DONDE toca.
                                 float pInv = 1f -
                                     MathF.Pow(1f - Math.Min(1f, frente / rMaxOnda), 1f / 2.2f);
-                                // EL DESFASE de los canales (px de radio
-                                // — la «lente rota»: cada canal viaja a
-                                // su propia velocidad aparente).
-                                float sep = 7f + 5f * (1f - frente / rMaxOnda);
-                                // CANAL A — rojo/cian (el par clásico).
-                                OndaLib.Pulse(Main.spriteBatch,
-                                    pos + new Vector2(-sep * 0.5f, 0f),
-                                    pInv, frente, new Color(255, 70, 90),
-                                    alfaOnda, seed + 61);
-                                OndaLib.Pulse(Main.spriteBatch,
-                                    pos + new Vector2(sep * 0.5f, 0f),
-                                    pInv, frente, new Color(90, 255, 235),
-                                    alfaOnda, seed + 62);
-                                // CANAL B — oro/púrpura (el par de la casa).
-                                OndaLib.Pulse(Main.spriteBatch,
-                                    pos + new Vector2(0f, -sep * 0.35f),
-                                    pInv, frente, OroGrimorio,
-                                    alfaOnda * 0.8f, seed + 63);
-                                OndaLib.Pulse(Main.spriteBatch,
-                                    pos + new Vector2(0f, sep * 0.35f),
-                                    pInv, frente, new Color(178, 110, 255),
-                                    alfaOnda * 0.8f, seed + 64);
-                                // CANAL C — el blanco que cierra (la
-                                // coherencia volviendo tras el rompiente).
-                                OndaLib.Pulse(Main.spriteBatch, pos,
-                                    pInv, frente * (1f - sep / 900f),
-                                    BlancoCaliente, alfaOnda * 0.55f, seed + 65);
+                                OndaLib.Shock(Main.spriteBatch, pos, pInv,
+                                    frente, BlancoCaliente, alfaOnda, seed,
+                                    thickness: 16f, OndaFalloff.Quadratic,
+                                    chromatic: true);
                             }
                         }
                     }

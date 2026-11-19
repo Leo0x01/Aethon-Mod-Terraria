@@ -110,26 +110,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             _ = centro;
 
             // ============================================================
-            //  v6.155 → v6.156 — LOS ANILLOS SON LOS DEL ACCESORIO (la
-            // letra: «ahora los anillos runicos de los soles si
-            // aparecen en la construccion, pero no son los mismos que
-            // los del accesorios, deben ser los mismos que los del
-            // accesorios y de hecho son mas que los que tiene el
-            // accesorio, el accesorio es la version que debes usar»):
-            // LA CORONA DORSAL DEL ACCESORIO (AnilloDorsalRenderer.Draw
-            // — LA TRIPLE CORONA DE CONJURO: el anillo de fotones + el
-            // dorado de 8 + el violeta de 6 contrarrotando + el blanco
-            // íntimo de 6 rápido, las runas DE PIE con sus perlas) es
-            // LA VERSIÓN QUE MANDA. La v6.155 los había cambiado por
-            // los anillos de los soles (SigiloLib.SistemaAnillos) — un
-            // sistema DISTINTO y MÁS NUMEROSO; MUEREN. La construcción
-            // 113-120 viste EXACTAMENTE LA MISMA CORONA del accesorio
-            // (AnilloRunicoDorsalHalo la usa por accesorio; aquí la
-            // usa la construcción), anclada a LA ESPALDA del portador
-            // (la misma cuenta del accesorio: Center − 0.04×altura,
-            // consciente del festín y de la gravedad) y CRECIENDO con
-            // los peldaños: alpha y densidad de runas suben 113→119
-            // hasta la corona plena del accesorio al 120.
+            //  v6.157 — LA CORONA ES LA DEL ACCESORIO, TAL CUAL (la
+            // letra: «solo toma los anillos del accesorio tal cual
+            // estan y copialos para la construccion»): LA MISMA
+            // LLAMADA EXACTA de AnilloRunicoDorsalHalo (el halo del
+            // ACCESORIO): alpha 1.0 · runas 1.0 · el mismo anclaje a
+            // la espalda · el mismo tamaño (Radio = 0.348 × altura —
+            // la corona externa ABRAZA al jugador). LA RAMPA de la
+            // v6.156 (alpha 0.60+0.10×n, runas 0.70+0.10×n — «no
+            // tienen el tamaño correcto») MURIÓ: no hay corona joven
+            // ni corona vieja — ES LA CORONA, idéntica al accesorio
+            // desde el peldaño 113 hasta la escupida del 120.
             // ============================================================
             Vector2 espalda = duenio.Center -
                 new Vector2(0f, duenio.height * 0.04f * duenio.gravDir);
@@ -140,15 +131,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 Vector2 rel = espalda - (duenio.position + eje);
                 espalda = duenio.position + eje + rel.RotatedBy(duenio.fullRotation);
             }
-            // LA RAMPA de la construcción (113→119: la corona se
-            // enciende parte por parte — la misma rampa de las partes
-            // 2-4 del accesorio, terminando en la PLENA).
-            float alphaCorona = MathHelper.Clamp(0.60f + 0.10f * (anillos - 1), 0f, 1f);
-            float runasCorona = MathHelper.Clamp(0.70f + 0.10f * (anillos - 1), 0f, 1f);
             try
             {
                 global::AethonMod.Content.VFX.AnilloDorsalRenderer.Draw(
-                    espalda, duenio.height, t, alphaCorona, runasCorona);
+                    espalda, duenio.height, t, 1f, 1f);
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             return false;
