@@ -1,5 +1,24 @@
 # AethonMod — Historial de Cambios
 
+## v6.156 — EL LIBRO V3, LA TIENDA DEL NIVEL 0 Y EL DIOS CON TU ARTE (release 451816830 · md5 5d1ee481…)
+
+**Los 12 puntos de la sesión 28, entregados y verificados:**
+
+1. **LA TIENDA NUNCA VACÍA**: el try/catch silencioso que mataba el mostrador MUERE — el catch ESCRIBE al log y lo ya llenado queda a la venta; el libro se busca también EN LA MANO; con nivel 0 el peldaño 1 (Slime Staff + Wand of Sparking) SALE SIEMPRE.
+2. **EL OJO MEDIO RESTAURADO DE TU ARTE**: OjoEterno_Medio.png 56×54 regenerado PIXEL A PIXEL desde el sprite libro v3 (RLE base64 exacto).
+3. **EL JEFE SELLADO ES TU GRIMORIO V3**: las 3 texturas del usuario (LibroV3_Abierto/Medio/Cerrado 706×967) a escala dios ×0.42 con EL PARPADEO RÁPIDO de los minions del título (abierto→medio→cerrado→medio 1,7 s; al doble en furia) + SUS ATAQUES: la pareja dorada/violeta ×3 en abanico y su SombraPaginaProjectile.
+4. **EL AURA: LA FRICCIÓN VOLVIÓ A ARDER**: las chispas de reentrada (la fricción enemigo-portador) reviven con SU física v6.145 completa; las partículas del buff/debuff son SOLO LA BRUMA.
+5. **SOMBRAS DE PÁGINA: 1 DESDE EL NACIMIENTO**: SombrasCap = 1 + nivel/20 — nivel 0 ya tiene UNA sombra (la cura del Eterno que cazaba sin atacar); cada presa de sus sombras baja 1% de hambre.
+6. **LOS ANILLOS SON LOS DEL ACCESORIO**: la construcción 113→120 usa AnilloDorsalRenderer — LA MISMA TRIPLE CORONA del accesorio (rampa de alpha/runas hasta la plena al 120); los anillos de soles de la v6.155 murieron.
+7. **LA EXPLOSIÓN FINAL BARRIE EL MUNDO**: la onda de ABERRACIÓN CROMÁTICA a 42 px/t (frente triple rojo/cian · oro/púrpura · blanco, desfasados como lente rota) MATA TODO lo que toca (StrikeNPC 999999 + InstantKill).
+8. **LA SOMBRA DEL FESTÍN DE JEFES ES LA NUEVA**: la Masa del estilo 3 pasa a lisa:true — la tinta estilizada v6.152 (la antigua con espinas murió).
+9. **EL CRONISTA ES UN JUGADOR DE TERRARIA**: Main.PlayerRenderer.DrawPlayer (el LegacyPlayerRenderer de vanilla, verificado en el decompile) dibuja un Player modelo MASCULINO con la Robe del escriba — con su andar de verdad.
+10. **NPC TEST**: la copia oscurecida del jugador local (shadow 0.65 del propio pipeline del renderer) + bruma violeta a sus pies; solo dice «Soy un test».
+
+— oráculo 0/0 (463 .cs) · build 0/0 (21.893.752 B) · headless 0 excepciones · release 451816830 + CDN verificado byte a byte (md5 5d1ee481).
+
+# AethonMod — Historial de Cambios
+
 # v6.155 — LOS OCHO PUNTOS DE LA LETRA (la sesión del crash y los anillos)
 
 **La letra** (el usuario jugó la v6.153/154): «el grimorio que debe molestar a los NPC del pueblo es el grimorio menor, o sea la mascota, el grimorio del eterno en modo caza no tiene que hacer eso… solo caza monstruos y criaturas no hostiles, pero no toca a los NPC» + «para la apariencia del cronista usa los mismos recursos que Terraria usa para sus NPC y jugadores» + «hay un error en el log… es un error en el juicio de los dos soles» + «la tienda del cronista esta vacia, el debe vender siempre lo que el jugador necesita para el despertar actual y ademas cuando se cumpla el nivel 120 de despertar, el cronista debe quedarse vendiendo pociones de mana y ademas 10 articulos aleatorios tomados de otros NPC, el mago no cuenta, puede contar los NPC de otros mod» + «el ojo que mira sigue teniendo el circulo amarillo, debes quitarlo… el circulo amarillo no es el iris es un circulo o varios que son mas grande que el propio ojo, por lo tanto debes poner el ojo del minion, en resumen, debes poner un minion ahi» + «el grimorio intenta salir a cazar constantemente, pero no debe ser asi, solo debe salir a cazar con hambre en 20% y usar la sombra de la pagina nueva para cazar» + «el aura del vacio tiene una especie de particulas tanto en el jugador como en los monstruos… estas particulas que son como circulitos no debe estar en el jugador y en los enemigos deben ser solo una pequeña bruma» + «la construccion de la forma eterna sigue fallando en mostrar los anillos de soles runicos… la explocion de luz final debe ser al menos 500% mas grande y debe siempre perseguir al jugador».
