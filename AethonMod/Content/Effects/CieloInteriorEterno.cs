@@ -81,6 +81,23 @@ namespace AethonMod.Content.Effects
         private static readonly int[] SemillaMedio = { 7203, 7217, 7233, 7249 };
         private static readonly int[] SemillaCerca = { 7307, 7331, 7353 };
 
+        /// <summary>v6.154 — LAS SOMBRAS EXTRA DEL FONDO (la letra:
+        /// «cuanto mayor sea el nivel de despertar del grimorio mas
+        /// sombras de la pagina hay en el fondo, 2 por cada 10 niveles
+        /// de despertar»): el despertar del grimorio del portador
+        /// LOCAL alimenta la población del cuerpo del dios — cada 10
+        /// peldaños, DOS sombras de página más en el telón.</summary>
+        private static int SombrasExtraDelDespertar()
+        {
+            try
+            {
+                int despertar = global::AethonMod.Content.Systems.DespertarGrimorio
+                    .NivelDe(Main.LocalPlayer);
+                return (despertar / 10) * 2;
+            }
+            catch { return 0; }
+        }
+
         // ==================================================================
         //  EL CICLO DE VIDA (GameEffect 2026: Activate/Deactivate)
         // ==================================================================
@@ -262,43 +279,46 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    Color tinteLejos = new Color(46, 28, 84);
+                    // v6.154 — EL FONDO ES LA PÁGINA (la letra: «cambia
+                    //     los tentaculos que hay por sombras de la
+                    //     pagina»): la lejanía es TINTA NEGRA LISA — el
+                    //     cuerpo de la sombra del arma (SombraPaginaProjectile:
+                    //     masa lisa, sin ojos, sin colmillos — la ley
+                    //     v6.152), en SU negro-violeta profundo. La
+                    //     POBLACIÓN crece con el despertar: +2 sombras
+                    //     por cada 10 peldaños (SombrasExtraDelDespertar)
+                    //     repartidas por el periodo con SUS raíces.
                     float perLejos = 900f;                     // el PERIODO del loop
                     float offLejos = Mod(camX * 0.012f, perLejos);
                     int repsLejos = (int)(w / perLejos) + 4;   // dos periodos de sobregiro por lado
+                    int extraLejos = SombrasExtraDelDespertar();   // la población del despertar
+                    int cupoLejos = 6 + extraLejos;                // base + la página del portador
                     for (int rep = -2; rep <= repsLejos - 2; rep++)
                     {
                         float x0 = rep * perLejos - offLejos;
-                        for (int k = 0; k < SemillaLejos.Length && k < 6; k++)
+                        for (int k = 0; k < cupoLejos; k++)
                         {
-                            int sem = SemillaLejos[k];
-                            float fx = 0.06f + 0.155f * k + 0.05f * VFXCore.Hash01(sem, 1, 911);
+                            // las 6 de siempre con SUS semillas; las
+                            // extra nacen de semillas derivadas (cada una
+                            // SU sitio en el periodo — la manada del fondo)
+                            int sem = k < SemillaLejos.Length
+                                ? SemillaLejos[k]
+                                : 9400 + k * 37 + (int)(VFXCore.Hash01(k, 1, 941) * 91f);
+                            float fx = 0.06f + 0.145f * k + 0.05f * VFXCore.Hash01(sem, 1, 911);
                             Vector2 raiz = new Vector2(x0 + perLejos * fx, -720f - 190f * VFXCore.Hash01(sem, 2, 913));
                             Vector2 cabeza = raiz + new Vector2(
                                 (VFXCore.Hash01(sem, 3, 917) - 0.5f) * 320f + MathF.Sin(t * 0.11f + k) * 46f,
                                 h * (0.42f + 0.40f * VFXCore.Hash01(sem, 4, 919)) + 720f);
-                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.4f, sem, 16, 0.16f);
-                            // v6.151 — LA SOMBRA DE LA PÁGINA EN EL FONDO
-                            //     (la letra: «El fondo del mundo interior
-                            //     nunca fue cambiado, deben estar los
-                            //     tentaculos de la sombra de la pagina en
-                            //     el fondo del mundo interior, pero sin
-                            //     ojos ni colmillos»): la capa lejana YA
-                            //     usa DibujarTira (la PielDelEterno — las
-                            //     bandas de V que fluyen, EL look de la
-                            //     sombra de página del grimorio) — pero se
-                            //     leía como cielo estrellado morado por el
-                            //     TINTE CLARO (46,28,84) y las 44 chispas
-                            //     encima. AHORA: la LEJANÍA ES TINTA — el
-                            //     tinte de la PÁGINA (el negro-violeta
-                            //     profundo de SombraPaginaProjectile), la
-                            //     tira MÁS ANCHA (la página fluye, no
-                            //     ondea) y el flujo MÁS VIVO (la tinta
-                            //     corre). Cero ojos, cero colmillos (los
-                            //     de la v6.150 siguen muertos).
+                            // v6.154 — LA FASE DE LA MANADA: cada tinta
+                            // ondea en SU momento (k·0.31 + su semilla):
+                            // el fondo respira como una manada, no como
+                            // una sola onda (la letra de la manada).
+                            float tK = t * (0.36f + 0.05f * (k % 4)) + k * 0.31f
+                                + VFXCore.Hash01(sem, 7, 943) * 6.2f;
+                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, tK, sem, 16, 0.16f);
                             Color tintaLejos = new Color(30, 18, 52);
                             DibujarTira(sb, espina, 22f, 46f, tintaLejos,
-                                (0.60f + 0.20f * latido) * a, flujo: t * 0.026f + k * 0.19f);
+                                (0.60f + 0.20f * latido) * a, flujo: tK * 0.026f + k * 0.19f);
                         }
                     }
 
@@ -377,21 +397,35 @@ namespace AethonMod.Content.Effects
                     // son PURA SOMBRA DE PÁGINA — la piel que fluye sin
                     // rostro. Los ojos viven SOLO en los dioses cercanos
                     // de verdad (el pilar, el Eterno), no en el telón.
+                    // v6.154 — LA MEDIA, TINTA DE PÁGINA (la letra: el
+                    // fondo SON sombras de la página): el violeta claro
+                    // (150,96,210 — «niebla morada») MUERE — la capa
+                    // media es TINTA, un tono apenas más vivo que la
+                    // lejana (la profundidad se lee por oscuridad, no por
+                    // color). Población +extra del despertar (la mitad de
+                    // las extra viven AQUÍ — la profundidad media).
                     int repsMedio = (int)(w / perMedio) + 4;
+                    int extraMedio = SombrasExtraDelDespertar() / 2;
+                    int cupoMedio = 4 + extraMedio;
                     for (int rep = -2; rep <= repsMedio - 2; rep++)
                     {
                         float x0 = rep * perMedio - offMedio;
-                        for (int k = 0; k < SemillaMedio.Length && k < 4; k++)
+                        for (int k = 0; k < cupoMedio; k++)
                         {
-                            int sem = SemillaMedio[k];
-                            float fx = 0.10f + 0.24f * k + 0.05f * VFXCore.Hash01(sem, 1, 931);
+                            int sem = k < SemillaMedio.Length
+                                ? SemillaMedio[k]
+                                : 9500 + k * 41 + (int)(VFXCore.Hash01(k, 1, 951) * 97f);
+                            float fx = 0.10f + 0.22f * k + 0.05f * VFXCore.Hash01(sem, 1, 931);
                             Vector2 raiz = new Vector2(x0 + perMedio * fx, -520f - 120f * VFXCore.Hash01(sem, 2, 933));
                             Vector2 cabeza = raiz + new Vector2(
                                 (VFXCore.Hash01(sem, 3, 937) - 0.5f) * 260f + MathF.Sin(t * 0.16f + k * 1.7f) * 60f * hincha,
                                 h * (0.46f + 0.42f * VFXCore.Hash01(sem, 4, 939)) + 520f);
-                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, t * 0.5f, sem, 18, 0.19f);
-                            DibujarTira(sb, espina, 22f, 52f, new Color(150, 96, 210),
-                                (0.50f + 0.16f * latido) * a, flujo: t * 0.020f + k * 0.21f);
+                            // LA FASE DE LA MANADA (cada tinta su momento)
+                            float tK = t * (0.44f + 0.06f * (k % 3)) + k * 0.27f
+                                + VFXCore.Hash01(sem, 7, 953) * 5.1f;
+                            Vector2[] espina = SombrasLib.Columna(raiz, cabeza, tK, sem, 18, 0.19f);
+                            DibujarTira(sb, espina, 22f, 52f, new Color(38, 24, 66),
+                                (0.50f + 0.16f * latido) * a, flujo: tK * 0.020f + k * 0.21f);
                         }
                     }
                 }
@@ -455,25 +489,41 @@ namespace AethonMod.Content.Effects
                     // telón son PURA SOMBRA — el cuerpo de piel que fluye
                     // sin rostro. El ojo que mira vive en el PILAR (el
                     // minion-ojo de la casa), no en el decorado.
+                    // v6.154 — LOS TITANES DE TINTA (la letra: el fondo
+                    // SON sombras de la página): el morado claro
+                    // (168,112,224) MUERE — los titanes cercanos son
+                    // TINTA GRUESA (58,36,96 — la oscuridad que SE LEE
+                    // contra la carne), un tono apenas más claro que las
+                    // capas de atrás (la profundidad por oscuridad). La
+                    // MITAD de las extra del despertar viven aquí — el
+                    // dios se cubre de página con cada peldaño.
                     int repsCerca = (int)(w / perCerca) + 4;
+                    int extraCerca = SombrasExtraDelDespertar() / 2;
+                    int cupoCerca = 2 + extraCerca;
                     for (int rep = -2; rep <= repsCerca - 2; rep++)
                     {
                         float x0 = rep * perCerca - offCerca;
-                        for (int k = 0; k < SemillaCerca.Length && k < 2; k++)
+                        for (int k = 0; k < cupoCerca; k++)
                         {
-                            int sem = SemillaCerca[k];
-                            float fx = 0.22f + 0.48f * k + 0.06f * VFXCore.Hash01(sem, 1, 951);
+                            int sem = k < SemillaCerca.Length
+                                ? SemillaCerca[k]
+                                : 9600 + k * 43 + (int)(VFXCore.Hash01(k, 1, 961) * 89f);
+                            float fx = 0.14f + (0.72f / Math.Max(1, cupoCerca - 1)) * k
+                                + 0.05f * VFXCore.Hash01(sem, 1, 951);
                             Vector2 raiz = new Vector2(x0 + perCerca * fx, -520f - 120f * VFXCore.Hash01(sem, 2, 953));
                             // LA CABEZA VIVA (Lissajous lenta — el verlet hace el resto)
                             Vector2 cabeza = raiz + new Vector2(
                                 MathF.Sin(t * 0.14f + k * 2.2f) * 150f * hincha,
                                 h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
                                 MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
-                            Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
+                            // LA FASE DE LA MANADA (cada titán su momento)
+                            float tK = t * (0.92f + 0.08f * (k % 2)) + k * 0.33f
+                                + VFXCore.Hash01(sem, 7, 963) * 4.7f;
+                            Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, tK, sem, 22, 0.24f, gancho: 0.42f);
 
                             // EL CUERPO (fusiforme: raíz 34 → vientre 104 → cabeza 66)
-                            DibujarTira(sb, espina, 34f, 104f, new Color(168, 112, 224),
-                                (0.78f + 0.14f * latido) * a, flujo: t * 0.030f + k * 0.29f,
+                            DibujarTira(sb, espina, 34f, 104f, new Color(58, 36, 96),
+                                (0.78f + 0.14f * latido) * a, flujo: tK * 0.030f + k * 0.29f,
                                 grosorCentroAlt: 66f);
                         }
                     }
@@ -505,7 +555,11 @@ namespace AethonMod.Content.Effects
                                 h * (0.38f + 0.24f * VFXCore.Hash01(sem, 4, 957)) +
                                 MathF.Cos(t * 0.10f + k * 1.3f) * 70f * hincha);
                             Vector2[] espina = SombrasLib.ColumnaViva(raiz, cabeza, t, sem, 22, 0.24f, gancho: 0.42f);
-                            DibujarTira(sb, espina, 46f, 140f, new Color(150, 84, 235),
+                            // v6.154 — EL BRILLO HÚMEDO DE LA TINTA: las
+                            // vetas de los titanes arden en el violeta
+                            // PROFUNDO de la página (el cuerpo es tinta —
+                            // su humedad es bruma violeta oscura)
+                            DibujarTira(sb, espina, 46f, 140f, new Color(110, 62, 180),
                                 (0.10f + 0.10f * latido) * a, flujo: t * 0.030f + k * 0.29f,
                                 grosorCentroAlt: 88f);
                         }

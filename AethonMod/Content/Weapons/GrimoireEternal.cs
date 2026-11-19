@@ -618,14 +618,16 @@ namespace AethonMod.Content.Weapons
 
             // 3) LA REFORJA VIVA (la columna Velocidad de la wiki:
             //    Maníaco/Prohibido +10 % … Celeste −10 % … Supremo +20 %).
-            //    v6.153 — LA COLUMNA JAMÁS PENALIZA (la letra: «cuando
-            //    aumenta el nivel del grimorio esta cadencia disminuye
-            //    y mucho, eso no debe pasar» — el SIM v6.152 medía la
-            //    caída 4,3/s → 3,5/s entre los peldaños 198 y 264: el
-            //    Celeste RESTABA 10 % y los peldaños neutros BORRABAN
-            //    el +10 % del anterior). El clamp a >= 0: subir de
-            //    peldaño NUNCA puede quitar cadencia — solo sumarla.
-            factor *= 1f - Math.Max(0f, PeldanoDe(sl.Level).Velocidad);
+            //    v6.154 — EL CLAMP FALSO MUERE (la letra: «ese cambio
+            //    que hiciste en los peldaños esta mal… la reduccion
+            //    ocurrio cuando limitaste los proyectiles basicos a
+            //    solo 10»): mi diagnóstico v6.153 (el Celeste restaba
+            //    y por eso la cadencia caía) ERA FALSO — el culpable
+            //    real era el TOPE DE BÁSICOS bloqueando disparos
+            //    enteros (curado arriba, en Shoot). La columna de la
+            //    reforja VUELVE A SER LA DE LA WIKI, con sus −10 % del
+            //    Celeste: es el peso del peldaño, no un bug.
+            factor *= 1f - PeldanoDe(sl.Level).Velocidad;
 
             // 4) LA CUANTIZACIÓN + EL TOPE: el uso efectivo SIEMPRE en
             //    ticks ENTEROS (animación y disparo JUNTOS — jamás
@@ -924,16 +926,24 @@ namespace AethonMod.Content.Weapons
             // LA PAREJA PRINCIPAL + LAS EXTRA POR NIVEL: cada «bolt» del
             // sistema del Eterno es UN DÍA Y UNA NOCHE — 1 pareja base y
             // ============================================================
-            //  v6.152 — EL LÍMITE DE 10 PROYECTILES BÁSICOS (la letra:
-            //  «lo que tenia que quedar en 10 era el limite de
-            //  proyectiles basicos del grimorio, no la penetracion»):
-            //  el disparo NACE con un TOPE: si ya viven 10 discos del
-            //  Equinoccio (los 931 con nuestras marcas 9201/9202 — los
-            //  del OTRO arma Dignos no cuentan), los NUEVOS esperan al
-            //  siguiente disparo. El abanico entero cabe en el tope:
-            //  nace lo que falde, jamás se dispara MÁS de 10 vivos.
-            //  (La penetración vuelve a su casa: los discos atraviesan
-            //  como siempre — el 10 es CUÁNTOS, no CUÁNTO.)
+            //  v6.154 — EL TOPE QUE ROTA (la letra: «la reduccion en la
+            //  cadencia ocurrio cuando limitaste los proyectiles
+            //  basicos a solo 10» — el diagnóstico v6.153 de la reforja
+            //  ERA FALSO y su clamp MUERE arriba, en
+            //  FactorVelocidadTotal): el tope de 10 vivos BLOQUEABA el
+            //  disparo entero cuando el cielo estaba lleno — y con
+            //  ExtraProjectiles = nivel/3 a niveles altos (500/1000/
+            //  2000) el primer disparo llenaba el tope y TODOS los
+            //  demás morían en el «cupo <= 0 → return false»: la
+            //  cadencia efectiva SE DESPLOMABA. LA CURA DE LA CASA:
+            //   · LA PAREJA BASE NACE SIEMPRE (el disparo JAMÁS se
+            //     bloquea — la cadencia solo crece, nunca cae);
+            //   · los extras llenan el cupo (10 − vivos) y si hace
+            //     falta, LOS MÁS VIEJOS CEDEN SU SITIO: la pareja nueva
+            //     nace y los 2 discos más antiguos se disipan — el
+            //     cielo ROTA, no se atasca;
+            //   · el abanico se TOPEA al cupo real: jamás intenta
+            //     cientos (nivel/3 era una locura de abanico).
             // ============================================================
             const int TOPE_BASICOS = 10;
             int vivos = 0;
@@ -945,17 +955,35 @@ namespace AethonMod.Content.Weapons
                 float marca = pr.ai[2];
                 if (marca == 9201f || marca == 9202f) vivos++;
             }
-            int cupo = Math.Max(0, TOPE_BASICOS - vivos);
-            if (cupo <= 0) return false;   // el cielo ya está lleno de discos
 
-            // una más cada 3 niveles, en abanico (el homing del 931 hace
-            // el resto)
+            // LA PAREJA BASE NACE SIEMPRE — y si el cielo está lleno,
+            // los DOS MÁS VIEJOS ceden su sitio (la rotación: el disco
+            // viejo ya hizo su trabajo, el nuevo trae el nivel de hoy)
+            if (vivos + 2 > TOPE_BASICOS)
+            {
+                int aCeder = Math.Max(2, vivos + 2 - TOPE_BASICOS);
+                for (int i = 0; i < Main.maxProjectiles && aCeder > 0; i++)
+                {
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || pr.owner != player.whoAmI ||
+                        pr.type != 931) continue;
+                    float marca = pr.ai[2];
+                    if (marca != 9201f && marca != 9202f) continue;
+                    pr.timeLeft = Math.Min(pr.timeLeft, 2);   // se disipa suave
+                    aCeder--;
+                }
+            }
+
+            // EL ABANICO TOPEADO AL CUPO REAL: el extra de nivel cuenta,
+            // pero el cielo solo tiene 10 asientos — la rotación de
+            // arriba ya garantizó 2 libres para la pareja base.
             int extra = WeaponScaling.ExtraProjectiles(level);
+            int cupo = Math.Max(0, TOPE_BASICOS - vivos);   // lo que cabe HOY
+            if (extra > 4) extra = 4;   // el abanico digno: máx 4 parejas extra (8 discos) — el homing del 931 hace el resto
 
             LanzarPareja(source, pos, baseV, damage, knockback, player);
-            cupo--;
 
-            for (int i = 0; i < extra && cupo > 0; i++)
+            for (int i = 0; i < extra && cupo > 1; i++)
             {
                 float angulo = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
                 LanzarPareja(source, pos, baseV.RotatedBy(angulo), damage, knockback, player);

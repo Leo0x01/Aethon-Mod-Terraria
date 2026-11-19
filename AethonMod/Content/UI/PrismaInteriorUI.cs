@@ -97,6 +97,12 @@ namespace AethonMod.Content.UI
 
         // === LOS RECTS VIVOS (el clic los lee — el patrón del panel) ===
         private static Rectangle _geoVolver, _geoInvocar, _geoCerrar;
+
+        // v6.154 — EL FLANCO DEL ESC (la letra: «que la ventana del
+        // pilar… se cierren tambien con esc»): el mismo borde de
+        // teclado del altar — dispara SOLO al PRESIONAR, no mientras
+        // está sostenida.
+        private static bool _ultimoEsc;
         private static Rectangle _geoMenos, _geoMas, _geoLanzar;
         private static Rectangle _geoListaJefes;
         private static readonly List<Rectangle> _geoJefes = new List<Rectangle>();
@@ -366,6 +372,20 @@ namespace AethonMod.Content.UI
                 // === EL MOTOR DEL CLIC (el patrón de la casa) ===
                 bool dentroPanel = new Rectangle(x, y, w, h).Contains(Main.mouseX, Main.mouseY);
                 if (dentroPanel) Main.LocalPlayer.mouseInterface = true;
+
+                // v6.154 — ESC TAMBIÉN CIERRA (la letra: «que la
+                // ventana del pilar, del altar y del libro de
+                // informacion se cierren tambien con esc, no solo con
+                // tocar la X»): el flanco de la tecla — mismo patrón
+                // del altar.
+                bool escAhora = Microsoft.Xna.Framework.Input.Keyboard
+                    .GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape);
+                if (escAhora && !_ultimoEsc)
+                {
+                    _abierta = false;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+                }
+                _ultimoEsc = escAhora;
 
                 if (clicNuevo)
                 {

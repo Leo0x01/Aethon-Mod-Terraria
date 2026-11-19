@@ -371,7 +371,9 @@ namespace AethonMod.Content.Projectiles.Sombras
                 SombrasLib.BrumaColumna(col, 34f, 0.40f * vivoF, tiempo, semilla + 53, 11);
 
                 // === LOS OJOS: TODOS abiertos, TODOS mirando a la víctima ===
-                SombrasLib.OjosDeMasa(col, centroJefe, (0.4f + 0.6f * festin) * vivoF, semilla, tiempo, 7);
+                // v6.154 — LA SOMBRA NUEVA EN TODO (la letra): tinta
+                // lisa, sin ojos — la bruma respira en su lugar.
+                SombrasLib.BrumaColumna(col, 38f, 0.50f * vivoF, tiempo, semilla + 73, 9);
 
                 // === LA CABEZA ES BRUMA (la boca de la casa) ===
                 Vector2 punta = col[col.Length - 1];

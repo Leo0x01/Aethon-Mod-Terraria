@@ -10,45 +10,53 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.NPCs
 {
     // ======================================================================
-    //  EL CRONISTA — v6.152 — EL COMERCIANTE DEL GRIMORIO (la letra del
-    //  usuario: «quiero agregar un NPC no hostil como comerciante…
-    //  investiga como los mods populares agregan NPC no hostiles como
-    //  por ejemplo thorium… y luego tu mismo añade uno que siempre
-    //  aparezca cuando el jugador posea el grimorio y mientras el
-    //  jugador tenga el grimorio este NPC estara ahi»).
+    //  EL CRONISTA — v6.154 — EL ESCRIBA INMORTAL DEL MARGEN.
     //
-    //  LA INVESTIGACIÓN (la casa — la guía de facto de tML + el patrón
-    //  de los town NPCs de BossesAsNPCs/Thorium): un ModNPC con
-    //  [AutoloadHead] + NPC.townNPC=true es un ALDEANO de verdad
-    //  (vivienda, tienda, felicidad) — el gate de llegada es
-    //  CanTownNPCSpawn (el patrón del Cobbler de Thorium: «un jugador
-    //  lleva el ítem») y la PARTIDA se controla en PreAI (si NADIE
-    //  tiene el grimorio, el Cronista SE VA — «mientras el jugador
-    //  tenga el grimorio este NPC estara ahi»).
-    //
-    //  QUIÉN ES: EL CRONISTA — el escriba que sobrevivió a la primer
-    //  devoración. Vende LOS MATERIALES DEL DESPERTAR (los que el
-    //  festín consume: esencias menores, monedas de paso, el
-    //  equipamiento del portador novato). No vende PODER: vende lo
-    //  que el libro COME.
+    //  EL LORE CANÓNICO (el Codex del Eterno, Lámina X — la letra del
+    //  usuario): «Fui testigo del primer devorado… la única forma de
+    //  seguir existiendo era hacerse útil al hambre… consumí la misma
+    //  Esencia del Eterno y desde entonces no puedo morir. Él sabe que
+    //  existo. Me mira, de vez en cuando, como se mira el mueble que
+    //  siempre ha estado ahí». EL CRONISTA ES:
+    //   · INMORTAL (la inmortalidad «me fue cobrada»): jamás muere —
+    //     ni vida que baje a 0, ni golpe que lo mate. canBeHitBy ==
+    //     false en TODO; su vida ES decorado (la tinta no se rompe);
+    //   · ÚNICO POR MUNDO (la letra: «siempre existira un cronista por
+    //     mundo sin importar cuantos jugadores con grimorios haya»):
+    //     el spawner de la v6.153 ya no dobla — y CanTownNPCSpawn
+    //     exige el grimorio de ALGUIEN;
+    //   · LA TIENDA LIGADA AL COMPRADOR (la letra: «lo que vende
+    //     siempre estara ligado al jugador que va a comprarle… el
+    //     cronista sabra el nivel de despertar de cada uno y vendera
+    //     la respectiva mercancia para cada uno»): la tienda se
+    //     reconstruye EN CADA APERTURA con el DESPERTAR DEL QUE HABLA
+    //     (ModifyActiveShop — el hook que recibe al comprador);
+    //   · SOLO ESENCIAS DEL ETERNO (la letra): CustomCurrencySystem
+    //     registrado (el patrón vanilla de las Medallas de Defensor —
+    //     verificado por reflexión contra el tModLoader.dll REAL);
+    //   · LO QUE VENDE (la letra): LOS REQUISITOS DE CADA DESPERTAR —
+    //     las armas del peldaño siguiente del comprador, cada una a
+    //     100 + (rareza × nivel de Despertar del requisito) − nivel de
+    //     oleadas de hambre (mín 100), y LAS POCIONES DE MANÁ
+    //     SINCRONIZADAS con el Mago vanilla (los mismos desbloqueos
+    //     de NPC.downedMechBossAny/hardMode: 1 esencia la básica → 5
+    //     la mayor).
     // ======================================================================
     [AutoloadHead]
     public class ElCronista : ModNPC
     {
         public override void SetStaticDefaults()
         {
-            // LA ANIMACIÓN prestada del Guide (el spritesheet 25 frames
-            // de vanilla — el patrón de los town NPCs de la casa)
+            // LA ANIMACIÓN PROPIA (la tira forjada: 25 marcos del
+            // town NPC — idle, caminar, atacar y EL REPOSO DEL ESCRIBA)
             Main.npcFrameCount[Type] = 25;
             NPCID.Sets.ExtraFramesCount[Type] = 9;
             NPCID.Sets.AttackFrameCount[Type] = 4;
             NPCID.Sets.DangerDetectRange[Type] = 700;
-            NPCID.Sets.AttackType[Type] = 0;          // lanzamiento
+            NPCID.Sets.AttackType[Type] = 0;          // lanzamiento (la pluma)
             NPCID.Sets.AttackTime[Type] = 90;
             NPCID.Sets.AttackAverageChance[Type] = 30;
             NPCID.Sets.NoTownNPCHappiness[Type] = true;   // precio fijo (la casa no cobra cariño)
-
-            // EL BESTIARIO mínimo (la entrada del aldeano)
             NPCID.Sets.NPCFramingGroup[Type] = 0;
         }
 
@@ -64,42 +72,32 @@ namespace AethonMod.Content.NPCs
             NPC.lifeMax = 250;
             NPC.HitSound = SoundID.NPCHit1;
             NPC.DeathSound = SoundID.NPCDeath1;
-            NPC.knockBackResist = 0.5f;
+            NPC.knockBackResist = 0f;  // v6.154: la tinta NO retrocede
             AnimationType = NPCID.Guide;
         }
 
         // ================================================================
-        //  LA LLEGADA (la letra: «que siempre aparezca cuando el jugador
-        //  posea el grimorio»): el patrón del Cobbler de Thorium — un
-        //  jugador CUALQUIERA con el Grimorio del Eterno en su
-        //  inventario LO LLAMA. Sin el libro no llega.
+        //  v6.154 — LA INMORTALIDAD (la letra del lore: «desde entonces
+        //  no puedo morir» + «recuerda que el cronista es inmortal»):
+        //  NADIE lo golpea, NADIE lo mata. Su vida jamás baja.
         // ================================================================
-        public override bool CanTownNPCSpawn(int numTownNPCs)
-        {
-            try
-            {
-                int eterno = ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.GrimoireEternal>();
-                foreach (Player p in Main.ActivePlayers)
-                {
-                    for (int i = 0; i < 58; i++)
-                        if (p.inventory[i] != null && p.inventory[i].type == eterno)
-                            return true;
-                }
-            }
-            catch { }
-            return false;
-        }
-
-        // ================================================================
-        //  LA PARTIDA (la letra: «mientras el jugador tenga el grimorio
-        //  este NPC estara ahi»): si NADIE lleva ya el grimorio, el
-        //  Cronista SE DESPIDE Y SE VA (despawn activo — el patrón
-        //  PreAI de los mods grandes: CanTownNPCSpawn solo gatea la
-        //  llegada, no la partida).
-        // ================================================================
+        public override bool? CanBeHitByItem(Player player, Item item) => false;
+        public override bool? CanBeHitByProjectile(Projectile projectile) => false;
+        public override bool CanBeHitByNPC(NPC attacker) => false; // ni los jefes lo rozan
+        public override bool CanHitNPC(NPC target) => false;      // él tampoco golpea de melee
+        public override bool CheckDead() => false;                 // jamás muere
         public override bool PreAI()
         {
+            // la tinta siempre entera (por si ALGO de vanilla la raya)
+            if (NPC.life < NPC.lifeMax) { NPC.life = NPC.lifeMax; }
+
+            // ============================================================
+            //  LA PARTIDA (la regla de siempre): si NADIE lleva ya el
+            //  grimorio, el Cronista SE DESPIDE Y SE VA (despawn activo
+            //  — el patrón PreAI de los mods grandes). NOTA: no es
+            //  morir — es IRSE (el inmortal camina a su siguiente
+            //  mundo; la tinta no se rompe).
+            // ============================================================
             if (Main.netMode == NetmodeID.MultiplayerClient) return true;
             try
             {
@@ -115,8 +113,6 @@ namespace AethonMod.Content.NPCs
                 }
                 if (!alguienConLibro && NPC.active)
                 {
-                    // LA DESPEDIDA: se disuelve en tinta (el teatro de la
-                    // casa — sus páginas vuelven al libro que las llama)
                     if (!Main.dedServ)
                         for (int k = 0; k < 12; k++)
                         {
@@ -160,45 +156,64 @@ namespace AethonMod.Content.NPCs
             multiplier = 12f;
         }
 
-        // ================================================================
-        //  EL NOMBRE — una sola identidad (el Cronista ES el Cronista)
-        // ================================================================
+        /// <summary>El Cronista ES el Cronista (una sola identidad).</summary>
         public override List<string> SetNPCNameList()
         {
             return new List<string> { "El Cronista" };
         }
 
+        // ================================================================
+        //  EL DIÁLOGO — LOS 22 EXCLUSIVOS DE LA LETRA, ORGANIZADOS POR
+        //  DISPARADOR (hjson: Mods.AethonMod.Cronista.Chat* — la casa
+        //  localiza; aquí solo la ELECCIÓN del disparador)
+        // ================================================================
         public override string GetChat()
         {
-            // EL DIÁLOGO DEL ESCRIBA: sabes del festín, de la furia, del
-            // despertar — y de las facturas del portador
-            string[] lineas =
+            try
             {
-                "Language.GetTextValue placeholder",
-            };
-            int dado = Main.rand.Next(6);
-            return dado switch
+                // LOS DISPARADORES DE LA LETRA:
+                //  · La Onceava Oleada activa → la línea 12
+                //  · El portador llega al Despertar 120 → la línea 15
+                //  · ...y el resto: la rotación por peso (genéricas y
+                //    las de portador/oleadas/despertar/sellado)
+                if (global::AethonMod.Content.Systems.GrimorioFuriaSistema.EspecialActiva)
+                    return Language.GetTextValue("Mods.AethonMod.Cronista.ChatOnceava");
+
+                int despertar = 0;
+                try
+                {
+                    despertar = global::AethonMod.Content.Systems.DespertarGrimorio
+                        .NivelDe(Main.LocalPlayer);
+                }
+                catch { }
+                if (despertar >= 120)
+                    return Language.GetTextValue("Mods.AethonMod.Cronista.ChatUltimaPuerta");
+
+                // LA ROTACIÓN: el dado de la casa sobre las 4 familias
+                // (genéricas 5 · portador 5 · oleadas 3 · despertar 1 ·
+                // sellado 2 · objetos 3 · cierre 2 — la letra completa)
+                int familia = Main.rand.Next(21);
+                string clave = familia switch
+                {
+                    int n when n < 5   => "Mods.AethonMod.Cronista.ChatGenerica" + (n + 1),
+                    int n when n < 10  => "Mods.AethonMod.Cronista.ChatPortador" + (n - 4),
+                    int n when n < 13  => "Mods.AethonMod.Cronista.ChatOleadas" + (n - 9),
+                    13                => "Mods.AethonMod.Cronista.ChatDespertar",
+                    int n when n < 16  => "Mods.AethonMod.Cronista.ChatSellado" + (n - 14),
+                    int n when n < 19  => "Mods.AethonMod.Cronista.ChatObjetos" + (n - 15),
+                    _                 => "Mods.AethonMod.Cronista.ChatCierre" + (familia - 18),
+                };
+                return Language.GetTextValue(clave);
+            }
+            catch
             {
-                0 => "(cierra el plumín) Cada página que come tu libro, yo la escribí primero. No preguntes cuánto cobré.",
-                1 => "(te mira los bolsillos) El hambre sube aunque no mires la barra. Cuando la cabeza te dé vueltas, ya sabes qué pasó.",
-                2 => "Las esencias no se venden solas, portador. Alguien tiene que clasificar los restos de los jefes… yo.",
-                3 => "Si el libro se pone furioso, corre hacia una puerta cerrada. A él le gustan las habitaciones con una sola salida.",
-                4 => "Yo vi la primer devoración. Por eso escribo con tinta violeta: la negra se me acabó aquel día.",
-                _ => "¿Monedas? Acepto. El grimorio paga con algo mejor cuando está de buen humor… y con algo peor cuando no.",
-            };
+                return "Trae Esencia del Eterno. Todo lo demás es ruido entre páginas.";
+            }
         }
 
         // ================================================================
-        //  v6.153 — LA LLEGADA AL INSTANTE (la letra: «el supuesto NPC
-        //  nuevo no lo veo en ninguna parte, deberia aparecer siempre
-        //  que el jugador tenga el grimorio y deberia aparecer al
-        //  instante»): CanTownNPCSpawn solo corre en el chequeo de
-        //  población de vanilla (~8 s Y solo con casa libre) — el
-        //  Cronista podía tardar minutos o no llegar. EL PASO DIRECTO:
-        //  cada segundo, si ALGUIEN lleva el grimorio y el Cronista NO
-        //  vive, NACE AL LADO del portador — sin casa, al instante,
-        //  con su estallido de tinta. (El despawn sin grimorio sigue
-        //  vivo en PreAI: la partida manda.)
+        //  v6.154 — LA LLEGADA AL INSTANTE (la regla de la v6.153 —
+        //  se conserva exacta: UNO por mundo, nace junto al portador).
         // ================================================================
         private class CronistaSistema : ModSystem
         {
@@ -206,14 +221,13 @@ namespace AethonMod.Content.NPCs
 
             public override void PostUpdateWorld()
             {
-                // cada segundo (60 t) — al instante para el ojo humano
                 if (++_tick < 60) return;
                 _tick = 0;
                 try
                 {
                     if (Main.netMode == NetmodeID.MultiplayerClient) return;
 
-                    // ¿YA vive? (el de vanilla o el nuestro — no se dobla)
+                    // ¿YA vive? (UNO por mundo — jamás se dobla)
                     int tipo = ModContent.NPCType<ElCronista>();
                     for (int i = 0; i < Main.maxNPCs; i++)
                         if (Main.npc[i] != null && Main.npc[i].active &&
@@ -230,7 +244,6 @@ namespace AethonMod.Content.NPCs
                             { tiene = true; break; }
                         if (!tiene) continue;
 
-                        // EL SITIO: 3 tiles al lado del portador, al suelo
                         int tx = (int)(p.Center.X / 16f) + (p.direction >= 0 ? 3 : -3);
                         int ty = (int)(p.Center.Y / 16f);
                         int suelo = -1;
@@ -244,11 +257,10 @@ namespace AethonMod.Content.NPCs
                             (int)pos.X, (int)pos.Y, tipo, 0, 0f, p.whoAmI);
                         if (idx >= 0 && idx < Main.maxNPCs && Main.npc[idx].active)
                         {
-                            Main.npc[idx].homeTileX = (int)(pos.X / 16f);   // su casa ES el lugar
+                            Main.npc[idx].homeTileX = (int)(pos.X / 16f);
                             Main.npc[idx].homeTileY = (int)(pos.Y / 16f);
                             Main.npc[idx].netUpdate = true;
 
-                            // EL ESTALLIDO DE TINTA (la firma de la casa)
                             if (!Main.dedServ)
                                 for (int k = 0; k < 16; k++)
                                 {
@@ -262,7 +274,7 @@ namespace AethonMod.Content.NPCs
                             global::AethonMod.Content.Systems.EcoRed.AnunciarMundo("Mods.AethonMod.Cronista.Llega",
                                 new Color(196, 138, 255));
                         }
-                        return;   // uno por mundo (el primero que lo lleve)
+                        return;   // UNO por mundo (el primero que lo lleve)
                     }
                 }
                 catch { }
@@ -280,35 +292,196 @@ namespace AethonMod.Content.NPCs
                 shopName = "Cronista";
         }
 
+        // ================================================================
+        //  LA MONEDA — ESENCIA DEL ETERNO (la letra: «solo usa como
+        //  moneda las esencias del eterno»). LA VÍA DE LA CASA: los
+        //  items de la tienda llevan shopSpecialCurrency (el ID que
+        //  registra EsenciaMonedaSistema — el patrón vanilla de las
+        //  Medallas de Defensor, verificado contra el tML real).
+        // ================================================================
+
+        /// <summary>EL PRECIO de un requisito de Despertar (la letra:
+        /// «cada uno cuesta como base 100 esencias del eterno y a eso
+        /// se le suma esto, el nivel de rareza del item x el nivel de
+        /// Despertar del requisito en cuestion - el nivel de oleadas
+        /// de hambre»): max(100, 100 + rareza×despertar − oleadas).
+        /// La rareza es la del item de Terraria (rare ≥ 0); el
+        /// despertar, el nivel de LA PUERTA que exige el requisito;
+        /// las oleadas, el nivel de furia del festín.</summary>
+        private static long PrecioRequisito(Item it, int despertarRequisito, Player comprador)
+        {
+            int rareza = Math.Max(0, it.rare);
+            int oleadas = 1;
+            try
+            {
+                var sp = comprador.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+                if (sp != null) oleadas = Math.Max(1, Math.Min(10, sp.FuriaNivel));
+            }
+            catch { }
+            long precio = 100L + (long)rareza * despertarRequisito - oleadas;
+            return Math.Max(100L, precio);   // el mínimo de la letra: 100
+        }
+
+        /// <summary>EL NIVEL DE DESPERTAR DE LA PUERTA que exige ESTA
+        /// arma (el peldaño donde el arma es requisito — la escalera
+        /// de ArmasDe). 0 si no es requisito de ninguna puerta: se
+        /// vende a la base (100).</summary>
+        private static int DespertarDelRequisito(int tipoArma)
+        {
+            try
+            {
+                for (int nivel = 1; nivel <= global::AethonMod.Content.Systems.DespertarGrimorio.NivelMax; nivel++)
+                {
+                    int[] armas = global::AethonMod.Content.Systems.DespertarGrimorio.ArmasDe(nivel);
+                    if (armas == null) continue;
+                    foreach (int a in armas)
+                        if (a == tipoArma) return nivel;
+                }
+            }
+            catch { }
+            return 0;
+        }
+
         public override void AddShops()
         {
-            // ============================================================
-            //  LA TIENDA DEL CRONISTA — LO QUE EL LIBRO COME (materiales
-            //  del despertar y del portador novato — NADA de poder
-            //  directo: la casa no vende la victoria)
-            // ============================================================
-            var tienda = new NPCShop(Type, "Cronista")
-                // LAS ESENCIAS MENORES (la moneda del altar — 3 de oro)
-                // LA ESENCIA DEL REY GELATINA (la más menuda del festín —
-                // el peldaño del despertar 5 en la mesa del altar)
-                .Add(new Item(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Esencias.EsenciaDelReyGelatina>()) { shopCustomPrice = Item.buyPrice(gold: 5) })
-                // LAS ANTORCHAS (la luz del camino — el pack de 10)
-                .Add(new Item(ItemID.Torch) { shopCustomPrice = Item.buyPrice(silver: 10), stack = 10 })
-                // EL PAPEL DEL PORTADOR (el material de la página en
-                // blanco — la casa la usa para recetas de despertar)
-                .Add(new Item(ModContent.ItemType
-                    <global::AethonMod.Content.Items.PaginaEnBlanco>()) { shopCustomPrice = Item.buyPrice(gold: 1) })
-                // LA CURA DE SIEMPRE (poción de maná — el coste del clic
-                // derecho está en el hambre, pero el portador novato
-                // necesita maná para el Equinoccio)
-                .Add(new Item(ItemID.ManaPotion) { shopCustomPrice = Item.buyPrice(silver: 25) })
-                .Add(new Item(ItemID.HealingPotion) { shopCustomPrice = Item.buyPrice(silver: 25) })
-                // LA CASA DE SIEMPRE (una antorcha del vacío para el
-                // camino de vuelta del mundo interior)
-                .Add(new Item(ItemID.RecallPotion) { shopCustomPrice = Item.buyPrice(silver: 15) })
-                ;
-            tienda.Register();
+            // LA TIENDA VACÍA DE NACIMIENTO: la mercancía vive en
+            // ModifyActiveShop (la tienda ES del comprador — la letra).
+            new NPCShop(Type, "Cronista").Register();
+        }
+
+        /// <summary>v6.154 — LA TIENDA DEL COMPRADOR (la letra: «lo que
+        /// vende siempre estara ligado al jugador que va a comprarle…
+        /// el cronista sabra el nivel de despertar de cada uno y
+        /// vendera la respectiva mercancia para cada uno»). EL HOOK:
+        /// ModifyActiveShop corre EN CADA APERTURA con el player LOCAL
+        /// delante del mostrador — la mercancía nace del DESPERTAR DE
+        /// QUIEN MIRA. (El botón de la Onceava y las esencias de
+        /// monstruos de la v6.153 MUEREN: la letra los mata.)</summary>
+        public override void ModifyActiveShop(string shopName, Item[] items)
+        {
+            if (shopName != "Cronista") return;
+            try
+            {
+                Player comprador = Main.LocalPlayer;
+                if (comprador == null || !comprador.active) return;
+
+                int eterno = ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                bool llevaElLibro = false;
+                for (int i = 0; i < 58; i++)
+                    if (comprador.inventory[i] != null &&
+                        comprador.inventory[i].type == eterno)
+                    { llevaElLibro = true; break; }
+                if (!llevaElLibro) return;   // sin el libro, el mostrador está vacío
+
+                // LA PUERTA QUE ESTÁ PAGANDO ESTE COMPRADOR: el nivel
+                // siguiente de SU grimorio (cada libro, su escalera).
+                int siguiente = Math.Min(
+                    global::AethonMod.Content.Systems.DespertarGrimorio.NivelMax,
+                    global::AethonMod.Content.Systems.DespertarGrimorio
+                        .NivelDespertarSiguiente(comprador));
+
+                int slot = 0;
+                void Poner(int tipoItem, long precio, int pila = 1)
+                {
+                    if (slot >= items.Length) return;
+                    var it = new Item(tipoItem);
+                    it.stack = pila;
+                    it.shopCustomPrice = (int)Math.Min(int.MaxValue, precio);
+                    it.shopSpecialCurrency = EsenciaMonedaSistema.IdMoneda;
+                    items[slot++] = it;
+                }
+
+                // ========================================================
+                //  (1) LOS REQUISITOS DEL DESPERTAR (la letra: «lo que
+                //  vende el cronista son los requisitos de cada
+                //  despertar»): LAS ARMAS del peldaño siguiente del
+                //  comprador — el festín se compra a plazos.
+                //  (Las monedas y las esencias del festín NO se
+                //  venden: el oro es de los vivos y las esencias de
+                //  jefe se ganan cazando.)
+                // ========================================================
+                int[] armas = global::AethonMod.Content.Systems.DespertarGrimorio.ArmasDe(siguiente);
+                if (armas != null)
+                {
+                    foreach (int tipoArma in armas)
+                    {
+                        if (tipoArma <= 0) continue;
+                        int despertarReq = DespertarDelRequisito(tipoArma);
+                        var plantilla = new Item(tipoArma);
+                        Poner(tipoArma, PrecioRequisito(plantilla, despertarReq, comprador));
+                    }
+                }
+                // LOS MATERIALES DE LA FORMA (101-120: los grupos con
+                // alternativas — se vende la PRIMERA del grupo)
+                int[][] grupos = global::AethonMod.Content.Systems.DespertarGrimorio.GruposMaterialesDeLaForma(siguiente);
+                if (grupos != null)
+                {
+                    foreach (int[] grupo in grupos)
+                    {
+                        if (grupo == null || grupo.Length == 0) continue;
+                        var plantilla = new Item(grupo[0]);
+                        int despertarReq = siguiente;
+                        long precioMat = Math.Max(100L,
+                            PrecioRequisito(plantilla, despertarReq, comprador) / 4);
+                        Poner(grupo[0], precioMat, 5);   // paquete de 5 (un tributo, no el festín entero)
+                    }
+                }
+
+                // ========================================================
+                //  (2) LAS POCIONES DE MANÁ SINCRONIZADAS CON EL MAGO
+                //  (la letra: «al igual que el mago en el juego estas
+                //  se iran desbloqueando a la par que el NPC Mago en
+                //  el terraria vanilla… siempre estaran sincronizadas
+                //  con las del NPC Mago, solo que el cronista las
+                //  vendera con esencias del eterno y su valor sera de
+                //  1 esencia del eterno la mas basica hasta 5 esencias
+                //  la de mayor calidad»).
+                //  LA SINCRONÍA REAL del Mago vanilla (el decompile:
+                //  el Mago vende Menor SIEMPRE; Restauración con
+                //  hardMode; Mayor con algún mech muerto):
+                //    Menor        → 1 esencia
+                //    Restauración → 3 esencias
+                //    Mayor        → 5 esencias
+                // ========================================================
+                Poner(ItemID.ManaPotion, 1, 5);                       // Menor (la básica: 1)
+                if (Main.hardMode)
+                    Poner(ItemID.RestorationPotion, 3, 5);            // Restauración: 3
+                if (NPC.downedMechBossAny)
+                    Poner(ItemID.GreaterManaPotion, 5, 5);            // Mayor (la de mayor calidad: 5)
+            }
+            catch { }
+        }
+    }
+
+    // ======================================================================
+    //  ESENCIAMONEDASISTEMA — LA MONEDA DEL DESPERTAR (v6.154).
+    //  El patrón vanilla de las Medallas de Defensor (CustomCurrency
+    //  SingleCoin — verificado por reflexión contra el tModLoader.dll
+    //  REAL de 2026.09.3.1): la Esencia del Eterno (ItemCorrupto — la
+    //  moneda del festín de siempre) pasa a ser MONEDA DE TIENDA. El
+    //  tope es el cap del alma: 9999 por pila (la pila de la v6.120).
+    // ======================================================================
+    public class EsenciaMonedaSistema : ModSystem
+    {
+        /// <summary>El ID de la moneda (lo reparten los items de la
+        /// tienda via shopSpecialCurrency — CustomCurrencyManager lo
+        /// registra en su Load).</summary>
+        public static int IdMoneda { get; private set; } = -1;
+
+        public override void Load()
+        {
+            // LA ESSENCIA COMO MONEDA: cuenta las pilas del inventario
+            // (y las cobra — el patrón del SingleCoin de vanilla).
+            IdMoneda = Terraria.GameContent.UI.CustomCurrencyManager
+                .RegisterCurrency(new Terraria.GameContent.UI.CustomCurrencySingleCoin(
+                    ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(),
+                    999999L));
+        }
+
+        public override void Unload()
+        {
+            IdMoneda = -1;
         }
     }
 }

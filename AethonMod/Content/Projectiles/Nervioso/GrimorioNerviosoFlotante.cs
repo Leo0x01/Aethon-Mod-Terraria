@@ -270,10 +270,23 @@ namespace AethonMod.Content.Projectiles.Nervioso
         {
             NPC mejor = null;
             float mejorD = RADIO_PUEBLO * RADIO_PUEBLO;
+            // v6.154 — EL CRONISTA NO ES VÍCTIMA (la letra: «el grimorio
+            // cuando esta en estado de caza se va al cronista, no debe
+            // suceder el grimorio siempre debe estar con el jugador»):
+            // el Cronista NACE a 3 tiles del portador y es town NPC —
+            // VecinoCercano lo elegía SIEMPRE como «el pueblo» y el
+            // libro dejaba de cazar para merodearlo. El Cronista es
+            // INMORTAL (la letra del lore: la inmortalidad «me fue
+            // cobrada») — el libro NO lo acecha: no cuenta como pueblo
+            // ni como víctima. (Su inmunidad es total: tampoco lo
+            // intimida ElegirVictima — está excluido desde la raíz.)
+            int tipoCronista = ModContent.NPCType
+                <global::AethonMod.Content.NPCs.ElCronista>();
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC n = Main.npc[i];
                 if (n == null || !n.active || !n.townNPC) continue;
+                if (n.type == tipoCronista) continue;   // el escriba inmortal no juega
                 float d = Vector2.DistanceSquared(n.Center, dueño.Center);
                 if (d < mejorD) { mejorD = d; mejor = n; }
             }

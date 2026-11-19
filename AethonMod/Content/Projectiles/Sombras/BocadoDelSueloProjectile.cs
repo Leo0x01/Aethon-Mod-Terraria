@@ -219,7 +219,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.BrumaColumna(col, 26f, 0.50f * vivo, tiempo, semilla, 9);
 
             // LOS OJOS DEL CUERPO (pocos, chicos, TODOS al plato)
-            SombrasLib.OjosDeMasa(col, ancla, (0.4f + 0.6f * envuelve) * vivo, semilla, tiempo, 4);
+            // v6.154 — LA SOMBRA NUEVA EN TODO (la letra): tinta
+            // lisa, sin ojos — la bruma respira en su lugar.
+            SombrasLib.BrumaColumna(col, 30f, 0.50f * vivo, tiempo, semilla + 73, 7);
 
             // === LA POSICIÓN DEL BOCAO EN VUELO (el plato por dentro) ===
             Vector2[] colPleno = Camino(portador, ancla, tiempo, semilla);

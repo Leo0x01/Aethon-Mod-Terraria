@@ -2652,10 +2652,40 @@ Furia: {
 	OleadaEspecial: EL JUICIO: los SEIS guardianes a la vez, ×15 en TODO. El festín final.
 	JefeRaro: EL DADO DEL INVIERNO: {0} se sienta a la mesa (oleada {1} — 1 de 100). El invierno caminante ya no guarda zona alguna: SOLO el azar lo invita.
 	MuertePortador: El festín muere con su portador. El libro TOMA NOTA.
+	// v6.154 — LA PURGA DE LA OLEADA (la letra: la muerte del portador
+	// cancela el festín y TODA la cena se disuelve, jefes incluidos)
+	Purga: El festín muere con su portador — toda la cena se disuelve en sombra.
 }
 
 Cronista: {
 	Llega: El Cronista despierta del libro — el escriba que sobrevivió a la primer devoración camina a tu lado.
+	// v6.154 — LOS 22 DIÁLOGOS EXCLUSIVOS (la letra), organizados
+	// por disparador: genéricas/portador/oleadas/despertar/sellado/
+	// objetos/cierre en rotación; la Onceava y la Última Puerta son
+	// DISPARADORES (la oleada activa / llegar al Despertar 120).
+	ChatGenerica1: Trae Esencia del Eterno. Todo lo demás es ruido entre páginas.
+	ChatGenerica2: El oro es de los vivos. Tú hace tiempo que eres otra cosa.
+	ChatGenerica3: Sigo aquí. Siempre estoy aquí. Aparte de escribir, es lo único que sé hacer.
+	ChatGenerica4: No me gusta la lluvia. La tinta corre, y con ella la verdad.
+	ChatGenerica5: La nieve me calma. La tinta se congela y, por un momento, puedo releerme.
+	ChatPortador1: Anoche escribí tu final. Hoy volví a tacharlo. No te acostumbres: la tinta se cansa.
+	ChatPortador2: He contado tus muertes. Deja de darme material.
+	ChatPortador3: ¿Qué eres? No me lo digas. Quiero descubrirlo.
+	ChatPortador4: Otra vez. Otra vez. Lo escribo y lo tacho y lo escribo. ¿Cuál de los dos es el terco?
+	ChatPortador5: Los portadores anteriores eran fáciles de definir. Tú me obligas a usar el margen.
+	ChatOleadas1: La ola que viene tiene hambre. La de ayer también. Todas tienen hambre: es su única palabra.
+	ChatOleadas2: Dosificar es de dioses pacientes. Nunca le pregunté por qué dosifica. Tal vez tema el final de la historia.
+	ChatOleadas3: Cada jefe que cae vuelve a mi lista. El Grimorio no desperdicia: guarda cada caída como un maestro guarda las copias del examen.
+	ChatOnceava: Esta noche cena bien. Todos vienen. Todos vinieron.
+	ChatDespertar: Puerta más, puerta menos. Todas se abren igual: hacia dentro.
+	ChatUltimaPuerta: La última puerta no tiene nada detrás. Detrás estás tú.
+	ChatSellado1: No le tengas miedo. Eres el capítulo que lleva eones esperando.
+	ChatSellado2: Cuando lo derrotes no habrá muerto. El papel no muere: se pasa de página.
+	ChatObjetos1: Eso que llevas no fue escrito en este idioma. Lo pondré en el margen.
+	ChatObjetos2: Palabra nueva. Palabra de otro libro. El Eterno la olió en cuanto entró.
+	ChatObjetos3: Los otros mundos también escriben. Peor, pero escriben.
+	ChatCierre1: Cuando acabe tu historia cerraré el libro. Y por fin podré parpadear.
+	ChatCierre2: …No me mires así. También los testigos soñamos.
 }
 
 Ira: {

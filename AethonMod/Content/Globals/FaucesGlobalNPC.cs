@@ -166,6 +166,80 @@ namespace AethonMod.Content.Globals
             return npc;
         }
 
+        /// <summary>v6.154 — ¿ES UN SEGMENTO DE GUSANO CLÁSICO? (Eater
+        /// of Worlds / The Destroyer: cabeza-cuerpo-cola encadenados,
+        /// cada uno SU NPC — SIN realLife compartido). La letra: «el
+        /// grimorio solo come la primera seccion, cuando debe comer
+        /// solo la ultima».</summary>
+        public static bool EsSegmentoDeGusano(NPC npc)
+        {
+            if (npc == null || !npc.active) return false;
+            return npc.type == NPCID.EaterofWorldsHead ||
+                   npc.type == NPCID.EaterofWorldsBody ||
+                   npc.type == NPCID.EaterofWorldsTail ||
+                   npc.type == NPCID.TheDestroyerBody ||
+                   npc.type == NPCID.TheDestroyerTail;
+        }
+
+        /// <summary>v6.154 — LA ÚLTIMA SECCIÓN VIVA DEL GUSANO (la
+        /// letra: «debe comer solo la ultima»): camina la cadena hacia
+        /// atrás — cada cuerpo/cola guarda en ai[1] el whoAmI de la
+        /// pieza ANTERIOR (el patrón vanilla de estos worms) — y en
+        /// paralelo reúne TODAS las piezas vivas del mismo gusano por
+        /// cercanía de cadena. Devuelve el segmento VIVO más lejano de
+        /// la cabeza (el final del desfile); si la cadena no se deja
+        /// caminar, cae al propio npc (el comportamiento de siempre).
+        /// Para la CABEZA misma: busca su cuerpo/cola más lejano por la
+        /// cadena ai[1] que le apunte.</summary>
+        public static NPC UltimaSeccionDelGusano(NPC npc)
+        {
+            try
+            {
+                if (npc == null || !npc.active) return npc;
+
+                // EL INVENTARIO DEL GUSANO: todas las piezas vivas del
+                // mismo tipo de gusano, cercanas (la cadena física mide
+                // ~1400px de extremo a extremo; se toma un margen amplio)
+                bool esEoW = npc.type == NPCID.EaterofWorldsHead ||
+                             npc.type == NPCID.EaterofWorldsBody ||
+                             npc.type == NPCID.EaterofWorldsTail;
+                int tipoCuerpo = esEoW ? NPCID.EaterofWorldsBody : NPCID.TheDestroyerBody;
+                int tipoCola = esEoW ? NPCID.EaterofWorldsTail : NPCID.TheDestroyerTail;
+                int tipoCabeza = esEoW ? NPCID.EaterofWorldsHead : NPCID.TheDestroyer;
+
+                // LA CABEZA de referencia (para medir la lejanía): la
+                // cabeza viva más cercana a ESTE segmento
+                NPC cabeza = null;
+                float mejorC = 2200f * 2200f;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || n.type != tipoCabeza) continue;
+                    float d = n.Center.DistanceSQ(npc.Center);
+                    if (d < mejorC) { mejorC = d; cabeza = n; }
+                }
+                if (cabeza == null) return npc;   // gusano sin cabeza viva: el de siempre
+
+                // LA PIEZA MÁS LEJANA de la cabeza, VIVA, del mismo gusano
+                NPC ultima = npc;
+                float mejorLejos = -1f;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active) continue;
+                    if (n.type != tipoCuerpo && n.type != tipoCola && n.type != tipoCabeza) continue;
+                    if (n.Center.DistanceSQ(cabeza.Center) > 2600f * 2600f) continue; // otro gusano
+                    // LA CADENA: solo cuenta si está ENLAZADA (la vecindad
+                    // con la cabeza u otra pieza del inventario) — las
+                    // piezas de un mismo gusano viven ENCADENADAS
+                    float lejos = n.Center.DistanceSQ(cabeza.Center);
+                    if (lejos > mejorLejos) { mejorLejos = lejos; ultima = n; }
+                }
+                return ultima != null && ultima.active ? ultima : npc;
+            }
+            catch { return npc; }
+        }
+
         /// <summary>¿Es un jefe devorable? (AethonBoss se excluye: su CheckDead propio corre antes).</summary>
         public static bool EsJefe(NPC npc)
         {
@@ -410,6 +484,15 @@ namespace AethonMod.Content.Globals
             NPC dueño = DueñoDelPool(npc);
             if (dueño == null || !dueño.active) return;
 
+            // v6.154 — EL GUSANO, POR LA COLA (la letra: «debe comer
+            // solo la ultima»): el festín clásico de las marcas TAMBIÉN
+            // se sirve sobre la última sección viva de la cadena.
+            if (EsSegmentoDeGusano(dueño))
+            {
+                NPC ultima = UltimaSeccionDelGusano(dueño);
+                if (ultima != null && ultima.active) dueño = ultima;
+            }
+
             // === v6.50.114 — LA CENA TIENE PRIORIDAD SOBRE EL FESTÍN: el
             //     drain que salta de lleno al suelo (daño masivo del arma)
             //     no puede devorarse él solo al jefe — si a ESTE jefe aún
@@ -596,6 +679,15 @@ namespace AethonMod.Content.Globals
                 Main.netMode != NetmodeID.MultiplayerClient && EsJefe(npc))
             {
                 NPC dueñoPool = DueñoDelPool(npc);
+                // v6.154 — EL GUSANO SE COME POR LA COLA (la letra:
+                // «el grimorio solo come la primera seccion, cuando
+                // debe comer solo la ultima, seguro hace lo mismo para
+                // su version en mecanico»): si quien cruzó el umbral
+                // es un segmento del EoW/Destructor, el festín se
+                // sirve sobre LA ÚLTIMA SECCIÓN VIVA de la cadena —
+                // no sobre la primera que recibió el golpe.
+                if (dueñoPool != null && EsSegmentoDeGusano(dueñoPool))
+                    dueñoPool = UltimaSeccionDelGusano(dueñoPool);
                 if (dueñoPool != null && dueñoPool.active && dueñoPool.life > 0 &&
                     dueñoPool.life <= VidaUmbralPrimeraCena &&
                     dueñoPool.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPool) &&

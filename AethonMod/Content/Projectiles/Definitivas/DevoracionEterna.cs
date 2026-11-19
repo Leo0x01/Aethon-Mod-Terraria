@@ -687,8 +687,14 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 SombrasLib.BrumaColumna(col, 44f, 0.50f * vivoF, tiempo, semilla, 13);
                 SombrasLib.BrumaColumna(col, 30f, 0.40f * vivoF, tiempo, semilla + 53, 10);
 
-                // LOS OJOS: TODOS abiertos, TODOS mirando a la presa
-                SombrasLib.OjosDeMasa(col, centroPresa, (0.4f + 0.6f * festin) * vivoF, semilla, tiempo, 7);
+                // v6.154 — LOS OJOS MURIERON EN TODAS LAS SOMBRAS DEL
+                // GRIMORIO (la letra: «todas las veces que el grimorio
+                // use la sombra de la pagina que sea con la nueva
+                // version mas estilizada»): la sombra nueva es TINTA
+                // LISA (v6.152) — sin ojos ni colmillos en NINGÚN uso.
+                // En su lugar: la bruma MÁS DENSA respirando por el
+                // cuerpo (la página exhala sobre su presa).
+                SombrasLib.BrumaColumna(col, 38f, 0.52f * vivoF, tiempo, semilla + 73, 9);
 
                 // LA CABEZA ES BRUMA (la boca de la casa)
                 Vector2 punta = col[col.Length - 1];

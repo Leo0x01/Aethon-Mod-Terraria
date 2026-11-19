@@ -498,37 +498,65 @@ namespace AethonMod.Content.Weapons.Definitivas
                         float enciende = MathHelper.Clamp((p - 0.55f) / 0.45f, 0f, 1f);
                         float alphaSol = (0.35f + 0.65f * enciende) * funde;
                         // el vals: el eclipse mutuo alterna los brillos
+                        // v6.154 — TODO LEE LA ESPIRAL MAESTRA (la
+                        // estela de la v6.153 dibujaba la órbita 190
+                        // aunque el sol volara del centro: estelas
+                        // huérfanas — ahora cada miga vive donde
+                        // REALMENTE pasó el sol, con la curva única)
                         if (_edad >= T_CONVOCATORIA)
                         {
-                            float u1 = MathHelper.Clamp(
-                                (_edad - T_CONVOCATORIA) / (float)T_FUSION, 0f, 1f);
-                            float pc = MathHelper.Clamp(u1 / P_CONTACTO, 0f, 1f);
-                            float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
-                            float angLado = ang + (luz ? 0f : MathHelper.Pi);
+                            float radioM, angM, pcCaida;
+                            EspiralDelPar(_edad, gt, out radioM, out angM, out pcCaida);
+                            float angLado = angM + (luz ? 0f : MathHelper.Pi);
                             bool delante = MathF.Sin(angLado) > 0f;
                             float alfaEclipse = delante ? 1.10f : 0.55f;
-                            alphaSol = MathHelper.Clamp(alfaEclipse, 0f, 1f) * funde;
+                            // EL ENCENDIDO del impulso: en el rebote del
+                            // centro el eclipse NACE suave (los soles se
+                            // acaban de tocar: la alternancia prende con
+                            // la espiral, no de golpe)
+                            float prendeEclipse = smoothstepNova(MathHelper.Clamp(
+                                (_edad - T_CONVOCATORIA) / (float)T_IMPULSO, 0f, 1f));
+                            float alfaSol = MathHelper.Lerp(0.85f,
+                                MathHelper.Clamp(alfaEclipse, 0f, 1f), prendeEclipse);
+                            alphaSol = alfaSol * funde;
 
-                            // LA ESTELA DEL COMETA (determinista, la de siempre)
-                            float radio = MathHelper.Lerp(190f, 24f,
-                                MathF.Pow(pc * pc * (3f - 2f * pc), 1.45f));
+                            // LA ESTELA DEL COMETA — sobre la curva maestra:
+                            // las migas viven donde el sol PASÓ DE VERDAD
                             VFXCore.AbrirAdditive();
                             try
                             {
                                 for (int k = 1; k <= 9; k++)
                                 {
+                                    // el paso atrás por la MISMA espiral:
+                                    // radio y ángulo de hace k·0.045 rad
                                     float angPas = angLado - k * 0.045f - 0.09f;
-                                    float radPas = radio + k * 2.2f;
+                                    float radPas = radioM + k * 2.2f;
                                     Vector2 posPas = Punto + angPas.ToRotationVector2() * radPas
                                         - Main.screenPosition;
                                     float fEst = (1f - k / 10f);
                                     VFXCore.Quad(posPas, SigiloLib.Tint(
                                         luz ? new Color(255, 240, 200) : new Color(190, 130, 255),
-                                        0.30f * fEst * fEst * alfaEclipse),
+                                        0.30f * fEst * fEst * alfaSol),
                                         new Vector2(r * (0.55f + 0.4f * fEst)), 0f);
                                 }
                             }
                             finally { VFXCore.RestaurarLoteVanilla(); }
+                        }
+
+                        // v6.154 — EL ABRAZO DE LA REUNIÓN (la mejora):
+                        // el instante del encuentro en el centro — un
+                        // flash que NACE DE 0 (bloom de la librería, no
+                        // un disco plano) y se disuelve en el impulso.
+                        if (_edad >= T_CONVOCATORIA - 2f && _edad < T_CONVOCATORIA + T_IMPULSO)
+                        {
+                            float fAbrazo = MathHelper.Clamp(
+                                (_edad - (T_CONVOCATORIA - 2f)) / (float)(T_IMPULSO + 2f), 0f, 1f);
+                            float vida = fAbrazo < 0.3f
+                                ? fAbrazo / 0.3f : 1f - (fAbrazo - 0.3f) / 0.7f;
+                            global::AethonMod.Content.VFX.LumenLib.Bloom(
+                                Main.spriteBatch, Punto - Main.screenPosition,
+                                (40f + 90f * fAbrazo), new Color(255, 235, 190),
+                                0.5f * vida * funde);
                         }
 
                         if (alphaSol > 0.01f)
@@ -544,10 +572,11 @@ namespace AethonMod.Content.Weapons.Definitivas
                     float pc = MathHelper.Clamp(p / P_CONTACTO, 0f, 1f);
                     if (p < P_CONTACTO)
                     {
-                        float caida = pc * pc * (3f - 2f * pc);
-                        caida = MathF.Pow(caida, 1.45f);
-                        float radio = MathHelper.Lerp(190f, 24f, caida);
-                        float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+                        // v6.154 — la espiral maestra manda (el radio
+                        // viejo nacía en 190: el teletransporte)
+                        float radio, ang, pcCaidaV;
+                        EspiralDelPar(_edad, gt, out radio, out ang, out pcCaidaV);
+                        pc = pcCaidaV;
 
                         for (int lado = 0; lado < 2; lado++)
                         {
@@ -869,6 +898,12 @@ namespace AethonMod.Content.Weapons.Definitivas
         /// cura del frame de menos-populación).</summary>
         private const int T_FUNDIDO = 10;
 
+        /// <summary>v6.154 — EL IMPULSO DE LA REUNIÓN: los ticks del
+        /// rebote — la espiral NACE DEL RADIO 0 (los soles ACABAN de
+        /// tocarse en el centro) y crece a la órbita de 190px. La cura
+        /// del teletransporte: UNA sola curva 0→190→24.</summary>
+        private const int T_IMPULSO = 16;
+
         /// <summary>El cabeceo de la convocatoria (±26 px) que DECAE
         /// continuo al entrar al vals — jamás muere abrupto.</summary>
         private static float Cabeceo(float edad)
@@ -880,30 +915,68 @@ namespace AethonMod.Content.Weapons.Definitivas
             return (1f - smoothstepNova(salida)) * 26f;
         }
 
-        /// <summary>LA POSICIÓN CONTINUA DE UN SOL DEL PAR: la cita con
-        /// el cabeceo vivo — la MISMA función para convocatoria y vals
-        /// (la órbita del vals hereda el punto de llegada SIN corte).</summary>
+        /// <summary>v6.154 — LA ESPIRAL ÚNICA DEL PAR (la reanimación
+        /// de verdad — la letra: «reanimados desde cero»). EL SALTO
+        /// ESTABA AQUÍ: el vuelo a la cita TERMINABA en el centro
+        /// (Punto) y el vals ARRANCABA en la órbita a 190px — un
+        /// teletransporte de 190px en un tick, escondido detrás del
+        /// crossfade. LA CURA — UNA SOLA COREOGRAFÍA:
+        ///   FASE 1 (0→36) EL VUELO A LA CITA: de ±300px al centro,
+        ///     con el cabeceo sereno que decae solo;
+        ///   FASE 2 (36→52) EL IMPULSO DE LA REUNIÓN: los soles ACABAN
+        ///     de tocarse — la espiral NACE DE RADIO 0 y crece a la
+        ///     órbita (0→190): el rebote físico del encuentro;
+        ///   FASE 3 (52→contacto) LA CAÍDA: la órbita de siempre
+        ///     (190→24, Kepler acelerando).
+        /// Cada fase termina EXACTO donde empieza la siguiente, con
+        /// derivada 0 (smoothsteps encadenados): el salto es
+        /// matemáticamente IMPOSIBLE.</summary>
         private Vector2 PosicionSolContinua(bool luz, float edad, float gt)
         {
-            if (edad < T_CONVOCATORIA + T_FUNDIDO)
+            // FASE 1 — EL VUELO A LA CITA
+            if (edad < T_CONVOCATORIA)
             {
-                // convocatoria (y los primeros ticks del vals fundidos):
-                // el vuelo sereno con el cabeceo que DECAE
                 float u0 = MathHelper.Clamp(edad / (float)T_CONVOCATORIA, 0f, 1f);
                 float suave = smoothstepNova(u0);
                 Vector2 origen = Punto + (luz ? new Vector2(-300f, 0f) : new Vector2(300f, 0f));
                 return Vector2.Lerp(origen, Punto, suave) +
-                    new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * Cabeceo(edad) * (1f - suave * 0.4f));
+                    new Vector2(0f, MathF.Sin(gt * 6f + (luz ? 0f : 3.1f)) * Cabeceo(edad) * (1f - suave));
             }
-            // el vals: la órbita de siempre (el cabeceo ya se disolvió)
-            float u1 = MathHelper.Clamp((edad - T_CONVOCATORIA) / (float)T_FUSION, 0f, 1f);
-            float pc = MathHelper.Clamp(u1 / P_CONTACTO, 0f, 1f);
-            float caida = pc * pc * (3f - 2f * pc);
-            caida = MathF.Pow(caida, 1.45f);
-            float radio = MathHelper.Lerp(190f, 24f, caida);
-            float ang = gt * 1.6f + lado0(gt) + pc * pc * 10.5f;
+            // FASES 2+3 — LA ESPIRAL (nace del centro, rebota a la
+            // órbita y cae a la fusión): UNA curva de radio para TODO
+            float radio, ang, pcCaida;
+            EspiralDelPar(edad, gt, out radio, out ang, out pcCaida);
             float angLado = ang + (luz ? 0f : MathHelper.Pi);
             return Punto + angLado.ToRotationVector2() * radio;
+        }
+
+        /// <summary>v6.154 — LA CURVA MAESTRA DE LA ESPIRAL: el radio
+        /// y el ángulo de la danza del par DESDE la reunión (radio 0 —
+        /// se acaban de tocar en el centro) HASTA el contacto de la
+        /// fusión (radio 24). La leen la POSICIÓN, las ESTELAS y los
+        /// ECLIPSES — una sola verdad, cero estelas huérfanas.</summary>
+        private static void EspiralDelPar(float edad, float gt,
+            out float radio, out float ang, out float pcCaida)
+        {
+            float tEsp = edad - T_CONVOCATORIA;
+            // EL IMPULSO: radio 0 → 190 (smoothstep — nace del centro
+            // con derivada 0: la continuidad con el vuelo a la cita)
+            float impulso = smoothstepNova(MathHelper.Clamp(
+                tEsp / (float)T_IMPULSO, 0f, 1f));
+            // LA CAÍDA: 190 → 24 (Kepler — la aceleración de siempre,
+            // corriendo por lo que queda de vals hasta el contacto)
+            float finCaida = T_FUSION * P_CONTACTO;
+            pcCaida = MathHelper.Clamp(
+                (tEsp - T_IMPULSO * 0.55f) / (finCaida - T_IMPULSO * 0.55f), 0f, 1f);
+            float caida = pcCaida * pcCaida * (3f - 2f * pcCaida);
+            caida = MathF.Pow(caida, 1.45f);
+            // EL RADIO ÚNICO: 0 → 190 (impulso) → 24 (caída) — la
+            // caída SOLO manda donde el impulso ya aterrizó (jamás
+            // restan: la curva es monotónica por tramos)
+            radio = (190f * impulso) * (1f - caida) + 24f * caida;
+            // EL ÁNGULO: continuo en el reloj del mundo (gt) — sin
+            // costuras angulares JAMÁS; la caída aprieta la espiral
+            ang = gt * 1.6f + lado0(gt) + pcCaida * pcCaida * 10.5f;
         }
 
         /// <summary>EL CROSSFADE DEL PAR: 1 mientras el par es LA

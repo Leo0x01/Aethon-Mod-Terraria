@@ -553,16 +553,18 @@ namespace AethonMod.Content.UI
                 _maxIzq = DibujarColumna(sb, columnas[0], pagIzq, recIzq, ref _scrollIzq, true);
                 _maxDer = DibujarColumna(sb, columnas[1], pagDer, recDer, ref _scrollDer, false);
 
-                sb.End();
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None,
-                    Main.Rasterizer, null, Main.Transform);
-
-                // ============ v6.144 — EL OJO DE ABAJO-DERECHA MURIÓ
-                // (la letra: «el ojo de abajo a la derecha lo puedes
-                // eliminar») — la página derecha es del LORE: el ojo
-                // ya no vive aquí. ============
-
+                // ============================================================
+                //  v6.154 — LA X VIVE CON LAS PÁGINAS (la cura de «la X
+                //  sigue desplazada a la izquierda lejos de su hitbox»):
+                //  el bloque v6.153 dibujaba la X en el pase Main.Transform
+                //  (coordenadas CRUDAS) mientras el libro entero vive en
+                //  el pase UIScaleMatrix (coordenadas ESCALADAS) — con la
+                //  escala de UI ≠ 100 % las páginas corrían y la X se
+                //  quedaba atrás: corrida a la izquierda, lejos de donde
+                //  el dedo caía. AHORA el dibujo Y la lectura del click
+                //  corren en EL MISMO sistema de coordenadas que las
+                //  páginas: la X cae EXACTA a cualquier escala.
+                // ============================================================
                 // ============ LA X — EN SU SITIO DE VERDAD ============
                 // v6.151 — EL BOTÓN Y SU DIBUJO SON LO MISMO (la letra:
                 // «esa X esta mal ubicada, esta muy a la izquierda
@@ -605,36 +607,28 @@ namespace AethonMod.Content.UI
                 if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
                     LibroDelEternoUI.Cerrar();
 
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None,
+                    Main.Rasterizer, null, Main.Transform);
+
+                // ============ v6.144 — EL OJO DE ABAJO-DERECHA MURIÓ
+                // (la letra: «el ojo de abajo a la derecha lo puedes
+                // eliminar») — la página derecha es del LORE: el ojo
+                // ya no vive aquí. ============
                 // ============================================================
-                //  v6.153 — EL CURSOR PROPIO (la letra: «el cursor
-                //  siempre queda oculto»): LO ÚLTIMO que dibuja el libro
-                //  es EL PROPIO CURSOR — el puntero de vanilla clonado
-                //  en la posición real del ratón. NADA del libro (ni de
-                //  la casa) puede taparlo: el usuario SIEMPRE ve dónde
-                //  apunta. (El cursor de vanilla vive en sus capas 33+;
-                //  esta capa corre antes — el clon garantiza la vista
-                //  aunque otro mod mueva capas.)
+                //  v6.154 — EL SEGUNDO CURSOR MUERE (la letra: «en el
+                //  libro de informacion aparece un segundo cursor
+                //  desplazado a la izquierda»): el CLON v6.153 se
+                //  dibujaba con el sb bajo Main.Transform (la matriz de
+                //  JUEGO) dentro del pase de interfaz — con la escala de
+                //  UI ≠ 100 % caía corrido: el fantasma de la izquierda.
+                //  La cura es RESTAR: el clon NO existe — el problema
+                //  original (el libro tapaba al cursor) ya lo mata la
+                //  CAPA (vive antes de 'Vanilla: Mouse Text': vanilla
+                //  dibuja SU cursor ENCIMA del libro, SIEMPRE). Un solo
+                //  cursor, el de verdad, en su sitio.
                 // ============================================================
-                try
-                {
-                    // v6.153 — EL CURSOR DE VANILLA CLONADO (verificado por
-                    // reflexión contra el tModLoader.dll REAL:
-                    // TextureAssets.Cursors es el Asset<Texture2D>[] de
-                    // siempre; Main.DrawCursor(bonus, smart) usa
-                    // Cursors[Main.cursorStyle] — aquí se clona su trazo
-                    // al pie: el tinte vivo del cursor (cursorColor, la
-                    // animación de color de vanilla) y SU escala).
-                    var cursor = Terraria.GameContent.TextureAssets.Cursors[0].Value;
-                    if (cursor != null && !cursor.IsDisposed)
-                    {
-                        Vector2 posCursor = new Vector2(Main.mouseX, Main.mouseY);
-                        sb.Draw(cursor, posCursor, null,
-                            Main.cursorColor * Main.cursorAlpha,
-                            0f, default, Main.cursorScale,
-                            SpriteEffects.None, 0f);
-                    }
-                }
-                catch { }
             }
             catch { }
         }

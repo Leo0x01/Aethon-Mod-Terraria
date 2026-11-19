@@ -238,11 +238,21 @@ namespace AethonMod.Content.Players
                 var visuales = Player.GetModPlayer<CosmeticPlayer>();
                 if (visuales == null) return;
                 bool escupida = alma.FormaEscupida && alma.FormasPartes >= PartesTotales;
+                // v6.154 — LOS ANILLOS NUNCA SE APAGAN ANTES DE LA
+                // CONVERSIÓN (la letra: «los anillos de soles runicos
+                // nunca aparecen en la construccion»): la v6.153 los
+                // encendía SOLO en la ventana 113-119 — en el 120 SIN
+                // PAGAR AÚN (la puerta del jefe espera) la condición
+                // `< NivelManifestacion` los apagaba TODOS: el portador
+                // pasaba de 7 anillos a CERO en el peldaño de la cima,
+                // justo antes de la conversión. LA CURA: los anillos
+                // viven desde el 113 hasta LA ESCUPIDA (el 120 incluido
+                // mientras se paga) — el vestido del sol se queda puesto
+                // hasta que la Forma lo reclame.
                 if (!escupida &&
-                    despertar > Systems.DespertarGrimorio.NivelManifestacion - 8 &&
-                    despertar < Systems.DespertarGrimorio.NivelManifestacion)
+                    despertar > Systems.DespertarGrimorio.NivelManifestacion - 8)
                 {
-                    visuales.AnillosSolRunico = despertar - 112; // 113→1 … 119→7
+                    visuales.AnillosSolRunico = Math.Min(7, despertar - 112); // 113→1 … 119-120→7
                     if (visuales.AnillosSolRunico > 0 &&
                         Player.whoAmI == Main.myPlayer && !alma.AnillosAvisoVivido)
                     {

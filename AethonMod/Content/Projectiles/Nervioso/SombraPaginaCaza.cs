@@ -293,7 +293,9 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 ? presa.Center
                 : dueño.MountedCenter + Projectile.velocity * 30f;
             float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 20f) : 1f;
-            SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 5);
+            // v6.154 — LA SOMBRA NUEVA EN TODO (la letra): tinta
+            // lisa, sin ojos — la bruma respira en su lugar.
+            SombrasLib.BrumaColumna(col, 32f, 0.52f * disipa, tiempo, semilla + 73, 8);
 
             // === LA PUNTA ===
             Vector2 punta = col[col.Length - 1];

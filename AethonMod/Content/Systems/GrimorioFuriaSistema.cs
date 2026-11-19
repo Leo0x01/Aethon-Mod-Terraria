@@ -678,9 +678,19 @@ namespace AethonMod.Content.Systems
             // libro TOMA VENGANZA (varias líneas — la voz del libro
             // siempre con prioridad). Castigo puro de voz: el evento
             // muere, la venganza es la despedida.
+            // v6.154 — LA PURGA TOTAL (la letra: «asegurate de que si
+            // el jugador muere en una oleada de hambre toda la oleada
+            // se cancela y todos los monstruos de oleadas de hambre
+            // desaparecen incluyendo los jefes, estos se van»): ANTES
+            // de Terminar(), TODO lo sellado con EsDeOleada — la chusma
+            // Y LOS JEFES (el sello viaja por herencia a los segmentos
+            // del gusano) — SE DISUELVE en polvo de sombra. Terminar()
+            // solo reseteaba el motor: los NPCs quedaban VIVOS. El
+            // festín muerto no deja platos servidos.
             if (hambriento.dead)
             {
                 VenganzaPorMuerte(hambriento);
+                PurgarOleada();
                 Terminar();
                 return;
             }
@@ -1256,7 +1266,11 @@ namespace AethonMod.Content.Systems
                 EcoRed.HablarVarianteAlPortador(hambriento,
                     "Mods.AethonMod.Eco.Furia.Venganza", 4,
                     new Color(178, 26, 38), rugido: true, escala: 0.62f, prioridad: true);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.MuertePortador",
+                // v6.154 — EL ANUNCIO DE LA PURGA (la letra: «toda la
+                // oleada se cancela y todos los monstruos… desaparecen
+                // incluyendo los jefes»): SU PROPIA línea — la cena se
+                // disuelve, no «toma nota».
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Purga",
                     new Color(150, 140, 148));
             }
             catch { }
@@ -1644,6 +1658,54 @@ namespace AethonMod.Content.Systems
         // ==================================================================
         //  EL FINAL
         // ==================================================================
+
+        /// <summary>v6.154 — LA PURGA DE LA OLEADA (la letra: «todos
+        /// los monstruos de oleadas de hambre desaparecen incluyendo
+        /// los jefes, estos se van»): todo NPC sellado con EsDeOleada
+        /// — la chusma del pool y LOS JEFES con sus segmentos heredados
+        /// — se DISUELVE en polvo de sombra y desaparece del mundo. El
+        /// sello es del GlobalNPC OleadaNPC: lo leen TODAS las máquinas
+        /// (el server manda; el polvo es gratis donde haya pantalla).
+        /// La purgea NO toca a nadie sin sello: los vecinos del pueblo,
+        /// los pets y los jefes ajenos al festín siguen su vida.</summary>
+        private static void PurgarOleada()
+        {
+            int purgados = 0;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active) continue;
+                if (!n.TryGetGlobalNPC<Globals.OleadaNPC>(out var sello) || !sello.EsDeOleada)
+                    continue;
+                // LA DISOLUCIÓN: cada bestia del festín se evapora en
+                // jirones de sombra (el color de la casa — la cena que
+                // se enfría y el viento se lleva).
+                if (!Main.dedServ && Main.netMode != NetmodeID.Server)
+                {
+                    for (int k = 0; k < 8; k++)
+                    {
+                        Dust d = Dust.NewDustPerfect(n.Center,
+                            DustID.Shadowflame,
+                            new Microsoft.Xna.Framework.Vector2(
+                                Main.rand.NextFloat(-2.5f, 2.5f),
+                                Main.rand.NextFloat(-3.5f, -0.5f)),
+                            120, new Microsoft.Xna.Framework.Color(96, 46, 150), 1.1f);
+                        d.noGravity = true;
+                    }
+                }
+                n.active = false;
+                n.life = 0;
+                n.netSkip = -1;
+                purgados++;
+            }
+            // el sync de la masacre (el server avisa a las pantallas)
+            if (Main.netMode == NetmodeID.Server && purgados > 0)
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                    if (Main.npc[i] != null && !Main.npc[i].active)
+                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, i);
+            }
+        }
 
         private static void Terminar()
         {

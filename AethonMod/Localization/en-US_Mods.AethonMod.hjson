@@ -2668,10 +2668,40 @@ Furia: {
 	OleadaEspecial: EL JUICIO: los SEIS guardianes a la vez, ×15 en TODO. El festín final.
 	JefeRaro: EL DADO DEL INVIERNO: {0} se sienta a la mesa (oleada {1} — 1 de 100). El invierno caminante ya no guarda zona alguna: SOLO el azar lo invita.
 	MuertePortador: El festín muere con su portador. El libro TOMA NOTA.
+	// v6.154 — LA PURGA DE LA OLEADA (la letra: la muerte del portador
+	// cancela el festín y TODA la cena se disuelve, jefes incluidos)
+	Purga: The feast dies with its bearer — the whole dinner dissolves into shadow.
 }
 
 Cronista: {
 	Llega: The Chronicler wakes from the book — the scribe who survived the first devouring walks beside you.
+	// v6.154 — LOS 22 DIÁLOGOS EXCLUSIVOS (la letra), organizados
+	// por disparador: genéricas/portador/oleadas/despertar/sellado/
+	// objetos/cierre en rotación; la Onceava y la Última Puerta son
+	// DISPARADORES (la oleada activa / llegar al Despertar 120).
+	ChatGenerica1: Bring Eternal Essence. Everything else is noise between pages.
+	ChatGenerica2: Gold belongs to the living. You stopped being that a long time ago.
+	ChatGenerica3: I am still here. I am always here. Besides writing, it is the only thing I know how to do.
+	ChatGenerica4: I do not like the rain. The ink runs, and with it, the truth.
+	ChatGenerica5: The snow calms me. The ink freezes and, for a moment, I can reread myself.
+	ChatPortador1: Last night I wrote your ending. Today I crossed it out again. Do not get used to it: ink tires.
+	ChatPortador2: I have counted your deaths. Stop giving me material.
+	ChatPortador3: What are you? Do not tell me. I want to find out.
+	ChatPortador4: Again. Again. I write it and cross it out and write it. Which of us is the stubborn one?
+	ChatPortador5: The previous bearers were easy to define. You force me to use the margin.
+	ChatOleadas1: The wave that comes is hungry. So was yesterday's. They are all hungry: it is their only word.
+	ChatOleadas2: Rationing is for patient gods. I never asked Him why He rations. Perhaps He fears the end of the story.
+	ChatOleadas3: Every boss that falls returns to my list. The Grimoire wastes nothing: it keeps every fall like a teacher keeps exam copies.
+	ChatOnceava: Tonight He dines well. Everyone is coming. Everyone came.
+	ChatDespertar: One more door, one less door. They all open the same way: inward.
+	ChatUltimaPuerta: The last door has nothing behind it. Behind it, you are.
+	ChatSellado1: Do not fear Him. You are the chapter that has waited for eons.
+	ChatSellado2: When you defeat Him, He will not have died. Paper does not die: it turns the page.
+	ChatObjetos1: What you carry was not written in this language. I will note it in the margin.
+	ChatObjetos2: New word. A word from another book. The Eternal smelled it the moment it arrived.
+	ChatObjetos3: The other worlds also write. Worse, but they write.
+	ChatCierre1: When your story ends, I will close the book. And I will finally be able to blink.
+	ChatCierre2: …Do not look at me like that. We witnesses dream too.
 }
 
 Ira: {

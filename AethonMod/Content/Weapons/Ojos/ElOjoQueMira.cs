@@ -234,17 +234,34 @@ namespace AethonMod.Content.Weapons.Ojos
             Projectile.velocity = new Vector2(lado, bob);
 
             // EL DISPARO: tras la carga, LA MIRADA
+            // v6.154 — EL RAYO NACE DEL OJO Y SE QUEDA EN ÉL (la letra:
+            // «el ojo se queda quieto flotando y ataque, el ataque sale
+            // del ojo y da al enemigo, si el enemigo se mueve lo que se
+            // mueve es la punta del rayo de perlin siguiendo al
+            // enemigo»): el proyectil del rayo NO VUELA — nace EN el
+            // ojo con velocidad CERO y le PASA su presa (ai[0] = el
+            // whoAmI+1 de la víctima): el rayo se dibuja DEL ojo A la
+            // presa, y la PUNTA la persigue si se mueve.
             if (_tick == CARGA && !_disparado)
             {
                 _disparado = true;
+
+                // ¿QUIÉN ES LA PRESA HOY? (la más cercana — la mirada
+                // elige en el instante del disparo, no antes)
+                NPC presaViva = PresaMasCerca(Projectile.Center);
+                if (presaViva != null) _presa = presaViva.Center;
                 Vector2 dir = _presa - Projectile.Center;
                 if (dir.LengthSquared() > 1f) dir.Normalize();
 
-                // EL RAYO: la mirada atraviesa TODO en su línea
+                int idxPresa = 0;
+                if (presaViva != null) idxPresa = presaViva.whoAmI + 1;
+
+                // EL RAYO: anclado al ojo — su vida es la mirada
                 Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                    Projectile.Center, dir * 26f,
+                    Projectile.Center, Vector2.Zero,
                     ModContent.ProjectileType<LaMiradaRayo>(),
-                    Projectile.damage, Projectile.knockBack, Projectile.owner);
+                    Projectile.damage, Projectile.knockBack, Projectile.owner,
+                    idxPresa);
 
                 SoundEngine.PlaySound(SoundID.Item73.WithPitchOffset(0.2f), Projectile.Center);
 
@@ -327,12 +344,23 @@ namespace AethonMod.Content.Weapons.Ojos
             float pop = _tick < 26 ? 1.16f - 0.16f * (_tick / 26f) : 1f;
             float esc = ESCALA * pop * (1f + 0.08f * f);
 
-            // el resplandor de la carga (violeta→dorado al abrirse)
-            Texture2D glow = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            // ============================================================
+            //  v6.154 — EL RESPLANDOR ES BRUMA DE LA LIBRERÍA (la letra:
+            //  «mejor que tenga bruma o brillos… ya sabes que se debe
+            //  usar la libreria de la casa»): el CÍRCULO AMARILLO era
+            //  un SoftGlow PLANO (un disco de geometría plana — el
+            //  pecado de la casa). AHORA: LumenLib.Bloom — el núcleo
+            //  cálido con SU halo que respira (violeta→dorado al
+            //  abrirse la carga) y un pulso vivo sobre él. Cero discos.
+            // ============================================================
             Color cGlow = Color.Lerp(new Color(150, 84, 235), new Color(255, 200, 90), f);
-            Main.spriteBatch.Draw(glow, pos, null, cGlow * (0.35f + 0.3f * f),
-                0f, glow.Size() * 0.5f, 0.5f + 0.25f * f, SpriteEffects.None, 0f);
+            float brillo = 26f + 16f * f + 3f * MathF.Sin(Main.GlobalTimeWrappedHourly * 6f);
+            global::AethonMod.Content.VFX.LumenLib.Bloom(
+                Main.spriteBatch, pos, brillo * esc, cGlow,
+                0.42f + 0.28f * f);
+            global::AethonMod.Content.VFX.LumenLib.BloomPulse(
+                Main.spriteBatch, pos, brillo * 1.5f * esc, cGlow,
+                0.20f + 0.18f * f, Main.GlobalTimeWrappedHourly * 2.2f + Projectile.whoAmI);
 
             // (el cuerpo ya vive ABAJO, con SU inclinación — la del iris)
 
@@ -354,16 +382,26 @@ namespace AethonMod.Content.Weapons.Ojos
                 my = hacia.Y * 2.5f * esc;
                 inclinacion = hacia.ToRotation() * 0.10f;   // la inclinación viva
             }
-            float iris = (0.41f + 0.14f * f) * esc;   // IRIS_ESCALA + la dilatación de la carga
             // el cuerpo con SU inclinación (el minion entero mira)
             Main.spriteBatch.Draw(tex, pos, null,
                 Microsoft.Xna.Framework.Color.White * (0.85f + 0.15f * f) * (muriendo ? 0.8f : 1f),
                 inclinacion, tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
-            // el iris dorado DESLIZADO
-            Main.spriteBatch.Draw(glow,
-                pos + new Vector2(mx, my), null,
-                new Color(255, 200, 90) * (0.85f + 0.15f * f),
-                0f, glow.Size() * 0.5f, iris * 2.2f, SpriteEffects.None, 0f);
+
+            // ============================================================
+            //  v6.154 — EL IRIS TAMBIÉN ES BRUMA (la cura del «circulo
+            //  amarillo»): el núcleo dorado que SE DESLIZA hacia la
+            //  presa ya no es un disco plano — ES UN BLOOM de la
+            //  librería (núcleo cálido + halo) que se DILATA con la
+            //  carga y MIRA deslizándose por la almendra (mx, my — el
+            //  mecanismo del escuadrón de siempre).
+            // ============================================================
+            float iris = (10f + 5f * f) * esc;   // el radio del iris (px — bruma, no escala de textura)
+            global::AethonMod.Content.VFX.LumenLib.Bloom(
+                Main.spriteBatch, pos + new Vector2(mx, my), iris,
+                new Color(255, 200, 90), 0.80f + 0.15f * f);
+            global::AethonMod.Content.VFX.LumenLib.Bloom(
+                Main.spriteBatch, pos + new Vector2(mx, my), iris * 0.45f,
+                new Color(255, 240, 200), 0.9f);
             return false;
         }
 
@@ -383,7 +421,17 @@ namespace AethonMod.Content.Weapons.Ojos
     }
 
     /// <summary>
-    /// LaMiradaRayo — EL RAYO DE LA MIRADA: corto, atravesante, rápido.
+    /// LaMiradaRayo — v6.154 — EL RAYO DE LA MIRADA, ANCLADO AL OJO.
+    /// La letra: «el ojo se queda quieto flotando y ataque, el ataque
+    /// sale del ojo y da al enemigo, si el enemigo se mueve lo que se
+    /// mueve es la punta del rayo de perlin siguiendo al enemigo».
+    /// EL DISEÑO NUEVO:
+    ///   · EL ORIGEN ES EL OJO (el proyectil NACE en el ojo y NO SE
+    ///     MUEVE — el origen del rayo viaja con el ojo que flota);
+    ///   · LA PUNTA ES LA PRESA (ai[0] = whoAmI+1 de la víctima: si se
+    ///     mueve, la PUNTA la sigue — el rayo se re-apunta cada tick);
+    ///   · LA LÍNEA es ojo→presa EXACTA: el rayo de Perlin recorre esa
+    ///     distancia real y su COLISIÓN es esa misma línea.
     /// TODO lo que toca recibe LA MARCA SILENCIOSA (el glifo) y la
     /// QUEMADURA DEL VACÍO (el debuff de la casa — en PvP el jugador
     /// enemigo ARDE: la letra).
@@ -392,7 +440,13 @@ namespace AethonMod.Content.Weapons.Ojos
     {
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        private const int LARGO = 340;      // el alcance de la mirada (px)
+        private const int LARGO_MIN = 60;   // la mirada mínima digna (px)
+        private const int VIDA = 26;        // el ojo sostiene la mirada un instante
+
+        /// <summary>LA PRESA (ai[0] = whoAmI + 1; 0 = al aire: recto
+        /// hacia donde miraba el ojo — la práctica).</summary>
+        private NPC Presa => Projectile.ai[0] <= 0f ? null
+            : Main.npc[(int)Projectile.ai[0] - 1];
 
         public override void SetDefaults()
         {
@@ -403,19 +457,63 @@ namespace AethonMod.Content.Weapons.Ojos
             Projectile.penetrate = -1;      // ATRAVIESA todo
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 8;
-            Projectile.timeLeft = 18;
+            Projectile.timeLeft = VIDA;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
         }
 
+        /// <summary>EL ORIGEN: el OJO que disparó (el proyectil padre
+        /// — LaMiradaProyectil del mismo dueño, el más cercano). El
+        /// rayo SIEMPRE nace del ojo, aunque el ojo flote.</summary>
+        private Vector2 OrigenDelOjo()
+        {
+            int tipoOjo = ModContent.ProjectileType<LaMiradaProyectil>();
+            Projectile mejor = null;
+            float mejorD = 600f * 600f;
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.type != tipoOjo ||
+                    pr.owner != Projectile.owner) continue;
+                float d = pr.Center.DistanceSQ(Projectile.Center);
+                if (d < mejorD) { mejorD = d; mejor = pr; }
+            }
+            return mejor != null ? mejor.Center : Projectile.Center;
+        }
+
+        /// <summary>LA PUNTA DEL RAYO: la presa (que se MUEVE — la
+        /// punta la sigue) o un punto al aire en la dirección de
+        /// siempre.</summary>
+        private Vector2 PuntaDelRayo(Vector2 origen)
+        {
+            NPC presa = Presa;
+            if (presa != null && presa.active && presa.life > 0)
+                return presa.Center;
+            // sin presa (murió o era práctica): la recta de la mirada
+            Vector2 dir = Projectile.velocity;
+            if (dir.LengthSquared() < 0.01f) dir = -Vector2.UnitY;
+            dir.Normalize();
+            return origen + dir * 320f;
+        }
+
         public override void AI()
         {
-            // LA ESTELA (las motas violeta-doradas de la casa)
+            // EL RAYO NO SE MUEVE (la letra): el origen viaja con el
+            // ojo (lo pide OrigenDelOjo al dibujar/colisionar) y la
+            // punta con la presa — el proyectil solo VIVE aquí.
+            Projectile.velocity *= 0f;
+            Projectile.Center = OrigenDelOjo();
+
+            // LA ESTELA sobre la línea (las motas violeta-doradas de la
+            // casa, repartidas por el recorrido de la mirada)
             if (Main.rand.NextBool(2))
             {
-                Terraria.Dust d = Terraria.Dust.NewDustPerfect(Projectile.Center,
+                Vector2 fin = PuntaDelRayo(Projectile.Center);
+                float k = Main.rand.NextFloat();
+                Terraria.Dust d = Terraria.Dust.NewDustPerfect(
+                    Vector2.Lerp(Projectile.Center, fin, k),
                     Terraria.ID.DustID.Enchanted_Pink,
-                    Main.rand.NextVector2Circular(1.5f, 1.5f),
+                    Main.rand.NextVector2Circular(1.2f, 1.2f),
                     140, new Color(200, 150, 255), 0.7f);
                 d.noGravity = true;
             }
@@ -423,15 +521,15 @@ namespace AethonMod.Content.Weapons.Ojos
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            // EL RAYO LARGO: la línea delante del proyectil (el vuelo
-            // corto + el rastro = la mirada completa)
-            Vector2 dir = Projectile.velocity;
-            if (dir.LengthSquared() < 0.01f) return null;
-            dir.Normalize();
+            // LA LÍNEA DE LA MIRADA: del ojo a la presa (la punta que
+            // sigue — la MISMA línea que se dibuja: donde ves el rayo,
+            // ahí golpea)
+            Vector2 origen = OrigenDelOjo();
+            Vector2 fin = PuntaDelRayo(origen);
+            if ((fin - origen).LengthSquared() < 1f) return null;
             float _ = 0f;
             return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(),
-                targetHitbox.Size(), Projectile.Center - dir * (LARGO * 0.5f),
-                Projectile.Center + dir * (LARGO * 0.5f), 10f, ref _);
+                targetHitbox.Size(), origen, fin, 10f, ref _);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -449,32 +547,53 @@ namespace AethonMod.Content.Weapons.Ojos
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // LA MIRADA: la línea violeta-dorada con su núcleo claro
-            Vector2 dir = Projectile.velocity;
-            if (dir.LengthSquared() < 0.01f) return false;
-            dir.Normalize();
-            var pos = Projectile.Center - Main.screenPosition;
-            Texture2D glow = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            float vida = Projectile.timeLeft / 18f;
+            // ============================================================
+            //  v6.154 — EL PERLIN DEL OJO A LA PRESA (la letra: «el
+            //  ataque sale del ojo y da al enemigo, si el enemigo se
+            //  mueve lo que se mueve es la punta del rayo de perlin
+            //  siguiendo al enemigo»): el arco eléctrico de la casa
+            //  (StormLib.PerlinBolt — el meandro fBm de 3 octavas,
+            //  halo violeta + núcleo blanco-oro) nace EN EL OJO
+            //  (origen FIJO que flota con él) y TERMINA EN LA PRESA
+            //  (la punta que SIGUE: cada tick la línea se re-apunta).
+            //  NADA del rayo vive detrás del ojo — su mitad trasera
+            //  murió con la v6.153 (era el «sale de mas atras»).
+            // ============================================================
+            Vector2 origen = OrigenDelOjo();
+            Vector2 fin = PuntaDelRayo(origen);
+            var inicio = origen - Main.screenPosition;
+            var finP = fin - Main.screenPosition;
 
-            // ============================================================
-            //  v6.144 — EL RAYO DE PERLIN (la letra: «el ataque es el
-            //  mismo que tiene el ojo que mira, solo que lo que lanza
-            //  es un rayo de perlin»): EL MISMO ARCO ELÉCTRICO de la
-            //  casa (StormLib.PerlinBolt — el meandro fBm de 3 octavas
-            //  con el halo violeta y el núcleo blanco-oro), del ojo a
-            //  lo largo de TODA la mirada.
-            // ============================================================
-            var inicio = pos - dir * (LARGO * 0.5f);
-            var fin = pos + dir * (LARGO * 0.5f);
+            // la longitud real de la mirada (mínimo digno — una chispa
+            // corta sigue siendo una mirada)
+            float largo = Vector2.Distance(inicio, finP);
+            if (largo < 8f) return false;
+            if (largo < LARGO_MIN)
+            {
+                Vector2 dir = Vector2.Normalize(finP - inicio);
+                finP = inicio + dir * LARGO_MIN;
+            }
+
+            float vida = Projectile.timeLeft / (float)VIDA;
             int seed = Projectile.whoAmI * 31 + (int)(Main.GameUpdateCount * 0.6f);
             global::AethonMod.Content.VFX.StormLib.PerlinBolt(
-                Main.spriteBatch, inicio, fin, seed, 2,
+                Main.spriteBatch, inicio, finP, seed, 2,
                 7f * vida,                                       // el ancho del arco
                 new Color(150, 84, 235) * (0.55f * vida),        // el halo violeta
                 new Color(255, 240, 210) * (0.85f * vida),       // el núcleo claro
                 1f, 0.14f);                                      // amplitud del meandro
+
+            // LA PUNTA VIVA: el punto de contacto ARDE (el instante de
+            // la mirada tocando a su presa — bruma de la librería)
+            if (Presa != null && Presa.active && Presa.life > 0)
+            {
+                global::AethonMod.Content.VFX.LumenLib.Bloom(
+                    Main.spriteBatch, finP, 22f * vida,
+                    new Color(200, 150, 255), 0.5f * vida);
+                global::AethonMod.Content.VFX.LumenLib.Bloom(
+                    Main.spriteBatch, inicio, 18f * vida,
+                    new Color(255, 220, 140), 0.55f * vida);
+            }
             return false;
         }
     }

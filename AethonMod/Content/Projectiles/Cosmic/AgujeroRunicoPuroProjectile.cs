@@ -92,8 +92,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 expansion = 1f;
             }
 
-            // La materia absorbida ACELERA hacia el centro al evaporarse.
-            ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
+            // v6.154 — EL BOOST GLOBAL MUERE (la letra: «cada vez que
+            // un agujero runico puro explota, hace que el resto
+            // desaparezca en el instante de la explocion y luego se
+            // vuelven a ver»): TODOS los agujeros compartían la
+            // estática PullToGlobalBoost del ParticleManager — al
+            // morir uno, el BOOST GLOBAL saltaba de 6× a 1× y la
+            // materia orbitante de TODOS LOS DEMÁS se DESPLOMABA un
+            // instante hacia sus centros y se recuperaba: el
+            // parpadeo. LA CURA: ESTE agujero ya NO ESCRIBE el global
+            // (ni en AI ni en OnKill) — la aceleración de la
+            // evaporación es asunto de cada agujero, no del mundo.
+            // (La secuencia de expansión visual del proyectil SIGUE:
+            // el pop elástico de escala de arriba es la lectura de la
+            // fase — lo que muere es el tirón GLOBAL ajeno.)
 
             // === MOVIMIENTO: deriva lenta y frenado (copia exacta) ===
             Projectile.velocity *= 0.97f;
@@ -564,7 +576,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     560f);
             }
 
-            ParticleManager.PullToGlobalBoost = 1f;
+            // v6.154 — sin el reset del global (el boost murió arriba:
+            // cada agujero acelera solo SU materia — la estática de
+            // nadie se toca al explotar)
 
             if (Main.netMode == NetmodeID.Server) return;
 

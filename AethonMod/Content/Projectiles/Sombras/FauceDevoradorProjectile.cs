@@ -201,8 +201,11 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.BrumaColumna(col, 54f, 0.55f * vivoF, tiempo, semilla, 16);
             SombrasLib.BrumaColumna(col, 36f, 0.42f * vivoF, tiempo, semilla + 53, 12);
 
-            // === LOS OJOS: TODOS abiertos, TODOS mirando al jefe ===
-            SombrasLib.OjosDeMasa(col, jefe.Center, (0.4f + 0.6f * envuelve) * vivoF, semilla, tiempo, 7);
+            // v6.154 — LOS OJOS MURIERON AQUÍ TAMBIÉN (la letra: TODAS
+            // las sombras del grimorio son la NUEVA versión estilizada
+            // — tinta lisa v6.152, sin ojos): la bruma densa respira
+            // sobre el jefe en su lugar (la página lo envuelve ciega).
+            SombrasLib.BrumaColumna(col, 40f, 0.50f * vivoF, tiempo, semilla + 73, 9);
 
             // === LA CABEZA ES BRUMA (la boca procedural JUBILADA — la
             // letra: «debes cambiar la boca por la forma actual») ===

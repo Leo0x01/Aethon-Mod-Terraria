@@ -608,12 +608,32 @@ namespace AethonMod.Content.Weapons
                 // por si mismo»).
                 // v6.50.102 — el espíritu nace con el TIPO de su libro en
                 // ai[2]: servirá al libro que lo llamó (SU hambre, SU XP).
-                if (h >= UMBRAL_CACERIA)
+                // v6.154 — EL ETERNO CAZA POR DESPERTAR (la letra:
+                // «el grimorio pese a estar en estado de caza no esta
+                // cazando… ahora mismo el grimorio esta en 120 y no
+                // aparece la sombra de la pagina en modo de caza, por
+                // lo tanto el grimorio no caza»): la v6.153 heredó el
+                // reloj del DEMO — el Eterno llena su hambre en UNA
+                // HORA REAL (1/216000 por tick) y su espíritu solo
+                // salía con 15 MINUTOS de hambre + AFK/ausencia: en
+                // partida activa JAMÁS salía. LA CURA: el Eterno con
+                // sombras de despertar (SombrasCap > 0 — la caza ES su
+                // poder de Despertar, no su estómago de demo) sale a
+                // cazar con SOLO UN MINUTO de hambre y SIN exigir
+                // ausencia total (5 s de quietud o 2 min sin atacar
+                // con el libro — el juego activo lo permite). El
+                // Nervioso de prueba conserva SU reloj de siempre.
+                bool esEternoCaza = TipoLibro == ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.GrimoireEternal>();
+                float umbral = esEternoCaza ? 0.0125f : UMBRAL_CACERIA;   // 1 min del Eterno vs 15 del demo
+                int quietudSalida = esEternoCaza ? 300 : TicksQuietudSalida;   // 5 s vs 10 s
+                int sinAtaque = esEternoCaza ? 7200 : TICKS_SIN_ATAQUE_LIBRO;  // 2 min vs 30 min
+                if (h >= umbral)
                 {
                     bool quieto = !player.dead && player.velocity.LengthSquared() < 0.02f;
                     e.TicksQuieto = quieto ? e.TicksQuieto + 1 : 0;
-                    if (e.TicksQuieto >= TicksQuietudSalida ||
-                        e.TicksSinAtaqueLibro >= TICKS_SIN_ATAQUE_LIBRO)
+                    if (e.TicksQuieto >= quietudSalida ||
+                        e.TicksSinAtaqueLibro >= sinAtaque)
                     {
                         e.TicksQuieto = 0;
                         e.TicksSinAtaqueLibro = 0;

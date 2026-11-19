@@ -287,7 +287,15 @@ namespace AethonMod.Content.Projectiles.Sombras
             // v6.50.67 — LA COLUMNA VIVA: física de verlet con inercia y
             // ONDA VIAJERA (la letra del GIF del usuario) + el GANCHO de
             // la punta — la base también se hace FLUIDA
-            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f, gancho: 0.5f);
+            // v6.154 — LA MANADA: cada sombra lleva SU PROPIA FASE —
+            // el tiempo propio de ESTA instancia (whoAmI como semilla de
+            // nacimiento + una deriva lenta): dos sombras del mismo
+            // lanzamiento NUNCA ondean a la vez (la letra: «que todas
+            // se muevan en momentos diferentes como una manada de
+            // tentaculos»).
+            float tiempoPropio = tiempo + (Projectile.whoAmI % 97) * 0.83f
+                + MathF.Sin(tiempo * 0.31f + Projectile.whoAmI) * 0.45f;
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempoPropio, semilla, 20, 0.24f, gancho: 0.5f);
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
             // v6.50.71 — EL PERFIL FUSIFORME (la letra del usuario): la base
             // pegada al jugador MUY FINA (9 px) → se ENGORDA al centro (la
@@ -349,12 +357,19 @@ namespace AethonMod.Content.Projectiles.Sombras
             {
                 for (int s = 0; s < sombras; s++)
                 {
-                    float angS = tiempo * (0.8f + 0.12f * (s % 3)) + s * MathHelper.TwoPi / Math.Max(1, sombras);
-                    float radS = 46f + 12f * MathF.Sin(tiempo * 3f + s * 1.7f);
+                    // v6.154 — CADA HILO, SU MOMENTO (la manada): fase
+                    // propia por hilo — el tiempo de cada uno nace
+                    // desfasado (s·0.7 + la identidad de la instancia):
+                    // NO es una sola onda, son TANTAS como sombras, cada
+                    // una apretando en SU instante.
+                    float tS = tiempo + s * 0.7f + (Projectile.whoAmI % 53) * 0.37f
+                        + MathF.Sin(tiempo * 0.5f + s * 2.3f) * 0.3f;
+                    float angS = tS * (0.8f + 0.12f * (s % 3)) + s * MathHelper.TwoPi / Math.Max(1, sombras);
+                    float radS = 46f + 12f * MathF.Sin(tS * 3f + s * 1.7f);
                     Vector2 anclaS = presa.Center + angS.ToRotationVector2() * radS;
-                    Vector2[] colS = SombrasLib.ColumnaViva(raiz, anclaS, tiempo,
+                    Vector2[] colS = SombrasLib.ColumnaViva(raiz, anclaS, tS,
                         semilla + s * 37, 12, 0.18f, gancho: 0.6f);
-                    SombrasLib.Masa(colS, 5f, 8f, 0.55f, semilla + s * 37, tiempo,
+                    SombrasLib.Masa(colS, 5f, 8f, 0.55f, semilla + s * 37, tS,
                         grosorCentro: 18f, lisa: true);
                 }
             }
