@@ -56,24 +56,13 @@ namespace AethonMod.Content.Buffs
 
         public override void Update(Player player, ref int buffIndex)
         {
-            // LA VIDA DEL BUFF — el teatro mínimo del aura: una mota de
-            // vacío invertido (núcleo negro + halo violeta) cada tanto,
-            // la misma firma de la quemadura pero SERENA (es el aura del
-            // dueño, no el fuego del impío).
-            if (Main.netMode != NetmodeID.Server && !Main.dedServ && !Main.gameMenu)
-            {
-                if (Main.rand.NextBool(5))
-                {
-                    Dust d = Dust.NewDustPerfect(
-                        player.Center + new Vector2(
-                            Main.rand.NextFloat(-player.width * 0.55f, player.width * 0.55f),
-                            Main.rand.NextFloat(-player.height * 0.55f, player.height * 0.55f)),
-                        ModContent.DustType<PolvoVacioInvertido>(),
-                        new Vector2(0f, -Main.rand.NextFloat(0.3f, 0.8f)),
-                        0, new Color(150, 84, 235), Main.rand.NextFloat(0.5f, 0.8f));
-                    d.noGravity = true;
-                }
-            }
+            // v6.155 — LAS MOTAS DEL JUGADOR MURIERON (la letra: «estas
+            // particulas que son como circulitos no debe estar en el
+            // jugador»): la mota de vacío invertido (núcleo negro + halo
+            // violeta — un CIRCULITO) que la v6.124 sembraba sobre el
+            // dueño CADA 5 ticks MURIÓ COMPLETA. El aura del portador
+            // ahora es LIMPIA: el trabajo lo hace el campo (el vestido
+            // de los impíos), no el teatro de partículas.
         }
 
         public override void ModifyBuffText(ref string buffName, ref string tip, ref int rare)

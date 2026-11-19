@@ -345,32 +345,30 @@ namespace AethonMod.Content.Weapons.Ojos
             float esc = ESCALA * pop * (1f + 0.08f * f);
 
             // ============================================================
-            //  v6.154 — EL RESPLANDOR ES BRUMA DE LA LIBRERÍA (la letra:
-            //  «mejor que tenga bruma o brillos… ya sabes que se debe
-            //  usar la libreria de la casa»): el CÍRCULO AMARILLO era
-            //  un SoftGlow PLANO (un disco de geometría plana — el
-            //  pecado de la casa). AHORA: LumenLib.Bloom — el núcleo
-            //  cálido con SU halo que respira (violeta→dorado al
-            //  abrirse la carga) y un pulso vivo sobre él. Cero discos.
+            //  v6.155 — LOS CÍRCULOS MURIERON TODOS (la letra: «el ojo
+            //  que mira sigue teniendo el circulo amarillo, debes
+            //  quitarlo… el circulo amarillo no es el iris es un circulo
+            //  o varios que son mas grande que el propio ojo, por lo
+            //  tanto debes poner el ojo del minion, en resumen, debes
+            //  poner un minion ahi»): los Bloom de la v6.154 (el
+            //  resplandor 26-45px × escalas hasta 4,1 = halos de hasta
+            //  ~185 px — CÍRCULOS MÁS GRANDES QUE EL PROPIO OJO de 22px)
+            //  MURIERON COMPLETOS. Lo que vive en el arma es EL CUERPO
+            //  DEL MINION EXACTO (el mismo dibujo del OjoEternoMinion:
+            //  la textura de 56×54 a escala de minion, SIN brumas) — el
+            //  ojo del arma ES un minion.
             // ============================================================
-            Color cGlow = Color.Lerp(new Color(150, 84, 235), new Color(255, 200, 90), f);
-            float brillo = 26f + 16f * f + 3f * MathF.Sin(Main.GlobalTimeWrappedHourly * 6f);
-            global::AethonMod.Content.VFX.LumenLib.Bloom(
-                Main.spriteBatch, pos, brillo * esc, cGlow,
-                0.42f + 0.28f * f);
-            global::AethonMod.Content.VFX.LumenLib.BloomPulse(
-                Main.spriteBatch, pos, brillo * 1.5f * esc, cGlow,
-                0.20f + 0.18f * f, Main.GlobalTimeWrappedHourly * 2.2f + Projectile.whoAmI);
 
             // (el cuerpo ya vive ABAJO, con SU inclinación — la del iris)
 
             // ============================================================
-            //  EL IRIS VIVO DEL ESCUADRÓN (el mecanismo EXACTO del
-            //  OjoEterneMinion.DrawElOjo): el núcleo dorado SE DESLIZA
-            //  por la almendra hacia la presa (MIRA_X/MIRA_Y de la
-            //  casa), se DILATA con la carga, y el CUERPO ENTERO se
-            //  INCLINA hacia su mirada (la rotación viva del escuadrón
-            //  — media vuelta del rumbo, suave).
+            //  EL IRIS DEL ESCUADRÓN EXACTO (el mecanismo LITERAL del
+            //  OjoEternoMinion.DrawElOjo): el IRIS DEL LIBRO (la misma
+            //  textura GrimorioHambriento_Iris del escuadrón, a la
+            //  escala IRIS_ESCALA 0.41) SE DESLIZA por la almendra
+            //  hacia la presa — la mirada del minion DE VERDAD, con SU
+            //  dilatación de carga. NADA de brumas: el iris es el
+            //  SPRITE del escuadrón.
             // ============================================================
             Vector2 hacia = _presa - Projectile.Center;
             float mx = 0f, my = 0f;
@@ -387,21 +385,19 @@ namespace AethonMod.Content.Weapons.Ojos
                 Microsoft.Xna.Framework.Color.White * (0.85f + 0.15f * f) * (muriendo ? 0.8f : 1f),
                 inclinacion, tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
 
-            // ============================================================
-            //  v6.154 — EL IRIS TAMBIÉN ES BRUMA (la cura del «circulo
-            //  amarillo»): el núcleo dorado que SE DESLIZA hacia la
-            //  presa ya no es un disco plano — ES UN BLOOM de la
-            //  librería (núcleo cálido + halo) que se DILATA con la
-            //  carga y MIRA deslizándose por la almendra (mx, my — el
-            //  mecanismo del escuadrón de siempre).
-            // ============================================================
-            float iris = (10f + 5f * f) * esc;   // el radio del iris (px — bruma, no escala de textura)
-            global::AethonMod.Content.VFX.LumenLib.Bloom(
-                Main.spriteBatch, pos + new Vector2(mx, my), iris,
-                new Color(255, 200, 90), 0.80f + 0.15f * f);
-            global::AethonMod.Content.VFX.LumenLib.Bloom(
-                Main.spriteBatch, pos + new Vector2(mx, my), iris * 0.45f,
-                new Color(255, 240, 200), 0.9f);
+            // EL IRIS SPRITE DEL ESCUADRÓN (56×54 es el cuerpo; el iris
+            // es la textura del LIBRO — la MISMA que usa el minion)
+            Texture2D iris = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+            // IRIS_REST del escuadrón (el centro medido del arte) + la
+            // mirada deslizándose, TODO a la escala del ojo (la MISMA
+            // receta de DrawElOjo: (IRIS_REST + mirada) × escOjo)
+            Vector2 irisRest = new Vector2(0f, -1f);   // el centro del ojo abierto
+            float escIris = 0.41f * (1f + 0.35f * f);  // la dilatación con la carga
+            Main.spriteBatch.Draw(iris,
+                pos + (irisRest + new Vector2(mx, my)) * esc, null,
+                Microsoft.Xna.Framework.Color.White * (0.9f + 0.1f * f),
+                inclinacion, iris.Size() * 0.5f, escIris * esc, SpriteEffects.None, 0f);
             return false;
         }
 
@@ -583,17 +579,13 @@ namespace AethonMod.Content.Weapons.Ojos
                 new Color(255, 240, 210) * (0.85f * vida),       // el núcleo claro
                 1f, 0.14f);                                      // amplitud del meandro
 
-            // LA PUNTA VIVA: el punto de contacto ARDE (el instante de
-            // la mirada tocando a su presa — bruma de la librería)
-            if (Presa != null && Presa.active && Presa.life > 0)
-            {
-                global::AethonMod.Content.VFX.LumenLib.Bloom(
-                    Main.spriteBatch, finP, 22f * vida,
-                    new Color(200, 150, 255), 0.5f * vida);
-                global::AethonMod.Content.VFX.LumenLib.Bloom(
-                    Main.spriteBatch, inicio, 18f * vida,
-                    new Color(255, 220, 140), 0.55f * vida);
-            }
+            // v6.155 — LAS BRUMAS DE LA PUNTA Y EL ORIGEN MURIERON (la
+            // letra: «el circulo amarillo no es el iris es un circulo o
+            // varios que son mas grande que el propio ojo»): los DOS
+            // Bloom de la v6.154 (punta violeta 22px + origen dorado
+            // 18px × escalas 4,1 = círculos de ~80px sobre un ojo de
+            // 22px) MURIERON — el rayo es SOLO el arco Perlin: donde
+            // nace está EL MINION dibujado, donde llega está la marca.
             return false;
         }
     }

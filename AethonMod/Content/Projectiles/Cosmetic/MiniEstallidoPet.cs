@@ -96,9 +96,24 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             //     mientras viva, el destello LE PEGA el centro a su fuente
             //     (determinista en TODAS las pantallas: lee el proyectil
             //     SINCRONIZADO — el mismo patrón del _miniCerca del pet). Si
-            //     la mascota murió, el destello queda donde estaba. ===
+            //     la mascota murió, el destello queda donde estaba.
+            // === v6.155 — ai[1] = -2: EL MODO MANIFESTACIÓN (la letra:
+            //     «la explocion de luz final… debe siempre perseguir al
+            //     jugador»): el estallido de la Forma Eterna PERSIGUE A
+            //     SU DUEÑO — le pega el centro al portador VIVO mientras
+            //     dure el destello (el nacimiento del dios lo SIGUE a
+            //     todas partes, no se queda en el punto donde nació). ===
             int quienPet = (int)Projectile.ai[1];
-            if (quienPet >= 0 && quienPet < Main.maxProjectiles)
+            if (quienPet == -2)
+            {
+                Player dueno = Main.player[Projectile.owner];
+                if (dueno != null && dueno.active)
+                {
+                    Projectile.Center = dueno.MountedCenter;
+                    Projectile.velocity = Vector2.Zero;
+                }
+            }
+            else if (quienPet >= 0 && quienPet < Main.maxProjectiles)
             {
                 Projectile pet = Main.projectile[quienPet];
                 if (pet != null && pet.active &&
@@ -216,6 +231,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         {
             if (Main.dedServ) return false;
 
+            // v6.155 — LA ESCALA DE LA MANIFESTACIÓN (la letra: «la
+            // explocion de luz final debe ser al menos 500% mas grande»):
+            // en modo manifestación (ai[1] = -2) TODO el dibujo crece
+            // ×6.0 — el 500% pedido + el colchón de la casa. El mismo
+            // arte del estallido de la mascota, EN TAMAÑO DIOS de
+            // verdad: los rayos de 130 px llegan a 780, el núcleo que
+            // inunda pasa de 130 a 780 px, la onda barre media ciudad.
+            float escDios = Projectile.ai[1] == -2f ? 6.0f : 1f;
+
             VFXCore.CerrarLoteSiAbierto();
             try
             {
@@ -230,15 +254,15 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     // convergiendo (la .53 a escala de bolsillo).
                     float c = _edad / 45f;
                     VFXCore.Quad(Projectile.Center, OroGrimorio * (0.20f + 0.25f * c),
-                        new Vector2(30f + 34f * c, 30f + 34f * c));
+                        new Vector2((30f + 34f * c) * escDios, (30f + 34f * c) * escDios));
                     for (int i = 0; i < 6; i++)
                     {
                         float angA = i * MathHelper.TwoPi / 6f + t * 0.35f;
-                        float rA = MathHelper.Lerp(120f, 26f, c);
+                        float rA = MathHelper.Lerp(120f, 26f, c) * escDios;
                         Vector2 punta = Projectile.Center +
                             new Vector2(MathF.Cos(angA), MathF.Sin(angA)) * rA;
                         VFXCore.Quad(punta, BlancoCaliente * (0.35f + 0.30f * c),
-                            new Vector2(14f, 5f), angA);
+                            new Vector2(14f * escDios, 5f * escDios), angA);
                     }
                 }
                 else
@@ -260,7 +284,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             (h0 - 0.5f) * (MathHelper.TwoPi / 14f) * 1.15f;
                         // el largo: de 34 (el rayo corto) a 130 px — la
                         // VARIANZA de la imagen, en miniatura honesta.
-                        float largo = (34f + 96f * h1) * crec;
+                        float largo = (34f + 96f * h1) * crec * escDios;
                         // la vida propia: cada rayo muere a SU tiempo.
                         float vidaR = 60f + 40f * h2;
                         float alfaR = fade * (tB < vidaR ? 1f :
@@ -270,7 +294,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         // LA LÍNEA NÚCLEO (blanca — la doble línea de la imagen).
                         VFXCore.Quad(Projectile.Center + dirR * (7f + largo * 0.5f),
                             BlancoCaliente * (0.85f * alfaR),
-                            new Vector2(largo, 1.8f + 1.4f * h3), ang);
+                            new Vector2(largo, (1.8f + 1.4f * h3) * escDios), ang);
                         // EL HALO (más corto, más ancho — y CALIENTE:
                         // el degradé blanco→oro→ámbar→brasa del jefe).
                         Color cHalo = Color.Lerp(OroGrimorio,
@@ -278,7 +302,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             0.35f + 0.45f * h3);
                         VFXCore.Quad(Projectile.Center + dirR * (5f + largo * 0.34f),
                             cHalo * (0.40f * alfaR),
-                            new Vector2(largo * 0.68f, 6.5f + 4.5f * h0), ang);
+                            new Vector2(largo * 0.68f, (6.5f + 4.5f * h0) * escDios), ang);
                     }
 
                     // === (b) v6.50.56 — EL ANILLO SEGMENTADO MURIÓ (la
@@ -293,13 +317,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     if (alfaC > 0.02f)
                     {
                         VFXCore.Quad(Projectile.Center, BlancoCaliente * alfaC,
-                            new Vector2(155f * crec, 3f));
+                            new Vector2(155f * crec * escDios, 3f * escDios));
                         VFXCore.Quad(Projectile.Center, BlancoCaliente * alfaC,
-                            new Vector2(3f, 155f * crec));
+                            new Vector2(3f * escDios, 155f * crec * escDios));
                         VFXCore.Quad(Projectile.Center, OroGrimorio * (alfaC * 0.6f),
-                            new Vector2(100f * crec, 7f));
+                            new Vector2(100f * crec * escDios, 7f * escDios));
                         VFXCore.Quad(Projectile.Center, OroGrimorio * (alfaC * 0.6f),
-                            new Vector2(7f, 100f * crec));
+                            new Vector2(7f * escDios, 100f * crec * escDios));
                     }
                 }
 
@@ -317,7 +341,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     // NÚCLEO que se llena (las agujas convergentes viven en
                     // la FASE 1 — son líneas, no aros).
                     float c = _edad / 45f;
-                    LumenLib.Bloom(Main.spriteBatch, pos, 22f + 26f * c,
+                    LumenLib.Bloom(Main.spriteBatch, pos, (22f + 26f * c) * escDios,
                         OroGrimorio, 0.35f + 0.35f * c, 3);
                 }
                 else
@@ -330,17 +354,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     // EL NÚCLEO INUNDANDO (el blanco que crece hasta ~130 px
                     // RESPIRANDO — el corazón que se queda viendo).
                     LumenLib.Bloom(Main.spriteBatch, pos,
-                        (26f + 104f * crecS) * respira, BlancoCaliente,
+                        (26f + 104f * crecS) * respira * escDios, BlancoCaliente,
                         0.95f * fadeS, 4);
                     LumenLib.BloomPulse(Main.spriteBatch, pos,
-                        22f + 26f * crecS, OroGrimorio, 0.55f * fadeS, t, 2.6f);
+                        (22f + 26f * crecS) * escDios, OroGrimorio, 0.55f * fadeS, t, 2.6f);
 
                     // LA ESTRELLA DE DESTELLO (el flare de 8 rayos girando
                     // LENTO — el lens-flare del cine, a escala de bolsillo).
                     Texture2D dest = VFXCore.DestelloFinal;
                     if (dest != null)
                     {
-                        float esc = (210f * crecS) / dest.Width *
+                        float esc = (210f * crecS * escDios) / dest.Width *
                             (0.92f + 0.08f * MathF.Sin(t * 3.4f));
                         Main.spriteBatch.Draw(dest, pos, null,
                             OrbitaLib.Tint(BlancoCaliente, 0.60f * fadeS),
@@ -352,7 +376,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     // LA ONDA EXPANSIVA (el frente que barre — una sola,
                     // clara: el golpe ya pasó, esto es la firma).
                     if (tB < 70f)
-                        OndaLib.Pulse(Main.spriteBatch, pos, tB / 70f, 105f,
+                        OndaLib.Pulse(Main.spriteBatch, pos, tB / 70f, 105f * escDios,
                             OroGrimorio, 0.50f * (1f - tB / 70f), seed);
 
                     // LAS BOKEH (los puntos de luz dispersos de la imagen:
@@ -363,10 +387,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         float h1 = VFXCore.Hash01(seed, i, 31);
                         float tw = 0.35f + 0.65f *
                             (0.5f + 0.5f * MathF.Sin(t * 2.6f + i * 1.9f));
-                        float rB = (12f + 88f * h1) * crecS;
+                        float rB = (12f + 88f * h1) * crecS * escDios;
                         float angB = h0 * MathHelper.TwoPi + t * 0.05f;
                         Vector2 b = pos + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rB;
-                        LumenLib.Bloom(Main.spriteBatch, b, 4f + 6f * h1,
+                        LumenLib.Bloom(Main.spriteBatch, b, (4f + 6f * h1) * escDios,
                             (i % 2 == 0) ? OroGrimorio : AmbarEstelar,
                             0.45f * fadeS * tw, 2);
                     }

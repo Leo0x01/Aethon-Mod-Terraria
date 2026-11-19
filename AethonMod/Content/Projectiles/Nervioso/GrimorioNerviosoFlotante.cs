@@ -382,15 +382,20 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 }
             }
 
-            // === v6.50.118 — EL ACECHO DEL PUEBLO: ¿el dueño entre
-            //     vecinos? El libro NO huye del pueblo (el refugio de la
-            //     .117 murió): se queda DENTRO del área del jugador,
-            //     elige VÍCTIMA y arranca la ronda de vigilancia con sus
-            //     intimidaciones — la misma salida de la caza («sale
-            //     como si fuera a cazar»), otro apetito. En MODO_VOLVER
-            //     no aplica (va directo a guardarse). ===
+            // === v6.155 — EL ACECHO DEL PUEBLO ES DE LA MASCOTA (la letra:
+            //     «el grimorio que debe molestar a los NPC del pueblo es el
+            //     grimorio menor, o sea la mascota, el grimorio del eterno
+            //     en modo caza no tiene que hacer eso, el no molesta a NPC,
+            //     solo caza monstruos y criaturas no hostiles, pero no toca
+            //     a los NPC no le importa»): el ETERNO en modo caza IGNORA
+            //     el pueblo por completo — ni vigila ni intimida a los
+            //     vecinos, su ojo solo tiene hambre de MONSTRUOS. El
+            //     Nervioso de prueba (la mascota menor) conserva SU ronda
+            //     de vigilancia con sus intimidaciones. ===
+            bool esEternoEspiritu = TipoLibro == ModContent.ItemType
+                <global::AethonMod.Content.Weapons.GrimoireEternal>();
             bool enPueblo = false;
-            if (Modo != MODO_VOLVER)
+            if (Modo != MODO_VOLVER && !esEternoEspiritu)
             {
                 NPC candidato = VecinoCercano(dueño);
                 if (candidato == null)

@@ -113,26 +113,36 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             int semilla = Projectile.identity % 89 + 11;
 
             // ============================================================
-            //  v6.152 — LOS ANILLOS DE LA CONSTRUCCIÓN SON LOS DEL
-            //  ACCESORIO (la letra: «no son los mismos que los de la
-            //  forma eterna en accesorio, ten en cuenta que la forma
-            //  eterna en accesorio es la correcta y es como debe verse
-            //  la Forma Eterna en construccion»). LA CORRECCIÓN: el
-            //  accesorio viste AnilloDorsalRenderer.Draw — LA TRIPLE
-            //  CORONA DE CONJURO + el anillo de fotones (la firma de la
-            //  espalda del portador). El SistemaAnillos de soles de la
-            //  v6.150 MURIÓ aquí: la construcción viste EXACTAMENTE la
-            //  corona del accesorio, con las runas ESCRIBIÉNDOSE —
-            //  cada peldaño 113-119 enciende un TERCIO de la corona
-            //  (runasMul 0.35→1.0: la escritura crece hasta su forma
-            //  final, LA del accesorio).
+            //  v6.155 — LOS ANILLOS DE SOLES RÚNICOS DE VERDAD, Y A LA
+            //  VISTA (la letra: «la construccion de la forma eterna
+            //  sigue fallando en mostrar los anillos de soles runicos…
+            //  porque no se muestran correctamente»): LA AUTOPSIA — la
+            //  v6.152 los cambió por LA CORONA DORSAL DEL ACCESORIO
+            //  (AnilloDorsalRenderer.Draw), que vive a 0.348×altura del
+            //  centro (~15 px) — un anillo TRASERO más PEQUEÑO que el
+            //  cuerpo del jugador (20×42): la corona quedaba OCULTA
+            //  TRAS EL SPRITE del portador casi todo el tiempo («nunca
+            //  aparecieron»: estaban, pero TAPADOS). Y la v6.150 que sí
+            //  usaba SistemaAnillos lo llamaba con R ≈ 34 px — el
+            //  cuerpo los tapaba igual. LA CURA: LOS ANILLOS DE SOLES
+            //  DE VERDAD (SigiloLib.SistemaAnillos — el mismo sistema
+            //  que visten a los soles rúnicos) con RADIO GRANDE: 64 px
+            //  de base + 7 por anillo encendido (113 → 64; 119-120 →
+            //  106 px) — SIEMPRE más grandes que el cuerpo del
+            //  portador, con precesión, las runas de pie, el oro y el
+            //  azul-estelar cada 3º. El vestido del sol SE VE alrededor
+            //  del portador, no detrás de él.
             // ============================================================
+            VFXCore.CerrarLoteSiAbierto();
+            VFXCore.Begin();
             try
             {
-                float runasMul = MathHelper.Clamp(0.35f + 0.65f * (anillos - 1) / 6f, 0.35f, 1f);
-                VFX.AnilloDorsalRenderer.Draw(centro, duenio.height, t, 1f, runasMul);
+                float R = 64f + 7f * (anillos - 1);
+                SigiloLib.SistemaAnillos(centro, R, t, semilla,
+                    anillos, 0f, 1f, 1f);
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
+            VFXCore.FlushAdditive();
             VFXCore.ReabrirLoteVanilla();
             return false;
         }

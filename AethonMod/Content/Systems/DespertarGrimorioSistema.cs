@@ -1252,13 +1252,17 @@ namespace AethonMod.Content.Systems
                         ModContent.ProjectileType
                             <global::AethonMod.Content.Projectiles.Cosmetic.MiniEstallidoPet>(),
                         0, 0f, p.whoAmI);
-                    // LA ESCALA DIOS de la manifestación: el estallido de
-                    // la mascota (daño decorativo 15) nace con SU semilla
-                    // determinista y NO sigue a ninguna mascota (ai[1]=-1:
-                    // queda clavado sobre el portador, como el velo de
-                    // siempre). La pantalla entera es pura luz.
+                    // LA ESCALA DIOS DE VERDAD v6.155 (la letra: «la
+                    // explocion de luz final debe ser al menos 500% mas
+                    // grande y debe siempre perseguir al jugador»): el
+                    // estallido de la manifestación nace en MODO DIOS —
+                    // ai[1] = -2: TODO el dibujo crece ×6 (el 500%
+                    // pedido) y PERSIGUE AL PORTADOR (el destello le
+                    // pega el centro al jugador VIVO mientras dure: el
+                    // nacimiento del dios LO SIGUE, no se queda en el
+                    // punto donde nació).
                     estallido.ai[0] = Main.rand.Next(10000);
-                    estallido.ai[1] = -1;
+                    estallido.ai[1] = -2;
                     estallido.netUpdate = true;
 
                     Main.NewText(Language.GetTextValue(

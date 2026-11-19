@@ -504,93 +504,35 @@ namespace AethonMod.Content.Projectiles
                 Vector2 dir = hacia * (1f / largo);
 
                 // ----------------------------------------------------------
-                //  v6.108 — EL PLASMA DEL PUNTO DE ESTANCAMIENTO:
-                //  «deben nacer del centro de la medialuna en la parte
-                //  abombada y extenderse en todas las direcciones pero
-                //  siempre alejandose de mi, a mayor cercania mas
-                //  particulas».
-                //
-                //  CADA CHISPA NACE EN EL TOPE ABOMBADO de la medialuna
-                //  (EL PUNTO DE ESTANCAMIENTO — el punto del arco que
-                //  MIRA al portador, donde el choque comprime y arde)
-                //  y se derrama hacia ATRÁS en TODAS las direcciones de
-                //  fuga (el abanico trasero COMPLETO ±90°: el plasma
-                //  rodea el cuerpo y deja la estela — así para TODAS
-                //  las direcciones, SIEMPRE alejándose del portador).
-                //  Cuanto más hondo cae el impío (más cercanía), MÁS
-                //  DENSA hierve la reentrada.
+                //  v6.108 → v6.155 — EL PLASMA MURIÓ; SOLO UNA PEQUEÑA
+                //  BRUMA (la letra: «en lo enemigos deben ser solo una
+                //  pequeña bruma»): las CHISPAS de la reentrada (los
+                //  circulitos de núcleo negro + halo violeta EXPULSADOS
+                //  del punto de estancamiento — la misma familia de
+                //  circulitos que el jugador ya no lleva) MURIERON
+                //  COMPLETAS. En el impío queda UNA BRUMA MENUDA: una
+                //  sola mota blanda cada ~18 ticks (muy rala), nacida
+                //  junto al corazón del cuerpo y disuelta en unos
+                //  pasos — apenas un suspiro violeta sobre el arco de
+                //  choque (la mota suave de la casa: núcleo negro +
+                //  halo, SIN la física de la expulsión de la chispa).
                 // ----------------------------------------------------------
-                // LA DENSIDAD DE LA ATMÓSFERA — a mayor cercanía, MÁS
-                // PARTÍCULAS (el impío cae más hondo: cada 6 ticks en
-                // el borde… CADA TICK pegado, en ráfagas).
-                int ritmo = (int)MathHelper.Clamp(6f - k * 5f, 1f, 6f);
+                int ritmo = 18;
                 if ((Projectile.ai[0] + i) % ritmo == 0f && n.Center.DistanceSQ(dueno.Center) < 640f * 640f)
                 {
-                    int rafaga = 1 + (k > 0.4f ? 1 : 0)
-                        + (k > 0.75f && Main.rand.NextFloat() < 0.5f ? 1 : 0);
-                    for (int s = 0; s < rafaga; s++)
-                    {
-                        // EL RUMBO — EL HEMISFERIO DE FUGA COMPLETO: el
-                        // plasma se derrama en TODAS las direcciones que
-                        // SE ALEJAN del portador (el abanico trasero
-                        // ±90° alrededor de la fuga — el flujo del
-                        // choque rodeando el cuerpo en su caída).
-                        // v6.145 — SOLO EL HEMISFERIO TRASERO (la letra:
-                        // «hay como una pequeña bruma que va hacia el
-                        // jugador lo cual esta mal, esta debe ir siempre
-                        // al lado opuesto del jugador»): el abanico
-                        // ±90° de la v6.108 mandaba la MITAD de las
-                        // partículas por encima del impío — hacia el
-                        // portador. AHORA el cono es ±60° alrededor de
-                        // la fuga: TODO lo que nace se ALEJA del
-                        // jugador, sin excepción.
-                        float abanico = Main.rand.NextFloat(
-                            -MathHelper.Pi / 3f, MathHelper.Pi / 3f);
-                        Vector2 rumbo = dir.RotatedBy(abanico);
-
-                        // LA CUNA — EL PUNTO DE ESTANCAMIENTO: el tope
-                        // ABOMBADO de la medialuna (el punto del arco
-                        // que MIRA al portador — allí el choque comprime
-                        // y arde, y de allí nace el plasma), con un
-                        // temblor mínimo para que no nazcan todas del
-                        // mismo pixel.
-                        Vector2 cuna = n.Center - dir * (RadioDomo(n, k) * 0.95f) + new Vector2(
-                            Main.rand.NextFloat(-1f, 1f) * n.width * 0.08f,
-                            Main.rand.NextFloat(-1f, 1f) * n.height * 0.08f);
-
-                        // LA VELOCIDAD — la furia del vacío escala con la
-                        // cercanía, y ACELERA sin freno durante el vuelo
-                        // (la rabia crece al escapar).
-                        float vBase = (0.9f + 1.1f * k) * Main.rand.NextFloat(0.85f, 1.2f);
-                        float acel = 0.020f + 0.018f * k;
-
-                        // LIBERADA — la cuna y el rumbo quedan congelados
-                        // AL NACER: aunque el impío camine, la chispa
-                        // termina SU vuelo sola (PolvoExpulsionJuicio
-                        // manda). El camino: del punto de estancamiento
-                        // hacia ATRÁS — la ESTELA de la reentrada, larga
-                        // y desgarrada (hasta ~2.6 cúpulas).
-                        float distMax = RadioDomo(n, k) * Main.rand.NextFloat(1.6f, 2.6f);
-                        var chispa = new PolvoExpulsionJuicio.Chispa
-                        {
-                            Centro = cuna,
-                            Dir = rumbo,
-                            Vel = vBase,
-                            Acel = acel,
-                            DistMax = distMax
-                        };
-
-                        // EL COLOR DE LA CASA — el halo violeta: más
-                        // CLARO cuanto más cerca arde (la temperatura).
-                        Color halo = Color.Lerp(
-                            new Color(150, 84, 235), new Color(224, 176, 255), k);
-                        Dust d = Dust.NewDustPerfect(cuna,
-                            ModContent.DustType<PolvoExpulsionJuicio>(), Vector2.Zero,
-                            0, halo, Main.rand.NextFloat(0.24f, 0.38f));   // MENUDAS (la letra)
-                        d.customData = chispa;
-                        d.noGravity = true;
-                        d.noLight = false;
-                    }
+                    Vector2 cuna = n.Center - dir * (RadioDomo(n, k) * 0.55f) + new Vector2(
+                        Main.rand.NextFloat(-1f, 1f) * n.width * 0.25f,
+                        Main.rand.NextFloat(-1f, 1f) * n.height * 0.25f);
+                    // LA BRUMA MENUDA: se disuelve sola, derivando al
+                    // lado OPUESTO del portador (la ley v6.145).
+                    Color tono = Color.Lerp(
+                        new Color(90, 40, 160), new Color(150, 84, 235), k);
+                    Dust d = Dust.NewDustPerfect(cuna,
+                        ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                        dir * Main.rand.NextFloat(0.2f, 0.5f) +
+                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -Main.rand.NextFloat(0.1f, 0.3f)),
+                        0, tono, Main.rand.NextFloat(0.22f, 0.38f));   // MENUDA de verdad
+                    d.noGravity = true;
                 }
             }
             Projectile.ai[0] += 1f;

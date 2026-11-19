@@ -8,7 +8,6 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
-
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -2029,8 +2028,6 @@ Items: {
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado para siempre.
 	ArmaCorrupta3: Consagrada por el Eterno: suéltala con el grimorio EN LA MANO y él la devorará.
 
-
-
 	// ================================================================
 	//  v6.100 — LOS ÚLTIMOS DOS DEL ESCRIBA: el archivo de localización
 	//  separado (Localization/Escriba/) MURIÓ con la purga de las
@@ -2078,8 +2075,6 @@ Items: {
 		DisplayName: La Última Palabra
 		Tooltip: La última palabra del Eterno: el silencio final
 	}
-
-
 
 	// v6.54.0 — LA INVESTIGACIÓN: LAS ALAS DE CÓDIGO (Task 74-a/b/c)
 	
@@ -4236,6 +4231,7 @@ Projectiles: {
 	// SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
 	// PilarOjoMinion.DisplayName: Pilar Ojo Minion
 	// AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
+	// SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
 }
 
 PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.

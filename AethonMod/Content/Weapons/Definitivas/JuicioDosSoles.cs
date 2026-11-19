@@ -553,10 +553,23 @@ namespace AethonMod.Content.Weapons.Definitivas
                                 (_edad - (T_CONVOCATORIA - 2f)) / (float)(T_IMPULSO + 2f), 0f, 1f);
                             float vida = fAbrazo < 0.3f
                                 ? fAbrazo / 0.3f : 1f - (fAbrazo - 0.3f) / 0.7f;
-                            global::AethonMod.Content.VFX.LumenLib.Bloom(
-                                Main.spriteBatch, Punto - Main.screenPosition,
-                                (40f + 90f * fAbrazo), new Color(255, 235, 190),
-                                0.5f * vida * funde);
+                            // v6.155 — EL ABRAZO ABRE SU LOTE (la cura del
+                            // crash del client.log: «InvalidOperationException:
+                            // Draw was called, but Begin has not yet been
+                            // called» en PreDraw — el Bloom de la v6.154
+                            // dibujaba FUERA de todo lote). LA LEY DE LA CASA:
+                            // el que dibuja, abre su lote (la lección v6.123
+                            // de las brumas del cielo) — try/finally devuelven
+                            // SIEMPRE el lote del pase de entidades.
+                            VFXCore.AbrirAdditive();
+                            try
+                            {
+                                global::AethonMod.Content.VFX.LumenLib.Bloom(
+                                    Main.spriteBatch, Punto - Main.screenPosition,
+                                    (40f + 90f * fAbrazo), new Color(255, 235, 190),
+                                    0.5f * vida * funde);
+                            }
+                            finally { VFXCore.RestaurarLoteVanilla(); }
                         }
 
                         if (alphaSol > 0.01f)

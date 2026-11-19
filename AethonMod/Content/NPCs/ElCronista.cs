@@ -449,6 +449,93 @@ namespace AethonMod.Content.NPCs
                     Poner(ItemID.RestorationPotion, 3, 5);            // Restauración: 3
                 if (NPC.downedMechBossAny)
                     Poner(ItemID.GreaterManaPotion, 5, 5);            // Mayor (la de mayor calidad: 5)
+
+                // ========================================================
+                //  (3) v6.155 — LA MERCANCÍA DEL 120 (la letra: «cuando
+                //  se cumpla el nivel 120 de despertar, el cronista debe
+                //  quedarse vendiendo pociones de mana y ademas 10
+                //  articulos aleatorios tomados de otros NPC, el mago no
+                //  cuenta, puede contar los NPC de otros mod»): al
+                //  Despertar 120 del comprador la escalera SE ACABÓ (no
+                //  hay peldaño siguiente que vender) — el Cronista se
+                //  queda con LAS POCIONES DE MANÁ de siempre + DIEZ
+                //  ARTÍCULOS tomados de las tiendas de OTROS NPC del
+                //  mundo (town NPC vanilla y de mods, EL MAGO EXCLUIDO
+                //  — las pociones de maná ya son suyas y no compite
+                //  con su colega). El surtido es ESTABLE por día (la
+                //  semilla nace del día del mundo: mismo día, mismo
+                //  mostrador — el Cronista no cambia de humor a media
+                //  partida) y se vende EN ESENCIAS (la moneda de la
+                //  casa): el precio de la casa, la rareza manda.
+                // ========================================================
+                int despertarComprador = global::AethonMod.Content.Systems
+                    .DespertarGrimorio.NivelDe(comprador);
+                if (despertarComprador >= 120)
+                {
+                    // LA COSECHA DE LAS TIENDAS AJENAS (la API real
+                    // verificada en el decompile del tModLoader.dll
+                    // 2026.09.3.1): NPCShopDatabase.AllShops expone TODAS
+                    // las tiendas registradas — vanilla Y de otros mods —
+                    // con su NpcType y sus ActiveEntries (el Entry
+                    // abstracto expone Item). Se toma UN artículo por
+                    // tienda ajena (el primer Entry activo con item de
+                    // verdad), saltando al MAGO (la letra: «el mago no
+                    // cuenta») y al propio Cronista.
+                    List<(int tipo, int stack)> cosecha = new List<(int, int)>();
+                    try
+                    {
+                        foreach (var tienda in Terraria.ModLoader.NPCShopDatabase.AllShops)
+                        {
+                            if (tienda == null) continue;
+                            if (tienda.NpcType == NPCID.Wizard) continue;   // el Mago NO cuenta
+                            if (tienda.NpcType == NPC.type) continue;       // él mismo tampoco
+                            // solo tiendas de NPC del PUEBLO: los town NPC
+                            // vanilla (IsTownNPC de la lista canónica — y
+                            // el Mercader Ambulante, que es tienda sin
+                            // casa)… y TODAS las de OTROS MODS (la letra:
+                            // «puede contar los NPC de otro mod»)
+                            bool esPueblo = tienda.NpcType >= NPCID.Count
+                                || tienda.NpcType == NPCID.TravellingMerchant
+                                || Terraria.ID.NPCID.Sets.ActsLikeTownNPC[tienda.NpcType];
+                            if (!esPueblo) continue;
+                            foreach (var entry in tienda.ActiveEntries)
+                            {
+                                Item mercancia = entry?.Item;
+                                if (mercancia == null || mercancia.IsAir) continue;
+                                if (mercancia.type == ItemID.CopperCoin || mercancia.type == ItemID.SilverCoin ||
+                                    mercancia.type == ItemID.GoldCoin || mercancia.type == ItemID.PlatinumCoin) continue;
+                                cosecha.Add((mercancia.type, mercancia.stack));
+                                break;   // UNO por tienda (10 tiendas = 10 artículos)
+                            }
+                            if (cosecha.Count >= 24) break;
+                        }
+                    }
+                    catch { }
+
+                    // LA ELECCIÓN DETERMINISTA DEL DÍA (la casa no usa
+                    // Main.rand en el surtido: el mismo día, el mismo
+                    // mostrador en todas las máquinas)
+                    if (cosecha.Count > 0)
+                    {
+                        // LA SEMILLA DEL DÍA: el reloj del mundo
+                        // (Main.time avanza 0→dayLength cada día) — el
+                        // número de días completos + el ID del mundo:
+                        // mismo día, mismo mostrador.
+                        int semillaDia = (int)(Main.time / Main.dayLength)
+                            + (int)Main.worldID;
+                        int cuantos = Math.Min(10, cosecha.Count);
+                        for (int k = 0; k < cuantos; k++)
+                        {
+                            // el dado de la casa (Hash01 determinista)
+                            int idx = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(
+                                semillaDia * 7 + 1, k, 31) * cosecha.Count);
+                            var (tipoV, pilaV) = cosecha[idx];
+                            var planta = new Item(tipoV);
+                            long precioV = Math.Max(5L, 20L + 40L * Math.Max(0, planta.rare));
+                            Poner(tipoV, precioV, Math.Max(1, Math.Min(5, pilaV)));
+                        }
+                    }
+                }
             }
             catch { }
         }
