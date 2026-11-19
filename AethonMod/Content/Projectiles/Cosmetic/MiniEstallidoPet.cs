@@ -60,6 +60,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         private float _edad;    // el compás del mini-estallido
         private int _curas;     // el tope de gratitud (5 × 1%)
+        // v6.156 — EL BARRIDO DE LA MANIFESTACIÓN: el frente de la onda
+        // de aberración cromática (px de radio — crece a GRAN velocidad
+        // barriendo la pantalla; -1 = todavía no nació).
+        private float _frenteAberracion = -1f;
 
         public override string Texture => "AethonMod/Content/NPCs/AethonBoss";
 
@@ -152,6 +156,63 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 // el cuerpo es puro espectáculo (la regla de la .53).
                 if (tB > 8f)
                     Projectile.friendly = false;
+
+                // ============================================================
+                //  v6.156 — LA MANIFESTACIÓN BARRIE EL MUNDO (la letra:
+                //  «en la explosion al final de la construccion debe
+                //  morir todo lo que toque y ademas una onda expansiva
+                //  en forma de aberracion cromatica debe extenderse
+                //  hacia fuera a gran velocidad barriendo con todos los
+                //  enemigos causando daño masivo»): en modo dios
+                //  (ai[1]=-2) nace LA ONDA DE ABERRACIÓN CROMÁTICA —
+                //  un frente que corre del centro hacia afuera a GRAN
+                //  velocidad (42 px/tick ≈ 2520 px/s: cruza una
+                //  pantalla completa en ~ medio segundo) y TODO lo que
+                //  toca MUERE (daño masivo: 999999 — la sentencia del
+                //  dios que despierta, no un golpe más).
+                // ============================================================
+                if (Projectile.ai[1] == -2f && Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    if (_frenteAberracion < 0f && tB >= 0f)
+                        _frenteAberracion = 0f;    // la onda nace con el estallido
+                    if (_frenteAberracion >= 0f)
+                    {
+                        float prevFrente = _frenteAberracion;
+                        _frenteAberracion += 42f;  // GRAN velocidad (px/t)
+                        // LA COSECHA DEL FRENTE: todo enemigo dentro del
+                        // anillo [prevFrente, frente] MUERE — la onda lo
+                        // barre al pasar (una sola vez cada uno: si ya
+                        // está detrás del frente, ya está muerto).
+                        float rMax = 2600f;        // ~ media pantalla grande
+                        for (int i = 0; i < Main.maxNPCs; i++)
+                        {
+                            NPC n = Main.npc[i];
+                            if (n == null || !n.active || n.life <= 0) continue;
+                            if (n.friendly || n.townNPC) continue;   // el pueblo no juega
+                            float d = Vector2.Distance(n.Center, Projectile.Center);
+                            if (d > prevFrente && d <= _frenteAberracion && d <= rMax)
+                            {
+                                // DAÑO MASIVO: la sentencia del despertar —
+                                // NPC.HitInfo directo (el patrón de la casa
+                                // para las ejecuciones del Juicio; la firma
+                                // REAL del decompile: StrikeNPC(HitInfo,
+                                // fromNet, noPlayerInteraction) y el campo
+                                // es Knockback — con K minúscula).
+                                n.StrikeNPC(new NPC.HitInfo
+                                {
+                                    Damage = 999999,
+                                    Knockback = 8f,
+                                    HitDirection = (n.Center.X < Projectile.Center.X) ? -1 : 1,
+                                    Crit = false,
+                                    InstantKill = true,   // «debe morir todo lo que toque»
+                                }, fromNet: false, noPlayerInteraction: true);
+                                n.netUpdate = true;
+                            }
+                        }
+                        if (_frenteAberracion > rMax)
+                            _frenteAberracion = rMax + 1f;   // la onda se apaga
+                    }
+                }
 
                 // LA LUZ QUE INUNDA (pequeña — la mascota alumbra, no ciega).
                 float auge = tB < 45f ? 1f : Math.Max(0f, 1f - (tB - 45f) / 70f);
@@ -378,6 +439,69 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     if (tB < 70f)
                         OndaLib.Pulse(Main.spriteBatch, pos, tB / 70f, 105f * escDios,
                             OroGrimorio, 0.50f * (1f - tB / 70f), seed);
+
+                    // ====================================================
+                    //  v6.156 — LA ONDA DE ABERRACIÓN CROMÁTICA (la letra:
+                    //  «una onda expansiva en forma de aberracion
+                    //  cromatica debe extenderse hacia fuera a gran
+                    //  velocidad barriendo con todos los enemigos»):
+                    //  en modo dios, EL FRENTE DEL BARRIDO se dibuja como
+                    //  una CORONA TRIPLE DESFAZADA — el mismo frente
+                    //  dibujado TRES veces, separado unos píxeles y en
+                    //  los TRES CANALES del prismático (rojo cian /
+                    //  oro púrpura / blanco turquesa): donde la onda
+                    //  pasa, los colores se ROMPEN como en una lente
+                    //  barata — LA ABERRACIÓN CROMÁTICA de verdad,
+                    //  hecha con las piezas de la casa (OndaLib.Pulse
+                    //  ×3 con offset radial y tintes opuestos).
+                    // ====================================================
+                    if (Projectile.ai[1] == -2f && _frenteAberracion >= 0f)
+                    {
+                        float frente = _frenteAberracion;
+                        float rMaxOnda = 2600f;
+                        if (frente <= rMaxOnda)
+                        {
+                            float alfaOnda = 0.85f * Math.Max(0f,
+                                1f - frente / rMaxOnda);
+                            if (alfaOnda > 0.02f)
+                            {
+                                // LA LEY DE LA CURVA: OndaLib.Expansion
+                                // mapea progreso→radio (1-(1-p)^2.2) —
+                                // para dibujar el frente EN el radio real
+                                // del barrido, el progreso es el que
+                                // EXPANDE INVERSO a ese radio.
+                                float pInv = 1f -
+                                    MathF.Pow(1f - Math.Min(1f, frente / rMaxOnda), 1f / 2.2f);
+                                // EL DESFASE de los canales (px de radio
+                                // — la «lente rota»: cada canal viaja a
+                                // su propia velocidad aparente).
+                                float sep = 7f + 5f * (1f - frente / rMaxOnda);
+                                // CANAL A — rojo/cian (el par clásico).
+                                OndaLib.Pulse(Main.spriteBatch,
+                                    pos + new Vector2(-sep * 0.5f, 0f),
+                                    pInv, frente, new Color(255, 70, 90),
+                                    alfaOnda, seed + 61);
+                                OndaLib.Pulse(Main.spriteBatch,
+                                    pos + new Vector2(sep * 0.5f, 0f),
+                                    pInv, frente, new Color(90, 255, 235),
+                                    alfaOnda, seed + 62);
+                                // CANAL B — oro/púrpura (el par de la casa).
+                                OndaLib.Pulse(Main.spriteBatch,
+                                    pos + new Vector2(0f, -sep * 0.35f),
+                                    pInv, frente, OroGrimorio,
+                                    alfaOnda * 0.8f, seed + 63);
+                                OndaLib.Pulse(Main.spriteBatch,
+                                    pos + new Vector2(0f, sep * 0.35f),
+                                    pInv, frente, new Color(178, 110, 255),
+                                    alfaOnda * 0.8f, seed + 64);
+                                // CANAL C — el blanco que cierra (la
+                                // coherencia volviendo tras el rompiente).
+                                OndaLib.Pulse(Main.spriteBatch, pos,
+                                    pInv, frente * (1f - sep / 900f),
+                                    BlancoCaliente, alfaOnda * 0.55f, seed + 65);
+                            }
+                        }
+                    }
 
                     // LAS BOKEH (los puntos de luz dispersos de la imagen:
                     // 8 chispas fijas que giran despacito y titilan).

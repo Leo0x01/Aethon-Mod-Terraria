@@ -72,17 +72,26 @@ namespace AethonMod.Content.Globals
         /// ceremonia no se repite por libro.</summary>
         public bool PetDelDespertar = false;
 
-        /// <summary>v6.153 — LAS SOMBRAS DE LA PÁGINA DEL GRIMORIO (la
+        /// <summary>v6.153 → v6.156 — LAS SOMBRAS DE LA PÁGINA DEL GRIMORIO (la
         /// letra: «por cada 20 despertares este pueda usar una sombra de
-        /// la pagina extra»): el CAP teórico es nivel/20 (SOLO lectura);
-        /// este contador son las YA GASTADAS (una sombra usada es una
-        /// sombra gastada — VUELVE cuando su presa es absorbida). Con el
-        /// nivel fijo, el disponible es (nivel/20 − gastadas).</summary>
+        /// la pagina extra» + la aclaración de la v6.156: «no es asi, el
+        /// ya debe tener 1 sombra de la pagina desde el nivel de despertar
+        /// 0, asi cuando llega a nivel de despertar 20 tiene 2 sombra de
+        /// la pagina y asi sucesivamente»): el CAP teórico es
+        /// 1 + nivel/20 (la PRIMERA nace con el libro — nivel 0 ya tiene
+        /// UNA; cada 20 despertares, una más); este contador son las YA
+        /// GASTADAS (una sombra usada es una sombra gastada — VUELVE
+        /// cuando su presa es absorbida). Con el nivel fijo, el
+        /// disponible es (1 + nivel/20 − gastadas).</summary>
         public int SombrasGastadas = 0;
 
-        /// <summary>v6.153 — EL CAP DE SOMBRAS del despertar de ESTE
-        /// libro (nivel/20 — el techo que la letra manda).</summary>
-        public int SombrasCap => NivelDespertar / 20;
+        /// <summary>v6.156 — EL CAP DE SOMBRAS del despertar de ESTE
+        /// libro (1 + nivel/20 — LA PRIMERA ES DEL NACIMIENTO: la letra
+        /// nueva, «ya debe tener 1 sombra de la pagina desde el nivel de
+        /// despertar 0»; a nivel 20 tiene 2, a nivel 40 tiene 3… la
+        /// escalera de siempre CORRIDA UN PELDAÑO — el nivel 0 NO es un
+        /// libro mudo: su primera sombra nace con él).</summary>
+        public int SombrasCap => 1 + NivelDespertar / 20;
 
         /// <summary>v6.153 — LAS SOMBRAS LIBRES ahora mismo (cap −
         /// gastadas, jamás negativo).</summary>

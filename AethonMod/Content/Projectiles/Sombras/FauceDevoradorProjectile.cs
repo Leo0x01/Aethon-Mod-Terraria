@@ -194,7 +194,14 @@ namespace AethonMod.Content.Projectiles.Sombras
             // v6.50.71 — EL PERFIL FUSIFORME (la letra del usuario): fina en
             // el jugador, GORDA al centro, fina en la punta — el tentáculo
             // GIGANTE del festín luce igual que el arma que lo invocó
-            SombrasLib.Masa(col, 14f, 22f, 0.96f * vivoF, semilla, tiempo, grosorCentro: 62f);
+            // v6.156 — LA SOMBRA NUEVA AL DEVORAR JEFES (la letra: «la sombra
+                        // de la pagina que el grimorio usa al devorar jefes sigue
+                        // siendo la antigua sombra de la pagina, debes cambiar eso
+                        // por la nueva sombra de la pagina»): la Masa del festín
+                        // ahora es LISA (lisa: true — la tinta estilizada v6.152,
+                        // sin espinas de hueso ni ventosas: el mismo trazo del
+                        // arma y de las sombras de caza).
+                        SombrasLib.Masa(col, 14f, 22f, 0.96f * vivoF, semilla, tiempo, grosorCentro: 62f, lisa: true);
 
             // === LA BRUMA DEL CUERPO GIGANTE — v6.50.69: DOS CAPAS (más
             // bruma en todo — la letra del usuario para la familia entera)

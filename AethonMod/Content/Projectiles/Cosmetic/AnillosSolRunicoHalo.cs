@@ -18,13 +18,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// runicos mientras lo hace».
     ///
     /// Durante los peldaños 113-119 del despertar (DESPUÉS de las 11
-    /// partes, ANTES de la escupida del 120), EL SISTEMA DE ANILLOS DEL
-    /// SOL RÚNICO — el mismo de SigiloLib.SistemaAnillos que viste a
-    /// los soles de verdad — se enciende UNO A UNO alrededor del
-    /// portador: cada peldaño un anillo más (1 al 113 … 7 al 119), el
-    /// vestido del sol creciendo hacia el 120. No es una copia
-    /// "parecida": ES el mismo trazo, el mismo latido y los mismos
-    /// glifos de siempre (la ley de la casa — nada de geometría plana).
+    /// partes, ANTES de la escupida del 120), LA CORONA DORSAL DEL
+    /// ACCESORIO (AnilloDorsalRenderer — la versión que manda, la letra
+    /// v6.156) se enciende PARTE POR PARTE alrededor del portador: cada
+    /// peldaño más alpha y más runas (113 → la corona joven; 119-120 →
+    /// LA PLENA del accesorio), el vestido del sol creciendo hacia el
+    /// 120. No es una copia "parecida": ES EL MISMO RENDERER del
+    /// accesorio AnilloRunicoDorsal (el anillo de fotones + la triple
+    /// corona de conjuro con sus runas de pie).
     ///
     /// Patrón probado de AnilloRunicoDorsalHalo/BrilloSolarHalo: pegado
     /// al dueño, el dueño local lo invoca y tML lo sincroniza, PreDraw
@@ -97,53 +98,59 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             float t = Main.GlobalTimeWrappedHourly;
             // El pegue del festín (v6.131): el delta del CUERPO COMPLETO
             // se hereda mientras el Eterno arrastra al portador.
+            // El ancla del festín (v6.131) queda como red de seguridad
+            // del centro; la corona de la construcción (v6.156) se
+            // ancla a LA ESPALDA del portador, como el accesorio.
             Vector2 centro = Projectile.Center +
                 (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
                     .ArrastrandoA(Projectile.owner)
                     ? global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
                         .DeltaDelFestin
                     : Vector2.Zero);
-
-            // EL SISTEMA DE ANILLOS DEL SOL RÚNICO — LA MISMA LEY que
-            // viste a los soles (SigiloLib.SistemaAnillos): los anillos
-            // elípticos con precesión, las runas de pie, el oro y el
-            // azul-estelar cada 3º. Cada peldaño 113-119 enciende UNO:
-            // el vestido crece hacia el 120. Semilla del dueño (una
-            // identidad por portador).
-            int semilla = Projectile.identity % 89 + 11;
+            _ = centro;
 
             // ============================================================
-            //  v6.155 — LOS ANILLOS DE SOLES RÚNICOS DE VERDAD, Y A LA
-            //  VISTA (la letra: «la construccion de la forma eterna
-            //  sigue fallando en mostrar los anillos de soles runicos…
-            //  porque no se muestran correctamente»): LA AUTOPSIA — la
-            //  v6.152 los cambió por LA CORONA DORSAL DEL ACCESORIO
-            //  (AnilloDorsalRenderer.Draw), que vive a 0.348×altura del
-            //  centro (~15 px) — un anillo TRASERO más PEQUEÑO que el
-            //  cuerpo del jugador (20×42): la corona quedaba OCULTA
-            //  TRAS EL SPRITE del portador casi todo el tiempo («nunca
-            //  aparecieron»: estaban, pero TAPADOS). Y la v6.150 que sí
-            //  usaba SistemaAnillos lo llamaba con R ≈ 34 px — el
-            //  cuerpo los tapaba igual. LA CURA: LOS ANILLOS DE SOLES
-            //  DE VERDAD (SigiloLib.SistemaAnillos — el mismo sistema
-            //  que visten a los soles rúnicos) con RADIO GRANDE: 64 px
-            //  de base + 7 por anillo encendido (113 → 64; 119-120 →
-            //  106 px) — SIEMPRE más grandes que el cuerpo del
-            //  portador, con precesión, las runas de pie, el oro y el
-            //  azul-estelar cada 3º. El vestido del sol SE VE alrededor
-            //  del portador, no detrás de él.
+            //  v6.155 → v6.156 — LOS ANILLOS SON LOS DEL ACCESORIO (la
+            // letra: «ahora los anillos runicos de los soles si
+            // aparecen en la construccion, pero no son los mismos que
+            // los del accesorios, deben ser los mismos que los del
+            // accesorios y de hecho son mas que los que tiene el
+            // accesorio, el accesorio es la version que debes usar»):
+            // LA CORONA DORSAL DEL ACCESORIO (AnilloDorsalRenderer.Draw
+            // — LA TRIPLE CORONA DE CONJURO: el anillo de fotones + el
+            // dorado de 8 + el violeta de 6 contrarrotando + el blanco
+            // íntimo de 6 rápido, las runas DE PIE con sus perlas) es
+            // LA VERSIÓN QUE MANDA. La v6.155 los había cambiado por
+            // los anillos de los soles (SigiloLib.SistemaAnillos) — un
+            // sistema DISTINTO y MÁS NUMEROSO; MUEREN. La construcción
+            // 113-120 viste EXACTAMENTE LA MISMA CORONA del accesorio
+            // (AnilloRunicoDorsalHalo la usa por accesorio; aquí la
+            // usa la construcción), anclada a LA ESPALDA del portador
+            // (la misma cuenta del accesorio: Center − 0.04×altura,
+            // consciente del festín y de la gravedad) y CRECIENDO con
+            // los peldaños: alpha y densidad de runas suben 113→119
+            // hasta la corona plena del accesorio al 120.
             // ============================================================
-            VFXCore.CerrarLoteSiAbierto();
-            VFXCore.Begin();
+            Vector2 espalda = duenio.Center -
+                new Vector2(0f, duenio.height * 0.04f * duenio.gravDir);
+            if (global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna
+                    .ArrastrandoA(Projectile.owner))
+            {
+                Vector2 eje = duenio.fullRotationOrigin;
+                Vector2 rel = espalda - (duenio.position + eje);
+                espalda = duenio.position + eje + rel.RotatedBy(duenio.fullRotation);
+            }
+            // LA RAMPA de la construcción (113→119: la corona se
+            // enciende parte por parte — la misma rampa de las partes
+            // 2-4 del accesorio, terminando en la PLENA).
+            float alphaCorona = MathHelper.Clamp(0.60f + 0.10f * (anillos - 1), 0f, 1f);
+            float runasCorona = MathHelper.Clamp(0.70f + 0.10f * (anillos - 1), 0f, 1f);
             try
             {
-                float R = 64f + 7f * (anillos - 1);
-                SigiloLib.SistemaAnillos(centro, R, t, semilla,
-                    anillos, 0f, 1f, 1f);
+                global::AethonMod.Content.VFX.AnilloDorsalRenderer.Draw(
+                    espalda, duenio.height, t, alphaCorona, runasCorona);
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
-            VFXCore.FlushAdditive();
-            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

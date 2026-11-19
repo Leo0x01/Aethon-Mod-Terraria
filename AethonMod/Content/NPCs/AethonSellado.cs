@@ -437,6 +437,16 @@ namespace AethonMod.Content.NPCs
 
         // ════════════════════════════════════════════════════════════
         //  EL ARSENAL (cada ataque lo dispara UN ojo — el libro dirige)
+        //  v6.156 — SUS PROPIOS ATAQUOS A MAYOR ESCALA (la letra:
+        //  «el jefe Aethon sellado que es el grimorio mismo con sus
+        //  propios ataques pero a mayor escala»): el arsenal se AMPLÍA
+        //  con LOS ATAQUES DEL GRIMORIO MISMO — la PAREJA DORADA/
+        //  VIOLETA del disparo básico (los discos día/noche del
+        //  Equinoccio, ×3 en abanico y con daño de jefe) y LA SOMBRAS
+        //  DE LA PÁGINA (los tentáculos negros del arma —
+        //  SombraPaginaProjectile con la marca del festín). El
+        //  repertorio viejo (púa, coro, virote, flecha, tajo,
+        //  estallido) QUEDA — el dios tiene TODO su arsenal.
         // ════════════════════════════════════════════════════════════
         private void DispararArsenal(Player presa)
         {
@@ -452,8 +462,63 @@ namespace AethonMod.Content.NPCs
                 { cuna = n.Center; break; }
             }
 
-            int estilo = ARSENAL[Main.rand.Next(ARSENAL.Length)];
             Vector2 rumbo = (presa.Center - cuna).SafeNormalize(Vector2.UnitX);
+
+            // ============================================================
+            //  v6.156 — LA MONEDA DEL ARSENAL AMPLIADO: mitad del tiempo
+            //  LOS ATAQUES DEL GRIMORIO (la pareja de discos ×3 en
+            //  abanico / la sombra de la página), mitad el repertorio
+            //  de siempre (el arsenal de AtaqueJefeProjectile).
+            // ============================================================
+            bool ataqueDelLibro = Main.rand.NextBool(2);
+            if (ataqueDelLibro)
+            {
+                int dado = Main.rand.Next(3);
+                if (dado < 2)
+                {
+                    // LA PAREJA DORADA/VIOLETA A MAYOR ESCALA: el disparo
+                    // básico del grimorio (los discos día/noche 931 con
+                    // LAS MARCAS DEL FX — el patrón de LanzarPareja del
+                    // arma) pero EN TRIPLICA: tres parejas en abanico
+                    // (−0.35, 0, +0.35 rad) — el dios escupe SU básico
+                    // por la boca ancha.
+                    int dano = (int)(NPC.damage * 0.42f);
+                    for (int k = -1; k <= 1; k++)
+                    {
+                        Vector2 velLibro = rumbo.RotatedBy(0.30f * k) * 13f;
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna,
+                            velLibro.RotatedBy(-0.30f), 931, dano, 2f, NPC.target,
+                            -1f, 0.64f, 9201f);   // EL DORADO (día)
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna,
+                            velLibro.RotatedBy(0.30f), 931, dano, 2f, NPC.target,
+                            -1f, 0.28f, 9202f);   // EL VIOLETA (noche)
+                    }
+                    Sonar(SoundID.Item122.WithPitchOffset(0.10f), cuna);
+                }
+                else
+                {
+                    // LA SOMBRA DE LA PÁGINA DEL DIOS: el tentáculo negro
+                    // del arma (SombraPaginaProjectile) con la marca del
+                    // festín — el dios SUelta su propio tentáculo a por
+                    // la presa (muerde 2,5% por golpe: el arma a escala).
+                    int idxS = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        cuna, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>(),
+                        (int)(NPC.damage * 0.60f), 3f, NPC.target,
+                        presa.whoAmI + 1);
+                    if (idxS >= 0)
+                    {
+                        // el jefe manda: la sombra persigue a SU presa
+                        Main.projectile[idxS].friendly = false;
+                        Main.projectile[idxS].hostile = true;
+                    }
+                    Sonar(SoundID.Item122.WithPitchOffset(-0.30f), cuna);
+                }
+                return;
+            }
+
+            int estilo = ARSENAL[Main.rand.Next(ARSENAL.Length)];
             float vel = estilo == Projectiles.Jefes.AtaqueJefeProjectile.EstiloEstallidoRadiante
                 ? 0f : 10f;
             Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna, rumbo * vel,
@@ -473,16 +538,44 @@ namespace AethonMod.Content.NPCs
         // ════════════════════════════════════════════════════════════
         //  EL DIBUJO DEL DIOS (el sprite del Nervioso GIGANTE + ojos)
         // ════════════════════════════════════════════════════════════
+        //  EL DIBUJO DEL DIOS — v6.156: EL CUERPO ES EL LIBRO V3 DEL
+        //  USUARIO (la letra: «tambien te dare el del grimorio para que
+        //  lo uses como el jefe Aethon sellado que es el grimorio mismo
+        //  con sus propios ataques pero a mayor escala, ademas debes
+        //  darle una animacion rapido, como los minions en la pantalla
+        //  de titulo y en el pilar»): LAS TRES TEXTURAS DEL SPRITE
+        //  LIBRO V3 (LibroV3_Abierto / LibroV3_Medio / LibroV3_Cerrado
+        //  — el arte del usuario decodificado PIXEL A PIXEL, 706×967)
+        //  dibujadas a escala de dios (×0.42: el cuerpo del jefe mide
+        //  ~296×406 px de pantalla) con EL PARPADEO RÁPIDO de los
+        //  minions del título y del pilar: el ciclo ABIERTO → MEDIO →
+        //  CERRADO → MEDIO que late cada ~2 segundos y se aprieta en
+        //  la furia (a media vida late al doble — el dios nervioso de
+        //  verdad).
+        // ════════════════════════════════════════════════════════════
         public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
 
             try
             {
-                var texAsset = TextureAssets.Npc[Type];
-                Texture2D tex = texAsset.Value;
+                // LAS TRES CARAS DEL LIBRO V3 (el arte del usuario):
+                // la tira del dios — abierto, medio, cerrado.
+                var texAbiertoAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/NPCs/LibroV3_Abierto",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                var texMedioAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/NPCs/LibroV3_Medio",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                var texCerradoAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/NPCs/LibroV3_Cerrado",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                Texture2D texAbierto = texAbiertoAsset.Value;
+                Texture2D texMedio = texMedioAsset.Value;
+                Texture2D texCerrado = texCerradoAsset.Value;
+
                 Vector2 pos = NPC.Center - screenPos;
-                float t = Main.GlobalTimeWrappedHourly + NPC.whoAmI;
+                float t = Main.GlobalTimeWrappedHourly + NPC.whoAmI * 0.37f;
 
                 // el vaivén del flotante (la firma)
                 float bob = MathF.Sin(t * 1.35f) * 8f;
@@ -495,18 +588,41 @@ namespace AethonMod.Content.NPCs
                     new Color(118, 74, 190) * (0.30f * NPC.Opacity), 0f,
                     glow.Size() * 0.5f, 5.5f, SpriteEffects.None, 0f);
 
-                // EL LIBRO (36×49 → ×6.4: el grimorio GIGANTE)
-                float escala = 6.4f;
+                // ============================================================
+                //  EL PARPADEO RÁPIDO DE LOS MINIONS (la referencia de la
+                //  letra: la pantalla de título y el pilar): el ciclo
+                //  ABIERTO → MEDIO → CERRADO → MEDIO → ABIERTO… con el
+                //  compás de la casa — un latido cada T_PARPADEO
+                //  segundos, y el párpado baja y sube EN FRENA (las
+                //  fases del cierre duran un cuarto del ciclo: RÁPIDO
+                //  de verdad). La furia aprieta el compás: a media vida
+                //  el dios parpidea AL DOBLE (nervioso como el libro
+                //  hambriento).
+                // ============================================================
+                float compas = Furia > 0.5f ? 0.85f : 1.70f;   // furia = al doble
+                float faseParp = (t % compas) / compas;          // 0..1
+                Texture2D tex;
+                // EL CIERRE EN FRENA: abierto (0-0.55), medio (0.55-0.70),
+                // cerrado (0.70-0.80), medio (0.80-0.95), abierto (0.95-1).
+                if (faseParp < 0.55f || faseParp >= 0.95f) tex = texAbierto;
+                else if (faseParp < 0.80f) tex = (faseParp < 0.70f) ? texMedio : texCerrado;
+                else tex = texMedio;
+
+                // EL LIBRO V3 GIGANTE (706×967 → ×0.42 ≈ 296×406 px: EL
+                // GRIMORIO MISMO, el arte del usuario a escala de dios)
+                float escala = 0.42f;
                 sb.Draw(tex, destino, null,
                     Color.White * NPC.Opacity, tilt,
                     tex.Size() * 0.5f, escala,
                     SpriteEffects.None, 0f);
 
-                // LOS TRES OJOS SELLADOS sobre la portada (el sello que
-                // mira): la textura del escuadrón (OjoEterno) dibujada
-                // aquí como los sellos vivos del libro — cada uno con su
-                // NPC-ojo orbitando (el dibujo del NPC-ojo manda; estos
-                // son los sellos de la PORTADA, apagados, el contrato)
+                // LOS OJOS SELLADOS sobre la portada: los sellos vivos
+                // del libro (cada uno con su NPC-ojo orbitando — el
+                // dibujo del NPC-ojo manda; estos son los sellos de la
+                // PORTADA, apagados, el contrato) — SIGUEN el compás
+                // del parpadeo del cuerpo (cerrado = sellos dormidos).
+                float alfaSello = (tex == texCerrado) ? 0.12f
+                    : (tex == texMedio) ? 0.24f : 0.35f;
                 var ojoTexAsset = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Projectiles/OjoEterno_Abierto",
                     ReLogic.Content.AssetRequestMode.ImmediateLoad);
@@ -516,7 +632,7 @@ namespace AethonMod.Content.NPCs
                     Vector2 off = new Vector2(
                         (i - 1) * 26f, -18f + (i == 1 ? -12f : 0f));
                     sb.Draw(ojoTex, destino + off, null,
-                        new Color(150, 110, 210) * (0.35f * NPC.Opacity), 0f,
+                        new Color(150, 110, 210) * (alfaSello * NPC.Opacity), 0f,
                         ojoTex.Size() * 0.5f, 0.55f, SpriteEffects.None, 0f);
                 }
             }

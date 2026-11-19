@@ -1584,7 +1584,7 @@ namespace AethonMod.Content.Weapons
                             <global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
                         if (almaS != null && almaS.SombrasCap > 0)
                             tooltips.Add(new TooltipLine(Mod, "WSombras",
-                                $"[c/96A8C8:Sombras de la página: {almaS.SombrasLibres}/{almaS.SombrasCap} — una por cada 20 despertares · el modo caza las reparte, el arma las concentra]"));
+                                $"[c/96A8C8:Sombras de la página: {almaS.SombrasLibres}/{almaS.SombrasCap} — la primera nace con el libro, una más por cada 20 despertares · el modo caza las reparte, el arma las concentra]"));
                     }
                     catch { }
                     tooltips.Add(new TooltipLine(Mod, "WIra2",

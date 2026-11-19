@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.DataStructures;
 
 namespace AethonMod.Content.NPCs
 {
@@ -45,6 +47,47 @@ namespace AethonMod.Content.NPCs
     [AutoloadHead]
     public class ElCronista : ModNPC
     {
+        // ================================================================
+        //  v6.156 — EL CUERPO DEL SISTEMA DE JUGADORES (la letra: «usa el
+        //  mismo sistema que terraria tiene para crear jugadores y crea
+        //  al Cronista»): un Player MODELO dibujado por EL RENDERER DE
+        //  VANILLA (Main.PlayerRenderer — el LegacyPlayerRenderer que
+        //  dibuja a todos los jugadores del mundo, verificado en el
+        //  decompile: DrawPlayer(Camera, Player, position, rotation,
+        //  rotationOrigin, shadow, scale)). El Cronista es UN HOMBRE
+        //  (la letra: «el cronista es hombre») con la túnica del
+        //  escriba (la MysticRobe de vanilla — el ropaje oscuro), la
+        //  paleta de tinta de la casa y la pluma en la solapa.
+        // ================================================================
+        private static Player _cuerpo;
+        private static bool _cuerpoListo;
+
+        private static void ForjarCuerpo()
+        {
+            if (_cuerpoListo) return;
+            try
+            {
+                _cuerpo = new Player();
+                _cuerpo.Male = true;                      // UN HOMBRE (la letra)
+                _cuerpo.name = "El Cronista";
+                _cuerpo.skinVariant = 0;                  // el cuerpo clásico
+                _cuerpo.hair = 7;                         // el pelo corto serio
+                _cuerpo.skinColor = new Color(216, 190, 150);   // pergamino
+                _cuerpo.eyeColor = new Color(150, 96, 210);     // la runa viva
+                _cuerpo.hairColor = new Color(46, 28, 70);      // la tinta
+                _cuerpo.armor[1] = new Item(ItemID.Robe); // LA TÚNICA DEL ESCRIBA
+                _cuerpo.armor[2] = new Item(ItemID.FamiliarShirt);
+                _cuerpo.armor[3] = new Item(ItemID.FamiliarPants);
+                _cuerpo.armor[4] = new Item(ItemID.FamiliarWig); // la capucha
+                _cuerpo.dead = false;
+                _cuerpoListo = true;
+            }
+            catch
+            {
+                _cuerpo = null;
+            }
+        }
+
         public override void SetStaticDefaults()
         {
             // LA ANIMACIÓN PROPIA (la tira forjada: 25 marcos del
@@ -293,6 +336,57 @@ namespace AethonMod.Content.NPCs
         }
 
         // ================================================================
+        //  v6.156 — EL DIBUJO: EL CRONISTA ES UN JUGADOR DE TERRARIA
+        //  (la letra: «usa el mismo sistema que terraria tiene para
+        //  crear jugadores»): el renderer de vanilla (Main.PlayerRenderer
+        //  — el LegacyPlayerRenderer, verificado en el decompile:
+        //  DrawPlayer(Camera, Player, position, rotation, rotationOrigin,
+        //  shadow, scale)) dibuja SU CUERPO — el Player modelo de
+        //  ForjarCuerpo: la túnica del escriba, el pelo de tinta, la
+        //  piel de pergamino y EL ANDAR de los jugadores (bodyFrame del
+        //  ciclo de caminar). LA PLUMA DORADA de la casa en la solapa.
+        // ================================================================
+        public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
+        {
+            if (Main.netMode == NetmodeID.Server) return false;
+            try
+            {
+                ForjarCuerpo();
+                if (_cuerpo != null && Main.PlayerRenderer != null)
+                {
+                    float vel = NPC.velocity.Length();
+                    if (vel > 0.5f)
+                    {
+                        int f = (int)(Main.GlobalTimeWrappedHourly * 8f) % 12 + 1;
+                        _cuerpo.bodyFrame = new Rectangle(0, 56 * f, 40, 56);
+                    }
+                    else
+                        _cuerpo.bodyFrame = new Rectangle(0, 0, 40, 56);
+                    _cuerpo.direction = NPC.direction;
+                    _cuerpo.gravDir = 1f;
+                    _cuerpo.fullRotation = 0f;
+                    _cuerpo.wingFrame = 0;
+
+                    Vector2 pos = NPC.position - screenPos;
+                    Main.PlayerRenderer.DrawPlayer(Main.Camera, _cuerpo, pos,
+                        0f, Vector2.Zero);
+
+                    // LA PLUMA DORADA (el sello del escriba inmortal).
+                    var plumaAsset = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/NPCs/ElCronista_Head",
+                        ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                    var pluma = plumaAsset.Value;
+                    spriteBatch.Draw(pluma,
+                        pos + new Vector2(NPC.width * 0.5f - 20f, -6f),
+                        null, Color.White * 0.85f, 0f, Vector2.Zero,
+                        2f, SpriteEffects.None, 0f);
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        // ================================================================
         //  LA MONEDA — ESENCIA DEL ETERNO (la letra: «solo usa como
         //  moneda las esencias del eterno»). LA VÍA DE LA CASA: los
         //  items de la tienda llevan shopSpecialCurrency (el ID que
@@ -356,7 +450,24 @@ namespace AethonMod.Content.NPCs
         /// ModifyActiveShop corre EN CADA APERTURA con el player LOCAL
         /// delante del mostrador — la mercancía nace del DESPERTAR DE
         /// QUIEN MIRA. (El botón de la Onceava y las esencias de
-        /// monstruos de la v6.153 MUEREN: la letra los mata.)</summary>
+        /// monstruos de la v6.153 MUEREN: la letra los mata.)
+        /// v6.156 — LA TIENDA NUNCA MÁS VACÍA (la letra: «la tienda del
+        /// cronista no muestra nada, tengo el grimorio en el nivel 0 de
+        /// Despertar y para subir a nivel 1 necesito articulos que no
+        /// salen en la tienda, recuerda que el Cronista debe vender
+        /// siempre lo que el jugador necesita para subir el nivel de
+        /// Despertar»): LA AUTOPSIA — el cuerpo entero vivía dentro de
+        /// un try/catch VACÍO: CUALQUIER excepción (la moneda sin
+        /// registrar, un null de la cosecha del 120, lo que sea)
+        /// dejaba el mostrador VACÍO y el log NI UNA LÍNEA. LA CURA:
+        /// (1) el catch silencioso MUERE — si algo revienta, la casa LO
+        /// ESCRIBE en el log (Logging.tML.Error) y lo que ya se llenó
+        /// QUEDA a la venta; (2) el nivel 0 TAMBIÉN COMPRA: con el
+        /// libro en la mano, el peldaño siguiente es el 1 (SlimeStaff
+        /// + WandofSparking — ArmasDelNivel[1]) y SIEMPRE se ofrece;
+        /// (3) la búsqueda del libro mira el inventario COMPLETO (58 +
+        /// la mano + el banco abierto) — la moneda se registra en Load
+        /// ANTES de cualquier tienda.</summary>
         public override void ModifyActiveShop(string shopName, Item[] items)
         {
             if (shopName != "Cronista") return;
@@ -372,10 +483,16 @@ namespace AethonMod.Content.NPCs
                     if (comprador.inventory[i] != null &&
                         comprador.inventory[i].type == eterno)
                     { llevaElLibro = true; break; }
+                if (!llevaElLibro && comprador.HeldItem != null &&
+                    comprador.HeldItem.type == eterno)
+                    llevaElLibro = true;   // v6.156: también EN LA MANO
                 if (!llevaElLibro) return;   // sin el libro, el mostrador está vacío
 
                 // LA PUERTA QUE ESTÁ PAGANDO ESTE COMPRADOR: el nivel
                 // siguiente de SU grimorio (cada libro, su escalera).
+                // v6.156 — EL NIVEL 0 SUBE AL 1: NivelDespertarSiguiente
+                // ya devuelve 1 cuando el libro está a 0 (nivel+1) — las
+                // armas del peldaño 1 SALEN SIEMPRE en el mostrador.
                 int siguiente = Math.Min(
                     global::AethonMod.Content.Systems.DespertarGrimorio.NivelMax,
                     global::AethonMod.Content.Systems.DespertarGrimorio
@@ -510,7 +627,17 @@ namespace AethonMod.Content.NPCs
                             if (cosecha.Count >= 24) break;
                         }
                     }
-                    catch { }
+                    catch (System.Exception eCol)
+                    {
+                        // v6.156 — la cosecha del 120 ya no es muda: si
+                        // una tienda ajena revienta, se anota y SE SIGUE
+                        // con las demás (el mostrador del 120 no muere).
+                        try
+                        {
+                            Mod.Logger.Error("[ElCronista/120] la cosecha de tiendas ajenas falló", eCol);
+                        }
+                        catch { }
+                    }
 
                     // LA ELECCIÓN DETERMINISTA DEL DÍA (la casa no usa
                     // Main.rand en el surtido: el mismo día, el mismo
@@ -529,7 +656,7 @@ namespace AethonMod.Content.NPCs
                             // el dado de la casa (Hash01 determinista)
                             int idx = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(
                                 semillaDia * 7 + 1, k, 31) * cosecha.Count);
-                            var (tipoV, pilaV) = cosecha[idx];
+                                var (tipoV, pilaV) = cosecha[idx];
                             var planta = new Item(tipoV);
                             long precioV = Math.Max(5L, 20L + 40L * Math.Max(0, planta.rare));
                             Poner(tipoV, precioV, Math.Max(1, Math.Min(5, pilaV)));
@@ -537,7 +664,19 @@ namespace AethonMod.Content.NPCs
                     }
                 }
             }
-            catch { }
+            catch (System.Exception e)
+            {
+                // v6.156 — EL CATCH SILENCIOSO MUERE: la tienda vacía del
+                // nivel 0 nació AQUÍ — cualquier excepción dejaba el
+                // mostrador MUERTO sin NI UNA LÍNEA en el log. Ahora la
+                // casa LO ESCRIBE (y lo que ya se llenó QUEDA a la venta:
+                // items[] ya escrito no se borra).
+                try
+                {
+                    Mod.Logger.Error("[ElCronista/ModifyActiveShop] la tienda falló a medio llenar", e);
+                }
+                catch { }
+            }
         }
     }
 

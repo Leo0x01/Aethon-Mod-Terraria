@@ -504,18 +504,79 @@ namespace AethonMod.Content.Projectiles
                 Vector2 dir = hacia * (1f / largo);
 
                 // ----------------------------------------------------------
-                //  v6.108 → v6.155 — EL PLASMA MURIÓ; SOLO UNA PEQUEÑA
-                //  BRUMA (la letra: «en lo enemigos deben ser solo una
-                //  pequeña bruma»): las CHISPAS de la reentrada (los
-                //  circulitos de núcleo negro + halo violeta EXPULSADOS
-                //  del punto de estancamiento — la misma familia de
-                //  circulitos que el jugador ya no lleva) MURIERON
-                //  COMPLETAS. En el impío queda UNA BRUMA MENUDA: una
-                //  sola mota blanda cada ~18 ticks (muy rala), nacida
-                //  junto al corazón del cuerpo y disuelta en unos
-                //  pasos — apenas un suspiro violeta sobre el arco de
-                //  choque (la mota suave de la casa: núcleo negro +
-                //  halo, SIN la física de la expulsión de la chispa).
+                //  v6.155 → v6.156 — LA FRICCIÓN VUELVE A ARDER (la
+                // letra: «lo que quitaste del aura del vacio no era lo
+                // correcto, regresa eso que quitaste ya que lo que
+                // quitaste era lo que representaba la friccion entre el
+                // enemigo y el personaje, asi que regresalo»): LAS
+                // CHISPAS DE LA REENTRADA (el plasma del punto de
+                // estancamiento — la FRICCIÓN del impío cayendo por el
+                // campo del portador) REVIVEN COMPLETAS con SU física
+                // de la v6.145: nacen del TOPE ABOMBADO de la medialuna
+                // y se derraman por el HEMISFERIO DE FUGA (±60° — TODO
+                // se aleja del portador), a mayor cercanía MÁS DENSA
+                // hierve. LO QUE SÍ ERA LOS CIRCULITOS DEL BUFF/debuff
+                // (la letra nueva: «lo que tenias que quitar del
+                // personaje y cambiar en los enemigos, eran las
+                // particulas que representaban al buff y debuff, que
+                // esas particulas deberia ser bruma») ya está curado en
+                // su sitio: el JUGADOR sigue LIMPIO (la mota del buff
+                // muerta desde la v6.155) y las partículas que visten la
+                // QUEMADURA son SOLO LA BRUMA MENUDA de abajo — la
+                // chispa es la fricción, la bruma es el fuego.
+                // ----------------------------------------------------------
+                int ritmoFriccion = (int)MathHelper.Clamp(6f - k * 5f, 1f, 6f);
+                if ((Projectile.ai[0] + i) % ritmoFriccion == 0f && n.Center.DistanceSQ(dueno.Center) < 640f * 640f)
+                {
+                    int rafaga = 1 + (k > 0.4f ? 1 : 0)
+                        + (k > 0.75f && Main.rand.NextFloat() < 0.5f ? 1 : 0);
+                    for (int s = 0; s < rafaga; s++)
+                    {
+                        // EL RUMBO — el hemisferio trasero ±60° (la ley
+                        // v6.145: TODO lo que nace se ALEJA del jugador).
+                        float abanico = Main.rand.NextFloat(
+                            -MathHelper.Pi / 3f, MathHelper.Pi / 3f);
+                        Vector2 rumbo = dir.RotatedBy(abanico);
+
+                        // LA CUNA — el punto de estancamiento: el tope
+                        // abombado de la medialuna que MIRA al portador.
+                        Vector2 cunaChispa = n.Center - dir * (RadioDomo(n, k) * 0.95f) + new Vector2(
+                            Main.rand.NextFloat(-1f, 1f) * n.width * 0.08f,
+                            Main.rand.NextFloat(-1f, 1f) * n.height * 0.08f);
+
+                        // LA FURIA escala con la cercanía y ACELERA en el vuelo.
+                        float vBase = (0.9f + 1.1f * k) * Main.rand.NextFloat(0.85f, 1.2f);
+                        float acel = 0.020f + 0.018f * k;
+                        float distMax = RadioDomo(n, k) * Main.rand.NextFloat(1.6f, 2.6f);
+                        var chispa = new PolvoExpulsionJuicio.Chispa
+                        {
+                            Centro = cunaChispa,
+                            Dir = rumbo,
+                            Vel = vBase,
+                            Acel = acel,
+                            DistMax = distMax
+                        };
+
+                        // EL COLOR DE LA CASA — el halo violeta, más
+                        // claro cuanto más cerca arde.
+                        Color halo = Color.Lerp(
+                            new Color(150, 84, 235), new Color(224, 176, 255), k);
+                        Dust d = Dust.NewDustPerfect(cunaChispa,
+                            ModContent.DustType<PolvoExpulsionJuicio>(), Vector2.Zero,
+                            0, halo, Main.rand.NextFloat(0.24f, 0.38f));   // MENUDAS
+                        d.customData = chispa;
+                        d.noGravity = true;
+                        d.noLight = false;
+                    }
+                }
+
+                // ----------------------------------------------------------
+                //  v6.156 — LA BRUMA DEL BUFF/debuff (la letra: las
+                //  partículas que representaban la quemadura «deberia
+                //  ser bruma»): la mota blanda de la v6.155 QUEDA —
+                //  cada ~18 ticks, un suspiro violeta sobre el arco de
+                //  choque, disuelto en unos pasos hacia el lado
+                //  opuesto del portador.
                 // ----------------------------------------------------------
                 int ritmo = 18;
                 if ((Projectile.ai[0] + i) % ritmo == 0f && n.Center.DistanceSQ(dueno.Center) < 640f * 640f)
