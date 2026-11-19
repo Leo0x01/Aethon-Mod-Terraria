@@ -1,5 +1,22 @@
 # AethonMod — Historial de Cambios
 
+## v6.157 — LA TIENDA QUE NUNCA ESTUVO, EL ESCRIBA DE TINTA Y LA CARGA DEL DIOS (release 451910277 · md5 3370a154…)
+
+**Los 6 puntos de la sesión 29 (el usuario JUGÓ y la autopsia fue cruel):**
+
+1. **LA TIENDA VACÍA — CAUSA RAÍZ DE NACIMIENTO**: ModifyActiveShop recibe el nombre COMPLETO («AethonMod/ElCronista/Cronista» — GetShopName del decompile); el guard viejo `!= "Cronista"` NUNCA casaba → VACÍA EN TODAS LAS PARTIDAS DESDE EL DÍA UNO. Cura: `EndsWith("/Cronista")`.
+2. **TODO LO VENDIDO SALE CONSAGRADO**: ConsagracionDelCronista (GlobalItem.OnCreated + BuyItemCreationContext con VendorNPC — ItemSlot.cs:1830 del decompile) marca Corrompido=true al comprar → el grimorio LO COME sin altar.
+3. **EL CRONISTA ES UN NPC DE TERRARIA**: LA TIRA PROPIA de 25 marcos 40×56 forjada por código (tinta+pergamino+runa+pluma+grimorio; idle · andar 1-14 · escriba sentado 15-20 · ataque 21-24) animada por EL FRAMER DE VANILLA (AnimationType=Guide). El PlayerRenderer MURIÓ (new Player() fallaba mudo → NPC INVISIBLE).
+4. **EL NPC TEST NACE JUNTO AL CRONISTA**: era town NPC SIN CASA (jamás llegaba — por eso no lo veía); ahora el spawner del Cronista lo invoca a 4 tiles con su bruma.
+5. **LOS ANILLOS TAL CUAL EL ACCESORIO**: LA MISMA LLAMADA de AnilloRunicoDorsalHalo — Draw(espalda, altura, t, 1f, 1f) — alpha plena, runas plenas, el mismo tamaño; la rampa v6.156 MURIÓ.
+6. **LA EXPLOSIÓN FINAL — CARGA + ONDA REAL**: la fase de recogida en modo dios es LA CARGA (26-44 Bloom dorados naciendo en anillo de 360-840 px CAYENDO AL JUGADOR con aceleración) y la onda es OndaLib.Shock(chromatic:true) — LA ONDA ROTA REAL de la casa con franjas R/B (la del Ciclo Estelar/Supergigante) EN el radio del barrido de 42 px/t.
+
+**⚠️ PARA EL USUARIO**: su client.log dice «Selected AethonMod 6.153» — el .tmod nuevo NO reemplazó al viejo: BORRAR el .tmod viejo de la carpeta Mods antes de copiar el nuevo.
+
+— oráculo 0/0 (464 .cs) · build 0/0 (21.896.042 B) · GUARDIÁN TODO VIVE ✔ · headless 0 excepciones · release 451910277 + CDN verificado byte a byte (md5 3370a154).
+
+# AethonMod — Historial de Cambios
+
 ## v6.156 — EL LIBRO V3, LA TIENDA DEL NIVEL 0 Y EL DIOS CON TU ARTE (release 451816830 · md5 5d1ee481…)
 
 **Los 12 puntos de la sesión 28, entregados y verificados:**
