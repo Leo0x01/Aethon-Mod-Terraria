@@ -2042,6 +2042,11 @@ Items: {
 	}
 
 	ArmaCorruptaTag: (Consagrado)
+	// v6.158 — the consecrated potion doubles what it does.
+	PocionConsagrada: The consecration doubles its effect:
+	PocionVidaDoble: life ×2
+	PocionManaDoble: mana ×2
+	PocionBuffDoble: duration ×2
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado para siempre.
 	ArmaCorrupta3: Consagrada por el Eterno: suéltala con el grimorio EN LA MANO y él la devorará.
@@ -2670,6 +2675,8 @@ Furia: {
 
 Cronista: {
 	Llega: The Chronicler wakes from the book — the scribe who survived the first devouring walks beside you.
+	// v6.158 — the shop price text (GetPriceText lowercases it).
+	Moneda: Essences of the Eternal
 	// v6.154 — LOS 22 DIÁLOGOS EXCLUSIVOS (la letra), organizados
 	// por disparador: genéricas/portador/oleadas/despertar/sellado/
 	// objetos/cierre en rotación; la Onceava y la Última Puerta son

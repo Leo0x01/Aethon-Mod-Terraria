@@ -609,7 +609,10 @@ namespace AethonMod.Content.UI
                                 Terraria.Audio.SoundEngine.PlaySound(
                                     SoundID.Item113.WithPitchOffset(-0.7f));
                             }
-                            sello.Corrompido = true;
+                            // v6.158 — LA CONSAGRACIÓN CENTRAL (la
+                            // poción consagrada DUPLICA lo que hace).
+                            global::AethonMod.Content.Globals.CorruptoGlobalItem
+                                .Consagrar(_arma);
                             _arma.ResetPrefix();
                             global::AethonMod.Content.Globals.CorruptoGlobalItem
                                 .VestirLaRareza(_arma);

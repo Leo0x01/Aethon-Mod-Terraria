@@ -161,9 +161,9 @@ namespace AethonMod.Content.Systems
             try
             {
                 if (item == null || item.IsAir) return;
-                var sello = item.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                if (sello == null) return;
-                sello.Corrompido = true;
+                // v6.158 — LA CONSAGRACIÓN CENTRAL (la poción
+                // consagrada DUPLICA lo que hace).
+                global::AethonMod.Content.Globals.CorruptoGlobalItem.Consagrar(item);
                 item.ResetPrefix();   // «ya no puede tener etiquetas» — pelada de fábrica
                 // v6.89 — Y VISTE SU RAREZA (el nombre negro en TODAS partes).
                 global::AethonMod.Content.Globals.CorruptoGlobalItem.VestirLaRareza(item);

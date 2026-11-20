@@ -68,6 +68,59 @@ namespace AethonMod.Content.Globals
             if (Corrompido) VestirLaRareza(item);
         }
 
+        // ================================================================
+        //  v6.158 — LA CONSAGRACIÓN CENTRAL + LA POCIÓN DOBLE.
+        //
+        //  LA LETRA: «veo que las pociones tambien salen consagradas,
+        //  hagamos que cuando se consagra una pocion sin importar el
+        //  que sea su efecto o duracion se duplica dependiendo de lo
+        //  que haga la pocion» — UNA SOLA CONSAGRACIÓN para TODO el
+        //  que consagra (el altar, las recetas, la tienda del
+        //  Cronista), y si lo consagrado es UNA POCIÓN (o cualquier
+        //  consumible que cure vida, cure maná o dé un buff), LO QUE
+        //  HACE SE DUPLICA:
+        //    · healLife  ×2 (la vida que devuelve),
+        //    · healMana  ×2 (el maná que devuelve),
+        //    · buffTime  ×2 (la duración del efecto).
+        //  La duplicación vive EN EL ITEM (no en un hook de uso): el
+        //  flujo vanilla ApplyLifeAndOrMana/AddBuff lee los campos
+        //  del item directamente — duplicados ahí, TODO consumo
+        //  (uso, QuickHeal, QuickBuff) los aplica doblados, en
+        //  singleplayer Y multiplayer, sin tocar un solo hook.
+        // ================================================================
+
+        /// <summary>LA CONSAGRACIÓN DE LA CASA: marca el item y (si es
+        /// poción) duplica lo que hace. Todos los que consagran
+        /// llaman AQUÍ — un solo camino, una sola ley.</summary>
+        public static void Consagrar(Item item)
+        {
+            if (item == null || item.IsAir) return;
+            var sello = item.GetGlobalItem<CorruptoGlobalItem>();
+            if (sello == null) return;
+            if (sello.Corrompido)
+            {
+                // ya consagrado: solo re-vestir (idempotente)
+                VestirLaRareza(item);
+                return;
+            }
+            sello.Corrompido = true;
+
+            // LA POCIÓN DOBLE: lo que la poción HACE, ×2 (la cura, el
+            // maná que DEVUELVE y la duración del efecto — cualquier
+            // poción, vanilla o de mods: los campos son del item).
+            // OJO: item.mana (el COSTO de maná de las armas) JAMÁS se
+            // toca — duplicarlo castigaría al portador.
+            try
+            {
+                if (item.healLife > 0) item.healLife *= 2;
+                if (item.healMana > 0) item.healMana *= 2;
+                if (item.buffType > 0 && item.buffTime > 0) item.buffTime *= 2;
+            }
+            catch { }
+
+            VestirLaRareza(item);
+        }
+
         /// <summary>v6.89 — EL ARMA CORRUPTA VISTE SU RAREZA: el color de
         /// su nombre es el MISMO en el inventario y en la barra de acceso
         /// rápido (la letra: «el color del nombre es diferente en el
@@ -297,8 +350,36 @@ namespace AethonMod.Content.Globals
                     //     humo de la consagración) en el tooltip, en la
                     //     barra rápida, en el chat y en TODAS partes:
                     //     idéntico, siempre.
-                    if (!nombre.EndsWith(etiqueta))
-                        tooltips[idxNombre].Text = nombre + " " + etiqueta;
+                    // v6.158 — EL STACK CON DOBLE ETIQUETA (la letra:
+                    //     «el texto dice pocion de mana (consagrado) (3)
+                    //     (consagrado), el segundo consagrado esta de
+                    //     mas, estoy seguro que este bug esta en todos
+                    //     los items apilables»): el nombre del tooltip
+                    //     es HoverName = «nombre (N)» (Item.cs del
+                    //     decompile: AffixName + " (" + stack + ")") —
+                    //     el EndsWith viejo NO veía la etiqueta (el
+                    //     «(3)» queda AL FINAL, después de ella) y la
+                    //     añadía OTRA VEZ: «pocion (consagrado) (3)
+                    //     (consagrado)». LA CURA: pelar el contador del
+                    //     stack del FINAL, chequear la etiqueta en el
+                    //     nombre LIMPIO, y devolver el contador al
+                    //     final — UNA sola etiqueta, siempre.
+                    string nombreLimpio = nombre;
+                    string cola = "";
+                    int cierra = nombre.LastIndexOf(')');
+                    if (cierra > 0)
+                    {
+                        string antes = nombre.Substring(0, cierra);
+                        int abre = antes.LastIndexOf('(');
+                        // ¿el último paréntesis ES el contador (un número)?
+                        if (abre > 0 && int.TryParse(antes.Substring(abre + 1), out _))
+                        {
+                            nombreLimpio = antes.Substring(0, abre).TrimEnd();
+                            cola = nombre.Substring(nombreLimpio.Length);
+                        }
+                    }
+                    if (!nombreLimpio.EndsWith(etiqueta))
+                        tooltips[idxNombre].Text = nombreLimpio + " " + etiqueta + cola;
                 }
 
                 // v6.90 — LA LETRA NUEVA: «si lo que corrompes es un arma
@@ -326,6 +407,27 @@ namespace AethonMod.Content.Globals
                     tooltips.Add(new TooltipLine(Mod, "CorruptoLinea3",
                         Language.GetTextValue("Mods.AethonMod.Items.ArmaCorrupta3"))
                     { OverrideColor = bruma });
+                }
+
+                // v6.158 — LA POCIÓN DOBLE SE ANUNCIA (la letra: «cuando
+                //     se consagra una pocion… se duplica dependiendo de lo
+                //     que haga»): la línea de la duplicación — vida ×2,
+                //     maná ×2, duración ×2 (lo que la poción TOCA).
+                if (item.healLife > 0 || item.healMana > 0 ||
+                    (item.buffType > 0 && item.buffTime > 0))
+                {
+                    var oro = new Color(255, 214, 130);
+                    string queDuplica =
+                        (item.healLife > 0 ? Language.GetTextValue(
+                            "Mods.AethonMod.Items.PocionVidaDoble") : "") +
+                        (item.healMana > 0 ? (item.healLife > 0 ? " " : "") +
+                            Language.GetTextValue("Mods.AethonMod.Items.PocionManaDoble") : "") +
+                        (item.buffType > 0 && item.buffTime > 0 ? " " +
+                            Language.GetTextValue("Mods.AethonMod.Items.PocionBuffDoble") : "");
+                    tooltips.Add(new TooltipLine(Mod, "PocionConsagrada",
+                        Language.GetTextValue("Mods.AethonMod.Items.PocionConsagrada") +
+                        " " + queDuplica.Trim())
+                    { OverrideColor = oro });
                 }
             }
             catch { }

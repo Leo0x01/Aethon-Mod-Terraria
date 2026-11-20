@@ -2024,6 +2024,12 @@ Items: {
 	}
 
 	ArmaCorruptaTag: (Consagrado)
+	// v6.158 — LA POCIÓN CONSAGRADA DOBLE (la letra: «cuando se
+	// consagra una pocion… se duplica dependiendo de lo que haga»).
+	PocionConsagrada: La consagración duplica su efecto:
+	PocionVidaDoble: vida ×2
+	PocionManaDoble: maná ×2
+	PocionBuffDoble: duración ×2
 	ArmaCorrupta1: +5% a TODAS sus estadísticas — daña más, empuja más, pega más rápido.
 	ArmaCorrupta2: Ya no acepta prefijos ni reforge — el yunque le está cerrado para siempre.
 	ArmaCorrupta3: Consagrada por el Eterno: suéltala con el grimorio EN LA MANO y él la devorará.
@@ -2654,6 +2660,11 @@ Furia: {
 
 Cronista: {
 	Llega: El Cronista despierta del libro — el escriba que sobrevivió a la primer devoración camina a tu lado.
+	// v6.158 — LA MONEDA HABLA EN NOMBRE PROPIO (la letra: «en el
+	// precio de compra dice medalla de defensor… debe decir esencias
+	// del eterno»): el texto del precio del mostrador (GetPriceText
+	// lo pasa por ToLower — el formato «precio: N esencias…»).
+	Moneda: Esencias del Eterno
 	// v6.154 — LOS 22 DIÁLOGOS EXCLUSIVOS (la letra), organizados
 	// por disparador: genéricas/portador/oleadas/despertar/sellado/
 	// objetos/cierre en rotación; la Onceava y la Última Puerta son

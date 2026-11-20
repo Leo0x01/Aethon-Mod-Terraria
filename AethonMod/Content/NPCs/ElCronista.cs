@@ -48,22 +48,74 @@ namespace AethonMod.Content.NPCs
     public class ElCronista : ModNPC
     {
         // ================================================================
-        //  v6.157 — EL CUERPO ES LA TIRA PROPIA (ver PreDraw): el
-        //  PlayerRenderer de la v6.156 MURIÓ (frágil: un fallo del
-        //  new Player() fuera de mundo dejaba al NPC INVISIBLE — el
-        //  «realmente no aparece» del usuario). El sprite es el
-        //  NPC_25_Frames clásico de los town NPC (verificado en el
-        //  framer del decompile: Main.npcFrameCount[Type]=25 con
-        //  ExtraFrames=5 y AttackFrames=4 — el layout del Guide).
+        //  v6.158 — EL CUERPO ES EL MODELO EXACTO DEL PERSONAJE DE
+        //  TERRARIA (la letra: «el cronista no es un personaje de
+        //  terraria, debes usar exactamente el modelo de personaje
+        //  del terraria original ya que es el que usan todos los
+        //  mods»). LA AUTOPSIA de por qué la v6.156 fallaba: el
+        //  Player modelo se creaba con `new Player()` PERO NUNCA
+        //  SE PONÍA `.active = true` — DrawPlayerInternal lo pasa
+        //  por BoringSetup y VARIAS capas del renderer dibujan solo
+        //  lo que el Player «está usando»; un Player inactivo cae
+        //  en estados vacíos y el catch mudo dejaba al NPC
+        //  INVISIBLE. LA CURA DE VERDAD (el mismo truco que usan
+        //  los mods de maniquíes/sacapultos, verificado contra el
+        //  decompile de LegacyPlayerRenderer.DrawPlayerInternal):
+        //  UN Player ACTIVO (active=true, InventorCreator=false,
+        //  no dead), vestido con las piezas de vanilla (Robe del
+        //  escriba), con bodyFrame MANEJADO A MANO (el ciclo de
+        //  andar de PlayerFrame — parado: frame 0; andar: la banda
+        //  7..18 por velocity), dibujado por
+        //  Main.PlayerRenderer.DrawPlayer — EL RENDERER QUE DIBUJA
+        //  A TODOS LOS JUGADORES DEL MUNDO, EL MODELO DE PERSONAJE
+        //  LITERAL DE TERRARIA.
         // ================================================================
+
+        // EL CUERPO MODELO — estático y por mundo (se viste UNA vez;
+        // el frame se anima en cada dibujado).
+        private static Player _cuerpo;
+        private static bool _cuerpoVestido;
+
+        private static Player CuerpoDelCronista()
+        {
+            if (_cuerpoVestido && _cuerpo != null) return _cuerpo;
+            try
+            {
+                _cuerpo = new Player();
+                _cuerpo.active = true;               // LA PIEZA QUE FALTABA
+                _cuerpo.dead = false;
+                _cuerpo.Male = true;                 // UN HOMBRE (la letra)
+                _cuerpo.name = "El Cronista";
+                _cuerpo.skinVariant = 0;             // el cuerpo clásico
+                _cuerpo.hair = 7;                    // el pelo corto serio
+                _cuerpo.skinColor = new Color(216, 190, 150);  // pergamino
+                _cuerpo.eyeColor = new Color(150, 96, 210);    // la runa viva
+                _cuerpo.hairColor = new Color(46, 28, 70);     // la tinta
+                _cuerpo.armor[0] = new Item();       // sin casco: LA CABEZA DESNUDA
+                _cuerpo.armor[1] = new Item(ItemID.Robe);      // LA TÚNICA DEL ESCRIBA
+                _cuerpo.armor[2] = new Item();       // sin pantalón (la túnica cubre)
+                _cuerpo.armor[3] = new Item();       // sin zapatos visibles
+                _cuerpo.miscEquips[0] = new Item();  // sin caballo ni gancho
+                _cuerpo.direction = 1;
+                _cuerpo.gravDir = 1f;
+                _cuerpo.fullRotation = 0f;
+                _cuerpo.wingFrame = 0;
+                _cuerpo.invis = false;
+                _cuerpoVestido = true;
+            }
+            catch
+            {
+                _cuerpo = null;
+            }
+            return _cuerpo;
+        }
 
         public override void SetStaticDefaults()
         {
-            // LA ANIMACIÓN PROPIA (la tira forjada v6.157: 25 marcos
-            // del town NPC — idle, caminar, EL ESCRIBA SENTADO y el
-            // lanzamiento de la pluma). EL LAYOUT DEL GUIDE (el framer
-            // del decompile): 0 idle · 1-14 andar · 15-20 extra ·
-            // 21-24 ataque → ExtraFrames = 5, AttackFrames = 4.
+            // EL CUERPO LO DIBUJA EL RENDERER DE JUGADORES (no hay tira
+            // propia) — pero el framer de vanilla necesita UN frame
+            // count: la textura fantasma es 1 marco (el cuerpo real es
+            // el Player modelo).
             Main.npcFrameCount[Type] = 25;
             NPCID.Sets.ExtraFramesCount[Type] = 5;
             NPCID.Sets.AttackFrameCount[Type] = 4;
@@ -171,10 +223,18 @@ namespace AethonMod.Content.NPCs
             multiplier = 12f;
         }
 
-        /// <summary>El Cronista ES el Cronista (una sola identidad).</summary>
+        /// <summary>v6.158 — EL NOMBRE DEL MAPA, UNA SOLA VEZ (la letra:
+        /// «el cronista en el mapa su nombre sale como, el cronista el
+        /// cronista, esta repetido»). LA CAUSA (el decompile):
+        /// NPC.FullName = «{GivenName} {TypeName}» (la key
+        /// Game.NPCTitle) — con SetNPCNameList devolviendo «El
+        /// Cronista» Y DisplayName «El Cronista», el mapa pintaba
+        /// «El Cronista El Cronista». LA CURA: SIN GivenName (la lista
+        /// vacía) — el mapa y el bestiario muestran SOLO el TypeName:
+        /// «El Cronista», una vez, como manda la letra.</summary>
         public override List<string> SetNPCNameList()
         {
-            return new List<string> { "El Cronista" };
+            return new List<string>();
         }
 
         // ================================================================
@@ -244,24 +304,60 @@ namespace AethonMod.Content.NPCs
 
                     // ¿YA vive? (UNO por mundo — jamás se dobla)
                     int tipo = ModContent.NPCType<ElCronista>();
+                    int idxCronista = -1;
                     for (int i = 0; i < Main.maxNPCs; i++)
                         if (Main.npc[i] != null && Main.npc[i].active &&
-                            Main.npc[i].type == tipo) return;
+                            Main.npc[i].type == tipo) { idxCronista = i; break; }
 
-                    // v6.157 — EL NPC TEST TAMBIÉN NACE (la letra: «el
-                    // NPC test debe aparecer junto con el cronista»):
-                    // el CanTownNPCSpawn del NPCTest NO LO HACE NACER
-                    // JAMÁS (los town NPC sin casa no llegan — el
-                    // chequeo vanilla de Main.SpawnTownNPC exige
-                    // housing; por eso «el NPC test no existe no lo
-                    // veo»). EL SPOWNER DE LA CASA: cuando nace el
-                    // Cronista, su sombra de pruebas nace A SU LADO
-                    // (UNO por mundo, el mismo bucle anti-doble).
+                    // v6.158 — EL NPC TEST SE CHEQUEA SIEMPRE (la
+                    // letra: «otra cosa, el NPC Test no aparece»): la
+                    // v6.157 tenía el chequeo del test DENTRO del flujo
+                    // del nacimiento del Cronista — el `return` de «ya
+                    // vive» MATABA todo el bloque: en un mundo con el
+                    // Cronista YA PRESENTE (de una sesión anterior) el
+                    // test JAMÁS se chequeaba, y en el nacimiento solo
+                    // se chequeaba UNA VEZ. LA CURA: el test se
+                    //-chequea CADA MINUTO, INDEPENDIENTE — si no vive
+                    // y el Cronista sí, RENACE A SU LADO.
                     int tipoTest = ModContent.NPCType<NPCTest>();
                     bool testVive = false;
                     for (int i = 0; i < Main.maxNPCs; i++)
                         if (Main.npc[i] != null && Main.npc[i].active &&
                             Main.npc[i].type == tipoTest) { testVive = true; break; }
+                    if (!testVive && idxCronista >= 0)
+                    {
+                        NPC cronista = Main.npc[idxCronista];
+                        int txT = cronista.homeTileX + 2;
+                        int sueloT = -1;
+                        for (int y = cronista.homeTileY - 8; y < cronista.homeTileY + 16 &&
+                             y < Main.maxTilesY - 4; y++)
+                            if (WorldGen.SolidTile(txT, y)) { sueloT = y; break; }
+                        Vector2 posT = sueloT >= 0
+                            ? new Vector2(txT * 16f + 8f, sueloT * 16f)
+                            : cronista.Bottom;
+                        int idxT = NPC.NewNPC(cronista.GetSource_FromAI(),
+                            (int)posT.X, (int)posT.Y, tipoTest, 0, 0f, 255);
+                        if (idxT >= 0 && idxT < Main.maxNPCs && Main.npc[idxT].active)
+                        {
+                            Main.npc[idxT].homeTileX = (int)(posT.X / 16f);
+                            Main.npc[idxT].homeTileY = (int)(posT.Y / 16f);
+                            Main.npc[idxT].netUpdate = true;
+                            if (!Main.dedServ)
+                                for (int k = 0; k < 10; k++)
+                                {
+                                    var d = Dust.NewDustPerfect(Main.npc[idxT].Center,
+                                        DustID.Shadowflame,
+                                        new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
+                                            Main.rand.NextFloat(-2.5f, -0.5f)),
+                                        100, new Color(110, 60, 180), 1.0f);
+                                    d.noGravity = true;
+                                }
+                        }
+                    }
+
+                    // ¿El Cronista YA vive? El flujo de nacimiento termina
+                    // aquí (el test ya se cuidó arriba).
+                    if (idxCronista >= 0) return;
 
                     // ¿ALGUIEN lleva el grimorio? Nace a SU lado.
                     int eterno = ModContent.ItemType
@@ -305,39 +401,10 @@ namespace AethonMod.Content.NPCs
                                 new Color(196, 138, 255));
                         }
 
-                        // v6.157 — LA SOMBRA DE PRUEBAS nace JUNTO AL
-                        // CRONISTA (la letra: «el NPC test debe aparecer
-                        // junto con el cronista»): a 4 tiles a la derecha
-                        // (o a la izquierda si no hay suelo), con SU
-                        // bruma violeta de nacimiento.
-                        if (!testVive)
-                        {
-                            int txT = tx + (p.direction >= 0 ? 4 : -4);
-                            int sueloT = -1;
-                            for (int y = ty - 4; y < ty + 22 && y < Main.maxTilesY - 4; y++)
-                                if (WorldGen.SolidTile(txT, y)) { sueloT = y; break; }
-                            Vector2 posT = sueloT >= 0
-                                ? new Vector2(txT * 16f + 8f, sueloT * 16f)
-                                : p.Bottom;
-                            int idxT = NPC.NewNPC(p.GetSource_FromAI(),
-                                (int)posT.X, (int)posT.Y, tipoTest, 0, 0f, p.whoAmI);
-                            if (idxT >= 0 && idxT < Main.maxNPCs && Main.npc[idxT].active)
-                            {
-                                Main.npc[idxT].homeTileX = (int)(posT.X / 16f);
-                                Main.npc[idxT].homeTileY = (int)(posT.Y / 16f);
-                                Main.npc[idxT].netUpdate = true;
-                                if (!Main.dedServ)
-                                    for (int k = 0; k < 10; k++)
-                                    {
-                                        var d = Dust.NewDustPerfect(Main.npc[idxT].Center,
-                                            DustID.Shadowflame,
-                                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
-                                                Main.rand.NextFloat(-2.5f, -0.5f)),
-                                            100, new Color(110, 60, 180), 1.0f);
-                                        d.noGravity = true;
-                                    }
-                            }
-                        }
+                        // v6.158 — EL NPC TEST ya NO nace aquí: el
+                        // chequeo INDEPENDIENTE de arriba lo revive a
+                        // su lado al minuto siguiente (y cada minuto
+                        // si hace falta — la cura del «no aparece»).
                         return;   // UNO por mundo (el primero que lo lleve)
                     }
                 }
@@ -377,28 +444,69 @@ namespace AethonMod.Content.NPCs
 
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            // LA LEY DE LA CASA: el sprite lo dibuja VANILLA (la tira
-            // propia de 25 marcos, animada por el framer del Guide) —
-            // aquí solo EL AURA DEL ESCRIBA: la tinta del oficio respira
-            // a sus pies (2 motas suaves, el suspiro de la pluma).
-            if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 18f == 0f)
+            // v6.158 — EL MODELO DE PERSONAJE DE TERRARIA, DE VERDAD
+            // (la letra: «debes usar exactamente el modelo de
+            // personaje del terraria original ya que es el que usan
+            // todos los mods»). Main.PlayerRenderer — EL renderer que
+            // dibuja a todos los jugadores del mundo — dibuja al
+            // Player modelo ACTIVO de CuerpoDelCronista: la Robe del
+            // escriba sobre EL CUERPO LITERAL de un personaje de
+            // Terraria (los mismos brazos, la misma cabeza, el mismo
+            // andar del ciclo de PlayerFrame). El frame se anima AQUÍ:
+            // parado = frame 0; caminando = la banda 7..18 (el ciclo
+            // de andar de vanilla, avanzando por la velocidad real).
+            if (Main.netMode == NetmodeID.Server) return false;
+            try
             {
-                try
+                Player cuerpo = CuerpoDelCronista();
+                if (cuerpo != null && Main.PlayerRenderer != null)
                 {
-                    for (int k = 0; k < 2; k++)
+                    // LA ANIMACIÓN DEL ANDAR (el ciclo de PlayerFrame:
+                    // el frame de cuerpo del jugador de vanilla).
+                    float vel = Math.Abs(NPC.velocity.X);
+                    if (vel > 0.4f)
                     {
-                        Vector2 cuna = NPC.BottomLeft + new Vector2(
-                            Main.rand.NextFloat(NPC.width), Main.rand.NextFloat(-3f, 1f));
-                        Dust d = Dust.NewDustPerfect(cuna,
-                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
-                            new Vector2(Main.rand.NextFloat(-0.25f, 0.25f), -Main.rand.NextFloat(0.08f, 0.3f)),
-                            0, new Color(196, 138, 255), Main.rand.NextFloat(0.18f, 0.30f));
-                        d.noGravity = true;
+                        // la banda de andar (7..18): avanza con la
+                        // velocidad real del NPC — el paso del escriba.
+                        int f = 7 + ((int)(Main.GlobalTimeWrappedHourly *
+                            (4f + vel * 3.5f)) % 12);
+                        cuerpo.bodyFrame = new Rectangle(0, 56 * f, 40, 56);
+                        cuerpo.legFrame = cuerpo.bodyFrame;
                     }
+                    else
+                    {
+                        cuerpo.bodyFrame = new Rectangle(0, 0, 40, 56);
+                        cuerpo.legFrame = cuerpo.bodyFrame;
+                    }
+                    cuerpo.direction = NPC.direction;
+                    cuerpo.gravDir = 1f;
+                    cuerpo.fullRotation = 0f;
+                    cuerpo.wingFrame = 0;
+                    cuerpo.itemAnimation = 0;   // sin brazos de golpe
+
+                    // LA ILUMINACIÓN DEL MUNDO sobre el escriba (el
+                    // color del tile donde está — como los jugadores).
+                    Vector3 luz = Lighting.GetSubLight(NPC.Center);
+                    float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.10f, 1f);
+
+                    Vector2 pos = NPC.position - screenPos;
+                    Main.PlayerRenderer.DrawPlayer(Main.Camera, cuerpo, pos,
+                        0f, Vector2.Zero, 0f, lum);
+
+                    // LA PLUMA DORADA en la diadema (el sello de la
+                    // casa — el detalle del escriba).
+                    var plumaAsset = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/NPCs/ElCronista_Head",
+                        ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                    var pluma = plumaAsset.Value;
+                    spriteBatch.Draw(pluma,
+                        pos + new Vector2(NPC.width * 0.5f - 20f, -2f),
+                        null, Color.White * 0.85f * lum, 0f, Vector2.Zero,
+                        1.6f, SpriteEffects.None, 0f);
                 }
-                catch { }
             }
-            return true;   // VANILLA DIBUJA (la tira de 25 marcos propia)
+            catch { }
+            return false;   // el sprite fantasma NO se dibuja: el cuerpo es el Player
         }
 
         // ================================================================
@@ -553,19 +661,35 @@ namespace AethonMod.Content.NPCs
                         Poner(tipoArma, PrecioRequisito(plantilla, despertarReq, comprador));
                     }
                 }
-                // LOS MATERIALES DE LA FORMA (101-120: los grupos con
-                // alternativas — se vende la PRIMERA del grupo)
+                // LOS MATERIALES DEL PELDAÑO (v6.158 — la letra: «falta
+                // vender los materiales consagrados»): TODAS las
+                // alternativas de CADA grupo del peldaño (los grupos de
+                // la Forma 101-120 con sus opciones, y los grupos
+                // clásicos si el peldaño los trae — la letra de la
+                // escalera: el material del grupo cuenta como UNA
+                // opción pagada, CUALQUIERA de sus alternativas).
                 int[][] grupos = global::AethonMod.Content.Systems.DespertarGrimorio.GruposMaterialesDeLaForma(siguiente);
                 if (grupos != null)
                 {
                     foreach (int[] grupo in grupos)
                     {
                         if (grupo == null || grupo.Length == 0) continue;
-                        var plantilla = new Item(grupo[0]);
-                        int despertarReq = siguiente;
-                        long precioMat = Math.Max(100L,
-                            PrecioRequisito(plantilla, despertarReq, comprador) / 4);
-                        Poner(grupo[0], precioMat, 5);   // paquete de 5 (un tributo, no el festín entero)
+                        foreach (int tipoMat in grupo)
+                        {
+                            if (tipoMat <= 0) continue;
+                            var plantilla = new Item(tipoMat);
+                            int despertarReq = siguiente;
+                            long precioMat = Math.Max(100L,
+                                PrecioRequisito(plantilla, despertarReq, comprador) / 4);
+                            // paquete de 20 — LA CUOTA de los materiales
+                            // de la Forma (CantidadMaterialesDeLaForma):
+                            // comprar el tributo COMPLETO de una vez.
+                            int pila = 20;
+                            if (siguiente > global::AethonMod.Content.Systems.DespertarGrimorio.NivelCaza)
+                                pila = global::AethonMod.Content.Systems
+                                    .DespertarGrimorio.CantidadMaterialesDeLaForma(siguiente, 0);
+                            Poner(tipoMat, precioMat, Math.Max(1, pila));
+                        }
                     }
                 }
 
@@ -723,10 +847,22 @@ namespace AethonMod.Content.NPCs
         {
             // LA ESSENCIA COMO MONEDA: cuenta las pilas del inventario
             // (y las cobra — el patrón del SingleCoin de vanilla).
+            var moneda = new Terraria.GameContent.UI.CustomCurrencySingleCoin(
+                ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(),
+                999999L);
+            // v6.158 — LA MONEDA HABLA EN NOMBRE PROPIO (la letra: «en
+            // el precio de compra dice medalla de defensor aunque en
+            // realidad usa las esencias del eterno, pero debe decir
+            // esencias del eterno»): el CurrencyTextKey DEFAULT de la
+            // clase vanilla es «Currency.DefenderMedals» (el decompile
+            // lo confiesa: el campo público se queda con el texto de
+            // LAS MEDALLAS AJENAS). LA CURA: la propiedad pública se
+            // viste con la key de LA CASA (×3 idiomas) y su color —
+            // el mostrador dice «Esencias del Eterno».
+            moneda.CurrencyTextKey = "Mods.AethonMod.Cronista.Moneda";
+            moneda.CurrencyTextColor = new Color(196, 138, 255);
             IdMoneda = Terraria.GameContent.UI.CustomCurrencyManager
-                .RegisterCurrency(new Terraria.GameContent.UI.CustomCurrencySingleCoin(
-                    ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>(),
-                    999999L));
+                .RegisterCurrency(moneda);
         }
 
         public override void Unload()
@@ -768,7 +904,12 @@ namespace AethonMod.Content.NPCs
                     <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                 if (sello != null && !sello.Corrompido)
                 {
-                    sello.Corrompido = true;   // EL SELLO DEL ESCRIBA
+                    // v6.158 — LA CONSAGRACIÓN CENTRAL (la poción
+                    // vendida DUPLICA lo que hace — la letra: «cuando
+                    // se consagra una pocion… se duplica dependiendo
+                    // de lo que haga la pocion»).
+                    global::AethonMod.Content.Globals.CorruptoGlobalItem
+                        .Consagrar(item);
                 }
             }
             catch { }
