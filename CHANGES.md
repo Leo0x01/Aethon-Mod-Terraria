@@ -1,5 +1,24 @@
 # AethonMod — Historial de Cambios
 
+## v6.158 — LA MONEDA CON NOMBRE PROPIO, EL ESCRIBA DE VERDAD Y LA PALABRA QUE CORTA (release 452734027 · md5 c76b9467…)
+
+**Los 10 puntos de la sesión 30 (la tienda ya vivía; ahora los detalles):**
+
+1. **MONEDA**: el precio decía «Medalla de Defensor» (el default de `CustomCurrencySingleCoin` — el decompile lo confiesa); la moneda viste su key propia «Esencias del Eterno» ×3 idiomas + violeta.
+2. **MAPA**: «El Cronista El Cronista» = FullName (GivenName+TypeName duplicados); SetNPCNameList vacío → una sola vez.
+3. **NPC TEST**: el chequeo vivía tras el `return` de «el Cronista ya vive» → jamás corría en mundos guardados; ahora independiente cada minuto, renace junto al Cronista vivo.
+4. **CRONISTA**: EL MODELO DE PERSONAJE DE TERRARIA EXACTO — Player ACTIVO (`active=true` era la pieza que faltaba: el renderer tragaba Players inactivos en estados vacíos → invisible), Robe del escriba, andar real (frames 7-18 por velocity), iluminación del mundo (GetSubLight).
+5. **ANILLOS**: rehechos = COPIA LITERAL de AnillosSolaresHalo (el accesorio REAL: SigiloLib.SistemaAnillos tier7 · R=altura×0.46 · alpha 0.80 · lote propio); la v6.157 usaba la corona del agujero negro (el accesorio EQUIVOCADO).
+6. **STACK**: «pocion (consagrado) (3) (consagrado)» → se pela el (N) del final, se chequea el nombre limpio, el contador vuelve al final — una etiqueta.
+7. **POCIONES CONSAGRADAS**: `Consagrar()` central (altar+recetas+tienda): healLife×2 · healMana×2 · buffTime×2 EN EL ITEM (el flujo vanilla los lee directo — uso/QuickHeal/QuickBuff, SP/MP) + tooltip dorado ×3 idiomas. El costo de maná de armas JAMÁS.
+8. **MATERIALES**: TODAS las alternativas de cada grupo del peldaño, paquete 20 (la cuota).
+9. **ATAQUE BÁSICO = EL TAJO**: LA PALABRA CORTADA — el Equinoccio muere como básico; glifos rúnicos gigantes (RunasVacio+RunaVacia) barriendo 90° frente a la mira, estela violeta-dorado, sentido alternante (vaivén), golpe por sector con StrikeNPC; escala: radio 90→230px, letras 1→5 (nv 20/50/100/200), nv 100+ DOS TAJOS CRUZADOS.
+10. **TIENDA 120** intacta (viva desde .157).
+
+— oráculo 0/0 · build 0/0 (21.898.316 B) · GUARDIÁN ✔ · headless 0 excepciones · release 452734027 + CDN byte a byte (md5 c76b9467…).
+
+# AethonMod — Historial de Cambios
+
 ## v6.157 — LA TIENDA QUE NUNCA ESTUVO, EL ESCRIBA DE TINTA Y LA CARGA DEL DIOS (release 451910277 · md5 3370a154…)
 
 **Los 6 puntos de la sesión 29 (el usuario JUGÓ y la autopsia fue cruel):**
