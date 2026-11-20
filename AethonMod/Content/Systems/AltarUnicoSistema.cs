@@ -176,5 +176,45 @@ namespace AethonMod.Content.Systems
             ActivoX = tag.ContainsKey("altarUnicoX") ? tag.GetInt("altarUnicoX") : -1;
             ActivoY = tag.ContainsKey("altarUnicoY") ? tag.GetInt("altarUnicoY") : -1;
         }
+
+        /// <summary>v6.159 — LA CURA DE LA REGRESIÓN DEL MAPA (la
+        /// letra: «sobre el altar, parece que no aparece en el mapa,
+        /// esto es un error que ya había sido solucionado no entiendo
+        /// porque regresa»). LA AUTOPSIA: el faro (RepintarEnMapa, cada
+        /// 60 ticks — la cura v6.141) solo pinta si HayActivo; y el
+        /// ESCALAFÓN de promoción (PromoverSiHaceFalta) solo corría
+        /// desde CanDrop — AL PICAR el altar. Un mundo cuyo tag perdió
+        /// las coords (o cuyo mapa RENACIÓ con las dimensiones del
+        /// submundo — la cura del crash v6.138 borra TODAS las entradas
+        /// del mapa, incluida la del altar) quedaba SIN FARO y SIN
+        /// PROMOCIÓN: el altar existía en el mundo pero el mapa JAMÁS
+        /// lo aprendía. LA CURA: al cargar el mundo, si el tag no trae
+        /// coords, SE RE-ESCANEA el mundo (PromoverSiHaceFalta — el
+        /// mismo escalafón de siempre) y el faro vuelve a encenderse;
+        /// y si las coords TRAÍDAS apuntan a un altar MUERTO (recogido
+        /// con el juego cerrado), también se re-escanea. El altar
+        /// aprende al mapa OTRA VEZ, siempre.</summary>
+        public override void OnWorldLoad()
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                bool coordsVivas = false;
+                if (HayActivo)
+                {
+                    int tipoAltar = ModContent.TileType
+                        <global::AethonMod.Content.Tiles.AltarOfrendasTile>();
+                    for (int dx = 0; dx < 2 && !coordsVivas; dx++)
+                        for (int dy = 0; dy < 3 && !coordsVivas; dy++)
+                        {
+                            Tile t = Framing.GetTileSafely(ActivoX + dx, ActivoY + dy);
+                            if (t != null && t.HasTile &&
+                                t.TileType == (ushort)tipoAltar) coordsVivas = true;
+                        }
+                }
+                if (!coordsVivas) PromoverSiHaceFalta();
+            }
+            catch { }
+        }
     }
 }

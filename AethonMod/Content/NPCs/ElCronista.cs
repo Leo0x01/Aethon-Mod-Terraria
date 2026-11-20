@@ -81,11 +81,29 @@ namespace AethonMod.Content.NPCs
             if (_cuerpoVestido && _cuerpo != null) return _cuerpo;
             try
             {
-                _cuerpo = new Player();
-                _cuerpo.active = true;               // LA PIEZA QUE FALTABA
+                // v6.159 — EL PATRÓN DE VANILLA DE VERDAD (la letra:
+                // «el cronista no es compatible con los modelos
+                // originales de terraria, acaso no investigaste como
+                // otros mods usan esos modelos»). LA RESPUESTA DE LA
+                // INVESTIGACIÓN: los mods que muestran un personaje
+                // usan EL MISMO CAMINO QUE LA PREVIEW DEL MENÚ DE
+                // VANILLA (UICharacter, el decompile): un
+                // Player.SerializedClone() — UN CUERPO DE TERRARIA
+                // COMPLETO, con TODOS los caches de dibujado ya
+                // construidos por el propio motor — vestido después a
+                // mano. UN `new Player()` forjado (la v6.158) NO ES un
+                // personaje de Terraria compatible: le faltan los
+                // caches que el renderer espera. EL CLON es el modelo
+                // del personaje de Terraria EXACTO; el vestido del
+                // escriba (la Robe, la cabeza descubierta con el pelo
+                // de tinta y los ojos de runa) va ENCIMA.
+                _cuerpo = Main.LocalPlayer != null
+                    ? Main.LocalPlayer.SerializedClone()
+                    : new Player();
+                _cuerpo.active = true;
                 _cuerpo.dead = false;
-                _cuerpo.Male = true;                 // UN HOMBRE (la letra)
                 _cuerpo.name = "El Cronista";
+                _cuerpo.Male = true;                 // UN HOMBRE (la letra)
                 _cuerpo.skinVariant = 0;             // el cuerpo clásico
                 _cuerpo.hair = 7;                    // el pelo corto serio
                 _cuerpo.skinColor = new Color(216, 190, 150);  // pergamino
@@ -490,8 +508,17 @@ namespace AethonMod.Content.NPCs
                     float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.10f, 1f);
 
                     Vector2 pos = NPC.position - screenPos;
-                    Main.PlayerRenderer.DrawPlayer(Main.Camera, cuerpo, pos,
-                        0f, Vector2.Zero, 0f, lum);
+                    // v6.159 — LA CESTA DE VANILLA (UICharacter.DrawSelf):
+                    // CurrentPlayerOverride hace que los hooks del
+                    // renderer corran SOBRE EL CLON — la misma secuencia
+                    // de la preview del menú. SIN la cesta, los hooks de
+                    // PlayerDrawLayer leen Main.LocalPlayer y el clon se
+                    // dibuja con los estados del jugador real.
+                    using (new Main.CurrentPlayerOverride(cuerpo))
+                    {
+                        Main.PlayerRenderer.DrawPlayer(Main.Camera, cuerpo, pos,
+                            0f, Vector2.Zero, 0f, lum);
+                    }
 
                     // LA PLUMA DORADA en la diadema (el sello de la
                     // casa — el detalle del escriba).
@@ -630,6 +657,12 @@ namespace AethonMod.Content.NPCs
                     global::AethonMod.Content.Systems.DespertarGrimorio
                         .NivelDespertarSiguiente(comprador));
 
+                // v6.159 — EL DESPERTAR DEL COMPRADOR (se lee UNA vez,
+                // arriba: la escalera viva del bloque (1) y la cosecha
+                // del 120 lo comparten).
+                int despertarComprador = global::AethonMod.Content.Systems
+                    .DespertarGrimorio.NivelDe(comprador);
+
                 int slot = 0;
                 void Poner(int tipoItem, long precio, int pila = 1)
                 {
@@ -649,46 +682,58 @@ namespace AethonMod.Content.NPCs
                 //  (Las monedas y las esencias del festín NO se
                 //  venden: el oro es de los vivos y las esencias de
                 //  jefe se ganan cazando.)
+                //  v6.159 — AL DESPERTAR 120 NADA DE REQUISITOS (la
+                //  letra: «al llegar a despertar 120, que es el ultimo
+                //  despertar, en la tienda del cronista ya no deberia
+                //  aparecer nada, solo las pociones y la seleccion de
+                //  items aleatorio»): la escalera SE ACABÓ — ni armas
+                //  de requisito, ni materiales, ni MONEDAS de las
+                //  puertas. Solo las pociones (siempre) + la cosecha
+                //  aleatoria del bloque (3).
                 // ========================================================
-                int[] armas = global::AethonMod.Content.Systems.DespertarGrimorio.ArmasDe(siguiente);
-                if (armas != null)
+                bool escaleraViva = despertarComprador < 120;
+                if (escaleraViva)
                 {
-                    foreach (int tipoArma in armas)
+                    int[] armas = global::AethonMod.Content.Systems.DespertarGrimorio.ArmasDe(siguiente);
+                    if (armas != null)
                     {
-                        if (tipoArma <= 0) continue;
-                        int despertarReq = DespertarDelRequisito(tipoArma);
-                        var plantilla = new Item(tipoArma);
-                        Poner(tipoArma, PrecioRequisito(plantilla, despertarReq, comprador));
-                    }
-                }
-                // LOS MATERIALES DEL PELDAÑO (v6.158 — la letra: «falta
-                // vender los materiales consagrados»): TODAS las
-                // alternativas de CADA grupo del peldaño (los grupos de
-                // la Forma 101-120 con sus opciones, y los grupos
-                // clásicos si el peldaño los trae — la letra de la
-                // escalera: el material del grupo cuenta como UNA
-                // opción pagada, CUALQUIERA de sus alternativas).
-                int[][] grupos = global::AethonMod.Content.Systems.DespertarGrimorio.GruposMaterialesDeLaForma(siguiente);
-                if (grupos != null)
-                {
-                    foreach (int[] grupo in grupos)
-                    {
-                        if (grupo == null || grupo.Length == 0) continue;
-                        foreach (int tipoMat in grupo)
+                        foreach (int tipoArma in armas)
                         {
-                            if (tipoMat <= 0) continue;
-                            var plantilla = new Item(tipoMat);
-                            int despertarReq = siguiente;
-                            long precioMat = Math.Max(100L,
-                                PrecioRequisito(plantilla, despertarReq, comprador) / 4);
-                            // paquete de 20 — LA CUOTA de los materiales
-                            // de la Forma (CantidadMaterialesDeLaForma):
-                            // comprar el tributo COMPLETO de una vez.
-                            int pila = 20;
-                            if (siguiente > global::AethonMod.Content.Systems.DespertarGrimorio.NivelCaza)
-                                pila = global::AethonMod.Content.Systems
-                                    .DespertarGrimorio.CantidadMaterialesDeLaForma(siguiente, 0);
-                            Poner(tipoMat, precioMat, Math.Max(1, pila));
+                            if (tipoArma <= 0) continue;
+                            int despertarReq = DespertarDelRequisito(tipoArma);
+                            var plantilla = new Item(tipoArma);
+                            Poner(tipoArma, PrecioRequisito(plantilla, despertarReq, comprador));
+                        }
+                    }
+                    // LOS MATERIALES DEL PELDAÑO (v6.158 — la letra: «falta
+                    // vender los materiales consagrados»): TODAS las
+                    // alternativas de CADA grupo del peldaño (los grupos de
+                    // la Forma 101-120 con sus opciones, y los grupos
+                    // clásicos si el peldaño los trae — la letra de la
+                    // escalera: el material del grupo cuenta como UNA
+                    // opción pagada, CUALQUIERA de sus alternativas).
+                    int[][] grupos = global::AethonMod.Content.Systems.DespertarGrimorio.GruposMaterialesDeLaForma(siguiente);
+                    if (grupos != null)
+                    {
+                        foreach (int[] grupo in grupos)
+                        {
+                            if (grupo == null || grupo.Length == 0) continue;
+                            foreach (int tipoMat in grupo)
+                            {
+                                if (tipoMat <= 0) continue;
+                                var plantilla = new Item(tipoMat);
+                                int despertarReq = siguiente;
+                                long precioMat = Math.Max(100L,
+                                    PrecioRequisito(plantilla, despertarReq, comprador) / 4);
+                                // paquete de 20 — LA CUOTA de los materiales
+                                // de la Forma (CantidadMaterialesDeLaForma):
+                                // comprar el tributo COMPLETO de una vez.
+                                int pila = 20;
+                                if (siguiente > global::AethonMod.Content.Systems.DespertarGrimorio.NivelCaza)
+                                    pila = global::AethonMod.Content.Systems
+                                        .DespertarGrimorio.CantidadMaterialesDeLaForma(siguiente, 0);
+                                Poner(tipoMat, precioMat, Math.Max(1, pila));
+                            }
                         }
                     }
                 }
@@ -732,9 +777,16 @@ namespace AethonMod.Content.NPCs
                 //  mostrador — el Cronista no cambia de humor a media
                 //  partida) y se vende EN ESENCIAS (la moneda de la
                 //  casa): el precio de la casa, la rareza manda.
+                //  v6.159 — EL RELOJ DE LOS 10 MINUTOS (la letra: «al
+                //  menos 10 items aleatorios que cambian cada 10
+                //  minutos»): la semilla ya NO es el día — es EL
+                //  INTERVALO de 10 minutos del reloj del mundo
+                //  (cada 36000 ticks de Main.time, el día completo
+                //  son 54000: un día trae ~1,5 intervalos). El
+                //  mostrador del 120 SE RENUEVA cada 10 minutos de
+                //  juego — y el precio de cada artículo es SU VALOR
+                //  EN ESENCIAS (la rareza manda: la casa de siempre).
                 // ========================================================
-                int despertarComprador = global::AethonMod.Content.Systems
-                    .DespertarGrimorio.NivelDe(comprador);
                 if (despertarComprador >= 120)
                 {
                     // LA COSECHA DE LAS TIENDAS AJENAS (la API real
@@ -792,11 +844,16 @@ namespace AethonMod.Content.NPCs
                     // mostrador en todas las máquinas)
                     if (cosecha.Count > 0)
                     {
-                        // LA SEMILLA DEL DÍA: el reloj del mundo
-                        // (Main.time avanza 0→dayLength cada día) — el
-                        // número de días completos + el ID del mundo:
-                        // mismo día, mismo mostrador.
-                        int semillaDia = (int)(Main.time / Main.dayLength)
+                        // v6.159 — LA SEMILLA DE LOS 10 MINUTOS (la
+                        // letra: «items aleatorios que cambian cada 10
+                        // minutos»): el reloj del mundo partido en
+                        // intervalos de 36000 ticks (= 10 minutos de
+                        // juego; un día completo son 54000) + el ID
+                        // del mundo: MISMO intervalo = mismo
+                        // mostrador en todas las máquinas; al girar el
+                        // intervalo, LA COSECHA SE RENUEVA.
+                        long intervalo10min = (long)(Main.time / 36000f);
+                        int semillaDia = (int)(intervalo10min & 0x7FFFFFFFL)
                             + (int)Main.worldID;
                         int cuantos = Math.Min(10, cosecha.Count);
                         for (int k = 0; k < cuantos; k++)
@@ -867,7 +924,43 @@ namespace AethonMod.Content.NPCs
 
         public override void Unload()
         {
+            // v6.159 — el detour del slot de monedas se suelta con el
+            // mod (el patrón de SubmundoGrimorio.BloquearGuardadoMapa).
+            Terraria.UI.On_ItemSlot.PickItemMovementAction -= AbrirElSlotDeMonedas;
             IdMoneda = -1;
+        }
+
+        // ================================================================
+        //  v6.159 — LAS ESENCIAS EN LA SECCIÓN DE MONEDAS (la letra:
+        //  «tambien debes permitir colocar las esencias del eterno en
+        //  la seccion de monedas y en la seccion de municiones»).
+        //  LA AUTOPSIA (el decompile de ItemSlot.PickItemMovementAction):
+        //  el slot de monedas (context 1) tiene la lista HARD-CODED de
+        //  vanilla — SOLO los tipos 71-74 (cobre→platino); ningún set
+        //  de mod lo abre. LA CURA: el DETOUR de la casa (el patrón de
+        //  BloquearGuardadoMapa) — si el item en el cursor ES la
+        //  esencia del Eterno y el contexto es EL SLOT DE MONEDAS, el
+        //  movimiento se PERMITE (result = 0, «colocar»); todo lo
+        //  demás pasa INTACTO por la vía de vanilla.
+        // ================================================================
+        private delegate int origPick(Item[] inv, int context, int slot, Item checkItem);
+
+        private int AbrirElSlotDeMonedas(
+            Terraria.UI.On_ItemSlot.orig_PickItemMovementAction orig,
+            Item[] inv, int context, int slot, Item checkItem)
+        {
+            int accion = orig(inv, context, slot, checkItem);
+            try
+            {
+                if (context != 1) return accion;   // 1 = LA SECCIÓN DE MONEDAS
+                if (checkItem == null || checkItem.IsAir) return accion;
+                int esencia = ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                if (checkItem.type == esencia && accion != 0)
+                    return 0;   // la esencia ENTRA al slot de monedas
+            }
+            catch { }
+            return accion;   // todo lo demás: la vía de vanilla, intacta
         }
     }
 

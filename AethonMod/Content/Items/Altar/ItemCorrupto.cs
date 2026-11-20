@@ -69,6 +69,19 @@ namespace AethonMod.Content.Items.Altar
             Item.useAnimation = 12;
             Item.UseSound = SoundID.Item4;
             Item.autoReuse = true;          // mantener clic = comer la pila
+
+            // v6.159 — LA ESENCIA EN LA SECCIÓN DE MUNICIÓN (la letra:
+            // «tambien debes permitir colocar las esencias del eterno
+            // en la seccion de monedas y en la seccion de municiones»):
+            // FitsAmmoSlot (el decompile) acepta cualquier item con
+            // ammo > 0 y sin notAmmo. La esencia lleva una CATEGORÍA
+            // PROPIA (9159 — el número de la casa): NINGUNA arma de
+            // vanilla ni de los mods la pide, así que puede VIVIR en
+            // el cartucho sin que nadie la gaste (cosmético de
+            // organización: las armas que la exigen la leen del
+            // inventario entero, como siempre).
+            Item.ammo = 9159;               // la categoría propia de la casa
+            Item.notAmmo = false;
         }
 
         /// <summary>El portador PUEDE comerla siempre (el festín es

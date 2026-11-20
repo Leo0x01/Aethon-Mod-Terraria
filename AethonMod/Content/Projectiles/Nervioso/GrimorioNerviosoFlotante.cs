@@ -118,10 +118,13 @@ namespace AethonMod.Content.Projectiles.Nervioso
         }
 
         /// <summary>¿Hay ya una sombra cazando para este libro? (una presa
-        /// por vez — el festín del Nervioso es un arte individual).</summary>
+        /// por vez — el festín del Nervioso es un arte individual).
+        /// v6.159 — la sombra es LA ACTUAL (SombraPaginaProjectile — la
+        /// del arma: la vieja SombraPaginaCaza ya no se usa).</summary>
         private bool SombraActiva()
         {
-            int tipo = ModContent.ProjectileType<SombraPaginaCaza>();
+            int tipo = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile pr = Main.projectile[i];
@@ -525,8 +528,16 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // sus vecinos NO lanza sombras nuevas («solo vigilar a
                 // los npc», la letra .118) — la sombra que ya había
                 // salido termina su comida en paz.
+                // v6.159 — EL ETERNO NO ESPERA (la letra: «el grimorio
+                // cuando esta en estado de caza, no esta cazando nada»):
+                // el margen de 5 s «sin atacar» bloqueaba la caza del
+                // Eterno TODO el tiempo en plena batalla — el libro del
+                // Eterno caza CON su portador (SU festín es suyo); el
+                // Nervioso de prueba conserva su regla de ausencia.
+                bool esEternoCaza = TipoLibro == ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.GrimoireEternal>();
                 if (!enPueblo && autoridad && t % TICKS_BUSCA == 0f &&
-                    !EstadoDelLibro.AtacoReciente())
+                    (esEternoCaza || !EstadoDelLibro.AtacoReciente()))
                 {
                     // ========================================================
                     //  v6.153 — LAS SOMBRAS DE LA PÁGINA DEL ETERNO (la
@@ -582,8 +593,20 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         NPC presa = PresaCercana();
                         if (presa != null)
                         {
+                            // v6.159 — LA SOMBRA ACTUAL (la letra: «el
+                            // grimorio del eterno no esta usando la
+                            // sombra de la pagina actual, sigue usando
+                            // la sombra de la pagina vieja para todo»):
+                            // la sombra del libro ES LA DEL ARMA —
+                            // SombraPaginaProjectile (la columna verlet
+                            // completa: emerge, caza, muerde y absorbe
+                            // — la MISMA de SombraDeLaPagina). La
+                            // SombraPaginaCaza de la v6.50.91 (el
+                            // hilillo simple) MUERE como cuerpo de
+                            // caza: la casa YA NO usa la vieja.
                             Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
-                                Vector2.Zero, ModContent.ProjectileType<SombraPaginaCaza>(),
+                                Vector2.Zero, ModContent.ProjectileType
+                                    <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>(),
                                 0, 0f, Projectile.owner, presa.whoAmI + 1, 0f, 0f);
                             Sonar(SoundID.Item122.WithPitchOffset(-0.3f).WithVolumeScale(0.6f), Projectile.Center);
                         }

@@ -490,7 +490,7 @@ namespace AethonMod.Content.UI
                 {
                     new string[][]
                     {
-                        new[] { "SecAltar", "Altar1", "Altar2", "Altar3", "Altar4", "Altar5" },
+                        new[] { "SecAltar", "Altar1", "Altar2", "Altar3", "Altar4", "Altar5", "Altar5b" },
                         new[] { "SecInterior", "Interior1", "Interior2", "Interior3", "Interior4" },
                         new[] { "SecOleadas", "Oleadas1", "Oleadas2", "Oleadas3", "Oleadas4" },
                         new[] { "SecGrimorio", "Grimorio1", "Grimorio2", "Grimorio3", "Grimorio4", "Grimorio5" },
@@ -501,17 +501,34 @@ namespace AethonMod.Content.UI
                     },
                     new string[][]
                     {
-                        // v6.147 — LA PÁGINA DERECHA ES EL COMPENDIO DEL
-                        // ETERNO (la letra: «el lore es el documento
-                        // Aethon_El_Compendio_del_Eterno…, ya lo puedes
-                        // integrar al juego»): las CUATRO PARTES del
-                        // documento canónico viven aquí — el prólogo con
-                        // su pregunta, el Devorador de Finales, el
-                        // Sistema del Pacto, el Ciclo del Portador y La
-                        // Respuesta. Las mecánicas (despertar·ataques·
-                        // forma·auras) se mudan a la página IZQUIERDA
-                        // con sus hermanas de siempre.
+                        // v6.159 — LA PÁGINA DERECHA ES EL CÓDEX DEL ETERNO
+                        // (la letra: «no veo que este integrado el lore
+                        // completo y bien estructurado como te lo di
+                        // antes, te volvere a dar el lore, intenta
+                        // intergrarlo completo»): EL DOCUMENTO NUEVO DEL
+                        // USUARIO (Aethon_Codex_del_Eterno.docx) — el
+                        // prólogo, los ONCE capítulos y el epílogo,
+                        // VERBATIM, cada uno una sección que se abre con
+                        // el Despertar (el canon SE GANA: 0/5/12/20/30/
+                        // 38/45/55/65/75/85/95/110). El Compendio viejo
+                        // (LoreI..V) queda debajo como EL ARCHIVO DE LA
+                        // CASA — las dos escrituras conviven.
                         new[] { "SecLore", "LoreEpigrafe0", "LoreIntro" },
+                        new[] { "CodexPrologoTit", "CodexPrologoP0", "CodexPrologoP1", "CodexPrologoP2", "CodexPrologoP3" },
+                        new[] { "CodexITit", "CodexIP0", "CodexIP1", "CodexIP2", "CodexIP3" },
+                        new[] { "CodexIITit", "CodexIIP0", "CodexIIP1", "CodexIIP2", "CodexIIP3" },
+                        new[] { "CodexIIITit", "CodexIIIP0", "CodexIIIP1", "CodexIIIP2", "CodexIIIP3" },
+                        new[] { "CodexIVTit", "CodexIVP0", "CodexIVP1", "CodexIVP2", "CodexIVP3", "CodexIVP4" },
+                        new[] { "CodexVTit", "CodexVP0", "CodexVP1", "CodexVP2", "CodexVP3" },
+                        new[] { "CodexVITit", "CodexVIP0", "CodexVIP1", "CodexVIP2", "CodexVIP3" },
+                        new[] { "CodexVIITit", "CodexVIIP0", "CodexVIIP1", "CodexVIIP2", "CodexVIIP3", "CodexVIIP4", "CodexVIIP5", "CodexVIIP6", "CodexVIIP7" },
+                        new[] { "CodexVIIITit", "CodexVIIIP0", "CodexVIIIP1", "CodexVIIIP2", "CodexVIIIP3" },
+                        new[] { "CodexIXTit", "CodexIXP0", "CodexIXP1", "CodexIXP2", "CodexIXP3" },
+                        new[] { "CodexXTit", "CodexXP0", "CodexXP1", "CodexXP2", "CodexXP3", "CodexXP4", "CodexXP5" },
+                        new[] { "CodexXITit", "CodexXIP0", "CodexXIP1", "CodexXIP2", "CodexXIP3" },
+                        new[] { "CodexEpilogoTit", "CodexEpilogoP0", "CodexEpilogoP1", "CodexEpilogoP2", "CodexEpilogoP3" },
+                        // EL ARCHIVO VIEJO DE LA CASA (el Compendio de
+                        // siempre, bajo el Codex nuevo).
                         new[] { "LoreSecI", "LoreEpigrafe1", "LoreI_Loquedevora",
                                 "LoreI_LaCuarentenadeTer", "LoreI_ElSellado" },
                         new[] { "LoreSecII", "LoreEpigrafe2", "LoreII_ElNivel",
@@ -520,12 +537,6 @@ namespace AethonMod.Content.UI
                                 "LoreIII_ElGrimoriodelEter", "LoreIII_ElAltar" },
                         new[] { "LoreSecIV", "LoreIV_Laimposibilidaddel",
                                 "LoreIV_Laentidadinmortal", "LoreIV_Elaburrimientoyla" },
-                        // v6.149 — LORE V: EL CANON ASSENTADO (la letra:
-                        // «con el nuevo lore que te di, integralo al mod …
-                        // e informar de ello en el libro de informacion»):
-                        // la Ira, el Pilar que cuenta, el Sellado y sus
-                        // funerales, los compañeros, las sombras y la
-                        // respuesta final — las piezas nuevas del Compendio.
                         new[] { "LoreSecV", "LoreV_LaIra",
                                 "LoreV_ElPilar", "LoreV_ElSellado",
                                 "LoreV_Loscompaneros", "LoreV_Lassombras",
@@ -649,7 +660,19 @@ namespace AethonMod.Content.UI
         /// (el epígrafe) SIEMPRE se ven; el CUERPO se abre al umbral.
         /// Los umbrales por índice de sección del lore (II+): el canon
         /// SE GANA con el despertar.</summary>
-        private static readonly int[] UmbralLore = { 0, 0, 10, 25, 40, 60, 80 };
+        private static readonly int[] UmbralLore =
+        {
+            // [0] SecLore y [1] el prólogo: SIEMPRE
+            0, 0,
+            // v6.159 — EL CÓDEX NUEVO (13 capítulos): el canon SE GANA —
+            // el prólogo al llegar, los capítulos I..XI escalonados y el
+            // epílogo AL BORDE del 120 (el borrador infinito se lee al
+            // final del camino).
+            0, 5, 12, 20, 30, 38, 45, 55, 65, 75, 85, 95, 110,
+            // EL ARCHIVO VIEJO (LoreI..V de la casa): siempre abierto —
+            // lo que ya se leyó no se vuelve a sellar.
+            0, 0, 0, 0, 0,
+        };
 
         /// <summary>El Despertar del portador local (para el lore).</summary>
         private static int DespertarLocal()

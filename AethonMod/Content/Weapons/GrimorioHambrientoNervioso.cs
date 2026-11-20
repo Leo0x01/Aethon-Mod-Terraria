@@ -488,11 +488,21 @@ namespace AethonMod.Content.Weapons
         /// mientras las almas suben al libro. Null = no hay festín.</summary>
         internal static Vector2? FocoDelFestin(int dueño)
         {
-            int tipo = ModContent.ProjectileType<SombraPaginaCaza>();
+            // v6.159 — la sombra es LA ACTUAL (SombraPaginaProjectile —
+            // la del arma; la vieja SombraPaginaCaza ya no se usa). Y
+            // también cuenta el festín de LAS SOMBRAS DEL ETERNO (las
+            // individuales de la caza del Eterno): mientras alguna
+            // muerde, el libro la mira.
+            int tipo = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+            int tipoEterno = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile pr = Main.projectile[i];
-                if (pr == null || !pr.active || pr.type != tipo || pr.owner != dueño)
+                if (pr == null || !pr.active || pr.owner != dueño)
+                    continue;
+                if (pr.type != tipo && pr.type != tipoEterno)
                     continue;
                 int idx = (int)pr.ai[0] - 1;
                 NPC presa = idx >= 0 && idx < Main.maxNPCs ? Main.npc[idx] : null;
@@ -623,9 +633,24 @@ namespace AethonMod.Content.Weapons
                 int sinAtaque = esEternoCaza ? 7200 : TICKS_SIN_ATAQUE_LIBRO;  // 2 min vs 30 min
                 if (h >= umbral)
                 {
+                    // v6.159 — EL ETERNO SALE A CAZAR DE VERDAD (la
+                    // letra: «el grimorio cuando esta en estado de
+                    // caza, no esta cazando nada, deberia cazar usando
+                    // la sombra de la pagina que tenemos»). LA CAUSA:
+                    // la puerta exigía 5 s de QUIETUD TOTAL o 2 min SIN
+                    // ATACAR — y cada tajo del jugador reiniciaba el
+                    // reloj: un portador ACTIVO (peleando, moviéndose)
+                    // JAMÁS veía la caza. LA CURA: para el ETERNO, la
+                    // puerta es SOLO EL HAMBRE (el 20% ya leído arriba)
+                    // — el libro hambriento SALE A CAZAR aunque su
+                    // portador esté en plena batalla (SU festín es
+                    // SUYO; la quietud y la ausencia siguen siendo la
+                    // vía del Nervioso de prueba, que NO se toca).
+                    bool saleElEterno = esEternoCaza;
                     bool quieto = !player.dead && player.velocity.LengthSquared() < 0.02f;
                     e.TicksQuieto = quieto ? e.TicksQuieto + 1 : 0;
-                    if (e.TicksQuieto >= quietudSalida ||
+                    if (saleElEterno ||
+                        e.TicksQuieto >= quietudSalida ||
                         e.TicksSinAtaqueLibro >= sinAtaque)
                     {
                         e.TicksQuieto = 0;

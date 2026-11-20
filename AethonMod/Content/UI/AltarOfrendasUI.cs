@@ -942,26 +942,16 @@ namespace AethonMod.Content.UI
                     x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
             }
 
-            // ── LA SECCIÓN 3 — CÓMO CONSEGUIR ESENCIAS (la mesa REAL del
-            //    juego: criaturas 0,1% · jefes 1-10 · ¡las OLEADAS DE
-            //    HAMBRE suben la probabilidad! — tal como caen de
-            //    verdad, ver EsenciaCorruptaDrops.cs y OleadaNPC). ──
-            cy = TituloSeccion(sb, Language.GetTextValue(Clave("ComoTitulo")),
-                x, cy, w, TintaApagado * 1.25f);
-            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoCriaturas")),
-                x + 24f, cy, w - 48f, 0.70f, TintaTexto);
-            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoJefes")),
-                x + 24f, cy, w - 48f, 0.70f, TintaTexto);
-            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoOleadas")),
-                x + 24f, cy, w - 48f, 0.70f, TintaVioleta);
-            // v6.93 — LA LEY DE LAS ESTATUAS (la letra: «también en el
-            //    altar tienes que decir que si el grimorio mata criatura
-            //    que salen de una estatua su hambre aumenta»): la línea
-            //    de la mesa de las estatuas, junto a las demás verdades.
-            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoEstatuas")),
-                x + 24f, cy, w - 48f, 0.70f, new Color(235, 130, 120));
-            cy = LineaMedida(sb, Language.GetTextValue(Clave("ComoNota")),
-                x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
+            // ── v6.159 — LA SECCIÓN «CÓMO CONSEGUIR ESENCIAS» MUERE DEL
+            //    PANEL (la letra: «ya tenemos al libro de informacion,
+            //    podemos poner toda la informacion que tiene la ventana
+            //    del atlar en el libro y de esa forma liberar espacio
+            //    para lo importante»): TODO el contenido informativo
+            //    (la mesa de las esencias: criaturas 0,1% · jefes 1-10 ·
+            //    las oleadas · LAS ESTATUAS · la nota) vive AHORA en EL
+            //    LIBRO DEL ETERNO (página izquierda, SecAltar/Altar5b).
+            //    El panel queda para LO VIVO: el estado del slot, el
+            //    sello y la puerta del mundo interior. ──
             cy += 6f;
 
             // ── LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el grimorio

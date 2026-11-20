@@ -244,10 +244,34 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     oro * (0.55f * alfa),
                     new Vector2(_radio * 0.86f, 13f), ang);
 
-                // === (3) LOS GLIFOS DEL FILO: las letras de la palabra ===
-                // LA RUNA DE LA CASA (OrbitaLib.RunaVacia + el alfabeto
-                // RunasVacio — la misma escritura de las coronas)
-                // GIGANTE, repartida por el filo, girando con el barrido.
+                VFXCore.FlushAdditive(null, false);
+            }
+            catch
+            {
+                VFXCore.CerrarLoteSiAbierto();
+            }
+            // v6.159 — LA CURA DEL LOG (la excepción silenciosa: «Draw
+            // was called, but Begin has not yet been called» desde
+            // OrbitaLib.RunaVacia ← PalabraCortadaProjectile.PreDraw):
+            // RunaVacia dibuja DIRECTO al spriteBatch de vanilla — y
+            // este PreDraw corría con el lote de vanilla CERRADO por
+            // CerrarLoteSiAbierto (el contrato de la casa: las runas
+            // viven en el lote ABIERTO del llamador). LA CURA: la
+            // pasada de los glifos va DESPUÉS de cerrar el lote del
+            // tajo, con el lote de vanilla REABIERTO (ReabrirLote-
+            // Vanilla) — la MISMA secuencia que usan las coronas de
+            // OrbitaLib en todos los renders de la casa.
+            VFXCore.ReabrirLoteVanilla();
+
+            // === (3) LOS GLIFOS DEL FILO: las letras de la palabra ===
+            // (pasada propia, lote vanilla abierto — el contrato de
+            // OrbitaLib.RunaVacia: dibuja en el lote de SU llamador)
+            try
+            {
+                float t = Main.GlobalTimeWrappedHourly;
+                Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                Color tinta = new Color(120, 66, 190);
+                Color oro = new Color(255, 208, 120);
                 for (int g = 0; g < _glifos; g++)
                 {
                     float fr = 0.30f + 0.62f * (g + 0.5f) / _glifos;
@@ -260,14 +284,8 @@ namespace AethonMod.Content.Projectiles.Grimorio
                         OrbitaLib.RunasVacio[letra],
                         cuerpo, Color.White * 0.65f, gs, 0.85f * alfa);
                 }
-
-                VFXCore.FlushAdditive(null, false);
             }
-            catch
-            {
-                VFXCore.CerrarLoteSiAbierto();
-            }
-            VFXCore.ReabrirLoteVanilla();
+            catch { }
             return false;
         }
     }
