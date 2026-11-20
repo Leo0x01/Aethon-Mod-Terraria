@@ -1,5 +1,24 @@
 # AethonMod — Historial de Cambios
 
+## v6.159 — LOS PERSONAJES DE TERRARIA DE VERDAD, LA CAZA VIVA Y EL CÓDEX COMPLETO (release 452851386 · md5 5cbcb72f…)
+
+**La regla de oro nace: la versión de GitHub siempre es la correcta** (sandbox ← GitHub antes de trabajar; GitHub ← todo al terminar).
+
+1. **NPC TEST + CRONISTA**: el patrón de la preview del menú de vanilla (UICharacter: `SerializedClone` + `CurrentPlayerOverride` + DrawPlayer oficial). El Test era una silueta shadow=0.65 (invisible); ahora es la copia viva del jugador. El Cronista: clon vestido de escriba.
+2. **LA PALABRA CORTADA**: la excepción del log (RunaVacia con el lote cerrado) — glifos en pasada propia tras ReabrirLoteVanilla.
+3. **SOMBRA ACTUAL EN TODO**: spawner + SombraActiva + FocoDelFestin migrados a SombraPaginaProjectile (la del arma).
+4. **CAZA VIVA**: el Eterno sale SOLO con hambre ≥20% (antes exigía 5s quieto o 2 min sin atacar — imposible en batalla); −1% hambre/presa, sin loot.
+5. **EL TRÍO DEL ETERNO**: el arma de las 3 armas — insertar (clic der), extraer (clic der vacío), dispara SUS proyectiles por turnos; ItemIO ×2 vías.
+6. **TIENDA 120**: cero requisitos; pociones + 10 aleatorios que cambian CADA 10 MIN (intervalo del reloj del mundo).
+7. **ESENCIAS EN MONEDAS + MUNICIÓN**: detour de PickItemMovementAction (coin slot hard-coded 71-74) + ammo=9159 propia.
+8. **ALTAR-MAPA**: OnWorldLoad re-escanea si el tag no trae altar vivo (la promoción solo corría al picar; el renacer del mapa v6.138 borraba las entradas).
+9. **CÓDEX COMPLETO**: el docx del usuario verbatim ×3 idiomas — Prólogo + 11 capítulos + Epílogo, desbloqueo 0/5/12/20/30/38/45/55/65/75/85/95/110.
+10. **ALTAR LIBERADO**: la sección «cómo conseguir esencias» muere del panel (vive en el libro Altar5+5b).
+
+— oráculo 0/0 · build 0/0 (21.924.011 B) · GUARDIÁN ✔ · headless 0 excepciones · release 452851386 + CDN byte a byte (md5 5cbcb72f…).
+
+# AethonMod — Historial de Cambios
+
 ## v6.158 — LA MONEDA CON NOMBRE PROPIO, EL ESCRIBA DE VERDAD Y LA PALABRA QUE CORTA (release 452734027 · md5 c76b9467…)
 
 **Los 10 puntos de la sesión 30 (la tienda ya vivía; ahora los detalles):**
