@@ -96,51 +96,46 @@ namespace AethonMod.Content.Weapons.Investigaciones
             // EL CLIC DERECHO NO dispara (es insertar/extraer).
             if (player.altFunctionUse == 2) return false;
 
-            // LA RANURA DEL TURNO: la primera ARMADA desde el turno
-            // actual (si una ranura está libre, se salta).
-            int primera = -1;
-            for (int k = 0; k < 3; k++)
+            // v6.160 — LAS TRES A LA VEZ (la letra: «es al mismo tiempo,
+            // las 3 armas se combinan y atacan a la vez»): TODAS las
+            // ranuras armadas disparan EN EL MISMO INSTANTE — el
+            // disparo COMBINADO del trío (cada arma con SU proyectil,
+            // SU daño y SU velocidad; la combinación ES el arma).
+            bool alguna = false;
+            for (int idx = 0; idx < 3; idx++)
             {
-                int idx = (Turno + k) % 3;
-                Item arma = Ranuras[idx];
-                if (arma == null || arma.IsAir || arma.shoot <= 0) continue;
-                primera = idx;
-                break;
+                Item armaTurno = Ranuras[idx];
+                if (armaTurno == null || armaTurno.IsAir || armaTurno.shoot <= 0) continue;
+                alguna = true;
+
+                // EL PROYECTIL DE ESA ARMA, con SUS números: el daño se
+                // recalcula por el pipeline de vanilla del JUGADOR con ESA
+                // arma (GetWeaponDamage respeta SU clase de daño y los
+                // buffs del portador), el knockback igual, y la velocidad
+                // de salida es la SUYA.
+                int dano = player.GetWeaponDamage(armaTurno);
+                float kb = player.GetWeaponKnockback(armaTurno, armaTurno.knockBack);
+                float vel = MathHelper.Clamp(armaTurno.shootSpeed, 4f, 24f);
+                Vector2 mira = Vector2.Normalize(Main.MouseWorld - player.MountedCenter);
+                if (mira.HasNaNs()) mira = new Vector2(player.direction, 0f);
+
+                // LA COMBINACIÓN: cada arma dispara con UNA PEQUEÑA CUÑA
+                // de ángulo (−8° · 0° · +8°) — el abanico del trío que
+                // nace del mismo punto: tres voces, una frase.
+                float cuña = (idx - 1) * 0.14f;
+                Vector2 velReal = mira.RotatedBy(cuña) * vel;
+
+                var srcTurno = new Terraria.DataStructures.EntitySource_ItemUse(player, armaTurno);
+                Projectile.NewProjectile(srcTurno, player.MountedCenter + mira * 24f,
+                    velReal, armaTurno.shoot, dano, kb, player.whoAmI);
             }
-            if (primera < 0)
+            if (!alguna && Main.myPlayer == player.whoAmI)
             {
                 // SIN ARMAS INSERTADAS: el atril está vacío — la voz del
-                // libro lo dice una vez (no spamea).
-                if (Main.myPlayer == player.whoAmI)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioVacio"),
-                        new Color(255, 170, 130));
-                return false;
+                // libro lo dice (no spamea).
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioVacio"),
+                    new Color(255, 170, 130));
             }
-
-            Item armaTurno = Ranuras[primera];
-
-            // EL PROYECTIL DE ESA ARMA, con SUS números: el daño se
-            // recalcula por el pipeline de vanilla del JUGADOR con ESA
-            // arma (GetWeaponDamage respeta SU clase de daño y los
-            // buffs del portador), el knockback igual, y la velocidad
-            // de salida es la SUYA.
-            int dano = player.GetWeaponDamage(armaTurno);
-            float kb = player.GetWeaponKnockback(armaTurno, armaTurno.knockBack);
-            float vel = MathHelper.Clamp(armaTurno.shootSpeed, 4f, 24f);
-            Vector2 mira = Vector2.Normalize(Main.MouseWorld - player.MountedCenter);
-            if (mira.HasNaNs()) mira = new Vector2(player.direction, 0f);
-            Vector2 velReal = mira * vel;
-
-            // LA VOZ DE ESA ARMA: disparamos su proyectil con SU tipo,
-            // SU sonido y SU uso (el patrón de la casa: NewProjectile
-            // directo — el source lleva EL ARMA DEL TURNO).
-            var srcTurno = new Terraria.DataStructures.EntitySource_ItemUse(player, armaTurno);
-            Projectile.NewProjectile(srcTurno, player.MountedCenter + mira * 24f,
-                velReal, armaTurno.shoot, dano, kb, player.whoAmI);
-
-            // EL TURNO AVANZA a la SIGUIENTE ranura con arma (la del
-            // disparo cede su sitio — el relevo del trío).
-            Turno = (primera + 1) % 3;
             return false;   // nada de vanilla: el disparo fue nuestro
         }
 

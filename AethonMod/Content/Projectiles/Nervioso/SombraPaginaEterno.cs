@@ -118,12 +118,18 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 Projectile.velocity = Vector2.Zero;
             }
 
-            // EL DRENAJE DE LA LETRA (solo AUTORIDAD): 1% de la vida
-            // MÁXIMA por segundo — el golpe NUNCA mata: a 1 de vida, LA
-            // ABSORCIÓN (la sombra se la come entera y VUELVE al libro)
+            // EL DRENAJE DE LA LETRA NUEVA (v6.160, solo AUTORIDAD): «1
+            // más la suma del daño de invocación total y el daño magico
+            // total menos el 5% de la vida maxima del jugador mas el 1%
+            // del mana total» — LA FÓRMULA DE LA CASA PARA TODAS LAS
+            // SOMBRAS DE LA PÁGINA DEL ETERNO (y «deben hacer un poco
+            // mas de daño», decía la letra: la vieja era un 1% plano de
+            // lifeMax — un hilo; la nueva lee EL PODER REAL del
+            // portador). El golpe NUNCA mata: a 1 de vida, LA ABSORCIÓN
+            // (la sombra se la come entera y VUELVE al libro).
             if (autoridad && t > 10f && t % CADENCIA == 0f)
             {
-                int golpe = Math.Max(1, (int)Math.Ceiling(presa.lifeMax * 0.01f));
+                int golpe = GolpeDeLaSombra(Main.player[Projectile.owner], presa);
                 if (presa.life - golpe <= 1)
                 {
                     // LA ABSORCIÓN — el festín del Eterno: sin loot, sin
@@ -150,11 +156,79 @@ namespace AethonMod.Content.Projectiles.Nervioso
             }
         }
 
+        // ================================================================
+        //  v6.160 — LA FÓRMULA DE LAS SOMBRAS DEL ETERNO (la letra):
+        //  «el nuevo calculo de daño sera el siguiente, 1 mas la suma
+        //  del daño de invocacion total y el daño magico total menos el
+        //  5% de la vida maxima del jugador mas el 1% del mana total,
+        //  ese sera el nuevo calculo de daño» — PÚBLICA y ESTÁTICA:
+        //  TODAS las sombras de la página que sirvan al Grimorio del
+        //  Eterno (la caza del libro flotante, la concentración del
+        //  arma SombraDeLaPagina, cualquier actividad) golpean con ESTA
+        //  cuenta — el poder REAL del portador, no un porcentaje plano.
+        // ================================================================
+        public static int GolpeDeLaSombra(Player portador, NPC presa)
+        {
+            try
+            {
+                if (portador == null || !portador.active) return 1;
+                // LA SUMA DE INVOCACIÓN: el daño de los minions VIVOS (los
+                // SourceDamage de cada minion activo — la lectura real de
+                // la casa) + el bono de invocación del portador.
+                float invocacion = portador.maxMinions > 0
+                    ? portador.slotsMinions * 0f : 0f;   // (los minions no dan daño plano: la escala real vive abajo)
+                int minionsVivos = 0;
+                float danoMinions = 0f;
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || !pr.minion || pr.owner != portador.whoAmI)
+                        continue;
+                    minionsVivos++;
+                    danoMinions += pr.damage;
+                }
+                invocacion = danoMinions;   // la suma TOTAL del daño de invocación
+                // EL DAÑO MÁGICO TOTAL: GetTotalDamage respeta TODAS las
+                // modifiers del portador (armadura, accesorios, buffs).
+                float magico = portador.GetTotalDamage(DamageClass.Magic).ApplyTo(1f) - 1f;
+                // (ApplyTo(1) devuelve el multiplicador aplicado: 1 → 0
+                // base... la lectura correcta es el valor escalado con un
+                // daño base de referencia del propio portador)
+                float magicoTotal = 0f;
+                try
+                {
+                    // el daño mágico del portador: su arma mágica más
+                    // alta no existe — se usa EL ESCALADO REAL: el
+                    // multiplicador mágico aplicado sobre el daño base
+                    // de las armas mágicas del inventario.
+                    foreach (Item it in portador.inventory)
+                    {
+                        if (it == null || it.IsAir || it.damage <= 0) continue;
+                        if (it.DamageType != DamageClass.Magic) continue;
+                        float d = portador.GetWeaponDamage(it);
+                        if (d > magicoTotal) magicoTotal = d;
+                    }
+                }
+                catch { }
+                if (magicoTotal <= 0f && magico > 0f)
+                    magicoTotal = magico * 10f;   // sin armas mágicas: el multiplicador como base
+                // LA FÓRMULA DE LA LETRA:
+                // 1 + (invocación total + mágico total) − 5%·vidaMax + 1%·manáMax
+                float golpe = 1f
+                    + invocacion
+                    + magicoTotal
+                    - portador.statLifeMax2 * 0.05f
+                    + portador.statManaMax2 * 0.01f;
+                if (golpe < 1f) golpe = 1f;   // la sombra pica, aunque el portador sea gigante
+                return (int)Math.Ceiling(golpe);
+            }
+            catch { return 1; }
+        }
+
         /// <summary>LA SOMBRA VUELVE AL GRIMORIO (la sombra gastada se
         /// libera — el contador del alma respira).</summary>
         private void DevolverLaSombra()
-        {
-            var alma = AlmaDelLibro();
+        {            var alma = AlmaDelLibro();
             if (alma != null && alma.SombrasGastadas > 0)
             {
                 alma.SombrasGastadas--;

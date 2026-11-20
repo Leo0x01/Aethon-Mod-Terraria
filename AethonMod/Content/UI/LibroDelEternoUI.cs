@@ -501,18 +501,20 @@ namespace AethonMod.Content.UI
                     },
                     new string[][]
                     {
-                        // v6.159 — LA PÁGINA DERECHA ES EL CÓDEX DEL ETERNO
-                        // (la letra: «no veo que este integrado el lore
-                        // completo y bien estructurado como te lo di
-                        // antes, te volvere a dar el lore, intenta
-                        // intergrarlo completo»): EL DOCUMENTO NUEVO DEL
-                        // USUARIO (Aethon_Codex_del_Eterno.docx) — el
-                        // prólogo, los ONCE capítulos y el epílogo,
-                        // VERBATIM, cada uno una sección que se abre con
-                        // el Despertar (el canon SE GANA: 0/5/12/20/30/
-                        // 38/45/55/65/75/85/95/110). El Compendio viejo
-                        // (LoreI..V) queda debajo como EL ARCHIVO DE LA
-                        // CASA — las dos escrituras conviven.
+                        // v6.160 — LA PÁGINA DERECHA ES EL CÓDEX DEL
+                        // ETERNO COMPLETO (la letra: «te di todo el lore
+                        // para integrarlo de la mejor manera posible»):
+                        // el documento canónico del usuario — el prólogo,
+                        // los ONCE capítulos y el epílogo, TODOS SUS
+                        // PÁRRAFOS (la v6.159 dejaba 5 de los 13 del
+                        // capítulo VII sin incluir; la cura del texto en
+                        // crudo: el bloque vivía en el namespace
+                        // EQUIVOCADO del hjson y tML devolvía las keys
+                        // sin traducir), cada capítulo una sección que se
+                        // abre con el Despertar (el canon SE GANA:
+                        // 0/5/12/20/30/38/45/55/65/75/85/95/110). El
+                        // Compendio viejo queda debajo como EL ARCHIVO DE
+                        // LA CASA.
                         new[] { "SecLore", "LoreEpigrafe0", "LoreIntro" },
                         new[] { "CodexPrologoTit", "CodexPrologoP0", "CodexPrologoP1", "CodexPrologoP2", "CodexPrologoP3" },
                         new[] { "CodexITit", "CodexIP0", "CodexIP1", "CodexIP2", "CodexIP3" },
@@ -521,7 +523,7 @@ namespace AethonMod.Content.UI
                         new[] { "CodexIVTit", "CodexIVP0", "CodexIVP1", "CodexIVP2", "CodexIVP3", "CodexIVP4" },
                         new[] { "CodexVTit", "CodexVP0", "CodexVP1", "CodexVP2", "CodexVP3" },
                         new[] { "CodexVITit", "CodexVIP0", "CodexVIP1", "CodexVIP2", "CodexVIP3" },
-                        new[] { "CodexVIITit", "CodexVIIP0", "CodexVIIP1", "CodexVIIP2", "CodexVIIP3", "CodexVIIP4", "CodexVIIP5", "CodexVIIP6", "CodexVIIP7" },
+                        new[] { "CodexVIITit", "CodexVIIP0", "CodexVIIP1", "CodexVIIP2", "CodexVIIP3", "CodexVIIP4", "CodexVIIP5", "CodexVIIP6", "CodexVIIP7", "CodexVIIP8", "CodexVIIP9", "CodexVIIP10", "CodexVIIP11", "CodexVIIP12" },
                         new[] { "CodexVIIITit", "CodexVIIIP0", "CodexVIIIP1", "CodexVIIIP2", "CodexVIIIP3" },
                         new[] { "CodexIXTit", "CodexIXP0", "CodexIXP1", "CodexIXP2", "CodexIXP3" },
                         new[] { "CodexXTit", "CodexXP0", "CodexXP1", "CodexXP2", "CodexXP3", "CodexXP4", "CodexXP5" },

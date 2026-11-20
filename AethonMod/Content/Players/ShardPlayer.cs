@@ -1672,6 +1672,14 @@ namespace AethonMod.Content.Players
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Bolsas.BolsaSuperforja>());
 
+                // v6.160 — EL TRÍO DEL ETERNO (la regla de la casa, la
+                // letra: «como regla todo item nuevo debe ser dado
+                // directamente al jugador»): el arma de las tres armas
+                // llega DIRECTO al inventario al entrar al mundo — la
+                // receta de 5 maderas queda como vía alternativa.
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Investigaciones.TrioDelEterno>());
+
                 if (entregados > 0)
                 {
                     Main.NewText(Terraria.Localization.Language.GetTextValue(

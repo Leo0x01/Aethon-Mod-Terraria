@@ -799,6 +799,11 @@ namespace AethonMod.Content.NPCs
                     // verdad), saltando al MAGO (la letra: «el mago no
                     // cuenta») y al propio Cronista.
                     List<(int tipo, int stack)> cosecha = new List<(int, int)>();
+                    // v6.160 — LA COSECHA SIN REPETIDOS (la letra: «los
+                    // items no deben repetirse en la tienda del
+                    // cronista»): si DOS tiendas venden el mismo
+                    // artículo, SOLO LA PRIMERA entra a la cosecha.
+                    var vistos = new HashSet<int>();
                     try
                     {
                         foreach (var tienda in Terraria.ModLoader.NPCShopDatabase.AllShops)
@@ -821,6 +826,7 @@ namespace AethonMod.Content.NPCs
                                 if (mercancia == null || mercancia.IsAir) continue;
                                 if (mercancia.type == ItemID.CopperCoin || mercancia.type == ItemID.SilverCoin ||
                                     mercancia.type == ItemID.GoldCoin || mercancia.type == ItemID.PlatinumCoin) continue;
+                                if (!vistos.Add(mercancia.type)) continue;   // repetido: fuera
                                 cosecha.Add((mercancia.type, mercancia.stack));
                                 break;   // UNO por tienda (10 tiendas = 10 artículos)
                             }
@@ -855,15 +861,36 @@ namespace AethonMod.Content.NPCs
                         long intervalo10min = (long)(Main.time / 36000f);
                         int semillaDia = (int)(intervalo10min & 0x7FFFFFFFL)
                             + (int)Main.worldID;
+                        // v6.160 — SIN REPETIDOS (la letra: «los items no
+                        // deben repetirse en la tienda del cronista») y
+                        // PRECIO MÍNIMO 100 ESENCIAS (la letra: «el
+                        // precion minimo en cualquier item es de 100
+                        // esencias del eterno mas el calculo
+                        // correspondiente, lo unico que no se rige por el
+                        // precio minimo son las pociones, esas tienen un
+                        // precio diferente»): el sorteo camina por la
+                        // cosecha SIN DEVOLVER (cada artículo sale UNA
+                        // vez) y el precio es 100 + el cálculo de la
+                        // casa (la rareza manda) — las pociones de maná
+                        // de arriba ya tienen SU precio propio (1/3/5).
                         int cuantos = Math.Min(10, cosecha.Count);
+                        var usados = new HashSet<int>();
                         for (int k = 0; k < cuantos; k++)
                         {
-                            // el dado de la casa (Hash01 determinista)
-                            int idx = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(
-                                semillaDia * 7 + 1, k, 31) * cosecha.Count);
-                                var (tipoV, pilaV) = cosecha[idx];
+                            // el dado de la casa (Hash01 determinista) —
+                            // reintentos hasta un artículo NO vendido
+                            int idx = 0;
+                            for (int intento = 0; intento < cosecha.Count; intento++)
+                            {
+                                idx = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(
+                                    semillaDia * 7 + 1, k * 31 + intento, 31) * cosecha.Count);
+                                if (!usados.Contains(idx)) break;
+                            }
+                            if (usados.Contains(idx)) idx = (idx + 1) % cosecha.Count;
+                            if (!usados.Add(idx)) continue;
+                            var (tipoV, pilaV) = cosecha[idx];
                             var planta = new Item(tipoV);
-                            long precioV = Math.Max(5L, 20L + 40L * Math.Max(0, planta.rare));
+                            long precioV = 100L + 20L + 40L * Math.Max(0, planta.rare);
                             Poner(tipoV, precioV, Math.Max(1, Math.Min(5, pilaV)));
                         }
                     }

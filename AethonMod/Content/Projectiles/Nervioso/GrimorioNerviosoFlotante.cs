@@ -181,12 +181,17 @@ namespace AethonMod.Content.Projectiles.Nervioso
         {
             NPC mejor = null;
             float mejorD = RADIO_CAZA * RADIO_CAZA;
+            // v6.160 — LA CAZA AL VER (la letra: «si esta en modo caza
+            // debe ponerse a cazar nada mas vea al enemigo»): el
+            // requisito de MOVIMIENTO («hasta que algo se mueva») MUERE
+            // aquí — la sombra del Eterno cae sobre el enemigo AL
+            // VERLO, quieto o corriendo. (PresaCercana, la del Nervioso
+            // de prueba, conserva su regla de siempre.)
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC n = Main.npc[i];
                 if (n == null || !n.active || n.life <= 0 || n.dontTakeDamage) continue;
                 if (n.townNPC || NPCID.Sets.ActsLikeTownNPC[n.type]) continue;   // los vecinos, jamás
-                if (n.velocity.LengthSquared() < 0.02f) continue;                 // «hasta que algo SE MUEVA»
                 // ¿YA tiene su sombra? (de ESTE dueño)
                 bool ocupada = false;
                 for (int k = 0; k < Main.maxProjectiles; k++)
@@ -536,7 +541,13 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 // Nervioso de prueba conserva su regla de ausencia.
                 bool esEternoCaza = TipoLibro == ModContent.ItemType
                     <global::AethonMod.Content.Weapons.GrimoireEternal>();
-                if (!enPueblo && autoridad && t % TICKS_BUSCA == 0f &&
+                // v6.160 — LA CAZA SIN DEMORA (la letra: «se demora
+                // mucho en cazar»): el Eterno busca CADA TICK (el
+                // espaciado de 20 ticks moría con él — la sombra sale
+                // EL MISMO tick en que un enemigo entra en la mira);
+                // el Nervioso conserva su ritmo de siempre.
+                bool ticBusca = esEternoCaza || t % TICKS_BUSCA == 0f;
+                if (!enPueblo && autoridad && ticBusca &&
                     (esEternoCaza || !EstadoDelLibro.AtacoReciente()))
                 {
                     // ========================================================
@@ -559,9 +570,18 @@ namespace AethonMod.Content.Projectiles.Nervioso
                     if (esEterno)
                     {
                         Player dueñoCaza = Main.player[Projectile.owner];
+                        Item libroCaza = global::AethonMod.Content.Globals
+                            .AlmaEternoGlobalItem.Activo(dueñoCaza);
                         var alma = global::AethonMod.Content.Globals.AlmaEternoGlobalItem
-                            .De(global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(dueñoCaza));
-                        if (alma != null && alma.SombrasLibres > 0)
+                            .De(libroCaza);
+                        // v6.160 — EL CAP NUEVO: 1 + despertar/20 +
+                        // NIVEL NORMAL/100 (la letra: «1 sombra cada 20
+                        // niveles del despertar y como nuevo añadido
+                        // cada 100 niveles normales, siempre 1 a nivel
+                        // 1») — SombrasCapDe fija el nivel del libro y
+                        // devuelve el cap verdadero.
+                        if (alma != null &&
+                            alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
                         {
                             // LAS PRESAS SIN SOMBRA (una sombra por enemigo)
                             int tipoEterno = ModContent.ProjectileType

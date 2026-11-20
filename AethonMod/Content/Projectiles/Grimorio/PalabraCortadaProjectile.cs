@@ -218,31 +218,89 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 Color tinta = new Color(120, 66, 190);       // la tinta del codex
                 Color oro = new Color(255, 208, 120);        // el filo de oro
 
-                // === (1) LA ESTELA DEL ARCO: los arcos ya barridos ===
+                // ============================================================
+                //  v6.160 — LA RUNA CORTANTE (la letra: «el proyectil
+                //  que le diste al grimorio del eterno son solo
+                //  circulos planos, que dije de los circulos planos,
+                //  nada de circulos planos»): LOS QUADS CIRCULARES
+                //  MUEREN — el tajo es UNA RUNA GIGANTE estirada como
+                //  cuchilla, dibujada con EL LENGUAJE DE LA CASA:
+                //  CÁPSULAS (OrbitaLib.Capsule — el mismo trazo de las
+                //  runas de las coronas) con gradiente cuerpo→punta,
+                //  la NUBE de trazos de UNA runa del alfabeto
+                //  (RunasVacio) escalada a la longitud del filo, y
+                //  cada segmento con su PERLA en la punta (la gema de
+                //  la corona). El arco barrido = LOS TRAZOS YA
+                //  ESCRITOS de la runa (se dibujan como cápsulas
+                //  cortas siguiendo la curvatura — la escritura del
+                //  corte, no un resplandor plano).
+                // ============================================================
+
+                // LA RUNA DEL FILO: la letra de ESTE tajo (determinista
+                // por whoAmI — cada tajo escribe SU palabra).
+                Vector2[] runa = OrbitaLib.RunasVacio[
+                    (Projectile.whoAmI * 5 + 3) % OrbitaLib.RunasVacio.Length];
+
+                // LA CÁPSULA DEL LOTE (no OrbitaLib.Capsule — esa dibuja
+                // DIRECTO al spriteBatch de vanilla, el error del log de
+                // la v6.159; esta vive EN el lote del tajo): SoftGlow
+                // estirado, la MISMA receta de la casa.
+                var glow = VFXCore.SoftGlow;
+                void Capsula(Vector2 mid, float len, float ancho, float rot, Color col)
+                {
+                    if (glow == null) return;
+                    VFXCore.Quad(mid, col, new Vector2(len + ancho, ancho * 1.9f), rot, glow);
+                }
+
+                // === (1) LA ESCRITURA DEL ARCO (la estela): cada trazo
+                // de la runa YA ESCRITO queda como cápsula curvada ===
                 int pasos = 14;
                 for (int i = 0; i < pasos; i++)
                 {
                     float pp = i / (float)(pasos - 1) * pE;   // 0..pE (lo barrido)
                     float aA = _giroBase + _sentido * (-APERTURA + BARRIDO * pp);
-                    float alfaArco = alfa * (0.28f + 0.55f * pp);  // más vivo al final
+                    float alfaArco = alfa * (0.30f + 0.50f * pp);
                     Vector2 dirA = new Vector2(MathF.Cos(aA), MathF.Sin(aA));
-                    // EL ARCO FINO: un quad largo y delgado en el radio.
+                    // EL SEGMENTO ESCRITO: cápsula TANGENTE al arco (la
+                    // curvatura de la escritura — cada trozo de arco es
+                    // un trazo de pluma, con su latido).
+                    float tang = aA + _sentido * MathHelper.PiOver2;
                     Vector2 medio = centro + dirA * (_radio * 0.62f);
-                    VFXCore.Quad(medio,
-                        tinta * alfaArco,
-                        new Vector2(_radio * 0.55f, 3.5f + 2.5f * (1f - pp)),
-                        aA);
+                    Capsula(medio,
+                        _radio * 0.30f,                      // largo del trazo
+                        2.6f + 2.0f * (1f - pp),             // grosor: afina al escribir
+                        tang,
+                        tinta * (alfaArco * 0.75f));
                 }
 
-                // === (2) EL FILO: la palabra en el ángulo actual ===
+                // === (2) EL FILO ACTUAL: LA RUNA GIGANTE ESTIRADA — el
+                // corte es la letra misma, cada trazo una cuchilla ===
                 Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
-                // EL BORDE EXTERIOR (el corte que abre): la línea larga.
-                VFXCore.Quad(centro + dir * (_radio * 0.55f),
-                    Color.White * (0.75f * alfa),
-                    new Vector2(_radio * 0.92f, 6.5f), ang);
-                VFXCore.Quad(centro + dir * (_radio * 0.52f),
-                    oro * (0.55f * alfa),
-                    new Vector2(_radio * 0.86f, 13f), ang);
+                float largo = _radio * 0.92f;
+                for (int s = 0; s < runa.Length; s += 2)
+                {
+                    // Los DOS extremos del trazo de la runa, PROYECTADOS
+                    // sobre la línea del filo (x = a lo largo, y = el
+                    // perfil dentado de la letra).
+                    Vector2 pa = runa[s], pb = runa[s + 1];
+                    Vector2 aScr = centro + dir * (_radio * 0.10f + (pa.X + 7f) / 14f * largo)
+                        + new Vector2(-dir.Y, dir.X) * (pa.Y * 2.2f);
+                    Vector2 bScr = centro + dir * (_radio * 0.10f + (pb.X + 7f) / 14f * largo)
+                        + new Vector2(-dir.Y, dir.X) * (pb.Y * 2.2f);
+                    Vector2 delta = bScr - aScr;
+                    float len = delta.Length();
+                    if (len < 2f) continue;
+                    float rot = MathF.Atan2(delta.Y, delta.X);
+                    Vector2 mid = (aScr + bScr) * 0.5f;
+                    float localY = ((pa.Y + pb.Y) * 0.5f + 7f) / 14f;
+
+                    // LA CUCHILLA: cápsula dorada con NÚCLEO blanco —
+                    // cuerpo→punta pálida como las runas de la casa.
+                    Capsula(mid, len, 7.5f, rot,
+                        Color.Lerp(oro, Color.White, 0.55f) * (0.85f * alfa));
+                    Capsula(mid, len, 3.0f, rot,
+                        Color.White * (0.95f * alfa * localY));
+                }
 
                 VFXCore.FlushAdditive(null, false);
             }

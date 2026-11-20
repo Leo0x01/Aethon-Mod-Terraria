@@ -200,11 +200,21 @@ namespace AethonMod.Content.Projectiles.Sombras
                             NPC dueñoPool = FaucesGlobalNPC.DueñoDelPool(presa);
                             if (dueñoPool != null && dueñoPool.active && dueñoPool.life > 1)
                             {
-                                // v6.153 — LA CONCENTRACIÓN: el drenaje
-                                // base × (1 + sombras concentradas) — cada
-                                // sombra de la página gastada aprieta CON
-                                // la mordiza (la letra).
-                                float quitar = MathF.Max(dueñoPool.life * 0.025f, 25f)
+                                // v6.160 — LA FÓRMULA DE LAS SOMBRAS DEL
+                                // ETERNO (la letra: «por ultima vez
+                                // asegurate de que todas las sombras de
+                                // las paginas que use el grimorio del
+                                // eterno en cualquier actividad sea la
+                                // nueva»): el drenaje de la mordida es
+                                // LA CUENTA NUEVA (GolpeDeLaSombra — 1 +
+                                // invocación total + mágico total − 5%
+                                // vidaMax + 1% manáMax) × (1 + sombras
+                                // concentradas — la concentración de la
+                                // v6.153 sigue apretando CON la mordida).
+                                float base_ = global::AethonMod.Content.Projectiles
+                                    .Nervioso.SombraPaginaEterno.GolpeDeLaSombra(
+                                        dueño, dueñoPool);
+                                float quitar = MathF.Max(base_, 25f)
                                     * (1f + SombrasConcentradas);
                                 if (dueñoPool.life - quitar <= 1f)
                                 {

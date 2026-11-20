@@ -85,13 +85,39 @@ namespace AethonMod.Content.Globals
         /// disponible es (1 + nivel/20 − gastadas).</summary>
         public int SombrasGastadas = 0;
 
-        /// <summary>v6.156 — EL CAP DE SOMBRAS del despertar de ESTE
-        /// libro (1 + nivel/20 — LA PRIMERA ES DEL NACIMIENTO: la letra
-        /// nueva, «ya debe tener 1 sombra de la pagina desde el nivel de
-        /// despertar 0»; a nivel 20 tiene 2, a nivel 40 tiene 3… la
-        /// escalera de siempre CORRIDA UN PELDAÑO — el nivel 0 NO es un
-        /// libro mudo: su primera sombra nace con él).</summary>
-        public int SombrasCap => 1 + NivelDespertar / 20;
+        /// <summary>v6.160 — EL CAP DE SOMBRAS NUEVO (la letra: «el
+        /// grimorio del eterno como dije antes debe tener sombra de la
+        /// pagina segun el calculo de 1 sombra cada 20 niveles del
+        /// despertar y como nuevo añadido cada 100 niveles normales,
+        /// ademas el grimorio del eterno siempre tiene 1 sombra de la
+        /// pagina a nivel 1»): 1 (LA DEL NACIMIENTO — siempre) +
+        /// despertar/20 (una por cada 20 despertares) + nivel/100 (LA
+        /// NUEVA: una por cada 100 NIVELES NORMALES del grimorio — el
+        /// grosor del libro, la otra escala del Códex). Un GlobalItem
+        /// no guarda el ítem como campo: el nivel normal llega POR
+        /// PARÁMETRO desde los lectores (que sí tienen el ítem).</summary>
+        public int SombrasCap => 1 + NivelDespertar / 20 + _nivelLibroCap / 100;
+
+        /// <summary>EL NIVEL NORMAL del grimorio (ShardLevelItem.Level)
+        /// — lo fijan los lectores del cap (el ítem vive con ellos).</summary>
+        private int _nivelLibroCap = 0;
+
+        /// <summary>LA LECTURA DEL CAP COMPLETA: fija el nivel normal
+        /// del libro (para la suma /100) y devuelve el cap. Los lectores
+        /// con el ítem en la mano llaman AQUÍ.</summary>
+        public int SombrasCapDe(Item libro)
+        {
+            try
+            {
+                if (libro != null && !libro.IsAir)
+                {
+                    var sl = libro.GetGlobalItem<ShardLevelItem>();
+                    if (sl != null) _nivelLibroCap = sl.Level;
+                }
+            }
+            catch { }
+            return SombrasCap;
+        }
 
         /// <summary>v6.153 — LAS SOMBRAS LIBRES ahora mismo (cap −
         /// gastadas, jamás negativo).</summary>
