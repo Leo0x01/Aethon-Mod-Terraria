@@ -1,5 +1,17 @@
 # AethonMod — Historial de Cambios
 
+## v6.160 — LAS RESPUESTAS + LAS CUATRO LETRAS (release 453153782 · md5 9089a074…)
+
+1. **EL CÓDEX CURADO DE VERDAD**: el texto en crudo era un namespace equivocado (el bloque vivía en `Projectiles`, el libro pedía `Pergamino.*`) — mudado por análisis de profundidad; **64 párrafos** completos (VII=13, IV=5, X=6) ×2 idiomas: es-ES verbatim, **en-US TRADUCIDO** (la respuesta del usuario); **es-MX borrado** (Terraria no lo usa).
+2. **EL TRÍO A LA VEZ** (la respuesta): las 3 armas disparan EN EL MISMO INSTANTE (cuña −8°/0°/+8°) + **ENTREGA DIRECTA** (la regla: «todo item nuevo debe ser dado directamente al jugador»).
+3. **LA FÓRMULA DE LAS SOMBRAS DEL ETERNO**: `1 + invocación total (minions vivos) + mágico total − 5% vidaMax + 1% manáMax` — PÚBLICA y usada por TODAS (caza del libro + mordida del arma). **CAP NUEVO**: 1 + despertar/20 + nivel/100. **CAZA AL VER** (sin requisito de movimiento, busca cada tick).
+4. **LA TIENDA**: sin repetidos (cosecha des-duplicada + sorteo sin devolución) + **mínimo 100 esencias** (pociones 1/3/5 intactas).
+5. **LA RUNA CORTANTE**: nada de círculos planos — el tajo es una runa gigante del alfabeto estirada como cuchilla (cápsulas del LOTE, no OrbitaLib.Capsule que dibuja directo — el error del log de la v6.159).
+
+— oráculo 0/0 · build 0/0 (21.833.130 B) · GUARDIÁN ✔ · headless 0 excepciones · release 453153782 + CDN byte a byte.
+
+# AethonMod — Historial de Cambios
+
 ## v6.159 — LOS PERSONAJES DE TERRARIA DE VERDAD, LA CAZA VIVA Y EL CÓDEX COMPLETO (release 452851386 · md5 5cbcb72f…)
 
 **La regla de oro nace: la versión de GitHub siempre es la correcta** (sandbox ← GitHub antes de trabajar; GitHub ← todo al terminar).
