@@ -181,6 +181,14 @@ namespace AethonMod.Content.Projectiles.Nervioso
         {
             NPC mejor = null;
             float mejorD = RADIO_CAZA * RADIO_CAZA;
+            // v6.161 — LOS DOS CUERPOS CUENTAN (la unificación de las
+            // sombras): una presa con sombra ACTUAL (SombraPaginaProjectile)
+            // O con el hilillo de reserva (SombraPaginaEterno) YA está
+            // ocupada — la caza no dobla sombras sobre el mismo enemigo.
+            int tipoActual = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+            int tipoReserva = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
             // v6.160 — LA CAZA AL VER (la letra: «si esta en modo caza
             // debe ponerse a cazar nada mas vea al enemigo»): el
             // requisito de MOVIMIENTO («hasta que algo se mueva») MUERE
@@ -197,8 +205,9 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 for (int k = 0; k < Main.maxProjectiles; k++)
                 {
                     Projectile sp = Main.projectile[k];
-                    if (sp != null && sp.active && sp.type == tipoSombra &&
-                        sp.owner == Projectile.owner && (int)sp.ai[0] - 1 == i)
+                    if (sp != null && sp.active && sp.owner == Projectile.owner &&
+                        (sp.type == tipoActual || sp.type == tipoReserva) &&
+                        (int)sp.ai[0] - 1 == i)
                     { ocupada = true; break; }
                 }
                 if (ocupada) continue;
@@ -584,24 +593,53 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
                         {
                             // LAS PRESAS SIN SOMBRA (una sombra por enemigo)
-                            int tipoEterno = ModContent.ProjectileType
+                            // v6.161 — LA SOMBRA ES LA ACTUAL (la letra:
+                            // «el grimorio acaba de devorar a un jefe y
+                            // sigue teniendo la sombra de la pagina
+                            // vieja […] asegurate que cuando el grimorio
+                            // use una sombra de la pagina sea el
+                            // actual»): la caza del Eterno ya NO usa el
+                            // hilillo SombraPaginaEterno (la pinta vieja
+                            // de la v6.153) — usa SombraPaginaProjectile,
+                            // LA COLUMNA VERLET COMPLETA (la MISMA del
+                            // arma SombraDeLaPagina: emerge del jugador,
+                            // ondea, muerde y absorbe — el cuerpo de la
+                            // casa). El hilillo solo vive como CUERPO DE
+                            // RESERVA si el arma no puede nacer.
+                            int tipoActual = ModContent.ProjectileType
+                                <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+                            int tipoReserva = ModContent.ProjectileType
                                 <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
                             int vivas = 0;
                             for (int i = 0; i < Main.maxProjectiles; i++)
                             {
                                 Projectile sp = Main.projectile[i];
-                                if (sp != null && sp.active && sp.type == tipoEterno &&
+                                if (sp != null && sp.active &&
+                                    (sp.type == tipoActual || sp.type == tipoReserva) &&
                                     sp.owner == Projectile.owner) vivas++;
                             }
                             if (vivas < alma.SombrasLibres)
                             {
-                                NPC presaLibre = PresaSinSombra(tipoEterno);
+                                NPC presaLibre = PresaSinSombra(tipoActual);
                                 if (presaLibre != null)
                                 {
                                     alma.SombrasGastadas++;   // LA SOMBRA SE GASTA al nacer
-                                    Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                                        Projectile.Center, Vector2.Zero, tipoEterno,
+                                    // v6.161 — EL NACIMIENTO DE LA SOMBRA
+                                    // ACTUAL: la columna verlet nace EN
+                                    // FASE EMERGER (ai[1]=0) con SU presa
+                                    // en ai[0] — el MISMO contrato del
+                                    // disparo del arma (SombraDeLaPagina.
+                                    // Shoot) y drena con LA FÓRMULA NUEVA
+                                    // (GolpeDeLaSombra, ya curada en la
+                                    // mordida de la v6.160). localAI[1]=1
+                                    // LA MARCA COMO SOMBRA DE CAZA: su
+                                    // Kill devuelve la sombra al alma.
+                                    int idxSombra = Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                                        Projectile.Center, Vector2.Zero, tipoActual,
                                         0, 0f, Projectile.owner, presaLibre.whoAmI + 1, 0f, 0f);
+                                    if (idxSombra >= 0 && idxSombra < Main.maxProjectiles &&
+                                        Main.projectile[idxSombra].active)
+                                        Main.projectile[idxSombra].localAI[1] = 1f;
                                     Sonar(SoundID.Item122.WithPitchOffset(-0.3f)
                                         .WithVolumeScale(0.6f), Projectile.Center);
                                 }

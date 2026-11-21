@@ -3953,6 +3953,12 @@ Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
 	Subtitulo: consagra la ofrenda — arma · material · esencias
 	SlotVacio: ofrenda
+	// v6.161 — LA MESA DE FUSIÓN DEL TRÍO (la letra: «que esta ventana
+	// tenga un apartado donde se pueda usar para fusionar y desfusionar
+	// el arma el trio eterno»)
+	TrioTitulo: EL TRÍO DEL ETERNO — LA MESA DE FUSIÓN
+	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
+	TrioPista: Clic con un arma en el cursor para insertarla · clic en un slot lleno para extraerla — las tres atacan a la vez.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora
 	ListaArma: Arma lista — gana estadísticas y su etiqueta

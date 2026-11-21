@@ -469,6 +469,81 @@ namespace AethonMod.Content.UI
                     }
                 }
 
+                // v6.161 — LOS SLOTS DEL TRÍO (la mesa de fusión): clic
+                // con un ARMA en el cursor → entra a la primera ranura
+                // libre; clic en una ranura llena → el arma vuelve al
+                // cursor. El MISMO contrato del atril (TrioDelEterno.
+                // EsArmaValida), pero SIN llevar el Trío en la mano —
+                // el altar es la mesa de fusionar de verdad.
+                var trioClic = global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.Del(Main.LocalPlayer);
+                if (trioClic != null)
+                {
+                    for (int slotT = 0; slotT < 3; slotT++)
+                    {
+                        Rectangle geoT = _geoTrio[slotT];
+                        if (geoT.Width <= 0) continue;   // la sección no vive este frame
+                        bool hoverTrio = geoT.Contains(Main.mouseX, Main.mouseY) &&
+                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        if (hoverTrio) Main.LocalPlayer.mouseInterface = true;
+                        if (!hoverTrio || !clicNuevo) continue;
+
+                        Item armaSlot = trioClic.Ranuras != null && slotT < trioClic.Ranuras.Length
+                            ? trioClic.Ranuras[slotT] : null;
+                        if (!Main.mouseItem.IsAir)
+                        {
+                            // INSERCIÓN: solo armas (la regla del atril).
+                            if (global::AethonMod.Content.Weapons.Investigaciones
+                                .TrioDelEterno.EsArmaValida(Main.mouseItem))
+                            {
+                                // ¿el slot está libre? si no, busco el
+                                // primero libre (el atril también lo
+                                // hace así — el cursor entra donde pueda).
+                                int destino = (armaSlot == null || armaSlot.IsAir)
+                                    ? slotT : -1;
+                                if (destino < 0)
+                                {
+                                    for (int k = 0; k < 3; k++)
+                                    {
+                                        Item rk = trioClic.Ranuras[k];
+                                        if (rk == null || rk.IsAir) { destino = k; break; }
+                                    }
+                                }
+                                if (destino >= 0)
+                                {
+                                    trioClic.Ranuras[destino] = (Item)Main.mouseItem.Clone();
+                                    Main.mouseItem.TurnToAir();
+                                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
+                                    Main.NewText(Language.GetTextValue(
+                                        "Mods.AethonMod.Items.TrioInsertada", destino + 1),
+                                        new Color(160, 230, 255));
+                                }
+                                else
+                                {
+                                    Main.NewText(Language.GetTextValue(
+                                        "Mods.AethonMod.Items.TrioLleno"),
+                                        new Color(255, 170, 130));
+                                }
+                            }
+                            else
+                            {
+                                Main.NewText(Language.GetTextValue(
+                                    "Mods.AethonMod.Items.TrioNoArma"),
+                                    new Color(255, 170, 130));
+                                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                            }
+                        }
+                        else if (armaSlot != null && !armaSlot.IsAir)
+                        {
+                            // EXTRACCIÓN: el arma del slot vuelve al cursor.
+                            Main.mouseItem = (Item)armaSlot.Clone();
+                            trioClic.Ranuras[slotT] = new Item();
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                        }
+                        break;   // un slot por clic
+                    }
+                }
+
                 // EL BOTÓN CONSAGRAR: el sello de la casa (el MISMO de la
                 // receta — Corrompido = true + ResetPrefix: el «Superior»
                 // jamás vuelve) + el teatro.
@@ -725,6 +800,9 @@ namespace AethonMod.Content.UI
         /// <summary>Los rects vivos de la pasada de dibujo (el clic los lee).</summary>
         private static Rectangle _geoSlot;
         private static Rectangle _geoBtn;
+        /// <summary>v6.161 — LOS TRES SLOTS DEL TRÍO (la mesa de
+        /// fusión del altar).</summary>
+        private static readonly Rectangle[] _geoTrio = new Rectangle[3];
         /// <summary>v6.119 — EL RECT de la PUERTA al mundo interior (solo
         /// vive cuando la puerta está abierta: Rectangle.Empty la apaga —
         /// un clic en un rect vacío jamás entra).</summary>
@@ -953,6 +1031,72 @@ namespace AethonMod.Content.UI
             //    El panel queda para LO VIVO: el estado del slot, el
             //    sello y la puerta del mundo interior. ──
             cy += 6f;
+
+            // ── v6.161 — LA SECCIÓN 3 — EL TRÍO DEL ETERNO (la letra:
+            //    «que esta ventana tenga un apartado donde se pueda
+            //    usar para fusionar y desfusionar el arma el trio
+            //    eterno»): LA MESA DE FUSIÓN. TRES slots (los mismos
+            //    Ranuras[] del atril — la MISMA arma, el MISMO
+            //    inventario): clic con un arma en el cursor → se
+            //    inserta; clic en un slot lleno → vuelve al cursor.
+            //    Si el portador NO lleva el Trío, la sección lo dice
+            //    (trae el atril al altar). ──
+            var trio = global::AethonMod.Content.Weapons.Investigaciones
+                .TrioDelEterno.Del(Main.LocalPlayer);
+            cy = TituloSeccion(sb, Language.GetTextValue(Clave("TrioTitulo")),
+                x, cy, w, new Color(150, 220, 255));
+            if (dibujar)
+            {
+                if (trio == null)
+                {
+                    // SIN TRÍO: la invitación (la mesa está puesta).
+                    LineaMedida(sb, Language.GetTextValue(Clave("TrioSinTrio")),
+                        x + 24f, cy, w - 48f, 0.75f, TintaApagado);
+                }
+                else
+                {
+                    LineaMedida(sb, Language.GetTextValue(Clave("TrioPista")),
+                        x + 24f, cy, w - 48f, 0.72f, TintaApagado * 0.9f);
+                }
+            }
+            float altoTrio = Math.Max(
+                AltoMedido(Language.GetTextValue(Clave("TrioSinTrio")), w - 48f, 0.75f),
+                AltoMedido(Language.GetTextValue(Clave("TrioPista")), w - 48f, 0.72f));
+            cy += altoTrio + 6f;
+            if (trio != null)
+            {
+                // LOS TRES SLOTS DEL ATRIL (en fila, 52 px — el mismo
+                // tamaño del slot de ofrenda: el lenguaje del panel).
+                for (int slotT = 0; slotT < 3; slotT++)
+                {
+                    Rectangle s = new Rectangle(x + 24 + slotT * 62, (int)cy, 52, 52);
+                    if (dibujar)
+                    {
+                        _geoTrio[slotT] = s;
+                        bool hoverS = PanelContiene(s) &&
+                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        sb.Draw(pixel, s, TintaFondo * 0.9f);
+                        Marco(sb, pixel, s, hoverS ? new Color(150, 220, 255)
+                            : new Color(150, 220, 255) * 0.4f);
+                        Item armaS = trio.Ranuras != null && slotT < trio.Ranuras.Length
+                            ? trio.Ranuras[slotT] : null;
+                        if (armaS != null && !armaS.IsAir)
+                        {
+                            Texture2D texS = TextureAssets.Item[armaS.type].Value;
+                            float esc = Math.Min(44f / texS.Width, 44f / texS.Height);
+                            sb.Draw(texS, s.Center.ToVector2(), null, Color.White, 0f,
+                                texS.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                        }
+                        else
+                        {
+                            Utils.DrawBorderString(sb, (slotT + 1).ToString(),
+                                new Vector2(s.Center.X, s.Center.Y),
+                                TintaApagado * 0.8f, 0.8f, 0.5f, 0.5f);
+                        }
+                    }
+                }
+                cy += 52f + 8f;
+            }
 
             // ── LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el grimorio
             //    SOLO devora lo consagrado · v6.92 — AHORA FLUYE: la

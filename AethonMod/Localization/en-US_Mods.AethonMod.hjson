@@ -3965,6 +3965,11 @@ Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
 	Subtitulo: consagra la ofrenda por el Eterno — arma, material o esencias
 	SlotVacio: ofrenda
+	// v6.161 — THE TRIO'S FUSION TABLE (the letter: a section to fuse
+	// and unfuse the Trio Eterno weapon)
+	TrioTitulo: THE ETERNAL TRIO — THE FUSION TABLE
+	TrioSinTrio: You are not carrying the Eternal Trio — bring it to the altar to fuse its three weapons.
+	TrioPista: Click with a weapon on the cursor to insert it · click a filled slot to take it back — all three fire at once.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them
 	ListaArma: Arma lista — gana estadísticas y su etiqueta

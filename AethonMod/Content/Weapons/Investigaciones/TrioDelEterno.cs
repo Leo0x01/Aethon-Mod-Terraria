@@ -47,6 +47,46 @@ namespace AethonMod.Content.Weapons.Investigaciones
         /// <summary>El turno del ataque (0..2): qué ranura dispara.</summary>
         public int Turno;
 
+        // ================================================================
+        //  v6.161 — LA MESA DEL ALTAR (la letra: «mejora la ventana que
+        //  aparece al tocar el altar, que esta ventana tenga un
+        //  apartado donde se pueda usar para fusionar y desfusionar el
+        //  arma el trio eterno»): EL TRÍO DEL JUGADOR LOCAL, leído por
+        //  la ventana del altar (los TRES slots de fusión viven en el
+        //  panel). El clic derecho del atril sigue vivo como camino
+        //  corto — pero el altar es LA MESA de fusionar de verdad.
+        // ================================================================
+
+        /// <summary>EL TRÍO del inventario del portador (o null si no
+        /// lleva ninguno).</summary>
+        public static TrioDelEterno Del(Player p)
+        {
+            try
+            {
+                int tipo = ModContent.ItemType<TrioDelEterno>();
+                if (p == null || !p.active) return null;
+                Item mano = p.HeldItem;
+                if (mano != null && !mano.IsAir && mano.type == tipo)
+                    return mano.ModItem as TrioDelEterno;
+                for (int i = 0; i < 58; i++)
+                {
+                    Item it = p.inventory[i];
+                    if (it != null && !it.IsAir && it.type == tipo)
+                        return it.ModItem as TrioDelEterno;
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        /// <summary>¿ES UN ARMA VÁLIDA para el atril? (daño > 0 y no el
+        /// propio Trío — la MISMA regla del clic derecho).</summary>
+        public static bool EsArmaValida(Item it)
+        {
+            int tipo = ModContent.ItemType<TrioDelEterno>();
+            return it != null && !it.IsAir && it.damage > 0 && it.type != tipo;
+        }
+
         public override string Texture => "AethonMod/Content/Weapons/Investigaciones/CetroDagasEterno";
 
         public override void SetStaticDefaults()

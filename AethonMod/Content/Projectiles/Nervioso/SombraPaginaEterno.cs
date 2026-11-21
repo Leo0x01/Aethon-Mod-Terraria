@@ -241,6 +241,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
             }
         }
 
+        /// <summary>v6.161 — EL CIERRE SIN FUGAS (la letra: «el grimorio
+        /// acaba de devorar a un jefe y sigue teniendo la sombra de la
+        /// pagina vieja» — la autopsia: SOMBRAS QUE NO VOLVÍAN): TODO
+        /// camino de muerte devuelve la sombra. El expiry de timeLeft
+        /// (60 s mordiendo a un jefe testarudo) y cualquier Kill de
+        /// vanilla pasaban por aquí SIN liberar el contador — cada uno
+        /// era una sombra PERDIDA para siempre (con 7 fugadas: cap 10
+        /// y solo 3 libres — el número exacto que reportaste). El Kill
+        /// de vanilla llama AQUÍ primero: la sombra SIEMPRE vuelve.</summary>
+        public override void OnKill(int timeLeft)
+        {
+            try { DevolverLaSombra(); }
+            catch { }
+        }
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;

@@ -1136,4 +1136,57 @@ namespace AethonMod.Content.Globals
             catch { }
         }
     }
+
+    // ==================================================================
+    //  v6.161 — EL RECUENTO DE SEGURIDAD (la autopsia de las sombras
+    //  que no volvían: con despertar 120 y nivel 332 el cap ES 10
+    //  (1 + 120/20 + 332/100) pero el usuario VEÍA 3 — siete sombras
+    //  fugadas por los caminos de muerte que no devolvían el
+    //  contador, acumuladas a lo largo de sesiones). LA RED DE
+    //  SEGURIDAD: cada minuto, para CADA jugador con un Eterno, el
+    //  contador de gastadas se corrige contando las sombras VIVAS de
+    //  verdad en el mundo — las que viven en Main.projectile son las
+    //  ÚNICAS que pueden tener un contador legítimamente gastado. Si
+    //  el libro dice 7 gastadas y solo 0 viven: las 7 vuelven. Cura
+    //  los libros YA dañados sin tocar a los sanos.
+    // ==================================================================
+    public class SombrasRecuentoSistema : ModSystem
+    {
+        private int _tick;
+
+        public override void PostUpdateWorld()
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            if (++_tick < 3600) return;   // cada minuto de juego
+            _tick = 0;
+            try
+            {
+                int tipoActual = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+                int tipoReserva = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
+                foreach (Player p in Main.ActivePlayers)
+                {
+                    Item libro = AlmaEternoGlobalItem.Activo(p);
+                    var alma = AlmaEternoGlobalItem.De(libro);
+                    if (alma == null) continue;
+                    // LAS SOMBRAS VIVAS de este portador (las dos
+                    // pintas cuentan: la actual y la de reserva)
+                    int vivas = 0;
+                    for (int i = 0; i < Main.maxProjectiles; i++)
+                    {
+                        Projectile sp = Main.projectile[i];
+                        if (sp == null || !sp.active || sp.owner != p.whoAmI) continue;
+                        if (sp.type == tipoActual || sp.type == tipoReserva) vivas++;
+                    }
+                    // EL GASTO LEGÍTIMO = las vivas (una sombra viva es
+                    // una sombra gastada; una muerta YA devolvió). Si el
+                    // contador dice más, EL EXCESO ES FUGA → vuelve.
+                    if (alma.SombrasGastadas > vivas)
+                        alma.SombrasGastadas = vivas;
+                }
+            }
+            catch { }
+        }
+    }
 }

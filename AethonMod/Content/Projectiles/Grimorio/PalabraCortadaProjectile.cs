@@ -219,21 +219,19 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 Color oro = new Color(255, 208, 120);        // el filo de oro
 
                 // ============================================================
-                //  v6.160 — LA RUNA CORTANTE (la letra: «el proyectil
-                //  que le diste al grimorio del eterno son solo
-                //  circulos planos, que dije de los circulos planos,
-                //  nada de circulos planos»): LOS QUADS CIRCULARES
-                //  MUEREN — el tajo es UNA RUNA GIGANTE estirada como
-                //  cuchilla, dibujada con EL LENGUAJE DE LA CASA:
-                //  CÁPSULAS (OrbitaLib.Capsule — el mismo trazo de las
-                //  runas de las coronas) con gradiente cuerpo→punta,
-                //  la NUBE de trazos de UNA runa del alfabeto
-                //  (RunasVacio) escalada a la longitud del filo, y
-                //  cada segmento con su PERLA en la punta (la gema de
-                //  la corona). El arco barrido = LOS TRAZOS YA
-                //  ESCRITOS de la runa (se dibujan como cápsulas
-                //  cortas siguiendo la curvatura — la escritura del
-                //  corte, no un resplandor plano).
+                //  v6.161 — EL FILO DE VERDAD (la letra: «el ataque del
+                //  grimorio siguen siendo circulos blancos
+                //  completamente lisos»): la v6.160 estiraba SoftGlow
+                //  (la textura de RESPLANDOR radial de la casa) — un
+                //  óvalo suave SIN bordes: por eso el tajo seguía
+                //  pareciendo un círculo blanco liso. LA CURA: el filo
+                //  usa LumenBlade (el PNG de la casa con perfil de
+                //  SABLE: núcleo duro + caída abrupta, medido a pelo —
+                //  pico de alfa 235 con caída a 21 en 4 px) — la MISMA
+                //  textura de las cuchillas de la casa — más el
+                //  BlackDisk como SILUETA oscura debajo (el contraste
+                //  que lee el ojo como «corte»). NADA de quads con
+                //  textura radial.
                 // ============================================================
 
                 // LA RUNA DEL FILO: la letra de ESTE tajo (determinista
@@ -241,19 +239,32 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 Vector2[] runa = OrbitaLib.RunasVacio[
                     (Projectile.whoAmI * 5 + 3) % OrbitaLib.RunasVacio.Length];
 
-                // LA CÁPSULA DEL LOTE (no OrbitaLib.Capsule — esa dibuja
-                // DIRECTO al spriteBatch de vanilla, el error del log de
-                // la v6.159; esta vive EN el lote del tajo): SoftGlow
-                // estirado, la MISMA receta de la casa.
-                var glow = VFXCore.SoftGlow;
-                void Capsula(Vector2 mid, float len, float ancho, float rot, Color col)
+                // EL MATERIAL DEL FILO: LumenBlade (el sable de la casa)
+                // + BlackDisk (la silueta). Request inmediato — el
+                // mismo patrón de las demás texturas del mod.
+                var bladeAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/LumenBlade",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                var diskAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/BlackDisk",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
+                Texture2D blade = bladeAsset.Value;
+                Texture2D disk = diskAsset.Value;
+
+                /// <summary>LA CUCHILLA: LumenBlade dibujado EN el lote
+                /// (VFXCore.Quad escala a px finales contra el tamaño de
+                /// la textura) con la SILUETA negra de BlackDisk
+                /// debajo — el borde que corta de verdad.</summary>
+                void Cuchilla(Vector2 mid, float len, float ancho, float rot, Color col, Color silueta)
                 {
-                    if (glow == null) return;
-                    VFXCore.Quad(mid, col, new Vector2(len + ancho, ancho * 1.9f), rot, glow);
+                    if (blade == null) return;
+                    if (disk != null && silueta.A > 0)
+                        VFXCore.Quad(mid, silueta, new Vector2(len + ancho * 0.6f, ancho * 1.55f), rot, disk);
+                    VFXCore.Quad(mid, col, new Vector2(len, ancho), rot, blade);
                 }
 
                 // === (1) LA ESCRITURA DEL ARCO (la estela): cada trazo
-                // de la runa YA ESCRITO queda como cápsula curvada ===
+                // de la runa YA ESCRITO queda como cuchilla curvada ===
                 int pasos = 14;
                 for (int i = 0; i < pasos; i++)
                 {
@@ -261,16 +272,17 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     float aA = _giroBase + _sentido * (-APERTURA + BARRIDO * pp);
                     float alfaArco = alfa * (0.30f + 0.50f * pp);
                     Vector2 dirA = new Vector2(MathF.Cos(aA), MathF.Sin(aA));
-                    // EL SEGMENTO ESCRITO: cápsula TANGENTE al arco (la
+                    // EL SEGMENTO ESCRITO: cuchilla TANGENTE al arco (la
                     // curvatura de la escritura — cada trozo de arco es
-                    // un trazo de pluma, con su latido).
+                    // un trazo de pluma, con su filo de verdad).
                     float tang = aA + _sentido * MathHelper.PiOver2;
                     Vector2 medio = centro + dirA * (_radio * 0.62f);
-                    Capsula(medio,
+                    Cuchilla(medio,
                         _radio * 0.30f,                      // largo del trazo
-                        2.6f + 2.0f * (1f - pp),             // grosor: afina al escribir
+                        5.5f + 3.5f * (1f - pp),             // grosor: afina al escribir
                         tang,
-                        tinta * (alfaArco * 0.75f));
+                        tinta * (alfaArco * 0.85f),
+                        Color.Black * (alfaArco * 0.55f));
                 }
 
                 // === (2) EL FILO ACTUAL: LA RUNA GIGANTE ESTIRADA — el
@@ -294,12 +306,16 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     Vector2 mid = (aScr + bScr) * 0.5f;
                     float localY = ((pa.Y + pb.Y) * 0.5f + 7f) / 14f;
 
-                    // LA CUCHILLA: cápsula dorada con NÚCLEO blanco —
-                    // cuerpo→punta pálida como las runas de la casa.
-                    Capsula(mid, len, 7.5f, rot,
-                        Color.Lerp(oro, Color.White, 0.55f) * (0.85f * alfa));
-                    Capsula(mid, len, 3.0f, rot,
-                        Color.White * (0.95f * alfa * localY));
+                    // LA CUCHILLA DE VERDAD: el trazo de la runa como
+                    // SABLE (LumenBlade — núcleo duro + borde abrupto)
+                    // con su silueta negra: oro→blanco hacia la punta,
+                    // el lenguaje de las cuchillas de la casa.
+                    Cuchilla(mid, len, 9.5f, rot,
+                        Color.Lerp(oro, Color.White, 0.55f) * (0.95f * alfa),
+                        Color.Black * (0.65f * alfa));
+                    Cuchilla(mid, len * 0.94f, 3.6f, rot,
+                        Color.White * (0.95f * alfa * localY),
+                        Color.Transparent);
                 }
 
                 VFXCore.FlushAdditive(null, false);

@@ -119,16 +119,33 @@ namespace AethonMod.Content.NPCs
                         copia.bodyFrame.Y = copia.legFrame.Y = copia.headFrame.Y = 0;
                     }
 
-                    // LA ILUMINACIÓN DEL MUNDO sobre la copia (como
-                    // cualquier jugador — no una silueta ciega).
-                    Vector3 luz = Lighting.GetSubLight(NPC.Center);
-                    float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.15f, 1f);
-
+                    // v6.161 — LA AUTOPSIA DEL INVISIBLE (la letra: «el
+                    // NPC test sigue invisible, no lo veo»): la firma
+                    // de DrawPlayer es (camera, player, position,
+                    // rotation, rotationOrigin, SHADOW, SCALE) — y la
+                    // v6.159 pasaba la ILUMINACIÓN (0.15..1) en el
+                    // parámetro ESCALA: de noche o en cueva el clon se
+                    // dibujaba al 15% de TAMAÑO (≈8 píxeles de cuerpo
+                    // — invisible). LA CURA: escala 1 SIEMPRE (el
+                    // cuerpo de verdad, tamaño de jugador). La
+                    // iluminación NO se toca aquí: el renderer lee LA
+                    // LUZ DEL MUNDO por sí mismo (como a cualquier
+                    // jugador — el patrón de vanilla).
                     Vector2 pos = NPC.position - screenPos;
                     using (new Main.CurrentPlayerOverride(copia))
                     {
                         Main.PlayerRenderer.DrawPlayer(Main.Camera, copia, pos,
-                            0f, Vector2.Zero, 0f, lum);
+                            0f, Vector2.Zero, 0f, 1f);
+
+                        // v6.161 — EL VELO DE SOMBRA (la letra original:
+                        // «estara oscurecido con un shader de sombra»):
+                        // el MISMO clon re-dibujado con shadow = 0.58 —
+                        // el parámetro DE SOMBRA del renderer de vanilla
+                        // (multiplica el color del cuerpo: la silueta
+                        // oscurecida de la letra, SIN tocar tintes a
+                        // mano y SIN matar la visibilidad).
+                        Main.PlayerRenderer.DrawPlayer(Main.Camera, copia, pos,
+                            0f, Vector2.Zero, 0.58f, 1f);
                     }
                 }
             }

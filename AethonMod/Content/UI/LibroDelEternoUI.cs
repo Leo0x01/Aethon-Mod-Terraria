@@ -664,15 +664,18 @@ namespace AethonMod.Content.UI
         /// SE GANA con el despertar.</summary>
         private static readonly int[] UmbralLore =
         {
-            // [0] SecLore y [1] el prólogo: SIEMPRE
-            0, 0,
-            // v6.159 — EL CÓDEX NUEVO (13 capítulos): el canon SE GANA —
-            // el prólogo al llegar, los capítulos I..XI escalonados y el
-            // epílogo AL BORDE del 120 (el borrador infinito se lee al
-            // final del camino).
-            0, 5, 12, 20, 30, 38, 45, 55, 65, 75, 85, 95, 110,
-            // EL ARCHIVO VIEJO (LoreI..V de la casa): siempre abierto —
-            // lo que ya se leyó no se vuelve a sellar.
+            // v6.161 — LAS 19 ENTRADAS EXACTAS (la autopsia: la v6.160
+            // dejó 20 entradas para 19 secciones y el 110 huérfano caía
+            // sobre LoreI — EL ARCHIVO VIEJO DE LA CASA, que debe estar
+            // SIEMPRE abierto, quedaba sellado al despertar 110). La
+            // escalera NUEVA, pedacito a pedacito como pide la letra:
+            // [0] SecLore: SIEMPRE · [1] Prólogo: SIEMPRE · capítulos
+            // I..XI: 2/12/22/32/42/52/62/72/82/92/102 (una puerta de
+            // despertar por capítulo, del 2 al 102) · [13] Epílogo:
+            // 118 (al borde del NivelMax — el borrador infinito se lee
+            // al final del camino) · [14..18] el archivo viejo:
+            // SIEMPRE abierto.
+            0, 0, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 118,
             0, 0, 0, 0, 0,
         };
 

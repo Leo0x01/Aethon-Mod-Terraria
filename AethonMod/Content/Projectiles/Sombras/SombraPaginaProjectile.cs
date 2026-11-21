@@ -277,6 +277,37 @@ namespace AethonMod.Content.Projectiles.Sombras
             return false;
         }
 
+        /// <summary>v6.161 — EL CIERRE SIN FUGAS (la autopsia de las
+        /// sombras que no volvían): DOS gatos, una bolsa. (1) Si ESTA
+        /// sombra nació de la CAZA del Eterno (localAI[1] = 1 — el
+        /// flotante ya gastó SU contador al spawnedla), su muerte
+        /// devuelve ESA sombra al alma del libro. (2) Si fue el
+        /// disparo del ARMA con sombras CONCENTRADAS (localAI[0] > 0 —
+        /// el gasto de la v6.153), TODAS las concentradas vuelven
+        /// también. La fuga masiva dejó libros con cap 10 y solo 3
+        /// libres PARA SIEMPRE — nunca más.</summary>
+        public override void OnKill(int timeLeft)
+        {
+            try
+            {
+                bool deCaza = Projectile.localAI[1] >= 1f;
+                int n = SombrasConcentradas;
+                if (!deCaza && n <= 0) return;
+                Player dueño = Main.player[Projectile.owner];
+                Item libro = global::AethonMod.Content.Globals
+                    .AlmaEternoGlobalItem.Activo(dueño);
+                var alma = global::AethonMod.Content.Globals
+                    .AlmaEternoGlobalItem.De(libro);
+                if (alma != null)
+                {
+                    int liberar = n + (deCaza ? 1 : 0);
+                    alma.SombrasGastadas = System.Math.Max(0,
+                        alma.SombrasGastadas - liberar);
+                }
+            }
+            catch { }
+        }
+
         private void DrawTodo()
         {
             float tiempo = Main.GlobalTimeWrappedHourly;

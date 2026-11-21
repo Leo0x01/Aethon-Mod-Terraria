@@ -114,6 +114,16 @@ namespace AethonMod.Content.NPCs
                 _cuerpo.armor[2] = new Item();       // sin pantalón (la túnica cubre)
                 _cuerpo.armor[3] = new Item();       // sin zapatos visibles
                 _cuerpo.miscEquips[0] = new Item();  // sin caballo ni gancho
+                // v6.161 — LA PLUMA EN LA MANO (la cura de «ni siquiera
+                // usa el estilo de terraria»): el escriba SOSTIENE la
+                // pluma de tinta de vanilla — el ítem dibujado por EL
+                // PROPIO renderer de jugadores (la mano viva del
+                // estilo Terraria, como el Merchant sostiene su caja).
+                // HeldItem es de solo lectura (lee inventory
+                // [selectedItem]): la pluma vive en la ranura 0 y el
+                // selectedItem la señala.
+                _cuerpo.inventory[0] = new Item(ItemID.Feather);
+                _cuerpo.selectedItem = 0;
                 _cuerpo.direction = 1;
                 _cuerpo.gravDir = 1f;
                 _cuerpo.fullRotation = 0f;
@@ -501,35 +511,51 @@ namespace AethonMod.Content.NPCs
                     cuerpo.fullRotation = 0f;
                     cuerpo.wingFrame = 0;
                     cuerpo.itemAnimation = 0;   // sin brazos de golpe
+                    // v6.161 — LA MANO DE LA PLUMA: itemAnimation > 0
+                    // mantiene el brazo EXTENDIDO sosteniendo la pluma
+                    // (el gesto de quien escribe — el HeldItem se dibuja
+                    // solo con animación activa, el patrón vanilla).
+                    cuerpo.itemAnimationMax = 30;
+                    if (cuerpo.itemAnimation <= 0) cuerpo.itemAnimation = 30;
+                    cuerpo.itemRotation = 0f;
 
-                    // LA ILUMINACIÓN DEL MUNDO sobre el escriba (el
-                    // color del tile donde está — como los jugadores).
-                    Vector3 luz = Lighting.GetSubLight(NPC.Center);
-                    float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.10f, 1f);
-
+                    // v6.161 — LA AUTOPSIA DE LA CABEZA FLOTANTE (la
+                    // letra: «es solo una cabeza mal hecha flotante»):
+                    // la firma de DrawPlayer es (camera, player,
+                    // position, rotation, rotationOrigin, SHADOW,
+                    // SCALE) — y la v6.159 pasaba la ILUMINACIÓN
+                    // (0.10..1) en el parámetro ESCALA: el cuerpo del
+                    // escriba se dibujaba al 10-20% de TAMAÑO
+                    // (microcuerpo invisible) y solo la PLUMA dibujada
+                    // aparte a escala 1.6 sobrevivía — ESA era «la
+                    // cabeza flotante». LA CURA: escala 1 SIEMPRE (el
+                    // escriba de cuerpo completo, tamaño de jugador),
+                    // la iluminación la lee el renderer del mundo (como
+                    // a cualquier jugador), y la pluma muere: el
+                    // sello del escriba es ahora LA PLUMA PEQUEÑA en
+                    // la mano (el ítem de pluma de vanilla, dibujado
+                    // por el propio renderer — el estilo Terraria).
                     Vector2 pos = NPC.position - screenPos;
-                    // v6.159 — LA CESTA DE VANILLA (UICharacter.DrawSelf):
-                    // CurrentPlayerOverride hace que los hooks del
-                    // renderer corran SOBRE EL CLON — la misma secuencia
-                    // de la preview del menú. SIN la cesta, los hooks de
-                    // PlayerDrawLayer leen Main.LocalPlayer y el clon se
-                    // dibuja con los estados del jugador real.
                     using (new Main.CurrentPlayerOverride(cuerpo))
                     {
                         Main.PlayerRenderer.DrawPlayer(Main.Camera, cuerpo, pos,
-                            0f, Vector2.Zero, 0f, lum);
+                            0f, Vector2.Zero, 0f, 1f);
                     }
 
-                    // LA PLUMA DORADA en la diadema (el sello de la
-                    // casa — el detalle del escriba).
-                    var plumaAsset = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/NPCs/ElCronista_Head",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                    var pluma = plumaAsset.Value;
-                    spriteBatch.Draw(pluma,
-                        pos + new Vector2(NPC.width * 0.5f - 20f, -2f),
-                        null, Color.White * 0.85f * lum, 0f, Vector2.Zero,
-                        1.6f, SpriteEffects.None, 0f);
+                    // LA FIRMA DEL ESCRIBA — el remate de tinta violeta
+                    // a sus pies (el suspiro de la casa: 2 motas cada
+                    // ~20 ticks, discretas como una firma al pie de
+                    // página).
+                    if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 20f == 0f)
+                    {
+                        Vector2 cuna = NPC.BottomLeft + new Vector2(
+                            Main.rand.NextFloat(NPC.width), 0f);
+                        Dust d = Dust.NewDustPerfect(cuna,
+                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.2f),
+                            0, new Color(110, 60, 180), Main.rand.NextFloat(0.18f, 0.28f));
+                        d.noGravity = true;
+                    }
                 }
             }
             catch { }
