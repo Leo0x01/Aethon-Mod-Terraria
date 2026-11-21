@@ -79,12 +79,17 @@ namespace AethonMod.Content.Weapons.Investigaciones
             return null;
         }
 
-        /// <summary>¿ES UN ARMA VÁLIDA para el atril? (daño > 0 y no el
-        /// propio Trío — la MISMA regla del clic derecho).</summary>
+        /// <summary>¿ES UN ARMA VÁLIDA para el atril? v6.162 — SOLO
+        /// ARMAS MÁGICAS (la letra: «como limitacion pon que solo se
+        /// puedan usar armas magicas, no armas de invocador, no armas
+        /// mele, no armas distancia, solo armas magicas»): daño > 0,
+        /// que SU clase de daño sea Mágica, y no el propio Trío. Nada
+        /// de espadas, arcos ni látigos.</summary>
         public static bool EsArmaValida(Item it)
         {
             int tipo = ModContent.ItemType<TrioDelEterno>();
-            return it != null && !it.IsAir && it.damage > 0 && it.type != tipo;
+            return it != null && !it.IsAir && it.damage > 0 && it.type != tipo &&
+                it.DamageType == DamageClass.Magic;
         }
 
         public override string Texture => "AethonMod/Content/Weapons/Investigaciones/CetroDagasEterno";
@@ -107,8 +112,15 @@ namespace AethonMod.Content.Weapons.Investigaciones
             Item.noUseGraphic = true;        // la vaina no se dibuja girando
             Item.value = Item.buyPrice(gold: 5);
             Item.rare = ItemRarityID.LightPurple;
-            Item.shoot = ProjectileID.None;  // el Trío NO dispara nada propio
-            Item.shootSpeed = 0f;
+            // v6.162 — EL GATILLO DEL DISPARO (la autopsia del «no
+            // dispara»): con shoot = None el hook Shoot JAMÁS corría
+            // (el contrato de Terraria: Shoot solo vive con shoot > 0).
+            // EL PORTAL: este proyectil invisible de 1 tick es SOLO la
+            // puerta — al dispararlo, TrioDelEterno.Shoot corre y las
+            // ARMAS DE LAS RANURAS hacen el disparo de verdad.
+            Item.shoot = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Grimorio.PortalTrioProjectile>();
+            Item.shootSpeed = 12f;
             Item.autoReuse = true;
             for (int i = 0; i < 3; i++)
                 Ranuras[i] = new Item();
@@ -130,20 +142,43 @@ namespace AethonMod.Content.Weapons.Investigaciones
 
         // === EL ATAQUE: los proyectiles DE LAS ARMAS INSERTADAS ===
 
+        /// <summary>v6.162 — LA ELECCIÓN DEL CLIC DERECHO (la letra:
+        /// «el click derecho lo que tiene que hacer es elegir cual arma
+        /// se va a disparar, si se dispara 1, 2 o 3»): 0..2 = el arma
+        /// de ESA ranura dispara sola · 3 = LAS TRES A LA VEZ (la
+        /// marca del altar — por defecto ON).</summary>
+        public int ModoDisparo = 3;
+
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // EL CLIC DERECHO NO dispara (es insertar/extraer).
+            // EL CLIC DERECHO NO dispara (es el selector de arma).
             if (player.altFunctionUse == 2) return false;
 
+            // v6.162 — LA CURA DEL «NO DISPARA» (la letra: «cuando uso
+            // el arma no funciona»): el Trío vivía con Item.shoot =
+            // None — y EL CONTRATO DE TERRARIA es que Shoot SOLO corre
+            // si Item.shoot > 0: las ranuras llenas y el clic muerto.
+            // AHORA el disparador es PortalTrioProjectile (invisible,
+            // 1 tick) y ESTE código corre de verdad. El portal que lo
+            // trajo muere aquí: solo era la puerta.
+            if (type == ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Grimorio.PortalTrioProjectile>())
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active && p.owner == player.whoAmI &&
+                        p.type == type) p.Kill();
+                }
+
             // v6.160 — LAS TRES A LA VEZ (la letra: «es al mismo tiempo,
-            // las 3 armas se combinan y atacan a la vez»): TODAS las
-            // ranuras armadas disparan EN EL MISMO INSTANTE — el
-            // disparo COMBINADO del trío (cada arma con SU proyectil,
-            // SU daño y SU velocidad; la combinación ES el arma).
+            // las 3 armas se combinan y atacan a la vez») · v6.162 — Y
+            // LA ELECCIÓN: ModoDisparo elige LA ranura (0..2) o las
+            // TRES (3 — la marca del altar, por defecto).
             bool alguna = false;
             for (int idx = 0; idx < 3; idx++)
             {
+                if (ModoDisparo < 3 && idx != ModoDisparo) continue;   // SOLO la elegida
                 Item armaTurno = Ranuras[idx];
                 if (armaTurno == null || armaTurno.IsAir || armaTurno.shoot <= 0) continue;
                 alguna = true;
@@ -168,6 +203,17 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 var srcTurno = new Terraria.DataStructures.EntitySource_ItemUse(player, armaTurno);
                 Projectile.NewProjectile(srcTurno, player.MountedCenter + mira * 24f,
                     velReal, armaTurno.shoot, dano, kb, player.whoAmI);
+                // EL MANÁ DEL ARMA: cada disparo cobra SU coste de mana
+                // (la letra: SOLO armas mágicas — y las mágicas cobran
+                // maná; sin él, el trío sería mana gratis).
+                if (armaTurno.mana > 0 && Main.netMode != NetmodeID.Server)
+                {
+                    int costo = player.statManaMax2 >= armaTurno.mana
+                        ? armaTurno.mana : armaTurno.mana;
+                    player.statMana -= costo;
+                    if (player.statMana < 0) player.statMana = 0;
+                    player.manaRegenDelay = (int)(180f * player.manaRegenDelayBonus);
+                }
             }
             if (!alguna && Main.myPlayer == player.whoAmI)
             {
@@ -179,71 +225,36 @@ namespace AethonMod.Content.Weapons.Investigaciones
             return false;   // nada de vanilla: el disparo fue nuestro
         }
 
-        // === LA INSERCIÓN / EXTRACCIÓN vive en el clic derecho del inventario ===
+        // === EL CLIC DERECHO: EL SELECTOR (la letra: «el click derecho
+        //     lo que tiene que hacer es elegir cual arma se va a
+        //     disparar, si se dispara 1, 2 o 3») — la extracción vive
+        //     SOLO en el altar. ===
 
         public override bool CanUseItem(Player player)
         {
             if (player.altFunctionUse == 2)
             {
-                // EL GESTO DE LA CASA: insertar/extraer con clic derecho
-                // SOLO cuando el ítem está EN LA MANO (seleccionado).
-                ManejarInsercion(player);
+                // EL SELECTOR DE ARMA: 1 → 2 → 3 → LAS TRES → 1… (el
+                // ciclo del atril; solo en el dueño local).
+                if (Main.myPlayer == player.whoAmI)
+                {
+                    ModoDisparo = (ModoDisparo + 1) % 4;
+                    string clave = ModoDisparo >= 3
+                        ? "Mods.AethonMod.Items.TrioModoTres"
+                        : "Mods.AethonMod.Items.TrioModoUna";
+                    Main.NewText(Language.GetTextValue(clave, ModoDisparo + 1),
+                        new Color(160, 230, 255));
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                }
                 return false;   // no gasta animación
             }
             return true;
         }
 
-        /// <summary>EL CLIC DERECHO DEL ATRIL: si el cursor trae UN ARMA,
-        /// se INSERTA en la primera ranura libre; si viene VACÍO, la
-        /// última arma insertada SALE de vuelta al cursor.</summary>
-        private void ManejarInsercion(Player player)
-        {
-            if (Main.myPlayer != player.whoAmI) return;
-            Item mouse = Main.mouseItem;
-            if (mouse != null && !mouse.IsAir)
-            {
-                // ¿ES UN ARMA? (daño > 0 y NO es el propio Trío — el
-                // atril no se sostiene a sí mismo).
-                int trio = ModContent.ItemType<TrioDelEterno>();
-                if (mouse.damage <= 0 || mouse.type == trio)
-                {
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioNoArma"),
-                        new Color(255, 170, 130));
-                    return;
-                }
-                for (int i = 0; i < 3; i++)
-                {
-                    if (Ranuras[i] == null || Ranuras[i].IsAir)
-                    {
-                        Ranuras[i] = mouse.Clone();
-                        mouse.TurnToAir();
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85,
-                            player.Center);   // el chasquido del atril
-                        Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items.TrioInsertada", i + 1),
-                            new Color(160, 230, 255));
-                        return;
-                    }
-                }
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioLleno"),
-                    new Color(255, 170, 130));
-            }
-            else
-            {
-                // EXTRACCIÓN: la ÚLTIMA arma insertada vuelve al cursor.
-                for (int i = 2; i >= 0; i--)
-                {
-                    if (Ranuras[i] != null && !Ranuras[i].IsAir)
-                    {
-                        Main.mouseItem = Ranuras[i].Clone();
-                        Ranuras[i] = new Item();
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item81,
-                            player.Center);
-                        return;
-                    }
-                }
-            }
-        }
+        // (v6.162 — EL VIEJO CLIC DERECHO DE INSERTAR/EXTRAER MURIÓ: la
+        //  letra mandó que el clic derecho SEA EL SELECTOR de arma y la
+        //  extracción viva SOLO en el altar — ManejarInsercion fue
+        //  jubilado.)
 
         // === EL TOOLTIP: las tres ranuras a la vista ===
 
@@ -266,6 +277,13 @@ namespace AethonMod.Content.Weapons.Investigaciones
                     ? new Color(160, 230, 255) : new Color(140, 140, 150) };
                 tooltips.Add(linea);
             }
+            // v6.162 — EL MODO A LA VISTA (la letra: el clic derecho
+            // elige el arma): el tooltip dice SIEMPRE qué dispara.
+            tooltips.Add(new TooltipLine(Mod, "TrioModo",
+                Language.GetTextValue(ModoDisparo >= 3
+                    ? "Mods.AethonMod.Items.TrioModoTresTip"
+                    : "Mods.AethonMod.Items.TrioModoUnaTip", ModoDisparo + 1))
+            { OverrideColor = new Color(200, 160, 255) });
         }
 
         // === LA PERSISTENCIA: las tres armas viajan con el ítem ===
@@ -275,6 +293,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
             for (int i = 0; i < 3; i++)
                 if (Ranuras[i] != null && !Ranuras[i].IsAir)
                     tag["trio" + i] = ItemIO.Save(Ranuras[i]);
+            tag["trioModo"] = ModoDisparo;   // v6.162: el modo elegido viaja
         }
 
         public override void LoadData(TagCompound tag)
@@ -286,6 +305,8 @@ namespace AethonMod.Content.Weapons.Investigaciones
                     : new Item();
                 if (Ranuras[i] == null) Ranuras[i] = new Item();
             }
+            ModoDisparo = tag.ContainsKey("trioModo")
+                ? System.Math.Clamp(tag.GetInt("trioModo"), 0, 3) : 3;
         }
 
         public override void NetSend(System.IO.BinaryWriter writer)
@@ -296,6 +317,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 if (Ranuras[i] != null && !Ranuras[i].IsAir)
                     ItemIO.Send(Ranuras[i], writer, true);
             }
+            writer.Write((byte)ModoDisparo);   // v6.162: el modo viaja por la red
         }
 
         public override void NetReceive(System.IO.BinaryReader reader)
@@ -306,6 +328,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 Ranuras[i] = viva ? ItemIO.Receive(reader, true, false) : new Item();
                 if (Ranuras[i] == null) Ranuras[i] = new Item();
             }
+            ModoDisparo = System.Math.Clamp((int)reader.ReadByte(), 0, 3);
         }
 
         public override void AddRecipes()

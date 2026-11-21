@@ -219,19 +219,22 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 Color oro = new Color(255, 208, 120);        // el filo de oro
 
                 // ============================================================
-                //  v6.161 — EL FILO DE VERDAD (la letra: «el ataque del
-                //  grimorio siguen siendo circulos blancos
-                //  completamente lisos»): la v6.160 estiraba SoftGlow
-                //  (la textura de RESPLANDOR radial de la casa) — un
-                //  óvalo suave SIN bordes: por eso el tajo seguía
-                //  pareciendo un círculo blanco liso. LA CURA: el filo
-                //  usa LumenBlade (el PNG de la casa con perfil de
-                //  SABLE: núcleo duro + caída abrupta, medido a pelo —
-                //  pico de alfa 235 con caída a 21 en 4 px) — la MISMA
-                //  textura de las cuchillas de la casa — más el
-                //  BlackDisk como SILUETA oscura debajo (el contraste
-                //  que lee el ojo como «corte»). NADA de quads con
-                //  textura radial.
+                //  v6.162 — EL FILO DE VERDAD, DE VERDAD (la letra: «el
+                //  ataque del grimorio sigue siendo circulos planos,
+                //  eso esta mal, segun la regla de la casa no se
+                //  permite circulos planos»): LA AUTOPSIA de la
+                //  v6.161 — LumenBlade es una ESPADA VERTICAL (su filo
+                //  duro corre en X=28..36 a lo largo de 256 px de
+                //  hoja) y el Quad la dibujaba con el LARGO del tajo
+                //  sobre el eje X de la textura: la hoja APLASTADA y
+                //  su fundido largo estirado a lo largo del corte =
+                //  el óvalo suave de siempre. LA CURA: FiloTajo — la
+                //  textura FORJADA PARA EL CORTE (256×48: núcleo
+                //  blanco plano 255, caída abrupta a 0 en 6 px y
+                //  PUNTAS AFILADAS en los extremos — verificada
+                //  píxel a píxel): el largo del trazo sobre SU eje
+                //  largo, el filo perpendicular. NADA de texturas de
+                //  resplandor radial.
                 // ============================================================
 
                 // LA RUNA DEL FILO: la letra de ESTE tajo (determinista
@@ -239,28 +242,28 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 Vector2[] runa = OrbitaLib.RunasVacio[
                     (Projectile.whoAmI * 5 + 3) % OrbitaLib.RunasVacio.Length];
 
-                // EL MATERIAL DEL FILO: LumenBlade (el sable de la casa)
-                // + BlackDisk (la silueta). Request inmediato — el
-                // mismo patrón de las demás texturas del mod.
-                var bladeAsset = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Procedural/LumenBlade",
+                // EL MATERIAL DEL FILO: FiloTajo (la cuchilla de la
+                // casa) + BlackDisk (la silueta oscura del corte).
+                var filoAsset = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/FiloTajo",
                     ReLogic.Content.AssetRequestMode.ImmediateLoad);
                 var diskAsset = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/BlackDisk",
                     ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                Texture2D blade = bladeAsset.Value;
+                Texture2D filo = filoAsset.Value;
                 Texture2D disk = diskAsset.Value;
 
-                /// <summary>LA CUCHILLA: LumenBlade dibujado EN el lote
-                /// (VFXCore.Quad escala a px finales contra el tamaño de
-                /// la textura) con la SILUETA negra de BlackDisk
-                /// debajo — el borde que corta de verdad.</summary>
+                /// <summary>LA CUCHILLA: FiloTajo dibujado EN el lote
+                /// — el largo del trazo sobre el eje LARGO de la
+                /// textura (el corte de verdad) y la silueta negra de
+                /// BlackDisk debajo (el contraste del corte: una
+                /// franja oscura FINA que el ojo lee como tajo).</summary>
                 void Cuchilla(Vector2 mid, float len, float ancho, float rot, Color col, Color silueta)
                 {
-                    if (blade == null) return;
+                    if (filo == null) return;
                     if (disk != null && silueta.A > 0)
-                        VFXCore.Quad(mid, silueta, new Vector2(len + ancho * 0.6f, ancho * 1.55f), rot, disk);
-                    VFXCore.Quad(mid, col, new Vector2(len, ancho), rot, blade);
+                        VFXCore.Quad(mid, silueta, new Vector2(len * 1.04f, ancho * 1.7f), rot, disk);
+                    VFXCore.Quad(mid, col, new Vector2(len, ancho), rot, filo);
                 }
 
                 // === (1) LA ESCRITURA DEL ARCO (la estela): cada trazo
@@ -279,10 +282,10 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     Vector2 medio = centro + dirA * (_radio * 0.62f);
                     Cuchilla(medio,
                         _radio * 0.30f,                      // largo del trazo
-                        5.5f + 3.5f * (1f - pp),             // grosor: afina al escribir
+                        7.5f + 4.5f * (1f - pp),             // grosor: afina al escribir
                         tang,
                         tinta * (alfaArco * 0.85f),
-                        Color.Black * (alfaArco * 0.55f));
+                        Color.Black * (alfaArco * 0.5f));
                 }
 
                 // === (2) EL FILO ACTUAL: LA RUNA GIGANTE ESTIRADA — el
@@ -307,13 +310,14 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     float localY = ((pa.Y + pb.Y) * 0.5f + 7f) / 14f;
 
                     // LA CUCHILLA DE VERDAD: el trazo de la runa como
-                    // SABLE (LumenBlade — núcleo duro + borde abrupto)
-                    // con su silueta negra: oro→blanco hacia la punta,
-                    // el lenguaje de las cuchillas de la casa.
-                    Cuchilla(mid, len, 9.5f, rot,
+                    // CUCHILLA (FiloTajo — núcleo duro 255 + borde
+                    // abrupto + puntas afiladas) con su silueta negra:
+                    // oro→blanco hacia la punta, y el remate FINO del
+                    // núcleo encima (el destello del filo).
+                    Cuchilla(mid, len, 13f, rot,
                         Color.Lerp(oro, Color.White, 0.55f) * (0.95f * alfa),
-                        Color.Black * (0.65f * alfa));
-                    Cuchilla(mid, len * 0.94f, 3.6f, rot,
+                        Color.Black * (0.7f * alfa));
+                    Cuchilla(mid, len * 0.94f, 5.5f, rot,
                         Color.White * (0.95f * alfa * localY),
                         Color.Transparent);
                 }

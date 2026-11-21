@@ -2266,13 +2266,17 @@ Items: {
 			insert it; right-click with an empty hand to extract the last one.
 			'''
 	}
-	TrioVacio: The stand is empty — insert weapons with a right-click.
-	TrioNoArma: That is not a weapon — the stand only holds weapons.
-	TrioLleno: The stand already holds three weapons — extract one first (right-click with an empty hand).
+	TrioVacio: The stand is empty — insert magic weapons at the altar.
+	TrioNoArma: That is not a magic weapon — the stand only holds MAGIC weapons.
+	TrioLleno: The stand already holds three weapons — extract one at the altar.
 	TrioInsertada: Weapon seated in slot {0}.
-	TrioComo: Right-click: insert / extract. Left click: the weapon on duty fires.
+	TrioComo: Right-click: pick the weapon (1 → 2 → 3 → all three). Left click: fires. Fusing and extraction live at the ALTAR.
 	TrioLibre: (free)
 	TrioRanura: Slot {0}: {1}
+	TrioModoUna: The trio will fire ONLY weapon {0}.
+	TrioModoTres: The trio will fire ALL THREE weapons at once.
+	TrioModoUnaTip: Fires: only weapon {0} (right-click to change)
+	TrioModoTresTip: Fires: ALL THREE at once (the altar's mark · right-click to change)
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -3969,7 +3973,8 @@ Altar: {
 	// and unfuse the Trio Eterno weapon)
 	TrioTitulo: THE ETERNAL TRIO — THE FUSION TABLE
 	TrioSinTrio: You are not carrying the Eternal Trio — bring it to the altar to fuse its three weapons.
-	TrioPista: Click with a weapon on the cursor to insert it · click a filled slot to take it back — all three fire at once.
+	TrioPista: Click with a MAGIC weapon on the cursor to insert it · click a filled slot to take it back.
+	TrioMarca: The "3" box: fire ALL THREE at once ({0}). The weapon's right-click cycles 1, 2, 3 and all three.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them
 	ListaArma: Arma lista — gana estadísticas y su etiqueta

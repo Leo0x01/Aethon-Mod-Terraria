@@ -542,6 +542,29 @@ namespace AethonMod.Content.UI
                         }
                         break;   // un slot por clic
                     }
+
+                    // v6.162 — LA MARCA DE LAS TRES (la letra: «para
+                    // elegir disparar las 3 al mismo tiempo tengas
+                    // marcar en el altar»): la casilla «3» alterna EL
+                    // MODO TRES (marcada = las tres a la vez — como
+                    // nace el Trío; desmarcada = la última ranura
+                    // elegida con el clic derecho).
+                    if (_geoTrioMarca.Width > 0 &&
+                        _geoTrioMarca.Contains(Main.mouseX, Main.mouseY) &&
+                        !Terraria.GameInput.PlayerInput.IgnoreMouseInterface)
+                    {
+                        Main.LocalPlayer.mouseInterface = true;
+                        if (clicNuevo)
+                        {
+                            trioClic.ModoDisparo = trioClic.ModoDisparo >= 3 ? 0 : 3;
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                            Main.NewText(Language.GetTextValue(
+                                "Mods.AethonMod.Items." +
+                                (trioClic.ModoDisparo >= 3 ? "TrioModoTres" : "TrioModoUna"),
+                                trioClic.ModoDisparo + 1),
+                                new Color(160, 230, 255));
+                        }
+                    }
                 }
 
                 // EL BOTÓN CONSAGRAR: el sello de la casa (el MISMO de la
@@ -803,6 +826,9 @@ namespace AethonMod.Content.UI
         /// <summary>v6.161 — LOS TRES SLOTS DEL TRÍO (la mesa de
         /// fusión del altar).</summary>
         private static readonly Rectangle[] _geoTrio = new Rectangle[3];
+        /// <summary>v6.162 — LA MARCA DE LAS TRES (la casilla «3» del
+        /// altar: disparar las 3 a la vez — por defecto ON).</summary>
+        private static Rectangle _geoTrioMarca;
         /// <summary>v6.119 — EL RECT de la PUERTA al mundo interior (solo
         /// vive cuando la puerta está abierta: Rectangle.Empty la apaga —
         /// un clic en un rect vacío jamás entra).</summary>
@@ -1076,7 +1102,12 @@ namespace AethonMod.Content.UI
                         bool hoverS = PanelContiene(s) &&
                             !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
                         sb.Draw(pixel, s, TintaFondo * 0.9f);
-                        Marco(sb, pixel, s, hoverS ? new Color(150, 220, 255)
+                        // v6.162 — LA RANURA ELEGIDA BRILLA (la letra: el
+                        // clic derecho elige el arma 1/2/3 — el altar lo
+                        // MUESTRA con el marco pleno de la elegida).
+                        bool elegida = trio.ModoDisparo == slotT;
+                        Marco(sb, pixel, s, elegida ? new Color(200, 170, 255)
+                            : hoverS ? new Color(150, 220, 255)
                             : new Color(150, 220, 255) * 0.4f);
                         Item armaS = trio.Ranuras != null && slotT < trio.Ranuras.Length
                             ? trio.Ranuras[slotT] : null;
@@ -1095,7 +1126,44 @@ namespace AethonMod.Content.UI
                         }
                     }
                 }
+                // v6.162 — LA MARCA DE LAS TRES (la letra: «para elegir
+                // disparar las 3 al mismo tiempo tengas marcar en el
+                // altar usar las 3 al mismo tiempo, que sea algo ya
+                // seleccionado por defecto»): la casilla «3» junto a
+                // los slots — marcada DE FÁBRICA (ModoDisparo = 3 al
+                // nacer el Trío). Clic: alterna el modo TRES ↔ la
+                // última ranura elegida.
+                Rectangle marca = new Rectangle(x + 24 + 3 * 62 + 6, (int)cy + 8, 36, 36);
+                if (dibujar)
+                {
+                    _geoTrioMarca = marca;
+                    bool marcada = trio.ModoDisparo >= 3;
+                    bool hoverM = PanelContiene(marca) &&
+                        !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                    sb.Draw(pixel, marca, (hoverM ? new Color(150, 220, 255) : TintaVioleta) * 0.25f);
+                    Marco(sb, pixel, marca, marcada ? new Color(200, 170, 255)
+                        : new Color(150, 220, 255) * 0.45f);
+                    if (marcada)
+                    {
+                        sb.Draw(pixel, new Rectangle(marca.X + 8, marca.Center.Y - 1, 20, 2),
+                            new Color(200, 170, 255));
+                        sb.Draw(pixel, new Rectangle(marca.Center.X - 1, marca.Y + 8, 2, 20),
+                            new Color(200, 170, 255));
+                    }
+                    Utils.DrawBorderString(sb, "3", new Vector2(marca.Center.X, marca.Center.Y),
+                        marcada ? new Color(230, 210, 255) : TintaApagado, 0.9f, 0.5f, 0.5f);
+                }
                 cy += 52f + 8f;
+                // la leyenda de la marca (qué dispara el Trío AHORA —
+                // siempre medida con su variante más larga).
+                float altoMarca = Math.Max(
+                    AltoMedido(Language.GetTextValue(Clave("TrioMarca"), 1), w - 48f, 0.70f),
+                    AltoMedido(Language.GetTextValue(Clave("TrioMarca"), 0), w - 48f, 0.70f));
+                if (dibujar)
+                    LineaMedida(sb, Language.GetTextValue(Clave("TrioMarca"),
+                            trio.ModoDisparo >= 3 ? 1 : 0),
+                        x + 24f, cy, w - 48f, 0.70f, TintaApagado * 0.9f);
+                cy += altoMarca + 4f;
             }
 
             // ── LA LEYENDA DEL SELLO (v6.90 — para qué sirve: el grimorio

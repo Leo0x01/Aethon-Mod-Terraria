@@ -2251,13 +2251,19 @@ Items: {
 			insertarla; clic derecho con la mano vacía para extraer la última.
 			'''
 	}
-	TrioVacio: El atril está vacío — insértale armas con clic derecho.
-	TrioNoArma: Eso no es un arma — el atril solo sostiene armas.
-	TrioLleno: El atril ya sostiene tres armas — extrae una primero (clic derecho con la mano vacía).
+	TrioVacio: El atril está vacío — insértale armas mágicas desde el altar.
+	TrioNoArma: Eso no es un arma mágica — el atril solo sostiene armas MÁGICAS.
+	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
 	TrioInsertada: Arma asentada en la ranura {0}.
-	TrioComo: Clic derecho: insertar / extraer. Clic izquierdo: el arma del turno dispara.
+	TrioComo: Clic derecho: elegir arma (1 → 2 → 3 → las tres). Clic izquierdo: dispara. La fusión y extracción viven en el ALTAR.
 	TrioLibre: (libre)
 	TrioRanura: Ranura {0}: {1}
+	// v6.162 — EL SELECTOR Y LA MARCA (la letra: el clic derecho elige
+	// el arma; las 3 a la vez se marcan en el altar, por defecto SÍ)
+	TrioModoUna: El trío disparará SOLO el arma {0}.
+	TrioModoTres: El trío disparará LAS TRES ARMAS a la vez.
+	TrioModoUnaTip: Dispara: solo el arma {0} (clic derecho para cambiar)
+	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar · clic derecho para cambiar)
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -3958,7 +3964,8 @@ Altar: {
 	// el arma el trio eterno»)
 	TrioTitulo: EL TRÍO DEL ETERNO — LA MESA DE FUSIÓN
 	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
-	TrioPista: Clic con un arma en el cursor para insertarla · clic en un slot lleno para extraerla — las tres atacan a la vez.
+	TrioPista: Clic con un ARMA MÁGICA en el cursor para insertarla · clic en un slot lleno para extraerla.
+	TrioMarca: Casilla «3»: disparar LAS TRES a la vez ({0}). El clic derecho del arma cambia entre 1, 2, 3 y las tres.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora
 	ListaArma: Arma lista — gana estadísticas y su etiqueta

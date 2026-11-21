@@ -282,7 +282,9 @@ namespace AethonMod.Content.Projectiles.Nervioso
             Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 18, 0.24f, gancho: 0.5f);
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f)
                 : fase == FASE_ABSORBER ? MathHelper.Clamp(1f - t / 40f, 0f, 1f) : 1f;
-            SombrasLib.Masa(col, 7f, 11f, 0.92f * disipa, semilla, tiempo, grosorCentro: 34f);
+            // v6.162 — LA SOMBRA ACTUAL (lisa: la tinta estilizada — la
+            // MISMA pinta del arma y de la caza del Eterno).
+            SombrasLib.Masa(col, 7f, 11f, 0.92f * disipa, semilla, tiempo, grosorCentro: 34f, lisa: true);
 
             // === LA BRUMA NEGRA del cuerpo ===
             SombrasLib.BrumaColumna(col, 40f, 0.50f * disipa, tiempo, semilla, 12);

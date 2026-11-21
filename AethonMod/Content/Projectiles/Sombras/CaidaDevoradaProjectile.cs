@@ -288,7 +288,10 @@ namespace AethonMod.Content.Projectiles.Sombras
                 Vector2 destino = Vector2.Lerp(raiz + rumboRaiz * 34f, centroLibro, alcance);
                 destino = Vector2.Lerp(destino, raiz + rumboRaiz * 14f, inhala * 0.85f);
                 Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 16, 0.20f, gancho: 0.45f);
-                SombrasLib.Masa(col, 9f, 15f, 0.95f * vivoF, semilla, tiempo, grosorCentro: 40f);
+                // v6.162 — LA SOMBRA ACTUAL (lisa: la tinta estilizada —
+                // sin colmillos ni ventosas: TODA sombra del grimorio es
+                // la nueva versión).
+                SombrasLib.Masa(col, 9f, 15f, 0.95f * vivoF, semilla, tiempo, grosorCentro: 40f, lisa: true);
 
                 // === LA BRUMA DEL CUERPO (dos capas) ===
                 SombrasLib.BrumaColumna(col, 42f, 0.50f * vivoF, tiempo, semilla, 12);

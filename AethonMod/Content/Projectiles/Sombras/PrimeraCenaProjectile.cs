@@ -364,7 +364,15 @@ namespace AethonMod.Content.Projectiles.Sombras
                 Vector2 destino = Vector2.Lerp(raiz + rumboRaiz * 42f, centroJefe, alcance);
                 destino = Vector2.Lerp(destino, raiz + rumboRaiz * 18f, inhala * 0.85f);
                 Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 22, 0.20f, gancho: 0.45f);
-                SombrasLib.Masa(col, 12f, 20f, 0.95f * vivoF, semilla, tiempo, grosorCentro: 54f);
+                // v6.162 — LA SOMBRA ACTUAL EN EL FESTÍN (la letra: «la
+                // animacion donde el grimorio devora a un jefe sigue
+                // usando la sombra de la pagina con colmillos y ojos»):
+                // ESTA era la cine del primer devoro con la Masa VIEJA
+                // (colmillos + ventosas de hueso). lisa=true la vuelve
+                // LA TINTA ESTILIZADA — el MISMO trazo del arma, de la
+                // caza y del FauceDevorador: TODA sombra del grimorio
+                // es la nueva versión.
+                SombrasLib.Masa(col, 12f, 20f, 0.95f * vivoF, semilla, tiempo, grosorCentro: 54f, lisa: true);
 
                 // === LA BRUMA DEL CUERPO GIGANTE (dos capas) ===
                 SombrasLib.BrumaColumna(col, 50f, 0.50f * vivoF, tiempo, semilla, 14);

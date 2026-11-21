@@ -213,7 +213,8 @@ namespace AethonMod.Content.Projectiles.Sombras
             Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 12, 0.22f, gancho: 0.42f);
 
             // EL PERFIL FUSIFORME del grande, fino (es un plato, no un jefe)
-            SombrasLib.Masa(col, 5f, 8f, 0.92f * vivo, semilla, tiempo, grosorCentro: 20f);
+            // v6.162 — LA SOMBRA ACTUAL (lisa: la tinta estilizada).
+            SombrasLib.Masa(col, 5f, 8f, 0.92f * vivo, semilla, tiempo, grosorCentro: 20f, lisa: true);
 
             // LA BRUMA DEL CUERPO (una capa — el grande lleva dos)
             SombrasLib.BrumaColumna(col, 26f, 0.50f * vivo, tiempo, semilla, 9);
