@@ -1,5 +1,16 @@
 # AethonMod — Historial de Cambios
 
+## v6.163 — EL GRIMORIO ES EL CENTRO (release 453925522 · md5 c02f85a9…)
+
+1. **EL TRÍO SIN SELECTOR EN EL ARMA**: el arma solo dispara; la elección vive en la pestaña ALTAR del libro.
+2. **LA GRAN UNIFICACIÓN**: el libro gana pestañas ÍNDICE · ALTAR · PILAR — los paneles flotantes murieron; altar y pilar se dibujan como páginas del mismo grimorio (AltarDelLibro/PilarDelLibro + motores de clic con ley de distancia).
+3. **EL LIBRO**: margen inferior curado (+58px), «ASENTADO» sin «(NUEVO)», lore revisado (limpio).
+4. **EL ATAQUE REHECHO — LA ESCRITURA DEL CORTE**: tres cintas de tinta caligráfica escriben el glifo rúnico; pluma estelar; tensión y estallido al cerrar. Cero círculos planos.
+
+— oráculo 0/0 · build 0/0 (21.847.984 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.162 — TRES CURAS DE RAÍZ (release 453885896 · md5 b547fb38…)
 
 1. **FESTÍN DE JEFES**: `lisa:true` en PrimeraCena, CaidaDevorada, BocadoDelSuelo, SombraPaginaCaza y DevoracionEterna — la sombra con colmillos y ojos murió en TODAS las animaciones del grimorio.
