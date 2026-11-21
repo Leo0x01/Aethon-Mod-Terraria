@@ -1,5 +1,17 @@
 # AethonMod — Historial de Cambios
 
+## v6.161 — LAS CINCO AUTOPSIAS (release 453840073 · md5 d0020e7d…)
+
+1. **SOMBRAS UNIFICADAS**: la caza del Eterno spawnea la columna verlet (la sombra ACTUAL del arma) con la fórmula nueva; las TRES fugas de `SombrasGastadas` mueren (`OnKill` devuelve siempre) + red de seguridad por minuto (cura los libros ya dañados). **La respuesta al "siempre veo 3"**: cap 10 − 7 fugadas = 3.
+2. **EL FILO DE VERDAD**: LumenBlade (perfil de sable) + silueta BlackDisk — nada de SoftGlow estirado.
+3. **NPCs VISIBLES**: el bug era pasar la iluminación en el parámetro ESCALA de `DrawPlayer` (microcuerpo del 10-15%); escala 1 + velo de sombra 0.58 en el test + el Cronista sostiene la pluma de vanilla.
+4. **LORE PEDACITO A PEDACITO**: UmbralLore con 19 entradas exactas (Prólogo 0 · caps 2..102 · Epílogo 118 · archivo abierto).
+5. **LA MESA DE FUSIÓN DEL TRÍO** en el altar: 3 slots sobre las Ranuras[] del atril.
+
+— oráculo 0/0 · build 0/0 (21.834.226 B) · GUARDIÁN ✔ · headless 0 excepciones · release 453840073 + CDN byte a byte.
+
+# AethonMod — Historial de Cambios
+
 ## v6.160 — LAS RESPUESTAS + LAS CUATRO LETRAS (release 453153782 · md5 9089a074…)
 
 1. **EL CÓDEX CURADO DE VERDAD**: el texto en crudo era un namespace equivocado (el bloque vivía en `Projectiles`, el libro pedía `Pergamino.*`) — mudado por análisis de profundidad; **64 párrafos** completos (VII=13, IV=5, X=6) ×2 idiomas: es-ES verbatim, **en-US TRADUCIDO** (la respuesta del usuario); **es-MX borrado** (Terraria no lo usa).
