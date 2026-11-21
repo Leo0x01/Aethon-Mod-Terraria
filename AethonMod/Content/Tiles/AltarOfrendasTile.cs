@@ -236,8 +236,18 @@ namespace AethonMod.Content.Tiles
                 return true;
             }
 
+            // v6.163 — EL ALTAR ABRE EL LIBRO (la letra: «puedes usar
+            // la misma ventana que usas para el libro de informacion
+            // en el altar, para que todo encaje mejor con el tema de
+            // que todo se hace en el mismo grimorio»): el panel
+            // flotante murió — el clic en el altar abre EL LIBRO DEL
+            // ETERNO directo en SU pestaña (la ofrenda a la izquierda,
+            // el trío a la derecha). El motor del altar queda vivo
+            // (ley de distancia + slot + clics): el libro es la
+            // VENTANA, el altar es el ALTAR.
             UI.AltarOfrendasUI.Alternar(i, j);
-            Main.playerInventory = true;
+            if (UI.AltarOfrendasUI.Abierta)
+                UI.LibroDelEternoUI.AbrirEn(1);   // pestaña 1 = EL ALTAR
             return true;
         }
 

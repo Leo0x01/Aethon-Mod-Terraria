@@ -67,6 +67,108 @@ namespace AethonMod.Content.UI
         /// <summary>¿La ventana está abierta?</summary>
         public static bool Abierta => _abierta;
 
+        // ================================================================
+        //  v6.163 — EL PILAR VIVE EN EL LIBRO (la letra: «y lo mismo
+        //  para el pilar en el mundo interior»): el panel FLOTANTE
+        //  murió — el contenido se dibuja como PESTAÑA del libro
+        //  (PilarDelLibro). Este sistema sigue vivo como EL MOTOR: la
+        //  ley de distancia y TODA la lógica de clic (invocar, la
+        //  oleada, los jefes). El libro llama; el pilar hace.
+        // ================================================================
+
+        /// <summary>EL CLIC DEL LIBRO: el libro dibuja las páginas del
+        /// pilar (PilarDelLibro) y ESTE motor ejecuta las acciones.
+        /// Lee las geos vivas que la página dejó grabadas.</summary>
+        public static void ClicDelLibro()
+        {
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active || !_abierta) return;
+
+                // EL NIVEL ELEGIDO (el selector [-]/[+] de la página).
+                var sp = yo.GetModPlayer<Players.ShardPlayer>();
+                int maxNivel = sp != null ? Math.Max(1, Math.Min(10, sp.FuriaNivel)) : 1;
+                if (PilarDelLibro.NivelElegido > maxNivel) PilarDelLibro.NivelElegido = maxNivel;
+
+                // EL SELECTOR DE NIVEL
+                if (PilarDelLibro.GeoMenos.Width > 0 &&
+                    PilarDelLibro.GeoMenos.Contains(Main.mouseX, Main.mouseY) && maxNivel > 1)
+                {
+                    PilarDelLibro.NivelElegido = Math.Max(1, PilarDelLibro.NivelElegido - 1);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    return;
+                }
+                if (PilarDelLibro.GeoMas.Width > 0 &&
+                    PilarDelLibro.GeoMas.Contains(Main.mouseX, Main.mouseY) &&
+                    maxNivel > 1 && PilarDelLibro.NivelElegido < maxNivel)
+                {
+                    PilarDelLibro.NivelElegido = Math.Min(maxNivel, PilarDelLibro.NivelElegido + 1);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    return;
+                }
+
+                // VOLVER AL MUNDO REAL
+                if (PilarDelLibro.GeoVolver.Width > 0 &&
+                    PilarDelLibro.GeoVolver.Contains(Main.mouseX, Main.mouseY))
+                {
+                    _abierta = false;
+                    if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
+                    Systems.SubmundoGrimorio.Salir(yo);
+                    return;
+                }
+
+                // INVOCAR (la LLAMADA de siempre — los dos fragmentos)
+                if (PilarDelLibro.GeoInvocar.Width > 0 &&
+                    PilarDelLibro.GeoInvocar.Contains(Main.mouseX, Main.mouseY))
+                {
+                    bool yaVive = false;
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n != null && n.active && (n.type ==
+                            ModContent.NPCType<global::AethonMod.Content.NPCs.AethonSellado>() ||
+                            n.type == ModContent.NPCType
+                                <global::AethonMod.Content.NPCs.AethonBoss>()))
+                        { yaVive = true; break; }
+                    }
+                    if (!yaVive) InvocarLaLlamada(yo);
+                    else Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    return;
+                }
+
+                // EL SELLADO (la vía del dios completo — el rojo)
+                if (PilarDelLibro.GeoSellado.Width > 0 &&
+                    PilarDelLibro.GeoSellado.Contains(Main.mouseX, Main.mouseY))
+                {
+                    if (!NPCs.AethonSellado.Invocar(yo))
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    return;
+                }
+
+                // LANZAR LA OLEADA
+                if (PilarDelLibro.GeoLanzar.Width > 0 &&
+                    PilarDelLibro.GeoLanzar.Contains(Main.mouseX, Main.mouseY))
+                {
+                    bool festinVivo = false;
+                    try { festinVivo = Systems.GrimorioFuriaSistema.Activo; } catch { }
+                    if (!festinVivo) LanzarLaOleada(yo, PilarDelLibro.NivelElegido);
+                    return;
+                }
+
+                // UN JEFE DEVORADO (la fila de la arena)
+                if (PilarDelLibro.HoverJefe >= 0 && sp != null &&
+                    sp.JefesDevorados != null &&
+                    PilarDelLibro.HoverJefe < sp.JefesDevorados.Count)
+                {
+                    InvocarJefeInterior(yo, sp.JefesDevorados[PilarDelLibro.HoverJefe]);
+                    return;
+                }
+            }
+            catch { }
+        }
+
         /// <summary>EL PRISMA SE ABRE (o se cierra).</summary>
         public static void Alternar(int i, int j)
         {
@@ -78,7 +180,11 @@ namespace AethonMod.Content.UI
             try
             {
                 var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
-                if (sp != null) _nivelElegido = Math.Max(1, Math.Min(10, sp.FuriaNivel));
+                if (sp != null)
+                {
+                    _nivelElegido = Math.Max(1, Math.Min(10, sp.FuriaNivel));
+                    PilarDelLibro.NivelElegido = _nivelElegido;
+                }
             }
             catch { }
         }
@@ -88,11 +194,37 @@ namespace AethonMod.Content.UI
 
         public override void ModifyInterfaceLayers(System.Collections.Generic.List<GameInterfaceLayer> layers)
         {
-            if (!_abierta) return;
-            int idx = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
-            if (idx < 0) idx = layers.Count;
-            layers.Insert(idx, new LegacyGameInterfaceLayer(
-                "AethonMod: PrismaInterior", DibujarPanel, InterfaceScaleType.UI));
+            // v6.163 — EL PANEL FLOTANTE MURIÓ (la letra: «y lo mismo
+            // para el pilar en el mundo interior»): el contenido vive
+            // como PESTAÑA del libro (PilarDelLibro). Solo queda EL
+            // MOTOR: la ley de distancia del pilar físico — cada
+            // frame, sin pilar (roto o lejos) o sin mundo interior,
+            // se cierra; y si el libro está en la pestaña pilar, se
+            // cierra TAMBIÉN.
+            if (_abierta)
+            {
+                try
+                {
+                    Player yo = Main.LocalPlayer;
+                    if (yo == null || !yo.active || Main.gameMenu || Main.dedServ ||
+                        !Systems.SubmundoGrimorio.Activo)
+                    {
+                        _abierta = false;
+                        if (LibroDelEternoUI.Abierto && LibroDelEternoUI.Pestana == 2)
+                            LibroDelEternoUI.Cerrar();
+                        return;
+                    }
+                    float dist = Vector2.Distance(yo.Center,
+                        new Vector2(_tileX * 16f + 24f, _tileY * 16f + 8f));
+                    if (dist > 280f)
+                    {
+                        _abierta = false;
+                        if (LibroDelEternoUI.Abierto && LibroDelEternoUI.Pestana == 2)
+                            LibroDelEternoUI.Cerrar();
+                    }
+                }
+                catch { }
+            }
         }
 
         // === LOS RECTS VIVOS (el clic los lee — el patrón del panel) ===

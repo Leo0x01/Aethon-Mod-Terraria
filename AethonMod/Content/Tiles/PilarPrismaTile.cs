@@ -155,9 +155,15 @@ namespace AethonMod.Content.Tiles
                 return true;
             }
 
-            // LA VENTANA CON LOS BOTONES (el gesto del prisma — «tipo
-            // prisma altar»): VOLVER AL MUNDO REAL o INVOCAR A AETHON.
+            // v6.163 — EL PILAR ABRE EL LIBRO (la letra: «y lo mismo
+            // para el pilar en el mundo interior»): el panel flotante
+            // murió — el clic abre EL LIBRO DEL ETERNO en su pestaña
+            // (la puerta y la invocación a la izquierda; la oleada y
+            // los jefes devorados a la derecha). El motor queda vivo:
+            // el libro es la VENTANA, el pilar es el PILAR.
             UI.PrismaInteriorUI.Alternar(i, j);
+            if (UI.PrismaInteriorUI.Abierta)
+                UI.LibroDelEternoUI.AbrirEn(2);   // pestaña 2 = EL PILAR
             return true;
         }
 

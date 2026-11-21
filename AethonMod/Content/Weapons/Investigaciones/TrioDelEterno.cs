@@ -126,34 +126,26 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 Ranuras[i] = new Item();
         }
 
-        // === LA INSERCIÓN Y LA EXTRACCIÓN (clic derecho) ===
+        // === LA INSERCIÓN Y LA EXTRACCIÓN (viven SOLO en el altar del
+        //     libro — v6.163: el arma no gestiona ranuras) ===
 
-        public override bool AltFunctionUse(Player player) => true;
+        public override bool AltFunctionUse(Player player) => false;
 
         public override bool CanRightClick() => false;
 
-        public override bool? UseItem(Player player)
-        {
-            // EL CLIC DERECHO fuera de Shoot: insertar/extraer NO gasta
-            // animación — se maneja aquí (Shoot solo corre en el izq).
-            if (player.altFunctionUse == 2) return true;
-            return base.UseItem(player);
-        }
-
         // === EL ATAQUE: los proyectiles DE LAS ARMAS INSERTADAS ===
 
-        /// <summary>v6.162 — LA ELECCIÓN DEL CLIC DERECHO (la letra:
-        /// «el click derecho lo que tiene que hacer es elegir cual arma
-        /// se va a disparar, si se dispara 1, 2 o 3»): 0..2 = el arma
-        /// de ESA ranura dispara sola · 3 = LAS TRES A LA VEZ (la
-        /// marca del altar — por defecto ON).</summary>
+        /// <summary>0..2 = el arma de ESA ranura dispara sola · 3 =
+        /// LAS TRES A LA VEZ (la marca del altar — por defecto ON).
+        /// v6.163: la elección vive SOLO en el altar del libro.</summary>
         public int ModoDisparo = 3;
 
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // EL CLIC DERECHO NO dispara (es el selector de arma).
-            if (player.altFunctionUse == 2) return false;
+            // v6.163 — EL ARMA SOLO DISPARA: el selector murió aquí (la
+            // letra: «quitar del arma la funcion de cambiar cual
+            // disparar y dejamos esa funcion al altar»).
 
             // v6.162 — LA CURA DEL «NO DISPARA» (la letra: «cuando uso
             // el arma no funciona»): el Trío vivía con Item.shoot =
@@ -225,31 +217,14 @@ namespace AethonMod.Content.Weapons.Investigaciones
             return false;   // nada de vanilla: el disparo fue nuestro
         }
 
-        // === EL CLIC DERECHO: EL SELECTOR (la letra: «el click derecho
-        //     lo que tiene que hacer es elegir cual arma se va a
-        //     disparar, si se dispara 1, 2 o 3») — la extracción vive
-        //     SOLO en el altar. ===
+        // === EL CLIC DERECHO MURIÓ EN EL ARMA (v6.163 — la letra: «es
+        //     mejor quitar del arma la funcion de cambiar cual disparar
+        //     y dejamos esa funcion al altar»): la ELECCIÓN del arma
+        //     vive SOLO en el altar del libro (clic en la ranura =
+        //     elegirla · casilla «3» = las tres a la vez). El clic
+        //     derecho del arma YA NO HACE NADA — el arma SOLO dispara. ===
 
-        public override bool CanUseItem(Player player)
-        {
-            if (player.altFunctionUse == 2)
-            {
-                // EL SELECTOR DE ARMA: 1 → 2 → 3 → LAS TRES → 1… (el
-                // ciclo del atril; solo en el dueño local).
-                if (Main.myPlayer == player.whoAmI)
-                {
-                    ModoDisparo = (ModoDisparo + 1) % 4;
-                    string clave = ModoDisparo >= 3
-                        ? "Mods.AethonMod.Items.TrioModoTres"
-                        : "Mods.AethonMod.Items.TrioModoUna";
-                    Main.NewText(Language.GetTextValue(clave, ModoDisparo + 1),
-                        new Color(160, 230, 255));
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                }
-                return false;   // no gasta animación
-            }
-            return true;
-        }
+        public override bool CanUseItem(Player player) => true;
 
         // (v6.162 — EL VIEJO CLIC DERECHO DE INSERTAR/EXTRAER MURIÓ: la
         //  letra mandó que el clic derecho SEA EL SELECTOR de arma y la
@@ -277,8 +252,8 @@ namespace AethonMod.Content.Weapons.Investigaciones
                     ? new Color(160, 230, 255) : new Color(140, 140, 150) };
                 tooltips.Add(linea);
             }
-            // v6.162 — EL MODO A LA VISTA (la letra: el clic derecho
-            // elige el arma): el tooltip dice SIEMPRE qué dispara.
+            // v6.162 — EL MODO A LA VISTA · v6.163: la elección vive
+            // en el ALTAR del libro (el arma solo dispara).
             tooltips.Add(new TooltipLine(Mod, "TrioModo",
                 Language.GetTextValue(ModoDisparo >= 3
                     ? "Mods.AethonMod.Items.TrioModoTresTip"

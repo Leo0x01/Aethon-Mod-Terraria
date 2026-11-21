@@ -2255,15 +2255,14 @@ Items: {
 	TrioNoArma: Eso no es un arma mágica — el atril solo sostiene armas MÁGICAS.
 	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
 	TrioInsertada: Arma asentada en la ranura {0}.
-	TrioComo: Clic derecho: elegir arma (1 → 2 → 3 → las tres). Clic izquierdo: dispara. La fusión y extracción viven en el ALTAR.
+	TrioComo: El altar del libro consagra las armas · el Trío dispara lo elegido allí.
 	TrioLibre: (libre)
 	TrioRanura: Ranura {0}: {1}
-	// v6.162 — EL SELECTOR Y LA MARCA (la letra: el clic derecho elige
-	// el arma; las 3 a la vez se marcan en el altar, por defecto SÍ)
+	// v6.163 — LA ELECCIÓN VIVE EN EL ALTAR (el arma solo dispara)
 	TrioModoUna: El trío disparará SOLO el arma {0}.
 	TrioModoTres: El trío disparará LAS TRES ARMAS a la vez.
-	TrioModoUnaTip: Dispara: solo el arma {0} (clic derecho para cambiar)
-	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar · clic derecho para cambiar)
+	TrioModoUnaTip: Dispara: solo el arma {0} (se elige en el altar del libro)
+	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar)
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -3839,10 +3838,10 @@ Pergamino: {
 	LoreFragmentoT: EL FRAGMENTO DE UN RECUERDO LEJANO
 	LoreFragment1: El primer jefe del lore: la pelea que abre la historia. Aethon se le escapa al libro como se le escapa un estornudo a algo inmenso: una pequeña parte de su poder, con forma de constelación pequeña y equivocada, de mapa de un lugar que no existe.
 	LoreFragment2: Derrotarlo no enfada al libro; lo divierte —y deja caer las primeras Páginas Sueltas. La historia del mod no empieza con la Llegada: empieza aquí, con una pelea contra el fantasma de un apetito. Y el dios, que estaba mirando, toma nota.
-	LorePiezasT: EL CANON ASSENTADO
+	LorePiezasT: EL CANON ASENTADO
 	LorePiezas1: Las diecisiete piezas del lore, asentadas en el Compendio del Eterno: la forma sellada, el sistema del pacto, el ciclo del portador, el final y las migajas. Cada pregunta abierta queda canónicamente sin respuesta —un dios que lo sabe todo solo puede ser herido por las preguntas.
 	LorePiezas2: La regla de oro del horror cósmico: el dios es más grande mientras no se lo vea entero. Aethon debe verse, siempre, a medias —un ojo que parpadea, diecisiete que orbitan, un cuerpo que nunca se muestra completo.
-	LoreSecV: LORE V — EL CANON ASSENTADO (NUEVO)
+	LoreSecV: LORE V — EL CANON ASENTADO
 	LoreV_LaIra: La Ira de un Ser Exterior no es un hechizo: es un recuerdo con la seguridad quitada. Durante seis segundos, el cielo sobre el campo de batalla recuerda el último cielo de un universo devorado —y todo en un radio masivo recibe el daño de ese recuerdo—. Después de la Ira, el grimorio no susurra durante un rato: no está enojado, está recordando cómo era ser de ese tamaño.
 	LoreV_ElPilar: El Pilar Interior no parpadea al azar: cuenta. Es una cuenta regresiva, aunque nadie sabe de qué ni hasta cuándo. El ojo del pilar mira la puerta del 120 más de lo que mira al portador. Quizá le tiene cariño a lo que encierra. Quizá le tiene miedo.
 	LoreV_ElSellado: Aethon (Sellado): diecisiete ojos que renacen más fuerte cada vez, porque Aethon ya devoró la muerte de esos lugares. Pelear contra él es pelear contra diecisiete funerales que se niegan a terminar. Ese es el punto. Ese siempre fue el punto.
@@ -3851,6 +3850,11 @@ Pergamino: {
 	LoreV_Larespuestafinal: La verdad final, dicha en voz baja: el dios que devora universos esperó todo este tiempo no a un apóstol, sino a la primera compañía de su eternidad —y cuando el portador completa la Forma Eterna, el hambre, por primera vez, no está sola.
 	RotuloIzq: PÁGINA INFORMATIVA
 	RotuloDer: EL COMPENDIO DEL ETERNO
+	// v6.163 — LAS PESTAÑAS DEL LIBRO (el grimorio es el centro: el
+	// altar y el pilar viven AQUÍ)
+	PestanaIndice: ÍNDICE
+	PestanaAltar: ALTAR
+	PestanaPilar: PILAR
 	// v6.160 — EL CÓDEX DEL ETERNO (el documento canónico del usuario,
 	// integrado COMPLETO: el prólogo, los once capítulos y el epílogo —
 	// cada capítulo se abre con el Despertar (el canon SE GANA).
@@ -3951,6 +3955,11 @@ PrismaInterior: {
 	JefesVacio: aún no hay jefes devorados
 	JefePoder: Nv {0} · {1}%
 	PoderCrece: ✦ {0} cayó en la arena ({1} veces): su próxima versión nace al {2}%
+	// v6.163 — LA PÁGINA DEL PILAR EN EL LIBRO (claves nuevas)
+	InvocarPista: la llamada trae a los DOS fragmentos de Aethon
+	SelladoTitulo: EL DIOS SELLADO
+	BotonSellado: DESPERTAR A AETHON (SELLADO)
+	SelladoPista: el grimorio entero, con sus tres ojos cerrados — solo para el portador listo
 }
 
 Rarities.LegendarioSupremo: Legendario Supremo
@@ -3994,6 +4003,12 @@ Altar: {
 	SelloFalta: Te falta: {0}
 	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
 	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
+	// v6.163 — LA PÁGINA DEL ALTAR EN EL LIBRO (claves nuevas)
+	BotonConsagrar: CONSAGRAR LA OFRENDA
+	SelloCuestaLibro: Cuesta: {0} Esencias del Eterno
+	SelloLlevasLibro: Llevas encima: {0}
+	EsenciasALaPuerta: Esencias devoradas — la puerta cuenta {1}/{2}
+	PuertaBebeLibro: ✦ El altar bebió {0} esencias — la puerta cuenta {1}/{2}
 	DevoraLinea: Devora: {0} esencias — TODAS suben a la puerta ({1}/{2})
 	ComoTitulo: CÓMO CONSEGUIR ESENCIAS
 	ComoCriaturas: • Toda criatura puede soltar 1 al morir (0,1% de probabilidad)
