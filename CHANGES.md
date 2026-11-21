@@ -1,5 +1,18 @@
 # AethonMod — Historial de Cambios
 
+## v6.164 — LAS TRES VENTANAS SEPARADAS Y EL TAJO DE TINTA (release 453991696 · md5 511c9779…)
+
+1. **LAS PESTAÑAS MUEREN**: icono/P → solo Índice · altar → solo altar · pilar → solo pilar; cierre sincronizado.
+2. **EL ÍNDICE LIMPIO**: títulos «Información» y «Lore» centrados (los rótulos largos mueren).
+3. **LA CURA DE LOS BOTONES MUERTOS**: el flanco de la casa (mouseLeft && !_ultimoClic) en el dibujo + clics granulares; textos medidos, tinta unificada, sin scroll (6 jefes + cuenta).
+4. **EL ALTAR SIN SCROLL**: la ofrenda + Consagrar + GANA + CÓMO CONSEGUIR ESENCIAS + EL MUNDO INTERIOR; el Trío con la guía honesta (la elección vive en el altar).
+5. **EL ATAQUE REHECHO DE RAÍZ**: los «círculos blancos» eran los glifos radiales (RunaVacia) + la textura Carne — ahora dos estelas de tinta con EstelaLib.Ribbon (3 capas, perfiles Alive/Comet, gotas al cierre).
+6. **EL REGALO DE BIENVENIDA**: 9999 esencias al generar un mundo nuevo.
+
+— oráculo 0/0 · build 0/0 (21.848.367 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.163 — EL GRIMORIO ES EL CENTRO (release 453925522 · md5 c02f85a9…)
 
 1. **EL TRÍO SIN SELECTOR EN EL ARMA**: el arma solo dispara; la elección vive en la pestaña ALTAR del libro.
