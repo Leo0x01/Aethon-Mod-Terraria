@@ -1,5 +1,15 @@
 # AethonMod — Historial de Cambios
 
+## v6.162 — TRES CURAS DE RAÍZ (release 453885896 · md5 b547fb38…)
+
+1. **FESTÍN DE JEFES**: `lisa:true` en PrimeraCena, CaidaDevorada, BocadoDelSuelo, SombraPaginaCaza y DevoracionEterna — la sombra con colmillos y ojos murió en TODAS las animaciones del grimorio.
+2. **EL TRÍO DISPARA**: causa raíz (`shoot=None` mataba el hook `Shoot`) curada con PortalTrioProjectile + solo armas MÁGICAS + clic derecho selector 1/2/3/tres + marca del altar (ON por defecto) + maná por arma.
+3. **EL ATAQUE**: LumenBlade era una espada VERTICAL dibujada aplastada — el óvalo suave de siempre. FiloTajo.png forjada para el corte (núcleo 255 plano, caída en 6 px, puntas afiladas).
+
+— oráculo 0/0 · build 0/0 (21.838.647 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.161 — LAS CINCO AUTOPSIAS (release 453840073 · md5 d0020e7d…)
 
 1. **SOMBRAS UNIFICADAS**: la caza del Eterno spawnea la columna verlet (la sombra ACTUAL del arma) con la fórmula nueva; las TRES fugas de `SombrasGastadas` mueren (`OnKill` devuelve siempre) + red de seguridad por minuto (cura los libros ya dañados). **La respuesta al "siempre veo 3"**: cap 10 − 7 fugadas = 3.
