@@ -3213,6 +3213,7 @@ Esencia: {
 
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
+	RegaloBienvenida: ✦ The Eternal welcomes you with 9999 Essences of the Eternal — the hunger starts served.
 }
 
 HUD: {
@@ -3967,6 +3968,7 @@ PrismaInterior: {
 	PoderCrece: ✦ {0} fell in the arena ({1} times): its next version is born at {2}%
 	// v6.163 — THE PILLAR PAGE IN THE BOOK
 	InvocarPista: the call brings BOTH of Aethon's fragments
+	JefesMas: …and {0} more devoured await their turn
 	SelladoTitulo: THE SEALED GOD
 	BotonSellado: AWAKEN AETHON (SEALED)
 	SelladoPista: the whole grimoire, three eyes closed — only for the ready bearer
@@ -3983,7 +3985,7 @@ Altar: {
 	TrioTitulo: THE ETERNAL TRIO — THE FUSION TABLE
 	TrioSinTrio: You are not carrying the Eternal Trio — bring it to the altar to fuse its three weapons.
 	TrioPista: Click with a MAGIC weapon on the cursor to insert it · click a filled slot to take it back.
-	TrioMarca: The "3" box: fire ALL THREE at once ({0}). The weapon's right-click cycles 1, 2, 3 and all three.
+	TrioMarca: The "3" box: fire ALL THREE at once ({0}) — chosen HERE, at the altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
@@ -4006,6 +4008,7 @@ Altar: {
 	GanaArma: Weapon → +5% to ALL stats and its tag
 	GanaMaterial: Material → SOLO su etiqueta junto al nombre
 	GanaEsencias: Essences → +1 to the gate each (the {0} open it)
+	GanaConsagrada: Consecrated weapon → +5% to ALL its stats, forever
 	SelloTitulo: EL SELLO
 	SelloCuesta: Cuesta: {0} Esencias del Eterno
 	SelloLlevas: Llevas: {0}

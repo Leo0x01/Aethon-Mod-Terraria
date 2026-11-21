@@ -65,6 +65,10 @@ namespace AethonMod.Content.UI
         /// <summary>¿El panel está abierto?</summary>
         public static bool Abierta => _abierta;
 
+        /// <summary>v6.164 — EL CIERRE POR ORDEN DEL LIBRO (ESC/X en
+        /// la pestaña altar): suelta el arma del slot como siempre.</summary>
+        public static void ForzarCierre() => CerrarDeVerdad();
+
         // ================================================================
         //  v6.163 — EL ALTAR VIVE EN EL LIBRO (la letra: «puedes usar
         //  la misma ventana que usas para el libro de informacion en
@@ -81,221 +85,216 @@ namespace AethonMod.Content.UI
         /// <summary>¿Es consagrible? (la puerta pública para el libro).</summary>
         public static bool EsOfrendaConsagriblePublica(Item it) => EsOfrendaConsagrible(it);
 
-        /// <summary>EL CLIC DEL LIBRO: el libro dibuja las páginas del
-        /// altar y ESTE motor ejecuta las acciones (meter/sacar la
-        /// ofrenda, consagrar, la puerta, el trío). Lee las geos que
-        /// AltarDelLibro dejó grabadas al dibujar.</summary>
-        public static void ClicDelLibro()
+        /// <summary>v6.164 — LOS CLICS GRANULARES DEL ALTAR (la cura de los
+/// botones muertos: las páginas del libro llaman a ESTOS métodos con
+/// el flanco de la casa — cada acción, su función).</summary>
+        public static void ClicEnSlot()
         {
             try
             {
                 Player yo = Main.LocalPlayer;
-                if (yo == null || !yo.active) return;
-                if (!_abierta) return;   // sin altar vivo, nada (la pestaña se cerró)
+                if (yo == null || !yo.active || !_abierta) return;
 
-                // EL SLOT: la ofrenda (el MISMO contrato de siempre).
-                if (AltarDelLibro.GeoSlot.Width > 0 &&
-                    AltarDelLibro.GeoSlot.Contains(Main.mouseX, Main.mouseY))
+                if (!Main.mouseItem.IsAir && Main.mouseItem.type == ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>())
                 {
-                    if (!Main.mouseItem.IsAir && Main.mouseItem.type == ModContent.ItemType
-                        <global::AethonMod.Content.Items.Altar.ItemCorrupto>())
+                    // EL DEPÓSITO DE LAS MIL (el devoro con tope).
+                    int topePuerta = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta;
+                    int yaConsagradas = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas;
+                    int falta = topePuerta - yaConsagradas;
+                    if (falta <= 0)
                     {
-                        // EL DEPÓSITO DE LAS MIL (el devoro con tope — la
-                        // letra v6.122, entera).
-                        int topePuerta = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta;
-                        int yaConsagradas = global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas;
-                        int falta = topePuerta - yaConsagradas;
-                        if (falta <= 0)
-                        {
-                            Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), TintaTeal);
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                        }
-                        else
-                        {
-                            int toma = Math.Min(falta, Main.mouseItem.stack);
-                            bool yaAbierta = global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
-                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += toma;
-                            Main.NewText(Language.GetTextValue(Clave("PuertaBebe"), toma,
-                                global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                                topePuerta), TintaVioleta);
-                            if (!yaAbierta && global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
-                            {
-                                Main.NewText(Terraria.Localization.Language.GetTextValue(
-                                    "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                    new Color(220, 170, 255));
-                                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
-                            }
-                            else Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.25f));
-                            Main.mouseItem.stack -= toma;
-                            if (Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
-                            if (!Main.dedServ)
-                                for (int k = 0; k < Math.Min(30, 8 + toma / 40); k++)
-                                {
-                                    Dust d = Dust.NewDustPerfect(
-                                        new Vector2(_tileX * 16f + 16f, _tileY * 16f + 4f) +
-                                            new Vector2(Main.rand.NextFloat(-14f, 14f), Main.rand.NextFloat(-30f, 4f)),
-                                        DustID.Shadowflame, Main.rand.NextVector2Circular(2.2f, 2.2f), 140,
-                                        new Color(140, 60, 210), 1f);
-                                    d.noGravity = true;
-                                }
-                        }
-                    }
-                    else if (!Main.mouseItem.IsAir)
-                    {
-                        if (EsOfrendaConsagrible(Main.mouseItem))
-                        {
-                            Item sale = _arma.IsAir ? new Item() : (Item)_arma.Clone();
-                            _arma = (Item)Main.mouseItem.Clone();
-                            Main.mouseItem = sale;
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
-                        }
-                        else
-                        {
-                            var selloMouse = Main.mouseItem.GetGlobalItem
-                                <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
-                            bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
-                            Main.NewText(Language.GetTextValue(
-                                yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), TintaRojo);
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                        }
-                    }
-                    else if (!_arma.IsAir)
-                    {
-                        Main.mouseItem = (Item)_arma.Clone();
-                        _arma = new Item();
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
-                    }
-                    return;
-                }
-
-                // EL TRÍO (la página derecha): insertar / extraer /
-                // ELEGIR (v6.163 — la elección vive AQUÍ: clic en la
-                // ranura la ELIGE; clic en la casilla «3» = las tres).
-                var trio = global::AethonMod.Content.Weapons.Investigaciones
-                    .TrioDelEterno.Del(Main.LocalPlayer);
-                if (trio != null)
-                {
-                    for (int slotT = 0; slotT < 3; slotT++)
-                    {
-                        Rectangle geoT = AltarDelLibro.GeoTrio[slotT];
-                        if (geoT.Width <= 0 || !geoT.Contains(Main.mouseX, Main.mouseY)) continue;
-
-                        Item armaSlot = trio.Ranuras != null && slotT < trio.Ranuras.Length
-                            ? trio.Ranuras[slotT] : null;
-                        if (!Main.mouseItem.IsAir)
-                        {
-                            if (global::AethonMod.Content.Weapons.Investigaciones
-                                .TrioDelEterno.EsArmaValida(Main.mouseItem))
-                            {
-                                int destino = (armaSlot == null || armaSlot.IsAir) ? slotT : -1;
-                                if (destino < 0)
-                                    for (int k = 0; k < 3; k++)
-                                    {
-                                        Item rk = trio.Ranuras[k];
-                                        if (rk == null || rk.IsAir) { destino = k; break; }
-                                    }
-                                if (destino >= 0)
-                                {
-                                    trio.Ranuras[destino] = (Item)Main.mouseItem.Clone();
-                                    Main.mouseItem.TurnToAir();
-                                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
-                                    Main.NewText(Language.GetTextValue(
-                                        "Mods.AethonMod.Items.TrioInsertada", destino + 1),
-                                        new Color(160, 230, 255));
-                                }
-                                else Main.NewText(Language.GetTextValue(
-                                    "Mods.AethonMod.Items.TrioLleno"), new Color(255, 170, 130));
-                            }
-                            else
-                            {
-                                Main.NewText(Language.GetTextValue(
-                                    "Mods.AethonMod.Items.TrioNoArma"), new Color(255, 170, 130));
-                                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                            }
-                        }
-                        else if (armaSlot != null && !armaSlot.IsAir)
-                        {
-                            // v6.163 — EL CONTRATO NUEVO (la letra: la
-                            // elección vive en el ALTAR): CLIC IZQUIERDO
-                            // en ranura llena con cursor vacío = LA ELIGE
-                            // (el modo de disparo). CLIC DERECHO = la
-                            // extrae de vuelta al cursor.
-                            if (Main.mouseRight && Main.mouseRightRelease)
-                            {
-                                Main.mouseItem = (Item)armaSlot.Clone();
-                                trio.Ranuras[slotT] = new Item();
-                                Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
-                            }
-                            else
-                            {
-                                trio.ModoDisparo = slotT;
-                                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                                Main.NewText(Language.GetTextValue(
-                                    "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
-                                    new Color(160, 230, 255));
-                            }
-                        }
-                        else
-                        {
-                            // RANURA VACÍA con cursor vacío: también la
-                            // elige (que dispare en vacío no daña — el
-                            // aviso del arma sale solo).
-                            trio.ModoDisparo = slotT;
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                            Main.NewText(Language.GetTextValue(
-                                "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
-                                new Color(160, 230, 255));
-                        }
-                        return;
-                    }
-
-                    // LA MARCA «3» (las tres a la vez)
-                    if (AltarDelLibro.GeoMarcaTres.Width > 0 &&
-                        AltarDelLibro.GeoMarcaTres.Contains(Main.mouseX, Main.mouseY))
-                    {
-                        trio.ModoDisparo = trio.ModoDisparo >= 3 ? 0 : 3;
+                        Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), TintaTeal);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                        Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items." +
-                            (trio.ModoDisparo >= 3 ? "TrioModoTres" : "TrioModoUna"),
-                            trio.ModoDisparo + 1), new Color(160, 230, 255));
-                        return;
-                    }
-                }
-
-                // EL BOTÓN CONSAGRAR (el sello de la casa — entero).
-                if (AltarDelLibro.GeoConsagrar.Width > 0 &&
-                    AltarDelLibro.GeoConsagrar.Contains(Main.mouseX, Main.mouseY) &&
-                    !_arma.IsAir)
-                {
-                    ConsagrarDesdeElLibro(yo);
-                    return;
-                }
-
-                // LA PUERTA AL MUNDO INTERIOR (el mismo disparo del panel).
-                if (AltarDelLibro.GeoPuerta.Width > 0 &&
-                    AltarDelLibro.GeoPuerta.Contains(Main.mouseX, Main.mouseY))
-                {
-                    string razonPuerta;
-                    if (global::AethonMod.Content.Systems.SubmundoGrimorio
-                        .PuedeEntrar(yo, out razonPuerta))
-                    {
-                        _abierta = false;   // el altar suelta la ventana: el libro toma el relevo
-                        if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
-                        Projectile.NewProjectile(yo.GetSource_Misc("AltarMundoInterior"),
-                            yo.Center, Vector2.Zero,
-                            ModContent.ProjectileType
-                                <global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna>(),
-                            0, 0f, yo.whoAmI);
                     }
                     else
                     {
-                        if (razonPuerta != null)
-                            Main.NewText(razonPuerta, new Color(190, 160, 220));
+                        int toma = Math.Min(falta, Main.mouseItem.stack);
+                        bool yaAbierta = global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta;
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += toma;
+                        Main.NewText(Language.GetTextValue(Clave("PuertaBebe"), toma,
+                            global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                            topePuerta), TintaVioleta);
+                        if (!yaAbierta && global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                        {
+                            Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
+                                new Color(220, 170, 255));
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
+                        }
+                        else Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.25f));
+                        Main.mouseItem.stack -= toma;
+                        if (Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
+                        if (!Main.dedServ)
+                            for (int k = 0; k < Math.Min(30, 8 + toma / 40); k++)
+                            {
+                                Dust d = Dust.NewDustPerfect(
+                                    new Vector2(_tileX * 16f + 16f, _tileY * 16f + 4f) +
+                                        new Vector2(Main.rand.NextFloat(-14f, 14f), Main.rand.NextFloat(-30f, 4f)),
+                                    DustID.Shadowflame, Main.rand.NextVector2Circular(2.2f, 2.2f), 140,
+                                    new Color(140, 60, 210), 1f);
+                                d.noGravity = true;
+                            }
+                    }
+                }
+                else if (!Main.mouseItem.IsAir)
+                {
+                    if (EsOfrendaConsagrible(Main.mouseItem))
+                    {
+                        Item sale = _arma.IsAir ? new Item() : (Item)_arma.Clone();
+                        _arma = (Item)Main.mouseItem.Clone();
+                        Main.mouseItem = sale;
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                    }
+                    else
+                    {
+                        var selloMouse = Main.mouseItem.GetGlobalItem
+                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                        bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
+                        Main.NewText(Language.GetTextValue(
+                            yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), TintaRojo);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     }
-                    return;
+                }
+                else if (!_arma.IsAir)
+                {
+                    Main.mouseItem = (Item)_arma.Clone();
+                    _arma = new Item();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>EL CLIC EN UNA RANURA DEL TRÍO: inserta / extrae /
+        /// ELIGE (v6.163: la elección vive AQUÍ — el arma ya no elige).</summary>
+        public static void ClicEnRanura(int slotT)
+        {
+            try
+            {
+                var trio = global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.Del(Main.LocalPlayer);
+                if (trio == null || slotT < 0 || slotT > 2) return;
+
+                Item armaSlot = trio.Ranuras != null && slotT < trio.Ranuras.Length
+                    ? trio.Ranuras[slotT] : null;
+                if (!Main.mouseItem.IsAir)
+                {
+                    if (global::AethonMod.Content.Weapons.Investigaciones
+                        .TrioDelEterno.EsArmaValida(Main.mouseItem))
+                    {
+                        int destino = (armaSlot == null || armaSlot.IsAir) ? slotT : -1;
+                        if (destino < 0)
+                            for (int k = 0; k < 3; k++)
+                            {
+                                Item rk = trio.Ranuras[k];
+                                if (rk == null || rk.IsAir) { destino = k; break; }
+                            }
+                        if (destino >= 0)
+                        {
+                            trio.Ranuras[destino] = (Item)Main.mouseItem.Clone();
+                            Main.mouseItem.TurnToAir();
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
+                            Main.NewText(Language.GetTextValue(
+                                "Mods.AethonMod.Items.TrioInsertada", destino + 1),
+                                new Color(160, 230, 255));
+                        }
+                        else Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Items.TrioLleno"), new Color(255, 170, 130));
+                    }
+                    else
+                    {
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Items.TrioNoArma"), new Color(255, 170, 130));
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                }
+                else if (armaSlot != null && !armaSlot.IsAir)
+                {
+                    // CLIC IZQUIERDO en ranura llena con cursor vacío: LA
+                    // ELIGE. CLIC DERECHO: la extrae al cursor.
+                    if (Main.mouseRight)
+                    {
+                        Main.mouseItem = (Item)armaSlot.Clone();
+                        trio.Ranuras[slotT] = new Item();
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                    }
+                    else
+                    {
+                        trio.ModoDisparo = slotT;
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
+                            new Color(160, 230, 255));
+                    }
+                }
+                else
+                {
+                    trio.ModoDisparo = slotT;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
+                        new Color(160, 230, 255));
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>EL CLIC EN LA MARCA «3»: alterna las-tres / ranura 1.</summary>
+        public static void ClicEnMarcaTres()
+        {
+            try
+            {
+                var trio = global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.Del(Main.LocalPlayer);
+                if (trio == null) return;
+                trio.ModoDisparo = trio.ModoDisparo >= 3 ? 0 : 3;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                Main.NewText(Language.GetTextValue(
+                    "Mods.AethonMod.Items." +
+                    (trio.ModoDisparo >= 3 ? "TrioModoTres" : "TrioModoUna"), 1),
+                    new Color(160, 230, 255));
+            }
+            catch { }
+        }
+
+        /// <summary>EL CLIC EN CONSAGRAR (el sello de la casa).</summary>
+        public static void ClicEnConsagrar()
+        {
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active || !_abierta || _arma.IsAir) return;
+                ConsagrarDesdeElLibro(yo);
+            }
+            catch { }
+        }
+
+        /// <summary>EL CLIC EN LA PUERTA al mundo interior.</summary>
+        public static void ClicEnPuerta()
+        {
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active || !_abierta) return;
+                string razonPuerta;
+                if (global::AethonMod.Content.Systems.SubmundoGrimorio
+                    .PuedeEntrar(yo, out razonPuerta))
+                {
+                    _abierta = false;
+                    if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
+                    Projectile.NewProjectile(yo.GetSource_Misc("AltarMundoInterior"),
+                        yo.Center, Vector2.Zero,
+                        ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna>(),
+                        0, 0f, yo.whoAmI);
+                }
+                else
+                {
+                    if (razonPuerta != null)
+                        Main.NewText(razonPuerta, new Color(190, 160, 220));
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
             catch { }

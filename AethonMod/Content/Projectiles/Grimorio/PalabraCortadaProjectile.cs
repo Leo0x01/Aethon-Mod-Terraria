@@ -188,7 +188,29 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 }
             }
         }
-
+        // ================================================================
+        //  v6.164 — EL TAJO DE TINTA DE VERDAD (la letra: «el ataque
+        //  basico del grimorio sigue siendo circulos planos y feos,
+        //  asi que investiga profundamente porque el ataque basico
+        //  siguen siendo lineas de circulos planos blancos y sin
+        //  estilo vfx ni nada»). LA AUTOPSIA PROFUNDA: el culpable NO
+        //  eran las cintas — era LA PASADA (3): los «glifos del filo»
+        //  llamaban a OrbitaLib.RunaVacia por cada letra, y CADA runa
+        //  dibuja un resplandor RADIAL (Quad Glow 36×36) + su PERLA
+        //  blanca — una FILA de círculos planos blancos a lo largo
+        //  del corte. Encima, las cintas usaban VFXCore.Carne (la
+        //  textura de carne CARMESÍ del agujero — nunca fue tinta) y
+        //  el RibbonTinted crudo, SIN las 3 capas de la casa. LA
+        //  CURA RAÍZ — se rehace con ESTELALIB.RIBBON, LA técnica de
+        //  tinta de la Grieta de Tinta (el lenguaje visual del
+        //  hambre): banda de GROSOR VIVO con perfil, suavizado y
+        //  TRES CAPAS por tramo (velo ×1.6 · cuerpo · núcleo blanco
+        //  ×0.30 — la doble pasada de la casa en versión triple) +
+        //  cabeza con bloom. EL CONCEPTO SIGUE (la Escritura del
+        //  Corte): el libro ESCRIBE el tajo — la pluma corre por el
+        //  arco y la estela de tinta QUEDA ESCRITA detrás; los
+        //  glifos radiales murieron para siempre.
+        // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ) return false;
@@ -209,154 +231,72 @@ namespace AethonMod.Content.Projectiles.Grimorio
             float alfa = tB <= 16f ? 1f : Math.Max(0f, 1f - (tB - 16f) / 10f);
             if (alfa <= 0.02f) return false;
 
-            VFXCore.CerrarLoteSiAbierto();
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = Projectile.Center - Main.screenPosition;
+            Color tinta = new Color(126, 62, 200);        // la tinta del codex
+            Color oro = new Color(255, 208, 120);         // el filo de oro
+
+            // ============================================================
+            //  (1) EL ARCO ESCRITO — la estela de tinta que QUEDÓ:
+            //  EstelaLib.Ribbon sobre la trayectoria YA barrida (del
+            //  arranque al filo actual), con EL PERFIL CALIGRÁFICO:
+            //  nace fina (la punta de la pluma), ENGORDA en el medio
+            //  (la carga del trazo) y afila al final. El camino lleva
+            //  la ONDULACIÓN viva del pulso de la mano (senoidal) —
+            //  la tinta respira, no es un arco geométrico.
+            // ============================================================
+            // EL ÁNGULO DE ARRANQUE del trazo (donde la pluma aterrizó).
+            float angArranque = _giroBase + _sentido * -APERTURA;
+
             try
             {
+                VFXCore.CerrarLoteSiAbierto();
                 VFXCore.Begin();
-                float t = Main.GlobalTimeWrappedHourly;
-                Vector2 centro = Projectile.Center - Main.screenPosition;
-                Color tinta = new Color(120, 66, 190);       // la tinta del codex
-                Color oro = new Color(255, 208, 120);        // el filo de oro
 
-                // ============================================================
-                //  v6.163 — LA ESCRITURA DEL CORTE (la letra: «el
-                //  grimorio sigue teniendo su ataque con circulos
-                //  planos y blancos, lo mejor es rehacer el ataque
-                //  basico por completo a uno mejor y mas estilizado»):
-                //  EL CONCEPTO NUEVO — el libro NO lanza nada: ESCRIBE.
-                //  TRES cintas de tinta caligráfica (RibbonTinted — el
-                //  lenguaje visual de la sombra del arma: la carne que
-                //  FLUYE por el cuerpo con uvFlow y el grosor que
-                //  respira grosorBase→punta) trazan EL GLIFO rúnico
-                //  en el aire delante del portador: nacen de la pluma
-                //  (la punta de la escritura) y QUEDAN ESCRITAS
-                //  mientras la pluma avanza por el arco. Cuando el
-                //  trazo termina, la tinta se TENSÁ (el compás:
-                //  escribir → tensar → cortar) y las cuerdas se
-                //  ESTRELLAN en destellos. NADA de quads radiales:
-                //  cada píxel del ataque es CINTA DE TINTA.
-                // ============================================================
-
-                // (1) EL GLIFO QUE SE ESCRIBE: la runa de este tajo
-                //     (determinista por whoAmI — cada tajo escribe SU
-                //     palabra) recorrida por la pluma conforme avanza
-                //     el barrido: la parte YA ESCRITA queda viva, lo
-                //     que falta aún no existe.
-                Vector2[] runa = OrbitaLib.RunasVacio[
-                    (Projectile.whoAmI * 5 + 3) % OrbitaLib.RunasVacio.Length];
-
-                // EL MARCO DEL GLIFO: la pluma recorre el arco (del
-                // borde de arranque al borde de cierre) y la runa se
-                // dibuja SOBRE esa trayectoria — escritura curva.
-                float angArranque = _giroBase + _sentido * -APERTURA;
-                float largo = _radio * 0.94f;
-
-                // LA PLUMA: donde la escritura va AHORA (la punta viva
-                // del trazo — su pos en el arco, avanza con pE).
-                Vector2 posPluma = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang))
-                    * (_radio * 0.66f);
-                // EL PERPENDICULAR ACTUAL del arco (para las tres
-                // cuerdas: cada una clava su punta con su deriva).
-                Vector2 perpAhora = new(-MathF.Sin(ang), MathF.Cos(ang));
-
-                // === (2) LAS TRES CUERDAS DE TINTA — EL TRAZO VIVO ===
-                // Cada cuerda es UNA RibbonTinted: la caligrafía del
-                // glifo (sus trazos rectos proyectados sobre el arco,
-                // curvados con la deriva del barrido). El grosor
-                // caligráfico: GORDO al nacer (la carga del trazo),
-                // fino al cerrar (la punta de la pluma).
-                int nSeg = 16;
-                float flujo = t * 0.9f;    // la tinta CORRE por las cuerdas
-                for (int cuerda = 0; cuerda < 3; cuerda++)
+                int nPuntos = 22;
+                var camino = new Vector2[nPuntos];
+                for (int i = 0; i < nPuntos; i++)
                 {
-                    // LA DERIVA de esta cuerda: cada una nace a un
-                    // tercio del barrido detrás de la pluma — el
-                    // glifo se escribe en TRES pasadas (el tres es la
-                    // firma de la casa: tres ojos, tres armas, tres
-                    // cuerdas).
-                    float retraso = cuerda * 0.14f;
-                    float pC = MathHelper.Clamp((pE - retraso) / (1f - retraso * 2f), 0f, 1f);
-                    if (pC <= 0.02f) continue;
-
-                    // La cuerda nace en la PLUMA DE SU PASADA y corre
-                    // hacia atrás por el arco ya escrito (la cinta es
-                    // TODO el trazo vivo: de la raíz del arranque a la
-                    // punta que avanza).
-                    Vector2[] spine = new Vector2[nSeg];
-                    float[] anchos = new float[nSeg];
-                    Color[] tintes = new Color[nSeg];
-                    for (int s = 0; s < nSeg; s++)
-                    {
-                        float f = s / (float)(nSeg - 1);       // 0 raíz → 1 punta
-                        float pPunto = pC * f;                // lo escrito de ESTA cuerda
-                        float aP = angArranque + _sentido * BARRIDO * pPunto;
-                        // LA CURVATURA VIVA: la deriva senoidal del
-                        // trazo caligráfico (la mano que escribe tiene
-                        // pulso — la cuerda NO es un arco geométrico).
-                        float ondula = MathF.Sin(f * MathF.PI * 2f + cuerda * 2.1f + t * 2f)
-                            * (7f + 5f * (1f - f));
-                        Vector2 dirP = new Vector2(MathF.Cos(aP), MathF.Sin(aP));
-                        Vector2 perp = new(-dirP.Y, dirP.X);
-                        spine[s] = centro + dirP * (_radio * (0.30f + 0.36f * pPunto))
-                            + perp * ondula;
-                        // EL GROSOR CALIGRÁFICO: la carga GORDA al
-                        // nacer (18) que se afila a la punta (4) — y
-                        // la cuerda MUERE donde la pluma va ahora.
-                        anchos[s] = MathHelper.Lerp(17f, 4f, f)
-                            * (0.85f + 0.3f * MathF.Sin(f * MathF.PI * 3f + t * 3f));
-                        // EL TINTE: violeta en la raíz → oro en la
-                        // punta (la tinta que se AVIVA al cortar).
-                        tintes[s] = Color.Lerp(tinta, oro, MathF.Pow(f, 1.4f)) *
-                            (alfa * (0.55f + 0.45f * f));
-                    }
-                    // LA PUNTA DE LA CUERDA sigue a la pluma viva: el
-                    // último segmento CLAVA su posición a ella.
-                    spine[nSeg - 1] = posPluma + perpAhora * (cuerda - 1) * 6f;
-
-                    VFXCore.RibbonTinted(spine, anchos, tintes, VFXCore.Carne,
-                        uvFlow: flujo + cuerda * 0.33f, edgeInset: 0.18f);
+                    float f = i / (float)(nPuntos - 1);       // 0 raíz → 1 filo
+                    float aP = angArranque + _sentido * BARRIDO * pE * f;
+                    // EL PULSO DE LA MANO: la ondulación senoidal que
+                    // hace del arco un TRAZO de pluma (2 medias ondas
+                    // por tajo, desfasadas por tajo — cada palabra es
+                    // distinta).
+                    float ondula = MathF.Sin(f * MathF.PI * 1.9f +
+                        Projectile.whoAmI * 0.7f) * (5f + _radio * 0.045f)
+                        + MathF.Sin(t * 3.1f + f * 5f) * 2.2f;
+                    Vector2 dirP = new Vector2(MathF.Cos(aP), MathF.Sin(aP));
+                    camino[i] = centro + dirP * _radio +
+                        new Vector2(-dirP.Y, dirP.X) * ondula;
                 }
+                // pts[ÚLTIMO] = CABEZA (el filo que avanza) — el contrato
+                // de EstelaLib: la cabeza es donde la pluma va AHORA.
+                EstelaLib.Ribbon(Main.spriteBatch, camino, 15f + _radio * 0.08f,
+                    EstelaProfile.Alive, tinta, 0.85f * alfa,
+                    Projectile.whoAmI, t, head: true, taper: 0.55f);
 
-                // (3) LA PLUMA ESTELAR: el punto de escritura — un
-                //     destello de 4 puntas con SU estela de chispas
-                //     doradas (la pluma que VIVE).
-                VFXCore.Quad(posPluma, oro * (0.95f * alfa),
-                    new Vector2(30f + 10f * MathF.Sin(t * 12f), 30f + 10f * MathF.Sin(t * 12f)),
-                    ang, VFXCore.Destello4Puntas);
-                VFXCore.Quad(posPluma, Color.White * (0.85f * alfa),
-                    new Vector2(10f, 10f), ang, VFXCore.GlowOrb);
-                for (int k = 0; k < 3; k++)
+                // ========================================================
+                //  (2) EL FILO — LA SEGUNDA ESCRITURA: una estela
+                //  MENOR (la mitad de ancho, perfil Lanza) en ORO que
+                //  sigue a la pluma por DENTRO del arco (radio·0.86):
+                //  el doble trazo de la casa (tinta + filo) — el corte
+                //  es lo que la pluma ESCRIBE, la tinta es la palabra.
+                // ========================================================
+                var caminoFilo = new Vector2[nPuntos];
+                for (int i = 0; i < nPuntos; i++)
                 {
-                    float fa = SombrasLib.Frac(t * 2.2f + k * 0.33f);
-                    Vector2 chispa = posPluma - new Vector2(MathF.Cos(ang), MathF.Sin(ang))
-                        * (14f + 26f * fa) + new Vector2(0f, -6f * fa);
-                    VFXCore.Quad(chispa, oro * (alfa * 0.7f * (1f - fa)),
-                        new Vector2(6f + 4f * (1f - fa), 6f + 4f * (1f - fa)),
-                        ang, VFXCore.Destello4Puntas);
+                    float f = i / (float)(nPuntos - 1);
+                    float aP = angArranque + _sentido * BARRIDO * pE * f;
+                    float ondula = MathF.Sin(f * MathF.PI * 1.9f +
+                        Projectile.whoAmI * 0.7f) * (4f + _radio * 0.035f);
+                    Vector2 dirP = new Vector2(MathF.Cos(aP), MathF.Sin(aP));
+                    caminoFilo[i] = centro + dirP * (_radio * 0.86f) +
+                        new Vector2(-dirP.Y, dirP.X) * ondula;
                 }
-
-                // (4) EL CIERRE — LA TENSIÓN: al terminar el barrido
-                //     (tB > 14) las cuerdas ya escritas se TENSAN (el
-                //     brillo sube, el flujo se acelera) y en el
-                //     último frame ESTALLAN en una fila de destellos
-                //     sobre el arco — el corte que se cierra.
-                if (tB > 14f)
-                {
-                    float tension = MathHelper.Clamp((tB - 14f) / 4f, 0f, 1f);
-                    for (int k = 0; k < 7; k++)
-                    {
-                        float fa = k / 6f;
-                        float aD = angArranque + _sentido * BARRIDO * fa;
-                        Vector2 posD = centro + new Vector2(MathF.Cos(aD), MathF.Sin(aD))
-                            * (_radio * 0.66f);
-                        float pulso = MathF.Max(0f, MathF.Sin(fa * MathF.PI + t * 6f));
-                        VFXCore.Quad(posD,
-                            Color.Lerp(tinta, Color.White, 0.5f + 0.5f * tension) *
-                                (alfa * tension * (0.4f + 0.6f * pulso)),
-                            new Vector2(16f + 14f * tension, 16f + 14f * tension),
-                            aD, VFXCore.Destello4Puntas);
-                    }
-                }
+                EstelaLib.Ribbon(Main.spriteBatch, caminoFilo,
+                    8f + _radio * 0.05f, EstelaProfile.Comet, oro,
+                    0.75f * alfa, Projectile.whoAmI + 7, t, head: true, taper: 0.7f);
 
                 VFXCore.FlushAdditive(null, false);
             }
@@ -364,39 +304,43 @@ namespace AethonMod.Content.Projectiles.Grimorio
             {
                 VFXCore.CerrarLoteSiAbierto();
             }
-            // v6.159 — LA CURA DEL LOG (la excepción silenciosa: «Draw
-            // was called, but Begin has not yet been called» desde
-            // OrbitaLib.RunaVacia ← PalabraCortadaProjectile.PreDraw):
-            // RunaVacia dibuja DIRECTO al spriteBatch de vanilla — y
-            // este PreDraw corría con el lote de vanilla CERRADO por
-            // CerrarLoteSiAbierto (el contrato de la casa: las runas
-            // viven en el lote ABIERTO del llamador). LA CURA: la
-            // pasada de los glifos va DESPUÉS de cerrar el lote del
-            // tajo, con el lote de vanilla REABIERTO (ReabrirLote-
-            // Vanilla) — la MISMA secuencia que usan las coronas de
-            // OrbitaLib en todos los renders de la casa.
-            VFXCore.ReabrirLoteVanilla();
 
-            // === (3) LOS GLIFOS DEL FILO: las letras de la palabra ===
-            // (pasada propia, lote vanilla abierto — el contrato de
-            // OrbitaLib.RunaVacia: dibuja en el lote de SU llamador)
+            // ============================================================
+            //  (3) LAS SALPICADURAS DE TINTA — el cierre del trazo: al
+            //  terminar el barrido, 6 gotas de tinta SALTAN del arco
+            //  (puntos con vida fractal, NO glows planos: cada gota es
+            //  UNA estela corta con taper completo — hilos de tinta).
+            // ============================================================
             try
             {
-                float t = Main.GlobalTimeWrappedHourly;
-                Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
-                Color tinta = new Color(120, 66, 190);
-                Color oro = new Color(255, 208, 120);
-                for (int g = 0; g < _glifos; g++)
+                VFXCore.ReabrirLoteVanilla();
+                if (tB > 13f)
                 {
-                    float fr = 0.30f + 0.62f * (g + 0.5f) / _glifos;
-                    Vector2 posG = Projectile.Center + dir * (_radio * fr) -
-                        Main.screenPosition;
-                    float gs = 0.85f + 0.30f * (_glifos - 1);   // el calibre de la letra
-                    int letra = (g * 3 + Projectile.whoAmI) % OrbitaLib.RunasVacio.Length;
-                    Color cuerpo = Color.Lerp(oro, tinta, g / (float)Math.Max(1, _glifos - 1));
-                    OrbitaLib.RunaVacia(posG, t * 0.9f + g * 2.1f, g,
-                        OrbitaLib.RunasVacio[letra],
-                        cuerpo, Color.White * 0.65f, gs, 0.85f * alfa);
+                    float tension = MathHelper.Clamp((tB - 13f) / 5f, 0f, 1f);
+                    for (int k = 0; k < 6; k++)
+                    {
+                        float fa = (k + 0.5f) / 6f;
+                        float aD = angArranque + _sentido * BARRIDO * fa;
+                        Vector2 dirD = new Vector2(MathF.Cos(aD), MathF.Sin(aD));
+                        Vector2 baseG = centro + dirD * (_radio * (0.92f + 0.06f *
+                            MathF.Sin(t * 4f + k * 2.4f)));
+                        // CADA GOTA: un hilo corto de tinta que salta
+                        // hacia afuera y se disuelve — vida fractal.
+                        float vida = SombrasLib.Frac(t * 1.6f + k * 0.37f);
+                        Vector2 salto = new Vector2(-dirD.Y, dirD.X) *
+                            (6f + 16f * vida) * _sentido;
+                        var hilo = new Vector2[]
+                        {
+                            baseG - salto * 0.30f,
+                            baseG + salto * 0.25f,
+                            baseG + salto,
+                        };
+                        EstelaLib.Ribbon(Main.spriteBatch, hilo,
+                            5f * (1f - vida) + 1.5f, EstelaProfile.Alive,
+                            k % 2 == 0 ? tinta : oro,
+                            alfa * tension * (1f - vida) * 0.8f,
+                            Projectile.whoAmI * 13 + k, t, head: false, taper: 0.9f);
+                    }
                 }
             }
             catch { }

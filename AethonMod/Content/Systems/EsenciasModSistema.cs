@@ -2,6 +2,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.Localization;
 using AethonMod.Content.Items.Esencias;
 
 namespace AethonMod.Content.Systems
@@ -122,6 +123,34 @@ namespace AethonMod.Content.Systems
         {
             _dadas = new int[5];
             _avisadoSeco = new bool[5];
+        }
+
+        // ================================================================
+        //  v6.164 — EL REGALO DE BIENVENIDA (la letra: «ahora al inicar
+        //  el mundo dale al jugador 9999 esencias del eterno»): al
+        //  GENERAR un mundo nuevo, el portador nace con LAS 9999
+        //  ESENCIAS DEL ETERNO en la bolsa — la puerta del altar
+        //  (1000) queda servida de entrada y sobra para consagrar.
+        //  SOLO en mundo NUEVO (PostWorldGen corre una vez, al crear):
+        //  los mundos existentes y las cargas posteriores no reciben
+        //  nada (la marca 'regaloDado' lo sella).
+        // ================================================================
+        public override void PostWorldGen()
+        {
+            try
+            {
+                foreach (Player p in Main.player)
+                {
+                    if (p == null || !p.active) continue;
+                    p.QuickSpawnItem(p.GetSource_FromThis(),
+                        ModContent.ItemType
+                            <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 9999);
+                }
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.RegaloBienvenida"),
+                        new Microsoft.Xna.Framework.Color(196, 150, 255));
+            }
+            catch { }
         }
     }
 }

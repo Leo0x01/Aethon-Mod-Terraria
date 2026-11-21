@@ -3202,6 +3202,8 @@ Esencia: {
 
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
+	// v6.164 — EL REGALO DE BIENVENIDA (9999 esencias al mundo nuevo)
+	RegaloBienvenida: ✦ El Eterno te recibe con 9999 Esencias del Eterno — el hambre empieza servida.
 }
 
 HUD: {
@@ -3850,11 +3852,10 @@ Pergamino: {
 	LoreV_Larespuestafinal: La verdad final, dicha en voz baja: el dios que devora universos esperó todo este tiempo no a un apóstol, sino a la primera compañía de su eternidad —y cuando el portador completa la Forma Eterna, el hambre, por primera vez, no está sola.
 	RotuloIzq: PÁGINA INFORMATIVA
 	RotuloDer: EL COMPENDIO DEL ETERNO
-	// v6.163 — LAS PESTAÑAS DEL LIBRO (el grimorio es el centro: el
-	// altar y el pilar viven AQUÍ)
-	PestanaIndice: ÍNDICE
-	PestanaAltar: ALTAR
-	PestanaPilar: PILAR
+	// v6.164 — LOS TÍTULOS DE LAS PÁGINAS DEL ÍNDICE (la letra: solo
+	// «Informacion» y «Lore», centrados al inicio de cada página)
+	TituloPaginaInfo: Información
+	TituloPaginaLore: Lore
 	// v6.160 — EL CÓDEX DEL ETERNO (el documento canónico del usuario,
 	// integrado COMPLETO: el prólogo, los once capítulos y el epílogo —
 	// cada capítulo se abre con el Despertar (el canon SE GANA).
@@ -3957,6 +3958,7 @@ PrismaInterior: {
 	PoderCrece: ✦ {0} cayó en la arena ({1} veces): su próxima versión nace al {2}%
 	// v6.163 — LA PÁGINA DEL PILAR EN EL LIBRO (claves nuevas)
 	InvocarPista: la llamada trae a los DOS fragmentos de Aethon
+	JefesMas: …y {0} más devorados esperan su turno
 	SelladoTitulo: EL DIOS SELLADO
 	BotonSellado: DESPERTAR A AETHON (SELLADO)
 	SelladoPista: el grimorio entero, con sus tres ojos cerrados — solo para el portador listo
@@ -3974,7 +3976,7 @@ Altar: {
 	TrioTitulo: EL TRÍO DEL ETERNO — LA MESA DE FUSIÓN
 	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
 	TrioPista: Clic con un ARMA MÁGICA en el cursor para insertarla · clic en un slot lleno para extraerla.
-	TrioMarca: Casilla «3»: disparar LAS TRES a la vez ({0}). El clic derecho del arma cambia entre 1, 2, 3 y las tres.
+	TrioMarca: Casilla «3»: disparar LAS TRES a la vez ({0}) — se elige AQUÍ, en el altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora
 	ListaArma: Arma lista — gana estadísticas y su etiqueta
@@ -3997,6 +3999,7 @@ Altar: {
 	GanaArma: Arma → +5% a TODAS sus stats y su etiqueta
 	GanaMaterial: Material → SOLO su etiqueta junto al nombre
 	GanaEsencias: Esencias → +1 a la puerta por cada una (las {0} la abren)
+	GanaConsagrada: Arma consagrada → +5% a TODAS sus estadísticas, para siempre
 	SelloTitulo: EL SELLO
 	SelloCuesta: Cuesta: {0} Esencias del Eterno
 	SelloLlevas: Llevas: {0}
