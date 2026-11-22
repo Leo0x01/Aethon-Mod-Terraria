@@ -168,6 +168,141 @@ namespace AethonMod.Content.UI
 
         /// <summary>EL CLIC EN UNA RANURA DEL TRÍO: inserta / extrae /
         /// ELIGE (v6.163: la elección vive AQUÍ — el arma ya no elige).</summary>
+        // ================================================================
+        //  v6.166 — EL SELECTOR DE INVENTARIO (la letra: «cuando toco un
+        //  slot para colocar un arma, quiero que debajo se muestren los
+        //  iconos de armas compatibles que yo tenga en el inventario […]
+        //  y en el slot de consagrar […] debes mostrar justo debajo todo
+        //  lo que se puede consagrar que el jugador tenga en el
+        //  inventario»): al TOCAR una ranura vacía (o el slot de la
+        //  ofrenda), la bandeja se abre DEBAJO con los candidatos del
+        //  inventario — un clic en un icono lo coloca. En las ranuras
+        //  del trío SOLO entran ARMAS CONSAGRADAS (la letra: «las
+        //  únicas armas que se pueden colocar en esos slot son armas
+        //  consagradas, si el arma no esta consagrada no se colocara y
+        //  ademas debes dejar en claro que las armas deben consagrarse
+        //  para ser colocadas ahi»).
+        // ================================================================
+        /// <summary>La bandeja abierta: null = cerrada. Item1 = para qué
+        /// es (-1 ranura trío 0-2 · -2 slot de consagrar).</summary>
+        internal static (int ranura, float expira)? SelectorAbierto;
+
+        /// <summary>¿ESTE item es un CANDIDATO para la bandeja? En las
+        /// ranuras del trío: arma VÁLIDA (mágica, con daño — la regla de
+        /// EsArmaValida) Y CONSAGRADA (Corrompido). En el slot de la
+        /// ofrenda: cualquier item consagrabLE (todo lo que no esté ya
+        /// consagrado).</summary>
+        internal static bool EsCandidato(Item it, bool paraTrío)
+        {
+            if (it == null || it.IsAir) return false;
+            bool sello = false;
+            try
+            {
+                var g = it.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                sello = g != null && g.Corrompido;
+            }
+            catch { }
+            if (paraTrío)
+                return sello && global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.EsArmaValida(it);
+            // EL SLOT DE CONSAGRAR: todo lo que el altar acepta (armas Y
+            // materiales — la letra de la v6.90) que aún NO esté sellado
+            return !sello && (it.damage > 0 || it.ammo > 0 || it.createTile >= 0 ||
+                it.createWall >= 0 || it.material || it.consumable ||
+                it.healLife > 0 || it.healMana > 0 || it.buffType > 0 ||
+                it.pick > 0 || it.axe > 0 || it.hammer > 0);
+        }
+
+        /// <summary>LA COSECHA del inventario: los candidatos VIVOS (sin
+        /// duplicar tipo) en orden de ranura.</summary>
+        internal static System.Collections.Generic.List<Item> CosecharCandidatos(bool paraTrío)
+        {
+            var lista = new System.Collections.Generic.List<Item>();
+            var vistos = new System.Collections.Generic.HashSet<int>();
+            Player yo = Main.LocalPlayer;
+            if (yo == null) return lista;
+            for (int k = 0; k < 58; k++)
+            {
+                Item it = yo.inventory[k];
+                if (!EsCandidato(it, paraTrío)) continue;
+                if (!vistos.Add(it.type)) continue;   // un icono por tipo
+                lista.Add(it);
+            }
+            return lista;
+        }
+
+        /// <summary>LA BANDEJA SE ABRE (clic en ranura vacía / en el slot
+        /// de ofrenda sin item al cursor).</summary>
+        public static void AbrirSelector(int ranura)
+        {
+            SelectorAbierto = (ranura, Main.GlobalTimeWrappedHourly + 20f);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+
+        /// <summary>EL CLIC EN UN ICONO de la bandeja: lo coloca (o lo
+        /// consagra primero si es el slot de ofrenda — no: el slot
+        /// consagra con SU botón; la bandeja SOLO coloca la ofrenda).</summary>
+        public static void ClicEnCandidato(int indiceCandidato)
+        {
+            try
+            {
+                if (SelectorAbierto == null) return;
+                int ranura = SelectorAbierto.Value.ranura;
+                bool paraTrío = ranura >= 0;
+                var candidatos = CosecharCandidatos(paraTrío);
+                if (indiceCandidato < 0 || indiceCandidato >= candidatos.Count) return;
+                Item elegido = candidatos[indiceCandidato];
+
+                if (paraTrío)
+                {
+                    var trio = global::AethonMod.Content.Weapons.Investigaciones
+                        .TrioDelEterno.Del(Main.LocalPlayer);
+                    if (trio == null) return;
+                    // LA DOBLE PUERTA de la letra: válida Y CONSAGRADA
+                    if (!global::AethonMod.Content.Weapons.Investigaciones
+                        .TrioDelEterno.EsArmaValida(elegido))
+                    {
+                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioNoArma"),
+                            new Color(255, 170, 130));
+                        return;
+                    }
+                    bool sellada = false;
+                    try
+                    {
+                        var g = elegido.GetGlobalItem
+                            <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
+                        sellada = g != null && g.Corrompido;
+                    }
+                    catch { }
+                    if (!sellada)
+                    {
+                        // LA LEY DE LA LETRA: «debes dejar en claro que
+                        // las armas deben consagrarse para ser colocadas
+                        // ahi»
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Items.TrioRequiereConsagrada"),
+                            new Color(255, 170, 130));
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                        return;
+                    }
+                    trio.Ranuras[ranura] = (Item)elegido.Clone();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Items.TrioInsertada", ranura + 1),
+                        new Color(160, 230, 255));
+                }
+                else
+                {
+                    // EL SLOT DE LA OFRENDA: el item viaja al slot (la
+                    // consagración la paga SU botón)
+                    _arma = (Item)elegido.Clone();
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                }
+                SelectorAbierto = null;   // la bandeja se cierra al elegir
+            }
+            catch { }
+        }
+
         public static void ClicEnRanura(int slotT)
         {
             try
@@ -230,6 +365,14 @@ namespace AethonMod.Content.UI
                 }
                 else
                 {
+                    // v6.166 — LA BANDEJA (la letra: «cuando toco un slot
+                    // para colocar un arma, quiero que debajo se muestren
+                    // los iconos de armas compatibles que yo tenga en el
+                    // inventario»): clic en la ranura con cursor vacío →
+                    // los candidatos (armas CONSAGRADAS) se despliegan
+                    // DEBAJO. La ranura también ELIGE el modo (lo de
+                    // siempre) — la bandeja es el extra.
+                    AbrirSelector(slotT);
                     trio.ModoDisparo = slotT;
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     Main.NewText(Language.GetTextValue(
@@ -282,6 +425,8 @@ namespace AethonMod.Content.UI
                     .PuedeEntrar(yo, out razonPuerta))
                 {
                     _abierta = false;
+            SelectorAbierto = null;   // v6.166 — la bandeja muere con la ventana
+                    SelectorAbierto = null;   // v6.166 — la bandeja muere con la ventana
                     if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
                     Projectile.NewProjectile(yo.GetSource_Misc("AltarMundoInterior"),
@@ -515,13 +660,20 @@ namespace AethonMod.Content.UI
         // ================================================================
         //  LA PALETA (la de la casa)
         // ================================================================
-        private static readonly Color TintaFondo = new(10, 16, 18);
-        private static readonly Color TintaPanel = new(16, 28, 30);
-        private static readonly Color TintaTeal = new(90, 220, 180);
-        private static readonly Color TintaVioleta = new(186, 96, 236);
-        private static readonly Color TintaTexto = new(220, 250, 245);
-        private static readonly Color TintaApagado = new(110, 150, 145);
-        private static readonly Color TintaRojo = new(255, 120, 120);
+        // v6.166 — LA CURA DE LA LETRA (la letra: «todas las letras se
+        // ven o demasiado oscuras o demasiado claras»): el borde NEGRO
+        // de DrawBorderString se fundía con el panel oscuro (texto
+        // 'apagado') y el texto apagado era ilegible. EL PANEL SUBE
+        // DOS PUNTOS de luminosidad (se distingue del fondo), el TEXTO
+        // APAGADO SUBE (110,150,145 → 168,196,190: se lee SIEMPRE) y
+        // el texto principal ya casi blanco queda.
+        private static readonly Color TintaFondo = new(12, 20, 22);
+        private static readonly Color TintaPanel = new(22, 38, 40);
+        private static readonly Color TintaTeal = new(110, 230, 190);
+        private static readonly Color TintaVioleta = new(198, 116, 244);
+        private static readonly Color TintaTexto = new(235, 252, 248);
+        private static readonly Color TintaApagado = new(168, 196, 190);
+        private static readonly Color TintaRojo = new(255, 128, 128);
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
 
         // ================================================================
@@ -821,6 +973,16 @@ namespace AethonMod.Content.UI
                         Main.mouseItem = (Item)_arma.Clone();
                         _arma = new Item();
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                    }
+                    else
+                    {
+                        // v6.166 — LA BANDEJA DE CONSAGRAR (la letra: «en
+                        // el slot de consagrar […] debes mostrar justo
+                        // debajo todo lo que se puede consagrar que el
+                        // jugador tenga en el inventario»): clic en el
+                        // slot VACÍO con cursor VACÍO → los candidatos
+                        // se despliegan DEBAJO del slot.
+                        AbrirSelector(-2);
                     }
                 }
 
@@ -1236,8 +1398,74 @@ namespace AethonMod.Content.UI
             cy = LineaMedida(sb, Language.GetTextValue(Clave("FiltroArma")),
                 x + 92f, cy + 1f, anchoTexto, 0.66f, TintaApagado * 0.95f);
 
+            // v6.166 — LA BANDEJA DE CONSAGRABLES (la letra: «en el
+            // slot de consagrar debes mostrar justo debajo todo lo que
+            // se puede consagrar que el jugador tenga en el
+            // inventario»): abierta por el clic en el slot vacío, la
+            // fila de iconos vive AQUÍ (justo debajo del slot y su
+            // texto). El alto de la bandeja se RESERVA siempre que está
+            // abierta (el panel no salta).
+            float altoBandeja = 0f;
+            if (SelectorAbierto != null && SelectorAbierto.Value.ranura == -2)
+            {
+                var cands = CosecharCandidatos(false);
+                if (cands.Count == 0)
+                    altoBandeja = AltoMedido(Language.GetTextValue(Clave("BandejaVacia")), w - 48f, 0.7f) + 4f;
+                else
+                    altoBandeja = 46f + (cands.Count > 8 ? 14f : 0f);
+            }
+
             // Las secciones nacen bajo el slot Y bajo el texto, lo que pida más.
             cy = Math.Max(cy, y + 138f) + 10f;
+
+            // EL DIBUJO DE LA BANDEJA (la fila de iconos consagrables)
+            if (dibujar && SelectorAbierto != null && SelectorAbierto.Value.ranura == -2)
+            {
+                var cands = CosecharCandidatos(false);
+                if (cands.Count == 0)
+                {
+                    LineaMedida(sb, Language.GetTextValue(Clave("BandejaVacia")),
+                        x + 24f, cy, w - 48f, 0.7f, TintaApagado);
+                }
+                else
+                {
+                    int visibles = Math.Min(8, cands.Count);
+                    float anchoFila = visibles * 46f;
+                    float bx = x + 24f;
+                    for (int ic = 0; ic < visibles; ic++)
+                    {
+                        Rectangle icRect = new Rectangle((int)(bx + ic * 46f), (int)cy, 42, 42);
+                        Item cand = cands[ic];
+                        bool hovIc = PanelContiene(icRect) &&
+                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        if (hovIc) Main.LocalPlayer.mouseInterface = true;
+                        sb.Draw(pixel, icRect, TintaPanel * (hovIc ? 1.6f : 1f));
+                        Marco(sb, pixel, icRect, hovIc ? TintaTeal : TintaTeal * 0.4f);
+                        Texture2D texI = TextureAssets.Item[cand.type].Value;
+                        float escI = Math.Min(34f / texI.Width, 34f / texI.Height);
+                        sb.Draw(texI, icRect.Center.ToVector2(), null, Color.White, 0f,
+                            texI.Size() * 0.5f, escI, SpriteEffects.None, 0f);
+                        // EL NOMBRE al pasar el cursor (la etiqueta de la casa)
+                        if (hovIc)
+                        {
+                            string nombreC = cand.Name;
+                            float escNom = 0.8f;
+                            var mNom = FontAssets.MouseText.Value.MeasureString(nombreC) * escNom;
+                            Vector2 posNom = new Vector2(
+                                Math.Min(icRect.Center.X, Main.screenWidth - mNom.X - 8f),
+                                icRect.Top - mNom.Y - 4f);
+                            Utils.DrawBorderString(sb, nombreC, posNom,
+                                TintaTexto, escNom);
+                        }
+                        if (hovIc && Main.mouseLeft && !_ultimoClicIzq)
+                            ClicEnCandidato(ic);
+                    }
+                    if (cands.Count > visibles)
+                        Utils.DrawBorderString(sb, "+" + (cands.Count - visibles),
+                            new Vector2(bx + anchoFila + 8f, cy + 21f), TintaApagado, 0.7f, 0f, 0.5f);
+                }
+                cy += altoBandeja;
+            }
 
             // ── EL ESTADO (v6.92 — reservado SIEMPRE con su variante más
             //    alta: el panel no salta al meter la ofrenda). La cura del

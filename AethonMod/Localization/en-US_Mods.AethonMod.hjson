@@ -2270,6 +2270,9 @@ Items: {
 	TrioNoArma: That is not a magic weapon — the stand only holds MAGIC weapons.
 	TrioLleno: The stand already holds three weapons — extract one at the altar.
 	TrioInsertada: Weapon seated in slot {0}.
+	TrioRequiereConsagrada: That weapon is not consecrated — consecrate it at the offering altar first to place it in the trio.
+	TrioSinConsagradas: You carry no consecrated weapons — consecrate a magic weapon at the altar and come back.
+	BandejaVacia: You carry nothing to consecrate.
 	TrioComo: The book's altar consecrates the weapons · the Trio fires whatever is chosen there.
 	TrioLibre: (free)
 	TrioRanura: Slot {0}: {1}
@@ -4390,3 +4393,7 @@ Projectiles: {
 
 PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.
 
+	Mapa: {
+		Altar: The Consecration Altar
+		Pilar: The Pillar of the Eternal
+	}

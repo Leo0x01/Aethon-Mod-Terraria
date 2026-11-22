@@ -58,11 +58,14 @@ namespace AethonMod.Content.UI
         private static int _ultimaRueda = int.MinValue;   // la rueda (el patrón del árbol)
         private static int _hoverJefe = -1;        // el jefe bajo el cursor
 
-        private static readonly Color TintaFondo = new Color(16, 8, 28);
-        private static readonly Color TintaVioleta = new Color(185, 110, 234);
-        private static readonly Color TintaOro = new Color(255, 214, 130);
-        private static readonly Color TintaApagado = new Color(150, 130, 170);
-        private static readonly Color TintaTeal = new Color(120, 235, 190);
+        // v6.166 — LA CURA DE LA LETRA (la misma del altar: el texto
+        // apagado sube de luminosidad para leerse SIEMPRE contra el
+        // panel violeta; el fondo respira un punto).
+        private static readonly Color TintaFondo = new Color(20, 12, 34);
+        private static readonly Color TintaVioleta = new Color(196, 124, 242);
+        private static readonly Color TintaOro = new Color(255, 220, 146);
+        private static readonly Color TintaApagado = new Color(198, 178, 216);
+        private static readonly Color TintaTeal = new Color(130, 240, 200);
 
         /// <summary>¿La ventana está abierta?</summary>
         public static bool Abierta => _abierta;

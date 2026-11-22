@@ -38,7 +38,10 @@ namespace AethonMod.Content.NPCs
             // EL LAYOUT VANILLA DE LA CASA (Guide/AlchemistNPC): 25
             // marcos + los sets del framer de aldeano.
             Main.npcFrameCount[Type] = 25;
-            NPCID.Sets.ExtraFramesCount[Type] = 5;
+            // v6.166 — LA FÓRMULA DE LA GUÍA (npcFrameCount = 16 + ExtraFrames
+            // = 16 + 5 sociales + 4 ataque = 25): ExtraFrames son TODOS
+            // los frames tras la caminata (5 + ataque).
+            NPCID.Sets.ExtraFramesCount[Type] = 9;
             NPCID.Sets.AttackFrameCount[Type] = 4;
             NPCID.Sets.DangerDetectRange[Type] = 500;
             NPCID.Sets.AttackType[Type] = 0;
@@ -60,7 +63,11 @@ namespace AethonMod.Content.NPCs
             NPC.HitSound = SoundID.NPCHit1;
             NPC.DeathSound = SoundID.NPCDeath1;
             NPC.knockBackResist = 0.4f;
-            AnimationType = NPCID.Guide;   // el framer vanilla de aldeano
+            // v6.166 — EL COMPAÑERO DE ENCUADRE EXACTO (la guía: «elige un
+            // vanilla con el MISMO total y el MISMO reparto interno»):
+            // Guide es 26/10/5 (no calza con una hoja de 25) — Merchant
+            // es 25/9/4, EXACTO como esta hoja.
+            AnimationType = NPCID.Merchant;   // el framer vanilla de aldeano
         }
 
         public override bool CanTownNPCSpawn(int numTownNPCs)

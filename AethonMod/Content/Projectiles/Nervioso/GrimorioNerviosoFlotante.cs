@@ -184,7 +184,19 @@ namespace AethonMod.Content.Projectiles.Nervioso
         private NPC PresaSinSombra(int tipoSombra)
         {
             NPC mejor = null;
-            float mejorD = RADIO_CAZA * RADIO_CAZA;
+            // v6.166 — EL CAMPO DE CAZA DEL ETERNO ES LA PANTALLA DEL
+            // DUEÑO (la letra: «que el grimorio ataque al instante en
+            // el que tenga un enemigo»): la distancia se mide desde el
+            // JUGADOR (no desde el libro — el muelle suave lo deja
+            // rezagado y las presas del borde de la pantalla quedaban
+            // FUERA del radio: el libro 'veía' al enemigo y no
+            // cazaba). La mascota de prueba conserva la medida desde
+            // el libro (su ronda es de cerca).
+            bool eternoCaza = TipoLibro == ModContent.ItemType
+                <global::AethonMod.Content.Weapons.GrimoireEternal>();
+            float radio = eternoCaza ? 1250f : RADIO_CAZA;
+            Vector2 origen = eternoCaza ? Main.player[Projectile.owner].Center : Projectile.Center;
+            float mejorD = radio * radio;
             // v6.161 — LOS DOS CUERPOS CUENTAN (la unificación de las
             // sombras): una presa con sombra ACTUAL (SombraPaginaProjectile)
             // O con el hilillo de reserva (SombraPaginaEterno) YA está
@@ -215,7 +227,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                     { ocupada = true; break; }
                 }
                 if (ocupada) continue;
-                float d = Vector2.DistanceSquared(n.Center, Projectile.Center);
+                float d = Vector2.DistanceSquared(n.Center, origen);
                 if (d < mejorD) { mejorD = d; mejor = n; }
             }
             return mejor;
@@ -399,7 +411,17 @@ namespace AethonMod.Content.Projectiles.Nervioso
                     // «la fuga simplemente la quitamos el libro no se fuga,
                     // solo queda flotando cerca del jugador cazando por si
                     // mismo»)
-                    if (hambre <= SaciedadVuelta) IrAVolver();
+                    // v6.166 — LA SALIDA NO SE COME LA CAZA (la cura
+                    // del «no está cazando»): el umbral de saciedad
+                    // SOLO despide al libro si YA no hay presa que
+                    // cazar — si el medidor cayó al 10% con un enemigo
+                    // a la vista, el libro TERMINA su cacería (la
+                    // histéresis 20%→10% de la letra queda intacta:
+                    // al 10% SIN presas, se guarda).
+                    if (hambre <= SaciedadVuelta &&
+                        PresaSinSombra(ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>()) == null)
+                        IrAVolver();
                 }
             }
 
@@ -612,6 +634,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         // lanzando. Las sombras del ARMA (concentradas,
                         // localAI[0]) NO cuentan: las suyas las devuelve
                         // su propio OnKill.
+                        // v6.166 — LA LECCIÓN DEL NRE (la letra: «el
+                        // grimorio en modo caza no esta cazando y sus
+                        // ataques siguen saliendo del jugador […] esto
+                        // hace varios commits atras no tenia
+                        // problemas»): el rearme de la v6.165 usaba
+                        // alma ANTES del null-check — si el libro no
+                        // estaba visible UN solo tick, NullReference
+                        // → el AI() entero moría → el flotante
+                        // congelado (ni caza ni camina) y lo único
+                        // que se veía eran las sombras DEL JUGADOR.
+                        // El orden vuelve a ser el de la casa: PRIMERO
+                        // null-check, DESPUÉS el uso. El rearme vive,
+                        // el NRE muere.
+                        if (alma != null)
+                        {
                         int tipoActual = ModContent.ProjectileType
                             <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
                         int tipoReserva = ModContent.ProjectileType
@@ -627,8 +664,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         }
                         if (alma.SombrasGastadas > vivasCaza)
                             alma.SombrasGastadas = vivasCaza;   // el exceso ES fuga
-                        if (alma != null &&
-                            alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
+                        if (alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
                         {
                             // LAS PRESAS SIN SOMBRA (una sombra por enemigo)
                             // v6.161 — LA SOMBRA ES LA ACTUAL (la letra:
@@ -679,6 +715,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                                 }
                             }
                         }
+                        }   // (fin del null-check de alma — la llave de la cura)
                     }
                     else if (!SombraActiva())
                     {

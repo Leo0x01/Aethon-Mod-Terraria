@@ -150,6 +150,12 @@ namespace AethonMod.Content.Systems
         private const int Roca = LlanoY + 2;            // la zona honda nace bajo la piel
         private const int LlanoY = 140;     // la PRIMERA FILA SÓLIDA del llano
         private const int PlazaX = 400;    // donde vive EL PILAR PRISMA
+
+        // v6.166 — EL FARO DEL PILAR EN EL MAPA (AltaresMapLayer): la
+        // posición del pilar en COORDENADAS DE TILE (el centro del
+        // mueble 3×5, para el icono del mapa).
+        public static float PosPilarX => PlazaX + 1.5f;
+        public static float PosPilarY => LlanoY - 2.5f;
         private const int SpawnX = 405;    // el nacimiento: AL LADO del pilar
 
         /// <summary>¿Estamos DENTRO del mundo interior?</summary>

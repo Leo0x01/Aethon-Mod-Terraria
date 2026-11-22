@@ -31,6 +31,39 @@ namespace AethonMod.Content.Players
     {
         public override void OnEnterWorld()
         {
+            // ==============================================================
+            //  v6.166 — LAS 9999 DE PRUEBA (la letra: «nunca le diste al
+            //  jugador las 9999 esencias del eterno»): OnWorldLoad de
+            //  EsenciasModSistema corría ANTES de que existiera jugador
+            //  alguno — pagaba a NADIE. AQUÍ el jugador YA está en el
+            //  mundo: top-up a 9999 Esencias del Eterno (cuenta lo que
+            //  ya lleva y completa lo que falta). ES PRUEBA: en el mod
+            //  final muere y las esencias se farmean (tasa de caída ×2
+            //  tras el Muro de Carne).
+            // ==============================================================
+            try
+            {
+                int tipoEsencia = ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                int lleva = 0;
+                for (int k = 0; k < 58; k++)
+                {
+                    Item it = Player.inventory[k];
+                    if (it != null && !it.IsAir && it.type == tipoEsencia)
+                        lleva += it.stack;
+                }
+                int falta = 9999 - lleva;
+                if (falta > 0)
+                {
+                    Player.QuickSpawnItem(Player.GetSource_FromThis(), tipoEsencia, falta);
+                    if (Player.whoAmI == Main.myPlayer)
+                        Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Esencia.PruebaEsencias"),
+                            new Microsoft.Xna.Framework.Color(196, 150, 255));
+                }
+            }
+            catch { }
+
             // v6.50.10 — ARMADURA: PlayerLoader.OnEnterWorld NO envuelve el
             // hook en try/catch (IL-verificado contra el tML 2026.07.3.0 —
             // a diferencia de SaveData/LoadData) y este cuerpo muta el

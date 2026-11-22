@@ -138,37 +138,10 @@ namespace AethonMod.Content.Systems
         //  de caída de EsenciaCorruptaDrops, que se DUPLICA tras el
         //  Muro de Carne). El aviso lo deja claro.
         // ================================================================
-        public override void OnWorldLoad()
-        {
-            try
-            {
-                if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                int tipoEsencia = ModContent.ItemType
-                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
-                foreach (Player p in Main.ActivePlayers)
-                {
-                    // LA CUENTA de lo que ya lleva (bolsa + cursor).
-                    int lleva = 0;
-                    for (int k = 0; k < 58; k++)
-                    {
-                        Item it = p.inventory[k];
-                        if (it != null && !it.IsAir && it.type == tipoEsencia)
-                            lleva += it.stack;
-                    }
-                    if (p.whoAmI == Main.myPlayer && !Main.mouseItem.IsAir &&
-                        Main.mouseItem.type == tipoEsencia)
-                        lleva += Main.mouseItem.stack;
-                    int falta = 9999 - lleva;
-                    if (falta > 0)
-                        p.QuickSpawnItem(p.GetSource_FromThis(), tipoEsencia, falta);
-                }
-                if (Main.netMode != NetmodeID.Server && !Main.dedServ)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.PruebaEsencias"),
-                        new Microsoft.Xna.Framework.Color(196, 150, 255));
-            }
-            catch { }
-        }
-
+        // (v6.166 — el OnWorldLoad MURIÓ: corre cuando TODAVÍA no hay
+        //  jugadores en el mundo (Main.ActivePlayers vacío) — el top-up
+        //  pagaba a NADIE. Se muda a TestingPlayer.OnEnterWorld, que
+        //  corre POR JUGADOR con el jugador YA dentro del mundo.)
         // (v6.164 — el PostWorldGen murió: solo tocaba mundos NUEVOS y
         //  el usuario probó en un mundo EXISTENTE — nunca las vio. El
         //  top-up de OnWorldLoad cubre TODAS las entradas.)

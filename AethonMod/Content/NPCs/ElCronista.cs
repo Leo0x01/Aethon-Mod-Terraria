@@ -81,7 +81,10 @@ namespace AethonMod.Content.NPCs
             // count: la textura fantasma es 1 marco (el cuerpo real es
             // el Player modelo).
             Main.npcFrameCount[Type] = 25;
-            NPCID.Sets.ExtraFramesCount[Type] = 5;
+            // v6.166 — LA FÓRMULA DE LA GUÍA (npcFrameCount = 16 + ExtraFrames
+            // = 16 + 5 sociales + 4 ataque = 25): ExtraFrames son TODOS
+            // los frames tras la caminata (5 + ataque).
+            NPCID.Sets.ExtraFramesCount[Type] = 9;
             NPCID.Sets.AttackFrameCount[Type] = 4;
             NPCID.Sets.DangerDetectRange[Type] = 700;
             NPCID.Sets.AttackType[Type] = 0;          // lanzamiento (la pluma)
@@ -104,7 +107,11 @@ namespace AethonMod.Content.NPCs
             NPC.HitSound = SoundID.NPCHit1;
             NPC.DeathSound = SoundID.NPCDeath1;
             NPC.knockBackResist = 0f;  // v6.154: la tinta NO retrocede
-            AnimationType = NPCID.Guide;
+            // v6.166 — EL COMPAÑERO DE ENCUADRE EXACTO (la guía: «elige un
+            // vanilla con el MISMO total y el MISMO reparto interno»):
+            // Guide es 26/10/5 (no calza con una hoja de 25) — Merchant
+            // es 25/9/4, EXACTO como esta hoja.
+            AnimationType = NPCID.Merchant;
         }
 
         // ================================================================

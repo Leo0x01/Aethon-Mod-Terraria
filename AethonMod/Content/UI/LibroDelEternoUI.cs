@@ -360,11 +360,23 @@ namespace AethonMod.Content.UI
         // DibujaCuerpo pinta BLANCO (el halo que la separa de las
         // sombras del papel). LOS TÍTULOS QUEDAN COMO ESTÁN (la letra:
         // «la letra de los titulos y esas cosas dejalas como estan»).
-        private static readonly Color Tinta = new(10, 8, 12);
-        private static readonly Color TintaTitulo = new(128, 52, 158);
-        private static readonly Color TintaCap = new(140, 84, 34);
-        private static readonly Color Papel = new(232, 218, 186);
-        private static readonly Color PapelSombra = new(206, 188, 150);
+        // v6.166 — LA CURA DE LA LETRA (la letra: «todas las letras se
+        // ven o demasiado oscuras o demasiado claras y sus colores son
+        // raros, tal vez si oscureces un poco la textura usada para
+        // esas ventanas»): el contorno BLANCO PURO alrededor de tinta
+        // casi-negra lavaba la letra (halo blanco sobre papel claro =
+        // colores raros). EL PAPEL OSCURECE UN PUNTO (el amarillo
+        // claro 232,218,186 era demasiado brillante), EL CONTORNO
+        // PASA A SEPIA OSCURO (el tono del papel en sombra — se funde
+        // con la página y separa la tinta) y LA TINTA RESPIRA (10,8,12
+        // → 28,20,16: negro con matiz cálido, el clásico de
+        // manuscrito). Los títulos suben de luminosidad para leerse
+        // SIEMPRE.
+        private static readonly Color Tinta = new(28, 20, 16);
+        private static readonly Color TintaTitulo = new(148, 72, 178);
+        private static readonly Color TintaCap = new(168, 108, 44);
+        private static readonly Color Papel = new(216, 200, 166);
+        private static readonly Color PapelSombra = new(190, 172, 134);
         private static readonly Color Cuero = new(84, 54, 34);
         private static readonly Color CueroClaro = new(112, 76, 46);
 
@@ -928,14 +940,18 @@ namespace AethonMod.Content.UI
                 float xc = pagina.X + (pagina.Width - ancho) * 0.5f;
                 var posL = new Vector2(xc, y);
                 const float o = 1.1f;   // el grosor del contorno
+                // v6.166 — EL CONTORNO SEPIA (la cura del halo blanco):
+                // el borde toma el color de la SOMBRA del papel — se
+                // funde con la página y la tinta queda limpia.
+                Color borde = new Color(178, 158, 120);
                 sb.DrawString(fuente, linea.ToString(), posL + new Vector2(o, 0f),
-                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                    borde, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
                 sb.DrawString(fuente, linea.ToString(), posL + new Vector2(-o, 0f),
-                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                    borde, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
                 sb.DrawString(fuente, linea.ToString(), posL + new Vector2(0f, o),
-                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                    borde, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
                 sb.DrawString(fuente, linea.ToString(), posL + new Vector2(0f, -o),
-                    Color.White, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
+                    borde, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
                 sb.DrawString(fuente, linea.ToString(), posL,
                     c, 0f, Vector2.Zero, 0.92f, SpriteEffects.None, 0f);
             }
@@ -1293,6 +1309,50 @@ namespace AethonMod.Content.UI
                 marcada ? TintaVioleta : TintaApagado, 0.95f, 0.5f, 0.5f);
             if (hovM && clicNuevo) AltarOfrendasUI.ClicEnMarcaTres();
             cy += 84f;
+
+            // ============================================================
+            //  v6.166 — LA BANDEJA DE CANDIDATOS (la letra: «cuando toco
+            //  un slot para colocar un arma, quiero que debajo se
+            //  muestren los iconos de armas compatibles que yo tenga en
+            //  el inventario»): abierta por el clic en una ranura, con
+            //  los candidatos CONSAGRADOS del inventario. Un clic en un
+            //  icono lo coloca en SU ranura.
+            // ============================================================
+            if (AltarOfrendasUI.SelectorAbierto != null &&
+                AltarOfrendasUI.SelectorAbierto.Value.ranura >= 0)
+            {
+                var candidatos = AltarOfrendasUI.CosecharCandidatos(true);
+                if (candidatos.Count == 0)
+                {
+                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Items.TrioSinConsagradas"),
+                        cy, 0.72f, TintaApagado);
+                }
+                else
+                {
+                    // LA FILA DE ICONOS (hasta 8 visibles, 40 px cada uno)
+                    int visibles = Math.Min(8, candidatos.Count);
+                    float anchoFila = visibles * 46f;
+                    float x0 = pag.X + (pag.Width - anchoFila) * 0.5f;
+                    for (int ic = 0; ic < visibles; ic++)
+                    {
+                        Rectangle icRect = new Rectangle((int)(x0 + ic * 46f), (int)cy, 42, 42);
+                        Item cand = candidatos[ic];
+                        bool hovIc = icRect.Contains(Main.mouseX, Main.mouseY) &&
+                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        sb.Draw(TextureAssets.MagicPixel.Value, icRect,
+                            PapelSombra * (hovIc ? 1.3f : 0.85f));
+                        LibroMarco.Marco(sb, icRect, hovIc ? TintaOro : TintaOro * 0.4f);
+                        Texture2D texI = TextureAssets.Item[cand.type].Value;
+                        float escI = Math.Min(34f / texI.Width, 34f / texI.Height);
+                        sb.Draw(texI, icRect.Center.ToVector2(), null, Color.White, 0f,
+                            texI.Size() * 0.5f, escI, SpriteEffects.None, 0f);
+                        if (hovIc && clicNuevo) AltarOfrendasUI.ClicEnCandidato(ic);
+                    }
+                    if (candidatos.Count > visibles)
+                        Linea("+" + (candidatos.Count - visibles), cy, 0.6f, TintaApagado);
+                    cy += 50f;
+                }
+            }
 
             // LA LEYENDA DE LA MARCA (qué dispara el trío AHORA)
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.TrioMarca",

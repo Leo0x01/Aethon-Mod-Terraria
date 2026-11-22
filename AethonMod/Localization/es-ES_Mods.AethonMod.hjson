@@ -2255,6 +2255,9 @@ Items: {
 	TrioNoArma: Eso no es un arma mágica — el atril solo sostiene armas MÁGICAS.
 	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
 	TrioInsertada: Arma asentada en la ranura {0}.
+	TrioRequiereConsagrada: Esa arma no está consagrada — conságala primero en el altar de la ofrenda para poder colocarla en el trío.
+	TrioSinConsagradas: No llevas armas consagradas — consagra un arma mágica en el altar y vuelve.
+	BandejaVacia: No llevas nada que consagrar.
 	TrioComo: El altar del libro consagra las armas · el Trío dispara lo elegido allí.
 	TrioLibre: (libre)
 	TrioRanura: Ranura {0}: {1}
@@ -4381,3 +4384,7 @@ Projectiles: {
 
 PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.
 
+	Mapa: {
+		Altar: El Altar de la Consagración
+		Pilar: El Pilar del Eterno
+	}
