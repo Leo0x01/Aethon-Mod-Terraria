@@ -1,5 +1,22 @@
 # AethonMod — Historial de Cambios
 
+## v6.167 — EL REGRESO DEL EQUINOCCIO Y LA BOLSA DE LOS VEINTE (release 454373583 · md5 c7317205…)
+
+1. **ATAQUE BÁSICO 931**: discos día/noche + OrigenDelDisparo (del libro) + tope que rota — La Palabra Cortada jubilada.
+2. **CAZA**: la sombra re-busca presa si la suya muere (la causa: el jugador mataba la presa durante la persecución y la sombra moría sin morder).
+3. **ALTAR/PILAR**: paleta del libro (papel + tinta).
+4. **TRÍO**: izq equipa (sin duplicar — el arma SALE del inventario) · der desequipa (vuelve) · botón Desequipar todo · casilla bajo los slots.
+5. **OFRENDA**: la bandeja vive en el libro + las Esencias del Eterno como candidatas (llave, tope 1000).
+6. **DEVORACIÓN**: solo jefes en el cine (guard EsJefe); la chusma muere con checkDead. Jefe inobjetable y loot final intactos.
+7. **CRONISTA v2**: la corona rúnica (melena + barba + túnica azul-noche). **NPC TEST**: clon exacto del jugador (SerializedClone + PlayerRenderer).
+8. **MUNDO INTERIOR**: todas las zonas de bioma activas dentro — todo jefe invocable.
+9. **OLEADA** (análisis): pizarra de 6 con veto de 2, ×(oleada+1), Deerclops 1%, sin dependencia de biomas.
+10. **20 CLICKERS**: 7 familias, 4 estilos de radio nuevos, especiales ×2-5 · BolsaClickers (Maestra + entrega al entrar).
+
+— oráculo 0/0 · build 0/0 (21.871.706 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.166 — LA SESIÓN DE LAS AUTOPSIAS SERIAS (release 454323857 · md5 8503e5f1…)
 
 1. **MODO CAZA**: NRE del rearme v6.165 (alma antes del null-check) mataba el AI del flotante — null-check primero · la salida al 10% respeta cacerías activas · el radio de caza se mide desde el jugador (1250 px).
