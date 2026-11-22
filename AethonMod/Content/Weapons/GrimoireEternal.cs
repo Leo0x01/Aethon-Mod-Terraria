@@ -414,12 +414,13 @@ namespace AethonMod.Content.Weapons
             usoBasico.MaxInstances = 2;
             Item.UseSound = usoBasico;
             Item.autoReuse = true;         // v5.1: mantener click = disparo continuo
-            // v6.158 — EL BÁSICO ES EL TAJO (LA PALABRA CORTADA): el
-            // disparo nace del Shoot (el proyectil del tajo) — el shoot
-            // apunta a él para que vanilla compute el daño con el
-            // damageClass del arma (mágico, como siempre).
-            Item.shoot = ModContent.ProjectileType
-                <global::AethonMod.Content.Projectiles.Grimorio.PalabraCortadaProjectile>();
+            // v6.167 — EL EQUINOCCIO VUELVE A CASA (la letra: «regresa al
+            // ataque basico original del grimorio, el ataque ese que era
+            // 931»): LA PALABRA CORTADA muere como básico — el disparo
+            // es EL DE SIEMPRE, los discos día/noche del 931 con sus
+            // marcas de FX, naciendo DEL LIBRO cuando está fuera (la
+            // cura de «sigue saliendo del jugador»).
+            Item.shoot = 931;              // Nightglow vanilla (el número — como el Equinoccio)
             Item.shootSpeed = 12f;
             Item.mana = 0;                 // la regla de la casa — el hambre ES el coste
             Item.noMelee = true;           // el tajo es el proyectil, no el sprite del libro
@@ -930,54 +931,78 @@ namespace AethonMod.Content.Weapons
             // (la caza solitaria es del ausente — la letra del Nervioso)
             Estado.TicksSinAtaqueLibro = 0;
 
-            // LA MIRA del golpe: hacia el cursor (el tajo nace donde
-            // miras — la palabra corta donde el portador señala).
-            Vector2 mira = Vector2.Zero;
-            try
+            // ============================================================
+            //  v6.167 — EL EQUINOCCIO DE SIEMPRE VUELVE (la letra:
+            //  «regresa al ataque basico original del grimorio, el
+            //  ataque ese que era 931 […] regresa a esos commit»):
+            //  el código ES el de la v6.156 — la pareja día/noche, el
+            //  tope que ROTA y el abanico topeado. Lo único nuevo: el
+            //  ORIGEN también mira al LIBRO FLOTANTE (OrigenDelDisparo
+            //  — la regla de la casa v6.50.93).
+            // ============================================================
+            // EL ORIGEN: si el espíritu está FUERA, el disparo nace DEL
+            // LIBRO FLOTANTE (la regla del Nervioso: «si el jugador
+            // ataca y el libro esta fuera sus ataques salen del libro»)
+            Vector2 pos = OrigenDelDisparo(player, position);
+
+            // === LA FUENTE DIVIDIDA (la del Equinoccio, EXACTA): la
+            //     velocidad de vanilla (aleatoria, siempre hacia arriba)
+            //     — el día y la noche separándose sobre tu cabeza ===
+            Vector2 baseV = Main.rand.NextVector2Circular(1f, 1f)
+                          + Main.rand.NextVector2CircularEdge(3f, 3f);
+            if (baseV.Y > 0f) baseV.Y *= -1f;
+
+            // ============================================================
+            //  v6.154 — EL TOPE QUE ROTA (la pareja base NACE SIEMPRE;
+            //  los viejos ceden su sitio — el cielo ROTA, no se atasca)
+            // ============================================================
+            const int TOPE_BASICOS = 10;
+            int vivos = 0;
+            for (int i = 0; i < Main.maxProjectiles; i++)
             {
-                mira = Main.MouseWorld - player.MountedCenter;
-                if (mira.Length() < 4f) mira = new Vector2(player.direction, 0f);
-                mira.Normalize();
+                Projectile pr = Main.projectile[i];
+                if (pr == null || !pr.active || pr.owner != player.whoAmI || pr.type != 931)
+                    continue;
+                float marca = pr.ai[2];
+                if (marca == 9201f || marca == 9202f) vivos++;
             }
-            catch { mira = new Vector2(player.direction, 0f); }
-            float angMira = MathF.Atan2(mira.Y, mira.X);
 
-            // EL SENTIDO DEL VAIVÉN (alterna con cada disparo — el
-            // registro vive en el InstancePerEntity del arma).
-            _sentidoTajo = (sbyte)(-_sentidoTajo);
-
-            int tipoTajo = ModContent.ProjectileType
-                <global::AethonMod.Content.Projectiles.Grimorio.PalabraCortadaProjectile>();
-            int idxT = Projectile.NewProjectile(source, player.MountedCenter,
-                Vector2.Zero, tipoTajo, damage, knockback, player.whoAmI);
-            if (idxT >= 0 && idxT < Main.maxProjectiles && Main.projectile[idxT].active)
+            // LA PAREJA BASE NACE SIEMPRE — y si el cielo está lleno,
+            // los DOS MÁS VIEJOS ceden su sitio
+            if (vivos + 2 > TOPE_BASICOS)
             {
-                var tajo = Main.projectile[idxT].ModProjectile
-                    as global::AethonMod.Content.Projectiles.Grimorio.PalabraCortadaProjectile;
-                tajo?.Vestir(level, angMira, _sentidoTajo, 0);
-            }
-
-            // LA PALABRA SE REPITE (nivel 100+): el segundo tajo CRUZADO
-            // — nace medio compás después y barre al revés.
-            if (level >= 100)
-            {
-                int idxT2 = Projectile.NewProjectile(source, player.MountedCenter,
-                    Vector2.Zero, tipoTajo, damage, knockback, player.whoAmI);
-                if (idxT2 >= 0 && idxT2 < Main.maxProjectiles && Main.projectile[idxT2].active)
+                int aCeder = Math.Max(2, vivos + 2 - TOPE_BASICOS);
+                for (int i = 0; i < Main.maxProjectiles && aCeder > 0; i++)
                 {
-                    var tajo2 = Main.projectile[idxT2].ModProjectile
-                        as global::AethonMod.Content.Projectiles.Grimorio.PalabraCortadaProjectile;
-                    tajo2?.Vestir(level, angMira, _sentidoTajo, 1);
+                    Projectile pr = Main.projectile[i];
+                    if (pr == null || !pr.active || pr.owner != player.whoAmI ||
+                        pr.type != 931) continue;
+                    float marca = pr.ai[2];
+                    if (marca != 9201f && marca != 9202f) continue;
+                    pr.timeLeft = Math.Min(pr.timeLeft, 2);   // se disipa suave
+                    aCeder--;
                 }
             }
 
-            return false;   // el tajo es nuestro — nada de vanilla
+            // EL ABANICO TOPEADO AL CUPO REAL
+            int extra = WeaponScaling.ExtraProjectiles(level);
+            int cupo = Math.Max(0, TOPE_BASICOS - vivos);
+            if (extra > 4) extra = 4;   // el abanico digno: máx 4 parejas extra
+
+            LanzarPareja(source, pos, baseV, damage, knockback, player);
+
+            for (int i = 0; i < extra && cupo > 1; i++)
+            {
+                float angulo = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
+                LanzarPareja(source, pos, baseV.RotatedBy(angulo), damage, knockback, player);
+                cupo -= 2;
+            }
+
+            return false;   // todos los spawns son nuestros
         }
 
-        /// <summary>v6.158 — EL SENTIDO DEL VAIVÉN del tajo (alterna con
-        /// cada disparo: izquierda→derecha, derecha→izquierda — como
-        /// una espada de verdad).</summary>
-        private sbyte _sentidoTajo = 1;
+        // (v6.167 — _sentidoTajo murió con LA PALABRA CORTADA: el
+        //  Equinoccio no tiene vaivén.)
 
         /// <summary>EL DÍA Y LA NOCHE — LOS DISCOS DEL EQUINOCCIO DE
         /// SIEMPRE. v6.51.3 — LA VUELTA A CASA (la letra: «ahora los
@@ -992,10 +1017,30 @@ namespace AethonMod.Content.Weapons
         /// pendiente de diseño — las ideas van en el mensaje de la
         /// versión.)</summary>
         // ================================================================
-        //  (v6.158 — LANZARPAREJA MURIÓ con el Equinoccio: el clic
-        //  izquierdo es ahora LA PALABRA CORTADA — los tajos del
-        //  grimorio, PalabraCortadaProjectile.)
+        //  (v6.167 — LANZARPAREJA REVIVE: la letra pidió el regreso del
+        //  básico original «el ataque ese que era 931» — los discos
+        //  día/noche del Equinoccio, tal como vivían en la v6.156. LA
+        //  PALABRA CORTADA queda retirada como ataque básico.)
         // ================================================================
+        private static void LanzarPareja(EntitySource_ItemUse_WithAmmo source, Vector2 pos,
+            Vector2 vel, int damage, float knockback, Player player)
+        {
+            // EL DORADO — EL DÍA: ai[1] = 0.64 → el render del 931 hace
+            // hslToRgb((hue+0.5)%1) → matiz 0.14 = DORADO de verdad
+            Projectile.NewProjectile(source, pos, vel.RotatedBy(-0.35f),
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.64f,    // ai[1]: EL MATIZ DORADO
+                9201f);   // ai[2]: la marca del FX del sol
+
+            // EL NEGRO — LA NOCHE: ai[1] = 0.28 → matiz 0.78 = VIOLETA
+            // (el rim del eclipse que late en la oscuridad)
+            Projectile.NewProjectile(source, pos, vel.RotatedBy(0.35f),
+                931, damage, knockback, player.whoAmI,
+                -1f,      // ai[0]: sin objetivo aún
+                0.28f,    // ai[1]: el matiz violeta (el rim)
+                9202f);   // ai[2]: la marca del FX del eclipse (SIN bruma)
+        }
 
         // ================================================================
         //  TOOLTIP — v6.50.108 — LA CAJA COMPACTA + LA SEGUNDA VENTANA.

@@ -162,6 +162,14 @@ namespace AethonMod.Content.UI
                     _arma = new Item();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
+                else
+                {
+                    // v6.167 — LA BANDEJA DE LA OFRENDA (la cura del
+                    // «slot de ofrendas no funciona»): clic en el slot
+                    // VACÍO con cursor VACÍO → los candidatos (con LAS
+                    // ESENCIAS de la llave) se despliegan debajo.
+                    AbrirSelector(-2);
+                }
             }
             catch { }
         }
@@ -206,7 +214,16 @@ namespace AethonMod.Content.UI
                 return sello && global::AethonMod.Content.Weapons.Investigaciones
                     .TrioDelEterno.EsArmaValida(it);
             // EL SLOT DE CONSAGRAR: todo lo que el altar acepta (armas Y
-            // materiales — la letra de la v6.90) que aún NO esté sellado
+            // materiales — la letra de la v6.90) que aún NO esté sellado.
+            // v6.167 — LAS ESENCIAS DEL ETERNO ENTRE LAS CANDIDATAS (la
+            // letra: «una ofrenda que debe incluir entre las que se
+            // muestra son las esencias del eterno, que no se consagran,
+            // solo son la llave al mundo interior»): entran SIEMPRE —
+            // el altar las DEVORA directo (SU flujo de las mil, de
+            // poco a poco o las 1000 de golpe).
+            if (it.type == ModContent.ItemType
+                <global::AethonMod.Content.Items.Altar.ItemCorrupto>())
+                return true;
             return !sello && (it.damage > 0 || it.ammo > 0 || it.createTile >= 0 ||
                 it.createWall >= 0 || it.material || it.consumable ||
                 it.healLife > 0 || it.healMana > 0 || it.buffType > 0 ||
@@ -285,7 +302,32 @@ namespace AethonMod.Content.UI
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         return;
                     }
-                    trio.Ranuras[ranura] = (Item)elegido.Clone();
+                    // v6.167 — SIN DUPLICACIÓN (la letra: «cuando el
+                    // arma se equipa en el slot esta debe dejar el
+                    // inventario del jugador ya que ahora esta en el
+                    // slot del altar»): la copia va a la ranura y EL
+                    // ORIGINAL MUERE en el inventario (stack incluido:
+                    // si llevaba 2, la ranura sostiene 1 y el otro
+                    // vuelve al inventario).
+                    if (elegido.stack > 1)
+                    {
+                        elegido.stack--;   // el sobreviviente queda en SU ranura
+                    }
+                    else
+                    {
+                        // el único ejemplar viaja: SU ranura muere
+                        for (int k = 0; k < 58; k++)
+                        {
+                            if (Main.LocalPlayer.inventory[k] == elegido)
+                            {
+                                Main.LocalPlayer.inventory[k].TurnToAir();
+                                break;
+                            }
+                        }
+                    }
+                    Item paraRanura = (Item)elegido.Clone();
+                    paraRanura.stack = 1;
+                    trio.Ranuras[ranura] = paraRanura;
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Items.TrioInsertada", ranura + 1),
@@ -294,7 +336,15 @@ namespace AethonMod.Content.UI
                 else
                 {
                     // EL SLOT DE LA OFRENDA: el item viaja al slot (la
-                    // consagración la paga SU botón)
+                    // consagración la paga SU botón). v6.167 — SIN
+                    // DUPLICACIÓN (la misma ley del trío): si había una
+                    // ofrenda anterior, VUELVE al inventario primero.
+                    if (_arma != null && !_arma.IsAir)
+                    {
+                        Item anterior = (Item)_arma.Clone();
+                        Main.LocalPlayer.QuickSpawnItem(
+                            Main.LocalPlayer.GetSource_FromThis(), anterior);
+                    }
                     _arma = (Item)elegido.Clone();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
@@ -350,8 +400,16 @@ namespace AethonMod.Content.UI
                     // ELIGE. CLIC DERECHO: la extrae al cursor.
                     if (Main.mouseRight)
                     {
-                        Main.mouseItem = (Item)armaSlot.Clone();
+                        // v6.167 — LA VUELTA AL INVENTARIO (la letra: «si
+                        // el jugador desequipa el arma con click derecho,
+                        // esta entonces vuelve al inventario»): el arma
+                        // regresa AL INVENTARIO (QuickSpawnItem — sin
+                        // depender del cursor, sin perderse NUNCA).
+                        Item devolver = (Item)armaSlot.Clone();
+                        devolver.stack = 1;
                         trio.Ranuras[slotT] = new Item();
+                        Main.LocalPlayer.QuickSpawnItem(
+                            Main.LocalPlayer.GetSource_FromThis(), devolver);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                     }
                     else
@@ -377,6 +435,40 @@ namespace AethonMod.Content.UI
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
+                        new Color(160, 230, 255));
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>v6.167 — EL CLIC EN «DESEQUIPAR TODO» (la letra:
+        /// «que haya un boton que permita desequiparlo todo»): las tres
+        /// ranuras DEVUELVEN sus armas al inventario — una por una, sin
+        /// perder NINGUNA (el camino de la extracción de siempre).</summary>
+        public static void ClicEnDesequiparTodo()
+        {
+            try
+            {
+                var trio = global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.Del(Main.LocalPlayer);
+                if (trio == null || trio.Ranuras == null) return;
+                int devueltas = 0;
+                for (int k = 0; k < 3; k++)
+                {
+                    Item arma = trio.Ranuras[k];
+                    if (arma == null || arma.IsAir) continue;
+                    Item devolver = (Item)arma.Clone();
+                    devolver.stack = 1;
+                    trio.Ranuras[k] = new Item();
+                    Main.LocalPlayer.QuickSpawnItem(
+                        Main.LocalPlayer.GetSource_FromThis(), devolver);
+                    devueltas++;
+                }
+                if (devueltas > 0)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Items.TrioTodoDevuelto", devueltas),
                         new Color(160, 230, 255));
                 }
             }
@@ -426,7 +518,6 @@ namespace AethonMod.Content.UI
                 {
                     _abierta = false;
             SelectorAbierto = null;   // v6.166 — la bandeja muere con la ventana
-                    SelectorAbierto = null;   // v6.166 — la bandeja muere con la ventana
                     if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
                     Projectile.NewProjectile(yo.GetSource_Misc("AltarMundoInterior"),
@@ -660,20 +751,21 @@ namespace AethonMod.Content.UI
         // ================================================================
         //  LA PALETA (la de la casa)
         // ================================================================
-        // v6.166 — LA CURA DE LA LETRA (la letra: «todas las letras se
-        // ven o demasiado oscuras o demasiado claras»): el borde NEGRO
-        // de DrawBorderString se fundía con el panel oscuro (texto
-        // 'apagado') y el texto apagado era ilegible. EL PANEL SUBE
-        // DOS PUNTOS de luminosidad (se distingue del fondo), el TEXTO
-        // APAGADO SUBE (110,150,145 → 168,196,190: se lee SIEMPRE) y
-        // el texto principal ya casi blanco queda.
-        private static readonly Color TintaFondo = new(12, 20, 22);
-        private static readonly Color TintaPanel = new(22, 38, 40);
-        private static readonly Color TintaTeal = new(110, 230, 190);
-        private static readonly Color TintaVioleta = new(198, 116, 244);
-        private static readonly Color TintaTexto = new(235, 252, 248);
-        private static readonly Color TintaApagado = new(168, 196, 190);
-        private static readonly Color TintaRojo = new(255, 128, 128);
+        // v6.167 — LA VENTANA DEL ALTAR VISTE LA PALETA DEL LIBRO (la
+        // letra: «en la ventana del altar debes poner el mismo color
+        // de letras que tiene la ventana de informacion» — y la del
+        // libro quedó BIEN): el panel oscuro teal MUERE — el altar es
+        // PAPEL de manuscrito (el mismo 216,200,166 del libro) con
+        // TINTA cálida (28,20,16), títulos violeta (148,72,178) y
+        // acentos ámbar (168,108,44). El borde de DrawBorderString ya
+        // no se funde con NADA: papel claro + tinta oscura.
+        private static readonly Color TintaFondo = new(216, 200, 166);   // el papel del libro
+        private static readonly Color TintaPanel = new(190, 172, 134);   // la sombra del papel
+        private static readonly Color TintaTeal = new(60, 118, 102);     // acento profundo (sobre papel)
+        private static readonly Color TintaVioleta = new(148, 72, 178);  // el violeta del libro
+        private static readonly Color TintaTexto = new(28, 20, 16);      // la tinta del libro
+        private static readonly Color TintaApagado = new(104, 84, 60);   // tinta suave (se lee en papel)
+        private static readonly Color TintaRojo = new(178, 52, 44);      // rojo tinta (errores)
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
 
         // ================================================================

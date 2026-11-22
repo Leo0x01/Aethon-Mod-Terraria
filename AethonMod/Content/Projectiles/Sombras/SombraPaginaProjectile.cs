@@ -139,10 +139,62 @@ namespace AethonMod.Content.Projectiles.Sombras
             bool presaValida = presa != null && presa.active && presa.life > 0;
             if (fase != FASE_DISIPAR && !presaValida)
             {
-                Projectile.ai[1] = FASE_DISIPAR;
-                Projectile.ai[2] = 0;
-                fase = FASE_DISIPAR;
-                t = 0;
+                // v6.167 — LA CAZA NO SE RINDE (la letra: «el grimorio en
+                // modo caza no esta cazando»): la CAUSA — la sombra
+                // nacía, EMERGÍA (26 t), PERSIGUÍA… y mientras tanto el
+                // jugador (o los discos del 931) mataban a la presa: la
+                // sombra se disipaba SIN MORDER NUNCA. En la v6.157 el
+                // hilillo viejo mordía PLANO al contacto — cazaba
+                // siempre. LA CURA MODERNA: la sombra de CAZA (la de
+                // localAI[1], nacida del flotante) NO se disipa —
+                // RE-BUSCA la presa viva más cercana al dueño y sigue
+                // cazando (el libro hambriento no se rinde). Las
+                // sombras del ARMA (las concentradas) conservan su
+                // comportamiento de siempre: su presa ES la que el
+                // jugador señaló.
+                bool esCaza = Projectile.localAI[1] >= 1f;
+                if (esCaza && Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    NPC nueva = null;
+                    float mejorD = 1250f * 1250f;
+                    Vector2 desde = dueño != null && dueño.active ? dueño.Center : Projectile.Center;
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n == null || !n.active || n.life <= 0 || n.friendly ||
+                            n.townNPC || n.dontTakeDamage) continue;
+                        float d = Vector2.DistanceSquared(n.Center, desde);
+                        if (d < mejorD) { mejorD = d; nueva = n; }
+                    }
+                    if (nueva != null)
+                    {
+                        Projectile.ai[0] = nueva.whoAmI + 1;
+                        presa = nueva;
+                        presaValida = true;
+                        if (fase == FASE_EMERGER && t > 8)
+                        {
+                            // ya emergió lo suficiente: directo a CAZA
+                            Projectile.ai[1] = FASE_CAZA;
+                            fase = FASE_CAZA;
+                            Projectile.ai[2] = 0;
+                            t = 0;
+                        }
+                    }
+                    else
+                    {
+                        Projectile.ai[1] = FASE_DISIPAR;
+                        Projectile.ai[2] = 0;
+                        fase = FASE_DISIPAR;
+                        t = 0;
+                    }
+                }
+                else
+                {
+                    Projectile.ai[1] = FASE_DISIPAR;
+                    Projectile.ai[2] = 0;
+                    fase = FASE_DISIPAR;
+                    t = 0;
+                }
             }
 
             switch (fase)
@@ -242,7 +294,22 @@ namespace AethonMod.Content.Projectiles.Sombras
                                     * (1f + SombrasConcentradas);
                                 if (dueñoPool.life - quitar <= 1f)
                                 {
-                                    FaucesGlobalNPC.Iniciar(dueñoPool, 3);
+                                    // v6.167 — EL JEFE CENA, LA CHUSMA MUERE:
+                                    // el festín cinematográfico es de JEFES
+                                    // (Iniciar hace SU guard); la chusma que
+                                    // llega al final de la mordida recibe EL
+                                    // GOLPE MORTAL de una vez (checkDead) y
+                                    // suelta SU absorbida de siempre — nada
+                                    // de zombis congelados a 1 HP.
+                                    if (FaucesGlobalNPC.EsJefe(dueñoPool) ||
+                                        FaucesGlobalNPC.EsSegmentoDeGusano(dueñoPool))
+                                        FaucesGlobalNPC.Iniciar(dueñoPool, 3);
+                                    else
+                                    {
+                                        dueñoPool.life = 0;
+                                        dueñoPool.checkDead();
+                                        dueñoPool.netUpdate = true;
+                                    }
                                     Projectile.ai[1] = FASE_DISIPAR;
                                     Projectile.ai[2] = 0;
                                     break;

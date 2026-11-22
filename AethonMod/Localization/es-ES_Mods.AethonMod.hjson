@@ -2257,6 +2257,7 @@ Items: {
 	TrioInsertada: Arma asentada en la ranura {0}.
 	TrioRequiereConsagrada: Esa arma no está consagrada — conságala primero en el altar de la ofrenda para poder colocarla en el trío.
 	TrioSinConsagradas: No llevas armas consagradas — consagra un arma mágica en el altar y vuelve.
+	TrioTodoDevuelto: "{0} armas devueltas al inventario."
 	BandejaVacia: No llevas nada que consagrar.
 	TrioComo: El altar del libro consagra las armas · el Trío dispara lo elegido allí.
 	TrioLibre: (libre)
@@ -4049,6 +4050,8 @@ Altar: {
 	MundoPuerta: IR AL MUNDO INTERIOR
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (esencias y dinero no necesitan sello)
+	TrioMarcaTexto: Permite usar todas al mismo tiempo
+	TrioDesequiparTodo: Desequipar todo
 }
 
 Arbol: {

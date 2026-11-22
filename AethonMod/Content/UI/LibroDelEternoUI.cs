@@ -1082,6 +1082,7 @@ namespace AethonMod.Content.UI
         internal static Rectangle GeoSlot, GeoConsagrar, GeoPuerta;
         internal static readonly Rectangle[] GeoTrio = new Rectangle[3];
         internal static Rectangle GeoMarcaTres;
+        internal static Rectangle GeoDesequiparTodo;   // v6.167 — el botón que vacía las tres ranuras
 
         /// <summary>El título de sección cosido (centrado, con sus
         /// filetes a los lados — el estilo del índice).</summary>
@@ -1167,6 +1168,57 @@ namespace AethonMod.Content.UI
             cy += 58f;
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.EtiquetaArma"), cy, 0.82f, Tinta);
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.FiltroArma"), cy, 0.68f, TintaApagado);
+
+            // ============================================================
+            //  v6.167 — LA BANDEJA DE LA OFRENDA (la letra: «el slot de
+            //  ofrendas no funciona […] no muestra las ofrendas»): LA
+            //  CAUSA — la bandeja vivía en FluirElContenido (el panel
+            //  viejo que YA NO se dibuja: el altar de hoy es ESTA
+            //  página del libro). Ahora vive AQUÍ, bajo el slot, con
+            //  LAS ESENCIAS DEL ETERNO ENTRE LAS CANDIDATAS (la letra:
+            //  «una ofrenda que debe incluir son las esencias del
+            //  eterno, que no se consagran, solo son la llave al mundo
+            //  interior») — clic en un icono = la ofrenda al slot.
+            // ============================================================
+            if (AltarOfrendasUI.SelectorAbierto != null &&
+                AltarOfrendasUI.SelectorAbierto.Value.ranura == -2)
+            {
+                var cands = AltarOfrendasUI.CosecharCandidatos(false);
+                if (cands.Count == 0)
+                {
+                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Items.BandejaVacia"),
+                        cy + 2f, 0.72f, TintaApagado);
+                }
+                else
+                {
+                    int visibles = Math.Min(8, cands.Count);
+                    float anchoFila = visibles * 46f;
+                    float x0 = pag.X + (pag.Width - anchoFila) * 0.5f;
+                    for (int ic = 0; ic < visibles; ic++)
+                    {
+                        Rectangle icRect = new Rectangle((int)(x0 + ic * 46f), (int)cy, 42, 42);
+                        Item cand = cands[ic];
+                        bool hovIc = icRect.Contains(Main.mouseX, Main.mouseY) &&
+                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        sb.Draw(TextureAssets.MagicPixel.Value, icRect,
+                            PapelSombra * (hovIc ? 1.35f : 0.85f));
+                        LibroMarco.Marco(sb, icRect, hovIc ? TintaOro : TintaOro * 0.4f);
+                        Texture2D texI = TextureAssets.Item[cand.type].Value;
+                        float escI = Math.Min(34f / texI.Width, 34f / texI.Height);
+                        sb.Draw(texI, icRect.Center.ToVector2(), null, Color.White, 0f,
+                            texI.Size() * 0.5f, escI, SpriteEffects.None, 0f);
+                        if (cand.stack > 1)
+                            Utils.DrawBorderString(sb, cand.stack.ToString(),
+                                new Vector2(icRect.Right - 4f, icRect.Bottom - 8f),
+                                Tinta, 0.7f, 1f, 0.85f);
+                        if (hovIc && clicNuevo) AltarOfrendasUI.ClicEnCandidato(ic);
+                    }
+                    if (cands.Count > visibles)
+                        Utils.DrawBorderString(sb, "+" + (cands.Count - visibles),
+                            new Vector2(x0 + anchoFila + 6f, cy + 21f), TintaApagado, 0.7f, 0f, 0.5f);
+                    cy += 50f;
+                }
+            }
 
             // ── EL SELLO (el precio A LA VISTA + consagrar) ──
             cy += 6f;
@@ -1289,27 +1341,6 @@ namespace AethonMod.Content.UI
                     elegida ? TintaVioleta : TintaApagado, escN, 0.5f, 0.5f);
                 if (hov && clicNuevo) AltarOfrendasUI.ClicEnRanura(i);
             }
-            // ── LA MARCA «3» (las tres a la vez) ──
-            Rectangle marca = new Rectangle(pag.X + pag.Width / 2 + 3 * 66 / 2 + 12, (int)cy + 13, 36, 36);
-            GeoMarcaTres = marca;
-            bool marcada = trio.ModoDisparo >= 3;
-            bool hovM = marca.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-            sb.Draw(TextureAssets.MagicPixel.Value, marca,
-                (marcada ? TintaVioleta : TintaApagado) * 0.22f);
-            LibroMarco.Marco(sb, marca, marcada ? TintaVioleta : TintaApagado * 0.5f);
-            if (marcada)
-            {
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(marca.X + 8, marca.Center.Y - 1, 20, 2), TintaVioleta);
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(marca.Center.X - 1, marca.Y + 8, 2, 20), TintaVioleta);
-            }
-            Utils.DrawBorderString(sb, "3", new Vector2(marca.Center.X, marca.Center.Y),
-                marcada ? TintaVioleta : TintaApagado, 0.95f, 0.5f, 0.5f);
-            if (hovM && clicNuevo) AltarOfrendasUI.ClicEnMarcaTres();
-            cy += 84f;
-
             // ============================================================
             //  v6.166 — LA BANDEJA DE CANDIDATOS (la letra: «cuando toco
             //  un slot para colocar un arma, quiero que debajo se
@@ -1353,6 +1384,65 @@ namespace AethonMod.Content.UI
                     cy += 50f;
                 }
             }
+            // ============================================================
+            //  v6.167 — LA CASILLA DEBAJO DE LOS SLOTS (la letra: «el
+            //  checklist de disparar las 3 armas deberia estar debajo
+            //  de los slot y decir, permite usar todas al mismo
+            //  tiempo»): la marca «3» lateral muere — la casilla vive
+            //  BAJO las tres ranuras, con SU texto al lado.
+            // ============================================================
+            cy += 10f;
+            Rectangle marca = new Rectangle(pag.X + pag.Width / 2 - 150, (int)cy, 22, 22);
+            GeoMarcaTres = marca;
+            bool marcada = trio.ModoDisparo >= 3;
+            bool hovM = marca.Contains(Main.mouseX, Main.mouseY) &&
+                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+            sb.Draw(TextureAssets.MagicPixel.Value, marca,
+                marcada ? TintaVioleta * 0.35f : PapelSombra * 0.9f);
+            LibroMarco.Marco(sb, marca, marcada ? TintaVioleta : TintaApagado * 0.6f);
+            if (marcada)
+            {
+                // LA PALOMITA (el trazo de la casa: dos barras)
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(marca.X + 4, marca.Center.Y - 1, 6, 2), TintaVioleta);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(marca.X + 9, marca.Center.Y - 4, 2, 8), TintaVioleta);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(marca.X + 6, marca.Y + 13, 2, 6), TintaVioleta);
+            }
+            // EL TEXTO DE LA LETRA (tal cual): «permite usar todas al
+            // mismo tiempo» — clic en texto o casilla, lo mismo
+            Rectangle txtMarca = new Rectangle(marca.Right + 8, marca.Y - 2, 280, 26);
+            bool hovTxt = txtMarca.Contains(Main.mouseX, Main.mouseY) &&
+                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+            Utils.DrawBorderString(sb,
+                Language.GetTextValue("Mods.AethonMod.Altar.TrioMarcaTexto"),
+                new Vector2(marca.Right + 8, marca.Center.Y),
+                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado,
+                0.78f, 0f, 0.5f);
+            if ((hovM || hovTxt) && clicNuevo) AltarOfrendasUI.ClicEnMarcaTres();
+            cy += 34f;
+
+            // ============================================================
+            //  v6.167 — EL BOTÓN «DESEQUIPAR TODO» (la letra: «que haya
+            //  un boton que permita desequiparlo todo»): todas las
+            //  ranuras llenas DEVUELVEN sus armas al inventario.
+            // ============================================================
+            Rectangle btnTodo = new Rectangle(
+                pag.X + pag.Width / 2 - 78, (int)cy, 156, 28);
+            GeoDesequiparTodo = btnTodo;
+            bool hovTodo = btnTodo.Contains(Main.mouseX, Main.mouseY) &&
+                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+            sb.Draw(TextureAssets.MagicPixel.Value, btnTodo,
+                hovTodo ? TintaOro * 0.30f : PapelSombra * 0.9f);
+            LibroMarco.Marco(sb, btnTodo, hovTodo ? TintaOro : TintaApagado * 0.6f);
+            Utils.DrawBorderString(sb,
+                Language.GetTextValue("Mods.AethonMod.Altar.TrioDesequiparTodo"),
+                new Vector2(btnTodo.Center.X, btnTodo.Center.Y),
+                hovTodo ? Tinta : TintaApagado, 0.78f, 0.5f, 0.5f);
+            if (hovTodo && clicNuevo) AltarOfrendasUI.ClicEnDesequiparTodo();
+            cy += 40f;
+
 
             // LA LEYENDA DE LA MARCA (qué dispara el trío AHORA)
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.TrioMarca",

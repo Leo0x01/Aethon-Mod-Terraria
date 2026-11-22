@@ -61,6 +61,18 @@ namespace AethonMod.Content.Weapons.Clicker
         /// <summary>v6.100 — El ojo que parpadea (el Parpadeo del Eterno):
         /// 4 pestañas de luz + el destino marcado.</summary>
         Ojo = 3,
+        /// <summary>v6.167 — LA ESTRELLA: 5 puntas girando + destello
+        /// polar (la brújula de los clickers estelares).</summary>
+        Estrella = 4,
+        /// <summary>v6.167 — LA LUNA: creciente plateado orbitando + la
+        /// marea del aro (la firma de los clickers lunares).</summary>
+        Luna = 5,
+        /// <summary>v6.167 — LA CENIZA: chispas ascendiendo del aro
+        /// (la muerte silenciosa de los clickers de brasa).</summary>
+        Ceniza = 6,
+        /// <summary>v6.167 — LAS RUNAS DOBLES: dos coronas rúnicas
+        /// contra-rotando (los clickers del pacto).</summary>
+        RunasDobles = 7,
     }
 
     /// <summary>
@@ -326,6 +338,74 @@ namespace AethonMod.Content.Weapons.Clicker
                 Quad(VFXCore.SoftGlow, Vector2.Lerp(centro, destino, 0.35f),
                     new Vector2(14f, 14f) * (0.8f + 0.2f * MathF.Sin(t * 5f)), t,
                     VFXCore.TintAlfa(new Color(210, 180, 255), 0.35f * alfa));
+            }
+
+            else if (arma.Estilo == EstiloClicker.Estrella)
+            {
+                // v6.167 — LA ESTRELLA: 5 puntas girando (la estrella
+                // polar del contrato) + SU destello en el centro.
+                for (int i = 0; i < 5; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 5f - t * 0.22f;
+                    Vector2 punta = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio);
+                    float late = 0.55f + 0.45f * MathF.Sin(t * 3.4f + i * 1.25f);
+                    Quad(VFXCore.SoftGlow, punta, new Vector2(12f, 12f) * late, ang,
+                        VFXCore.TintAlfa(Color.Lerp(arma.Color, Color.White, 0.35f),
+                            0.55f * late * alfa));
+                }
+                float lateC = 0.5f + 0.5f * MathF.Sin(t * 2.2f);
+                Quad(VFXCore.SoftGlow, centro, new Vector2(16f, 16f) * lateC, t * 0.3f,
+                    VFXCore.TintAlfa(arma.Color, 0.30f * lateC * alfa));
+            }
+            else if (arma.Estilo == EstiloClicker.Luna)
+            {
+                // v6.167 — LA LUNA: el creciente plateado viaja por el
+                // aro y LA MAREA lo sigue (el aro ondula bajo él).
+                float angLuna = t * 0.30f;
+                Vector2 luna = centro + new Vector2(
+                    MathF.Cos(angLuna) * radio, MathF.Sin(angLuna) * radio);
+                Quad(VFXCore.SoftGlow, luna, new Vector2(15f, 15f), angLuna,
+                    VFXCore.TintAlfa(Color.Lerp(arma.Color, new Color(220, 235, 255), 0.6f),
+                        0.65f * alfa));
+                // LA MAREA: el arco de la luna brilla más (la gravedad)
+                for (int i = 0; i < 6; i++)
+                {
+                    float ang = angLuna + (i - 2.5f) * 0.16f;
+                    Vector2 pos = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio);
+                    Quad(VFXCore.SoftGlow, pos, new Vector2(7f, 7f), ang,
+                        VFXCore.TintAlfa(arma.Color, 0.40f * alfa * (1f - MathF.Abs(i - 2.5f) / 3f)));
+                }
+            }
+            else if (arma.Estilo == EstiloClicker.Ceniza)
+            {
+                // v6.167 — LA CENIZA: las chispas nacen del aro y suben
+                // (la brasa que respira hacia el cielo).
+                for (int i = 0; i < 8; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 8f + t * 0.05f;
+                    float sube = (t * 0.45f + i * 0.125f) % 1f;
+                    Vector2 pos = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio)
+                        - new Vector2(0f, sube * 26f);
+                    Quad(VFXCore.SoftGlow, pos, new Vector2(5f, 5f) * (1f - sube * 0.5f), 0f,
+                        VFXCore.TintAlfa(Color.Lerp(arma.Color, new Color(255, 200, 120), 0.5f),
+                            0.45f * (1f - sube) * alfa));
+                }
+            }
+            else if (arma.Estilo == EstiloClicker.RunasDobles)
+            {
+                // v6.167 — LAS RUNAS DOBLES: dos coronas rúnicas
+                // contra-rotando (el pacto de los dos relojes).
+                if (VFXCore.Presupuesto(80))
+                {
+                    OrbitaLib.CirculoRunico(centro, radio, t, 1f, 6, 0.12f,
+                        arma.Color, Color.White, 0.60f, offset: 0, ringAlpha: 0f);
+                    OrbitaLib.CirculoRunico(centro, radio * 0.90f, -t * 1.4f, 1f, 5, 0.12f,
+                        Color.Lerp(arma.Color, Color.White, 0.4f), Color.White, 0.50f,
+                        offset: 3, ringAlpha: 0f);
+                }
             }
 
             // LA LUZ DEL CONTRATO: un baño tenue del color del arma sobre

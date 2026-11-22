@@ -52,6 +52,23 @@ namespace AethonMod.Content.Players
                     if (it != null && !it.IsAir && it.type == tipoEsencia)
                         lleva += it.stack;
                 }
+                // v6.167 — LA BOLSA DE LOS VEINTE CLICKERS (la letra:
+                // «crea una bolsa con al menos 20 armas tipo clickler y
+                // daselas al jugador»): la bolsa llega CON las esencias
+                // de prueba — solo si no la lleva ya.
+                bool llevaBolsa = false;
+                for (int k = 0; k < 58; k++)
+                {
+                    Item it = Player.inventory[k];
+                    if (it != null && !it.IsAir && it.type == ModContent.ItemType
+                        <global::AethonMod.Content.Items.Bolsas.BolsaClickers>())
+                    { llevaBolsa = true; break; }
+                }
+                if (!llevaBolsa)
+                    Player.QuickSpawnItem(Player.GetSource_FromThis(),
+                        ModContent.ItemType
+                            <global::AethonMod.Content.Items.Bolsas.BolsaClickers>(), 1);
+
                 int falta = 9999 - lleva;
                 if (falta > 0)
                 {

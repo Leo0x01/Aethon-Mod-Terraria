@@ -147,6 +147,17 @@ namespace AethonMod.Content.Globals
             NPC dueño = DueñoDelPool(npc);
             if (dueño == null || !dueño.active) return;
 
+            // v6.167 — SOLO JEFES EN EL CINE (la letra: «asegurate de
+            // que el grimorio solo devore a los jefes con su animacion
+            // caracteristicas y en el momento correcto»): la autopsia —
+            // DueñoDelPool devuelve a la PROPIA presa cuando no es un
+            // segmento de gusano, así que la mordida de una sombra
+            // sobre CHUSMA común (vida ≤ 1) arrancaba EL FESTÍN
+            // COMPLETO sobre un zombi cualquiera. El cine de las
+            // Fauces es de JEFES; la chusma muere y ya (SU absorbida
+            // de siempre vive en AbsorberPresa).
+            if (!EsJefe(dueño) && !EsSegmentoDeGusano(dueño)) return;
+
             if (Main.netMode == NetmodeID.MultiplayerClient) return; // la autoridad decide
 
             _marcas[dueño.whoAmI] = 300;              // caduca en 5 s

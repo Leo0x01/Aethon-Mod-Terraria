@@ -2272,6 +2272,7 @@ Items: {
 	TrioInsertada: Weapon seated in slot {0}.
 	TrioRequiereConsagrada: That weapon is not consecrated — consecrate it at the offering altar first to place it in the trio.
 	TrioSinConsagradas: You carry no consecrated weapons — consecrate a magic weapon at the altar and come back.
+	TrioTodoDevuelto: "{0} weapons returned to your inventory."
 	BandejaVacia: You carry nothing to consecrate.
 	TrioComo: The book's altar consecrates the weapons · the Trio fires whatever is chosen there.
 	TrioLibre: (free)
@@ -4058,6 +4059,8 @@ Altar: {
 	MundoPuerta: ENTER THE INNER WORLD
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
+	TrioMarcaTexto: Allows using all of them at once
+	TrioDesequiparTodo: Unequip all
 }
 
 Arbol: {
