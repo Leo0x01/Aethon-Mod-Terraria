@@ -1,5 +1,22 @@
 # AethonMod — Historial de Cambios
 
+## v6.165 — LA CAZA DEL LIBRO Y LOS NPCS DE TERRARIA (release 454288045 · md5 78905746…)
+
+1. **LAS VENTANAS PISADAS**: AbrirEn ya no pasa por Abrir() (que forzaba Índice y pisaba la pestaña del altar/pilar).
+2. **EL SUBTÍTULO DEL ÍNDICE MUERE** — solo Información/Lore centrados.
+3. **LA CAZA ATACA DESDE EL LIBRO**: RaizDeSombra = centro del flotante en caza.
+4. **HISTÉRESIS**: entra 20% · sale 10%.
+5. **EL REARME DE LAS SOMBRAS**: re-sincronización viva del contador con las sombras de caza vivas.
+6. **EL ATAQUE BÁSICO**: lote aditivo del patrón Grieta (Begin/End/ReabrirLoteVanilla).
+7. **9999 DE PRUEBA**: top-up a 9999 al entrar (OnWorldLoad).
+8. **TASA ×2 TRAS EL MURO**: Main.hardMode duplica el botín (no existía — añadida).
+9. **EL MAPA**: región de repintado (mapMin/mapMax + updateMap) al colocar altar y pilar.
+10. **NPCs DE TERRARIA**: hojas propias de 25 marcos (layout Guide/AlchemistNPC), AnimationType=Guide — el renderer de jugadores murió.
+
+— oráculo 0/0 · build 0/0 (21.847.042 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.164 — LAS TRES VENTANAS SEPARADAS Y EL TAJO DE TINTA (release 453991696 · md5 511c9779…)
 
 1. **LAS PESTAÑAS MUEREN**: icono/P → solo Índice · altar → solo altar · pilar → solo pilar; cierre sincronizado.
