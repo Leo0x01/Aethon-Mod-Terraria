@@ -1,5 +1,18 @@
 # AethonMod — Historial de Cambios
 
+## v6.166 — LA SESIÓN DE LAS AUTOPSIAS SERIAS (release 454323857 · md5 8503e5f1…)
+
+1. **MODO CAZA**: NRE del rearme v6.165 (alma antes del null-check) mataba el AI del flotante — null-check primero · la salida al 10% respeta cacerías activas · el radio de caza se mide desde el jugador (1250 px).
+2. **9999 ESENCIAS**: OnWorldLoad pagaba sin jugadores — el top-up vive en OnEnterWorld.
+3. **LA LETRA**: papel del libro oscurecido + contorno sepia (el halo blanco moría) · altar/pilar más legibles.
+4. **BANDEJAS DEL TRÍO**: iconos de armas consagradas debajo de la ranura · solo consagradas (aviso al rebotar) · bandeja de consagrables bajo el slot de ofrenda.
+5. **MAPA**: AltaresMapLayer (ModMapLayer — el sistema de los NPC) — iconos de altar y pilar siempre visibles.
+6. **NPCs**: hojas con el blueprint Musician verificado (25 marcos, re-mapeo de paleta escriba/espécimen) · ExtraFramesCount 9 · AnimationType Merchant (25/9/4 exacto).
+
+— oráculo 0/0 · build 0/0 (21.858.889 B) · GUARDIÁN ✔ · headless 0 excepciones.
+
+# AethonMod — Historial de Cambios
+
 ## v6.165 — LA CAZA DEL LIBRO Y LOS NPCS DE TERRARIA (release 454288045 · md5 78905746…)
 
 1. **LAS VENTANAS PISADAS**: AbrirEn ya no pasa por Abrir() (que forzaba Índice y pisaba la pestaña del altar/pilar).
