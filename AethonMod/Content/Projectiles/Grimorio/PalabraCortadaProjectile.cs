@@ -248,10 +248,20 @@ namespace AethonMod.Content.Projectiles.Grimorio
             // EL ÁNGULO DE ARRANQUE del trazo (donde la pluma aterrizó).
             float angArranque = _giroBase + _sentido * -APERTURA;
 
+            // v6.165 — EL LOTE DE LA GRIETA (la cura del error del
+            // ataque básico): el ribbon NO vive en el lote de VFXCore
+            // (Begin/FlushAdditive son el buffer de QUADS propio — ni
+            // abren ni cierran el spriteBatch). El patrón de la casa
+            // (GrietaDeTinta): cerrar el lote vivo SI HAY UNO,
+            // abrir el spriteBatch en ADITIVO INMEDIATO y End al
+            // terminar — las estelas se dibujan donde deben, con el
+            // blend de la tinta.
+            VFXCore.CerrarLoteSiAbierto();
             try
             {
-                VFXCore.CerrarLoteSiAbierto();
-                VFXCore.Begin();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
 
                 int nPuntos = 22;
                 var camino = new Vector2[nPuntos];
@@ -298,22 +308,9 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     8f + _radio * 0.05f, EstelaProfile.Comet, oro,
                     0.75f * alfa, Projectile.whoAmI + 7, t, head: true, taper: 0.7f);
 
-                VFXCore.FlushAdditive(null, false);
-            }
-            catch
-            {
-                VFXCore.CerrarLoteSiAbierto();
-            }
-
-            // ============================================================
-            //  (3) LAS SALPICADURAS DE TINTA — el cierre del trazo: al
-            //  terminar el barrido, 6 gotas de tinta SALTAN del arco
-            //  (puntos con vida fractal, NO glows planos: cada gota es
-            //  UNA estela corta con taper completo — hilos de tinta).
-            // ============================================================
-            try
-            {
-                VFXCore.ReabrirLoteVanilla();
+                // LAS GOTAS viven en el MISMO lote aditivo (la tinta
+                // es una sola): se dibujan tras las estelas, dentro del
+                // mismo Begin…End — sin reabrir nada.
                 if (tB > 13f)
                 {
                     float tension = MathHelper.Clamp((tB - 13f) / 5f, 0f, 1f);
@@ -344,6 +341,11 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 }
             }
             catch { }
+            // EL CIERRE DEL LOTE ADITIVO + la vuelta al lote del juego
+            // (el patrón de la Grieta: End SIEMPRE, y Reabrir para que
+            // el resto del frame dibuje normal).
+            try { Main.spriteBatch.End(); } catch { }
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

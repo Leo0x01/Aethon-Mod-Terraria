@@ -73,70 +73,6 @@ namespace AethonMod.Content.NPCs
 
         // EL CUERPO MODELO — estático y por mundo (se viste UNA vez;
         // el frame se anima en cada dibujado).
-        private static Player _cuerpo;
-        private static bool _cuerpoVestido;
-
-        private static Player CuerpoDelCronista()
-        {
-            if (_cuerpoVestido && _cuerpo != null) return _cuerpo;
-            try
-            {
-                // v6.159 — EL PATRÓN DE VANILLA DE VERDAD (la letra:
-                // «el cronista no es compatible con los modelos
-                // originales de terraria, acaso no investigaste como
-                // otros mods usan esos modelos»). LA RESPUESTA DE LA
-                // INVESTIGACIÓN: los mods que muestran un personaje
-                // usan EL MISMO CAMINO QUE LA PREVIEW DEL MENÚ DE
-                // VANILLA (UICharacter, el decompile): un
-                // Player.SerializedClone() — UN CUERPO DE TERRARIA
-                // COMPLETO, con TODOS los caches de dibujado ya
-                // construidos por el propio motor — vestido después a
-                // mano. UN `new Player()` forjado (la v6.158) NO ES un
-                // personaje de Terraria compatible: le faltan los
-                // caches que el renderer espera. EL CLON es el modelo
-                // del personaje de Terraria EXACTO; el vestido del
-                // escriba (la Robe, la cabeza descubierta con el pelo
-                // de tinta y los ojos de runa) va ENCIMA.
-                _cuerpo = Main.LocalPlayer != null
-                    ? Main.LocalPlayer.SerializedClone()
-                    : new Player();
-                _cuerpo.active = true;
-                _cuerpo.dead = false;
-                _cuerpo.name = "El Cronista";
-                _cuerpo.Male = true;                 // UN HOMBRE (la letra)
-                _cuerpo.skinVariant = 0;             // el cuerpo clásico
-                _cuerpo.hair = 7;                    // el pelo corto serio
-                _cuerpo.skinColor = new Color(216, 190, 150);  // pergamino
-                _cuerpo.eyeColor = new Color(150, 96, 210);    // la runa viva
-                _cuerpo.hairColor = new Color(46, 28, 70);     // la tinta
-                _cuerpo.armor[0] = new Item();       // sin casco: LA CABEZA DESNUDA
-                _cuerpo.armor[1] = new Item(ItemID.Robe);      // LA TÚNICA DEL ESCRIBA
-                _cuerpo.armor[2] = new Item();       // sin pantalón (la túnica cubre)
-                _cuerpo.armor[3] = new Item();       // sin zapatos visibles
-                _cuerpo.miscEquips[0] = new Item();  // sin caballo ni gancho
-                // v6.161 — LA PLUMA EN LA MANO (la cura de «ni siquiera
-                // usa el estilo de terraria»): el escriba SOSTIENE la
-                // pluma de tinta de vanilla — el ítem dibujado por EL
-                // PROPIO renderer de jugadores (la mano viva del
-                // estilo Terraria, como el Merchant sostiene su caja).
-                // HeldItem es de solo lectura (lee inventory
-                // [selectedItem]): la pluma vive en la ranura 0 y el
-                // selectedItem la señala.
-                _cuerpo.inventory[0] = new Item(ItemID.Feather);
-                _cuerpo.selectedItem = 0;
-                _cuerpo.direction = 1;
-                _cuerpo.gravDir = 1f;
-                _cuerpo.fullRotation = 0f;
-                _cuerpo.wingFrame = 0;
-                _cuerpo.invis = false;
-                _cuerpoVestido = true;
-            }
-            catch
-            {
-                _cuerpo = null;
-            }
-            return _cuerpo;
-        }
 
         public override void SetStaticDefaults()
         {
@@ -472,94 +408,34 @@ namespace AethonMod.Content.NPCs
 
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            // v6.158 — EL MODELO DE PERSONAJE DE TERRARIA, DE VERDAD
-            // (la letra: «debes usar exactamente el modelo de
-            // personaje del terraria original ya que es el que usan
-            // todos los mods»). Main.PlayerRenderer — EL renderer que
-            // dibuja a todos los jugadores del mundo — dibuja al
-            // Player modelo ACTIVO de CuerpoDelCronista: la Robe del
-            // escriba sobre EL CUERPO LITERAL de un personaje de
-            // Terraria (los mismos brazos, la misma cabeza, el mismo
-            // andar del ciclo de PlayerFrame). El frame se anima AQUÍ:
-            // parado = frame 0; caminando = la banda 7..18 (el ciclo
-            // de andar de vanilla, avanzando por la velocidad real).
-            if (Main.netMode == NetmodeID.Server) return false;
-            try
+            // v6.165 — EL SPRITESHEET DE TERRARIA, DE VERDAD (la letra:
+            // «los NPCs, el cronista y el NPC test siguen sin ser NPC
+            // de terraria, dime porque no usas los mismos spritesheet
+            // de terraria para los NPC, todos los mods lo usan para
+            // sus NPC»): EL RENDERER DE JUGADORES MUERE para siempre —
+            // frágil (un Player fuera de mundo → invisible) y jamás
+            // fue «un NPC de Terraria». El Cronista vive AHORA en SU
+            // PROPIA HOJA de 25 marcos (ElCronista.png, el layout
+            // AlchemistNPC-Lite/Guide: idle+parpadeo 0-3 · caminar
+            // 4-7 · uso del brazo 8-13/14-19 · resto 20-24) y el
+            // framer de vanilla lo anima SOLO (AnimationType = Guide).
+            // Esta función solo deja pasar el dibujo VANILLA y firma
+            // el aire: las 2 motas de tinta a sus pies.
+            if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 20f == 0f)
             {
-                Player cuerpo = CuerpoDelCronista();
-                if (cuerpo != null && Main.PlayerRenderer != null)
+                try
                 {
-                    // LA ANIMACIÓN DEL ANDAR (el ciclo de PlayerFrame:
-                    // el frame de cuerpo del jugador de vanilla).
-                    float vel = Math.Abs(NPC.velocity.X);
-                    if (vel > 0.4f)
-                    {
-                        // la banda de andar (7..18): avanza con la
-                        // velocidad real del NPC — el paso del escriba.
-                        int f = 7 + ((int)(Main.GlobalTimeWrappedHourly *
-                            (4f + vel * 3.5f)) % 12);
-                        cuerpo.bodyFrame = new Rectangle(0, 56 * f, 40, 56);
-                        cuerpo.legFrame = cuerpo.bodyFrame;
-                    }
-                    else
-                    {
-                        cuerpo.bodyFrame = new Rectangle(0, 0, 40, 56);
-                        cuerpo.legFrame = cuerpo.bodyFrame;
-                    }
-                    cuerpo.direction = NPC.direction;
-                    cuerpo.gravDir = 1f;
-                    cuerpo.fullRotation = 0f;
-                    cuerpo.wingFrame = 0;
-                    cuerpo.itemAnimation = 0;   // sin brazos de golpe
-                    // v6.161 — LA MANO DE LA PLUMA: itemAnimation > 0
-                    // mantiene el brazo EXTENDIDO sosteniendo la pluma
-                    // (el gesto de quien escribe — el HeldItem se dibuja
-                    // solo con animación activa, el patrón vanilla).
-                    cuerpo.itemAnimationMax = 30;
-                    if (cuerpo.itemAnimation <= 0) cuerpo.itemAnimation = 30;
-                    cuerpo.itemRotation = 0f;
-
-                    // v6.161 — LA AUTOPSIA DE LA CABEZA FLOTANTE (la
-                    // letra: «es solo una cabeza mal hecha flotante»):
-                    // la firma de DrawPlayer es (camera, player,
-                    // position, rotation, rotationOrigin, SHADOW,
-                    // SCALE) — y la v6.159 pasaba la ILUMINACIÓN
-                    // (0.10..1) en el parámetro ESCALA: el cuerpo del
-                    // escriba se dibujaba al 10-20% de TAMAÑO
-                    // (microcuerpo invisible) y solo la PLUMA dibujada
-                    // aparte a escala 1.6 sobrevivía — ESA era «la
-                    // cabeza flotante». LA CURA: escala 1 SIEMPRE (el
-                    // escriba de cuerpo completo, tamaño de jugador),
-                    // la iluminación la lee el renderer del mundo (como
-                    // a cualquier jugador), y la pluma muere: el
-                    // sello del escriba es ahora LA PLUMA PEQUEÑA en
-                    // la mano (el ítem de pluma de vanilla, dibujado
-                    // por el propio renderer — el estilo Terraria).
-                    Vector2 pos = NPC.position - screenPos;
-                    using (new Main.CurrentPlayerOverride(cuerpo))
-                    {
-                        Main.PlayerRenderer.DrawPlayer(Main.Camera, cuerpo, pos,
-                            0f, Vector2.Zero, 0f, 1f);
-                    }
-
-                    // LA FIRMA DEL ESCRIBA — el remate de tinta violeta
-                    // a sus pies (el suspiro de la casa: 2 motas cada
-                    // ~20 ticks, discretas como una firma al pie de
-                    // página).
-                    if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 20f == 0f)
-                    {
-                        Vector2 cuna = NPC.BottomLeft + new Vector2(
-                            Main.rand.NextFloat(NPC.width), 0f);
-                        Dust d = Dust.NewDustPerfect(cuna,
-                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
-                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.2f),
-                            0, new Color(110, 60, 180), Main.rand.NextFloat(0.18f, 0.28f));
-                        d.noGravity = true;
-                    }
+                    Vector2 cuna = NPC.BottomLeft + new Vector2(
+                        Main.rand.NextFloat(NPC.width), 0f);
+                    Dust d = Dust.NewDustPerfect(cuna,
+                        ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                        new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.2f),
+                        0, new Color(110, 60, 180), Main.rand.NextFloat(0.18f, 0.28f));
+                    d.noGravity = true;
                 }
+                catch { }
             }
-            catch { }
-            return false;   // el sprite fantasma NO se dibuja: el cuerpo es el Player
+            return true;    // LA TIRA PROPIA — vanilla la dibuja y la anima
         }
 
         // ================================================================

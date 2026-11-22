@@ -3213,7 +3213,7 @@ Esencia: {
 
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
-	RegaloBienvenida: ✦ The Eternal welcomes you with 9999 Essences of the Eternal — the hunger starts served.
+	PruebaEsencias: ✦ [TEST] Essences topped up to 9999 — in the final mod they are farmed.
 }
 
 HUD: {
@@ -3762,7 +3762,6 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: Grimoire info pages
-	Subtitulo: left: the info page · right: the lore page
 	SecAltar: THE CONSECRATION ALTAR
 	Altar1: • The offering: a weapon gains +5% to ALL its stats and its tag; a material only its tag; essences raise the gate by 1.
 	Altar2: • Not accepted: already consecrated, tools, accessories or money. ESSENCES ARE: the Eternal devours them whole.

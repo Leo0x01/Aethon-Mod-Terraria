@@ -73,7 +73,11 @@ namespace AethonMod.Content.Projectiles.Nervioso
         // Ahora la vuelta a casa se decide dentro de esta franja de
         // saciedad (5% del medidor): hambre casi agotada = libro que
         // se guarda.
-        public const float SaciedadVuelta = 0.05f;
+        // v6.165 — LA SALIDA AL 10% (la letra: «entra en modo caza al
+        // 20%, sale del modo caza al 10%»): la franja de saciedad pasa
+        // de 5% a 10% — el libro se guarda cuando el medidor cae a la
+        // décima parte, con su histéresis limpia (20% entra, 10% sale).
+        public const float SaciedadVuelta = 0.10f;
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
@@ -589,6 +593,40 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         // cada 100 niveles normales, siempre 1 a nivel
                         // 1») — SombrasCapDe fija el nivel del libro y
                         // devuelve el cap verdadero.
+                        // v6.165 — EL REARME EN VIVO (la letra: «cuando
+                        // el grimorio estaba cazando solo lanzo las
+                        // sombras de la pagina 1 sola vez y luego no
+                        // volvio a hacerlo»): la sombra de caza muere
+                        // por MUCHOS caminos (presa comida por otra
+                        // cosa, disipación, reciclaje del proyectil) y
+                        // NO todos pasan por el OnKill que devuelve el
+                        // gasto — el contador quedaba clavado y la caza
+                        // callaba PARA SIEMPRE (hasta el saneador de
+                        // cada minuto, que además solo corrige a la
+                        // baja). LA CURA: el propio flotante
+                        // RE-SINCRONIZA el contador con las sombras de
+                        // caza REALMENTE VIVAS en CADA tick de búsqueda
+                        // (el mismo conteo que ya hacía para el cap) —
+                        // si una sombra murió por cualquier vía, su
+                        // gasto vuelve AL INSTANTE y la caza sigue
+                        // lanzando. Las sombras del ARMA (concentradas,
+                        // localAI[0]) NO cuentan: las suyas las devuelve
+                        // su propio OnKill.
+                        int tipoActual = ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+                        int tipoReserva = ModContent.ProjectileType
+                            <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
+                        int vivasCaza = 0;
+                        for (int i = 0; i < Main.maxProjectiles; i++)
+                        {
+                            Projectile sp = Main.projectile[i];
+                            if (sp != null && sp.active &&
+                                (sp.type == tipoActual || sp.type == tipoReserva) &&
+                                sp.owner == Projectile.owner &&
+                                sp.localAI[1] >= 1f) vivasCaza++;   // SOLO las de caza
+                        }
+                        if (alma.SombrasGastadas > vivasCaza)
+                            alma.SombrasGastadas = vivasCaza;   // el exceso ES fuga
                         if (alma != null &&
                             alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
                         {
@@ -606,19 +644,15 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             // ondea, muerde y absorbe — el cuerpo de la
                             // casa). El hilillo solo vive como CUERPO DE
                             // RESERVA si el arma no puede nacer.
-                            int tipoActual = ModContent.ProjectileType
-                                <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
-                            int tipoReserva = ModContent.ProjectileType
-                                <global::AethonMod.Content.Projectiles.Nervioso.SombraPaginaEterno>();
-                            int vivas = 0;
+                            int vivasTodas = 0;
                             for (int i = 0; i < Main.maxProjectiles; i++)
                             {
                                 Projectile sp = Main.projectile[i];
                                 if (sp != null && sp.active &&
                                     (sp.type == tipoActual || sp.type == tipoReserva) &&
-                                    sp.owner == Projectile.owner) vivas++;
+                                    sp.owner == Projectile.owner) vivasTodas++;
                             }
-                            if (vivas < alma.SombrasLibres)
+                            if (vivasTodas < alma.SombrasLibres)
                             {
                                 NPC presaLibre = PresaSinSombra(tipoActual);
                                 if (presaLibre != null)

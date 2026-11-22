@@ -945,6 +945,33 @@ namespace AethonMod.Content.Systems
             {
                 WorldGen.PlaceObject(PlazaX, LlanoY - 1,
                     ModContent.TileType<Tiles.PilarPrismaTile>(), false, 0);
+                // v6.165 — EL MAPA APRENDE EL PILAR (la letra: «el
+                // pilar en el mundo interior tampoco se ve en el
+                // mapa»): la región de repintado del minimapa se
+                // amplía al rectángulo del pilar (el mismo mecanismo
+                // del IL que la casa documentó en v6.117) — el pilar
+                // nace AL LADO del spawn y el mapa lo pinta con SU
+                // MapEntry violeta al frame siguiente.
+                try
+                {
+                    int px0 = Math.Max(0, PlazaX - 2), py0 = Math.Max(0, LlanoY - 6);
+                    int px1 = Math.Min(Main.maxTilesX - 1, PlazaX + 3);
+                    int py1 = Math.Min(Main.maxTilesY - 1, LlanoY + 2);
+                    if (!Main.updateMap)
+                    {
+                        Main.mapMinX = px0; Main.mapMaxX = px1;
+                        Main.mapMinY = py0; Main.mapMaxY = py1;
+                    }
+                    else
+                    {
+                        Main.mapMinX = Math.Min(Main.mapMinX, px0);
+                        Main.mapMaxX = Math.Max(Main.mapMaxX, px1);
+                        Main.mapMinY = Math.Min(Main.mapMinY, py0);
+                        Main.mapMaxY = Math.Max(Main.mapMaxY, py1);
+                    }
+                    Main.updateMap = true;
+                }
+                catch { }
             }
             catch { }
 

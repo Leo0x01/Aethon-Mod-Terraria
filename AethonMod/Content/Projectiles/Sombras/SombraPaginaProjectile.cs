@@ -76,6 +76,30 @@ namespace AethonMod.Content.Projectiles.Sombras
         /// </summary>
         private Vector2 RaizDeSombra(Player dueño)
         {
+            // v6.165 — LA RAÍZ ES EL LIBRO EN CAZA (la letra: «cuando
+            // el grimorio esta en fase de caza, todos los ataques
+            // deben salir del grimorio pero no lo hacen, salen del
+            // jugador»): si el Eterno tiene su ESPÍRITU FLOTANTE en
+            // modo caza, la sombra nace DEL LIBRO (su centro vivo),
+            // no del jugador. La búsqueda es barata (un pase sobre los
+            // proyectiles, solo cuando la sombra RE-ENRAÍZA) y se
+            // protege con try — si no hay libro fuera, la raíz de
+            // siempre (el portador).
+            try
+            {
+                int tipoFlotante = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Nervioso.GrimorioNerviosoFlotante>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.type != tipoFlotante ||
+                        p.owner != Projectile.owner) continue;
+                    if (p.ai[0] == global::AethonMod.Content.Projectiles.Nervioso
+                        .GrimorioNerviosoFlotante.MODO_CAZA)
+                        return p.Center;
+                }
+            }
+            catch { }
             return dueño.MountedCenter;
         }
 

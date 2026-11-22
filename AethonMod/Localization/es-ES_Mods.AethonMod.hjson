@@ -3203,7 +3203,7 @@ Esencia: {
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
 	// v6.164 — EL REGALO DE BIENVENIDA (9999 esencias al mundo nuevo)
-	RegaloBienvenida: ✦ El Eterno te recibe con 9999 Esencias del Eterno — el hambre empieza servida.
+	PruebaEsencias: ✦ [PRUEBA] Esencias completadas a 9999 — en el mod final se farmean.
 }
 
 HUD: {
@@ -3752,7 +3752,6 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: Páginas informativas del grimorio
-	Subtitulo: la izquierda: la página informativa · la derecha: la página de lore
 	SecAltar: EL ALTAR DE LA CONSAGRACIÓN
 	Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
 	Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.

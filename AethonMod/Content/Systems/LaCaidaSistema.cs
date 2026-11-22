@@ -906,6 +906,36 @@ namespace AethonMod.Content.Systems
                             NetMessage.SendData(MessageID.TileSquare, -1, -1, null,
                                 Math.Max(6, alto + 2), ax - 2, arriba - 2);
                         }
+                        // v6.165 — EL MAPA APRENDE EL ALTAR (la letra:
+                        // «el altar sigue sin aparecer en el mapa, no se
+                        // ve»): el minimapa solo repinta la región que
+                        // marcan mapMin/mapMax (el IL de DrawToMap, la
+                        // lección v6.117) — un mueble colocado por
+                        // CÓDIGO no dispara NINGUNA actualización.
+                        // LA CURA: la región de repintado se AMPLÍA al
+                        // rectángulo del altar y updateMap se enciende
+                        // — el mapa lo pinta con su MapEntry al frame
+                        // siguiente.
+                        try
+                        {
+                            int rx0 = Math.Max(0, ax - 2), ry0 = Math.Max(0, arriba - 2);
+                            int rx1 = Math.Min(Main.maxTilesX - 1, ax + 3);
+                            int ry1 = Math.Min(Main.maxTilesY - 1, abajo + 3);
+                            if (!Main.updateMap)
+                            {
+                                Main.mapMinX = rx0; Main.mapMaxX = rx1;
+                                Main.mapMinY = ry0; Main.mapMaxY = ry1;
+                            }
+                            else
+                            {
+                                Main.mapMinX = Math.Min(Main.mapMinX, rx0);
+                                Main.mapMaxX = Math.Max(Main.mapMaxX, rx1);
+                                Main.mapMinY = Math.Min(Main.mapMinY, ry0);
+                                Main.mapMaxY = Math.Max(Main.mapMaxY, ry1);
+                            }
+                            Main.updateMap = true;
+                        }
+                        catch { }
                         // v6.137 — LA CIMA DEL ALTAR: la fila más alta
                         // del mueble colocado — la llegada nace el libro
                         // POR ENCIMA, jamás solapado.

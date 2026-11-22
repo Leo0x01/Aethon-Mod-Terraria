@@ -62,6 +62,17 @@ namespace AethonMod.Content.Globals
                 bool esJefe = npc.boss ||
                     npc.type == NPCID.EaterofWorldsHead ||      // el Devorador no lleva flag
                     npc.type == NPCID.BrainofCthulhu;
+
+                // v6.165 — LA TASA SE DUPLICA TRAS EL MURO (la letra:
+                // «en el mod final se tendran que farmear con la tasa
+                // de caida que deberias verificar que todavia funcione
+                // y recordar que despues del muro de carne esta tasa
+                // se duplica»): en hardMode TODO el botín de esencias
+                // se DUPLICA (jefes y chusma, la cantidad — no la
+                // probabilidad: el filtro entre las realidades se
+                // abre del todo cuando el mundo se rompe).
+                int mult = Main.hardMode ? 2 : 1;
+
                 if (esJefe)
                 {
                     int dado = Main.rand.Next(1000);
@@ -76,13 +87,14 @@ namespace AethonMod.Content.Globals
                         int[] resto = { 2, 4, 5, 6, 7, 8, 9 };
                         cantidad = resto[Main.rand.Next(resto.Length)];
                     }
-                    Soltar(npc, tipoEsencia, cantidad);
+                    Soltar(npc, tipoEsencia, cantidad * mult);
                     return;
                 }
 
-                // === LAS CRIATURAS: 0,1 % → 1 esencia (la letra) ===
+                // === LAS CRIATURAS: 0,1 % → 1 esencia (la letra) ·
+                //     ×2 tras el Muro (2 esencias cuando cae) ===
                 if (Main.rand.Next(1000) == 0)
-                    Soltar(npc, tipoEsencia, 1);
+                    Soltar(npc, tipoEsencia, 1 * mult);
             }
             catch { }
         }

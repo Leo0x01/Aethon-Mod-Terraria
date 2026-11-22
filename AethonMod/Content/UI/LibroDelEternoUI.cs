@@ -72,9 +72,19 @@ namespace AethonMod.Content.UI
         /// <summary>ABRE EL LIBRO en una pestaña (0 Índice · 1 Altar · 2 Pilar).</summary>
         public static void AbrirEn(int pestana)
         {
+            // v6.165 — LA CURA DE LAS VENTANAS PISADAS (la letra: «al
+            // tocar el altar solo sale el libro de informacion, no
+            // sale la ventana del altar»): ESTA ruta NO pasa por
+            // Abrir() — Abrir() fuerza Pestana = 0 (el icono y la P
+            // abren SOLO el índice) y PISABA la pestaña del
+            // altar/pilar que el tile acababa de poner. El libro se
+            // abre AQUÍ, en la pestaña de su disparador.
             Pestana = pestana;
-            if (_estado != null) _estado.ReiniciarScroll();
-            Abrir();
+            if (_estado == null) _estado = new LibroEstado();
+            _estado.Visible = true;
+            _estado.ReiniciarScroll();
+            _iface.SetState(_estado);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
 
         // EL ICONO: la geometría vanilla del botón de logros (el

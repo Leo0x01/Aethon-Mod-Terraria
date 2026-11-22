@@ -126,31 +126,51 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  v6.164 — EL REGALO DE BIENVENIDA (la letra: «ahora al inicar
-        //  el mundo dale al jugador 9999 esencias del eterno»): al
-        //  GENERAR un mundo nuevo, el portador nace con LAS 9999
-        //  ESENCIAS DEL ETERNO en la bolsa — la puerta del altar
-        //  (1000) queda servida de entrada y sobra para consagrar.
-        //  SOLO en mundo NUEVO (PostWorldGen corre una vez, al crear):
-        //  los mundos existentes y las cargas posteriores no reciben
-        //  nada (la marca 'regaloDado' lo sella).
+        //  v6.165 — LAS 9999 DE PRUEBA (la letra: «al jugador no le
+        //  entregaste las 9999 esencias del eterno, se lo debes dar al
+        //  jugador, no es un regalo es una prueba, en el mod final el
+        //  jugador nunca recibira esencias del eterno de esta forma,
+        //  en el mod final se tendran que farmear»): AL ENTRAR al
+        //  mundo (cada entrada), el jugador recibe un TOP-UP a 9999
+        //  Esencias del Eterno — si ya lleva 9999 o más, no se le da
+        //  nada; si le falta, se le completa. ES PRUEBA: en el mod
+        //  final esto MUERE y las esencias solo se farmean (la tasa
+        //  de caída de EsenciaCorruptaDrops, que se DUPLICA tras el
+        //  Muro de Carne). El aviso lo deja claro.
         // ================================================================
-        public override void PostWorldGen()
+        public override void OnWorldLoad()
         {
             try
             {
-                foreach (Player p in Main.player)
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                int tipoEsencia = ModContent.ItemType
+                    <global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+                foreach (Player p in Main.ActivePlayers)
                 {
-                    if (p == null || !p.active) continue;
-                    p.QuickSpawnItem(p.GetSource_FromThis(),
-                        ModContent.ItemType
-                            <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 9999);
+                    // LA CUENTA de lo que ya lleva (bolsa + cursor).
+                    int lleva = 0;
+                    for (int k = 0; k < 58; k++)
+                    {
+                        Item it = p.inventory[k];
+                        if (it != null && !it.IsAir && it.type == tipoEsencia)
+                            lleva += it.stack;
+                    }
+                    if (p.whoAmI == Main.myPlayer && !Main.mouseItem.IsAir &&
+                        Main.mouseItem.type == tipoEsencia)
+                        lleva += Main.mouseItem.stack;
+                    int falta = 9999 - lleva;
+                    if (falta > 0)
+                        p.QuickSpawnItem(p.GetSource_FromThis(), tipoEsencia, falta);
                 }
                 if (Main.netMode != NetmodeID.Server && !Main.dedServ)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.RegaloBienvenida"),
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.PruebaEsencias"),
                         new Microsoft.Xna.Framework.Color(196, 150, 255));
             }
             catch { }
         }
+
+        // (v6.164 — el PostWorldGen murió: solo tocaba mundos NUEVOS y
+        //  el usuario probó en un mundo EXISTENTE — nunca las vio. El
+        //  top-up de OnWorldLoad cubre TODAS las entradas.)
     }
 }
