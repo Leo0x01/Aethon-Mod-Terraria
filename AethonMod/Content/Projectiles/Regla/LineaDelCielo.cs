@@ -116,9 +116,19 @@ namespace AethonMod.Content.Projectiles.Regla
         }
 
         // ================================================================
-        //  LA GEOMETRÍA (la sembró el ARMA en localAI al disparar — el
-        //  contrato del tajo: [0]=centro.X [1]=centro.Y [2]=radio
-        //  [3]=ángulo medio extra (0 = vertical puro))
+        //  LA GEOMETRÍA (v6.171 — EL CONTRATO SIN localAI[3]): LA
+        //  AUTOPSIA DEL client.log — Projectile.localAI es float[3]
+        //  (índices 0..2, la lección de la v6.52.2 documentada en
+        //  BocadoDelSueloProjectile): la v6.170 escribía la
+        //  inclinación en localAI[3] y la katana CRASHEABA en cada
+        //  uso (IndexOutOfRange en AnguloMedio — 3 excepciones
+        //  silenciosas del log del dueño). EL CONTRATO NUEVO:
+        //   · localAI[0..1] = el CENTRO del arco (el cursor — el
+        //     arma lo siembra directo: son SÓLO visuales, no viajan)
+        //   · localAI[2] = el RADIO
+        //   · ai[1] = la INCLINACIÓN EXTRA hacia la presa ×1000
+        //     (ai SÍ viaja por el cable: el tajo se ve igual en MP)
+        //   · ai[2] = el SENTIDO de la hoja (0 baja · 1 sube)
         // ================================================================
         private Vector2 CentroMundo() => new(Projectile.localAI[0], Projectile.localAI[1]);
         private float Radio() => Projectile.localAI[2] > 8f ? Projectile.localAI[2] : 150f;
@@ -126,7 +136,9 @@ namespace AethonMod.Content.Projectiles.Regla
         {
             float diag = Sube ? -MathHelper.PiOver2 + INCLINACION
                               : MathHelper.PiOver2 - INCLINACION;
-            return diag + Projectile.localAI[3];
+            // ai[1] llega ×1000 (la precisión de la inclinación sobrevive
+            // a la redondeo del cable) — sin marca = 0: vertical puro
+            return diag + Projectile.ai[1] / 1000f;
         }
 
         public override void OnSpawn(IEntitySource fuente)

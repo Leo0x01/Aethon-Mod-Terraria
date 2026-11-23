@@ -60,12 +60,23 @@ namespace AethonMod.Content.UI
         internal static bool Abierta => _ancla.Width > 0;
 
         /// <summary>ABRIR: anclada al slot, con los candidatos VIVOS.</summary>
-        internal static void Abrir(Rectangle ancla, bool paraTrio, string titulo)
+        internal static void Abrir(Rectangle ancla, bool paraTrio, string titulo,
+            int ranuraDestino = int.MinValue)
         {
             _ancla = ancla;
             _paraTrio = paraTrio;
             _titulo = titulo;
             _scroll = 0f;
+            // v6.171 — LA RANURA DESTINO (la letra: «el slot de
+            // consagrar y el slot donde se ponen las armas no se
+            // pueden usar […] no permite dejar el item ahi»): LA
+            // AUTOPSIA — el libro NULEA SelectorAbierto al abrir
+            // ESTE flotante (para no re-abrirlo al frame siguiente)
+            // y ClicEnCandidato perdía la ranura destino → el
+            // depósito moría en el guard silencioso. AHORA la
+            // ranura VIVE AQUÍ: se siembra al abrir y se entrega al
+            // elegir — el libro ya puede nular lo suyo.
+            _ranuraDestino = ranuraDestino;
             // v6.170 — EL FRAME DE GRACIA (la letra: «esas ventanas
             // flotantes no aparecen, bueno aparecen rapido y se
             // quitan, no duran ni medio segundo»): LA AUTOPSIA — la
@@ -85,6 +96,13 @@ namespace AethonMod.Content.UI
         /// <summary>v6.170 — EL TICK DE NACIMIENTO (el frame de gracia:
         /// el clic que ABRE la ventana jamás la cierra).</summary>
         private static ulong _tickNacimiento;
+
+        /// <summary>v6.171 — LA RANURA DESTINO de la elección (−2 = el
+        /// slot de la ofrenda · 0..2 = las ranuras del trío ·
+        /// int.MinValue = sin destino: la ventana vieja de solo mirar).
+        /// Vive AQUÍ porque el libro nula SelectorAbierto al abrir —
+        /// el destino no puede vivir en el altar.</summary>
+        private static int _ranuraDestino = int.MinValue;
 
         /// <summary>REFRESCAR la lista (el inventario vive: cada frame
         /// la ventana muestra lo que HAY, no una foto vieja).</summary>
@@ -208,23 +226,44 @@ namespace AethonMod.Content.UI
                     Utils.DrawBorderString(sb, it.stack.ToString(),
                         new Vector2(celda.Right - 3f, celda.Bottom - 7f),
                         Tinta, 0.68f, 1f, 0.85f);
-                // EL TOOLTIP DE LA CASA (el nombre al pasar el cursor)
+                // EL TOOLTIP DE LA CASA (el nombre al pasar el cursor) —
+                // v6.171 — CON SU PLACA DE PAPEL (la letra: «el color
+                // negro del texto que sale en el nombre de los items
+                // esta horrible, no se puede leer nada»): LA CAUSA —
+                // el nombre flotaba en tinta oscura SOBRE EL MUNDO
+                // (sin papel detrás: invisible). LA CURA — LA PLACA:
+                // la tinta del libro SIEMPRE viaja sobre su papel —
+                // un rectángulo Papel con el marco cosido, y la
+                // tinta encima como en el libro. Se lee SIEMPRE.
                 if (hov)
                 {
                     string nombre = it.Name;
                     float escN = 0.8f;
                     var mN = fuente.MeasureString(nombre) * escN;
                     if (mN.X > 260f && mN.X > 0f) escN *= 260f / mN.X;
+                    Rectangle placa = new Rectangle(
+                        (int)(celda.Center.X - mN.X * 0.5f - 8f),
+                        (int)(celda.Y - 8f - mN.Y - 7f),
+                        (int)(mN.X + 16f), (int)(mN.Y + 12f));
+                    placa.X = Math.Clamp(placa.X, 6, Main.screenWidth - placa.Width - 6);
+                    if (placa.Y < 6) placa.Y = celda.Bottom + 6;
+                    sb.Draw(px, placa, Papel);
+                    sb.Draw(px, new Rectangle(placa.X + 2, placa.Y + 2,
+                        placa.Width - 4, placa.Height - 4), PapelSombra * 0.35f);
+                    LibroMarco.Marco(sb, placa, TintaOro * 0.8f);
                     Utils.DrawBorderString(sb, nombre,
-                        new Vector2(celda.Center.X, celda.Y - 8f),
-                        Tinta, escN, 0.5f, 1f);
+                        new Vector2(placa.Center.X, placa.Y + 7f),
+                        Tinta, escN, 0.5f, 0f);
                 }
                 if (hov && clicNuevo)
                 {
-                    // LA ELECCIÓN: el índice de la lista VIVA al motor
-                    // del altar (el mismo camino de la bandeja vieja).
-                    AltarOfrendasUI.ClicEnCandidato(i);
+                    // LA ELECCIÓN: el índice de la lista VIVA + LA
+                    // RANURA DESTINO (v6.171: viaja AQUÍ — el índice
+                    // solo ya no basta: el altar no recuerda adónde).
+                    int destino = _ranuraDestino;
                     Cerrar();
+                    if (destino != int.MinValue)
+                        AltarOfrendasUI.ClicEnCandidato(i, destino);
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
                 dibujadas++;

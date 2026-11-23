@@ -237,14 +237,14 @@ namespace AethonMod.Content.NPCs
                     return Language.GetTextValue("Mods.AethonMod.Cronista.ChatUltimaPuerta");
 
                 // ============================================================
-                //  v6.170 — EL NARRADOR DE LAS ARCAS (la letra: «cuenta
+                //  v6.170 — EL NARRADOR DE LAS HISTORIAS (la letra: «cuenta
                 //  con cada cierto despertar una parte del lore, y es
                 //  quien desbloquea finalmente esa parte del lore en el
                 //  libro de informacion»): al ALCANZAR un despertar de
-                //  arca (4/24/44/64/84 — las mismas puertas del
+                //  historia (4/24/44/64/84 — las mismas puertas del
                 //  Compendio), SU siguiente charla NARRA ESA ARCA y
                 //  marca el sello — el libro la abre DESDE ENTONCES.
-                //  La charla del arca tiene PRIORIDAD: es la historia
+                //  La charla de la historia tiene PRIORIDAD: es la historia
                 //  que esperó TODO ese camino para contarse.
                 // ============================================================
                 try
@@ -253,10 +253,10 @@ namespace AethonMod.Content.NPCs
                         <global::AethonMod.Content.Players.ShardPlayer>();
                     if (spYo != null)
                     {
-                        int[] puertasArca = { 4, 24, 44, 64, 84 };
-                        for (int a = puertasArca.Length - 1; a >= 0; a--)
+                        int[] puertasHistoria = { 4, 24, 44, 64, 84 };
+                        for (int a = puertasHistoria.Length - 1; a >= 0; a--)
                         {
-                            if (despertar >= puertasArca[a] &&
+                            if (despertar >= puertasHistoria[a] &&
                                 (spYo.LoreDesbloqueado & (1 << a)) == 0)
                             {
                                 spYo.LoreDesbloqueado |= (1 << a);
@@ -419,57 +419,90 @@ namespace AethonMod.Content.NPCs
             // framer de vanilla lo anima SOLO (AnimationType = Guide).
             // Esta función solo deja pasar el dibujo VANILLA y firma
             // el aire: las 2 motas de tinta a sus pies.
-            if (!Main.dedServ && (Main.GameUpdateCount + NPC.whoAmI) % 20f == 0f)
-            {
-                try
-                {
-                    Vector2 cuna = NPC.BottomLeft + new Vector2(
-                        Main.rand.NextFloat(NPC.width), 0f);
-                    Dust d = Dust.NewDustPerfect(cuna,
-                        ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
-                        new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.2f),
-                        0, new Color(110, 60, 180), Main.rand.NextFloat(0.18f, 0.28f));
-                    d.noGravity = true;
-                }
-                catch { }
-            }
-
             // ============================================================
-            //  v6.170 — LA CORONA RÚNICA ESTELAR (la letra: «quiero que
-            //  al NPC de el cronista le coloques el accesorio Corona
-            //  Runica Estelar, solo hacerlo por codigo»): el arco de
-            //  los OCHO GLIFOS de la casa (RuneCrownRenderer — el
-            //  MISMO motor del accesorio) flotando sobre su cabeza,
-            //  cosido AQUÍ, en el PreDraw del NPC — sin item, sin
-            //  hueco de accesorio: la corona es SUYA porque él es el
-            //  escriba del Eterno. Coordenadas de MUNDO (el contrato
-            //  del renderer: anchor = el centro de la cabeza) — el
-            //  lote aditivo de VFXCore pinta tras el dibujo vanilla.
+            //  v6.171 — EL SER DE BRUMA (la letra: «ahora quiero que al
+            //  cronista le pngas mucha burma, quiero tanta que haga
+            //  que el cronista no se vea y quedaria algo asi como un
+            //  ser de bruma usando la corona»): EL CUERPO YA NO SE
+            //  DIBUJA — PreDraw retorna FALSE y la tira de 25 marcos
+            //  muere para el render; en su lugar, LA NUBE MASIVA de
+            //  la casa (SombrasLib.Bruma — la que OCIUDE: masa de
+            //  humo fBm + rampa violácea, la misma que desintegra a
+            //  los jefes en el festín) lo envuelve ENTERO cada frame,
+            //  con su deriva lenta y su aliento violeta. Lo que queda
+            //  es lo que pide la letra: UN SER DE BRUMA — y la corona
+            //  (PostDraw) FLOTANDO donde estaba su cabeza.
             // ============================================================
             try
             {
                 if (!Main.dedServ)
                 {
-                    // EL PATRÓN DE LA CASA (el del halo del espíritu): el
-                    // lote aditivo vive ENTRE CerrarLoteSiAbierto y
-                    // ReabrirLoteVanilla — coords de MUNDO, sin tocar el
-                    // lote de vanilla que está dibujando la tira.
-                    VFXCore.CerrarLoteSiAbierto();
-                    Vector2 cabeza = NPC.Center + new Vector2(0f, -NPC.height * 0.52f);
-                    float escala = Math.Max(0.85f, NPC.height / 42f);
-                    VFXCore.Begin();
-                    global::AethonMod.Content.VFX.RuneCrownRenderer.ComputeQuads(
-                        cabeza, escala, Main.GlobalTimeWrappedHourly, 1f);
-                    VFXCore.FlushAdditive();
+                    // LA NUBE QUE TAPA: radio generoso (el cuerpo entero
+                    // + margen), alfa CASI TOTAL (0.92: un fantasma de
+                    // silueta sobrevive dentro — la firma de la casa) y
+                    // deriva lenta hacia arriba (la bruma VIVE).
+                    Vector2 centro = NPC.Center;
+                    float radio = Math.Max(46f, NPC.height * 0.95f);
+                    float tiempo = Main.GlobalTimeWrappedHourly;
+                    Vector2 deriva = new Vector2(
+                        MathF.Sin(tiempo * 0.35f + NPC.whoAmI) * 6f,
+                        -4f + MathF.Cos(tiempo * 0.27f + NPC.whoAmI) * 3f);
+                    SombrasLib.Bruma(centro, radio, 0.92f, tiempo,
+                        NPC.whoAmI * 17 + 3, deriva);
+                    // LA SEGUNDA CAPA (el doble abrazo: otra nube más
+                    // alta y ancha, desfasada — la masa nunca respira
+                    // huecos que dejen ver la tira)
+                    SombrasLib.Bruma(centro + new Vector2(0f, -NPC.height * 0.18f),
+                        radio * 0.78f, 0.55f, tiempo * 1.31f,
+                        NPC.whoAmI * 17 + 57, -deriva * 0.6f);
+                    // LAS MOTAS DE TINTA (las 2 de siempre, ahora nacen
+                    // DENTRO de la bruma — la firma del escriba)
+                    if ((Main.GameUpdateCount + NPC.whoAmI) % 14f == 0f)
+                    {
+                        Vector2 cuna = NPC.BottomLeft + new Vector2(
+                            Main.rand.NextFloat(NPC.width), 0f);
+                        Dust d = Dust.NewDustPerfect(cuna,
+                            ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
+                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.5f),
+                            0, new Color(140, 90, 200), Main.rand.NextFloat(0.22f, 0.34f));
+                        d.noGravity = true;
+                    }
                 }
+            }
+            catch { }
+
+            // LA CAJA DE DIÁLOGO SIGUE VIENDO AL NPC (la tira no se
+            // dibuja pero el NPC vive: el retrato del chat usa su
+            // head icon — ElCronista_Head.png — y la bruma no lo toca)
+            return false;   // v6.171 — LA TIRA MUERE: solo queda el ser de bruma
+        }
+
+        /// <summary>v6.171 — LA CORONA SOBRE LA BRUMA: el arco rúnico
+        /// vive en PostDraw para nacer ENCIMA de la nube (en PreDraw
+        /// la bruma la tapaba). Flota donde estaba su cabeza — el ser
+        /// de bruma USA la corona (la letra) — con su vaivén lento.</summary>
+        public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
+        {
+            if (Main.dedServ) return;
+            try
+            {
+                // EL PATRÓN DE LA CASA: el lote aditivo vive ENTRE
+                // CerrarLoteSiAbierto y ReabrirLoteVanilla.
+                VFXCore.CerrarLoteSiAbierto();
+                float tiempo = Main.GlobalTimeWrappedHourly;
+                float vaiven = MathF.Sin(tiempo * 0.9f + NPC.whoAmI) * 3f;
+                Vector2 cabeza = NPC.Center + new Vector2(0f, -NPC.height * 0.52f + vaiven);
+                float escala = Math.Max(0.9f, NPC.height / 42f);
+                VFXCore.Begin();
+                global::AethonMod.Content.VFX.RuneCrownRenderer.ComputeQuads(
+                    cabeza, escala, tiempo, 1f);
+                VFXCore.FlushAdditive();
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             finally
             {
                 try { VFXCore.ReabrirLoteVanilla(); } catch { }
             }
-
-            return true;    // LA TIRA PROPIA — vanilla la dibuja y la anima
         }
 
         // ================================================================

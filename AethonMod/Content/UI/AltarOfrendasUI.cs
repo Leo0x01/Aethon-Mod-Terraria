@@ -104,7 +104,7 @@ namespace AethonMod.Content.UI
                     int falta = topePuerta - yaConsagradas;
                     if (falta <= 0)
                     {
-                        Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), TintaTeal);
+                        Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), ChatOro);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     }
                     else
@@ -114,12 +114,12 @@ namespace AethonMod.Content.UI
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas += toma;
                         Main.NewText(Language.GetTextValue(Clave("PuertaBebe"), toma,
                             global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                            topePuerta), TintaVioleta);
+                            topePuerta), ChatVioleta);
                         if (!yaAbierta && global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
                         {
                             Main.NewText(Terraria.Localization.Language.GetTextValue(
                                 "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                new Color(220, 170, 255));
+                                ChatVioleta);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
                         }
                         else Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.25f));
@@ -152,7 +152,7 @@ namespace AethonMod.Content.UI
                             <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                         bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
                         Main.NewText(Language.GetTextValue(
-                            yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), TintaRojo);
+                            yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), ChatRojo);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     }
                 }
@@ -259,12 +259,24 @@ namespace AethonMod.Content.UI
         /// <summary>EL CLIC EN UN ICONO de la bandeja: lo coloca (o lo
         /// consagra primero si es el slot de ofrenda — no: el slot
         /// consagra con SU botón; la bandeja SOLO coloca la ofrenda).</summary>
-        public static void ClicEnCandidato(int indiceCandidato)
+        public static void ClicEnCandidato(int indiceCandidato,
+            int ranuraDestino = int.MinValue)
         {
             try
             {
-                if (SelectorAbierto == null) return;
-                int ranura = SelectorAbierto.Value.ranura;
+                // v6.171 — LA RANURA LLEGA DE FUERA (la letra: «el
+                // slot […] no permite dejar el item ahi»): la ventana
+                // flotante la lleva DESDE SU NACIMIENTO (el libro nula
+                // SelectorAbierto al abrirla — el destino no puede
+                // vivir aquí). El parámetro manda; el viejo
+                // SelectorAbierto queda como RESPALDO para los
+                // caminos que aún lo siembran (la bandeja vieja).
+                int ranura = ranuraDestino;
+                if (ranura == int.MinValue)
+                {
+                    if (SelectorAbierto == null) return;
+                    ranura = SelectorAbierto.Value.ranura;
+                }
                 bool paraTrío = ranura >= 0;
                 var candidatos = CosecharCandidatos(paraTrío);
                 if (indiceCandidato < 0 || indiceCandidato >= candidatos.Count) return;
@@ -280,7 +292,7 @@ namespace AethonMod.Content.UI
                         .TrioDelEterno.EsArmaValida(elegido))
                     {
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioNoArma"),
-                            new Color(255, 170, 130));
+                            ChatRojo);
                         return;
                     }
                     bool sellada = false;
@@ -298,7 +310,7 @@ namespace AethonMod.Content.UI
                         // ahi»
                         Main.NewText(Language.GetTextValue(
                             "Mods.AethonMod.Items.TrioRequiereConsagrada"),
-                            new Color(255, 170, 130));
+                            ChatRojo);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         return;
                     }
@@ -383,12 +395,12 @@ namespace AethonMod.Content.UI
                                 new Color(160, 230, 255));
                         }
                         else Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items.TrioLleno"), new Color(255, 170, 130));
+                            "Mods.AethonMod.Items.TrioLleno"), ChatRojo);
                     }
                     else
                     {
                         Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items.TrioNoArma"), new Color(255, 170, 130));
+                            "Mods.AethonMod.Items.TrioNoArma"), ChatRojo);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     }
                 }
@@ -489,7 +501,7 @@ namespace AethonMod.Content.UI
                 //    con su AVISO (nada de pérdidas silenciosas).
                 yo.QuickSpawnItem(yo.GetSource_FromThis(), (Item)it.Clone(), it.stack);
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.Altar.DevueltaAlSuelo"),
-                    new Color(178, 52, 44));
+                    ChatRojo);
             }
             catch { }
         }
@@ -577,7 +589,7 @@ namespace AethonMod.Content.UI
                 else
                 {
                     if (razonPuerta != null)
-                        Main.NewText(razonPuerta, new Color(190, 160, 220));
+                        Main.NewText(razonPuerta, ChatVioleta);
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
@@ -602,7 +614,7 @@ namespace AethonMod.Content.UI
                 int cuantas = _arma.stack;
                 if (falta <= 0)
                 {
-                    Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), TintaTeal);
+                    Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")), ChatOro);
                     if (cuantas > 0 && Main.netMode != NetmodeID.MultiplayerClient)
                         yo.QuickSpawnItem(yo.GetSource_FromThis(), _arma.type, cuantas);
                 }
@@ -626,14 +638,14 @@ namespace AethonMod.Content.UI
                         }
                     Main.NewText(Language.GetTextValue(Clave("DevoradasHecha"), toma,
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        topePuerta), TintaVioleta);
+                        topePuerta), ChatVioleta);
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.45f));
                     if (!yaAbiertaEsencias &&
                         global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
                     {
                         Main.NewText(Terraria.Localization.Language.GetTextValue(
                             "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                            new Color(220, 170, 255));
+                            ChatVioleta);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
                     }
                 }
@@ -649,7 +661,7 @@ namespace AethonMod.Content.UI
                 .EsenciasEnLaBolsa(yo);
             if (llevaba < coste)
             {
-                Main.NewText(Language.GetTextValue(Clave("FaltanEsencias")), TintaRojo);
+                Main.NewText(Language.GetTextValue(Clave("FaltanEsencias")), ChatRojo);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 return;
             }
@@ -660,7 +672,7 @@ namespace AethonMod.Content.UI
             {
                 Main.NewText(Terraria.Localization.Language.GetTextValue(
                     "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                    new Color(220, 170, 255));
+                    ChatVioleta);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
             }
             global::AethonMod.Content.Globals.CorruptoGlobalItem.Consagrar(_arma);
@@ -668,7 +680,7 @@ namespace AethonMod.Content.UI
             global::AethonMod.Content.Globals.CorruptoGlobalItem.VestirLaRareza(_arma);
             Main.NewText(Language.GetTextValue(
                 EsArmaDeVerdad(_arma) ? Clave("ConsagradaHechaArma") : Clave("ConsagradaHechaMaterial"),
-                _arma.Name), TintaVioleta);
+                _arma.Name), ChatVioleta);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.45f));
             if (!Main.dedServ)
                 for (int k = 0; k < 22; k++)
@@ -809,19 +821,31 @@ namespace AethonMod.Content.UI
         // no se funde con NADA: papel claro + tinta oscura.
         private static readonly Color TintaFondo = new(216, 200, 166);   // el papel del libro
         private static readonly Color TintaPanel = new(190, 172, 134);   // la sombra del papel
-        // v6.170 — LA PALETA ÚNICA (la letra: «asegurate de que los
-        // colores de los textos sean parejos para todos, y la
-        // referencia es el libro de informacion»): LAS MISMAS cuatro
-        // tintas del LibroDelEternoUI, EXACTAS — el teal propio MURIÓ
-        // (era un verde ajeno a la familia) y el rojo es EL DEL LIBRO
-        // (140,40,40 — el de PilarDelLibro), no el escarlata viejo.
+        // v6.171 — LA LEY DE LOS DOS FONDOS (la letra: «el color del
+        // texto en el altar esta horrible […] no se puede leer
+        // nada»): LA AUTOPSIA DE LA v6.170 — las tintas EXACTAS del
+        // libro (28,20,16 = NEGRO) se pusieron también en los
+        // Main.NewText: el LIBRO pinta sobre PAPEL claro, el CHAT
+        // pinta sobre fondo OSCURO — la tinta del papel es INVISIBLE
+        // en el chat. LA CURA: DOS familias, UNA casa —
+        //  · EN EL LIBRO (sobre papel): las tintas exactas de siempre
+        //    (violeta 148,72,178 · tinta 28,20,16 · apagado 118,96,70
+        //    · oro 168,108,44 — NADIE se toca)
+        //  · EN EL CHAT (sobre oscuro): las LUMINOSAS de la MISMA
+        //    familia — violeta claro 196,110,228 · oro claro
+        //    214,152,70 · apagado claro 168,140,104 · rojo claro
+        //    226,96,88: se RECONOCEN como la casa y SE LEEN.
         private static readonly Color TintaVioleta = new(148, 72, 178);  // el violeta del título (el libro)
         private static readonly Color TintaTexto = new(28, 20, 16);      // la tinta del cuerpo (el libro)
         private static readonly Color TintaApagado = new(118, 96, 70);   // la apagada de las pistas (el libro)
         private static readonly Color TintaOro = new(168, 108, 44);      // el oro del capítulo (el libro)
         private static readonly Color TintaRojo = new(140, 40, 40);      // el rojo del pilar (el libro)
-        // compatibilidad: el teal viejo apunta al oro del libro (los
-        // mensajes «buenos» del altar ahora hablan la lengua del libro)
+        // LAS LUMINOSAS DEL CHAT (la misma familia, versión cielo)
+        private static readonly Color ChatVioleta = new(196, 110, 228);
+        private static readonly Color ChatOro = new(214, 152, 70);
+        private static readonly Color ChatApagado = new(168, 140, 104);
+        private static readonly Color ChatRojo = new(226, 96, 88);
+        // compatibilidad: el teal viejo apunta al oro (la lengua del libro)
         private static Color TintaTeal => TintaOro;
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
 
@@ -1049,7 +1073,7 @@ namespace AethonMod.Content.UI
                             // LA PUERTA YA ESTÁ ABIERTA: el altar no bebe
                             // más — las mil ya viven en sus huesos.
                             Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")),
-                                TintaTeal);
+                                ChatOro);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                         else
@@ -1067,7 +1091,7 @@ namespace AethonMod.Content.UI
                             {
                                 Main.NewText(Terraria.Localization.Language.GetTextValue(
                                     "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                    new Color(220, 170, 255));
+                                    ChatVioleta);
                                 Terraria.Audio.SoundEngine.PlaySound(
                                     SoundID.Item113.WithPitchOffset(-0.7f));
                             }
@@ -1113,7 +1137,7 @@ namespace AethonMod.Content.UI
                                 <global::AethonMod.Content.Globals.CorruptoGlobalItem>();
                             bool yaEraMouse = selloMouse != null && selloMouse.Corrompido;
                             Main.NewText(Language.GetTextValue(
-                                yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), TintaRojo);
+                                yaEraMouse ? Clave("YaConsagrada") : Clave("NoArma")), ChatRojo);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                     }
@@ -1188,14 +1212,14 @@ namespace AethonMod.Content.UI
                                 {
                                     Main.NewText(Language.GetTextValue(
                                         "Mods.AethonMod.Items.TrioLleno"),
-                                        new Color(255, 170, 130));
+                                        ChatRojo);
                                 }
                             }
                             else
                             {
                                 Main.NewText(Language.GetTextValue(
                                     "Mods.AethonMod.Items.TrioNoArma"),
-                                    new Color(255, 170, 130));
+                                    ChatRojo);
                                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                             }
                         }
@@ -1276,7 +1300,7 @@ namespace AethonMod.Content.UI
                             // LA PUERTA YA ESTÁ ABIERTA: el altar no bebe
                             // más — TODO vuelve al inventario.
                             Main.NewText(Language.GetTextValue(Clave("PuertaYaAbierta")),
-                                TintaTeal);
+                                ChatOro);
                             if (cuantas > 0 && Main.netMode != NetmodeID.MultiplayerClient)
                                 Main.LocalPlayer.QuickSpawnItem(
                                     Main.LocalPlayer.GetSource_FromThis(),
@@ -1319,7 +1343,7 @@ namespace AethonMod.Content.UI
                             {
                                 Main.NewText(Terraria.Localization.Language.GetTextValue(
                                     "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                    new Color(220, 170, 255));
+                                    ChatVioleta);
                                 Terraria.Audio.SoundEngine.PlaySound(
                                     SoundID.Item113.WithPitchOffset(-0.7f));
                             }
@@ -1348,7 +1372,7 @@ namespace AethonMod.Content.UI
                             //     faltaba — la cuenta se fue del chat para
                             //     siempre.)
                             Main.NewText(Language.GetTextValue(Clave("FaltanEsencias")),
-                                TintaRojo);
+                                ChatRojo);
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         }
                         else
@@ -1369,7 +1393,7 @@ namespace AethonMod.Content.UI
                             {
                                 Main.NewText(Terraria.Localization.Language.GetTextValue(
                                     "Mods.AethonMod.Submundo.PuertaAbiertaAnuncio"),
-                                    new Color(220, 170, 255));
+                                    ChatVioleta);
                                 Terraria.Audio.SoundEngine.PlaySound(
                                     SoundID.Item113.WithPitchOffset(-0.7f));
                             }
@@ -1433,7 +1457,7 @@ namespace AethonMod.Content.UI
                         .PuedeEntrar(portador, out razonPuerta))
                     {
                         if (razonPuerta != null)
-                            Main.NewText(razonPuerta, new Color(190, 160, 220));
+                            Main.NewText(razonPuerta, ChatVioleta);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     }
                     else

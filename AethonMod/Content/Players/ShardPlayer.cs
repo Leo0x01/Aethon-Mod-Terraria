@@ -69,7 +69,7 @@ namespace AethonMod.Content.Players
         /// </summary>
         public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
 
-        /// <summary>v6.170 — LAS ARCAS DEL CRONISTA (la letra: «es
+        /// <summary>v6.170 — LAS HISTORIAS DEL CRONISTA (la letra: «es
         /// quien desbloquea finalmente esa parte del lore en el libro
         /// de informacion»): bits 0..4 = las cinco secciones del
         /// archivo viejo (El devorador de finales · El sistema del
@@ -1811,7 +1811,7 @@ namespace AethonMod.Content.Players
                 // v6.51.0 — EL DESPERTAR (el nivel y la mascota del 20).
                 tag["nivelDespertar"] = NivelDespertar;
                 tag["petDespertar"] = PetDelDespertar;
-                // v6.170 — LAS ARCAS DEL CRONISTA (lo que ya narró)
+                // v6.170 — LAS HISTORIAS DEL CRONISTA (lo que ya narró)
                 tag["loreDesbloqueado"] = LoreDesbloqueado;
             }
             catch { }
@@ -1840,7 +1840,7 @@ namespace AethonMod.Content.Players
                     FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 JefesDevorados = new System.Collections.Generic.List<int>(tag.GetList<int>("jefesDevorados"));
-                // v6.170 — LAS ARCAS DEL CRONISTA (ausente = 0: el
+                // v6.170 — LAS HISTORIAS DEL CRONISTA (ausente = 0: el
                 // guardado viejo escucha al Cronista desde cero)
                 LoreDesbloqueado = tag.GetInt("loreDesbloqueado");
                 MuertesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorTipos"));

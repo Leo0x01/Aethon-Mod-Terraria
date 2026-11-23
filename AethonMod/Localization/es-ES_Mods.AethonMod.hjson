@@ -2705,17 +2705,19 @@ Cronista: {
 	ChatObjetos3: Los otros mundos también escriben. Peor, pero escriben.
 	ChatCierre1: Cuando acabe tu historia cerraré el libro. Y por fin podré parpadear.
 	ChatCierre2: …No me mires así. También los testigos soñamos.
-	// v6.170 — LAS CHARLAS DEL ARCA (la letra: «cuenta con cada
-	// cierto despertar una parte del lore, y es quien desbloquea
-	// finalmente esa parte del lore en el libro de informacion»):
-	// al alcanzar el despertar de cada arca (4/24/44/64/84), la
-	// siguiente charla NARRA ESA SECCIÓN y la abre en el libro —
-	// la historia que esperó todo el camino para contarse.
-	ChatLore1: Siéntate. Es hora de la primera arca. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
-	ChatLore2: La segunda arca, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
-	ChatLore3: Tercera arca. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
-	ChatLore4: Cuarta arca. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
-	ChatLore5: Última arca. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
+	// v6.171 — LAS CHARLAS DE LAS HISTORIAS (la letra: «cuenta con
+	// cada cierto despertar una parte del lore, y es quien desbloquea
+	// finalmente esa parte del lore en el libro de informacion»; y la
+	// v6.171: «no creo que sea correcto llamar a esas secciones como
+	// arca, yo lo llamaria historias o escrituras»): al alcanzar el
+	// despertar de cada historia (4/24/44/64/84), la siguiente charla
+	// NARRA ESA ESCRITURA y la abre en el libro — la historia que
+	// esperó todo el camino para contarse.
+	ChatLore1: Siéntate. Es hora de la primera historia. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
+	ChatLore2: La segunda escritura, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
+	ChatLore3: Tercera historia. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
+	ChatLore4: Cuarta escritura. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
+	ChatLore5: Última historia. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
 }
 
 Ira: {

@@ -68,36 +68,37 @@ namespace AethonMod.Content.Weapons.Regla
             // ============================================================
             //  LA SIEMBRA DE LA MEDIA LUNA: el tajo nace EN EL CURSOR
             //  (la letra v6.168 vive) con su geometría completa:
+            //   · ai[1] = la INCLINACIÓN EXTRA hacia la presa ×1000
+            //     (v6.171: SIN localAI[3] — es float[3], la lección
+            //     de la casa; VIAJA por el cable vía NewProjectile)
             //   · ai[2] = el SENTIDO de la hoja (0 baja · 1 sube — al azar)
             //   · localAI[0..1] = el CENTRO del arco (el cursor)
             //   · localAI[2] = el RADIO
-            //   · localAI[3] = la inclinación EXTRA hacia la presa (si
-            //     hay un enemigo cerca del cursor, el arco se ABRE
-            //     hacia él: la media luna lo abraza)
             // ============================================================
             bool sube = Main.rand.NextBool();
+            // LA ABRAZADA A LA PRESA: un blanco cerca del cursor
+            // inclina el arco hacia él (±0.5 rad máximo) — en ai[1] ×1000
+            float inclinacionExtra = 0f;
+            NPC presa = PresaCerca(Main.MouseWorld, RADIO);
+            if (presa != null)
+            {
+                Vector2 rel = presa.Center - Main.MouseWorld;
+                if (rel.Length() > 24f)
+                    inclinacionExtra = MathHelper.Clamp(
+                        MathF.Atan2(rel.Y, rel.X) -
+                        (sube ? -MathHelper.PiOver2 : MathHelper.PiOver2),
+                        -0.5f, 0.5f);
+            }
             int idx = Projectile.NewProjectile(fuente, Main.MouseWorld, Vector2.Zero,
-                tipo, dano, 0f, player.whoAmI, 0f, 0f, sube ? 1f : 0f);
+                tipo, dano, 0f, player.whoAmI, 0f, inclinacionExtra * 1000f,
+                sube ? 1f : 0f);
             if (idx >= 0 && idx < Main.maxProjectiles && Main.projectile[idx].active)
             {
                 Projectile p = Main.projectile[idx];
                 p.localAI[0] = Main.MouseWorld.X;
                 p.localAI[1] = Main.MouseWorld.Y;
                 p.localAI[2] = RADIO;
-                // LA ABRAZADA A LA PRESA: un blanco cerca del cursor
-                // inclina el arco hacia él (±0.5 rad máximo)
-                NPC presa = PresaCerca(Main.MouseWorld, RADIO);
-                if (presa != null)
-                {
-                    Vector2 rel = presa.Center - Main.MouseWorld;
-                    if (rel.Length() > 24f)
-                        p.localAI[3] = MathHelper.Clamp(
-                            MathF.Atan2(rel.Y, rel.X) -
-                            (sube ? -MathHelper.PiOver2 : MathHelper.PiOver2),
-                            -0.5f, 0.5f);
-                }
                 p.originalDamage = Item.damage;
-                p.netUpdate = true;
             }
             // EL SONIDO DEL DESEMBRAINE (el silbido corto de la hoja)
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item72.WithPitchOffset(0.55f)

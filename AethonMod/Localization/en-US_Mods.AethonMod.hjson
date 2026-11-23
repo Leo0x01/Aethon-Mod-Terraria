@@ -2717,11 +2717,11 @@ Cronista: {
 	ChatCierre2: …Do not look at me like that. We witnesses dream too.
 	// v6.170 — LAS CHARLAS DEL ARCA (el español viaja en la maleta del
 	// fallback — la red de seguridad v6.56.6 de la casa)
-	ChatLore1: Siéntate. Es hora de la primera arca. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
-	ChatLore2: La segunda arca, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
-	ChatLore3: Tercera arca. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
-	ChatLore4: Cuarta arca. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
-	ChatLore5: Última arca. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
+	ChatLore1: Siéntate. Es hora de la primera historia. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
+	ChatLore2: La segunda escritura, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
+	ChatLore3: Tercera historia. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
+	ChatLore4: Cuarta escritura. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
+	ChatLore5: Última historia. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
 }
 
 Ira: {

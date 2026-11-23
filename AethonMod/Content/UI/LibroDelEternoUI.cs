@@ -849,7 +849,7 @@ namespace AethonMod.Content.UI
             // v6.170 — TAMBIÉN SE GANA (la letra: «todo el lore del
             // mod debe estar sellado hasta llegar a cierto nivel de
             // despertar»): 4/24/44/64/84 — el Compendio de la casa
-            // abre sus cinco arcas a lo largo del camino.
+            // abre sus cinco historias a lo largo del camino.
             0, 0, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 118,
             4, 24, 44, 64, 84,
         };
@@ -911,11 +911,11 @@ namespace AethonMod.Content.UI
                 {
                     int umbral = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
                     seccionAbierta = despertarAhora >= umbral;
-                    // v6.170 — LAS ARCAS (14..18) además piden SU bit
+                    // v6.171 — LAS HISTORIAS (14..18) además piden SU bit
                     if (seccionAbierta && idxSec >= 14 && idxSec <= 18)
                     {
-                        int bitArca = 1 << (idxSec - 14);
-                        seccionAbierta = (selloCronista & bitArca) != 0;
+                        int bitHistoria = 1 << (idxSec - 14);
+                        seccionAbierta = (selloCronista & bitHistoria) != 0;
                     }
                 }
                 var medT = fuente.MeasureString(titulo);
@@ -951,14 +951,16 @@ namespace AethonMod.Content.UI
                         cy = LineaLibro(sb, T(sec[1]), xizq, cy, maxAncho,
                             Tinta, recorte, pagina);
                     int umbralSello = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
-                    // v6.170 — EL SELLO DE LAS ARCAS DICE LA VERDAD: el
-                    // Cronista narra y el libro abre — el resto solo
-                    // cuenta la puerta de despertar de siempre.
-                    bool esArca = idxSec >= 14 && idxSec <= 18;
+                    // v6.171 — EL SELLO DE LAS HISTORIAS DICE LA
+                    // VERDAD (la letra: «yo lo llamaria historias o
+                    // escrituras o algo asi»): el Cronista narra y el
+                    // libro abre — el resto solo cuenta la puerta de
+                    // despertar de siempre.
+                    bool esHistoria = idxSec >= 14 && idxSec <= 18;
                     bool despertarYa = despertarAhora >= umbralSello;
-                    string sello = esArca
+                    string sello = esHistoria
                         ? (despertarYa
-                            ? "· · · ✦ el Cronista aún no contó esta arca — búscalo ✦ · · ·"
+                            ? "· · · ✦ el Cronista aún no contó esta historia — búscalo ✦ · · ·"
                             : "· · · ✦ sellada hasta el Despertar " + umbralSello + " — y las palabras del Cronista ✦ · · ·")
                         : "· · · ✦ sellado · se revela al Despertar " + umbralSello + " ✦ · · ·";
                     cy = LineaLibro(sb, sello, xizq, cy, maxAncho,
@@ -1240,8 +1242,9 @@ namespace AethonMod.Content.UI
                 !SelectorFlotante.Abierta)
             {
                 // el slot abrió el selector: la ventanita nace anclada
+                // (v6.171: con SU RANURA DESTINO −2 — la ofrenda)
                 SelectorFlotante.Abrir(slot, false,
-                    Language.GetTextValue("Mods.AethonMod.Altar.SelectorTitulo"));
+                    Language.GetTextValue("Mods.AethonMod.Altar.SelectorTitulo"), -2);
                 AltarOfrendasUI.SelectorAbierto = null;
             }
             cy += 58f;
@@ -1383,8 +1386,10 @@ namespace AethonMod.Content.UI
                     AltarOfrendasUI.SelectorAbierto.Value.ranura == i &&
                     !SelectorFlotante.Abierta)
                 {
+                    // v6.171: con SU RANURA DESTINO (i — la ranura del
+                    // trío que pidió la ventana)
                     SelectorFlotante.Abrir(s, true,
-                        Language.GetTextValue("Mods.AethonMod.Altar.SelectorTrioTitulo"));
+                        Language.GetTextValue("Mods.AethonMod.Altar.SelectorTrioTitulo"), i);
                     AltarOfrendasUI.SelectorAbierto = null;
                 }
             }
