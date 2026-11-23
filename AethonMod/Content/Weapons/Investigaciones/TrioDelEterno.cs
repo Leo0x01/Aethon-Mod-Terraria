@@ -192,9 +192,56 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 float cuña = (idx - 1) * 0.14f;
                 Vector2 velReal = mira.RotatedBy(cuña) * vel;
 
-                var srcTurno = new Terraria.DataStructures.EntitySource_ItemUse(player, armaTurno);
-                Projectile.NewProjectile(srcTurno, player.MountedCenter + mira * 24f,
-                    velReal, armaTurno.shoot, dano, kb, player.whoAmI);
+                // v6.173 — EL PIPELINE DE VERDAD (la letra: «dos
+                // tenian seguimiento […] y la tercera solo disparaba al
+                // cursor, pero al poner el arma que solo dispara al
+                // cursor en el slot e intentar usarla esta no se usaba
+                // […] el mana intentaba gastarse pero aun asi no se
+                // disparaba el arma desde el slot»). LA AUTOPSIA — el
+                // trío lanzaba el proyectil del arma con
+                // Projectile.NewProjectile PELADO: para las armas cuyo
+                // ModItem.Shoot() SIEMBRA el disparo (la del cursor
+                // nace EN Main.MouseWorld, las teledirigidas siembran
+                // su presa, MUCHAS de mods hacen TODO su trabajo en SU
+                // Shoot y devuelven false — el proyectil del item.shoot
+                // NUNCA nace), el NewProjectile pelado escupía el
+                // proyectil crudo sin SU lógica y el resultado leía
+                // «no dispara» (y las que SÍ funcionaban eran las
+                // teledirigidas vanilla, cuyo AI() arman su rumbo
+                // solas — el síntoma EXACTO del usuario). LA CURA —
+                // LLAMAR A LA MISMA CADENA que vanilla (verificada al
+                // decompile: CombinedHooks.Shoot → ItemLoader.Shoot →
+                // ModItem.Shoot): si el arma tiene ModItem, SU Shoot
+                // corre con SU posición, SU velocidad hacia el cursor y
+                // SUS números; si devuelve true (o es vanilla), el
+                // disparo DEFAULT de la casa nace con el ángulo al
+                // cursor sembrado en ai[0] ×1000 (el contrato de las
+                // armas de cursor que leen ai[0]; las de seguimiento lo
+                // ignoran y arman su presa ellas solas).
+                var srcTurno = new Terraria.DataStructures
+                    .EntitySource_ItemUse_WithAmmo(player, armaTurno, 0);
+                Vector2 posTurno = player.MountedCenter + mira * 24f;
+                bool loHizoElArma = false;
+                try
+                {
+                    // LA CADENA DE VANILLA (CombinedHooks.Shoot es
+                    // pública en el tML de la casa — PlayerLoader +
+                    // ItemLoader + ModItem.Shoot, TODO en uno).
+                    loHizoElArma = !Terraria.ModLoader.CombinedHooks.Shoot(
+                        player, armaTurno, srcTurno, posTurno, velReal,
+                        armaTurno.shoot, dano, kb);
+                }
+                catch { loHizoElArma = false; }
+                if (!loHizoElArma)
+                {
+                    // EL DISPARO DEFAULT: el proyectil del arma con el
+                    // ángulo hacia el cursor en ai[0] ×1000 (la
+                    // precisión de la casa que sobrevive el cable).
+                    float angCursor = (float)System.Math.Atan2(velReal.Y, velReal.X);
+                    Projectile.NewProjectile(srcTurno, posTurno,
+                        velReal, armaTurno.shoot, dano, kb, player.whoAmI,
+                        angCursor * 1000f, armaTurno.shootSpeed);
+                }
                 // EL MANÁ DEL ARMA: cada disparo cobra SU coste de mana
                 // (la letra: SOLO armas mágicas — y las mágicas cobran
                 // maná; sin él, el trío sería mana gratis).

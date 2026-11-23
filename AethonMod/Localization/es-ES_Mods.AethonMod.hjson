@@ -2244,6 +2244,7 @@ Items: {
 	TrioRequiereConsagrada: Esa arma no está consagrada — conságala primero en el altar de la ofrenda para poder colocarla en el trío.
 	TrioSinConsagradas: No llevas armas consagradas — consagra un arma mágica en el altar y vuelve.
 	TrioTodoDevuelto: "{0} armas devueltas al inventario."
+	TrioExtraida: Arma devuelta al inventario desde la ranura {0}.
 	BandejaVacia: No llevas nada que consagrar.
 	TrioComo: El altar del libro consagra las armas · el Trío dispara lo elegido allí.
 	TrioLibre: (libre)

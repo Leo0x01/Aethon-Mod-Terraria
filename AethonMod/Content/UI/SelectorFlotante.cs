@@ -264,6 +264,14 @@ namespace AethonMod.Content.UI
                     Cerrar();
                     if (destino != int.MinValue)
                         AltarOfrendasUI.ClicEnCandidato(i, destino);
+                    // v6.173 — EL FRAME DE GRACIA DE LA ELECCIÓN (la
+                    // cura de las ranuras que se desequipaban solas):
+                    // la ventana MUERE este frame y el clic sigue
+                    // apretado; sin esta marca, el flanco del frame
+                    // siguiente caía sobre el control que quedó debajo
+                    // (la casilla «3» o «Desequipar todo») y las armas
+                    // se devolvían «solas». La página come un frame.
+                    LibroDelEternoUI.MarcoDeGracia();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
                 dibujadas++;

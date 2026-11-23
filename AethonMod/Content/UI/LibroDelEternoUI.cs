@@ -66,6 +66,20 @@ namespace AethonMod.Content.UI
         //  cambia (los tiles llaman).
         // ============================================================
 
+        /// <summary>v6.173 — LA MARCA DEL FRAME DE GRACIA: el
+        /// selector flotante la llama al elegir — la página no
+        /// procesa clics hasta el frame siguiente (la cura del clic
+        /// fantasma que vaciaba las ranuras del trío).</summary>
+        /// <summary>v6.173 — EL RELOJ DE GRACIA ESTÁTICO (compartido
+        /// con LibroEstado — el marco de gracia vive en la clase
+        /// externa porque el selector lo siembra DESDE FUERA).</summary>
+        internal static ulong TickGracia;
+
+        internal static void MarcoDeGracia()
+        {
+            TickGracia = Main.GameUpdateCount;
+        }
+
         /// <summary>La pestaña viva: 0 = Índice · 1 = Altar · 2 = Pilar.</summary>
         internal static int Pestana;
 
@@ -335,6 +349,27 @@ namespace AethonMod.Content.UI
         // botones muertos: el patrón del árbol/altar/prisma viejos).
         private bool _ultimoClicIzq;
 
+        /// <summary>v6.173 — EL FLANCO DEL CLIC DERECHO (la letra:
+        /// «el click derecho sobre un slot debe desequipar el arma»):
+        /// un clic derecho puro JAMÁS entraba por el flanco izquierdo
+        /// — la extracción vivía muerta dentro de un if mouseRight
+        /// que solo corría dentro del clic IZQUIERDO. Ahora tiene SU
+        /// propio flanco.</summary>
+        private bool _ultimoClicDer;
+
+        /// <summary>v6.173 — EL FRAME DE GRACIA DE LA PÁGINA (la letra:
+        /// «a veces colocas un arma en un slot, pero al colocar una
+        /// segunda el primer slot se desequipa solo»): LA AUTOPSIA —
+        /// al elegir un candidato, la ventana flotante SE CIERRA el
+        /// MISMO frame y el clic sigue apretado; al frame siguiente
+        /// el cursor cae sobre LO QUE QUEDÓ DEBAJO (la casilla «3» o
+        /// el botón «Desequipar todo») y el flanco del soltar dispara
+        /// EL CONTROL DE ABAJO — el fantasma que vaciaba las ranuras.
+        /// LA CURA — la página ENTIENDE un frame de gracia tras
+        /// cualquier acción del selector: los clics mueren por un
+        /// frame (el reloj vive ESTÁTICO en LibroDelEternoUI — el
+        /// selector lo siembra desde fuera).</summary>
+
         /// <summary>v6.163 — al cambiar de pestaña el scroll vuelve
         /// arriba (cada pestaña es un mundo nuevo).</summary>
         public void ReiniciarScroll() { _scrollIzq = 0f; _scrollDer = 0f; }
@@ -570,7 +605,14 @@ namespace AethonMod.Content.UI
                 // AQUÍ en el dibujo — donde viven las geometrías.
                 bool clicAhora = Main.mouseLeft &&
                     !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                bool clicNuevo = clicAhora && !_ultimoClicIzq;
+                bool clicNuevo = clicAhora && !_ultimoClicIzq &&
+                    Main.GameUpdateCount > LibroDelEternoUI.TickGracia;   // v6.173: el frame de gracia
+
+                // v6.173 — EL FLANCO DERECHO (la extracción de las
+                // ranuras del trío — la letra del clic derecho).
+                bool clicDerAhora = Main.mouseRight &&
+                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                bool clicDerNuevo = clicDerAhora && !_ultimoClicDer;
 
                 // el cuerpo arranca DEBAJO del rótulo de la página —
                 // nunca debajo del titular (que ya vive en el cuero)
@@ -706,7 +748,7 @@ namespace AethonMod.Content.UI
                     float sinScroll = 0f;
                     _maxIzq = 0f; _maxDer = 0f;
                     AltarDelLibro.Izquierda(sb, pagIzq, recIzq, ref sinScroll, clicNuevo);
-                    AltarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicNuevo);
+                    AltarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicNuevo, clicDerNuevo);
                 }
                 else if (LibroDelEternoUI.Pestana == 2)
                 {
@@ -725,6 +767,7 @@ namespace AethonMod.Content.UI
                 // EL FLANCO SE COMPLETA AQUÍ (el clic se consumió en el
                 // dibujo de las páginas — el mismo lugar que lo leyó).
                 _ultimoClicIzq = clicAhora;
+                _ultimoClicDer = clicDerAhora;
 
                 // ============================================================
                 //  v6.154 — LA X VIVE CON LAS PÁGINAS (la cura de «la X
@@ -1320,9 +1363,11 @@ namespace AethonMod.Content.UI
             return 0f;
         }
 
-        /// <summary>LA PÁGINA DERECHA: EL TRÍO DEL ETERNO en grande.</summary>
+        /// <summary>LA PÁGINA DERECHA: EL TRÍO DEL ETERNO en grande.
+        /// v6.173 — RECIBE EL FLANCO DERECHO (el clic derecho sobre
+        /// una ranura desequipa su arma — la letra).</summary>
         public static float Derecha(SpriteBatch sb, Rectangle pag, Rectangle rec,
-            ref float scroll, bool clicNuevo)
+            ref float scroll, bool clicNuevo, bool clicDerNuevo = false)
         {
             var fuente = FontAssets.MouseText.Value;
             float cy = rec.Y + 6f;
@@ -1379,7 +1424,22 @@ namespace AethonMod.Content.UI
                 if (mN.X > 64f && mN.X > 0f) escN *= 64f / mN.X;
                 Utils.DrawBorderString(sb, nombreR, new Vector2(s.Center.X, s.Bottom + 9f),
                     elegida ? TintaVioleta : TintaApagado, escN, 0.5f, 0.5f);
-                if (hov && clicNuevo) AltarOfrendasUI.ClicEnRanura(i);
+                // v6.173 — EL FRAME DE GRACIA (la cura de las
+                // desequipadas): la ranura que abre SU selector SIEMBRA
+                // el clic que lo abre — la página no procesa OTRO clic
+                // hasta el frame siguiente (el fantasma que clicaba el
+                // botón de abajo murió).
+                if (hov && clicNuevo)
+                {
+                    AltarOfrendasUI.ClicEnRanura(i);
+                    LibroDelEternoUI.TickGracia = Main.GameUpdateCount;
+                }
+                // v6.173 — EL CLIC DERECHO DESEQUIPA (la letra: «el
+                // click derecho sobre un slot debe desequipar el arma»):
+                // el arma de la ranura vuelve al inventario — SU flanco,
+                // SU gesto (el izquierdo elige; el derecho desequipa).
+                if (hov && clicDerNuevo)
+                    AltarOfrendasUI.DesequiparRanura(i);
                 // v6.168 — la ranura que abrió SU selector: la ventanita
                 // nace ANCLADA a la ranura (el flotante de la casa).
                 if (AltarOfrendasUI.SelectorAbierto != null &&

@@ -153,8 +153,14 @@ namespace AethonMod.Content.Tiles
             // no tiene ModifyMapEntryName) escribe «(ACTIVO)» sobre el
             // que funciona y «(devorado por el grimorio)» sobre los
             // muertos — el mapa siempre dice la verdad.
+            // v6.173 — LA TINTA DEL LIBRO TAMBIÉN EN EL MAPA (la
+            // letra: «los colores de la tipografia en el altar y en el
+            // pilar siguen siendo incorrectos, no son iguales a los
+            // colores del libro de informacion»): el TEAL 90,220,180 era
+            // el ÚLTIMO teal vivo de la casa — muere; el nombre del
+            // altar viste el VIOLETA DEL TÍTULO del libro (148,72,178).
             LocalizedText nombre = CreateMapEntryName();
-            AddMapEntry(new Color(90, 220, 180), nombre, (n, i, j) =>
+            AddMapEntry(new Color(148, 72, 178), nombre, (n, i, j) =>
             {
                 try
                 {
@@ -222,8 +228,11 @@ namespace AethonMod.Content.Tiles
             if (global::AethonMod.Content.Systems.AltarUnicoSistema.HayActivo &&
                 !global::AethonMod.Content.Systems.AltarUnicoSistema.EsElActivo(i, j))
             {
+                // v6.173 — LA FAMILIA CLARA DEL CHAT (la ley de los
+                // dos fondos de la casa): el lavanda 190,160,220 ajeno
+                // muere — el VIOLETA CLARO del libro (196,110,228).
                 Main.NewText(Terraria.Localization.Language.GetTextValue(
-                    "Mods.AethonMod.Altar.Desactivado"), new Microsoft.Xna.Framework.Color(190, 160, 220));
+                    "Mods.AethonMod.Altar.Desactivado"), new Microsoft.Xna.Framework.Color(196, 110, 228));
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose, new Vector2(i * 16f, j * 16f));
                 return true;
             }
@@ -316,7 +325,7 @@ namespace AethonMod.Content.Tiles
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.25f), centro);
                     Main.NewText(Terraria.Localization.Language.GetTextValue(
                         "Mods.AethonMod.Altar.DevoradoAnuncio"),
-                        new Color(190, 160, 220));
+                        new Color(196, 110, 228));   // v6.173 — la familia clara del libro
                 }
                 // matar TODAS las tiles del mueble 2×3 (el pico de
                 // vanilla mataría una; la boca se lleva el cuerpo entero).

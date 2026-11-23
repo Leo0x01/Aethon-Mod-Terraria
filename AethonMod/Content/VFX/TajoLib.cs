@@ -98,9 +98,12 @@ namespace AethonMod.Content.VFX
         //  LA PRIMITIVA — EL Tajo (la media luna completa)
         // ==================================================================
 
-        /// <summary>Segmentos del arco (20: curva suave con deltas de
-        /// ángulo pequeños — los quads banda quedan continuos).</summary>
-        public const int Segmentos = 20;
+        /// <summary>Segmentos del arco. v6.173 — 32 (la letra: «el
+        /// tajo no es una linea continua esta seccionado, es una linea
+        /// con muchas subdivisiones»): más quads = MENOS delta de ángulo
+        /// por unión = la curra LISA y la costura invisible (el solape
+        /// de 3px de SegmentoArco cierra la cuña).</summary>
+        public const int Segmentos = 32;
 
         /// <summary>v6.172 — LA COMPRESIÓN VERTICAL de la elipse (0.78:
         /// el corte katana entra EN DIAGONAL al plano — el arco circular
@@ -194,7 +197,10 @@ namespace AethonMod.Content.VFX
             //     clásico). Hojas FANTASMA finísimas a radios ±6 %,
             //     desfase angular decreciente, reveladas UN PASO ADELANTE
             //     del filo real (la estela del gesto). ---
-            if (smeares > 0.05f)
+            // v6.173 — LOS SMEARS MUEREN: las 3 hojas fantasma a
+            // radios ±6% eran MÁS LÍNEAS PARALELAS — el hilo de
+            // subdivisiones que el usuario ve. La luna queda LIMPIA.
+            if (false && smeares > 0.05f)
             {
                 for (int s = 0; s < 3; s++)
                 {
@@ -217,17 +223,22 @@ namespace AethonMod.Content.VFX
                 }
             }
 
-            // --- 1. EL ECO FANTASMA (el rastro interior del anime: un
-            //     segundo arco a radio ×0.88, finísimo, apagándose). ---
+            // --- 1. EL RESPLANDOR INTERIOR (v6.173 — la cura de la
+            //     línea seccionada: el «eco fantasma» a radio ×0.88 con
+            //     ancho ×1.9 era UNA SEGUNDA LÍNEA paralela — el ojo
+            //     leía las dos como una sola partida. Ahora es un
+            //     resplandor PEGADO al filo: radio ×0.965, ancho ×0.9,
+            //     alfa bajo — la luna es UNA, con su brillo de
+            //     adentro). ---
             for (int i = 0; i < Segmentos; i++)
             {
                 float u0 = i / (float)Segmentos;
                 if (u0 >= prog) break;
                 float um = (u0 + (i + 1f) / Segmentos) * 0.5f;
                 float gu = PerfilLente(um);
-                SegmentoArco(Banda, centro, radio * 0.88f, ang0, span, u0, um,
-                    ancho * 1.9f * gu,
-                    Tint(nucleo, 0.14f * brillo * (0.4f + 0.6f * gu)));
+                SegmentoArco(Banda, centro, radio * 0.965f, ang0, span, u0, um,
+                    ancho * 0.9f * gu,
+                    Tint(nucleo, 0.11f * brillo * (0.4f + 0.6f * gu)));
             }
 
             // --- 2. EL HALO (el color: DOS PASADAS APILADAS del pixel del
@@ -250,8 +261,11 @@ namespace AethonMod.Content.VFX
                     Tint(halo, 0.13f * brillo * flick * (0.35f + 0.65f * gu)));
             }
 
-            // --- 3. EL NÚCLEO (el filo blanco-caliente: BoltCore fino,
-            //     limpio, sin parpadeo, el grosor de la lente). ---
+            // --- 3. EL NÚCLEO (el filo blanco-caliente: BoltCore
+            //     fino, limpio, sin parpadeo, el grosor de la lente).
+            //     v6.173 — ×3.6 (era ×2.8): la línea única LEE GRUESA y
+            //     CONTINUA (la letra: «un tajo real no es asi» — una
+            //     línea de corte real es UNA viva, no un hilo). ---
             for (int i = 0; i < Segmentos; i++)
             {
                 float u0 = i / (float)Segmentos;
@@ -259,16 +273,20 @@ namespace AethonMod.Content.VFX
                 float um = (u0 + (i + 1f) / Segmentos) * 0.5f;
                 float gu = PerfilLente(um);
                 SegmentoArco(Vena, centro, radio, ang0, span, u0, um,
-                    ancho * 2.8f * (0.40f + 0.60f * gu),
+                    ancho * 3.6f * (0.40f + 0.60f * gu),
                     Tint(nucleo, 0.95f * brillo * (0.40f + 0.60f * gu)));
             }
 
-            // --- 3.5 EL DOBLE FILO (v6.172 — la firma de Hollow Knight:
-            //     un SEGUNDO creciente a radio ×0.82 que corre EN
-            //     SENTIDO OPUESTO — los dos filos se cruzan en el
-            //     centro del gesto). Nace cuando el filo principal ya
-            //     recorrió un tercio: la segunda hoja DEL cierre. ---
-            if (prog > 0.30f)
+            // --- 3.5 EL DOBLE FILO — MUERTO POR DEFECTO (v6.173 —
+            //     la cura de la línea seccionada: el segundo creciente
+            //     a radio ×0.82 corriendo EN SENTIDO OPUESTO era LA
+            //     CAUSA — dos líneas gruesas casi pegadas que se
+            //     revelan en sentidos opuestos leen «una línea con
+            //     muchas subdivisiones» (la letra exacta del usuario).
+            //     El código queda ENTERRADO bajo `false &&` — la firma
+            //     TajoDoble sigue compilando para quien la quiera, pero
+            //     la LUNA DEL USUARIO ES UNA. ---
+            if (false && prog > 0.30f)
             {
                 float prog2 = MathHelper.Clamp((prog - 0.30f) / 0.70f, 0f, 1f);
                 for (int i = 0; i < Segmentos; i++)
@@ -383,11 +401,14 @@ namespace AethonMod.Content.VFX
             float rot = (float)Math.Atan2(delta.Y, delta.X);
 
             // La tangente del punto medio (el quad se gira al filo REAL del
-            // arco — el solape de 2px cubre la cuña del giro).
+            // arco). v6.173 — EL SOLAPE DE 3px (era 2): con quads anchos
+            // la cuña del giro era VISIBLE entre segmentos (la «línea
+            // con subdivisiones» de la letra) — 3px de solape la CIERRA
+            // para todos los anchos de la casa.
             _ = um;
             Main.spriteBatch.Draw(tex, mid, null, tint, rot,
                 new Vector2(tex.Width, tex.Height) * 0.5f,
-                new Vector2((len + 2f) / tex.Width, altoQuad / tex.Height),
+                new Vector2((len + 3f) / tex.Width, altoQuad / tex.Height),
                 SpriteEffects.None, 0f);
         }
 

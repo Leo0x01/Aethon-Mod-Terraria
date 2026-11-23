@@ -2258,6 +2258,7 @@ Items: {
 	TrioRequiereConsagrada: That weapon is not consecrated — consecrate it at the offering altar first to place it in the trio.
 	TrioSinConsagradas: You carry no consecrated weapons — consecrate a magic weapon at the altar and come back.
 	TrioTodoDevuelto: "{0} weapons returned to your inventory."
+	TrioExtraida: Weapon returned to your inventory from slot {0}.
 	BandejaVacia: You carry nothing to consecrate.
 	TrioComo: The book's altar consecrates the weapons · the Trio fires whatever is chosen there.
 	TrioLibre: (free)

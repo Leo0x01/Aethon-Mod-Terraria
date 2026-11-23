@@ -60,62 +60,15 @@ namespace AethonMod.Content.Systems
                 return false;
             });
 
+        // v6.173 — LAS RECETAS DE CONSAGRAR DEL INVENTARIO MURIERON
+        // (la letra: «veo que hay recetas de consagrar que se ven desde
+        // el inventario, quitalas, solo se puede consagrar desde la
+        // ventana del altar»): el apartado creación YA NO consagra —
+        // LA ÚNICA CONSAGRACIÓN es la ventana del altar del libro (su
+        // botón, su precio, su teatro). Este sistema queda VACÍO: ni
+        // una receta se registra.
         public override void AddRecipes()
         {
-            try
-            {
-                int eterno = ModContent.ItemType<global::AethonMod.Content.Weapons.GrimoireEternal>();
-
-                int total = ItemLoader.ItemCount;
-                int armas = 0;
-
-                for (int t = 1; t < total; t++)
-                {
-                    // LO QUE EL GRIMORIO NO TOCA.
-                    if (t == eterno) continue;
-
-                    // EL PROTOTIPO (ContentSamples ya conoce a todos: los
-                    // items cargan ANTES que las recetas).
-                    Item proto = null;
-                    try { proto = ContentSamples.ItemsByType[t]; } catch { }
-                    if (proto == null) continue;
-
-                    // v6.51.1 — SOLO ARMAS (la letra: «mejor quitemos que
-                    // cualquier cosa se convierta en esencia corrupta,
-                    // dejemos que la esencia corrupta sea solo un loot de
-                    // monstruo y jefes»): las recetas item→esencia
-                    // MURIERON — la Esencia Corrupta solo cae de los
-                    // cuerpos.
-                    if (!DespertarGrimorioSistema.EsArma(proto)) continue;
-
-                    // ===== LA RECETA DEL SELLO: arma → arma CORRUPTA =====
-                    // (EL SELLO lo pone MarcarCorrupta — el callback de
-                    // ESTA receta: el resultado nace con la etiqueta
-                    // Corrupto y SIN prefijo). LAS CONDICIONES:
-                    //   · LlevaElGrimorio: el libro en el inventario (la
-                    //     corrupción vive en el apartado de creación — sin
-                    //     estaciones, sin lanzar nada).
-                    //   · QuedaUnaLimpia: el arma corrupta NO puede volver
-                    //     a corromperse (la letra) — la receta solo se
-                    //     ofrece si llevas una instancia SIN corromper.
-                    //   · NaceCorrupta (siempre cierta): el aviso de las
-                    //     estadísticas del arma corrupta EN EL MENÚ (la
-                    //     letra: «eso debe mostrarse con una etiqueta»).
-                    Recipe.Create(t, 1)
-                        .AddIngredient(t, 1)
-                        .AddIngredient(ModContent.ItemType
-                            <global::AethonMod.Content.Items.Altar.ItemCorrupto>(),
-                            global::AethonMod.Content.Globals.CorruptoGlobalItem
-                                .CosteCorrupcion(proto))
-                        .AddCondition(LlevaElGrimorio)
-                        .AddCondition(QuedaUnaLimpia(t))
-                        .AddCondition(NaceCorrupta)
-                        .AddOnCraftCallback(MarcarCorrupta)   // v6.89: cuesta CosteCorrupcion esencias (la de cobre pide menos que la de adamantita)
-                        .Register();
-                    armas++;
-                }
-            }
-            catch { }
         }
 
         /// <summary>v6.51.1 — ¿El portador lleva una instancia LIMPIA de

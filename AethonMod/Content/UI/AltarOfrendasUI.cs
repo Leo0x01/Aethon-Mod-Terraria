@@ -259,6 +259,35 @@ namespace AethonMod.Content.UI
         /// <summary>EL CLIC EN UN ICONO de la bandeja: lo coloca (o lo
         /// consagra primero si es el slot de ofrenda — no: el slot
         /// consagra con SU botón; la bandeja SOLO coloca la ofrenda).</summary>
+        /// <summary>v6.173 — EL COBRO DEL INVENTARIO (la línea de
+        /// la vida del slot de consagrar): el item elegido SALE del
+        /// inventario del portador — 1 de su pila si hay más, o su
+        /// ranura entera si era el único. NADA se duplica: la copia que
+        /// vive en el slot ES el item.</summary>
+        private static void CobrarDelInventario(Item elegido)
+        {
+            try
+            {
+                if (elegido == null || elegido.IsAir) return;
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active) return;
+                if (elegido.stack > 1)
+                {
+                    elegido.stack--;   // la pila paga uno (la copia vive en el slot)
+                    return;
+                }
+                for (int k = 0; k < 58; k++)
+                {
+                    if (yo.inventory[k] == elegido)
+                    {
+                        yo.inventory[k].TurnToAir();
+                        return;
+                    }
+                }
+            }
+            catch { }
+        }
+
         public static void ClicEnCandidato(int indiceCandidato,
             int ranuraDestino = int.MinValue)
         {
@@ -364,7 +393,23 @@ namespace AethonMod.Content.UI
                     // cura de las desaparecidas: INSERCIÓN, no spawn).
                     if (_arma != null && !_arma.IsAir)
                         AdoptarItem(_arma);
+                    // v6.173 — LA LÍNEA DE LA VIDA DEL CONSAGRAR (la
+                    // letra: «hay duplicacion de arma […] cuando se toca
+                    // consagrar el juego devuelva la misma arma ya con
+                    // el modificador» + LA NOTA: «el arma en el
+                    // inventario solo se borrara en el momento en el que
+                    // se toque el boton consagrar y se cree la version
+                    // consagrada»): LA AUTOPSIA — el selector clonaba la
+                    // ofrenda al slot y el ORIGINAL vivía por siempre en
+                    // la bolsa → al consagrar nacían DOS (la del cursor
+                    // sellada + la limpia del inventario). LA CURA — LA
+                    // MISMA LÍNEA DE LA VIDA del trío (v6.172): la copia
+                    // nace PRIMERO, el original muere DESPUÉS. El
+                    // inventario pierde el item YA (va al slot — la
+                    // ventana lo muestra); al CONSAGRAR, esa misma copia
+                    // — ya sellada — vuelve al inventario.
                     _arma = (Item)elegido.Clone();
+                    CobrarDelInventario(elegido);
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
                 SelectorAbierto = null;   // la bandeja se cierra al elegir
@@ -387,24 +432,31 @@ namespace AethonMod.Content.UI
                     if (global::AethonMod.Content.Weapons.Investigaciones
                         .TrioDelEterno.EsArmaValida(Main.mouseItem))
                     {
-                        int destino = (armaSlot == null || armaSlot.IsAir) ? slotT : -1;
-                        if (destino < 0)
-                            for (int k = 0; k < 3; k++)
-                            {
-                                Item rk = trio.Ranuras[k];
-                                if (rk == null || rk.IsAir) { destino = k; break; }
-                            }
-                        if (destino >= 0)
+                        // v6.173 — EL ARMA ENTRA EN LA RANURA CLICADA (la
+                        // letra: «a veces colocas un arma en un slot, pero
+                        // al colocar una segunda el primer slot se
+                        // desequipa solo»): LA AUTOPSIA — si la ranura
+                        // clicada estaba ocupada, el código buscaba LA
+                        // PRIMERA LIBRE y escribía ahí: el arma aparecía
+                        // en OTRA ranura y el mensaje decía el número de
+                        // ESA — el usuario re-clicaba creyendo que falló y
+                        // el caos leía como «se desequipa sola». LA CURA —
+                        // EL CONTRATO DEL SLOT: entra EN LA RANURA
+                        // CLICADA; si estaba ocupada, la vieja VUELVE al
+                        // inventario (AdoptarItem) y la nueva toma su
+                        // sitio. Sin búsquedas, sin sorpresas.
+                        if (armaSlot != null && !armaSlot.IsAir)
                         {
-                            trio.Ranuras[destino] = (Item)Main.mouseItem.Clone();
-                            Main.mouseItem.TurnToAir();
-                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
-                            Main.NewText(Language.GetTextValue(
-                                "Mods.AethonMod.Items.TrioInsertada", destino + 1),
-                                ChatVioleta);
+                            Item saleLaVieja = (Item)armaSlot.Clone();
+                            saleLaVieja.stack = 1;
+                            AdoptarItem(saleLaVieja);
                         }
-                        else Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items.TrioLleno"), ChatRojo);
+                        trio.Ranuras[slotT] = (Item)Main.mouseItem.Clone();
+                        Main.mouseItem.TurnToAir();
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
+                        Main.NewText(Language.GetTextValue(
+                            "Mods.AethonMod.Items.TrioInsertada", slotT + 1),
+                            ChatVioleta);
                     }
                     else
                     {
@@ -416,31 +468,17 @@ namespace AethonMod.Content.UI
                 else if (armaSlot != null && !armaSlot.IsAir)
                 {
                     // CLIC IZQUIERDO en ranura llena con cursor vacío: LA
-                    // ELIGE. CLIC DERECHO: la extrae al cursor.
-                    if (Main.mouseRight)
-                    {
-                        // v6.167 — LA VUELTA AL INVENTARIO (la letra: «si
-                        // el jugador desequipa el arma con click derecho,
-                        // esta entonces vuelve al inventario»): el arma
-                        // regresa AL INVENTARIO. v6.168 — LA CURA DE LAS
-                        // DESAPARECIDAS: QuickSpawnItem (spawn al suelo)
-                        // muere — la vuelta es UNA INSERCIÓN DIRECTA
-                        // (AdoptarItem: apila, entra en el hueco, y solo
-                        // de último recurso cae — con aviso).
-                        Item devolver = (Item)armaSlot.Clone();
-                        devolver.stack = 1;
-                        trio.Ranuras[slotT] = new Item();
-                        AdoptarItem(devolver);
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
-                    }
-                    else
-                    {
-                        trio.ModoDisparo = slotT;
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                        Main.NewText(Language.GetTextValue(
-                            "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
-                            ChatVioleta);
-                    }
+                    // ELIGE (el modo de UNA ranura). v6.173 — LA RAMA
+                    // MUERTA DEL mouseRight MURIÓ: la extracción con clic
+                    // derecho vive en el FLANCO DERECHO del libro
+                    // (LibroDelEternoUI — DesequiparRanura), no aquí
+                    // dentro del clic izquierdo (era código muerto: un
+                    // clic derecho puro jamás entraba por esta puerta).
+                    trio.ModoDisparo = slotT;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    Main.NewText(Language.GetTextValue(
+                        "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
+                        ChatVioleta);
                 }
                 else
                 {
@@ -458,6 +496,35 @@ namespace AethonMod.Content.UI
                         "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
                         ChatVioleta);
                 }
+            }
+            catch { }
+        }
+
+        /// <summary>v6.173 — LA EXTRACCIÓN CON CLIC DERECHO (la
+        /// letra: «el click derecho sobre un slot debe desequipar el
+        /// arma»): la ranura devuelve SU arma al inventario (AdoptarItem
+        /// — inserción directa, jamás spawn al suelo) y queda libre.
+        /// La llama el FLANCO DERECHO del libro (el clic izquierdo
+        /// vive en ClicEnRanura — son gestos distintos, flancos
+        /// distintos).</summary>
+        public static void DesequiparRanura(int slotT)
+        {
+            try
+            {
+                var trio = global::AethonMod.Content.Weapons.Investigaciones
+                    .TrioDelEterno.Del(Main.LocalPlayer);
+                if (trio == null || trio.Ranuras == null) return;
+                if (slotT < 0 || slotT > 2) return;
+                Item armaSlot = trio.Ranuras[slotT];
+                if (armaSlot == null || armaSlot.IsAir) return;
+                Item devolver = (Item)armaSlot.Clone();
+                devolver.stack = 1;
+                trio.Ranuras[slotT] = new Item();
+                AdoptarItem(devolver);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                Main.NewText(Language.GetTextValue(
+                    "Mods.AethonMod.Items.TrioExtraida", slotT + 1),
+                    ChatVioleta);
             }
             catch { }
         }
@@ -1192,37 +1259,24 @@ namespace AethonMod.Content.UI
                         if (!Main.mouseItem.IsAir)
                         {
                             // INSERCIÓN: solo armas (la regla del atril).
+                            // v6.173 — EN LA RANURA CLICADA (la misma cura
+                            // del libro: swap si estaba ocupada, nada de
+                            // buscar la primera libre).
                             if (global::AethonMod.Content.Weapons.Investigaciones
                                 .TrioDelEterno.EsArmaValida(Main.mouseItem))
                             {
-                                // ¿el slot está libre? si no, busco el
-                                // primero libre (el atril también lo
-                                // hace así — el cursor entra donde pueda).
-                                int destino = (armaSlot == null || armaSlot.IsAir)
-                                    ? slotT : -1;
-                                if (destino < 0)
+                                if (armaSlot != null && !armaSlot.IsAir)
                                 {
-                                    for (int k = 0; k < 3; k++)
-                                    {
-                                        Item rk = trioClic.Ranuras[k];
-                                        if (rk == null || rk.IsAir) { destino = k; break; }
-                                    }
+                                    Item saleLaVieja = (Item)armaSlot.Clone();
+                                    saleLaVieja.stack = 1;
+                                    AdoptarItem(saleLaVieja);
                                 }
-                                if (destino >= 0)
-                                {
-                                    trioClic.Ranuras[destino] = (Item)Main.mouseItem.Clone();
-                                    Main.mouseItem.TurnToAir();
-                                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
-                                    Main.NewText(Language.GetTextValue(
-                                        "Mods.AethonMod.Items.TrioInsertada", destino + 1),
-                                        ChatVioleta);
-                                }
-                                else
-                                {
-                                    Main.NewText(Language.GetTextValue(
-                                        "Mods.AethonMod.Items.TrioLleno"),
-                                        ChatRojo);
-                                }
+                                trioClic.Ranuras[slotT] = (Item)Main.mouseItem.Clone();
+                                Main.mouseItem.TurnToAir();
+                                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
+                                Main.NewText(Language.GetTextValue(
+                                    "Mods.AethonMod.Items.TrioInsertada", slotT + 1),
+                                    ChatVioleta);
                             }
                             else
                             {

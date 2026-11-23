@@ -239,15 +239,21 @@ namespace AethonMod.Content.Projectiles.Regla
                     //     FRAME DE IMPACTO (el flash monocromo del
                     //     sakuga en los 2 primeros ticks de vida) ===
                     float impacto = t / VIDA;
+                    // v6.173 — LA LUNA LIMPIA (la letra: «el tajo no es
+                    // una linea continua esta seccionado, es una linea
+                    // con muchas subdivisiones»): SIN smeares (las hojas
+                    // fantasma paralelas morían en TajoLib — aquí también
+                    // se apagan: 0.0 en ambos llamados). UNA media luna
+                    // blanca CONTINUA con su halo azul.
                     if (Cruzado)
                         TajoLib.TajoCruzado(centro, radio,
                             medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
-                            reveal, campana, ANCHO, HaloCielo, Filo, seed, time, 1f);
+                            reveal, campana, ANCHO, HaloCielo, Filo, seed, time, 0f);
                     else
                         TajoLib.TajoDoble(centro, radio,
                             medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
                             reveal, campana, ANCHO, HaloCielo, Filo, seed, time,
-                            1f, impacto);
+                            0f, impacto);
 
                     // === 3. EL DESTEMPLE (el flash de clausura: los
                     //     últimos 4 ticks, un destello alto y frío en el

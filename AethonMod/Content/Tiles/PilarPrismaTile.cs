@@ -113,7 +113,10 @@ namespace AethonMod.Content.Tiles
 
             // EL MAPA: el violeta del pilar (la familia del prisma).
             LocalizedText nombre = CreateMapEntryName();
-            AddMapEntry(new Color(180, 120, 240), nombre);
+            // v6.173 — LA TINTA DEL LIBRO EN EL MAPA (la letra: los
+            // colores del pilar = los del libro): el violeta ajeno
+            // 180,120,240 muere — el VIOLETA DEL TÍTULO del libro.
+            AddMapEntry(new Color(148, 72, 178), nombre);
 
             // EL POLVO AL PICARLO (inútil: nadie lo pica — pero la casa).
             DustType = DustID.Enchanted_Pink;

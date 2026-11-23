@@ -97,7 +97,7 @@ namespace AethonMod.Content.Items.Llamados
             if (!SubmundoGrimorio.PuedeEntrar(player, out razon))
             {
                 if (razon != null)
-                    Main.NewText(razon, new Color(190, 160, 220));
+                    Main.NewText(razon, new Color(196, 110, 228));   // v6.173 — la familia clara del libro
                 return true;
             }
 

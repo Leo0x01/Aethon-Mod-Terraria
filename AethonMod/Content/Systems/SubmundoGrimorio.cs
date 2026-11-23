@@ -405,7 +405,7 @@ namespace AethonMod.Content.Systems
             if (!PuedeEntrar(player, out razon))
             {
                 if (player != null && player.whoAmI == Main.myPlayer && razon != null)
-                    Main.NewText(razon, new Color(190, 160, 220));
+                    Main.NewText(razon, new Color(196, 110, 228));   // v6.173 — la familia clara del libro
                 return;
             }
             // v6.118 — EL FESTÍN NO CRUZA LA PUERTA: si una oleada corría en
