@@ -63,11 +63,23 @@ namespace AethonMod.Content.UI
         // panel violeta oscuro MUERE — el pilar es PAPEL de manuscrito
         // (el 216,200,166 del libro) con TINTA cálida y acentos
         // violeta/ámbar de la familia del libro.
+        // v6.172 — LA PALETA EXACTA DEL LIBRO DE INFORMACIÓN (la
+        // letra: «todavia el color de los textos en el altar y en el
+        // pilar estan mal, revisa los colores de la tipografia y has
+        // que los colores sean los mismos que la del libro de
+        // informacion»): los valores v6.167 ERAN «parecidos» pero NO
+        // los del libro — violeta 128,52,158 (el libro pinta 148,72,178),
+        // oro 156,104,36 (el libro: 168,108,44), apagado 104,84,60 (el
+        // libro: 118,96,70), y un TEAL 60,118,102 que NUNCA fue de la
+        // familia. AHORA: LOS CUATRO VALORES EXACTOS de
+        // LibroDelEternoUI (Tinta 28,20,16 · Violeta 148,72,178 · Oro
+        // 168,108,44 · Apagado 118,96,70) y el Teal MUERE (apunta al
+        // oro, como el altar) — UNA sola casa.
         private static readonly Color TintaFondo = new Color(216, 200, 166);   // el papel del libro
-        private static readonly Color TintaVioleta = new Color(128, 52, 158);  // el violeta del libro
-        private static readonly Color TintaOro = new Color(156, 104, 36);      // el ámbar del libro
-        private static readonly Color TintaApagado = new Color(104, 84, 60);   // tinta suave
-        private static readonly Color TintaTeal = new Color(60, 118, 102);     // acento profundo
+        private static readonly Color TintaVioleta = new Color(148, 72, 178);  // el violeta EXACTO del libro
+        private static readonly Color TintaOro = new Color(168, 108, 44);      // el oro EXACTO del libro
+        private static readonly Color TintaApagado = new Color(118, 96, 70);   // la apagada EXACTA del libro
+        private static Color TintaTeal => TintaOro;   // v6.172 — el teal ajeno muere: es ORO
 
         /// <summary>¿La ventana está abierta?</summary>
         public static bool Abierta => _abierta;
@@ -304,11 +316,11 @@ namespace AethonMod.Content.UI
                 _geoVolver = new Rectangle(x + 40, (int)cy, w - 80, 44);
                 bool hoverVolver = _geoVolver.Contains(Main.mouseX, Main.mouseY);
                 sb.Draw(pixel, _geoVolver,
-                    (hoverVolver ? TintaOro : new Color(212, 168, 84)) * (hoverVolver ? 0.34f : 0.20f));
+                    (hoverVolver ? TintaOro : new Color(184, 122, 58)) * (hoverVolver ? 0.34f : 0.20f));
                 Marco(sb, pixel, _geoVolver, TintaOro * (hoverVolver ? 0.95f : 0.55f));
                 Utils.DrawBorderString(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonVolver"),
                     new Vector2(_geoVolver.Center.X, _geoVolver.Center.Y),
-                    hoverVolver ? TintaOro : new Color(232, 200, 140), 0.95f, 0.5f, 0.5f);
+                    hoverVolver ? TintaOro : new Color(214, 152, 70), 0.95f, 0.5f, 0.5f);
                 cy += 54f;
 
                 // === EL BOTÓN 2 — INVOCAR A AETHON (el violeta) ===
@@ -316,7 +328,7 @@ namespace AethonMod.Content.UI
                 _geoInvocar = new Rectangle(x + 40, (int)cy, w - 80, 44);
                 bool hoverInvocar = _geoInvocar.Contains(Main.mouseX, Main.mouseY) && !yaVive;
                 sb.Draw(pixel, _geoInvocar,
-                    (hoverInvocar ? TintaVioleta : new Color(120, 74, 178)) * (hoverInvocar ? 0.36f : 0.20f));
+                    (hoverInvocar ? TintaVioleta : new Color(118, 58, 142)) * (hoverInvocar ? 0.36f : 0.20f));
                 Marco(sb, pixel, _geoInvocar,
                     (yaVive ? TintaApagado : TintaVioleta) * (hoverInvocar ? 0.95f : 0.55f));
                 string txtInvocar = yaVive
@@ -324,7 +336,7 @@ namespace AethonMod.Content.UI
                     : Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonInvocar");
                 Utils.DrawBorderString(sb, txtInvocar,
                     new Vector2(_geoInvocar.Center.X, _geoInvocar.Center.Y),
-                    yaVive ? TintaApagado : (hoverInvocar ? TintaVioleta : new Color(196, 160, 240)),
+                    yaVive ? TintaApagado : (hoverInvocar ? TintaVioleta : new Color(196, 110, 228)),
                     0.95f, 0.5f, 0.5f);
                 cy += 58f;
 
@@ -368,9 +380,9 @@ namespace AethonMod.Content.UI
                 try { festinVivo = Systems.GrimorioFuriaSistema.Activo; } catch { }
                 _geoLanzar = new Rectangle(x + 90, (int)cy, w - 180, 40);
                 bool hoverLanzar = _geoLanzar.Contains(Main.mouseX, Main.mouseY) && !festinVivo;
-                Color rojoHambre = new Color(226, 64, 64);
+                Color rojoHambre = new Color(226, 96, 88);   // v6.172 — el rojo CLARO de la familia del libro (chat)
                 sb.Draw(pixel, _geoLanzar,
-                    (hoverLanzar ? rojoHambre : new Color(150, 60, 60)) * (hoverLanzar ? 0.36f : 0.20f));
+                    (hoverLanzar ? rojoHambre : new Color(168, 72, 64)) * (hoverLanzar ? 0.36f : 0.20f));
                 Marco(sb, pixel, _geoLanzar,
                     (festinVivo ? TintaApagado : rojoHambre) * (hoverLanzar ? 0.95f : 0.55f));
                 string txtLanzar = festinVivo

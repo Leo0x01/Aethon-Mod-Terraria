@@ -42,6 +42,10 @@ namespace AethonMod.Content.Weapons.Regla
         /// longitud» viva como el ALCANCE del arco).</summary>
         private const float RADIO = 150f;
 
+        /// <summary>v6.172 — EL CONTADOR DEL COMBO (0..3): al llegar a
+        /// 4 usos el próximo tajo es EL CRUZADO (la X doble).</summary>
+        private static int _combo;
+
         public override string Texture => "AethonMod/Content/Weapons/Regla/LaReglaDelCielo";
 
         public override void SetDefaults()
@@ -76,6 +80,12 @@ namespace AethonMod.Content.Weapons.Regla
             //   · localAI[2] = el RADIO
             // ============================================================
             bool sube = Main.rand.NextBool();
+            // v6.172 — EL CONTADOR DEL COMBO (ai[0]): cada CUARTO uso
+            // desata EL TAJO CRUZADO (la X del doble corte anime —
+            // TajoLib.TajoCruzado). El contador vive en el ítem (es
+            // el gesto local del portador).
+            _combo = (_combo + 1) % 4;
+            bool cruzado = _combo == 0;
             // LA ABRAZADA A LA PRESA: un blanco cerca del cursor
             // inclina el arco hacia él (±0.5 rad máximo) — en ai[1] ×1000
             float inclinacionExtra = 0f;
@@ -90,8 +100,8 @@ namespace AethonMod.Content.Weapons.Regla
                         -0.5f, 0.5f);
             }
             int idx = Projectile.NewProjectile(fuente, Main.MouseWorld, Vector2.Zero,
-                tipo, dano, 0f, player.whoAmI, 0f, inclinacionExtra * 1000f,
-                sube ? 1f : 0f);
+                tipo, dano, 0f, player.whoAmI, cruzado ? 4f : 0f,
+                inclinacionExtra * 1000f, sube ? 1f : 0f);
             if (idx >= 0 && idx < Main.maxProjectiles && Main.projectile[idx].active)
             {
                 Projectile p = Main.projectile[idx];

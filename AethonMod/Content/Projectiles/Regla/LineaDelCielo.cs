@@ -73,6 +73,12 @@ namespace AethonMod.Content.Projectiles.Regla
         /// <summary>¿La hoja SUBE (1) o BAJA (0)? — al azar al nacer (la letra v6.168).</summary>
         private bool Sube => Projectile.ai[2] >= 1f;
 
+        /// <summary>v6.172 — ¿EL TAJO CRUZADO? (ai[0] = el contador de
+        /// usos del arma: cada CUARTO uso desata la X del combo — el
+        /// doble corte cruzado del anime, la nueva variante de
+        /// TajoLib.TajoCruzado).</summary>
+        private bool Cruzado => Projectile.ai[0] >= 4f;
+
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetStaticDefaults()
@@ -223,11 +229,25 @@ namespace AethonMod.Content.Projectiles.Regla
 
                     // === 2. LA MEDIA LUNA (el corazón del anime: eco
                     //     fantasma + halo doble parpadeante + núcleo
-                    //     blanco — TODO en TajoLib.Tajo, el primitivo
-                    //     de la casa del Tajo Astral) ===
-                    TajoLib.Tajo(centro, radio,
-                        medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
-                        reveal, campana, ANCHO, HaloCielo, Filo, seed, time);
+                    //     blanco — TODO en TajoLib.TajoDoble, la
+                    //     REFORJA v6.172 de la investigación: EL DOBLE
+                    //     FILO (el segundo creciente en sentido
+                    //     contrario, la firma de Hollow Knight), LOS
+                    //     SMEARS (las hojas fantasma del swing), LAS
+                    //     CHISPAS del filo exterior y LA ELIPSE (el
+                    //     corte en perspectiva de la katana) + EL
+                    //     FRAME DE IMPACTO (el flash monocromo del
+                    //     sakuga en los 2 primeros ticks de vida) ===
+                    float impacto = t / VIDA;
+                    if (Cruzado)
+                        TajoLib.TajoCruzado(centro, radio,
+                            medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
+                            reveal, campana, ANCHO, HaloCielo, Filo, seed, time, 1f);
+                    else
+                        TajoLib.TajoDoble(centro, radio,
+                            medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
+                            reveal, campana, ANCHO, HaloCielo, Filo, seed, time,
+                            1f, impacto);
 
                     // === 3. EL DESTEMPLE (el flash de clausura: los
                     //     últimos 4 ticks, un destello alto y frío en el

@@ -212,7 +212,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 // SIN ARMAS INSERTADAS: el atril está vacío — la voz del
                 // libro lo dice (no spamea).
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioVacio"),
-                    new Color(255, 170, 130));
+                    new Color(214, 152, 70));
             }
             return false;   // nada de vanilla: el disparo fue nuestro
         }
@@ -249,7 +249,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 var linea = new TooltipLine(Mod, "TrioR" + i,
                     Language.GetTextValue("Mods.AethonMod.Items.TrioRanura", i + 1, contenido))
                 { OverrideColor = (Ranuras[i] != null && !Ranuras[i].IsAir)
-                    ? new Color(160, 230, 255) : new Color(140, 140, 150) };
+                    ? new Color(196, 110, 228) : new Color(168, 140, 104) };
                 tooltips.Add(linea);
             }
             // v6.162 — EL MODO A LA VISTA · v6.163: la elección vive

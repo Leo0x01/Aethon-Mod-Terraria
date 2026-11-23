@@ -317,10 +317,20 @@ namespace AethonMod.Content.UI
                     // v6.167 — SIN DUPLICACIÓN (la letra: «cuando el
                     // arma se equipa en el slot esta debe dejar el
                     // inventario del jugador ya que ahora esta en el
-                    // slot del altar»): la copia va a la ranura y EL
-                    // ORIGINAL MUERE en el inventario (stack incluido:
-                    // si llevaba 2, la ranura sostiene 1 y el otro
-                    // vuelve al inventario).
+                    // slot del altar»). v6.172 — LA CURA DE LAS
+                    // DESAPARECIDAS (la letra: «al poner el arma al
+                    // slot para armas esta desaparece por completo del
+                    // inventario, pero no llega al slot, el slot queda
+                    // vacio»): LA AUTOPSIA — elegido ES LA MISMA
+                    // REFERENCIA que inventory[k]; el código viejo
+                    // mataba la ranura del inventario PRIMERO
+                    // (TurnToAir) y clonaba DESPUÉS → clonaba AIRE →
+                    // la ranura del trío recibía un item vacío. LA
+                    // CURA — EL ORDEN INVERSO: la copia nace PRIMERO
+                    // (con todos sus datos), y SOLO ENTONCES el
+                    // original muere en el inventario.
+                    Item paraRanura = (Item)elegido.Clone();
+                    paraRanura.stack = 1;
                     if (elegido.stack > 1)
                     {
                         elegido.stack--;   // el sobreviviente queda en SU ranura
@@ -328,6 +338,7 @@ namespace AethonMod.Content.UI
                     else
                     {
                         // el único ejemplar viaja: SU ranura muere
+                        // (paraRanura ya está a salvo: es un CLON)
                         for (int k = 0; k < 58; k++)
                         {
                             if (Main.LocalPlayer.inventory[k] == elegido)
@@ -337,13 +348,11 @@ namespace AethonMod.Content.UI
                             }
                         }
                     }
-                    Item paraRanura = (Item)elegido.Clone();
-                    paraRanura.stack = 1;
                     trio.Ranuras[ranura] = paraRanura;
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Items.TrioInsertada", ranura + 1),
-                        new Color(160, 230, 255));
+                        ChatVioleta);
                 }
                 else
                 {
@@ -392,7 +401,7 @@ namespace AethonMod.Content.UI
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
                             Main.NewText(Language.GetTextValue(
                                 "Mods.AethonMod.Items.TrioInsertada", destino + 1),
-                                new Color(160, 230, 255));
+                                ChatVioleta);
                         }
                         else Main.NewText(Language.GetTextValue(
                             "Mods.AethonMod.Items.TrioLleno"), ChatRojo);
@@ -430,7 +439,7 @@ namespace AethonMod.Content.UI
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                         Main.NewText(Language.GetTextValue(
                             "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
-                            new Color(160, 230, 255));
+                            ChatVioleta);
                     }
                 }
                 else
@@ -447,7 +456,7 @@ namespace AethonMod.Content.UI
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Items.TrioModoUna", slotT + 1),
-                        new Color(160, 230, 255));
+                        ChatVioleta);
                 }
             }
             catch { }
@@ -529,7 +538,7 @@ namespace AethonMod.Content.UI
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Items.TrioTodoDevuelto", devueltas),
-                        new Color(160, 230, 255));
+                        ChatVioleta);
                 }
             }
             catch { }
@@ -548,7 +557,7 @@ namespace AethonMod.Content.UI
                 Main.NewText(Language.GetTextValue(
                     "Mods.AethonMod.Items." +
                     (trio.ModoDisparo >= 3 ? "TrioModoTres" : "TrioModoUna"), 1),
-                    new Color(160, 230, 255));
+                    ChatVioleta);
             }
             catch { }
         }
@@ -1206,7 +1215,7 @@ namespace AethonMod.Content.UI
                                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item85);
                                     Main.NewText(Language.GetTextValue(
                                         "Mods.AethonMod.Items.TrioInsertada", destino + 1),
-                                        new Color(160, 230, 255));
+                                        ChatVioleta);
                                 }
                                 else
                                 {
@@ -1252,7 +1261,7 @@ namespace AethonMod.Content.UI
                                 "Mods.AethonMod.Items." +
                                 (trioClic.ModoDisparo >= 3 ? "TrioModoTres" : "TrioModoUna"),
                                 trioClic.ModoDisparo + 1),
-                                new Color(160, 230, 255));
+                                ChatVioleta);
                         }
                     }
                 }
@@ -1907,7 +1916,7 @@ namespace AethonMod.Content.UI
                             new Color(200, 170, 255));
                     }
                     Utils.DrawBorderString(sb, "3", new Vector2(marca.Center.X, marca.Center.Y),
-                        marcada ? new Color(230, 210, 255) : TintaApagado, 0.9f, 0.5f, 0.5f);
+                        marcada ? TintaVioleta : TintaApagado, 0.9f, 0.5f, 0.5f);
                 }
                 cy += 52f + 8f;
                 // la leyenda de la marca (qué dispara el Trío AHORA —

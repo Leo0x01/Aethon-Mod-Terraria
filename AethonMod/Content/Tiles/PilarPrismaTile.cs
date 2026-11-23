@@ -150,8 +150,14 @@ namespace AethonMod.Content.Tiles
                 Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
             {
                 if (NPCs.AethonSellado.Invocar(Main.LocalPlayer))
-                    Main.NewText("[c/B96EEA:AETHON (SELLADO) DESPIERTA — el grimorio se alza entero]",
-                        new Color(185, 110, 250));
+                    // v6.172 — LA TINTA DE LA CASA (la letra: «revisa los
+                    // colores de la tipografia y has que los colores sean
+                    // los mismos que la del libro de informacion»): la
+                    // misma familia del libro en SU versión chat — el
+                    // violeta claro 196,110,228 (y el [c/C46EE4:] de
+                    // adentro calza con él).
+                    Main.NewText("[c/C46EE4:AETHON (SELLADO) DESPIERTA — el grimorio se alza entero]",
+                        new Color(196, 110, 228));
                 return true;
             }
 

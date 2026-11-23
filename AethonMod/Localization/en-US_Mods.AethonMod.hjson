@@ -4213,7 +4213,7 @@ Projectiles: {
 	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
 	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	ClickerGolpeProjectile.DisplayName: Clicker Golpe Projectile
+	// ClickerGolpeProjectile.DisplayName: Clicker Golpe Projectile
 	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	AlasAuroraHalo.DisplayName: Alas Aurora Halo
