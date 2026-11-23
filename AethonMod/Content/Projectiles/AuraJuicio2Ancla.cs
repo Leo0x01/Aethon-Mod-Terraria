@@ -301,12 +301,29 @@ namespace AethonMod.Content.Projectiles
                     // (aiStyle 23 — espectros, poltergeists, segadores —
                     // y los Ghost/Espectro por ID) ENTRAN SIEMPRE: su
                     // intangibilidad es una POSE, el vacío los toca
-                    // igual. El resto de la ley v6.145 queda: amigo,
-                    // pueblo, inmortal → fuera.
+                    // igual.
+                    // v6.168 — LA INTANGIBILIDAD ES UNA POSE, PARA
+                    // TODOS (la letra: «hay un enemigo llamado
+                    // Espectro […] el aura del vacio deberia
+                    // afectarle y dañarlo, pero simplemente no le hace
+                    // nada, sera porque se hace intangible, pero aun
+                    // asi deberia ser dañado por eso»): la puerta
+                    // dontTakeDamage de la v6.146 solo perdonaba a los
+                    // espíritus de VANILLA (aiStyle 23 + Ghost +
+                    // Wraith) — un Espectro de CUALQUIER OTRO AI (los
+                    // del taller, los custom) que se vuelve intangible
+                    // REBOTABA igual. LA LEY DEFINITIVA: dontTakeDamage
+                    // ya NO echa a NADIE que sea un enemigo de verdad
+                    // — solo a los OBJETOS invulnerables (lo que no
+                    // se puede perseguir — luces de ceremonia,
+                    // artefactos — o la chusma menuda de vida nula).
+                    // Un Espectro dentro de la pared ARDE igual que
+                    // fuera: el vacío toca lo intangible.
                     bool esEspiritu = n.aiStyle == 23 ||
                         n.type == NPCID.Ghost || n.type == NPCID.Wraith;
-                    if ((n.friendly || n.townNPC || n.immortal ||
-                         n.dontTakeDamage) && !esEspiritu)
+                    bool objetoInvulnerable = n.dontTakeDamage && !esEspiritu &&
+                        (!n.chaseable || n.lifeMax <= 5);
+                    if (n.friendly || n.townNPC || n.immortal || objetoInvulnerable)
                         continue;
 
                     VacioGlobalNPC vacio = n.GetGlobalNPC<VacioGlobalNPC>();

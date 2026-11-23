@@ -408,10 +408,66 @@ namespace AethonMod.Content.Weapons.Clicker
                 }
             }
 
+            else if (arma.Estilo == (EstiloClicker)8)
+            {
+                // v6.168 — EL MARGEN (EL CLICKER DEL UMBRAL — la firma
+                // del definitivo): LA LLUVIA DE TINTA — finas líneas
+                // verticales cayendo DENTRO del aro (el margen del
+                // manuscrito, vivo) + LA PLUMA orbitando el contrato
+                // (la pluma que sella, con su brillo).
+                for (int i = 0; i < 9; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 9f;
+                    float cae = (t * 0.42f + i * 0.111f) % 1f;
+                    Vector2 pos = centro + new Vector2(
+                        MathF.Cos(ang) * radio, MathF.Sin(ang) * radio);
+                    Vector2 gota = pos + new Vector2(0f, -radio * 0.55f * (1f - cae));
+                    Quad(VFXCore.SoftGlow, gota, new Vector2(2.2f, 13f * (1f - cae * 0.4f)), 0f,
+                        VFXCore.TintAlfa(Color.Lerp(arma.Color, new Color(216, 186, 255), 0.5f),
+                            0.42f * (1f - cae) * alfa));
+                }
+                // LA PLUMA ORBITANDO (la que sella el umbral)
+                float angP = t * 0.55f;
+                Vector2 pluma = centro + new Vector2(
+                    MathF.Cos(angP) * radio, MathF.Sin(angP) * radio);
+                Quad(VFXCore.SoftGlow, pluma, new Vector2(3f, 15f), angP + MathHelper.PiOver2,
+                    VFXCore.TintAlfa(new Color(224, 214, 235), 0.75f * alfa));
+                Quad(VFXCore.SoftGlow, pluma, new Vector2(11f, 11f), 0f,
+                    VFXCore.TintAlfa(arma.Color, 0.40f * alfa));
+                // EL CONTEO VIVO: los picos de las marcas ya sembradas
+                // (la cuenta del umbral A LA VISTA — 8 rompe)
+                int sembradas = ConteoDeMarcas();
+                for (int m = 0; m < sembradas; m++)
+                {
+                    float angM = -MathHelper.PiOver2 + (m - 3.5f) * 0.16f;
+                    Vector2 posM = centro + new Vector2(
+                        MathF.Cos(angM) * (radio * 0.82f), MathF.Sin(angM) * (radio * 0.82f));
+                    Quad(VFXCore.SoftGlow, posM, new Vector2(5f, 5f), 0f,
+                        VFXCore.TintAlfa(new Color(216, 186, 255), 0.60f * alfa));
+                }
+            }
+
             // LA LUZ DEL CONTRATO: un baño tenue del color del arma sobre
             // el jugador (la presencia del arma — barato: UN quad).
             Quad(VFXCore.SoftGlow, centro, new Vector2(radio * 0.9f, radio * 0.9f), 0f,
                 VFXCore.TintAlfa(arma.Color, 0.045f * alfa));
+        }
+
+        /// <summary>v6.168 — LAS MARCAS SEMBRADAS por el Clicker del
+        /// Umbral (vivas, del jugador local): las dibuja el contrato
+        /// como picos de tinta — la cuenta del umbral A LA VISTA.</summary>
+        private static int ConteoDeMarcas()
+        {
+            int n = 0;
+            int tipoMarca = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Clicker.MarcaDeTinta>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.type == tipoMarca && p.owner == Main.myPlayer)
+                    n++;
+            }
+            return Math.Min(n, 8);
         }
 
         /// <summary>Quad centrado directo al lote aditivo activo (el

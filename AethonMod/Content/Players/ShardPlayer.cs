@@ -1595,14 +1595,23 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Weapons.TresCasas.PlumaDelEscribaSanto>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.VastagoDelEternoItem>());
-                // v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (los clickers,
-                // las auras y la definitiva — todas hechas con LAS
-                // HERRAMIENTAS de la casa): también en la Bolsa de las
-                // Investigaciones, pero la regla es la regla — DIRECTO.
+                // v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (las auras y
+                // la definitiva — todas hechas con LAS HERRAMIENTAS de
+                // la casa): también en la Bolsa de las Investigaciones,
+                // pero la regla es la regla — DIRECTO.
+                // v6.168 — LOS CLICKERS VIEJOS MURIERON (la letra:
+                // «borra la bolsa de clicker […] crea el arma clicker
+                // definitiva»): SelloDeTinta y ParpadeoDelEterno YA NO
+                // EXISTEN — en su lugar, EL CLICKER DEL UMBRAL (la
+                // entrega de la casa, también con las esencias).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Clicker.SelloDeTinta>());
+                    <global::AethonMod.Content.Weapons.Clicker.ClickerDelUmbral>());
+                // v6.168 — EL ARMA NUEVA (la letra: «crea una nueva
+                // arma, su ataque seran lineas en el aire a gran
+                // velocidad»): La Regla del Cielo — también DIRECTO
+                // (la regla de la casa: nada nuevo sin entrega).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Clicker.ParpadeoDelEterno>());
+                    <global::AethonMod.Content.Weapons.Regla.LaReglaDelCielo>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Weapons.Auras.CoronaDePlumas>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType

@@ -8,6 +8,16 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
+		// v6.168 — THE DEFINITIVE CLICKER
+		ClickerDelUmbral: {
+			DisplayName: THE THRESHOLD CLICKER
+			Tooltip: The threshold quill: every click SOWS an ink mark · at 8 marks, THE THRESHOLD BREAKS and the sentence detonates in chain
+		}
+		// v6.168 — THE NEW WEAPON (the vertical lines)
+		LaReglaDelCielo: {
+			DisplayName: THE SKY RULE
+			Tooltip: Long, razor-thin lines fall where you aim: the flash is born top or bottom at random and runs the line · glow, blur and turbulence at the tip
+		}
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -630,18 +640,6 @@ Items: {
 	RequiemDelPulsarStaff: {
 		// v6.82: the cosmic weapon (the rotating lighthouse)
 		DisplayName: Requiem del Púlsar
-		Tooltip: ""
-	}
-
-	CompasRunico: {
-		// v6.82: clicker #1 (the constellation every 8 clicks)
-		DisplayName: El Compás Rúnico
-		Tooltip: ""
-	}
-
-	FuriaSolarClicker: {
-		// v6.82: clicker #2 (the nova every 12 clicks)
-		DisplayName: La Furia Solar
 		Tooltip: ""
 	}
 
@@ -2074,16 +2072,6 @@ Items: {
 	// v6.100 — the new weapons of the session (clickers, auras and the
 	// definitive one — all made with THE HOUSE TOOLS: the forge, the
 	// pixel engine and the multilayer wiring).
-	SelloDeTinta: {
-		DisplayName: The Scribe's Seal
-		Tooltip: The grimoire's ink seal
-	}
-
-	ParpadeoDelEterno: {
-		DisplayName: The Eternal's Blink
-		Tooltip: The Eternal's blink: wherever you close your eyes
-	}
-
 	CoronaDePlumas: {
 		DisplayName: The Crown of Feathers
 		Tooltip: The Eternal's feather crown circles the wicked
@@ -3972,6 +3960,7 @@ PrismaInterior: {
 	// v6.163 — THE PILLAR PAGE IN THE BOOK
 	InvocarPista: the call brings BOTH of Aethon's fragments
 	JefesMas: …and {0} more devoured await their turn
+	JefesCuenta: "{0} devoured bosses — the wheel scrolls the list"
 	SelladoTitulo: THE SEALED GOD
 	BotonSellado: AWAKEN AETHON (SEALED)
 	SelladoPista: the whole grimoire, three eyes closed — only for the ready bearer
@@ -3985,9 +3974,12 @@ Altar: {
 	SlotVacio: ofrenda
 	// v6.161 — THE TRIO'S FUSION TABLE (the letter: a section to fuse
 	// and unfuse the Trio Eterno weapon)
-	TrioTitulo: THE ETERNAL TRIO — THE FUSION TABLE
+	TrioTitulo: THE GRIMOIRE'S ARSENAL — THE ETERNAL TRIO
+	SelectorTitulo: THE OFFERING — CHOOSE
+	SelectorTrioTitulo: THE ARSENAL — CHOOSE A WEAPON
+	DevueltaAlSuelo: Your inventory is full: the weapon dropped at your feet.
 	TrioSinTrio: You are not carrying the Eternal Trio — bring it to the altar to fuse its three weapons.
-	TrioPista: Click with a MAGIC weapon on the cursor to insert it · click a filled slot to take it back.
+	TrioPista: Click an empty slot to OPEN THE ARSENAL and choose · right-click a filled one to return it to your inventory.
 	TrioMarca: The "3" box: fire ALL THREE at once ({0}) — chosen HERE, at the altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them

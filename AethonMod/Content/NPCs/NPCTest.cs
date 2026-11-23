@@ -69,41 +69,46 @@ namespace AethonMod.Content.NPCs
             if (Main.netMode == NetmodeID.Server) return false;
 
             // ============================================================
-            //  v6.159 — LA COPIA VIVA DEL JUGADOR, DE VERDAD (la letra:
-            //  «el NPC test no copia al jugador» + «es invisible, solo
-            //  lo encontré por las partículas del aura del vacío»).
-            //  LA AUTOPSIA de las dos vías muertas:
-            //   · LA v6.156 dibujaba AL JUGADOR LOCAL MISMO con
-            //     shadow=0.65 — una SILUETA OSCURECIDA (el param de
-            //     sombra multiplica el color a casi negro): contra un
-            //     fondo de cueva o de noche, el cuerpo SE PERDÍA — por
-            //     eso solo las partículas del aura lo delataban. Y PEOR:
-            //     dibujar al jugador vivo con Main.Camera en la posición
-            //     del NPC no es «una copia»: es un doble parásito.
-            //   · LA v6.158 del Cronista usó `new Player()` forjado —
-            //     sin los caches de dibujado que el renderer espera de
-            //     un Player REAL.
-            //  EL PATRÓN DE VANILLA (UICharacter — la preview del menú,
-            //  el decompile): Player.SerializedClone() + LA CESTA
-            //  `using Main.CurrentPlayerOverride(copia)` para que
-            //  PlayerFrame() y los hooks corran SOBRE EL CLON + el
-            //  DrawPlayer oficial. EL CLON ES EL JUGADOR DE VERDAD: su
-            //  cuerpo, su ropa, sus ojos, su pelo — SIN el oscurecido
-            //     que lo mataba (visible SIEMPRE), animado con EL CICLO
-            //  DE ANDAR de la preview (la banda 6..19 de vanilla, el
-            //  mismo de la fila del menú).
+            //  v6.168 — LA COPIA EXACTA, VISIBLE SIEMPRE (la letra:
+            //  «el NPC test no se parece en nada al jugador […] el NPC
+            //  test esta invisible y no se ve»). LA AUTOPSIA de la
+            //  v6.159: el clon nacía con SerializedClone() PERO SIN
+            //  `active = true` NI `whoAmI` — DrawPlayerInternal pasa
+            //  al Player por BoringSetup y las capas del renderer solo
+            //  visten a un Player ACTIVO con slot válido: el clon caía
+            //  en estados vacíos, el catch MUDO se lo tragaba y el NPC
+            //  quedaba INVISIBLE (solo la bruma lo delataba).
+            //  LA CURA — EL PATRÓN UICharacter COMPLETO (la preview
+            //  del menú de vanilla, verificada contra el tML real):
+            //   1. SerializedClone() del jugador local (la copia
+            //      EXACTA: cuerpo, pelo, ojos, ropa, accesorios).
+            //   2. active = true · whoAmI = 0 (un slot válido) ·
+            //      InventorCreator = false (no es la preview del menú).
+            //   3. Frames manejados a mano (la banda de andar 6..19 de
+            //      la preview — parado: frame 0).
+            //   4. CurrentPlayerOverride(copia) + DrawPlayer OFICIAL
+            //      con la LUZ DEL MUNDO (no silueta ciega).
+            //  SIN catch mudo: si el renderer falla, SE VE el fantasma
+            //  (la cabeza del Cronista — la textura fantasma de
+            //  siempre): jamás invisible.
             // ============================================================
+            bool dibujado = false;
             try
             {
                 Player copia = _clon ??= Main.LocalPlayer.SerializedClone();
                 if (copia != null && Main.PlayerRenderer != null)
                 {
+                    // EL CLON ACTIVO — la clave que faltaba: sin
+                    // active=true el renderer lo viste de NADA.
+                    copia.active = true;
+                    copia.whoAmI = 0;               // un slot válido
                     copia.dead = false;
                     copia.direction = NPC.direction;
                     copia.gravDir = 1f;
                     copia.fullRotation = 0f;
                     copia.wingFrame = 0;
                     copia.itemAnimation = 0;
+                    copia.velocity = new Vector2(NPC.velocity.X, 0f);
 
                     // EL ANDAR DE LA PREVIEW (UICharacter.UpdateAnim):
                     // parado = frame 0 · en marcha = la banda 6..19 del
@@ -122,7 +127,7 @@ namespace AethonMod.Content.NPCs
                     // LA ILUMINACIÓN DEL MUNDO sobre la copia (como
                     // cualquier jugador — no una silueta ciega).
                     Vector3 luz = Lighting.GetSubLight(NPC.Center);
-                    float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.15f, 1f);
+                    float lum = MathHelper.Clamp((luz.X + luz.Y + luz.Z) / 3f * 1.35f, 0.20f, 1f);
 
                     Vector2 pos = NPC.position - screenPos;
                     using (new Main.CurrentPlayerOverride(copia))
@@ -130,9 +135,16 @@ namespace AethonMod.Content.NPCs
                         Main.PlayerRenderer.DrawPlayer(Main.Camera, copia, pos,
                             0f, Vector2.Zero, 0f, lum);
                     }
+                    dibujado = true;
                 }
             }
             catch { }
+
+            // LA RED DE SEGURIDAD: si el renderer no dibujó, SE VE EL
+            // FANTASMA (jamás invisible — la letra: «esta invisible y
+            // no se ve»).
+            if (!dibujado)
+                return true;   // vanilla dibuja la textura fantasma
 
             // UN POCO DE BRUMA A SUS PIES: dos motas suaves cada ~14
             // ticks — el suspiro violeta de la casa (PolvoVacioInvertido

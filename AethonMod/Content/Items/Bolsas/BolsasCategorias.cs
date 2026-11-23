@@ -800,45 +800,15 @@ namespace AethonMod.Content.Items.Bolsas
     /// desde la v6.55.0) + la Bolsa de las Alas y la de las Definitivas
     /// aparte.</summary>
     // ==================================================================
-    //  v6.167 — LA BOLSA DE LOS VEINTE CLICKERS (la letra: «crea una
-    //  bolsa con al menos 20 armas tipo clickler y daselas al
-    //  jugador»): las 20 armas nuevas de la clase clicker de la casa —
-    //  cuatro familias (tinta · estelar · lunar · pacto · vórtice ·
-    //  nova) con sus 4 estilos de radio nuevos.
     // ==================================================================
-    public class BolsaClickers : BolsaCategoria
-    {
-        protected override string Titulo => "La Bolsa de los Veinte Clickers";
-        protected override string NombreCorto => "Bolsa de los Clickers";
-        protected override Color ColorFiesta => new(185, 120, 245);
-        protected override string Nota => "Veinte contratos de la casa: tinta, estrella, luna, ceniza, runas, vórtice y nova";
-
-        protected override List<(int tipo, int pila)> Contenido()
-        {
-            var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<Weapons.Clicker.PlumaDelCronista>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.CompasDeLosSilos>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.BrujulaPolar>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.QuintaEsenza>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.OjoDelNorte>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.MareaDePlata>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.EclipseDeBolsillo>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.CenizaDeAyer>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.UltimaBrasa>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.PactoDoble>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.SelloRoto>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.VeredictoRunico>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.BocaDelVacio>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.GargantaProfunda>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.CoronaSolar>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.MediaNoche>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.FaroDeCazador>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.CorazonDelLibro>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.SusurroDePagina>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.RelojDeArena>(), 1));
-            return l;
-        }
-    }
+    //  v6.168 — LA BOLSA DE LOS CLICKERS MURIÓ (la letra: «borra la
+    //  bolsa de clicker, al final todos son iguales nada es diferente,
+    //  todas las armas son tecnicamente el mismo ataque, es super
+    //  aburrido»): los veinte clickers de la v6.167 (y los dos
+    //  originales) MUEREN — en su lugar vive UNO SOLO: EL CLICKER
+    //  DEL UMBRAL (Armas/ClickerDelUmbral.cs — la entrega es por el
+    //  kit de pruebas de la casa).
+    // ==================================================================
 
     public class BolsaMaestra : BolsaCategoria
     {
@@ -869,8 +839,6 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<BolsaIdeasGrimorio>(), 1));
             l.Add((ModContent.ItemType<BolsaProyectilesDignos>(), 1));
             l.Add((ModContent.ItemType<BolsaArmasRayo>(), 1));
-            // v6.167 — LA BOLSA DE LOS VEINTE CLICKERS entra al cofre.
-            l.Add((ModContent.ItemType<BolsaClickers>(), 1));
             l.Add((ModContent.ItemType<BolsaSombras>(), 1));
             l.Add((ModContent.ItemType<BolsaEmperatriz>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.BolsaDeLaCria>(), 1));
@@ -983,11 +951,10 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.82 — LOS DOS CLICKERS (nacieron con receta de 5 maderas
-            // pero SIN bolsa: la lección v6.14.2 — el jugador NUNCA vuelve
-            // a quedarse sin sus armas):
-            l.Add((ModContent.ItemType<Weapons.Clicker.CompasRunico>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.FuriaSolarClicker>(), 1));
+            // v6.168 — LOS CLICKERS VIEJOS MURIERON (la letra: «borra
+            // la bolsa de clicker»): Compás Rúnico y Furia Solar YA NO
+            // EXISTEN — vive UNO SOLO, EL CLICKER DEL UMBRAL:
+            l.Add((ModContent.ItemType<Weapons.Clicker.ClickerDelUmbral>(), 1));
             // v6.85 — LOS FRUTOS DE LAS INVESTIGACIONES:
             // R8 — LA MIRADA (el rayo de energía; v6.93: recreada 100 %
             // de la casa sobre HazLib — La Mirada del Eterno).
@@ -1004,8 +971,6 @@ namespace AethonMod.Content.Items.Bolsas
             // los clickers, las auras y la definitiva — todos hechos con
             // LAS HERRAMIENTAS de la casa: la forja, el motor de píxeles y
             // el cableado multicapa):
-            l.Add((ModContent.ItemType<Weapons.Clicker.SelloDeTinta>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Clicker.ParpadeoDelEterno>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
             l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
             l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));

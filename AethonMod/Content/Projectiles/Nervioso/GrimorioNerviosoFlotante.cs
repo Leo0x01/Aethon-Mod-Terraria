@@ -647,8 +647,17 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         // El orden vuelve a ser el de la casa: PRIMERO
                         // null-check, DESPUÉS el uso. El rearme vive,
                         // el NRE muere.
-                        if (alma != null)
-                        {
+                        // v6.168 — LA CAZA NO DEPENDE DEL ALMA (la
+                        // letra: «el grimorio sigue sin cazar […]
+                        // simplemente atacara tambien»): si el libro
+                        // no está visible UN tick (alma == null), la
+                        // caza del Eterno YA NO SE CALLA — el flotante
+                        // lleva SU PROPIA cuenta local de sombras de
+                        // caza vivas (re-contada CADA tick, la vía que
+                        // jamás se clava) y lanza hasta el TOPE DE
+                        // DIEZ de la casa. El alma, cuando existe,
+                        // sigue sincronizada como siempre (sus
+                        // gastadas = las vivas: sin fugas).
                         int tipoActual = ModContent.ProjectileType
                             <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
                         int tipoReserva = ModContent.ProjectileType
@@ -662,9 +671,18 @@ namespace AethonMod.Content.Projectiles.Nervioso
                                 sp.owner == Projectile.owner &&
                                 sp.localAI[1] >= 1f) vivasCaza++;   // SOLO las de caza
                         }
-                        if (alma.SombrasGastadas > vivasCaza)
+                        if (alma != null && alma.SombrasGastadas > vivasCaza)
                             alma.SombrasGastadas = vivasCaza;   // el exceso ES fuga
-                        if (alma.SombrasLibres < alma.SombrasCapDe(libroCaza))
+                        // EL TOPE VIVO: el cap del alma (con su tope
+                        // de 10) o, sin alma, el 10 de la casa —
+                        // SIEMPRE al menos 1.
+                        int topeSombra = 10;
+                        if (alma != null)
+                        {
+                            int capAlma = alma.SombrasCapDe(libroCaza);
+                            if (capAlma > 0 && capAlma < topeSombra) topeSombra = capAlma;
+                        }
+                        if (vivasCaza < topeSombra)
                         {
                             // LAS PRESAS SIN SOMBRA (una sombra por enemigo)
                             // v6.161 — LA SOMBRA ES LA ACTUAL (la letra:
@@ -680,42 +698,42 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             // ondea, muerde y absorbe — el cuerpo de la
                             // casa). El hilillo solo vive como CUERPO DE
                             // RESERVA si el arma no puede nacer.
-                            int vivasTodas = 0;
-                            for (int i = 0; i < Main.maxProjectiles; i++)
+                            // v6.168 — LA DECISIÓN VIVE AQUÍ: la
+                            // sombra nace si QUEDA SITIO en el tope
+                            // (vivasCaza < topeSombra, ya medido) — el
+                            // doble conteo (vivasTodas < SombrasLibres)
+                            // MUERE: pedía el ALMA viva y se callaba sin
+                            // ella. La presa se busca Y SE LANZA — el
+                            // libro es egoísta y quiere comer.
+                            NPC presaLibre = PresaSinSombra(tipoActual);
+                            if (presaLibre != null)
                             {
-                                Projectile sp = Main.projectile[i];
-                                if (sp != null && sp.active &&
-                                    (sp.type == tipoActual || sp.type == tipoReserva) &&
-                                    sp.owner == Projectile.owner) vivasTodas++;
-                            }
-                            if (vivasTodas < alma.SombrasLibres)
-                            {
-                                NPC presaLibre = PresaSinSombra(tipoActual);
-                                if (presaLibre != null)
-                                {
-                                    alma.SombrasGastadas++;   // LA SOMBRA SE GASTA al nacer
-                                    // v6.161 — EL NACIMIENTO DE LA SOMBRA
-                                    // ACTUAL: la columna verlet nace EN
-                                    // FASE EMERGER (ai[1]=0) con SU presa
-                                    // en ai[0] — el MISMO contrato del
-                                    // disparo del arma (SombraDeLaPagina.
-                                    // Shoot) y drena con LA FÓRMULA NUEVA
-                                    // (GolpeDeLaSombra, ya curada en la
-                                    // mordida de la v6.160). localAI[1]=1
-                                    // LA MARCA COMO SOMBRA DE CAZA: su
-                                    // Kill devuelve la sombra al alma.
-                                    int idxSombra = Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                                        Projectile.Center, Vector2.Zero, tipoActual,
-                                        0, 0f, Projectile.owner, presaLibre.whoAmI + 1, 0f, 0f);
-                                    if (idxSombra >= 0 && idxSombra < Main.maxProjectiles &&
-                                        Main.projectile[idxSombra].active)
-                                        Main.projectile[idxSombra].localAI[1] = 1f;
-                                    Sonar(SoundID.Item122.WithPitchOffset(-0.3f)
-                                        .WithVolumeScale(0.6f), Projectile.Center);
-                                }
+                                if (alma != null)
+                                    alma.SombrasGastadas++;   // LA SOMBRA SE GASTA al nacer (si hay alma)
+                                // v6.161 — EL NACIMIENTO DE LA SOMBRA
+                                // ACTUAL: la columna verlet nace EN
+                                // FASE EMERGER (ai[1]=0) con SU presa
+                                // en ai[0] — el MISMO contrato del
+                                // disparo del arma (SombraDeLaPagina.
+                                // Shoot) y drena con LA FÓRMULA NUEVA
+                                // (GolpeDeLaSombra, ya curada en la
+                                // mordida de la v6.160). localAI[1]=1
+                                // LA MARCA COMO SOMBRA DE CAZA: su
+                                // Kill devuelve la sombra al alma.
+                                int idxSombra = Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                                    Projectile.Center, Vector2.Zero, tipoActual,
+                                    0, 0f, Projectile.owner, presaLibre.whoAmI + 1, 0f, 0f);
+                                if (idxSombra >= 0 && idxSombra < Main.maxProjectiles &&
+                                    Main.projectile[idxSombra].active)
+                                    Main.projectile[idxSombra].localAI[1] = 1f;
+                                Sonar(SoundID.Item122.WithPitchOffset(-0.3f)
+                                    .WithVolumeScale(0.6f), Projectile.Center);
                             }
                         }
-                        }   // (fin del null-check de alma — la llave de la cura)
+                        // v6.168 — LA CAZA SIN ALMA YA NO ES UN ERROR:
+                        // el bloque entero corre SIEMPRE para el Eterno
+                        // (el viejo «} // fin del null-check» murió con
+                        // la dependencia).
                     }
                     else if (!SombraActiva())
                     {

@@ -96,7 +96,16 @@ namespace AethonMod.Content.Globals
         /// grosor del libro, la otra escala del Códex). Un GlobalItem
         /// no guarda el ítem como campo: el nivel normal llega POR
         /// PARÁMETRO desde los lectores (que sí tienen el ítem).</summary>
-        public int SombrasCap => 1 + NivelDespertar / 20 + _nivelLibroCap / 100;
+        // v6.168 — EL TOPE DE DIEZ (la letra: «analiza si el problema
+        // puede ser demasiadas sombras de la pagina y limitalas a
+        // solo 10 como maximo pero que se sigan desbloqueando de la
+        // misma manera, a travez del nivel de despertar y el nivel
+        // normal»): LA FÓRMULA SIGUE VIVA (1 + despertar/20 + nivel/100)
+        // — solo que ahora CHOCAN CONTRA EL TECHO de 10: la progresión
+        // se desbloquea IGUAL (peldaño a peldaño, por despertar y
+        // nivel) pero el libro JAMÁS sostiene más de DIEZ sombras a la
+        // vez — cada una cuenta y ninguna se pierde en una nube.
+        public int SombrasCap => Math.Min(10, 1 + NivelDespertar / 20 + _nivelLibroCap / 100);
 
         /// <summary>EL NIVEL NORMAL del grimorio (ShardLevelItem.Level)
         /// — lo fijan los lectores del cap (el ítem vive con ellos).</summary>

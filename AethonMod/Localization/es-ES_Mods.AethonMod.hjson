@@ -8,6 +8,18 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
+		// v6.168 — EL CLICKER DEFINITIVO (la letra: «crea el arma
+		// clicker definitiva, esta vez se super creativo»)
+		ClickerDelUmbral: {
+			DisplayName: EL CLICKER DEL UMBRAL
+			Tooltip: La pluma del umbral: cada clic SIEMBRA una marca de tinta · a las 8 marcas, EL UMBRAL SE ROMPE y la sentencia detona en cadena
+		}
+		// v6.168 — EL ARMA NUEVA (la letra: «crea una nueva arma, su
+		// ataque seran lineas en el aire a gran velocidad»)
+		LaReglaDelCielo: {
+			DisplayName: LA REGLA DEL CIELO
+			Tooltip: Líneas largas y delgadas que caen donde miras: el destello nace arriba o abajo al azar y recorre la línea · glow, desenfoque y turbulencia en la punta
+		}
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -613,18 +625,6 @@ Items: {
 	RequiemDelPulsarStaff: {
 		// v6.82: the cosmic weapon (the rotating lighthouse)
 		DisplayName: Requiem del Púlsar
-		Tooltip: ""
-	}
-
-	CompasRunico: {
-		// v6.82: clicker #1 (the constellation every 8 clicks)
-		DisplayName: El Compás Rúnico
-		Tooltip: ""
-	}
-
-	FuriaSolarClicker: {
-		// v6.82: clicker #2 (the nova every 12 clicks)
-		DisplayName: La Furia Solar
 		Tooltip: ""
 	}
 
@@ -2057,16 +2057,6 @@ Items: {
 	// v6.100 — the new weapons of the session (clickers, auras and the
 	// definitive one — all made with THE HOUSE TOOLS: the forge, the
 	// pixel engine and the multilayer wiring).
-	SelloDeTinta: {
-		DisplayName: El Sello del Escriba
-		Tooltip: El sello de tinta del grimorio
-	}
-
-	ParpadeoDelEterno: {
-		DisplayName: El Parpadeo del Eterno
-		Tooltip: El parpadeo del Eterno: allí donde cierres los ojos
-	}
-
 	CoronaDePlumas: {
 		DisplayName: La Corona de Plumas
 		Tooltip: La corona de plumas del Eterno ronda a los impíos
@@ -3962,6 +3952,7 @@ PrismaInterior: {
 	// v6.163 — LA PÁGINA DEL PILAR EN EL LIBRO (claves nuevas)
 	InvocarPista: la llamada trae a los DOS fragmentos de Aethon
 	JefesMas: …y {0} más devorados esperan su turno
+	JefesCuenta: "{0} jefes devorados — la rueda recorre la lista"
 	SelladoTitulo: EL DIOS SELLADO
 	BotonSellado: DESPERTAR A AETHON (SELLADO)
 	SelladoPista: el grimorio entero, con sus tres ojos cerrados — solo para el portador listo
@@ -3976,9 +3967,14 @@ Altar: {
 	// v6.161 — LA MESA DE FUSIÓN DEL TRÍO (la letra: «que esta ventana
 	// tenga un apartado donde se pueda usar para fusionar y desfusionar
 	// el arma el trio eterno»)
-	TrioTitulo: EL TRÍO DEL ETERNO — LA MESA DE FUSIÓN
+	TrioTitulo: EL ARSENAL DEL GRIMORIO — EL TRÍO DEL ETERNO
+	// v6.168 — EL SELECTOR FLOTANTE (la ventana de elegir: la ofrenda
+	// y las armas del Arsenal, con la lista COMPLETA y su rueda)
+	SelectorTitulo: LA OFRENDA — ELIGE
+	SelectorTrioTitulo: EL ARSENAL — ELIGE UN ARMA
+	DevueltaAlSuelo: Tu inventario está lleno: el arma cayó a tus pies.
 	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
-	TrioPista: Clic con un ARMA MÁGICA en el cursor para insertarla · clic en un slot lleno para extraerla.
+	TrioPista: Clic en una ranura vacía para ABRIR EL ARSENAL y elegir · clic derecho en una llena para devolverla al inventario.
 	TrioMarca: Casilla «3»: disparar LAS TRES a la vez ({0}) — se elige AQUÍ, en el altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora

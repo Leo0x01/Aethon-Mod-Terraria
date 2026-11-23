@@ -426,7 +426,13 @@ namespace AethonMod.Content.UI
             }
 
             if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
-                LibroDelEternoUI.Cerrar();
+            {
+                // v6.168 — ESC CIERRA PRIMERO AL SELECTOR FLOTANTE (la
+                // ventanita de elegir es lo más joven de la pila: un ESC
+                // con ella abierta la cierra, NO al libro entero).
+                if (SelectorFlotante.Abierta) SelectorFlotante.Cerrar();
+                else LibroDelEternoUI.Cerrar();
+            }
 
             // (v6.164 — el motor de clics SE MUDÓ al dibujo de las
             //  páginas: el flanco de la casa vive donde viven las
@@ -774,6 +780,18 @@ namespace AethonMod.Content.UI
                 if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
                     LibroDelEternoUI.Cerrar();
 
+                // ============================================================
+                //  v6.168 — EL SELECTOR FLOTANTE (la ventana de elegir
+                //  ofrendas y armas — la letra: «se haga con una ventana
+                //  flotante, una pequeña ventana que muestre los items
+                //  disponibles»): se dibuja AL FINAL, ENCIMA de las
+                //  páginas (la vitrina flota sobre el libro). Su rueda
+                //  se come sola (el libro no se mueve) y ESC la cierra
+                //  primero — la ventanita es lo más joven de la pila.
+                // ============================================================
+                bool ruedaSelector = Terraria.GameInput.PlayerInput.ScrollWheelDelta != 0;
+                SelectorFlotante.Dibujar(sb, clicNuevo, ruedaSelector);
+
                 sb.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     Main.DefaultSamplerState, DepthStencilState.None,
@@ -1072,11 +1090,17 @@ namespace AethonMod.Content.UI
         // familia — la tinta del papel (cuerpo), el violeta del
         // título, el oro del capítulo y el apagado de las pistas. Ni
         // blancos cegadores ni negros invisibles.
-        private static readonly Color Tinta = new(52, 36, 24);
-        private static readonly Color TintaVioleta = new(128, 52, 158);
-        private static readonly Color TintaOro = new(156, 104, 36);
-        private static readonly Color TintaApagado = new(112, 92, 66);
-        private static readonly Color PapelSombra = new(206, 188, 150);
+        // v6.168 — LA PALETA ES LA DEL LIBRO DE INFORMACIÓN, EXACTA
+        // (la letra: «tenias que usar el color de la tipografia en el
+        // libro de informacion para darle color al altar y al pilar»):
+        // cuerpo 28,20,16 · título 148,72,178 · capítulo 168,108,44 ·
+        // apagado 118,96,70 · papel 216,200,166 — LOS MISMOS valores
+        // de la clase principal (arriba). Ni una tinta propia.
+        private static readonly Color Tinta = new(28, 20, 16);
+        private static readonly Color TintaVioleta = new(148, 72, 178);
+        private static readonly Color TintaOro = new(168, 108, 44);
+        private static readonly Color TintaApagado = new(118, 96, 70);
+        private static readonly Color PapelSombra = new(216, 200, 166);
 
         // LA GEOMETRÍA VIVA (el clic del dibujo las lee).
         internal static Rectangle GeoSlot, GeoConsagrar, GeoPuerta;
@@ -1164,61 +1188,38 @@ namespace AethonMod.Content.UI
             else
                 Utils.DrawBorderString(sb, Language.GetTextValue("Mods.AethonMod.Altar.SlotVacio"),
                     new Vector2(slot.Center.X, slot.Center.Y), TintaApagado, 0.7f, 0.5f, 0.5f);
+            // ============================================================
+            //  v6.168 — LA BANDEJA MURIÓ, LA VENTANA FLOTANTE VIVE (la
+            //  letra: «seria mejor que para seleccionar las ofrendas y
+            //  las armas […] se haga con una ventana flotante, una
+            //  pequeña ventana que muestre los items disponibles»): el
+            //  slot con cursor vacío ABRE EL SELECTOR FLOTANTE anclado
+            //  al slot (la lista COMPLETA con SU rueda — SelectorFlotante,
+            //  dibujado al final del libro). NADA se incrusta aquí: la
+            //  página no salta.
+            // ============================================================
             if (hoverSlot && clicNuevo) AltarOfrendasUI.ClicEnSlot();
+            if (AltarOfrendasUI.SelectorAbierto != null &&
+                AltarOfrendasUI.SelectorAbierto.Value.ranura == -2 &&
+                !SelectorFlotante.Abierta)
+            {
+                // el slot abrió el selector: la ventanita nace anclada
+                SelectorFlotante.Abrir(slot, false,
+                    Language.GetTextValue("Mods.AethonMod.Altar.SelectorTitulo"));
+                AltarOfrendasUI.SelectorAbierto = null;
+            }
             cy += 58f;
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.EtiquetaArma"), cy, 0.82f, Tinta);
             cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.FiltroArma"), cy, 0.68f, TintaApagado);
 
             // ============================================================
-            //  v6.167 — LA BANDEJA DE LA OFRENDA (la letra: «el slot de
-            //  ofrendas no funciona […] no muestra las ofrendas»): LA
-            //  CAUSA — la bandeja vivía en FluirElContenido (el panel
-            //  viejo que YA NO se dibuja: el altar de hoy es ESTA
-            //  página del libro). Ahora vive AQUÍ, bajo el slot, con
-            //  LAS ESENCIAS DEL ETERNO ENTRE LAS CANDIDATAS (la letra:
-            //  «una ofrenda que debe incluir son las esencias del
-            //  eterno, que no se consagran, solo son la llave al mundo
-            //  interior») — clic en un icono = la ofrenda al slot.
+            //  v6.168 — LA BANDEJA DE LA OFRENDA MURIÓ: la selección
+            //  vive en LA VENTANA FLOTANTE (SelectorFlotante — la
+            //  letra: «se haga con una ventana flotante, una pequeña
+            //  ventana que muestre los items disponibles»). La lista
+            //  COMPLETA con SU rueda, anclada al slot — la página ya
+            //  no se estira ni corta a los 8 de siempre.
             // ============================================================
-            if (AltarOfrendasUI.SelectorAbierto != null &&
-                AltarOfrendasUI.SelectorAbierto.Value.ranura == -2)
-            {
-                var cands = AltarOfrendasUI.CosecharCandidatos(false);
-                if (cands.Count == 0)
-                {
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Items.BandejaVacia"),
-                        cy + 2f, 0.72f, TintaApagado);
-                }
-                else
-                {
-                    int visibles = Math.Min(8, cands.Count);
-                    float anchoFila = visibles * 46f;
-                    float x0 = pag.X + (pag.Width - anchoFila) * 0.5f;
-                    for (int ic = 0; ic < visibles; ic++)
-                    {
-                        Rectangle icRect = new Rectangle((int)(x0 + ic * 46f), (int)cy, 42, 42);
-                        Item cand = cands[ic];
-                        bool hovIc = icRect.Contains(Main.mouseX, Main.mouseY) &&
-                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                        sb.Draw(TextureAssets.MagicPixel.Value, icRect,
-                            PapelSombra * (hovIc ? 1.35f : 0.85f));
-                        LibroMarco.Marco(sb, icRect, hovIc ? TintaOro : TintaOro * 0.4f);
-                        Texture2D texI = TextureAssets.Item[cand.type].Value;
-                        float escI = Math.Min(34f / texI.Width, 34f / texI.Height);
-                        sb.Draw(texI, icRect.Center.ToVector2(), null, Color.White, 0f,
-                            texI.Size() * 0.5f, escI, SpriteEffects.None, 0f);
-                        if (cand.stack > 1)
-                            Utils.DrawBorderString(sb, cand.stack.ToString(),
-                                new Vector2(icRect.Right - 4f, icRect.Bottom - 8f),
-                                Tinta, 0.7f, 1f, 0.85f);
-                        if (hovIc && clicNuevo) AltarOfrendasUI.ClicEnCandidato(ic);
-                    }
-                    if (cands.Count > visibles)
-                        Utils.DrawBorderString(sb, "+" + (cands.Count - visibles),
-                            new Vector2(x0 + anchoFila + 6f, cy + 21f), TintaApagado, 0.7f, 0f, 0.5f);
-                    cy += 50f;
-                }
-            }
 
             // ── EL SELLO (el precio A LA VISTA + consagrar) ──
             cy += 6f;
@@ -1340,50 +1341,30 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, nombreR, new Vector2(s.Center.X, s.Bottom + 9f),
                     elegida ? TintaVioleta : TintaApagado, escN, 0.5f, 0.5f);
                 if (hov && clicNuevo) AltarOfrendasUI.ClicEnRanura(i);
-            }
-            // ============================================================
-            //  v6.166 — LA BANDEJA DE CANDIDATOS (la letra: «cuando toco
-            //  un slot para colocar un arma, quiero que debajo se
-            //  muestren los iconos de armas compatibles que yo tenga en
-            //  el inventario»): abierta por el clic en una ranura, con
-            //  los candidatos CONSAGRADOS del inventario. Un clic en un
-            //  icono lo coloca en SU ranura.
-            // ============================================================
-            if (AltarOfrendasUI.SelectorAbierto != null &&
-                AltarOfrendasUI.SelectorAbierto.Value.ranura >= 0)
-            {
-                var candidatos = AltarOfrendasUI.CosecharCandidatos(true);
-                if (candidatos.Count == 0)
+                // v6.168 — la ranura que abrió SU selector: la ventanita
+                // nace ANCLADA a la ranura (el flotante de la casa).
+                if (AltarOfrendasUI.SelectorAbierto != null &&
+                    AltarOfrendasUI.SelectorAbierto.Value.ranura == i &&
+                    !SelectorFlotante.Abierta)
                 {
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Items.TrioSinConsagradas"),
-                        cy, 0.72f, TintaApagado);
-                }
-                else
-                {
-                    // LA FILA DE ICONOS (hasta 8 visibles, 40 px cada uno)
-                    int visibles = Math.Min(8, candidatos.Count);
-                    float anchoFila = visibles * 46f;
-                    float x0 = pag.X + (pag.Width - anchoFila) * 0.5f;
-                    for (int ic = 0; ic < visibles; ic++)
-                    {
-                        Rectangle icRect = new Rectangle((int)(x0 + ic * 46f), (int)cy, 42, 42);
-                        Item cand = candidatos[ic];
-                        bool hovIc = icRect.Contains(Main.mouseX, Main.mouseY) &&
-                            !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                        sb.Draw(TextureAssets.MagicPixel.Value, icRect,
-                            PapelSombra * (hovIc ? 1.3f : 0.85f));
-                        LibroMarco.Marco(sb, icRect, hovIc ? TintaOro : TintaOro * 0.4f);
-                        Texture2D texI = TextureAssets.Item[cand.type].Value;
-                        float escI = Math.Min(34f / texI.Width, 34f / texI.Height);
-                        sb.Draw(texI, icRect.Center.ToVector2(), null, Color.White, 0f,
-                            texI.Size() * 0.5f, escI, SpriteEffects.None, 0f);
-                        if (hovIc && clicNuevo) AltarOfrendasUI.ClicEnCandidato(ic);
-                    }
-                    if (candidatos.Count > visibles)
-                        Linea("+" + (candidatos.Count - visibles), cy, 0.6f, TintaApagado);
-                    cy += 50f;
+                    SelectorFlotante.Abrir(s, true,
+                        Language.GetTextValue("Mods.AethonMod.Altar.SelectorTrioTitulo"));
+                    AltarOfrendasUI.SelectorAbierto = null;
                 }
             }
+            // ============================================================
+            //  v6.168 — LA CURA DEL SOLAPAMIENTO (la letra: «los botones
+            //  se solapan entre si»): el bucle de las ranuras NUNCA
+            //  avanzaba cy — la casilla de las tres, el botón
+            //  «Desequipar todo» y la leyenda nacían ENCIMA de las
+            //  ranuras. Ahora la página FLUYE: cada bloque reserva SU
+            //  altura (ranuras 84 px con leyenda, casilla 34, botón
+            //  40, leyenda final) y el siguiente nace DEBAJO. Además
+            //  la bandeja de candidatos ya NO se incrusta aquí — vive
+            //  en SU VENTANA FLOTANTE (SelectorFlotante, abajo).
+            // ============================================================
+            cy += 84f;   // las tres ranuras (62 px) + su leyenda medida
+
             // ============================================================
             //  v6.167 — LA CASILLA DEBAJO DE LOS SLOTS (la letra: «el
             //  checklist de disparar las 3 armas deberia estar debajo
@@ -1391,7 +1372,6 @@ namespace AethonMod.Content.UI
             //  tiempo»): la marca «3» lateral muere — la casilla vive
             //  BAJO las tres ranuras, con SU texto al lado.
             // ============================================================
-            cy += 10f;
             Rectangle marca = new Rectangle(pag.X + pag.Width / 2 - 150, (int)cy, 22, 22);
             GeoMarcaTres = marca;
             bool marcada = trio.ModoDisparo >= 3;
@@ -1534,18 +1514,27 @@ namespace AethonMod.Content.UI
     // ====================================================================
     internal static class PilarDelLibro
     {
-        private static readonly Color Tinta = new(52, 36, 24);
-        private static readonly Color TintaVioleta = new(128, 52, 158);
-        private static readonly Color TintaOro = new(156, 104, 36);
-        private static readonly Color TintaApagado = new(112, 92, 66);
+        // v6.168 — LA PALETA DEL LIBRO DE INFORMACIÓN, EXACTA (la
+        // letra: «usa el color de la tipografia en el libro de
+        // informacion para darle color al altar y al pilar»).
+        private static readonly Color Tinta = new(28, 20, 16);
+        private static readonly Color TintaVioleta = new(148, 72, 178);
+        private static readonly Color TintaOro = new(168, 108, 44);
+        private static readonly Color TintaApagado = new(118, 96, 70);
         private static readonly Color TintaRojo = new(140, 40, 40);
-        private static readonly Color PapelSombra = new(206, 188, 150);
+        private static readonly Color PapelSombra = new(216, 200, 166);
 
         internal static Rectangle GeoVolver, GeoInvocar, GeoSellado;
         internal static Rectangle GeoMenos, GeoMas, GeoLanzar;
         internal static readonly List<Rectangle> GeoJefes = new List<Rectangle>();
         internal static int HoverJefe = -1;
         internal static int NivelElegido = 1;
+
+        // v6.168 — EL SCROLL DE LA VITRINA DE DEVORADOS (la letra: «si
+        // necesitara un scroll solo en esa seccion»): el desplazamiento
+        // INTERNO de la lista de jefes devorados — SOLO esa sección se
+        // mueve; el resto de la página sigue FIJO.
+        private static float _scrollJefes;
 
         private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut)
         {
@@ -1692,7 +1681,20 @@ namespace AethonMod.Content.UI
                 () => { if (!festinVivo) PrismaInteriorUI.ClicEnLanzar(NivelElegido); }, festinVivo);
             cy += 8f;
 
-            // ── LOS JEFES DEVORADOS (la arena — SIN scroll: 6 visibles) ──
+            // ── LOS JEFES DEVORADOS (la arena) ──
+            // ============================================================
+            //  v6.168 — LA VITRINA CON RUEDA (la letra: «si el grimorio
+            //  devora a demasiados jefes en la seccion de arena del
+            //  pilar donde aparece la lista de jefes devorados, esta
+            //  lista sera demasiado larga y si necesitara un scroll
+            //  solo en esa seccion»): la lista de devorados vive en SU
+            //  PROPIA VITRINA — un rectángulo de altura fija (la que
+            //  queda de página) con SU scroll INTERNO: la rueda SOLO
+            //  mueve la lista cuando el cursor está DENTRO de la
+            //  vitrina; el resto de la página NO se mueve (la cura de
+            //  la v6.164 — «el scroll en la ventana pilar es
+            //  innecesario» — SIGUE VIVA para todo lo demás).
+            // ============================================================
             Titulo(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesTitulo"), pag, cy, out cy);
             var devorados = sp != null ? sp.JefesDevorados : null;
             int nJefes = devorados != null ? devorados.Count : 0;
@@ -1704,11 +1706,39 @@ namespace AethonMod.Content.UI
             }
             else
             {
-                int visibles = Math.Min(6, nJefes);
-                for (int k = 0; k < visibles; k++)
+                // LA VITRINA: desde cy hasta el borde útil de la página.
+                int topVitrina = (int)cy;
+                int altoVitrina = (pag.Y + pag.Height - 14) - topVitrina;
+                if (altoVitrina < 60) altoVitrina = 60;   // mínimo legible
+                Rectangle vitrina = new Rectangle((int)xizq - 4, topVitrina, (int)maxAncho + 8, altoVitrina);
+
+                // LA RUEDA INTERNA: el máximo nace de las filas TOTALES
+                // vs las visibles; el cursor DENTRO de la vitrina la
+                // mueve (y SOLO a ella — el delta se consume aquí).
+                float altoFila = 34f;
+                float altoTotal = nJefes * altoFila;
+                float maxScroll = Math.Max(0f, altoTotal - altoVitrina);
+                bool cursorEnVitrina = vitrina.Contains(Main.mouseX, Main.mouseY) &&
+                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                if (cursorEnVitrina && Terraria.GameInput.PlayerInput.ScrollWheelDelta != 0)
                 {
+                    _scrollJefes = MathHelper.Clamp(_scrollJefes -
+                        Terraria.GameInput.PlayerInput.ScrollWheelDelta * 0.45f, 0f, maxScroll);
+                    Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es de la vitrina
+                }
+                if (_scrollJefes > maxScroll) _scrollJefes = maxScroll;
+
+                // EL PAPEL DE LA VITRINA (un tonco más hundido que la página)
+                sb.Draw(TextureAssets.MagicPixel.Value, vitrina, PapelSombra * 0.45f);
+                LibroMarco.Marco(sb, vitrina, TintaOro * 0.45f);
+
+                // LAS FILAS (solo las que viven en la vitrina)
+                for (int k = 0; k < nJefes; k++)
+                {
+                    float yFila = topVitrina + 4 + k * altoFila - _scrollJefes;
+                    if (yFila + altoFila < topVitrina || yFila > vitrina.Bottom - 4) continue;
                     int tipoJefe = devorados[k];
-                    Rectangle fila = new Rectangle((int)xizq, (int)cy, (int)maxAncho, 30);
+                    Rectangle fila = new Rectangle((int)xizq, (int)yFila, (int)maxAncho, 30);
                     bool hovF = fila.Contains(Main.mouseX, Main.mouseY) &&
                         !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
                     if (hovF) HoverJefe = k;
@@ -1739,12 +1769,26 @@ namespace AethonMod.Content.UI
                         nivelPoder >= 8 ? TintaRojo : TintaOro, escP, 1f, 0.5f);
                     if (hovF && clicNuevo) PrismaInteriorUI.ClicEnJefe(tipoJefe);
                     GeoJefes.Add(fila);
-                    cy += 34f;
                 }
-                // LA CUENTA del resto (sin scroll: lo que no cabe, se cuenta)
-                if (nJefes > visibles)
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesMas",
-                        nJefes - visibles), cy, 0.72f, TintaApagado);
+
+                // LA BARRA DE LA VITRINA (la línea del scroll: oro apagado)
+                if (maxScroll > 0f)
+                {
+                    float proporcion = altoVitrina / altoTotal;
+                    int altoBarra = Math.Max(20, (int)(altoVitrina * proporcion));
+                    int yBarra = vitrina.Y + 2 + (int)((_scrollJefes / maxScroll) *
+                        (altoVitrina - altoBarra - 4));
+                    sb.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle(vitrina.Right - 8, vitrina.Y + 2, 5, altoVitrina - 4),
+                        PapelSombra * 0.9f);
+                    sb.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle(vitrina.Right - 8, yBarra, 5, altoBarra), TintaOro * 0.7f);
+                }
+                // LA CUENTA TOTAL (bajo la vitrina, la de siempre)
+                Utils.DrawBorderString(sb,
+                    Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesCuenta", nJefes),
+                    new Vector2(pag.Center.X, vitrina.Bottom + 12f),
+                    TintaApagado, 0.72f, 0.5f, 0.5f);
             }
             return 0f;
         }

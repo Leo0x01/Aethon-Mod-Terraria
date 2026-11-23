@@ -339,12 +339,10 @@ namespace AethonMod.Content.UI
                     // consagración la paga SU botón). v6.167 — SIN
                     // DUPLICACIÓN (la misma ley del trío): si había una
                     // ofrenda anterior, VUELVE al inventario primero.
+                    // v6.168 — LA VUELTA ES DIRECTA (AdoptarItem — la
+                    // cura de las desaparecidas: INSERCIÓN, no spawn).
                     if (_arma != null && !_arma.IsAir)
-                    {
-                        Item anterior = (Item)_arma.Clone();
-                        Main.LocalPlayer.QuickSpawnItem(
-                            Main.LocalPlayer.GetSource_FromThis(), anterior);
-                    }
+                        AdoptarItem(_arma);
                     _arma = (Item)elegido.Clone();
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
@@ -403,13 +401,15 @@ namespace AethonMod.Content.UI
                         // v6.167 — LA VUELTA AL INVENTARIO (la letra: «si
                         // el jugador desequipa el arma con click derecho,
                         // esta entonces vuelve al inventario»): el arma
-                        // regresa AL INVENTARIO (QuickSpawnItem — sin
-                        // depender del cursor, sin perderse NUNCA).
+                        // regresa AL INVENTARIO. v6.168 — LA CURA DE LAS
+                        // DESAPARECIDAS: QuickSpawnItem (spawn al suelo)
+                        // muere — la vuelta es UNA INSERCIÓN DIRECTA
+                        // (AdoptarItem: apila, entra en el hueco, y solo
+                        // de último recurso cae — con aviso).
                         Item devolver = (Item)armaSlot.Clone();
                         devolver.stack = 1;
                         trio.Ranuras[slotT] = new Item();
-                        Main.LocalPlayer.QuickSpawnItem(
-                            Main.LocalPlayer.GetSource_FromThis(), devolver);
+                        AdoptarItem(devolver);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                     }
                     else
@@ -445,6 +445,55 @@ namespace AethonMod.Content.UI
         /// «que haya un boton que permita desequiparlo todo»): las tres
         /// ranuras DEVUELVEN sus armas al inventario — una por una, sin
         /// perder NINGUNA (el camino de la extracción de siempre).</summary>
+        /// <summary>v6.168 — LA ENTREGA DIRECTA AL INVENTARIO (la cura de
+        /// las armas desaparecidas: la letra: «al equipar y desequipar
+        /// las armas en la mesa de fusion, estas desaparecieron por
+        /// completo»). LA AUTOPSIA: los caminos del trío devolvían el
+        /// arma con QuickSpawnItem — un SPAWN AL SUELO con vida propia
+        /// (busca hueco, y si el inventario está lleno o el mouse
+        /// interface lo interfiere, el item VIVE EN EL SUELO, donde un
+        /// jugador que no mira abajo lo pierde de vista). LA CURA: la
+        /// devolución es UNA INSERCIÓN DIRECTA — apila en una pila
+        /// igual, entra en el primer hueco libre, y SOLO si no cabe
+        /// en NINGUNA parte cae al suelo (QuickSpawnItem como ÚLTIMO
+        /// recurso). El arma vuelve AL INVENTARIO, visible y clara.</summary>
+        private static void AdoptarItem(Item it)
+        {
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active || it == null || it.IsAir) return;
+                // 1) APILAR en una pila del mismo tipo (por si el arma
+                //    era apilable — las consagradas no, pero la ley
+                //    vale para toda devolución).
+                for (int k = 0; k < 58; k++)
+                {
+                    Item inv = yo.inventory[k];
+                    if (inv == null || inv.IsAir || inv.type != it.type) continue;
+                    if (inv.stack + it.stack <= inv.maxStack)
+                    {
+                        inv.stack += it.stack;
+                        return;
+                    }
+                }
+                // 2) EL PRIMER HUECO LIBRE del inventario real.
+                for (int k = 0; k < 58; k++)
+                {
+                    if (yo.inventory[k] == null || yo.inventory[k].IsAir)
+                    {
+                        yo.inventory[k] = (Item)it.Clone();
+                        return;
+                    }
+                }
+                // 3) ÚLTIMO RECURSO: al suelo (QuickSpawnItem) — pero
+                //    con su AVISO (nada de pérdidas silenciosas).
+                yo.QuickSpawnItem(yo.GetSource_FromThis(), (Item)it.Clone(), it.stack);
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Altar.DevueltaAlSuelo"),
+                    new Color(178, 52, 44));
+            }
+            catch { }
+        }
+
         public static void ClicEnDesequiparTodo()
         {
             try
@@ -460,8 +509,7 @@ namespace AethonMod.Content.UI
                     Item devolver = (Item)arma.Clone();
                     devolver.stack = 1;
                     trio.Ranuras[k] = new Item();
-                    Main.LocalPlayer.QuickSpawnItem(
-                        Main.LocalPlayer.GetSource_FromThis(), devolver);
+                    AdoptarItem(devolver);   // v6.168 — inserción directa, no spawn
                     devueltas++;
                 }
                 if (devueltas > 0)
